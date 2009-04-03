@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Release" />
+	<File name="checkfile.cpp" open="0" top="0" tabpos="4">
+		<Cursor position="4721" topLine="65" />
+	</File>
+	<File name="compile.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="21215" topLine="641" />
+	</File>
+	<File name="darray.h" open="0" top="0" tabpos="5">
+		<Cursor position="2229" topLine="42" />
+	</File>
+	<File name="externs.h" open="0" top="0" tabpos="6">
+		<Cursor position="1122" topLine="7" />
+	</File>
+	<File name="main.cpp" open="0" top="0" tabpos="1">
+		<Cursor position="3961" topLine="73" />
+	</File>
+	<File name="parser.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="2523" topLine="21" />
+	</File>
+	<File name="parser_components.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="71000" topLine="1973" />
+	</File>
+	<File name="parser_components.h" open="0" top="0" tabpos="0">
+		<Cursor position="4799" topLine="68" />
+	</File>
+	<File name="syncheck.h" open="0" top="0" tabpos="0">
+		<Cursor position="2368" topLine="8" />
+	</File>
+	<File name="syntax.cpp" open="0" top="0" tabpos="2">
+		<Cursor position="2313" topLine="22" />
+	</File>
+	<File name="syntaxtools.h" open="0" top="0" tabpos="3">
+		<Cursor position="10132" topLine="278" />
+	</File>
+</CodeBlocks_layout_file>

@@ -1,0 +1,113 @@
+# depslib dependency file v1.0
+1236549752 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\compile.cpp
+	"OS_Switchboard.h"
+	<stdio.h>
+	<string>
+	<map>
+	"syncheck.h"
+	"parser_components.h"
+	"parser.h"
+	"filter_args.h"
+	"string.h"
+
+1234646887 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\os_switchboard.h
+
+1236551549 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\syncheck.h
+
+1232141493 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\parser_components.h
+
+1232072602 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\parser.h
+
+1232142029 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\filter_args.h
+
+1232117995 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\string.h
+
+1232142069 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\filter_args.cpp
+	<map>
+	<string>
+	"string.h"
+
+1232144051 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\load_gnames.cpp
+	<map>
+	<string>
+	<stdio.h>
+	"textfile.h"
+
+1232069463 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\textfile.h
+
+1236817507 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\main.cpp
+	<time.h>
+	<string>
+	<cstdlib>
+	<map>
+	"varloading.h"
+	"syncheck.h"
+	"parser_components.h"
+	"filter_args.h"
+	"parser.h"
+	"compile.h"
+	"checkfile.h"
+	"load_gnames.h"
+
+1232144499 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\varloading.h
+
+1232070425 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\compile.h
+
+1232256824 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\checkfile.h
+
+1232141823 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\load_gnames.h
+
+1236521539 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\parser.cpp
+	<map>
+	<string>
+	"string.h"
+	"parser_components.h"
+
+1232141567 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\parser_components.cpp
+	<string>
+	<map>
+	"string.h"
+
+1232118135 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\string.cpp
+	<string>
+
+1232069372 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\textfile.cpp
+	<stdio.h>
+	<string>
+	<map>
+
+1236989821 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\syntax.cpp
+	<map>
+	<string>
+	<cstdlib>
+	"textfile.h"
+	"darray.h"
+	"externs.h"
+	"syntax/parentheses.h"
+	"syntax/loadfnames.h"
+	"syntax/castchecker.h"
+	"syntax/chkfunction.h"
+	"syntaxtools.h"
+
+1219518944 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\syntax\parentheses.h
+
+1236987910 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\syntax\loadfnames.h
+
+1236987917 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\syntax\chkfunction.h
+
+1219518896 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\syntax\castchecker.h
+
+1236989772 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\syntaxtools.h
+
+1236800142 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\checkfile.cpp
+	<map>
+	<string>
+	"syncheck.h"
+	"parser.h"
+
+1236551262 source:c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\darray.cpp
+
+1237037173 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\externs.h
+
+1236987336 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\darray.h
+

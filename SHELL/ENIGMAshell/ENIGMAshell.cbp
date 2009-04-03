@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="ENIGMAshell" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/ENIGMAshell" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/ENIGMAshell" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Linker>
+			<Add option="-lGL -lz" />
+		</Linker>
+		<Unit filename="../API_Switchboard.h" />
+		<Unit filename="../Colligma/Checks/data_check.h" />
+		<Unit filename="../Colligma/Checks/linear_check.h" />
+		<Unit filename="../Colligma/Checks/shape_check.h" />
+		<Unit filename="../Colligma/Fills/data_fill.h" />
+		<Unit filename="../Colligma/Fills/linear_fill.h" />
+		<Unit filename="../Colligma/Fills/scaled_fill.h" />
+		<Unit filename="../Colligma/Fills/shape_fill.h" />
+		<Unit filename="../Colligma/GMcollisions.h" />
+		<Unit filename="../Colligma/GMcollisionsp.h" />
+		<Unit filename="../Colligma/colligma_end.h" />
+		<Unit filename="../Colligma/colligma_start.h" />
+		<Unit filename="../Colligma/structures.h" />
+		<Unit filename="../Deprecated/GAME_MAKER_CONSTANTS.h" />
+		<Unit filename="../Deprecated/argument_templates.h" />
+		<Unit filename="../Deprecated/argument_types.h" />
+		<Unit filename="../Deprecated/imap.h" />
+		<Unit filename="../Deprecated/specialtypes.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSblend.cpp" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSblend.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/GScolors.cpp" />
+		<Unit filename="../Graphics_Systems/OpenGL/GScolors.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSenable.cpp" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSenable.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSprmtvs.cpp" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSprmtvs.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSscreen.cpp" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSscreen.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSsprite.cpp" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSsprite.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSspriteadd.cpp" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSspriteadd.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSstdraw.cpp" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSstdraw.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSsurface.cpp" />
+		<Unit filename="../Graphics_Systems/OpenGL/GSsurface.h" />
+		<Unit filename="../Graphics_Systems/OpenGL/OPENGLStd.h" />
+		<Unit filename="../Modes/buildmode.h" />
+		<Unit filename="../Platforms/xlib/XLIBdialog.h" />
+		<Unit filename="../Platforms/xlib/XLIBmain.h" />
+		<Unit filename="../Platforms/xlib/XLIBwindow.cpp" />
+		<Unit filename="../Platforms/xlib/XLIBwindow.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/GAME_SETTINGS.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_objectdata.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_scriptdeclarations.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_withdeclarations.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/IDE_EDIT_withfunctionality.h" />
+		<Unit filename="../Preprocessor_Environment_Editable/LIBINCLUDE.h" />
+		<Unit filename="../SHELLmain.cpp" />
+		<Unit filename="../Universal_System/CallbackArrays.cpp" />
+		<Unit filename="../Universal_System/CallbackArrays.h" />
+		<Unit filename="../Universal_System/EGMstd.cpp" />
+		<Unit filename="../Universal_System/EGMstd.h" />
+		<Unit filename="../Universal_System/ENIGMA_GLOBALS.h" />
+		<Unit filename="../Universal_System/GAME_GLOBALS.h" />
+		<Unit filename="../Universal_System/GMexternals.h" />
+		<Unit filename="../Universal_System/IMGloading.cpp" />
+		<Unit filename="../Universal_System/IMGloading.h" />
+		<Unit filename="../Universal_System/OBJaccess.cpp" />
+		<Unit filename="../Universal_System/OBJaccess.h" />
+		<Unit filename="../Universal_System/WITHconstruct.cpp" />
+		<Unit filename="../Universal_System/WITHconstruct.h" />
+		<Unit filename="../Universal_System/WITHconstructClose.h" />
+		<Unit filename="../Universal_System/collisions.cpp" />
+		<Unit filename="../Universal_System/collisions.h" />
+		<Unit filename="../Universal_System/compression.cpp" />
+		<Unit filename="../Universal_System/compression.h" />
+		<Unit filename="../Universal_System/estring.cpp" />
+		<Unit filename="../Universal_System/estring.h" />
+		<Unit filename="../Universal_System/events.h" />
+		<Unit filename="../Universal_System/globalupdate.cpp" />
+		<Unit filename="../Universal_System/globalupdate.h" />
+		<Unit filename="../Universal_System/imap.h" />
+		<Unit filename="../Universal_System/instance.h" />
+		<Unit filename="../Universal_System/instance_create.h" />
+		<Unit filename="../Universal_System/mathnc.cpp" />
+		<Unit filename="../Universal_System/mathnc.h" />
+		<Unit filename="../Universal_System/multifunction_variant.h" />
+		<Unit filename="../Universal_System/object.cpp" />
+		<Unit filename="../Universal_System/object.h" />
+		<Unit filename="../Universal_System/objecttable.h" />
+		<Unit filename="../Universal_System/reflexive_types.h" />
+		<Unit filename="../Universal_System/roomsystem.cpp" />
+		<Unit filename="../Universal_System/roomsystem.h" />
+		<Unit filename="../Universal_System/simplecollisions.cpp" />
+		<Unit filename="../Universal_System/simplecollisions.h" />
+		<Unit filename="../Universal_System/spriteinit.h" />
+		<Unit filename="../Universal_System/spritestruct.cpp" />
+		<Unit filename="../Universal_System/spritestruct.h" />
+		<Unit filename="../Universal_System/switch_stuff.h" />
+		<Unit filename="../Universal_System/var_cr3.cpp" />
+		<Unit filename="../Universal_System/var_cr3.h" />
+		<Unit filename="../initialize.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

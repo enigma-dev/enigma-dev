@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="compileEGMf" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Release">
+				<Option output="..\CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Os" />
+					<Add option="-O" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Debug">
+				<Option output="..\CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="CompileEGMf.cbp" />
+		<Unit filename="CompileEGMf.depend" />
+		<Unit filename="OS_Switchboard.h" />
+		<Unit filename="Syntax\assignments.h" />
+		<Unit filename="Syntax\beginandend.h" />
+		<Unit filename="Syntax\bracecheck.h" />
+		<Unit filename="Syntax\castchecker.h" />
+		<Unit filename="Syntax\chkfunction.h" />
+		<Unit filename="Syntax\langmarkrs.h" />
+		<Unit filename="Syntax\letterdigit.h" />
+		<Unit filename="Syntax\loadfnames.h" />
+		<Unit filename="Syntax\operatorcheck.h" />
+		<Unit filename="Syntax\opkeywords.h" />
+		<Unit filename="Syntax\parenthcheck.h" />
+		<Unit filename="Syntax\parentheses.h" />
+		<Unit filename="Syntax\quotecheck.h" />
+		<Unit filename="Syntax\statements.h" />
+		<Unit filename="Syntax\syntax_rules.h" />
+		<Unit filename="Syntax\typenamech.h" />
+		<Unit filename="checkfile.cpp" />
+		<Unit filename="checkfile.h" />
+		<Unit filename="compile.cpp" />
+		<Unit filename="compile.h" />
+		<Unit filename="consts.txt" />
+		<Unit filename="darray.h" />
+		<Unit filename="externs.h" />
+		<Unit filename="filter_args.cpp" />
+		<Unit filename="filter_args.h" />
+		<Unit filename="globals.txt" />
+		<Unit filename="load_gnames.cpp" />
+		<Unit filename="load_gnames.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="parser.cpp" />
+		<Unit filename="parser.h" />
+		<Unit filename="parser_components.cpp" />
+		<Unit filename="parser_components.h" />
+		<Unit filename="string.cpp" />
+		<Unit filename="string.h" />
+		<Unit filename="syncheck.h" />
+		<Unit filename="syntax.cpp" />
+		<Unit filename="syntaxtools.h" />
+		<Unit filename="textfile.cpp" />
+		<Unit filename="textfile.h" />
+		<Unit filename="var.h" />
+		<Unit filename="varloading.h" />
+		<Extensions>
+			<code_completion />
+			<debugger>
+				<remote_debugging target="Debug">
+					<options conn_type="0" serial_baud="115200" additional_cmds_before="-s syntax.txt" />
+				</remote_debugging>
+			</debugger>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
