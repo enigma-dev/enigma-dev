@@ -21,10 +21,11 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
+#include <stdlib.h>
 #include <map>
 #include <string>
 using namespace std;
@@ -41,15 +42,15 @@ void load_filter_args()
 {
    FILE* pcs=fopen("pcs.txt","rb");
    if (pcs==NULL) { printf("Failed to load Post-Compile Script.\r\n"); fflush(stdout); return; }
-   
+
    printf("\n");
    int contpre=0,contpost=0;
-   
+
    while (!feof(pcs))
    {
       string cmd; cmd="";
       char rb; rb=0;
-      
+
       while (rb != EOF)
       {
          rb=fgetc(pcs);

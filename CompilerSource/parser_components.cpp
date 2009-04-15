@@ -25,6 +25,7 @@
 **                                                                              **
 \*********************************************************************************/
 
+#include <stdlib.h>
 #include <string>
 #include <map>
 
@@ -49,12 +50,12 @@ extern int _errorlast, _error_position, __varcount,__fcount,__withcount,__global
 int parser_init()
 {
     /* Allocate some memory as a test and safety precaution */
-    
+
     __varnames  = new string[20];
     __varnametags = new string[20];
     __varnamestars = new string[20];
     __varnamearrays = new string[20];
-    
+
     if (__varnames==NULL || __varnametags==NULL || __varnamearrays==NULL)
     {
       printf("Memory is dangerously low. Parse can not continue.\r\n");
@@ -1813,9 +1814,9 @@ int parser_patch_inconsistency(std::string argument0, std::string argument1)
     {
         pos=__codebuffer.find(argument0,pos);
         if (pos==std::string::npos) break;
-        
+
         pos++;
-        
+
         if ((!is_lettersdigits(__codebuffer[-1+pos-1])
            || is_of_digits(__codebuffer[-1+pos-1])||pos==1)
            &&!is_lettersdigits(__codebuffer[-1+pos+string_length(argument0)]))
@@ -1871,16 +1872,16 @@ void parser_handle_new()
     for (unsigned int pos=0;(pos=__codebuffer.find("<new>",pos)) != std::string::npos;pos++)
     {
         int epos=pos;
-        
+
         while (__codebuffer[epos] == '<')
         { while (epos<len && __codebuffer[epos]!='>') epos++; epos++; }
-        
+
         __codebuffer.insert(epos,")");
         __codebuffer.insert(pos,"(");
         len+=2;
         pos++;
     }
-    
+
     len=__codebuffer.length();
     for (unsigned int pos=0;(pos=__codebuffer.find("<delete>",pos)) != std::string::npos;pos++)
     {
@@ -1905,7 +1906,7 @@ void parser_unhandle_new()
         __codebuffer.erase(pos,1);
         len-=2;
     }
-    
+
     len=__codebuffer.length();
     for (unsigned int pos=0;(pos=__codebuffer.find("(delete)",pos)) != std::string::npos;pos++)
     {
@@ -1956,27 +1957,27 @@ void parser_develop_token_stream()
 {
   //printf("seg-5, input:\r\n%s\r\n",__codebuffer.c_str());
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   parser_store_other_languages();
   parser_remove_strings();
   parser_remove_newlines();
-  
-  
-  
+
+
+
   //printf("seg-4\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   __codebuffer=string_replace_all(__codebuffer,"\r"," ");
   __codebuffer=string_replace_all(__codebuffer,"\n"," ");
-  
+
   //printf("seg-3\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   parser_remove_spaces();
-  
+
   //printf("seg-2\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   string_replace_stack(" [","[");
   string_replace_stack("[ ","[");
   string_replace_stack(" ]","]");
@@ -1984,18 +1985,18 @@ void parser_develop_token_stream()
   string_replace_stack(". ",".");
   string_replace_stack(" .",".");
   parser_replace(".",chr(238));
-  
-  
+
+
   //printf("seg-1\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   while (string_count("++",__codebuffer)||string_count("++",__codebuffer)||string_count("+-",__codebuffer)||string_count("-+",__codebuffer))
   {
       __codebuffer=string_replace_all(string_replace_all(string_replace_all(string_replace_all(__codebuffer,"++","+"),"--","+"),"+-","-"),"-+","-");
   }
   //printf("seg0\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   parser_replace("<","<lt>");
   parser_replace(">","<gt>");
   parser_replace("<lt<gt>","<lt>");
@@ -2006,20 +2007,20 @@ void parser_develop_token_stream()
   parser_replace("<gt><gt>","<rsh>");
   parser_replace("<lt><l=>","<ls=>");
   parser_replace("<gt><g=>","<rs=>");
-  
+
   //printf("seg1\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   parser_patch_inconsistency("and","<&&>");
   parser_patch_inconsistency("or","<||>");
   parser_patch_inconsistency("not","<!>");
   parser_patch_inconsistency("mod","<%>");
   parser_patch_inconsistency("div","<div>");
   parser_patch_inconsistency("xor","<^^>");
-  
+
   //printf("seg2\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   parser_replace("&&","<&&>");
   parser_replace("||","<||>");
   parser_replace("!","<!>");
@@ -2053,11 +2054,11 @@ void parser_develop_token_stream()
   parser_replace("<<==>>","<==>");
   parser_replace("<l<=>","<l=>");
   parser_replace("<g<=>","<g=>");
-  
-  
+
+
   //printf("seg3\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   parser_identify_statement("if");
   parser_identify_statement("with");
   parser_identify_statement("for");
@@ -2082,10 +2083,10 @@ void parser_develop_token_stream()
   parser_identify_statement("new");
   parser_identify_statement("delete");
   parser_replace("<delete>[]","<delete>");
-  
+
   //printf("seg4\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   string_replace_stack("<var> ","<var>");
   string_replace_stack("<double> ","<double>");
   string_replace_stack("<float> ","<float>");
@@ -2130,13 +2131,13 @@ void parser_develop_token_stream()
   string_replace_stack("(<const>) ","(<const>)");
   string_replace_stack("(<static>) ","(<static>)");
   string_replace_stack("(<localv>) ","(<localv>)");
-  
-  
-  
-  
+
+
+
+
   //printf("seg6\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   parser_identify_statement("do");
   parser_identify_statement("until");
   parser_identify_statement("then");
@@ -2148,10 +2149,10 @@ void parser_develop_token_stream()
   parser_identify_statement("default");
   parser_identify_statement("exit");
   parser_identify_statement("return");
-  
+
   //printf("seg7\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   //std::cout << "check 1";
   string_replace_stack("<<","<");
   //std::cout << "check 2";
@@ -2164,10 +2165,10 @@ void parser_develop_token_stream()
   string_replace_stack(";;",";");
   //std::cout << "check 6";
   string_replace_stack(" ;",";");
-  
+
   //printf("seg8\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   parser_replace("<break>;","<break>");
   parser_replace("<continue>;","<continue>");
   parser_replace("<exit>;","<exit>");
@@ -2192,29 +2193,29 @@ void parser_develop_token_stream()
   parser_replace("<else>"," <else>");
   parser_replace("<exit>"," <exit>");
   parser_replace("<return>"," <return> ");
-  
+
   //printf("seg9\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   string_replace_stack("  "," ");
   string_replace_stack("<return> ","<return>");
-  
-  
-  
+
+
+
   //printf("seg5\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   //parser_handle_new();
   //parser_recast_unify();
-  
-  
+
+
   //printf("seg10\r\n");
   //std::cout << __codebuffer << "\r\n"; system("PAUSE");
-  
+
   parser_buffer_syntax_map();
-  
-  
-  
+
+
+
   /* Now that we have a syntax buffer, we can easily list all the variable names.
   |* They are all represented by a string of 'n' characters in the syntax buffer.
   **********************************************************************************/
@@ -2233,20 +2234,20 @@ void parser_buffer_remove_linecomments(std::string code)
   {
     if (code[pos]=='/' && code[pos+1]=='/')
     { while (code[pos]!='\r' && code[pos]!='\n') pos++; continue; }
-    
+
     if (code[pos]=='/' && code[pos+1]=='*')
     { pos++; while (code[pos]!='*' || code[pos+1]!='/') pos++; pos+=2; continue; }
-    
+
     if (code[pos]=='"')
     { __codebuffer+=code[pos]; pos++; while (code[pos]!='"') { __codebuffer+=code[pos]; pos++; } __codebuffer+=code[pos]; pos++; continue; }
-    
+
     if (code[pos]=='\'')
     { __codebuffer+=code[pos]; pos++; while (code[pos]!='\'') { __codebuffer+=code[pos]; pos++; } __codebuffer+=code[pos]; pos++; continue; }
-    
+
     __codebuffer+=code[pos];
     pos++;
   }
-  
+
   __codebuffer+=" ";
 }
 
@@ -2261,22 +2262,22 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
 {
    std::map<int,string> names,nametags,namestars,namearrays,locals;
    std::map<int,bool>   dots;
-   
+
    unsigned int pos=0,spos,epos,cpos;
    int ncount=0,lcount=0,used,isntlocal,dotted;
    string checker;
-   
+
    while ((pos=synt.find("<localv>",pos))!=string::npos)
    {
      code.erase(pos,8);
      synt.erase(pos,8);
      int start_position=pos;
      int posi=pos;
-     
+
      //Get the type of the local
      while (code[pos]=='<') { while (code[pos]!='>') pos++; pos++; }
      string typetoadd=code.substr(posi,pos-posi);
-     
+
      //make that into C++ (detokenize it)
      {
        unsigned int detokpos=0;
@@ -2287,24 +2288,24 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
          else detokpos++;
        }
      }
-     
+
      //remove the type names
      code.erase(posi,pos-posi);
      synt.erase(posi,pos-posi);
-     
+
      //Revert back to where name was
      pos=posi;
-     
+
      //Until the end of the list
      while (code[pos]!=';')
      {
        //Be safe.
        pos=posi;
-       
+
        //reset the unary
        unsigned int unarypos;
        while ((unarypos=typetoadd.find("*",0)) != string::npos) { typetoadd.erase(unarypos,1); }
-       
+
        //remember that * is a valid character, as well as (
        namestars[ncount]="";
        while (pos<code.length() && (code[pos]=='*' || code[pos]=='('))
@@ -2313,7 +2314,7 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
          code.erase(pos,1);
          synt.erase(pos,1);
        }
-       
+
        //Not seeing a variable name...
        if (synt[pos]!='n')
        {
@@ -2324,12 +2325,12 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
          printf("Error in getting varnames\r\n");
          return;
        }
-       
+
        //Pretending like the above thing never happened now.
-       
+
        //move to end of varname
        while (synt[pos]=='n') pos++;
-       
+
        //Bother to write the varname down as a local...
        {
          int a=0;
@@ -2343,22 +2344,22 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
          //increment ncount then
          }
        }
-       
-       
+
+
        //See if we have an array.
        int posi2=pos,pos2=pos;
        while (code[pos2]==')' || code[pos2]=='[')
        { pos2++; if (code[pos2-1]=='[') pos2=parser_end_of_brackets(pos2); }
        if (pos2>posi2) namearrays[ncount]=code.substr(posi2,pos2-posi2);
        else            namearrays[ncount]="";
-       
+
        //now increment ncount
        ncount++;
-       
+
        //Move to end of that
        pos=pos2;
-       
-       
+
+
        //if the next token is not an = sign
        if (code.substr(pos,3)!="<=>")
        {
@@ -2366,7 +2367,7 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
          code.erase(posi,pos-posi);
          synt.erase(posi,pos-posi);
          pos=posi;
-         
+
          //This means the item isn't used in declaration...
          //Check if the next thing is a comma.
          if (code[pos] != ',')
@@ -2404,23 +2405,23 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
      }
      code.insert(pos," } ");
      synt.insert(pos," } ");
-     
+
      code.insert(start_position," { ");
      synt.insert(start_position," { ");
    }
-   
-   
-   
-   
+
+
+
+
    pos=0;
    while (pos<synt.length())
    {
       pos=synt.find("n",pos);
-      
+
       if (pos==string::npos)
         break;
-      
-      
+
+
       spos=pos;
       while (synt[spos]=='n') spos--;
       //Skip any tokens
@@ -2434,9 +2435,9 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
           continue;
       }
       spos++;
-      
-      
-      
+
+
+
       epos=pos;
       while (synt[epos]=='n') epos++;
       //Skip any tokens
@@ -2449,46 +2450,46 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
           while (synt[pos]=='n') pos++;
           continue;
       }
-      
+
       pos=epos+1;
       checker=code.substr(spos,epos-spos);
       spos--;
-      
+
       /* See if it's referenced outside this instance.
       *************************************************/
       dotted=(synt[spos]=='.');
-      
+
       /* Check that it's on neither list
       ************************************/
       used=0;
-      
+
       //Check that it isn't on the list already, but if it is,
       //make sure it's global if we ever found it dotted.
       for (int i=0; i<ncount; i++)
       if (names[i]==checker) { used=1; if (dotted) dots[i]=1; }
       if (used) continue;
-      
+
       //exit if its on the locals list, but only if it isn't dotted.
       //(Because then it'd be global anyway)
       if (!dotted)
       for (int i=0; i<lcount; i++)
       if (locals[i]==checker) used=1;
       if (used) continue;
-      
-      
-      
+
+
+
       /* This is obviously the first time this variable appears in the code.
       |* Just make sure this isn't its declaration.
       *****************************************************************************/
-      
+
       /* Check that it isn't in a list of declarations. */
       isntlocal=0;
-      
+
       //We don't need to know how many stars there are. Think:
       //They aren't declaring it local here, or it'd be in the
       //localv section above.
       while (code[spos]=='*' || code[spos]=='(') spos--;
-      
+
       if (synt[spos]==',')
       {
          for (cpos=spos;cpos>0;cpos--)
@@ -2499,14 +2500,14 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
                 while (synt[cpos]==']') { cpos=parser_start_of_brackets(cpos+1)-2; }
                 while (synt[cpos]=='}') { cpos=parser_start_of_braces(cpos+1)-2; }
              }
-             
+
              if (synt[cpos]=='(' || synt[cpos]=='[' || synt[cpos]=='{' || synt[cpos]==';')
              { isntlocal=1; break; }
              else if (synt[cpos]=='>')
              {
                 std::string seg[5];
                 seg[0]=seg[1]=seg[2]=seg[3]=seg[4]="";
-                
+
                 if (cpos>=4)
                 {
                   seg[0]=code.substr(cpos-4,5);
@@ -2527,7 +2528,7 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
                     }
                   }
                }
-               
+
                if(seg[0]=="<int>"
                || seg[0]=="<var>"
                || seg[1]=="<char>"
@@ -2545,7 +2546,7 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
          }
          spos=cpos;
       }
-      
+
       //If this was set to true, we can be sure it is not in a list, because it
       //was interupted by some other symbol.
       if (isntlocal)
@@ -2558,18 +2559,18 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
         ncount++;
         continue;
       }
-      
+
       //There is a good chance that segment of code was not executed, since it is
       //not perfectly likely that the variable in question was declared in a list
       //of other declarations.
-      
+
       //Either way, at this point the only way this is a local variable is if the
       //symbol we're at now marks the end of a type name token. Let's check that.
-      
+
       if (synt[spos]=='>')
       {
          //addition 4-11
-         
+
          //Seek to the beginning of the typenames
          int bpos1,bpos2;
          bpos1=bpos2=spos;
@@ -2582,7 +2583,7 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
            else
            { bpos1--; bpos2=bpos1; }
          }
-         
+
          //Repaired 4-10-08
          std::string seg[5];
          if (spos>=4)
@@ -2605,7 +2606,7 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
              }
            }
          }
-         
+
          if(seg[0]=="<int"         //It would be a good idea to make sure
          || seg[0]=="<var"         //the token we are at does indeed mark
          || seg[1]=="<char"        //a type name.
@@ -2640,18 +2641,18 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
          ncount+=1;
       }
    }
-    
+
     delete[] vns;
     delete[] vnss;
     delete[] vnts;
     delete[] vnas;
-    
+
     vns=new string[ncount+1];
     vnss=new string[ncount+1];
     vnts=new string[ncount+1];
     vnas=new string[ncount+1];
     vnc=0;
-    
+
     for (int i=0;i<ncount;i++)
     {
        vns[vnc]=names[i];
@@ -2659,7 +2660,7 @@ void parser_get_varnamelist(string& code,string& synt,string*& vns,string*& vnss
        vnts[vnc]=nametags[i];
        vnas[vnc]=namearrays[i];
        vnc++;
-       
+
        if (dots[i]!=0)
        {
           int on=0;
@@ -2686,19 +2687,19 @@ void parser_get_withvars()
       spos=withpos;
       while (__codebuffer[spos] != '(') spos++;
       epos=spos=parser_end_of_parenths(spos);
-      
+
       if (__codebuffer[epos]=='{')
       epos=parser_end_of_braces(epos-1)-1;
       else if (__codebuffer[epos+1]=='{')
       epos=parser_end_of_braces(epos)-1;
       else while (__codebuffer[epos] != ';') epos++;
-      
+
       std::string
       withsyntax=__syntaxbuffer.substr(spos,epos-spos+1),
       withcode = __codebuffer . substr(spos,epos-spos+1);
-      
+
       withpos=epos;
-      
+
       parser_get_varnamelist(withcode,withsyntax,1);
    }
    printf("JUST KIDDING!\n");
@@ -2714,13 +2715,13 @@ int varname_onlists(std::string vname)
     */
     for (int i=0; i<__constcount;i++)
     if (vname==__consts[i]) return 1;
-    
+
     for (int i=0; i<localc;i++)
     if (vname==localn[i]) return 1;
-    
+
     for (int i=0; i<__enigmaglobalcount;i++)
     if (vname==__enigmaglobals[i]) return 1;
-    
+
     return 0;
 }
 
@@ -2728,13 +2729,13 @@ int varname_oninheriteds(std::string vname)
 {
     for (int i=0; i<localc;i++)
     if (vname==localn[i]) return 1;
-    
+
     for (int i=0; i<__constcount;i++)
     if (vname==__consts[i]) return 1;
-    
+
     for (int i=0; i<__enigmaglobalcount;i++)
     if (vname==__enigmaglobals[i]) return 1;
-    
+
     return 0;
 }
 
@@ -2745,10 +2746,10 @@ int varname_onnotinheriteds(std::string vname)
 {
     for (int i=0; i<__constcount;i++)
     if (vname==__consts[i]) return 1;
-    
+
     for (int i=0; i<__enigmaglobalcount;i++)
     if (vname==__enigmaglobals[i]) return 1;
-    
+
     return 0;
 }
 
@@ -2763,30 +2764,30 @@ void parser_get_withcodes()
       string tnc,tns;
       tnc=tostring(wnum);
       tns=string_repeat("0",tnc.length());
-      
+
       int spos=pos+6; while (__codebuffer[spos]!='(') spos++;
       __codebuffer . replace(pos,spos-pos+1,"{<for>(<withiter>ENIGMA_WITHiter=enigma::pushwith("+tnc+",");
       __syntaxbuffer.replace(pos,spos-pos+1,"{<for>(<withiter>000000000000000=ffffffffffffffff("+tns+",");
                                            /*1234567890123456789012345678901234567890123456789*/
-      
+
       wnum++;
       pos+=49;
       pos=parser_end_of_parenths(pos);
       if(pos==string::npos) { printf("C++ is being a total piece of poo. Dropping out. \n%s\n",__codebuffer.c_str()); exit(0xFEE15BAD); }
-      
+
       __codebuffer . insert(pos,";ENIGMA_WITHiter.stillgoing;ENIGMA_WITHiter++) <if>(*enigma::withcur["+tnc+"].id==enigma::withid["+tnc+"]<||>*enigma::withcur["+tnc+"].object_index==enigma::withid["+tnc+"])");
       __syntaxbuffer.insert(pos,";00000000000000000000000000;000000000000000++) <if>(*fffffffffffffff["+tns+"].nn==nnnnnnnnnnnnnn["+tns+"]<||>*nnnnnnnnnnnnnnn["+tns+"].nnnnnnnnnnnn==nnnnnnnnnnnnnn["+tns+"])");
                                //123456789012345678901234567890123456789012345678901
       pos+=51; pos=parser_end_of_parenths(pos);
       if(pos==string::npos) { printf("C++ is STILL being a total piece of poo. Dropping out. \n%s\n",__codebuffer.c_str()); exit(0xFEE15BAD); }
-      
-      
-      
-      
+
+
+
+
       if (__codebuffer[pos]==' ') pos++;
-      
+
       int wcstart=pos;
-      
+
       if (__codebuffer[pos]=='{')
       pos=parser_end_of_braces(pos-1)-1;
       else if (__codebuffer[pos+1]=='{')
@@ -2795,18 +2796,18 @@ void parser_get_withcodes()
       {
         pos++; if (__codebuffer[pos]=='{') pos=parser_end_of_braces(pos+1);
       }
-      
+
       string wc=__codebuffer . substr(wcstart,pos-wcstart+1);
       string ws=__syntaxbuffer.substr(wcstart,pos-wcstart+1);
-      
+
       __codebuffer . insert(pos+1," enigma::popOtherObject();}");
       __syntaxbuffer.insert(pos+1," ffffffffffffffffffffff();}");
-      
+
       string *wvn=new string[2],*wvs=new string[2],*wvt=new string[2],*wva=new string[2];
       int wvc;
-      
+
       parser_get_varnamelist(wc,ws,wvn,wvs,wvt,wva,wvc);
-      
+
       for (unsigned int i=0;i<wc.length();i++)
       {
         if (ws[i]=='n')
@@ -2815,9 +2816,9 @@ void parser_get_withcodes()
           while (ws[iii]=='n') iii++; if (ws[iii]=='>' || (ws[iii]>='a'&&ws[iii]<='z')||(ws[iii]>='A'&&ws[iii]<='Z') || ws[iii]=='_') { i=iii; continue; }
           int ii=i;
           while (ws[ii]=='n') ii--; if (ws[ii]=='<' || (ws[ii]>='a'&&ws[ii]<='z')||(ws[ii]>='A'&&ws[ii]<='Z') || ws[ii]=='_') { i=iii; continue; }
-          
+
           string viq=wc.substr(ii+1,iii-ii-1);
-          
+
           int isl=0;
           for (int iv=0;iv<wvc;iv++)
           if (wvn[iv]==viq) { isl=1; break; }
@@ -2826,13 +2827,13 @@ void parser_get_withcodes()
           wc.insert(i,"*enigma::withcur["+tnc+"].");
           ws.insert(i,"*nnnnnnnnnnnnnnn["+tns+"]\xEE");
           i+=17;
-          
+
           while (ws[i]!=']') i++;
           i+=2; char c=ws[i];
           while (ws[i]==c) i++;
         }
       }
-      
+
       __codebuffer . replace(wcstart,pos-wcstart+1,wc);
       __syntaxbuffer.replace(wcstart,pos-wcstart+1,ws);
    }

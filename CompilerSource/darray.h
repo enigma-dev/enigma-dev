@@ -25,7 +25,9 @@
 **                                                                              **
 \*********************************************************************************/
 
-template <typename atype> 
+#include <string.h>
+
+template <typename atype>
 struct darray
 {
   atype* where;
@@ -38,16 +40,16 @@ struct darray
     {
       int olds=allocd;
       while (allocd<=ind) allocd<<=1;
-      
+
       atype* nar=new atype[allocd];
       if (nar==0)
       {
          allocd=olds;
-         return safety_val; 
+         return safety_val;
       }
       if (olds>0)
         memcpy(nar,where,olds*sizeof(atype));
-      
+
       delete []where;
       where=nar;
     }
@@ -58,7 +60,7 @@ struct darray
   ~darray() { if (where != 0) delete[] where; }
 };
 
-template <typename atype> 
+template <typename atype>
 struct varray
 {
   atype** where;
@@ -71,19 +73,19 @@ struct varray
     {
       int olds=allocd;
       while (allocd<=ind) allocd<<=1;
-      
+
       atype** nar=new atype*[allocd];
       if (nar==0)
       {
          allocd=olds;
-         return *safety_val; 
+         return *safety_val;
       }
       if (olds>0)
       {
         memcpy(nar,where,olds*sizeof(atype*));
         for (unsigned int i=olds;i<allocd;i++) nar[i]=0;
       }
-      
+
       delete []where;
       where=nar;
     }

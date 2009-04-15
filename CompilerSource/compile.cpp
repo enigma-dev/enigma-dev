@@ -27,6 +27,7 @@
 
 #include "OS_Switchboard.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string>
 #include <map>
@@ -88,7 +89,7 @@ extern int _errorlast, _error_position, __varcount,__fcount,__withcount,__global
  //Probably another one of my experiments gone wrong.
  //you put
  */
- 
+
 
 /*
  * These functions are designed to do all the file garbage for you, making the
@@ -102,14 +103,14 @@ int EXPECTNULL=0;
    {
      delete[] writehere;
      writehere=new char[size+1];
-     
+
      if (writehere==NULL)
      {
        printf("Memory allocation failed for %d byte request. Aborting.\n",size);
        fflush(stdout);
        exit(-9);
      }
-     
+
      for (int i=0;i<size+1;i++)
      writehere[i]='\0';
    }
@@ -123,11 +124,11 @@ int EXPECTNULL=0;
    {
      int size;
      fread(&size,4,1,enigma_file);
-     
+
      space(size+1);
      fread(writehere,size,1,enigma_file);
      writehere[size]=0;
-     
+
      int readi;
      fread(&readi,4,1,enigma_file);
      if (readi != 0) EXPECTNULL=1;
@@ -137,7 +138,7 @@ int EXPECTNULL=0;
    {
      int size;
      fread(&size,4,1,enigma_file);
-     
+
      space(size+1);
      fread(writehere,size,1,enigma_file);
      int readi;
@@ -163,7 +164,7 @@ int EXPECTNULL=0;
      fread(a,1,size,enigma_file);
      return a;
    }
-   
+
    void writes(FILE* fn,string str)
    {
      fwrite(str.c_str(),1,str.length(),fn);
@@ -173,8 +174,8 @@ int EXPECTNULL=0;
      string write="const int "+varname+" = "+tostring(value)+";\r\n";
      fwrite(write.c_str(),1,write.length(),fn);
    }
-   
-   
+
+
    void transfer(int size,FILE* in,FILE* out)
    {
      unsigned char buf[BUFSIZ];
@@ -189,7 +190,7 @@ int EXPECTNULL=0;
      fwrite(buf,size,1,out);
      fclose(out);
    }
-   
+
    int fileout(char* name,char* data,int size)
    {
         FILE* out=fopen(name,"wb");
@@ -209,11 +210,11 @@ int EXPECTNULL=0;
         delete[] data;
         return 0;
    }
-   
-   
-   
-   
-   
+
+
+
+
+
    int transi(FILE* out)
    {
        int a;
@@ -662,26 +663,26 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
             //Read the null
             int_read=readi();
             if (int_read != 0) return -5;
-            
+
             //Read the additional index
             objects[i].events[ii].addind=readi();
-            
+
             //Read the code
             string code=readSTR();
             //Was there a null int?
             if (EXPECTNULL) return -3;
-            
+
             //Check it
             int synt=syncheck::syntacheck(code);
             if (!(synt<0))
             {
               printf("\nERROR: Compile error. Invalid syntax.\n\n");
               printf("In icon %d of event `%s' for object `%s',\n",0,objects[i].events[ii].name.c_str(),objects[i].name.c_str());
-              
+
               int l=0,p=0; int i;
               for (i=0;i<synt;i++) { if (code[i]=='\r') { l++; if (code[i+1]=='\n') i++; p=i+1; } else if (code[i]=='\n') { l++; p=i+1; } }
               printf("Syntax check returned error on line %d, position %d; or absolute index %d:\n",(l)+1,(synt-p)+1,synt);
-              
+
               printf("%s\n\n",syncheck::error.c_str());
               printf("Compile can not continue, aborting.\n");
               fflush(stdout);
@@ -689,7 +690,7 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
             }
             //Parse it
             code=parser_main(code)+"  \r\n  return 0;\r\n";
-            
+
             //Put this all in the object
             if (objects[i].events[ii].name=="step")
             {
@@ -701,7 +702,7 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
               objects[i].eventcount++;
               objects[i].events[ii].code=code;
             }
-            
+
             for(int iii=0;iii<__varcount;iii++)
             {
               objects[i].events[ii].varnames[iii]=__varnames[iii];
@@ -709,7 +710,7 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
               objects[i].events[ii].varnametags[iii]=__varnametags[iii];
               objects[i].events[ii].varnamearrays[iii]=__varnamearrays[iii];
             } objects[i].events[ii].varcount=__varcount;
-            
+
             //For each script
             for(int iii=0;iii<__fcount;iii++)
             {
@@ -1773,7 +1774,7 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
         libs += " ENIGMAsystem/SHELL/Graphics_Systems/OpenGL/GSsurface.o";
         libs += " ENIGMAsystem/SHELL/Graphics_Systems/OpenGL/GSmiscextra.o";
       //}
-      
+
       #if WINDOWS
       o_compile_command=         gcc+" -s -c ENIGMAsystem\\SHELL\\SHELLmain.cpp";
       #else
