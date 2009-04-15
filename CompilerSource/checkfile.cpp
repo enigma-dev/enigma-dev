@@ -51,6 +51,7 @@ int file_check(string filename)
     fseek(in,0,SEEK_SET);
 
     char* in2=new char[size+1];
+    char* inb4 = in2; //so we know what memory to free
     fread(in2,1,size,in);
     in2[size]='\0';
     fclose(in);
@@ -92,6 +93,6 @@ int file_check(string filename)
     for (i=0;i<retval;i++) { if (in2[i]=='\r') { l++; if (in2[i+1]=='\n') i++; p=i+1; } else if (in2[i]=='\n') { l++; p=i+1; } }
     printf("Line %d, position %d (absolute index %d): %s\r\n",(l)+1,(retval-p)+1,retval,syncheck::error.c_str());
 
-    delete []in2;
+    delete []inb4;
     return retval;
 }
