@@ -100,8 +100,8 @@ int EXPECTNULL=0;
 
    void space(int size)
    {
-     free(writehere);
-     writehere=(char*)malloc(sizeof(char)*(size+1));
+     delete[] writehere;
+     writehere=new char[size+1];
      
      if (writehere==NULL)
      {
@@ -157,9 +157,9 @@ int EXPECTNULL=0;
      fread(&a,1,1,enigma_file);
      return a;
    }
-   void* readv(int size)
+   char* readv(int size)
    {
-     void* a=malloc(size+3);
+     char* a=new char[size+3];
      fread(a,1,size,enigma_file);
      return a;
    }
@@ -190,7 +190,7 @@ int EXPECTNULL=0;
      fclose(out);
    }
    
-   int fileout(char* name,void* data,int size)
+   int fileout(char* name,char* data,int size)
    {
         FILE* out=fopen(name,"wb");
         if (out==NULL)
@@ -206,7 +206,7 @@ int EXPECTNULL=0;
         fwrite(&(((char*)data)[n]),size-n,1,out);
 
         fclose(out);
-        free(data);
+        delete[] data;
         return 0;
    }
    
@@ -320,7 +320,7 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
 {
   string     str_read;
   int             int_read;
-  void*           ptr_read;
+  char*           ptr_read;
 
   string changefile="";
   if (build)
@@ -340,7 +340,7 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
   const string GLOBALscriptargsinit="(enigma::variant argument0=0, enigma::variant argument1=0, enigma::variant argument2=0, enigma::variant argument3=0, enigma::variant argument4=0, enigma::variant argument5=0, enigma::variant argument6=0, enigma::variant argument7=0, enigma::variant argument8=0, enigma::variant argument9=0, enigma::variant argument10=0, enigma::variant argument11=0, enigma::variant argument12=0, enigma::variant argument13=0, enigma::variant argument14=0, enigma::variant argument15=0);";
 
 
-  writehere=(char*) malloc(1);
+  writehere=new char[1];
 
   enigma_file=fopen(filename.c_str(),"rb");
   if (enigma_file==NULL) { printf("Failed to open file \"%s\"\n",filename.c_str()); fflush(stdout); return -8; }
@@ -382,7 +382,7 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
       fflush(stdout);
 
       /* Dump the icon into its own file */
-      if (fileout((char*)"game_icon.ico",ptr_read,int_read)==-8) return -8;
+      if (fileout((char*)"game_icon.ico",(char*)ptr_read,int_read)==-8) return -8;
 
   printf("Exported icon.\n");
   fflush(stdout);
