@@ -121,7 +121,7 @@
 
 1236987336 c:\documents and settings\hp_owner\desktop\enigma r3b\data\compilersource\darray.h
 
-1239756813 source:/home/ismavatar/svn/enigma/CompilerSource/main.cpp
+1239777386 source:/home/ismavatar/svn/enigma/CompilerSource/main.cpp
 	<time.h>
 	<string>
 	<cstdlib>
@@ -217,8 +217,7 @@
 	"syntax/chkfunction.h"
 	"syntaxtools.h"
 
-1239764972 /home/ismavatar/svn/enigma/CompilerSource/darray.h
-	<string.h>
+1241308356 /home/ismavatar/svn/enigma/CompilerSource/darray.h
 
 1239756813 /home/ismavatar/svn/enigma/CompilerSource/externs.h
 

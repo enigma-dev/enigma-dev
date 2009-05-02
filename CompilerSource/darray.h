@@ -25,6 +25,8 @@
 **                                                                              **
 \*********************************************************************************/
 
+#include <string.h> //memcpy (linux)
+
 template <typename atype>
 struct darray
 {
