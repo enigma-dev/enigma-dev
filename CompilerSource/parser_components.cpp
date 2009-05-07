@@ -847,7 +847,7 @@ void parser_store_other_languages()
   unsigned int pos;
 
   langcount=0;
-  char lolwut[16];
+  char lolwut[17];
   for (int i=0;i<16;i++)
   { if (rand()%5<=1) lolwut[i]=rand()%25+'a'; else if (rand()%5==4) lolwut[i]=rand()%9+'0'; else lolwut[i]=rand()%25+'A'; }
   lolwut[16]=0;
