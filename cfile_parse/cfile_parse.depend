@@ -1,0 +1,39 @@
+# depslib dependency file v1.0
+1245537880 source:c:\documents and settings\hp_owner\desktop\enigma interface\cfile_parse\cfile_parse.cpp
+	<map>
+	<string>
+	<iostream>
+	"darray.h"
+	"externs.h"
+	"expev_macros.h"
+	"value.h"
+
+1245376695 source:c:\documents and settings\hp_owner\desktop\enigma interface\cfile_parse\expression_evaluator.cpp
+	<map>
+	<string>
+	<iostream>
+	"darray.h"
+	"implicit_stack.h"
+	"externs.h"
+	"expev_macros.h"
+	"value.h"
+
+1239376790 c:\documents and settings\hp_owner\desktop\enigma interface\cfile_parse\darray.h
+
+1243098406 c:\documents and settings\hp_owner\desktop\enigma interface\cfile_parse\implicit_stack.h
+
+1245516958 c:\documents and settings\hp_owner\desktop\enigma interface\cfile_parse\externs.h
+
+1245381492 source:c:\documents and settings\hp_owner\desktop\enigma interface\cfile_parse\externs.cpp
+	<map>
+	<string>
+	"darray.h"
+	"externs.h"
+
+1245102605 c:\documents and settings\hp_owner\desktop\enigma interface\cfile_parse\value.h
+
+1245172646 c:\documents and settings\hp_owner\desktop\enigma interface\cfile_parse\expression_evaluator_settings.h
+
+1245175068 c:\documents and settings\hp_owner\desktop\enigma interface\cfile_parse\expev_macros.h
+	"expression_evaluator_settings.h"
+

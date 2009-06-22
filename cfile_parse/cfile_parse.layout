@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="cfile_parse.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="2221" topLine="37" />
+	</File>
+	<File name="darray.h" open="0" top="0" tabpos="3">
+		<Cursor position="2186" topLine="0" />
+	</File>
+	<File name="expression_evaluator.cpp" open="0" top="0" tabpos="2">
+		<Cursor position="8207" topLine="201" />
+	</File>
+	<File name="expression_evaluator_settings.h" open="0" top="0" tabpos="4">
+		<Cursor position="2348" topLine="16" />
+	</File>
+	<File name="externs.cpp" open="0" top="0" tabpos="5">
+		<Cursor position="227" topLine="0" />
+	</File>
+	<File name="externs.h" open="1" top="0" tabpos="2">
+		<Cursor position="524" topLine="0" />
+	</File>
+	<File name="..\..\..\..\..\cfile.h" open="1" top="0" tabpos="3">
+		<Cursor position="0" topLine="0" />
+	</File>
+</CodeBlocks_layout_file>
