@@ -1,20 +1,50 @@
+/*
+ * Copyright (C) 2008, 2009 IsmAvatar <IsmAvatar@gmail.com>
+ * 
+ * This file is part of Enigma Plugin.
+ * 
+ * Enigma Plugin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Enigma Plugin is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License (COPYING) for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.enigma;
 
-import java.awt.Container;
+import java.awt.Graphics;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.URL;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
@@ -26,12 +56,11 @@ import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
 import org.lateralgm.subframes.SubframeInformer.SubframeListener;
 
-public class EnigmaRunner implements ActionListener, SubframeListener
+public class EnigmaRunner implements ActionListener,SubframeListener
 	{
 	public static final String ENIGMA = "compileEGMf.exe";
 	public EnigmaFrame ef;
 	public JMenuItem run, debug, build, compile;
-	public JButton syntaxCheck;
 
 	public EnigmaRunner()
 		{
@@ -52,6 +81,116 @@ public class EnigmaRunner implements ActionListener, SubframeListener
 
 		LGM.frame.getJMenuBar().add(menu,1);
 		SubframeInformer.addSubframeListener(this);
+		LGM.mdi.add(new MDIBackground(new ImageIcon("enigma.png")),JLayeredPane.FRAME_CONTENT_LAYER);
+
+		EnigmaGroup node = new EnigmaGroup();
+		LGM.root.add(node);
+		node.add(new EnigmaNode("Whitespace"));
+		node.add(new EnigmaNode("Enigma Init"));
+		node.add(new EnigmaNode("Enigma Term"));
+		LGM.tree.updateUI();
+		}
+
+	public class MDIBackground extends JComponent
+		{
+		private static final long serialVersionUID = 1L;
+		ImageIcon image;
+
+		public MDIBackground(ImageIcon icon)
+			{
+			image = icon;
+			}
+
+		public int getWidth()
+			{
+			return LGM.mdi.getWidth();
+			}
+
+		public int getHeight()
+			{
+			return LGM.mdi.getHeight();
+			}
+
+		public void paintComponent(Graphics g)
+			{
+			super.paintComponent(g);
+			for (int y = 0; y < getHeight(); y += image.getIconHeight())
+				for (int x = 0; x < getWidth(); x += image.getIconWidth())
+					g.drawImage(image.getImage(),x,y,null);
+			}
+		}
+
+	public class EnigmaGroup extends ResNode
+		{
+		private static final long serialVersionUID = 1L;
+
+		public EnigmaGroup()
+			{
+			super("Enigma",ResNode.STATUS_PRIMARY,Resource.Kind.SCRIPT);
+			}
+
+		public void showMenu(MouseEvent e)
+			{
+			//No menu
+			}
+
+		public DataFlavor[] getTransferDataFlavors()
+			{
+			return null;
+			}
+
+		public boolean isDataFlavorSupported(DataFlavor flavor)
+			{
+			return false;
+			}
+
+		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException
+			{
+			throw new UnsupportedFlavorException(flavor);
+			}
+		}
+
+	public class EnigmaNode extends ResNode implements ActionListener
+		{
+		private static final long serialVersionUID = 1L;
+		private JPopupMenu pm;
+
+		public EnigmaNode(String name)
+			{
+			super(name,ResNode.STATUS_SECONDARY,Resource.Kind.SCRIPT);
+			pm = new JPopupMenu();
+			pm.add(new JMenuItem("Edit")).addActionListener(this);
+			}
+
+		public void openFrame()
+			{
+			System.out.println("You can has " + getUserObject());
+			}
+
+		public void showMenu(MouseEvent e)
+			{
+			pm.show(e.getComponent(),e.getX(),e.getY());
+			}
+
+		public void actionPerformed(ActionEvent e)
+			{
+			openFrame();
+			}
+
+		public DataFlavor[] getTransferDataFlavors()
+			{
+			return null;
+			}
+
+		public boolean isDataFlavorSupported(DataFlavor flavor)
+			{
+			return false;
+			}
+
+		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException
+			{
+			throw new UnsupportedFlavorException(flavor);
+			}
 		}
 
 	public String findEnigma(String expected)
@@ -129,12 +268,14 @@ public class EnigmaRunner implements ActionListener, SubframeListener
 			}
 		System.out.println("Compiling with " + enigma);
 
+		File err = new File(LGM.tempDir,"egmerrors.txt");
+
 		try
 			{
-			String[] cmd = new String[] { enigma,arg1,egmf.getPath(),exef.getPath() };
+			String[] cmd = new String[] { enigma,arg1,egmf.getPath(),exef.getPath(),"-e",err.getPath() };
 			Process p = Runtime.getRuntime().exec(cmd);
 			new EnigmaThread(ef,p.getInputStream());
-			new EnigmaThread(ef,p.getErrorStream());
+			new EnigmaThread(p.getErrorStream(),new PrintStream(new FileOutputStream(err),true));
 			new EnigmaThread(ef,p,mode,exef);
 			}
 		catch (Exception e)
@@ -147,10 +288,12 @@ public class EnigmaRunner implements ActionListener, SubframeListener
 
 	public static int checkSyntax(String code)
 		{
-		BufferedWriter f;
+		File sf = null;
 		try
 			{
-			f = new BufferedWriter(new FileWriter("syntax.txt"));
+			sf = File.createTempFile("egm",".egm");
+			sf.deleteOnExit();
+			BufferedWriter f = new BufferedWriter(new FileWriter(sf));
 			f.write('1');
 			f.newLine();
 			for (Script scr : LGM.currentFile.scripts)
@@ -162,6 +305,8 @@ public class EnigmaRunner implements ActionListener, SubframeListener
 		catch (IOException e)
 			{
 			e.printStackTrace();
+			if (sf != null) sf.delete();
+			return -1;
 			}
 
 		String path = "compileEGMf.exe";
@@ -170,12 +315,15 @@ public class EnigmaRunner implements ActionListener, SubframeListener
 		if (!new File(path).exists())
 			{
 			JOptionPane.showMessageDialog(null,"Unable to locate Enigma for Syntax Check");
+			sf.delete();
 			return -1;
 			}
 		if (!new File(path).equals(fi))
 			System.out.println(fi.getAbsolutePath() + " not found. Attempting " + path);
 		else
 			System.out.println("Checking syntax with " + fi.getAbsolutePath());
+
+		int r = -1;
 		try
 			{
 			Process p = Runtime.getRuntime().exec("\"" + path + "\" -s syntax.txt");
@@ -185,17 +333,17 @@ public class EnigmaRunner implements ActionListener, SubframeListener
 			while ((line = input.readLine()) != null)
 				if (line.length() > 0) output += line + "\n";
 			input.close();
-			int r = p.waitFor();
-			if (r == -1) return -1;
 
-			JOptionPane.showMessageDialog(null,output);
-			return r;
+			r = p.waitFor();
+			if (r != -1) JOptionPane.showMessageDialog(null,output);
 			}
 		catch (Exception e)
 			{
 			e.printStackTrace();
 			}
-		return -1;
+
+		sf.delete();
+		return r;
 		}
 
 	public void actionPerformed(ActionEvent e)
@@ -216,24 +364,52 @@ public class EnigmaRunner implements ActionListener, SubframeListener
 			{
 			compile((byte) 4);
 			}
-		if (e.getSource() == syntaxCheck)
-			{
-			Container c = syntaxCheck.getParent();
-			if (c instanceof ScriptFrame)
-				checkSyntax(((ScriptFrame)c).code.getText());
-			}
 		}
 
 	public void subframeAppeared(MDIFrame source)
 		{
 		if (!(source instanceof ScriptFrame)) return;
-		ScriptFrame sf = (ScriptFrame) source;
-		syntaxCheck = new JButton("Syntax");
-		syntaxCheck.addActionListener(this);
-		sf.tool.add(syntaxCheck);
+		final ScriptFrame sf = (ScriptFrame) source;
+		JButton syntaxCheck;
+		Icon i = findIcon("syntax.png");
+		if (i == null)
+			syntaxCheck = new JButton("Syntax");
+		else
+			{
+			syntaxCheck = new JButton(i);
+			syntaxCheck.setToolTipText("Syntax");
+			}
+		syntaxCheck.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+					{
+					int p = checkSyntax(sf.code.getText());
+					if (p > -1)
+						{
+						sf.code.setSelectionStart(p);
+						sf.code.setSelectionEnd(p + 1);
+						}
+					}
+			});
+		sf.tool.add(syntaxCheck,5);
 		}
 
-	public boolean subframeRequested(Resource<?> res, ResNode node)
+	public Icon findIcon(String loc)
+		{
+		String location = "org/enigma/" + loc;
+		ImageIcon ico = new ImageIcon(location);
+		if (ico.getIconWidth() == -1)
+			{
+			URL url = this.getClass().getClassLoader().getResource(location);
+			if (url != null)
+				{
+				ico = new ImageIcon(url);
+				}
+			}
+		return ico;
+		}
+
+	public boolean subframeRequested(Resource<?,?> res, ResNode node)
 		{
 		return false;
 		}

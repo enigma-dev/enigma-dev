@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Documents and Settings/Owner/Desktop/lateralgm.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LateralGM"/>
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="output" path=""/>
 </classpath>
