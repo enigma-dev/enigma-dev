@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
 <jardesc>
-    <jar path="/home/ismavatar/Desktop/plugins/enigma.jar"/>
+    <jar path="/home/cb2317/Desktop/plugins/enigma.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/Enigma/description.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>

@@ -19,8 +19,6 @@
 
 package org.enigma;
 
-import static org.lateralgm.main.Util.deRef;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -52,6 +50,8 @@ import org.lateralgm.resources.sub.Event;
 import org.lateralgm.resources.sub.Instance;
 import org.lateralgm.resources.sub.MainEvent;
 import org.lateralgm.resources.sub.View;
+import org.lateralgm.resources.sub.Instance.PInstance;
+import org.lateralgm.resources.sub.View.PView;
 
 public final class EnigmaWriter
 	{
@@ -261,10 +261,17 @@ public final class EnigmaWriter
 			out.write4(dbc ? bgc : 0);
 			writeStr(out,r.get(PRoom.CREATION_CODE));
 			out.writeBool(r.properties,PRoom.ENABLE_VIEWS);
-			if (r.views.length != 8) throw new IOException("View count mismatch: " + r.views.length);
+			if (r.views.size() != 8) throw new IOException("View count mismatch: " + r.views.size());
 			for (View view : r.views)
 				{
-				out.writeBool(view.visible);
+
+				out.writeBool(view.properties,PView.VISIBLE);
+				out.write4(view.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,PView.VIEW_H,
+						PView.PORT_X,PView.PORT_Y,PView.PORT_W,PView.PORT_H,PView.BORDER_H,PView.BORDER_V,
+						PView.SPEED_H,PView.SPEED_V);
+				out.writeId((ResourceReference<?>) view.properties.get(PView.OBJECT));
+				
+/*				out.writeBool(view.properties..visible);
 				out.write4(view.viewX);
 				out.write4(view.viewY);
 				out.write4(view.viewW);
@@ -282,12 +289,13 @@ public final class EnigmaWriter
 					System.out.println("??" + view.objectFollowing.get().getId());
 				else
 					System.out.println("?-1");
-				}
+*/				}
 			for (Instance i : r.instances)
 				{
 				out.write("inst".getBytes());
-				out.write4(i.instanceId);
-				out.writeId(i.getObject());
+				out.write4((Integer) i.properties.get(PInstance.ID));
+				ResourceReference<GmObject> or = i.properties.get(PInstance.OBJECT);
+				out.writeId(or);
 				out.write4(i.getPosition().x);
 				out.write4(i.getPosition().y);
 				writeStr(out,i.getCreationCode());

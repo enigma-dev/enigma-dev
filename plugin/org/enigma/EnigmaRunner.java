@@ -35,7 +35,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URL;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -81,7 +80,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 		LGM.frame.getJMenuBar().add(menu,1);
 		SubframeInformer.addSubframeListener(this);
-		LGM.mdi.add(new MDIBackground(new ImageIcon("enigma.png")),JLayeredPane.FRAME_CONTENT_LAYER);
+		String loc = "org/enigma/enigma.png";
+		ImageIcon bg = findIcon(loc);
+		LGM.mdi.add(new MDIBackground(bg),JLayeredPane.FRAME_CONTENT_LAYER);
 
 		EnigmaGroup node = new EnigmaGroup();
 		LGM.root.add(node);
@@ -99,6 +100,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		public MDIBackground(ImageIcon icon)
 			{
 			image = icon;
+			if (image == null) return;
+			if (image.getIconWidth() <= 0) image = null;
 			}
 
 		public int getWidth()
@@ -114,6 +117,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		public void paintComponent(Graphics g)
 			{
 			super.paintComponent(g);
+			if (image == null) return;
 			for (int y = 0; y < getHeight(); y += image.getIconHeight())
 				for (int x = 0; x < getWidth(); x += image.getIconWidth())
 					g.drawImage(image.getImage(),x,y,null);
@@ -371,7 +375,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		if (!(source instanceof ScriptFrame)) return;
 		final ScriptFrame sf = (ScriptFrame) source;
 		JButton syntaxCheck;
-		Icon i = findIcon("syntax.png");
+		ImageIcon i = findIcon("syntax.png");
 		if (i == null)
 			syntaxCheck = new JButton("Syntax");
 		else
@@ -394,18 +398,21 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		sf.tool.add(syntaxCheck,5);
 		}
 
-	public Icon findIcon(String loc)
+	public ImageIcon findIcon(String loc)
 		{
-		String location = "org/enigma/" + loc;
-		ImageIcon ico = new ImageIcon(location);
-		if (ico.getIconWidth() == -1)
-			{
-			URL url = this.getClass().getClassLoader().getResource(location);
-			if (url != null)
-				{
-				ico = new ImageIcon(url);
-				}
-			}
+		ImageIcon ico = new ImageIcon(loc);
+		if (ico.getIconWidth() != -1) return ico;
+
+		URL url = this.getClass().getClassLoader().getResource(loc);
+		if (url != null) ico = new ImageIcon(url);
+		if (ico.getIconWidth() != -1) return ico;
+
+		loc = "org/enigma/" + loc;
+		ico = new ImageIcon(loc);
+		if (ico.getIconWidth() != -1) return ico;
+
+		url = this.getClass().getClassLoader().getResource(loc);
+		if (url != null) ico = new ImageIcon(url);
 		return ico;
 		}
 

@@ -25,8 +25,10 @@ import java.io.File;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.main.LGM;
+import org.lateralgm.resources.GmObject;
 import org.lateralgm.resources.Room;
 import org.lateralgm.resources.sub.Instance;
+import org.lateralgm.resources.sub.Instance.PInstance;
 
 public final class EnigmaReader
 	{
@@ -50,7 +52,9 @@ public final class EnigmaReader
 				{
 				case 0:
 					inst = r.addInstance();
-					inst.setObject(LGM.currentFile.gmObjects.getUnsafe(f.read4()).reference);
+					GmObject temp = LGM.currentFile.gmObjects.getUnsafe(f.read4());
+					if (temp != null) inst.properties.put(PInstance.OBJECT,temp.reference);
+//					inst.setObject(LGM.currentFile.gmObjects.getUnsafe(f.read4()).reference);
 					inst.setPosition(new Point(f.read4(),f.read4()));
 					break;
 				case 1:
