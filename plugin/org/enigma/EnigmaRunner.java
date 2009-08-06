@@ -199,20 +199,24 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 	public String findEnigma(String expected)
 		{
-		String path = expected;
-		File f = new File(path);
-		if (!f.exists()) path = System.getProperty("user.dir") + File.separator + path;
-		if (!new File(path).exists())
-			{
-			System.err.println("Unable to locate Enigma");
-			return null;
-			}
-		if (!new File(path).equals(f))
-			{
-			System.out.println(f.getAbsolutePath() + " not found.");
-			return path;
-			}
-		return f.getAbsolutePath();
+		File f = new File(expected);
+		if (f.exists()) return f.getAbsolutePath();
+
+		f = new File(LGM.workDir.getParent(),"plugins");
+		if (!f.exists()) f = new File(LGM.workDir.getParent(),"Plugins");
+		f = new File(f,expected);
+		if (f.exists()) return f.getAbsolutePath();
+
+		f = new File(System.getProperty("user.dir"),expected);
+		if (f.exists()) return f.getAbsolutePath();
+
+		f = new File(System.getProperty("user.home"));
+		if (!new File(f,expected).exists()) f = new File(f,"Desktop");
+		f = new File(f,expected);
+		if (f.exists()) return f.getAbsolutePath();
+
+		System.err.println("Unable to locate Enigma");
+		return null;
 		}
 
 	public void compile(final byte mode)
