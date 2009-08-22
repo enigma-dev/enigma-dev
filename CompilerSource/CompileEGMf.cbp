@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="compileEGMf" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Release">
+				<Option output="..\CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Os" />
+					<Add option="-O" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Debug">
+				<Option output="..\CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="OS_Switchboard.h" />
+		<Unit filename="cfile_parse\cfile_parse.cpp" />
+		<Unit filename="cfile_parse\cfile_parse.h" />
+		<Unit filename="cfile_parse\cfile_parse_calls.h" />
+		<Unit filename="cfile_parse\cfile_parse_constants.h" />
+		<Unit filename="cfile_parse\cfile_parse_macros.cpp" />
+		<Unit filename="cfile_parse\darray.h" />
+		<Unit filename="cfile_parse\expev_macros.h" />
+		<Unit filename="cfile_parse\expression_evaluator.cpp" />
+		<Unit filename="cfile_parse\expression_evaluator.h" />
+		<Unit filename="cfile_parse\expression_evaluator_settings.h" />
+		<Unit filename="cfile_parse\implicit_stack.h" />
+		<Unit filename="cfile_parse\keyword_operator.cpp" />
+		<Unit filename="cfile_parse\main.cpp" />
+		<Unit filename="cfile_parse\value.h" />
+		<Unit filename="compiler\compile.cpp" />
+		<Unit filename="compiler\compile.h" />
+		<Unit filename="compiler\compile_includes.cpp" />
+		<Unit filename="compiler\compile_includes.h" />
+		<Unit filename="compiler\license_string.h" />
+		<Unit filename="compiler\pcs\pcs.cpp" />
+		<Unit filename="compiler\pcs\pcs.h" />
+		<Unit filename="externs\externs.cpp" />
+		<Unit filename="externs\externs.h" />
+		<Unit filename="general\darray.h" />
+		<Unit filename="general\estring.h" />
+		<Unit filename="general\string.cpp" />
+		<Unit filename="general\string.h" />
+		<Unit filename="general\textfile.cpp" />
+		<Unit filename="general\textfile.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="parser\parser.cpp" />
+		<Unit filename="parser\parser.h" />
+		<Unit filename="parser\parser_components.cpp" />
+		<Unit filename="parser\parser_components.h" />
+		<Unit filename="syntax\checkfile.cpp" />
+		<Unit filename="syntax\checkfile.h" />
+		<Unit filename="syntax\chkfunction.h" />
+		<Unit filename="syntax\syncheck.h" />
+		<Unit filename="syntax\syntax.cpp" />
+		<Unit filename="syntax\syntaxtools.h" />
+		<Unit filename="varnames\varnames.cpp" />
+		<Unit filename="varnames\varnames.h" />
+		<Extensions>
+			<code_completion />
+			<debugger>
+				<remote_debugging target="Debug">
+					<options conn_type="0" serial_baud="115200" additional_cmds_before="-s syntax.txt" />
+				</remote_debugging>
+			</debugger>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
