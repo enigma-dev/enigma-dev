@@ -52,6 +52,8 @@ struct externs
   map<string, externs*> members;
   
   externs();
+  externs(string n,externs* p,unsigned int f);
+  externs(string n,externs* t,externs* p,unsigned int f);
 };
 
 extern map<string,string> macros;

@@ -34,7 +34,7 @@
 using namespace std;
 
 #include "value.h"
-#include "externs.h"
+#include "../externs/externs.h"
 #include "expression_evaluator.h"
 
 string cferr;
@@ -46,9 +46,10 @@ string cferr;
 #define quote while (cfile[pos]!='"') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='"')) pos+=2; }
 #define squote while (cfile[pos]!='\'') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='\'')) pos+=2; }
 
+string tostring(int val);
 
 unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned int len);
-extern inline int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_named_phase,string &last_identifier);
+int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_named_phase,string &last_identifier);
 int parse_cfile(string cftext)
 {
   cferr="No error";
@@ -68,12 +69,10 @@ int parse_cfile(string cftext)
   unsigned int macrod=0;
   varray<string> inmacros;
   
-  string last_typename="";
+  externs *last_type = NULL;
   string last_identifier="";
   int last_named=LN_NOTHING;
   int last_named_phase=0;
-  
-  externs *last_typedef = NULL;
   
   int plevel=0;
   int funclevel=-1;
@@ -96,6 +95,8 @@ int parse_cfile(string cftext)
     If you have a problem with this, please go to hell.
     I don't want to hear about it.
   */
+  
+  int anoncount = 0;
   
   for (;;)
   {
@@ -308,8 +309,8 @@ int parse_cfile(string cftext)
       //Check if it's a modifier
       if (is_tflag(n))
       {
-        last_typename += n + " ";
-        last_typedef = global_scope.members.find("int")->second;
+        //last_typename += n + " "; Why bother
+        last_type = global_scope.members.find("n")->second;
         if (last_named==LN_NOTHING)
         {
           last_named=LN_DECLARATOR;
@@ -367,37 +368,43 @@ int parse_cfile(string cftext)
       //Check if it's a primitive or anything user defined that serves as a type.
       if (find_extname(n,EXTFLAG_TYPENAME))
       {
-        last_typename += n + " ";
-        last_typedef = ext_retriever_var;
         if (last_named == LN_NOTHING)
         {
+          last_type = ext_retriever_var;
           last_named=LN_DECLARATOR;
           last_named_phase=4;
+          continue;
+        }
+        if (last_named == LN_TYPEDEF)
+        {
+          last_type = ext_retriever_var;
+          last_named |= LN_DECLARATOR;
+          last_named_phase = 4;
           continue;
         }
         if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF))
         {
           if (last_named_phase != 4)
-          last_named_phase=4;
-          else
+          {
+            last_type = ext_retriever_var;
+            last_named_phase=4;
+            continue;
+          } //If it was only declared in a separate scope, we can permit redeclaration:
+          else if (ext_retriever_var->parent == current_scope) 
           {
             cferr = "Two types named in declaration";
             return pos;
           }
-          continue;
         }
-        if (last_named == LN_TYPEDEF)
-        {
-          last_named |= LN_DECLARATOR;
-          last_named_phase = 4;
-          continue;
+        else //This else is here because the above will need to pass this                 //struct a;
+        {    //in the case of the current type being redeclared as scalar in this scope   //namespace b { int a; }
+          cferr = "Unexpected declarator at this point";
+          return pos;
         }
-        cferr = "Unexpected declarator at this point";
-        return pos;
       }
       
       //Here's the big part
-      //We now assume that the named is an identifier.
+      //We now assume that what was named is an identifier.
       //This means we do a lot of error checking here.
       if (last_named == LN_NOTHING)
       {
@@ -410,7 +417,7 @@ int parse_cfile(string cftext)
         return pos;
       }
       
-      bool is_td = last_named & LN_TYPEDEF;
+      //bool is_td = last_named & LN_TYPEDEF;
       switch (last_named & ~LN_TYPEDEF)
       {
         case LN_DECLARATOR:
@@ -499,10 +506,11 @@ int parse_cfile(string cftext)
             }
             last_named_phase = 3;
           break;
+          default:
+            last_named = LN_IDENTIFIER;
+            last_named_phase = 0;
       }
       
-      last_named = LN_IDENTIFIER;
-      last_named_phase = 0;
       last_identifier = n;
       
       continue;
@@ -532,12 +540,12 @@ int parse_cfile(string cftext)
           return pos;
         }
         
-        if (last_typedef==NULL)
+        if (last_type == NULL)
         {
           cferr = "Program error: Type does not exist. An error should have been reported earlier.";
           return pos;
         }
-        current_scope->members[last_identifier] = last_typedef;
+        current_scope->members[last_identifier] = last_type;
       }
       else 
       {
@@ -590,7 +598,7 @@ int parse_cfile(string cftext)
             break;
         }
         
-        if (!ExtRegister(last_named,last_identifier,last_typedef))
+        if (!ExtRegister(last_named,last_identifier,last_type))
           return pos;
       }
         
@@ -605,8 +613,7 @@ int parse_cfile(string cftext)
         last_named = LN_NOTHING;
         last_named_phase = 0;
         last_identifier = "";
-        last_typedef = NULL;
-        last_typename = "";
+        last_type = NULL;
       }
       
       pos++;
@@ -727,6 +734,87 @@ int parse_cfile(string cftext)
       last_named_phase=0;
       continue;
     }
+    
+    if (cfile[pos] == '{')
+    {
+      if (last_named == LN_NAMESPACE or last_named == LN_STRUCT
+      or  last_named == LN_CLASS)
+      {
+        unsigned int tflags = (last_named==LN_NAMESPACE)?EXTFLAG_NAMESPACE:EXTFLAG_TYPENAME | ((last_named==LN_STRUCT)?EXTFLAG_STRUCT:EXTFLAG_CLASS);
+        if (last_identifier != "")
+        {
+          extiter addin = current_scope->members.find(last_identifier);
+          if (addin != current_scope->members.end())
+          {
+            if (last_named != LN_NAMESPACE)
+            {
+              cferr = "Redeclaration of " + last_identifier + " at this point";
+              return pos;
+            }
+            current_scope = addin->second;
+          }
+          else
+            current_scope = current_scope->members[last_identifier] = new externs(last_identifier,current_scope,tflags);
+        }
+        else
+          current_scope = current_scope->members["<anonymous"+tostring(anoncount++)+">"] = new externs(last_identifier,current_scope,tflags);
+      }
+      else
+      {
+        if (last_named == LN_IDENTIFIER and plevel == funclevel)
+        {
+          pos++;
+          int bl = 1;
+          while ((pos++)<cfile.length() and bl)
+          {
+            if (cfile[pos] == '"')
+              while (cfile[++pos] != '"')
+                if (cfile[pos] == '\\') pos++;
+            else
+            if (cfile[pos] == '\'')
+              while (cfile[++pos] != '\'')
+                if (cfile[pos] == '\\') pos++;
+            
+            else if (cfile[pos] == '{') bl++;
+            else if (cfile[pos] == '}') bl--;
+          }
+        }
+        else
+        {
+          cferr = "Expected scope declaration before '{'";
+          return pos;
+        }
+      }
+      
+      last_identifier = "";
+      last_named = LN_NOTHING;
+      last_named_phase = 0;
+      last_type = NULL;
+      pos++;
+      
+      continue;
+    }
+    
+    if (cfile[pos] == '}')
+    {
+      if (current_scope == &global_scope)
+      {
+        cferr = "Unexpected closing brace at this point";
+        return pos;
+      }
+      if (current_scope->flags & EXTFLAG_TYPENAME)
+        last_named = LN_DECLARATOR;
+      else
+        last_named = LN_NOTHING;
+      last_named_phase = 0;
+      
+      pos++;
+      last_type = current_scope;
+      
+      current_scope = current_scope->parent;
+      continue;
+    }
+    
     
     cferr = "Unknown symbol";
     return pos;

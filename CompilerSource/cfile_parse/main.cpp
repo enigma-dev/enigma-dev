@@ -32,7 +32,7 @@
 
 using namespace std;
 
-#include "externs.h"
+#include "../externs/externs.h"
 #include "expev_macros.h"
 #include "value.h"
 
@@ -102,7 +102,7 @@ void print_scope_members(externs* gscope, int indent)
     {
       cout << "\r\n" << indstr << "{\r\n";
       print_scope_members(i->second,indent+2);
-      cout << indstr << "}\r\n";
+      cout << indstr << "};\r\n";
     }
     
     cout << "\r\n";

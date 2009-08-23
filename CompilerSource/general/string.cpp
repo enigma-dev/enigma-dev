@@ -39,17 +39,6 @@ int negmod(double firstval, double secondval)
 }
 
 
-
-string chr(char val)
-{
-   char ordinal=(char) negmod(val,255);
-    string ret;
-   ret=ordinal;
-   return ret;
-}
-
-
-
 string tostring(int val)
 {
      free(ENIGMA_returnstring);

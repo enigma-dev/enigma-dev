@@ -36,6 +36,20 @@ externs::externs()
   type = NULL;
   parent = NULL;
 }
+externs::externs(string n,externs* p,unsigned int f)
+{
+  name = n;
+  type = NULL;
+  parent = p;
+  flags = f;
+}
+externs::externs(string n,externs* t,externs* p,unsigned int f)
+{
+  name = n;
+  type = NULL;
+  parent = p;
+  flags = f;
+}
 
 //Map to sort, darray for polymorphic things
 map<string, varray<externs> > extarray;

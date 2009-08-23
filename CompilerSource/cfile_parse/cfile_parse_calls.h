@@ -67,11 +67,11 @@ bool find_extname(string name,unsigned int flags)
 {
   externs* inscope=current_scope;
   extiter it = inscope->members.find(name);
-  while (it==inscope->members.end())
+  while (it == inscope->members.end()) //Until we find it
   {
-    if (inscope==&global_scope)
+    if (inscope==&global_scope) //If we're at global scope, give up
       return 0;
-    inscope=inscope->parent;
+    inscope=inscope->parent; //This must ALWAYS be nonzero when != global_scope
     it = inscope->members.find(name);
   } 
   ext_retriever_var = it->second;
