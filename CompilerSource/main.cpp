@@ -37,7 +37,7 @@ using namespace std;
 
 #include "general/darray.h"
 
-#include "cfile_parse/externs.h"
+#include "externs/externs.h"
 #include "syntax/syncheck.h"
     #include "parser/parser.h"
     #include "compiler/compile.h"
@@ -53,13 +53,13 @@ string fc(const char* fn)
       fseek(pt,0,SEEK_END);
       size_t sz = ftell(pt);
       fseek(pt,0,SEEK_SET);
-      
+
       char a[sz+1];
-      fread(a,1,sz,pt);
+      sz = fread(a,1,sz,pt);
       a[sz] = 0;
       return a;
     }
-}
+};
 
 void print_scope_members(externs* gscope, int indent);
 
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 {
       cparse_init();
       string cftp = fc("C:/Documents and Settings/HP_OWNER/Desktop/parsein.h");
-      
+
       int a = parse_cfile(cftp);
       if (a != -1)
       {
@@ -81,24 +81,24 @@ int main(int argc, char *argv[])
         }
         printf("Line %d, position %d: %s\r\n",line+1,pos,cferr.c_str());
       }
-      
+
       cout << "Macros:\r\n";
       for (maciter i=macros.begin(); i!=macros.end();i++)
         cout<<"  "<<i->second<<"\r\n";
-      
+
       print_scope_members(&global_scope, 0);
-    
-    system("PAUSE");
+
+    if (system("pause")) return 1337;
     return 0;
-    
+
       parser_init();
       string b = parser_main(fc("C:/Documents and Settings/HP_OWNER/Desktop/parsein.txt"));
-    
-    system("PAUSE");
+
+    if (system("pause")) return 1337;
     return 0;
-    
-    
-    
+
+
+
     string p1;
     if (!(argc>1)) { p1=""; }
     else      { p1=argv[1]; }
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
       puts("-c in out | Compile 'in' to 'out', no add-ons, full compile \r\n");
       puts("-d in out | Compile 'in' to 'out', including ENIGMA debugger\r\n");
     }
-    if (p1=="") system("lateralgm-7-13.jar");
+    if (p1=="") result = system("lateralgm-7-13.jar");
 
 
     return (int)result;

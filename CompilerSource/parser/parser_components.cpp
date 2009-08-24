@@ -690,5 +690,6 @@ void print_the_fucker(string code,string synt)
     }
   }
   fclose(of);
-  system("\"C:/Documents and Settings/HP_OWNER/Desktop/parseout.txt\"");
+  if (system("\"C:/Documents and Settings/HP_OWNER/Desktop/parseout.txt\""))
+    printf("zomg fnf\r\n");
 }

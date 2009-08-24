@@ -28,7 +28,7 @@
 //I'm copyrighting my license now, it looks like.
 //Don't get mad at me, this file would look fine to me right in the middle of the code.
 
-char *enigma_license = "/*********************************************************************************\\\r\n\
+const char *enigma_license = "/*********************************************************************************\\\r\n\
 **                                                                              **\r\n\
 **  Copyright (C) 2008 Josh Ventura                                             **\r\n\
 **                                                                              **\r\n\

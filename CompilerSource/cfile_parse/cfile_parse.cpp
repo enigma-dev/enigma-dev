@@ -28,8 +28,8 @@
 #include <map>
 #include <string>
 #include <iostream>
-#include "darray.h"
-#include "implicit_stack.h"
+#include "../general/darray.h"
+#include "../general/implicit_stack.h"
 
 using namespace std;
 
@@ -53,9 +53,9 @@ int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_n
 int parse_cfile(string cftext)
 {
   cferr="No error";
-  
+
   bool preprocallowed=1;
-  
+
   implicit_stack<string> c_file;
   #define cfile c_file()
   cfile = cftext;
@@ -65,39 +65,39 @@ int parse_cfile(string cftext)
   implicit_stack<unsigned int> cfile_length;
   #define len cfile_length()
   len = cfile.length();
-  
+
   unsigned int macrod=0;
   varray<string> inmacros;
-  
+
   externs *last_type = NULL;
   string last_identifier="";
   int last_named=LN_NOTHING;
   int last_named_phase=0;
-  
+
   int plevel=0;
   int funclevel=-1;
   int fargs_named=0;
   int fargs_count=0;
-  
+
   unsigned int *debugpos;
   debugpos = &pos;
-  
+
   /*
     Okay, we have to break this into sections.
-    We're going to blindly check what we are looking at RIGHT NOW. 
+    We're going to blindly check what we are looking at RIGHT NOW.
     THEN we're going to see how that fits together with what we already know.
-    
+
     In other words, this parser does not use a token tree.
     So, everything in this parser is handled in one pass.
-    The closest thing to a token tree in this parser is a 
+    The closest thing to a token tree in this parser is a
     linked list I use for reference tracing.
-    
+
     If you have a problem with this, please go to hell.
     I don't want to hear about it.
   */
-  
+
   int anoncount = 0;
-  
+
   for (;;)
   {
     if (!(pos<len))
@@ -113,24 +113,24 @@ int parse_cfile(string cftext)
       }
       else break;
     }
-    
-    if (is_useless(cfile[pos])) 
-    { 
-      if (cfile[pos]=='\r' or cfile[pos]=='\n') 
-        preprocallowed=true; 
+
+    if (is_useless(cfile[pos]))
+    {
+      if (cfile[pos]=='\r' or cfile[pos]=='\n')
+        preprocallowed=true;
       pos++; continue;
     }
-    
+
     //If it's a macro, deal with it here
     if (cfile[pos]=='#')
     {
       cfile_parse_macro(cfile,pos,len);
       continue;
     }
-    
+
     //Not a preprocessor
     preprocallowed = false;
-    
+
     //First, let's check if it's a letter.
     //This implies it's one of three things...
     if (is_letter(cfile[pos]))
@@ -138,7 +138,7 @@ int parse_cfile(string cftext)
       unsigned int sp = pos;
       while (is_letterd(cfile[++pos])); // move to the end of the word
       string n = cfile.substr(sp,pos-sp); //This is the word we're looking at.
-      
+
       //Macros get precedence. Check if it's one.
       maciter t;
       if ((t=macros.find(n)) != macros.end())
@@ -158,7 +158,7 @@ int parse_cfile(string cftext)
           continue;
         }
       }
-      
+
       //it's not a macro, so the next thing we'll check for is keyword
       if (n=="struct")
       {
@@ -302,10 +302,10 @@ int parse_cfile(string cftext)
       if (n=="virtual")
       if (n=="mutable")
       continue;
-      
+
       //Next, check if it's a type name.
       //If flow allows, this should be moved before the keywords section.
-      
+
       //Check if it's a modifier
       if (is_tflag(n))
       {
@@ -347,7 +347,7 @@ int parse_cfile(string cftext)
             cferr="Unexpected declarator at this point";
             return pos;
           }
-          
+
           continue;
         }
         if (last_named==LN_TYPEDEF) //if typedef is single, phase==0
@@ -359,12 +359,12 @@ int parse_cfile(string cftext)
             last_named_phase = 1;
           continue;
         }
-        
+
         cferr="Unexpected declarator at this point";
         return pos;
       }
-      
-      
+
+
       //Check if it's a primitive or anything user defined that serves as a type.
       if (find_extname(n,EXTFLAG_TYPENAME))
       {
@@ -390,7 +390,7 @@ int parse_cfile(string cftext)
             last_named_phase=4;
             continue;
           } //If it was only declared in a separate scope, we can permit redeclaration:
-          else if (ext_retriever_var->parent == current_scope) 
+          else if (ext_retriever_var->parent == current_scope)
           {
             cferr = "Two types named in declaration";
             return pos;
@@ -402,7 +402,7 @@ int parse_cfile(string cftext)
           return pos;
         }
       }
-      
+
       //Here's the big part
       //We now assume that what was named is an identifier.
       //This means we do a lot of error checking here.
@@ -416,7 +416,7 @@ int parse_cfile(string cftext)
         cferr="Type definition does not specify a type";
         return pos;
       }
-      
+
       //bool is_td = last_named & LN_TYPEDEF;
       switch (last_named & ~LN_TYPEDEF)
       {
@@ -510,22 +510,22 @@ int parse_cfile(string cftext)
             last_named = LN_IDENTIFIER;
             last_named_phase = 0;
       }
-      
+
       last_identifier = n;
-      
+
       continue;
     }
-    
+
     //There is a select number of symbols we are supposed to encounter.
     //A digit is actually not one of them. Digits, most operators, etc,
     //will be skipped over when we see an = sign.
-    
+
     //The symbol we will see most often is probably the semicolon.
     if (cfile[pos] == ',' or cfile[pos] == ';')
     {
       if (last_named == LN_NOTHING)
         { pos++; continue; }
-       
+
       if ((last_named & LN_TYPEDEF) != 0)
       {
         if (last_identifier == "")
@@ -539,7 +539,7 @@ int parse_cfile(string cftext)
           cferr = "Redeclaration of `"+last_identifier+"' as typedef at this point";
           return pos;
         }
-        
+
         if (last_type == NULL)
         {
           cferr = "Program error: Type does not exist. An error should have been reported earlier.";
@@ -547,7 +547,7 @@ int parse_cfile(string cftext)
         }
         current_scope->members[last_identifier] = last_type;
       }
-      else 
+      else
       {
         switch (last_named)
         {
@@ -597,11 +597,11 @@ int parse_cfile(string cftext)
               }
             break;
         }
-        
+
         if (!ExtRegister(last_named,last_identifier,last_type))
           return pos;
       }
-        
+
       if (cfile[pos] == ';')
       {
         if (plevel > 0)
@@ -615,11 +615,11 @@ int parse_cfile(string cftext)
         last_identifier = "";
         last_type = NULL;
       }
-      
+
       pos++;
       continue;
     }
-    
+
     //You're looking at another symbol we have to watch out for right now.
     //I'm talking of / in comments, for those who don't like riddles.
     if (cfile[pos]=='/')
@@ -634,20 +634,20 @@ int parse_cfile(string cftext)
       {
         int spos=pos;
         pos+=2;
-        
+
         while ((cfile[pos] != '/' or cfile[pos-1] != '*') and (pos++)<len);
         if (pos>=len)
         {
           cferr="Unterminating comment";
           return spos;
         }
-        
+
         pos++;
         continue;
       }
       pos--;
     }
-    
+
     //The next thing we want to do is check we're not expecting an operator for the operator keyword.
     if (last_named==LN_OPERATOR and last_named_phase != OP_PARAMS)
     {
@@ -655,18 +655,18 @@ int parse_cfile(string cftext)
       if (a != -1) return a;
       continue;
     }
-    
+
     //Now that we're sure we aren't in an "operator" expression,
     //We can check for the few symbols we expect to see.
-    
+
     //First off, the most common is likely to be a pointer indicator.
     if (cfile[pos]=='*')
     {
       //type should be named
       if (last_named != LN_DECLARATOR)
       {
-        if (last_named != LN_STRUCT 
-        and last_named != LN_CLASS 
+        if (last_named != LN_STRUCT
+        and last_named != LN_CLASS
         and last_named != LN_UNION)
         {
           cferr="Expected type id before '*' symbol";
@@ -684,7 +684,7 @@ int parse_cfile(string cftext)
         }
       }
     }
-    
+
     if (cfile[pos] == '(')
     {
       if (last_named != LN_IDENTIFIER)
@@ -703,12 +703,12 @@ int parse_cfile(string cftext)
           pos++;
           continue;
         }
-        
+
       }
-      
+
       last_named = LN_IDENTIFIER;
       last_named_phase = 0;
-      
+
       if (funclevel==-1)
       {
         funclevel=plevel;
@@ -719,7 +719,7 @@ int parse_cfile(string cftext)
       pos++;
       continue;
     }
-    
+
     if (cfile[pos] == ')')
     {
       pos++;
@@ -734,7 +734,7 @@ int parse_cfile(string cftext)
       last_named_phase=0;
       continue;
     }
-    
+
     if (cfile[pos] == '{')
     {
       if (last_named == LN_NAMESPACE or last_named == LN_STRUCT
@@ -774,7 +774,7 @@ int parse_cfile(string cftext)
             if (cfile[pos] == '\'')
               while (cfile[++pos] != '\'')
                 if (cfile[pos] == '\\') pos++;
-            
+
             else if (cfile[pos] == '{') bl++;
             else if (cfile[pos] == '}') bl--;
           }
@@ -785,16 +785,16 @@ int parse_cfile(string cftext)
           return pos;
         }
       }
-      
+
       last_identifier = "";
       last_named = LN_NOTHING;
       last_named_phase = 0;
       last_type = NULL;
       pos++;
-      
+
       continue;
     }
-    
+
     if (cfile[pos] == '}')
     {
       if (current_scope == &global_scope)
@@ -807,21 +807,21 @@ int parse_cfile(string cftext)
       else
         last_named = LN_NOTHING;
       last_named_phase = 0;
-      
+
       pos++;
       last_type = current_scope;
-      
+
       current_scope = current_scope->parent;
       continue;
     }
-    
-    
+
+
     cferr = "Unknown symbol";
     return pos;
   }
-  
-  
-  
+
+
+
   /*
   string pname = "";
   if (last_typedef != NULL) pname=last_typedef->name;

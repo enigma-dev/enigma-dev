@@ -67,9 +67,9 @@ using namespace std;
  *
  *
  *
- * 
+ *
  */
- 
+
 
 
 
@@ -485,30 +485,30 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
             string n = reads(namelen);
             //Store the name
             objects[i].events[ii].name = n;
-            
+
             //Read the null
             int_read=readi();
             if (int_read != 0) return -5;
-            
+
             //Read the additional index
             objects[i].events[ii].addind=readi();
-            
+
             //Read the code
             string code=readSTR();
             //Was there a null int?
             if (EXPECTNULL) return -3;
-            
+
             //Check it
             int synt=syncheck::syntacheck(code);
             if (!(synt<0))
             {
               printf("\nERROR: Compile error. Invalid syntax.\n\n");
               printf("In icon %d of event `%s' for object `%s',\n",0,objects[i].events[ii].name.c_str(),objects[i].name.c_str());
-              
+
               int l=0,p=0; int i;
               for (i=0;i<synt;i++) { if (code[i]=='\r') { l++; if (code[i+1]=='\n') i++; p=i+1; } else if (code[i]=='\n') { l++; p=i+1; } }
               printf("Syntax check returned error on line %d, position %d; or absolute index %d:\n",(l)+1,(synt-p)+1,synt);
-              
+
               printf("%s\n\n",syncheck::error.c_str());
               printf("Compile can not continue, aborting.\n");
               fflush(stdout);
@@ -516,7 +516,7 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
             }
             //Parse it
             code=parser_main(code)+"  \r\n  return 0;\r\n";
-            
+
             //Put this all in the object
             if (objects[i].events[ii].name=="step")
             {
@@ -528,7 +528,7 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
               objects[i].eventcount++;
               objects[i].events[ii].code=code;
             }
-            
+
             for(int iii=0;iii<varcount;iii++)
             {
               objects[i].events[ii].varnames[iii]=varnames[iii];
@@ -536,7 +536,7 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
               objects[i].events[ii].varname_types[iii]=varname_types[iii];
               objects[i].events[ii].varname_suffix[iii]=varname_suffix[iii];
             } objects[i].events[ii].varcount=varcount;
-            
+
             //For each script
             for(int iii=0;iii<fcount;iii++)
             {
@@ -999,8 +999,8 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
             writes(IDE_EDIT_objectfunctionality,"}\r\n\r\n");
          }
       }
-      
-      
+
+
       /*********************************************************************
       * Export a table of object info
       *********************************************************************/
@@ -1020,8 +1020,8 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
          fprintf(IDE_EDIT_objectdata,"  enigma::objectdata[%d].persistent=%d;\r\n\r\n",objects[i].id,objects[i].persistent);
       }
       fclose(IDE_EDIT_objectdata);
-      
-      
+
+
       /* Then include all the scripts that are called in each object.
       *******************************************************************
       //Deprecated as of WILDCLASS rethink, release 4
@@ -1035,28 +1035,28 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
          }
       }
       */
-      
-      
+
+
       fclose(IDE_EDIT_objectdeclarations);
       fclose(IDE_EDIT_objectfunctionality);
-  
+
   printf("Wrote event code.\n");
   fflush(stdout);
-  
-  
-  
-  
+
+
+
+
   /* Give it inherited_locals.h
   ************************************************************/
-  
+
     FILE* IDE_EDIT_inherited_locals=fopen("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h","wb");
     if (IDE_EDIT_inherited_locals==NULL) return -8;
-    
+
     for (int i=0; i<localcount; i++)
     fprintf(IDE_EDIT_inherited_locals,"%s %s;\r\n",localt[i].c_str(),localn[i].c_str());
-    
+
     fclose(IDE_EDIT_inherited_locals);
-    
+
   printf("Wrote inherited locals.\n");
   fflush(stdout);
 
@@ -1067,7 +1067,7 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
 
   /* Implicit access of potentially nonexisting members
   **************************************************************/
-  
+
       varray<string> alltypes,allnames,allprefixes,allarrays; int allvarcount=0;
       for (int i=0;i<object_count;i++)
       {
@@ -1102,7 +1102,7 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
                 for(int iv=0;iv<object_count;iv++)
                   if (objects[iv].name==objects[i].events[ii].varnames[iii])
                   {
-                    on=1; 
+                    on=1;
                     break;
                   }
                 if (!on)
@@ -1110,7 +1110,7 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
                   for(int iv=0;iv<sprite_count;iv++)
                     if (sprites[iv].name==objects[i].events[ii].varnames[iii])
                     {
-                      on=1; 
+                      on=1;
                       break;
                     }
                   if (!on)
@@ -1571,7 +1571,7 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
         libs += " ENIGMAsystem/SHELL/Graphics_Systems/OpenGL/GSsurface.o";
         libs += " ENIGMAsystem/SHELL/Graphics_Systems/OpenGL/GSmiscextra.o";
       //}
-      
+
       #if WINDOWS
       o_compile_command=         gcc+" -s -c ENIGMAsystem\\SHELL\\SHELLmain.cpp";
       #else
@@ -1717,7 +1717,8 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
       //run it for build mode
       if (build)
       {
-        system(outname.c_str());
+        int sr = system(outname.c_str());
+        printf("'Build mode' game exited with status %d\r\n",sr);
         remove(outname.c_str());
       }
 

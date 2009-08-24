@@ -29,7 +29,6 @@
 using namespace std;
 
 
-char* ENIGMA_returnstring;
 
 int negmod(double firstval, double secondval)
 {
@@ -41,12 +40,9 @@ int negmod(double firstval, double secondval)
 
 string tostring(int val)
 {
-     free(ENIGMA_returnstring);
-     ENIGMA_returnstring=new char[70];
-
-     sprintf(ENIGMA_returnstring,"%d",val);
-
-     return ENIGMA_returnstring;
+  char a[32];
+  sprintf(a,"%d",val);
+  return a;
 }
 
 

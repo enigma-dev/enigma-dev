@@ -28,7 +28,7 @@
 #include <map>
 #include <string>
 #include <iostream>
-#include "darray.h"
+#include "../general/darray.h"
 
 using namespace std;
 
@@ -48,16 +48,16 @@ string file_contents(string file)
 {
   FILE *f = fopen(file.c_str(),"rb");
   if (f==NULL) return "";
-  
+
   fseek(f,0,SEEK_END);
   size_t sz = ftell(f);
   char a[sz+1];
   fseek(f,0,SEEK_SET);
-  fread(a,sz,1,f);
-  
+  sz = fread(a,sz,1,f);
+
   fclose(f);
   a[sz]=0;
-  
+
   return a;
 }
 
@@ -68,43 +68,43 @@ void print_scope_members(externs* gscope, int indent)
   {
     bool comma=0;
     string indstr(indent,' ');
-    
+
     cout << indstr << i->second->name << ":  ";
-    
+
     if (i->second->type != NULL)
       cout << i->second->type->name << "  ";
-    
+
     if (i->second->flags&EXTFLAG_FUNCTION)
     {
       cout << " function (" << i->second->fargs.size << " parameters)"/* returning "<<(i->second)[0].macrotext*/;
       comma=1;
     } /*else cout << " " << (i->second)[0].macrotext;*/
-    
+
     if (i->second->flags&EXTFLAG_TEMPLATE)
     {
       cout << " template with " << i->second->targs.size << " parameters";
       comma=1;
     }
-    
+
     if (i->second->flags & EXTFLAG_TYPENAME)
     {
-      if (comma) 
+      if (comma)
       cout << ", serves as typename";
       else
       cout << " Serves as typename";
     }
-    
+
     if (i->second->flags & EXTFLAG_NAMESPACE) cout << " namespace";
     if (i->second->flags & EXTFLAG_STRUCT) cout << " : struct";
     if (i->second->flags & EXTFLAG_CLASS) cout << " : class";
-    
+
     if (!i->second->members.empty())
     {
       cout << "\r\n" << indstr << "{\r\n";
       print_scope_members(i->second,indent+2);
       cout << indstr << "};\r\n";
     }
-    
+
     cout << "\r\n";
   }
 }
@@ -112,7 +112,7 @@ void print_scope_members(externs* gscope, int indent)
 int cfile_parse_main()
 {
   cparse_init();
-  
+
   string fc=file_contents("C:\\cfile.h");
   time_t ts = clock();
   int a=parse_cfile(fc);
@@ -131,15 +131,15 @@ int cfile_parse_main()
     }
     printf("Line %d, position %d: %s\r\n",line+1,pos,cferr.c_str());
   }
-  
+
   cout << "Macros:\r\n";
   for (maciter i=macros.begin(); i!=macros.end();i++)
     cout<<"  "<<i->second<<"\r\n";
-  
+
   print_scope_members(&global_scope, 0);
-  
+
   //system("pause");
-  
+
   #if 0
       while (1)
       {
@@ -174,7 +174,7 @@ int cfile_parse_main()
         }
       }
   #endif
-  
-  
+
+
   return 0;
 }

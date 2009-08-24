@@ -21,12 +21,13 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
 #include <map>
 #include <string>
+#include <stdlib.h> //system (Linux)
 using namespace std;
 #include "../../general/estring.h"
 
@@ -41,15 +42,15 @@ void load_filter_args()
 {
    FILE* pcs=fopen("pcs.txt","rb");
    if (pcs==NULL) { printf("Failed to load Post-Compile Script.\r\n"); fflush(stdout); return; }
-   
+
    printf("\n");
    int contpre=0,contpost=0;
-   
+
    while (!feof(pcs))
    {
       string cmd; cmd="";
       char rb; rb=0;
-      
+
       while (rb != EOF)
       {
          rb=fgetc(pcs);
@@ -96,12 +97,16 @@ void load_filter_args()
 
 void execute_pcs_pre_commands(string exename="")
 {
-   for (int i=0;i<pcs::prec;i++)
-     system(string_replace_all(pcs::pre[i],"%exename%",exename).c_str());
+  int sr;
+  for (int i=0;i<pcs::prec;i++)
+    if ((sr = system(string_replace_all(pcs::pre[i],"%exename%",exename).c_str())) != 0)
+      printf("Pre-Compile command %d returned %d exit status\r\n",i,sr);
 }
 
 void execute_pcs_post_commands(string exename="")
 {
-   for (int i=0;i<pcs::postc;i++)
-     system(string_replace_all(pcs::post[i],"%exename%",exename).c_str());
+  int sr;
+  for (int i=0;i<pcs::postc;i++)
+    if ((sr = system(string_replace_all(pcs::post[i],"%exename%",exename).c_str())) != 0)
+      printf("Pre-Compile command %d returned %d exit status\r\n",i,sr);
 }

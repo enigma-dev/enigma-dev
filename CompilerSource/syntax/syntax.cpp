@@ -44,7 +44,7 @@ using namespace std;
 /*
 extern map<int,string> fnames;
 extern int fcount;*/
-#include "../cfile_parse/externs.h"
+#include "../externs/externs.h"
 
 string tostring(int val);
 
@@ -54,7 +54,7 @@ namespace syncheck
   int lastln;
   string error="";
   int syntacheck(string code);
-  
+
   void addscr(string name)
   {
     externs *ne=global_scope.members[name];
@@ -62,9 +62,9 @@ namespace syncheck
     for (int i=0;i<16;i++)
     ne->fargs[ne->fargs.size]=0;
   }
-  
+
   /*
-  
+
   struct function_info
   {
     string name;
@@ -72,7 +72,7 @@ namespace syncheck
     char argcount; //-100 for infinite
     char atype[64]; //up to 64 args, 0 for real 1 for string 2 for variant +3 for optional 5 for WTF MAN
   };
-  
+
   int fcount=0;
     map<int,function_info> fnames;
   int scrcount=0;
@@ -87,7 +87,7 @@ int get_two(int pos)
 
 namespace syncheck
 {
-  // Start off with some basic things 
+  // Start off with some basic things
   // we'll need during the check process
   ////////////////////////////////////////
   /*
@@ -96,12 +96,12 @@ namespace syncheck
     /*string typenames="|bool||char||int||float||double||cstring||short||long|";
     string typeflags="|lovalv||unsigned||signed||const||static||short||long|";
     #include "syntax/castchecker.h"*/
-    
+
     #include "chkfunction.h"
-    
+
     //Map for flexibility, dynamics, and legibility
     typedef map<int,int> array;
-    
+
     //How high we are, stack wise
      int level=0;
     //These tell us what kind of level this is
@@ -114,13 +114,13 @@ namespace syncheck
      #define LEVELTYPE_SWITCH_BLOCK 5
      #define LEVELTYPE_FOR_PARAMETERS 6
      #define LEVELTYPE_GENERAL_STATEMENT 7
-     
+
     //If we are in an if statement, we expect two expressions before else statement.
-      //For example, if a=b b=c else d=e; 
+      //For example, if a=b b=c else d=e;
       //a=b is expression one, then b=c is expression two.
       //This variable represents the number of statements.
       array statement_pad;
-    
+
     //How high we are, parenthesis wise
      int plevel=0;
     //These tell us what kind of parentheses we're in
@@ -129,8 +129,8 @@ namespace syncheck
       #define PLT_BRACKET 1
       #define PLT_FUNCTION 2
       #define PLT_FORSTATEMENT 3
-      
-      
+
+
     array assop; //Whether we have an assignment operator, organized per-level
     array lastnamed; //The last thing that was named
     //Values for type of last named token:
@@ -140,49 +140,49 @@ namespace syncheck
      #define LN_DIGIT 3
      #define LN_FUNCTION 4
      #define LN_CLOSING_SYMBOL 5
-    
+
     //For declarations based on a typename
      array indeclist;
-     
+
     //either in a declaration list and plevel is zero, or it's one and plevelt is PLT_FORSTATEMENT
     //or we're in a function
       #define inlist() ((indeclist[level] && (plevel==0 || plevelt[plevel]==PLT_FORSTATEMENT)) or (plevelt[plevel]==PLT_FUNCTION))
-    
+
     //One more precaution. This is for a=.b
     //it enables the checker to dismiss a . it comes by until next iteration,
     //where it is treated as a regular number. This makes it so when that happens,
     //you can't have .5.23
     int decimal_named=0;
     int number_of_statements=0;
- 
+
    //Anything else the checker will use a lot
     #include "syntaxtools.h"
-   
-  // Now that the basics are over, we get into 
+
+  // Now that the basics are over, we get into
   // the specific variables we'll be working with
   //////////////////////////////////////////////////
-  
+
     int errorpos=-1;
-  
+
   // Onto the actual syntax checker code
   ////////////////////////////////////////
-      
+
   int syntacheck(string code) //string for substr() member
   {
     error="";
     errorpos=-1;
-    
+
     int pos=0;
     const int len=code.length();
-    
+
     level=0; plevel=0;
     assop[level]=0;
     lastnamed[level]=LN_NOTHING;
-    
+
     int last_identifier_start = 0;
-    
+
     statement_pad[level]=0;
-    
+
     while (pos<len)
     {
       if (is_letter(code[pos])) //we're at an identifier, a statement, or a word-based operator
@@ -201,7 +201,7 @@ namespace syncheck
             if (lastnamed[level]==LN_VARNAME or lastnamed[level]==LN_FUNCTION)
               { error="Operator expected at this point"; return pos; }
           }
-          
+
           if (is_statement(code,pos,len)) //Check if it's a statement, handle it if it is.
           {
             int hs=handle_statement(code,pos); //This does NOT handle until and else. See above.
@@ -221,10 +221,10 @@ namespace syncheck
             if (!assop[level] or lastnamed[level]!=LN_OPERATOR) //has to be preceeded by operator
             {
               error="Expected operator before unary `not' operator";
-              return pos; 
+              return pos;
             }
           }
-          else /*if((code[pos]=='a') //and 
+          else /*if((code[pos]=='a') //and
           or (code[pos]=='o') //or
           or (code[pos]=='x') //xor
           or (code[pos]=='d') //div
@@ -250,7 +250,7 @@ namespace syncheck
           if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
           introuble=2;//{ error="Operator expected before numeric constant"; return pos; }
         }
-        
+
         while (is_digit(code[pos])) pos++;
         while (is_useless(code[pos])) pos++;
         if (!decimal_named)
@@ -309,7 +309,7 @@ namespace syncheck
           pos++;
           continue;
         }
-        
+
         if (code[pos]==';')
         {
           if (plevel>0 and plevelt[plevel] != PLT_FORSTATEMENT)
@@ -321,8 +321,8 @@ namespace syncheck
           pos++;
           continue;
         }
-        
-        
+
+
         if (code[pos]==':')
         {
           if (plevel>0)
@@ -340,30 +340,30 @@ namespace syncheck
           }
           else
           {
-            error="Unexpected symbol `:' at this point"; 
+            error="Unexpected symbol `:' at this point";
             return pos;
           }
           pos++;
           continue;
         }
-        
-        
+
+
         if (code[pos]==',')
         {
           if (!inlist())
            { error="Comma outside of function parameters or declarations"; return pos; }
           if (lastnamed[level]==LN_OPERATOR)
             { error="Secondary expression expected before comma"; return pos; }
-          
+
           //The beauty: if we have unterminated parentheses before the comma, the first error is true.
           //There does not need to be an assignment operator in either case.
-          
+
           lastnamed[level]=LN_NOTHING;
           pos++;
           continue;
         }
-        
-        
+
+
         //Moving on...
         //first priority is to check for a bracket of any sort; () [] {}
         if (code[pos]=='(')
@@ -383,18 +383,18 @@ namespace syncheck
               int cpos=pos+1,qc=1;
               while (qc>0)
               {
-                if (code[cpos]=='(') qc++; if (code[cpos]==')') qc--; 
+                if (code[cpos]=='(') qc++; if (code[cpos]==')') qc--;
                 if (cpos>=len) break; //Ensure we don't overflow
                 cpos++;
               }
-              
+
               if (qc>0)
               { error="Unterminated parenthetical expression at this point"; return pos; }
-              
+
               while (is_useless(code[cpos])) cpos++;
               if (code[cpos]!='.')
               { error="Unexpected parenthetical expression at this point"; return pos; }
-              
+
               if (statement_completed(lastnamed[level]))
               close_statement(code,pos);
             }
@@ -418,8 +418,8 @@ namespace syncheck
           pos++;
           continue;
         }
-        
-        
+
+
         if (code[pos]=='[')
         {
           if (lastnamed[level] != LN_VARNAME)
@@ -439,30 +439,30 @@ namespace syncheck
           pos++;
           continue;
         }
-        
-        
+
+
         if (code[pos]=='{')
         {
           /*int einfo;
           if (levelt[level]==LEVELTYPE_SWITCH) einfo=LEXTRAINFO_SWITCHBLOCK;
           if (levelt[level]==LEVELTYPE_DO) einfo=LEXTRAINFO_LOOPBLOCK;
           if (levelt[level]==LEVELTYPE_FOR_PARAMETERS) einfo=LEXTRAINFO_LOOPBLOCK;
-          if (levelt[level]==LEVELTYPE_GENERAL_STATEMENT) 
+          if (levelt[level]==LEVELTYPE_GENERAL_STATEMENT)
           {
             if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
             if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
           }*/
           bool isbr=levelt[level]==LEVELTYPE_SWITCH;
-          
+
           if (lastnamed[level]==LN_OPERATOR)
           { error="Unexpected brace at this point"; return pos; }
-          
-          level+=!isbr; 
+
+          level+=!isbr;
           levelt[level]=(isbr?LEVELTYPE_SWITCH_BLOCK:LEVELTYPE_BRACE);
           lastnamed[level]=LN_NOTHING; //This is the beginning of a glorious new level
           statement_pad[level]=-1;
           assop[level]=0;
-          
+
           pos++;
           continue;
         }
@@ -470,29 +470,29 @@ namespace syncheck
         {
           if (level<=0)
           { error="Unexpected closing brace at this point"; return pos; }
-          
+
           if (lastnamed[level]==LN_OPERATOR)
           { error="Expected secondary expression before closing brace"; return pos; }
-          
+
           if (statement_completed(lastnamed[level]))
           {
             int cs=close_statement(code,pos);
             if (cs != -1) return cs;
           }
-          
+
           lower_to_level(LEVELTYPE_BRACE,"`}' symbol");
           level--;
           statement_pad[level]=-1;
           lastnamed[level]=LN_CLOSING_SYMBOL; //Group is like one statement for this level
           //this will invoke the next statement to close the current statement
-          
+
           pos++;
           continue;
         }
-        
-        
-        
-        
+
+
+
+
         if (code[pos]=='"')
         {
           if (!assop[level] && !(plevel>0))
@@ -517,9 +517,9 @@ namespace syncheck
           lastnamed[level]=LN_DIGIT;
           continue;
         }
-        
-        
-        
+
+
+
         if (code[pos]=='.')
         {
           if (lastnamed[level] == LN_DIGIT || lastnamed[level]==LN_VARNAME || lastnamed[level]==LN_FUNCTION)
@@ -542,8 +542,8 @@ namespace syncheck
             { error="Unexpected symbol `.' in expression"; return pos; }
           }
         }
-        
-        
+
+
         //Now we can assume it's supposed to be an operator
         if (code[pos]=='=') //handle = and == first
         {
@@ -567,22 +567,22 @@ namespace syncheck
           }
           continue;
         }
-        
+
         //Now we check if it's an operator... last chance
         ///////////////////////////////////////////////////
-        
+
         if ((code[pos+1]=='=') or (code[pos+1]==code[pos] && code[pos+2]=='=')) //is an assignment operator (or potentially a comparison)
         {
           if (code[pos+1] == '=') //one character base operator, followed by =
           {
             switch (code[pos])
             {
-              case '+': 
-              case '-': 
-              case '*': 
-              case '/': 
-              case '&': 
-              case '|': 
+              case '+':
+              case '-':
+              case '*':
+              case '/':
+              case '&':
+              case '|':
               case '^': //Same code as two below follwing case '<':
                 if (lastnamed[level]==LN_FUNCTION && !assop[level])
                 { error="Cannot assign to a function, use == to test equality"; return pos; }
@@ -590,8 +590,8 @@ namespace syncheck
                 { error="Variable name expected before assignment operator"; return pos; }
                 assop[level]=1;
                 lastnamed[level]=LN_OPERATOR;
-                break; 
-              
+                break;
+
               case '>':
               case '<':
               case '!':
@@ -600,12 +600,12 @@ namespace syncheck
                 if (lastnamed[level]==LN_CLOSING_SYMBOL || lastnamed[level]==LN_OPERATOR || lastnamed[level]==LN_NOTHING)
                 { error="Expected primary expression before comparison operator"; return pos; }
                 break;
-              
+
               default:
-                error="Invalid operator at this point"; 
+                error="Invalid operator at this point";
                 return pos;
             }
-            pos+=2; 
+            pos+=2;
             continue;
           }
           else //two character base operator, followed by =
@@ -621,12 +621,12 @@ namespace syncheck
                 assop[level]=1;
                 lastnamed[level]=LN_OPERATOR;
                 break;
-              
+
               default:
-                error="Invalid operator at this point"; 
+                error="Invalid operator at this point";
                 return pos;
             }
-            pos+=3; 
+            pos+=3;
             continue;
           }
         }
@@ -642,10 +642,10 @@ namespace syncheck
               { error="Assignment operator expected before any secondary operators"; return pos; }
               //Since +, - and * can also be unary, we do not have to check for previous identifier
               lastnamed[level]=LN_OPERATOR;
-              while (code[pos]=='+' or code[pos]=='-' or code[pos]=='*' or code[pos]=='&' or is_useless(code[pos])) 
+              while (code[pos]=='+' or code[pos]=='-' or code[pos]=='*' or code[pos]=='&' or is_useless(code[pos]))
               pos++;
               break;
-            
+
             case '/':
             case '%':
             case '|':
@@ -665,17 +665,17 @@ namespace syncheck
               }
               if (code[pos]=='<' and code[pos+1]=='>')
               pos++;
-              
+
               pos++;
               break;
-            
+
             case '!': //we already know the next symbol is not '=', so this is unary
             case '~':
               if (lastnamed[level]!=LN_OPERATOR)
               { error="Unexpected unary operator following value"; return pos; }
               pos++;
               break; //lastnamed is already operator, so just break
-            
+
             default:
               error="Unexpected symbol reached";
               return pos;
@@ -684,27 +684,27 @@ namespace syncheck
         }
       }
     }
-              
+
     //We're now at the end of the code. Perform a couple checks...
     if (plevel>1)
      { error="Code ends with "+tostring(plevel)+" unterminated parentheses"; return pos; }
     if (plevel==1)
      { error="Code ends with one unterminated parenthesis"; return pos; }
-     
+
     if (lastnamed[level]==LN_VARNAME and !assop[level])
      { error="Assignment operator expected before end of code"; return pos; }
-     
-    
+
+
     if (statement_completed(lastnamed[level]))
       close_statement(code,pos);
-    
+
     if (lastnamed[level]==LN_OPERATOR)
      { error="Expected secondary expression before end of code"; return pos; }
-    
+
     if (statement_pad[level]>(levelt[level]==LEVELTYPE_IF))
     { error="Unexpected end of code reached ("+tostring(level)+","+tostring(statement_pad[level]); return pos; }
-    
-    
+
+
     while (level>0)
     {
       if (levelt[level]==LEVELTYPE_BRACE or levelt[level]==LEVELTYPE_SWITCH_BLOCK)
@@ -713,7 +713,7 @@ namespace syncheck
         { error="Statement `until' expected before end of code"; return pos; }
       else level--;
     }
-    
+
     return -1;
   }
 }

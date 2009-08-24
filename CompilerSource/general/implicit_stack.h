@@ -25,74 +25,67 @@
 **                                                                              **
 \*********************************************************************************/
 
+#include <stdlib.h>
 
-template <typename atype> 
-struct darray
+template <typename atype>
+struct implicit_stack
 {
-  atype* where;
-  atype safety_val;
-  unsigned int size;
-  unsigned int allocd;
-  atype &operator[] (unsigned int ind)
+  atype* safety;
+  atype** astack;
+  unsigned int ind, allocd;
+  void push()
   {
+    ind++;
     if (allocd<=ind)
     {
       int olds=allocd;
       while (allocd<=ind) allocd<<=1;
-      
-      atype* nar=new atype[allocd];
-      if (nar==0)
-      {
-         allocd=olds;
-         return safety_val; 
-      }
-      if (olds>0)
-        memcpy(nar,where,olds*sizeof(atype));
-      
-      delete []where;
-      where=nar;
-    }
-    if (ind+1>size) size=ind+1;
-    return where[ind];
-  }
-  darray() { where=new atype[1]; allocd=(where!=0); size=0; }
-  ~darray() { if (where != 0) delete[] where; }
-};
 
-template <typename atype> 
-struct varray
-{
-  atype** where;
-  atype* safety_val;
-  unsigned int size;
-  unsigned int allocd;
-  atype &operator[] (unsigned int ind)
-  {
-    if (allocd<=ind)
-    {
-      int olds=allocd;
-      while (allocd<=ind) allocd<<=1;
-      
       atype** nar=new atype*[allocd];
       if (nar==0)
       {
-         allocd=olds;
-         return *safety_val; 
+        ind--;
+        allocd=olds;
+        return;
       }
       if (olds>0)
       {
-        memcpy(nar,where,olds*sizeof(atype*));
+        memcpy(nar,astack,olds*sizeof(atype*));
         for (unsigned int i=olds;i<allocd;i++) nar[i]=0;
       }
-      
-      delete []where;
-      where=nar;
+
+      delete []astack;
+      astack=nar;
     }
-    if (ind+1>size) size=ind+1;
-    if (where[ind]==0) where[ind]=new atype;
-    if (where[ind]==0) return *safety_val;
-    return *where[ind];
+    if (astack[ind]==0) astack[ind]=new atype;
+    if (astack[ind]==0) ind--;
   }
-  varray() { safety_val=new atype; where=new atype*[1]; allocd=(where!=0); if (allocd==0 or safety_val==0) exit(-18); where[0]=0; size=0; }
-  ~varray() { if (where != 0) for (unsigned int i=0; i<size; i++) delete where[i]; }
+  void pop()
+  {
+    delete astack[ind];
+    astack[ind]=0;
+    ind--;
+  }
+
+  atype &operator() ()
+  {
+    return *astack[ind];
+  }
+
+  implicit_stack()
+  {
+    ind=0;
+    safety = new atype;
+    astack=new atype*[1];
+    allocd=astack!=NULL;
+    if (safety==0 or allocd==0) exit(-18);
+    astack[0]=new atype;
+    if (astack[0]==0) exit(-18);
+  }
+  ~implicit_stack()
+  {
+    if (astack != 0)
+    for (unsigned int i=0; i<ind; i++)
+    delete astack[i];
+  }
 };

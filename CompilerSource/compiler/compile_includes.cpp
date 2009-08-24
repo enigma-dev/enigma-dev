@@ -43,31 +43,37 @@ char* writehere;
 FILE* enigma_file;
 int EXPECTNULL=0;
 
-   void space(int size)
+   inline void space(int size)
    {
      delete[] writehere;
      writehere=new char[size+1];
      
      for (int i=0;i<size+1;i++)
-     writehere[i]='\0';
+     writehere[i] = 0;
    }
+   inline void cap(int at)
+   {
+     writehere[at] = 0;
+   }
+   
    string reads(int size)
    {
      space(size);
-     fread(writehere,size,1,enigma_file);
+     cap(fread(writehere,size,1,enigma_file));
      return writehere;
    }
    string readSTR()
    {
      int size;
-     fread(&size,4,1,enigma_file);
+     if (fread(&size,4,1,enigma_file) != 1)
+       return "";
      
      space(size+1);
-     fread(writehere,size,1,enigma_file);
-     writehere[size]=0;
+     cap(fread(writehere,size,1,enigma_file));
      
      int readi;
-     fread(&readi,4,1,enigma_file);
+     if (fread(&readi,4,1,enigma_file) != 1)
+       return "";
      if (readi != 0) EXPECTNULL=1;
      return writehere;
    }
@@ -86,19 +92,21 @@ int EXPECTNULL=0;
    int readi()
    {
      int a;
-     fread(&a,4,1,enigma_file);
+     if (!fread(&a,4,1,enigma_file))
+       return 0;
      return a;
    }
    unsigned char readb()
    {
      unsigned char a;
-     fread(&a,1,1,enigma_file);
+     if (!fread(&a,1,1,enigma_file))
+       return 0;
      return a;
    }
    char* readv(int size)
    {
      char* a=new char[size+3];
-     fread(a,1,size,enigma_file);
+     if (!fread(a,1,size,enigma_file));
      return a;
    }
    
@@ -123,7 +131,7 @@ int EXPECTNULL=0;
        fwrite(buf,s,1,out);
        size -= s;
      }
-     fread(buf,size,1,in);
+     size = fread(buf,size,1,in);
      fwrite(buf,size,1,out);
      fclose(out);
    }
@@ -155,14 +163,15 @@ int EXPECTNULL=0;
    int transi(FILE* out)
    {
        int a;
-       fread(&a,4,1,enigma_file);
+       if (fread(&a,4,1,enigma_file))
        fwrite(&a,4,1,out);
        return a;
    }
    void transSTR(FILE* out)
    {
        int a;
-       fread(&a,4,1,enigma_file);
+       if (!fread(&a,4,1,enigma_file))
+         return;
        fwrite(&a,4,1,out);
 
        int aa;
@@ -176,6 +185,6 @@ int EXPECTNULL=0;
        aa=fread(outbuf,1,a,enigma_file);
        fwrite(outbuf,1,aa,out);
 
-       fread(&a,4,1,enigma_file);
+       fseek(enigma_file,4,SEEK_CUR);
        fwrite("\0\0\0\0",4,1,out);
    }

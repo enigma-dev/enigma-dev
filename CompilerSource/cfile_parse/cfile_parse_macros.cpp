@@ -28,12 +28,12 @@
 #include <map>
 #include <string>
 #include <iostream>
-#include "darray.h"
+#include "../general/darray.h"
 
 using namespace std;
 
 #include "value.h"
-#include "externs.h"
+#include "../externs/externs.h"
 #include "expression_evaluator.h"
 
 
@@ -49,17 +49,17 @@ extern string cferr;
 inline void move_newline_a(string &cfile,unsigned int &pos,const unsigned int len)
 {
   while (cfile[pos]!='\r' and cfile[pos]!='\n' and pos<len)
-  { 
-    pos++; 
+  {
+    pos++;
     if (cfile[pos]=='\\' and pos+1<len)
     {
       pos++;
-      if (cfile[pos]=='\\') 
-      pos++; 
-      else 
+      if (cfile[pos]=='\\')
+      pos++;
+      else
       {
         if (cfile[pos]=='\r') { pos++; if (cfile[pos]=='\n') pos++; }
-        else if (cfile[pos]=='\n') pos++; 
+        else if (cfile[pos]=='\n') pos++;
       }
     }
   }
@@ -71,16 +71,16 @@ unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned in
 {
   pos++;
   while(is_useless(cfile[pos])) pos++;
-  
+
   unsigned int poss=pos;
   if (!is_letter(cfile[pos])) { cferr="Preprocessor directive expected"; return pos; }
   while (is_letterd(cfile[pos])) pos++;
   string next=cfile.substr(poss,pos-poss);
-  
+
   if (next=="error")
   {
     move_newline();
-    
+
     //Execute the following if and when ENIGMA supports #if
     /*int poss=pos;
     move_newline();
@@ -91,13 +91,13 @@ unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned in
     if (next=="define")
     {
       while (is_useless(cfile[pos])) pos++;
-      
+
       unsigned poss=pos;
       if (!is_letter(cfile[pos])) { cferr="Identifier expected for #define"; return pos; }
       while (is_letterd(cfile[pos])) pos++;
-      
+
       unsigned int flags=0;
-      
+
       string defiendum=cfile.substr(poss,pos-poss);
       if (cfile[pos]=='(') //macro function
       {
@@ -109,23 +109,23 @@ unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned in
           if (cfile[pos]=='(') lvl++;
           else if (cfile[pos]==')') lvl--;
           else if (cfile[pos]==',') { if (an==0) { cferr="Identifier expected before ',' symbol"; return pos; } ac++; an=0; }
-          else if (is_letter(cfile[pos])) 
+          else if (is_letter(cfile[pos]))
           {
-            if (an) { cferr="Symbol ',' expected"; return pos; } 
-            while (is_letterd(cfile[pos])) pos++; pos--; 
+            if (an) { cferr="Symbol ',' expected"; return pos; }
+            while (is_letterd(cfile[pos])) pos++; pos--;
             an=1; if (ac==0) ac=1;
           }
           else if (cfile[pos]!=' ') { cferr="Unexpected symbol in macro parameters"; return pos; }
           pos++;
         }
       }
-      
+
       while (is_useless(cfile[pos])) pos++;
-      
+
       poss=pos;
       move_newline();
       string defiens=cfile.substr(poss,pos-poss);
-      
+
       //cout << "Define \"" << defiendum << "\" as \"" << defiens << "\"\r\n";
       if (current_scope->members.find(defiendum) != current_scope->members.end())
         current_scope->members.erase(defiendum);
@@ -133,13 +133,13 @@ unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned in
     }
     if (next=="undef")
     {
-      
+
     }
   }
   {
     if (next=="include")
     {
-      
+
     }
     if (next=="import")
     {
