@@ -389,8 +389,10 @@ void parser_add_semicolons(string &code,string &synt)
         }
         if (*sy_semi != ';')
         {
-          codebuf[bufpos] = *sy_semi;
-          syntbuf[bufpos++] = *sy_semi;
+          codebuf[bufpos-1] = *sy_semi;
+          syntbuf[bufpos-1] = *sy_semi;
+          codebuf[bufpos+0] = ';';
+          syntbuf[bufpos++] = ';';
         }
         sy_semi=sy_semi->popif('s');
         continue;
@@ -398,13 +400,15 @@ void parser_add_semicolons(string &code,string &synt)
       if (synt[pos]==':')
       {
         if (terns) terns--;
-        else if (*sy_semi == ')')
+        else if (*sy_semi != ';')
         {
-          codebuf[bufpos-1] = ')';
-          syntbuf[bufpos-1] = ')';
-          sy_semi = sy_semi->popif('s');
-          continue;
+          codebuf[bufpos-1] = *sy_semi;
+          syntbuf[bufpos-1] = *sy_semi;
+          codebuf[bufpos+0] = ';';
+          syntbuf[bufpos++] = ';';
         }
+        sy_semi=sy_semi->popif('s');
+        continue;
       }
       
       if (need_semi(synt[pos-1],synt[pos],0,synt[pos-2],synt[pos-3]))
@@ -461,35 +465,42 @@ void parser_add_semicolons(string &code,string &synt)
   code = string(codebuf,bufpos);
   synt = string(syntbuf,bufpos);
   
+  cout << ":: " << code << "\r\n:: " << synt << "\r\n\r\n";
+  
   //This part's trickier; add semicolons only after do ... until and do ... while
   unsigned int len = synt.length();
   for (unsigned int pos=0; pos<len; pos++)
   {
-    if (synt[pos] == 'r')
+    if (synt[pos] == 'r') //For every 'do'
     {
       //Make sure we're at do
       if ((code[pos] != 'd'  or  code[pos+1] != 'o')
       or !(code[pos+2] == ' ' or synt[pos+2] != 'r')) 
       {
-        while (synt[++pos] == 'r');
+        while (synt[pos] == 'r' and code[pos] != ' ') pos++;
         continue;
       }
+      
+      cout << "At do\r\n>>" << code << "\r\n>>" << synt << "\r\n\r\n";
+      
+      //Begin do handling
       
       pos += 2;
       int lpos = pos;
       int semis = 1, dos = 0;
       
-      while (pos < len)
+      while (pos < len) //looking for end of do
       {
         if (synt[pos] == ';')
-          semis--;
-        else if (synt[pos]=='s')
+          semis=0;
+        else if (synt[pos]=='s') //if we're at a statement
         {
+          //if the statement is while or until
           if (synt[pos+1]=='s' and ((code[pos]=='w' and code[pos+1]=='h') or code[pos]=='u'))
           {
-            if (dos == 0)
+            if (dos == 0) //If this until is our closing until
             {
-              if (semis) //If they said do while (function())
+              if (semis) //If they said 'do while', leaving out the semicolon
               {
                 code.insert(pos,";");
                 synt.insert(pos,";");
@@ -501,16 +512,24 @@ void parser_add_semicolons(string &code,string &synt)
               while (pos<len and ps)
               {
                 if (synt[pos]=='(') ps++;
-                if (synt[pos]==')') ps--;
+                else if (synt[pos]==')') ps--;
                 pos++;
               }
               
-              code.insert(pos,";");
-              synt.insert(pos,";");
-              len++;
+              if (synt[pos] != ';')
+              {
+                code.insert(pos,";");
+                synt.insert(pos,";");
+                len++;
+              }
               break;
             }
-            else dos--;
+            else
+            {
+              dos--;
+              semis = 0;
+              pos += 4;
+            }
           }
           else
           semis=1;
@@ -521,13 +540,14 @@ void parser_add_semicolons(string &code,string &synt)
           {
             dos++;
             pos+=2;
+            if (code[pos] != ' ') pos--;
           }
           else while (synt[pos] == 'r' and code[pos] != ' ') pos++;
         }
         else if (synt[pos]=='{')
         {
           pos++;
-          for (int bs = 1; bs; pos++)
+          for (int bs = 1; pos<len and bs; pos++)
           {
             if (synt[pos] == '{') bs++;
             else if (synt[pos] == '}') bs--;
@@ -540,6 +560,8 @@ void parser_add_semicolons(string &code,string &synt)
       
       //Go fix any nested do's
       pos = lpos;
+      
+      cout << "<<" << code << "\r\n<<" << synt << "\r\n\r\n";
     }
   }
   
@@ -591,7 +613,7 @@ inline bool likesaspace(char c,char d)
 
 void print_the_fucker(string code,string synt)
 {
-  FILE* of = fopen("C:/Documents and Settings/HP_OWNER/Desktop/parseout.txt","w+b");
+  FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
   if (of == NULL) return;
   
   const char* indent = "\r\n\
@@ -690,6 +712,7 @@ void print_the_fucker(string code,string synt)
     }
   }
   fclose(of);
-  if (system("\"C:/Documents and Settings/HP_OWNER/Desktop/parseout.txt\""))
+  if (system("\"/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt\""))
+  if (system("gedit \"/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt\""))
     printf("zomg fnf\r\n");
 }

@@ -66,7 +66,7 @@ void print_scope_members(externs* gscope, int indent);
 int main(int argc, char *argv[])
 {
       cparse_init();
-      string cftp = fc("C:/Documents and Settings/HP_OWNER/Desktop/parsein.h");
+      string cftp = fc("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parsein.h");
 
       int a = parse_cfile(cftp);
       if (a != -1)
@@ -88,13 +88,13 @@ int main(int argc, char *argv[])
 
       print_scope_members(&global_scope, 0);
 
-    if (system("pause")) return 1337;
+    getchar();
     return 0;
 
       parser_init();
-      string b = parser_main(fc("C:/Documents and Settings/HP_OWNER/Desktop/parsein.txt"));
+      string b = parser_main(fc("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parsein.txt"));
 
-    if (system("pause")) return 1337;
+    getchar();
     return 0;
 
 
