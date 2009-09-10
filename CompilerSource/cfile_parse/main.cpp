@@ -104,7 +104,17 @@ void print_scope_members(externs* gscope, int indent)
       print_scope_members(i->second,indent+2);
       cout << indstr << "};\r\n";
     }
-
+    
+    if (!i->second->refstack.empty())
+    {
+      cout << "Dereference path: ";
+      for (rf_node *ii = i->second->refstack.last; ii != NULL; ii = ii->prev)
+        if (ii->ref.symbol == '(') cout << "(params = " << ii->ref.count << ")";
+        else if (ii->ref.symbol == ')') cout << "</group>";
+        else if (ii->ref.symbol == '[') cout << "[]";
+        else cout << ii->ref.symbol;
+    }
+    
     cout << "\r\n";
   }
 }

@@ -48,7 +48,7 @@ inline bool is_useless(char x)
   return x==' ' || x=='\r' || x=='\n' || x=='\t';
 }
 
-inline bool is_tflag(string x)
+bool is_tflag(string x)
 {
   return 
      x=="unsigned" 
@@ -61,58 +61,6 @@ inline bool is_tflag(string x)
   or x=="const" 
   or x=="volatile";
 }
-
-externs* ext_retriever_var = NULL;
-bool find_extname(string name,unsigned int flags)
-{
-  externs* inscope=current_scope;
-  extiter it = inscope->members.find(name);
-  while (it == inscope->members.end()) //Until we find it
-  {
-    if (inscope==&global_scope) //If we're at global scope, give up
-      return 0;
-    inscope=inscope->parent; //This must ALWAYS be nonzero when != global_scope
-    it = inscope->members.find(name);
-  } 
-  ext_retriever_var = it->second;
-  return ((it->second->flags & flags) != 0);
-}
-bool ExtRegister(unsigned int last,string name,externs *type = NULL)
-{
-  externs* e;
-  extiter it = current_scope->members.find(name);
-  if (it != current_scope->members.end())
-  {
-    if (last != LN_NAMESPACE or !(it->second->flags & EXTFLAG_NAMESPACE))
-    {
-      cferr = "Redeclaration of `"+name+"' at this point";
-      return 0;
-    }
-    ext_retriever_var = it->second;
-    return 1;
-  }
-  else
-  {
-    e = new externs;
-    current_scope->members[name] = e;
-    ext_retriever_var = e;
-  }
-  e->name = name;
-  if (last == LN_CLASS)
-    e->flags = EXTFLAG_CLASS | EXTFLAG_TYPENAME;
-  else if (last == LN_STRUCT)
-    e->flags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME;
-  else if (last == LN_UNION) // Same as struct, for our purposes. 
-    e->flags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME; //sizeof() can't be used in Macros, you bunch of arses.
-  else if (last == LN_ENUM)
-    e->flags = EXTFLAG_ENUM | EXTFLAG_TYPENAME;
-  else e->flags = 0;
-  
-  e->type = type;
-  
-  return 1;
-}
-
 
 
 
@@ -144,4 +92,45 @@ void cparse_init()
   regt("auto");
   
   #undef regt
+}
+
+
+bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NULL)
+{
+  externs* e;
+  extiter it = current_scope->members.find(name);
+  
+  //cout << "  Receiving " << (refs.empty()?"empty":"unempty") << " reference stack\r\n";
+  
+  if (it != current_scope->members.end())
+  {
+    if (last != LN_NAMESPACE or !(it->second->flags & EXTFLAG_NAMESPACE))
+    {
+      cferr = "Redeclaration of `"+name+"' at this point";
+      return 0;
+    }
+    ext_retriever_var = it->second;
+    return 1;
+  }
+  else
+  {
+    e = new externs;
+    current_scope->members[name] = e;
+    ext_retriever_var = e;
+  }
+  e->name = name;
+  if (last == LN_CLASS)
+    e->flags = EXTFLAG_CLASS | EXTFLAG_TYPENAME;
+  else if (last == LN_STRUCT)
+    e->flags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME;
+  else if (last == LN_UNION) // Same as struct, for our purposes. 
+    e->flags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME; //sizeof() can't be used in Macros, you bunch of arses.
+  else if (last == LN_ENUM)
+    e->flags = EXTFLAG_ENUM | EXTFLAG_TYPENAME;
+  else e->flags = 0;
+  
+  e->type = type;
+  e->refstack = refs;
+  
+  return 1;
 }

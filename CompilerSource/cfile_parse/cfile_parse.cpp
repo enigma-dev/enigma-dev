@@ -50,6 +50,8 @@ string tostring(int val);
 
 unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned int len);
 int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_named_phase,string &last_identifier);
+#include "handle_letters.h"
+
 int parse_cfile(string cftext)
 {
   cferr="No error";
@@ -66,21 +68,21 @@ int parse_cfile(string cftext)
   #define len cfile_length()
   len = cfile.length();
 
-  unsigned int macrod=0;
-  varray<string> inmacros;
-
   externs *last_type = NULL;
   string last_identifier="";
   int last_named=LN_NOTHING;
   int last_named_phase=0;
 
-  int plevel=0;
+  int plevel=0;/*
   int funclevel=-1;
   int fargs_named=0;
-  int fargs_count=0;
+  int fargs_count=0;*/
 
   unsigned int *debugpos;
   debugpos = &pos;
+  
+  int skip_depth = 0;
+  char skipto = 0, skipto2 = 0, skip_inc_on = 0;
 
   /*
     Okay, we have to break this into sections.
@@ -105,32 +107,48 @@ int parse_cfile(string cftext)
       if (c_file.ind>0) //If we're in a macro
       {
         //Move back down
-        c_file.pop();
-        position.pop();
-        cfile_length.pop();
-        macrod--;
+        handle_macro_pop(c_file,position,cfile_length);
         continue;
       }
       else break;
     }
-
+    
+    
     if (is_useless(cfile[pos]))
     {
       if (cfile[pos]=='\r' or cfile[pos]=='\n')
         preprocallowed=true;
       pos++; continue;
     }
-
+    
+    
     //If it's a macro, deal with it here
-    if (cfile[pos]=='#')
+    if (cfile[pos]=='#' and preprocallowed)
     {
       cfile_parse_macro(cfile,pos,len);
       continue;
     }
-
+    
     //Not a preprocessor
     preprocallowed = false;
-
+    
+    if (skipto)
+    {
+      if (cfile[pos] == skipto or cfile[pos] == skipto2)
+      {
+        if (skip_depth == 0)
+          skipto = skipto2 = skip_inc_on = 0;
+        else
+          skip_depth--;
+      }
+      else if (cfile[pos] == skip_inc_on)
+        skip_depth++;
+      
+      pos++;
+      continue;
+    }
+    
+    
     //First, let's check if it's a letter.
     //This implies it's one of three things...
     if (is_letter(cfile[pos]))
@@ -138,383 +156,16 @@ int parse_cfile(string cftext)
       unsigned int sp = pos;
       while (is_letterd(cfile[++pos])); // move to the end of the word
       string n = cfile.substr(sp,pos-sp); //This is the word we're looking at.
-
+      
       //Macros get precedence. Check if it's one.
-      maciter t;
-      if ((t=macros.find(n)) != macros.end())
-      {
-        bool recurs=0;
-        for (unsigned int iii=0;iii<macrod;iii++)
-        if (inmacros[iii]==n) { recurs=1; break; }
-        if (!recurs)
-        {
-          c_file.push();
-          position.push();
-          cfile_length.push();
-          pos = 0;
-          cfile = t->second;
-          len = cfile.length();
-          inmacros[macrod++]=n;
-          continue;
-        }
-      }
-
-      //it's not a macro, so the next thing we'll check for is keyword
-      if (n=="struct")
-      {
-        //Struct can only really follow typedef.
-        if (last_named != LN_NOTHING)
-        {
-          if (last_named != LN_TYPEDEF)
-          {
-            cferr="Unexpected `struct' token";
-            return pos;
-          }
-          else
-          {
-            last_named |= LN_STRUCT;
-          }
-        }
-        else last_named = LN_STRUCT;
+      if (handle_macros(n,c_file,position,cfile_length))
         continue;
-      }
-      if (n=="enum")
-      {
-        //Same with enum
-        if (last_named != LN_NOTHING)
-        {
-          if (last_named != LN_TYPEDEF)
-          {
-            cferr="Unexpected `enum' token";
-            return pos;
-          }
-          else
-            last_named |= LN_ENUM;
-        }
-        else
-          last_named = LN_ENUM;
-        continue;
-      }
-      if (n=="typedef")
-      {
-        //Typedef can't follow anything
-        if (last_named != LN_NOTHING)
-        {
-          cferr="Unexpected `struct' token";
-          return pos;
-        }
-        last_named = LN_TYPEDEF;
-        continue;
-      }
-      if (n=="extern")
-      { //This doesn't tell us anything useful.
-        continue;
-      }
-      if (n=="union")
-      {
-        //Struct can only really follow typedef.
-        if (last_named != LN_NOTHING)
-        {
-          if (last_named != LN_TYPEDEF)
-          {
-            cferr="Unexpected `struct' token";
-            return pos;
-          }
-          else
-          {
-            last_named |= LN_UNION;
-          }
-        }
-        else last_named = LN_UNION;
-        continue;
-      }
-      if (n=="namespace")
-      {
-        //Namespace can't follow anything.
-        if (last_named != LN_NOTHING)
-        {
-          if (last_named != LN_USING or last_named_phase != 0)
-          {
-            cferr="Unexpected `namespace' token";
-            return pos;
-          }
-          last_named_phase = 1; //using namespace...
-        }
-        else
-          last_named = LN_NAMESPACE; //namespace...
-        continue;
-      }
-      if (n=="explicit")
-      { //This is for GCC to know, and us to just be okay with.
-        continue;
-      }
-      if (n=="operator")
-      {
-        if (last_named != LN_DECLARATOR)
-        {
-          cferr="Expected declarator before `operator' token";
-          return pos;
-        }
-        if (last_named_phase<1)
-        {
-          cferr="Declarator before `operator' token names no type";
-          return pos;
-        }
-        last_named=LN_OPERATOR;
-        last_named_phase=0;
-        cout << last_named << " = " << last_named_phase << "\r\n";
-        continue;
-      }
-      if (n=="new")
-      {
-        //New must only follow keyword "operator" or an = outside of functions
-        if (last_named != LN_OPERATOR)
-        {
-          if (last_named != LN_NOTHING)
-            cferr="Expect `new' token only after `operator' token or as initializer";
-          else
-            cferr="Expected identifier before `new' token";
-          return pos;
-        }
-        last_named_phase=3;
-        last_identifier="operator new";
-        continue;
-      }
-      if (n=="delete")
-      {
-        //Delete must only follow keyword "operator" outside of functions
-        if (last_named != LN_OPERATOR)
-        {
-          cferr="Expect `delete' token only after `operator' token";
-          return pos;
-        }
-        last_named_phase=3;
-        last_identifier="operator delete";
-        continue;
-      }
-      if (n=="template")
-      if (n=="typename")
-      if (n=="class")
-      if (n=="friend")
-      if (n=="private")
-      if (n=="public" or n=="protected" or n=="using")
-      if (n=="inline")
-      if (n=="virtual")
-      if (n=="mutable")
-      continue;
-
-      //Next, check if it's a type name.
-      //If flow allows, this should be moved before the keywords section.
-
-      //Check if it's a modifier
-      if (is_tflag(n))
-      {
-        //last_typename += n + " "; Why bother
-        last_type = global_scope.members.find("n")->second;
-        if (last_named==LN_NOTHING)
-        {
-          last_named=LN_DECLARATOR;
-          if (n=="long")
-            last_named_phase = 2;
-          else
-            last_named_phase = 1;
-          continue;
-        }
-        if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF))
-        {
-          if (last_named_phase != 4)
-          {
-            if (n=="long")
-            {
-              if (last_named_phase == 0)
-                last_named_phase = 2;
-              else if (last_named_phase == 2)
-                last_named_phase = 3;
-              else
-              {
-                if (last_named_phase == 3)
-                  cferr="Type is too long for GCC";
-                else
-                  cferr="Unexpected `long' modifier at this point";
-                return pos;
-              }
-            }
-            else if (last_named_phase == 0)
-              last_named_phase = 1;
-          }
-          else
-          {
-            cferr="Unexpected declarator at this point";
-            return pos;
-          }
-
-          continue;
-        }
-        if (last_named==LN_TYPEDEF) //if typedef is single, phase==0
-        {
-          last_named=LN_DECLARATOR | LN_TYPEDEF;
-          if (n=="long")
-            last_named_phase = 2;
-          else
-            last_named_phase = 1;
-          continue;
-        }
-
-        cferr="Unexpected declarator at this point";
-        return pos;
-      }
-
-
-      //Check if it's a primitive or anything user defined that serves as a type.
-      if (find_extname(n,EXTFLAG_TYPENAME))
-      {
-        if (last_named == LN_NOTHING)
-        {
-          last_type = ext_retriever_var;
-          last_named=LN_DECLARATOR;
-          last_named_phase=4;
-          continue;
-        }
-        if (last_named == LN_TYPEDEF)
-        {
-          last_type = ext_retriever_var;
-          last_named |= LN_DECLARATOR;
-          last_named_phase = 4;
-          continue;
-        }
-        if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF))
-        {
-          if (last_named_phase != 4)
-          {
-            last_type = ext_retriever_var;
-            last_named_phase=4;
-            continue;
-          } //If it was only declared in a separate scope, we can permit redeclaration:
-          else if (ext_retriever_var->parent == current_scope)
-          {
-            cferr = "Two types named in declaration";
-            return pos;
-          }
-        }
-        else //This else is here because the above will need to pass this                 //struct a;
-        {    //in the case of the current type being redeclared as scalar in this scope   //namespace b { int a; }
-          cferr = "Unexpected declarator at this point";
-          return pos;
-        }
-      }
-
-      //Here's the big part
-      //We now assume that what was named is an identifier.
-      //This means we do a lot of error checking here.
-      if (last_named == LN_NOTHING)
-      {
-        cferr="Expected type name or keyword before identifier";
-        return pos;
-      }
-      if (last_named == LN_TYPEDEF)
-      {
-        cferr="Type definition does not specify a type";
-        return pos;
-      }
-
-      //bool is_td = last_named & LN_TYPEDEF;
-      switch (last_named & ~LN_TYPEDEF)
-      {
-        case LN_DECLARATOR:
-            if (last_named_phase == 5)
-            {
-              cferr="Expected ',' or ';' before identifier";
-              return pos;
-            }
-            last_named_phase = 5;
-          break;
-        case LN_TEMPLATE:
-            if (last_named_phase != 2)
-            {
-              cferr="Unexpected identifier in template declaration";
-              return pos;
-            }
-            last_named_phase=3;
-          break;
-        case LN_CLASS:
-            if (last_named_phase != 0)
-            {
-              cferr="Unexpected identifier in class declaration";
-              return pos;
-            }
-            last_named_phase = 1;
-          break;
-        case LN_STRUCT:
-            if (last_named_phase != 0)
-            {
-              cferr="Unexpected identifier in struct declaration";
-              return pos;
-            }
-            last_named_phase = 1;
-          break;
-        case LN_UNION:
-             if (last_named_phase != 0)
-            {
-              cferr="Unexpected identifier in union declaration";
-              return pos;
-            }
-            last_named_phase = 1;
-          break;
-        case LN_ENUM:
-            if (last_named_phase == 1 or last_named_phase == 3)
-            {
-              cferr="Expected '{' before identifier";
-              return pos;
-            }
-            if (last_named_phase == 0)
-              last_named_phase = 1;
-            else if (last_named_phase == 2)
-              last_named_phase = 3;
-          break;
-        case LN_NAMESPACE:
-            if (last_named_phase == 0)
-              last_named_phase = 1;
-            else
-            {
-              cferr = "Unexpected identifier in namespace definition";
-              return pos;
-            }
-          break;
-        case LN_OPERATOR:
-            cferr = "Unexpected identifier in operator statement";
-          return pos;
-        case LN_USING:
-            if (last_named_phase == 2)
-            {
-              cferr = "Namespace to use already specified";
-              return pos;
-            }
-            if (last_named_phase == 3)
-            {
-              cferr = "Identifier to use already specified";
-              return pos;
-            }
-            if (last_named_phase == 1)
-            {
-              if (!find_extname(n,LN_NAMESPACE))
-              {
-                cferr = "Expected namespace identifier following `namespace' keyword";
-                return pos;
-              }
-              last_named_phase = 2;
-              break;
-            }
-            last_named_phase = 3;
-          break;
-          default:
-            last_named = LN_IDENTIFIER;
-            last_named_phase = 0;
-      }
-
-      last_identifier = n;
-
+      
+      if (int diderrat = handle_identifiers(n,cferr,last_identifier,pos,last_named,last_named_phase,last_type))
+        return diderrat;
       continue;
     }
+
 
     //There is a select number of symbols we are supposed to encounter.
     //A digit is actually not one of them. Digits, most operators, etc,
@@ -552,7 +203,7 @@ int parse_cfile(string cftext)
         switch (last_named)
         {
           case LN_DECLARATOR:
-              last_named_phase = 4; //reset to 4 for next identifier.
+              last_named_phase = DEC_FULL; //reset to 4 for next identifier.
             break;
           case LN_TEMPLATE:
               cferr="Unused template declaration: Identifier expected before ;";
@@ -578,15 +229,15 @@ int parse_cfile(string cftext)
                 cferr="Expected ';' for namespace declarations, not ','";
                 return pos;
               }
-              if (last_named_phase != 3)
+              if (last_named_phase != NS_COMPLETE_ASSIGN) //If it's not a complete assignment, shouldn't see ';'
               {
-                cferr = "Cannot define empty namespace; expect `= namespaceid' before ';'";
+                cferr = "Cannot define empty namespace; expect '=' and namespace identifier before ';'";
                 return pos;
               }
             break;
           case LN_OPERATOR:
               if (last_named_phase == 0)
-                cferr = "Expected overloadable operator at this point";
+                cferr = "Expected overloadable operator before ';'";
               else cferr = "Expected parameters to operator overload at this point";
             return pos;
           case LN_USING:
@@ -597,12 +248,12 @@ int parse_cfile(string cftext)
               }
             break;
         }
-
-        if (!ExtRegister(last_named,last_identifier,last_type))
+        
+        if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type))
           return pos;
       }
 
-      if (cfile[pos] == ';')
+      if (cfile[pos] == ';') //If it was ';' and not ','
       {
         if (plevel > 0)
         { //No semicolons in parentheses.
@@ -614,6 +265,7 @@ int parse_cfile(string cftext)
         last_named_phase = 0;
         last_identifier = "";
         last_type = NULL;
+        refstack.dump();
       }
 
       pos++;
@@ -665,59 +317,49 @@ int parse_cfile(string cftext)
       //type should be named
       if (last_named != LN_DECLARATOR)
       {
-        if (last_named != LN_STRUCT
-        and last_named != LN_CLASS
-        and last_named != LN_UNION)
-        {
-          cferr="Expected type id before '*' symbol";
-          return pos;
-        }
-        else
-        {
-          if (last_named_phase != 1)
-          {
-            cferr = "Instantiation should only follow object name or definition";
-            return pos;
-          }
-          if (!ExtRegister(last_named,last_identifier))
-            return pos;
-        }
+        cferr = "Unexpected '*'";
+        return pos;
       }
+      refstack += referencer('*');
+      pos++; continue;
+    }
+    
+    if (cfile[pos]=='[')
+    {
+      //type should be named
+      if (last_named != LN_DECLARATOR)
+      {
+        cferr = "Unexpected '*'";
+        return pos;
+      }
+      refstack += referencer('[');
+      skipto = ']'; skip_inc_on = '[';
+      pos++; continue;
     }
 
     if (cfile[pos] == '(')
     {
-      if (last_named != LN_IDENTIFIER)
+      if (last_named != LN_DECLARATOR)
       {
         if (last_named != LN_OPERATOR or last_named_phase != OP_PARAMS)
         {
-          if (last_named != LN_DECLARATOR)
-          {
-            if (last_named != LN_NOTHING)
-            {
-              cferr = "Unexpected parenthesis at this point";
-              return pos;
-            }
-          }
-          plevel++;
-          pos++;
-          continue;
+          cferr = "Unexpected parenthesis at this point";
+          return pos;
         }
-
+        
+        //operator()
+        plevel++;
+        pos++;
+        continue;
       }
-
-      last_named = LN_IDENTIFIER;
-      last_named_phase = 0;
-
-      if (funclevel==-1)
-      {
-        funclevel=plevel;
-        fargs_named=1;
-        fargs_count=0;
-      }
+      
+      //In a declaration
+      
+      //<declarator> ( ... ) or <declarator> <identifier> ()
+      refstack += referencer(last_named_phase == DEC_IDENTIFIER ? '(':')',0,last_named_phase != DEC_IDENTIFIER);
       plevel++;
-      pos++;
-      continue;
+      
+      pos++; continue;
     }
 
     if (cfile[pos] == ')')
@@ -729,8 +371,7 @@ int parse_cfile(string cftext)
         return pos;
       }
       plevel--;
-      if (plevel < funclevel)
-        funclevel = -1;
+      refstack--;
       last_named_phase=0;
       continue;
     }
@@ -761,23 +402,16 @@ int parse_cfile(string cftext)
       }
       else
       {
-        if (last_named == LN_IDENTIFIER and plevel == funclevel)
+        if (last_named == LN_DECLARATOR and refstack.nextsymbol() == '(') // Do not confuse with ')'
         {
-          pos++;
-          int bl = 1;
-          while ((pos++)<cfile.length() and bl)
-          {
-            if (cfile[pos] == '"')
-              while (cfile[++pos] != '"')
-                if (cfile[pos] == '\\') pos++;
-            else
-            if (cfile[pos] == '\'')
-              while (cfile[++pos] != '\'')
-                if (cfile[pos] == '\\') pos++;
-
-            else if (cfile[pos] == '{') bl++;
-            else if (cfile[pos] == '}') bl--;
-          }
+          //Function implementation.
+          
+          //Register the function in the current scope
+          if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type))
+            return pos;
+          
+          //Skip the code: we don't need to know it ^_^
+          skipto = '}'; skip_inc_on = '{';
         }
         else
         {
@@ -790,6 +424,7 @@ int parse_cfile(string cftext)
       last_named = LN_NOTHING;
       last_named_phase = 0;
       last_type = NULL;
+      refstack.dump();
       pos++;
 
       continue;
@@ -814,8 +449,7 @@ int parse_cfile(string cftext)
       current_scope = current_scope->parent;
       continue;
     }
-
-
+    
     cferr = "Unknown symbol";
     return pos;
   }

@@ -25,10 +25,11 @@
 **                                                                              **
 \*********************************************************************************/
 
+
 enum
 {
   LN_NOTHING,
-  LN_IDENTIFIER,
+  //LN_IDENTIFIER,
   LN_DECLARATOR,
   LN_TEMPLATE,
   LN_CLASS,
@@ -36,28 +37,56 @@ enum
   LN_ENUM,
   LN_UNION,
   LN_NAMESPACE,
-  LN_OPERATOR,
+  LN_OPERATOR, //as in the operator keyword, not a random operator
   LN_USING,
   LN_TYPEDEF=128,
 };
 
-//Don't stress. In typedef struct a b;, a is already defined.
+//No worries. In typedef struct a b;, a is already defined.
 //Grab a pointer to it, and move on.
+
+
 enum
 {
-  SP_EMPTY,
-  SP_IDENTIFIER,
-  SP_COLON,
-  SP_PUBLIC,
-  SP_PRIVATE,
-  SP_PROTECTED
+  SP_EMPTY,       //
+  SP_IDENTIFIER,  //
+  SP_COLON,       //
+  SP_PUBLIC,      //
+  SP_PRIVATE,     //
+  SP_PROTECTED    //
 };
 
 enum
 {
-  OP_EMPTY,
-  OP_BRACKET,
-  OP_PARENTH,
-  OP_NEWORDELETE,
-  OP_PARAMS
+  OP_EMPTY,       //operator...
+  OP_BRACKET,     //operator[] ...
+  OP_PARENTH,     //operator() ...
+  OP_NEWORDELETE, //operator new..., operator delete...
+  OP_PARAMS       //operator whatever (...)
+};
+
+enum
+{
+  DEC_NOTHING_SOMEHOW, //not sure when this'd happen
+  DEC_GENERAL_FLAG,    //short, unsigned... anything but long
+  DEC_LONG,            //long...
+  DEC_LONGLONG,        //long long...
+  DEC_FULL,            //completed type; ie, "int"
+  DEC_IDENTIFIER       //completed type and identifier. Recurses back to DEC_FULL on comma or semi
+};
+
+enum
+{
+  NS_NOTHING,        //namespace...
+  NS_IDENTIFIER,     //namespace a...
+  NS_EQUALS,         //namespace a = ...;
+  NS_COMPLETE_ASSIGN //namespace a = b;
+};
+
+enum
+{
+  USE_NOTHING,              //using
+  USE_NAMESPACE,            //using namespace
+  USE_NAMESPACE_IDENTIFIER, //using namespace
+  USE_SINGLE_IDENTIFIER,    //using namespace
 };
