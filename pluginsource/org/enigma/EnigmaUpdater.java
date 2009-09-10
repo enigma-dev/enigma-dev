@@ -1,15 +1,13 @@
 package org.enigma;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 
+import javax.swing.JOptionPane;
+
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.file.GmFormatException;
-import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.main.LGM;
 import org.lateralgm.messages.Messages;
 import org.tmatesoft.svn.core.SVNDepth;
@@ -21,7 +19,10 @@ import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNRevision;
+import org.tmatesoft.svn.core.wc.SVNStatus;
+import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
+import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 public class EnigmaUpdater
 	{
@@ -31,56 +32,54 @@ public class EnigmaUpdater
 
 	public EnigmaUpdater()
 		{
-		try
+		if (path == null)
 			{
-			oldFashionedUpdate(new URL(server));
+			path = LGM.workDir.getParentFile();
+			if (SUBFOLDER) path = new File(path,"enigma");
 			}
-		catch (MalformedURLException e1)
+
+		if (cliMan == null)
 			{
-			e1.printStackTrace();
-			return;
-			}
-		catch (GmFormatException e)
-			{
-			new ErrorDialog(
-					null,
-					"Unable to Update Enigma",
-					"The Enigma Auto-Updater was unable to run due to some miscommunication with the server.\n"
-							+ "This may be temporary, or you may be required to visit http://www.enigma-dev.org\n"
-							+ "to find out what's going on or to get a more up-to-date version of the Lgm-Enigma plugin.",
-					Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
-							e.getClass().getName(),e.getMessage(),e.stackAsString())).setVisible(true);
+			DAVRepositoryFactory.setup();
+			cliMan = SVNClientManager.newInstance();
 			}
 		}
 
-	final static boolean SUBFOLDER = false;
-	final static boolean CHECKOUT = true;
-	final static boolean UPDATE = true;
+	final static boolean SUBFOLDER = true;
 
-	private static void svnClientUpdate() throws SVNException
+	SVNClientManager cliMan = null;
+	File path = null;
+
+	private boolean needsCheckout()
 		{
-		DAVRepositoryFactory.setup();
-		SVNClientManager cliMan = SVNClientManager.newInstance();
+		return !SVNWCUtil.isVersionedDirectory(path);
+		}
+
+	private boolean needsUpdate() throws SVNException
+		{
+		SVNStatus stat = cliMan.getStatusClient().doStatus(path,true);
+		SVNStatusType st = stat.getRemoteContentsStatus();
+		System.out.println(st);
+		return stat.getRemoteContentsStatus() != SVNStatusType.STATUS_NONE;
+		}
+
+	private void checkout() throws SVNException
+		{
 		SVNUpdateClient upCli = cliMan.getUpdateClient();
 		SVNURL url = SVNURL.parseURIDecoded(svn);
-		File path = LGM.workDir.getParentFile();
-		if (SUBFOLDER) path = new File(path,"enigma");
-		long r = -1; //stores the resulting revision number
-		if (CHECKOUT)
-			{
-			r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.HEAD,SVNDepth.INFINITY,true);
-			System.out.println("Checked out " + r);
-			}
-		if (UPDATE)
-			{
-			r = upCli.doUpdate(path,SVNRevision.HEAD,SVNDepth.INFINITY,true,false);
-			System.out.println("Updated to " + r);
-			}
+		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.HEAD,SVNDepth.INFINITY,true);
+		System.out.println("Checked out " + r);
+		}
+
+	private void update() throws SVNException
+		{
+		SVNUpdateClient upCli = cliMan.getUpdateClient();
+		long r = upCli.doUpdate(path,SVNRevision.HEAD,SVNDepth.INFINITY,true,false);
+		System.out.println("Updated to " + r);
 		}
 
 	private static void svnLog() throws SVNException
 		{
-		DAVRepositoryFactory.setup();
 		SVNURL url = SVNURL.parseURIDecoded(svn);
 		SVNRepository repository = SVNRepositoryFactory.create(url,null);
 
@@ -95,53 +94,47 @@ public class EnigmaUpdater
 		repository.closeSession();
 		}
 
-	private static void oldFashionedUpdate(URL url) throws GmFormatException
-		{
-		GmStreamDecoder in = null;
-		try
-			{
-			in = new GmStreamDecoder(url.openStream());
-			if (in.read4() != 1146439525) //1146439525 = 'eGUD'
-				throw new GmFormatException(null,
-						"Update server not found. Found some other page. Maybe an error page.");
-			int rversion = in.read4();
-			if (rversion > version || true)
-				throw new GmFormatException(null,"Incorrect update version. Expecting " + version
-						+ ", found " + rversion);
-			}
-		catch (Exception e)
-			{
-			if ((e instanceof GmFormatException)) throw (GmFormatException) e;
-			throw new GmFormatException(null,e);
-			}
-		finally
-			{
-			try
-				{
-				if (in != null)
-					{
-					in.close();
-					in = null;
-					}
-				}
-			catch (IOException ex)
-				{
-				String key = Messages.getString("GmFileReader.ERROR_CLOSEFAILED"); //$NON-NLS-1$
-				throw new GmFormatException(null,key);
-				}
-			}
-		}
-
 	public static void main(String[] args)
 		{
-		//		new EnigmaUpdater();
+		EnigmaUpdater svn = new EnigmaUpdater();
 		try
 			{
-			svnClientUpdate();
+			if (svn.needsCheckout())
+				{
+				if (JOptionPane.showConfirmDialog(null,
+						"Enigma is missing libraries. Would you like us to fetch these libraries for you?",
+						"Checkout",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.checkout();
+				return;
+				}
+			if (svn.needsUpdate())
+				{
+				if (JOptionPane.showConfirmDialog(
+						null,
+						"Enigma has detected that newer libraries may exist. Would you like us to fetch these for you?",
+						"Update",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
+				return;
+				}
 			}
 		catch (SVNException e)
 			{
-			e.printStackTrace();
+			showError(e);
 			}
+		}
+
+	public static void showError(Exception e)
+		{
+		showError(new GmFormatException(null,e));
+		}
+
+	public static void showError(GmFormatException e)
+		{
+		new ErrorDialog(
+				null,
+				"Unable to Update Enigma",
+				"The Enigma Auto-Updater was unable to run due to some miscommunication with the server.\n"
+						+ "This may be temporary, or you may be required to visit http://www.enigma-dev.org\n"
+						+ "to find out what's going on or to get a more up-to-date version of the Lgm-Enigma plugin.",
+				Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
+						e.getClass().getName(),e.getMessage(),e.stackAsString())).setVisible(true);
 		}
 	}
