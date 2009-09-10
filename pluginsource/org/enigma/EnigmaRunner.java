@@ -63,6 +63,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 	public EnigmaRunner()
 		{
+		populateMenu();
+		populateTree();
+		SubframeInformer.addSubframeListener(this);
+		applyBackground("org/enigma/enigma.png");
+		attemptUpdate();
+		}
+
+	public void populateMenu()
+		{
 		JMenu menu = new JMenu("Enigma");
 
 		run = new JMenuItem("Run");
@@ -79,18 +88,26 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		menu.add(compile);
 
 		LGM.frame.getJMenuBar().add(menu,1);
-		SubframeInformer.addSubframeListener(this);
-		String loc = "org/enigma/enigma.png";
-		ImageIcon bg = findIcon(loc);
-		LGM.mdi.add(new MDIBackground(bg),JLayeredPane.FRAME_CONTENT_LAYER);
+		}
 
+	public void populateTree()
+		{
 		EnigmaGroup node = new EnigmaGroup();
 		LGM.root.add(node);
 		node.add(new EnigmaNode("Whitespace"));
 		node.add(new EnigmaNode("Enigma Init"));
 		node.add(new EnigmaNode("Enigma Term"));
 		LGM.tree.updateUI();
+		}
 
+	public void applyBackground(String bgloc)
+		{
+		ImageIcon bg = findIcon(bgloc);
+		LGM.mdi.add(new MDIBackground(bg),JLayeredPane.FRAME_CONTENT_LAYER);
+		}
+
+	public void attemptUpdate()
+		{
 		try
 			{
 			EnigmaUpdater.checkForUpdates();
