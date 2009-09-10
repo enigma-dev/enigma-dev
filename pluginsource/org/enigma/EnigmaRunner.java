@@ -215,6 +215,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		f = new File(f,expected);
 		if (f.exists()) return f.getAbsolutePath();
 
+		f = new File(f.getParent(),"plugins");
+		if (!f.exists()) f = new File(f.getParent(),"Plugins");
+		f = new File(f,expected);
+		if (f.exists()) return f.getAbsolutePath();
+
 		System.err.println("Unable to locate Enigma");
 		return null;
 		}
@@ -274,13 +279,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 			ef.progress(100,"Failed, Enigma not found");
 			return;
 			}
-		System.out.println("Compiling with " + enigma);
+//		System.out.println("Compiling with " + enigma);
 
 		File err = new File(LGM.tempDir,"egmerrors.txt");
 
 		try
 			{
 			String[] cmd = new String[] { enigma,arg1,egmf.getPath(),exef.getPath(),"-e",err.getPath() };
+			for (String s : cmd) System.out.print(s + " ");
+			System.out.println();
 			Process p = Runtime.getRuntime().exec(cmd);
 			new EnigmaThread(ef,p.getInputStream());
 			new EnigmaThread(p.getErrorStream(),new PrintStream(new FileOutputStream(err),true));

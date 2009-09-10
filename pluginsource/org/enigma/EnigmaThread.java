@@ -86,6 +86,7 @@ public class EnigmaThread extends Thread
 				{
 				if (g_out == null)
 					{
+					System.out.println("> " + line);
 					ef.ta.append(line + "\n");
 					SwingUtilities.invokeLater(new Thread()
 						{
