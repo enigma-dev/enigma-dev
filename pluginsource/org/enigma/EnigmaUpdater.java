@@ -24,77 +24,13 @@ import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
+//TODO: Thread
 public class EnigmaUpdater
 	{
-	final static String server = "http://www.enigma-dav.org/update5";
-	final static String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev";
-	final static int version = 1;
+	public static final String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev";
+	public static final boolean SUBFOLDER = false;
 
-	public EnigmaUpdater()
-		{
-		if (path == null)
-			{
-			path = LGM.workDir.getParentFile();
-			if (SUBFOLDER) path = new File(path,"enigma");
-			}
-
-		if (cliMan == null)
-			{
-			DAVRepositoryFactory.setup();
-			cliMan = SVNClientManager.newInstance();
-			}
-		}
-
-	final static boolean SUBFOLDER = true;
-
-	SVNClientManager cliMan = null;
-	File path = null;
-
-	private boolean needsCheckout()
-		{
-		return !SVNWCUtil.isVersionedDirectory(path);
-		}
-
-	private boolean needsUpdate() throws SVNException
-		{
-		SVNStatus stat = cliMan.getStatusClient().doStatus(path,true);
-		SVNStatusType st = stat.getRemoteContentsStatus();
-		System.out.println(st);
-		return stat.getRemoteContentsStatus() != SVNStatusType.STATUS_NONE;
-		}
-
-	private void checkout() throws SVNException
-		{
-		SVNUpdateClient upCli = cliMan.getUpdateClient();
-		SVNURL url = SVNURL.parseURIDecoded(svn);
-		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.HEAD,SVNDepth.INFINITY,true);
-		System.out.println("Checked out " + r);
-		}
-
-	private void update() throws SVNException
-		{
-		SVNUpdateClient upCli = cliMan.getUpdateClient();
-		long r = upCli.doUpdate(path,SVNRevision.HEAD,SVNDepth.INFINITY,true,false);
-		System.out.println("Updated to " + r);
-		}
-
-	private static void svnLog() throws SVNException
-		{
-		SVNURL url = SVNURL.parseURIDecoded(svn);
-		SVNRepository repository = SVNRepositoryFactory.create(url,null);
-
-		Collection<?> entries = repository.log(null,null,0,-1,true,true);
-
-		Iterator<?> i = entries.iterator();
-		while (i.hasNext())
-			{
-			SVNLogEntry sle = (SVNLogEntry) i.next();
-			System.out.format("R%d by %s - %s\n",sle.getRevision(),sle.getAuthor(),sle.getMessage());
-			}
-		repository.closeSession();
-		}
-
-	public static void main(String[] args)
+	public static void checkForUpdates()
 		{
 		EnigmaUpdater svn = new EnigmaUpdater();
 		try
@@ -117,16 +53,101 @@ public class EnigmaUpdater
 			}
 		catch (SVNException e)
 			{
-			showError(e);
+			showUpdateError(e);
 			}
 		}
 
-	public static void showError(Exception e)
+	private EnigmaUpdater()
 		{
-		showError(new GmFormatException(null,e));
+		if (path == null)
+			{
+			path = LGM.workDir.getParentFile();
+			if (SUBFOLDER) path = new File(path,"enigma");
+			}
+
+		if (cliMan == null)
+			{
+			DAVRepositoryFactory.setup();
+			cliMan = SVNClientManager.newInstance();
+			}
 		}
 
-	public static void showError(GmFormatException e)
+	private SVNClientManager cliMan = null;
+	private File path = null;
+
+	private boolean needsCheckout()
+		{
+		return !SVNWCUtil.isVersionedDirectory(path);
+		}
+
+	private boolean needsUpdate() throws SVNException
+		{
+		SVNStatus stat = cliMan.getStatusClient().doStatus(path,true);
+		SVNStatusType st = stat.getRemoteContentsStatus();
+		System.out.println(st);
+		return stat.getRemoteContentsStatus() != SVNStatusType.STATUS_NONE;
+		}
+
+	/**
+	 * This is debug code that checks out a given revision.
+	 * This allows me to test that update works.
+	 * @param rev - the revision to check out
+	 * @throws SVNException
+	 */
+	@SuppressWarnings("unused")
+	private void checkoutRev(int rev) throws SVNException
+		{
+		SVNUpdateClient upCli = cliMan.getUpdateClient();
+		SVNURL url = SVNURL.parseURIDecoded(svn);
+		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.create(rev),SVNDepth.INFINITY,
+				true);
+		System.out.println("Checked out " + r);
+		}
+
+	private void checkout() throws SVNException
+		{
+		SVNUpdateClient upCli = cliMan.getUpdateClient();
+		SVNURL url = SVNURL.parseURIDecoded(svn);
+		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.HEAD,SVNDepth.INFINITY,true);
+		System.out.println("Checked out " + r);
+		}
+
+	private void update() throws SVNException
+		{
+		SVNUpdateClient upCli = cliMan.getUpdateClient();
+		long r = upCli.doUpdate(path,SVNRevision.HEAD,SVNDepth.INFINITY,true,false);
+		System.out.println("Updated to " + r);
+		}
+
+	/**
+	 * This function will eventually be adapted
+	 * to allow the user to review a list of
+	 * changes since their working version
+	 * @throws SVNException
+	 */
+	@SuppressWarnings("unused")
+	private static void svnLog() throws SVNException
+		{
+		SVNURL url = SVNURL.parseURIDecoded(svn);
+		SVNRepository repository = SVNRepositoryFactory.create(url,null);
+
+		Collection<?> entries = repository.log(null,null,0,-1,true,true);
+
+		Iterator<?> i = entries.iterator();
+		while (i.hasNext())
+			{
+			SVNLogEntry sle = (SVNLogEntry) i.next();
+			System.out.format("r%d by %s - %s\n",sle.getRevision(),sle.getAuthor(),sle.getMessage());
+			}
+		repository.closeSession();
+		}
+
+	public static void showUpdateError(Exception e)
+		{
+		showUpdateError(new GmFormatException(null,e));
+		}
+
+	public static void showUpdateError(GmFormatException e)
 		{
 		new ErrorDialog(
 				null,

@@ -90,6 +90,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		node.add(new EnigmaNode("Enigma Init"));
 		node.add(new EnigmaNode("Enigma Term"));
 		LGM.tree.updateUI();
+
+		File lgm = LGM.workDir.getParentFile();
+		File plugins = new File(lgm,"plugins");
+		if (new File(plugins,"svnkit.jar").exists())
+			EnigmaUpdater.checkForUpdates();
+		else
+			System.err.println("SvnKit missing. Please " +
+					"download and place next to the enigma " +
+					"plugin in order to enable auto-update.");
 		}
 
 	public class MDIBackground extends JComponent
