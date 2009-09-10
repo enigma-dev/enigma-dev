@@ -91,14 +91,22 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		node.add(new EnigmaNode("Enigma Term"));
 		LGM.tree.updateUI();
 
-		File lgm = LGM.workDir.getParentFile();
-		File plugins = new File(lgm,"plugins");
-		if (new File(plugins,"svnkit.jar").exists())
+		try
+			{
 			EnigmaUpdater.checkForUpdates();
-		else
-			System.err.println("SvnKit missing. Please " +
-					"download and place next to the enigma " +
-					"plugin in order to enable auto-update.");
+			}
+		/**
+		 * Usually you shouldn't catch an Error, however,
+		 * in this case we catch it to abort the module,
+		 * rather than allowing the failed module to cause
+		 * the entire program to fail
+		 */
+		catch (NoClassDefFoundError e)
+			{
+			String error = "SvnKit missing, corrupted, or unusable. Please download and "
+					+ "place next to the enigma plugin in order to enable auto-update.";
+			System.err.println(error);
+			}
 		}
 
 	public class MDIBackground extends JComponent
@@ -288,14 +296,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 			ef.progress(100,"Failed, Enigma not found");
 			return;
 			}
-//		System.out.println("Compiling with " + enigma);
+		//		System.out.println("Compiling with " + enigma);
 
 		File err = new File(LGM.tempDir,"egmerrors.txt");
 
 		try
 			{
 			String[] cmd = new String[] { enigma,arg1,egmf.getPath(),exef.getPath(),"-e",err.getPath() };
-			for (String s : cmd) System.out.print(s + " ");
+			for (String s : cmd)
+				System.out.print(s + " ");
 			System.out.println();
 			Process p = Runtime.getRuntime().exec(cmd);
 			new EnigmaThread(ef,p.getInputStream());
