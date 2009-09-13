@@ -30,7 +30,6 @@
 
 #include <map>
 
-#define EXTFLAG_FUNCTION 1
 #define EXTFLAG_TEMPLATE 2
 #define EXTFLAG_TYPENAME 4
 #define EXTFLAG_MACRO 8
@@ -45,7 +44,6 @@
 struct externs
 {
   unsigned int flags;
-  darray<char> fargs;
   darray<char> targs;
   string name;
   
@@ -53,6 +51,9 @@ struct externs
   externs* parent;
   rf_stack refstack;
   map<string, externs*> members;
+  
+  bool is_function(); //test if this is a function
+  int parameter_count(); //returns topmost function param number
   
   externs();
   externs(string n,externs* p,unsigned int f);

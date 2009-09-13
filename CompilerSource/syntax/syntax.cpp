@@ -58,9 +58,7 @@ namespace syncheck
   void addscr(string name)
   {
     externs *ne=global_scope.members[name];
-    ne->flags|=EXTFLAG_FUNCTION;
-    for (int i=0;i<16;i++)
-    ne->fargs[ne->fargs.size]=0;
+    ne->refstack += referencer('(',16,0,1);
   }
 
   /*

@@ -29,11 +29,13 @@ struct referencer
 {
   char symbol;
   unsigned short count;
+  unsigned short countmin;
   char completed;
   
   referencer(char s);
   referencer(char s,unsigned short c);
-  referencer(char s,unsigned short c,char ch);
+  referencer(char s,unsigned short c,char complete);
+  referencer(char s,unsigned short c,unsigned short cmin,char complete);
   referencer(const referencer &r);
 };
 
@@ -55,8 +57,18 @@ extern struct rf_stack
   rf_node* last;
   rf_node* now;
   
+  char prevsymbol();
   char nextsymbol();
   char currentsymbol();
+  char topmostsymbol();
+  
+  unsigned short prevcount();
+  unsigned short nextcount();
+  unsigned short currentcount();
+  unsigned short topmostcount();
+  
+  void inc_current();
+  void dec_current_min();
   rf_stack &operator += (referencer r);
   rf_stack &operator++ (int nothing);
   

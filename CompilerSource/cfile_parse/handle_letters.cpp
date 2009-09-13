@@ -71,7 +71,7 @@ bool handle_macros(const string n,iss &c_file,isui &position,isui &cfile_length)
 }
 
 extern bool is_tflag(string x);
-bool handle_identifiers(const string n,string &cferr,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type)
+int handle_identifiers(const string n,string &cferr,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type)
 {
   //it's not a macro, so the next thing we'll check for is keyword
   if (n=="struct")
@@ -90,7 +90,7 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
       }
     }
     else last_named = LN_STRUCT;
-    return 0;
+    return -1;
   }
   if (n=="enum")
   {
@@ -107,7 +107,7 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
     }
     else
       last_named = LN_ENUM;
-    return 0;
+    return -1;
   }
   if (n=="typedef")
   {
@@ -118,11 +118,11 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
       return pos;
     }
     last_named = LN_TYPEDEF;
-    return 0;
+    return -1;
   }
   if (n=="extern")
   { //This doesn't tell us anything useful.
-    return 0;
+    return -1;
   }
   if (n=="union")
   {
@@ -140,7 +140,7 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
       }
     }
     else last_named = LN_UNION;
-    return 0;
+    return -1;
   }
   if (n=="namespace")
   {
@@ -156,11 +156,11 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
     }
     else
       last_named = LN_NAMESPACE; //namespace...
-    return 0;
+    return -1;
   }
   if (n=="explicit")
   { //This is for GCC to know, and us to just be okay with.
-    return 0;
+    return -1;
   }
   if (n=="operator")
   {
@@ -177,7 +177,7 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
     last_named=LN_OPERATOR;
     last_named_phase=0;
     cout << last_named << " = " << last_named_phase << "\r\n";
-    return 0;
+    return -1;
   }
   if (n=="new")
   {
@@ -190,9 +190,9 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
         cferr="Expected identifier before `new' token";
       return pos;
     }
-    last_named_phase=3;
-    last_identifier="operator new";
-    return 0;
+    last_named_phase = OP_NEWORDELETE;
+    last_identifier = "operator new";
+    return -1;
   }
   if (n=="delete")
   {
@@ -202,9 +202,9 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
       cferr="Expect `delete' token only after `operator' token";
       return pos;
     }
-    last_named_phase=3;
-    last_identifier="operator delete";
-    return 0;
+    last_named_phase = OP_NEWORDELETE;
+    last_identifier = "operator delete";
+    return -1;
   }
   if (n=="template")
   if (n=="typename")
@@ -215,7 +215,7 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
   if (n=="inline")
   if (n=="virtual")
   if (n=="mutable")
-  return 0;
+  return -1;
 
   //Next, check if it's a type name.
   //If flow allows, this should be moved before the keywords section.
@@ -227,34 +227,47 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
     last_type = global_scope.members.find("n")->second;
     if (last_named==LN_NOTHING)
     {
-      last_named=LN_DECLARATOR;
+      last_named = LN_DECLARATOR;
       if (n=="long")
         last_named_phase = DEC_LONG;
       else
         last_named_phase = DEC_GENERAL_FLAG;
-      return 0;
+      return -1;
     }
+    
     if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF))
     {
       if (last_named_phase != DEC_FULL)
       {
-        if (n=="long")
+        if (last_named_phase != DEC_IDENTIFIER)
         {
-          if (last_named_phase == 0)
-            last_named_phase = DEC_LONG;
-          else if (last_named_phase == DEC_LONG)
-            last_named_phase = DEC_LONGLONG;
-          else
+          if (n=="long")
           {
-            if (last_named_phase == DEC_LONGLONG)
-              cferr="Type is too long for GCC";
+            if (last_named_phase == 0)
+              last_named_phase = DEC_LONG;
+            else if (last_named_phase == DEC_LONG)
+              last_named_phase = DEC_LONGLONG;
             else
-              cferr="Unexpected `long' modifier at this point";
+            {
+              if (last_named_phase == DEC_LONGLONG)
+                cferr="Type is too long for GCC";
+              else
+                cferr="Unexpected `long' modifier at this point";
+              return pos;
+            }
+          }
+          else if (last_named_phase == 0)
+            last_named_phase = DEC_GENERAL_FLAG;
+        }
+        else
+        {
+          if (refstack.currentsymbol() != '(')
+          {
+            cferr = "Expected ';' before new declaration";
             return pos;
           }
+          return -1;
         }
-        else if (last_named_phase == 0)
-          last_named_phase = DEC_GENERAL_FLAG;
       }
       else
       {
@@ -262,7 +275,7 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
         return pos;
       }
 
-      return 0;
+      return -1;
     }
     if (last_named==LN_TYPEDEF) //if typedef is single, phase==0
     {
@@ -271,7 +284,7 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
         last_named_phase = DEC_LONG;
       else
         last_named_phase = DEC_GENERAL_FLAG;
-      return 0;
+      return -1;
     }
 
     cferr="Unexpected declarator at this point";
@@ -287,22 +300,34 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
       last_type = ext_retriever_var;
       last_named=LN_DECLARATOR;
       last_named_phase=DEC_FULL;
-      return 0;
+      return -1;
     }
     if (last_named == LN_TYPEDEF)
     {
       last_type = ext_retriever_var;
       last_named |= LN_DECLARATOR;
       last_named_phase = DEC_FULL;
-      return 0;
+      return -1;
     }
     if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF))
     {
       if (last_named_phase != DEC_FULL)
       {
-        last_type = ext_retriever_var;
-        last_named_phase = DEC_FULL;
-        return 0;
+        if (last_named_phase != DEC_IDENTIFIER)
+        {
+          last_type = ext_retriever_var;
+          last_named_phase = DEC_FULL;
+          return -1;
+        }
+        else
+        {
+          if (refstack.currentsymbol() != '(')
+          {
+            cferr = "Expected ';' before new declarationzor";
+            return pos;
+          }
+          return -1;
+        }
       } //If it was only declared in a separate scope, we can permit redeclaration:
       else if (ext_retriever_var->parent == current_scope)
       {
@@ -337,8 +362,13 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
     case LN_DECLARATOR:
         if (last_named_phase == DEC_IDENTIFIER)
         {
-          cferr="Expected ',' or ';' before identifier";
-          return pos;
+          if (refstack.currentsymbol() != '(')
+          {
+            cferr="Expected ',' or ';' before identifier";
+            return pos;
+          }
+          refstack.inc_current();
+          return -1;
         }
         last_named_phase = DEC_IDENTIFIER;
       break;
@@ -430,5 +460,5 @@ bool handle_identifiers(const string n,string &cferr,string &last_identifier,uns
   }
 
   last_identifier = n;
-  return 0;
+  return -1;
 }

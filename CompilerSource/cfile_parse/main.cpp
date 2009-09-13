@@ -69,17 +69,15 @@ void print_scope_members(externs* gscope, int indent)
     bool comma=0;
     string indstr(indent,' ');
 
-    cout << indstr << i->second->name << ":  ";
+    cout << indstr << i->first << ":  ";
+    
+    if (i->second->is_function())
+      cout << "Function with " << i->second->parameter_count() << " parameters, returning ";
 
     if (i->second->type != NULL)
       cout << i->second->type->name << "  ";
-
-    if (i->second->flags&EXTFLAG_FUNCTION)
-    {
-      cout << " function (" << i->second->fargs.size << " parameters)"/* returning "<<(i->second)[0].macrotext*/;
-      comma=1;
-    } /*else cout << " " << (i->second)[0].macrotext;*/
-
+    
+    
     if (i->second->flags&EXTFLAG_TEMPLATE)
     {
       cout << " template with " << i->second->targs.size << " parameters";

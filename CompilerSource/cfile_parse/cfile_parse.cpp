@@ -160,9 +160,12 @@ int parse_cfile(string cftext)
       //Macros get precedence. Check if it's one.
       if (handle_macros(n,c_file,position,cfile_length))
         continue;
-      
-      if (int diderrat = handle_identifiers(n,cferr,last_identifier,pos,last_named,last_named_phase,last_type))
+        
+      int diderrat = handle_identifiers(n,cferr,last_identifier,pos,last_named,last_named_phase,last_type);
+      //cout << last_named << ":" << last_named_phase << "  ->  ";
+      if (diderrat != -1)
         return diderrat;
+      //cout << last_named << ":" << last_named_phase << "\r\n";
       continue;
     }
 
@@ -203,6 +206,11 @@ int parse_cfile(string cftext)
         switch (last_named)
         {
           case LN_DECLARATOR:
+              if (last_named_phase != DEC_IDENTIFIER or refstack.currentsymbol() == '(')
+              {
+                pos++;
+                continue;
+              }
               last_named_phase = DEC_FULL; //reset to 4 for next identifier.
             break;
           case LN_TEMPLATE:
@@ -315,7 +323,7 @@ int parse_cfile(string cftext)
     if (cfile[pos]=='*')
     {
       //type should be named
-      if (last_named != LN_DECLARATOR)
+      if ((last_named | LN_TYPEDEF) != (LN_DECLARATOR | LN_TYPEDEF))
       {
         cferr = "Unexpected '*'";
         return pos;
@@ -347,10 +355,8 @@ int parse_cfile(string cftext)
           return pos;
         }
         
-        //operator()
-        plevel++;
-        pos++;
-        continue;
+        last_named = LN_DECLARATOR;
+        last_named_phase = DEC_IDENTIFIER;
       }
       
       //In a declaration
@@ -372,7 +378,7 @@ int parse_cfile(string cftext)
       }
       plevel--;
       refstack--;
-      last_named_phase=0;
+      //last_named_phase=0;
       continue;
     }
 

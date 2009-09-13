@@ -31,6 +31,24 @@
 using namespace std;
 #include "externs.h"
 
+
+bool externs::is_function()
+{
+  if (refstack.topmostsymbol() == '(')
+    return true;
+  if (refstack.last != NULL and refstack.last->prev != NULL and refstack.last->prev->ref.symbol == '(')
+    return true;
+  return false;
+}
+int externs::parameter_count()
+{
+  if (refstack.topmostsymbol() == '(')
+    return refstack.topmostcount();
+  if (refstack.last != NULL and refstack.last->prev != NULL and refstack.last->prev->ref.symbol == '(')
+    return refstack.last->prev->ref.count;
+  return 0;
+}
+
 externs::externs()
 {
   type = NULL;

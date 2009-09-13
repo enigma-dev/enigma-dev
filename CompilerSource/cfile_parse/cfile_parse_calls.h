@@ -59,6 +59,7 @@ bool is_tflag(string x)
   or x=="long" 
   or x=="static" 
   or x=="const" 
+  or x=="mutable" 
   or x=="volatile";
 }
 

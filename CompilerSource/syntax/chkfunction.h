@@ -44,7 +44,7 @@
     }
     
     externs *func = fit->second;
-    if ((func->flags & EXTFLAG_FUNCTION) == 0)
+    if (!func->is_function())
     {
       error="`"+fname+"' can not be used as a function";
       return fstart;
@@ -54,7 +54,7 @@
     int cnt=0,args=0;
     int args_exceeded_at=-1;
     
-    int argc=func->fargs.size;
+    int argc=func->parameter_count();
     while (cnt>-1)
     {
       pos++;

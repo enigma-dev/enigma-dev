@@ -96,12 +96,12 @@ unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned in
       if (!is_letter(cfile[pos])) { cferr="Identifier expected for #define"; return pos; }
       while (is_letterd(cfile[pos])) pos++;
 
-      unsigned int flags=0;
+      //unsigned int flags=0;
 
       string defiendum=cfile.substr(poss,pos-poss);
       if (cfile[pos]=='(') //macro function
       {
-        flags |= EXTFLAG_FUNCTION;
+        //flags |= EXTFLAG_FUNCTION;
         int lvl=1, an=0,ac=0;
         pos++;
         while (lvl>0 and pos<len)
@@ -115,7 +115,7 @@ unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned in
             while (is_letterd(cfile[pos])) pos++; pos--;
             an=1; if (ac==0) ac=1;
           }
-          else if (cfile[pos]!=' ') { cferr="Unexpected symbol in macro parameters"; return pos; }
+          else if (!is_useless(cfile[pos])) { cferr="Unexpected symbol in macro parameters"; return pos; }
           pos++;
         }
       }

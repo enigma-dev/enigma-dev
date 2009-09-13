@@ -32,4 +32,4 @@ typedef implicit_stack<unsigned int> isui;
 
 void handle_macro_pop(iss &c_file,isui &position,isui &cfile_length);
 bool handle_macros(const string n,iss &c_file,isui &position,isui &cfile_length);
-bool handle_identifiers(const string n,string &cferr,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type);
+int handle_identifiers(const string n,string &cferr,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type);

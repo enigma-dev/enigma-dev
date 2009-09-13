@@ -33,7 +33,8 @@ rf_stack refstack;
   
 referencer::referencer(char s): symbol(s), count(0), completed(1) {}
 referencer::referencer(char s,unsigned short c): symbol(s), count(c), completed(1) {}
-referencer::referencer(char s,unsigned short c,char ch): symbol(s), count(c), completed(ch) {}
+referencer::referencer(char s,unsigned short c,char complete): symbol(s), count(c), completed(complete) {}
+referencer::referencer(char s,unsigned short c,unsigned short cmin,char complete): symbol(s), count(c), countmin(cmin), completed(complete) {}
 referencer::referencer(const referencer &r): symbol(r.symbol), count(r.count), completed(r.completed) {}
 
 rf_node::rf_node(): next(NULL), prev(NULL), ref(0,0,0) {}
@@ -42,16 +43,60 @@ rf_node::rf_node(rf_node* Prev,const referencer &r): next(NULL), prev(Prev), ref
 rf_node::rf_node(const referencer &r,rf_node* Next): next(Next), prev(NULL), ref(r) {}
 rf_node::rf_node(rf_node* Prev,const referencer &r,rf_node* Next): next(Next), prev(Prev), ref(r) {}
 
-  
+
 char rf_stack::currentsymbol()
 {
   if (now == NULL) return 0;
   return now->ref.symbol;
-}  
+}
+char rf_stack::topmostsymbol()
+{
+  if (last == NULL) return 0;
+  return last->ref.symbol;
+}
 char rf_stack::nextsymbol()
 {
   if (now == NULL or now->next == NULL) return 0;
   return now->next->ref.symbol;
+}
+char rf_stack::prevsymbol()
+{
+  if (now == NULL or now->prev == NULL) return 0;
+  return now->prev->ref.symbol;
+}
+
+unsigned short rf_stack::currentcount()
+{
+  if (now == NULL) return 0;
+  return now->ref.count;
+}
+unsigned short rf_stack::topmostcount()
+{
+  if (last == NULL) return 0;
+  return last->ref.count;
+}
+unsigned short rf_stack::nextcount()
+{
+  if (now == NULL or now->next == NULL) return 0;
+  return now->next->ref.count;
+}
+unsigned short rf_stack::prevcount()
+{
+  if (now == NULL or now->prev == NULL) return 0;
+  return now->prev->ref.count;
+}
+
+void rf_stack::inc_current()
+{
+  if (now == NULL) return;
+  now->ref.count++;
+  now->ref.countmin++;
+}
+void rf_stack::dec_current_min()
+{
+  if (now == NULL) return;
+  now->ref.count++;
+  now->ref.countmin++;
 }
 
 rf_stack &rf_stack::operator += (referencer r)

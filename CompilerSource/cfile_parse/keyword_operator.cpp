@@ -74,13 +74,13 @@ int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_n
       {
         last_named_phase=OP_BRACKET;
         last_identifier="operator[]";
-        return -1;
+        pos--; return -1;
       }
       else if (o=='(')
       {
         last_named_phase=OP_PARENTH;
         last_identifier="operator()";
-        return -1;
+        pos--; return -1;
       }
       last_identifier=string("operator") + o;
       last_named_phase = OP_PARAMS;
@@ -88,7 +88,7 @@ int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_n
     }
     else
     {
-      ((cferr="Can't overload that '")+=cfile[pos])+="'";
+      ((cferr="Can't overload this: '")+=cfile[pos])+="'";
       return pos;
     }
   }
