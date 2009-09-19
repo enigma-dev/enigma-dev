@@ -182,6 +182,7 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
   if (n=="new")
   {
     //New must only follow keyword "operator" or an = outside of functions
+    //In the case of =, it will be skipped anyway. Check for "operator".
     if (last_named != LN_OPERATOR)
     {
       if (last_named != LN_NOTHING)
@@ -290,19 +291,11 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
     cferr="Unexpected declarator at this point";
     return pos;
   }
-
-
+  
   //Check if it's a primitive or anything user defined that serves as a type.
   if (find_extname(n,EXTFLAG_TYPENAME))
   {
-    if (last_named == LN_NOTHING)
-    {
-      last_type = ext_retriever_var;
-      last_named=LN_DECLARATOR;
-      last_named_phase=DEC_FULL;
-      return -1;
-    }
-    if (last_named == LN_TYPEDEF)
+    if (last_named == LN_NOTHING or last_named == LN_TYPEDEF)
     {
       last_type = ext_retriever_var;
       last_named |= LN_DECLARATOR;

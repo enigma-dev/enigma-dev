@@ -81,4 +81,5 @@ extern struct rf_stack
   
   bool empty();
   
+  rf_stack();
 } refstack;

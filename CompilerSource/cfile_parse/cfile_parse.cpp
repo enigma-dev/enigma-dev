@@ -206,7 +206,8 @@ int parse_cfile(string cftext)
         switch (last_named)
         {
           case LN_DECLARATOR:
-              if (last_named_phase != DEC_IDENTIFIER or refstack.currentsymbol() == '(')
+              //Can't error on last_named_phase != DEC_IDENTIFIER, or structs won't work
+              if (refstack.currentsymbol() == '(')
               {
                 pos++;
                 continue;
@@ -257,6 +258,7 @@ int parse_cfile(string cftext)
             break;
         }
         
+        if (last_identifier != "")
         if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type))
           return pos;
       }
@@ -384,8 +386,8 @@ int parse_cfile(string cftext)
 
     if (cfile[pos] == '{')
     {
-      if (last_named == LN_NAMESPACE or last_named == LN_STRUCT
-      or  last_named == LN_CLASS)
+      if (last_named == LN_NAMESPACE or (last_named | LN_TYPEDEF) == (LN_STRUCT | LN_TYPEDEF)
+      or  (last_named | LN_TYPEDEF) == (LN_CLASS | LN_TYPEDEF))
       {
         unsigned int tflags = (last_named==LN_NAMESPACE)?EXTFLAG_NAMESPACE:EXTFLAG_TYPENAME | ((last_named==LN_STRUCT)?EXTFLAG_STRUCT:EXTFLAG_CLASS);
         if (last_identifier != "")
@@ -444,9 +446,9 @@ int parse_cfile(string cftext)
         return pos;
       }
       if (current_scope->flags & EXTFLAG_TYPENAME)
-        last_named = LN_DECLARATOR;
+        last_named = LN_DECLARATOR; //if the scope we're popping serves as a typename
       else
-        last_named = LN_NOTHING;
+        last_named = LN_NOTHING;//Not sure what to do with enum {}
       last_named_phase = 0;
 
       pos++;

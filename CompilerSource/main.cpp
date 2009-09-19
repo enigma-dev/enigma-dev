@@ -66,7 +66,7 @@ void print_scope_members(externs* gscope, int indent);
 int main(int argc, char *argv[])
 {
       cparse_init();
-      string cftp = fc("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parsein.h");
+      string cftp = fc("./cfile_parse/parsein.h");
 
       int a = parse_cfile(cftp);
       if (a != -1)
