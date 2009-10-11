@@ -1,4 +1,14 @@
-int main(int argc,char *argv[])
+namespace mainnamespace
+{
+  template <typename a,typename b = long unsigned int,typename c> int testfunctiontemplate(b defile);
+  int nottemplated;
+  template <typename zero> struct a
+  {
+    zero niggers;
+  }
+};
+
+/*int main(int argc,char *argv[])
 {
   
 }
@@ -16,8 +26,9 @@ namespace enigma
     int a;
     typedef of_stuff c;
     c b;
-    typedef unsigned float d;
+    typedef unsigned float** d;
     d e;
-    typedef struct arpagio { int aomethingmusicy; } tengelo;
+    typedef struct arpagio { int somethingmusicy; } tangelo, *avacado, **artichoke, plum;
   }
 }
+*/

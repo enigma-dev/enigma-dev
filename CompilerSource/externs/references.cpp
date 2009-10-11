@@ -43,6 +43,7 @@ rf_node::rf_node(rf_node* Prev,const referencer &r): next(NULL), prev(Prev), ref
 rf_node::rf_node(const referencer &r,rf_node* Next): next(Next), prev(NULL), ref(r) {}
 rf_node::rf_node(rf_node* Prev,const referencer &r,rf_node* Next): next(Next), prev(Prev), ref(r) {}
 
+rf_stack::rf_stack(int x): first(NULL), last(NULL), now(NULL) {};
 rf_stack::rf_stack(): first(NULL), last(NULL), now(NULL) {};
 
 char rf_stack::currentsymbol()
@@ -113,6 +114,12 @@ rf_stack &rf_stack::operator += (referencer r)
       else now = now->next = new rf_node(now,r,now->next);
     }
   }
+  return *this;
+}
+rf_stack &rf_stack::operator += (const rf_stack &r)
+{
+  for (rf_node* i = r.first; i != NULL; i = i->next)
+    *this += i->ref;
   return *this;
 }
 

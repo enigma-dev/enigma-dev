@@ -69,6 +69,7 @@ extern struct rf_stack
   
   void inc_current();
   void dec_current_min();
+  rf_stack &operator += (const rf_stack &s);
   rf_stack &operator += (referencer r);
   rf_stack &operator++ (int nothing);
   
@@ -81,5 +82,6 @@ extern struct rf_stack
   
   bool empty();
   
+  rf_stack(int x);
   rf_stack();
 } refstack;

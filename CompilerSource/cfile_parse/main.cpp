@@ -78,10 +78,19 @@ void print_scope_members(externs* gscope, int indent)
       cout << i->second->type->name << "  ";
     
     
-    if (i->second->flags&EXTFLAG_TEMPLATE)
+    if (i->second->flags & EXTFLAG_TEMPLATE)
     {
-      cout << " template with " << i->second->targs.size << " parameters";
-      comma=1;
+      cout << "Template [" << i->second->tempargs.size() << "]<";
+      char comma = 0;
+      for (externs::tempiter ii = i->second->tempargs.begin(); ii != i->second->tempargs.end(); ii++)
+      {
+        if (comma != 0) cout << comma;
+        cout << ii->first;
+        if (ii->second != NULL)
+          cout << "=" << ii->second->name;
+        comma = ',';
+      }
+      cout << ">";
     }
 
     if (i->second->flags & EXTFLAG_TYPENAME)

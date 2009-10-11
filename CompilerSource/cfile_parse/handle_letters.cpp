@@ -74,14 +74,14 @@ extern bool is_tflag(string x);
 int handle_identifiers(const string n,string &cferr,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type)
 {
   //it's not a macro, so the next thing we'll check for is keyword
-  if (n=="struct")
+  if (n=="struct" or n=="class")
   {
     //Struct can only really follow typedef.
     if (last_named != LN_NOTHING)
     {
       if (last_named != LN_TYPEDEF)
       {
-        cferr="Unexpected `struct' token";
+        cferr="Unexpected `"+n+"' token";
         return pos;
       }
       else
@@ -208,7 +208,26 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
     return -1;
   }
   if (n=="template")
+  {
+    if (last_named != LN_NOTHING)
+    {
+      cferr = "Unexpected `template' token";
+      return pos;
+    }
+    last_named = LN_TEMPLATE;
+    last_named_phase = 0;
+    return -1;
+  }
   if (n=="typename")
+  {
+    if (last_named != LN_TEMPLATE or last_named_phase != TMP_PSTART)
+    {
+      cferr = "Unexpected `typename' token";
+      return pos;
+    }
+    last_named_phase = TMP_TYPENAME;
+    return -1;
+  }
   if (n=="class")
   if (n=="friend")
   if (n=="private")
@@ -270,6 +289,11 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
           return -1;
         }
       }
+      else if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF) and (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED))
+      {
+        last_named_phase = TMP_DEFAULTED;
+        return -1;
+      }
       else
       {
         cferr="Unexpected declarator at this point";
@@ -287,7 +311,13 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
         last_named_phase = DEC_GENERAL_FLAG;
       return -1;
     }
-
+    
+    if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF) and (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED))
+    {
+      last_named_phase = TMP_DEFAULTED;
+      return -1;
+    }
+    
     cferr="Unexpected declarator at this point";
     return pos;
   }
@@ -328,6 +358,12 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
         return pos;
       }
     }
+    else if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF) and (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED))
+    {
+      last_named_phase = TMP_DEFAULTED;
+      last_type = ext_retriever_var;
+      return -1;
+    }
     else //This else is here because the above will need to pass this                 //struct a;
     {    //in the case of the current type being redeclared as scalar in this scope   //namespace b { int a; }
       cferr = "Unexpected declarator at this point";
@@ -366,33 +402,17 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
         last_named_phase = DEC_IDENTIFIER;
       break;
     case LN_TEMPLATE:
-        if (last_named_phase != 2)
+        if (last_named_phase == TMP_TYPENAME)
         {
-          cferr="Unexpected identifier in template declaration";
-          return pos;
+          last_named_phase = TMP_IDENTIFIER;
+          break;
         }
-        last_named_phase=3;
-      break;
     case LN_CLASS:
-        if (last_named_phase != 0)
-        {
-          cferr="Unexpected identifier in class declaration";
-          return pos;
-        }
-        last_named_phase = 1;
-      break;
     case LN_STRUCT:
+    case LN_UNION:
         if (last_named_phase != 0)
         {
-          cferr="Unexpected identifier in struct declaration";
-          return pos;
-        }
-        last_named_phase = 1;
-      break;
-    case LN_UNION:
-         if (last_named_phase != 0)
-        {
-          cferr="Unexpected identifier in union declaration";
+          cferr="Unexpected identifier in declaration";
           return pos;
         }
         last_named_phase = 1;

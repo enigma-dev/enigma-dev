@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Release">
-				<Option output="..\CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option output="../CompileEGMf" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -19,7 +19,7 @@
 				</Linker>
 			</Target>
 			<Target title="Debug">
-				<Option output="..\CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option output="../CompileEGMf" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
@@ -33,54 +33,55 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="OS_Switchboard.h" />
-		<Unit filename="cfile_parse\cfile_parse.cpp" />
-		<Unit filename="cfile_parse\cfile_parse.h" />
-		<Unit filename="cfile_parse\cfile_parse_calls.h" />
-		<Unit filename="cfile_parse\cfile_parse_constants.h" />
-		<Unit filename="cfile_parse\cfile_parse_macros.cpp" />
-		<Unit filename="cfile_parse\expev_macros.h" />
-		<Unit filename="cfile_parse\expression_evaluator.cpp" />
-		<Unit filename="cfile_parse\expression_evaluator.h" />
-		<Unit filename="cfile_parse\expression_evaluator_settings.h" />
-		<Unit filename="cfile_parse\handle_letters.cpp" />
-		<Unit filename="cfile_parse\handle_letters.h" />
-		<Unit filename="cfile_parse\keyword_operator.cpp" />
-		<Unit filename="cfile_parse\main.cpp" />
-		<Unit filename="cfile_parse\parsein.h">
+		<Unit filename="cfile_parse/cfile_parse.cpp" />
+		<Unit filename="cfile_parse/cfile_parse.h" />
+		<Unit filename="cfile_parse/cfile_parse_calls.h" />
+		<Unit filename="cfile_parse/cfile_parse_constants.h" />
+		<Unit filename="cfile_parse/cfile_parse_macros.cpp" />
+		<Unit filename="cfile_parse/expev_macros.h" />
+		<Unit filename="cfile_parse/expression_evaluator.cpp" />
+		<Unit filename="cfile_parse/expression_evaluator.h" />
+		<Unit filename="cfile_parse/expression_evaluator_settings.h" />
+		<Unit filename="cfile_parse/handle_letters.cpp" />
+		<Unit filename="cfile_parse/handle_letters.h" />
+		<Unit filename="cfile_parse/keyword_operator.cpp" />
+		<Unit filename="cfile_parse/main.cpp" />
+		<Unit filename="cfile_parse/parsein.h">
+			<Option virtualFolder="cfile_parse/" />
 			<Option target="Debug" />
 		</Unit>
-		<Unit filename="cfile_parse\value.h" />
-		<Unit filename="compiler\compile.cpp" />
-		<Unit filename="compiler\compile.h" />
-		<Unit filename="compiler\compile_includes.cpp" />
-		<Unit filename="compiler\compile_includes.h" />
-		<Unit filename="compiler\license_string.h" />
-		<Unit filename="compiler\pcs\pcs.cpp" />
-		<Unit filename="compiler\pcs\pcs.h" />
-		<Unit filename="externs\externs.cpp" />
-		<Unit filename="externs\externs.h" />
-		<Unit filename="externs\references.cpp" />
-		<Unit filename="externs\references.h" />
-		<Unit filename="general\darray.h" />
-		<Unit filename="general\estring.h" />
-		<Unit filename="general\implicit_stack.h" />
-		<Unit filename="general\string.cpp" />
-		<Unit filename="general\string.h" />
-		<Unit filename="general\textfile.cpp" />
-		<Unit filename="general\textfile.h" />
+		<Unit filename="cfile_parse/value.h" />
+		<Unit filename="compiler/compile.cpp" />
+		<Unit filename="compiler/compile.h" />
+		<Unit filename="compiler/compile_includes.cpp" />
+		<Unit filename="compiler/compile_includes.h" />
+		<Unit filename="compiler/license_string.h" />
+		<Unit filename="compiler/pcs/pcs.cpp" />
+		<Unit filename="compiler/pcs/pcs.h" />
+		<Unit filename="externs/externs.cpp" />
+		<Unit filename="externs/externs.h" />
+		<Unit filename="externs/references.cpp" />
+		<Unit filename="externs/references.h" />
+		<Unit filename="general/darray.h" />
+		<Unit filename="general/estring.h" />
+		<Unit filename="general/implicit_stack.h" />
+		<Unit filename="general/string.cpp" />
+		<Unit filename="general/string.h" />
+		<Unit filename="general/textfile.cpp" />
+		<Unit filename="general/textfile.h" />
 		<Unit filename="main.cpp" />
-		<Unit filename="parser\parser.cpp" />
-		<Unit filename="parser\parser.h" />
-		<Unit filename="parser\parser_components.cpp" />
-		<Unit filename="parser\parser_components.h" />
-		<Unit filename="syntax\checkfile.cpp" />
-		<Unit filename="syntax\checkfile.h" />
-		<Unit filename="syntax\chkfunction.h" />
-		<Unit filename="syntax\syncheck.h" />
-		<Unit filename="syntax\syntax.cpp" />
-		<Unit filename="syntax\syntaxtools.h" />
-		<Unit filename="varnames\varnames.cpp" />
-		<Unit filename="varnames\varnames.h" />
+		<Unit filename="parser/parser.cpp" />
+		<Unit filename="parser/parser.h" />
+		<Unit filename="parser/parser_components.cpp" />
+		<Unit filename="parser/parser_components.h" />
+		<Unit filename="syntax/checkfile.cpp" />
+		<Unit filename="syntax/checkfile.h" />
+		<Unit filename="syntax/chkfunction.h" />
+		<Unit filename="syntax/syncheck.h" />
+		<Unit filename="syntax/syntax.cpp" />
+		<Unit filename="syntax/syntaxtools.h" />
+		<Unit filename="varnames/varnames.cpp" />
+		<Unit filename="varnames/varnames.h" />
 		<Extensions>
 			<code_completion />
 			<debugger>

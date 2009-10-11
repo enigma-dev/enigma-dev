@@ -90,3 +90,13 @@ enum
   USE_NAMESPACE_IDENTIFIER, //using namespace
   USE_SINGLE_IDENTIFIER,    //using namespace
 };
+
+enum
+{
+  TMP_NOTHING,
+  TMP_PSTART,
+  TMP_TYPENAME,
+  TMP_IDENTIFIER,
+  TMP_EQUALS,
+  TMP_DEFAULTED
+};

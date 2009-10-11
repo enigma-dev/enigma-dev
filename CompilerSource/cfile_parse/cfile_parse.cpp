@@ -38,6 +38,7 @@ using namespace std;
 #include "expression_evaluator.h"
 
 string cferr;
+string tostring(int val);
 
 #include "cfile_parse_constants.h"
 #include "cfile_parse_calls.h"
@@ -46,11 +47,10 @@ string cferr;
 #define quote while (cfile[pos]!='"') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='"')) pos+=2; }
 #define squote while (cfile[pos]!='\'') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='\'')) pos+=2; }
 
-string tostring(int val);
-
 unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned int len);
 int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_named_phase,string &last_identifier);
 #include "handle_letters.h"
+
 
 int parse_cfile(string cftext)
 {
@@ -98,7 +98,7 @@ int parse_cfile(string cftext)
     I don't want to hear about it.
   */
 
-  int anoncount = 0;
+  anoncount = 0;
 
   for (;;)
   {
@@ -168,20 +168,25 @@ int parse_cfile(string cftext)
       //cout << last_named << ":" << last_named_phase << "\r\n";
       continue;
     }
-
-
+    
+    
     //There is a select number of symbols we are supposed to encounter.
     //A digit is actually not one of them. Digits, most operators, etc,
     //will be skipped over when we see an = sign.
-
+    
     //The symbol we will see most often is probably the semicolon.
     if (cfile[pos] == ',' or cfile[pos] == ';')
     {
       if (last_named == LN_NOTHING)
         { pos++; continue; }
-
+      
       if ((last_named & LN_TYPEDEF) != 0)
       {
+        if (last_named != (LN_DECLARATOR | LN_TYPEDEF))
+        {
+          cferr = "Invalid typedef";
+          return pos;
+        }
         if (last_identifier == "")
         {
           cferr = "No defiendum in type definition";
@@ -199,7 +204,14 @@ int parse_cfile(string cftext)
           cferr = "Program error: Type does not exist. An error should have been reported earlier.";
           return pos;
         }
-        current_scope->members[last_identifier] = last_type;
+        
+        current_scope->members[last_identifier] = new externs;
+        current_scope->members[last_identifier]-> name = last_identifier;
+        current_scope->members[last_identifier]-> members[ "" ] = last_type;
+        current_scope->members[last_identifier]-> flags = last_type->flags | EXTFLAG_TYPEDEF;
+        current_scope->members[last_identifier]-> refstack = refstack.dissociate();
+        
+        last_named_phase = DEC_FULL;
       }
       else
       {
@@ -215,9 +227,19 @@ int parse_cfile(string cftext)
               last_named_phase = DEC_FULL; //reset to 4 for next identifier.
             break;
           case LN_TEMPLATE:
-              cferr="Unused template declaration: Identifier expected before ;";
-              return pos;
-            break;
+              if (cfile[pos] == ';')
+              {
+                cferr="Unterminating template declaration; expected '>' before ';'";
+                return pos;
+              }
+              if (last_named_phase != TMP_IDENTIFIER and last_named_phase != TMP_DEFAULTED)
+              {
+                cferr="Unexpected comma in template declaration";
+                return pos;
+              }
+              tmplate_params[tpc++] = tpdata(last_identifier,last_named_phase != TMP_DEFAULTED ? NULL : last_type);
+              last_named_phase = TMP_PSTART;
+            pos++; continue;
           //These can all be looked at the same at this point.
           case LN_CLASS: case LN_STRUCT:
           case LN_UNION: case LN_ENUM:
@@ -258,8 +280,19 @@ int parse_cfile(string cftext)
             break;
         }
         
+        externs *type_to_use = last_type;
+        rf_stack refs_to_use = refstack.dissociate();
+        
+        if (type_to_use != NULL) //A case where it would be is struct str;
+        while (type_to_use->flags & EXTFLAG_TYPEDEF)
+        {
+          refs_to_use += type_to_use->refstack;
+          type_to_use = type_to_use->members[""];
+          if (type_to_use == NULL) { cferr = "Fatal error in parse."; return pos; }
+        }
+        
         if (last_identifier != "")
-        if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type))
+        if (!ExtRegister(last_named,last_identifier,refs_to_use,type_to_use,tmplate_params,tpc))
           return pos;
       }
 
@@ -296,14 +329,14 @@ int parse_cfile(string cftext)
       {
         int spos=pos;
         pos+=2;
-
+        
         while ((cfile[pos] != '/' or cfile[pos-1] != '*') and (pos++)<len);
         if (pos>=len)
         {
           cferr="Unterminating comment";
           return spos;
         }
-
+        
         pos++;
         continue;
       }
@@ -386,46 +419,36 @@ int parse_cfile(string cftext)
 
     if (cfile[pos] == '{')
     {
-      if (last_named == LN_NAMESPACE or (last_named | LN_TYPEDEF) == (LN_STRUCT | LN_TYPEDEF)
-      or  (last_named | LN_TYPEDEF) == (LN_CLASS | LN_TYPEDEF))
+      unsigned int tflags = 0;
+      if (last_named & LN_TYPEDEF)
       {
-        unsigned int tflags = (last_named==LN_NAMESPACE)?EXTFLAG_NAMESPACE:EXTFLAG_TYPENAME | ((last_named==LN_STRUCT)?EXTFLAG_STRUCT:EXTFLAG_CLASS);
-        if (last_identifier != "")
-        {
-          extiter addin = current_scope->members.find(last_identifier);
-          if (addin != current_scope->members.end())
-          {
-            if (last_named != LN_NAMESPACE)
-            {
-              cferr = "Redeclaration of " + last_identifier + " at this point";
-              return pos;
-            }
-            current_scope = addin->second;
-          }
-          else
-            current_scope = current_scope->members[last_identifier] = new externs(last_identifier,current_scope,tflags);
-        }
-        else
-          current_scope = current_scope->members["<anonymous"+tostring(anoncount++)+">"] = new externs(last_identifier,current_scope,tflags);
+        last_named &= ~LN_TYPEDEF;
+        tflags |= EXTFLAG_TYPEDEF;
+      }
+      
+      //Class/Namespace declaration.
+      if (last_named == LN_NAMESPACE or last_named == LN_STRUCT or last_named == LN_CLASS)
+      {
+        if (!ExtRegister(last_named,last_identifier,0,NULL,tmplate_params,tpc))
+          return pos;
+        current_scope = ext_retriever_var;
+      }
+      //Function implementation.
+      else if (last_named == LN_DECLARATOR and refstack.nextsymbol() == '(') // Do not confuse with ')'
+      {
+        //Function implementation.
+        
+        //Register the function in the current scope
+        if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc))
+          return pos;
+        
+        //Skip the code: we don't need to know it ^_^
+        skipto = '}'; skip_inc_on = '{';
       }
       else
       {
-        if (last_named == LN_DECLARATOR and refstack.nextsymbol() == '(') // Do not confuse with ')'
-        {
-          //Function implementation.
-          
-          //Register the function in the current scope
-          if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type))
-            return pos;
-          
-          //Skip the code: we don't need to know it ^_^
-          skipto = '}'; skip_inc_on = '{';
-        }
-        else
-        {
-          cferr = "Expected scope declaration before '{'";
-          return pos;
-        }
+        cferr = "Expected scope name or function declaration before '{'";
+        return pos;
       }
 
       last_identifier = "";
@@ -446,24 +469,73 @@ int parse_cfile(string cftext)
         return pos;
       }
       if (current_scope->flags & EXTFLAG_TYPENAME)
+      {
         last_named = LN_DECLARATOR; //if the scope we're popping serves as a typename
+        last_named_phase = DEC_FULL;
+      }
       else
-        last_named = LN_NOTHING;//Not sure what to do with enum {}
-      last_named_phase = 0;
-
-      pos++;
+      {
+        last_named = LN_NOTHING;  //Not sure what to do with enum {}
+        last_named_phase = 0;
+      }
+      if (current_scope->flags & EXTFLAG_TYPEDEF)
+      {
+        last_named |= LN_TYPEDEF;
+      }
+      
       last_type = current_scope;
-
       current_scope = current_scope->parent;
-      continue;
+      
+      pos++; continue;
     }
+    
+    //Two less freqent symbols now, heh.
+    
+    if (cfile[pos] == '<')
+    {
+      if (last_named != LN_TEMPLATE or last_named_phase != TMP_NOTHING)
+      {
+        cferr = "Unexpected symbol '<' should only occur directly following `template' token or type";
+        return pos;
+      }
+      last_named_phase = TMP_PSTART;
+      pos++; continue;
+    }
+    
+    if (cfile[pos] == '>')
+    {
+      if (last_named != LN_TEMPLATE or (last_named_phase != TMP_IDENTIFIER and last_named_phase != TMP_DEFAULTED))
+      {
+        cferr = "Unexpected symbol '>', should only occur as closing symbol of template parameters";
+        return pos;
+      }
+      tmplate_params[tpc++] = tpdata(last_identifier,last_named_phase != TMP_DEFAULTED ? NULL : last_type);
+      last_named = LN_NOTHING;
+      last_named_phase = 0;
+      pos++; continue;
+    }
+    
+    if (cfile[pos] == '=')
+    {
+      if (last_named == LN_TEMPLATE)
+      {
+        if (last_named_phase != TMP_IDENTIFIER)
+        {
+          cferr = "Expected identifier before '=' token";
+          return pos;
+        }
+        last_named_phase = TMP_EQUALS;
+        pos++; continue;
+      }
+      cout << "SHIIIIIIIIIII---";
+    }
+    
     
     cferr = "Unknown symbol";
     return pos;
   }
-
-
-
+  
+  
   /*
   string pname = "";
   if (last_typedef != NULL) pname=last_typedef->name;

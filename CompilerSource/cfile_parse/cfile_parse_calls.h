@@ -96,29 +96,45 @@ void cparse_init()
 }
 
 
-bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NULL)
+int tpc;
+varray<tpdata> tmplate_params;
+
+int anoncount = 0;
+
+bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = 0)
 {
-  externs* e;
-  extiter it = current_scope->members.find(name);
-  
-  //cout << "  Receiving " << (refs.empty()?"empty":"unempty") << " reference stack\r\n";
-  
-  if (it != current_scope->members.end())
+  if (name != "")
   {
-    if (last != LN_NAMESPACE or !(it->second->flags & EXTFLAG_NAMESPACE))
+    extiter it = current_scope->members.find(name);
+    
+    //cout << "  Receiving " << (refs.empty()?"empty":"unempty") << " reference stack\r\n";
+    
+    if (it != current_scope->members.end())
     {
-      cferr = "Redeclaration of `"+name+"' at this point";
-      return 0;
+      if (last != LN_NAMESPACE or !(it->second->flags & EXTFLAG_NAMESPACE))
+      {
+        cferr = "Redeclaration of `"+name+"' at this point";
+        return 0;
+      }
+      ext_retriever_var = it->second;
+      return 1;
     }
-    ext_retriever_var = it->second;
-    return 1;
   }
   else
   {
-    e = new externs;
-    current_scope->members[name] = e;
-    ext_retriever_var = e;
+    if (last == LN_STRUCT or last == LN_CLASS)
+      name = "<anonymous"+tostring(anoncount++)+">";
+    else
+    {
+      cferr = "Identifier required except in class definition";
+      return 0;
+    }
   }
+  
+  externs* e = new externs;
+  current_scope->members[name] = e;
+  ext_retriever_var = e;
+  
   e->name = name;
   if (last == LN_CLASS)
     e->flags = EXTFLAG_CLASS | EXTFLAG_TYPENAME;
@@ -130,7 +146,15 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
     e->flags = EXTFLAG_ENUM | EXTFLAG_TYPENAME;
   else e->flags = 0;
   
+  if (tpc != 0)
+  {
+    e->flags |= EXTFLAG_TEMPLATE;
+    for (int i=0; i<tpc; i++)
+      e->tempargs[tparams[i].name] = tparams[i].def;
+  }
+  
   e->type = type;
+  e->parent = current_scope;
   e->refstack = refs;
   
   return 1;

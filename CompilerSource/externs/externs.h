@@ -37,23 +37,38 @@
 #define EXTFLAG_ENUM 32
 #define EXTFLAG_STRUCT 64
 #define EXTFLAG_NAMESPACE 128
-//#define EXTFLAG_NAMESPACE 256
+#define EXTFLAG_TYPEDEF 256
+//#define EXTFLAG_NAMESPACE 512
 
 #include "references.h"
+
+struct externs;
+
+struct tpdata
+{
+  string name;
+  externs* def;
+  tpdata(): name(""), def(NULL) {}
+  tpdata(string n,externs* d): name(n), def(d) {}
+};
 
 struct externs
 {
   unsigned int flags;
-  darray<char> targs;
   string name;
   
   externs* type;
   externs* parent;
   rf_stack refstack;
+  
+  darray<externs*> ancestors;
+  map<string,externs*> tempargs;
   map<string, externs*> members;
   
+  typedef map<string,externs*>::iterator tempiter;
+  
   bool is_function(); //test if this is a function
-  int parameter_count(); //returns topmost function param number
+  int parameter_count(); //returns topmost function argument count
   
   externs();
   externs(string n,externs* p,unsigned int f);

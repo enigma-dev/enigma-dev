@@ -27,6 +27,7 @@
 
 #include <map>
 #include <string>
+#include <iostream>
 #include "../general/darray.h"
 using namespace std;
 #include "externs.h"
@@ -92,12 +93,26 @@ externs* ext_retriever_var = NULL;
 bool find_extname(string name,unsigned int flags)
 {
   externs* inscope=current_scope;
+  externs::tempiter tit = inscope->tempargs.find(name);
+  if (tit != inscope->tempargs.end())
+  {
+    ext_retriever_var = tit->second;
+    return 1;
+  }
   extiter it = inscope->members.find(name);
   while (it == inscope->members.end()) //Until we find it
   {
     if (inscope==&global_scope) //If we're at global scope, give up
       return 0;
     inscope=inscope->parent; //This must ALWAYS be nonzero when != global_scope
+    
+    tit = inscope->tempargs.find(name);
+    if (tit != inscope->tempargs.end())
+    {
+      ext_retriever_var = tit->second;
+      return 1;
+    }
+    
     it = inscope->members.find(name);
   } 
   ext_retriever_var = it->second;
