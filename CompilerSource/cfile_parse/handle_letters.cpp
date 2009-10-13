@@ -332,6 +332,8 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
       last_named_phase = DEC_FULL;
       return -1;
     }
+    
+    //If we're declaring a variable by type
     if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF))
     {
       if (last_named_phase != DEC_FULL)
@@ -340,31 +342,46 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
         {
           last_type = ext_retriever_var;
           last_named_phase = DEC_FULL;
-          return -1;
         }
-        else
+        else if (refstack.currentsymbol() != '(')
         {
-          if (refstack.currentsymbol() != '(')
-          {
-            cferr = "Expected ';' before new declarationzor";
-            return pos;
-          }
-          return -1;
+          cferr = "Expected ';' before new declaration";
+          return pos;
         }
-      } //If it was only declared in a separate scope, we can permit redeclaration:
-      else if (ext_retriever_var->parent == current_scope)
+        return -1;
+      } 
+      //If error, or if it was declared in this scope
+      else if (ext_retriever_var == NULL or ext_retriever_var->parent == current_scope)
       {
-        cferr = "Two types named in declaration";
+        cferr = ext_retriever_var == NULL ? "Type unimplemented in this scope" : "Two types named in declaration";
         return pos;
       }
+      //If we made it this far, we are redeclaring something in this scope that is different in higher scopes
+      //These next segments of elses are skipped, and the variable is treated like new.
     }
+    //Check if we're declaring a new struct or something instead
+    else 
+    if ((last_named | LN_TYPEDEF) == (LN_STRUCT | LN_TYPEDEF)
+    or  (last_named | LN_TYPEDEF) == (LN_ENUM   | LN_TYPEDEF)
+    or  (last_named | LN_TYPEDEF) == (LN_CLASS  | LN_TYPEDEF))
+    {
+      //If we're not right after "struct" (or the like) or are capable of redeclaring it in this scope
+      if (last_named_phase != SP_EMPTY or ext_retriever_var == NULL or ext_retriever_var->parent == current_scope)
+      {
+        cferr = ext_retriever_var == NULL ? "Type unimplemented, but present in this scope" : "Expected identifier";
+        return pos;
+      }
+      //Past this point, the type will be redeclared in this scope.
+    }
+    //Not declaring var by type, see if we're giving a template parameter a default value
     else if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF) and (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED))
     {
       last_named_phase = TMP_DEFAULTED;
       last_type = ext_retriever_var;
       return -1;
     }
-    else //This else is here because the above will need to pass this                 //struct a;
+    //Not declaring by type or giving default template value
+    else //Note: This else is here because the above will need to pass this block     //struct a;
     {    //in the case of the current type being redeclared as scalar in this scope   //namespace b { int a; }
       cferr = "Unexpected declarator at this point";
       return pos;

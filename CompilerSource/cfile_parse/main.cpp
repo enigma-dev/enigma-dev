@@ -90,7 +90,7 @@ void print_scope_members(externs* gscope, int indent)
           cout << "=" << ii->second->name;
         comma = ',';
       }
-      cout << ">";
+      cout << "> ";
     }
 
     if (i->second->flags & EXTFLAG_TYPENAME)
@@ -104,7 +104,10 @@ void print_scope_members(externs* gscope, int indent)
     if (i->second->flags & EXTFLAG_NAMESPACE) cout << " namespace";
     if (i->second->flags & EXTFLAG_STRUCT) cout << " : struct";
     if (i->second->flags & EXTFLAG_CLASS) cout << " : class";
-
+    
+    if (i->second->flags & EXTFLAG_TYPEDEF)
+      cout << " type defined as " << (i->second->members[""] != NULL ? i->second->members[""]->name : "<NULL>") << " ";
+    else
     if (!i->second->members.empty())
     {
       cout << "\r\n" << indstr << "{\r\n";

@@ -103,6 +103,9 @@ int anoncount = 0;
 
 bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = 0)
 {
+  unsigned int is_tdef = last & LN_TYPEDEF;
+  last &= ~LN_TYPEDEF;
+  
   if (name != "")
   {
     extiter it = current_scope->members.find(name);
@@ -134,8 +137,9 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
   externs* e = new externs;
   current_scope->members[name] = e;
   ext_retriever_var = e;
-  
   e->name = name;
+  
+  e->flags = 0;
   if (last == LN_CLASS)
     e->flags = EXTFLAG_CLASS | EXTFLAG_TYPENAME;
   else if (last == LN_STRUCT)
@@ -144,7 +148,11 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
     e->flags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME; //sizeof() can't be used in Macros, you bunch of arses.
   else if (last == LN_ENUM)
     e->flags = EXTFLAG_ENUM | EXTFLAG_TYPENAME;
-  else e->flags = 0;
+  else if (last == LN_NAMESPACE)
+    e->flags = EXTFLAG_NAMESPACE;
+  
+  if (is_tdef)
+    e->flags |= EXTFLAG_TYPEDEF; //If this is a new type being typedef'd, it will later be undone
   
   if (tpc != 0)
   {

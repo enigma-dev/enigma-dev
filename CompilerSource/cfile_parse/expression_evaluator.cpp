@@ -1173,3 +1173,9 @@ value evaluate_expression(string expr)
 
   return regval[0][0];
 }
+
+bool evaluate_conditional(string exp)
+{
+  value a = evaluate_expression(exp);
+  return (bool)a;
+}

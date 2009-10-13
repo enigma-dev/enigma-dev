@@ -205,6 +205,21 @@ struct value
       return 0;
     }
   #endif
+  
+  operator bool()
+  {
+    #if USETYPE_INT
+      if (type==RTYPE_INT) return real.i;
+    #endif
+    #if USETYPE_DOUBLE
+      if (type==RTYPE_DOUBLE) return real.d;
+    #endif
+    #if USETYPE_UINT
+      if (type==RTYPE_UINT) return real.u;
+    #endif
+    return 0;
+  }
+  
   #if USETYPE_STRING
     value(string a)
     {

@@ -67,6 +67,29 @@ inline void move_newline_a(string &cfile,unsigned int &pos,const unsigned int le
 
 #define move_newline() move_newline_a(cfile,pos,len)
 
+struct flow_stack
+{
+  struct n
+  {
+    n* prev;
+    bool value;
+    n(): prev(NULL) {}
+    n(bool x): prev(NULL), value(x) {}
+    n(n* p,bool x): prev(p), value(x) {}
+  } *top;
+  flow_stack(): top(NULL) {}
+  void push(bool x) { top = new n(top,x); }
+  bool pop() { if (top==NULL) return 1; n*d=top; bool r=top->value; top=top->prev; delete d; return r; }
+  bool empty() { return top == NULL; }
+  bool topval() { return top->value; }
+} flowstack;
+
+bool in_false_conditional()
+{
+  if (flowstack.empty()) return 0;
+  return flowstack.topval() == 0;
+}
+
 unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned int len)
 {
   pos++;
@@ -79,14 +102,12 @@ unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned in
 
   if (next=="error")
   {
-    move_newline();
-
-    //Execute the following if and when ENIGMA supports #if
-    /*int poss=pos;
+    int poss=pos;
     move_newline();
     cferr=cfile.substr(poss,pos-poss+1);
-    return pos;*/
+    return pos;
   }
+  //Define, Undefine
   {
     if (next=="define")
     {
@@ -136,6 +157,7 @@ unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned in
 
     }
   }
+  //Including things
   {
     if (next=="include")
     {
@@ -150,15 +172,22 @@ unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned in
       move_newline();
     }
   }
+  //Conditionals/Flow
   {
     if (next=="if" or next=="ifdef" or next=="ifndef" or next=="else" or next=="elif" or next=="endif")
     {
+      int spos = pos;
       move_newline();
+      string exp = cfile.substr(spos,pos-spos+1);
+      if (next.length() == 2)
+      {
+        flowstack.push(evaluate_expression(exp));
+      }
     }
   }
   if (next=="line")
   {
-    cferr="Fuck you.";
+    cferr="#line is unimplemented for reasons of sanity.";
     return pos;
   }
   if (next=="pragma")

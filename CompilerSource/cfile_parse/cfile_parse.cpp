@@ -47,6 +47,7 @@ string tostring(int val);
 #define quote while (cfile[pos]!='"') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='"')) pos+=2; }
 #define squote while (cfile[pos]!='\'') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='\'')) pos+=2; }
 
+bool in_false_conditional();
 unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned int len);
 int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_named_phase,string &last_identifier);
 #include "handle_letters.h"
@@ -131,6 +132,9 @@ int parse_cfile(string cftext)
     
     //Not a preprocessor
     preprocallowed = false;
+    
+    if (in_false_conditional())
+      { pos++; continue; }
     
     if (skipto)
     {
@@ -294,6 +298,7 @@ int parse_cfile(string cftext)
         if (last_identifier != "")
         if (!ExtRegister(last_named,last_identifier,refs_to_use,type_to_use,tmplate_params,tpc))
           return pos;
+        tpc = 0;
       }
 
       if (cfile[pos] == ';') //If it was ';' and not ','
@@ -309,6 +314,7 @@ int parse_cfile(string cftext)
         last_identifier = "";
         last_type = NULL;
         refstack.dump();
+        tpc = 0;
       }
 
       pos++;
@@ -418,26 +424,19 @@ int parse_cfile(string cftext)
     }
 
     if (cfile[pos] == '{')
-    {
-      unsigned int tflags = 0;
-      if (last_named & LN_TYPEDEF)
-      {
-        last_named &= ~LN_TYPEDEF;
-        tflags |= EXTFLAG_TYPEDEF;
-      }
+    { 
+      const int last_named_raw = last_named & ~LN_TYPEDEF;
       
       //Class/Namespace declaration.
-      if (last_named == LN_NAMESPACE or last_named == LN_STRUCT or last_named == LN_CLASS)
+      if (last_named_raw == LN_NAMESPACE or last_named_raw == LN_STRUCT or last_named_raw == LN_CLASS)
       {
         if (!ExtRegister(last_named,last_identifier,0,NULL,tmplate_params,tpc))
           return pos;
         current_scope = ext_retriever_var;
       }
       //Function implementation.
-      else if (last_named == LN_DECLARATOR and refstack.nextsymbol() == '(') // Do not confuse with ')'
+      else if (last_named_raw == LN_DECLARATOR and refstack.nextsymbol() == '(') // Do not confuse with ')'
       {
-        //Function implementation.
-        
         //Register the function in the current scope
         if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc))
           return pos;
@@ -456,6 +455,7 @@ int parse_cfile(string cftext)
       last_named_phase = 0;
       last_type = NULL;
       refstack.dump();
+      tpc = 0;
       pos++;
 
       continue;
@@ -468,6 +468,7 @@ int parse_cfile(string cftext)
         cferr = "Unexpected closing brace at this point";
         return pos;
       }
+      
       if (current_scope->flags & EXTFLAG_TYPENAME)
       {
         last_named = LN_DECLARATOR; //if the scope we're popping serves as a typename
@@ -478,9 +479,11 @@ int parse_cfile(string cftext)
         last_named = LN_NOTHING;  //Not sure what to do with enum {}
         last_named_phase = 0;
       }
+      
       if (current_scope->flags & EXTFLAG_TYPEDEF)
       {
         last_named |= LN_TYPEDEF;
+        current_scope->flags &= ~EXTFLAG_TYPEDEF;
       }
       
       last_type = current_scope;
