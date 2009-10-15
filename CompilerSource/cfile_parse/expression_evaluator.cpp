@@ -73,10 +73,10 @@ value evaluate_expression(string expr)
   implicit_stack<int> position;
   exp=expr;
   pos=0;
-
+  
   implicit_stack<int> explength;
   len=exp.length();
-
+  
   unsigned int macrod=0;
   varray<string> inmacros;
   varray<varray<value> > regval; //stack of stack necessary for precedence
@@ -84,23 +84,23 @@ value evaluate_expression(string expr)
   varray<darray<int> > unary; //Unary, stack of stack for multiple: !! is a good example
   darray<int> uc,opc; //How many (unary, regular) operators there are on this level
   int level=0; //Parenthesis level
-
+  
   VZERO(regval[0][0].); //zero the value
   regval[0][0].type=RTYPE_NONE;
   op[0][0]=OP_NONE; //no operator
   opc[0]=0; //no normal operators
   uc[0]=0; //no unary operators
-
+  
   #if CASTS_ALLOWED
    darray<int> is_cast; //Tells if this level casts and how many flags there are
    is_cast[0]=0;
   #endif
-
+  
   //Note that the number of values should be the same as number of operators + 1.
-
+  
   rerr="";
   rerrpos=0;
-
+  
   for (;;) //since goto is out of the question
   {
     if (!(pos<len))
@@ -115,9 +115,9 @@ value evaluate_expression(string expr)
       }
       else break;
     }
-
+    
     if (is_useless(exp[pos])) { pos++; continue; }
-
+    
     #if CASTS_ALLOWED
       if (is_cast[level] and exp[pos]!=')' and !is_letter(exp[pos]))
       {
@@ -127,7 +127,7 @@ value evaluate_expression(string expr)
         return 0;
       }
     #endif
-
+    
     if (is_letterd(exp[pos]) or exp[pos]=='.' or exp[pos]==')' or exp[pos]=='"' or exp[pos]=='\'')
     {
       //cout << "Entering at " << pos << " -> " << regval[level][opc[level]].type << endl;
@@ -139,7 +139,7 @@ value evaluate_expression(string expr)
         int sp=pos;
         while (is_letterd(exp[pos])) pos++;
         string n=exp.substr(sp,pos-sp);
-
+        
         #if CASTS_ALLOWED
             if (n=="bool") { unary[level-1][uc[level-1]++]=UNARY_BOOL; is_cast[level]++; continue; }
             if (n=="char") { unary[level-1][uc[level-1]++]=UNARY_CHAR; is_cast[level]++; continue; }
@@ -151,7 +151,7 @@ value evaluate_expression(string expr)
             if (n=="signed") { unary[level-1][uc[level-1]++]=UNARY_SIGNED; is_cast[level]++; continue; }
             if (n=="unsigned") { unary[level-1][uc[level-1]++]=UNARY_UNSIGNED; is_cast[level]++; continue; }
             if (n=="const") { is_cast[level]=1; continue; }
-
+            
             if (is_cast[level])
             {
               rerr="Unexpected symbol in cast";
@@ -159,7 +159,7 @@ value evaluate_expression(string expr)
               return 0;
             }
         #endif
-
+        
         if (is_opkeyword(n))
         {
           if (regval[level][opc[level]].type==RTYPE_NONE)
@@ -202,12 +202,12 @@ value evaluate_expression(string expr)
               op[level][opc[level]++]=OP_XOR;
             #endif
           }
-
+          
           regval[level][opc[level]].type=RTYPE_NONE;
           continue;
         }
-
-
+        
+        
         //Look up the value. In this case, this is a macro, and so we can not treat it as a number and must continue.
         //This part must be manually edited for compatibility with other languages or purposes.
         maciter i=macros.find(n);
@@ -228,8 +228,8 @@ value evaluate_expression(string expr)
             continue;
           }
         } //else printf("Unknown var %s\r\n",n.c_str());
-
-
+        
+        
         //okay, if it didn't actually exist, I lied. We're going to pretend it was just zero, and not continue;.
         setval=0;
       }
@@ -244,7 +244,7 @@ value evaluate_expression(string expr)
           while (is_letterd(exp[pos])) pos++;
           string num=exp.substr(sp,pos-sp);
           const int vl=num.length();
-
+          
           for (int i=0;i<vl;i++)
           {
             if (is_digit(num[i]))
@@ -272,7 +272,7 @@ value evaluate_expression(string expr)
           while (is_letterd(exp[pos])) pos++;
           string num=exp.substr(sp,pos-sp);
           const int vl=num.length();
-
+          
           for (int i=0;i<vl;i++)
           {
             if (num[i]=='1') { val<<=1; val++; }
@@ -288,7 +288,7 @@ value evaluate_expression(string expr)
               while (is_letterd(exp[pos])) pos++;
               string num=exp.substr(sp,pos-sp);
               const int vl=num.length();
-
+              
               double div=1;
               for (int i=0;i<vl;i++)
               {
@@ -310,7 +310,7 @@ value evaluate_expression(string expr)
           while (is_letterd(exp[pos])) pos++;
           string num=exp.substr(sp,pos-sp);
           const int vl=num.length();
-
+          
           for (int i=0;i<vl;i++)
           {
             if (num[i]>='0' and num[i]<'8')
@@ -325,7 +325,7 @@ value evaluate_expression(string expr)
         while (is_letterd(exp[pos]) || exp[pos]=='.') pos++;
         string num=exp.substr(sp,pos-sp);
         const int vl=num.length();
-
+        
         double div=0;
         int isunsigned=0,istoobig=0;
         int trigger_f=0,trigger_u=0;
@@ -353,7 +353,7 @@ value evaluate_expression(string expr)
           else if (num[i]=='U') trigger_u=1;
           //if (i>50) break; //past the point of being riddiculous
         }
-
+        
         if (div>0)
         {
           #if USETYPE_DOUBLE
@@ -443,7 +443,7 @@ value evaluate_expression(string expr)
           str = exp.substr(sp+1,pos-sp-1);
        #endif
        #if SQUOTE_IS_STRING
-
+       
        #else
           val=0;
           unsigned int vl=str.length();
@@ -492,16 +492,16 @@ value evaluate_expression(string expr)
             continue;
           }
         #endif
-
+        
         flush_opstack();
         setval=regval[level][0];
         level--; pos++;
       }
-
+      
       //Apply any immediate unary
       double nvd=0;
       long long nv=0;
-
+      
       #if USETYPE_INT
         #define setitype(x) setval.type=RTYPE_INT; setval.real.i=x;
       #elif USETYPE_UINT
@@ -511,7 +511,7 @@ value evaluate_expression(string expr)
       #else
         #define setitype(x)
       #endif
-
+      
       #if USETYPE_DOUBLE
         #define setdtype(x) setval.type=RTYPE_DOUBLE; setval.real.d=x;
       #elif USETYPE_INT
@@ -521,7 +521,7 @@ value evaluate_expression(string expr)
       #else
         #define setdtype(x)
       #endif
-
+      
       while ((uc[level]--)>0)
       switch (unary[level][uc[level]])
       {
@@ -695,7 +695,7 @@ value evaluate_expression(string expr)
           break;
       }
       uc[level]=0;
-
+      
       //Now we actually register it
       //cout << "while ("<<opc[level]<<">1)\r\n{ main="<<regval[0][0].real.i<<"\r\n";
       while (opc[level] > 1)
@@ -732,7 +732,7 @@ value evaluate_expression(string expr)
       }
       continue;
     } //end is_digit(exp[pos])
-
+    
     if (exp[pos]=='(')
     {
       level++;
@@ -741,15 +741,15 @@ value evaluate_expression(string expr)
       op[level][0]=OP_NONE; //no operator
       opc[level]=0; //no normal operators
       uc[level]=0; //no unary operators
-
+      
       #if CASTS_ALLOWED
       is_cast[level]=0; //not a cast (or we can't tell yet)
       #endif
-
+      
       pos++;
       continue;
     }
-
+    
     if (exp[pos]=='-')
     {
       if (exp[pos+1]=='-')
@@ -1050,7 +1050,7 @@ value evaluate_expression(string expr)
       unary[level][uc[level]++]=UNARY_NEGATE;
       pos++; continue;
     }
-
+    
     if (exp[pos]=='?')
     {
       int a=1,b=0;
@@ -1114,7 +1114,7 @@ value evaluate_expression(string expr)
       regval[level][0].type=RTYPE_NONE;
       pos++; continue;
     }
-
+    
     if (exp[pos]==':')
     {
       int a=0;
@@ -1157,25 +1157,19 @@ value evaluate_expression(string expr)
       }
       continue;
     }
-
+    
     cout << "Unrecognized symbol '"<< exp[pos] <<"'.\r\n";
     cout << exp << " at " << pos << "\r\n";
     pos++;
   } //end of expression
-
+  
   if (level>0)
   {
     rerr="Unterminated paretheses before end of expression";
     rerrpos=pos;
   }
-
+  
   flush_opstack();
-
+  
   return regval[0][0];
-}
-
-bool evaluate_conditional(string exp)
-{
-  value a = evaluate_expression(exp);
-  return (bool)a;
 }

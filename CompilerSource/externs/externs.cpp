@@ -70,10 +70,15 @@ externs::externs(string n,externs* t,externs* p,unsigned int f)
   flags = f;
 }
 
+macro_type::operator string() { return name; }
+macro_type& macro_type::operator= (string x) { name = x; return *this; }
+
+
+
 //Map to sort, darray for polymorphic things
 map<string, varray<externs> > extarray;
 externs global_scope,*current_scope;
-map<string,string> macros;
+map<string,macro_type> macros;
 
 
 

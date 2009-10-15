@@ -75,9 +75,18 @@ struct externs
   externs(string n,externs* t,externs* p,unsigned int f);
 };
 
-extern map<string,string> macros;
+struct macro_type
+{
+  string name;
+  bool hasargs;
+  varray<string> args;
+  operator string();
+  macro_type &operator= (string x);
+};
+
+extern map<string,macro_type> macros;
 typedef map<string,externs*>::iterator extiter;
-typedef map<string,string>::iterator maciter;
+typedef map<string,macro_type>::iterator maciter;
 extern externs global_scope,*current_scope;
 
 extiter scope_find_member(string name);

@@ -44,22 +44,7 @@ using namespace std;
     #include "cfile_parse/cfile_parse.h"
     #include "syntax/checkfile.h"
 
-string fc(const char* fn)
-{
-    FILE *pt = fopen(fn,"rb");
-    if (pt==NULL) { cout << "fail\r\n"; return ""; }
-    else
-    {
-      fseek(pt,0,SEEK_END);
-      size_t sz = ftell(pt);
-      fseek(pt,0,SEEK_SET);
-
-      char a[sz+1];
-      sz = fread(a,1,sz,pt);
-      a[sz] = 0;
-      return a;
-    }
-};
+string fc(const char* fn);
 
 void print_scope_members(externs* gscope, int indent);
 
@@ -67,8 +52,13 @@ int main(int argc, char *argv[])
 {
       cparse_init();
       string cftp = fc("./cfile_parse/parsein.h");
-
-      int a = parse_cfile(cftp);
+      
+      time_t ts = clock();
+        int a = parse_cfile(cftp);
+      time_t te = clock();
+      cout << "Parse time: " << (((te-ts) * 1000.0) / CLOCKS_PER_SEC) << " milliseconds\r\n\r\n";
+      
+      
       if (a != -1)
       {
         int line=0,pos=0;
@@ -82,10 +72,10 @@ int main(int argc, char *argv[])
         printf("Line %d, position %d: %s\r\n",line+1,pos,cferr.c_str());
       }
 
-      cout << "Macros:\r\n";
+      cout << "Macros ("<<macros.size()<<"):\r\n";
       for (maciter i=macros.begin(); i!=macros.end();i++)
-        cout<<"  "<<i->second<<"\r\n";
-
+        cout<<"  "<<i->first<<": "<<i->second<<"\r\n";
+      cout<<"\r\nVariables:";
       print_scope_members(&global_scope, 0);
 
     getchar();

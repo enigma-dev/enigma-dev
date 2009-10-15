@@ -48,7 +48,11 @@ string tostring(int val);
 #define squote while (cfile[pos]!='\'') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='\'')) pos+=2; }
 
 bool in_false_conditional();
-unsigned int cfile_parse_macro(string& cfile,unsigned int& pos,const unsigned int len);
+
+
+typedef implicit_stack<string> iss;
+typedef implicit_stack<unsigned int> isui;
+unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length);
 int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_named_phase,string &last_identifier);
 #include "handle_letters.h"
 
@@ -126,7 +130,8 @@ int parse_cfile(string cftext)
     //If it's a macro, deal with it here
     if (cfile[pos]=='#' and preprocallowed)
     {
-      cfile_parse_macro(cfile,pos,len);
+      const unsigned a = cfile_parse_macro(c_file,position,cfile_length);
+      if (a != unsigned(-1)) return a;
       continue;
     }
     
