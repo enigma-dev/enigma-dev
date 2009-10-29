@@ -37,6 +37,10 @@ using namespace std;
 #include "expev_macros.h"
 #include "value.h"
 
+#include "macro_functions.h"
+
+string tostring(int val);
+
 int precedence[] = PRECEDENCE;
 bool nz(value v)
 {
@@ -160,6 +164,26 @@ value evaluate_expression(string expr)
             }
         #endif
         
+        #if USE_DEFINED_KEYWORD == 1
+          if (n == "defined")
+          {
+            while (is_useless(exp[pos])) pos++;
+            if (!is_letter(exp[pos])) 
+            {
+              rerr="Expected identifier following `defined' token";
+              rerrpos=pos;
+              return 0;
+            }
+            const unsigned spos = pos;
+            while (is_letterd(exp[pos])) pos++;
+            bool addthis = (macros.find(exp.substr(spos,pos-spos)) != macros.end());
+            
+            setval = (value)addthis;
+            
+            goto electron_transport_chain;
+          }
+        #endif
+        
         if (is_opkeyword(n))
         {
           if (regval[level][opc[level]].type==RTYPE_NONE)
@@ -218,12 +242,24 @@ value evaluate_expression(string expr)
           if (inmacros[iii]==n) { recurs=1; break; }
           if (!recurs)
           {
+            string macrostr = i->second;
+            if (i->second.argc != -1) //Expect ()
+            {
+              unsigned int pt = pos;
+              if (!macro_function_parse(exp,pt,macrostr,i->second.args,i->second.argc))
+              {
+                rerr = macrostr;
+                return pos;
+              }
+              pos = pt;
+            }
+            
             position.push();
             explength.push();
             expression.push();
-            exp=i->second;
-            len=exp.length();
-            pos=0; //printf("var %s[%d] = %s\r\n",n.c_str(),ind,exp.c_str());
+            exp = macrostr;
+            len = exp.length();
+            pos = 0; //printf("var %s[%d] = %s\r\n",n.c_str(),ind,exp.c_str());
             inmacros[macrod++]=n;
             continue;
           }
@@ -497,6 +533,8 @@ value evaluate_expression(string expr)
         setval=regval[level][0];
         level--; pos++;
       }
+      
+      electron_transport_chain:
       
       //Apply any immediate unary
       double nvd=0;
@@ -1158,9 +1196,15 @@ value evaluate_expression(string expr)
       continue;
     }
     
-    cout << "Unrecognized symbol '"<< exp[pos] <<"'.\r\n";
-    cout << exp << " at " << pos << "\r\n";
-    pos++;
+    if (exp[pos] == '\\')
+    {
+      if (exp[pos+1] == '\r' or exp[pos+1]=='\n')
+        { pos++; continue; }
+    }
+    
+    rerr = string("Unrecognized symbol '") + exp[pos] + "' in [ " + exp + " ] at " + tostring(pos);
+    cout << rerr;
+    return pos;
   } //end of expression
   
   if (level>0)

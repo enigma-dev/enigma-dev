@@ -32,12 +32,7 @@ using namespace std;
 #include "../general/darray.h"
 #include "../externs/externs.h"
 
-#define is_letter(x)  ((x>='a' && x<='z') || (x>='A' && x<='Z') || (x=='_'))
-  #define is_digit(x)   (x>='0' && x<='9')
-  #define is_letterd(x) (is_letter(x) || is_digit(x))
-  #define is_unary(x)   (x=='!' || x=='~' || x=='+' || x=='-' || x=='&' || x=='*')
-  #define is_linker(x)  (x=='+' || x=='-' || x=='*' || x=='/' || x=='=' || x=='!' || x=='~' || x=='&' || x=='|' || x=='^' || x=='.')
-#define is_useless(x) (x==' ' || x=='\r' || x=='\n' || x=='\t')
+#include "../general/parse_basics.h"
 
 unsigned int strc = 0;
 varray<string> stringincode;

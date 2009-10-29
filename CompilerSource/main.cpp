@@ -48,6 +48,8 @@ string fc(const char* fn);
 
 void print_scope_members(externs* gscope, int indent);
 
+#include "general/implicit_stack.h"
+extern string cfile_top;
 int main(int argc, char *argv[])
 {
       cparse_init();
@@ -64,39 +66,52 @@ int main(int argc, char *argv[])
         int line=0,pos=0;
         for (int i=0; i<a; i++,pos++)
         {
-          if (cftp[i]=='\r')
+          if (cfile_top[i]=='\r')
             i++;
-          if (cftp[i]=='\n')
+          if (cfile_top[i]=='\n')
             line++, pos=0;
         }
-        printf("Line %d, position %d: %s\r\n",line+1,pos,cferr.c_str());
+        printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
+        const int margin = 100;
+        unsigned int begin = (signed)a-(margin/2)<0?0:a-(margin/2), end = (a+(margin/2)>cfile_top.length())?cfile_top.length():a+(margin/2);
+        cout << "code snippet: " << cfile_top.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
       }
 
       cout << "Macros ("<<macros.size()<<"):\r\n";
       for (maciter i=macros.begin(); i!=macros.end();i++)
-        cout<<"  "<<i->first<<": "<<i->second<<"\r\n";
-      cout<<"\r\nVariables:";
+      {
+        cout<<"  "<<i->first;
+        if (i->second.argc != -1)
+        {
+          cout << "(";
+          for (int ii = 0; ii<i->second.argc; ii++)
+            cout << i->second.args[ii] << (ii<i->second.argc-1 ? ",":"");
+          cout << ")";
+        }
+        cout<<": "<<(string)i->second<<"\r\n";
+      }
+      cout<<"\r\nVariables:\r\n";
       print_scope_members(&global_scope, 0);
 
     getchar();
     return 0;
-
+    
       parser_init();
       string b = parser_main(fc("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parsein.txt"));
-
+    
     getchar();
     return 0;
-
-
-
+    
+    
+    
     string p1;
     if (!(argc>1)) { p1=""; }
     else      { p1=argv[1]; }
     double result=0;
-
-
+    
+    
     if (p1[0]=='/' || p1[0]=='\\') p1[0]='-';
-
+    
     if (p1=="-r")
     {
       if (argc<3) {puts("Insufficient parameters"); return -11; }

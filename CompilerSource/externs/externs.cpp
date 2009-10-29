@@ -71,7 +71,11 @@ externs::externs(string n,externs* t,externs* p,unsigned int f)
 }
 
 macro_type::operator string() { return name; }
+macro_type::macro_type(): argc(-1) {}
+macro_type::macro_type(string x): argc(-1), name(x) {}
 macro_type& macro_type::operator= (string x) { name = x; return *this; }
+void macro_type::assign_func() { if (argc==-1) argc=0; }
+void macro_type::addarg(string x) { args[argc++] = x; }
 
 
 

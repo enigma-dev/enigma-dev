@@ -26,6 +26,7 @@
 \*********************************************************************************/
 
 #include <map>
+#include <stack>
 #include <string>
 #include <iostream>
 #include "../general/darray.h"
@@ -36,36 +37,48 @@ using namespace std;
 #include "value.h"
 #include "../externs/externs.h"
 #include "expression_evaluator.h"
-
-
-#define is_letter(x)  ((x>='a' && x<='z') || (x>='A' && x<='Z') || (x=='_'))
-  #define is_digit(x)   (x>='0' && x<='9')
-  #define is_letterd(x) (is_letter(x) || is_digit(x))
-  #define is_unary(x)   (x=='!' || x=='~' || x=='+' || x=='-' || x=='&' || x=='*')
-  #define is_linker(x)  (x=='+' || x=='-' || x=='*' || x=='/' || x=='=' || x=='!' || x=='~' || x=='&' || x=='|' || x=='^' || x=='.')
-#define is_useless(x) (x==' ' || x=='\r' || x=='\n' || x=='\t')
+#include "../general/parse_basics.h"
 
 extern string cferr;
+struct includings
+{
+  string name;
+  string path; 
+  includings(string n,string p):name(n), path(p) {} 
+};
+extern stack<includings> included_files;
 
 typedef implicit_stack<string> iss;
 typedef implicit_stack<unsigned int> isui;
 
 inline void move_newline_a(string &cfile,unsigned int &pos,const unsigned int len)
 {
+  bool cancomment = 1;
   while (cfile[pos]!='\r' and cfile[pos]!='\n' and pos<len)
   {
-    pos++;
     if (cfile[pos]=='\\' and pos+1<len)
     {
       pos++;
-      if (cfile[pos]=='\\')
-      pos++;
+      if (cfile[pos]=='\\') pos++;
       else
       {
-        if (cfile[pos]=='\r') { pos++; if (cfile[pos]=='\n') pos++; }
-        else if (cfile[pos]=='\n') pos++;
+        if (cfile[pos]=='\r') pos++;
+        if (cfile[pos]=='\n') pos++;
       }
     }
+    else if (cfile[pos]=='/' and cancomment)
+    {
+      if (cfile[pos+1]=='/')
+        cancomment = 0;
+      else if (cfile[pos+1]=='*') 
+      {
+        pos+=2;
+        if (pos<len) pos++;
+        while (pos<len and cfile[pos] != '/' and cfile[pos-1] != '*') pos++;
+        continue;
+      }
+    }
+    pos++;
   }
 }
 
@@ -89,6 +102,8 @@ string fc(const char* fn)
 
       char a[sz+1];
       sz = fread(a,1,sz,pt);
+      fclose(pt);
+      
       a[sz] = 0;
       return a;
     }
@@ -100,17 +115,20 @@ struct flow_stack
   {
     n* prev;
     bool value;
-    n(): prev(NULL) {}
-    n(bool x): prev(NULL), value(x) {}
-    n(n* p,bool x): prev(p), value(x) {}
+    bool used;
+    n(): prev(NULL),value(0),used(0) {}
+    n(bool x): prev(NULL), value(x), used(x)  {}
+    n(n* p,bool x): prev(p), value(x), used(x) {}
+    n(n* p,bool x,bool pre): prev(p), value(x), used(x or pre) {}
   } *top;
   flow_stack(): top(NULL) {}
-  void push(bool x) { top = new n(top,(top == NULL) ? x : top->value and x); }
+  void push(bool x) { top = (top) ? new n(top,top->value and x,!top->value) : new n(top,x,0); }
   bool pop() { if (top==NULL) return 1; n*d=top; bool r=top->value; top=top->prev; delete d; return r; }
   bool empty() { return top == NULL; }
-  bool topval() { return top->value; }
-  bool invert_top() { return top->value = !top->value; }
-  void set_top(bool x) { top->value = x; }
+  bool topval() { if (top) return top->value; return 0; }
+  bool invert_top() { if (top and (top->value or !top->used)) { top->used=1; return top->value = !top->value; } return 0; }
+  bool topused() { if (top) return top->used; return 0; }
+  void set_top(bool x) { top->value = x; top->used |= x; }
 } flowstack;
 
 bool in_false_conditional()
@@ -119,9 +137,13 @@ bool in_false_conditional()
   return flowstack.topval() == 0;
 }
 
+extern string cfile_top;
 
 typedef implicit_stack<string> iss;
 typedef implicit_stack<unsigned int> isui;
+
+extern varray<string> include_directories;
+extern unsigned int include_directory_count;
 
 #define cfile c_file()
 #define pos position()
@@ -129,117 +151,181 @@ typedef implicit_stack<unsigned int> isui;
 unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
 {
   pos++;
-  while(is_useless(cfile[pos])) pos++;
+  while(is_useless_macros(cfile[pos])) pos++;
 
   unsigned int poss=pos;
   if (!is_letter(cfile[pos])) { cferr="Preprocessor directive expected"; return pos; }
   while (is_letterd(cfile[pos])) pos++;
   string next=cfile.substr(poss,pos-poss);
-
-  if (next=="error")
+  
+  while (cfile[pos] == ' ' or cfile[pos] == '\t') pos++;
+  
+  if (!in_false_conditional())
   {
-    int poss=pos;
-    move_newline();
-    cferr=cfile.substr(poss,pos-poss+1);
-    return pos;
-  }
-  //Define, Undefine
-  {
-    if (next=="define")
+    if (next=="error")
     {
-      while (is_useless(cfile[pos])) pos++;
-      
-      const unsigned poss=pos;
-      if (!is_letter(cfile[pos])) { cferr="Identifier expected for #define"; return pos; }
-      while (is_letterd(cfile[pos])) pos++;
-      
-      //unsigned int flags=0;
-      
-      string defiendum=cfile.substr(poss,pos-poss);
-      if (cfile[pos]=='(') //macro function
+      int poss=pos;
+      move_newline();
+      cferr="#error "+cfile.substr(poss,pos-poss+1);
+      return pos;
+    }
+    //Define, Undefine
+    {
+      if (next=="define")
       {
-        int lvl=1, an=0,ac=0;
-        pos++;
-        while (lvl>0 and pos<len)
+        while (cfile[pos] == ' ' or cfile[pos] == '\t') pos++;
+        
+        const unsigned poss=pos;
+        if (!is_letter(cfile[pos])) { cferr="Identifier expected for #define"; return pos; }
+        while (is_letterd(cfile[pos])) pos++;
+        
+        //unsigned int flags=0;
+        int arg_count = -1;
+        varray<string> args;
+        
+        string defiendum=cfile.substr(poss,pos-poss);
+        if (cfile[pos]=='(') //macro function
         {
-          if (cfile[pos]=='(') lvl++;
-          else if (cfile[pos]==')') lvl--;
-          else if (cfile[pos]==',') { if (an==0) { cferr="Identifier expected before ',' symbol"; return pos; } ac++; an=0; }
-          else if (is_letter(cfile[pos]))
-          {
-            if (an) { cferr="Symbol ',' expected"; return pos; }
-            while (is_letterd(cfile[pos])) pos++; pos--;
-            an=1; if (ac==0) ac=1;
-          }
-          else if (!is_useless(cfile[pos])) { cferr="Unexpected symbol in macro parameters"; return pos; }
           pos++;
+          bool an = 0;
+          arg_count = 0;
+          while (pos<len)
+          {
+            if (cfile[pos] == ')') { pos++; break; }
+            else if (cfile[pos]==',') { if (an==0) { cferr="Identifier expected before ',' symbol"; return pos; } an=0; }
+            else if (is_letter(cfile[pos]))
+            {
+              if (an) { cferr="Symbol ',' expected"; return pos; }
+              
+              const unsigned spos = pos;
+              while (is_letterd(cfile[pos])) pos++;
+              an=1; args[arg_count++] = cfile.substr(spos,pos-spos);
+              continue;
+            }
+            
+            else if (!is_useless_macros(cfile[pos]))
+            {
+              if (is_useless(cfile[pos]))
+                cferr = "Unexpected newline in macro parameters";
+              else
+                cferr = string("Unexpected symbol '")+cfile[pos]+"' in macro parameters";
+              return pos;
+            }
+            pos++;
+          }
+        }
+        
+        while (is_useless_macros(cfile[pos])) pos++;
+        
+        const unsigned poss2=pos;
+        move_newline();
+        
+        string defiens=cfile.substr(poss2,pos-poss2);
+        
+        /*cout << "Define \"" << defiendum << "\" as \"" << defiens << "\"\r\n";
+        if (current_scope->members.find(defiendum) != current_scope->members.end())
+          current_scope->members.erase(defiendum);*/
+        macro_type *t = &macros[defiendum];
+        *t = defiens;
+        if (arg_count != -1)
+        {
+          t->assign_func();
+          for (int i=0; i<arg_count; i++)
+            t->addarg(args[i]);
         }
       }
-      
-      while (is_useless(cfile[pos])) pos++;
-      
-      const unsigned poss2=pos;
-      move_newline();
-      
-      string defiens=cfile.substr(poss2,pos-poss2);
-      
-      /*cout << "Define \"" << defiendum << "\" as \"" << defiens << "\"\r\n";
-      if (current_scope->members.find(defiendum) != current_scope->members.end())
-        current_scope->members.erase(defiendum);*/
-      macros[defiendum]=defiens;
-    }
-    if (next=="undef")
-    {
-      const unsigned poss=pos;
-      if (!is_letter(cfile[pos])) { cferr="Identifier expected for #define"; return pos; }
-      while (is_letterd(cfile[pos])) pos++;
-      
-      macros.erase(cfile.substr(poss,pos-poss));
-    }
-  }
-  //Including things
-  {
-    if (next=="include")
-    {
-      while (cfile[pos]==' ' or cfile[pos]=='\t') pos++;
-      
-      const char c = cfile[pos];
-      if (cfile[pos] != '"' and cfile[pos] != '<')
+      if (next=="undef")
       {
-        cferr = "Expcted filename to include set in quotes or <>";
-        return pos;
+        const unsigned poss=pos;
+        if (!is_letter(cfile[pos])) { cferr="Identifier expected for #undef"; return pos; }
+        while (is_letterd(cfile[pos])) pos++;
+        
+        macros.erase(cfile.substr(poss,pos-poss));
       }
-      
-      const int spos = ++pos;
-      while (cfile[pos++] != '"');
-      string file = cfile.substr(spos,pos-spos-1);
-      move_newline();
-      
-      if (c == '"')
+    }
+    //Including things
+    {
+      if (next=="include")
       {
-        const string ins = fc(file.c_str());
-        if (fnf)
+        while (cfile[pos]==' ' or cfile[pos]=='\t') pos++;
+        
+        const char c = cfile[pos];
+        if (pos<len and cfile[pos] != '"' and cfile[pos] != '<')
         {
-          cferr = "Failed to include " + file + ": File not found";
+          cferr = "Expcted filename to include set in quotes or in <>";
           return pos;
         }
+        
+        //Isolate filename
+        const int spos = ++pos;
+        const char ce = c=='"'? c:'>';
+        while (cfile[pos++] != ce);
+        string file = cfile.substr(spos,pos-spos-1);
+        move_newline();
+        
+        //Find the file and include it
+        string ins;
+        string include_from;
+        if (c == '"')
+        {
+          if (included_files.empty())
+            include_from = "";
+          else
+            include_from = included_files.top().path;
+          
+          ins = fc( (include_from+file).c_str() );
+          if (fnf)
+          {
+            cferr = "Failed to include " + file + " from " + include_from + ": File not found";
+            return pos;
+          }
+        }
+        else
+        {
+          for (unsigned int i = 0; i < include_directory_count; i++)
+          {
+            include_from = include_directories[i];
+            ins = fc( (include_from+file).c_str() );
+            if (!fnf) break;
+          }
+          if (fnf)
+          {
+            cferr = "Failed to include " + file + " from " + include_from + ": File not found";
+            return pos;
+          }
+        }
+        
+        int iline=0;
+        for (unsigned int i=0; i<pos; i++)
+        {
+          if (cfile[i]=='\n')
+            iline++;
+        }
+        
         c_file.push();
         position.push();
         cfile_length.push();
-        cfile = ins;
+        
+        cfile_top = cfile = ins;
         len = cfile.length();
         pos = 0;
+        
+        included_files.push(includings(file,include_from));
+        
+        cout << "Including file " << file << " from line " << iline << endl;
+      }
+      if (next=="import")
+      {
+        move_newline();
+      }
+      if (next=="using")
+      {
+        move_newline();
       }
     }
-    if (next=="import")
-    {
-      move_newline();
-    }
-    if (next=="using")
-    {
-      move_newline();
-    }
-  }
+  } //end if (!in_false_conditional())
+  
+  
   //Conditionals/Flow
   {
     if (next=="if" or next=="ifdef" or next=="ifndef" or next=="else" or next=="elif" or next=="endif")
@@ -264,21 +350,30 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
           if (next[3]=='e') //else
             flowstack.invert_top();
           else //elif
-            flowstack.set_top(evaluate_expression(exp));
+            flowstack.set_top(flowstack.topval() == 0 and !flowstack.topused() and evaluate_expression(exp));
         }
-        else
+        else //endif
           flowstack.pop();
       }
     }
   }
-  if (next=="line")
+  
+  if (!in_false_conditional())
   {
-    cferr="#line is unimplemented for reasons of sanity.";
-    return pos;
-  }
-  if (next=="pragma")
-  {
-    move_newline();
+    if (next=="line")
+    {
+      cferr="#line is unimplemented for reasons of sanity.";
+      return pos;
+    }
+    if (next=="pragma")
+    {
+      const unsigned sp = pos;
+      move_newline();
+      if (cfile.substr(sp,pos-sp) == "debug_entry_point")
+      {
+        cout << "#pragma: debug_entry_point\r\n";
+      }
+    }
   }
   return (unsigned)-1;
 }

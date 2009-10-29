@@ -25,6 +25,7 @@
 **                                                                              **
 \*********************************************************************************/
 
+#include <stack>
 #include <string>
 #include <iostream>
 using namespace std;
@@ -36,18 +37,33 @@ using namespace std;
 unsigned int macrod=0;
 varray<string> inmacros;
 
+#include "macro_functions.h"
+
 typedef implicit_stack<string> iss;
 typedef implicit_stack<unsigned int> isui;
 
+struct includings { string name; string path; };
+extern stack<includings> included_files;
+
+extern string cfile_top;
 void handle_macro_pop(iss &c_file,isui &position,isui &cfile_length)
 {
   c_file.pop();
   position.pop();
   cfile_length.pop();
-  macrod--;
+  if (macrod > 0)
+    macrod--;
+  else if (!included_files.empty())
+  {
+    cfile_top=c_file();
+    included_files.pop();
+  }
 }
 
-bool handle_macros(const string n,iss &c_file,isui &position,isui &cfile_length)
+string tostring(int val);
+#include "../general/parse_basics.h"
+
+unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile_length,string &cferr)
 {
   maciter t;
   if ((t=macros.find(n)) != macros.end())
@@ -57,17 +73,38 @@ bool handle_macros(const string n,iss &c_file,isui &position,isui &cfile_length)
     if (inmacros[iii]==n) { recurs=1; break; }
     if (!recurs)
     {
+      string macrostr = t->second;
+      
+      #define cfile c_file()
+      #define pos position()
+        if (t->second.argc != -1) //Expect ()
+        {
+          if (!macro_function_parse(cfile,pos,macrostr,t->second.args,t->second.argc))
+          {
+            cferr = macrostr;
+            return pos;
+          }
+        }
+      #undef cfile
+      #undef pos
+      
+      //Push everything
       c_file.push();
       position.push();
       cfile_length.push();
+      
+      cfile_top = c_file();
+      
+      //Set everything
       position() = 0;
-      c_file() = t->second;
+      c_file() = macrostr;
       cfile_length() = c_file().length();
-      inmacros[macrod++]=n;
-      return 1;
+      
+      inmacros[macrod++] = n;
+      return unsigned(-2);
     }
   }
-  return 0;
+  return unsigned(-1);
 }
 
 extern bool is_tflag(string x);
@@ -252,6 +289,7 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
         last_named_phase = DEC_LONG;
       else
         last_named_phase = DEC_GENERAL_FLAG;
+      last_type = global_scope.members.find("int")->second;
       return -1;
     }
     
@@ -263,7 +301,8 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
         {
           if (n=="long")
           {
-            if (last_named_phase == 0)
+            if (last_named_phase == DEC_NOTHING_YET
+            or  last_named_phase == DEC_GENERAL_FLAG)
               last_named_phase = DEC_LONG;
             else if (last_named_phase == DEC_LONG)
               last_named_phase = DEC_LONGLONG;
@@ -360,16 +399,32 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
       //These next segments of elses are skipped, and the variable is treated like new.
     }
     //Check if we're declaring a new struct or something instead
-    else 
+    else //Last isn't a declarator. Maybe it's a struct or something?
     if ((last_named | LN_TYPEDEF) == (LN_STRUCT | LN_TYPEDEF)
     or  (last_named | LN_TYPEDEF) == (LN_ENUM   | LN_TYPEDEF)
     or  (last_named | LN_TYPEDEF) == (LN_CLASS  | LN_TYPEDEF))
     {
+      //We're dealing with struct structid
       //If we're not right after "struct" (or the like) or are capable of redeclaring it in this scope
-      if (last_named_phase != SP_EMPTY or ext_retriever_var == NULL or ext_retriever_var->parent == current_scope)
+      if (last_named_phase != SP_EMPTY)
       {
-        cferr = ext_retriever_var == NULL ? "Type unimplemented, but present in this scope" : "Expected identifier";
+        cferr = "Structure already identified, expected undeclared identifier";
         return pos;
+      }
+      //This shouldn't really happen
+      if (ext_retriever_var == NULL)
+      {
+        cferr = "Cannot work with NULL type `"+n+"': This error should not occur";
+        return pos;
+      }
+      //If this structid can be redeclared in this scope
+      if (ext_retriever_var->parent == current_scope)
+      {
+        //Report that we're now a declarator (or typedef declarator) and return
+        last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
+        last_named_phase = DEC_FULL;
+        last_type = ext_retriever_var;
+        return -1;
       }
       //Past this point, the type will be redeclared in this scope.
     }

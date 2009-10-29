@@ -28,3 +28,4 @@
 int parse_cfile(string cftext);
 extern string cferr;
 void cparse_init();
+string cferr_get_file();

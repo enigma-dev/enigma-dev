@@ -28,18 +28,18 @@
 
 enum
 {
-  LN_NOTHING,
-  //LN_IDENTIFIER,
-  LN_DECLARATOR,
-  LN_TEMPLATE,
-  LN_CLASS,
-  LN_STRUCT,
-  LN_ENUM,
-  LN_UNION,
-  LN_NAMESPACE,
-  LN_OPERATOR, //as in the operator keyword, not a random operator
-  LN_USING,
-  LN_TYPEDEF=128,
+  LN_NOTHING,      //Nothing named
+  //LN_IDENTIFIER, //Identifier (antiquated)
+  LN_DECLARATOR,   //int, struct {}, you name it
+  LN_TEMPLATE,     //template <>
+  LN_CLASS,        //class
+  LN_STRUCT,       //struct
+  LN_ENUM,         //enum
+  LN_UNION,        //union
+  LN_NAMESPACE,    //namespace whatever
+  LN_OPERATOR,     //as in the operator keyword, not a random operator
+  LN_USING,        //using whatever
+  LN_TYPEDEF=128,  //typedef whatever
 };
 
 //No worries. In typedef struct a b;, a is already defined.
@@ -67,12 +67,12 @@ enum
 
 enum
 {
-  DEC_NOTHING_SOMEHOW, //not sure when this'd happen
-  DEC_GENERAL_FLAG,    //short, unsigned... anything but long
-  DEC_LONG,            //long...
-  DEC_LONGLONG,        //long long...
-  DEC_FULL,            //completed type; ie, "int"
-  DEC_IDENTIFIER       //completed type and identifier. Recurses back to DEC_FULL on comma or semi
+  DEC_NOTHING_YET,  //not sure when this'd happen
+  DEC_GENERAL_FLAG, //short, unsigned... anything but long
+  DEC_LONG,         //long...
+  DEC_LONGLONG,     //long long...
+  DEC_FULL,         //completed type; ie, "int"
+  DEC_IDENTIFIER    //completed type and identifier. Recurses back to DEC_FULL on comma or semi
 };
 
 enum

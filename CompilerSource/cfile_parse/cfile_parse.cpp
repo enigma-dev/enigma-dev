@@ -26,6 +26,7 @@
 \*********************************************************************************/
 
 #include <map>
+#include <stack>
 #include <string>
 #include <iostream>
 #include "../general/darray.h"
@@ -56,16 +57,30 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length);
 int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_named_phase,string &last_identifier);
 #include "handle_letters.h"
 
+extern varray<string> include_directories;
+
+string cfile_top;
+struct includings { string name; string path; };
+stack<includings> included_files;
+
+string cferr_get_file()
+{
+  if (included_files.empty())
+    return "";
+  return "In file included from " + included_files.top().name + ": ";
+}
 
 int parse_cfile(string cftext)
 {
   cferr="No error";
+  while (!included_files.empty())
+    included_files.pop();
 
   bool preprocallowed=1;
-
+  
   implicit_stack<string> c_file;
   #define cfile c_file()
-  cfile = cftext;
+  cfile_top = cfile = cftext;
   implicit_stack<unsigned int> position;
   #define pos position()
   pos = 0;
@@ -107,12 +122,14 @@ int parse_cfile(string cftext)
 
   for (;;)
   {
+    cfile_top = cfile;
     if (!(pos<len))
     {
       if (c_file.ind>0) //If we're in a macro
       {
         //Move back down
         handle_macro_pop(c_file,position,cfile_length);
+        cfile_top = cfile;
         continue;
       }
       else break;
@@ -167,8 +184,9 @@ int parse_cfile(string cftext)
       string n = cfile.substr(sp,pos-sp); //This is the word we're looking at.
       
       //Macros get precedence. Check if it's one.
-      if (handle_macros(n,c_file,position,cfile_length))
-        continue;
+      const unsigned int cm = handle_macros(n,c_file,position,cfile_length,cferr);
+      if (cm == unsigned(-2)) continue;
+      if (cm != unsigned(-1)) return cm;
         
       int diderrat = handle_identifiers(n,cferr,last_identifier,pos,last_named,last_named_phase,last_type);
       //cout << last_named << ":" << last_named_phase << "  ->  ";
@@ -222,7 +240,7 @@ int parse_cfile(string cftext)
         
         last_named_phase = DEC_FULL;
       }
-      else
+      else //Not typedefing anything
       {
         switch (last_named)
         {
@@ -296,8 +314,18 @@ int parse_cfile(string cftext)
         while (type_to_use->flags & EXTFLAG_TYPEDEF)
         {
           refs_to_use += type_to_use->refstack;
-          type_to_use = type_to_use->members[""];
-          if (type_to_use == NULL) { cferr = "Fatal error in parse."; return pos; }
+          extiter n = type_to_use->members.find("");
+          if (n == type_to_use->members.end())
+          {
+            cferr = "Fatal error in parse: Field `" + type_to_use->name + "' is labeled as typedef'd, but contains no definition";
+            return pos;
+          }
+          if (type_to_use == NULL)
+          {
+            cferr = "Fatal error in parse: `" + type_to_use->name + "' is labeled as typedef'd, but points to NULL";
+            return pos;
+          }
+          type_to_use = n->second;
         }
         
         if (last_identifier != "")
@@ -433,7 +461,7 @@ int parse_cfile(string cftext)
       const int last_named_raw = last_named & ~LN_TYPEDEF;
       
       //Class/Namespace declaration.
-      if (last_named_raw == LN_NAMESPACE or last_named_raw == LN_STRUCT or last_named_raw == LN_CLASS)
+      if (last_named_raw == LN_NAMESPACE or last_named_raw == LN_STRUCT or last_named_raw == LN_CLASS or last_named_raw == LN_UNION)
       {
         if (!ExtRegister(last_named,last_identifier,0,NULL,tmplate_params,tpc))
           return pos;
@@ -539,7 +567,7 @@ int parse_cfile(string cftext)
     }
     
     
-    cferr = "Unknown symbol";
+    cferr = string("Unknown symbol '")+cfile[pos]+"'";
     return pos;
   }
   

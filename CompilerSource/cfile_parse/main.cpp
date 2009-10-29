@@ -154,7 +154,7 @@ int cfile_parse_main()
 
   cout << "Macros:\r\n";
   for (maciter i=macros.begin(); i!=macros.end();i++)
-    cout<<"  "<<i->second<<"\r\n";
+    cout<<"  "<<(string)i->second<<"\r\n";
 
   print_scope_members(&global_scope, 0);
 

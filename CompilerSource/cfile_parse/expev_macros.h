@@ -26,6 +26,7 @@
 \*********************************************************************************/
 
 #include "expression_evaluator_settings.h"
+#include "../general/parse_basics.h"
 
 #define RTYPE_NONE -1
 #define RTYPE_INT 0
@@ -78,13 +79,6 @@
 #define UNARY_INCLATER 17
 #define UNARY_COUNT 18
 
-#define is_letter(x)  ((x>='a' && x<='z') || (x>='A' && x<='Z') || (x=='_'))
-  #define is_digit(x)   (x>='0' && x<='9')
-  #define is_letterd(x) (is_letter(x) || is_digit(x))
-  #define is_unary(x)   (x=='!' || x=='~' || x=='+' || x=='-' || x=='&' || x=='*')
-  #define is_linker(x)  (x=='+' || x=='-' || x=='*' || x=='/' || x=='=' || x=='!' || x=='~' || x=='&' || x=='|' || x=='^' || x=='.')
-#define is_useless(x) (x==' ' || x=='\r' || x=='\n' || x=='\t')
-
 
 //--------------------------------------------------------------
 // This section defines functions that are specific to each type
@@ -95,34 +89,34 @@
 // int, same as/applies to long long
 //------------------------------------
 #if USETYPE_INT
-  #define perform_operatorii(val1, operatore, operator, val2)\
-    if (val2.type==RTYPE_INT) val1.real.i operatore val2.real.i; else
+  #define perform_operatorii(val1, operator, val2)\
+    if (val2.type==RTYPE_INT) val1.real.i operator##= val2.real.i; else
   
   #if USETYPE_DOUBLE
-    #define perform_operatorid(val1, operatore, operator, val2)\
+    #define perform_operatorid(val1, operator, val2)\
       if (val2.type==RTYPE_DOUBLE)\
       {\
         val1.real.d=val1.real.i operator val2.real.d;\
         val1.type=RTYPE_DOUBLE;\
       } else
   #else
-    #define perform_operatorid(val1, operatore, operator, val2)
+    #define perform_operatorid(val1, operator, val2)
   #endif
   
   #if USETYPE_UINT
-    #define perform_operatoriu(val1, operatore, operator, val2)\
+    #define perform_operatoriu(val1, operator, val2)\
       if (val2.type==RTYPE_UINT)\
       {\
         val1.real.u = val1.real.i operator val2.real.u;\
         val1.type=RTYPE_UINT;\
       } else
   #else
-    #define perform_operatoriu(val1, operatore, operator, val2)
+    #define perform_operatoriu(val1, operator, val2)
   #endif
 #else
-  #define perform_operatorii(val1, operatore, operator, val2)
-  #define perform_operatorid(val1, operatore, operator, val2)
-  #define perform_operatoriu(val1, operatore, operator, val2)
+  #define perform_operatorii(val1, operator, val2)
+  #define perform_operatorid(val1, operator, val2)
+  #define perform_operatoriu(val1, operator, val2)
 #endif
 
 
@@ -130,29 +124,29 @@
 // double, long double, float
 //------------------------------------
 #if USETYPE_DOUBLE
-  #define perform_operatordd(val1, operatore, operator, val2)\
+  #define perform_operatordd(val1, operator, val2)\
     if (val2.type==RTYPE_DOUBLE)\
-     val1.real.d operatore val2.real.d; else
+     val1.real.d operator##= val2.real.d; else
   
   #if USETYPE_INT
-    #define perform_operatordi(val1, operatore, operator, val2)\
+    #define perform_operatordi(val1, operator, val2)\
       if (val2.type==RTYPE_INT)\
-        val1.real.d operatore val2.real.i; else
+        val1.real.d operator##= val2.real.i; else
   #else
-    #define perform_operatordi(val1, operatore, operator, val2)
+    #define perform_operatordi(val1, operator, val2)
   #endif
   
   #if USETYPE_UINT
-    #define perform_operatordu(val1, operatore, operator, val2)\
+    #define perform_operatordu(val1, operator, val2)\
       if (val2.type==RTYPE_UINT)\
-        val1.real.d operatore val2.real.u; else
+        val1.real.d operator##= val2.real.u; else
   #else
-    #define perform_operatordu(val1, operatore, operator, val2)
+    #define perform_operatordu(val1, operator, val2)
   #endif
 #else
-  #define perform_operatordi(val1, operatore, operator, val2)
-  #define perform_operatordd(val1, operatore, operator, val2)
-  #define perform_operatordu(val1, operatore, operator, val2)
+  #define perform_operatordi(val1, operator, val2)
+  #define perform_operatordd(val1, operator, val2)
+  #define perform_operatordu(val1, operator, val2)
 #endif
 
 
@@ -160,33 +154,33 @@
 // unsigned long long. For when it REALLY has to stay an integer.
 //----------------------------------------------------------------
 #if USETYPE_UINT
-  #define perform_operatoruu(val1, operatore, operator, val2)\
-    if (val2.type==RTYPE_UINT) val1.real.u operatore val2.real.u; else
+  #define perform_operatoruu(val1, operator, val2)\
+    if (val2.type==RTYPE_UINT) val1.real.u operator##= val2.real.u; else
   
   #if USETYPE_INT
-    #define perform_operatorui(val1, operatore, operator, val2)\
+    #define perform_operatorui(val1, operator, val2)\
       if (val2.type==RTYPE_INT)\
       {\
-        val1.real.u operatore val2.real.i;\
+        val1.real.u operator##= val2.real.i;\
       } else
   #else
-    #define perform_operatorui(val1, operatore, operator, val2)
+    #define perform_operatorui(val1, operator, val2)
   #endif
   
   #if USETYPE_DOUBLE
-    #define perform_operatorud(val1, operatore, operator, val2)\
+    #define perform_operatorud(val1, operator, val2)\
       if (val2.type==RTYPE_DOUBLE)\
       {\
         val1.real.d=val1.real.u operator val2.real.d;\
         val1.type=RTYPE_DOUBLE;\
       } else
   #else
-    #define perform_operatorud(val1, operatore, operator, val2)
+    #define perform_operatorud(val1, operator, val2)
   #endif
 #else
-  #define perform_operatorui(val1, operatore, operator, val2)
-  #define perform_operatorud(val1, operatore, operator, val2)
-  #define perform_operatoruu(val1, operatore, operator, val2)
+  #define perform_operatorui(val1, operator, val2)
+  #define perform_operatorud(val1, operator, val2)
+  #define perform_operatoruu(val1, operator, val2)
 #endif
 
 
@@ -196,28 +190,28 @@
 //   They and their routines do all type checking, just call them.
 //-------------------------------------------------------------------
 
-#define perform_operatori(val1, operatore, operator, val2)\
+#define perform_operatori(val1, operator, val2)\
   if (val1.type==RTYPE_INT)\
   {\
-    perform_operatorii(val1, operatore, operator, val2)\
-    perform_operatorid(val1, operatore, operator, val2)\
-    perform_operatoriu(val1, operatore, operator, val2);\
+    perform_operatorii(val1, operator, val2)\
+    perform_operatorid(val1, operator, val2)\
+    perform_operatoriu(val1, operator, val2);\
   } else
 
-#define perform_operatord(val1, operatore, operator, val2)\
+#define perform_operatord(val1, operator, val2)\
   if (val1.type==RTYPE_DOUBLE)\
   {\
-    perform_operatordi(val1, operatore, operator, val2)\
-    perform_operatordd(val1, operatore, operator, val2)\
-    perform_operatordu(val1, operatore, operator, val2);\
+    perform_operatordi(val1, operator, val2)\
+    perform_operatordd(val1, operator, val2)\
+    perform_operatordu(val1, operator, val2);\
   } else
 
-#define perform_operatoru(val1, operatore, operator, val2)\
+#define perform_operatoru(val1, operator, val2)\
   if (val1.type==RTYPE_UINT)\
   {\
-    perform_operatorui(val1, operatore, operator, val2)\
-    perform_operatorud(val1, operatore, operator, val2)\
-    perform_operatoruu(val1, operatore, operator, val2);\
+    perform_operatorui(val1, operator, val2)\
+    perform_operatorud(val1, operator, val2)\
+    perform_operatoruu(val1, operator, val2);\
   } else
 
 
@@ -225,10 +219,10 @@
 //---------------------------------------------------------------------------
 // This function is the big kahuna. Call it, and it'll take care of the rest.
 //---------------------------------------------------------------------------
-#define perform_operator(val1, operatore, operator, val2)\
-    perform_operatori(val1, operatore, operator, val2)\
-    perform_operatord(val1, operatore, operator, val2)\
-    perform_operatoru(val1, operatore, operator, val2);
+#define perform_operator(val1, operator, val2)\
+    perform_operatori(val1, operator, val2)\
+    perform_operatord(val1, operator, val2)\
+    perform_operatoru(val1, operator, val2);
 
 
 
@@ -558,32 +552,32 @@
 // int, same as/applies to long long
 //------------------------------------
 #if USETYPE_INT
-  #define perform_intoperatorii(val1, operatore, operator, val2)\
-    if (val2.type==RTYPE_INT) val1.real.i operatore val2.real.i; else
+  #define perform_intoperatorii(val1, operator, val2)\
+    if (val2.type==RTYPE_INT) val1.real.i operator##= val2.real.i; else
   
   #if USETYPE_DOUBLE
     #if ALLOW_FLOAT_BITOPS
-      #define perform_intoperatorid(val1, operatore, operator, val2)\
+      #define perform_intoperatorid(val1, operator, val2)\
         if (val2.type==RTYPE_DOUBLE)\
-          val1.real.i operatore (long long)val2.real.d; else
+          val1.real.i operator##= (long long)val2.real.d; else
     #else
-      #define perform_intoperatorid(val1, operatore, operator, val2) { rerr="Performing a bitwise operator on a float"; rerrpos=pos; return 0; }
+      #define perform_intoperatorid(val1, operator, val2) { rerr="Performing a bitwise operator on a float"; rerrpos=pos; return 0; }
     #endif
   #else
-    #define perform_intoperatorid(val1, operatore, operator, val2)
+    #define perform_intoperatorid(val1, operator, val2)
   #endif
   
   #if USETYPE_UINT
-    #define perform_intoperatoriu(val1, operatore, operator, val2)\
+    #define perform_intoperatoriu(val1, operator, val2)\
       if (val2.type==RTYPE_UINT)\
-        val1.real.i operatore val2.real.u; else
+        val1.real.i operator##= val2.real.u; else
   #else
-    #define perform_intoperatoriu(val1, operatore, operator, val2)
+    #define perform_intoperatoriu(val1, operator, val2)
   #endif
 #else
-  #define perform_intoperatorii(val1, operatore, operator, val2)
-  #define perform_intoperatorid(val1, operatore, operator, val2)
-  #define perform_intoperatoriu(val1, operatore, operator, val2)
+  #define perform_intoperatorii(val1, operator, val2)
+  #define perform_intoperatorid(val1, operator, val2)
+  #define perform_intoperatoriu(val1, operator, val2)
 #endif
 
 
@@ -592,55 +586,55 @@
 //------------------------------------
 #if ALLOW_FLOAT_BITOPS
     #if USETYPE_DOUBLE
-      #define perform_intoperatordd(val1, operatore, operator, val2)\
+      #define perform_intoperatordd(val1, operator, val2)\
         if (val2.type==RTYPE_DOUBLE)\
          val1.real.d=(long long)val1.real.d operator (long long)val2.real.d; else
       
       #if USETYPE_INT
-        #define perform_intoperatordi(val1, operatore, operator, val2)\
+        #define perform_intoperatordi(val1, operator, val2)\
           if (val2.type==RTYPE_INT)\
             val1.real.d=(long long)val1.real.d operator val2.real.i; else
       #else
-        #define perform_intoperatordi(val1, operatore, operator, val2)
+        #define perform_intoperatordi(val1, operator, val2)
       #endif
       
       #if USETYPE_UINT
-        #define perform_intoperatordu(val1, operatore, operator, val2)\
+        #define perform_intoperatordu(val1, operator, val2)\
           if (val2.type==RTYPE_UINT)\
             val1.real.d=(long long)val1.real.d operator val2.real.u; else
       #else
-        #define perform_intoperatordu(val1, operatore, operator, val2)
+        #define perform_intoperatordu(val1, operator, val2)
       #endif
     #else
-      #define perform_intoperatordi(val1, operatore, operator, val2)
-      #define perform_intoperatordd(val1, operatore, operator, val2)
-      #define perform_intoperatordu(val1, operatore, operator, val2)
+      #define perform_intoperatordi(val1, operator, val2)
+      #define perform_intoperatordd(val1, operator, val2)
+      #define perform_intoperatordu(val1, operator, val2)
     #endif
 #else
     #if USETYPE_DOUBLE
-      #define perform_intoperatordd(val1, operatore, operator, val2)\
+      #define perform_intoperatordd(val1, operator, val2)\
         if (val2.type==RTYPE_DOUBLE)\
            { rerr="Performing a bitwise operator on a float"; rerrpos=pos; return 0; } else
       
       #if USETYPE_INT
-        #define perform_intoperatordi(val1, operatore, operator, val2)\
+        #define perform_intoperatordi(val1, operator, val2)\
           if (val2.type==RTYPE_INT)\
             { rerr="Performing a bitwise operator on a float"; rerrpos=pos; return 0; } else
       #else
-        #define perform_intoperatordi(val1, operatore, operator, val2)
+        #define perform_intoperatordi(val1, operator, val2)
       #endif
       
       #if USETYPE_UINT
-        #define perform_intoperatordu(val1, operatore, operator, val2)\
+        #define perform_intoperatordu(val1, operator, val2)\
           if (val2.type==RTYPE_UINT)\
             { rerr="Performing a bitwise operator on a float"; rerrpos=pos; return 0; } else
       #else
-        #define perform_intoperatordu(val1, operatore, operator, val2)
+        #define perform_intoperatordu(val1, operator, val2)
       #endif
     #else
-      #define perform_intoperatordi(val1, operatore, operator, val2)
-      #define perform_intoperatordd(val1, operatore, operator, val2)
-      #define perform_intoperatordu(val1, operatore, operator, val2)
+      #define perform_intoperatordi(val1, operator, val2)
+      #define perform_intoperatordd(val1, operator, val2)
+      #define perform_intoperatordu(val1, operator, val2)
     #endif
 #endif
 
@@ -649,32 +643,32 @@
 #if USETYPE_UINT
   //#define val1.real.u=x) { val1.real.u = (x); val1.type=RTYPE_UINT; }
   
-  #define perform_intoperatoruu(val1, operatore, operator, val2)\
-    if (val2.type==RTYPE_UINT) val1.real.u operatore val2.real.u; else
+  #define perform_intoperatoruu(val1, operator, val2)\
+    if (val2.type==RTYPE_UINT) val1.real.u operator##= val2.real.u; else
   
   #if USETYPE_INT
-    #define perform_intoperatorui(val1, operatore, operator, val2)\
+    #define perform_intoperatorui(val1, operator, val2)\
       if (val2.type==RTYPE_INT)\
-        val1.real.u operatore val2.real.i; else
+        val1.real.u operator##= val2.real.i; else
   #else
-    #define perform_intoperatorui(val1, operatore, operator, val2)
+    #define perform_intoperatorui(val1, operator, val2)
   #endif
   
   #if USETYPE_DOUBLE
     #if ALLOW_FLOAT_BITOPS
-      #define perform_intoperatorud(val1, operatore, operator, val2)\
+      #define perform_intoperatorud(val1, operator, val2)\
         if (val2.type==RTYPE_DOUBLE)\
-          val1.real.u operatore (long long)val2.real.d; else
+          val1.real.u operator##= (long long)val2.real.d; else
     #else
-      #define perform_intoperatorud(val1, operatore, operator, val2) { rerr="Performing a bitwise operator on a float"; rerrpos=pos; return 0; }
+      #define perform_intoperatorud(val1, operator, val2) { rerr="Performing a bitwise operator on a float"; rerrpos=pos; return 0; }
     #endif
   #else
-    #define perform_intoperatorud(val1, operatore, operator, val2)
+    #define perform_intoperatorud(val1, operator, val2)
   #endif
 #else
-  #define perform_intoperatorui(val1, operatore, operator, val2)
-  #define perform_intoperatorud(val1, operatore, operator, val2)
-  #define perform_intoperatoruu(val1, operatore, operator, val2)
+  #define perform_intoperatorui(val1, operator, val2)
+  #define perform_intoperatorud(val1, operator, val2)
+  #define perform_intoperatoruu(val1, operator, val2)
 #endif
 
 
@@ -684,28 +678,28 @@
 //   They and their routines do all type checking, just call them.
 //-------------------------------------------------------------------
 
-#define perform_intoperatori(val1, operatore, operator, val2)\
+#define perform_intoperatori(val1, operator, val2)\
   if (val1.type==RTYPE_INT)\
   {\
-    perform_intoperatorii(val1, operatore, operator, val2)\
-    perform_intoperatorid(val1, operatore, operator, val2)\
-    perform_intoperatoriu(val1, operatore, operator, val2);\
+    perform_intoperatorii(val1, operator, val2)\
+    perform_intoperatorid(val1, operator, val2)\
+    perform_intoperatoriu(val1, operator, val2);\
   } else
 
-#define perform_intoperatord(val1, operatore, operator, val2)\
+#define perform_intoperatord(val1, operator, val2)\
   if (val1.type==RTYPE_DOUBLE)\
   {\
-    perform_intoperatordi(val1, operatore, operator, val2)\
-    perform_intoperatordd(val1, operatore, operator, val2)\
-    perform_intoperatordu(val1, operatore, operator, val2);\
+    perform_intoperatordi(val1, operator, val2)\
+    perform_intoperatordd(val1, operator, val2)\
+    perform_intoperatordu(val1, operator, val2);\
   } else
 
-#define perform_intoperatoru(val1, operatore, operator, val2)\
+#define perform_intoperatoru(val1, operator, val2)\
   if (val1.type==RTYPE_UINT)\
   {\
-    perform_intoperatorui(val1, operatore, operator, val2)\
-    perform_intoperatorud(val1, operatore, operator, val2)\
-    perform_intoperatoruu(val1, operatore, operator, val2);\
+    perform_intoperatorui(val1, operator, val2)\
+    perform_intoperatorud(val1, operator, val2)\
+    perform_intoperatoruu(val1, operator, val2);\
   } else
 
 
@@ -714,10 +708,10 @@
 // This function is the big kahuna. Call it, and it'll take care of the rest.
 //---------------------------------------------------------------------------
 
-#define perform_intoperator(val1, operatore, operator, val2)\
-    perform_intoperatori(val1, operatore, operator, val2)\
-    perform_intoperatord(val1, operatore, operator, val2)\
-    perform_intoperatoru(val1, operatore, operator, val2);
+#define perform_intoperator(val1, operator, val2)\
+    perform_intoperatori(val1, operator, val2)\
+    perform_intoperatord(val1, operator, val2)\
+    perform_intoperatoru(val1, operator, val2);
 
 
 
@@ -731,7 +725,7 @@
   #define addstrings(val1,val2)\
     if (val1.type==RTYPE_STRING and val2.type==RTYPE_STRING) val1.str+=val2.str;
 #else
-  #define addstrings(val1,val2) puts("nostr");
+  #define addstrings(val1,val2)
 #endif
 
 
@@ -744,20 +738,20 @@
 #define opstack_pae(q)\
     switch (op[level][--opc[level]])\
     {\
-      case OP_ADD: perform_operator(regval[level][opc[level]],+=,+,regval[level][opc[level]+1]); addstrings(regval[level][opc[level]],regval[level][opc[level]+1]); break;\
-      case OP_SUB: perform_operator(regval[level][opc[level]],-=,-,regval[level][opc[level]+1]); break;\
-      case OP_MUL: perform_operator(regval[level][opc[level]],*=,*,regval[level][opc[level]+1]); break;\
+      case OP_ADD: perform_operator(regval[level][opc[level]],+,regval[level][opc[level]+1]); addstrings(regval[level][opc[level]],regval[level][opc[level]+1]); break;\
+      case OP_SUB: perform_operator(regval[level][opc[level]],-,regval[level][opc[level]+1]); break;\
+      case OP_MUL: perform_operator(regval[level][opc[level]],*,regval[level][opc[level]+1]); break;\
       case OP_BOOLAND: perform_operator_noe(regval[level][opc[level]],&,regval[level][opc[level]+1]); break;\
       case OP_BOOLOR: perform_operator_noe(regval[level][opc[level]],|,regval[level][opc[level]+1]); break;\
       case OP_BOOLXOR: perform_operator_noe(regval[level][opc[level]],^,regval[level][opc[level]+1]); break;\
-      case OP_DIV: if(nz(regval[level][opc[level]+1])) { perform_operator(regval[level][opc[level]],/=,/,regval[level][opc[level]+1]); } break;\
-      case OP_IDIV: if(nz(regval[level][opc[level]+1])) { perform_intoperator(regval[level][opc[level]],/=,/,regval[level][opc[level]+1]); } break;\
-      case OP_MOD: perform_intoperator(regval[level][opc[level]],%=,%,regval[level][opc[level]+1]); break;\
-      case OP_AND: perform_intoperator(regval[level][opc[level]],&=,&,regval[level][opc[level]+1]); break;\
-      case OP_OR:  perform_intoperator(regval[level][opc[level]],|=,|,regval[level][opc[level]+1]); break;\
-      case OP_XOR: perform_intoperator(regval[level][opc[level]],^=,^,regval[level][opc[level]+1]); break;\
-      case OP_LSH: perform_intoperator(regval[level][opc[level]],<<=,<<,regval[level][opc[level]+1]); break;\
-      case OP_RSH: perform_intoperator(regval[level][opc[level]],>>=,>>,regval[level][opc[level]+1]); break;\
+      case OP_DIV: if(nz(regval[level][opc[level]+1])) { perform_operator(regval[level][opc[level]],/,regval[level][opc[level]+1]); } break;\
+      case OP_IDIV: if(nz(regval[level][opc[level]+1])) { perform_intoperator(regval[level][opc[level]],/,regval[level][opc[level]+1]); } break;\
+      case OP_MOD: perform_intoperator(regval[level][opc[level]],%,regval[level][opc[level]+1]); break;\
+      case OP_AND: perform_intoperator(regval[level][opc[level]],&,regval[level][opc[level]+1]); break;\
+      case OP_OR:  perform_intoperator(regval[level][opc[level]],|,regval[level][opc[level]+1]); break;\
+      case OP_XOR: perform_intoperator(regval[level][opc[level]],^,regval[level][opc[level]+1]); break;\
+      case OP_LSH: perform_intoperator(regval[level][opc[level]],<<,regval[level][opc[level]+1]); break;\
+      case OP_RSH: perform_intoperator(regval[level][opc[level]],>>,regval[level][opc[level]+1]); break;\
       case OP_MORE: perform_comparison(regval[level][opc[level]],>,regval[level][opc[level]+1]); break;\
       case OP_LESS: perform_comparison(regval[level][opc[level]],<,regval[level][opc[level]+1]); break;\
       case OP_EQUAL: perform_comparison(regval[level][opc[level]],==,regval[level][opc[level]+1]); break;\

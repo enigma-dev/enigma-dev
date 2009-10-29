@@ -77,11 +77,15 @@ struct externs
 
 struct macro_type
 {
+  int argc;
   string name;
-  bool hasargs;
   varray<string> args;
   operator string();
+  macro_type();
+  macro_type(string x);
   macro_type &operator= (string x);
+  void addarg(string x);
+  void assign_func();
 };
 
 extern map<string,macro_type> macros;

@@ -5,6 +5,7 @@
 		<Option title="compileEGMf" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
+		<Option virtualFolders="cfile_parse/;" />
 		<Build>
 			<Target title="Release">
 				<Option output="../CompileEGMf" prefix_auto="1" extension_auto="1" />
@@ -46,6 +47,7 @@
 		<Unit filename="cfile_parse/handle_letters.h" />
 		<Unit filename="cfile_parse/keyword_operator.cpp" />
 		<Unit filename="cfile_parse/main.cpp" />
+		<Unit filename="cfile_parse/parse_basics.h" />
 		<Unit filename="cfile_parse/parsein.h">
 			<Option virtualFolder="cfile_parse/" />
 			<Option target="Debug" />
@@ -69,6 +71,12 @@
 		<Unit filename="general/string.h" />
 		<Unit filename="general/textfile.cpp" />
 		<Unit filename="general/textfile.h" />
+		<Unit filename="macro_functions.cpp">
+			<Option virtualFolder="cfile_parse/" />
+		</Unit>
+		<Unit filename="macro_functions.h">
+			<Option virtualFolder="cfile_parse/" />
+		</Unit>
 		<Unit filename="main.cpp" />
 		<Unit filename="parser/parser.cpp" />
 		<Unit filename="parser/parser.h" />

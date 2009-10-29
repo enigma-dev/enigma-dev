@@ -35,12 +35,7 @@ using namespace std;
 #include "../syntax/syncheck.h"
 #include "../parser/parser.h"
 
-#define is_letter(x)  ((x>='a' && x<='z') || (x>='A' && x<='Z') || (x=='_'))
-  #define is_digit(x)   (x>='0' && x<='9')
-  #define is_letterd(x) (is_letter(x) || is_digit(x))
-  #define is_unary(x)   (x=='!' || x=='~' || x=='+' || x=='-' || x=='&' || x=='*')
-  #define is_linker(x)  (x=='+' || x=='-' || x=='*' || x=='/' || x=='=' || x=='!' || x=='~' || x=='&' || x=='|' || x=='^' || x=='.')
-#define is_useless(x) (x==' ' || x=='\r' || x=='\n' || x=='\t')
+#include "../general/parse_basics.h"
 
 int file_check(string filename)
 {
@@ -72,7 +67,7 @@ int file_check(string filename)
     {
         if (!is_letter(in2[i]))
         { printf("An error occurred during syntax check. Invalid script name \"%s\".",in2); return 0; }
-        i++; while is_letterd(in2[i]) i++;
+        i++; while (is_letterd(in2[i])) i++;
 
         if (in2[i]!=',') { puts("An error occurred during syntax check. Format error."); return 0; }
         in2[i]=0; i++;

@@ -1,4 +1,71 @@
-struct a
+//#include <stdio.h>
+//#include <wchar.h>
+namespace namespacicle
+{
+  int this_does_work();
+  int *this_doesnt_work();
+  int this_is_cut();
+}
+
+/*
+union pascal
+{
+  int something;
+  double ovaries;
+}*/
+
+/*
+#if 1
+  #if 0
+  typedef long int __quad_t;
+  typedef unsigned long int __u_quad_t;
+  #elif 0
+  __extension__ typedef long long int __quad_t;
+  __extension__ typedef unsigned long long int __u_quad_t;
+  #else
+  typedef struct
+  {
+    long __val[2];
+  } __quad_t;
+  typedef struct
+  {
+    long __val[2];
+  } __u_quad_t;
+  #endif
+#endif
+*/
+
+/*
+struct salad;
+typedef struct salad dressing;*/
+
+/*#define WORDSIZE 32
+
+#if WORDSIZE == 32
+# define Successish
+#elif WORDSIZE == 64
+# define Absolute_failure
+#else
+# define failure
+# error "unexpected value for __WORDSIZE macro"
+#endif
+*/
+/*
+#if defined TACOS
+  int should_not_be_here;
+#else
+  int should_be_here;
+#endif
+
+#define TACOS 1
+
+#if defined TACOS
+  int passing_grade;
+#else
+  int failing_grade;
+#endif
+
+/*struct a
 {
   struct a
   {
@@ -41,6 +108,11 @@ struct a
 
 #include "cfile_parse/expression_evaluator_settings.h"
 
-#define captain(planet) planet.save()
+#define captain(planet) int planet[32];
 
 #define ZE_END_OF_INCLUDE winnage
+
+int ordinal();
+captain(chalupa);
+
+*/

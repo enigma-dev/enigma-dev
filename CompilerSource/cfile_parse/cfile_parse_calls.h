@@ -28,25 +28,7 @@
 
 //Some things that only cause clutter when left in the same file
 
-inline bool is_letter(char x)
-{
-  return (x>='a' and x<='z') or (x>='A' and x<='Z') or (x=='_');
-}
-
-inline bool is_digit(char x)
-{
-  return x>='0' and x<='9';
-}
-
-inline bool is_letterd(char x)
-{
-  return  (x>='a' and x<='z') or (x>='A' and x<='Z') or (x=='_') or (x>='0' and x<='9');
-}
-
-inline bool is_useless(char x) 
-{
-  return x==' ' || x=='\r' || x=='\n' || x=='\t';
-}
+#include "../general/parse_basics.h"
 
 bool is_tflag(string x)
 {
@@ -72,6 +54,9 @@ void regt(string x)
   t->name = x;
 }
 
+varray<string> include_directories;
+unsigned int include_directory_count;
+
 void cparse_init()
 {
   current_scope = &global_scope;
@@ -81,6 +66,8 @@ void cparse_init()
   regt("int");
   regt("float");
   regt("double");
+  
+  regt("void"); //this was only after careful consideration
   
   regt("long");
   regt("short");
@@ -92,7 +79,15 @@ void cparse_init()
   regt("register");
   regt("auto");
   
+  //__builtin_ grabbage
+  regt("wchar_t");
+  regt("__builtin_va_list");
+  
   #undef regt
+  
+  include_directories[0] = "/usr/include/";
+  include_directories[1] = "/usr/lib/gcc/i486-linux-gnu/4.3.3/include/";
+  include_directory_count = 2;
 }
 
 
@@ -125,11 +120,11 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
   }
   else
   {
-    if (last == LN_STRUCT or last == LN_CLASS)
+    if (last != LN_NAMESPACE)
       name = "<anonymous"+tostring(anoncount++)+">";
     else
     {
-      cferr = "Identifier required except in class definition";
+      cferr = "Identifier required for namespace definition";
       return 0;
     }
   }
