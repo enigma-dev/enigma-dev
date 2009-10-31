@@ -66,9 +66,10 @@ extern struct rf_stack
   unsigned short nextcount();
   unsigned short currentcount();
   unsigned short topmostcount();
+  bool topmostcomplete();
   
   void inc_current();
-  void dec_current_min();
+  void inc_current_min();
   rf_stack &operator += (const rf_stack &s);
   rf_stack &operator += (referencer r);
   rf_stack &operator++ (int nothing);

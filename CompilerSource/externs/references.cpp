@@ -30,7 +30,7 @@
 #include "references.h"
 
 rf_stack refstack;
-  
+
 referencer::referencer(char s): symbol(s), count(0), completed(1) {}
 referencer::referencer(char s,unsigned short c): symbol(s), count(c), completed(1) {}
 referencer::referencer(char s,unsigned short c,char complete): symbol(s), count(c), completed(complete) {}
@@ -77,6 +77,11 @@ unsigned short rf_stack::topmostcount()
   if (last == NULL) return 0;
   return last->ref.count;
 }
+bool rf_stack::topmostcomplete()
+{
+  if (last == NULL) return 0;
+  return last->ref.completed;
+}
 unsigned short rf_stack::nextcount()
 {
   if (now == NULL or now->next == NULL) return 0;
@@ -94,7 +99,8 @@ void rf_stack::inc_current()
   now->ref.count++;
   now->ref.countmin++;
 }
-void rf_stack::dec_current_min()
+//Increment the current minimum arg count
+void rf_stack::inc_current_min()
 {
   if (now == NULL) return;
   now->ref.count++;
@@ -159,15 +165,18 @@ rf_stack &rf_stack::operator-- (int nothing)
   return *this;
 }
 
+
+//This is what STD::String does when freeing after return.
+//We'll be doing that manually, though.
 rf_stack rf_stack::dissociate()
 {
-  //std::cout << "Dissociating "<<(empty()?"empty":"unempty") << " reference stack\r\n";
-  
   rf_stack r = *this;
   first = last = now = NULL;
   return r;
 }
 
+//This destroys the stack. It is what STD::String does on free,
+//if the contents of the string have not been referenced elsewhere.
 void rf_stack::dump()
 {
   rf_node* n = NULL;

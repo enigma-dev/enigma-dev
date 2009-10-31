@@ -79,8 +79,11 @@ void cparse_init()
   regt("register");
   regt("auto");
   
-  //__builtin_ grabbage
+  //lesser used types
+  regt("size_t");
   regt("wchar_t");
+  
+  //__builtin_ grabbage
   regt("__builtin_va_list");
   
   #undef regt

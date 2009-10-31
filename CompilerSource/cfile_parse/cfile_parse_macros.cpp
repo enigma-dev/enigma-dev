@@ -323,8 +323,22 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
         move_newline();
       }
     }
+    
+    if (next=="line")
+    {
+      cferr="#line is unimplemented for reasons of sanity.";
+      return pos;
+    }
+    if (next=="pragma")
+    {
+      const unsigned sp = pos;
+      move_newline();
+      if (cfile.substr(sp,pos-sp) == "debug_entry_point")
+      {
+        cout << "#pragma: debug_entry_point\r\n";
+      }
+    }
   } //end if (!in_false_conditional())
-  
   
   //Conditionals/Flow
   {
@@ -356,24 +370,12 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
           flowstack.pop();
       }
     }
+    else if (in_false_conditional())
+    {
+      move_newline();
+    }
   }
   
-  if (!in_false_conditional())
-  {
-    if (next=="line")
-    {
-      cferr="#line is unimplemented for reasons of sanity.";
-      return pos;
-    }
-    if (next=="pragma")
-    {
-      const unsigned sp = pos;
-      move_newline();
-      if (cfile.substr(sp,pos-sp) == "debug_entry_point")
-      {
-        cout << "#pragma: debug_entry_point\r\n";
-      }
-    }
-  }
+  
   return (unsigned)-1;
 }

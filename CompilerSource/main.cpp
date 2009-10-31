@@ -73,7 +73,9 @@ int main(int argc, char *argv[])
         }
         printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
         const int margin = 100;
-        unsigned int begin = (signed)a-(margin/2)<0?0:a-(margin/2), end = (a+(margin/2)>cfile_top.length())?cfile_top.length():a+(margin/2);
+        const unsigned int 
+          begin = (signed)a-(margin/2)<0?0:a-(margin/2), 
+          end = (a+unsigned(margin/2)>cfile_top.length())?cfile_top.length():a+(margin/2);
         cout << "code snippet: " << cfile_top.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
       }
 

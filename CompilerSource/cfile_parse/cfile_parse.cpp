@@ -43,6 +43,7 @@ string tostring(int val);
 
 #include "cfile_parse_constants.h"
 #include "cfile_parse_calls.h"
+#include "cparse_components.h"
 
 #define encountered pos++;
 #define quote while (cfile[pos]!='"') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='"')) pos+=2; }
@@ -145,12 +146,26 @@ int parse_cfile(string cftext)
     
     
     //If it's a macro, deal with it here
-    if (cfile[pos]=='#' and preprocallowed)
+    if (cfile[pos]=='#')
     {
-      const unsigned a = cfile_parse_macro(c_file,position,cfile_length);
-      if (a != unsigned(-1)) return a;
-      continue;
+      if (true or preprocallowed)
+      {
+        const unsigned a = cfile_parse_macro(c_file,position,cfile_length);
+        if (a != unsigned(-1)) return a;
+        continue;
+      }/*
+      else
+      {
+        cferr = "WHY?! WHHHHHHHHHHYYYYYYYYYYYYYYYYY!!?";
+        return pos;
+      }*/
     }
+    
+    //Handle comments here, before conditionals
+    //And before we disallow a preprocessor
+    const unsigned hc = handle_comments(cfile,pos,len);
+    if (hc == unsigned(-2)) continue;
+    if (hc != unsigned(-1)) return hc;
     
     //Not a preprocessor
     preprocallowed = false;
@@ -225,7 +240,7 @@ int parse_cfile(string cftext)
           cferr = "Redeclaration of `"+last_identifier+"' as typedef at this point";
           return pos;
         }
-
+        
         if (last_type == NULL)
         {
           cferr = "Program error: Type does not exist. An error should have been reported earlier.";
@@ -246,7 +261,7 @@ int parse_cfile(string cftext)
         {
           case LN_DECLARATOR:
               //Can't error on last_named_phase != DEC_IDENTIFIER, or structs won't work
-              if (refstack.currentsymbol() == '(')
+              if (refstack.currentsymbol() == '(' and not refstack.topmostcomplete())
               {
                 pos++;
                 continue;
@@ -333,7 +348,7 @@ int parse_cfile(string cftext)
           return pos;
         tpc = 0;
       }
-
+      
       if (cfile[pos] == ';') //If it was ';' and not ','
       {
         if (plevel > 0)
@@ -349,39 +364,12 @@ int parse_cfile(string cftext)
         refstack.dump();
         tpc = 0;
       }
-
+      
       pos++;
       continue;
     }
-
-    //You're looking at another symbol we have to watch out for right now.
-    //I'm talking of / in comments, for those who don't like riddles.
-    if (cfile[pos]=='/')
-    {
-      pos++;
-      if (cfile[pos]=='/')
-      {
-        while (cfile[pos] != '\r' and cfile[pos] != '\n' and (pos++)<len);
-        continue;
-      }
-      if (cfile[pos]=='*')
-      {
-        int spos=pos;
-        pos+=2;
-        
-        while ((cfile[pos] != '/' or cfile[pos-1] != '*') and (pos++)<len);
-        if (pos>=len)
-        {
-          cferr="Unterminating comment";
-          return spos;
-        }
-        
-        pos++;
-        continue;
-      }
-      pos--;
-    }
-
+    
+    
     //The next thing we want to do is check we're not expecting an operator for the operator keyword.
     if (last_named==LN_OPERATOR and last_named_phase != OP_PARAMS)
     {
@@ -389,10 +377,10 @@ int parse_cfile(string cftext)
       if (a != -1) return a;
       continue;
     }
-
+    
     //Now that we're sure we aren't in an "operator" expression,
     //We can check for the few symbols we expect to see.
-
+    
     //First off, the most common is likely to be a pointer indicator.
     if (cfile[pos]=='*')
     {
@@ -418,7 +406,7 @@ int parse_cfile(string cftext)
       skipto = ']'; skip_inc_on = '[';
       pos++; continue;
     }
-
+    
     if (cfile[pos] == '(')
     {
       if (last_named != LN_DECLARATOR)
@@ -441,21 +429,20 @@ int parse_cfile(string cftext)
       
       pos++; continue;
     }
-
+    
     if (cfile[pos] == ')')
     {
-      pos++;
       if (!(plevel > 0))
       {
         cferr = "Unexpected closing parenthesis: None open";
         return pos;
       }
       plevel--;
-      refstack--;
+      refstack--; //Move past previous parenthesis
       //last_named_phase=0;
-      continue;
+      pos++; continue;
     }
-
+    
     if (cfile[pos] == '{')
     { 
       const int last_named_raw = last_named & ~LN_TYPEDEF;
@@ -482,7 +469,7 @@ int parse_cfile(string cftext)
         cferr = "Expected scope name or function declaration before '{'";
         return pos;
       }
-
+      
       last_identifier = "";
       last_named = LN_NOTHING;
       last_named_phase = 0;
@@ -490,10 +477,10 @@ int parse_cfile(string cftext)
       refstack.dump();
       tpc = 0;
       pos++;
-
+      
       continue;
     }
-
+    
     if (cfile[pos] == '}')
     {
       if (current_scope == &global_scope)

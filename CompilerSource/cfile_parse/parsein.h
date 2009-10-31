@@ -1,11 +1,17 @@
 //#include <stdio.h>
-//#include <wchar.h>
-namespace namespacicle
+#include <wchar.h>
+
+/*
+ #define __attribute__(xyz) // Ignore
+__attribute__ ((__pure__))
+*/
+
+/*namespace namespacicle
 {
   int this_does_work();
   int *this_doesnt_work();
   int this_is_cut();
-}
+}*/
 
 /*
 union pascal
