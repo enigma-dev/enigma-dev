@@ -25,7 +25,7 @@
 **                                                                              **
 \*********************************************************************************/
 
-#include <string>
+#include <iostream>
 using namespace std;
 #include "../general/parse_basics.h"
 #include "../general/darray.h"
@@ -50,22 +50,31 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
   const unsigned len = cfile.length();
 
   unsigned lvl = 1;
-  for (unsigned i = 0; i < numparams; i++) //parse out each parameter value into an array
+  for (unsigned i = 0; i < numparams or lvl > 0; i++) //parse out each parameter value into an array
   {
+    if (i > numparams)
+    { macrostr = "Expected closing parenthesis for macro function at this point: too many parameters"; return false; }
     const unsigned spos = pos;
     while (is_useless(cfile[pos])) pos++;
-    while ((cfile[pos] != ',' or lvl > 1) and pos < len and lvl)
-    {      if (cfile[pos] == '\"') { pos++; while (cfile[pos] != '\"' and pos < len) { if (cfile[pos] == '\\') pos++; pos++; } } 
-      else if (cfile[pos] == '\'') { pos++; while (cfile[pos] != '\'' and pos < len) { if (cfile[pos] == '\\') pos++; pos++; } } 
-      else if (cfile[pos] == '(') lvl++; else if (cfile[pos] == ')') lvl--; 
-      pos++; 
+    while ((lvl > 1 or cfile[pos] != ',') and pos < len and lvl)
+    {
+      if (cfile[pos] == ')') lvl--;
+      else if (cfile[pos] == '(') lvl++;
+      else if (cfile[pos] == '\"') { pos++; while (cfile[pos] != '\"' and pos < len) { if (cfile[pos] == '\\') pos++; pos++; } } 
+      else if (cfile[pos] == '\'') { pos++; while (cfile[pos] != '\'' and pos < len) { if (cfile[pos] == '\\') pos++; pos++; } }  
+      if (lvl) pos++; 
     }
+    //Comma drops out as soon as cfile[pos] == ','
+    //End Parenth will not increment if !lvl, so cfile[pos] == ')'
     macro_args[args_given++] = cfile.substr(spos,pos-spos);
+    cout << "Argument " << i << ": " << cfile.substr(spos,pos-spos) << endl;
+    pos++;
   }
 
   while (is_useless(cfile[pos])) pos++; 
   if (lvl) { macrostr = "Expected closing parenthesis for macro function"; return false; }
-
+  pos++;
+  
   if (args_given != numparams)
   {
     macrostr = "Macro function requires " + tostring(numparams) + " parameters, passed " + tostring(args_given);
@@ -84,15 +93,15 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
       if (macrostr[i] == '#')
       {
         if (macrostr[i+1] == '#')
-          pos++, skipspace = true;
+          i++, skipspace = true;
         else stringify = true;
         
-        pos++;
+        i++;
         if (!is_letter(macrostr[i]))
           continue;
       }
       
-      pos++; //Guaranteed letter here
+      i++; //Guaranteed letter here
       while (is_letterd(macrostr[i])) i++;
       const string sstr = macrostr.substr(si,i-si);
       

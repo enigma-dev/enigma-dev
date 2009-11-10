@@ -50,7 +50,7 @@ string tostring(int val);
 #define squote while (cfile[pos]!='\'') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='\'')) pos+=2; }
 
 bool in_false_conditional();
-
+//extern void print_cfile_top(const unsigned);
 
 typedef implicit_stack<string> iss;
 typedef implicit_stack<unsigned int> isui;
@@ -69,6 +69,13 @@ string cferr_get_file()
   if (included_files.empty())
     return "";
   return "In file included from " + included_files.top().name + ": ";
+}
+
+string cferr_get_file_orfirstfile()
+{
+  if (included_files.empty())
+    return "first file";
+  return included_files.top().name;
 }
 
 int parse_cfile(string cftext)
@@ -120,6 +127,7 @@ int parse_cfile(string cftext)
   */
 
   anoncount = 0;
+  stack<bool> scope_stack_because_of_fucking_extern_C_keyword;
 
   for (;;)
   {
@@ -130,7 +138,6 @@ int parse_cfile(string cftext)
       {
         //Move back down
         handle_macro_pop(c_file,position,cfile_length);
-        cfile_top = cfile;
         continue;
       }
       else break;
@@ -153,12 +160,12 @@ int parse_cfile(string cftext)
         const unsigned a = cfile_parse_macro(c_file,position,cfile_length);
         if (a != unsigned(-1)) return a;
         continue;
-      }/*
+      }
       else
       {
         cferr = "WHY?! WHHHHHHHHHHYYYYYYYYYYYYYYYYY!!?";
         return pos;
-      }*/
+      }
     }
     
     //Handle comments here, before conditionals
@@ -175,6 +182,32 @@ int parse_cfile(string cftext)
     
     if (skipto)
     {
+      if (skipto == ';' and skipto2 == ';')
+      {
+        if (cfile[pos] == ';' or cfile[pos] == ',')
+        {
+          if (skip_depth == 0)
+          {
+            skipto = skipto2 = skip_inc_on = 0;
+            pos--;
+          }
+        }
+        else if (cfile[pos] == '{')
+          skip_depth++;
+        else if (cfile[pos] == '}')
+        {
+          if (skip_depth == 0)
+          {
+            skipto = skipto2 = skip_inc_on = 0;
+            pos--;
+          }
+          else
+            skip_depth--;
+        }
+        pos++;
+        continue;
+      }
+      
       if (cfile[pos] == skipto or cfile[pos] == skipto2)
       {
         if (skip_depth == 0)
@@ -199,14 +232,50 @@ int parse_cfile(string cftext)
       string n = cfile.substr(sp,pos-sp); //This is the word we're looking at.
       
       //Macros get precedence. Check if it's one.
-      const unsigned int cm = handle_macros(n,c_file,position,cfile_length,cferr);
+      const unsigned int cm = handle_macros(n,c_file,position,cfile_length);
       if (cm == unsigned(-2)) continue;
       if (cm != unsigned(-1)) return cm;
-        
-      int diderrat = handle_identifiers(n,cferr,last_identifier,pos,last_named,last_named_phase,last_type);
+      
+  if (n=="__asm") //now we have a problem
+  {
+    while (is_useless(cfile[pos])) pos++;
+    if (cfile[pos] != '(')
+    {
+      cferr = "Expected ( following inline-assembly token";
+      return pos;
+    }
+    pos++;
+    while (is_useless(cfile[pos])) pos++;
+    if (cfile[pos] != '"')
+    {
+      cferr = "Expected string of assembly instructions";
+      return pos;
+    }
+    pos++;
+    while (pos<len and cfile[pos] != '"')
+      { if (cfile[pos]=='\\') pos++; pos++; }
+    if (cfile[pos]!='"')
+    {
+      cferr = "Expected string of assembly instructions";
+      return pos;
+    }
+    pos++;
+    while (is_useless(cfile[pos])) pos++;
+    if (cfile[pos]!=')')
+    {
+      cferr = "Expected closing parenthesis after assembly string";
+      return pos;
+    }
+    pos++;
+  }
+  else
+  {
+      int diderrat = handle_identifiers(n,last_identifier,pos,last_named,last_named_phase,last_type);
       //cout << last_named << ":" << last_named_phase << "  ->  ";
       if (diderrat != -1)
         return diderrat;
+  }
+      
       //cout << last_named << ":" << last_named_phase << "\r\n";
       continue;
     }
@@ -387,8 +456,15 @@ int parse_cfile(string cftext)
       //type should be named
       if ((last_named | LN_TYPEDEF) != (LN_DECLARATOR | LN_TYPEDEF))
       {
-        cferr = "Unexpected '*'";
-        return pos;
+        if ((last_named | LN_TYPEDEF) != (LN_CLASS  | LN_TYPEDEF)
+        and (last_named | LN_TYPEDEF) != (LN_STRUCT | LN_TYPEDEF)
+        and (last_named | LN_TYPEDEF) != (LN_UNION  | LN_TYPEDEF))
+        {
+          cferr = "Unexpected '*'";
+          return pos;
+        }
+        if (!extreg_deprecated_struct(false,last_identifier,last_named,last_named_phase,last_type))
+          return pos;
       }
       refstack += referencer('*');
       pos++; continue;
@@ -444,7 +520,8 @@ int parse_cfile(string cftext)
     }
     
     if (cfile[pos] == '{')
-    { 
+    {
+      bool push_worthless = 0;
       const int last_named_raw = last_named & ~LN_TYPEDEF;
       
       //Class/Namespace declaration.
@@ -454,21 +531,62 @@ int parse_cfile(string cftext)
           return pos;
         current_scope = ext_retriever_var;
       }
-      //Function implementation.
-      else if (last_named_raw == LN_DECLARATOR and refstack.nextsymbol() == '(') // Do not confuse with ')'
+      //Enum declaration.
+      else if (last_named_raw == LN_ENUM)
       {
-        //Register the function in the current scope
-        if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc))
+        if (!ExtRegister(last_named,last_identifier,0,NULL,tmplate_params,tpc))
           return pos;
-        
-        //Skip the code: we don't need to know it ^_^
-        skipto = '}'; skip_inc_on = '{';
+        current_scope = ext_retriever_var;
+      }
+      //Function implementation.
+      else if (last_named_raw == LN_DECLARATOR) // Do not confuse with ')'
+      {
+        if (refstack.nextsymbol() == '(')
+        {
+          //Register the function in the current scope
+          if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc))
+            return pos;
+          
+          //Skip the code: we don't need to know it ^_^
+          skipto = '}'; skip_inc_on = '{';
+        }
+        else
+        {
+          if (last_type != NULL and last_type->flags & (EXTFLAG_STRUCT|EXTFLAG_CLASS|EXTFLAG_ENUM))
+          {
+            if (last_type->parent == current_scope)
+            {
+              if (!last_type->members.empty())
+              {
+                cferr = "Attempting to redeclare struct `"+last_type->name+"'";
+                return pos;
+              }
+              else //struct a; struct a {}
+                current_scope = last_type; //Move into it. Brilliantly simple; we already know it's parent is current_scope.
+            }
+            else
+            {
+              cferr = "Fuck, I'm a dumbass.";
+              return pos;
+            }
+          }
+          else
+          {
+            cferr = (last_named_phase == DEC_FULL)?"Expected identifier between typename and '{'":
+                    (last_named_phase == DEC_IDENTIFIER)?"`"+last_identifier+"' does not name a function":
+                    "Unexpected '{' in declaration.";
+            return pos;
+          }
+        }
       }
       else
       {
-        cferr = "Expected scope name or function declaration before '{'";
-        return pos;
+        push_worthless = 1;
+        /*cferr = "Expected scope name or function declaration before '{'";
+        return pos;*/
       }
+      
+      scope_stack_because_of_fucking_extern_C_keyword.push(push_worthless);
       
       last_identifier = "";
       last_named = LN_NOTHING;
@@ -483,10 +601,30 @@ int parse_cfile(string cftext)
     
     if (cfile[pos] == '}')
     {
+      if (scope_stack_because_of_fucking_extern_C_keyword.empty())
+      {
+        cferr = "Unexpected closing brace at this point: none open";
+        return pos;
+      }
+      
+      const bool worthless = scope_stack_because_of_fucking_extern_C_keyword.top();
+      scope_stack_because_of_fucking_extern_C_keyword.pop();
+      if (worthless) continue;
+      
       if (current_scope == &global_scope)
       {
-        cferr = "Unexpected closing brace at this point";
+        cferr = "No scope to pop. This error shouldn't occur...";
         return pos;
+      }
+      
+      if (last_named != LN_NOTHING)
+      {
+        if (last_named != LN_DECLARATOR or !(current_scope->flags & EXTFLAG_ENUM))
+        {
+          cferr = "Unexpected closing brace at this point";
+          return pos;
+        }
+        ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc);
       }
       
       if (current_scope->flags & EXTFLAG_TYPENAME)
@@ -496,7 +634,7 @@ int parse_cfile(string cftext)
       }
       else
       {
-        last_named = LN_NOTHING;  //Not sure what to do with enum {}
+        last_named = LN_NOTHING;
         last_named_phase = 0;
       }
       
@@ -550,13 +688,33 @@ int parse_cfile(string cftext)
         last_named_phase = TMP_EQUALS;
         pos++; continue;
       }
+      if (last_named == LN_DECLARATOR)
+      {
+        skipto = ';';
+        skipto2 = ';';
+        continue;
+      }
       cout << "SHIIIIIIIIIII---";
     }
     
+    //extern "C"
+    if (cfile[pos] == '"')
+    {
+      if (last_named == LN_DECLARATOR and last_named_phase == 0) //assuming it's "extern" and not "unsigned", which'd behave the same
+      if (cfile[++pos] == 'C')
+      if (cfile[++pos] == '"')
+      {
+        last_named = LN_NOTHING;
+        pos++; continue;
+      }
+      cferr = "String literal not allowed here";
+      return pos;
+    }
     
-    cferr = string("Unknown symbol '")+cfile[pos]+"'";
+    cferr = string("Unexpected symbol '")+cfile[pos]+"'";
     return pos;
   }
+  
   
   
   /*

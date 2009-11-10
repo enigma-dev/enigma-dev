@@ -40,6 +40,7 @@ using namespace std;
 #include "../general/parse_basics.h"
 
 extern string cferr;
+extern string tostring(int x);
 struct includings
 {
   string name;
@@ -306,6 +307,7 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
         position.push();
         cfile_length.push();
         
+        
         cfile_top = cfile = ins;
         len = cfile.length();
         pos = 0;
@@ -329,16 +331,28 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
       cferr="#line is unimplemented for reasons of sanity.";
       return pos;
     }
-    if (next=="pragma")
-    {
-      const unsigned sp = pos;
-      move_newline();
-      if (cfile.substr(sp,pos-sp) == "debug_entry_point")
-      {
-        cout << "#pragma: debug_entry_point\r\n";
-      }
-    }
   } //end if (!in_false_conditional())
+  
+  if (next=="pragma") //Visit this even in a false conditional for print and debug
+  {
+    const unsigned sp = pos;
+    move_newline();
+    const string pc = cfile.substr(sp,pos-sp);
+    if (pc == "debug_entry_point" and !in_false_conditional())
+      cout << "#pragma: debug_entry_point\r\n";
+    if (pc == "debug_entry_point_unconditional")
+      cout << "#pragma: debug_entry_point\r\n";
+    if (pc.substr(0,8) == "println " and !in_false_conditional())
+    {
+      cout << "Debug output: " << pc.substr(8) << endl;
+      fflush(stdout);
+    }
+    if (pc.substr(0,22) == "println_unconditional ")
+    {
+      cout << "Unconditional debug output: " << pc.substr(22) << endl;
+      fflush(stdout);
+    }
+  }
   
   //Conditionals/Flow
   {
@@ -351,7 +365,10 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
       if (next[0] == 'i')
       {
         if (next.length() == 2)
+        {
           flowstack.push(evaluate_expression(exp));
+          if (rerrpos != -1) { cferr = "In #if expression at position " + tostring(rerrpos) + ": " + rerr; return spos+rerrpos; }
+        }
         else if (next.length() == 5)
           flowstack.push(macros.find(exp) != macros.end());
         else if (next.length() == 6)
@@ -364,7 +381,10 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
           if (next[3]=='e') //else
             flowstack.invert_top();
           else //elif
+          {
             flowstack.set_top(flowstack.topval() == 0 and !flowstack.topused() and evaluate_expression(exp));
+            if (rerrpos != -1) { cferr = "In #if expression at position " + tostring(rerrpos) + ": " + rerr; return spos+rerrpos; }
+          }
         }
         else //endif
           flowstack.pop();

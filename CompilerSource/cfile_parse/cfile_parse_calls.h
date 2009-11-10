@@ -47,13 +47,30 @@ bool is_tflag(string x)
 
 
 
-void regt(string x)
+inline externs* regt(string x)
 {
   externs* t = current_scope->members[x] = new externs;
   t->flags = EXTFLAG_TYPENAME;
   t->name = x;
+  return t;
+}
+inline void regmacro(string m)
+{
+  macros[m];
+}
+inline void regmacro(string m,string val)
+{
+  macros[m] = val;
+}
+inline void regmacro(string m,string val,string arg1)
+{
+  macro_type *mac = &macros[m];
+  *mac = val;
+  mac->assign_func();
+  mac->addarg(arg1);
 }
 
+externs *builtin_type__int;
 varray<string> include_directories;
 unsigned int include_directory_count;
 
@@ -63,7 +80,7 @@ void cparse_init()
   
   regt("bool");
   regt("char");
-  regt("int");
+  builtin_type__int = regt("int");
   regt("float");
   regt("double");
   
@@ -80,13 +97,17 @@ void cparse_init()
   regt("auto");
   
   //lesser used types
-  regt("size_t");
+  //regt("size_t"); //size_t doesn't need registered here as it is typdef'd in stdio somewhere.
   regt("wchar_t");
   
   //__builtin_ grabbage
   regt("__builtin_va_list");
   
   #undef regt
+  
+  //These are GCC things and must be hard coded in
+  regmacro("__attribute__","","x"); //__attribute__(x) 
+  regmacro("__extension__"); //__extension__
   
   include_directories[0] = "/usr/include/";
   include_directories[1] = "/usr/lib/gcc/i486-linux-gnu/4.3.3/include/";

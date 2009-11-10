@@ -44,10 +44,25 @@ typedef implicit_stack<unsigned int> isui;
 
 struct includings { string name; string path; };
 extern stack<includings> included_files;
+extern externs* builtin_type__int;
 
 extern string cfile_top;
+extern string cferr_get_file_orfirstfile();
+int get_line(string& cfile,const unsigned int pos)
+{
+  int iline=0;
+    for (unsigned int i=0; i<pos; i++)
+    {
+      if (cfile[i]=='\n')
+        iline++;
+    }
+  return iline;
+}
+
 void handle_macro_pop(iss &c_file,isui &position,isui &cfile_length)
 {
+  //const int pos = position();
+  
   c_file.pop();
   position.pop();
   cfile_length.pop();
@@ -55,15 +70,31 @@ void handle_macro_pop(iss &c_file,isui &position,isui &cfile_length)
     macrod--;
   else if (!included_files.empty())
   {
+    //print_cfile_top(pos);
     cfile_top=c_file();
     included_files.pop();
   }
 }
 
+extern string cferr;
 string tostring(int val);
 #include "../general/parse_basics.h"
 
-unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile_length,string &cferr)
+//struct a { struct a *b; }, not struct a { a* b }
+bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_named,int & last_named_phase, externs *&last_type)
+{
+  if (last_identifier == "" or !find_extname(last_identifier,EXTFLAG_TYPENAME))
+  {
+    cferr = "`"+last_identifier+"' does not name a type.";
+    return 0;
+  }
+  last_named = LN_DECLARATOR;
+  last_named_phase = idnamed?DEC_IDENTIFIER:DEC_FULL;
+  last_type = ext_retriever_var;
+  return 1;
+}
+
+unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile_length)
 {
   maciter t;
   if ((t=macros.find(n)) != macros.end())
@@ -88,11 +119,14 @@ unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile
       #undef cfile
       #undef pos
       
+      //const int cpos = position();
+      
       //Push everything
       c_file.push();
       position.push();
       cfile_length.push();
       
+      //print_cfile_top(cpos);
       cfile_top = c_file();
       
       //Set everything
@@ -108,7 +142,7 @@ unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile
 }
 
 extern bool is_tflag(string x);
-int handle_identifiers(const string n,string &cferr,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type)
+int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type)
 {
   //it's not a macro, so the next thing we'll check for is keyword
   if (n=="struct" or n=="class")
@@ -158,7 +192,26 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
     return -1;
   }
   if (n=="extern")
-  { //This doesn't tell us anything useful.
+  { //This doesn't tell us anything useful unless the next token is "C"
+    if (last_named != LN_NOTHING)
+    {
+      if (last_named != LN_DECLARATOR)
+      {
+        cferr = "Unexpected `extern' token at this point";
+        return pos;
+      }
+      if (last_named_phase != DEC_LONG 
+      and last_named_phase != DEC_LONGLONG 
+      and last_named_phase != DEC_GENERAL_FLAG
+      and last_named_phase != DEC_NOTHING_YET)
+      {
+        cferr = "Unexpected `extern' token at this point";
+        return pos;
+      }
+      return -1;
+    }
+    last_named = LN_DECLARATOR;
+    last_named_phase = 0;
     return -1;
   }
   if (n=="union")
@@ -289,7 +342,7 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
         last_named_phase = DEC_LONG;
       else
         last_named_phase = DEC_GENERAL_FLAG;
-      last_type = global_scope.members.find("int")->second;
+      last_type = builtin_type__int;
       return -1;
     }
     
@@ -444,14 +497,25 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
   }
 
   //Here's the big part
-  //We now assume that what was named is an identifier.
+  //We now assume that what was named is a regular identifier.
   //This means we do a lot of error checking here.
-  if (last_named == LN_NOTHING)
+  if (last_named == LN_NOTHING) //what we have here is a standalone identifier.
   {
-    cferr="Expected type name or keyword before identifier";
-    return pos;
+    if (!(current_scope != &global_scope and current_scope->flags & EXTFLAG_ENUM))
+    {
+      cferr="Expected type name or keyword before identifier";
+      return pos;
+    }
+    else
+    {
+      last_named = LN_DECLARATOR;
+      last_named_phase = DEC_IDENTIFIER;
+      last_type = builtin_type__int;
+      last_identifier = n;
+      return unsigned(-1);
+    }
   }
-  if (last_named == LN_TYPEDEF)
+  if (last_named == LN_TYPEDEF) //plain typedef, not typedef | declarator
   {
     cferr="Type definition does not specify a type";
     return pos;
@@ -482,10 +546,17 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
     case LN_CLASS:
     case LN_STRUCT:
     case LN_UNION:
-        if (last_named_phase != 0)
+        if (last_named_phase != SP_EMPTY) //Probably shouldn't be an identifier here
         {
-          cferr="Unexpected identifier in declaration";
-          return pos;
+          if (last_named_phase != SP_IDENTIFIER) //Shouldn't be an identifier here
+          {
+            cferr="Unexpected identifier in declaration";
+            return pos;
+          }
+          //struct a { struct a b; }
+          if (!extreg_deprecated_struct(true,last_identifier,last_named,last_named_phase,last_type))
+            return pos;
+          break;
         }
         last_named_phase = 1;
       break;
@@ -538,7 +609,7 @@ int handle_identifiers(const string n,string &cferr,string &last_identifier,unsi
         last_named_phase = USE_SINGLE_IDENTIFIER;
       break;
     default:
-      cferr = "Errorness: Unspecified errorzor!@!111";
+      cferr = "Unspecified Error. This shouldn't happen...";
       return pos;
       //last_named = LN_IDENTIFIER;
       //last_named_phase = 0;

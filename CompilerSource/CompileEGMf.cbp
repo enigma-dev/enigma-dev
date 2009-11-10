@@ -71,7 +71,6 @@
 		<Unit filename="general/estring.h" />
 		<Unit filename="general/implicit_stack.h" />
 		<Unit filename="general/string.cpp" />
-		<Unit filename="general/string.h" />
 		<Unit filename="general/textfile.cpp" />
 		<Unit filename="general/textfile.h" />
 		<Unit filename="main.cpp" />

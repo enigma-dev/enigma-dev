@@ -58,7 +58,6 @@ int main(int argc, char *argv[])
       time_t ts = clock();
         int a = parse_cfile(cftp);
       time_t te = clock();
-      cout << "Parse time: " << (((te-ts) * 1000.0) / CLOCKS_PER_SEC) << " milliseconds\r\n\r\n";
       
       
       if (a != -1)
@@ -77,25 +76,57 @@ int main(int argc, char *argv[])
           begin = (signed)a-(margin/2)<0?0:a-(margin/2), 
           end = (a+unsigned(margin/2)>cfile_top.length())?cfile_top.length():a+(margin/2);
         cout << "code snippet: " << cfile_top.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
+        cout << "------------------------------------------------\r\n\r\n";
       }
+      else
+      cout << "No error.\r\nParse time: " << (((te-ts) * 1000.0) / CLOCKS_PER_SEC)
+           << " milliseconds\r\n++++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";
 
-      cout << "Macros ("<<macros.size()<<"):\r\n";
-      for (maciter i=macros.begin(); i!=macros.end();i++)
+      cout << "Macros ("<<macros.size()<<") [+]\r\nVariables [+]\r\n";
+      
+      cout << ">>";
+      char c = getchar();
+      while (c != '\r' and c != '\n')
       {
-        cout<<"  "<<i->first;
-        if (i->second.argc != -1)
+        if (c == '+')
         {
-          cout << "(";
-          for (int ii = 0; ii<i->second.argc; ii++)
-            cout << i->second.args[ii] << (ii<i->second.argc-1 ? ",":"");
-          cout << ")";
+          cout << "Macros ("<<macros.size()<<"):\r\n";
+            for (maciter i=macros.begin(); i!=macros.end();i++)
+            {
+              cout<<"  "<<i->first;
+              if (i->second.argc != -1)
+              {
+                cout << "(";
+                for (int ii = 0; ii<i->second.argc; ii++)
+                  cout << i->second.args[ii] << (ii<i->second.argc-1 ? ",":"");
+                cout << ")";
+              }
+              cout<<": "<<(string)i->second<<"\r\n";
+            }
+          cout<<"\r\nVariables:\r\n";
+            print_scope_members(&global_scope, 2);
         }
-        cout<<": "<<(string)i->second<<"\r\n";
+        if (c == 'c') system("clear");
+        if (c == 'd')
+        {
+          string n;
+          cout << "Define: "; cin >> n;
+          maciter a = macros.find(n);
+          if (a != macros.end())
+            cout << "  #define " << n << " " << (string)a->second << endl;
+          else
+          {
+            extiter a = global_scope.members.find(n);
+            if (a != global_scope.members.end())
+              print_scope_members(a->second, 2);
+            else cout << "Not found: " << n << endl;
+          }
+        }
+        getchar();
+        cout << ">>";
+        c = getchar();
       }
-      cout<<"\r\nVariables:\r\n";
-      print_scope_members(&global_scope, 0);
-
-    getchar();
+    
     return 0;
     
       parser_init();
@@ -103,8 +134,6 @@ int main(int argc, char *argv[])
     
     getchar();
     return 0;
-    
-    
     
     string p1;
     if (!(argc>1)) { p1=""; }

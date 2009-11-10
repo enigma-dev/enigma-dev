@@ -70,7 +70,7 @@ bool is_opkeyword(string x)
 #define pos position()
 #define len explength()
 #define exp expression()
-string rerr=""; int rerrpos=0;
+string rerr=""; int rerrpos=-1;
 value evaluate_expression(string expr)
 {
   implicit_stack<string> expression;
@@ -103,7 +103,7 @@ value evaluate_expression(string expr)
   //Note that the number of values should be the same as number of operators + 1.
   
   rerr="";
-  rerrpos=0;
+  rerrpos=-1;
   
   for (;;) //since goto is out of the question
   {
@@ -167,18 +167,32 @@ value evaluate_expression(string expr)
         #if USE_DEFINED_KEYWORD == 1
           if (n == "defined")
           {
+            bool inps = 0;
             while (is_useless(exp[pos])) pos++;
+            if (exp[pos] == '(')
+            {
+              pos++; while (is_useless(exp[pos])) pos++;
+              inps = 1;
+            }
             if (!is_letter(exp[pos])) 
             {
-              rerr="Expected identifier following `defined' token";
-              rerrpos=pos;
+              rerr = "Expected identifier following `defined' token";
+              rerrpos = pos;
               return 0;
             }
             const unsigned spos = pos;
             while (is_letterd(exp[pos])) pos++;
-            bool addthis = (macros.find(exp.substr(spos,pos-spos)) != macros.end());
             
+            bool addthis = (macros.find(exp.substr(spos,pos-spos)) != macros.end());
             setval = (value)addthis;
+            
+            if (inps)
+            {
+              while (is_useless(exp[pos])) pos++;
+              if (exp[pos] != ')')
+              { rerr = "Expected closing parenthesis after `defined' expression"; rerrpos = pos; return 0; }
+              pos++;
+            }
             
             goto electron_transport_chain;
           }
@@ -249,7 +263,8 @@ value evaluate_expression(string expr)
               if (!macro_function_parse(exp,pt,macrostr,i->second.args,i->second.argc))
               {
                 rerr = macrostr;
-                return pos;
+                rerrpos = pos;
+                return 0;
               }
               pos = pt;
             }
