@@ -68,12 +68,9 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
     //End Parenth will not increment if !lvl, so cfile[pos] == ')'
     macro_args[args_given++] = cfile.substr(spos,pos-spos);
     cout << "Argument " << i << ": " << cfile.substr(spos,pos-spos) << endl;
+    cout << "This: '"<<cfile[pos]<<"'\r\n";
     pos++;
   }
-
-  while (is_useless(cfile[pos])) pos++; 
-  if (lvl) { macrostr = "Expected closing parenthesis for macro function"; return false; }
-  pos++;
   
   if (args_given != numparams)
   {

@@ -241,7 +241,9 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
         if (!is_letter(cfile[pos])) { cferr="Identifier expected for #undef"; return pos; }
         while (is_letterd(cfile[pos])) pos++;
         
-        macros.erase(cfile.substr(poss,pos-poss));
+        const string uw = cfile.substr(poss,pos-poss);
+        if (uw != "__attribute__") //_mingw.h is a little bitch
+        macros.erase(uw);
       }
     }
     //Including things

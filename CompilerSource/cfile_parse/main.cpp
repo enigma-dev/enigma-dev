@@ -62,71 +62,76 @@ string file_contents(string file)
 }
 
 
+void print_ext_data(externs *ext,int indent);
+
 void print_scope_members(externs* gscope, int indent)
 {
   for (extiter i=gscope->members.begin();i!=gscope->members.end();i++)
+    print_ext_data(i->second,indent);
+}
+
+void print_ext_data(externs *ext,int indent)
+{
+  bool comma=0;
+  string indstr(indent,' ');
+
+  cout << indstr << ext->name << ":  ";
+  
+  if (ext->is_function())
+    cout << "Function with " << ext->parameter_count() << " parameters, returning ";
+
+  if (ext->type != NULL)
+    cout << ext->type->name << "  ";
+  
+  
+  if (ext->flags & EXTFLAG_TEMPLATE)
   {
-    bool comma=0;
-    string indstr(indent,' ');
-
-    cout << indstr << i->first << ":  ";
-    
-    if (i->second->is_function())
-      cout << "Function with " << i->second->parameter_count() << " parameters, returning ";
-
-    if (i->second->type != NULL)
-      cout << i->second->type->name << "  ";
-    
-    
-    if (i->second->flags & EXTFLAG_TEMPLATE)
+    cout << "Template [" << ext->tempargs.size() << "]<";
+    char comma = 0;
+    for (externs::tempiter ii = ext->tempargs.begin(); ii != ext->tempargs.end(); ii++)
     {
-      cout << "Template [" << i->second->tempargs.size() << "]<";
-      char comma = 0;
-      for (externs::tempiter ii = i->second->tempargs.begin(); ii != i->second->tempargs.end(); ii++)
-      {
-        if (comma != 0) cout << comma;
-        cout << ii->first;
-        if (ii->second != NULL)
-          cout << "=" << ii->second->name;
-        comma = ',';
-      }
-      cout << "> ";
+      if (comma != 0) cout << comma;
+      cout << ii->first;
+      if (ii->second != NULL)
+        cout << "=" << ii->second->name;
+      comma = ',';
     }
-
-    if (i->second->flags & EXTFLAG_TYPENAME)
-    {
-      if (comma)
-      cout << ", serves as typename";
-      else
-      cout << " Serves as typename";
-    }
-
-    if (i->second->flags & EXTFLAG_NAMESPACE) cout << " namespace";
-    if (i->second->flags & EXTFLAG_STRUCT) cout << " : struct";
-    if (i->second->flags & EXTFLAG_CLASS) cout << " : class";
-    
-    if (i->second->flags & EXTFLAG_TYPEDEF)
-      cout << " type defined as " << (i->second->members[""] != NULL ? i->second->members[""]->name : "<NULL>") << " ";
-    else
-    if (!i->second->members.empty())
-    {
-      cout << "\r\n" << indstr << "{\r\n";
-      print_scope_members(i->second,indent+2);
-      cout << indstr << "};\r\n";
-    }
-    
-    if (!i->second->refstack.empty())
-    {
-      cout << "Dereference path: ";
-      for (rf_node *ii = i->second->refstack.last; ii != NULL; ii = ii->prev)
-        if (ii->ref.symbol == '(') cout << "(params = " << ii->ref.count << ")";
-        else if (ii->ref.symbol == ')') cout << "</group>";
-        else if (ii->ref.symbol == '[') cout << "[]";
-        else cout << ii->ref.symbol;
-    }
-    
-    cout << "\r\n";
+    cout << "> ";
   }
+
+  if (ext->flags & EXTFLAG_TYPENAME)
+  {
+    if (comma)
+    cout << ", serves as typename";
+    else
+    cout << " Serves as typename";
+  }
+
+  if (ext->flags & EXTFLAG_NAMESPACE) cout << " namespace";
+  if (ext->flags & EXTFLAG_STRUCT) cout << " : struct";
+  if (ext->flags & EXTFLAG_CLASS) cout << " : class";
+  
+  if (ext->flags & EXTFLAG_TYPEDEF)
+    cout << " typedef'd as " << (ext->members[""] != NULL ? ext->members[""]->name : "<NULL>") << " ";
+  else
+  if (!ext->members.empty())
+  {
+    cout << "\r\n" << indstr << "{\r\n";
+    print_scope_members(ext,indent+2);
+    cout << indstr << "};\r\n";
+  }
+  
+  if (!ext->refstack.empty())
+  {
+    cout << "Dereference path: ";
+    for (rf_node *ii = ext->refstack.last; ii != NULL; ii = ii->prev)
+      if (ii->ref.symbol == '(') cout << "(params = " << ii->ref.count << ")";
+      else if (ii->ref.symbol == ')') cout << "</group>";
+      else if (ii->ref.symbol == '[') cout << "[]";
+      else cout << ii->ref.symbol;
+  }
+  
+  cout << "\r\n";
 }
 
 int cfile_parse_main()

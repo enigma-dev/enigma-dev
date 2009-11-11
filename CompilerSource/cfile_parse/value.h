@@ -25,6 +25,9 @@
 **                                                                              **
 \*********************************************************************************/
 
+#ifndef _EXPRESSION_EVALUATOR_H
+#define _EXPRESSION_EVALUATOR_H
+
 #include "expression_evaluator_settings.h"
 
 #define RTYPE_NONE -1
@@ -231,3 +234,5 @@ struct value
   #endif
   
 };
+
+#endif

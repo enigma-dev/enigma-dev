@@ -697,6 +697,18 @@ int parse_cfile(string cftext)
       cout << "SHIIIIIIIIIII---";
     }
     
+    //...
+    if (cfile[pos] == '.' and cfile[pos+1] == '.' and cfile[pos+2] == '.')
+    {
+      if (last_named != LN_DECLARATOR)
+      {
+        cferr = "Token `...' expected only in function parameters";
+        return pos;
+      }
+      pos += 3;
+      continue;
+    }
+    
     //extern "C"
     if (cfile[pos] == '"')
     {

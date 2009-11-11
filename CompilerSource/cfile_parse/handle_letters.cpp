@@ -318,11 +318,14 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
     last_named_phase = TMP_TYPENAME;
     return -1;
   }
+  if (n=="inline")
+  {
+    return -1;
+  }
   if (n=="class")
   if (n=="friend")
   if (n=="private")
   if (n=="public" or n=="protected" or n=="using")
-  if (n=="inline")
   if (n=="virtual")
   if (n=="mutable")
   return -1;
@@ -435,9 +438,9 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
           last_type = ext_retriever_var;
           last_named_phase = DEC_FULL;
         }
-        else if (refstack.currentsymbol() != '(')
+        else if (refstack.currentsymbol() != '(') //int a b, as opposed to int a(b)
         {
-          cferr = "Expected ';' before new declaration";
+          cferr = "Expected ';' before new declaration; old declaration is of type " + (last_type?last_type->name:string("NULL")) + " as " + last_identifier;
           return pos;
         }
         return -1;

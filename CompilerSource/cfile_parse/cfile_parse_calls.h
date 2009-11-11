@@ -109,8 +109,14 @@ void cparse_init()
   regmacro("__attribute__","","x"); //__attribute__(x) 
   regmacro("__extension__"); //__extension__
   
+  #ifdef linux
   include_directories[0] = "/usr/include/";
   include_directories[1] = "/usr/lib/gcc/i486-linux-gnu/4.3.3/include/";
+  #else
+  include_directories[0] = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\include\\";
+  include_directories[1] = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\lib\\gcc\\mingw32\\3.4.5\\install-tools\\include\\";
+  #endif
+  
   include_directory_count = 2;
 }
 

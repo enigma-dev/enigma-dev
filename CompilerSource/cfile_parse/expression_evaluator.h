@@ -25,5 +25,6 @@
 **                                                                              **
 \*********************************************************************************/
 
+#include "value.h"
 value evaluate_expression(string exp);
 extern string rerr; extern int rerrpos;

@@ -46,6 +46,7 @@ using namespace std;
 
 string fc(const char* fn);
 
+void print_ext_data(externs *ext,int indent);
 void print_scope_members(externs* gscope, int indent);
 
 #include "general/implicit_stack.h"
@@ -106,7 +107,7 @@ int main(int argc, char *argv[])
           cout<<"\r\nVariables:\r\n";
             print_scope_members(&global_scope, 2);
         }
-        if (c == 'c') system("clear");
+        if (c == 'c') system("cls ^ clear");
         if (c == 'd')
         {
           string n;
@@ -118,10 +119,11 @@ int main(int argc, char *argv[])
           {
             extiter a = global_scope.members.find(n);
             if (a != global_scope.members.end())
-              print_scope_members(a->second, 2);
+              print_ext_data(a->second, 2);
             else cout << "Not found: " << n << endl;
           }
         }
+        if (c == 'e') cout << cferr << endl;
         getchar();
         cout << ">>";
         c = getchar();
@@ -165,12 +167,12 @@ int main(int argc, char *argv[])
     }
     if (p1=="-d")
     {
-      if (argc<3) {puts("Insufficient parameters"); return -11; }
+      if (argc < 3) {puts("Insufficient parameters"); return -11; }
       result = CompileEGMf(argv[2],argv[3],1,0);
     }
     if (true or p1=="-s")
     {
-      if (argc<3) { return file_check("syntax.txt"); {puts("Insufficient parameters"); return -11; } }
+      if (argc < 3) { return file_check("syntax.txt"); {puts("Insufficient parameters"); return -11; } }
       return file_check(argv[2]);
     }
     if (p1=="-?")
