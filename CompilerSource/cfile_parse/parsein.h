@@ -218,7 +218,15 @@
 #define __GNUC_GNU_INLINE__ 1
 #define _GNU_SOURCE 1*/
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <math.h>
+
+/*
+typedef long cock;
+typedef cock dong;
+*/
 
 /*
 #include <_mingw.h>

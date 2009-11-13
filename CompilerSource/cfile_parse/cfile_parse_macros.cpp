@@ -184,7 +184,7 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
         int arg_count = -1;
         varray<string> args;
         
-        string defiendum=cfile.substr(poss,pos-poss);
+        string definiendum=cfile.substr(poss,pos-poss);
         if (cfile[pos]=='(') //macro function
         {
           pos++;
@@ -221,13 +221,13 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
         const unsigned poss2=pos;
         move_newline();
         
-        string defiens=cfile.substr(poss2,pos-poss2);
+        string definiens=cfile.substr(poss2,pos-poss2);
         
-        /*cout << "Define \"" << defiendum << "\" as \"" << defiens << "\"\r\n";
-        if (current_scope->members.find(defiendum) != current_scope->members.end())
-          current_scope->members.erase(defiendum);*/
-        macro_type *t = &macros[defiendum];
-        *t = defiens;
+        /*cout << "Define \"" << definiendum << "\" as \"" << definiens << "\"\r\n";
+        if (current_scope->members.find(definiendum) != current_scope->members.end())
+          current_scope->members.erase(definiendum);*/
+        macro_type *t = &macros[definiendum];
+        *t = definiens;
         if (arg_count != -1)
         {
           t->assign_func();
@@ -243,7 +243,7 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
         
         const string uw = cfile.substr(poss,pos-poss);
         if (uw != "__attribute__") //_mingw.h is a little bitch
-        macros.erase(uw);
+          macros.erase(uw);
       }
     }
     //Including things

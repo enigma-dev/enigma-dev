@@ -105,7 +105,8 @@ int parse_cfile(string cftext)
   int funclevel=-1;
   int fargs_named=0;
   int fargs_count=0;*/
-
+  
+  int fparam_named = 0;
   unsigned int *debugpos;
   debugpos = &pos;
   
@@ -236,47 +237,45 @@ int parse_cfile(string cftext)
       if (cm == unsigned(-2)) continue;
       if (cm != unsigned(-1)) return cm;
       
-  if (n=="__asm") //now we have a problem
-  {
-    while (is_useless(cfile[pos])) pos++;
-    if (cfile[pos] != '(')
-    {
-      cferr = "Expected ( following inline-assembly token";
-      return pos;
-    }
-    pos++;
-    while (is_useless(cfile[pos])) pos++;
-    if (cfile[pos] != '"')
-    {
-      cferr = "Expected string of assembly instructions";
-      return pos;
-    }
-    pos++;
-    while (pos<len and cfile[pos] != '"')
-      { if (cfile[pos]=='\\') pos++; pos++; }
-    if (cfile[pos]!='"')
-    {
-      cferr = "Expected string of assembly instructions";
-      return pos;
-    }
-    pos++;
-    while (is_useless(cfile[pos])) pos++;
-    if (cfile[pos]!=')')
-    {
-      cferr = "Expected closing parenthesis after assembly string";
-      return pos;
-    }
-    pos++;
-  }
-  else
-  {
-      int diderrat = handle_identifiers(n,last_identifier,pos,last_named,last_named_phase,last_type);
-      //cout << last_named << ":" << last_named_phase << "  ->  ";
-      if (diderrat != -1)
-        return diderrat;
-  }
-      
-      //cout << last_named << ":" << last_named_phase << "\r\n";
+      if (n=="__asm") //now we have a problem
+      {
+        while (is_useless(cfile[pos])) pos++;
+        if (cfile[pos] != '(')
+        {
+          cferr = "Expected ( following inline-assembly token";
+          return pos;
+        }
+        pos++;
+        while (is_useless(cfile[pos])) pos++;
+        if (cfile[pos] != '"')
+        {
+          cferr = "Expected string of assembly instructions";
+          return pos;
+        }
+        pos++;
+        while (pos<len and cfile[pos] != '"')
+          { if (cfile[pos]=='\\') pos++; pos++; }
+        if (cfile[pos]!='"')
+        {
+          cferr = "Expected string of assembly instructions";
+          return pos;
+        }
+        pos++;
+        while (is_useless(cfile[pos])) pos++;
+        if (cfile[pos]!=')')
+        {
+          cferr = "Expected closing parenthesis after assembly string";
+          return pos;
+        }
+        pos++;
+      }
+      else
+      {
+        int diderrat = handle_identifiers(n,last_identifier,pos,last_named,last_named_phase,last_type,fparam_named);
+        //cout << last_named << ":" << last_named_phase << "  ->  ";
+        if (diderrat != -1)
+          return diderrat;
+      }
       continue;
     }
     
@@ -300,7 +299,7 @@ int parse_cfile(string cftext)
         }
         if (last_identifier == "")
         {
-          cferr = "No defiendum in type definition";
+          cferr = "No definiendum in type definition";
           return pos;
         }
         extiter it = current_scope->members.find(last_identifier);
@@ -330,10 +329,11 @@ int parse_cfile(string cftext)
         {
           case LN_DECLARATOR:
               //Can't error on last_named_phase != DEC_IDENTIFIER, or structs won't work
-              if (refstack.currentsymbol() == '(' and not refstack.topmostcomplete())
+              if (refstack.currentsymbol() == '(' and !refstack.currentcomplete())
               {
-                pos++;
-                continue;
+                if (fparam_named)
+                  refstack.inc_current();
+                pos++; continue;
               }
               last_named_phase = DEC_FULL; //reset to 4 for next identifier.
             break;
@@ -485,7 +485,7 @@ int parse_cfile(string cftext)
     
     if (cfile[pos] == '(')
     {
-      if (last_named != LN_DECLARATOR)
+      if ((last_named | LN_TYPEDEF) != (LN_DECLARATOR | LN_TYPEDEF))
       {
         if (last_named != LN_OPERATOR or last_named_phase != OP_PARAMS)
         {
@@ -513,6 +513,10 @@ int parse_cfile(string cftext)
         cferr = "Unexpected closing parenthesis: None open";
         return pos;
       }
+      if (refstack.currentsymbol() == '(')
+        if (fparam_named)
+          refstack.inc_current();
+      
       plevel--;
       refstack--; //Move past previous parenthesis
       //last_named_phase=0;
@@ -541,7 +545,7 @@ int parse_cfile(string cftext)
       //Function implementation.
       else if (last_named_raw == LN_DECLARATOR) // Do not confuse with ')'
       {
-        if (refstack.nextsymbol() == '(')
+        if (refstack.topmostsymbol() == '(')
         {
           //Register the function in the current scope
           if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc))
@@ -549,6 +553,7 @@ int parse_cfile(string cftext)
           
           //Skip the code: we don't need to know it ^_^
           skipto = '}'; skip_inc_on = '{';
+          push_worthless = 2;
         }
         else
         {
@@ -573,7 +578,7 @@ int parse_cfile(string cftext)
           else
           {
             cferr = (last_named_phase == DEC_FULL)?"Expected identifier between typename and '{'":
-                    (last_named_phase == DEC_IDENTIFIER)?"`"+last_identifier+"' does not name a function":
+                    (last_named_phase == DEC_IDENTIFIER)?"Unepected symbol '{':  `"+last_identifier+"' does not name a function":
                     "Unexpected '{' in declaration.";
             return pos;
           }
@@ -586,7 +591,8 @@ int parse_cfile(string cftext)
         return pos;*/
       }
       
-      scope_stack_because_of_fucking_extern_C_keyword.push(push_worthless);
+      if (push_worthless != 2)
+        scope_stack_because_of_fucking_extern_C_keyword.push(push_worthless);
       
       last_identifier = "";
       last_named = LN_NOTHING;
@@ -609,7 +615,7 @@ int parse_cfile(string cftext)
       
       const bool worthless = scope_stack_because_of_fucking_extern_C_keyword.top();
       scope_stack_because_of_fucking_extern_C_keyword.pop();
-      if (worthless) continue;
+      if (worthless) { pos++; continue; }
       
       if (current_scope == &global_scope)
       {
@@ -716,7 +722,7 @@ int parse_cfile(string cftext)
       if (cfile[++pos] == 'C')
       if (cfile[++pos] == '"')
       {
-        last_named = LN_NOTHING;
+        last_named = LN_NOTHING; //phase is already 0
         pos++; continue;
       }
       cferr = "String literal not allowed here";

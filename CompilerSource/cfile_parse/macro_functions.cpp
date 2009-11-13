@@ -67,8 +67,8 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
     //Comma drops out as soon as cfile[pos] == ','
     //End Parenth will not increment if !lvl, so cfile[pos] == ')'
     macro_args[args_given++] = cfile.substr(spos,pos-spos);
-    cout << "Argument " << i << ": " << cfile.substr(spos,pos-spos) << endl;
-    cout << "This: '"<<cfile[pos]<<"'\r\n";
+    //cout << "Argument " << i << ": " << cfile.substr(spos,pos-spos) << endl;
+    //cout << "This: '"<<cfile[pos]<<"'\r\n";
     pos++;
   }
   
@@ -78,7 +78,7 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
     return false;
   }
   
-  for (unsigned i = 0; i < macrostr.length(); i++) //unload the array of values we created before into the macro's defiens
+  for (unsigned i = 0; i < macrostr.length(); i++) //unload the array of values we created before into the macro's definiens
   {
     if ((is_letter(macrostr[i]) and !is_digit(macrostr[i-1])) or macrostr[i] == '#')
     {

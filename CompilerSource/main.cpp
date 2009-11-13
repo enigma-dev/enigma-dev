@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
           }
         }
         if (c == 'e') cout << cferr << endl;
+        if (c == 'p') system("PAUSE");
         getchar();
         cout << ">>";
         c = getchar();

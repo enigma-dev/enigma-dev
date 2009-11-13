@@ -77,6 +77,11 @@ unsigned short rf_stack::topmostcount()
   if (last == NULL) return 0;
   return last->ref.count;
 }
+bool rf_stack::currentcomplete()
+{
+  if (now == NULL) return 0;
+  return last->ref.completed;
+}
 bool rf_stack::topmostcomplete()
 {
   if (last == NULL) return 0;

@@ -139,13 +139,24 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
     
     if (it != current_scope->members.end())
     {
-      if (last != LN_NAMESPACE or !(it->second->flags & EXTFLAG_NAMESPACE))
+      if (last == LN_NAMESPACE and (it->second->flags & EXTFLAG_NAMESPACE))
       {
-        cferr = "Redeclaration of `"+name+"' at this point";
-        return 0;
+        ext_retriever_var = it->second;
+        return 1;
       }
-      ext_retriever_var = it->second;
-      return 1;
+      else
+      {
+        if (it->second->is_function())
+        {
+          ext_retriever_var = it->second;
+          return 1;
+        }
+        else
+        {
+          cferr = "Redeclaration of `"+name+"' at this point";
+          return 0;
+        }
+      }
     }
   }
   else

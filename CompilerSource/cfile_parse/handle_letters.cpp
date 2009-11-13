@@ -142,7 +142,7 @@ unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile
 }
 
 extern bool is_tflag(string x);
-int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type)
+int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named)
 {
   //it's not a macro, so the next thing we'll check for is keyword
   if (n=="struct" or n=="class")
@@ -152,8 +152,11 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
     {
       if (last_named != LN_TYPEDEF)
       {
-        cferr="Unexpected `"+n+"' token";
-        return pos;
+        if (last_named != LN_DECLARATOR or refstack.currentsymbol() != '(')
+        {
+          cferr="Unexpected `"+n+"' token";
+          return pos;
+        }
       }
       else
       {
@@ -329,15 +332,16 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
   if (n=="virtual")
   if (n=="mutable")
   return -1;
-
+  
   //Next, check if it's a type name.
   //If flow allows, this should be moved before the keywords section.
-
+  
   //Check if it's a modifier
   if (is_tflag(n))
   {
     //last_typename += n + " "; Why bother
-    last_type = global_scope.members.find("n")->second;
+    last_type = builtin_type__int;
+    
     if (last_named==LN_NOTHING)
     {
       last_named = LN_DECLARATOR;
@@ -345,7 +349,6 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
         last_named_phase = DEC_LONG;
       else
         last_named_phase = DEC_GENERAL_FLAG;
-      last_type = builtin_type__int;
       return -1;
     }
     
@@ -381,6 +384,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
             cferr = "Expected ';' before new declaration";
             return pos;
           }
+          fparam_named = 1;
           return -1;
         }
       }
@@ -443,6 +447,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
           cferr = "Expected ';' before new declaration; old declaration is of type " + (last_type?last_type->name:string("NULL")) + " as " + last_identifier;
           return pos;
         }
+        fparam_named = 1;
         return -1;
       } 
       //If error, or if it was declared in this scope
@@ -509,7 +514,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       cferr="Expected type name or keyword before identifier";
       return pos;
     }
-    else
+    else //Standalone identifer is okay in an enum
     {
       last_named = LN_DECLARATOR;
       last_named_phase = DEC_IDENTIFIER;
@@ -535,7 +540,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
             cferr="Expected ',' or ';' before identifier";
             return pos;
           }
-          refstack.inc_current();
+          fparam_named = 1;
           return -1;
         }
         last_named_phase = DEC_IDENTIFIER;
