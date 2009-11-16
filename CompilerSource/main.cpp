@@ -49,6 +49,27 @@ string fc(const char* fn);
 void print_ext_data(externs *ext,int indent);
 void print_scope_members(externs* gscope, int indent);
 
+char getch()
+{
+  int c, first;
+  first = c = getchar();
+  while (c != '\n' && c != EOF)
+  c = getchar();
+  return first;
+}
+string getst()
+{
+  string res;
+  int c, first;
+  first = c = getchar();
+  while (c != '\n' && c != EOF)
+  {
+    res += char(c);
+    c = getchar();
+  }
+  return res;
+}
+
 #include "general/implicit_stack.h"
 extern string cfile_top;
 int main(int argc, char *argv[])
@@ -86,7 +107,7 @@ int main(int argc, char *argv[])
       cout << "Macros ("<<macros.size()<<") [+]\r\nVariables [+]\r\n";
       
       cout << ">>";
-      char c = getchar();
+      char c = getch();
       while (c != '\r' and c != '\n')
       {
         if (c == '+')
@@ -110,11 +131,17 @@ int main(int argc, char *argv[])
         if (c == 'c') system("cls ^ clear");
         if (c == 'd')
         {
-          string n;
-          cout << "Define: "; cin >> n;
+          cout << "Define: ";
+          string n = getst();
           maciter a = macros.find(n);
           if (a != macros.end())
-            cout << "  #define " << n << " " << (string)a->second << endl;
+          {
+            cout << "  #define " << n;
+            if (a->second.argc != -1) {
+              cout << "("; for (int i=0; i<a->second.argc; i++) 
+              cout << a->second.args[i] << (i+1<a->second.argc ? ", " : ")"); }
+            cout << " " << (string)a->second << endl;
+          }
           else
           {
             extiter a = global_scope.members.find(n);
@@ -123,11 +150,22 @@ int main(int argc, char *argv[])
             else cout << "Not found: " << n << endl;
           }
         }
+        if (c == 'm')
+        {
+          string search_terms;
+          cout << "Search in Macros: ";
+          cin >> search_terms;
+          
+          getch(); bool f = 0;
+          for (maciter i = macros.begin(); i != macros.end(); i++)
+            if (string(i->second).find(search_terms) != string::npos)
+            { cout << "Found " << i->first << ". (N/Q)"; char a = getch(); f=1; if (a != 'N' and a != 'n') break; }
+          if (!f) cout << "Not found.";
+        }
         if (c == 'e') cout << cferr << endl;
         if (c == 'p') system("PAUSE");
-        getchar();
         cout << ">>";
-        c = getchar();
+        c = getch();
       }
     
     return 0;
@@ -135,7 +173,6 @@ int main(int argc, char *argv[])
       parser_init();
       string b = parser_main(fc("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parsein.txt"));
     
-    getchar();
     return 0;
     
     string p1;

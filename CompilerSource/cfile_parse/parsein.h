@@ -1,4 +1,5 @@
 //These must be requested by the IDE
+/*//Windows
 #define __DBL_MIN_EXP__ (-1021)
 #define __FLT_MIN__ 1.17549435e-38F
 #define __CHAR_BIT__ 8
@@ -89,7 +90,7 @@
 #define __LDBL_DIG__ 18
 #define __declspec(x) __attribute__((x))
 
-/*
+/*/
 #define __DBL_MIN_EXP__ (-1021)
 #define __FLT_MIN__ 1.17549435e-38F
 #define __DEC64_DEN__ 0.000000000000001E-383DD
@@ -216,12 +217,27 @@
 #define __SIZEOF_LONG_LONG__ 8
 #define __LDBL_DIG__ 18
 #define __GNUC_GNU_INLINE__ 1
-#define _GNU_SOURCE 1*/
+#define _GNU_SOURCE 1
+//*/
 
-#include <stdlib.h>
+
 #include <stdio.h>
+//#include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
+//typedef int you_piece_of_shit(void __cookie, char __buf, size_t __nbytes);
+
+/*
+#define regablah(x) int wee##x##11;
+regablah(kends)
+regablah(ner)
+regablah(nis)
+regablah(eeeeeeeeeeeeee)
+
+#define tits(x) __asm(#x)
+int a() tits(mov $1 %eax);
+*/
 
 /*
 typedef long cock;

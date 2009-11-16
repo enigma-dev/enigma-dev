@@ -79,14 +79,26 @@ void handle_macro_pop(iss &c_file,isui &position,isui &cfile_length)
 extern string cferr;
 string tostring(int val);
 #include "../general/parse_basics.h"
+bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type,varray<tpdata> &tparams, int tpc = 0);
 
 //struct a { struct a *b; }, not struct a { a* b }
 bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_named,int & last_named_phase, externs *&last_type)
 {
-  if (last_identifier == "" or !find_extname(last_identifier,EXTFLAG_TYPENAME))
+  if (last_identifier == "")
   {
-    cferr = "`"+last_identifier+"' does not name a type.";
+    cferr = "Identifier expected";
     return 0;
+  }
+  if (!find_extname(last_identifier,EXTFLAG_TYPENAME))
+  {
+    if (current_scope->members.find(last_identifier) != current_scope->members.end())
+    {
+      cferr = "`"+last_identifier+"' does not name a type.";
+      return 0;
+    }
+    rf_stack NO_REFS;
+    varray<tpdata> EMPTY;
+    ExtRegister(LN_STRUCT,last_identifier,NO_REFS,NULL,EMPTY,0);
   }
   last_named = LN_DECLARATOR;
   last_named_phase = idnamed?DEC_IDENTIFIER:DEC_FULL;
@@ -152,7 +164,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
     {
       if (last_named != LN_TYPEDEF)
       {
-        if (last_named != LN_DECLARATOR or refstack.currentsymbol() != '(')
+        if (last_named != LN_DECLARATOR or !(last_named_phase == 0 or refstack.currentsymbol() == '('))
         {
           cferr="Unexpected `"+n+"' token";
           return pos;
@@ -219,12 +231,12 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
   }
   if (n=="union")
   {
-    //Struct can only really follow typedef, if it's not on its own.
+    //Union can only really follow typedef, if it's not on its own.
     if (last_named != LN_NOTHING)
     {
       if (last_named != LN_TYPEDEF)
       {
-        cferr="Unexpected `struct' token";
+        cferr="Unexpected `union' token";
         return pos;
       }
       else
@@ -325,6 +337,15 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
   {
     return -1;
   }
+  if (n == "throw")
+  {
+    if (last_named != LN_DECLARATOR or (refstack.currentsymbol() != '(' and refstack.currentsymbol() != ')'))
+    { cferr = "Unexpected `throw' token"; return pos; }
+    last_named_phase = DEC_THROW;
+    return -1;
+  }
+  if (n=="const" or n=="__const") //or for that matter, if n fucking= ____const__
+    return -1; //Put something here if const ever fucking matters
   if (n=="class")
   if (n=="friend")
   if (n=="private")

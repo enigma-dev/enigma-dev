@@ -1218,8 +1218,8 @@ value evaluate_expression(string expr)
     }
     
     rerr = string("Unrecognized symbol '") + exp[pos] + "' in [ " + exp + " ] at " + tostring(pos);
-    cout << rerr;
-    return pos;
+    rerrpos = pos; //cout << rerr;
+    return 0;
   } //end of expression
   
   if (level>0)

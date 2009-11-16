@@ -297,6 +297,11 @@ int parse_cfile(string cftext)
           cferr = "Invalid typedef";
           return pos;
         }
+        
+        //If we're in function params of a typedef
+        if (refstack.currentsymbol() == '(' and !refstack.currentcomplete())
+          goto not_typedefing_anything_yet;
+        
         if (last_identifier == "")
         {
           cferr = "No definiendum in type definition";
@@ -325,7 +330,8 @@ int parse_cfile(string cftext)
       }
       else //Not typedefing anything
       {
-        switch (last_named)
+        not_typedefing_anything_yet:
+        switch (last_named & ~LN_TYPEDEF)
         {
           case LN_DECLARATOR:
               //Can't error on last_named_phase != DEC_IDENTIFIER, or structs won't work
@@ -498,6 +504,14 @@ int parse_cfile(string cftext)
       }
       
       //In a declaration
+      
+      if (last_named_phase == DEC_THROW) //int func() throw(<--You are here);
+      {
+        skipto = ')';
+        skip_inc_on = '(';
+        last_named_phase = DEC_IDENTIFIER;
+        pos++; continue;
+      }
       
       //<declarator> ( ... ) or <declarator> <identifier> ()
       refstack += referencer(last_named_phase == DEC_IDENTIFIER ? '(':')',0,last_named_phase != DEC_IDENTIFIER);
@@ -682,6 +696,18 @@ int parse_cfile(string cftext)
       pos++; continue;
     }
     
+    if (cfile[pos] == ':')
+    {
+      if (last_named == LN_DECLARATOR)
+      {
+        skipto = ';';
+        skipto2 = ';';
+        continue;
+      }
+      cferr = "Unexpected colon at this point";
+      return pos;
+    }
+    
     if (cfile[pos] == '=')
     {
       if (last_named == LN_TEMPLATE)
@@ -727,6 +753,15 @@ int parse_cfile(string cftext)
       }
       cferr = "String literal not allowed here";
       return pos;
+    }//Backslash. This is actually not that common.
+    
+    if (cfile[pos] == '\\')
+    {
+      pos++;
+      if (cfile[pos] == '\r' or cfile[pos] == '\n')
+      { pos++; continue; }
+      cferr = "Stray backslash in program";
+      return pos-1;
     }
     
     cferr = string("Unexpected symbol '")+cfile[pos]+"'";

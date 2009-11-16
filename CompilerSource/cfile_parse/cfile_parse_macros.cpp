@@ -114,9 +114,9 @@ struct flow_stack
 {
   struct n
   {
-    n* prev;
-    bool value;
-    bool used;
+    n* prev; //Next level down, obviously
+    bool value; //If current level is true or false
+    bool used; //If it has been true before, meaning an else has been used/no longer can be anyway
     n(): prev(NULL),value(0),used(0) {}
     n(bool x): prev(NULL), value(x), used(x)  {}
     n(n* p,bool x): prev(p), value(x), used(x) {}
@@ -124,6 +124,7 @@ struct flow_stack
   } *top;
   flow_stack(): top(NULL) {}
   void push(bool x) { top = (top) ? new n(top,top->value and x,!top->value) : new n(top,x,0); }
+  bool push_false() { if (!top) return 0; if (!top->value) top = new n(top,0,1); return !top->value; }
   bool pop() { if (top==NULL) return 1; n*d=top; bool r=top->value; top=top->prev; delete d; return r; }
   bool empty() { return top == NULL; }
   bool topval() { if (top) return top->value; return 0; }
@@ -298,13 +299,6 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
           }
         }
         
-        int iline=0;
-        for (unsigned int i=0; i<pos; i++)
-        {
-          if (cfile[i]=='\n')
-            iline++;
-        }
-        
         c_file.push();
         position.push();
         cfile_length.push();
@@ -315,8 +309,6 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
         pos = 0;
         
         included_files.push(includings(file,include_from));
-        
-        cout << "Including file " << file << " from line " << iline << endl;
       }
       if (next=="import")
       {
@@ -366,15 +358,18 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
       string exp = cfile.substr(spos,pos-spos);
       if (next[0] == 'i')
       {
-        if (next.length() == 2)
+        if (!flowstack.push_false()) //If this expression will be evaluated as false anyway, just push it that way...
         {
-          flowstack.push(evaluate_expression(exp));
-          if (rerrpos != -1) { cferr = "In #if expression at position " + tostring(rerrpos) + ": " + rerr; return spos+rerrpos; }
+          if (next.length() == 2)
+          {
+            flowstack.push(evaluate_expression(exp));
+            if (rerrpos != -1) { cferr = "In #if expression at position " + tostring(rerrpos) + ": " + rerr; return spos+rerrpos; }
+          }
+          else if (next.length() == 5)
+            flowstack.push(macros.find(exp) != macros.end());
+          else if (next.length() == 6)
+            flowstack.push(macros.find(exp) == macros.end());
         }
-        else if (next.length() == 5)
-          flowstack.push(macros.find(exp) != macros.end());
-        else if (next.length() == 6)
-          flowstack.push(macros.find(exp) == macros.end());
       }
       else
       {

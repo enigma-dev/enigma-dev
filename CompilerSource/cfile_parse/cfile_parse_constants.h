@@ -72,7 +72,8 @@ enum
   DEC_LONG,         //long...
   DEC_LONGLONG,     //long long...
   DEC_FULL,         //completed type; ie, "int"
-  DEC_IDENTIFIER    //completed type and identifier. Recurses back to DEC_FULL on comma or semi
+  DEC_IDENTIFIER,   //completed type and identifier. Recurses back to DEC_FULL on comma or semi.
+  DEC_THROW         //int a() throw(...);
 };
 
 enum

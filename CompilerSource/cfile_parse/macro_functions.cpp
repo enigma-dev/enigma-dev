@@ -34,9 +34,18 @@ string tostring(int x);
 string escaped_string(string x)
 {
   string res = '"' + x;
-  for (unsigned i = 0; i < res.length(); i++)
-  if (res[i] == '"' or res[i] == '\\') res.insert(i,"\\");
+  for (unsigned i = 1; i < res.length(); i++)
+    if (res[i] == '"' or res[i] == '\\') { 
+      res.insert(i,"\\"); i++; }
   return res + '"';
+}
+
+string stripspace(string x)
+{
+  unsigned int i;
+  for (i=0; is_useless(x[i]); i++);
+  x.erase(0,i);
+  return x;
 }
 
 bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varray<string> &args, const unsigned numparams)
@@ -77,35 +86,49 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
     macrostr = "Macro function requires " + tostring(numparams) + " parameters, passed " + tostring(args_given);
     return false;
   }
+  bool skipspace = 0, stringify = 0;
   
-  for (unsigned i = 0; i < macrostr.length(); i++) //unload the array of values we created before into the macro's definiens
+  for (unsigned i = 0; i < macrostr.length(); ) //unload the array of values we created before into the macro's definiens
   {
-    if ((is_letter(macrostr[i]) and !is_digit(macrostr[i-1])) or macrostr[i] == '#')
+    if (is_letter(macrostr[i]) and !is_digit(macrostr[i-1]))
     {
       const unsigned si = i;
       
-      //Be on the lookout for such homosexualities as # and ##
-      //To be ISO compliant, add a space between everything that doesn't have a ## in it
-      bool skipspace = 0, stringify = 0;
-      if (macrostr[i] == '#')
-      {
-        if (macrostr[i+1] == '#')
-          i++, skipspace = true;
-        else stringify = true;
-        
-        i++;
-        if (!is_letter(macrostr[i]))
-          continue;
-      }
-      
-      i++; //Guaranteed letter here
-      while (is_letterd(macrostr[i])) i++;
-      const string sstr = macrostr.substr(si,i-si);
+      i++; //Guaranteed letter here, so incrememnt
+      while (i < macrostr.length() and is_letterd(macrostr[i])) i++;
+      string sstr = macrostr.substr(si,i-si);
       
       for (unsigned ii = 0; ii < numparams; ii++)
         if (args[ii] ==  sstr)
-          macrostr.replace(si,i-si,stringify?escaped_string(macro_args[ii]):skipspace?macro_args[ii]:macro_args[ii]+" ");
+        {
+          const string es = macro_args[ii];
+          const string iinto = stringify?escaped_string(es):skipspace?stripspace(es):" "+es;
+          macrostr.replace(si,i-si,iinto);
+          i = si + iinto.length();
+          break;
+        }
+      stringify = skipspace = false;
     }
+    //Be on the lookout for such homosexualities as # and ##
+    //To be ISO compliant, add a space between everything that doesn't have a ## in it
+    else if (macrostr[i] == '#')
+    {
+      if (macrostr[i+1] == '#')
+      {
+        skipspace = true;
+        unsigned int end = i+2; //I'ma be lazy for once and not account for \\\n
+        while (i > 0 and is_useless(macrostr[i-1])) i--;
+        while (end < macrostr.length() and is_useless(macrostr[++end]));
+        macrostr.erase(i,end-i);
+      }
+      else
+      {
+        stringify = true;
+        macrostr[i] = ' ';
+        i++;
+      }
+    }
+    else i++;
   }
   
   return true;
