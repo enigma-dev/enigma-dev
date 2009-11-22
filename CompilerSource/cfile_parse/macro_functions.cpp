@@ -48,16 +48,25 @@ string stripspace(string x)
   return x;
 }
 
+bool is_entirely_white(string x)
+{
+  for (unsigned i=0; i<x.length(); i++)
+    if (!is_useless(x[i])) return 0;
+  return 1;
+}
+
 bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varray<string> &args, const unsigned numparams)
 {
   while (is_useless(cfile[pos])) pos++; 
   if (cfile[pos] != '(') { macrostr = "Expected parameters to macro function"; return false; }
   pos++;
-
+  
+  //cout << endl << endl << endl << endl << endl << endl << "Raw: \r\n" << macrostr;
+  
   varray<string> macro_args;
   unsigned int args_given = 0;
   const unsigned len = cfile.length();
-
+  
   unsigned lvl = 1;
   for (unsigned i = 0; i < numparams or lvl > 0; i++) //parse out each parameter value into an array
   {
@@ -75,7 +84,9 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
     }
     //Comma drops out as soon as cfile[pos] == ','
     //End Parenth will not increment if !lvl, so cfile[pos] == ')'
-    macro_args[args_given++] = cfile.substr(spos,pos-spos);
+    const string rw = cfile.substr(spos,pos-spos);
+    if (args_given or cfile[pos] != ')' or !is_entirely_white(rw))
+      macro_args[args_given++] = rw;
     //cout << "Argument " << i << ": " << cfile.substr(spos,pos-spos) << endl;
     //cout << "This: '"<<cfile[pos]<<"'\r\n";
     pos++;
@@ -86,7 +97,10 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
     macrostr = "Macro function requires " + tostring(numparams) + " parameters, passed " + tostring(args_given);
     return false;
   }
-  bool skipspace = 0, stringify = 0;
+  
+  //cout << "Params: "; for (int i=0; i<args_given; i++) cout << macro_args[i] << ", "; cout << "end.";
+  
+  bool stringify = 0;
   
   for (unsigned i = 0; i < macrostr.length(); ) //unload the array of values we created before into the macro's definiens
   {
@@ -102,12 +116,12 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
         if (args[ii] ==  sstr)
         {
           const string es = macro_args[ii];
-          const string iinto = stringify?escaped_string(es):skipspace?stripspace(es):" "+es;
+          const string iinto = stringify?escaped_string(es):es;
           macrostr.replace(si,i-si,iinto);
           i = si + iinto.length();
           break;
         }
-      stringify = skipspace = false;
+      stringify = false;
     }
     //Be on the lookout for such homosexualities as # and ##
     //To be ISO compliant, add a space between everything that doesn't have a ## in it
@@ -115,7 +129,6 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
     {
       if (macrostr[i+1] == '#')
       {
-        skipspace = true;
         unsigned int end = i+2; //I'ma be lazy for once and not account for \\\n
         while (i > 0 and is_useless(macrostr[i-1])) i--;
         while (end < macrostr.length() and is_useless(macrostr[++end]));
@@ -130,6 +143,6 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
     }
     else i++;
   }
-  
+  //cout << endl << endl << endl << macrostr << endl << endl << endl << endl << endl << endl;
   return true;
 }

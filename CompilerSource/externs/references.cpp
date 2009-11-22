@@ -80,7 +80,7 @@ unsigned short rf_stack::topmostcount()
 bool rf_stack::currentcomplete()
 {
   if (now == NULL) return 0;
-  return last->ref.completed;
+  return now->ref.completed;
 }
 bool rf_stack::topmostcomplete()
 {

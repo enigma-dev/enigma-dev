@@ -156,7 +156,7 @@ int parse_cfile(string cftext)
     //If it's a macro, deal with it here
     if (cfile[pos]=='#')
     {
-      if (true or preprocallowed)
+      if (preprocallowed)
       {
         const unsigned a = cfile_parse_macro(c_file,position,cfile_length);
         if (a != unsigned(-1)) return a;
@@ -337,6 +337,10 @@ int parse_cfile(string cftext)
               //Can't error on last_named_phase != DEC_IDENTIFIER, or structs won't work
               if (refstack.currentsymbol() == '(' and !refstack.currentcomplete())
               {
+                if (cfile[pos] == ';') {
+                  cferr = "Expected closing parenthesis before ';'";
+                  return pos;
+                }
                 if (fparam_named)
                   refstack.inc_current();
                 pos++; continue;

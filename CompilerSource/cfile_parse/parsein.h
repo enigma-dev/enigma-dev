@@ -220,13 +220,28 @@
 #define _GNU_SOURCE 1
 //*/
 
+#define TRIPLE_CONCAT(a,b, c) ALIAS_CONCAT( __CONCAT(a,b),c)
+#define ALIAS_CONCAT(a, b) __CONCAT(a,b)
+int TRIPLE_CONCAT(X,Y,Z);
 
+/*
 #include <stdio.h>
 //#include <stdlib.h>
 #include <string.h>
 #include <math.h>
+*/
 
 //typedef int you_piece_of_shit(void __cookie, char __buf, size_t __nbytes);
+
+/*
+#define __CONCAT(x,y) x ## y
+#define __MATH_PRECNAME(name, r) __CONCAT(name,r)
+
+extern double __MATH_PRECNAME(__CONCAT(__,acos), ) 
+#pragma debug_entry_point
+(double __x);
+extern double __MATH_PRECNAME(asin, ) (double __x);
+*/
 
 /*
 #define regablah(x) int wee##x##11;
@@ -439,3 +454,4 @@ int ordinal();
 captain(chalupa);
 
 */
+

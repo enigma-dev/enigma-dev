@@ -220,7 +220,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       and last_named_phase != DEC_GENERAL_FLAG
       and last_named_phase != DEC_NOTHING_YET)
       {
-        cferr = "Unexpected `extern' token at this point";
+        cferr = "Stray `extern' token at this point, not expected after DECID_" + tostring(last_named_phase);
         return pos;
       }
       return -1;
