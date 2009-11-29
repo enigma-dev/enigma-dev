@@ -399,30 +399,30 @@ double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fu
           //For each script
           for (int superscript=0;superscript<script_count;superscript++)
           {
-             //For each script on each script's list
-             for (int i=0;i<scripts[superscript].fcount;i++) for (int subscript=0;subscript<script_count;subscript++)  if (scripts[subscript].name==scripts[superscript].fnames[i])
-             {
-                //Go through the list of scripts script I's subscripts call, and add them
-                for (int subsubscr=0;subsubscr<scripts[subscript].fcount;subsubscr++)
+            //For each script on each script's list
+            for (int i=0;i<scripts[superscript].fcount;i++) for (int subscript=0;subscript<script_count;subscript++)  if (scripts[subscript].name==scripts[superscript].fnames[i])
+            {
+              //Go through the list of scripts script I's subscripts call, and add them
+              for (int subsubscr=0;subsubscr<scripts[subscript].fcount;subsubscr++)
+              {
+                int onl=0;
+                
+                //check if the subscript's subscript is on the original script's list already.
+                for (int subsubscr2=0;subsubscr2<scripts[superscript].fcount;subsubscr2++)
+                if (scripts[superscript].fnames[subsubscr2]==scripts[subscript].fnames[subsubscr])
+                { onl=1; break; }
+                
+                if (!onl)
                 {
-                   int onl=0;
-
-                   //check if the subscript's subscript is on the original script's list already.
-                   for (int subsubscr2=0;subsubscr2<scripts[superscript].fcount;subsubscr2++)
-                   if (scripts[superscript].fnames[subsubscr2]==scripts[subscript].fnames[subsubscr])
-                   { onl=1; break; }
-
-                   if (!onl)
-                   {
-                     //printf("Link'd %s to %s\n",scripts[subscript].fnames[subsubscr].c_str(),scripts[superscript].name.c_str());
-                     scripts[superscript].fnames[scripts[superscript].fcount] = scripts[subscript].fnames[subsubscr];
-                     scripts[superscript].fcount++;
-                   }
+                 //printf("Link'd %s to %s\n",scripts[subscript].fnames[subsubscr].c_str(),scripts[superscript].name.c_str());
+                 scripts[superscript].fnames[scripts[superscript].fcount] = scripts[subscript].fnames[subsubscr];
+                 scripts[superscript].fcount++;
                 }
-                break;
-             }
+              }
+              break;
+            }
           }
-      //}
+      
       printf("\"Link'd\" all scripts.\n"); fflush(stdout);
       for (int i=0;i<script_count;i++)
       {
