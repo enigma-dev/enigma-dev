@@ -129,9 +129,9 @@ bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varr
     {
       if (macrostr[i+1] == '#')
       {
-        unsigned int end = i+2; //I'ma be lazy for once and not account for \\\n
+        unsigned int end = i+2; //I'ma be lazy for once and not account for \\\n (backslash-escaped newlines)
         while (i > 0 and is_useless(macrostr[i-1])) i--;
-        while (end < macrostr.length() and is_useless(macrostr[++end]));
+        while (end < macrostr.length() and is_useless(macrostr[end])) end++;
         macrostr.erase(i,end-i);
       }
       else

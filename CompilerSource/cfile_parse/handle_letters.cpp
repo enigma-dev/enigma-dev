@@ -112,8 +112,9 @@ unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile
   if ((t=macros.find(n)) != macros.end())
   {
     bool recurs=0;
-    for (unsigned int iii=0;iii<macrod;iii++)
-    if (inmacros[iii]==n) { recurs=1; break; }
+    if (t->second.recurse_danger)
+      for (unsigned int iii=0;iii<macrod;iii++)
+         if (inmacros[iii]==n) { recurs=1; break; }
     if (!recurs)
     {
       string macrostr = t->second;
@@ -149,6 +150,7 @@ unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile
       inmacros[macrod++] = n;
       return unsigned(-2);
     }
+    else cout << "I'm a stupid cunt.\r\n";
   }
   return unsigned(-1);
 }
@@ -346,10 +348,20 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
   }
   if (n=="const" or n=="__const") //or for that matter, if n fucking= ____const__
     return -1; //Put something here if const ever fucking matters
+  if (n=="using")
+  {
+    if (last_named != LN_NOTHING) {
+      cferr = "Unexpecting `using' token";
+      return pos;
+    }
+    last_named = LN_USING;
+    last_named_phase = USE_NOTHING;
+    return -1;
+  }
   if (n=="class")
   if (n=="friend")
   if (n=="private")
-  if (n=="public" or n=="protected" or n=="using")
+  if (n=="public" or n=="protected")
   if (n=="virtual")
   if (n=="mutable")
   return -1;
@@ -627,12 +639,13 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
         }
         if (last_named_phase == USE_NAMESPACE)
         {
-          if (!find_extname(n,LN_NAMESPACE))
+          if (!find_extname(n,EXTFLAG_NAMESPACE))
           {
             cferr = "Expected namespace identifier following `namespace' keyword";
             return pos;
           }
           last_named_phase = USE_NAMESPACE_IDENTIFIER;
+          last_type = ext_retriever_var;
           break;
         }
         last_named_phase = USE_SINGLE_IDENTIFIER;

@@ -231,7 +231,7 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
         *t = definiens;
         if (arg_count != -1)
         {
-          t->assign_func();
+          t->assign_func(definiendum);
           for (int i=0; i<arg_count; i++)
             t->addarg(args[i]);
         }

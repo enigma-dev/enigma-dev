@@ -70,18 +70,35 @@ externs::externs(string n,externs* t,externs* p,unsigned int f)
   flags = f;
 }
 
-macro_type::operator string() { return name; }
-macro_type::macro_type(): argc(-1) {}
-macro_type::macro_type(string x): argc(-1), name(x) {}
-macro_type& macro_type::operator= (string x) { name = x; return *this; }
-void macro_type::assign_func() { if (argc==-1) argc=0; }
+macro_type::operator string() { return val; }
+macro_type::macro_type(): argc(-1), recurse_danger(0) {}
+macro_type::macro_type(string x): argc(-1), val(x), recurse_danger(0) {}
+macro_type& macro_type::operator= (string x) { val = x; return *this; }
+void macro_type::assign_func(string n) { if (argc==-1) argc=0; recurse_danger = check_recurse_danger(n); }
 void macro_type::addarg(string x) { args[argc++] = x; }
+
+#include "../general/parse_basics.h"
+bool macro_type::check_recurse_danger(string n)
+{
+  register bool dgr = 0;
+  for (unsigned i = 0; i < val.length(); i++)
+  {
+    if (is_letter(val[i]))
+    {
+      const unsigned si = i;
+      while (is_letterd(val[i])) i++;
+      if (val.substr(si,i-si) == n)
+      { dgr = 1; break; }
+    }
+  }
+  return dgr;
+}
 
 
 
 //Map to sort, darray for polymorphic things
 map<string, varray<externs> > extarray;
-externs global_scope,*current_scope;
+externs global_scope,*current_scope,using_scope;
 map<string,macro_type> macros;
 
 

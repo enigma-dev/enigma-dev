@@ -228,9 +228,18 @@ int parse_cfile(string cftext)
     //This implies it's one of three things...
     if (is_letter(cfile[pos]))
     {
-      unsigned int sp = pos;
-      while (is_letterd(cfile[++pos])); // move to the end of the word
-      string n = cfile.substr(sp,pos-sp); //This is the word we're looking at.
+      string n = "";
+      unsigned int sp = pos++;
+      while (is_letterd(cfile[pos])) // move to the end of the word
+      { //This is an odd case. If we reach the end of the file while we read, 
+        if (++pos >= len) //it's a good idea to keep going
+        {
+          n += cfile.substr(sp,pos-sp);
+          handle_macro_pop(c_file,position,cfile_length);
+          sp=pos; if (pos >= len) break;
+        }
+      }
+      n += cfile.substr(sp,pos-sp); //This is the word we're looking at.
       
       //Macros get precedence. Check if it's one.
       const unsigned int cm = handle_macros(n,c_file,position,cfile_length);
@@ -320,12 +329,13 @@ int parse_cfile(string cftext)
           return pos;
         }
         
-        current_scope->members[last_identifier] = new externs;
-        current_scope->members[last_identifier]-> name = last_identifier;
-        current_scope->members[last_identifier]-> members[ "" ] = last_type;
-        current_scope->members[last_identifier]-> flags = last_type->flags | EXTFLAG_TYPEDEF;
-        current_scope->members[last_identifier]-> refstack = refstack.dissociate();
+        externs *n = new externs;
+        n->name = last_identifier;
+        n->members[ "" ] = last_type;
+        n->flags = last_type->flags | EXTFLAG_TYPEDEF;
+        n->refstack = refstack.dissociate();
         
+        current_scope->members[last_identifier] = n;
         last_named_phase = DEC_FULL;
       }
       else //Not typedefing anything
@@ -398,13 +408,32 @@ int parse_cfile(string cftext)
                 cferr = "Nothing to use";
                 return pos;
               }
-            break;
+              else //This is just so jump to case doesn't skip pu
+              {
+                extiter pu = using_scope.members.find(last_type->name);
+                if (pu != using_scope.members.end())
+                {
+                  if (pu->second != last_type) {
+                    cferr = "Using `" + last_type->name + "' conflicts with previous `using' directive";
+                    return pos;
+                  }
+                } 
+                else
+                {
+                  using_scope.members[last_type->name] = last_type;
+                }
+              }
+            pos++;
+            continue;
+          default:
+              cferr = "WELL WHAT THE FUCK.";
+            return pos;
         }
         
         externs *type_to_use = last_type;
         rf_stack refs_to_use = refstack.dissociate();
         
-        if (type_to_use != NULL) //A case where it would be is struct str;
+        if (type_to_use != NULL) //A case where it would be NULL is struct str;
         while (type_to_use->flags & EXTFLAG_TYPEDEF)
         {
           refs_to_use += type_to_use->refstack;
@@ -518,8 +547,18 @@ int parse_cfile(string cftext)
       }
       
       //<declarator> ( ... ) or <declarator> <identifier> ()
-      refstack += referencer(last_named_phase == DEC_IDENTIFIER ? '(':')',0,last_named_phase != DEC_IDENTIFIER);
-      plevel++;
+      if (refstack.currentsymbol() == '(' and !refstack.currentcomplete()) //int func() throw(<--You are here);
+      {
+        skipto = ')';
+        skip_inc_on = '(';
+        last_named_phase = DEC_IDENTIFIER;
+        pos++; continue;
+      }
+      else
+      {
+        refstack += referencer(last_named_phase == DEC_IDENTIFIER ? '(':')',0,last_named_phase != DEC_IDENTIFIER);
+        plevel++;
+      }
       
       pos++; continue;
     }
@@ -662,10 +701,10 @@ int parse_cfile(string cftext)
         last_named_phase = 0;
       }
       
-      if (current_scope->flags & EXTFLAG_TYPEDEF)
+      if (current_scope->flags & EXTFLAG_PENDING_TYPEDEF)
       {
         last_named |= LN_TYPEDEF;
-        current_scope->flags &= ~EXTFLAG_TYPEDEF;
+        current_scope->flags &= ~EXTFLAG_PENDING_TYPEDEF;
       }
       
       last_type = current_scope;

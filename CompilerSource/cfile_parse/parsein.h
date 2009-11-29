@@ -90,7 +90,7 @@
 #define __LDBL_DIG__ 18
 #define __declspec(x) __attribute__((x))
 
-/*/
+/*///Linux
 #define __DBL_MIN_EXP__ (-1021)
 #define __FLT_MIN__ 1.17549435e-38F
 #define __DEC64_DEN__ 0.000000000000001E-383DD
@@ -220,16 +220,35 @@
 #define _GNU_SOURCE 1
 //*/
 
-#define TRIPLE_CONCAT(a,b, c) ALIAS_CONCAT( __CONCAT(a,b),c)
-#define ALIAS_CONCAT(a, b) __CONCAT(a,b)
-int TRIPLE_CONCAT(X,Y,Z);
+namespace enigma
+{
+  typedef int ITACO;
+}
+
+using namespace enigma;
+ITACO TUESDAYS;
+
+//#include <cstdio>
 
 /*
 #include <stdio.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 */
+
+/*
+typedef struct __pthread_internal_slist
+{
+  struct __pthread_internal_slist *__next;
+} __pthread_slist_t;
+*/
+
+/*
+#define __CONCAT(a, b) a ## b
+#define TRIPLE_CONCAT(a,b, c) ALIAS_CONCAT( __CONCAT(a,b),c)
+#define ALIAS_CONCAT(a, b) __CONCAT(a,b)
+int TRIPLE_CONCAT(X,Y,Z);*/
 
 //typedef int you_piece_of_shit(void __cookie, char __buf, size_t __nbytes);
 

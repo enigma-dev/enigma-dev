@@ -38,7 +38,8 @@
 #define EXTFLAG_STRUCT 64
 #define EXTFLAG_NAMESPACE 128
 #define EXTFLAG_TYPEDEF 256
-//#define EXTFLAG_NAMESPACE 512
+#define EXTFLAG_PENDING_TYPEDEF 512
+//#define EXTFLAG_NAMESPACE 1024
 
 #include "references.h"
 
@@ -78,20 +79,22 @@ struct externs
 struct macro_type
 {
   int argc;
-  string name;
+  string val;
+  bool recurse_danger;
   varray<string> args;
   operator string();
   macro_type();
   macro_type(string x);
   macro_type &operator= (string x);
+  bool check_recurse_danger(string n);
+  void assign_func(string n);
   void addarg(string x);
-  void assign_func();
 };
 
 extern map<string,macro_type> macros;
 typedef map<string,externs*>::iterator extiter;
 typedef map<string,macro_type>::iterator maciter;
-extern externs global_scope,*current_scope;
+extern externs global_scope,*current_scope,using_scope;
 
 extiter scope_find_member(string name);
 extern externs* ext_retriever_var;

@@ -65,7 +65,7 @@ inline void regmacro(string m,string val,string arg1)
 {
   macro_type *mac = &macros[m];
   *mac = val;
-  mac->assign_func();
+  mac->assign_func(m);
   mac->addarg(arg1);
 }
 
@@ -110,13 +110,16 @@ void cparse_init()
   
   #ifdef linux
   include_directories[0] = "/usr/include/";
-  include_directories[1] = "/usr/lib/gcc/i486-linux-gnu/4.3.3/include/";
+  include_directories[1] = "/usr/include/c++/4.3/";
+  include_directories[2] = "/usr/include/c++/4.3/i486-linux-gnu/";
+  include_directories[3] = "/usr/lib/gcc/i486-linux-gnu/4.3.3/include/";
+  include_directory_count = 4;
   #else
   include_directories[0] = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\include\\";
   include_directories[1] = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\lib\\gcc\\mingw32\\3.4.5\\install-tools\\include\\";
+  include_directory_count = 2;
   #endif
   
-  include_directory_count = 2;
 }
 
 
@@ -187,7 +190,7 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
     e->flags = EXTFLAG_NAMESPACE;
   
   if (is_tdef)
-    e->flags |= EXTFLAG_TYPEDEF; //If this is a new type being typedef'd, it will later be undone
+    e->flags |= EXTFLAG_PENDING_TYPEDEF; //If this is a new type being typedef'd, it will later be undone
   
   if (tpc != 0)
   {
