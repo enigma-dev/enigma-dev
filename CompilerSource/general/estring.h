@@ -25,20 +25,7 @@
 **                                                                              **
 \*********************************************************************************/
 
-int negmod(double firstval, double secondval);
-string chr(char val);
 string tostring(int val);
-unsigned int string_length(string str);
-int string_pos(string substr, string str);
-int string_pos(char* substr, string str);
-string string_copy(string str,double index,double count);
-string string_delete(string str,double index,double count);
-string string_insert(string substr, string str,double index);
-string string_replace(string str, string substr, string newstr);
-string string_replace_all(string str, string substr, string newstr);
-int string_count(string substr, string str);
-string string_repeat(string str,double count);
+int string_count(char c, char* str);
 string arraybounds_as_str(string str);
-string string_letters(string str);
-string string_digits(string str);
-string string_lettersdigits(string str);
+string string_replace_all(string str,string substr,string nstr);

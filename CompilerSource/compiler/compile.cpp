@@ -782,7 +782,7 @@ Double error! Syntax check mischecked undefined script `%s', now compiler is con
                      }
                      if (to_write_tags[iv]!="" && vtags!="")
                      {
-                       if (to_write_tags[iv] != vstars || string_count("[",to_write_arrays[iv]) != string_count("[",varrays))
+                       if (to_write_tags[iv] != vstars || string_count('[',(char*)to_write_arrays[iv].c_str()) != string_count('[',(char*)varrays.c_str()))
                        {
                          printf("Mechanics Warning: Redeclaration of local variable `%s' in event `%s' for object `%s' as different pointer-to types.\n",vname.c_str(),objects[i].events[ii].name.c_str(),objects[i].name.c_str());
                          fflush(stdout);
@@ -1082,10 +1082,10 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
                  on=1;
                  if (alltypes[iv]!=objects[i].events[ii].varname_types[iii] && objects[i].events[ii].varname_types[iii]!="" && alltypes[iv]!="")
                  {
-                    printf("\n\n*********************************%s*********************************\n",string_repeat("*",allnames[iv].length()).c_str());
+                    printf("\n\n*********************************%s*********************************\n",string(allnames[iv].length(),'*').c_str());
                     printf(    "ERROR: Objects contain variable `%s' under two different type names.\n",allnames[iv].c_str());
                     printf(    "Cannot continue with varname of different types. Bailing.\n");
-                    printf(    "*********************************%s*********************************\n\n",string_repeat("*",allnames[iv].length()).c_str());
+                    printf(    "*********************************%s*********************************\n\n",string(allnames[iv].length(),'*').c_str());
                     return 1;
                  }
                  break;
@@ -1142,10 +1142,10 @@ JOYSTICK2 BUTTON5 = 40;  JOYSTICK2 BUTTON6 = 41;  JOYSTICK2 BUTTON7 = 42;  JOYST
             on=1;
             if (alltypes[ii]!=globaltags[i] && globaltags[i]!="" && alltypes[ii]!="")
             {
-               printf("\n\n*********************************%s*****************************************\n",string_repeat("*",allnames[ii].length()).c_str());
+               printf("\n\n*********************************%s*****************************************\n",string(allnames[ii].length(),'*').c_str());
                printf(    "ERROR: Global variable `%s' under different type name than local equivalant.\n",allnames[ii].c_str());
                printf(    "Cannot continue with varname of different types. Bailing.\n");
-               printf(    "*********************************%s*****************************************\n\n",string_repeat("*",allnames[ii].length()).c_str());
+               printf(    "*********************************%s*****************************************\n\n",string(allnames[ii].length(),'*').c_str());
                return 1;
             }
           }

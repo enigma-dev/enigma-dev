@@ -2,7 +2,7 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="cfile_parse/cfile_parse.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="10998" topLine="310" />
+		<Cursor position="14274" topLine="403" />
 	</File>
 	<File name="cfile_parse/cfile_parse_calls.h" open="1" top="0" tabpos="3">
 		<Cursor position="4061" topLine="91" />
@@ -31,8 +31,8 @@
 	<File name="cfile_parse/expression_evaluator_settings.h" open="0" top="0" tabpos="9">
 		<Cursor position="2036" topLine="9" />
 	</File>
-	<File name="cfile_parse/handle_letters.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="9119" topLine="271" />
+	<File name="cfile_parse/handle_letters.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="19942" topLine="629" />
 	</File>
 	<File name="cfile_parse/handle_letters.h" open="0" top="0" tabpos="0">
 		<Cursor position="2505" topLine="4" />
@@ -49,7 +49,7 @@
 	<File name="cfile_parse/parse_basics.h" open="0" top="0" tabpos="0">
 		<Cursor position="2260" topLine="13" />
 	</File>
-	<File name="cfile_parse/parsein.h" open="1" top="1" tabpos="6">
+	<File name="cfile_parse/parsein.h" open="1" top="0" tabpos="6">
 		<Cursor position="7143" topLine="208" />
 	</File>
 	<File name="cfile_parse/value.h" open="0" top="0" tabpos="0">
@@ -67,11 +67,11 @@
 	<File name="compiler/pcs/pcs.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="4479" topLine="79" />
 	</File>
-	<File name="externs/externs.cpp" open="0" top="0" tabpos="5">
-		<Cursor position="3439" topLine="58" />
+	<File name="externs/externs.cpp" open="1" top="0" tabpos="7">
+		<Cursor position="4019" topLine="84" />
 	</File>
-	<File name="externs/externs.h" open="0" top="0" tabpos="3">
-		<Cursor position="3221" topLine="61" />
+	<File name="externs/externs.h" open="1" top="0" tabpos="8">
+		<Cursor position="3736" topLine="71" />
 	</File>
 	<File name="externs/references.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="3978" topLine="74" />

@@ -28,143 +28,16 @@
 #include <string>
 using namespace std;
 
-
-
-int negmod(double firstval, double secondval)
-{
-    while (firstval<0) firstval+=secondval+1;
-    while (firstval>secondval) firstval-=secondval+1;
-    return (int)firstval;
-}
-
-
 string tostring(int val)
 {
-  char a[32];
+  char a[12];
   sprintf(a,"%d",val);
   return a;
 }
 
-
-unsigned int string_length(string str)
-{
-    return str.length();
-}
-
-
-
-int string_pos(string substr, string str)
-{
-    unsigned int a=str.find(substr,0);
-    if (a== string::npos)
-    return 0;
-    return a+1;
-}
-int string_pos(char* substr, string str)
-{
-    unsigned int a=str.find(substr,0);
-    if (a== string::npos)
-    return 0;
-    return a+1;
-}
-
-
-string string_copy(string str,double index,double count)
-{
-    string strn=str;
-   unsigned int indx=(unsigned int)index-1; if (indx==string::npos) indx=0;
-
-   if (indx>strn.length())
-   return "";
-
-   return strn.substr(indx,(int)count);
-}
-
-
-
-string string_delete(string str,double index,double count)
-{
-    string strn=str;
-   int x=(int) index-1; if (x<0) x=0;
-   int c=(int) count;   if (c<0) c=0;
-   return strn.erase(x,c);
-}
-
-
-
-
-string string_insert(string substr, string str,double index)
-{
-    string strn=str;
-    unsigned int x=(unsigned int) index-1; if (x==string::npos) x=0; if (x>strn.length()) x=strn.length();
-    return strn.insert(x,substr);
-}
-
-
-
-string string_replace(string str, string substr, string newstr)
-{
-     string strr=str;
-    int sublen=substr.length();
-    int pos=0;
-    if ((pos=strr.find(substr,pos)) != -1)
-    {
-        strr.erase(pos,sublen);
-        strr.insert(pos,newstr);
-    }
-
-    return strr;
-}
-
-
-
-
-
-string string_replace_all(string str, string substr, string newstr)
-{
-     string strr=str;
-    int sublen=substr.length(),
-        newlen=newstr.length();
-    int pos=0;
-    while ((pos=strr.find(substr,pos)) != -1)
-    {
-        strr.erase(pos,sublen);
-        strr.insert(pos,newstr);
-        pos+=newlen;
-    }
-
-    return strr;
-}
-
-
-int string_count(string substr, string str)
-{
-    int sublen=substr.length();
-    int pos=-sublen, occ=0;
-    while ((pos=str.find(substr,pos+sublen))>=0) occ++;
-    return occ;
-}
-
-
-
-
-
-string string_repeat(string str,double count)
-{
-     string ret="";
-    for (int i=0;i<count;i++)
-    {
-        ret.append(str);
-    }
-    return ret;
-}
-
-
-
-
 string arraybounds_as_str(string str)
 {
-  string ret="";
+  string ret;
   for (unsigned int i=0;i<str.length();i++)
   {
     if (str[i]=='[') ret+="arrayb";
@@ -174,44 +47,20 @@ string arraybounds_as_str(string str)
   return ret;
 }
 
-
-
-
-
-
-string string_letters(string str)
+int string_count(char c, char* str)
 {
-     string ret="";
-    int len=str.length()-1;
-    for (int i=0; i<=len; i++)
-    {
-       if ((str[i]>=65 && str[i]<=91) || (str[i]>=97 && str[i]<=122))
-       ret+=str[i];
-    }
-    return ret;
+    int occ = 0;
+    while (*str) occ+=*(str++)==c;
+    return occ;
 }
 
-string string_digits(string str)
+string string_replace_all(string str,string substr,string nstr)
 {
-     string ret="";
-    int len=str.length()-1;
-    for (int i=0; i<=len; i++)
-    {
-       if (str[i]>=48 && str[i]<=57)
-       ret+=str[i];
-    }
-    return ret;
-}
-
-string string_lettersdigits(string str)
-{
-     string ret="";
-    int len=str.length()-1;
-
-    for (int i=0; i<=len; i++)
-    {
-       if ((str[i]>=65 && str[i]<=91) || (str[i]>=97 && str[i]<=122) || (str[i]>=48 && str[i]<=57))
-       ret+=str[i];
-    }
-    return ret;
+  unsigned pos=0;
+  while ((pos=str.find(substr,pos)) != string::npos)
+  {
+    str.replace(pos,substr.length(),nstr);
+    pos+=nstr.length();
+  }
+  return str;
 }
