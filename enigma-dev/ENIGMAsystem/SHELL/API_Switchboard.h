@@ -1,2 +1,0 @@
-#define ENIGMA_GS_OPENGL 1
-#define ENIGMA_WS_WINDOWS 1 
