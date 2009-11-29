@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+LGM-Plugin: org.enigma.EnigmaRunner
+Class-Path: ../lateralgm.jar svnkit.jar
+
