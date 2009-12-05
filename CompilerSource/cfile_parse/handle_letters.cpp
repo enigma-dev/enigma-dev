@@ -648,7 +648,10 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
           last_type = ext_retriever_var;
           break;
         }
+        if (!find_extname(n,0xFFFFFFFF))
+        { cferr = "Cannot use `" + n + "': undeclared"; return pos; }
         last_named_phase = USE_SINGLE_IDENTIFIER;
+        last_type = ext_retriever_var;
       break;
     default:
       cferr = "Unspecified Error. This shouldn't happen...";
