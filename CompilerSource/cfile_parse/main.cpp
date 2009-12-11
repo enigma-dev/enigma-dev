@@ -120,6 +120,9 @@ void print_ext_data(externs *ext,int indent)
     print_scope_members(ext,indent+2);
     cout << indstr << "};\r\n";
   }
+  else
+  if (ext->flags & (EXTFLAG_STRUCT | EXTFLAG_CLASS | EXTFLAG_NAMESPACE))
+    cout << " {}; ";
   
   if (!ext->refstack.empty())
   {

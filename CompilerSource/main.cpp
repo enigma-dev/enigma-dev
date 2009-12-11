@@ -150,6 +150,18 @@ int main(int argc, char *argv[])
             else cout << "Not found: " << n << endl;
           }
         }
+        if (c == 't')
+        {
+          cout << "Trace: ";
+          string n = getst();
+          extiter a = global_scope.members.find(n);
+          if (a != global_scope.members.end())
+          {
+            for (externs* i=a->second; i!=&global_scope; i=i->parent)
+            cout << i->name << "::";
+          }
+          else cout << "Not found: " << n << endl;
+        }
         if (c == 'm')
         {
           string search_terms;

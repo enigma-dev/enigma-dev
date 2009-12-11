@@ -156,7 +156,7 @@ unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile
 }
 
 extern bool is_tflag(string x);
-int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named)
+int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named,bool at_scope_accessor)
 {
   //it's not a macro, so the next thing we'll check for is keyword
   if (n=="struct" or n=="class")
@@ -366,6 +366,18 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
   if (n=="mutable")
   return -1;
   
+  //This is the end of the reserved words.
+  //Now we make sure we're not accessing something from this id's scope, meaning this id must be a scope of some sort
+  if (at_scope_accessor)
+  {
+    if (!find_extname(n,EXTFLAG_CLASS | EXTFLAG_STRUCT | EXTFLAG_NAMESPACE)) {
+      cferr = "Cannot access `" + n + "' as scope";
+      return pos;
+    }
+    immediate_scope = ext_retriever_var;
+    return -1;
+  }
+  
   //Next, check if it's a type name.
   //If flow allows, this should be moved before the keywords section.
   
@@ -486,7 +498,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       //If error, or if it was declared in this scope
       else if (ext_retriever_var == NULL or ext_retriever_var->parent == current_scope)
       {
-        cferr = ext_retriever_var == NULL ? "Type unimplemented in this scope" : "Two types named in declaration";
+        cferr = ext_retriever_var == NULL ? "Type unimplemented in this scope" : "Two types named in declaration: `"+n+"' cannot be declared in this scope";
         return pos;
       }
       //If we made it this far, we are redeclaring something in this scope that is different in higher scopes
@@ -526,6 +538,16 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
     else if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF) and (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED))
     {
       last_named_phase = TMP_DEFAULTED;
+      last_type = ext_retriever_var;
+      return -1;
+    }
+    else if (last_named == LN_USING) //last chance... hopefully we're using this
+    {
+      if (last_named_phase != USE_NOTHING) {
+        cferr = "Unexpected typename in `using' statement";
+        return pos;
+      }
+      last_named_phase = USE_SINGLE_IDENTIFIER;
       last_type = ext_retriever_var;
       return -1;
     }
@@ -649,7 +671,8 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
           break;
         }
         if (!find_extname(n,0xFFFFFFFF))
-        { cferr = "Cannot use `" + n + "': undeclared"; return pos; }
+        { find_extname(n,0xFFFFFFFF);
+          cferr = "Cannot use `" + n + "': undeclared"; return pos; }
         last_named_phase = USE_SINGLE_IDENTIFIER;
         last_type = ext_retriever_var;
       break;

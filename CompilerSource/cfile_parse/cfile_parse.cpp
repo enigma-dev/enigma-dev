@@ -129,6 +129,8 @@ int parse_cfile(string cftext)
 
   anoncount = 0;
   stack<bool> scope_stack_because_of_fucking_extern_C_keyword;
+  bool handle_ids_next_iter = false;
+  string id_to_handle;
 
   for (;;)
   {
@@ -223,6 +225,20 @@ int parse_cfile(string cftext)
       continue;
     }
     
+    if (handle_ids_next_iter)
+    {
+      bool at_scope_accessor = cfile[pos] == ':' and cfile[pos+1] == ':';
+      
+      int diderrat = handle_identifiers(id_to_handle,last_identifier,pos,last_named,last_named_phase,last_type,fparam_named,at_scope_accessor);
+      //cout << last_named << ":" << last_named_phase << "  ->  ";
+      if (diderrat != -1)
+        return diderrat;
+      
+        
+      handle_ids_next_iter = false;
+      continue;
+    }
+    
     
     //First, let's check if it's a letter.
     //This implies it's one of three things...
@@ -280,10 +296,8 @@ int parse_cfile(string cftext)
       }
       else
       {
-        int diderrat = handle_identifiers(n,last_identifier,pos,last_named,last_named_phase,last_type,fparam_named);
-        //cout << last_named << ":" << last_named_phase << "  ->  ";
-        if (diderrat != -1)
-          return diderrat;
+        handle_ids_next_iter = true;
+        id_to_handle = n;
       }
       continue;
     }
@@ -293,7 +307,8 @@ int parse_cfile(string cftext)
     //A digit is actually not one of them. Digits, most operators, etc,
     //will be skipped over when we see an = sign.
     
-    //The symbol we will see most often is probably the semicolon.
+    //Here's a biggun: deal with semicolons
+    //This is probably the symbol we will see most often
     if (cfile[pos] == ',' or cfile[pos] == ';')
     {
       if (last_named == LN_NOTHING)
@@ -403,12 +418,14 @@ int parse_cfile(string cftext)
               else cferr = "Expected parameters to operator overload at this point";
             return pos;
           case LN_USING:
-              if (last_named_phase != 2)
+              if (last_named_phase != USE_NAMESPACE_IDENTIFIER)
               {
-                cferr = "Nothing to use";
-                return pos;
+                if (last_named_phase != USE_SINGLE_IDENTIFIER)
+                {
+                  cferr = "Nothing to use";
+                  return pos;
+                }
               }
-              else //This is just so jump to case doesn't skip pu
               {
                 extiter pu = using_scope.members.find(last_type->name);
                 if (pu != using_scope.members.end())
@@ -419,11 +436,12 @@ int parse_cfile(string cftext)
                   }
                 } 
                 else
-                {
                   using_scope.members[last_type->name] = last_type;
-                }
               }
-            pos++;
+              pos++;
+              last_named = LN_NOTHING;
+              last_named_phase = 0;
+              last_identifier = "";
             continue;
           default:
               cferr = "WELL WHAT THE FUCK.";
@@ -741,14 +759,23 @@ int parse_cfile(string cftext)
     
     if (cfile[pos] == ':')
     {
-      if (last_named == LN_DECLARATOR)
+      if (cfile[pos+1] == ':')
       {
-        skipto = ';';
-        skipto2 = ';';
+        immediate_scope = &global_scope;
+        pos += 2;
         continue;
       }
-      cferr = "Unexpected colon at this point";
-      return pos;
+      else
+      {
+        if (last_named == LN_DECLARATOR)
+        {
+          skipto = ';';
+          skipto2 = ';';
+          continue;
+        }
+        cferr = "Unexpected colon at this point";
+        return pos;
+      }
     }
     
     if (cfile[pos] == '=')
@@ -769,7 +796,8 @@ int parse_cfile(string cftext)
         skipto2 = ';';
         continue;
       }
-      cout << "SHIIIIIIIIIII---";
+      cferr = "I have no idea what to do with this '=' token. If you see that as a problem, report the error";
+      return pos;
     }
     
     //...

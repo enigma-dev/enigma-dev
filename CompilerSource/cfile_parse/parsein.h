@@ -220,22 +220,27 @@
 #define _GNU_SOURCE 1
 //*/
 
+//fuckweeeeee e;
+
+//#include <cstdio>
+#include <cstdlib>
+
+/*
 namespace enigma
 {
   typedef int ITACO;
+  struct fuckweeeeee;
 }
 
-using namespace enigma;
+using enigma::ITACO;
 ITACO TUESDAYS;
 
-//#include <cstdio>
-
-/*
+/* /
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-*/
+//*/
 
 /*
 typedef struct __pthread_internal_slist

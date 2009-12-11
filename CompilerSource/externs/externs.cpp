@@ -98,7 +98,7 @@ bool macro_type::check_recurse_danger(string n)
 
 //Map to sort, darray for polymorphic things
 map<string, varray<externs> > extarray;
-externs global_scope,*current_scope,using_scope;
+externs global_scope,*current_scope,using_scope,*immediate_scope=NULL;
 map<string,macro_type> macros;
 
 
@@ -118,6 +118,14 @@ extiter scope_find_member(string name)
 externs* ext_retriever_var = NULL;
 bool find_extname(string name,unsigned int flags)
 {
+  if (immediate_scope != NULL)
+  {
+    extiter f = immediate_scope->members.find(name);
+    if (f == immediate_scope->members.end()) return false;
+    ext_retriever_var = f->second;
+    immediate_scope = NULL;
+    return true;
+  }
   externs* inscope=current_scope;
   externs::tempiter tit = inscope->tempargs.find(name);
   if (tit != inscope->tempargs.end())
@@ -129,7 +137,7 @@ bool find_extname(string name,unsigned int flags)
   while (it == inscope->members.end()) //Until we find it
   {
     if (inscope==&global_scope) //If we're at global scope, give up
-      return 0;
+      goto check_using_namespaces;
     inscope=inscope->parent; //This must ALWAYS be nonzero when != global_scope
     
     tit = inscope->tempargs.find(name);
@@ -140,7 +148,26 @@ bool find_extname(string name,unsigned int flags)
     }
     
     it = inscope->members.find(name);
-  } 
+  }
   ext_retriever_var = it->second;
-  return ((it->second->flags & flags) != 0);
+  return ((it->second->flags & flags) != 0 or flags == 0xFFFFFFFF);
+  
+  check_using_namespaces:
+  it = using_scope.members.find(name);
+  if (it != using_scope.members.end())
+  {
+    ext_retriever_var = it->second;
+    return 1;
+  }
+  for (it = using_scope.members.begin(); it != using_scope.members.end(); it++)
+    if (it->second->flags & EXTFLAG_NAMESPACE)
+    {
+      extiter sit = it->second->members.find(name);
+      if (sit != it->second->members.end())
+      {
+        ext_retriever_var = sit->second;
+        return 1;
+      }
+    }
+  return 0;
 }

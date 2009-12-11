@@ -94,7 +94,7 @@ struct macro_type
 extern map<string,macro_type> macros;
 typedef map<string,externs*>::iterator extiter;
 typedef map<string,macro_type>::iterator maciter;
-extern externs global_scope,*current_scope,using_scope;
+extern externs global_scope,*current_scope,using_scope,*immediate_scope;
 
 extiter scope_find_member(string name);
 extern externs* ext_retriever_var;
