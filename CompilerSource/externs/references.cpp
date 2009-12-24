@@ -29,12 +29,14 @@
 #include <stdlib.h>
 #include "references.h"
 
+using namespace std;
+
 rf_stack refstack;
 
 referencer::referencer(char s): symbol(s), count(0), completed(1) {}
-referencer::referencer(char s,unsigned short c): symbol(s), count(c), completed(1) {}
-referencer::referencer(char s,unsigned short c,char complete): symbol(s), count(c), completed(complete) {}
-referencer::referencer(char s,unsigned short c,unsigned short cmin,char complete): symbol(s), count(c), countmin(cmin), completed(complete) {}
+referencer::referencer(char s,int c): symbol(s), count(c), completed(1) {}
+referencer::referencer(char s,int c,char complete): symbol(s), count(c), completed(complete) {}
+referencer::referencer(char s,short cn,short cx,char complete): symbol(s), count((cn << 16) + cx), completed(complete) {}
 referencer::referencer(const referencer &r): symbol(r.symbol), count(r.count), completed(r.completed) {}
 
 rf_node::rf_node(): next(NULL), prev(NULL), ref(0,0,0) {}
@@ -67,12 +69,12 @@ char rf_stack::prevsymbol()
   return now->prev->ref.symbol;
 }
 
-unsigned short rf_stack::currentcount()
+unsigned rf_stack::currentcount()
 {
   if (now == NULL) return 0;
   return now->ref.count;
 }
-unsigned short rf_stack::topmostcount()
+unsigned rf_stack::topmostcount()
 {
   if (last == NULL) return 0;
   return last->ref.count;
@@ -87,29 +89,74 @@ bool rf_stack::topmostcomplete()
   if (last == NULL) return 0;
   return last->ref.completed;
 }
-unsigned short rf_stack::nextcount()
+unsigned rf_stack::nextcount()
 {
   if (now == NULL or now->next == NULL) return 0;
   return now->next->ref.count;
 }
-unsigned short rf_stack::prevcount()
+unsigned rf_stack::prevcount()
 {
   if (now == NULL or now->prev == NULL) return 0;
   return now->prev->ref.count;
 }
 
-void rf_stack::inc_current()
+void rf_stack::inc_current_count()
 {
   if (now == NULL) return;
   now->ref.count++;
-  now->ref.countmin++;
 }
 //Increment the current minimum arg count
 void rf_stack::inc_current_min()
 {
   if (now == NULL) return;
-  now->ref.count++;
-  now->ref.countmin++;
+  if ((now->ref.count >> 16) < 0xFFFF)
+    now->ref.count += 0x00010000;
+}
+void rf_stack::inc_current_max()
+{
+  if (now == NULL) return;
+  if ((now->ref.count & 0xFFFF) < 0xFFFF)
+    now->ref.count++;
+}
+
+int rf_stack::parameter_count_min()
+{
+  if (topmostsymbol() == '(')
+    return topmostcount() >> 16;
+  if (last != NULL and last->prev != NULL and last->prev->ref.symbol == '(')
+    return last->prev->ref.count;
+  return 0;
+}
+int rf_stack::parameter_count_max()
+{
+  if (topmostsymbol() == '(')
+    return (topmostcount() & 0x0000FFFF);
+  if (last != NULL and last->prev != NULL and last->prev->ref.symbol == '(')
+    return last->prev->ref.count;
+  return 0;
+}
+void rf_stack::parameter_count_set(const short n,const short x)
+{
+  if (topmostsymbol() == '(')
+    last->ref.count = (n << 16) + x;
+  else if (last != NULL and last->prev != NULL and last->prev->ref.symbol == '(')
+    last->prev->ref.count = (n << 16) + x;
+}
+
+void rf_stack::set_current_count(int x)
+{
+  if (now == NULL) return;
+  now->ref.count = x;
+}
+void rf_stack::set_current_min(short x)
+{
+  if (now == NULL) return;
+  now->ref.count = (x << 16) + (now->ref.count & 0xFFFF);
+}
+void rf_stack::set_current_max(short x)
+{
+  if (now == NULL) return;
+  now->ref.count = (x & 0xFFFF0000) + x;
 }
 
 rf_stack &rf_stack::operator += (referencer r)
@@ -196,4 +243,13 @@ void rf_stack::dump()
 bool rf_stack::empty()
 {
   return first == NULL;
+}
+
+bool rf_stack::is_function()
+{
+  if (topmostsymbol() == '(')
+    return true;
+  if (last != NULL and last->prev != NULL and last->prev->ref.symbol == '(')
+    return true;
+  return false; 
 }

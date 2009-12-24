@@ -123,12 +123,12 @@ void cparse_init()
 }
 
 
-int tpc;
+int tpc = -1;
 varray<tpdata> tmplate_params;
 
 int anoncount = 0;
 
-bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = 0)
+bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = -1)
 {
   unsigned int is_tdef = last & LN_TYPEDEF;
   last &= ~LN_TYPEDEF;
@@ -148,8 +148,9 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
       }
       else
       {
-        if (it->second->is_function())
+        if (it->second->is_function() and refs.is_function())
         {
+          it->second->parameter_unify(refs);
           ext_retriever_var = it->second;
           return 1;
         }
@@ -192,11 +193,31 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
   if (is_tdef)
     e->flags |= EXTFLAG_PENDING_TYPEDEF; //If this is a new type being typedef'd, it will later be undone
   
-  if (tpc != 0)
+  if (tpc > 0)
   {
     e->flags |= EXTFLAG_TEMPLATE;
     for (int i=0; i<tpc; i++)
-      e->tempargs[tparams[i].name] = tparams[i].def;
+    {
+      externs* tdl;
+      if (!tparams[i].standalone)
+      {
+        tdl = new externs;
+        tdl->name = tparams[i].name;
+        tdl->flags = EXTFLAG_TYPEDEF;
+        tdl->parent = e;
+        tdl->members[""] = tparams[i].def;
+      }
+      else
+      {
+        tdl = tparams[i].def;
+        if (tdl == NULL) {
+          cferr = "Parse error: Template parameter is marked as definite but defined as NULL";
+          return 0;
+        }
+      }
+      
+      e->tempargs[e->tempargs.size] = tdl;
+    }
   }
   
   e->type = type;
@@ -204,4 +225,124 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
   e->refstack = refs;
   
   return 1;
+}
+
+#include "expression_evaluator.h"
+
+map<string,bool> constant_types; //Load this with types like "int" and flags like "unsigned"
+struct init_const_types { init_const_types() {
+  constant_types["bool"] = 1; 
+  constant_types["char"] = 1; 
+  constant_types["short"] = 1; 
+  constant_types["long"] = 1; 
+  constant_types["int"] = 1; 
+  constant_types["unsigned"] = 1; 
+  constant_types["signed"] = 1; 
+  constant_types["const"] = 1; 
+  constant_types["static"] = 1; 
+  } } init_const_types_now;
+
+string temp_parse_seg(string seg, externs* type_default)
+{
+  if (type_default->flags & EXTFLAG_TYPEDEF)
+  {
+    string p = "";
+    for (unsigned i = 0; i<seg.length(); i++)
+    {
+      if (is_letter(seg[i]))
+      {
+        const unsigned is = i;
+        while (is_letterd(seg[++i]));
+        string tn = seg.substr(is,i-is);
+        
+        if (constant_types.find(tn) == constant_types.end()) {
+          cferr = "`"+tn+"' cannot be used in a constant expression";
+          return "";
+        }
+        
+        p += "_" + tn;
+      }
+    }
+    if (p == "")
+      cferr = "No valid type named in template parameters";
+    return p;
+  }
+  else if (type_default->flags & EXTFLAG_TYPENAME)
+  {
+    if (constant_types.find(type_default->name) == constant_types.end()) {
+      cferr = "`"+type_default->name+"' cannot be used in a constant expression";
+      return "";
+    }
+    
+    value a = evaluate_expression(seg);
+    if (rerrpos != -1) {
+      cferr = "Error in template expression, position " + tostring(rerrpos) + ": " + rerr;
+      return "";
+    }
+    return tostring((UTYPE_INT)a);
+  }
+  cferr = "Macro parameter set up wrong. This error shouldn't really occur...";
+  return "";
+}
+
+string temp_parse_list(externs* last,string specs)
+{
+  string ns;
+  unsigned is = 0, ti = 0, i;
+  for (i = 0; i<specs.length(); i++)
+  {
+    if (specs[i] == ',')
+    {
+      externs* pd = last->tempargs[ti++];
+      const string exps = temp_parse_seg(specs.substr(is,i-is),pd);
+      if (exps == "")
+        return "";
+      ns += "_" + exps;
+      is = i+1;
+    }
+  }
+  if (i - is)
+  {
+    externs* pd = last->tempargs[ti++];
+    const string exps = temp_parse_seg(specs.substr(is,i-is),pd);
+    if (exps == "")
+      return "";
+    ns += "_" + exps;
+  }
+  
+  if (ti < last->tempargs.size) {
+    cferr = "Too few parameters to template";
+    return "";
+  }
+  
+  return ns;
+}
+
+externs* TemplateSpecialize(externs* last, string specs)
+{
+  string ns = temp_parse_list(last,specs);
+  if (ns == "")
+    return NULL;
+  
+  externs* ret = new externs;
+  ret->name = last->name + ns;
+  ret->flags = last->flags;
+  ret->type = last->type;
+  ret->parent = last->parent;
+  
+  temp_get_specialization(last)->members[ns] = ret;
+  return ret;
+}
+
+void access_specialization(externs *&whom, string specs)
+{
+  cout << "Accessing `" << specs << "' from " << whom->name << endl ;
+  string ns = temp_parse_list(whom,specs);
+  if (ns == "")
+    return;
+  
+  externs* s = temp_get_specialization(whom);
+  extiter it = s->members.find(ns);
+  if (it != s->members.end())
+    whom = it->second;
 }

@@ -51,10 +51,9 @@
     }
     
     
-    int cnt=0,args=0;
-    int args_exceeded_at=-1;
-    
-    int argc=func->parameter_count();
+    int cnt = 0, args = 0;
+    int argcmin=func->parameter_count_min();
+    int argcmax=func->parameter_count_max();
     while (cnt>-1)
     {
       pos++;
@@ -68,21 +67,18 @@
       if (code[pos]==',' && cnt==0)
       {
         if (args==0) args=1; args++;
-        if (args>argc) if (args_exceeded_at==-1) args_exceeded_at=pos;
+        if (args > argcmax and argcmax != -1)
+          return pos;
       }
       if (code[pos]==')') cnt--;
       
       if (!(pos<len)) { error="List of function parameters unterminated"; return pos; }
     }
     
-    if (argc==-100) return -1;
-    if (argc==-116)
-    { if (args<=16) return-1; else { error="Too many arguments to script, provided "+tostring(args)+", limit is 16"; return pos; } }
-    
-    if (argc>=0)
+    if (args < argcmin) 
     {
-      if (args>argc) { string err="Too many arguments to function `"+fname+"': Provided "+tostring(args)+", requested "+tostring(argc); error=(char*)err.c_str(); return (args_exceeded_at!=-1)?args_exceeded_at:pos; }
-      if (args<argc) { string err="Too few arguments to function `"+fname+"': Provided "+tostring(args)+", requested "+tostring(argc); error=(char*)err.c_str(); return pos; }
+      error = "Too few arguments to function `"+fname+"': Provided "+tostring(args)+", requested "+tostring(argcmin);
+      return pos; 
     }
     
     return -1;

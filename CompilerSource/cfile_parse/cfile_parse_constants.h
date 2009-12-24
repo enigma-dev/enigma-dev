@@ -29,9 +29,8 @@
 enum
 {
   LN_NOTHING,      //Nothing named
-  //LN_IDENTIFIER, //Identifier (antiquated)
   LN_DECLARATOR,   //int, struct {}, you name it
-  LN_TEMPLATE,     //template <>
+  LN_TEMPLATE,     //template <...>
   LN_CLASS,        //class
   LN_STRUCT,       //struct
   LN_ENUM,         //enum
@@ -39,6 +38,7 @@ enum
   LN_NAMESPACE,    //namespace whatever
   LN_OPERATOR,     //as in the operator keyword, not a random operator
   LN_USING,        //using whatever
+  LN_TEMPARGS,     //std::map<...>
   LN_TYPEDEF=128,  //typedef whatever
 };
 
@@ -98,6 +98,8 @@ enum
   TMP_PSTART,
   TMP_TYPENAME,
   TMP_IDENTIFIER,
-  TMP_EQUALS,
-  TMP_DEFAULTED
+  TMP_EQUALS, //Antiquated
+  TMP_DEFAULTED,
+  TMP_SIMPLE //Like DEFAULTED, only without going through TYPENAME
+  
 };

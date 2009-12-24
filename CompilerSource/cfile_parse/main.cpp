@@ -78,7 +78,13 @@ void print_ext_data(externs *ext,int indent)
   cout << indstr << ext->name << ":  ";
   
   if (ext->is_function())
-    cout << "Function with " << ext->parameter_count() << " parameters, returning ";
+  {
+    const int pcn = ext->parameter_count_min();
+    cout << "Function with " << pcn;
+    if (pcn != ext->parameter_count_max())
+      cout << " to " << ext->parameter_count_max();
+    cout << " parameters, returning ";
+  }
 
   if (ext->type != NULL)
     cout << ext->type->name << "  ";
@@ -86,14 +92,14 @@ void print_ext_data(externs *ext,int indent)
   
   if (ext->flags & EXTFLAG_TEMPLATE)
   {
-    cout << "Template [" << ext->tempargs.size() << "]<";
+    cout << "Template [" << ext->tempargs.size << "]<";
     char comma = 0;
-    for (externs::tempiter ii = ext->tempargs.begin(); ii != ext->tempargs.end(); ii++)
+    for (unsigned ii=0; ii < ext->tempargs.size; ii++)
     {
       if (comma != 0) cout << comma;
-      cout << ii->first;
-      if (ii->second != NULL)
-        cout << "=" << ii->second->name;
+      cout << ext->tempargs[ii]->name;
+      if (ext->tempargs[ii]->members[""] != NULL)
+        cout << "=" << ext->tempargs[ii]->members[""]->name;
       comma = ',';
     }
     cout << "> ";

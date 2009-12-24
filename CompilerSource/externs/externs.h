@@ -49,8 +49,10 @@ struct tpdata
 {
   string name;
   externs* def;
-  tpdata(): name(""), def(NULL) {}
-  tpdata(string n,externs* d): name(n), def(d) {}
+  bool standalone;
+  tpdata(): name(""), def(NULL), standalone(false) {}
+  tpdata(string n,externs* d): name(n), def(d), standalone(false) {}
+  tpdata(string n,externs* d, bool sa): name(n), def(d), standalone(sa) {}
 };
 
 struct externs
@@ -63,13 +65,15 @@ struct externs
   rf_stack refstack;
   
   darray<externs*> ancestors;
-  map<string,externs*> tempargs;
+  varray<externs*> tempargs;
   map<string, externs*> members;
   
   typedef map<string,externs*>::iterator tempiter;
   
   bool is_function(); //test if this is a function
-  int parameter_count(); //returns topmost function argument count
+  int parameter_count_min(); //returns topmost function argument count
+  int parameter_count_max(); //returns topmost function argument count
+  void parameter_unify(rf_stack&); //Set parameter set to union of this and another
   
   externs();
   externs(string n,externs* p,unsigned int f);
@@ -94,8 +98,10 @@ struct macro_type
 extern map<string,macro_type> macros;
 typedef map<string,externs*>::iterator extiter;
 typedef map<string,macro_type>::iterator maciter;
-extern externs global_scope,*current_scope,using_scope,*immediate_scope;
+extern externs global_scope,*current_scope,*immediate_scope;
 
+externs* scope_get_using(externs* scope);
+externs* temp_get_specialization(externs* scope);
 extiter scope_find_member(string name);
 extern externs* ext_retriever_var;
 bool find_extname(string name,unsigned int flags);

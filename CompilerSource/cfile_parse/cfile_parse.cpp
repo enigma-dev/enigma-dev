@@ -78,6 +78,14 @@ string cferr_get_file_orfirstfile()
   return included_files.top().name;
 }
 
+string strace(externs *f)
+{
+  string o = "";
+  for (externs* i=f; i != &global_scope; i=i->parent)
+    o = "::" + i->name + o;
+  return o;
+}
+
 int parse_cfile(string cftext)
 {
   cferr="No error";
@@ -107,10 +115,14 @@ int parse_cfile(string cftext)
   int fargs_count=0;*/
   
   int fparam_named = 0;
+  int fparam_defaulted = 0;
   unsigned int *debugpos;
   debugpos = &pos;
   
   int skip_depth = 0;
+  int specialize_start = 0;
+  string specialize_string;
+  bool specializing = false;
   char skipto = 0, skipto2 = 0, skip_inc_on = 0;
 
   /*
@@ -129,7 +141,8 @@ int parse_cfile(string cftext)
 
   anoncount = 0;
   stack<bool> scope_stack_because_of_fucking_extern_C_keyword;
-  bool handle_ids_next_iter = false;
+  stack<externs*> current_templates;
+  bool handle_ids_next_iter = 0;
   string id_to_handle;
 
   for (;;)
@@ -140,7 +153,14 @@ int parse_cfile(string cftext)
       if (c_file.ind>0) //If we're in a macro
       {
         //Move back down
+        if (specializing)
+        {
+          cout << "substr(" << specialize_start << "," << pos-specialize_start << ");" << endl;
+          specialize_string += cfile.substr(specialize_start,pos-specialize_start);
+        }
         handle_macro_pop(c_file,position,cfile_length);
+          if (specializing)
+            specialize_start = pos;
         continue;
       }
       else break;
@@ -160,7 +180,14 @@ int parse_cfile(string cftext)
     {
       if (preprocallowed)
       {
+        if (specializing)
+          specialize_string += cfile.substr(specialize_start,pos-specialize_start);
+        
         const unsigned a = cfile_parse_macro(c_file,position,cfile_length);
+        
+        if (specializing)
+          specialize_start = pos;
+        
         if (a != unsigned(-1)) return a;
         continue;
       }
@@ -185,6 +212,41 @@ int parse_cfile(string cftext)
     
     if (skipto)
     {
+      if (is_letter(cfile[pos]))
+      {
+        if (specializing and pos-specialize_start)
+          specialize_string += cfile.substr(specialize_start,pos-specialize_start);
+        
+        //This segment is completely stolen from below and should be functionized ASAP
+        string n = "";
+        unsigned int sp = pos++;
+        while (is_letterd(cfile[pos])) // move to the end of the word
+        { //This is an odd case. If we reach the end of the file while we read, 
+          if (++pos >= len) //it's a good idea to keep going
+          {
+            n += cfile.substr(sp,pos-sp);
+            handle_macro_pop(c_file,position,cfile_length);
+            sp=pos; if (pos >= len) break;
+          }
+        }
+        n += cfile.substr(sp,pos-sp); //This is the word we're looking at.
+        
+        //This piece is also stolen from below, but is simple enough as-is
+        const unsigned int cm = handle_macros(n,c_file,position,cfile_length);
+        if (cm == unsigned(-2)) // Was a macro
+        {
+          if (specializing)
+            specialize_start = pos;
+          continue;
+        }
+        if (cm != unsigned(-1)) return cm;
+        
+        if (specializing) {
+          specialize_start = pos;
+          specialize_string += n;
+        }
+        continue;
+      }
       if (skipto == ';' and skipto2 == ';')
       {
         if (cfile[pos] == ';' or cfile[pos] == ',')
@@ -210,17 +272,34 @@ int parse_cfile(string cftext)
         pos++;
         continue;
       }
-      
-      if (cfile[pos] == skipto or cfile[pos] == skipto2)
+      else
       {
-        if (skip_depth == 0)
-          skipto = skipto2 = skip_inc_on = 0;
-        else
-          skip_depth--;
+        if (cfile[pos] == skipto or cfile[pos] == skipto2)
+        {
+          if (skip_depth == 0)
+          {
+            skipto = skipto2 = skip_inc_on = 0;
+            if (specializing)
+            {
+              specialize_string += cfile.substr(specialize_start,pos-specialize_start);
+              if ((last_named & ~LN_TYPEDEF) == LN_TEMPARGS) {
+                last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
+                access_specialization(last_type,specialize_string);
+              } specializing = false;
+            }
+          }
+          else if (cfile[pos] == skipto) //Only skip if the primary is met. For instance, in "s = '>'; s2 = ','; sion = '<';", we want to dec only on >
+            skip_depth--;
+        }
+        else if (cfile[pos] == skip_inc_on)
+        {
+          skip_depth++;
+          if (specializing) {
+            cferr = "Unexpected start of new template parameters in specialization of others";
+            return pos;
+          }
+        }
       }
-      else if (cfile[pos] == skip_inc_on)
-        skip_depth++;
-      
       pos++;
       continue;
     }
@@ -230,10 +309,7 @@ int parse_cfile(string cftext)
       bool at_scope_accessor = cfile[pos] == ':' and cfile[pos+1] == ':';
       
       int diderrat = handle_identifiers(id_to_handle,last_identifier,pos,last_named,last_named_phase,last_type,fparam_named,at_scope_accessor);
-      //cout << last_named << ":" << last_named_phase << "  ->  ";
-      if (diderrat != -1)
-        return diderrat;
-      
+      if (diderrat != -1) return diderrat;
         
       handle_ids_next_iter = false;
       continue;
@@ -367,7 +443,12 @@ int parse_cfile(string cftext)
                   return pos;
                 }
                 if (fparam_named)
-                  refstack.inc_current();
+                {
+                  if (!fparam_defaulted)
+                    refstack.inc_current_min();
+                  refstack.inc_current_max();
+                  fparam_defaulted = 0;
+                }
                 pos++; continue;
               }
               last_named_phase = DEC_FULL; //reset to 4 for next identifier.
@@ -427,21 +508,31 @@ int parse_cfile(string cftext)
                 }
               }
               {
-                extiter pu = using_scope.members.find(last_type->name);
-                if (pu != using_scope.members.end())
+                externs* using_scope = scope_get_using(current_scope);
+                extiter pu = using_scope->members.find(last_type->name);
+                if (pu != using_scope->members.end())
                 {
-                  if (pu->second != last_type) {
-                    cferr = "Using `" + last_type->name + "' conflicts with previous `using' directive";
-                    return pos;
+                  if (pu->second != last_type)
+                  {
+                    if (pu->second->is_function() and last_type->is_function())
+                    {
+                      pu->second->parameter_unify(last_type->refstack);
+                    }
+                    else
+                    {
+                      cferr = "Using `" + last_type->name + "' conflicts with previous `using' directive";
+                      return pos;
+                    }
                   }
                 } 
                 else
-                  using_scope.members[last_type->name] = last_type;
+                  using_scope->members[last_type->name] = last_type;
               }
               pos++;
               last_named = LN_NOTHING;
               last_named_phase = 0;
               last_identifier = "";
+              
             continue;
           default:
               cferr = "WELL WHAT THE FUCK.";
@@ -472,7 +563,7 @@ int parse_cfile(string cftext)
         if (last_identifier != "")
         if (!ExtRegister(last_named,last_identifier,refs_to_use,type_to_use,tmplate_params,tpc))
           return pos;
-        tpc = 0;
+        tpc = -1;
       }
       
       if (cfile[pos] == ';') //If it was ';' and not ','
@@ -488,7 +579,7 @@ int parse_cfile(string cftext)
         last_identifier = "";
         last_type = NULL;
         refstack.dump();
-        tpc = 0;
+        tpc = -1;
       }
       
       pos++;
@@ -590,7 +681,12 @@ int parse_cfile(string cftext)
       }
       if (refstack.currentsymbol() == '(')
         if (fparam_named)
-          refstack.inc_current();
+        {
+          if (!fparam_defaulted)
+            refstack.inc_current_min();
+          refstack.inc_current_max();
+          fparam_defaulted = 0;
+        }
       
       plevel--;
       refstack--; //Move past previous parenthesis
@@ -600,7 +696,7 @@ int parse_cfile(string cftext)
     
     if (cfile[pos] == '{')
     {
-      bool push_worthless = 0;
+      char push_worthless = 0;
       const int last_named_raw = last_named & ~LN_TYPEDEF;
       
       //Class/Namespace declaration.
@@ -638,10 +734,17 @@ int parse_cfile(string cftext)
             {
               if (!last_type->members.empty())
               {
-                cferr = "Attempting to redeclare struct `"+last_type->name+"'";
-                return pos;
+                if ((last_type->flags & EXTFLAG_TEMPLATE) and specialize_string != "")
+                {
+                  current_scope = TemplateSpecialize(last_type,specialize_string); //Parse specialize_string and 
+                  if (current_scope == NULL) return pos;
+                }
+                else {
+                  cferr = "Attempting to redeclare struct `"+last_type->name+"'";
+                  return pos;
+                }
               }
-              else //struct a; struct a {}
+              else
                 current_scope = last_type; //Move into it. Brilliantly simple; we already know it's parent is current_scope.
             }
             else
@@ -661,9 +764,12 @@ int parse_cfile(string cftext)
       }
       else
       {
-        push_worthless = 1;
-        /*cferr = "Expected scope name or function declaration before '{'";
-        return pos;*/
+        if (last_named == LN_NOTHING and last_named_phase == 99)
+          push_worthless = 1, last_named_phase = 0;
+        else
+        { cferr = "Unexpected opening brace at this point";
+          return pos;
+        }
       }
       
       if (push_worthless != 2)
@@ -674,7 +780,7 @@ int parse_cfile(string cftext)
       last_named_phase = 0;
       last_type = NULL;
       refstack.dump();
-      tpc = 0;
+      tpc = -1;
       pos++;
       
       continue;
@@ -735,23 +841,86 @@ int parse_cfile(string cftext)
     
     if (cfile[pos] == '<')
     {
-      if (last_named != LN_TEMPLATE or last_named_phase != TMP_NOTHING)
+      if ((last_named & ~LN_TYPEDEF) != LN_TEMPLATE)
       {
-        cferr = "Unexpected symbol '<' should only occur directly following `template' token or type";
+        if ((last_named & ~LN_TYPEDEF) != LN_DECLARATOR or last_named_phase != DEC_FULL or last_type == NULL or !(last_type->flags & EXTFLAG_TEMPLATE))
+        {
+          cferr = "Unexpected symbol '<' should only occur directly following `template' token or type";
+          return pos;
+        }
+        if (tpc == -1)
+        {
+          last_named = LN_TEMPARGS | (last_named & LN_TYPEDEF);
+          
+          skipto = '>';
+          skip_inc_on = '<';
+          specializing = 1;
+          specialize_start = ++pos;
+          specialize_string = "";
+          
+          pos++; continue;
+        }
+        else //template<> templated_declarator <(*)...>
+        {
+          skipto = '>';
+          skip_inc_on = '<';
+          specializing = 1;
+          specialize_start = ++pos;
+          specialize_string = "";
+          //cferr = "Specialization not implemented...";
+          //return pos;
+          continue;
+        }
+      }
+      if (last_named_phase != TMP_NOTHING) {
+        cferr = "Unexpected token '<' in template parameters";
         return pos;
       }
+      
+      if (tpc == -1) tpc = 0;
+      else
+      { cferr = "Template parameters already named for this declaration";
+        return pos; }
       last_named_phase = TMP_PSTART;
       pos++; continue;
     }
     
     if (cfile[pos] == '>')
     {
-      if (last_named != LN_TEMPLATE or (last_named_phase != TMP_IDENTIFIER and last_named_phase != TMP_DEFAULTED))
+      if (last_named != LN_TEMPLATE)
       {
-        cferr = "Unexpected symbol '>', should only occur as closing symbol of template parameters";
-        return pos;
+        if (last_named != LN_TEMPARGS)
+        {
+          cferr = "Unexpected symbol '>' should only occur as closing symbol of template parameters";
+          return pos;
+        }
+        //Add to template args here
+        last_named = LN_DECLARATOR;
+        last_named_phase = DEC_FULL;
+        last_type = current_templates.top();
+        current_templates.pop();
+        pos++; continue;
       }
-      tmplate_params[tpc++] = tpdata(last_identifier,last_named_phase != TMP_DEFAULTED ? NULL : last_type);
+      if (last_named_phase != TMP_IDENTIFIER and last_named_phase != TMP_DEFAULTED)
+      {
+        if (last_named_phase != TMP_SIMPLE)
+        {
+          if (last_named_phase != TMP_PSTART or !current_templates.empty()) //Template <> is allowed
+          { cferr = "Unexpected end of input before '>'";
+            return pos; }
+        }
+        else
+        {
+          tmplate_params[tpc++] = tpdata(last_identifier, last_type, 1);
+          if (last_type == NULL) {
+            cferr = "Type in template parameter appears to be NULL...";
+            return pos;
+          }
+        }
+      }
+      else
+        tmplate_params[tpc++] = tpdata(last_identifier,last_named_phase != TMP_DEFAULTED ? NULL : last_type);
+      
       last_named = LN_NOTHING;
       last_named_phase = 0;
       pos++; continue;
@@ -761,7 +930,14 @@ int parse_cfile(string cftext)
     {
       if (cfile[pos+1] == ':')
       {
-        immediate_scope = &global_scope;
+        if (last_named == LN_DECLARATOR and last_named_phase == DEC_FULL)
+        {
+          immediate_scope = last_type;
+          last_named = LN_NOTHING;
+          last_named_phase = 0;
+        }
+        else
+          immediate_scope = &global_scope;
         pos += 2;
         continue;
       }
@@ -787,25 +963,36 @@ int parse_cfile(string cftext)
           cferr = "Expected identifier before '=' token";
           return pos;
         }
-        last_named_phase = TMP_EQUALS;
-        pos++; continue;
+        last_named_phase = TMP_DEFAULTED; //TMP_EQUALS would be used if we had anywhere to put the data
+        skipto = ',';
+        skipto2 = '>';
+        continue;
       }
       if (last_named == LN_DECLARATOR)
       {
+        if (fparam_named)
+          fparam_defaulted = 1;
         skipto = ';';
         skipto2 = ';';
         continue;
       }
-      cferr = "I have no idea what to do with this '=' token. If you see that as a problem, report the error";
+      cferr = "I have no idea what to do with this '=' token. If you see that as a problem, report this error";
       return pos;
     }
     
     //...
     if (cfile[pos] == '.' and cfile[pos+1] == '.' and cfile[pos+2] == '.')
     {
-      if (last_named != LN_DECLARATOR)
+      if (last_named != LN_DECLARATOR or refstack.currentsymbol() != '(')
       {
         cferr = "Token `...' expected only in function parameters";
+        return pos;
+      }
+      if (refstack.parameter_count_max() != (unsigned char)(-1))
+        refstack.set_current_max((unsigned char)(-1));
+      else
+      {
+        cferr = "Token `...' already named";
         return pos;
       }
       pos += 3;
@@ -819,7 +1006,8 @@ int parse_cfile(string cftext)
       if (cfile[++pos] == 'C')
       if (cfile[++pos] == '"')
       {
-        last_named = LN_NOTHING; //phase is already 0
+        last_named = LN_NOTHING;
+        last_named_phase = 99;
         pos++; continue;
       }
       cferr = "String literal not allowed here";

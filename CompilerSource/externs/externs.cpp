@@ -35,19 +35,24 @@ using namespace std;
 
 bool externs::is_function()
 {
-  if (refstack.topmostsymbol() == '(')
-    return true;
-  if (refstack.last != NULL and refstack.last->prev != NULL and refstack.last->prev->ref.symbol == '(')
-    return true;
-  return false;
+  return refstack.is_function();
 }
-int externs::parameter_count()
+
+//This thing was really designed with 32bit architecture in mind
+int externs::parameter_count_min()
 {
-  if (refstack.topmostsymbol() == '(')
-    return refstack.topmostcount();
-  if (refstack.last != NULL and refstack.last->prev != NULL and refstack.last->prev->ref.symbol == '(')
-    return refstack.last->prev->ref.count;
-  return 0;
+  return refstack.parameter_count_min();
+}
+int externs::parameter_count_max()
+{
+  return refstack.parameter_count_max();
+}
+void externs::parameter_unify(rf_stack& x)
+{
+  const unsigned short n1 = parameter_count_min(), n2 = x.parameter_count_min();
+  const unsigned short x1 = parameter_count_max(), x2 = x.parameter_count_max();
+  const int nn = n1<n2?n1:n2, nx = x1>x2?x1:x2;
+  refstack.parameter_count_set(nn,nx);
 }
 
 externs::externs()
@@ -98,7 +103,7 @@ bool macro_type::check_recurse_danger(string n)
 
 //Map to sort, darray for polymorphic things
 map<string, varray<externs> > extarray;
-externs global_scope,*current_scope,using_scope,*immediate_scope=NULL;
+externs global_scope,*current_scope,*immediate_scope=NULL;
 map<string,macro_type> macros;
 
 
@@ -114,60 +119,121 @@ extiter scope_find_member(string name)
   return global_scope.members.end();
 }
 
+externs* scope_get_using(externs* scope)
+{
+  extiter u = scope->members.find("<using>");
+  if (u != scope->members.end())
+    return u->second;
+  
+  externs* rv = new externs;
+  scope->members["<using>"] = rv;
+  rv->name = "<using>";
+  rv->flags = EXTFLAG_NAMESPACE;
+  return rv;
+}
+
+externs* temp_get_specialization(externs* scope)
+{
+  extiter u = scope->members.find("<specializations>");
+  if (u != scope->members.end())
+    return u->second;
+  
+  externs* rv = new externs;
+  scope->members["<specializations>"] = rv;
+  rv->name = "<specializations>";
+  rv->flags = EXTFLAG_NAMESPACE;
+  return rv;
+}
+
+externs* scope_get_using_ie(externs* scope)
+{
+  extiter u = scope->members.find("<using>");
+  if (u != scope->members.end())
+    return u->second;
+  return NULL;
+}
 
 externs* ext_retriever_var = NULL;
+void print_scope_members(externs*, int);
 bool find_extname(string name,unsigned int flags)
 {
+  //If we've been given a qualified id, check in the path or give up
   if (immediate_scope != NULL)
   {
     extiter f = immediate_scope->members.find(name);
+      /*cout << "Find " << name << " in " << immediate_scope->name << endl;
+      print_scope_members(immediate_scope,4);*/
     if (f == immediate_scope->members.end()) return false;
     ext_retriever_var = f->second;
     immediate_scope = NULL;
-    return true;
+    
+    return ((f->second->flags & flags) != 0) or (flags == 0xFFFFFFFF);
   }
+  
+  //Start looking in this scope
   externs* inscope=current_scope;
-  externs::tempiter tit = inscope->tempargs.find(name);
-  if (tit != inscope->tempargs.end())
+  
+  //If we're looking for a type name, try the template args
+  if (flags & EXTFLAG_TYPENAME)
   {
-    ext_retriever_var = tit->second;
-    return 1;
+    for (unsigned ti=0; ti<current_scope->tempargs.size; ti++)
+    {
+      if (current_scope->tempargs[ti]->name == name)
+      {
+        ext_retriever_var = current_scope->tempargs[ti];
+        return 1;
+      }
+    }
   }
+  
+  //Check all scopes here and above.
   extiter it = inscope->members.find(name);
   while (it == inscope->members.end()) //Until we find it
   {
-    if (inscope==&global_scope) //If we're at global scope, give up
-      goto check_using_namespaces;
-    inscope=inscope->parent; //This must ALWAYS be nonzero when != global_scope
-    
-    tit = inscope->tempargs.find(name);
-    if (tit != inscope->tempargs.end())
+    //Wasn't a member. Try the `using' scope.
+    externs* using_scope = scope_get_using_ie(inscope);
+    if (using_scope != NULL)
     {
-      ext_retriever_var = tit->second;
-      return 1;
+      it = using_scope->members.find(name);
+      if (it != using_scope->members.end() 
+      and (((it->second->flags & flags) != 0) or (flags == 0xFFFFFFFF)))
+      {
+        ext_retriever_var = it->second;
+        return 1;
+      }
+      for (it = using_scope->members.begin(); it != using_scope->members.end(); it++)
+        if (it->second->flags & EXTFLAG_NAMESPACE)
+        {
+          extiter sit = it->second->members.find(name);
+          if (sit != it->second->members.end()
+          and (((it->second->flags & flags) != 0) or (flags == 0xFFFFFFFF)))
+          {
+            ext_retriever_var = sit->second;
+            return 1;
+          }
+        }
     }
     
+    if (inscope != &global_scope) //If we're not at global scope, move up
+      inscope = inscope->parent; //This must ALWAYS be nonzero when != global_scope
+    else return 0;
+    
+    //Check template params of new scope first
+    if (flags & EXTFLAG_TYPENAME)
+    {
+      for (unsigned ti=0; ti<inscope->tempargs.size; ti++)
+      {
+        if (inscope->tempargs[ti]->name == name)
+          ext_retriever_var = inscope->tempargs[ti];
+        return 1;
+      }
+    }
+    
+    //Try to find it as a member of this scope
     it = inscope->members.find(name);
   }
   ext_retriever_var = it->second;
   return ((it->second->flags & flags) != 0 or flags == 0xFFFFFFFF);
   
-  check_using_namespaces:
-  it = using_scope.members.find(name);
-  if (it != using_scope.members.end())
-  {
-    ext_retriever_var = it->second;
-    return 1;
-  }
-  for (it = using_scope.members.begin(); it != using_scope.members.end(); it++)
-    if (it->second->flags & EXTFLAG_NAMESPACE)
-    {
-      extiter sit = it->second->members.find(name);
-      if (sit != it->second->members.end())
-      {
-        ext_retriever_var = sit->second;
-        return 1;
-      }
-    }
   return 0;
 }

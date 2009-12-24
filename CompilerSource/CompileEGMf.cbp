@@ -34,6 +34,9 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="OS_Switchboard.h" />
+		<Unit filename="cfile_parse/auxilary.h">
+			<Option virtualFolder="cfile_parse/" />
+		</Unit>
 		<Unit filename="cfile_parse/cfile_parse.cpp" />
 		<Unit filename="cfile_parse/cfile_parse.h" />
 		<Unit filename="cfile_parse/cfile_parse_calls.h" />

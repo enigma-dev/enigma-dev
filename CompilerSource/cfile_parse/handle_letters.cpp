@@ -79,7 +79,7 @@ void handle_macro_pop(iss &c_file,isui &position,isui &cfile_length)
 extern string cferr;
 string tostring(int val);
 #include "../general/parse_basics.h"
-bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type,varray<tpdata> &tparams, int tpc = 0);
+bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type,varray<tpdata> &tparams, int tpc = -1);
 
 //struct a { struct a *b; }, not struct a { a* b }
 bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_named,int & last_named_phase, externs *&last_type)
@@ -98,7 +98,7 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
     }
     rf_stack NO_REFS;
     varray<tpdata> EMPTY;
-    ExtRegister(LN_STRUCT,last_identifier,NO_REFS,NULL,EMPTY,0);
+    ExtRegister(LN_STRUCT,last_identifier,NO_REFS,NULL,EMPTY,-1);
   }
   last_named = LN_DECLARATOR;
   last_named_phase = idnamed?DEC_IDENTIFIER:DEC_FULL;
@@ -168,8 +168,13 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       {
         if (last_named != LN_DECLARATOR or !(last_named_phase == 0 or refstack.currentsymbol() == '('))
         {
-          cferr="Unexpected `"+n+"' token";
-          return pos;
+          if (last_named != LN_TEMPLATE or last_named_phase != TMP_PSTART)
+          {
+            cferr="Unexpected `"+n+"' token";
+            return pos;
+          }
+          last_named_phase = TMP_TYPENAME;
+          return -1;
         }
       }
       else
@@ -397,7 +402,8 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       return -1;
     }
     
-    if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF))
+    if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF) 
+    or (last_named | LN_TYPEDEF) == (LN_TEMPARGS | LN_TYPEDEF))
     {
       if (last_named_phase != DEC_FULL)
       {
@@ -433,14 +439,14 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
           return -1;
         }
       }
-      else if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF) and (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED))
+      else if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF)) //template<int> can be used in specialization
       {
-        last_named_phase = TMP_DEFAULTED;
+        last_named_phase = (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED)?TMP_DEFAULTED:TMP_SIMPLE;
         return -1;
       }
       else
       {
-        cferr="Unexpected declarator at this point";
+        cferr="Unexpected declarator at this point.";
         return pos;
       }
 
@@ -462,7 +468,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       return -1;
     }
     
-    cferr="Unexpected declarator at this point";
+    cferr="Unexpected declarator at this point...";
     return pos;
   }
   
@@ -478,7 +484,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
     }
     
     //If we're declaring a variable by type
-    if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF))
+    if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF) or (last_named | LN_TYPEDEF) == (LN_TEMPARGS | LN_TYPEDEF))
     {
       if (last_named_phase != DEC_FULL)
       {
@@ -535,11 +541,24 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       //Past this point, the type will be redeclared in this scope.
     }
     //Not declaring var by type, see if we're giving a template parameter a default value
-    else if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF) and (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED))
+    else if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF))
     {
-      last_named_phase = TMP_DEFAULTED;
-      last_type = ext_retriever_var;
-      return -1;
+      if (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED)
+      {
+        last_named_phase = TMP_DEFAULTED;
+        last_type = ext_retriever_var;
+        return -1;
+      }
+      else if (last_named_phase == TMP_PSTART) //Plain old type, often for specialization
+      {
+        last_named_phase = TMP_SIMPLE;
+        last_type = ext_retriever_var;
+        return -1;
+      }
+      else {
+        cferr = "Unexpected type in template parameters: " + tostring(last_named_phase);
+        return pos;
+      }
     }
     else if (last_named == LN_USING) //last chance... hopefully we're using this
     {
@@ -583,7 +602,8 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
     cferr="Type definition does not specify a type";
     return pos;
   }
-
+  
+  //Find what preceded this identifier.
   //bool is_td = last_named & LN_TYPEDEF;
   switch (last_named & ~LN_TYPEDEF)
   {
@@ -673,11 +693,15 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
         if (!find_extname(n,0xFFFFFFFF))
         { find_extname(n,0xFFFFFFFF);
           cferr = "Cannot use `" + n + "': undeclared"; return pos; }
+        
         last_named_phase = USE_SINGLE_IDENTIFIER;
         last_type = ext_retriever_var;
       break;
+    case LN_TEMPARGS:
+        cferr = "Unexpected identifier in template parameters";
+      return pos;
     default:
-      cferr = "Unspecified Error. This shouldn't happen...";
+        cferr = "Unspecified Error. This shouldn't happen... Result: last_named = "+tostring(last_named);
       return pos;
       //last_named = LN_IDENTIFIER;
       //last_named_phase = 0;

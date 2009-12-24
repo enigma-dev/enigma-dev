@@ -220,10 +220,59 @@
 #define _GNU_SOURCE 1
 //*/
 
+
+
+#include "/home/josh/Documents/Projects/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary.h"
+
+
+/*template<typename a> struct crap;
+typedef crap<char> a;*/
+
+/*template<bool> struct squirrel
+{
+  int nuts;
+  int tree;
+};
+squirrel<bool> epitome;
+
+template<> struct squirrel<1>
+{
+  typedef int SHIIIIII;
+};
+template<> struct squirrel<2>
+{
+  typedef int WEEEEEEE;
+};
+template<> struct squirrel<3>
+{
+  typedef int PEEEEEEE;
+};
+
+squirrel<1> taco1;
+squirrel<2> taco2;
+
+squirrel<1>::SHIIIIII tacossss;*/
+
+/*
+template <class a> class enigmathing
+{
+  a b;
+};
+
+enigmathing<int> c;
+*/
+
 //fuckweeeeee e;
 
-//#include <cstdio>
-#include <cstdlib>
+//#include <cstdlib>
+
+/*int abs (int x);
+namespace std
+{
+  using ::abs;
+  long abs(long __i);
+}
+*/
 
 /*
 namespace enigma

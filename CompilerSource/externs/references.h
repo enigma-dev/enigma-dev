@@ -28,14 +28,13 @@
 struct referencer
 {
   char symbol;
-  unsigned short count;
-  unsigned short countmin;
+  unsigned count;
   char completed;
   
   referencer(char s);
-  referencer(char s,unsigned short c);
-  referencer(char s,unsigned short c,char complete);
-  referencer(char s,unsigned short c,unsigned short cmin,char complete);
+  referencer(char s,int c);
+  referencer(char s,int c,char complete);
+  referencer(char s,short cn,short cx,char complete);
   referencer(const referencer &r);
 };
 
@@ -62,15 +61,20 @@ extern struct rf_stack
   char currentsymbol();
   char topmostsymbol();
   
-  unsigned short prevcount();
-  unsigned short nextcount();
-  unsigned short currentcount();
-  unsigned short topmostcount();
+  unsigned prevcount();
+  unsigned nextcount();
+  unsigned currentcount();
+  unsigned topmostcount();
   bool currentcomplete();
   bool topmostcomplete();
   
-  void inc_current();
+  void inc_current_count();
   void inc_current_min();
+  void inc_current_max();
+  void set_current_count(int x);
+  void set_current_min(short x);
+  void set_current_max(short x);
+  void parameter_count_set(const short n,const short x);
   rf_stack &operator += (const rf_stack &s);
   rf_stack &operator += (referencer r);
   rf_stack &operator++ (int nothing);
@@ -82,7 +86,10 @@ extern struct rf_stack
   rf_stack dissociate();
   void dump();
   
-  bool empty();
+  bool empty(); //Any referencers at all
+  bool is_function(); //test if this is a function
+  int parameter_count_min(); //returns topmost function argument count
+  int parameter_count_max(); //returns topmost function argument count
   
   rf_stack(int x);
   rf_stack();

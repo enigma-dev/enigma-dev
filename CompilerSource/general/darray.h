@@ -33,7 +33,6 @@ struct darray
 {
   atype* where;
   atype safety_val;
-  unsigned int size;
   unsigned int allocd;
   atype &operator[] (unsigned int ind)
   {
@@ -54,10 +53,9 @@ struct darray
       delete []where;
       where=nar;
     }
-    if (ind+1>size) size=ind+1;
     return where[ind];
   }
-  darray() { where=new atype[1]; allocd=(where!=0); size=0; }
+  darray() { where=new atype[1]; allocd=(where!=0); }
   ~darray() { if (where != 0) delete[] where; }
 };
 
@@ -97,4 +95,73 @@ struct varray
   }
   varray() { safety_val=new atype; where=new atype*[1]; allocd=(where!=0); if (allocd==0 or safety_val==0) exit(-18); where[0]=0; size=0; }
   ~varray() { if (where != 0) for (unsigned int i=0; i<size; i++) delete where[i]; }
+};
+
+template <typename atype>
+struct varray_ns
+{
+  atype** where;
+  atype* safety_val;
+  unsigned int allocd;
+  atype &operator[] (unsigned int ind)
+  {
+    if (allocd<=ind)
+    {
+      int olds=allocd;
+      while (allocd<=ind) allocd<<=1;
+
+      atype** nar=new atype*[allocd];
+      if (nar==0)
+      {
+         allocd=olds;
+         return *safety_val;
+      }
+      if (olds>0)
+      {
+        memcpy(nar,where,olds*sizeof(atype*));
+        for (unsigned int i=olds;i<allocd;i++) nar[i]=0;
+      }
+
+      delete []where;
+      where=nar;
+    }
+    if (where[ind]==0) where[ind]=new atype;
+    if (where[ind]==0) return *safety_val;
+    return *where[ind];
+  }
+  varray_ns() { safety_val=new atype; where=new atype*[1]; allocd=(where!=0); if (allocd==0 or safety_val==0) exit(-18); where[0]=0; }
+  ~varray_ns() { if (where != 0) for (unsigned int i=0; i<allocd; i++) delete where[i]; }
+};
+
+template <typename atype>
+struct darray_s
+{
+  atype* where;
+  atype safety_val;
+  unsigned int size;
+  unsigned int allocd;
+  atype &operator[] (unsigned int ind)
+  {
+    if (allocd<=ind)
+    {
+      int olds=allocd;
+      while (allocd<=ind) allocd<<=1;
+
+      atype* nar=new atype[allocd];
+      if (nar==0)
+      {
+         allocd=olds;
+         return safety_val;
+      }
+      if (olds>0)
+        memcpy(nar,where,olds*sizeof(atype));
+
+      delete []where;
+      where=nar;
+    }
+    if (ind+1>size) size=ind+1;
+    return where[ind];
+  }
+  darray_s() { where=new atype[1]; allocd=(where!=0); size=0; }
+  ~darray_s() { if (where != 0) delete[] where; }
 };

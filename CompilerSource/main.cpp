@@ -144,10 +144,23 @@ int main(int argc, char *argv[])
           }
           else
           {
-            extiter a = global_scope.members.find(n);
-            if (a != global_scope.members.end())
+            extiter a;
+            string seg;
+            externs *isco = &global_scope;
+            for (unsigned i=0; i<n.length();)
+            {
+              const unsigned is = i;
+              while (i<n.length() and n[i] != ':') i++;
+              
+              seg = n.substr(is,i-is);
+              a = isco->members.find(seg);
+              if (i<n.length() and a != isco->members.end())
+                isco = a->second;
+              while (i<n.length() and n[i] == ':') i++;
+            }
+            if (a != isco->members.end())
               print_ext_data(a->second, 2);
-            else cout << "Not found: " << n << endl;
+            else cout << "Not found: " << seg << endl;
           }
         }
         if (c == 't')

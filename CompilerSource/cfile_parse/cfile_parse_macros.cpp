@@ -346,6 +346,33 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
       cout << "Unconditional debug output: " << pc.substr(22) << endl;
       fflush(stdout);
     }
+    if (pc.substr(0,10) == "tracescope")
+    {
+      string o;
+      cout << "Tracing scope (" << (pc.length()>11?pc.substr(11):"no additional info") << "): ";
+      
+      string lnm;
+      for (externs* i=current_scope; i != &global_scope; i=i->parent)
+      {
+        if (lnm != "")
+        {
+          extiter ii = i->members.find(lnm);
+          if (ii == i->members.end())
+            cout << "ERROR! Scope `" << i->name << "' offers no route back to `" << lnm << "'  ";
+        }
+        o = "::" + i->name + o;
+        lnm = i->name;
+      }
+      if (lnm != "")
+      {
+        extiter ii = global_scope.members.find(lnm);
+        if (ii == global_scope.members.end())
+          cout << "ERROR! Global scope offers no route back to `" << lnm << "'  " << o << endl << endl;
+        else cout << o << endl<< "Confirmed global scope traces back to `" << lnm << "'" << endl << endl;
+      } else cout << endl << "At global scope." << endl << endl;
+      
+      fflush(stdout);
+    }
   }
   
   //Conditionals/Flow
