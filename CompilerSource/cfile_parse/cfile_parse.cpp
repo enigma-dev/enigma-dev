@@ -86,6 +86,7 @@ string strace(externs *f)
   return o;
 }
 
+char skipto, skipto2, skip_inc_on;
 int parse_cfile(string cftext)
 {
   cferr="No error";
@@ -123,7 +124,7 @@ int parse_cfile(string cftext)
   int specialize_start = 0;
   string specialize_string;
   bool specializing = false;
-  char skipto = 0, skipto2 = 0, skip_inc_on = 0;
+  skipto = 0, skipto2 = 0, skip_inc_on = 0;
 
   /*
     Okay, we have to break this into sections.
@@ -461,8 +462,11 @@ int parse_cfile(string cftext)
               }
               if (last_named_phase != TMP_IDENTIFIER and last_named_phase != TMP_DEFAULTED)
               {
-                cferr="Unexpected comma in template declaration";
-                return pos;
+                if (last_named != TMP_TYPENAME) {
+                  cferr="Unexpected comma in template declaration";
+                  return pos;
+                }
+                last_identifier = "";
               }
               tmplate_params[tpc++] = tpdata(last_identifier,last_named_phase != TMP_DEFAULTED ? NULL : last_type);
               last_named_phase = TMP_PSTART;
@@ -901,7 +905,7 @@ int parse_cfile(string cftext)
         current_templates.pop();
         pos++; continue;
       }
-      if (last_named_phase != TMP_IDENTIFIER and last_named_phase != TMP_DEFAULTED)
+      if (last_named_phase != TMP_IDENTIFIER and last_named_phase != TMP_DEFAULTED and (last_named_phase == TMP_TYPENAME? last_identifier = "", false : true))
       {
         if (last_named_phase != TMP_SIMPLE)
         {
@@ -923,6 +927,7 @@ int parse_cfile(string cftext)
       
       last_named = LN_NOTHING;
       last_named_phase = 0;
+      last_type = NULL;
       pos++; continue;
     }
     

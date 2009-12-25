@@ -74,7 +74,11 @@ void print_ext_data(externs *ext,int indent)
 {
   bool comma=0;
   string indstr(indent,' ');
-
+  
+  if (ext == NULL) {
+    cout <<  indstr << "error\n";
+    return;
+  }
   cout << indstr << ext->name << ":  ";
   
   if (ext->is_function())
@@ -97,9 +101,16 @@ void print_ext_data(externs *ext,int indent)
     for (unsigned ii=0; ii < ext->tempargs.size; ii++)
     {
       if (comma != 0) cout << comma;
-      cout << ext->tempargs[ii]->name;
-      if (ext->tempargs[ii]->members[""] != NULL)
-        cout << "=" << ext->tempargs[ii]->members[""]->name;
+      if (ext->tempargs[ii]->flags & EXTFLAG_TYPEDEF)
+      {
+        cout << "typename " << ext->tempargs[ii]->name;
+        if (ext->tempargs[ii]->members[""] != NULL)
+          cout << "=" << ext->tempargs[ii]->members[""]->name;
+      }
+      else
+      {
+        cout << ext->tempargs[ii]->name;
+      }
       comma = ',';
     }
     cout << "> ";

@@ -155,6 +155,7 @@ unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile
   return unsigned(-1);
 }
 
+extern char skipto, skipto2;
 extern bool is_tflag(string x);
 int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named,bool at_scope_accessor)
 {
@@ -334,8 +335,15 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
   {
     if (last_named != LN_TEMPLATE or last_named_phase != TMP_PSTART)
     {
-      cferr = "Unexpected `typename' token";
-      return pos;
+      if (last_named != LN_TYPEDEF) //Plain old typedef... Nothing else named yet
+      {
+        cferr = "Unexpected `typename' token";
+        return pos;
+      }
+      last_named = LN_NOTHING;
+      skipto = ';';
+      skipto2 = ';';
+      return -1;
     }
     last_named_phase = TMP_TYPENAME;
     return -1;

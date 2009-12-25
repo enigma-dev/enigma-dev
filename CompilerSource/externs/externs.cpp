@@ -153,6 +153,7 @@ externs* scope_get_using_ie(externs* scope)
   return NULL;
 }
 
+string strace(externs *f);
 externs* ext_retriever_var = NULL;
 void print_scope_members(externs*, int);
 bool find_extname(string name,unsigned int flags)
@@ -163,7 +164,10 @@ bool find_extname(string name,unsigned int flags)
     extiter f = immediate_scope->members.find(name);
       /*cout << "Find " << name << " in " << immediate_scope->name << endl;
       print_scope_members(immediate_scope,4);*/
-    if (f == immediate_scope->members.end()) return false;
+    if (f == immediate_scope->members.end()) {
+      cout << "Error: Unable to locate member `" << name << "' in scope `" << strace(immediate_scope) << "'" << endl;
+      return false;
+    }
     ext_retriever_var = f->second;
     immediate_scope = NULL;
     
