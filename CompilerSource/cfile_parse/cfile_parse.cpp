@@ -86,6 +86,7 @@ string strace(externs *f)
   return o;
 }
 
+externs *argument_type;
 char skipto, skipto2, skip_inc_on;
 int parse_cfile(string cftext)
 {
@@ -106,6 +107,7 @@ int parse_cfile(string cftext)
   len = cfile.length();
 
   externs *last_type = NULL;
+  argument_type = NULL;
   string last_identifier="";
   int last_named=LN_NOTHING;
   int last_named_phase=0;
@@ -141,7 +143,7 @@ int parse_cfile(string cftext)
   */
 
   anoncount = 0;
-  stack<bool> scope_stack_because_of_fucking_extern_C_keyword;
+  stack<externs*> scope_stack;
   stack<externs*> current_templates;
   bool handle_ids_next_iter = 0;
   string id_to_handle;
@@ -288,6 +290,8 @@ int parse_cfile(string cftext)
                 access_specialization(last_type,specialize_string);
               } specializing = false;
             }
+            if (cfile[pos] == ';' or cfile[pos]=='{')
+              pos--;
           }
           else if (cfile[pos] == skipto) //Only skip if the primary is met. For instance, in "s = '>'; s2 = ','; sion = '<';", we want to dec only on >
             skip_depth--;
@@ -556,11 +560,7 @@ int parse_cfile(string cftext)
             cferr = "Fatal error in parse: Field `" + type_to_use->name + "' is labeled as typedef'd, but contains no definition";
             return pos;
           }
-          if (type_to_use == NULL)
-          {
-            cferr = "Fatal error in parse: `" + type_to_use->name + "' is labeled as typedef'd, but points to NULL";
-            return pos;
-          }
+          if (n->second == NULL) break;
           type_to_use = n->second;
         }
         
@@ -582,6 +582,7 @@ int parse_cfile(string cftext)
         last_named_phase = 0;
         last_identifier = "";
         last_type = NULL;
+        argument_type = NULL;
         refstack.dump();
         tpc = -1;
       }
@@ -621,13 +622,32 @@ int parse_cfile(string cftext)
       refstack += referencer('*');
       pos++; continue;
     }
+    //First off, the most common is likely to be a pointer indicator.
+    if (cfile[pos]=='&')
+    {
+      //type should be named
+      if ((last_named | LN_TYPEDEF) != (LN_DECLARATOR | LN_TYPEDEF))
+      {
+        if ((last_named | LN_TYPEDEF) != (LN_CLASS  | LN_TYPEDEF)
+        and (last_named | LN_TYPEDEF) != (LN_STRUCT | LN_TYPEDEF)
+        and (last_named | LN_TYPEDEF) != (LN_UNION  | LN_TYPEDEF))
+        {
+          cferr = "Unexpected '&'";
+          return pos;
+        }
+        if (!extreg_deprecated_struct(false,last_identifier,last_named,last_named_phase,last_type))
+          return pos;
+      }
+      refstack += referencer('&');
+      pos++; continue;
+    }
     
     if (cfile[pos]=='[')
     {
       //type should be named
       if (last_named != LN_DECLARATOR)
       {
-        cferr = "Unexpected '*'";
+        cferr = "Unexpected '['";
         return pos;
       }
       refstack += referencer('[');
@@ -649,19 +669,32 @@ int parse_cfile(string cftext)
         last_named_phase = DEC_IDENTIFIER;
       }
       
+      
       //In a declaration
       
-      if (last_named_phase == DEC_THROW) //int func() throw(<--You are here);
+      if (last_named_phase != DEC_IDENTIFIER)
       {
-        skipto = ')';
-        skip_inc_on = '(';
-        last_named_phase = DEC_IDENTIFIER;
-        pos++; continue;
+        if (last_named_phase == DEC_THROW) //int func() throw(<--You are here);
+        {
+          skipto = ')';
+          skip_inc_on = '(';
+          last_named_phase = DEC_IDENTIFIER;
+          pos++; continue;
+        }
+        if (last_named_phase != DEC_FULL) {
+          cferr = "Unexpected parenthesis in declaration";
+          return pos;
+        }
+        if (last_type->flags & (EXTFLAG_STRUCT | EXTFLAG_CLASS)) {
+          last_identifier = last_type->name;
+          last_named_phase = DEC_IDENTIFIER;
+        }
+        //last_type can stay what it is
       }
       
       //<declarator> ( ... ) or <declarator> <identifier> ()
-      if (refstack.currentsymbol() == '(' and !refstack.currentcomplete()) //int func() throw(<--You are here);
-      {
+      if (refstack.currentsymbol() == '(' and !refstack.currentcomplete())
+      { //Skip parenths inside function params
         skipto = ')';
         skip_inc_on = '(';
         last_named_phase = DEC_IDENTIFIER;
@@ -669,7 +702,8 @@ int parse_cfile(string cftext)
       }
       else
       {
-        refstack += referencer(last_named_phase == DEC_IDENTIFIER ? '(':')',0,last_named_phase != DEC_IDENTIFIER);
+        refstack += referencer(last_named_phase == DEC_IDENTIFIER ? '(' : ')',0,last_named_phase != DEC_IDENTIFIER);
+        argument_type = NULL;
         plevel++;
       }
       
@@ -700,7 +734,9 @@ int parse_cfile(string cftext)
     
     if (cfile[pos] == '{')
     {
-      char push_worthless = 0;
+      //Because :: can be used to move to a distant scope, we must leave a breadcrumb trail
+      externs *push_scope = current_scope; 
+      bool skipping_to = false; //Also, if this is set to true (like for function implementation), nothing is pushed
       const int last_named_raw = last_named & ~LN_TYPEDEF;
       
       //Class/Namespace declaration.
@@ -718,9 +754,9 @@ int parse_cfile(string cftext)
         current_scope = ext_retriever_var;
       }
       //Function implementation.
-      else if (last_named_raw == LN_DECLARATOR) // Do not confuse with ')'
+      else if (last_named_raw == LN_DECLARATOR)
       {
-        if (refstack.topmostsymbol() == '(')
+        if (refstack.topmostsymbol() == '(') // Do not confuse with ')'
         {
           //Register the function in the current scope
           if (!ExtRegister(last_named,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc))
@@ -728,34 +764,28 @@ int parse_cfile(string cftext)
           
           //Skip the code: we don't need to know it ^_^
           skipto = '}'; skip_inc_on = '{';
-          push_worthless = 2;
+          push_scope = NULL;
+          skipping_to = 1;
         }
         else
         {
           if (last_type != NULL and last_type->flags & (EXTFLAG_STRUCT|EXTFLAG_CLASS|EXTFLAG_ENUM))
-          {
-            if (last_type->parent == current_scope)
+          { //We're at a structure or something, and we're not NULL
+            //if (last_type->parent == current_scope)
+            if (!last_type->members.empty())
             {
-              if (!last_type->members.empty())
+              if ((last_type->flags & EXTFLAG_TEMPLATE) and specialize_string != "")
               {
-                if ((last_type->flags & EXTFLAG_TEMPLATE) and specialize_string != "")
-                {
-                  current_scope = TemplateSpecialize(last_type,specialize_string); //Parse specialize_string and 
-                  if (current_scope == NULL) return pos;
-                }
-                else {
-                  cferr = "Attempting to redeclare struct `"+last_type->name+"'";
-                  return pos;
-                }
+                current_scope = TemplateSpecialize(last_type,specialize_string); //Parse specialize_string and 
+                if (current_scope == NULL) return pos;
               }
-              else
-                current_scope = last_type; //Move into it. Brilliantly simple; we already know it's parent is current_scope.
+              else {
+                cferr = "Attempting to redeclare struct `"+last_type->name+"'";
+                return pos;
+              }
             }
             else
-            {
-              cferr = "Fuck, I'm a dumbass.";
-              return pos;
-            }
+              current_scope = last_type; //Move into it. Brilliantly simple; we already know it's parent is current_scope.
           }
           else
           {
@@ -769,20 +799,22 @@ int parse_cfile(string cftext)
       else
       {
         if (last_named == LN_NOTHING and last_named_phase == 99)
-          push_worthless = 1, last_named_phase = 0;
+          last_named_phase = 0;
         else
         { cferr = "Unexpected opening brace at this point";
           return pos;
         }
       }
       
-      if (push_worthless != 2)
-        scope_stack_because_of_fucking_extern_C_keyword.push(push_worthless);
+      if (!skipping_to)
+        scope_stack.push(push_scope);
       
       last_identifier = "";
       last_named = LN_NOTHING;
+      
       last_named_phase = 0;
       last_type = NULL;
+      argument_type = NULL;
       refstack.dump();
       tpc = -1;
       pos++;
@@ -792,20 +824,17 @@ int parse_cfile(string cftext)
     
     if (cfile[pos] == '}')
     {
-      if (scope_stack_because_of_fucking_extern_C_keyword.empty())
+      if (scope_stack.empty())
       {
         cferr = "Unexpected closing brace at this point: none open";
         return pos;
       }
       
-      const bool worthless = scope_stack_because_of_fucking_extern_C_keyword.top();
-      scope_stack_because_of_fucking_extern_C_keyword.pop();
-      if (worthless) { pos++; continue; }
-      
-      if (current_scope == &global_scope)
-      {
-        cferr = "No scope to pop. This error shouldn't occur...";
-        return pos;
+      externs* lscope = scope_stack.top();
+      scope_stack.pop();
+      if (lscope == NULL) { 
+        pos++;
+        continue;
       }
       
       if (last_named != LN_NOTHING)
@@ -836,7 +865,7 @@ int parse_cfile(string cftext)
       }
       
       last_type = current_scope;
-      current_scope = current_scope->parent;
+      current_scope = lscope;
       
       pos++; continue;
     }
@@ -847,10 +876,19 @@ int parse_cfile(string cftext)
     {
       if ((last_named & ~LN_TYPEDEF) != LN_TEMPLATE)
       {
-        if ((last_named & ~LN_TYPEDEF) != LN_DECLARATOR or last_named_phase != DEC_FULL or last_type == NULL or !(last_type->flags & EXTFLAG_TEMPLATE))
+        if ((last_named & ~LN_TYPEDEF) != LN_DECLARATOR or last_named_phase != DEC_FULL)
         {
-          cferr = "Unexpected symbol '<' should only occur directly following `template' token or type";
-          return pos;
+          if (last_type == NULL) {
+            cferr = "Unexpected symbol '<' should only occur directly following `template' token or type";
+            return pos;
+          }
+          if (!(last_type->flags & EXTFLAG_TEMPLATE))
+          {
+            if (!refstack.is_function() or argument_type == NULL or !(argument_type->flags & EXTFLAG_TEMPLATE)) {
+              cferr = "Unexpected symbol '<' should only occur directly following `template' token or type, even in function parameters <_<";
+              return pos;
+            }
+          }
         }
         if (tpc == -1)
         {
@@ -928,6 +966,7 @@ int parse_cfile(string cftext)
       last_named = LN_NOTHING;
       last_named_phase = 0;
       last_type = NULL;
+      argument_type = NULL;
       pos++; continue;
     }
     
@@ -950,9 +989,30 @@ int parse_cfile(string cftext)
       {
         if (last_named == LN_DECLARATOR)
         {
-          skipto = ';';
-          skipto2 = ';';
+          if (refstack.is_function()) {
+            skipto = '{';
+            skipto2 = ';'; //This shouldn't actually happen, but is included as a failsafe.
+          } else {
+            skipto = ';';
+            skipto2 = ';';
+          }
           continue;
+        }
+        if (last_named == LN_STRUCT or last_named == LN_CLASS)
+        {
+          if (last_named_phase != SP_IDENTIFIER and last_named_phase != SP_EMPTY) {
+            cferr = "Colon already named in heritance expression";
+            return pos;
+          }
+          last_named_phase = SP_COLON;
+          pos++; continue;
+        }
+        if (last_named == LN_LABEL)
+        {
+          //TODO: Eventually this is to be used for public/private distinction
+          last_named = LN_NOTHING;
+          last_named_phase = 0;
+          pos++; continue;
         }
         cferr = "Unexpected colon at this point";
         return pos;
@@ -1004,11 +1064,31 @@ int parse_cfile(string cftext)
       continue;
     }
     
+    //The somewhat uncommon destructor token
+    if (cfile[pos] == '~')
+    {
+      if (last_named != LN_NOTHING) {
+        cferr = "Token `~' should only occur to denote a destructor. Furthermore, `~' was fun to type";
+        return pos;
+      }
+      last_named = LN_DESTRUCTOR;
+      last_named_phase = 0;
+      pos++; continue;
+    }
+    
     //extern "C"
     if (cfile[pos] == '"')
     {
       if (last_named == LN_DECLARATOR and last_named_phase == 0) //assuming it's "extern" and not "unsigned", which'd behave the same
       if (cfile[++pos] == 'C')
+      if (cfile[++pos] == '"')
+      {
+        last_named = LN_NOTHING;
+        last_named_phase = 99;
+        pos++; continue;
+      }
+      if (cfile[pos] == '+')
+      if (cfile[++pos] == '+')
       if (cfile[++pos] == '"')
       {
         last_named = LN_NOTHING;

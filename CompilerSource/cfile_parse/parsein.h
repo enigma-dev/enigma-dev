@@ -1,5 +1,5 @@
 //These must be requested by the IDE
-/*//Windows
+//*//Windows
 #define __DBL_MIN_EXP__ (-1021)
 #define __FLT_MIN__ 1.17549435e-38F
 #define __CHAR_BIT__ 8
@@ -221,9 +221,31 @@
 //*/
 
 
+#ifdef __WIN32
+  #include "C:/Users/Josh/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary.h"
+#else
+  #include "/home/josh/Documents/Projects/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary.h"
+#endif
 
-#include "/home/josh/Documents/Projects/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary.h"
+/*
+template<typename t> struct taco
+{
+  taco(const taco<int> &t);
+}
+*/
 
+/* struct taco
+{
+  int a;
+  #pragma tracescope
+  taco() {
+    #pragma tracescope
+  };
+  #pragma tracescope
+  taco(int hondas) {};
+  #pragma tracescope
+}
+ */
 
 /*template<typename a> struct crap;
 typedef crap<char> a;*/

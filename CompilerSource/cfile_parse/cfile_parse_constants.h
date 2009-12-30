@@ -39,6 +39,8 @@ enum
   LN_OPERATOR,     //as in the operator keyword, not a random operator
   LN_USING,        //using whatever
   LN_TEMPARGS,     //std::map<...>
+  LN_LABEL,        //Public, private, protected
+  LN_DESTRUCTOR,   //Added to invoke errors where appropriate
   LN_TYPEDEF=128,  //typedef whatever
 };
 
@@ -73,7 +75,8 @@ enum
   DEC_LONGLONG,     //long long...
   DEC_FULL,         //completed type; ie, "int"
   DEC_IDENTIFIER,   //completed type and identifier. Recurses back to DEC_FULL on comma or semi.
-  DEC_THROW         //int a() throw(...);
+  DEC_THROW,        //int a() throw(...);
+  DEC_DESTRUCTOR    //~classname()
 };
 
 enum

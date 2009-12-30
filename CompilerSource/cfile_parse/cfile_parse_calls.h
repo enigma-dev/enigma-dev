@@ -69,7 +69,7 @@ inline void regmacro(string m,string val,string arg1)
   mac->addarg(arg1);
 }
 
-externs *builtin_type__int;
+externs *builtin_type__int, *builtin_type__void;
 varray<string> include_directories;
 unsigned int include_directory_count;
 
@@ -83,7 +83,7 @@ void cparse_init()
   regt("float");
   regt("double");
   
-  regt("void"); //this was only after careful consideration
+  builtin_type__void = regt("void"); //this was only after careful consideration
   
   regt("long");
   regt("short");
@@ -117,7 +117,9 @@ void cparse_init()
   #else
   include_directories[0] = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\include\\";
   include_directories[1] = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\lib\\gcc\\mingw32\\3.4.5\\install-tools\\include\\";
-  include_directory_count = 2;
+  include_directories[2] = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\include\\c++\\3.4.5\\";
+  include_directories[3] = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\include\\c++\\3.4.5\\mingw32\\";
+  include_directory_count = 4;
   #endif
   
 }
@@ -230,7 +232,7 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
 #include "expression_evaluator.h"
 
 map<string,bool> constant_types; //Load this with types like "int" and flags like "unsigned"
-struct init_const_types { init_const_types() {
+struct init_const_types { init_const_types() { //These are acceptable for const-expressions
   constant_types["bool"] = 1; 
   constant_types["char"] = 1; 
   constant_types["short"] = 1; 
@@ -255,7 +257,7 @@ string temp_parse_seg(string seg, externs* type_default)
         while (is_letterd(seg[++i]));
         string tn = seg.substr(is,i-is);
         
-        if (constant_types.find(tn) == constant_types.end()) {
+        if (!find_extname(tn,EXTFLAG_TYPENAME)) {
           cferr = "`"+tn+"' cannot be used in a constant expression";
           return "";
         }

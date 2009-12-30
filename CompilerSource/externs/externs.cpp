@@ -176,6 +176,11 @@ bool find_extname(string name,unsigned int flags)
   
   //Start looking in this scope
   externs* inscope=current_scope;
+  //The actual scope we're in should get search precedence, otherwise constructors will flop
+  if (inscope->flags & EXTFLAG_TYPENAME and flags & EXTFLAG_TYPENAME and inscope->name == name) {
+    ext_retriever_var = inscope;
+    return true;
+  }
   
   //If we're looking for a type name, try the template args
   if (flags & EXTFLAG_TYPENAME)
@@ -231,6 +236,12 @@ bool find_extname(string name,unsigned int flags)
           ext_retriever_var = inscope->tempargs[ti];
         return 1;
       }
+    }
+    
+    //The actual scope we're in should then get search precedence, otherwise constructors will flop
+    if (inscope->flags & EXTFLAG_TYPENAME and flags & EXTFLAG_TYPENAME and inscope->name == name) {
+      ext_retriever_var = inscope;
+      return true;
     }
     
     //Try to find it as a member of this scope

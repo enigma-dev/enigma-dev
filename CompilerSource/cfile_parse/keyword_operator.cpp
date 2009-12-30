@@ -118,7 +118,7 @@ int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_n
     {
       last_identifier += "[]";
       last_named_phase=OP_BRACKET;
-      pos+=2; return -1;
+      pos++; return -1;
     }
     last_named_phase = OP_PARAMS;
     return -1;

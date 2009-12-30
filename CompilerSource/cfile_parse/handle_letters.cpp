@@ -150,13 +150,14 @@ unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile
       inmacros[macrod++] = n;
       return unsigned(-2);
     }
-    else cout << "I'm a stupid cunt.\r\n";
+    else cout << "I'm a stupid cunt. What of it?\r\n";
   }
   return unsigned(-1);
 }
 
 extern char skipto, skipto2;
 extern bool is_tflag(string x);
+extern externs *argument_type;
 int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named,bool at_scope_accessor)
 {
   //it's not a macro, so the next thing we'll check for is keyword
@@ -371,13 +372,37 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
     last_named_phase = USE_NOTHING;
     return -1;
   }
-  if (n=="class")
   if (n=="friend")
-  if (n=="private")
-  if (n=="public" or n=="protected")
+    return -1;
+  if (n=="private" or n=="protected" or n=="public")
+  {
+    if (last_named == LN_STRUCT or last_named == LN_CLASS)
+    {
+      if (last_named_phase != SP_COLON) {
+        cferr = "Unexpected `" + n + "' token in structure declaration";
+        return pos;
+      }
+      switch (n[2]) {
+        case 'i': last_named_phase = SP_PRIVATE;   break;
+        case 'o': last_named_phase = SP_PROTECTED; break;
+        case 'b': last_named_phase = SP_PUBLIC;    break;
+      }
+    }
+    else
+    {
+      if (last_named != LN_NOTHING) {
+        cferr = "What the hell is this doing here?";
+        return pos;
+      }
+      last_named = LN_LABEL;
+      //last_named_phase == LBL_
+    }
+    return -1;
+  }
   if (n=="virtual")
+    return -1;
   if (n=="mutable")
-  return -1;
+    return -1;
   
   //This is the end of the reserved words.
   //Now we make sure we're not accessing something from this id's scope, meaning this id must be a scope of some sort
@@ -506,6 +531,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
           cferr = "Expected ';' before new declaration; old declaration is of type " + (last_type?last_type->name:string("NULL")) + " as " + last_identifier;
           return pos;
         }
+        else argument_type = ext_retriever_var;
         fparam_named = 1;
         return -1;
       } 
@@ -518,8 +544,8 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       //If we made it this far, we are redeclaring something in this scope that is different in higher scopes
       //These next segments of elses are skipped, and the variable is treated like new.
     }
-    //Check if we're declaring a new struct or something instead
-    else //Last isn't a declarator. Maybe it's a struct or something?
+    //Check if we're declaring a new struct
+    else //Last isn't a declarator
     if ((last_named | LN_TYPEDEF) == (LN_STRUCT | LN_TYPEDEF)
     or  (last_named | LN_TYPEDEF) == (LN_ENUM   | LN_TYPEDEF)
     or  (last_named | LN_TYPEDEF) == (LN_CLASS  | LN_TYPEDEF))
@@ -528,8 +554,11 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       //If we're not right after "struct" (or the like) or are capable of redeclaring it in this scope
       if (last_named_phase != SP_EMPTY)
       {
-        cferr = "Structure already identified, expected undeclared identifier";
-        return pos;
+        if (last_named_phase != SP_PRIVATE and last_named_phase != SP_PROTECTED and last_named_phase != SP_PUBLIC) {
+          cferr = "Structure already identified, expected undeclared identifier";
+          return pos;
+        }
+        return -1;
       }
       //This shouldn't really happen
       if (ext_retriever_var == NULL)
@@ -578,6 +607,14 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       last_type = ext_retriever_var;
       return -1;
     }
+    else if (last_named == LN_DESTRUCTOR and (ext_retriever_var->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT)))
+    {
+      last_named = LN_DECLARATOR;
+      last_named_phase = DEC_IDENTIFIER;
+      last_type = ext_retriever_var;
+      last_identifier = "~" + n;
+      return unsigned(-1);
+    }
     //Not declaring by type or giving default template value
     else //Note: This else is here because the above will need to pass this block     //struct a;
     {    //in the case of the current type being redeclared as scalar in this scope   //namespace b { int a; }
@@ -593,7 +630,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
   {
     if (!(current_scope != &global_scope and current_scope->flags & EXTFLAG_ENUM))
     {
-      cferr="Expected type name or keyword before identifier";
+      cferr = "Expected type name or keyword before identifier";
       return pos;
     }
     else //Standalone identifer is okay in an enum
@@ -607,7 +644,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
   }
   if (last_named == LN_TYPEDEF) //plain typedef, not typedef | declarator
   {
-    cferr="Type definition does not specify a type";
+    cferr = "Type definition does not specify a type";
     return pos;
   }
   
