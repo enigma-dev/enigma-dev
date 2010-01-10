@@ -37,12 +37,13 @@ using namespace std;
 #include "expression_evaluator.h"
 
 #include "cfile_parse_constants.h"
+#include "cparse_shared.h"
 
 extern string cferr;
 
 //110 lines of clutter.
 //For operators new, delete, new[], and delete[], see the list of keywords in cfile_parse.cpp
-int keyword_operator(string& cfile,unsigned int &pos,int &last_named,int &last_named_phase,string &last_identifier)
+int keyword_operator()
 {
   if (last_named_phase==OP_EMPTY)
   {

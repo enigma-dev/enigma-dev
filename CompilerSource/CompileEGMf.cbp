@@ -42,8 +42,12 @@
 		<Unit filename="cfile_parse/cfile_parse_calls.h" />
 		<Unit filename="cfile_parse/cfile_parse_constants.h" />
 		<Unit filename="cfile_parse/cfile_parse_macros.cpp" />
+		<Unit filename="cfile_parse/cfile_pushing.cpp" />
+		<Unit filename="cfile_parse/cfile_pushing.h" />
 		<Unit filename="cfile_parse/cparse_components.cpp" />
 		<Unit filename="cfile_parse/cparse_components.h" />
+		<Unit filename="cfile_parse/cparse_shared.cpp" />
+		<Unit filename="cfile_parse/cparse_shared.h" />
 		<Unit filename="cfile_parse/expev_macros.h" />
 		<Unit filename="cfile_parse/expression_evaluator.cpp" />
 		<Unit filename="cfile_parse/expression_evaluator.h" />
@@ -52,6 +56,7 @@
 		<Unit filename="cfile_parse/handle_letters.h" />
 		<Unit filename="cfile_parse/keyword_operator.cpp" />
 		<Unit filename="cfile_parse/macro_functions.cpp" />
+		<Unit filename="cfile_parse/macro_functions.h" />
 		<Unit filename="cfile_parse/main.cpp" />
 		<Unit filename="cfile_parse/parse_basics.h" />
 		<Unit filename="cfile_parse/parsein.h">

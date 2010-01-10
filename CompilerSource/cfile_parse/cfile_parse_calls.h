@@ -107,6 +107,8 @@ void cparse_init()
   //These are GCC things and must be hard coded in
   regmacro("__attribute__","","x"); //__attribute__(x) 
   regmacro("__extension__"); //__extension__
+  regmacro("false","0"); //false
+  regmacro("true","1"); //true
   
   #ifdef linux
   include_directories[0] = "/usr/include/";
@@ -125,12 +127,9 @@ void cparse_init()
 }
 
 
-int tpc = -1;
-varray<tpdata> tmplate_params;
 
 int anoncount = 0;
-
-bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = -1)
+bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = -1,long long last_value = 0)
 {
   unsigned int is_tdef = last & LN_TYPEDEF;
   last &= ~LN_TYPEDEF;
@@ -188,7 +187,7 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
   else if (last == LN_UNION) // Same as struct, for our purposes. 
     e->flags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME; //sizeof() can't be used in Macros, you bunch of arses.
   else if (last == LN_ENUM)
-    e->flags = EXTFLAG_ENUM | EXTFLAG_TYPENAME;
+    e->flags = (phase == EN_IDENTIFIER or phase == EN_NOTHING) ? EXTFLAG_ENUM | EXTFLAG_TYPENAME : EXTFLAG_VALUED;
   else if (last == LN_NAMESPACE)
     e->flags = EXTFLAG_NAMESPACE;
   
@@ -200,30 +199,23 @@ bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type = NUL
     e->flags |= EXTFLAG_TEMPLATE;
     for (int i=0; i<tpc; i++)
     {
-      externs* tdl;
       if (!tparams[i].standalone)
-      {
-        tdl = new externs;
-        tdl->name = tparams[i].name;
-        tdl->flags = EXTFLAG_TYPEDEF;
-        tdl->parent = e;
-        tdl->members[""] = tparams[i].def;
-      }
+        tparams[i].def->parent = e;
       else
       {
-        tdl = tparams[i].def;
-        if (tdl == NULL) {
+        if (tparams[i].def == NULL) {
           cferr = "Parse error: Template parameter is marked as definite but defined as NULL";
           return 0;
         }
       }
       
-      e->tempargs[e->tempargs.size] = tdl;
+      e->tempargs[e->tempargs.size] = tparams[i].def;
     }
   }
   
   e->type = type;
   e->parent = current_scope;
+  e->value_of = last_value;
   e->refstack = refs;
   
   return 1;
@@ -244,87 +236,179 @@ struct init_const_types { init_const_types() { //These are acceptable for const-
   constant_types["static"] = 1; 
   } } init_const_types_now;
 
-string temp_parse_seg(string seg, externs* type_default)
+string temp_parse_seg(string seg, externs* type_default, externs **kt = NULL)
 {
+  //cout << seg << endl;
   if (type_default->flags & EXTFLAG_TYPEDEF)
   {
     string p = "";
+    externs* is = immediate_scope;
+    immediate_scope = NULL;
+    
+    unsigned lvl = 0;
     for (unsigned i = 0; i<seg.length(); i++)
     {
-      if (is_letter(seg[i]))
+      if (is_letter(seg[i]) and lvl == 0)
       {
         const unsigned is = i;
         while (is_letterd(seg[++i]));
         string tn = seg.substr(is,i-is);
         
-        if (!find_extname(tn,EXTFLAG_TYPENAME)) {
-          cferr = "`"+tn+"' cannot be used in a constant expression";
+        if (!find_extname(tn,EXTFLAG_TYPENAME | EXTFLAG_NAMESPACE)) {
+          cferr = "`"+tn+"' cannot be used in a constant expression <" + type_default->name + ":" + tostring(type_default->flags) + "> [" + seg + "] in ";
           return "";
         }
         
+        cout << "find " << tn << ": ";
+        if (ext_retriever_var->flags & EXTFLAG_NAMESPACE) {
+          immediate_scope = ext_retriever_var;
+          cout << "move into\n";
+        }
+        else {
+          immediate_scope = NULL;
+          cout << "use\n";
+        }
+        
+        if (kt)
+          *kt = ext_retriever_var;
         p += "_" + tn;
       }
+      else if (seg[i] == '<')
+        lvl++;
+      else if (seg[i] == '>')
+        lvl--;
     }
+    immediate_scope = is;
+    
     if (p == "")
-      cferr = "No valid type named in template parameters";
+      cferr = "No valid type named in template parameters <" + type_default->name + ":" + tostring(type_default->flags) + "> [" + seg + "] in ";
     return p;
   }
   else if (type_default->flags & EXTFLAG_TYPENAME)
   {
-    if (constant_types.find(type_default->name) == constant_types.end()) {
-      cferr = "`"+type_default->name+"' cannot be used in a constant expression";
+    if (constant_types.find(type_default->type->name) == constant_types.end()) {
+      cferr = "Type `"+type_default->type->name+"' cannot be used in a constant expression... [" + seg + "] in ";
       return "";
     }
     
     value a = evaluate_expression(seg);
     if (rerrpos != -1) {
-      cferr = "Error in template expression, position " + tostring(rerrpos) + ": " + rerr;
+      cferr = "Error in template expression, position " + tostring(rerrpos) + ": " + rerr + " [" + seg + "] in ";
       return "";
     }
-    return tostring((UTYPE_INT)a);
+    
+    if (kt)
+    {
+      externs *a = *kt = new externs;
+      a->name = type_default->name;
+      a->flags = type_default->flags | EXTFLAG_DEFAULTED | EXTFLAG_VALUED;
+      a->parent = current_scope;
+      a->value_of = (long long) a;
+      a->type = NULL;
+    }
+    return "_" + tostring((UTYPE_INT)a);
   }
-  cferr = "Macro parameter set up wrong. This error shouldn't really occur...";
+  cferr = "Macro parameter set up wrong. This error shouldn't occur...  [" + seg + "] in ";
   return "";
 }
 
-string temp_parse_list(externs* last,string specs)
+string temp_parse_list(externs* last,string specs,varray<externs*> *va = NULL)
 {
   string ns;
-  unsigned is = 0, ti = 0, i;
+  unsigned is = 0, ti = 0, cnt = 0, i;
   for (i = 0; i<specs.length(); i++)
   {
-    if (specs[i] == ',')
+    if (specs[i] == ',' and cnt == 0)
     {
-      externs* pd = last->tempargs[ti++];
-      const string exps = temp_parse_seg(specs.substr(is,i-is),pd);
-      if (exps == "")
+      if (ti >= last->tempargs.size) 
+      {
+        cferr = "Too many parameters to template`"+last->name+"': Passed at least " + tostring(ti+1) 
+              + ", requested " + tostring(last->tempargs.size);
         return "";
+      }
+      
+      externs* pd = last->tempargs[ti];
+      const string exps = temp_parse_seg(specs.substr(is,i-is),pd, va? &((*va)[ti]) : NULL);
+      if (exps == "") {
+        cferr += "{" + specs + "} at " + tostring(i);
+        return "";
+      }
       ns += "_" + exps;
       is = i+1;
+      ti++;
     }
+    else if (specs[i] == '<') cnt++;
+    else if (specs[i] == '>') cnt--;
   }
   if (i - is)
   {
-    externs* pd = last->tempargs[ti++];
-    const string exps = temp_parse_seg(specs.substr(is,i-is),pd);
-    if (exps == "")
+    if (ti >= last->tempargs.size) 
+    {
+      cferr = "Too many parameters to template`"+last->name+"': Passed at least " + tostring(ti)
+            + ", requested " + tostring(last->tempargs.size);
       return "";
+    }
+    
+    externs* pd = last->tempargs[ti];
+    const string exps = temp_parse_seg(specs.substr(is,i-is),pd, va? &((*va)[ti]) : NULL);
+    if (exps == "") {
+      cferr += "{" + specs + "} at " + tostring(i);
+      return "";
+    }
     ns += "_" + exps;
+    ti++;
   }
   
-  if (ti < last->tempargs.size) {
-    cferr = "Too few parameters to template";
-    return "";
+  while (ti < last->tempargs.size)
+  {
+    if (last->tempargs[ti]->flags & EXTFLAG_DEFAULTED)
+    {
+      if (va)
+      {
+        externs *nta = (*va)[ti] = new externs;
+        
+        nta->name = last->tempargs[ti]->name;
+        nta->type = last->tempargs[ti]->type;
+        nta->parent = last->tempargs[ti]->parent;
+        nta->flags = last->tempargs[ti]->flags;
+        nta->value_of = last->tempargs[ti]->value_of;
+      }
+      ti++;
+    }
+    else {
+      cferr = "Too few parameters to template";
+      return "";
+    }
   }
   
   return ns;
 }
 
-externs* TemplateSpecialize(externs* last, string specs)
+externs* TemplateSpecialize(externs* last, string specs) //Last is the type we're specializing, specs is the the string content of the <> in the code.
 {
-  string ns = temp_parse_list(last,specs);
+  /**
+    There are three template lists to consider in this function, which applies to this code:
+    template<typename a> b<c,a>
+    Since str_b is an already-fully-defined template we are specializing, we will use its list as a reference to check our work.
+      @b->tempargs is known simply as @last->tempargs, and represents the original list.
+      @template <typename a> has not yet been dumped into anything, and is accessed with  @tmplate_params.
+      @implementations is a new array we allocate, and contains data from parsed implementation string @specs.
+  */
+  
+  if (not(last->flags & EXTFLAG_TEMPLATE)) {
+    cferr = "Attempting to specialize non-template type `" + last->name + "'";
+    return NULL;
+  }
+  
+  varray<externs*> implementations; //Set of new values to template. These will be either solid types, or a new typedef.
+  string ns = temp_parse_list(last,specs,&implementations); //Fetch a string and varray containing (possibly partial) specialization data
   if (ns == "")
     return NULL;
+  
+  if (implementations.size != last->tempargs.size) {
+    cferr = "Wrong number of parameters to template specialization";
+    return NULL;
+  }
   
   externs* ret = new externs;
   ret->name = last->name + ns;
@@ -332,19 +416,92 @@ externs* TemplateSpecialize(externs* last, string specs)
   ret->type = last->type;
   ret->parent = last->parent;
   
-  temp_get_specialization(last)->members[ns] = ret;
+  //cout << "for (unsigned i = 0; i < " << implementations.size << " and i < " << last->tempargs.size << "; i++)" << endl;
+  for (unsigned i = 0; i < last->tempargs.size; i++) 
+  {
+    if (last->tempargs[i]->flags & EXTFLAG_TYPEDEF)
+    {
+      externs* n = ret->tempargs[i] = new externs;
+      n->flags = EXTFLAG_TYPEDEF;
+      n->name = last->tempargs[i]->name;
+      n->type = implementations[i];
+      n->parent = ret;
+      
+      //cout << "Copied " << n->name << " to new instantiation";
+      //Iterate through the new template parameters. If this is one of them, inherit its name.
+      
+      for (unsigned ii = 0; ii < tmplate_params.size; ii++)
+      {
+        if (implementations[i] == tmplate_params[ii].def) { //If the current implementation is on the list of new typenames
+          n->name = tmplate_params[ii].name;
+          break;
+        }
+      }
+      
+      if (n->name == "")
+        cout << "**************************************************\nSHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n*****************************************************************";
+    }
+  }
+  
+  temp_get_specializations(last)->members[ns] = ret;
   return ret;
 }
 
-void access_specialization(externs *&whom, string specs)
+bool access_specialization(externs* &whom, string specs)
 {
-  cout << "Accessing `" << specs << "' from " << whom->name << endl ;
+  if (not(whom->flags & EXTFLAG_TEMPLATE)) {
+    cferr = "Attempting to access specialization of non-template type `" + whom->name + "'";
+    return NULL;
+  } cout << "Accessing specialization <" << specs << "> from " << whom->name << endl ;
+  
   string ns = temp_parse_list(whom,specs);
   if (ns == "")
-    return;
+    return 0;
   
-  externs* s = temp_get_specialization(whom);
+  externs* s = temp_get_specializations(whom);
   extiter it = s->members.find(ns);
+  /*if (it == s->members.end())
+  {
+    cout << endl << endl << endl << endl << endl << "New section: "<< endl ;
+    for (extiter it = s->members.begin(); it != s->members.end(); it++)
+      cout << "*  " << it->second->name << endl;
+    cferr = "Failed to access specialization <" + ns + "> in `" + whom->name + "': Probably does not exist";
+    return 0;
+  }
+  */
   if (it != s->members.end())
     whom = it->second;
+  return 1;
+}
+
+
+
+unsigned int handle_comments()
+{
+  if (cfile[pos]=='/')
+  {
+    pos++;
+    if (cfile[pos]=='/')
+    {
+      while (cfile[pos] != '\r' and cfile[pos] != '\n' and (pos++)<len);
+      return unsigned(-2);
+    }
+    if (cfile[pos]=='*')
+    {
+      int spos=pos;
+      pos+=2;
+      
+      while ((cfile[pos] != '/' or cfile[pos-1] != '*') and (pos++)<len);
+      if (pos>=len)
+      {
+        cferr="Unterminating comment";
+        return spos;
+      }
+      
+      pos++;
+      return unsigned(-2);
+    }
+    pos--;
+  }
+  return unsigned(-1);
 }

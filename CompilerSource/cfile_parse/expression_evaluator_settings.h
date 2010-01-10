@@ -28,7 +28,7 @@
 //This is just a settings file.
 //It's simply for ease of editing of larger features of this evaluator.
 
-#define CASTS_ALLOWED 0 //No casts in a preprocessor
+#define CASTS_ALLOWED 1 //No casts in a preprocessor, but allowed in ENUM
 #define BOOLXOR_ALLOWED 0
 #define LOGIC_BOOLEAN 1
 #define USE_INTIGERDIV 0

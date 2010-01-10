@@ -25,6 +25,9 @@
 **                                                                              **
 \*********************************************************************************/
 
+#ifndef ELIB_DARRAY
+#define ELIB_DARRAY 1
+
 #include <string.h> //memcpy (linux)
 #include <stdlib.h> //exit
 
@@ -165,3 +168,5 @@ struct darray_s
   darray_s() { where=new atype[1]; allocd=(where!=0); size=0; }
   ~darray_s() { if (where != 0) delete[] where; }
 };
+
+#endif

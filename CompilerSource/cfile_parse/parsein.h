@@ -1,5 +1,5 @@
 //These must be requested by the IDE
-//*//Windows
+/*//Windows
 #define __DBL_MIN_EXP__ (-1021)
 #define __FLT_MIN__ 1.17549435e-38F
 #define __CHAR_BIT__ 8
@@ -226,6 +226,19 @@
 #else
   #include "/home/josh/Documents/Projects/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary.h"
 #endif
+
+
+/*
+template<typename a = float> struct tacos
+{
+  a b;
+};
+template<typename b> struct tacos<b>
+{
+  #pragma debug_entry_point
+  a c;
+};
+*/
 
 /*
 template<typename t> struct taco

@@ -25,10 +25,5 @@
 **                                                                              **
 \*********************************************************************************/
 
-typedef implicit_stack<string> iss;
-typedef implicit_stack<unsigned int> isui;
-
-void handle_macro_pop(iss &c_file,isui &position,isui &cfile_length);
-unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile_length);
 bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_named,int & last_named_phase, externs *&last_type);
-int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named,bool at_scope_accessor);
+int handle_identifiers(const string n,string &last_identifier,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named,bool at_scope_accessor);

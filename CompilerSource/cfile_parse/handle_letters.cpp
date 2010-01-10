@@ -34,21 +34,14 @@ using namespace std;
 #include "../externs/externs.h"
 #include "cfile_parse_constants.h"
 
-unsigned int macrod=0;
-varray<string> inmacros;
-
+#include "cfile_pushing.h"
 #include "macro_functions.h"
 
-typedef implicit_stack<string> iss;
-typedef implicit_stack<unsigned int> isui;
-
-struct includings { string name; string path; };
-extern stack<includings> included_files;
 extern externs* builtin_type__int;
 
 extern string cfile_top;
 extern string cferr_get_file_orfirstfile();
-int get_line(string& cfile,const unsigned int pos)
+int get_line()
 {
   int iline=0;
     for (unsigned int i=0; i<pos; i++)
@@ -59,29 +52,11 @@ int get_line(string& cfile,const unsigned int pos)
   return iline;
 }
 
-void handle_macro_pop(iss &c_file,isui &position,isui &cfile_length)
-{
-  //const int pos = position();
-  
-  c_file.pop();
-  position.pop();
-  cfile_length.pop();
-  if (macrod > 0)
-    macrod--;
-  else if (!included_files.empty())
-  {
-    //print_cfile_top(pos);
-    cfile_top=c_file();
-    included_files.pop();
-  }
-}
-
-extern string cferr;
-string tostring(int val);
 #include "../general/parse_basics.h"
-bool ExtRegister(unsigned int last,string name,rf_stack refs,externs *type,varray<tpdata> &tparams, int tpc = -1);
 
-//struct a { struct a *b; }, not struct a { a* b }
+bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,externs *type,varray<tpdata> &tparams, int tpc = -1, long long last_value = 0);
+
+//struct a { struct a *b; }, not struct a { a *b }
 bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_named,int & last_named_phase, externs *&last_type)
 {
   if (last_identifier == "")
@@ -98,7 +73,7 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
     }
     rf_stack NO_REFS;
     varray<tpdata> EMPTY;
-    ExtRegister(LN_STRUCT,last_identifier,NO_REFS,NULL,EMPTY,-1);
+    ExtRegister(LN_STRUCT,last_named_phase,last_identifier,NO_REFS,NULL,EMPTY,tpc = -1);
   }
   last_named = LN_DECLARATOR;
   last_named_phase = idnamed?DEC_IDENTIFIER:DEC_FULL;
@@ -106,59 +81,7 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
   return 1;
 }
 
-unsigned int handle_macros(const string n,iss &c_file,isui &position,isui &cfile_length)
-{
-  maciter t;
-  if ((t=macros.find(n)) != macros.end())
-  {
-    bool recurs=0;
-    if (t->second.recurse_danger)
-      for (unsigned int iii=0;iii<macrod;iii++)
-         if (inmacros[iii]==n) { recurs=1; break; }
-    if (!recurs)
-    {
-      string macrostr = t->second;
-      
-      #define cfile c_file()
-      #define pos position()
-        if (t->second.argc != -1) //Expect ()
-        {
-          if (!macro_function_parse(cfile,pos,macrostr,t->second.args,t->second.argc))
-          {
-            cferr = macrostr;
-            return pos;
-          }
-        }
-      #undef cfile
-      #undef pos
-      
-      //const int cpos = position();
-      
-      //Push everything
-      c_file.push();
-      position.push();
-      cfile_length.push();
-      
-      //print_cfile_top(cpos);
-      cfile_top = c_file();
-      
-      //Set everything
-      position() = 0;
-      c_file() = macrostr;
-      cfile_length() = c_file().length();
-      
-      inmacros[macrod++] = n;
-      return unsigned(-2);
-    }
-    else cout << "I'm a stupid cunt. What of it?\r\n";
-  }
-  return unsigned(-1);
-}
-
-extern char skipto, skipto2;
-extern bool is_tflag(string x);
-extern externs *argument_type;
-int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named,bool at_scope_accessor)
+int handle_identifiers(const string n,string &last_identifier,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named,bool at_scope_accessor)
 {
   //it's not a macro, so the next thing we'll check for is keyword
   if (n=="struct" or n=="class")
@@ -179,10 +102,8 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
           return -1;
         }
       }
-      else
-      {
+      else //last_named == ln_typedef
         last_named |= LN_STRUCT;
-      }
     }
     else last_named = LN_STRUCT;
     return -1;
@@ -197,11 +118,11 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
         cferr="Unexpected `enum' token";
         return pos;
       }
-      else
-        last_named |= LN_ENUM;
+      last_named |= LN_ENUM;
     }
     else
       last_named = LN_ENUM;
+    last_named_phase = EN_NOTHING;
     return -1;
   }
   if (n=="typedef")
@@ -209,7 +130,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
     //Typedef can't follow anything
     if (last_named != LN_NOTHING)
     {
-      cferr="Unexpected `struct' token";
+      cferr="Unexpected `typedef' token";
       return pos;
     }
     last_named = LN_TYPEDEF;
@@ -409,7 +330,7 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
   if (at_scope_accessor)
   {
     if (!find_extname(n,EXTFLAG_CLASS | EXTFLAG_STRUCT | EXTFLAG_NAMESPACE)) {
-      cferr = "Cannot access `" + n + "' as scope";
+      cferr = "Cannot access `" + n + "' as scope from `" + (immediate_scope?immediate_scope->name:current_scope->name) + "'";
       return pos;
     }
     immediate_scope = ext_retriever_var;
@@ -547,7 +468,6 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
     //Check if we're declaring a new struct
     else //Last isn't a declarator
     if ((last_named | LN_TYPEDEF) == (LN_STRUCT | LN_TYPEDEF)
-    or  (last_named | LN_TYPEDEF) == (LN_ENUM   | LN_TYPEDEF)
     or  (last_named | LN_TYPEDEF) == (LN_CLASS  | LN_TYPEDEF))
     {
       //We're dealing with struct structid
@@ -558,6 +478,8 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
           cferr = "Structure already identified, expected undeclared identifier";
           return pos;
         }
+        inheritance_types[ihc++] = ihdata(ext_retriever_var,last_named_phase == SP_PUBLIC ? ihdata::s_public : last_named_phase == SP_PRIVATE ? ihdata::s_private : ihdata::s_protected);
+        last_named_phase = SP_PARENT_NAMED;
         return -1;
       }
       //This shouldn't really happen
@@ -615,6 +537,11 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       last_identifier = "~" + n;
       return unsigned(-1);
     }
+    else if ((last_named | LN_TYPEDEF) == (LN_ENUM   | LN_TYPEDEF))
+    {
+      /*cferr = "Unexpected type name in enumeration";
+      return pos;*/
+    }
     //Not declaring by type or giving default template value
     else //Note: This else is here because the above will need to pass this block     //struct a;
     {    //in the case of the current type being redeclared as scalar in this scope   //namespace b { int a; }
@@ -667,13 +594,11 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
       break;
     case LN_TEMPLATE:
         if (last_named_phase == TMP_TYPENAME)
-        {
           last_named_phase = TMP_IDENTIFIER;
-          break;
-        }
+      break;
     case LN_CLASS:
     case LN_STRUCT:
-    case LN_UNION:
+    case LN_UNION: //Class, struct, or union
         if (last_named_phase != SP_EMPTY) //Probably shouldn't be an identifier here
         {
           if (last_named_phase != SP_IDENTIFIER) //Shouldn't be an identifier here
@@ -686,18 +611,22 @@ int handle_identifiers(const string n,string &last_identifier,unsigned int &pos,
             return pos;
           break;
         }
-        last_named_phase = 1;
+        last_named_phase = SP_IDENTIFIER;
       break;
     case LN_ENUM:
-        if (last_named_phase == 1 or last_named_phase == 3)
-        {
-          cferr="Expected '{' before identifier";
+        if (last_named_phase == EN_IDENTIFIER or last_named_phase == EN_CONST_IDENTIFIER) {
+          cferr="Expected '{' or ',' before identifier";
           return pos;
         }
-        if (last_named_phase == 0)
-          last_named_phase = 1;
-        else if (last_named_phase == 2)
-          last_named_phase = 3;
+        
+        if (last_named_phase == EN_NOTHING)
+          last_named_phase = EN_IDENTIFIER;
+        else if (last_named_phase == EN_WAITING)
+          last_named_phase = EN_CONST_IDENTIFIER;
+        else {
+          cferr = "Unexpected identifier in enumeration";
+          return pos;
+        }
       break;
     case LN_NAMESPACE:
         if (last_named_phase == NS_NOTHING)

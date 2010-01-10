@@ -104,8 +104,8 @@ void print_ext_data(externs *ext,int indent)
       if (ext->tempargs[ii]->flags & EXTFLAG_TYPEDEF)
       {
         cout << "typename " << ext->tempargs[ii]->name;
-        if (ext->tempargs[ii]->members[""] != NULL)
-          cout << "=" << ext->tempargs[ii]->members[""]->name;
+        if (ext->tempargs[ii]->type != NULL)
+          cout << "=" << ext->tempargs[ii]->type->name;
       }
       else
       {
@@ -114,6 +114,12 @@ void print_ext_data(externs *ext,int indent)
       comma = ',';
     }
     cout << "> ";
+  }
+  
+  if (ext->flags & EXTFLAG_VALUED)
+  {
+    cout << " valued as " << ext->value_of;
+    comma = ',';
   }
 
   if (ext->flags & EXTFLAG_TYPENAME)
@@ -129,7 +135,7 @@ void print_ext_data(externs *ext,int indent)
   if (ext->flags & EXTFLAG_CLASS) cout << " : class";
   
   if (ext->flags & EXTFLAG_TYPEDEF)
-    cout << " typedef'd as " << (ext->members[""] != NULL ? ext->members[""]->name : "<NULL>") << " ";
+    cout << " typedef'd as " << (ext->type != NULL ? ext->type->name : "<NULL>") << " ";
   else
   if (!ext->members.empty())
   {

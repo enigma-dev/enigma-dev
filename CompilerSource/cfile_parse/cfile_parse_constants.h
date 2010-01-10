@@ -50,12 +50,22 @@ enum
 
 enum
 {
-  SP_EMPTY,       //
-  SP_IDENTIFIER,  //
-  SP_COLON,       //
-  SP_PUBLIC,      //
-  SP_PRIVATE,     //
-  SP_PROTECTED    //
+  SP_EMPTY,        //Nothing but the keyword
+  SP_IDENTIFIER,   //The class has been named
+  SP_COLON,        //The class will now be given ancestors
+  SP_PUBLIC,       //Inherits publicly
+  SP_PRIVATE,      //Inherits privately
+  SP_PROTECTED,    //Inherits in protected scope
+  SP_PARENT_NAMED, //The parent's name was given
+};
+
+enum
+{
+  EN_NOTHING,
+  EN_IDENTIFIER,
+  EN_WAITING,
+  EN_CONST_IDENTIFIER,
+  EN_DEFAULTED
 };
 
 enum

@@ -132,7 +132,7 @@ externs* scope_get_using(externs* scope)
   return rv;
 }
 
-externs* temp_get_specialization(externs* scope)
+externs* temp_get_specializations(externs* scope)
 {
   extiter u = scope->members.find("<specializations>");
   if (u != scope->members.end())
@@ -156,6 +156,54 @@ externs* scope_get_using_ie(externs* scope)
 string strace(externs *f);
 externs* ext_retriever_var = NULL;
 void print_scope_members(externs*, int);
+
+
+
+
+//Implement TpData's constructors
+
+tpdata::tpdata(): name("")
+{
+  def = new externs;
+  def->name = name = "";
+  def->flags = EXTFLAG_TYPEDEF;
+  def->type = NULL;
+}
+tpdata::tpdata(string n,externs* d): name(n), standalone(false)
+{
+  def = new externs;
+  def->name = name = n;
+  def->flags = EXTFLAG_TYPEDEF | EXTFLAG_TYPENAME | (d?EXTFLAG_DEFAULTED:0);
+  def->type = d;
+}
+tpdata::tpdata(string n,externs* d, bool sa): name(n), standalone(sa)
+{
+  def = new externs;
+  def->name = name = n;
+  def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0);
+  def->type = d;
+}
+int tpc = -1;
+varray<tpdata> tmplate_params;
+
+
+ihdata::ihdata()
+{
+  parent = NULL;
+  scopet = s_public;
+}
+ihdata::ihdata(externs* p,heredtypes t)
+{
+  parent = p;
+  scopet = t;
+}
+int ihc;
+varray<ihdata> inheritance_types;
+
+
+//This function is used a lot; it traverses scopes, checks 
+//template parameters and scope names, and filters by type.
+
 bool find_extname(string name,unsigned int flags)
 {
   //If we've been given a qualified id, check in the path or give up
@@ -164,9 +212,17 @@ bool find_extname(string name,unsigned int flags)
     extiter f = immediate_scope->members.find(name);
       /*cout << "Find " << name << " in " << immediate_scope->name << endl;
       print_scope_members(immediate_scope,4);*/
-    if (f == immediate_scope->members.end()) {
-      cout << "Error: Unable to locate member `" << name << "' in scope `" << strace(immediate_scope) << "'" << endl;
-      return false;
+    if (f == immediate_scope->members.end())
+    {
+      externs* us = scope_get_using(immediate_scope);
+      if (us == NULL or (f = us->members.find(name)) == us->members.end()) {
+        cout << "Error: Unable to locate member `" << name << "' in scope `" << strace(immediate_scope) << endl;// << "Members are as follows: "<<endl; print_scope_members(immediate_scope,4);
+        return false;
+      }
+      ext_retriever_var = f->second;
+      immediate_scope = NULL;
+      
+      return ((f->second->flags & flags) != 0) or (flags == 0xFFFFFFFF);
     }
     ext_retriever_var = f->second;
     immediate_scope = NULL;
@@ -176,19 +232,33 @@ bool find_extname(string name,unsigned int flags)
   
   //Start looking in this scope
   externs* inscope=current_scope;
-  //The actual scope we're in should get search precedence, otherwise constructors will flop
-  if (inscope->flags & EXTFLAG_TYPENAME and flags & EXTFLAG_TYPENAME and inscope->name == name) {
-    ext_retriever_var = inscope;
-    return true;
-  }
   
   //If we're looking for a type name, try the template args
   if (flags & EXTFLAG_TYPENAME)
   {
+    //The actual scope we're in should get search precedence, otherwise constructors will flop
+    if (flags & EXTFLAG_TYPENAME and inscope->name == name) {
+      ext_retriever_var = inscope;
+      return true;
+    }
+    
+    //Check new templates
+    for (int ti=0; ti<tpc; ti++)
+    {
+      if (tmplate_params[ti].name == name)
+      {
+        ext_retriever_var = tmplate_params[ti].def;
+        if (ext_retriever_var == NULL)
+          return 0;
+        return 1;
+      }
+    }
+    
+    //Check scope's own templates
     for (unsigned ti=0; ti<current_scope->tempargs.size; ti++)
     {
-      if (current_scope->tempargs[ti]->name == name)
-      {
+      //cout << "if ("<<current_scope->tempargs[ti]->name<<" == "<<name<<") {\n";
+      if (current_scope->tempargs[ti]->name == name) {
         ext_retriever_var = current_scope->tempargs[ti];
         return 1;
       }

@@ -29,7 +29,9 @@
 #define _INCLUDED_EXTERNS 1
 
 #include <map>
+#include "../general/darray.h"
 
+#define EXTFLAG_VALUED 1
 #define EXTFLAG_TEMPLATE 2
 #define EXTFLAG_TYPENAME 4
 #define EXTFLAG_MACRO 8
@@ -39,21 +41,10 @@
 #define EXTFLAG_NAMESPACE 128
 #define EXTFLAG_TYPEDEF 256
 #define EXTFLAG_PENDING_TYPEDEF 512
-//#define EXTFLAG_NAMESPACE 1024
+#define EXTFLAG_DEFAULTED 1024
+//#define EXTFLAG_NAMESPACE 2048
 
 #include "references.h"
-
-struct externs;
-
-struct tpdata
-{
-  string name;
-  externs* def;
-  bool standalone;
-  tpdata(): name(""), def(NULL), standalone(false) {}
-  tpdata(string n,externs* d): name(n), def(d), standalone(false) {}
-  tpdata(string n,externs* d, bool sa): name(n), def(d), standalone(sa) {}
-};
 
 struct externs
 {
@@ -62,6 +53,7 @@ struct externs
   
   externs* type;
   externs* parent;
+  long long  value_of;
   rf_stack refstack;
   
   darray<externs*> ancestors;
@@ -79,6 +71,38 @@ struct externs
   externs(string n,externs* p,unsigned int f);
   externs(string n,externs* t,externs* p,unsigned int f);
 };
+
+extern int tpc;
+
+struct tpdata
+{
+  string name;
+  externs* def;
+  bool standalone;
+  
+  tpdata();
+  tpdata(string n,externs* d);
+  tpdata(string n,externs* d, bool sa);
+};
+
+extern int tpc;
+extern varray<tpdata> tmplate_params;
+
+struct ihdata
+{
+  externs *parent;
+  enum heredtypes {
+    s_private,
+    s_public,
+    s_protected
+  } scopet;
+  
+  ihdata();
+  ihdata(externs*,heredtypes);
+};
+
+extern int ihc;
+extern varray<ihdata> inheritance_types;
 
 struct macro_type
 {
@@ -101,7 +125,7 @@ typedef map<string,macro_type>::iterator maciter;
 extern externs global_scope,*current_scope,*immediate_scope;
 
 externs* scope_get_using(externs* scope);
-externs* temp_get_specialization(externs* scope);
+externs* temp_get_specializations(externs* scope);
 extiter scope_find_member(string name);
 extern externs* ext_retriever_var;
 bool find_extname(string name,unsigned int flags);

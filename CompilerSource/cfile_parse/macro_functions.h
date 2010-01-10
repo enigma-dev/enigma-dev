@@ -26,4 +26,4 @@
 \*********************************************************************************/
 
 extern string macro_function_parsed;
-bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varray<string> &args, const unsigned numparams);
+bool macro_function_parse(string cfile,unsigned int &pos,string& macrostr, varray<string> &args, const unsigned numparams);

@@ -29,7 +29,7 @@
 using namespace std;
 #include "../general/parse_basics.h"
 #include "../general/darray.h"
-string tostring(int x);
+#include "cparse_shared.h"
 
 string escaped_string(string x)
 {
@@ -55,7 +55,7 @@ bool is_entirely_white(string x)
   return 1;
 }
 
-bool macro_function_parse(string cfile, unsigned int& pos,string& macrostr, varray<string> &args, const unsigned numparams)
+bool macro_function_parse(string cfile,unsigned int &pos,string& macrostr, varray<string> &args, const unsigned numparams)
 {
   while (is_useless(cfile[pos])) pos++; 
   if (cfile[pos] != '(') { macrostr = "Expected parameters to macro function"; return false; }

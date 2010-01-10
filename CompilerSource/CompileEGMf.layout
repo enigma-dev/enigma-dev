@@ -1,112 +1,112 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="cfile_parse\auxilary.h" open="1" top="1" tabpos="9">
-		<Cursor position="263" topLine="0" />
+	<File name="cfile_parse/auxilary.h" open="1" top="0" tabpos="6">
+		<Cursor position="242" topLine="0" />
 	</File>
-	<File name="cfile_parse\cfile_parse.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="31811" topLine="954" />
+	<File name="cfile_parse/cfile_parse.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="18164" topLine="512" />
 	</File>
-	<File name="cfile_parse\cfile_parse_calls.h" open="1" top="0" tabpos="2">
-		<Cursor position="8149" topLine="246" />
+	<File name="cfile_parse/cfile_parse_calls.h" open="1" top="0" tabpos="2">
+		<Cursor position="6292" topLine="172" />
 	</File>
-	<File name="cfile_parse\cfile_parse_constants.h" open="1" top="0" tabpos="7">
-		<Cursor position="2866" topLine="40" />
+	<File name="cfile_parse/cfile_parse_constants.h" open="1" top="0" tabpos="7">
+		<Cursor position="3297" topLine="46" />
 	</File>
-	<File name="cfile_parse\cfile_parse_macros.cpp" open="0" top="0" tabpos="4">
-		<Cursor position="13774" topLine="331" />
+	<File name="cfile_parse/cfile_parse_macros.cpp" open="0" top="0" tabpos="4">
+		<Cursor position="10965" topLine="239" />
 	</File>
-	<File name="cfile_parse\cparse_components.cpp" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/cparse_components.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="2475" topLine="28" />
 	</File>
-	<File name="cfile_parse\cparse_components.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/cparse_components.h" open="0" top="0" tabpos="0">
 		<Cursor position="2247" topLine="0" />
 	</File>
-	<File name="cfile_parse\expev_macros.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/expev_macros.h" open="0" top="0" tabpos="0">
 		<Cursor position="27194" topLine="747" />
 	</File>
-	<File name="cfile_parse\expression_evaluator.cpp" open="0" top="0" tabpos="10">
-		<Cursor position="2397" topLine="20" />
+	<File name="cfile_parse/expression_evaluator.cpp" open="0" top="0" tabpos="10">
+		<Cursor position="2946" topLine="56" />
 	</File>
-	<File name="cfile_parse\expression_evaluator.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/expression_evaluator.h" open="0" top="0" tabpos="0">
 		<Cursor position="2198" topLine="0" />
 	</File>
-	<File name="cfile_parse\expression_evaluator_settings.h" open="0" top="0" tabpos="9">
+	<File name="cfile_parse/expression_evaluator_settings.h" open="0" top="0" tabpos="9">
 		<Cursor position="2036" topLine="9" />
 	</File>
-	<File name="cfile_parse\handle_letters.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="5733" topLine="159" />
+	<File name="cfile_parse/handle_letters.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="22032" topLine="675" />
 	</File>
-	<File name="cfile_parse\handle_letters.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/handle_letters.h" open="0" top="0" tabpos="0">
 		<Cursor position="2505" topLine="4" />
 	</File>
-	<File name="cfile_parse\keyword_operator.cpp" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/keyword_operator.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="4595" topLine="101" />
 	</File>
-	<File name="cfile_parse\macro_functions.cpp" open="1" top="0" tabpos="4">
+	<File name="cfile_parse/macro_functions.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="6038" topLine="105" />
 	</File>
-	<File name="cfile_parse\main.cpp" open="0" top="0" tabpos="7">
-		<Cursor position="3977" topLine="88" />
+	<File name="cfile_parse/main.cpp" open="0" top="0" tabpos="7">
+		<Cursor position="4779" topLine="112" />
 	</File>
-	<File name="cfile_parse\parse_basics.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/parse_basics.h" open="0" top="0" tabpos="0">
 		<Cursor position="2260" topLine="13" />
 	</File>
-	<File name="cfile_parse\parsein.h" open="1" top="0" tabpos="8">
-		<Cursor position="6950" topLine="207" />
+	<File name="cfile_parse/parsein.h" open="0" top="0" tabpos="8">
+		<Cursor position="3703" topLine="97" />
 	</File>
-	<File name="cfile_parse\value.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/value.h" open="0" top="0" tabpos="0">
 		<Cursor position="4733" topLine="205" />
 	</File>
-	<File name="compiler\compile.cpp" open="0" top="0" tabpos="3">
+	<File name="compiler/compile.cpp" open="0" top="0" tabpos="3">
 		<Cursor position="11069" topLine="314" />
 	</File>
-	<File name="compiler\compile_includes.cpp" open="0" top="0" tabpos="4">
+	<File name="compiler/compile_includes.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="5287" topLine="100" />
 	</File>
-	<File name="compiler\license_string.h" open="0" top="0" tabpos="0">
+	<File name="compiler/license_string.h" open="0" top="0" tabpos="0">
 		<Cursor position="3072" topLine="11" />
 	</File>
-	<File name="compiler\pcs\pcs.cpp" open="0" top="0" tabpos="6">
+	<File name="compiler/pcs/pcs.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="4479" topLine="79" />
 	</File>
-	<File name="externs\externs.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="8213" topLine="218" />
+	<File name="externs/externs.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="5546" topLine="167" />
 	</File>
-	<File name="externs\externs.h" open="1" top="0" tabpos="6">
-		<Cursor position="3044" topLine="48" />
+	<File name="externs/externs.h" open="1" top="0" tabpos="4">
+		<Cursor position="2635" topLine="40" />
 	</File>
-	<File name="externs\references.cpp" open="0" top="0" tabpos="4">
+	<File name="externs/references.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="4685" topLine="110" />
 	</File>
-	<File name="externs\references.h" open="0" top="0" tabpos="0">
+	<File name="externs/references.h" open="0" top="0" tabpos="0">
 		<Cursor position="3146" topLine="31" />
 	</File>
-	<File name="general\darray.h" open="0" top="0" tabpos="0">
+	<File name="general/darray.h" open="0" top="0" tabpos="0">
 		<Cursor position="3050" topLine="61" />
 	</File>
-	<File name="general\estring.h" open="0" top="0" tabpos="0">
+	<File name="general/estring.h" open="0" top="0" tabpos="0">
 		<Cursor position="0" topLine="11" />
 	</File>
-	<File name="general\implicit_stack.h" open="0" top="0" tabpos="0">
+	<File name="general/implicit_stack.h" open="0" top="0" tabpos="0">
 		<Cursor position="3004" topLine="58" />
 	</File>
-	<File name="general\string.cpp" open="0" top="0" tabpos="0">
+	<File name="general/string.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="2252" topLine="6" />
 	</File>
 	<File name="main.cpp" open="0" top="0" tabpos="8">
 		<Cursor position="5168" topLine="42" />
 	</File>
-	<File name="parser\parser_components.cpp" open="0" top="0" tabpos="7">
+	<File name="parser/parser_components.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="16433" topLine="524" />
 	</File>
-	<File name="syntax\checkfile.cpp" open="0" top="0" tabpos="2">
+	<File name="syntax/checkfile.cpp" open="0" top="0" tabpos="2">
 		<Cursor position="2922" topLine="43" />
 	</File>
-	<File name="syntax\chkfunction.h" open="0" top="0" tabpos="0">
+	<File name="syntax/chkfunction.h" open="0" top="0" tabpos="0">
 		<Cursor position="3127" topLine="40" />
 	</File>
-	<File name="syntax\syntax.cpp" open="0" top="0" tabpos="0">
+	<File name="syntax/syntax.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="4829" topLine="113" />
 	</File>
 </CodeBlocks_layout_file>

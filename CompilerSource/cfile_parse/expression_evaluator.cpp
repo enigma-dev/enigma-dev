@@ -82,22 +82,22 @@ value evaluate_expression(string expr)
   len=exp.length();
   
   unsigned int macrod=0;
-  varray<string> inmacros;
-  varray<varray<value> > regval; //stack of stack necessary for precedence
+  varray<string> inmacros; //To detect recursion
+  varray<varray<value> > regval; //stack of stack is necessary for precedence
   varray<darray<int> > op; //Operator at this level, stack of stack for precedence
   varray<darray<int> > unary; //Unary, stack of stack for multiple: !! is a good example
   darray<int> uc,opc; //How many (unary, regular) operators there are on this level
   int level=0; //Parenthesis level
   
   VZERO(regval[0][0].); //zero the value
-  regval[0][0].type=RTYPE_NONE;
-  op[0][0]=OP_NONE; //no operator
-  opc[0]=0; //no normal operators
-  uc[0]=0; //no unary operators
+  regval[0][0].type = RTYPE_NONE;
+  op[0][0] = OP_NONE; //no operator
+  opc[0] = 0; //no normal operators
+  uc[0] = 0; //no unary operators
   
   #if CASTS_ALLOWED
    darray<int> is_cast; //Tells if this level casts and how many flags there are
-   is_cast[0]=0;
+   is_cast[0] = 0;
   #endif
   
   //Note that the number of values should be the same as number of operators + 1.
@@ -135,26 +135,29 @@ value evaluate_expression(string expr)
     if (is_letterd(exp[pos]) or exp[pos]=='.' or exp[pos]==')' or exp[pos]=='"' or exp[pos]=='\'')
     {
       //cout << "Entering at " << pos << " -> " << regval[level][opc[level]].type << endl;
-      long long val=0;
-      long double dval=0;
+      long long val = 0;
+      long double dval = 0;
       value setval;
       if (is_letter(exp[pos]))
       {
-        int sp=pos;
+        int sp = pos;
         while (is_letterd(exp[pos])) pos++;
-        string n=exp.substr(sp,pos-sp);
+        string n = exp.substr(sp,pos-sp);
         
         #if CASTS_ALLOWED
-            if (n=="bool") { unary[level-1][uc[level-1]++]=UNARY_BOOL; is_cast[level]++; continue; }
-            if (n=="char") { unary[level-1][uc[level-1]++]=UNARY_CHAR; is_cast[level]++; continue; }
-            if (n=="int") { unary[level-1][uc[level-1]++]=UNARY_LONG; is_cast[level]++; continue; }
-            if (n=="float") { unary[level-1][uc[level-1]++]=UNARY_FLOAT; is_cast[level]++; continue; }
-            if (n=="double") { unary[level-1][uc[level-1]++]=UNARY_DOUBLE; is_cast[level]++; continue; }
-            if (n=="short") { unary[level-1][uc[level-1]++]=UNARY_SHORT; is_cast[level]++; continue; }
-            if (n=="long") { unary[level-1][uc[level-1]++]=UNARY_LONG; is_cast[level]++; continue; }
-            if (n=="signed") { unary[level-1][uc[level-1]++]=UNARY_SIGNED; is_cast[level]++; continue; }
-            if (n=="unsigned") { unary[level-1][uc[level-1]++]=UNARY_UNSIGNED; is_cast[level]++; continue; }
-            if (n=="const") { is_cast[level]=1; continue; }
+          if (level > 0 and opc[level] == 0) //This is a parenthetical cast, and doesn't count as a level. Apply to the one below.
+          {
+            //FIXME: This should probably be eliminated in favor of the code below, but result in the unary being transfered to the level below at closing parenth
+            if (n=="bool")     { unary[level - 1][uc[level - 1]++]=UNARY_BOOL;     is_cast[level]++; continue; }
+            if (n=="char")     { unary[level - 1][uc[level - 1]++]=UNARY_CHAR;     is_cast[level]++; continue; }
+            if (n=="int")      { unary[level - 1][uc[level - 1]++]=UNARY_LONG;     is_cast[level]++; continue; }
+            if (n=="float")    { unary[level - 1][uc[level - 1]++]=UNARY_FLOAT;    is_cast[level]++; continue; }
+            if (n=="double")   { unary[level - 1][uc[level - 1]++]=UNARY_DOUBLE;   is_cast[level]++; continue; }
+            if (n=="short")    { unary[level - 1][uc[level - 1]++]=UNARY_SHORT;    is_cast[level]++; continue; }
+            if (n=="long")     { unary[level - 1][uc[level - 1]++]=UNARY_LONG;     is_cast[level]++; continue; }
+            if (n=="signed")   { unary[level - 1][uc[level - 1]++]=UNARY_SIGNED;   is_cast[level]++; continue; }
+            if (n=="unsigned") { unary[level - 1][uc[level - 1]++]=UNARY_UNSIGNED; is_cast[level]++; continue; }
+            if (n=="const")    { is_cast[level]=1; continue; }
             
             if (is_cast[level])
             {
@@ -162,6 +165,21 @@ value evaluate_expression(string expr)
               rerrpos=pos;
               return 0;
             }
+          }
+          else //Append unary in this level.
+          {
+            if (n=="bool")     { unary[level][uc[level]++]=UNARY_BOOL;     continue; }
+            if (n=="char")     { unary[level][uc[level]++]=UNARY_CHAR;     continue; }
+            if (n=="int")      { unary[level][uc[level]++]=UNARY_LONG;     continue; }
+            if (n=="float")    { unary[level][uc[level]++]=UNARY_FLOAT;    continue; }
+            if (n=="double")   { unary[level][uc[level]++]=UNARY_DOUBLE;   continue; }
+            if (n=="short")    { unary[level][uc[level]++]=UNARY_SHORT;    continue; }
+            if (n=="long")     { unary[level][uc[level]++]=UNARY_LONG;     continue; }
+            if (n=="signed")   { unary[level][uc[level]++]=UNARY_SIGNED;   continue; }
+            if (n=="unsigned") { unary[level][uc[level]++]=UNARY_UNSIGNED; continue; }
+            if (n=="const")    { is_cast[level] = 1; continue; }
+          }
+          
         #endif
         
         #if USE_DEFINED_KEYWORD == 1
@@ -280,9 +298,54 @@ value evaluate_expression(string expr)
           }
         } //else printf("Unknown var %s\r\n",n.c_str());
         
-        
         //okay, if it didn't actually exist, I lied. We're going to pretend it was just zero, and not continue;.
         setval=0;
+        
+        //However...
+        #if !defined USE_CPP_ID_TREE || USE_CPP_ID_TREE
+          externs *tis = immediate_scope;
+          for (;;)
+          {
+            if (find_extname(n,EXTFLAG_STRUCT | EXTFLAG_CLASS | EXTFLAG_NAMESPACE | EXTFLAG_ENUM | EXTFLAG_VALUED))
+            {
+              if (ext_retriever_var->flags & EXTFLAG_VALUED) {
+                setval = ext_retriever_var->value_of;
+                break;
+              }
+              else
+              {
+                //Skip whitespace and comments
+                while (is_useless(exp[pos]) or exp[pos] == '/')
+                {
+                  if (exp[pos++] == '/') {
+                    if (exp[pos] == '/') while (exp[pos] != '\r' and exp[pos] != '\n') pos++;
+                    else if (exp[pos] == '*') while (exp[++pos] != '*' and exp[pos+1] != '/');
+                  }
+                }
+                if (exp[pos] == ':' and exp[pos+1] == ':')
+                {
+                  immediate_scope = ext_retriever_var;
+                  pos += 2;
+                  while (is_useless(exp[pos]) or exp[pos] == '/')
+                  {
+                    if (exp[pos++] == '/') {
+                      if (exp[pos] == '/') while (exp[pos] != '\r' and exp[pos] != '\n') pos++;
+                      else if (exp[pos] == '*') while (exp[++pos] != '*' and exp[pos+1] != '/');
+                    }
+                  }
+                  if (!is_letter(exp[pos]))
+                    break;
+                  const unsigned sp = pos;
+                  while (is_letterd(exp[++pos]));
+                  n = exp.substr(sp, pos-sp);
+                }
+                else break;
+              }
+            }
+            else break;
+          }
+          immediate_scope = tis;
+        #endif
       }
       else if (exp[pos]=='0')
       {

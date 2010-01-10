@@ -38,21 +38,14 @@ using namespace std;
 #include "../externs/externs.h"
 #include "expression_evaluator.h"
 #include "../general/parse_basics.h"
+#include "cfile_pushing.h"
 
 extern string cferr;
 extern string tostring(int x);
-struct includings
-{
-  string name;
-  string path; 
-  includings(string n,string p):name(n), path(p) {} 
-};
+  
 extern stack<includings> included_files;
 
-typedef implicit_stack<string> iss;
-typedef implicit_stack<unsigned int> isui;
-
-inline void move_newline_a(string &cfile,unsigned int &pos,const unsigned int len)
+inline void move_newline()
 {
   bool cancomment = 1;
   while (cfile[pos]!='\r' and cfile[pos]!='\n' and pos<len)
@@ -82,8 +75,6 @@ inline void move_newline_a(string &cfile,unsigned int &pos,const unsigned int le
     pos++;
   }
 }
-
-#define move_newline() move_newline_a(cfile,pos,len)
 
 bool fnf = 0;
 string fc(const char* fn)
@@ -139,24 +130,15 @@ bool in_false_conditional()
   return flowstack.topval() == 0;
 }
 
-extern string cfile_top;
-
-typedef implicit_stack<string> iss;
-typedef implicit_stack<unsigned int> isui;
-
-extern varray<string> include_directories;
-extern unsigned int include_directory_count;
-
-#define cfile c_file()
-#define pos position()
-#define len cfile_length()
-unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
+unsigned int cfile_parse_macro()
 {
-  pos++;
-  while(is_useless_macros(cfile[pos])) pos++;
-
+  while(is_useless_macros(cfile[++pos]));
+  
   unsigned int poss=pos;
-  if (!is_letter(cfile[pos])) { cferr="Preprocessor directive expected"; return pos; }
+  if (!is_letter(cfile[pos])) { 
+    cferr="Preprocessor directive expected";
+    return pos;
+  }
   while (is_letterd(cfile[pos])) pos++;
   string next=cfile.substr(poss,pos-poss);
   
@@ -299,10 +281,9 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
           }
         }
         
-        c_file.push();
-        position.push();
-        cfile_length.push();
-        
+        cfnode pt;
+        pt.capture();
+        cfstack.push(pt);
         
         cfile_top = cfile = ins;
         len = cfile.length();
@@ -352,7 +333,7 @@ unsigned int cfile_parse_macro(iss &c_file,isui &position,isui &cfile_length)
       cout << "Tracing scope (" << (pc.length()>11?pc.substr(11):"no additional info") << "): ";
       
       string lnm;
-      for (externs* i=current_scope; i != &global_scope; i=i->parent)
+      for (externs* i=immediate_scope?immediate_scope:current_scope; i != &global_scope; i=i->parent)
       {
         if (lnm != "")
         {
