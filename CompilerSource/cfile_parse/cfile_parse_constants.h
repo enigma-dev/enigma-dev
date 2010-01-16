@@ -28,20 +28,21 @@
 
 enum
 {
-  LN_NOTHING,      //Nothing named
-  LN_DECLARATOR,   //int, struct {}, you name it
-  LN_TEMPLATE,     //template <...>
-  LN_CLASS,        //class
-  LN_STRUCT,       //struct
-  LN_ENUM,         //enum
-  LN_UNION,        //union
-  LN_NAMESPACE,    //namespace whatever
-  LN_OPERATOR,     //as in the operator keyword, not a random operator
-  LN_USING,        //using whatever
-  LN_TEMPARGS,     //std::map<...>
-  LN_LABEL,        //Public, private, protected
-  LN_DESTRUCTOR,   //Added to invoke errors where appropriate
-  LN_TYPEDEF=128,  //typedef whatever
+  LN_NOTHING,     //Nothing named
+  LN_DECLARATOR,  //int, struct {}, you name it
+  LN_TEMPLATE,    //template <...>
+  LN_CLASS,       //class
+  LN_STRUCT,      //struct
+  LN_ENUM,        //enum
+  LN_UNION,       //union
+  LN_NAMESPACE,   //namespace whatever
+  LN_OPERATOR,    //as in the operator keyword, not a random operator
+  LN_USING,       //using whatever
+  LN_TEMPARGS,    //std::map<...>
+  LN_LABEL,       //Public, private, protected
+  LN_IMPLEMENT,   //int templated_class<int>::...
+  LN_DESTRUCTOR,  //Added to invoke errors where appropriate
+  LN_TYPEDEF=128, //typedef whatever
 };
 
 //No worries. In typedef struct a b;, a is already defined.
@@ -61,11 +62,11 @@ enum
 
 enum
 {
-  EN_NOTHING,
-  EN_IDENTIFIER,
-  EN_WAITING,
-  EN_CONST_IDENTIFIER,
-  EN_DEFAULTED
+  EN_NOTHING,          //enum...
+  EN_IDENTIFIER,       //enum a...
+  EN_WAITING,          //enum a { ... // or enum a { b, ...
+  EN_CONST_IDENTIFIER, //enum a { b...
+  EN_DEFAULTED         //enum a { b = 1,...
 };
 
 enum
@@ -99,20 +100,27 @@ enum
 
 enum
 {
-  USE_NOTHING,              //using
-  USE_NAMESPACE,            //using namespace
-  USE_NAMESPACE_IDENTIFIER, //using namespace
-  USE_SINGLE_IDENTIFIER,    //using namespace
+  USE_NOTHING,              //using...
+  USE_NAMESPACE,            //using namespace...
+  USE_NAMESPACE_IDENTIFIER, //using namespace std
+  USE_SINGLE_IDENTIFIER,    //using std::string
 };
 
 enum
 {
-  TMP_NOTHING,
-  TMP_PSTART,
-  TMP_TYPENAME,
-  TMP_IDENTIFIER,
-  TMP_EQUALS, //Antiquated
-  TMP_DEFAULTED,
-  TMP_SIMPLE //Like DEFAULTED, only without going through TYPENAME
-  
+  IM_NOTHING, //Unused
+  IM_SCOPE,   //int template_type...<
+  IM_SPECD    //int template_type<int>... expect :
+};
+
+enum
+{
+  TMP_NOTHING,     //template
+  TMP_PSTART,      //template <...
+  TMP_TYPENAME,    //template <typename
+  TMP_IDENTIFIER,  //template <typename a...
+  TMP_EQUALS,      //template <typename a =...
+  TMP_DEFAULTED,   //template <typename a = bool,...
+  TMP_SIMPLE,      //template <bool...
+  TMP_SIMPLE_DEFAULTED //template <bool = 1,...
 };

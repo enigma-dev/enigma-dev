@@ -110,6 +110,8 @@ void print_ext_data(externs *ext,int indent)
       else
       {
         cout << ext->tempargs[ii]->name;
+        if (ext->tempargs[ii]->flags & EXTFLAG_VALUED)
+          cout << "=" << ext->tempargs[ii]->value_of;
       }
       comma = ',';
     }
@@ -121,15 +123,15 @@ void print_ext_data(externs *ext,int indent)
     cout << " valued as " << ext->value_of;
     comma = ',';
   }
-
+  
   if (ext->flags & EXTFLAG_TYPENAME)
   {
     if (comma)
-    cout << ", serves as typename";
+      cout << ", serves as typename";
     else
-    cout << " Serves as typename";
+      cout << " Serves as typename";
   }
-
+  
   if (ext->flags & EXTFLAG_NAMESPACE) cout << " namespace";
   if (ext->flags & EXTFLAG_STRUCT) cout << " : struct";
   if (ext->flags & EXTFLAG_CLASS) cout << " : class";
@@ -163,7 +165,7 @@ void print_ext_data(externs *ext,int indent)
 int cfile_parse_main()
 {
   cparse_init();
-
+  
   string fc=file_contents("C:\\cfile.h");
   time_t ts = clock();
   int a=parse_cfile(fc);
@@ -182,13 +184,13 @@ int cfile_parse_main()
     }
     printf("Line %d, position %d: %s\r\n",line+1,pos,cferr.c_str());
   }
-
+  
   cout << "Macros:\r\n";
   for (maciter i=macros.begin(); i!=macros.end();i++)
     cout<<"  "<<(string)i->second<<"\r\n";
-
+  
   print_scope_members(&global_scope, 0);
-
+  
   //system("pause");
 
   #if 0

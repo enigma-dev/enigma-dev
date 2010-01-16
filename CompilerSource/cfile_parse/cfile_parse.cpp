@@ -146,10 +146,7 @@ int parse_cfile(string cftext)
       {
         //Move back down
         if (specializing)
-        {
-          cout << "substr(" << specialize_start << "," << pos-specialize_start << ");" << endl;
           specialize_string += cfile.substr(specialize_start,pos-specialize_start);
-        }
         handle_macro_pop();
           if (specializing)
             specialize_start = pos;
@@ -248,6 +245,10 @@ int parse_cfile(string cftext)
         }
         else if (cfile[pos] == '{')
           skip_depth++;
+        else if (cfile[pos] == '(')
+          skip_depth++;
+        else if (cfile[pos] == ')')
+          skip_depth--;
         else if (cfile[pos] == '}')
         {
           if (skip_depth == 0)
@@ -290,8 +291,22 @@ int parse_cfile(string cftext)
           }
           else if ((last_named & ~LN_TYPEDEF) == LN_TEMPLATE)
           {
-            if (!access_specialization(last_type,specialize_string))
-              return pos;
+            //template<whatever = a<...(*)> >
+            if (last_named_phase == TMP_SIMPLE)
+            {
+              last_value = evaluate_expression(specialize_string);
+              if (rerrpos != -1) {
+                cferr = "In specialization expression at position " + tostring(rerrpos) + ": " + rerr;
+                return pos;
+              }
+              last_named_phase = TMP_SIMPLE_DEFAULTED;
+              pos--;
+            }
+            else 
+            {
+              if (!access_specialization(last_type,specialize_string))
+                return pos;
+            }
           }
           else if ((last_named & ~LN_TYPEDEF) == LN_DECLARATOR and last_named_phase == DEC_FULL)
           {
@@ -310,7 +325,7 @@ int parse_cfile(string cftext)
               cferr = rerr;
               return pos;
             }
-            cout << "Evaluated \"" << specialize_string << "\" as " << last_value << endl;
+            //cout << "Evaluated \"" << specialize_string << "\" as " << last_value << endl;
           }
           else if ((last_named & ~LN_TYPEDEF) == LN_STRUCT
                or  (last_named & ~LN_TYPEDEF) == LN_CLASS)
@@ -321,9 +336,15 @@ int parse_cfile(string cftext)
                 cferr = "Error in instantiating inherited template: this should have been reported earlier";
                 return pos;
               }
-              if (!access_specialization(inheritance_types[ihc-1].parent,specialize_string))
+              if (!access_specialization(inheritance_types[ihc-1].parent,specialize_string)) //Parent we're inheriting from
                 return pos;
             }
+          }
+          else if (last_named == LN_IMPLEMENT)
+          {
+            if (!access_specialization(immediate_scope,specialize_string))
+              return pos;
+            last_named_phase = IM_SPECD;
           }
           else {
             cferr = "Nothing to do with freshly parsed string. This shouldn't happen. ln = " + tostring(last_named);
@@ -343,8 +364,9 @@ int parse_cfile(string cftext)
     if (handle_ids_next_iter)
     {
       bool at_scope_accessor = cfile[pos] == ':' and cfile[pos+1] == ':';
+      bool at_template_param = cfile[pos] == '<';
       
-      int diderrat = handle_identifiers(id_to_handle,last_identifier,last_named,last_named_phase,last_type,fparam_named,at_scope_accessor);
+      int diderrat = handle_identifiers(id_to_handle,fparam_named,at_scope_accessor,at_template_param);
       if (diderrat != -1) return id_would_err_at; //Discard diderrat until future use
       
       if (at_scope_accessor) pos += 2;
@@ -635,6 +657,7 @@ int parse_cfile(string cftext)
         if (last_identifier != "")
         if (!ExtRegister(last_named,last_named_phase,last_identifier,refs_to_use,type_to_use,tmplate_params,tpc))
           return pos;
+        
         tpc = -1;
       }
       
@@ -656,6 +679,7 @@ int parse_cfile(string cftext)
       }
       
       pos++;
+      immediate_scope = NULL;
       continue;
     }
     
@@ -681,6 +705,8 @@ int parse_cfile(string cftext)
         and (last_named | LN_TYPEDEF) != (LN_STRUCT | LN_TYPEDEF)
         and (last_named | LN_TYPEDEF) != (LN_UNION  | LN_TYPEDEF))
         {
+          if (last_named == LN_TEMPLATE or last_named == LN_TEMPARGS)
+          { pos++; continue; }
           cferr = "Unexpected '*'";
           return pos;
         }
@@ -700,6 +726,8 @@ int parse_cfile(string cftext)
         and (last_named | LN_TYPEDEF) != (LN_STRUCT | LN_TYPEDEF)
         and (last_named | LN_TYPEDEF) != (LN_UNION  | LN_TYPEDEF))
         {
+          if (last_named == LN_TEMPLATE or last_named == LN_TEMPARGS)
+          { pos++; continue; }
           cferr = "Unexpected '&'";
           return pos;
         }
@@ -960,25 +988,51 @@ int parse_cfile(string cftext)
       //If we're not just past the word "template"
       if ((last_named & ~LN_TYPEDEF) != LN_TEMPLATE)
       {
-        if ((last_named & ~LN_TYPEDEF) != LN_DECLARATOR or last_named_phase != DEC_FULL)
+        if ((last_named & ~LN_TYPEDEF) != LN_DECLARATOR)
         {
           if (((last_named & ~LN_TYPEDEF) != LN_STRUCT and (last_named & ~LN_TYPEDEF) != LN_CLASS) or last_named_phase != SP_PARENT_NAMED or ihc == 0)
           {
-            if (last_type == NULL) {
-              cferr = "Unexpected symbol '<' should only occur directly following `template' token or type";
-              return pos;
-            }
-            if (!(last_type->flags & EXTFLAG_TEMPLATE))
+            if (last_named != LN_IMPLEMENT)
             {
-              if (!refstack.is_function() or argument_type == NULL or !(argument_type->flags & EXTFLAG_TEMPLATE)) {
-                cferr = "Unexpected symbol '<' should only occur directly following `template' token or type, even in function parameters <_<";
+              if (last_type == NULL) {
+                cferr = "Unexpected symbol '<' should only occur directly following `template' token or type";
                 return pos;
               }
+              if (!(last_type->flags & EXTFLAG_TEMPLATE))
+              {
+                if  (!refstack.is_function()){
+                  cferr = "Unexpected symbol '<' [with ln == " + tostring(last_named) + "]";
+                  return pos;
+                }
+                if (argument_type == NULL or !(argument_type->flags & EXTFLAG_TEMPLATE)) {
+                  cferr = "Unexpected symbol '<' should only occur directly following `template' token or type, even in function parameters <_<";
+                  return pos;
+                }
+              }
+            }
+            else if (last_named_phase != IM_SCOPE) {
+              cferr = "Unexpected '<' in implementation";
+              return pos;
             }
           }
         }
-        else if (tpc == -1) //tname<(*)...>
-          last_named = LN_TEMPARGS | (last_named & LN_TYPEDEF);
+        else
+        {
+          if (last_named_phase != DEC_FULL) {
+            if (last_named_phase == DEC_IDENTIFIER and refstack.is_function())
+            {
+              skipto = '>';
+              skip_inc_on = '<';
+              pos++; continue;
+            }
+            else {
+              cferr = "Unexpected '<' in declaration";
+              return pos;
+            }
+          }
+          if (tpc == -1) //tname<(*)...>
+            last_named = LN_TEMPARGS | (last_named & LN_TYPEDEF);
+        }
         
     the_next_block_up:
           
@@ -1029,7 +1083,7 @@ int parse_cfile(string cftext)
       }
       if (last_named_phase != TMP_IDENTIFIER and last_named_phase != TMP_DEFAULTED and (last_named_phase != TMP_TYPENAME? true : (last_identifier = "", false)))
       {
-        if (last_named_phase != TMP_SIMPLE)
+        if (last_named_phase != TMP_SIMPLE and last_named_phase != TMP_SIMPLE_DEFAULTED)
         {
           if (last_named_phase != TMP_PSTART/* or !current_templates.empty()*/) //Template <> is allowed
           { cferr = "Unexpected end of input before '>'";
@@ -1041,7 +1095,7 @@ int parse_cfile(string cftext)
             cferr = "Type in template parameter appears to be NULL... Not sure why this would happen";
             return pos;
           }
-          tmplate_params[tpc++] = tpdata(last_identifier, last_type, 1);
+          tmplate_params[tpc++] = tpdata(last_identifier, last_type, last_value, 1, last_named_phase == TMP_SIMPLE_DEFAULTED);
         }
       }
       else
@@ -1056,13 +1110,30 @@ int parse_cfile(string cftext)
     
     if (cfile[pos] == ':')
     {
-      if (cfile[pos+1] == ':')
+      if (cfile[pos+1] == ':') //Handle :: 
       {
         if (last_named == LN_DECLARATOR and last_named_phase == DEC_FULL)
         {
           immediate_scope = last_type;
           last_named = LN_NOTHING;
           last_named_phase = 0;
+        }
+        else if (last_named == LN_IMPLEMENT and last_named_phase == IM_SPECD)
+        {
+          last_named = LN_DECLARATOR;
+          last_named_phase = DEC_FULL;
+          //immediate_scope was set before arrival
+        }
+        else if ((last_named == LN_STRUCT or last_named == LN_CLASS) and last_named_phase == SP_PARENT_NAMED)
+        {
+          if (ihc != 0)
+            immediate_scope = inheritance_types[--ihc].parent;
+          else {
+            cferr = "Nothing makes sense anymore...";
+            return pos;
+          }
+          const int iht = inheritance_types[ihc].scopet;
+          last_named_phase =  (iht == ihdata::s_private)? SP_PRIVATE : ((iht == ihdata::s_protected)? SP_PROTECTED : SP_PUBLIC);
         }
         else
           immediate_scope = &global_scope;
@@ -1109,7 +1180,7 @@ int parse_cfile(string cftext)
     {
       if (last_named == LN_TEMPLATE)
       {
-        if (last_named_phase != TMP_IDENTIFIER)
+        if (last_named_phase != TMP_IDENTIFIER and last_named_phase != TMP_SIMPLE)
         {
           /*cferr = "Expected identifier before '=' token";
           return pos;*/ //Somehow, this is ISO...
@@ -1121,6 +1192,7 @@ int parse_cfile(string cftext)
         {
           skipto = '>';
           skipto2 = ',';
+          skip_inc_on = '<';
           specializing = true;
           specialize_start = ++pos;
           specialize_string = "";

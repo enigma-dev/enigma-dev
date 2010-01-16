@@ -228,6 +228,39 @@
 #endif
 
 
+/*template<typename a = long long> struct alberta {};
+template<> struct alberta<int> { int speshol; };
+template<typename b = alberta<int> > struct albatross {};*/
+
+
+/*
+enum pistacio
+{
+  taco = 12,
+  gordo = 2
+} a;
+int b;
+
+#if pistacio::taco != 12
+  #error LOSE
+#endif
+*/
+/*enum fack { facade = 2, taco_for_the_millionth_time = 3 };
+#if bool(fack::facade) != bool(fack::taco_for_the_millionth_time) || bool(fack::taco_for_the_millionth_time) != 1
+  #error FACK
+#endif
+*/
+/*
+template<typename _Tp, bool = std::__is_integer<_Tp>::__value> struct __promote
+    { typedef double __type; };
+*/
+
+/*
+template<typename x> struct t { x y; };
+template<typename x> struct u { x y; };
+template<> struct t< u<int> > { int FUCKINLOLMAN; };
+*/
+
 /*
 template<typename a = float> struct tacos
 {

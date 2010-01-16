@@ -55,26 +55,28 @@ bool is_entirely_white(string x)
   return 1;
 }
 
-bool macro_function_parse(string cfile,unsigned int &pos,string& macrostr, varray<string> &args, const unsigned numparams)
+bool macro_function_parse(string cfile,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at)
 {
+  //cout << "The function was at least fucking entered";
+  
   while (is_useless(cfile[pos])) pos++; 
   if (cfile[pos] != '(') { macrostr = "Expected parameters to macro function"; return false; }
   pos++;
   
   //cout << endl << endl << endl << endl << endl << endl << "Raw: \r\n" << macrostr;
   
+  int args_given = 0;
   varray<string> macro_args;
-  unsigned int args_given = 0;
-  const unsigned len = cfile.length();
+  const size_t len = cfile.length();
   
   unsigned lvl = 1;
-  for (unsigned i = 0; i < numparams or lvl > 0; i++) //parse out each parameter value into an array
+  for (int i = 0; i < numparams or lvl > 0; i++) //parse out each parameter value into an array
   {
     if (i > numparams)
     { macrostr = "Expected closing parenthesis for macro function at this point: too many parameters"; return false; }
     const unsigned spos = pos;
     while (is_useless(cfile[pos])) pos++;
-    while ((lvl > 1 or cfile[pos] != ',') and pos < len and lvl)
+    while ((lvl > 1 or (cfile[pos] != ',' or args_given == au_at)) and pos < len and lvl)
     {
       if (cfile[pos] == ')') lvl--;
       else if (cfile[pos] == '(') lvl++;
@@ -94,8 +96,10 @@ bool macro_function_parse(string cfile,unsigned int &pos,string& macrostr, varra
   
   if (args_given != numparams)
   {
-    macrostr = "Macro function requires " + tostring(numparams) + " parameters, passed " + tostring(args_given);
-    return false;
+    if (au_at == -1 or args_given <= au_at) {
+      macrostr = "Macro function requires " + tostring(numparams) + " parameters, passed " + tostring(args_given);
+      return false;
+    }
   }
   
   //cout << "Params: "; for (int i=0; i<args_given; i++) cout << macro_args[i] << ", "; cout << "end.";
@@ -112,7 +116,7 @@ bool macro_function_parse(string cfile,unsigned int &pos,string& macrostr, varra
       while (i < macrostr.length() and is_letterd(macrostr[i])) i++;
       string sstr = macrostr.substr(si,i-si);
       
-      for (unsigned ii = 0; ii < numparams; ii++)
+      for (int ii = 0; ii < numparams; ii++)
         if (args[ii] ==  sstr)
         {
           const string es = macro_args[ii];

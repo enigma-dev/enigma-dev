@@ -102,7 +102,7 @@ value evaluate_expression(string expr)
   
   //Note that the number of values should be the same as number of operators + 1.
   
-  rerr="";
+  rerr="No error";
   rerrpos=-1;
   
   for (;;) //since goto is out of the question
@@ -278,7 +278,7 @@ value evaluate_expression(string expr)
             if (i->second.argc != -1) //Expect ()
             {
               unsigned int pt = pos;
-              if (!macro_function_parse(exp,pt,macrostr,i->second.args,i->second.argc))
+              if (!macro_function_parse(exp,pt,macrostr,i->second.args,i->second.argc,i->second.args_uat))
               {
                 rerr = macrostr;
                 rerrpos = pos;

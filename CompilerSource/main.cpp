@@ -78,7 +78,9 @@ int main(int argc, char *argv[])
       string cftp = fc("./cfile_parse/parsein.h");
       
       time_t ts = clock();
+      system("date +\"%s.%N\"");
         int a = parse_cfile(cftp);
+      system("date +\"%s.%N\"");
       time_t te = clock();
       
       
@@ -128,7 +130,7 @@ int main(int argc, char *argv[])
           cout<<"\r\nVariables:\r\n";
             print_scope_members(&global_scope, 2);
         }
-        if (c == 'c') system("cls ^ clear");
+        if (c == 'c') system("cls || clear");
         if (c == 'd')
         {
           cout << "Define: ";

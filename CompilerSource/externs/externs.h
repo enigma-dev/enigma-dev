@@ -78,11 +78,14 @@ struct tpdata
 {
   string name;
   externs* def;
+  long long val;
   bool standalone;
+  bool valdefd;
   
   tpdata();
   tpdata(string n,externs* d);
   tpdata(string n,externs* d, bool sa);
+  tpdata(string n,externs* d, long long v, bool sa, bool vd);
 };
 
 extern int tpc;
@@ -106,16 +109,19 @@ extern varray<ihdata> inheritance_types;
 
 struct macro_type
 {
-  int argc;
-  string val;
-  bool recurse_danger;
-  varray<string> args;
+  int argc; //Argument count, or -1 if not a function.
+  string val; //Definiens
+  int args_uat; //Index of argument from which there can be infinitely many more
+  bool recurse_danger; //True if it is possible for this macro to send the parser on an infinite loop
+  varray<string> args; //Names of each argument
+  
   operator string();
   macro_type();
   macro_type(string x);
   macro_type &operator= (string x);
   bool check_recurse_danger(string n);
   void assign_func(string n);
+  void set_unltd_args(int x);
   void addarg(string x);
 };
 

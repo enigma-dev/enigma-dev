@@ -26,4 +26,4 @@
 \*********************************************************************************/
 
 bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_named,int & last_named_phase, externs *&last_type);
-int handle_identifiers(const string n,string &last_identifier,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named,bool at_scope_accessor);
+int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bool at_template_param);

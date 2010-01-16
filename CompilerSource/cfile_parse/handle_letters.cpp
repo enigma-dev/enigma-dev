@@ -81,7 +81,7 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
   return 1;
 }
 
-int handle_identifiers(const string n,string &last_identifier,int &last_named,int &last_named_phase,externs* &last_type,int &fparam_named,bool at_scope_accessor)
+int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bool at_template_param)
 {
   //it's not a macro, so the next thing we'll check for is keyword
   if (n=="struct" or n=="class")
@@ -257,7 +257,7 @@ int handle_identifiers(const string n,string &last_identifier,int &last_named,in
   {
     if (last_named != LN_TEMPLATE or last_named_phase != TMP_PSTART)
     {
-      if (last_named != LN_TYPEDEF) //Plain old typedef... Nothing else named yet
+      if (last_named != LN_TYPEDEF and last_named != LN_NOTHING) //Plain old typedef... Nothing else named yet
       {
         cferr = "Unexpected `typename' token";
         return pos;
@@ -429,6 +429,7 @@ int handle_identifiers(const string n,string &last_identifier,int &last_named,in
   //Check if it's a primitive or anything user defined that serves as a type.
   if (find_extname(n,EXTFLAG_TYPENAME))
   {
+    //cout << n << " is type \n";
     if (last_named == LN_NOTHING or last_named == LN_TYPEDEF)
     {
       last_type = ext_retriever_var;
@@ -457,10 +458,20 @@ int handle_identifiers(const string n,string &last_identifier,int &last_named,in
         return -1;
       } 
       //If error, or if it was declared in this scope
-      else if (ext_retriever_var == NULL or ext_retriever_var->parent == current_scope)
-      {
-        cferr = ext_retriever_var == NULL ? "Type unimplemented in this scope" : "Two types named in declaration: `"+n+"' cannot be declared in this scope";
+      else if (ext_retriever_var == NULL) {
+        cferr = "Type unimplemented in this scope";
         return pos;
+      }
+      else if (ext_retriever_var->parent == current_scope)
+      {
+        if (!at_template_param or !(ext_retriever_var->flags & (EXTFLAG_STRUCT | EXTFLAG_CLASS))) {
+          cferr = "Two types named in declaration: `"+n+"' cannot be declared in this scope";
+          return pos;
+        }
+        last_named = LN_IMPLEMENT;
+        last_named_phase = IM_SCOPE;
+        immediate_scope = ext_retriever_var;
+        return -1;
       }
       //If we made it this far, we are redeclaring something in this scope that is different in higher scopes
       //These next segments of elses are skipped, and the variable is treated like new.
@@ -673,6 +684,9 @@ int handle_identifiers(const string n,string &last_identifier,int &last_named,in
       break;
     case LN_TEMPARGS:
         cferr = "Unexpected identifier in template parameters";
+      return pos;
+    case LN_IMPLEMENT:
+        cferr = "Unexpected identifier in implementation";
       return pos;
     default:
         cferr = "Unspecified Error. This shouldn't happen... Result: last_named = "+tostring(last_named);

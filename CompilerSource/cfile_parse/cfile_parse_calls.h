@@ -106,6 +106,7 @@ void cparse_init()
   
   //These are GCC things and must be hard coded in
   regmacro("__attribute__","","x"); //__attribute__(x) 
+  regmacro("__typeof__","int","x"); //__attribute__(x) 
   regmacro("__extension__"); //__extension__
   regmacro("false","0"); //false
   regmacro("true","1"); //true
@@ -134,16 +135,16 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,exte
   unsigned int is_tdef = last & LN_TYPEDEF;
   last &= ~LN_TYPEDEF;
   
+  externs *scope_to_use = immediate_scope ? immediate_scope : current_scope;
   if (name != "")
   {
-    extiter it = current_scope->members.find(name);
+    extiter it = scope_to_use->members.find(name);
     
     //cout << "  Receiving " << (refs.empty()?"empty":"unempty") << " reference stack\r\n";
     
-    if (it != current_scope->members.end())
+    if (it != scope_to_use->members.end())
     {
-      if (last == LN_NAMESPACE and (it->second->flags & EXTFLAG_NAMESPACE))
-      {
+      if (last == LN_NAMESPACE and (it->second->flags & EXTFLAG_NAMESPACE)) {
         ext_retriever_var = it->second;
         return 1;
       }
@@ -157,8 +158,16 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,exte
         }
         else
         {
-          cferr = "Redeclaration of `"+name+"' at this point";
-          return 0;
+          if (it->second->parent == current_scope) {
+            cferr = "Redeclaration of `"+name+"' at this point";
+            return 0;
+          }
+          if (!(it->second->parent->flags & EXTFLAG_TEMPLATE)) {
+            cferr = "Cannot declare that here.";
+            return 0;
+          }
+          ext_retriever_var = it->second;
+          return 1;
         }
       }
     }
@@ -175,7 +184,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,exte
   }
   
   externs* e = new externs;
-  current_scope->members[name] = e;
+  scope_to_use->members[name] = e;
   ext_retriever_var = e;
   e->name = name;
   
@@ -208,7 +217,6 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,exte
           return 0;
         }
       }
-      
       e->tempargs[e->tempargs.size] = tparams[i].def;
     }
   }
@@ -218,6 +226,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,exte
   e->value_of = last_value;
   e->refstack = refs;
   
+  immediate_scope = NULL;
   return 1;
 }
 
@@ -259,14 +268,14 @@ string temp_parse_seg(string seg, externs* type_default, externs **kt = NULL)
           return "";
         }
         
-        cout << "find " << tn << ": ";
+        //cout << "find " << tn << ": ";
         if (ext_retriever_var->flags & EXTFLAG_NAMESPACE) {
           immediate_scope = ext_retriever_var;
-          cout << "move into\n";
+          //cout << "move into\n";
         }
         else {
           immediate_scope = NULL;
-          cout << "use\n";
+          //cout << "use\n";
         }
         
         if (kt)
@@ -419,17 +428,18 @@ externs* TemplateSpecialize(externs* last, string specs) //Last is the type we'r
   //cout << "for (unsigned i = 0; i < " << implementations.size << " and i < " << last->tempargs.size << "; i++)" << endl;
   for (unsigned i = 0; i < last->tempargs.size; i++) 
   {
+    externs* n = ret->tempargs[i] = new externs;
+    n->flags = last->tempargs[i]->flags;
+    n->name = last->tempargs[i]->name;
+    n->type = implementations[i];
+    n->flags = (last->tempargs[i]->flags & ~EXTFLAG_DEFAULTED) | (n->type?EXTFLAG_DEFAULTED:0);
+    n->parent = ret;
+    
+    //cout << "Copied " << n->name << " to new instantiation";
+    //Iterate through the new template parameters. If this is one of them, inherit its name.
+    
     if (last->tempargs[i]->flags & EXTFLAG_TYPEDEF)
     {
-      externs* n = ret->tempargs[i] = new externs;
-      n->flags = EXTFLAG_TYPEDEF;
-      n->name = last->tempargs[i]->name;
-      n->type = implementations[i];
-      n->parent = ret;
-      
-      //cout << "Copied " << n->name << " to new instantiation";
-      //Iterate through the new template parameters. If this is one of them, inherit its name.
-      
       for (unsigned ii = 0; ii < tmplate_params.size; ii++)
       {
         if (implementations[i] == tmplate_params[ii].def) { //If the current implementation is on the list of new typenames
@@ -437,9 +447,6 @@ externs* TemplateSpecialize(externs* last, string specs) //Last is the type we'r
           break;
         }
       }
-      
-      if (n->name == "")
-        cout << "**************************************************\nSHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n*****************************************************************";
     }
   }
   
@@ -452,7 +459,7 @@ bool access_specialization(externs* &whom, string specs)
   if (not(whom->flags & EXTFLAG_TEMPLATE)) {
     cferr = "Attempting to access specialization of non-template type `" + whom->name + "'";
     return NULL;
-  } cout << "Accessing specialization <" << specs << "> from " << whom->name << endl ;
+  } //cout << "Accessing specialization <" << specs << "> from " << whom->name << endl ;
   
   string ns = temp_parse_list(whom,specs);
   if (ns == "")

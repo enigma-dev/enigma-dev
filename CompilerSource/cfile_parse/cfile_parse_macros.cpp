@@ -165,6 +165,7 @@ unsigned int cfile_parse_macro()
         
         //unsigned int flags=0;
         int arg_count = -1;
+        int args_unlimited_at = -1;
         varray<string> args;
         
         string definiendum=cfile.substr(poss,pos-poss);
@@ -186,7 +187,15 @@ unsigned int cfile_parse_macro()
               an=1; args[arg_count++] = cfile.substr(spos,pos-spos);
               continue;
             }
-            
+            else if (cfile[pos] == '.' and cfile[pos+1] == '.' and cfile[pos+2] == '.')
+            {
+              if (args_unlimited_at != -1){
+                cferr = "Unexpected ellipsis in function parameters: already given";
+                return pos;
+              }
+              args_unlimited_at = arg_count-an;
+              pos += 2;
+            }
             else if (!is_useless_macros(cfile[pos]))
             {
               if (is_useless(cfile[pos]))
@@ -216,6 +225,8 @@ unsigned int cfile_parse_macro()
           t->assign_func(definiendum);
           for (int i=0; i<arg_count; i++)
             t->addarg(args[i]);
+          if (args_unlimited_at != -1)
+            t->set_unltd_args(args_unlimited_at);
         }
       }
       if (next=="undef")
@@ -281,10 +292,7 @@ unsigned int cfile_parse_macro()
           }
         }
         
-        cfnode pt;
-        pt.capture();
-        cfstack.push(pt);
-        
+        cfstack.push(new cfnode);
         cfile_top = cfile = ins;
         len = cfile.length();
         pos = 0;

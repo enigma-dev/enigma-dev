@@ -12,8 +12,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-Os" />
-					<Add option="-O" />
+					<Add option="-O3" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -75,6 +74,7 @@
 		<Unit filename="externs/externs.h" />
 		<Unit filename="externs/references.cpp" />
 		<Unit filename="externs/references.h" />
+		<Unit filename="general/darray.cpp" />
 		<Unit filename="general/darray.h" />
 		<Unit filename="general/estring.h" />
 		<Unit filename="general/implicit_stack.h" />

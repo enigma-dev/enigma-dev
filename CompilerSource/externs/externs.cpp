@@ -76,10 +76,12 @@ externs::externs(string n,externs* t,externs* p,unsigned int f)
 }
 
 macro_type::operator string() { return val; }
-macro_type::macro_type(): argc(-1), recurse_danger(0) {}
-macro_type::macro_type(string x): argc(-1), val(x), recurse_danger(0) {}
-macro_type& macro_type::operator= (string x) { val = x; return *this; }
+macro_type::macro_type(): argc(-1), args_uat(-1), recurse_danger(0) {}
+macro_type::macro_type(string x): argc(-1), val(x), args_uat(-1), recurse_danger(0) {}
+
+macro_type &macro_type::operator= (string x) { val = x; return *this; }
 void macro_type::assign_func(string n) { if (argc==-1) argc=0; recurse_danger = check_recurse_danger(n); }
+void macro_type::set_unltd_args(int x) { args_uat = x; }
 void macro_type::addarg(string x) { args[argc++] = x; }
 
 #include "../general/parse_basics.h"
@@ -162,25 +164,36 @@ void print_scope_members(externs*, int);
 
 //Implement TpData's constructors
 
-tpdata::tpdata(): name("")
+tpdata::tpdata(): name(""), valdefd(0)
 {
   def = new externs;
   def->name = name = "";
   def->flags = EXTFLAG_TYPEDEF;
+  def->value_of = 0;
   def->type = NULL;
 }
-tpdata::tpdata(string n,externs* d): name(n), standalone(false)
+tpdata::tpdata(string n,externs* d): name(n), val(0), standalone(false), valdefd(0)
 {
   def = new externs;
   def->name = name = n;
   def->flags = EXTFLAG_TYPEDEF | EXTFLAG_TYPENAME | (d?EXTFLAG_DEFAULTED:0);
+  def->value_of = 0;
   def->type = d;
 }
-tpdata::tpdata(string n,externs* d, bool sa): name(n), standalone(sa)
+tpdata::tpdata(string n,externs* d, bool sa): name(n), val(0), standalone(sa), valdefd(0)
 {
   def = new externs;
   def->name = name = n;
   def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0);
+  def->value_of = 0;
+  def->type = d;
+}
+tpdata::tpdata(string n,externs* d, long long v, bool sa, bool vd): name(n), standalone(sa), valdefd(vd)
+{
+  def = new externs;
+  def->name = name = n;
+  def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0) | (vd?EXTFLAG_VALUED:0);
+  def->value_of = v;
   def->type = d;
 }
 int tpc = -1;
@@ -216,18 +229,20 @@ bool find_extname(string name,unsigned int flags)
     {
       externs* us = scope_get_using(immediate_scope);
       if (us == NULL or (f = us->members.find(name)) == us->members.end()) {
-        cout << "Error: Unable to locate member `" << name << "' in scope `" << strace(immediate_scope) << endl;// << "Members are as follows: "<<endl; print_scope_members(immediate_scope,4);
+        cout << "Error: Unable to locate member `" << name << "' in scope `" << strace(immediate_scope) << "'" << endl;// << "Members are as follows: "<<endl; print_scope_members(immediate_scope,4);
         return false;
       }
       ext_retriever_var = f->second;
-      immediate_scope = NULL;
       
-      return ((f->second->flags & flags) != 0) or (flags == 0xFFFFFFFF);
+      const bool ret = ((f->second->flags & flags) != 0) or (flags == 0xFFFFFFFF);
+      if (ret) immediate_scope = NULL;
+      return ret;
     }
     ext_retriever_var = f->second;
-    immediate_scope = NULL;
     
-    return ((f->second->flags & flags) != 0) or (flags == 0xFFFFFFFF);
+    const bool ret = ((f->second->flags & flags) != 0) or (flags == 0xFFFFFFFF);
+    if (ret) immediate_scope = NULL;
+    return ret;
   }
   
   //Start looking in this scope
