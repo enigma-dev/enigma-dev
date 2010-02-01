@@ -62,15 +62,17 @@ string file_contents(string file)
 }
 
 
-void print_ext_data(externs *ext,int indent);
+void print_ext_data(externs *ext,int indent, int depth);
 
-void print_scope_members(externs* gscope, int indent)
+void print_scope_members(externs* gscope, int indent,int depth = 100)
 {
+  if (depth--)
   for (extiter i=gscope->members.begin();i!=gscope->members.end();i++)
-    print_ext_data(i->second,indent);
+    print_ext_data(i->second,indent,depth);
 }
 
-void print_ext_data(externs *ext,int indent)
+extern string strace(externs*);
+void print_ext_data(externs *ext,int indent,int depth)
 {
   bool comma=0;
   string indstr(indent,' ');
@@ -92,6 +94,17 @@ void print_ext_data(externs *ext,int indent)
 
   if (ext->type != NULL)
     cout << ext->type->name << "  ";
+  
+  if (ext->ancestors.size)
+  {
+    cout << " derived from ";
+    string nc;
+    for (int i = 0; i < ext->ancestors.size; i++) {
+      cout << nc << strace(ext->ancestors[i]);
+      nc = ", ";
+    }
+    cout << "; ";
+  }
   
   
   if (ext->flags & EXTFLAG_TEMPLATE)
@@ -142,7 +155,7 @@ void print_ext_data(externs *ext,int indent)
   if (!ext->members.empty())
   {
     cout << "\r\n" << indstr << "{\r\n";
-    print_scope_members(ext,indent+2);
+    print_scope_members(ext,indent+2,depth);
     cout << indstr << "};\r\n";
   }
   else

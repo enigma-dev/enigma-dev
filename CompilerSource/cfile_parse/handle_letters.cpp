@@ -184,7 +184,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
     {
       if (last_named != LN_USING or last_named_phase != USE_NOTHING)
       {
-        cferr="Unexpected `namespace' token";
+        cferr="Unexpected `namespace' token: "+tostring(last_named);
         return pos;
       }
       last_named_phase = USE_NAMESPACE; //using namespace...
@@ -199,19 +199,17 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
   }
   if (n=="operator")
   {
-    if (last_named != LN_DECLARATOR)
+    if (last_named != LN_DECLARATOR or last_named_phase < 1)
     {
-      cferr="Expected declarator before `operator' token";
-      return pos;
+      //cferr="Expected declarator before `operator' token";
+      last_named = LN_OPERATOR;
+      last_named_phase = OP_CAST;
+      last_identifier = "operator";
+      return -1;
     }
-    if (last_named_phase<1)
-    {
-      cferr="Declarator before `operator' token names no type";
-      return pos;
-    }
-    last_named=LN_OPERATOR;
-    last_named_phase=0;
-    cout << last_named << " = " << last_named_phase << "\r\n";
+    last_named = LN_OPERATOR;
+    last_named_phase = 0;
+    //cout << last_named << " = " << last_named_phase << "\r\n";
     return -1;
   }
   if (n=="new")
@@ -246,6 +244,13 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
   {
     if (last_named != LN_NOTHING)
     {
+      if (last_named == LN_DECLARATOR and last_named_phase == 0) //extern
+      { //extern template. This is garbage.
+        skipto = ';';
+        skipto2 = ';';
+        skippast = false; //; will clear everything anyway
+        return -1;
+      }
       cferr = "Unexpected `template' token";
       return pos;
     }
@@ -257,14 +262,12 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
   {
     if (last_named != LN_TEMPLATE or last_named_phase != TMP_PSTART)
     {
-      if (last_named != LN_TYPEDEF and last_named != LN_NOTHING) //Plain old typedef... Nothing else named yet
+      /*if (last_named != LN_TYPEDEF and last_named != LN_NOTHING) //Plain old typedef... Nothing else named yet, or nothing at all
       {
         cferr = "Unexpected `typename' token";
         return pos;
-      }
-      last_named = LN_NOTHING;
-      skipto = ';';
-      skipto2 = ';';
+      }*/
+      //C++ uses "typename" to make up for inadequacy when using a type that may not exist.
       return -1;
     }
     last_named_phase = TMP_TYPENAME;
@@ -329,7 +332,16 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
   //Now we make sure we're not accessing something from this id's scope, meaning this id must be a scope of some sort
   if (at_scope_accessor)
   {
-    if (!find_extname(n,EXTFLAG_CLASS | EXTFLAG_STRUCT | EXTFLAG_NAMESPACE)) {
+    if (!find_extname(n,EXTFLAG_CLASS | EXTFLAG_STRUCT | EXTFLAG_NAMESPACE))
+    {
+      if (immediate_scope == NULL)
+        for (unsigned i = 0; i < current_scope->tempargs.size; i++)
+          if (current_scope->tempargs[i]->name == n)
+          {
+            immediate_scope = current_scope->tempargs[i];
+            immediate_scope->flags |= EXTFLAG_HYPOTHETICAL;
+            return -1;
+          }
       cferr = "Cannot access `" + n + "' as scope from `" + (immediate_scope?immediate_scope->name:current_scope->name) + "'";
       return pos;
     }
@@ -352,7 +364,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       if (n=="long")
         last_named_phase = DEC_LONG;
       else
-        last_named_phase = DEC_GENERAL_FLAG;
+        last_named_phase = tflag_atomic(n) ? DEC_ATOMIC_FLAG : DEC_GENERAL_FLAG; //See section on bindingly atomic flags
       return -1;
     }
     
@@ -366,7 +378,8 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           if (n=="long")
           {
             if (last_named_phase == DEC_NOTHING_YET
-            or  last_named_phase == DEC_GENERAL_FLAG)
+            or  last_named_phase == DEC_GENERAL_FLAG
+            or  last_named_phase == DEC_ATOMIC_FLAG)
               last_named_phase = DEC_LONG;
             else if (last_named_phase == DEC_LONG)
               last_named_phase = DEC_LONGLONG;
@@ -380,7 +393,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
             }
           }
           else if (last_named_phase == 0)
-            last_named_phase = DEC_GENERAL_FLAG;
+            last_named_phase = tflag_atomic(n) ? DEC_ATOMIC_FLAG : DEC_GENERAL_FLAG;
         }
         else
         {
@@ -393,7 +406,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           return -1;
         }
       }
-      else if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF)) //template<int> can be used in specialization
+      else if ((last_named & ~LN_TYPEDEF) == LN_TEMPLATE) //template<int> can be used in specialization
       {
         last_named_phase = (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED)?TMP_DEFAULTED:TMP_SIMPLE;
         return -1;
@@ -406,13 +419,13 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
 
       return -1;
     }
-    if (last_named==LN_TYPEDEF) //if typedef is single, phase==0
+    if (last_named == LN_TYPEDEF) //if typedef is single, phase==0
     {
       last_named=LN_DECLARATOR | LN_TYPEDEF;
       if (n=="long")
         last_named_phase = DEC_LONG;
       else
-        last_named_phase = DEC_GENERAL_FLAG;
+        last_named_phase = tflag_atomic(n) ? DEC_ATOMIC_FLAG : DEC_GENERAL_FLAG;
       return -1;
     }
     
@@ -422,9 +435,28 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       return -1;
     }
     
+    if ((last_named | LN_TYPEDEF) == (LN_OPERATOR | LN_TYPEDEF))
+    {
+      if (last_named_phase != OP_CAST) {
+        cferr = "Unexpected type name in operator expression";
+        return pos;
+      }
+      last_identifier += " " + n;
+      return -1;
+    }
+    
     cferr="Unexpected declarator at this point...";
     return pos;
   }
+  
+  
+  /*
+  static int iteration = 0; iteration++;
+  //cout << iteration << endl;
+  if (iteration == 620)
+    cout << "We're here. *Matrix music plays* " << n <<"\n";
+  */
+  
   
   //Check if it's a primitive or anything user defined that serves as a type.
   if (find_extname(n,EXTFLAG_TYPENAME))
@@ -439,10 +471,14 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
     }
     
     //If we're declaring a variable by type
-    if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF) or (last_named | LN_TYPEDEF) == (LN_TEMPARGS | LN_TYPEDEF))
+    if ((last_named & ~LN_TYPEDEF) == LN_DECLARATOR or (last_named & ~LN_TYPEDEF) == LN_TEMPARGS)
     {
-      if (last_named_phase != DEC_FULL)
+      //Single EXTFLAG_TYPENAME implies atomic type.
+      //We are fully qualified if either phase == DEC_FULL, Or if it's DEC_ATOMIC_TYPE/LONG/LONGLONG and we're not an atomic type.
+      const bool atat = last_named_phase == DEC_ATOMIC_FLAG or last_named_phase == DEC_LONG or last_named_phase == DEC_LONGLONG;
+      if (last_named_phase != DEC_FULL and !(atat and ext_retriever_var->flags != EXTFLAG_TYPENAME))
       {
+        //In the case that both of those are false, we assume this will finish it
         if (last_named_phase != DEC_IDENTIFIER)
         {
           last_type = ext_retriever_var;
@@ -465,12 +501,24 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       else if (ext_retriever_var->parent == current_scope)
       {
         if (!at_template_param or !(ext_retriever_var->flags & (EXTFLAG_STRUCT | EXTFLAG_CLASS))) {
-          cferr = "Two types named in declaration: `"+n+"' cannot be declared in this scope";
+          cferr = "Two types named in declaration: `"+ext_retriever_var->name+"' cannot be declared in this scope";
           return pos;
         }
+        
+        //Sometimes STL programmers like to say typename a b::c; which is fuck-annoying.
+        //Also, we have no use for int a::b() {}
+        //In either case, we'll skip.
+        
+        //This tells us nothing new, there's no need to parse it.
+        //This will cause the parser to skip to the nearest ";" or "{", the latter case resulting in a skip to "}"
+        skipto = '{';
+        skipto2 = ';';
+        skippast = false; //Need to know if we hit '{' so we can begin move toward '}'
+        
         last_named = LN_IMPLEMENT;
-        last_named_phase = IM_SCOPE;
-        immediate_scope = ext_retriever_var;
+        last_named_phase = 0;
+        last_identifier = "";
+        
         return -1;
       }
       //If we made it this far, we are redeclaring something in this scope that is different in higher scopes
@@ -519,16 +567,17 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
         last_type = ext_retriever_var;
         return -1;
       }
-      else if (last_named_phase == TMP_PSTART) //Plain old type, often for specialization
+      else if (last_named_phase == TMP_PSTART) //Plain old type, to be passed a constant expression
       {
         last_named_phase = TMP_SIMPLE;
         last_type = ext_retriever_var;
         return -1;
       }
-      else {
+      else if (last_named_phase != TMP_TYPENAME) { //template <typename string> is fine
         cferr = "Unexpected type in template parameters: " + tostring(last_named_phase);
         return pos;
       }
+      //Else skip to the end of this huge block down to the part where we handle identifiers.
     }
     else if (last_named == LN_USING) //last chance... hopefully we're using this
     {
@@ -553,20 +602,36 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       /*cferr = "Unexpected type name in enumeration";
       return pos;*/
     }
+    else if ((last_named | LN_TYPEDEF) == (LN_OPERATOR | LN_TYPEDEF))
+    {
+      if (last_named_phase != OP_CAST) {
+        cferr = "Unexpected type name in enumeration";
+        return pos;
+      }
+      externs* ttu = ext_retriever_var;
+      while ((ttu->flags & EXTFLAG_TYPEDEF) and ttu->type)
+        ttu = ttu->type;
+      last_identifier += " " + strace(ttu);
+      return -1;
+    }
     //Not declaring by type or giving default template value
     else //Note: This else is here because the above will need to pass this block     //struct a;
     {    //in the case of the current type being redeclared as scalar in this scope   //namespace b { int a; }
       cferr = "Unexpected declarator at this point";
+      cout << "\nTracing path to `" << ext_retriever_var->name << "': " <<strace(ext_retriever_var);
+      cout << endl << ext_retriever_var->flags << " flags\n";// on iteration " << iteration << endl;
       return pos;
     }
   }
-
+  
+  
+  
   //Here's the big part
   //We now assume that what was named is a regular identifier.
   //This means we do a lot of error checking here.
   if (last_named == LN_NOTHING) //what we have here is a standalone identifier.
   {
-    if (!(current_scope != &global_scope and current_scope->flags & EXTFLAG_ENUM))
+    if (!(current_scope != &global_scope and (current_scope->flags & EXTFLAG_ENUM)))
     {
       cferr = "Expected type name or keyword before identifier";
       return pos;
@@ -580,8 +645,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       return unsigned(-1);
     }
   }
-  if (last_named == LN_TYPEDEF) //plain typedef, not typedef | declarator
-  {
+  if (last_named == LN_TYPEDEF) { //plain typedef, not typedef | declarator
     cferr = "Type definition does not specify a type";
     return pos;
   }
@@ -666,8 +730,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
         }
         if (last_named_phase == USE_NAMESPACE)
         {
-          if (!find_extname(n,EXTFLAG_NAMESPACE))
-          {
+          if (!find_extname(n,EXTFLAG_NAMESPACE)) {
             cferr = "Expected namespace identifier following `namespace' keyword";
             return pos;
           }
@@ -675,9 +738,10 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           last_type = ext_retriever_var;
           break;
         }
-        if (!find_extname(n,0xFFFFFFFF))
-        { find_extname(n,0xFFFFFFFF);
-          cferr = "Cannot use `" + n + "': undeclared"; return pos; }
+        if (!find_extname(n,0xFFFFFFFF)) {
+          cferr = "Cannot use `" + n + "': undeclared";
+          return pos;
+        }
         
         last_named_phase = USE_SINGLE_IDENTIFIER;
         last_type = ext_retriever_var;

@@ -42,7 +42,7 @@ using namespace std;
 
 extern string cferr;
 extern string tostring(int x);
-  
+
 extern stack<includings> included_files;
 
 inline void move_newline()
@@ -325,6 +325,18 @@ unsigned int cfile_parse_macro()
       cout << "#pragma: debug_entry_point\r\n";
     if (pc == "debug_entry_point_unconditional")
       cout << "#pragma: debug_entry_point\r\n";
+    if (pc == "skiptell")
+      cout << "#pragma: skipto status: ['"<<skipto<<"', '"<<skipto2<<"' : " << specializing << "]\r\n";
+    if (pc == "toggledebug")
+      cout << "#pragma: toggledebug = " << (cfile_debug = !cfile_debug) << "\r\n";
+    if (pc == "ihtell")
+      cout << "#pragma: ihc = " << ihc << "\r\n";
+    if (pc == "tptell")
+    {
+      cout << "#pragma: tpc = " << tpc << " Current scope: " << current_scope->tempargs.size << "\r\n";
+      for (int i=0; i<tpc; i++) cout << "  " << tmplate_params[i].name << endl;
+      for (unsigned i=0; i<current_scope->tempargs.size; i++) cout << "  " << current_scope->tempargs[i]->name << endl;
+    }
     if (pc.substr(0,8) == "println " and !in_false_conditional())
     {
       cout << "Debug output: " << pc.substr(8) << endl;
@@ -335,6 +347,17 @@ unsigned int cfile_parse_macro()
       cout << "Unconditional debug output: " << pc.substr(22) << endl;
       fflush(stdout);
     }
+    if (pc == "printlast")
+    {
+      cout << 
+      "Last named: " << last_named << endl << 
+      "Last named phase: " << last_named_phase << endl << 
+      "Last identifier: " << last_identifier << endl << 
+      "Last type: " << (void*)last_type << endl << 
+      "Immediate scope: " << immediate_scope << (immediate_scope? ": " + strace(immediate_scope) : "") << endl << 
+      endl;
+      fflush(stdout);
+    }
     if (pc.substr(0,10) == "tracescope")
     {
       string o;
@@ -343,6 +366,11 @@ unsigned int cfile_parse_macro()
       string lnm;
       for (externs* i=immediate_scope?immediate_scope:current_scope; i != &global_scope; i=i->parent)
       {
+        if (i == NULL) {
+          cout << "ERROR! Trace wound up at NULL! ";
+          break;
+        }
+        
         if (lnm != "")
         {
           extiter ii = i->members.find(lnm);

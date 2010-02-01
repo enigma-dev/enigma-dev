@@ -42,6 +42,7 @@
 #define EXTFLAG_TYPEDEF 256
 #define EXTFLAG_PENDING_TYPEDEF 512
 #define EXTFLAG_DEFAULTED 1024
+#define EXTFLAG_HYPOTHETICAL 2048
 //#define EXTFLAG_NAMESPACE 2048
 
 #include "references.h"
@@ -56,8 +57,8 @@ struct externs
   long long  value_of;
   rf_stack refstack;
   
-  darray<externs*> ancestors;
   varray<externs*> tempargs;
+  darray_s<externs*> ancestors;
   map<string, externs*> members;
   
   typedef map<string,externs*>::iterator tempiter;

@@ -44,12 +44,25 @@ bool is_tflag(string x)
   or x=="volatile";
 }
 
+//Each of these flags implies that the type
+//named cannot be a struct or the like:
+//Picture any of these flags prefixed to string
+bool tflag_atomic(string x)
+{
+  return 
+     x=="unsigned" 
+  or x=="signed"
+  or x=="short" 
+  or x=="long";
+}
+
 
 
 inline externs* regt(string x)
 {
   externs* t = current_scope->members[x] = new externs;
   t->flags = EXTFLAG_TYPENAME;
+  t->parent = &global_scope;
   t->name = x;
   return t;
 }
@@ -106,7 +119,8 @@ void cparse_init()
   
   //These are GCC things and must be hard coded in
   regmacro("__attribute__","","x"); //__attribute__(x) 
-  regmacro("__typeof__","int","x"); //__attribute__(x) 
+  regmacro("__typeof__","int","x"); //__typeof__(x) 
+  regmacro("__typeof","int","x"); //__typeof(x) 
   regmacro("__extension__"); //__extension__
   regmacro("false","0"); //false
   regmacro("true","1"); //true
@@ -151,24 +165,51 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,exte
       else
       {
         if (it->second->is_function() and refs.is_function())
-        {
           it->second->parameter_unify(refs);
-          ext_retriever_var = it->second;
-          return 1;
+        else if (it->second->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT))
+        {
+          if (!it->second->members.empty())
+          {
+            extiter a = it->second->members.begin();
+            if (a->second->name != "<specializations>")
+              goto error_block;
+            a++;
+            if (a != it->second->members.end())
+              goto error_block;
+          }
         }
         else
         {
+          error_block:
           if (it->second->parent == current_scope) {
             cferr = "Redeclaration of `"+name+"' at this point";
             return 0;
           }
-          if (!(it->second->parent->flags & EXTFLAG_TEMPLATE)) {
+          else if (!(it->second->parent->flags & EXTFLAG_TEMPLATE)) {
             cferr = "Cannot declare that here.";
             return 0;
           }
-          ext_retriever_var = it->second;
-          return 1;
         }
+        ext_retriever_var = it->second;
+        immediate_scope = NULL;
+        //Inheritance
+            if (ext_retriever_var->ancestors.size != 0) {
+              cferr = "Implementing structure that has already been given inheritance";
+              return pos;
+            }
+            for (int i=0; i<ihc; i++)
+              ext_retriever_var->ancestors[i] = inheritance_types[i].parent;
+            ihc = 0;
+        //Template args
+            if ((tpc == -1?0:(unsigned)tpc) != ext_retriever_var->tempargs.size) {
+              cferr = "Template parameter mismatch in implementation of `"+ext_retriever_var->name+"'";
+              return pos;
+            }
+            for (int i=0; i<tpc; i++)
+              ext_retriever_var->tempargs[i]->name = tmplate_params[i].name;
+              tpc = -1;
+        //Success
+        return 1;
       }
     }
   }
@@ -219,12 +260,26 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,exte
       }
       e->tempargs[e->tempargs.size] = tparams[i].def;
     }
+    tpc = 0;
   }
   
   e->type = type;
   e->parent = current_scope;
   e->value_of = last_value;
   e->refstack = refs;
+  
+  if (ihc)
+  {
+    if (last != LN_STRUCT and last != LN_CLASS) {
+      cferr = "Mishandling of inheritance. This is probably my fault. Please report the concerned code.";
+      return 0;
+    }
+    for (int i = 0; i < ihc; i++) {
+      e->ancestors[i] = inheritance_types[i].parent;
+      if (cfile_debug) cout << "Transferring " << inheritance_types[i].parent->name << endl;
+    }
+    ihc = 0;
+  }
   
   immediate_scope = NULL;
   return 1;
@@ -370,7 +425,7 @@ string temp_parse_list(externs* last,string specs,varray<externs*> *va = NULL)
   
   while (ti < last->tempargs.size)
   {
-    if (last->tempargs[ti]->flags & EXTFLAG_DEFAULTED)
+    if ((last->tempargs[ti]->flags & EXTFLAG_DEFAULTED) or (last->tempargs[ti]->flags & EXTFLAG_VALUED))
     {
       if (va)
       {
@@ -385,7 +440,7 @@ string temp_parse_list(externs* last,string specs,varray<externs*> *va = NULL)
       ti++;
     }
     else {
-      cferr = "Too few parameters to template";
+      cferr = "Too few parameters to template `" + last->name + "': Passed " + tostring(ti) + ", expected " + tostring(last->tempargs.size);
       return "";
     }
   }
@@ -402,7 +457,7 @@ externs* TemplateSpecialize(externs* last, string specs) //Last is the type we'r
       @b->tempargs is known simply as @last->tempargs, and represents the original list.
       @template <typename a> has not yet been dumped into anything, and is accessed with  @tmplate_params.
       @implementations is a new array we allocate, and contains data from parsed implementation string @specs.
-  */
+  **/
   
   if (not(last->flags & EXTFLAG_TEMPLATE)) {
     cferr = "Attempting to specialize non-template type `" + last->name + "'";
@@ -419,11 +474,18 @@ externs* TemplateSpecialize(externs* last, string specs) //Last is the type we'r
     return NULL;
   }
   
+  externs* specm = temp_get_specializations(last);
+  if (specm->members.find(ns) != specm->members.end()) {
+    cferr = "WAT HEL";
+    return NULL;
+  }
+  
   externs* ret = new externs;
   ret->name = last->name + ns;
   ret->flags = last->flags;
   ret->type = last->type;
   ret->parent = last->parent;
+  ret->ancestors[0] = last;
   
   //cout << "for (unsigned i = 0; i < " << implementations.size << " and i < " << last->tempargs.size << "; i++)" << endl;
   for (unsigned i = 0; i < last->tempargs.size; i++) 
@@ -450,7 +512,7 @@ externs* TemplateSpecialize(externs* last, string specs) //Last is the type we'r
     }
   }
   
-  temp_get_specializations(last)->members[ns] = ret;
+  specm->members[ns] = ret;
   return ret;
 }
 
@@ -485,30 +547,27 @@ bool access_specialization(externs* &whom, string specs)
 
 unsigned int handle_comments()
 {
+  pos++;
   if (cfile[pos]=='/')
   {
-    pos++;
-    if (cfile[pos]=='/')
-    {
-      while (cfile[pos] != '\r' and cfile[pos] != '\n' and (pos++)<len);
-      return unsigned(-2);
-    }
-    if (cfile[pos]=='*')
-    {
-      int spos=pos;
-      pos+=2;
-      
-      while ((cfile[pos] != '/' or cfile[pos-1] != '*') and (pos++)<len);
-      if (pos>=len)
-      {
-        cferr="Unterminating comment";
-        return spos;
-      }
-      
-      pos++;
-      return unsigned(-2);
-    }
-    pos--;
+    while (cfile[pos] != '\r' and cfile[pos] != '\n' and (pos++)<len);
+    return unsigned(-2);
   }
+  if (cfile[pos]=='*')
+  {
+    int spos=pos;
+    pos+=2;
+    
+    while ((cfile[pos] != '/' or cfile[pos-1] != '*') and (pos++)<len);
+    if (pos>=len)
+    {
+      cferr="Unterminating comment";
+      return spos;
+    }
+    
+    pos++;
+    return unsigned(-2);
+  }
+  pos--;
   return unsigned(-1);
 }

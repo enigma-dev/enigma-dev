@@ -71,17 +71,23 @@ int keyword_operator()
         last_named_phase=OP_PARAMS;
         return -1; //++ or --, &&, ||, <<, >>, <<=, >>=
       }
+      else if (o == '-' and o2 == '>')
+      {
+        last_identifier = "operator->";
+        last_named_phase = OP_PARAMS;
+        pos++; return -1;
+      }
       else if (o=='[')
       {
         last_named_phase=OP_BRACKET;
         last_identifier="operator[]";
-        pos--; return -1;
+        return -1;
       }
       else if (o=='(')
       {
         last_named_phase=OP_PARENTH;
         last_identifier="operator()";
-        pos--; return -1;
+        return -1;
       }
       last_identifier=string("operator") + o;
       last_named_phase = OP_PARAMS;
@@ -120,6 +126,15 @@ int keyword_operator()
       last_identifier += "[]";
       last_named_phase=OP_BRACKET;
       pos++; return -1;
+    }
+    last_named_phase = OP_PARAMS;
+    return -1;
+  }
+  if (last_named_phase == OP_CAST)
+  {
+    if (cfile[pos] != '(') {
+      cferr = "Expected '(' at this point";
+      return pos;
     }
     last_named_phase = OP_PARAMS;
     return -1;

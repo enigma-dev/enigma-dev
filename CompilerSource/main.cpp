@@ -46,8 +46,8 @@ using namespace std;
 
 string fc(const char* fn);
 
-void print_ext_data(externs *ext,int indent);
-void print_scope_members(externs* gscope, int indent);
+void print_ext_data(externs *ext,int indent, int depth = 100);
+void print_scope_members(externs* gscope, int indent, int depth = 100);
 
 char getch()
 {
@@ -71,7 +71,28 @@ string getst()
 }
 
 #include "general/implicit_stack.h"
-extern string cfile_top;
+extern string cfile;
+
+void print_err_line_at(unsigned a)
+{
+  int line=0,pos=0;
+  for (int i=0; i<(signed)a; i++,pos++)
+  {
+    if (cfile[i]=='\r')
+      i++;
+    if (cfile[i]=='\n')
+      line++, pos=0;
+  }
+  printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
+  const int margin = 100;
+  const unsigned int 
+    begin = (signed)a-(margin/2)<0?0:a-(margin/2), 
+    end = (a+unsigned(margin/2)>cfile.length())?cfile.length():a+(margin/2);
+  cout << "code snippet: " << cfile.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
+  cout << "------------------------------------------------\r\n\r\n";
+}
+
+
 int main(int argc, char *argv[])
 {
       cparse_init();
@@ -85,23 +106,7 @@ int main(int argc, char *argv[])
       
       
       if (a != -1)
-      {
-        int line=0,pos=0;
-        for (int i=0; i<a; i++,pos++)
-        {
-          if (cfile_top[i]=='\r')
-            i++;
-          if (cfile_top[i]=='\n')
-            line++, pos=0;
-        }
-        printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
-        const int margin = 100;
-        const unsigned int 
-          begin = (signed)a-(margin/2)<0?0:a-(margin/2), 
-          end = (a+unsigned(margin/2)>cfile_top.length())?cfile_top.length():a+(margin/2);
-        cout << "code snippet: " << cfile_top.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
-        cout << "------------------------------------------------\r\n\r\n";
-      }
+        print_err_line_at(a);
       else
       cout << "No error.\r\nParse time: " << (((te-ts) * 1000.0) / CLOCKS_PER_SEC)
            << " milliseconds\r\n++++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";

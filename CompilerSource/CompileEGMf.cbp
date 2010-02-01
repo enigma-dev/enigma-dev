@@ -57,7 +57,6 @@
 		<Unit filename="cfile_parse/macro_functions.cpp" />
 		<Unit filename="cfile_parse/macro_functions.h" />
 		<Unit filename="cfile_parse/main.cpp" />
-		<Unit filename="cfile_parse/parse_basics.h" />
 		<Unit filename="cfile_parse/parsein.h">
 			<Option virtualFolder="cfile_parse/" />
 			<Option target="Debug" />

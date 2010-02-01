@@ -92,6 +92,7 @@ value evaluate_expression(string expr)
   VZERO(regval[0][0].); //zero the value
   regval[0][0].type = RTYPE_NONE;
   op[0][0] = OP_NONE; //no operator
+  unary[0][0] = 0; //For posterity
   opc[0] = 0; //no normal operators
   uc[0] = 0; //no unary operators
   
@@ -855,6 +856,7 @@ value evaluate_expression(string expr)
       VZERO(regval[level][0].); //zero the value
       regval[level][0].type=RTYPE_NONE; //nothing yet
       op[level][0]=OP_NONE; //no operator
+      unary[level][0] = 0; //For posterity
       opc[level]=0; //no normal operators
       uc[level]=0; //no unary operators
       
@@ -1194,7 +1196,7 @@ value evaluate_expression(string expr)
           if (a==0) break;
         }
         if (exp[pos]=='(') b++;
-        else if (exp[pos]==')') b++;
+        else if (exp[pos]==')') b--;
         else if (exp[pos]=='/')
         {
           if (exp[pos+1]=='/')
