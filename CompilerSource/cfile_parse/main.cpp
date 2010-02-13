@@ -99,7 +99,7 @@ void print_ext_data(externs *ext,int indent,int depth)
   {
     cout << " derived from ";
     string nc;
-    for (int i = 0; i < ext->ancestors.size; i++) {
+    for (unsigned i = 0; i < ext->ancestors.size; i++) {
       cout << nc << strace(ext->ancestors[i]);
       nc = ", ";
     }
@@ -150,7 +150,7 @@ void print_ext_data(externs *ext,int indent,int depth)
   if (ext->flags & EXTFLAG_CLASS) cout << " : class";
   
   if (ext->flags & EXTFLAG_TYPEDEF)
-    cout << " typedef'd as " << (ext->type != NULL ? ext->type->name : "<NULL>") << " ";
+    cout << " typedef'd as " << strace(ext->type) << " ";
   else
   if (!ext->members.empty())
   {

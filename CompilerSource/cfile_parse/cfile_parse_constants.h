@@ -42,6 +42,9 @@ enum
   LN_LABEL,       //Public, private, protected
   LN_IMPLEMENT,   //int templated_class<int>::...
   LN_DESTRUCTOR,  //Added to invoke errors where appropriate
+  LN_TYPENAME,    //typename some_unimplemented_structure::doesntexist...
+   LN_TYPENAME_P, //int a(typename some_unimplemented_structure::doesntexist...
+  LN_STRUCT_DD,   //Previously declared struct/class
   LN_TYPEDEF=128, //typedef whatever
 };
 
@@ -54,9 +57,9 @@ enum
   SP_EMPTY,        //Nothing but the keyword
   SP_IDENTIFIER,   //The class has been named
   SP_COLON,        //The class will now be given ancestors
-  SP_PUBLIC,       //Inherits publicly
-  SP_PRIVATE,      //Inherits privately
-  SP_PROTECTED,    //Inherits in protected scope
+  SP_PUBLIC,       //Inherits as-is
+  SP_PRIVATE,      //Inherits into private scope
+  SP_PROTECTED,    //Inherits into protected scope
   SP_PARENT_NAMED, //The parent's name was given
 };
 
@@ -126,3 +129,43 @@ enum
   TMP_SIMPLE,      //template <bool...
   TMP_SIMPLE_DEFAULTED //template <bool = 1,...
 };
+
+enum
+{
+  TN_NOTHING, //typename ...
+  TN_TEMPLATE //typename anything::template ...
+};
+
+//For efficiency
+
+enum
+{
+  SH___CONST = 130,
+  SH_CLASS = 143,
+  SH_CONST = 173,
+  SH_DELETE = 209,
+  SH_ENUM = 213,
+  SH_EXPLICIT = 214,
+  SH_EXTERN = 234,
+  SH_FRIEND = 333,
+  SH_INLINE = 4,
+  SH_MUTABLE = 469,
+  SH_NAMESPACE = 494,
+  SH_NEW = 504,
+  SH_OPERATOR = 518,
+  SH_PRIVATE = 547,
+  SH_PROTECTED = 554,
+  SH_PUBLIC = 560,
+  SH_STRUCT = 659,
+  SH_TEMPLATE = 686,
+  SH_THROW = 689,
+  SH_TYPEDEF = 689,
+  SH_TYPENAME = 691,
+  SH_UNION = 714,
+  SH_USING = 714,
+  SH_VIRTUAL = 755
+};
+
+inline short switch_hash(string x) {
+  return x.length()>2 ? ((x[0]-'_')<<5) + (x[2]-'_') : 0;
+}

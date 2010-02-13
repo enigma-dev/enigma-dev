@@ -57,7 +57,7 @@ bool is_entirely_white(string x)
 
 bool macro_function_parse(string cfile,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at)
 {
-  //cout << "The function was at least fucking entered";
+  //cout << "The function was at least entered";
   
   while (is_useless(cfile[pos])) pos++; 
   if (cfile[pos] != '(') { macrostr = "Expected parameters to macro function"; return false; }

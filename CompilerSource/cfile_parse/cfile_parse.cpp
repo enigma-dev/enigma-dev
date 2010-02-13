@@ -43,11 +43,6 @@ using namespace std;
 #include "cfile_parse_calls.h"
 #include "cparse_components.h"
 
-
-#define encountered pos++;
-#define quote while (cfile[pos]!='"') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='"')) pos+=2; }
-#define squote while (cfile[pos]!='\'') { pos++; if (cfile[pos]=='\\' and (cfile[pos+1]=='\\'||cfile[pos]=='\'')) pos+=2; }
-
 bool in_false_conditional();
 //extern void print_cfile_top(const unsigned);
 
@@ -82,6 +77,8 @@ string strace(externs *f)
     else { o = "NULL! " + o; break; }
   return o;
 }
+
+extern unsigned handle_skip();
 
 int parse_cfile(string cftext)
 {
@@ -202,162 +199,9 @@ int parse_cfile(string cftext)
     if (in_false_conditional())
       { pos++; continue; }
     
-    if (skipto)
-    {
-      if (is_letter(cfile[pos]))
-      {
-        if (specializing and pos-specialize_start)
-          specialize_string += cfile.substr(specialize_start,pos-specialize_start);
-        
-        //This segment is completely stolen from below and should be functionized ASAP
-        unsigned int sp = pos;
-        while (is_letterd(cfile[++pos]));
-        string n = cfile.substr(sp,pos-sp); //This is the word we're looking at.
-        
-        //This piece is also stolen from below, but is simple enough as-is
-        const unsigned int cm = handle_macros(n);
-        if (cm == unsigned(-2)) // Was a macro
-        {
-          if (specializing)
-            specialize_start = pos;
-          continue;
-        }
-        if (cm != unsigned(-1)) return cm;
-        
-        if (specializing) {
-          specialize_start = pos;
-          specialize_string += n;
-        }
-        continue;
-      }
-      if (skipto == ';' and skipto2 == ';')
-      {
-        if (cfile[pos] == ';' or cfile[pos] == ',')
-        {
-          if (skip_depth == 0)
-            skipto = skipto2 = skip_inc_on = 0;
-        }
-        else if (cfile[pos] == '{')
-          skip_depth++;
-        else if (cfile[pos] == '(')
-          skip_depth++;
-        else if (cfile[pos] == ')')
-        {
-          if (skip_depth)
-            skip_depth--;
-          else
-            skipto = skipto2 = skip_inc_on = 0;
-        }
-        else if (cfile[pos] == '}')
-        {
-          if (skip_depth == 0)
-          {
-            skipto = skipto2 = skip_inc_on = 0;
-          }
-          else
-            skip_depth--;
-        }
-      }
-      else
-      {
-        if (cfile[pos] == skipto or cfile[pos] == skipto2)
-        {
-          if (skip_depth == 0)
-            skipto = skipto2 = skip_inc_on = 0;
-          else if (cfile[pos] == skipto) //Only skip if the primary is met. For instance, in "s = '>'; s2 = ','; sincon = '<';", we want to dec only on >
-            skip_depth--;
-          //if (cfile[pos] == ')')
-            //pos++;
-        }
-        else if (cfile[pos] == skip_inc_on)
-        {
-          skip_depth++;
-          /*if (specializing) {
-            cferr = "Unexpected start of new template parameters in specialization of others";
-            return pos;
-          }*/
-        }
-      }
-      
-      if (skipto == 0)
-      {
-        if (specializing)
-        {
-          specialize_string += cfile.substr(specialize_start,pos-specialize_start);
-          if ((last_named & ~LN_TYPEDEF) == LN_TEMPARGS)
-          {
-            last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
-            if (!access_specialization(last_type,specialize_string))
-              return pos;
-          }
-          else if ((last_named & ~LN_TYPEDEF) == LN_TEMPLATE)
-          {
-            //template<whatever = a<...(*)> >
-            if (last_named_phase == TMP_SIMPLE)
-            {
-              last_value = evaluate_expression(specialize_string);
-              if (rerrpos != -1) {
-                cout<< "Ignoring error in specialization expression at position " + tostring(rerrpos) + ": " + rerr << endl << endl;
-                //return pos;
-              }
-              last_named_phase = TMP_SIMPLE_DEFAULTED;
-              pos--;
-            }
-            else 
-            {
-              if (!access_specialization(last_type,specialize_string))
-                return pos;
-            }
-          }
-          else if ((last_named & ~LN_TYPEDEF) == LN_DECLARATOR and last_named_phase == DEC_FULL)
-          {
-            last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
-            bool ts = access_specialization(last_type,specialize_string);
-            if (!ts)
-              return pos;
-          }
-          else if ((last_named & ~LN_TYPEDEF) == LN_ENUM)
-          {
-            last_named_phase = EN_DEFAULTED;
-            last_value = evaluate_expression(specialize_string);
-            if (rerrpos != -1) {
-              cferr = rerr;
-              return pos;
-            }
-            //cout << "Evaluated \"" << specialize_string << "\" as " << last_value << endl;
-          }
-          else if ((last_named & ~LN_TYPEDEF) == LN_STRUCT
-               or  (last_named & ~LN_TYPEDEF) == LN_CLASS)
-          {
-            if (last_named_phase == SP_PUBLIC or last_named_phase == SP_PRIVATE or last_named_phase == SP_PROTECTED)
-            {
-              if (ihc <= 0) {
-                cferr = "Error in instantiating inherited template: this should have been reported earlier";
-                return pos;
-              }
-              if (!access_specialization(inheritance_types[ihc-1].parent,specialize_string)) //Parent we're inheriting from
-                return pos;
-            }
-          }
-          else if ((last_named & ~LN_TYPEDEF) == LN_IMPLEMENT)
-          {
-            if (!access_specialization(argument_type,specialize_string))
-              return pos;
-            last_named_phase = IM_SPECD;
-          }
-          else {
-            cferr = "Nothing to do with freshly parsed string. This shouldn't happen. ln = " + tostring(last_named);
-            return pos;
-          }
-          specializing = false;
-          if (skippast)
-            pos++;
-        }
-        else if (skippast)
-          pos++;
-        skippast = 0;
-      }
-      else pos++;
+    if (skipto) {
+      unsigned a = handle_skip(); // Too huge to display here. May need maintenance in the future anyway.
+      if (a != unsigned(-1)) return a;
       continue;
     }
     
@@ -637,6 +481,9 @@ int parse_cfile(string cftext)
               last_named = LN_NOTHING;
               last_named_phase = 0;
             continue;
+          case LN_TYPENAME:
+              cferr = "Unexpected symbol in expression";
+            return pos;
           default:
               cferr = "WELL WHAT THE FUCK.";
             return pos;
@@ -653,8 +500,28 @@ int parse_cfile(string cftext)
           type_to_use = type_to_use->type;
         }
         
-        if (last_identifier != "")
-        if (!ExtRegister(last_named,last_named_phase,last_identifier,refs_to_use,type_to_use,tmplate_params,tpc))
+        if (last_identifier == "")
+        {
+          if (!last_type or !(last_type->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT))) {
+            cferr = "Declaration doesn't declare anything.";
+            return pos;
+          }
+          if (last_named == LN_DECLARATOR and last_named_phase == DEC_FULL)
+          {
+            externs *cs = immediate_scope? immediate_scope:current_scope; // Someimes structs are redeclared, unimplemented, with defaulted template parameters
+            if (cs->members.find(last_type->name) != cs->members.end())  //TODO: Remove ExtRegister from this block and manually set the template params.
+            {
+              last_identifier = last_type->name;
+              
+              last_type = NULL;
+              last_named = LN_STRUCT;
+              last_named_phase = SP_IDENTIFIER;
+              if (!ExtRegister(last_named,last_named_phase,last_identifier,refs_to_use,type_to_use,tmplate_params,tpc))
+                return pos;
+            }
+          }
+        }
+        else if (!ExtRegister(last_named,last_named_phase,last_identifier,refs_to_use,type_to_use,tmplate_params,tpc))
           return pos;
         
         tpc = -1;
@@ -843,6 +710,13 @@ int parse_cfile(string cftext)
           return pos;
         current_scope = ext_retriever_var;
       }
+      else if (last_named_raw == LN_STRUCT_DD)
+      {
+        current_scope = last_type;
+        for (int i = 0; i < ihc; i++)
+          current_scope->ancestors[current_scope->ancestors.size] = inheritance_types[i].parent;
+        ihc = 0;
+      }
       //Enum declaration.
       else if (last_named_raw == LN_ENUM)
       {
@@ -881,15 +755,8 @@ int parse_cfile(string cftext)
             //if (last_type->parent == current_scope)
             if (!last_type->members.empty())
             {
-              if ((last_type->flags & EXTFLAG_TEMPLATE) and specialize_string != "")
-              {
-                current_scope = TemplateSpecialize(last_type,specialize_string); //Parse specialize_string and 
-                if (current_scope == NULL) return pos;
-              }
-              else {
-                cferr = "Attempting to redeclare struct `"+last_type->name+"'";
-                return pos;
-              }
+              cferr = "Attempting to redeclare struct `"+last_type->name+"'";
+              return pos;
             }
             else
               current_scope = last_type; //Move into it. Brilliantly simple; we already know it's parent is current_scope.
@@ -960,10 +827,12 @@ int parse_cfile(string cftext)
             cferr = "Unexpected closing brace at this point";
             return pos;
           }
-          ExtRegister(last_named,last_named_phase,last_identifier,refstack.dissociate(),builtin_type__int,tmplate_params,tpc,last_value);
+          if (!ExtRegister(last_named,last_named_phase,last_identifier,refstack.dissociate(),builtin_type__int,tmplate_params,tpc,last_value))
+            return pos;
         }
         else
-          ExtRegister(last_named,last_named_phase,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc);
+          if (!ExtRegister(last_named,last_named_phase,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc))
+            return pos;
       }
       
       if (current_scope->flags & EXTFLAG_TYPENAME)
@@ -1003,20 +872,27 @@ int parse_cfile(string cftext)
           {
             if ((last_named & ~LN_TYPEDEF) != LN_IMPLEMENT)
             {
-              if (last_type == NULL) {
-                cferr = "Unexpected symbol '<' should only occur directly following `template' token or type";
-                return pos;
-              }
-              if (!(last_type->flags & EXTFLAG_TEMPLATE))
+              if ((last_named & ~LN_TYPEDEF) != LN_TYPENAME and (last_named & ~LN_TYPEDEF) != LN_TYPENAME_P)
               {
-                if  (!refstack.is_function()){
-                  cferr = "Unexpected symbol '<' [with ln == " + tostring(last_named) + "]";
+                if (last_type == NULL) {
+                  cferr = "Unexpected symbol '<' should only occur directly following `template' token or type";
                   return pos;
                 }
-                if (argument_type == NULL or !(argument_type->flags & EXTFLAG_TEMPLATE)) {
-                  cferr = "Unexpected symbol '<' should only occur directly following `template' token or type, even in function parameters <_<";
-                  return pos;
+                if (!(last_type->flags & EXTFLAG_TEMPLATE))
+                {
+                  if  (!refstack.is_function()){
+                    cferr = "Unexpected symbol '<' [with ln == " + tostring(last_named) + "]";
+                    return pos;
+                  }
+                  if (argument_type == NULL or !(argument_type->flags & EXTFLAG_TEMPLATE)) {
+                    cferr = "Unexpected symbol '<' should only occur directly following `template' token or type, even in function parameters <_<\"";
+                    return pos;
+                  }
                 }
+              }
+              else {
+                cferr = "Should have been dealt with prior to this point...";
+                return pos;
               }
             }
             else if (last_named_phase != IM_SCOPE) {
@@ -1136,7 +1012,7 @@ int parse_cfile(string cftext)
           else if (last_named_phase == DEC_IDENTIFIER and refstack.is_function())
             immediate_scope = argument_type;
           else {
-            cferr = "Since a giant ascii pear was out of the question, I assert: LOL WUT";
+            cferr = "This error is an easter egg. You found it! Now go report it";
             return pos;
           }
         }
@@ -1144,9 +1020,10 @@ int parse_cfile(string cftext)
         {
           last_named = LN_DECLARATOR;
           last_named_phase = DEC_FULL;
-          immediate_scope = argument_type;
+          immediate_scope = argument_type; //We reused this; it's nothing to do with functions in this case.
         }
-        else if ((last_named_raw == LN_STRUCT or last_named_raw == LN_CLASS) and last_named_phase == SP_PARENT_NAMED)
+        else if ((last_named_raw == LN_STRUCT or last_named_raw == LN_CLASS or last_named_raw == LN_STRUCT_DD)
+             and (last_named_phase == SP_PARENT_NAMED))
         {
           if (ihc != 0)
             immediate_scope = inheritance_types[--ihc].parent;
@@ -1180,9 +1057,9 @@ int parse_cfile(string cftext)
           {
             if (last_type->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT))
             {
-              last_named = LN_STRUCT;
-              last_identifier = last_type->name;
-              goto next_block;
+              last_named = LN_STRUCT_DD;
+              last_named_phase = SP_COLON;
+              pos++; continue;
             }
             else {
               skipto = ';';
@@ -1203,7 +1080,6 @@ int parse_cfile(string cftext)
             cferr = "Colon already named in heritance expression";
             return pos;
           }
-          next_block:
           last_named_phase = SP_COLON;
           pos++; continue;
         }

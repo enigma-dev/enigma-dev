@@ -147,6 +147,13 @@ externs* temp_get_specializations(externs* scope)
   rv->flags = EXTFLAG_NAMESPACE;
   return rv;
 }
+externs* temp_get_specializations_ie(externs* scope)
+{
+  extiter u = scope->members.find("<specializations>");
+  if (u != scope->members.end())
+    return u->second;
+  return NULL;
+}
 
 externs* scope_get_using_ie(externs* scope)
 {
@@ -214,11 +221,14 @@ ihdata::ihdata(externs* p,heredtypes t)
 int ihc;
 varray<ihdata> inheritance_types;
 
-bool local_found_something = 0;
+bool find_in_parents(externs* whose, string name,unsigned int flags);
+bool find_in_using(externs* inscope,string name, unsigned flags);
+bool find_in_specializations(externs* inscope,string name, unsigned flags);
+
 
 bool find_in_parents(externs* whose, string name,unsigned int flags)
 {
-  if (whose->name == name and (local_found_something = 1) and whose->flags & flags) {
+  if (whose->name == name and whose->flags & flags) {
     ext_retriever_var = whose;
     return 1;
   }
@@ -226,12 +236,14 @@ bool find_in_parents(externs* whose, string name,unsigned int flags)
   extiter it = whose->members.find(name);
   if (it != whose->members.end())
   {
-    (local_found_something = 1); 
-    if (it->second->flags & flags) {
+    if ((it->second->flags & flags) or flags == 0xFFFFFFFF) {
       ext_retriever_var = it->second;
       return 1;
     } //else cout << it->second->flags << " : " << flags << " of " << strace(it->second) << endl << endl;
   }
+  
+  if (find_in_specializations(whose,name,flags))
+    return true;
   
   for (unsigned i=0; i<whose->ancestors.size; i++)
   {
@@ -250,7 +262,7 @@ bool find_in_using(externs* inscope,string name, unsigned flags)
   {
     extiter it = using_scope->members.find(name);
     if (it != using_scope->members.end())
-      if ((local_found_something = 1) and (((it->second->flags & flags) != 0) or (flags == 0xFFFFFFFF))) {
+      if ((((it->second->flags & flags) != 0) or (flags == 0xFFFFFFFF))) {
         ext_retriever_var = it->second;
         return 1;
     }
@@ -258,7 +270,7 @@ bool find_in_using(externs* inscope,string name, unsigned flags)
       if (it->second->flags & EXTFLAG_NAMESPACE)
       {
         extiter sit = it->second->members.find(name);
-        if (sit != it->second->members.end() and (local_found_something = 1)
+        if (sit != it->second->members.end()
         and  (((it->second->flags & flags) != 0) or (flags == 0xFFFFFFFF)))
         {
           ext_retriever_var = sit->second;
@@ -277,7 +289,7 @@ bool find_in_specializations(externs* inscope,string name, unsigned flags)
     for (extiter it = spec_scope->members.begin(); it != spec_scope->members.end(); it++)
     {
       extiter sit = it->second->members.find(name);
-      if (sit != it->second->members.end() and (local_found_something = 1)
+      if (sit != it->second->members.end()
       and (((it->second->flags & flags) != 0) or (flags == 0xFFFFFFFF)))
       {
         ext_retriever_var = sit->second;
@@ -295,23 +307,16 @@ extern string cferr;
 extern unsigned pos;
 void print_err_line_at(unsigned a = pos);
   #include "../cfile_parse/cparse_shared.h"
-bool find_extname(string name,unsigned int flags)
+bool find_extname(string name,unsigned int flags,bool expect_find)
 {
   //If we've been given a qualified id, check in the path or give up
   if (immediate_scope != NULL)
   {
-    local_found_something = 0;
-    
     externs* iscope = immediate_scope;
     while (iscope->flags & EXTFLAG_TYPEDEF and iscope->type)
       iscope = iscope->type;
-    if (iscope->parent == NULL)
-      iscope->flags |= EXTFLAG_HYPOTHETICAL;
     
     extiter f = iscope->members.find(name);
-    
-      //cout << "Find " << name << " in " << immediate_scope->name << endl;
-      //print_scope_members(immediate_scope,4);
     
     if (f == iscope->members.end())
     {
@@ -321,7 +326,7 @@ bool find_extname(string name,unsigned int flags)
         ext_retriever_var = new externs;
         ext_retriever_var->name = name;
         ext_retriever_var->type = builtin_type__int;
-        ext_retriever_var->flags = EXTFLAG_TYPENAME | EXTFLAG_TYPEDEF; //A hackish catch-it-all is no place for pure actuality
+        ext_retriever_var->flags = EXTFLAG_TYPENAME | EXTFLAG_TYPEDEF | EXTFLAG_HYPOTHETICAL; //Not a base type, but typedef to NULL. HYPOTHETICAL is viral.
         ext_retriever_var->parent = iscope;
         ext_retriever_var->value_of = 0;
         
@@ -341,7 +346,7 @@ bool find_extname(string name,unsigned int flags)
       if (find_in_specializations(iscope,name,flags))
         return immediate_scope = NULL, true;
       
-      if (!local_found_something) {
+      if (expect_find) {
         cferr = "Unable to locate member `" + name + "' in scope `" + strace(iscope) + "' (" + strace(immediate_scope) + ")";
         print_err_line_at();
       }
@@ -361,7 +366,7 @@ bool find_extname(string name,unsigned int flags)
   if (flags & EXTFLAG_TYPENAME)
   {
     //The actual scope we're in should get search precedence, otherwise constructors will flop
-    if (inscope->flags & EXTFLAG_TYPENAME and inscope->name == name) {
+    if ((inscope->flags & EXTFLAG_TYPENAME) and (inscope->name == name or (inscope->ancestors.size and inscope->ancestors[0]->name == name))) {
       ext_retriever_var = inscope;
       return true;
     }
@@ -415,13 +420,14 @@ bool find_extname(string name,unsigned int flags)
           return 1;
         }
       }
+      
+      //The actual scope we're in should then get search precedence, otherwise constructors will flop
+      if (inscope->flags & EXTFLAG_TYPENAME and inscope->name == name) {
+        ext_retriever_var = inscope;
+        return true;
+      }
     }
     
-    //The actual scope we're in should then get search precedence, otherwise constructors will flop
-    if (inscope->flags & EXTFLAG_TYPENAME and flags & EXTFLAG_TYPENAME and inscope->name == name) {
-      ext_retriever_var = inscope;
-      return true;
-    }
     
     //Try to find it as a member of this scope
     it = inscope->members.find(name);

@@ -92,24 +92,68 @@ void print_err_line_at(unsigned a)
   cout << "------------------------------------------------\r\n\r\n";
 }
 
+void print_definition(string n)
+{
+  maciter a = macros.find(n);
+  if (a != macros.end())
+  {
+    cout << "  #define " << n;
+    if (a->second.argc != -1) {
+      cout << "("; for (int i=0; i<a->second.argc; i++) 
+      cout << a->second.args[i] << (i+1<a->second.argc ? ", " : ")"); }
+    cout << " " << (string)a->second << endl;
+  }
+  else
+  {
+    extiter a;
+    string seg;
+    externs *isco = &global_scope;
+    for (unsigned i=0; i<n.length();)
+    {
+      const unsigned is = i;
+      while (i<n.length() and n[i] != ':') i++;
+      
+      seg = n.substr(is,i-is);
+      a = isco->members.find(seg);
+      if (i<n.length() and a != isco->members.end())
+        isco = a->second;
+      while (i<n.length() and n[i] == ':') i++;
+    }
+    if (a != isco->members.end())
+      print_ext_data(a->second, 2);
+    else cout << "Not found: " << seg << endl;
+  }
+}
+
+#include <sys/time.h>
 
 int main(int argc, char *argv[])
 {
       cparse_init();
       string cftp = fc("./cfile_parse/parsein.h");
       
-      time_t ts = clock();
-      system("date +\"%s.%N\"");
-        int a = parse_cfile(cftp);
-      system("date +\"%s.%N\"");
-      time_t te = clock();
+      #ifdef linux
+        timeval ts; gettimeofday(&ts,NULL);
+      #else
+        time_t ts = clock();
+      #endif
+      
+      int a = parse_cfile(cftp);
+      
+      #ifdef linux
+        timeval te; gettimeofday(&te,NULL);
+        double tel = (te.tv_sec*1000000.0 + te.tv_usec) - (ts.tv_sec*1000000.0 + ts.tv_usec);
+      #else
+        time_t te = clock();
+        double tel = (((te-ts) * 1000000.0) / CLOCKS_PER_SEC)
+      #endif
       
       
       if (a != -1)
         print_err_line_at(a);
       else
-      cout << "No error.\r\nParse time: " << (((te-ts) * 1000.0) / CLOCKS_PER_SEC)
-           << " milliseconds\r\n++++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";
+      cout << "No error.\r\nParse time: " << tel
+           << " microseconds\r\n++++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";
 
       cout << "Macros ("<<macros.size()<<") [+]\r\nVariables [+]\r\n";
       
@@ -140,35 +184,7 @@ int main(int argc, char *argv[])
         {
           cout << "Define: ";
           string n = getst();
-          maciter a = macros.find(n);
-          if (a != macros.end())
-          {
-            cout << "  #define " << n;
-            if (a->second.argc != -1) {
-              cout << "("; for (int i=0; i<a->second.argc; i++) 
-              cout << a->second.args[i] << (i+1<a->second.argc ? ", " : ")"); }
-            cout << " " << (string)a->second << endl;
-          }
-          else
-          {
-            extiter a;
-            string seg;
-            externs *isco = &global_scope;
-            for (unsigned i=0; i<n.length();)
-            {
-              const unsigned is = i;
-              while (i<n.length() and n[i] != ':') i++;
-              
-              seg = n.substr(is,i-is);
-              a = isco->members.find(seg);
-              if (i<n.length() and a != isco->members.end())
-                isco = a->second;
-              while (i<n.length() and n[i] == ':') i++;
-            }
-            if (a != isco->members.end())
-              print_ext_data(a->second, 2);
-            else cout << "Not found: " << seg << endl;
-          }
+          print_definition(n);
         }
         if (c == 't')
         {
@@ -194,7 +210,7 @@ int main(int argc, char *argv[])
             { cout << "Found " << i->first << ". (N/Q)"; char a = getch(); f=1; if (a != 'N' and a != 'n') break; }
           if (!f) cout << "Not found.";
         }
-        if (c == 'e') cout << cferr << endl;
+        if (c == 'e') print_err_line_at(a);
         if (c == 'p') system("PAUSE");
         cout << ">>";
         c = getch();

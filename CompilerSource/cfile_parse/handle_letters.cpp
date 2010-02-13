@@ -73,7 +73,8 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
     }
     rf_stack NO_REFS;
     varray<tpdata> EMPTY;
-    ExtRegister(LN_STRUCT,last_named_phase,last_identifier,NO_REFS,NULL,EMPTY,tpc = -1);
+    if (!ExtRegister(LN_STRUCT,last_named_phase,last_identifier,NO_REFS,NULL,EMPTY,tpc = -1))
+      return 0;
   }
   last_named = LN_DECLARATOR;
   last_named_phase = idnamed?DEC_IDENTIFIER:DEC_FULL;
@@ -84,249 +85,311 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
 int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bool at_template_param)
 {
   //it's not a macro, so the next thing we'll check for is keyword
-  if (n=="struct" or n=="class")
+  if (n == "class")
+    cout << "oh oh.";
+  switch (switch_hash(n))
   {
-    //Struct can only really follow typedef.
-    if (last_named != LN_NOTHING)
-    {
-      if (last_named != LN_TYPEDEF)
-      {
-        if (last_named != LN_DECLARATOR or !(last_named_phase == 0 or refstack.currentsymbol() == '('))
+    case SH_STRUCT: case SH_CLASS:
+        if (n=="struct" or n=="class")
+        {
+          //Struct can only really follow typedef.
+          if (last_named != LN_NOTHING)
+          {
+            if (last_named != LN_TYPEDEF)
+            {
+              if (last_named != LN_DECLARATOR or !(last_named_phase == 0 or refstack.currentsymbol() == '('))
+              {
+                if (last_named != LN_TEMPLATE or last_named_phase != TMP_PSTART)
+                {
+                  cferr="Unexpected `"+n+"' token";
+                  return pos;
+                }
+                last_named_phase = TMP_TYPENAME;
+                return -1;
+              }
+            }
+            else //last_named == ln_typedef
+              last_named |= LN_STRUCT;
+          }
+          else last_named = LN_STRUCT;
+          return -1;
+        }
+      break;
+    case SH_ENUM: if (n=="enum")
+        {
+          //Same with enum
+          if (last_named != LN_NOTHING)
+          {
+            if (last_named != LN_TYPEDEF)
+            {
+              cferr="Unexpected `enum' token";
+              return pos;
+            }
+            last_named |= LN_ENUM;
+          }
+          else
+            last_named = LN_ENUM;
+          last_named_phase = EN_NOTHING;
+          return -1;
+        }
+      break;
+    case SH_TYPEDEF: //case SH_THROW:
+        if (n=="typedef")
+        {
+          //Typedef can't follow anything
+          if (last_named != LN_NOTHING)
+          {
+            cferr="Unexpected `typedef' token";
+            return pos;
+          }
+          last_named = LN_TYPEDEF;
+          return -1;
+        }
+        if (n == "throw")
+        {
+          if (last_named != LN_DECLARATOR or (refstack.currentsymbol() != '(' and refstack.currentsymbol() != ')'))
+          { cferr = "Unexpected `throw' token"; return pos; }
+          last_named_phase = DEC_THROW;
+          return -1;
+        }
+      break;
+      break;
+    case SH_EXTERN: if (n=="extern")
+        { //This doesn't tell us anything useful unless the next token is "C"
+          if (last_named != LN_NOTHING)
+          {
+            if (last_named != LN_DECLARATOR)
+            {
+              cferr = "Unexpected `extern' token at this point";
+              return pos;
+            }
+            if (last_named_phase != DEC_LONG 
+            and last_named_phase != DEC_LONGLONG 
+            and last_named_phase != DEC_GENERAL_FLAG
+            and last_named_phase != DEC_NOTHING_YET)
+            {
+              cferr = "Stray `extern' token at this point, not expected after DECID_" + tostring(last_named_phase);
+              return pos;
+            }
+            return -1;
+          }
+          last_named = LN_DECLARATOR;
+          last_named_phase = 0;
+          return -1;
+        }
+      break;
+    case SH_UNION: 
+        if (n=="union")
+        {
+          //Union can only really follow typedef, if it's not on its own.
+          if (last_named != LN_NOTHING)
+          {
+            if (last_named != LN_TYPEDEF)
+            {
+              cferr="Unexpected `union' token";
+              return pos;
+            }
+            else
+            {
+              last_named |= LN_UNION;
+            }
+          }
+          else last_named = LN_UNION;
+          return -1;
+        }
+    //break;
+    //case SH_USING: 
+       if (n=="using")
+        {
+          if (last_named != LN_NOTHING) {
+            cferr = "Unexpecting `using' token";
+            return pos;
+          }
+          last_named = LN_USING;
+          last_named_phase = USE_NOTHING;
+          return -1;
+        }
+      break;
+    case SH_NAMESPACE: if (n=="namespace")
+        {
+          //Namespace can only follow using, when it's not on its own.
+          if (last_named != LN_NOTHING)
+          {
+            if (last_named != LN_USING or last_named_phase != USE_NOTHING)
+            {
+              cferr="Unexpected `namespace' token: "+tostring(last_named);
+              return pos;
+            }
+            last_named_phase = USE_NAMESPACE; //using namespace...
+          }
+          else
+            last_named = LN_NAMESPACE; //namespace...
+          return -1;
+        }
+      break;
+    case SH_EXPLICIT: if (n=="explicit")
+        { //This is for GCC to know, and us to just be okay with.
+          return -1;
+        }
+      break;
+    case SH_OPERATOR: if (n=="operator")
+        {
+          if (!(current_scope->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT)))
+          {
+            skipto = '{';
+            skipto2 = ';';
+            skippast = false; //Need to know if we hit '{' so we can begin move toward '}'
+            
+            last_named = LN_IMPLEMENT;
+            last_named_phase = 0;
+            last_identifier = "";
+            tpc = ihc = 0;
+            
+            return -1;
+          }
+          if (last_named != LN_DECLARATOR or last_named_phase < 1)
+          {
+            //cferr="Expected declarator before `operator' token";
+            last_named = LN_OPERATOR;
+            last_named_phase = OP_CAST;
+            last_identifier = "operator";
+            return -1;
+          }
+          last_named = LN_OPERATOR;
+          last_named_phase = 0;
+          //cout << last_named << " = " << last_named_phase << "\r\n";
+          return -1;
+        }
+      break;
+    case SH_NEW: if (n=="new")
+        {
+          //New must only follow keyword "operator" or an = outside of functions
+          //In the case of =, it will be skipped anyway. Check for "operator".
+          if (last_named != LN_OPERATOR)
+          {
+            if (last_named != LN_NOTHING)
+              cferr="Expect `new' token only after `operator' token or as initializer";
+            else
+              cferr="Expected identifier before `new' token";
+            return pos;
+          }
+          last_named_phase = OP_NEWORDELETE;
+          last_identifier = "operator new";
+          return -1;
+        }
+      break;
+    case SH_DELETE: if (n=="delete")
+        {
+          //Delete must only follow keyword "operator" outside of functions
+          if (last_named != LN_OPERATOR)
+          {
+            cferr="Expect `delete' token only after `operator' token";
+            return pos;
+          }
+          last_named_phase = OP_NEWORDELETE;
+          last_identifier = "operator delete";
+          return -1;
+        }
+      break;
+    case SH_TEMPLATE: if (n=="template")
+        {
+          if (last_named != LN_NOTHING)
+          {
+            if (last_named == LN_DECLARATOR and last_named_phase == 0) //extern
+            { //extern template: This is garbage.
+              skipto = ';';
+              skipto2 = ';';
+              skippast = false; //; will clear everything anyway
+              last_named = LN_NOTHING;
+              return -1;
+            }
+            if ((((last_named & ~LN_TYPEDEF) == LN_TYPENAME) or (last_named == LN_TYPENAME_P)) and last_named_phase == TN_NOTHING) { // typename tp::template
+              last_named_phase = TN_TEMPLATE;
+              return -1; 
+            }
+            cferr = "Unexpected `template' token: "+tostring(last_named);
+            return pos;
+          }
+          last_named = LN_TEMPLATE;
+          last_named_phase = 0;
+          return -1;
+        }
+      break;
+    case SH_TYPENAME: if (n=="typename")
         {
           if (last_named != LN_TEMPLATE or last_named_phase != TMP_PSTART)
           {
-            cferr="Unexpected `"+n+"' token";
+            if (((last_named & ~LN_TYPEDEF) == LN_DECLARATOR) and (last_named_phase > DEC_NOTHING_YET and last_named_phase < DEC_FULL))
+              last_named &= LN_TYPEDEF;
+            if (last_named == LN_TYPEDEF or last_named == LN_NOTHING) //Plain old typedef... Nothing else named yet; or just nothing at all
+            {
+              last_named |= LN_TYPENAME;
+              last_named_phase = TN_NOTHING;
+              return -1;
+            }
+            if (((last_named & ~LN_TYPEDEF) == LN_DECLARATOR) and (last_named_phase == DEC_IDENTIFIER) and refstack.is_function())
+            {
+              last_named = LN_TYPENAME_P; //This relies on a truth I don't plan to document elsewhere:
+              last_named_phase = TN_NOTHING;  //You can't typedef a usable function.
+              return -1;
+            }
+            cferr = "Unexpected `typename' token";
             return pos;
           }
           last_named_phase = TMP_TYPENAME;
           return -1;
         }
-      }
-      else //last_named == ln_typedef
-        last_named |= LN_STRUCT;
-    }
-    else last_named = LN_STRUCT;
-    return -1;
-  }
-  if (n=="enum")
-  {
-    //Same with enum
-    if (last_named != LN_NOTHING)
-    {
-      if (last_named != LN_TYPEDEF)
-      {
-        cferr="Unexpected `enum' token";
-        return pos;
-      }
-      last_named |= LN_ENUM;
-    }
-    else
-      last_named = LN_ENUM;
-    last_named_phase = EN_NOTHING;
-    return -1;
-  }
-  if (n=="typedef")
-  {
-    //Typedef can't follow anything
-    if (last_named != LN_NOTHING)
-    {
-      cferr="Unexpected `typedef' token";
-      return pos;
-    }
-    last_named = LN_TYPEDEF;
-    return -1;
-  }
-  if (n=="extern")
-  { //This doesn't tell us anything useful unless the next token is "C"
-    if (last_named != LN_NOTHING)
-    {
-      if (last_named != LN_DECLARATOR)
-      {
-        cferr = "Unexpected `extern' token at this point";
-        return pos;
-      }
-      if (last_named_phase != DEC_LONG 
-      and last_named_phase != DEC_LONGLONG 
-      and last_named_phase != DEC_GENERAL_FLAG
-      and last_named_phase != DEC_NOTHING_YET)
-      {
-        cferr = "Stray `extern' token at this point, not expected after DECID_" + tostring(last_named_phase);
-        return pos;
-      }
+      break;
+    case SH_INLINE: if (n=="inline")
       return -1;
-    }
-    last_named = LN_DECLARATOR;
-    last_named_phase = 0;
-    return -1;
-  }
-  if (n=="union")
-  {
-    //Union can only really follow typedef, if it's not on its own.
-    if (last_named != LN_NOTHING)
-    {
-      if (last_named != LN_TYPEDEF)
-      {
-        cferr="Unexpected `union' token";
-        return pos;
-      }
-      else
-      {
-        last_named |= LN_UNION;
-      }
-    }
-    else last_named = LN_UNION;
-    return -1;
-  }
-  if (n=="namespace")
-  {
-    //Namespace can only follow using, when it's not on its own.
-    if (last_named != LN_NOTHING)
-    {
-      if (last_named != LN_USING or last_named_phase != USE_NOTHING)
-      {
-        cferr="Unexpected `namespace' token: "+tostring(last_named);
-        return pos;
-      }
-      last_named_phase = USE_NAMESPACE; //using namespace...
-    }
-    else
-      last_named = LN_NAMESPACE; //namespace...
-    return -1;
-  }
-  if (n=="explicit")
-  { //This is for GCC to know, and us to just be okay with.
-    return -1;
-  }
-  if (n=="operator")
-  {
-    if (last_named != LN_DECLARATOR or last_named_phase < 1)
-    {
-      //cferr="Expected declarator before `operator' token";
-      last_named = LN_OPERATOR;
-      last_named_phase = OP_CAST;
-      last_identifier = "operator";
+    case SH_CONST: case SH___CONST:
+        if (n=="const" or n=="__const") //or for that matter, if n fucking= ____const__
+          return -1; //Put something here if const ever fucking matters
+      break;
+    case SH_FRIEND: if (n=="friend")
+        {
+          if (last_named or last_named_phase) {
+            cferr = "Unexpected `friend' token";
+            return pos;
+          }
+          skipto = ';';
+          skipto2 = 0;
+          skippast = true;
+          return -1;
+        }
+      break;
+    case SH_PRIVATE: case SH_PUBLIC: case SH_PROTECTED: 
+        if (n=="private" or n=="protected" or n=="public")
+        {
+          if (last_named == LN_STRUCT or last_named == LN_CLASS or last_named == LN_STRUCT_DD)
+          {
+            if (last_named_phase != SP_COLON) {
+              cferr = "Unexpected `" + n + "' token in structure declaration";
+              return pos;
+            }
+            switch (n[2]) {
+              case 'i': last_named_phase = SP_PRIVATE;   break;
+              case 'o': last_named_phase = SP_PROTECTED; break;
+              case 'b': last_named_phase = SP_PUBLIC;    break;
+            }
+          }
+          else
+          {
+            if (last_named != LN_NOTHING) {
+              cferr = "What the hell is this doing here?";
+              return pos;
+            }
+            last_named = LN_LABEL;
+            //last_named_phase == LBL_
+          }
+          return -1;
+        }
+      break;
+    case SH_VIRTUAL: if (n=="virtual")
       return -1;
-    }
-    last_named = LN_OPERATOR;
-    last_named_phase = 0;
-    //cout << last_named << " = " << last_named_phase << "\r\n";
-    return -1;
-  }
-  if (n=="new")
-  {
-    //New must only follow keyword "operator" or an = outside of functions
-    //In the case of =, it will be skipped anyway. Check for "operator".
-    if (last_named != LN_OPERATOR)
-    {
-      if (last_named != LN_NOTHING)
-        cferr="Expect `new' token only after `operator' token or as initializer";
-      else
-        cferr="Expected identifier before `new' token";
-      return pos;
-    }
-    last_named_phase = OP_NEWORDELETE;
-    last_identifier = "operator new";
-    return -1;
-  }
-  if (n=="delete")
-  {
-    //Delete must only follow keyword "operator" outside of functions
-    if (last_named != LN_OPERATOR)
-    {
-      cferr="Expect `delete' token only after `operator' token";
-      return pos;
-    }
-    last_named_phase = OP_NEWORDELETE;
-    last_identifier = "operator delete";
-    return -1;
-  }
-  if (n=="template")
-  {
-    if (last_named != LN_NOTHING)
-    {
-      if (last_named == LN_DECLARATOR and last_named_phase == 0) //extern
-      { //extern template. This is garbage.
-        skipto = ';';
-        skipto2 = ';';
-        skippast = false; //; will clear everything anyway
-        return -1;
-      }
-      cferr = "Unexpected `template' token";
-      return pos;
-    }
-    last_named = LN_TEMPLATE;
-    last_named_phase = 0;
-    return -1;
-  }
-  if (n=="typename")
-  {
-    if (last_named != LN_TEMPLATE or last_named_phase != TMP_PSTART)
-    {
-      /*if (last_named != LN_TYPEDEF and last_named != LN_NOTHING) //Plain old typedef... Nothing else named yet, or nothing at all
-      {
-        cferr = "Unexpected `typename' token";
-        return pos;
-      }*/
-      //C++ uses "typename" to make up for inadequacy when using a type that may not exist.
+    case SH_MUTABLE: if (n=="mutable")
       return -1;
-    }
-    last_named_phase = TMP_TYPENAME;
-    return -1;
   }
-  if (n=="inline")
-  {
-    return -1;
-  }
-  if (n == "throw")
-  {
-    if (last_named != LN_DECLARATOR or (refstack.currentsymbol() != '(' and refstack.currentsymbol() != ')'))
-    { cferr = "Unexpected `throw' token"; return pos; }
-    last_named_phase = DEC_THROW;
-    return -1;
-  }
-  if (n=="const" or n=="__const") //or for that matter, if n fucking= ____const__
-    return -1; //Put something here if const ever fucking matters
-  if (n=="using")
-  {
-    if (last_named != LN_NOTHING) {
-      cferr = "Unexpecting `using' token";
-      return pos;
-    }
-    last_named = LN_USING;
-    last_named_phase = USE_NOTHING;
-    return -1;
-  }
-  if (n=="friend")
-    return -1;
-  if (n=="private" or n=="protected" or n=="public")
-  {
-    if (last_named == LN_STRUCT or last_named == LN_CLASS)
-    {
-      if (last_named_phase != SP_COLON) {
-        cferr = "Unexpected `" + n + "' token in structure declaration";
-        return pos;
-      }
-      switch (n[2]) {
-        case 'i': last_named_phase = SP_PRIVATE;   break;
-        case 'o': last_named_phase = SP_PROTECTED; break;
-        case 'b': last_named_phase = SP_PUBLIC;    break;
-      }
-    }
-    else
-    {
-      if (last_named != LN_NOTHING) {
-        cferr = "What the hell is this doing here?";
-        return pos;
-      }
-      last_named = LN_LABEL;
-      //last_named_phase == LBL_
-    }
-    return -1;
-  }
-  if (n=="virtual")
-    return -1;
-  if (n=="mutable")
-    return -1;
   
   //This is the end of the reserved words.
   //Now we make sure we're not accessing something from this id's scope, meaning this id must be a scope of some sort
@@ -335,13 +398,33 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
     if (!find_extname(n,EXTFLAG_CLASS | EXTFLAG_STRUCT | EXTFLAG_NAMESPACE))
     {
       if (immediate_scope == NULL)
-        for (unsigned i = 0; i < current_scope->tempargs.size; i++)
-          if (current_scope->tempargs[i]->name == n)
-          {
-            immediate_scope = current_scope->tempargs[i];
-            immediate_scope->flags |= EXTFLAG_HYPOTHETICAL;
+        for (externs *cscope = current_scope; cscope; cscope = cscope->parent)
+          for (unsigned i = 0; i < cscope->tempargs.size; i++)
+            if (cscope->tempargs[i]->name == n)
+            {
+              immediate_scope = cscope->tempargs[i];
+              return -1;
+            }
+      
+      //This happens so rarely as to barely justify its existence
+      //And to fully justify a second pass.
+      if (find_extname(n,EXTFLAG_TYPEDEF))
+      {
+        while (ext_retriever_var->type and (ext_retriever_var->flags & EXTFLAG_TYPEDEF))
+        {
+          ext_retriever_var = ext_retriever_var->type;
+          if (ext_retriever_var->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT | EXTFLAG_HYPOTHETICAL)) {
+            immediate_scope = ext_retriever_var;
             return -1;
           }
+          //If it's discernably a template
+          if (ext_retriever_var->flags & EXTFLAG_TYPEDEF and (ext_retriever_var->type == NULL or (ext_retriever_var->flags & EXTFLAG_DEFAULTED))){
+            immediate_scope = ext_retriever_var;
+            return -1;
+          }
+        }
+      }
+      
       cferr = "Cannot access `" + n + "' as scope from `" + (immediate_scope?immediate_scope->name:current_scope->name) + "'";
       return pos;
     }
@@ -450,16 +533,8 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
   }
   
   
-  /*
-  static int iteration = 0; iteration++;
-  //cout << iteration << endl;
-  if (iteration == 620)
-    cout << "We're here. *Matrix music plays* " << n <<"\n";
-  */
-  
-  
   //Check if it's a primitive or anything user defined that serves as a type.
-  if (find_extname(n,EXTFLAG_TYPENAME))
+  if (find_extname(n,EXTFLAG_TYPENAME,0))
   {
     //cout << n << " is type \n";
     if (last_named == LN_NOTHING or last_named == LN_TYPEDEF)
@@ -526,16 +601,23 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
     }
     //Check if we're declaring a new struct
     else //Last isn't a declarator
-    if ((last_named | LN_TYPEDEF) == (LN_STRUCT | LN_TYPEDEF)
-    or  (last_named | LN_TYPEDEF) == (LN_CLASS  | LN_TYPEDEF))
+    if ((last_named &~ LN_TYPEDEF) == LN_STRUCT
+    or  (last_named &~ LN_TYPEDEF) == LN_CLASS
+    or  (last_named &~ LN_TYPEDEF) == LN_STRUCT_DD)
     {
       //We're dealing with struct structid
       //If we're not right after "struct" (or the like) or are capable of redeclaring it in this scope
       if (last_named_phase != SP_EMPTY)
       {
-        if (last_named_phase != SP_PRIVATE and last_named_phase != SP_PROTECTED and last_named_phase != SP_PUBLIC) {
-          cferr = "Structure already identified, expected undeclared identifier";
-          return pos;
+        if (last_named_phase != SP_PRIVATE and last_named_phase != SP_PROTECTED and last_named_phase != SP_PUBLIC)
+        {
+          //This is sad, really, but it's standard...
+          if (last_named_phase == SP_COLON)
+            last_named_phase = SP_PUBLIC;
+          else {
+            cferr = "Structure already identified, expected undeclared identifier";
+            return pos;
+          }
         }
         inheritance_types[ihc++] = ihdata(ext_retriever_var,last_named_phase == SP_PUBLIC ? ihdata::s_public : last_named_phase == SP_PRIVATE ? ihdata::s_private : ihdata::s_protected);
         last_named_phase = SP_PARENT_NAMED;
@@ -614,6 +696,13 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       last_identifier += " " + strace(ttu);
       return -1;
     }
+    else if ((last_named & ~LN_TYPEDEF) == LN_TYPENAME or last_named == LN_TYPENAME_P)
+    {
+      last_type = ext_retriever_var;
+      last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
+      last_named_phase = last_named == LN_TYPENAME_P ? DEC_IDENTIFIER : DEC_FULL;
+      return -1;
+    }
     //Not declaring by type or giving default template value
     else //Note: This else is here because the above will need to pass this block     //struct a;
     {    //in the case of the current type being redeclared as scalar in this scope   //namespace b { int a; }
@@ -631,8 +720,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
   //This means we do a lot of error checking here.
   if (last_named == LN_NOTHING) //what we have here is a standalone identifier.
   {
-    if (!(current_scope != &global_scope and (current_scope->flags & EXTFLAG_ENUM)))
-    {
+    if (!(current_scope != &global_scope and (current_scope->flags & EXTFLAG_ENUM))) {
       cferr = "Expected type name or keyword before identifier";
       return pos;
     }
@@ -739,7 +827,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           break;
         }
         if (!find_extname(n,0xFFFFFFFF)) {
-          cferr = "Cannot use `" + n + "': undeclared";
+          cferr = "Cannot use `" + n + "' from `"+(immediate_scope?strace(immediate_scope):"current scope")+"': undeclared";
           return pos;
         }
         
@@ -751,6 +839,36 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       return pos;
     case LN_IMPLEMENT:
         cferr = "Unexpected identifier in implementation";
+      return pos;
+    case LN_TYPENAME:
+    case LN_TYPENAME_P:
+        if (last_named_phase == TN_NOTHING)
+        {
+          varray<tpdata> empty;
+          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,0,NULL,empty,0,0) ? ext_retriever_var : NULL;
+          last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); last_named_phase = last_named == LN_TYPENAME_P ? DEC_IDENTIFIER : DEC_FULL;
+          if (last_type)
+          {
+            last_type->flags &= ~EXTFLAG_PENDING_TYPEDEF;
+            last_type->flags |= EXTFLAG_TYPENAME | EXTFLAG_TYPEDEF | EXTFLAG_HYPOTHETICAL | EXTFLAG_STRUCT;
+            return -1;
+          }
+          return pos;
+        }
+        else //if (last_named_phase == TN_TEMPLATE)
+        {
+          varray<tpdata> single;
+          single[0] = tpdata("",builtin_type__int,0,true,true);
+          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,0,NULL,single,1,0) ? ext_retriever_var : NULL;
+          last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); last_named_phase = last_named == LN_TYPENAME_P ? DEC_IDENTIFIER : DEC_FULL;
+          if (last_type)
+          {
+            last_type->flags &= ~EXTFLAG_PENDING_TYPEDEF;
+            last_type->flags |= EXTFLAG_TYPENAME | EXTFLAG_TYPEDEF | EXTFLAG_HYPOTHETICAL | EXTFLAG_STRUCT;
+            return -1;
+          }
+          return pos;
+        }
       return pos;
     default:
         cferr = "Unspecified Error. This shouldn't happen... Result: last_named = "+tostring(last_named);

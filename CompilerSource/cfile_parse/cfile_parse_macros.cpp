@@ -40,11 +40,6 @@ using namespace std;
 #include "../general/parse_basics.h"
 #include "cfile_pushing.h"
 
-extern string cferr;
-extern string tostring(int x);
-
-extern stack<includings> included_files;
-
 inline void move_newline()
 {
   bool cancomment = 1;
@@ -130,6 +125,7 @@ bool in_false_conditional()
   return flowstack.topval() == 0;
 }
 
+extern void print_definition(string);
 unsigned int cfile_parse_macro()
 {
   while(is_useless_macros(cfile[++pos]));
@@ -345,6 +341,12 @@ unsigned int cfile_parse_macro()
     if (pc.substr(0,22) == "println_unconditional ")
     {
       cout << "Unconditional debug output: " << pc.substr(22) << endl;
+      fflush(stdout);
+    }
+    if (pc.substr(0,10) == "printinfo ")
+    {
+      cout << "Define " << pc.substr(10) << ": " << endl;
+      print_definition(pc.substr(10));
       fflush(stdout);
     }
     if (pc == "printlast")

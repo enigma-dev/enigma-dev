@@ -133,8 +133,9 @@ extern externs global_scope,*current_scope,*immediate_scope;
 
 externs* scope_get_using(externs* scope);
 externs* temp_get_specializations(externs* scope);
+externs* temp_get_specializations_ie(externs* scope);
 extiter scope_find_member(string name);
 extern externs* ext_retriever_var;
-bool find_extname(string name,unsigned int flags);
+bool find_extname(string name,unsigned int flags,bool expect_find = 1);
 
 #endif
