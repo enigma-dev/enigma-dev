@@ -62,7 +62,7 @@ struct darray
   ~darray() { if (where != 0) delete[] where; }
 };
 
-extern void post_access_watch(unsigned,unsigned,unsigned);
+//extern void post_access_watch(unsigned,unsigned,unsigned);
 template <typename atype>
 struct varray
 {
@@ -72,7 +72,7 @@ struct varray
   unsigned int allocd;
   atype &operator[] (unsigned int ind)
   {
-    post_access_watch(ind,size,allocd);
+    //post_access_watch(ind,size,allocd);
     if (allocd<=ind)
     {
       int olds=allocd;

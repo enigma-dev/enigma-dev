@@ -140,32 +140,33 @@ enum
 
 enum
 {
-  SH___CONST = 130,
-  SH_CLASS = 143,
-  SH_CONST = 173,
-  SH_DELETE = 209,
-  SH_ENUM = 213,
-  SH_EXPLICIT = 214,
-  SH_EXTERN = 234,
-  SH_FRIEND = 333,
-  SH_INLINE = 4,
-  SH_MUTABLE = 469,
-  SH_NAMESPACE = 494,
-  SH_NEW = 504,
-  SH_OPERATOR = 518,
-  SH_PRIVATE = 547,
-  SH_PROTECTED = 554,
-  SH_PUBLIC = 560,
-  SH_STRUCT = 659,
-  SH_TEMPLATE = 686,
-  SH_THROW = 689,
-  SH_TYPEDEF = 689,
-  SH_TYPENAME = 691,
-  SH_UNION = 714,
-  SH_USING = 714,
-  SH_VIRTUAL = 755
+  SH___CONST = 391,
+  SH_CLASS = 417,
+  SH_CONST = 436,
+  SH_DELETE = 416,
+  SH_ENUM = 442,
+  SH_EXPLICIT = 461,
+  SH_EXTERN = 463,
+  SH_FRIEND = 441,
+  SH_INLINE = 439,
+  SH_MUTABLE = 466,
+  SH_NAMESPACE = 422,
+  SH_NEW = 434,
+  SH_OPERATOR = 444,
+  SH_PRIVATE = 452,
+  SH_PROTECTED = 460,
+  SH_PUBLIC = 450,
+  SH_STRUCT = 467,
+  SH_TEMPLATE = 435,
+  SH_THROW = 443,
+  SH_TYPEDEF = 477,
+  SH_TYPENAME = 478,
+  SH_UNION = 447,
+  SH_USING = 457,
+  SH_VIRTUAL = 449,
 };
 
 inline short switch_hash(string x) {
-  return x.length()>2 ? ((x[0]-'_')<<5) + (x[2]-'_') : 0;
+  const int l = x.length();
+  return l>2 ? (x[0]+x[1]+x[1]+x[2]+l) : 0;
 }

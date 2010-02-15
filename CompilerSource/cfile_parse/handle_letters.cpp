@@ -84,9 +84,6 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
 
 int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bool at_template_param)
 {
-  //it's not a macro, so the next thing we'll check for is keyword
-  if (n == "class")
-    cout << "oh oh.";
   switch (switch_hash(n))
   {
     case SH_STRUCT: case SH_CLASS:
@@ -133,8 +130,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           return -1;
         }
       break;
-    case SH_TYPEDEF: //case SH_THROW:
-        if (n=="typedef")
+    case SH_TYPEDEF: if (n=="typedef")
         {
           //Typedef can't follow anything
           if (last_named != LN_NOTHING)
@@ -145,14 +141,6 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           last_named = LN_TYPEDEF;
           return -1;
         }
-        if (n == "throw")
-        {
-          if (last_named != LN_DECLARATOR or (refstack.currentsymbol() != '(' and refstack.currentsymbol() != ')'))
-          { cferr = "Unexpected `throw' token"; return pos; }
-          last_named_phase = DEC_THROW;
-          return -1;
-        }
-      break;
       break;
     case SH_EXTERN: if (n=="extern")
         { //This doesn't tell us anything useful unless the next token is "C"
@@ -178,8 +166,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           return -1;
         }
       break;
-    case SH_UNION: 
-        if (n=="union")
+    case SH_UNION: if (n=="union")
         {
           //Union can only really follow typedef, if it's not on its own.
           if (last_named != LN_NOTHING)
@@ -195,18 +182,6 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
             }
           }
           else last_named = LN_UNION;
-          return -1;
-        }
-    //break;
-    //case SH_USING: 
-       if (n=="using")
-        {
-          if (last_named != LN_NOTHING) {
-            cferr = "Unexpecting `using' token";
-            return pos;
-          }
-          last_named = LN_USING;
-          last_named_phase = USE_NOTHING;
           return -1;
         }
       break;
@@ -342,9 +317,28 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       break;
     case SH_INLINE: if (n=="inline")
       return -1;
+    case SH_THROW: if (n == "throw")
+        {
+          if (last_named != LN_DECLARATOR or (refstack.currentsymbol() != '(' and refstack.currentsymbol() != ')'))
+          { cferr = "Unexpected `throw' token"; return pos; }
+          last_named_phase = DEC_THROW;
+          return -1;
+        }
+      break;
     case SH_CONST: case SH___CONST:
         if (n=="const" or n=="__const") //or for that matter, if n fucking= ____const__
           return -1; //Put something here if const ever fucking matters
+      break;
+    case SH_USING: if (n=="using")
+        {
+          if (last_named != LN_NOTHING) {
+            cferr = "Unexpecting `using' token";
+            return pos;
+          }
+          last_named = LN_USING;
+          last_named_phase = USE_NOTHING;
+          return -1;
+        }
       break;
     case SH_FRIEND: if (n=="friend")
         {
@@ -359,32 +353,32 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
         }
       break;
     case SH_PRIVATE: case SH_PUBLIC: case SH_PROTECTED: 
-        if (n=="private" or n=="protected" or n=="public")
-        {
-          if (last_named == LN_STRUCT or last_named == LN_CLASS or last_named == LN_STRUCT_DD)
+          if (n=="private" or n=="protected" or n=="public")
           {
-            if (last_named_phase != SP_COLON) {
-              cferr = "Unexpected `" + n + "' token in structure declaration";
-              return pos;
+            if (last_named == LN_STRUCT or last_named == LN_CLASS or last_named == LN_STRUCT_DD)
+            {
+              if (last_named_phase != SP_COLON) {
+                cferr = "Unexpected `" + n + "' token in structure declaration";
+                return pos;
+              }
+              switch (n[2]) {
+                case 'i': last_named_phase = SP_PRIVATE;   break;
+                case 'o': last_named_phase = SP_PROTECTED; break;
+                case 'b': last_named_phase = SP_PUBLIC;    break;
+              }
             }
-            switch (n[2]) {
-              case 'i': last_named_phase = SP_PRIVATE;   break;
-              case 'o': last_named_phase = SP_PROTECTED; break;
-              case 'b': last_named_phase = SP_PUBLIC;    break;
+            else
+            {
+              if (last_named != LN_NOTHING) {
+                cferr = "What the hell is this doing here?";
+                return pos;
+              }
+              last_named = LN_LABEL;
+              //last_named_phase == LBL_
             }
+            return -1;
           }
-          else
-          {
-            if (last_named != LN_NOTHING) {
-              cferr = "What the hell is this doing here?";
-              return pos;
-            }
-            last_named = LN_LABEL;
-            //last_named_phase == LBL_
-          }
-          return -1;
-        }
-      break;
+        break;
     case SH_VIRTUAL: if (n=="virtual")
       return -1;
     case SH_MUTABLE: if (n=="mutable")
