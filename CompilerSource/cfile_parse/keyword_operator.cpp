@@ -132,6 +132,14 @@ int keyword_operator()
   }
   if (last_named_phase == OP_CAST)
   {
+    if (cfile[pos] == '*') {
+      last_identifier += "*";
+      pos++; return -1;
+    }
+    if (cfile[pos] == '&') {
+      last_identifier += "*";
+      pos++; return -1;
+    }
     if (cfile[pos] != '(') {
       cferr = "Expected '(' at this point";
       return pos;

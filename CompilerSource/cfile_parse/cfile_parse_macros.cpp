@@ -355,7 +355,7 @@ unsigned int cfile_parse_macro()
       "Last named: " << last_named << endl << 
       "Last named phase: " << last_named_phase << endl << 
       "Last identifier: " << last_identifier << endl << 
-      "Last type: " << (void*)last_type << endl << 
+      "Last type: " << (void*)last_type << (last_type? ": " + strace(last_type) : "") << endl << 
       "Immediate scope: " << immediate_scope << (immediate_scope? ": " + strace(immediate_scope) : "") << endl << 
       endl;
       fflush(stdout);

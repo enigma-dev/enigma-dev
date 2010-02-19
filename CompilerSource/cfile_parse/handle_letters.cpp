@@ -315,8 +315,9 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           return -1;
         }
       break;
-    case SH_INLINE: if (n=="inline")
-      return -1;
+    case SH_INLINE: if (n == "inline")
+        return -1;
+      break;
     case SH_THROW: if (n == "throw")
         {
           if (last_named != LN_DECLARATOR or (refstack.currentsymbol() != '(' and refstack.currentsymbol() != ')'))
@@ -326,7 +327,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
         }
       break;
     case SH_CONST: case SH___CONST:
-        if (n=="const" or n=="__const") //or for that matter, if n fucking= ____const__
+        if (n=="const" or n=="__const") //or for that matter, if n == ____const__
           return -1; //Put something here if const ever fucking matters
       break;
     case SH_USING: if (n=="using")
@@ -353,36 +354,38 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
         }
       break;
     case SH_PRIVATE: case SH_PUBLIC: case SH_PROTECTED: 
-          if (n=="private" or n=="protected" or n=="public")
+        if (n=="private" or n=="protected" or n=="public")
+        {
+          if (last_named == LN_STRUCT or last_named == LN_CLASS or last_named == LN_STRUCT_DD)
           {
-            if (last_named == LN_STRUCT or last_named == LN_CLASS or last_named == LN_STRUCT_DD)
-            {
-              if (last_named_phase != SP_COLON) {
-                cferr = "Unexpected `" + n + "' token in structure declaration";
-                return pos;
-              }
-              switch (n[2]) {
-                case 'i': last_named_phase = SP_PRIVATE;   break;
-                case 'o': last_named_phase = SP_PROTECTED; break;
-                case 'b': last_named_phase = SP_PUBLIC;    break;
-              }
+            if (last_named_phase != SP_COLON) {
+              cferr = "Unexpected `" + n + "' token in structure declaration";
+              return pos;
             }
-            else
-            {
-              if (last_named != LN_NOTHING) {
-                cferr = "What the hell is this doing here?";
-                return pos;
-              }
-              last_named = LN_LABEL;
-              //last_named_phase == LBL_
+            switch (n[2]) {
+              case 'i': last_named_phase = SP_PRIVATE;   break;
+              case 'o': last_named_phase = SP_PROTECTED; break;
+              case 'b': last_named_phase = SP_PUBLIC;    break;
             }
-            return -1;
           }
-        break;
+          else
+          {
+            if (last_named != LN_NOTHING) {
+              cferr = "What the hell is this doing here?";
+              return pos;
+            }
+            last_named = LN_LABEL;
+            //last_named_phase == LBL_
+          }
+          return -1;
+        }
+      break;
     case SH_VIRTUAL: if (n=="virtual")
-      return -1;
+        return -1;
+      break;
     case SH_MUTABLE: if (n=="mutable")
-      return -1;
+        return -1;
+      break;
   }
   
   //This is the end of the reserved words.

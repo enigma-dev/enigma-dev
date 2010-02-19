@@ -366,9 +366,24 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
   if (flags & EXTFLAG_TYPENAME)
   {
     //The actual scope we're in should get search precedence, otherwise constructors will flop
-    if ((inscope->flags & EXTFLAG_TYPENAME) and (inscope->name == name or (inscope->ancestors.size and inscope->ancestors[0]->name == name))) {
-      ext_retriever_var = inscope;
-      return true;
+    if (inscope->flags & EXTFLAG_TYPENAME)
+    { 
+      if (inscope->name == name) {
+        ext_retriever_var = inscope;
+        return true;
+      }
+      if (inscope->ancestors.size and inscope->ancestors[0]->name == name) //Templates...
+      {
+        externs* a = temp_get_specializations_ie(inscope->ancestors[0]);
+        if (a and name.length() < inscope->name.length()) // This should probably be removed and the next comment invalidated
+        {
+          extiter it = a->members.find(inscope->name.substr(name.length())); //If we're a__int, stored is '__int', and name is 'a'
+          if (it != a->members.end() and it->second == inscope) {
+            ext_retriever_var = inscope;
+            return true;
+          }
+        }
+      }
     }
     
     //Check new templates

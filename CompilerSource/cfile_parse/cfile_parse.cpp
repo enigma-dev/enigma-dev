@@ -387,13 +387,18 @@ int parse_cfile(string cftext)
             pos++; continue;
           
           //These can all be looked at the same at this point.
-          case LN_CLASS: case LN_STRUCT: case LN_UNION:
+          case LN_CLASS: case LN_STRUCT: case LN_STRUCT_DD: case LN_UNION:
               if (cfile[pos] != ';') 
               {
+                if (last_named_phase == SP_PARENT_NAMED) { 
+                  last_named_phase = SP_COLON;
+                  pos++; continue;
+                } 
+                
                 cferr="Expected ';' instead of ',' when not implemented";
                 return pos;
               }
-              if (last_named_phase != 1) {
+              if (last_named_phase != SP_IDENTIFIER) {
                 cferr="Expected only identifier when not implemented";
                 return pos;
               }
@@ -485,7 +490,7 @@ int parse_cfile(string cftext)
               cferr = "Unexpected symbol in expression";
             return pos;
           default:
-              cferr = "WELL WHAT THE FUCK.";
+              cferr = "This shouldn't have happened. Not that it's totally impossible, but it should be. (" + tostring(last_named) + ")";
             return pos;
         }
         
@@ -904,17 +909,28 @@ int parse_cfile(string cftext)
         else
         {
           if (last_named_phase != DEC_FULL) {
-            if (last_named_phase == DEC_IDENTIFIER and refstack.is_function())
+            if (last_named_phase == DEC_IDENTIFIER)
             {
-              skipto = '>';
-              skip_inc_on = '<';
-              skippast = true;
-              pos++; continue;
+              if (refstack.is_function())
+              {
+                skipto = '>';
+                skip_inc_on = '<';
+                skippast = true;
+                pos++; continue;
+              }
+              if (find_extname(last_identifier,0xFFFFFFFF,0))
+              {
+                if (ext_retriever_var->is_function())
+                {
+                  skipto = '>';
+                  skip_inc_on = '<';
+                  skippast = true;
+                  pos++; continue;
+                }
+              }
             }
-            else {
-              cferr = "Unexpected '<' in declaration";
-              return pos;
-            }
+            cferr = "Unexpected '<' in declaration";
+            return pos;
           }
           if (tpc == -1) //tname<(*)...>
             last_named = LN_TEMPARGS | (last_named & LN_TYPEDEF);
