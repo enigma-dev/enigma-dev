@@ -199,9 +199,11 @@ int parse_cfile(string cftext)
     if (in_false_conditional())
       { pos++; continue; }
     
-    if (skipto) {
+    if (skipto)
+    {
       unsigned a = handle_skip(); // Too huge to display here. May need maintenance in the future anyway.
-      if (a != unsigned(-1)) return a;
+      if (a != unsigned(-1))
+        return a;
       continue;
     }
     
@@ -288,11 +290,13 @@ int parse_cfile(string cftext)
       if (last_named == LN_NOTHING)
         { pos++; continue; }
       
-      if ((last_named & LN_TYPEDEF) != 0) //Typedefing something
+      if (last_named & LN_TYPEDEF) //Typedefing something
       {
         if (last_named != (LN_DECLARATOR | LN_TYPEDEF))
         {
-          cferr = "Invalid typedef";
+          if (last_named == (LN_ENUM | LN_TYPEDEF))
+            goto not_typedefing_anything_yet;
+          cferr = "Invalid typedef: "+tostring(last_named & ~LN_TYPEDEF);
           return pos;
         }
         
@@ -420,7 +424,7 @@ int parse_cfile(string cftext)
                   return pos;
                 }
                 if (last_identifier != "") {
-                  if (!ExtRegister(last_named,last_named_phase,last_identifier,refstack,builtin_type__int,tmplate_params,tpc,last_value))
+                  if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refstack,builtin_type__int,tmplate_params,tpc,last_value))
                     return pos;
                 }
                 else {
@@ -485,6 +489,7 @@ int parse_cfile(string cftext)
               pos++;
               last_named = LN_NOTHING;
               last_named_phase = 0;
+              tpc = ihc = 0;
             continue;
           case LN_TYPENAME:
               cferr = "Unexpected symbol in expression";
@@ -514,21 +519,22 @@ int parse_cfile(string cftext)
           if (last_named == LN_DECLARATOR and last_named_phase == DEC_FULL)
           {
             externs *cs = immediate_scope? immediate_scope:current_scope; // Someimes structs are redeclared, unimplemented, with defaulted template parameters
-            if (cs->members.find(last_type->name) != cs->members.end())  //TODO: Remove ExtRegister from this block and manually set the template params.
+            if (cs->members.find(last_type->name) != cs->members.end())  // TODO: Remove ExtRegister from this block and manually set the template params.
             {
               last_identifier = last_type->name;
               
               last_type = NULL;
               last_named = LN_STRUCT;
               last_named_phase = SP_IDENTIFIER;
-              if (!ExtRegister(last_named,last_named_phase,last_identifier,refs_to_use,type_to_use,tmplate_params,tpc))
+              if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refs_to_use,type_to_use,tmplate_params,tpc))
                 return pos;
             }
           }
         }
-        else if (!ExtRegister(last_named,last_named_phase,last_identifier,refs_to_use,type_to_use,tmplate_params,tpc))
+        else if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refs_to_use,type_to_use,tmplate_params,tpc))
           return pos;
         
+        flag_extern = 0;
         tpc = -1;
       }
       
@@ -546,6 +552,7 @@ int parse_cfile(string cftext)
         last_type = NULL;
         argument_type = NULL;
         refstack.dump();
+        flag_extern = 0;
         tpc = -1;
       }
       
@@ -576,9 +583,10 @@ int parse_cfile(string cftext)
         and (last_named | LN_TYPEDEF) != (LN_STRUCT | LN_TYPEDEF)
         and (last_named | LN_TYPEDEF) != (LN_UNION  | LN_TYPEDEF))
         {
-          if (last_named == LN_TEMPLATE or last_named == LN_TEMPARGS)
+          if (last_named == LN_TEMPLATE or last_named == LN_TEMPARGS
+          or (last_named & ~LN_TYPEDEF) == LN_TYPENAME or last_named == LN_TYPENAME_P)
           { pos++; continue; }
-          cferr = "Unexpected '*'";
+          cferr = "Unexpected '*' ("+tostring(last_named);
           return pos;
         }
         if (!extreg_deprecated_struct(false,last_identifier,last_named,last_named_phase,last_type))
@@ -597,9 +605,10 @@ int parse_cfile(string cftext)
         and (last_named | LN_TYPEDEF) != (LN_STRUCT | LN_TYPEDEF)
         and (last_named | LN_TYPEDEF) != (LN_UNION  | LN_TYPEDEF))
         {
-          if (last_named == LN_TEMPLATE or last_named == LN_TEMPARGS)
+          if (last_named == LN_TEMPLATE or last_named == LN_TEMPARGS 
+          or (last_named & ~LN_TYPEDEF) == LN_TYPENAME or last_named == LN_TYPENAME_P)
           { pos++; continue; }
-          cferr = "Unexpected '&'";
+          cferr = "Unexpected '&' " + tostring(last_named);
           return pos;
         }
         if (!extreg_deprecated_struct(false,last_identifier,last_named,last_named_phase,last_type))
@@ -653,7 +662,12 @@ int parse_cfile(string cftext)
           cferr = "Unexpected parenthesis in declaration";
           return pos;
         }
-        if (last_type->flags & (EXTFLAG_STRUCT | EXTFLAG_CLASS)) {
+        if  (last_type->flags & (EXTFLAG_STRUCT | EXTFLAG_CLASS)
+        and (~last_named & LN_TYPEDEF)
+        and (last_type == (immediate_scope?immediate_scope:current_scope) 
+             or (last_type->members.find(last_type->name) != last_type->members.end())
+             or (last_type->ancestors.size > 0 and last_type->ancestors[0]->name == last_type->name))
+        ) { ///FIXME: Make this only execute if we're SURE this is a constructor...
           last_identifier = last_type->name;
           last_named_phase = DEC_IDENTIFIER;
         }
@@ -711,7 +725,7 @@ int parse_cfile(string cftext)
       //Class/Namespace declaration.
       if (last_named_raw == LN_NAMESPACE or last_named_raw == LN_STRUCT or last_named_raw == LN_CLASS or last_named_raw == LN_UNION)
       {
-        if (!ExtRegister(last_named,last_named_phase,last_identifier,0,NULL,tmplate_params,tpc))
+        if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern=0,0,NULL,tmplate_params,tpc))
           return pos;
         current_scope = ext_retriever_var;
       }
@@ -725,7 +739,7 @@ int parse_cfile(string cftext)
       //Enum declaration.
       else if (last_named_raw == LN_ENUM)
       {
-        if (!ExtRegister(last_named,last_named_phase,last_identifier,0,NULL,tmplate_params,tpc))
+        if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern=0,0,NULL,tmplate_params,tpc))
           return pos;
         scope_stack.push(current_scope);
         current_scope = ext_retriever_var;
@@ -744,7 +758,7 @@ int parse_cfile(string cftext)
         if (refstack.topmostsymbol() == '(') // Do not confuse with ')'
         {
           //Register the function in the current scope
-          if (!ExtRegister(last_named,last_named_phase,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc))
+          if (!ExtRegister(last_named,last_named_phase,last_identifier,0,refstack.dissociate(),last_type,tmplate_params,tpc))
             return pos;
           
           //Skip the code: we don't need to know it ^_^
@@ -825,19 +839,23 @@ int parse_cfile(string cftext)
       
       if (last_named != LN_NOTHING)
       {
-        if (last_named != LN_DECLARATOR or !(current_scope->flags & EXTFLAG_ENUM))
-        {
-          if (last_named != LN_ENUM or (last_named_phase != EN_WAITING
+        //if (last_named != LN_DECLARATOR or !(current_scope->flags & EXTFLAG_ENUM))
+        //{
+          //enum { a = 0 <here> }
+          if ((last_named & ~LN_TYPEDEF) != LN_ENUM or (last_named_phase != EN_WAITING
           and last_named_phase != EN_DEFAULTED and last_named_phase != EN_CONST_IDENTIFIER)) {
             cferr = "Unexpected closing brace at this point";
             return pos;
           }
-          if (!ExtRegister(last_named,last_named_phase,last_identifier,refstack.dissociate(),builtin_type__int,tmplate_params,tpc,last_value))
+          if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern=0,refstack.dissociate(),builtin_type__int,tmplate_params,tpc,last_value))
             return pos;
-        }
+        /*}
         else
-          if (!ExtRegister(last_named,last_named_phase,last_identifier,refstack.dissociate(),last_type,tmplate_params,tpc))
+        {
+          cout << "This is reached; don't delete it.";
+          if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refstack.dissociate(),last_type,tmplate_params,tpc))
             return pos;
+        }*/
       }
       
       if (current_scope->flags & EXTFLAG_TYPENAME)
@@ -895,9 +913,14 @@ int parse_cfile(string cftext)
                   }
                 }
               }
-              else {
-                cferr = "Should have been dealt with prior to this point...";
-                return pos;
+              else
+              {
+                skipto = '>';
+                skip_inc_on = '<';
+                skippast = true;
+                specialize_start = pos;
+                specialize_string = "";
+                specializing = true;
               }
             }
             else if (last_named_phase != IM_SCOPE) {
@@ -906,10 +929,11 @@ int parse_cfile(string cftext)
             }
           }
         }
-        else
+        else //last_named == LN_DECLARATOR here
         {
-          if (last_named_phase != DEC_FULL) {
-            if (last_named_phase == DEC_IDENTIFIER)
+          if (last_named_phase != DEC_FULL)
+          {
+            if (last_named_phase == DEC_IDENTIFIER) //In a declarator at '<', but type is named...
             {
               if (refstack.is_function())
               {
@@ -922,6 +946,16 @@ int parse_cfile(string cftext)
               {
                 if (ext_retriever_var->is_function())
                 {
+                  skipto = '>';
+                  skip_inc_on = '<';
+                  skippast = true;
+                  pos++; continue;
+                }
+                if (ext_retriever_var->flags & (EXTFLAG_STRUCT|EXTFLAG_CLASS|EXTFLAG_NAMESPACE))
+                { //int scope<x>::func() {}
+                  last_named = LN_IMPLEMENT;
+                  last_named_phase = 0;
+                  last_type = ext_retriever_var; //Already know type of what will be implemented. Good thing we just parsed it <_<
                   skipto = '>';
                   skip_inc_on = '<';
                   skippast = true;
@@ -1014,16 +1048,17 @@ int parse_cfile(string cftext)
     
     if (cfile[pos] == ':')
     {
-      if (cfile[pos+1] == ':') //Handle '::' 
+      const int last_named_raw = last_named & ~LN_TYPEDEF;
+      if (cfile[pos+1] == ':') //Handle '::'
       {
-        const int last_named_raw = last_named & ~LN_TYPEDEF;
         if (last_named_raw == LN_DECLARATOR)
         {
           if (last_named_phase == DEC_FULL)
           {
             immediate_scope = last_type;
-            last_named &= LN_TYPEDEF;
+            last_named &= LN_TYPEDEF; //Set back to either TYPEDEF or NOTHING
             last_named_phase = 0;
+            last_type = NULL;
           }
           else if (last_named_phase == DEC_IDENTIFIER and refstack.is_function())
             immediate_scope = argument_type;
@@ -1038,6 +1073,11 @@ int parse_cfile(string cftext)
           last_named_phase = DEC_FULL;
           immediate_scope = argument_type; //We reused this; it's nothing to do with functions in this case.
         }
+        else if (last_named_raw == LN_USING and last_named_phase == USE_SINGLE_IDENTIFIER)
+        {
+          last_named_phase = USE_NOTHING;
+          immediate_scope = last_type;
+        }
         else if ((last_named_raw == LN_STRUCT or last_named_raw == LN_CLASS or last_named_raw == LN_STRUCT_DD)
              and (last_named_phase == SP_PARENT_NAMED))
         {
@@ -1049,6 +1089,17 @@ int parse_cfile(string cftext)
           }
           const int iht = inheritance_types[ihc].scopet;
           last_named_phase =  (iht == ihdata::s_private)? SP_PRIVATE : ((iht == ihdata::s_protected)? SP_PROTECTED : SP_PUBLIC);
+        }
+        else if ((last_named_raw == LN_TYPENAME) or (last_named_raw == LN_TYPENAME_P) and last_named_phase >= TN_GIVEN)
+        {
+          last_named_phase = last_named_phase == TN_GIVEN? TN_NOTHING : TN_TEMPLATE;
+          immediate_scope = last_type;
+        }
+        else if (last_named_raw == LN_IMPLEMENT)
+        {
+          immediate_scope = last_type;
+          last_named = LN_DECLARATOR;
+          last_type = NULL; //FIXME if necessary
         }
         else
           immediate_scope = &global_scope;
@@ -1090,7 +1141,7 @@ int parse_cfile(string cftext)
           pos++;
           continue;
         }
-        if (last_named == LN_STRUCT or last_named == LN_CLASS)
+        if (last_named_raw == LN_STRUCT or last_named_raw == LN_CLASS)
         {
           if (last_named_phase != SP_IDENTIFIER and last_named_phase != SP_EMPTY) {
             cferr = "Colon already named in heritance expression";
@@ -1145,7 +1196,7 @@ int parse_cfile(string cftext)
         skippast = false;
         continue;
       }
-      if (last_named == LN_ENUM)
+      if ((last_named & ~LN_TYPEDEF) == LN_ENUM)
       {
         if (last_named_phase != EN_CONST_IDENTIFIER) {
           cferr = "Unexpected '=' in enum declaration";

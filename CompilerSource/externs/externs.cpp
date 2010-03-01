@@ -176,7 +176,7 @@ tpdata::tpdata(): name(""), valdefd(0)
 {
   def = new externs;
   def->name = name = "";
-  def->flags = EXTFLAG_TYPEDEF;
+  def->flags = EXTFLAG_TEMPPARAM | EXTFLAG_TYPEDEF;
   def->value_of = 0;
   def->type = NULL;
 }
@@ -184,7 +184,7 @@ tpdata::tpdata(string n,externs* d): name(n), val(0), standalone(false), valdefd
 {
   def = new externs;
   def->name = name = n;
-  def->flags = EXTFLAG_TYPEDEF | EXTFLAG_TYPENAME | (d?EXTFLAG_DEFAULTED:0);
+  def->flags = EXTFLAG_TYPEDEF | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | (d?EXTFLAG_DEFAULTED:0);
   def->value_of = 0;
   def->type = d;
 }
@@ -192,7 +192,7 @@ tpdata::tpdata(string n,externs* d, bool sa): name(n), val(0), standalone(sa), v
 {
   def = new externs;
   def->name = name = n;
-  def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0);
+  def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0);
   def->value_of = 0;
   def->type = d;
 }
@@ -200,7 +200,7 @@ tpdata::tpdata(string n,externs* d, long long v, bool sa, bool vd): name(n), sta
 {
   def = new externs;
   def->name = name = n;
-  def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0) | (vd?EXTFLAG_VALUED:0);
+  def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0) | (vd?EXTFLAG_VALUED:0);
   def->value_of = v;
   def->type = d;
 }
@@ -307,13 +307,14 @@ extern string cferr;
 extern unsigned pos;
 void print_err_line_at(unsigned a = pos);
   #include "../cfile_parse/cparse_shared.h"
+  #include "../cfile_parse/cfile_parse_constants.h"
 bool find_extname(string name,unsigned int flags,bool expect_find)
 {
   //If we've been given a qualified id, check in the path or give up
   if (immediate_scope != NULL)
   {
     externs* iscope = immediate_scope;
-    while (iscope->flags & EXTFLAG_TYPEDEF and iscope->type)
+    while ((iscope->flags & EXTFLAG_TYPEDEF) and !(iscope->flags & EXTFLAG_HYPOTHETICAL) and iscope->type)
       iscope = iscope->type;
     
     extiter f = iscope->members.find(name);
@@ -326,9 +327,16 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
         ext_retriever_var = new externs;
         ext_retriever_var->name = name;
         ext_retriever_var->type = builtin_type__int;
-        ext_retriever_var->flags = EXTFLAG_TYPENAME | EXTFLAG_TYPEDEF | EXTFLAG_HYPOTHETICAL; //Not a base type, but typedef to NULL. HYPOTHETICAL is viral.
+        ext_retriever_var->flags = EXTFLAG_TYPENAME
+          | EXTFLAG_TYPEDEF         // Not a base type, but typedef to NULL.
+          | EXTFLAG_HYPOTHETICAL;   // HYPOTHETICAL is viral.
         ext_retriever_var->parent = iscope;
         ext_retriever_var->value_of = 0;
+        
+        if ((last_named & ~LN_TYPEDEF) == LN_TYPENAME and last_named_phase == TN_TEMPLATE) {
+          ext_retriever_var->flags |= EXTFLAG_TEMPLATE;
+          ext_retriever_var->tempargs[0] = tpdata().def;
+        }
         
         iscope->members[name] = ext_retriever_var;
         immediate_scope = NULL;
@@ -363,7 +371,7 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
   externs* inscope = current_scope;
   
   //If we're looking for a type name, try the template args
-  if (flags & EXTFLAG_TYPENAME)
+  if (flags & (EXTFLAG_TYPENAME | EXTFLAG_TEMPPARAM))
   {
     //The actual scope we're in should get search precedence, otherwise constructors will flop
     if (inscope->flags & EXTFLAG_TYPENAME)
@@ -375,9 +383,11 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
       if (inscope->ancestors.size and inscope->ancestors[0]->name == name) //Templates...
       {
         externs* a = temp_get_specializations_ie(inscope->ancestors[0]);
-        if (a and name.length() < inscope->name.length()) // This should probably be removed and the next comment invalidated
+        //If we're in "a__int" (inscope), stored in parent is '__int', and name (our search) is 'a'
+        if (a and name.length() < inscope->name.length()) //TODO: find this comment's twin and replace both with a CONSTRUCTOR extflag.
         {
-          extiter it = a->members.find(inscope->name.substr(name.length())); //If we're a__int, stored is '__int', and name is 'a'
+          //Find templated constructor by this name in the parent class
+          extiter it = a->members.find(inscope->name.substr(name.length()));
           if (it != a->members.end() and it->second == inscope) {
             ext_retriever_var = inscope;
             return true;

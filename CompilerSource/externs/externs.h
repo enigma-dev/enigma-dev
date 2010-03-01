@@ -31,18 +31,23 @@
 #include <map>
 #include "../general/darray.h"
 
-#define EXTFLAG_VALUED 1
-#define EXTFLAG_TEMPLATE 2
-#define EXTFLAG_TYPENAME 4
-#define EXTFLAG_MACRO 8
-#define EXTFLAG_CLASS 16
-#define EXTFLAG_ENUM 32
-#define EXTFLAG_STRUCT 64
-#define EXTFLAG_NAMESPACE 128
-#define EXTFLAG_TYPEDEF 256
-#define EXTFLAG_PENDING_TYPEDEF 512
-#define EXTFLAG_DEFAULTED 1024
-#define EXTFLAG_HYPOTHETICAL 2048
+enum
+{
+  EXTFLAG_VALUED =          1 <<  0,
+  EXTFLAG_TEMPLATE =        1 <<  1,
+  EXTFLAG_TYPENAME =        1 <<  2,
+  EXTFLAG_MACRO =           1 <<  3,
+  EXTFLAG_CLASS =           1 <<  4,
+  EXTFLAG_ENUM =            1 <<  5,
+  EXTFLAG_STRUCT =          1 <<  6,
+  EXTFLAG_NAMESPACE =       1 <<  7,
+  EXTFLAG_TYPEDEF =         1 <<  8,
+  EXTFLAG_PENDING_TYPEDEF = 1 <<  9,
+  EXTFLAG_DEFAULTED =       1 << 10,
+  EXTFLAG_TEMPPARAM =       1 << 11,
+  EXTFLAG_EXTERN =          1 << 12,
+  EXTFLAG_HYPOTHETICAL =    1 << 13
+};
 //#define EXTFLAG_NAMESPACE 2048
 
 #include "references.h"

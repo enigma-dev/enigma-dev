@@ -1,5 +1,5 @@
 //These must be requested by the IDE
-/*//Windows
+///*//Windows
 #define __DBL_MIN_EXP__ (-1021)
 #define __FLT_MIN__ 1.17549435e-38F
 #define __CHAR_BIT__ 8

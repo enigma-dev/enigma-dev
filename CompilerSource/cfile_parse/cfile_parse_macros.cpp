@@ -357,6 +357,7 @@ unsigned int cfile_parse_macro()
       "Last identifier: " << last_identifier << endl << 
       "Last type: " << (void*)last_type << (last_type? ": " + strace(last_type) : "") << endl << 
       "Immediate scope: " << immediate_scope << (immediate_scope? ": " + strace(immediate_scope) : "") << endl << 
+      "In false conditional: " << in_false_conditional() << endl <<
       endl;
       fflush(stdout);
     }
@@ -406,15 +407,19 @@ unsigned int cfile_parse_macro()
       {
         if (!flowstack.push_false()) //If this expression will be evaluated as false anyway, just push it that way...
         {
-          if (next.length() == 2)
+          if (next.length() == 2) //if
           {
             flowstack.push(evaluate_expression(exp));
             if (rerrpos != -1) { cferr = "In #if expression at position " + tostring(rerrpos) + ": " + rerr; return spos+rerrpos; }
           }
-          else if (next.length() == 5)
-            flowstack.push(macros.find(exp) != macros.end());
-          else if (next.length() == 6)
-            flowstack.push(macros.find(exp) == macros.end());
+          else if (next.length() == 5) { //ifdef
+            int e = 0; while (is_letterd(exp[++e]));
+            flowstack.push(macros.find(exp.substr(0,e)) != macros.end());
+          }
+          else if (next.length() == 6) { //ifndef
+            int e = 0; while (is_letterd(exp[++e]));
+            flowstack.push(macros.find(exp.substr(0,e)) == macros.end());
+          }
         }
       }
       else

@@ -49,6 +49,7 @@ extern int skip_depth;
 extern int specialize_start;
 extern string specialize_string;
 extern bool specializing;
+extern bool flag_extern;
 
 extern string cferr;
 extern string tostring(int val);

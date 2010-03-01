@@ -142,10 +142,10 @@ int main(int argc, char *argv[])
       
       #ifdef linux
         timeval te; gettimeofday(&te,NULL);
-        double tel = (te.tv_sec*1000000.0 + te.tv_usec) - (ts.tv_sec*1000000.0 + ts.tv_usec);
+        double tel = (te.tv_sec*1000.0 + te.tv_usec) - (ts.tv_sec*1000.0 + ts.tv_usec);
       #else
         time_t te = clock();
-        double tel = (((te-ts) * 1000000.0) / CLOCKS_PER_SEC)
+        double tel = (((te-ts) * 1000.0) / CLOCKS_PER_SEC);
       #endif
       
       
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
         print_err_line_at(a);
       else
       cout << "No error.\r\nParse time: " << tel
-           << " microseconds\r\n++++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";
+           << " milliseconds\r\n++++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";
 
       cout << "Macros ("<<macros.size()<<") [+]\r\nVariables [+]\r\n";
       

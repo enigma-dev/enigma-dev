@@ -38,7 +38,7 @@ enum
   LN_NAMESPACE,   //namespace whatever
   LN_OPERATOR,    //as in the operator keyword, not a random operator
   LN_USING,       //using whatever
-  LN_TEMPARGS,    //std::map<...>
+  LN_TEMPARGS,//10//std::map<...>
   LN_LABEL,       //Public, private, protected
   LN_IMPLEMENT,   //int templated_class<int>::...
   LN_DESTRUCTOR,  //Added to invoke errors where appropriate
@@ -132,8 +132,10 @@ enum
 
 enum
 {
-  TN_NOTHING, //typename ...
-  TN_TEMPLATE //typename anything::template ...
+  TN_NOTHING,   //typename ...
+  TN_TEMPLATE,  //typename anything::template ...
+  TN_GIVEN,     //typename anything...
+  TN_GIVEN_TEMP //typename anything::template anything...
 };
 
 //For efficiency
@@ -141,6 +143,7 @@ enum
 enum
 {
   SH___CONST = 391,
+  SH___INLINE__ = 400,
   SH_CLASS = 417,
   SH_CONST = 436,
   SH_DELETE = 416,

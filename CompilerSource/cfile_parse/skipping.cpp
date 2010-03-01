@@ -59,7 +59,7 @@ unsigned handle_skip()
     {
       if (specializing)
         specialize_start = pos;
-      return -1;
+      return unsigned(-1);
     }
     if (cm != unsigned(-1)) return cm;
     
@@ -69,7 +69,7 @@ unsigned handle_skip()
       specialize_string += n;
     }
     //skiping_last_id = n;
-    return -1;
+    return unsigned(-1);
   }
   
   /*if (is_useless(cfile[pos])) continue; //If anything ever needs to skip to whitespace, change "continue;" to "else"
@@ -171,6 +171,11 @@ unsigned handle_skip()
         }
         //cout << "Evaluated \"" << specialize_string << "\" as " << last_value << endl;
       }
+      else if ((last_named & ~LN_TYPEDEF) == LN_USING)
+      {
+        if (!access_specialization(last_type,specialize_string)) //Scope we're using
+          return pos;
+      }
       else if ((last_named & ~LN_TYPEDEF) == LN_STRUCT
            or  (last_named & ~LN_TYPEDEF) == LN_CLASS
            or  (last_named & ~LN_TYPEDEF) == LN_STRUCT_DD)
@@ -191,6 +196,21 @@ unsigned handle_skip()
           return pos;
         last_named_phase = IM_SPECD;
       }
+      else if ((last_named & ~LN_TYPEDEF) == LN_OPERATOR) //operator cast_type<...> ();
+      {
+        string ne = temp_parse_list(last_type,specialize_string);
+        if (ne == "") return pos;
+        last_identifier += ne;
+      }
+      else if ((last_named & ~LN_TYPEDEF) == LN_TYPENAME or (last_named & ~LN_TYPEDEF) == LN_TYPENAME_P) //operator cast_type<...> ();
+      {
+        if (last_type == NULL) {
+          cferr = "Internal error: `typename' turned up NULL somehow.";
+          return pos;
+        }
+        if (!access_specialization(last_type,specialize_string)) //Nothing to do with functions; we reused arg_type
+          return pos;
+      }
       else {
         cferr = "Nothing to do with freshly parsed string. This shouldn't happen. ln = " + tostring(last_named);
         return pos;
@@ -205,5 +225,5 @@ unsigned handle_skip()
     skippast = 0;
   }
   else pos++;
-  return -1;
+  return unsigned(-1);
 }

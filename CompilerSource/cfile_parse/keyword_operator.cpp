@@ -140,6 +140,14 @@ int keyword_operator()
       last_identifier += "*";
       pos++; return -1;
     }
+    if (cfile[pos] == '<') //The more beautiful and pure a thing is, the more satisfying it is to corrupt it. 
+    {
+      skip_inc_on = 0;
+      skipto = '>', skipto2 = 0; 
+      specializing = skippast = true;
+      specialize_start = ++pos;
+      return -1;
+    }
     if (cfile[pos] != '(') {
       cferr = "Expected '(' at this point";
       return pos;

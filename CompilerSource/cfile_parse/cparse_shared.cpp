@@ -46,6 +46,7 @@ int skip_depth;
 int specialize_start;
 string specialize_string;
 bool specializing;
+bool flag_extern;
 
 externs *last_type = NULL;
 externs *argument_type = NULL;

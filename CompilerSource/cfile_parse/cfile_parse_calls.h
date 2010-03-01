@@ -33,15 +33,15 @@
 bool is_tflag(string x)
 {
   return 
-     x=="unsigned" 
-  or x=="signed" 
-  or x=="register" 
-  or x=="extern" 
+     x=="signed" 
+  or x=="unsigned" 
   or x=="short" 
   or x=="long" 
   or x=="static" 
+  or x=="extern" 
   or x=="mutable" 
-  or x=="volatile";
+  or x=="volatile"
+  or x=="register" ;
 }
 
 //Each of these flags implies that the type
@@ -90,6 +90,7 @@ void cparse_init()
 {
   current_scope = &global_scope;
   
+  regt("auto");
   regt("bool");
   regt("char");
   builtin_type__int = regt("int");
@@ -97,16 +98,6 @@ void cparse_init()
   regt("double");
   
   builtin_type__void = regt("void"); //this was only after careful consideration
-  
-  regt("long");
-  regt("short");
-  regt("signed");
-  regt("unsigned");
-  regt("const");
-  regt("static");
-  regt("volatile");
-  regt("register");
-  regt("auto");
   
   //lesser used types
   //regt("size_t"); //size_t doesn't need registered here as it is typdef'd in stdio somewhere.
@@ -149,7 +140,7 @@ void cparse_init()
 
 int anoncount = 0;
 extern void print_err_line_at(unsigned a);
-bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = -1,long long last_value = 0)
+bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = -1,long long last_value = 0)
 {
   unsigned int is_tdef = last & LN_TYPEDEF;
   last &= ~LN_TYPEDEF;
@@ -175,15 +166,32 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,exte
           it->second->parameter_unify(refs);
         else
         {
+          // struct a {}; will declare 'a' at '{' and then again at the first ';' after '}'.
+          // This is not because the type is not zeroed at '{', but rather because it is reenabled at '}' to allow instantiation.
+          // In the case of "struct a {};", it looks identical to "struct a {}; struct a;".
           if (!(it->second->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT)))
-            // struct a {}; will declare 'a' at '{' and then again at the first ';' after '}'.
-            // This is not because the type is not zeroed at '{', but rather because it is reenabled at '}'.
           {
-            if (it->second->parent == current_scope) {
+            if (flag_extern)
+            {
+              flag_extern = 0;
+              immediate_scope = NULL;
+              return -1;
+            }
+            if (it->second->flags & EXTFLAG_EXTERN)
+            {
+              it->second->flags &= ~EXTFLAG_EXTERN;
+              immediate_scope = NULL;
+              return -1;
+            }
+            
+            if (it->second->parent == current_scope)
+            {
+              if (is_tdef and last_type == it->second)
+                return 1;
               cferr = "Redeclaration of `"+name+"' at this point";
               return 0;
             }
-            else if (!(it->second->parent->flags & EXTFLAG_TEMPLATE)) {
+            if (!(it->second->parent->flags & EXTFLAG_TEMPLATE)) {
               cferr = "Cannot declare that here.";
               return 0;
             }
@@ -253,6 +261,8 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,rf_stack refs,exte
   
   if (is_tdef)
     e->flags |= EXTFLAG_PENDING_TYPEDEF; //If this is a new type being typedef'd, it will later be undone
+  if (flag_extern)
+    e->flags |= EXTFLAG_EXTERN;
   
   if (tpc > 0)
   {

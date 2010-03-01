@@ -48,8 +48,8 @@ struct init_const_types { init_const_types() { //These are acceptable for const-
   constant_types["short"] = 1; 
   constant_types["long"] = 1; 
   constant_types["int"] = 1; 
-  constant_types["unsigned"] = 1; 
   constant_types["signed"] = 1; 
+  constant_types["unsigned"] = 1; 
   constant_types["const"] = 1; 
   constant_types["static"] = 1; 
   } } init_const_types_now;
@@ -93,6 +93,8 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
             
             move_into = a;
           } //TODO: add a "templatize" to go with "hypothesize" 
+          else if (constant_types.find(tn) != constant_types.end())
+            ext_retriever_var = builtin_type__int;
           else
           {
             cferr = "`"+tn+"' cannot be used in a constant expression: not found in `" + 
@@ -141,7 +143,7 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
       a->name = tparam_ext->name;
       a->flags = tparam_ext->flags | EXTFLAG_DEFAULTED | EXTFLAG_VALUED;
       a->parent = current_scope;
-      a->value_of = (long long) a;
+      a->value_of = (long long)(long)a;
       a->type = NULL;
     }
     return "_" + tostring((UTYPE_INT)a);
