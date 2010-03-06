@@ -37,6 +37,7 @@ using namespace std;
 unsigned int strc = 0;
 varray<string> stringincode;
 map<string,char> edl_tokens; //logarithmic lookup, with token
+typedef map<string,char>::iterator tokiter;
 
 string string_escape(string s)
 {
@@ -58,243 +59,85 @@ string string_escape(string s)
   return ret;
 }
 
-//Also removes comments and strings
-void parser_remove_whitespace(string& code,const int use_cpp_strings)
+typedef size_t pt; //Use size_t as our pos type; helps on 64bit systems.
+
+///Remove whitespace, unfold macros,
+///And lex code into synt.
+//Compatibility considerations:
+//123.45 with 000.00, then .0 with 00. Do *not* replace 0. with 00
+int parser_ready_input(string &code,string &synt)
 {
-  //Since we will only be shortening the current code,
-  //instead of allocating a new string or buffer, we'll
-  //just overwrite parts of the one we're using
-  
-  int pos, streampos = 0;
-  const int len = code.length();
-  
-  for (pos=0; pos<len; pos++)
+  synt = code;
+  pt pos = 0, bpos = 0;
+  while (pos < code.length())
   {
-    if (is_useless(code[pos]))
-    {
-      if (streampos == 0 or code[streampos-1] != ' ')
-      code[streampos++] = ' ';
-      while (is_useless(code[pos])) //0 is not useless.
-        pos++;
-      pos--;
-      continue;
-    }
-    if (code[pos] == '/')
-    {
-      if (code[pos+1] == '/')
-      {
-        pos+=2;
-        while (pos<len and code[pos] != '\r' and code[pos] != '\n')
-          pos++;
-        pos--;
-        continue;
-      }
-      else if (code[pos+1] == '*')
-      {
-        pos+=2;
-        while (pos<len and (code[pos] != '/' or code[pos-1] != '*'))
-          pos++;
-        continue;
-      }
-    }
-    if (code[pos] == '"')
-    {
-      code[streampos++] = '"';
-      pos++;
-      if (use_cpp_strings)
-      {
-        int sp = pos;
-        while (code[pos] != '"') //Stops dead on the next double quote
-        {
-          if (code[pos] == '\\')
-            pos++;
-          pos++;
-        }
-        stringincode[strc++] = code.substr(sp,pos-sp);
-      }
-      else
-      {
-        int sp = pos;
-        while (code[++pos] != '"'); //Stops dead on the next double quote
-        stringincode[strc++] = string_escape(code.substr(sp,pos-sp));
-      }
-      continue;
-    }
-    if (code[pos] == '\'')
-    {
-      code[streampos++] = '"'; //This remains double quote intentionally.
-      pos++;
-      if (use_cpp_strings)
-      {
-        int sp = pos;
-        while (code[pos] != '\'') //Stops dead on the next quote
-        {
-          if (code[pos] == '\\')
-            pos++;
-          pos++;
-        }
-        stringincode[strc++] = code.substr(sp,pos-sp);
-      }
-      else
-      {
-        int sp = pos;
-        while (code[++pos] != '\''); //Stops dead on the next quote
-        stringincode[strc++] = string_escape(code.substr(sp,pos-sp));
-      }
-      continue;
-    }
     if (is_letter(code[pos]))
     {
-      const int sp = pos;
-      const int ssp = streampos;
+      //This is a word of some sort. Could be a keyword, a type, a macro... maybe just a varname
+      const pt spos = pos;
+      while (is_letterd(code[++pos]));
+      const string name = code.substr(spos,pos-spos);
       
-      while (is_letterd(code[pos]))
-        code[streampos++] = code[pos++];
+      maciter itm = macros.find(name);
+      if (itm != macros.end())
+      {
+        code.insert(pos,itm->second);
+        continue;
+      }
       
-      if (pos-sp == 5) if (code.substr(sp,5) == "begin") {
-        code[streampos = ssp] = '{';
-        streampos++; } else;
-      else if (pos-sp == 4) if (code.substr(sp,4) == "then")
-        streampos = ssp; else;
-      else if (pos-sp == 3) if (code.substr(sp,3) == "end") {
-        code[streampos = ssp] = '}';
-        streampos++; }
+      char c = 'n';
       
-      pos--;
+      tokiter itt = edl_tokens.find(name);
+      if (itt != edl_tokens.end()) {
+        c = itt->second;
+      }
+      else if (find_extname_global(name))
+      {
+        if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
+          c = 't';
+      }
+      else if (name == "then")
+        continue; //"Then" is a truly useless keyword. I see no need to preserve it.
+      
+      for (pt i = 0; i < name.length(); i++) {
+        code[bpos]   = name[i];
+        synt[bpos++] = c;
+      }
+      
       continue;
     }
-    code[streampos++] = code[pos];
-  }
-  code.erase(streampos);
-  return;
-}
-
-
-void parser_buffer_syntax_map(string &code,string &syntax,const int use_cpp_numbers)
-{
-  syntax = code;
-  externs* nscope = NULL;
-  const int len = syntax.length();
-  for (int pos = 0; pos < len; pos++)
-  {
-    if (is_letter(syntax[pos]))
+    else if (is_digit(code[pos]))
     {
-      int spos = pos;
-      while (is_letterd(syntax[pos]))
-      {
-        syntax[pos] = 'n';
+      if (bpos and synt[bpos-1] == '.')
+        synt[bpos-1] = '0';
+      while (code[pos] == '0')
         pos++;
-      }
-      
-      string lword = code.substr(spos,pos-spos);
-      map<string,char>::iterator token = edl_tokens.find(lword);
-      
-      char c = 0;
-      bool istemplate = 0;
-      if (token != edl_tokens.end())
-      {
-        nscope = NULL;
-        c = token->second;
-        if (c == 't')
-        {
-          c = 'd';
-          istemplate = 1;
-        }
-        
-        for(int i = spos; i<pos; i++)
-          syntax[i] = c;
-      }
+      if (is_digit(code[pos]))
+        do {
+          code[bpos] = code[pos];
+          synt[bpos++] = '0';
+        } while (is_digit(code[++pos]));
       else
-      {
-        extiter sit;
-        if (nscope == NULL) sit = scope_find_member(lword);
-        else sit = nscope->members.find(lword);
-        
-        if (sit != global_scope.members.end())
-        {
-          if (sit->second->flags & EXTFLAG_TYPENAME) c = 'd';
-          //else if (sit->second->flags & EXTFLAG_NAMESPACE) c = 'N';
-          else c = 'g';
-          for(int i = spos; i<pos; i++)
-            syntax[i] = c;
-          istemplate = sit->second->flags & EXTFLAG_TEMPLATE;
-        }
-      }
-      if (c == 'd')
-      {
-        if (code[pos] == ' ')
-          syntax[pos++] = 'd';
-        if (code[pos] == '<' and istemplate)
-        {
-          syntax[pos++] = 'd';
-          for (int tb = 1; tb and pos<len; pos++)
-          {
-            if (syntax[pos] == '<') tb++;
-            else if (syntax[pos] == '>') tb--;
-            syntax[pos] = 'd';
-          }
-        }
-        if (code[pos] == ' ')
-          syntax[pos++] = 'd';
-        
-        if (spos>0 and syntax[spos] == '(' and syntax[pos] == ')' and syntax[spos] == 'd')
-        {
-          for(int i = spos-1; i<pos; i++)
-            syntax[i] = 'c';
-        }
-      }
-      pos--;
-      continue;
-    }
-    if (is_digit(syntax[pos]))
-    {
-      nscope = NULL;
-      if (pos and syntax[pos-1] == '.') syntax[pos-1] = '0';
-      if (use_cpp_numbers)
-      {
-        while (is_letterd(syntax[pos]))
-        {
-          syntax[pos] = '0';
-          pos++;
-        }
-      }
-      else while (is_digit(syntax[pos]))
-        syntax[pos++] = '0';
-      pos--;
-      continue;
-    }
-    //Scope access
-    if (syntax[pos]==':' and syntax[pos+1]==':' and pos)
-    {
-      const char c = syntax[pos-1];
-      if (c == 'n' or c == 'g' or c == 'd')
-      {
-        unsigned int epos = pos, i;
-        for (i = pos-1; i and syntax[i] == c; i--) if (code[i] == '<') epos = i;
-        const string aname = code.substr(i,epos-i);
-        
-        if (nscope == NULL)
-          nscope = scope_find_member(aname)->second;
-        else
-          nscope = nscope->members.find(aname)->second;
-      }
-    }
-    else if (syntax[pos]=='$')
-    {
-      code[pos] = '0';
-      syntax[pos++]='0';
-      code[pos] = 'x';
-      syntax[pos++]='0';
+       code[bpos] = synt[bpos++] = '0';
       
-      while ((code[pos] >= 'a' and code[pos]<='f') or (code[pos] >= 'A' and code[pos]<='F') or is_digit(code[pos]))
-      {
-        code[pos] = code[pos];
-        syntax[pos++] = '0';
-      }
+      continue;
     }
+    
+    //Wasn't anything usable
+    if (!is_useless(code[pos]))
+      code[bpos] = synt[bpos++] = code[pos];
+    
+    pos++;
   }
+  
+  code.erase(bpos);
+  synt.erase(bpos);
+  
+  cout << code << endl << synt << endl << endl;
+  return 0;
 }
 
+//Has conditional popping based on an attribute pushed with the value
 struct stackif
 {
   stackif* prev;
@@ -377,8 +220,7 @@ void parser_add_semicolons(string &code,string &synt)
       if (synt[pos]==')') { sy_semi=sy_semi->popif('(');    continue; }
       if (synt[pos]==';')
       {
-        if (synt[pos+1] == ')')
-        {
+        if (synt[pos+1] == ')') {
           bufpos--;
           continue;
         }
@@ -389,12 +231,13 @@ void parser_add_semicolons(string &code,string &synt)
           codebuf[bufpos+0] = ';';
           syntbuf[bufpos++] = ';';
         }
-        sy_semi=sy_semi->popif('s');
+        sy_semi = sy_semi->popif('s');
         continue;
       }
       if (synt[pos]==':')
       {
-        if (terns) terns--;
+        if (terns)
+          terns--;
         else if (*sy_semi != ';')
         {
           codebuf[bufpos-1] = *sy_semi;
@@ -426,23 +269,21 @@ void parser_add_semicolons(string &code,string &synt)
       if (synt[pos] != ' ')
         pos--;
       
-        codebuf[bufpos]='(';
-        syntbuf[bufpos++]='(';
+      codebuf[bufpos] = syntbuf[bufpos++] = '(';
       sy_semi=sy_semi->push(')','s');
     }
-    else if (synt[pos]=='f')
+    else if (synt[pos] == 'f')
     {
-      codebuf[bufpos+0]='o';
-      codebuf[bufpos+1]='r';
-      syntbuf[bufpos++]='f';
-      syntbuf[bufpos+0]='f';
+      codebuf[bufpos] = 'o';
+      syntbuf[bufpos] = 'f';
+      codebuf[++bufpos] = 'r';
+      syntbuf[bufpos++] = 'f';
       
       pos+=3;
       if (synt[pos] != ' ')
         pos--; //If there's a (, you'll be at it next iteration
       
-      codebuf[bufpos]='(';
-      syntbuf[bufpos++]='(';
+      codebuf[bufpos] = syntbuf[bufpos++] = '(';
       
       sy_semi=sy_semi->push(')','s');
       sy_semi=sy_semi->push(';','s');
@@ -451,16 +292,13 @@ void parser_add_semicolons(string &code,string &synt)
   }
   
   //Add a semicolon at the end if there isn't one
-  if (syntbuf[bufpos-1] != ';')
-  {
-    codebuf[bufpos]=';';
-    syntbuf[bufpos++]=';';
-  }
+  if (bufpos and syntbuf[bufpos-1] != ';')
+    codebuf[bufpos] = syntbuf[bufpos++] = ';';
   
   code = string(codebuf,bufpos);
   synt = string(syntbuf,bufpos);
   
-  cout << ":: " << code << "\r\n:: " << synt << "\r\n\r\n";
+  cout << code << endl << synt << endl << endl;
   
   //This part's trickier; add semicolons only after do ... until and do ... while
   unsigned int len = synt.length();
@@ -608,20 +446,16 @@ inline bool likesaspace(char c,char d)
 
 void print_the_fucker(string code,string synt)
 {
-  FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
+  //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
+  FILE* of = fopen("C:/Users/Josh/Desktop/parseout.txt","w+b");
   if (of == NULL) return;
   
-  const char* indent = "\r\n\
-                          \
-                          \
-                          \
-                          \
-                          \
-                          \
-                          \
-                          \
-                          \
-                      ";
+  const char * indent   =  "\r\n                                \
+                                                                \
+                                                                \
+                                                                \
+                                                                ";
+  
   const int indentmin=2;
   int indc = 0,tind = 0,pars = 0,str = 0;
   

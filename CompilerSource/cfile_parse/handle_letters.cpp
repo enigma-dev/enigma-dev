@@ -76,7 +76,7 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
     if (!ExtRegister(LN_STRUCT,last_named_phase,last_identifier,flag_extern=0,NO_REFS,NULL,EMPTY,tpc = -1))
       return 0;
   }
-  last_named = LN_DECLARATOR;
+  last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); //Switch to declarator, but preserve typedef status
   last_named_phase = idnamed?DEC_IDENTIFIER:DEC_FULL;
   last_type = ext_retriever_var;
   return 1;
@@ -94,7 +94,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           {
             if (last_named != LN_TYPEDEF)
             {
-              if (last_named != LN_DECLARATOR)
+              if ((last_named &~ LN_TYPEDEF) != LN_DECLARATOR)
               {
                 if (last_named != LN_TEMPLATE or last_named_phase != TMP_PSTART)
                 {
@@ -104,7 +104,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
                 last_named_phase = TMP_TYPENAME;
                 return -1;
               }
-              else if (last_named_phase != 0 and refstack.currentsymbol() != '(')
+              else if (last_named_phase != 0 and refstack.currentsymbol() != '(') //In either of these cases, just ignore this token... It's a C thing
               {
                 if (last_named_phase != DEC_GENERAL_FLAG) {
                   cferr="Unexpected `"+n+"' token";
@@ -589,7 +589,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       }
       else if (ext_retriever_var->parent == current_scope)
       {
-        if (ext_retriever_var->flags & EXTFLAG_TYPEDEF and last_named & LN_TYPEDEF) {
+        if (ext_retriever_var->flags & EXTFLAG_TYPEDEF and last_named & LN_TYPEDEF) { //typedef some_typedefd_type some_typedefd_type;
           last_named = LN_NOTHING;
           last_named_phase = 0;
           return -1;
@@ -597,11 +597,9 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
         
         if (!at_template_param or !(ext_retriever_var->flags & (EXTFLAG_STRUCT | EXTFLAG_CLASS)))
         {
-          if (last_type == ext_retriever_var)
-          {
-            last_named = LN_NOTHING;
-            last_named_phase = 0;
-            last_identifier = "";
+          if (last_type == ext_retriever_var) { //typedef struct a {} a;
+            last_identifier = last_type->name;
+            last_named_phase = DEC_IDENTIFIER;
             return unsigned(-1);
           }
           cferr = "Two types named in declaration: `"+ext_retriever_var->name+"' cannot be declared in this scope";
@@ -711,7 +709,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       if (last_named_phase == EN_NOTHING)
       {
         last_type = ext_retriever_var;
-        last_named = LN_DECLARATOR;
+        last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
         last_named_phase = DEC_FULL;
         return unsigned(-1);
       }

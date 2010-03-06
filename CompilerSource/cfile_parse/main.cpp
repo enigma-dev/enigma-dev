@@ -244,3 +244,173 @@ int cfile_parse_main()
 
   return 0;
 }
+
+string fc(const char* fn);
+
+char getch()
+{
+  int c, first;
+  first = c = getchar();
+  while (c != '\n' && c != EOF)
+  c = getchar();
+  return first;
+}
+string getst()
+{
+  string res;
+  int c, first;
+  first = c = getchar();
+  while (c != '\n' && c != EOF)
+  {
+    res += char(c);
+    c = getchar();
+  }
+  return res;
+}
+
+#include "cfile_parse.h"
+#include "../general/implicit_stack.h"
+extern string cfile;
+
+void print_err_line_at(unsigned a)
+{
+  int line=0,pos=0;
+  for (int i=0; i<(signed)a; i++,pos++)
+  {
+    if (cfile[i]=='\r')
+      i++;
+    if (cfile[i]=='\n')
+      line++, pos=0;
+  }
+  printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
+  const int margin = 100;
+  const unsigned int 
+    begin = (signed)a-(margin/2)<0?0:a-(margin/2), 
+    end = (a+unsigned(margin/2)>cfile.length())?cfile.length():a+(margin/2);
+  cout << "code snippet: " << cfile.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
+  cout << "------------------------------------------------\r\n\r\n";
+}
+
+void print_definition(string n)
+{
+  maciter a = macros.find(n);
+  if (a != macros.end())
+  {
+    cout << "  #define " << n;
+    if (a->second.argc != -1) {
+      cout << "("; for (int i=0; i<a->second.argc; i++) 
+      cout << a->second.args[i] << (i+1<a->second.argc ? ", " : ")"); }
+    cout << " " << (string)a->second << endl;
+  }
+  else
+  {
+    extiter a;
+    string seg;
+    externs *isco = &global_scope;
+    for (unsigned i=0; i<n.length();)
+    {
+      const unsigned is = i;
+      while (i<n.length() and n[i] != ':') i++;
+      
+      seg = n.substr(is,i-is);
+      a = isco->members.find(seg);
+      if (i<n.length() and a != isco->members.end())
+        isco = a->second;
+      while (i<n.length() and n[i] == ':') i++;
+    }
+    if (a != isco->members.end())
+      print_ext_data(a->second, 2,1000);
+    else cout << "Not found: " << seg << endl;
+  }
+}
+
+int m_prog_loop_cfp()
+{
+  string cftp = fc("./cfile_parse/parsein.h");
+  
+  #ifdef linux
+    timeval ts; gettimeofday(&ts,NULL);
+  #else
+    time_t ts = clock();
+  #endif
+  
+  int a = parse_cfile(cftp);
+  
+  #ifdef linux
+    timeval te; gettimeofday(&te,NULL);
+    double tel = (te.tv_sec*1000.0 + te.tv_usec) - (ts.tv_sec*1000.0 + ts.tv_usec);
+  #else
+    time_t te = clock();
+    double tel = (((te-ts) * 1000.0) / CLOCKS_PER_SEC);
+  #endif
+  
+  
+  if (a != -1)
+    print_err_line_at(a);
+  else
+  cout << "No error.\r\nParse time: " << tel
+       << " milliseconds\r\n++++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";
+
+  cout << "Macros ("<<macros.size()<<") [+]\r\nVariables [+]\r\n";
+  
+  cout << ">>";
+  char c = getch();
+  while (c != '\r' and c != '\n')
+  {
+    if (c == '+')
+    {
+      cout << "Macros ("<<macros.size()<<"):\r\n";
+        for (maciter i=macros.begin(); i!=macros.end();i++)
+        {
+          cout<<"  "<<i->first;
+          if (i->second.argc != -1)
+          {
+            cout << "(";
+            for (int ii = 0; ii<i->second.argc; ii++)
+              cout << i->second.args[ii] << (ii<i->second.argc-1 ? ",":"");
+            cout << ")";
+          }
+          cout<<": "<<(string)i->second<<"\r\n";
+        }
+      cout<<"\r\nVariables:\r\n";
+        print_scope_members(&global_scope, 2);
+    }
+    if (c == 'c') system("cls || clear");
+    if (c == 'd')
+    {
+      cout << "Define: ";
+      string n = getst();
+      print_definition(n);
+    }
+    if (c == 't')
+    {
+      cout << "Trace: ";
+      string n = getst();
+      extiter a = global_scope.members.find(n);
+      if (a != global_scope.members.end())
+      {
+        for (externs* i=a->second; i!=&global_scope; i=i->parent)
+        cout << i->name << "::";
+      }
+      else cout << "Not found: " << n << endl;
+    }
+    if (c == 'm')
+    {
+      string search_terms;
+      cout << "Search in Macros: ";
+      cin >> search_terms;
+      
+      getch(); bool f = 0;
+      for (maciter i = macros.begin(); i != macros.end(); i++)
+        if (string(i->second).find(search_terms) != string::npos)
+        { cout << "Found " << i->first << ". (N/Q)"; char a = getch(); f=1; if (a != 'N' and a != 'n') break; }
+      if (!f) cout << "Not found.";
+    }
+    if (c == 'e') print_err_line_at(a);
+    if (c == 'p') system("PAUSE");
+    cout << ">>";
+    c = getch();
+  }
+  
+  return 0;
+}

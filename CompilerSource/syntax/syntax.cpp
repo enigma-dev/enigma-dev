@@ -35,10 +35,6 @@ using namespace std;
 #include "../general/darray.h"
 
 #include "../general/parse_basics.h"
-
-/*
-extern map<int,string> fnames;
-extern int fcount;*/
 #include "../externs/externs.h"
 
 string tostring(int val);
@@ -55,42 +51,15 @@ namespace syncheck
     externs *ne=global_scope.members[name];
     ne->refstack += referencer('(',16,0,1);
   }
-
-  /*
-
-  struct function_info
-  {
-    string name;
-    char rtype;
-    char argcount; //-100 for infinite
-    char atype[64]; //up to 64 args, 0 for real 1 for string 2 for variant +3 for optional 5 for WTF MAN
-  };
-
-  int fcount=0;
-    map<int,function_info> fnames;
-  int scrcount=0;
-    map<int,function_info> scrnames;*/
 }
-/*
-int get_two(int pos)
-{
-  printf("Accessed LN_OPERATOR at %d\n",pos);
-  return 2;
-}*/
 
 namespace syncheck
 {
   // Start off with some basic things
   // we'll need during the check process
   ////////////////////////////////////////
-  /*
-    #include "syntax/parentheses.h"*/
-    //#include "loadfnames.h"
-    /*string typenames="|bool||char||int||float||double||cstring||short||long|";
-    string typeflags="|lovalv||unsigned||signed||const||static||short||long|";
-    #include "syntax/castchecker.h"*/
 
-    #include "chkfunction.h"
+  #include "chkfunction.h"
 
     //Map for flexibility, dynamics, and legibility
     typedef map<int,int> array;
@@ -99,14 +68,16 @@ namespace syncheck
      int level=0;
     //These tell us what kind of level this is
      array levelt;
-     #define LEVELTYPE_BRACE 0
-     #define LEVELTYPE_IF 1
-     #define LEVELTYPE_DO 2
-     #define LEVELTYPE_CASE 3
-     #define LEVELTYPE_SWITCH 4
-     #define LEVELTYPE_SWITCH_BLOCK 5
-     #define LEVELTYPE_FOR_PARAMETERS 6
-     #define LEVELTYPE_GENERAL_STATEMENT 7
+     enum {
+       LEVELTYPE_BRACE,
+       LEVELTYPE_IF,
+       LEVELTYPE_DO,
+       LEVELTYPE_CASE,
+       LEVELTYPE_SWITCH,
+       LEVELTYPE_SWITCH_BLOCK,
+       LEVELTYPE_FOR_PARAMETERS,
+       LEVELTYPE_GENERAL_STATEMENT
+     };
 
     //If we are in an if statement, we expect two expressions before else statement.
       //For example, if a=b b=c else d=e;

@@ -468,3 +468,32 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
   
   return 0;
 }
+
+
+bool find_extname_global(string name,unsigned int flags)
+{
+  extiter it = global_scope.members.find(name);
+  if (it != global_scope.members.end()) {
+    ext_retriever_var = it->second;
+    return (it->second->flags & flags) or (flags == 0xFFFFFFFF);
+  }
+  
+  externs *using_scope = scope_get_using_ie(&global_scope);
+  if (using_scope)
+  for (it = using_scope->members.begin(); it != using_scope->members.end(); it++)
+    if (it->second->name == name){
+      ext_retriever_var = it->second;
+      return (it->second->flags & flags) or (flags == 0xFFFFFFFF);
+    }
+    else if (it->second->flags & EXTFLAG_NAMESPACE)
+    {
+      extiter sit = it->second->members.find(name);
+      if (sit != it->second->members.end()
+      and  (((it->second->flags & flags) != 0) or (flags == 0xFFFFFFFF))) {
+        ext_retriever_var = sit->second;
+        return 1;
+      }
+    }
+  
+  return 0;
+}

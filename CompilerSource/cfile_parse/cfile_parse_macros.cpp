@@ -252,7 +252,7 @@ unsigned int cfile_parse_macro()
         //Isolate filename
         const int spos = ++pos;
         const char ce = c=='"'? c:'>';
-        while (cfile[pos++] != ce);
+        while (pos < len and cfile[pos++] != ce);
         string file = cfile.substr(spos,pos-spos-1);
         move_newline();
         
@@ -261,15 +261,23 @@ unsigned int cfile_parse_macro()
         string include_from;
         if (c == '"')
         {
+          string qpath;
+          for (unsigned i = file.length(); i; i--)
+            if (file[i] == '\\' or file[i] == '/')
+            {
+              qpath = file.substr(0,i+1);
+              file.erase(0,i+1);
+              break;
+            }
           if (included_files.empty())
-            include_from = "";
+            include_from = qpath;
           else
-            include_from = included_files.top().path;
+            include_from = included_files.top().path + qpath;
           
           ins = fc( (include_from+file).c_str() );
           if (fnf)
           {
-            cferr = "Failed to include " + file + " from " + include_from + ": File not found";
+            cferr = "Failed to include `" + file + "' from " + include_from + ": File not found";
             return pos;
           }
         }
@@ -314,6 +322,8 @@ unsigned int cfile_parse_macro()
   
   if (next=="pragma") //Visit this even in a false conditional for print and debug
   {
+    move_newline();
+    /* // This was my beautiful debugging suite during development of the parser.
     const unsigned sp = pos;
     move_newline();
     const string pc = cfile.substr(sp,pos-sp);
@@ -392,7 +402,7 @@ unsigned int cfile_parse_macro()
       } else cout << endl << "At global scope." << endl << endl;
       
       fflush(stdout);
-    }
+    }*/
   }
   
   //Conditionals/Flow
@@ -407,8 +417,14 @@ unsigned int cfile_parse_macro()
       {
         if (!flowstack.push_false()) //If this expression will be evaluated as false anyway, just push it that way...
         {
-          if (next.length() == 2) //if
+          if (next.length() == 2) //#if
           {
+            //We're allowed to cheat like this because there are no fucking strings.
+            size_t p;
+            for (p = exp.find("/*"); p != string::npos; p = exp.find("/*")) {
+              size_t p2 = exp.find("*/",p+2);
+              exp.erase(p,p2-p+1);
+            } if ((p = exp.find("//")) != string::npos) exp.erase(p);
             flowstack.push(evaluate_expression(exp));
             if (rerrpos != -1) { cferr = "In #if expression at position " + tostring(rerrpos) + ": " + rerr; return spos+rerrpos; }
           }

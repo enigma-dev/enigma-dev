@@ -46,181 +46,77 @@ using namespace std;
 
 string fc(const char* fn);
 
-void print_ext_data(externs *ext,int indent, int depth = 100);
-void print_scope_members(externs* gscope, int indent, int depth = 100);
+int m_prog_loop_cfp();
 
-char getch()
-{
-  int c, first;
-  first = c = getchar();
-  while (c != '\n' && c != EOF)
-  c = getchar();
-  return first;
-}
-string getst()
-{
-  string res;
-  int c, first;
-  first = c = getchar();
-  while (c != '\n' && c != EOF)
-  {
-    res += char(c);
-    c = getchar();
-  }
-  return res;
-}
-
-#include "general/implicit_stack.h"
-extern string cfile;
-
-void print_err_line_at(unsigned a)
-{
-  int line=0,pos=0;
-  for (int i=0; i<(signed)a; i++,pos++)
-  {
-    if (cfile[i]=='\r')
-      i++;
-    if (cfile[i]=='\n')
-      line++, pos=0;
-  }
-  printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
-  const int margin = 100;
-  const unsigned int 
-    begin = (signed)a-(margin/2)<0?0:a-(margin/2), 
-    end = (a+unsigned(margin/2)>cfile.length())?cfile.length():a+(margin/2);
-  cout << "code snippet: " << cfile.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
-  cout << "------------------------------------------------\r\n\r\n";
-}
-
-void print_definition(string n)
-{
-  maciter a = macros.find(n);
-  if (a != macros.end())
-  {
-    cout << "  #define " << n;
-    if (a->second.argc != -1) {
-      cout << "("; for (int i=0; i<a->second.argc; i++) 
-      cout << a->second.args[i] << (i+1<a->second.argc ? ", " : ")"); }
-    cout << " " << (string)a->second << endl;
-  }
-  else
-  {
-    extiter a;
-    string seg;
-    externs *isco = &global_scope;
-    for (unsigned i=0; i<n.length();)
-    {
-      const unsigned is = i;
-      while (i<n.length() and n[i] != ':') i++;
-      
-      seg = n.substr(is,i-is);
-      a = isco->members.find(seg);
-      if (i<n.length() and a != isco->members.end())
-        isco = a->second;
-      while (i<n.length() and n[i] == ':') i++;
-    }
-    if (a != isco->members.end())
-      print_ext_data(a->second, 2);
-    else cout << "Not found: " << seg << endl;
-  }
-}
 
 #include <sys/time.h>
+#include <windows.h>
 
+int establish_bearings()
+{
+  //find us the GCC
+  fclose(fopen("blank.txt","wb"));
+  fclose(fopen("defines.txt","wb"));
+  if (system("cpp -dM -x c++ -E  blank.txt > defines.txt"))
+  {
+    fclose(fopen("defines.txt","wb"));
+    if (system("C:/MinGW/bin/cpp -dM -x c++ -E blank.txt > defines.txt"))
+      return 1;
+  }
+  string defs = fc("defines.txt");
+  if (defs == "")
+    return 1;
+  
+  unsigned a = parse_cfile(defs);
+  if (a != unsigned(-1)) {
+    cout << "Highly unlikely error. Borderline impossible, but stupid things can happen when working with files.\n\n";
+    return 1;
+  }
+  
+  cout << "Successfully loaded GCC definitions\n";
+  cout << "Undefining _GLIBCXX_EXPORT_TEMPLATE\n";
+  macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0";
+  return 0;
+}
+
+#include "cfile_parse/cfile_pushing.h"
+
+extern void print_err_line_at(unsigned a);
 int main(int argc, char *argv[])
 {
-      cparse_init();
-      string cftp = fc("./cfile_parse/parsein.h");
-      
-      #ifdef linux
-        timeval ts; gettimeofday(&ts,NULL);
-      #else
-        time_t ts = clock();
-      #endif
-      
-      int a = parse_cfile(cftp);
-      
-      #ifdef linux
-        timeval te; gettimeofday(&te,NULL);
-        double tel = (te.tv_sec*1000.0 + te.tv_usec) - (ts.tv_sec*1000.0 + ts.tv_usec);
-      #else
-        time_t te = clock();
-        double tel = (((te-ts) * 1000.0) / CLOCKS_PER_SEC);
-      #endif
-      
-      
-      if (a != -1)
-        print_err_line_at(a);
-      else
-      cout << "No error.\r\nParse time: " << tel
-           << " milliseconds\r\n++++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";
-
-      cout << "Macros ("<<macros.size()<<") [+]\r\nVariables [+]\r\n";
-      
-      cout << ">>";
-      char c = getch();
-      while (c != '\r' and c != '\n')
-      {
-        if (c == '+')
-        {
-          cout << "Macros ("<<macros.size()<<"):\r\n";
-            for (maciter i=macros.begin(); i!=macros.end();i++)
-            {
-              cout<<"  "<<i->first;
-              if (i->second.argc != -1)
-              {
-                cout << "(";
-                for (int ii = 0; ii<i->second.argc; ii++)
-                  cout << i->second.args[ii] << (ii<i->second.argc-1 ? ",":"");
-                cout << ")";
-              }
-              cout<<": "<<(string)i->second<<"\r\n";
-            }
-          cout<<"\r\nVariables:\r\n";
-            print_scope_members(&global_scope, 2);
-        }
-        if (c == 'c') system("cls || clear");
-        if (c == 'd')
-        {
-          cout << "Define: ";
-          string n = getst();
-          print_definition(n);
-        }
-        if (c == 't')
-        {
-          cout << "Trace: ";
-          string n = getst();
-          extiter a = global_scope.members.find(n);
-          if (a != global_scope.members.end())
-          {
-            for (externs* i=a->second; i!=&global_scope; i=i->parent)
-            cout << i->name << "::";
-          }
-          else cout << "Not found: " << n << endl;
-        }
-        if (c == 'm')
-        {
-          string search_terms;
-          cout << "Search in Macros: ";
-          cin >> search_terms;
-          
-          getch(); bool f = 0;
-          for (maciter i = macros.begin(); i != macros.end(); i++)
-            if (string(i->second).find(search_terms) != string::npos)
-            { cout << "Found " << i->first << ". (N/Q)"; char a = getch(); f=1; if (a != 'N' and a != 'n') break; }
-          if (!f) cout << "Not found.";
-        }
-        if (c == 'e') print_err_line_at(a);
-        if (c == 'p') system("PAUSE");
-        cout << ">>";
-        c = getch();
-      }
+    cparse_init();
     
-    return 0;
+    if (establish_bearings()) {
+      cout << "ERROR: Failed to locate the GCC";
+      getchar(); return 1;
+    }
     
-      parser_init();
-      string b = parser_main(fc("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parsein.txt"));
+    string EGMmain = fc("../ENIGMAsystem/SHELL/SHELLmain.cpp");
+    if (EGMmain == "") {
+      char d[600];
+      GetCurrentDirectory(600,d);
+      cout << "ERROR: Failed to read main engine file from " << d;
+      getchar(); return 1;
+    }
     
+    clock_t cs = clock();
+    unsigned a = parse_cfile(EGMmain);
+    clock_t ce = clock();
+    
+    if (a != unsigned(-1)) {
+      cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few milliseconds of compile.\n";
+      print_err_line_at(a);
+      getchar(); return 1;
+    }
+    
+    cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
+    
+    print_scope_members(global_scope.members.find("enigma")->second,2);
+    
+    parser_init();
+    string b = parser_main(fc("C:/Users/Josh/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary_gml.h"));
+    cout << endl << endl << endl << endl << b << endl;
+    getchar();
     return 0;
     
     string p1;

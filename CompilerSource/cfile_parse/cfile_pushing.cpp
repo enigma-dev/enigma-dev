@@ -80,7 +80,7 @@ unsigned int handle_macros(const string n)
       
       if (t->second.argc != -1) //Expect ()
       {
-        if (!macro_function_parse(cfile,pos,macrostr,t->second.args,t->second.argc,t->second.args_uat)) {
+        if (!macro_function_parse(cfile,n,pos,macrostr,t->second.args,t->second.argc,t->second.args_uat)) {
           cferr = macrostr;
           return pos;
         }

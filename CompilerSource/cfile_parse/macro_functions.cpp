@@ -55,12 +55,12 @@ bool is_entirely_white(string x)
   return 1;
 }
 
-bool macro_function_parse(string cfile,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at)
+bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at)
 {
   //cout << "The function was at least entered";
   
   while (is_useless(cfile[pos])) pos++; 
-  if (cfile[pos] != '(') { macrostr = "Expected parameters to macro function"; return false; }
+  if (cfile[pos] != '(') { macrostr = macroname; return true; } //"Expected parameters to macro function"; return false; }
   pos++;
   
   //cout << endl << endl << endl << endl << endl << endl << "Raw: \r\n" << macrostr;

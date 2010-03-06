@@ -48,6 +48,7 @@
 #include <iostream> //Print shit
 using namespace std; //More ease
 #include "parser_components.h" //duh
+#include "../externs/externs.h" //To interface with externally defined types and functions
 
 #include "../general/darray.h"
 
@@ -121,7 +122,7 @@ void parser_init()
   //Token is 'a'
   edl_tokens["new"] = 'a';
 
-  //Classify this as O then replace O() with nnn and then O(.*)\( with nnn
+  //Classify this as O then replace O() with nnn and then O(.*)\( with nn...n
   edl_tokens["operator"] = 'o';
 }
 
@@ -133,12 +134,14 @@ string parser_main(string code,void (*collectdecls)(string,string))
   
   //To preserve efficiency, however, we will reduce the number of passes by replacing multiple things at once.
   
-  //First off, remove comments, strings, and whitespace.
+  /*/First off, remove comments, strings, and whitespace.
   parser_remove_whitespace(code,0);
   
   //Next, we generate a syntax map
+  parser_buffer_syntax_map(code,synt,0);*/
   string synt;
-  parser_buffer_syntax_map(code,synt,0);
+  
+  parser_ready_input(code,synt);
   
   parser_add_semicolons(code,synt);
   

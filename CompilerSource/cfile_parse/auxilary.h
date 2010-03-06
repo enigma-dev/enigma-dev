@@ -34,8 +34,8 @@ template <typename,typename,typename> struct basic_string { basic_string(); };
 ):_M_dataplus(_S_empty_rep()._M_refdata(), _Alloc()) { }
 */
 
-//*
 
+/*
 #include <map>
 #include <string>
 #include <vector>
@@ -43,14 +43,34 @@ template <typename,typename,typename> struct basic_string { basic_string(); };
 #include <queue>
 #include <list>
 #include <set>
-#include <iostream>
+#include <iostream>*/
 
+//CUsersJoshENIGMAtrunkENIGMAsystemSHELL
+#include "C:/Users/Josh/ENIGMA/trunk/ENIGMAsystem/SHELL/SHELLmain.cpp"
 
-typedef struct a {
-  
-} b, c, *d;
+/* 
+enum ass { a };
+#pragma printlast
+typedef enum 
+#pragma printlast
+ass 
+#pragma printlast
+ass
+#pragma printlast
+;
 
-#include <windows.h>
+/* */
+/*
+struct a;
+typedef struct a { int c; } b;
+typedef const b *c;
+*/
+/*struct a;
+typedef struct a * b;
+typedef const b c;*/
+
+//#include <windows.h>
+//using namespace std;
 
 
 /* */
