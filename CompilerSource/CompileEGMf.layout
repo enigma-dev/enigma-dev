@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="cfile_parse\auxilary.h" open="1" top="0" tabpos="8">
-		<Cursor position="968" topLine="31" />
+	<File name="cfile_parse\auxilary.h" open="0" top="0" tabpos="8">
+		<Cursor position="1040" topLine="33" />
 	</File>
-	<File name="cfile_parse\cfile_parse.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="13208" topLine="233" />
+	<File name="cfile_parse\auxilary_gml.h" open="1" top="0" tabpos="9">
+		<Cursor position="407" topLine="2" />
 	</File>
-	<File name="cfile_parse\cfile_parse_calls.h" open="1" top="0" tabpos="2">
-		<Cursor position="4748" topLine="116" />
+	<File name="cfile_parse\cfile_parse.cpp" open="0" top="0" tabpos="1">
+		<Cursor position="49853" topLine="1302" />
+	</File>
+	<File name="cfile_parse\cfile_parse_calls.h" open="0" top="0" tabpos="2">
+		<Cursor position="3735" topLine="90" />
 	</File>
 	<File name="cfile_parse\cfile_parse_constants.h" open="0" top="0" tabpos="7">
-		<Cursor position="5968" topLine="148" />
+		<Cursor position="3854" topLine="70" />
 	</File>
-	<File name="cfile_parse\cfile_parse_macros.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="10820" topLine="303" />
+	<File name="cfile_parse\cfile_parse_macros.cpp" open="0" top="0" tabpos="4">
+		<Cursor position="14875" topLine="412" />
 	</File>
-	<File name="cfile_parse\cfile_pushing.cpp" open="1" top="0" tabpos="7">
-		<Cursor position="3212" topLine="64" />
+	<File name="cfile_parse\cfile_pushing.cpp" open="1" top="0" tabpos="10">
+		<Cursor position="2963" topLine="64" />
 	</File>
 	<File name="cfile_parse\cfile_pushing.h" open="0" top="0" tabpos="0">
-		<Cursor position="2246" topLine="26" />
+		<Cursor position="2246" topLine="20" />
 	</File>
 	<File name="cfile_parse\cparse_components.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="2475" topLine="28" />
@@ -29,16 +32,16 @@
 		<Cursor position="2247" topLine="0" />
 	</File>
 	<File name="cfile_parse\cparse_shared.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="2541" topLine="30" />
+		<Cursor position="2398" topLine="21" />
 	</File>
 	<File name="cfile_parse\cparse_shared.h" open="0" top="0" tabpos="0">
-		<Cursor position="2897" topLine="36" />
+		<Cursor position="3071" topLine="39" />
 	</File>
 	<File name="cfile_parse\expev_macros.h" open="0" top="0" tabpos="0">
 		<Cursor position="27194" topLine="747" />
 	</File>
-	<File name="cfile_parse\expression_evaluator.cpp" open="0" top="0" tabpos="8">
-		<Cursor position="4145" topLine="88" />
+	<File name="cfile_parse\expression_evaluator.cpp" open="1" top="0" tabpos="11">
+		<Cursor position="2422" topLine="21" />
 	</File>
 	<File name="cfile_parse\expression_evaluator.h" open="0" top="0" tabpos="0">
 		<Cursor position="2198" topLine="0" />
@@ -46,8 +49,8 @@
 	<File name="cfile_parse\expression_evaluator_settings.h" open="0" top="0" tabpos="9">
 		<Cursor position="2036" topLine="9" />
 	</File>
-	<File name="cfile_parse\handle_letters.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="34941" topLine="928" />
+	<File name="cfile_parse\handle_letters.cpp" open="0" top="0" tabpos="3">
+		<Cursor position="3668" topLine="56" />
 	</File>
 	<File name="cfile_parse\handle_letters.h" open="0" top="0" tabpos="0">
 		<Cursor position="2505" topLine="4" />
@@ -55,17 +58,17 @@
 	<File name="cfile_parse\keyword_operator.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="5224" topLine="124" />
 	</File>
-	<File name="cfile_parse\macro_functions.cpp" open="1" top="0" tabpos="7">
-		<Cursor position="6018" topLine="89" />
+	<File name="cfile_parse\macro_functions.cpp" open="1" top="1" tabpos="12">
+		<Cursor position="5952" topLine="37" />
 	</File>
-	<File name="cfile_parse\macro_functions.h" open="0" top="0" tabpos="0">
-		<Cursor position="2198" topLine="0" />
+	<File name="cfile_parse\macro_functions.h" open="1" top="0" tabpos="13">
+		<Cursor position="2231" topLine="0" />
 	</File>
 	<File name="cfile_parse\main.cpp" open="0" top="0" tabpos="9">
-		<Cursor position="3908" topLine="40" />
+		<Cursor position="9531" topLine="314" />
 	</File>
 	<File name="cfile_parse\parsein.h" open="0" top="0" tabpos="8">
-		<Cursor position="39" topLine="87" />
+		<Cursor position="6967" topLine="202" />
 	</File>
 	<File name="cfile_parse\skipping.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="8083" topLine="189" />
@@ -85,14 +88,20 @@
 	<File name="compiler\license_string.h" open="0" top="0" tabpos="0">
 		<Cursor position="3072" topLine="11" />
 	</File>
+	<File name="compiler\output_locals.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="2281" topLine="5" />
+	</File>
+	<File name="compiler\output_locals.h" open="0" top="0" tabpos="0">
+		<Cursor position="2229" topLine="1" />
+	</File>
 	<File name="compiler\pcs\pcs.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="4479" topLine="79" />
 	</File>
-	<File name="externs\externs.cpp" open="1" top="0" tabpos="6">
-		<Cursor position="6793" topLine="195" />
+	<File name="externs\externs.cpp" open="0" top="0" tabpos="6">
+		<Cursor position="2202" topLine="51" />
 	</File>
-	<File name="externs\externs.h" open="1" top="0" tabpos="5">
-		<Cursor position="4022" topLine="84" />
+	<File name="externs\externs.h" open="0" top="0" tabpos="5">
+		<Cursor position="2260" topLine="15" />
 	</File>
 	<File name="externs\references.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="4685" topLine="110" />
@@ -115,19 +124,37 @@
 	<File name="general\string.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="2252" topLine="6" />
 	</File>
-	<File name="main.cpp" open="0" top="0" tabpos="8">
-		<Cursor position="5067" topLine="138" />
+	<File name="main.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="5207" topLine="109" />
 	</File>
-	<File name="parser\parser_components.cpp" open="0" top="0" tabpos="7">
-		<Cursor position="16433" topLine="524" />
+	<File name="parser\parser.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="6127" topLine="119" />
 	</File>
-	<File name="syntax\checkfile.cpp" open="0" top="0" tabpos="2">
-		<Cursor position="2922" topLine="43" />
+	<File name="parser\parser.h" open="0" top="0" tabpos="0">
+		<Cursor position="1376" topLine="3" />
 	</File>
-	<File name="syntax\chkfunction.h" open="0" top="0" tabpos="0">
-		<Cursor position="3127" topLine="40" />
+	<File name="parser\parser_components.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="6281" topLine="184" />
 	</File>
-	<File name="syntax\syntax.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="6052" topLine="148" />
+	<File name="parser\parser_components.h" open="1" top="0" tabpos="7">
+		<Cursor position="2533" topLine="19" />
+	</File>
+	<File name="settings.h" open="1" top="0" tabpos="8">
+		<Cursor position="2344" topLine="0" />
+	</File>
+	<File name="syntax\checkfile.cpp" open="0" top="0" tabpos="4">
+		<Cursor position="4031" topLine="67" />
+	</File>
+	<File name="syntax\chkfunction.h" open="1" top="0" tabpos="4">
+		<Cursor position="2397" topLine="23" />
+	</File>
+	<File name="syntax\syncheck.h" open="0" top="0" tabpos="0">
+		<Cursor position="1511" topLine="12" />
+	</File>
+	<File name="syntax\syntax.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="6301" topLine="140" />
+	</File>
+	<File name="syntax\syntaxtools.h" open="1" top="0" tabpos="3">
+		<Cursor position="3225" topLine="70" />
 	</File>
 </CodeBlocks_layout_file>

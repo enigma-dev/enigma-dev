@@ -55,11 +55,20 @@ bool is_entirely_white(string x)
   return 1;
 }
 
-bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at)
+bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments = true)
 {
-  //cout << "The function was at least entered";
+  //Skip comments. Ignore this block; it's savage but efficient.
+  //Basically, I don't trust the compiler to correctly unroll a large conditional of shared parts.
+    pos--; do you_know_you_love_this_block: if (cfile[++pos] == '/') {
+    if (cfile[++pos] == '/') {
+      pos += cppcomments;
+      while (cfile[++pos] and cfile[pos] != '\n' and cfile[pos] != '\r'); goto you_know_you_love_this_block;
+    } else if (cfile[pos] == '*') {
+      pos += cppcomments;
+      while (cfile[pos] and (cfile[pos++] != '*' or cfile[pos] != '/')); goto you_know_you_love_this_block;
+    } } while (is_useless(cfile[pos]));
+  //You can resume reading the code
   
-  while (is_useless(cfile[pos])) pos++; 
   if (cfile[pos] != '(') { macrostr = macroname; return true; } //"Expected parameters to macro function"; return false; }
   pos++;
   

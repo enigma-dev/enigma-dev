@@ -72,6 +72,8 @@
 		<Unit filename="compiler\compile_includes.cpp" />
 		<Unit filename="compiler\compile_includes.h" />
 		<Unit filename="compiler\license_string.h" />
+		<Unit filename="compiler\output_locals.cpp" />
+		<Unit filename="compiler\output_locals.h" />
 		<Unit filename="compiler\pcs\pcs.cpp" />
 		<Unit filename="compiler\pcs\pcs.h" />
 		<Unit filename="externs\externs.cpp" />
@@ -90,6 +92,7 @@
 		<Unit filename="parser\parser.h" />
 		<Unit filename="parser\parser_components.cpp" />
 		<Unit filename="parser\parser_components.h" />
+		<Unit filename="settings.h" />
 		<Unit filename="syntax\checkfile.cpp" />
 		<Unit filename="syntax\checkfile.h" />
 		<Unit filename="syntax\chkfunction.h" />

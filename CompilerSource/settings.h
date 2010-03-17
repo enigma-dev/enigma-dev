@@ -25,38 +25,5 @@
 **                                                                              **
 \*********************************************************************************/
 
-//Uses the same variables as the other code. Like copypasting, only easier to understand
-  int checkfunction(externs* func,string &code,int pos,int len,int canargs = 1)
-  {
-    int cnt = 0, args = 0;
-    int argcmin=func->parameter_count_min();
-    int argcmax=func->parameter_count_max();
-    while (cnt>-1)
-    {
-      pos++;
-      
-      if (code[pos]=='"') { pos++;  while (code[pos]!='"')  pos++; if (args==0) args=1; }
-      if (code[pos]=='\'') { pos++; while (code[pos]!='\'') pos++; if (args==0) args=1; }
-      
-      if (code[pos]=='[') { pos++; int bcnt=1; while(bcnt>0 && pos<len) { pos++; if (code[pos]=='[') bcnt++; if (code[pos]==']') bcnt--; } }
-      
-      if (code[pos]=='(') { cnt++; if (args==0) args=1; }
-      if (code[pos]==',' && cnt==0)
-      {
-        if (args==0) args=1; args++;
-        if (args > argcmax and argcmax != -1)
-          return pos;
-      }
-      if (code[pos]==')') cnt--;
-      
-      if (!(pos<len)) { error="List of function parameters unterminated"; return pos; }
-    }
-    
-    if (args < argcmin) 
-    {
-      error = "Too few arguments to function `"+func->name+"': Provided "+tostring(args)+", requested "+tostring(argcmin);
-      return pos; 
-    }
-    
-    return -1;
-  }
+const bool OPTION_CPP_UNARY = true; //Allow opertors ++ and --
+const bool OPTION_CPP_STRINGS = false; //Use escape codes in strings and use '' for integers

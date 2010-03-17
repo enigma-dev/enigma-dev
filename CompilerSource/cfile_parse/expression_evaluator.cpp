@@ -52,7 +52,7 @@ bool nz(value v)
     #endif
   #if USETYPE_UINT
     if (v.type==RTYPE_UINT) return v.real.u!=0;
-    #endif
+  #endif
   return 0;
 }
 

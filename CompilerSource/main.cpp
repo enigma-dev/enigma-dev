@@ -110,22 +110,42 @@ int main(int argc, char *argv[])
     }
     
     cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
-    
-    print_scope_members(global_scope.members.find("enigma")->second,2);
+    cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
     
     parser_init();
-    string b = parser_main(fc("C:/Users/Josh/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary_gml.h"));
-    cout << endl << endl << endl << endl << b << endl;
+    string pf = fc("C:/Users/Josh/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary_gml.h");
+    
+    a = syncheck::syntacheck(pf);
+    if (a != unsigned(-1))
+    {
+      int line = 1, lp = 1;
+      for (unsigned i=0; i<a; i++,lp++) {
+        if (pf[i] =='\r')
+          line++, lp = 0, i += pf[i+1] == '\n';
+        else if (pf[i] == '\n') line++, lp = 0;
+      }
+      cout << "Line " << line << ", position " << lp << " (absolute " << a << "): " << syncheck::error <<  endl;
+    }
+    else
+    {
+      cout << "Syntax check completed with no error.\n";
+      
+      string b = parser_main(pf);
+      cout << endl << endl << endl << endl << b << endl;
+    }
+    
     getchar();
     return 0;
     
-    string p1;
-    if (!(argc>1)) { p1=""; }
-    else      { p1=argv[1]; }
-    double result=0;
     
     
-    if (p1[0]=='/' || p1[0]=='\\') p1[0]='-';
+    //Parse out some parameters
+      string p1;
+      if (!(argc>1)) { p1=""; }
+      else      { p1=argv[1]; }
+      double result=0; 
+    
+    if (p1[0]=='/' || p1[0]=='\\') p1[0] = '-';
     
     if (p1=="-r")
     {
