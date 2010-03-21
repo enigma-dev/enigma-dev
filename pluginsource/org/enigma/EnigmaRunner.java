@@ -116,7 +116,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		 * Usually you shouldn't catch an Error, however,
 		 * in this case we catch it to abort the module,
 		 * rather than allowing the failed module to cause
-		 * the entire program to fail
+		 * the entire program/plugin to fail
 		 */
 		catch (NoClassDefFoundError e)
 			{
@@ -465,5 +465,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 	public boolean subframeRequested(Resource<?,?> res, ResNode node)
 		{
 		return false;
+		}
+
+	public static void main(String[] args)
+		{
+		LGM.main(args);
+		new EnigmaRunner();
 		}
 	}

@@ -4,6 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LateralGM"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/SvnKit"/>
 	<classpathentry kind="src" path=""/>
-	<classpathentry kind="lib" path="/LateralGM"/>
+	<classpathentry kind="lib" path="/LateralGM" sourcepath="/LateralGM"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JNA"/>
 	<classpathentry kind="output" path=""/>
 </classpath>

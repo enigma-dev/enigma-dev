@@ -91,7 +91,9 @@ public final class EnigmaWriter
 			out = new GmStreamEncoder(egmf);
 			out.write("EGMf".getBytes());
 			out.write4(4); //version
-			writeStr(out,f.gameSettings.gameIconData);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			f.gameSettings.gameIcon.write(baos);
+			writeStr(out,baos.toByteArray());
 
 			ArrayList<LibAction> ala = getQuestionLibActions();
 			out.write4(f.scripts.size() + ala.size());
