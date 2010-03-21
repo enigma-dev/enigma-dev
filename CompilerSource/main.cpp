@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     clock_t ce = clock();
     
     if (a != unsigned(-1)) {
-      cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few milliseconds of compile.\n";
+      cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
       print_err_line_at(a);
       getchar(); return 1;
     }

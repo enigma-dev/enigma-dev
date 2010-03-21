@@ -504,11 +504,17 @@ namespace syncheck
           { error="Assignment operator expected before string constant"; return pos; }
           if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
           { error="Operator expected before string constant"; return pos; }
-          pos++;
-          while (code[pos]!='"') pos++;
-          pos++;
-          lastnamed[level]=LN_DIGIT;
-          continue;
+          
+          if (OPTION_CPP_STRINGS)
+            while (code[++pos]!='"') { 
+              if (code[pos] == '\\')
+                pos++;
+            }
+          else
+            while (code[++pos]!='"');
+          
+          lastnamed[level] = LN_DIGIT;
+          pos++; continue;
         }
         else if (code[pos]=='\'')
         {
@@ -516,11 +522,17 @@ namespace syncheck
           { error="Assignment operator expected before string constant"; return pos; }
           if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
           { error="Operator expected before string constant"; return pos; }
-          pos++;
-          while (code[pos]!='\'') pos++;
-          pos++;
+          
+          if (OPTION_CPP_STRINGS)
+            while (code[++pos]!='\'') { 
+              if (code[pos] == '\\')
+                pos++;
+            }
+          else
+            while (code[++pos]!='\'');
+          
           lastnamed[level]=LN_DIGIT;
-          continue;
+          pos++; continue;
         }
 
 

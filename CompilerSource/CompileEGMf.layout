@@ -4,7 +4,7 @@
 	<File name="cfile_parse\auxilary.h" open="0" top="0" tabpos="8">
 		<Cursor position="1040" topLine="33" />
 	</File>
-	<File name="cfile_parse\auxilary_gml.h" open="1" top="0" tabpos="9">
+	<File name="cfile_parse\auxilary_gml.h" open="1" top="0" tabpos="11">
 		<Cursor position="407" topLine="2" />
 	</File>
 	<File name="cfile_parse\cfile_parse.cpp" open="0" top="0" tabpos="1">
@@ -19,8 +19,8 @@
 	<File name="cfile_parse\cfile_parse_macros.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="14875" topLine="412" />
 	</File>
-	<File name="cfile_parse\cfile_pushing.cpp" open="1" top="0" tabpos="10">
-		<Cursor position="2963" topLine="64" />
+	<File name="cfile_parse\cfile_pushing.cpp" open="0" top="0" tabpos="10">
+		<Cursor position="2964" topLine="64" />
 	</File>
 	<File name="cfile_parse\cfile_pushing.h" open="0" top="0" tabpos="0">
 		<Cursor position="2246" topLine="20" />
@@ -40,7 +40,7 @@
 	<File name="cfile_parse\expev_macros.h" open="0" top="0" tabpos="0">
 		<Cursor position="27194" topLine="747" />
 	</File>
-	<File name="cfile_parse\expression_evaluator.cpp" open="1" top="0" tabpos="11">
+	<File name="cfile_parse\expression_evaluator.cpp" open="1" top="0" tabpos="9">
 		<Cursor position="2422" topLine="21" />
 	</File>
 	<File name="cfile_parse\expression_evaluator.h" open="0" top="0" tabpos="0">
@@ -58,14 +58,14 @@
 	<File name="cfile_parse\keyword_operator.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="5224" topLine="124" />
 	</File>
-	<File name="cfile_parse\macro_functions.cpp" open="1" top="1" tabpos="12">
-		<Cursor position="5952" topLine="37" />
+	<File name="cfile_parse\macro_functions.cpp" open="1" top="0" tabpos="10">
+		<Cursor position="3557" topLine="46" />
 	</File>
-	<File name="cfile_parse\macro_functions.h" open="1" top="0" tabpos="13">
+	<File name="cfile_parse\macro_functions.h" open="0" top="0" tabpos="13">
 		<Cursor position="2231" topLine="0" />
 	</File>
 	<File name="cfile_parse\main.cpp" open="0" top="0" tabpos="9">
-		<Cursor position="9531" topLine="314" />
+		<Cursor position="7870" topLine="242" />
 	</File>
 	<File name="cfile_parse\parsein.h" open="0" top="0" tabpos="8">
 		<Cursor position="6967" topLine="202" />
@@ -124,8 +124,8 @@
 	<File name="general\string.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="2252" topLine="6" />
 	</File>
-	<File name="main.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="5207" topLine="109" />
+	<File name="main.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="4608" topLine="82" />
 	</File>
 	<File name="parser\parser.cpp" open="1" top="0" tabpos="5">
 		<Cursor position="6127" topLine="119" />
@@ -134,13 +134,13 @@
 		<Cursor position="1376" topLine="3" />
 	</File>
 	<File name="parser\parser_components.cpp" open="1" top="0" tabpos="6">
-		<Cursor position="6281" topLine="184" />
+		<Cursor position="5129" topLine="109" />
 	</File>
 	<File name="parser\parser_components.h" open="1" top="0" tabpos="7">
 		<Cursor position="2533" topLine="19" />
 	</File>
 	<File name="settings.h" open="1" top="0" tabpos="8">
-		<Cursor position="2344" topLine="0" />
+		<Cursor position="2346" topLine="0" />
 	</File>
 	<File name="syntax\checkfile.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="4031" topLine="67" />
@@ -152,9 +152,9 @@
 		<Cursor position="1511" topLine="12" />
 	</File>
 	<File name="syntax\syntax.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="6301" topLine="140" />
+		<Cursor position="18724" topLine="498" />
 	</File>
 	<File name="syntax\syntaxtools.h" open="1" top="0" tabpos="3">
-		<Cursor position="3225" topLine="70" />
+		<Cursor position="3225" topLine="67" />
 	</File>
 </CodeBlocks_layout_file>
