@@ -17,12 +17,12 @@ public class Path extends Structure
 	String name;
 	int id;
 
-	boolean SMOOTH;
-	boolean CLOSED;
-	int PRECISION;
-	Room.ByReference BACKGROUND_ROOM;
-	int SNAP_X;
-	int SNAP_Y;
+	boolean smooth;
+	boolean closed;
+	int precision;
+	Room.ByReference backgroundRoom;
+	int snapX;
+	int snapY;
 
 	PathPoint[] points;
 	}

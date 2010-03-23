@@ -15,10 +15,10 @@ public class Font extends Structure
 	String name;
 	int id;
 
-	String FONT_NAME;
-	int SIZE;
-	boolean BOLD;
-	boolean ITALIC;
-	int RANGE_MIN;
-	int RANGE_MAX;
+	String fontName;
+	int size;
+	boolean bold;
+	boolean italic;
+	int rangeMin;
+	int rangeMax;
 	}

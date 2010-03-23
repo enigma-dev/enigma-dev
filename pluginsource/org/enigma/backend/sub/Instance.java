@@ -15,12 +15,12 @@ import com.sun.jna.Structure;
 
 public class Instance extends Structure
 	{
-	int X;
-	int Y;
-	GmObject.ByReference OBJECT;
-	int ID;
-	String CREATION_CODE;
-	boolean LOCKED;
+	int x;
+	int y;
+	GmObject.ByReference object;
+	int id;
+	String creationCode;
+	boolean locked;
 
 	Room.ByReference room;
 	}

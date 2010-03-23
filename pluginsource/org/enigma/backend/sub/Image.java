@@ -14,5 +14,5 @@ public class Image extends Structure
 	{
 	int width;
 	int height;
-	byte[] data;
+	int[] pixels;
 	}

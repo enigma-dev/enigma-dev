@@ -14,16 +14,15 @@ import com.sun.jna.Structure;
 
 public class BackgroundDef extends Structure
 	{
-	boolean VISIBLE;
-	boolean FOREGROUND;
-	boolean BACKGROUND;
-	int X;
-	int Y;
-	boolean TILE_HORIZ;
-	boolean TILE_VERT;
-	int H_SPEED;
-	int V_SPEED;
-	boolean STRETCH;
+	boolean visible;
+	boolean foreground;
+	int x;
+	int y;
+	boolean tileHoriz;
+	boolean tileVert;
+	int hSpeed;
+	int vSpeed;
+	boolean stretch;
 
 	Background.ByReference background;
 	}

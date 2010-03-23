@@ -15,16 +15,16 @@ import com.sun.jna.Structure;
 
 public class Tile extends Structure
 	{
-	int BG_X;
-	int BG_Y;
-	int ROOM_X;
-	int ROOM_Y;
-	int WIDTH;
-	int HEIGHT;
-	int DEPTH;
-	Background.ByReference BACKGROUND;
-	int ID;
-	boolean LOCKED;
-	
+	int bgX;
+	int bgY;
+	int roomX;
+	int roomY;
+	int width;
+	int height;
+	int depth;
+	Background.ByReference background;
+	int id;
+	boolean locked;
+
 	Room.ByReference room;
 	}

@@ -15,17 +15,17 @@ public class Sound extends Structure
 	String name;
 	int id;
 
-	int KIND;
-	int FILE_TYPE;
-	String FILE_NAME;
-	boolean CHORUS;
-	boolean ECHO;
-	boolean FLANGER;
-	boolean GARGLE;
-	boolean REVERB;
-	double VOLUME;
-	double PAN;
-	boolean PRELOAD;
+	int kind;
+	int fileType;
+	String fileName;
+	boolean chorus;
+	boolean echo;
+	boolean flanger;
+	boolean gargle;
+	boolean reverb;
+	double volume;
+	double pan;
+	boolean preload;
 
 	byte[] data;
 	}

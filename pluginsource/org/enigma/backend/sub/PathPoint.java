@@ -12,7 +12,7 @@ import com.sun.jna.Structure;
 
 public class PathPoint extends Structure
 	{
-	int X;
-	int Y;
-	int SPEED;
+	int x;
+	int y;
+	int speed;
 	}

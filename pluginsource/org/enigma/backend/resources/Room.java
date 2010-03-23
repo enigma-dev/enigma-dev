@@ -20,32 +20,32 @@ public class Room extends Structure
 	String name;
 	int id;
 
-	String CAPTION;
-	int WIDTH;
-	int HEIGHT;
-	int SNAP_X;
-	int SNAP_Y;
-	boolean ISOMETRIC;
-	int SPEED;
-	boolean PERSISTENT;
-	int BACKGROUND_COLOR; //GM color
-	boolean DRAW_BACKGROUND_COLOR;
-	String CREATION_CODE;
-	boolean REMEMBER_WINDOW_SIZE;
-	int EDITOR_WIDTH;
-	int EDITOR_HEIGHT;
-	boolean SHOW_GRID;
-	boolean SHOW_OBJECTS;
-	boolean SHOW_TILES;
-	boolean SHOW_BACKGROUNDS;
-	boolean SHOW_FOREGROUNDS;
-	boolean SHOW_VIEWS;
-	boolean DELETE_UNDERLYING_OBJECTS;
-	boolean DELETE_UNDERLYING_TILES;
-	int CURRENT_TAB;
-	int SCROLL_BAR_X;
-	int SCROLL_BAR_Y;
-	boolean ENABLE_VIEWS;
+	String caption;
+	int width;
+	int height;
+	int snapX;
+	
+	int snapY;
+	boolean isometric;
+	int speed;
+	boolean persistent;
+	int backgroundColor;
+	boolean drawBackgroundColor; //GM color
+	String creationCode;
+	boolean rememberWindowSize;
+	int editorWidth;
+	int editorHeight;
+	boolean showGrid;
+	boolean showObjects;
+	boolean showTiles;
+	boolean showBackgrounds;
+	boolean showViews;
+	boolean deleteUnderlyingObjects;
+	boolean deleteUnderlyingTiles;
+	int currentTab;
+	int scrollBarX;
+	int scrollBarY;
+	boolean enableViews;
 
 	BackgroundDef[] backgroundDefs;
 	View[] views;

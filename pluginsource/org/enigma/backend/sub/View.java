@@ -14,18 +14,18 @@ import com.sun.jna.Structure;
 
 public class View extends Structure
 	{
-	boolean VISIBLE;
-	int VIEW_X;
-	int VIEW_Y;
-	int VIEW_W;
-	int VIEW_H;
-	int PORT_X;
-	int PORT_Y;
-	int PORT_W;
-	int PORT_H;
-	int BORDER_H;
-	int BORDER_V;
-	int SPEED_H;
-	int SPEED_V;
-	GmObject.ByReference OBJECT;
+	boolean visible;
+	int viewX;
+	int viewY;
+	int viewW;
+	int viewH;
+	int portX;
+	int portY;
+	int portW;
+	int portH;
+	int borderH;
+	int borderV;
+	int speedH;
+	int speedV;
+	GmObject.ByReference object;
 	}

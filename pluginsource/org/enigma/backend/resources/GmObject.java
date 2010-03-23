@@ -17,13 +17,13 @@ public class GmObject extends Structure
 	String name;
 	int id;
 
-	Sprite.ByReference SPRITE;
-	boolean SOLID;
-	boolean VISIBLE;
-	int DEPTH;
-	boolean PERSISTENT;
-	GmObject.ByReference PARENT;
-	Sprite.ByReference MASK;
+	Sprite.ByReference sprite;
+	boolean solid;
+	boolean visible;
+	int depth;
+	boolean persistent;
+	GmObject.ByReference parent;
+	Sprite.ByReference mask;
 
 	Event[][] events;
 
