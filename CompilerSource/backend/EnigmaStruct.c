@@ -5,22 +5,35 @@ typedef struct {
 	String filename;
 
 	Sprite[] sprites;
+	int spriteCount;
 	/*Sound[] sounds;
+	int soundCount;
 	Background[] backgrounds;
+	int backgroundCount;
 	Path[] paths;
+	int pathCount;
 	Script[] scripts;
+	int scriptCount;
 	Font[] fonts;
+	int fontCount;
 	Timeline[] timelines;
+	int timelineCount;
 	GmObject[] gmObjects;
+	int gmObjectCount;
 	Room[] rooms;
+	int roomCount;
 
 	Trigger[] triggers;
+	int triggerCount;
 	Constant[] constants;
-	Include[] includes;*/
+	int constantCount;
+	Include[] includes;
+	int includeCount;*/
 	String[] packages;
+	int packageCount;
 
 	//GameInformation gameInfo;
 	//GameSettings gameSettings;
-	int lastInstanceId = 100000;
-	int lastTileId = 10000000;
+	int lastInstanceId;
+	int lastTileId;
 } EnigmaStruct, *pEnigmaStruct;

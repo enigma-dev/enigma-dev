@@ -20,4 +20,5 @@ typedef struct {
 	int bbBottom;
 
 	Image[] subImages;
+	int subImageCount;
 } Sprite, *pSprite;
