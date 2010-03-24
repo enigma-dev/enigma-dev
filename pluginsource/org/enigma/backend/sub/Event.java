@@ -19,4 +19,5 @@ public class Event extends Structure
 	int mainId;
 
 	Action[] actions;
+	int actionCount;
 	}

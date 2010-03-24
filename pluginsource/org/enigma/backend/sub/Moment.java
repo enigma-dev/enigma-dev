@@ -14,4 +14,5 @@ public class Moment extends Structure
 	{
 	int stepNo;
 	Action[] actions;
+	int actionCount;
 	}

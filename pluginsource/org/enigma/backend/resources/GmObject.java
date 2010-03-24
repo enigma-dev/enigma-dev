@@ -8,7 +8,7 @@
 
 package org.enigma.backend.resources;
 
-import org.enigma.backend.sub.Event;
+import org.enigma.backend.sub.MainEvent;
 
 import com.sun.jna.Structure;
 
@@ -25,7 +25,8 @@ public class GmObject extends Structure
 	GmObject.ByReference parent;
 	Sprite.ByReference mask;
 
-	Event[][] events;
+	MainEvent[] mainEvents;
+	int mainEventCount;
 
 	public static class ByReference extends GmObject implements Structure.ByReference
 		{

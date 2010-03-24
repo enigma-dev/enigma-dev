@@ -25,4 +25,5 @@ public class Path extends Structure
 	int snapY;
 
 	PathPoint[] points;
+	int pointCount;
 	}

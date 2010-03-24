@@ -28,4 +28,5 @@ public class Sound extends Structure
 	boolean preload;
 
 	byte[] data;
+	int size;
 	}

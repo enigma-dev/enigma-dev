@@ -13,4 +13,5 @@ import com.sun.jna.Structure;
 public class MainEvent extends Structure
 	{
 	Event[] events;
+	int eventCount;
 	}

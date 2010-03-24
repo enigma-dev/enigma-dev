@@ -48,9 +48,13 @@ public class Room extends Structure
 	boolean enableViews;
 
 	BackgroundDef[] backgroundDefs;
+	int backgroundDefCount;
 	View[] views;
+	int viewCount;
 	Instance[] instances;
+	int instanceCount;
 	Tile[] tiles;
+	int tileCount;
 
 	public static class ByReference extends Room implements Structure.ByReference
 		{

@@ -31,19 +31,32 @@ public class EnigmaStruct extends Structure
 	public String filename = null;
 
 	public Sprite[] sprites;
+	public int spriteCount;
 	public Sound[] sounds;
+	public int soundCount;
 	public Background[] backgrounds;
+	public int backgroundCount;
 	public Path[] paths;
+	public int pathCount;
 	public Script[] scripts;
+	public int scriptCount;
 	public Font[] fonts;
+	public int fontCount;
 	public Timeline[] timelines;
+	public int timelineCount;
 	public GmObject[] gmObjects;
+	public int gmObjectCount;
 	public Room[] rooms;
+	public int roomCount;
 
 	public Trigger[] triggers;
+	public int triggerCount;
 	public Constant[] constants;
+	public int constantCount;
 	public Include[] includes;
+	public int includeCount;
 	public String[] packages;
+	public int packageCount;
 
 	public GameInformation gameInfo;
 	public GameSettings gameSettings;

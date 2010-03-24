@@ -32,6 +32,7 @@ public class Sprite extends Structure
 	int bbBottom;
 
 	Image[] subImages;
+	int subImageCount;
 
 	public static class ByReference extends Sprite implements Structure.ByReference
 		{

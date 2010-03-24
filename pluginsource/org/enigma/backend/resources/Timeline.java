@@ -18,4 +18,5 @@ public class Timeline extends Structure
 	int id;
 
 	Moment[] moments;
+	int momentCount;
 	}
