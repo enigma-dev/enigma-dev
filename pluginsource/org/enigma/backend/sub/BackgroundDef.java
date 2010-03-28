@@ -8,8 +8,6 @@
 
 package org.enigma.backend.sub;
 
-import org.enigma.backend.resources.Background;
-
 import com.sun.jna.Structure;
 
 public class BackgroundDef extends Structure
@@ -24,5 +22,5 @@ public class BackgroundDef extends Structure
 	int vSpeed;
 	boolean stretch;
 
-	Background.ByReference background;
+	int backgroundId;
 	}

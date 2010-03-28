@@ -19,24 +19,23 @@
 
 package org.enigma;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.enigma.backend.EnigmaStruct;
+import org.enigma.backend.resources.GmObject;
+import org.enigma.backend.resources.Room;
+import org.enigma.backend.resources.Script;
+import org.enigma.backend.resources.Sprite;
+import org.enigma.backend.sub.Image;
+import org.enigma.backend.sub.MainEvent;
 import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmFormatException;
 import org.lateralgm.file.GmStreamEncoder;
-import org.lateralgm.resources.GmObject;
 import org.lateralgm.resources.ResourceReference;
-import org.lateralgm.resources.Room;
-import org.lateralgm.resources.Script;
-import org.lateralgm.resources.Sprite;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
@@ -47,11 +46,6 @@ import org.lateralgm.resources.library.Library;
 import org.lateralgm.resources.sub.Action;
 import org.lateralgm.resources.sub.Argument;
 import org.lateralgm.resources.sub.Event;
-import org.lateralgm.resources.sub.Instance;
-import org.lateralgm.resources.sub.MainEvent;
-import org.lateralgm.resources.sub.View;
-import org.lateralgm.resources.sub.Instance.PInstance;
-import org.lateralgm.resources.sub.View.PView;
 
 public final class EnigmaWriter
 	{
@@ -59,9 +53,9 @@ public final class EnigmaWriter
 		{
 		}
 
-	public static boolean writeEgmFile(EnigmaFrame ef, GmFile f, File egmf)
+	public static boolean writeEgmFile(EnigmaFrame ef, GmFile f)
 		{
-		return new EnigmaWriter().writeFile(ef,f,egmf);
+		return new EnigmaWriter().writeFile(ef,f);
 		}
 
 	public static void writeStr(GmStreamEncoder out, Object data) throws IOException
@@ -82,93 +76,109 @@ public final class EnigmaWriter
 		out.write4(0);
 		}
 
-	private boolean writeFile(EnigmaFrame ef, GmFile f, File egmf)
+	private boolean writeFile(EnigmaFrame ef, GmFile i)
 		{
 		ef.progress(0,"Sending Enigma resource names");
-		GmStreamEncoder out = null;
-		try
+
+		EnigmaStruct o = new EnigmaStruct();
+		o.fileVersion = i.fileVersion;
+		o.filename = i.filename;
+		o.lastInstanceId = i.lastInstanceId;
+		o.lastTileId = i.lastTileId;
+
+		writeSprites(o,i);
+		writeScripts(o,i);
+		writeObjects(o,i);
+		writeRooms(o,i);
+
+		return true;
+		/*		o.spriteCount = i.sprites.size();
+				public Sprite[] sprites;
+				o.soundCount = i.sounds.size();
+				public Sound[] sounds;
+				o.backgroundCount = i.backgrounds.size();
+				public Background[] backgrounds;
+				o.pathCount = i.paths.size();
+				public Path[] paths;
+				o.scriptCount = i.scripts.size();
+				public Script[] scripts;
+				o.fontCount = i.fonts.size();
+				public Font[] fonts;
+				o.timelineCount = i.timelines.size();
+				public Timeline[] timelines;
+				o.gmObjectCount = i.gmObjects.size();
+				public GmObject[] gmObjects;
+				o.roomCount = i.rooms.size();
+				public Room[] rooms;
+
+				o.triggerCount = i.triggers.size();
+				public Trigger[] triggers;
+				o.constantCount = i.constants.size();
+				public Constant[] constants;
+				o.includeCount = i.includes.size();
+				public Include[] includes;
+				o.packageCount = i.packages.size();
+				public String[] packages;*/
+
+		/*out.write("EGMf".getBytes());
+		out.write4(4); //version
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		f.gameSettings.gameIcon.write(baos);
+		writeStr(out,baos.toByteArray());
+
+		ArrayList<LibAction> ala = getQuestionLibActions();
+		out.write4(f.scripts.size() + ala.size());
+		for (Script s : f.scripts)
+			writeStr(out,s.getName());
+		for (LibAction la : ala)
+			writeStr(out,"lib" + la.parentId + "_action" + la.id);
+
+		ArrayList<String> names = new ArrayList<String>(f.gmObjects.size());
+		out.write4(f.gmObjects.size());
+		for (GmObject o : f.gmObjects)
 			{
-			out = new GmStreamEncoder(egmf);
-			out.write("EGMf".getBytes());
-			out.write4(4); //version
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			f.gameSettings.gameIcon.write(baos);
-			writeStr(out,baos.toByteArray());
-
-			ArrayList<LibAction> ala = getQuestionLibActions();
-			out.write4(f.scripts.size() + ala.size());
-			for (Script s : f.scripts)
-				writeStr(out,s.getName());
-			for (LibAction la : ala)
-				writeStr(out,"lib" + la.parentId + "_action" + la.id);
-
-			ArrayList<String> names = new ArrayList<String>(f.gmObjects.size());
-			out.write4(f.gmObjects.size());
-			for (GmObject o : f.gmObjects)
-				{
-				out.write4(o.getId());
-				String name = o.getName();
-				if (names.contains(name)) throw new GmFormatException(f,"Duplicate object name: " + name);
-				writeStr(out,name);
-				}
-
-			out.write4(f.rooms.size());
-			for (Room o : f.rooms)
-				{
-				out.write4(o.getId());
-				writeStr(out,o.getName());
-				}
-
-			out.write4(f.sprites.size());
-			for (Sprite o : f.sprites)
-				{
-				out.write4(o.getId());
-				writeStr(out,o.getName());
-				}
-			ef.progress(30,"Sending Enigma resource data");
-
-			writeScripts(f,out);
-			for (LibAction la : ala)
-				writeStr(out,la.execInfo);
-
-			ef.pb.setValue(45);
-			writeObjects(f,out);
-			ef.pb.setValue(60);
-			writeRooms(f,out);
-			ef.pb.setValue(75);
-
-			out.write("myn".getBytes());
-			out.write(0);
-			writeStr(out,"");
-			writeStr(out,"");
-
-			writeSprites(f,out); //after myn
-			ef.pb.setValue(90);
-
-			out.close();
-			ef.progress(95,"Executing Enigma...");
-			return true;
+			out.write4(o.getId());
+			String name = o.getName();
+			if (names.contains(name)) throw new GmFormatException(f,"Duplicate object name: " + name);
+			writeStr(out,name);
 			}
-		catch (Exception e)
+
+		out.write4(f.rooms.size());
+		for (Room o : f.rooms)
 			{
-			e.printStackTrace();
-			ef.progress(100,"Failed to prepare Enigma",e.getMessage());
+			out.write4(o.getId());
+			writeStr(out,o.getName());
 			}
-		if (out != null)
+
+		out.write4(f.sprites.size());
+		for (Sprite o : f.sprites)
 			{
-			try
-				{
-				out.close();
-				egmf.delete();
-				}
-			catch (IOException e)
-				{
-				egmf.deleteOnExit();
-				e.printStackTrace();
-				ef.progress(100,"Failed to prepare Enigma",e.getMessage());
-				}
+			out.write4(o.getId());
+			writeStr(out,o.getName());
 			}
-		return false;
+		ef.progress(30,"Sending Enigma resource data");
+
+		writeScripts(f,out);
+		for (LibAction la : ala)
+			writeStr(out,la.execInfo);
+
+		ef.pb.setValue(45);
+		writeObjects(f,out);
+		ef.pb.setValue(60);
+		writeRooms(f,out);
+		ef.pb.setValue(75);
+
+		out.write("myn".getBytes());
+		out.write(0);
+		writeStr(out,"");
+		writeStr(out,"");
+
+		writeSprites(f,out); //after myn
+		ef.pb.setValue(90);
+
+		out.close();
+		ef.progress(95,"Executing Enigma...");
+		return true;*/
 		}
 
 	public static ArrayList<LibAction> getQuestionLibActions()
@@ -180,79 +190,119 @@ public final class EnigmaWriter
 		return ala;
 		}
 
-	public void writeScripts(GmFile f, GmStreamEncoder out) throws IOException
+	public void writeScripts(EnigmaStruct o, GmFile i)
 		{
-		out.write("scr".getBytes());
-		out.write(0);
-		for (Script s : f.scripts)
-			writeStr(out,s.get(PScript.CODE));
-		}
-
-	public void writeObjects(GmFile f, GmStreamEncoder out) throws IOException
-		{
-		out.write("obj".getBytes());
-		out.write(0);
-		for (GmObject o : f.gmObjects)
+		int size = i.scripts.size();
+		o.scriptCount = size;
+		o.scripts = new Script[size];
+		org.lateralgm.resources.Script[] isl = i.scripts.toArray(new org.lateralgm.resources.Script[0]);
+		for (int s = 0; s < size; s++)
 			{
-			out.writeId((ResourceReference<?>) o.get(PGmObject.SPRITE));
-			out.writeBool(o.properties,PGmObject.SOLID,PGmObject.VISIBLE);
-			out.write4(o.properties,PGmObject.DEPTH);
-			out.writeBool(o.properties,PGmObject.PERSISTENT);
-			out.writeId((ResourceReference<?>) o.get(PGmObject.PARENT)); //or -1 (not -100)
-			out.writeId((ResourceReference<?>) o.get(PGmObject.MASK)); //or -1
-			for (int j = 0; j < 11; j++)
-				for (Event ev : o.mainEvents.get(j).events)
-					{
-					String s = getActionsCode(ev);
-					if (s == null || s.length() == 0) continue;
-					if (writeEvent(out,ev)) writeStr(out,s);
-					}
-			out.write4(0);
+			Script oo = o.scripts[s];
+			org.lateralgm.resources.Script io = isl[s];
+
+			oo.name = io.getName();
+			oo.id = io.getId();
+			oo.code = io.get(PScript.CODE);
 			}
 		}
 
-	public void writeSprites(GmFile f, GmStreamEncoder out) throws IOException
+	public void writeObjects(EnigmaStruct o, GmFile i)
 		{
-		out.write("spr".getBytes());
-		out.write(0);
-		for (Sprite s : f.sprites)
+		int size = i.gmObjects.size();
+		o.gmObjectCount = size;
+		o.gmObjects = new GmObject[size];
+		org.lateralgm.resources.GmObject[] iol = i.gmObjects.toArray(new org.lateralgm.resources.GmObject[0]);
+		for (int s = 0; s < size; s++)
 			{
-			out.write4(s.subImages.getWidth());
-			out.write4(s.subImages.getHeight());
-			out.write4(s.properties,PSprite.ORIGIN_X,PSprite.ORIGIN_Y);
-			out.write4(s.subImages.size());
-			boolean transp = (Boolean) s.get(PSprite.TRANSPARENT);
-			for (BufferedImage bi : s.subImages)
-				{
-				int width = bi.getWidth();
-				int height = bi.getHeight();
-				out.write4(transp ? bi.getRGB(0,height - 1) : 0);
-				ByteArrayOutputStream data = new ByteArrayOutputStream();
-				for (int y = 0; y < height; y++)
-					for (int x = 0; x < width; x++)
-						{
-						int rgb = bi.getRGB(x,y);
-						//GM way???
-						//						data.write(rgb & 255);
-						//						data.write((rgb >> 8) & 255);
-						//						data.write((rgb >> 16) & 255);
-						//						data.write((rgb >> 24) & 255);
+			GmObject oo = o.gmObjects[s];
+			org.lateralgm.resources.GmObject io = iol[s];
 
-						//Old way
-						data.write(rgb >> 16 & 255);
-						data.write(rgb >> 8 & 255);
-						data.write(rgb & 255);
-						}
-				out.write4(data.size());
-				out.compress(data.toByteArray());
-				out.write4(0);
-				}
+			oo.name = io.getName();
+			oo.id = io.getId();
+
+			//			oo.sprite = io.get(PGmObject.SPRITE);
+			oo.solid = io.get(PGmObject.SOLID);
+			oo.visible = io.get(PGmObject.VISIBLE);
+			oo.depth = io.get(PGmObject.DEPTH);
+			oo.persistent = io.get(PGmObject.PERSISTENT);
+			//			GmObject.ByReference parent;
+			//			Sprite.ByReference mask;
+
+			oo.mainEventCount = io.mainEvents.size();
+			oo.mainEvents = new MainEvent[oo.mainEventCount];
+			//TODO: handle main events
 			}
 		}
 
-	public void writeRooms(GmFile f, GmStreamEncoder out) throws IOException
+	public void writeSprites(EnigmaStruct o, GmFile i)
 		{
-		out.write("rmm".getBytes());
+		int size = i.sprites.size();
+		o.spriteCount = size;
+		o.sprites = new Sprite[size];
+		org.lateralgm.resources.Sprite[] isl = i.sprites.toArray(new org.lateralgm.resources.Sprite[0]);
+		for (int s = 0; s < size; s++)
+			{
+			Sprite os = o.sprites[s];
+			org.lateralgm.resources.Sprite is = isl[s];
+
+			os.name = is.getName();
+			os.id = is.getId();
+
+			os.transparent = is.get(PSprite.TRANSPARENT);
+			os.shape = is.get(PSprite.SHAPE); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
+			os.alphaTolerance = is.get(PSprite.ALPHA_TOLERANCE);
+			os.separateMask = is.get(PSprite.SEPARATE_MASK);
+			os.smoothEdges = is.get(PSprite.SMOOTH_EDGES);
+			os.preload = is.get(PSprite.PRELOAD);
+			os.originX = is.get(PSprite.ORIGIN_X);
+			os.originY = is.get(PSprite.ORIGIN_Y);
+			os.bbMode = is.get(PSprite.BB_MODE); //0*=Automatic, 1=Full image, 2=Manual
+			os.bbLeft = is.get(PSprite.BB_LEFT);
+			os.bbRight = is.get(PSprite.BB_RIGHT);
+			os.bbTop = is.get(PSprite.BB_TOP);
+			os.bbBottom = is.get(PSprite.BB_BOTTOM);
+
+			os.subImageCount = is.subImages.size();
+			os.subImages = new Image[os.subImageCount];
+			//			is.subImages.get(0);
+			//			Image[] subImages;
+			//			int subImageCount;
+			}
+		}
+
+	public void writeRooms(EnigmaStruct o, GmFile i)
+		{
+		int size = i.rooms.size();
+		o.roomCount = size;
+		o.rooms = new Room[size];
+		org.lateralgm.resources.Room[] irl = i.rooms.toArray(new org.lateralgm.resources.Room[0]);
+		for (int s = 0; s < size; s++)
+			{
+			Room os = o.rooms[s];
+			org.lateralgm.resources.Room is = irl[s];
+
+			os.name = is.getName();
+			os.id = is.getId();
+
+			os.caption = is.get(PRoom.CAPTION);
+			os.width = is.get(PRoom.WIDTH);
+			os.height = is.get(PRoom.HEIGHT);
+
+			// vvv may be useless vvv //
+			os.snapX = is.get(PRoom.SNAP_X);
+			os.snapY = is.get(PRoom.SNAP_Y);
+			os.isometric = is.get(PRoom.ISOMETRIC);
+			// ^^^ may be useless ^^^ //
+
+			os.speed = is.get(PRoom.SPEED);
+			os.persistent = is.get(PRoom.PERSISTENT);
+			os.backgroundColor = is.get(PRoom.BACKGROUND_COLOR);
+			os.drawBackgroundColor = is.get(PRoom.DRAW_BACKGROUND_COLOR);
+			os.creationCode = is.get(PRoom.CREATION_CODE);
+			}
+
+		/*out.write("rmm".getBytes());
 		out.write(0);
 		for (Room r : f.rooms)
 			{
@@ -272,42 +322,60 @@ public final class EnigmaWriter
 						PView.PORT_X,PView.PORT_Y,PView.PORT_W,PView.PORT_H,PView.BORDER_H,PView.BORDER_V,
 						PView.SPEED_H,PView.SPEED_V);
 				out.writeId((ResourceReference<?>) view.properties.get(PView.OBJECT));
-				
-/*				out.writeBool(view.properties..visible);
-				out.write4(view.viewX);
-				out.write4(view.viewY);
-				out.write4(view.viewW);
-				out.write4(view.viewH);
-				out.write4(view.portX);
-				out.write4(view.portY);
-				out.write4(view.portW);
-				out.write4(view.portH);
-				out.write4(view.hbor);
-				out.write4(view.vbor);
-				out.write4(view.hspeed);
-				out.write4(view.vspeed);
-				out.writeId(view.objectFollowing);
-				if (deRef(view.objectFollowing) != null)
-					System.out.println("??" + view.objectFollowing.get().getId());
-				else
-					System.out.println("?-1");
-*/				}
-			for (Instance i : r.instances)
-				{
-				out.write("inst".getBytes());
-				out.write4((Integer) i.properties.get(PInstance.ID));
-				ResourceReference<GmObject> or = i.properties.get(PInstance.OBJECT);
-				out.writeId(or);
-				out.write4(i.getPosition().x);
-				out.write4(i.getPosition().y);
-				writeStr(out,i.getCreationCode());
-				}
-			out.write4(0);
-			}
+		*/
+
+		/*				out.writeBool(view.properties..visible);
+						out.write4(view.viewX);
+						out.write4(view.viewY);
+						out.write4(view.viewW);
+						out.write4(view.viewH);
+						out.write4(view.portX);
+						out.write4(view.portY);
+						out.write4(view.portW);
+						out.write4(view.portH);
+						out.write4(view.hbor);
+						out.write4(view.vbor);
+						out.write4(view.hspeed);
+						out.write4(view.vspeed);
+						out.writeId(view.objectFollowing);
+						if (deRef(view.objectFollowing) != null)
+							System.out.println("??" + view.objectFollowing.get().getId());
+						else
+							System.out.println("?-1");
+		*/
+		/*}
+					for (Instance i : r.instances)
+						{
+						out.write("inst".getBytes());
+						out.write4((Integer) i.properties.get(PInstance.ID));
+						ResourceReference<GmObject> or = i.properties.get(PInstance.OBJECT);
+						out.writeId(or);
+						out.write4(i.getPosition().x);
+						out.write4(i.getPosition().y);
+						writeStr(out,i.getCreationCode());
+						}
+					out.write4(0);
+					}
+				*/
+		}
+
+	public void toImage(BufferedImage im)
+		{
+		Image i = new Image();
+		i.width = im.getWidth();
+		i.height = im.getHeight();
+		i.pixels = new int[i.height * i.width];
+		//not really sure how to do this efficiently
+		/*		for (int y = 0; y < i.height; y++)
+					for (int x = 0; x < i.width; x++)
+						{
+						i.pixels[y * i.width + x] = im.getColorModel().getRed(0);
+						}*/
 		}
 
 	public boolean writeEvent(GmStreamEncoder out, Event ev) throws IOException
 		{
+		/*
 		String e;
 		switch (ev.mainId)
 			{
@@ -359,6 +427,8 @@ public final class EnigmaWriter
 			default:
 				return false;
 			}
+			*/
+			
 		/*
 		create; game start; room start; draw; begin step; alarm; keyboard; key press;
 		key release; step; path end; outside room; intersect boundary; collision;
@@ -366,6 +436,7 @@ public final class EnigmaWriter
 		alarm; destroy; room end; game end.
 		*/
 
+		/*
 		if (e.length() == 0) return false;
 		writeStr(out,e);
 		if (ev.mainId == MainEvent.EV_STEP)
@@ -374,7 +445,8 @@ public final class EnigmaWriter
 			out.writeId(ev.other);
 		else
 			out.write4(ev.id);
-		return true;
+			*/
+		return false;
 		}
 
 	public static boolean actionDemise = false;
@@ -423,7 +495,7 @@ public final class EnigmaWriter
 					code += args.get(0).getVal() + " = " + args.get(1).getVal() + nl;
 					break;
 				case Action.ACT_NORMAL:
-					{
+					{/*
 					if (la.execType == Action.EXEC_NONE) break;
 					ResourceReference<GmObject> apto = act.getAppliesTo();
 					if (la.question)
@@ -467,7 +539,7 @@ public final class EnigmaWriter
 						}
 					code += nl;
 					if (apto != GmObject.OBJECT_SELF) code += "}";
-					}
+					*/}
 					break;
 				}
 			}

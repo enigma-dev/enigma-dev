@@ -8,14 +8,12 @@
 
 package org.enigma.backend.sub;
 
-import org.enigma.backend.resources.GmObject;
-
 import com.sun.jna.Structure;
 
 public class Event extends Structure
 	{
 	int id;
-	GmObject other;
+	int otherObjectId; //collision, etc
 	int mainId;
 
 	Action[] actions;

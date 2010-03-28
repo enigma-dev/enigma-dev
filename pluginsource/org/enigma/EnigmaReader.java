@@ -54,7 +54,7 @@ public final class EnigmaReader
 					inst = r.addInstance();
 					GmObject temp = LGM.currentFile.gmObjects.getUnsafe(f.read4());
 					if (temp != null) inst.properties.put(PInstance.OBJECT,temp.reference);
-//					inst.setObject(LGM.currentFile.gmObjects.getUnsafe(f.read4()).reference);
+					//					inst.setObject(LGM.currentFile.gmObjects.getUnsafe(f.read4()).reference);
 					inst.setPosition(new Point(f.read4(),f.read4()));
 					break;
 				case 1:

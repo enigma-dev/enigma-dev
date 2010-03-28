@@ -8,9 +8,6 @@
 
 package org.enigma.backend.sub;
 
-import org.enigma.backend.resources.Background;
-import org.enigma.backend.resources.Room;
-
 import com.sun.jna.Structure;
 
 public class Tile extends Structure
@@ -22,9 +19,7 @@ public class Tile extends Structure
 	int width;
 	int height;
 	int depth;
-	Background.ByReference background;
+	int backgroundId;
 	int id;
 	boolean locked;
-
-	Room.ByReference room;
 	}

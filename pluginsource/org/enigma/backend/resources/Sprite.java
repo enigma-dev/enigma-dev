@@ -14,25 +14,25 @@ import com.sun.jna.Structure;
 
 public class Sprite extends Structure
 	{
-	String name;
-	int id;
+	public String name;
+	public int id;
 
-	boolean transparent;
-	int shape; //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
-	int alphaTolerance;
-	boolean separateMask;
-	boolean smoothEdges;
-	boolean preload;
-	int originX;
-	int originY;
-	int bbMode; //0*=Automatic, 1=Full image, 2=Manual
-	int bbLeft;
-	int bbRight;
-	int bbTop;
-	int bbBottom;
+	public boolean transparent;
+	public int shape; //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
+	public int alphaTolerance;
+	public boolean separateMask;
+	public boolean smoothEdges;
+	public boolean preload;
+	public int originX;
+	public int originY;
+	public int bbMode; //0*=Automatic, 1=Full image, 2=Manual
+	public int bbLeft;
+	public int bbRight;
+	public int bbTop;
+	public int bbBottom;
 
-	Image[] subImages;
-	int subImageCount;
+	public Image[] subImages;
+	public int subImageCount;
 
 	public static class ByReference extends Sprite implements Structure.ByReference
 		{

@@ -279,12 +279,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 				return;
 			}
 
-		File egmf, exef = null;
+		File exef = null;
 		try
 			{
-			egmf = File.createTempFile("egm",".egm");
-			egmf.deleteOnExit();
-
 			if (mode < 3)
 				exef = File.createTempFile("egm",".exe");
 			else if (mode == 3) exef = File.createTempFile("egm",".emd");
@@ -305,35 +302,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 		LGM.commitAll();
 		ef = new EnigmaFrame();
-		if (!EnigmaWriter.writeEgmFile(ef,LGM.currentFile,egmf)) return;
+		if (!EnigmaWriter.writeEgmFile(ef,LGM.currentFile)) return;
 
-		String enigma = findEnigma(ENIGMA);
-		if (enigma == null)
-			{
-			ef.progress(100,"Failed, Enigma not found");
-			return;
-			}
 		//		System.out.println("Compiling with " + enigma);
 
-		File err = new File(LGM.tempDir,"egmerrors.txt");
-
-		try
-			{
-			String[] cmd = new String[] { enigma,arg1,egmf.getPath(),exef.getPath(),"-e",err.getPath() };
-			for (String s : cmd)
-				System.out.print(s + " ");
-			System.out.println();
-			Process p = Runtime.getRuntime().exec(cmd);
-			new EnigmaThread(ef,p.getInputStream());
-			new EnigmaThread(p.getErrorStream(),new PrintStream(new FileOutputStream(err),true));
-			new EnigmaThread(ef,p,mode,exef);
-			}
-		catch (Exception e)
-			{
-			e.printStackTrace();
-			ef.progress(100,"Finished with errors",e.getMessage());
-			return;
-			}
+		String[] cmd = new String[] { arg1,exef.getPath() };
+		for (String s : cmd)
+			System.out.print(s + " ");
+		System.out.println();
 		}
 
 	public static int checkSyntax(String code)

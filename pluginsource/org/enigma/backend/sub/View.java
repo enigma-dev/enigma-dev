@@ -8,8 +8,6 @@
 
 package org.enigma.backend.sub;
 
-import org.enigma.backend.resources.GmObject;
-
 import com.sun.jna.Structure;
 
 public class View extends Structure
@@ -27,5 +25,5 @@ public class View extends Structure
 	int borderV;
 	int speedH;
 	int speedV;
-	GmObject.ByReference object;
+	int objectId; //following object
 	}

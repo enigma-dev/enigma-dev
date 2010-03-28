@@ -12,7 +12,7 @@ import com.sun.jna.Structure;
 
 public class Image extends Structure
 	{
-	int width;
-	int height;
-	int[] pixels;
+	public int width;
+	public int height;
+	public int[] pixels;
 	}

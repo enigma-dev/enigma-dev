@@ -17,44 +17,46 @@ import com.sun.jna.Structure;
 
 public class Room extends Structure
 	{
-	String name;
-	int id;
+	public String name;
+	public int id;
 
-	String caption;
-	int width;
-	int height;
-	int snapX;
-	
-	int snapY;
-	boolean isometric;
-	int speed;
-	boolean persistent;
-	int backgroundColor;
-	boolean drawBackgroundColor; //GM color
-	String creationCode;
-	boolean rememberWindowSize;
-	int editorWidth;
-	int editorHeight;
-	boolean showGrid;
-	boolean showObjects;
-	boolean showTiles;
-	boolean showBackgrounds;
-	boolean showViews;
-	boolean deleteUnderlyingObjects;
-	boolean deleteUnderlyingTiles;
-	int currentTab;
-	int scrollBarX;
-	int scrollBarY;
-	boolean enableViews;
+	public String caption;
+	public int width;
+	public int height;
+	public int snapX;
+	public int snapY;
+	public boolean isometric;
+	public int speed;
+	public boolean persistent;
+	public int backgroundColor; //GM color
+	public boolean drawBackgroundColor;
+	public String creationCode;
 
-	BackgroundDef[] backgroundDefs;
-	int backgroundDefCount;
-	View[] views;
-	int viewCount;
-	Instance[] instances;
-	int instanceCount;
-	Tile[] tiles;
-	int tileCount;
+	// vvv useless stuff vvv //
+	public boolean rememberWindowSize;
+	public int editorWidth;
+	public int editorHeight;
+	public boolean showGrid;
+	public boolean showObjects;
+	public boolean showTiles;
+	public boolean showBackgrounds;
+	public boolean showViews;
+	public boolean deleteUnderlyingObjects;
+	public boolean deleteUnderlyingTiles;
+	public int currentTab;
+	public int scrollBarX;
+	public int scrollBarY;
+	public boolean enableViews;
+	// ^^^ useless stuff ^^^ //
+
+	public BackgroundDef[] backgroundDefs;
+	public int backgroundDefCount;
+	public View[] views;
+	public int viewCount;
+	public Instance[] instances;
+	public int instanceCount;
+	public Tile[] tiles;
+	public int tileCount;
 
 	public static class ByReference extends Room implements Structure.ByReference
 		{

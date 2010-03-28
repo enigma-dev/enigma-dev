@@ -12,8 +12,8 @@ import com.sun.jna.Structure;
 
 public class Script extends Structure
 	{
-	String name;
-	int id;
+	public String name;
+	public int id;
 
-	String code;
+	public String code;
 	}

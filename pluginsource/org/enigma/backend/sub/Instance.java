@@ -8,19 +8,14 @@
 
 package org.enigma.backend.sub;
 
-import org.enigma.backend.resources.GmObject;
-import org.enigma.backend.resources.Room;
-
 import com.sun.jna.Structure;
 
 public class Instance extends Structure
 	{
 	int x;
 	int y;
-	GmObject.ByReference object;
+	int objectId;
 	int id;
 	String creationCode;
 	boolean locked;
-
-	Room.ByReference room;
 	}

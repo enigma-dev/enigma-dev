@@ -14,19 +14,19 @@ import com.sun.jna.Structure;
 
 public class GmObject extends Structure
 	{
-	String name;
-	int id;
+	public String name;
+	public int id;
 
-	Sprite.ByReference sprite;
-	boolean solid;
-	boolean visible;
-	int depth;
-	boolean persistent;
-	GmObject.ByReference parent;
-	Sprite.ByReference mask;
+	public int spriteId;
+	public boolean solid;
+	public boolean visible;
+	public int depth;
+	public boolean persistent;
+	public int parentId;
+	public int maskId; //sprite
 
-	MainEvent[] mainEvents;
-	int mainEventCount;
+	public MainEvent[] mainEvents;
+	public int mainEventCount;
 
 	public static class ByReference extends GmObject implements Structure.ByReference
 		{

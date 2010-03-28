@@ -8,8 +8,6 @@
 
 package org.enigma.backend.sub;
 
-import org.enigma.backend.resources.GmObject;
-
 import com.sun.jna.Structure;
 
 public class Action extends Structure
@@ -17,7 +15,7 @@ public class Action extends Structure
 	//	LibAction libAction;
 	boolean relative;
 	boolean not;
-	GmObject appliesTo;
+	int appliesToObjectId;
 
 	//	Argument[] arguments;
 	}

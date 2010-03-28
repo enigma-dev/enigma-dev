@@ -20,7 +20,7 @@ public class Path extends Structure
 	boolean smooth;
 	boolean closed;
 	int precision;
-	Room.ByReference backgroundRoom;
+	int backgroundRoomId;
 	int snapX;
 	int snapY;
 
