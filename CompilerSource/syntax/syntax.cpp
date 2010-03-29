@@ -44,6 +44,13 @@ using namespace std;
 string tostring(int val);
 
 
+//From parser_components
+int dropscope();
+int quickscope();
+int initscope(string name);
+int quicktype(unsigned flags, string name);
+
+
 namespace syncheck
 {
   int lastln;
@@ -81,6 +88,7 @@ namespace syncheck
        LEVELTYPE_SWITCH_BLOCK,
        LEVELTYPE_FOR_PARAMETERS,
        LEVELTYPE_GENERAL_STATEMENT,
+       LEVELTYPE_STRUCT,
        LEVELTYPE_LOOP
      };
 
@@ -157,15 +165,14 @@ namespace syncheck
     lastnamed[level]=LN_NOTHING;
 
     statement_pad[level]=0;
+    
+    initscope("script0 | Syntax");
 
     while (pos < len)
     {
       //Handle whitespace first of all
-      if (is_useless(code[pos]))
-      {
-        pos++;
-        while (is_useless(code[pos]))
-        pos++;
+      if (is_useless(code[pos])) {
+        while (is_useless(code[++pos]));
         continue;
       }
       
@@ -193,7 +200,7 @@ namespace syncheck
             if (issr != unsigned(-1))
               return issr;
           }
-          else if (find_extname_global(name,0xFFFFFFFF))
+          else if (find_extname(name,0xFFFFFFFF))
           {
             if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
               indeclist[level] = true;
@@ -205,6 +212,8 @@ namespace syncheck
           else //just an identifier; ie, a variable or function name
           {
             last_identifier = name;
+            if (levelt[level] == LEVELTYPE_STRUCT and statement_pad[level] == PAD_STRUCT_NOTHING)
+              quicktype(EXTFLAG_STRUCT,last_identifier);
             lastnamed[level] = LN_VARNAME;
           }
         }
@@ -458,6 +467,8 @@ namespace syncheck
             if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
           }*/
           bool isbr=levelt[level]==LEVELTYPE_SWITCH;
+          
+          quickscope();
 
           if (lastnamed[level]==LN_OPERATOR)
           { error="Unexpected brace at this point"; return pos; }
@@ -473,6 +484,8 @@ namespace syncheck
         }
         else if (code[pos]=='}')
         {
+          dropscope();
+          
           if (level<=0)
           { error="Unexpected closing brace at this point"; return pos; }
 

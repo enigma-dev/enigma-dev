@@ -74,7 +74,7 @@ void parser_init()
   edl_tokens["static"] = 'd';
   edl_tokens["const"] = 'd';*/
   
-  //word ops
+  //Word ops: these aren't actually replaced, just tokenized.
   edl_tokens["and"] = '&';
   edl_tokens["or"]  = '|';
   edl_tokens["xor"] = '^';
@@ -140,6 +140,9 @@ string parser_main(string code,void (*collectdecls)(string,string))
   //Next, we generate a syntax map
   parser_buffer_syntax_map(code,synt,0);*/
   string synt;
+  
+  //Initialize us a spot in the global scope
+  initscope("script0");
   
   parser_ready_input(code,synt);
   

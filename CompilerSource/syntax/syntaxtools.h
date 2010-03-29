@@ -171,6 +171,13 @@ inline int get_closest_level_pad(int leveltype)
 
 int close_statement(string& code,pt& pos);
 
+enum {
+  PAD_STRUCT_NOTHING,
+  PAD_STRUCT_IDENTIFIER,
+  PAD_STRUCT_COLON,
+  PAD_STRUCT_FULL
+};
+
 inline unsigned handle_if_statement(string& code,string name,pt& pos)
 {
   unsigned ret = unsigned(-1);
@@ -193,6 +200,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       if (name == "case")    goto label_case;
       if (name == "catch")   goto label_catch;
       if (name == "continue")goto label_continue;
+      if (name == "class")   goto label_struct;
     case 'd':
       if (name == "default") goto label_default;
       if (name == "do")      goto label_do;
@@ -208,6 +216,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       if (name == "return")  goto label_general;
     case 's':
       if (name == "switch")  goto label_switch;
+      if (name == "struct")  goto label_struct;
     case 't':
       if (name == "try")     goto label_general;
       if (name == "then")    goto label_then;
@@ -364,6 +373,15 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       level++; 
       levelt[level]=LEVELTYPE_GENERAL_STATEMENT;
       statement_pad[level]=1;
+      
+      assop[level] = 1;
+      lastnamed[level]=LN_OPERATOR;
+    return ret;
+    
+  label_struct:
+      level++; 
+      levelt[level]=LEVELTYPE_STRUCT;
+      statement_pad[level] = PAD_STRUCT_NOTHING;
       
       assop[level] = 1;
       lastnamed[level]=LN_OPERATOR;

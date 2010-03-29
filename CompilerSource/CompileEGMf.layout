@@ -41,7 +41,7 @@
 		<Cursor position="27194" topLine="747" />
 	</File>
 	<File name="cfile_parse\expression_evaluator.cpp" open="1" top="0" tabpos="9">
-		<Cursor position="2422" topLine="21" />
+		<Cursor position="2696" topLine="84" />
 	</File>
 	<File name="cfile_parse\expression_evaluator.h" open="0" top="0" tabpos="0">
 		<Cursor position="2198" topLine="0" />
@@ -59,7 +59,7 @@
 		<Cursor position="5224" topLine="124" />
 	</File>
 	<File name="cfile_parse\macro_functions.cpp" open="1" top="0" tabpos="10">
-		<Cursor position="3557" topLine="46" />
+		<Cursor position="3557" topLine="10" />
 	</File>
 	<File name="cfile_parse\macro_functions.h" open="0" top="0" tabpos="13">
 		<Cursor position="2231" topLine="0" />
@@ -124,8 +124,8 @@
 	<File name="general\string.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="2252" topLine="6" />
 	</File>
-	<File name="main.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="4608" topLine="82" />
+	<File name="main.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="5267" topLine="118" />
 	</File>
 	<File name="parser\parser.cpp" open="1" top="0" tabpos="5">
 		<Cursor position="6127" topLine="119" />
@@ -145,8 +145,8 @@
 	<File name="syntax\checkfile.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="4031" topLine="67" />
 	</File>
-	<File name="syntax\chkfunction.h" open="1" top="0" tabpos="4">
-		<Cursor position="2397" topLine="23" />
+	<File name="syntax\chkfunction.h" open="1" top="1" tabpos="4">
+		<Cursor position="3091" topLine="23" />
 	</File>
 	<File name="syntax\syncheck.h" open="0" top="0" tabpos="0">
 		<Cursor position="1511" topLine="12" />

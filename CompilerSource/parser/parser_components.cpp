@@ -73,6 +73,50 @@ string string_escape(string s)
 
 #include "../cfile_parse/macro_functions.h"
 
+
+int scope_braceid = 0;
+extern string tostring(int);
+int dropscope()
+{
+  if (current_scope != &global_scope)
+  current_scope = current_scope->parent;
+  return 0;
+}
+int quickscope()
+{
+  externs *ne = current_scope->members["{}"+tostring(scope_braceid++)] = new externs;
+  ne->name = "{}";
+  ne->type = NULL;
+  ne->flags = EXTFLAG_NAMESPACE;
+  ne->parent = current_scope;
+  current_scope = ne;
+  return 0;
+}
+int initscope(string name)
+{
+  current_scope = &global_scope;
+  scope_braceid = 0;
+  
+  externs *ne = current_scope->members[name] = new externs;
+  ne->name = name;
+  ne->type = NULL;
+  ne->flags = EXTFLAG_NAMESPACE;
+  ne->parent = current_scope;
+  current_scope = ne;
+  
+  return 0;
+}
+int quicktype(unsigned flags, string name)
+{
+  externs *ne = current_scope->members[name] = new externs;
+  ne->name = name;
+  ne->type = NULL;
+  ne->flags = flags | EXTFLAG_TYPENAME;
+  ne->parent = current_scope;
+  return 0;
+}
+
+
 ///Remove whitespace, unfold macros,
 ///And lex code into synt.
 //Compatibility considerations:
@@ -133,11 +177,14 @@ int parser_ready_input(string &code,string &synt)
       
       char c = 'n';
       
+      if (name == "sometype") 
+        cout << "LOL SOMETYPE\n";
+      
       tokiter itt = edl_tokens.find(name);
       if (itt != edl_tokens.end()) {
         c = itt->second;
       }
-      else if (find_extname_global(name))
+      else if (find_extname(name,0xFFFFFFFF))
       {
         if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
           c = 't';
@@ -152,6 +199,11 @@ int parser_ready_input(string &code,string &synt)
       for (pt i = 0; i < name.length(); i++) {
         code[bpos]   = name[i];
         synt[bpos++] = c;
+      }
+      
+      //Accurately reflect newly defined types and structures
+      if (c == 'n' and last_token == 'C') { //"class <name>"
+        quicktype(EXTFLAG_STRUCT,name); //Add the string we used to determine if this token is 'n' as a struct
       }
       
       last_token = c;
@@ -226,6 +278,11 @@ int parser_ready_input(string &code,string &synt)
       code[bpos] = synt[bpos++] = last_token = '/';
       continue;
     }
+    
+    if (code[pos] == '{')
+      quickscope();
+    else if (code[pos] == '}')
+      dropscope();
     
     //Wasn't anything usable
     if (!is_useless(code[pos]))

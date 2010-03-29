@@ -32,6 +32,11 @@ void parser_add_semicolons(string &code,string &synt);
 void print_the_fucker(string code,string synt);
 int parser_ready_input(string&,string&);
 
+int dropscope();
+int quickscope();
+int initscope(string name);
+int quicktype(unsigned flags, string name);
+
 /*
 int max(int a,int b);
 int min(int a,int b);

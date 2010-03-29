@@ -8,31 +8,62 @@
 		<Option virtualFolders="cfile_parse\;" />
 		<Build>
 			<Target title="Release">
-				<Option output="..\CompileEGMf" prefix_auto="1" extension_auto="1" />
-				<Option type="1" />
+				<Option output="bin\Release\CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O3" />
+					<Add option="-Wall" />
+					<Add option="-DBUILD_DLL" />
+					<Add option="-O2" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="user32" />
 				</Linker>
 			</Target>
 			<Target title="Debug">
-				<Option output="..\CompileEGMf" prefix_auto="1" extension_auto="1" />
-				<Option type="1" />
+				<Option output="bin\Debug\CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add option="-DBUILD_DLL" />
 				</Compiler>
+				<Linker>
+					<Add library="user32" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="OS_Switchboard.h" />
+		<Unit filename="backend\EnigmaStruct.h" />
+		<Unit filename="backend\JavaStruct.h" />
+		<Unit filename="backend\resources\Background.h" />
+		<Unit filename="backend\resources\EnigmaSettings.h" />
+		<Unit filename="backend\resources\Font.h" />
+		<Unit filename="backend\resources\GameInformation.h" />
+		<Unit filename="backend\resources\GameSettings.h" />
+		<Unit filename="backend\resources\GmObject.h" />
+		<Unit filename="backend\resources\Path.h" />
+		<Unit filename="backend\resources\Room.h" />
+		<Unit filename="backend\resources\Script.h" />
+		<Unit filename="backend\resources\Sound.h" />
+		<Unit filename="backend\resources\Sprite.h" />
+		<Unit filename="backend\resources\Timeline.h" />
+		<Unit filename="backend\sub\Action.h" />
+		<Unit filename="backend\sub\BackgroundDef.h" />
+		<Unit filename="backend\sub\Event.h" />
+		<Unit filename="backend\sub\Image.h" />
+		<Unit filename="backend\sub\Instance.h" />
+		<Unit filename="backend\sub\MainEvent.h" />
+		<Unit filename="backend\sub\Moment.h" />
+		<Unit filename="backend\sub\PathPoint.h" />
+		<Unit filename="backend\sub\Tile.h" />
+		<Unit filename="backend\sub\View.h" />
 		<Unit filename="cfile_parse\auxilary.h">
 			<Option virtualFolder="cfile_parse\" />
 		</Unit>
@@ -88,6 +119,7 @@
 		<Unit filename="general\textfile.cpp" />
 		<Unit filename="general\textfile.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="main.h" />
 		<Unit filename="parser\parser.cpp" />
 		<Unit filename="parser\parser.h" />
 		<Unit filename="parser\parser_components.cpp" />
