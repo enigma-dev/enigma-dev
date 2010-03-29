@@ -28,11 +28,9 @@ import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
@@ -45,6 +43,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
+import org.enigma.backend.EnigmaStruct;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
@@ -260,7 +259,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 	public void compile(final byte mode)
 		{
-		String arg1;
+		//decide whether we're compiling, debugging, etc
+/*		String arg1;
 		switch (mode)
 			{
 			case 1:
@@ -277,9 +277,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 				break;
 			default:
 				return;
-			}
+			}*/
 
-		File exef = null;
+		//determine where to output the exe
+/*		File exef = null;
 		try
 			{
 			if (mode < 3)
@@ -298,18 +299,21 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 			fc.setFileFilter(new CustomFileFilter(".exe","Executable files"));
 			if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			exef = fc.getSelectedFile();
-			}
+			}*/
 
 		LGM.commitAll();
-		ef = new EnigmaFrame();
-		if (!EnigmaWriter.writeEgmFile(ef,LGM.currentFile)) return;
+		//		ef = new EnigmaFrame();
+		EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
+		System.out.println("Enigma output:");
+		System.out.println(EnigmaStruct.gameNew());
+		System.out.println(EnigmaStruct.compileEGMf(es));
 
 		//		System.out.println("Compiling with " + enigma);
 
-		String[] cmd = new String[] { arg1,exef.getPath() };
-		for (String s : cmd)
-			System.out.print(s + " ");
-		System.out.println();
+		/*		String[] cmd = new String[] { arg1,exef.getPath() };
+				for (String s : cmd)
+					System.out.print(s + " ");
+				System.out.println();*/
 		}
 
 	public static int checkSyntax(String code)

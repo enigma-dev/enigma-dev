@@ -65,10 +65,13 @@ public class EnigmaStruct extends Structure
 
 	static
 		{
-		String lib = "exl";
+		String lib = "compileEGMf";
 		NativeLibrary.addSearchPath(lib,".");
 		Native.register(lib);
 		}
+
+	public static native int gameNew();
+	public static native int compileEGMf(EnigmaStruct es);
 
 	public static void main(String[] args)
 		{

@@ -35,7 +35,6 @@ import org.enigma.backend.sub.Image;
 import org.enigma.backend.sub.MainEvent;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmStreamEncoder;
-import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
@@ -49,38 +48,25 @@ import org.lateralgm.resources.sub.Event;
 
 public final class EnigmaWriter
 	{
-	private EnigmaWriter()
+	protected GmFile i;
+	protected EnigmaStruct o;
+
+	private EnigmaWriter(GmFile in, EnigmaStruct out)
 		{
+		i = in;
+		o = out;
 		}
 
-	public static boolean writeEgmFile(EnigmaFrame ef, GmFile f)
+	public static EnigmaStruct prepareStruct(GmFile f)
 		{
-		return new EnigmaWriter().writeFile(ef,f);
+		EnigmaWriter ew = new EnigmaWriter(f,new EnigmaStruct());
+		return ew.populateStruct();
 		}
 
-	public static void writeStr(GmStreamEncoder out, Object data) throws IOException
+	private EnigmaStruct populateStruct()
 		{
-		writeStr(out,(String) data);
-		}
+		//		ef.progress(0,"Initializing");
 
-	public static void writeStr(GmStreamEncoder out, byte[] data) throws IOException
-		{
-		out.write4(data.length);
-		out.write(data);
-		out.write4(0);
-		}
-
-	public static void writeStr(GmStreamEncoder out, String data) throws IOException
-		{
-		out.writeStr(data);
-		out.write4(0);
-		}
-
-	private boolean writeFile(EnigmaFrame ef, GmFile i)
-		{
-		ef.progress(0,"Sending Enigma resource names");
-
-		EnigmaStruct o = new EnigmaStruct();
 		o.fileVersion = i.fileVersion;
 		o.filename = i.filename;
 		o.lastInstanceId = i.lastInstanceId;
@@ -91,7 +77,10 @@ public final class EnigmaWriter
 		writeObjects(o,i);
 		writeRooms(o,i);
 
-		return true;
+		//		ef.progress(100,"Finalizing");
+
+		return o;
+
 		/*		o.spriteCount = i.sprites.size();
 				public Sprite[] sprites;
 				o.soundCount = i.sounds.size();
@@ -428,7 +417,7 @@ public final class EnigmaWriter
 				return false;
 			}
 			*/
-			
+
 		/*
 		create; game start; room start; draw; begin step; alarm; keyboard; key press;
 		key release; step; path end; outside room; intersect boundary; collision;
@@ -496,9 +485,9 @@ public final class EnigmaWriter
 					break;
 				case Action.ACT_NORMAL:
 					{/*
-					if (la.execType == Action.EXEC_NONE) break;
-					ResourceReference<GmObject> apto = act.getAppliesTo();
-					if (la.question)
+						if (la.execType == Action.EXEC_NONE) break;
+						ResourceReference<GmObject> apto = act.getAppliesTo();
+						if (la.question)
 						if (apto != GmObject.OBJECT_SELF)
 							{
 							if (!actionDemise)
@@ -516,30 +505,31 @@ public final class EnigmaWriter
 								}
 							continue;
 							}
-					if (apto != GmObject.OBJECT_SELF)
+						if (apto != GmObject.OBJECT_SELF)
 						{
 						if (apto == GmObject.OBJECT_OTHER)
 							code += "with (other) {";
 						else
 							code += "with (" + apto.get().getName() + ") {";
 						}
-					if (act.isRelative()) code += "argument_relative = true" + nl;
-					if (la.question) code += "if ";
-					if (act.isNot()) code += "!";
-					if (la.question && la.execType == Action.EXEC_CODE)
+						if (act.isRelative()) code += "argument_relative = true" + nl;
+						if (la.question) code += "if ";
+						if (act.isNot()) code += "!";
+						if (la.question && la.execType == Action.EXEC_CODE)
 						code += "lib" + la.parentId + "_action" + la.id;
-					else
+						else
 						code += la.execInfo;
-					if (la.execType == Action.EXEC_FUNCTION)
+						if (la.execType == Action.EXEC_FUNCTION)
 						{
 						code += "(";
 						for (int i = 0; i < args.size() - 1; i++)
 							code += args.get(i).getVal() + ",";
 						if (args.size() != 0) code += args.get(args.size() - 1) + ")";
 						}
-					code += nl;
-					if (apto != GmObject.OBJECT_SELF) code += "}";
-					*/}
+						code += nl;
+						if (apto != GmObject.OBJECT_SELF) code += "}";
+						*/
+					}
 					break;
 				}
 			}
