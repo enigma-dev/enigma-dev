@@ -21,4 +21,8 @@ public class Font extends Structure
 	boolean italic;
 	int rangeMin;
 	int rangeMax;
+
+	public static class ByReference extends Font implements Structure.ByReference
+		{
+		}
 	}

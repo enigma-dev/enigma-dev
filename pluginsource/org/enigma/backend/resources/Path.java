@@ -26,4 +26,8 @@ public class Path extends Structure
 
 	PathPoint[] points;
 	int pointCount;
+
+	public static class ByReference extends Path implements Structure.ByReference
+		{
+		}
 	}

@@ -19,4 +19,8 @@ public class Timeline extends Structure
 
 	Moment[] moments;
 	int momentCount;
+
+	public static class ByReference extends Timeline implements Structure.ByReference
+		{
+		}
 	}

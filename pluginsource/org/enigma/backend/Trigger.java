@@ -18,4 +18,8 @@ public class Trigger extends Structure
 	String condition = "";
 	int checkStep = Event.EV_STEP_NORMAL;
 	String constant = "";
+
+	public static class ByReference extends Trigger implements Structure.ByReference
+		{
+		}
 	}

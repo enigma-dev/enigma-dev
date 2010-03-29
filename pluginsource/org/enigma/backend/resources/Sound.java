@@ -29,4 +29,8 @@ public class Sound extends Structure
 
 	byte[] data;
 	int size;
+
+	public static class ByReference extends Sound implements Structure.ByReference
+		{
+		}
 	}

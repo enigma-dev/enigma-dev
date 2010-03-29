@@ -22,4 +22,8 @@ public class Include extends Structure
 	boolean overwriteExisting = false;
 	boolean freeMemAfterExport = true;
 	boolean removeAtGameEnd = true;
+
+	public static class ByReference extends Include implements Structure.ByReference
+		{
+		}
 	}

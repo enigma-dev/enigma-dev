@@ -14,4 +14,8 @@ public class Constant extends Structure
 	{
 	String name = "";
 	String value = "";
+
+	public static class ByReference extends Constant implements Structure.ByReference
+		{
+		}
 	}
