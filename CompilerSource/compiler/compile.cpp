@@ -27,3 +27,9 @@
 
 #include "../OS_Switchboard.h" //Tell us where the hell we are
 #include "../backend/EnigmaStruct.h" //LateralGM interface structures
+
+#include <iostream>
+using namespace std;
+
+extern "C" __declspec(dllexport) int gameNew() { cout << "\n\n\nI .love. you.\n\n\n"; return 0; };
+extern "C" __declspec(dllexport) int compileEGMf(EnigmaStruct es) { cout << "Hey. I wanted you to know: I have no fucking idea what to do with this input. :D\n\n\n\n"; return 0; };
