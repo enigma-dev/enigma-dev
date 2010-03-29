@@ -92,7 +92,7 @@ public final class EnigmaWriter2
 			out.write("EGMf".getBytes());
 			out.write4(4); //version
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			f.gameSettings.gameIcon.write(baos);
+			//f.gameSettings.gameIcon.write(baos);
 			writeStr(out,baos.toByteArray());
 
 			ArrayList<LibAction> ala = getQuestionLibActions();

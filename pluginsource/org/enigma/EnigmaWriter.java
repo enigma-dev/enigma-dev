@@ -239,9 +239,9 @@ public final class EnigmaWriter
 			os.id = is.getId();
 
 			os.transparent = is.get(PSprite.TRANSPARENT);
-			os.shape = is.get(PSprite.SHAPE); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
-			os.alphaTolerance = is.get(PSprite.ALPHA_TOLERANCE);
-			os.separateMask = is.get(PSprite.SEPARATE_MASK);
+			os.shape = is.get(PSprite.PRECISE) ? 0 : 1;//is.get(PSprite.SHAPE); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
+			os.alphaTolerance = 0;//is.get(PSprite.ALPHA_TOLERANCE);
+			os.separateMask = false;//is.get(PSprite.SEPARATE_MASK);
 			os.smoothEdges = is.get(PSprite.SMOOTH_EDGES);
 			os.preload = is.get(PSprite.PRELOAD);
 			os.originX = is.get(PSprite.ORIGIN_X);
