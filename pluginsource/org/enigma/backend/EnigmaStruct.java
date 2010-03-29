@@ -30,32 +30,32 @@ public class EnigmaStruct extends Structure
 	public int fileVersion = 600;
 	public String filename = null;
 
-	public Sprite[] sprites;
+	public Sprite.ByReference sprites;
 	public int spriteCount;
-	public Sound[] sounds;
+	public Sound.ByReference sounds;
 	public int soundCount;
-	public Background[] backgrounds;
+	public Background.ByReference backgrounds;
 	public int backgroundCount;
-	public Path[] paths;
+	public Path.ByReference paths;
 	public int pathCount;
-	public Script[] scripts;
+	public Script.ByReference scripts;
 	public int scriptCount;
-	public Font[] fonts;
+	public Font.ByReference fonts;
 	public int fontCount;
-	public Timeline[] timelines;
+	public Timeline.ByReference timelines;
 	public int timelineCount;
-	public GmObject[] gmObjects;
+	public GmObject.ByReference gmObjects;
 	public int gmObjectCount;
-	public Room[] rooms;
+	public Room.ByReference rooms;
 	public int roomCount;
 
-	public Trigger[] triggers;
+	public Trigger.ByReference triggers;
 	public int triggerCount;
-	public Constant[] constants;
+	public Constant.ByReference constants;
 	public int constantCount;
-	public Include[] includes;
+	public Include.ByReference includes;
 	public int includeCount;
-	public String[] packages;
+	public String[] packages; //?
 	public int packageCount;
 
 	public GameInformation gameInfo;
@@ -71,6 +71,7 @@ public class EnigmaStruct extends Structure
 		}
 
 	public static native int gameNew();
+
 	public static native int compileEGMf(EnigmaStruct es);
 
 	public static void main(String[] args)

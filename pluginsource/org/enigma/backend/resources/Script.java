@@ -16,4 +16,8 @@ public class Script extends Structure
 	public int id;
 
 	public String code;
+
+	public static class ByReference extends Script implements Structure.ByReference
+		{
+		}
 	}

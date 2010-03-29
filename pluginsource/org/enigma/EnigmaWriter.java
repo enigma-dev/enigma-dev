@@ -72,10 +72,10 @@ public final class EnigmaWriter
 		o.lastInstanceId = i.lastInstanceId;
 		o.lastTileId = i.lastTileId;
 
-		writeSprites(o,i);
-		writeScripts(o,i);
-		writeObjects(o,i);
-		writeRooms(o,i);
+		populateSprites();
+		populateScripts();
+		populateObjects();
+		populateRooms();
 
 		//		ef.progress(100,"Finalizing");
 
@@ -170,69 +170,18 @@ public final class EnigmaWriter
 		return true;*/
 		}
 
-	public static ArrayList<LibAction> getQuestionLibActions()
-		{
-		ArrayList<LibAction> ala = new ArrayList<LibAction>();
-		for (Library lib : LibManager.libs)
-			for (LibAction act : lib.libActions)
-				if (act.question && act.execType == Action.EXEC_CODE) ala.add(act);
-		return ala;
-		}
-
-	public void writeScripts(EnigmaStruct o, GmFile i)
-		{
-		int size = i.scripts.size();
-		o.scriptCount = size;
-		o.scripts = new Script[size];
-		org.lateralgm.resources.Script[] isl = i.scripts.toArray(new org.lateralgm.resources.Script[0]);
-		for (int s = 0; s < size; s++)
-			{
-			Script oo = o.scripts[s];
-			org.lateralgm.resources.Script io = isl[s];
-
-			oo.name = io.getName();
-			oo.id = io.getId();
-			oo.code = io.get(PScript.CODE);
-			}
-		}
-
-	public void writeObjects(EnigmaStruct o, GmFile i)
-		{
-		int size = i.gmObjects.size();
-		o.gmObjectCount = size;
-		o.gmObjects = new GmObject[size];
-		org.lateralgm.resources.GmObject[] iol = i.gmObjects.toArray(new org.lateralgm.resources.GmObject[0]);
-		for (int s = 0; s < size; s++)
-			{
-			GmObject oo = o.gmObjects[s];
-			org.lateralgm.resources.GmObject io = iol[s];
-
-			oo.name = io.getName();
-			oo.id = io.getId();
-
-			//			oo.sprite = io.get(PGmObject.SPRITE);
-			oo.solid = io.get(PGmObject.SOLID);
-			oo.visible = io.get(PGmObject.VISIBLE);
-			oo.depth = io.get(PGmObject.DEPTH);
-			oo.persistent = io.get(PGmObject.PERSISTENT);
-			//			GmObject.ByReference parent;
-			//			Sprite.ByReference mask;
-
-			oo.mainEventCount = io.mainEvents.size();
-			oo.mainEvents = new MainEvent[oo.mainEventCount];
-			//TODO: handle main events
-			}
-		}
-
-	public void writeSprites(EnigmaStruct o, GmFile i)
+	public void populateSprites()
 		{
 		int size = i.sprites.size();
 		o.spriteCount = size;
-		o.sprites = new Sprite[size];
+		if (size == 0) return;
+
+		o.sprites = new Sprite.ByReference();
+		Sprite[] osl = (Sprite[]) o.sprites.toArray(size);
 		org.lateralgm.resources.Sprite[] isl = i.sprites.toArray(new org.lateralgm.resources.Sprite[0]);
 		for (int s = 0; s < size; s++)
 			{
-			Sprite os = o.sprites[s];
+			Sprite os = osl[s];
 			org.lateralgm.resources.Sprite is = isl[s];
 
 			os.name = is.getName();
@@ -260,15 +209,69 @@ public final class EnigmaWriter
 			}
 		}
 
-	public void writeRooms(EnigmaStruct o, GmFile i)
+	public void populateScripts()
+		{
+		int size = i.scripts.size();
+		o.scriptCount = size;
+		if (size == 0) return;
+
+		o.scripts = new Script.ByReference();
+		Script[] osl = (Script[]) o.scripts.toArray(size);
+		org.lateralgm.resources.Script[] isl = i.scripts.toArray(new org.lateralgm.resources.Script[0]);
+		for (int s = 0; s < size; s++)
+			{
+			Script oo = osl[s];
+			org.lateralgm.resources.Script io = isl[s];
+
+			oo.name = io.getName();
+			oo.id = io.getId();
+			oo.code = io.get(PScript.CODE);
+			}
+		}
+
+	public void populateObjects()
+		{
+		int size = i.gmObjects.size();
+		o.gmObjectCount = size;
+		if (size == 0) return;
+
+		o.gmObjects = new GmObject.ByReference();
+		GmObject[] ool = (GmObject[]) o.gmObjects.toArray(size);
+		org.lateralgm.resources.GmObject[] iol = i.gmObjects.toArray(new org.lateralgm.resources.GmObject[0]);
+		for (int s = 0; s < size; s++)
+			{
+			GmObject oo = ool[s];
+			org.lateralgm.resources.GmObject io = iol[s];
+
+			oo.name = io.getName();
+			oo.id = io.getId();
+
+			//			oo.sprite = io.get(PGmObject.SPRITE);
+			oo.solid = io.get(PGmObject.SOLID);
+			oo.visible = io.get(PGmObject.VISIBLE);
+			oo.depth = io.get(PGmObject.DEPTH);
+			oo.persistent = io.get(PGmObject.PERSISTENT);
+			//			GmObject.ByReference parent;
+			//			Sprite.ByReference mask;
+
+			oo.mainEventCount = io.mainEvents.size();
+			oo.mainEvents = new MainEvent[oo.mainEventCount];
+			//TODO: handle main events
+			}
+		}
+
+	public void populateRooms()
 		{
 		int size = i.rooms.size();
 		o.roomCount = size;
-		o.rooms = new Room[size];
+		if (size == 0) return;
+
+		o.rooms = new Room.ByReference();
+		Room[] orly = (Room[]) o.rooms.toArray(size);
 		org.lateralgm.resources.Room[] irl = i.rooms.toArray(new org.lateralgm.resources.Room[0]);
 		for (int s = 0; s < size; s++)
 			{
-			Room os = o.rooms[s];
+			Room os = orly[s];
 			org.lateralgm.resources.Room is = irl[s];
 
 			os.name = is.getName();
@@ -348,19 +351,22 @@ public final class EnigmaWriter
 				*/
 		}
 
-	public void toImage(BufferedImage im)
+	public Image toImage(BufferedImage im)
 		{
 		Image i = new Image();
 		i.width = im.getWidth();
 		i.height = im.getHeight();
 		i.pixels = new int[i.height * i.width];
-		//not really sure how to do this efficiently
+		//TODO: not really sure how to do this efficiently
 		/*		for (int y = 0; y < i.height; y++)
 					for (int x = 0; x < i.width; x++)
 						{
 						i.pixels[y * i.width + x] = im.getColorModel().getRed(0);
 						}*/
+		return i;
 		}
+
+	//the methods below are old and need to be replaced
 
 	public boolean writeEvent(GmStreamEncoder out, Event ev) throws IOException
 		{
@@ -534,5 +540,14 @@ public final class EnigmaWriter
 				}
 			}
 		return code;
+		}
+
+	public static ArrayList<LibAction> getQuestionLibActions()
+		{
+		ArrayList<LibAction> ala = new ArrayList<LibAction>();
+		for (Library lib : LibManager.libs)
+			for (LibAction act : lib.libActions)
+				if (act.question && act.execType == Action.EXEC_CODE) ala.add(act);
+		return ala;
 		}
 	}

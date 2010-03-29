@@ -36,7 +36,6 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -44,7 +43,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import org.enigma.backend.EnigmaStruct;
-import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.main.LGM;
@@ -260,46 +258,46 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 	public void compile(final byte mode)
 		{
 		//decide whether we're compiling, debugging, etc
-/*		String arg1;
-		switch (mode)
-			{
-			case 1:
-				arg1 = "-c";
-				break;
-			case 2:
-				arg1 = "-d";
-				break;
-			case 3:
-				arg1 = "-b";
-				break;
-			case 4:
-				arg1 = "-c";
-				break;
-			default:
-				return;
-			}*/
+		/*		String arg1;
+				switch (mode)
+					{
+					case 1:
+						arg1 = "-c";
+						break;
+					case 2:
+						arg1 = "-d";
+						break;
+					case 3:
+						arg1 = "-b";
+						break;
+					case 4:
+						arg1 = "-c";
+						break;
+					default:
+						return;
+					}*/
 
 		//determine where to output the exe
-/*		File exef = null;
-		try
-			{
-			if (mode < 3)
-				exef = File.createTempFile("egm",".exe");
-			else if (mode == 3) exef = File.createTempFile("egm",".emd");
-			if (exef != null) exef.deleteOnExit();
-			}
-		catch (IOException e)
-			{
-			e.printStackTrace();
-			return;
-			}
-		if (mode == 4)
-			{
-			JFileChooser fc = new JFileChooser();
-			fc.setFileFilter(new CustomFileFilter(".exe","Executable files"));
-			if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
-			exef = fc.getSelectedFile();
-			}*/
+		/*		File exef = null;
+				try
+					{
+					if (mode < 3)
+						exef = File.createTempFile("egm",".exe");
+					else if (mode == 3) exef = File.createTempFile("egm",".emd");
+					if (exef != null) exef.deleteOnExit();
+					}
+				catch (IOException e)
+					{
+					e.printStackTrace();
+					return;
+					}
+				if (mode == 4)
+					{
+					JFileChooser fc = new JFileChooser();
+					fc.setFileFilter(new CustomFileFilter(".exe","Executable files"));
+					if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
+					exef = fc.getSelectedFile();
+					}*/
 
 		LGM.commitAll();
 		//		ef = new EnigmaFrame();
