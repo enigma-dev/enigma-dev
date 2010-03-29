@@ -8,6 +8,9 @@
 
 package org.enigma.backend;
 
+import org.enigma.backend.other.Constant;
+import org.enigma.backend.other.Include;
+import org.enigma.backend.other.Trigger;
 import org.enigma.backend.resources.Background;
 import org.enigma.backend.resources.Font;
 import org.enigma.backend.resources.GameInformation;

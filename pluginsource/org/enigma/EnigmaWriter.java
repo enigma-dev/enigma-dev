@@ -71,11 +71,22 @@ public final class EnigmaWriter
 		o.filename = i.filename;
 		o.lastInstanceId = i.lastInstanceId;
 		o.lastTileId = i.lastTileId;
+		/*
+				populateSprites();
+				o.soundCount = 0;
+				o.backgroundCount = 0;
+				o.pathCount = 0;
+				populateScripts();
+				o.fontCount = 0;
+				o.timelineCount = 0;
+				populateObjects();
+				populateRooms();
 
-		populateSprites();
-		populateScripts();
-		populateObjects();
-		populateRooms();
+				o.triggerCount = 0;
+				o.constantCount = 0;
+				o.includeCount = 0;
+				o.packageCount = 0;
+				o.packages = new String[0];*/
 
 		//		ef.progress(100,"Finalizing");
 
@@ -202,10 +213,12 @@ public final class EnigmaWriter
 			os.bbBottom = is.get(PSprite.BB_BOTTOM);
 
 			os.subImageCount = is.subImages.size();
-			os.subImages = new Image[os.subImageCount];
-			//			is.subImages.get(0);
-			//			Image[] subImages;
-			//			int subImageCount;
+			if (os.subImageCount == 0) continue;
+
+			os.subImages = new Image.ByReference();
+			Image[] osil = (Image[]) os.subImages.toArray(os.subImageCount);
+			for (int i = 0; i < os.subImageCount; i++)
+				populateImage(is.subImages.get(i),osil[i]);
 			}
 		}
 
@@ -293,77 +306,19 @@ public final class EnigmaWriter
 			os.drawBackgroundColor = is.get(PRoom.DRAW_BACKGROUND_COLOR);
 			os.creationCode = is.get(PRoom.CREATION_CODE);
 			}
-
-		/*out.write("rmm".getBytes());
-		out.write(0);
-		for (Room r : f.rooms)
-			{
-			writeStr(out,r.get(PRoom.CAPTION));
-			out.write4(r.properties,PRoom.WIDTH,PRoom.HEIGHT,PRoom.SPEED);
-			boolean dbc = (Boolean) r.get(PRoom.DRAW_BACKGROUND_COLOR);
-			int bgc = ((Color) r.get(PRoom.BACKGROUND_COLOR)).getRGB();
-			out.write4(dbc ? bgc : 0);
-			writeStr(out,r.get(PRoom.CREATION_CODE));
-			out.writeBool(r.properties,PRoom.ENABLE_VIEWS);
-			if (r.views.size() != 8) throw new IOException("View count mismatch: " + r.views.size());
-			for (View view : r.views)
-				{
-
-				out.writeBool(view.properties,PView.VISIBLE);
-				out.write4(view.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,PView.VIEW_H,
-						PView.PORT_X,PView.PORT_Y,PView.PORT_W,PView.PORT_H,PView.BORDER_H,PView.BORDER_V,
-						PView.SPEED_H,PView.SPEED_V);
-				out.writeId((ResourceReference<?>) view.properties.get(PView.OBJECT));
-		*/
-
-		/*				out.writeBool(view.properties..visible);
-						out.write4(view.viewX);
-						out.write4(view.viewY);
-						out.write4(view.viewW);
-						out.write4(view.viewH);
-						out.write4(view.portX);
-						out.write4(view.portY);
-						out.write4(view.portW);
-						out.write4(view.portH);
-						out.write4(view.hbor);
-						out.write4(view.vbor);
-						out.write4(view.hspeed);
-						out.write4(view.vspeed);
-						out.writeId(view.objectFollowing);
-						if (deRef(view.objectFollowing) != null)
-							System.out.println("??" + view.objectFollowing.get().getId());
-						else
-							System.out.println("?-1");
-		*/
-		/*}
-					for (Instance i : r.instances)
-						{
-						out.write("inst".getBytes());
-						out.write4((Integer) i.properties.get(PInstance.ID));
-						ResourceReference<GmObject> or = i.properties.get(PInstance.OBJECT);
-						out.writeId(or);
-						out.write4(i.getPosition().x);
-						out.write4(i.getPosition().y);
-						writeStr(out,i.getCreationCode());
-						}
-					out.write4(0);
-					}
-				*/
 		}
 
-	public Image toImage(BufferedImage im)
+	public void populateImage(BufferedImage i, Image o)
 		{
-		Image i = new Image();
-		i.width = im.getWidth();
-		i.height = im.getHeight();
-		i.pixels = new int[i.height * i.width];
+		o.width = i.getWidth();
+		o.height = i.getHeight();
+		o.pixels = new int[o.height * o.width];
 		//TODO: not really sure how to do this efficiently
 		/*		for (int y = 0; y < i.height; y++)
 					for (int x = 0; x < i.width; x++)
 						{
 						i.pixels[y * i.width + x] = im.getColorModel().getRed(0);
 						}*/
-		return i;
 		}
 
 	//the methods below are old and need to be replaced

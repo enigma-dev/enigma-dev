@@ -27,8 +27,8 @@ public class Sound extends Structure
 	double pan;
 	boolean preload;
 
-	byte[] data;
-	int size;
+	byte[] data = new byte[0];
+	int size = 0;
 
 	public static class ByReference extends Sound implements Structure.ByReference
 		{

@@ -15,4 +15,8 @@ public class Image extends Structure
 	public int width;
 	public int height;
 	public int[] pixels;
+
+	public static class ByReference extends Image implements Structure.ByReference
+		{
+		}
 	}

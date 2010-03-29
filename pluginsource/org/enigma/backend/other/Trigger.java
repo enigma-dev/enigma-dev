@@ -6,7 +6,7 @@
  * See LICENSE for details.
  */
 
-package org.enigma.backend;
+package org.enigma.backend.other;
 
 import org.lateralgm.resources.sub.Event;
 
