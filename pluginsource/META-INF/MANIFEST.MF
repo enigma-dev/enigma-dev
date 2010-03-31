@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Main-Class: org.enigma.EnigmaRunner
+Main-Class: org.enigma.DLL
 LGM-Plugin: org.enigma.EnigmaRunner
 Class-Path: ../lateralgm.jar svnkit.jar jna.jar
 

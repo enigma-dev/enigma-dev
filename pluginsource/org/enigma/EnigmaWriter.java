@@ -69,24 +69,24 @@ public final class EnigmaWriter
 
 		o.fileVersion = i.fileVersion;
 		o.filename = i.filename;
-		o.lastInstanceId = i.lastInstanceId;
-		o.lastTileId = i.lastTileId;
-		/*
-				populateSprites();
-				o.soundCount = 0;
-				o.backgroundCount = 0;
-				o.pathCount = 0;
-				populateScripts();
-				o.fontCount = 0;
-				o.timelineCount = 0;
-				populateObjects();
-				populateRooms();
+		//		o.lastInstanceId = i.lastInstanceId;
+		//		o.lastTileId = i.lastTileId;
 
-				o.triggerCount = 0;
-				o.constantCount = 0;
-				o.includeCount = 0;
-				o.packageCount = 0;
-				o.packages = new String[0];*/
+		populateSprites();
+		o.soundCount = 0;
+		o.backgroundCount = 0;
+		o.pathCount = 0;
+		populateScripts();
+		o.fontCount = 0;
+		o.timelineCount = 0;
+		populateObjects();
+		populateRooms();
+
+		o.triggerCount = 0;
+		o.constantCount = 0;
+		o.includeCount = 0;
+		o.packageCount = 0;
+//		o.packages = new String[1];
 
 		//		ef.progress(100,"Finalizing");
 
@@ -267,8 +267,8 @@ public final class EnigmaWriter
 			//			GmObject.ByReference parent;
 			//			Sprite.ByReference mask;
 
-			oo.mainEventCount = io.mainEvents.size();
-			oo.mainEvents = new MainEvent[oo.mainEventCount];
+			//			oo.mainEventCount = io.mainEvents.size();
+			//			oo.mainEvents = new MainEvent[oo.mainEventCount];
 			//TODO: handle main events
 			}
 		}

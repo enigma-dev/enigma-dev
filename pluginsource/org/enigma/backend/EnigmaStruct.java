@@ -58,13 +58,13 @@ public class EnigmaStruct extends Structure
 	public int constantCount;
 	public Include.ByReference includes;
 	public int includeCount;
-	public String[] packages; //?
+//	public String[] packages; //?
 	public int packageCount;
 
-	public GameInformation gameInfo;
-	public GameSettings gameSettings;
-	public int lastInstanceId = 100000;
-	public int lastTileId = 10000000;
+	//public GameInformation gameInfo;
+	//public GameSettings gameSettings;
+//	public int lastInstanceId = 100000;
+//	public int lastTileId = 10000000;
 
 	static
 		{
@@ -76,8 +76,4 @@ public class EnigmaStruct extends Structure
 	public static native int gameNew();
 
 	public static native int compileEGMf(EnigmaStruct es);
-
-	public static void main(String[] args)
-		{
-		}
 	}

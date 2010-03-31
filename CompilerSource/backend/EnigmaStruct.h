@@ -51,7 +51,7 @@ struct EnigmaStruct
 	int constantCount;
 	Include *includes;
 	int includeCount;
-	String *packages; //?
+//	String *packages; //?
 	int packageCount;
 
 	//GameInformation gameInfo;

@@ -52,6 +52,9 @@ import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
 import org.lateralgm.subframes.SubframeInformer.SubframeListener;
 
+import com.sun.jna.Native;
+import com.sun.jna.NativeLibrary;
+
 public class EnigmaRunner implements ActionListener,SubframeListener
 	{
 	public static final String ENIGMA = "compileEGMf.exe";
@@ -299,14 +302,16 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 					exef = fc.getSelectedFile();
 					}*/
 
-		LGM.commitAll();
+		//		LGM.commitAll();
 		//		ef = new EnigmaFrame();
+
+		System.out.println();
+		System.out.println();
 		EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
-		System.out.println("Enigma output:");
 		System.out.println(EnigmaStruct.gameNew());
 		System.out.println(EnigmaStruct.compileEGMf(es));
 
-		//		System.out.println("Compiling with " + enigma);
+		//				System.out.println("Compiling with " + enigma);
 
 		/*		String[] cmd = new String[] { arg1,exef.getPath() };
 				for (String s : cmd)
