@@ -42,6 +42,9 @@
 		<Unit filename="OS_Switchboard.h" />
 		<Unit filename="backend\EnigmaStruct.h" />
 		<Unit filename="backend\JavaStruct.h" />
+		<Unit filename="backend\other\Constant.h" />
+		<Unit filename="backend\other\Include.h" />
+		<Unit filename="backend\other\Trigger.h" />
 		<Unit filename="backend\resources\Background.h" />
 		<Unit filename="backend\resources\EnigmaSettings.h" />
 		<Unit filename="backend\resources\Font.h" />
@@ -54,6 +57,7 @@
 		<Unit filename="backend\resources\Sound.h" />
 		<Unit filename="backend\resources\Sprite.h" />
 		<Unit filename="backend\resources\Timeline.h" />
+		<Unit filename="backend\resources\Whitespace.h" />
 		<Unit filename="backend\sub\Action.h" />
 		<Unit filename="backend\sub\BackgroundDef.h" />
 		<Unit filename="backend\sub\Event.h" />

@@ -79,7 +79,8 @@ namespace syncheck
      int level=0;
     //These tell us what kind of level this is
      array levelt;
-     enum {
+     enum 
+     {
        LEVELTYPE_BRACE,
        LEVELTYPE_IF,
        LEVELTYPE_DO,

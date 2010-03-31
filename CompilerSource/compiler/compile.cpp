@@ -31,5 +31,46 @@
 #include <iostream>
 using namespace std;
 
-extern "C" __declspec(dllexport) int gameNew() { cout << "\n\n\nI .love. you.\n\n\n"; return 0; };
-extern "C" __declspec(dllexport) int compileEGMf(EnigmaStruct es) { cout << "Hey. I wanted you to know: I have no fucking idea what to do with this input. :D\n\n\n\n"; return 0; };
+enum
+{
+  E_ERROR_NO_ERROR_LOL,
+  E_ERROR_PLUGIN_FUCKED_UP,
+  E_ERROR_WUT
+};
+
+extern "C" __declspec(dllexport) int gameNew()
+{
+  cout << "\nI .love. you.\n";
+  return 0;
+};
+
+extern "C" __declspec(dllexport) int compileEGMf(EnigmaStruct *es)
+{
+  cout << "Hey. I wanted you to know: I have no fucking idea what to do with this input. :D\n";
+  
+  cout << "Location in memory of structure: " << es << endl;
+  if (es == NULL)
+    return E_ERROR_PLUGIN_FUCKED_UP/0;
+  
+  cout << "File version: " << es->fileVersion << endl << endl;
+  
+  cout << "Number of sprites: " << es->spriteCount << endl;
+  for (int i = 0; i < es->spriteCount; i++) {
+    cout << "Sprite " << es->sprites[i].name << endl;
+    fflush(stdout);
+  }
+  for (int i = 0; i < es->soundCount; i++) {
+    cout << "Sound " << es->sounds[i].name << endl;
+    fflush(stdout);
+  }
+  for (int i = 0; i < es->scriptCount; i++) {
+    cout << "Script " << es->scripts[i].name << endl;
+    fflush(stdout);
+  }
+  for (int i = 0; i < es->roomCount; i++) {
+    cout << "Room " << es->rooms[i].name << endl;
+    fflush(stdout);
+  }
+  
+  return 0;
+};

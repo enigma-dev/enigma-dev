@@ -14,7 +14,7 @@
 #include "resources/Script.h"
 #include "resources/Font.h"
 #include "resources/Timeline.h"
-#include "resources/gmObject.h"
+#include "resources/GmObject.h"
 #include "resources/Room.h"
 
 #include "other/Trigger.h"
@@ -24,25 +24,38 @@
 struct EnigmaStruct
 {
   int fileVersion;
-  String filename;
-  
-  Sprite      *sprites;
-  Sound       *sounds;
-  Background  *backgrounds;
-  Path        *paths;
-  Script      *scripts;
-  Font        *fonts;
-  Timeline    *timelines;
-  GmObject    *gmObjects;
-  Room        *rooms;
-  
-	Trigger     *triggers;
-	Constant    *constants;
-	Include     *includes;
-	String      *packages;
+	String filename;
+
+	Sprite *sprites;
+	int spriteCount;
+	Sound *sounds;
+	int soundCount;
+	Background *backgrounds;
+	int backgroundCount;
+	Path *paths;
+	int pathCount;
+	Script *scripts;
+	int scriptCount;
+	Font *fonts;
+	int fontCount;
+	Timeline *timelines;
+	int timelineCount;
+	GmObject *gmObjects;
+	int gmObjectCount;
+	Room *rooms;
+	int roomCount;
+
+	Trigger *triggers;
+	int triggerCount;
+	Constant *constants;
+	int constantCount;
+	Include *includes;
+	int includeCount;
+	String *packages; //?
+	int packageCount;
 
 	//GameInformation gameInfo;
 	//GameSettings gameSettings;
-	int lastInstanceId;// = 100000;
-	int lastTileId;// = 10000000;
+	//int lastInstanceId;
+	//int lastTileId;
 };
