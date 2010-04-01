@@ -28,6 +28,13 @@
 #include "../OS_Switchboard.h" //Tell us where the hell we are
 #include "../backend/EnigmaStruct.h" //LateralGM interface structures
 
+#ifdef _WIN32
+ #define dllexport extern "C" __declspec(dllexport)
+#else
+ #define dllexport extern "C"
+ #include <cstdio>
+#endif
+
 #include <iostream>
 using namespace std;
 
@@ -38,19 +45,19 @@ enum
   E_ERROR_WUT
 };
 
-extern "C" __declspec(dllexport) int gameNew()
+dllexport int gameNew()
 {
   cout << "\nI .love. you.\n";
   return 0;
 };
 
-extern "C" __declspec(dllexport) int compileEGMf(EnigmaStruct *es)
+dllexport int compileEGMf(EnigmaStruct *es)
 {
   cout << "Hey. I wanted you to know: I have no fucking idea what to do with this input. :D\n";
   
   cout << "Location in memory of structure: " << es << endl;
   if (es == NULL)
-    return E_ERROR_PLUGIN_FUCKED_UP/0;
+    return E_ERROR_PLUGIN_FUCKED_UP;
   
   cout << "File version: " << es->fileVersion << endl << endl;
   

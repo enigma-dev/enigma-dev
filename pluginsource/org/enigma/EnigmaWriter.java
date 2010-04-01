@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -334,7 +335,7 @@ public final class EnigmaWriter
 			{
 			pg.grabPixels();
 
-			//is this the most efficient way?
+			//is this the most efficient way? ARGB => RGBA
 			for (int p = 0; p < pixels.length; p++)
 				pixels[p] = ((pixels[p] & 0x00FFFFFF) << 8) | (pixels[p] >>> 24);
 			}
@@ -344,7 +345,8 @@ public final class EnigmaWriter
 			}
 
 		//we assume an int is 4 bytes
-		o.pixels = ByteBuffer.allocateDirect(o.width * o.height * 4).asIntBuffer().put(pixels);
+		o.pixels = ByteBuffer.allocateDirect(o.width * o.height * 4).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(
+				pixels);
 		}
 
 	//the methods below are old and need to be replaced

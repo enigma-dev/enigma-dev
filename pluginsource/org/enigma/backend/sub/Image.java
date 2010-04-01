@@ -8,7 +8,7 @@
 
 package org.enigma.backend.sub;
 
-import java.nio.IntBuffer;
+import java.nio.Buffer;
 
 import com.sun.jna.Structure;
 
@@ -16,7 +16,7 @@ public class Image extends Structure
 	{
 	public int width;
 	public int height;
-	public IntBuffer pixels;
+	public Buffer pixels;
 
 	public static class ByReference extends Image implements Structure.ByReference
 		{
