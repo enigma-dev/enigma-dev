@@ -20,9 +20,14 @@
 package org.enigma;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.PixelGrabber;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 
@@ -32,12 +37,12 @@ import org.enigma.backend.resources.Room;
 import org.enigma.backend.resources.Script;
 import org.enigma.backend.resources.Sprite;
 import org.enigma.backend.sub.Image;
-import org.enigma.backend.sub.MainEvent;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmStreamEncoder;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
+import org.lateralgm.resources.Sprite.BBMode;
 import org.lateralgm.resources.Sprite.PSprite;
 import org.lateralgm.resources.library.LibAction;
 import org.lateralgm.resources.library.LibManager;
@@ -86,7 +91,7 @@ public final class EnigmaWriter
 		o.constantCount = 0;
 		o.includeCount = 0;
 		o.packageCount = 0;
-//		o.packages = new String[1];
+		//		o.packages = new String[1];
 
 		//		ef.progress(100,"Finalizing");
 
@@ -181,6 +186,16 @@ public final class EnigmaWriter
 		return true;*/
 		}
 
+	protected static final BBMode[] SPRITE_BB_MODE = { BBMode.AUTO,BBMode.FULL,BBMode.MANUAL };
+	protected static final Map<BBMode,Integer> SPRITE_BB_CODE;
+	static
+		{
+		EnumMap<BBMode,Integer> m = new EnumMap<BBMode,Integer>(BBMode.class);
+		for (int i = 0; i < SPRITE_BB_MODE.length; i++)
+			m.put(SPRITE_BB_MODE[i],i);
+		SPRITE_BB_CODE = Collections.unmodifiableMap(m);
+		}
+
 	public void populateSprites()
 		{
 		int size = i.sprites.size();
@@ -206,7 +221,7 @@ public final class EnigmaWriter
 			os.preload = is.get(PSprite.PRELOAD);
 			os.originX = is.get(PSprite.ORIGIN_X);
 			os.originY = is.get(PSprite.ORIGIN_Y);
-			os.bbMode = is.get(PSprite.BB_MODE); //0*=Automatic, 1=Full image, 2=Manual
+			os.bbMode = SPRITE_BB_CODE.get(is.get(PSprite.BB_MODE)); //0*=Automatic, 1=Full image, 2=Manual
 			os.bbLeft = is.get(PSprite.BB_LEFT);
 			os.bbRight = is.get(PSprite.BB_RIGHT);
 			os.bbTop = is.get(PSprite.BB_TOP);
@@ -312,13 +327,24 @@ public final class EnigmaWriter
 		{
 		o.width = i.getWidth();
 		o.height = i.getHeight();
-		o.pixels = new int[o.height * o.width];
-		//TODO: not really sure how to do this efficiently
-		/*		for (int y = 0; y < i.height; y++)
-					for (int x = 0; x < i.width; x++)
-						{
-						i.pixels[y * i.width + x] = im.getColorModel().getRed(0);
-						}*/
+
+		int[] pixels = new int[o.width * o.height];
+		PixelGrabber pg = new PixelGrabber(i,0,0,o.width,o.height,pixels,0,o.width);
+		try
+			{
+			pg.grabPixels();
+
+			//is this the most efficient way?
+			for (int p = 0; p < pixels.length; p++)
+				pixels[p] = ((pixels[p] & 0x00FFFFFF) << 8) | (pixels[p] >>> 24);
+			}
+		catch (InterruptedException e)
+			{
+			e.printStackTrace();
+			}
+
+		//we assume an int is 4 bytes
+		o.pixels = ByteBuffer.allocateDirect(o.width * o.height * 4).asIntBuffer().put(pixels);
 		}
 
 	//the methods below are old and need to be replaced
