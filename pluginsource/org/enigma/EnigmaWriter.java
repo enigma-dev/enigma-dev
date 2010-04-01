@@ -55,6 +55,7 @@ import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
+import org.lateralgm.resources.Sound.SoundKind;
 import org.lateralgm.resources.Sprite.BBMode;
 import org.lateralgm.resources.Sprite.PSprite;
 import org.lateralgm.resources.library.LibAction;
@@ -94,7 +95,7 @@ public final class EnigmaWriter
 		//		o.lastTileId = i.lastTileId;
 
 		populateSprites();
-		o.soundCount = 0;
+		populateSounds();
 		populateBackgrounds();
 		o.pathCount = 0;
 		populateScripts();
@@ -202,6 +203,16 @@ public final class EnigmaWriter
 		return true;*/
 		}
 
+	protected static final SoundKind[] SOUND_KIND = { SoundKind.NORMAL,SoundKind.BACKGROUND,
+			SoundKind.SPATIAL,SoundKind.MULTIMEDIA };
+	protected static final Map<SoundKind,Integer> SOUND_CODE;
+	static
+		{
+		EnumMap<SoundKind,Integer> m = new EnumMap<SoundKind,Integer>(SoundKind.class);
+		for (int i = 0; i < SOUND_KIND.length; i++)
+			m.put(SOUND_KIND[i],i);
+		SOUND_CODE = Collections.unmodifiableMap(m);
+		}
 	protected static final BBMode[] SPRITE_BB_MODE = { BBMode.AUTO,BBMode.FULL,BBMode.MANUAL };
 	protected static final Map<BBMode,Integer> SPRITE_BB_CODE;
 	static
@@ -270,7 +281,7 @@ public final class EnigmaWriter
 			os.name = is.getName();
 			os.id = is.getId();
 
-			os.kind = is.get(PSound.KIND);
+			os.kind = SOUND_CODE.get(is.get(PSound.KIND));
 			os.fileType = is.get(PSound.FILE_TYPE);
 			os.fileName = is.get(PSound.FILE_NAME);
 			os.chorus = is.get(PSound.CHORUS);

@@ -15,7 +15,7 @@ struct Sound
 	int id;
 
 	int kind;
-	int fileType;
+	String fileType;
 	String fileName;
 	boolean chorus;
 	boolean echo;

@@ -18,7 +18,7 @@ public class Sound extends Structure
 	public int id;
 
 	public int kind;
-	public int fileType;
+	public String fileType;
 	public String fileName;
 	public boolean chorus;
 	public boolean echo;
