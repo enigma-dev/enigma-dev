@@ -12,16 +12,16 @@ import com.sun.jna.Structure;
 
 public class Tile extends Structure
 	{
-	int bgX;
-	int bgY;
-	int roomX;
-	int roomY;
-	int width;
-	int height;
-	int depth;
-	int backgroundId;
-	int id;
-	boolean locked;
+	public int bgX;
+	public int bgY;
+	public int roomX;
+	public int roomY;
+	public int width;
+	public int height;
+	public int depth;
+	public int backgroundId;
+	public int id;
+	public boolean locked;
 
 	public static class ByReference extends Tile implements Structure.ByReference
 		{

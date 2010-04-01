@@ -12,17 +12,17 @@ import com.sun.jna.Structure;
 
 public class BackgroundDef extends Structure
 	{
-	boolean visible;
-	boolean foreground;
-	int x;
-	int y;
-	boolean tileHoriz;
-	boolean tileVert;
-	int hSpeed;
-	int vSpeed;
-	boolean stretch;
+	public boolean visible;
+	public boolean foreground;
+	public int x;
+	public int y;
+	public boolean tileHoriz;
+	public boolean tileVert;
+	public int hSpeed;
+	public int vSpeed;
+	public boolean stretch;
 
-	int backgroundId;
+	public int backgroundId;
 
 	public static class ByReference extends BackgroundDef implements Structure.ByReference
 		{

@@ -12,12 +12,12 @@ import com.sun.jna.Structure;
 
 public class Instance extends Structure
 	{
-	int x;
-	int y;
-	int objectId;
-	int id;
-	String creationCode;
-	boolean locked;
+	public int x;
+	public int y;
+	public int objectId;
+	public int id;
+	public String creationCode;
+	public boolean locked;
 
 	public static class ByReference extends Instance implements Structure.ByReference
 		{

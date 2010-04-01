@@ -21,6 +21,7 @@ package org.enigma;
 
 import static org.lateralgm.main.Util.deRef;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.nio.ByteBuffer;
@@ -40,9 +41,13 @@ import org.enigma.backend.resources.Room;
 import org.enigma.backend.resources.Script;
 import org.enigma.backend.resources.Sound;
 import org.enigma.backend.resources.Sprite;
+import org.enigma.backend.sub.BackgroundDef;
 import org.enigma.backend.sub.Event;
 import org.enigma.backend.sub.Image;
+import org.enigma.backend.sub.Instance;
 import org.enigma.backend.sub.MainEvent;
+import org.enigma.backend.sub.Tile;
+import org.enigma.backend.sub.View;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
@@ -57,6 +62,10 @@ import org.lateralgm.resources.library.LibManager;
 import org.lateralgm.resources.library.Library;
 import org.lateralgm.resources.sub.Action;
 import org.lateralgm.resources.sub.Argument;
+import org.lateralgm.resources.sub.BackgroundDef.PBackgroundDef;
+import org.lateralgm.resources.sub.Instance.PInstance;
+import org.lateralgm.resources.sub.Tile.PTile;
+import org.lateralgm.resources.sub.View.PView;
 
 public final class EnigmaWriter
 	{
@@ -419,51 +428,139 @@ public final class EnigmaWriter
 		org.lateralgm.resources.Room[] irl = i.rooms.toArray(new org.lateralgm.resources.Room[0]);
 		for (int s = 0; s < size; s++)
 			{
-			Room os = orly[s];
+			Room or = orly[s];
 			org.lateralgm.resources.Room is = irl[s];
 
-			os.name = is.getName();
-			os.id = is.getId();
+			or.name = is.getName();
+			or.id = is.getId();
 
-			os.caption = is.get(PRoom.CAPTION);
-			os.width = is.get(PRoom.WIDTH);
-			os.height = is.get(PRoom.HEIGHT);
+			or.caption = is.get(PRoom.CAPTION);
+			or.width = is.get(PRoom.WIDTH);
+			or.height = is.get(PRoom.HEIGHT);
 
 			// vvv may be useless vvv //
-			os.snapX = is.get(PRoom.SNAP_X);
-			os.snapY = is.get(PRoom.SNAP_Y);
-			os.isometric = is.get(PRoom.ISOMETRIC);
+			or.snapX = is.get(PRoom.SNAP_X);
+			or.snapY = is.get(PRoom.SNAP_Y);
+			or.isometric = is.get(PRoom.ISOMETRIC);
 			// ^^^ may be useless ^^^ //
 
-			os.speed = is.get(PRoom.SPEED);
-			os.persistent = is.get(PRoom.PERSISTENT);
-			os.backgroundColor = is.get(PRoom.BACKGROUND_COLOR);
-			os.drawBackgroundColor = is.get(PRoom.DRAW_BACKGROUND_COLOR);
-			os.creationCode = is.get(PRoom.CREATION_CODE);
+			or.speed = is.get(PRoom.SPEED);
+			or.persistent = is.get(PRoom.PERSISTENT);
+			or.backgroundColor = ARGBtoRGBA(((Color) is.get(PRoom.BACKGROUND_COLOR)).getRGB());
+			or.drawBackgroundColor = is.get(PRoom.DRAW_BACKGROUND_COLOR);
+			or.creationCode = is.get(PRoom.CREATION_CODE);
 
 			/// vvv useless stuff vvv //
-			os.rememberWindowSize = is.get(PRoom.REMEMBER_WINDOW_SIZE);
-			os.editorWidth = is.get(PRoom.EDITOR_WIDTH);
-			os.editorHeight = is.get(PRoom.EDITOR_HEIGHT);
-			os.showGrid = is.get(PRoom.SHOW_GRID);
-			os.showObjects = is.get(PRoom.SHOW_OBJECTS);
-			os.showTiles = is.get(PRoom.SHOW_TILES);
-			os.showBackgrounds = is.get(PRoom.SHOW_BACKGROUNDS);
-			os.showViews = is.get(PRoom.SHOW_VIEWS);
-			os.deleteUnderlyingObjects = is.get(PRoom.DELETE_UNDERLYING_OBJECTS);
-			os.deleteUnderlyingTiles = is.get(PRoom.DELETE_UNDERLYING_TILES);
-			os.currentTab = is.get(PRoom.CURRENT_TAB);
-			os.scrollBarX = is.get(PRoom.SCROLL_BAR_X);
-			os.scrollBarY = is.get(PRoom.SCROLL_BAR_Y);
-			os.enableViews = is.get(PRoom.ENABLE_VIEWS);
+			or.rememberWindowSize = is.get(PRoom.REMEMBER_WINDOW_SIZE);
+			or.editorWidth = is.get(PRoom.EDITOR_WIDTH);
+			or.editorHeight = is.get(PRoom.EDITOR_HEIGHT);
+			or.showGrid = is.get(PRoom.SHOW_GRID);
+			or.showObjects = is.get(PRoom.SHOW_OBJECTS);
+			or.showTiles = is.get(PRoom.SHOW_TILES);
+			or.showBackgrounds = is.get(PRoom.SHOW_BACKGROUNDS);
+			or.showViews = is.get(PRoom.SHOW_VIEWS);
+			or.deleteUnderlyingObjects = is.get(PRoom.DELETE_UNDERLYING_OBJECTS);
+			or.deleteUnderlyingTiles = is.get(PRoom.DELETE_UNDERLYING_TILES);
+			or.currentTab = is.get(PRoom.CURRENT_TAB);
+			or.scrollBarX = is.get(PRoom.SCROLL_BAR_X);
+			or.scrollBarY = is.get(PRoom.SCROLL_BAR_Y);
+			or.enableViews = is.get(PRoom.ENABLE_VIEWS);
 			// ^^^ useless stuff ^^^ //
 
-			os.backgroundDefCount = 0;
-			os.viewCount = 0;
-			os.instanceCount = 0;
-			os.tileCount = 0;
-			}
-		}
+			or.backgroundDefCount = is.backgroundDefs.size();
+			if (or.backgroundDefCount != 0)
+				{
+				or.backgroundDefs = new BackgroundDef.ByReference();
+				BackgroundDef[] obdl = (BackgroundDef[]) or.backgroundDefs.toArray(or.backgroundDefCount);
+				for (int bd = 0; bd < obdl.length; bd++)
+					{
+					BackgroundDef obd = obdl[bd];
+					org.lateralgm.resources.sub.BackgroundDef ibd = is.backgroundDefs.get(bd);
+
+					obd.visible = ibd.properties.get(PBackgroundDef.VISIBLE);
+					obd.foreground = ibd.properties.get(PBackgroundDef.FOREGROUND);
+					obd.x = ibd.properties.get(PBackgroundDef.X);
+					obd.y = ibd.properties.get(PBackgroundDef.Y);
+					obd.tileHoriz = ibd.properties.get(PBackgroundDef.TILE_HORIZ);
+					obd.tileVert = ibd.properties.get(PBackgroundDef.TILE_VERT);
+					obd.hSpeed = ibd.properties.get(PBackgroundDef.H_SPEED);
+					obd.vSpeed = ibd.properties.get(PBackgroundDef.V_SPEED);
+					obd.stretch = ibd.properties.get(PBackgroundDef.STRETCH);
+
+					obd.backgroundId = toId(ibd.properties.get(PBackgroundDef.BACKGROUND),-1);
+					}
+				}
+
+			or.viewCount = is.views.size();
+			if (or.viewCount != 0)
+				{
+				or.views = new View.ByReference();
+				View[] ovl = (View[]) or.views.toArray(or.viewCount);
+				for (int v = 0; v < ovl.length; v++)
+					{
+					View ov = ovl[v];
+					org.lateralgm.resources.sub.View iv = is.views.get(v);
+
+					ov.visible = iv.properties.get(PView.VISIBLE);
+					ov.viewX = iv.properties.get(PView.VIEW_X);
+					ov.viewY = iv.properties.get(PView.VIEW_Y);
+					ov.viewW = iv.properties.get(PView.VIEW_W);
+					ov.viewH = iv.properties.get(PView.VIEW_H);
+					ov.portX = iv.properties.get(PView.PORT_X);
+					ov.portY = iv.properties.get(PView.PORT_Y);
+					ov.portW = iv.properties.get(PView.PORT_W);
+					ov.portH = iv.properties.get(PView.PORT_H);
+					ov.borderH = iv.properties.get(PView.BORDER_H);
+					ov.borderV = iv.properties.get(PView.BORDER_V);
+					ov.speedH = iv.properties.get(PView.SPEED_H);
+					ov.speedV = iv.properties.get(PView.SPEED_V);
+					ov.objectId = toId(iv.properties.get(PView.OBJECT),-1);
+					}
+				}
+
+			or.instanceCount = is.instances.size();
+			if (or.instanceCount != 0)
+				{
+				or.instances = new Instance.ByReference();
+				Instance[] oil = (Instance[]) or.instances.toArray(or.instanceCount);
+				for (int i = 0; i < oil.length; i++)
+					{
+					Instance oi = oil[i];
+					org.lateralgm.resources.sub.Instance ii = is.instances.get(i);
+
+					oi.x = ii.properties.get(PInstance.X);
+					oi.y = ii.properties.get(PInstance.Y);
+					oi.objectId = toId(ii.properties.get(PInstance.OBJECT),-1);
+					oi.id = ii.properties.get(PInstance.ID);
+					oi.creationCode = ii.properties.get(PInstance.CREATION_CODE);
+					oi.locked = ii.properties.get(PInstance.LOCKED);
+					}
+				}
+
+			or.tileCount = is.tiles.size();
+			if (or.tileCount != 0)
+				{
+				or.tiles = new Tile.ByReference();
+				Tile[] otl = (Tile[]) or.tiles.toArray(or.tileCount);
+				for (int t = 0; t < otl.length; t++)
+					{
+					Tile ot = otl[t];
+					org.lateralgm.resources.sub.Tile it = is.tiles.get(t);
+
+					ot.bgX = it.properties.get(PTile.BG_X);
+					ot.bgY = it.properties.get(PTile.BG_Y);
+					ot.roomX = it.properties.get(PTile.ROOM_X);
+					ot.roomY = it.properties.get(PTile.ROOM_Y);
+					ot.width = it.properties.get(PTile.WIDTH);
+					ot.height = it.properties.get(PTile.HEIGHT);
+					ot.depth = it.properties.get(PTile.DEPTH);
+					ot.backgroundId = toId(it.properties.get(PTile.BACKGROUND),-1);
+					ot.id = it.properties.get(PTile.ID);
+					ot.locked = it.properties.get(PTile.LOCKED);
+					} //tile
+				} //tiles
+			} //rooms
+		} //populateRooms()
 
 	public static void populateImage(BufferedImage i, Image o)
 		{
@@ -480,7 +577,7 @@ public final class EnigmaWriter
 
 			//is this the most efficient way? ARGB => RGBA
 			for (int p = 0; p < pixels.length; p++)
-				pixels[p] = ((pixels[p] & 0x00FFFFFF) << 8) | (pixels[p] >>> 24);
+				pixels[p] = ARGBtoRGBA(pixels[p]);
 			}
 		catch (InterruptedException e)
 			{
@@ -490,6 +587,11 @@ public final class EnigmaWriter
 		//we assume an int is 4 bytes
 		o.pixels = ByteBuffer.allocateDirect(o.width * o.height * 4).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(
 				pixels);
+		}
+
+	public static int ARGBtoRGBA(int argb)
+		{
+		return ((argb & 0x00FFFFFF) << 8) | (argb >>> 24);
 		}
 
 	public static int toId(Object obj, int def)
