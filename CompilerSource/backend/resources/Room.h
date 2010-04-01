@@ -23,15 +23,20 @@ struct Room
 	String caption;
 	int width;
 	int height;
+
+	// vvv may be useless vvv //
 	int snapX;
-	
 	int snapY;
 	boolean isometric;
+	// ^^^ may be useless ^^^ //
+
 	int speed;
 	boolean persistent;
 	int backgroundColor;
 	boolean drawBackgroundColor; //GM color
 	String creationCode;
+
+	// vvv useless stuff vvv //
 	boolean rememberWindowSize;
 	int editorWidth;
 	int editorHeight;
@@ -46,9 +51,14 @@ struct Room
 	int scrollBarX;
 	int scrollBarY;
 	boolean enableViews;
+	// ^^^ useless stuff ^^^ //
 
 	BackgroundDef *backgroundDefs;
+	int backgroundDefCount;
 	View *views;
+	int viewCount;
 	Instance *instances;
+	int instanceCount;
 	Tile *tiles;
+	int tileCount;
 };

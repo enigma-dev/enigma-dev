@@ -23,4 +23,8 @@ public class BackgroundDef extends Structure
 	boolean stretch;
 
 	int backgroundId;
+
+	public static class ByReference extends BackgroundDef implements Structure.ByReference
+		{
+		}
 	}

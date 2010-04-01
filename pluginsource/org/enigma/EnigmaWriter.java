@@ -34,18 +34,22 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 
 import org.enigma.backend.EnigmaStruct;
+import org.enigma.backend.resources.Background;
 import org.enigma.backend.resources.GmObject;
 import org.enigma.backend.resources.Room;
 import org.enigma.backend.resources.Script;
+import org.enigma.backend.resources.Sound;
 import org.enigma.backend.resources.Sprite;
 import org.enigma.backend.sub.Event;
 import org.enigma.backend.sub.Image;
 import org.enigma.backend.sub.MainEvent;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.resources.ResourceReference;
+import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
+import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.Sprite.BBMode;
 import org.lateralgm.resources.Sprite.PSprite;
 import org.lateralgm.resources.library.LibAction;
@@ -71,7 +75,7 @@ public final class EnigmaWriter
 		return ew.populateStruct();
 		}
 
-	private EnigmaStruct populateStruct()
+	protected EnigmaStruct populateStruct()
 		{
 		//		ef.progress(0,"Initializing");
 
@@ -82,7 +86,7 @@ public final class EnigmaWriter
 
 		populateSprites();
 		o.soundCount = 0;
-		o.backgroundCount = 0;
+		populateBackgrounds();
 		o.pathCount = 0;
 		populateScripts();
 		o.fontCount = 0;
@@ -199,7 +203,7 @@ public final class EnigmaWriter
 		SPRITE_BB_CODE = Collections.unmodifiableMap(m);
 		}
 
-	public void populateSprites()
+	protected void populateSprites()
 		{
 		int size = i.sprites.size();
 		o.spriteCount = size;
@@ -240,16 +244,90 @@ public final class EnigmaWriter
 			}
 		}
 
-	public void populateScripts()
+	protected void populateSounds()
 		{
-		int size = i.scripts.size();
+		int size = i.sounds.size();
+		o.soundCount = size;
+		if (size == 0) return;
+
+		o.sounds = new Sound.ByReference();
+		Sound[] osl = (Sound[]) o.sounds.toArray(size);
+		org.lateralgm.resources.Sound[] isl = i.sounds.toArray(new org.lateralgm.resources.Sound[0]);
+		for (int s = 0; s < size; s++)
+			{
+			Sound os = osl[s];
+			org.lateralgm.resources.Sound is = isl[s];
+
+			os.name = is.getName();
+			os.id = is.getId();
+
+			os.kind = is.get(PSound.KIND);
+			os.fileType = is.get(PSound.FILE_TYPE);
+			os.fileName = is.get(PSound.FILE_NAME);
+			os.chorus = is.get(PSound.CHORUS);
+			os.echo = is.get(PSound.ECHO);
+			os.flanger = is.get(PSound.FLANGER);
+			os.gargle = is.get(PSound.GARGLE);
+			os.reverb = is.get(PSound.REVERB);
+			os.volume = is.get(PSound.VOLUME);
+			os.pan = is.get(PSound.PAN);
+			os.preload = is.get(PSound.PRELOAD);
+
+			if (is.data == null)
+				{
+				os.size = 0;
+				continue;
+				}
+			os.size = is.data.length;
+			os.data = ByteBuffer.allocateDirect(os.size).put(is.data);
+			}
+		}
+
+	protected void populateBackgrounds()
+		{
+		int size = i.backgrounds.size();
+		o.backgroundCount = size;
+		if (size == 0) return;
+
+		o.backgrounds = new Background.ByReference();
+		Background[] obl = (Background[]) o.backgrounds.toArray(size);
+		org.lateralgm.resources.Background[] ibl = i.backgrounds.toArray(new org.lateralgm.resources.Background[0]);
+		for (int s = 0; s < size; s++)
+			{
+			Background ob = obl[s];
+			org.lateralgm.resources.Background ib = ibl[s];
+
+			ob.name = ib.getName();
+			ob.id = ib.getId();
+
+			ob.transparent = ib.get(PBackground.TRANSPARENT);
+			ob.smoothEdges = ib.get(PBackground.SMOOTH_EDGES);
+			ob.preload = ib.get(PBackground.PRELOAD);
+			ob.useAsTileset = ib.get(PBackground.USE_AS_TILESET);
+			ob.tileWidth = ib.get(PBackground.TILE_WIDTH);
+			ob.tileHeight = ib.get(PBackground.TILE_HEIGHT);
+			ob.hOffset = ib.get(PBackground.H_OFFSET);
+			ob.vOffset = ib.get(PBackground.V_OFFSET);
+			ob.hSep = ib.get(PBackground.H_SEP);
+			ob.vSep = ib.get(PBackground.V_SEP);
+
+			ob.backgroundImage = new Image.ByReference();
+			populateImage(ib.getBackgroundImage(),ob.backgroundImage);
+			}
+		}
+
+	protected void populateScripts()
+		{
+		List<LibAction> qs = getQuestionLibActions();
+
+		int size = i.scripts.size() + qs.size();
 		o.scriptCount = size;
 		if (size == 0) return;
 
 		o.scripts = new Script.ByReference();
 		Script[] osl = (Script[]) o.scripts.toArray(size);
 		org.lateralgm.resources.Script[] isl = i.scripts.toArray(new org.lateralgm.resources.Script[0]);
-		for (int s = 0; s < size; s++)
+		for (int s = 0; s < isl.length; s++)
 			{
 			Script oo = osl[s];
 			org.lateralgm.resources.Script io = isl[s];
@@ -258,9 +336,17 @@ public final class EnigmaWriter
 			oo.id = io.getId();
 			oo.code = io.get(PScript.CODE);
 			}
+
+		for (int s = 0; s < qs.size(); s++)
+			{
+			Script oo = osl[s + isl.length];
+			oo.name = "lib" + qs.get(s).parentId + "_action" + qs.get(s).id;
+			oo.id = -s - 2;
+			oo.code = qs.get(s).execInfo;
+			}
 		}
 
-	public void populateObjects()
+	protected void populateObjects()
 		{
 		int size = i.gmObjects.size();
 		o.gmObjectCount = size;
@@ -322,14 +408,7 @@ public final class EnigmaWriter
 			}
 		}
 
-	public static int toId(Object obj, int def)
-		{
-		ResourceReference<?> rr = (ResourceReference<?>) obj;
-		if (deRef(rr) != null) return rr.get().getId();
-		return def;
-		}
-
-	public void populateRooms()
+	protected void populateRooms()
 		{
 		int size = i.rooms.size();
 		o.roomCount = size;
@@ -361,11 +440,35 @@ public final class EnigmaWriter
 			os.backgroundColor = is.get(PRoom.BACKGROUND_COLOR);
 			os.drawBackgroundColor = is.get(PRoom.DRAW_BACKGROUND_COLOR);
 			os.creationCode = is.get(PRoom.CREATION_CODE);
+
+			/// vvv useless stuff vvv //
+			os.rememberWindowSize = is.get(PRoom.REMEMBER_WINDOW_SIZE);
+			os.editorWidth = is.get(PRoom.EDITOR_WIDTH);
+			os.editorHeight = is.get(PRoom.EDITOR_HEIGHT);
+			os.showGrid = is.get(PRoom.SHOW_GRID);
+			os.showObjects = is.get(PRoom.SHOW_OBJECTS);
+			os.showTiles = is.get(PRoom.SHOW_TILES);
+			os.showBackgrounds = is.get(PRoom.SHOW_BACKGROUNDS);
+			os.showViews = is.get(PRoom.SHOW_VIEWS);
+			os.deleteUnderlyingObjects = is.get(PRoom.DELETE_UNDERLYING_OBJECTS);
+			os.deleteUnderlyingTiles = is.get(PRoom.DELETE_UNDERLYING_TILES);
+			os.currentTab = is.get(PRoom.CURRENT_TAB);
+			os.scrollBarX = is.get(PRoom.SCROLL_BAR_X);
+			os.scrollBarY = is.get(PRoom.SCROLL_BAR_Y);
+			os.enableViews = is.get(PRoom.ENABLE_VIEWS);
+			// ^^^ useless stuff ^^^ //
+
+			os.backgroundDefCount = 0;
+			os.viewCount = 0;
+			os.instanceCount = 0;
+			os.tileCount = 0;
 			}
 		}
 
-	public void populateImage(BufferedImage i, Image o)
+	public static void populateImage(BufferedImage i, Image o)
 		{
+		if (i == null || o == null) return;
+
 		o.width = i.getWidth();
 		o.height = i.getHeight();
 
@@ -387,6 +490,13 @@ public final class EnigmaWriter
 		//we assume an int is 4 bytes
 		o.pixels = ByteBuffer.allocateDirect(o.width * o.height * 4).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(
 				pixels);
+		}
+
+	public static int toId(Object obj, int def)
+		{
+		ResourceReference<?> rr = (ResourceReference<?>) obj;
+		if (deRef(rr) != null) return rr.get().getId();
+		return def;
 		}
 
 	public static boolean actionDemise = false;
@@ -486,7 +596,7 @@ public final class EnigmaWriter
 		return code;
 		}
 
-	//this method is left over from when we used files. Find out what its purpose is and replace/use it
+	//in order to allow question actions to get converted to code, we treat their internal code as scripts
 	public static ArrayList<LibAction> getQuestionLibActions()
 		{
 		ArrayList<LibAction> ala = new ArrayList<LibAction>();

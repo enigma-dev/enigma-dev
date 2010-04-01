@@ -8,27 +8,29 @@
 
 package org.enigma.backend.resources;
 
+import java.nio.Buffer;
+
 import com.sun.jna.Structure;
 
 public class Sound extends Structure
 	{
-	String name;
-	int id;
+	public String name;
+	public int id;
 
-	int kind;
-	int fileType;
-	String fileName;
-	boolean chorus;
-	boolean echo;
-	boolean flanger;
-	boolean gargle;
-	boolean reverb;
-	double volume;
-	double pan;
-	boolean preload;
+	public int kind;
+	public int fileType;
+	public String fileName;
+	public boolean chorus;
+	public boolean echo;
+	public boolean flanger;
+	public boolean gargle;
+	public boolean reverb;
+	public double volume;
+	public double pan;
+	public boolean preload;
 
-	byte[] data = new byte[0];
-	int size = 0;
+	public Buffer data;
+	public int size;
 
 	public static class ByReference extends Sound implements Structure.ByReference
 		{

@@ -18,4 +18,8 @@ public class Instance extends Structure
 	int id;
 	String creationCode;
 	boolean locked;
+
+	public static class ByReference extends Instance implements Structure.ByReference
+		{
+		}
 	}

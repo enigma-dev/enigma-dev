@@ -23,9 +23,13 @@ public class Room extends Structure
 	public String caption;
 	public int width;
 	public int height;
+
+	// vvv may be useless vvv //
 	public int snapX;
 	public int snapY;
 	public boolean isometric;
+	// ^^^ may be useless ^^^ //
+
 	public int speed;
 	public boolean persistent;
 	public int backgroundColor; //GM color
@@ -49,13 +53,13 @@ public class Room extends Structure
 	public boolean enableViews;
 	// ^^^ useless stuff ^^^ //
 
-	public BackgroundDef[] backgroundDefs;
+	public BackgroundDef.ByReference backgroundDefs;
 	public int backgroundDefCount;
-	public View[] views;
+	public View.ByReference views;
 	public int viewCount;
-	public Instance[] instances;
+	public Instance.ByReference instances;
 	public int instanceCount;
-	public Tile[] tiles;
+	public Tile.ByReference tiles;
 	public int tileCount;
 
 	public static class ByReference extends Room implements Structure.ByReference

@@ -14,23 +14,23 @@ import com.sun.jna.Structure;
 
 public class Background extends Structure
 	{
-	String name;
-	int id;
+	public String name;
+	public int id;
 
-	boolean transparent;
-	boolean smoothEdges;
-	boolean preload;
-	boolean useAsTileset;
-	int tileWidth;
-	int tileHeight;
-	int hOffset;
-	int vOffset;
-	int hSep;
-	int vSep;
+	public boolean transparent;
+	public boolean smoothEdges;
+	public boolean preload;
+	public boolean useAsTileset;
+	public int tileWidth;
+	public int tileHeight;
+	public int hOffset;
+	public int vOffset;
+	public int hSep;
+	public int vSep;
 
-	Image backgroundImage;
+	public Image backgroundImage;
 
-	public class ByReference extends Background implements Structure.ByReference
+	public static class ByReference extends Background implements Structure.ByReference
 		{
 		}
 	}

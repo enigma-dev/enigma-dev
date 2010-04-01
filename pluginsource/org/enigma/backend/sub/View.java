@@ -26,4 +26,8 @@ public class View extends Structure
 	int speedH;
 	int speedV;
 	int objectId; //following object
+
+	public static class ByReference extends View implements Structure.ByReference
+		{
+		}
 	}

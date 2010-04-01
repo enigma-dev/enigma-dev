@@ -27,4 +27,5 @@ struct Sound
 	boolean preload;
 
 	byte *data;
+	int size;
 };

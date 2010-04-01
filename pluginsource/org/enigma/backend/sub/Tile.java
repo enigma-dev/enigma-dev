@@ -22,4 +22,8 @@ public class Tile extends Structure
 	int backgroundId;
 	int id;
 	boolean locked;
+
+	public static class ByReference extends Tile implements Structure.ByReference
+		{
+		}
 	}
