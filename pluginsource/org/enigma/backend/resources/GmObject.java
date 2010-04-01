@@ -25,8 +25,8 @@ public class GmObject extends Structure
 	public int parentId;
 	public int maskId; //sprite
 
-//	public MainEvent[] mainEvents;
-//	public int mainEventCount;
+	public MainEvent.ByReference mainEvents;
+	public int mainEventCount;
 
 	public static class ByReference extends GmObject implements Structure.ByReference
 		{

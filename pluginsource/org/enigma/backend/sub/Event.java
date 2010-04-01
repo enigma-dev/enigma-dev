@@ -12,10 +12,13 @@ import com.sun.jna.Structure;
 
 public class Event extends Structure
 	{
-	int id;
-	int otherObjectId; //collision, etc
-	int mainId;
+	public int id;
+	public int otherObjectId; //collision, etc
+	public int mainId;
 
-	Action[] actions;
-	int actionCount;
+	public String code;
+
+	public static class ByReference extends Event implements Structure.ByReference
+		{
+		}
 	}

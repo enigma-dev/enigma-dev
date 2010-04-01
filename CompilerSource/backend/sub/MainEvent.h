@@ -7,10 +7,11 @@
  */
 
 
-
+#include "Event.h"
 #include "../JavaStruct.h"
 
 struct MainEvent
-	{
-	Event[] events;
-	}
+{
+	Event *events;
+	int eventCount;
+};

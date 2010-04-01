@@ -7,7 +7,7 @@
  */
 
 
-//#include "../sub/Event.h"
+#include "../sub/MainEvent.h"
 #include "../JavaStruct.h"
 
 struct GmObject
@@ -22,8 +22,7 @@ struct GmObject
   boolean persistent;
   int parentId;
   int maskId;
-  
- // Event *events[];
-  
-  //public static class ByReference extends GmObject implements Structure.ByReference { } //WAT HELL
+
+  MainEvent *mainEvents;
+  int mainEventCount;
 };

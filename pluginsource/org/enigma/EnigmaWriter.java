@@ -19,9 +19,10 @@
 
 package org.enigma;
 
+import static org.lateralgm.main.Util.deRef;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -37,9 +38,11 @@ import org.enigma.backend.resources.GmObject;
 import org.enigma.backend.resources.Room;
 import org.enigma.backend.resources.Script;
 import org.enigma.backend.resources.Sprite;
+import org.enigma.backend.sub.Event;
 import org.enigma.backend.sub.Image;
+import org.enigma.backend.sub.MainEvent;
 import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmStreamEncoder;
+import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
@@ -50,7 +53,6 @@ import org.lateralgm.resources.library.LibManager;
 import org.lateralgm.resources.library.Library;
 import org.lateralgm.resources.sub.Action;
 import org.lateralgm.resources.sub.Argument;
-import org.lateralgm.resources.sub.Event;
 
 public final class EnigmaWriter
 	{
@@ -275,18 +277,56 @@ public final class EnigmaWriter
 			oo.name = io.getName();
 			oo.id = io.getId();
 
-			//			oo.sprite = io.get(PGmObject.SPRITE);
+			oo.spriteId = toId(io.get(PGmObject.SPRITE),-1);
 			oo.solid = io.get(PGmObject.SOLID);
 			oo.visible = io.get(PGmObject.VISIBLE);
 			oo.depth = io.get(PGmObject.DEPTH);
 			oo.persistent = io.get(PGmObject.PERSISTENT);
-			//			GmObject.ByReference parent;
-			//			Sprite.ByReference mask;
+			oo.parentId = toId(io.get(PGmObject.PARENT),-100);
+			oo.maskId = toId(io.get(PGmObject.MASK),-1);
 
+			//Use this code instead to allow 0 main events
+			//and switch GmObject.mainEvents to MainEvent.ByReference
+			oo.mainEventCount = io.mainEvents.size();
+			if (oo.mainEventCount == 0) continue;
+
+			oo.mainEvents = new MainEvent.ByReference();
+			MainEvent[] ooil = (MainEvent[]) oo.mainEvents.toArray(oo.mainEventCount);
+
+			//we assume there are never 0 main events
 			//			oo.mainEventCount = io.mainEvents.size();
 			//			oo.mainEvents = new MainEvent[oo.mainEventCount];
-			//TODO: handle main events
+			for (int me = 0; me < oo.mainEventCount; me++)
+				{
+				MainEvent ome = ooil[me];
+				ArrayList<org.lateralgm.resources.sub.Event> iel = io.mainEvents.get(me).events;
+
+				ome.eventCount = iel.size();
+				if (ome.eventCount == 0) continue;
+
+				ome.events = new Event.ByReference();
+				Event[] oel = (Event[]) ome.events.toArray(ome.eventCount);
+
+				for (int e = 0; e < ome.eventCount; e++)
+					{
+					Event oe = oel[e];
+					org.lateralgm.resources.sub.Event ie = iel.get(e);
+
+					oe.id = ie.id;
+					oe.otherObjectId = toId(ie.other,-1);
+					oe.mainId = me;
+
+					oe.code = getActionsCode(ie);
+					}
+				}
 			}
+		}
+
+	public static int toId(Object obj, int def)
+		{
+		ResourceReference<?> rr = (ResourceReference<?>) obj;
+		if (deRef(rr) != null) return rr.get().getId();
+		return def;
 		}
 
 	public void populateRooms()
@@ -349,87 +389,9 @@ public final class EnigmaWriter
 				pixels);
 		}
 
-	//the methods below are old and need to be replaced
-
-	public boolean writeEvent(GmStreamEncoder out, Event ev) throws IOException
-		{
-		/*
-		String e;
-		switch (ev.mainId)
-			{
-			case MainEvent.EV_CREATE:
-				e = "create";
-				break;
-			case MainEvent.EV_DESTROY:
-				e = "destroy";
-				break;
-			case MainEvent.EV_ALARM:
-				e = "alarm";
-				break;
-			case MainEvent.EV_STEP:
-				switch (ev.id)
-					{
-					case Event.EV_STEP_BEGIN:
-						e = "beginstep";
-						break;
-					case Event.EV_STEP_NORMAL:
-						e = "step";
-						break;
-					case Event.EV_STEP_END:
-						e = "endstep";
-						break;
-					default:
-						return false; //don't write unknowns
-					}
-				break;
-			case MainEvent.EV_COLLISION:
-				e = "collision";
-				break;
-			case MainEvent.EV_KEYBOARD:
-				e = "keyboard";
-				break;
-			case MainEvent.EV_MOUSE:
-				e = "mouse";
-				break;
-			case MainEvent.EV_OTHER:
-				return false;
-			case MainEvent.EV_DRAW:
-				e = "draw";
-				break;
-			case MainEvent.EV_KEYPRESS:
-				e = "keypress";
-				break;
-			case MainEvent.EV_KEYRELEASE:
-				e = "keyrelease";
-				break;
-			default:
-				return false;
-			}
-			*/
-
-		/*
-		create; game start; room start; draw; begin step; alarm; keyboard; key press;
-		key release; step; path end; outside room; intersect boundary; collision;
-		no more lives; no more health; end step; draw; end animation; begin step;
-		alarm; destroy; room end; game end.
-		*/
-
-		/*
-		if (e.length() == 0) return false;
-		writeStr(out,e);
-		if (ev.mainId == MainEvent.EV_STEP)
-			out.write4(0);
-		else if (ev.mainId == MainEvent.EV_COLLISION)
-			out.writeId(ev.other);
-		else
-			out.write4(ev.id);
-			*/
-		return false;
-		}
-
 	public static boolean actionDemise = false;
 
-	public static String getActionsCode(Event ev)
+	public static String getActionsCode(org.lateralgm.resources.sub.Event ev)
 		{
 		String nl = System.getProperty("line.separator");
 		String code = "";
@@ -473,11 +435,11 @@ public final class EnigmaWriter
 					code += args.get(0).getVal() + " = " + args.get(1).getVal() + nl;
 					break;
 				case Action.ACT_NORMAL:
-					{/*
-						if (la.execType == Action.EXEC_NONE) break;
-						ResourceReference<GmObject> apto = act.getAppliesTo();
-						if (la.question)
-						if (apto != GmObject.OBJECT_SELF)
+					{
+					if (la.execType == Action.EXEC_NONE) break;
+					ResourceReference<org.lateralgm.resources.GmObject> apto = act.getAppliesTo();
+					if (la.question)
+						if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF)
 							{
 							if (!actionDemise)
 								{
@@ -494,30 +456,29 @@ public final class EnigmaWriter
 								}
 							continue;
 							}
-						if (apto != GmObject.OBJECT_SELF)
+					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF)
 						{
-						if (apto == GmObject.OBJECT_OTHER)
+						if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
 							code += "with (other) {";
 						else
 							code += "with (" + apto.get().getName() + ") {";
 						}
-						if (act.isRelative()) code += "argument_relative = true" + nl;
-						if (la.question) code += "if ";
-						if (act.isNot()) code += "!";
-						if (la.question && la.execType == Action.EXEC_CODE)
+					if (act.isRelative()) code += "argument_relative = true" + nl;
+					if (la.question) code += "if ";
+					if (act.isNot()) code += "!";
+					if (la.question && la.execType == Action.EXEC_CODE)
 						code += "lib" + la.parentId + "_action" + la.id;
-						else
+					else
 						code += la.execInfo;
-						if (la.execType == Action.EXEC_FUNCTION)
+					if (la.execType == Action.EXEC_FUNCTION)
 						{
 						code += "(";
 						for (int i = 0; i < args.size() - 1; i++)
 							code += args.get(i).getVal() + ",";
 						if (args.size() != 0) code += args.get(args.size() - 1) + ")";
 						}
-						code += nl;
-						if (apto != GmObject.OBJECT_SELF) code += "}";
-						*/
+					code += nl;
+					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF) code += "}";
 					}
 					break;
 				}
@@ -525,6 +486,7 @@ public final class EnigmaWriter
 		return code;
 		}
 
+	//this method is left over from when we used files. Find out what its purpose is and replace/use it
 	public static ArrayList<LibAction> getQuestionLibActions()
 		{
 		ArrayList<LibAction> ala = new ArrayList<LibAction>();

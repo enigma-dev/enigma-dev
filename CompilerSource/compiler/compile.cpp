@@ -61,21 +61,34 @@ dllexport int compileEGMf(EnigmaStruct *es)
   
   cout << "File version: " << es->fileVersion << endl << endl;
   
-  cout << "Number of sprites: " << es->spriteCount << endl;
+  cout << es->spriteCount << " Sprites:" << endl;
   for (int i = 0; i < es->spriteCount; i++) {
-    cout << "Sprite " << es->sprites[i].name << endl;
+    cout << " " << es->sprites[i].name << endl;
     fflush(stdout);
   }
+  cout << es->spriteCount << " Sounds:" << endl;
   for (int i = 0; i < es->soundCount; i++) {
-    cout << "Sound " << es->sounds[i].name << endl;
+    cout << " " << es->sounds[i].name << endl;
     fflush(stdout);
   }
+  cout << es->spriteCount << " Scripts:" << endl;
   for (int i = 0; i < es->scriptCount; i++) {
-    cout << "Script " << es->scripts[i].name << endl;
+    cout << " " << es->scripts[i].name << endl;
     fflush(stdout);
   }
+  cout << es->spriteCount << " Rooms:" << endl;
   for (int i = 0; i < es->roomCount; i++) {
-    cout << "Room " << es->rooms[i].name << endl;
+    cout << " " << es->rooms[i].name << endl;
+    fflush(stdout);
+  }
+
+  cout << es->spriteCount << " Objects:" << endl;
+  for (int i = 0; i < es->gmObjectCount; i++) {
+    cout << " " << es->gmObjects[i].name;
+    int ev = 0;
+    for (int j = 0; j < es->gmObjects[i].mainEventCount; j++)
+      ev += es->gmObjects[i].mainEvents[j].eventCount;
+    cout << " (" << ev << " event(s))" << endl;
     fflush(stdout);
   }
   

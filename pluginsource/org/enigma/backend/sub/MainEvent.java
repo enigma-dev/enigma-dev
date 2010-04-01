@@ -12,6 +12,10 @@ import com.sun.jna.Structure;
 
 public class MainEvent extends Structure
 	{
-	Event[] events;
-	int eventCount;
+	public Event.ByReference events;
+	public int eventCount;
+
+	public static class ByReference extends MainEvent implements Structure.ByReference
+		{
+		}
 	}

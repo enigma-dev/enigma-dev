@@ -16,5 +16,5 @@ struct Event
 	int otherObjectId; //FIXME: This started as a GmObject, not even a reference. No idea what it does; revised to int.
 	int mainId;
 
-	Action *actions;
+	String code;
 };
