@@ -9,7 +9,6 @@
 
 
 #include "../sub/PathPoint.h"
-
 #include "../JavaStruct.h"
 
 struct Path

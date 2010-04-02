@@ -68,7 +68,7 @@
 		<Cursor position="278" topLine="0" />
 	</File>
 	<File name="backend\sub\Image.h" open="0" top="0" tabpos="0">
-		<Cursor position="331" topLine="0" />
+		<Cursor position="316" topLine="0" />
 	</File>
 	<File name="backend\sub\Instance.h" open="0" top="0" tabpos="0">
 		<Cursor position="207" topLine="0" />
@@ -88,10 +88,10 @@
 	<File name="backend\sub\View.h" open="0" top="0" tabpos="0">
 		<Cursor position="447" topLine="0" />
 	</File>
-	<File name="cfile_parse\auxilary.h" open="0" top="0" tabpos="8">
-		<Cursor position="1040" topLine="33" />
+	<File name="cfile_parse\auxilary.h" open="1" top="0" tabpos="15">
+		<Cursor position="1040" topLine="0" />
 	</File>
-	<File name="cfile_parse\auxilary_gml.h" open="0" top="0" tabpos="11">
+	<File name="cfile_parse\auxilary_gml.h" open="1" top="0" tabpos="14">
 		<Cursor position="510" topLine="9" />
 	</File>
 	<File name="cfile_parse\cfile_parse.cpp" open="0" top="0" tabpos="1">
@@ -155,7 +155,7 @@
 		<Cursor position="7870" topLine="242" />
 	</File>
 	<File name="cfile_parse\parsein.h" open="0" top="0" tabpos="8">
-		<Cursor position="6967" topLine="202" />
+		<Cursor position="1886" topLine="0" />
 	</File>
 	<File name="cfile_parse\skipping.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="8083" topLine="189" />
@@ -167,7 +167,7 @@
 		<Cursor position="4733" topLine="205" />
 	</File>
 	<File name="compiler\compile.cpp" open="1" top="1" tabpos="12">
-		<Cursor position="2809" topLine="34" />
+		<Cursor position="3174" topLine="42" />
 	</File>
 	<File name="compiler\compile.h" open="0" top="0" tabpos="0">
 		<Cursor position="2280" topLine="0" />

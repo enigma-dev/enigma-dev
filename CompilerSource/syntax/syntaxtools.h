@@ -249,14 +249,14 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       if (level<=0)
       { error="Unexpected `else' statement at this point"; return pos; }
       
-      if (lower_to_level(LEVELTYPE_IF,"`else' statement")!=-1)
-      return pos;
+      if (lower_to_level(LEVELTYPE_IF,"`else' statement") != -1)
+        return pos;
       
       if (statement_pad[level]!=1)
       { error="Statement `else' expected two expressions after `if' statement, given "+tostring(3-statement_pad[level]); return pos; }
       
-      levelt[level]=LEVELTYPE_GENERAL_STATEMENT;
-      statement_pad[level]=1;
+      levelt[level] = LEVELTYPE_ELSE;
+      statement_pad[level] = 1;
       lastnamed[level]=LN_NOTHING; //end of if level, start of else level
     return ret;
   

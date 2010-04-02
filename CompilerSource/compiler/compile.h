@@ -25,4 +25,6 @@
 **                                                                              **
 \*********************************************************************************/
 
+extern externs *globals_scope;
+
 double CompileEGMf(string filename,string outname,int debug=0,int build=0,int fullcomp=0);

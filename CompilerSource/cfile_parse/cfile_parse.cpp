@@ -86,7 +86,7 @@ int parse_cfile(string cftext)
   while (!included_files.empty())
     included_files.pop();
   
-  included_files.push(includings("SHELLmain.cpp","../ENIGMAsystem/SHELL/"));
+  included_files.push(includings("SHELLmain.cpp","./ENIGMAsystem/SHELL/"));
 
   bool preprocallowed=1;
   

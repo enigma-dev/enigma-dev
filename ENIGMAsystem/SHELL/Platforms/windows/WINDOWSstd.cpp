@@ -32,6 +32,11 @@
 
 int show_error(std::string error,double fatal);
 
+void windowsystem_write_exename(char* exenamehere)
+{
+   GetModuleFileName(NULL, exenamehere, 1024);
+}
+
 namespace enigma
 {
     extern HWND hWnd;
@@ -68,4 +73,20 @@ namespace enigma
         ReleaseDC (hWnd, hDC);
     }
     #endif
+}
+
+int screen_refresh()
+{
+    SwapBuffers(enigma::window_hDC);
+    return 0;
+}
+
+void enigma_catchmouse_backend(bool x) {
+  if (x) SetCapture(enigma::hWnd); else ReleaseCapture();
+}
+
+int sleep(int millis)
+{
+  Sleep(millis);
+  return 0;
 }

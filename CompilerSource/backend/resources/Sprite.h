@@ -9,7 +9,7 @@
 #include "../JavaStruct.h"
 #include "../sub/Image.h"
 
-typedef struct
+struct Sprite
 {
   String name;
   int id;
@@ -30,4 +30,4 @@ typedef struct
   int bbBottom;
   
   Image *subImages;
-} Sprite, *pSprite;
+};

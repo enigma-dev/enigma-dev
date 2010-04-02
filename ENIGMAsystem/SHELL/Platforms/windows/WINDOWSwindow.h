@@ -21,14 +21,14 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
 /**Standard window functions***************************************************\
 
-cr_default, cr_none, cr_arrow, cr_cross, cr_beam, cr_size_nesw, cr_size_ns, cr_size_nwse, 
-cr_size_we, cr_uparrow, cr_hourglass, cr_drag, cr_nodrop, cr_hsplit, cr_vsplit, 
+cr_default, cr_none, cr_arrow, cr_cross, cr_beam, cr_size_nesw, cr_size_ns, cr_size_nwse,
+cr_size_we, cr_uparrow, cr_hourglass, cr_drag, cr_nodrop, cr_hsplit, cr_vsplit,
 cr_multidrag, cr_sqlwait, cr_no, cr_appstart, cr_help, cr_handpoint, cr_size_all
 
 int show_message(std::string str)
@@ -87,10 +87,7 @@ int game_end()
 
 
 
-namespace enigma
-{
-  void clampparent();
-}
+namespace enigma{void clampparent();}
 
 int show_message(std::string str);
 int window_get_x();
@@ -116,11 +113,10 @@ double window_default();
 double window_mouse_get_x();
 double window_mouse_get_y();
 int window_mouse_set(double x,double y);
-
 int window_set_fullscreen(double full);
+int window_get_fullscreen();
 
-namespace getstr
-{
+namespace getstr {
   void init();
 }
 

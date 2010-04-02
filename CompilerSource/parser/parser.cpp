@@ -51,6 +51,7 @@ using namespace std; //More ease
 #include "../externs/externs.h" //To interface with externally defined types and functions
 
 #include "../general/darray.h"
+#include "object_storage.h"
 
 
 
@@ -127,7 +128,7 @@ void parser_init()
 }
 
 
-string parser_main(string code,void (*collectdecls)(string,string))
+string parser_main(string code, parsed_event* pev = NULL)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
@@ -148,12 +149,16 @@ string parser_main(string code,void (*collectdecls)(string,string))
   
   parser_add_semicolons(code,synt);
   
-  cout << synt << endl;
-  cout << code << endl;
+  //cout << synt << endl;
+  //cout << code << endl;
   
+  if (pev)
+  {
+    pev->code = code;
+    pev->synt = synt;
+  }
   
-  
-  print_the_fucker(code,synt);
+  //print_the_fucker(code,synt);
   
   return code;
 }

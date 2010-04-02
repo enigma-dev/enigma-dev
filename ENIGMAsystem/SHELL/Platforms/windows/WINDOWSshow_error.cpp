@@ -25,8 +25,39 @@
 **                                                                              **
 \*********************************************************************************/
 
-#include "object_storage.h"
+#include <string>
+#include <windows.h>
 
-void parser_init();
-string file_parse(string filename,string outname);
-string parser_main(string code,parsed_event* x = NULL);
+/*namespace enigma //TODO: find the original declaration of the contents of this namespace and erradicate it
+{
+   extern std::string evname(int num);
+   extern int getID();
+}*/
+
+
+namespace enigma //TODO: This is from events.h: fix according to TODO pointed to by above TODO
+{
+	extern int event_current;
+	extern std::string evname(int evnumb);
+	extern int getID();
+}
+
+extern std::string string(double val);
+
+extern void ABORT_ON_FATAL_ERRORS();
+int show_error(std::string errortext,double fatal)
+{
+  if (MessageBox(NULL,("Error in "+enigma::evname(enigma::event_current) + " event for object number " + string(enigma::getID())+": \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
+    exit(0);
+		  
+	if (fatal)
+	{
+		printf("FATAL ERROR: %s\n",errortext.c_str());
+		exit(0);
+	}
+	else
+	  printf("ERROR: %s\n",errortext.c_str());
+  
+  ABORT_ON_FATAL_ERRORS();
+	return 0;
+}

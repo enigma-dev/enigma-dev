@@ -25,42 +25,14 @@
 **                                                                              **
 \*********************************************************************************/
 
-#include <windows.h>
 
+void windowsystem_write_exename(char* exenamehere);
+int screen_refresh();
 
-void windowsystem_write_exename(char* exenamehere)
-{
-   GetModuleFileName(NULL, exenamehere, 1024);
-}
-
-namespace enigma
-{
-    HWND hWndParent;
-    HWND hWnd;
-    LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
-    HDC window_hDC;
-    
-    int windowcolor; double viewscale; bool windowIsTop;
-    
-    void EnableDrawing (HGLRC *hRC);
-    void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-    int screen_refresh();
-    
-    #ifdef ENIGMA_GS_OPENGL
-    void EnableDrawing (HGLRC *hRC);
-    void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-    #endif
-}
-
-#ifdef ENIGMA_GS_OPENGL
-int screen_refresh()
-{
-    SwapBuffers(enigma::window_hDC);
-    return 0;
-}
-#endif
-
-#define enigmacatchmouse() if (enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1) SetCapture(enigma::hWnd); else ReleaseCapture();
+int sleep(int millis);
+void enigma_catchmouse_backend(bool x);
+int show_error(std::string errortext, double fatal);
+#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
 
 
 #if WINDOWLIB

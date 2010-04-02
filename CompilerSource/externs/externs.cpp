@@ -106,7 +106,7 @@ bool macro_type::check_recurse_danger(string n)
 
 //Map to sort, darray for polymorphic things
 map<string, varray<externs> > extarray;
-externs global_scope,*current_scope,*immediate_scope=NULL;
+externs global_scope,*current_scope = &global_scope,*immediate_scope=NULL;
 map<string,macro_type> macros;
 
 

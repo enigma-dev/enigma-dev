@@ -14,5 +14,6 @@ struct MainEvent
 {
 	int id;
 	Event *events;
+	
 	int eventCount;
 };

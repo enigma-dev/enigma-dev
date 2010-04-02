@@ -29,27 +29,39 @@
   int checkfunction(externs* func,string &code,int pos,int len,int canargs = 1)
   {
     int cnt = 0, args = 0;
+    bool exhausted = false;
     int argcmin=func->parameter_count_min();
     int argcmax=func->parameter_count_max();
-    while (cnt>-1)
+    while (cnt > -1) //While we're still in parentheses
     {
-      pos++;
+      if (++pos >= len) { error="List of function parameters unterminated"; return pos; }
       
-      if (code[pos]=='"') { pos++;  while (code[pos]!='"')  pos++; if (args==0) args=1; }
-      if (code[pos]=='\'') { pos++; while (code[pos]!='\'') pos++; if (args==0) args=1; }
+      if (is_useless(code[pos]))
+        continue;
+      
+      if (!exhausted) {
+        exhausted = true; 
+        args++;
+      }
+      
+      if (code[pos]=='"') {
+        pos++; while (code[pos] != '"')  pos++; if (args==0) args=1; //TODO: Replace with skipstrings();
+      }
+      else if (code[pos]=='\'') {
+        pos++; while (code[pos] != '\'') pos++; if (args==0) args=1; //TODO: Replace with skipstrings();
+      }
       
       if (code[pos]=='[') { pos++; int bcnt=1; while(bcnt>0 && pos<len) { pos++; if (code[pos]=='[') bcnt++; if (code[pos]==']') bcnt--; } }
       
       if (code[pos]=='(') { cnt++; if (args==0) args=1; }
       if (code[pos]==',' && cnt==0)
       {
-        if (args==0) args=1; args++;
+        exhausted = false;
         if (args > argcmax and argcmax != -1)
           return pos;
       }
       if (code[pos]==')') cnt--;
       
-      if (!(pos<len)) { error="List of function parameters unterminated"; return pos; }
     }
     
     if (args < argcmin) 

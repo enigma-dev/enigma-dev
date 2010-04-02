@@ -28,6 +28,7 @@
 #include "../OS_Switchboard.h" //Tell us where the hell we are
 #include "../backend/EnigmaStruct.h" //LateralGM interface structures
 
+
 #ifdef _WIN32
  #define dllexport extern "C" __declspec(dllexport)
 #else
@@ -35,74 +36,173 @@
  #include <cstdio>
 #endif
 
+
+#include <string>
 #include <iostream>
 using namespace std;
+#define flushl (fflush(stdout), "\n")
 
-enum
-{
-  E_ERROR_NO_ERROR_LOL,
-  E_ERROR_PLUGIN_FUCKED_UP,
-  E_ERROR_WUT
-};
-
-dllexport int gameNew()
-{
-  cout << "\nI .love. you.\n";
-  return 0;
-};
+#include "../externs/externs.h"
+#include "../syntax/syncheck.h"
+#include "../parser/parser.h"
+#include "compile_includes.h"
 
 dllexport int compileEGMf(EnigmaStruct *es)
 {
   cout << "Hey. I wanted you to know: I have no fucking idea what to do with this input. :D\n";
   
-  cout << "Location in memory of structure: " << es << endl;
+  cout << "Location in memory of structure: " << es << flushl;
   if (es == NULL)
     return E_ERROR_PLUGIN_FUCKED_UP;
   
-  cout << "File version: " << es->fileVersion << endl << endl;
+  cout << "File version: " << es->fileVersion << endl << flushl;
+  if (es->fileVersion != 600)
+    cout << "Error: Incorrect version. File is too " << ((es->fileVersion > 600)?"new":"old") << " for this compiler.";
   
-  cout << es->spriteCount << " Sprites:" << endl;
-  for (int i = 0; i < es->spriteCount; i++) {
-    cout << " " << es->sprites[i].name << endl;
+  /**
+    Segment One: This segment of the compile process is responsible for
+    translating the code into C++. Basically, anything essential to the
+    compilation of said code is dealt with during this segment.
+  */
+  
+  ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.  
+  
+  //First, we make a space to put our globals.
+  globals_scope = scope_get_using(&global_scope);
+  globals_scope = globals_scope->members["ENIGMA Resources"] = new externs;
+    globals_scope->name  = "ENIGMA Resources";
+    globals_scope->flags = EXTFLAG_NAMESPACE;
+    globals_scope->type  = NULL;
+  
+  
+  
+  //Next, add the resource names to that list
+  cout << "COPYING SOME FUCKING RESOURCES:" << flushl;
+  
+  cout << "Copying sprite names [" << es->spriteCount << "]" << flushl;
+  for (int i = 0; i < es->spriteCount; i++)
+    quickmember_variable(globals_scope,builtin_type__int,es->sprites[i].name);
+    
+  cout << "Copying sound names [" << es->soundCount << "]" << flushl;
+  for (int i = 0; i < es->soundCount; i++)
+    quickmember_variable(globals_scope,builtin_type__int,es->sounds[i].name);
+    
+  cout << "Copying background names [" << es->backgroundCount << "]" << flushl;
+  for (int i = 0; i < es->backgroundCount; i++)
+    quickmember_variable(globals_scope,builtin_type__int,es->backgrounds[i].name);
+    
+  cout << "Copying path names [kidding, these are totally not implemented :P] [" << es->pathCount << "]" << flushl;
+  for (int i = 0; i < es->spriteCount; i++)
+    quickmember_variable(globals_scope,builtin_type__int,es->sprites[i].name);
+    
+  cout << "Copying script names [" << es->scriptCount << "]" << flushl;
+  for (int i = 0; i < es->scriptCount; i++)
+    quickmember_script(globals_scope,es->scripts[i].name);
+    
+  cout << "Copying font names [kidding, these are totally not implemented :P] [" << es->fontCount << "]" << flushl;
+  for (int i = 0; i < es->fontCount; i++)
+    quickmember_variable(globals_scope,builtin_type__int,es->fonts[i].name);
+    
+  cout << "Copying timeline names [kidding, these are totally not implemented :P] [" << es->timelineCount << "]" << flushl;
+  for (int i = 0; i < es->timelineCount; i++)
+    quickmember_variable(globals_scope,builtin_type__int,es->timelines[i].name);
+  
+  cout << "Copying object names [" << es->gmObjectCount << "]" << flushl;
+  for (int i = 0; i < es->gmObjectCount; i++)
+    quickmember_variable(globals_scope,builtin_type__int,es->gmObjects[i].name);
+  
+  cout << "Copying room names [" << es->roomCount << "]" << flushl;
+  for (int i = 0; i < es->roomCount; i++)
+    quickmember_variable(globals_scope,builtin_type__int,es->rooms[i].name);
+  
+  
+  
+  ///Next we do a simple pares of the code, scouting for some variable names and adding semicolons.
+  cout << "SYNTAX CHECKING AND PRIMARY PARSING" << flushl;
+  
+  cout << es->scriptCount << " Scripts:" << endl;
+  for (int i = 0; i < es->scriptCount; i++)
+  {
+    int a = syncheck::syntacheck(es->scripts[i].code);
+    if (a != -1) {
+      cout << "Syntax error in script `" << es->scripts[i].name << "'" << endl << syncheck::error << flushl;
+      return E_ERROR_SYNTAX;
+    }
     fflush(stdout);
   }
-  cout << es->spriteCount << " Sounds:" << endl;
-  for (int i = 0; i < es->soundCount; i++) {
-    cout << " " << es->sounds[i].name << endl;
+
+  cout << es->gmObjectCount << " Objects:" << endl;
+  for (int i = 0; i < es->gmObjectCount; i++)
+  {
+    //For every object in Ism's struct, make our own
+    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object;
+    cout << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " sub-events: " << flushl;
+    
+    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
+    {
+      //For each main event in that object, make a copy
+      const int mev_id = es->gmObjects[i].mainEvents[ii].id;
+      parsed_mevent* pme = pob -> mevents[mev_id] = new parsed_mevent;
+      cout << "  Event[" << es->gmObjects[i].mainEvents[ii].eventCount << "]: ";
+      
+      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
+      {
+        //For each individual event (like begin_step) in the main event (Step), parse the code
+        const int sev_id = es->gmObjects[i].mainEvents[ii].events[iii].id;
+        parsed_event* pev = pme -> events[sev_id] = new parsed_event;
+        cout << "[" << mev_id << "," << sev_id << "]";
+        
+        //Copy the code into a string, and its attributes elsewhere
+        string code = es->gmObjects[i].mainEvents[ii].events[iii].code;
+        
+        //Syntax check the code
+        int sc = syncheck::syntacheck(code);
+        if (sc != -1)
+        {
+          cout << "Syntax error in object `" << es->gmObjects[i].name << "', event " << mev_id << ":"
+               << es->gmObjects[i].mainEvents[ii].events[iii].id << ":\n" << format_error(code,syncheck::error,sc) << flushl;
+          return E_ERROR_SYNTAX;
+        }
+        
+        //Add this to our objects map
+        pev->myObj = pob; //link to its parent
+        parser_main(code,pev);
+      }
+    }
     fflush(stdout);
   }
-  cout << es->spriteCount << " Scripts:" << endl;
-  for (int i = 0; i < es->scriptCount; i++) {
-    cout << " " << es->scripts[i].name << endl;
-    fflush(stdout);
-  }
-  cout << es->spriteCount << " Rooms:" << endl;
+  
+  cout << es->roomCount << " Rooms:" << endl;
   for (int i = 0; i < es->roomCount; i++) {
     cout << " " << es->rooms[i].name << endl;
     fflush(stdout);
   }
-
-  cout << es->spriteCount << " Objects:" << endl;
-  for (int i = 0; i < es->gmObjectCount; i++) {
-    cout << " " << es->gmObjects[i].name;
-    int ev = 0;
-    for (int j = 0; j < es->gmObjects[i].mainEventCount; j++)
-      ev += es->gmObjects[i].mainEvents[j].eventCount;
-    cout << " (" << ev << " event(s))" << endl;
+  
+  //Now, time to review
+  //for ( )
+  
+  
+  /*
+    Segment three: Add resources into the game executable
+  */
+  
+  cout << es->spriteCount << " Sprites:" << endl;
+  for (int i = 0; i < es->spriteCount; i++)
+  {
+    cout << "Sprite " << es->sprites[i].name << endl;
+    cout << "Data at: " << es->sprites[i].subImages[0].pixels << endl << endl;
+    //for (int ii = 0; ii <  es->sprites[i].subImages[0].width *  es->sprites[i].subImages[0].height; ii++) {
+    //  cout << (void*)(es->sprites[i].subImages[0].pixels[ii]);
+    //}
     fflush(stdout);
   }
   
-  cout << es->constantCount << " Constants:" << endl;
-  for (int i = 0; i < es->constantCount; i++) {
-    cout << " " << es->constants[i].name << " = " << es->constants[i].value << endl;
+  cout << es->soundCount << " Sounds:" << endl;
+  for (int i = 0; i < es->soundCount; i++) {
+    cout << " " << es->sounds[i].name << endl;
     fflush(stdout);
   }
-
-  cout << es->includeCount << " Includes:" << endl;
-  for (int i = 0; i < es->includeCount; i++) {
-    cout << " " << es->includes[i].filepath << endl;
-    fflush(stdout);
-  }
-
+  
+  
   return 0;
 };

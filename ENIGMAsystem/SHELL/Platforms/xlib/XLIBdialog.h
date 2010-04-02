@@ -26,8 +26,7 @@
 \*********************************************************************************/
 
 
-int show_message(std::string message)
-{
+int show_message(std::string message){
   printf("A message was shown! =D\n");
   return 0;
 }

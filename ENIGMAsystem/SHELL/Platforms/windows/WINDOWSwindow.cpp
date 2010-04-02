@@ -124,7 +124,7 @@ int window_set_caption(char* caption)
 
 int window_set_caption(std::string caption)
 {
-    SetWindowText(enigma::hWnd,(char*) caption.c_str());
+    SetWindowText(enigma::hWndParent,(char*) caption.c_str());
     return 0;
 }
 
@@ -238,7 +238,7 @@ int window_mouse_set(double x,double y)
     return 0;
 }
 
-namespace enigma { long int laststyle; char isFullScreen=0; }
+namespace enigma { long int laststyle; int isFullScreen=0; }
 int window_set_fullscreen(double full)
 {
   if (full)
@@ -252,7 +252,15 @@ int window_set_fullscreen(double full)
     }
   }
   else
-  { ShowWindow(enigma::hWndParent,SW_RESTORE); enigma::isFullScreen=0; }
+  {
+    if (enigma::isFullScreen)
+    {
+      SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,enigma::laststyle);
+      ShowWindow(enigma::hWndParent,SW_RESTORE);
+      ShowWindow(enigma::hWnd,SW_RESTORE);
+      enigma::isFullScreen=0;
+    }
+  }
   return 0;
 }
 int window_get_fullscreen() { return enigma::isFullScreen;  }

@@ -83,6 +83,7 @@ namespace syncheck
      {
        LEVELTYPE_BRACE,
        LEVELTYPE_IF,
+       LEVELTYPE_ELSE,
        LEVELTYPE_DO,
        LEVELTYPE_CASE,
        LEVELTYPE_SWITCH,
@@ -223,7 +224,7 @@ namespace syncheck
           if (name[0]=='n') //not, the only unary operator.
           {
             if (!assop[level] or lastnamed[level] != LN_OPERATOR) { //has to be preceeded by operator
-              error="Expected operator before unary `not' operator";
+              error = "Expected operator before unary `not' operator";
               return pos;
             }
           }

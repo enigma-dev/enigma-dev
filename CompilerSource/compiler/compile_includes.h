@@ -25,24 +25,77 @@
 **                                                                              **
 \*********************************************************************************/
 
+externs *globals_scope;
+externs *enigma_type__var = builtin_type__int;
+externs *enigma_type__variant = builtin_type__int;
 
+extern string tostring(int val);
+
+void quickmember_variable(externs* scope, externs* type, string name)
+{
+  externs* n = scope->members[name] = new externs;
+  n->name = name;
+  n->type = type;
+  n->flags = 0;
+  n->value_of = 0;
+}
+void quickmember_script(externs* scope, string name)
+{
+  externs* n = scope->members[name] = new externs;
+  n->name = name;
+  n->type = enigma_type__var;
+  n->flags = 0;
+  n->value_of = 0;
+  
+  rf_stack rfs;
+  rfs += referencer('(',0,16,true);
+  n->refstack = rfs.dissociate();
+}
+
+string format_error(string code,string err,int pos)
+{
+  if (pos == -1)
+    return err;
+  
+  int line = 1, lp = 1;
+  for (int i=0; i<pos; i++,lp++) {
+    if (code[i] =='\r')
+      line++, lp = 0, i += code[i+1] == '\n';
+    else if (code[i] == '\n') line++, lp = 0;
+  }
+  return "Line " + tostring(line) + ", position " + tostring(lp) + " (absolute " + tostring(pos) + "): " + err;
+}
+
+//Error codes
+enum {
+  E_ERROR_NO_ERROR_LOL,
+  E_ERROR_PLUGIN_FUCKED_UP,
+  E_ERROR_SYNTAX,
+  E_ERROR_WUT
+};
+
+
+
+/*
 #include <string>
 #include <stdio.h>
 using namespace std;
 
-/*
+/ *
  * These functions are designed to do all the file garbage for you, making the
  * code look a little less messy, and a lot simpler.
  */
-
+/*
 extern char* writehere;
 extern FILE* enigma_file;
 extern int EXPECTNULL;
 
+
 void space(int size);
 string reads(int size);
 string readSTR();
-/*string readNAME();*/
+
+//string readNAME();
 int readi();
 unsigned char readb();
 char* readv(int size);
@@ -52,3 +105,4 @@ void transfer(int size,FILE* in,FILE* out);
 int fileout(char* name,char* data,int size);
 int transi(FILE* out);
 void transSTR(FILE* out);
+*/
