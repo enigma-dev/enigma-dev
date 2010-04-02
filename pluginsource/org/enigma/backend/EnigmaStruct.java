@@ -13,8 +13,6 @@ import org.enigma.backend.other.Include;
 import org.enigma.backend.other.Trigger;
 import org.enigma.backend.resources.Background;
 import org.enigma.backend.resources.Font;
-import org.enigma.backend.resources.GameInformation;
-import org.enigma.backend.resources.GameSettings;
 import org.enigma.backend.resources.GmObject;
 import org.enigma.backend.resources.Path;
 import org.enigma.backend.resources.Room;
@@ -25,6 +23,7 @@ import org.enigma.backend.resources.Timeline;
 
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 public class EnigmaStruct extends Structure
@@ -58,13 +57,13 @@ public class EnigmaStruct extends Structure
 	public int constantCount;
 	public Include.ByReference includes;
 	public int includeCount;
-//	public String[] packages; //?
+	public Pointer packages; //StringArray
 	public int packageCount;
 
 	//public GameInformation gameInfo;
 	//public GameSettings gameSettings;
-//	public int lastInstanceId = 100000;
-//	public int lastTileId = 10000000;
+	public int lastInstanceId = 100000;
+	public int lastTileId = 10000000;
 
 	static
 		{

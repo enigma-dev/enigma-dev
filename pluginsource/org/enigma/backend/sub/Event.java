@@ -14,7 +14,6 @@ public class Event extends Structure
 	{
 	public int id;
 	public int otherObjectId; //collision, etc
-	public int mainId;
 
 	public String code;
 

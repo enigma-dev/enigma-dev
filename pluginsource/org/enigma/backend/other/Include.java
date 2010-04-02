@@ -13,7 +13,7 @@ import com.sun.jna.Structure;
 public class Include extends Structure
 	{
 	String filename = "";
-	String filepath = "";
+	public String filepath;
 	boolean isOriginal;
 	int size = 0;
 	byte[] data = null;

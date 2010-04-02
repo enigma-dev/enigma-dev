@@ -12,6 +12,7 @@ import com.sun.jna.Structure;
 
 public class MainEvent extends Structure
 	{
+	public int id;
 	public Event.ByReference events;
 	public int eventCount;
 

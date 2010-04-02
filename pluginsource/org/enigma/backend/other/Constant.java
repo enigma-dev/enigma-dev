@@ -12,8 +12,8 @@ import com.sun.jna.Structure;
 
 public class Constant extends Structure
 	{
-	String name = "";
-	String value = "";
+	public String name;
+	public String value;
 
 	public static class ByReference extends Constant implements Structure.ByReference
 		{

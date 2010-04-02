@@ -92,5 +92,17 @@ dllexport int compileEGMf(EnigmaStruct *es)
     fflush(stdout);
   }
   
+  cout << es->constantCount << " Constants:" << endl;
+  for (int i = 0; i < es->constantCount; i++) {
+    cout << " " << es->constants[i].name << " = " << es->constants[i].value << endl;
+    fflush(stdout);
+  }
+
+  cout << es->includeCount << " Includes:" << endl;
+  for (int i = 0; i < es->includeCount; i++) {
+    cout << " " << es->includes[i].filepath << endl;
+    fflush(stdout);
+  }
+
   return 0;
 };

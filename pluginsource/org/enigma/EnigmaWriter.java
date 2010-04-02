@@ -35,6 +35,8 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 
 import org.enigma.backend.EnigmaStruct;
+import org.enigma.backend.other.Constant;
+import org.enigma.backend.other.Include;
 import org.enigma.backend.resources.Background;
 import org.enigma.backend.resources.GmObject;
 import org.enigma.backend.resources.Room;
@@ -91,8 +93,6 @@ public final class EnigmaWriter
 
 		o.fileVersion = i.fileVersion;
 		o.filename = i.filename;
-		//		o.lastInstanceId = i.lastInstanceId;
-		//		o.lastTileId = i.lastTileId;
 
 		populateSprites();
 		populateSounds();
@@ -105,10 +105,38 @@ public final class EnigmaWriter
 		populateRooms();
 
 		o.triggerCount = 0;
-		o.constantCount = 0;
-		o.includeCount = 0;
+
+		o.constantCount = i.gameSettings.constants.size();
+		if (o.constantCount != 0)
+			{
+			o.constants = new Constant.ByReference();
+			Constant[] ocl = (Constant[]) o.constants.toArray(o.constantCount);
+			for (int c = 0; c < o.constantCount; c++)
+				{
+				ocl[c].name = i.gameSettings.constants.get(c).name;
+				ocl[c].value = i.gameSettings.constants.get(c).value;
+				}
+			}
+
+		o.includeCount = i.gameSettings.includes.size();
+		if (o.includeCount != 0)
+			{
+			o.includes = new Include.ByReference();
+			Include[] oil = (Include[]) o.includes.toArray(o.includeCount);
+			for (int inc = 0; inc < o.includeCount; inc++)
+				{
+				oil[inc].filepath = i.gameSettings.includes.get(inc).filePath;
+				System.out.println(oil[inc].filepath);
+				}
+			}
+
 		o.packageCount = 0;
-		//		o.packages = new String[1];
+		//String[] packages = { "Alpha","Beta","Gamma","Delta" };
+		//o.packageCount = packages.length;
+		//o.packages = new StringArray(packages);
+
+		o.lastInstanceId = i.lastInstanceId;
+		o.lastTileId = i.lastTileId;
 
 		//		ef.progress(100,"Finalizing");
 
@@ -407,6 +435,7 @@ public final class EnigmaWriter
 				MainEvent ome = ooil[me];
 				ArrayList<org.lateralgm.resources.sub.Event> iel = io.mainEvents.get(me).events;
 
+				ome.id = me;
 				ome.eventCount = iel.size();
 				if (ome.eventCount == 0) continue;
 
@@ -420,7 +449,6 @@ public final class EnigmaWriter
 
 					oe.id = ie.id;
 					oe.otherObjectId = toId(ie.other,-1);
-					oe.mainId = me;
 
 					oe.code = getActionsCode(ie);
 					}

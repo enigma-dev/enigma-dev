@@ -51,11 +51,11 @@ struct EnigmaStruct
 	int constantCount;
 	Include *includes;
 	int includeCount;
-//	String *packages; //?
+	char *packages[];
 	int packageCount;
 
 	//GameInformation gameInfo;
 	//GameSettings gameSettings;
-	//int lastInstanceId;
-	//int lastTileId;
+	int lastInstanceId;
+	int lastTileId;
 };

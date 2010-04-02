@@ -302,7 +302,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 					exef = fc.getSelectedFile();
 					}*/
 
-		//		LGM.commitAll();
+		LGM.commitAll();
 		//		ef = new EnigmaFrame();
 
 		System.out.println();
