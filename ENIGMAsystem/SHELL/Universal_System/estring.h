@@ -21,16 +21,15 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
-/**Sprite adding functions*****************************************************\
+/**String functions*****************************************************\
 
 bool is_string(enigma::variant val)
 bool is_real(enigma::variant val)
 std::string chr(char val)
-char cchr(double val)
 double ord(char* str)
 double real(std::string str)
 std::string string(double val)
@@ -62,7 +61,6 @@ bool is_real(enigma::variant val);
 bool is_real(var& val);
 
 std::string chr(char val);
-char cchr(double val);
 
 int ord(char str);
 int ord(char* str);
@@ -73,8 +71,8 @@ double real(char* str);
 double real(double str);
 double real(var& str);
 
-int string_length(std::string str);
-int string_length(char* str);
+size_t string_length(std::string str);
+size_t string_length(char* str);
 int string_pos(std::string substr,std::string str);
 int string_pos(char* substr,std::string str);
 

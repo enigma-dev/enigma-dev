@@ -21,236 +21,102 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
 #include <GL/gl.h>
+#include <math.h>
 
-#define __GETR(x) (((unsigned int)x & 0x0000FF))
-#define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
-#define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)
+#define __GETR(x) ((x & 0x0000FF))
+#define __GETG(x) ((x & 0x00FF00)>>8)
+#define __GETB(x) ((x & 0xFF0000)>>16)
+#define __GETRf(x) fmod(x,256)
+#define __GETGf(x) fmod(x/256,256)
+#define __GETBf(x) fmod(x/65536,256)
+namespace enigma{ extern float currentcolor[4];}
 
-extern double min(double value1, double value2), max(double value1,double value2);
+int draw_clear_alpha(double col,float alpha){
+	glClearColor(__GETRf(col)/255,__GETGf(col)/255,__GETBf(col)/255,alpha);
+	glClear(GL_COLOR_BUFFER_BIT);
+	return 0;
+}
+int draw_clear(double col){return draw_clear_alpha(col,1);}
 
-namespace enigma
-{  extern double currentcolor[4];  }
-
-
-
-
-int draw_clear(double color)
+int merge_color(int col1, int col2, double amount)
 {
-    color=(int)color;
-    
-    glClearColor(__GETR(color)/255.0,__GETG(color)/255.0,__GETB(color)/255.0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-    return 0;
-}
-int draw_clear_alpha(double color, double alpha)
-{
-    color=(int)color;
-    glClearColor(__GETR(color)/255.0,__GETG(color)/255.0,__GETB(color)/255.0,(((int)(alpha*255))&255)/255.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    return 0;
+  unsigned char* c1 = (unsigned char*)&col1;
+  unsigned char* c2 = (unsigned char*)&col2;
+  c1[0] = char(c1[0]*(1-amount) + c2[0]*(amount));
+  c1[1] = char(c1[1]*(1-amount) + c2[1]*(amount));
+  c1[2] = char(c1[2]*(1-amount) + c2[2]*(amount));
+  c1[3] = char(c1[3]*(1-amount) + c2[3]*(amount));
+  return col1;
 }
 
-
-
-int draw_set_color(double col)
-{
-     int color=((int)col)&16777215;
-     enigma::currentcolor[0]=__GETR(color)/255.0;
-     enigma::currentcolor[1]=__GETG(color)/255.0;
-     enigma::currentcolor[2]=__GETB(color)/255.0;
-     glColor4f(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
-     return 0;
+int draw_set_color(double color){
+	enigma::currentcolor[0]=__GETRf(color)/255;
+	enigma::currentcolor[1]=__GETGf(color)/255;
+	enigma::currentcolor[2]=__GETBf(color)/255;
+	glColor4fv(enigma::currentcolor);
+	return 0;
 }
-int draw_set_color_rgb(double red, double green, double blue)
-{
-     enigma::currentcolor[0]=(((int)red)&255)/255.0;
-     enigma::currentcolor[1]=(((int)green)&255)/255.0;
-     enigma::currentcolor[2]=(((int)blue)&255)/255.0;
-     
-     glColor4f(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
-     return 0;
+int draw_set_color_rgb(float red,float green,float blue){
+	enigma::currentcolor[0]=fmod(red,256)/255;
+	enigma::currentcolor[1]=fmod(green,256)/255;
+	enigma::currentcolor[2]=fmod(blue,256)/255;
+	glColor4fv(enigma::currentcolor);
+	return 0;
 }
-int draw_set_alpha(double alpha)
-{
-    enigma::currentcolor[3]=(((int)(alpha*255))&255)/255.0; 
-    glColor4f(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
-    return 0;
+int draw_set_alpha(float alpha){
+	enigma::currentcolor[3]=alpha>1?1:(alpha<0?0:alpha);
+	glColor4fv(enigma::currentcolor);
+	return 0;
 }
-int draw_set_color_rgba(double red, double green, double blue, double alpha)
-{ 
-     enigma::currentcolor[0]=(((int)red)&255)/255.0;
-     enigma::currentcolor[1]=(((int)green)&255)/255.0;
-     enigma::currentcolor[2]=(((int)blue)&255)/255.0;
-     enigma::currentcolor[3]=(((int)(alpha*255))&255)/255.0;
-     glColor4f(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
-     return 0;
+int draw_set_color_rgba(float red,float green,float blue,float alpha){
+	enigma::currentcolor[0]=fmod(red,256)/255;
+	enigma::currentcolor[1]=fmod(green,256)/255;
+	enigma::currentcolor[2]=fmod(blue,256)/255;
+	enigma::currentcolor[3]=alpha>1?1:(alpha<0?0:alpha);
+	glColor4fv(enigma::currentcolor);
+	return 0;
 }
 
-
-
-
-int draw_get_color()
-{
-    return (int)((enigma::currentcolor[0]*255)+(enigma::currentcolor[1]*255)*0xFF+(enigma::currentcolor[2]*255)*0xFFFF);
+double draw_get_color(){return enigma::currentcolor[0]*255+enigma::currentcolor[1]*65280+enigma::currentcolor[2]*16711680;}
+float draw_get_red(){return enigma::currentcolor[0];}
+float draw_get_green(){return enigma::currentcolor[1];}
+float draw_get_blue(){return enigma::currentcolor[2];}
+float draw_get_alpha(){return enigma::currentcolor[3];}
+double make_color_rgb(double r, double g, double b){return fmod(r,256)+fmod(g,256)*256+fmod(b,256)*65536;}
+double color_get_red(double c){return __GETRf(c);}
+double color_get_green(double c){return __GETGf(c);}
+double color_get_blue(double c){return __GETBf(c);}
+double color_get_hue(double c){
+	double r=__GETRf(c),g=__GETGf(c),b=__GETBf(c);
+	double cmpmax=r>g?(r>b?r:b):(g>b?g:b);
+	if(!cmpmax) return 0;
+	double cmpdel=cmpmax-(r<g?(r<b?r:b):(g<b?g:b));
+	double h=(r==cmpmax?(g-b)/cmpdel:(g==cmpmax?2+(r-g)/cmpdel:4+(r-g)/cmpdel));
+	return (h<0?h+6:h)*60;
 }
-
-
-
-
-int make_color(double red, double green, double blue)
-{
-     int r=((int)red)&255;
-     int g=((int)green)&255;
-     int b=((int)blue)&255;
-     
-     return (int) (r + g*0xFF + b*0xFFFF);
+double color_get_value(double c){
+    double r=__GETRf(c),g=__GETGf(c),b=__GETBf(c);
+	return r>g?(r>b?r:b):(g>b?g:b);
 }
-
-
-int make_color_rgb(double red, double green, double blue)
-{
-     int r=((int)red)&0xFF;
-     int g=((int)green)&0xFF;
-     int b=((int)blue)&0xFF;
-     
-     return (int) (r + g*0xFF + b*0xFFFF);
+double color_get_saturation(double color){
+	double r=__GETRf(color),g=__GETGf(color),b=__GETBf(color),cmpmax=r>g?(r>b?r:b):(g>b?g:b);
+	return cmpmax?1-(r<g?(r<b?r:b):(g<b?g:b))/cmpmax:0;
 }
-
-
-
-
-
-
-
-int color_get_red(double color)
-{
-    int c=(int)color;
-    return __GETR(c);
+double make_color_hsv(double h,double s,double v){
+	h=fmod(h,256);
+	s=1-fmod(s,256)/255;
+	v=fmod(v,256);
+	double
+		r=fmax(510-(h>128?255-h:h)/42.5*255,0),
+		g=fmax(510-fabs(h-85)/42.5*255,0),
+		b=fmax(510-fabs(h-170)/42.5*255,0);
+	r=r<256?r+((1-r/255)*v)*s:1;
+	g=g<256?((1-(g<255?g/255:1))*v)*s:1;
+	b=b<256?((1-(b<255?b/255:1))*v)*s:1;
+	return (r>0?r:0)+(g>0?256*g:0)+(b>0?65536*b:0);
 }
-int color_get_green(double color)
-{
-     int c=(int)color;
-     return __GETG(c);
-}
-int color_get_blue(double color)
-{
-     int c=(int)color;
-     return __GETB(c);
-}
-
-
-
-
-
-
-double color_get_hue(double color)
-{
-    int c=(int)color;
-    
-    double r=__GETR(c),
-           g=__GETG(c),
-           b=__GETB(c);
-    
-    double cmpmin, cmpmax, delta;
-
-	cmpmin = r; if (g<cmpmin) cmpmin=g; if (b<cmpmin) cmpmin=b;
-	cmpmax = r; if (g>cmpmax) cmpmax=g; if (b>cmpmax) cmpmax=b;
-
-	delta = cmpmax - cmpmin;
-
-	if( cmpmax == 0 )
-	{
-		return 0;
-	}
-	
-	double h;
-	
-	if (r==cmpmax)
-	  h= (g-b)/delta;
-	else if(g==cmpmax)
-	  h= 2+(b-r)/delta;
-	else
-	  h= 4+(r-g)/delta;
-
-	h*=60; if (h<0) h+=360;
-	
-	return h;
-}
-double color_get_value(double color)
-{
-    int c=(int)color;
-    
-    double r=__GETR(c),
-           g=__GETG(c),
-           b=__GETB(c);
-    
-    if (r>=g and r>=b)
-	   return r;
-	if (g>=r and g>=b)
-	   return g;
-	if (b>=r and b>=g)
-	   return b;
-    
-    return -1;
-}
-double color_get_saturation(double color)
-{
-    int c=(int)color;
-    
-    double r=__GETR(c),
-           g=__GETG(c),
-           b=__GETB(c);
-    
-    double cmpmin, cmpmax, delta;
-
-	cmpmin=r; if (g<cmpmin) cmpmin=g; if (b<cmpmin) cmpmin=b;
-	cmpmax=r; if (g>cmpmax) cmpmax=g; if (b>cmpmax) cmpmax=b;
-
-	delta=cmpmax - cmpmin;
-
-	if(cmpmax != 0)
-	return delta/cmpmax;
-	else 
-    {
-		return 0;
-	}
-}
-
-
-
-int make_color_hsv(double hue,double saturation,double value)
-{
-double h=((int)hue)&255,s=((int)saturation)&255,v=((int)value)&255;
-double red,green,blue;
-
-red = min(255.0,max(510-min(h,255-h)/42.5*255.0,0));
-green = min(255.0,max(510-max(85-h,h-85)/42.5*255.0,0));
-blue = min(255.0,max(510-max(170-h,h-170)/42.5*255.0,0));
-
-red = red/255.0*v;
-green = green/255.0*v;
-blue = blue/255.0*v;
-
-red += (v-red)*(1-s/255.0);
-green += (v-green)*(1-s/255.0);
-blue += (v-blue)*(1-s/255.0);
-
-red=(int)  red;
-green=(int)green;
-blue=(int) blue;
-if (red<0) red=0;
-if (green<0) green=0;
-if (blue<0) blue=0;
-
-return (int)(red+ 256*green+ 65536*blue +.5);
-}
-
-
-#undef __GETR
-#undef __GETG
-#undef __GETB

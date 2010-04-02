@@ -25,66 +25,48 @@
 **                                                                              **
 \*********************************************************************************/
 
-namespace enigma
-{
-    wildclass int2object(double intr);
+namespace enigma {
+  wildclass int2object(double intr);
 }
 
-
-
-
-/*
-Source
-*/
 namespace enigma
 {
-    wildclass int2object(double intr)
+  wildclass int2object(double intr)
+  {
+    int integer=(int)intr;
+    if(integer<=100000)
     {
-        int integer=(int)intr;
-        if (integer<=100000)
-        {
-          if (integer>=0)
-          {
-              for (instance_iterator=instance_list.begin(); instance_iterator != instance_list.end(); instance_iterator++)
-              {
-                  if ((*instance_iterator).second != NULL)
-                  if ((*instance_iterator).second->object_index==integer)
-                  {
-                      return ((*instance_iterator).second);
-                  }
-              }
-              
-              #if SHOWERRORS
-              show_error("Attempting to retrieve nonexisting object "+string(integer),0);
-              #endif
-              return (object*)ENIGMA_global_instance;
-          }
-          else
-          {
-              if (integer==-5)
-              {
-                return (object*)ENIGMA_global_instance;
-              }
-              if (integer==-1)
-              {
-                return (*instance_iterator).second;
-              }
-              if (integer==-3)
-              {
-                instance_iterator=instance_list.begin();
-                return (*instance_iterator).second;
-              }
-              
-              #if SHOWERRORS
-              show_error("Attempting to retrieve nonexisting object "+string(integer),0);
-              #endif
-              
-              return (object*)ENIGMA_global_instance;
-          }
+      if(integer>=0)
+      {
+        for (instance_iterator=instance_list.begin(); instance_iterator != instance_list.end(); instance_iterator++) {
+          if((*instance_iterator).second&&(*instance_iterator).second->object_index==integer)
+            return ((*instance_iterator).second);
         }
-        else
-        {
-            return instance_list[integer];
+        
+        #if SHOWERRORS
+          show_error("Attempting to retrieve nonexisting object "+string(integer),0);
+        #endif
+        
+        return (object_basic*)ENIGMA_global_instance;
+      }
+      else
+      {
+        if(integer==-5)
+          return (object_basic*)ENIGMA_global_instance;
+        if(integer==-1)
+          return (*instance_iterator).second;
+        if(integer==-3) {
+          instance_iterator=instance_list.begin();
+          return (*instance_iterator).second;
         }
+        
+        #if SHOWERRORS
+        show_error("Attempting to retrieve nonexisting object "+string(integer),0);
+        #endif
+        
+        return (object_basic*)ENIGMA_global_instance;
+      }
     }
+    else return instance_list[integer];
+  }
 }

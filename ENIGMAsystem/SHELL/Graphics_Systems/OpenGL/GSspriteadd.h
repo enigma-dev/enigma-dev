@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
@@ -33,10 +33,7 @@ int sprite_add(std::string filename,double imgnumb,double precise,double transpa
 
 //#include "../../Universal_System/spritestruct.h"
 
-//          sprite_add(    fname,          imgnumb,       precise,       transparent,       smooth,       preload,       xorig,          yorig)
 int sprite_add(std::string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset);
-
-
 
 /* These functions are primarily for use of the engine. Experienced users
  * who are familiar with C++ can make use of these, but they were made to
@@ -46,16 +43,17 @@ int sprite_add(std::string filename,double imgnumb,double precise,double transpa
 
 namespace enigma
 {
-    //Adds an empty sprite to the list
-    int new_sprexe(int sprid, int w, int h, int x, int y, int pl, int sm);
-    
-    
+  //Adds an empty sprite to the list
+  int new_sprexe(int sprid,int w,int h,int x,int y,int pl,int sm);
+  
+  #if COLLIGMA
+  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h);
+  #endif
+  
+  //Adds a subimage to an existing sprite from the exe
+  void sprexe(int sprid,
     #if COLLIGMA
-    collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h);
+    int x,int y,
     #endif
-    
-    //Adds a subimage to an existing sprite from the exe
-    void sprexe(int sprid,int x, int y, int w, int h, 
-                int te, int tr,int tg,int tb,
-                unsigned char* chunk);
-}        
+    unsigned int w,unsigned int h,unsigned char*tra,unsigned char*chunk);
+}

@@ -27,30 +27,14 @@
 
 namespace enigma
 {
+  double mouse_xprevious, mouse_yprevious;
   void update_globals()
   {
-    //Update mouse coordinates
-    //////////////////////////
-        mouse_xprevious=mouse_x;
-        mouse_yprevious=mouse_y;
-        mouse_x=window_mouse_get_x();
-        mouse_y=window_mouse_get_y(); 
-        
-        if (view_enabled)
-   	    {
-         for (int i=0;i<7;i++)
-          {
-            if((mouse_x>=view_xport[i] && mouse_x<view_xport[i]+view_wport[i])
-            && (mouse_y>=view_yport[i] && mouse_y<view_yport[i]+view_hport[i]))
-            {
-              mouse_x=view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
-              mouse_y=view_yview[i]+((mouse_y-view_yport[i])/(double)view_hport[i])*view_hview[i];
-              break;
-            }
-          }
-        }
-    //end mouse coords
-    
+    mouse_xprevious = mouse_x;
+    mouse_yprevious = mouse_y;
+    mouse_x = window_mouse_get_x();
+    mouse_y = window_mouse_get_y();
+    enigma::room_update();
   }
 }
 

@@ -27,12 +27,10 @@
 
 namespace enigma
 {
-  struct objecttable
-  {
-     std::string name;
-     int sprite_index,mask_index,parent,visible,solid,persistent,depth;
+  struct objecttable{
+    std::string name;
+    int sprite_index,mask_index,parent,visible,solid,persistent,depth;
   };
-  
-  std::map<int,objecttable> objectdata;
-  std::map<int,objecttable>::iterator objiter;
+  extern std::map<int,objecttable> objectdata;
+  extern std::map<int,objecttable>::iterator objiter;
 }

@@ -29,54 +29,64 @@
 #include <string>
 #include <stdio.h>
 
+//Fuck whoever did this to the spec
+#ifndef GL_BGR
+  #define GL_BGR 0x80E0
+#endif
+
 extern int window_get_width();
 extern int window_get_height();
 
-int screen_save(std::string filename)
-{
-  int w=window_get_width(),h=window_get_height();
-  int sz=w*h*4; int intout; unsigned char bout;
-  char *scrbuf=new char[sz];
-  glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,scrbuf);
-  char pad=(4-((w*3)&3))&3;
-  
-  FILE* bmp=fopen(filename.c_str(),"wb");
-  if (bmp==NULL) { return -1; }
-  
-  fwrite("BM",2,1,bmp);
-  fwrite(&sz,4,1,bmp); 
-  intout=0; fwrite(&intout,2+2,1,bmp);
-  
-  intout=54; fwrite(&intout,4,1,bmp);
-  intout=40; fwrite(&intout,4,1,bmp);
-  
-  fwrite(&w,4,1,bmp);
-  fwrite(&h,4,1,bmp);
-  
-  bout=1; fwrite(&bout,1,1,bmp);
-  bout=0; fwrite(&bout,1,1,bmp);
-  bout=24; fwrite(&bout,1,1,bmp);
-  bout=0; fwrite(&bout,1,1,bmp);
-  
-  intout=0; 
-  fwrite(&intout,4,1,bmp);
-  fwrite(&intout,4,1,bmp);
-  fwrite(&intout,4,1,bmp);
-  fwrite(&intout,4,1,bmp);
-  fwrite(&intout,4,1,bmp);
-  fwrite(&intout,4,1,bmp);
-  
-  w=w*4;
-  intout=0;
-  for (int i=0;i<sz;i+=w)
-  {
-   for (int ii=0;ii<w;ii+=4)
-    for (int iii=2;iii>=0;iii--)
-     fwrite(&(scrbuf[i+ii+iii]),1,1,bmp);
-   fwrite(&intout,pad,1,bmp);
-  }
-  
-  fclose(bmp);
-  delete[] scrbuf;
-  return 0;
+int screen_save(std::string filename){//Assumes native integers are little endian
+	unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
+	char *scrbuf=new char[sz*3];
+	glReadPixels(0,0,w,h,GL_BGR,GL_UNSIGNED_BYTE,scrbuf);
+	FILE *bmp=fopen(filename.c_str(),"wb");
+	if(!bmp) return -1;
+	fwrite("BM",2,1,bmp);
+	sz<<=2;
+	fwrite(&sz,4,1,bmp);
+	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+	fwrite(&w,4,1,bmp);
+	fwrite(&h,4,1,bmp);
+	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+	if(w&3){
+		size_t pad=w&3;
+		w*=3;
+		sz-=sz>>2;
+		for(unsigned int i=0;i<sz;i+=w){
+			fwrite(scrbuf+i,w,1,bmp);
+			fwrite("\0\0",pad,1,bmp);
+		}
+	}else fwrite(scrbuf,w*3,h,bmp);
+	fclose(bmp);
+	delete[] scrbuf;
+	return 0;
+}
+
+int screen_save_part(std::string filename,unsigned x,unsigned y,unsigned w,unsigned h){//Assumes native integers are little endian
+	unsigned sz=w*h;
+	char *scrbuf=new char[sz*3];
+	glReadPixels(x,y,w,h,GL_BGR,GL_UNSIGNED_BYTE,scrbuf);
+	FILE *bmp=fopen(filename.c_str(),"wb");
+	if(!bmp) return -1;
+	fwrite("BM",2,1,bmp);
+	sz<<=2;
+	fwrite(&sz,4,1,bmp);
+	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+	fwrite(&w,4,1,bmp);
+	fwrite(&h,4,1,bmp);
+	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+	if(w&3){
+		size_t pad=w&3;
+		w*=3;
+		sz-=sz>>2;
+		for(unsigned i=0;i<sz;i+=w){
+			fwrite(scrbuf+i,w,1,bmp);
+			fwrite("\0\0",pad,1,bmp);
+		}
+	}else fwrite(scrbuf,w*3,h,bmp);
+	fclose(bmp);
+	delete[] scrbuf;
+	return 0;
 }

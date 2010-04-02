@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                     
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
@@ -43,7 +43,8 @@ namespace enigma
     char keybdstatus[256];
     short mousewheel;
 }
-const int mb_any   =-1;
+
+const int mb_any    =-1;
 const int mb_none   =0;
 const int mb_left   =1;
 const int mb_right  =2;

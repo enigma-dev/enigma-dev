@@ -30,7 +30,7 @@ ENIGMA Global Variables
 **********************/
 namespace enigma
 {
-  int nodestroy=0;
+  extern int nodestroy;
 }
 /*************************
 End ENIGMA Global Variables

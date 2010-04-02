@@ -25,14 +25,13 @@
 **                                                                              **
 \*********************************************************************************/
 
-
 #include <map>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <limits>
-#include <vector>
+//#include <vector> //COLLIGMA
 
 #include <time.h>
 
@@ -54,35 +53,31 @@
 
 #if STRINGLIB
     #include "Universal_System/estring.h"
-    #endif
-#if MATHNCLIB
-    #include "Universal_System/mathnc.h"
-    #endif
+#endif
+#include "Universal_System/mathnc.h"
 
-#ifdef ENIGMA_GS_OPENGL
+#if ENIGMA_GS_OPENGL
     #include "Graphics_Systems/OpenGL/OPENGLStd.h"
-    #endif
-#ifdef ENIGMA_WS_WINDOWS
-    #include "Platforms/WINDOWS/WINDOWSStd.h"
-    #endif
-#ifdef ENIGMA_WS_XLIB
+#endif
+#if ENIGMA_WS_WINDOWS!=0
+    #include "Platforms/windows/WINDOWSStd.h"
+#elif ENIGMA_WS_XLIB!=0
     #include "Platforms/xlib/XLIBwindow.h"
     #include "Platforms/xlib/XLIBdialog.h"
-    #endif
+#endif
 
 
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
 #include "Universal_System/switch_stuff.h"
 #include "Universal_System/CallbackArrays.h"
-#include "Universal_System/compression.h"
 
 
 
 #if COLLIGMA
     #include "Colligma/colligma_start.h"
     #include "Colligma/colligma_end.h"
-    #endif
+#endif
 
 #include "Universal_System/IMGloading.h"
 #include "Graphics_Systems/OpenGL/GSsprite.h"
@@ -90,12 +85,13 @@
 
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h"
-#include "Universal_System/globalupdate.h"
 
 #include "Universal_System/objecttable.h"
 #include "Universal_System/object.h"
 #include "Universal_System/instance.h"
 #include "Universal_System/roomsystem.h"
+
+#include "Universal_System/globalupdate.h"
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h"
 #include "Universal_System/WITHconstruct.h"
@@ -104,8 +100,9 @@
 #include "Universal_System/simplecollisions.h"
 #if COLLIGMA
     #include "Universal_System/collisions.h"
-    #endif
+#endif
 
+#include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
 
@@ -113,24 +110,29 @@
 
 
 #if BUILDMODE
-  #include "Modes/buildmode.h"
-  #endif
+	#include "Modes/buildmode.h"
+#endif
 
 
-#ifdef ENIGMA_GS_OPENGL
-    #include "Graphics_Systems/OpenGL/GSscreen.h"
-    #endif
+#if ENIGMA_GS_OPENGL
+	#include "Graphics_Systems/OpenGL/GSscreen.h"
+#endif
 
 #include "Universal_System/spriteinit.h"
 #include "Universal_System/events.h"
 
-#ifdef ENIGMA_WS_WINDOWS
+#if ENIGMA_WS_WINDOWS
     #include "Platforms/windows/WINDOWSmain.h"
     #include "Platforms/windows/WINDOWScallback.h"
-    #endif
-#ifdef ENIGMA_WS_XLIB
-    #include "Platforms/xlib/XLIBmain.h"
-    #endif
+#elif ENIGMA_WS_XLIB
+	#include "Platforms/xlib/XLIBmain.h"
+#endif
 
 #include "Universal_System/instance_create.h"
 
+//This is like main(), only cross-api
+int initialize_everything()
+{
+  #include "initialize.h"
+  return 0;
+}

@@ -21,16 +21,12 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
 #include "../../additional/zlib/zlib.h"
 
-
-/*
-source
-*/
 
 /*int zlib_compressed_size=0;
 int zlib_decompressed_size=0;
@@ -39,9 +35,9 @@ Bytef* zlib_compress(char* inbuffer,int actualsize)
 {
     uLongf outsize=(int)(actualsize*1.1)+12;
     Bytef* outbytef=new Bytef[outsize];
-    
+
     int res=compress(outbytef,&outsize,(Bytef*)inbuffer,actualsize);
-    
+
     if (res != Z_OK)
     {
      #if SHOWERRORS
@@ -51,37 +47,30 @@ Bytef* zlib_compress(char* inbuffer,int actualsize)
      show_error("Zlib failed to compress the buffer. Output size greater than allotted.",0);
      #endif
     }
-    
+
     zlib_compressed_size=outsize;
     return outbytef;
 }*/
 
-int zlib_decompress(Bytef* inbuffer, int insize, int uncompresssize,Bytef* outbytef)
-{
-    uLongf outused=uncompresssize;
-    
-    int res=uncompress(outbytef,&outused,(Bytef*)inbuffer,insize);
-    
-    if (res != Z_OK)
-    {
-        #if SHOWERRORS
-        if (res == Z_MEM_ERROR)
-        show_error("Zlib failed to decompress the buffer. Out of memory.",0);
-        if (res == Z_BUF_ERROR)
-        show_error("Zlib failed to decompress the buffer. Output size ["+string(outused)+"] greater than allotted ["+string(uncompresssize)+"].",0);
-        if (res == Z_DATA_ERROR)
-        show_error("Zlib failed to decompress the buffer. Compressed data is invalid.",0);
-        #endif
-        
-        if (res == Z_MEM_ERROR)
-        return -1;//(Bytef*)"[out of memory]";
-        if (res == Z_BUF_ERROR)
-        return -2;//(Bytef*)"[output too large for buffer]";
-        if (res == Z_DATA_ERROR)
-        return -3;//(Bytef*)"[compression data invalid]";
-        
-        return -4;//(Bytef*)"[unknown error occurred]";
-    }
-    
-    return outused;
+int zlib_decompress(Bytef* inbuffer, int insize, int uncompresssize,Bytef* outbytef){
+	uLongf outused=uncompresssize;
+	switch(uncompress(outbytef,&outused,(Bytef*)inbuffer,insize)){
+	case Z_OK:return outused;
+	case Z_MEM_ERROR:
+		#if SHOWERRORS
+			show_error("Zerror: Memory out",0);
+		#endif
+		return -1;
+	case Z_BUF_ERROR:
+		#if SHOWERRORS
+			show_error("Zerror: Output of "+string(outused)+" above alloted "+string(uncompresssize),0);
+		#endif
+		return -2;
+	case Z_DATA_ERROR:
+		#if SHOWERRORS
+			show_error("Zerror: Invalid data",0);
+		#endif
+		return -3;
+	default:return -4;
+	}
 }

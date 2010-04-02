@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 struct collCustom {
@@ -31,7 +31,7 @@ struct collCustom {
        float xOrigin, yOrigin;//Point of rotation
        float xFocus, yFocus;//Point of scaling
        collCustom (unsigned short axDim, unsigned short ayDim, int axOff=0, int ayOff=0, float axOrigin=0, float ayOrigin=0, float axFocus=0, float ayFocus=0, unsigned short aFill=1)
-       {          
+       {
                   unsigned int byteRef;
                   unsigned char bitMod;
                   unsigned short i,ii,i2,ii2;
@@ -42,7 +42,7 @@ struct collCustom {
                   xOff = axOff;
                   yOff = ayOff;
                   xOrigin = axOrigin;
-                  yOrigin = ayOrigin;                  
+                  yOrigin = ayOrigin;
                   yFocus=ayFocus;
                   xFocus=axFocus;
                   if (aFill!=1)
@@ -64,7 +64,7 @@ struct collCustom {
                               h=(float)(xDim)/(yDim);
                               xRad=(float)xDim/2;
                               for (i=0;i<yDim;i++)
-                              {    
+                              {
                                   cLen=sqrt((i+0.5)*h*(xDim-(i+0.5)*h));
                                   i2=(unsigned short)round(xRad-cLen);
                                   ii2=(unsigned short)round(xRad+cLen)-1;//Define the two X-Bounds
@@ -74,11 +74,11 @@ struct collCustom {
                                   {
                                       byteRef=ii+i*(byteDim);
                                       if (ii==byteI)
-                                      {          
+                                      {
                                             bitMod=255>>(((-ii2-1)&7)*((i2+7)>ii2));
                                             bitMod&=255<<((i2)&7);
                                             cMask[byteRef]=(255&bitMod);
-                                      }     
+                                      }
                                       else
                                       {
                                             if (ii==byteII)
@@ -86,11 +86,11 @@ struct collCustom {
                                                bitMod=255>>((-ii2-1)&7);
                                                cMask[byteRef]=(255&bitMod);
                                             }
-                                            else  
+                                            else
                                             cMask[byteRef]=(255);
                                       }
                                   }
-                              }  
+                              }
                               break;
                   }
        }
@@ -116,7 +116,7 @@ struct collRectangle {
 };
 struct collEllipse {
        unsigned short xDim, yDim;//X and Y dimensions in pixels
-       int xOff, yOff;//X and Y offsets 
+       int xOff, yOff;//X and Y offsets
        collEllipse(unsigned short axDim, unsigned short ayDim, int axOff=0, int ayOff=0, float acAngle=0, float axOrigin=0, float ayOrigin=0)
        {
                   xDim = axDim;
@@ -126,7 +126,7 @@ struct collEllipse {
        }
 };
 struct collTriangle {
-       unsigned short x1,y1,x2,y2,x3,y3;   
+       unsigned short x1,y1,x2,y2,x3,y3;
        float xOrigin, yOrigin;//Point of rotation
        collTriangle(unsigned short aX1, unsigned short aY1, unsigned short aX2, unsigned short aY2,unsigned short aX3, unsigned short aY3, float acAngle=0, float axOrigin=0, float ayOrigin=0)
        {
@@ -141,25 +141,23 @@ struct collTriangle {
        }
 };*/
 struct collLinelist{
-            int yOff;
-            std::vector<float> x1List;
-            std::vector<float> x2List;
-            float xOrigin, yOrigin;//Point of rotation
-            float xFocus, yFocus;//Point of scaling
-            collLinelist()
-            {
-            yOff=0;
-            xOrigin=0;
-            yOrigin=0;
-            xFocus=0;
-            yFocus=0;
-            }
-            collLinelist(float xOrigin, float yOrigin, float xFocus, float yFocus)
-            {
-            yOff=0;
-            xOrigin=0;
-            yOrigin=0;
-            xFocus=0;
-            yFocus=0;
-            }
-            };
+	int yOff;
+	std::vector<float> x1List;
+	std::vector<float> x2List;
+	float xOrigin, yOrigin;//Point of rotation
+	float xFocus, yFocus;//Point of scaling
+	collLinelist(){
+		yOff=0;
+		xOrigin=0;
+		yOrigin=0;
+		xFocus=0;
+		yFocus=0;
+	}
+	collLinelist(float xOrigin, float yOrigin, float xFocus, float yFocus){
+		yOff=0;
+		xOrigin=0;
+		yOrigin=0;
+		xFocus=0;
+		yFocus=0;
+	}
+};

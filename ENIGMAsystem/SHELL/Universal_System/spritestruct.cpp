@@ -29,130 +29,105 @@
 #include <string>
 #include "spritestruct.h"
 
-namespace enigma
-{
-  int currentspriteind;
-
-  std::map<int,sprite*> spritestructarray;
-  std::map<int,sprite*>::iterator spriteiter;
+namespace enigma{
+	int currentspriteind;
+	std::map<int,sprite*> spritestructarray;
+	std::map<int,sprite*>::iterator spriteiter;
 }
 
 
-int sprite_get_width(double sprite)
-{
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return fnd->width;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
+int sprite_get_width(int sprite){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return fnd->width;
+	#if SHOWERRORS
+	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
 }
 
-int sprite_get_height(double sprite)
-{
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return fnd->height;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
-}
-
-
-int sprite_get_bbox_bottom(double sprite)
-{
-
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return fnd->height;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
-}
-int sprite_get_bbox_left(double sprite)
-{
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return 0;//fnd->height;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
-}
-int sprite_get_bbox_right(double sprite)
-{
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return fnd->width;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
-}
-int sprite_get_bbox_top(double sprite)
-{
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return 0;//fnd->height;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
-}
-
-int sprite_get_bbox_mode(double sprite)
-{
-  /*enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return fnd->height;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif*/
-  return 0;
+int sprite_get_height(int sprite){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return fnd->height;
+	#if SHOWERRORS
+	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
 }
 
 
+int sprite_get_bbox_bottom(int sprite){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return fnd->height;
+	#if SHOWERRORS
+	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
+}
+int sprite_get_bbox_left(int sprite){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return 0;//fnd->height;
+	#if SHOWERRORS
+	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
+}
+
+int sprite_get_bbox_right(int sprite){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return fnd->width;
+	#if SHOWERRORS
+	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
+}
+int sprite_get_bbox_top(int sprite){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return 0;//fnd->height;
+	#if SHOWERRORS
+	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
+}
+
+//sprite_get_bbox_mode
 //sprite_get_name
-
-int sprite_get_number(double sprite)
-{
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return fnd->subcount;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
-}
-
-
 //sprite_get_precise
 //sprite_get_preload
 //sprite_get_smooth
-
-int sprite_get_texture(double sprite,double subimage)
-{
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return fnd->texturearray[(int)subimage];
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
-}
-
 //sprite_get_transparent
 
-int sprite_get_xoffset(double sprite)
-{
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return fnd->xoffset;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
-}
-int sprite_get_yoffset(double sprite)
-{
-  enigma::sprite* fnd=enigma::spritestructarray[(int)sprite]; if (fnd!=NULL)
-    return fnd->yoffset;
-  #if SHOWERRORS
-  else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-  #endif
-  return 0;
+int sprite_get_number(int sprite){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return fnd->subcount;
+	#if SHOWERRORS
+	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
 }
 
+int sprite_get_texture(int sprite,int subimage){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return fnd->texturearray[subimage];
+	#if SHOWERRORS
+	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
+}
+
+int sprite_get_xoffset(int sprite){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return fnd->xoffset;
+	#if SHOWERRORS
+	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
+}
+
+int sprite_get_yoffset(int sprite){
+	enigma::sprite* fnd=enigma::spritestructarray[sprite];
+	if(fnd) return fnd->yoffset;
+	#if SHOWERRORS
+	else show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+	#endif
+	return 0;
+}

@@ -21,60 +21,44 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
-
-/*
-int sprite_get_width(double sprite)
-int sprite_get_height(double sprite)
-int sprite_get_bbox_bottom(double sprite)
-int sprite_get_bbox_left(double sprite)
-int sprite_get_bbox_right(double sprite)
-int sprite_get_bbox_top(double sprite)
-int sprite_get_bbox_mode(double sprite)
-int sprite_get_number(double sprite)
-int sprite_get_texture(double sprite,double subimage)
-int sprite_get_xoffset(double sprite)
-int sprite_get_yoffset(double sprite)
-*/
-
-
+#include <map>
 namespace enigma
 {
   extern int currentspriteind;
   struct sprite
   {
-       int width, height, subcount;
-       int xoffset, yoffset;
-       int id;
-       
-       std::map<int,unsigned int> texturearray;       //Each subimage has a texture
-       #if COLLIGMA
-       std::map<int,collCustom*> bitmask;     //Each subimage gets a custom mask 
-       #endif
-       //void*  *pixeldata;
-       
-       double texbordx, texbordy;
-       int bbox_bottom, bbox_left, bbox_right, bbox_top;
-       bool where,smooth;
+    int width,height,subcount,xoffset,yoffset,id;
+    std::map<int,unsigned int> texturearray;       //Each subimage has a texture
+    
+    //unsigned int*texturearray;
+    #if COLLIGMA
+    std::map<int,collCustom*> bitmask;     //Each subimage gets a custom mask
+    #endif
+    
+    //void*  *pixeldata;
+    double texbordx, texbordy;
+    int bbox_bottom, bbox_left, bbox_right, bbox_top;
+    bool where,smooth;
   };
-  
   extern std::map<int,sprite*> spritestructarray;
+  //extern sprite* spritestructarray;
   extern std::map<int,sprite*>::iterator spriteiter;
 }
 
-extern int sprite_get_width(double sprite);
-extern int sprite_get_height(double sprite);
-extern int sprite_get_bbox_bottom(double sprite);
-extern int sprite_get_bbox_left(double sprite);
-extern int sprite_get_bbox_right(double sprite);
-extern int sprite_get_bbox_top(double sprite);
-extern int sprite_get_bbox_mode(double sprite);
-extern int sprite_get_number(double sprite);
-extern int sprite_get_texture(double sprite,double subimage);
-extern int sprite_get_xoffset(double sprite);
-extern int sprite_get_yoffset(double sprite);
+extern int sprite_get_width(int sprite);
+extern int sprite_get_height(int sprite);
+extern int sprite_get_bbox_bottom(int sprite);
+extern int sprite_get_bbox_left(int sprite);
+extern int sprite_get_bbox_right(int sprite);
+extern int sprite_get_bbox_top(int sprite);
+extern int sprite_get_bbox_mode(int sprite);
+extern int sprite_get_number(int sprite);
+extern int sprite_get_texture(int sprite,int subimage);
+extern int sprite_get_xoffset(int sprite);
+extern int sprite_get_yoffset(int sprite);
 
 
 

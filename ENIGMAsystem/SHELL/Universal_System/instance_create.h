@@ -21,53 +21,44 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
 
 int instance_create(double x,double y,double object)
 {
-    int a=enigma::maxid;
+	int idn=enigma::maxid;
+    enigma::newinst_id=enigma::maxid;
     enigma::maxid++;
-    
-    enigma::newinst_id=a;
     enigma::newinst_obj=(int)object;
     enigma::newinst_x=x;
     enigma::newinst_y=y;
-    
-    switch ((int)object)
-    {
-       #include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
-       default:
-            #if SHOWERRORS
-            show_error("Object does not exist...",0);
-            #endif
-            return -1;
+
+	switch((int)object){
+	#include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
+	default:
+		#if SHOWERRORS
+		show_error("Object doesn't exist",(int)object);
+		#endif
+		return -1;
     }
-    
-    return a;
+    return idn;
 }
 
-namespace enigma
-{
-  void instance_create_id(int x,int y,int object,int idg) //This is for use by the system only. Please leave be.
-  {
-    int a=idg;
-    if (enigma::maxid<=a) enigma::maxid=a;
-    
-    enigma::newinst_id=idg;
-    enigma::newinst_obj=object;
-    enigma::newinst_x=x;
-    enigma::newinst_y=y;
-    
-    switch (object)
-    {
-       #include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
-       default:
-            #if SHOWERRORS
-            show_error("Object does not exist...",0);
-            #endif
-    }
-  }
+namespace enigma{
+void instance_create_id(int x,int y,int object,int idn){ //This is for use by the system only. Please leave be
+	if (enigma::maxid<idn) enigma::maxid=idn;
+	enigma::newinst_id=idn;
+	enigma::newinst_obj=object;
+	enigma::newinst_x=x;
+	enigma::newinst_y=y;
+    switch (object){
+	#include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
+	default:
+		#if SHOWERRORS
+		show_error("Object doesn't exist",object);
+		#endif
+	}
+}
 }

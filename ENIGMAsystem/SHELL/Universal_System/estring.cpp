@@ -29,255 +29,132 @@
 #include <cstdlib>
 #include "var_cr3.h"
 
+const char ldgrs[256]={
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,0,
+0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,
+0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
+bool is_string(enigma::variant val){return val.type;}
+bool is_string(var& val){return val.values[0]->type;}
+bool is_real(enigma::variant val){return !val.type;}
+bool is_real(var& val){return !val.values[0]->type;}
 
-/*
-Source
-*/
-
-bool is_string(enigma::variant val)     { return val.type; }
-bool is_string(var& val)                { return val.values[0]->type; }
-
-bool is_real(enigma::variant val)       { return !(val.type); }
-bool is_real(var& val)                  { return !(val.values[0]->type); }
-
-
-
-std::string chr(char val)
-{
-   char ordinal=((char)val)&0xFF;
-   std::string ret;
-   ret=ordinal;
-   return ret;
+std::string chr(char val){
+	char ret[2]={val,0};
+	return ret;
 }
 
-char cchr(double val)
-{
-    return (char)((char)val)&0xFF;
+int ord(char str){return str;}
+int ord(char* str){return *str;}
+int ord(std::string str){return str[0];}
+
+double real(std::string str){return atof(str.c_str());}
+double real(char* str){return atof(str);}
+double real(double str){return str;}
+double real(var& str){return str.values[0]->type?atof(((std::string)str).c_str()):(double)str;}
+
+size_t string_length(std::string str){return str.length();}
+size_t string_length(char* str){
+	char*s=str;
+	while(*s++);
+	return s-str;
 }
 
-
-
-int ord(char str)
-{
-  return str;
-}
-int ord(char* str)
-{
-  return str[0];
-}
-int ord(std::string str)
-{
-  return str[0];
+int string_pos(std::string substr,std::string str){
+	return str.find(substr,0)+1;
 }
 
-
-
-double real(std::string str)
-{
-  return atof(str.c_str());
-}
-double real(char* str)
-{
-  return atof(str);
-}
-double real(double str)
-{
-  return str;
-}
-double real(var& str)
-{
-  if (str.values[0]->type==1)
-  {
-    std::string strn=(std::string)str;
-    return atof(strn.c_str());
-  }
-  else
-  {
-    return (double) str;
-  }
+std::string string_copy(std::string str,double index,double count){
+	unsigned int indx=index<=1?0:(int)index-1;
+	return indx>str.length()?"":str.substr(indx,(int)count);
 }
 
-
-
-int string_length(std::string str)
-{
-    return str.length();
-}
-int string_length(char* str)
-{
-    int a; for(a=0;str[a];a++);
-    return a;
+std::string string_char_at(std::string str,double index){
+	unsigned int n=index<=1?0:(unsigned int)index-1;
+	char ret[2]={n<str.length()?str[n]:0,0};
+	return ret;
 }
 
-
-int string_pos(std::string substr,std::string str)
-{
-    unsigned int a=str.find(substr,0);
-    if (a==std::string::npos)
-    return 0;
-    return a+1;
+std::string string_delete(std::string str,double index,double count){
+	return str.erase(index<2?0:(size_t)index-1,count<1?0:(size_t)count);
 }
 
-
-std::string string_copy(std::string str,double index,double count)
-{
-   std::string strn=str;
-   unsigned int indx=(unsigned int)index-1; if (indx<0) indx=0;
-
-   if (indx>strn.length())
-   return "";
-
-   return strn.substr(indx,(int)count);
+std::string string_insert(std::string substr,std::string str,double index){
+	if(index<=1) return str.insert(0,substr);
+	size_t x=(size_t)index-1;
+	return str.insert(x>str.length()?str.length():x,substr);
 }
 
-
-std::string string_char_at(std::string str,double index)
-{
-    unsigned int n=(unsigned int)index-1;
-
-    if (n==std::string::npos) n=0;
-
-    if (n>=str.length())
-    return "";
-
-    std::string ret="";
-    ret+=str[n];
-
-    return ret;
+std::string string_replace(std::string str,std::string substr,std::string newstr){
+	size_t pos=str.find(substr,0);
+	return pos==(size_t)-1?str:str.replace(pos,substr.length(),newstr);
 }
 
-
-std::string string_delete(std::string str,double index,double count)
-{
-   std::string strn=str;
-   int x=(int) index-1; if (x<0) x=0;
-   int c=(int) count;   if (c<0) c=0;
-   return strn.erase(x,c);
+std::string string_replace_all(std::string str,std::string substr,std::string newstr){
+	int pos=0,sublen=substr.length(),newlen=newstr.length();
+    while((pos=str.find(substr,pos))!=-1){
+		str.replace(pos,sublen,newstr);
+		pos+=newlen;
+	}
+	return str;
 }
 
-
-
-std::string string_insert(std::string substr,std::string str,double index)
-{
-    std::string strn=str;
-    unsigned int x=(unsigned int) index-1; if (x==std::string::npos) x=0; if (x>strn.length()) x=strn.length();
-    return strn.insert(x,substr);
-}
-
-
-
-std::string string_replace(std::string str,std::string substr,std::string newstr)
-{
-    std::string strr=str;
-    int sublen=substr.length();
-    int pos=0;
-    if ((pos=strr.find(substr,pos)) != -1)
-    {
-        strr.erase(pos,sublen);
-        strr.insert(pos,newstr);
-    }
-
-    return strr;
-}
-
-
-std::string string_replace_all(std::string str,std::string substr,std::string newstr)
-{
-    std::string strr=str;
-    int sublen=substr.length(),
-        newlen=newstr.length();
-    int pos=0;
-    while ((pos=strr.find(substr,pos)) != -1)
-    {
-        strr.erase(pos,sublen);
-        strr.insert(pos,newstr);
-        pos+=newlen;
-    }
-
-    return strr;
-}
-
-
-int string_count(std::string substr,std::string str)
-{
-    int sublen=substr.length();
-    int pos=-sublen, occ=0;
-    while ((pos=str.find(substr,pos+sublen))>=0) occ++;
+int string_count(std::string substr,std::string str){
+	int sublen=substr.length(),pos=-sublen,occ=0;
+    while((pos=str.find(substr,pos+sublen))!=-1) occ++;
     return occ;
 }
 
-
-std::string string_lower(std::string str)
-{
-    int len=str.length()-1;
-    int i=-1;
-    while (++i<len)
-    {
-       if (str[i]>=65 && str[i]<=91)
-          str[i]+=32;
-    }
-    return str;
-}
-std::string string_upper(std::string str)
-{
-    int len=str.length()-1;
-    int i=-1;
-    while (++i<len)
-    {
-       if (str[i]>=97 && str[i]<=122)
-          str[i]-=32;
-    }
-    return str;
+std::string string_lower(std::string str){
+	int len=str.length()-1;
+	for(int i=0;i<len;i++)
+		if(ldgrs[(unsigned char)str[i]]&2) str[i]-=32;
+	return str;
 }
 
-
-std::string string_repeat(std::string str,double count)
-{
-    std::string ret="";
-    for (int i=0;i<count;i++)
-    {
-        ret.append(str);
-    }
-    return ret;
+std::string string_upper(std::string str){
+	int len=str.length()-1;
+	for(int i=0;i<len;i++)
+		if(ldgrs[(unsigned char)str[i]]&1) str[i]-=32;
+	return str;
 }
 
-
-std::string string_letters(std::string str)
-{
-    std::string ret="";
-    unsigned int len=str.length()-1;
-    for (unsigned int i=0; i<=len; i++)
-    {
-       if ((str[i]>=65 && str[i]<=91) || (str[i]>=97 && str[i]<=122))
-       ret+=str[i];
-    }
-    return ret;
+std::string string_repeat(std::string str,int count){
+	std::string ret;
+	for(int i=count;i;i--) ret.append(str);
+	return ret;
 }
 
-
-std::string string_digits(std::string str)
-{
-    std::string ret="";
-    int len=str.length()-1;
-    for (int i=0; i<=len; i++)
-    {
-       if (str[i]>=48 && str[i]<=57)
-       ret+=str[i];
-    }
-    return ret;
+std::string string_letters(std::string str){
+	std::string ret;
+	for(const char*c=str.c_str();*c;c++)
+		if(ldgrs[(unsigned char)*c]&3) ret+=*c;
+	return ret;
 }
 
+std::string string_digits(std::string str){
+	std::string ret;
+	for(const char*c=str.c_str();*c;c++)
+		if(ldgrs[(unsigned char)*c]&4) ret+=*c;
+	return ret;
+}
 
-std::string string_lettersdigits(std::string str)
-{
-    std::string ret="";
-    int len=str.length()-1;
-
-    for (int i=0; i<=len; i++)
-    {
-       if ((str[i]>=65 && str[i]<=91) || (str[i]>=97 && str[i]<=122) || (str[i]>=48 && str[i]<=57))
-       ret+=str[i];
-    }
-    return ret;
+std::string string_lettersdigits(std::string str){
+	std::string ret;
+	for(const char*c=str.c_str();*c;c++)
+		if(ldgrs[(unsigned char)*c]) ret+=*c;
+	return ret;
 }

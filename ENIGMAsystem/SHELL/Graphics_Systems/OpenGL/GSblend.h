@@ -21,14 +21,14 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
 /**Blend Mode Functions********************************************************\
 
-bm_normal, bm_add, bm_max, bm_subtract, bm_zero, bm_one, bm_src_color, 
-bm_inv_src_color, bm_src_alpha, bm_inv_src_alpha, bm_dest_alpha, 
+bm_normal, bm_add, bm_max, bm_subtract, bm_zero, bm_one, bm_src_color,
+bm_inv_src_color, bm_src_alpha, bm_inv_src_alpha, bm_dest_alpha,
 bm_inv_dest_alpha, bm_dest_color, bm_inv_dest_color, bm_src_alpha_sat
 
 int draw_set_blend_mode(ARG mode)

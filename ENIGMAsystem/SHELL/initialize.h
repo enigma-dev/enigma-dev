@@ -25,77 +25,61 @@
 **                                                                              **
 \*********************************************************************************/
 
-
-#if MATHNCLIB
-srand(time(0));
-enigma::Random_Seed=rand();
-#endif
-
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectdata.h"
-
+mtrandom_seed(enigma::Random_Seed=time(0));
 #if BUILDMODE
-buildmode::buildinit();
+	buildmode::buildinit();
+#endif
+graphicssystem_initialize();
+#if ENIGMA_WS_WINDOWS!=0
+	enigma::init_fonts();
 #endif
 
-
-graphicssystem_initialize();
-
-#ifdef ENIGMA_WS_WINDOWS
-    enigma::init_fonts();
-   #endif
+enigma::instance_event_iterator = NULL;
 
 //Clear the input arrays
-for (int i=0;i<256;i++)
-{
-    enigma::last_keybdstatus[i]=0;
-    enigma::keybdstatus[i]=0;
+for(int i=0;i<3;i++){
+	enigma::last_mousestatus[i]=0;
+	enigma::mousestatus[i]=0;
 }
-for (int i=0;i<3;i++)
-{
-    enigma::last_mousestatus[i]=0;
-    enigma::mousestatus[i]=0;
+for(int i=0;i<256;i++){
+	enigma::last_keybdstatus[i]=0;
+	enigma::keybdstatus[i]=0;
 }
-
-
-
 
 //Take care of sprites;
 enigma::currentspriteind=0;
 enigma::exe_loadsprs();
-
-graphicssystem_untexture();
-
+glBindTexture(GL_TEXTURE_2D,0);
 //Load rooms
 #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
 int instarpos=0;
 for (enigma::roomiter=enigma::roomdata.begin();
-     enigma::roomiter!=enigma::roomdata.end(); enigma::roomiter++)
-{
-  int troc=(*enigma::roomiter).second.instancecount;
-  for(int i=0;i<troc;i++)
-  {
+     enigma::roomiter!=enigma::roomdata.end(); enigma::roomiter++){
+	int troc=(*enigma::roomiter).second.instancecount;
+	for(int i=0;i<troc;i++)
+	{
     int idn=instdata[instarpos];
-    (*enigma::roomiter).second.instances[i].id=idn;
-    if (idn>=enigma::maxid) enigma::maxid=idn+1;
-    (*enigma::roomiter).second.instances[i].obj=instdata[instarpos+1];
-    (*enigma::roomiter).second.instances[i].x=instdata[instarpos+2];
-    (*enigma::roomiter).second.instances[i].y=instdata[instarpos+3];
-    instarpos+=4;
-  }
+		(*enigma::roomiter).second.instances[i].id=idn;
+		if (idn>=enigma::maxid) enigma::maxid=idn+1;
+		(*enigma::roomiter).second.instances[i].obj=instdata[instarpos+1];
+		(*enigma::roomiter).second.instances[i].x=instdata[instarpos+2];
+		(*enigma::roomiter).second.instances[i].y=instdata[instarpos+3];
+		instarpos+=4;
+	}
 }
-
 
 //Go to the first room
 room_goto_absolute(0);
 /*
 FILE* a=fopen("shit!.txt","wb");
-if (a!=NULL)
+if (a)
 {
-  fprintf(a,"Listing of all instances:\r\n"); 
+  fprintf(a,"Listing of all instances:\r\n");
   for (enigma::instance_iterator=enigma::instance_list.begin();
   enigma::instance_iterator!=enigma::instance_list.end();
-  enigma::instance_iterator++) 
-  { 
+  enigma::instance_iterator++)
+  {
     fprintf(a,"IND: %d | ID: %d   | obj: %3d   | x: %3d   | y: %3d\r\n",
       (int)(*enigma::instance_iterator).first,
       (int)(*enigma::instance_iterator).second->id,
@@ -103,7 +87,7 @@ if (a!=NULL)
       (int)(*enigma::instance_iterator).second->x,
       (int)(*enigma::instance_iterator).second->y);
   }
-  fclose(a);    
+  fclose(a);
 }
 
 system("shit!.txt");*/

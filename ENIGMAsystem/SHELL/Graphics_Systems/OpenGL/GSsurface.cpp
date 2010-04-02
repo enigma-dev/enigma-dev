@@ -150,14 +150,14 @@ int draw_surface(double id, double x, double y)
     if (s>enigma::surface_max)
     {
         #if SHOWERRORS
-        show_error("Surface does not exist.",0);
+        show_error("Surface does not exist",0);
         #endif
         return -1;
     }
     if (enigma::surface_array[s]==NULL)
     {
         #if SHOWERRORS
-        show_error("Surface does not exist.",0);
+        show_error("Surface does not exist",0);
         #endif
         return -1;
     }

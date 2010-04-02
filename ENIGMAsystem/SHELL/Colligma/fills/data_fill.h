@@ -94,7 +94,7 @@ bool collFill(collCustom& aColl,unsigned char Blend,float aX,float aY,collCustom
      minY=(int)std::max((float)0,bY);
      maxX=(int)std::min((float)aColl.xDim,bX+bColl.xDim)-1;
      maxY=(int)std::min((float)aColl.yDim,bY+bColl.yDim);
-     cMod=(unsigned char)((((int)bX>0)?(int)bX:-(int)bX)&7);
+     cMod=(unsigned char)(abs((int)bX)&7);
      dir=(0<bX);
      for (ii=(int)minY;ii<(int)maxY;ii++)
                 {
@@ -138,7 +138,7 @@ bool collFill(collCustom& aColl,unsigned char Blend,float aX,float aY,collCustom
                               else
                                  bMod >>= cMod;
                            }
-                           bMod&=255>>((int)(-maxX-1)&7);
+                           bMod&=255u>>((int)(-maxX-1)&7);
                            switch (Blend)
                            {
                                   case bm_normal:

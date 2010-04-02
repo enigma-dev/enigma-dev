@@ -39,7 +39,7 @@ namespace enigma
   {
     bool stillgoing;
     int level; wildclass mycur;
-    std::map<int,object*>::iterator instit;
+    std::map<int,object_basic*>::iterator instit;
 
     withiter(int a);
 
@@ -52,7 +52,7 @@ namespace enigma
 namespace enigma
 {
 
-  struct withstack { withstack* prev; object* obj; } *withOTHERobject=NULL;
+  struct withstack { withstack* prev; object_basic* obj; } *withOTHERobject=NULL;
   int pushwith(int level,double object2do)
   {
     withpush=level;
@@ -65,7 +65,7 @@ namespace enigma
   void popOtherObject()
   {
     withstack *lastoo=withOTHERobject;
-    if (lastoo==NULL) { show_error("Unexpected end of with statement.",0); return; }
+    if (lastoo==NULL) { show_error("Unexpected end of with clause",0); return; }
     withOTHERobject=lastoo->prev;
     delete []lastoo;
   }

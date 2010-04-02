@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
@@ -33,19 +33,20 @@ namespace enigma
 {
   struct TYPEPURPOSE:variant
   {
-    double *reflex1, *reflex2, *reflex3;
-    
+    double *reflex1,*reflex2,*reflex3;
     //These are assignment operators and require a reference to be passed
-    double &operator= (int y),  &operator= (double y);   std::string &operator= (std::string y),  &operator= (char* y); enigma::variant& operator= (enigma::variant y), &operator= (var& y);
-    double &operator+= (int y), &operator+= (double y);  std::string &operator+= (std::string y), &operator+= (char* y);  enigma::variant &operator+= (enigma::variant y), &operator+= (var& y);
-    double &operator-= (int y), &operator-= (double y);  std::string &operator-= (std::string y), &operator-= (char* y);  enigma::variant &operator-= (enigma::variant y), &operator-= (var& y);
-    double &operator*= (int y), &operator*= (double y);  std::string &operator*= (std::string y), &operator*= (char* y);  enigma::variant &operator*= (enigma::variant y), &operator*= (var& y);
-    double &operator/= (int y), &operator/= (double y);  std::string &operator/= (std::string y), &operator/= (char* y);  enigma::variant &operator/= (enigma::variant y), &operator/= (var& y);
-    double &operator<<= (int y),&operator<<= (double y); std::string &operator<<= (std::string y),&operator<<= (char* y); enigma::variant &operator<<= (enigma::variant y),&operator<<= (var& y);
-    double &operator>>= (int y),&operator>>= (double y); std::string &operator>>= (std::string y),&operator>>= (char* y); enigma::variant &operator>>= (enigma::variant y),&operator>>= (var& y);
-    
-    double &operator&= (int y), &operator&= (double y);  std::string &operator&= (std::string y), &operator&= (char* y);  enigma::variant &operator&= (enigma::variant y), &operator&= (var& y);
-    double &operator|= (int y), &operator|= (double y);  std::string &operator|= (std::string y), &operator|= (char* y);  enigma::variant &operator|= (enigma::variant y), &operator|= (var& y);
-    double &operator^= (int y), &operator^= (double y);  std::string &operator^= (std::string y), &operator^= (char* y);  enigma::variant &operator^= (enigma::variant y), &operator^= (var& y);
+    double&operator= (int y),  &operator= (double y);   std::string &operator= (std::string y),  &operator= (char* y); 
+    enigma::variant& 
+    operator= (enigma::variant y), 
+    &operator= (var& y);
+    double&operator+= (int y), &operator+= (double y);  std::string &operator+= (std::string y), &operator+= (char* y);  enigma::variant &operator+= (enigma::variant y), &operator+= (var& y);
+    double&operator-= (int y), &operator-= (double y);  std::string &operator-= (std::string y), &operator-= (char* y);  enigma::variant &operator-= (enigma::variant y), &operator-= (var& y);
+    double&operator*= (int y), &operator*= (double y);  std::string &operator*= (std::string y), &operator*= (char* y);  enigma::variant &operator*= (enigma::variant y), &operator*= (var& y);
+    double&operator/= (int y), &operator/= (double y);  std::string &operator/= (std::string y), &operator/= (char* y);  enigma::variant &operator/= (enigma::variant y), &operator/= (var& y);
+    double&operator<<= (int y),&operator<<= (double y); std::string &operator<<= (std::string y),&operator<<= (char* y); enigma::variant &operator<<= (enigma::variant y),&operator<<= (var& y);
+    double&operator>>= (int y),&operator>>= (double y); std::string &operator>>= (std::string y),&operator>>= (char* y); enigma::variant &operator>>= (enigma::variant y),&operator>>= (var& y);
+    double&operator&= (int y), &operator&= (double y);  std::string &operator&= (std::string y), &operator&= (char* y);  enigma::variant &operator&= (enigma::variant y), &operator&= (var& y);
+    double&operator|= (int y), &operator|= (double y);  std::string &operator|= (std::string y), &operator|= (char* y);  enigma::variant &operator|= (enigma::variant y), &operator|= (var& y);
+    double&operator^= (int y), &operator^= (double y);  std::string &operator^= (std::string y), &operator^= (char* y);  enigma::variant &operator^= (enigma::variant y), &operator^= (var& y);
   };
 }

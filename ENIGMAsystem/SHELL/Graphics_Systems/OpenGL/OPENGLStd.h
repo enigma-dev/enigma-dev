@@ -30,88 +30,32 @@
 #else
 #  include <../additional/glee/GLee.h>
 #endif*/
+
 #include <GL/gl.h>
 
 namespace enigma
 {
-    unsigned int current_texture_bound_that_noone_should_ever_change_ever;
-    double currentcolor[4]={0,0,0,1};
-    
-    bool glew_isgo;
-    bool pbo_isgo;
-    
-    void untexture()
-    {
-         if (enigma::current_texture_bound_that_noone_should_ever_change_ever != 0)
-         glBindTexture(GL_TEXTURE_2D,0);
-         enigma::current_texture_bound_that_noone_should_ever_change_ever = 0;
-    }
+  extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;
+  extern float currentcolor[4];
+  extern bool glew_isgo;
+  extern bool pbo_isgo;
 }
-
 
 #if COLORSLIB
     #include "GScolors.h"
-    #endif
+#endif
 #if PRIMTVLIB
     #include "GSprmtvs.h"
-    #endif
+#endif
 #if STDRAWLIB
     #include "GSstdraw.h"
-    #endif
+#endif
 #if BLENDMODE
     #include "GSblend.h"
-    #endif
+#endif
 #if GMSURFACE
     #include "GSsurface.h"
-    #endif
-    #include "GSmiscextra.h"
+#endif
+#include "GSmiscextra.h"
 
-void graphicssystem_initialize()
-{
-    #if GMSURFACE
-    glBindFramebufferEXT   =    (PFNGLBINDFRAMEBUFFEREXTPROC) wglGetProcAddress("glBindFramebufferEXT");
-    glGenFramebuffersEXT   =    (PFNGLGENFRAMEBUFFERSEXTPROC) wglGetProcAddress("glGenFramebuffersEXT");
-    glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) wglGetProcAddress("glFramebufferTexture2DEXT");
-    if ((glBindFramebufferEXT==NULL) || (glGenFramebuffersEXT==NULL) || (glFramebufferTexture2DEXT==NULL))
-    {
-      MessageBox(0,"Additional drawing surfaces cannot be created. Extension unsupported by graphics card.","Error",MB_OK);
-    }
-    #endif
-    /*
-    enigma::pbo_isgo=0;
-    if (GL_ARB_pixel_buffer_object)
-       enigma::pbo_isgo=1;
-    */
-    glMatrixMode(GL_PROJECTION);
-    
-    glClearColor(1,1,1,1);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glLoadIdentity();
-    glViewport(0,0,(int)room_width,(int)room_height);
-    glOrtho(0,(int)room_width-1,(int)room_height-1,0,-1,1);
-    
-    
-    
-        glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        glDisable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearDepth(1.0);
-        glDepthFunc(GL_LEQUAL);
-        
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        
-        glEnable(GL_BLEND);
-        glEnable(GL_ALPHA_TEST);
-        glEnable(GL_TEXTURE_2D);
-        glAlphaFunc(GL_ALWAYS,0);
-    
-    //Set the draw color to black
-    glColor4f(0,0,0,1);
-}
-
-void graphicssystem_untexture()
-{
-  glBindTexture(GL_TEXTURE_2D,0);
-}
+void graphicssystem_initialize();

@@ -6,10 +6,65 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
-			<Target title="default">
+			<Target title="win-debug">
 				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add directory="\home\git\enigma\ENIGMAsystem\additional\" />
+				</Linker>
+			</Target>
+			<Target title="win-build">
+				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="lin-debug">
+				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="lin-build">
+				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="mac-debug">
+				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="mac-build">
+				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
@@ -17,10 +72,9 @@
 			<Add option="-DCODEBLOX" />
 		</Compiler>
 		<Linker>
-			<Add option="C:/Dev-Cpp/include/GL/glew.o" />
-			<Add option='&quot;C:\Dev-Cpp\include\zlib\libzlib.a&quot;' />
 			<Add library="opengl32" />
-			<Add library="C:\Program Files\CodeBlocks\MinGW\include\GL\GLee.lib" />
+			<Add library="..\additional\GL\GLee.lib" />
+			<Add library="..\additional\zlib\libzlib.a" />
 		</Linker>
 		<Unit filename="API_Switchboard.h" />
 		<Unit filename="Colligma\Checks\data_check.h" />
@@ -44,6 +98,7 @@
 		<Unit filename="Graphics_Systems\OpenGL\GSmiscextra.h" />
 		<Unit filename="Graphics_Systems\OpenGL\GSprmtvs.cpp" />
 		<Unit filename="Graphics_Systems\OpenGL\GSprmtvs.h" />
+		<Unit filename="Graphics_Systems\OpenGL\GSscreen.cpp" />
 		<Unit filename="Graphics_Systems\OpenGL\GSscreen.h" />
 		<Unit filename="Graphics_Systems\OpenGL\GSsprite.cpp" />
 		<Unit filename="Graphics_Systems\OpenGL\GSsprite.h" />
@@ -53,17 +108,85 @@
 		<Unit filename="Graphics_Systems\OpenGL\GSstdraw.h" />
 		<Unit filename="Graphics_Systems\OpenGL\GSsurface.cpp" />
 		<Unit filename="Graphics_Systems\OpenGL\GSsurface.h" />
+		<Unit filename="Graphics_Systems\OpenGL\OPENGLStd.cpp" />
 		<Unit filename="Graphics_Systems\OpenGL\OPENGLStd.h" />
+		<Unit filename="Graphics_Systems\OpenGL\graphics_object.cpp" />
+		<Unit filename="Graphics_Systems\OpenGL\graphics_object.h" />
 		<Unit filename="Modes\buildmode.h" />
-		<Unit filename="Platforms\WINDOWS\WINDOWSStd.h" />
-		<Unit filename="Platforms\WINDOWS\WINDOWScallback.cpp" />
-		<Unit filename="Platforms\WINDOWS\WINDOWScallback.h" />
-		<Unit filename="Platforms\WINDOWS\WINDOWSfonts.cpp" />
-		<Unit filename="Platforms\WINDOWS\WINDOWSfonts.h" />
-		<Unit filename="Platforms\WINDOWS\WINDOWSmain.h" />
-		<Unit filename="Platforms\WINDOWS\WINDOWSstd.cpp" />
-		<Unit filename="Platforms\WINDOWS\WINDOWSwindow.cpp" />
-		<Unit filename="Platforms\WINDOWS\WINDOWSwindow.h" />
+		<Unit filename="Platforms\windows\WINDOWSStd.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWScallback.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWScallback.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWSfonts.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWSfonts.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWSmain.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWSmain.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWSshow_error.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWSstd.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWSwindow.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\windows\WINDOWSwindow.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms\xlib\XLIBdialog.h">
+			<Option target="lin-debug" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Platforms\xlib\XLIBmain.h">
+			<Option target="lin-debug" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Platforms\xlib\XLIBwindow.cpp">
+			<Option target="lin-debug" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Platforms\xlib\XLIBwindow.h">
+			<Option target="lin-debug" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Platforms\xlib\xwindow_gml.h">
+			<Option target="lin-debug" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
 		<Unit filename="Preprocessor_Environment_Editable\GAME_SETTINGS.h" />
 		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_inherited_locals.h" />
 		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_modesenabled.h" />
@@ -75,6 +198,7 @@
 		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_roomarrays.h" />
 		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_roomcreates.h" />
 		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_scriptdeclarations.h" />
+		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_wildclass.cpp" />
 		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_wildclass.h" />
 		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_withdeclarations.h" />
 		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_withfunctionality.h" />
@@ -84,6 +208,7 @@
 		<Unit filename="Universal_System\CallbackArrays.h" />
 		<Unit filename="Universal_System\EGMstd.cpp" />
 		<Unit filename="Universal_System\EGMstd.h" />
+		<Unit filename="Universal_System\ENIGMA_GLOBALS.cpp" />
 		<Unit filename="Universal_System\ENIGMA_GLOBALS.h" />
 		<Unit filename="Universal_System\GAME_GLOBALS.h" />
 		<Unit filename="Universal_System\GMexternals.h" />
@@ -95,28 +220,36 @@
 		<Unit filename="Universal_System\WITHconstruct.h" />
 		<Unit filename="Universal_System\collisions.cpp" />
 		<Unit filename="Universal_System\collisions.h" />
+		<Unit filename="Universal_System\collisions_object.h" />
 		<Unit filename="Universal_System\compression.cpp" />
 		<Unit filename="Universal_System\compression.h" />
 		<Unit filename="Universal_System\estring.cpp" />
 		<Unit filename="Universal_System\estring.h" />
+		<Unit filename="Universal_System\event_system.cpp" />
+		<Unit filename="Universal_System\events.cpp" />
 		<Unit filename="Universal_System\events.h" />
 		<Unit filename="Universal_System\globalupdate.h" />
 		<Unit filename="Universal_System\instance.cpp" />
 		<Unit filename="Universal_System\instance.h" />
 		<Unit filename="Universal_System\instance_create.h" />
+		<Unit filename="Universal_System\key_game_globals.h" />
 		<Unit filename="Universal_System\mathnc.cpp" />
 		<Unit filename="Universal_System\mathnc.h" />
 		<Unit filename="Universal_System\multifunction_variant.h" />
 		<Unit filename="Universal_System\multifunction_variant_source.h" />
 		<Unit filename="Universal_System\object.cpp" />
 		<Unit filename="Universal_System\object.h" />
+		<Unit filename="Universal_System\objecttable.cpp" />
 		<Unit filename="Universal_System\objecttable.h" />
+		<Unit filename="Universal_System\planar_object.cpp" />
+		<Unit filename="Universal_System\planar_object.h" />
 		<Unit filename="Universal_System\reflexive_types.cpp" />
 		<Unit filename="Universal_System\reflexive_types.h" />
 		<Unit filename="Universal_System\roomsystem.cpp" />
 		<Unit filename="Universal_System\roomsystem.h" />
 		<Unit filename="Universal_System\simplecollisions.cpp" />
 		<Unit filename="Universal_System\simplecollisions.h" />
+		<Unit filename="Universal_System\spriteinit.cpp" />
 		<Unit filename="Universal_System\spriteinit.h" />
 		<Unit filename="Universal_System\spritestruct.cpp" />
 		<Unit filename="Universal_System\spritestruct.h" />
@@ -125,8 +258,8 @@
 		<Unit filename="Universal_System\var_cr3.h" />
 		<Unit filename="initialize.h" />
 		<Extensions>
-			<code_completion />
 			<debugger />
+			<code_completion />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

@@ -24,45 +24,19 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
-
 #include <GL/gl.h>
 
-int draw_set_blend_mode(int mode)
-{
-    switch (mode)
-    {
-        case 0: //bm_normal
-             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-             return 0;
-        case 1: //bm_add
-             glBlendFunc(GL_SRC_ALPHA,GL_DST_ALPHA);
-             return 0;
-        case 2: //bm_max
-             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_COLOR);
-             return 0;
-        case 3: //bm_subtract
-             glBlendFunc(GL_ZERO,GL_ONE_MINUS_SRC_COLOR);
-             return 0;
-        default:
-             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-             return 0;
+int draw_set_blend_mode(int mode){
+	switch (mode){//0norm 1add 2bm_max 3bm_subtract
+	case 1:glBlendFunc(GL_SRC_ALPHA,GL_DST_ALPHA);return 0;
+	case 2:glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_COLOR);return 0;
+	case 3:glBlendFunc(GL_ZERO,GL_ONE_MINUS_SRC_COLOR);return 0;
+	default:glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);return 0;
     }
 }
 
-namespace enigma
-{
-    int blendequivs[]={ GL_ZERO,GL_ONE,GL_SRC_COLOR,GL_ONE_MINUS_SRC_COLOR,GL_SRC_ALPHA,
-                        GL_ONE_MINUS_SRC_ALPHA,GL_DST_ALPHA,GL_ONE_MINUS_DST_ALPHA,
-                        GL_DST_COLOR,GL_ONE_MINUS_DST_COLOR,GL_SRC_ALPHA_SATURATE };
-}
-
-int draw_set_blend_mode_ext(double src,double dest)
-{
-    int source,dst;
-    source=enigma::blendequivs[((int)src-1) % 10];
-    dst=enigma::blendequivs[((int)dest-1) % 10];
-
-    glBlendFunc(source,dst);
-
-    return 0;
+int draw_set_blend_mode_ext(double src,double dest){
+	const static GLenum blendequivs[11]={GL_ZERO,GL_ONE,GL_SRC_COLOR,GL_ONE_MINUS_SRC_COLOR,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA,GL_DST_ALPHA,GL_ONE_MINUS_DST_ALPHA,GL_DST_COLOR,GL_ONE_MINUS_DST_COLOR,GL_SRC_ALPHA_SATURATE};
+	glBlendFunc(blendequivs[((int)src-1)%10],blendequivs[((int)dest-1)%10]);
+	return 0;
 }

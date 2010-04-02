@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
@@ -71,21 +71,28 @@ const int c_yellow =0x00FFFF;
 int draw_clear(double color);
 int draw_clear_alpha(double color, double alpha);
 
+int merge_color(int col1, int col2, double amount);
+
 int draw_set_color(double col);
 int draw_set_color_rgb(double red, double green, double blue);
-int draw_set_alpha(double alpha);
+int draw_set_alpha(float alpha);
 int draw_set_color_rgba(double red, double green, double blue, double alpha);
-int draw_get_color();
+double draw_get_color();
+float draw_get_red(void);
+float draw_get_green(void);
+float draw_get_blue(void);
+float draw_get_alpha(void);
 
-int make_color(double red, double green, double blue);
-int make_color_rgb(double red, double green, double blue);
 
-int color_get_red(double color);
-int color_get_green(double color);
-int color_get_blue(double color);
+double make_color_rgb(double red, double green, double blue);
+double(*const make_color)(double,double,double)=make_color_rgb;
+
+double color_get_red(double color);
+double color_get_green(double color);
+double color_get_blue(double color);
 
 double color_get_hue(double color);
 double color_get_value(double color);
 double color_get_saturation(double color);
 
-int make_color_hsv(double hue,double saturation,double value);
+double make_color_hsv(double hue,double saturation,double value);

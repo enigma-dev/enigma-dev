@@ -34,9 +34,9 @@
 #define FREEOLD__ true //Free strings when switching to real, zero real when switching to string
 
 #if DEBUGMODE && SHOWERRORS
-#define terr(t1,t2) if (t1 != t2) show_error("Performing operations on variables of different trypes.",0);
-#define serr(t1,t2) if (t1 == 1 || t2 == 1) show_error("Performing invalid operations on string types.",0); else if (t1 != t2) show_error("Performing operations on variables of different trypes.",0);
-#define uerr(t)     if (t==1) show_error("Performing invalid unary operation on string types.",0);
+#define terr(t1,t2) if (t1 != t2) show_error("Performing operations on different types",0);
+#define serr(t1,t2) if (t1 == 1 || t2 == 1) show_error("Performing invalid operations on string",0); else if (t1 != t2) show_error("Performing operations on different types",0);
+#define uerr(t)     if (t==1) show_error("Performing invalid unary operation on string",0);
 #else
 #define terr(t1,t2)
 #define serr(t1,t2)
@@ -57,12 +57,7 @@
 #endif
 
 
-/*
-Source
-*/
-
-namespace enigma
-{
+namespace enigma{
     variant::variant(void)          { realval=0; stringval=""; type=0; }
     variant::~variant()     {                                  }
 
@@ -80,8 +75,7 @@ namespace enigma
     variant::operator std::string&()      { return stringval; }
 }
 
-void var::resize(int xn,int yn)
-{
+void var::resize(int xn,int yn){
     if (xn<xsize && yn<ysize) return;
 
     xn++; if (xn<1)xn=1;
@@ -91,12 +85,7 @@ void var::resize(int xn,int yn)
     if (xn>xsize) xsize=xn; else xn=xsize;
     if (yn>ysize) ysize=yn; else yn=ysize;
 
-    enigma::variant** oldvalues;
-
-    if (initd)
-      oldvalues=values;
-    else
-      oldvalues=NULL;
+    enigma::variant** oldvalues=initd?values:0;
 
     values=new enigma::variant*[xn*yn];
 
@@ -145,6 +134,7 @@ var::var(int v)          { x=0; y=0; xsize=0; ysize=0; initd=0; resize(0,0); val
 var::var(double v)       { x=0; y=0; xsize=0; ysize=0; initd=0; resize(0,0); values[0]->realval=v; values[0]->type=0; }
 var::var(const char* v)  { x=0; y=0; xsize=0; ysize=0; initd=0; resize(0,0); values[0]->stringval=v; values[0]->type=1; }
 var::var(std::string v)  { x=0; y=0; xsize=0; ysize=0; initd=0; resize(0,0); values[0]->stringval=v; values[0]->type=1; }
+var::var(const var &v)   { x=0; y=0; xsize=0; ysize=0; initd=0; resize(0,0); values[0]->stringval=v.values[0]->stringval; values[0]->realval=v.values[0]->realval; values[0]->type=v.values[0]->type; }
 
 var::~var (void)
 {
@@ -612,8 +602,8 @@ bool var::operator!= (var& y)              { terr(values[0]->type,y.values[0]->t
 bool             enigma::variant::operator!() { uerr(type); return !realval; }
 double           enigma::variant::operator~() { uerr(type); return ~int(realval+.5); }
 enigma::variant* enigma::variant::operator*() { return this; }
-double           enigma::variant::operator+() { uerr(type); return (realval); }
-double           enigma::variant::operator-() { uerr(type); return (-realval); }
+double           enigma::variant::operator+() { uerr(type); return realval; }
+double           enigma::variant::operator-() { uerr(type); return -realval; }
 
 
 /************************
@@ -623,7 +613,5 @@ double           enigma::variant::operator-() { uerr(type); return (-realval); }
 bool              var::operator!() { uerr(values[0]->type); return !values[0]->realval; }
 double            var::operator~() { uerr(values[0]->type); return ~int(values[0]->realval+.5); }
 enigma::variant** var::operator*() { return values; }
-double            var::operator+() { uerr(values[0]->type); return (values[0]->realval); }
-double            var::operator-() { uerr(values[0]->type); return (-(values[0]->realval)); }
-
-
+double            var::operator+() { uerr(values[0]->type); return values[0]->realval; }
+double            var::operator-() { uerr(values[0]->type); return -(values[0]->realval); }

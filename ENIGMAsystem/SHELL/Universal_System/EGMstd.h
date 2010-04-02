@@ -21,32 +21,25 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
 /**Bare minumum functions******************************************************\
 
-int __negmod(double firstval, double secondval)
-void mplay_maek_opengl_work()
 void dispstr(char* str, double value)
 int show_error(double errortext, double fatal)
-double point_direction(double x1,double y1,double x2,double y2)
-double point_distance(double x1, double y1, double x2, double y2)
 
 \******************************************************************************/
 
-const double pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679;
+const double pi=M_PI;
 
-namespace enigma
-{
-   std::string evname(int num);
-   int getID();
+namespace enigma{
+	std::string evname(int num);
+	int getID();
 }
 
 int show_error(std::string errortext, double fatal);
-double point_direction(double x1,double y1,double x2,double y2);
-double point_distance(double x1, double y1, double x2, double y2);
 std::string string(double val);
 std::string string(var& val);
 std::string string(enigma::variant& val);
@@ -58,6 +51,3 @@ std::string string_hex(enigma::variant& val);
 std::string string_hex(std::string val);
 std::string string_hex(char* val);
 std::string string_pointer(void* val);
-
-
-

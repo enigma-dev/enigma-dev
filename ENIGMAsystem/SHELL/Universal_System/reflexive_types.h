@@ -21,11 +21,12 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
 
-#define PI 3.14159265358979323846264338
+#ifndef _reflexive_types_h
+#define _reflexive_types_h
 
 //Make direction work
 #define TYPEPURPOSE directionv
@@ -55,12 +56,4 @@
 #undef TYPEFUNCTION
 #undef TYPEPURPOSE
 
-//Make room work
-int room_goto(double roomind);
-#define TYPEPURPOSE roomv
-#define TYPEFUNCTION() room_goto((int)realval);
-#include "multifunction_variant.h"
-#undef TYPEFUNCTION
-#undef TYPEPURPOSE
-
-#undef PI
+#endif //_reflexive_types_h

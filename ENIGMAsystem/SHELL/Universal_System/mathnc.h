@@ -62,19 +62,23 @@ double ceil(double x)
 double floor(double x)
 double sqrt(double x)
 double exp(double x)
-
-//Note:
-///Both point_direction and point_distance are declared in EGMstd.h
-
+point_direction
+point_distance
 \******************************************************************************/
 
-namespace enigma { int Random_Seed; }
+namespace enigma{
+	unsigned int Random_Seed;
+	unsigned long mt[625];
+}
 
 extern double random(double n);
 int random_set_seed(int seed);
 int random_get_seed();
 int randomize();
 int random_integer(double x);
+int random32();
+double mtrandom();
+int mtrandom_seed(int x);
 
 double round(double x);
 double sqr(double x);
@@ -99,6 +103,9 @@ double radtodeg(double x);
 double lengthdir_x(double len,double dir);
 double lengthdir_y(double len,double dir);
 double direction_difference(double dir1,double dir2);
+double point_direction(double x1,double y1,double x2,double y2);
+double point_distance(double x1, double y1, double x2, double y2);
+
 
 /*double sin(double x);
 double cos(double x);
