@@ -24,13 +24,14 @@ import static org.lateralgm.main.Util.deRef;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.DeflaterOutputStream;
 
 import javax.swing.JOptionPane;
 
@@ -614,18 +615,30 @@ public final class EnigmaWriter
 			{
 			pg.grabPixels();
 
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(pixels.length * 4);
+			DeflaterOutputStream dos = new DeflaterOutputStream(baos);
 			//is this the most efficient way? ARGB => RGBA
 			for (int p = 0; p < pixels.length; p++)
-				pixels[p] = ARGBtoRGBA(pixels[p]);
+				{
+				dos.write(pixels[p] >>> 16 & 0xFF);
+				dos.write(pixels[p] >>> 8 & 0xFF);
+				dos.write(pixels[p] & 0xFF);
+				dos.write(pixels[p] >>> 24);
+				}
+			//pixels[p] = ARGBtoRGBA(pixels[p]);
+
+			dos.finish();
+			o.dataSize = baos.size();
+			o.data = ByteBuffer.allocateDirect(baos.size()).put(baos.toByteArray());
 			}
-		catch (InterruptedException e)
+		catch (Exception e)
 			{
 			e.printStackTrace();
 			}
 
-		//we assume an int is 4 bytes
-		o.pixels = ByteBuffer.allocateDirect(o.width * o.height * 4).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(
-				pixels);
+		////we assume an int is 4 bytes
+		//o.pixels = ByteBuffer.allocateDirect(o.width * o.height * 4).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(
+		//		pixels);
 		}
 
 	public static int ARGBtoRGBA(int argb)

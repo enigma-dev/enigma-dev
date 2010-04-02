@@ -16,7 +16,8 @@ public class Image extends Structure
 	{
 	public int width;
 	public int height;
-	public Buffer pixels;
+	public Buffer data; //zlib compressed RGBA
+	public int dataSize;
 
 	public static class ByReference extends Image implements Structure.ByReference
 		{

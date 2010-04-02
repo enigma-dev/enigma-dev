@@ -32,8 +32,8 @@ struct Room
 
 	int speed;
 	boolean persistent;
-	int backgroundColor;
-	boolean drawBackgroundColor; //GM color
+	int backgroundColor; //RGBA
+	boolean drawBackgroundColor;
 	String creationCode;
 
 	// vvv useless stuff vvv //
