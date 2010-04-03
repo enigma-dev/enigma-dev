@@ -322,6 +322,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
     goto label_general;
     
   label_begin:
+    {
       bool isbr=levelt[level]==LEVELTYPE_SWITCH;
 
       if (lastnamed[level]==LN_OPERATOR)
@@ -332,6 +333,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       lastnamed[level]=LN_NOTHING; //This is the beginning of a glorious new level
       statement_pad[level]=-1;
       assop[level]=0;
+    }
     return ret;
   
   label_end:
@@ -354,6 +356,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
     return ret;
   
   label_case:
+    {
       int a=lower_to_level(LEVELTYPE_SWITCH_BLOCK,"`case' statement");
       if (a != -1) return a;
       if (levelt[level]!=LEVELTYPE_SWITCH_BLOCK) {
@@ -367,6 +370,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       
       assop[level] = 1;
       lastnamed[level] = LN_OPERATOR;
+    }
     return ret;
     
   label_general:

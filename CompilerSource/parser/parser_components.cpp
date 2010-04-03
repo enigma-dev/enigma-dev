@@ -153,9 +153,14 @@ int parser_ready_input(string &code,string &synt)
         bool recurs=0;
         for (unsigned int iii=0;iii<mymacroc;iii++)
            if (mymacros[iii] == name)
-             if (pos <= mymacroend[iii]) { recurs=1; break; }
+           {
+             if (pos <= mymacroend[iii]) {
+               recurs=1; break;
+             }
              else for (int k = 0, kn = 0, ic = mymacroc; k<ic; k++)
-               if (pos > mymacroend[iii]) mymacros[kn++] = mymacros[k], mymacroc--;
+               if (pos > mymacroend[iii])
+                 mymacros[kn++] = mymacros[k], mymacroc--;
+           }
 
         if (!recurs)
         {
@@ -194,7 +199,7 @@ int parser_ready_input(string &code,string &synt)
         continue; //"Then" is a truly useless keyword. I see no need to preserve it.
 
       if (last_token == 'n' and c == 'n')
-        code[bpos]   = synt[bpos++] = ';';
+        code[bpos] = synt[bpos] = ';', bpos++;
 
 
       for (pt i = 0; i < name.length(); i++) {
@@ -222,7 +227,7 @@ int parser_ready_input(string &code,string &synt)
           synt[bpos++] = '0';
         } while (is_digit(code[++pos]));
       else
-       code[bpos] = synt[bpos++] = last_token = '0';
+       code[bpos] = synt[bpos] = last_token = '0', bpos++;
 
       continue;
     }
@@ -242,7 +247,7 @@ int parser_ready_input(string &code,string &synt)
         str = string_escape(code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
-      code[bpos] = synt[bpos++] = last_token = '"';
+      code[bpos] = synt[bpos] = last_token = '"', bpos++;
       continue;
     }
     if (code[pos] == '\'')
@@ -261,7 +266,7 @@ int parser_ready_input(string &code,string &synt)
         str = string_escape(code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
-      code[bpos] = synt[bpos++] = last_token = '"';
+      code[bpos] = synt[bpos] = last_token = '"', bpos++;
       continue;
     }
     if (code[pos] == '/')
@@ -276,7 +281,7 @@ int parser_ready_input(string &code,string &synt)
         while ((code[pos++] != '*' or code[pos] != '/') and pos < len);
         pos++; continue;
       }
-      code[bpos] = synt[bpos++] = last_token = '/';
+      code[bpos] = synt[bpos] = last_token = '/', bpos++;
       continue;
     }
 
@@ -287,7 +292,7 @@ int parser_ready_input(string &code,string &synt)
 
     //Wasn't anything usable
     if (!is_useless(code[pos]))
-      code[bpos] = synt[bpos++] = last_token = code[pos];
+      code[bpos] = synt[bpos] = last_token = code[pos], bpos++;
 
     pos++;
   }
@@ -431,7 +436,7 @@ void parser_add_semicolons(string &code,string &synt)
       if (synt[pos] != ' ')
         pos--;
 
-      codebuf[bufpos] = syntbuf[bufpos++] = '(';
+      codebuf[bufpos] = syntbuf[bufpos] = '(', bufpos++;
       sy_semi=sy_semi->push(')','s');
     }
     else if (synt[pos] == 'f')
@@ -445,7 +450,7 @@ void parser_add_semicolons(string &code,string &synt)
       if (synt[pos] != ' ')
         pos--; //If there's a (, you'll be at it next iteration
 
-      codebuf[bufpos] = syntbuf[bufpos++] = '(';
+      codebuf[bufpos] = syntbuf[bufpos] = '(', bufpos++;
 
       sy_semi=sy_semi->push(')','s');
       sy_semi=sy_semi->push(';','s');
@@ -455,7 +460,7 @@ void parser_add_semicolons(string &code,string &synt)
 
   //Add a semicolon at the end if there isn't one
   if (bufpos and syntbuf[bufpos-1] != ';')
-    codebuf[bufpos] = syntbuf[bufpos++] = ';';
+    codebuf[bufpos] = syntbuf[bufpos] = ';', bufpos++;
 
   code = string(codebuf,bufpos);
   synt = string(syntbuf,bufpos);
