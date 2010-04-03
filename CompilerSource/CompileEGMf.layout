@@ -4,247 +4,247 @@
 	<File name="OS_Switchboard.h" open="0" top="0" tabpos="0">
 		<Cursor position="2" topLine="0" />
 	</File>
-	<File name="backend\EnigmaStruct.h" open="1" top="0" tabpos="13">
+	<File name="backend/EnigmaStruct.h" open="1" top="0" tabpos="13">
 		<Cursor position="1087" topLine="14" />
 	</File>
-	<File name="backend\JavaStruct.h" open="0" top="0" tabpos="0">
+	<File name="backend/JavaStruct.h" open="0" top="0" tabpos="0">
 		<Cursor position="341" topLine="0" />
 	</File>
-	<File name="backend\other\Constant.h" open="0" top="0" tabpos="0">
+	<File name="backend/other/Constant.h" open="0" top="0" tabpos="0">
 		<Cursor position="251" topLine="0" />
 	</File>
-	<File name="backend\other\Include.h" open="0" top="0" tabpos="0">
+	<File name="backend/other/Include.h" open="0" top="0" tabpos="0">
 		<Cursor position="473" topLine="0" />
 	</File>
-	<File name="backend\other\Trigger.h" open="0" top="0" tabpos="0">
+	<File name="backend/other/Trigger.h" open="0" top="0" tabpos="0">
 		<Cursor position="270" topLine="0" />
 	</File>
-	<File name="backend\resources\Background.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/Background.h" open="0" top="0" tabpos="0">
 		<Cursor position="297" topLine="0" />
 	</File>
-	<File name="backend\resources\EnigmaSettings.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/EnigmaSettings.h" open="0" top="0" tabpos="0">
 		<Cursor position="922" topLine="0" />
 	</File>
-	<File name="backend\resources\Font.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/Font.h" open="0" top="0" tabpos="0">
 		<Cursor position="277" topLine="0" />
 	</File>
-	<File name="backend\resources\GameInformation.h" open="1" top="0" tabpos="10">
+	<File name="backend/resources/GameInformation.h" open="1" top="0" tabpos="10">
 		<Cursor position="380" topLine="0" />
 	</File>
-	<File name="backend\resources\GameSettings.h" open="1" top="0" tabpos="11">
+	<File name="backend/resources/GameSettings.h" open="1" top="0" tabpos="11">
 		<Cursor position="335" topLine="0" />
 	</File>
-	<File name="backend\resources\GmObject.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/GmObject.h" open="0" top="0" tabpos="0">
 		<Cursor position="541" topLine="0" />
 	</File>
-	<File name="backend\resources\Path.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/Path.h" open="0" top="0" tabpos="0">
 		<Cursor position="516" topLine="0" />
 	</File>
-	<File name="backend\resources\Room.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/Room.h" open="0" top="0" tabpos="0">
 		<Cursor position="321" topLine="2" />
 	</File>
-	<File name="backend\resources\Script.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/Script.h" open="0" top="0" tabpos="0">
 		<Cursor position="250" topLine="0" />
 	</File>
-	<File name="backend\resources\Sound.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/Sound.h" open="0" top="0" tabpos="0">
 		<Cursor position="225" topLine="0" />
 	</File>
-	<File name="backend\resources\Sprite.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/Sprite.h" open="0" top="0" tabpos="0">
 		<Cursor position="614" topLine="0" />
 	</File>
-	<File name="backend\resources\Timeline.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/Timeline.h" open="0" top="0" tabpos="0">
 		<Cursor position="234" topLine="0" />
 	</File>
-	<File name="backend\resources\Whitespace.h" open="0" top="0" tabpos="0">
+	<File name="backend/resources/Whitespace.h" open="0" top="0" tabpos="0">
 		<Cursor position="251" topLine="0" />
 	</File>
-	<File name="backend\sub\Action.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/Action.h" open="0" top="0" tabpos="0">
 		<Cursor position="341" topLine="0" />
 	</File>
-	<File name="backend\sub\BackgroundDef.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/BackgroundDef.h" open="0" top="0" tabpos="0">
 		<Cursor position="235" topLine="0" />
 	</File>
-	<File name="backend\sub\Event.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/Event.h" open="0" top="0" tabpos="0">
 		<Cursor position="278" topLine="0" />
 	</File>
-	<File name="backend\sub\Image.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/Image.h" open="0" top="0" tabpos="0">
 		<Cursor position="316" topLine="0" />
 	</File>
-	<File name="backend\sub\Instance.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/Instance.h" open="0" top="0" tabpos="0">
 		<Cursor position="207" topLine="0" />
 	</File>
-	<File name="backend\sub\MainEvent.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/MainEvent.h" open="0" top="0" tabpos="0">
 		<Cursor position="252" topLine="0" />
 	</File>
-	<File name="backend\sub\Moment.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/Moment.h" open="0" top="0" tabpos="0">
 		<Cursor position="259" topLine="0" />
 	</File>
-	<File name="backend\sub\PathPoint.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/PathPoint.h" open="0" top="0" tabpos="0">
 		<Cursor position="253" topLine="0" />
 	</File>
-	<File name="backend\sub\Tile.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/Tile.h" open="0" top="0" tabpos="0">
 		<Cursor position="207" topLine="0" />
 	</File>
-	<File name="backend\sub\View.h" open="0" top="0" tabpos="0">
+	<File name="backend/sub/View.h" open="0" top="0" tabpos="0">
 		<Cursor position="447" topLine="0" />
 	</File>
-	<File name="cfile_parse\auxilary.h" open="1" top="0" tabpos="15">
+	<File name="cfile_parse/auxilary.h" open="1" top="0" tabpos="15">
 		<Cursor position="1040" topLine="0" />
 	</File>
-	<File name="cfile_parse\auxilary_gml.h" open="1" top="0" tabpos="14">
-		<Cursor position="510" topLine="9" />
+	<File name="cfile_parse/auxilary_gml.h" open="1" top="0" tabpos="14">
+		<Cursor position="510" topLine="6" />
 	</File>
-	<File name="cfile_parse\cfile_parse.cpp" open="0" top="0" tabpos="1">
+	<File name="cfile_parse/cfile_parse.cpp" open="0" top="0" tabpos="1">
 		<Cursor position="49853" topLine="1302" />
 	</File>
-	<File name="cfile_parse\cfile_parse_calls.h" open="0" top="0" tabpos="2">
+	<File name="cfile_parse/cfile_parse_calls.h" open="0" top="0" tabpos="2">
 		<Cursor position="3735" topLine="90" />
 	</File>
-	<File name="cfile_parse\cfile_parse_constants.h" open="0" top="0" tabpos="7">
+	<File name="cfile_parse/cfile_parse_constants.h" open="0" top="0" tabpos="7">
 		<Cursor position="3854" topLine="70" />
 	</File>
-	<File name="cfile_parse\cfile_parse_macros.cpp" open="0" top="0" tabpos="4">
-		<Cursor position="14875" topLine="412" />
+	<File name="cfile_parse/cfile_parse_macros.cpp" open="1" top="0" tabpos="16">
+		<Cursor position="2258" topLine="9" />
 	</File>
-	<File name="cfile_parse\cfile_pushing.cpp" open="0" top="0" tabpos="10">
+	<File name="cfile_parse/cfile_pushing.cpp" open="0" top="0" tabpos="10">
 		<Cursor position="2964" topLine="64" />
 	</File>
-	<File name="cfile_parse\cfile_pushing.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/cfile_pushing.h" open="0" top="0" tabpos="0">
 		<Cursor position="2246" topLine="20" />
 	</File>
-	<File name="cfile_parse\cparse_components.cpp" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/cparse_components.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="2475" topLine="28" />
 	</File>
-	<File name="cfile_parse\cparse_components.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/cparse_components.h" open="0" top="0" tabpos="0">
 		<Cursor position="2247" topLine="0" />
 	</File>
-	<File name="cfile_parse\cparse_shared.cpp" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/cparse_shared.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="2398" topLine="21" />
 	</File>
-	<File name="cfile_parse\cparse_shared.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/cparse_shared.h" open="0" top="0" tabpos="0">
 		<Cursor position="3071" topLine="39" />
 	</File>
-	<File name="cfile_parse\expev_macros.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/expev_macros.h" open="0" top="0" tabpos="0">
 		<Cursor position="27194" topLine="747" />
 	</File>
-	<File name="cfile_parse\expression_evaluator.cpp" open="0" top="0" tabpos="9">
+	<File name="cfile_parse/expression_evaluator.cpp" open="0" top="0" tabpos="9">
 		<Cursor position="2696" topLine="84" />
 	</File>
-	<File name="cfile_parse\expression_evaluator.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/expression_evaluator.h" open="0" top="0" tabpos="0">
 		<Cursor position="2198" topLine="0" />
 	</File>
-	<File name="cfile_parse\expression_evaluator_settings.h" open="0" top="0" tabpos="9">
+	<File name="cfile_parse/expression_evaluator_settings.h" open="0" top="0" tabpos="9">
 		<Cursor position="2036" topLine="9" />
 	</File>
-	<File name="cfile_parse\handle_letters.cpp" open="0" top="0" tabpos="3">
+	<File name="cfile_parse/handle_letters.cpp" open="0" top="0" tabpos="3">
 		<Cursor position="3668" topLine="56" />
 	</File>
-	<File name="cfile_parse\handle_letters.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/handle_letters.h" open="0" top="0" tabpos="0">
 		<Cursor position="2505" topLine="4" />
 	</File>
-	<File name="cfile_parse\keyword_operator.cpp" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/keyword_operator.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="5224" topLine="124" />
 	</File>
-	<File name="cfile_parse\macro_functions.cpp" open="1" top="0" tabpos="8">
+	<File name="cfile_parse/macro_functions.cpp" open="1" top="0" tabpos="8">
 		<Cursor position="3557" topLine="9" />
 	</File>
-	<File name="cfile_parse\macro_functions.h" open="0" top="0" tabpos="13">
+	<File name="cfile_parse/macro_functions.h" open="0" top="0" tabpos="13">
 		<Cursor position="2231" topLine="0" />
 	</File>
-	<File name="cfile_parse\main.cpp" open="0" top="0" tabpos="9">
-		<Cursor position="7870" topLine="242" />
+	<File name="cfile_parse/main.cpp" open="1" top="0" tabpos="17">
+		<Cursor position="2219" topLine="0" />
 	</File>
-	<File name="cfile_parse\parsein.h" open="0" top="0" tabpos="8">
+	<File name="cfile_parse/parsein.h" open="0" top="0" tabpos="8">
 		<Cursor position="1886" topLine="0" />
 	</File>
-	<File name="cfile_parse\skipping.cpp" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/skipping.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="8083" topLine="189" />
 	</File>
-	<File name="cfile_parse\template_handlers.cpp" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/template_handlers.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="3877" topLine="70" />
 	</File>
-	<File name="cfile_parse\value.h" open="0" top="0" tabpos="0">
+	<File name="cfile_parse/value.h" open="0" top="0" tabpos="0">
 		<Cursor position="4733" topLine="205" />
 	</File>
-	<File name="compiler\compile.cpp" open="1" top="1" tabpos="12">
+	<File name="compiler/compile.cpp" open="1" top="0" tabpos="12">
 		<Cursor position="3174" topLine="42" />
 	</File>
-	<File name="compiler\compile.h" open="0" top="0" tabpos="0">
+	<File name="compiler/compile.h" open="0" top="0" tabpos="0">
 		<Cursor position="2280" topLine="0" />
 	</File>
-	<File name="compiler\compile_includes.cpp" open="0" top="0" tabpos="4">
+	<File name="compiler/compile_includes.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="5287" topLine="100" />
 	</File>
-	<File name="compiler\license_string.h" open="0" top="0" tabpos="0">
+	<File name="compiler/license_string.h" open="0" top="0" tabpos="0">
 		<Cursor position="3072" topLine="11" />
 	</File>
-	<File name="compiler\output_locals.cpp" open="0" top="0" tabpos="0">
+	<File name="compiler/output_locals.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="2281" topLine="5" />
 	</File>
-	<File name="compiler\output_locals.h" open="0" top="0" tabpos="0">
+	<File name="compiler/output_locals.h" open="0" top="0" tabpos="0">
 		<Cursor position="2229" topLine="1" />
 	</File>
-	<File name="compiler\pcs\pcs.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="4479" topLine="79" />
+	<File name="compiler/pcs/pcs.cpp" open="1" top="0" tabpos="18">
+		<Cursor position="2461" topLine="21" />
 	</File>
-	<File name="externs\externs.cpp" open="0" top="0" tabpos="6">
+	<File name="externs/externs.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="2202" topLine="51" />
 	</File>
-	<File name="externs\externs.h" open="1" top="0" tabpos="9">
-		<Cursor position="5139" topLine="110" />
+	<File name="externs/externs.h" open="1" top="0" tabpos="9">
+		<Cursor position="5139" topLine="108" />
 	</File>
-	<File name="externs\references.cpp" open="0" top="0" tabpos="4">
+	<File name="externs/references.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="4685" topLine="110" />
 	</File>
-	<File name="externs\references.h" open="0" top="0" tabpos="0">
+	<File name="externs/references.h" open="0" top="0" tabpos="0">
 		<Cursor position="2416" topLine="13" />
 	</File>
-	<File name="general\darray.cpp" open="0" top="0" tabpos="0">
+	<File name="general/darray.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="215" topLine="0" />
 	</File>
-	<File name="general\darray.h" open="0" top="0" tabpos="0">
+	<File name="general/darray.h" open="0" top="0" tabpos="0">
 		<Cursor position="2923" topLine="48" />
 	</File>
-	<File name="general\estring.h" open="0" top="0" tabpos="0">
+	<File name="general/estring.h" open="0" top="0" tabpos="0">
 		<Cursor position="0" topLine="11" />
 	</File>
-	<File name="general\implicit_stack.h" open="0" top="0" tabpos="0">
+	<File name="general/implicit_stack.h" open="0" top="0" tabpos="0">
 		<Cursor position="3004" topLine="58" />
 	</File>
-	<File name="general\string.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="2252" topLine="6" />
+	<File name="general/string.cpp" open="1" top="0" tabpos="19">
+		<Cursor position="2221" topLine="12" />
 	</File>
 	<File name="main.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="2099" topLine="22" />
+		<Cursor position="4006" topLine="82" />
 	</File>
-	<File name="parser\parser.cpp" open="1" top="0" tabpos="5">
+	<File name="parser/parser.cpp" open="1" top="0" tabpos="5">
 		<Cursor position="6286" topLine="120" />
 	</File>
-	<File name="parser\parser.h" open="0" top="0" tabpos="0">
+	<File name="parser/parser.h" open="0" top="0" tabpos="0">
 		<Cursor position="1376" topLine="3" />
 	</File>
-	<File name="parser\parser_components.cpp" open="1" top="0" tabpos="6">
-		<Cursor position="3465" topLine="64" />
+	<File name="parser/parser_components.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="2244" topLine="3" />
 	</File>
-	<File name="parser\parser_components.h" open="1" top="0" tabpos="7">
+	<File name="parser/parser_components.h" open="1" top="0" tabpos="7">
 		<Cursor position="2555" topLine="17" />
 	</File>
 	<File name="settings.h" open="0" top="0" tabpos="8">
 		<Cursor position="2346" topLine="0" />
 	</File>
-	<File name="syntax\checkfile.cpp" open="0" top="0" tabpos="4">
-		<Cursor position="4031" topLine="67" />
+	<File name="syntax/checkfile.cpp" open="1" top="0" tabpos="20">
+		<Cursor position="2440" topLine="20" />
 	</File>
-	<File name="syntax\chkfunction.h" open="1" top="0" tabpos="4">
+	<File name="syntax/chkfunction.h" open="1" top="0" tabpos="4">
 		<Cursor position="2870" topLine="23" />
 	</File>
-	<File name="syntax\syncheck.h" open="0" top="0" tabpos="0">
+	<File name="syntax/syncheck.h" open="0" top="0" tabpos="0">
 		<Cursor position="1511" topLine="12" />
 	</File>
-	<File name="syntax\syntax.cpp" open="1" top="0" tabpos="2">
+	<File name="syntax/syntax.cpp" open="1" top="0" tabpos="2">
 		<Cursor position="3265" topLine="54" />
 	</File>
-	<File name="syntax\syntaxtools.h" open="1" top="0" tabpos="3">
-		<Cursor position="12956" topLine="393" />
+	<File name="syntax/syntaxtools.h" open="1" top="1" tabpos="3">
+		<Cursor position="7418" topLine="194" />
 	</File>
 </CodeBlocks_layout_file>

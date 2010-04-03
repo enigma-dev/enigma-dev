@@ -75,4 +75,13 @@ public class EnigmaStruct extends Structure
 	public static native int gameNew();
 
 	public static native int compileEGMf(EnigmaStruct es);
+
+	public static class SyntaxError extends Structure
+		{
+		public String errorString;
+		public int line, position;
+		public int absoluteIndex;
+		}
+
+	public static native SyntaxError syntaxCheck(int script_count, String scripts[], String code);
 	}

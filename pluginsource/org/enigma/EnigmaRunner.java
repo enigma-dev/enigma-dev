@@ -25,12 +25,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
@@ -39,10 +34,10 @@ import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import org.enigma.backend.EnigmaStruct;
+import org.enigma.backend.EnigmaStruct.SyntaxError;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.main.LGM;
@@ -316,8 +311,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 				System.out.println();*/
 		}
 
-	public static int checkSyntax(String code)
+	public static SyntaxError checkSyntax(String code)
 		{
+		String osl[] = new String[LGM.currentFile.scripts.size()];
+		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
+		for (int i = 0; i < osl.length; i++)
+			osl[i] = isl[i].getName();
+		return EnigmaStruct.syntaxCheck(osl.length,osl,code);
+
+		/*
 		File sf = null;
 		try
 			{
@@ -374,7 +376,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 		sf.delete();
 		return r;
-		}
+		*/}
 
 	public void actionPerformed(ActionEvent e)
 		{
@@ -413,11 +415,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 			{
 				public void actionPerformed(ActionEvent e)
 					{
-					int p = checkSyntax(sf.code.getText());
-					if (p > -1)
+					SyntaxError se = checkSyntax(sf.code.getText());
+					//FIXME: how are no errors handled?
+					if (se.absoluteIndex >= 0)
 						{
-						sf.code.setSelectionStart(p);
-						sf.code.setSelectionEnd(p + 1);
+						sf.code.setSelectionStart(se.absoluteIndex);
+						sf.code.setSelectionEnd(se.absoluteIndex + 1);
+						//TODO: Toolbar with error message
 						}
 					}
 			});
