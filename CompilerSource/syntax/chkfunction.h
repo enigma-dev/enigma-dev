@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **                                                                              **
@@ -23,7 +23,7 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 
 //Uses the same variables as the other code. Like copypasting, only easier to understand
   int checkfunction(externs* func,string &code,int pos,int len,int canargs = 1)

@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **                                                                              **
@@ -23,11 +23,12 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 
 #include "../OS_Switchboard.h" //Tell us where the hell we are
 #include "../backend/EnigmaStruct.h" //LateralGM interface structures
 
+#include "../general/darray.h"
 
 #ifdef _WIN32
  #define dllexport extern "C" __declspec(dllexport)
@@ -135,21 +136,22 @@ dllexport int compileEGMf(EnigmaStruct *es)
   for (int i = 0; i < es->gmObjectCount; i++)
   {
     //For every object in Ism's struct, make our own
-    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object;
+    unsigned ev_count = 0;
+    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object(es->gmObjects[i].name);
     cout << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " sub-events: " << flushl;
     
     for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
+      if (es->gmObjects[i].mainEvents[ii].eventCount) //For every MainEvent that contains event code
     {
       //For each main event in that object, make a copy
       const int mev_id = es->gmObjects[i].mainEvents[ii].id;
-      parsed_mevent* pme = pob -> mevents[mev_id] = new parsed_mevent;
-      cout << "  Event[" << es->gmObjects[i].mainEvents[ii].eventCount << "]: ";
+      cout << "  Event[" << es->gmObjects[i].mainEvents[ii].id << "]: ";
       
       for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
       {
         //For each individual event (like begin_step) in the main event (Step), parse the code
         const int sev_id = es->gmObjects[i].mainEvents[ii].events[iii].id;
-        parsed_event* pev = pme -> events[sev_id] = new parsed_event;
+        parsed_event &pev = pob->events[ev_count++];
         cout << "[" << mev_id << "," << sev_id << "]";
         
         //Copy the code into a string, and its attributes elsewhere
@@ -165,8 +167,8 @@ dllexport int compileEGMf(EnigmaStruct *es)
         }
         
         //Add this to our objects map
-        pev->myObj = pob; //link to its parent
-        parser_main(code,pev);
+        pev.myObj = pob; //link to its parent
+        parser_main(code,&pev);
       }
     }
     fflush(stdout);
@@ -179,7 +181,20 @@ dllexport int compileEGMf(EnigmaStruct *es)
   }
   
   //Now, time to review
-  //for ( )
+  cout << "Printing all objects and events: " << flushl;
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+  {
+    cout << "Object `"<< i->second->name << "':" << flushl;
+    for (unsigned ii = 0; ii < i->second->events.size; ii++)
+    {
+      cout << "Event(" << i->second->events[ii].mainId << "," << i->second->events[ii].id << "):" << flushl;
+      cout << i->second->events[ii].code << flushl << flushl << flushl;
+    }
+  }
+  
+  
+  //Export resources to each file.
+  
   
   
   /*

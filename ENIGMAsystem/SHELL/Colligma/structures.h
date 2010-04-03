@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Adam Domurad                                             **
 **                                                                              **
@@ -23,7 +23,7 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 struct collCustom {
        unsigned short xDim, yDim, byteDim;//X and Y dimensions in pixels, and then X dimension in bytes
        char * cMask;//Mask of the object, 1Dimensional Char array used as 2D, rounds xOff to next highest b;

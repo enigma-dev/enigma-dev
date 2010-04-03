@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **                                                                              **
@@ -23,7 +23,7 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 
 //This is just a settings file.
 //It's simply for ease of editing of larger features of this evaluator.

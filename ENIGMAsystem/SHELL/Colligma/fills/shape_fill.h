@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Adam Domurad                                             **
 **                                                                              **
@@ -23,7 +23,7 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **                      
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 //Bit concerning functions
 bool collbitSet(collCustom& aColl,unsigned short aX,unsigned short aY,bool aBool){
       if (aBool)

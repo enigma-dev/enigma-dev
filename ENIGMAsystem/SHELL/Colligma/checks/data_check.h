@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Adam Domurad                                             **
 **                                                                              **
@@ -23,7 +23,7 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 //Line list ---> Line list
 //Custom ---> Custom
 bool collCheck(collCustom& aColl,float aX,float aY,collCustom& bColl,float bX,float bY, double aAngle, double bAngle){

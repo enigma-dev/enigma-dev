@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Adam Domurad                                             **
 **                                                                              **
@@ -23,7 +23,7 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **                      
 **                                                                              **
-\*********************************************************************************/            
+\********************************************************************************/            
             //uses: i, ii, aX1, aX2, bitMod, byteRef
             for (i=(unsigned int)(((unsigned int)aX1>>3));(unsigned int)i<=(unsigned int)((unsigned int)aX2>>3);i++)
                     {

@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Adam Domurad                                             **
 **                                                                              **
@@ -23,7 +23,7 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **                      
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 bool collbitGet(collCustom& aColl,unsigned short aX,unsigned short aY){//Does not check for bounds
       return (aColl.cMask[(aX>>3)+aY*(aColl.byteDim)]&(1<<(aX&7)))!=0;
       }

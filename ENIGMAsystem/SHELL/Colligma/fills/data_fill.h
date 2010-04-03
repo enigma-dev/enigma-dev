@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Adam Domurad                                             **
 **                                                                              **
@@ -23,7 +23,7 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 //Line list ---> Line list
 bool collFill(collLinelist& aColl,unsigned char Blend,float aX,float aY,collLinelist& bColl,float bX,float bY, double aAngle, double bAngle, double axScale, double ayScale, double bxScale, double byScale)
 {//Only takes bm_normal and bm_add

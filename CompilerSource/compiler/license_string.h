@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **                                                                              **
@@ -23,12 +23,12 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 
 //I'm copyrighting my license now, it looks like.
 //Don't get mad at me, this file would look fine to me right in the middle of the code.
 
-const char *enigma_license = "/*********************************************************************************\\\r\n\
+const char *enigma_license = "/********************************************************************************\\\r\n\
 **                                                                              **\r\n\
 **  Copyright (C) 2008 Josh Ventura                                             **\r\n\
 **                                                                              **\r\n\
@@ -53,4 +53,4 @@ const char *enigma_license = "/*************************************************
 **  applications created by its users, or damages caused by the environment     **\r\n\
 **  or programs made in the environment.                                        **\r\n\
 **                                                                              **\r\n\
-\\*********************************************************************************/\r\n\r\n\r\n";
+\\********************************************************************************/\r\n\r\n\r\n";

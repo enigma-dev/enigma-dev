@@ -21,24 +21,35 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
-
-void windowsystem_write_exename(char* exenamehere);
-int screen_refresh();
-
-int sleep(int millis);
-void enigma_catchmouse_backend(bool x);
-int show_error(std::string errortext, double fatal);
-#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
-
-
-#if WINDOWLIB
-#include"WINDOWSwindow.h"
-#endif
-
-#if FONTPOLYS
-#include "WINDOWSfonts.h"
-#endif
+//These parallel ism's structs, but offer additional properties we need to finish compile
+struct parsed_object;
+struct parsed_event
+{
+  int id, mainId;
+  string code;
+  string synt;
+  int otherObjId;
+  parsed_object* myObj; //This will let us add to locals from the code
+  
+  parsed_event();
+};
+struct parsed_object
+{
+  varray<parsed_event> events;
+  
+  string name;
+  
+  map<string,int> calls;     //Any function or script KEY called.
+  map<string,string> locals; //Any variable KEY used but not declared, or declared as VALUE.
+  map<string,int> dots;   //Any attribute KEY accessed via a dot, as in a.KEY
+  
+  parsed_object();
+  parsed_object(string);
+};
+extern map<int,parsed_object*> parsed_objects;
+typedef map<int,parsed_object*>  :: iterator po_i;
+typedef map<int,parsed_event*>   :: iterator pe_i;

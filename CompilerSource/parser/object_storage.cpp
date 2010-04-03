@@ -21,24 +21,20 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
+#include <map>
+#include <string>
 
-void windowsystem_write_exename(char* exenamehere);
-int screen_refresh();
+using namespace std;
 
-int sleep(int millis);
-void enigma_catchmouse_backend(bool x);
-int show_error(std::string errortext, double fatal);
-#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
+#include "../general/darray.h"
 
+#include "object_storage.h"
 
-#if WINDOWLIB
-#include"WINDOWSwindow.h"
-#endif
-
-#if FONTPOLYS
-#include "WINDOWSfonts.h"
-#endif
+parsed_event::parsed_event(): id(0), mainId(0), otherObjId(-4) {}
+parsed_object::parsed_object() {}
+parsed_object::parsed_object(string n): name(n) {}
+map<int,parsed_object*> parsed_objects;
