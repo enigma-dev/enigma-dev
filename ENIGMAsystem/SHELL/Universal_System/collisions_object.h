@@ -31,14 +31,15 @@
   @summary Adds a graphics-related tier following the planar tier.
 */
 
-#include "../Graphics_Systems/OpenGL/graphics_object.h"
+#include "transform_object.h"
 
 namespace enigma
 {
-  struct object_collisions: object_graphics
+  struct object_collisions: object_transform
   {
     //Bit Mask
       var mask_index;
+      var  solid;
     
     //Bounding box
       var bbox_top;
@@ -48,6 +49,6 @@ namespace enigma
     
     //Constructors
       object_collisions() {}
-      object_collisions(unsigned x, int y): object_graphics(x,y) {}
+      object_collisions(unsigned x, int y): object_transform(x,y) {}
   };
 }

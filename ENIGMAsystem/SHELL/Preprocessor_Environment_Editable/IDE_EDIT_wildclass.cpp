@@ -49,7 +49,7 @@ namespace enigma
     image_angle = &from->image_angle;
     image_blend = &from->image_blend;
     image_index = &from->image_index;
-    image_number = &from->image_number;
+    //image_number = &from->image_number;
     image_single = &from->image_single;
     image_speed = &from->image_speed;
     image_xscale = &from->image_xscale;
@@ -64,9 +64,8 @@ namespace enigma
     path_speed = &from->path_speed;
     persistent = &from->persistent;
     solid = &from->solid;
-    sprite_height = &from->sprite_height;
-    sprite_index = &from->sprite_index;
-    sprite_width = &from->sprite_width;
+    //sprite_height = &from->sprite_height;
+    //sprite_width = &from->sprite_width;
     sprite_xoffset = &from->sprite_xoffset;
     sprite_yoffset = &from->sprite_yoffset;
     timeline_index = &from->timeline_index;

@@ -71,7 +71,7 @@ int screen_redraw()
        if (vob != -1)
        {
          bool instanceexists=0; 
-         enigma::object_graphics* vobr;
+         enigma::object_planar* vobr;
          
          //TODO: Replace this once instances are sorted by object index as well
          for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)

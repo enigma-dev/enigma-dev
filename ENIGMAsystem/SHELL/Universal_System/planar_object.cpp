@@ -41,28 +41,8 @@
 
 namespace enigma
 {
-  struct object_planar: object_basic
-  {
-    //Position
-      var  x, y;
-      var  xprevious, yprevious;
-      var  xstart, ystart;
-    
-    //Motion
-      directionv direction;
-      speedv     speed;
-      hspeedv    hspeed;
-      vspeedv    vspeed;
-      
-    //Accelerators
-      var  gravity;
-      var  gravity_direction;
-      var  friction;
-    
-    //Constructors
-      object_planar() {}
-      object_planar(unsigned x, int y): object_basic(x,y) {}
-  };
+  object_planar::object_planar() {}
+  object_planar::object_planar(unsigned x, int y): object_basic(x,y) {}
   
   void step_basic(object_basic* instance_b)
   {

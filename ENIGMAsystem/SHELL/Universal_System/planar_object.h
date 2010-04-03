@@ -46,6 +46,9 @@ namespace enigma
       var  xprevious, yprevious;
       var  xstart, ystart;
     
+    //Persistence
+      var  persistent;
+    
     //Motion
       directionv direction;
       speedv     speed;
@@ -58,8 +61,8 @@ namespace enigma
       var  friction;
     
     //Constructors
-      object_planar() {}
-      object_planar(unsigned x, int y): object_basic(x,y) {}
+      object_planar();
+      object_planar(unsigned x, int y);
   };
   
   void step_basic(object_basic* instance_b);

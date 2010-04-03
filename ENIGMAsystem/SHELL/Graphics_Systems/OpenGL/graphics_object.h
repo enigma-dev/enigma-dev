@@ -35,9 +35,21 @@ namespace enigma
 {
   struct object_graphics: object_planar
   {
-    //Sprites
+    //Sprites: these are mostly for higher tiers...
       var sprite_index;
       var image_index;
+    
+    //Depth
+      var  depth;
+      var  visible;
+    
+    //Transformations: these are mostly for higher tiers...
+      var  sprite_xoffset;
+      var  sprite_yoffset;
+      var  image_xscale;
+      var  image_yscale;
+      var  image_angle;
+    
     //Constructors
       object_graphics();
       object_graphics(unsigned x, int y);
