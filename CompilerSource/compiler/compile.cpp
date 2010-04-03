@@ -40,6 +40,7 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 using namespace std;
 #define flushl (fflush(stdout), "\n")
 
@@ -137,7 +138,7 @@ dllexport int compileEGMf(EnigmaStruct *es)
   {
     //For every object in Ism's struct, make our own
     unsigned ev_count = 0;
-    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object(es->gmObjects[i].name);
+    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object(es->gmObjects[i].name,es->gmObjects[i].id);
     cout << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " sub-events: " << flushl;
     
     for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
@@ -180,7 +181,9 @@ dllexport int compileEGMf(EnigmaStruct *es)
     fflush(stdout);
   }
   
-  //Now, time to review
+  ///Now, time to review and "link": Our linking is less complicated than compiled code linking.
+  ///This process is designed to offer a better understanding of used variables from event to event
+  ///and then from instance to instance.
   cout << "Printing all objects and events: " << flushl;
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
   {
@@ -192,8 +195,95 @@ dllexport int compileEGMf(EnigmaStruct *es)
     }
   }
   
+  //Define some variables based on usage
+  bool used__object_set_sprite = 0;
   
   //Export resources to each file.
+  
+  ofstream wto;
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
+    wto << license;
+    wto << "#define SHOWERRORS 1\n";
+    wto << "#define ABORTONALL 0\n";
+    wto << "#define ASSUMEZERO 0\n";
+    wto << "#define PRIMBUFFER 0\n";
+    wto << "#define PRIMDEPTH2 6\n";
+    wto << "#define AUTOLOCALS 0\n";
+    wto << "#define MODE3DVARS 0\n";
+    wto << "void ABORT_ON_FATAL_ERRORS() { " << (false?"exit(0);":"") << " }\n";
+    wto << '\n';
+  wto.close();
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h",ios_base::out);
+    wto << license;
+    wto << "#define BUILDMODE " << 0 << "\n";
+    wto << "#define DEBUGMODE " << 0 << "\n";
+    wto << '\n';
+  wto.close();
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out);
+    wto << license;
+    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+    {
+      wto << "case " << i->second->id << ":\n";
+      wto << "    enigma::instance_list[idn]=new enigma::" << i->second->name <<";\n";
+      wto << "  break;\n";
+    }
+    wto << '\n';
+  wto.close();
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out);
+    wto << license;
+    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+    {
+      wto << "case " << i->second->id << ":\n";
+      wto << "    enigma::instance_list[idn]=new enigma::" << i->second->name <<";\n";
+      wto << "  break;\n";
+    }
+    wto << '\n';
+  wto.close();
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
+    wto << license;
+    wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
+    wto << "namespace enigma\n{\n";
+      wto << "  struct object_locals: object_collisions\n  {\n";
+        wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
+        wto << "    object_locals() {}\n";
+        wto << "    object_locals(unsigned x, int y): object_collisions(x,y) {}\n  };\n";
+      for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+      {
+        wto << "  struct OBJ_" << i->second->name << ": object_locals\n  {";
+        for (unsigned ii = 0; ii < i->second->events.size; ii++)
+        {
+          //Look up the event name
+          string evname = event_get_enigma_main_name(i->second->events[ii].mainId,i->second->events[ii].id);
+          wto << "  #define ENIGMAEVENT_" << evname << " 1";
+          wto << "  variant myevent_" << evname << "();";
+          
+          //Automatic constructor
+          wto << "  OBJ_" <<  i->second->name << "(): object_locals(enigma::newinst_id++, " << i->second->id << ")";
+          if (used__object_set_sprite) //We want to initialize 
+            wto << ", enigma::object_table[" << i->second->id << "].sprite\n  {\n    enigma::constructor(this);\n  }\n";
+          else 
+            wto << "\n  {\n    enigma::constructor(this);\n    sprite_index = 0;\n  }\n";
+          
+          //Directed constructor (ID is specified)
+          wto << "  OBJ_" <<  i->second->name << "(int id): object_locals(id, " << i->second->id << ")\n";
+          if (used__object_set_sprite) //We want to initialize 
+            wto << ", enigma::object_table[" << i->second->id << "].sprite\n  {\n    enigma::constructor(this);\n  }\n";
+          else 
+            wto << "\n  {\n    enigma::constructor(this);\n    sprite_index = 0;\n  }\n";
+        }
+        wto << "  };";
+      }
+      wto << "}\n";
+  wto.close();
+  
+  
+  
+  
   
   
   

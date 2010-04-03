@@ -123,6 +123,7 @@ namespace syncheck
         LN_FUNCTION,       // game_end()
         LN_FUNCTION_NAME,  // game_end
         LN_CLOSING_SYMBOL, // { ; }
+        LN_LOCGLOBAL,      // global/local
         LN_FOR             // for
       };
 
@@ -205,11 +206,19 @@ namespace syncheck
           else if (find_extname(name,0xFFFFFFFF))
           {
             if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
+            {
               indeclist[level] = true;
+              if (lastnamed[level] == LN_LOCGLOBAL)
+                lastnamed[level] = LN_NOTHING;
+            }
             if (ext_retriever_var->is_function()) {
               lastnamed[level] = LN_FUNCTION_NAME;
               function_ext = ext_retriever_var;
             }
+          }
+          else if (name == "local" or name == "global") //These two are very special...
+          {
+            lastnamed[level] = LN_LOCGLOBAL;
           }
           else //just an identifier; ie, a variable or function name
           {

@@ -130,6 +130,8 @@
 		<Unit filename="general\textfile.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
+		<Unit filename="parser\object_storage.cpp" />
+		<Unit filename="parser\object_storage.h" />
 		<Unit filename="parser\parser.cpp" />
 		<Unit filename="parser\parser.h" />
 		<Unit filename="parser\parser_components.cpp" />

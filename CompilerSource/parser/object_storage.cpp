@@ -36,5 +36,5 @@ using namespace std;
 
 parsed_event::parsed_event(): id(0), mainId(0), otherObjId(-4) {}
 parsed_object::parsed_object() {}
-parsed_object::parsed_object(string n): name(n) {}
+parsed_object::parsed_object(string n, int i): name(n), id(i) {}
 map<int,parsed_object*> parsed_objects;

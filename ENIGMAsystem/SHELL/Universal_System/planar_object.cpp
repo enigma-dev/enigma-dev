@@ -30,14 +30,13 @@
   @summary Adds a planar tier following the main tier.
 */
 
-#ifndef _planar_object_h
-#define _planar_object_h
-
 #include <math.h>
 
 #include "object.h"
 #include "var_cr3.h"
 #include "reflexive_types.h"
+
+#include "planar_object.h"
 
 namespace enigma
 {
@@ -79,5 +78,3 @@ namespace enigma
     instance->y+=instance->vspeed.realval;
   }
 }
-
-#endif //_planar_object_h
