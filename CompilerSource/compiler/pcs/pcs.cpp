@@ -28,6 +28,7 @@
 #include <map>
 #include <string>
 #include <stdlib.h> //system (Linux)
+#include <cstdio>
 using namespace std;
 #include "../../general/estring.h"
 

@@ -29,6 +29,7 @@
 #include <stack>
 #include <string>
 #include <iostream>
+#include <cstdio>
 #include "../general/darray.h"
 #include "../general/implicit_stack.h"
 
@@ -59,7 +60,7 @@ inline void move_newline()
     {
       if (cfile[pos+1]=='/')
         cancomment = 0;
-      else if (cfile[pos+1]=='*') 
+      else if (cfile[pos+1]=='*')
       {
         pos+=2;
         if (pos<len) pos++;
@@ -90,7 +91,7 @@ string fc(const char* fn)
       char a[sz+1];
       sz = fread(a,1,sz,pt);
       fclose(pt);
-      
+
       a[sz] = 0;
       return a;
     }
@@ -129,17 +130,17 @@ extern void print_definition(string);
 unsigned int cfile_parse_macro()
 {
   while(is_useless_macros(cfile[++pos]));
-  
+
   unsigned int poss=pos;
-  if (!is_letter(cfile[pos])) { 
+  if (!is_letter(cfile[pos])) {
     cferr="Preprocessor directive expected";
     return pos;
   }
   while (is_letterd(cfile[pos])) pos++;
   string next=cfile.substr(poss,pos-poss);
-  
+
   while (cfile[pos] == ' ' or cfile[pos] == '\t') pos++;
-  
+
   if (!in_false_conditional())
   {
     if (next=="error")
@@ -154,16 +155,16 @@ unsigned int cfile_parse_macro()
       if (next=="define")
       {
         while (cfile[pos] == ' ' or cfile[pos] == '\t') pos++;
-        
+
         const unsigned poss=pos;
         if (!is_letter(cfile[pos])) { cferr="Identifier expected for #define"; return pos; }
         while (is_letterd(cfile[pos])) pos++;
-        
+
         //unsigned int flags=0;
         int arg_count = -1;
         int args_unlimited_at = -1;
         varray<string> args;
-        
+
         string definiendum=cfile.substr(poss,pos-poss);
         if (cfile[pos]=='(') //macro function
         {
@@ -177,7 +178,7 @@ unsigned int cfile_parse_macro()
             else if (is_letter(cfile[pos]))
             {
               if (an) { cferr="Symbol ',' expected"; return pos; }
-              
+
               const unsigned spos = pos;
               while (is_letterd(cfile[pos])) pos++;
               an=1; args[arg_count++] = cfile.substr(spos,pos-spos);
@@ -203,14 +204,14 @@ unsigned int cfile_parse_macro()
             pos++;
           }
         }
-        
+
         while (is_useless_macros(cfile[pos])) pos++;
-        
+
         const unsigned poss2=pos;
         move_newline();
-        
+
         string definiens=cfile.substr(poss2,pos-poss2);
-        
+
         /*cout << "Define \"" << definiendum << "\" as \"" << definiens << "\"\r\n";
         if (current_scope->members.find(definiendum) != current_scope->members.end())
           current_scope->members.erase(definiendum);*/
@@ -230,7 +231,7 @@ unsigned int cfile_parse_macro()
         const unsigned poss=pos;
         if (!is_letter(cfile[pos])) { cferr="Identifier expected for #undef"; return pos; }
         while (is_letterd(cfile[pos])) pos++;
-        
+
         const string uw = cfile.substr(poss,pos-poss);
         if (uw != "__attribute__") //_mingw.h is a little bitch
           macros.erase(uw);
@@ -241,21 +242,21 @@ unsigned int cfile_parse_macro()
       if (next=="include")
       {
         while (cfile[pos]==' ' or cfile[pos]=='\t') pos++;
-        
+
         const char c = cfile[pos];
         if (pos<len and cfile[pos] != '"' and cfile[pos] != '<')
         {
           cferr = "Expcted filename to include set in quotes or in <>";
           return pos;
         }
-        
+
         //Isolate filename
         const int spos = ++pos;
         const char ce = c=='"'? c:'>';
         while (pos < len and cfile[pos++] != ce);
         string file = cfile.substr(spos,pos-spos-1);
         move_newline();
-        
+
         //Find the file and include it
         string ins;
         string include_from;
@@ -273,7 +274,7 @@ unsigned int cfile_parse_macro()
             include_from = qpath;
           else
             include_from = included_files.top().path + qpath;
-          
+
           ins = fc( (include_from+file).c_str() );
           if (fnf)
           {
@@ -295,12 +296,12 @@ unsigned int cfile_parse_macro()
             return pos;
           }
         }
-        
+
         cfstack.push(new cfnode);
         cfile_top = cfile = ins;
         len = cfile.length();
         pos = 0;
-        
+
         included_files.push(includings(file,include_from));
       }
       if (next=="import")
@@ -312,14 +313,14 @@ unsigned int cfile_parse_macro()
         move_newline();
       }
     }
-    
+
     if (next=="line")
     {
       cferr="#line is unimplemented for reasons of sanity.";
       return pos;
     }
   } //end if (!in_false_conditional())
-  
+
   if (next=="pragma") //Visit this even in a false conditional for print and debug
   {
     move_newline();
@@ -361,12 +362,12 @@ unsigned int cfile_parse_macro()
     }
     if (pc == "printlast")
     {
-      cout << 
-      "Last named: " << last_named << endl << 
-      "Last named phase: " << last_named_phase << endl << 
-      "Last identifier: " << last_identifier << endl << 
-      "Last type: " << (void*)last_type << (last_type? ": " + strace(last_type) : "") << endl << 
-      "Immediate scope: " << immediate_scope << (immediate_scope? ": " + strace(immediate_scope) : "") << endl << 
+      cout <<
+      "Last named: " << last_named << endl <<
+      "Last named phase: " << last_named_phase << endl <<
+      "Last identifier: " << last_identifier << endl <<
+      "Last type: " << (void*)last_type << (last_type? ": " + strace(last_type) : "") << endl <<
+      "Immediate scope: " << immediate_scope << (immediate_scope? ": " + strace(immediate_scope) : "") << endl <<
       "In false conditional: " << in_false_conditional() << endl <<
       endl;
       fflush(stdout);
@@ -375,7 +376,7 @@ unsigned int cfile_parse_macro()
     {
       string o;
       cout << "Tracing scope (" << (pc.length()>11?pc.substr(11):"no additional info") << "): ";
-      
+
       string lnm;
       for (externs* i=immediate_scope?immediate_scope:current_scope; i != &global_scope; i=i->parent)
       {
@@ -383,7 +384,7 @@ unsigned int cfile_parse_macro()
           cout << "ERROR! Trace wound up at NULL! ";
           break;
         }
-        
+
         if (lnm != "")
         {
           extiter ii = i->members.find(lnm);
@@ -400,11 +401,11 @@ unsigned int cfile_parse_macro()
           cout << "ERROR! Global scope offers no route back to `" << lnm << "'  " << o << endl << endl;
         else cout << o << endl<< "Confirmed global scope traces back to `" << lnm << "'" << endl << endl;
       } else cout << endl << "At global scope." << endl << endl;
-      
+
       fflush(stdout);
     }*/
   }
-  
+
   //Conditionals/Flow
   {
     if (next=="if" or next=="ifdef" or next=="ifndef" or next=="else" or next=="elif" or next=="endif")
@@ -459,7 +460,7 @@ unsigned int cfile_parse_macro()
       move_newline();
     }
   }
-  
-  
+
+
   return (unsigned)-1;
 }

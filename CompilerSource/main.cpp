@@ -48,9 +48,9 @@ string fc(const char* fn);
 int m_prog_loop_cfp();
 
 #include <sys/time.h>
-#include <windows.h>
 
 #ifdef _WIN32
+ #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)
 #else
  #define dllexport extern "C"
@@ -72,13 +72,13 @@ int establish_bearings()
   string defs = fc("defines.txt");
   if (defs == "")
     return 1;
-  
+
   unsigned a = parse_cfile(defs);
   if (a != unsigned(-1)) {
     cout << "Highly unlikely error. Borderline impossible, but stupid things can happen when working with files.\n\n";
     return 1;
   }
-  
+
   cout << "Successfully loaded GCC definitions\n";
   cout << "Undefining _GLIBCXX_EXPORT_TEMPLATE\n";
   macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0";
@@ -91,34 +91,34 @@ dllexport int gameNew()
 {
   cout << "Intializing Parsers.";
   cparse_init();
-    
+
   if (establish_bearings()) {
     cout << "ERROR: Failed to locate the GCC";
     return 1;
   }
-  
+
   string EGMmain = fc("ENIGMAsystem/SHELL/SHELLmain.cpp");
   if (EGMmain == "")
   {
-    char d[600];
-    GetCurrentDirectory(600,d);
-    cout << "ERROR: Failed to read main engine file from " << d;
+//    char d[600];
+//    GetCurrentDirectory(600,d);
+//    cout << "ERROR: Failed to read main engine file from " << d;
     return 1;
   }
-  
+
   clock_t cs = clock();
   unsigned a = parse_cfile(EGMmain);
   clock_t ce = clock();
-  
+
   if (a != unsigned(-1)) {
     cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
     print_err_line_at(a);
     return 1;
   }
-  
+
   cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
   cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
-  
+
   parser_init();
   return 0;
 };
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 {
     parser_init();
     string pf = fc("C:/Users/Josh/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary_gml.h");
-    
+
     a = syncheck::syntacheck(pf);
     if (a != unsigned(-1))
     {
@@ -143,24 +143,24 @@ int main(int argc, char *argv[])
     else
     {
       cout << "Syntax check completed with no error.\n";
-      
+
       string b = parser_main(pf);
       cout << endl << endl << endl << endl << b << endl;
     }
-    
+
     getchar();
     return 0;
-    
-    
-    
+
+
+
     //Parse out some parameters
       string p1;
       if (!(argc>1)) { p1=""; }
       else      { p1=argv[1]; }
-      double result=0; 
-    
+      double result=0;
+
     if (p1[0]=='/' || p1[0]=='\\') p1[0] = '-';
-    
+
     if (p1=="-r")
     {
       if (argc<3) {puts("Insufficient parameters"); return -11; }

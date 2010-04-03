@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include <string>
+#include <cstdio>
 using namespace std;
 
 string tostring(int val)

@@ -205,7 +205,7 @@ dllexport int compileEGMf(EnigmaStruct *es)
   for (int i = 0; i < es->spriteCount; i++)
   {
     cout << "Sprite " << es->sprites[i].name << endl;
-    cout << "Data at: " << es->sprites[i].subImages[0].pixels << endl << endl;
+//    cout << "Data at: " << es->sprites[i].subImages[0].pixels << endl << endl;
     //for (int ii = 0; ii <  es->sprites[i].subImages[0].width *  es->sprites[i].subImages[0].height; ii++) {
     //  cout << (void*)(es->sprites[i].subImages[0].pixels[ii]);
     //}
@@ -217,7 +217,12 @@ dllexport int compileEGMf(EnigmaStruct *es)
     cout << " " << es->sounds[i].name << endl;
     fflush(stdout);
   }
-  
-  
+  /*
+  cout << es->includeCount << " Includes:" << endl;
+  for (int i = 0; i < es->includeCount; i++) {
+    cout << " " << es->includes[i].filepath << endl;
+    fflush(stdout);
+  }
+  */
   return 0;
 };

@@ -27,7 +27,7 @@
 
 #include <map>
 #include <string>
-
+#include <cstdio>
 using namespace std;
 
 #include "../general/darray.h"
@@ -83,14 +83,14 @@ int file_check(string filename)
 
     int retval=syncheck::syntacheck(in2);
     if (retval==-1)
-    { 
+    {
       string code=parser_main(in2);
       FILE* o=fopen("C:\\PARSERESULT.TXT","wb");
       if (o)
       {
-        fwrite(code.c_str(),1,code.length(),o); 
-        fclose(o); 
-        int sr = system("C:\\PARSERESULT.TXT"); 
+        fwrite(code.c_str(),1,code.length(),o);
+        fclose(o);
+        int sr = system("C:\\PARSERESULT.TXT");
         if (sr != 0) printf("Returned %d...",sr);
       }
     }

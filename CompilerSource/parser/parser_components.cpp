@@ -28,6 +28,7 @@
 
 #include <string>
 #include <iostream>
+#include <cstdio>
 using namespace std;
 #include "../general/darray.h"
 #include "../externs/externs.h"
@@ -48,12 +49,12 @@ string string_escape(string s)
 {
   cout << "format " << s << endl;
   const pt il = s.length()-1;
-  
+
   //allocate enough space to hold it
   char* out = new char[il*2 + 1];
-  
+
   out[0] = '"';
-  
+
   pt opos = 1;
   for (pt pos = 1; pos < il; pos++)
   {
@@ -61,12 +62,12 @@ string string_escape(string s)
       out[opos++] = '\\';
     out[opos++] = s[pos];
   }
-  
+
   out[opos++] = '"';
-  
+
   string ret(out,opos);
   delete[] out;
-  
+
   cout << "  as " << ret;
   return ret;
 }
@@ -96,14 +97,14 @@ int initscope(string name)
 {
   current_scope = &global_scope;
   scope_braceid = 0;
-  
+
   externs *ne = current_scope->members[name] = new externs;
   ne->name = name;
   ne->type = NULL;
   ne->flags = EXTFLAG_NAMESPACE;
   ne->parent = current_scope;
   current_scope = ne;
-  
+
   return 0;
 }
 int quicktype(unsigned flags, string name)
@@ -132,11 +133,11 @@ int parser_ready_input(string &code,string &synt)
   #else
     #define safe 1
   #endif
-  
+
   unsigned mymacroc = 0;
   darray<pt> mymacroend;
   varray<string> mymacros;
-  
+
   while (pos < code.length())
   {
     if (is_letter(code[pos]))
@@ -145,7 +146,7 @@ int parser_ready_input(string &code,string &synt)
       const pt spos = pos;
       while (is_letterd(code[++pos]));
       const string name = code.substr(spos,pos-spos);
-      
+
       maciter itm = macros.find(name);
       if (itm != macros.end())
       {
@@ -155,11 +156,11 @@ int parser_ready_input(string &code,string &synt)
              if (pos <= mymacroend[iii]) { recurs=1; break; }
              else for (int k = 0, kn = 0, ic = mymacroc; k<ic; k++)
                if (pos > mymacroend[iii]) mymacros[kn++] = mymacros[k], mymacroc--;
-           
+
         if (!recurs)
         {
           string macrostr = itm->second;
-          
+
           if (itm->second.argc != -1) //Expect ()
           {
             if (!macro_function_parse(code,name,pos,macrostr,itm->second.args,itm->second.argc,itm->second.args_uat)) {
@@ -174,12 +175,12 @@ int parser_ready_input(string &code,string &synt)
           continue;
         }
       }
-      
+
       char c = 'n';
-      
-      if (name == "sometype") 
+
+      if (name == "sometype")
         cout << "LOL SOMETYPE\n";
-      
+
       tokiter itt = edl_tokens.find(name);
       if (itt != edl_tokens.end()) {
         c = itt->second;
@@ -191,21 +192,21 @@ int parser_ready_input(string &code,string &synt)
       }
       else if (name == "then")
         continue; //"Then" is a truly useless keyword. I see no need to preserve it.
-      
+
       if (last_token == 'n' and c == 'n')
         code[bpos]   = synt[bpos++] = ';';
-      
-      
+
+
       for (pt i = 0; i < name.length(); i++) {
         code[bpos]   = name[i];
         synt[bpos++] = c;
       }
-      
+
       //Accurately reflect newly defined types and structures
       if (c == 'n' and last_token == 'C') { //"class <name>"
         quicktype(EXTFLAG_STRUCT,name); //Add the string we used to determine if this token is 'n' as a struct
       }
-      
+
       last_token = c;
       continue;
     }
@@ -222,7 +223,7 @@ int parser_ready_input(string &code,string &synt)
         } while (is_digit(code[++pos]));
       else
        code[bpos] = synt[bpos++] = last_token = '0';
-      
+
       continue;
     }
     if (code[pos] == '"')
@@ -278,22 +279,22 @@ int parser_ready_input(string &code,string &synt)
       code[bpos] = synt[bpos++] = last_token = '/';
       continue;
     }
-    
+
     if (code[pos] == '{')
       quickscope();
     else if (code[pos] == '}')
       dropscope();
-    
+
     //Wasn't anything usable
     if (!is_useless(code[pos]))
       code[bpos] = synt[bpos++] = last_token = code[pos];
-    
+
     pos++;
   }
-  
+
   code.erase(bpos);
   synt.erase(bpos);
-  
+
   cout << code << endl << synt << endl << endl;
   return 0;
 }
@@ -303,11 +304,11 @@ struct stackif
 {
   stackif* prev;
   char value,popifc;
-  
+
   stackif(void):prev(NULL) { }
   stackif(char v):prev(NULL),value(v) { }
   stackif(stackif* p,char v,char i):prev(p),value(v),popifc(i) { }
-  
+
   stackif* push(char v,char i)
   {
     stackif* r = new stackif(this,v,i);
@@ -322,7 +323,7 @@ struct stackif
     delete this;
     return r;
   }
-  
+
   operator char()
   {
     return value;
@@ -344,13 +345,13 @@ inline bool need_semi(char c1,char c2,const bool sepd,char c0,char cn1)
 void parser_add_semicolons(string &code,string &synt)
 {
   cout << synt << endl << code << endl;
-  
+
   //Allocate enough memory to hold all the semicolons we'd ever need
   char *codebuf = new char[code.length()*2+1];
   char *syntbuf = new char[code.length()*2+1];
   int bufpos = 0;
   int terns = 0;
-  
+
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
   for (unsigned int pos=0; pos<code.length(); pos++)
@@ -376,7 +377,7 @@ void parser_add_semicolons(string &code,string &synt)
         codebuf[bufpos]=code[pos];
         syntbuf[bufpos++]=synt[pos];
       }
-      
+
       if (synt[pos]=='(') { if (sy_semi->prev == NULL) sy_semi=sy_semi->push(',','('); continue; }
       if (synt[pos]==')') { sy_semi=sy_semi->popif('(');    continue; }
       if (synt[pos]==';')
@@ -409,7 +410,7 @@ void parser_add_semicolons(string &code,string &synt)
         sy_semi=sy_semi->popif('s');
         continue;
       }
-      
+
       if (need_semi(synt[pos-1],synt[pos],0,synt[pos-2],synt[pos-3]))
       {
         codebuf[bufpos-1] = *sy_semi;
@@ -426,10 +427,10 @@ void parser_add_semicolons(string &code,string &synt)
         codebuf[bufpos] = code[pos];
         syntbuf[bufpos++] = 's';
       }
-      
+
       if (synt[pos] != ' ')
         pos--;
-      
+
       codebuf[bufpos] = syntbuf[bufpos++] = '(';
       sy_semi=sy_semi->push(')','s');
     }
@@ -439,28 +440,28 @@ void parser_add_semicolons(string &code,string &synt)
       syntbuf[bufpos] = 'f';
       codebuf[++bufpos] = 'r';
       syntbuf[bufpos++] = 'f';
-      
+
       pos+=3;
       if (synt[pos] != ' ')
         pos--; //If there's a (, you'll be at it next iteration
-      
+
       codebuf[bufpos] = syntbuf[bufpos++] = '(';
-      
+
       sy_semi=sy_semi->push(')','s');
       sy_semi=sy_semi->push(';','s');
       sy_semi=sy_semi->push(';','s');
     }
   }
-  
+
   //Add a semicolon at the end if there isn't one
   if (bufpos and syntbuf[bufpos-1] != ';')
     codebuf[bufpos] = syntbuf[bufpos++] = ';';
-  
+
   code = string(codebuf,bufpos);
   synt = string(syntbuf,bufpos);
-  
+
   cout << code << endl << synt << endl << endl;
-  
+
   //This part's trickier; add semicolons only after do ... until and do ... while
   unsigned int len = synt.length();
   for (unsigned int pos=0; pos<len; pos++)
@@ -469,20 +470,20 @@ void parser_add_semicolons(string &code,string &synt)
     {
       //Make sure we're at do
       if ((code[pos] != 'd'  or  code[pos+1] != 'o')
-      or !(code[pos+2] == ' ' or synt[pos+2] != 'r')) 
+      or !(code[pos+2] == ' ' or synt[pos+2] != 'r'))
       {
         while (synt[pos] == 'r' and code[pos] != ' ') pos++;
         continue;
       }
-      
+
       cout << "At do\r\n>>" << code << "\r\n>>" << synt << "\r\n\r\n";
-      
+
       //Begin do handling
-      
+
       pos += 2;
       int lpos = pos;
       int semis = 1, dos = 0;
-      
+
       while (pos < len) //looking for end of do
       {
         if (synt[pos] == ';')
@@ -500,7 +501,7 @@ void parser_add_semicolons(string &code,string &synt)
                 synt.insert(pos,";");
                 len++; pos++;
               }
-              
+
               pos+=6; //Skip to the end of this until( or while(
               int ps = 1; //Track number of parentheses to find end
               while (pos<len and ps)
@@ -509,7 +510,7 @@ void parser_add_semicolons(string &code,string &synt)
                 else if (synt[pos]==')') ps--;
                 pos++;
               }
-              
+
               if (synt[pos] != ';')
               {
                 code.insert(pos,";");
@@ -551,21 +552,21 @@ void parser_add_semicolons(string &code,string &synt)
         }
         pos++;
       }
-      
+
       //Go fix any nested do's
       pos = lpos;
-      
+
       cout << "<<" << code << "\r\n<<" << synt << "\r\n\r\n";
     }
   }
-  
+
   //now we'll do ONE MORE pass, to take care of (())
   len = code.length();
   for (unsigned int pos = 0; pos<len; pos++)
   if (synt[pos] == '(' and synt[pos+1]=='(')
   {
     const int sp = pos;
-    
+
     pos+=2;
     int pl = 1;
     while (pos<len and pl)
@@ -595,15 +596,15 @@ int gmlparse_get_varnames(string code, string synt)
   //This operates in its own pass, sadly.
   //During this pass, we will look for two tokens: 'n' and 't'
   //We will also acknowledge these tokens: '{' '}' ';'
-  
+
   //Store length for quickness
   const register pt len = code.length();
-  
+
   //Keep track of a few things while we read
   string decl_t; //Know what we're declaring things as.
   bool in_decl = false; //Know if we're actually declaring anything.
   bool suspend_t = false; //type a = b, we don't want to declare b as int. So we suspend until comma.
-  
+
   for (register pt pos = 0; pos < len; pos++)
   {
     if (synt[pos] == 't')
@@ -633,7 +634,7 @@ int gmlparse_get_varnames(string code, string synt)
 /**
 This part outputs well-formatted code.
 
-@func likesaspace(char c, char d) 
+@func likesaspace(char c, char d)
   @return returns whether or not the two characters (as seen
   in syntax string) @param c and @param d should be separated
   by a space in the outputted code.
@@ -667,16 +668,16 @@ void print_the_fucker(string code,string synt)
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
   FILE* of = fopen("C:/Users/Josh/Desktop/parseout.txt","w+b");
   if (of == NULL) return;
-  
+
   const char * indent   =  "\r\n                                \
                                                                 \
                                                                 \
                                                                 \
                                                                 ";
-  
+
   const int indentmin=2;
   int indc = 0,tind = 0,pars = 0,str = 0;
-  
+
   const unsigned int len = code.length();
   for (unsigned int pos = 0; pos < len; pos++)
   {
@@ -749,7 +750,7 @@ void print_the_fucker(string code,string synt)
           pars = 1;
           fputc(code[pos],of);
         break;
-      
+
       default:
           fputc(code[pos],of);
           if (likesaspace(synt[pos],synt[pos+1]))

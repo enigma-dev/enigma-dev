@@ -28,6 +28,8 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <cstdio>
+#include <sys/time.h>
 #include "../general/darray.h"
 
 using namespace std;
@@ -76,13 +78,13 @@ void print_ext_data(externs *ext,int indent,int depth)
 {
   bool comma=0;
   string indstr(indent,' ');
-  
+
   if (ext == NULL) {
     cout <<  indstr << "error\n";
     return;
   }
   cout << indstr << ext->name << ":  ";
-  
+
   if (ext->is_function())
   {
     const int pcn = ext->parameter_count_min();
@@ -94,7 +96,7 @@ void print_ext_data(externs *ext,int indent,int depth)
 
   if (ext->type != NULL)
     cout << ext->type->name << "  ";
-  
+
   if (ext->ancestors.size)
   {
     cout << " derived from ";
@@ -105,8 +107,8 @@ void print_ext_data(externs *ext,int indent,int depth)
     }
     cout << "; ";
   }
-  
-  
+
+
   if (ext->flags & EXTFLAG_TEMPLATE)
   {
     cout << "Template [" << ext->tempargs.size << "]<";
@@ -130,13 +132,13 @@ void print_ext_data(externs *ext,int indent,int depth)
     }
     cout << "> ";
   }
-  
+
   if (ext->flags & EXTFLAG_VALUED)
   {
     cout << " valued as " << ext->value_of;
     comma = ',';
   }
-  
+
   if (ext->flags & EXTFLAG_TYPENAME)
   {
     if (comma)
@@ -144,11 +146,11 @@ void print_ext_data(externs *ext,int indent,int depth)
     else
       cout << " Serves as typename";
   }
-  
+
   if (ext->flags & EXTFLAG_NAMESPACE) cout << " namespace";
   if (ext->flags & EXTFLAG_STRUCT) cout << " : struct";
   if (ext->flags & EXTFLAG_CLASS) cout << " : class";
-  
+
   if (ext->flags & EXTFLAG_TYPEDEF)
     cout << " typedef'd as " << strace(ext->type) << " ";
   else
@@ -161,7 +163,7 @@ void print_ext_data(externs *ext,int indent,int depth)
   else
   if (ext->flags & (EXTFLAG_STRUCT | EXTFLAG_CLASS | EXTFLAG_NAMESPACE))
     cout << " {}; ";
-  
+
   if (!ext->refstack.empty())
   {
     cout << "Dereference path: ";
@@ -171,14 +173,14 @@ void print_ext_data(externs *ext,int indent,int depth)
       else if (ii->ref.symbol == '[') cout << "[]";
       else cout << ii->ref.symbol;
   }
-  
+
   cout << "\r\n";
 }
 
 int cfile_parse_main()
 {
   cparse_init();
-  
+
   string fc=file_contents("C:\\cfile.h");
   time_t ts = clock();
   int a=parse_cfile(fc);
@@ -197,13 +199,13 @@ int cfile_parse_main()
     }
     printf("Line %d, position %d: %s\r\n",line+1,pos,cferr.c_str());
   }
-  
+
   cout << "Macros:\r\n";
   for (maciter i=macros.begin(); i!=macros.end();i++)
     cout<<"  "<<(string)i->second<<"\r\n";
-  
+
   print_scope_members(&global_scope, 0);
-  
+
   //system("pause");
 
   #if 0
@@ -284,8 +286,8 @@ void print_err_line_at(unsigned a)
   }
   printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
   const int margin = 100;
-  const unsigned int 
-    begin = (signed)a-(margin/2)<0?0:a-(margin/2), 
+  const unsigned int
+    begin = (signed)a-(margin/2)<0?0:a-(margin/2),
     end = (a+unsigned(margin/2)>cfile.length())?cfile.length():a+(margin/2);
   cout << "code snippet: " << cfile.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
   cout << "------------------------------------------------\r\n\r\n";
@@ -298,7 +300,7 @@ void print_definition(string n)
   {
     cout << "  #define " << n;
     if (a->second.argc != -1) {
-      cout << "("; for (int i=0; i<a->second.argc; i++) 
+      cout << "("; for (int i=0; i<a->second.argc; i++)
       cout << a->second.args[i] << (i+1<a->second.argc ? ", " : ")"); }
     cout << " " << (string)a->second << endl;
   }
@@ -311,7 +313,7 @@ void print_definition(string n)
     {
       const unsigned is = i;
       while (i<n.length() and n[i] != ':') i++;
-      
+
       seg = n.substr(is,i-is);
       a = isco->members.find(seg);
       if (i<n.length() and a != isco->members.end())
@@ -327,15 +329,15 @@ void print_definition(string n)
 int m_prog_loop_cfp()
 {
   string cftp = fc("./cfile_parse/parsein.h");
-  
+
   #ifdef linux
     timeval ts; gettimeofday(&ts,NULL);
   #else
     time_t ts = clock();
   #endif
-  
+
   int a = parse_cfile(cftp);
-  
+
   #ifdef linux
     timeval te; gettimeofday(&te,NULL);
     double tel = (te.tv_sec*1000.0 + te.tv_usec) - (ts.tv_sec*1000.0 + ts.tv_usec);
@@ -343,8 +345,8 @@ int m_prog_loop_cfp()
     time_t te = clock();
     double tel = (((te-ts) * 1000.0) / CLOCKS_PER_SEC);
   #endif
-  
-  
+
+
   if (a != -1)
     print_err_line_at(a);
   else
@@ -352,7 +354,7 @@ int m_prog_loop_cfp()
        << " milliseconds\r\n++++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";
 
   cout << "Macros ("<<macros.size()<<") [+]\r\nVariables [+]\r\n";
-  
+
   cout << ">>";
   char c = getch();
   while (c != '\r' and c != '\n')
@@ -399,7 +401,7 @@ int m_prog_loop_cfp()
       string search_terms;
       cout << "Search in Macros: ";
       cin >> search_terms;
-      
+
       getch(); bool f = 0;
       for (maciter i = macros.begin(); i != macros.end(); i++)
         if (string(i->second).find(search_terms) != string::npos)
@@ -411,6 +413,6 @@ int m_prog_loop_cfp()
     cout << ">>";
     c = getch();
   }
-  
+
   return 0;
 }
