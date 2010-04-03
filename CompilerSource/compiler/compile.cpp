@@ -238,7 +238,7 @@ dllexport int compileEGMf(EnigmaStruct *es)
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
       wto << "case " << i->second->id << ":\n";
-      wto << "    enigma::instance_list[idn]=new enigma::" << i->second->name <<";\n";
+      wto << "    enigma::instance_list[idn]=new enigma::OBJ_" << i->second->name <<";\n";
       wto << "  break;\n";
     }
     wto << '\n';

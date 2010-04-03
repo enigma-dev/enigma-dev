@@ -44,9 +44,10 @@ struct parsed_object
   string name;
   int id;
   
-  map<string,int> calls;     //Any function or script KEY called.
-  map<string,string> locals; //Any variable KEY used but not declared, or declared as VALUE.
-  map<string,int> dots;   //Any attribute KEY accessed via a dot, as in a.KEY
+  map<string,int> calls;      //Any function or script KEY called.
+  map<string,string> locals;  //Any variable KEY used but not declared, or declared as local VALUE.
+  map<string,string> globals; //Any variable KEY or declared as global VALUE.
+  map<string,int> dots;       //Any attribute KEY accessed via a dot, as in a.KEY
   
   parsed_object();
   parsed_object(string,int);

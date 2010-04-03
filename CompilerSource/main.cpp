@@ -131,7 +131,7 @@ struct syntax_error {
 string error_sstring;
 
 void quickmember_script(externs* scope, string name);
-dllexport syntax_error check_code(int script_count, const char* *script_names, const char* code)
+dllexport syntax_error syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
   //First, we make a space to put our scripts.
   globals_scope = scope_get_using(&global_scope);

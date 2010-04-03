@@ -113,6 +113,10 @@ void parser_init()
   edl_tokens["static_cast"] = 't';
   edl_tokens["template"] = 't';
   
+  //Local and Global are special.
+  edl_tokens["local"] = 'L';  // Each of these has a dual meaning. They can either change the scope
+  edl_tokens["global"] = 'L'; // of the declaration that follows, or just serve as a negative constant
+  
   //These each require a parameter of some sort, so should not be given a semicolon right after
   //Token is 'p'
   edl_tokens["delete"] = 'p';
@@ -126,6 +130,11 @@ void parser_init()
   //Classify this as O then replace O() with nnn and then O(.*)\( with nn...n
   edl_tokens["operator"] = 'o';
 }
+
+
+struct scope_ignore {
+  map<string,int> i;
+};
 
 
 string parser_main(string code, parsed_event* pev = NULL)
@@ -154,6 +163,103 @@ string parser_main(string code, parsed_event* pev = NULL)
   
   if (pev)
   {
+    int igpos = 0;
+    darray<scope_ignore*> igstack;
+    igstack[igpos++] = new scope_ignore;
+    
+    for (size_t pos = 0; pos < code.length(); pos++)
+    {
+      if (synt[pos] == '{') {
+        igstack[igpos++] = new scope_ignore;
+        continue;
+      }
+      if (synt[pos] == '}') {
+        delete igstack[--igpos];
+        continue;
+      }
+      
+      int out_of_scope = 0; //Not declaring outside this scope
+      
+      if (synt[pos] == 'L') //Double meaning.
+      {
+        //Determine which meaning it is.
+        const int sp = pos;
+        pos += 5; //Skip "L-O-C-A-L" or "G-L-O-B-A"
+        if (synt[pos] == 'L') pos++;
+        if (synt[pos] != 't')
+        {
+          for (unsigned i = sp; i < pos; i++)
+            synt[pos] = 'n'; //convert to regular identifier
+          continue;
+        }
+        //We're at either global declarator or local declarator: record which scope it is.
+        out_of_scope = 1 + (code[sp] == 'g'); //If the first character of this token is 'g', it's global. Otherwise we assume it's local.
+        
+        //Remove the keyword from the code
+        code.erase(sp,pos);
+        synt.erase(sp,pos);
+        pos = sp;
+        
+        goto past_this_if;
+      }
+      if (synt[pos] == 't')
+      {
+        past_this_if:
+        
+        //Skip to the end of the typename, remember where we started
+        const int tsp = pos;
+        while (synt[++pos] == 't');
+        
+        //Copy the type
+        string type_name = code.substr(tsp,pos-tsp);
+        
+        if (out_of_scope)
+        {
+          //Remove the keyword from the code
+          code.erase(tsp,pos);
+          synt.erase(tsp,pos);
+          pos = tsp;
+        }
+        
+        string lid;
+        unsigned spos = pos;
+        
+        //Begin iterating the declared variables
+        while (pos < code.length())
+        {
+          bool has_init = false;
+          if (synt[pos] == ',' or synt[pos] == ';')
+          {
+            if (out_of_scope) //Designated for a different scope, global or local
+            {
+              if (out_of_scope - 1) //to be placed at global scope
+                pev->myObj->globals[lid] = type_name;
+              else
+                pev->myObj->locals[lid] = type_name;
+              if (!has_init)
+              {
+                code.erase(spos,pos+1);
+                synt.erase(spos,pos+1);
+                pos = spos;
+              }
+              else pos++;
+            }
+            else //Add to this scope
+            {
+              //igstack[igpos]->i[]
+              pos++;
+            }
+            
+            has_init = false;
+            if (synt[pos] == ';')
+              break;
+            continue;
+          }
+        }
+      }
+    }
+    
+    //Store these for later.
     pev->code = code;
     pev->synt = synt;
   }
