@@ -12,16 +12,16 @@ import com.sun.jna.Structure;
 
 public class Include extends Structure
 	{
-	String filename = "";
+//	String filename = "";
 	public String filepath;
-	boolean isOriginal;
+/*	boolean isOriginal;
 	int size = 0;
 	byte[] data = null;
 	int export = 2;
 	String exportFolder = "";
 	boolean overwriteExisting = false;
 	boolean freeMemAfterExport = true;
-	boolean removeAtGameEnd = true;
+	boolean removeAtGameEnd = true;*/
 
 	public static class ByReference extends Include implements Structure.ByReference
 		{

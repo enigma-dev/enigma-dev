@@ -10,14 +10,14 @@
 
 struct Include
 {
-  String filename;
+//  String filename;
   String filepath;
-  boolean isOriginal;
+/*  boolean isOriginal;
   int size;
   byte *data;
   int exportThisInclude;
   String exportFolder;
   boolean overwriteExisting;
   boolean freeMemAfterExport;
-  boolean removeAtGameEnd;
+  boolean removeAtGameEnd;*/
 };

@@ -52,9 +52,6 @@ import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
 import org.lateralgm.subframes.SubframeInformer.SubframeListener;
 
-import com.sun.jna.Native;
-import com.sun.jna.NativeLibrary;
-
 public class EnigmaRunner implements ActionListener,SubframeListener
 	{
 	public static final String ENIGMA = "compileEGMf.exe";

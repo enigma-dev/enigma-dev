@@ -126,8 +126,8 @@ public final class EnigmaWriter
 			Include[] oil = (Include[]) o.includes.toArray(o.includeCount);
 			for (int inc = 0; inc < o.includeCount; inc++)
 				{
-				oil[inc].filepath = i.gameSettings.includes.get(inc).filePath;
-				System.out.println(oil[inc].filepath);
+				System.out.println("J: " + i.gameSettings.includes.get(inc).filePath);
+//				oil[inc].filepath = i.gameSettings.includes.get(inc).filePath;
 				}
 			}
 
