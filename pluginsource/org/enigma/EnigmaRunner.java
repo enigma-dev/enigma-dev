@@ -69,6 +69,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		System.out.print("Initializing Enigma: ");
 		int ret = EnigmaStruct.libInit();
 		System.out.println(ret == 0 ? "Done" : "Error " + ret);
+
+		//TODO: add whitespace support
+		EnigmaStruct.whitespaceModified("");
 		}
 
 	public void populateMenu()
@@ -288,8 +291,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		LGM.commitAll();
 		//		ef = new EnigmaFrame();
 
-		EnigmaStruct.whitespaceModified(""); //TODO: add whitespace support
-
 		EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
 		System.out.println(EnigmaStruct.compileEGMf(es,exef.getAbsolutePath(),mode));
 
@@ -298,8 +299,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 	public static SyntaxError checkSyntax(String code)
 		{
-		EnigmaStruct.whitespaceModified(""); //TODO: add whitespace support
-
 		String osl[] = new String[LGM.currentFile.scripts.size()];
 		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
 		for (int i = 0; i < osl.length; i++)
