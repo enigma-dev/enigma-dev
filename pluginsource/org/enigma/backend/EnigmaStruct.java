@@ -72,10 +72,6 @@ public class EnigmaStruct extends Structure
 		Native.register(lib);
 		}
 
-	public static native int gameNew();
-
-	public static native int compileEGMf(EnigmaStruct es);
-
 	public static class SyntaxError extends Structure
 		{
 		public String errorString;
@@ -83,6 +79,12 @@ public class EnigmaStruct extends Structure
 		public int absoluteIndex;
 		}
 
+	public static native int libInit();
+
+	public static native SyntaxError whitespaceModified(String wscode);
+
 	/** @param scriptNames (StringArray) */
 	public static native SyntaxError syntaxCheck(int scriptCount, Pointer scriptNames, String code);
+
+	public static native int compileEGMf(EnigmaStruct es, String outname, int mode);
 	}

@@ -26,11 +26,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -38,6 +40,7 @@ import javax.swing.JPopupMenu;
 
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.EnigmaStruct.SyntaxError;
+import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.main.LGM;
@@ -62,6 +65,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		SubframeInformer.addSubframeListener(this);
 		applyBackground("org/enigma/enigma.png");
 		attemptUpdate();
+
+		System.out.print("Initializing Enigma: ");
+		int ret = EnigmaStruct.libInit();
+		System.out.println(ret == 0 ? "Done" : "Error " + ret);
 		}
 
 	public void populateMenu()
@@ -254,45 +261,45 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 	public void compile(final byte mode)
 		{
-		//modes: 1=run, 2=debug, 3=build, 4=compile
+		//modes: 0=run, 1=debug, 2=build, 3=compile
 
 		//determine where to output the exe
-		/*		File exef = null;
-				try
-					{
-					if (mode < 3)
-						exef = File.createTempFile("egm",".exe");
-					else if (mode == 3) exef = File.createTempFile("egm",".emd");
-					if (exef != null) exef.deleteOnExit();
-					}
-				catch (IOException e)
-					{
-					e.printStackTrace();
-					return;
-					}
-				if (mode == 4)
-					{
-					JFileChooser fc = new JFileChooser();
-					fc.setFileFilter(new CustomFileFilter(".exe","Executable files"));
-					if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
-					exef = fc.getSelectedFile();
-					}*/
+		File exef = null;
+		try
+			{
+			if (mode < 2)
+				exef = File.createTempFile("egm",".exe");
+			else if (mode == 2) exef = File.createTempFile("egm",".emd");
+			if (exef != null) exef.deleteOnExit();
+			}
+		catch (IOException e)
+			{
+			e.printStackTrace();
+			return;
+			}
+		if (mode == 3)
+			{
+			JFileChooser fc = new JFileChooser();
+			fc.setFileFilter(new CustomFileFilter(".exe","Executable files"));
+			if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
+			exef = fc.getSelectedFile();
+			}
 
 		LGM.commitAll();
 		//		ef = new EnigmaFrame();
 
-		System.out.println();
-		System.out.println();
+		EnigmaStruct.whitespaceModified(""); //TODO: add whitespace support
+
 		EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
-		System.out.println(EnigmaStruct.gameNew());
-		System.out.println(EnigmaStruct.compileEGMf(es));
+		System.out.println(EnigmaStruct.compileEGMf(es,exef.getAbsolutePath(),mode));
 
 		//				System.out.println("Compiling with " + enigma);
 		}
 
 	public static SyntaxError checkSyntax(String code)
 		{
-		EnigmaStruct.gameNew(); //FIXME: Call at a different time?
+		EnigmaStruct.whitespaceModified(""); //TODO: add whitespace support
+
 		String osl[] = new String[LGM.currentFile.scripts.size()];
 		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
 		for (int i = 0; i < osl.length; i++)
