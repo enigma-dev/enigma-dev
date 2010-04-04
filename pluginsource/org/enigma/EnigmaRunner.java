@@ -290,11 +290,23 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 		LGM.commitAll();
 		//		ef = new EnigmaFrame();
+		//				System.out.println("Compiling with " + enigma);
 
 		EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
 		System.out.println(EnigmaStruct.compileEGMf(es,exef.getAbsolutePath(),mode));
 
-		//				System.out.println("Compiling with " + enigma);
+		if (mode == 2)
+			{
+			try
+				{
+				EnigmaReader.readChanges(exef);
+				}
+			catch (Exception e)
+				{
+				e.printStackTrace();
+				}
+			}
+
 		}
 
 	public static SyntaxError checkSyntax(String code)

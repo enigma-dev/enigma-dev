@@ -81,6 +81,8 @@ public class EnigmaStruct extends Structure
 
 	public static native int libInit();
 
+	public static native int gccDefinePath(String path);
+
 	public static native SyntaxError whitespaceModified(String wscode);
 
 	/** @param scriptNames (StringArray) */
