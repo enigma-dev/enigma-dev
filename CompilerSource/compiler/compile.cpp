@@ -44,10 +44,21 @@
 using namespace std;
 #define flushl (fflush(stdout), "\n")
 
-//#include "../externs/externs.h"
-//#include "../syntax/syncheck.h"
-//#include "../parser/parser.h"
-//#include "compile_includes.h"
+#include "../externs/externs.h"
+#include "../syntax/syncheck.h"
+#include "../parser/parser.h"
+#include "compile_includes.h"
+
+void clear_ide_editables()
+{
+  ofstream wto;
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h",ios_base::out); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out); wto.close();
+}
 
 dllexport int compileEGMf(EnigmaStruct *es)
 {
@@ -70,8 +81,8 @@ dllexport int compileEGMf(EnigmaStruct *es)
   ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.  
   
   //First, we make a space to put our globals.
-  /*globals_scope = scope_get_using(&global_scope);
-  globals_scope = globals_scope->members["ENIGMA Resources"] = new externs;
+    globals_scope = scope_get_using(&global_scope);
+    globals_scope = globals_scope->members["ENIGMA Resources"] = new externs;
     globals_scope->name  = "ENIGMA Resources";
     globals_scope->flags = EXTFLAG_NAMESPACE;
     globals_scope->type  = NULL;
@@ -281,7 +292,7 @@ dllexport int compileEGMf(EnigmaStruct *es)
       wto << "}\n";
   wto.close();
   
-  */
+  
   
   
   

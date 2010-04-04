@@ -85,6 +85,7 @@ int establish_bearings()
   return 0;
 }
 
+extern void clear_ide_editables();
 extern void print_err_line_at(unsigned a);
 #include "cfile_parse/cfile_pushing.h"
 dllexport int gameNew()
@@ -96,6 +97,8 @@ dllexport int gameNew()
     cout << "ERROR: Failed to locate the GCC";
     return 1;
   }
+  
+  clear_ide_editables();
   
   string EGMmain = fc("ENIGMAsystem/SHELL/SHELLmain.cpp");
   if (EGMmain == "")
@@ -131,8 +134,9 @@ struct syntax_error {
 string error_sstring;
 
 void quickmember_script(externs* scope, string name);
-dllexport syntax_error syntaxCheck(int script_count, const char* *script_names, const char* code)
+dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
+  cout << "Called." << endl;
   //First, we make a space to put our scripts.
   globals_scope = scope_get_using(&global_scope);
   globals_scope = globals_scope->members["ENIGMA Resources"] = new externs;
@@ -140,12 +144,17 @@ dllexport syntax_error syntaxCheck(int script_count, const char* *script_names, 
     globals_scope->flags = EXTFLAG_NAMESPACE;
     globals_scope->type  = NULL;
   
-  for (int i = 0; i < script_count; i++)
+  cout << "Checkpoint 1. Script count " << script_count << ", address " << script_names << endl;
+  for (int i = 0; i < script_count; i++) {
+    cout << "  Script " << i << " is named " << script_names[i] << endl;
     quickmember_script(globals_scope,script_names[i]);
+  }
   
+  cout << "Checkpoint 2." << endl;
   ide_passback_error.absolute_index = syncheck::syntacheck(code);
   error_sstring = syncheck::error;
   
+  cout << "Checkpoint 3." << endl;
   ide_passback_error.err_str = error_sstring.c_str();
   
   if (ide_passback_error.absolute_index != -1)
@@ -160,7 +169,7 @@ dllexport syntax_error syntaxCheck(int script_count, const char* *script_names, 
     ide_passback_error.line = line;
     ide_passback_error.position = lp;
   }
-  return ide_passback_error;
+  return &ide_passback_error;
 }
 
 /*

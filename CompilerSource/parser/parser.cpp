@@ -32,15 +32,17 @@
   As a fun fact, this parser was the first one I ever wrote, and was originally
   coded in GML. When it was complete, it parsed itself to C++.
   Large parts of it have since undergone recode to account for new features and
-  for reasons of efficiency and overall legibility. (The parser does not preserve
-  whitespace or comments, for one thing.)
+  for reasons of efficiency as well as overall legibility. (The parser does not
+  preserve whitespace or comments, for one thing, so that was all lost when the
+  original parsed itself over.)
   
-  It's worth noting that this is basically my only parser to do anything with tokens
-  or multiple passes. It uses what I call a syntax map, which someone told me was 
-  akin to a token stream. I don't really care; I made this up myself without any
-  external sources.
+  It's also worth noting that this is my only parser which incorporates a lexer
+  or conducts multiple passes. It uses what I call a syntax string, which some-
+  one once told me was akin to a token stream. I don't really care; I made this
+  up myself long ago without any help from external sources.
+  
   At any rate, this means that this parser is really easy to follow as far as
-  telling what's going on, as te parser can be divided into separate sections.
+  telling what's going on, as it can be divided into separate sections.
 /*/
 
 #include <map> //Log lookup
@@ -51,6 +53,7 @@ using namespace std; //More ease
 #include "../externs/externs.h" //To interface with externally defined types and functions
 
 #include "../general/darray.h"
+#include "../general/parse_basics.h"
 #include "object_storage.h"
 
 
@@ -255,6 +258,21 @@ string parser_main(string code, parsed_event* pev = NULL)
               break;
             continue;
           }
+          if (synt[pos] == 'n')
+          {
+            const size_t spos = pos;
+            while (synt[++pos] == 'n');
+            lid = code.substr(spos,pos-spos);
+            continue;
+          }
+          if (synt[pos] == '=')
+          {
+            while (synt[++pos] != ',' and synt[pos] != ';' and synt[pos]);
+            continue;
+          }
+          if (is_useless(pos++))
+            continue;
+          cout << "This shouldn't occur, so I will look the other way and not treat it as an error.\n";
         }
       }
     }
