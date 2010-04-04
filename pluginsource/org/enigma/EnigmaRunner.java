@@ -414,6 +414,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 				public void actionPerformed(ActionEvent e)
 					{
 					SyntaxError se = checkSyntax(sf.code.getText());
+					int max = sf.code.getDocumentLength() - 1;
+					if (se.absoluteIndex > max) se.absoluteIndex = max;
 					if (se.absoluteIndex != -1) //-1 = no error
 						{
 						sf.code.setSelectionStart(se.absoluteIndex);
