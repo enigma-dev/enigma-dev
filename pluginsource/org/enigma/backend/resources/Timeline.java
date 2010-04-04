@@ -14,11 +14,11 @@ import com.sun.jna.Structure;
 
 public class Timeline extends Structure
 	{
-	String name;
-	int id;
+	public String name;
+	public int id;
 
-	Moment[] moments;
-	int momentCount;
+	public Moment.ByReference moments;
+	public int momentCount;
 
 	public static class ByReference extends Timeline implements Structure.ByReference
 		{

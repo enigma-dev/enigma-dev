@@ -46,11 +46,13 @@ import org.enigma.backend.resources.Room;
 import org.enigma.backend.resources.Script;
 import org.enigma.backend.resources.Sound;
 import org.enigma.backend.resources.Sprite;
+import org.enigma.backend.resources.Timeline;
 import org.enigma.backend.sub.BackgroundDef;
 import org.enigma.backend.sub.Event;
 import org.enigma.backend.sub.Image;
 import org.enigma.backend.sub.Instance;
 import org.enigma.backend.sub.MainEvent;
+import org.enigma.backend.sub.Moment;
 import org.enigma.backend.sub.PathPoint;
 import org.enigma.backend.sub.Tile;
 import org.enigma.backend.sub.View;
@@ -70,6 +72,7 @@ import org.lateralgm.resources.library.LibAction;
 import org.lateralgm.resources.library.LibManager;
 import org.lateralgm.resources.library.Library;
 import org.lateralgm.resources.sub.Action;
+import org.lateralgm.resources.sub.ActionContainer;
 import org.lateralgm.resources.sub.Argument;
 import org.lateralgm.resources.sub.BackgroundDef.PBackgroundDef;
 import org.lateralgm.resources.sub.Instance.PInstance;
@@ -105,7 +108,7 @@ public final class EnigmaWriter
 		populatePaths();
 		populateScripts();
 		populateFonts();
-		o.timelineCount = 0;
+		populateTimelines();
 		populateObjects();
 		populateRooms();
 
@@ -463,6 +466,36 @@ public final class EnigmaWriter
 			}
 		}
 
+	protected void populateTimelines()
+		{
+		int size = i.timelines.size();
+		o.timelineCount = size;
+		if (size == 0) return;
+
+		o.timelines = new Timeline.ByReference();
+		Timeline[] otl = (Timeline[]) o.timelines.toArray(size);
+		org.lateralgm.resources.Timeline[] itl = i.timelines.toArray(new org.lateralgm.resources.Timeline[0]);
+		for (int t = 0; t < size; t++)
+			{
+			Timeline ot = otl[t];
+			org.lateralgm.resources.Timeline it = itl[t];
+
+			ot.name = it.getName();
+			ot.id = it.getId();
+
+			ot.momentCount = it.moments.size();
+			if (ot.momentCount == 0) continue;
+
+			ot.moments = new Moment.ByReference();
+			Moment[] oml = (Moment[]) ot.moments.toArray(ot.momentCount);
+			for (int m = 0; m < ot.momentCount; m++)
+				{
+				oml[m].stepNo = it.moments.get(m).stepNo;
+				oml[m].code = getActionsCode(it.moments.get(m));
+				}
+			}
+		}
+
 	protected void populateObjects()
 		{
 		int size = i.gmObjects.size();
@@ -723,11 +756,11 @@ public final class EnigmaWriter
 
 	public static boolean actionDemise = false;
 
-	public static String getActionsCode(org.lateralgm.resources.sub.Event ev)
+	public static String getActionsCode(ActionContainer ac)
 		{
 		String nl = System.getProperty("line.separator");
 		String code = "";
-		for (Action act : ev.actions)
+		for (Action act : ac.actions)
 			{
 			LibAction la = act.getLibAction();
 			if (la == null)
@@ -736,7 +769,7 @@ public final class EnigmaWriter
 					{
 					String mess = "Warning, you have a D&D action which is unsupported by this compiler."
 							+ " This and future unsupported D&D actions will be discarded. (LibAction not found"
-							+ " in event " + ev.toString() + ")";
+							+ " in moment/event " + ac.toString() + ")";
 					JOptionPane.showMessageDialog(null,mess);
 					actionDemise = true;
 					}
@@ -777,7 +810,7 @@ public final class EnigmaWriter
 								{
 								String mess = "Warning, you have a D&D action which is unsupported by this compiler."
 										+ " This and future unsupported D&D actions will be discarded. (Question + Applies To"
-										+ " in event " + ev.toString() + " in library ";
+										+ " in moment/event " + ac.toString() + " in library ";
 								if (la.parent == null || la.parent.tabCaption.length() == 0)
 									mess += la.parentId;
 								else

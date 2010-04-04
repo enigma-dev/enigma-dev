@@ -14,5 +14,5 @@
 struct Moment
 {
 	int stepNo;
-	Action *actions;
+	String code;
 };

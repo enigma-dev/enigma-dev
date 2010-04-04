@@ -12,7 +12,10 @@ import com.sun.jna.Structure;
 
 public class Moment extends Structure
 	{
-	int stepNo;
-	Action[] actions;
-	int actionCount;
+	public int stepNo;
+	public String code;
+
+	public static class ByReference extends Moment implements Structure.ByReference
+		{
+		}
 	}
