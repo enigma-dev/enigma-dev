@@ -319,7 +319,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
 		for (int i = 0; i < osl.length; i++)
 			osl[i] = isl[i].getName();
-		return EnigmaStruct.syntaxCheck(osl.length,new StringArray(osl),code);
+		EnigmaStruct.syntaxCheck(osl.length,new StringArray(osl),code);
+		SyntaxError e = new SyntaxError();
+		e.absoluteIndex = -1;
+		return e;
 
 		/*
 		File sf = null;

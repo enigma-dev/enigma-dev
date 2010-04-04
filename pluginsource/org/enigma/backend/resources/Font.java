@@ -12,15 +12,15 @@ import com.sun.jna.Structure;
 
 public class Font extends Structure
 	{
-	String name;
-	int id;
+	public String name;
+	public int id;
 
-	String fontName;
-	int size;
-	boolean bold;
-	boolean italic;
-	int rangeMin;
-	int rangeMax;
+	public String fontName;
+	public int size;
+	public boolean bold;
+	public boolean italic;
+	public int rangeMin;
+	public int rangeMax;
 
 	public static class ByReference extends Font implements Structure.ByReference
 		{

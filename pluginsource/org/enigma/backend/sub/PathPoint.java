@@ -12,7 +12,11 @@ import com.sun.jna.Structure;
 
 public class PathPoint extends Structure
 	{
-	int x;
-	int y;
-	int speed;
+	public int x;
+	public int y;
+	public int speed;
+
+	public static class ByReference extends PathPoint implements Structure.ByReference
+		{
+		}
 	}

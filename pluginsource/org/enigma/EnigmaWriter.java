@@ -39,7 +39,9 @@ import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.other.Constant;
 import org.enigma.backend.other.Include;
 import org.enigma.backend.resources.Background;
+import org.enigma.backend.resources.Font;
 import org.enigma.backend.resources.GmObject;
+import org.enigma.backend.resources.Path;
 import org.enigma.backend.resources.Room;
 import org.enigma.backend.resources.Script;
 import org.enigma.backend.resources.Sound;
@@ -49,12 +51,15 @@ import org.enigma.backend.sub.Event;
 import org.enigma.backend.sub.Image;
 import org.enigma.backend.sub.Instance;
 import org.enigma.backend.sub.MainEvent;
+import org.enigma.backend.sub.PathPoint;
 import org.enigma.backend.sub.Tile;
 import org.enigma.backend.sub.View;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
+import org.lateralgm.resources.Font.PFont;
 import org.lateralgm.resources.GmObject.PGmObject;
+import org.lateralgm.resources.Path.PPath;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
@@ -97,9 +102,9 @@ public final class EnigmaWriter
 		populateSprites();
 		populateSounds();
 		populateBackgrounds();
-		o.pathCount = 0;
+		populatePaths();
 		populateScripts();
-		o.fontCount = 0;
+		populateFonts();
 		o.timelineCount = 0;
 		populateObjects();
 		populateRooms();
@@ -125,7 +130,6 @@ public final class EnigmaWriter
 			Include[] oil = (Include[]) o.includes.toArray(o.includeCount);
 			for (int inc = 0; inc < o.includeCount; inc++)
 				{
-				System.out.println("J: " + i.gameSettings.includes.get(inc).filePath);
 				oil[inc].filepath = i.gameSettings.includes.get(inc).filePath;
 				}
 			}
@@ -364,6 +368,45 @@ public final class EnigmaWriter
 			}
 		}
 
+	protected void populatePaths()
+		{
+		int size = i.paths.size();
+		o.pathCount = size;
+		if (size == 0) return;
+
+		o.paths = new Path.ByReference();
+		Path[] opl = (Path[]) o.paths.toArray(size);
+		org.lateralgm.resources.Path[] ipl = i.paths.toArray(new org.lateralgm.resources.Path[0]);
+		for (int p = 0; p < size; p++)
+			{
+			Path op = opl[p];
+			org.lateralgm.resources.Path ip = ipl[p];
+
+			op.name = ip.getName();
+			op.id = ip.getId();
+
+			op.smooth = ip.get(PPath.SMOOTH);
+			op.closed = ip.get(PPath.CLOSED);
+			op.precision = ip.get(PPath.PRECISION);
+			op.backgroundRoomId = toId(ip.get(PPath.BACKGROUND_ROOM),-1);
+			op.snapX = ip.get(PPath.SNAP_X);
+			op.snapY = ip.get(PPath.SNAP_Y);
+
+			op.pointCount = ip.points.size();
+			if (op.pointCount == 0) continue;
+
+			op.points = new PathPoint.ByReference();
+			PathPoint[] oppl = (PathPoint[]) op.points.toArray(op.pointCount);
+			for (int pp = 0; pp < oppl.length; pp++)
+				{
+				org.lateralgm.resources.sub.PathPoint ipp = ip.points.get(pp);
+				oppl[pp].x = ipp.getX();
+				oppl[pp].y = ipp.getY();
+				oppl[pp].speed = ipp.getSpeed();
+				}
+			}
+		}
+
 	protected void populateScripts()
 		{
 		List<LibAction> qs = getQuestionLibActions();
@@ -391,6 +434,32 @@ public final class EnigmaWriter
 			oo.name = "lib" + qs.get(s).parentId + "_action" + qs.get(s).id;
 			oo.id = -s - 2;
 			oo.code = qs.get(s).execInfo;
+			}
+		}
+
+	protected void populateFonts()
+		{
+		int size = i.fonts.size();
+		o.fontCount = size;
+		if (size == 0) return;
+
+		o.fonts = new Font.ByReference();
+		Font[] ofl = (Font[]) o.fonts.toArray(size);
+		org.lateralgm.resources.Font[] ifl = i.fonts.toArray(new org.lateralgm.resources.Font[0]);
+		for (int f = 0; f < size; f++)
+			{
+			Font of = ofl[f];
+			org.lateralgm.resources.Font ifont = ifl[f];
+
+			of.name = ifont.getName();
+			of.id = ifont.getId();
+
+			of.fontName = ifont.get(PFont.FONT_NAME);
+			of.size = ifont.get(PFont.SIZE);
+			of.bold = ifont.get(PFont.BOLD);
+			of.italic = ifont.get(PFont.ITALIC);
+			of.rangeMin = ifont.get(PFont.RANGE_MIN);
+			of.rangeMax = ifont.get(PFont.RANGE_MAX);
 			}
 		}
 

@@ -14,18 +14,18 @@ import com.sun.jna.Structure;
 
 public class Path extends Structure
 	{
-	String name;
-	int id;
+	public String name;
+	public int id;
 
-	boolean smooth;
-	boolean closed;
-	int precision;
-	int backgroundRoomId;
-	int snapX;
-	int snapY;
+	public boolean smooth;
+	public boolean closed;
+	public int precision;
+	public int backgroundRoomId;
+	public int snapX;
+	public int snapY;
 
-	PathPoint[] points;
-	int pointCount;
+	public PathPoint.ByReference points;
+	public int pointCount;
 
 	public static class ByReference extends Path implements Structure.ByReference
 		{
