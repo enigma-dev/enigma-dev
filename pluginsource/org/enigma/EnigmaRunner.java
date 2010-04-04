@@ -254,25 +254,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 	public void compile(final byte mode)
 		{
-		//decide whether we're compiling, debugging, etc
-		/*		String arg1;
-				switch (mode)
-					{
-					case 1:
-						arg1 = "-c";
-						break;
-					case 2:
-						arg1 = "-d";
-						break;
-					case 3:
-						arg1 = "-b";
-						break;
-					case 4:
-						arg1 = "-c";
-						break;
-					default:
-						return;
-					}*/
+		//modes: 1=run, 2=debug, 3=build, 4=compile
 
 		//determine where to output the exe
 		/*		File exef = null;
@@ -306,23 +288,16 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		System.out.println(EnigmaStruct.compileEGMf(es));
 
 		//				System.out.println("Compiling with " + enigma);
-
-		/*		String[] cmd = new String[] { arg1,exef.getPath() };
-				for (String s : cmd)
-					System.out.print(s + " ");
-				System.out.println();*/
 		}
 
 	public static SyntaxError checkSyntax(String code)
 		{
+		EnigmaStruct.gameNew(); //FIXME: Call at a different time?
 		String osl[] = new String[LGM.currentFile.scripts.size()];
 		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
 		for (int i = 0; i < osl.length; i++)
 			osl[i] = isl[i].getName();
-		EnigmaStruct.syntaxCheck(osl.length,new StringArray(osl),code);
-		SyntaxError e = new SyntaxError();
-		e.absoluteIndex = -1;
-		return e;
+		return EnigmaStruct.syntaxCheck(osl.length,new StringArray(osl),code);
 
 		/*
 		File sf = null;
