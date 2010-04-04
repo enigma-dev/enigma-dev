@@ -47,6 +47,8 @@ import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
 import org.lateralgm.subframes.SubframeInformer.SubframeListener;
 
+import com.sun.jna.StringArray;
+
 public class EnigmaRunner implements ActionListener,SubframeListener
 	{
 	public static final String ENIGMA = "compileEGMf.exe";
@@ -317,7 +319,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
 		for (int i = 0; i < osl.length; i++)
 			osl[i] = isl[i].getName();
-		return EnigmaStruct.syntaxCheck(osl.length,osl,code);
+		return EnigmaStruct.syntaxCheck(osl.length,new StringArray(osl),code);
 
 		/*
 		File sf = null;
@@ -416,12 +418,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 				public void actionPerformed(ActionEvent e)
 					{
 					SyntaxError se = checkSyntax(sf.code.getText());
-					//FIXME: how are no errors handled?
-					if (se.absoluteIndex >= 0)
+					if (se.absoluteIndex != -1) //-1 = no error
 						{
 						sf.code.setSelectionStart(se.absoluteIndex);
 						sf.code.setSelectionEnd(se.absoluteIndex + 1);
-						//TODO: Toolbar with error message
+						//TODO: Statusbar with error message
 						}
 					}
 			});

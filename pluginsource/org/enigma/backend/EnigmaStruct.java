@@ -83,5 +83,6 @@ public class EnigmaStruct extends Structure
 		public int absoluteIndex;
 		}
 
-	public static native SyntaxError syntaxCheck(int script_count, String scripts[], String code);
+	/** @param scriptNames (StringArray) */
+	public static native SyntaxError syntaxCheck(int scriptCount, Pointer scriptNames, String code);
 	}

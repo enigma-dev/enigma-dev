@@ -84,8 +84,7 @@ public final class EnigmaWriter
 
 	public static EnigmaStruct prepareStruct(GmFile f)
 		{
-		EnigmaWriter ew = new EnigmaWriter(f,new EnigmaStruct());
-		return ew.populateStruct();
+		return new EnigmaWriter(f,new EnigmaStruct()).populateStruct();
 		}
 
 	protected EnigmaStruct populateStruct()
@@ -127,7 +126,7 @@ public final class EnigmaWriter
 			for (int inc = 0; inc < o.includeCount; inc++)
 				{
 				System.out.println("J: " + i.gameSettings.includes.get(inc).filePath);
-//				oil[inc].filepath = i.gameSettings.includes.get(inc).filePath;
+				oil[inc].filepath = i.gameSettings.includes.get(inc).filePath;
 				}
 			}
 

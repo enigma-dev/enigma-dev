@@ -44,10 +44,10 @@
 using namespace std;
 #define flushl (fflush(stdout), "\n")
 
-#include "../externs/externs.h"
-#include "../syntax/syncheck.h"
-#include "../parser/parser.h"
-#include "compile_includes.h"
+//#include "../externs/externs.h"
+//#include "../syntax/syncheck.h"
+//#include "../parser/parser.h"
+//#include "compile_includes.h"
 
 dllexport int compileEGMf(EnigmaStruct *es)
 {
@@ -55,7 +55,7 @@ dllexport int compileEGMf(EnigmaStruct *es)
   
   cout << "Location in memory of structure: " << es << flushl;
   if (es == NULL)
-    return E_ERROR_PLUGIN_FUCKED_UP;
+    return -1;//E_ERROR_PLUGIN_FUCKED_UP;
   
   cout << "File version: " << es->fileVersion << endl << flushl;
   if (es->fileVersion != 600)
@@ -70,7 +70,7 @@ dllexport int compileEGMf(EnigmaStruct *es)
   ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.  
   
   //First, we make a space to put our globals.
-  globals_scope = scope_get_using(&global_scope);
+  /*globals_scope = scope_get_using(&global_scope);
   globals_scope = globals_scope->members["ENIGMA Resources"] = new externs;
     globals_scope->name  = "ENIGMA Resources";
     globals_scope->flags = EXTFLAG_NAMESPACE;
@@ -281,7 +281,7 @@ dllexport int compileEGMf(EnigmaStruct *es)
       wto << "}\n";
   wto.close();
   
-  
+  */
   
   
   
