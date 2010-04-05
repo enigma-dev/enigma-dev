@@ -226,6 +226,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       if (name == "while")   goto label_while;
       if (name == "with")    goto label_with;
   }
+  error = "";
   return unsigned(-2);
   
   
@@ -409,6 +410,25 @@ int close_statement(string& code,pt& pos)
 {
   assop[level]=0;
   number_of_statements++;
+  if (plevel > 0)
+  {
+    if (plevel > 1) {
+      error = "Expected multiple closing parentheses before this point";
+      return pos;
+    }
+    if (plevelt[plevel] != PLT_FORSTATEMENT) {
+      error = plevelt[plevel] == PLT_BRACKET?"Expected closing bracket before this point" : "Expected closing brace before this point";
+    }
+    const int ef = lower_to_level(LEVELTYPE_FOR_PARAMETERS,"otherwise meaningless parenthetical expression");
+      if (ef != -1) return ef;
+    if (statement_pad[level] > 1)
+      statement_pad[level]--;
+    else {
+      error = "Expected ending parenthesis before this point";
+      return pos;
+    }
+    return -1;
+  }
   while (level>0)
   {
     if (statement_pad[level]>=0) statement_pad[level]--;

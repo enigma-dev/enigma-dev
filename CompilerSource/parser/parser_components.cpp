@@ -668,19 +668,21 @@ inline bool likesaspace(char c,char d)
   return 1;
 }
 
-void print_the_fucker(string code,string synt)
+#include <fstream>
+
+const char * indent_chars   =  "\n                                \
+                                                                  \
+                                                                  \
+                                                                  \
+                                                                  ";
+
+void print_to_file(string code,string synt,int indentmin_b4,ofstream &of)
 {
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
-  FILE* of = fopen("C:/Users/Josh/Desktop/parseout.txt","w+b");
-  if (of == NULL) return;
-
-  const char * indent   =  "\r\n                                \
-                                                                \
-                                                                \
-                                                                \
-                                                                ";
-
-  const int indentmin=2;
+  //FILE* of = fopen("C:/Users/Josh/Desktop/parseout.txt","w+b");
+  //if (of == NULL) return;
+  
+  const int indentmin = indentmin_b4 + 1;
   int indc = 0,tind = 0,pars = 0,str = 0;
 
   const unsigned int len = code.length();
@@ -690,50 +692,44 @@ void print_the_fucker(string code,string synt)
     {
       case '{':
           tind = 0;
-          fwrite(indent,1,indentmin+indc,of);
+          of.write(indent_chars,indentmin+indc);
           if (indc < 256) indc+=2;
-          fputc('{',of);
-          fwrite(indent,1,indentmin+indc,of);
+          of << '{';
+          of.write(indent_chars,indentmin+indc);
         break;
       case '}':
           tind = 0;
           indc -= 2;
-          {
-            fseek(of,-2,SEEK_CUR);
-            bool ds = 1;
-            ds &= fgetc(of) == ' ';
-            ds &= fgetc(of) == ' ';
-            if (ds) fseek(of,-2,SEEK_CUR);
-          }
-          fputc('}',of);
-          fwrite(indent,1,indentmin+indc,of);
+          of.write(indent_chars,indentmin+indc);
+          of << '}';
+          of.write(indent_chars,indentmin+indc);
         break;
       case ';':
         if (pars)
         {
-          fputc(code[pos],of);
-          fputc(' ',of);
+          of << code[pos];
+          of << ' ';
           break;
         }
         if (tind) tind = 0;
         case ':':
-          fputc(code[pos],of);
-          fwrite(indent,1,indentmin+indc+tind,of);
+          of << code[pos];
+          of.write(indent_chars,indentmin+indc+tind);
         break;
       case '(':
           if (pars) pars++;
-          fputc('(',of);
+          of << '(';
         break;
       case ')':
           if (pars) pars--;
-          fputc(')',of);
+          of << ')';
           if (pars == 1)
           {
             pars = 0;
             if (synt[pos+1] != '{' and synt[pos+1] != ';')
             {
               tind+=2;
-              fwrite(indent,1,indentmin+indc+tind,of);
+              of.write(indent_chars,indentmin+indc+tind);
             }
           }
         break;
@@ -741,7 +737,7 @@ void print_the_fucker(string code,string synt)
           if (pars) pars--;
           for (int c = 1; c; c--)
           {
-            fwrite(string_in_code[str].c_str(),1,string_in_code[str].length(),of);
+            of.write(string_in_code[str].c_str(),string_in_code[str].length());
             str++;
             if (synt[pos+1] == '+' and synt[pos+2] == '"')
             {
@@ -753,18 +749,17 @@ void print_the_fucker(string code,string synt)
       case 's':
       case 'f':
           pars = 1;
-          fputc(code[pos],of);
+          of << code[pos];
         break;
 
       default:
-          fputc(code[pos],of);
+          of << code[pos];
           if (likesaspace(synt[pos],synt[pos+1]))
-            fputc(' ',of);
+            of << ' ';
         break;
     }
   }
-  fclose(of);
-  if (system("\"/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt\""))
+  /*if (system("\"/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt\""))
   if (system("gedit \"/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt\""))
-    printf("zomg fnf\r\n");
+    printf("zomg fnf\r\n");*/
 }

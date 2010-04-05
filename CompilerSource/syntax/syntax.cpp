@@ -108,7 +108,8 @@ namespace syncheck
       PLT_PARENTH,
       PLT_BRACKET,
       PLT_FUNCTION,
-      PLT_FORSTATEMENT
+      PLT_FORSTATEMENT,
+      PLT_CAST
      };
 
 
@@ -122,6 +123,7 @@ namespace syncheck
         LN_DIGIT,          // 0 1 2... (...)
         LN_FUNCTION,       // game_end()
         LN_FUNCTION_NAME,  // game_end
+        LN_TYPE_NAME,      // int, double, whatever 
         LN_CLOSING_SYMBOL, // { ; }
         LN_LOCGLOBAL,      // global/local
         LN_FOR             // for
@@ -193,35 +195,41 @@ namespace syncheck
             int cs = close_statement(code,pos);
             if (cs != -1) return cs;
           }
-          else {
-            if (lastnamed[level]==LN_VARNAME or lastnamed[level]==LN_FUNCTION_NAME)
-              { error="Operator expected at this point"; return pos; }
-          }
+          else if (lastnamed[level]==LN_VARNAME or lastnamed[level]==LN_FUNCTION_NAME)
+          { error="Operator expected at this point"; return pos; }
           
           const unsigned issr = handle_if_statement(code,name,pos); //Check *if* it's a statement, handle it *if* it is.
           if (issr != unsigned(-2)) { 
             if (issr != unsigned(-1))
               return issr;
           }
+          else if (name == "local" or name == "global") //These two are very special...
+            lastnamed[level] = LN_LOCGLOBAL;
           else if (find_extname(name,0xFFFFFFFF))
           {
             if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
             {
               indeclist[level] = true;
-              if (lastnamed[level] == LN_LOCGLOBAL)
-                lastnamed[level] = LN_NOTHING;
+              lastnamed[level] = LN_TYPE_NAME;
+              if (plevel > 0)
+              {
+                if (plevelt[plevel] == PLT_PARENTH)
+                  plevelt[plevel] = PLT_CAST;
+                else if (plevelt[plevel] != PLT_FORSTATEMENT) {
+                  error = "Unexpected declarator at this point";
+                  return pos;
+                }
+              }
             }
-            if (ext_retriever_var->is_function()) {
+            else if (ext_retriever_var->is_function()) {
               lastnamed[level] = LN_FUNCTION_NAME;
               function_ext = ext_retriever_var;
             }
-          }
-          else if (name == "local" or name == "global") //These two are very special...
-          {
-            lastnamed[level] = LN_LOCGLOBAL;
+            else goto just_an_identifier;
           }
           else //just an identifier; ie, a variable or function name
           {
+            just_an_identifier:
             last_identifier = name;
             if (levelt[level] == LEVELTYPE_STRUCT and statement_pad[level] == PAD_STRUCT_NOTHING)
               quicktype(EXTFLAG_STRUCT,last_identifier);
@@ -354,20 +362,20 @@ namespace syncheck
 
         if (code[pos]==',')
         {
-          if (!inlist())
-           { error="Comma outside of function parameters or declarations"; return pos; }
+          //if (!inlist())
+           //{ error="Comma outside of function parameters or declarations"; return pos; }
           if (lastnamed[level]==LN_OPERATOR)
             { error="Secondary expression expected before comma"; return pos; }
-
+          
           //The beauty: if we have unterminated parentheses before the comma, the first error is true.
           //There does not need to be an assignment operator in either case.
-
-          lastnamed[level]=LN_NOTHING;
+          
+          lastnamed[level] = LN_NOTHING;
           pos++;
           continue;
         }
-
-
+        
+        
         //Moving on...
         //first priority is to check for a bracket of any sort; () [] {}
         if (code[pos] == '(')
@@ -387,11 +395,15 @@ namespace syncheck
             if (cf!=-1) return cf;
             lastnamed[level] = LN_NOTHING;
           }
+          else if (lastnamed[level] == LN_TYPE_NAME) //Is a C++ function.
+          {
+            plevelt[plevel] = PLT_PARENTH;
+            lastnamed[level] = LN_NOTHING;
+          }
           else if (lastnamed[level] == LN_FOR)
           {
             plevelt[plevel] = PLT_FORSTATEMENT;
             lastnamed[level] = LN_NOTHING;
-            statement_pad[level]--;
           }
           else
           {
@@ -416,7 +428,7 @@ namespace syncheck
               close_statement(code,pos);
             }
             else if (!assop[level] && !(plevel>0))
-            { error="Parenthetical expression outside of assignment operator: This is what made C nasty"; return pos; }
+            { error="Parenthetical expression outside of assignment operator: This is what makes C taste bitter"; return pos; }
             plevelt[plevel] = PLT_PARENTH;
             //lastnamed[level] should remain the same... it should be an operator.
           }
@@ -425,20 +437,30 @@ namespace syncheck
         }
         else if (code[pos]==')')
         {
-          if (plevelt[plevel]!=PLT_PARENTH and plevelt[plevel]!=PLT_FUNCTION)
+          if (plevelt[plevel] != PLT_PARENTH and plevelt[plevel] != PLT_FUNCTION)
           {
-            if (plevelt[plevel] == PLT_FORSTATEMENT and statement_pad[level] == 1) {
+            if (plevelt[plevel] == PLT_FORSTATEMENT)
+            {
+              if (statement_pad[level] != 1) {
+                error = "Too soon for closing parentheses to for() statement " + tostring(statement_pad[level]);
+                return pos;
+              }
               level--, plevel--;
+              pos++; continue;
+            }
+            
+            if (plevelt[plevel] == PLT_CAST) {
+              plevel--; lastnamed[level] = LN_OPERATOR; //Casts are the equivalent to unary operators
               pos++; continue;
             }
             
             error="Unexpected closing parenthesis at this point";
             return pos;
           }
-          if (plevelt[plevel]==PLT_FUNCTION)
-            lastnamed[level]=LN_FUNCTION;
+          if (plevelt[plevel] == PLT_FUNCTION)
+            lastnamed[level] = LN_FUNCTION;
           else
-            lastnamed[level]=LN_DIGIT;
+            lastnamed[level] = LN_DIGIT;
           plevel--;
           pos++;
           continue;
@@ -575,8 +597,7 @@ namespace syncheck
           {
             //in this case, there could be a number following
             //Syntax checking on the positioning of the number will be handled next iteration
-            pos++;
-            while (is_useless(code[pos+1])) pos++;
+            while (is_useless(code[++pos]));
             if (is_digit(code[pos]))
             { decimal_named=1; continue; }
             else
@@ -734,7 +755,7 @@ namespace syncheck
               break;
 
             case '!': case '~': //we already know the next symbol is not '=', so this is unary
-                if (lastnamed[level]!=LN_OPERATOR)
+                if (lastnamed[level] != LN_OPERATOR and lastnamed[level] != LN_NOTHING)
                 { error="Unexpected unary operator following value"; return pos; }
                 pos++;
               break; //lastnamed is already operator, so just break

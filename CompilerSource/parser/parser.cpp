@@ -139,6 +139,7 @@ struct scope_ignore {
   map<string,int> i;
 };
 
+#define and_safety
 
 string parser_main(string code, parsed_event* pev = NULL)
 {
@@ -226,20 +227,22 @@ string parser_main(string code, parsed_event* pev = NULL)
         
         string lid;
         unsigned spos = pos;
+        bool has_init = false;
+        
+        string prefixes, suffixes;
         
         //Begin iterating the declared variables
         while (pos < code.length())
         {
-          bool has_init = false;
           if (synt[pos] == ',' or synt[pos] == ';')
           {
-            if (out_of_scope) //Designated for a different scope, global or local
+            if (out_of_scope) //Designated for a different scope: global or local
             {
               if (out_of_scope - 1) //to be placed at global scope
-                pev->myObj->globals[lid] = type_name;
+                pev->myObj->globals[lid] = dectrip(type_name);
               else
-                pev->myObj->locals[lid] = type_name;
-              if (!has_init)
+                pev->myObj->locals[lid] = dectrip(type_name);
+              if (!has_init) //If this statement does nothing other than declare, remove it
               {
                 code.erase(spos,pos+1);
                 synt.erase(spos,pos+1);
@@ -253,6 +256,7 @@ string parser_main(string code, parsed_event* pev = NULL)
               pos++;
             }
             
+            spos = pos;
             has_init = false;
             if (synt[pos] == ';')
               break;
@@ -265,14 +269,31 @@ string parser_main(string code, parsed_event* pev = NULL)
             lid = code.substr(spos,pos-spos);
             continue;
           }
+          if (synt[pos] == '*') {
+            prefixes += "*";
+            pos++; continue;
+          }
+          if (synt[pos] == '&') {
+            prefixes += "&";
+            pos++; continue;
+          }
+          if (synt[pos] == '[')
+          {
+            pos++;
+            const unsigned ssp = pos;
+            for (int cnt = 1; cnt > 0 and_safety; pos++)
+              if (synt[pos] == '[') cnt++;
+              else if (synt[pos] == ']') cnt--;
+            suffixes += code.substr(ssp,pos-ssp);
+            continue;
+          }
           if (synt[pos] == '=')
           {
             while (synt[++pos] != ',' and synt[pos] != ';' and synt[pos]);
+            has_init = true;
             continue;
           }
-          if (is_useless(pos++))
-            continue;
-          cout << "This shouldn't occur, so I will look the other way and not treat it as an error.\n";
+          cout << "This shouldn't occur, so I will look the other way and not error." << code[pos++] << '\n';
         }
       }
     }
@@ -282,7 +303,6 @@ string parser_main(string code, parsed_event* pev = NULL)
     pev->synt = synt;
   }
   
-  //print_the_fucker(code,synt);
-  
   return code;
 }
+

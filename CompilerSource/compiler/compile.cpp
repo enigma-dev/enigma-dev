@@ -60,7 +60,14 @@ void clear_ide_editables()
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out); wto.close();
 }
 
-dllexport int compileEGMf(EnigmaStruct *es)
+enum cmodes {
+  mode_run,
+  mode_debug,
+  mode_build,
+  mode_compile
+};
+
+dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
   cout << "Hey. I wanted you to know: I have no fucking idea what to do with this input. :D\n";
   
@@ -149,7 +156,7 @@ dllexport int compileEGMf(EnigmaStruct *es)
   {
     //For every object in Ism's struct, make our own
     unsigned ev_count = 0;
-    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object(es->gmObjects[i].name,es->gmObjects[i].id);
+    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object(es->gmObjects[i].name,es->gmObjects[i].id,es->gmObjects[i].spriteId);
     cout << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " sub-events: " << flushl;
     
     for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
@@ -270,31 +277,44 @@ dllexport int compileEGMf(EnigmaStruct *es)
         {
           //Look up the event name
           string evname = event_get_enigma_main_name(i->second->events[ii].mainId,i->second->events[ii].id);
-          wto << "  #define ENIGMAEVENT_" << evname << " 1";
-          wto << "  variant myevent_" << evname << "();";
-          
-          //Automatic constructor
-          wto << "  OBJ_" <<  i->second->name << "(): object_locals(enigma::newinst_id++, " << i->second->id << ")";
-          if (used__object_set_sprite) //We want to initialize 
-            wto << ", enigma::object_table[" << i->second->id << "].sprite\n  {\n    enigma::constructor(this);\n  }\n";
-          else 
-            wto << "\n  {\n    enigma::constructor(this);\n    sprite_index = 0;\n  }\n";
-          
-          //Directed constructor (ID is specified)
-          wto << "  OBJ_" <<  i->second->name << "(int id): object_locals(id, " << i->second->id << ")\n";
-          if (used__object_set_sprite) //We want to initialize 
-            wto << ", enigma::object_table[" << i->second->id << "].sprite\n  {\n    enigma::constructor(this);\n  }\n";
-          else 
-            wto << "\n  {\n    enigma::constructor(this);\n    sprite_index = 0;\n  }\n";
+          wto << "\n    #define ENIGMAEVENT_" << evname << " 1\n";
+          wto << "    variant myevent_" << evname << "();\n  ";
         }
-        wto << "  };";
+        
+        //Automatic constructor
+        wto << "\n    OBJ_" <<  i->second->name << "(): object_locals(enigma::newinst_id++, " << i->second->id << ")";
+        if (used__object_set_sprite) //We want to initialize 
+          wto << ", sprite_index(enigma::object_table[" << i->second->id << "].sprite)";
+        else 
+          wto << ", sprite_index(" << i->second->sprite_index << ")";
+        wto << "\n    {\n      enigma::constructor(this);\n      myevent_create();\n    }\n";
+        
+        //Directed constructor (ID is specified)
+        wto << "    OBJ_" <<  i->second->name << "(int id): object_locals(id, " << i->second->id << ")";
+        if (used__object_set_sprite) //We want to initialize 
+          wto << ", sprite_index(enigma::object_table[" << i->second->id << "].sprite)";
+        else 
+          wto << ", sprite_index(" << i->second->sprite_index << ")";
+        wto << "\n    {\n      enigma::constructor(this);\n      myevent_create();\n    }\n";
+        
+        wto << "  };\n";
       }
-      wto << "}\n";
+    wto << "}\n";
   wto.close();
   
-  
-  
-  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out);
+    wto << license;
+    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+    {
+      for (unsigned ii = 0; ii < i->second->events.size; ii++)
+      {
+        string evname = event_get_enigma_main_name(i->second->events[ii].mainId,i->second->events[ii].id);
+        wto << "enigma::variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
+          print_to_file(i->second->events[ii].code,i->second->events[ii].synt,2,wto);
+        wto << "\n}\n\n";
+      }
+    }  
+  wto.close();
   
   
   
@@ -318,6 +338,8 @@ dllexport int compileEGMf(EnigmaStruct *es)
     cout << " " << es->sounds[i].name << endl;
     fflush(stdout);
   }
+  
+  
   /*
   cout << es->includeCount << " Includes:" << endl;
   for (int i = 0; i < es->includeCount; i++) {

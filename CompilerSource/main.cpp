@@ -88,7 +88,8 @@ int establish_bearings()
 extern void clear_ide_editables();
 extern void print_err_line_at(unsigned a);
 #include "cfile_parse/cfile_pushing.h"
-dllexport int gameNew()
+
+dllexport int libInit()
 {
   cout << "Intializing Parsers.";
   cparse_init();
@@ -97,7 +98,16 @@ dllexport int gameNew()
     cout << "ERROR: Failed to locate the GCC";
     return 1;
   }
-  
+  return 0;
+}
+
+dllexport int gccDefinePath(const char* gccPath)
+{
+  return 0;
+}
+
+dllexport int whitespaceModified(const char* wscode)
+{
   clear_ide_editables();
   
   string EGMmain = fc("ENIGMAsystem/SHELL/SHELLmain.cpp");
@@ -136,7 +146,6 @@ string error_sstring;
 void quickmember_script(externs* scope, string name);
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
-  cout << "Called." << endl;
   //First, we make a space to put our scripts.
   globals_scope = scope_get_using(&global_scope);
   globals_scope = globals_scope->members["ENIGMA Resources"] = new externs;
@@ -144,23 +153,18 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
     globals_scope->flags = EXTFLAG_NAMESPACE;
     globals_scope->type  = NULL;
   
-  cout << "Checkpoint 1. Script count " << script_count << ", address " << script_names << endl;
-  for (int i = 0; i < script_count; i++) {
-    cout << "  Script " << i << " is named " << script_names[i] << endl;
+  for (int i = 0; i < script_count; i++)
     quickmember_script(globals_scope,script_names[i]);
-  }
   
-  cout << "Checkpoint 2." << endl;
   ide_passback_error.absolute_index = syncheck::syntacheck(code);
   error_sstring = syncheck::error;
   
-  cout << "Checkpoint 3." << endl;
   ide_passback_error.err_str = error_sstring.c_str();
   
   if (ide_passback_error.absolute_index != -1)
   {
     int line = 1, lp = 1;
-    for (unsigned i=0; i<pos; i++,lp++) {
+    for (int i=0; i<ide_passback_error.absolute_index; i++,lp++) {
       if (code[i] =='\n')
         line++, lp = 0, i += code[i+1] == '\n';
       else if (code[i] == '\n') line++, lp = 0;
@@ -169,6 +173,8 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
     ide_passback_error.line = line;
     ide_passback_error.position = lp;
   }
+  cout << "In checking code\n" << code << "\n\nat position " << ide_passback_error.absolute_index << "\n\n";
+  cout << endl << "Line " << ide_passback_error.line << ", position " << ide_passback_error.position << ": " << ide_passback_error.err_str << endl<< endl;
   return &ide_passback_error;
 }
 

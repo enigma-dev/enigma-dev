@@ -34,7 +34,12 @@ using namespace std;
 
 #include "object_storage.h"
 
+
+dectrip::dectrip(): type(), prefix(), suffix() {}
+dectrip::dectrip(string t): type(t), prefix(), suffix() {}
+dectrip::dectrip(string t,string p, string s): type(t), prefix(p), suffix(s) {}
+
 parsed_event::parsed_event(): id(0), mainId(0), otherObjId(-4) {}
 parsed_object::parsed_object() {}
-parsed_object::parsed_object(string n, int i): name(n), id(i) {}
+parsed_object::parsed_object(string n, int i, int s): name(n), id(i), sprite_index(s) {}
 map<int,parsed_object*> parsed_objects;

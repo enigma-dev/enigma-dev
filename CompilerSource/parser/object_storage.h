@@ -37,20 +37,26 @@ struct parsed_event
   
   parsed_event();
 };
+struct dectrip {
+  string type, prefix, suffix;
+  dectrip();
+  dectrip(string t);
+  dectrip(string t,string p, string s);
+};
 struct parsed_object
 {
   varray<parsed_event> events;
   
   string name;
-  int id;
+  int id, sprite_index;
   
   map<string,int> calls;      //Any function or script KEY called.
-  map<string,string> locals;  //Any variable KEY used but not declared, or declared as local VALUE.
-  map<string,string> globals; //Any variable KEY or declared as global VALUE.
+  map<string,dectrip> locals;  //Any variable KEY used but not declared, or declared as local VALUE.
+  map<string,dectrip> globals; //Any variable KEY or declared as global VALUE.
   map<string,int> dots;       //Any attribute KEY accessed via a dot, as in a.KEY
   
   parsed_object();
-  parsed_object(string,int);
+  parsed_object(string,int,int);
 };
 extern map<int,parsed_object*> parsed_objects;
 typedef map<int,parsed_object*>  :: iterator po_i;

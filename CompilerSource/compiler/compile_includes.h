@@ -74,9 +74,62 @@ enum {
   E_ERROR_WUT
 };
 
+#include "event_ids.h"
+
+string event_get_subname_other(int id)
+{
+  switch (id)
+  {
+    case EV_OUTSIDE:        return "outside";
+    case EV_BOUNDARY:       return "boundary";
+    case EV_GAME_START:     return "game_start";
+    case EV_GAME_END:       return "game_end";
+    case EV_ROOM_START:     return "room_start";
+    case EV_ROOM_END:       return "room_end";
+    case EV_NO_MORE_LIVES:  return "no_more_lives";
+    case EV_NO_MORE_HEALTH: return "no_more_health";
+    case EV_ANIMATION_END:  return "animation_end";
+    case EV_END_OF_PATH:    return "end_of_path";
+    
+    case EV_USER0:  return "user0";
+    case EV_USER1:  return "user1";
+    case EV_USER2:  return "user2";
+    case EV_USER3:  return "user3";
+    case EV_USER4:  return "user4";
+    case EV_USER5:  return "user5";
+    case EV_USER6:  return "user6";
+    case EV_USER7:  return "user7";
+    case EV_USER8:  return "user8";
+    case EV_USER9:  return "user9";
+    case EV_USER10: return "user10";
+    case EV_USER11: return "user11";
+    case EV_USER12: return "user12";
+    case EV_USER13: return "user13";
+    case EV_USER14: return "user14";
+    case EV_USER15: return "user15";
+  }
+  return "lol_error";
+}
+
 string event_get_enigma_main_name(int mid, int id)
 {
-  return "draw";
+  switch (mid)
+  {
+    case EV_CREATE:     return "create";
+    case EV_DESTROY:    return "destroy";
+    case EV_ALARM:      return "alarm";
+    case EV_STEP:
+      return (id == STEP_BEGIN) ? "step_begin" : (id == STEP_END) ? "step_end" : "step";
+    case EV_COLLISION:  return "collision";
+    case EV_KEYBOARD:   return "keyboard";
+    case EV_MOUSE:      return "mouse";
+    case EV_OTHER:      return "other";
+    case EV_DRAW:       return "draw";
+    case EV_KEYPRESS:   return "keypress";
+    case EV_KEYRELEASE: return "keyrelease";
+    case EV_TRIGGER:    return "trigger";
+  }
+  return "error_not_main";
 }
 
 
