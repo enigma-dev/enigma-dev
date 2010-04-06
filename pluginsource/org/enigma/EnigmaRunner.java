@@ -27,6 +27,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
@@ -36,7 +38,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JTextArea;
 
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.EnigmaStruct.SyntaxError;
@@ -68,10 +72,77 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 		System.out.print("Initializing Enigma: ");
 		int ret = EnigmaStruct.libInit();
-		System.out.println(ret == 0 ? "Done" : "Error " + ret);
+		if (ret != 0)
+			{
+			//this is my sad attempt at trying to get the user to locate GCC
+			JFileChooser fc = new JFileChooser();
+			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			fc.setDialogTitle("Please locate the GCC directory (containing bin/, lib/ etc)");
+			fc.setAcceptAllFileFilterUsed(false);
+			if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
+				{
+				ret = EnigmaStruct.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
+				if (ret != 0)
+					JOptionPane.showMessageDialog(null,
+							"WTF OMG GCC NOT FOUND!!! *collapses* *twitches on floor*");
+				}
+			}
+
+		if (ret == 0)
+			{
+			//Apparently josh wants a textbox for if it returns 0 (gcc found)?
+			//I'm guessing he also wants me to get text from him and put it in here
+			ef = new EnigmaFrame();
+
+			if (false)
+				{
+				PrintStream oldOut = System.out;
+				System.setOut(new PrintStream(new TextAreaOutputStream(ef.ta)));
+				}
+			}
 
 		//TODO: add whitespace support
 		EnigmaStruct.whitespaceModified("");
+		}
+
+	public class TextAreaOutputStream extends OutputStream
+		{
+		StringBuilder sb = new StringBuilder();
+		JTextArea ta;
+
+		public TextAreaOutputStream(JTextArea ta)
+			{
+			this.ta = ta;
+			}
+
+		@Override
+		public void write(byte[] b) throws IOException
+			{
+			flush();
+			ta.append(new String(b));
+			}
+
+		public void write(byte[] b, int off, int len) throws IOException
+			{
+			flush();
+			ta.append(new String(b,off,len));
+			}
+
+		@Override
+		public void write(int b) throws IOException
+			{
+			sb.append((char) b);
+			if (b == '\n') flush();
+			}
+
+		public void flush() throws IOException
+			{
+			if (sb.length() != 0)
+				{
+				ta.append(sb.toString());
+				sb = new StringBuilder();
+				}
+			}
 		}
 
 	public void populateMenu()
