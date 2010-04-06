@@ -160,6 +160,8 @@ string parser_main(string code, parsed_event* pev = NULL)
   
   parser_ready_input(code,synt);
   
+  parser_reinterpret(code,synt);
+  
   parser_add_semicolons(code,synt);
   
   //cout << synt << endl;
@@ -169,16 +171,16 @@ string parser_main(string code, parsed_event* pev = NULL)
   {
     int igpos = 0;
     darray<scope_ignore*> igstack;
-    igstack[igpos++] = new scope_ignore;
+    igstack[igpos] = new scope_ignore;
     
     for (size_t pos = 0; pos < code.length(); pos++)
     {
       if (synt[pos] == '{') {
-        igstack[igpos++] = new scope_ignore;
+        igstack[++igpos] = new scope_ignore;
         continue;
       }
       if (synt[pos] == '}') {
-        delete igstack[--igpos];
+        delete igstack[igpos--];
         continue;
       }
       
@@ -200,8 +202,8 @@ string parser_main(string code, parsed_event* pev = NULL)
         out_of_scope = 1 + (code[sp] == 'g'); //If the first character of this token is 'g', it's global. Otherwise we assume it's local.
         
         //Remove the keyword from the code
-        code.erase(sp,pos);
-        synt.erase(sp,pos);
+        code.erase(sp,pos-sp);
+        synt.erase(sp,pos-sp);
         pos = sp;
         
         goto past_this_if;
@@ -220,8 +222,8 @@ string parser_main(string code, parsed_event* pev = NULL)
         if (out_of_scope)
         {
           //Remove the keyword from the code
-          code.erase(tsp,pos);
-          synt.erase(tsp,pos);
+          code.erase(tsp,pos-tsp);
+          synt.erase(tsp,pos-tsp);
           pos = tsp;
         }
         
@@ -236,30 +238,41 @@ string parser_main(string code, parsed_event* pev = NULL)
         {
           if (synt[pos] == ',' or synt[pos] == ';')
           {
+            const bool donehere = (synt[pos] == ';');
+            
+            cout << "*************" << pos << "; " << spos << "*************" << endl;
+            //cout << "\n" << code.substr(0,spos) << "<<" << code.substr(spos,pos-spos) << ">>" << code.substr(pos) << endl << endl;// << synt.substr(0,pos) << "<<>>" << code.substr(pos) << endl << endl;
+            
             if (out_of_scope) //Designated for a different scope: global or local
             {
               if (out_of_scope - 1) //to be placed at global scope
-                pev->myObj->globals[lid] = dectrip(type_name);
+                pev->myObj->globals[lid] = dectrip(type_name,prefixes,suffixes);
               else
-                pev->myObj->locals[lid] = dectrip(type_name);
+                pev->myObj->locals[lid] = dectrip(type_name,prefixes,suffixes);
               if (!has_init) //If this statement does nothing other than declare, remove it
               {
-                code.erase(spos,pos+1);
-                synt.erase(spos,pos+1);
+                code.erase(spos,pos+1-spos);
+                synt.erase(spos,pos+1-spos);
                 pos = spos;
               }
               else pos++;
             }
             else //Add to this scope
             {
-              //igstack[igpos]->i[]
+              cout << "Add to ig" << endl;
+              igstack[igpos]->i[lid] = 1;
               pos++;
+              cout << "Added to ig" << endl;
             }
+            cout << "endif ';'" << endl;
+            
+            prefixes = suffixes = "";
             
             spos = pos;
             has_init = false;
-            if (synt[pos] == ';')
-              break;
+            if (donehere) {
+              pos--; break;
+            }
             continue;
           }
           if (synt[pos] == 'n')
@@ -279,24 +292,25 @@ string parser_main(string code, parsed_event* pev = NULL)
           }
           if (synt[pos] == '[')
           {
-            pos++;
-            const unsigned ssp = pos;
+            const unsigned ssp = pos++;
             for (int cnt = 1; cnt > 0 and_safety; pos++)
               if (synt[pos] == '[') cnt++;
               else if (synt[pos] == ']') cnt--;
             suffixes += code.substr(ssp,pos-ssp);
             continue;
           }
-          if (synt[pos] == '=')
+          if (synt[pos++] == '=')
           {
-            while (synt[++pos] != ',' and synt[pos] != ';' and synt[pos]);
+            while (synt[pos] != ',' and synt[pos] != ';' and synt[pos]) pos++;
             has_init = true;
             continue;
           }
-          cout << "This shouldn't occur, so I will look the other way and not error." << code[pos++] << '\n';
+          cout << "~" << code[pos-1];
         }
       }
     }
+    
+    cout << "*****************************FINISHED********************\n";
     
     //Store these for later.
     pev->code = code;

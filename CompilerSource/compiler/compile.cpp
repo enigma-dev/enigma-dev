@@ -172,6 +172,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
         const int sev_id = es->gmObjects[i].mainEvents[ii].events[iii].id;
         parsed_event &pev = pob->events[ev_count++];
         cout << "[" << mev_id << "," << sev_id << "]";
+        pev.mainId = mev_id, pev.id = sev_id;
         
         //Copy the code into a string, and its attributes elsewhere
         string code = es->gmObjects[i].mainEvents[ii].events[iii].code;
@@ -273,6 +274,11 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
       {
         wto << "  struct OBJ_" << i->second->name << ": object_locals\n  {";
+        
+        wto << "\n    //Locals to instances of this object\n    ";
+        for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
+          wto << ii->second.type << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
+        
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
         {
           //Look up the event name
@@ -283,19 +289,25 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
         
         //Automatic constructor
         wto << "\n    OBJ_" <<  i->second->name << "(): object_locals(enigma::newinst_id++, " << i->second->id << ")";
-        if (used__object_set_sprite) //We want to initialize 
-          wto << ", sprite_index(enigma::object_table[" << i->second->id << "].sprite)";
-        else 
-          wto << ", sprite_index(" << i->second->sprite_index << ")";
-        wto << "\n    {\n      enigma::constructor(this);\n      myevent_create();\n    }\n";
+        
+        wto << "\n    {\n";
+        //Sprite index
+          if (used__object_set_sprite) //We want to initialize 
+            wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n";
+          else
+            wto << "      sprite_index = " << i->second->sprite_index << ";\n";
+        wto << "      enigma::constructor(this);\n      myevent_create();\n    }\n";
         
         //Directed constructor (ID is specified)
         wto << "    OBJ_" <<  i->second->name << "(int id): object_locals(id, " << i->second->id << ")";
-        if (used__object_set_sprite) //We want to initialize 
-          wto << ", sprite_index(enigma::object_table[" << i->second->id << "].sprite)";
-        else 
-          wto << ", sprite_index(" << i->second->sprite_index << ")";
-        wto << "\n    {\n      enigma::constructor(this);\n      myevent_create();\n    }\n";
+        
+        wto << "\n    {\n";
+        //Sprite index
+          if (used__object_set_sprite) //We want to initialize 
+            wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n";
+          else
+            wto << "      sprite_index = " << i->second->sprite_index << ";\n";
+        wto << "      enigma::constructor(this);\n      myevent_create();\n    }\n";
         
         wto << "  };\n";
       }

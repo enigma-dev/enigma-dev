@@ -346,6 +346,13 @@ inline bool need_semi(char c1,char c2,const bool sepd,char c0,char cn1)
   and (is_letterd(c2) or c2=='"' or c2=='{' or c2=='}');
 }
 
+
+int parser_reinterpret(string &code,string &synt)
+{
+  
+  return 0;
+}
+
 //Add semicolons
 void parser_add_semicolons(string &code,string &synt)
 {
