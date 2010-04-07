@@ -349,7 +349,27 @@ inline bool need_semi(char c1,char c2,const bool sepd,char c0,char cn1)
 
 int parser_reinterpret(string &code,string &synt)
 {
-  
+  for (pt pos = 1; pos < code.length(); pos++)
+  {
+    if (synt[pos] == '0' and synt[pos-1] == '.')
+      synt[pos-1] = '0';
+    else if (synt[pos] == 't')
+    {
+      if (synt[pos-1] == '(')
+      {
+        const pt sp = pos-1;
+        while (synt[++pos] == 't');
+        if (synt[pos] == ')')
+          for (pt i = sp; i <= pos; i++)
+            synt[i] = 'c';
+      }
+      else if (synt[pos+1]  == '(')
+      {
+        sdfds fsdf a
+      }
+    }
+    if isop(synt[pos]
+  }
   return 0;
 }
 

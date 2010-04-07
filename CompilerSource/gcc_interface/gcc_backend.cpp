@@ -25,83 +25,74 @@
 **                                                                              **
 \********************************************************************************/
 
-//Code essentially stolen from IsmAvatar. Same license applies.
+#include <time.h>
+#include <string>
+#include <iostream>
+#include <cstdlib>
+#include <map>
 
-enum
-{
-  EV_CREATE = 0,
-  EV_DESTROY = 1,
-  EV_ALARM = 2,
-  EV_STEP = 3,
-  EV_COLLISION = 4,
-  EV_KEYBOARD = 5,
-  EV_MOUSE = 6,
-  EV_OTHER = 7,
-  EV_DRAW = 8,
-  EV_KEYPRESS = 9,
-  EV_KEYRELEASE = 10,
-  EV_TRIGGER = 11
-};
+using namespace std;
+#define flushl (fflush(stdout), "\n")
 
-enum
-{
-  EV_LEFbUTTON=0,
-  EV_RIGHbUTTON=1,
-  EV_MIDDLbUTTON=2,
-  EV_NOBUTTON=3,
-  EV_LEFT_PRESS=4,
-  EV_RIGHT_PRESS=5,
-  EV_MIDDLE_PRESS=6,
-  EV_LEFT_RELEASE=7,
-  EV_RIGHT_RELEASE=8,
-  EV_MIDDLE_RELEASE=9,
-  EV_MOUSE_ENTER=10,
-  EV_MOUSE_LEAVE=11,
-  EV_MOUSE_WHEEL_UP=60,
-  EV_MOUSE_WHEEL_DOWN=61,
-  EV_GOBAL_LEFTBUTTON=50,
-  EV_GOBAL_RIGHTBUTTON=51,
-  EV_GOBAL_MIDDLEBUTTON=52,
-  EV_GOBAL_LEFT_PRESS=53,
-  EV_GOBAL_RIGHT_PRESS=54,
-  EV_GOBAL_MIDDLE_PRESS=55,
-  EV_GOBAL_LEFT_RELEASE=56,
-  EV_GOBAL_RIGHT_RELEASE=57
-};
+#include "general/darray.h"
 
-enum
-{
-  EV_OUTSIDE = 0,
-  EV_BOUNDARY = 1,
-  EV_GAME_START = 2,
-  EV_GAME_END = 3,
-  EV_ROOM_START = 4,
-  EV_ROOM_END = 5,
-  EV_NO_MORE_LIVES = 6,
-  EV_NO_MORE_HEALTH = 9,
-  EV_ANIMATION_END = 7,
-  EV_END_OF_PATH = 8,
-  EV_USER0 = 10,
-  EV_USER1 = 11,
-  EV_USER2 = 12,
-  EV_USER3 = 13,
-  EV_USER4 = 14,
-  EV_USER5 = 15,
-  EV_USER6 = 16,
-  EV_USER7 = 17,
-  EV_USER8 = 18,
-  EV_USER9 = 19,
-  EV_USER10 = 20,
-  EV_USER11 = 21,
-  EV_USER12 = 22,
-  EV_USER13 = 23,
-  EV_USER14 = 24,
-  EV_USER15 = 25
-};
+#include "externs/externs.h"
+#include "syntax/syncheck.h"
+    #include "parser/parser.h"
+    #include "compiler/compile.h"
+    #include "cfile_parse/cfile_parse.h"
+    #include "syntax/checkfile.h"
 
-enum
+string fc(const char* fn);
+
+#include <sys/time.h>
+
+#ifdef _WIN32
+ #include <windows.h>
+ #define dllexport extern "C" __declspec(dllexport)
+#else
+ #define dllexport extern "C"
+ #include <cstdio>
+#endif
+
+bool init_found_gcc = false;
+bool init_load_successful = false;
+varray<string> include_directories;
+
+//Find us the GCC, get info about it and ourself
+int establish_bearings()
 {
-  STEP_NORMAL = 0,
-  STEP_BEGIN = 1,
-  STEP_END = 2
-};
+  // Clear some files
+  fclose(fopen("blank.txt","wb"));
+  fclose(fopen("defines.txt","wb"));
+  fclose(fopen("searchpaths.txt","wb"));
+  
+  // See if we've been down this road before
+  string GCC_location =
+  
+  if (system("cpp -dM -x c++ -E  blank.txt > defines.txt"))
+  {
+    fclose(fopen("defines.txt","wb"));
+    if (system("C:/MinGW/bin/cpp -dM -x c++ -E blank.txt > defines.txt"))
+      return 1;
+  }
+  string defs = fc("defines.txt");
+  if (defs == "")
+    return 1;
+  
+  unsigned a = parse_cfile(defs);
+  if (a != unsigned(-1)) {
+    cout << "Highly unlikely error. Borderline impossible, but stupid things can happen when working with files.\n\n";
+    return 1;
+  }
+  
+  cout << "Successfully loaded GCC definitions\n";
+  cout << "Undefining _GLIBCXX_EXPORT_TEMPLATE\n";
+  macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0";
+  return 0;
+}
+
+dllexport int gccDefinePath(const char* gccPath)
+{
+  return 0;
+}

@@ -119,21 +119,6 @@ void cparse_init()
   
   regmacro("__typeof","int","x"); //__typeof(x) 
   regmacro("sizeof","4","x"); //sizeof(x)
-  
-  #ifdef linux
-  include_directories[0] = "/usr/include/";
-  include_directories[1] = "/usr/include/c++/4.3/";
-  include_directories[2] = "/usr/include/c++/4.3/i486-linux-gnu/";
-  include_directories[3] = "/usr/lib/gcc/i486-linux-gnu/4.3.3/include/";
-  include_directory_count = 4;
-  #else
-  include_directories[0] = "C:\\MinGW\\include\\";
-  include_directories[1] = "C:\\MinGW\\lib\\gcc\\mingw32\\3.4.5\\install-tools\\include\\";
-  include_directories[2] = "C:\\MinGW\\include\\c++\\3.4.5\\";
-  include_directories[3] = "C:\\MinGW\\include\\c++\\3.4.5\\mingw32\\";
-  include_directory_count = 4;
-  #endif
-  
 }
 
 

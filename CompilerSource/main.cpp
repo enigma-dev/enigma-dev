@@ -57,34 +57,6 @@ int m_prog_loop_cfp();
  #include <cstdio>
 #endif
 
-
-int establish_bearings()
-{
-  //find us the GCC
-  fclose(fopen("blank.txt","wb"));
-  fclose(fopen("defines.txt","wb"));
-  if (system("cpp -dM -x c++ -E  blank.txt > defines.txt"))
-  {
-    fclose(fopen("defines.txt","wb"));
-    if (system("C:/MinGW/bin/cpp -dM -x c++ -E blank.txt > defines.txt"))
-      return 1;
-  }
-  string defs = fc("defines.txt");
-  if (defs == "")
-    return 1;
-  
-  unsigned a = parse_cfile(defs);
-  if (a != unsigned(-1)) {
-    cout << "Highly unlikely error. Borderline impossible, but stupid things can happen when working with files.\n\n";
-    return 1;
-  }
-  
-  cout << "Successfully loaded GCC definitions\n";
-  cout << "Undefining _GLIBCXX_EXPORT_TEMPLATE\n";
-  macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0";
-  return 0;
-}
-
 extern void clear_ide_editables();
 extern void print_err_line_at(unsigned a);
 #include "cfile_parse/cfile_pushing.h"
@@ -93,16 +65,12 @@ dllexport int libInit()
 {
   cout << "Intializing Parsers.";
   cparse_init();
-    
-  if (establish_bearings()) {
-    cout << "ERROR: Failed to locate the GCC";
-    return 1;
+  
+  int a = establish_bearings();
+  if (a) {
+    cout << ((a == 1) ? "ERROR: Failed to locate the GCC" : "ERROR: GCC responded in an unexpected fashion") << "\n";
+    return a;
   }
-  return 0;
-}
-
-dllexport int gccDefinePath(const char* gccPath)
-{
   return 0;
 }
 
