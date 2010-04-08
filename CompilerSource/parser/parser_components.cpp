@@ -363,12 +363,8 @@ int parser_reinterpret(string &code,string &synt)
           for (pt i = sp; i <= pos; i++)
             synt[i] = 'c';
       }
-      else if (synt[pos+1]  == '(')
-      {
-        sdfds fsdf a
-      }
+      //else if (synt[pos+1]  == '(') // This case doesn't need handled. int() is fine.s
     }
-    if isop(synt[pos]
   }
   return 0;
 }

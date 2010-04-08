@@ -43,9 +43,12 @@ to be copied, not just passed as a reference.
 
 #include <string>
 
-#define REAL__ double //Use double as the real type
-#define STRING__ std::string //Use std::string as the string type
-#define FREEOLD__ true //Free strings when switching to real, zero real when switching to string
+#define REAL__ double 
+//Use double as the real type
+#define STRING__ std::string 
+//Use std::string as the string type
+#define FREEOLD__ true 
+//Free strings when switching to real, zero real when switching to string
 
 #if DEBUGMODE && SHOWERRORS
 #define terr(t1,t2) if (t1 != t2) show_error("Performing operations on different types",0);

@@ -35,7 +35,7 @@ namespace enigma
 {
   void wildclass::setto(object_basic* from_p)
   {
-    object_locals* from = (object_locals*)from_p;
+    /*object_locals* from = (object_locals*)from_p;
     alarm = &from->alarm;
     bbox_bottom = &from->bbox_bottom;
     bbox_left = &from->bbox_left;
@@ -85,7 +85,7 @@ namespace enigma
     
     if (from->object_index==-5) //Global
     {
-    }
+    }*/
   }
   
   wildclass::wildclass() {}

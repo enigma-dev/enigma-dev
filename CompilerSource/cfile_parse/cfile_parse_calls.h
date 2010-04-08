@@ -83,8 +83,8 @@ inline void regmacro(string m,string val,string arg1)
 }
 
 externs *builtin_type__int, *builtin_type__void;
-varray<string> include_directories;
-unsigned int include_directory_count;
+extern varray<string> include_directories;
+extern unsigned int include_directory_count;
 
 void cparse_init()
 {

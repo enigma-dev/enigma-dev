@@ -46,19 +46,24 @@ int instance_create(double x,double y,double object)
     return idn;
 }
 
-namespace enigma{
-void instance_create_id(int x,int y,int object,int idn){ //This is for use by the system only. Please leave be
-	if (enigma::maxid<idn) enigma::maxid=idn;
-	enigma::newinst_id=idn;
-	enigma::newinst_obj=object;
-	enigma::newinst_x=x;
-	enigma::newinst_y=y;
-    switch (object){
-	#include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
-	default:
-		#if SHOWERRORS
-		show_error("Object doesn't exist",object);
-		#endif
-	}
-}
+namespace enigma
+{
+  void instance_create_id(int x,int y,int object,int idn)
+  { //This is for use by the system only. Please leave be
+    if (enigma::maxid<idn) enigma::maxid=idn;
+    enigma::newinst_id=idn;
+    enigma::newinst_obj=object;
+    enigma::newinst_x=x;
+    enigma::newinst_y=y;
+    switch (object)
+    {
+      #include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
+      
+      default:
+        #if SHOWERRORS
+        show_error("Object doesn't exist",object);
+        #endif
+        ;
+    }
+  }
 }

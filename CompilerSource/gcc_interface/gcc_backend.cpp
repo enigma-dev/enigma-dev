@@ -28,20 +28,16 @@
 #include <time.h>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <map>
 
 using namespace std;
 #define flushl (fflush(stdout), "\n")
 
-#include "general/darray.h"
-
-#include "externs/externs.h"
-#include "syntax/syncheck.h"
-    #include "parser/parser.h"
-    #include "compiler/compile.h"
-    #include "cfile_parse/cfile_parse.h"
-    #include "syntax/checkfile.h"
+#include "../externs/externs.h"
+    #include "../cfile_parse/cfile_parse.h"
+    #include "../syntax/checkfile.h"
 
 string fc(const char* fn);
 
@@ -58,6 +54,7 @@ string fc(const char* fn);
 bool init_found_gcc = false;
 bool init_load_successful = false;
 varray<string> include_directories;
+unsigned int include_directory_count;
 
 //Find us the GCC, get info about it and ourself
 int establish_bearings()
@@ -65,34 +62,104 @@ int establish_bearings()
   // Clear some files
   fclose(fopen("blank.txt","wb"));
   fclose(fopen("defines.txt","wb"));
-  fclose(fopen("searchpaths.txt","wb"));
+  fclose(fopen("searchdirs.txt","wb"));
+  
+  string defs;
+  fclose(fopen("defines.txt","wb"));
+  bool got_success = false;
+  
+  cout << "Probing for GCC..." << endl;
   
   // See if we've been down this road before
-  string GCC_location =
+  string GCC_location = fc("gcc_adhoc.txt");
   
-  if (system("cpp -dM -x c++ -E  blank.txt > defines.txt"))
-  {
-    fclose(fopen("defines.txt","wb"));
-    if (system("C:/MinGW/bin/cpp -dM -x c++ -E blank.txt > defines.txt"))
-      return 1;
-  }
-  string defs = fc("defines.txt");
+  if (GCC_location != "") //We have in fact never been down this road before...
+    got_success = !system((GCC_location + "cpp -dM -x c++ -E  blank.txt > defines.txt").c_str());
+  
+  if (!got_success)
+    got_success = !system(((GCC_location = "") + "cpp -dM -x c++ -E  blank.txt > defines.txt").c_str());
+  
+  if (!got_success)
+    got_success = !system(((GCC_location = "C:/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
+  
+  if (!got_success)
+    got_success = !system(((GCC_location = "./ENIGMAsystem/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
+    
+  if (!got_success)
+    got_success = !system(((GCC_location = "./ENIGMAsystem/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
+  
+  if (!got_success)
+    return (cout << "Bailing: Error 1\n" , 1);
+  
+  cout << "GCC located. Path: `" << GCC_location << '\'' << endl;
+  
+  defs = fc("defines.txt");
   if (defs == "")
-    return 1;
+    return (cout << "Bailing: Error 2\n" , 1);
   
   unsigned a = parse_cfile(defs);
   if (a != unsigned(-1)) {
-    cout << "Highly unlikely error. Borderline impossible, but stupid things can happen when working with files.\n\n";
-    return 1;
+    cout << "Highly unlikely error. But stupid things can happen when working with files.\n\n";
+    return (cout << "Bailing: Error 3\n" , 1);
   }
   
   cout << "Successfully loaded GCC definitions\n";
   cout << "Undefining _GLIBCXX_EXPORT_TEMPLATE\n";
-  macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0";
+  macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0"; //Save us some work
+  
+  //Read the search dirs
+  got_success = system((GCC_location + "gcc -print-search-dirs > searchdirs.txt").c_str());
+  if (!got_success) {
+    cout << "Failed to read search directories. Error 4.\n";
+    return 4;
+  }
+  
+  string idirs = fc("searchdirs.txt");
+  if (idirs == "") {
+    cout << "Invalid search directories returned. Error 5.\n";
+    return 5;
+  }
+  
+  size_t pos;
+  for (pos = 0; (pos < idirs.length() - 10) and (idirs.substr(pos,10) != "libraries:"); pos = idirs.find("\n",pos));
+  if (idirs.substr(pos,10) != "libraries:") {
+    cout << "Invalid search directories returned. Error 5.\n";
+    return 5;
+  }
+  
+  pos += 10;
+  while (pos < idirs.length() and idirs[++pos] != '=');
+  if (idirs[pos] != '=') {
+    cout << "Invalid search directories returned. Error 5.\n";
+    return 5;
+  }
+  
+  size_t endpos = idirs.find("\n",pos);
+  if (endpos != string::npos)
+    idirs = idirs.substr(pos, endpos-pos);
+  else
+    idirs.erase(0,pos);
+  
+  size_t spos = 0;
+  for (pos = 0; pos < idirs.length(); pos++)
+  {
+    if (idirs[pos] == ';')
+    {
+      include_directories[include_directory_count++] = idirs.substr(spos,pos-spos);
+      spos = pos+1;
+    }
+  }
+  include_directories[include_directory_count++] = idirs.substr(spos);
+  
   return 0;
 }
 
 dllexport int gccDefinePath(const char* gccPath)
 {
-  return 0;
+  ofstream a("gcc_adhoc.txt");
+  if (a.is_open()) {
+    a << gccPath;
+    a.close();
+  }
+  return establish_bearings();
 }
