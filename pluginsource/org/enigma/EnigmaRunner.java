@@ -64,10 +64,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 	public EnigmaRunner()
 		{
-		populateMenu();
-		populateTree();
-		SubframeInformer.addSubframeListener(this);
-		applyBackground("org/enigma/enigma.png");
 		attemptUpdate();
 
 		System.out.print("Initializing Enigma: ");
@@ -77,28 +73,35 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 			//this is my sad attempt at trying to get the user to locate GCC
 			JFileChooser fc = new JFileChooser();
 			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			fc.setDialogTitle("Please locate the GCC directory (containing bin/, lib/ etc)");
+			fc.setDialogTitle("ENIGMA: Please locate the GCC directory (containing bin/, lib/ etc)");
 			fc.setAcceptAllFileFilterUsed(false);
 			if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
 				{
-				ret = EnigmaStruct.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
-				if (ret != 0)
-					JOptionPane.showMessageDialog(null,
-							"WTF OMG GCC NOT FOUND!!! *collapses* *twitches on floor*");
+				JOptionPane.showMessageDialog(null,
+						"LOL nub, Enigma can't work without GCC. Come back when you learn how to Enigma");
+				return;
+				}
+			if (EnigmaStruct.gccDefinePath(fc.getSelectedFile().getAbsolutePath()) != 0)
+				{
+				JOptionPane.showMessageDialog(null,
+						"WTF OMG GCC NOT FOUND!!! *collapses* *twitches on floor*");
+				return;
 				}
 			}
 
-		if (ret == 0)
-			{
-			//Apparently josh wants a textbox for if it returns 0 (gcc found)?
-			//I'm guessing he also wants me to get text from him and put it in here
-			ef = new EnigmaFrame();
+		populateMenu();
+		populateTree();
+		SubframeInformer.addSubframeListener(this);
+		applyBackground("org/enigma/enigma.png");
 
-			if (false)
-				{
-				PrintStream oldOut = System.out;
-				System.setOut(new PrintStream(new TextAreaOutputStream(ef.ta)));
-				}
+		//Apparently josh wants a textbox for if it returns 0 (gcc found)?
+		//I'm guessing he also wants me to get text from him and put it in here
+		ef = new EnigmaFrame();
+
+		if (false)
+			{
+			PrintStream oldOut = System.out;
+			System.setOut(new PrintStream(new TextAreaOutputStream(ef.ta)));
 			}
 
 		//TODO: add whitespace support
