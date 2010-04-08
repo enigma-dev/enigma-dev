@@ -68,7 +68,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 		System.out.print("Initializing Enigma: ");
 		int ret = EnigmaStruct.libInit();
-		if (ret != 0)
+		if (ret == 1)
 			{
 			//this is my sad attempt at trying to get the user to locate GCC
 			JFileChooser fc = new JFileChooser();
@@ -81,12 +81,29 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 						"LOL nub, Enigma can't work without GCC. Come back when you learn how to Enigma");
 				return;
 				}
-			if (EnigmaStruct.gccDefinePath(fc.getSelectedFile().getAbsolutePath()) != 0)
+			ret = EnigmaStruct.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
+			}
+		if (ret != 0)
+			{
+			String err;
+			switch (ret)
 				{
-				JOptionPane.showMessageDialog(null,
-						"WTF OMG GCC NOT FOUND!!! *collapses* *twitches on floor*");
-				return;
+				case 1:
+					err = "ENIGMA: GCC not found";
+					break;
+				case 2:
+					err = "ENIGMA: No output gained from call to GCC";
+					break;
+				case 3:
+					err = "ENIGMA: Output from GCC doesn't make sense";
+					break;
+				default:
+					err = "ENIGMA: Undefined error " + ret;
+					break;
 				}
+
+			JOptionPane.showMessageDialog(null,err);
+			return;
 			}
 
 		populateMenu();
