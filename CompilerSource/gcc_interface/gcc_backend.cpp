@@ -38,6 +38,7 @@ using namespace std;
 #include "../externs/externs.h"
     #include "../cfile_parse/cfile_parse.h"
     #include "../syntax/checkfile.h"
+    #include "../general/parse_basics.h"
 
 string fc(const char* fn);
 
@@ -108,7 +109,8 @@ int establish_bearings()
   macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0"; //Save us some work
   
   //Read the search dirs
-  got_success = system((GCC_location + "gcc -print-search-dirs > searchdirs.txt").c_str());
+  fclose(fopen("blank.txt","wb"));
+  got_success = !system((GCC_location + "gcc -E -x c++ -v blank.txt 2> searchdirs.txt").c_str()); //For some reason, the info we want is written to stderr
   if (!got_success) {
     cout << "Failed to read search directories. Error 4.\n";
     return 4;
@@ -120,36 +122,32 @@ int establish_bearings()
     return 5;
   }
   
-  size_t pos;
-  for (pos = 0; (pos < idirs.length() - 10) and (idirs.substr(pos,10) != "libraries:"); pos = idirs.find("\n",pos));
-  if (idirs.substr(pos,10) != "libraries:") {
-    cout << "Invalid search directories returned. Error 5.\n";
+  size_t pos = idirs.find("#include <...> search starts here:");
+  if (pos == string::npos or (pos > 0 and idirs[pos-1] != '\n' and idirs[pos-1] != '\r')) {
+    cout << "Invalid search directories returned. Error 5: " << (pos == string::npos?"former":"latter") << ".\n";
     return 5;
   }
   
-  pos += 10;
-  while (pos < idirs.length() and idirs[++pos] != '=');
-  if (idirs[pos] != '=') {
-    cout << "Invalid search directories returned. Error 5.\n";
-    return 5;
-  }
-  
-  size_t endpos = idirs.find("\n",pos);
-  if (endpos != string::npos)
-    idirs = idirs.substr(pos, endpos-pos);
-  else
-    idirs.erase(0,pos);
+  pos += 34;
+  while (is_useless(idirs[++pos]));
+  const size_t endpos = idirs.find("End of search list.");
+  idirs = idirs.substr(pos,endpos-pos); //Assume the rest of the file is full of these
   
   size_t spos = 0;
   for (pos = 0; pos < idirs.length(); pos++)
   {
-    if (idirs[pos] == ';')
+    if (idirs[pos] == '\r' or idirs[pos] == '\n')
     {
-      include_directories[include_directory_count++] = idirs.substr(spos,pos-spos);
-      spos = pos+1;
+      idirs[pos] = '/';
+      include_directories[include_directory_count++] = idirs.substr(spos,pos-spos+(idirs[pos-1] != '/'));
+      while (is_useless(idirs[++pos]));
+      spos = pos--;
     }
   }
-  include_directories[include_directory_count++] = idirs.substr(spos);
+  
+  cout << include_directory_count << "dirs:\n";
+  for (unsigned i = 0; i < include_directory_count; i++)
+    cout << '"' << include_directories[i] << '"' << endl;
   
   return 0;
 }
