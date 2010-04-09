@@ -82,7 +82,7 @@ namespace enigma
   {
     REAL__   realval;
     STRING__ stringval;
-    bool type;
+    int type;
 
     variant(void);
 

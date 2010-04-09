@@ -323,9 +323,46 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
         string evname = event_get_enigma_main_name(i->second->events[ii].mainId,i->second->events[ii].id);
         wto << "enigma::variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
           print_to_file(i->second->events[ii].code,i->second->events[ii].synt,2,wto);
-        wto << "\n}\n\n";
+        wto << "\n  return 0;\n}\n\n";
       }
-    }  
+    }
+    
+    wto << 
+    "namespace enigma\n{\n  void constructor(object_basic* instance_b)\n  {\n"
+    "//This is the universal create event code\n    instance_list[newinst_id]=instance_b;\n\n"    
+    "object_locals* instance = (object_locals*)instance_b;\n\n"
+    "instance->x = newinst_x;\n    instance->y = newinst_y;\n\n"
+    "instance->xstart = newinst_x;\n    instance->ystart = newinst_y;\n    instance->xprevious = newinst_x;\n    instance->yprevious = newinst_y;\n\n"
+    "instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n\n"
+    /*instance->sprite_index = enigma::objectdata[newinst_obj].sprite_index;
+    instance->mask_index = enigma::objectdata[newinst_obj].mask_index;
+    instance->visible = enigma::objectdata[newinst_obj].visible;
+    instance->solid = enigma::objectdata[newinst_obj].solid;
+    instance->persistent = enigma::objectdata[newinst_obj].persistent;
+    instance->depth = enigma::objectdata[newinst_obj].depth;*/
+    "for(int i=0;i<16;i++)\n      instance->alarm[i]=-1;\n\n"
+    
+    "if(instance->sprite_index!=-1)\n    {\n      instance->bbox_bottom  =   sprite_get_bbox_bottom(instance->sprite_index);\n      "
+    "instance->bbox_left    =   sprite_get_bbox_left(instance->sprite_index);\n      instance->bbox_right   =   sprite_get_bbox_right(instance->sprite_index);\n      "
+    "instance->bbox_top     =   sprite_get_bbox_top(instance->sprite_index);\n      //instance->sprite_height =  sprite_get_height(instance->sprite_index); "
+    "//TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n      //instance->sprite_width  =  sprite_get_width(instance->sprite_index);  //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n      "
+    "instance->sprite_xoffset = sprite_get_xoffset(instance->sprite_index);\n      instance->sprite_yoffset = sprite_get_yoffset(instance->sprite_index);\n      "
+    "//instance->image_number  =  sprite_get_number(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n    }\n\n"
+    
+    "instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
+    "instance->image_single = -1;\n    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n\n"
+    /*instance->path_endaction;
+    instance->path_index;
+    instance->path_orientation;
+        instance->path_position;
+        instance->path_positionprevious;
+        instance->path_scale;
+        instance->path_speed;
+        instance->timeline_index;
+        instance->timeline_position;
+        instance->timeline_speed;     */
+        //instance->sprite_index = enigma::objectinfo[newinst_obj].sprite_index;
+    "instancecount++;\n    instance_count++;\n  }\n}\n";
   wto.close();
   
   

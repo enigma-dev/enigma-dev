@@ -57,69 +57,71 @@
 #endif
 
 
-namespace enigma{
-    variant::variant(void)          { realval=0; stringval=""; type=0; }
-    variant::~variant()     {                                  }
-
-    variant::variant(int x)         { realval=x; stringval=""; type=0; }
-    variant::variant(double x)      { realval=x; stringval=""; type=0; }
-    variant::variant(const char* x) { realval=0; stringval=x;  type=1; }
-    variant::variant(std::string x) { realval=0; stringval=x;  type=1; }
-
-    char &variant::operator[] (int x) { return stringval[x]; }
-
-    const char* variant::c_str()      { return stringval.c_str(); }
-
-
-    variant::operator double&()           { return realval;   }
-    variant::operator std::string&()      { return stringval; }
+namespace enigma
+{
+  variant::variant(void)          { realval=0; stringval=""; type=0; }
+  variant::~variant()             {                                  }
+  
+  variant::variant(int x)         { realval=x; stringval=""; type=0; }
+  variant::variant(double x)      { realval=x; stringval=""; type=0; }
+  variant::variant(const char* x) { realval=0; stringval=x;  type=1; }
+  variant::variant(std::string x) { realval=0; stringval=x;  type=1; }
+  
+  char &variant::operator[] (int x) { return stringval[x]; }
+  
+  const char* variant::c_str()      { return stringval.c_str(); }
+  
+  
+  variant::operator double&()           { return realval;   }
+  variant::operator std::string&()      { return stringval; }
 }
 
-void var::resize(int xn,int yn){
-    if (xn<xsize && yn<ysize) return;
-
-    xn++; if (xn<1)xn=1;
-    yn++; if (yn<1)xn=1;
-
-    int xo=xsize,yo=ysize;
-    if (xn>xsize) xsize=xn; else xn=xsize;
-    if (yn>ysize) ysize=yn; else yn=ysize;
-
-    enigma::variant** oldvalues=initd?values:0;
-
-    values=new enigma::variant*[xn*yn];
-
-    if (initd)
+void var::resize(int xn,int yn)
+{
+  if (xn<xsize && yn<ysize) return;
+  
+  xn++; if (xn<1)xn=1;
+  yn++; if (yn<1)xn=1;
+  
+  int xo=xsize,yo=ysize;
+  if (xn>xsize) xsize=xn; else xn=xsize;
+  if (yn>ysize) ysize=yn; else yn=ysize;
+  
+  enigma::variant** oldvalues=initd?values:0;
+  
+  values=new enigma::variant*[xn*yn];
+  
+  if (initd)
+  {
+    int ix;
+    for (ix=0;ix<xo;ix++)
     {
-      int ix;
-      for (ix=0;ix<xo;ix++)
-      {
-        int iy;
-
-        for (iy=0;iy<yo;iy++)
-        values[ix*yn+iy]=oldvalues[ix*yo+iy];
-
-        for (;iy<yn;iy++)
-        values[ix*yn+iy]=new enigma::variant;
-      }
-      for (ix=ix;ix<xn;ix++)
-      {
-        for (int iy=0;iy<yn;iy++)
-        values[ix*yn+iy]=new enigma::variant;
-      }
-
-      delete[] oldvalues;
+      int iy;
+      
+      for (iy=0;iy<yo;iy++)
+      values[ix*yn+iy]=oldvalues[ix*yo+iy];
+      
+      for (;iy<yn;iy++)
+      values[ix*yn+iy]=new enigma::variant;
     }
-    else
+    for (ix=ix;ix<xn;ix++)
     {
-      for (int ixy=0;ixy<xn*yn;ixy++)
-      {
-        values[ixy]=new enigma::variant;
-      }
+      for (int iy=0;iy<yn;iy++)
+      values[ix*yn+iy]=new enigma::variant;
     }
-
-
-    initd=1;
+    
+    delete[] oldvalues;
+  }
+  else
+  {
+    for (int ixy=0;ixy<xn*yn;ixy++)
+    {
+      values[ixy]=new enigma::variant;
+    }
+  }
+  
+  
+  initd=1;
 }
 
 enigma::variant& var::operator[] (double x)          { resize((int)x,0);      return *values[(int)x*ysize]; }

@@ -219,8 +219,9 @@ int parser_ready_input(string &code,string &synt)
     {
       if (bpos and synt[bpos-1] == '.')
         synt[bpos-1] = '0';
-      while (code[pos] == '0')
-        pos++;
+      else //We don't want to remove significant zeroes, only octal-inducing ones
+        while (code[pos] == '0')
+          pos++;
       if (is_digit(code[pos]))
         do {
           code[bpos] = code[pos];

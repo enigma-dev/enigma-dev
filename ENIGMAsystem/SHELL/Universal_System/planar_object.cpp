@@ -40,7 +40,21 @@
 
 namespace enigma
 {
-  object_planar::object_planar() {}
+  object_planar::object_planar()
+  {
+    hspeed.reflex1 = &vspeed.realval;
+      hspeed.reflex2 = &direction.realval;
+      hspeed.reflex3 = &speed.realval;
+    vspeed.reflex1 = &hspeed.realval;
+      vspeed.reflex2 = &direction.realval;
+      vspeed.reflex3 = &speed.realval;
+    direction.reflex1 = &speed.realval;
+      direction.reflex2 = &hspeed.realval;
+      direction.reflex3 = &vspeed.realval;
+    speed.reflex1 = &direction.realval;
+      speed.reflex2 = &hspeed.realval;
+      speed.reflex3 = &vspeed.realval;
+  }
   object_planar::object_planar(unsigned x, int y): object_basic(x,y) {}
   
   void step_basic(object_basic* instance_b)
