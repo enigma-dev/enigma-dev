@@ -156,7 +156,7 @@ dllexport int gccDefinePath(const char* gccPath)
 {
   ofstream a("gcc_adhoc.txt");
   if (a.is_open()) {
-    a << gccPath;
+    a << gccPath << "/bin/";
     a.close();
   }
   return establish_bearings();
