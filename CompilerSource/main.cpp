@@ -96,9 +96,6 @@ dllexport int whitespaceModified(const char* wscode)
   if (a != unsigned(-1)) {
     cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
     print_err_line_at(a);
-    cout << "I'm not sure why, but this console is about to segfault. Good bye, HAL.\n";
-    for (int i = 0; i < 10; i++) cout << "NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!!\n";
-    cout << "Goodbye!\n";
     return 1;
   }
   

@@ -254,6 +254,7 @@
 		<Unit filename="Universal_System\spritestruct.cpp" />
 		<Unit filename="Universal_System\spritestruct.h" />
 		<Unit filename="Universal_System\switch_stuff.h" />
+		<Unit filename="Universal_System\transform_object.h" />
 		<Unit filename="Universal_System\var_cr3.cpp" />
 		<Unit filename="Universal_System\var_cr3.h" />
 		<Unit filename="initialize.h" />

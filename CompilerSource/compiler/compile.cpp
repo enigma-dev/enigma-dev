@@ -69,10 +69,6 @@ enum cmodes {
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
-  
-    for (int i = 0; i < 10000; i++) cout << "NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!!\n";
-    cout << "Goodbye!\n";
-  
   cout << "Hey. I wanted you to know: I have no fucking idea what to do with this input. :D\n";
   
   cout << "Location in memory of structure: " << es << flushl;
