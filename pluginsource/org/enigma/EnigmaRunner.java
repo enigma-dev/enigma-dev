@@ -61,28 +61,42 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 	public static final String ENIGMA = "compileEGMf.exe";
 	public EnigmaFrame ef;
 	public JMenuItem run, debug, build, compile;
+	public boolean GCC_LOCATED = false;
+	public EnigmaNode node = new EnigmaNode();
 
 	public EnigmaRunner()
 		{
 		attemptUpdate();
+		initEnigmaLib();
+		populateMenu();
+		populateTree();
+		SubframeInformer.addSubframeListener(this);
+		applyBackground("org/enigma/enigma.png");
 
+		//Apparently josh wants a textbox for if it returns 0 (gcc found)?
+		//I'm guessing he also wants me to get text from him and put it in here
+		if (false)
+			{
+			ef = new EnigmaFrame();
+			PrintStream oldOut = System.out;
+			System.setOut(new PrintStream(new TextAreaOutputStream(ef.ta)));
+			}
+
+		//TODO: add whitespace support
+		if (GCC_LOCATED) EnigmaStruct.whitespaceModified("");
+		}
+
+	private void initEnigmaLib()
+		{
 		System.out.print("Initializing Enigma: ");
 		int ret = EnigmaStruct.libInit();
-		if (ret == 1)
+		if (ret == 0)
 			{
-			//this is my sad attempt at trying to get the user to locate GCC
-			JFileChooser fc = new JFileChooser();
-			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			fc.setDialogTitle("ENIGMA: Please locate the GCC directory (containing bin/, lib/ etc)");
-			fc.setAcceptAllFileFilterUsed(false);
-			if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
-				{
-				JOptionPane.showMessageDialog(null,
-						"LOL nub, Enigma can't work without GCC. Come back when you learn how to Enigma");
-				return;
-				}
-			ret = EnigmaStruct.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
+			GCC_LOCATED = true;
+			return;
 			}
+
+		if (ret == 1) ret = locateGCC();
 		if (ret != 0)
 			{
 			String err;
@@ -101,28 +115,21 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 					err = "ENIGMA: Undefined error " + ret;
 					break;
 				}
-
 			JOptionPane.showMessageDialog(null,err);
-			return;
 			}
+		}
 
-		populateMenu();
-		populateTree();
-		SubframeInformer.addSubframeListener(this);
-		applyBackground("org/enigma/enigma.png");
-
-		//Apparently josh wants a textbox for if it returns 0 (gcc found)?
-		//I'm guessing he also wants me to get text from him and put it in here
-		ef = new EnigmaFrame();
-
-		if (false)
-			{
-			PrintStream oldOut = System.out;
-			System.setOut(new PrintStream(new TextAreaOutputStream(ef.ta)));
-			}
-
-		//TODO: add whitespace support
-		EnigmaStruct.whitespaceModified("");
+	public int locateGCC()
+		{
+		//this is my sad attempt at trying to get the user to locate GCC
+		JFileChooser fc = new JFileChooser();
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		fc.setDialogTitle("ENIGMA: Please locate the GCC directory (containing bin/, lib/ etc)");
+		fc.setAcceptAllFileFilterUsed(false);
+		if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) return 0;
+		int ret = EnigmaStruct.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
+		if (ret == 0) GCC_LOCATED = true;
+		return ret;
 		}
 
 	public class TextAreaOutputStream extends OutputStream
@@ -182,16 +189,25 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 		compile.addActionListener(this);
 		menu.add(compile);
 
+		menu.addSeparator();
+
+		JMenuItem mi = new JMenuItem("Settings");
+		mi.addActionListener(node);
+		menu.add(mi);
+
 		LGM.frame.getJMenuBar().add(menu,1);
 		}
 
 	public void populateTree()
 		{
-		EnigmaGroup node = new EnigmaGroup();
+		LGM.root.add(node);
+
+		/*EnigmaGroup node = new EnigmaGroup();
 		LGM.root.add(node);
 		node.add(new EnigmaNode("Whitespace"));
 		node.add(new EnigmaNode("Enigma Init"));
-		node.add(new EnigmaNode("Enigma Term"));
+		node.add(new EnigmaNode("Enigma Term"));*/
+
 		LGM.tree.updateUI();
 		}
 
@@ -253,44 +269,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 			}
 		}
 
-	public class EnigmaGroup extends ResNode
-		{
-		private static final long serialVersionUID = 1L;
-
-		public EnigmaGroup()
-			{
-			super("Enigma",ResNode.STATUS_PRIMARY,Resource.Kind.SCRIPT);
-			}
-
-		public void showMenu(MouseEvent e)
-			{
-			//No menu
-			}
-
-		public DataFlavor[] getTransferDataFlavors()
-			{
-			return null;
-			}
-
-		public boolean isDataFlavorSupported(DataFlavor flavor)
-			{
-			return false;
-			}
-
-		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException
-			{
-			throw new UnsupportedFlavorException(flavor);
-			}
-		}
-
 	public class EnigmaNode extends ResNode implements ActionListener
 		{
 		private static final long serialVersionUID = 1L;
 		private JPopupMenu pm;
 
-		public EnigmaNode(String name)
+		public EnigmaNode()
 			{
-			super(name,ResNode.STATUS_SECONDARY,Resource.Kind.SCRIPT);
+			super("Enigma Settings",ResNode.STATUS_SECONDARY,Resource.Kind.GAMESETTINGS);
 			pm = new JPopupMenu();
 			pm.add(new JMenuItem("Edit")).addActionListener(this);
 			}
