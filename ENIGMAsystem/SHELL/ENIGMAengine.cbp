@@ -73,7 +73,6 @@
 		</Compiler>
 		<Linker>
 			<Add library="opengl32" />
-			<Add library="..\additional\GL\GLee.lib" />
 			<Add library="..\additional\zlib\libzlib.a" />
 		</Linker>
 		<Unit filename="API_Switchboard.h" />

@@ -263,6 +263,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << '\n';
   wto.close();
   
+  //NEXT FILE ----------------------------------------
+  //Object declarations: object classes/names and locals
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
     wto << license;
     wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
@@ -277,7 +279,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
         
         wto << "\n    //Locals to instances of this object\n    ";
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
-          wto << ii->second.type << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
+          wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
         
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
         {

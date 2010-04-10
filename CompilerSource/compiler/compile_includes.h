@@ -66,6 +66,11 @@ string format_error(string code,string err,int pos)
   return "Line " + tostring(line) + ", position " + tostring(lp) + " (absolute " + tostring(pos) + "): " + err;
 }
 
+
+inline string tdefault(string t) {
+  return (t != "" ? t : "var");
+}
+
 //Error codes
 enum {
   E_ERROR_NO_ERROR_LOL,

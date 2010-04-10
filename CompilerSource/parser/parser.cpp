@@ -245,10 +245,12 @@ string parser_main(string code, parsed_event* pev = NULL)
             
             if (out_of_scope) //Designated for a different scope: global or local
             {
+              //Declare this as a specific type
               if (out_of_scope - 1) //to be placed at global scope
                 pev->myObj->globals[lid] = dectrip(type_name,prefixes,suffixes);
               else
                 pev->myObj->locals[lid] = dectrip(type_name,prefixes,suffixes);
+              
               if (!has_init) //If this statement does nothing other than declare, remove it
               {
                 code.erase(spos,pos+1-spos);
@@ -262,7 +264,7 @@ string parser_main(string code, parsed_event* pev = NULL)
               cout << "Add to ig" << endl;
               igstack[igpos]->i[lid] = 1;
               pos++;
-              cout << "Added to ig" << endl;
+              cout << "Added `" << lid << "' to ig" << endl;
             }
             cout << "endif ';'" << endl;
             
@@ -306,6 +308,18 @@ string parser_main(string code, parsed_event* pev = NULL)
             continue;
           }
           cout << "~" << code[pos-1];
+        }
+      }
+      if (synt[pos] == 'n')
+      {
+        const unsigned spos = pos;
+        while (synt[++pos] == 'n');
+        if (synt[pos] != '(') // If it isn't a function (we assume it's nothing else)
+        {
+          const string nname = code.substr(spos,pos-spos);
+          if (igstack[igpos]->i.find(nname) == igstack[igpos]->i.end()) {
+            pev->myObj->locals[nname] = dectrip();
+          }
         }
       }
     }
