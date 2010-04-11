@@ -85,7 +85,7 @@ inline int statement_completed(int lt,int pos=0)
   if (lt==LN_OPERATOR)
     return 0;
   
-  if (lt==LN_FUNCTION)
+  if (lt==LN_VALUE)
     return 1;
   
   if (assop[level])
@@ -118,14 +118,14 @@ inline bool check_level_accessible(int leveltype)
   int chklvl=level;
   while (chklvl>0)
   {
-    if (levelt[chklvl]==leveltype)
+    if (levelt[chklvl] == leveltype)
       return 1;
     
-    if (levelt[chklvl]==LEVELTYPE_DO)
+    if (levelt[chklvl] == LEVELTYPE_DO)
     { return 0; }
-    if (levelt[chklvl]==LEVELTYPE_SWITCH_BLOCK)
+    if (levelt[chklvl] == LEVELTYPE_SWITCH_BLOCK)
     { return 0; }
-    if (levelt[chklvl]==LEVELTYPE_BRACE)
+    if (levelt[chklvl] == LEVELTYPE_BRACE)
     { return 0; }
     
     chklvl--;

@@ -197,9 +197,11 @@ void ENIGMA_events(void)
 	for (int i=0; i<enigma::cleancount; i++){
 		delete enigma::instance_list[enigma::cleanups[i]];
 		enigma::instance_list.erase(enigma::cleanups[i]);
+		instance_count--;
 	}
 	enigma::cleanups.clear();
 	enigma::cleancount=0;
+	
 	instance_count=enigma::instance_list.size();
 	static int __framecount=0;
 	clock_t tsclock=clock();

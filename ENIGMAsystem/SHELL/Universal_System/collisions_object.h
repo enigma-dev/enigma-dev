@@ -1,4 +1,3 @@
-
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
@@ -28,8 +27,11 @@
 
 /**
   @file    graphics_object.h
-  @summary Adds a graphics-related tier following the planar tier.
+  @summary Adds a collisions-related tier following the transform tier.
 */
+
+#ifndef _COLLISIONS_OBJECT_H
+#define _COLLISIONS_OBJECT_H
 
 #include "transform_object.h"
 
@@ -48,7 +50,10 @@ namespace enigma
       var bbox_right;
     
     //Constructors
-      object_collisions() {}
-      object_collisions(unsigned x, int y): object_transform(x,y) {}
+      object_collisions();
+      object_collisions(unsigned, int);
+      virtual ~object_collisions();
   };
 }
+
+#endif

@@ -80,6 +80,14 @@ namespace enigma
   struct inst {
     int x,y,id,obj;
   };
+  struct viewstruct
+  {
+    int start_vis;
+    int area_x,area_y,area_w,area_h;
+    int port_x,port_y,port_w,port_h;
+    int object2follow;
+    int hborder,vborder,hspd,vspd;
+  };
   struct roomstruct
   {
     std::string name;
@@ -87,16 +95,14 @@ namespace enigma
     void(*createcode)();
     std::string cap;
     int width, height, spd;
-    char views_enabled,start_vis[8];
-    int area_x[8],area_y[8],area_w[8],area_h[8];
-    int port_x[8],port_y[8],port_w[8],port_h[8];
-    int object2follow[8];
-    int hborder[8],vborder[8],hspd[8],vspd[8];
-      int instancecount;
+    int views_enabled;
+    viewstruct views[8];
+    int instancecount;
     
     std::map<int,inst> instances;
     void gotome();
   };
+  
   
   extern int room_max;
   extern std::map<int,roomstruct> roomdata;

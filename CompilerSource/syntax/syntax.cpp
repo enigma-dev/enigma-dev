@@ -90,6 +90,7 @@ namespace syncheck
        LEVELTYPE_SWITCH_BLOCK,
        LEVELTYPE_FOR_PARAMETERS,
        LEVELTYPE_GENERAL_STATEMENT,
+       LEVELTYPE_TERNARY,
        LEVELTYPE_STRUCT,
        LEVELTYPE_LOOP
      };
@@ -121,7 +122,7 @@ namespace syncheck
         LN_VARNAME,        // somevar
         LN_OPERATOR,       // = + - *...
         LN_DIGIT,          // 0 1 2... (...)
-        LN_FUNCTION,       // game_end()
+        LN_VALUE,          // 1.5, "", function()
         LN_FUNCTION_NAME,  // game_end
         LN_TYPE_NAME,      // int, double, whatever 
         LN_CLOSING_SYMBOL, // { ; }
@@ -184,7 +185,7 @@ namespace syncheck
       if (is_letter(code[pos])) //we're at an identifier, a statement, or a word-based operator
       {
         const pt spos = pos;
-        while (is_letter(code[++pos]));
+        while (is_letterd(code[++pos]));
         const string name = code.substr(spos,pos-spos);
         
         if (!is_wordop(name))
@@ -320,455 +321,475 @@ namespace syncheck
       }
       
       
-      //switch (code[pos])//It's a symbol: Not a letter or digit
+      switch (code[pos])//It's a symbol: Not a letter or digit
       {
-        if (code[pos] == ';')
-        {
-          if (plevel>0 and plevelt[plevel] != PLT_FORSTATEMENT)
-            { error="Semicolon does not belong inside set of parentheses"; return pos; }
-          if (lastnamed[level]==LN_OPERATOR)
-            { error="Secondary expression expected before semicolon"; return pos; }
-          indeclist[level] = false;
-          lastnamed[level] = LN_CLOSING_SYMBOL;
-          pos++;
-          continue;
-        }
-
-
-        if (code[pos]==':')
-        {
-          if (plevel>0)
-            { error="Unexpected colon at this point"; return pos; }
-          if (level>0 and levelt[level]==LEVELTYPE_CASE)
-          {
-            if (statement_pad[level]!=1 || lastnamed[level]==LN_OPERATOR)
-            { error="Expression expected before `:' symbol"; return pos; }
-            lastnamed[level]=LN_CLOSING_SYMBOL;
-          }
-          else if (lastnamed[level]==LN_VARNAME and !assop[level])
-          {
-            { error="Goto labels not yet supported"; return pos; }
-            lastnamed[level]=LN_NOTHING; //Pretend you never saw the identifier
-          }
-          else
-          {
-            error="Unexpected symbol `:' at this point";
-            return pos;
-          }
-          pos++;
-          continue;
-        }
-
-
-        if (code[pos]==',')
-        {
-          //if (!inlist())
-           //{ error="Comma outside of function parameters or declarations"; return pos; }
-          if (lastnamed[level]==LN_OPERATOR)
-            { error="Secondary expression expected before comma"; return pos; }
-          
-          //The beauty: if we have unterminated parentheses before the comma, the first error is true.
-          //There does not need to be an assignment operator in either case.
-          
-          lastnamed[level] = LN_NOTHING;
-          pos++;
-          continue;
-        }
+        case ';':
+            {
+              if (plevel>0 and plevelt[plevel] != PLT_FORSTATEMENT)
+                { error="Semicolon does not belong inside set of parentheses"; return pos; }
+              if (lastnamed[level]==LN_OPERATOR)
+                { error="Secondary expression expected before semicolon"; return pos; }
+              indeclist[level] = false;
+              lastnamed[level] = LN_CLOSING_SYMBOL;
+            }
+          pos++; continue;
+        
+        
+        case ',':
+            {
+              //if (!inlist())
+               //{ error="Comma outside of function parameters or declarations"; return pos; }
+              if (lastnamed[level]==LN_OPERATOR)
+                { error="Secondary expression expected before comma"; return pos; }
+              
+              //The beauty: if we have unterminated parentheses before the comma, the first error is true.
+              //There does not need to be an assignment operator in either case.
+              
+              lastnamed[level] = LN_NOTHING;
+            }
+          pos++; continue;
         
         
         //Moving on...
         //first priority is to check for a bracket of any sort; () [] {}
-        if (code[pos] == '(')
-        {
-          plevel++;
-          if (lastnamed[level] == LN_VARNAME) //May be a script.
-          {
-            plevelt[plevel] = PLT_FUNCTION;
-            int cf=checkfunction(function_ext,code,pos,len);
-            if (cf!=-1) return cf;
-            lastnamed[level] = LN_NOTHING;
-          }
-          else if (lastnamed[level] == LN_FUNCTION_NAME) //Is a C++ function.
-          {
-            plevelt[plevel] = PLT_FUNCTION;
-            int cf=checkfunction(function_ext,code,pos,len);
-            if (cf!=-1) return cf;
-            lastnamed[level] = LN_NOTHING;
-          }
-          else if (lastnamed[level] == LN_TYPE_NAME) //Is a C++ function.
-          {
-            plevelt[plevel] = PLT_PARENTH;
-            lastnamed[level] = LN_NOTHING;
-          }
-          else if (lastnamed[level] == LN_FOR)
-          {
-            plevelt[plevel] = PLT_FORSTATEMENT;
-            lastnamed[level] = LN_NOTHING;
-          }
-          else
-          {
-            if (lastnamed[level] != LN_OPERATOR)
+        case '(':
             {
-              pt cpos = pos+1, qc = 1;
-              while (qc>0)
+              plevel++;
+              if (lastnamed[level] == LN_VARNAME) //May be a script.
               {
-                if (code[cpos]=='(') qc++; if (code[cpos]==')') qc--;
-                if (cpos>=len) break; //Ensure we don't overflow
-                cpos++;
+                plevelt[plevel] = PLT_FUNCTION;
+                int cf=checkfunction(function_ext,code,pos,len);
+                if (cf!=-1) return cf;
+                lastnamed[level] = LN_NOTHING;
               }
+              else if (lastnamed[level] == LN_FUNCTION_NAME) //Is a C++ function.
+              {
+                plevelt[plevel] = PLT_FUNCTION;
+                int cf=checkfunction(function_ext,code,pos,len);
+                if (cf!=-1) return cf;
+                lastnamed[level] = LN_NOTHING;
+              }
+              else if (lastnamed[level] == LN_TYPE_NAME) //Is a C++ function.
+              {
+                plevelt[plevel] = PLT_PARENTH;
+                lastnamed[level] = LN_NOTHING;
+              }
+              else if (lastnamed[level] == LN_FOR)
+              {
+                plevelt[plevel] = PLT_FORSTATEMENT;
+                lastnamed[level] = LN_NOTHING;
+              }
+              else
+              {
+                if (lastnamed[level] != LN_OPERATOR)
+                {
+                  pt cpos = pos+1, qc = 1;
+                  while (qc>0)
+                  {
+                    if (code[cpos]=='(') qc++; if (code[cpos]==')') qc--;
+                    if (cpos>=len) break; //Ensure we don't overflow
+                    cpos++;
+                  }
 
-              if (qc>0)
-              { error="Unterminated parenthesis at this point"; return pos; }
+                  if (qc>0)
+                  { error="Unterminated parenthesis at this point"; return pos; }
 
-              while (is_useless(code[cpos])) cpos++;
-              if (code[cpos]!='.')
-              { error="Unexpected parenthesis at this point"; return pos; }
+                  while (is_useless(code[cpos])) cpos++;
+                  if (code[cpos]!='.')
+                  { error="Unexpected parenthesis at this point"; return pos; }
 
-              if (statement_completed(lastnamed[level]))
-              close_statement(code,pos);
+                  if (statement_completed(lastnamed[level]))
+                  close_statement(code,pos);
+                }
+                else if (!assop[level] && !(plevel>0))
+                { error="Parenthetical expression outside of assignment operator: This is what makes C taste bitter"; return pos; }
+                plevelt[plevel] = PLT_PARENTH;
+                //lastnamed[level] should remain the same... it should be an operator.
+              }
             }
-            else if (!assop[level] && !(plevel>0))
-            { error="Parenthetical expression outside of assignment operator: This is what makes C taste bitter"; return pos; }
-            plevelt[plevel] = PLT_PARENTH;
-            //lastnamed[level] should remain the same... it should be an operator.
-          }
-          pos++;
-          continue;
-        }
-        else if (code[pos]==')')
-        {
-          if (plevelt[plevel] != PLT_PARENTH and plevelt[plevel] != PLT_FUNCTION)
-          {
-            if (plevelt[plevel] == PLT_FORSTATEMENT)
+          pos++; continue;
+        
+        case ')':
             {
-              if (statement_pad[level] != 1) {
-                error = "Too soon for closing parentheses to for() statement " + tostring(statement_pad[level]);
+              if (lastnamed[level] == LN_OPERATOR) { 
+                error = "Expected secondary expression before closing parenthesis";
                 return pos;
               }
-              level--, plevel--;
-              pos++; continue;
+              if (plevelt[plevel] != PLT_PARENTH and plevelt[plevel] != PLT_FUNCTION)
+              {
+                if (plevelt[plevel] == PLT_FORSTATEMENT)
+                {
+                  if (statement_pad[level] != 1) {
+                    error = "Too soon for closing parentheses to for() statement " + tostring(statement_pad[level]);
+                    return pos;
+                  }
+                  level--, plevel--;
+                  pos++; continue;
+                }
+                
+                if (plevelt[plevel] == PLT_CAST) {
+                  plevel--; lastnamed[level] = LN_OPERATOR; //Casts are the equivalent to unary operators
+                  pos++; continue;
+                }
+                
+                error="Unexpected closing parenthesis at this point";
+                return pos;
+              }
+              else
+                lastnamed[level] = LN_VALUE;
+              plevel--;
             }
-            
-            if (plevelt[plevel] == PLT_CAST) {
-              plevel--; lastnamed[level] = LN_OPERATOR; //Casts are the equivalent to unary operators
-              pos++; continue;
-            }
-            
-            error="Unexpected closing parenthesis at this point";
-            return pos;
-          }
-          if (plevelt[plevel] == PLT_FUNCTION)
-            lastnamed[level] = LN_FUNCTION;
-          else
-            lastnamed[level] = LN_DIGIT;
-          plevel--;
-          pos++;
-          continue;
-        }
-
-
-        if (code[pos]=='[')
-        {
-          if (lastnamed[level] != LN_VARNAME)
-          { error="Invalid use of `[' symbol"; return pos; }
-          plevel++;
-          plevelt[plevel]=PLT_BRACKET;
-          lastnamed[level]=LN_OPERATOR;
-          pos++;
-          continue;
-        }
-        else if (code[pos]==']')
-        {
-          if (plevelt[plevel] != PLT_BRACKET)
-          { error="Unexpected closing bracket at this point"; return pos; }
-          lastnamed[level]=LN_VARNAME;
-          plevel--;
-          pos++;
-          continue;
-        }
-
-
-        if (code[pos]=='{')
-        {
-          /*int einfo;
-          if (levelt[level]==LEVELTYPE_SWITCH) einfo=LEXTRAINFO_SWITCHBLOCK;
-          if (levelt[level]==LEVELTYPE_DO) einfo=LEXTRAINFO_LOOPBLOCK;
-          if (levelt[level]==LEVELTYPE_FOR_PARAMETERS) einfo=LEXTRAINFO_LOOPBLOCK;
-          if (levelt[level]==LEVELTYPE_GENERAL_STATEMENT)
-          {
-            if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
-            if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
-          }*/
-          bool isbr=levelt[level]==LEVELTYPE_SWITCH;
-          
-          quickscope();
-
-          if (lastnamed[level]==LN_OPERATOR)
-          { error="Unexpected brace at this point"; return pos; }
-
-          level+=!isbr;
-          levelt[level]=(isbr?LEVELTYPE_SWITCH_BLOCK:LEVELTYPE_BRACE);
-          lastnamed[level]=LN_NOTHING; //This is the beginning of a glorious new level
-          statement_pad[level]=-1;
-          assop[level]=0;
-
-          pos++;
-          continue;
-        }
-        else if (code[pos]=='}')
-        {
-          dropscope();
-          
-          if (level<=0)
-          { error="Unexpected closing brace at this point"; return pos; }
-
-          if (lastnamed[level]==LN_OPERATOR)
-          { error="Expected secondary expression before closing brace"; return pos; }
-
-          if (statement_completed(lastnamed[level]))
-          {
-            int cs=close_statement(code,pos);
-            if (cs != -1) return cs;
-          }
-
-          lower_to_level(LEVELTYPE_BRACE,"`}' symbol");
-          level--;
-          statement_pad[level]=-1;
-          lastnamed[level]=LN_CLOSING_SYMBOL; //Group is like one statement for this level
-          //this will invoke the next statement to close the current statement
-
-          pos++;
-          continue;
-        }
-
-
-
-
-        if (code[pos]=='"')
-        {
-          if (!assop[level] && !(plevel>0))
-          { error="Assignment operator expected before string constant"; return pos; }
-          if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
-          { error="Operator expected before string constant"; return pos; }
-          
-          if (OPTION_CPP_STRINGS)
-            while (code[++pos]!='"') { 
-              if (code[pos] == '\\')
-                pos++;
-            }
-          else
-            while (code[++pos]!='"');
-          
-          lastnamed[level] = LN_DIGIT;
           pos++; continue;
-        }
-        else if (code[pos]=='\'')
-        {
-          if (!assop[level] && !(plevel>0))
-          { error="Assignment operator expected before string constant"; return pos; }
-          if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
-          { error="Operator expected before string constant"; return pos; }
-          
-          if (OPTION_CPP_STRINGS)
-            while (code[++pos]!='\'') { 
-              if (code[pos] == '\\')
-                pos++;
-            }
-          else
-            while (code[++pos]!='\'');
-          
-          lastnamed[level]=LN_DIGIT;
-          pos++; continue;
-        }
-
-
-
-        if (code[pos]=='.')
-        {
-          if (lastnamed[level] == LN_DIGIT || lastnamed[level]==LN_VARNAME || lastnamed[level]==LN_FUNCTION)
-          {
-            pos++;
-            while (is_useless(code[pos])) pos++;
-            if (!is_letter(code[pos])) { error="Identifier expected following `.' symbol"; return pos; }
-            lastnamed[level]=LN_OPERATOR;
-            continue;
-          }
-          else
-          {
-            //in this case, there could be a number following
-            //Syntax checking on the positioning of the number will be handled next iteration
-            while (is_useless(code[++pos]));
-            if (is_digit(code[pos]))
-            { decimal_named=1; continue; }
-            else
-            { error="Unexpected symbol `.' in expression"; return pos; }
-          }
-        }
-
-
-        //Now we can assume it's supposed to be an operator
-        if (code[pos]=='=') //handle = and == first
-        {
-          if (code[pos+1]=='=') //it's operator==
-          {
-            if (!assop[level] && !(plevel>0))
-            { error="Assignment operator expected before comparison operator"; return pos; }
-            if (lastnamed[level]==LN_CLOSING_SYMBOL || lastnamed[level]==LN_OPERATOR || lastnamed[level]==LN_NOTHING)
-            { error="Expected primary expression before comparison operator"; return pos; }
-            pos+=2; lastnamed[level]=LN_OPERATOR;
-          }
-          else //operator=
-          {
-            if (lastnamed[level]==LN_FUNCTION && !assop[level])
-            { error="Cannot assign to a function, use == to test equality"; return pos; }
-            if (lastnamed[level]!=LN_VARNAME && !assop[level])
-            { error="Variable name expected before assignment operator"; return pos; }
-            assop[level]=1;
-            lastnamed[level]=LN_OPERATOR;
-            pos+=1;
-          }
-          continue;
-        }
-
-        //Now we check if it's an operator... last chance
-        ///////////////////////////////////////////////////
-
-        if ((code[pos+1]=='=') or (code[pos+1]==code[pos] && code[pos+2]=='=')) //is an assignment operator (or potentially a comparison)
-        {
-          if (code[pos+1] == '=') //one character base operator, followed by =
-          {
-            switch (code[pos])
+        
+        
+        case '[':
             {
-              case '+': case '-': case '*': 
-              case '/': case '&': case '|': 
-              case '^': //Same code as two below follwing case '<':
-                if (lastnamed[level]==LN_FUNCTION && !assop[level])
+              if (lastnamed[level] != LN_VARNAME)
+              { error="Invalid use of `[' symbol"; return pos; }
+              plevel++;
+              plevelt[plevel]=PLT_BRACKET;
+              lastnamed[level]=LN_OPERATOR;
+              pos++;
+              continue;
+            }
+          pos++; continue;
+        case ']':
+            {
+              if (plevelt[plevel] != PLT_BRACKET)
+              { error="Unexpected closing bracket at this point"; return pos; }
+              lastnamed[level]=LN_VARNAME;
+              plevel--;
+            }
+          pos++; continue;
+
+
+        case '{':
+            {
+              /*int einfo;
+              if (levelt[level]==LEVELTYPE_SWITCH) einfo=LEXTRAINFO_SWITCHBLOCK;
+              if (levelt[level]==LEVELTYPE_DO) einfo=LEXTRAINFO_LOOPBLOCK;
+              if (levelt[level]==LEVELTYPE_FOR_PARAMETERS) einfo=LEXTRAINFO_LOOPBLOCK;
+              if (levelt[level]==LEVELTYPE_GENERAL_STATEMENT)
+              {
+                if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
+                if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
+              }*/
+              bool isbr=levelt[level]==LEVELTYPE_SWITCH;
+              
+              quickscope();
+
+              if (lastnamed[level]==LN_OPERATOR)
+              { error="Unexpected brace at this point"; return pos; }
+
+              level+=!isbr;
+              levelt[level]=(isbr?LEVELTYPE_SWITCH_BLOCK:LEVELTYPE_BRACE);
+              lastnamed[level]=LN_NOTHING; //This is the beginning of a glorious new level
+              statement_pad[level]=-1;
+              assop[level]=0;
+            }
+          pos++; continue;
+        case '}':
+            {
+              dropscope();
+              
+              if (level<=0)
+              { error="Unexpected closing brace at this point"; return pos; }
+              
+              if (lastnamed[level]==LN_OPERATOR)
+              { error="Expected secondary expression before closing brace"; return pos; }
+              
+              if (statement_completed(lastnamed[level]))
+              {
+                int cs=close_statement(code,pos);
+                if (cs != -1) return cs;
+              }
+              
+              lower_to_level(LEVELTYPE_BRACE,"`}' symbol");
+              level--;
+              statement_pad[level]=-1;
+              lastnamed[level]=LN_CLOSING_SYMBOL; //Group is like one statement for this level
+              //this will invoke the next statement to close the current statement
+            }
+          pos++; continue;
+        
+        
+        case '"':
+            {
+              if (!assop[level] && !(plevel>0))
+              { error="Assignment operator expected before string constant"; return pos; }
+              if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
+              { error="Operator expected before string constant"; return pos; }
+              
+              if (OPTION_CPP_STRINGS)
+                while (code[++pos]!='"') { 
+                  if (code[pos] == '\\')
+                    pos++;
+                }
+              else
+                while (code[++pos]!='"');
+              
+              lastnamed[level] = LN_DIGIT;
+            }
+          pos++; continue;
+        
+        case '\'':
+            {
+              if (!assop[level] && !(plevel>0))
+              { error="Assignment operator expected before string constant"; return pos; }
+              if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
+              { error="Operator expected before string constant"; return pos; }
+              
+              if (OPTION_CPP_STRINGS)
+                while (code[++pos]!='\'') { 
+                  if (code[pos] == '\\')
+                    pos++;
+                }
+              else
+                while (code[++pos]!='\'');
+              
+              lastnamed[level]=LN_DIGIT;
+            }
+          pos++; continue;
+        
+        
+        
+        case '.':
+            {
+              if (lastnamed[level] == LN_DIGIT || lastnamed[level]==LN_VARNAME || lastnamed[level]==LN_VALUE)
+              {
+                pos++;
+                while (is_useless(code[pos])) pos++;
+                if (!is_letter(code[pos])) { error="Identifier expected following `.' symbol"; return pos; }
+                lastnamed[level]=LN_OPERATOR;
+                continue;
+              }
+              else
+              {
+                //in this case, there could be a number following
+                //Syntax checking on the positioning of the number will be handled next iteration
+                while (is_useless(code[++pos]));
+                if (is_digit(code[pos]))
+                { decimal_named=1; continue; }
+                else
+                { error="Unexpected symbol `.' in expression"; return pos; }
+              }
+            }
+          break;
+        
+        
+        //Now we can assume it's supposed to be an operator
+        
+        case '=': //handle = and == first
+            {
+              if (code[pos+1]=='=') //it's operator==
+              {
+                if (!assop[level] && !(plevel>0))
+                { error="Assignment operator expected before comparison operator"; return pos; }
+                if (lastnamed[level]==LN_CLOSING_SYMBOL || lastnamed[level]==LN_OPERATOR || lastnamed[level]==LN_NOTHING)
+                { error="Expected primary expression before comparison operator"; return pos; }
+                pos+=2; lastnamed[level]=LN_OPERATOR;
+              }
+              else //operator=
+              {
+                if (lastnamed[level]==LN_VALUE && !assop[level])
                 { error="Cannot assign to a function, use == to test equality"; return pos; }
                 if (lastnamed[level]!=LN_VARNAME && !assop[level])
                 { error="Variable name expected before assignment operator"; return pos; }
                 assop[level]=1;
                 lastnamed[level]=LN_OPERATOR;
-                break;
-
-              case '>': case '<': case '!':
-                if (!assop[level] && !(plevel>0))
-                { error="Assignment operator expected before comparison operator"; return pos; }
-                if (lastnamed[level]==LN_CLOSING_SYMBOL || lastnamed[level]==LN_OPERATOR || lastnamed[level]==LN_NOTHING)
-                { error="Expected primary expression before comparison operator"; return pos; }
-                break;
-
-              default:
-                error="Invalid operator at this point";
-                return pos;
+                pos+=1;
+              }
             }
-            pos+=2;
-            continue;
-          }
-          else //two character base operator, followed by =
-          {
-            switch (code[pos])
-            {
-              case '>':
-              case '<': //same code as above following case '^':
-                if (lastnamed[level]!=LN_VARNAME)
-                { error="Variable name expected before assignment operator"; return pos; }
-                if (lastnamed[level]==LN_FUNCTION)
-                { error="Cannot assign to a function, use == to test equality"; return pos; }
-                assop[level]=1;
-                lastnamed[level]=LN_OPERATOR;
-                break;
-
-              default:
-                error="Invalid operator at this point";
-                return pos;
-            }
-            pos+=3;
-            continue;
-          }
-        }
-        else //is not an assignment operator
-        {
-          switch (code[pos])
-          {
-            case '+': case '-':
-                if (OPTION_CPP_UNARY and code[pos+1] == code[pos]) //Operators ++ and --
-                {
-                  if (lastnamed[level] == LN_OPERATOR) {
-                    pos += 2;
-                    break;
-                  }
-                  if (lastnamed[level] == LN_VARNAME) {
-                    assop[level] = true;
-                    lastnamed[level] = LN_DIGIT;
-                    pos += 2; break;
-                  }
-                  if (lastnamed[level] == LN_NOTHING or lastnamed[level] == LN_CLOSING_SYMBOL) {
-                    assop[level] = true;
-                    lastnamed[level] = LN_OPERATOR;
-                    pos += 2; break;
-                  }
-                }
-              //Intentional overflow into next case label otherwise.
-            case '*': case '&':
-                if (!assop[level] && !(plevel>0))
-                { 
-                  if (indeclist[level])
-                  { pos++; continue; }
-                  error="Assignment operator expected before arithmetic operators"; return pos;
-                }
-                //Since +, - and * can also be unary, we do not have to check for previous identifier
-                lastnamed[level] = LN_OPERATOR;
-                while (code[pos]=='+' or code[pos]=='-' or code[pos]=='*' or code[pos]=='&' or is_useless(code[pos]))
-                  pos++;
-              break;
-
-            case '/':
-                if (code[pos+1] == '/')
-                {
-                  pos++;
-                  while (code[++pos] != '\n' and code[pos] != '\r' and pos < len);
-                  continue;
-                }
-                else if (code[pos+1] == '*')
-                {
-                  pos++;
-                  while ((code[pos++] != '*' or code[pos] != '/') and pos < len);
-                  pos++; continue;
-                }
-              //overflow into next otherwise
-            case '%': case '|':
-            case '^': case '>': case '<':
-                if (!assop[level] && !(plevel>0))
-                { error="Assignment operator expected before any secondary operators"; return pos; }
-                if (lastnamed[level]!=LN_VARNAME && lastnamed[level]!=LN_DIGIT)
-                { error="Primary expression expected before operator"; return pos; }
-                lastnamed[level]=LN_OPERATOR;
-                if (code[pos+1]==code[pos])
-                {
-                  if (code[pos]!='^' && code[pos]!='|' && code[pos]!='^' && code[pos]!='<' && code[pos]!='>')
-                  { error="Invalid operator at this point"; return pos; }
-                  pos++;
-                }
-                if (code[pos]=='<' and code[pos+1]=='>')
-                  pos++;
-                pos++;
-              break;
-
-            case '!': case '~': //we already know the next symbol is not '=', so this is unary
-                if (lastnamed[level] != LN_OPERATOR and lastnamed[level] != LN_NOTHING)
-                { error="Unexpected unary operator following value"; return pos; }
-                pos++;
-              break; //lastnamed is already operator, so just break
-
-            default:
-                error="Unexpected symbol reached";
-              return pos;
-          }
           continue;
-        }
-      }
-    }
+          
+        //TERNARY
+        case '?':
+            if (lastnamed[level] != LN_VARNAME and lastnamed[level] != LN_VALUE and lastnamed[level] != LN_DIGIT)
+            { error = "Unexpected ternary operator at this point"; return pos; }
+            levelt[++level] = LEVELTYPE_TERNARY;
+            lastnamed[level] = LN_OPERATOR;
+            statement_pad[level] = 2;
+            assop[level] = true;
+          pos++; continue;
+        
+        case ':': //The unhappiest symbol in the C language!
+            {
+              if (levelt[level] == LEVELTYPE_TERNARY)
+              {
+                while (statement_pad[level] != 2)
+                {
+                  if (level > 1 and levelt[level-1] == LEVELTYPE_TERNARY)
+                    level--;
+                  else
+                  { error = "Already used a colon this ternary expression"; return pos; }
+                }
+                if (lastnamed[level] == LN_OPERATOR)
+                { error = "Expected secondary expression to ternary operator before colon"; return pos; }
+                statement_pad[level]--;
+                lastnamed[level] = LN_OPERATOR;
+              }
+              else if (plevel>0)
+                { error="Unexpected colon at this point"; return pos; }
+              else if (level>0 and levelt[level]==LEVELTYPE_CASE)
+              {
+                if (statement_pad[level] != 1 || lastnamed[level]==LN_OPERATOR)
+                { error="Expression expected before `:' symbol"; return pos; }
+                lastnamed[level]=LN_CLOSING_SYMBOL;
+              }
+              else if (lastnamed[level]==LN_VARNAME and !assop[level])
+              {
+                error="Goto labels not yet supported"; return pos;
+                lastnamed[level]=LN_NOTHING; //Pretend you never saw the identifier
+              }
+              else
+              {
+                error="Unexpected symbol `:' at this point";
+                return pos;
+              }
+            }
+          pos++; continue;
+        
+        //Now we check if it's an operator... last chance
+        ///////////////////////////////////////////////////
+        default:
+            if ((code[pos+1]=='=') or (code[pos+1]==code[pos] && code[pos+2]=='=')) //is an assignment operator (or potentially a comparison)
+            {
+              if (code[pos+1] == '=') //one character base operator, followed by =
+              {
+                switch (code[pos])
+                {
+                  case '+': case '-': case '*': 
+                  case '/': case '&': case '|': 
+                  case '^': //Same code as two below follwing case '<':
+                    if (lastnamed[level]==LN_VALUE && !assop[level])
+                    { error="Cannot assign to a function, use == to test equality"; return pos; }
+                    if (lastnamed[level]!=LN_VARNAME && !assop[level])
+                    { error="Variable name expected before assignment operator"; return pos; }
+                    assop[level]=1;
+                    lastnamed[level]=LN_OPERATOR;
+                    break;
 
+                  case '>': case '<': case '!':
+                    if (!assop[level] && !(plevel>0))
+                    { error="Assignment operator expected before comparison operator"; return pos; }
+                    if (lastnamed[level]==LN_CLOSING_SYMBOL || lastnamed[level]==LN_OPERATOR || lastnamed[level]==LN_NOTHING)
+                    { error="Expected primary expression before comparison operator"; return pos; }
+                    break;
+
+                  default:
+                    error="Invalid operator at this point";
+                    return pos;
+                }
+                pos+=2;
+                continue;
+              }
+              else //two character base operator, followed by =
+              {
+                switch (code[pos])
+                {
+                  case '>':
+                  case '<': //same code as above following case '^':
+                    if (lastnamed[level]!=LN_VARNAME)
+                    { error="Variable name expected before assignment operator"; return pos; }
+                    if (lastnamed[level]==LN_VALUE)
+                    { error="Cannot assign to left operand; use == to test equality"; return pos; }
+                    assop[level]=1;
+                    lastnamed[level]=LN_OPERATOR;
+                    break;
+
+                  default:
+                    error="Invalid operator at this point";
+                    return pos;
+                }
+                pos+=3;
+                continue;
+              }
+            }
+            else //is not an assignment operator
+            {
+              switch (code[pos])
+              {
+                case '+': case '-':
+                    if (OPTION_CPP_UNARY and code[pos+1] == code[pos]) //Operators ++ and --
+                    {
+                      if (lastnamed[level] == LN_OPERATOR) {
+                        pos += 2;
+                        break;
+                      }
+                      if (lastnamed[level] == LN_VARNAME) {
+                        assop[level] = true;
+                        lastnamed[level] = LN_DIGIT;
+                        pos += 2; break;
+                      }
+                      if (lastnamed[level] == LN_NOTHING or lastnamed[level] == LN_CLOSING_SYMBOL) {
+                        assop[level] = true;
+                        lastnamed[level] = LN_OPERATOR;
+                        pos += 2; break;
+                      }
+                    }
+                  //Intentional overflow into next case label otherwise.
+                case '*': case '&':
+                    if (!assop[level] && !(plevel>0))
+                    { 
+                      if (indeclist[level])
+                      { pos++; continue; }
+                      error="Assignment operator expected before arithmetic operators"; return pos;
+                    }
+                    //Since +, - and * can also be unary, we do not have to check for previous identifier
+                    lastnamed[level] = LN_OPERATOR;
+                    while (code[pos]=='+' or code[pos]=='-' or code[pos]=='*' or code[pos]=='&' or is_useless(code[pos]))
+                      pos++;
+                  break;
+
+                case '/':
+                    if (code[pos+1] == '/')
+                    {
+                      pos++;
+                      while (code[++pos] != '\n' and code[pos] != '\r' and pos < len);
+                      continue;
+                    }
+                    else if (code[pos+1] == '*')
+                    {
+                      pos++;
+                      while ((code[pos++] != '*' or code[pos] != '/') and pos < len);
+                      pos++; continue;
+                    }
+                  //overflow into next otherwise
+                case '%': case '|':
+                case '^': case '>': case '<':
+                    if (!assop[level] && !(plevel>0))
+                    { error="Assignment operator expected before any secondary operators"; return pos; }
+                    if (lastnamed[level] != LN_VARNAME && lastnamed[level] != LN_DIGIT)
+                    { error="Primary expression expected before operator"; return pos; }
+                    lastnamed[level]=LN_OPERATOR;
+                    if (code[pos+1]==code[pos])
+                    {
+                      if (code[pos]!='^' && code[pos]!='|' && code[pos]!='^' && code[pos]!='<' && code[pos]!='>')
+                      { error="Invalid operator at this point"; return pos; }
+                      pos++;
+                    }
+                    if (code[pos]=='<' and code[pos+1]=='>')
+                      pos++;
+                    pos++;
+                  break;
+
+                case '!': case '~': //we already know the next symbol is not '=', so this is unary
+                    if (lastnamed[level] != LN_OPERATOR and lastnamed[level] != LN_NOTHING)
+                    { error="Unexpected unary operator following value"; return pos; }
+                    pos++;
+                  break; //lastnamed is already operator, so just break
+
+                default:
+                    error="Unexpected symbol reached";
+                  return pos;
+              }
+              continue;
+            }
+          //End of assignment operator checking
+      }
+      //End of switch(code[pos])
+    }
+    
     //We're now at the end of the code. Perform a couple checks...
     if (plevel>1)
      { error="Code ends with "+tostring(plevel)+" unterminated parentheses"; return pos; }
@@ -785,7 +806,7 @@ namespace syncheck
     if (lastnamed[level]==LN_OPERATOR)
      { error="Expected secondary expression before end of code"; return pos; }
 
-    if (statement_pad[level]>(levelt[level]==LEVELTYPE_IF))
+    if (statement_pad[level] > (levelt[level]==LEVELTYPE_IF))
     { error="Unexpected end of code reached ("+tostring(level)+","+tostring(statement_pad[level]); return pos; }
 
 

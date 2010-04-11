@@ -85,7 +85,7 @@ void bmain(){
 				}
 				draw_sprite(enigma::objectdata[objnum].sprite_index,0,xx,yy);
 			}
-		}else{
+		} else {
 			if(!enigma::last_mousestatus[0] || enigma::keybdstatus[vk_shift]){
 				int xx=mouse_x,yy=mouse_y;
 				if(!enigma::keybdstatus[vk_alt]){

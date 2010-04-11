@@ -62,7 +62,8 @@ namespace enigma
     
     //Constructors
       object_planar();
-      object_planar(unsigned x, int y);
+      object_planar(unsigned, int);
+      virtual ~object_planar();
   };
   
   void step_basic(object_basic* instance_b);

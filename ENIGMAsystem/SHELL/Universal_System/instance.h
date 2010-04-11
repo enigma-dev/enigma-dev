@@ -39,15 +39,13 @@ int instance_furthest(double x,double y,double obj)
 
 \******************************************************************************/
 
-namespace enigma
-{
+namespace enigma {
   extern int destroycalls, createcalls;
 }
 
-int instance_create(double x,double y,double object);
+int instance_create(int x,int y,int object);
 
-namespace enigma
-{
+namespace enigma {
   void instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
 }
 

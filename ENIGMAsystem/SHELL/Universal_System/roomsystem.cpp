@@ -78,6 +78,14 @@ namespace enigma
   struct inst {
     int x,y,id,obj;
   };
+  struct viewstruct
+  {
+    int start_vis;
+    int area_x,area_y,area_w,area_h;
+    int port_x,port_y,port_w,port_h;
+    int object2follow;
+    int hborder,vborder,hspd,vspd;
+  };
   struct roomstruct
   {
     std::string name;
@@ -85,12 +93,9 @@ namespace enigma
     void(*createcode)();
     std::string cap;
     int width, height, spd;
-    char views_enabled,start_vis[8];
-    int area_x[8],area_y[8],area_w[8],area_h[8];
-    int port_x[8],port_y[8],port_w[8],port_h[8];
-    int object2follow[8];
-    int hborder[8],vborder[8],hspd[8],vspd[8];
-      int instancecount;
+    int views_enabled;
+    viewstruct views[8];
+    int instancecount;
     
     std::map<int,inst> instances;
     void gotome();
@@ -113,11 +118,11 @@ namespace enigma
     view_enabled = views_enabled;
     
     for(int i=0;i<7;i++){
-      view_xview[i]=area_x[i]; view_yview[i]=area_y[i]; view_wview[i]=area_w[i]; view_hview[i]=area_h[i];
-      view_xport[i]=port_x[i]; view_yport[i]=port_y[i]; view_wport[i]=port_w[i]; view_hport[i]=port_h[i];
-      view_object[i]=object2follow[i];
-      view_hborder[i]=hborder[i]; view_vborder[i]=vborder[i]; view_hspeed[i]=hspd[i]; view_vspeed[i]=vspd[i];
-      view_visible[i]=start_vis[i];
+      view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
+      view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
+      view_object[i] = views[i].object2follow;
+      view_hborder[i] = views[i].hborder; view_vborder[i] = views[i].vborder; view_hspeed[i] = views[i].hspd; view_vspeed[i] = views[i].vspd;
+      view_visible[i] = views[i].start_vis;
     }
     
     double xm=0,ym=0;

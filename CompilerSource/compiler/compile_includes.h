@@ -66,6 +66,11 @@ string format_error(string code,string err,int pos)
   return "Line " + tostring(line) + ", position " + tostring(lp) + " (absolute " + tostring(pos) + "): " + err;
 }
 
+void* lgmRoomBGColor(int c)
+{
+  return (void*)((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):-1);
+}
+
 
 inline string tdefault(string t) {
   return (t != "" ? t : "var");

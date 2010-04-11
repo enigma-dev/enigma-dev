@@ -26,43 +26,36 @@
 \********************************************************************************/
 
 
-int instance_create(double x,double y,double object)
+int instance_create(int x,int y,int object)
 {
-	int idn=enigma::maxid;
-    enigma::newinst_id=enigma::maxid;
-    enigma::maxid++;
-    enigma::newinst_obj=(int)object;
-    enigma::newinst_x=x;
-    enigma::newinst_y=y;
+	int idn = enigma::maxid++;
 
-	switch((int)object){
-	#include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
-	default:
-		#if SHOWERRORS
-		show_error("Object doesn't exist",(int)object);
-		#endif
-		return -1;
-    }
-    return idn;
+	switch((int)object)
+	{
+    #include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
+    default:
+        #if SHOWERRORS
+        show_error("Object doesn't exist",0);
+        #endif
+      return -1;
+  }
+  return idn;
 }
 
 namespace enigma
 {
   void instance_create_id(int x,int y,int object,int idn)
   { //This is for use by the system only. Please leave be
-    if (enigma::maxid<idn) enigma::maxid=idn;
-    enigma::newinst_id=idn;
-    enigma::newinst_obj=object;
-    enigma::newinst_x=x;
-    enigma::newinst_y=y;
+    if (enigma::maxid<idn)
+      enigma::maxid = idn;
     switch (object)
     {
       #include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
       
       default:
-        #if SHOWERRORS
-        show_error("Object doesn't exist",object);
-        #endif
+          #if SHOWERRORS
+          show_error("Object doesn't exist",0);
+          #endif
         ;
     }
   }

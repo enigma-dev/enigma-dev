@@ -82,6 +82,8 @@ namespace enigma
 
       virtual enigma::variant myevent_destroy();
       
+      virtual int instance_destroy();
+      
       object_basic();
       object_basic(int uid, int uoid);
       virtual ~object_basic();

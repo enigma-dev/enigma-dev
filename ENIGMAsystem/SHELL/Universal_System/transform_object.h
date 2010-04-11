@@ -1,4 +1,3 @@
-
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
@@ -31,6 +30,9 @@
   @summary Adds a graphics-related tier following the planar tier.
 */
 
+#ifndef _TRANSFORM_OBJECT_H
+#define _TRANSFORM_OBJECT_H
+
 #include "../Graphics_Systems/OpenGL/graphics_object.h"
 
 namespace enigma
@@ -41,7 +43,10 @@ namespace enigma
         var  image_alpha;
         var  image_blend;
     //Constructors
-      object_transform() {}
-      object_transform(unsigned x, int y): object_graphics(x,y) {}
+      object_transform();
+      object_transform(unsigned x, int y);
+      virtual ~object_transform();
   };
 }
+
+#endif

@@ -42,6 +42,8 @@ const double pi=M_PI;
 
 #include "var_cr3.h"
 
+int show_error(std::string errortext,double fatal);
+
 namespace enigma
 {
     int maxid = 100001;
@@ -81,6 +83,7 @@ namespace enigma
     object_basic::~object_basic() {}
     
     object_basic *ENIGMA_global_instance;
+    
 
 
     //#include "imap.h"
@@ -97,6 +100,11 @@ namespace enigma
     std::map<int,int> cleanups;
     int cleancount=0;
     
+    int object_basic::instance_destroy()
+    {
+      cleanups[cleancount++] = id;
+      return 0;
+    }
     
     void constructor(object_basic* instance); //This is the universal create event code
     void step_basic(object_basic* instance);

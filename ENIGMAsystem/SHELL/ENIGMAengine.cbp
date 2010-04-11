@@ -219,6 +219,7 @@
 		<Unit filename="Universal_System\WITHconstruct.h" />
 		<Unit filename="Universal_System\collisions.cpp" />
 		<Unit filename="Universal_System\collisions.h" />
+		<Unit filename="Universal_System\collisions_object.cpp" />
 		<Unit filename="Universal_System\collisions_object.h" />
 		<Unit filename="Universal_System\compression.cpp" />
 		<Unit filename="Universal_System\compression.h" />
@@ -253,6 +254,7 @@
 		<Unit filename="Universal_System\spritestruct.cpp" />
 		<Unit filename="Universal_System\spritestruct.h" />
 		<Unit filename="Universal_System\switch_stuff.h" />
+		<Unit filename="Universal_System\transform_object.cpp" />
 		<Unit filename="Universal_System\transform_object.h" />
 		<Unit filename="Universal_System\var_cr3.cpp" />
 		<Unit filename="Universal_System\var_cr3.h" />

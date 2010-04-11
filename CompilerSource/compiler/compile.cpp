@@ -58,6 +58,8 @@ void clear_ide_editables()
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out); wto.close();
 }
 
 enum cmodes {
@@ -69,8 +71,6 @@ enum cmodes {
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
-  cout << "Hey. I wanted you to know: I have no fucking idea what to do with this input. :D\n";
-  
   cout << "Location in memory of structure: " << es << flushl;
   if (es == NULL)
     return -1;//E_ERROR_PLUGIN_FUCKED_UP;
@@ -252,19 +252,48 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << '\n';
   wto.close();
   
+  
+  //NEXT FILE ----------------------------------------
+  //Object switch: A listing of all object IDs and the code to allocate them.
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out);
     wto << license;
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
       wto << "case " << i->second->id << ":\n";
-      wto << "    enigma::instance_list[idn]=new enigma::OBJ_" << i->second->name <<";\n";
+      wto << "    enigma::instance_list[idn]=new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
       wto << "  break;\n";
     }
     wto << '\n';
   wto.close();
   
+  
   //NEXT FILE ----------------------------------------
-  //Object declarations: object classes/names and locals
+  //Resource names: Defines integer constants for all resources.
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out);
+    wto << license;
+    
+    wto << "enum //object names\n{\n";
+    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+      wto << "  " << i->second->name << " = " << i->first << ",\n"; 
+    wto << "};\n\n";
+    
+    wto << "enum //sprite names\n{\n";
+    for (int i = 0; i < es->spriteCount; i++)
+      wto << "  " << es->sprites[i].name << " = " << es->sprites[i].id << ",\n"; 
+    wto << "};\n\n";
+    
+    wto << "enum //sound names\n{\n";
+    for (int i = 0; i < es->soundCount; i++)
+      wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n"; 
+    wto << "};\n\n";
+    
+    
+  wto.close();
+  
+  
+  
+  //NEXT FILE ----------------------------------------
+  //Object declarations: object classes/names and locals.
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
     wto << license;
     wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
@@ -290,32 +319,27 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
         }
         
         //Automatic constructor
-        wto << "\n    OBJ_" <<  i->second->name << "(): object_locals(enigma::newinst_id++, " << i->second->id << ")";
-        
-        wto << "\n    {\n";
-        //Sprite index
-          if (used__object_set_sprite) //We want to initialize 
-            wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n";
-          else
-            wto << "      sprite_index = " << i->second->sprite_index << ";\n";
-        wto << "      enigma::constructor(this);\n      myevent_create();\n    }\n";
-        
         //Directed constructor (ID is specified)
-        wto << "    OBJ_" <<  i->second->name << "(int id): object_locals(id, " << i->second->id << ")";
-        
-        wto << "\n    {\n";
-        //Sprite index
-          if (used__object_set_sprite) //We want to initialize 
-            wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n";
-          else
-            wto << "      sprite_index = " << i->second->sprite_index << ";\n";
-        wto << "      enigma::constructor(this);\n      myevent_create();\n    }\n";
-        
+        wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, int id = (enigma::maxid++))";
+          wto << ": object_locals(id, " << i->second->id << ")";
+          wto << "\n    {\n";
+            //Sprite index
+              if (used__object_set_sprite) //We want to initialize 
+                wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n";
+              else
+                wto << "      sprite_index = " << i->second->sprite_index << ";\n";
+            
+            //Coordinates
+                wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
+              
+          wto << "      enigma::constructor(this);\n      myevent_create();\n    }\n";
         wto << "  };\n";
       }
     wto << "}\n";
   wto.close();
   
+  //NEXT FILE ----------------------------------------
+  //Object functions: events, constructors, other codes.
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out);
     wto << license;
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
@@ -331,28 +355,27 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     
     wto << 
     "namespace enigma\n{\n  void constructor(object_basic* instance_b)\n  {\n"
-    "//This is the universal create event code\n    instance_list[newinst_id]=instance_b;\n\n"    
-    "object_locals* instance = (object_locals*)instance_b;\n\n"
-    "instance->x = newinst_x;\n    instance->y = newinst_y;\n\n"
-    "instance->xstart = newinst_x;\n    instance->ystart = newinst_y;\n    instance->xprevious = newinst_x;\n    instance->yprevious = newinst_y;\n\n"
-    "instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n\n"
-    /*instance->sprite_index = enigma::objectdata[newinst_obj].sprite_index;
-    instance->mask_index = enigma::objectdata[newinst_obj].mask_index;
-    instance->visible = enigma::objectdata[newinst_obj].visible;
-    instance->solid = enigma::objectdata[newinst_obj].solid;
-    instance->persistent = enigma::objectdata[newinst_obj].persistent;
-    instance->depth = enigma::objectdata[newinst_obj].depth;*/
-    "for(int i=0;i<16;i++)\n      instance->alarm[i]=-1;\n\n"
+    "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"    
+    "    instance_list[instance->id]=instance_b;\n\n"
+    "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
+    "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
+    /*instance->sprite_index = enigma::objectdata[instance->obj].sprite_index;
+    instance->mask_index = enigma::objectdata[instance->obj].mask_index;
+    instance->visible = enigma::objectdata[instance->obj].visible;
+    instance->solid = enigma::objectdata[instance->obj].solid;
+    instance->persistent = enigma::objectdata[instance->obj].persistent;
+    instance->depth = enigma::objectdata[instance->obj].depth;*/
+    "    for(int i=0;i<16;i++)\n      instance->alarm[i]=-1;\n\n"
     
-    "if(instance->sprite_index!=-1)\n    {\n      instance->bbox_bottom  =   sprite_get_bbox_bottom(instance->sprite_index);\n      "
-    "instance->bbox_left    =   sprite_get_bbox_left(instance->sprite_index);\n      instance->bbox_right   =   sprite_get_bbox_right(instance->sprite_index);\n      "
-    "instance->bbox_top     =   sprite_get_bbox_top(instance->sprite_index);\n      //instance->sprite_height =  sprite_get_height(instance->sprite_index); "
-    "//TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n      //instance->sprite_width  =  sprite_get_width(instance->sprite_index);  //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n      "
-    "instance->sprite_xoffset = sprite_get_xoffset(instance->sprite_index);\n      instance->sprite_yoffset = sprite_get_yoffset(instance->sprite_index);\n      "
-    "//instance->image_number  =  sprite_get_number(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n    }\n\n"
+    "    if(instance->sprite_index!=-1)\n    {\n      instance->bbox_bottom  =   sprite_get_bbox_bottom(instance->sprite_index);\n      "
+    "    instance->bbox_left    =   sprite_get_bbox_left(instance->sprite_index);\n      instance->bbox_right   =   sprite_get_bbox_right(instance->sprite_index);\n      "
+    "    instance->bbox_top     =   sprite_get_bbox_top(instance->sprite_index);\n      //instance->sprite_height =  sprite_get_height(instance->sprite_index); "
+    "    //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n      //instance->sprite_width  =  sprite_get_width(instance->sprite_index);  //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n      "
+    "    instance->sprite_xoffset = sprite_get_xoffset(instance->sprite_index);\n      instance->sprite_yoffset = sprite_get_yoffset(instance->sprite_index);\n      "
+    "    //instance->image_number  =  sprite_get_number(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n    }\n    \n"
     
-    "instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
-    "instance->image_single = -1;\n    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n\n"
+    "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
+    "    instance->image_single = -1;\n    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
     /*instance->path_endaction;
     instance->path_index;
     instance->path_orientation;
@@ -367,7 +390,55 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     "instancecount++;\n    instance_count++;\n  }\n}\n";
   wto.close();
   
-  
+  //NEXT FILE ----------------------------------------
+  //Object functions: events, constructors, other codes.
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out);
+    wto << license;
+    int room_highid = 0, room_highinstid = 100000;
+    for (int i = 0; i < es->roomCount; i++) 
+    {
+      wto <<
+      "  enigma::roomdata[" << es->rooms[i].id << "].name = \"" << es->rooms[i].name << "\";\n"
+      "  enigma::roomdata[" << es->rooms[i].id << "].cap = \"" << es->rooms[i].caption << "\";\n"
+      "  enigma::roomdata[" << es->rooms[i].id << "].backcolor = " << lgmRoomBGColor(es->rooms[i].backgroundColor) << ";\n"
+      "  enigma::roomdata[" << es->rooms[i].id << "].spd = " << es->rooms[i].speed << ";\n"
+      "  enigma::roomdata[" << es->rooms[i].id << "].width = " << es->rooms[i].width << ";\n"
+      "  enigma::roomdata[" << es->rooms[i].id << "].height = " << es->rooms[i].height << ";\n"
+      "  enigma::roomdata[" << es->rooms[i].id << "].views_enabled = " << es->rooms[i].enableViews << ";\n";
+      for (int ii = 0; ii < es->rooms[i].viewCount; ii++)
+      {
+        wto << 
+        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].start_vis = 0;\n"
+        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_x = 0; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_y = 0;"
+           " enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_w = 640; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_h = 480;\n"
+        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_x = 0;   enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_y = 0;"
+           " enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_w = 640; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_h = 480;\n"
+        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].object2follow = 0;\n"
+        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].hborder=32; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].vborder = 32;"
+           " enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].hspd = -1;  enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].vspd = -1;\n";
+      }
+      wto << 
+      "  enigma::roomdata[" << es->rooms[i].id << "].instancecount = " << es->rooms[i].instanceCount << ";\n"
+      "  enigma::roomdata[" << es->rooms[i].id << "].createcode = (void(*)())roomcreate" << es->rooms[i].id << ";";
+      
+      if (es->rooms[i].id > room_highid)
+        room_highid = es->rooms[i].id;
+    }
+    
+    wto << "int instdata[] = {";
+    for (int i = 0; i < es->roomCount; i++)
+      for (int ii = 0; ii < es->rooms[i].instanceCount; ii++) {
+        wto << 
+          es->rooms[i].instances[ii].id << "," << 
+          es->rooms[i].instances[ii].objectId << "," << 
+          es->rooms[i].instances[ii].x << "," << 
+          es->rooms[i].instances[ii].y << ",";
+        if (es->rooms[i].instances[ii].id > room_highinstid)
+          room_highinstid = es->rooms[i].instances[ii].id;
+      }
+    wto << "};\n\n";
+    wto << "enigma::room_max = " <<  room_highid << " + 1;\nenigma::maxid = " << room_highinstid << " + 1;\n";
+  wto.close();
   
   /*
     Segment three: Add resources into the game executable

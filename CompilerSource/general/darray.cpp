@@ -9,6 +9,6 @@ void post_access_watch(unsigned i,unsigned sz,unsigned all)
     cout <<
     "***************************************************\n" <<
     "Though this is not a fatal error, its occurrance is\n" <<
-    "potentially dangerous. Please report its occurrence\n" <<
+    "potentially dangerous. Please report the occurrence\n" <<
     "***************************************************\n";
 }

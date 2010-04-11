@@ -30,6 +30,9 @@
   @summary Adds a graphics-related tier following the planar tier.
 */
 
+#ifndef _GRAPHICS_OBJECT_H
+#define _GRAPHICS_OBJECT_H
+
 #include "../../Universal_System/planar_object.h"
 namespace enigma
 {
@@ -53,5 +56,8 @@ namespace enigma
     //Constructors
       object_graphics();
       object_graphics(unsigned x, int y);
+      virtual ~object_graphics();
   };
 }
+
+#endif

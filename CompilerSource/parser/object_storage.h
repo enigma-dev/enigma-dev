@@ -25,6 +25,11 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _OBJECT_STORAGE_H
+#define _OBJECT_STORAGE_H
+
+#include "../general/darray.h"
+
 //These parallel ism's structs, but offer additional properties we need to finish compile
 struct parsed_object;
 struct parsed_event
@@ -64,3 +69,5 @@ typedef map<int,parsed_object*>  :: iterator po_i;
 typedef map<int,parsed_event*>   :: iterator pe_i;
 
 typedef map<string,dectrip>::iterator deciter;
+
+#endif

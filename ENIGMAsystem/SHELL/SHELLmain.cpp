@@ -86,6 +86,8 @@
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h"
 
+#include "Universal_System/collisions_object.h"
+
 #include "Universal_System/objecttable.h"
 #include "Universal_System/object.h"
 #include "Universal_System/instance.h"
@@ -129,6 +131,13 @@
 #endif
 
 #include "Universal_System/instance_create.h"
+
+#define faery_princess   700
+
+#if 0
+# elif defined faery_princess && (faery_princess - 0) < 600
+  LOL WHAT
+#endif
 
 //This is like main(), only cross-api
 int initialize_everything()
