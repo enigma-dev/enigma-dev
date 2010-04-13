@@ -60,18 +60,21 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 	{
 	public static final String ENIGMA = "compileEGMf.exe";
 	public EnigmaFrame ef;
+	public EnigmaSettingsFrame esf = new EnigmaSettingsFrame();
 	public JMenuItem run, debug, build, compile;
 	public boolean GCC_LOCATED = false;
-	public EnigmaNode node = new EnigmaNode();
+	public final EnigmaNode node = new EnigmaNode();
 
 	public EnigmaRunner()
 		{
 		attemptUpdate();
-		initEnigmaLib();
+		if (false) initEnigmaLib();
 		populateMenu();
 		populateTree();
 		SubframeInformer.addSubframeListener(this);
 		applyBackground("org/enigma/enigma.png");
+
+		LGM.mdi.add(esf);
 
 		//Apparently josh wants a textbox for if it returns 0 (gcc found)?
 		//I'm guessing he also wants me to get text from him and put it in here
@@ -283,7 +286,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 		public void openFrame()
 			{
-			System.out.println("You can has " + getUserObject());
+			esf.toTop();
 			}
 
 		public void showMenu(MouseEvent e)
