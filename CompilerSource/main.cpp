@@ -122,7 +122,8 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
     return &ide_passback_error;
   }
   
-  cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
+  cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n"
+  << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
   //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   
   cout << "Initializing EDL Parser...";

@@ -32,7 +32,7 @@ int show_error(double errortext, double fatal)
 
 \******************************************************************************/
 
-const double pi=M_PI;
+//const double pi = M_PI;
 
 namespace enigma{
 	std::string evname(int num);

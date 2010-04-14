@@ -76,9 +76,9 @@ goforit(at);*/
 #if ENIGMA_GS_OPENGL
     #include "Graphics_Systems/OpenGL/OPENGLStd.h"
 #endif
-#if ENIGMA_WS_WINDOWS!=0
+#if ENIGMA_WS_WINDOWS != 0
     #include "Platforms/windows/WINDOWSStd.h"
-#elif ENIGMA_WS_XLIB!=0
+#elif ENIGMA_WS_XLIB != 0
     #include "Platforms/xlib/XLIBwindow.h"
     #include "Platforms/xlib/XLIBdialog.h"
 #endif
@@ -148,7 +148,7 @@ goforit(at);*/
 	#include "Platforms/xlib/XLIBmain.h"
 #endif
 */
-/*
+
 #include "Universal_System/instance_create.h"
 
 //This is like main(), only cross-api
@@ -156,4 +156,4 @@ int initialize_everything()
 {
   #include "initialize.h"
   return 0;
-}*/
+}

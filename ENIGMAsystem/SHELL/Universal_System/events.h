@@ -33,6 +33,7 @@ namespace enigma
 	extern int getID();
 }
 
+extern int sleep(int); //TODO: Move to platforms root
 
 void ENIGMA_events(void)
 {

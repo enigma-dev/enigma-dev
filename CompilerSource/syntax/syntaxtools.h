@@ -85,13 +85,12 @@ inline int statement_completed(int lt,int pos=0)
   if (lt==LN_OPERATOR)
     return 0;
   
-  if (lt==LN_VALUE)
+  if (lt==LN_VALUE ||  lt==LN_DIGIT)
     return 1;
   
   if (assop[level])
-  if (lt==LN_VARNAME 
-  ||  lt==LN_DIGIT
-  ) return 1;
+  if (lt==LN_VARNAME)
+    return 1;
   
   return 0;
 }
