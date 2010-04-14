@@ -48,6 +48,7 @@ import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.main.LGM;
+import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
 import org.lateralgm.subframes.ScriptFrame;
@@ -56,7 +57,7 @@ import org.lateralgm.subframes.SubframeInformer.SubframeListener;
 
 import com.sun.jna.StringArray;
 
-public class EnigmaRunner implements ActionListener,SubframeListener
+public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListener
 	{
 	public static final String ENIGMA = "compileEGMf.exe";
 	public EnigmaFrame ef;
@@ -68,6 +69,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 	public EnigmaRunner()
 		{
 		attemptUpdate();
+		LGM.addReloadListener(this);
 		if (false) initEnigmaLib();
 		populateMenu();
 		populateTree();
@@ -315,36 +317,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 			}
 		}
 
-	public String findEnigma(String expected)
-		{
-		File f = new File(expected);
-		if (f.exists()) return f.getAbsolutePath();
-
-		f = new File(LGM.workDir.getParent(),"plugins");
-		if (!f.exists()) f = new File(LGM.workDir.getParent(),"Plugins");
-		f = new File(f,expected);
-		if (f.exists()) return f.getAbsolutePath();
-
-		f = new File(System.getProperty("user.dir"),expected);
-		if (f.exists()) return f.getAbsolutePath();
-
-		f = new File(System.getProperty("user.home"));
-		if (!new File(f,expected).exists()) f = new File(f,"Desktop");
-		f = new File(f,expected);
-		if (f.exists()) return f.getAbsolutePath();
-
-		f = new File(f.getParent(),"plugins");
-		if (!f.exists()) f = new File(f.getParent(),"Plugins");
-		f = new File(f,expected);
-		if (f.exists()) return f.getAbsolutePath();
-
-		System.err.println("Unable to locate Enigma");
-		return null;
-		}
-
 	public void compile(final byte mode)
 		{
 		//modes: 0=run, 1=debug, 2=build, 3=compile
+		if (!GCC_LOCATED)
+			{
+			JOptionPane.showMessageDialog(null,"You can't compile without GCC.");
+			return;
+			}
 
 		//determine where to output the exe
 		File exef = null;
@@ -389,72 +369,20 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 
 		}
 
-	public static SyntaxError checkSyntax(String code)
+	public SyntaxError checkSyntax(String code)
 		{
+		if (!GCC_LOCATED)
+			{
+			JOptionPane.showMessageDialog(null,"You can't compile without GCC.");
+			return null;
+			}
+
 		String osl[] = new String[LGM.currentFile.scripts.size()];
 		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
 		for (int i = 0; i < osl.length; i++)
 			osl[i] = isl[i].getName();
 		return EnigmaStruct.syntaxCheck(osl.length,new StringArray(osl),code);
-
-		/*
-		File sf = null;
-		try
-			{
-			sf = File.createTempFile("egm",".egm");
-			sf.deleteOnExit();
-			BufferedWriter f = new BufferedWriter(new FileWriter(sf));
-			f.write('1');
-			f.newLine();
-			for (Script scr : LGM.currentFile.scripts)
-				f.write(scr.getName() + ",");
-			f.newLine();
-			f.write(code);
-			f.close();
-			}
-		catch (IOException e)
-			{
-			e.printStackTrace();
-			if (sf != null) sf.delete();
-			return -1;
-			}
-
-		String path = "compileEGMf.exe";
-		File fi = new File(path);
-		if (!fi.exists()) path = System.getProperty("user.dir") + File.separator + path;
-		if (!new File(path).exists())
-			{
-			JOptionPane.showMessageDialog(null,"Unable to locate Enigma for Syntax Check");
-			sf.delete();
-			return -1;
-			}
-		if (!new File(path).equals(fi))
-			System.out.println(fi.getAbsolutePath() + " not found. Attempting " + path);
-		else
-			System.out.println("Checking syntax with " + fi.getAbsolutePath());
-
-		int r = -1;
-		try
-			{
-			Process p = Runtime.getRuntime().exec("\"" + path + "\" -s syntax.txt");
-			BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			String line;
-			String output = "";
-			while ((line = input.readLine()) != null)
-				if (line.length() > 0) output += line + "\n";
-			input.close();
-
-			r = p.waitFor();
-			if (r != -1) JOptionPane.showMessageDialog(null,output);
-			}
-		catch (Exception e)
-			{
-			e.printStackTrace();
-			}
-
-		sf.delete();
-		return r;
-		*/}
+		}
 
 	public void actionPerformed(ActionEvent e)
 		{
@@ -494,6 +422,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 				public void actionPerformed(ActionEvent e)
 					{
 					SyntaxError se = checkSyntax(sf.code.getText());
+					if (se == null) return;
 					int max = sf.code.getDocumentLength() - 1;
 					if (se.absoluteIndex > max) se.absoluteIndex = max;
 					if (se.absoluteIndex != -1) //-1 = no error
@@ -505,6 +434,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener
 					}
 			});
 		sf.tool.add(syntaxCheck,5);
+		}
+
+	@Override
+	public void reloadPerformed(boolean arg0)
+		{
+		populateTree();
 		}
 
 	public ImageIcon findIcon(String loc)
