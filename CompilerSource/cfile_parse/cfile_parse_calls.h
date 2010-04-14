@@ -105,6 +105,7 @@ void cparse_init()
   
   //__builtin_ grabbage
   regt("__builtin_va_list");
+  regt("__PTRDIFF_TYPE__");
   
   #undef regt
   

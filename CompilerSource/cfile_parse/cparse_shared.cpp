@@ -40,7 +40,6 @@ string cferr;
 string cfile;
 unsigned int pos = 0;
 unsigned int len = cfile.length();
-string cfile_top;
 
 int skip_depth;
 int specialize_start;
@@ -54,5 +53,7 @@ string last_identifier = "";
 int last_named = LN_NOTHING;
 int last_named_phase = 0;
 long long last_value = 0;
+
+unsigned id_would_err_at = 0;
 
 bool cfile_debug = 0;

@@ -66,7 +66,7 @@ point_direction
 point_distance
 \******************************************************************************/
 
-namespace enigma{
+namespace enigma {
 	unsigned int Random_Seed;
 	unsigned long mt[625];
 }

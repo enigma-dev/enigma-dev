@@ -39,14 +39,15 @@ namespace enigma
     char exename[1025];
     windowsystem_write_exename(exename);
     FILE* exe=fopen(exename,"rb");
-    if(!exe){
+    if(!exe) {
       show_error("Resource load fail: exe unopenable",0);
       return;
     }
+    
     fseek(exe,-8,SEEK_END);
     char str_quad[4];
     fread(str_quad,1,4,exe);
-    if(str_quad[0]=='s'&&str_quad[1]=='p'&&str_quad[2]=='r'&&str_quad[3]=='n'){
+    if(str_quad[0]=='s'&&str_quad[1]=='p'&&str_quad[2]=='r'&&str_quad[3]=='n') {
       printf("No resource data in exe\n");
       return;
     }

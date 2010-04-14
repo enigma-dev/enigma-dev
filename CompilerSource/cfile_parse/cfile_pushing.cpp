@@ -44,6 +44,7 @@ cfnode::~cfnode()
   cfile = scfile;
   pos = spos;
   len = slen;
+  id_would_err_at = pos;
 }
 
 unsigned int macrod = 0;
@@ -57,9 +58,7 @@ void handle_macro_pop()
   
   if (macrod > 0)
     macrod--;
-  else if (!included_files.empty())
-  {
-    cfile_top=cfile;
+  else if (!included_files.empty()) {
     included_files.pop();
   }
 }
@@ -68,6 +67,7 @@ void handle_macro_pop()
 unsigned int handle_macros(const string n)
 {
   maciter t;
+  //cout << "Find macro <"<<n<<">\n";
   
   if ((t=macros.find(n)) != macros.end())
   {
@@ -93,9 +93,6 @@ unsigned int handle_macros(const string n)
       cfile = macrostr;
       len = cfile.length();
       pos = 0;
-      
-      //print_cfile_top(cpos);
-      cfile_top = cfile;
       
       inmacros[macrod++] = n;
       return unsigned(-2);

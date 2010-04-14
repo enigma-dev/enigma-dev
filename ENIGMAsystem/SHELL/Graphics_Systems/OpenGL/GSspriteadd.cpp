@@ -37,7 +37,7 @@ int sprite_add(std::string filename,double imgnumb,double precise,double transpa
 #include "../../Universal_System/IMGloading.h"
 #include "../../Universal_System/spritestruct.h"
 
-int show_error(std::string errortext,double fatal);
+int show_error(std::string errortext,int fatal); //TODO: Include this from somewhere
 
 int sprite_add(std::string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset){
 	GLuint texture;
@@ -93,13 +93,11 @@ inline unsigned int nlpo2dc(unsigned int x){//Next largest power of two minus on
 }
 namespace enigma{
 //Adds an empty sprite to the list
-int new_sprexe(int sprid, int w, int h, int x, int y, int pl, int sm){
+int new_sprexe(int sprid, int w, int h, int x, int y, int pl, int sm)
+{
 	int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
 	enigma::spritestructarray[sprid]=new enigma::sprite;
-	if(!enigma::spritestructarray[sprid]){
-		show_error("Could not allocate enough memory for a relatively small structure. Abort likely necessary",1);
-		return -1;
-	}
+	
 	enigma::spritestructarray[sprid]->id=sprid;
 	enigma::spritestructarray[sprid]->subcount=0;
 	enigma::spritestructarray[sprid]->width=w;
@@ -108,6 +106,7 @@ int new_sprexe(int sprid, int w, int h, int x, int y, int pl, int sm){
 	enigma::spritestructarray[sprid]->yoffset=y;
 	enigma::spritestructarray[sprid]->texbordx=(double)w/fullwidth;
 	enigma::spritestructarray[sprid]->texbordy=(double)h/fullheight;
+	
 	return enigma::currentspriteind=sprid+1;
 }
 #if COLLIGMA
@@ -162,8 +161,11 @@ void sprexe(int sprid,
 	//gluBuild2DMipmaps( GL_TEXTURE_2D, 3, bmpwidth, bmpheight, GL_RGB, GL_UNSIGNED_BYTE, readbuffer);
 	glBindTexture(GL_TEXTURE_2D,0);
 	delete[] imgpxdata;
-	enigma::sprite* sprstr=enigma::spritestructarray[sprid];
-	if(!sprstr) show_error("THE WORLD CAN NO LONGER BE TRUSTED! HEAD FOR THE HILLS!",1);
+	
+	enigma::sprite* sprstr = enigma::spritestructarray[sprid];
+	if(!sprstr)
+	  show_error("THE WORLD CAN NO LONGER BE TRUSTED! HEAD FOR THE HILLS!",1);
+  
 	sprstr->texturearray[sprstr->subcount]=texture;
 	#if COLLIGMA
 	sprstr->bitmask[enigma::spritestructarray[sprid]->subcount] = themask;

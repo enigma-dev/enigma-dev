@@ -63,20 +63,20 @@ void parser_init()
 {
   //Single statements taking no parameters requiring semicolon/other dividing symbol before and then a semicolon directly after
   //Tokenized as 'b'
-  edl_tokens["break"] = 'b';
-  edl_tokens["continue"] = 'b';
-  edl_tokens["default"] = 'b';
+  edl_tokens["break"]     = 'b';
+  edl_tokens["continue"]  = 'b';
+  edl_tokens["default"]   = 'b';
   //Labels; anything followed by :, can be classified the same way: semicolon before, but colon after.
-  edl_tokens["private"] = 'b';
+  edl_tokens["private"]   = 'b';
   edl_tokens["protected"] = 'b';
-  edl_tokens["public"] = 'b';
+  edl_tokens["public"]    = 'b';
   
   /*These are type flags that don't really imply a type
-  edl_tokens["signed"] = 'd';
+  edl_tokens["signed"]   = 'd';
   edl_tokens["unsigned"] = 'd';
   edl_tokens["register"] = 'd';
-  edl_tokens["static"] = 'd';
-  edl_tokens["const"] = 'd';*/
+  edl_tokens["static"]   = 'd';
+  edl_tokens["const"]    = 'd';*/
   
   //Word ops: these aren't actually replaced, just tokenized.
   edl_tokens["and"] = '&';
@@ -86,35 +86,35 @@ void parser_init()
   
   //These must be marked separately for easy retrieval
   //tokenized as 'C'
-  edl_tokens["class"] = 'C';
-  edl_tokens["enum"] = 'C';
+  edl_tokens["class"]     = 'C';
+  edl_tokens["enum"]      = 'C';
   edl_tokens["namespace"] = 'C';
-  edl_tokens["struct"] = 'C';
+  edl_tokens["struct"]    = 'C';
   
   //These two are... Special.
-  edl_tokens["do"] = 'r';
+  edl_tokens["do"]   = 'r';
   edl_tokens["else"] = 'e';
   
   //These must be passed a parameter in parentheses
   //Token is 's'
-  edl_tokens["case"] = 's';
-  edl_tokens["catch"] = 's';
-  edl_tokens["if"] = 's';
+  edl_tokens["case"]   = 's';
+  edl_tokens["catch"]  = 's';
+  edl_tokens["if"]     = 's';
   edl_tokens["repeat"] = 's';
   edl_tokens["switch"] = 's';
-  edl_tokens["until"] = 's';
-  edl_tokens["while"] = 's';
-  edl_tokens["with"] = 's';
+  edl_tokens["until"]  = 's';
+  edl_tokens["while"]  = 's';
+  edl_tokens["with"]   = 's';
   //For gets an f
   edl_tokens["for"] = 'f';
   
   //These are all templates, which can later be revised to 'd' when passed a parameter in <>
   //token is 't'
-  edl_tokens["const_cast"] = 't';
-  edl_tokens["dynamic_cast"] = 't';
+  edl_tokens["const_cast"]       = 't';
+  edl_tokens["dynamic_cast"]     = 't';
   edl_tokens["reinterpret_cast"] = 't';
-  edl_tokens["static_cast"] = 't';
-  edl_tokens["template"] = 't';
+  edl_tokens["static_cast"]      = 't';
+  edl_tokens["template"]         = 'X'; //template is disabled
   
   //Local and Global are special.
   edl_tokens["local"] = 'L';  // Each of these has a dual meaning. They can either change the scope
@@ -123,9 +123,9 @@ void parser_init()
   //These each require a parameter of some sort, so should not be given a semicolon right after
   //Token is 'p'
   edl_tokens["delete"] = 'p';
-  edl_tokens["goto"] = 'p';
+  edl_tokens["goto"]   = 'p';
   edl_tokens["return"] = 'p';
-  edl_tokens["throw"] = 'p';
+  edl_tokens["throw"]  = 'p';
   
   //Token is 'a'
   edl_tokens["new"] = 'a';

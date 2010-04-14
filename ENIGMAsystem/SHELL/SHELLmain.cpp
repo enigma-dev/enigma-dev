@@ -25,12 +25,29 @@
 **                                                                              **
 \********************************************************************************/
 
+/*#define tits int
+typedef tits nigr;
+
+
+#define __CONCAT(x,y)	x ## y
+#define unchange(x,y) __CONCAT(x,y)
+int unchange(__CONCAT(one,tawoo),athree);
+
+
+#define test(x)
+#define attest(x)
+#define detest(x) error here x D
+#define goforit(x) x ## test(:O)
+
+goforit(at);*/
+
+
 #include <map>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <limits>
+
 //#include <vector> //COLLIGMA
 
 #include <time.h>
@@ -123,25 +140,20 @@
 #include "Universal_System/spriteinit.h"
 #include "Universal_System/events.h"
 
+/*
 #if ENIGMA_WS_WINDOWS
     #include "Platforms/windows/WINDOWSmain.h"
     #include "Platforms/windows/WINDOWScallback.h"
 #elif ENIGMA_WS_XLIB
 	#include "Platforms/xlib/XLIBmain.h"
 #endif
-
+*/
+/*
 #include "Universal_System/instance_create.h"
-
-#define faery_princess   700
-
-#if 0
-# elif defined faery_princess && (faery_princess - 0) < 600
-  LOL WHAT
-#endif
 
 //This is like main(), only cross-api
 int initialize_everything()
 {
   #include "initialize.h"
   return 0;
-}
+}*/

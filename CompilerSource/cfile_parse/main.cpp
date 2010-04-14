@@ -325,7 +325,7 @@ void print_definition(string n)
     else cout << "Not found: " << seg << endl;
   }
 }
-
+/*
 int m_prog_loop_cfp()
 {
   string cftp = fc("./cfile_parse/parsein.h");
@@ -416,3 +416,4 @@ int m_prog_loop_cfp()
 
   return 0;
 }
+*/

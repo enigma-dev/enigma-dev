@@ -53,21 +53,27 @@ void graphicssystem_initialize()
 	#endif
 	//enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
 	glMatrixMode(GL_PROJECTION);
-	glClearColor(1,1,1,1);
+	  glClearColor(1,1,1,1);
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glLoadIdentity();
-	glViewport(0,0,(int)room_width,(int)room_height);
-	glOrtho(0,(int)room_width-1,(int)room_height-1,0,-1,1);
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearDepth(1.0);
-	glDepthFunc(GL_LEQUAL);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
-	glEnable(GL_ALPHA_TEST);
-	glEnable(GL_TEXTURE_2D);
-	glAlphaFunc(GL_ALWAYS,0);
-	glColor4f(0,0,0,1);
+    glLoadIdentity();
+    glLoadIdentity();
+    
+    glViewport(0,0,(int)room_width,(int)room_height);
+    glOrtho(0,(int)room_width-1,(int)room_height-1,0,-1,1);
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    glDisable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearDepth(1.0);
+    
+    glDepthFunc(GL_LEQUAL); //FIXME: Calling this after disabling depth test?
+    
+    glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glAlphaFunc(GL_ALWAYS,0);
+    
+    glColor4f(0,0,0,1);
+    glBindTexture(GL_TEXTURE_2D,0);
 }

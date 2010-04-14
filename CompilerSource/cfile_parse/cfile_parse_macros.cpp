@@ -298,7 +298,7 @@ unsigned int cfile_parse_macro()
         }
 
         cfstack.push(new cfnode);
-        cfile_top = cfile = ins;
+        cfile = ins;
         len = cfile.length();
         pos = 0;
 

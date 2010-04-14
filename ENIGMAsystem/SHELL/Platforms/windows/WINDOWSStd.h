@@ -31,7 +31,7 @@ int screen_refresh();
 
 int sleep(int millis);
 void enigma_catchmouse_backend(bool x);
-int show_error(std::string errortext, double fatal);
+int show_error(std::string errortext, int fatal);
 #define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
 
 

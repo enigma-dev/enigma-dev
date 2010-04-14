@@ -39,12 +39,12 @@ using namespace std;
 #include "expression_evaluator.h"
 
 #include "cfile_pushing.h"
+
 #include "cfile_parse_constants.h"
 #include "cfile_parse_calls.h"
 #include "cparse_components.h"
 
 bool in_false_conditional();
-//extern void print_cfile_top(const unsigned);
 
 unsigned int cfile_parse_macro();
 int keyword_operator();
@@ -90,7 +90,7 @@ int parse_cfile(string cftext)
 
   bool preprocallowed=1;
   
-  cfile_top = cfile = cftext;
+  cfile = cftext;
   len = cfile.length();
   pos = 0;
 
@@ -133,7 +133,6 @@ int parse_cfile(string cftext)
   stack<externs*> scope_stack;
   //stack<externs*> current_templates;
   bool handle_ids_next_iter = 0;
-  unsigned id_would_err_at = 0;
   string id_to_handle;
   bool rconcat = false;
 
@@ -178,11 +177,11 @@ int parse_cfile(string cftext)
           specialize_start = pos;
         
         if (a != unsigned(-1)) return a;
-        continue;
+          continue;
       }
       else
       {
-        cferr = "WHY?! WHHHHHHHHHHYYYYYYYYYYYYYYYYY!!?";
+        cferr = "Unexpected pound symbol at this point; must be at beginning of line for preprocessor";
         return pos;
       }
     }
@@ -210,6 +209,9 @@ int parse_cfile(string cftext)
       continue;
     }
     
+    if (rconcat and is_letterd(cfile[pos]))
+      goto is_letter__the_block_below_this_next_block;
+    
     if (handle_ids_next_iter)
     {
       if (cfile[pos] != '#' or cfile[pos+1] != '#')
@@ -231,9 +233,14 @@ int parse_cfile(string cftext)
     //First, let's check if it's a letter.
     //This implies it's one of three things...
     if (is_letter(cfile[pos]))
-    {
+    { is_letter__the_block_below_this_next_block:
+      
       unsigned int sp = id_would_err_at = pos;
       while (is_letterd(cfile[++pos]));
+      
+      if (cfile.substr(sp,pos-sp) == "tawoo")
+        cout << "lol wat";
+      
       string n = rconcat? id_to_handle + cfile.substr(sp,pos-sp) : cfile.substr(sp,pos-sp); //This is the word we're looking at.
       
       //Macros get precedence. Check if it's one.
@@ -521,10 +528,12 @@ int parse_cfile(string cftext)
         if (last_identifier == "")
         {
           if (!last_type or !(last_type->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT))) {
-            cferr = "Declaration doesn't declare anything.";
-            return pos;
+            /*cferr = "Declaration doesn't declare anything.";
+            return pos;*/
+            //Let a truly ISO compliant compiler bitch about this. Ours is to read.
+            //Useful debugging feature, though.
           }
-          if (last_named == LN_DECLARATOR and last_named_phase == DEC_FULL)
+          else if (last_named == LN_DECLARATOR and last_named_phase == DEC_FULL)
           {
             externs *cs = immediate_scope? immediate_scope:current_scope; // Someimes structs are redeclared, unimplemented, with defaulted template parameters
             if (cs->members.find(last_type->name) != cs->members.end())  // TODO: Remove ExtRegister from this block and manually set the template params.
@@ -1115,7 +1124,7 @@ int parse_cfile(string cftext)
                   const int iht = inheritance_types[ihc].scopet;
                   last_named_phase =  (iht == ihdata::s_private)? SP_PRIVATE : ((iht == ihdata::s_protected)? SP_PROTECTED : SP_PUBLIC);
                 }
-                else if ((last_named_raw == LN_TYPENAME) or (last_named_raw == LN_TYPENAME_P) and last_named_phase >= TN_GIVEN)
+                else if (((last_named_raw == LN_TYPENAME) or (last_named_raw == LN_TYPENAME_P)) and last_named_phase >= TN_GIVEN)
                 {
                   last_named_phase = last_named_phase == TN_GIVEN? TN_NOTHING : TN_TEMPLATE;
                   immediate_scope = last_type;

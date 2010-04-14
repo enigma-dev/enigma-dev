@@ -37,11 +37,11 @@ bool keyboard_check_released(double key)
 
 namespace enigma
 {
-    char mousestatus[3];
-    char last_mousestatus[3];
-    char last_keybdstatus[256];
-    char keybdstatus[256];
-    short mousewheel;
+  extern char mousestatus[3];
+  extern char last_mousestatus[3];
+  extern char last_keybdstatus[256];
+  extern char keybdstatus[256];
+  extern short mousewheel;
 }
 
 const int mb_any    =-1;

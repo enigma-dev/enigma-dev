@@ -30,7 +30,7 @@
 #include <windows.h>
 #include "../../API_Switchboard.h"
 
-int show_error(std::string error,double fatal);
+int show_error(std::string error,int fatal);
 
 void windowsystem_write_exename(char* exenamehere)
 {

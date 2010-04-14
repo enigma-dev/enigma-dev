@@ -35,7 +35,7 @@ graphicssystem_initialize();
 	enigma::init_fonts();
 #endif
 
-enigma::instance_event_iterator = NULL;
+enigma::instance_event_iterator = enigma::instance_list.begin();
 
 //Clear the input arrays
 for(int i=0;i<3;i++){
@@ -50,7 +50,7 @@ for(int i=0;i<256;i++){
 //Take care of sprites;
 enigma::currentspriteind=0;
 enigma::exe_loadsprs();
-glBindTexture(GL_TEXTURE_2D,0);
+
 //Load rooms
 #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
 int instarpos=0;
@@ -59,9 +59,9 @@ for (enigma::roomiter=enigma::roomdata.begin();
 	int troc=(*enigma::roomiter).second.instancecount;
 	for(int i=0;i<troc;i++)
 	{
-    int idn=instdata[instarpos];
+    int idn = instdata[instarpos];
 		(*enigma::roomiter).second.instances[i].id=idn;
-		if (idn>=enigma::maxid) enigma::maxid=idn+1;
+		if (idn >= enigma::maxid) enigma::maxid=idn+1;
 		(*enigma::roomiter).second.instances[i].obj=instdata[instarpos+1];
 		(*enigma::roomiter).second.instances[i].x=instdata[instarpos+2];
 		(*enigma::roomiter).second.instances[i].y=instdata[instarpos+3];

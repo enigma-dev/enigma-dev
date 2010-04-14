@@ -304,10 +304,9 @@ bool find_in_specializations(externs* inscope,string name, unsigned flags)
 //template parameters and scope names, and filters by type.
 
 extern string cferr;
-extern unsigned pos;
-void print_err_line_at(unsigned a = pos);
   #include "../cfile_parse/cparse_shared.h"
   #include "../cfile_parse/cfile_parse_constants.h"
+void print_err_line_at(unsigned a = pos);
 bool find_extname(string name,unsigned int flags,bool expect_find)
 {
   //If we've been given a qualified id, check in the path or give up

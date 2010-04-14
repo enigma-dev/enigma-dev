@@ -64,8 +64,8 @@ namespace enigma
 		}
 	}
 	int getID()
-	{
-		return (instance_event_iterator!=NULL)?instance_event_iterator->first?instance_event_iterator->second?instance_event_iterator->second->object_index:-2:-1:-1;
+	{ //FIXME: Fix me.
+		return -4;//(instance_event_iterator!=NULL)?instance_event_iterator->first?instance_event_iterator->second?instance_event_iterator->second->object_index:-2:-1:-1;
 /*		if((*instance_event_iterator).first){
 			if ((*instance_event_iterator).second)
 				return (int)(*instance_event_iterator).second->object_index;

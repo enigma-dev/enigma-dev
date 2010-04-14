@@ -37,7 +37,7 @@ double string_height(char* text)
 #include <gl/gl.h>
 #include <windows.h>
 
-int show_error(std::string errortext,double fatal);
+int show_error(std::string errortext,int fatal);
 
 namespace enigma
 {

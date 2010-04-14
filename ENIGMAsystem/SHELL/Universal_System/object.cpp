@@ -42,7 +42,7 @@ const double pi=M_PI;
 
 #include "var_cr3.h"
 
-int show_error(std::string errortext,double fatal);
+int show_error(std::string errortext,int fatal);
 
 namespace enigma
 {

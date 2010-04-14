@@ -17,6 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string>
+
 void gmw_init();
 
 void Sleep(int ms);
@@ -48,7 +50,7 @@ int display_mouse_set(double x,double y);
 ////////////
 // WINDOW //
 ////////////
-int getWindowDimension(int i);
+//int getWindowDimension(int i);
 
 //Getters
 int window_get_x();
@@ -128,7 +130,10 @@ window_get_stayontop()
 window_set_sizeable(sizeable)
 window_get_sizeable()*/
 
-namespace enigma { char** parameters;
-void writename(char* x) { int irx; for(irx=0;enigma::parameters[0][irx]!=0;irx++) x[irx]=enigma::parameters[0][irx]; x[irx]=0; } }
-#define windowsystem_write_exename(x) enigma::writename(x);
+
+namespace enigma {
+  extern char** parameters;
+  //void writename(char* x);
+}
+
 #define enigmacatchmouse() //Linux should hopefully do that automatically.

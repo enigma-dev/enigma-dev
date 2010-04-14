@@ -39,7 +39,7 @@ namespace enigma{
 	int getID();
 }
 
-int show_error(std::string errortext, double fatal);
+int show_error(std::string errortext, int fatal);
 std::string string(double val);
 std::string string(var& val);
 std::string string(enigma::variant& val);

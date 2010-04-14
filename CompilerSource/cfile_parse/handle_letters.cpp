@@ -39,7 +39,6 @@ using namespace std;
 
 extern externs* builtin_type__int;
 
-extern string cfile_top;
 extern string cferr_get_file_orfirstfile();
 int get_line()
 {
@@ -796,7 +795,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
         {
           if (refstack.currentsymbol() != '(')
           {
-            cferr="Expected ',' or ';' before identifier";
+            cferr = "Expected ',' or ';' before identifier";
             return pos;
           }
           fparam_named = 1;

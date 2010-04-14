@@ -27,11 +27,11 @@
 
 namespace enigma
 {
-	extern char mousestatus[3];
-	extern char last_mousestatus[3];
-	extern char last_keybdstatus[256];
-	extern char keybdstatus[256];
-	extern short mousewheel;
+	char mousestatus[3];
+	char last_mousestatus[3];
+	char last_keybdstatus[256];
+	char keybdstatus[256];
+	short mousewheel;
 }
 
 bool mouse_check_button(double button)

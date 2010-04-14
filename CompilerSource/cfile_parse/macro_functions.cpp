@@ -55,7 +55,94 @@ bool is_entirely_white(string x)
   return 1;
 }
 
-bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments = true)
+bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments = true);
+
+
+//This function has its own recursion stack.
+//It is only called when a parameter is passed to a macro function.
+bool preprocess_separately(string &macs)
+{
+  bool stringify = false;
+  unsigned int macrod = 0;
+  varray<string> inmacros;
+  for (size_t i = 0; i < macs.length(); i++)
+  {
+    if (is_digit(macs[i]))
+    {
+      const unsigned is = is;
+      while (is_letterd(macs[++i]));
+      if (stringify)
+      {
+        stringify = false;
+        const string os = macs.substr(is,i-is);
+        const size_t osl = os.length();
+        string ns = escaped_string(os);
+        macs.replace(is,i-is,ns);
+        i += ns.length() - osl;
+      }
+    }
+    else if (is_letter(macs[i]))
+    {
+      const size_t si = i;
+      while (is_letterd(macs[++i]));
+      string n = macs.substr(si,i-si);
+      
+      maciter t;
+      if ((t=macros.find(n)) != macros.end())
+      {
+        if (stringify)
+        {
+          stringify = false;
+          macs.replace(si,i-si,escaped_string(n));
+          continue;
+        }
+        
+        bool recurs=0;
+        for (unsigned int iii=0;iii<macrod;iii++)
+           if (inmacros[iii]==n) { recurs=1; break; }
+        if (!recurs)
+        {
+          string macrostr = t->second;
+          
+          if (t->second.argc != -1) //Expect ()
+          {
+            if (!macro_function_parse(macs,n,i,macrostr,t->second.args,t->second.argc,t->second.args_uat)) {
+              cferr = macrostr;
+              return false;
+            }
+          }
+          
+          macs.replace(si,i-si,macrostr);
+          inmacros[macrod++] = n;
+          i = si;
+        }
+        //else puts("Recursing macro. This may be a problem.\r\n");
+      }
+    }
+    else if (macs[i] == '#')
+    {
+      if (macs[i+1] == '#')
+      {
+        if (stringify)
+          return false;
+        unsigned ib = i;
+        while (is_useless(macs[--ib])); ib++;
+        i++;  while (is_useless(macs[++ib]));
+        
+        macs.erase(ib,i-ib);
+        i = ib;
+      }
+      else //Stringify
+      {
+        stringify = true; //Notice the parallel in structure to the below function. No, not "redundant." The word is "parallel." <_<
+        macs.erase(i,1);
+      }
+    }
+  }
+  return true;
+}
+
+bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments)
 {
   //Skip comments. Ignore this block; it's savage but efficient.
   //Basically, I don't trust the compiler to correctly unroll a large conditional of shared parts.
@@ -128,9 +215,16 @@ bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string
       for (int ii = 0; ii < numparams; ii++)
         if (args[ii] ==  sstr)
         {
-          const string es = macro_args[ii];
-          const string iinto = stringify?escaped_string(es):es;
-          macrostr.replace(si,i-si,iinto);
+          string iinto = macro_args[ii];
+          if (stringify)
+            macrostr.replace(si,i-si,escaped_string(iinto));
+          else
+          {
+            if (!preprocess_separately(iinto))
+              return false;
+            macrostr.replace(si,i-si,iinto);
+          }
+              
           i = si + iinto.length();
           break;
         }
@@ -142,9 +236,10 @@ bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string
     {
       if (macrostr[i+1] == '#')
       {
-        unsigned int end = i+2; //I'ma be lazy for once and not account for \\\n (backslash-escaped newlines)
-        while (i > 0 and is_useless(macrostr[i-1])) i--;
-        while (end < macrostr.length() and is_useless(macrostr[end])) end++;
+        unsigned int end = i+2;
+        while (i > 0 and is_useless(macrostr[--i])); i++;
+        while (end < macrostr.length() and is_useless(macrostr[end]))
+          if (macrostr[end++] == '\\') end++;
         macrostr.erase(i,end-i);
       }
       else
