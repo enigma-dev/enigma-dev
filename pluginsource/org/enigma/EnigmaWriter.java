@@ -97,8 +97,6 @@ public final class EnigmaWriter
 
 	protected EnigmaStruct populateStruct()
 		{
-		//		ef.progress(0,"Initializing");
-
 		o.fileVersion = i.fileVersion;
 		o.filename = i.filename;
 
@@ -114,128 +112,37 @@ public final class EnigmaWriter
 
 		o.triggerCount = 0;
 
-		o.constantCount = i.gameSettings.constants.size();
+		o.constantCount = i.constants.size();
 		if (o.constantCount != 0)
 			{
 			o.constants = new Constant.ByReference();
 			Constant[] ocl = (Constant[]) o.constants.toArray(o.constantCount);
 			for (int c = 0; c < o.constantCount; c++)
 				{
-				ocl[c].name = i.gameSettings.constants.get(c).name;
-				ocl[c].value = i.gameSettings.constants.get(c).value;
+				ocl[c].name = i.constants.get(c).name;
+				ocl[c].value = i.constants.get(c).value;
 				}
 			}
 
-		o.includeCount = i.gameSettings.includes.size();
+		o.includeCount = i.includes.size();
 		if (o.includeCount != 0)
 			{
 			o.includes = new Include.ByReference();
 			Include[] oil = (Include[]) o.includes.toArray(o.includeCount);
 			for (int inc = 0; inc < o.includeCount; inc++)
 				{
-				oil[inc].filepath = i.gameSettings.includes.get(inc).filePath;
+				oil[inc].filepath = i.includes.get(inc).filepath;
 				}
 			}
 
 		o.packageCount = 0;
-		//String[] packages = { "Alpha","Beta","Gamma","Delta" };
 		//o.packageCount = packages.length;
 		//o.packages = new StringArray(packages);
 
 		o.lastInstanceId = i.lastInstanceId;
 		o.lastTileId = i.lastTileId;
 
-		//		ef.progress(100,"Finalizing");
-
 		return o;
-
-		/*		o.spriteCount = i.sprites.size();
-				public Sprite[] sprites;
-				o.soundCount = i.sounds.size();
-				public Sound[] sounds;
-				o.backgroundCount = i.backgrounds.size();
-				public Background[] backgrounds;
-				o.pathCount = i.paths.size();
-				public Path[] paths;
-				o.scriptCount = i.scripts.size();
-				public Script[] scripts;
-				o.fontCount = i.fonts.size();
-				public Font[] fonts;
-				o.timelineCount = i.timelines.size();
-				public Timeline[] timelines;
-				o.gmObjectCount = i.gmObjects.size();
-				public GmObject[] gmObjects;
-				o.roomCount = i.rooms.size();
-				public Room[] rooms;
-
-				o.triggerCount = i.triggers.size();
-				public Trigger[] triggers;
-				o.constantCount = i.constants.size();
-				public Constant[] constants;
-				o.includeCount = i.includes.size();
-				public Include[] includes;
-				o.packageCount = i.packages.size();
-				public String[] packages;*/
-
-		/*out.write("EGMf".getBytes());
-		out.write4(4); //version
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		f.gameSettings.gameIcon.write(baos);
-		writeStr(out,baos.toByteArray());
-
-		ArrayList<LibAction> ala = getQuestionLibActions();
-		out.write4(f.scripts.size() + ala.size());
-		for (Script s : f.scripts)
-			writeStr(out,s.getName());
-		for (LibAction la : ala)
-			writeStr(out,"lib" + la.parentId + "_action" + la.id);
-
-		ArrayList<String> names = new ArrayList<String>(f.gmObjects.size());
-		out.write4(f.gmObjects.size());
-		for (GmObject o : f.gmObjects)
-			{
-			out.write4(o.getId());
-			String name = o.getName();
-			if (names.contains(name)) throw new GmFormatException(f,"Duplicate object name: " + name);
-			writeStr(out,name);
-			}
-
-		out.write4(f.rooms.size());
-		for (Room o : f.rooms)
-			{
-			out.write4(o.getId());
-			writeStr(out,o.getName());
-			}
-
-		out.write4(f.sprites.size());
-		for (Sprite o : f.sprites)
-			{
-			out.write4(o.getId());
-			writeStr(out,o.getName());
-			}
-		ef.progress(30,"Sending Enigma resource data");
-
-		writeScripts(f,out);
-		for (LibAction la : ala)
-			writeStr(out,la.execInfo);
-
-		ef.pb.setValue(45);
-		writeObjects(f,out);
-		ef.pb.setValue(60);
-		writeRooms(f,out);
-		ef.pb.setValue(75);
-
-		out.write("myn".getBytes());
-		out.write(0);
-		writeStr(out,"");
-		writeStr(out,"");
-
-		writeSprites(f,out); //after myn
-		ef.pb.setValue(90);
-
-		out.close();
-		ef.progress(95,"Executing Enigma...");
-		return true;*/
 		}
 
 	protected static final SoundKind[] SOUND_KIND = { SoundKind.NORMAL,SoundKind.BACKGROUND,
@@ -276,9 +183,9 @@ public final class EnigmaWriter
 			os.id = is.getId();
 
 			os.transparent = is.get(PSprite.TRANSPARENT);
-			os.shape = is.get(PSprite.PRECISE) ? 0 : 1;//is.get(PSprite.SHAPE); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
-			os.alphaTolerance = 0;//is.get(PSprite.ALPHA_TOLERANCE);
-			os.separateMask = false;//is.get(PSprite.SEPARATE_MASK);
+			os.shape = is.get(PSprite.SHAPE); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
+			os.alphaTolerance = is.get(PSprite.ALPHA_TOLERANCE);
+			os.separateMask = is.get(PSprite.SEPARATE_MASK);
 			os.smoothEdges = is.get(PSprite.SMOOTH_EDGES);
 			os.preload = is.get(PSprite.PRELOAD);
 			os.originX = is.get(PSprite.ORIGIN_X);
