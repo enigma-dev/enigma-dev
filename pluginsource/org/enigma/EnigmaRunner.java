@@ -70,7 +70,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		attemptUpdate();
 		LGM.addReloadListener(this);
-		if (false) initEnigmaLib();
+		initEnigmaLib();
 		populateMenu();
 		populateTree();
 		SubframeInformer.addSubframeListener(this);
