@@ -95,7 +95,7 @@ void load_filter_args()
    fflush(stdout);
 }
 
-
+/*O_
 void execute_pcs_pre_commands(string exename="")
 {
   int sr;
@@ -110,4 +110,4 @@ void execute_pcs_post_commands(string exename="")
   for (int i=0;i<pcs::postc;i++)
     if ((sr = system(string_replace_all(pcs::post[i],"%exename%",exename).c_str())) != 0)
       printf("Pre-Compile command %d returned %d exit status\r\n",i,sr);
-}
+}*/

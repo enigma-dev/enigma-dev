@@ -69,7 +69,7 @@ bool preprocess_separately(string &macs)
   {
     if (is_digit(macs[i]))
     {
-      const unsigned is = is;
+      const unsigned is = i;
       while (is_letterd(macs[++i]));
       if (stringify)
       {
