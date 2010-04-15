@@ -55,7 +55,7 @@ bool is_entirely_white(string x)
   return 1;
 }
 
-bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments = true);
+bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments = true);
 
 
 //This function has its own recursion stack.
@@ -142,7 +142,7 @@ bool preprocess_separately(string &macs)
   return true;
 }
 
-bool macro_function_parse(string cfile,string macroname,unsigned int &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments)
+bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments)
 {
   //Skip comments. Ignore this block; it's savage but efficient.
   //Basically, I don't trust the compiler to correctly unroll a large conditional of shared parts.
