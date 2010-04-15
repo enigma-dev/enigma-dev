@@ -141,6 +141,9 @@ value evaluate_expression(string expr)
       value setval;
       if (is_letter(exp[pos]))
       {
+        if (exp[pos] == 'L' and (exp[pos+1] == '"' or exp[pos+1] == '\''))
+        { pos++; continue; }
+        
         int sp = pos;
         while (is_letterd(exp[pos])) pos++;
         string n = exp.substr(sp,pos-sp);

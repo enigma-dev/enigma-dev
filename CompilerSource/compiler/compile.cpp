@@ -402,7 +402,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     int room_highid = 0, room_highinstid = 100000;
     for (int i = 0; i < es->roomCount; i++) 
     {
-      wto <<
+      wto << "//Room " << es->rooms[i].id << "\n" <<
       "  enigma::roomdata[" << es->rooms[i].id << "].name = \"" << es->rooms[i].name << "\";\n"
       "  enigma::roomdata[" << es->rooms[i].id << "].cap = \"" << es->rooms[i].caption << "\";\n"
       "  enigma::roomdata[" << es->rooms[i].id << "].backcolor = " << lgmRoomBGColor(es->rooms[i].backgroundColor) << ";\n"

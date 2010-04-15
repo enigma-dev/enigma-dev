@@ -29,4 +29,4 @@
 //Editing it is a sign of a certain medical condition. We're not sure which one.
 
 #define ENIGMA_GS_OPENGL 1
-#define ENIGMA_WS_WINDOWS 1
+#define ENIGMA_WS_XLIB 1

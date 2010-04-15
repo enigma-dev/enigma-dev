@@ -235,6 +235,11 @@ int parse_cfile(string cftext)
     if (is_letter(cfile[pos]))
     { is_letter__the_block_below_this_next_block:
       
+      if (cfile[pos] == 'L' and (cfile[pos+1] == '"' or cfile[pos+1] == '\'')) {
+        rconcat = false;
+        pos++; continue;
+      }
+      
       unsigned int sp = id_would_err_at = pos;
       while (is_letterd(cfile[++pos]));
       
