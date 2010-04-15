@@ -125,7 +125,7 @@ void cparse_init()
 
 
 int anoncount = 0;
-extern void print_err_line_at(unsigned a);
+extern void print_err_line_at(pt a);
 bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = -1,long long last_value = 0)
 {
   unsigned int is_tdef = last & LN_TYPEDEF;
@@ -294,7 +294,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
 //#include "expression_evaluator.h"
 
 
-unsigned int handle_comments()
+pt handle_comments()
 {
   pos++;
   if (cfile[pos]=='/')

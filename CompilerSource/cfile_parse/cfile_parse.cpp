@@ -46,7 +46,7 @@ using namespace std;
 
 bool in_false_conditional();
 
-unsigned int cfile_parse_macro();
+pt cfile_parse_macro();
 int keyword_operator();
 #include "handle_letters.h"
 
@@ -78,7 +78,7 @@ string strace(externs *f)
   return o;
 }
 
-extern unsigned handle_skip();
+extern pt handle_skip();
 
 int parse_cfile(string cftext)
 {
@@ -171,12 +171,12 @@ int parse_cfile(string cftext)
         if (specializing)
           specialize_string += cfile.substr(specialize_start,pos-specialize_start);
         
-        const unsigned a = cfile_parse_macro();
+        const pt a = cfile_parse_macro();
         
         if (specializing)
           specialize_start = pos;
         
-        if (a != unsigned(-1)) return a;
+        if (a != pt(-1)) return a;
           continue;
       }
       else
@@ -190,9 +190,9 @@ int parse_cfile(string cftext)
     //And before we disallow a preprocessor
     if (cfile[pos]=='/')
     {
-      const unsigned hc = handle_comments();
-      if (hc == unsigned(-2)) continue;
-      if (hc != unsigned(-1)) return hc;
+      const pt hc = handle_comments();
+      if (hc == pt(-2)) continue;
+      if (hc != pt(-1)) return hc;
     }
     
     //Not a preprocessor
@@ -203,8 +203,8 @@ int parse_cfile(string cftext)
     
     if (skipto)
     {
-      unsigned a = handle_skip(); // Too huge to display here. May need maintenance in the future anyway.
-      if (a != unsigned(-1))
+      pt a = handle_skip(); // Too huge to display here. May need maintenance in the future anyway.
+      if (a != pt(-1))
         return a;
       continue;
     }
@@ -240,7 +240,7 @@ int parse_cfile(string cftext)
         pos++; continue;
       }
       
-      unsigned int sp = id_would_err_at = pos;
+      pt sp = id_would_err_at = pos;
       while (is_letterd(cfile[++pos]));
       
       if (cfile.substr(sp,pos-sp) == "tawoo")
@@ -249,7 +249,7 @@ int parse_cfile(string cftext)
       string n = rconcat? id_to_handle + cfile.substr(sp,pos-sp) : cfile.substr(sp,pos-sp); //This is the word we're looking at.
       
       //Macros get precedence. Check if it's one.
-      const unsigned int cm = handle_macros(n);
+      const pt cm = handle_macros(n);
       if (cm == unsigned(-2)) continue;
       if (cm != unsigned(-1)) return cm;
       

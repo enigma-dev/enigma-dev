@@ -30,6 +30,7 @@
 
 #include <map>
 #include "../general/darray.h"
+typedef size_t pt;
 
 enum
 {

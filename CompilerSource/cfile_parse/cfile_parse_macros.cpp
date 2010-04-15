@@ -127,11 +127,11 @@ bool in_false_conditional()
 }
 
 extern void print_definition(string);
-unsigned int cfile_parse_macro()
+pt cfile_parse_macro()
 {
   while(is_useless_macros(cfile[++pos]));
 
-  unsigned int poss=pos;
+  pt poss=pos;
   if (!is_letter(cfile[pos])) {
     cferr="Preprocessor directive expected";
     return pos;
@@ -156,7 +156,7 @@ unsigned int cfile_parse_macro()
       {
         while (cfile[pos] == ' ' or cfile[pos] == '\t') pos++;
 
-        const unsigned poss=pos;
+        const pt poss=pos;
         if (!is_letter(cfile[pos])) { cferr="Identifier expected for #define"; return pos; }
         while (is_letterd(cfile[pos])) pos++;
 
@@ -207,7 +207,7 @@ unsigned int cfile_parse_macro()
 
         while (is_useless_macros(cfile[pos])) pos++;
 
-        const unsigned poss2=pos;
+        const pt poss2=pos;
         move_newline();
 
         string definiens=cfile.substr(poss2,pos-poss2);
@@ -228,7 +228,7 @@ unsigned int cfile_parse_macro()
       }
       if (next=="undef")
       {
-        const unsigned poss=pos;
+        const pt poss=pos;
         if (!is_letter(cfile[pos])) { cferr="Identifier expected for #undef"; return pos; }
         while (is_letterd(cfile[pos])) pos++;
 

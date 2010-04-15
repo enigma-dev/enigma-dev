@@ -122,7 +122,7 @@ int establish_bearings()
     return 5;
   }
   
-  size_t pos = idirs.find("#include <...> search starts here:");
+  pt pos = idirs.find("#include <...> search starts here:");
   if (pos == string::npos or (pos > 0 and idirs[pos-1] != '\n' and idirs[pos-1] != '\r')) {
     cout << "Invalid search directories returned. Error 5: " << (pos == string::npos?"former":"latter") << ".\n";
     return 5;
@@ -130,10 +130,10 @@ int establish_bearings()
   
   pos += 34;
   while (is_useless(idirs[++pos]));
-  const size_t endpos = idirs.find("End of search list.");
+  const pt endpos = idirs.find("End of search list.");
   idirs = idirs.substr(pos,endpos-pos); //Assume the rest of the file is full of these
   
-  size_t spos = 0;
+  pt spos = 0;
   for (pos = 0; pos < idirs.length(); pos++)
   {
     if (idirs[pos] == '\r' or idirs[pos] == '\n')

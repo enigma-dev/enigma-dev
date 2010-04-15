@@ -65,7 +65,7 @@ bool preprocess_separately(string &macs)
   bool stringify = false;
   unsigned int macrod = 0;
   varray<string> inmacros;
-  for (size_t i = 0; i < macs.length(); i++)
+  for (pt i = 0; i < macs.length(); i++)
   {
     if (is_digit(macs[i]))
     {

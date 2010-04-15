@@ -59,7 +59,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       pscope = parent->second;
   }
   
-  for (size_t pos = 0; pos < code.length(); pos++)
+  for (pt pos = 0; pos < code.length(); pos++)
   {
     if (synt[pos] == '{') {
       igstack[++igpos] = new scope_ignore;
@@ -163,7 +163,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         }
         if (synt[pos] == 'n')
         {
-          const size_t spos = pos;
+          const pt spos = pos;
           while (synt[++pos] == 'n');
           lid = code.substr(spos,pos-spos);
           continue;
