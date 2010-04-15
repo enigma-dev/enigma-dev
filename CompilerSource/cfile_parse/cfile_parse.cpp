@@ -878,11 +878,12 @@ int parse_cfile(string cftext)
                 //if (last_named != LN_DECLARATOR or !(current_scope->flags & EXTFLAG_ENUM))
                 //{
                   //enum { a = 0 <here> }
-                  if ((last_named & ~LN_TYPEDEF) != LN_ENUM or (last_named_phase != EN_WAITING
-                  and last_named_phase != EN_DEFAULTED and last_named_phase != EN_CONST_IDENTIFIER)) {
+                  if (((last_named & ~LN_TYPEDEF) != LN_ENUM)
+                  or  (last_named_phase != EN_WAITING and last_named_phase != EN_DEFAULTED and last_named_phase != EN_CONST_IDENTIFIER)) {
                     cferr = "Unexpected closing brace at this point";
                     return pos;
                   }
+                  if (last_named_phase != EN_WAITING)
                   if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern=0,refstack.dissociate(),builtin_type__int,tmplate_params,tpc,last_value))
                     return pos;
                 /*}
