@@ -74,11 +74,11 @@ string rerr=""; int rerrpos=-1;
 value evaluate_expression(string expr)
 {
   implicit_stack<string> expression;
-  implicit_stack<int> position;
+  implicit_stack<pt> position;
   exp=expr;
   pos=0;
   
-  implicit_stack<int> explength;
+  implicit_stack<pt> explength;
   len=exp.length();
   
   unsigned int macrod=0;
