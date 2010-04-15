@@ -42,6 +42,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 
+import org.enigma.EnigmaSettingsFrame.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.EnigmaStruct.SyntaxError;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -61,9 +62,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	{
 	public static final String ENIGMA = "compileEGMf.exe";
 	public EnigmaFrame ef;
-	public EnigmaSettingsFrame esf = new EnigmaSettingsFrame();
+	public EnigmaSettings es = new EnigmaSettings();
+	public EnigmaSettingsFrame esf = new EnigmaSettingsFrame(es);
 	public JMenuItem run, debug, build, compile;
-	public boolean GCC_LOCATED = false;
+	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
+	public static boolean GCC_LOCATED = false;
 	public final EnigmaNode node = new EnigmaNode();
 
 	public EnigmaRunner()
@@ -87,8 +90,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			System.setOut(new PrintStream(new TextAreaOutputStream(ef.ta)));
 			}
 
-		//TODO: add whitespace support
-		if (GCC_LOCATED) EnigmaStruct.whitespaceModified("");
+		if (GCC_LOCATED) EnigmaStruct.whitespaceModified(es.definitions);
 		}
 
 	private void initEnigmaLib()
@@ -369,7 +371,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		}
 
-	public SyntaxError checkSyntax(String code)
+	//This can be static since the GCC_LOCATED and Enigma dll are both static.
+	public static SyntaxError checkSyntax(String code)
 		{
 		if (!GCC_LOCATED)
 			{
@@ -437,9 +440,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		}
 
 	@Override
-	public void reloadPerformed(boolean arg0)
+	public void reloadPerformed(boolean newRoot)
 		{
-		populateTree();
+		if (newRoot) populateTree();
+		es = new EnigmaSettings();
+		esf.setComponents(es);
 		}
 
 	public ImageIcon findIcon(String loc)
