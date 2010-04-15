@@ -281,14 +281,14 @@ value evaluate_expression(string expr)
             string macrostr = i->second;
             if (i->second.argc != -1) //Expect ()
             {
-              unsigned int pt = pos;
-              if (!macro_function_parse(exp,n,pt,macrostr,i->second.args,i->second.argc,i->second.args_uat))
+              pt pst = pos;
+              if (!macro_function_parse(exp,n,pst,macrostr,i->second.args,i->second.argc,i->second.args_uat))
               {
                 rerr = macrostr;
                 rerrpos = pos;
                 return 0;
               }
-              pos = pt;
+              pos = pst;
             }
             
             position.push();
