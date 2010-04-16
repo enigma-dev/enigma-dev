@@ -49,11 +49,10 @@
 					<Add option="-O3" />
 					<Add option="-O2" />
 					<Add option="-Wall" />
-					<Add option="-DBUILD_DLL" />
+					<Add option="-fPIC" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-fPIC" />
 				</Linker>
 			</Target>
 			<Target title="Debug-Linux">
@@ -66,11 +65,8 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
-					<Add option="-DBUILD_DLL" />
-				</Compiler>
-				<Linker>
 					<Add option="-fPIC" />
-				</Linker>
+				</Compiler>
 			</Target>
 			<Target title="StandAlone">
 				<Option output="bin/exec/CompileEGMf" prefix_auto="1" extension_auto="1" />
