@@ -239,7 +239,7 @@ pt cfile_parse_macro()
     }
     //Including things
     {
-      if (next=="include")
+      if (next=="include" or next=="include_next")
       {
         while (cfile[pos]==' ' or cfile[pos]=='\t') pos++;
 
