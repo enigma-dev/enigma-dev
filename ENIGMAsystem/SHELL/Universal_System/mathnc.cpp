@@ -51,8 +51,8 @@ double frac(double x)             { return x-(int)x;    }
 double degtorad(double x)         { return x*(M_PI/180.0);}
 double radtodeg(double x)         { return x*(180.0/M_PI);}
 
-double lengthdir_x(double len,double dir) { return len*cos(degtorad(dir));}
-double lengthdir_y(double len,double dir) { return len*-sin(degtorad(dir));}
+double lengthdir_x(double len,double dir) { return len *  cos(dir*M_PI/180); }
+double lengthdir_y(double len,double dir) { return len * -sin(dir*M_PI/180); }
 
 double direction_difference(double dir1,double dir2) {
 	dir1=fmod(dir2-dir1,360)+180;

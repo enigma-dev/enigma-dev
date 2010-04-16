@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
   //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   
   parser_init();
-  string pf = fc("C:/Users/Josh/ENIGMA/trunk/CompilerSource/cfile_parse/auxilary_gml.h");
+  string pf = fc("./CompilerSource/cfile_parse/auxilary_gml.h");
   
   a = syncheck::syntacheck(pf);
   if (a != unsigned(-1))

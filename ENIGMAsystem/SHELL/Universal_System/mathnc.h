@@ -66,10 +66,14 @@ point_direction
 point_distance
 \******************************************************************************/
 
+#include <math.h>
+
 namespace enigma {
 	unsigned int Random_Seed;
 	unsigned long mt[625];
 }
+
+const double pi = M_PI;
 
 extern double random(double n);
 int random_set_seed(int seed);

@@ -32,6 +32,7 @@
     bool exhausted = false;
     int argcmin=func->parameter_count_min();
     int argcmax=func->parameter_count_max();
+    
     while (cnt > 0) //While we're still in parentheses
     {
       if (++pos >= len) { error="List of function parameters unterminated"; return pos; }
@@ -56,6 +57,12 @@
         int bcnt=1;
         while (bcnt>0 && (++pos)<len)
         {
+          if (code[pos]=='"') {
+            while (code[++pos] != '"'); //TODO: Replace with skipstrings();
+          }
+          else if (code[pos]=='\'') {
+            while (code[++pos] != '\''); //TODO: Replace with skipstrings();
+          }
           if (code[pos]=='[')
             bcnt++;
           if (code[pos]==']')

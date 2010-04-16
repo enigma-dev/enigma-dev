@@ -71,6 +71,7 @@ goforit(at);*/
 #if STRINGLIB
     #include "Universal_System/estring.h"
 #endif
+
 #include "Universal_System/mathnc.h"
 
 #if ENIGMA_GS_OPENGL

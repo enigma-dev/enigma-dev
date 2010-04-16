@@ -357,10 +357,13 @@ namespace syncheck
               plevel++;
               if (lastnamed[level] == LN_VARNAME) //May be a script.
               {
-                plevelt[plevel] = PLT_FUNCTION;
-                int cf=checkfunction(function_ext,code,pos,len);
-                if (cf!=-1) return cf;
-                lastnamed[level] = LN_NOTHING;
+                //but we can't check that now
+                error = "Unrecognized function or script `" + last_identifier + "'";
+                return pos;
+//                int cf=checkfunction(function_ext,code,pos,len);
+//                if (cf!=-1) return cf;
+//                lastnamed[level] = LN_NOTHING;
+//                plevelt[plevel] = PLT_FUNCTION;
               }
               else if (lastnamed[level] == LN_FUNCTION_NAME) //Is a C++ function.
               {
@@ -759,8 +762,8 @@ namespace syncheck
                 case '^': case '>': case '<':
                     if (!assop[level] && !(plevel>0))
                     { error="Assignment operator expected before any secondary operators"; return pos; }
-                    if (lastnamed[level] != LN_VARNAME && lastnamed[level] != LN_DIGIT)
-                    { error="Primary expression expected before operator"; return pos; }
+                    if (lastnamed[level] != LN_VARNAME && lastnamed[level] != LN_DIGIT && lastnamed[level] != LN_VALUE)
+                    { error="Expected primary expression before operator"; return pos; }
                     lastnamed[level]=LN_OPERATOR;
                     if (code[pos+1]==code[pos])
                     {
