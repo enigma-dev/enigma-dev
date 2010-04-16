@@ -67,6 +67,7 @@ import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.Sound.SoundKind;
 import org.lateralgm.resources.Sprite.BBMode;
+import org.lateralgm.resources.Sprite.MaskShape;
 import org.lateralgm.resources.Sprite.PSprite;
 import org.lateralgm.resources.library.LibAction;
 import org.lateralgm.resources.library.LibManager;
@@ -164,6 +165,16 @@ public final class EnigmaWriter
 			m.put(SPRITE_BB_MODE[i],i);
 		SPRITE_BB_CODE = Collections.unmodifiableMap(m);
 		}
+	protected static final MaskShape[] SPRITE_MASK_SHAPE = { MaskShape.PRECISE,MaskShape.RECTANGLE,
+			MaskShape.DISK,MaskShape.DIAMOND };
+	protected static final Map<MaskShape,Integer> SPRITE_MASK_CODE;
+	static
+		{
+		EnumMap<MaskShape,Integer> m = new EnumMap<MaskShape,Integer>(MaskShape.class);
+		for (int i = 0; i < SPRITE_MASK_SHAPE.length; i++)
+			m.put(SPRITE_MASK_SHAPE[i],i);
+		SPRITE_MASK_CODE = Collections.unmodifiableMap(m);
+		}
 
 	protected void populateSprites()
 		{
@@ -183,7 +194,7 @@ public final class EnigmaWriter
 			os.id = is.getId();
 
 			os.transparent = is.get(PSprite.TRANSPARENT);
-			os.shape = is.get(PSprite.SHAPE); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
+			os.shape = SPRITE_MASK_CODE.get(is.get(PSprite.SHAPE)); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
 			os.alphaTolerance = is.get(PSprite.ALPHA_TOLERANCE);
 			os.separateMask = is.get(PSprite.SEPARATE_MASK);
 			os.smoothEdges = is.get(PSprite.SMOOTH_EDGES);
