@@ -31,6 +31,7 @@ extern GLXDrawable win;
 extern Atom wm_delwin;
 
 #include "../../Universal_System/CallbackArrays.h"
+#include "../../Universal_System/roomsystem.h"
 
 namespace enigma
 {
@@ -50,13 +51,13 @@ int handleEvents()
     case KeyPress: {
           gk=XLookupKeysym(&e.xkey,0);
           if (gk==NoSymbol) return 0;
-          
+
           if (!(gk & 0xFF00)) actualKey=gk;
           else actualKey=enigma::keymap[gk & 0xFF];
-          
+
           if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
-            enigma::keybdstatus[actualKey]=1; 
-            return 0; 
+            enigma::keybdstatus[actualKey]=1;
+            return 0;
           }
           enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
           enigma::keybdstatus[actualKey]=1;
@@ -96,19 +97,19 @@ int main(int argc,char** argv)
 	for (int i=0; i<argc; i++)
 		enigma::parameters[i]=argv[i];
 	enigma::initkeymap();
-	
-	
+
+
 	//initiate display
 	disp = XOpenDisplay(NULL);
 	if(!disp){
 		printf("Display failed\n");
 		return -1;
 	}
-	
+
 	//identify components (close button, root pane)
 	wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
 	Window root = DefaultRootWindow(disp);
-	
+
 	//Prepare openGL
 	GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, None };
 	XVisualInfo *vi = glXChooseVisual(disp,0,att);
@@ -116,7 +117,7 @@ int main(int argc,char** argv)
 		printf("GLFail\n");
 		return -2;
 	}
-	
+
 	//window event listening and coloring
 	XSetWindowAttributes swa;
 	swa.border_pixel = 0;
@@ -124,17 +125,18 @@ int main(int argc,char** argv)
 	swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
 	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask;// | StructureNotifyMask;
 	unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
-	
+
 	//default window size
-	int winw = 200;
-	int winh = 100;
+	int winw = room_width;
+	int winh = room_height;
 	win = XCreateWindow(disp,root,0,0,winw,winh,0,vi->depth,InputOutput,vi->visual,valmask,&swa);
 	XMapRaised(disp,win); //request visible
-	
+
 	//prepare window for display (center, caption, etc)
 	Screen *s = DefaultScreenOfDisplay(disp);
+	//printf("Screen: %d %d %d %d\n",s->width/2,s->height/2,winw,winh);
 	XMoveWindow(disp,win,(s->width-winw)/2,(s->height-winh)/2);
-	
+
 	//geom();
 	//give us a GL context
 	GLXContext glxc = glXCreateContext(disp, vi, NULL, True);
@@ -142,10 +144,10 @@ int main(int argc,char** argv)
 		printf("NoContext\n");
 		return -3;
 	}
-	
+
 	//apply context
 	glXMakeCurrent(disp,win,glxc); //flushes
-	
+
 	/* XEvent e;//wait for server to report our display request
 	do {
 	XNextEvent(disp, &e); //auto-flush
@@ -159,10 +161,10 @@ int main(int argc,char** argv)
 	}
 	gmw_init(); //init gm window functions, flushes
 	//#include "../../initialize.h"
-	
+
 	//Call ENIGMA system initializers; sprites, audio, and what have you
 	initialize_everything();
-	
+
 	/*
 	for(char q=1;q;ENIGMA_events())
 		while(XQLength(disp))
