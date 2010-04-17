@@ -155,6 +155,7 @@
 		<Unit filename="compiler/output_locals.h" />
 		<Unit filename="compiler/pcs/pcs.cpp" />
 		<Unit filename="compiler/pcs/pcs.h" />
+		<Unit filename="externs/ext_iteration.cpp" />
 		<Unit filename="externs/externs.cpp" />
 		<Unit filename="externs/externs.h" />
 		<Unit filename="externs/references.cpp" />

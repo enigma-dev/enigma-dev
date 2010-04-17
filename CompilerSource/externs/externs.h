@@ -138,6 +138,7 @@ typedef map<string,macro_type>::iterator maciter;
 extern externs global_scope,*current_scope,*immediate_scope;
 
 externs* scope_get_using(externs* scope);
+externs* scope_get_using_ie(externs* scope);
 externs* temp_get_specializations(externs* scope);
 externs* temp_get_specializations_ie(externs* scope);
 extiter scope_find_member(string name);

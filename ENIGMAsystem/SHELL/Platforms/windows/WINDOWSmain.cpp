@@ -53,7 +53,7 @@ int initialize_everything();
 
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
-    int wid=(int)room_width,hgt=(int)room_height;
+    int wid=(int)room_width, hgt=(int)room_height;
     
     //Create the window
         WNDCLASS wcontainer,wmain;
