@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -420,6 +421,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	private MDIFrame keywordListFrames[] = new MDIFrame[3];
 	private JTextArea keywordLists[] = new JTextArea[3];
+	private final static Pattern nameRegex = Pattern.compile("[a-zA-Z][a-zA-Z0-9_]*");
 
 	public void showKeywordListFrame(int mode)
 		{
@@ -432,12 +434,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			LGM.mdi.add(keywordListFrames[mode]);
 			keywordLists[mode] = new JTextArea();
 			keywordLists[mode].setEditable(false);
-			keywordListFrames[mode].getContentPane().add(new JScrollPane(keywordLists[mode]));
+			keywordListFrames[mode].setContentPane(new JScrollPane(keywordLists[mode]));
 			keywordListFrames[mode].setFocusTraversalPolicy(new TextAreaFocusTraversalPolicy(
 					keywordLists[mode]));
 			}
 		//TODO: should only repopulate when whitespace changes
 		keywordLists[mode].setText(getKeywordList(mode));
+		keywordLists[mode].setCaretPosition(0);
 		keywordListFrames[mode].toTop();
 		}
 
@@ -452,7 +455,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		String res = EnigmaDriver.first_available_resource();
 		while (res != null)
 			{
-			switch (type)
+			if (nameRegex.matcher(res).matches()) switch (type)
 				{
 				case 0:
 					if (EnigmaDriver.resource_isFunction()) sb.append(res + "\n");
