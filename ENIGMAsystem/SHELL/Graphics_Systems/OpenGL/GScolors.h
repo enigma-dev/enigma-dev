@@ -85,7 +85,7 @@ float draw_get_alpha(void);
 
 
 double make_color_rgb(double red, double green, double blue);
-double(*const make_color)(double,double,double)=make_color_rgb;
+double(*const make_color)(double,double,double) = make_color_rgb;
 
 double color_get_red(double color);
 double color_get_green(double color);

@@ -41,7 +41,8 @@ struct parsed_event
   parsed_object* myObj; //This will let us add to locals from the code
   
   parsed_event();
-  parsed_event(int,int);
+  parsed_event(parsed_object*);
+  parsed_event(int,int,parsed_object*);
 };
 struct dectrip {
   string type, prefix, suffix;

@@ -76,7 +76,6 @@ void clear_ide_editables()
   wto.close();
 
 //FIXME: Accessors are required for sprite_width and height, as well as all bbox_ variables
-
   
   wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
     wto << license;

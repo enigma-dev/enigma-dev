@@ -59,6 +59,7 @@ using namespace std; //More ease
 #include "collect_variables.h"
 
 
+//This adds all keywords to a tree structure for quick lookup of their token.
 void parser_init()
 {
   //Single statements taking no parameters requiring semicolon/other dividing symbol before and then a semicolon directly after

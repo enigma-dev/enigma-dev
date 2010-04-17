@@ -28,6 +28,7 @@
 #include <time.h>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <map>
 
@@ -39,6 +40,7 @@ using namespace std;
 #include "externs/externs.h"
 #include "syntax/syncheck.h"
     #include "parser/parser.h"
+    #include "parser/object_storage.h"
     #include "compiler/compile.h"
     #include "cfile_parse/cfile_parse.h"
     #include "syntax/checkfile.h"
@@ -80,6 +82,14 @@ int main(int argc, char *argv[])
     getchar(); return 1;
   }
   
+  ofstream wto("freezway.txt",ios_base::out);
+    wto << "This is what ENIGMA read for SHELL: \n";
+    wto << EGMmain;
+  wto.close();
+  
+  EGMmain += "\n\n";
+  EGMmain += fc("./CompilerSource/cfile_parse/auxilary.h");
+  
   clock_t cs = clock();
   unsigned a = parse_cfile(EGMmain);
   clock_t ce = clock();
@@ -108,13 +118,22 @@ int main(int argc, char *argv[])
       else if (pf[i] == '\n') line++, lp = 0;
     }
     cout << "Line " << line << ", position " << lp << " (absolute " << a << "): " << syncheck::error <<  endl;
+    return 0;
   }
-  else
+  
+  cout << "Syntax check completed with no error.\n";
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+  
+  parsed_object par;
+  parsed_event ev(&par);
+  string b = parser_main(pf,&ev);
+  cout << "\nParsed to:\n" << b;
+  cout << "\n=======================\n\n";
+  
+  cout << "Locals declared:\n";
+  for (deciter i = par.locals.begin(); i != par.locals.end(); i++)
   {
-    cout << "Syntax check completed with no error.\n";
-    
-    string b = parser_main(pf);
-    cout << endl << endl << endl << endl << b << endl;
+    cout << "  " << (i->second.type != ""? i->second.type : "var") << " " << i->second.prefix << " " << i->first << " " << i->second.suffix << "\n";
   }
   
   return 0;

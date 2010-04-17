@@ -39,8 +39,9 @@ dectrip::dectrip(): type(), prefix(), suffix() {}
 dectrip::dectrip(string t): type(t), prefix(), suffix() {}
 dectrip::dectrip(string t,string p, string s): type(t), prefix(p), suffix(s) {}
 
-parsed_event::parsed_event(): id(0), mainId(0), otherObjId(-4) {}
-parsed_event::parsed_event(int m, int s): id(s), mainId(m), otherObjId(-4) {}
+parsed_event::parsed_event(): id(0), mainId(0), otherObjId(-4), myObj(NULL) {}
+parsed_event::parsed_event(parsed_object *po): id(0), mainId(0), otherObjId(-4), myObj(po) {}
+parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), otherObjId(-4), myObj(po) {}
 parsed_object::parsed_object() {}
 parsed_object::parsed_object(string n, int i, int s): name(n), id(i), sprite_index(s) {}
 map<int,parsed_object*> parsed_objects;
