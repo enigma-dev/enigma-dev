@@ -54,22 +54,26 @@ int m_prog_loop_cfp();
 
 namespace dll_ext_iteration {
   extiter it;
+  externs*gus;
   string  its_name;
 }
 using namespace dll_ext_iteration;
 
 dllexport const char* first_available_resource() //Returns the name of the first resource on the list, or "" otherwise.
 {
-  externs *gus = scope_get_using_ie(&global_scope);
+  gus = scope_get_using_ie(&global_scope);
   if (!gus)
     gus = &global_scope;
   
   it = gus->members.begin();
-  if (it == it->second->members.end())
+  if (it == gus->members.end())
   {
     if (it->second == &global_scope)
       return NULL;
-    it = global_scope.members.begin();
+    gus = &global_scope;
+    it = gus->members.begin();
+    if (it == gus->members.end())
+      return NULL;
   }
   
   its_name = it->second->name;
@@ -99,11 +103,14 @@ dllexport bool resource_isGlobal()   //Returns whether the resource is nothing b
 dllexport const char* next_available_resource() //Returns the name of the next resource on the list, or "" otherwise.
 {
   it++;
-  if (it == it->second->members.end())
+  if (it == gus->members.end())
   {
     if (it->second == &global_scope)
       return NULL;
-    it = global_scope.members.begin();
+    gus = &global_scope;
+    it = gus->members.begin();
+    if (it == gus->members.end())
+      return NULL;
   }
   
   its_name = it->second->name;
@@ -111,5 +118,5 @@ dllexport const char* next_available_resource() //Returns the name of the next r
 }
 dllexport bool resources_atEnd() //Returns whether we're really done iterating the list
 {
-  return ((it == it->second->members.end()) and (it->second == &global_scope));
+  return ((it == gus->members.end()) and (gus == &global_scope));
 }
