@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+//This is to be redone before official release.
+/*
 namespace enigma
 {
   std::map<int,int> withid;
@@ -96,3 +98,4 @@ namespace enigma
     }
   }
 }
+*/

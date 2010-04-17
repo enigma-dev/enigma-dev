@@ -60,11 +60,36 @@ void clear_ide_editables()
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h"); wto.close();
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h",ios_base::out);
+    wto << "int instdata[] = { 0 }; //Empty until game is built via ENIGMA\n";
+    //wto << "enigma::room_max = 1;\nenigma::maxid = 100001;\n";
+  wto.close();
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h",ios_base::out);
+    wto <<
+    "var  alarm;\nvar  image_single;\nvar  image_speed;\nvar  path_endaction;\nvar  path_index;\nvar  path_orientation;\n"
+    "var  path_position;\nvar  path_positionprevious;\nvar  path_scale;\nvar  path_speed;\nvar  timeline_index;\n"
+    "var  timeline_position;\nvar  timeline_speed;\n";
+  wto.close();
+
+//FIXME: Accessors are required for sprite_width and height, as well as all bbox_ variables
+
   
   wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
     wto << license;
     wto << "#define ENIGMA_GS_OPENGL 1\n#define " << TARGET_PLATFORM_NAME << " 1\n";
   wto.close();
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/LIBINCLUDE.h");
+    wto << license;
+    wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
+    wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n#define FONTPOLYS 1\n"
+           "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n#define COLLIGMA  0\n";
+    wto << "/***************\nEnd optional libs\n ***************/\n";
+  wto.close();
+  
 }
 
 enum cmodes {
@@ -443,6 +468,23 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       }
     wto << "};\n\n";
     wto << "enigma::room_max = " <<  room_highid << " + 1;\nenigma::maxid = " << room_highinstid << " + 1;\n";
+  wto.close();
+  
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h",ios_base::out);
+    wto << license;
+    for (int i = 0; i < es->roomCount; i++) 
+    {
+      wto << "void roomcreate" << es->rooms[i].id << "()\n{\n  ";
+      string cme = es->rooms[i].creationCode;
+      int a = syncheck::syntacheck(cme);
+      if (a != -1) {
+        cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::error << flushl;
+        return E_ERROR_SYNTAX;
+      }
+      wto << parser_main(cme);
+      wto << "\n}\n";
+    }
   wto.close();
   
   /*

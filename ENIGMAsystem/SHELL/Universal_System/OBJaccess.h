@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+//R3 instance access was inefficient at best.
+//It will be redone along with Wildclass promptly after the new instance system is implemented.
+/*
 namespace enigma {
   wildclass int2object(double intr);
 }
@@ -70,3 +73,4 @@ namespace enigma
     else return instance_list[integer];
   }
 }
+*/

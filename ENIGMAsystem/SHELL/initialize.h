@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "Preprocessor_Environment_Editable/IDE_EDIT_objectdata.h"
+//#include "Preprocessor_Environment_Editable/IDE_EDIT_objectdata.h"
 mtrandom_seed(enigma::Random_Seed=time(0));
 #if BUILDMODE
 	buildmode::buildinit();
