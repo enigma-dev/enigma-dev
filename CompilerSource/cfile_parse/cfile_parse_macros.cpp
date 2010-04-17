@@ -323,87 +323,90 @@ pt cfile_parse_macro()
 
   if (next=="pragma") //Visit this even in a false conditional for print and debug
   {
-    //move_newline();
-    // This was my beautiful debugging suite during development of the parser.
-    const unsigned sp = pos;
+    // This is my beautiful debugging suite during development of the parser.
+      #ifdef ENIGMA_PARSERS_DEBUG
+        const unsigned sp = pos;
+      #endif
     move_newline();
-    const string pc = cfile.substr(sp,pos-sp);
-    if (pc == "debug_entry_point" and !in_false_conditional())
-      cout << "#pragma: debug_entry_point\r\n";
-    if (pc == "debug_entry_point_unconditional")
-      cout << "#pragma: debug_entry_point\r\n";
-    if (pc == "skiptell")
-      cout << "#pragma: skipto status: ['"<<skipto<<"', '"<<skipto2<<"' : " << specializing << "]\r\n";
-    if (pc == "toggledebug")
-      cout << "#pragma: toggledebug = " << (cfile_debug = !cfile_debug) << "\r\n";
-    if (pc == "ihtell")
-      cout << "#pragma: ihc = " << ihc << "\r\n";
-    if (pc == "tptell")
-    {
-      cout << "#pragma: tpc = " << tpc << " Current scope: " << current_scope->tempargs.size << "\r\n";
-      for (int i=0; i<tpc; i++) cout << "  " << tmplate_params[i].name << endl;
-      for (unsigned i=0; i<current_scope->tempargs.size; i++) cout << "  " << current_scope->tempargs[i]->name << endl;
-    }
-    if (pc.substr(0,8) == "println " and !in_false_conditional())
-    {
-      cout << "Debug output: " << pc.substr(8) << endl;
-      fflush(stdout);
-    }
-    if (pc.substr(0,22) == "println_unconditional ")
-    {
-      cout << "Unconditional debug output: " << pc.substr(22) << endl;
-      fflush(stdout);
-    }
-    if (pc.substr(0,10) == "printinfo ")
-    {
-      cout << "Define " << pc.substr(10) << ": " << endl;
-      print_definition(pc.substr(10));
-      fflush(stdout);
-    }
-    if (pc == "printlast")
-    {
-      cout <<
-      "Last named: " << last_named << endl <<
-      "Last named phase: " << last_named_phase << endl <<
-      "Last identifier: " << last_identifier << endl <<
-      "Last type: " << (void*)last_type << (last_type? ": " + strace(last_type) : "") << endl <<
-      "Immediate scope: " << immediate_scope << (immediate_scope? ": " + strace(immediate_scope) : "") << endl <<
-      "In false conditional: " << in_false_conditional() << endl <<
-      endl;
-      fflush(stdout);
-    }
-    if (pc.substr(0,10) == "tracescope")
-    {
-      string o;
-      cout << "Tracing scope (" << (pc.length()>11?pc.substr(11):"no additional info") << "): ";
-
-      string lnm;
-      for (externs* i=immediate_scope?immediate_scope:current_scope; i != &global_scope; i=i->parent)
-      {
-        if (i == NULL) {
-          cout << "ERROR! Trace wound up at NULL! ";
-          break;
-        }
-
-        if (lnm != "")
+      #ifdef ENIGMA_PARSERS_DEBUG
+        const string pc = cfile.substr(sp,pos-sp);
+        if (pc == "debug_entry_point" and !in_false_conditional())
+          cout << "#pragma: debug_entry_point\r\n";
+        if (pc == "debug_entry_point_unconditional")
+          cout << "#pragma: debug_entry_point\r\n";
+        if (pc == "skiptell")
+          cout << "#pragma: skipto status: ['"<<skipto<<"', '"<<skipto2<<"' : " << specializing << "]\r\n";
+        if (pc == "toggledebug")
+          cout << "#pragma: toggledebug = " << (cfile_debug = !cfile_debug) << "\r\n";
+        if (pc == "ihtell")
+          cout << "#pragma: ihc = " << ihc << "\r\n";
+        if (pc == "tptell")
         {
-          extiter ii = i->members.find(lnm);
-          if (ii == i->members.end())
-            cout << "ERROR! Scope `" << i->name << "' offers no route back to `" << lnm << "'  ";
+          cout << "#pragma: tpc = " << tpc << " Current scope: " << current_scope->tempargs.size << "\r\n";
+          for (int i=0; i<tpc; i++) cout << "  " << tmplate_params[i].name << endl;
+          for (unsigned i=0; i<current_scope->tempargs.size; i++) cout << "  " << current_scope->tempargs[i]->name << endl;
         }
-        o = "::" + i->name + o;
-        lnm = i->name;
-      }
-      if (lnm != "")
-      {
-        extiter ii = global_scope.members.find(lnm);
-        if (ii == global_scope.members.end())
-          cout << "ERROR! Global scope offers no route back to `" << lnm << "'  " << o << endl << endl;
-        else cout << o << endl<< "Confirmed global scope traces back to `" << lnm << "'" << endl << endl;
-      } else cout << endl << "At global scope." << endl << endl;
+        if (pc.substr(0,8) == "println " and !in_false_conditional())
+        {
+          cout << "Debug output: " << pc.substr(8) << endl;
+          fflush(stdout);
+        }
+        if (pc.substr(0,22) == "println_unconditional ")
+        {
+          cout << "Unconditional debug output: " << pc.substr(22) << endl;
+          fflush(stdout);
+        }
+        if (pc.substr(0,10) == "printinfo ")
+        {
+          cout << "Define " << pc.substr(10) << ": " << endl;
+          print_definition(pc.substr(10));
+          fflush(stdout);
+        }
+        if (pc == "printlast")
+        {
+          cout <<
+          "Last named: " << last_named << endl <<
+          "Last named phase: " << last_named_phase << endl <<
+          "Last identifier: " << last_identifier << endl <<
+          "Last type: " << (void*)last_type << (last_type? ": " + strace(last_type) : "") << endl <<
+          "Immediate scope: " << immediate_scope << (immediate_scope? ": " + strace(immediate_scope) : "") << endl <<
+          "In false conditional: " << in_false_conditional() << endl <<
+          endl;
+          fflush(stdout);
+        }
+        if (pc.substr(0,10) == "tracescope")
+        {
+          string o;
+          cout << "Tracing scope (" << (pc.length()>11?pc.substr(11):"no additional info") << "): ";
 
-      fflush(stdout);
-    }
+          string lnm;
+          for (externs* i=immediate_scope?immediate_scope:current_scope; i != &global_scope; i=i->parent)
+          {
+            if (i == NULL) {
+              cout << "ERROR! Trace wound up at NULL! ";
+              break;
+            }
+            
+            if (lnm != "")
+            {
+              extiter ii = i->members.find(lnm);
+              if (ii == i->members.end())
+                cout << "ERROR! Scope `" << i->name << "' offers no route back to `" << lnm << "'  ";
+            }
+            o = "::" + i->name + o;
+            lnm = i->name;
+          }
+          if (lnm != "")
+          {
+            extiter ii = global_scope.members.find(lnm);
+            if (ii == global_scope.members.end())
+              cout << "ERROR! Global scope offers no route back to `" << lnm << "'  " << o << endl << endl;
+            else cout << o << endl<< "Confirmed global scope traces back to `" << lnm << "'" << endl << endl;
+          } else cout << endl << "At global scope." << endl << endl;
+          
+          fflush(stdout);
+        }
+      #endif
   }
 
   //Conditionals/Flow

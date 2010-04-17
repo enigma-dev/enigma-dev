@@ -76,6 +76,7 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add option="-DENIGMA_PARSERS_DEBUG" />
 				</Compiler>
 			</Target>
 		</Build>
