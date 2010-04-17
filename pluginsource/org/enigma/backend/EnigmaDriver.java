@@ -32,14 +32,11 @@ public class EnigmaDriver
 
 	public static native int compileEGMf(EnigmaStruct es, String outname, int mode);
 
-	/** Returns the name of the first resource on the list, or "" otherwise. */
+	/** Returns the name of the first resource on the list, or null if there is no first element. */
 	public static native String first_available_resource();
 
-	/** Returns the name of the next resource on the list, or "" otherwise. */
+	/** Returns the name of the next resource on the list, or null if there is no first element. */
 	public static native String next_available_resource();
-
-	/** Returns whether we're really done iterating the list */
-	public static native boolean resources_atEnd();
 
 	/** Returns the minimum number of arguments to the function; the names cannot be fetched. */
 	public static native int resource_argCountMin();

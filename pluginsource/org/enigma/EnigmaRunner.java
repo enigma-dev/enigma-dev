@@ -207,7 +207,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		mi.addActionListener(node);
 		menu.add(mi);
 
-		JMenu sub = new JMenu("Show Built-in...");
+		JMenu sub = new JMenu("Keyword List");
 		menu.add(sub);
 
 		showFunctions = new JMenuItem("Functions");
@@ -413,29 +413,60 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (s == build) compile((byte) 3);
 		if (s == compile) compile((byte) 4);
 
-		if (s == showFunctions) showStuffFrame(0);
-		if (s == showGlobals) showStuffFrame(1);
-		if (s == showTypes) showStuffFrame(2);
+		if (s == showFunctions) showKeywordListFrame(0);
+		if (s == showGlobals) showKeywordListFrame(1);
+		if (s == showTypes) showKeywordListFrame(2);
 		}
 
-	MDIFrame stuffFrames[] = new MDIFrame[3];
-	JTextArea stuffLists[] = new JTextArea[3];
+	private MDIFrame keywordListFrames[] = new MDIFrame[3];
+	private JTextArea keywordLists[] = new JTextArea[3];
 
-	public void showStuffFrame(int mode)
+	public void showKeywordListFrame(int mode)
 		{
 		String[] modes = { "Functions","Globals","Types" };
-		if (stuffFrames[mode] == null)
+		if (keywordListFrames[mode] == null)
 			{
-			stuffFrames[mode] = new MDIFrame(modes[mode],true,true,true,true);
-			stuffFrames[mode].setSize(200,400);
-			stuffFrames[mode].setDefaultCloseOperation(JInternalFrame.HIDE_ON_CLOSE);
-			LGM.mdi.add(stuffFrames[mode]);
-			stuffLists[mode] = new JTextArea();
-			stuffLists[mode].setEditable(false);
-			stuffFrames[mode].getContentPane().add(new JScrollPane(stuffLists[mode]));
-			stuffFrames[mode].setFocusTraversalPolicy(new TextAreaFocusTraversalPolicy(stuffLists[mode]));
+			keywordListFrames[mode] = new MDIFrame(modes[mode],true,true,true,true);
+			keywordListFrames[mode].setSize(200,400);
+			keywordListFrames[mode].setDefaultCloseOperation(JInternalFrame.HIDE_ON_CLOSE);
+			LGM.mdi.add(keywordListFrames[mode]);
+			keywordLists[mode] = new JTextArea();
+			keywordLists[mode].setEditable(false);
+			keywordListFrames[mode].getContentPane().add(new JScrollPane(keywordLists[mode]));
+			keywordListFrames[mode].setFocusTraversalPolicy(new TextAreaFocusTraversalPolicy(
+					keywordLists[mode]));
 			}
-		stuffFrames[mode].toTop();
+		//TODO: should only repopulate when whitespace changes
+		keywordLists[mode].setText(getKeywordList(mode));
+		keywordListFrames[mode].toTop();
+		}
+
+	/**
+	 * Generates a newline (\n) delimited list of keywords of given type
+	 * @param type 0 for functions, 1 for globals, 2 for types
+	 * @return The keyword list
+	 */
+	public static String getKeywordList(int type)
+		{
+		StringBuilder sb = new StringBuilder();
+		String res = EnigmaDriver.first_available_resource();
+		while (res != null)
+			{
+			switch (type)
+				{
+				case 0:
+					if (EnigmaDriver.resource_isFunction()) sb.append(res + "\n");
+					break;
+				case 1:
+					if (EnigmaDriver.resource_isGlobal()) sb.append(res + "\n");
+					break;
+				case 2:
+					if (EnigmaDriver.resource_isTypeName()) sb.append(res + "\n");
+					break;
+				}
+			res = EnigmaDriver.next_available_resource();
+			}
+		return sb.toString();
 		}
 
 	public void subframeAppeared(MDIFrame source)
