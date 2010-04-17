@@ -43,10 +43,15 @@ goforit(at);*/
 
 
 #include <map>
+#pragma tracescope
 #include <stdio.h>
+#pragma tracescope
 #include <stdlib.h>
+#pragma tracescope
 #include <string>
+#pragma tracescope
 #include <limits>
+#pragma tracescope
 
 //#include <vector> //COLLIGMA
 
@@ -66,7 +71,7 @@ goforit(at);*/
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
 
-
+#pragma tracescope
 
 #if STRINGLIB
     #include "Universal_System/estring.h"

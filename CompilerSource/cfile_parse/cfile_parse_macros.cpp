@@ -324,7 +324,7 @@ pt cfile_parse_macro()
   if (next=="pragma") //Visit this even in a false conditional for print and debug
   {
     move_newline();
-    /* // This was my beautiful debugging suite during development of the parser.
+    // This was my beautiful debugging suite during development of the parser.
     const unsigned sp = pos;
     move_newline();
     const string pc = cfile.substr(sp,pos-sp);
@@ -403,7 +403,7 @@ pt cfile_parse_macro()
       } else cout << endl << "At global scope." << endl << endl;
 
       fflush(stdout);
-    }*/
+    }
   }
 
   //Conditionals/Flow
