@@ -17,6 +17,8 @@
 				<Linker>
 					<Add library="opengl32" />
 					<Add library="../additional/zlib/libzlib.a" />
+					<Add library="gdi32" />
+					<Add library="comdlg32" />
 					<Add directory="/home/git/enigma/ENIGMAsystem/additional/" />
 				</Linker>
 			</Target>
@@ -31,6 +33,8 @@
 					<Add option="-s" />
 					<Add library="opengl32" />
 					<Add library="../additional/zlib/libzlib.a" />
+					<Add library="gdi32" />
+					<Add library="comdlg32" />
 				</Linker>
 			</Target>
 			<Target title="lin-debug">
