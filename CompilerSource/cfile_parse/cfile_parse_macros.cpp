@@ -323,7 +323,7 @@ pt cfile_parse_macro()
 
   if (next=="pragma") //Visit this even in a false conditional for print and debug
   {
-    move_newline();
+    //move_newline();
     // This was my beautiful debugging suite during development of the parser.
     const unsigned sp = pos;
     move_newline();
