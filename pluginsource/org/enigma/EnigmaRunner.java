@@ -19,6 +19,8 @@
 
 package org.enigma;
 
+import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -421,7 +423,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	private MDIFrame keywordListFrames[] = new MDIFrame[3];
 	private JTextArea keywordLists[] = new JTextArea[3];
-	private final static Pattern nameRegex = Pattern.compile("[a-zA-Z][a-zA-Z0-9_]*");
+	private final static Pattern nameRegex = Pattern.compile("[a-zA-][a-zA-Z0-9_]*");
 
 	public void showKeywordListFrame(int mode)
 		{
@@ -434,6 +436,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			LGM.mdi.add(keywordListFrames[mode]);
 			keywordLists[mode] = new JTextArea();
 			keywordLists[mode].setEditable(false);
+			keywordLists[mode].setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+			keywordLists[mode].setFont(new Font(Font.MONOSPACED,Font.PLAIN,12));
 			keywordListFrames[mode].setContentPane(new JScrollPane(keywordLists[mode]));
 			keywordListFrames[mode].setFocusTraversalPolicy(new TextAreaFocusTraversalPolicy(
 					keywordLists[mode]));
@@ -458,7 +462,20 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			if (nameRegex.matcher(res).matches()) switch (type)
 				{
 				case 0:
-					if (EnigmaDriver.resource_isFunction()) sb.append(res + "\n");
+					if (EnigmaDriver.resource_isFunction())
+						{
+						int min = EnigmaDriver.resource_argCountMin();
+						int max = EnigmaDriver.resource_argCountMax();
+						sb.append(res);
+						sb.append("(");
+						sb.append(EnigmaDriver.resource_argCountMin());
+						if (min != max)
+							{
+							sb.append("-");
+							sb.append(EnigmaDriver.resource_argCountMax());
+							}
+						sb.append(")\n");
+						}
 					break;
 				case 1:
 					if (EnigmaDriver.resource_isGlobal()) sb.append(res + "\n");
