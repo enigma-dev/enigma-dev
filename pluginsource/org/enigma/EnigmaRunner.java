@@ -35,18 +35,22 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import org.enigma.EnigmaSettingsFrame.EnigmaSettings;
+import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaStruct;
-import org.enigma.backend.EnigmaStruct.SyntaxError;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
+import org.lateralgm.components.impl.TextAreaFocusTraversalPolicy;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
@@ -65,6 +69,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public EnigmaSettings es = new EnigmaSettings();
 	public EnigmaSettingsFrame esf = new EnigmaSettingsFrame(es);
 	public JMenuItem run, debug, build, compile;
+	public JMenuItem showFunctions, showGlobals, showTypes;
 	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
 	public static boolean GCC_LOCATED = false;
 	public final EnigmaNode node = new EnigmaNode();
@@ -90,13 +95,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			System.setOut(new PrintStream(new TextAreaOutputStream(ef.ta)));
 			}
 
-		if (GCC_LOCATED) EnigmaStruct.whitespaceModified(es.definitions);
+		if (GCC_LOCATED) EnigmaDriver.whitespaceModified(es.definitions);
 		}
 
 	private void initEnigmaLib()
 		{
 		System.out.print("Initializing Enigma: ");
-		int ret = EnigmaStruct.libInit();
+		int ret = EnigmaDriver.libInit();
 		if (ret == 0)
 			{
 			GCC_LOCATED = true;
@@ -134,7 +139,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		fc.setDialogTitle("ENIGMA: Please locate the GCC directory (containing bin/, lib/ etc)");
 		fc.setAcceptAllFileFilterUsed(false);
 		if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) return 0;
-		int ret = EnigmaStruct.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
+		int ret = EnigmaDriver.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
 		if (ret == 0) GCC_LOCATED = true;
 		return ret;
 		}
@@ -201,6 +206,19 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		JMenuItem mi = new JMenuItem("Settings");
 		mi.addActionListener(node);
 		menu.add(mi);
+
+		JMenu sub = new JMenu("Show Built-in...");
+		menu.add(sub);
+
+		showFunctions = new JMenuItem("Functions");
+		showFunctions.addActionListener(this);
+		sub.add(showFunctions);
+		showGlobals = new JMenuItem("Globals");
+		showGlobals.addActionListener(this);
+		sub.add(showGlobals);
+		showTypes = new JMenuItem("Types");
+		showTypes.addActionListener(this);
+		sub.add(showTypes);
 
 		LGM.frame.getJMenuBar().add(menu,1);
 		}
@@ -355,7 +373,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		//				System.out.println("Compiling with " + enigma);
 
 		EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
-		System.out.println(EnigmaStruct.compileEGMf(es,exef.getAbsolutePath(),mode));
+		System.out.println(EnigmaDriver.compileEGMf(es,exef.getAbsolutePath(),mode));
 
 		if (mode == 2)
 			{
@@ -384,27 +402,40 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
 		for (int i = 0; i < osl.length; i++)
 			osl[i] = isl[i].getName();
-		return EnigmaStruct.syntaxCheck(osl.length,new StringArray(osl),code);
+		return EnigmaDriver.syntaxCheck(osl.length,new StringArray(osl),code);
 		}
 
 	public void actionPerformed(ActionEvent e)
 		{
-		if (e.getSource() == run)
+		Object s = e.getSource();
+		if (s == run) compile((byte) 1);
+		if (s == debug) compile((byte) 2);
+		if (s == build) compile((byte) 3);
+		if (s == compile) compile((byte) 4);
+
+		if (s == showFunctions) showStuffFrame(0);
+		if (s == showGlobals) showStuffFrame(1);
+		if (s == showTypes) showStuffFrame(2);
+		}
+
+	MDIFrame stuffFrames[] = new MDIFrame[3];
+	JTextArea stuffLists[] = new JTextArea[3];
+
+	public void showStuffFrame(int mode)
+		{
+		String[] modes = { "Functions","Globals","Types" };
+		if (stuffFrames[mode] == null)
 			{
-			compile((byte) 1);
+			stuffFrames[mode] = new MDIFrame(modes[mode],true,true,true,true);
+			stuffFrames[mode].setSize(200,400);
+			stuffFrames[mode].setDefaultCloseOperation(JInternalFrame.HIDE_ON_CLOSE);
+			LGM.mdi.add(stuffFrames[mode]);
+			stuffLists[mode] = new JTextArea();
+			stuffLists[mode].setEditable(false);
+			stuffFrames[mode].getContentPane().add(new JScrollPane(stuffLists[mode]));
+			stuffFrames[mode].setFocusTraversalPolicy(new TextAreaFocusTraversalPolicy(stuffLists[mode]));
 			}
-		if (e.getSource() == debug)
-			{
-			compile((byte) 2);
-			}
-		if (e.getSource() == build)
-			{
-			compile((byte) 3);
-			}
-		if (e.getSource() == compile)
-			{
-			compile((byte) 4);
-			}
+		stuffFrames[mode].toTop();
 		}
 
 	public void subframeAppeared(MDIFrame source)

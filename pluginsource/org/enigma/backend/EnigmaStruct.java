@@ -21,8 +21,6 @@ import org.enigma.backend.resources.Sound;
 import org.enigma.backend.resources.Sprite;
 import org.enigma.backend.resources.Timeline;
 
-import com.sun.jna.Native;
-import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
@@ -65,28 +63,4 @@ public class EnigmaStruct extends Structure
 	public int lastInstanceId = 100000;
 	public int lastTileId = 10000000;
 
-	static
-		{
-		String lib = "compileEGMf";
-		NativeLibrary.addSearchPath(lib,".");
-		Native.register(lib);
-		}
-
-	public static class SyntaxError extends Structure
-		{
-		public String errorString;
-		public int line, position;
-		public int absoluteIndex;
-		}
-
-	public static native int libInit();
-
-	public static native int gccDefinePath(String path);
-
-	public static native SyntaxError whitespaceModified(String wscode);
-
-	/** @param scriptNames (StringArray) */
-	public static native SyntaxError syntaxCheck(int scriptCount, Pointer scriptNames, String code);
-
-	public static native int compileEGMf(EnigmaStruct es, String outname, int mode);
 	}

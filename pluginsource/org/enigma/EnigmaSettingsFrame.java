@@ -20,7 +20,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-import org.enigma.backend.EnigmaStruct;
+import org.enigma.backend.EnigmaDriver;
 import org.lateralgm.components.impl.IndexButtonGroup;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.main.LGM;
@@ -338,7 +338,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		if (!es.definitions.equals(sDef.getCode()))
 			{
 			es.definitions = sDef.getCode();
-			if (EnigmaRunner.GCC_LOCATED) EnigmaStruct.whitespaceModified(es.definitions);
+			if (EnigmaRunner.GCC_LOCATED) EnigmaDriver.whitespaceModified(es.definitions);
 			}
 		es.globalLocals = sGlobLoc.getCode();
 		es.initialization = sInit.getCode();
