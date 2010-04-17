@@ -68,7 +68,7 @@ dllexport const char* first_available_resource() //Returns the name of the first
   if (it == it->second->members.end())
   {
     if (it->second == &global_scope)
-      return "";
+      return NULL;
     it = global_scope.members.begin();
   }
   
@@ -102,7 +102,7 @@ dllexport const char* next_available_resource() //Returns the name of the next r
   if (it == it->second->members.end())
   {
     if (it->second == &global_scope)
-      return "";
+      return NULL;
     it = global_scope.members.begin();
   }
   
