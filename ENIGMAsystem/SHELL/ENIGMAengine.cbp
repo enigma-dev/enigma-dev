@@ -8,8 +8,9 @@
 		<Build>
 			<Target title="win-debug">
 				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
-				<Option type="0" />
+				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -40,6 +41,19 @@
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
+					<Add library="GL" />
+					<Add library="z" />
+				</Linker>
+			</Target>
+			<Target title="lin-profile">
+				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-pg" />
+				</Compiler>
+				<Linker>
+					<Add option="-pg" />
 					<Add library="GL" />
 					<Add library="z" />
 				</Linker>
@@ -167,34 +181,40 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="lin-profile" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBmain.cpp">
 			<Option target="lin-debug" />
 			<Option target="lin-build" />
+			<Option target="lin-profile" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBmain.h">
 			<Option target="lin-debug" />
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="lin-profile" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBwindow.cpp">
 			<Option target="lin-debug" />
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="lin-profile" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBwindow.h">
 			<Option target="lin-debug" />
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="lin-profile" />
 		</Unit>
 		<Unit filename="Platforms/xlib/xwindow_gml.h">
 			<Option target="lin-debug" />
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="lin-profile" />
 		</Unit>
 		<Unit filename="Preprocessor_Environment_Editable/GAME_SETTINGS.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h" />

@@ -97,7 +97,7 @@ dllexport bool resource_isTypeName() //Returns whether the resource can be used 
 }
 dllexport bool resource_isGlobal()   //Returns whether the resource is nothing but a global variable.
 {
-  return !it->second->flags;
+  return !it->second->flags and !it->second->is_function();
 }
 
 dllexport const char* next_available_resource() //Returns the name of the next resource on the list, or "" otherwise.
