@@ -199,9 +199,9 @@ namespace syncheck
           else if (lastnamed[level]==LN_VARNAME or lastnamed[level]==LN_FUNCTION_NAME)
           { error="Operator expected at this point"; return pos; }
           
-          const unsigned issr = handle_if_statement(code,name,pos); //Check *if* it's a statement, handle it *if* it is.
-          if (issr != unsigned(-2)) { 
-            if (issr != unsigned(-1))
+          const pt issr = handle_if_statement(code,name,pos); //Check *if* it's a statement, handle it *if* it is.
+          if (issr != pt(-2)) { 
+            if (issr != pt(-1))
               return issr;
           }
           else if (name == "local" or name == "global") //These two are very special...

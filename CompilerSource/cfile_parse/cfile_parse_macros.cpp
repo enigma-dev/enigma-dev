@@ -130,7 +130,7 @@ extern void print_definition(string);
 pt cfile_parse_macro()
 {
   while(is_useless_macros(cfile[++pos]));
-
+  
   pt poss=pos;
   if (!is_letter(cfile[pos])) {
     cferr="Preprocessor directive expected";
@@ -138,14 +138,14 @@ pt cfile_parse_macro()
   }
   while (is_letterd(cfile[pos])) pos++;
   string next=cfile.substr(poss,pos-poss);
-
+  
   while (cfile[pos] == ' ' or cfile[pos] == '\t') pos++;
-
+  
   if (!in_false_conditional())
   {
     if (next=="error")
     {
-      int poss=pos;
+      pt poss=pos;
       move_newline();
       cferr="#error "+cfile.substr(poss,pos-poss+1);
       return pos;
@@ -155,16 +155,16 @@ pt cfile_parse_macro()
       if (next=="define")
       {
         while (cfile[pos] == ' ' or cfile[pos] == '\t') pos++;
-
+        
         const pt poss=pos;
         if (!is_letter(cfile[pos])) { cferr="Identifier expected for #define"; return pos; }
         while (is_letterd(cfile[pos])) pos++;
-
+        
         //unsigned int flags=0;
         int arg_count = -1;
         int args_unlimited_at = -1;
         varray<string> args;
-
+        
         string definiendum=cfile.substr(poss,pos-poss);
         if (cfile[pos]=='(') //macro function
         {
@@ -178,8 +178,8 @@ pt cfile_parse_macro()
             else if (is_letter(cfile[pos]))
             {
               if (an) { cferr="Symbol ',' expected"; return pos; }
-
-              const unsigned spos = pos;
+              
+              const pt spos = pos;
               while (is_letterd(cfile[pos])) pos++;
               an=1; args[arg_count++] = cfile.substr(spos,pos-spos);
               continue;
@@ -204,14 +204,14 @@ pt cfile_parse_macro()
             pos++;
           }
         }
-
+        
         while (is_useless_macros(cfile[pos])) pos++;
-
+        
         const pt poss2=pos;
         move_newline();
-
+        
         string definiens=cfile.substr(poss2,pos-poss2);
-
+        
         /*cout << "Define \"" << definiendum << "\" as \"" << definiens << "\"\r\n";
         if (current_scope->members.find(definiendum) != current_scope->members.end())
           current_scope->members.erase(definiendum);*/
@@ -242,21 +242,21 @@ pt cfile_parse_macro()
       if (next=="include" or next=="include_next")
       {
         while (cfile[pos]==' ' or cfile[pos]=='\t') pos++;
-
+        
         const char c = cfile[pos];
         if (pos<len and cfile[pos] != '"' and cfile[pos] != '<')
         {
           cferr = "Expcted filename to include set in quotes or in <>";
           return pos;
         }
-
+        
         //Isolate filename
         const int spos = ++pos;
         const char ce = c=='"'? c:'>';
         while (pos < len and cfile[pos++] != ce);
         string file = cfile.substr(spos,pos-spos-1);
         move_newline();
-
+        
         //Find the file and include it
         string ins;
         string include_from;
@@ -274,7 +274,7 @@ pt cfile_parse_macro()
             include_from = qpath;
           else
             include_from = included_files.top().path + qpath;
-
+          
           ins = fc( (include_from+file).c_str() );
           if (fnf)
           {
@@ -296,12 +296,12 @@ pt cfile_parse_macro()
             return pos;
           }
         }
-
+        
         cfstack.push(new cfnode);
         cfile = ins;
         len = cfile.length();
         pos = 0;
-
+        
         included_files.push(includings(file,include_from));
       }
       if (next=="import")
@@ -313,7 +313,7 @@ pt cfile_parse_macro()
         move_newline();
       }
     }
-
+    
     if (next=="line")
     {
       cferr="#line is unimplemented for reasons of sanity.";
@@ -325,7 +325,7 @@ pt cfile_parse_macro()
   {
     // This is my beautiful debugging suite during development of the parser.
       #ifdef ENIGMA_PARSERS_DEBUG
-        const unsigned sp = pos;
+        const pt sp = pos;
       #endif
     move_newline();
       #ifdef ENIGMA_PARSERS_DEBUG
@@ -378,7 +378,7 @@ pt cfile_parse_macro()
         {
           string o;
           cout << "Tracing scope (" << (pc.length()>11?pc.substr(11):"no additional info") << "): ";
-
+          
           string lnm;
           for (externs* i=immediate_scope?immediate_scope:current_scope; i != &global_scope; i=i->parent)
           {
@@ -403,12 +403,12 @@ pt cfile_parse_macro()
               cout << "ERROR! Global scope offers no route back to `" << lnm << "'  " << o << endl << endl;
             else cout << o << endl<< "Confirmed global scope traces back to `" << lnm << "'" << endl << endl;
           } else cout << endl << "At global scope." << endl << endl;
-          
+
           fflush(stdout);
         }
       #endif
   }
-
+  
   //Conditionals/Flow
   {
     if (next=="if" or next=="ifdef" or next=="ifndef" or next=="else" or next=="elif" or next=="endif")
@@ -463,7 +463,7 @@ pt cfile_parse_macro()
       move_newline();
     }
   }
-
-
-  return (unsigned)-1;
+  
+  
+  return pt(-1);
 }

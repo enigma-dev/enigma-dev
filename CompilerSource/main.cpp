@@ -58,7 +58,7 @@ int m_prog_loop_cfp();
 #endif
 
 extern void clear_ide_editables();
-extern void print_err_line_at(unsigned a);
+extern void print_err_line_at(pt a);
 #include "cfile_parse/cfile_pushing.h"
 
 extern int establish_bearings();
@@ -110,10 +110,10 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
   }
   
   clock_t cs = clock();
-  unsigned a = parse_cfile(EGMmain);
+  pt a = parse_cfile(EGMmain);
   clock_t ce = clock();
   
-  if (a != unsigned(-1)) {
+  if (a != pt(-1)) {
     cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
     print_definition("__GNUC_PREREQ");
     print_definition("__builtin_huge_val");

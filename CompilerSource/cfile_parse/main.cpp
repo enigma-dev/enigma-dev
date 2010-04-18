@@ -274,7 +274,7 @@ string getst()
 #include "../general/implicit_stack.h"
 extern string cfile;
 
-void print_err_line_at(unsigned a)
+void print_err_line_at(pt a)
 {
   int line=0,pos=0;
   for (int i=0; i<(signed)a; i++,pos++)
@@ -286,9 +286,9 @@ void print_err_line_at(unsigned a)
   }
   printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
   const int margin = 100;
-  const unsigned int
-    begin = (signed)a-(margin/2)<0?0:a-(margin/2),
-    end = (a+unsigned(margin/2)>cfile.length())?cfile.length():a+(margin/2);
+  const pt
+    begin = ((signed pt)a-(margin/2)<0)?0:a-(margin/2),
+    end = (a+pt(margin/2)>cfile.length())?cfile.length():a+(margin/2);
   cout << "code snippet: " << cfile.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
   cout << "------------------------------------------------\r\n\r\n";
 }
@@ -309,9 +309,9 @@ void print_definition(string n)
     extiter a;
     string seg;
     externs *isco = &global_scope;
-    for (unsigned i=0; i<n.length();)
+    for (pt i = 0; i<n.length();)
     {
-      const unsigned is = i;
+      const pt is = i;
       while (i<n.length() and n[i] != ':') i++;
 
       seg = n.substr(is,i-is);

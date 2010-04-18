@@ -49,12 +49,12 @@ string string_escape(string s)
 {
   cout << "format " << s << endl;
   const pt il = s.length()-1;
-
+  
   //allocate enough space to hold it
   char* out = new char[il*2 + 1];
-
+  
   out[0] = '"';
-
+  
   pt opos = 1;
   for (pt pos = 1; pos < il; pos++)
   {
@@ -62,12 +62,12 @@ string string_escape(string s)
       out[opos++] = '\\';
     out[opos++] = s[pos];
   }
-
+  
   out[opos++] = '"';
-
+  
   string ret(out,opos);
   delete[] out;
-
+  
   cout << "  as " << ret;
   return ret;
 }
@@ -97,14 +97,14 @@ int initscope(string name)
 {
   current_scope = &global_scope;
   scope_braceid = 0;
-
+  
   externs *ne = current_scope->members[name] = new externs;
   ne->name = name;
   ne->type = NULL;
   ne->flags = EXTFLAG_NAMESPACE;
   ne->parent = current_scope;
   current_scope = ne;
-
+  
   return 0;
 }
 int quicktype(unsigned flags, string name)
@@ -133,11 +133,11 @@ int parser_ready_input(string &code,string &synt)
   #else
     #define safe 1
   #endif
-
+  
   unsigned mymacroc = 0;
   darray<pt> mymacroend;
   varray<string> mymacros;
-
+  
   while (pos < code.length())
   {
     if (is_letter(code[pos]))
@@ -146,7 +146,7 @@ int parser_ready_input(string &code,string &synt)
       const pt spos = pos;
       while (is_letterd(code[++pos]));
       const string name = code.substr(spos,pos-spos);
-
+      
       maciter itm = macros.find(name);
       if (itm != macros.end())
       {
@@ -161,7 +161,7 @@ int parser_ready_input(string &code,string &synt)
                if (pos > mymacroend[iii])
                  mymacros[kn++] = mymacros[k], mymacroc--;
            }
-
+        
         if (!recurs)
         {
           string macrostr = itm->second;
@@ -180,12 +180,12 @@ int parser_ready_input(string &code,string &synt)
           continue;
         }
       }
-
+      
       char c = 'n';
-
+      
       if (name == "sometype")
         cout << "LOL SOMETYPE\n";
-
+      
       tokiter itt = edl_tokens.find(name);
       if (itt != edl_tokens.end()) {
         c = itt->second;
@@ -197,21 +197,21 @@ int parser_ready_input(string &code,string &synt)
       }
       else if (name == "then")
         continue; //"Then" is a truly useless keyword. I see no need to preserve it.
-
+      
       if (last_token == 'n' and c == 'n')
         code[bpos] = synt[bpos] = ';', bpos++;
-
-
+      
+      
       for (pt i = 0; i < name.length(); i++) {
         code[bpos]   = name[i];
         synt[bpos++] = c;
       }
-
+      
       //Accurately reflect newly defined types and structures
       if (c == 'n' and last_token == 'C') { //"class <name>"
         quicktype(EXTFLAG_STRUCT,name); //Add the string we used to determine if this token is 'n' as a struct
       }
-
+      
       last_token = c;
       continue;
     }
@@ -229,7 +229,7 @@ int parser_ready_input(string &code,string &synt)
         } while (is_digit(code[++pos]));
       else
        code[bpos] = synt[bpos] = last_token = '0', bpos++;
-
+      
       continue;
     }
     if (code[pos] == '"')
@@ -285,22 +285,22 @@ int parser_ready_input(string &code,string &synt)
       code[bpos] = synt[bpos] = last_token = '/', bpos++;
       continue;
     }
-
+    
     if (code[pos] == '{')
       quickscope();
     else if (code[pos] == '}')
       dropscope();
-
+    
     //Wasn't anything usable
     if (!is_useless(code[pos]))
       code[bpos] = synt[bpos] = last_token = code[pos], bpos++;
-
+    
     pos++;
   }
-
+  
   code.erase(bpos);
   synt.erase(bpos);
-
+  
   cout << code << endl << synt << endl << endl;
   return 0;
 }
@@ -337,12 +337,10 @@ struct stackif
 };
 
 //Check if semicolon is needed here
-inline bool need_semi(char c1,char c2,const bool sepd,char c0,char cn1)
+inline bool need_semi(char c1,char c2,const bool sepd)
 {
   if (c1 == c2)
-    return sepd and c1 != 'r';
-  if (cn1 == 'n' and c0 == c1 and (c1 == '+' or c1=='-')) //n++n => n++; n
-    return 1;
+    return sepd and c1 != 'r'; //if the two tokens are the same, we assume they are one word; if they are
   return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
   and (is_letterd(c2) or c2=='"' or c2=='{' or c2=='}');
 }
@@ -383,11 +381,11 @@ void parser_add_semicolons(string &code,string &synt)
 
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
-  for (unsigned int pos=0; pos<code.length(); pos++)
+  for (pt pos=0; pos<code.length(); pos++)
   {
     if (synt[pos]==' ')
     {
-      if (need_semi(synt[pos-1],synt[pos+1],1,synt[pos-2],synt[pos-3]))
+      if (need_semi(synt[pos-1],synt[pos+1],true))
       {
         codebuf[bufpos] = *sy_semi;
         syntbuf[bufpos++] = *sy_semi;
@@ -440,7 +438,7 @@ void parser_add_semicolons(string &code,string &synt)
         continue;
       }
 
-      if (need_semi(synt[pos-1],synt[pos],0,synt[pos-2],synt[pos-3]))
+      if (pos and need_semi(synt[pos-1],synt[pos],false))
       {
         codebuf[bufpos-1] = *sy_semi;
         syntbuf[bufpos-1] = *sy_semi;
@@ -492,8 +490,8 @@ void parser_add_semicolons(string &code,string &synt)
   cout << code << endl << synt << endl << endl;
 
   //This part's trickier; add semicolons only after do ... until and do ... while
-  unsigned int len = synt.length();
-  for (unsigned int pos=0; pos<len; pos++)
+  pt len = synt.length();
+  for (pt pos=0; pos<len; pos++)
   {
     if (synt[pos] == 'r') //For every 'do'
     {
@@ -591,7 +589,7 @@ void parser_add_semicolons(string &code,string &synt)
 
   //now we'll do ONE MORE pass, to take care of (())
   len = code.length();
-  for (unsigned int pos = 0; pos<len; pos++)
+  for (pt pos = 0; pos<len; pos++)
   if (synt[pos] == '(' and synt[pos+1]=='(')
   {
     const int sp = pos;
@@ -705,12 +703,12 @@ void print_to_file(string code,string synt,int indentmin_b4,ofstream &of)
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
   //FILE* of = fopen("C:/Users/Josh/Desktop/parseout.txt","w+b");
   //if (of == NULL) return;
-  
+
   const int indentmin = indentmin_b4 + 1;
   int indc = 0,tind = 0,pars = 0,str = 0;
 
-  const unsigned int len = code.length();
-  for (unsigned int pos = 0; pos < len; pos++)
+  const pt len = code.length();
+  for (pt pos = 0; pos < len; pos++)
   {
     switch (synt[pos])
     {

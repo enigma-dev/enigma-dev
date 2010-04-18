@@ -41,7 +41,7 @@ using namespace std;
 #include "expression_evaluator.h"
 #include "template_handlers.h"
 
-unsigned handle_skip()
+pt handle_skip()
 {
   if (is_letter(cfile[pos]))
   {
@@ -49,19 +49,19 @@ unsigned handle_skip()
       specialize_string += cfile.substr(specialize_start,pos-specialize_start);
     
     //This segment is completely stolen from below and should be functionized ASAP
-    unsigned int sp = pos;
+    pt sp = pos;
     while (is_letterd(cfile[++pos]));
     string n = cfile.substr(sp,pos-sp); //This is the word we're looking at.
     
     //This piece is also stolen from below, but is simple enough as-is
-    const unsigned int cm = handle_macros(n);
-    if (cm == unsigned(-2)) // Was a macro
+    const pt cm = handle_macros(n);
+    if (cm == pt(-2)) // Was a macro
     {
       if (specializing)
         specialize_start = pos;
-      return unsigned(-1);
+      return pt(-1);
     }
-    if (cm != unsigned(-1)) return cm;
+    if (cm != pt(-1)) return cm;
     
     //Not a macro
     if (specializing) {
@@ -69,7 +69,7 @@ unsigned handle_skip()
       specialize_string += n;
     }
     //skiping_last_id = n;
-    return unsigned(-1);
+    return pt(-1);
   }
   
   /*if (is_useless(cfile[pos])) continue; //If anything ever needs to skip to whitespace, change "continue;" to "else"
@@ -225,5 +225,5 @@ unsigned handle_skip()
     skippast = 0;
   }
   else pos++;
-  return unsigned(-1);
+  return pt(-1);
 }

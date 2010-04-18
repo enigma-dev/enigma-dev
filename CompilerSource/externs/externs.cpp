@@ -89,11 +89,11 @@ void macro_type::addarg(string x) { args[argc++] = x; }
 bool macro_type::check_recurse_danger(string n)
 {
   register bool dgr = 0;
-  for (unsigned i = 0; i < val.length(); i++)
+  for (pt i = 0; i < val.length(); i++)
   {
     if (is_letter(val[i]))
     {
-      const unsigned si = i;
+      const pt si = i;
       while (is_letterd(val[i])) i++;
       if (val.substr(si,i-si) == n)
       { dgr = 1; break; }
@@ -306,7 +306,7 @@ bool find_in_specializations(externs* inscope,string name, unsigned flags)
 extern string cferr;
   #include "../cfile_parse/cparse_shared.h"
   #include "../cfile_parse/cfile_parse_constants.h"
-void print_err_line_at(unsigned a = pos);
+void print_err_line_at(pt a = pos);
 bool find_extname(string name,unsigned int flags,bool expect_find)
 {
   //If we've been given a qualified id, check in the path or give up

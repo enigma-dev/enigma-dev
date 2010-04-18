@@ -64,7 +64,7 @@ void handle_macro_pop()
 }
 
 #include <iostream>
-unsigned int handle_macros(const string n)
+pt handle_macros(const string n)
 {
   maciter t;
   //cout << "Find macro <"<<n<<">\n";
@@ -95,9 +95,9 @@ unsigned int handle_macros(const string n)
       pos = 0;
       
       inmacros[macrod++] = n;
-      return unsigned(-2);
+      return pt(-2);
     }
     //else puts("Recursing macro. This may be a problem.\r\n");
   }
-  return unsigned(-1);
+  return pt(-1);
 }

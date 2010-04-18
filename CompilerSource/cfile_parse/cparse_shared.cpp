@@ -38,8 +38,8 @@ string cferr;
 //string tostring(int val);
 
 string cfile;
-unsigned int pos = 0;
-unsigned int len = cfile.length();
+pt pos = 0;
+pt len = cfile.length();
 
 int skip_depth;
 int specialize_start;

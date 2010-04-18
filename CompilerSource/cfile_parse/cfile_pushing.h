@@ -42,8 +42,8 @@ extern stack<includings> included_files;
 struct cfnode
 {
   string scfile;
-  unsigned spos;
-  unsigned slen;
+  pt spos;
+  pt slen;
   cfnode();
   ~cfnode();
 };
@@ -53,7 +53,7 @@ struct cfnode
 
 extern stack<cfnode*> cfstack;
 void handle_macro_pop();
-unsigned int handle_macros(const string n);
+pt handle_macros(const string n);
 
 extern varray<string> include_directories;
 extern unsigned int include_directory_count;

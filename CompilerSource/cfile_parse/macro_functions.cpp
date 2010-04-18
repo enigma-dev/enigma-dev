@@ -42,7 +42,7 @@ string escaped_string(string x)
 
 string stripspace(string x)
 {
-  unsigned int i;
+  size_t i;
   for (i=0; is_useless(x[i]); i++);
   x.erase(0,i);
   return x;
@@ -50,7 +50,7 @@ string stripspace(string x)
 
 bool is_entirely_white(string x)
 {
-  for (unsigned i=0; i<x.length(); i++)
+  for (size_t i=0; i<x.length(); i++)
     if (!is_useless(x[i])) return 0;
   return 1;
 }
@@ -83,7 +83,7 @@ bool preprocess_separately(string &macs)
     }
     else if (is_letter(macs[i]))
     {
-      const size_t si = i;
+      const pt si = i;
       while (is_letterd(macs[++i]));
       string n = macs.substr(si,i-si);
       
@@ -125,7 +125,7 @@ bool preprocess_separately(string &macs)
       {
         if (stringify)
           return false;
-        unsigned ib = i;
+        pt ib = i;
         while (is_useless(macs[--ib])); ib++;
         i++;  while (is_useless(macs[++ib]));
         
@@ -170,7 +170,7 @@ bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr
   {
     if (i > numparams)
     { macrostr = "Expected closing parenthesis for macro function at this point: too many parameters"; return false; }
-    const unsigned spos = pos;
+    const pt spos = pos;
     while (is_useless(cfile[pos])) pos++;
     while ((lvl > 1 or (cfile[pos] != ',' or args_given == au_at)) and pos < len and lvl)
     {
@@ -202,11 +202,11 @@ bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr
   
   bool stringify = 0;
   
-  for (unsigned i = 0; i < macrostr.length(); ) //unload the array of values we created before into the macro's definiens
+  for (pt i = 0; i < macrostr.length(); ) //unload the array of values we created before into the macro's definiens
   {
     if (is_letter(macrostr[i]) and !is_digit(macrostr[i-1]))
     {
-      const unsigned si = i;
+      const pt si = i;
       
       i++; //Guaranteed letter here, so incrememnt
       while (i < macrostr.length() and is_letterd(macrostr[i])) i++;
@@ -236,7 +236,7 @@ bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr
     {
       if (macrostr[i+1] == '#')
       {
-        unsigned int end = i+2;
+        pt end = i+2;
         while (i > 0 and is_useless(macrostr[--i])); i++;
         while (end < macrostr.length() and is_useless(macrostr[end]))
           if (macrostr[end++] == '\\') end++;

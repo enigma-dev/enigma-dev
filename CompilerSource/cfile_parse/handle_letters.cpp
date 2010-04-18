@@ -81,7 +81,7 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
   return 1;
 }
 
-int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bool at_template_param)
+pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bool at_template_param)
 {
   switch (switch_hash(n))
   {
@@ -599,7 +599,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
           if (last_type == ext_retriever_var) { //typedef struct a {} a;
             last_identifier = last_type->name;
             last_named_phase = DEC_IDENTIFIER;
-            return unsigned(-1);
+            return pt(-1);
           }
           cferr = "Two types named in declaration: `"+ext_retriever_var->name+"' cannot be declared in this scope";
           return pos;
@@ -701,7 +701,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       last_named_phase = DEC_IDENTIFIER;
       last_type = ext_retriever_var;
       last_identifier = "~" + n;
-      return unsigned(-1);
+      return pt(-1);
     }
     else if ((last_named &~ LN_TYPEDEF) == LN_ENUM)
     {
@@ -710,7 +710,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
         last_type = ext_retriever_var;
         last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
         last_named_phase = DEC_FULL;
-        return unsigned(-1);
+        return pt(-1);
       }
     }
     else if ((last_named | LN_TYPEDEF) == (LN_OPERATOR | LN_TYPEDEF))
@@ -778,7 +778,7 @@ int handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,b
       last_named_phase = DEC_IDENTIFIER;
       last_type = builtin_type__int;
       last_identifier = n;
-      return unsigned(-1);
+      return pt(-1);
     }
   }
   if (last_named == LN_TYPEDEF) { //plain typedef, not typedef | declarator

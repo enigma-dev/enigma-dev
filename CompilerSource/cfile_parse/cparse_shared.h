@@ -56,7 +56,7 @@ extern string tostring(int val);
 
 extern string cfile;
 extern pt pos;
-extern unsigned len;
+extern pt len;
 
 extern unsigned id_would_err_at;
 

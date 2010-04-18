@@ -67,11 +67,11 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
     unsigned lvl = 0;
     bool hypothesize = false;
     externs *move_into = &global_scope;
-    for (unsigned i = 0; i<seg.length(); i++)
+    for (pt i = 0; i<seg.length(); i++)
     {
       if (!lvl and is_letter(seg[i]))
       {
-        const unsigned is = i;
+        const pt is = i;
         while (is_letterd(seg[++i]));
         string tn = seg.substr(is,i-- - is);
         
@@ -155,7 +155,7 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
 string temp_parse_list(externs* last,string specs,varray<externs*> *va = NULL)
 {
   string ns;
-  unsigned is = 0, ti = 0, cnt = 0, i;
+  pt is = 0, ti = 0, cnt = 0, i;
   for (i = 0; i<specs.length(); i++)
   {
     if (specs[i] == ',' and cnt == 0)

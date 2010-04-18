@@ -80,7 +80,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       if (synt[pos] == 'L') pos++;
       if (synt[pos] != 't')
       {
-        for (unsigned i = sp; i < pos; i++)
+        for (pt i = sp; i < pos; i++)
           synt[pos] = 'n'; //convert to regular identifier
         continue;
       }
@@ -114,7 +114,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       }
       
       string lid;
-      unsigned spos = pos;
+      pt spos = pos;
       bool has_init = false;
       
       string prefixes, suffixes;
@@ -178,7 +178,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         }
         if (synt[pos] == '[')
         {
-          const unsigned ssp = pos++;
+          const pt ssp = pos++;
           for (int cnt = 1; cnt > 0 and_safety; pos++)
             if (synt[pos] == '[') cnt++;
             else if (synt[pos] == ']') cnt--;
@@ -196,7 +196,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
     }
     if (synt[pos] == 'n')
     {
-      const unsigned spos = pos;
+      const pt spos = pos;
       while (synt[++pos] == 'n');
       if (synt[pos] != '(') // If it isn't a function (we assume it's nothing else)
       {

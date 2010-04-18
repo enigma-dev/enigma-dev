@@ -202,7 +202,7 @@ value evaluate_expression(string expr)
               rerrpos = pos;
               return 0;
             }
-            const unsigned spos = pos;
+            const pt spos = pos;
             while (is_letterd(exp[pos])) pos++;
             
             bool addthis = (macros.find(exp.substr(spos,pos-spos)) != macros.end());
@@ -339,7 +339,7 @@ value evaluate_expression(string expr)
                   }
                   if (!is_letter(exp[pos]))
                     break;
-                  const unsigned sp = pos;
+                  const pt sp = pos;
                   while (is_letterd(exp[++pos]));
                   n = exp.substr(sp, pos-sp);
                 }
@@ -564,8 +564,8 @@ value evaluate_expression(string expr)
        
        #else
           val=0;
-          unsigned int vl=str.length();
-          for (unsigned int i=0;i<vl;i++) { val<<=8; val+=str[i]; }
+          size_t vl=str.length();
+          for (size_t i=0;i<vl;i++) { val<<=8; val+=str[i]; }
        #endif
         setval=val;
         pos++;

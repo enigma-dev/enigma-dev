@@ -117,8 +117,8 @@ int establish_bearings()
   if (defs == "")
     return (cout << "Bailing: Error 2\n" , 1);
   
-  unsigned a = parse_cfile(defs);
-  if (a != unsigned(-1)) {
+  pt a = parse_cfile(defs);
+  if (a != pt(-1)) {
     cout << "Highly unlikely error. But stupid things can happen when working with files.\n\n";
     return (cout << "Bailing: Error 3\n" , 1);
   }

@@ -29,6 +29,8 @@
 #include <cstdio>
 using namespace std;
 
+typedef size_t pt;
+
 string tostring(int val)
 {
   char a[12];
@@ -39,7 +41,7 @@ string tostring(int val)
 string arraybounds_as_str(string str)
 {
   string ret;
-  for (unsigned int i=0;i<str.length();i++)
+  for (pt i=0;i<str.length();i++)
   {
     if (str[i]=='[') ret+="arrayb";
     else if (str[i]==')') ret+="eparenth";

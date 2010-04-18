@@ -300,7 +300,7 @@ pt handle_comments()
   if (cfile[pos]=='/')
   {
     while (cfile[pos] != '\r' and cfile[pos] != '\n' and (pos++)<len);
-    return unsigned(-2);
+    return pt(-2);
   }
   if (cfile[pos]=='*')
   {
@@ -315,8 +315,8 @@ pt handle_comments()
     }
     
     pos++;
-    return unsigned(-2);
+    return pt(-2);
   }
   pos--;
-  return unsigned(-1);
+  return pt(-1);
 }

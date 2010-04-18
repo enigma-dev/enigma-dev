@@ -60,7 +60,7 @@ int m_prog_loop_cfp();
 #endif
 
 extern void clear_ide_editables();
-extern void print_err_line_at(unsigned a);
+extern void print_err_line_at(pt a);
 #include "cfile_parse/cfile_pushing.h"
 
 extern int establish_bearings();
@@ -70,49 +70,49 @@ extern int cfile_parse_main();
 int main(int argc, char *argv[])
 {
   cparse_init();
-  
+
   if (establish_bearings()) {
     cout << "ERROR: Failed to locate the GCC";
     getchar(); return 1;
   }
-  
+
   string EGMmain = fc("./ENIGMAsystem/SHELL/SHELLmain.cpp");
   if (EGMmain == "") {
     cout << "ERROR: Failed to read main engine file\n";
     getchar(); return 1;
   }
-  
+
   ofstream wto("freezway.txt",ios_base::out);
     wto << "This is what ENIGMA read for SHELL: \n";
     wto << EGMmain;
   wto.close();
-  
+
   EGMmain += "\n\n";
   EGMmain += fc("./CompilerSource/cfile_parse/auxilary.h");
-  
+
   clock_t cs = clock();
-  unsigned a = parse_cfile(EGMmain);
+  pt a = parse_cfile(EGMmain);
   clock_t ce = clock();
-  
-  if (a != unsigned(-1)) {
+
+  if (a != pt(-1)) {
     cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
     print_err_line_at(a);
-    
+
     print_definition("__PTRDIFF_TYPE__");
     return 1;
   }
-  
+
   cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
   //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
-  
+
   parser_init();
   string pf = fc("./CompilerSource/cfile_parse/auxilary_gml.h");
-  
+
   a = syncheck::syntacheck(pf);
-  if (a != unsigned(-1))
+  if (a != pt(-1))
   {
     int line = 1, lp = 1;
-    for (unsigned i=0; i<a; i++,lp++) {
+    for (pt i=0; i<a; i++,lp++) {
       if (pf[i] =='\r')
         line++, lp = 0, i += pf[i+1] == '\n';
       else if (pf[i] == '\n') line++, lp = 0;
@@ -120,21 +120,21 @@ int main(int argc, char *argv[])
     cout << "Line " << line << ", position " << lp << " (absolute " << a << "): " << syncheck::error <<  endl;
     return 0;
   }
-  
+
   cout << "Syntax check completed with no error.\n";
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-  
+
   parsed_object par;
   parsed_event ev(&par);
   string b = parser_main(pf,&ev);
   cout << "\nParsed to:\n" << b;
   cout << "\n=======================\n\n";
-  
+
   cout << "Locals declared:\n";
   for (deciter i = par.locals.begin(); i != par.locals.end(); i++)
   {
     cout << "  " << (i->second.type != ""? i->second.type : "var") << " " << i->second.prefix << " " << i->first << " " << i->second.suffix << "\n";
   }
-  
+
   return 0;
 }

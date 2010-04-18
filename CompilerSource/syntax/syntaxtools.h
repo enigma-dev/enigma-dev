@@ -77,21 +77,21 @@ inline bool is_statement(string name)
 }
 
 //this code assumes we are at a variable name that is not an operator
-inline int statement_completed(int lt,int pos=0) 
+inline int statement_completed(int lt,int pos=0)
 {
   if (lt==LN_CLOSING_SYMBOL)
     return 1;
-  
+
   if (lt==LN_OPERATOR)
     return 0;
-  
+
   if (lt==LN_VALUE ||  lt==LN_DIGIT)
     return 1;
-  
+
   if (assop[level])
   if (lt==LN_VARNAME)
     return 1;
-  
+
   return 0;
 }
 
@@ -119,14 +119,14 @@ inline bool check_level_accessible(int leveltype)
   {
     if (levelt[chklvl] == leveltype)
       return 1;
-    
+
     if (levelt[chklvl] == LEVELTYPE_DO)
     { return 0; }
     if (levelt[chklvl] == LEVELTYPE_SWITCH_BLOCK)
     { return 0; }
     if (levelt[chklvl] == LEVELTYPE_BRACE)
     { return 0; }
-    
+
     chklvl--;
   }
   return 0;
@@ -139,10 +139,10 @@ inline bool check_level_breakable()
     cout << "ENUM " << levelt[chklvl] << " " << LEVELTYPE_SWITCH_BLOCK << endl;
     if (levelt[chklvl]==LEVELTYPE_LOOP)
       return 1;
-    
+
     if (levelt[chklvl]==LEVELTYPE_DO or levelt[chklvl]==LEVELTYPE_SWITCH_BLOCK)
       return 1;
-    
+
     chklvl--;
   }
   return 0;
@@ -154,14 +154,14 @@ inline int get_closest_level_pad(int leveltype)
   {
     if (levelt[chklvl]==leveltype)
       return statement_pad[chklvl];
-    
+
     if (levelt[chklvl]==LEVELTYPE_DO)
     { return 0; }
     if (levelt[chklvl]==LEVELTYPE_SWITCH_BLOCK)
     { return 0; }
     if (levelt[chklvl]==LEVELTYPE_BRACE)
     { return 0; }
-    
+
     chklvl--;
   }
   return 0;
@@ -177,18 +177,18 @@ enum {
   PAD_STRUCT_FULL
 };
 
-inline unsigned handle_if_statement(string& code,string name,pt& pos)
+inline pt handle_if_statement(string& code,string name,pt& pos)
 {
-  unsigned ret = unsigned(-1);
+  pt ret = pt(-1);
   if (lastnamed[level]==LN_OPERATOR)
   { error="Expected arithmetic expression before statement"; ret = pos; }
-  
+
   if ((statement_pad[level]>0 and levelt[level]==LEVELTYPE_GENERAL_STATEMENT)
   or  (statement_pad[level]>1 and levelt[level]==LEVELTYPE_SWITCH)
   or  (statement_pad[level]>2 and levelt[level]==LEVELTYPE_IF)
   or  (statement_pad[level]>2 and levelt[level]==LEVELTYPE_DO))
   { error="Second statement given in parameters of first"; ret = pos; }
-  
+
   switch (name[0])
   {
     case 'b':
@@ -226,11 +226,11 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       if (name == "with")    goto label_with;
   }
   error = "";
-  return unsigned(-2);
-  
-  
+  return pt(-2);
+
+
   label_if:
-      level++; 
+      level++;
       lastnamed[level] = LN_OPERATOR;
       assop[level] = 1;
       levelt[level] = LEVELTYPE_IF;
@@ -239,7 +239,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
   label_then:
     return ret;
   label_do:
-      level++; 
+      level++;
       lastnamed[level]=LN_NOTHING;
       assop[level] = 0;
       levelt[level]=LEVELTYPE_DO;
@@ -248,56 +248,56 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
   label_else:
       if (level<=0)
       { error="Unexpected `else' statement at this point"; return pos; }
-      
+
       if (lower_to_level(LEVELTYPE_IF,"`else' statement") != -1)
         return pos;
-      
+
       if (statement_pad[level]!=1)
       { error="Statement `else' expected two expressions after `if' statement, given "+tostring(3-statement_pad[level]); return pos; }
-      
+
       levelt[level] = LEVELTYPE_ELSE;
       statement_pad[level] = 1;
       lastnamed[level]=LN_NOTHING; //end of if level, start of else level
     return ret;
-  
+
   label_while:
       if (check_level_accessible(LEVELTYPE_DO) and get_closest_level_pad(LEVELTYPE_DO) == 1)
         goto label_until;
     goto label_loop;
-  
+
   label_until:
       if (level <= 0)
       { error="Unexpected `until' statement at this point"; return pos; }
-      
+
       if (lower_to_level(LEVELTYPE_DO,"`until' statement") != -1)
         return pos;
-      
+
       if (statement_pad[level] != 1)
       { error="Statement `until' expected one expression after `do' statement, given "+tostring(2-statement_pad[level]); return pos; }
-      
+
       //level--; level++;
       levelt[level]=LEVELTYPE_GENERAL_STATEMENT;
       statement_pad[level]=1;
       lastnamed[level]=LN_OPERATOR; //end of if level, start of else level
       assop[level]=1;
     return ret;
-  
+
   label_switch:
-      level++; 
+      level++;
       lastnamed[level] = LN_OPERATOR;
       assop[level] = 1;
       levelt[level] = LEVELTYPE_SWITCH;
       statement_pad[level] = 2;
     return ret;
-  
+
   label_for:
-      level++; 
+      level++;
       lastnamed[level] = LN_FOR;
       assop[level] = 0;
       levelt[level] = LEVELTYPE_FOR_PARAMETERS;
       statement_pad[level] = 3;
     return ret;
-    
+
   label_default:
       if (levelt[level] != LEVELTYPE_SWITCH_BLOCK)
       { error="Statement `default' expected only in switch statement"; return pos; }
@@ -305,22 +305,22 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       if (code[pos] == ':') pos++;
       lastnamed[level] = LN_NOTHING;
     return ret;
-  
-  label_break: 
+
+  label_break:
   label_continue:
       if (!check_level_breakable())
       { error = "Cannot break/continue from here: not in a loop"; return pos; }
   label_exit:
       if (levelt[level] == LEVELTYPE_FOR_PARAMETERS)
       { error="Unexpected `" + name + "' statement in `for' parameters"; return pos; }
-      
+
       lastnamed[level] = LN_CLOSING_SYMBOL;
       assop[level]=1;
     return ret;
-  
+
   label_catch:
     goto label_general;
-    
+
   label_begin:
     {
       bool isbr=levelt[level]==LEVELTYPE_SWITCH;
@@ -335,7 +335,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       assop[level]=0;
     }
     return ret;
-  
+
   label_end:
       if (level<=0)
       { error="Unexpected closing brace at this point"; return pos; }
@@ -354,7 +354,7 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
       statement_pad[level]=-1;
       lastnamed[level]=LN_CLOSING_SYMBOL;
     return ret;
-  
+
   label_case:
     {
       int a=lower_to_level(LEVELTYPE_SWITCH_BLOCK,"`case' statement");
@@ -363,44 +363,44 @@ inline unsigned handle_if_statement(string& code,string name,pt& pos)
         error="Statement `case' expected only in switch statement";
         return pos;
       }
-      
-      level++; 
+
+      level++;
       levelt[level] = LEVELTYPE_CASE;
       statement_pad[level] = 1;
-      
+
       assop[level] = 1;
       lastnamed[level] = LN_OPERATOR;
     }
     return ret;
-    
+
   label_general:
-      level++; 
+      level++;
       levelt[level]=LEVELTYPE_GENERAL_STATEMENT;
       statement_pad[level]=1;
-      
+
       assop[level] = 1;
       lastnamed[level]=LN_OPERATOR;
     return ret;
-    
+
   label_struct:
-      level++; 
+      level++;
       levelt[level]=LEVELTYPE_STRUCT;
       statement_pad[level] = PAD_STRUCT_NOTHING;
-      
+
       assop[level] = 1;
       lastnamed[level]=LN_OPERATOR;
     return ret;
-  
+
   label_with:
   label_loop:
-      level++; 
+      level++;
       levelt[level] = LEVELTYPE_LOOP;
       statement_pad[level] = 2; //Take a parameter, then an instruction to loop.
-      
+
       assop[level] = 1;
       lastnamed[level]=LN_OPERATOR;
     return ret;
-  
+
   return ret;
 }
 
