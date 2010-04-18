@@ -39,18 +39,22 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JToolBar;
 
 import org.enigma.EnigmaSettingsFrame.EnigmaSettings;
 import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
+import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.impl.TextAreaFocusTraversalPolicy;
@@ -59,6 +63,7 @@ import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
+import org.lateralgm.subframes.CodeFrame;
 import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
 import org.lateralgm.subframes.SubframeInformer.SubframeListener;
@@ -491,8 +496,31 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public void subframeAppeared(MDIFrame source)
 		{
-		if (!(source instanceof ScriptFrame)) return;
-		final ScriptFrame sf = (ScriptFrame) source;
+		JToolBar tool;
+		final GMLTextArea code;
+		final JPanel status;
+		if (source instanceof ScriptFrame)
+			{
+			ScriptFrame sf = (ScriptFrame) source;
+			tool = sf.tool;
+			code = sf.code;
+			status = sf.status;
+			}
+		else if (source instanceof CodeFrame)
+			{
+			CodeFrame cf = (CodeFrame) source;
+			tool = cf.tool;
+			code = cf.gta;
+			status = cf.status;
+			}
+		else
+			return;
+
+		status.add(new JLabel(" | ")); //$NON-NLS-1$
+		//visible divider       ^   since JSeparator isn't visible and takes up the whole thing...
+		final JLabel errors = new JLabel("No errors");
+		status.add(errors);
+
 		JButton syntaxCheck;
 		ImageIcon i = findIcon("syntax.png");
 		if (i == null)
@@ -506,19 +534,22 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 				public void actionPerformed(ActionEvent e)
 					{
-					SyntaxError se = checkSyntax(sf.code.getText());
+					SyntaxError se = checkSyntax(code.getText());
 					if (se == null) return;
-					int max = sf.code.getDocumentLength() - 1;
+					int max = code.getDocumentLength() - 1;
 					if (se.absoluteIndex > max) se.absoluteIndex = max;
 					if (se.absoluteIndex != -1) //-1 = no error
 						{
-						sf.code.setSelectionStart(se.absoluteIndex);
-						sf.code.setSelectionEnd(se.absoluteIndex + 1);
-						//TODO: Statusbar with error message
+						code.setCaretPosition(se.absoluteIndex);
+						code.setSelectionStart(se.absoluteIndex);
+						code.setSelectionEnd(se.absoluteIndex + 1);
+						errors.setText(se.line + ":" + se.position + "::" + se.errorString);
 						}
+					else errors.setText("No errors");
+					code.requestFocus();
 					}
 			});
-		sf.tool.add(syntaxCheck,5);
+		tool.add(syntaxCheck,5);
 		}
 
 	@Override
