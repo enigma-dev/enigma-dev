@@ -195,7 +195,8 @@ void ENIGMA_events(void)
 	enigma::mousewheel=0;
 	window_set_caption(room_caption);
 	
-	for (int i=0; i<enigma::cleancount; i++){
+	for (int i=0; i<enigma::cleancount; i++)
+	{
 		delete enigma::instance_list[enigma::cleanups[i]];
 		enigma::instance_list.erase(enigma::cleanups[i]);
 		instance_count--;

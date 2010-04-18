@@ -101,7 +101,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
                   return pos;
                 }
                 last_named_phase = TMP_TYPENAME;
-                return -1;
+                return pt(-1);
               }
               else if (last_named_phase != 0 and refstack.currentsymbol() != '(') //In either of these cases, just ignore this token... It's a C thing
               {
@@ -117,7 +117,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
               last_named |= LN_STRUCT;
           }
           else last_named = LN_STRUCT;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_ENUM: if (n=="enum")
@@ -135,7 +135,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           else
             last_named = LN_ENUM;
           last_named_phase = EN_NOTHING;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_TYPEDEF: if (n=="typedef")
@@ -147,7 +147,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             return pos;
           }
           last_named = LN_TYPEDEF;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_EXTERN: if (n=="extern")
@@ -167,12 +167,12 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
               cferr = "Stray `extern' token at this point, not expected after DECID_" + tostring(last_named_phase);
               return pos;
             }
-            return -1;
+            return pt(-1);
           }
           last_named = LN_DECLARATOR;
           last_named_phase = 0;
           flag_extern = 1;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_UNION: if (n=="union")
@@ -191,7 +191,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             }
           }
           else last_named = LN_UNION;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_NAMESPACE: if (n=="namespace")
@@ -208,12 +208,12 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           }
           else
             last_named = LN_NAMESPACE; //namespace...
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_EXPLICIT: if (n=="explicit")
         { //This is for GCC to know, and us to just be okay with.
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_OPERATOR: if (n=="operator")
@@ -229,7 +229,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             last_identifier = "";
             tpc = ihc = 0;
             
-            return -1;
+            return pt(-1);
           }
           if (last_named != LN_DECLARATOR or last_named_phase < 1)
           {
@@ -237,12 +237,12 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             last_named = LN_OPERATOR;
             last_named_phase = OP_CAST;
             last_identifier = "operator";
-            return -1;
+            return pt(-1);
           }
           last_named = LN_OPERATOR;
           last_named_phase = 0;
           //cout << last_named << " = " << last_named_phase << "\r\n";
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_NEW: if (n=="new")
@@ -259,7 +259,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           }
           last_named_phase = OP_NEWORDELETE;
           last_identifier = "operator new";
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_DELETE: if (n=="delete")
@@ -272,7 +272,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           }
           last_named_phase = OP_NEWORDELETE;
           last_identifier = "operator delete";
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_TEMPLATE: if (n=="template")
@@ -285,18 +285,18 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
               skipto2 = ';';
               skippast = false; //; will clear everything anyway
               last_named = LN_NOTHING;
-              return -1;
+              return pt(-1);
             }
             if ((((last_named & ~LN_TYPEDEF) == LN_TYPENAME) or (last_named == LN_TYPENAME_P)) and last_named_phase == TN_NOTHING) { // typename tp::template
               last_named_phase = TN_TEMPLATE;
-              return -1; 
+              return pt(-1); 
             }
             cferr = "Unexpected `template' token: "+tostring(last_named);
             return pos;
           }
           last_named = LN_TEMPLATE;
           last_named_phase = 0;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_TYPENAME: if (n=="typename")
@@ -309,35 +309,35 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             {
               last_named |= LN_TYPENAME;
               last_named_phase = TN_NOTHING;
-              return -1;
+              return pt(-1);
             }
             if (((last_named & ~LN_TYPEDEF) == LN_DECLARATOR) and (last_named_phase == DEC_IDENTIFIER) and refstack.is_function())
             {
               last_named = LN_TYPENAME_P; //This relies on a truth I don't plan to document elsewhere:
               last_named_phase = TN_NOTHING;  //You can't typedef a usable function.
-              return -1;
+              return pt(-1);
             }
             cferr = "Unexpected `typename' token";
             return pos;
           }
           last_named_phase = TMP_TYPENAME;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_INLINE: case SH___INLINE__: if (n == "inline" or n == "__inline__")
-        return -1;
+        return pt(-1);
       break;
     case SH_THROW: if (n == "throw")
         {
           if (last_named != LN_DECLARATOR or (refstack.currentsymbol() != '(' and refstack.currentsymbol() != ')'))
           { cferr = "Unexpected `throw' token"; return pos; }
           last_named_phase = DEC_THROW;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_CONST: case SH___CONST:
         if (n=="const" or n=="__const") //or for that matter, if n == ____const__
-          return -1; //Put something here if const ever fucking matters
+          return pt(-1); //Put something here if const ever fucking matters
       break;
     case SH_USING: if (n=="using")
         {
@@ -347,7 +347,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           }
           last_named = LN_USING;
           last_named_phase = USE_NOTHING;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_FRIEND: if (n=="friend")
@@ -359,7 +359,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           skipto = ';';
           skipto2 = 0;
           skippast = true;
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_PRIVATE: case SH_PUBLIC: case SH_PROTECTED: 
@@ -386,14 +386,14 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             last_named = LN_LABEL;
             //last_named_phase == LBL_
           }
-          return -1;
+          return pt(-1);
         }
       break;
     case SH_VIRTUAL: if (n=="virtual")
-        return -1;
+        return pt(-1);
       break;
     case SH_MUTABLE: if (n=="mutable")
-        return -1;
+        return pt(-1);
       break;
   }
   
@@ -409,7 +409,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             if (cscope->tempargs[i]->name == n)
             {
               immediate_scope = cscope->tempargs[i];
-              return -1;
+              return pt(-1);
             }
       
       //This happens so rarely as to barely justify its existence
@@ -421,13 +421,13 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           ext_retriever_var = ext_retriever_var->type;
           if (ext_retriever_var->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT | EXTFLAG_HYPOTHETICAL)) {
             immediate_scope = ext_retriever_var;
-            return -1;
+            return pt(-1);
           }
           //If it's a template parameter
           if (ext_retriever_var->flags & EXTFLAG_TEMPPARAM){
             immediate_scope = ext_retriever_var;
             immediate_scope->flags |= EXTFLAG_HYPOTHETICAL;
-            return -1;
+            return pt(-1);
           }
         }
       }
@@ -441,7 +441,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
     immediate_scope = ext_retriever_var;
     if (immediate_scope->flags & EXTFLAG_TEMPPARAM)
       immediate_scope->flags |= EXTFLAG_HYPOTHETICAL;
-    return -1;
+    return pt(-1);
   }
   
   //Next, check if it's a type name.
@@ -460,7 +460,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         last_named_phase = DEC_LONG;
       else
         last_named_phase = tflag_atomic(n) ? DEC_ATOMIC_FLAG : DEC_GENERAL_FLAG; //See section on bindingly atomic flags
-      return -1;
+      return pt(-1);
     }
     
     if ((last_named | LN_TYPEDEF) == (LN_DECLARATOR | LN_TYPEDEF) 
@@ -498,13 +498,13 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             return pos;
           }
           fparam_named = 1;
-          return -1;
+          return pt(-1);
         }
       }
       else if ((last_named & ~LN_TYPEDEF) == LN_TEMPLATE) //template<int> can be used in specialization
       {
         last_named_phase = (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED)?TMP_DEFAULTED:TMP_SIMPLE;
-        return -1;
+        return pt(-1);
       }
       else
       {
@@ -512,7 +512,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         return pos;
       }
 
-      return -1;
+      return pt(-1);
     }
     if (last_named == LN_TYPEDEF) //if typedef is single, phase==0
     {
@@ -521,13 +521,13 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         last_named_phase = DEC_LONG;
       else
         last_named_phase = tflag_atomic(n) ? DEC_ATOMIC_FLAG : DEC_GENERAL_FLAG;
-      return -1;
+      return pt(-1);
     }
     
     if ((last_named | LN_TYPEDEF) == (LN_TEMPLATE | LN_TYPEDEF) and (last_named_phase == TMP_EQUALS or last_named_phase == TMP_DEFAULTED))
     {
       last_named_phase = TMP_DEFAULTED;
-      return -1;
+      return pt(-1);
     }
     
     if ((last_named | LN_TYPEDEF) == (LN_OPERATOR | LN_TYPEDEF))
@@ -538,7 +538,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
       }
       last_identifier += " " + n;
       last_type = builtin_type__int;
-      return -1;
+      return pt(-1);
     }
     
     cferr="Unexpected declarator at this point...";
@@ -555,7 +555,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
       last_type = ext_retriever_var;
       last_named |= LN_DECLARATOR;
       last_named_phase = DEC_FULL;
-      return -1;
+      return pt(-1);
     }
     
     //If we're declaring a variable by type
@@ -579,7 +579,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         }
         else argument_type = ext_retriever_var;
         fparam_named = 1;
-        return -1;
+        return pt(-1);
       } 
       //If error, or if it was declared in this scope
       else if (ext_retriever_var == NULL) {
@@ -591,7 +591,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         if (ext_retriever_var->flags & EXTFLAG_TYPEDEF and last_named & LN_TYPEDEF) { //typedef some_typedefd_type some_typedefd_type;
           last_named = LN_NOTHING;
           last_named_phase = 0;
-          return -1;
+          return pt(-1);
         }
         
         if (!at_template_param or !(ext_retriever_var->flags & (EXTFLAG_STRUCT | EXTFLAG_CLASS)))
@@ -619,7 +619,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         last_named_phase = 0;
         last_identifier = "";
         
-        return -1;
+        return pt(-1);
       }
       //If we made it this far, we are redeclaring something in this scope that is different in higher scopes
       //These next segments of elses are skipped, and the variable is treated like new.
@@ -646,7 +646,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         }
         inheritance_types[ihc++] = ihdata(ext_retriever_var,last_named_phase == SP_PUBLIC ? ihdata::s_public : last_named_phase == SP_PRIVATE ? ihdata::s_private : ihdata::s_protected);
         last_named_phase = SP_PARENT_NAMED;
-        return -1;
+        return pt(-1);
       }
       //This shouldn't really happen
       if (ext_retriever_var == NULL) {
@@ -660,7 +660,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
         last_named_phase = DEC_FULL;
         last_type = ext_retriever_var;
-        return -1;
+        return pt(-1);
       }
       //Past this point, the type will be redeclared in this scope.
     }
@@ -671,13 +671,13 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
       {
         last_named_phase = TMP_DEFAULTED;
         last_type = ext_retriever_var;
-        return -1;
+        return pt(-1);
       }
       else if (last_named_phase == TMP_PSTART) //Plain old type, to be passed a constant expression
       {
         last_named_phase = TMP_SIMPLE;
         last_type = ext_retriever_var;
-        return -1;
+        return pt(-1);
       }
       else if (last_named_phase != TMP_TYPENAME) { //template <typename string> is fine
         cferr = "Unexpected type in template parameters: " + tostring(last_named_phase);
@@ -693,7 +693,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
       }
       last_named_phase = USE_SINGLE_IDENTIFIER;
       last_type = ext_retriever_var;
-      return -1;
+      return pt(-1);
     }
     else if (last_named == LN_DESTRUCTOR and (ext_retriever_var->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT)))
     {
@@ -724,7 +724,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         ttu = ttu->type;
       last_identifier += " " + strace(ttu);
       last_type = ttu;
-      return -1;
+      return pt(-1);
     }
     else if ((last_named & ~LN_TYPEDEF) == LN_TYPENAME or last_named == LN_TYPENAME_P)
     {
@@ -734,7 +734,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         //last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); //FIXME: fixme
         //last_named_phase = last_named == LN_TYPENAME_P ? DEC_IDENTIFIER : DEC_FULL;
         last_named_phase = last_named_phase == TN_NOTHING ? TN_GIVEN : TN_GIVEN_TEMP;
-        return -1;
+        return pt(-1);
       }
     }
     //Not declaring by type or giving default template value
@@ -766,7 +766,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           last_identifier = ext_retriever_var->name;
           last_named = LN_DECLARATOR;
           last_named_phase = DEC_IDENTIFIER;
-          return -1;
+          return pt(-1);
         }
       }
       cferr = "Expected type name or keyword before identifier";
@@ -799,7 +799,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             return pos;
           }
           fparam_named = 1;
-          return -1;
+          return pt(-1);
         }
         last_named_phase = DEC_IDENTIFIER;
       break;
@@ -830,7 +830,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           if (~last_named & LN_TYPEDEF) {
             cferr="Expected '{' or ',' before identifier";
             return pos;
-          } return -1;
+          } return pt(-1);
         }
         
         if (last_named_phase == EN_CONST_IDENTIFIER) {
@@ -907,7 +907,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           {
             last_type->flags &= ~EXTFLAG_PENDING_TYPEDEF;
             last_type->flags |= EXTFLAG_TYPENAME | EXTFLAG_TYPEDEF | EXTFLAG_HYPOTHETICAL | EXTFLAG_STRUCT;
-            return -1;
+            return pt(-1);
           }
           return pos;
         }
@@ -921,7 +921,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           {
             last_type->flags &= ~EXTFLAG_PENDING_TYPEDEF;
             last_type->flags |= EXTFLAG_TYPENAME | EXTFLAG_TYPEDEF | EXTFLAG_HYPOTHETICAL | EXTFLAG_STRUCT;
-            return -1;
+            return pt(-1);
           }
           return pos;
         }
@@ -951,5 +951,5 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
   }
 
   last_identifier = n;
-  return -1;
+  return pt(-1);
 }
