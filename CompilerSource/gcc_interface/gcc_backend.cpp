@@ -57,6 +57,8 @@ bool init_load_successful = false;
 varray<string> include_directories;
 unsigned int include_directory_count;
 
+string GCC_location, MAKE_location;
+
 //Find us the GCC, get info about it and ourself
 int establish_bearings()
 {
@@ -72,27 +74,44 @@ int establish_bearings()
   cout << "Probing for GCC..." << endl;
   
   // See if we've been down this road before
-  string GCC_location = fc("gcc_adhoc.txt");
+  string bin_path = fc("gcc_adhoc.txt");
   
-  if (GCC_location != "") //We have in fact never been down this road before...
-    got_success = !system((GCC_location + "cpp -dM -x c++ -E  blank.txt > defines.txt").c_str());
-  
+  if (bin_path != "") //We have in fact been down this road before...
+  {
+    string cm = "\"" + bin_path + "cpp\" -dM -x c++ -E  blank.txt > defines.txt";
+    got_success = !system(cm.c_str());
+    if (!got_success)
+      cout << "Failed to load GCC from Ad-Hoc location:\n" << bin_path << endl;
+    else
+    {
+      GCC_location = "\"" + bin_path + "gcc\"";
+      MAKE_location = "\"" + bin_path + "gcc\"";
+    }
+  }
   if (!got_success)
-    got_success = !system(((GCC_location = "") + "cpp -dM -x c++ -E  blank.txt > defines.txt").c_str());
+  {
+    got_success = !system(((bin_path = "") + "cpp -dM -x c++ -E  blank.txt > defines.txt").c_str());
   
-  if (!got_success)
-    got_success = !system(((GCC_location = "C:/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
-  
-  if (!got_success)
-    got_success = !system(((GCC_location = "./ENIGMAsystem/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
+    if (!got_success)
+      got_success = !system(((bin_path = "/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
     
-  if (!got_success)
-    got_success = !system(((GCC_location = "./ENIGMAsystem/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
+    if (!got_success)
+      got_success = !system(((bin_path = "C:/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
+    
+    if (!got_success)
+      got_success = !system(((bin_path = "./ENIGMAsystem/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
+      
+    if (!got_success)
+      got_success = !system(((bin_path = "./ENIGMAsystem/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
+    
+    if (!got_success)
+      return (cout << "Bailing: Error 1\n" , 1);
+    
+    GCC_location = bin_path + "gcc";
+    MAKE_location = bin_path + "make";
+  }
   
-  if (!got_success)
-    return (cout << "Bailing: Error 1\n" , 1);
-  
-  cout << "GCC located. Path: `" << GCC_location << '\'' << endl;
+  cout << "GCC located. Path: `" << bin_path << '\'' << endl;
   
   defs = fc("defines.txt");
   if (defs == "")
@@ -110,7 +129,7 @@ int establish_bearings()
   
   //Read the search dirs
   fclose(fopen("blank.txt","wb"));
-  got_success = !system((GCC_location + "gcc -E -x c++ -v blank.txt 2> searchdirs.txt").c_str()); //For some reason, the info we want is written to stderr
+  got_success = !system((GCC_location + " -E -x c++ -v blank.txt 2> searchdirs.txt").c_str()); //For some reason, the info we want is written to stderr
   if (!got_success) {
     cout << "Failed to read search directories. Error 4.\n";
     return 4;

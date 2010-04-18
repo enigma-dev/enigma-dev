@@ -39,7 +39,7 @@ namespace enigma
     char exename[1025];
     windowsystem_write_exename(exename);
     FILE* exe=fopen(exename,"rb");
-    if(!exe) {
+    if (!exe) {
       show_error("Resource load fail: exe unopenable",0);
       return;
     }
@@ -47,7 +47,7 @@ namespace enigma
     fseek(exe,-8,SEEK_END);
     char str_quad[4];
     fread(str_quad,1,4,exe);
-    if(str_quad[0]=='s'&&str_quad[1]=='p'&&str_quad[2]=='r'&&str_quad[3]=='n') {
+    if (str_quad[0] != 's' or str_quad[1] != 'p' or str_quad[2] != 'r' or str_quad[3] != 'n') {
       printf("No resource data in exe\n");
       return;
     }
@@ -63,7 +63,7 @@ namespace enigma
     
     int sprcount;
     fread(&sprcount,4,1,exe);
-    for(int i=0;i<sprcount;i++)
+    for (int i=0;i<sprcount;i++)
     {
       fread(&sprid,4,1,exe);
       fread(&width,4,1,exe);
@@ -74,7 +74,7 @@ namespace enigma
       
       int subimages;
       fread(&subimages,4,1,exe);
-      for(int ii=0;ii<subimages;ii++) 
+      for (int ii=0;ii<subimages;ii++) 
       {
         unsigned char transparent[4];
         fread(transparent,1,4,exe);
@@ -83,7 +83,7 @@ namespace enigma
         unsigned int size;
         fread(&size,4,1,exe);
         unsigned char* cpixels=new unsigned char[size+1];
-        if(!cpixels)
+        if (!cpixels)
         {
           #if SHOWERRORS
             show_error("Failed to load sprite: Cannot allocate enough memory "+string(unpacked),0);
@@ -91,7 +91,7 @@ namespace enigma
           break;
         }
         unsigned int sz2=fread(cpixels,1,size,exe);
-        if(size!=sz2)
+        if (size!=sz2)
         {
           #if SHOWERRORS
             show_error("Failed to load sprite: Data is truncated before exe end. Read "+string(sz2)+" out of expected "+string(size),0);
@@ -99,7 +99,7 @@ namespace enigma
           goto break2;
         }
         unsigned char* pixels=new unsigned char[unpacked+1];
-        if(zlib_decompress(cpixels,size,unpacked,pixels)!=width*height*3)
+        if (zlib_decompress(cpixels,size,unpacked,pixels)!=width*height*3)
         {
           #if SHOWERRORS
             show_error("Sprite load error: Sprite does not match expected size",0);
@@ -117,7 +117,7 @@ namespace enigma
         delete[] pixels;
         fread(&nullhere,1,4,exe);
         
-        if(nullhere)
+        if (nullhere)
         {
           #if SHOWERRORS
             show_error("Sprite load error: Null terminator expected",0);
