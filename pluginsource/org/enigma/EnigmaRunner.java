@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008, 2009 IsmAvatar <IsmAvatar@gmail.com>
+ * Copyright (C) 2008, 2009, 2010 IsmAvatar <IsmAvatar@gmail.com>
  * 
  * This file is part of Enigma Plugin.
  * 
@@ -63,6 +63,7 @@ import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
+import org.lateralgm.subframes.ActionFrame;
 import org.lateralgm.subframes.CodeFrame;
 import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
@@ -510,8 +511,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 			CodeFrame cf = (CodeFrame) source;
 			tool = cf.tool;
-			code = cf.gta;
+			code = cf.code;
 			status = cf.status;
+			}
+		else if (source instanceof ActionFrame)
+			{
+			ActionFrame af = (ActionFrame) source;
+			tool = af.tool;
+			code = af.code;
+			status = af.status;
 			}
 		else
 			return;
@@ -545,7 +553,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						code.setSelectionEnd(se.absoluteIndex + 1);
 						errors.setText(se.line + ":" + se.position + "::" + se.errorString);
 						}
-					else errors.setText("No errors");
+					else
+						errors.setText("No errors");
 					code.requestFocus();
 					}
 			});
