@@ -32,6 +32,8 @@
 using namespace std;
 #include "externs.h"
 
+#define NAME__USING_SCOPE "<using>"
+
 extern externs* builtin_type__int;
 
 bool externs::is_function()
@@ -56,24 +58,51 @@ void externs::parameter_unify(rf_stack& x)
   refstack.parameter_count_set(nn,nx);
 }
 
-externs::externs()
+#ifdef ENIGMA_PARSERS_DEBUG
+  int ext_count;
+  map<externs*, int> bigmap;
+  #define ecpp ext_count++; if (!(ext_count % 100)) cout << "Number of externs: " << ext_count << endl; bigmap[this] = 1;
+  #define ecmm ext_count--; if (!(ext_count % 100)) cout << "Number of externs: " << ext_count << endl; bigmap.erase(this);
+#else
+  #define ecpp
+  #define ecmm
+#endif
+
+externs::externs(): flags(0), name(), type(NULL), parent(NULL), value_of(0)
 {
-  type = NULL;
-  parent = NULL;
+  ecpp;
 }
-externs::externs(string n,externs* p,unsigned int f)
+externs::externs(string n,externs* p,unsigned int f): flags(f), name(n), type(NULL), parent(p), value_of(0)
 {
-  name = n;
-  type = NULL;
-  parent = p;
-  flags = f;
+  ecpp;
 }
-externs::externs(string n,externs* t,externs* p,unsigned int f)
+externs::externs(string n,externs* t,externs* p,unsigned int f): flags(f), name(n), type(t), parent(p), value_of(0)
 {
-  name = n;
-  type = NULL;
-  parent = p;
-  flags = f;
+  ecpp;
+}
+
+bool externs::is_using_scope()
+{
+  return name == NAME__USING_SCOPE;
+}
+
+void externs::clear_all()
+{
+  if (!is_using_scope())
+  {
+    for (extiter i = members.begin(); i != members.end(); i++)
+    {
+      i->second->clear_all();
+      delete i->second;
+    }
+  }
+  members.clear();
+}
+
+externs::~externs()
+{
+  clear_all();
+  ecmm;
 }
 
 macro_type::operator string() { return val; }
@@ -89,11 +118,11 @@ void macro_type::addarg(string x) { args[argc++] = x; }
 bool macro_type::check_recurse_danger(string n)
 {
   register bool dgr = 0;
-  for (pt i = 0; i < val.length(); i++)
+  for (unsigned i = 0; i < val.length(); i++)
   {
     if (is_letter(val[i]))
     {
-      const pt si = i;
+      const unsigned si = i;
       while (is_letterd(val[i])) i++;
       if (val.substr(si,i-si) == n)
       { dgr = 1; break; }
@@ -124,13 +153,13 @@ extiter scope_find_member(string name)
 
 externs* scope_get_using(externs* scope)
 {
-  extiter u = scope->members.find("<using>");
+  extiter u = scope->members.find(NAME__USING_SCOPE);
   if (u != scope->members.end())
     return u->second;
   
   externs* rv = new externs;
-  scope->members["<using>"] = rv;
-  rv->name = "<using>";
+  scope->members[NAME__USING_SCOPE] = rv;
+  rv->name = NAME__USING_SCOPE;
   rv->flags = EXTFLAG_NAMESPACE;
   return rv;
 }
@@ -157,7 +186,7 @@ externs* temp_get_specializations_ie(externs* scope)
 
 externs* scope_get_using_ie(externs* scope)
 {
-  extiter u = scope->members.find("<using>");
+  extiter u = scope->members.find(NAME__USING_SCOPE);
   if (u != scope->members.end())
     return u->second;
   return NULL;
@@ -306,7 +335,7 @@ bool find_in_specializations(externs* inscope,string name, unsigned flags)
 extern string cferr;
   #include "../cfile_parse/cparse_shared.h"
   #include "../cfile_parse/cfile_parse_constants.h"
-void print_err_line_at(pt a = pos);
+void print_err_line_at(unsigned a = pos);
 bool find_extname(string name,unsigned int flags,bool expect_find)
 {
   //If we've been given a qualified id, check in the path or give up

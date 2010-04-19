@@ -25,18 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-/**Primitive functions*********************************************************\
-
-pr_pointlist, pr_linelist, pr_linestrip, pr_trianglelist, pr_trianglestrip,
-pr_trianglefan, pr_lineloop, pr_quadlist, pr_quadstrip, pr_polygon
-
-int draw_primitive_begin(double kind)
-int draw_vertex(double x, double y)
-int draw_vertex_color(double x, double y, double color, double alpha)
-int draw_primitive_end()
-
-\******************************************************************************/
-
 #include <GL/gl.h>
 #if PRIMBUFFER
 GLenum __primitivetype[PRIMDEPTH2];
@@ -96,7 +84,7 @@ int draw_vertex(double x, double y){
 	#endif
 	return 0;
 }
-int draw_vertex_color(double x, double y, int color, double alpha){
+int draw_vertex_color(float x, float y, int color, float alpha){
 	unsigned int col=color;
 	#if !PRIMBUFFER
 	glPushAttrib(GL_CURRENT_BIT);

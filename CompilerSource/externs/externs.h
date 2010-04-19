@@ -57,26 +57,30 @@ struct externs
 {
   unsigned int flags;
   string name;
-
+  
   externs* type;
   externs* parent;
   long long  value_of;
   rf_stack refstack;
-
+  
   varray<externs*> tempargs;
   darray_s<externs*> ancestors;
   map<string, externs*> members;
-
+  
   typedef map<string,externs*>::iterator tempiter;
-
+  
   bool is_function(); //test if this is a function
   int parameter_count_min(); //returns topmost function argument count
   int parameter_count_max(); //returns topmost function argument count
   void parameter_unify(rf_stack&); //Set parameter set to union of this and another
-
+  bool is_using_scope(); //test if we are someone's using scope
+  
   externs();
   externs(string n,externs* p,unsigned int f);
   externs(string n,externs* t,externs* p,unsigned int f);
+  
+  void clear_all();
+  ~externs();
 };
 
 extern int tpc;
@@ -88,7 +92,7 @@ struct tpdata
   long long val;
   bool standalone;
   bool valdefd;
-
+  
   tpdata();
   tpdata(string n,externs* d);
   tpdata(string n,externs* d, bool sa);
@@ -106,7 +110,7 @@ struct ihdata
     s_public,
     s_protected
   } scopet;
-
+  
   ihdata();
   ihdata(externs*,heredtypes);
 };
@@ -121,7 +125,7 @@ struct macro_type
   int args_uat; //Index of argument from which there can be infinitely many more
   bool recurse_danger; //True if it is possible for this macro to send the parser on an infinite loop
   varray<string> args; //Names of each argument
-
+  
   operator string();
   macro_type();
   macro_type(string x);

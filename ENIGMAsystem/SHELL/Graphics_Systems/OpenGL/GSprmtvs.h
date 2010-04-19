@@ -25,18 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-/**Primitive functions*********************************************************\
-
-pr_pointlist, pr_linelist, pr_linestrip, pr_trianglelist, pr_trianglestrip, 
-pr_trianglefan, pr_lineloop, pr_quadlist, pr_quadstrip, pr_polygon
-
-int draw_primitive_begin(double kind)
-int draw_vertex(double x, double y)
-int draw_vertex_color(double x, double y, double color, double alpha)
-int draw_primitive_end()
-
-\******************************************************************************/
-
 const int pr_pointlist      =1;     //GL_POINTS
 const int pr_linelist       =2;     //GL_LINES
 const int pr_linestrip      =3;     //GL_LINE_STRIP
@@ -51,5 +39,5 @@ const int pr_polygon       =10;     //GL_POLYGON
 
 int draw_primitive_begin(double kind);
 int draw_vertex(double x, double y);
-int draw_vertex_color(double x, double y, double color, double alpha);
+int draw_vertex_color(float x, float y, int color, float alpha);
 int draw_primitive_end();
