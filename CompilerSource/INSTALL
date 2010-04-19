@@ -1,0 +1,7 @@
+The build makefile will, by default, compile a file that is named compileEGMf in the ENIGMA directory.  However, this should be named either compileEGMf.dll or libcompileEGMf.so.  The makefile can do this:
+make or make build - Compiles compileEGMf
+make build-standalone - Compiles compileEGMf with extra debugging support
+make win - Runs the build target and then renames to compileEGMf.dll
+make linux or unix - Compiles the build target and then renames to libcompileEGMf.so
+make win-standalone - Compiles the build-standalone target and then renames to compileEGMf.dll
+make linux-standalone or unix-standalone - Compiles the build-standalone target and then renames to libcompileEGMf.so
