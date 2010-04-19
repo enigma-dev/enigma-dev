@@ -85,6 +85,17 @@ bool externs::is_using_scope()
 {
   return name == NAME__USING_SCOPE;
 }
+/*
+externs *tpdata::def
+{
+  return def;
+}
+externs *tpdata::def
+{
+  externs* r = def;
+  def = NULL;
+  return r;
+}*/
 
 void externs::clear_all()
 {
@@ -102,6 +113,8 @@ void externs::clear_all()
 externs::~externs()
 {
   clear_all();
+  for (unsigned i = 0; i < tempargs.size; i++)
+    delete tempargs[i];
   ecmm;
 }
 
@@ -233,6 +246,12 @@ tpdata::tpdata(string n,externs* d, long long v, bool sa, bool vd): name(n), sta
   def->value_of = v;
   def->type = d;
 }
+
+/*tpdata::~tpdata()
+{
+  delete def;
+}*/
+
 int tpc = -1;
 varray<tpdata> tmplate_params;
 

@@ -202,7 +202,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
               for (int i=0; i<tpc; i++)
               {
                 ext_retriever_var->tempargs[i]->name = tmplate_params[i].name;
-                if (tmplate_params[i].def) {                                     // cferr = "Implementing `"+ext_retriever_var->name+"'"; print_err_line_at(pos);
+                if (tmplate_params[i].def) { // cferr = "Implementing `"+ext_retriever_var->name+"'"; print_err_line_at(pos);
                   ext_retriever_var->tempargs[i]->type = tmplate_params[i].def;
                   ext_retriever_var->tempargs[i]->flags |= EXTFLAG_DEFAULTED;
                 }
@@ -300,7 +300,7 @@ pt handle_comments()
   if (cfile[pos]=='/')
   {
     while (cfile[pos] != '\r' and cfile[pos] != '\n' and (pos++)<len);
-    return pt(-2);
+    return unsigned(-2);
   }
   if (cfile[pos]=='*')
   {
@@ -315,8 +315,8 @@ pt handle_comments()
     }
     
     pos++;
-    return pt(-2);
+    return unsigned(-2);
   }
   pos--;
-  return pt(-1);
+  return unsigned(-1);
 }
