@@ -19,7 +19,7 @@
 
 package org.enigma;
 
-import java.awt.Cursor;
+import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.datatransfer.DataFlavor;
@@ -32,8 +32,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.swing.AbstractListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -41,6 +44,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -48,7 +52,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.enigma.EnigmaSettingsFrame.EnigmaSettings;
 import org.enigma.backend.EnigmaDriver;
@@ -57,7 +64,6 @@ import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
-import org.lateralgm.components.impl.TextAreaFocusTraversalPolicy;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
@@ -428,10 +434,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		}
 
 	private MDIFrame keywordListFrames[] = new MDIFrame[3];
-	private JTextArea keywordLists[] = new JTextArea[3];
+	private KeywordListModel keywordLists[] = new KeywordListModel[3];
 	private final static Pattern nameRegex = Pattern.compile("[a-zA-][a-zA-Z0-9_]*");
 
-	public void showKeywordListFrame(int mode)
+	public void showKeywordListFrame(final int mode)
 		{
 		String[] modes = { "Functions","Globals","Types" };
 		if (keywordListFrames[mode] == null)
@@ -440,18 +446,86 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			keywordListFrames[mode].setSize(200,400);
 			keywordListFrames[mode].setDefaultCloseOperation(JInternalFrame.HIDE_ON_CLOSE);
 			LGM.mdi.add(keywordListFrames[mode]);
-			keywordLists[mode] = new JTextArea();
-			keywordLists[mode].setEditable(false);
-			keywordLists[mode].setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-			keywordLists[mode].setFont(new Font(Font.MONOSPACED,Font.PLAIN,12));
-			keywordListFrames[mode].setContentPane(new JScrollPane(keywordLists[mode]));
-			keywordListFrames[mode].setFocusTraversalPolicy(new TextAreaFocusTraversalPolicy(
-					keywordLists[mode]));
+			keywordLists[mode] = new KeywordListModel();
+			final JList list = new JList(keywordLists[mode]);
+			//			keywordLists[mode].setEditable(false);
+			//			keywordLists[mode].setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+			list.setFont(new Font(Font.MONOSPACED,Font.PLAIN,12));
+			final JTextField filter = new JTextField();
+			filter.getDocument().addDocumentListener(new DocumentListener()
+				{
+					@Override
+					public void changedUpdate(DocumentEvent e)
+						{
+						keywordLists[mode].setFilter(filter.getText());
+						}
+
+					@Override
+					public void insertUpdate(DocumentEvent e)
+						{
+						keywordLists[mode].setFilter(filter.getText());
+						}
+
+					@Override
+					public void removeUpdate(DocumentEvent e)
+						{
+						keywordLists[mode].setFilter(filter.getText());
+						}
+				});
+			keywordListFrames[mode].add(new JScrollPane(filter),BorderLayout.NORTH);
+			keywordListFrames[mode].add(new JScrollPane(list),BorderLayout.CENTER);
+			//			keywordListFrames[mode].setFocusTraversalPolicy(new TextAreaFocusTraversalPolicy(list));
 			}
 		//TODO: should only repopulate when whitespace changes
-		keywordLists[mode].setText(getKeywordList(mode));
-		keywordLists[mode].setCaretPosition(0);
+		keywordLists[mode].setKeywords(getKeywordList(mode));
 		keywordListFrames[mode].toTop();
+		}
+
+	public class KeywordListModel extends AbstractListModel
+		{
+		private static final long serialVersionUID = 1L;
+		public List<String> keywords;
+		private List<String> filteredKeywords = new ArrayList<String>();
+		private String filter = "";
+
+		public void setKeywords(List<String> keywords)
+			{
+			this.keywords = keywords;
+			applyFilter();
+			}
+
+		public void setFilter(String filter)
+			{
+			this.filter = filter;
+			applyFilter();
+			}
+
+		private void applyFilter()
+			{
+			filteredKeywords.clear();
+			if (filter.isEmpty() && keywords != null)
+				filteredKeywords.addAll(keywords);
+			else
+				{
+				for (String s : keywords)
+					if (s.startsWith(filter)) filteredKeywords.add(s);
+				for (String s : keywords)
+					if (s.contains(filter) && !s.startsWith(filter)) filteredKeywords.add(s);
+				}
+			this.fireContentsChanged(this,0,getSize());
+			}
+
+		@Override
+		public Object getElementAt(int index)
+			{
+			return filteredKeywords.get(index);
+			}
+
+		@Override
+		public int getSize()
+			{
+			return filteredKeywords.size();
+			}
 		}
 
 	/**
@@ -459,9 +533,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	 * @param type 0 for functions, 1 for globals, 2 for types
 	 * @return The keyword list
 	 */
-	public static String getKeywordList(int type)
+	public static List<String> getKeywordList(int type)
 		{
-		StringBuilder sb = new StringBuilder();
+		List<String> rl = new ArrayList<String>();
 		String res = EnigmaDriver.first_available_resource();
 		while (res != null)
 			{
@@ -472,27 +546,22 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						{
 						int min = EnigmaDriver.resource_argCountMin();
 						int max = EnigmaDriver.resource_argCountMax();
-						sb.append(res);
-						sb.append("(");
-						sb.append(EnigmaDriver.resource_argCountMin());
-						if (min != max)
-							{
-							sb.append("-");
-							sb.append(EnigmaDriver.resource_argCountMax());
-							}
-						sb.append(")\n");
+						res += "(" + EnigmaDriver.resource_argCountMin();
+						if (min != max) res += "-" + EnigmaDriver.resource_argCountMax();
+						res += ")";
+						rl.add(res);
 						}
 					break;
 				case 1:
-					if (EnigmaDriver.resource_isGlobal()) sb.append(res + "\n");
+					if (EnigmaDriver.resource_isGlobal()) rl.add(res);
 					break;
 				case 2:
-					if (EnigmaDriver.resource_isTypeName()) sb.append(res + "\n");
+					if (EnigmaDriver.resource_isTypeName()) rl.add(res);
 					break;
 				}
 			res = EnigmaDriver.next_available_resource();
 			}
-		return sb.toString();
+		return rl;
 		}
 
 	public void subframeAppeared(MDIFrame source)
