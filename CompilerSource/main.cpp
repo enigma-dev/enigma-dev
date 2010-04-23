@@ -140,10 +140,7 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
 {
   //First, we make a space to put our scripts.
   globals_scope = scope_get_using(&global_scope);
-  globals_scope = globals_scope->members["ENIGMA Resources"] = new externs;
-    globals_scope->name  = "ENIGMA Resources";
-    globals_scope->flags = EXTFLAG_NAMESPACE;
-    globals_scope->type  = NULL;
+  globals_scope = globals_scope->members["ENIGMA Resources"] = new externs("ENIGMA Resources",NULL,globals_scope,EXTFLAG_NAMESPACE);
   
   for (int i = 0; i < script_count; i++)
     quickmember_script(globals_scope,script_names[i]);

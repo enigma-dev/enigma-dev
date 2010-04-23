@@ -60,11 +60,7 @@ bool tflag_atomic(string x)
 
 inline externs* regt(string x)
 {
-  externs* t = current_scope->members[x] = new externs;
-  t->flags = EXTFLAG_TYPENAME;
-  t->parent = &global_scope;
-  t->name = x;
-  return t;
+  return current_scope->members[x] = new externs(x,NULL,current_scope,EXTFLAG_TYPENAME);
 }
 inline void regmacro(string m)
 {
@@ -229,27 +225,28 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
     }
   }
   
-  externs* e = new externs;
-  scope_to_use->members[name] = e;
-  ext_retriever_var = e;
-  e->name = name;
-  
-  e->flags = 0;
+  //Determine what flags will mark the externs we're about to instantiate
+  unsigned eflags = 0;
   if (last == LN_CLASS)
-    e->flags = EXTFLAG_CLASS | EXTFLAG_TYPENAME;
+    eflags = EXTFLAG_CLASS | EXTFLAG_TYPENAME;
   else if (last == LN_STRUCT)
-    e->flags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME;
+    eflags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME;
   else if (last == LN_UNION) // Same as struct, for our purposes. 
-    e->flags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME; //sizeof() can't be used in Macros, you bunch of arses.
+    eflags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME; //sizeof() can't be used in Macros, you bunch of arses.
   else if (last == LN_ENUM)
-    e->flags = (phase == EN_IDENTIFIER or phase == EN_NOTHING) ? EXTFLAG_ENUM | EXTFLAG_TYPENAME : EXTFLAG_VALUED;
+    eflags = (phase == EN_IDENTIFIER or phase == EN_NOTHING) ? EXTFLAG_ENUM | EXTFLAG_TYPENAME : EXTFLAG_VALUED;
   else if (last == LN_NAMESPACE)
-    e->flags = EXTFLAG_NAMESPACE;
+    eflags = EXTFLAG_NAMESPACE;
   
   if (is_tdef)
-    e->flags |= EXTFLAG_PENDING_TYPEDEF; //If this is a new type being typedef'd, it will later be undone
+    eflags |= EXTFLAG_PENDING_TYPEDEF; //If this is a new type being typedef'd, it will later be undone
   if (flag_extern)
-    e->flags |= EXTFLAG_EXTERN;
+    eflags |= EXTFLAG_EXTERN;
+  
+  externs* e = new externs(name,type,scope_to_use,eflags);
+  scope_to_use->members[name] = e;
+  ext_retriever_var = e;
+  
   
   if (tpc > 0)
   {
@@ -271,8 +268,6 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
   }
   tpc = -1;
   
-  e->type = type;
-  e->parent = scope_to_use;
   e->value_of = last_value;
   e->refstack = refs;
   

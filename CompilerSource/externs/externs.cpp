@@ -85,6 +85,14 @@ externs::externs(string n,externs* t,externs* p,unsigned int f): flags(f), name(
 {
   ecpp;
 }
+externs::externs(string n,externs* t,externs* p,unsigned int f,long long v): flags(f), name(n), type(t), parent(p), value_of(v)
+{
+  ecpp;
+}
+externs::externs(string n,externs* t,externs* p,unsigned int f,long long v,rf_stack rfs): flags(f), name(n), type(t), parent(p), value_of(v), refstack(rfs)
+{
+  ecpp;
+}
 
 bool externs::is_using_scope()
 {
@@ -177,10 +185,8 @@ externs* scope_get_using(externs* scope)
   if (u != scope->members.end())
     return u->second;
   
-  externs* rv = new externs;
+  externs* rv = new externs(NAME__USING_SCOPE,NULL,scope,EXTFLAG_NAMESPACE);
   scope->members[NAME__USING_SCOPE] = rv;
-  rv->name = NAME__USING_SCOPE;
-  rv->flags = EXTFLAG_NAMESPACE;
   return rv;
 }
 
@@ -190,10 +196,8 @@ externs* temp_get_specializations(externs* scope)
   if (u != scope->members.end())
     return u->second;
   
-  externs* rv = new externs;
+  externs* rv = new externs("<specializations>",scope,NULL,EXTFLAG_NAMESPACE);
   scope->members["<specializations>"] = rv;
-  rv->name = "<specializations>";
-  rv->flags = EXTFLAG_NAMESPACE;
   return rv;
 }
 externs* temp_get_specializations_ie(externs* scope)
@@ -217,45 +221,30 @@ externs* ext_retriever_var = NULL;
 void print_scope_members(externs*, int);
 
 
-
+#define GARBAGE_SCOPE NULL
 
 //Implement TpData's constructors
-
+extern string tostring(int);
 tpdata::tpdata(): name(""), valdefd(0)
 {
   tp_just_instd__TRUE;
-  def = new externs;
-  def->name = name = "";
-  def->flags = EXTFLAG_TEMPPARAM | EXTFLAG_TYPEDEF;
-  def->value_of = 0;
-  def->type = NULL;
+  static int howmany = 0;
+  def = new externs("<nameless"+tostring(howmany++)+">",NULL,GARBAGE_SCOPE,EXTFLAG_TEMPPARAM | EXTFLAG_TYPEDEF);
 }
 tpdata::tpdata(string n,externs* d): name(n), val(0), standalone(false), valdefd(0)
 {
   tp_just_instd__TRUE;
-  def = new externs;
-  def->name = name = n;
-  def->flags = EXTFLAG_TYPEDEF | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | (d?EXTFLAG_DEFAULTED:0);
-  def->value_of = 0;
-  def->type = d;
+  def = new externs(n,d,GARBAGE_SCOPE,EXTFLAG_TYPEDEF | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | (d?EXTFLAG_DEFAULTED:0));
 }
 tpdata::tpdata(string n,externs* d, bool sa): name(n), val(0), standalone(sa), valdefd(0)
 {
   tp_just_instd__TRUE;
-  def = new externs;
-  def->name = name = n;
-  def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0);
-  def->value_of = 0;
-  def->type = d;
+  def = new externs(n,d,GARBAGE_SCOPE,(sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0));
 }
 tpdata::tpdata(string n,externs* d, long long v, bool sa, bool vd): name(n), standalone(sa), valdefd(vd)
 {
   tp_just_instd__TRUE;
-  def = new externs;
-  def->name = name = n;
-  def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0) | (vd?EXTFLAG_VALUED:0);
-  def->value_of = v;
-  def->type = d;
+  def = new externs(name,d,GARBAGE_SCOPE,(sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0) | (vd?EXTFLAG_VALUED:0),v);
 }
 
 /*tpdata::~tpdata()
@@ -397,14 +386,10 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
       if (iscope->flags & EXTFLAG_HYPOTHETICAL)
       {
         //We know it doesn't exist to our immediate findings; create it.
-        ext_retriever_var = new externs;
-        ext_retriever_var->name = name;
-        ext_retriever_var->type = builtin_type__int;
-        ext_retriever_var->flags = EXTFLAG_TYPENAME
+        ext_retriever_var = new externs(name,builtin_type__int,iscope,
+          EXTFLAG_TYPENAME
           | EXTFLAG_TYPEDEF         // Not a base type, but typedef to NULL.
-          | EXTFLAG_HYPOTHETICAL;   // HYPOTHETICAL is viral.
-        ext_retriever_var->parent = iscope;
-        ext_retriever_var->value_of = 0;
+          | EXTFLAG_HYPOTHETICAL);  // HYPOTHETICAL is viral.
         
         if ((last_named & ~LN_TYPEDEF) == LN_TYPENAME and last_named_phase == TN_TEMPLATE) {
           ext_retriever_var->flags |= EXTFLAG_TEMPLATE;

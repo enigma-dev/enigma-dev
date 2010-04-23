@@ -78,6 +78,8 @@ struct externs
   externs();
   externs(string n,externs* p,unsigned int f);
   externs(string n,externs* t,externs* p,unsigned int f);
+  externs(string n,externs* t,externs* p,unsigned int f,long long vof);
+  externs(string n,externs* t,externs* p,unsigned int f,long long vof,rf_stack rfs);
   
   void clear_all();
   ~externs();

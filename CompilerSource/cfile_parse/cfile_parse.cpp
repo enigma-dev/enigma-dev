@@ -349,17 +349,8 @@ int parse_cfile(string cftext)
             return pos;
           }
           
-          externs *n = new externs;
-          
-          n->type = last_type;
-          n->name = last_identifier;
-          n->parent = current_scope;
-          n->flags = last_type->flags | EXTFLAG_TYPEDEF;
-          n->refstack = refstack.dissociate();
-          n->value_of = 0;
-          
+          externs *n = new externs(last_identifier,last_type,current_scope,last_type->flags | EXTFLAG_TYPEDEF,0,refstack.dissociate());
           current_scope->members[last_identifier] = n;
-          
           last_named_phase = DEC_FULL;
         }
       }

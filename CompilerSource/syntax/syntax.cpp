@@ -668,8 +668,6 @@ namespace syncheck
                     { error="Cannot assign to a function, use == to test equality"; return pos; }
                     if (lastnamed[level]!=LN_VARNAME && !assop[level])
                     { error="Variable name expected before assignment operator"; return pos; }
-                    assop[level]=1;
-                    lastnamed[level]=LN_OPERATOR;
                     break;
 
                   case '>': case '<': case '!':
@@ -683,6 +681,8 @@ namespace syncheck
                     error="Invalid operator at this point";
                     return pos;
                 }
+                assop[level]=1;
+                lastnamed[level]=LN_OPERATOR;
                 pos+=2;
                 continue;
               }

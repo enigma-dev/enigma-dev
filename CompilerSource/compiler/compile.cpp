@@ -119,10 +119,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   //First, we make a space to put our globals.
     globals_scope = scope_get_using(&global_scope);
-    globals_scope = globals_scope->members["ENIGMA Resources"] = new externs;
-    globals_scope->name  = "ENIGMA Resources";
-    globals_scope->flags = EXTFLAG_NAMESPACE;
-    globals_scope->type  = NULL;
+    globals_scope = globals_scope->members["ENIGMA Resources"] = new externs("ENIGMA Resources",globals_scope,NULL,EXTFLAG_NAMESPACE);
   
   
   

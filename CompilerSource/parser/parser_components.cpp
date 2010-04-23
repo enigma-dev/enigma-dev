@@ -85,35 +85,18 @@ int dropscope()
 }
 int quickscope()
 {
-  externs *ne = current_scope->members["{}"+tostring(scope_braceid++)] = new externs;
-  ne->name = "{}";
-  ne->type = NULL;
-  ne->flags = EXTFLAG_NAMESPACE;
-  ne->parent = current_scope;
-  current_scope = ne;
+  current_scope = current_scope->members["{}"+tostring(scope_braceid++)] = new externs("{}",NULL,current_scope,EXTFLAG_NAMESPACE);
   return 0;
 }
 int initscope(string name)
 {
-  current_scope = &global_scope;
   scope_braceid = 0;
-  
-  externs *ne = current_scope->members[name] = new externs;
-  ne->name = name;
-  ne->type = NULL;
-  ne->flags = EXTFLAG_NAMESPACE;
-  ne->parent = current_scope;
-  current_scope = ne;
-  
+  current_scope = global_scope.members[name] = new externs(name,NULL,&global_scope,EXTFLAG_NAMESPACE);
   return 0;
 }
 int quicktype(unsigned flags, string name)
 {
-  externs *ne = current_scope->members[name] = new externs;
-  ne->name = name;
-  ne->type = NULL;
-  ne->flags = flags | EXTFLAG_TYPENAME;
-  ne->parent = current_scope;
+  current_scope->members[name] = new externs(name,NULL,current_scope,flags | EXTFLAG_TYPENAME);
   return 0;
 }
 

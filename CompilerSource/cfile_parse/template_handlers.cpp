@@ -82,15 +82,9 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
         
         if (!find_extname(tn,EXTFLAG_TYPENAME | EXTFLAG_NAMESPACE))
         {
-          if (hypothesize and move_into) //This is a new typename! Yay standard!
+          if (hypothesize and move_into) //This is a new typename! Yay standard! Looks like this:  template<...> ... typename a::doesnotexist b;
           {
-            externs *a = move_into->members[tn] = new externs;
-            
-            a->flags = EXTFLAG_TYPEDEF | EXTFLAG_TYPENAME;
-            a->type = builtin_type__int;
-            a->parent = move_into;
-            a->value_of = 0;
-            
+            externs *a = move_into->members[tn] = new externs("<new template param alias>",builtin_type__int,move_into,EXTFLAG_TYPEDEF | EXTFLAG_TYPENAME);
             move_into = a;
           } //TODO: add a "templatize" to go with "hypothesize" 
           else if (constant_types.find(tn) != constant_types.end())
@@ -138,14 +132,7 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
     }
     
     if (kt)
-    {
-      externs *a = *kt = new externs;
-      a->name = tparam_ext->name;
-      a->flags = tparam_ext->flags | EXTFLAG_DEFAULTED | EXTFLAG_VALUED;
-      a->parent = current_scope;
-      a->value_of = (long long)(long)a;
-      a->type = NULL;
-    }
+      externs *a = *kt = new externs(tparam_ext->name,NULL,current_scope,tparam_ext->flags | EXTFLAG_DEFAULTED | EXTFLAG_VALUED,(long long)(long)a);
     return "_" + tostring((UTYPE_INT)a);
   }
   cferr = "Macro parameter set up wrong. This error shouldn't occur...  [" + seg + "] in ";
@@ -204,15 +191,7 @@ string temp_parse_list(externs* last,string specs,varray<externs*> *va = NULL)
     if ((last->tempargs[ti]->flags & EXTFLAG_DEFAULTED) or (last->tempargs[ti]->flags & EXTFLAG_VALUED))
     {
       if (va)
-      {
-        externs *nta = (*va)[ti] = new externs;
-        
-        nta->name = last->tempargs[ti]->name;
-        nta->type = last->tempargs[ti]->type;
-        nta->parent = last->tempargs[ti]->parent;
-        nta->flags = last->tempargs[ti]->flags;
-        nta->value_of = last->tempargs[ti]->value_of;
-      }
+        (*va)[ti] = new externs(last->tempargs[ti]->name,last->tempargs[ti]->type,last->tempargs[ti]->parent,last->tempargs[ti]->flags,last->tempargs[ti]->value_of);
       ti++;
     }
     else {
@@ -255,22 +234,13 @@ externs* TemplateSpecialize(externs* last, string specs) //Last is the type we'r
   if (exiterexists != specm->members.end())
     return exiterexists->second;
   
-  externs* ret = new externs;
-  ret->name = last->name + ns;
-  ret->flags = last->flags;
-  ret->type = last->type;
-  ret->parent = last->parent;
+  externs* ret = new externs(last->name + ns,last->type,last->parent,last->flags);
   ret->ancestors[0] = last;
   
   //cout << "for (unsigned i = 0; i < " << implementations.size << " and i < " << last->tempargs.size << "; i++)" << endl;
   for (unsigned i = 0; i < last->tempargs.size; i++) 
   {
-    externs* n = ret->tempargs[i] = new externs;
-    n->flags = last->tempargs[i]->flags;
-    n->name = last->tempargs[i]->name;
-    n->type = implementations[i];
-    n->flags = (last->tempargs[i]->flags & ~EXTFLAG_DEFAULTED) | (n->type?EXTFLAG_DEFAULTED:0);
-    n->parent = ret;
+    externs* n = ret->tempargs[i] = new externs(last->tempargs[i]->name,implementations[i],ret,(last->tempargs[i]->flags & ~EXTFLAG_DEFAULTED) | (n->type?EXTFLAG_DEFAULTED:0));
     
     //cout << "Copied " << n->name << " to new instantiation";
     //Iterate through the new template parameters. If this is one of them, inherit its name.
