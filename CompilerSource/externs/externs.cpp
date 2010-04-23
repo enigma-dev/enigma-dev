@@ -61,11 +61,16 @@ void externs::parameter_unify(rf_stack& x)
 #ifdef ENIGMA_PARSERS_DEBUG
   int ext_count;
   map<externs*, int> bigmap;
-  #define ecpp ext_count++; if (!(ext_count % 100)) cout << "Number of externs: " << ext_count << endl; bigmap[this] = 1;
+  int tp_just_instd = 0;
+  int total_alloc_count[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  int tpcsval;
+  #define tp_just_instd__TRUE tp_just_instd = tpcsval;
+  #define ecpp ext_count++; if (!(ext_count % 100)) cout << "Number of externs: " << ext_count << endl; bigmap[this] = tpcsval; tpcsval=0;
   #define ecmm ext_count--; if (!(ext_count % 100)) cout << "Number of externs: " << ext_count << endl; bigmap.erase(this);
 #else
   #define ecpp
   #define ecmm
+  #define tp_just_instd__TRUE
 #endif
 
 externs::externs(): flags(0), name(), type(NULL), parent(NULL), value_of(0)
@@ -100,21 +105,23 @@ externs *tpdata::def
 void externs::clear_all()
 {
   if (!is_using_scope())
-  {
     for (extiter i = members.begin(); i != members.end(); i++)
     {
-      i->second->clear_all();
+      //cout << "Delete " << i->second->name << "\n";
+      if (i->second->name == "x")
+        cout << "poof.";
       delete i->second;
     }
-  }
+  for (unsigned i = 0; i < tempargs.size; i++)
+    delete tempargs[i];
+  tempargs.size = 0;
   members.clear();
 }
 
 externs::~externs()
 {
   clear_all();
-  for (unsigned i = 0; i < tempargs.size; i++)
-    delete tempargs[i];
+  //cout << name << ": I'm being deleted!\n";
   ecmm;
 }
 
@@ -216,6 +223,7 @@ void print_scope_members(externs*, int);
 
 tpdata::tpdata(): name(""), valdefd(0)
 {
+  tp_just_instd__TRUE;
   def = new externs;
   def->name = name = "";
   def->flags = EXTFLAG_TEMPPARAM | EXTFLAG_TYPEDEF;
@@ -224,6 +232,7 @@ tpdata::tpdata(): name(""), valdefd(0)
 }
 tpdata::tpdata(string n,externs* d): name(n), val(0), standalone(false), valdefd(0)
 {
+  tp_just_instd__TRUE;
   def = new externs;
   def->name = name = n;
   def->flags = EXTFLAG_TYPEDEF | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | (d?EXTFLAG_DEFAULTED:0);
@@ -232,6 +241,7 @@ tpdata::tpdata(string n,externs* d): name(n), val(0), standalone(false), valdefd
 }
 tpdata::tpdata(string n,externs* d, bool sa): name(n), val(0), standalone(sa), valdefd(0)
 {
+  tp_just_instd__TRUE;
   def = new externs;
   def->name = name = n;
   def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0);
@@ -240,6 +250,7 @@ tpdata::tpdata(string n,externs* d, bool sa): name(n), val(0), standalone(sa), v
 }
 tpdata::tpdata(string n,externs* d, long long v, bool sa, bool vd): name(n), standalone(sa), valdefd(vd)
 {
+  tp_just_instd__TRUE;
   def = new externs;
   def->name = name = n;
   def->flags = (sa?0:EXTFLAG_TYPEDEF) | EXTFLAG_TEMPPARAM | EXTFLAG_TYPENAME | ((d and !sa)?EXTFLAG_DEFAULTED:0) | (vd?EXTFLAG_VALUED:0);
@@ -254,6 +265,21 @@ tpdata::tpdata(string n,externs* d, long long v, bool sa, bool vd): name(n), sta
 
 int tpc = -1;
 varray<tpdata> tmplate_params;
+void tmplate_params_clear_used(varray<tpdata> &vatp, int vs)
+{
+  for (int i=0; i<vs; i++)
+  {
+    vatp[i].def = NULL;
+  }
+}
+void tmplate_params_clear(varray<tpdata> &vatp, int vs)
+{
+  for (int i=0; i<vs; i++)
+  {
+    delete vatp[i].def;
+    vatp[i].def = NULL;
+  }
+}
 
 
 ihdata::ihdata()

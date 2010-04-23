@@ -201,13 +201,14 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
               }
               for (int i=0; i<tpc; i++)
               {
-                ext_retriever_var->tempargs[i]->name = tmplate_params[i].name;
-                if (tmplate_params[i].def) { // cferr = "Implementing `"+ext_retriever_var->name+"'"; print_err_line_at(pos);
-                  ext_retriever_var->tempargs[i]->type = tmplate_params[i].def;
+                ext_retriever_var->tempargs[i]->name = tparams[i].name;
+                if (tparams[i].def) { // cferr = "Implementing `"+ext_retriever_var->name+"'"; print_err_line_at(pos);
+                  ext_retriever_var->tempargs[i]->type = tparams[i].def;
                   ext_retriever_var->tempargs[i]->flags |= EXTFLAG_DEFAULTED;
                 }
               }
             }
+          tmplate_params_clear(tparams);
           tpc = -1;
         }        
         
@@ -266,8 +267,9 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
       }
       e->tempargs[e->tempargs.size] = tparams[i].def;
     }
-    tpc = 0;
+    tmplate_params_clear_used(tparams);
   }
+  tpc = -1;
   
   e->type = type;
   e->parent = scope_to_use;

@@ -141,12 +141,14 @@ int main(int argc, char *argv[])
     cout << "  " << (i->second.type != ""? i->second.type : "var") << " " << i->second.prefix << " " << i->first << " " << i->second.suffix << "\n";
   }
   
-  cout << "~~Testing free~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-  global_scope.clear_all();
+  cout << "% Testing free % \n";
+  cout << "Freeing global scope... "; global_scope.clear_all(); cout << "Done.\n";
+  cout << "Clearing parser lists... "; int cfp_clear_lists(); cout << "Done.\n";
+  
   cout << "Free completed successfully (" << global_scope.members.size() << "): " << ext_count << " remaining\n";
   cout << "(Or, if you want a second opinion, there are apparently " << bigmap.size() << " remaining)\n";
   for (map<externs*,int>::iterator i = bigmap.begin(); i != bigmap.end(); i++)
-    cout << i->first->name << ", "; cout << "end\n";
+    cout << i->first->name << " ("<<(i->second)<<"), "; cout << "end\n";
   
   return 0;
 }

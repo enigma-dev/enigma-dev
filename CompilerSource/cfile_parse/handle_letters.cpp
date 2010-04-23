@@ -37,6 +37,15 @@ using namespace std;
 #include "cfile_pushing.h"
 #include "macro_functions.h"
 
+
+#ifdef ENIGMA_PARSERS_DEBUG
+  extern int tpcsval, total_alloc_count[4];
+  #define TPDATA_CONSTRUCT(x) tpcsval = (total_alloc_count[x]++) * 10 + x
+#else
+  #define TPDATA_CONSTRUCT(x)
+#endif
+
+
 extern externs* builtin_type__int;
 
 extern string cferr_get_file_orfirstfile();
@@ -227,7 +236,9 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             last_named = LN_IMPLEMENT;
             last_named_phase = 0;
             last_identifier = "";
-            tpc = ihc = 0;
+            tmplate_params_clear();
+            tpc = -1;
+            ihc = 0;
             
             return pt(-1);
           }
@@ -917,6 +928,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           single[0] = tpdata("",builtin_type__int,0,true,true);
           last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,flag_extern=0,0,NULL,single,1,0) ? ext_retriever_var : NULL;
           last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); last_named_phase = last_named == LN_TYPENAME_P ? DEC_IDENTIFIER : DEC_FULL;
+          
           if (last_type)
           {
             last_type->flags &= ~EXTFLAG_PENDING_TYPEDEF;

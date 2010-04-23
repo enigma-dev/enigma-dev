@@ -101,6 +101,8 @@ struct tpdata
 
 extern int tpc;
 extern varray<tpdata> tmplate_params;
+void tmplate_params_clear_used(varray<tpdata>& vatp = tmplate_params, int vs = tpc);
+void tmplate_params_clear(varray<tpdata>& vatp = tmplate_params, int vs = tpc);
 
 struct ihdata
 {
