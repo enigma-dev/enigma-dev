@@ -151,6 +151,9 @@ string parser_main(string code, parsed_event* pev = NULL)
   parser_buffer_syntax_map(code,synt,0);*/
   string synt;
   
+  //Reset things
+  strc = 0; //Number of strings in this code
+  
   //Initialize us a spot in the global scope
   initscope("script0");
   

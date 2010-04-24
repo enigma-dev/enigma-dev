@@ -688,7 +688,8 @@ void print_to_file(string code,string synt,int indentmin_b4,ofstream &of)
   //if (of == NULL) return;
 
   const int indentmin = indentmin_b4 + 1;
-  int indc = 0,tind = 0,pars = 0,str = 0;
+  int indc = 0,tind = 0,pars = 0;
+  unsigned str_ind = 0;
 
   const pt len = code.length();
   for (pt pos = 0; pos < len; pos++)
@@ -740,9 +741,9 @@ void print_to_file(string code,string synt,int indentmin_b4,ofstream &of)
         break;
       case '"':
           if (pars) pars--;
-          
-            of.write(string_in_code[str].c_str(),string_in_code[str].length());
-            str++;
+            if (str_ind >= strc) cout << "What the crap.\n";
+            of.write(string_in_code[str_ind].c_str(),string_in_code[str_ind].length());
+            str_ind++;
             if (synt[pos+1] == '+' and synt[pos+2] == '"')
               synt[pos+1] = code[pos+1] = ' ';
         break;

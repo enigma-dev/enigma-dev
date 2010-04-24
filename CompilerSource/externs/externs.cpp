@@ -271,7 +271,7 @@ void tmplate_params_clear(varray<tpdata> &vatp, int vs)
 {
   for (int i=0; i<vs; i++)
   {
-    //delete vatp[i].def;
+    delete vatp[i].def;
     vatp[i].def = NULL;
   }
 }

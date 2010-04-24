@@ -348,8 +348,7 @@ pt parse_cfile(string cftext)
             cferr = "Program error: Type does not exist. An error should have been reported earlier.";
             return pos;
           }
-          static int nn = 0; if (++nn == 40)
-            cout << nn << endl;
+          
           externs *n = new externs(last_identifier,last_type,current_scope,last_type->flags | EXTFLAG_TYPEDEF,0,refstack.dissociate());
           current_scope->members[last_identifier] = n;
           last_named_phase = DEC_FULL;
@@ -400,7 +399,7 @@ pt parse_cfile(string cftext)
                 if (last_identifier == "")
                   last_identifier = last_named_phase == TMP_SIMPLE?"<type only>":"<not named>";
                 
-                TPDATA_CONSTRUCT(1); cout << "Constructed (1)\n";
+                TPDATA_CONSTRUCT(1);
                 tmplate_params[tpc++] = tpdata(last_identifier,last_type,last_type != NULL);
                 last_named_phase = TMP_PSTART;
                 pos++; continue;
@@ -530,8 +529,6 @@ pt parse_cfile(string cftext)
         externs *type_to_use = last_type;
         rf_stack refs_to_use = refstack.dissociate();
         
-        static int whatever = 0; if (whatever++ == 165)
-          cout << whatever << endl;
         if (type_to_use != NULL) //A case where it would be NULL is struct str;
         while (type_to_use->flags & EXTFLAG_TYPEDEF)
         {
@@ -821,8 +818,9 @@ pt parse_cfile(string cftext)
               else
               {
                 if (last_type != NULL and last_type->flags & (EXTFLAG_STRUCT|EXTFLAG_CLASS|EXTFLAG_ENUM))
-                { //We're at a structure or something, and we're not NULL
-                  //if (last_type->parent == current_scope)
+                {
+                  //We're at a structure or something, and a type was given (not NULL)
+                  //This means we're at "struct named_earlier <{> ... }"
                   if (!last_type->members.empty())
                   {
                     cferr = "Attempting to redeclare struct `"+last_type->name+"'";
@@ -833,6 +831,14 @@ pt parse_cfile(string cftext)
                     current_scope = last_type; //Move into it. Brilliantly simple; we already know it's parent is current_scope.
                     if (last_named & LN_TYPEDEF)
                       current_scope->flags |= EXTFLAG_PENDING_TYPEDEF; //Since we're implementing it now, make sure we're not typedefing it also ;_; 
+                    //TODO SOME DAY IN THE DISTANT, DISTANT FUTURE:
+                    // This is where true template specialization should be handled; where same<tp,tp> is properly linked in memory
+                    for (int i = 0; i < tpc; i++)
+                      for (unsigned ii = 0; ii < current_scope->tempargs.size; ii++)
+                      {
+                        if (current_scope->tempargs[ii]->type == tmplate_params[i].def)
+                          tmplate_params[i].def = NULL;
+                      }
                   }
                 }
                 else

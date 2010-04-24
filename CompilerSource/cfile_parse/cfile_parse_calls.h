@@ -122,7 +122,8 @@ void cparse_init()
 
 int anoncount = 0;
 extern void print_err_line_at(pt a);
-bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int tpc = -1,long long last_value = 0)
+int negative_one = -1;
+bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int &tpc = negative_one,long long last_value = 0)
 {
   unsigned int is_tdef = last & LN_TYPEDEF;
   last &= ~LN_TYPEDEF;
@@ -204,7 +205,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
                 }
               }
             }
-          tmplate_params_clear(tparams);
+          tmplate_params_clear(tparams,tpc);
           tpc = -1;
         }        
         

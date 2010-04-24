@@ -134,6 +134,9 @@ int main(int argc, char *argv[])
   string b = parser_main(pf,&ev);
   
   cout << "\nParsed to:\n" << b;
+  ofstream fpsd("parse_output.txt",ios_base::out);
+  print_to_file(ev.code,ev.synt,0,fpsd); fpsd.close();
+  system("notepad parse_output.txt || gedit parse_output.txt");
   cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
   
   cout << "Locals declared:\n";

@@ -61,8 +61,8 @@ int get_line()
 }
 
 #include "../general/parse_basics.h"
-
-bool ExtRegister(unsigned int last,unsigned phase,string name,bool,rf_stack refs,externs *type,varray<tpdata> &tparams, int tpc = -1, long long last_value = 0);
+extern int negative_one;
+bool ExtRegister(unsigned int last,unsigned phase,string name,bool,rf_stack refs,externs *type,varray<tpdata> &tparams, int &tpc = negative_one, long long last_value = 0);
 
 //struct a { struct a *b; }, not struct a { a *b }
 bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_named,int & last_named_phase, externs *&last_type)
@@ -912,7 +912,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         if (last_named_phase == TN_NOTHING)
         {
           varray<tpdata> empty;
-          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,0,0,NULL,empty,0,0) ? ext_retriever_var : NULL;
+          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,0,0,NULL,empty,negative_one,0) ? ext_retriever_var : NULL;
           last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); last_named_phase = last_named == LN_TYPENAME_P ? DEC_IDENTIFIER : DEC_FULL;
           if (last_type)
           {
@@ -924,9 +924,9 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         }
         else if (last_named_phase == TN_TEMPLATE)
         {
-          varray<tpdata> single;
+          varray<tpdata> single; int one = 1;
           single[0] = tpdata("",builtin_type__int,0,true,true);
-          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,flag_extern=0,0,NULL,single,1,0) ? ext_retriever_var : NULL;
+          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,flag_extern=0,0,NULL,single,one,0) ? ext_retriever_var : NULL;
           last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); last_named_phase = last_named == LN_TYPENAME_P ? DEC_IDENTIFIER : DEC_FULL;
           
           if (last_type)
