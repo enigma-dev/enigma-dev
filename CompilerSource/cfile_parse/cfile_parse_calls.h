@@ -199,7 +199,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
               {
                 ext_retriever_var->tempargs[i]->name = tparams[i].name;
                 if (tparams[i].def) { // cferr = "Implementing `"+ext_retriever_var->name+"'"; print_err_line_at(pos);
-                  ext_retriever_var->tempargs[i]->type = tparams[i].def;
+                 // ext_retriever_var->tempargs[i]->type = tparams[i].def;
                   ext_retriever_var->tempargs[i]->flags |= EXTFLAG_DEFAULTED;
                 }
               }
@@ -297,7 +297,7 @@ pt handle_comments()
   if (cfile[pos]=='/')
   {
     while (cfile[pos] != '\r' and cfile[pos] != '\n' and (pos++)<len);
-    return unsigned(-2);
+    return pt(-2);
   }
   if (cfile[pos]=='*')
   {
@@ -312,8 +312,8 @@ pt handle_comments()
     }
     
     pos++;
-    return unsigned(-2);
+    return pt(-2);
   }
   pos--;
-  return unsigned(-1);
+  return pt(-1);
 }

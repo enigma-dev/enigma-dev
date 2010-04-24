@@ -88,7 +88,7 @@ string strace(externs *f)
 
 extern pt handle_skip();
 
-int parse_cfile(string cftext)
+pt parse_cfile(string cftext)
 {
   cferr="No error";
   while (!included_files.empty())
@@ -258,8 +258,8 @@ int parse_cfile(string cftext)
       
       //Macros get precedence. Check if it's one.
       const pt cm = handle_macros(n);
-      if (cm == unsigned(-2)) continue;
-      if (cm != unsigned(-1)) return cm;
+      if (cm == pt(-2)) continue;
+      if (cm != pt(-1)) return cm;
       
       if (n=="__asm") //now we have a problem
       {
@@ -348,7 +348,8 @@ int parse_cfile(string cftext)
             cferr = "Program error: Type does not exist. An error should have been reported earlier.";
             return pos;
           }
-          
+          static int nn = 0; if (++nn == 40)
+            cout << nn << endl;
           externs *n = new externs(last_identifier,last_type,current_scope,last_type->flags | EXTFLAG_TYPEDEF,0,refstack.dissociate());
           current_scope->members[last_identifier] = n;
           last_named_phase = DEC_FULL;
@@ -523,9 +524,14 @@ int parse_cfile(string cftext)
             return pos;
         }
         
+        //As a recap, we are in cfile_parse, we're at a semicolon or
+        //comma, and we are not typedef'ing anything.
+        
         externs *type_to_use = last_type;
         rf_stack refs_to_use = refstack.dissociate();
         
+        static int whatever = 0; if (whatever++ == 165)
+          cout << whatever << endl;
         if (type_to_use != NULL) //A case where it would be NULL is struct str;
         while (type_to_use->flags & EXTFLAG_TYPEDEF)
         {

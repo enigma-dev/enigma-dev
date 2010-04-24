@@ -71,6 +71,7 @@ void externs::parameter_unify(rf_stack& x)
   #define ecpp
   #define ecmm
   #define tp_just_instd__TRUE
+  #error lol
 #endif
 
 externs::externs(): flags(0), name(), type(NULL), parent(NULL), value_of(0)
@@ -83,14 +84,20 @@ externs::externs(string n,externs* p,unsigned int f): flags(f), name(n), type(NU
 }
 externs::externs(string n,externs* t,externs* p,unsigned int f): flags(f), name(n), type(t), parent(p), value_of(0)
 {
+  if (t and t->type and t->type == this)
+    while ((cout<<"yes\n",1));
   ecpp;
 }
 externs::externs(string n,externs* t,externs* p,unsigned int f,long long v): flags(f), name(n), type(t), parent(p), value_of(v)
 {
+  if (t and t->type and t->type == this)
+    while ((cout<<"no\n",1));
   ecpp;
 }
 externs::externs(string n,externs* t,externs* p,unsigned int f,long long v,rf_stack rfs): flags(f), name(n), type(t), parent(p), value_of(v), refstack(rfs)
 {
+  if (t and t->type and t->type == this)
+    cout<<"maybe\n";
   ecpp;
 }
 
@@ -265,7 +272,7 @@ void tmplate_params_clear(varray<tpdata> &vatp, int vs)
 {
   for (int i=0; i<vs; i++)
   {
-    delete vatp[i].def;
+    //delete vatp[i].def;
     vatp[i].def = NULL;
   }
 }
@@ -369,7 +376,7 @@ bool find_in_specializations(externs* inscope,string name, unsigned flags)
 extern string cferr;
   #include "../cfile_parse/cparse_shared.h"
   #include "../cfile_parse/cfile_parse_constants.h"
-void print_err_line_at(unsigned a = pos);
+void print_err_line_at(pt a = pos);
 bool find_extname(string name,unsigned int flags,bool expect_find)
 {
   //If we've been given a qualified id, check in the path or give up

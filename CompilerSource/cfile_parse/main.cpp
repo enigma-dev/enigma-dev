@@ -43,7 +43,7 @@ extern string rerr; extern int rerrpos;
 void cparse_init();
 
 extern string cferr;
-int parse_cfile(string cfile);
+pt parse_cfile(string cfile);
 
 
 string file_contents(string file)
@@ -78,13 +78,13 @@ void print_ext_data(externs *ext,int indent,int depth)
 {
   bool comma=0;
   string indstr(indent,' ');
-
+  
   if (ext == NULL) {
     cout <<  indstr << "error\n";
     return;
   }
   cout << indstr << ext->name << ":  ";
-
+  
   if (ext->is_function())
   {
     const int pcn = ext->parameter_count_min();
@@ -287,7 +287,7 @@ void print_err_line_at(pt a)
   printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
   const int margin = 100;
   const pt
-    begin = ((signed pt)a-(margin/2)<0)?0:a-(margin/2),
+    begin = (a < (margin/2))?0:a-(margin/2),
     end = (a+pt(margin/2)>cfile.length())?cfile.length():a+(margin/2);
   cout << "code snippet: " << cfile.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
   cout << "------------------------------------------------\r\n\r\n";
