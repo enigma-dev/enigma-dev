@@ -740,16 +740,11 @@ void print_to_file(string code,string synt,int indentmin_b4,ofstream &of)
         break;
       case '"':
           if (pars) pars--;
-          for (int c = 1; c; c--)
-          {
+          
             of.write(string_in_code[str].c_str(),string_in_code[str].length());
             str++;
             if (synt[pos+1] == '+' and synt[pos+2] == '"')
-            {
-              pos+=2;
-              c++;
-            }
-          }
+              synt[pos+1] = code[pos+1] = ' ';
         break;
       case 's':
       case 'f':
