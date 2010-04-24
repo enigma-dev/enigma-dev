@@ -132,7 +132,7 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
     }
     
     if (kt)
-      externs *a = *kt = new externs(tparam_ext->name,NULL,current_scope,tparam_ext->flags | EXTFLAG_DEFAULTED | EXTFLAG_VALUED,(long long)(long)a);
+      *kt = new externs(tparam_ext->name,NULL,current_scope,tparam_ext->flags | EXTFLAG_DEFAULTED | EXTFLAG_VALUED,(long long)a);
     return "_" + tostring((UTYPE_INT)a);
   }
   cferr = "Macro parameter set up wrong. This error shouldn't occur...  [" + seg + "] in ";
@@ -240,7 +240,8 @@ externs* TemplateSpecialize(externs* last, string specs) //Last is the type we'r
   //cout << "for (unsigned i = 0; i < " << implementations.size << " and i < " << last->tempargs.size << "; i++)" << endl;
   for (unsigned i = 0; i < last->tempargs.size; i++) 
   {
-    externs* n = ret->tempargs[i] = new externs(last->tempargs[i]->name,implementations[i],ret,(last->tempargs[i]->flags & ~EXTFLAG_DEFAULTED) | (n->type?EXTFLAG_DEFAULTED:0));
+    externs* atype = implementations[i];
+    externs* n = ret->tempargs[i] = new externs(last->tempargs[i]->name,atype,ret,(last->tempargs[i]->flags & ~EXTFLAG_DEFAULTED) | (atype?EXTFLAG_DEFAULTED:0));
     
     //cout << "Copied " << n->name << " to new instantiation";
     //Iterate through the new template parameters. If this is one of them, inherit its name.
