@@ -31,10 +31,10 @@ externs *enigma_type__variant = builtin_type__int;
 
 extern string tostring(int val);
 
-inline void quickmember_variable(externs* scope, externs* type, string name) {
+void quickmember_variable(externs* scope, externs* type, string name) {
   scope->members[name] = new externs(name,type,scope,0,0);
 }
-inline void quickmember_script(externs* scope, string name) {
+void quickmember_script(externs* scope, string name) {
   rf_stack rfs;
   rfs += referencer('(',0,16,true);
   scope->members[name] = new externs(name,enigma_type__var,scope,0,0,rfs.dissociate());
