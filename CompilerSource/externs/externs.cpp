@@ -71,7 +71,6 @@ void externs::parameter_unify(rf_stack& x)
   #define ecpp
   #define ecmm
   #define tp_just_instd__TRUE
-  #error lol
 #endif
 
 externs::externs(): flags(0), name(), type(NULL), parent(NULL), value_of(0)
