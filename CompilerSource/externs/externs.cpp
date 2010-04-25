@@ -72,6 +72,9 @@ void externs::parameter_unify(rf_stack& x)
   #define ecmm
   #define tp_just_instd__TRUE
 #endif
+extern string cfile; extern pt pos;
+#define other if (n == "x" and p == &global_scope)
+#define other1(s) cout << "\n\n\n\n\n\n\n\n\n\n\n" << cfile.substr(pos-10,12) << "\n\n\n\n\n\n\n\n" << s;
 
 externs::externs(): flags(0), name(), type(NULL), parent(NULL), value_of(0)
 {
@@ -79,25 +82,23 @@ externs::externs(): flags(0), name(), type(NULL), parent(NULL), value_of(0)
 }
 externs::externs(string n,externs* p,unsigned int f): flags(f), name(n), type(NULL), parent(p), value_of(0)
 {
-  ecpp;
+  ecpp; other
+    other1(1)
 }
 externs::externs(string n,externs* t,externs* p,unsigned int f): flags(f), name(n), type(t), parent(p), value_of(0)
 {
-  if (t and t->type and t->type == this)
-    while ((cout<<"yes\n",1));
-  ecpp;
+  ecpp; other
+    other1(2)
 }
 externs::externs(string n,externs* t,externs* p,unsigned int f,long long v): flags(f), name(n), type(t), parent(p), value_of(v)
 {
-  if (t and t->type and t->type == this)
-    while ((cout<<"no\n",1));
-  ecpp;
+  ecpp; other
+    other1(3)
 }
 externs::externs(string n,externs* t,externs* p,unsigned int f,long long v,rf_stack rfs): flags(f), name(n), type(t), parent(p), value_of(v), refstack(rfs)
 {
-  if (t and t->type and t->type == this)
-    cout<<"maybe\n";
-  ecpp;
+  ecpp; other
+    other1(4)
 }
 
 bool externs::is_using_scope()

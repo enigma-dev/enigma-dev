@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
   wto.close();
   
   EGMmain += "\n\n";
-  EGMmain += fc("./CompilerSource/cfile_parse/auxilary.h");
+  //EGMmain = fc("./CompilerSource/cfile_parse/auxilary.h");
   
   clock_t cs = clock();
   pt a = parse_cfile(EGMmain);
@@ -106,6 +106,8 @@ int main(int argc, char *argv[])
     print_definition("__PTRDIFF_TYPE__");
     return 1;
   }
+  
+  //print_scope_members(&global_scope);
   
   cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
   //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";

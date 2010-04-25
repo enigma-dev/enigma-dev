@@ -65,7 +65,9 @@ bool preprocess_separately(string &macs)
   bool stringify = false;
   unsigned int macrod = 0;
   varray<string> inmacros;
-  for (pt i = 0; i < macs.length(); i++)
+  //cout << "parse " << macs << endl;
+  pt i = 0; 
+  while (i < macs.length())
   {
     if (is_digit(macs[i]))
     {
@@ -80,8 +82,9 @@ bool preprocess_separately(string &macs)
         macs.replace(is,i-is,ns);
         i += ns.length() - osl;
       }
+      i++; continue;
     }
-    else if (is_letter(macs[i]))
+    if (is_letter(macs[i]))
     {
       const pt si = i;
       while (is_letterd(macs[++i]));
@@ -94,7 +97,7 @@ bool preprocess_separately(string &macs)
         {
           stringify = false;
           macs.replace(si,i-si,escaped_string(n));
-          continue;
+          i++; continue;
         }
         
         bool recurs=0;
@@ -114,12 +117,13 @@ bool preprocess_separately(string &macs)
           
           macs.replace(si,i-si,macrostr);
           inmacros[macrod++] = n;
-          i = si;
+          i = si; continue;
         }
         //else puts("Recursing macro. This may be a problem.\r\n");
       }
+      i++; continue;
     }
-    else if (macs[i] == '#')
+    if (macs[i] == '#')
     {
       if (macs[i+1] == '#')
       {
@@ -127,7 +131,7 @@ bool preprocess_separately(string &macs)
           return false;
         pt ib = i;
         while (is_useless(macs[--ib])); ib++;
-        i++;  while (is_useless(macs[++ib]));
+        i++;  while (is_useless(macs[++i]));
         
         macs.erase(ib,i-ib);
         i = ib;
@@ -137,19 +141,23 @@ bool preprocess_separately(string &macs)
         stringify = true; //Notice the parallel in structure to the below function. No, not "redundant." The word is "parallel." <_<
         macs.erase(i,1);
       }
+      i++; continue;
     }
+    i++; continue;
   }
+  //cout << " >> " << macs << endl;
   return true;
 }
 
 bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments)
 {
+  //cout << "parse " << macrostr << endl;
   //Skip comments. Ignore this block; it's savage but efficient.
   //Basically, I don't trust the compiler to correctly unroll a large conditional of shared parts.
     pos--; do you_know_you_love_this_block: if (cfile[++pos] == '/') {
     if (cfile[++pos] == '/') {
       pos += cppcomments;
-      while (cfile[++pos] and cfile[pos] != '\n' and cfile[pos] != '\r'); goto you_know_you_love_this_block;
+      while (cfile[++pos] and cfile[pos] != '\n' and cfile[pos] != '\r'); goto you_know_you_love_this_block; //continue is a bad idea here
     } else if (cfile[pos] == '*') {
       pos += cppcomments;
       while (cfile[pos] and (cfile[pos++] != '*' or cfile[pos] != '/')); goto you_know_you_love_this_block;
@@ -204,7 +212,17 @@ bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr
   
   for (pt i = 0; i < macrostr.length(); ) //unload the array of values we created before into the macro's definiens
   {
-    if (is_letter(macrostr[i]) and !is_digit(macrostr[i-1]))
+    if (is_digit(macrostr[i]))
+    {
+      const pt is = i;
+      while (is_letterd(macrostr[++i]));
+      if (stringify) {
+        macrostr.replace(is,i,"\""+macrostr.substr(is,i)+"\"");
+        stringify = false;
+      }
+      continue;
+    }
+    if (is_letter(macrostr[i]))
     {
       const pt si = i;
       
@@ -252,5 +270,6 @@ bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr
     else i++;
   }
   //cout << endl << endl << endl << macrostr << endl << endl << endl << endl << endl << endl;
+  //cout << " >> " << macrostr << endl;
   return true;
 }
