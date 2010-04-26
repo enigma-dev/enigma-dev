@@ -69,7 +69,16 @@ enum {
   E_ERROR_NO_ERROR_LOL,
   E_ERROR_PLUGIN_FUCKED_UP,
   E_ERROR_SYNTAX,
+  E_ERROR_BUILD,
   E_ERROR_WUT
+};
+
+//Mode codes
+enum cmodes {
+  mode_run,
+  mode_debug,
+  mode_build,
+  mode_compile
 };
 
 #include "event_ids.h"

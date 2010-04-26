@@ -92,12 +92,6 @@ void clear_ide_editables()
   
 }
 
-enum cmodes {
-  mode_run,
-  mode_debug,
-  mode_build,
-  mode_compile
-};
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
@@ -109,11 +103,11 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   if (es->fileVersion != 600)
     cout << "Error: Incorrect version. File is too " << ((es->fileVersion > 600)?"new":"old") << " for this compiler.";
   
-  /**
+  /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment One: This segment of the compile process is responsible for
     translating the code into C++. Basically, anything essential to the
     compilation of said code is dealt with during this segment.
-  */
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
   ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.  
   
@@ -483,6 +477,41 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       wto << "\n}\n";
     }
   wto.close();
+  
+  
+  
+  
+  /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    Segment two: Now that the game has been exported as C++ and raw
+    resources, our task is to compile the game itself via GNU Make.
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+  
+  string gflags = "";
+  #if   TARGET_PLATFORM_ID == OS_WINDOWS
+    string glinks = "-lopengl32 \"\"";
+  #else
+    string glinks = "-lGL -lz";
+  #endif
+  string graphics = "OpenGL";
+  string platform = "xlib";
+  
+  string make = "make Game ";
+  make += "GMODE=Run ";
+  make += "GFLAGS=\"" + gflags   + "\" ";
+  make += "GLINKS=\"" + glinks   + "\" ";
+  make += "GRAPHICS=" + graphics + " ";
+  make += "PLATFORM=" + platform + " ";
+  
+  int makeres = system(make.c_str());
+  if (makeres) {
+    cout << "Make returned error " << makeres << ". That means this can be any combination of either of our faults.\n";
+    return E_ERROR_BUILD;
+  }
+  cout << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";
+  int gameres = system("ENIGMAsystem/SHELL/game.exe");
+  cout << "Game returned " << gameres << "\n";
+  
+  
   
   /*
     Segment three: Add resources into the game executable
