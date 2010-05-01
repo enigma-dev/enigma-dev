@@ -49,6 +49,18 @@ struct dectrip {
   dectrip();
   dectrip(string t);
   dectrip(string t,string p, string s);
+  
+  bool defined();
+  bool operator!= (const dectrip&);
+};
+struct decquad {
+  string type, prefix, suffix, value;
+  decquad();
+  decquad(string t);
+  decquad(string t,string p, string s, string v);
+  
+  bool defined();
+  bool operator!= (const decquad&);
 };
 struct parsed_object
 {
@@ -59,8 +71,19 @@ struct parsed_object
   
   map<string,int> calls;      //Any function or script KEY called.
   map<string,dectrip> locals;  //Any variable KEY used but not declared, or declared as local VALUE.
-  map<string,dectrip> globals; //Any variable KEY or declared as global VALUE.
+  map<string,dectrip> globals; //Any variable KEY declared as global VALUE.
+  map<string,decquad> consts;  //Any variable KEY declared as constant VALUE.
+  map<string,int> funcs;       //Any function KEY called with at most VALUE parameters.
   map<string,int> dots;       //Any attribute KEY accessed via a dot, as in a.KEY
+  
+  typedef map<string,dectrip>::iterator locit;
+  typedef map<string,dectrip>::iterator globit;
+  typedef map<string,decquad>::iterator constit;
+  typedef map<string,int>::iterator funcit;
+  typedef map<string,int>::iterator dotit;
+  
+  void copy_from(parsed_object&, string, string);
+  void copy_calls_from(parsed_object&);
   
   parsed_object();
   parsed_object(string,int,int);

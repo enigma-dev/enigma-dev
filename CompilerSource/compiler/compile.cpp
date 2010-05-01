@@ -38,16 +38,19 @@
 #endif
 
 
+#include <math.h>
 #include <string>
 #include <iostream>
 #include <fstream>
 using namespace std;
 #define flushl (fflush(stdout), "\n")
+#define flushs (fflush(stdout), " ")
 
 #include "../externs/externs.h"
 #include "../syntax/syncheck.h"
 #include "../parser/parser.h"
 #include "compile_includes.h"
+#include "compile_organization.h"
 
 void clear_ide_editables()
 {
@@ -133,8 +136,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     quickmember_variable(globals_scope,builtin_type__int,es->backgrounds[i].name);
     
   cout << "Copying path names [kidding, these are totally not implemented :P] [" << es->pathCount << "]" << flushl;
-  for (int i = 0; i < es->spriteCount; i++)
-    quickmember_variable(globals_scope,builtin_type__int,es->sprites[i].name);
+  for (int i = 0; i < es->pathCount; i++)
+    quickmember_variable(globals_scope,builtin_type__int,es->paths[i].name);
     
   cout << "Copying script names [" << es->scriptCount << "]" << flushl;
   for (int i = 0; i < es->scriptCount; i++)
@@ -158,10 +161,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   
   
-  ///Next we do a simple pares of the code, scouting for some variable names and adding semicolons.
-  cout << "SYNTAX CHECKING AND PRIMARY PARSING" << flushl;
+  ///Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
+  cout << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
   
   cout << es->scriptCount << " Scripts:" << endl;
+  parsed_script *scripts[es->scriptCount];
+  map<string,parsed_script*> scr_lookup;
+  
+  //First we just parse the scripts to add semicolons and collect variable names
   for (int i = 0; i < es->scriptCount; i++)
   {
     int a = syncheck::syntacheck(es->scripts[i].code);
@@ -169,36 +176,84 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       cout << "Syntax error in script `" << es->scripts[i].name << "'" << endl << syncheck::error << flushl;
       return E_ERROR_SYNTAX;
     }
+    scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
+    parser_main(es->scripts[i].code,&scripts[i]->pev);
+    cout << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
     fflush(stdout);
   }
-
+  
+  cout << "\"Linking\" scripts" << flushl;
+  
+  //Next we traverse the scripts for dependencies.
+  unsigned nec_iters = 0;
+  if (es->scriptCount > 0)
+    nec_iters = ceilf(log2(es->scriptCount));
+  cout << "`Linking' " << es->scriptCount << " scripts in " << nec_iters << " passes...\n";
+  for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
+  {
+    for (int _im = 0; _im < es->scriptCount; _im++) //For each script
+    {
+      parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
+      for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
+      {
+        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+        if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
+          curscript->obj.copy_calls_from(subscr->second->obj);
+      }
+    }
+  }
+  
+  cout << "Completing script \"Link\"" << flushl;
+  
+  for (int _im = 0; _im < es->scriptCount; _im++) //For each script
+  {
+    string curscrname = es->scripts[_im].name;
+    parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
+    cout << "Linking `" << curscrname << "':\n";
+    for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
+    {
+      cout << string(it->first) << "::";
+      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+      if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
+      {
+        cout << "is_script::";
+        curscript->obj.copy_from(subscr->second->obj,  "script `"+it->first+"'",  "script `"+curscrname + "'");
+      }
+    }
+    cout << endl;
+  }
+  cout << "Done." << flushl;
+  
+  
   cout << es->gmObjectCount << " Objects:" << endl;
   for (int i = 0; i < es->gmObjectCount; i++)
   {
     //For every object in Ism's struct, make our own
     unsigned ev_count = 0;
     parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object(es->gmObjects[i].name,es->gmObjects[i].id,es->gmObjects[i].spriteId);
-    cout << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " sub-events: " << flushl;
+    
+    cout << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " events: " << flushl;
     
     for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
-      if (es->gmObjects[i].mainEvents[ii].eventCount) //For every MainEvent that contains event code
+    if (es->gmObjects[i].mainEvents[ii].eventCount) //For every MainEvent that contains event code
     {
       //For each main event in that object, make a copy
       const int mev_id = es->gmObjects[i].mainEvents[ii].id;
       cout << "  Event[" << es->gmObjects[i].mainEvents[ii].id << "]: ";
       
+      cout << "  Parsing " << es->gmObjects[i].mainEvents[ii].eventCount << " sub-events:" << flushl;
       for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
       {
         //For each individual event (like begin_step) in the main event (Step), parse the code
         const int sev_id = es->gmObjects[i].mainEvents[ii].events[iii].id;
-        parsed_event &pev = pob->events[ev_count++];
-        cout << "[" << mev_id << "," << sev_id << "]";
+        parsed_event &pev = pob->events[ev_count++]; //Make sure each sub event knows its main event's event ID.
         pev.mainId = mev_id, pev.id = sev_id;
         
         //Copy the code into a string, and its attributes elsewhere
         string code = es->gmObjects[i].mainEvents[ii].events[iii].code;
         
         //Syntax check the code
+        cout << "Check `" << es->gmObjects[i].name << "::" << event_get_enigma_main_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << "..." << flushs;
         int sc = syncheck::syntacheck(code);
         if (sc != -1)
         {
@@ -206,10 +261,13 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
                << es->gmObjects[i].mainEvents[ii].events[iii].id << ":\n" << format_error(code,syncheck::error,sc) << flushl;
           return E_ERROR_SYNTAX;
         }
+        cout << "Done. Starting parse..." << flushs;
         
         //Add this to our objects map
         pev.myObj = pob; //link to its parent
         parser_main(code,&pev);
+        
+        cout << "Done." << flushl;
       }
     }
     fflush(stdout);
@@ -221,10 +279,31 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     fflush(stdout);
   }
   
+  //Next we link the scripts into the objects.
+  cout << "\"Linking\" scripts into the objects..." << flushl;
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+  {
+    parsed_object* t = i->second;
+    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
+    {
+      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+      if (subscr != scr_lookup.end()) //If we've got ourselves a script
+        t->copy_calls_from(subscr->second->obj);
+    }
+    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
+    {
+      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+      if (subscr != scr_lookup.end()) //If we've got ourselves a script
+        t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+    }
+  }
+  cout << "\"Link\" complete." << flushl;
+  
+  
   ///Now, time to review and "link": Our linking is less complicated than compiled code linking.
   ///This process is designed to offer a better understanding of used variables from event to event
   ///and then from instance to instance.
-  cout << "Printing all objects and events: " << flushl;
+  /*cout << "Printing all objects and events: " << flushl;
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
   {
     cout << "Object `"<< i->second->name << "':" << flushl;
@@ -233,7 +312,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       cout << "Event(" << i->second->events[ii].mainId << "," << i->second->events[ii].id << "):" << flushl;
       cout << i->second->events[ii].code << flushl << flushl << flushl;
     }
-  }
+  }*/
   
   //Define some variables based on usage
   bool used__object_set_sprite = 0;
@@ -331,6 +410,23 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
           wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
         
+        parsed_object* t = i->second;
+        for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
+        {
+          map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+          if (subscr != scr_lookup.end()) //If we've got ourselves a script
+          {
+            const char* comma = "";
+            wto << "\n    enigma::variant " << it->first << "(";
+            for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
+            {
+              wto << "enigma::variant argument" << argn << comma;
+              comma = ", ";
+            }
+            wto << ");";
+          }
+        } wto << "\n    ";
+        
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
         {
           //Look up the event name
@@ -371,6 +467,25 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
         wto << "enigma::variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
           print_to_file(i->second->events[ii].code,i->second->events[ii].synt,2,wto);
         wto << "\n  return 0;\n}\n\n";
+      }
+      
+      parsed_object* t = i->second;
+      for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
+      {
+        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+        if (subscr != scr_lookup.end()) //If we've got ourselves a script
+        {
+          const char* comma = "";
+          wto << "enigma::variant enigma::OBJ_" << i->second->name << "::" << it->first << "(";
+          for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
+          {
+            wto << "enigma::variant argument" << argn << comma;
+            comma = ", ";
+          }
+          wto << ")\n{\n  ";
+          print_to_file(subscr->second->pev.code,subscr->second->pev.synt,2,wto);
+          wto << "\n}\n\n";
+        }
       }
     }
     

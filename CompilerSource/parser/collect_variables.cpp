@@ -48,6 +48,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
   darray<scope_ignore*> igstack;
   igstack[igpos] = new scope_ignore;
   
+  cout << "find parent..."; fflush(stdout);
   externs* pscope = NULL;
   current_scope = &global_scope;
   extiter ns_enigma = current_scope->members.find("enigma");
@@ -58,6 +59,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
     if (parent != ns_enigma->second->members.end())
       pscope = parent->second;
   }
+  cout << "found"; fflush(stdout);
   
   for (pt pos = 0; pos < code.length(); pos++)
   {
@@ -74,6 +76,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
     
     if (synt[pos] == 'L') //Double meaning.
     {
+      cout << "L"; fflush(stdout);
       //Determine which meaning it is.
       const int sp = pos;
       pos += 5; //Skip "L-O-C-A-L" or "G-L-O-B-A"
@@ -92,11 +95,13 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       synt.erase(sp,pos-sp);
       pos = sp;
       
+      cout << "\\"; fflush(stdout);
       goto past_this_if;
     }
     if (synt[pos] == 't')
     {
       past_this_if:
+      cout << "t"; fflush(stdout);
       
       //Skip to the end of the typename, remember where we started
       const int tsp = pos;
@@ -193,16 +198,20 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         }
         cout << "~" << code[pos-1];
       }
+      cout << "\\"; fflush(stdout);
     }
     if (synt[pos] == 'n')
     {
+      cout << "N"; fflush(stdout);
       const pt spos = pos;
       while (synt[++pos] == 'n');
-      if (synt[pos] != '(') // If it isn't a function (we assume it's nothing else)
+      
+      //Looking at a straight identifier. Make sure it actually needs declared.
+      const string nname = code.substr(spos,pos-spos);
+      
+      if (synt[pos] != '(') // If it isn't a function (we assume it's nothing other than a function or varname)
       {
-        //Looking at a straight identifier. Make sure it actually needs declared.
-        const string nname = code.substr(spos,pos-spos);
-        
+        cout << "("; fflush(stdout);
         //First, check that it's not a global
         if (find_extname(nname,0xFFFFFFFF))
           continue;
@@ -221,8 +230,31 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
             goto continue_2;
         
         pev->myObj->locals[nname] = dectrip();
-        continue_2: continue;
+        continue_2: cout << ")"; fflush(stdout); continue;
       }
+      else //Since a syntax check already completed, we assume this is a valid function
+      {
+        cout << "!"; fflush(stdout);
+        bool contented = false;
+        unsigned pars = 1, args = 0;
+        for (pt i = pos+1; pars; i++)
+        {
+          if (synt[i] == ',' and pars == 1) {
+            args += contented;
+            contented = false; continue;
+          }
+          contented = true;
+          if (synt[i] == '(') {
+            pars++; continue;
+          }
+          if (synt[i] == ')') { //TODO: if (a,) is one arg according to ISO, move this before contented = true;
+            pars--; continue;
+          }
+        }
+        pev->myObj->funcs[nname] = args;
+        cout << "\\"; fflush(stdout);
+      }
+      cout << "\\"; fflush(stdout);
     }
   }
   

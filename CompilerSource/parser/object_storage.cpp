@@ -27,6 +27,7 @@
 
 #include <map>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -39,9 +40,68 @@ dectrip::dectrip(): type(), prefix(), suffix() {}
 dectrip::dectrip(string t): type(t), prefix(), suffix() {}
 dectrip::dectrip(string t,string p, string s): type(t), prefix(p), suffix(s) {}
 
+decquad::decquad(): type(), prefix(), suffix(), value() {}
+decquad::decquad(string t): type(t), prefix(), suffix(), value() {}
+decquad::decquad(string t,string p, string s, string v): type(t), prefix(p), suffix(s), value(v) {}
+
+
+bool dectrip::defined() {
+  return type != "" or prefix != "" or suffix != "";
+}
+bool dectrip::operator!= (const dectrip& x) {
+  return type != x.type or prefix != x.prefix or suffix != x.suffix;
+}
+bool decquad::defined() {
+  return type != "" or prefix != "" or suffix != "" or value != "";
+}
+bool decquad::operator!= (const decquad& x) {
+  return type != x.type or prefix != x.prefix or suffix != x.suffix or value != x.value;
+}
+
 parsed_event::parsed_event(): id(0), mainId(0), otherObjId(-4), myObj(NULL) {}
 parsed_event::parsed_event(parsed_object *po): id(0), mainId(0), otherObjId(-4), myObj(po) {}
 parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), otherObjId(-4), myObj(po) {}
 parsed_object::parsed_object() {}
 parsed_object::parsed_object(string n, int i, int s): name(n), id(i), sprite_index(s) {}
 map<int,parsed_object*> parsed_objects;
+
+void parsed_object::copy_from(parsed_object& source, string sourcename, string destname)
+{
+  parsed_object& dest = *this;
+  //Copy 
+  for (parsed_object::dotit vit = source.dots.begin(); vit != source.dots.end(); vit++)
+    dest.dots[vit->first] = 0;
+  for (parsed_object::locit vit = source.locals.begin(); vit != source.locals.end(); vit++)
+  {
+    dectrip &t = dest.locals[vit->first];
+    if (!t.defined())
+      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+    else if (vit->second.defined() and vit->second != t)
+      cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
+  }
+  for (parsed_object::globit vit = source.locals.begin(); vit != source.locals.end(); vit++)
+  {
+    dectrip &t = dest.globals[vit->first];
+    if (!t.defined())
+      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+    else if (vit->second.defined() and vit->second != t)
+      cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
+  }
+  for (parsed_object::constit vit = source.consts.begin(); vit != source.consts.end(); vit++)
+  {
+    decquad &t = dest.consts[vit->first];
+    if (!t.defined())
+      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+    else if (vit->second.defined() and vit->second != t)
+      cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
+  }
+}
+//subscr->second
+void parsed_object::copy_calls_from(parsed_object& source)
+{
+  for (parsed_object::funcit sit = source.funcs.begin(); sit != source.funcs.end(); sit++)
+  {
+    int &x = funcs[sit->first]; //copy the function into curscript's called list.
+    x = x > sit->second ? x : sit->second; //use larger max param count
+  }
+}

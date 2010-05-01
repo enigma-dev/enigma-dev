@@ -181,16 +181,24 @@ int parser_ready_input(string &code,string &synt)
       else if (name == "then")
         continue; //"Then" is a truly useless keyword. I see no need to preserve it.
       
-      if (last_token == 'n' and c == 'n')
-        code[bpos] = synt[bpos] = ';', bpos++;
+      if (last_token == c)
+      {
+        if (c == 'n')
+          code[bpos] = synt[bpos] = ';', bpos++;
+        else {
+          code[bpos] = ' ';
+          synt[bpos++] = c;
+        }
+      }
       
-      
+      //Copy the identifier and its token over
       for (pt i = 0; i < name.length(); i++) {
         code[bpos]   = name[i];
         synt[bpos++] = c;
       }
       
       //Accurately reflect newly defined types and structures
+      //These will be added as types now, but their innards will be ignored until ENIGMA "link"
       if (c == 'n' and last_token == 'C') { //"class <name>"
         quicktype(EXTFLAG_STRUCT,name); //Add the string we used to determine if this token is 'n' as a struct
       }
@@ -331,6 +339,7 @@ inline bool need_semi(char c1,char c2,const bool sepd)
 
 int parser_reinterpret(string &code,string &synt)
 {
+  cout << "Second pass...";
   for (pt pos = 1; pos < code.length(); pos++)
   {
     if (synt[pos] == '0' and synt[pos-1] == '.')
@@ -348,13 +357,14 @@ int parser_reinterpret(string &code,string &synt)
       //else if (synt[pos+1]  == '(') // This case doesn't need handled. int() is fine.s
     }
   }
+  cout << "done. ";
   return 0;
 }
 
 //Add semicolons
 void parser_add_semicolons(string &code,string &synt)
 {
-  cout << synt << endl << code << endl;
+  cout << "adding semicolons...";//synt << endl << code << endl;
 
   //Allocate enough memory to hold all the semicolons we'd ever need
   char *codebuf = new char[code.length()*2+1];
@@ -470,8 +480,9 @@ void parser_add_semicolons(string &code,string &synt)
   code = string(codebuf,bufpos);
   synt = string(syntbuf,bufpos);
 
-  cout << code << endl << synt << endl << endl;
-
+  //cout << code << endl << synt << endl << endl;
+  //cout << "cp1"; fflush(stdout);
+  
   //This part's trickier; add semicolons only after do ... until and do ... while
   pt len = synt.length();
   for (pt pos=0; pos<len; pos++)
@@ -569,13 +580,15 @@ void parser_add_semicolons(string &code,string &synt)
       cout << "<<" << code << "\r\n<<" << synt << "\r\n\r\n";
     }
   }
+  
+  //cout << "cp2"; fflush(stdout);
 
   //now we'll do ONE MORE pass, to take care of (())
   len = code.length();
   for (pt pos = 0; pos<len; pos++)
   if (synt[pos] == '(' and synt[pos+1]=='(')
   {
-    const int sp = pos;
+    const pt sp = pos;
 
     pos+=2;
     int pl = 1;
@@ -595,6 +608,7 @@ void parser_add_semicolons(string &code,string &synt)
     }
     pos = sp;
   }
+  cout << "done. "; fflush(stdout);
 }
 
 
