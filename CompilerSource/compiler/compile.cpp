@@ -418,9 +418,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
           {
             const char* comma = "";
             wto << "\n    enigma::variant " << it->first << "(";
-            for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
+            for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
             {
-              wto << "enigma::variant argument" << argn << comma;
+              wto << comma << "enigma::variant argument" << argn;
               comma = ", ";
             }
             wto << ");";
@@ -477,14 +477,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
         {
           const char* comma = "";
           wto << "enigma::variant enigma::OBJ_" << i->second->name << "::" << it->first << "(";
-          for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
+          for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
           {
-            wto << "enigma::variant argument" << argn << comma;
+            wto << comma << "enigma::variant argument" << argn;
             comma = ", ";
           }
           wto << ")\n{\n  ";
           print_to_file(subscr->second->pev.code,subscr->second->pev.synt,2,wto);
-          wto << "\n}\n\n";
+          wto << "\n  return 0;\n}\n\n";
         }
       }
     }

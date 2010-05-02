@@ -483,6 +483,11 @@ namespace syncheck
 
               if (lastnamed[level]==LN_OPERATOR)
               { error="Unexpected brace at this point"; return pos; }
+              
+              if (plevel) {
+                error = plevelt[plevel] == PLT_BRACKET ? "Expected closing bracket before brace" : "Expected closing parenthesis before brace";
+                return pos;
+              }
 
               level+=!isbr;
               levelt[level]=(isbr?LEVELTYPE_SWITCH_BLOCK:LEVELTYPE_BRACE);

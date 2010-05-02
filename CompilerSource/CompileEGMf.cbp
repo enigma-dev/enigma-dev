@@ -150,6 +150,7 @@
 		<Unit filename="compiler/compile.h" />
 		<Unit filename="compiler/compile_includes.cpp" />
 		<Unit filename="compiler/compile_includes.h" />
+		<Unit filename="compiler/compile_organization.h" />
 		<Unit filename="compiler/event_ids.h" />
 		<Unit filename="compiler/license_string.h" />
 		<Unit filename="compiler/output_locals.cpp" />

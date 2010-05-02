@@ -417,9 +417,10 @@ int close_statement(string& code,pt& pos)
     }
     if (plevelt[plevel] != PLT_FORSTATEMENT) {
       error = plevelt[plevel] == PLT_BRACKET?"Expected closing bracket before this point" : "Expected closing brace before this point";
+      return pos;
     }
     const int ef = lower_to_level(LEVELTYPE_FOR_PARAMETERS,"otherwise meaningless parenthetical expression");
-      if (ef != -1) return ef;
+      if (ef != -1) return pos;
     if (statement_pad[level] > 1)
       statement_pad[level]--;
     else {

@@ -81,8 +81,10 @@
       if (code[pos]==',' && cnt == 1)
       {
         exhausted = false;
-        if (args > argcmax and argcmax != -1)
+        if (args > argcmax and argcmax != -1) {
+          error = "Too many arguments to function `"+func->name+"': Provided "+tostring(args)+" at this point, requested "+tostring(argcmax);
           return pos;
+        }
       }
     }
     
