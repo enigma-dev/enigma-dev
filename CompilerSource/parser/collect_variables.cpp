@@ -31,6 +31,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <stdio.h>
 using namespace std;
 
 struct scope_ignore {
@@ -47,12 +48,12 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
   int igpos = 0;
   darray<scope_ignore*> igstack;
   igstack[igpos] = new scope_ignore;
-  
+
   cout << "find parent..."; fflush(stdout);
   externs* pscope = NULL;
   current_scope = &global_scope;
   extiter ns_enigma = current_scope->members.find("enigma");
-  
+
   // Find the parent object
   if (ns_enigma != current_scope->members.end()) {
     extiter parent = ns_enigma->second->members.find("object_collisions");
@@ -60,7 +61,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       pscope = parent->second;
   }
   cout << "found"; fflush(stdout);
-  
+
   for (pt pos = 0; pos < code.length(); pos++)
   {
     if (synt[pos] == '{') {
@@ -71,9 +72,9 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       delete igstack[igpos--];
       continue;
     }
-    
+
     int out_of_scope = 0; //Not declaring outside this scope
-    
+
     if (synt[pos] == 'L') //Double meaning.
     {
       cout << "L"; fflush(stdout);
@@ -89,12 +90,12 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       }
       //We're at either global declarator or local declarator: record which scope it is.
       out_of_scope = 1 + (code[sp] == 'g'); //If the first character of this token is 'g', it's global. Otherwise we assume it's local.
-      
+
       //Remove the keyword from the code
       code.erase(sp,pos-sp);
       synt.erase(sp,pos-sp);
       pos = sp;
-      
+
       cout << "\\"; fflush(stdout);
       goto past_this_if;
     }
@@ -102,14 +103,14 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
     {
       past_this_if:
       cout << "t"; fflush(stdout);
-      
+
       //Skip to the end of the typename, remember where we started
       const int tsp = pos;
       while (synt[++pos] == 't');
-      
+
       //Copy the type
       string type_name = code.substr(tsp,pos-tsp);
-      
+
       if (out_of_scope)
       {
         //Remove the keyword from the code
@@ -117,13 +118,13 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         synt.erase(tsp,pos-tsp);
         pos = tsp;
       }
-      
+
       string lid;
       pt spos = pos;
       bool has_init = false;
-      
+
       string prefixes, suffixes;
-      
+
       //Begin iterating the declared variables
       while (pos < code.length())
       {
@@ -131,7 +132,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         {
           const bool donehere = (synt[pos] == ';');
           //cout << "\n" << code.substr(0,spos) << "<<" << code.substr(spos,pos-spos) << ">>" << code.substr(pos) << endl << endl;// << synt.substr(0,pos) << "<<>>" << code.substr(pos) << endl << endl;
-          
+
           if (out_of_scope) //Designated for a different scope: global or local
           {
             //Declare this as a specific type
@@ -139,7 +140,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
               pev->myObj->globals[lid] = dectrip(type_name,prefixes,suffixes);
             else
               pev->myObj->locals[lid] = dectrip(type_name,prefixes,suffixes);
-            
+
             if (!has_init) //If this statement does nothing other than declare, remove it
             {
               code.erase(spos,pos+1-spos);
@@ -156,9 +157,9 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
             cout << "Added `" << lid << "' to ig" << endl;
           }
           cout << "endif ';'" << endl;
-          
+
           prefixes = suffixes = "";
-          
+
           spos = pos;
           has_init = false;
           if (donehere) {
@@ -205,17 +206,17 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       cout << "N"; fflush(stdout);
       const pt spos = pos;
       while (synt[++pos] == 'n');
-      
+
       //Looking at a straight identifier. Make sure it actually needs declared.
       const string nname = code.substr(spos,pos-spos);
-      
+
       if (synt[pos] != '(') // If it isn't a function (we assume it's nothing other than a function or varname)
       {
         cout << "("; fflush(stdout);
         //First, check that it's not a global
         if (find_extname(nname,0xFFFFFFFF))
           continue;
-        
+
         //Iterate the tiers of the parent object
         for (externs *cs = pscope; cs; cs = (cs->ancestors.size ? cs->ancestors[0] : NULL) )
         {
@@ -223,12 +224,12 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
           if (cs->members.find(nname) != cs->members.end())
             goto continue_2;
         }
-        
+
         //Now make sure we're not specifically ignoring it
         for (int i = igpos; i >= 0; i--)
           if (igstack[i]->i.find(nname) != igstack[igpos]->i.end())
             goto continue_2;
-        
+
         pev->myObj->locals[nname] = dectrip();
         continue_2: cout << ")"; fflush(stdout); continue;
       }
@@ -257,9 +258,9 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       cout << "\\"; fflush(stdout);
     }
   }
-  
+
   cout << "*****************************FINISHED********************\n";
-  
+
   //Store these for later.
   pev->code = code;
   pev->synt = synt;
