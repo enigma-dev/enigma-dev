@@ -43,8 +43,8 @@
 				<Option working_dir="../" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option parameters="-jar lgm16b4.jar" />
-				<Option host_application="java" />
+				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
+				<Option host_application="xterm" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-O2" />
@@ -60,8 +60,8 @@
 				<Option working_dir="../" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option parameters="-jar lgm16b4.jar" />
-				<Option host_application="java" />
+				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
+				<Option host_application="xterm" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -151,6 +151,10 @@
 		<Unit filename="compiler/compile_includes.cpp" />
 		<Unit filename="compiler/compile_includes.h" />
 		<Unit filename="compiler/compile_organization.h" />
+		<Unit filename="compiler/components/components.h" />
+		<Unit filename="compiler/components/parse_and_link.cpp" />
+		<Unit filename="compiler/components/write_object_data.cpp" />
+		<Unit filename="compiler/components/write_room_data.cpp" />
 		<Unit filename="compiler/event_ids.h" />
 		<Unit filename="compiler/license_string.h" />
 		<Unit filename="compiler/output_locals.cpp" />

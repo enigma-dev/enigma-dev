@@ -38,11 +38,12 @@
 #endif
 
 
-#include <math.h>
 #include <string>
 #include <iostream>
 #include <fstream>
+
 using namespace std;
+
 #define flushl (fflush(stdout), "\n")
 #define flushs (fflush(stdout), " ")
 
@@ -50,7 +51,9 @@ using namespace std;
 #include "../syntax/syncheck.h"
 #include "../parser/parser.h"
 #include "compile_includes.h"
-#include "compile_organization.h"
+#include "compile_common.h"
+
+#include "components/components.h"
 
 void clear_ide_editables()
 {
@@ -166,156 +169,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   cout << es->scriptCount << " Scripts:" << endl;
   parsed_script *scripts[es->scriptCount];
-  map<string,parsed_script*> scr_lookup;
   
-  //First we just parse the scripts to add semicolons and collect variable names
-  for (int i = 0; i < es->scriptCount; i++)
-  {
-    int a = syncheck::syntacheck(es->scripts[i].code);
-    if (a != -1) {
-      cout << "Syntax error in script `" << es->scripts[i].name << "'" << endl << syncheck::error << flushl;
-      return E_ERROR_SYNTAX;
-    }
-    scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
-    parser_main(es->scripts[i].code,&scripts[i]->pev);
-    cout << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
-    fflush(stdout);
-  }
+  scr_lookup.clear();
+  used_funcs::zero();
   
-  cout << "\"Linking\" scripts" << flushl;
+  int res;
   
-  //Next we traverse the scripts for dependencies.
-  unsigned nec_iters = 0;
-  if (es->scriptCount > 0)
-    nec_iters = ceilf(log2(es->scriptCount));
-  cout << "`Linking' " << es->scriptCount << " scripts in " << nec_iters << " passes...\n";
-  for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
-  {
-    for (int _im = 0; _im < es->scriptCount; _im++) //For each script
-    {
-      parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
-      for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
-      {
-        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-        if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
-          curscript->obj.copy_calls_from(subscr->second->obj);
-      }
-    }
-  }
-  
-  cout << "Completing script \"Link\"" << flushl;
-  
-  for (int _im = 0; _im < es->scriptCount; _im++) //For each script
-  {
-    string curscrname = es->scripts[_im].name;
-    parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
-    cout << "Linking `" << curscrname << "':\n";
-    for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
-    {
-      cout << string(it->first) << "::";
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
-      {
-        cout << "is_script::";
-        curscript->obj.copy_from(subscr->second->obj,  "script `"+it->first+"'",  "script `"+curscrname + "'");
-      }
-    }
-    cout << endl;
-  }
-  cout << "Done." << flushl;
-  
-  
-  cout << es->gmObjectCount << " Objects:" << endl;
-  for (int i = 0; i < es->gmObjectCount; i++)
-  {
-    //For every object in Ism's struct, make our own
-    unsigned ev_count = 0;
-    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object(es->gmObjects[i].name,es->gmObjects[i].id,es->gmObjects[i].spriteId);
-    
-    cout << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " events: " << flushl;
-    
-    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
-    if (es->gmObjects[i].mainEvents[ii].eventCount) //For every MainEvent that contains event code
-    {
-      //For each main event in that object, make a copy
-      const int mev_id = es->gmObjects[i].mainEvents[ii].id;
-      cout << "  Event[" << es->gmObjects[i].mainEvents[ii].id << "]: ";
-      
-      cout << "  Parsing " << es->gmObjects[i].mainEvents[ii].eventCount << " sub-events:" << flushl;
-      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
-      {
-        //For each individual event (like begin_step) in the main event (Step), parse the code
-        const int sev_id = es->gmObjects[i].mainEvents[ii].events[iii].id;
-        parsed_event &pev = pob->events[ev_count++]; //Make sure each sub event knows its main event's event ID.
-        pev.mainId = mev_id, pev.id = sev_id;
-        
-        //Copy the code into a string, and its attributes elsewhere
-        string code = es->gmObjects[i].mainEvents[ii].events[iii].code;
-        
-        //Syntax check the code
-        cout << "Check `" << es->gmObjects[i].name << "::" << event_get_enigma_main_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << "..." << flushs;
-        int sc = syncheck::syntacheck(code);
-        if (sc != -1)
-        {
-          cout << "Syntax error in object `" << es->gmObjects[i].name << "', event " << mev_id << ":"
-               << es->gmObjects[i].mainEvents[ii].events[iii].id << ":\n" << format_error(code,syncheck::error,sc) << flushl;
-          return E_ERROR_SYNTAX;
-        }
-        cout << "Done. Starting parse..." << flushs;
-        
-        //Add this to our objects map
-        pev.myObj = pob; //link to its parent
-        parser_main(code,&pev);
-        
-        cout << "Done." << flushl;
-      }
-    }
-    fflush(stdout);
-  }
-  
-  cout << es->roomCount << " Rooms:" << endl;
-  for (int i = 0; i < es->roomCount; i++) {
-    cout << " " << es->rooms[i].name << endl;
-    fflush(stdout);
-  }
-  
-  //Next we link the scripts into the objects.
-  cout << "\"Linking\" scripts into the objects..." << flushl;
-  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
-  {
-    parsed_object* t = i->second;
-    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
-    {
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //If we've got ourselves a script
-        t->copy_calls_from(subscr->second->obj);
-    }
-    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
-    {
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //If we've got ourselves a script
-        t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
-    }
-  }
-  cout << "\"Link\" complete." << flushl;
-  
-  
-  ///Now, time to review and "link": Our linking is less complicated than compiled code linking.
-  ///This process is designed to offer a better understanding of used variables from event to event
-  ///and then from instance to instance.
-  /*cout << "Printing all objects and events: " << flushl;
-  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
-  {
-    cout << "Object `"<< i->second->name << "':" << flushl;
-    for (unsigned ii = 0; ii < i->second->events.size; ii++)
-    {
-      cout << "Event(" << i->second->events[ii].mainId << "," << i->second->events[ii].id << "):" << flushl;
-      cout << i->second->events[ii].code << flushl << flushl << flushl;
-    }
-  }*/
-  
-  //Define some variables based on usage
-  bool used__object_set_sprite = 0;
+  res = compile_parseAndLink(es,scripts);
+  if (res) return res;
   
   //Export resources to each file.
   
@@ -391,208 +252,10 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   wto.close();
   
   
-  
-  //NEXT FILE ----------------------------------------
-  //Object declarations: object classes/names and locals.
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
-    wto << license;
-    wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
-    wto << "namespace enigma\n{\n";
-      wto << "  struct object_locals: object_collisions\n  {\n";
-        wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
-        wto << "    object_locals() {}\n";
-        wto << "    object_locals(unsigned x, int y): object_collisions(x,y) {}\n  };\n";
-      for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
-      {
-        wto << "  struct OBJ_" << i->second->name << ": object_locals\n  {";
-        
-        wto << "\n    //Locals to instances of this object\n    ";
-        for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
-          wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
-        
-        parsed_object* t = i->second;
-        for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
-        {
-          map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-          if (subscr != scr_lookup.end()) //If we've got ourselves a script
-          {
-            const char* comma = "";
-            wto << "\n    enigma::variant " << it->first << "(";
-            for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
-            {
-              wto << comma << "enigma::variant argument" << argn;
-              comma = ", ";
-            }
-            wto << ");";
-          }
-        } wto << "\n    ";
-        
-        for (unsigned ii = 0; ii < i->second->events.size; ii++)
-        {
-          //Look up the event name
-          string evname = event_get_enigma_main_name(i->second->events[ii].mainId,i->second->events[ii].id);
-          wto << "\n    #define ENIGMAEVENT_" << evname << " 1\n";
-          wto << "    variant myevent_" << evname << "();\n  ";
-        }
-        
-        //Automatic constructor
-        //Directed constructor (ID is specified)
-        wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, int id = (enigma::maxid++))";
-          wto << ": object_locals(id, " << i->second->id << ")";
-          wto << "\n    {\n";
-            //Sprite index
-              if (used__object_set_sprite) //We want to initialize 
-                wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n";
-              else
-                wto << "      sprite_index = " << i->second->sprite_index << ";\n";
-            
-            //Coordinates
-                wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
-              
-          wto << "      enigma::constructor(this);\n      myevent_create();\n    }\n";
-        wto << "  };\n";
-      }
-    wto << "}\n";
-  wto.close();
-  
-  //NEXT FILE ----------------------------------------
-  //Object functions: events, constructors, other codes.
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out);
-    wto << license;
-    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
-    {
-      for (unsigned ii = 0; ii < i->second->events.size; ii++)
-      {
-        string evname = event_get_enigma_main_name(i->second->events[ii].mainId,i->second->events[ii].id);
-        wto << "enigma::variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
-          print_to_file(i->second->events[ii].code,i->second->events[ii].synt,2,wto);
-        wto << "\n  return 0;\n}\n\n";
-      }
-      
-      parsed_object* t = i->second;
-      for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
-      {
-        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-        if (subscr != scr_lookup.end()) //If we've got ourselves a script
-        {
-          const char* comma = "";
-          wto << "enigma::variant enigma::OBJ_" << i->second->name << "::" << it->first << "(";
-          for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
-          {
-            wto << comma << "enigma::variant argument" << argn;
-            comma = ", ";
-          }
-          wto << ")\n{\n  ";
-          print_to_file(subscr->second->pev.code,subscr->second->pev.synt,2,wto);
-          wto << "\n  return 0;\n}\n\n";
-        }
-      }
-    }
-    
-    wto << 
-    "namespace enigma\n{\n  void constructor(object_basic* instance_b)\n  {\n"
-    "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"    
-    "    instance_list[instance->id]=instance_b;\n\n"
-    "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
-    "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
-    /*instance->sprite_index = enigma::objectdata[instance->obj].sprite_index;
-    instance->mask_index = enigma::objectdata[instance->obj].mask_index;
-    instance->visible = enigma::objectdata[instance->obj].visible;
-    instance->solid = enigma::objectdata[instance->obj].solid;
-    instance->persistent = enigma::objectdata[instance->obj].persistent;
-    instance->depth = enigma::objectdata[instance->obj].depth;*/
-    "    for(int i=0;i<16;i++)\n      instance->alarm[i]=-1;\n\n"
-    
-    "    if(instance->sprite_index!=-1)\n    {\n      instance->bbox_bottom  =   sprite_get_bbox_bottom(instance->sprite_index);\n      "
-    "    instance->bbox_left    =   sprite_get_bbox_left(instance->sprite_index);\n      instance->bbox_right   =   sprite_get_bbox_right(instance->sprite_index);\n      "
-    "    instance->bbox_top     =   sprite_get_bbox_top(instance->sprite_index);\n      //instance->sprite_height =  sprite_get_height(instance->sprite_index); "
-    "    //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n      //instance->sprite_width  =  sprite_get_width(instance->sprite_index);  //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n      "
-    "    instance->sprite_xoffset = sprite_get_xoffset(instance->sprite_index);\n      instance->sprite_yoffset = sprite_get_yoffset(instance->sprite_index);\n      "
-    "    //instance->image_number  =  sprite_get_number(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n    }\n    \n"
-    
-    "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
-    "    instance->image_single = -1;\n    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
-    /*instance->path_endaction;
-    instance->path_index;
-    instance->path_orientation;
-        instance->path_position;
-        instance->path_positionprevious;
-        instance->path_scale;
-        instance->path_speed;
-        instance->timeline_index;
-        instance->timeline_position;
-        instance->timeline_speed;     */
-        //instance->sprite_index = enigma::objectinfo[newinst_obj].sprite_index;
-    "instancecount++;\n    instance_count++;\n  }\n}\n";
-  wto.close();
-  
-  //NEXT FILE ----------------------------------------
-  //Object functions: events, constructors, other codes.
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out);
-    wto << license;
-    int room_highid = 0, room_highinstid = 100000;
-    for (int i = 0; i < es->roomCount; i++) 
-    {
-      wto << "//Room " << es->rooms[i].id << "\n" <<
-      "  enigma::roomdata[" << es->rooms[i].id << "].name = \"" << es->rooms[i].name << "\";\n"
-      "  enigma::roomdata[" << es->rooms[i].id << "].cap = \"" << es->rooms[i].caption << "\";\n"
-      "  enigma::roomdata[" << es->rooms[i].id << "].backcolor = " << lgmRoomBGColor(es->rooms[i].backgroundColor) << ";\n"
-      "  enigma::roomdata[" << es->rooms[i].id << "].spd = " << es->rooms[i].speed << ";\n"
-      "  enigma::roomdata[" << es->rooms[i].id << "].width = " << es->rooms[i].width << ";\n"
-      "  enigma::roomdata[" << es->rooms[i].id << "].height = " << es->rooms[i].height << ";\n"
-      "  enigma::roomdata[" << es->rooms[i].id << "].views_enabled = " << es->rooms[i].enableViews << ";\n";
-      for (int ii = 0; ii < es->rooms[i].viewCount; ii++)
-      {
-        wto << 
-        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].start_vis = 0;\n"
-        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_x = 0; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_y = 0;"
-           " enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_w = 640; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_h = 480;\n"
-        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_x = 0;   enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_y = 0;"
-           " enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_w = 640; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_h = 480;\n"
-        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].object2follow = 0;\n"
-        "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].hborder=32; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].vborder = 32;"
-           " enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].hspd = -1;  enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].vspd = -1;\n";
-      }
-      wto << 
-      "  enigma::roomdata[" << es->rooms[i].id << "].instancecount = " << es->rooms[i].instanceCount << ";\n"
-      "  enigma::roomdata[" << es->rooms[i].id << "].createcode = (void(*)())roomcreate" << es->rooms[i].id << ";";
-      
-      if (es->rooms[i].id > room_highid)
-        room_highid = es->rooms[i].id;
-    }
-    
-    wto << "int instdata[] = {";
-    for (int i = 0; i < es->roomCount; i++)
-      for (int ii = 0; ii < es->rooms[i].instanceCount; ii++) {
-        wto << 
-          es->rooms[i].instances[ii].id << "," << 
-          es->rooms[i].instances[ii].objectId << "," << 
-          es->rooms[i].instances[ii].x << "," << 
-          es->rooms[i].instances[ii].y << ",";
-        if (es->rooms[i].instances[ii].id > room_highinstid)
-          room_highinstid = es->rooms[i].instances[ii].id;
-      }
-    wto << "};\n\n";
-    wto << "enigma::room_max = " <<  room_highid << " + 1;\nenigma::maxid = " << room_highinstid << " + 1;\n";
-  wto.close();
-  
-  
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h",ios_base::out);
-    wto << license;
-    for (int i = 0; i < es->roomCount; i++) 
-    {
-      wto << "void roomcreate" << es->rooms[i].id << "()\n{\n  ";
-      string cme = es->rooms[i].creationCode;
-      int a = syncheck::syntacheck(cme);
-      if (a != -1) {
-        cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::error << flushl;
-        return E_ERROR_SYNTAX;
-      }
-      wto << parser_main(cme);
-      wto << "\n}\n";
-    }
-  wto.close();
-  
+  res = compile_writeObjectData(es);
+  if (res) return res;
+  res = compile_writeRoomData(es);
+  if (res) return res;
   
   
   

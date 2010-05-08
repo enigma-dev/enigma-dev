@@ -28,6 +28,7 @@
 #ifndef _OBJECT_STORAGE_H
 #define _OBJECT_STORAGE_H
 
+#include <map>
 #include "../general/darray.h"
 
 //These parallel ism's structs, but offer additional properties we need to finish compile
@@ -69,12 +70,12 @@ struct parsed_object
   string name;
   int id, sprite_index;
   
-  map<string,int> calls;      //Any function or script KEY called.
+  map<string,int> calls;       //Any function or script KEY called.
   map<string,dectrip> locals;  //Any variable KEY used but not declared, or declared as local VALUE.
   map<string,dectrip> globals; //Any variable KEY declared as global VALUE.
   map<string,decquad> consts;  //Any variable KEY declared as constant VALUE.
   map<string,int> funcs;       //Any function KEY called with at most VALUE parameters.
-  map<string,int> dots;       //Any attribute KEY accessed via a dot, as in a.KEY
+  map<string,int> dots;        //Any attribute KEY accessed via a dot, as in a.KEY
   
   typedef map<string,dectrip>::iterator locit;
   typedef map<string,dectrip>::iterator globit;
