@@ -148,6 +148,8 @@
 		<Unit filename="cfile_parse/value.h" />
 		<Unit filename="compiler/compile.cpp" />
 		<Unit filename="compiler/compile.h" />
+		<Unit filename="compiler/compile_common.cpp" />
+		<Unit filename="compiler/compile_common.h" />
 		<Unit filename="compiler/compile_includes.cpp" />
 		<Unit filename="compiler/compile_includes.h" />
 		<Unit filename="compiler/compile_organization.h" />

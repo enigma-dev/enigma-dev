@@ -371,6 +371,7 @@ namespace syncheck
                 int cf=checkfunction(function_ext,code,pos,len);
                 if (cf!=-1) return cf;
                 lastnamed[level] = LN_NOTHING;
+                assop[level] = true;
               }
               else if (lastnamed[level] == LN_TYPE_NAME) //Is a C++ function.
               {
@@ -393,14 +394,14 @@ namespace syncheck
                     if (cpos>=len) break; //Ensure we don't overflow
                     cpos++;
                   }
-
+                  
                   if (qc>0)
                   { error="Unterminated parenthesis at this point"; return pos; }
-
+                  
                   while (is_useless(code[cpos])) cpos++;
-                  if (code[cpos]!='.')
+                  if (!assop[level] and code[cpos]!='.')
                   { error="Unexpected parenthesis at this point"; return pos; }
-
+                  
                   if (statement_completed(lastnamed[level]))
                   close_statement(code,pos);
                 }
