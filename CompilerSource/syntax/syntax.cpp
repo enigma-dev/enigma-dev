@@ -327,8 +327,10 @@ namespace syncheck
             {
               if (plevel>0 and plevelt[plevel] != PLT_FORSTATEMENT)
                 { error="Semicolon does not belong inside set of parentheses"; return pos; }
-              if (lastnamed[level]==LN_OPERATOR)
+              if (lastnamed[level] == LN_OPERATOR)
                 { error="Secondary expression expected before semicolon"; return pos; }
+              if (lastnamed[level] == LN_CLOSING_SYMBOL)
+                close_statement(code,pos);
               indeclist[level] = false;
               lastnamed[level] = LN_CLOSING_SYMBOL;
             }
@@ -423,6 +425,8 @@ namespace syncheck
               {
                 if (plevelt[plevel] == PLT_FORSTATEMENT)
                 {
+                  if (lastnamed[level] == LN_CLOSING_SYMBOL)
+                    close_statement(code,pos);
                   if (statement_pad[level] != 1) {
                     error = "Too soon for closing parentheses to for() statement " + tostring(statement_pad[level]);
                     return pos;
@@ -482,8 +486,10 @@ namespace syncheck
               
               quickscope();
 
-              if (lastnamed[level]==LN_OPERATOR)
+              if (lastnamed[level] == LN_OPERATOR)
               { error="Unexpected brace at this point"; return pos; }
+              if (lastnamed[level] == LN_CLOSING_SYMBOL) //FIXME: perhaps this should be statement_complete()?
+                close_statement(code,pos);
               
               if (plevel) {
                 error = plevelt[plevel] == PLT_BRACKET ? "Expected closing bracket before brace" : "Expected closing parenthesis before brace";

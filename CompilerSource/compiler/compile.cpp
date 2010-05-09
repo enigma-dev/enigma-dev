@@ -291,18 +291,17 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   
   
-  /*
-    Segment three: Add resources into the game executable
-  */
+  /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    Segment three: Add resources into the game executable. They are
+    literally tacked on to the end of the file for now. They should
+    have an option in the config file to pass them to some resource
+    linker sometime in the future.
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
   cout << es->spriteCount << " Sprites:" << endl;
   for (int i = 0; i < es->spriteCount; i++)
   {
     cout << "Sprite " << es->sprites[i].name << endl;
-//    cout << "Data at: " << es->sprites[i].subImages[0].pixels << endl << endl;
-    //for (int ii = 0; ii <  es->sprites[i].subImages[0].width *  es->sprites[i].subImages[0].height; ii++) {
-    //  cout << (void*)(es->sprites[i].subImages[0].pixels[ii]);
-    //}
     fflush(stdout);
   }
   
@@ -312,13 +311,5 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     fflush(stdout);
   }
   
-  
-  /*
-  cout << es->includeCount << " Includes:" << endl;
-  for (int i = 0; i < es->includeCount; i++) {
-    cout << " " << es->includes[i].filepath << endl;
-    fflush(stdout);
-  }
-  */
   return 0;
 };
