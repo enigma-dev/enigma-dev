@@ -48,6 +48,15 @@ goforit(at);*/
 #include <string>
 #include <limits>
 
+//Before anyone else includes math.h, let's make sure we
+//Don't get bitten by those damn bessel functions.
+#define y0 bessel_y0
+#define y1 bessel_y1
+#include <math.h>
+#undef y1
+#undef y0
+
+
 //#include <vector> //COLLIGMA
 
 #include <time.h>
