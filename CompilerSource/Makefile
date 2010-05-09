@@ -24,6 +24,10 @@ objects:
 	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c cfile_parse/template_handlers.cpp -o cfile_parse/template_handlers.o
 	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c compiler/compile.cpp -o compiler/compile.o
 	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c compiler/compile_includes.cpp -o compiler/compile_includes.o
+	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c compiler/compile_common.cpp -o compiler/compile_common.o
+	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c compiler/components/parse_and_link.cpp -o compiler/components/parse_and_link.o
+	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c compiler/components/write_object_data.cpp -o compiler/components/write_object_data.o
+	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c compiler/components/write_room_data.cpp -o compiler/components/write_room_data.o
 	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c compiler/output_locals.cpp -o compiler/output_locals.o
 	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c compiler/pcs/pcs.cpp -o compiler/pcs/pcs.o
 	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c externs/ext_iteration.cpp -o externs/ext_iteration.o
