@@ -365,19 +365,21 @@ int parser_reinterpret(string &code,string &synt)
 void parser_add_semicolons(string &code,string &synt)
 {
   cout << "adding semicolons...";//synt << endl << code << endl;
-
+  cout << "\nThis is what I have to work with:\n" << code << endl << synt << endl;
+  
   //Allocate enough memory to hold all the semicolons we'd ever need
   char *codebuf = new char[code.length()*2+1];
   char *syntbuf = new char[code.length()*2+1];
   int bufpos = 0;
   int terns = 0;
-
+  
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
   for (pt pos=0; pos<code.length(); pos++)
   {
     if (synt[pos]==' ')
     {
+      cout << "I'm thinking this never happens.";
       if (need_semi(synt[pos-1],synt[pos+1],true))
       {
         codebuf[bufpos] = *sy_semi;
@@ -392,20 +394,17 @@ void parser_add_semicolons(string &code,string &synt)
     }
     else
     {
-      if (code[pos] != ' ' or synt[pos] == 'r')
-      {
-        codebuf[bufpos]=code[pos];
-        syntbuf[bufpos++]=synt[pos];
-      }
-
+      codebuf[bufpos]=code[pos];
+      syntbuf[bufpos++]=synt[pos];
+      
       if (synt[pos]=='(') { if (sy_semi->prev == NULL) sy_semi=sy_semi->push(',','('); continue; }
       if (synt[pos]==')') { sy_semi=sy_semi->popif('(');    continue; }
       if (synt[pos]==';')
       {
-        if (synt[pos+1] == ')') {
+        /*if (synt[pos+1] == ')') {
           bufpos--;
           continue;
-        }
+        }*/
         if (*sy_semi != ';')
         {
           codebuf[bufpos-1] = *sy_semi;

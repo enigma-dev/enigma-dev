@@ -261,7 +261,7 @@ inline pt handle_if_statement(string& code,string name,pt& pos)
     return ret;
 
   label_while:
-      if (check_level_accessible(LEVELTYPE_DO) and get_closest_level_pad(LEVELTYPE_DO) == 1)
+      if ((levelt[level] == LEVELTYPE_DO and statement_pad[level] == 1) or (check_level_accessible(LEVELTYPE_DO) and get_closest_level_pad(LEVELTYPE_DO) == 2))
         goto label_until;
     goto label_loop;
 

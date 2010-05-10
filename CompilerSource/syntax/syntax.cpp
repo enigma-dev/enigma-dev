@@ -286,8 +286,10 @@ namespace syncheck
           {
             if (is_letter(code[cpos]))
             {
-              if (statement_completed(lastnamed[level]))
-              close_statement(code,pos);
+              if (statement_completed(lastnamed[level])){
+                int cs = close_statement(code,pos);
+                if (cs != -1) return cs;
+              }
             }
             else
             {
@@ -304,8 +306,10 @@ namespace syncheck
           while (is_useless(code[cpos])) cpos++;
           if (code[cpos]=='.')
           {
-            if (statement_completed(lastnamed[level]))
-            close_statement(code,cpos);
+            if (statement_completed(lastnamed[level])){
+              int cs = close_statement(code,pos);
+              if (cs != -1) return cs;
+            }
           }
           else
           {
@@ -329,10 +333,19 @@ namespace syncheck
                 { error="Semicolon does not belong inside set of parentheses"; return pos; }
               if (lastnamed[level] == LN_OPERATOR)
                 { error="Secondary expression expected before semicolon"; return pos; }
-              if (lastnamed[level] == LN_CLOSING_SYMBOL)
-                close_statement(code,pos);
+              if (statement_completed(lastnamed[level])) {
+                int cs = close_statement(code,pos);
+                if (cs != -1) return cs;
+              }
+              if (level) //A semicolon must drop a level if it's closing an entire statement.
+              {
+                if ((levelt[level] == LEVELTYPE_IF and statement_pad[level] >= 2) 
+                or  (levelt[level] == LEVELTYPE_LOOP)
+                or  (levelt[level] == LEVELTYPE_DO and lastnamed[level] == LN_NOTHING))
+                  statement_pad[level]--;
+              }
               indeclist[level] = false;
-              lastnamed[level] = LN_CLOSING_SYMBOL;
+              lastnamed[level] = LN_NOTHING;
             }
           pos++; continue;
         
@@ -404,8 +417,10 @@ namespace syncheck
                   if (!assop[level] and code[cpos]!='.')
                   { error="Unexpected parenthesis at this point"; return pos; }
                   
-                  if (statement_completed(lastnamed[level]))
-                  close_statement(code,pos);
+                  if (statement_completed(lastnamed[level])) {
+                    int cs = close_statement(code,pos);
+                    if (cs != -1) return cs;
+                  }
                 }
                 else if (!assop[level] && !(plevel>0))
                 { error="Parenthetical expression outside of assignment operator: This is what makes C taste bitter"; return pos; }
@@ -425,8 +440,10 @@ namespace syncheck
               {
                 if (plevelt[plevel] == PLT_FORSTATEMENT)
                 {
-                  if (lastnamed[level] == LN_CLOSING_SYMBOL)
-                    close_statement(code,pos);
+                  if (lastnamed[level] == LN_CLOSING_SYMBOL) {
+                    int cs = close_statement(code,pos);
+                    if (cs != -1) return cs;
+                  }
                   if (statement_pad[level] != 1) {
                     error = "Too soon for closing parentheses to for() statement " + tostring(statement_pad[level]);
                     return pos;
@@ -482,23 +499,25 @@ namespace syncheck
                 if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
                 if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
               }*/
-              bool isbr=levelt[level]==LEVELTYPE_SWITCH;
+              bool isbr = (levelt[level] == LEVELTYPE_SWITCH);
               
               quickscope();
 
               if (lastnamed[level] == LN_OPERATOR)
               { error="Unexpected brace at this point"; return pos; }
-              if (lastnamed[level] == LN_CLOSING_SYMBOL) //FIXME: perhaps this should be statement_complete()?
-                close_statement(code,pos);
+              if (statement_completed(lastnamed[level])) { //FIXME: perhaps this should be statement_complete()?
+                int cs = close_statement(code,pos);
+                if (cs != -1) return cs;
+              }
               
               if (plevel) {
                 error = plevelt[plevel] == PLT_BRACKET ? "Expected closing bracket before brace" : "Expected closing parenthesis before brace";
                 return pos;
               }
 
-              level+=!isbr;
-              levelt[level]=(isbr?LEVELTYPE_SWITCH_BLOCK:LEVELTYPE_BRACE);
-              lastnamed[level]=LN_NOTHING; //This is the beginning of a glorious new level
+              level += !isbr;
+              levelt[level] = (isbr?LEVELTYPE_SWITCH_BLOCK:LEVELTYPE_BRACE);
+              lastnamed[level] = LN_NOTHING; //This is the beginning of a glorious new level
               statement_pad[level]=-1;
               assop[level]=0;
             }
@@ -513,16 +532,15 @@ namespace syncheck
               if (lastnamed[level]==LN_OPERATOR)
               { error="Expected secondary expression before closing brace"; return pos; }
               
-              if (statement_completed(lastnamed[level]))
-              {
+              if (statement_completed(lastnamed[level])) {
                 int cs=close_statement(code,pos);
                 if (cs != -1) return cs;
               }
               
               lower_to_level(LEVELTYPE_BRACE,"`}' symbol");
               level--;
-              statement_pad[level]=-1;
-              lastnamed[level]=LN_CLOSING_SYMBOL; //Group is like one statement for this level
+              //statement_pad[level] = -1;
+              lastnamed[level] = LN_CLOSING_SYMBOL;//LN_CLOSING_SYMBOL; //Group is like one statement for this level
               //this will invoke the next statement to close the current statement
             }
           pos++; continue;
@@ -815,8 +833,10 @@ namespace syncheck
      { error="Assignment operator expected before end of code"; return pos; }
 
 
-    if (statement_completed(lastnamed[level]))
-      close_statement(code,pos);
+    if (statement_completed(lastnamed[level])) {
+      int cs = close_statement(code,pos);
+      if (cs != -1) return cs;
+    }
 
     if (lastnamed[level]==LN_OPERATOR)
      { error="Expected secondary expression before end of code"; return pos; }
