@@ -9,5 +9,5 @@ all:
 	cd Platforms/$(PLATFORM)/ 		&& $(MAKE) $(GMODE) MODE=$(GMODE)
 	cd Universal_System/			&& $(MAKE) $(GMODE) MODE=$(GMODE)
 	
-	g++ SHELLmain.cpp Graphics_Systems/$(GRAPHICS)/.eobjs/*.o Platforms/$(PLATFORM)/.eobjs/*.o Universal_System/.eobjs/*.o $(GLINKS) -o game.exe
+	g++ SHELLmain.cpp Graphics_Systems/$(GRAPHICS)/.eobjs_$(GMODE)/*.o Platforms/$(PLATFORM)/.eobjs_$(GMODE)/*.o Universal_System/.eobjs_$(GMODE)/*.o $(GLINKS) -o game.exe
 
