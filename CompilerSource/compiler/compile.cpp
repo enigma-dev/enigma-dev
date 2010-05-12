@@ -207,7 +207,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
       wto << "case " << i->second->id << ":\n";
-      wto << "    enigma::instance_list[idn]=new enigma::" << i->second->name <<";\n";
+      wto << "    enigma::instance_list[idn] = new enigma::" << i->second->name <<";\n";
       wto << "  break;\n";
     }
     wto << '\n';
@@ -221,7 +221,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
       wto << "case " << i->second->id << ":\n";
-      wto << "    enigma::instance_list[idn]=new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
+      wto << "    enigma::instance_list[idn] = new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
       wto << "  break;\n";
     }
     wto << '\n';
@@ -282,7 +282,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   int makeres = system(make.c_str());
   if (makeres) {
-    cout << "Make returned error " << makeres << ". That means this can be any combination of either of our faults.\n";
+    cout << "----Make returned error " << makeres << "----------------------------------\n";
     return E_ERROR_BUILD;
   }
   cout << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";

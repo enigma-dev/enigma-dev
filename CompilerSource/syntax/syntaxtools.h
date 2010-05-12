@@ -267,11 +267,19 @@ inline pt handle_if_statement(string& code,string name,pt& pos)
 
   label_until:
       if (level <= 0)
-      { error="Unexpected `until' statement at this point"; return pos; }
+        goto label_loop;
 
-      if (lower_to_level(LEVELTYPE_DO,"`until' statement") != -1)
+      if (lower_to_level(LEVELTYPE_DO,"`"+name+"' statement") != -1)
         return pos;
-
+      
+      if (levelt[level] != LEVELTYPE_DO) {
+        cout << "shit happens, rama rama.\n";
+        goto label_loop;
+      }
+      
+      if (statement_pad[level] == 2)
+        goto label_loop;
+      
       if (statement_pad[level] != 1)
       { error="Statement `until' expected one expression after `do' statement, given "+tostring(2-statement_pad[level]); return pos; }
 

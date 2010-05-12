@@ -336,11 +336,11 @@ namespace syncheck
               if (statement_completed(lastnamed[level])) {
                 int cs = close_statement(code,pos);
                 if (cs != -1) return cs;
-              }
-              if (level) //A semicolon must drop a level if it's closing an entire statement.
+              } 
+              else if (level) //A semicolon must drop a level if it's closing an entire statement.
               {
                 if ((levelt[level] == LEVELTYPE_IF and statement_pad[level] >= 2) 
-                or  (levelt[level] == LEVELTYPE_LOOP)
+                or  (levelt[level] == LEVELTYPE_LOOP or levelt[level] == LEVELTYPE_FOR_PARAMETERS)
                 or  (levelt[level] == LEVELTYPE_DO and lastnamed[level] == LN_NOTHING))
                   statement_pad[level]--;
               }

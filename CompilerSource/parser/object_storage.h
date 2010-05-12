@@ -31,6 +31,10 @@
 #include <map>
 #include "../general/darray.h"
 
+//Locals that are inherited by all instances of all objects from the core system.
+extern map<string,int> shared_object_locals;
+extern int shared_locals_load();
+
 //These parallel ism's structs, but offer additional properties we need to finish compile
 struct parsed_object;
 struct parsed_event

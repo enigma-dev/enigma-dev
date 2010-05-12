@@ -71,7 +71,7 @@ int compile_writeObjectData(EnigmaStruct* es)
             wto << "\n    enigma::variant " << it->first << "(";
             for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
             {
-              wto << comma << "enigma::variant argument" << argn;
+              wto << comma << "enigma::variant argument" << argn << " = 0";
               comma = ", ";
             }
             wto << ");";

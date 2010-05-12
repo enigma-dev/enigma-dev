@@ -123,29 +123,28 @@ int instance_position(double x,double y,double obj)
 
 //TODO: replace all these fucking enigma::instance_iterators with enigma::institer_t i or something
 
-int instance_nearest(double x,double y,double obj)
+int instance_nearest(int x,int y,int obj)
 {
     double dist_lowest=-1,retid=-4;
     int objind=(int) obj;
-    int xl,yl;
-    double dstclc;
+    double xl,yl;
 
     for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
     {
       if ((*enigma::instance_iterator).second->object_index==objind)
       {
-         xl=(int)((enigma::object_planar*)enigma::instance_iterator->second)->x;
-         yl=(int)((enigma::object_planar*)enigma::instance_iterator->second)->y;
-         dstclc=sqrt(xl*xl+yl*yl);
-         if (dstclc<dist_lowest || dist_lowest==-1)
+         xl = ((enigma::object_planar*)enigma::instance_iterator->second)->x;
+         yl = ((enigma::object_planar*)enigma::instance_iterator->second)->y;
+         const double dstclc = hypot(xl,yl);
+         if (dstclc < dist_lowest or dist_lowest == -1)
          {
-            dist_lowest=dstclc;
-            retid=(*enigma::instance_iterator).second->id;
+            dist_lowest = dstclc;
+            retid = (*enigma::instance_iterator).second->id;
          }
       }
     }
 
-    return (int)retid;
+    return retid;
 }
 int instance_furthest(double x,double y,double obj)
 {

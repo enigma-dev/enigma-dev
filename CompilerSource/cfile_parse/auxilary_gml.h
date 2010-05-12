@@ -1,3 +1,6 @@
+for ;;;
+for (;;);
+
 if 0;
 else;
 if (0)
@@ -8,11 +11,12 @@ if (0)
         if b
           if c
             do
+            {
               if d
-                a=b=c;
+                { a=b=c; }
               else
-                if 0;
-                else;
+                for ;;;
+            }
             while d
           else
             c=d
@@ -26,3 +30,6 @@ if (0)
    b = c
 }
 else a=0;
+do
+while 0;
+until 0

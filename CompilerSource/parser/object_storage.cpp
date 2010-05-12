@@ -27,6 +27,7 @@
 
 #include <map>
 #include <string>
+#include <stdio.h>
 #include <iostream>
 
 using namespace std;
@@ -34,6 +35,36 @@ using namespace std;
 #include "../general/darray.h"
 
 #include "object_storage.h"
+#include "../externs/externs.h"
+
+
+map<string,int> shared_object_locals;
+int shared_locals_load()
+{
+  cout << "Finding parent..."; fflush(stdout);
+  
+  // Find namespace enigma
+  externs* pscope = NULL;
+  current_scope = &global_scope;
+  extiter ns_enigma = current_scope->members.find("enigma");
+
+  // Find the parent object
+  if (ns_enigma != current_scope->members.end()) {
+    extiter parent = ns_enigma->second->members.find("object_collisions");
+    if (parent != ns_enigma->second->members.end())
+      pscope = parent->second;
+  }
+  cout << "found"; fflush(stdout);
+  
+  //Iterate the tiers of the parent object
+  for (externs *cs = pscope; cs; cs = (cs->ancestors.size ? cs->ancestors[0] : NULL) )
+  {
+    cout << " >> Checking ancestor " << cs->name << endl;
+    for (extiter mem = cs->members.begin(); mem != cs->members.end(); mem++)
+      shared_object_locals[mem->first] = 0;
+  }
+  return 0;
+}
 
 
 dectrip::dectrip(): type(), prefix(), suffix() {}

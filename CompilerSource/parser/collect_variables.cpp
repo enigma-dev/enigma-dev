@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 //Welcome to the ENIGMA EDL-to-C++ parser; just add semicolons.
-//No, it's not really that simple.
+//...No, it's not really that simple.
 
 #include <map>
 #include <string>
@@ -48,20 +48,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
   int igpos = 0;
   darray<scope_ignore*> igstack;
   igstack[igpos] = new scope_ignore;
-
-  cout << "find parent..."; fflush(stdout);
-  externs* pscope = NULL;
-  current_scope = &global_scope;
-  extiter ns_enigma = current_scope->members.find("enigma");
-
-  // Find the parent object
-  if (ns_enigma != current_scope->members.end()) {
-    extiter parent = ns_enigma->second->members.find("object_collisions");
-    if (parent != ns_enigma->second->members.end())
-      pscope = parent->second;
-  }
-  cout << "found"; fflush(stdout);
-
+  
   for (pt pos = 0; pos < code.length(); pos++)
   {
     if (synt[pos] == '{') {
@@ -206,7 +193,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       cout << "N"; fflush(stdout);
       const pt spos = pos;
       while (synt[++pos] == 'n');
-
+      
       //Looking at a straight identifier. Make sure it actually needs declared.
       const string nname = code.substr(spos,pos-spos);
 
@@ -216,20 +203,16 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         //First, check that it's not a global
         if (find_extname(nname,0xFFFFFFFF))
           continue;
-
-        //Iterate the tiers of the parent object
-        for (externs *cs = pscope; cs; cs = (cs->ancestors.size ? cs->ancestors[0] : NULL) )
-        {
-          cout << " >> Checking ancestor " << cs->name << endl;
-          if (cs->members.find(nname) != cs->members.end())
-            goto continue_2;
-        }
-
+        
+        //Check shared locals to see if we already have one
+        if (shared_object_locals.find(nname) != shared_object_locals.end())
+          continue;
+        
         //Now make sure we're not specifically ignoring it
         for (int i = igpos; i >= 0; i--)
           if (igstack[i]->i.find(nname) != igstack[igpos]->i.end())
             goto continue_2;
-
+        
         pev->myObj->locals[nname] = dectrip();
         continue_2: cout << ")"; fflush(stdout); continue;
       }
@@ -252,6 +235,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
             pars--; continue;
           }
         }
+        args += contented; //Final arg for closing parentheses
         pev->myObj->funcs[nname] = args;
         cout << "\\"; fflush(stdout);
       }
