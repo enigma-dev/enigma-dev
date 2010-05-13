@@ -54,6 +54,7 @@ using namespace std;
 #include "compile_common.h"
 
 #include "components/components.h"
+#include "../gcc_interface/gcc_backend.h"
 
 void clear_ide_editables()
 {
@@ -273,7 +274,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   string graphics = "OpenGL";
   string platform = "xlib";
   
-  string make = "make Game ";
+  string make = MAKE_location + " Game ";
   make += "GMODE=Run ";
   make += "GFLAGS=\"" + gflags   + "\" ";
   make += "GLINKS=\"" + glinks   + "\" ";

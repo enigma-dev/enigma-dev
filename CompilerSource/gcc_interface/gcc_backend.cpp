@@ -185,7 +185,7 @@ int establish_bearings()
     }
   }
   
-  cout << "Good news; it should seem I can reach make from " << MAKE_location << "\n";
+  cout << "Good news; it should seem I can reach make from `" << MAKE_location << "'\n";
   
   return 0;
 }
