@@ -64,7 +64,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   //Next we traverse the scripts for dependencies.
   unsigned nec_iters = 0;
   if (es->scriptCount > 0)
-    nec_iters = ceilf(log2(es->scriptCount));
+    nec_iters = lrint(ceilf(log2(es->scriptCount)));
   cout << "`Linking' " << es->scriptCount << " scripts in " << nec_iters << " passes...\n";
   for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
   {

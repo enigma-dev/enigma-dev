@@ -1,5 +1,5 @@
 ENIGMA:
-	cd CompilerSource && $(MAKE) Release
+	cd CompilerSource && $(MAKE) $(PLATFORM)
 Game:
 	# Target takes the following parameters:
 	#	GMODE{run,build,debug,compile}
@@ -7,5 +7,5 @@ Game:
 	#	PLATFORM{<anything under platforms>}
 	#	GLINKS{<requirements of anything above>}
 	echo Okay.
-	cd ENIGMAsystem/SHELL/ && make GMODE=$(GMODE) GLINKS="$(GLINKS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM)
+	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM)
 
