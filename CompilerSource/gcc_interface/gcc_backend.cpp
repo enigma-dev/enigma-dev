@@ -85,7 +85,7 @@ int establish_bearings()
     else
     {
       GCC_location = "\"" + bin_path + "gcc\"";
-      MAKE_location = "\"" + bin_path + "gcc\"";
+      MAKE_location = "\"" + bin_path + "make\"";
     }
   }
   if (!got_success)
@@ -167,6 +167,25 @@ int establish_bearings()
   cout << include_directory_count << "dirs:\n";
   for (unsigned i = 0; i < include_directory_count; i++)
     cout << '"' << include_directories[i] << '"' << endl;
+  
+  
+  //Now we'll look for make
+  cout << "All that worked. Trying to find make.\n";
+  
+  int askmake = 1;
+  //At present, MAKE_location = "\"" + bin_path + "make\"";
+  askmake = system(MAKE_location.c_str());
+  if (askmake) //Didn't answer us right; let's try someone else
+  {
+    askmake = system((MAKE_location = "\"" + bin_path + "mingw32-make\"").c_str());
+    if (askmake)
+    {
+      cout << "Sir, I can't find make.\n";
+      return 6;
+    }
+  }
+  
+  cout << "Good news; it should seem I can reach make from " << MAKE_location << "\n";
   
   return 0;
 }
