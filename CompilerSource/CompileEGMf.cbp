@@ -129,6 +129,7 @@
 		<Unit filename="cfile_parse/cparse_components.h" />
 		<Unit filename="cfile_parse/cparse_shared.cpp" />
 		<Unit filename="cfile_parse/cparse_shared.h" />
+		<Unit filename="cfile_parse/cpmain.cpp" />
 		<Unit filename="cfile_parse/expev_macros.h" />
 		<Unit filename="cfile_parse/expression_evaluator.cpp" />
 		<Unit filename="cfile_parse/expression_evaluator.h" />
@@ -138,7 +139,6 @@
 		<Unit filename="cfile_parse/keyword_operator.cpp" />
 		<Unit filename="cfile_parse/macro_functions.cpp" />
 		<Unit filename="cfile_parse/macro_functions.h" />
-		<Unit filename="cfile_parse/main.cpp" />
 		<Unit filename="cfile_parse/parsein.h">
 			<Option virtualFolder="cfile_parse/" />
 		</Unit>
@@ -206,6 +206,7 @@
 					<options conn_type="0" serial_baud="115200" additional_cmds_before="-s syntax.txt" />
 				</remote_debugging>
 			</debugger>
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
