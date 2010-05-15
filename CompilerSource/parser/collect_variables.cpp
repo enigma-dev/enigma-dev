@@ -35,7 +35,7 @@
 using namespace std;
 
 struct scope_ignore {
-  map<string,int> i;
+  map<string,int> ignore;
 };
 
 #define and_safety
@@ -72,7 +72,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       if (synt[pos] != 't')
       {
         for (pt i = sp; i < pos; i++)
-          synt[pos] = 'n'; //convert to regular identifier
+          synt[pos] = 'n'; //convert to regular identifier; in this case marking a constant.
         continue;
       }
       //We're at either global declarator or local declarator: record which scope it is.
@@ -139,7 +139,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
           else //Add to this scope
           {
             cout << "Add to ig" << endl;
-            igstack[igpos]->i[lid] = 1;
+            igstack[igpos]->ignore[lid] = pos;
             pos++;
             cout << "Added `" << lid << "' to ig" << endl;
           }
@@ -201,18 +201,20 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       {
         cout << "("; fflush(stdout);
         //First, check that it's not a global
-        if (find_extname(nname,0xFFFFFFFF))
-          continue;
+        if (find_extname(nname,0xFFFFFFFF)) {
+          cout << "Ignoring `" << nname << "' because it's a global.\n"; continue; }
         
         //Check shared locals to see if we already have one
-        if (shared_object_locals.find(nname) != shared_object_locals.end())
-          continue;
+        if (shared_object_locals.find(nname) != shared_object_locals.end()) {
+          cout << "Ignoring `" << nname << "' because it's a local.\n"; continue; }
         
         //Now make sure we're not specifically ignoring it
+        map<string,int>::iterator ex;
         for (int i = igpos; i >= 0; i--)
-          if (igstack[i]->i.find(nname) != igstack[igpos]->i.end())
-            goto continue_2;
+          if ((ex = igstack[i]->ignore.find(nname)) != igstack[i]->ignore.end()) {
+            cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n"; goto continue_2; }
         
+        cout << "Adding `" << nname << "' because that's just what I do.\n";
         pev->myObj->locals[nname] = dectrip();
         continue_2: cout << ")"; fflush(stdout); continue;
       }

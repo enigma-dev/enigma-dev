@@ -102,6 +102,11 @@ void clear_ide_editables()
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
+  // CLean up from any previous executions.
+    parsed_objects.clear(); //Make sure we don't dump in any old object code...
+  
+  
+  // Pick apart the sent resources
   cout << "Location in memory of structure: " << es << flushl;
   if (es == NULL)
     return -1;//E_ERROR_PLUGIN_FUCKED_UP;
