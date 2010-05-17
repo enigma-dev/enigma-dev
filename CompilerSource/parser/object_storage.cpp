@@ -66,6 +66,12 @@ int shared_locals_load()
   return 0;
 }
 
+int shared_locals_clear()
+{
+  shared_object_locals.clear();
+  return !shared_object_locals.empty();
+}
+
 
 dectrip::dectrip(): type(), prefix(), suffix() {}
 dectrip::dectrip(string t): type(t), prefix(), suffix() {}

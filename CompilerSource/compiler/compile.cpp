@@ -56,6 +56,8 @@ using namespace std;
 #include "components/components.h"
 #include "../gcc_interface/gcc_backend.h"
 
+#include "../general/bettersystem.h"
+
 void clear_ide_editables()
 {
   ofstream wto;
@@ -104,7 +106,13 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
   // CLean up from any previous executions.
     parsed_objects.clear(); //Make sure we don't dump in any old object code...
+    shared_locals_clear();
   
+  // Re-establish ourself
+    if (shared_locals_load() != 0) {
+      cout << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
+      return E_ERROR_LOAD_LOCALS;
+    }
   
   // Pick apart the sent resources
   cout << "Location in memory of structure: " << es << flushl;
@@ -272,27 +280,31 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   string gflags = "";
   #if   TARGET_PLATFORM_ID == OS_WINDOWS
-    string glinks = "-lopengl32 \"\"";
+    string glinks = "-lopengl32 '../additional/zlib/libzlib.a' -lcomdlg32 -lgdi32";
+    string graphics = "OpenGL";
+    string platform = "windows";
   #else
     string glinks = "-lGL -lz";
+    string graphics = "OpenGL";
+    string platform = "xlib";
   #endif
-  string graphics = "OpenGL";
-  string platform = "xlib";
   
-  string make = MAKE_location + " Game ";
+  string make = "Game ";
   make += "GMODE=Run ";
   make += "GFLAGS=\"" + gflags   + "\" ";
   make += "GLINKS=\"" + glinks   + "\" ";
   make += "GRAPHICS=" + graphics + " ";
   make += "PLATFORM=" + platform + " ";
   
-  int makeres = system(make.c_str());
+  cout << "Running make from `" << MAKE_location << "'" << flushl;
+  cout << "Full command line: " << MAKE_location << " " << make << flushl;
+  int makeres = better_system(MAKE_location,make);
   if (makeres) {
     cout << "----Make returned error " << makeres << "----------------------------------\n";
     return E_ERROR_BUILD;
   }
   cout << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";
-  int gameres = system("ENIGMAsystem/SHELL/game.exe");
+  int gameres = better_system("ENIGMAsystem/SHELL/game.exe","");
   cout << "Game returned " << gameres << "\n";
   
   

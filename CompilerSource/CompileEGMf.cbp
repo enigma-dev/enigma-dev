@@ -3,14 +3,15 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="compileEGMf" />
+		<Option makefile="makefile" />
 		<Option pch_mode="2" />
 		<Option default_target="StandAlone" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="cfile_parse/;" />
+		<Option virtualFolders="cfile_parse\;" />
 		<Build>
 			<Target title="Release">
-				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../" />
+				<Option output="..\compileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters="-jar lgm16b4.jar" />
@@ -26,8 +27,8 @@
 				</Linker>
 			</Target>
 			<Target title="Debug">
-				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../" />
+				<Option output="..\compileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters="-jar lgm16b4.jar" />
@@ -39,8 +40,8 @@
 				</Compiler>
 			</Target>
 			<Target title="Release-Linux">
-				<Option output="../libcompileEGMf" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../" />
+				<Option output="..\libcompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
@@ -56,8 +57,8 @@
 				</Linker>
 			</Target>
 			<Target title="Debug-Linux">
-				<Option output="../libcompileEGMf" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../" />
+				<Option output="..\libcompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
@@ -69,8 +70,8 @@
 				</Compiler>
 			</Target>
 			<Target title="StandAlone">
-				<Option output="bin/exec/CompileEGMf" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../" />
+				<Option output="bin\exec\CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -84,121 +85,123 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="OS_Switchboard.h" />
-		<Unit filename="backend/EnigmaStruct.h" />
-		<Unit filename="backend/JavaStruct.h" />
-		<Unit filename="backend/other/Constant.h" />
-		<Unit filename="backend/other/Include.h" />
-		<Unit filename="backend/other/Trigger.h" />
-		<Unit filename="backend/resources/Background.h" />
-		<Unit filename="backend/resources/EnigmaSettings.h" />
-		<Unit filename="backend/resources/Font.h" />
-		<Unit filename="backend/resources/GameInformation.h" />
-		<Unit filename="backend/resources/GameSettings.h" />
-		<Unit filename="backend/resources/GmObject.h" />
-		<Unit filename="backend/resources/Path.h" />
-		<Unit filename="backend/resources/Room.h" />
-		<Unit filename="backend/resources/Script.h" />
-		<Unit filename="backend/resources/Sound.h" />
-		<Unit filename="backend/resources/Sprite.h" />
-		<Unit filename="backend/resources/Timeline.h" />
-		<Unit filename="backend/resources/Whitespace.h" />
-		<Unit filename="backend/sub/Action.h" />
-		<Unit filename="backend/sub/BackgroundDef.h" />
-		<Unit filename="backend/sub/Event.h" />
-		<Unit filename="backend/sub/Image.h" />
-		<Unit filename="backend/sub/Instance.h" />
-		<Unit filename="backend/sub/MainEvent.h" />
-		<Unit filename="backend/sub/Moment.h" />
-		<Unit filename="backend/sub/PathPoint.h" />
-		<Unit filename="backend/sub/Tile.h" />
-		<Unit filename="backend/sub/View.h" />
-		<Unit filename="cfile_parse/auxilary.h">
-			<Option virtualFolder="cfile_parse/" />
+		<Unit filename="backend\EnigmaStruct.h" />
+		<Unit filename="backend\JavaStruct.h" />
+		<Unit filename="backend\other\Constant.h" />
+		<Unit filename="backend\other\Include.h" />
+		<Unit filename="backend\other\Trigger.h" />
+		<Unit filename="backend\resources\Background.h" />
+		<Unit filename="backend\resources\EnigmaSettings.h" />
+		<Unit filename="backend\resources\Font.h" />
+		<Unit filename="backend\resources\GameInformation.h" />
+		<Unit filename="backend\resources\GameSettings.h" />
+		<Unit filename="backend\resources\GmObject.h" />
+		<Unit filename="backend\resources\Path.h" />
+		<Unit filename="backend\resources\Room.h" />
+		<Unit filename="backend\resources\Script.h" />
+		<Unit filename="backend\resources\Sound.h" />
+		<Unit filename="backend\resources\Sprite.h" />
+		<Unit filename="backend\resources\Timeline.h" />
+		<Unit filename="backend\resources\Whitespace.h" />
+		<Unit filename="backend\sub\Action.h" />
+		<Unit filename="backend\sub\BackgroundDef.h" />
+		<Unit filename="backend\sub\Event.h" />
+		<Unit filename="backend\sub\Image.h" />
+		<Unit filename="backend\sub\Instance.h" />
+		<Unit filename="backend\sub\MainEvent.h" />
+		<Unit filename="backend\sub\Moment.h" />
+		<Unit filename="backend\sub\PathPoint.h" />
+		<Unit filename="backend\sub\Tile.h" />
+		<Unit filename="backend\sub\View.h" />
+		<Unit filename="cfile_parse\auxilary.h">
+			<Option virtualFolder="cfile_parse\" />
 		</Unit>
-		<Unit filename="cfile_parse/auxilary_gml.h">
-			<Option virtualFolder="cfile_parse/" />
+		<Unit filename="cfile_parse\auxilary_gml.h">
+			<Option virtualFolder="cfile_parse\" />
 		</Unit>
-		<Unit filename="cfile_parse/cfile_parse.cpp" />
-		<Unit filename="cfile_parse/cfile_parse.h" />
-		<Unit filename="cfile_parse/cfile_parse_calls.h" />
-		<Unit filename="cfile_parse/cfile_parse_constants.h" />
-		<Unit filename="cfile_parse/cfile_parse_macros.cpp" />
-		<Unit filename="cfile_parse/cfile_pushing.cpp" />
-		<Unit filename="cfile_parse/cfile_pushing.h" />
-		<Unit filename="cfile_parse/cparse_components.cpp" />
-		<Unit filename="cfile_parse/cparse_components.h" />
-		<Unit filename="cfile_parse/cparse_shared.cpp" />
-		<Unit filename="cfile_parse/cparse_shared.h" />
-		<Unit filename="cfile_parse/cpmain.cpp" />
-		<Unit filename="cfile_parse/expev_macros.h" />
-		<Unit filename="cfile_parse/expression_evaluator.cpp" />
-		<Unit filename="cfile_parse/expression_evaluator.h" />
-		<Unit filename="cfile_parse/expression_evaluator_settings.h" />
-		<Unit filename="cfile_parse/handle_letters.cpp" />
-		<Unit filename="cfile_parse/handle_letters.h" />
-		<Unit filename="cfile_parse/keyword_operator.cpp" />
-		<Unit filename="cfile_parse/macro_functions.cpp" />
-		<Unit filename="cfile_parse/macro_functions.h" />
-		<Unit filename="cfile_parse/parsein.h">
-			<Option virtualFolder="cfile_parse/" />
+		<Unit filename="cfile_parse\cfile_parse.cpp" />
+		<Unit filename="cfile_parse\cfile_parse.h" />
+		<Unit filename="cfile_parse\cfile_parse_calls.h" />
+		<Unit filename="cfile_parse\cfile_parse_constants.h" />
+		<Unit filename="cfile_parse\cfile_parse_macros.cpp" />
+		<Unit filename="cfile_parse\cfile_pushing.cpp" />
+		<Unit filename="cfile_parse\cfile_pushing.h" />
+		<Unit filename="cfile_parse\cparse_components.cpp" />
+		<Unit filename="cfile_parse\cparse_components.h" />
+		<Unit filename="cfile_parse\cparse_shared.cpp" />
+		<Unit filename="cfile_parse\cparse_shared.h" />
+		<Unit filename="cfile_parse\cpmain.cpp" />
+		<Unit filename="cfile_parse\expev_macros.h" />
+		<Unit filename="cfile_parse\expression_evaluator.cpp" />
+		<Unit filename="cfile_parse\expression_evaluator.h" />
+		<Unit filename="cfile_parse\expression_evaluator_settings.h" />
+		<Unit filename="cfile_parse\handle_letters.cpp" />
+		<Unit filename="cfile_parse\handle_letters.h" />
+		<Unit filename="cfile_parse\keyword_operator.cpp" />
+		<Unit filename="cfile_parse\macro_functions.cpp" />
+		<Unit filename="cfile_parse\macro_functions.h" />
+		<Unit filename="cfile_parse\parsein.h">
+			<Option virtualFolder="cfile_parse\" />
 		</Unit>
-		<Unit filename="cfile_parse/skipping.cpp" />
-		<Unit filename="cfile_parse/template_handlers.cpp" />
-		<Unit filename="cfile_parse/template_handlers.h" />
-		<Unit filename="cfile_parse/value.h" />
-		<Unit filename="compiler/compile.cpp" />
-		<Unit filename="compiler/compile.h" />
-		<Unit filename="compiler/compile_common.cpp" />
-		<Unit filename="compiler/compile_common.h" />
-		<Unit filename="compiler/compile_includes.cpp" />
-		<Unit filename="compiler/compile_includes.h" />
-		<Unit filename="compiler/compile_organization.h" />
-		<Unit filename="compiler/components/components.h" />
-		<Unit filename="compiler/components/parse_and_link.cpp" />
-		<Unit filename="compiler/components/write_object_data.cpp" />
-		<Unit filename="compiler/components/write_room_data.cpp" />
-		<Unit filename="compiler/event_ids.h" />
-		<Unit filename="compiler/license_string.h" />
-		<Unit filename="compiler/output_locals.cpp" />
-		<Unit filename="compiler/output_locals.h" />
-		<Unit filename="compiler/pcs/pcs.cpp" />
-		<Unit filename="compiler/pcs/pcs.h" />
-		<Unit filename="externs/ext_iteration.cpp" />
-		<Unit filename="externs/externs.cpp" />
-		<Unit filename="externs/externs.h" />
-		<Unit filename="externs/references.cpp" />
-		<Unit filename="externs/references.h" />
-		<Unit filename="gcc_interface/gcc_backend.cpp" />
-		<Unit filename="general/darray.cpp" />
-		<Unit filename="general/darray.h" />
-		<Unit filename="general/estring.h" />
-		<Unit filename="general/implicit_stack.h" />
-		<Unit filename="general/parse_basics.h" />
-		<Unit filename="general/string.cpp" />
-		<Unit filename="general/textfile.cpp" />
-		<Unit filename="general/textfile.h" />
+		<Unit filename="cfile_parse\skipping.cpp" />
+		<Unit filename="cfile_parse\template_handlers.cpp" />
+		<Unit filename="cfile_parse\template_handlers.h" />
+		<Unit filename="cfile_parse\value.h" />
+		<Unit filename="compiler\compile.cpp" />
+		<Unit filename="compiler\compile.h" />
+		<Unit filename="compiler\compile_common.cpp" />
+		<Unit filename="compiler\compile_common.h" />
+		<Unit filename="compiler\compile_includes.cpp" />
+		<Unit filename="compiler\compile_includes.h" />
+		<Unit filename="compiler\compile_organization.h" />
+		<Unit filename="compiler\components\components.h" />
+		<Unit filename="compiler\components\parse_and_link.cpp" />
+		<Unit filename="compiler\components\write_object_data.cpp" />
+		<Unit filename="compiler\components\write_room_data.cpp" />
+		<Unit filename="compiler\event_ids.h" />
+		<Unit filename="compiler\license_string.h" />
+		<Unit filename="compiler\output_locals.cpp" />
+		<Unit filename="compiler\output_locals.h" />
+		<Unit filename="compiler\pcs\pcs.cpp" />
+		<Unit filename="compiler\pcs\pcs.h" />
+		<Unit filename="externs\ext_iteration.cpp" />
+		<Unit filename="externs\externs.cpp" />
+		<Unit filename="externs\externs.h" />
+		<Unit filename="externs\references.cpp" />
+		<Unit filename="externs\references.h" />
+		<Unit filename="gcc_interface\gcc_backend.cpp" />
+		<Unit filename="general\bettersystem.cpp" />
+		<Unit filename="general\bettersystem.h" />
+		<Unit filename="general\darray.cpp" />
+		<Unit filename="general\darray.h" />
+		<Unit filename="general\estring.h" />
+		<Unit filename="general\implicit_stack.h" />
+		<Unit filename="general\parse_basics.h" />
+		<Unit filename="general\string.cpp" />
+		<Unit filename="general\textfile.cpp" />
+		<Unit filename="general\textfile.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
-		<Unit filename="parser/collect_variables.cpp" />
-		<Unit filename="parser/collect_variables.h" />
-		<Unit filename="parser/object_storage.cpp" />
-		<Unit filename="parser/object_storage.h" />
-		<Unit filename="parser/parser.cpp" />
-		<Unit filename="parser/parser.h" />
-		<Unit filename="parser/parser_components.cpp" />
-		<Unit filename="parser/parser_components.h" />
+		<Unit filename="parser\collect_variables.cpp" />
+		<Unit filename="parser\collect_variables.h" />
+		<Unit filename="parser\object_storage.cpp" />
+		<Unit filename="parser\object_storage.h" />
+		<Unit filename="parser\parser.cpp" />
+		<Unit filename="parser\parser.h" />
+		<Unit filename="parser\parser_components.cpp" />
+		<Unit filename="parser\parser_components.h" />
 		<Unit filename="settings.h" />
 		<Unit filename="standalone_main.cpp">
 			<Option target="StandAlone" />
 		</Unit>
-		<Unit filename="syntax/checkfile.cpp" />
-		<Unit filename="syntax/checkfile.h" />
-		<Unit filename="syntax/chkfunction.h" />
-		<Unit filename="syntax/syncheck.h" />
-		<Unit filename="syntax/syntax.cpp" />
-		<Unit filename="syntax/syntaxtools.h" />
-		<Unit filename="varnames/varnames.cpp" />
-		<Unit filename="varnames/varnames.h" />
+		<Unit filename="syntax\checkfile.cpp" />
+		<Unit filename="syntax\checkfile.h" />
+		<Unit filename="syntax\chkfunction.h" />
+		<Unit filename="syntax\syncheck.h" />
+		<Unit filename="syntax\syntax.cpp" />
+		<Unit filename="syntax\syntaxtools.h" />
+		<Unit filename="varnames\varnames.cpp" />
+		<Unit filename="varnames\varnames.h" />
 		<Extensions>
 			<code_completion />
 			<debugger>

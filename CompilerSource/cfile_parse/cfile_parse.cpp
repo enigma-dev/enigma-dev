@@ -1372,7 +1372,7 @@ pt parse_cfile(string cftext)
   string pname = "";
   if (last_typedef != NULL) pname=last_typedef->name;
   cout << '"' << last_typename << "\":" << pname << " \"" << last_identifier << "\"\r\n";*/
-  return -1;
+  return pt(-1);
 }
 
 

@@ -70,7 +70,7 @@ dllexport int libInit()
   
   int a = establish_bearings();
   if (a) {
-    cout << ((a == 1) ? "ERROR: Failed to locate the GCC" : "ERROR: GCC responded in an unexpected fashion") << "\n";
+    cout << "ERROR: See scrollback for information.\n";
     return a;
   }
   return 0;

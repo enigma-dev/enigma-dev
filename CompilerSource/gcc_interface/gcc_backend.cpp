@@ -177,7 +177,7 @@ int establish_bearings()
   askmake = system(MAKE_location.c_str());
   if (askmake) //Didn't answer us right; let's try someone else
   {
-    askmake = system((MAKE_location = "\"" + bin_path + "mingw32-make\"").c_str());
+    askmake = system(((MAKE_location = "\"" + bin_path + "mingw32-make\"") + " --version").c_str());
     if (askmake)
     {
       cout << "Sir, I can't find make.\n";
