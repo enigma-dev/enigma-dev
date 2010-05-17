@@ -34,7 +34,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 
 	private EnigmaSettings es;
 
-	private IndexButtonGroup strings, increment, literal, struct;
+	private IndexButtonGroup strings, increment, equal, literal, struct;
 	private IndexButtonGroup instance, storage;
 	private JButton bDef, bGlobLoc;
 	private JButton bInit, bClean;
@@ -86,8 +86,16 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		increment.add(incrementGML);
 		increment.add(incrementCPP);
 		increment.setValue(es.cppOperators);
+		
+		JLabel l3 = new JLabel("Inherit = (e.g. a=b=c) from:");
+		equal = new IndexButtonGroup(2,true,false);
+		JRadioButton equalGML = new JRadioButton("GML (a=(b==c))");
+		JRadioButton equalCPP = new JRadioButton("C (a=c; b=c)");
+		equal.add(equalGML);
+		equal.add(equalCPP);
+		equal.setValue(es.cppEquals);
 
-		JLabel l3 = new JLabel("Treat literals as:");
+		JLabel l4 = new JLabel("Treat literals as:");
 		literal = new IndexButtonGroup(2,true,false);
 		JRadioButton literalVar = new JRadioButton("Enigma (Variant)");
 		JRadioButton literalScalar = new JRadioButton("C++ (Scalar)");
@@ -95,7 +103,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		literal.add(literalScalar);
 		literal.setValue(es.literalHandling);
 
-		JLabel l4 = new JLabel("Closing brace of struct:");
+		JLabel l5 = new JLabel("Closing brace of struct:");
 		struct = new IndexButtonGroup(2,true,false);
 		JRadioButton structSemi = new JRadioButton("Implied Semicolon");
 		JRadioButton structISO = new JRadioButton("ISO C");
@@ -108,15 +116,18 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/*	*/.addComponent(l1)
 		/*	*/.addComponent(l2)
 		/*	*/.addComponent(l3)
-		/*	*/.addComponent(l4))
+		/*	*/.addComponent(l4)
+		/*	*/.addComponent(l5))
 		/**/.addGroup(compat.createParallelGroup()
 		/*	*/.addComponent(stringsGML)
 		/*	*/.addComponent(incrementGML)
+		/*	*/.addComponent(equalGML)
 		/*	*/.addComponent(literalVar)
 		/*	*/.addComponent(structSemi))
 		/**/.addGroup(compat.createParallelGroup()
 		/*	*/.addComponent(stringsCPP)
 		/*	*/.addComponent(incrementCPP)
+		/*	*/.addComponent(equalCPP)
 		/*	*/.addComponent(literalScalar)
 		/*	*/.addComponent(structISO)));
 
@@ -131,10 +142,14 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/*	*/.addComponent(incrementCPP))
 		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
 		/*	*/.addComponent(l3)
+		/*	*/.addComponent(equalGML)
+		/*	*/.addComponent(equalCPP))
+		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
+		/*	*/.addComponent(l4)
 		/*	*/.addComponent(literalVar)
 		/*	*/.addComponent(literalScalar))
 		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(l4)
+		/*	*/.addComponent(l5)
 		/*	*/.addComponent(structSemi)
 		/*	*/.addComponent(structISO)));
 
@@ -368,6 +383,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		//Compatibility / Progess options
 		int cppStrings = 0; // Defines what language strings are inherited from.               0 = GML,               1 = C
 		int cppOperators = 0; // Defines what language operators ++ and -- are inherited from. 0 = GML,               1 = C
+		int cppEquals = 0; // Defines whether = should be exclusively treated as a setter.     0 = GML (= or ==)      1 = C (= only)
 		int literalHandling = 0; // Determines how literals are treated.                       0 = enigma::variant,   1 = C-scalar
 		int structHandling = 0; // Defines behavior of the closing brace of struct {}.         0 = Implied semicolon, 1 = ISO C
 
