@@ -30,11 +30,11 @@
 #include <iostream>
 using namespace std;
 
+#include "../OS_Switchboard.h"
+
 #if TARGET_PLATFORM_ID == OS_WINDOWS
   #include <windows.h>
 #endif
-
-#include "../OS_Switchboard.h"
 
   #if TARGET_PLATFORM_ID == OS_WINDOWS
     typedef DWORD sys_result_type;
@@ -68,9 +68,9 @@ int better_system(string program,string arguments)
       cout << "ENIGMA: Failed to create process `" << program << "'.\n";
       exit_status = DWORD(-1);
     }
-    
-    return exit_status;
   #else
-    return system((program + " " + arguments).c_str());
+    exit_status = system((program + " " + arguments).c_str());
   #endif
+  
+  return exit_status;
 }
