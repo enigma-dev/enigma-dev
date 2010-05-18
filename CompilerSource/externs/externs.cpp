@@ -191,7 +191,7 @@ externs* scope_get_using(externs* scope)
   extiter u = scope->members.find(NAME__USING_SCOPE);
   if (u != scope->members.end())
     return u->second;
-  
+
   externs* rv = new externs(NAME__USING_SCOPE,NULL,scope,EXTFLAG_NAMESPACE);
   scope->members[NAME__USING_SCOPE] = rv;
   return rv;
@@ -202,7 +202,7 @@ externs* temp_get_specializations(externs* scope)
   extiter u = scope->members.find("<specializations>");
   if (u != scope->members.end())
     return u->second;
-  
+
   externs* rv = new externs("<specializations>",scope,NULL,EXTFLAG_NAMESPACE);
   scope->members["<specializations>"] = rv;
   return rv;
@@ -302,7 +302,7 @@ bool find_in_parents(externs* whose, string name,unsigned int flags)
     ext_retriever_var = whose;
     return 1;
   }
-  
+
   extiter it = whose->members.find(name);
   if (it != whose->members.end())
   {
@@ -311,10 +311,10 @@ bool find_in_parents(externs* whose, string name,unsigned int flags)
       return 1;
     } //else cout << it->second->flags << " : " << flags << " of " << strace(it->second) << endl << endl;
   }
-  
+
   if (find_in_specializations(whose,name,flags))
     return true;
-  
+
   for (unsigned i=0; i<whose->ancestors.size; i++)
   {
     externs* a = whose->ancestors[i];
@@ -370,7 +370,7 @@ bool find_in_specializations(externs* inscope,string name, unsigned flags)
   return 0;
 }
 
-//This function is used a lot; it traverses scopes, checks 
+//This function is used a lot; it traverses scopes, checks
 //template parameters and scope names, and filters by type.
 
 extern string cferr;
@@ -385,9 +385,9 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
     externs* iscope = immediate_scope;
     while ((iscope->flags & EXTFLAG_TYPEDEF) and !(iscope->flags & EXTFLAG_HYPOTHETICAL) and iscope->type)
       iscope = iscope->type;
-    
+
     extiter f = iscope->members.find(name);
-    
+
     if (f == iscope->members.end())
     {
       if (iscope->flags & EXTFLAG_HYPOTHETICAL)
@@ -397,28 +397,28 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
           EXTFLAG_TYPENAME
           | EXTFLAG_TYPEDEF         // Not a base type, but typedef to NULL.
           | EXTFLAG_HYPOTHETICAL);  // HYPOTHETICAL is viral.
-        
+
         if ((last_named & ~LN_TYPEDEF) == LN_TYPENAME and last_named_phase == TN_TEMPLATE) {
           ext_retriever_var->flags |= EXTFLAG_TEMPLATE;
           ext_retriever_var->tempargs[0] = tpdata().def;
         }
-        
+
         iscope->members[name] = ext_retriever_var;
         immediate_scope = NULL;
         return true;
       }
-      
+
       //Check ancestors
       for (unsigned i = 0; i < iscope->ancestors.size; i++)
         if (find_in_parents(iscope->ancestors[i],name,flags))
           return immediate_scope = NULL, true;
-      
+
       if (find_in_using(iscope,name,flags))
         return immediate_scope = NULL, true;
-        
+
       if (find_in_specializations(iscope,name,flags))
         return immediate_scope = NULL, true;
-      
+
       if (expect_find) {
         cferr = "Unable to locate member `" + name + "' in scope `" + strace(iscope) + "' (" + strace(immediate_scope) + ")";
         print_err_line_at();
@@ -426,21 +426,21 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
       return false;
     }
     ext_retriever_var = f->second;
-    
+
     const bool ret = ((f->second->flags & flags) != 0) or (flags == 0xFFFFFFFF);
     if (ret) immediate_scope = NULL;
     return ret;
   }
-  
+
   //Start looking in this scope
   externs* inscope = current_scope;
-  
+
   //If we're looking for a type name, try the template args
   if (flags & (EXTFLAG_TYPENAME | EXTFLAG_TEMPPARAM))
   {
     //The actual scope we're in should get search precedence, otherwise constructors will flop
     if (inscope->flags & EXTFLAG_TYPENAME)
-    { 
+    {
       if (inscope->name == name) {
         ext_retriever_var = inscope;
         return true;
@@ -460,7 +460,7 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
         }
       }
     }
-    
+
     //Check new templates
     for (int ti=0; ti<tpc; ti++)
     {
@@ -472,7 +472,7 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
         return 1;
       }
     }
-    
+
     //Check scope's own templates
     for (unsigned ti=0; ti<current_scope->tempargs.size; ti++)
     {
@@ -483,23 +483,23 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
       }
     }
   }
-  
+
   //Check all scopes here and above.
   extiter it = inscope->members.find(name);
   while (it == inscope->members.end()) //Until we find it
   {
     if (find_in_using(inscope,name,flags))
       return true;
-    
+
     //Check ancestors
     for (unsigned i = 0; i < inscope->ancestors.size; i++)
       if (find_in_parents(inscope->ancestors[i],name,flags))
         return 1;
-    
+
     if (inscope != &global_scope) //If we're not at global scope, move up
       inscope = inscope->parent; //This must ALWAYS be nonzero when != global_scope
     else return 0;
-    
+
     //Check template params of new scope first
     if (flags & EXTFLAG_TYPENAME)
     {
@@ -510,15 +510,15 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
           return 1;
         }
       }
-      
+
       //The actual scope we're in should then get search precedence, otherwise constructors will flop
       if (inscope->flags & EXTFLAG_TYPENAME and inscope->name == name) {
         ext_retriever_var = inscope;
         return true;
       }
     }
-    
-    
+
+
     //Try to find it as a member of this scope
     it = inscope->members.find(name);
     if (cfile_debug)
@@ -530,7 +530,7 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
   }
   ext_retriever_var = it->second;
   return ((it->second->flags & flags) != 0 or flags == 0xFFFFFFFF);
-  
+
   return 0;
 }
 
@@ -542,7 +542,7 @@ bool find_extname_global(string name,unsigned int flags)
     ext_retriever_var = it->second;
     return (it->second->flags & flags) or (flags == 0xFFFFFFFF);
   }
-  
+
   externs *using_scope = scope_get_using_ie(&global_scope);
   if (using_scope)
   for (it = using_scope->members.begin(); it != using_scope->members.end(); it++)
@@ -559,6 +559,6 @@ bool find_extname_global(string name,unsigned int flags)
         return 1;
       }
     }
-  
+
   return 0;
 }
