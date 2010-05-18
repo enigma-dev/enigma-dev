@@ -381,6 +381,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       writei(swidth * sheight * 4,gameModule); //size when unpacked
       writei(es->sprites[i].subImages[ii].dataSize,gameModule); //size when unpacked
       fwrite(es->sprites[i].subImages[ii].data, 1, es->sprites[i].subImages[ii].dataSize, gameModule); //sprite data
+      writei(NULL,gameModule);
     }
   }
  

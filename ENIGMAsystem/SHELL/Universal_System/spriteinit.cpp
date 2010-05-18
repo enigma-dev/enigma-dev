@@ -111,6 +111,7 @@ namespace enigma
           continue;
         }
         delete[] cpixels;
+        cout << "Adding subimage...\n";
         sprexe(sprid, xorig, yorig, width, height, pixels);
         
         delete[] pixels;

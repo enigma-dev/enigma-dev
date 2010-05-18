@@ -33,6 +33,7 @@ int sprite_add(std::string filename,double imgnumb,double precise,double transpa
 
 #include <string>
 #include <cstring>
+#include <iostream>
 #include <GL/gl.h>
 #include "../../Universal_System/IMGloading.h"
 #include "../../Universal_System/spritestruct.h"
@@ -164,10 +165,11 @@ namespace enigma
     if(!sprstr)
       show_error("THE WORLD CAN NO LONGER BE TRUSTED! HEAD FOR THE HILLS!",1);
     
-    sprstr->texturearray[sprstr->subcount]=texture;
+    sprstr->texturearray[sprstr->subcount] = texture;
     #if COLLIGMA
     sprstr->bitmask[enigma::spritestructarray[sprid]->subcount] = themask;
     #endif
     sprstr->subcount++;
+    std::cout << "Added subimage " << sprstr->subcount << " to sprite " << sprid << std::endl;
   }
 }
