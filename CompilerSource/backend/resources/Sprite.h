@@ -30,4 +30,5 @@ struct Sprite
   int bbBottom;
   
   Image *subImages;
+  int subImageCount;
 };

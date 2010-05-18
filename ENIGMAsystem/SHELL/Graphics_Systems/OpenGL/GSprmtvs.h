@@ -37,7 +37,7 @@ const int pr_quadlist       =8;     //GL_QUADS
 const int pr_quadstrip      =9;     //GL_QUAD_STRIP
 const int pr_polygon       =10;     //GL_POLYGON
 
-int draw_primitive_begin(double kind);
+int draw_primitive_begin(int kind);
 int draw_vertex(double x, double y);
 int draw_vertex_color(float x, float y, int color, float alpha);
 int draw_primitive_end();

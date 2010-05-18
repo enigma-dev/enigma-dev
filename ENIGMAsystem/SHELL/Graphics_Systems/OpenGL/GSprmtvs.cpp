@@ -39,52 +39,52 @@ int __currentpdepth;
 namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
 #define untexture() if(enigma::cur_bou_tha_noo_sho_eve_cha_eve) glBindTexture(GL_TEXTURE_2D,enigma::cur_bou_tha_noo_sho_eve_cha_eve=0);
 
-int draw_primitive_begin(double dink){
-	untexture();
-	GLenum kind;
-	switch((int)dink){
-	case 2:kind=GL_LINES;
-	break;case 3:kind=GL_LINE_STRIP;
-	break;case 4:kind=GL_TRIANGLES;
-	break;case 5:kind=GL_TRIANGLE_STRIP;
-	break;case 6:kind=GL_TRIANGLE_FAN;
-	break;case 7:kind=GL_LINE_LOOP;
-	break;case 8:kind=GL_QUADS;
-	break;case 9:kind=GL_QUAD_STRIP;
-	break;case 10:kind=GL_POLYGON;
-	break;default:kind=GL_POINTS;
-	}
+GLenum ptypes_by_id[16] = { 
+  GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, 
+  GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_LINE_LOOP, GL_QUADS,
+  GL_QUAD_STRIP, GL_POLYGON, 
+  
+  //These are padding.
+  GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS
+};
+
+int draw_primitive_begin(int dink)
+{
+	GLenum kind = ptypes_by_id[ dink & 15 ];
 	#if !PRIMBUFFER
-	glBegin(kind);
+	  glBegin(kind);
 	#else
-	if(++__currentpdepth>PRIMDEPTH2){
-		#if SHOWERRORS
-		show_error("Max open primitive count exceeded. Disable the limit via the buffer option, or increase buffer depth",0);
-		#endif
-		return -1;
-     }
-     __currentpcount[__currentpdepth]=0;
-     __primitivetype[__currentpdepth]=kind;
-     #endif
-     return 0;
+    if(++__currentpdepth>PRIMDEPTH2)
+    {
+      show_error("Max open primitive count exceeded. Disable the limit via the buffer option, or increase buffer depth",0);
+      return -1;
+    }
+    __currentpcount[__currentpdepth]=0;
+    __primitivetype[__currentpdepth]=kind;
+  #endif
+  return 0;
 }
 
-int draw_vertex(double x, double y){
+int draw_vertex(double x, double y)
+{
+	untexture();
 	#if !PRIMBUFFER
 	glVertex2f(x,y);
 	#else
-	int pco=__currentpcount[__currentpdepth]++;
-	glGetFloatv(GL_CURRENT_COLOR,__primitivecolor[pco][__currentpdepth]);
-	untexture();
-	__primitivexy[pco][__currentpdepth][0]=x;
-	__primitivexy[pco][__currentpdepth][1]=y;
-	#if SHOWERRORS
-	if(pco+1>PRIMBUFFER) show_error("Max point count exceeded",0);
-	#endif
+    int pco=__currentpcount[__currentpdepth]++;
+    glGetFloatv(GL_CURRENT_COLOR,__primitivecolor[pco][__currentpdepth]);
+    untexture();
+    __primitivexy[pco][__currentpdepth][0]=x;
+    __primitivexy[pco][__currentpdepth][1]=y;
+    
+    if(pco+1>PRIMBUFFER) show_error("Max point count exceeded",0);
 	#endif
 	return 0;
 }
-int draw_vertex_color(float x, float y, int color, float alpha){
+
+int draw_vertex_color(float x, float y, int color, float alpha)
+{
+	untexture();
 	unsigned int col=color;
 	#if !PRIMBUFFER
 	glPushAttrib(GL_CURRENT_BIT);
@@ -110,8 +110,8 @@ int draw_vertex_color(float x, float y, int color, float alpha){
 	#endif
 	return 0;
 }
-int draw_primitive_end(){
-	untexture();
+int draw_primitive_end()
+{
 	#if PRIMBUFFER
 	glPushAttrib(GL_CURRENT_BIT);
 	glBegin(__primitivetype[__currentpdepth]);

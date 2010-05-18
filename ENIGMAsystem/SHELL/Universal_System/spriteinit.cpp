@@ -76,43 +76,30 @@ namespace enigma
       fread(&subimages,4,1,exe);
       for (int ii=0;ii<subimages;ii++) 
       {
-        unsigned char transparent[4];
-        fread(transparent,1,4,exe);
         int unpacked;
         fread(&unpacked,1,4,exe);
         unsigned int size;
         fread(&size,4,1,exe);
         unsigned char* cpixels=new unsigned char[size+1];
         if (!cpixels)
-        {
-          #if SHOWERRORS
-            show_error("Failed to load sprite: Cannot allocate enough memory "+string(unpacked),0);
-          #endif
+        {  //FIXME: Uncomment these when tostring is available
+          //show_error("Failed to load sprite: Cannot allocate enough memory "+tostring(unpacked),0);
           break;
         }
         unsigned int sz2=fread(cpixels,1,size,exe);
         if (size!=sz2)
         {
-          #if SHOWERRORS
-            show_error("Failed to load sprite: Data is truncated before exe end. Read "+string(sz2)+" out of expected "+string(size),0);
-          #endif
+          //show_error("Failed to load sprite: Data is truncated before exe end. Read "+tostring(sz2)+" out of expected "+tostring(size),0);
           goto break2;
         }
         unsigned char* pixels=new unsigned char[unpacked+1];
         if (zlib_decompress(cpixels,size,unpacked,pixels)!=width*height*3)
         {
-          #if SHOWERRORS
-            show_error("Sprite load error: Sprite does not match expected size",0);
-          #endif
+          //show_error("Sprite load error: Sprite does not match expected size",0);
           continue;
         }
         delete[] cpixels;
-        sprexe(sprid,
-          #if COLLIGMA
-            xorig, yorig,
-          #endif
-          width, height,transparent,pixels
-        );
+        sprexe(sprid, xorig, yorig, width, height, pixels);
         
         delete[] pixels;
         fread(&nullhere,1,4,exe);

@@ -43,15 +43,13 @@ int draw_clear_alpha(double col,float alpha){
 }
 int draw_clear(double col){return draw_clear_alpha(col,1);}
 
-int merge_color(int col1, int col2, double amount)
+int merge_color(int c1,int c2,double amount)
 {
-  unsigned char* c1 = (unsigned char*)&col1;
-  unsigned char* c2 = (unsigned char*)&col2;
-  c1[0] = char(c1[0]*(1-amount) + c2[0]*(amount));
-  c1[1] = char(c1[1]*(1-amount) + c2[1]*(amount));
-  c1[2] = char(c1[2]*(1-amount) + c2[2]*(amount));
-  c1[3] = char(c1[3]*(1-amount) + c2[3]*(amount));
-  return col1;
+	amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);
+	return
+	  (unsigned char)(__GETR(c1) - (__GETR(c1) + __GETR(c2)) * amount)
+  | (unsigned char)(__GETG(c1) - (__GETG(c1) + __GETG(c2)) * amount) << 8
+	| (unsigned char)(__GETB(c1) - (__GETB(c1) + __GETB(c2)) * amount) << 16;
 }
 
 int draw_set_color(double color){

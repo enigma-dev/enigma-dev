@@ -58,6 +58,11 @@ using namespace std;
 
 #include "../general/bettersystem.h"
 
+void writei(int x, FILE *f)
+{
+  fwrite(&x,4,1,f);
+}
+
 void clear_ide_editables()
 {
   ofstream wto;
@@ -304,8 +309,6 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     return E_ERROR_BUILD;
   }
   cout << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";
-  int gameres = better_system("ENIGMAsystem/SHELL/game.exe","");
-  cout << "Game returned " << gameres << "\n";
   
   
   
@@ -316,18 +319,93 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     linker sometime in the future.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
-  cout << es->spriteCount << " Sprites:" << endl;
-  for (int i = 0; i < es->spriteCount; i++)
-  {
-    cout << "Sprite " << es->sprites[i].name << endl;
-    fflush(stdout);
+  FILE *gameModule = fopen("ENIGMAsystem/SHELL/game.exe","ab");
+  if (!gameModule) {
+    cout << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
+    return 12;
   }
+  
+  int resourceblock_start = ftell(gameModule);
+  
+  if (resourceblock_start < 128) {
+    cout << "Compiled game is clearly not a working module; cannot continue" << flushl;
+    return 13;
+  }
+  
+  
+  // Start by setting off our location with a DWord of NULLs
+  fwrite("\0\0\0",1,4,gameModule);
+  
+  // Now we're going to add sprites
+  cout << es->spriteCount << " Adding Sprites to Game Module: " << flushl;
+  
+  //Indicate how many
+  int sprite_count = es->spriteCount;
+  fwrite(&sprite_count,4,1,gameModule);
+  
+  for (int i = 0; i < sprite_count; i++)
+  {
+    writei(es->sprites[i].id,gameModule); //id
+    
+    // Track how many subImages we're copying
+    int subCount = es->sprites[i].subImageCount;
+    
+    int swidth = 0, sheight = 0;
+    for (int ii = 0; ii < subCount; ii++)
+    {
+      if (!swidth and !sheight) {
+        swidth =  es->sprites[i].subImages[ii].width;
+        sheight = es->sprites[i].subImages[ii].height;
+      }
+      else if (swidth != es->sprites[i].subImages[ii].width or sheight != es->sprites[i].subImages[ii].height) {
+        cout << "Subimages of sprite `" << es->sprites[i].name << "' vary in dimensions; do not want." << flushl;
+        return 14;
+      }
+    }
+    if (!swidth and !sheight and subCount) {
+      cout << "Subimages of sprite `" << es->sprites[i].name << "' have zero size." << flushl;
+      return 14;
+    }
+    
+    writei(swidth, gameModule); //width
+    writei(sheight,gameModule); //height
+    writei(es->sprites[i].originX,gameModule); //xorig
+    writei(es->sprites[i].originY,gameModule); //yorig
+    
+    writei(subCount,gameModule); //subimages
+    
+    for (int ii = 0;ii < subCount; ii++)
+    {
+      //strans = es->sprites[i].subImages[ii].transColor, fwrite(&idttrans,4,1,exe); //Transparent color
+      writei(swidth * sheight * 4,gameModule); //size when unpacked
+      fwrite(es->sprites[i].subImages[ii].data, 1, es->sprites[i].subImages[ii].dataSize, gameModule); //sprite data
+    }
+  }
+ 
+  cout << "Done writing sprites." << flushl;
+  
+  
+  // Tell where the sprites are
+  fwrite("\0\0\0\0sprn",8,1,gameModule);
+  fwrite(&resourceblock_start,4,1,gameModule);
+  
+  // Debug print; we're done
+  cout << "Finalized sprites." << flushl;
   
   cout << es->soundCount << " Sounds:" << endl;
   for (int i = 0; i < es->soundCount; i++) {
     cout << " " << es->sounds[i].name << endl;
     fflush(stdout);
   }
+  
+  
+  //Close the game module; we're done adding resources
+  cout << "Closing game module and running." << flushl;
+  fclose(gameModule);
+  
+  
+  int gameres = better_system("ENIGMAsystem/SHELL/game.exe","");
+  cout << "Game returned " << gameres << "\n";
   
   return 0;
 };

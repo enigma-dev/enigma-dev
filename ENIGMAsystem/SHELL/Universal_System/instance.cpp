@@ -42,17 +42,16 @@ namespace enigma
 
 int instance_destroy(double id)
 {
-    enigma::cleanups[enigma::cleancount++]=(int)id;
-    enigma::instancecount--;
-    instance_count--;
-    return 0;
+  enigma::cleanups[enigma::cleancount++]=(int)id;
+  enigma::instancecount--;
+  instance_count--;
+  return 0;
 }
 
-int instance_destroy(){
-    #if SHOWERRORS
-    show_error("Nothing to destroy",0);
-    #endif
-    return -1;
+int instance_destroy()
+{
+  show_error("Nothing to destroy",0);
+  return -1;
 }
 
 bool instance_exists(double obj)

@@ -51,9 +51,5 @@ namespace enigma
   #endif
   
   //Adds a subimage to an existing sprite from the exe
-  void sprexe(int sprid,
-    #if COLLIGMA
-    int x,int y,
-    #endif
-    unsigned int w,unsigned int h,unsigned char*tra,unsigned char*chunk);
+  void sprexe(int sprid, int x, int y, unsigned int w, unsigned int h, unsigned char* chunk);
 }
