@@ -27,9 +27,19 @@
 
 #include <string>
 #include <stdio.h>
+#include <iostream>
 #include "../Graphics_Systems/OpenGL/GSspriteadd.h"
 #include "../Platforms/windows/WINDOWSStd.h"
 #include "compression.h"
+
+using namespace std;
+
+inline string tostring(int x)
+{
+  char a[20];
+  sprintf(a,"%d",x);
+  return a;
+}
 
 namespace enigma
 {
@@ -43,6 +53,8 @@ namespace enigma
       show_error("Resource load fail: exe unopenable",0);
       return;
     }
+    
+    
     
     fseek(exe,-8,SEEK_END);
     char str_quad[4];
@@ -73,29 +85,29 @@ namespace enigma
       enigma::new_sprexe(sprid,width,height,xorig,yorig,1,0);
       
       int subimages;
-      fread(&subimages,4,1,exe);
+      fread(&subimages,4,1,exe); cout << "Subimages: " << subimages << endl;
       for (int ii=0;ii<subimages;ii++) 
       {
         int unpacked;
         fread(&unpacked,1,4,exe);
         unsigned int size;
-        fread(&size,4,1,exe);
+        fread(&size,4,1,exe); cout << "Alloc size: " << size << endl;
         unsigned char* cpixels=new unsigned char[size+1];
         if (!cpixels)
         {  //FIXME: Uncomment these when tostring is available
-          //show_error("Failed to load sprite: Cannot allocate enough memory "+tostring(unpacked),0);
+          show_error("Failed to load sprite: Cannot allocate enough memory "+tostring(unpacked),0);
           break;
         }
         unsigned int sz2=fread(cpixels,1,size,exe);
         if (size!=sz2)
         {
-          //show_error("Failed to load sprite: Data is truncated before exe end. Read "+tostring(sz2)+" out of expected "+tostring(size),0);
+          show_error("Failed to load sprite: Data is truncated before exe end. Read "+tostring(sz2)+" out of expected "+tostring(size),0);
           goto break2;
         }
         unsigned char* pixels=new unsigned char[unpacked+1];
-        if (zlib_decompress(cpixels,size,unpacked,pixels)!=width*height*3)
+        if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
         {
-          //show_error("Sprite load error: Sprite does not match expected size",0);
+          show_error("Sprite load error: Sprite does not match expected size",0);
           continue;
         }
         delete[] cpixels;
@@ -106,9 +118,7 @@ namespace enigma
         
         if (nullhere)
         {
-          #if SHOWERRORS
-            show_error("Sprite load error: Null terminator expected",0);
-          #endif
+          show_error("Sprite load error: Null terminator expected",0);
           break;
         }
       }

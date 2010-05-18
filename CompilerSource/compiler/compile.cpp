@@ -106,7 +106,8 @@ void clear_ide_editables()
   
 }
 
-
+// modes: 0=run, 1=debug, 2=build, 3=compile
+enum { emode_run, emode_debug, emode_build, emode_compile };
 dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
   // CLean up from any previous executions.
@@ -378,6 +379,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     {
       //strans = es->sprites[i].subImages[ii].transColor, fwrite(&idttrans,4,1,exe); //Transparent color
       writei(swidth * sheight * 4,gameModule); //size when unpacked
+      writei(es->sprites[i].subImages[ii].dataSize,gameModule); //size when unpacked
       fwrite(es->sprites[i].subImages[ii].data, 1, es->sprites[i].subImages[ii].dataSize, gameModule); //sprite data
     }
   }
@@ -400,12 +402,15 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   
   //Close the game module; we're done adding resources
-  cout << "Closing game module and running." << flushl;
+  cout << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
   
+  if (mode == emode_run or mode == emode_build or true)
+  {
+    int gameres = better_system("ENIGMAsystem/SHELL/game.exe","");
+    cout << "Game returned " << gameres << "\n";
+  }
   
-  int gameres = better_system("ENIGMAsystem/SHELL/game.exe","");
-  cout << "Game returned " << gameres << "\n";
   
   return 0;
 };

@@ -34,7 +34,8 @@
 
 namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
 
-int sprite_exists(int spr){
+int sprite_exists(int spr)
+{
 //	for(size_t id=0;id<enigma::spritestructarray.size();id++)
 //		if(enigma::spritestructarray[id]&&enigma::spritestructarray[id]->id==spr) return 1;
 //	return 0;
@@ -44,7 +45,8 @@ int sprite_exists(int spr){
 	return 0;
 }
 
-int draw_sprite(int spr,int subimg,double x,double y){
+int draw_sprite(int spr,int subimg,double x,double y)
+{
     enigma::sprite *spr2d=enigma::spritestructarray[spr];
     if(!spr2d) return -1;
     glPushAttrib(GL_CURRENT_BIT);
@@ -55,6 +57,7 @@ int draw_sprite(int spr,int subimg,double x,double y){
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
     glColor4f(1,1,1,1);
+  
 	float tbx=spr2d->texbordx,tby=spr2d->texbordy;
 	glBegin(GL_QUADS);
 	glTexCoord2f(0,0);
@@ -70,7 +73,8 @@ int draw_sprite(int spr,int subimg,double x,double y){
 	return 0;
 }
 
-int draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h){
+int draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h)
+{
 	enigma::sprite *spr2d=enigma::spritestructarray[spr];
 	if(!spr2d) return -1;
 	glPushAttrib(GL_CURRENT_BIT);
@@ -79,8 +83,10 @@ int draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h
 		glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg]);
 		enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg];
 	}
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+	
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+  
 	glBegin(GL_QUADS);
 	glTexCoord2f(spr2d->texbordx,0);
 	glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);

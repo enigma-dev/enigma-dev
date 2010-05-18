@@ -44,8 +44,8 @@ int draw_sprite_general(int spr,int subimg,double left,double top,double width,d
  */
 #include "../../Universal_System/spritestruct.h"
 
-int sprite_exists(double sprite);
-int draw_sprite(double spr,double subimg,double x,double y);
+int sprite_exists(int sprite);
+int draw_sprite(int spr,int subimg,double x,double y);
 int draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h);
 //enigma::4args int draw_sprite_tiled(ARG sprite,ARG2 subimg,ARG3 x,ARG4 y)
 int draw_sprite_part(int spr,int subimg,double left,double top,double width,double height,double x,double y);
