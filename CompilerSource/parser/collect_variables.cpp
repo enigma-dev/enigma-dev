@@ -49,6 +49,20 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
   darray<scope_ignore*> igstack;
   igstack[igpos] = new scope_ignore;
   
+  cout << "\n\n\nCollecting variables for event " << pev->id << "..." << endl;
+  cout << code << endl;
+  cout << synt << endl;
+  
+  pt dec_start_pos = 0;
+  
+  int in_decl = 0, dec_out_of_scope = 0; //Not declaring, not declaring outside this scope via global or local
+  string dec_prefixes, dec_type, dec_suffixes; //Unary referencers, type names and flags, and unary-postfix array subscripts
+  int dec_initializing = false; //This tells us we've passed an = in our initialization
+  int bracklevel = 0; //This will help us make sure not to add unwanted unary symbols or miss variables/scripts.
+  
+  bool dec_name_givn = false; //Has an identifier been named in this declaration?
+  string dec_name; //Identifier being declared
+  
   for (pt pos = 0; pos < code.length(); pos++)
   {
     if (synt[pos] == '{') {
@@ -59,9 +73,86 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       delete igstack[igpos--];
       continue;
     }
+    
+    if (bracklevel == 0 and in_decl)
+    {
+      if (synt[pos] == ';' or synt[pos] == ',')
+      {
+        if (dec_name_givn)
+        {
+          if (dec_out_of_scope) //Designated for a different scope: global or local
+          {
+            //Declare this as a specific type
+            if (dec_out_of_scope - 1) //to be placed at global scope
+              pev->myObj->globals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
+            else
+              pev->myObj->locals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
 
-    int out_of_scope = 0; //Not declaring outside this scope
-
+            if (!dec_initializing) //If this statement does nothing other than declare, remove it
+            {
+              code.erase(dec_start_pos,pos+1-dec_start_pos);
+              synt.erase(dec_start_pos,pos+1-dec_start_pos);
+              pos = dec_start_pos;
+            }
+            else pos++;
+          }
+          else //Add to this scope
+          {
+            cout << "Add to ig" << endl;
+            igstack[igpos]->ignore[dec_name] = pos;
+            pos++;
+            cout << "Added `" << dec_name << "' to ig" << endl;
+          }
+        }
+        
+        dec_type = "";
+        if (synt[pos] == ';')
+          dec_out_of_scope = in_decl = 0, dec_type = "";
+        dec_prefixes = dec_suffixes = "";
+        dec_initializing = false;
+      }
+      if (!dec_initializing)
+      {
+        if (synt[pos] == '*') {
+          dec_prefixes += "*";
+          continue;
+        }
+        if (synt[pos] == '&') {
+          dec_prefixes += "&";
+          continue;
+        }
+        if (synt[pos] == '=') {
+          dec_initializing = true;
+          continue;
+        }
+        if (synt[pos] == '(') {
+          ((dec_name_givn)?dec_suffixes:dec_prefixes) += '(';
+          continue;
+        }
+        if (synt[pos] == '(') {
+          ((dec_name_givn)?dec_suffixes:dec_prefixes) += ')';
+          continue;
+        }
+      }
+    }
+    if (synt[pos] == '[')
+    {
+      if (in_decl and !dec_initializing)
+      {
+        pt ep = pos + 1;
+        for (int bc = 1; bc > 0; ep++)
+          if (synt[ep] == '[') bc++;
+          else if (synt[ep] == ']') bc--;
+        dec_suffixes += code.substr(pos,ep - pos);
+      }
+      bracklevel++;
+      continue;
+    }
+    if (synt[pos] == ']') {
+      bracklevel--;
+      continue;
+    }
+    
     if (synt[pos] == 'L') //Double meaning.
     {
       cout << "L"; fflush(stdout);
@@ -76,13 +167,13 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         continue;
       }
       //We're at either global declarator or local declarator: record which scope it is.
-      out_of_scope = 1 + (code[sp] == 'g'); //If the first character of this token is 'g', it's global. Otherwise we assume it's local.
-
+      dec_out_of_scope = 1 + (code[sp] == 'g'); //If the first character of this token is 'g', it's global. Otherwise we assume it's local.
+      
       //Remove the keyword from the code
       code.erase(sp,pos-sp);
       synt.erase(sp,pos-sp);
       pos = sp;
-
+      
       cout << "\\"; fflush(stdout);
       goto past_this_if;
     }
@@ -90,103 +181,28 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
     {
       past_this_if:
       cout << "t"; fflush(stdout);
-
+      
       //Skip to the end of the typename, remember where we started
       const int tsp = pos;
       while (synt[++pos] == 't');
-
+      
       //Copy the type
-      string type_name = code.substr(tsp,pos-tsp);
-
-      if (out_of_scope)
+      dec_type = code.substr(tsp,pos-tsp);
+      
+      if (dec_out_of_scope)
       {
         //Remove the keyword from the code
         code.erase(tsp,pos-tsp);
         synt.erase(tsp,pos-tsp);
         pos = tsp;
       }
-
-      string lid;
-      pt spos = pos;
-      bool has_init = false;
-
-      string prefixes, suffixes;
-
-      //Begin iterating the declared variables
-      while (pos < code.length())
-      {
-        if (synt[pos] == ',' or synt[pos] == ';')
-        {
-          const bool donehere = (synt[pos] == ';');
-          //cout << "\n" << code.substr(0,spos) << "<<" << code.substr(spos,pos-spos) << ">>" << code.substr(pos) << endl << endl;// << synt.substr(0,pos) << "<<>>" << code.substr(pos) << endl << endl;
-
-          if (out_of_scope) //Designated for a different scope: global or local
-          {
-            //Declare this as a specific type
-            if (out_of_scope - 1) //to be placed at global scope
-              pev->myObj->globals[lid] = dectrip(type_name,prefixes,suffixes);
-            else
-              pev->myObj->locals[lid] = dectrip(type_name,prefixes,suffixes);
-
-            if (!has_init) //If this statement does nothing other than declare, remove it
-            {
-              code.erase(spos,pos+1-spos);
-              synt.erase(spos,pos+1-spos);
-              pos = spos;
-            }
-            else pos++;
-          }
-          else //Add to this scope
-          {
-            cout << "Add to ig" << endl;
-            igstack[igpos]->ignore[lid] = pos;
-            pos++;
-            cout << "Added `" << lid << "' to ig" << endl;
-          }
-          cout << "endif ';'" << endl;
-
-          prefixes = suffixes = "";
-
-          spos = pos;
-          has_init = false;
-          if (donehere) {
-            pos--; break;
-          }
-          continue;
-        }
-        if (synt[pos] == 'n')
-        {
-          const pt spos = pos;
-          while (synt[++pos] == 'n');
-          lid = code.substr(spos,pos-spos);
-          continue;
-        }
-        if (synt[pos] == '*') {
-          prefixes += "*";
-          pos++; continue;
-        }
-        if (synt[pos] == '&') {
-          prefixes += "&";
-          pos++; continue;
-        }
-        if (synt[pos] == '[')
-        {
-          const pt ssp = pos++;
-          for (int cnt = 1; cnt > 0 and_safety; pos++)
-            if (synt[pos] == '[') cnt++;
-            else if (synt[pos] == ']') cnt--;
-          suffixes += code.substr(ssp,pos-ssp);
-          continue;
-        }
-        if (synt[pos++] == '=')
-        {
-          while (synt[pos] != ',' and synt[pos] != ';' and synt[pos]) pos++;
-          has_init = true;
-          continue;
-        }
-        cout << "~" << code[pos-1];
-      }
-      cout << "\\"; fflush(stdout);
+      
+      // Indicate that we're in a declaration and should start
+      // Ignoring shit rather than adding it to the local list
+      in_decl = true;
+      
+      // Log this position
+      dec_start_pos = pos; 
     }
     if (synt[pos] == 'n')
     {
@@ -199,20 +215,27 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
 
       if (synt[pos] != '(') // If it isn't a function (we assume it's nothing other than a function or varname)
       {
-        cout << "("; fflush(stdout);
+        if (in_decl and !dec_initializing) {
+          dec_name_givn = true;
+          dec_name = nname; continue;
+        }
+        
         //First, check that it's not a global
         if (find_extname(nname,0xFFFFFFFF)) {
-          cout << "Ignoring `" << nname << "' because it's a global.\n"; continue; }
+          cout << "Ignoring `" << nname << "' because it's a global.\n"; continue;
+        }
         
         //Check shared locals to see if we already have one
         if (shared_object_locals.find(nname) != shared_object_locals.end()) {
-          cout << "Ignoring `" << nname << "' because it's a local.\n"; continue; }
+          cout << "Ignoring `" << nname << "' because it's a local.\n"; continue;
+        }
         
         //Now make sure we're not specifically ignoring it
         map<string,int>::iterator ex;
         for (int i = igpos; i >= 0; i--)
           if ((ex = igstack[i]->ignore.find(nname)) != igstack[i]->ignore.end()) {
-            cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n"; goto continue_2; }
+            cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n"; goto continue_2;
+          }
         
         cout << "Adding `" << nname << "' because that's just what I do.\n";
         pev->myObj->locals[nname] = dectrip();
@@ -221,6 +244,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       else //Since a syntax check already completed, we assume this is a valid function
       {
         cout << "!"; fflush(stdout);
+        cout << "\nLooking at " <<nname << "...\n";
         bool contented = false;
         unsigned pars = 1, args = 0;
         for (pt i = pos+1; pars; i++)
@@ -239,6 +263,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         }
         args += contented; //Final arg for closing parentheses
         pev->myObj->funcs[nname] = args;
+        cout << "  Calls script `" << nname << "'\n";
         cout << "\\"; fflush(stdout);
       }
       cout << "\\"; fflush(stdout);
@@ -246,7 +271,9 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
   }
 
   cout << "*****************************FINISHED********************\n";
-
+  
+  cout << "\n\n\n\n";
+  
   //Store these for later.
   pev->code = code;
   pev->synt = synt;

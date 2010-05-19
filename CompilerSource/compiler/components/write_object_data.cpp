@@ -61,6 +61,7 @@ int compile_writeObjectData(EnigmaStruct* es)
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
           wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
         
+        wto << "\n    //Scripts called by this object\n    ";
         parsed_object* t = i->second;
         for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
         {

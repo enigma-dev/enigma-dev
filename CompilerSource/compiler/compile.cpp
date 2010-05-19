@@ -326,6 +326,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     return 12;
   }
   
+  fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
   int resourceblock_start = ftell(gameModule);
   
   if (resourceblock_start < 128) {

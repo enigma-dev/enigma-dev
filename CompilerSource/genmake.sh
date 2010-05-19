@@ -63,6 +63,7 @@ printf "link:" >> Makefile;
 
 echo "" >> Makefile;
 echo "win windows: link" >> Makefile;
+echo "	-move ../compileEGMf.exe ../compileEGMf" >> Makefile;
 echo "	move ../compileEGMf ../compileEGMf.dll" >> Makefile;
 echo "lin linux unix: link" >> Makefile;
 echo "	mv ../compileEGMf ../libcompileEGMf.so" >> Makefile;

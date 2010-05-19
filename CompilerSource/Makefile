@@ -127,6 +127,7 @@ link: .eobjs/cfile_parse.o .eobjs/cfile_parse_macros.o .eobjs/cfile_pushing.o .e
 	g++ -shared -fPIC .eobjs/*.o -o ../compileEGMf
 
 win windows: link
+	-move ../compileEGMf.exe ../compileEGMf
 	move ../compileEGMf ../compileEGMf.dll
 lin linux unix: link
 	mv ../compileEGMf ../libcompileEGMf.so
