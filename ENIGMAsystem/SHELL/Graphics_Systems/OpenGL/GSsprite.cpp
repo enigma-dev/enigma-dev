@@ -24,6 +24,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+
 #include <math.h>
 #include <GL/gl.h>
 #include "../../Universal_System/spritestruct.h"
@@ -36,39 +37,37 @@ namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
 
 int sprite_exists(int spr)
 {
-//	for(size_t id=0;id<enigma::spritestructarray.size();id++)
-//		if(enigma::spritestructarray[id]&&enigma::spritestructarray[id]->id==spr) return 1;
-//	return 0;
-    if(!enigma::spritestructarray.empty())
-		for(enigma::spriteiter=enigma::spritestructarray.begin();enigma::spriteiter != enigma::spritestructarray.end();enigma::spriteiter++)
-			if((*enigma::spriteiter).first==spr) return 1;
-	return 0;
+  return enigma::spritestructarray.find(spr) != enigma::spritestructarray.end();
 }
 
 int draw_sprite(int spr,int subimg,double x,double y)
 {
-    enigma::sprite *spr2d=enigma::spritestructarray[spr];
-    if(!spr2d) return -1;
-    glPushAttrib(GL_CURRENT_BIT);
-    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg]){
-		glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg]);
-		enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg];
+  enigma::sprite *spr2d = enigma::spritestructarray[spr];
+  if (!spr2d)
+    return -1;
+  
+  glPushAttrib(GL_CURRENT_BIT);
+    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg % spr2d->subcount])
+    {
+      glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg % spr2d->subcount]);
+      enigma::cur_bou_tha_noo_sho_eve_cha_eve = spr2d->texturearray[subimg % spr2d->subcount];
     }
+    
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
     glColor4f(1,1,1,1);
-  
-	float tbx=spr2d->texbordx,tby=spr2d->texbordy;
-	glBegin(GL_QUADS);
-	glTexCoord2f(0,0);
-	glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
-	glTexCoord2f(tbx,0);
-	glVertex2f(x+spr2d->width-spr2d->xoffset,y-spr2d->yoffset);
-	glTexCoord2f(tbx,tby);
-	glVertex2f(x+spr2d->width-spr2d->xoffset,y+spr2d->height-spr2d->yoffset);
-	glTexCoord2f(0,tby);
-	glVertex2f(x-spr2d->xoffset,y+spr2d->height-spr2d->yoffset);
-	glEnd();
+    
+    float tbx=spr2d->texbordx,tby=spr2d->texbordy;
+    glBegin(GL_QUADS);
+      glTexCoord2f(0,0);
+        glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
+      glTexCoord2f(tbx,0);
+        glVertex2f(x+spr2d->width-spr2d->xoffset,y-spr2d->yoffset);
+      glTexCoord2f(tbx,tby);
+        glVertex2f(x+spr2d->width-spr2d->xoffset,y+spr2d->height-spr2d->yoffset);
+      glTexCoord2f(0,tby);
+        glVertex2f(x-spr2d->xoffset,y+spr2d->height-spr2d->yoffset);
+    glEnd();
 	glPopAttrib();
 	return 0;
 }
@@ -76,169 +75,203 @@ int draw_sprite(int spr,int subimg,double x,double y)
 int draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h)
 {
 	enigma::sprite *spr2d=enigma::spritestructarray[spr];
-	if(!spr2d) return -1;
-	glPushAttrib(GL_CURRENT_BIT);
-	glColor4f(1,1,1,1);
-	if(enigma::cur_bou_tha_noo_sho_eve_cha_eve!=spr2d->texturearray[subimg]){
-		glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg]);
-		enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg];
-	}
+	if (!spr2d)
+    return -1;
 	
+	glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(1,1,1,1);
+    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve!=spr2d->texturearray[subimg % spr2d->subcount])
+    {
+      glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg % spr2d->subcount]);
+      enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg % spr2d->subcount];
+    }
+    
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+    
+    glBegin(GL_QUADS);
+      glTexCoord2f(spr2d->texbordx,0);
+        glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
+      glTexCoord2f(0,0);
+        glVertex2f(x+w-spr2d->xoffset,y-spr2d->yoffset);
+      glTexCoord2f(0,spr2d->texbordy);
+        glVertex2f(x+w-spr2d->xoffset,y+h-spr2d->yoffset);
+      glTexCoord2f(spr2d->texbordx,spr2d->texbordy);
+        glVertex2f(x-spr2d->xoffset,y+h-spr2d->yoffset);
+    glEnd();
+	glPopAttrib();
+	return 0;
+}
+
+int draw_sprite_part(int spr,int subimg,double left,double top,double width,double height,double x,double y)
+{
+  enigma::sprite *spr2d=enigma::spritestructarray[spr];
+  if (!spr2d)
+    return -1;
+  
+  glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(1,1,1,1);
+    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg % spr2d->subcount])
+    {
+      glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg % spr2d->subcount]);
+      enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg % spr2d->subcount];
+    }
+    
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+    float tbw=spr2d->width/(float)spr2d->texbordx,tbh=spr2d->height/(float)spr2d->texbordy;
+    
+    glBegin(GL_TRIANGLE_STRIP);
+      glTexCoord2f(left/tbw,top/tbh);
+        glVertex2f(x,y);
+      glTexCoord2f((left+width)/tbw,top/tbh);
+        glVertex2f(x+width,y);
+      glTexCoord2f(left/tbw,(top+height)/tbh);
+        glVertex2f(x,y+height);
+      glTexCoord2f((left+width)/tbw,(top+height)/tbh);
+        glVertex2f(x+width,y+height);
+    glEnd();
+	glPopAttrib();
+	return 0;
+}
+
+int draw_sprite_part_offset(int spr,int subimg,double left,double top,double width,double height,double x,double y)
+{
+  enigma::sprite *spr2d=enigma::spritestructarray[spr];
+  if (!spr2d)
+    return -1;
+  
+  glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(1,1,1,1);
+    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg % spr2d->subcount])
+    {
+      glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg % spr2d->subcount]);
+      enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg % spr2d->subcount];
+    }
+    
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+    float tbw=spr2d->width/spr2d->texbordx,tbh=spr2d->height/spr2d->texbordy;
+    
+    glBegin(GL_TRIANGLE_STRIP);
+      glTexCoord2f(left/tbw,top/tbh);
+        glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
+      glTexCoord2f((left+width-1)/tbw,top/tbh);
+        glVertex2f(x+width-1-spr2d->xoffset,y-spr2d->yoffset);
+      glTexCoord2f(left/tbw,(top+height-1)/tbh);
+        glVertex2f(x-spr2d->xoffset,y+height-1-spr2d->yoffset);
+      glTexCoord2f((left+width-1)/tbw,(top+height-1)/tbh);
+        glVertex2f(x+width-1-spr2d->xoffset,y+height-1-spr2d->yoffset);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D,0);
+	glPopAttrib();
+	return 0;
+}
+
+int draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double yscale,double rot,double blend,double alpha)
+{
+	enigma::sprite *spr2d=enigma::spritestructarray[spr];
+	if (!spr2d)
+    return -1;
+  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg % spr2d->subcount])
+  {
+    glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg % spr2d->subcount]);
+    enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg % spr2d->subcount];
+  }
+  
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
   
-	glBegin(GL_QUADS);
-	glTexCoord2f(spr2d->texbordx,0);
-	glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
-	glTexCoord2f(0,0);
-	glVertex2f(x+w-spr2d->xoffset,y-spr2d->yoffset);
-	glTexCoord2f(0,spr2d->texbordy);
-	glVertex2f(x+w-spr2d->xoffset,y+h-spr2d->yoffset);
-	glTexCoord2f(spr2d->texbordx,spr2d->texbordy);
-	glVertex2f(x-spr2d->xoffset,y+h-spr2d->yoffset);
-	glEnd();
-	glPopAttrib();
-	return 0;
+  int w = int(spr2d->width*xscale),   h = int(spr2d->height*yscale);
+  float tbx = spr2d->texbordx,        tby = spr2d->texbordy;
+  rot *= M_PI/180;
+  
+  glPushAttrib(GL_CURRENT_BIT);
+    glBegin(GL_TRIANGLE_STRIP);
+      float
+        ulcx = x + spr2d->xoffset*cos(M_PI+rot) + spr2d->yoffset*cos(M_PI/2+rot),
+        ulcy = y + spr2d->xoffset*-sin(M_PI+rot) + spr2d->yoffset*-sin(M_PI/2+rot);
+      
+      glColor4f(__GETRf(blend)/255,__GETGf(blend)/255,__GETBf(blend)/255,alpha); //Implement "blend" parameter
+        glTexCoord2f(0,0);
+          glVertex2f(ulcx,ulcy);
+        glTexCoord2f(tbx,0);
+          glVertex2f(ulcx+w*cos(rot),ulcy-w*sin(rot));
+        glTexCoord2f(0,tby);
+          ulcx+=h*cos(3*M_PI/2+rot);
+        ulcy-=h*sin(3*M_PI/2+rot);
+          glVertex2f(ulcx,ulcy);
+        glTexCoord2f(tbx,tby);
+          glVertex2f(ulcx+w*cos(rot),ulcy-w*sin(rot));
+      //End of blend color
+    glEnd();
+  glPopAttrib();
+  return 0;
 }
 
-int draw_sprite_part(int spr,int subimg,double left,double top,double width,double height,double x,double y){
-    enigma::sprite *spr2d=enigma::spritestructarray[spr];
-    if(!spr2d) return -1;
-    glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(1,1,1,1);
-    if(enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg]){
-		glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg]);
-		enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg];
-	}
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-	float tbw=spr2d->width/(float)spr2d->texbordx,tbh=spr2d->height/(float)spr2d->texbordy;
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(left/tbw,top/tbh);
-	glVertex2f(x,y);
-	glTexCoord2f((left+width)/tbw,top/tbh);
-	glVertex2f(x+width,y);
-	glTexCoord2f(left/tbw,(top+height)/tbh);
-	glVertex2f(x,y+height);
-	glTexCoord2f((left+width)/tbw,(top+height)/tbh);
-	glVertex2f(x+width,y+height);
-	glEnd();
-	glPopAttrib();
-	return 0;
-}
-
-int draw_sprite_part_offset(int spr,int subimg,double left,double top,double width,double height,double x,double y){
-    enigma::sprite *spr2d=enigma::spritestructarray[spr];
-    if(!spr2d) return -1;
-    glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(1,1,1,1);
-    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg]){
-		glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg]);
-		enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg];
-	}
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-	float tbw=spr2d->width/spr2d->texbordx,tbh=spr2d->height/spr2d->texbordy;
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(left/tbw,top/tbh);
-	glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
-	glTexCoord2f((left+width-1)/tbw,top/tbh);
-	glVertex2f(x+width-1-spr2d->xoffset,y-spr2d->yoffset);
-	glTexCoord2f(left/tbw,(top+height-1)/tbh);
-	glVertex2f(x-spr2d->xoffset,y+height-1-spr2d->yoffset);
-	glTexCoord2f((left+width-1)/tbw,(top+height-1)/tbh);
-	glVertex2f(x+width-1-spr2d->xoffset,y+height-1-spr2d->yoffset);
-	glEnd();
-	glBindTexture(GL_TEXTURE_2D,0);
-	glPopAttrib();
-	return 0;
-}
-
-int draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double yscale,double rot,double blend,double alpha){
+int draw_sprite_part_ext(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
+{
 	enigma::sprite *spr2d=enigma::spritestructarray[spr];
-	if(!spr2d) return -1;
-    if(enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg]){
-		glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg]);
-		enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg];
-	}
+	if (!spr2d)
+    return -1;
+	
+	glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(__GETRf(color)/255,__GETGf(color)/255,__GETBf(color)/255,alpha);
+    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg % spr2d->subcount])
+    {
+      glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg % spr2d->subcount]);
+      enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg % spr2d->subcount];
+    }
+    
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-    int w = int(spr2d->width*xscale), h = int(spr2d->height*yscale);
-    float tbx=spr2d->texbordx,tby=spr2d->texbordy;
-    rot*=M_PI/180;
+    float tbw=spr2d->width/spr2d->texbordx,tbh=spr2d->height/spr2d->texbordy;
+    
     glBegin(GL_TRIANGLE_STRIP);
-    glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(__GETRf(blend)/255,__GETGf(blend)/255,__GETBf(blend)/255,alpha);
-    glTexCoord2f(0,0);
-    float ulcx=x+spr2d->xoffset*cos(M_PI+rot)+spr2d->yoffset*cos(M_PI/2+rot),ulcy=y+spr2d->xoffset*-sin(M_PI+rot)+spr2d->yoffset*-sin(M_PI/2+rot);
-    glVertex2f(ulcx,ulcy);
-    glTexCoord2f(tbx,0);
-    glVertex2f(ulcx+w*cos(rot),ulcy-w*sin(rot));
-    glTexCoord2f(0,tby);
-    ulcx+=h*cos(3*M_PI/2+rot);
-    ulcy-=h*sin(3*M_PI/2+rot);
-    glVertex2f(ulcx,ulcy);
-    glTexCoord2f(tbx,tby);
-    glVertex2f(ulcx+w*cos(rot),ulcy-w*sin(rot));
+      glTexCoord2f(left/tbw,top/tbh);
+        glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
+      glTexCoord2f((left+width-1)/tbw,top/tbh);
+        glVertex2f(x+width-1-spr2d->xoffset,y-spr2d->yoffset);
+      glTexCoord2f(left/tbw,(top+height-1)/tbh);
+        glVertex2f(x-spr2d->xoffset,y+height-1-spr2d->yoffset);
+      glTexCoord2f((left+width-1)/tbw,(top+height-1)/tbh);
+        glVertex2f(x+width-1-spr2d->xoffset,y+height-1-spr2d->yoffset);
     glEnd();
-    glPopAttrib();
-    return 0;
-}
-
-int draw_sprite_part_ext(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha){
-	enigma::sprite *spr2d=enigma::spritestructarray[spr];
-	if(!spr2d) return -1;
-	glPushAttrib(GL_CURRENT_BIT);
-	glColor4f(__GETRf(color)/255,__GETGf(color)/255,__GETBf(color)/255,alpha);
-	if(enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg]){
-		glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg]);
-		enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg];
-	}
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-	float tbw=spr2d->width/spr2d->texbordx,tbh=spr2d->height/spr2d->texbordy;
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(left/tbw,top/tbh);
-	glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
-	glTexCoord2f((left+width-1)/tbw,top/tbh);
-	glVertex2f(x+width-1-spr2d->xoffset,y-spr2d->yoffset);
-	glTexCoord2f(left/tbw,(top+height-1)/tbh);
-	glVertex2f(x-spr2d->xoffset,y+height-1-spr2d->yoffset);
-	glTexCoord2f((left+width-1)/tbw,(top+height-1)/tbh);
-	glVertex2f(x+width-1-spr2d->xoffset,y+height-1-spr2d->yoffset);
-	glEnd();
 	glPopAttrib();
 	return 0;
 }
 
-int draw_sprite_general(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double alpha){
+int draw_sprite_general(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double alpha)
+{
 	enigma::sprite *spr2d=enigma::spritestructarray[spr];
-	if(!spr2d) return -1;
-    glPushAttrib(GL_CURRENT_BIT);
-    if(enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg]){
-		glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg]);
-		enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg];
-	}
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-	int w = int(spr2d->width * xscale),h = int(spr2d->height*yscale);
-	float tbx=spr2d->texbordx,tby=spr2d->texbordy;
-	glBegin(GL_TRIANGLE_STRIP);
-    glColor4f(__GETRf(c1)/255,__GETGf(c1)/255,__GETBf(c1)/255,alpha);
-    glTexCoord2f(width/tbx,top/tby);
-    glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
+	if (!spr2d)
+    return -1;
+	
+  glPushAttrib(GL_CURRENT_BIT);
+    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg % spr2d->subcount])
+    {
+      glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg % spr2d->subcount]);
+      enigma::cur_bou_tha_noo_sho_eve_cha_eve=spr2d->texturearray[subimg % spr2d->subcount];
+    }
     
-    glColor4f(__GETRf(c2)/255,__GETGf(c2)/255,__GETBf(c2)/255,alpha);
-    glTexCoord2f(left/tbx,top/tby);
-    glVertex2f(x+w-spr2d->xoffset,y-spr2d->yoffset);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+    int w = int(spr2d->width * xscale),h = int(spr2d->height*yscale);
+    float tbx=spr2d->texbordx,tby=spr2d->texbordy;
     
-    glColor4f(__GETRf(c3)/255,__GETGf(c3)/255,__GETBf(c3)/255,alpha);
-    glTexCoord2f(width/tbx,height/tby);
-    glVertex2f(x-spr2d->xoffset,y+h-spr2d->yoffset);
-    
-    glColor4f(__GETRf(c4)/255,__GETGf(c4)/255,__GETBf(c4)/255,alpha);
-    glTexCoord2f(left/tbx,height/tby);
-    glVertex2f(x+w-spr2d->xoffset,y+h-spr2d->yoffset);
-	glEnd();
+    glBegin(GL_TRIANGLE_STRIP);
+      glColor4f(__GETRf(c1)/255,__GETGf(c1)/255,__GETBf(c1)/255,alpha);
+        glTexCoord2f(width/tbx,top/tby);
+          glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
+      glColor4f(__GETRf(c2)/255,__GETGf(c2)/255,__GETBf(c2)/255,alpha);
+        glTexCoord2f(left/tbx,top/tby);
+          glVertex2f(x+w-spr2d->xoffset,y-spr2d->yoffset);
+      glColor4f(__GETRf(c3)/255,__GETGf(c3)/255,__GETBf(c3)/255,alpha);
+        glTexCoord2f(width/tbx,height/tby);
+          glVertex2f(x-spr2d->xoffset,y+h-spr2d->yoffset);
+      glColor4f(__GETRf(c4)/255,__GETGf(c4)/255,__GETBf(c4)/255,alpha);
+        glTexCoord2f(left/tbx,height/tby);
+          glVertex2f(x+w-spr2d->xoffset,y+h-spr2d->yoffset);
+    glEnd();
 	glPopAttrib();
 	return 0;
 }
