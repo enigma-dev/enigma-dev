@@ -23,8 +23,8 @@ import static org.lateralgm.main.Util.deRef;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.awt.image.PixelGrabber;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -628,12 +628,9 @@ public final class EnigmaWriter
 		o.width = i.getWidth();
 		o.height = i.getHeight();
 
-		int[] pixels = new int[o.width * o.height];
-		PixelGrabber pg = new PixelGrabber(i,0,0,o.width,o.height,pixels,0,o.width);
+		int pixels[] = i.getRGB(0,0,o.width,o.height,null,0,o.width);
 		try
 			{
-			pg.grabPixels();
-
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(pixels.length * 4);
 			DeflaterOutputStream dos = new DeflaterOutputStream(baos);
 			//is this the most efficient way? ARGB => RGBA
@@ -650,7 +647,7 @@ public final class EnigmaWriter
 			o.dataSize = baos.size();
 			o.data = ByteBuffer.allocateDirect(baos.size()).put(baos.toByteArray());
 			}
-		catch (Exception e)
+		catch (IOException e)
 			{
 			e.printStackTrace();
 			}
