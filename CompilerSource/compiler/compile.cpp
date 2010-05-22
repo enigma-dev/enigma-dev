@@ -271,11 +271,22 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     
   wto.close();
   
-  
-  res = compile_writeObjectData(es);
+  parsed_object *EGMglobal = new parsed_object;
+  link_globals(EGMglobal,es,scripts);
   if (res) return res;
+  
+  res = compile_writeGlobals(es,EGMglobal);
+  if (res) return res;
+  
+  res = compile_writeObjectData(es,EGMglobal);
+  if (res) return res;
+  
   res = compile_writeRoomData(es);
   if (res) return res;
+  
+  
+  
+  
   
   
   
@@ -310,6 +321,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     return E_ERROR_BUILD;
   }
   cout << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";
+  
+  
   
   
   

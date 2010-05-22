@@ -171,3 +171,13 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   cout << "\"Link\" complete." << flushl;
   return 0;
 }
+
+
+int link_globals(parsed_object *global, EnigmaStruct *es,parsed_script *scripts[])
+{
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+    global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
+  for (int i = 0; i < es->scriptCount; i++)
+    global->copy_from(scripts[i]->obj,"script `"+scripts[i]->obj.name+"'","the Global Scope");
+  return 0;
+}

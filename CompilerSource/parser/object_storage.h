@@ -75,7 +75,6 @@ struct parsed_object
   string name;
   int id, sprite_index;
   
-  map<string,int> calls;       //Any function or script KEY called.
   map<string,dectrip> locals;  //Any variable KEY used but not declared, or declared as local VALUE.
   map<string,dectrip> globals; //Any variable KEY declared as global VALUE.
   map<string,decquad> consts;  //Any variable KEY declared as constant VALUE.

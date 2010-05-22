@@ -52,7 +52,13 @@ goforit(at);*/
 //Don't get bitten by those damn bessel functions.
 #define y0 bessel_y0
 #define y1 bessel_y1
+#define jn bessel_jn
+#define j0 bessel_j0
+#define j1 bessel_j1
 #include <math.h>
+#undef j1
+#undef j0
+#undef jn
 #undef y1
 #undef y0
 
@@ -130,6 +136,7 @@ goforit(at);*/
     #include "Universal_System/collisions.h"
 #endif
 
+#include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"

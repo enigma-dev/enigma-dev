@@ -25,8 +25,29 @@
 **                                                                              **
 \********************************************************************************/
 
-extern int compile_parseAndLink(EnigmaStruct*,parsed_script*[]);
-int link_globals(parsed_object*, EnigmaStruct*,parsed_script*[]);
-int compile_writeGlobals(EnigmaStruct*,parsed_object*);
-extern int compile_writeObjectData(EnigmaStruct*,parsed_object*);
-int compile_writeRoomData(EnigmaStruct* es);
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+#include "../../externs/externs.h"
+#include "../../syntax/syncheck.h"
+#include "../../parser/parser.h"
+
+#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
+#include "../compile_common.h"
+
+int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
+{
+  ofstream wto;
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out);
+    wto << license;
+    for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
+      wto << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;
+    //This part needs written into a global object_parent class instance elsewhere.
+    //for (globit i = global->dots.begin(); i != global->globals.end(); i++)
+    //  wto << i->second->type << " " << i->second->prefixes << i->second->name << i->second->suffixes << ";" << endl;
+    wto << endl;
+  return 0;
+}

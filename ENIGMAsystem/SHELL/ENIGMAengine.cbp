@@ -419,6 +419,7 @@
 			<Option target="lin-profile" />
 		</Unit>
 		<Unit filename="Preprocessor_Environment_Editable/GAME_SETTINGS.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_globals.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h" />
@@ -494,6 +495,7 @@
 		<Extensions>
 			<debugger />
 			<code_completion />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

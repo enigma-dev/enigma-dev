@@ -40,7 +40,7 @@ using namespace std;
 
 #include <math.h> //log2 to calculate passes.
 
-int compile_writeObjectData(EnigmaStruct* es)
+int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 {
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
@@ -59,7 +59,17 @@ int compile_writeObjectData(EnigmaStruct* es)
         
         wto << "\n    //Locals to instances of this object\n    ";
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
-          wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
+        {
+          bool writeit = true;
+          parsed_object::globit ve = global->globals.find(ii->first);
+          if (ve != global->globals.end()) {
+            if (ve->second.defined())
+              writeit = false;
+            cout << "enigma: scopedebug: variable `" << ii->first << "' from object `" << i->second->name << "' will be used from the " << (writeit ? "object" : "global") << " scope." << endl;
+          }
+          if (writeit)
+            wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
+        }
         
         wto << "\n    //Scripts called by this object\n    ";
         parsed_object* t = i->second;

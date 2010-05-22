@@ -78,6 +78,8 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
     {
       if (synt[pos] == ';' or synt[pos] == ',')
       {
+        const bool was_a_semicolon = synt[pos] == ';';
+        
         if (dec_name_givn)
         {
           if (dec_out_of_scope) //Designated for a different scope: global or local
@@ -90,6 +92,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
 
             if (!dec_initializing) //If this statement does nothing other than declare, remove it
             {
+              cout << "ERASE FROM CODE: " << code.substr(dec_start_pos,pos+1-dec_start_pos) << endl << endl << endl;
               code.erase(dec_start_pos,pos+1-dec_start_pos);
               synt.erase(dec_start_pos,pos+1-dec_start_pos);
               pos = dec_start_pos;
@@ -105,11 +108,11 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
           }
         }
         
-        dec_type = "";
-        if (synt[pos] == ';')
+        if (was_a_semicolon)
           dec_out_of_scope = in_decl = 0, dec_type = "";
         dec_prefixes = dec_suffixes = "";
         dec_initializing = false;
+        dec_name_givn = false;
       }
       if (!dec_initializing)
       {
@@ -156,8 +159,11 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
     if (synt[pos] == 'L') //Double meaning.
     {
       cout << "L"; fflush(stdout);
-      //Determine which meaning it is.
+      
+      //Bookmark this spot
       const int sp = pos;
+      
+      //Determine which meaning it is.
       pos += 5; //Skip "L-O-C-A-L" or "G-L-O-B-A"
       if (synt[pos] == 'L') pos++;
       if (synt[pos] != 't')
