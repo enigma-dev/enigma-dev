@@ -124,7 +124,8 @@ int instance_position(double x,double y,double obj)
 
 int instance_nearest(int x,int y,int obj)
 {
-    double dist_lowest=-1,retid=-4;
+    double dist_lowest=-1;
+    int retid=-4;
     int objind=(int) obj;
     double xl,yl;
 

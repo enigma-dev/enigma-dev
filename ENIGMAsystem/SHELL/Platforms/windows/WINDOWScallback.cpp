@@ -33,7 +33,7 @@ namespace enigma
     extern short mousewheel;
 
     LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam)
-    {/goto /``
+    {
         switch (message)
         {
         case WM_CREATE:
