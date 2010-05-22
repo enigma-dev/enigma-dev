@@ -213,7 +213,7 @@ public final class EnigmaWriter
 			os.subImages = new Image.ByReference();
 			Image[] osil = (Image[]) os.subImages.toArray(os.subImageCount);
 			for (int i = 0; i < os.subImageCount; i++)
-				populateImage(is.subImages.get(i),osil[i]);
+				populateImage(is.subImages.get(i),osil[i],os.transparent);
 			}
 		}
 
@@ -285,7 +285,7 @@ public final class EnigmaWriter
 			ob.vSep = ib.get(PBackground.V_SEP);
 
 			ob.backgroundImage = new Image.ByReference();
-			populateImage(ib.getBackgroundImage(),ob.backgroundImage);
+			populateImage(ib.getBackgroundImage(),ob.backgroundImage,ob.transparent);
 			}
 		}
 
@@ -621,7 +621,7 @@ public final class EnigmaWriter
 			} //rooms
 		} //populateRooms()
 
-	public static void populateImage(BufferedImage i, Image o)
+	public static void populateImage(BufferedImage i, Image o, boolean useTransp)
 		{
 		if (i == null || o == null) return;
 
@@ -629,6 +629,7 @@ public final class EnigmaWriter
 		o.height = i.getHeight();
 
 		int pixels[] = i.getRGB(0,0,o.width,o.height,null,0,o.width);
+		int trans = i.getRGB(0,o.height - 1) & 0x00FFFFFF;
 		try
 			{
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(pixels.length * 4);
@@ -639,7 +640,10 @@ public final class EnigmaWriter
 				dos.write(pixels[p] >>> 16 & 0xFF);
 				dos.write(pixels[p] >>> 8 & 0xFF);
 				dos.write(pixels[p] & 0xFF);
-				dos.write(pixels[p] >>> 24);
+				if (useTransp && ((pixels[p] & 0x00FFFFFF) == trans))
+					dos.write(0);
+				else
+					dos.write(pixels[p] >>> 24);
 				}
 			//pixels[p] = ARGBtoRGBA(pixels[p]);
 

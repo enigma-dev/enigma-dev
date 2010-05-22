@@ -352,7 +352,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
-	public void compile(final byte mode)
+	public void compile(final int mode)
 		{
 		//modes: 0=run, 1=debug, 2=build, 3=compile
 		if (!GCC_LOCATED)
@@ -365,9 +365,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		File exef = null;
 		try
 			{
-			if (mode < 2)
+			if (mode < 2) //run/debug
 				exef = File.createTempFile("egm",".exe");
-			else if (mode == 2) exef = File.createTempFile("egm",".emd");
+			else if (mode == 2) exef = File.createTempFile("egm",".emd"); //build
 			if (exef != null) exef.deleteOnExit();
 			}
 		catch (IOException e)
@@ -375,7 +375,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			e.printStackTrace();
 			return;
 			}
-		if (mode == 3)
+		if (mode == 3) //compile
 			{
 			JFileChooser fc = new JFileChooser();
 			fc.setFileFilter(new CustomFileFilter(".exe","Executable files"));
@@ -390,7 +390,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
 		System.out.println(EnigmaDriver.compileEGMf(es,exef.getAbsolutePath(),mode));
 
-		if (mode == 2)
+		if (mode == 2) //build
 			{
 			try
 				{
@@ -423,10 +423,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public void actionPerformed(ActionEvent e)
 		{
 		Object s = e.getSource();
-		if (s == run) compile((byte) 1);
-		if (s == debug) compile((byte) 2);
-		if (s == build) compile((byte) 3);
-		if (s == compile) compile((byte) 4);
+		if (s == run) compile(1);
+		if (s == debug) compile(2);
+		if (s == build) compile(3);
+		if (s == compile) compile(4);
 
 		if (s == showFunctions) showKeywordListFrame(0);
 		if (s == showGlobals) showKeywordListFrame(1);
