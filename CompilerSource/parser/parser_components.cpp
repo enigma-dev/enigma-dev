@@ -40,8 +40,6 @@ using namespace std;
 
 
 typedef size_t pt; //Use size_t as our pos type; helps on 64bit systems.
-unsigned int strc = 0; // Number of strings we removed from the code.
-varray<string> string_in_code; // This holds strings we removed.
 map<string,char> edl_tokens; // Logarithmic lookup, with token.
 typedef map<string,char>::iterator tokiter;
 
@@ -105,7 +103,7 @@ int quicktype(unsigned flags, string name)
 ///And lex code into synt.
 //Compatibility considerations:
 //123.45 with 000.00, then .0 with 00. Do *not* replace 0. with 00
-int parser_ready_input(string &code,string &synt)
+int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<string> &string_in_code)
 {
   synt = code;
   pt pos = 0, bpos = 0;
@@ -611,49 +609,6 @@ void parser_add_semicolons(string &code,string &synt)
 }
 
 
-///int gmlparse_get_varnames()
-///  Expects properly formatted code (semicolon-wise)
-///  @return Returns zero on success.
-int gmlparse_get_varnames(string code, string synt)
-{
-  //This operates in its own pass, sadly.
-  //During this pass, we will look for two tokens: 'n' and 't'
-  //We will also acknowledge these tokens: '{' '}' ';'
-
-  //Store length for quickness
-  const register pt len = code.length();
-
-  //Keep track of a few things while we read
-  string decl_t; //Know what we're declaring things as.
-  bool in_decl = false; //Know if we're actually declaring anything.
-  bool suspend_t = false; //type a = b, we don't want to declare b as int. So we suspend until comma.
-
-  for (register pt pos = 0; pos < len; pos++)
-  {
-    if (synt[pos] == 't')
-    {
-      const pt spos = pos;
-      while (synt[++pos] == 't');
-      decl_t = code.substr(spos,pos-spos+1);
-      suspend_t = false;
-      in_decl = true;
-    }
-    else if (synt[pos] == 'n')
-    {
-      const pt spos = pos;
-      while (synt[++pos] == 'n');
-      string name = code.substr(spos,pos-spos+1);
-      string *res = &(parsed_varnames[name]);
-      if (*res == "")
-        *res = decl_t;
-    }
-    else if (synt[pos] == ';')
-      decl_t = "";
-  }
-  return 0;
-}
-
-
 /**
 This part outputs well-formatted code.
 
@@ -694,7 +649,7 @@ const char * indent_chars   =  "\n                                \
                                                                   \
                                                                   ";
 
-void print_to_file(string code,string synt,int indentmin_b4,ofstream &of)
+void print_to_file(string code,string synt,unsigned int &strc, varray<string> &string_in_code,int indentmin_b4,ofstream &of)
 {
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
   //FILE* of = fopen("C:/Users/Josh/Desktop/parseout.txt","w+b");

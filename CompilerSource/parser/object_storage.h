@@ -43,6 +43,8 @@ struct parsed_event
   int id, mainId;
   string code;
   string synt;
+  unsigned int strc;
+  varray<string> strs;
   int otherObjId;
   parsed_object* myObj; //This will let us add to locals from the code
   

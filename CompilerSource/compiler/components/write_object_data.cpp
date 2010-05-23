@@ -127,7 +127,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       {
         string evname = event_get_enigma_main_name(i->second->events[ii].mainId,i->second->events[ii].id);
         wto << "enigma::variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
-          print_to_file(i->second->events[ii].code,i->second->events[ii].synt,2,wto);
+          print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
         wto << "\n  return 0;\n}\n\n";
       }
       
@@ -145,7 +145,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             comma = ", ";
           }
           wto << ")\n{\n  ";
-          print_to_file(subscr->second->pev.code,subscr->second->pev.synt,2,wto);
+          print_to_file(subscr->second->pev.code,subscr->second->pev.synt,subscr->second->pev.strc,subscr->second->pev.strs,2,wto);
           wto << "\n  return 0;\n}\n\n";
         }
       }

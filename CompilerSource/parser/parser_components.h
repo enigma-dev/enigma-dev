@@ -27,14 +27,14 @@
 
 typedef size_t pt; //Use size_t as our pos type; this will prevent errors with size_t's like std::string::npos
 
-extern unsigned int strc; // Number of strings we removed from the code.
+#include "../general/darray.h"
 
 extern map<string,char> edl_tokens;
+int parser_ready_input(string&,string&,unsigned int&,varray<string>&);
 void parser_remove_whitespace(string& code,const int use_cpp_strings=0);
 void parser_buffer_syntax_map(string &code,string &syntax,const int use_cpp_numbers = 0);
 void parser_add_semicolons(string &code,string &synt);
 void print_the_fucker(string code,string synt);
-int parser_ready_input(string&,string&);
 int parser_reinterpret(string&,string&);
 
 int dropscope();

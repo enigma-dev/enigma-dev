@@ -142,28 +142,37 @@ string parser_main(string code, parsed_event* pev = NULL)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
-
+  
   //To preserve efficiency, however, we will reduce the number of passes by replacing multiple things at once.
-
+  
   /*/First off, remove comments, strings, and whitespace.
   parser_remove_whitespace(code,0);
-
+  
   //Next, we generate a syntax map
   parser_buffer_syntax_map(code,synt,0);*/
   string synt;
-
+  
   //Reset things
-  strc = 0; //Number of strings in this code
-
+    //Nothing to reset :trollface:
+  
   //Initialize us a spot in the global scope
   initscope("script0");
-
-  parser_ready_input(code,synt);
-
+  
+  if (pev) {
+    pev->strc = 0; //Number of strings in this code
+    parser_ready_input(code,synt,pev->strc,pev->strs);
+  }
+  else
+  {
+    varray<string> strst;
+    unsigned int strct = 0;
+    parser_ready_input(code,synt,strct,strst);
+  }
+  
   parser_reinterpret(code,synt);
-
+  
   parser_add_semicolons(code,synt);
-
+  
   //cout << synt << endl;
   //cout << code << endl;
 
