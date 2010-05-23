@@ -25,16 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-/***********************************************
-
-int draw_text(double x,double y,std::string text)
-double string_width(char* text)
-double string_height(char* text)
-
-************************************************/
-
-
-
 namespace enigma
 {
     void init_fonts();

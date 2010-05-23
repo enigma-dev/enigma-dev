@@ -25,14 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-/***********************************************
-
-int draw_text(double x,double y,std::string text)
-double string_width(char* text)
-double string_height(char* text)
-
-************************************************/
-
 #include <string>
 #include <gl/gl.h>
 #include <windows.h>

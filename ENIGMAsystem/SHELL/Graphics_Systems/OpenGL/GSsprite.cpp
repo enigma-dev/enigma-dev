@@ -46,15 +46,16 @@ int draw_sprite(int spr,int subimg,double x,double y)
   if (!spr2d)
     return -1;
   
+  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg % spr2d->subcount])
+  {
+    glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg % spr2d->subcount]);
+    enigma::cur_bou_tha_noo_sho_eve_cha_eve = spr2d->texturearray[subimg % spr2d->subcount];
+  }
+  
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+  
   glPushAttrib(GL_CURRENT_BIT);
-    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != spr2d->texturearray[subimg % spr2d->subcount])
-    {
-      glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[subimg % spr2d->subcount]);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = spr2d->texturearray[subimg % spr2d->subcount];
-    }
-    
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
     glColor4f(1,1,1,1);
     
     float tbx=spr2d->texbordx,tby=spr2d->texbordy;
