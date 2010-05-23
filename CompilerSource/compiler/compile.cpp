@@ -269,7 +269,10 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n"; 
     wto << "};\n\n";
     
-    
+    wto << "enum //room names\n{\n";
+    for (int i = 0; i < es->roomCount; i++)
+      wto << "  " << es->room[i].name << " = " << es->room[i].id << ",\n"; 
+    wto << "};\n\n";
   wto.close();
   
   parsed_object *EGMglobal = new parsed_object;
