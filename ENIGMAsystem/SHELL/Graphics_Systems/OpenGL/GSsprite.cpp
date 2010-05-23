@@ -37,7 +37,7 @@ namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
 
 int sprite_exists(int spr)
 {
-  return enigma::spritestructarray.find(spr) != enigma::spritestructarray.end();
+  return unsigned(spr) < enigma::sprite_idmax and bool(enigma::spritestructarray[spr]);
 }
 
 int draw_sprite(int spr,int subimg,double x,double y)
@@ -58,7 +58,7 @@ int draw_sprite(int spr,int subimg,double x,double y)
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
     
-    float tbx=spr2d->texbordx,tby=spr2d->texbordy;
+    const float tbx=spr2d->texbordx,tby=spr2d->texbordy;
     glBegin(GL_QUADS);
       glTexCoord2f(0,0);
         glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);

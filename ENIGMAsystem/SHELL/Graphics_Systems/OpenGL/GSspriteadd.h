@@ -25,12 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-/**Sprite adding functions*****************************************************\
-
-int sprite_add(std::string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)
-
-\******************************************************************************/
-
 //#include "../../Universal_System/spritestruct.h"
 
 int sprite_add(std::string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset);
@@ -43,8 +37,10 @@ int sprite_add(std::string filename,double imgnumb,double precise,double transpa
 
 namespace enigma
 {
+  void sprites_allocate_initial(int);
+  
   //Adds an empty sprite to the list
-  int new_sprexe(int sprid,int w,int h,int x,int y,int pl,int sm);
+  int new_sprexe(unsigned sprid,int w,int h,int x,int y,int pl,int sm);
   
   #if COLLIGMA
   collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h);

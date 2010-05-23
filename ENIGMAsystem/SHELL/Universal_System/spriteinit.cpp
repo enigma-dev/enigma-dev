@@ -54,8 +54,7 @@ namespace enigma
       return;
     }
     
-    
-    
+    // Read the magic number so we know we're looking at our own data
     fseek(exe,-8,SEEK_END);
     char str_quad[4];
     fread(str_quad,1,4,exe);
@@ -64,17 +63,26 @@ namespace enigma
       return;
     }
     
+    // Get where our resources are located in the module
     int pos;
     fread(&pos,4,1,exe);
-    int sprid,width,height,xorig,yorig;
+    unsigned sprid, width, height;
+    int xorig, yorig;
     
-    //Go to the sprites in the exe
+    // Go to the start of the resource data
     fseek(exe,pos,SEEK_SET);
     fread(&nullhere,4,1,exe);
     if(nullhere) return;
     
+    // Determine how many sprites we have
     int sprcount;
     fread(&sprcount,4,1,exe);
+    
+    // Fetch the highest ID we will be using
+    int spr_highid;
+    fread(&spr_highid,4,1,exe);
+    sprites_allocate_initial(spr_highid);
+    
     for (int i=0;i<sprcount;i++)
     {
       fread(&sprid,4,1,exe);

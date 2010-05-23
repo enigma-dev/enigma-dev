@@ -48,7 +48,7 @@ for(int i=0;i<256;i++){
 }
 
 //Take care of sprites;
-enigma::currentspriteind=0;
+enigma::sprite_idmax = 0;
 enigma::exe_loadsprs();
 
 //Load rooms

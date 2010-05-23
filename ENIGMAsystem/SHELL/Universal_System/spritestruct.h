@@ -27,7 +27,6 @@
 #include <map>
 namespace enigma
 {
-  extern int currentspriteind;
   struct sprite
   {
     int width,height,subcount,xoffset,yoffset,id;
@@ -43,9 +42,8 @@ namespace enigma
     int bbox_bottom, bbox_left, bbox_right, bbox_top;
     bool where,smooth;
   };
-  extern std::map<int,sprite*> spritestructarray;
-  //extern sprite* spritestructarray;
-  extern std::map<int,sprite*>::iterator spriteiter;
+  extern sprite** spritestructarray;
+	extern unsigned int sprite_idmax;
 }
 
 extern int sprite_get_width(int sprite);

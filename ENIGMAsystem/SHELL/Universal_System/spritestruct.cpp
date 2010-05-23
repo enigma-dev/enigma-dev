@@ -29,64 +29,73 @@
 #include <string>
 #include "spritestruct.h"
 
-namespace enigma{
-	int currentspriteind;
-	std::map<int,sprite*> spritestructarray;
-	std::map<int,sprite*>::iterator spriteiter;
+namespace enigma {
+  sprite** spritestructarray;
+	unsigned int sprite_idmax;
+}
+
+int sprite_get_width(int sprite)
+{
+	#ifdef DEBUGMODE
+  if (!enigma::spritestructarray[sprite]) {
+	  show_error("Trying to retrieve width of non-existing sprite "+string(sprite),0);
+	  return 0;
+  }
+	#endif
+	return enigma::spritestructarray[sprite]->width;
+}
+
+int sprite_get_height(int sprite)
+{
+	#ifdef DEBUGMODE
+  if (!enigma::spritestructarray[sprite]) {
+	  show_error("Trying to retrieve width of non-existing sprite "+string(sprite),0);
+	  return 0;
+  }
+	#endif
+	return enigma::spritestructarray[sprite]->height;
 }
 
 
-int sprite_get_width(int sprite){
-	enigma::sprite* fnd=enigma::spritestructarray[sprite];
-	if(fnd) return fnd->width;
-	#if SHOWERRORS
-	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+int sprite_get_bbox_bottom(int sprite)
+{
+	#ifdef DEBUGMODE
+  if (!enigma::spritestructarray[sprite]) {
+	  show_error("Trying to retrieve bounding box of non-existing sprite "+string(sprite),0);
+	  return 0;
+  }
 	#endif
-	return 0;
+	return enigma::spritestructarray[sprite]->bbox_bottom;
 }
-
-int sprite_get_height(int sprite){
-	enigma::sprite* fnd=enigma::spritestructarray[sprite];
-	if(fnd) return fnd->height;
-	#if SHOWERRORS
-	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+int sprite_get_bbox_left(int sprite)
+{
+	#ifdef DEBUGMODE
+  if (!enigma::spritestructarray[sprite]) {
+	  show_error("Trying to retrieve bounding box of non-existing sprite "+string(sprite),0);
+	  return 0;
+  }
 	#endif
-	return 0;
+	return enigma::spritestructarray[sprite]->bbox_left;
 }
-
-
-int sprite_get_bbox_bottom(int sprite){
-	enigma::sprite* fnd=enigma::spritestructarray[sprite];
-	if(fnd) return fnd->height;
-	#if SHOWERRORS
-	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+int sprite_get_bbox_right(int sprite)
+{
+	#ifdef DEBUGMODE
+  if (!enigma::spritestructarray[sprite]) {
+	  show_error("Trying to retrieve bounding box of non-existing sprite "+string(sprite),0);
+	  return 0;
+  }
 	#endif
-	return 0;
+	return enigma::spritestructarray[sprite]->bbox_right;
 }
-int sprite_get_bbox_left(int sprite){
-	enigma::sprite* fnd=enigma::spritestructarray[sprite];
-	if(fnd) return 0;//fnd->height;
-	#if SHOWERRORS
-	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+int sprite_get_bbox_top(int sprite)
+{
+	#ifdef DEBUGMODE
+  if (!enigma::spritestructarray[sprite]) {
+	  show_error("Trying to retrieve bounding box of non-existing sprite "+string(sprite),0);
+	  return 0;
+  }
 	#endif
-	return 0;
-}
-
-int sprite_get_bbox_right(int sprite){
-	enigma::sprite* fnd=enigma::spritestructarray[sprite];
-	if(fnd) return fnd->width;
-	#if SHOWERRORS
-	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-	#endif
-	return 0;
-}
-int sprite_get_bbox_top(int sprite){
-	enigma::sprite* fnd=enigma::spritestructarray[sprite];
-	if(fnd) return 0;//fnd->height;
-	#if SHOWERRORS
-	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
-	#endif
-	return 0;
+	return enigma::spritestructarray[sprite]->bbox_top;
 }
 
 //sprite_get_bbox_mode
@@ -96,22 +105,27 @@ int sprite_get_bbox_top(int sprite){
 //sprite_get_smooth
 //sprite_get_transparent
 
-int sprite_get_number(int sprite){
-	enigma::sprite* fnd=enigma::spritestructarray[sprite];
-	if(fnd) return fnd->subcount;
-	#if SHOWERRORS
-	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+int sprite_get_number(int sprite)
+{
+	#ifdef DEBUGMODE
+  if (!enigma::spritestructarray[sprite]) {
+	  show_error("Trying to retrieve subimage count of non-existing sprite "+string(sprite),0);
+	  return 0;
+  }
 	#endif
-	return 0;
+	return enigma::spritestructarray[sprite]->subcount;
 }
 
-int sprite_get_texture(int sprite,int subimage){
-	enigma::sprite* fnd=enigma::spritestructarray[sprite];
-	if(fnd) return fnd->texturearray[subimage];
-	#if SHOWERRORS
-	show_error("Trying to retrieve width of unexisting sprite "+string(sprite),0);
+int sprite_get_texture(int sprite,int subimage)
+{
+  enigma::sprite* ps = enigma::spritestructarray[sprite];
+	#ifdef DEBUGMODE
+  if (!ps) {
+	  show_error("Trying to retrieve bounding box of non-existing sprite "+string(sprite),0);
+	  return 0;
+  }
 	#endif
-	return 0;
+	return ps->texturearray[subimage % ps->subcount];
 }
 
 int sprite_get_xoffset(int sprite){

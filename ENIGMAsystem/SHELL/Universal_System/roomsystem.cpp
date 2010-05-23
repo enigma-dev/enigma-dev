@@ -117,7 +117,8 @@ namespace enigma
     
     view_enabled = views_enabled;
     
-    for(int i=0;i<7;i++){
+    for(int i=0;i<7;i++)
+    {
       view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
       view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
       view_object[i] = views[i].object2follow;
@@ -190,17 +191,21 @@ int room_goto(double roomind){
 	return 0;
 }
 
-int room_restart(){
+int room_restart()
+{
 	int indx=(int)room.realval;
-	if (enigma::roomdata.find(indx)==enigma::roomdata.end()){
-		#if SHOWERRORS
+	
+	#if SHOWERRORS
+	if (enigma::roomdata.find(indx) == enigma::roomdata.end()) {
 		show_error("Is this some kind of joke? <__<",0);
-		#endif
 		return 0;
-	}//error like GM here
+	}
+  #endif
+	
 	//Destroy all objects
 	enigma::nodestroy=1;
-	for(enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++){
+	for(enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+	{
 		(*enigma::instance_iterator).second->myevent_roomend();
 		#ifdef ISCONTROLLER_persistent
 		if (!(*enigma::instance_iterator).second->persistent)
@@ -212,22 +217,25 @@ int room_restart(){
 	return 0;
 }
 
-int room_goto_absolute(double index){
-	enigma::roomiter=enigma::roomdata.begin();
+int room_goto_absolute(double index)
+{
+	enigma::roomiter = enigma::roomdata.begin();
 	//for (int ii=0; ii<(int)index; ii++) if (enigma::roomiter==enigma::roomdata.end()) { break; } else enigma::roomiter++;
-
-	if (enigma::roomiter==enigma::roomdata.end()){
-		#if SHOWERRORS
+  
+  #ifdef DEBUGMODE
+	if (enigma::roomiter == enigma::roomdata.end())
+	{
 		if (enigma::roomdata.empty())
 			show_error("Game must have at least one room to run",0);
 		else show_error("Attempting to go to nonexisting room",0);
-		#endif
 		return 0;
 	}
+  #endif
 	int indx=(*enigma::roomiter).first;
 	//Destroy all objects
 	enigma::nodestroy=1;
-	for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++){
+	for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+	{
 		(*enigma::instance_iterator).second->myevent_roomend();
 		#ifdef ISCONTROLLER_persistent
 		if(!(*enigma::instance_iterator).second->persistent)
@@ -245,13 +253,13 @@ int room_goto_absolute(double index){
 int room_goto_first()
 {
     enigma::roomiter=enigma::roomdata.begin();
+    #ifdef DEBUGMODE
     if (enigma::roomiter==enigma::roomdata.end())
     {
-        #if SHOWERRORS
         show_error("Game must have at least one room to run",0);
-        #endif
         return 0;
     }
+    #endif
 
     int indx=(*enigma::roomiter).first;
 
@@ -276,29 +284,27 @@ int room_goto_first()
 
 int room_goto_next()
 {
-    for (enigma::roomiter=enigma::roomdata.begin();enigma::roomiter!=enigma::roomdata.end();enigma::roomiter++)
-    if ((*enigma::roomiter).first==(int)room) break;
-
+    enigma::roomiter=enigma::roomdata.find(int(room));
+    #ifdef DEBUGMODE
     if (enigma::roomiter==enigma::roomdata.end())
-      {
-        #if SHOWERRORS
-        show_error("Going to next room from unexisting room (?)",0);
-        #endif
-        return 0;
-      } //error like GM here
-
+    {
+      show_error("Going to next room from unexisting room (?)",0);
+      return 0;
+    } //error like GM here
+    #endif
+    
     enigma::roomiter++;
 
+    #ifdef DEBUGMODE
     if (enigma::roomiter==enigma::roomdata.end())
-      {
-        #if SHOWERRORS
-        show_error("Going to next room after last",0);
-        #endif
-        return 0;
-      } //error like GM here
-
+    {
+      show_error("Going to next room after last",0);
+      return 0;
+    } //error like GM here
+    #endif
+    
     //Destroy all objects
-    enigma::nodestroy=1;
+    enigma::nodestroy = 1;
     for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
     {
       (*enigma::instance_iterator).second->myevent_roomend();
@@ -309,31 +315,31 @@ int room_goto_next()
     }
     enigma::nodestroy=0;
 
-    room.realval=(*enigma::roomiter).first;
-    (*enigma::roomiter).second.gotome();
+    room.realval = enigma::roomiter->first;
+    enigma::roomiter->second.gotome();
     return 0;
 }
 
 
-int room_next(double num)
+int room_next(int num)
 {
     enigma::roomiter=enigma::roomdata.find((int)num);
-    
+    if (enigma::roomiter == enigma::roomdata.end())
+      return -1;
+    enigma::roomiter++;
     if (enigma::roomiter==enigma::roomdata.end())
-    { show_error("Retrieving next room after nonexisting room "+string(num),0); return -1; }
-    
-    enigma::roomiter++; if (enigma::roomiter==enigma::roomdata.end()) { return -1; }
-    return (*enigma::roomiter).first;
+      return -1;
+    return enigma::roomiter->first;
 }
-int room_previous(double num)
+int room_previous(int num)
 {
     enigma::roomiter=enigma::roomdata.find((int)num);
-    
     if (enigma::roomiter==enigma::roomdata.end())
-    { show_error("Retrieving previous room before nonexisting room "+string(num),0); return -1; }
-    
-    enigma::roomiter--; if (enigma::roomiter==enigma::roomdata.end()) { return -1; }
-    return (*enigma::roomiter).first;
+      return -1;
+    enigma::roomiter--; 
+    if (enigma::roomiter==enigma::roomdata.end())
+      return -1;
+    return enigma::roomiter->first;
 }
 
 #include "key_game_globals.h" //TODO: Remove all instances of this line. It's just sloppy. Figure out the dependencies manually.

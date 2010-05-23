@@ -271,7 +271,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     
     wto << "enum //room names\n{\n";
     for (int i = 0; i < es->roomCount; i++)
-      wto << "  " << es->room[i].name << " = " << es->room[i].id << ",\n"; 
+      wto << "  " << es->rooms[i].name << " = " << es->rooms[i].id << ",\n"; 
     wto << "};\n\n";
   wto.close();
   
@@ -361,6 +361,12 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   //Indicate how many
   int sprite_count = es->spriteCount;
   fwrite(&sprite_count,4,1,gameModule);
+  
+  int sprite_maxid = 0;
+  for (int i = 0; i < sprite_count; i++)
+    if (es->sprites[i].id > sprite_maxid)
+      sprite_maxid = es->sprites[i].id;
+  fwrite(&sprite_maxid,4,1,gameModule);
   
   for (int i = 0; i < sprite_count; i++)
   {
