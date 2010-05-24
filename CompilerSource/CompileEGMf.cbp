@@ -44,7 +44,7 @@
 				<Option working_dir="../" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot; | grep enigma:' />
+				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
 				<Option host_application="xterm" />
 				<Compiler>
 					<Add option="-O3" />

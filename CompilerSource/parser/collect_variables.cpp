@@ -98,6 +98,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
               pos = dec_start_pos;
             }
             else pos++;
+            dec_start_pos = pos;
           }
           else //Add to this scope
           {
@@ -218,8 +219,9 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       
       //Looking at a straight identifier. Make sure it actually needs declared.
       const string nname = code.substr(spos,pos-spos);
-
-      if (synt[pos] != '(') // If it isn't a function (we assume it's nothing other than a function or varname)
+      
+      //Decrement pos to avoid skipping a char on continue
+      if (synt[pos--] != '(') // If it isn't a function (we assume it's nothing other than a function or varname)
       {
         if (in_decl and !dec_initializing) {
           dec_name_givn = true;
@@ -245,7 +247,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         
         cout << "Adding `" << nname << "' because that's just what I do.\n";
         pev->myObj->locals[nname] = dectrip();
-        continue_2: cout << ")"; fflush(stdout); continue;
+        continue_2: continue;
       }
       else //Since a syntax check already completed, we assume this is a valid function
       {
@@ -253,7 +255,8 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         cout << "\nLooking at " <<nname << "...\n";
         bool contented = false;
         unsigned pars = 1, args = 0;
-        for (pt i = pos+1; pars; i++)
+        
+        for (pt i = pos+2; pars; i++) //Start after parenthesis at pos+1, loop until that parenthesis is closed
         {
           if (synt[i] == ',' and pars == 1) {
             args += contented;
