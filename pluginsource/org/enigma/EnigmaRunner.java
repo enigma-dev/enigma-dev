@@ -583,7 +583,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			code = cf.code;
 			status = cf.status;
 			}
-		else if (source instanceof ActionFrame)
+		else if (source instanceof ActionFrame && ((ActionFrame) source).code != null)
 			{
 			ActionFrame af = (ActionFrame) source;
 			tool = af.tool;
