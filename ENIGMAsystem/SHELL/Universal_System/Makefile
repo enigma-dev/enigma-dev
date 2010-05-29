@@ -12,6 +12,9 @@
 .eobjs_$(MODE)/compression.o: compression.cpp ../../additional/zlib/zlib.h ../../additional/zlib/zconf.h
 	-mkdir .eobjs_$(MODE)
 	g++ -c compression.cpp		-o .eobjs_$(MODE)/compression.o $(FLAGS)
+.eobjs_$(MODE)/darray.o: darray.cpp
+	-mkdir .eobjs_$(MODE)
+	g++ -c darray.cpp		-o .eobjs_$(MODE)/darray.o $(FLAGS)
 .eobjs_$(MODE)/EGMstd.o: EGMstd.cpp var_cr3.h EGMstd.h
 	-mkdir .eobjs_$(MODE)
 	g++ -c EGMstd.cpp		-o .eobjs_$(MODE)/EGMstd.o $(FLAGS)
@@ -27,6 +30,9 @@
 .eobjs_$(MODE)/event_system.o: event_system.cpp object.h var_cr3.h
 	-mkdir .eobjs_$(MODE)
 	g++ -c event_system.cpp		-o .eobjs_$(MODE)/event_system.o $(FLAGS)
+.eobjs_$(MODE)/fileio.o: fileio.cpp darray.h
+	-mkdir .eobjs_$(MODE)
+	g++ -c fileio.cpp		-o .eobjs_$(MODE)/fileio.o $(FLAGS)
 .eobjs_$(MODE)/globalupdate.o: globalupdate.cpp
 	-mkdir .eobjs_$(MODE)
 	g++ -c globalupdate.cpp		-o .eobjs_$(MODE)/globalupdate.o $(FLAGS)
@@ -76,13 +82,13 @@
 	-mkdir .eobjs_$(MODE)
 	g++ -c WITHconstruct.cpp		-o .eobjs_$(MODE)/WITHconstruct.o $(FLAGS)
 
-Run: .eobjs_Run/CallbackArrays.o .eobjs_Run/collisions.o .eobjs_Run/collisions_object.o .eobjs_Run/compression.o .eobjs_Run/EGMstd.o .eobjs_Run/ENIGMA_GLOBALS.o .eobjs_Run/estring.o .eobjs_Run/events.o .eobjs_Run/event_system.o .eobjs_Run/globalupdate.o .eobjs_Run/IMGloading.o .eobjs_Run/instance.o .eobjs_Run/mathnc.o .eobjs_Run/OBJaccess.o .eobjs_Run/object.o .eobjs_Run/objecttable.o .eobjs_Run/planar_object.o .eobjs_Run/reflexive_types.o .eobjs_Run/roomsystem.o .eobjs_Run/simplecollisions.o .eobjs_Run/spriteinit.o .eobjs_Run/spritestruct.o .eobjs_Run/transform_object.o .eobjs_Run/var_cr3.o .eobjs_Run/WITHconstruct.o 
+Run: .eobjs_Run/CallbackArrays.o .eobjs_Run/collisions.o .eobjs_Run/collisions_object.o .eobjs_Run/compression.o .eobjs_Run/darray.o .eobjs_Run/EGMstd.o .eobjs_Run/ENIGMA_GLOBALS.o .eobjs_Run/estring.o .eobjs_Run/events.o .eobjs_Run/event_system.o .eobjs_Run/fileio.o .eobjs_Run/globalupdate.o .eobjs_Run/IMGloading.o .eobjs_Run/instance.o .eobjs_Run/mathnc.o .eobjs_Run/OBJaccess.o .eobjs_Run/object.o .eobjs_Run/objecttable.o .eobjs_Run/planar_object.o .eobjs_Run/reflexive_types.o .eobjs_Run/roomsystem.o .eobjs_Run/simplecollisions.o .eobjs_Run/spriteinit.o .eobjs_Run/spritestruct.o .eobjs_Run/transform_object.o .eobjs_Run/var_cr3.o .eobjs_Run/WITHconstruct.o 
 	-mkdir .eobjs_Run/
-Debug: .eobjs_Debug/CallbackArrays.o .eobjs_Debug/collisions.o .eobjs_Debug/collisions_object.o .eobjs_Debug/compression.o .eobjs_Debug/EGMstd.o .eobjs_Debug/ENIGMA_GLOBALS.o .eobjs_Debug/estring.o .eobjs_Debug/events.o .eobjs_Debug/event_system.o .eobjs_Debug/globalupdate.o .eobjs_Debug/IMGloading.o .eobjs_Debug/instance.o .eobjs_Debug/mathnc.o .eobjs_Debug/OBJaccess.o .eobjs_Debug/object.o .eobjs_Debug/objecttable.o .eobjs_Debug/planar_object.o .eobjs_Debug/reflexive_types.o .eobjs_Debug/roomsystem.o .eobjs_Debug/simplecollisions.o .eobjs_Debug/spriteinit.o .eobjs_Debug/spritestruct.o .eobjs_Debug/transform_object.o .eobjs_Debug/var_cr3.o .eobjs_Debug/WITHconstruct.o 
+Debug: .eobjs_Debug/CallbackArrays.o .eobjs_Debug/collisions.o .eobjs_Debug/collisions_object.o .eobjs_Debug/compression.o .eobjs_Debug/darray.o .eobjs_Debug/EGMstd.o .eobjs_Debug/ENIGMA_GLOBALS.o .eobjs_Debug/estring.o .eobjs_Debug/events.o .eobjs_Debug/event_system.o .eobjs_Debug/fileio.o .eobjs_Debug/globalupdate.o .eobjs_Debug/IMGloading.o .eobjs_Debug/instance.o .eobjs_Debug/mathnc.o .eobjs_Debug/OBJaccess.o .eobjs_Debug/object.o .eobjs_Debug/objecttable.o .eobjs_Debug/planar_object.o .eobjs_Debug/reflexive_types.o .eobjs_Debug/roomsystem.o .eobjs_Debug/simplecollisions.o .eobjs_Debug/spriteinit.o .eobjs_Debug/spritestruct.o .eobjs_Debug/transform_object.o .eobjs_Debug/var_cr3.o .eobjs_Debug/WITHconstruct.o 
 	-mkdir .eobjs_Debug/
-Build: .eobjs_Build/CallbackArrays.o .eobjs_Build/collisions.o .eobjs_Build/collisions_object.o .eobjs_Build/compression.o .eobjs_Build/EGMstd.o .eobjs_Build/ENIGMA_GLOBALS.o .eobjs_Build/estring.o .eobjs_Build/events.o .eobjs_Build/event_system.o .eobjs_Build/globalupdate.o .eobjs_Build/IMGloading.o .eobjs_Build/instance.o .eobjs_Build/mathnc.o .eobjs_Build/OBJaccess.o .eobjs_Build/object.o .eobjs_Build/objecttable.o .eobjs_Build/planar_object.o .eobjs_Build/reflexive_types.o .eobjs_Build/roomsystem.o .eobjs_Build/simplecollisions.o .eobjs_Build/spriteinit.o .eobjs_Build/spritestruct.o .eobjs_Build/transform_object.o .eobjs_Build/var_cr3.o .eobjs_Build/WITHconstruct.o 
+Build: .eobjs_Build/CallbackArrays.o .eobjs_Build/collisions.o .eobjs_Build/collisions_object.o .eobjs_Build/compression.o .eobjs_Build/darray.o .eobjs_Build/EGMstd.o .eobjs_Build/ENIGMA_GLOBALS.o .eobjs_Build/estring.o .eobjs_Build/events.o .eobjs_Build/event_system.o .eobjs_Build/fileio.o .eobjs_Build/globalupdate.o .eobjs_Build/IMGloading.o .eobjs_Build/instance.o .eobjs_Build/mathnc.o .eobjs_Build/OBJaccess.o .eobjs_Build/object.o .eobjs_Build/objecttable.o .eobjs_Build/planar_object.o .eobjs_Build/reflexive_types.o .eobjs_Build/roomsystem.o .eobjs_Build/simplecollisions.o .eobjs_Build/spriteinit.o .eobjs_Build/spritestruct.o .eobjs_Build/transform_object.o .eobjs_Build/var_cr3.o .eobjs_Build/WITHconstruct.o 
 	-mkdir .eobjs_Build/
-Release: .eobjs_Release/CallbackArrays.o .eobjs_Release/collisions.o .eobjs_Release/collisions_object.o .eobjs_Release/compression.o .eobjs_Release/EGMstd.o .eobjs_Release/ENIGMA_GLOBALS.o .eobjs_Release/estring.o .eobjs_Release/events.o .eobjs_Release/event_system.o .eobjs_Release/globalupdate.o .eobjs_Release/IMGloading.o .eobjs_Release/instance.o .eobjs_Release/mathnc.o .eobjs_Release/OBJaccess.o .eobjs_Release/object.o .eobjs_Release/objecttable.o .eobjs_Release/planar_object.o .eobjs_Release/reflexive_types.o .eobjs_Release/roomsystem.o .eobjs_Release/simplecollisions.o .eobjs_Release/spriteinit.o .eobjs_Release/spritestruct.o .eobjs_Release/transform_object.o .eobjs_Release/var_cr3.o .eobjs_Release/WITHconstruct.o 
+Release: .eobjs_Release/CallbackArrays.o .eobjs_Release/collisions.o .eobjs_Release/collisions_object.o .eobjs_Release/compression.o .eobjs_Release/darray.o .eobjs_Release/EGMstd.o .eobjs_Release/ENIGMA_GLOBALS.o .eobjs_Release/estring.o .eobjs_Release/events.o .eobjs_Release/event_system.o .eobjs_Release/fileio.o .eobjs_Release/globalupdate.o .eobjs_Release/IMGloading.o .eobjs_Release/instance.o .eobjs_Release/mathnc.o .eobjs_Release/OBJaccess.o .eobjs_Release/object.o .eobjs_Release/objecttable.o .eobjs_Release/planar_object.o .eobjs_Release/reflexive_types.o .eobjs_Release/roomsystem.o .eobjs_Release/simplecollisions.o .eobjs_Release/spriteinit.o .eobjs_Release/spritestruct.o .eobjs_Release/transform_object.o .eobjs_Release/var_cr3.o .eobjs_Release/WITHconstruct.o 
 	-mkdir .eobjs_Release/
 
 clean:

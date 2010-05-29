@@ -124,7 +124,7 @@ void externs::clear_all()
     {
       //cout << "Delete " << i->second->name << "\n";
       if (i->second->name == "x")
-        cout << "poof.";
+        cout << "poof.\n";
       delete i->second;
     }
   for (unsigned i = 0; i < tempargs.size; i++)
