@@ -33,6 +33,7 @@
 
 using namespace std;
 #define flushl (fflush(stdout), "\n")
+#define flushs (fflush(stdout), "")
 
 #include "general/darray.h"
 
