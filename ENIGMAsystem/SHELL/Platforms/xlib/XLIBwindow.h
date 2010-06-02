@@ -59,9 +59,9 @@ int window_get_width();
 int window_get_height();
 
 //Setters
-int window_set_position(double x,double y);
-int window_set_size(double w,double h);
-int window_set_rectangle(double x,double y,double w,double h);
+void window_set_position(int x,int y);
+void window_set_size(unsigned int w,unsigned int h);
+void window_set_rectangle(int x,int y,int w,int h);
 
 //Center
 int window_center();

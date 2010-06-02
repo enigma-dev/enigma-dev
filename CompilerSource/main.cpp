@@ -97,8 +97,11 @@ void syntax_error::set(int x, int y, int a, string s)
 extern void print_definition(string n);
 dllexport syntax_error *whitespaceModified(const char* wscode)
 {
-  clear_ide_editables();
+  cout << "Clearing IDE editables... " << flushs;
+    clear_ide_editables();
+  cout << "Done." << flushl;
   
+  cout << "Opening ENIGMA for parse..." << flushl;
   string EGMmain = fc("ENIGMAsystem/SHELL/SHELLmain.cpp");
   if (EGMmain == "")
   {

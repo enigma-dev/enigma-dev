@@ -25,45 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-/**Standard window functions***************************************************\
-
-cr_default, cr_none, cr_arrow, cr_cross, cr_beam, cr_size_nesw, cr_size_ns, cr_size_nwse,
-cr_size_we, cr_uparrow, cr_hourglass, cr_drag, cr_nodrop, cr_hsplit, cr_vsplit,
-cr_multidrag, cr_sqlwait, cr_no, cr_appstart, cr_help, cr_handpoint, cr_size_all
-
-int show_message(std::string str)
-int window_get_x()
-int window_get_y()
-int window_get_width()
-int window_get_height()
-int window_set_visible(double visible)
-int window_get_visible()
-int window_set_stayontop(double stay)
-int window_get_stayontop()
-int window_set_caption(char* caption)
-int window_set_caption(std::string caption)
-std::string window_get_caption()
-double window_set_color(double color)
-double window_get_color()
-int window_set_region_scale(double scale, double adaptwindow)
-double window_get_region_scale()
-int window_set_position(double x, double y)
-int window_set_size(double width, double height)
-int window_set_rectangle(double x, double y, double width, double height)
-double window_center()
-double window_default()
-double window_mouse_get_x()
-double window_mouse_get_y()
-int window_mouse_set(double x,double y)
-std::string get_string(std::string message, std::string def)
-int window_set_fullscreen(double full)
-int get_color(double defcolor)
-int game_end()
-
-\******************************************************************************/
-
-enum
-{
+enum {
   cr_default    = 0,
   cr_none       = -1,
   cr_arrow      = -2,
@@ -89,34 +51,36 @@ enum
 };
 
 
-namespace enigma{void clampparent();}
+namespace enigma {
+  void clampparent();
+}
 
-int show_message(std::string str);
-int window_get_x();
-int window_get_y();
-int window_get_width();
-int window_get_height();
-int window_set_visible(double visible);
-int window_get_visible();
-int window_set_stayontop(double stay);
-int window_get_stayontop();
-int window_set_caption(char* caption);
-int window_set_caption(std::string caption);
+int  show_message(std::string str);
+int  window_get_x();
+int  window_get_y();
+int  window_get_width();
+int  window_get_height();
+void window_set_visible(int visible);
+int  window_get_visible();
+void window_set_stayontop(int stay);
+int  window_get_stayontop();
+void window_set_caption(char* caption);
+void window_set_caption(std::string caption);
 std::string window_get_caption();
-double window_set_color(double color);
+double window_set_color(int color);
 double window_get_color();
-int window_set_region_scale(double scale, double adaptwindow);
+void window_set_region_scale(int scale, int adaptwindow);
 double window_get_region_scale();
-int window_set_position(double x, double y);
-int window_set_size(double width, double height);
-int window_set_rectangle(double x, double y, double width, double height);
-double window_center();
-double window_default();
-double window_mouse_get_x();
-double window_mouse_get_y();
-int window_mouse_set(double x,double y);
-int window_set_fullscreen(double full);
-int window_get_fullscreen();
+void window_set_position(int x, int y);
+void window_set_size(unsigned int width, unsigned int height);
+void window_set_rectangle(int x, int y, int width, int height);
+void window_center();
+int  window_default();
+int  window_mouse_get_x();
+int  window_mouse_get_y();
+void window_mouse_set(int x,int y);
+void window_set_fullscreen(bool full);
+int  window_get_fullscreen();
 
 namespace getstr {
   void init();

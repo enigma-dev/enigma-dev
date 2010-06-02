@@ -46,92 +46,105 @@ Atom wm_delwin;
 // INIT //
 //////////
 Cursor NoCursor,DefCursor;
-void gmw_init() {
+void gmw_init()
+{
 	//Default cursor
 	DefCursor = XCreateFontCursor(disp,68);
 	//Blank cursor
 	XColor dummy;
 	Pixmap blank = XCreateBitmapFromData(disp,win,"",1,1);
-	if(blank == None) //out of memory
+	if(blank == None) { //out of memory
+		printf("Failed to create no cursor. lulz\n");
 		NoCursor = DefCursor;
-	else{
+	}
+	else {
 		NoCursor = XCreatePixmapCursor(disp,blank,blank,&dummy,&dummy,0,0);
 		XFreePixmap(disp,blank);
 	}
 }
 
-void sleep(int ms){
+void sleep(int ms)
+{
 	if(ms>1000) sleep(ms/1000);
 	if(ms>0)	usleep(ms%1000*1000);
 }
 
-int window_set_position(double x,double y);
+void window_set_position(int x,int y);
 int visx = -1, visy = -1;
-int window_set_visible(double visible){
-	if(visible){
+
+int window_set_visible(const bool visible)
+{
+	if(visible)
+	{
 		XMapRaised(disp,win);
 		GLXContext glxc = glXGetCurrentContext();
 		glXMakeCurrent(disp,win,glxc);
-		if(visx!=-1 && visy!=-1)
+		if(visx != -1 && visy != -1)
 			window_set_position(visx,visy);
-	}else XUnmapWindow(disp, win);
+	}
+	else
+	  XUnmapWindow(disp, win);
 	return 0;
 }
-int window_get_visible() {
+int window_get_visible()
+{
 	XWindowAttributes wa;
 	XGetWindowAttributes(disp,win,&wa);
 	return wa.map_state != IsUnmapped;
 }
 
-int window_set_caption(std::string caption){
+int window_set_caption(std::string caption)
+{
 	XStoreName(disp,win,caption.c_str());
 	return 0;
 }
-std::string window_get_caption(){
+std::string window_get_caption()
+{
 	char *caption;
 	XFetchName(disp,win,&caption);
 	std::string r=caption;
 	return r;
 }
 
-inline int getMouse(int i) {
+inline int getMouse(int i)
+{
 	Window r1,r2;
 	int rx,ry,wx,wy;
 	unsigned int mask;
 	XQueryPointer(disp,win,&r1,&r2,&rx,&ry,&wx,&wy,&mask);
-	switch(i){
-	case 0:return rx;
-	case 1:return ry;
-	case 2:return wx;
-	case 3:return wy;
-	default:return -1;
+	switch(i)
+	{
+    case 0:  return rx;
+    case 1:  return ry;
+    case 2:  return wx;
+    case 3:  return wy;
+    default: return -1;
 	}
 }
 
-int display_mouse_get_x(){return getMouse(0);}
-int display_mouse_get_y(){return getMouse(1);}
-int window_mouse_get_x(){return getMouse(2);}
-int window_mouse_get_y(){return getMouse(3);}
+int display_mouse_get_x() { return getMouse(0); }
+int display_mouse_get_y() { return getMouse(1); }
+int window_mouse_get_x()  { return getMouse(2); }
+int window_mouse_get_y()  { return getMouse(3); }
 
-int window_mouse_set(double x,double y){
+void window_mouse_set(double x,double y) {
 	XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
-	return 0;
 }
-int display_mouse_set(double x,double y) {
+void display_mouse_set(double x,double y) {
 	XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
-	return 0;
 }
 
 ////////////
 // WINDOW //
 ////////////
-int getWindowDimension(int i) {
+int getWindowDimension(int i)
+{
 	XFlush(disp);
 	XWindowAttributes wa;
 	XGetWindowAttributes(disp,win,&wa);
 	if(i == 2) return wa.width;
 	if(i == 3) return wa.height;
-	Window root,parent,*child;
+	Window root, parent, *child;
 	uint children;
 	XQueryTree(disp,win,&root,&parent,&child,&children);
 	XWindowAttributes pwa;
@@ -140,44 +153,47 @@ int getWindowDimension(int i) {
 }
 
 //Getters
-int window_get_x(){return getWindowDimension(0);}
-int window_get_y(){return getWindowDimension(1);}
-int window_get_width(){return getWindowDimension(2);}
-int window_get_height(){return getWindowDimension(3);}
+int window_get_x()      { return getWindowDimension(0); }
+int window_get_y()      { return getWindowDimension(1); }
+int window_get_width()  { return getWindowDimension(2); }
+int window_get_height() { return getWindowDimension(3); }
 
 //Setters
-int window_set_position(double x,double y) {
+void window_set_position(int x,int y)
+{
 	XWindowAttributes wa;
 	XGetWindowAttributes(disp,win,&wa);
 	XMoveWindow(disp,win,(int) x  - wa.x,(int) y - wa.y);
-	return 0;
 }
-int window_set_size(double w,double h){
-	XResizeWindow(disp,win,(uint) w,(uint) h);
-	return 0;
+void window_set_size(unsigned int w,unsigned int h) {
+	XResizeWindow(disp,win, w, h);
 }
-int window_set_rectangle(double x,double y,double w,double h) {
-	XMoveResizeWindow(disp,win,(int)x,(int)y,(uint)w,(uint)h);
-	return 0;
+void window_set_rectangle(int x,int y,int w,int h) {
+	XMoveResizeWindow(disp, win, x, y, w, h);
 }
 
 //Center
-int window_center() {
+void window_center()
+{
 	Window r;
 	int x,y;
 	uint w,h,b,d;
 	XGetGeometry(disp,win,&r,&x,&y,&w,&h,&b,&d);
 	Screen *s = DefaultScreenOfDisplay(disp);
 	XMoveWindow(disp,win,s->width/2-w/2,s->height/2-h/2);
-	return 0;
 }
 
 ////////////////
 // FULLSCREEN //
 ////////////////
-enum{_NET_WM_STATE_REMOVE,_NET_WM_STATE_ADD,_NET_WM_STATE_TOGGLE};
+enum {
+  _NET_WM_STATE_REMOVE,
+  _NET_WM_STATE_ADD,
+  _NET_WM_STATE_TOGGLE
+};
 
-int window_set_fullscreen(double full) {
+void window_set_fullscreen(const bool full)
+{
 	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
 	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
 	XEvent xev;
@@ -191,9 +207,9 @@ int window_set_fullscreen(double full) {
 	xev.xclient.data.l[1] = aFullScreen;
 	xev.xclient.data.l[2] = 0;
 	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
-	return 0;
 }
-int window_get_fullscreen() {
+int window_get_fullscreen()
+{
 	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN",False);
 	Atom ra;
 	int ri;
@@ -210,42 +226,17 @@ int window_get_fullscreen() {
 	return 0;
 }
 
-////////////
-// CURSOR //
-////////////
-#define cr_default 0
-#define cr_none -1
-#define cr_arrow -2
-#define cr_cross -3
-#define cr_beam -4
-#define cr_size_nesw -6
-#define cr_size_ns -7
-#define cr_size_nwse -8
-#define cr_size_we -9
-#define cr_uparrow -10
-#define cr_hourglass -11
-#define cr_drag -12
-#define cr_nodrop -13
-#define cr_hsplit -14
-#define cr_vsplit -15
-#define cr_multidrag -16
-#define cr_sqlwait -17
-#define cr_no -18
-#define cr_appstart -19
-#define cr_help -20
-#define cr_handpoint -21
-#define cr_size_all -22
                  //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
 short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
-int window_set_cursor(double c) {
+int window_set_cursor(int c)
+{
 	XUndefineCursor(disp,win);
-	XDefineCursor(disp,win,c==-1?NoCursor:XCreateFontCursor(disp,curs[(int)(-c)]));
+	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
 	return 0;
 }
 
-int screen_refresh(){
+void screen_refresh() {
 	glXSwapBuffers(disp,win);
-	return 0;
 }
 
 namespace enigma
@@ -253,59 +244,57 @@ namespace enigma
   char keymap[256];
   void initkeymap()
   {
-    keymap[0x51]=37;//vk_left;
-    keymap[0x53]=39;//vk_right;
-    keymap[0x52]=38;//vk_up;
-    keymap[0x54]=40;//vk_down;
-    keymap[0xE4]=17;//vk_control;
-    keymap[0xEA]=18;//vk_alt;
-    keymap[0xE2]=16;//vk_shift;
-    keymap[0x0D]=13;//vk_enter;
-    keymap[0x9E]=96;//vk_numpad0;
-    keymap[0x9C]=97;//vk_numpad1;
-    keymap[0x99]=98;//vk_numpad2;
-    keymap[0x9B]=99;//vk_numpad3;
-    keymap[0x96]=100;//vk_numpad4;
-    keymap[0x9D]=101;//vk_numpad5;
-    keymap[0x98]=102;//vk_numpad6;
-    keymap[0x95]=103;//vk_numpad7;
-    keymap[0x97]=104;//vk_numpad8;
-    keymap[0x9A]=105;//vk_numpad9;
-    keymap[0xAF]=111;//vk_divide;
-    keymap[0xAA]=106;//vk_multiply;
-    keymap[0xAD]=109;//vk_subtract;
-    keymap[0xAB]=107;//vk_add;
-    keymap[0x9F]=110;//vk_decimal;
-    keymap[0xBE]=112;//vk_f1;
-    keymap[0xBF]=113;//vk_f2;
-    keymap[0xC0]=114;//vk_f3;
-    keymap[0xC1]=115;//vk_f4;
-    keymap[0xC2]=116;//vk_f5;
-    keymap[0xC3]=117;//vk_f6;
-    keymap[0xC4]=118;//vk_f7;
-    keymap[0xC5]=119;//vk_f8;
-    keymap[0xC6]=120;//vk_f9;
-    keymap[0xC7]=121;//vk_f10;
-    keymap[0xC8]=122;//vk_f11;
-    keymap[0xC9]=123;//vk_f12;
-    keymap[0x08]=8;//vk_backspace;
-    keymap[0x1B]=27;//vk_escape;
-    keymap[0x50]=36;//vk_home;
-    keymap[0x57]=35;//vk_end;
-    keymap[0x55]=33;//vk_pageup;
-    keymap[0x56]=34;//vk_pagedown;
-    keymap[0xFF]=46;//vk_delete;
-    keymap[0x63]=45;//vk_insert;
-  }
+    keymap[0x51] = 37;  //vk_left;
+    keymap[0x53] = 39;  //vk_right;
+    keymap[0x52] = 38;  //vk_up;
+    keymap[0x54] = 40;  //vk_down;
+    keymap[0xE4] = 17;  //vk_control;
+    keymap[0xEA] = 18;  //vk_alt;
+    keymap[0xE2] = 16;  //vk_shift;
+    keymap[0x0D] = 13;  //vk_enter;
+    keymap[0x9E] = 96;  //vk_numpad0;
+    keymap[0x9C] = 97;  //vk_numpad1;
+    keymap[0x99] = 98;  //vk_numpad2;
+    keymap[0x9B] = 99;  //vk_numpad3;
+    keymap[0x96] = 100; //vk_numpad4;
+    keymap[0x9D] = 101; //vk_numpad5;
+    keymap[0x98] = 102; //vk_numpad6;
+    keymap[0x95] = 103; //vk_numpad7;
+    keymap[0x97] = 104; //vk_numpad8;
+    keymap[0x9A] = 105; //vk_numpad9;
+    keymap[0xAF] = 111; //vk_divide;
+    keymap[0xAA] = 106; //vk_multiply;
+    keymap[0xAD] = 109; //vk_subtract;
+    keymap[0xAB] = 107; //vk_add;
+    keymap[0x9F] = 110; //vk_decimal;
+    keymap[0xBE] = 112; //vk_f1;
+    keymap[0xBF] = 113; //vk_f2;
+    keymap[0xC0] = 114; //vk_f3;
+    keymap[0xC1] = 115; //vk_f4;
+    keymap[0xC2] = 116; //vk_f5;
+    keymap[0xC3] = 117; //vk_f6;
+    keymap[0xC4] = 118; //vk_f7;
+    keymap[0xC5] = 119; //vk_f8;
+    keymap[0xC6] = 120; //vk_f9;
+    keymap[0xC7] = 121; //vk_f10;
+    keymap[0xC8] = 122; //vk_f11;
+    keymap[0xC9] = 123; //vk_f12;
+    keymap[0x08] = 8;   //vk_backspace;
+    keymap[0x1B] = 27;  //vk_escape;
+    keymap[0x50] = 36;  //vk_home;
+    keymap[0x57] = 35;  //vk_end;
+    keymap[0x55] = 33;  //vk_pageup;
+    keymap[0x56] = 34;  //vk_pagedown;
+    keymap[0xFF] = 46;  //vk_delete;
+    keymap[0x63] = 45;  //vk_insert;
+   }
 }
 
 extern void ABORT_ON_FATAL_ERRORS();
-int show_error(std::string err, int fatal)
+void show_error(std::string err, int fatal)
 {
   printf("ERROR: %s\n",err.c_str());
-  if (fatal) exit(0);
-  ABORT_ON_FATAL_ERRORS();
-  return 0;
+  if (fatal) ABORT_ON_FATAL_ERRORS();
 }
 
 namespace enigma {

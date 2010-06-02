@@ -37,7 +37,6 @@ namespace enigma
 {
   extern HWND hWnd,hWndParent;
   extern int windowcolor; extern double viewscale; extern bool windowIsTop;
-
   
   void clampparent()
   {
@@ -51,52 +50,51 @@ namespace enigma
 
 int show_message(std::string str)
 {
-    MessageBox(enigma::hWnd,str.c_str(),"Message",MB_OK);
-    return 0;
+  MessageBox(enigma::hWnd,str.c_str(),"Message",MB_OK);
+  return 0;
 }
 
 int window_get_x()
 {
-    RECT window;
-    GetWindowRect(enigma::hWnd,&window);
-    return window.left;
+  RECT window;
+  GetWindowRect(enigma::hWnd,&window);
+  return window.left;
 }
 
 int window_get_y()
 {
-    RECT window;
-    GetWindowRect(enigma::hWnd,&window);
-    return window.top;
+  RECT window;
+  GetWindowRect(enigma::hWnd,&window);
+  return window.top;
 }
 
 int window_get_width()
 {
-    RECT window;
-    GetWindowRect(enigma::hWnd,&window);
-    return window.right-window.left;
+  RECT window;
+  GetWindowRect(enigma::hWnd,&window);
+  return window.right-window.left;
 }
 
 int window_get_height()
 {
-    RECT window;
-    GetWindowRect(enigma::hWnd,&window);
-    return window.bottom-window.top;
+  RECT window;
+  GetWindowRect(enigma::hWnd,&window);
+  return window.bottom-window.top;
 }
 
-int window_set_visible(double visible)
+void window_set_visible(bool visible)
 {
-    ShowWindow(enigma::hWnd,(bool)visible);
-    return 0;
+  ShowWindow(enigma::hWnd,visible);
 }
 
 int window_get_visible()
 {
-    return IsWindowVisible(enigma::hWnd);
+   return IsWindowVisible(enigma::hWnd);
 }
 
 
 
-int window_set_stayontop(double stay)
+void window_set_stayontop(const bool stay)
 {
    if ((bool)stay)
    {
@@ -109,44 +107,40 @@ int window_set_stayontop(double stay)
      enigma::windowIsTop=0; //Cheap hax, but every windows program I've experimented with does it, 
      //though GM changes it back every step if you try to make it stay on top. It does not notice if you send it back.
    }
-   return 0;
 }
 int window_get_stayontop()
 {
-   return enigma::windowIsTop;
+  return enigma::windowIsTop;
 }
 
-int window_set_caption(char* caption)
+void window_set_caption(char* caption)
 {
-    SetWindowText(enigma::hWnd,caption);
-    return 0;
+  SetWindowText(enigma::hWnd,caption);
 }
 
 int window_set_caption(std::string caption)
 {
-    SetWindowText(enigma::hWndParent,(char*) caption.c_str());
-    return 0;
+  SetWindowText(enigma::hWndParent,(char*) caption.c_str());
 }
 
 std::string window_get_caption()
 {
-    char text_buffer[513];
-    GetWindowText(enigma::hWnd, text_buffer, 512);
-    return text_buffer;
+  char text_buffer[513];
+  GetWindowText(enigma::hWnd, text_buffer, 512);
+  return text_buffer;
 }
 
-double window_set_color(double color)
+void window_set_color(int color)
 {
   enigma::windowcolor=(int)color;
-  return 0;
 }
 
-double window_get_color()
+int window_get_color()
 {
   return enigma::windowcolor;
 }
 
-int window_set_region_scale(double scale, double adaptwindow)
+int window_set_region_scale(double scale, const bool adaptwindow)
 {
     enigma::viewscale=scale;
     if ((bool)adaptwindow)
@@ -156,31 +150,28 @@ int window_set_region_scale(double scale, double adaptwindow)
     }
     return 0;
 }
-double window_get_region_scale()
+int window_get_region_scale()
 {
     return enigma::viewscale;
 }
 
-int window_set_position(double x, double y)
+void window_set_position(int x, int y)
 {
-    SetWindowPos(enigma::hWnd, HWND_TOP, (int)x, (int)y, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
-    return 0;
+  SetWindowPos(enigma::hWnd, HWND_TOP, (int)x, (int)y, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
 }
-int window_set_size(double width, double height)
+void window_set_size(unsigned int width, unsigned int height)
 {
     SetWindowPos(enigma::hWnd, HWND_TOP, 0, 0, (int)width, (int)height, SWP_NOMOVE|SWP_NOACTIVATE);
     enigma::clampparent();
-    return 0;
 }
 
-int window_set_rectangle(double x, double y, double width, double height)
+void window_set_rectangle(int x, int y, int width, int height)
 {
-    SetWindowPos(enigma::hWnd, HWND_TOP, (int)x, (int)y, (int)width, (int)height, SWP_SHOWWINDOW);
+    SetWindowPos(enigma::hWnd, HWND_TOP, x, y, width, height, SWP_SHOWWINDOW);
     enigma::clampparent();
-    return 0;
 }    
 
-double window_center()
+void window_center()
 {
     RECT window;
     GetWindowRect(enigma::hWnd,&window);
@@ -190,11 +181,9 @@ double window_center()
     int screen_width = GetSystemMetrics(SM_CXBORDER);
     int screen_height = GetSystemMetrics(SM_CYBORDER);
     SetWindowPos(enigma::hWnd, HWND_TOP, (screen_width-tmp_wind_width)/2, (screen_height-tmp_wind_height)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE|SWP_DRAWFRAME);
-    
-    return 0;
 }
 
-double window_default()
+void window_default()
 {
     RECT window;
     GetWindowRect(enigma::hWnd,&window);
@@ -210,11 +199,9 @@ double window_default()
     int screen_width = GetSystemMetrics(SM_CXBORDER);
     int screen_height = GetSystemMetrics(SM_CYBORDER);
     SetWindowPos(enigma::hWnd, HWND_TOP, screen_width - xm/2, screen_height - ym/2, xm, ym, SWP_SHOWWINDOW);
-    
-    return 0;
 }
 
-double window_mouse_get_x()
+int window_mouse_get_x()
 {
     RECT window;
     GetWindowRect(enigma::hWnd,&window);
@@ -223,7 +210,7 @@ double window_mouse_get_x()
 	
 	return mouse.x-window.left;
 }
-double window_mouse_get_y()
+int window_mouse_get_y()
 {
     RECT window;
     GetWindowRect(enigma::hWnd,&window);
@@ -232,13 +219,15 @@ double window_mouse_get_y()
 	
 	return mouse.y-window.top;
 }
-int window_mouse_set(double x,double y)
+void window_mouse_set(int x,int y)
 {
-    SetCursorPos((int)x,(int)y);
-    return 0;
+    SetCursorPos(x,y);
 }
 
-namespace enigma { long int laststyle; int isFullScreen=0; }
+namespace enigma {
+  long int laststyle;
+  int isFullScreen=0;
+}
 int window_set_fullscreen(double full)
 {
   if (full)

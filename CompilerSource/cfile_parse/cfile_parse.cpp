@@ -446,6 +446,11 @@ pt parse_cfile(string cftext)
                 }
                 if (last_identifier != "") {
                   TPDATA_CONSTRUCT(1);
+                  externs* enuScope = current_scope; //Store where we are
+                  current_scope = current_scope->parent; //Move up a scope: ENUMs declare in two scopes
+                  if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refstack,builtin_type__int,tmplate_params,tpc,last_value))
+                    return pos;
+                  current_scope = enuScope; //Move back where we started and declare in that scope
                   if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refstack,builtin_type__int,tmplate_params,tpc,last_value))
                     return pos;
                 }

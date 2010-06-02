@@ -73,8 +73,12 @@ int window_get_visible() {
 /////////////
 // CAPTION //
 /////////////
-int window_set_caption(char* caption) { XStoreName(disp,win,caption); }
-char *window_get_caption() {
+void window_set_caption(char* caption)
+{
+  XStoreName(disp,win,caption);
+}
+char *window_get_caption()
+{
  char *caption;
  XFetchName(disp,win,&caption);
  return caption;
@@ -83,7 +87,8 @@ char *window_get_caption() {
 ///////////
 // MOUSE //
 ///////////
-inline int getMouse(int i) {
+inline int getMouse(int i)
+{
  Window r1, r2;
  int rx,ry,wx,wy;
  unsigned int mask;
@@ -99,14 +104,16 @@ inline int getMouse(int i) {
 
 int display_mouse_get_x() { return getMouse(0); }
 int display_mouse_get_y() { return getMouse(1); }
-int window_mouse_get_x() { return getMouse(2); }
-int window_mouse_get_y() { return getMouse(3); }
+int window_mouse_get_x()  { return getMouse(2); }
+int window_mouse_get_y()  { return getMouse(3); }
 
-int window_mouse_set(double x,double y) {
+int window_mouse_set(double x,double y)
+{
  XWarpPointer(disp,None,win,0,0,0,0,(int) x,(int) y);
  return 0;
 }
-int display_mouse_set(double x,double y) {
+int display_mouse_set(double x,double y)
+{
  XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int) x,(int) y);
  return 0;
 }
@@ -114,138 +121,141 @@ int display_mouse_set(double x,double y) {
 ////////////
 // WINDOW //
 ////////////
-int getWindowDimension(int i) {
- XFlush(disp);
- XWindowAttributes wa;
- XGetWindowAttributes(disp,win,&wa);
- if (i == 2) return wa.width;
- if (i == 3) return wa.height;
-
- Window root,parent,*child;
- uint children;
- XQueryTree(disp,win,&root,&parent,&child,&children);
- XWindowAttributes pwa;
- XGetWindowAttributes(disp,parent,&pwa);
- if (i == 0) return pwa.x + wa.x;
- if (i == 1) return pwa.y + wa.y;
- return -1;
+int getWindowDimension(int i)
+{
+  XFlush(disp);
+  XWindowAttributes wa;
+  XGetWindowAttributes(disp,win,&wa);
+  if (i == 2) return wa.width;
+  if (i == 3) return wa.height;
+  
+  Window root,parent,*child;
+  uint children;
+  XQueryTree(disp,win,&root,&parent,&child,&children);
+  XWindowAttributes pwa;
+  XGetWindowAttributes(disp,parent,&pwa);
+  if (i == 0) return pwa.x + wa.x;
+  if (i == 1) return pwa.y + wa.y;
+  return -1;
 }
 
 //Getters
-int window_get_x() { return getWindowDimension(0); }
-int window_get_y() { return getWindowDimension(1); }
-int window_get_width() { return getWindowDimension(2); }
+int window_get_x()      { return getWindowDimension(0); }
+int window_get_y()      { return getWindowDimension(1); }
+int window_get_width()  { return getWindowDimension(2); }
 int window_get_height() { return getWindowDimension(3); }
 
 //Setters
-int window_set_position(double x,double y) {
- XWindowAttributes wa;
- XGetWindowAttributes(disp,win,&wa);
- XMoveWindow(disp,win,(int) x  - wa.x,(int) y - wa.y);
+void window_set_position(double x,double y)
+{
+  XWindowAttributes wa;
+  XGetWindowAttributes(disp, win, &wa);
+  XMoveWindow(disp, win, x-wa.x, y-wa.y);
 }
-int window_set_size(double w,double h) { XResizeWindow(disp,win,(uint) w,(uint) h); }
-int window_set_rectangle(double x,double y,double w,double h) {
- XMoveResizeWindow(disp,win,(int)x,(int)y,(uint)w,(uint)h);
+void window_set_size(unsigned int w,unsigned int h)
+{
+  XResizeWindow(disp,win,(uint) w,(uint) h);
+}
+void window_set_rectangle(double x,double y,double w,double h)
+{
+  XMoveResizeWindow(disp,win,(int)x,(int)y,(uint)w,(uint)h);
 }
 
 //Center
-int window_center() {
- Window r;
- int x,y;
- uint w,h,b,d;
- XGetGeometry(disp,win,&r,&x,&y,&w,&h,&b,&d);
- Screen *s = DefaultScreenOfDisplay(disp);
- XMoveWindow(disp,win,s->width/2-w/2,s->height/2-h/2);
+void window_center()
+{
+  Window r;
+  int x,y;
+  uint w,h,b,d;
+  XGetGeometry(disp,win,&r,&x,&y,&w,&h,&b,&d);
+  Screen *s = DefaultScreenOfDisplay(disp);
+  XMoveWindow(disp,win,s->width/2-w/2,s->height/2-h/2);
 }
 
-void geom() {
- Window r;
- int x,y;
- uint w,h,b,d;
- XGetGeometry(disp,win,&r,&x,&y,&w,&h,&b,&d);
+void geom()
+{
+  Window r;
+  int x,y;
+  uint w,h,b,d;
+  XGetGeometry(disp,win,&r,&x,&y,&w,&h,&b,&d);
 }
 
 ////////////////
 // FULLSCREEN //
 ////////////////
 enum {
- _NET_WM_STATE_REMOVE = 0,
- _NET_WM_STATE_ADD    = 1,
- _NET_WM_STATE_TOGGLE = 2
+  _NET_WM_STATE_REMOVE = 0,
+  _NET_WM_STATE_ADD    = 1,
+  _NET_WM_STATE_TOGGLE = 2
 };
 
-int window_set_fullscreen(double full) {
- Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
- Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
-
- XEvent xev;
- xev.xclient.type=ClientMessage;
- xev.xclient.serial = 0;
- xev.xclient.send_event=True;
- xev.xclient.window=win;
- xev.xclient.message_type=wmState;
- xev.xclient.format=32;
- xev.xclient.data.l[0] = (full ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
- xev.xclient.data.l[1] = aFullScreen;
- xev.xclient.data.l[2] = 0;
-
- XSendEvent(disp, DefaultRootWindow(disp), False,
-            SubstructureRedirectMask | SubstructureNotifyMask, &xev);
+int window_set_fullscreen(double full)
+{
+  Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
+  Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
+  
+  XEvent xev;
+  xev.xclient.type=ClientMessage;
+  xev.xclient.serial = 0;
+  xev.xclient.send_event=True;
+  xev.xclient.window=win;
+  xev.xclient.message_type=wmState;
+  xev.xclient.format=32;
+  xev.xclient.data.l[0] = (full ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
+  xev.xclient.data.l[1] = aFullScreen;
+  xev.xclient.data.l[2] = 0;
+  
+  XSendEvent(disp, DefaultRootWindow(disp), False,
+             SubstructureRedirectMask | SubstructureNotifyMask, &xev);
 }
-int window_get_fullscreen() {
- Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
- Atom ra;
- int ri;
- unsigned long nr, bar;
- unsigned char *data;
-
- int stat = XGetWindowProperty(disp,win,aFullScreen,0L,
-            0L,False,AnyPropertyType,&ra,&ri,&nr,&bar,&data);
- if (stat != Success) {
+int window_get_fullscreen() 
+{
+  Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
+  Atom ra;
+  int ri;
+  unsigned long nr, bar;
+  unsigned char *data;
+  
+  int stat = XGetWindowProperty(disp,win,aFullScreen,0L,
+             0L,False,AnyPropertyType,&ra,&ri,&nr,&bar,&data);
+  if (stat != Success) {
   printf("Status: %d\n",stat);
   return 0;
- }
- printf("%d %d %d %d\n",ra,ri,nr,bar);
- int i;
- for (i = 0; i < nr; i++) printf("%02X ",data[i]);
- printf("\n");
+  }
+  //printf("%d %d %d %d\n",ra,ri,nr,bar);
+  int i;
+  for (i = 0; i < nr; i++) printf("%02X ",data[i]);
+  printf("\n");
 }
 
 ////////////
 // CURSOR //
 ////////////
-#define cr_default 0
-#define cr_none -1
-#define cr_arrow -2
-#define cr_cross -3
-#define cr_beam -4
-#define cr_size_nesw -6
-#define cr_size_ns -7
-#define cr_size_nwse -8
-#define cr_size_we -9
-#define cr_uparrow -10
-#define cr_hourglass -11
-#define cr_drag -12
-#define cr_nodrop -13
-#define cr_hsplit -14
-#define cr_vsplit -15
-#define cr_multidrag -16
-#define cr_sqlwait -17
-#define cr_no -18
-#define cr_appstart -19
-#define cr_help -20
-#define cr_handpoint -21
-#define cr_size_all -22
-                 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
-short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
-int window_set_cursor(double c) {
- XUndefineCursor(disp,win);
- if (c == -1) {
-  XDefineCursor(disp,win,NoCursor);
-  return 0;
- }
- XDefineCursor(disp,win,XCreateFontCursor(disp,curs[(int) (-c)]));
-}
+enum {
+  cr_default    = 0,
+  cr_none       = -1,
+  cr_arrow      = -2,
+  cr_cross      = -3,
+  cr_beam       = -4,
+  cr_size_nesw  = -6,
+  cr_size_ns    = -7,
+  cr_size_nwse  = -8,
+  cr_size_we    = -9,
+  cr_uparrow    = -10,
+  cr_hourglass  = -11,
+  cr_drag       = -12,
+  cr_nodrop     = -13,
+  cr_hsplit     = -14,
+  cr_vsplit     = -15,
+  cr_multidrag  = -16,
+  cr_sqlwait    = -17,
+  cr_no         = -18,
+  cr_appstart   = -19,
+  cr_help       = -20,
+  cr_handpoint  = -21,
+  cr_size_all   = -22
+};
+
 
 /*
 display_get_width() // Returns the width of the display in pixels.

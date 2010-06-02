@@ -166,7 +166,8 @@ int room_goto(double roomind);
 enigma::roomv room;
 
 
-int room_goto(double roomind){
+int room_goto(double roomind)
+{
 	int indx=(int)roomind;
 	if(enigma::roomdata.find(indx)==enigma::roomdata.end()){
 		#if SHOWERRORS
@@ -176,7 +177,8 @@ int room_goto(double roomind){
 	} //error like GM here
 	//Destroy all objects
 	enigma::nodestroy=1;
-	for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++){
+	for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+	{
 		(*enigma::instance_iterator).second->myevent_roomend();
 		#ifdef ISCONTROLLER_persistent
 		if(!(*enigma::instance_iterator).second->persistent)

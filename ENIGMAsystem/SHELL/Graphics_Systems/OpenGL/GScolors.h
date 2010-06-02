@@ -25,58 +25,36 @@
 **                                                                              **
 \********************************************************************************/
 
-/**Some color functions********************************************************\
-
-c_aqua, c_black, c_blue, c_dkgray, c_fuchsia, c_gray, c_green, c_lime, c_ltgray,
-c_maroon, c_navy, c_olive, c_purple, c_red, c_silver ,c_teal, c_white, c_yellow
-
-int draw_clear(double color)
-int draw_clear_alpha(double color, double alpha)
-int draw_set_color(double col)
-int draw_set_color_rgb(double red, double green, double blue)
-int draw_set_alpha(double alpha)
-int draw_set_color_rgba(double red, double green, double blue, double alpha)
-int draw_get_color()
-int make_color(double red, double green, double blue)
-int make_color_rgb(double red, double green, double blue)
-int color_get_red(double color)
-int color_get_green(double color)
-int color_get_blue(double color)
-double color_get_hue(double color)
-double color_get_value(double color)
-double color_get_saturation(double color)
-int make_color_hsv(double hue,double saturation,double value)
-
-\******************************************************************************/
-
-const int c_aqua   =0xFFFF00;
-const int c_black  =0x000000;
-const int c_blue   =0xFF0000;
-const int c_dkgray =0x404040;
-const int c_fuchsia=0xFF00FF;
-const int c_gray   =0x808080;
-const int c_green  =0x008000;
-const int c_lime   =0x00FF00;
-const int c_ltgray =0xC0C0C0;
-const int c_maroon =0x000080;
-const int c_navy   =0x800000;
-const int c_olive  =0x008080;
-const int c_purple =0x800080;
-const int c_red    =0x0000FF;
-const int c_silver =0xC0C0C0;
-const int c_teal   =0x808000;
-const int c_white  =0xFFFFFF;
-const int c_yellow =0x00FFFF;
+enum {
+  c_aqua    = 0xFFFF00,
+  c_black   = 0x000000,
+  c_blue    = 0xFF0000,
+  c_dkgray  = 0x404040,
+  c_fuchsia = 0xFF00FF,
+  c_gray    = 0x808080,
+  c_green   = 0x008000,
+  c_lime    = 0x00FF00,
+  c_ltgray  = 0xC0C0C0,
+  c_maroon  = 0x000080,
+  c_navy    = 0x800000,
+  c_olive   = 0x008080,
+  c_purple  = 0x800080,
+  c_red     = 0x0000FF,
+  c_silver  = 0xC0C0C0,
+  c_teal    = 0x808000,
+  c_white   = 0xFFFFFF,
+  c_yellow  = 0x00FFFF
+};
 
 int draw_clear(double color);
 int draw_clear_alpha(double color, double alpha);
 
 int merge_color(int col1, int col2, double amount);
 
-int draw_set_color(double col);
-int draw_set_color_rgb(double red, double green, double blue);
+int draw_set_color(int col);
+int draw_set_color_rgb(unsigned char red, unsigned char green, unsigned char blue);
 int draw_set_alpha(float alpha);
-int draw_set_color_rgba(double red, double green, double blue, double alpha);
+int draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
 double draw_get_color();
 float draw_get_red(void);
 float draw_get_green(void);
@@ -84,15 +62,15 @@ float draw_get_blue(void);
 float draw_get_alpha(void);
 
 
-double make_color_rgb(double red, double green, double blue);
-double(*const make_color)(double,double,double) = make_color_rgb;
+int make_color_rgb(unsigned char red, unsigned char green, unsigned char blue);
+int (*const make_color)(unsigned char,unsigned char,unsigned char) = make_color_rgb;
 
-double color_get_red(double color);
-double color_get_green(double color);
-double color_get_blue(double color);
+int color_get_red(int color);
+int color_get_green(int color);
+int color_get_blue(int color);
 
-double color_get_hue(double color);
-double color_get_value(double color);
-double color_get_saturation(double color);
+int color_get_hue(int color);
+int color_get_value(int color);
+int color_get_saturation(int color);
 
-double make_color_hsv(double hue,double saturation,double value);
+int make_color_hsv(int hue,int saturation,int value);

@@ -15,7 +15,7 @@
 **  details.                                                                    **
 **                                                                              **
 **  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http:
+**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
 **                                                                              **
 **  ENIGMA is an environment designed to create games and other programs with a **
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
@@ -25,25 +25,77 @@
 **                                                                              **
 \********************************************************************************/
 
-/* Simple, intuitive, integer based file I/O */
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 
-int     file_text_open_read(std::string fname);         
-int     file_text_open_write(std::string fname);        
-int     file_text_open_append(std::string fname);       
-void    file_text_close(int fileid);            
-void    file_text_write_string(int fileid, std::string str); 
-void    file_text_write_real(int fileid, double x);     
-void    file_text_writeln(int fileid);          
-std::string file_text_read_string(int fileid);  
-double  file_text_read_real(int fileid);        
-void    file_text_readln(int fileid);           
-bool    file_text_eof(int fileid);              
+#include <string>
+using namespace std;
 
-int     file_bin_open(std::string fname,int mode); 
-bool    file_bin_rewrite(int fileid);         
-void    file_bin_close(int fileid);           
-size_t  file_bin_size(int fileid);            
-size_t  file_bin_position(int fileid);        
-void    file_bin_seek(int fileid,int pos);        
-void    file_bin_write_byte(int fileid,unsigned char byte); 
-int     file_bin_read_byte(int fileid);       
+/* UNIX-ready port of file manipulation */
+
+int file_exists(string fname)
+{
+  struct stat st;
+  return (stat(fname.c_str(),&st) == 0) and !(S_ISDIR(st.st_mode));
+}
+int file_delete(string fname)
+{
+  return remove(fname.c_str());
+}
+int file_rename(string oldname,string newname)
+{
+  return rename(oldname.c_str(),newname.c_str());
+}
+int file_copy(string fname,string newname)
+{
+  return system(("cp "+fname+" "+newname).c_str()); // Hackish, but there's no good implementation on Linux
+}
+int directory_exists(string dname)
+{
+  struct stat st;
+  return (stat(dname.c_str(),&st) == 0) and (S_ISDIR(st.st_mode));
+}
+int directory_create(string dname) {
+  return mkdir(dname.c_str(),S_IRUSR|S_IWUSR|S_IXUSR);
+}
+
+
+
+string file_find_first(string mask,int attr);   
+
+enum {
+  fa_readonly  = 1,
+  fa_hidden    = 2,
+  fa_sysfile   = 4,
+  fa_volumeid  = 8,
+  fa_directory = 16,
+  fa_archive   = 32
+};
+
+string file_find_next();                 
+void file_find_close();                
+bool file_attributes(string fname,int attr); 
+
+string filename_name(string fname);              
+string filename_path(string fname);              
+string filename_dir(string fname);               
+string filename_drive(string fname);             
+string filename_ext(string fname);               
+string filename_change_ext(string fname,string newext); 
+
+void export_include_file(string fname);                   
+void export_include_file_location(string fname,string location); 
+void discard_include_file(string fname);                  
+
+extern unsigned game_id;
+extern string working_directory;
+extern string program_directory;
+extern string temp_directory;
+
+
+int parameter_count();
+string parameter_string(int n);
+
+string environment_get_variable(string name);

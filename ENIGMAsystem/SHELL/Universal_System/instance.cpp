@@ -40,12 +40,11 @@ namespace enigma
   int destroycalls = 0, createcalls = 0;
 }
 
-int instance_destroy(double id)
+void instance_destroy(double id)
 {
   enigma::cleanups[enigma::cleancount++]=(int)id;
   enigma::instancecount--;
   instance_count--;
-  return 0;
 }
 
 int instance_destroy()
@@ -57,7 +56,8 @@ int instance_destroy()
 bool instance_exists(double obj)
 {
      int instance=(int) obj;
-     if (instance>100000){
+     if (instance>100000)
+     {
         return (enigma::instance_list.find(instance) != enigma::instance_list.end());
      }else if (instance>=0){
        for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)

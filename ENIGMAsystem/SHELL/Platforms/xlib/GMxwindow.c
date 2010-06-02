@@ -70,64 +70,67 @@ char exit_on_esc = 1;
 int room_speed = 30;
 void processEvents() {
 
- XEvent e;
- while (1) {
-
-
-  if (XQLength(disp) == 0) {
-   int wait = 1000 / room_speed;
-   while (wait > 100) {
-    int cl = clock() * 1000 / CLOCKS_PER_SEC;
-    glXSwapBuffers(disp,win);
-    cl = clock() * 1000 / CLOCKS_PER_SEC - cl;
-    Sleep(100 - cl);
-    wait -= 100;
-   }
-
-    glViewport(0,0,window_get_width(),window_get_height());
-    glClearColor(0,1,0,1); //rgba
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    usleep(10000);
-    glBegin(GL_LINES);
-    glColor4f(1,0,0,1);
-    glVertex2f(-1,-1);
-    glColor4f(1,1,0,1);
-    glVertex2f(1,1);
-    glColor4f(0,0,1,1);
-    glVertex2f(1,-1);
-    glColor4f(0,1,0,1);
-    glVertex2f(-1,1);
-    glEnd();
-
-   glXSwapBuffers(disp,win);
-   XFlush(disp);
-   usleep(1000000/30);
-   Sleep(wait);
-   continue;
+  XEvent e;
+  while (1) // FIXME: WHAT THE HELL
+  {
+    if (XQLength(disp) == 0)
+    {
+      int wait = 1000 / room_speed;
+      while (wait > 100)
+      {
+        int cl = clock() * 1000 / CLOCKS_PER_SEC;
+        glXSwapBuffers(disp,win);
+        cl = clock() * 1000 / CLOCKS_PER_SEC - cl;
+        Sleep(100 - cl);
+        wait -= 100;
+      }
+      
+      glViewport(0,0,window_get_width(),window_get_height());
+      glClearColor(0,1,0,1); //rgba
+      glClear(GL_COLOR_BUFFER_BIT);
+      
+      usleep(10000);
+      glBegin(GL_LINES);
+      glColor4f(1,0,0,1);
+      glVertex2f(-1,-1);
+      glColor4f(1,1,0,1);
+      glVertex2f(1,1);
+      glColor4f(0,0,1,1);
+      glVertex2f(1,-1);
+      glColor4f(0,1,0,1);
+      glVertex2f(-1,1);
+      glEnd();
+      
+      glXSwapBuffers(disp,win);
+      XFlush(disp);
+      usleep(1000000/30);
+      Sleep(wait);
+      continue;
+    }
+    XNextEvent(disp, &e);
+    switch (e.type) 
+    {
+      case KeyPress: {
+        printf("Keypress. Scan: %d;  XLookupKeysym: %d\n",e.xkey.keycode,XLookupKeysym(&e.xkey,0));
+        nextCurse();
+        break;
+      }
+      case Expose: {
+        repaint();
+        break;
+      }
+      case ClientMessage:
+      if (e.xclient.data.l[0] == wm_delwin)
+        return;
+      //else overflow to default
+      default:
+        printf("%d\n",e.type);
+      break;
+    }
+    //Move/Resize = ConfigureNotify
+    //Min = UnmapNotify
+    //Restore = MapNotify
   }
-  XNextEvent(disp, &e);
-  switch (e.type) {
-   case KeyPress: {
-    printf("Keypress. Scan: %d;  XLookupKeysym: %d\n",e.xkey.keycode,XLookupKeysym(&e.xkey,0));
-    nextCurse();
-    break;
-   }
-   case Expose: {
-    repaint();
-    break;
-   }
-   case ClientMessage:
-    if (e.xclient.data.l[0] == wm_delwin) return;
-    //else overflow to default
-   default:
-    printf("%d\n",e.type);
-    break;
-  }
-  //Move/Resize = ConfigureNotify
-  //Min = UnmapNotify
-  //Restore = MapNotify
- }
 }
 
 int main() {
@@ -203,7 +206,7 @@ int main() {
  gmw_init(); //init gm window functions, flushes
 
 //
-
+  printf("Going process...\n");
  processEvents();
 
  glxc = glXGetCurrentContext();

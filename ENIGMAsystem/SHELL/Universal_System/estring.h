@@ -25,35 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-/**String functions*****************************************************\
-
-bool is_string(enigma::variant val)
-bool is_real(enigma::variant val)
-std::string chr(char val)
-double ord(char* str)
-double real(std::string str)
-std::string string(double val)
-int string_length(std::string str)
-int string_pos(std::string substr,std::string str)
-std::string string_copy(std::string str,double index,double count)
-std::string string_char_at(std::string str,double index)
-std::string string_delete(std::string str,double index,double count)
-std::string string_insert(std::string substr,std::string str,double index)
-std::string string_replace(std::string str,std::string substr,std::string newstr)
-std::string string_replace_all(std::string str,std::string substr,std::string newstr)
-int string_count(std::string substr,std::string str)
-std::string string_lower(std::string str)
-std::string string_upper(std::string str)
-std::string string_repeat(std::string str,double count)
-std::string string_letters(std::string str)
-std::string string_digits(std::string str)
-std::string string_lettersdigits(std::string str)
-
-\******************************************************************************/
-
-
-
-
 extern bool is_string(enigma::variant val);
 bool is_string(var& val);
 

@@ -50,6 +50,7 @@ GLenum ptypes_by_id[16] = {
 
 int draw_primitive_begin(int dink)
 {
+	untexture();
 	GLenum kind = ptypes_by_id[ dink & 15 ];
 	#if !PRIMBUFFER
 	  glBegin(kind);
@@ -67,7 +68,6 @@ int draw_primitive_begin(int dink)
 
 int draw_vertex(double x, double y)
 {
-	untexture();
 	#if !PRIMBUFFER
 	glVertex2f(x,y);
 	#else
@@ -84,7 +84,6 @@ int draw_vertex(double x, double y)
 
 int draw_vertex_color(float x, float y, int color, float alpha)
 {
-	untexture();
 	unsigned int col=color;
 	#if !PRIMBUFFER
 	glPushAttrib(GL_CURRENT_BIT);

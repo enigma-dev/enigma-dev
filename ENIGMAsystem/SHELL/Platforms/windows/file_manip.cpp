@@ -15,7 +15,7 @@
 **  details.                                                                    **
 **                                                                              **
 **  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http:
+**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
 **                                                                              **
 **  ENIGMA is an environment designed to create games and other programs with a **
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
@@ -25,25 +25,51 @@
 **                                                                              **
 \********************************************************************************/
 
-/* Simple, intuitive, integer based file I/O */
 
-int     file_text_open_read(std::string fname);         
-int     file_text_open_write(std::string fname);        
-int     file_text_open_append(std::string fname);       
-void    file_text_close(int fileid);            
-void    file_text_write_string(int fileid, std::string str); 
-void    file_text_write_real(int fileid, double x);     
-void    file_text_writeln(int fileid);          
-std::string file_text_read_string(int fileid);  
-double  file_text_read_real(int fileid);        
-void    file_text_readln(int fileid);           
-bool    file_text_eof(int fileid);              
+/* OS Specific; should be moved */
 
-int     file_bin_open(std::string fname,int mode); 
-bool    file_bin_rewrite(int fileid);         
-void    file_bin_close(int fileid);           
-size_t  file_bin_size(int fileid);            
-size_t  file_bin_position(int fileid);        
-void    file_bin_seek(int fileid,int pos);        
-void    file_bin_write_byte(int fileid,unsigned char byte); 
-int     file_bin_read_byte(int fileid);       
+int file_exists(std::string fname);           
+int file_delete(std::string fname);           
+int file_rename(std::string oldname,std::string newname); 
+int file_copy(std::string fname,std::string newname);     
+int directory_exists(std::string dname);      
+int directory_create(std::string dname);      
+
+
+
+std::string file_find_first(std::string mask,int attr);   
+
+enum {
+  fa_readonly  = 1,
+  fa_hidden    = 2,
+  fa_sysfile   = 4,
+  fa_volumeid  = 8,
+  fa_directory = 16,
+  fa_archive   = 32
+};
+
+std::string file_find_next();                 
+void file_find_close();                
+bool file_attributes(std::string fname,int attr); 
+
+std::string filename_name(std::string fname);              
+std::string filename_path(std::string fname);              
+std::string filename_dir(std::string fname);               
+std::string filename_drive(std::string fname);             
+std::string filename_ext(std::string fname);               
+std::string filename_change_ext(std::string fname,std::string newext); 
+
+void export_include_file(std::string fname);                   
+void export_include_file_location(std::string fname,std::string location); 
+void discard_include_file(std::string fname);                  
+
+extern unsigned game_id;
+extern std::string working_directory;
+extern std::string program_directory;
+extern std::string temp_directory;
+
+
+int parameter_count();
+std::string parameter_string(int n);
+
+std::string environment_get_variable(std::string name);
