@@ -128,26 +128,29 @@ int draw_rectangle(float x1,float y1,float x2,float y2,bool outline)
 	return 0;
 }
 
-int draw_rectangle_angle(float x1,float y1,float x2,float y2,bool outline,float angle)
+int draw_rectangle_angle(float x1,float y1,float x2,float y2,float angle,bool outline)
 {
 	untexture();
-	angle*=M_PI/180;
+	angle *= M_PI/180;
 	
 	float
-		xm=(x2+x1)/2,
-		ym=(y2+y1)/2,
-		len=hypot(xm-x1,ym-y1),
-		dir,ldx1,ldy1,ldx2,ldy2;
+		xm = (x2+x1)/2,
+		ym = (y2+y1)/2;
   
-	dir=atan2(y1-ym,x1-xm)+angle;
-	ldx1=len*cos(dir);
-	ldy1=len*sin(dir);
+  float
+		len = hypot(xm-x1,ym-y1),
+		dir = atan2(y1-ym,x1-xm)+angle;
+  
+  float
+	  ldx1 = len*cos(dir),
+	  ldy1 = len*sin(dir);
 	
-	dir=atan2(y2-ym,x1-xm)+angle;
-	ldx2=len*cos(dir);
-	ldy2=len*sin(dir);
+	dir = atan2(y2-ym,x1-xm)+angle;
+	float
+	  ldx2 = len*cos(dir),
+	  ldy2 = len*sin(dir);
 	
-	glBegin(outline?GL_LINE_LOOP:GL_QUADS);
+	glBegin(outline ? GL_LINE_LOOP : GL_QUADS);
     glVertex2f(xm+ldx1,ym-ldy1);
     glVertex2f(xm+ldx2,ym-ldy2);
     glVertex2f(xm-ldx1,ym+ldy1);

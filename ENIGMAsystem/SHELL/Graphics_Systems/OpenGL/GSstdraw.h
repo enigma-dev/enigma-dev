@@ -56,7 +56,7 @@ int draw_line_width(float x1,float y1,float x2,float y2,float width);
 int draw_line_color(float x1,float y1,float x2,float y2,int color1,int color2);
 int draw_line_width_color(float x1,float y1,float x2,float y2,float width,int color1,int color2);
 int draw_rectangle(float x1,float y1,float x2,float y2,bool outline);
-int draw_rectangle_angle(float x1,float y1,float x2,float y2,bool outline,float angle);
+int draw_rectangle_angle(float x1,float y1,float x2,float y2,float angle,bool outline);
 int draw_rectangle_color(float x1,float y1,float x2,float y2,int color1,int color2,int color3,int color4,bool outline);
 int draw_set_circle_precision(float precision);
 float draw_set_circle_precision(void);
