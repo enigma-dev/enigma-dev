@@ -223,9 +223,12 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       //Decrement pos to avoid skipping a char on continue
       if (synt[pos--] != '(') // If it isn't a function (we assume it's nothing other than a function or varname)
       {
-        if (in_decl and !dec_initializing) {
-          dec_name_givn = true;
-          dec_name = nname; continue;
+        if (in_decl and !dec_initializing)
+        {
+          if (!dec_name_givn) {
+            dec_name_givn = true;
+            dec_name = nname;
+          } continue;
         }
         
         //First, check that it's not a global
