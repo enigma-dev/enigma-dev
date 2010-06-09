@@ -155,7 +155,10 @@
 		<Unit filename="compiler/compile_includes.h" />
 		<Unit filename="compiler/compile_organization.h" />
 		<Unit filename="compiler/components/components.h" />
+		<Unit filename="compiler/components/module_write_sprites" />
+		<Unit filename="compiler/components/module_write_sprites.cpp" />
 		<Unit filename="compiler/components/parse_and_link.cpp" />
+		<Unit filename="compiler/components/write_defragged_events.cpp" />
 		<Unit filename="compiler/components/write_globals.cpp" />
 		<Unit filename="compiler/components/write_object_data.cpp" />
 		<Unit filename="compiler/components/write_room_data.cpp" />

@@ -25,8 +25,15 @@
 **                                                                              **
 \********************************************************************************/
 
-extern int compile_parseAndLink(EnigmaStruct*,parsed_script*[]);
+// Sizable utilities
 int link_globals(parsed_object*, EnigmaStruct*,parsed_script*[]);
+
+// IDE_EDITABLEs added before compile
+extern int compile_parseAndLink(EnigmaStruct*,parsed_script*[]);
 int compile_writeGlobals(EnigmaStruct*,parsed_object*);
 extern int compile_writeObjectData(EnigmaStruct*,parsed_object*);
 int compile_writeRoomData(EnigmaStruct* es);
+int compile_writeDefraggedEvents(EnigmaStruct* es);
+
+// Resources added to module
+int module_write_sprites(EnigmaStruct *es, FILE *gameModule);

@@ -82,33 +82,10 @@ namespace enigma
 
       virtual enigma::variant myevent_destroy();
       
-      virtual int instance_destroy();
-      
       object_basic();
       object_basic(int uid, int uoid);
       virtual ~object_basic();
     };
-    
-    extern object_basic* ENIGMA_global_instance;
-    
-    //#include "imap.h"
-    
-    /*//imap instance_list;
-    iiterator instance_iterator;
-    iiterator instance_event_iterator;
-    iiterator instance_with_iterator;*/
-    
-    extern std::map<int,object_basic*> instance_list;
-    extern std::map<int,object_basic*>::iterator instance_iterator;
-    extern std::map<int,object_basic*>::iterator instance_event_iterator;
-    
-    extern std::map<int,int> cleanups;
-    extern int cleancount;
-    
-    
-    void constructor(object_basic* instance);//This is the universal create event code
-    
-    void step_basic(object_basic* instance);
 }
 
 namespace enigma

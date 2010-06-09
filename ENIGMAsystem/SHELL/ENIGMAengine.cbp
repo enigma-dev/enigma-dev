@@ -467,6 +467,7 @@
 		<Unit filename="Universal_System/instance.cpp" />
 		<Unit filename="Universal_System/instance.h" />
 		<Unit filename="Universal_System/instance_create.h" />
+		<Unit filename="Universal_System/instance_system.cpp" />
 		<Unit filename="Universal_System/key_game_globals.h" />
 		<Unit filename="Universal_System/mathnc.cpp" />
 		<Unit filename="Universal_System/mathnc.h" />

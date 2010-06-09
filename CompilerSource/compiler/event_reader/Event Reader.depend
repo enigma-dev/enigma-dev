@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1276032028 source:/home/josh/C Things/Event Reader/main.cpp
+	<stdio.h>
+	<stdlib.h>
+	<string>
+

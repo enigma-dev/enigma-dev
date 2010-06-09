@@ -58,8 +58,7 @@ using namespace std;
 
 #include "../general/bettersystem.h"
 
-void writei(int x, FILE *f)
-{
+inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
@@ -75,6 +74,7 @@ void clear_ide_editables()
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_eventpointers.h"); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_wildclass.cpp"); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h"); wto.close();
   
@@ -275,22 +275,25 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << "};\n\n";
   wto.close();
   
-  parsed_object *EGMglobal = new parsed_object;
-  link_globals(EGMglobal,es,scripts);
+  parsed_object EGMglobal;
+  
+  link_globals(&EGMglobal,es,scripts);
   if (res) return res;
   
-  res = compile_writeGlobals(es,EGMglobal);
+  res = compile_writeGlobals(es,&EGMglobal);
   if (res) return res;
   
-  res = compile_writeObjectData(es,EGMglobal);
+  res = compile_writeObjectData(es,&EGMglobal);
   if (res) return res;
   
   res = compile_writeRoomData(es);
   if (res) return res;
   
+  res = compile_writeRoomData(es);
+  if (res) return res;
   
-  
-  
+  res = compile_writeDefraggedEvents(es);
+  if (res) return res;
   
   
   
@@ -355,61 +358,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   // Start by setting off our location with a DWord of NULLs
   fwrite("\0\0\0",1,4,gameModule);
   
-  // Now we're going to add sprites
-  cout << es->spriteCount << " Adding Sprites to Game Module: " << flushl;
-  
-  //Indicate how many
-  int sprite_count = es->spriteCount;
-  fwrite(&sprite_count,4,1,gameModule);
-  
-  int sprite_maxid = 0;
-  for (int i = 0; i < sprite_count; i++)
-    if (es->sprites[i].id > sprite_maxid)
-      sprite_maxid = es->sprites[i].id;
-  fwrite(&sprite_maxid,4,1,gameModule);
-  
-  for (int i = 0; i < sprite_count; i++)
-  {
-    writei(es->sprites[i].id,gameModule); //id
-    
-    // Track how many subImages we're copying
-    int subCount = es->sprites[i].subImageCount;
-    
-    int swidth = 0, sheight = 0;
-    for (int ii = 0; ii < subCount; ii++)
-    {
-      if (!swidth and !sheight) {
-        swidth =  es->sprites[i].subImages[ii].width;
-        sheight = es->sprites[i].subImages[ii].height;
-      }
-      else if (swidth != es->sprites[i].subImages[ii].width or sheight != es->sprites[i].subImages[ii].height) {
-        cout << "Subimages of sprite `" << es->sprites[i].name << "' vary in dimensions; do not want." << flushl;
-        return 14;
-      }
-    }
-    if (!swidth and !sheight and subCount) {
-      cout << "Subimages of sprite `" << es->sprites[i].name << "' have zero size." << flushl;
-      return 14;
-    }
-    
-    writei(swidth, gameModule); //width
-    writei(sheight,gameModule); //height
-    writei(es->sprites[i].originX,gameModule); //xorig
-    writei(es->sprites[i].originY,gameModule); //yorig
-    
-    writei(subCount,gameModule); //subimages
-    
-    for (int ii = 0;ii < subCount; ii++)
-    {
-      //strans = es->sprites[i].subImages[ii].transColor, fwrite(&idttrans,4,1,exe); //Transparent color
-      writei(swidth * sheight * 4,gameModule); //size when unpacked
-      writei(es->sprites[i].subImages[ii].dataSize,gameModule); //size when unpacked
-      fwrite(es->sprites[i].subImages[ii].data, 1, es->sprites[i].subImages[ii].dataSize, gameModule); //sprite data
-      writei(0,gameModule);
-    }
-  }
- 
-  cout << "Done writing sprites." << flushl;
+  res = module_write_sprites(es, gameModule);
+  if (res) return res;
   
   
   // Tell where the sprites are

@@ -35,7 +35,8 @@ int screen_redraw(int dontswap)
 #define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
 #define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)
 
-#include "../../Universal_System/roomsystem.h" 
+#include "../../Universal_System/roomsystem.h"
+#include "../../Universal_System/instance_system.h"
 #include "graphics_object.h"
 
 extern int window_get_width(), window_get_height();
@@ -56,7 +57,7 @@ int screen_redraw()
          glClear(GL_COLOR_BUFFER_BIT);
       }
 
-      for (enigma::instance_event_iterator=enigma::instance_list.begin(); enigma::instance_event_iterator != enigma::instance_list.end(); enigma::instance_event_iterator++)
+      for (enigma::inst_iter = enigma::instance_list_first(); enigma::instance_event_iterator != enigma::instance_list.end(); enigma::instance_event_iterator++)
       {
          (*enigma::instance_event_iterator).second->myevent_draw();
       }

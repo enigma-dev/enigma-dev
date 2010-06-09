@@ -31,16 +31,7 @@
 #include "var_cr3.h"
 #include "reflexive_types.h"
 
-const double pi=M_PI;
-
 #include "object.h"
-//#include "sprite.h"
-
-#include "objecttable.h"
-
-//#include "GAME_GLOBALS.h"
-
-#include "var_cr3.h"
 
 int show_error(std::string errortext,int fatal);
 
@@ -81,33 +72,6 @@ namespace enigma
     object_basic::object_basic(): id(0), object_index(-4) {}
     object_basic::object_basic(int uid, int uoid): id(uid), object_index(uoid) {}
     object_basic::~object_basic() {}
-    
-    object_basic *ENIGMA_global_instance;
-    
-
-
-    //#include "imap.h"
-
-    /*//imap instance_list;
-    iiterator instance_iterator;
-    iiterator instance_event_iterator;
-    iiterator instance_with_iterator;*/
-
-    std::map<int,object_basic*> instance_list;
-    std::map<int,object_basic*>::iterator instance_iterator;
-    std::map<int,object_basic*>::iterator instance_event_iterator;
-    
-    std::map<int,int> cleanups;
-    int cleancount=0;
-    
-    int object_basic::instance_destroy()
-    {
-      cleanups[cleancount++] = id;
-      return 0;
-    }
-    
-    void constructor(object_basic* instance); //This is the universal create event code
-    void step_basic(object_basic* instance);
 }
 
 
