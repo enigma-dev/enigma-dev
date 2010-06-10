@@ -6,6 +6,8 @@
 #include <string>
 using namespace std;
 
+#include "../../general/darray.h"
+
 inline bool lc(string s, string ss)
 {
   const size_t l = s.length();
@@ -106,7 +108,9 @@ struct main_event
   string name;
   bool is_group;
   varray<event_class> specs;
-}
+};
+
+varray<main_event> main_events;
 
 int parse_event_res()
 {
