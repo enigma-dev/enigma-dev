@@ -42,6 +42,8 @@ namespace used_funcs
 }
 map<string,parsed_script*> scr_lookup;
 
+//string event_get_function_name(int mid, int id) // Implemented in event_reader/event_parser.cpp
+
 
 //Hey, it's that license from above!
 const char* license = 

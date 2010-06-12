@@ -95,6 +95,27 @@ void syntax_error::set(int x, int y, int a, string s)
   absolute_index = a;
 }
 
+const char* heaping_pile_of_dog_shit = "\
+             /\n\
+            |    |\n\
+             \\    \\\n\
+      |       |    |\n\
+       \\     /    /     \\\n\
+    \\   |   |    |      |\n\
+     | /     /\\   \\    /\n\
+    / |     /# \\   |  |\n\
+   |   \\   *    `      \\\n\
+    \\    /   =  # `     |\n\
+     |  | #     ___/   /\n\
+    /   _`---^^^   `. |\n\
+   |  .*     #  =    | \\\n\
+     |  =   #      __/\n\
+    .\\____-------^^  `.\n\
+   /      #         #  \\\n\
+  |   =          =     |\n\
+  \\___    #     #___--^\n\
+      ^^^^^^^^^^^\n\n";
+
 extern void print_definition(string n);
 dllexport syntax_error *whitespaceModified(const char* wscode)
 {
@@ -119,6 +140,7 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
   
   if (a != pt(-1)) {
     cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
+    cout << heaping_pile_of_dog_shit;
     print_definition("__GNUC_PREREQ");
     print_definition("__builtin_huge_val");
     print_err_line_at(a);

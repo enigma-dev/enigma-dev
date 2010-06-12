@@ -73,6 +73,10 @@ extern  map<externs*, int> bigmap;
 extern int cfile_parse_main();
 int main(int argc, char *argv[])
 {
+  
+  return m_prog_loop_cfp();
+  
+  
   cparse_init();
   
   if (establish_bearings()) {
@@ -93,6 +97,7 @@ int main(int argc, char *argv[])
   
   EGMmain += "\n\n";
   //EGMmain = fc("./CompilerSource/cfile_parse/auxilary.h");
+  
   
   clock_t cs = clock();
   pt a = parse_cfile(EGMmain);
@@ -134,10 +139,12 @@ int main(int argc, char *argv[])
   parsed_object par;
   parsed_event ev(&par);
   string b = parser_main(pf,&ev);
+  unsigned sc = 0;
+  varray<string> empty;
   
   cout << "\nParsed to:\n" << b;
   ofstream fpsd("parse_output.txt",ios_base::out);
-  print_to_file(ev.code,ev.synt,0,fpsd); fpsd.close();
+  print_to_file(ev.code,ev.synt,sc,empty,0,fpsd); fpsd.close();
   system("notepad parse_output.txt || gedit parse_output.txt");
   cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
   
@@ -150,11 +157,11 @@ int main(int argc, char *argv[])
   cout << "% Testing free % \n";
   cout << "Freeing global scope... "; global_scope.clear_all(); cout << "Done.\n";
   cout << "Clearing parser lists... "; int cfp_clear_lists(); cout << "Done.\n";
-  
+  /*
   cout << "Free completed successfully (" << global_scope.members.size() << "): " << ext_count << " remaining\n";
   cout << "(Or, if you want a second opinion, there are apparently " << bigmap.size() << " remaining)\n";
   for (map<externs*,int>::iterator i = bigmap.begin(); i != bigmap.end(); i++)
-    cout << i->first->name << " ("<<(i->second)<<"), "; cout << "end\n";
+    cout << i->first->name << " ("<<(i->second)<<"), "; cout << "end\n";*/
   
   return 0;
 }

@@ -71,6 +71,7 @@ keyrelease: 10
 # There are a million different specialized mouse events.
 
 leftbutton: 6
+	Group: Mouse
 	Name: Left Button
 	Mode: Special
 	Case: 0
@@ -252,13 +253,13 @@ endstep: 3
 	Case: 2
 
 # Fun fact: Draw comes after End Step.
-draw:
+draw: 8
 	Name: Draw
 	Mode: Inline
-	Super Check: (screen_redraw(), screen_refresh(), false) # We never want to iterate draw; we let screen_redraw() handle it.
+	Instead: screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
 
 
-# Why this comes after "end step," I do not know. One would think it'd be with pathend
+# Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
 animationend: 7
 	Name: Animation End
 	Mode: Special

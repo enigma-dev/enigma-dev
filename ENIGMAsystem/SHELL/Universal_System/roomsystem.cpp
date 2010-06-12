@@ -38,6 +38,7 @@
 
 #include "../Platforms/windows/WINDOWSwindow.h"
 #include "../Platforms/windows/WINDOWSStd.h"
+#include "instance_system.h"
 #include "instance.h"
 #include "object.h"
 
@@ -169,21 +170,24 @@ enigma::roomv room;
 int room_goto(double roomind)
 {
 	int indx=(int)roomind;
-	if(enigma::roomdata.find(indx)==enigma::roomdata.end()){
-		#if SHOWERRORS
+	
+	#if SHOWERRORS
+	if(enigma::roomdata.find(indx)==enigma::roomdata.end())
+	{
 		show_error("Attempting to go to nonexisting room",0);
-		#endif
 		return 0;
-	} //error like GM here
+	}
+	#endif
+	
 	//Destroy all objects
 	enigma::nodestroy=1;
-	for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+	for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
 	{
-		(*enigma::instance_iterator).second->myevent_roomend();
+		it->inst->myevent_roomend();
 		#ifdef ISCONTROLLER_persistent
-		if(!(*enigma::instance_iterator).second->persistent)
+		if(!it->inst->persistent)
 		#endif
-		instance_destroy((*enigma::instance_iterator).second->id);
+		instance_destroy(it->inst->id);
 	}
 	enigma::nodestroy = 0;
 	
@@ -206,13 +210,13 @@ int room_restart()
 	
 	//Destroy all objects
 	enigma::nodestroy=1;
-	for(enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+	for(enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
 	{
-		(*enigma::instance_iterator).second->myevent_roomend();
+		it->inst->myevent_roomend();
 		#ifdef ISCONTROLLER_persistent
-		if (!(*enigma::instance_iterator).second->persistent)
+		if (!it->inst->persistent)
 		#endif
-		instance_destroy((*enigma::instance_iterator).second->id);
+		instance_destroy(it->inst->id);
 	}
 	enigma::nodestroy=0;
 	enigma::roomdata[indx].gotome();
@@ -236,13 +240,13 @@ int room_goto_absolute(double index)
 	int indx=(*enigma::roomiter).first;
 	//Destroy all objects
 	enigma::nodestroy=1;
-	for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+	for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
 	{
-		(*enigma::instance_iterator).second->myevent_roomend();
+		it->inst->myevent_roomend();
 		#ifdef ISCONTROLLER_persistent
-		if(!(*enigma::instance_iterator).second->persistent)
+		if(!it->inst->persistent)
 		#endif
-		instance_destroy((*enigma::instance_iterator).second->id);
+		instance_destroy(it->inst->id);
 	}
 	enigma::nodestroy=0;
 	room.realval=indx;
@@ -267,13 +271,13 @@ int room_goto_first()
 
     //Destroy all objects
     enigma::nodestroy=1;
-    for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+    for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
     {
-      (*enigma::instance_iterator).second->myevent_roomend();
+      it->inst->myevent_roomend();
       #ifdef ISCONTROLLER_persistent
-      if (!(*enigma::instance_iterator).second->persistent)
+      if (!it->inst->persistent)
       #endif
-      instance_destroy((*enigma::instance_iterator).second->id);
+      instance_destroy(it->inst->id);
     }
     enigma::nodestroy=0;
 
@@ -307,13 +311,13 @@ int room_goto_next()
     
     //Destroy all objects
     enigma::nodestroy = 1;
-    for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+    for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
     {
-      (*enigma::instance_iterator).second->myevent_roomend();
+      it->inst->myevent_roomend();
       #ifdef ISCONTROLLER_persistent
-      if (!(*enigma::instance_iterator).second->persistent)
+      if (!it->inst->persistent)
       #endif
-      instance_destroy((*enigma::instance_iterator).second->id);
+      instance_destroy(it->inst->id);
     }
     enigma::nodestroy=0;
 

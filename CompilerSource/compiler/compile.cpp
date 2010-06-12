@@ -57,6 +57,7 @@ using namespace std;
 #include "../gcc_interface/gcc_backend.h"
 
 #include "../general/bettersystem.h"
+#include "event_reader/event_parser.h"
 
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
@@ -77,6 +78,9 @@ void clear_ide_editables()
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_eventpointers.h"); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_wildclass.cpp"); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h"); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.cpp"); wto.close();
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.h"); wto.close();
   
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h",ios_base::out);
     wto << "int instdata[] = { 0 }; //Empty until game is built via ENIGMA\n";
@@ -113,13 +117,18 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
   // CLean up from any previous executions.
     parsed_objects.clear(); //Make sure we don't dump in any old object code...
-    shared_locals_clear();
+    shared_locals_clear();  //Forget inherited locals, we'll reparse them
+    event_info_clear();     //Forget event definitions, we'll re-get them
   
   // Re-establish ourself
+    // Read the locals that will be included with each instance
     if (shared_locals_load() != 0) {
       cout << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
       return E_ERROR_LOAD_LOCALS;
     }
+    
+    //Read the types of events
+    event_parse_resourcefile();
   
   // Pick apart the sent resources
   cout << "Location in memory of structure: " << es << flushl;

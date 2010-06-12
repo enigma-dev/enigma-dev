@@ -176,7 +176,8 @@ int main(int argc,char** argv)
 	for(;;)
 	{
 		while(XQLength(disp))
-			if(handleEvents()>0){
+			if(handleEvents() > 0)
+			{
 				glxc = glXGetCurrentContext();
 				glXDestroyContext(disp,glxc);
 				XCloseDisplay(disp);

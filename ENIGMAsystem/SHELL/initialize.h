@@ -35,7 +35,7 @@ graphicssystem_initialize();
 	enigma::init_fonts();
 #endif
 
-enigma::instance_event_iterator = enigma::instance_list.begin();
+enigma::instance_event_iterator = NULL;
 
 //Clear the input arrays
 for(int i=0;i<3;i++){

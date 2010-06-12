@@ -47,7 +47,7 @@ namespace enigma //TODO: Find where this belongs
     #endif
 }
 
-int ENIGMA_events();
+void ENIGMA_events();
 int initialize_everything();
 
 

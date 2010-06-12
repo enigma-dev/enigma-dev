@@ -71,5 +71,6 @@ echo "	mv ../compileEGMf ../libcompileEGMf.so" >> Makefile;
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
 echo "	rm -f .eobjs/*" >> Makefile;
+echo "	rm ../compileEGMf.*" >> Makefile;
 
 echo "" >> Makefile;

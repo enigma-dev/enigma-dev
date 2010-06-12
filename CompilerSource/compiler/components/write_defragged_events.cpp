@@ -25,36 +25,46 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <string>
 #include <map>
-#include "compile_organization.h"
 
-#define flushl (fflush(stdout), "\n")
-#define flushs (fflush(stdout), " ")
+using namespace std;
 
-namespace used_funcs
+#include "../../externs/externs.h"
+#include "../../syntax/syncheck.h"
+#include "../../parser/parser.h"
+
+#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
+#include "../compile_common.h"
+
+#include "../event_reader/event_parser.h"
+
+struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} void operator++(int) { count++; } };
+
+int compile_writeDefraggedEvents(EnigmaStruct* es)
 {
-  extern bool object_set_sprite;
-  void zero();
-}
-extern std::map<string,parsed_script*> scr_lookup;
-
-extern const char* license;
-extern string format_error(string code,string err,int pos);
-
-
-extern string event_get_function_name(int mid, int id);
-extern string event_get_human_name(int mid, int id);
-extern bool   event_has_default_code(int mid, int id);
-extern string event_get_default_code(int mid, int id);
-
-
-inline string tdefault(string t) {
-  return (t != "" ? t : "var");
-}
-inline void* lgmRoomBGColor(int c) {
-  return (void*)((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
-}
-
-inline string system_get_uppermost_tier() {
-  return "object_collisions";
+  ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h");
+  wto << license;
+  
+  map<string,foundevent> used_events;
+  for (int i = 0; i < es->gmObjectCount; i++)
+    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
+      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
+        used_events[event_get_function_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id)]++;
+  
+  wto << "struct event_parent: " << system_get_uppermost_tier() << endl;
+  wto << "{" << endl;
+  for (map<string,foundevent>::iterator it = used_events.begin(); it != used_events.end(); it++)
+  {
+    wto << "  virtual enigma::variant myevent_" << it->first << "()";
+    if (event_has_default_code(it->second.mid,it->second.id))
+      wto << endl << "  {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << "  }" << endl;
+    else wto << " {}" << endl;
+  }
+  wto << "};" << endl;
+  
+  return 0;
 }

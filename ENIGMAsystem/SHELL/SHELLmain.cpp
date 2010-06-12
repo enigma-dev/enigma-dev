@@ -134,6 +134,8 @@ goforit(at);*/
     #include "Universal_System/collisions.h"
 #endif
 
+#include "Universal_System/instance_system.h"
+
 #include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
@@ -152,17 +154,6 @@ goforit(at);*/
 #endif
 
 #include "Universal_System/spriteinit.h"
-#include "Universal_System/events.h"
-
-/*
-#if ENIGMA_WS_WINDOWS
-    #include "Platforms/windows/WINDOWSmain.h"
-    #include "Platforms/windows/WINDOWScallback.h"
-#elif ENIGMA_WS_XLIB
-	#include "Platforms/xlib/XLIBmain.h"
-#endif
-*/
-
 #include "Universal_System/instance_create.h"
 
 //This is like main(), only cross-api

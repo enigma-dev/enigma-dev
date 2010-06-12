@@ -251,11 +251,14 @@ pt cfile_parse_macro()
         }
         
         //Isolate filename
-        const int spos = ++pos;
-        const char ce = c=='"'? c:'>';
+        const int spos = ++pos; //Start after opening symbol
+        const char ce = c=='"'? c:'>'; //Get end char
+        
         while (pos < len and cfile[pos++] != ce);
         string file = cfile.substr(spos,pos-spos-1);
         move_newline();
+        
+        cout << "Include file from " << file << endl;
         
         //Find the file and include it
         string ins;
@@ -276,22 +279,27 @@ pt cfile_parse_macro()
             include_from = included_files.top().path + qpath;
           
           ins = fc( (include_from+file).c_str() );
-          if (fnf)
-          {
+          if (fnf) {
             cferr = "Failed to include `" + file + "' from " + include_from + ": File not found";
             return pos;
           }
         }
         else
         {
+          if (!include_directory_count) {
+            cferr = "Failed to include " + file + ": Search path is empty!!!111111!!112";
+            return pos;
+          }
+          
+          // Loop through the search path, seeking the header
           for (unsigned int i = 0; i < include_directory_count; i++)
           {
             include_from = include_directories[i];
             ins = fc( (include_from+file).c_str() );
             if (!fnf) break;
           }
-          if (fnf)
-          {
+          
+          if (fnf) {
             cferr = "Failed to include " + file + " from " + include_from + ": File not found";
             return pos;
           }

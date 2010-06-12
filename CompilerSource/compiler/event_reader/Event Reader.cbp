@@ -31,7 +31,8 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.cpp" />
+		<Unit filename="event_parser.cpp" />
+		<Unit filename="event_parser.h" />
 		<Extensions>
 			<envvars />
 			<code_completion />

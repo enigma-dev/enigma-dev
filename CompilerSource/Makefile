@@ -137,4 +137,5 @@ lin linux unix: link
 
 clean:
 	rm -f .eobjs/*
+	rm ../compileEGMf.*
 

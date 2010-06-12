@@ -9,7 +9,7 @@
 		<Option compiler="gcc" />
 		<Option virtualFolders="cfile_parse/;" />
 		<Build>
-			<Target title="Release">
+			<Target title="WinRelease">
 				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../" />
 				<Option type="3" />
@@ -26,7 +26,7 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
-			<Target title="Debug">
+			<Target title="WinDebug">
 				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../" />
 				<Option type="3" />
@@ -155,7 +155,6 @@
 		<Unit filename="compiler/compile_includes.h" />
 		<Unit filename="compiler/compile_organization.h" />
 		<Unit filename="compiler/components/components.h" />
-		<Unit filename="compiler/components/module_write_sprites" />
 		<Unit filename="compiler/components/module_write_sprites.cpp" />
 		<Unit filename="compiler/components/parse_and_link.cpp" />
 		<Unit filename="compiler/components/write_defragged_events.cpp" />
@@ -163,6 +162,8 @@
 		<Unit filename="compiler/components/write_object_data.cpp" />
 		<Unit filename="compiler/components/write_room_data.cpp" />
 		<Unit filename="compiler/event_ids.h" />
+		<Unit filename="compiler/event_reader/event_parser.cpp" />
+		<Unit filename="compiler/event_reader/event_parser.h" />
 		<Unit filename="compiler/license_string.h" />
 		<Unit filename="compiler/output_locals.cpp" />
 		<Unit filename="compiler/output_locals.h" />
@@ -209,7 +210,7 @@
 		<Extensions>
 			<code_completion />
 			<debugger>
-				<remote_debugging target="Debug">
+				<remote_debugging target="WinDebug">
 					<options conn_type="0" serial_baud="115200" additional_cmds_before="-s syntax.txt" />
 				</remote_debugging>
 			</debugger>

@@ -32,7 +32,6 @@
 using namespace std;
 
 #include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
 #include "../../parser/parser.h"
 
 #include "../../backend/EnigmaStruct.h" //LateralGM interface structures
@@ -92,7 +91,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
         {
           //Look up the event name
-          string evname = event_get_enigma_main_name(i->second->events[ii].mainId,i->second->events[ii].id);
+          string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
           wto << "\n    #define ENIGMAEVENT_" << evname << " 1\n";
           wto << "    variant myevent_" << evname << "();\n  ";
         }
@@ -125,7 +124,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     {
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
       {
-        string evname = event_get_enigma_main_name(i->second->events[ii].mainId,i->second->events[ii].id);
+        string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
         wto << "enigma::variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
           print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
         wto << "\n  return 0;\n}\n\n";
@@ -153,8 +152,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     
     wto << 
     "namespace enigma\n{\n  void constructor(object_basic* instance_b)\n  {\n"
-    "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"    
-    "    instance_list[instance->id]=instance_b;\n\n"
+    "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    enigma::link_instance(instance_b);\n\n"
     "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
     "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
     /*instance->sprite_index = enigma::objectdata[instance->obj].sprite_index;

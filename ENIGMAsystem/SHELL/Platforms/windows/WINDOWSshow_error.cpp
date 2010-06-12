@@ -44,7 +44,7 @@ namespace enigma //TODO: This is from events.h: fix according to TODO pointed to
 
 extern std::string string(double val);
 
-extern void ABORT_ON_FATAL_ERRORS();
+extern void ABORT_ON_ALL_ERRORS();
 int show_error(std::string errortext,int fatal)
 {
   if (MessageBox(NULL,("Error in "+enigma::evname(enigma::event_current) + " event for object number " + string(enigma::getID())+": \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
@@ -58,6 +58,6 @@ int show_error(std::string errortext,int fatal)
 	else
 	  printf("ERROR: %s\n",errortext.c_str());
   
-  ABORT_ON_FATAL_ERRORS();
+  ABORT_ON_ALL_ERRORS();
 	return 0;
 }

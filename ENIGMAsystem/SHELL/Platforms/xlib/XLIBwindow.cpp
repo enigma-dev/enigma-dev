@@ -290,11 +290,12 @@ namespace enigma
    }
 }
 
-extern void ABORT_ON_FATAL_ERRORS();
+extern void ABORT_ON_ALL_ERRORS();
 void show_error(std::string err, int fatal)
 {
   printf("ERROR: %s\n",err.c_str());
-  if (fatal) ABORT_ON_FATAL_ERRORS();
+  if (fatal) exit(0);
+  ABORT_ON_ALL_ERRORS();
 }
 
 namespace enigma {

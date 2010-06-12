@@ -12,88 +12,256 @@
 # These events are executed outside the main event source at special moments
 
 gamestart: 7		# This event is executed from within code at the start of the game
-	Mode: Spec-none
+	Name: Game Start
+	Mode: Spec-sys
 	Case: 2
 
 roomstart: 7		# This event is executed from within the code that loads a new room
-	Mode: Spec-none
+	Name: Room Start
+	Mode: Spec-sys
 	Case: 4
+create: 0			# This event is performed as a ctor: immedaitely as the instance is created
+	Name: Create
+	Mode: System
 
+destroy: 1			# This event is performed as a dtor: immediately as the instance is "destroyed"
+	Name: Destroy
+	Mode: System
 
 
 # Here marks the start of events that are actually executed in place
 
-step: 3 
+beginstep: 3
+	Group: Step
+	Name: Begin Step
 	Mode: Special
 	Case: 1
+
 alarm: 2
+	Group: Alarm
+	Name: Alarm %1
 	Mode: Stacked
 	Sub Check: { if ((alarm[%1] == -1) or (alarm[%1]--)) return 0; }
 
 
 # Keyboard events. These are simple enough.
+
 keyboard: 5
-	Mode: Inline
+	Group: Keyboard
+	Name: Keyboard <%1>
+	Type: Key
+	Mode: Stacked
 	Super Check: keyboard_check(%1)
+
 keypress: 9
-	Mode: Inline
+	Group: Key Press
+	Name: Press <%1>
+	Type: Key
+	Mode: Stacked
 	Super Check: keyboard_check_pressed(%1)
+
 keyrelease: 10
-	Mode: Inline
+	Group: Key Release
+	Name: Release <%1>
+	Type: Key
+	Mode: Stacked
 	Super Check: keyboard_check_released(%1)
 
 
 # There are a million different specialized mouse events.
-mouse: 6
-	Mode: Special
-	Super Check: mouse_check
 
-
-# Finally, some general-purpose eventage
-step: 3
+leftbutton: 6
+	Group: Mouse
+	Name: Left Button
 	Mode: Special
 	Case: 0
-	Sub Check: { x += hspeed; y += vspeed; speed -= friction; vspeed += sin(gravity_direction * pi/180); hspeed += cos(gravity_direction * pi/180); }
+
+rightbutton: 6
+	Name: Right Button
+	Mode: Special
+	Case: 1
+
+middlebutton: 6
+	Name: Middle Button
+	Mode: Special
+	Case: 2
+
+nobutton: 6
+	Name: No Button
+	Mode: Special
+	Case: 3
+
+leftpress: 6
+	Name: Left Press
+	Mode: Special
+	Case: 4
+
+rightpress: 6
+	Name: Right Press
+	Mode: Special
+	Case: 5
+
+middlepress: 6
+	Name: Middle Press
+	Mode: Special
+	Case: 6
+
+leftrelease: 6
+	Name: Left Release
+	Mode: Special
+	Case: 7
+
+rightrelease: 6
+	Name: Right Release
+	Mode: Special
+	Case: 8
+
+middlerelease: 6
+	Name: Middle Release
+	Mode: Special
+	Case: 9
+
+mouseenter: 6
+	Name: Mouse Enter
+	Mode: Special
+	Case: 10
+
+mouseleave: 6
+	Name: Mouse Leave
+	Mode: Special
+	Case: 11
+
+mousewheelup: 6
+	Name: Mouse Wheel Up
+	Mode: Special
+	Case: 60
+
+mousewheeldown: 6
+	Name: Mouse Wheel Down
+	Mode: Special
+	Case: 61
+
+globalleftbutton: 6
+	Name: Global Left Button
+	Mode: Special
+	Case: 50
+
+globalrightbutton: 6
+	Name: Global Right Button
+	Mode: Special
+	Case: 51
+
+globalmiddlebutton: 6
+	Name: Global Middle Button
+	Mode: Special
+	Case: 52
+
+globalleftpress: 6
+	Name: Global Left Press
+	Mode: Special
+	Case: 53
+
+globalrightpress: 6
+	Name: Global Right Press
+	Mode: Special
+	Case: 54
+
+globalmiddlepress: 6
+	Name: Global Middle press
+	Mode: Special
+	Case: 55
+
+globalleftrelease: 6
+	Name: Global Left Release
+	Mode: Special
+	Case: 56
+
+globalrightrelease: 6
+	Name: Global Right Release
+	Mode: Special
+	Case: 57
+
+globalmiddlerelease: 6
+	Name: Global Middle Release
+	Mode: Special
+	Case: 57
+
+# Finally, some general-purpose events
+
+step: 3
+	Name: Step
+	Mode: Special
+	Case: 0
+	Constant: { 
+		x += hspeed, y += vspeed;
+		speed -= friction; 
+		vspeed += sin(gravity_direction * pi/180),
+		hspeed += cos(gravity_direction * pi/180);
+	}
 
 
 # Lump of "Other" events.
+
 pathend: 7
+	Name: Path End
 	Mode: Special
 	Case: 8
 	Super Check: false #Paths are not yet implemented.
 outsideroom: 7
+	Name: Outside Room
 	Mode: Special
 	Case: 0
 	Sub Check: (bbox_right < 0) or (bbox_left > room_width) or (bbox_bottom < 0) or (bbox_top > room_height)
 boundary: 7
+	Name: Intersect Boundary
 	Mode: Special
 	Case: 1
 	Super Check: (bbox_left < 0) or (bbox_right > room_width) or (bbox_top < 0) or (bbox_bottom > room_height)
 
+
 # Collisions stuck here for some reason, possibly so that you
 # can deduct lives/health right before the "No more Lives" event
+
 collision: 4
+	Group: Collision
+	Name: %1
+	Type: Object
 	Mode: Stacked
 	Super Check: instance_number(%1)
 	Sub Check: place_meeting(x,y,%1)
 
+
 # Check for detriment from collision events above
+
 nomorelives: 7
+	Name: No More Lives
 	Mode: Special
 	Case: 6
 	Sub Check: lives <= 0
 nomorehealth: 7
+	Name: No More Health
 	Mode: Special
 	Case: 9
 	Sub Check: health <= 0
 
+
 # General purpose once again!
+
 endstep: 3
+	Name: End Step
 	Mode: Special
 	Case: 2
 
-# Why this comes after "end step," I do not know. One would think it'd be with pathend
+# Fun fact: Draw comes after End Step.
+draw: 8
+	Name: Draw
+	Mode: Inline
+	Instead: screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
+
+
+# Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
 animationend: 7
+	Name: Animation End
 	Mode: Special
 	Case: 7
 	Sub Check: !(int(image_index) % image_count)
@@ -103,14 +271,14 @@ animationend: 7
 # These are later-executed, special-triggered events that are also not listed for iteration
 
 roomend: 7
-	Mode: Spec-none
+	Name: Room End
+	Mode: Spec-sys
 	Case: 5
 
 gameend: 7
-	Mode: Spec-none
+	Name: Game End
+	Mode: Spec-sys
 	Case: 3
-
-parent_endstep: -1
 
 
 #  EV_BOUNDARY = 1,

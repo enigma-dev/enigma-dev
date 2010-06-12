@@ -36,59 +36,21 @@
 #include "EGMstd.h"
 
 #include "collisions_object.h"
+#include "instance_system.h"
 
-bool collision_bbox_rect(double object,double x1,double y1,double x2,double y2)
+bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2)
 {
-  int obj=(int)object;
-  if (obj==-3)
-  for (enigma::instance_iterator=enigma::instance_list.begin();
-  enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
   {
-    int ox=((enigma::object_collisions*)enigma::instance_iterator->second)->x;
-    int oy=((enigma::object_collisions*)enigma::instance_iterator->second)->y;
+    int ox=((enigma::object_collisions*)it->inst)->x;
+    int oy=((enigma::object_collisions*)it->inst)->y;
     
-    int bl=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_left;
-    int br=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_right;
-    int bt=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_top;
-    int bb=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_bottom;
+    int bl=((enigma::object_collisions*)it->inst)->bbox_left;
+    int br=((enigma::object_collisions*)it->inst)->bbox_right;
+    int bt=((enigma::object_collisions*)it->inst)->bbox_top;
+    int bb=((enigma::object_collisions*)it->inst)->bbox_bottom;
     if (x1<ox+br && x2>ox+bl && y1<oy+bb && y2>oy+bt)
     return 1;
-  }
-  else if (obj>=0 && obj<100000)
-  for (enigma::instance_iterator=enigma::instance_list.begin();
-  enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
-  {
-    if (((enigma::object_collisions*)enigma::instance_iterator->second)->object_index==obj)
-    {
-      int ox=((enigma::object_collisions*)enigma::instance_iterator->second)->x;
-      int oy=((enigma::object_collisions*)enigma::instance_iterator->second)->y;
-      
-      int bl=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_left;
-      int br=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_right;
-      int bt=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_top;
-      int bb=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_bottom;
-      if (x1<ox+br && x2>ox+bl && y1<oy+bb && y2>oy+bt)
-      return 1;
-    }
-  }
-  else if (obj>=100000)
-  {
-    enigma::instance_iterator=enigma::instance_list.find(obj);
-    if (enigma::instance_iterator != enigma::instance_list.end())
-    {
-      //if (((enigma::object_collisions*)enigma::instance_iterator->second)->id == obj)
-      //{
-        int ox=((enigma::object_collisions*)enigma::instance_iterator->second)->x;
-        int oy=((enigma::object_collisions*)enigma::instance_iterator->second)->y;
-        
-        int bl=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_left;
-        int br=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_right;
-        int bt=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_top;
-        int bb=((enigma::object_collisions*)enigma::instance_iterator->second)->bbox_bottom;
-        if (x1<ox+br && x2>ox+bl && y1<oy+bb && y2>oy+bt)
-          return 1;
-      //}
-    }
   }
   return 0;
 }

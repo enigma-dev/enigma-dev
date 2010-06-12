@@ -55,7 +55,7 @@ string file_contents(string file)
   size_t sz = ftell(f);
   char a[sz+1];
   fseek(f,0,SEEK_SET);
-  sz = fread(a,sz,1,f);
+  sz = fread(a,1,sz,f);
 
   fclose(f);
   a[sz]=0;
@@ -181,12 +181,16 @@ int cfile_parse_main()
 {
   cparse_init();
 
-  string fc=file_contents("C:\\cfile.h");
+  string fc=file_contents("./ENIGMAsystem/SHELL/SHELLmain.cpp");
+  if (fc == "") cout << "FAILOOS.";
+  
+  cout << fc;
+  
   time_t ts = clock();
   int a=parse_cfile(fc);
   time_t te = clock();
   cout << "Parse time: " << ((te-ts) * 1000) / CLOCKS_PER_SEC << " milliseconds";
-  return 0;
+  
   if (a != -1)
   {
     int line=0,pos=0;
@@ -199,51 +203,15 @@ int cfile_parse_main()
     }
     printf("Line %d, position %d: %s\r\n",line+1,pos,cferr.c_str());
   }
-
+  
   cout << "Macros:\r\n";
   for (maciter i=macros.begin(); i!=macros.end();i++)
     cout<<"  "<<(string)i->second<<"\r\n";
-
+  
   print_scope_members(&global_scope, 0);
-
+  
   //system("pause");
-
-  #if 0
-      while (1)
-      {
-        string p;
-        char ghere[2048];
-        value val;
-        cin.getline(ghere,2048);
-        p=ghere;
-        if (p=="x") return 0;
-        if (p=="c" or p=="cls") system("cls");
-        else
-        {
-          val=evaluate_expression(p);
-          #if USETYPE_INT
-            if (val.type==RTYPE_INT)
-              cout<<val.real.i;
-          #endif
-          #if USETYPE_DOUBLE
-            if (val.type==RTYPE_DOUBLE)
-              cout<<val.real.d;
-          #endif
-          #if USETYPE_UINT
-            if (val.type==RTYPE_UINT)
-              cout<<val.real.u;
-          #endif
-          #if USETYPE_STRING
-            if (val.type==RTYPE_STRING)
-              cout << '"' << val.str << '"';
-          #endif
-          cout << endl;
-          if (rerr != "") cout <<"error at "<<rerrpos<<": "<<rerr << "\r\n\r\n";
-        }
-      }
-  #endif
-
-
+  
   return 0;
 }
 
@@ -325,10 +293,48 @@ void print_definition(string n)
     else cout << "Not found: " << seg << endl;
   }
 }
-/*
+
+int test_exp_eval()
+{
+  while (1)
+  {
+    string p;
+    char ghere[2048];
+    value val;
+    cin.getline(ghere,2048);
+    p=ghere;
+    if (p=="x") return 0;
+    if (p=="c" or p=="cls") system("cls");
+    else
+    {
+      val=evaluate_expression(p);
+      #if USETYPE_INT
+        if (val.type==RTYPE_INT)
+          cout<<val.real.i;
+      #endif
+      #if USETYPE_DOUBLE
+        if (val.type==RTYPE_DOUBLE)
+          cout<<val.real.d;
+      #endif
+      #if USETYPE_UINT
+        if (val.type==RTYPE_UINT)
+          cout<<val.real.u;
+      #endif
+      #if USETYPE_STRING
+        if (val.type==RTYPE_STRING)
+          cout << '"' << val.str << '"';
+      #endif
+      cout << endl;
+      if (rerr != "") cout <<"error at "<<rerrpos<<": "<<rerr << "\r\n\r\n";
+    }
+  }
+}
+
+
 int m_prog_loop_cfp()
 {
-  string cftp = fc("./cfile_parse/parsein.h");
+  cparse_init();
+  string cftp = fc("./ENIGMAsystem/SHELL/SHELLmain.cpp");
 
   #ifdef linux
     timeval ts; gettimeofday(&ts,NULL);
@@ -416,4 +422,3 @@ int m_prog_loop_cfp()
 
   return 0;
 }
-*/

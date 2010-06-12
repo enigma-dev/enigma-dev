@@ -26,35 +26,53 @@
 \********************************************************************************/
 
 #include <map>
-#include "compile_organization.h"
+#include <math.h>
+#include <vector>
+#include <string>
+#include "var_cr3.h"
+#include "reflexive_types.h"
 
-#define flushl (fflush(stdout), "\n")
-#define flushs (fflush(stdout), " ")
+#include "object.h"
 
-namespace used_funcs
+namespace enigma
 {
-  extern bool object_set_sprite;
-  void zero();
-}
-extern std::map<string,parsed_script*> scr_lookup;
-
-extern const char* license;
-extern string format_error(string code,string err,int pos);
-
-
-extern string event_get_function_name(int mid, int id);
-extern string event_get_human_name(int mid, int id);
-extern bool   event_has_default_code(int mid, int id);
-extern string event_get_default_code(int mid, int id);
-
-
-inline string tdefault(string t) {
-  return (t != "" ? t : "var");
-}
-inline void* lgmRoomBGColor(int c) {
-  return (void*)((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
-}
-
-inline string system_get_uppermost_tier() {
-  return "object_collisions";
+  struct inst_iter
+  {
+    object_basic* inst;     // Inst is first member for non-arithmetic dereference
+    inst_iter *next, *prev; // Double linked for active removal
+    bool dead; // Whether or not this instance has been destroyed. Should be accessed rarely.
+    inst_iter(object_basic* i,inst_iter *n,inst_iter *p);
+  };
+  
+  // This structure is for composing lists of events to execute.
+  struct event_iter
+  {
+    inst_iter *insts; // Instances for which to perform this event
+    event_iter *next; // Next iterator in the list, single linked: No need for deletion.
+  };
+  
+  // This structure will store info about and lists of each object by index.
+  struct objectid_base
+  {
+    inst_iter *insts;
+    size_t count;
+  };
+  
+  // This is an iterator typedef for use with the red-black backbone of the instance list.
+  typedef std::map<int,inst_iter*>::iterator instance_list_iterator;
+  
+  // The rest is documented by comment in the corresponding source file.
+  extern event_iter *events;
+  extern objectid_base *objects;
+  extern std::map<int,inst_iter*> instance_list;
+  extern object_basic *ENIGMA_global_instance;
+  extern inst_iter *instance_event_iterator;
+  extern std::vector<inst_iter*> cleanups;
+  
+  inst_iter*    instance_list_first();
+  inst_iter*    fetch_inst_iter_by_id(int id);
+  inst_iter*    fetch_inst_iter_by_int(int x);
+  object_basic* fetch_instance_by_int(int x);
+  
+  void link_instance(object_basic* who);
 }

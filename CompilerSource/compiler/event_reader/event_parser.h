@@ -25,36 +25,62 @@
 **                                                                              **
 \********************************************************************************/
 
+enum e_type {
+  et_inline,
+  et_stacked,
+  et_special,
+  et_spec_sys,
+  et_system,
+  et_none,
+  et_error
+};
+
+enum p_type {
+  p2t_sprite,
+  p2t_sound,
+  p2t_background,
+  p2t_path,
+  p2t_script,
+  p2t_font,
+  p2t_timeline,
+  p2t_object,
+  p2t_room,
+  p2t_key,
+  p2t_error
+};
+
+#include <string>
 #include <map>
-#include "compile_organization.h"
 
-#define flushl (fflush(stdout), "\n")
-#define flushs (fflush(stdout), " ")
-
-namespace used_funcs
+struct event_info
 {
-  extern bool object_set_sprite;
-  void zero();
-}
-extern std::map<string,parsed_script*> scr_lookup;
+  string name;
+  int    gmid;
+  
+  string humanname;
+  p_type par2type;
+  
+  e_type mode;
+  int    mmod;
+  
+  string def;
+  string cons;
+  string super;
+  string sub;
+  string instead;
+  
+  event_info();
+  event_info(string n,int i);
+};
 
-extern const char* license;
-extern string format_error(string code,string err,int pos);
+struct main_event_info
+{
+  string name;
+  bool is_group;
+  map<int,event_info*> specs;
+  typedef map<int,event_info*>::iterator iter;
+  main_event_info();
+};
 
-
-extern string event_get_function_name(int mid, int id);
-extern string event_get_human_name(int mid, int id);
-extern bool   event_has_default_code(int mid, int id);
-extern string event_get_default_code(int mid, int id);
-
-
-inline string tdefault(string t) {
-  return (t != "" ? t : "var");
-}
-inline void* lgmRoomBGColor(int c) {
-  return (void*)((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
-}
-
-inline string system_get_uppermost_tier() {
-  return "object_collisions";
-}
+int event_parse_resourcefile();
+void event_info_clear();

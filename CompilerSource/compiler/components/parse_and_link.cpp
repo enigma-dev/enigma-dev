@@ -43,6 +43,9 @@ using namespace std;
 #define flushl (fflush(stdout), "\n")
 #define flushs (fflush(stdout), " ")
 
+#define user (cout << "enigma: ")
+#define edbg (cout << "info: ")
+
 int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
 {
   //First we just parse the scripts to add semicolons and collect variable names
@@ -50,22 +53,22 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   {
     int a = syncheck::syntacheck(es->scripts[i].code);
     if (a != -1) {
-      cout << "Syntax error in script `" << es->scripts[i].name << "'" << endl << syncheck::error << flushl;
+      user << "Syntax error in script `" << es->scripts[i].name << "'" << endl << syncheck::error << flushl;
       return E_ERROR_SYNTAX;
     }
     scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
     parser_main(es->scripts[i].code,&scripts[i]->pev);
-    cout << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
+    edbg << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
     fflush(stdout);
   }
   
-  cout << "\"Linking\" scripts" << flushl;
+  edbg << "\"Linking\" scripts" << flushl;
   
   //Next we traverse the scripts for dependencies.
   unsigned nec_iters = 0;
   if (es->scriptCount > 0)
     nec_iters = lrint(ceilf(log2(es->scriptCount)));
-  cout << "`Linking' " << es->scriptCount << " scripts in " << nec_iters << " passes...\n";
+  edbg << "`Linking' " << es->scriptCount << " scripts in " << nec_iters << " passes...\n";
   for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
   {
     for (int _im = 0; _im < es->scriptCount; _im++) //For each script
@@ -80,13 +83,13 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
     }
   }
   
-  cout << "Completing script \"Link\"" << flushl;
+  edbg << "Completing script \"Link\"" << flushl;
   
   for (int _im = 0; _im < es->scriptCount; _im++) //For each script
   {
     string curscrname = es->scripts[_im].name;
     parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
-    cout << "Linking `" << curscrname << "':\n";
+    edbg << "Linking `" << curscrname << "':\n";
     for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
     {
       cout << string(it->first) << "::";
@@ -99,26 +102,26 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
     }
     cout << endl;
   }
-  cout << "Done." << flushl;
+  edbg << "Done." << flushl;
   
   
-  cout << es->gmObjectCount << " Objects:" << endl;
+  edbg << es->gmObjectCount << " Objects:" << endl;
   for (int i = 0; i < es->gmObjectCount; i++)
   {
     //For every object in Ism's struct, make our own
     unsigned ev_count = 0;
     parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object(es->gmObjects[i].name,es->gmObjects[i].id,es->gmObjects[i].spriteId);
     
-    cout << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " events: " << flushl;
+    edbg << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " events: " << flushl;
     
     for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
     if (es->gmObjects[i].mainEvents[ii].eventCount) //For every MainEvent that contains event code
     {
       //For each main event in that object, make a copy
       const int mev_id = es->gmObjects[i].mainEvents[ii].id;
-      cout << "  Event[" << es->gmObjects[i].mainEvents[ii].id << "]: ";
+      edbg << "  Event[" << es->gmObjects[i].mainEvents[ii].id << "]: ";
       
-      cout << "  Parsing " << es->gmObjects[i].mainEvents[ii].eventCount << " sub-events:" << flushl;
+      edbg << "  Parsing " << es->gmObjects[i].mainEvents[ii].eventCount << " sub-events:" << flushl;
       for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
       {
         //For each individual event (like begin_step) in the main event (Step), parse the code
@@ -130,28 +133,34 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
         string code = es->gmObjects[i].mainEvents[ii].events[iii].code;
         
         //Syntax check the code
-        cout << "Check `" << es->gmObjects[i].name << "::" << event_get_enigma_main_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << "..." << flushs;
+        
+        // Print debug info
+          edbg << "Check `" << es->gmObjects[i].name << "::" << event_get_function_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << "..." << flushs;
+        
+        // Check the code
         int sc = syncheck::syntacheck(code);
         if (sc != -1)
         {
-          cout << "Syntax error in object `" << es->gmObjects[i].name << "', event " << mev_id << ":"
+          // Error. Report it.
+          user << "Syntax error in object `" << es->gmObjects[i].name << "', " << event_get_human_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << " event:"
                << es->gmObjects[i].mainEvents[ii].events[iii].id << ":\n" << format_error(code,syncheck::error,sc) << flushl;
           return E_ERROR_SYNTAX;
         }
-        cout << "Done. Starting parse..." << flushs;
+        
+        edbg << "Done. Starting parse..." << flushs;
         
         //Add this to our objects map
-        pev.myObj = pob; //link to its parent
-        parser_main(code,&pev);
+        pev.myObj = pob; //Link to its calling object.
+        parser_main(code,&pev); //Format it to C++
         
-        cout << "Done." << flushl;
+        edbg << "Done." << flushl;
       }
     }
     fflush(stdout);
   }
   
   //Next we link the scripts into the objects.
-  cout << "\"Linking\" scripts into the objects..." << flushl;
+  edbg << "\"Linking\" scripts into the objects..." << flushl;
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
   {
     parsed_object* t = i->second;
@@ -168,7 +177,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
         t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
     }
   }
-  cout << "\"Link\" complete." << flushl;
+  edbg << "\"Link\" complete." << flushl;
   return 0;
 }
 

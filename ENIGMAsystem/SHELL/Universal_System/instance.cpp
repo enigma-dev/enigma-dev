@@ -28,93 +28,80 @@
 #include <map>
 #include <math.h>
 #include <string>
-#include "var_cr3.h"
-#include "reflexive_types.h"
-#include "EGMstd.h"
+//#include "reflexive_types.h"
+//#include "EGMstd.h"
 #include "object.h"
 
 #include "key_game_globals.h"
+#include "instance_system.h"
 
 namespace enigma
 {
   int destroycalls = 0, createcalls = 0;
 }
 
-void instance_destroy(double id)
+void instance_destroy(int id)
 {
-  enigma::cleanups[enigma::cleancount++]=(int)id;
-  enigma::instancecount--;
-  instance_count--;
+  enigma::inst_iter* who = enigma::fetch_inst_iter_by_id(id);
+  if (who) {
+    enigma::cleanups.push_back(who);
+    enigma::instancecount--;
+    instance_count--;
+  }
 }
 
+extern int show_error(std::string,int);
 int instance_destroy()
 {
   show_error("Nothing to destroy",0);
   return -1;
 }
 
-bool instance_exists(double obj)
+bool instance_exists(int obj)
 {
-     int instance=(int) obj;
-     if (instance>100000)
-     {
-        return (enigma::instance_list.find(instance) != enigma::instance_list.end());
-     }else if (instance>=0){
-       for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
-           if ((*enigma::instance_iterator).second->object_index==instance)
-              return 1;
-     }else{
-         switch (instance){
-            case -1:return (enigma::instance_list.find((int)((*enigma::instance_iterator).second->id)) != enigma::instance_list.end());
-			case -3:return (enigma::instance_list.size()>0);
-            default:return 0;
-         }
-     }
-     return 0;
+  return enigma::fetch_instance_by_int(obj) != NULL;
 }
 
 int instance_find(double obj,double n)
 {
-   int objind=(int)obj;
-   int num=(int)n;
-   int nth=0;
-   for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++){
-       if ((*enigma::instance_iterator).second->object_index==objind){
-          nth++;
-          if (nth>num)
-          return (int) (*enigma::instance_iterator).second->id;
-       }
-   }
-   return -4;
+  int objind=(int)obj;
+  int num=(int)n;
+  int nth=0;
+  for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
+  {
+    if (it->inst->object_index==objind)
+    {
+      nth++;
+      if (nth>num)
+      return (int) it->inst->id;
+    }
+  }
+  return -4;
 }
-int instance_number(double obj)
+
+int instance_number(int obj)
 {
-   int objind=(int)obj;
-   int n=0;
-   for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
-       if ((*enigma::instance_iterator).second->object_index==objind)
-          n++;
-   return n;
+  return enigma::objects[obj].count;
 }
 
 //TODO: Move these to an instance_planar
 #include "planar_object.h"
 
-int instance_position(double x,double y,double obj)
+int instance_position(int x,int y,int obj)
 {
     int objind=(int) obj;
     int xl,yl;
     int xc=(int)x,yc=(int)y;
     
-    for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+    for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
     {
-      if (((*enigma::instance_iterator).second->object_index==objind) || objind==-3)
+      if ((it->inst->object_index==objind) || objind==-3)
       {
-        xl=(int)((enigma::object_planar*)enigma::instance_iterator->second)->x;
-        yl=(int)((enigma::object_planar*)enigma::instance_iterator->second)->y;
+        xl=(int)((enigma::object_planar*)it->inst)->x;
+        yl=(int)((enigma::object_planar*)it->inst)->y;
         
         if (xl==xc && yl==yc)
-        return (int)(*enigma::instance_iterator).second->id;
+        return (int)it->inst->id;
       }
     }
     return noone;
@@ -129,47 +116,49 @@ int instance_nearest(int x,int y,int obj)
     int objind=(int) obj;
     double xl,yl;
 
-    for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+    for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
     {
-      if ((*enigma::instance_iterator).second->object_index==objind)
+      if (it->inst->object_index==objind)
       {
-         xl = ((enigma::object_planar*)enigma::instance_iterator->second)->x;
-         yl = ((enigma::object_planar*)enigma::instance_iterator->second)->y;
+         xl = ((enigma::object_planar*)it->inst)->x - x;
+         yl = ((enigma::object_planar*)it->inst)->y - y;
          const double dstclc = hypot(xl,yl);
          if (dstclc < dist_lowest or dist_lowest == -1)
          {
             dist_lowest = dstclc;
-            retid = (*enigma::instance_iterator).second->id;
+            retid = it->inst->id;
          }
       }
     }
 
     return retid;
 }
-int instance_furthest(double x,double y,double obj)
+
+int instance_furthest(int x,int y,int obj)
 {
-    double dist_highest=0,retid=0;
-    bool found=0;
-    int objind=(int) obj;
-    int xl,yl;
-    double dstclc;
+  double dist_highest=0;
+  bool found=0;
+  int retid = noone;
+  int objind=(int) obj;
+  double xl,yl;
+  double dstclc;
 
-    for (enigma::instance_iterator=enigma::instance_list.begin(); enigma::instance_iterator != enigma::instance_list.end(); enigma::instance_iterator++)
+  for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
+  {
+    if ((it->inst->object_index==objind) || objind==-3)
     {
-    if (((*enigma::instance_iterator).second->object_index==objind) || objind==-3)
-    {
-       xl=(int)((enigma::object_planar*)enigma::instance_iterator->second)->x;
-       yl=(int)((enigma::object_planar*)enigma::instance_iterator->second)->y;
-       dstclc=sqrt(xl*xl+yl*yl);
-       if (dstclc>dist_highest || found==0)
-       {
-          dist_highest=dstclc;
-          retid=(*enigma::instance_iterator).second->id;
-          found=1;
-       }
+      xl=((enigma::object_planar*)it->inst)->x - x;
+      yl=((enigma::object_planar*)it->inst)->y - y;
+      dstclc = hypot(xl,yl);
+      if (dstclc > dist_highest or !found)
+      {
+        dist_highest = dstclc;
+        retid = it->inst->id;
+        found = 1;
+      }
     }
-    }
+  }
 
-    return (int)retid;
+  return retid;
 }
 

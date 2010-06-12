@@ -25,20 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-/**Instance functions**********************************************************\
-
-int instance_create(double x,double y,int object)
-int instance_destroy(double id)
-int instance_destroy()
-bool instance_exists(int obj)
-int instance_find(double obj,double n)
-int instance_number(double obj)
-int instance_position(double x,double y,double obj)
-int instance_nearest(double x,double y,double obj)
-int instance_furthest(double x,double y,double obj)
-
-\******************************************************************************/
-
 namespace enigma {
   extern int destroycalls, createcalls;
 }
@@ -49,14 +35,14 @@ namespace enigma {
   void instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
 }
 
-int instance_destroy(double id);
-int instance_destroy();
-bool instance_exists(double obj);
-int instance_find(double obj,double n);
-int instance_number(double obj);
-int instance_position(double x,double y,double obj);
-int instance_nearest(double x,double y,double obj);
-int instance_furthest(double x,double y,double obj);
+int  instance_destroy();
+int  instance_destroy(int id);
+bool instance_exists (int obj);
+int  instance_find   (int obj,int n);
+int  instance_number (int obj);
+int  instance_position(int x,int y,int obj);
+int  instance_nearest (int x,int y,int obj);
+int  instance_furthest(int x,int y,int obj);
 
 
 //int instance_place(x,y,obj)
