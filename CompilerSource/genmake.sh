@@ -34,7 +34,7 @@ for subdir in */ */*/ ./; #Iterate
         done;
         echo "" >> Makefile;
         
-        echo "	-mkdir .eobjs" >> Makefile;
+#        echo "	-mkdir .eobjs" >> Makefile;
         echo "	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c  $file		-o .eobjs/${pathless%.cpp}.o \$(FLAGS)"  >> Makefile;
       };
       done;
@@ -42,7 +42,10 @@ for subdir in */ */*/ ./; #Iterate
 
 echo "" >> Makefile;
 echo "# Nobody knows the trouble I've seen, no... no... nooo..." >> Makefile;
-printf "link:" >> Makefile;
+echo "mkeobjs:" >> Makefile;
+echo "	-mkdir .eobjs" >> Makefile;
+echo "" >> Makefile;
+printf "link: mkeobjs" >> Makefile;
   for subdir in */ */*/ ./; #Iterate 
     do
       for file in $subdir*.cpp;
@@ -71,6 +74,6 @@ echo "	mv ../compileEGMf ../libcompileEGMf.so" >> Makefile;
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
 echo "	rm -f .eobjs/*" >> Makefile;
-echo "	rm ../compileEGMf.*" >> Makefile;
+echo "	rm ../*compileEGMf.*" >> Makefile;
 
 echo "" >> Makefile;
