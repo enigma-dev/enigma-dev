@@ -938,8 +938,15 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           return pos;
         }
         else {
-          last_named_phase = DEC_IDENTIFIER;
-          last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
+          if (last_named == LN_TYPENAME_P) {
+            last_named = LN_DECLARATOR;
+            last_named_phase = DEC_IDENTIFIER;
+            return pt(-1);
+          }
+          else {
+            last_named_phase = DEC_IDENTIFIER;
+            last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
+          }
         }
       break;
     case LN_STRUCT_DD:

@@ -36,10 +36,9 @@ extern Atom wm_delwin;
 namespace enigma
 {
   extern char keymap[256];
-}
-
-void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
+  void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
 extern int initialize_everything();
+}
 
 int handleEvents()
 {
@@ -163,7 +162,7 @@ int main(int argc,char** argv)
 	//#include "../../initialize.h"
 
 	//Call ENIGMA system initializers; sprites, audio, and what have you
-	initialize_everything();
+	enigma::initialize_everything();
 
 	/*
 	for(char q=1;q;ENIGMA_events())
@@ -183,7 +182,7 @@ int main(int argc,char** argv)
 				XCloseDisplay(disp);
 				return 0;
 			}
-		ENIGMA_events();
+		enigma::ENIGMA_events();
 	}
 }
 

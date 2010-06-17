@@ -35,6 +35,8 @@
 #define __GETGf(x) fmod(x/256,256)
 #define __GETBf(x) fmod(x/65536,256)*/
 
+#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:alpha*255))
+
 namespace enigma {
   extern unsigned char currentcolor[4];
 }
@@ -59,7 +61,6 @@ int merge_color(int c1,int c2,double amount)
   | (unsigned char)(__GETG(c1)+(__GETG(c1)-__GETG(c2))*(1-amount))<<8
   | (unsigned char)(__GETB(c1)+(__GETB(c1)-__GETB(c2))*(1-amount))<<16;
 }
-
 void draw_set_color(int color)
 {
 	enigma::currentcolor[0] = __GETR(color);
@@ -76,7 +77,7 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 }
 void draw_set_alpha(float alpha)
 {
-	enigma::currentcolor[3]=alpha>1?1:(alpha<0?0:alpha);
+	enigma::currentcolor[3] = bind_alpha(alpha);
 	glColor4ubv(enigma::currentcolor);
 }
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
@@ -84,7 +85,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
-	enigma::currentcolor[3] = int (255 * (alpha > 1 ? 1 : (alpha < 0 ? 0 : alpha)));
+	enigma::currentcolor[3] = bind_alpha(alpha);
 	glColor4ubv(enigma::currentcolor);
 }
 
@@ -96,7 +97,7 @@ int draw_get_green() { return enigma::currentcolor[1]; }
 int draw_get_blue()  { return enigma::currentcolor[2]; }
 
 float draw_get_alpha() {
-  return enigma::currentcolor[3];
+  return enigma::currentcolor[3] / 255.0;
 }
 int make_color_rgb(unsigned char r, unsigned char g, unsigned char b) {
   return r + (g << 8) + (b << 16);

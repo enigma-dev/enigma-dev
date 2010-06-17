@@ -37,6 +37,8 @@ graphicssystem_initialize();
 
 enigma::instance_event_iterator = NULL;
 
+event_system_initialize();
+
 //Clear the input arrays
 for(int i=0;i<3;i++){
 	enigma::last_mousestatus[i]=0;

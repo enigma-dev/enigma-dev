@@ -302,9 +302,9 @@ int test_exp_eval()
     char ghere[2048];
     value val;
     cin.getline(ghere,2048);
-    p=ghere;
+    p=ghere; int wret;
     if (p=="x") return 0;
-    if (p=="c" or p=="cls") system("cls");
+    if (p=="c" or p=="cls") wret = system("cls");
     else
     {
       val=evaluate_expression(p);
@@ -333,16 +333,16 @@ int test_exp_eval()
 
 int m_prog_loop_cfp()
 {
-  cparse_init();
-  string cftp = fc("./ENIGMAsystem/SHELL/SHELLmain.cpp");
+  string cftp = fc(0 ? "./ENIGMAsystem/SHELL/SHELLmain.cpp" : "./CompilerSource/cfile_parse/parsein.h");
 
   #ifdef linux
     timeval ts; gettimeofday(&ts,NULL);
   #else
     time_t ts = clock();
   #endif
-
+  
   int a = parse_cfile(cftp);
+  int wret;
 
   #ifdef linux
     timeval te; gettimeofday(&te,NULL);
@@ -383,7 +383,7 @@ int m_prog_loop_cfp()
       cout<<"\r\nVariables:\r\n";
         print_scope_members(&global_scope, 2);
     }
-    if (c == 'c') system("cls || clear");
+    if (c == 'c') wret = system("cls || clear");
     if (c == 'd')
     {
       cout << "Define: ";
@@ -415,7 +415,7 @@ int m_prog_loop_cfp()
       if (!f) cout << "Not found.";
     }
     if (c == 'e') print_err_line_at(a);
-    if (c == 'p') system("PAUSE");
+    if (c == 'p') wret = system("PAUSE");
     cout << ">>";
     c = getch();
   }

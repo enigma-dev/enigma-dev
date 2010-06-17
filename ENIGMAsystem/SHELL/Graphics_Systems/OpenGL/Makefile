@@ -18,7 +18,7 @@
 .eobjs_$(MODE)/GSprmtvs.o: GSprmtvs.cpp
 	-mkdir .eobjs_$(MODE)
 	g++ -c GSprmtvs.cpp		-o .eobjs_$(MODE)/GSprmtvs.o $(FLAGS)
-.eobjs_$(MODE)/GSscreen.o: GSscreen.cpp ../../Universal_System/roomsystem.h ../../Universal_System/var_cr3.h ../../Universal_System/multifunction_variant.h graphics_object.h ../../Universal_System/planar_object.h ../../Universal_System/object.h ../../Universal_System/reflexive_types.h
+.eobjs_$(MODE)/GSscreen.o: GSscreen.cpp ../../Universal_System/roomsystem.h ../../Universal_System/var_cr3.h ../../Universal_System/multifunction_variant.h ../../Universal_System/instance_system.h ../../Universal_System/reflexive_types.h ../../Universal_System/object.h graphics_object.h ../../Universal_System/planar_object.h
 	-mkdir .eobjs_$(MODE)
 	g++ -c GSscreen.cpp		-o .eobjs_$(MODE)/GSscreen.o $(FLAGS)
 .eobjs_$(MODE)/GSspriteadd.o: GSspriteadd.cpp ../../Universal_System/IMGloading.h ../../Universal_System/spritestruct.h

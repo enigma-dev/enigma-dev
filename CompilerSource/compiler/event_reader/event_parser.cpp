@@ -312,10 +312,44 @@ string event_get_human_name(int mid, int id)
 
 // Test whether there is code that will remain
 // active if a user has not declared this event.
-bool event_has_default_code(int mid, int id)
-{
+bool event_has_default_code(int mid, int id) {
   return main_event_infos[mid].specs[id]->def != "" or main_event_infos[mid].specs[id]->cons != "";
 }
+
+// Some events have special behavior as placeholders, instead of simple iteration.
+// These two functions will test for and return such.
+
+bool event_has_instead(int mid, int id) {
+  return main_event_infos[mid].specs[id]->instead != "";
+}
+
+string event_get_instead(int mid, int id) {
+  return main_event_infos[mid].specs[id]->instead;
+}
+
+
+// Some events have special behavior as placeholders, instead of simple iteration.
+// These two functions will test for and return such.
+
+bool event_has_super_check(int mid, int id) {
+  return main_event_infos[mid].specs[id]->super != "";
+}
+
+string event_get_super_check_condition(int mid, int id) {
+  return main_event_infos[mid].specs[id]->super;
+}
+
+string event_get_super_check_function(int mid, int id) {
+  event_info *e = main_event_infos[mid].specs[id];
+  return (e->super != "" and e->super[0] == '{') ? "inline bool supercheck_" + e->name + "() " + e->super + "\n\n" : "";
+}
+
+// Does this event belong on the list of events to execute?
+bool event_execution_uses_default(int mid, int id) {
+  event_info *e = main_event_infos[mid].specs[id];
+  return e->mode == et_inline or e->mode == et_special or e->mode == et_stacked;
+}
+
 
 // Fetch any code that will remain active if a
 // user has not declared this event.

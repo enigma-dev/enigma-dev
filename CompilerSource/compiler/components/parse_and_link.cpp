@@ -37,6 +37,7 @@ using namespace std;
 #include "../../backend/EnigmaStruct.h" //LateralGM interface structures
 #include "../../parser/object_storage.h"
 #include "../compile_common.h"
+#include "../event_reader/event_parser.h"
 
 #include <math.h> //log2 to calculate passes.
 
@@ -110,7 +111,12 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   {
     //For every object in Ism's struct, make our own
     unsigned ev_count = 0;
-    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = new parsed_object(es->gmObjects[i].name,es->gmObjects[i].id,es->gmObjects[i].spriteId);
+    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = 
+      new parsed_object(
+        es->gmObjects[i].name, es->gmObjects[i].id, es->gmObjects[i].spriteId,
+        es->gmObjects[i].parentId,
+        es->gmObjects[i].visible, es->gmObjects[i].solid
+      );
     
     edbg << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " events: " << flushl;
     

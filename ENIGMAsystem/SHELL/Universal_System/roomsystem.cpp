@@ -354,6 +354,7 @@ namespace enigma
 {
   void room_update()
   {
+    window_set_caption(room_caption);
     if(view_enabled)
     {
       for(int i=0;i<7;i++)

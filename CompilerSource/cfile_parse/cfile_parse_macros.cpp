@@ -258,8 +258,6 @@ pt cfile_parse_macro()
         string file = cfile.substr(spos,pos-spos-1);
         move_newline();
         
-        cout << "Include file from " << file << endl;
-        
         //Find the file and include it
         string ins;
         string include_from;

@@ -36,7 +36,7 @@
 namespace enigma
 {
   extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;
-  extern float currentcolor[4];
+  extern unsigned char currentcolor[4];
   extern bool glew_isgo;
   extern bool pbo_isgo;
 }

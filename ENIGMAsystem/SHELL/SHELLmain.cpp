@@ -137,6 +137,9 @@ goforit(at);*/
 #include "Universal_System/instance_system.h"
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
+#include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
+	#include "Graphics_Systems/OpenGL/GSscreen.h" // TODO: Move this declaration to its own header called *mandatory*.h in the root of /Graphics_Systems/.
+#include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
@@ -149,16 +152,23 @@ goforit(at);*/
 #endif
 
 
-#if ENIGMA_GS_OPENGL
-	#include "Graphics_Systems/OpenGL/GSscreen.h"
-#endif
-
 #include "Universal_System/spriteinit.h"
 #include "Universal_System/instance_create.h"
 
-//This is like main(), only cross-api
-int initialize_everything()
-{
-  #include "initialize.h"
-  return 0;
+//#include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"
+namespace enigma {
+  extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
 }
+
+//This is like main(), only cross-api
+namespace enigma
+{
+  int initialize_everything()
+  {
+    #include "initialize.h"
+    return 0;
+  }
+}
+
+//int main() { enigma::inst_iter *a = new enigma::inst_iter(NULL,NULL,NULL); }
+  

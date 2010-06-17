@@ -46,8 +46,8 @@ enum {
   c_yellow  = 0x00FFFF
 };
 
-int draw_clear(double color);
-int draw_clear_alpha(double color, double alpha);
+int draw_clear(int color);
+int draw_clear_alpha(int color, float alpha);
 
 int merge_color(int col1, int col2, double amount);
 

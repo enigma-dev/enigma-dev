@@ -42,12 +42,6 @@ extern const char* license;
 extern string format_error(string code,string err,int pos);
 
 
-extern string event_get_function_name(int mid, int id);
-extern string event_get_human_name(int mid, int id);
-extern bool   event_has_default_code(int mid, int id);
-extern string event_get_default_code(int mid, int id);
-
-
 inline string tdefault(string t) {
   return (t != "" ? t : "var");
 }

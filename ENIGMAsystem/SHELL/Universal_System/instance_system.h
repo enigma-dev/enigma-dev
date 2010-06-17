@@ -40,7 +40,7 @@ namespace enigma
   {
     object_basic* inst;     // Inst is first member for non-arithmetic dereference
     inst_iter *next, *prev; // Double linked for active removal
-    bool dead; // Whether or not this instance has been destroyed. Should be accessed rarely.
+    bool dead;              // Whether or not this instance has been destroyed. Should be accessed rarely.
     inst_iter(object_basic* i,inst_iter *n,inst_iter *p);
   };
   
@@ -48,14 +48,20 @@ namespace enigma
   struct event_iter
   {
     inst_iter *insts; // Instances for which to perform this event
-    event_iter *next; // Next iterator in the list, single linked: No need for deletion.
+    inst_iter *last;  // The last instance for which to perform it. (Both of these can be NULL)
+    std::string name; // Event name
+    void add_inst(object_basic* inst);  // Append an instance to the list
+    event_iter();
   };
   
   // This structure will store info about and lists of each object by index.
   struct objectid_base
   {
-    inst_iter *insts;
-    size_t count;
+    inst_iter *insts; // First instance on the list
+    inst_iter *last;  // Last instance on the list  (Both of these can be NULL)
+    size_t count;     // Number of instances on this list
+    void add_inst(object_basic* inst);  // Append an instance to the list
+    objectid_base();
   };
   
   // This is an iterator typedef for use with the red-black backbone of the instance list.
@@ -75,4 +81,5 @@ namespace enigma
   object_basic* fetch_instance_by_int(int x);
   
   void link_instance(object_basic* who);
+  void link_obj_instance(object_basic* who, int oid);
 }

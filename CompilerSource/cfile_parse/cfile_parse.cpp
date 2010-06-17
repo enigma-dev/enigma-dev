@@ -196,7 +196,7 @@ pt parse_cfile(string cftext)
     
     //Handle comments here, before conditionals
     //And before we disallow a preprocessor
-    if (cfile[pos]=='/')
+    if (cfile[pos] == '/')
     {
       const pt hc = handle_comments();
       if (hc == pt(-2)) continue;
@@ -250,9 +250,6 @@ pt parse_cfile(string cftext)
       
       pt sp = id_would_err_at = pos;
       while (is_letterd(cfile[++pos]));
-      
-      if (cfile.substr(sp,pos-sp) == "tawoo")
-        cout << "lol wat";
       
       string n = rconcat? id_to_handle + cfile.substr(sp,pos-sp) : cfile.substr(sp,pos-sp); //This is the word we're looking at.
       
@@ -459,6 +456,7 @@ pt parse_cfile(string cftext)
                   return pos;
                 }
                 last_named_phase = EN_WAITING;
+                last_identifier = "";
                 pos++; continue;
               }
             break;

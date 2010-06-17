@@ -31,12 +31,35 @@
 #include <string>
 #include "var_cr3.h"
 #include "reflexive_types.h"
+#include <iostream>
+#include <stdio.h>
 
 #include "instance_system.h"
 
+using namespace std;
+
 namespace enigma
 {
-  inst_iter::inst_iter(object_basic* i,inst_iter *n,inst_iter *p): inst(i), next(n), prev(p) {}
+  inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL): inst(i), next(n), prev(p) {}
+  objectid_base::objectid_base(): insts(NULL), last(NULL), count(0) {}
+  event_iter::event_iter(): insts(NULL), name() {}
+  
+  void event_iter::add_inst(object_basic* inst)
+  {
+    inst_iter *a = new inst_iter(inst,NULL,last);
+    if (last) last->next = a;
+    else insts = a;
+    last = a;
+  }
+  
+  void objectid_base::add_inst(object_basic* inst)
+  {
+    cout << inst << endl;
+    inst_iter *a = new inst_iter(inst,NULL,last); 
+    if (last) last->next = a;
+    else insts = a;
+    last = a;
+  }
   
   /* **  Variables ** */
   // This will be instantiated for each event with a unique ID or Sub ID.
@@ -46,15 +69,16 @@ namespace enigma
   objectid_base *objects;
   
   // This is the all-inclusive, centralized list of instances.
-  std::map<int,inst_iter*> instance_list;
-  typedef std::map<int,inst_iter*>::iterator iliter;
+  map<int,inst_iter*> instance_list;
+  typedef map<int,inst_iter*>::iterator iliter;
+  typedef pair<int,inst_iter*> inode_pair;
   
   // When you say "global.vname", this is the structure that answers
   object_basic *ENIGMA_global_instance; // We also need an iterator for only global.
   inst_iter ENIGMA_global_instance_iterator(ENIGMA_global_instance,0,0);
   
   // This is basically a garbage collection list for when instances are destroyed
-  std::vector<inst_iter*> cleanups; // We'll use vector
+  vector<inst_iter*> cleanups; // We'll use vector
   
   // It's a good idea to centralize an event iterator so error reporting can tell where it is.
   inst_iter *instance_event_iterator; // Not bad for efficiency, either.
@@ -119,7 +143,20 @@ namespace enigma
   //Link in an instance
   void link_instance(object_basic* who)
   {
-    
+    inst_iter *ins = new inst_iter(who);
+    pair<iliter,bool> it = instance_list.insert(inode_pair(who->id,ins));
+    if (!it.second) { puts("System error: Leak probable"); return; }
+    if (it.first != instance_list.begin()) {
+      iliter ib = it.first; ib--;
+      ins->prev = ib->second;
+    }
+    it.first++;
+    if (it.first != instance_list.end())
+      ins->next = it.first->second;
+  }
+  void link_obj_instance(object_basic* who, int oid)
+  {
+    objects[oid].add_inst(who);
   }
   
   

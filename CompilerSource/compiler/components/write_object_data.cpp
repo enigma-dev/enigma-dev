@@ -36,6 +36,7 @@ using namespace std;
 
 #include "../../backend/EnigmaStruct.h" //LateralGM interface structures
 #include "../compile_common.h"
+#include "../event_reader/event_parser.h"
 
 #include <math.h> //log2 to calculate passes.
 
@@ -48,10 +49,10 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     wto << license;
     wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
     wto << "namespace enigma\n{\n";
-      wto << "  struct object_locals: object_collisions\n  {\n";
+      wto << "  struct object_locals: event_parent\n  {\n";
         wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
         wto << "    object_locals() {}\n";
-        wto << "    object_locals(unsigned x, int y): object_collisions(x,y) {}\n  };\n";
+        wto << "    object_locals(unsigned x, int y): event_parent(x,y) {}\n  };\n";
       for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
       {
         wto << "  struct OBJ_" << i->second->name << ": object_locals\n  {";
@@ -98,19 +99,31 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         
         //Automatic constructor
         //Directed constructor (ID is specified)
-        wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, int id = (enigma::maxid++))";
+        wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++))";
           wto << ": object_locals(id, " << i->second->id << ")";
           wto << "\n    {\n";
-            //Sprite index
+            // Sprite index
               if (used_funcs::object_set_sprite) //We want to initialize 
                 wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n";
               else
                 wto << "      sprite_index = " << i->second->sprite_index << ";\n";
             
-            //Coordinates
-                wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
+            // Instance system interface
+              wto << "      enigma::link_instance(this);\n";
+              for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+                wto << "      enigma::link_obj_instance(this, " << her->second->id << ");\n";
+            
+            // Events
+              for (unsigned ii = 0; ii < i->second->events.size; ii++)
+                wto << "      enigma::event_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << "->add_inst(this);\n";
+            
+            // Coordinates
+              wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
               
-          wto << "      enigma::constructor(this);\n      myevent_create();\n    }\n";
+          wto << "      enigma::constructor(this);\n";
+          if (event_used_by_something("create"))
+            wto << "      myevent_create();";
+          wto << "\n    }\n";
         wto << "  };\n";
       }
     wto << "}\n";
@@ -152,7 +165,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     
     wto << 
     "namespace enigma\n{\n  void constructor(object_basic* instance_b)\n  {\n"
-    "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    enigma::link_instance(instance_b);\n\n"
+    "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"
     "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
     "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
     /*instance->sprite_index = enigma::objectdata[instance->obj].sprite_index;

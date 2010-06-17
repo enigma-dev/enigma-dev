@@ -8,3 +8,10 @@
 int conc(conc(a,b1),c1);
 
 #include <math.h>
+
+
+#include <string>
+#include <list>
+#include <stack>
+#include <vector>
+#include <map>

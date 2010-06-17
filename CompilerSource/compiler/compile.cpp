@@ -221,7 +221,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << "#define PRIMDEPTH2 6\n";
     wto << "#define AUTOLOCALS 0\n";
     wto << "#define MODE3DVARS 0\n";
-    wto << "void ABORT_ON_FATAL_ERRORS() { " << (false?"exit(0);":"") << " }\n";
+    wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"exit(0);":"") << " }\n";
     wto << '\n';
   wto.close();
   
@@ -229,17 +229,6 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << license;
     wto << "#define BUILDMODE " << 0 << "\n";
     wto << "#define DEBUGMODE " << 0 << "\n";
-    wto << '\n';
-  wto.close();
-  
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out);
-    wto << license;
-    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
-    {
-      wto << "case " << i->second->id << ":\n";
-      wto << "    enigma::instance_list[idn] = new enigma::" << i->second->name <<";\n";
-      wto << "  break;\n";
-    }
     wto << '\n';
   wto.close();
   
@@ -251,7 +240,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
       wto << "case " << i->second->id << ":\n";
-      wto << "    enigma::instance_list[idn] = new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
+      wto << "    new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
       wto << "  break;\n";
     }
     wto << '\n';
@@ -292,6 +281,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   res = compile_writeGlobals(es,&EGMglobal);
   if (res) return res;
   
+  // Defragged events must be written before object data, or object data cannot determine which events were used.
+  res = compile_writeDefraggedEvents(es);
+  if (res) return res;
   res = compile_writeObjectData(es,&EGMglobal);
   if (res) return res;
   
@@ -301,8 +293,6 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   res = compile_writeRoomData(es);
   if (res) return res;
   
-  res = compile_writeDefraggedEvents(es);
-  if (res) return res;
   
   
   

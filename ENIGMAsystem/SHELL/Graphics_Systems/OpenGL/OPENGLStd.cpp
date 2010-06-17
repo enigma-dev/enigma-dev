@@ -35,7 +35,7 @@
 namespace enigma
 {
   unsigned cur_bou_tha_noo_sho_eve_cha_eve=0;
-  float currentcolor[4]={0,0,0,1};
+  unsigned char currentcolor[4] = {0,0,0,255};
   bool glew_isgo;
   bool pbo_isgo;
 }

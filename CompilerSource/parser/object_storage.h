@@ -75,7 +75,8 @@ struct parsed_object
   varray<parsed_event> events;
   
   string name;
-  int id, sprite_index;
+  int id, sprite_index, parent;
+  bool visible, solid;
   
   map<string,dectrip> locals;  //Any variable KEY used but not declared, or declared as local VALUE.
   map<string,dectrip> globals; //Any variable KEY declared as global VALUE.
@@ -93,7 +94,7 @@ struct parsed_object
   void copy_calls_from(parsed_object&);
   
   parsed_object();
-  parsed_object(string,int,int);
+  parsed_object(string,int,int,int,bool,bool);
 };
 extern map<int,parsed_object*> parsed_objects;
 typedef map<int,parsed_object*>  :: iterator po_i;

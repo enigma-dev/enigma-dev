@@ -48,7 +48,9 @@ namespace enigma //TODO: Find where this belongs
 }
 
 void ENIGMA_events();
-int initialize_everything();
+namespace enigma {
+  int initialize_everything();
+} // TODO: synchronize with XLib by moving these declarations to a platform_mandatories header in the root.
 
 
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)

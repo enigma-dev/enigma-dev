@@ -73,6 +73,12 @@ extern  map<externs*, int> bigmap;
 extern int cfile_parse_main();
 int main(int argc, char *argv[])
 {
+  cparse_init();
+  
+  if (establish_bearings()) {
+    cout << "ERROR: Failed to locate the GCC";
+    getchar(); return 1;
+  }
   
   return m_prog_loop_cfp();
   
