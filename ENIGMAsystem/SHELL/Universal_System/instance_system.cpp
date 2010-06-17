@@ -42,7 +42,7 @@ namespace enigma
 {
   inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL): inst(i), next(n), prev(p) {}
   objectid_base::objectid_base(): insts(NULL), last(NULL), count(0) {}
-  event_iter::event_iter(): insts(NULL), name() {}
+  event_iter::event_iter(): insts(NULL), last(NULL), name() {}
   
   void event_iter::add_inst(object_basic* inst)
   {
