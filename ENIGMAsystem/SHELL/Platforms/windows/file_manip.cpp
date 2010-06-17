@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <string>
+using namespace std;
 
 /* OS Specific; should be moved */
 

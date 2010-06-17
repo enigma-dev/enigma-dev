@@ -47,9 +47,9 @@ namespace enigma //TODO: Find where this belongs
     #endif
 }
 
-void ENIGMA_events();
 namespace enigma {
   int initialize_everything();
+  int ENIGMA_events();
 } // TODO: synchronize with XLib by moving these declarations to a platform_mandatories header in the root.
 
 
@@ -106,7 +106,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     
     
     enigma::EnableDrawing (&hRC);
-    initialize_everything();
+    enigma::initialize_everything();
     
     //Main loop
         char bQuit=0;
@@ -127,7 +127,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
             }
             else
             {
-                ENIGMA_events();
+                enigma::ENIGMA_events();
             }
         }
     
