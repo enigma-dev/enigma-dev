@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 #include <map>
 using namespace std;
 
@@ -76,16 +77,18 @@ event_info::event_info(string n,int i): name(n), gmid(i), humanname(), par2type(
 main_event_info::main_event_info(): name(), is_group(false), specs() { }
 
 varray<main_event_info> main_event_infos;
+typedef pair<int, int> evpair;
+vector<evpair> event_sequence;
 
-void event_add(int evid,event_info* last)
+inline void event_add(int evid,event_info* last)
 {
   int lid;
   if (last->mode == et_special or last->mode == et_spec_sys or last->mmod)
     lid = last->mmod;
   else
     lid = main_event_infos[evid].specs.rbegin() != main_event_infos[evid].specs.rend() ? main_event_infos[evid].specs.rbegin()->first + 1 : 0;
-  lid = last->mmod;
   main_event_infos[evid].specs[lid] = last;
+  event_sequence.push_back(evpair(evid,lid));
 }
 
 int event_parse_resourcefile()
@@ -101,8 +104,8 @@ int event_parse_resourcefile()
   // Parse modes
   int evid = -1;            // If we are in an event, this is its ID. Otherwise, it must be -1.
   event_info *last = NULL; // What we're dealing with thus far
-  int linenum = 0; // What line we're on, for error reporting
-  int braces = 0;  // Number of curly braces we are in
+  int linenum = 0;   // What line we're on, for error reporting
+  int braces = 0;   // Number of curly braces we are in
   int iq = 0;      // In a quote in an expression
   
   enum { exp_default, exp_constant, exp_sub, exp_super, exp_instead } last_exp = exp_default; // Whether last EXPRESSION was sub or super
@@ -278,6 +281,9 @@ int event_parse_resourcefile()
       last = new event_info(str,evid);
     }
   }
+  
+  if (last and evid != -1)
+    event_add(evid,last);
   
   for (size_t i=0; i<main_event_infos.size; i++)
   {

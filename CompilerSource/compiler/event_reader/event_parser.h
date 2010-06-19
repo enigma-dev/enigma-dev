@@ -50,6 +50,7 @@ enum p_type {
 };
 
 #include <string>
+#include <vector>
 #include <map>
 
 struct event_info
@@ -98,3 +99,6 @@ extern bool   event_execution_uses_default(int mid, int id);
 
 // This is implemented in write_defragged_events.
 extern bool   event_used_by_something(string name);
+
+typedef pair<int, int> evpair;
+extern  vector<evpair> event_sequence;

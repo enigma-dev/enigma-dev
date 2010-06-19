@@ -95,9 +95,12 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
     wto << event_get_super_check_function(it->second.mid, it->second.id);
   
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
-    for (evfit it = used_events.begin(); it != used_events.end(); it++)
+    for (size_t i=0; i<event_sequence.size(); i++)
     {
-      const int mid = it->second.mid, id = it->second.id;
+      const int mid = event_sequence[i].first, id = event_sequence[i].second;
+      evfit it = used_events.find(event_get_function_name(mid,id));
+      if (it == used_events.end()) continue;
+      
       if (event_has_instead(mid,id))
       {
         wto << "    " << event_get_instead(mid,id) << endl;
