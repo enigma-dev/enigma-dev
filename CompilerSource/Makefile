@@ -10,6 +10,17 @@ SYMBOL_FLAGS       = -s # Strip symbol table
 OPTIMIZATION_FLAGS = -O2 # Optimize for speed
 # OPTIMIZATION_FLAGS = -Os # Optimize for size
 
+# OS and default target
+OS := $(shell uname -s)
+ifeq ($(OS), Linux)
+ TARGET := linux
+else
+ TARGET := win
+endif
+
+# default target (because it appears first)
+default: $(TARGET)
+
 .eobjs/cfile_parse.o: cfile_parse/cfile_parse.cpp general/darray.h general/implicit_stack.h cfile_parse/value.h cfile_parse/expression_evaluator_settings.h externs/externs.h externs/references.h cfile_parse/expression_evaluator.h cfile_parse/cfile_pushing.h cfile_parse/cparse_shared.h cfile_parse/cfile_parse_constants.h cfile_parse/cfile_parse_calls.h general/parse_basics.h cfile_parse/cparse_components.h cfile_parse/handle_letters.h
 	g++ -Wall   -fPIC -c  cfile_parse/cfile_parse.cpp		-o .eobjs/cfile_parse.o $(FLAGS)
 .eobjs/cfile_parse_macros.o: cfile_parse/cfile_parse_macros.cpp general/darray.h general/implicit_stack.h cfile_parse/value.h cfile_parse/expression_evaluator_settings.h externs/externs.h externs/references.h cfile_parse/expression_evaluator.h general/parse_basics.h cfile_parse/cfile_pushing.h cfile_parse/cparse_shared.h
@@ -109,6 +120,6 @@ lin linux unix: link
 	mv ../compileEGMf ../libcompileEGMf.so
 
 clean:
-	rm -f .eobjs/*
-	rm ../*compileEGMf.*
+	-rm -f .eobjs/*
+	-rm ../*compileEGMf.*
 

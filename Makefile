@@ -10,3 +10,7 @@ Game:
 	echo Okay.
 	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM)
 
+clean:
+	-rm -f CompilerSource/.eobjs/*
+	-rm ./*compileEGMf.*
+
