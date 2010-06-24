@@ -442,8 +442,6 @@
 		<Unit filename="SHELLmain.cpp" />
 		<Unit filename="Universal_System/CallbackArrays.cpp" />
 		<Unit filename="Universal_System/CallbackArrays.h" />
-		<Unit filename="Universal_System/EGMstd.cpp" />
-		<Unit filename="Universal_System/EGMstd.h" />
 		<Unit filename="Universal_System/ENIGMA_GLOBALS.cpp" />
 		<Unit filename="Universal_System/ENIGMA_GLOBALS.h" />
 		<Unit filename="Universal_System/GAME_GLOBALS.h" />
@@ -474,6 +472,7 @@
 		<Unit filename="Universal_System/instance_system.cpp" />
 		<Unit filename="Universal_System/instance_system.h" />
 		<Unit filename="Universal_System/key_game_globals.h" />
+		<Unit filename="Universal_System/lua_table.h" />
 		<Unit filename="Universal_System/mathnc.cpp" />
 		<Unit filename="Universal_System/mathnc.h" />
 		<Unit filename="Universal_System/multifunction_variant.h" />
@@ -497,8 +496,10 @@
 		<Unit filename="Universal_System/switch_stuff.h" />
 		<Unit filename="Universal_System/transform_object.cpp" />
 		<Unit filename="Universal_System/transform_object.h" />
-		<Unit filename="Universal_System/var_cr3.cpp" />
-		<Unit filename="Universal_System/var_cr3.h" />
+		<Unit filename="Universal_System/var4.cpp" />
+		<Unit filename="Universal_System/var4.h" />
+		<Unit filename="Universal_System/var4_lua.cpp" />
+		<Unit filename="Universal_System/var_te.h" />
 		<Unit filename="initialize.h" />
 		<Extensions>
 			<debugger />

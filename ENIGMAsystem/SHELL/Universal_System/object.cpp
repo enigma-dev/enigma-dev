@@ -28,12 +28,11 @@
 #include <map>
 #include <math.h>
 #include <string>
-#include "var_cr3.h"
+#include "var4.h"
 #include "reflexive_types.h"
 
 #include "object.h"
-
-int show_error(std::string errortext,int fatal);
+#include "../libEGMstd.h"
 
 namespace enigma
 {
@@ -44,7 +43,7 @@ namespace enigma
     double newinst_x, newinst_y;
     int newinst_obj, newinst_id;
     
-    enigma::variant object_basic::myevent_create()        { return 0; }
+    variant object_basic::myevent_create()        { return 0; }
     
     variant object_basic::myevent_gamestart()     { return 0; }
     variant object_basic::myevent_roomstart()     { return 0; }
@@ -109,18 +108,18 @@ namespace enigma
     instance->persistent = enigma::objectdata[newinst_obj].persistent;
     instance->depth = enigma::objectdata[newinst_obj].depth;
     
-    instance->hspeed.reflex1=&instance->vspeed.realval;
-      instance->hspeed.reflex2=&instance->direction.realval;
-      instance->hspeed.reflex3=&instance->speed.realval;
-    instance->vspeed.reflex1=&instance->hspeed.realval;
-      instance->vspeed.reflex2=&instance->direction.realval;
-      instance->vspeed.reflex3=&instance->speed.realval;
-    instance->direction.reflex1=&instance->speed.realval;
-      instance->direction.reflex2=&instance->hspeed.realval;
-      instance->direction.reflex3=&instance->vspeed.realval;
-    instance->speed.reflex1=&instance->direction.realval;
-      instance->speed.reflex2=&instance->hspeed.realval;
-      instance->speed.reflex3=&instance->vspeed.realval;
+    instance->hspeed.reflex1=&instance->vspeed.rval.d;
+      instance->hspeed.reflex2=&instance->direction.rval.d;
+      instance->hspeed.reflex3=&instance->speed.rval.d;
+    instance->vspeed.reflex1=&instance->hspeed.rval.d;
+      instance->vspeed.reflex2=&instance->direction.rval.d;
+      instance->vspeed.reflex3=&instance->speed.rval.d;
+    instance->direction.reflex1=&instance->speed.rval.d;
+      instance->direction.reflex2=&instance->hspeed.rval.d;
+      instance->direction.reflex3=&instance->vspeed.rval.d;
+    instance->speed.reflex1=&instance->direction.rval.d;
+      instance->speed.reflex2=&instance->hspeed.rval.d;
+      instance->speed.reflex3=&instance->vspeed.rval.d;
     
     for(int i=0;i<16;i++)
       instance->alarm[i]=-1;

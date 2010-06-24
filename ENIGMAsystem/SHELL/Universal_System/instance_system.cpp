@@ -29,7 +29,7 @@
 #include <math.h>
 #include <vector>
 #include <string>
-#include "var_cr3.h"
+#include "var4.h"
 #include "reflexive_types.h"
 #include <iostream>
 #include <stdio.h>
@@ -37,6 +37,8 @@
 #include "instance_system.h"
 
 using namespace std;
+
+int instance_count = 0;
 
 namespace enigma
 {
@@ -54,7 +56,6 @@ namespace enigma
   
   void objectid_base::add_inst(object_basic* inst)
   {
-    cout << inst << endl;
     inst_iter *a = new inst_iter(inst,NULL,last); 
     if (last) last->next = a;
     else insts = a;
@@ -159,6 +160,12 @@ namespace enigma
     objects[oid].add_inst(who);
   }
   
+  void instance_iter_queue_for_destroy(inst_iter* who)
+  {
+    enigma::cleanups.push_back(who);
+    enigma::instancecount--;
+    instance_count--;
+  }
   
   //This is the universal create event code
   void constructor(object_basic* instance);

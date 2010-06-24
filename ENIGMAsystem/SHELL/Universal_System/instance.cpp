@@ -32,7 +32,6 @@
 //#include "EGMstd.h"
 #include "object.h"
 
-#include "key_game_globals.h"
 #include "instance_system.h"
 
 namespace enigma
@@ -42,19 +41,17 @@ namespace enigma
 
 void instance_destroy(int id)
 {
+  return ;
   enigma::inst_iter* who = enigma::fetch_inst_iter_by_id(id);
-  if (who) {
-    enigma::cleanups.push_back(who);
-    enigma::instancecount--;
-    instance_count--;
-  }
+  if (who) 
+    enigma::instance_iter_queue_for_destroy(who);
 }
 
 extern int show_error(std::string,int);
 int instance_destroy()
 {
-  show_error("Nothing to destroy",0);
-  return -1;
+  enigma::instance_iter_queue_for_destroy(enigma::instance_event_iterator);
+  return 0;
 }
 
 bool instance_exists(int obj)

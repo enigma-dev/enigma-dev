@@ -3,7 +3,7 @@
 .eobjs_$(MODE)/file_manip.o: file_manip.cpp
 	-mkdir .eobjs_$(MODE)
 	g++ -c file_manip.cpp		-o .eobjs_$(MODE)/file_manip.o $(FLAGS)
-.eobjs_$(MODE)/XLIBmain.o: XLIBmain.cpp XLIBwindow.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var_cr3.h ../../Universal_System/multifunction_variant.h
+.eobjs_$(MODE)/XLIBmain.o: XLIBmain.cpp XLIBwindow.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
 	-mkdir .eobjs_$(MODE)
 	g++ -c XLIBmain.cpp		-o .eobjs_$(MODE)/XLIBmain.o $(FLAGS)
 .eobjs_$(MODE)/XLIBwindow.o: XLIBwindow.cpp

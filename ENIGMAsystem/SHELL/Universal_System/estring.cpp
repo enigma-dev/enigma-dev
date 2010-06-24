@@ -27,7 +27,7 @@
 
 #include <string>
 #include <cstdlib>
-#include "var_cr3.h"
+#include "var4.h"
 
 const char ldgrs[256]={
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -47,63 +47,62 @@ const char ldgrs[256]={
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-bool is_string(enigma::variant val){return val.type;}
-bool is_string(var& val){return val.values[0]->type;}
-bool is_real(enigma::variant val){return !val.type;}
-bool is_real(var& val){return !val.values[0]->type;}
-
-std::string chr(char val){
+bool is_string(variant val) { return val.type;  }
+bool is_real(variant val)   { return !val.type; }
+string chr(char val){
 	char ret[2]={val,0};
 	return ret;
 }
 
 int ord(char str){return str;}
 int ord(char* str){return *str;}
-int ord(std::string str){return str[0];}
+int ord(string str){return str[0];}
 
-double real(std::string str){return atof(str.c_str());}
-double real(char* str){return atof(str);}
-double real(double str){return str;}
-double real(var& str){return str.values[0]->type?atof(((std::string)str).c_str()):(double)str;}
+double real(string str) { return atof(str.c_str()); }
+double real(char* str)  { return atof(str); }
+double real(double str) { return str; }
+double real(variant str){ return str.type ? atof(((string)str).c_str()) : (double) str; }
+double real(var& str)   { return (*str).type ? atof(((string)str).c_str()) : (double) str; }
 
-size_t string_length(std::string str){return str.length();}
-size_t string_length(char* str){
-	char*s=str;
-	while(*s++);
-	return s-str;
+size_t string_length(string str) { return str.length(); }
+size_t string_length(const char* str)
+{
+	const char* s = str;
+	while (*s++);
+	return str - s;
 }
 
-int string_pos(std::string substr,std::string str){
+int string_pos(string substr,string str){
 	return str.find(substr,0)+1;
 }
 
-std::string string_copy(std::string str,double index,double count){
+string string_copy(string str,double index,double count){
 	unsigned int indx=index<=1?0:(int)index-1;
 	return indx>str.length()?"":str.substr(indx,(int)count);
 }
 
-std::string string_char_at(std::string str,double index){
+string string_char_at(string str,double index){
 	unsigned int n=index<=1?0:(unsigned int)index-1;
 	char ret[2]={n<str.length()?str[n]:0,0};
 	return ret;
 }
 
-std::string string_delete(std::string str,double index,double count){
+string string_delete(string str,double index,double count){
 	return str.erase(index<2?0:(size_t)index-1,count<1?0:(size_t)count);
 }
 
-std::string string_insert(std::string substr,std::string str,double index){
+string string_insert(string substr,string str,double index){
 	if(index<=1) return str.insert(0,substr);
 	size_t x=(size_t)index-1;
 	return str.insert(x>str.length()?str.length():x,substr);
 }
 
-std::string string_replace(std::string str,std::string substr,std::string newstr){
+string string_replace(string str,string substr,string newstr){
 	size_t pos=str.find(substr,0);
 	return pos==(size_t)-1?str:str.replace(pos,substr.length(),newstr);
 }
 
-std::string string_replace_all(std::string str,std::string substr,std::string newstr){
+string string_replace_all(string str,string substr,string newstr){
 	int pos=0,sublen=substr.length(),newlen=newstr.length();
     while((pos=str.find(substr,pos))!=-1){
 		str.replace(pos,sublen,newstr);
@@ -112,48 +111,48 @@ std::string string_replace_all(std::string str,std::string substr,std::string ne
 	return str;
 }
 
-int string_count(std::string substr,std::string str){
+int string_count(string substr,string str){
 	int sublen=substr.length(),pos=-sublen,occ=0;
     while((pos=str.find(substr,pos+sublen))!=-1) occ++;
     return occ;
 }
 
-std::string string_lower(std::string str){
+string string_lower(string str){
 	int len=str.length()-1;
 	for(int i=0;i<len;i++)
 		if(ldgrs[(unsigned char)str[i]]&2) str[i]-=32;
 	return str;
 }
 
-std::string string_upper(std::string str){
+string string_upper(string str){
 	int len=str.length()-1;
 	for(int i=0;i<len;i++)
 		if(ldgrs[(unsigned char)str[i]]&1) str[i]-=32;
 	return str;
 }
 
-std::string string_repeat(std::string str,int count){
-	std::string ret;
+string string_repeat(string str,int count){
+	string ret;
 	for(int i=count;i;i--) ret.append(str);
 	return ret;
 }
 
-std::string string_letters(std::string str){
-	std::string ret;
+string string_letters(string str){
+	string ret;
 	for(const char*c=str.c_str();*c;c++)
 		if(ldgrs[(unsigned char)*c]&3) ret+=*c;
 	return ret;
 }
 
-std::string string_digits(std::string str){
-	std::string ret;
+string string_digits(string str){
+	string ret;
 	for(const char*c=str.c_str();*c;c++)
 		if(ldgrs[(unsigned char)*c]&4) ret+=*c;
 	return ret;
 }
 
-std::string string_lettersdigits(std::string str){
-	std::string ret;
+string string_lettersdigits(string str){
+	string ret;
 	for(const char*c=str.c_str();*c;c++)
 		if(ldgrs[(unsigned char)*c]) ret+=*c;
 	return ret;

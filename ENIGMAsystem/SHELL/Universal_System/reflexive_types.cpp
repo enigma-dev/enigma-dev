@@ -27,32 +27,33 @@
 
 #include <math.h>
 #include <string>
-#include "var_cr3.h"
+#include "var4.h"
 
 //Make direction work
 #define TYPEPURPOSE directionv
-#define TYPEFUNCTION *reflex2 = *reflex1 * cos(realval*M_PI/180); *reflex3 = *reflex1 * -sin(realval*M_PI/180);
+#define TYPEVARIABLES double *reflex1, *reflex2, *reflex3;
+#define TYPEFUNCTION *reflex2 = *reflex1 * cos(rval.d*M_PI/180); *reflex3 = *reflex1 * -sin(rval.d*M_PI/180);
 #include "multifunction_variant_source.h"
 #undef TYPEFUNCTION
 #undef TYPEPURPOSE
 
-//Make speed work -- same as above, but realval and reflex1 are switched.
+//Make speed work -- same as above, but rval.d and reflex1 are switched.
 #define TYPEPURPOSE speedv
-#define TYPEFUNCTION *reflex2 = realval * cos(*reflex1*M_PI/180); *reflex3 = realval * -sin(*reflex1*M_PI/180);
+#define TYPEFUNCTION *reflex2 = rval.d * cos(*reflex1*M_PI/180); *reflex3 = rval.d * -sin(*reflex1*M_PI/180);
 #include "multifunction_variant_source.h"
 #undef TYPEFUNCTION
 #undef TYPEPURPOSE
 
 //Make hspeed work
 #define TYPEPURPOSE hspeedv
-#define TYPEFUNCTION *reflex2 = (int(180+180*(1-atan2(*reflex1,realval)/M_PI)))%360; *reflex3 = hypot(realval,*reflex1);
+#define TYPEFUNCTION *reflex2 = (int(180+180*(1-atan2(*reflex1,rval.d)/M_PI)))%360; *reflex3 = hypot(rval.d,*reflex1);
 #include "multifunction_variant_source.h"
 #undef TYPEFUNCTION
 #undef TYPEPURPOSE
 
 //Make vspeed work -- Same as above, except the arguments to atan2 are reversed
 #define TYPEPURPOSE vspeedv
-#define TYPEFUNCTION *reflex2 = (int(180+180*(1-atan2(realval,*reflex1)/M_PI)))%360; *reflex3 = hypot(realval,*reflex1);
+#define TYPEFUNCTION *reflex2 = (int(180+180*(1-atan2(rval.d,*reflex1)/M_PI)))%360; *reflex3 = hypot(rval.d,*reflex1);
 #include "multifunction_variant_source.h"
 #undef TYPEFUNCTION
 #undef TYPEPURPOSE

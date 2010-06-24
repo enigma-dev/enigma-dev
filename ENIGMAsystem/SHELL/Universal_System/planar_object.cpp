@@ -33,7 +33,7 @@
 #include <math.h>
 
 #include "object.h"
-#include "var_cr3.h"
+#include "var4.h"
 #include "reflexive_types.h"
 
 #include "planar_object.h"
@@ -42,33 +42,33 @@ namespace enigma
 {
   object_planar::object_planar()
   {
-    hspeed.reflex1 = &vspeed.realval;
-      hspeed.reflex2 = &direction.realval;
-      hspeed.reflex3 = &speed.realval;
-    vspeed.reflex1 = &hspeed.realval;
-      vspeed.reflex2 = &direction.realval;
-      vspeed.reflex3 = &speed.realval;
-    direction.reflex1 = &speed.realval;
-      direction.reflex2 = &hspeed.realval;
-      direction.reflex3 = &vspeed.realval;
-    speed.reflex1 = &direction.realval;
-      speed.reflex2 = &hspeed.realval;
-      speed.reflex3 = &vspeed.realval;
+    hspeed.reflex1 = &vspeed.rval.d;
+      hspeed.reflex2 = &direction.rval.d;
+      hspeed.reflex3 = &speed.rval.d;
+    vspeed.reflex1 = &hspeed.rval.d;
+      vspeed.reflex2 = &direction.rval.d;
+      vspeed.reflex3 = &speed.rval.d;
+    direction.reflex1 = &speed.rval.d;
+      direction.reflex2 = &hspeed.rval.d;
+      direction.reflex3 = &vspeed.rval.d;
+    speed.reflex1 = &direction.rval.d;
+      speed.reflex2 = &hspeed.rval.d;
+      speed.reflex3 = &vspeed.rval.d;
   }
   object_planar::object_planar(unsigned id, int objid): object_basic(id,objid)
   {
-    hspeed.reflex1 = &vspeed.realval;
-      hspeed.reflex2 = &direction.realval;
-      hspeed.reflex3 = &speed.realval;
-    vspeed.reflex1 = &hspeed.realval;
-      vspeed.reflex2 = &direction.realval;
-      vspeed.reflex3 = &speed.realval;
-    direction.reflex1 = &speed.realval;
-      direction.reflex2 = &hspeed.realval;
-      direction.reflex3 = &vspeed.realval;
-    speed.reflex1 = &direction.realval;
-      speed.reflex2 = &hspeed.realval;
-      speed.reflex3 = &vspeed.realval;
+    hspeed.reflex1 = &vspeed.rval.d;
+      hspeed.reflex2 = &direction.rval.d;
+      hspeed.reflex3 = &speed.rval.d;
+    vspeed.reflex1 = &hspeed.rval.d;
+      vspeed.reflex2 = &direction.rval.d;
+      vspeed.reflex3 = &speed.rval.d;
+    direction.reflex1 = &speed.rval.d;
+      direction.reflex2 = &hspeed.rval.d;
+      direction.reflex3 = &vspeed.rval.d;
+    speed.reflex1 = &direction.rval.d;
+      speed.reflex2 = &hspeed.rval.d;
+      speed.reflex3 = &vspeed.rval.d;
   }
   
   //This just needs implemented virtually so instance_destroy works.
@@ -81,31 +81,31 @@ namespace enigma
     instance->yprevious=instance->y;
     if(instance->gravity || instance->friction)
     {
-      double hb4 = instance->hspeed.realval, vb4 = instance->vspeed.realval;
+      double hb4 = instance->hspeed.rval.d, vb4 = instance->vspeed.rval.d;
       int sign = (instance->speed > 0) - (instance->speed < 0);
       
-      instance->hspeed.realval -= (sign * instance->friction) * cos(instance->direction.realval * M_PI/180);
-      if ((hb4>0 && instance->hspeed.realval<0) || (hb4<0 && instance->hspeed.realval>0))
-        instance->hspeed.realval=0;
-      instance->vspeed.realval -= (sign * instance->friction) * -sin(instance->direction.realval * M_PI/180);
-      if ((vb4>0 && instance->vspeed.realval<0) || (vb4<0 && instance->vspeed.realval>0))
-        instance->vspeed.realval=0;
+      instance->hspeed.rval.d -= (sign * instance->friction) * cos(instance->direction.rval.d * M_PI/180);
+      if ((hb4>0 && instance->hspeed.rval.d<0) || (hb4<0 && instance->hspeed.rval.d>0))
+        instance->hspeed.rval.d=0;
+      instance->vspeed.rval.d -= (sign * instance->friction) * -sin(instance->direction.rval.d * M_PI/180);
+      if ((vb4>0 && instance->vspeed.rval.d<0) || (vb4<0 && instance->vspeed.rval.d>0))
+        instance->vspeed.rval.d=0;
       
-      instance->hspeed.realval += (instance->gravity) * cos(instance->gravity_direction * M_PI/180);
-      instance->vspeed.realval += (instance->gravity) * -sin(instance->gravity_direction * M_PI/180);
+      instance->hspeed.rval.d += (instance->gravity) * cos(instance->gravity_direction * M_PI/180);
+      instance->vspeed.rval.d += (instance->gravity) * -sin(instance->gravity_direction * M_PI/180);
       
-      if(instance->speed.realval<0) {
-        instance->direction.realval=fmod(180+instance->direction.realval,360);//180+(int(180+180*(1-atan2(instance->vspeed.realval,instance->hspeed.realval)/pi)))%360;
-        instance->speed.realval=-hypotf((instance->hspeed.realval),(instance->vspeed.realval));
+      if(instance->speed.rval.d<0) {
+        instance->direction.rval.d=fmod(180+instance->direction.rval.d,360);//180+(int(180+180*(1-atan2(instance->vspeed.rval.d,instance->hspeed.rval.d)/pi)))%360;
+        instance->speed.rval.d=-hypotf((instance->hspeed.rval.d),(instance->vspeed.rval.d));
       }
       else {
-        instance->direction.realval=fmod(instance->direction.realval,360);//(int(180+180*(1-atan2(instance->vspeed.realval,instance->hspeed.realval)/pi)))%360;
-        instance->speed.realval=hypotf((instance->hspeed.realval),(instance->vspeed.realval));
+        instance->direction.rval.d=fmod(instance->direction.rval.d,360);//(int(180+180*(1-atan2(instance->vspeed.rval.d,instance->hspeed.rval.d)/pi)))%360;
+        instance->speed.rval.d=hypotf((instance->hspeed.rval.d),(instance->vspeed.rval.d));
       }
-      if(instance->direction.realval<0) instance->direction.realval+=360;
+      if(instance->direction.rval.d<0) instance->direction.rval.d+=360;
     }
     
-    instance->x+=instance->hspeed.realval;
-    instance->y+=instance->vspeed.realval;
+    instance->x+=instance->hspeed.rval.d;
+    instance->y+=instance->vspeed.rval.d;
   }
 }

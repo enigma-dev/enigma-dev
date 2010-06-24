@@ -29,7 +29,7 @@
 #include <math.h>
 #include <string>
 
-#include "var_cr3.h"
+#include "var4.h"
 #include "reflexive_types.h"
 
 //#include "GAME_GLOBALS.h"
@@ -160,7 +160,7 @@ namespace enigma
 //Implement the "room" global before we continue
 int room_goto(double roomind);
   #define TYPEPURPOSE roomv
-  #define TYPEFUNCTION room_goto((int)realval);
+  #define TYPEFUNCTION room_goto((int)rval.d);
   #include "multifunction_variant_source.h"
   #undef TYPEFUNCTION
   #undef TYPEPURPOSE
@@ -191,7 +191,7 @@ int room_goto(double roomind)
 	}
 	enigma::nodestroy = 0;
 	
-	room.realval = indx;
+	room.rval.d = indx;
 	
 	enigma::roomdata[indx].gotome();
 	return 0;
@@ -199,7 +199,7 @@ int room_goto(double roomind)
 
 int room_restart()
 {
-	int indx=(int)room.realval;
+	int indx=(int)room.rval.d;
 	
 	#if SHOWERRORS
 	if (enigma::roomdata.find(indx) == enigma::roomdata.end()) {
@@ -249,7 +249,7 @@ int room_goto_absolute(double index)
 		instance_destroy(it->inst->id);
 	}
 	enigma::nodestroy=0;
-	room.realval=indx;
+	room.rval.d=indx;
 	enigma::roomdata[indx].gotome();
 	return 0;
 }
@@ -281,7 +281,7 @@ int room_goto_first()
     }
     enigma::nodestroy=0;
 
-    room.realval=indx;
+    room.rval.d=indx;
     enigma::roomdata[indx].gotome();
 
     return 0;
@@ -321,7 +321,7 @@ int room_goto_next()
     }
     enigma::nodestroy=0;
 
-    room.realval = enigma::roomiter->first;
+    room.rval.d = enigma::roomiter->first;
     enigma::roomiter->second.gotome();
     return 0;
 }

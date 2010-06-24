@@ -63,7 +63,7 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   wto << "  {" << endl;
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
   {
-    wto << "    virtual enigma::variant myevent_" << it->first << "()";
+    wto << "    virtual variant myevent_" << it->first << "()";
     if (event_has_default_code(it->second.mid,it->second.id))
       wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << "    return 0;" << endl << "    }" << endl;
     else wto << " { return 0; }" << endl;

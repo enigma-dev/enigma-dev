@@ -79,10 +79,10 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           if (subscr != scr_lookup.end()) //If we've got ourselves a script
           {
             const char* comma = "";
-            wto << "\n    enigma::variant " << it->first << "(";
+            wto << "\n    variant " << it->first << "(";
             for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
             {
-              wto << comma << "enigma::variant argument" << argn << " = 0";
+              wto << comma << "variant argument" << argn << " = 0";
               comma = ", ";
             }
             wto << ");";
@@ -138,7 +138,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
       {
         string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
-        wto << "enigma::variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
+        wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
           print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
         wto << "\n  return 0;\n}\n\n";
       }
@@ -150,10 +150,10 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         if (subscr != scr_lookup.end()) //If we've got ourselves a script
         {
           const char* comma = "";
-          wto << "enigma::variant enigma::OBJ_" << i->second->name << "::" << it->first << "(";
+          wto << "variant enigma::OBJ_" << i->second->name << "::" << it->first << "(";
           for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
           {
-            wto << comma << "enigma::variant argument" << argn;
+            wto << comma << "variant argument" << argn;
             comma = ", ";
           }
           wto << ")\n{\n  ";

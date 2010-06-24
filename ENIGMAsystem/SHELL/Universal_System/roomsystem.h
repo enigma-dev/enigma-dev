@@ -64,13 +64,13 @@ extern double view_yview[9];
 
 #include <map>
 #include <string>
-#include "var_cr3.h"
+#include "var4.h"
 
 extern std::string room_caption;
 
 //Make "room" globsl work
 #define TYPEPURPOSE roomv
-#define TYPEFUNCTION() room_goto((int)realval);
+#define TYPEFUNCTION() room_goto((int)rval.d);
 #include "multifunction_variant.h"
 #undef TYPEFUNCTION
 #undef TYPEPURPOSE

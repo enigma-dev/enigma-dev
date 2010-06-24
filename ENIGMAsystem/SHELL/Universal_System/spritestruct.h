@@ -30,17 +30,20 @@ namespace enigma
   struct sprite
   {
     int width,height,subcount,xoffset,yoffset,id;
-    std::map<int,unsigned int> texturearray;       //Each subimage has a texture
+    unsigned int *texturearray; //Each subimage has a texture
     
     //unsigned int*texturearray;
     #if COLLIGMA
-    std::map<int,collCustom*> bitmask;     //Each subimage gets a custom mask
+    collCustom **bitmask;     //Each subimage gets a custom mask
     #endif
     
     //void*  *pixeldata;
     double texbordx, texbordy;
     int bbox_bottom, bbox_left, bbox_right, bbox_top;
     bool where,smooth;
+    
+    sprite();
+    sprite(unsigned int);
   };
   extern sprite** spritestructarray;
 	extern unsigned int sprite_idmax;

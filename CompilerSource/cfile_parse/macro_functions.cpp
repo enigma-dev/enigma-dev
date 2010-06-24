@@ -177,7 +177,9 @@ bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr
   for (int i = 0; i < numparams or lvl > 0; i++) //parse out each parameter value into an array
   {
     if (i > numparams)
-    { macrostr = "Expected closing parenthesis for macro function at this point: too many parameters"; return false; }
+      return macrostr = "Expected closing parenthesis for macro function at this point: too many parameters", false;
+    if (lvl <= 0)
+      return macrostr = "Expected additional macro parameters before end parenthesis: function requires " + tostring(numparams) + " parameters, passed only " + tostring(args_given), false;
     const pt spos = pos;
     while (is_useless(cfile[pos])) pos++;
     while ((lvl > 1 or (cfile[pos] != ',' or args_given == au_at)) and pos < len and lvl)
@@ -201,7 +203,7 @@ bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr
   if (args_given != numparams)
   {
     if (au_at == -1 or args_given <= au_at) {
-      macrostr = "Macro function requires " + tostring(numparams) + " parameters, passed " + tostring(args_given);
+      macrostr = "Macro function requires " + tostring(numparams) + " parameters, passed only " + tostring(args_given);
       return false;
     }
   }

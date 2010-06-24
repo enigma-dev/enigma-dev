@@ -25,32 +25,60 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "var_te.h"
+#include <string>
+using std::string;
 
-namespace enigma
+#include "var4.h"      // Var stuff
+#include "lua_table.h" // The Lua part
+
+#define as_lua(x) (*(vararray*)(&(x)))
+#define vararray lua_table<lua_table<variant> >
+
+void var::initialize() {
+  new(&values) vararray;
+}
+void var::cleanup() {
+  as_lua(values) . ~vararray();
+}
+
+variant& var::operator*  ()
 {
-  struct TYPEPURPOSE:variant
-  {
-    double *reflex1,*reflex2,*reflex3;
-    
-    #undef  types_extrapolate_alldec
-    #define types_extrapolate_alldec(prefix)\
-     types_extrapolate_real_p  (prefix,;)\
-     types_extrapolate_string_p(prefix,;)\
-     prefix (const variant &x);\
-     prefix (const var &x);
-    
-    //These are assignment operators and require a reference to be passed
-    types_extrapolate_alldec(double& operator=);
-    types_extrapolate_alldec(double& operator-=);
-    types_extrapolate_alldec(double& operator*=);
-    types_extrapolate_alldec(double& operator/=);
-    types_extrapolate_alldec(double& operator<<=);
-    types_extrapolate_alldec(double& operator>>=);
-    types_extrapolate_alldec(double& operator&=);
-    types_extrapolate_alldec(double& operator|=);
-    types_extrapolate_alldec(double& operator^=);
-    
-    #undef  types_extrapolate_alldec
-  };
+  return **as_lua(values);
+}
+variant& var::operator[] (int ind)
+{
+  return (*as_lua(values))[size_t(ind)];
+}
+variant& var::operator() (int ind)
+{
+  return (*as_lua(values))[size_t(ind)];
+}
+variant& var::operator() (int ind1,int ind2)
+{
+  return as_lua(values)[size_t(ind2)][size_t(ind1)];
+}
+
+const variant& var::operator*  () const
+{
+  return **as_lua(values);
+}
+const variant& var::operator[] (int ind) const
+{
+  return (*as_lua(values))[size_t(ind)];
+}
+const variant& var::operator() (int ind) const
+{
+  return (*as_lua(values))[size_t(ind)];
+}
+const variant& var::operator() (int ind1,int ind2) const
+{
+  return as_lua(values)[size_t(ind2)][size_t(ind1)];
+}
+
+var::var(const var& x) {
+  new(&values) vararray(*(vararray*)&(x.values));
+}
+var& var::operator= (const var& x) {
+  *(vararray*)&(values) = *(vararray*)&(x.values);
+  return *this;
 }

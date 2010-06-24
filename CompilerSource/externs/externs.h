@@ -135,6 +135,7 @@ struct macro_type
   macro_type(string x);
   macro_type &operator= (string x);
   bool check_recurse_danger(string n);
+  void clear_func();
   void assign_func(string n);
   void set_unltd_args(int x);
   void addarg(string x);

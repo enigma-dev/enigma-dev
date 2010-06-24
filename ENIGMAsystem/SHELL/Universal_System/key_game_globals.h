@@ -66,8 +66,7 @@ extern global:     event_object
 extern global:     event_type*/
 extern double      fps;/*
 extern global:     game_id
-extern global:     health*/
-extern double      instance_count;/*
+extern global:     health
 extern global:     instance_id
 extern global:     keyboard_key
 extern global:     keyboard_lastchar

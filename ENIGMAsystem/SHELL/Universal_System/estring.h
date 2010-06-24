@@ -25,13 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
-extern bool is_string(enigma::variant val);
-bool is_string(var& val);
+bool is_string(variant val);
+bool is_real(variant val);
 
-bool is_real(enigma::variant val);
-bool is_real(var& val);
-
-std::string chr(char val);
+string chr(char val);
 
 int ord(char str);
 int ord(char* str);

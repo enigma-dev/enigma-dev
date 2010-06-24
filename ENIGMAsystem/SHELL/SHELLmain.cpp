@@ -69,13 +69,13 @@ goforit(at);*/
 
 #include "API_Switchboard.h"
 
-#include "Universal_System/var_cr3.h"
+#include "Universal_System/var4.h"
 #include "Universal_System/reflexive_types.h"
 
 #include "Universal_System/GAME_GLOBALS.h"
 #include "Universal_System/ENIGMA_GLOBALS.h"
 
-#include "Universal_System/EGMstd.h"
+#include "libEGMstd.h"
 
 
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"

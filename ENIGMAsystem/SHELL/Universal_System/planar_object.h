@@ -34,7 +34,7 @@
 #define _planar_object_h
 
 #include "object.h"
-#include "var_cr3.h"
+#include "var4.h"
 #include "reflexive_types.h"
 
 namespace enigma

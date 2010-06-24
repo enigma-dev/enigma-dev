@@ -29,11 +29,10 @@
 #include <math.h>
 #include <string>
 
-#include "var_cr3.h"
+#include "var4.h"
 #include "reflexive_types.h"
 
 #include "ENIGMA_GLOBALS.h"
-#include "EGMstd.h"
 
 #include "collisions_object.h"
 #include "instance_system.h"

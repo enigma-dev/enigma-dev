@@ -29,8 +29,7 @@
 #include <gl/gl.h>
 #include <windows.h>
 #include "../../API_Switchboard.h"
-
-int show_error(std::string error,int fatal);
+#include "../../libEGMstd.h"
 
 void windowsystem_write_exename(char* exenamehere)
 {

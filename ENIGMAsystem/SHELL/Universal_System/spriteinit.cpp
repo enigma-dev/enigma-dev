@@ -29,7 +29,8 @@
 #include <stdio.h>
 #include <iostream>
 #include "../Graphics_Systems/OpenGL/GSspriteadd.h"
-#include "../Platforms/windows/WINDOWSStd.h"
+#include "../Platforms/platforms_mandatory.h"
+#include "../libEGMstd.h"
 #include "compression.h"
 
 using namespace std;

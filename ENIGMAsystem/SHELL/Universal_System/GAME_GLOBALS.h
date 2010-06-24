@@ -65,8 +65,7 @@ global:     event_object
 global:     event_type*/
 double      fps;/*
 global:     game_id
-global:     health*/
-double      instance_count=0;/*
+global:     health*//*
 global:     instance_id
 global:     keyboard_key
 global:     keyboard_lastchar

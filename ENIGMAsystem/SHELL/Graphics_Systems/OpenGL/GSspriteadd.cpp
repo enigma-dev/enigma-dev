@@ -37,8 +37,7 @@ int sprite_add(std::string filename,double imgnumb,double precise,double transpa
 #include <GL/gl.h>
 #include "../../Universal_System/IMGloading.h"
 #include "../../Universal_System/spritestruct.h"
-
-int show_error(std::string errortext,int fatal); //TODO: Include this from somewhere
+#include "../../libEGMstd.h"
 
 int sprite_add(std::string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)
 {

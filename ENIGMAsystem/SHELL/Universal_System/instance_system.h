@@ -29,7 +29,7 @@
 #include <math.h>
 #include <vector>
 #include <string>
-#include "var_cr3.h"
+#include "var4.h"
 #include "reflexive_types.h"
 
 #include "object.h"
@@ -82,4 +82,8 @@ namespace enigma
   
   void link_instance(object_basic* who);
   void link_obj_instance(object_basic* who, int oid);
+  void instance_iter_queue_for_destroy(inst_iter* who);
 }
+
+// Other
+extern int instance_count;

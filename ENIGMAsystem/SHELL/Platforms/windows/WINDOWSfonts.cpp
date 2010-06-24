@@ -28,8 +28,7 @@
 #include <string>
 #include <gl/gl.h>
 #include <windows.h>
-
-int show_error(std::string errortext,int fatal);
+#include "../../libEGMstd.h"
 
 namespace enigma
 {

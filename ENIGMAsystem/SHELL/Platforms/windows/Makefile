@@ -6,16 +6,16 @@
 .eobjs_$(MODE)/WINDOWScallback.o: WINDOWScallback.cpp
 	-mkdir .eobjs_$(MODE)
 	g++ -c WINDOWScallback.cpp		-o .eobjs_$(MODE)/WINDOWScallback.o $(FLAGS)
-.eobjs_$(MODE)/WINDOWSfonts.o: WINDOWSfonts.cpp
+.eobjs_$(MODE)/WINDOWSfonts.o: WINDOWSfonts.cpp ../../libEGMstd.h
 	-mkdir .eobjs_$(MODE)
 	g++ -c WINDOWSfonts.cpp		-o .eobjs_$(MODE)/WINDOWSfonts.o $(FLAGS)
-.eobjs_$(MODE)/WINDOWSmain.o: WINDOWSmain.cpp ../../Universal_System/roomsystem.h ../../Universal_System/var_cr3.h ../../Universal_System/multifunction_variant.h
+.eobjs_$(MODE)/WINDOWSmain.o: WINDOWSmain.cpp ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
 	-mkdir .eobjs_$(MODE)
 	g++ -c WINDOWSmain.cpp		-o .eobjs_$(MODE)/WINDOWSmain.o $(FLAGS)
 .eobjs_$(MODE)/WINDOWSshow_error.o: WINDOWSshow_error.cpp
 	-mkdir .eobjs_$(MODE)
 	g++ -c WINDOWSshow_error.cpp		-o .eobjs_$(MODE)/WINDOWSshow_error.o $(FLAGS)
-.eobjs_$(MODE)/WINDOWSstd.o: WINDOWSstd.cpp ../../API_Switchboard.h
+.eobjs_$(MODE)/WINDOWSstd.o: WINDOWSstd.cpp ../../API_Switchboard.h ../../libEGMstd.h
 	-mkdir .eobjs_$(MODE)
 	g++ -c WINDOWSstd.cpp		-o .eobjs_$(MODE)/WINDOWSstd.o $(FLAGS)
 .eobjs_$(MODE)/WINDOWSwindow.o: WINDOWSwindow.cpp

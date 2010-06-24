@@ -416,6 +416,7 @@ int m_prog_loop_cfp()
     }
     if (c == 'e') print_err_line_at(a);
     if (c == 'p') wret = system("PAUSE");
+    if (c == '>') cout << cfile << endl;
     cout << ">>";
     c = getch();
   }

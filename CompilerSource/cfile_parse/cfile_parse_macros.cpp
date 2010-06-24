@@ -219,6 +219,7 @@ pt cfile_parse_macro()
         *t = definiens;
         if (arg_count != -1)
         {
+          t->clear_func();
           t->assign_func(definiendum);
           for (int i=0; i<arg_count; i++)
             t->addarg(args[i]);

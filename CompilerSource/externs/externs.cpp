@@ -145,6 +145,7 @@ macro_type::macro_type(): argc(-1), args_uat(-1), recurse_danger(0) {}
 macro_type::macro_type(string x): argc(-1), val(x), args_uat(-1), recurse_danger(0) {}
 
 macro_type &macro_type::operator= (string x) { val = x; return *this; }
+void macro_type::clear_func()          { argc = -1; }
 void macro_type::assign_func(string n) { if (argc==-1) argc=0; recurse_danger = check_recurse_danger(n); }
 void macro_type::set_unltd_args(int x) { args_uat = x; }
 void macro_type::addarg(string x) { args[argc++] = x; }
