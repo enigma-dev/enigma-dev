@@ -42,31 +42,31 @@ namespace enigma
 {
   object_planar::object_planar()
   {
-    hspeed.reflex1 = &vspeed.rval.d;
+    hspeed.reflex1   = &vspeed.rval.d;
       hspeed.reflex2 = &direction.rval.d;
       hspeed.reflex3 = &speed.rval.d;
-    vspeed.reflex1 = &hspeed.rval.d;
-      vspeed.reflex2 = &direction.rval.d;
-      vspeed.reflex3 = &speed.rval.d;
-    direction.reflex1 = &speed.rval.d;
+    vspeed.reflex1    = &hspeed.rval.d;
+      vspeed.reflex2  = &direction.rval.d;
+      vspeed.reflex3  = &speed.rval.d;
+    direction.reflex1   = &speed.rval.d;
       direction.reflex2 = &hspeed.rval.d;
       direction.reflex3 = &vspeed.rval.d;
-    speed.reflex1 = &direction.rval.d;
+    speed.reflex1   = &direction.rval.d;
       speed.reflex2 = &hspeed.rval.d;
       speed.reflex3 = &vspeed.rval.d;
   }
   object_planar::object_planar(unsigned id, int objid): object_basic(id,objid)
   {
-    hspeed.reflex1 = &vspeed.rval.d;
+    hspeed.reflex1   = &vspeed.rval.d;
       hspeed.reflex2 = &direction.rval.d;
       hspeed.reflex3 = &speed.rval.d;
-    vspeed.reflex1 = &hspeed.rval.d;
-      vspeed.reflex2 = &direction.rval.d;
-      vspeed.reflex3 = &speed.rval.d;
-    direction.reflex1 = &speed.rval.d;
+    vspeed.reflex1    = &hspeed.rval.d;
+      vspeed.reflex2  = &direction.rval.d;
+      vspeed.reflex3  = &speed.rval.d;
+    direction.reflex1   = &speed.rval.d;
       direction.reflex2 = &hspeed.rval.d;
       direction.reflex3 = &vspeed.rval.d;
-    speed.reflex1 = &direction.rval.d;
+    speed.reflex1   = &direction.rval.d;
       speed.reflex2 = &hspeed.rval.d;
       speed.reflex3 = &vspeed.rval.d;
   }

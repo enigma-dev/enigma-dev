@@ -70,9 +70,11 @@ extern std::string room_caption;
 
 //Make "room" globsl work
 #define TYPEPURPOSE roomv
+#define TYPEVARIABLES 
 #define TYPEFUNCTION() room_goto((int)rval.d);
 #include "multifunction_variant.h"
 #undef TYPEFUNCTION
+#undef TYPEVARIABLES
 #undef TYPEPURPOSE
 
 namespace enigma

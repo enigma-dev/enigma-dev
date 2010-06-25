@@ -103,11 +103,16 @@ namespace enigma
       spritestructarray[i] = NULL;
   }
   
+  void sprite_safety_override() {
+    sprites_allocate_initial(15); //15's a good number.
+    //...Fuck you.
+  }
+  
   //Adds an empty sprite to the list
-  int new_sprexe(unsigned sprid, int w, int h, int x, int y, int pl, int sm)
+  int new_sprexe(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm)
   {
     int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
-    enigma::sprite *as = enigma::spritestructarray[sprid] = new enigma::sprite;
+    enigma::sprite *as = enigma::spritestructarray[sprid] = new enigma::sprite(subc);
     
     as->id=sprid;
     as->subcount=0;

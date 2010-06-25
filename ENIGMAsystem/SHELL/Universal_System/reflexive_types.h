@@ -28,6 +28,8 @@
 #ifndef _reflexive_types_h
 #define _reflexive_types_h
 
+#define TYPEVARIABLES double *reflex1, *reflex2, *reflex3;
+
 //Make direction work
 #define TYPEPURPOSE directionv
 #define TYPEFUNCTION() *reflex2=*reflex1*cos(rval.d/180*PI); *reflex3=*reflex1*-sin(rval.d/180*PI);
@@ -55,5 +57,7 @@
 #include "multifunction_variant.h"
 #undef TYPEFUNCTION
 #undef TYPEPURPOSE
+
+#undef TYPEVARIABLES
 
 #endif //_reflexive_types_h

@@ -67,6 +67,22 @@ struct variant
   
   operator string();
   
+  operator int() const;
+  operator bool() const;
+  operator char() const;
+  operator long() const;
+  operator short() const;
+  operator unsigned() const;
+  operator unsigned char() const;
+  operator unsigned long() const;
+  operator unsigned short() const;
+  operator unsigned long long() const;
+  operator long long() const;
+  operator double() const;
+  operator float() const;
+  
+  operator string() const;
+  
   variant();
   types_extrapolate_alldecc(variant)
   
@@ -153,6 +169,22 @@ struct var
   operator float();
   
   operator string();
+  
+  operator int() const;
+  operator bool() const;
+  operator char() const;
+  operator long() const;
+  operator short() const;
+  operator unsigned() const;
+  operator unsigned char() const;
+  operator unsigned long() const;
+  operator unsigned short() const;
+  operator unsigned long long() const;
+  operator long long() const;
+  operator double() const;
+  operator float() const;
+  
+  operator string() const;
   
   var();
   var(const var&);

@@ -51,6 +51,23 @@ variant::operator float()     { return float      (rval.d); }
   
 variant::operator string() { return sval; }
 
+variant::operator int()       const { return int  (rval.d); }
+variant::operator bool()      const { return lrint(rval.d) > 0; }
+variant::operator char()      const { return char (rval.d); }
+variant::operator long()      const { return long (rval.d); }
+variant::operator short()     const { return short(rval.d); }
+variant::operator unsigned()           const { return (unsigned int)       (rval.d); }
+variant::operator unsigned char()      const { return (unsigned char)      (rval.d); }
+variant::operator unsigned short()     const { return (unsigned short)     (rval.d); }
+variant::operator unsigned long long() const { return (unsigned long long) (rval.d); }
+variant::operator long long() const { return (long long)(rval.d); }
+variant::operator double()    const { return double     (rval.d); }
+variant::operator float()     const { return float      (rval.d); }
+  
+variant::operator string() const { return sval; }
+
+#define real enigma::vt_real
+#define tstr enigma::vt_tstr
 
 types_extrapolate_real_p  (variant::variant,: rval(x), sval( ), type(real) {})
 types_extrapolate_string_p(variant::variant,: rval(0), sval(x), type(tstr) {})
@@ -186,6 +203,8 @@ var::var() { initialize(); }
 types_extrapolate_real_p  (var::var, { initialize(); **this = x; })
 types_extrapolate_string_p(var::var, { initialize(); **this = x; })
 
+
+
 var::operator int()       { return int  (**this); }
 var::operator bool()      { return bool (**this); }
 var::operator char()      { return char (**this); }
@@ -200,6 +219,24 @@ var::operator double()    { return double     (**this); }
 var::operator float()     { return float      (**this); }
 
 var::operator string() { return string(**this); }
+
+
+var::operator int()       const { return int  (**this); }
+var::operator bool()      const { return bool (**this); }
+var::operator char()      const { return char (**this); }
+var::operator long()      const { return long (**this); }
+var::operator short()     const { return short(**this); }
+var::operator unsigned()           const { return (unsigned int)       (**this); }
+var::operator unsigned char()      const { return (unsigned char)      (**this); }
+var::operator unsigned short()     const { return (unsigned short)     (**this); }
+var::operator unsigned long long() const { return (unsigned long long) (**this); }
+var::operator long long() const { return (long long)(**this); }
+var::operator double()    const { return double     (**this); }
+var::operator float()     const { return float      (**this); }
+
+var::operator string() const { return string(**this); }
+
+
 
  types_extrapolate_real_p  (variant& var::operator=,  { return **this = x; })
  types_extrapolate_string_p(variant& var::operator=,  { return **this = x; })
@@ -387,5 +424,16 @@ string toString(const variant &a)
   return a.sval;
 }
 string toString(const var &a) {
+  return toString(*a);
+}
+
+string toString(variant &a)
+{
+  char buf[32];
+  if (a.type == real)
+    return string(buf,sprintf(buf,"%lf",a.rval.d));
+  return a.sval;
+}
+string toString(var &a) {
   return toString(*a);
 }

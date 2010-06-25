@@ -11,21 +11,22 @@
  * / We want error reporting to be unobtrusive, both efficiency-wise and in terms of code space used.
  */
 
-#ifdef DEBUGMODE
-  #define terror(x) if (type == x) { show_error("Incompatible types to operator.",0); }
-  #define terror2(dt) if (type == dt or x.type == dt) { show_error("Incompatible types to operator.",0); }
-  #define terrortrue() show_error("Incompatible right-hand type to operator.",0);
-#else
-  #define terror(x)
-  #define terror2(x)
-  #define terrortrue()
-#endif
-
 #ifndef __var_te
 #define __var_te
-// Types
-enum var_types { real, tstr };
+  #ifdef DEBUGMODE
+    #define terror(x) if (type == x) { show_error("Incompatible types to operator.",0); }
+    #define terror2(dt) if (type == dt or x.type == dt) { show_error("Incompatible types to operator.",0); }
+    #define terrortrue() show_error("Incompatible right-hand type to operator.",0);
+  #else
+    #define terror(x)
+    #define terror2(x)
+    #define terrortrue()
+  #endif
+
+  // Types
+  namespace enigma { enum var_types { vt_real, vt_tstr }; }
 #endif
+
 
 /** / **
  * / This stuff just takes up entirely too much space.

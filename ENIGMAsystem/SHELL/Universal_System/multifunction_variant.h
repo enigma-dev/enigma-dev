@@ -31,7 +31,7 @@ namespace enigma
 {
   struct TYPEPURPOSE:variant
   {
-    double *reflex1,*reflex2,*reflex3;
+    TYPEVARIABLES;
     
     #undef  types_extrapolate_alldec
     #define types_extrapolate_alldec(prefix)\
@@ -41,15 +41,16 @@ namespace enigma
      prefix (const var &x);
     
     //These are assignment operators and require a reference to be passed
-    types_extrapolate_alldec(double& operator=);
-    types_extrapolate_alldec(double& operator-=);
-    types_extrapolate_alldec(double& operator*=);
-    types_extrapolate_alldec(double& operator/=);
-    types_extrapolate_alldec(double& operator<<=);
-    types_extrapolate_alldec(double& operator>>=);
-    types_extrapolate_alldec(double& operator&=);
-    types_extrapolate_alldec(double& operator|=);
-    types_extrapolate_alldec(double& operator^=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator+=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator-=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator*=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator/=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator<<=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator>>=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator&=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator|=);
+    types_extrapolate_alldec(TYPEPURPOSE& operator^=);
     
     #undef  types_extrapolate_alldec
   };

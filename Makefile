@@ -8,7 +8,7 @@ ENIGMA:
 #	GLINKS{<requirements of anything above>}
 Game:
 	echo Okay.
-	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM)
+	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GFLAGS="$(GFLAGS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM)
 
 clean:
 	-rm -f CompilerSource/.eobjs/*

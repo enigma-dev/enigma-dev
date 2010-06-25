@@ -61,6 +61,7 @@ namespace enigma
     fread(str_quad,1,4,exe);
     if (str_quad[0] != 's' or str_quad[1] != 'p' or str_quad[2] != 'r' or str_quad[3] != 'n') {
       printf("No resource data in exe\n");
+      sprite_safety_override();
       return;
     }
     
@@ -91,10 +92,12 @@ namespace enigma
       fread(&height,4,1,exe);
       fread(&xorig,4,1,exe);
       fread(&yorig,4,1,exe);
-      enigma::new_sprexe(sprid,width,height,xorig,yorig,1,0);
       
       int subimages;
       fread(&subimages,4,1,exe); cout << "Subimages: " << subimages << endl;
+      
+      
+      new_sprexe(sprid,subimages,width,height,xorig,yorig,1,0);
       for (int ii=0;ii<subimages;ii++) 
       {
         int unpacked;

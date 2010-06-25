@@ -29,9 +29,10 @@
 #include <string>
 #include "var4.h"
 
+#define TYPEVARIABLES double *reflex1, *reflex2, *reflex3;
+
 //Make direction work
 #define TYPEPURPOSE directionv
-#define TYPEVARIABLES double *reflex1, *reflex2, *reflex3;
 #define TYPEFUNCTION *reflex2 = *reflex1 * cos(rval.d*M_PI/180); *reflex3 = *reflex1 * -sin(rval.d*M_PI/180);
 #include "multifunction_variant_source.h"
 #undef TYPEFUNCTION
@@ -58,3 +59,4 @@
 #undef TYPEFUNCTION
 #undef TYPEPURPOSE
 
+#undef TYPEVARIABLES

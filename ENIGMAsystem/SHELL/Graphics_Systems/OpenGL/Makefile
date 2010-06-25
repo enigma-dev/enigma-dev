@@ -47,4 +47,4 @@ Release: .eobjs_Release/graphics_object.o .eobjs_Release/GSblend.o .eobjs_Releas
 	-mkdir .eobjs_Release/
 
 clean:
-	rm -f .eobjs/*
+	rm -f .eobjs*/*

@@ -32,4 +32,4 @@ Release: .eobjs_Release/file_manip.o .eobjs_Release/WINDOWScallback.o .eobjs_Rel
 	-mkdir .eobjs_Release/
 
 clean:
-	rm -f .eobjs/*
+	rm -f .eobjs*/*

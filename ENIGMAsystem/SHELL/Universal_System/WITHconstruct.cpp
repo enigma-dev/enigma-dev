@@ -24,18 +24,4 @@
 **  or programs made in the environment.                                        **                      
 **                                                                              **
 \********************************************************************************/
-/*
-#include <map>
-#include <math.h>
-#include <string>
 
-#include "var_cr3.h"
-#include "reflexive_types.h"
-
-#include "GAME_GLOBALS.h"
-#include "ENIGMA_GLOBALS.h"
-#include "EGMstd.h"
-
-#include "object.h"
-namespace enigma { struct wildclass { wildclass(); wildclass(object* from); wildclass &operator=(object *from);  }; }
-#include "WITHconstruct.h"*/

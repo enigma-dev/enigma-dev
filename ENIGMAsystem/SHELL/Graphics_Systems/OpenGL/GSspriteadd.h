@@ -37,10 +37,11 @@ int sprite_add(std::string filename,double imgnumb,double precise,double transpa
 
 namespace enigma
 {
+  void sprite_safety_override();
   void sprites_allocate_initial(int);
   
   //Adds an empty sprite to the list
-  int new_sprexe(unsigned sprid,int w,int h,int x,int y,int pl,int sm);
+  int new_sprexe(unsigned sprid,unsigned subc,int w,int h,int x,int y,int pl,int sm);
   
   #if COLLIGMA
   collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h);

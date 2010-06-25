@@ -301,7 +301,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     resources, our task is to compile the game itself via GNU Make.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
-  string gflags = "";
+  string gflags = "-g";
   #if   TARGET_PLATFORM_ID == OS_WINDOWS
     string glinks = "-lopengl32 '../additional/zlib/libzlib.a' -lcomdlg32 -lgdi32";
     string graphics = "OpenGL";

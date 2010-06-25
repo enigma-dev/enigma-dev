@@ -20,4 +20,4 @@ Release: .eobjs_Release/file_manip.o .eobjs_Release/XLIBmain.o .eobjs_Release/XL
 	-mkdir .eobjs_Release/
 
 clean:
-	rm -f .eobjs/*
+	rm -f .eobjs*/*
