@@ -217,8 +217,7 @@ namespace syncheck
                 if (plevelt[plevel] == PLT_PARENTH)
                   plevelt[plevel] = PLT_CAST;
                 else if (plevelt[plevel] != PLT_FORSTATEMENT) {
-                  error = "Unexpected declarator at this point";
-                  return pos;
+                  lastnamed[level] = LN_OPERATOR; //Cast ~= Unary operator
                 }
               }
             }

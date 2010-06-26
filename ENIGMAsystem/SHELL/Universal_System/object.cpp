@@ -43,30 +43,9 @@ namespace enigma
     double newinst_x, newinst_y;
     int newinst_obj, newinst_id;
     
-    variant object_basic::myevent_create()        { return 0; }
-    
-    variant object_basic::myevent_gamestart()     { return 0; }
-    variant object_basic::myevent_roomstart()     { return 0; }
-    variant object_basic::myevent_beginstep()     { return 0; }
-    variant object_basic::myevent_alarm()         { return 0; }
-    variant object_basic::myevent_keyboard()      { return 0; }
-    variant object_basic::myevent_keypress()      { return 0; }
-    variant object_basic::myevent_keyrelease()    { return 0; }
-    variant object_basic::myevent_mouse()         { return 0; }
-    variant object_basic::myevent_step()          { return 0; }
-    variant object_basic::myevent_pathend()       { return 0; }
-    variant object_basic::myevent_outsideroom()   { return 0; }
-    variant object_basic::myevent_boundary()      { return 0; }
-    variant object_basic::myevent_collision()     { return 0; }
-    variant object_basic::myevent_nomorelives()   { return 0; }
-    variant object_basic::myevent_nomorehealth()  { return 0; }
-    variant object_basic::myevent_endstep()       { return 0; }
-    variant object_basic::myevent_draw()          { return 0; }
-    variant object_basic::myevent_endanimation()  { return 0; }
-    variant object_basic::myevent_roomend()       { return 0; }
-    variant object_basic::myevent_gameend()       { return 0; }
-
-    variant object_basic::myevent_destroy()       { return 0; }
+    void unlink() {}
+    variant object_basic::myevent_draw()    { return 0; }
+    variant object_basic::myevent_roomend() { return 0; }
       
     object_basic::object_basic(): id(0), object_index(-4) {}
     object_basic::object_basic(int uid, int uoid): id(uid), object_index(uoid) {}

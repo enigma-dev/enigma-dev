@@ -67,6 +67,18 @@ namespace enigma
   // This is an iterator typedef for use with the red-black backbone of the instance list.
   typedef std::map<int,inst_iter*>::iterator instance_list_iterator;
   
+  // Centralized stack of iterators in use by with() statements and the like.
+  // Never empty; always contains a pointer to the instance_event_iterator.
+  struct with_iter {
+    inst_iter* it;
+    object_basic* other;
+    with_iter *last;
+    with_iter(inst_iter*,object_basic*,with_iter*);
+    void push(inst_iter*,object_basic*);
+    void pop();
+  };
+  extern with_iter *wi_base, *wi_top;
+  
   // The rest is documented by comment in the corresponding source file.
   extern event_iter *events;
   extern objectid_base *objects;

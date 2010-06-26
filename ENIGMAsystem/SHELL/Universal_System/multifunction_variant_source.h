@@ -40,15 +40,15 @@
 #undef  types_extrapolate_alldec_i
 #undef  types_extrapolate_alldec_ib
 #define types_extrapolate_alldec_i(op, stringops, sentiments)\
- types_extrapolate_real_p  (TYPEPURPOSE& TYPEPURPOSE::operator op, { sentiments; rval.d op x; return *this; } )\
- types_extrapolate_string_p(TYPEPURPOSE& TYPEPURPOSE::operator op, { sentiments; stringops;   return *this; } )\
- TYPEPURPOSE& TYPEPURPOSE::operator op (const variant &x)          { sentiments; rval.d op x; return *this; }\
- TYPEPURPOSE& TYPEPURPOSE::operator op(const var &x)               { sentiments; rval.d op x; return *this; }
+ types_extrapolate_real_p  (TYPEPURPOSE& TYPEPURPOSE::operator op, { rval.d op x; sentiments;  return *this; } )\
+ types_extrapolate_string_p(TYPEPURPOSE& TYPEPURPOSE::operator op, { stringops;   sentiments; return *this; } )\
+ TYPEPURPOSE& TYPEPURPOSE::operator op (const variant &x)          { rval.d op x; sentiments; return *this; }\
+ TYPEPURPOSE& TYPEPURPOSE::operator op(const var &x)               { rval.d op x; sentiments; return *this; }
 #define types_extrapolate_alldec_ib(op, sentiments)\
- types_extrapolate_real_p  (TYPEPURPOSE& TYPEPURPOSE::operator op##=, { sentiments; rval.d = long(rval.d) op long(x); return *this; } )\
- types_extrapolate_string_p(TYPEPURPOSE& TYPEPURPOSE::operator op##=, { sentiments; terrortrue();                     return *this; } )\
- TYPEPURPOSE& TYPEPURPOSE::operator op##= (const variant &x)          { sentiments; rval.d = long(rval.d) op long(x); return *this; }\
- TYPEPURPOSE& TYPEPURPOSE::operator op##= (const var &x)              { sentiments; rval.d = long(rval.d) op long(x); return *this; }
+ types_extrapolate_real_p  (TYPEPURPOSE& TYPEPURPOSE::operator op##=, { rval.d = long(rval.d) op long(x); sentiments;  return *this; } )\
+ types_extrapolate_string_p(TYPEPURPOSE& TYPEPURPOSE::operator op##=, { terrortrue();                     sentiments; return *this; } )\
+ TYPEPURPOSE& TYPEPURPOSE::operator op##= (const variant &x)          { rval.d = long(rval.d) op long(x); sentiments; return *this; }\
+ TYPEPURPOSE& TYPEPURPOSE::operator op##= (const var &x)              { rval.d = long(rval.d) op long(x); sentiments; return *this; }
 
 namespace enigma
 {

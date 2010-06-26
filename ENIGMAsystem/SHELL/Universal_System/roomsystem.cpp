@@ -38,9 +38,10 @@
 
 #include "../Platforms/windows/WINDOWSwindow.h"
 #include "../Platforms/windows/WINDOWSStd.h"
+#include "../libEGMstd.h"
 #include "instance_system.h"
 #include "instance.h"
-#include "object.h"
+#include "planar_object.h"
 
 extern std::string string(double); //TODO: Clean these up without EGMstd.
 
@@ -100,6 +101,7 @@ namespace enigma
     
     std::map<int,inst> instances;
     void gotome();
+    roomstruct(): createcode(NULL) {}
   };
   
   int room_max;
@@ -186,10 +188,8 @@ int room_goto(double roomind)
 	for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
 	{
 		it->inst->myevent_roomend();
-		#ifdef ISCONTROLLER_persistent
-		if(!it->inst->persistent)
-		#endif
-		instance_destroy(it->inst->id);
+		if(!((enigma::object_planar*)(it->inst))->persistent)
+      instance_destroy(it->inst->id);
 	}
 	enigma::nodestroy = 0;
 	

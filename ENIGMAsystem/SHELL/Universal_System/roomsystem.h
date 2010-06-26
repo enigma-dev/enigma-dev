@@ -103,6 +103,7 @@ namespace enigma
     
     std::map<int,inst> instances;
     void gotome();
+    roomstruct();
   };
   
   

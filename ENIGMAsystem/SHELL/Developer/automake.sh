@@ -21,20 +21,18 @@ for file in *.cpp ;
 echo "" >> Makefile;
 
 #create the eobjs folder
-echo "mkeobjs:" >> Makefile;
-echo "  -mkdir .eobjs_\$(MODE)" >> Makefile;
+echo "mkObjDir:" >> Makefile;
+echo "	-mkdir .eobjs_\$(MODE)" >> Makefile;
 echo "" >> Makefile;
 
 #generate targets for each ENIGMA mode.
 for modename in Run Debug Build Release;
 do
-  printf "$modename: mkeobjs " >> Makefile;
+  printf "$modename: mkObjDir " >> Makefile;
   for file in *.cpp ;
     do printf ".eobjs_$modename/${file%.cpp}.o " >> Makefile; 
     done;
   echo "" >> Makefile;
-  
-  echo "	-mkdir .eobjs_$modename/" >> Makefile;
 done;
 
 echo "" >> Makefile;

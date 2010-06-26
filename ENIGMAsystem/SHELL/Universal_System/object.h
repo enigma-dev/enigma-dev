@@ -57,30 +57,9 @@ namespace enigma
       const unsigned id;
       const int object_index;
       
-      virtual variant myevent_create();
-      
-      virtual variant myevent_gamestart();
-      virtual variant myevent_roomstart();
-      virtual variant myevent_beginstep();
-      virtual variant myevent_alarm();
-      virtual variant myevent_keyboard();
-      virtual variant myevent_keypress();
-      virtual variant myevent_keyrelease();
-      virtual variant myevent_mouse();
-      virtual variant myevent_step();
-      virtual variant myevent_pathend();
-      virtual variant myevent_outsideroom();
-      virtual variant myevent_boundary();
-      virtual variant myevent_collision();
-      virtual variant myevent_nomorelives();
-      virtual variant myevent_nomorehealth();
-      virtual variant myevent_endstep();
+      void unlink();
       virtual variant myevent_draw();
-      virtual variant myevent_endanimation();
       virtual variant myevent_roomend();
-      virtual variant myevent_gameend();
-
-      virtual variant myevent_destroy();
       
       object_basic();
       object_basic(int uid, int uoid);

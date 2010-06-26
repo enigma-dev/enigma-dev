@@ -108,12 +108,6 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
   synt = code;
   pt pos = 0, bpos = 0;
   char last_token = ' '; //Space is actually invalid. Heh.
-  #ifndef ASSUME_SAFE
-    const pt len = code.length();
-    #define safe (pos < len)
-  #else
-    #define safe 1
-  #endif
   
   unsigned mymacroc = 0;
   darray<pt> mymacroend;
@@ -157,7 +151,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
           }
           mymacros[mymacroc] = name;
           mymacroend[mymacroc++] = pos + string(itm->second).length();
-          code.insert(pos,itm->second);
+          code.insert(pos,macrostr);
           continue;
         }
       }
@@ -181,8 +175,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       
       if (last_token == c)
       {
-        if (c == 'n')
-          code[bpos] = synt[bpos] = ';', bpos++;
+        if (c != 'r')
+          code[bpos] = synt[bpos] = ' ', bpos++;
         else {
           code[bpos] = ' ';
           synt[bpos++] = c;
@@ -227,16 +221,17 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       const pt spos = pos;
       if (OPTION_CPP_STRINGS)
       {
-        while (safe and code[++pos] != '"')
+        while (code[++pos] != '"')
           if (code[pos] == '\\') pos++;
         str = code.substr(spos,++pos-spos);
       }
       else
       {
-        while (safe and code[++pos] != '"');
+        while (code[++pos] != '"');
         str = string_escape(code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
+      cout << "\n\n\nCut string " << str << "\n\n\n";
       code[bpos] = synt[bpos] = last_token = '"', bpos++;
       continue;
     }
@@ -246,13 +241,13 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       const pt spos = pos;
       if (OPTION_CPP_STRINGS)
       {
-        while (safe and code[++pos] != '\'')
+        while (code[++pos] != '\'')
           if (code[pos] == '\\') pos++;
         str = code.substr(spos,++pos-spos);
       }
       else
       {
-        while (safe and code[++pos] != '\'');
+        while (code[++pos] != '\'');
         str = string_escape(code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
@@ -263,12 +258,12 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     {
       if (code[++pos] == '/')
       {
-        while (code[++pos] != '\n' and code[pos] != '\r' and pos < len);
+        while (code[++pos] != '\n' and code[pos] != '\r');
         continue;
       }
       else if (code[pos] == '*')
       {
-        while ((code[pos++] != '*' or code[pos] != '/') and pos < len);
+        while (code[pos++] != '*' or code[pos] != '/');
         pos++; continue;
       }
       code[bpos] = synt[bpos] = last_token = '/', bpos++;
@@ -369,7 +364,6 @@ void parser_add_semicolons(string &code,string &synt)
   char *codebuf = new char[code.length()*2+1];
   char *syntbuf = new char[code.length()*2+1];
   int bufpos = 0;
-  int terns = 0;
   
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
@@ -415,9 +409,7 @@ void parser_add_semicolons(string &code,string &synt)
       }
       if (synt[pos]==':')
       {
-        if (terns)
-          terns--;
-        else if (*sy_semi != ';')
+        if (*sy_semi != ';' and *sy_semi != ':')
         {
           codebuf[bufpos-1] = *sy_semi;
           syntbuf[bufpos-1] = *sy_semi;
@@ -425,6 +417,12 @@ void parser_add_semicolons(string &code,string &synt)
           syntbuf[bufpos++] = ';';
         }
         sy_semi=sy_semi->popif('s');
+        continue;
+      }
+      
+      if (synt[pos]=='?')
+      {
+        sy_semi=sy_semi->push(':','s');
         continue;
       }
 

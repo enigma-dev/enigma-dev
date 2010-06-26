@@ -25,79 +25,18 @@
 **                                                                              **
 \********************************************************************************/
 
+// This file contains functions that are used by virtually all components of ENIGMA.
+// They are also, directly or otherwise, available to the user.
+
 #include <string>
 #include <stdio.h>
+
 using namespace std;
 
-#include "../general/darray.h"
-#include "cfile_pushing.h"
+string toString(int n)            { char buf[12]; return string(buf,sprintf(buf,"%d", n)); }
+string toString(long long n)      { char buf[32]; return string(buf,sprintf(buf,"%lld", n)); }
+string toString(char n)           { char buf[8];  return string(buf,sprintf(buf,"%d", n)); }
+string toString(char* n)          { return string(n); }
+string toString(double n)         { char buf[32]; return string(buf,sprintf(buf,"%lf", n)); }
 
-#include "macro_functions.h"
-#include "../externs/externs.h"
-
-includings::includings(string n,string p):name(n), path(p) {} 
-stack<includings> included_files;
-
-cfnode::cfnode(): scfile(cfile), spos(pos), slen(len) { }
-cfnode::~cfnode()
-{
-  cfile = scfile;
-  pos = spos;
-  len = slen;
-  id_would_err_at = pos;
-}
-
-unsigned int macrod = 0;
-varray<string> inmacros;
-
-stack<cfnode*> cfstack;
-void handle_macro_pop()
-{
-  delete cfstack.top();
-  cfstack.pop();
-  
-  if (macrod > 0)
-    macrod--;
-  else if (!included_files.empty()) {
-    included_files.pop();
-  }
-}
-
-#include <iostream>
-pt handle_macros(const string n)
-{
-  maciter t = macros.find(n);
-  //cout << "Find macro <"<<n<<">\n";
-  
-  if (t != macros.end())
-  {
-    bool recurs=0;
-    for (unsigned int iii=0;iii<macrod;iii++)
-       if (inmacros[iii]==n) { recurs=1; break; }
-    if (!recurs)
-    {
-      string macrostr = t->second;
-      
-      if (t->second.argc != -1) //Expect ()
-      {
-        if (!macro_function_parse(cfile,n,pos,macrostr,t->second.args,t->second.argc,t->second.args_uat)) {
-          cferr = macrostr;
-          return pos;
-        }
-      }
-      
-      //const int cpos = position();
-      cfstack.push(new cfnode);
-      
-      //Set everything
-      cfile = macrostr;
-      len = cfile.length();
-      pos = 0;
-      
-      inmacros[macrod++] = n;
-      return pt(-2);
-    }
-    //else puts("Recursing macro. This may be a problem.\r\n");
-  }
-  return pt(-1);
-}
+void show_error(std::string, const bool);

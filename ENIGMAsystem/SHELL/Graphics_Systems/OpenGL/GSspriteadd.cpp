@@ -98,21 +98,22 @@ namespace enigma
   //Allocates and zero-fills the array at game start
   void sprites_allocate_initial(int spr_highid)
   {
-    spritestructarray = new sprite*[spr_highid];
+    spritestructarray = new sprite*[spr_highid+1];
     for (int i = 0; i < spr_highid; i++)
       spritestructarray[i] = NULL;
   }
   
   void sprite_safety_override() {
     sprites_allocate_initial(15); //15's a good number.
-    //...Fuck you.
+                                 //...Fuck you.
   }
   
   //Adds an empty sprite to the list
   int new_sprexe(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm)
   {
     int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
-    enigma::sprite *as = enigma::spritestructarray[sprid] = new enigma::sprite(subc);
+    sprite *as = new sprite(subc);
+    spritestructarray[sprid] = as;
     
     as->id=sprid;
     as->subcount=0;

@@ -78,6 +78,12 @@ namespace enigma
   object_basic *ENIGMA_global_instance; // We also need an iterator for only global.
   inst_iter ENIGMA_global_instance_iterator(ENIGMA_global_instance,0,0);
   
+  // With() will operate on this
+  with_iter::with_iter(inst_iter* i,object_basic* o, with_iter* l): it(i), other(o), last(l) {}
+  void with_iter::push(inst_iter* i,object_basic* o) { wi_top = new with_iter(i,o,wi_top); }
+  void with_iter::pop() { wi_top = wi_top->last; }
+  with_iter *wi_top = new with_iter(instance_event_iterator,NULL,NULL);
+  
   // This is basically a garbage collection list for when instances are destroyed
   vector<inst_iter*> cleanups; // We'll use vector
   
