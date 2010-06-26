@@ -46,21 +46,35 @@ namespace enigma
   objectid_base::objectid_base(): insts(NULL), last(NULL), count(0) {}
   event_iter::event_iter(): insts(NULL), last(NULL), name() {}
   
-  void event_iter::add_inst(object_basic* inst)
+  inst_iter *event_iter::add_inst(object_basic* inst)
   {
     inst_iter *a = new inst_iter(inst,NULL,last);
     if (last) last->next = a;
     else insts = a;
-    last = a;
+    return last = a;
   }
   
-  void objectid_base::add_inst(object_basic* inst)
+  void unlink_event_iter(inst_iter* which)
+  {
+    if (which->prev) which->prev->next = which->next;
+    if (which->next) which->next->prev = which->prev;
+  }
+  
+  inst_iter *objectid_base::add_inst(object_basic* inst)
   {
     inst_iter *a = new inst_iter(inst,NULL,last); 
     if (last) last->next = a;
     else insts = a;
-    last = a;
+    return last = a;
   }
+  
+  void unlink_object_id_iter(inst_iter* which)
+  {
+    if (which->prev) which->prev->next = which->next;
+    if (which->next) which->next->prev = which->prev;
+  }
+  
+  
   
   /* **  Variables ** */
   // This will be instantiated for each event with a unique ID or Sub ID.
@@ -148,29 +162,41 @@ namespace enigma
   
   
   //Link in an instance
-  void link_instance(object_basic* who)
+  iliter link_instance(object_basic* who)
   {
     inst_iter *ins = new inst_iter(who);
     pair<iliter,bool> it = instance_list.insert(inode_pair(who->id,ins));
-    if (!it.second) { puts("System error: Leak probable"); return; }
+    if (!it.second)
+      puts("System error: Leak probable");
     if (it.first != instance_list.begin()) {
       iliter ib = it.first; ib--;
       ins->prev = ib->second;
     }
-    it.first++;
-    if (it.first != instance_list.end())
-      ins->next = it.first->second;
+    iliter in = it.first; in++;
+    if (in != instance_list.end())
+      ins->next = in->second;
+    return it.first;
   }
-  void link_obj_instance(object_basic* who, int oid)
+  inst_iter *link_obj_instance(object_basic* who, int oid)
   {
-    objects[oid].add_inst(who);
+    return objects[oid].add_inst(who);
   }
+  
+  
   
   void instance_iter_queue_for_destroy(inst_iter* who)
   {
     enigma::cleanups.push_back(who);
     enigma::instancecount--;
     instance_count--;
+  } static int FUCKCKCKCKC = 0;
+  void unlink_main(instance_list_iterator who)
+  {
+    inst_iter *a = who->second;
+    if (a->prev) a->prev->next = a->next;
+    if (a->next) a->next->prev = a->prev;
+    cout << "Fuck me: " << FUCKCKCKCKC++ << endl;
+    instance_list.erase(who);
   }
   
   //This is the universal create event code

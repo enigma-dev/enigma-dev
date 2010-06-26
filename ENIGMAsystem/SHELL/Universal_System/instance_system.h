@@ -50,7 +50,7 @@ namespace enigma
     inst_iter *insts; // Instances for which to perform this event
     inst_iter *last;  // The last instance for which to perform it. (Both of these can be NULL)
     std::string name; // Event name
-    void add_inst(object_basic* inst);  // Append an instance to the list
+    inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
     event_iter();
   };
   
@@ -60,7 +60,7 @@ namespace enigma
     inst_iter *insts; // First instance on the list
     inst_iter *last;  // Last instance on the list  (Both of these can be NULL)
     size_t count;     // Number of instances on this list
-    void add_inst(object_basic* inst);  // Append an instance to the list
+    inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
     objectid_base();
   };
   
@@ -79,7 +79,7 @@ namespace enigma
   };
   extern with_iter *wi_base, *wi_top;
   
-  // The rest is documented by comment in the corresponding source file.
+  // The rest is decently commented on in the corresponding source file.
   extern event_iter *events;
   extern objectid_base *objects;
   extern std::map<int,inst_iter*> instance_list;
@@ -92,9 +92,15 @@ namespace enigma
   inst_iter*    fetch_inst_iter_by_int(int x);
   object_basic* fetch_instance_by_int(int x);
   
-  void link_instance(object_basic* who);
-  void link_obj_instance(object_basic* who, int oid);
+  // Linking
+  instance_list_iterator link_instance(object_basic* who);
+  inst_iter *link_obj_instance(object_basic* who, int oid);
+  
+  // Unlinking/Destroying
   void instance_iter_queue_for_destroy(inst_iter* who);
+  void unlink_main(instance_list_iterator);
+  void unlink_object_id_iter(inst_iter*);
+  void unlink_event_iter(inst_iter*);
 }
 
 // Other

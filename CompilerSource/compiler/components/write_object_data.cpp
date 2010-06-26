@@ -90,12 +90,34 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         } wto << "\n    ";
         
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
+        if  (i->second->events[ii].code != "")
         {
           //Look up the event name
           string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
           wto << "\n    #define ENIGMAEVENT_" << evname << " 1\n";
-          wto << "    variant myevent_" << evname << "();\n  ";
+          wto << "    variant myevent_" << evname << "();\n    ";
         }
+        
+        //Callable unlinker
+        wto << "\n    // Self-tracking\n";
+          // Variables to track self in lists
+            // Instance system interface
+              wto << "      enigma::instance_list_iterator ENOBJ_ITER_me;\n";
+              for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+                wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n";
+            
+            // Event system interface
+              for (unsigned ii = 0; ii < i->second->events.size; ii++)
+                wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+        
+        wto << "\n    void unlink()\n    {\n";
+          wto << "      enigma::unlink_main(ENOBJ_ITER_me);\n";
+          for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+            wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ");\n";
+          for (unsigned ii = 0; ii < i->second->events.size; ii++)
+            wto << "      unlink_event_iter(ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ");\n";
+          wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me->second);";
+        wto << "\n    }\n    ";
         
         //Automatic constructor
         //Directed constructor (ID is specified)
@@ -109,13 +131,15 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 wto << "      sprite_index = " << i->second->sprite_index << ";\n";
             
             // Instance system interface
-              wto << "      enigma::link_instance(this);\n";
+              wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
               for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
-                wto << "      enigma::link_obj_instance(this, " << her->second->id << ");\n";
+                wto << "      ENOBJ_ITER_myobj" << her->second->id << " = enigma::link_obj_instance(this, " << her->second->id << ");\n";
             
-            // Events
-              for (unsigned ii = 0; ii < i->second->events.size; ii++)
-                wto << "      enigma::event_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << "->add_inst(this);\n";
+            // Event system interface
+              for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+                const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
+                wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
+              }
             
             // Coordinates
               wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
@@ -124,6 +148,16 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           if (event_used_by_something("create"))
             wto << "      myevent_create();";
           wto << "\n    }\n";
+          
+          // Destructor
+          wto <<   "\n    ~OBJ_" <<  i->second->name << "()\n    {\n";
+            //wto << "      delete ENOBJ_ITER_me;\n"; // Don't think you can delete this. :P
+            for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+              wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
+            for (unsigned ii = 0; ii < i->second->events.size; ii++)
+              wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+          wto << "\n    }\n    ";
+          
         wto << "  };\n";
       }
     wto << "}\n";
@@ -136,6 +170,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
+      if  (i->second->events[ii].code != "")
       {
         string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
         wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";

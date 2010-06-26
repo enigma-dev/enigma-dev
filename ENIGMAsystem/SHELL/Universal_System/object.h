@@ -57,7 +57,7 @@ namespace enigma
       const unsigned id;
       const int object_index;
       
-      void unlink();
+      virtual void unlink();
       virtual variant myevent_draw();
       virtual variant myevent_roomend();
       

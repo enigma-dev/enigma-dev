@@ -63,8 +63,8 @@ int screen_redraw()
          glClear(GL_COLOR_BUFFER_BIT);
       }
 
-      for (inst_iter *i = event_draw->insts; i != NULL; i = i->next)
-         i->inst->myevent_draw();
+      for (enigma::instance_event_iterator = event_draw->insts; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
+        enigma::instance_event_iterator->inst->myevent_draw();
     }
     else 
     for (view_current=0; view_current<7; view_current++)
@@ -107,8 +107,8 @@ int screen_redraw()
          glClear(GL_COLOR_BUFFER_BIT);
       }
       
-      for (inst_iter *i = event_draw->insts; i != NULL; i = i->next)
-        i->inst->myevent_draw();
+      for (enigma::instance_event_iterator = event_draw->insts; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
+        enigma::instance_event_iterator->inst->myevent_draw();
     }
     
     return 0;

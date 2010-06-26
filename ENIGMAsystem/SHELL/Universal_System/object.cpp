@@ -43,7 +43,7 @@ namespace enigma
     double newinst_x, newinst_y;
     int newinst_obj, newinst_id;
     
-    void unlink() {}
+    void object_basic::unlink() {}
     variant object_basic::myevent_draw()    { return 0; }
     variant object_basic::myevent_roomend() { return 0; }
       

@@ -334,8 +334,7 @@ string event_get_instead(int mid, int id) {
 }
 
 
-// Some events have special behavior as placeholders, instead of simple iteration.
-// These two functions will test for and return such.
+// Many events check things before executing, some before starting the loop. Deal with them.
 
 bool event_has_super_check(int mid, int id) {
   return main_event_infos[mid].specs[id]->super != "";

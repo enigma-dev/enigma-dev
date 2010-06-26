@@ -41,15 +41,18 @@ namespace enigma
 
 void instance_destroy(int id)
 {
-  return ;
   enigma::inst_iter* who = enigma::fetch_inst_iter_by_id(id);
-  if (who) 
+  if (who) {
+    who->inst->unlink();
     enigma::instance_iter_queue_for_destroy(who);
+  }
 }
 
+#include <iostream>
 extern int show_error(std::string,int);
 int instance_destroy()
 {
+  enigma::instance_event_iterator->inst->unlink();
   enigma::instance_iter_queue_for_destroy(enigma::instance_event_iterator);
   return 0;
 }

@@ -195,8 +195,8 @@ step: 3
 	Constant: { 
 		x += hspeed, y += vspeed;
 		speed -= friction; 
-		vspeed += sin(gravity_direction * pi/180),
-		hspeed += cos(gravity_direction * pi/180);
+		vspeed += gravity * sin(gravity_direction * pi/180),
+		hspeed += gravity * cos(gravity_direction * pi/180);
 	}
 
 
