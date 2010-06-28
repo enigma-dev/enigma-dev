@@ -1,0 +1,10 @@
+[Desktop Entry]
+Exec=java -jar /opt/enigma/lgm*.jar
+Icon=enigma
+Type=Application
+Terminal=true
+Name=ENIGMA Game Maker
+GenericName=ENIGMA Game Maker
+StartupNotify=true
+Categories=Application;Development;
+
