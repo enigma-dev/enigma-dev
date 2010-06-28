@@ -45,20 +45,22 @@ namespace enigma
   };
   
   // This structure is for composing lists of events to execute.
-  struct event_iter
+  struct event_iter: inst_iter
   {
-    inst_iter *insts; // Instances for which to perform this event
-    inst_iter *last;  // The last instance for which to perform it. (Both of these can be NULL)
+    // Inherits object_basic *inst: should be NULL
+    // Inherits inst_iter *next:    First of instances for which to perform this event (Can be NULL)
+    // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
     std::string name; // Event name
     inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
     event_iter();
   };
   
   // This structure will store info about and lists of each object by index.
-  struct objectid_base
+  struct objectid_base: inst_iter
   {
-    inst_iter *insts; // First instance on the list
-    inst_iter *last;  // Last instance on the list  (Both of these can be NULL)
+    // Inherits object_basic *inst: should be NULL
+    // Inherits inst_iter *next:    First of instances for which to perform this event (Can be NULL)
+    // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
     size_t count;     // Number of instances on this list
     inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
     objectid_base();
@@ -99,7 +101,7 @@ namespace enigma
   // Unlinking/Destroying
   void instance_iter_queue_for_destroy(inst_iter* who);
   void unlink_main(instance_list_iterator);
-  void unlink_object_id_iter(inst_iter*);
+  void unlink_object_id_iter(inst_iter*,int);
   void unlink_event_iter(inst_iter*);
 }
 

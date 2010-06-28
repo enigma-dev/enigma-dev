@@ -43,15 +43,15 @@ int instance_count = 0;
 namespace enigma
 {
   inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL): inst(i), next(n), prev(p) {}
-  objectid_base::objectid_base(): insts(NULL), last(NULL), count(0) {}
-  event_iter::event_iter(): insts(NULL), last(NULL), name() {}
+  objectid_base::objectid_base(): inst_iter(NULL,NULL,this), count(0) {}
+  event_iter::event_iter(): inst_iter(NULL,NULL,this), name() {}
   
   inst_iter *event_iter::add_inst(object_basic* inst)
   {
-    inst_iter *a = new inst_iter(inst,NULL,last);
-    if (last) last->next = a;
-    else insts = a;
-    return last = a;
+    inst_iter *a = new inst_iter(inst,NULL,prev);
+    if (prev) prev->next = a;
+    else next = a;
+    return prev = a;
   }
   
   void unlink_event_iter(inst_iter* which)
@@ -62,16 +62,17 @@ namespace enigma
   
   inst_iter *objectid_base::add_inst(object_basic* inst)
   {
-    inst_iter *a = new inst_iter(inst,NULL,last); 
-    if (last) last->next = a;
-    else insts = a;
-    return last = a;
+    inst_iter *a = new inst_iter(inst,NULL,prev);
+    if (prev) prev->next = a;
+    else next = a;
+    return prev = a;
   }
   
-  void unlink_object_id_iter(inst_iter* which)
+  void unlink_object_id_iter(inst_iter* which, int oid)
   {
     if (which->prev) which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
+    objects[oid].count--;
   }
   
   
@@ -127,7 +128,7 @@ namespace enigma
     }
     
     if (x < 100000)
-      return objects[x].insts->inst;
+      return objects[x].next ? objects[x].next->inst : NULL;
     iliter a = instance_list.find(x);
     return a != instance_list.end() ? a->second->inst : NULL;
   }
@@ -145,7 +146,7 @@ namespace enigma
     }
     
     if (x < 100000) // Object-index-based lookup
-      return objects[x].insts;
+      return objects[x].next;
     
     // ID-based lookup
     iliter a = instance_list.find(x);
@@ -189,13 +190,12 @@ namespace enigma
     enigma::cleanups.push_back(who);
     enigma::instancecount--;
     instance_count--;
-  } static int FUCKCKCKCKC = 0;
+  }
   void unlink_main(instance_list_iterator who)
   {
     inst_iter *a = who->second;
     if (a->prev) a->prev->next = a->next;
     if (a->next) a->next->prev = a->prev;
-    cout << "Fuck me: " << FUCKCKCKCKC++ << endl;
     instance_list.erase(who);
   }
   

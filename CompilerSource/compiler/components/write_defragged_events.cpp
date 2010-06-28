@@ -135,10 +135,10 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
         {
           if (event_has_super_check(mid,id))
             wto << "    if (" << event_get_super_check_condition(mid,id) << ")" << endl
-                << "      for (instance_event_iterator = event_" << it->first << "->insts; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)" << endl
+                << "      for (instance_event_iterator = event_" << it->first << "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)" << endl
                 << "        ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" << it->first << "();" << endl;
           else
-            wto << "    for (instance_event_iterator = event_" << it->first << "->insts; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)" << endl
+            wto << "    for (instance_event_iterator = event_" << it->first << "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)" << endl
                 << "      ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" << it->first << "();" << endl;
           wto << "    " << endl;
           wto << "    enigma::update_globals();" << endl;
