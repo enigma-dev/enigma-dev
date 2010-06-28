@@ -91,9 +91,9 @@ types_extrapolate_real_p  (variant& variant::operator*=, { terror(real); rval.d 
 types_extrapolate_string_p(variant& variant::operator*=, { terrortrue(); return *this; })
 variant& variant::operator*=(const variant x)            { terror2(real); rval.d *= x.rval.d; return *this; }
 
-types_extrapolate_real_p  (variant& variant::operator/=, { terror(real); rval.d *= x; return *this; })
-types_extrapolate_string_p(variant& variant::operator/=, { terrortrue(); return *this; })
-variant& variant::operator/=(const variant x)            { terror2(real); rval.d /= x.rval.d; return *this; }
+types_extrapolate_real_p  (variant& variant::operator/=, { terror(real); div0c(x); rval.d *= x; return *this; })
+types_extrapolate_string_p(variant& variant::operator/=, { terrortrue(); div0c(x); return *this; })
+variant& variant::operator/=(const variant x)            { terror2(real); div0c(x); rval.d /= x.rval.d; return *this; }
 
 
 types_extrapolate_real_p  (variant& variant::operator<<=, { terror(real); rval.d = long(rval.d) << int(x); return *this; })
@@ -122,15 +122,15 @@ types_extrapolate_real_p  (variant variant::operator+, { terror(real); return rv
 types_extrapolate_string_p(variant variant::operator+, { terror(tstr); return sval   + x; })
 variant variant::operator+(const variant x)            { terror(x.type); if (x.type == real) return rval.d + x.rval.d; return sval + x.sval; }
 
-types_extrapolate_real_p  (double  variant::operator-, { terror(real); rval.d = long(rval.d) & long(x); return *this; })
+types_extrapolate_real_p  (double  variant::operator-, { terror(real); return rval.d - x; })
 types_extrapolate_string_p(double  variant::operator-, { terrortrue(); return rval.d; })
 double variant::operator-(const variant x)             { terror2(real); return rval.d - x.rval.d; }
 
-types_extrapolate_real_p  (double  variant::operator*, { terror(real); rval.d = long(rval.d) & long(x); return *this; })
+types_extrapolate_real_p  (double  variant::operator*, { terror(real); return rval.d * x; })
 types_extrapolate_string_p(double  variant::operator*, { terrortrue(); return rval.d; })
 double variant::operator*(const variant x)             { terror2(real); return rval.d * x.rval.d; }
 
-types_extrapolate_real_p  (double  variant::operator/, { terror(real); rval.d = long(rval.d) & long(x); return *this; })
+types_extrapolate_real_p  (double  variant::operator/, { terror(real); div0c(x); return rval.d / x; })
 types_extrapolate_string_p(double  variant::operator/, { terrortrue(); return rval.d; })
 double variant::operator/(const variant x)             { terror2(real); return rval.d / x.rval.d; }
 

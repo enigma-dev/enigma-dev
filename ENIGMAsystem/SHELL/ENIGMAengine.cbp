@@ -445,19 +445,28 @@
 		<Unit filename="Universal_System/ENIGMA_GLOBALS.cpp" />
 		<Unit filename="Universal_System/ENIGMA_GLOBALS.h" />
 		<Unit filename="Universal_System/GAME_GLOBALS.h" />
+		<Unit filename="Universal_System/GMcollisions.h" />
 		<Unit filename="Universal_System/GMexternals.h" />
+		<Unit filename="Universal_System/GMinstance.h" />
+		<Unit filename="Universal_System/GMmathnc.h" />
+		<Unit filename="Universal_System/GMobject.h" />
+		<Unit filename="Universal_System/GMroomsystem.h" />
+		<Unit filename="Universal_System/GMstring.h" />
 		<Unit filename="Universal_System/IMGloading.cpp" />
 		<Unit filename="Universal_System/IMGloading.h" />
 		<Unit filename="Universal_System/OBJaccess.cpp" />
 		<Unit filename="Universal_System/OBJaccess.h" />
 		<Unit filename="Universal_System/WITHconstruct.cpp" />
 		<Unit filename="Universal_System/WITHconstruct.h" />
+		<Unit filename="Universal_System/WITHconstructClose.h" />
 		<Unit filename="Universal_System/collisions.cpp" />
 		<Unit filename="Universal_System/collisions.h" />
 		<Unit filename="Universal_System/collisions_object.cpp" />
 		<Unit filename="Universal_System/collisions_object.h" />
 		<Unit filename="Universal_System/compression.cpp" />
 		<Unit filename="Universal_System/compression.h" />
+		<Unit filename="Universal_System/darray.cpp" />
+		<Unit filename="Universal_System/darray.h" />
 		<Unit filename="Universal_System/estring.cpp" />
 		<Unit filename="Universal_System/estring.h" />
 		<Unit filename="Universal_System/event_system.cpp" />
@@ -465,7 +474,9 @@
 		<Unit filename="Universal_System/events.h" />
 		<Unit filename="Universal_System/fileio.cpp" />
 		<Unit filename="Universal_System/fileio.h" />
+		<Unit filename="Universal_System/globalupdate.cpp" />
 		<Unit filename="Universal_System/globalupdate.h" />
+		<Unit filename="Universal_System/imap.h" />
 		<Unit filename="Universal_System/instance.cpp" />
 		<Unit filename="Universal_System/instance.h" />
 		<Unit filename="Universal_System/instance_create.h" />
@@ -501,6 +512,8 @@
 		<Unit filename="Universal_System/var4_lua.cpp" />
 		<Unit filename="Universal_System/var_te.h" />
 		<Unit filename="initialize.h" />
+		<Unit filename="libEGMstd.cpp" />
+		<Unit filename="libEGMstd.h" />
 		<Extensions>
 			<debugger />
 			<code_completion />

@@ -56,7 +56,7 @@ namespace enigma
   types_extrapolate_alldec_i(+=,  sval += x,    TYPEFUNCTION; );
   types_extrapolate_alldec_i(-=,  terrortrue(), TYPEFUNCTION; );
   types_extrapolate_alldec_i(*=,  terrortrue(), TYPEFUNCTION; );
-  types_extrapolate_alldec_i(/=,  terrortrue(), TYPEFUNCTION; );
+  types_extrapolate_alldec_i(/=,  terrortrue(), div0c(x); TYPEFUNCTION; );
   types_extrapolate_alldec_ib(<<, TYPEFUNCTION; );
   types_extrapolate_alldec_ib(>>, TYPEFUNCTION; );
   types_extrapolate_alldec_ib(&,  TYPEFUNCTION; );
