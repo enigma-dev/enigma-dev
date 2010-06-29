@@ -111,13 +111,13 @@ mkeobjs:
 	-mkdir .eobjs
 
 link: mkeobjs .eobjs/cfile_parse.o .eobjs/cfile_parse_macros.o .eobjs/cfile_pushing.o .eobjs/cparse_components.o .eobjs/cparse_shared.o .eobjs/cpmain.o .eobjs/expression_evaluator.o .eobjs/handle_letters.o .eobjs/keyword_operator.o .eobjs/macro_functions.o .eobjs/skipping.o .eobjs/template_handlers.o .eobjs/compile_common.o .eobjs/compile.o .eobjs/compile_includes.o .eobjs/output_locals.o .eobjs/externs.o .eobjs/ext_iteration.o .eobjs/references.o .eobjs/gcc_backend.o .eobjs/bettersystem.o .eobjs/darray.o .eobjs/string.o .eobjs/textfile.o .eobjs/collect_variables.o .eobjs/object_storage.o .eobjs/parser_components.o .eobjs/parser.o .eobjs/checkfile.o .eobjs/syntax.o .eobjs/varnames.o .eobjs/module_write_sprites.o .eobjs/parse_and_link.o .eobjs/write_defragged_events.o .eobjs/write_event_code.o .eobjs/write_globals.o .eobjs/write_object_data.o .eobjs/write_room_data.o .eobjs/event_parser.o .eobjs/pcs.o .eobjs/main.o
-	g++ -shared -fPIC .eobjs/*.o -o ../compileEGMf
+	g++ -shared -fPIC .eobjs/*.o -o ../compileEGMf.dll
+
+#If Window's weren't so fucking incompetent, I'd keep this part neutral and have each platform rename. But...
 
 win windows: link
-	-move ../compileEGMf.exe ../compileEGMf
-	move ../compileEGMf ../compileEGMf.dll
 lin linux unix: link
-	mv ../compileEGMf ../libcompileEGMf.so
+	mv ../compileEGMf.dll ../libcompileEGMf.so
 
 clean:
 	-rm -f .eobjs/*

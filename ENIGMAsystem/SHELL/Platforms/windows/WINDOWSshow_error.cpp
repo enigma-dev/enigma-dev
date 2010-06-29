@@ -28,36 +28,20 @@
 #include <string>
 #include <windows.h>
 
-/*namespace enigma //TODO: find the original declaration of the contents of this namespace and erradicate it
-{
-   extern std::string evname(int num);
-   extern int getID();
-}*/
-
-
-namespace enigma //TODO: This is from events.h: fix according to TODO pointed to by above TODO
-{
-	extern int event_current;
-	extern std::string evname(int evnumb);
-	extern int getID();
-}
-
-extern std::string string(double val);
-
 extern void ABORT_ON_ALL_ERRORS();
 int show_error(std::string errortext,const bool fatal)
 {
-  if (MessageBox(NULL,("Error in "+enigma::evname(enigma::event_current) + " event for object number " + string(enigma::getID())+": \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
+  if (MessageBox(NULL,("Error in some event or another for some object I'm too lazy to look up: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
     exit(0);
-		  
-	if (fatal)
-	{
-		printf("FATAL ERROR: %s\n",errortext.c_str());
-		exit(0);
-	}
-	else
-	  printf("ERROR: %s\n",errortext.c_str());
+  	  
+  if (fatal)
+  {
+    printf("FATAL ERROR: %s\n",errortext.c_str());
+    exit(0);
+  }
+  else
+    printf("ERROR: %s\n",errortext.c_str());
   
   ABORT_ON_ALL_ERRORS();
-	return 0;
+  return 0;
 }
