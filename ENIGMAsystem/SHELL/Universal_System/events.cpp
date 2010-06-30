@@ -32,7 +32,7 @@
 namespace enigma
 {
 	int event_current=-1;
-	std::string evname(int evnumb)
+	string evname(int evnumb)
 	{
 		switch (evnumb)
 		{

@@ -28,7 +28,7 @@
 namespace enigma
 {
   struct objecttable{
-    std::string name;
+    string name;
     int sprite_index,mask_index,parent,visible,solid,persistent,depth;
   };
   extern std::map<int,objecttable> objectdata;

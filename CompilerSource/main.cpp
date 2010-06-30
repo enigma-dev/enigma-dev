@@ -180,7 +180,7 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
   {
     int line = 1, lp = 1;
     for (int i=0; i<ide_passback_error.absolute_index; i++,lp++) {
-      if (code[i] =='\n')
+      if (code[i] =='\r')
         line++, lp = 0, i += code[i+1] == '\n';
       else if (code[i] == '\n') line++, lp = 0;
     }

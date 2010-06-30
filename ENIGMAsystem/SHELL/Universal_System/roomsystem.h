@@ -66,7 +66,7 @@ extern double view_yview[9];
 #include <string>
 #include "var4.h"
 
-extern std::string room_caption;
+extern string room_caption;
 
 //Make "room" globsl work
 #define TYPEPURPOSE roomv
@@ -92,10 +92,10 @@ namespace enigma
   };
   struct roomstruct
   {
-    std::string name;
+    string name;
     int backcolor;
     void(*createcode)();
-    std::string cap;
+    string cap;
     int width, height, spd;
     int views_enabled;
     viewstruct views[8];

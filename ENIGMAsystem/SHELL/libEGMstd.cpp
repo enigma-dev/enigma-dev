@@ -37,6 +37,7 @@ string toString(int n)            { char buf[12]; return string(buf,sprintf(buf,
 string toString(long long n)      { char buf[32]; return string(buf,sprintf(buf,"%lld", n)); }
 string toString(char n)           { char buf[8];  return string(buf,sprintf(buf,"%d", n)); }
 string toString(char* n)          { return string(n); }
-string toString(double n)         { char buf[32]; return string(buf,sprintf(buf,"%lf", n)); }
+string toString(float n)          { char buf[32]; return string(buf,sprintf(buf,"%.0f", n)); }
+string toString(double n)         { char buf[32]; return string(buf,sprintf(buf,"%.0lf", n)); }
 
-void show_error(std::string, const bool);
+void show_error(string, const bool);

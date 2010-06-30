@@ -334,6 +334,7 @@
 			<Option target="mac-build" />
 		</Unit>
 		<Unit filename="Modes/buildmode.h" />
+		<Unit filename="Platforms/platforms_mandatory.h" />
 		<Unit filename="Platforms/windows/WINDOWSStd.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />

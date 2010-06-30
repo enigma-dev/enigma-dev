@@ -50,8 +50,9 @@ namespace enigma
     // Inherits object_basic *inst: should be NULL
     // Inherits inst_iter *next:    First of instances for which to perform this event (Can be NULL)
     // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
-    std::string name; // Event name
+    string name; // Event name
     inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
+    void unlink(inst_iter*);
     event_iter();
   };
   
@@ -100,9 +101,9 @@ namespace enigma
   
   // Unlinking/Destroying
   void instance_iter_queue_for_destroy(inst_iter* who);
+  void dispose_destroyed_instances();
   void unlink_main(instance_list_iterator);
   void unlink_object_id_iter(inst_iter*,int);
-  void unlink_event_iter(inst_iter*);
 }
 
 // Other

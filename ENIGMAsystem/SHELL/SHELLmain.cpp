@@ -135,6 +135,7 @@ goforit(at);*/
 #endif
 
 #include "Universal_System/instance_system.h"
+#include "Platforms/platforms_mandatory.h"
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"

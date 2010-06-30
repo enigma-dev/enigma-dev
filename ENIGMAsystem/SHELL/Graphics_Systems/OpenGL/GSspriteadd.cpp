@@ -27,7 +27,7 @@
 
 /**Sprite adding functions*****************************************************\
 
-int sprite_add(std::string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)
+int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)
 
 \******************************************************************************/
 
@@ -35,11 +35,13 @@ int sprite_add(std::string filename,double imgnumb,double precise,double transpa
 #include <cstring>
 #include <iostream>
 #include <GL/gl.h>
+using namespace std;
+
 #include "../../Universal_System/IMGloading.h"
 #include "../../Universal_System/spritestruct.h"
 #include "../../libEGMstd.h"
 
-int sprite_add(std::string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)
+int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)
 {
 	GLuint texture;
 	int width,height,fullwidth,fullheight;

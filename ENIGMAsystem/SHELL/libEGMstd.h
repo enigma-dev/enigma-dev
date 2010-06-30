@@ -28,9 +28,11 @@
 // This file contains functions that are used by virtually all components of ENIGMA.
 // They are also, directly or otherwise, available to the user.
 
-std::string toString(int);
-std::string toString(char);
-std::string toString(char*);
-std::string toString(double);
+string toString(int);
+string toString(long long n);
+string toString(char);
+string toString(char*);
+string toString(float);
+string toString(double);
 
-void show_error(std::string, const bool);
+void show_error(string, const bool);

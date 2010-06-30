@@ -29,26 +29,26 @@
 
 bool is_string(enigma::variant val)
 bool is_real(enigma::variant val)
-std::string chr(char val)
+string chr(char val)
 char cchr(double val)
 double ord(char* str)
-double real(std::string str)
-std::string string(double val)
-int string_length(std::string str)
-int string_pos(std::string substr,std::string str)
-std::string string_copy(std::string str,double index,double count)
-std::string string_char_at(std::string str,double index)
-std::string string_delete(std::string str,double index,double count)
-std::string string_insert(std::string substr,std::string str,double index)
-std::string string_replace(std::string str,std::string substr,std::string newstr)
-std::string string_replace_all(std::string str,std::string substr,std::string newstr)
-int string_count(std::string substr,std::string str)
-std::string string_lower(std::string str)
-std::string string_upper(std::string str)
-std::string string_repeat(std::string str,double count)
-std::string string_letters(std::string str)
-std::string string_digits(std::string str)
-std::string string_lettersdigits(std::string str)
+double real(string str)
+string string(double val)
+int string_length(string str)
+int string_pos(string substr,string str)
+string string_copy(string str,double index,double count)
+string string_char_at(string str,double index)
+string string_delete(string str,double index,double count)
+string string_insert(string substr,string str,double index)
+string string_replace(string str,string substr,string newstr)
+string string_replace_all(string str,string substr,string newstr)
+int string_count(string substr,string str)
+string string_lower(string str)
+string string_upper(string str)
+string string_repeat(string str,double count)
+string string_letters(string str)
+string string_digits(string str)
+string string_lettersdigits(string str)
 
 \******************************************************************************/
 
@@ -63,10 +63,10 @@ bool is_real(var& val)                  { return !(val.values[0]->type); }
 
 
 
-std::string chr(char val)
+string chr(char val)
 { 
    char ordinal=(char) enigma::negmod(val,255);
-   std::string ret;
+   string ret;
    ret=ordinal;
    return ret;                         
 }
@@ -86,14 +86,14 @@ double ord(char* str)
 {
   return (double) str[0];
 }
-double ord(std::string str)
+double ord(string str)
 {
   return (double) str[0];
 }
 
 
 
-double real(std::string str)
+double real(string str)
 {
   return atof(str.c_str());
 }
@@ -109,7 +109,7 @@ double real(var& str)
 {
   if (str.values[0]->type==1)
   {
-    std::string strn=(std::string)str;
+    string strn=(string)str;
     return atof(strn.c_str());
   }
   else
@@ -120,7 +120,7 @@ double real(var& str)
 
 
 
-int string_length(std::string str)
+int string_length(string str)
 {
     return str.length();
 }
@@ -130,25 +130,25 @@ int string_length(char* str)
 }
 
 
-int string_pos(std::string substr,std::string str)
+int string_pos(string substr,string str)
 {
     unsigned int a=str.find(substr,0);
-    if (a==std::string::npos)
+    if (a==string::npos)
     return 0;
     return a+1;
 }
-int string_pos(char* substr,std::string str)
+int string_pos(char* substr,string str)
 {
     unsigned int a=str.find(substr,0);
-    if (a==std::string::npos)
+    if (a==string::npos)
     return 0;
     return a+1;
 }
 
 
-std::string string_copy(std::string str,double index,double count)
+string string_copy(string str,double index,double count)
 {
-   std::string strn=str;
+   string strn=str;
    unsigned int indx=(unsigned int)index-1; if (indx<0) indx=0;
    
    if (indx>strn.length())
@@ -158,25 +158,25 @@ std::string string_copy(std::string str,double index,double count)
 }
 
 
-std::string string_char_at(std::string str,double index)
+string string_char_at(string str,double index)
 {
     unsigned int n=(unsigned int)index-1;
     
-    if (n==std::string::npos) n=0;
+    if (n==string::npos) n=0;
     
     if (n>=str.length())
     return "";
     
-    std::string ret=""; 
+    string ret=""; 
     ret+=str[n];
     
     return ret;
 }
 
 
-std::string string_delete(std::string str,double index,double count)
+string string_delete(string str,double index,double count)
 {
-   std::string strn=str;
+   string strn=str;
    int x=(int) index-1; if (x<0) x=0;
    int c=(int) count;   if (c<0) c=0;
    return strn.erase(x,c);
@@ -184,18 +184,18 @@ std::string string_delete(std::string str,double index,double count)
 
 
 
-std::string string_insert(std::string substr,std::string str,double index)
+string string_insert(string substr,string str,double index)
 {
-    std::string strn=str;
-    unsigned int x=(unsigned int) index-1; if (x==std::string::npos) x=0; if (x>strn.length()) x=strn.length(); 
+    string strn=str;
+    unsigned int x=(unsigned int) index-1; if (x==string::npos) x=0; if (x>strn.length()) x=strn.length(); 
     return strn.insert(x,substr);
 }
 
 
 
-std::string string_replace(std::string str,std::string substr,std::string newstr)
+string string_replace(string str,string substr,string newstr)
 {
-    std::string strr=str;
+    string strr=str;
     int sublen=substr.length();
     int pos=0;
     if ((pos=strr.find(substr,pos)) != -1)
@@ -208,9 +208,9 @@ std::string string_replace(std::string str,std::string substr,std::string newstr
 }
 
 
-std::string string_replace_all(std::string str,std::string substr,std::string newstr)
+string string_replace_all(string str,string substr,string newstr)
 {
-    std::string strr=str;
+    string strr=str;
     int sublen=substr.length(),
         newlen=newstr.length();
     int pos=0;
@@ -225,7 +225,7 @@ std::string string_replace_all(std::string str,std::string substr,std::string ne
 }
 
 
-int string_count(std::string substr,std::string str)
+int string_count(string substr,string str)
 {
     int sublen=substr.length();
     int pos=-sublen, occ=0;
@@ -234,7 +234,7 @@ int string_count(std::string substr,std::string str)
 }
 
 
-std::string string_lower(std::string str)
+string string_lower(string str)
 {
     int len=str.length()-1;
     int i=-1;
@@ -245,7 +245,7 @@ std::string string_lower(std::string str)
     }
     return str;
 } 
-std::string string_upper(std::string str)
+string string_upper(string str)
 {
     int len=str.length()-1;
     int i=-1;
@@ -258,9 +258,9 @@ std::string string_upper(std::string str)
 } 
 
 
-std::string string_repeat(std::string str,double count)
+string string_repeat(string str,double count)
 {
-    std::string ret="";
+    string ret="";
     for (int i=0;i<count;i++)
     {
         ret.append(str);
@@ -269,9 +269,9 @@ std::string string_repeat(std::string str,double count)
 }
 
 
-std::string string_letters(std::string str)
+string string_letters(string str)
 {
-    std::string ret="";
+    string ret="";
     unsigned int len=str.length()-1;
     for (unsigned int i=0; i<=len; i++)
     {
@@ -282,9 +282,9 @@ std::string string_letters(std::string str)
 }
 
 
-std::string string_digits(std::string str)
+string string_digits(string str)
 {
-    std::string ret="";
+    string ret="";
     int len=str.length()-1;
     for (int i=0; i<=len; i++)
     {
@@ -295,9 +295,9 @@ std::string string_digits(std::string str)
 }
 
 
-std::string string_lettersdigits(std::string str)
+string string_lettersdigits(string str)
 {
-    std::string ret="";
+    string ret="";
     int len=str.length()-1;
     
     for (int i=0; i<=len; i++)

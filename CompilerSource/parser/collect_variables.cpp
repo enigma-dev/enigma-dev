@@ -33,6 +33,7 @@
 #include <iostream>
 #include <stdio.h>
 using namespace std;
+#include "../compiler/event_reader/event_parser.h"
 
 struct scope_ignore {
   map<string,int> ignore;
@@ -49,9 +50,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
   darray<scope_ignore*> igstack;
   igstack[igpos] = new scope_ignore;
   
-  cout << "\n\n\nCollecting variables for event " << pev->id << "..." << endl;
-  cout << code << endl;
-  cout << synt << endl;
+  cout << "\nCollecting some variables...\n";
   
   pt dec_start_pos = 0;
   
@@ -102,10 +101,9 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
           }
           else //Add to this scope
           {
-            cout << "Add to ig" << endl;
             igstack[igpos]->ignore[dec_name] = pos;
             pos++;
-            cout << "Added `" << dec_name << "' to ig" << endl;
+            cout << "Added `" << dec_name << "' to ig\n";
           }
         }
         
@@ -159,8 +157,6 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
     
     if (synt[pos] == 'L') //Double meaning.
     {
-      cout << "L"; fflush(stdout);
-      
       //Bookmark this spot
       const int sp = pos;
       
@@ -213,7 +209,6 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
     }
     if (synt[pos] == 'n')
     {
-      cout << "N"; fflush(stdout);
       const pt spos = pos;
       while (synt[++pos] == 'n');
       
@@ -238,7 +233,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         
         //Check shared locals to see if we already have one
         if (shared_object_locals.find(nname) != shared_object_locals.end()) {
-          cout << "Ignoring `" << nname << "' because it's a local.\n"; continue;
+          cout << "Ignoring `" << nname << "' because it's a shared local.\n"; continue;
         }
         
         //Now make sure we're not specifically ignoring it
@@ -248,13 +243,16 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
             cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n"; goto continue_2;
           }
         
+        if (pev->myObj->locals.find(nname) != pev->myObj->locals.end()) {
+          cout << "Ignoring `" << nname << "' because it's already a local.\n"; continue;
+        }
+        
         cout << "Adding `" << nname << "' because that's just what I do.\n";
         pev->myObj->locals[nname] = dectrip();
         continue_2: continue;
       }
       else //Since a syntax check already completed, we assume this is a valid function
       {
-        cout << "!"; fflush(stdout);
         cout << "\nLooking at " <<nname << "...\n";
         bool contented = false;
         unsigned pars = 1, args = 0;
@@ -276,15 +274,11 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         args += contented; //Final arg for closing parentheses
         pev->myObj->funcs[nname] = args;
         cout << "  Calls script `" << nname << "'\n";
-        cout << "\\"; fflush(stdout);
       }
-      cout << "\\"; fflush(stdout);
     }
   }
-
-  cout << "*****************************FINISHED********************\n";
   
-  cout << "\n\n\n\n";
+  cout << "**Finished collections in " << (pev==NULL ? "some event for some unspecified object" : pev->myObj->name + ", event " + event_get_human_name(pev->mainId,pev->id))<< "\n";
   
   //Store these for later.
   pev->code = code;

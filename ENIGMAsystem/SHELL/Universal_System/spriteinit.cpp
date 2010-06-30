@@ -28,6 +28,8 @@
 #include <string>
 #include <stdio.h>
 #include <iostream>
+using namespace std;
+
 #include "../Graphics_Systems/OpenGL/GSspriteadd.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"

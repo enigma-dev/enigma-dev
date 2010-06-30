@@ -29,7 +29,7 @@
 namespace enigma
 {
 	extern int event_current;
-	extern std::string evname(int evnumb);
+	extern string evname(int evnumb);
 	extern int getID();
 }
 

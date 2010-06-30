@@ -126,9 +126,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       cout << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
       return E_ERROR_LOAD_LOCALS;
     }
-    
-    //Read the types of events
-    event_parse_resourcefile();
+  
+  //Read the types of events
+  event_parse_resourcefile();
   
   // Pick apart the sent resources
   cout << "Location in memory of structure: " << es << flushl;

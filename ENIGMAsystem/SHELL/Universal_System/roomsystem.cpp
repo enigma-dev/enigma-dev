@@ -43,7 +43,7 @@
 #include "instance.h"
 #include "planar_object.h"
 
-extern std::string string(double); //TODO: Clean these up without EGMstd.
+extern string string(double); //TODO: Clean these up without EGMstd.
 
 
 double room_first  = 0;
@@ -52,7 +52,7 @@ double room_speed  = 60;
 double room_width  = 640;
 double room_height = 480;
 double room_persistent = 0;
-std::string room_caption = "ENIGMA Engine";
+string room_caption = "ENIGMA Engine";
 
 double background_color=16777215;
 double background_showcolor=1;
@@ -90,10 +90,10 @@ namespace enigma
   };
   struct roomstruct
   {
-    std::string name;
+    string name;
     int backcolor;
     void(*createcode)();
-    std::string cap;
+    string cap;
     int width, height, spd;
     int views_enabled;
     viewstruct views[8];

@@ -322,6 +322,10 @@ bool event_has_default_code(int mid, int id) {
   return main_event_infos[mid].specs[id]->def != "" or main_event_infos[mid].specs[id]->cons != "";
 }
 
+string event_get_default_code(int mid, int id) {
+  return main_event_infos[mid].specs[id]->def + main_event_infos[mid].specs[id]->cons;
+}
+
 // Some events have special behavior as placeholders, instead of simple iteration.
 // These two functions will test for and return such.
 
@@ -355,20 +359,13 @@ bool event_execution_uses_default(int mid, int id) {
   return e->mode == et_inline or e->mode == et_special or e->mode == et_stacked;
 }
 
-
-// Fetch any code that will remain active if a
-// user has not declared this event.
-string event_get_default_code(int mid, int id)
-{
-  return main_event_infos[mid].specs[id]->def + main_event_infos[mid].specs[id]->cons;
-}
-
 // Clear all data from previous parses, save
 // main events, which can just be overwritten.
 void event_info_clear()
 {
   for (unsigned i=0; i<main_event_infos.size; i++)
     main_event_infos[i].specs.clear();
+  event_sequence.clear();
 }
 
 /*

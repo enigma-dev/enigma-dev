@@ -32,32 +32,32 @@ string chr(char val);
 
 int ord(char str);
 int ord(char* str);
-int ord(std::string str);
+int ord(string str);
 
-double real(std::string str);
+double real(string str);
 double real(char* str);
 double real(double str);
 double real(var& str);
 
-size_t string_length(std::string str);
+size_t string_length(string str);
 size_t string_length(char* str);
-int string_pos(std::string substr,std::string str);
-int string_pos(char* substr,std::string str);
+int string_pos(string substr,string str);
+int string_pos(char* substr,string str);
 
-std::string string_copy(std::string str,double index,double count);
-std::string string_char_at(std::string str,double index);
-std::string string_delete(std::string str,double index,double count);
-std::string string_insert(std::string substr,std::string str,double index);
-std::string string_replace(std::string str,std::string substr,std::string newstr);
-std::string string_replace_all(std::string str,std::string substr,std::string newstr);
-int string_count(std::string substr,std::string str);
+string string_copy(string str,double index,double count);
+string string_char_at(string str,double index);
+string string_delete(string str,double index,double count);
+string string_insert(string substr,string str,double index);
+string string_replace(string str,string substr,string newstr);
+string string_replace_all(string str,string substr,string newstr);
+int string_count(string substr,string str);
 
-std::string string_lower(std::string str);
-std::string string_upper(std::string str);
+string string_lower(string str);
+string string_upper(string str);
 
-std::string string_repeat(std::string str,double count);
+string string_repeat(string str,double count);
 
-std::string string_letters(std::string str);
-std::string string_digits(std::string str);
-std::string string_lettersdigits(std::string str);
+string string_letters(string str);
+string string_digits(string str);
+string string_lettersdigits(string str);
 

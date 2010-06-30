@@ -193,9 +193,10 @@ step: 3
 	Mode: Special
 	Case: 0
 	Constant: { 
+		xprevious = x, yprevious = y;
 		x += hspeed, y += vspeed;
 		speed -= friction; 
-		vspeed += gravity * sin(gravity_direction * pi/180),
+		vspeed -= gravity * sin(gravity_direction * pi/180),
 		hspeed += gravity * cos(gravity_direction * pi/180);
 	}
 
@@ -256,6 +257,7 @@ endstep: 3
 draw: 8
 	Name: Draw
 	Mode: Inline
+	Default: if (sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
 	Instead: screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
 
 

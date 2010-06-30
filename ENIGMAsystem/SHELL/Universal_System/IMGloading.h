@@ -26,6 +26,6 @@
 \********************************************************************************/
 
 namespace enigma{
-	char* load_bitmap(std::string filename,int* width,int* height, int* fullwidth, int* fullheight);
+	char* load_bitmap(string filename,int* width,int* height, int* fullwidth, int* fullheight);
 }
 

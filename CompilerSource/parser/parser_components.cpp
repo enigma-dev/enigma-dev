@@ -357,9 +357,6 @@ int parser_reinterpret(string &code,string &synt)
 //Add semicolons
 void parser_add_semicolons(string &code,string &synt)
 {
-  cout << "adding semicolons...";//synt << endl << code << endl;
-  cout << "\nThis is what I have to work with:\n" << code << endl << synt << endl;
-  
   //Allocate enough memory to hold all the semicolons we'd ever need
   char *codebuf = new char[code.length()*2+1];
   char *syntbuf = new char[code.length()*2+1];
@@ -369,20 +366,11 @@ void parser_add_semicolons(string &code,string &synt)
   stackif *sy_semi = new stackif(';');
   for (pt pos=0; pos<code.length(); pos++)
   {
-    if (synt[pos]==' ')
+    if (synt[pos]==' ') // Automatic semicolon
     {
-      cout << "I'm thinking this never happens.";
-      if (need_semi(synt[pos-1],synt[pos+1],true))
-      {
-        codebuf[bufpos] = *sy_semi;
-        syntbuf[bufpos++] = *sy_semi;
-        sy_semi=sy_semi->popif('s');
-      }
-      else if (bufpos and syntbuf[bufpos-1] == synt[pos+1])
-      {
-        codebuf[bufpos] = ' ';
-        syntbuf[bufpos++] = ' ';
-      }
+      codebuf[bufpos] = *sy_semi;
+      syntbuf[bufpos++] = *sy_semi;
+      sy_semi=sy_semi->popif('s');
     }
     else
     {

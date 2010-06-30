@@ -27,6 +27,8 @@
 
 #include <string>
 #include <stdio.h>
+using namespace std;
+
 inline unsigned int nlpo2dc(unsigned int x){//Next largest power of two minus one
 	x|=x>>1;
 	x|=x>>2;
@@ -42,60 +44,63 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	x+=x>>8;
 	return (x+(x>>16))&63;
 }
-namespace enigma{
-char* load_bitmap(std::string filename,int* width,int* height, int* fullwidth, int* fullheight){
-	FILE *imgfile;
-	int bmpstart,bmpwidth,bmpheight;
-	if(!(imgfile=fopen(filename.c_str(),"r"))) return 0;
-	fseek(imgfile,0,SEEK_END);
-	ftell(imgfile);//bmpsize
-	fseek(imgfile,10,SEEK_SET);
-	fread(&bmpstart,1,4,imgfile);
-	fseek(imgfile,18,SEEK_SET);
-	fread(&bmpwidth,1,4,imgfile);
-	fread(&bmpheight,1,4,imgfile);
-	fseek(imgfile,28,SEEK_SET);//color depth
-	//int colordepth=fgetc(imgfile);
-	//if(colordepth != 24) return 0; //Only take 24-bit bitmaps for now
-	if(fgetc(imgfile)!=24) return 0;
-	int
-		wfdc=nlpo2dc(bmpwidth),widfull=wfdc+1,wflgp2=lgpp2(widfull)+2,
-		hgtfull=nlpo2dc(bmpheight),
-		ih,iw,tmp=hgtfull++<<wflgp2;
-	char* bitmap=new char[(hgtfull<<wflgp2)|2];
-	long int pad=bmpwidth&3; //This is that set of nulls that follows each line
-    fseek(imgfile,bmpstart,SEEK_SET);
-	for(ih=0; ih<hgtfull-bmpheight; ih++){
-		for(iw=0; iw<widfull; iw++){
-			bitmap[tmp]=0;
-			bitmap[tmp+1]=0;
-			bitmap[tmp+2]=0;
-			bitmap[tmp+3]=0;
-			tmp+=4;
-		}
-	}
-	for(ih=0; ih<bmpheight; ih++){
-		for (iw=0; iw<bmpwidth; iw++){
-			bitmap[tmp+3]=255;
-			bitmap[tmp+2]=fgetc(imgfile);
-			bitmap[tmp+1]=fgetc(imgfile);
-			bitmap[tmp]=fgetc(imgfile);
-			tmp+=4;
-		}
-		for (iw=0; iw<widfull-bmpwidth; iw++){
-			bitmap[tmp]=0;
-			bitmap[tmp+1]=0;
-			bitmap[tmp+2]=0;
-			bitmap[tmp+3]=0;
-			tmp+=4;
-		}
-		fseek(imgfile,pad,SEEK_CUR);
-	}
-	fclose(imgfile);
-	*width=bmpwidth;
-	*height=bmpheight;
-	*fullwidth=widfull;
-	*fullheight=hgtfull;
-	return bitmap;
-}
+namespace enigma
+{
+  char* load_bitmap(string filename,int* width,int* height, int* fullwidth, int* fullheight)
+  {
+    FILE *imgfile;
+    int bmpstart,bmpwidth,bmpheight;
+    if(!(imgfile=fopen(filename.c_str(),"r"))) return 0;
+    fseek(imgfile,0,SEEK_END);
+    ftell(imgfile);//bmpsize
+    fseek(imgfile,10,SEEK_SET);
+    fread(&bmpstart,1,4,imgfile);
+    fseek(imgfile,18,SEEK_SET);
+    fread(&bmpwidth,1,4,imgfile);
+    fread(&bmpheight,1,4,imgfile);
+    fseek(imgfile,28,SEEK_SET);//color depth
+    //int colordepth=fgetc(imgfile);
+    //if(colordepth != 24) return 0; //Only take 24-bit bitmaps for now
+    if(fgetc(imgfile)!=24) return 0;
+    int
+      wfdc=nlpo2dc(bmpwidth),widfull=wfdc+1,wflgp2=lgpp2(widfull)+2,
+      hgtfull=nlpo2dc(bmpheight),
+      ih,iw,tmp=hgtfull++<<wflgp2;
+    char* bitmap=new char[(hgtfull<<wflgp2)|2];
+    long int pad=bmpwidth&3; //This is that set of nulls that follows each line
+      fseek(imgfile,bmpstart,SEEK_SET);
+    for(ih=0; ih<hgtfull-bmpheight; ih++){
+      for(iw=0; iw<widfull; iw++){
+        bitmap[tmp]=0;
+        bitmap[tmp+1]=0;
+        bitmap[tmp+2]=0;
+        bitmap[tmp+3]=0;
+        tmp+=4;
+      }
+    }
+    for(ih=0; ih<bmpheight; ih++)
+    {
+      for (iw=0; iw<bmpwidth; iw++){
+        bitmap[tmp+3]=255;
+        bitmap[tmp+2]=fgetc(imgfile);
+        bitmap[tmp+1]=fgetc(imgfile);
+        bitmap[tmp]=fgetc(imgfile);
+        tmp+=4;
+      }
+      for (iw=0; iw<widfull-bmpwidth; iw++){
+        bitmap[tmp]=0;
+        bitmap[tmp+1]=0;
+        bitmap[tmp+2]=0;
+        bitmap[tmp+3]=0;
+        tmp+=4;
+      }
+      fseek(imgfile,pad,SEEK_CUR);
+    }
+    fclose(imgfile);
+    *width=bmpwidth;
+    *height=bmpheight;
+    *fullwidth=widfull;
+    *fullheight=hgtfull;
+    return bitmap;
+  }
 }

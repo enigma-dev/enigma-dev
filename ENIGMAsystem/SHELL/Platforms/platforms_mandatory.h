@@ -29,5 +29,11 @@
 // under this directory, /Platforms/. They are not required to do anything at all
 // if the platform in question lacks support for them entirely.
 
-// This method should write the name of the running module to exenamehere.
-void windowsystem_write_exename(char* exenamehere);
+namespace enigma
+{
+  // This method should write the name of the running module to exenamehere.
+  void windowsystem_write_exename(char* exenamehere);
+
+  // This method should take an integer framerate and perform the necessary operations to limit fps to that rate.
+  void sleep_for_framerate(int framerate);
+}

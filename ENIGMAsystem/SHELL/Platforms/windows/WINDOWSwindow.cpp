@@ -48,7 +48,7 @@ namespace enigma
 }
 
 
-int show_message(std::string str)
+int show_message(string str)
 {
   MessageBox(enigma::hWnd,str.c_str(),"Message",MB_OK);
   return 0;
@@ -118,12 +118,12 @@ void window_set_caption(char* caption)
   SetWindowText(enigma::hWnd,caption);
 }
 
-int window_set_caption(std::string caption)
+int window_set_caption(string caption)
 {
   SetWindowText(enigma::hWndParent,(char*) caption.c_str());
 }
 
-std::string window_get_caption()
+string window_get_caption()
 {
   char text_buffer[513];
   GetWindowText(enigma::hWnd, text_buffer, 512);
@@ -314,7 +314,7 @@ namespace getstr
   }
 }
 
-std::string get_string(std::string message, std::string def)
+string get_string(string message, string def)
 {
   if (!getstr::initdstrfncs) 
   {

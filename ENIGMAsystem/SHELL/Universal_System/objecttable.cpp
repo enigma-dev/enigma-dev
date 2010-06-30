@@ -27,14 +27,15 @@
 
 #include <map>
 #include <string>
+using namespace std;
 
 namespace enigma
 {
   struct objecttable
   {
-    std::string name;
+    string name;
     int sprite_index,mask_index,parent,visible,solid,persistent,depth;
   };
-  std::map<int,objecttable> objectdata;
-  std::map<int,objecttable>::iterator objiter;
+  map<int,objecttable> objectdata;
+  map<int,objecttable>::iterator objiter;
 }

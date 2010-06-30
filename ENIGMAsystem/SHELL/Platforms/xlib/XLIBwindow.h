@@ -18,6 +18,7 @@
  */
 
 #include <string>
+using std::string;
 
 void gmw_init();
 
@@ -33,7 +34,7 @@ int window_get_visible();
 /////////////
 // CAPTION //
 /////////////
-int window_set_caption(std::string caption);
+int window_set_caption(string caption);
 char *window_get_caption();
 
 ///////////

@@ -104,7 +104,7 @@ namespace enigma
     }
 }
 
-int draw_text(double x,double y,std::string text)
+int draw_text(double x,double y,string text)
 {
     untexture();
     

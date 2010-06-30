@@ -49,7 +49,7 @@ namespace enigma
    int extcount=0;
 }
 
-int external_define(std::string dll,std::string name,double calltype,double restype,
+int external_define(string dll,string name,double calltype,double restype,
     double argnum,double arg0=0,double arg1=0,double arg2=0,double arg3=0,double arg4=0,double arg5=0,double arg6=0,
     double arg7=0,double arg8=0,double arg9=0,double arg10=0,double arg11=0)
 {

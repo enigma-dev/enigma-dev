@@ -111,12 +111,14 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
         
         wto << "\n    void unlink()\n    {\n";
+          wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me->second); // Queue for delete while we're still valid\n";
           wto << "      enigma::unlink_main(ENOBJ_ITER_me);\n";
           for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
             wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
-          for (unsigned ii = 0; ii < i->second->events.size; ii++)
-            wto << "      unlink_event_iter(ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ");\n";
-          wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me->second);";
+          for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+            const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
+            wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
+          }
         wto << "\n    }\n    ";
         
         //Automatic constructor

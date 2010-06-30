@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 
-int show_message(std::string message)
+int show_message(string message)
 {
   printf("show_message: %s\n",message.c_str());
   return 0;

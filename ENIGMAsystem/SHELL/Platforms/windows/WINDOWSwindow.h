@@ -55,7 +55,7 @@ namespace enigma {
   void clampparent();
 }
 
-int  show_message(std::string str);
+int  show_message(string str);
 int  window_get_x();
 int  window_get_y();
 int  window_get_width();
@@ -65,8 +65,8 @@ int  window_get_visible();
 void window_set_stayontop(int stay);
 int  window_get_stayontop();
 void window_set_caption(char* caption);
-void window_set_caption(std::string caption);
-std::string window_get_caption();
+void window_set_caption(string caption);
+string window_get_caption();
 double window_set_color(int color);
 double window_get_color();
 void window_set_region_scale(int scale, int adaptwindow);
@@ -86,6 +86,6 @@ namespace getstr {
   void init();
 }
 
-std::string get_string(std::string message, std::string def);
+string get_string(string message, string def);
 int game_end();
 int get_color(double defcolor);

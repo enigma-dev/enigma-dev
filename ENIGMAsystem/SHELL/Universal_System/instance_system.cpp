@@ -54,10 +54,11 @@ namespace enigma
     return prev = a;
   }
   
-  void unlink_event_iter(inst_iter* which)
+  void event_iter::unlink(inst_iter* which)
   {
-    if (which->prev) which->prev->next = which->next;
+    which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
+    if (prev == which) prev = which->prev;
   }
   
   inst_iter *objectid_base::add_inst(object_basic* inst)
@@ -70,9 +71,11 @@ namespace enigma
   
   void unlink_object_id_iter(inst_iter* which, int oid)
   {
-    if (which->prev) which->prev->next = which->next;
+    which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
-    objects[oid].count--;
+    objectid_base *a = objects + oid;
+    if (a->prev == which) a->prev = which->prev;
+    a->count--;
   }
   
   
@@ -190,6 +193,12 @@ namespace enigma
     enigma::cleanups.push_back(who);
     enigma::instancecount--;
     instance_count--;
+  }
+  void dispose_destroyed_instances()
+  {
+    for (size_t i = 0; i < cleanups.size(); i++)
+      delete cleanups[i]->inst;
+    cleanups.clear();
   }
   void unlink_main(instance_list_iterator who)
   {

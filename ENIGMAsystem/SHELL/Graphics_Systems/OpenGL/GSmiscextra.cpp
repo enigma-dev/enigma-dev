@@ -29,6 +29,8 @@
 #include <string>
 #include <stdio.h>
 
+using namespace std;
+
 //Fuck whoever did this to the spec
 #ifndef GL_BGR
   #define GL_BGR 0x80E0
@@ -37,7 +39,7 @@
 extern int window_get_width();
 extern int window_get_height();
 
-int screen_save(std::string filename) //Assumes native integers are little endian
+int screen_save(string filename) //Assumes native integers are little endian
 {
 	unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
 	char *scrbuf=new char[sz*3];
@@ -69,7 +71,7 @@ int screen_save(std::string filename) //Assumes native integers are little endia
 	return 0;
 }
 
-int screen_save_part(std::string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
 	unsigned sz=w*h;
 	char *scrbuf=new char[sz*3];

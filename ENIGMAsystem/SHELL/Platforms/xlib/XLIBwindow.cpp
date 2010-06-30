@@ -95,16 +95,16 @@ int window_get_visible()
 	return wa.map_state != IsUnmapped;
 }
 
-int window_set_caption(std::string caption)
+int window_set_caption(string caption)
 {
 	XStoreName(disp,win,caption.c_str());
 	return 0;
 }
-std::string window_get_caption()
+string window_get_caption()
 {
 	char *caption;
 	XFetchName(disp,win,&caption);
-	std::string r=caption;
+	string r=caption;
 	return r;
 }
 
@@ -300,15 +300,27 @@ void show_error(string err, const bool fatal)
   ABORT_ON_ALL_ERRORS();
 }
 
+#include <sys/time.h>
+
 namespace enigma {
   char** parameters;
-}
-void windowsystem_write_exename(char* x)
-{
-  unsigned irx;
-  for (irx = 0; enigma::parameters[0][irx] != 0; irx++)
-    x[irx] = enigma::parameters[0][irx];
-  x[irx] = 0;
+  void windowsystem_write_exename(char* x)
+  {
+    unsigned irx;
+    for (irx = 0; enigma::parameters[0][irx] != 0; irx++)
+      x[irx] = enigma::parameters[0][irx];
+    x[irx] = 0;
+  }
+  static int last_second,last_microsecond;
+  void sleep_for_framerate(int rs)
+  {
+    timeval tv;
+    gettimeofday(&tv, NULL);
+    //We'll give the processor a millisecond to take care of these calculations and hop threads. Rather be fast than slow.
+    int sdur = (tv.tv_sec - last_second * 1000000) + (tv.tv_usec - last_microsecond) - 1000;
+    if (sdur > 0 and sdur < 1000000) usleep(sdur);
+    last_second = tv.tv_sec, last_microsecond = tv.tv_usec;
+  }
 }
 
 /*

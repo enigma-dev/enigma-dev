@@ -26,4 +26,4 @@
 \********************************************************************************/
 
 
-int screen_save(std::string filename);
+int screen_save(string filename);

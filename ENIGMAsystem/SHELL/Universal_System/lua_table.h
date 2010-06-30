@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _H_LUA_TABLE
+#define _H_LUA_TABLE
+
 #include <map>      // Sparse part
 #include <string.h> // Memcpy
 #include <stdlib.h> // Malloc, Realloc, Free
@@ -169,3 +172,5 @@ template <class T> struct lua_table
     destroy();
   }
 };
+
+#endif //_H_LUA_TABLE

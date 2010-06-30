@@ -27,6 +27,8 @@
 
 #include <map>
 #include <string>
+using namespace std;
+
 #include "spritestruct.h"
 #include "../libEGMstd.h"
 

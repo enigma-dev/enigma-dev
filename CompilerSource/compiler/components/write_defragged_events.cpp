@@ -42,7 +42,7 @@ using namespace std;
 
 #include "../event_reader/event_parser.h"
 
-struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} void inc(int m,int i) { mid=m,id=i,count++; } void operator++(int) { count++; } };
+struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} void f2(int m,int i) { id = i, mid = m; } void inc(int m,int i) { mid=m,id=i,count++; } void operator++(int) { count++; } };
 map<string,foundevent> used_events;
 typedef map<string,foundevent>::iterator evfit;
 
@@ -64,7 +64,7 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
     const int mid = event_sequence[i].first, id = event_sequence[i].second;
     if (event_has_default_code(mid,id)) // We may not be using this event, but if it's persistent... (constant or defaulted: mandatory)
     { 
-      used_events[event_get_function_name(mid,id)]; // ...Reserve it anyway.
+      used_events[event_get_function_name(mid,id)].f2(mid,id); // ...Reserve it anyway.
       
       for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) // Then shell it out into the other objects.
       {
@@ -86,7 +86,7 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
     wto << "    virtual variant myevent_" << it->first << "()";
     if (event_has_default_code(it->second.mid,it->second.id))
       wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << "    return 0;" << endl << "    }" << endl;
-    else wto << " { return 0; }" << endl;
+    else wto << " { return 0; } // No default " << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
   }
   wto << "    //virtual void unlink() {} // This is already declared at the super level." << endl;
   wto << "    event_parent() {}" << endl;
@@ -145,8 +145,11 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
           wto << "    " << endl;
         }
     }
+    wto << "    enigma::dispose_destroyed_instances();" << endl;
+    wto << "    enigma::sleep_for_framerate(room_speed);" << endl;
+    wto << "    " << endl;
     wto << "    return 0;" << endl;
-  wto << "  }" << endl;
+  wto << "  } // event function" << endl;
   
   // Done, end the namespace
   wto << "} // namespace enigma" << endl;

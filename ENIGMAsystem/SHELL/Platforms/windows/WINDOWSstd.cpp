@@ -31,15 +31,16 @@
 #include "../../API_Switchboard.h"
 #include "../../libEGMstd.h"
 
-void windowsystem_write_exename(char* exenamehere)
-{
-   GetModuleFileName(NULL, exenamehere, 1024);
-}
 
 namespace enigma
 {
     extern HWND hWnd;
     extern HDC window_hDC;
+    
+    void windowsystem_write_exename(char* exenamehere)
+    {
+      GetModuleFileName(NULL, exenamehere, 1024);
+    }
     
     #ifdef ENIGMA_GS_OPENGL
     void EnableDrawing (HGLRC *hRC)
