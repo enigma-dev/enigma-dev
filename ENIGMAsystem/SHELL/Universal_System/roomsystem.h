@@ -34,33 +34,33 @@ int room_next(double num);
 int room_previous(double num);
 
 
-extern double background_color;
-extern double background_showcolor;
+extern int background_color;
+extern int background_showcolor;
 
-extern double room_first;
-extern double room_height;
-extern double room_last;
-extern double room_persistent;
-extern double room_speed;
-extern double room_width;
+extern int room_first;
+extern int room_height;
+extern int room_last;
+extern int room_persistent;
+extern int room_speed;
+extern int room_width;
 
-extern double view_angle;
-extern double view_current;
-extern double view_enabled;
-extern double view_hborder[9];
-extern double view_hport[9];
-extern double view_hspeed[9];
-extern double view_hview[9];
-extern double view_object[9];
-extern double view_vborder[9];
-extern double view_visible[9];
-extern double view_vspeed[9];
-extern double view_wport[9];
-extern double view_wview[9];
-extern double view_xport[9];
-extern double view_xview[9];
-extern double view_yport[9];
-extern double view_yview[9];
+extern int view_angle;
+extern int view_current;
+extern int view_enabled;
+extern int view_hborder[9];
+extern int view_hport[9];
+extern int view_hspeed[9];
+extern int view_hview[9];
+extern int view_object[9];
+extern int view_vborder[9];
+extern int view_visible[9];
+extern int view_vspeed[9];
+extern int view_wport[9];
+extern int view_wview[9];
+extern int view_xport[9];
+extern int view_xview[9];
+extern int view_yport[9];
+extern int view_yview[9];
 
 #include <map>
 #include <string>

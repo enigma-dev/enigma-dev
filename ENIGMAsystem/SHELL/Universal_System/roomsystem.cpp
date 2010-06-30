@@ -46,34 +46,34 @@
 extern string string(double); //TODO: Clean these up without EGMstd.
 
 
-double room_first  = 0;
-double room_last   = 0;
-double room_speed  = 60;
-double room_width  = 640;
-double room_height = 480;
-double room_persistent = 0;
+int room_first  = 0;
+int room_last   = 0;
+int room_speed  = 60;
+int room_width  = 640;
+int room_height = 480;
+int room_persistent = 0;
 string room_caption = "ENIGMA Engine";
 
-double background_color=16777215;
-double background_showcolor=1;
+int background_color = 16777215;
+int background_showcolor=1;
 
-double view_angle   = 0;
-double view_current = 0;
-double view_enabled = 0;
-double view_hborder[9] = {0,0,0,0,0,0,0,0};
-double view_hport[9]   = {0,0,0,0,0,0,0,0};
-double view_hspeed[9]  = {0,0,0,0,0,0,0,0};
-double view_hview[9]   = {0,0,0,0,0,0,0,0};
-double view_object[9]  = {0,0,0,0,0,0,0,0};
-double view_vborder[9] = {0,0,0,0,0,0,0,0};
-double view_visible[9] = {0,0,0,0,0,0,0,0};
-double view_vspeed[9]  = {0,0,0,0,0,0,0,0};
-double view_wport[9]   = {0,0,0,0,0,0,0,0};
-double view_wview[9]   = {0,0,0,0,0,0,0,0};
-double view_xport[9]   = {0,0,0,0,0,0,0,0};
-double view_xview[9]   = {0,0,0,0,0,0,0,0};
-double view_yport[9]   = {0,0,0,0,0,0,0,0};
-double view_yview[9]   = {0,0,0,0,0,0,0,0};
+int view_angle   = 0;
+int view_current = 0;
+int view_enabled = 0;
+int view_hborder[9] = {0,0,0,0,0,0,0,0};
+int view_hport[9]   = {0,0,0,0,0,0,0,0};
+int view_hspeed[9]  = {0,0,0,0,0,0,0,0};
+int view_hview[9]   = {0,0,0,0,0,0,0,0};
+int view_object[9]  = {0,0,0,0,0,0,0,0};
+int view_vborder[9] = {0,0,0,0,0,0,0,0};
+int view_visible[9] = {0,0,0,0,0,0,0,0};
+int view_vspeed[9]  = {0,0,0,0,0,0,0,0};
+int view_wport[9]   = {0,0,0,0,0,0,0,0};
+int view_wview[9]   = {0,0,0,0,0,0,0,0};
+int view_xport[9]   = {0,0,0,0,0,0,0,0};
+int view_xview[9]   = {0,0,0,0,0,0,0,0};
+int view_yport[9]   = {0,0,0,0,0,0,0,0};
+int view_yview[9]   = {0,0,0,0,0,0,0,0};
 
 namespace enigma
 {
@@ -129,7 +129,7 @@ namespace enigma
       view_visible[i] = views[i].start_vis;
     }
     
-    double xm=0,ym=0;
+    int xm=0,ym=0;
     if (view_enabled)
     {
       for (int i=0;i<7;i++)
@@ -143,8 +143,8 @@ namespace enigma
     }
     else
     {
-      xm=room_width;
-      ym=room_height;
+      xm = int(room_width);
+      ym = int(room_height);
     }
     window_set_size(xm,ym);
     for (int i=0; i<instancecount; i++)

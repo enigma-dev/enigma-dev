@@ -50,8 +50,18 @@ namespace enigma //TODO: Find where this belongs
 namespace enigma {
   int initialize_everything();
   int ENIGMA_events();
-} // TODO: synchronize with XLib by moving these declarations to a platform_mandatories header in the root.
+} // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
+namespace enigma {
+  clock_t lc;
+  void sleep_for_framerate(int rs)
+  {
+    clock_t nc = clock();
+    int sdur = 1000/rs - 1 - (nc - lc)*1000 / CLOCKS_PER_SEC;
+    if (sdur > 0) Sleep(sdur);
+    lc = nc;
+  }
+}
 
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {

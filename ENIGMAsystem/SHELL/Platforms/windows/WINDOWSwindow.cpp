@@ -27,7 +27,7 @@
 
 #include <string>
 #include <windows.h>
-
+using namespace std;
 
 extern int room_width,room_height,view_enabled,view_visible[8],
            view_xview[8],view_yview[8],view_wview[8],view_hview[8],
@@ -118,8 +118,7 @@ void window_set_caption(char* caption)
   SetWindowText(enigma::hWnd,caption);
 }
 
-int window_set_caption(string caption)
-{
+void window_set_caption(string caption) {
   SetWindowText(enigma::hWndParent,(char*) caption.c_str());
 }
 
@@ -142,17 +141,17 @@ int window_get_color()
 
 int window_set_region_scale(double scale, const bool adaptwindow)
 {
-    enigma::viewscale=scale;
-    if ((bool)adaptwindow)
-    {
-       RECT window; GetWindowRect(enigma::hWnd,&window);
-       SetWindowPos(enigma::hWnd, HWND_TOP, window.right, window.top, (int)(room_width*scale), (int)(room_height*scale), SWP_SHOWWINDOW);
-    }
-    return 0;
+  enigma::viewscale=scale;
+  if ((bool)adaptwindow)
+  {
+    RECT window; GetWindowRect(enigma::hWnd,&window);
+    SetWindowPos(enigma::hWnd, HWND_TOP, window.right, window.top, (int)(room_width*scale), (int)(room_height*scale), SWP_SHOWWINDOW);
+  }
+  return 0;
 }
-int window_get_region_scale()
+double window_get_region_scale()
 {
-    return enigma::viewscale;
+  return enigma::viewscale;
 }
 
 void window_set_position(int x, int y)
@@ -228,7 +227,7 @@ namespace enigma {
   long int laststyle;
   int isFullScreen=0;
 }
-int window_set_fullscreen(double full)
+void window_set_fullscreen(const bool full)
 {
   if (full)
   {
@@ -250,7 +249,6 @@ int window_set_fullscreen(double full)
       enigma::isFullScreen=0;
     }
   }
-  return 0;
 }
 int window_get_fullscreen() { return enigma::isFullScreen;  }
 
@@ -337,7 +335,7 @@ string get_string(string message, string def)
   
   ShowWindow(getstr::nwindow,SW_SHOW);
   
-  while (1) 
+  for (;;) 
   {
     if (SendMessage(getstr::bconfrm,BM_GETSTATE,0,0)==108) { int sz=GetWindowTextLength(getstr::ninputf)+2; 
         char sbuffer[sz]; GetWindowText(getstr::ninputf,sbuffer,sz); ShowWindow(getstr::nwindow,SW_HIDE); return sbuffer; }

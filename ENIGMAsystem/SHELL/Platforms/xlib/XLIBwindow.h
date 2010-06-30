@@ -34,7 +34,7 @@ int window_get_visible();
 /////////////
 // CAPTION //
 /////////////
-int window_set_caption(string caption);
+void window_set_caption(string caption);
 char *window_get_caption();
 
 ///////////
@@ -70,7 +70,7 @@ int window_center();
 ////////////////
 // FULLSCREEN //
 ////////////////
-int window_set_fullscreen(double full);
+void window_set_fullscreen(double full);
 int window_get_fullscreen();
 
 ////////////

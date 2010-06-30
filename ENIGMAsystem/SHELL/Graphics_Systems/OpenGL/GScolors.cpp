@@ -35,7 +35,7 @@
 #define __GETGf(x) fmod(x/256,256)
 #define __GETBf(x) fmod(x/65536,256)*/
 
-#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:alpha*255))
+#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
 
 namespace enigma {
   extern unsigned char currentcolor[4];

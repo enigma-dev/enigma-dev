@@ -79,7 +79,7 @@ int  window_default();
 int  window_mouse_get_x();
 int  window_mouse_get_y();
 void window_mouse_set(int x,int y);
-void window_set_fullscreen(bool full);
+void window_set_fullscreen(const bool full);
 int  window_get_fullscreen();
 
 namespace getstr {

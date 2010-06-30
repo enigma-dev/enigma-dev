@@ -28,6 +28,8 @@
 #include <string>
 #include <gl/gl.h>
 #include <windows.h>
+using namespace std;
+
 #include "../../libEGMstd.h"
 
 namespace enigma

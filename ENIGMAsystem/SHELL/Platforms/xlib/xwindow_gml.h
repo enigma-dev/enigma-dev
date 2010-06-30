@@ -189,7 +189,7 @@ enum {
   _NET_WM_STATE_TOGGLE = 2
 };
 
-int window_set_fullscreen(double full)
+void window_set_fullscreen(const bool full)
 {
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);

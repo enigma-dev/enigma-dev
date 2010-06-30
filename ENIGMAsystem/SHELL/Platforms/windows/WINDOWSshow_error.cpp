@@ -27,6 +27,7 @@
 
 #include <string>
 #include <windows.h>
+using namespace std;
 
 extern void ABORT_ON_ALL_ERRORS();
 int show_error(string errortext,const bool fatal)
