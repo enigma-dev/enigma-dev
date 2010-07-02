@@ -84,6 +84,7 @@ goforit(at);*/
 // Simple Universal libraries
 #include "Universal_System/estring.h"
 #include "Universal_System/fileio.h"
+#include "Universal_System/terminal_io.h"
 #include "Universal_System/mathnc.h"
 
 #if ENIGMA_GS_OPENGL

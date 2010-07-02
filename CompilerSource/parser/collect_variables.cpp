@@ -37,6 +37,11 @@ using namespace std;
 
 struct scope_ignore {
   map<string,int> ignore;
+  bool is_with;
+  
+  scope_ignore(scope_ignore*x): is_with(x->is_with) {}
+  scope_ignore(bool x): is_with(x) {}
+  scope_ignore(int x): is_with(x) {}
 };
 
 #define and_safety
@@ -44,11 +49,11 @@ struct scope_ignore {
 
 #include "../externs/externs.h"
 
-void collect_variables(string code, string synt, parsed_event* pev = NULL)
+void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
 {
   int igpos = 0;
   darray<scope_ignore*> igstack;
-  igstack[igpos] = new scope_ignore;
+  igstack[igpos] = new scope_ignore(0);
   
   cout << "\nCollecting some variables...\n";
   
@@ -62,16 +67,26 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
   bool dec_name_givn = false; //Has an identifier been named in this declaration?
   string dec_name; //Identifier being declared
   
+  int  with_after_parenths = 0;
+  bool with_until_semi = false;
+  
   for (pt pos = 0; pos < code.length(); pos++)
   {
     if (synt[pos] == '{') {
-      igstack[++igpos] = new scope_ignore;
+      bool isw = igstack[igpos]->is_with | with_until_semi; with_until_semi = 0;
+      igstack[++igpos] = new scope_ignore(isw);
       continue;
     }
     if (synt[pos] == '}') {
       delete igstack[igpos--];
       continue;
     }
+    
+    if (synt[pos] == '(' and with_after_parenths) with_after_parenths++;
+    if (synt[pos] == ')' and with_after_parenths and --with_after_parenths == 1)
+      with_until_semi = with_after_parenths--;
+    
+    with_until_semi &= (synt[pos] != ';');
     
     if (bracklevel == 0 and in_decl)
     {
@@ -109,6 +124,7 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         
         if (was_a_semicolon)
           dec_out_of_scope = in_decl = 0, dec_type = "";
+        
         dec_prefixes = dec_suffixes = "";
         dec_initializing = false;
         dec_name_givn = false;
@@ -243,6 +259,15 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
             cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n"; goto continue_2;
           }
         
+        //Finally, make sure we're not in a with.
+        if (with_until_semi or igstack[igpos]->is_with)
+        {
+          pos += 5;
+          code.insert(spos,"self.");
+          synt.insert(spos,"nnnn.");
+        }
+        
+        //Of course, we also don't want to risk overwriting a typed version
         if (pev->myObj->locals.find(nname) != pev->myObj->locals.end()) {
           cout << "Ignoring `" << nname << "' because it's already a local.\n"; continue;
         }
@@ -253,7 +278,6 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
       }
       else //Since a syntax check already completed, we assume this is a valid function
       {
-        cout << "\nLooking at " <<nname << "...\n";
         bool contented = false;
         unsigned pars = 1, args = 0;
         
@@ -274,6 +298,15 @@ void collect_variables(string code, string synt, parsed_event* pev = NULL)
         args += contented; //Final arg for closing parentheses
         pev->myObj->funcs[nname] = args;
         cout << "  Calls script `" << nname << "'\n";
+      }
+    }
+    else if (synt[pos] == 's')
+    {
+      const size_t sp = pos;
+      while (synt[++pos] == 's');
+      if (code.substr(sp,(pos--)-sp) == "with") {
+        with_after_parenths = 1;
+        continue;
       }
     }
   }

@@ -63,7 +63,7 @@ inline bool is_statement(string name)
     case 'i':
       return name == "if";
     case 'r':
-      return name == "return";
+      return name == "return" or name == "repeat";
     case 's':
       return name == "switch";
     case 't':
@@ -196,34 +196,44 @@ inline pt handle_if_statement(string& code,string name,pt& pos)
         if (name == "break") goto label_break;
       break;
     case 'c':
-      if (name == "case")    goto label_case;
-      if (name == "catch")   goto label_catch;
-      if (name == "continue")goto label_continue;
-      if (name == "class")   goto label_struct;
+        if (name == "case")    goto label_case;
+        if (name == "catch")   goto label_catch;
+        if (name == "continue")goto label_continue;
+        if (name == "class")   goto label_struct;
+      break;
     case 'd':
-      if (name == "default") goto label_default;
-      if (name == "do")      goto label_do;
+        if (name == "default") goto label_default;
+        if (name == "do")      goto label_do;
+      break;
     case 'e':
-      if (name == "else")    goto label_else;
-      if (name == "end")     goto label_end;
-      if (name == "exit")    goto label_exit;
+        if (name == "else")    goto label_else;
+        if (name == "end")     goto label_end;
+        if (name == "exit")    goto label_exit;
+      break;
     case 'f':
-      if (name == "for")     goto label_for;
+        if (name == "for")     goto label_for;
+      break;
     case 'i':
-      if (name == "if")      goto label_if;
+        if (name == "if")      goto label_if;
+      break;
     case 'r':
-      if (name == "return")  goto label_general;
+        if (name == "return")  goto label_general;
+        if (name == "repeat")  goto label_loop;
+      break;
     case 's':
-      if (name == "switch")  goto label_switch;
-      if (name == "struct")  goto label_struct;
+        if (name == "switch")  goto label_switch;
+        if (name == "struct")  goto label_struct;
+      break;
     case 't':
-      if (name == "try")     goto label_general;
-      if (name == "then")    goto label_then;
+        if (name == "try")     goto label_general;
+        if (name == "then")    goto label_then;
+      break;
     case 'u':
-      if (name == "until")   goto label_until;
+        if (name == "until")   goto label_until;
+      break;
     case 'w':
-      if (name == "while")   goto label_while;
-      if (name == "with")    goto label_with;
+        if (name == "while")   goto label_while;
+        if (name == "with")    goto label_with;
   }
   error = "";
   return pt(-2);
@@ -417,19 +427,21 @@ int close_statement(string& code,pt& pos)
 {
   assop[level]=0;
   number_of_statements++;
+  
   if (plevel > 0)
   {
     if (plevel > 1) {
-      error = "Expected multiple closing parentheses before this point";
+      error = plevelt[plevel] == PLT_BRACKET ? "Expected at least one closing bracket at this point" : "Expected at least one closing parenthesis at this point";
       return pos;
     }
     if (plevelt[plevel] != PLT_FORSTATEMENT) {
       error = plevelt[plevel] == PLT_BRACKET?"Expected closing bracket before this point" : "Expected closing brace before this point";
       return pos;
     }
+    // So, we're closing a for()
     const int ef = lower_to_level(LEVELTYPE_FOR_PARAMETERS,"otherwise meaningless parenthetical expression");
       if (ef != -1) return pos;
-    if (statement_pad[level] > 1)
+    if (statement_pad[level] > 0)
       statement_pad[level]--;
     else {
       error = "Expected ending parenthesis before this point";
@@ -439,7 +451,8 @@ int close_statement(string& code,pt& pos)
   }
   while (level>0)
   {
-    if (statement_pad[level]>=0) statement_pad[level]--;
+    if (statement_pad[level] > 0)
+      statement_pad[level]--;
     if (levelt[level]==LEVELTYPE_SWITCH and statement_pad[level]==1)
     {
       if (code[pos]!='{')
@@ -447,12 +460,12 @@ int close_statement(string& code,pt& pos)
     }
     else if (statement_pad[level]==0) //if it's less than zero we can assume it hasn't been initialized
     {
-      if (levelt[level]==LEVELTYPE_DO) //We just learned this isn't an until statement
-      {
+      if (levelt[level]==LEVELTYPE_DO) { //We just learned this isn't an until statement
         error="Statement `until' or `while' expected at this point, following `do' statement";
         return pos;
       }
       level--;
+      //if (levelt[level]
     }
     else break;
   }

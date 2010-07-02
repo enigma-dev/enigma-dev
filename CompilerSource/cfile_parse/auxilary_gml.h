@@ -1,21 +1,16 @@
-{ rad2 = argument4; }
-draw_primitive_begin(pr_trianglefan); //x, y
-draw_vertex(x,y);
-double radinc = 2*pi/argument2; //Sides
-int rad = argument3,rad1 = argument4; //r1
-double start = argument5;
-for (double i = start; i <= 2 * pi + start + .01; i += radinc)
-{
-  draw_vertex(argument0+rad*cos(i),argument1-rad*sin(i));
-  draw_vertex(argument0+rad1*cos(i+radinc/2),argument1-rad2*sin(i+radinc/2));
-}
-draw_primitive_end();
+for (;;);
+for (int i=0;i<10;i++)a=0
+for int i = 0; i < 10; i++ a=0
+if 0 do {} until a; else;
+do while 0; until 0
 
-/*for ;;;
+if 0; else;
+if 0 {} else {}
+
+for ;;;
 for (;;);
 
-if 0;
-else;
+
 if (0)
 {
   if 1
@@ -43,7 +38,17 @@ if (0)
    b = c
 }
 else a=0;
-do
-while 0;
-until 0
-*/
+
+if 1 while 0 else b=c
+
+if 0 do {} until a; else;
+do while 0; until 0
+do a=b while c=d
+
+do do while a p=oo until a until b;
+
+for int i = 0 i < 10 i++ a=0
+for int i = 0; i < 10; i++ a=0
+for (int i=0;i<10;i++)a=0
+for (int i=0i<10i++)a=0
+for int i=0i<10i++a=0

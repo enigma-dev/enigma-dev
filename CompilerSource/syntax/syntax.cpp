@@ -263,7 +263,7 @@ namespace syncheck
         int introuble=0;
         if (!(plevel>0))
         {
-          if (!assop[level])
+          if (!assop[level] and !(levelt[level] == LEVELTYPE_FOR_PARAMETERS and statement_pad[level] == 2))
           introuble=1;//{ error="Assignment operator expected before numeric constant"; return pos; }
           if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
           introuble=2;//{ error="Operator expected before numeric constant"; return pos; }
@@ -332,17 +332,16 @@ namespace syncheck
                 { error="Semicolon does not belong inside set of parentheses"; return pos; }
               if (lastnamed[level] == LN_OPERATOR)
                 { error="Secondary expression expected before semicolon"; return pos; }
-              if (statement_completed(lastnamed[level])) {
+              if (statement_completed(lastnamed[level]))
+              {
+                if((levelt[level] == LEVELTYPE_IF and statement_pad[level] == 3)
+                or (levelt[level] == LEVELTYPE_LOOP))
+                  statement_pad[level]--;
                 int cs = close_statement(code,pos);
                 if (cs != -1) return cs;
-              } 
-              else if (level) //A semicolon must drop a level if it's closing an entire statement.
-              {
-                if ((levelt[level] == LEVELTYPE_IF and statement_pad[level] >= 2) 
-                or  (levelt[level] == LEVELTYPE_LOOP or levelt[level] == LEVELTYPE_FOR_PARAMETERS)
-                or  (levelt[level] == LEVELTYPE_DO and lastnamed[level] == LN_NOTHING))
-                  statement_pad[level]--;
               }
+              else if (plevel > 0 and plevelt[plevel] == PLT_FORSTATEMENT)
+                statement_pad[level]--;
               indeclist[level] = false;
               lastnamed[level] = LN_NOTHING;
             }
@@ -439,11 +438,11 @@ namespace syncheck
               {
                 if (plevelt[plevel] == PLT_FORSTATEMENT)
                 {
-                  if (lastnamed[level] == LN_CLOSING_SYMBOL) {
+                  if (statement_completed(levelt[level],pos)) {
                     int cs = close_statement(code,pos);
                     if (cs != -1) return cs;
                   }
-                  if (statement_pad[level] != 1) {
+                  if (statement_pad[level] != 0 and statement_pad[level] != 1) { // for (something;something;) is fine, too.
                     error = "Too soon for closing parentheses to for() statement " + tostring(statement_pad[level]);
                     return pos;
                   }
@@ -504,21 +503,27 @@ namespace syncheck
 
               if (lastnamed[level] == LN_OPERATOR)
               { error="Unexpected brace at this point"; return pos; }
-              if (statement_completed(lastnamed[level])) { //FIXME: perhaps this should be statement_complete()?
-                int cs = close_statement(code,pos);
-                if (cs != -1) return cs;
-              }
-              
               if (plevel) {
                 error = plevelt[plevel] == PLT_BRACKET ? "Expected closing bracket before brace" : "Expected closing parenthesis before brace";
                 return pos;
               }
+              
+              if (statement_completed(lastnamed[level])) {
+                if((levelt[level] == LEVELTYPE_IF and statement_pad[level] == 3)
+                or (levelt[level] == LEVELTYPE_LOOP or levelt[level] == LEVELTYPE_FOR_PARAMETERS))
+                  statement_pad[level]--;
+                int cs = close_statement(code,pos);
+                if (cs != -1) return cs;
+              }
+              
+              if (levelt[level] == LEVELTYPE_DO and statement_pad[level]-- != 2)
+              { error = "Unexpected '{' in `do' statement"; return pos; }
 
               level += !isbr;
               levelt[level] = (isbr?LEVELTYPE_SWITCH_BLOCK:LEVELTYPE_BRACE);
               lastnamed[level] = LN_NOTHING; //This is the beginning of a glorious new level
-              statement_pad[level]=-1;
-              assop[level]=0;
+              statement_pad[level] = -1;
+              assop[level] = 0;
             }
           pos++; continue;
         case '}':
@@ -539,7 +544,7 @@ namespace syncheck
               lower_to_level(LEVELTYPE_BRACE,"`}' symbol");
               level--;
               //statement_pad[level] = -1;
-              lastnamed[level] = LN_CLOSING_SYMBOL;//LN_CLOSING_SYMBOL; //Group is like one statement for this level
+              lastnamed[level] = LN_NOTHING;//LN_CLOSING_SYMBOL; //We closed at the beginning of this group.
               //this will invoke the next statement to close the current statement
             }
           pos++; continue;
@@ -789,7 +794,7 @@ namespace syncheck
                   //overflow into next otherwise
                 case '%': case '|':
                 case '^': case '>': case '<':
-                    if (!assop[level] && !(plevel>0))
+                    if ((!assop[level] && !(plevel>0)) and !(levelt[level] == LEVELTYPE_FOR_PARAMETERS and statement_pad[level] == 2))
                     { error="Assignment operator expected before any secondary operators"; return pos; }
                     if (lastnamed[level] != LN_VARNAME && lastnamed[level] != LN_DIGIT && lastnamed[level] != LN_VALUE)
                     { error="Expected primary expression before operator"; return pos; }
@@ -839,11 +844,7 @@ namespace syncheck
 
     if (lastnamed[level]==LN_OPERATOR)
      { error="Expected secondary expression before end of code"; return pos; }
-
-    if (statement_pad[level] > (levelt[level]==LEVELTYPE_IF))
-    { error="Unexpected end of code reached ("+tostring(level)+","+tostring(statement_pad[level]); return pos; }
-
-
+    
     while (level>0)
     {
       if (levelt[level]==LEVELTYPE_BRACE or levelt[level]==LEVELTYPE_SWITCH_BLOCK)

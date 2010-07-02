@@ -80,15 +80,7 @@ int main(int argc, char *argv[])
     getchar(); return 1;
   }
   
-  return m_prog_loop_cfp();
-  
-  
-  cparse_init();
-  
-  if (establish_bearings()) {
-    cout << "ERROR: Failed to locate the GCC";
-    getchar(); return 1;
-  }
+  //m_prog_loop_cfp();
   
   string EGMmain = fc("./ENIGMAsystem/SHELL/SHELLmain.cpp");
   if (EGMmain == "") {

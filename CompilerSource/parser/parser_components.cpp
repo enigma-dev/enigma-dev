@@ -321,10 +321,15 @@ struct stackif
 };
 
 //Check if semicolon is needed here
-inline bool need_semi(char c1,char c2,const bool sepd)
+inline bool need_semi(char c1,char c2)
 {
-  if (c1 == c2)
-    return sepd and c1 != 'r'; //if the two tokens are the same, we assume they are one word; if they are
+  if (c1 == c2) return 0; //if the two tokens are the same, we assume they are one word; if they are
+  return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
+  and (is_letterd(c2) or c2=='"' or c2=='{' or c2=='}');
+}
+inline bool need_semi_sepd(char c1,char c2)
+{
+  if (c1 == c2) return 1; //if the two tokens are the same, we assume they are one word; if they are
   return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
   and (is_letterd(c2) or c2=='"' or c2=='{' or c2=='}');
 }
@@ -385,12 +390,13 @@ void parser_add_semicolons(string &code,string &synt)
           bufpos--;
           continue;
         }*/
-        if (*sy_semi != ';')
+        while (*sy_semi != ';')
         {
           codebuf[bufpos-1] = *sy_semi;
           syntbuf[bufpos-1] = *sy_semi;
           codebuf[bufpos+0] = ';';
           syntbuf[bufpos++] = ';';
+          sy_semi = sy_semi->popif('s');
         }
         sy_semi = sy_semi->popif('s');
         continue;
@@ -403,6 +409,7 @@ void parser_add_semicolons(string &code,string &synt)
           syntbuf[bufpos-1] = *sy_semi;
           codebuf[bufpos+0] = ';';
           syntbuf[bufpos++] = ';';
+          sy_semi = sy_semi->popif('s');
         }
         sy_semi=sy_semi->popif('s');
         continue;
@@ -414,12 +421,19 @@ void parser_add_semicolons(string &code,string &synt)
         continue;
       }
 
-      if (pos and need_semi(synt[pos-1],synt[pos],false))
+      if (pos and need_semi(synt[pos-1],synt[pos]))
       {
         codebuf[bufpos-1] = *sy_semi;
         syntbuf[bufpos-1] = *sy_semi;
-        codebuf[bufpos] = code[pos];
+        codebuf[bufpos  ] = code[pos];
         syntbuf[bufpos++] = synt[pos];
+        sy_semi=sy_semi->popif('s');
+      }
+      if((pos>2 and synt[pos] == '+' and synt[pos-1] == '+' and synt[pos-2] == 'n' and need_semi_sepd('n',synt[pos+1]))
+      or (pos>2 and synt[pos] == '-' and synt[pos-1] == '-' and synt[pos-2] == 'n' and need_semi_sepd('n',synt[pos+1])))
+      {
+        codebuf[bufpos  ] = *sy_semi;
+        syntbuf[bufpos++] = *sy_semi;
         sy_semi=sy_semi->popif('s');
       }
     }
@@ -456,9 +470,9 @@ void parser_add_semicolons(string &code,string &synt)
     }
   }
 
-  //Add a semicolon at the end if there isn't one
-  if (bufpos and syntbuf[bufpos-1] != ';')
-    codebuf[bufpos] = syntbuf[bufpos] = ';', bufpos++;
+  //Dump the semicolon stack at the end.
+  do codebuf[bufpos] = syntbuf[bufpos] = *sy_semi, bufpos++;
+  while (sy_semi->prev and (sy_semi = sy_semi->prev));
 
   code = string(codebuf,bufpos);
   synt = string(syntbuf,bufpos);
@@ -499,11 +513,8 @@ void parser_add_semicolons(string &code,string &synt)
           {
             if (dos == 0) //If this until is our closing until
             {
-              if (semis) //If they said 'do while', leaving out the semicolon
-              {
-                code.insert(pos,";");
-                synt.insert(pos,";");
-                len++; pos++;
+              if (semis) { // If they said 'do while', leaving out the semicolon
+                pos++; continue; // We let it go.
               }
 
               pos+=6; //Skip to the end of this until( or while(
@@ -559,8 +570,6 @@ void parser_add_semicolons(string &code,string &synt)
 
       //Go fix any nested do's
       pos = lpos;
-
-      cout << "<<" << code << "\r\n<<" << synt << "\r\n\r\n";
     }
   }
   

@@ -301,7 +301,9 @@ void show_error(string err, const bool fatal)
 }
 
 #include <sys/time.h>
+#include <iostream>
 
+extern double fps;
 namespace enigma {
   char** parameters;
   void windowsystem_write_exename(char* x)
@@ -311,15 +313,29 @@ namespace enigma {
       x[irx] = enigma::parameters[0][irx];
     x[irx] = 0;
   }
-  static int last_second,last_microsecond;
+  #define hielem 9
+  static int last_second[hielem+1] = {0},last_microsecond[hielem+1] = {0};
   void sleep_for_framerate(int rs)
   {
     timeval tv;
+    
+    for (int i=1; i<hielem+1; i++) {
+      last_microsecond[i-1] = last_microsecond[i];
+      last_second[i-1] = last_second[i];
+    }
+    
+    //How many microseconds since 1970? herp
     gettimeofday(&tv, NULL);
-    //We'll give the processor a millisecond to take care of these calculations and hop threads. Rather be fast than slow.
-    int sdur = (tv.tv_sec - last_second * 1000000) + (tv.tv_usec - last_microsecond) - 1000;
+    
+    // I'm feeling hacky, so we'll give the processor a millisecond to take care
+    // of these calculations and hop threads. I'd rather be fast than slow.
+    int sdur = 1000000/rs - 1000 - (tv.tv_sec - last_second[hielem]) * 1000000 - (tv.tv_usec - last_microsecond[hielem]);
     if (sdur > 0 and sdur < 1000000) usleep(sdur);
-    last_second = tv.tv_sec, last_microsecond = tv.tv_usec;
+    
+    // Store this time for diff next time
+    gettimeofday(&tv, NULL);
+    last_second[hielem] = tv.tv_sec, last_microsecond[hielem] = tv.tv_usec;
+    fps = (hielem+1)*1000000 / ((last_second[hielem] - last_second[0]) * 1000000 + (last_microsecond[hielem] - last_microsecond[0]));
   }
 }
 

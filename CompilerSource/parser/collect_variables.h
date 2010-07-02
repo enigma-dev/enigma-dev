@@ -27,4 +27,4 @@
 
 
 #include "object_storage.h"
-void collect_variables(string code, string synt, parsed_event* pev = NULL);
+void collect_variables(string &code, string &synt, parsed_event* pev = NULL);
