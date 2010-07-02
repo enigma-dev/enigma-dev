@@ -175,7 +175,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       
       if (last_token == c)
       {
-        if (c != 'r')
+        if (c != 'r' and c != 't')
           code[bpos] = synt[bpos] = ' ', bpos++;
         else {
           code[bpos] = ' ';

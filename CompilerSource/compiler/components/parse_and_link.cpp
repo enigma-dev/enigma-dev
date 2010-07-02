@@ -41,8 +41,8 @@ using namespace std;
 
 #include <math.h> //log2 to calculate passes.
 
-#define flushl (fflush(stdout), "\n")
-#define flushs (fflush(stdout), " ")
+#define flushl '\n' << flush
+#define flushs flush
 
 #define user (cout << "enigma: ")
 #define edbg (cout << "info: ")

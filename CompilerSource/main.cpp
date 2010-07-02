@@ -32,8 +32,8 @@
 #include <map>
 
 using namespace std;
-#define flushl (fflush(stdout), "\n")
-#define flushs (fflush(stdout), "")
+#define flushl '\n' << flush
+#define flushs flush
 
 #include "general/darray.h"
 

@@ -44,8 +44,8 @@
 
 using namespace std;
 
-#define flushl (fflush(stdout), "\n")
-#define flushs (fflush(stdout), " ")
+#define flushl '\n' << flush
+#define flushs flush
 
 #include "../externs/externs.h"
 #include "../syntax/syncheck.h"

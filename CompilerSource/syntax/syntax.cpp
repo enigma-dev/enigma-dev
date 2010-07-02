@@ -206,10 +206,14 @@ namespace syncheck
           }
           else if (name == "local" or name == "global") //These two are very special...
             lastnamed[level] = LN_LOCGLOBAL;
+          else if (name == "long" or name == "short" or name == "signed" or name == "register"
+               or  name == "unsigned" or name == "const" or name == "volatile" or name == "static")
+            goto lbl_typename;
           else if (find_extname(name,0xFFFFFFFF))
           {
             if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
             {
+              lbl_typename:
               indeclist[level] = true;
               lastnamed[level] = LN_TYPE_NAME;
               if (plevel > 0)

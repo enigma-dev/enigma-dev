@@ -41,8 +41,8 @@ using namespace std;
 
 #include <math.h> //log2 to calculate passes.
 
-#define flushl (fflush(stdout), "\n")
-#define flushs (fflush(stdout), " ")
+#define flushl '\n' << flush
+#define flushs flush
 
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);

@@ -109,9 +109,21 @@ void parser_init()
   edl_tokens["with"]   = 's';
   //For gets an f
   edl_tokens["for"] = 'f';
-
-  //These are all templates, which can later be revised to 'd' when passed a parameter in <>
+  
+  //Type flags
   //token is 't'
+  edl_tokens["unsigned"] = 't';
+  edl_tokens["long"]     = 't';
+  edl_tokens["short"]    = 't';
+  edl_tokens["signed"]   = 't';
+  edl_tokens["register"] = 't';
+  edl_tokens["unsigned"] = 't';
+  edl_tokens["const"]    = 't';
+  edl_tokens["volatile"] = 't';
+  edl_tokens["static"]   = 't';
+  
+  //These are all templates, which can later be revised to 'd' when passed a parameter in <>
+  //token is also 't'
   edl_tokens["const_cast"]       = 't';
   edl_tokens["dynamic_cast"]     = 't';
   edl_tokens["reinterpret_cast"] = 't';

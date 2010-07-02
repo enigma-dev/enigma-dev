@@ -33,7 +33,8 @@
 #include <map>
 
 using namespace std;
-#define flushl (fflush(stdout), "\n")
+#define flushl '\n' << flush
+#define flushs flush
 
 #include "../externs/externs.h"
     #include "../cfile_parse/cfile_parse.h"

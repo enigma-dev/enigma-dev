@@ -10,6 +10,7 @@ if 0 {} else {}
 for ;;;
 for (;;);
 
+long unsigned int a;
 
 if (0)
 {

@@ -28,8 +28,8 @@
 #include <map>
 #include "compile_organization.h"
 
-#define flushl (fflush(stdout), "\n")
-#define flushs (fflush(stdout), " ")
+#define flushl '\n' << flush
+#define flushs flush
 
 namespace used_funcs
 {
