@@ -245,7 +245,8 @@ var::operator string() const { return string(**this); }
 #define types_extrapolate_all_fromvariant(type, op)\
  types_extrapolate_real_p  (type var::operator op, { return **this op x; })\
  types_extrapolate_string_p(type var::operator op, { return **this op x; })\
- type var::operator op(const variant x)            { return **this op x; }
+ type var::operator op(const variant x)            { return **this op x; }\
+ type var::operator op(const var &x)               { return **this op *x; }
 
 types_extrapolate_all_fromvariant(variant& , +=)
 types_extrapolate_all_fromvariant(variant& , -=)
