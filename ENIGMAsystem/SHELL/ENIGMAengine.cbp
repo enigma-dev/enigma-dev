@@ -506,6 +506,8 @@
 		<Unit filename="Universal_System/spritestruct.cpp" />
 		<Unit filename="Universal_System/spritestruct.h" />
 		<Unit filename="Universal_System/switch_stuff.h" />
+		<Unit filename="Universal_System/terminal_io.cpp" />
+		<Unit filename="Universal_System/terminal_io.h" />
 		<Unit filename="Universal_System/transform_object.cpp" />
 		<Unit filename="Universal_System/transform_object.h" />
 		<Unit filename="Universal_System/var4.cpp" />

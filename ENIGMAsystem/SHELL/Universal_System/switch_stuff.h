@@ -1,6 +1,6 @@
 namespace enigma
 {
-  std::map<int,var> switchvalues;
+  /*std::map<int,var> switchvalues;
   std::map<int,bool> switch_active;
   int switches_nested=0;
   
@@ -15,5 +15,5 @@ namespace enigma
   {
       if (switch_active[layer]) return 1;
       return switchvalues[layer]==value;
-  }
+  }*/
 }

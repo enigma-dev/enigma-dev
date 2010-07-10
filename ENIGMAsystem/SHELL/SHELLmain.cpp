@@ -41,12 +41,11 @@ int unchange(__CONCAT(one,tawoo),athree);
 
 goforit(at);*/
 
-
-#include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <limits>
+
+#include "Universal_System/var4.h"
 
 //Before anyone else includes math.h, let's make sure we
 //Don't get bitten by those damn bessel functions.
@@ -55,13 +54,14 @@ goforit(at);*/
   #define jn bessel_jn
   #define j0 bessel_j0
   #define j1 bessel_j1
-    #include <math.h>
+    #include <cmath>
   #undef j1
   #undef j0
   #undef jn
   #undef y1
 #undef y0
-
+inline double abs(variant x) { return fabs((double)x); } // cmath introduces a number of overloads for this that will ambiguate variant.
+inline double abs(var     x) { return fabs((double)x); } // cmath introduces a number of overloads for this that will ambiguate var.
 
 //#include <vector> //COLLIGMA
 
@@ -69,7 +69,6 @@ goforit(at);*/
 
 #include "API_Switchboard.h"
 
-#include "Universal_System/var4.h"
 #include "Universal_System/reflexive_types.h"
 
 #include "Universal_System/GAME_GLOBALS.h"
