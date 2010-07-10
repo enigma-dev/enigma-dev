@@ -105,11 +105,13 @@
 #define types_extrapolate_alldec(prefix)\
  types_extrapolate_real_p  (prefix,;)\
  types_extrapolate_string_p(prefix,;)\
- prefix (const variant x);
+ prefix (const variant x);\
+ prefix (const var &x);
 #define types_extrapolate_alldecc(prefix)\
  types_extrapolate_real_p  (prefix,;)\
  types_extrapolate_string_p(prefix,;)\
- prefix (const variant &x);
+ prefix (const variant &x);\
+ prefix (const var &x);
 #define types_binary_extrapolate_alldecc(type,fname,type2)\
  types_binary_extrapolate_real_p  (type   fname, type2,;)\
  types_binary_extrapolate_string_p(string fname, type2,;)

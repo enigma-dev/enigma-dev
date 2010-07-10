@@ -78,82 +78,101 @@ variant::variant(): rval(0), sval( ), type(0) { }
 types_extrapolate_real_p  (variant& variant::operator=, { rval.d = x; type = real; return *this; })
 types_extrapolate_string_p(variant& variant::operator=, { sval   = x; type = tstr; return *this; })
 variant& variant::operator=(const variant x)            { rval.d = x.rval.d; if ((type = x.type) == tstr) sval = x.sval; return *this; }
+variant& variant::operator=(const var &x)               { return *this = *x; }
 
 types_extrapolate_real_p  (variant& variant::operator+=, { terror(real); rval.d += x; return *this; })
 types_extrapolate_string_p(variant& variant::operator+=, { terror(tstr); sval   += x; return *this; })
 variant& variant::operator+=(const variant x)            { terror(x.type); if (x.type == real) rval.d += x.rval.d; else sval += x.sval; return *this; }
+variant& variant::operator+=(const var &x)               { return *this += *x; }
 
 types_extrapolate_real_p  (variant& variant::operator-=, { terror(real); rval.d -= x; return *this; })
 types_extrapolate_string_p(variant& variant::operator-=, { terrortrue(); return *this; })
 variant& variant::operator-=(const variant x)            { terror2(real); rval.d -= x.rval.d; return *this; }
+variant& variant::operator-=(const var &x)               { return *this -= *x; }
 
 types_extrapolate_real_p  (variant& variant::operator*=, { terror(real); rval.d *= x; return *this; })
 types_extrapolate_string_p(variant& variant::operator*=, { terrortrue(); return *this; })
 variant& variant::operator*=(const variant x)            { terror2(real); rval.d *= x.rval.d; return *this; }
+variant& variant::operator*=(const var &x)               { return *this *= *x; }
 
 types_extrapolate_real_p  (variant& variant::operator/=, { terror(real); div0c(x); rval.d *= x; return *this; })
 types_extrapolate_string_p(variant& variant::operator/=, { terrortrue(); div0c(x); return *this; })
 variant& variant::operator/=(const variant x)            { terror2(real); div0c(x); rval.d /= x.rval.d; return *this; }
+variant& variant::operator/=(const var &x)               { return *this /= *x; }
 
 
 types_extrapolate_real_p  (variant& variant::operator<<=, { terror(real); rval.d = long(rval.d) << int(x); return *this; })
 types_extrapolate_string_p(variant& variant::operator<<=, { terrortrue(); return *this; })
 variant& variant::operator<<=(const variant x)            { terror2(real); rval.d = long(rval.d) << long(x.rval.d); return *this; }
+variant& variant::operator<<=(const var &x)               { return *this <<= *x; }
 
 types_extrapolate_real_p  (variant& variant::operator>>=, { terror(real); rval.d = long(rval.d) >> int(x); return *this; })
 types_extrapolate_string_p(variant& variant::operator>>=, { terrortrue(); return *this; })
 variant& variant::operator>>=(const variant x)            { terror2(real); rval.d = long(rval.d) >> long(x.rval.d); return *this; }
+variant& variant::operator>>=(const var &x)               { return *this >>= *x; }
 
 types_extrapolate_real_p  (variant& variant::operator&=,  { terror(real); rval.d = long(rval.d) & long(x); return *this; })
 types_extrapolate_string_p(variant& variant::operator&=,  { terrortrue(); return *this; })
 variant& variant::operator&=(const variant x)             { terror2(real); rval.d = long(rval.d) & long(x.rval.d); return *this; }
+variant& variant::operator&=(const var &x)                { return *this &= *x; }
 
 types_extrapolate_real_p  (variant& variant::operator|=,  { terror(real); rval.d = long(rval.d) | long(x); return *this; })
 types_extrapolate_string_p(variant& variant::operator|=,  { terrortrue(); return *this; })
 variant& variant::operator|=(const variant x)             { terror2(real); rval.d = long(rval.d) | long(x.rval.d); return *this; }
+variant& variant::operator|=(const var &x)                { return *this |= *x; }
 
 types_extrapolate_real_p  (variant& variant::operator^=,  { terror(real); rval.d = long(rval.d) ^ long(x); return *this; })
 types_extrapolate_string_p(variant& variant::operator^=,  { terrortrue(); return *this; })
 variant& variant::operator^=(const variant x)             { terror2(real); rval.d = long(rval.d) ^ long(x.rval.d); return *this; }
+variant& variant::operator^=(const var &x)                { return *this ^= *x; }
 
 
 
 types_extrapolate_real_p  (variant variant::operator+, { terror(real); return rval.d + x; })
 types_extrapolate_string_p(variant variant::operator+, { terror(tstr); return sval   + x; })
 variant variant::operator+(const variant x)            { terror(x.type); if (x.type == real) return rval.d + x.rval.d; return sval + x.sval; }
+variant variant::operator+(const var &x)               { return *this + *x; }
 
 types_extrapolate_real_p  (double  variant::operator-, { terror(real); return rval.d - x; })
 types_extrapolate_string_p(double  variant::operator-, { terrortrue(); return rval.d; })
 double variant::operator-(const variant x)             { terror2(real); return rval.d - x.rval.d; }
+double variant::operator-(const var &x)                { return *this - *x; }
 
 types_extrapolate_real_p  (double  variant::operator*, { terror(real); return rval.d * x; })
 types_extrapolate_string_p(double  variant::operator*, { terrortrue(); return rval.d; })
 double variant::operator*(const variant x)             { terror2(real); return rval.d * x.rval.d; }
+double variant::operator*(const var &x)                { return *this * *x; }
 
 types_extrapolate_real_p  (double  variant::operator/, { terror(real); div0c(x); return rval.d / x; })
 types_extrapolate_string_p(double  variant::operator/, { terrortrue(); return rval.d; })
 double variant::operator/(const variant x)             { terror2(real); return rval.d / x.rval.d; }
+double variant::operator/(const var &x)                { return *this / *x; }
 
 
 types_extrapolate_real_p  (long variant::operator<<, { terror(real); return long(rval.d) << long(x); })
 types_extrapolate_string_p(long variant::operator<<, { terrortrue(); return long(rval.d); })
 long variant::operator<<(const variant x)            { terror2(real); return long(rval.d) << long(x.rval.d); }
+long variant::operator<<(const var &x)               { return *this << *x; }
 
 types_extrapolate_real_p  (long variant::operator>>, { terror(real); return long(rval.d) >> long(x); })
 types_extrapolate_string_p(long variant::operator>>, { terrortrue(); return long(rval.d); })
 long variant::operator>>(const variant x)            { terror2(real); return long(rval.d) >> long(x.rval.d); }
+long variant::operator>>(const var &x)               { return *this >> *x; }
 
 types_extrapolate_real_p  (long variant::operator&, { terror(real); return long(rval.d) & long(x); })
 types_extrapolate_string_p(long variant::operator&, { terrortrue(); return long(rval.d); })
 long variant::operator&(const variant x)            { terror2(real); return long(rval.d) & long(x.rval.d); }
+long variant::operator&(const var &x)               { return *this & *x; }
 
 types_extrapolate_real_p  (long variant::operator|, { terror(real); return long(rval.d) | long(x); })
 types_extrapolate_string_p(long variant::operator|, { terrortrue(); return long(rval.d);})
 long variant::operator|(const variant x)            { terror2(real); return long(rval.d) | long(x.rval.d); }
+long variant::operator|(const var &x)               { return *this | *x; }
 
 types_extrapolate_real_p  (long variant::operator^, { terror(real); return long(rval.d) ^ long(x); })
 types_extrapolate_string_p(long variant::operator^, { terrortrue(); return long(rval.d); })
 long variant::operator^(const variant x)            { terror2(real); return long(rval.d) ^ long(x.rval.d); }
+long variant::operator^(const var &x)               { return *this ^ *x; }
 
 
 // STANDARD:  In all cases, string > real
@@ -162,31 +181,37 @@ types_extrapolate_real_p  (bool variant::operator==, { return type == real and r
 types_extrapolate_string_p(bool variant::operator==, { return type == tstr and sval   == x; })
 bool variant::operator==(const variant &x) const     { return type == x.type and ((x.type == real) ? rval.d == x.rval.d : sval == x.sval); }
 bool variant::operator==(const variant x)            { return type == x.type and ((x.type == real) ? rval.d == x.rval.d : sval == x.sval); }
+bool variant::operator==(const var &x)               { return *this == *x; }
 
 types_extrapolate_real_p  (bool variant::operator!=, { return type != real or rval.d != x; })
 types_extrapolate_string_p(bool variant::operator!=, { return type != tstr or sval   != x; })
 bool variant::operator!=(const variant &x) const     { return type != x.type or ((x.type == real) ? rval.d != x.rval.d : sval != x.sval); }
 bool variant::operator!=(const variant x)            { return type != x.type or ((x.type == real) ? rval.d != x.rval.d : sval != x.sval); }
+bool variant::operator!=(const var &x)               { return *this != *x; }
 
 types_extrapolate_real_p  (bool variant::operator>=, { return type != real or  rval.d >= x; }) //type != real, then we're string and a priori greater.
 types_extrapolate_string_p(bool variant::operator>=, { return type == tstr and sval   >= x; }) //To be more, we must be string anyway.
 bool variant::operator>=(const variant &x) const     { return !(type < x.type) and (type > x.type or ((x.type == real) ? rval.d >= x.rval.d : sval >= x.sval)); }
 bool variant::operator>=(const variant x)            { return !(type < x.type) and (type > x.type or ((x.type == real) ? rval.d >= x.rval.d : sval >= x.sval)); }
+bool variant::operator>=(const var &x)               { return *this >= *x; }
 
 types_extrapolate_real_p  (bool variant::operator<=, { return type == real and rval.d <= x; }) //To be less, we must be real anyway.
 types_extrapolate_string_p(bool variant::operator<=, { return type != tstr or  sval   <= x; }) //type != tstr, then we're real and a priori less.
 bool variant::operator<=(const variant &x) const     { return !(type > x.type) and (type < x.type or ((x.type == real) ? rval.d <= x.rval.d : sval <= x.sval)); }
 bool variant::operator<=(const variant x)            { return !(type > x.type) and (type < x.type or ((x.type == real) ? rval.d <= x.rval.d : sval <= x.sval)); }
+bool variant::operator<=(const var &x)               { return *this <= *x; }
 
 types_extrapolate_real_p  (bool variant::operator>,  { return type != real or  rval.d > x; }) //type != real, then we're string and a priori greater.
 types_extrapolate_string_p(bool variant::operator>,  { return type == tstr and sval   > x; }) //To be more, we must be string anyway.
 bool variant::operator>(const variant &x) const      { return !(type < x.type) and (type > x.type or ((x.type == real) ? rval.d > x.rval.d : sval > x.sval)); }
 bool variant::operator>(const variant x)             { return !(type < x.type) and (type > x.type or ((x.type == real) ? rval.d > x.rval.d : sval > x.sval)); }
+bool variant::operator>(const var &x)                { return *this > *x; }
 
 types_extrapolate_real_p  (bool variant::operator<,  { return type == real and rval.d < x; }) //To be less, we must be real anyway.
 types_extrapolate_string_p(bool variant::operator<,  { return type != tstr or  sval   < x; }) //type != tstr, then we're real and a priori less.
 bool variant::operator<(const variant &x) const      { return !(type > x.type) and (type < x.type or ((x.type == real) ? rval.d < x.rval.d : sval < x.sval)); }
 bool variant::operator<(const variant x)             { return !(type > x.type) and (type < x.type or ((x.type == real) ? rval.d < x.rval.d : sval < x.sval)); }
+bool variant::operator<(const var &x)                { return *this < *x; }
 
 variant::~variant() { }
 

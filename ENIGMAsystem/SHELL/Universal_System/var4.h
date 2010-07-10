@@ -114,7 +114,8 @@ struct variant
    types_extrapolate_real_p  (prefix,;)\
    types_extrapolate_string_p(prefix,;)\
    prefix (const variant &x) const;\
-   prefix (const variant x);
+   prefix (const variant x);\
+   prefix (const var &x);
   
   types_extrapolate_alldec(bool operator==)
   types_extrapolate_alldec(bool operator!=)
