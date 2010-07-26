@@ -7,19 +7,19 @@ import com.sun.jna.Structure;
 
 public class EnigmaCallbacks extends Structure
 	{
-	public OutputOpen coo = new OutputOpen(); //void (*coo) (void)
-	public OutputAppend coa = new OutputAppend(); //void (*coa) (String)
-	public OutputClear cock = new OutputClear(); //void (*cock) (void)
-	public OutputProgress cop = new OutputProgress(); //void (*cop) (int)
-	public OutputTip cot = new OutputTip(); //void (*cot) (String)
+	public Callback coo = new OutputOpen(); //void (*coo) (void)
+	public Callback coa = new OutputAppend(); //void (*coa) (String)
+	public Callback cock = new OutputClear(); //void (*cock) (void)
+	public Callback cop = new OutputProgress(); //void (*cop) (int)
+	public Callback cot = new OutputTip(); //void (*cot) (String)
 
 	public EnigmaCallbacks(EnigmaFrame ef)
 		{
-		coo.ef = ef;
-		coa.ef = ef;
-		cock.ef = ef;
-		cop.ef = ef;
-		cot.ef = ef;
+		((OutputHolder)coo).ef = ef;
+		((OutputHolder)coa).ef = ef;
+		((OutputHolder)cock).ef = ef;
+		((OutputHolder)cop).ef = ef;
+		((OutputHolder)cot).ef = ef;
 		}
 
 	public static class OutputHolder

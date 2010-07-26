@@ -50,7 +50,6 @@ public class EnigmaFrame extends JFrame
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setVisible(true);
 		}
 
 	void progress(int pos, String tip)
