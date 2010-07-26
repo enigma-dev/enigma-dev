@@ -30,7 +30,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,9 +57,10 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.enigma.EnigmaSettingsFrame.EnigmaSettings;
+import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
-import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
+import org.enigma.backend.EnigmaStruct;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
@@ -80,7 +80,9 @@ import com.sun.jna.StringArray;
 public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListener
 	{
 	public static final String ENIGMA = "compileEGMf.exe";
-	public EnigmaFrame ef;
+	public EnigmaFrame ef = new EnigmaFrame();
+	/** This is global scoped so that it doesn't get GC'd */
+	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
 	public EnigmaSettings es = new EnigmaSettings();
 	public EnigmaSettingsFrame esf = new EnigmaSettingsFrame(es);
 	public JMenuItem run, debug, build, compile;
@@ -101,22 +103,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		LGM.mdi.add(esf);
 
-		//Apparently josh wants a textbox for if it returns 0 (gcc found)?
-		//I'm guessing he also wants me to get text from him and put it in here
-		if (false)
-			{
-			ef = new EnigmaFrame();
-			PrintStream oldOut = System.out;
-			System.setOut(new PrintStream(new TextAreaOutputStream(ef.ta)));
-			}
-
 		if (GCC_LOCATED) EnigmaDriver.whitespaceModified(es.definitions);
 		}
 
 	private void initEnigmaLib()
 		{
 		System.out.print("Initializing Enigma: ");
-		int ret = EnigmaDriver.libInit();
+		int ret = EnigmaDriver.libInit(ec);
 		if (ret == 0)
 			{
 			GCC_LOCATED = true;
@@ -389,6 +382,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
 		System.out.println(EnigmaDriver.compileEGMf(es,exef.getAbsolutePath(),mode));
+		//ok to GC es now
 
 		if (mode == 2) //build
 			{
