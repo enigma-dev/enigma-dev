@@ -25,8 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
-#include <math.h>
 #include <vector>
 #include <string>
 #include "var4.h"

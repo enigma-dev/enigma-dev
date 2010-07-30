@@ -37,6 +37,12 @@ string tostring(int val)
   sprintf(a,"%d",val);
   return a;
 }
+string tostringd(double val)
+{
+  char a[24];
+  sprintf(a,"%f",val);
+  return a;
+}
 
 string arraybounds_as_str(string str)
 {

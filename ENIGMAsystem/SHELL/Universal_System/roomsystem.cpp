@@ -43,8 +43,7 @@
 #include "instance.h"
 #include "planar_object.h"
 
-extern string string(double); //TODO: Clean these up without EGMstd.
-
+#include "roomsystem.h"
 
 int room_first  = 0;
 int room_last   = 0;
@@ -77,36 +76,8 @@ int view_yview[9]   = {0,0,0,0,0,0,0,0};
 
 namespace enigma
 {
-  struct inst {
-    int x,y,id,obj;
-  };
-  struct viewstruct
-  {
-    int start_vis;
-    int area_x,area_y,area_w,area_h;
-    int port_x,port_y,port_w,port_h;
-    int object2follow;
-    int hborder,vborder,hspd,vspd;
-  };
-  struct roomstruct
-  {
-    string name;
-    int backcolor;
-    void(*createcode)();
-    string cap;
-    int width, height, spd;
-    int views_enabled;
-    viewstruct views[8];
-    int instancecount;
-    
-    std::map<int,inst> instances;
-    void gotome();
-    roomstruct(): createcode(NULL) {}
-  };
-  
-  int room_max;
-  std::map<int,roomstruct> roomdata;
-  std::map<int,enigma::roomstruct>::iterator roomiter;
+  std::map<int,roomstruct*> roomdata;
+  typedef std::map<int,enigma::roomstruct*>::iterator roomiter;
   
   void roomstruct::gotome()
   {
@@ -129,7 +100,7 @@ namespace enigma
       view_visible[i] = views[i].start_vis;
     }
     
-    int xm=0,ym=0;
+    int xm = 0,ym = 0;
     if (view_enabled)
     {
       for (int i=0;i<7;i++)
@@ -147,20 +118,26 @@ namespace enigma
       ym = int(room_height);
     }
     window_set_size(xm,ym);
-    for (int i=0; i<instancecount; i++)
-    {
-      inst obj=instances[i];
-      if (obj.id>enigma::maxid)
-        enigma::maxid=obj.id;
-      instance_create_id(obj.x,obj.y,obj.obj,obj.id);
+    for (int i=0; i<instancecount; i++) {
+      inst *obj = &instances[i];
+      instance_create_id(obj->x,obj->y,obj->obj,obj->id);
     }
     createcode();
+  }
+  
+  extern int room_loadtimecount;
+  extern roomstruct grd_rooms[];
+  void rooms_load()
+  {
+    for (int i = 0; i < room_loadtimecount; i++)
+      roomdata[i] = &grd_rooms[i];
   }
 }
 
 
 //Implement the "room" global before we continue
-int room_goto(double roomind);
+int room_goto(int roomind);
+  #define MFV_ALREADY_INCLUDED 1
   #define TYPEPURPOSE roomv
   #define TYPEVARIABLES
   #define TYPEFUNCTION room_goto((int)rval.d);
@@ -171,10 +148,8 @@ int room_goto(double roomind);
 enigma::roomv room;
 
 
-int room_goto(double roomind)
+int room_goto(int indx)
 {
-	int indx=(int)roomind;
-	
 	#if SHOWERRORS
 	if(enigma::roomdata.find(indx)==enigma::roomdata.end())
 	{
@@ -195,7 +170,7 @@ int room_goto(double roomind)
 	
 	room.rval.d = indx;
 	
-	enigma::roomdata[indx].gotome();
+	enigma::roomdata[indx]->gotome();
 	return 0;
 }
 
@@ -221,17 +196,17 @@ int room_restart()
 		instance_destroy(it->inst->id);
 	}
 	enigma::nodestroy=0;
-	enigma::roomdata[indx].gotome();
+	enigma::roomdata[indx]->gotome();
 	return 0;
 }
 
-int room_goto_absolute(double index)
+int room_goto_absolute(int index)
 {
-	enigma::roomiter = enigma::roomdata.begin();
-	//for (int ii=0; ii<(int)index; ii++) if (enigma::roomiter==enigma::roomdata.end()) { break; } else enigma::roomiter++;
+	enigma::roomiter rit = enigma::roomdata.begin();
+	//for (int ii=0; ii<(int)index; ii++) if (rit == enigma::roomdata.end()) { break; } else rit++;
   
   #ifdef DEBUGMODE
-	if (enigma::roomiter == enigma::roomdata.end())
+	if (rit == enigma::roomdata.end())
 	{
 		if (enigma::roomdata.empty())
 			show_error("Game must have at least one room to run",0);
@@ -239,7 +214,7 @@ int room_goto_absolute(double index)
 		return 0;
 	}
   #endif
-	int indx=(*enigma::roomiter).first;
+	int indx = (*rit).first;
 	//Destroy all objects
 	enigma::nodestroy=1;
 	for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
@@ -252,24 +227,27 @@ int room_goto_absolute(double index)
 	}
 	enigma::nodestroy=0;
 	room.rval.d=indx;
-	enigma::roomdata[indx].gotome();
+	enigma::roomdata[indx]->gotome();
 	return 0;
 }
 
-
+#undef room_count
+int room_count() {
+  return enigma::roomdata.size();
+}
 
 int room_goto_first()
 {
-    enigma::roomiter=enigma::roomdata.begin();
+    enigma::roomiter rit = enigma::roomdata.begin();
     #ifdef DEBUGMODE
-    if (enigma::roomiter==enigma::roomdata.end())
+    if (rit == enigma::roomdata.end())
     {
         show_error("Game must have at least one room to run",0);
         return 0;
     }
     #endif
 
-    int indx=(*enigma::roomiter).first;
+    int indx = rit->first;
 
     //Destroy all objects
     enigma::nodestroy=1;
@@ -284,7 +262,7 @@ int room_goto_first()
     enigma::nodestroy=0;
 
     room.rval.d=indx;
-    enigma::roomdata[indx].gotome();
+    enigma::roomdata[indx]->gotome();
 
     return 0;
 }
@@ -292,19 +270,19 @@ int room_goto_first()
 
 int room_goto_next()
 {
-    enigma::roomiter=enigma::roomdata.find(int(room));
+    enigma::roomiter rit = enigma::roomdata.find(int(room));
     #ifdef DEBUGMODE
-    if (enigma::roomiter==enigma::roomdata.end())
+    if (rit == enigma::roomdata.end())
     {
       show_error("Going to next room from unexisting room (?)",0);
       return 0;
     } //error like GM here
     #endif
     
-    enigma::roomiter++;
+    rit++;
 
     #ifdef DEBUGMODE
-    if (enigma::roomiter==enigma::roomdata.end())
+    if (rit == enigma::roomdata.end())
     {
       show_error("Going to next room after last",0);
       return 0;
@@ -323,31 +301,31 @@ int room_goto_next()
     }
     enigma::nodestroy=0;
 
-    room.rval.d = enigma::roomiter->first;
-    enigma::roomiter->second.gotome();
+    room.rval.d = rit->first;
+    rit->second->gotome();
     return 0;
 }
 
 
 int room_next(int num)
 {
-    enigma::roomiter=enigma::roomdata.find((int)num);
-    if (enigma::roomiter == enigma::roomdata.end())
+    enigma::roomiter rit = enigma::roomdata.find((int)num);
+    if (rit == enigma::roomdata.end())
       return -1;
-    enigma::roomiter++;
-    if (enigma::roomiter==enigma::roomdata.end())
+    rit++;
+    if (rit == enigma::roomdata.end())
       return -1;
-    return enigma::roomiter->first;
+    return rit->first;
 }
 int room_previous(int num)
 {
-    enigma::roomiter=enigma::roomdata.find((int)num);
-    if (enigma::roomiter==enigma::roomdata.end())
+    enigma::roomiter rit = enigma::roomdata.find((int)num);
+    if (rit == enigma::roomdata.end())
       return -1;
-    enigma::roomiter--; 
-    if (enigma::roomiter==enigma::roomdata.end())
+    rit--; 
+    if (rit == enigma::roomdata.end())
       return -1;
-    return enigma::roomiter->first;
+    return rit->first;
 }
 
 #include "key_game_globals.h" //TODO: Remove all instances of this line. It's just sloppy. Figure out the dependencies manually.

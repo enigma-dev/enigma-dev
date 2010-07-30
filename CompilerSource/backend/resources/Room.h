@@ -50,8 +50,10 @@ struct Room
 	int currentTab;
 	int scrollBarX;
 	int scrollBarY;
-	boolean enableViews;
 	// ^^^ useless stuff ^^^ //
+	
+	// Ism thought this one was useless:
+	boolean enableViews;
 
 	BackgroundDef *backgroundDefs;
 	int backgroundDefCount;

@@ -1,3 +1,9 @@
+int<int,int,1> aa;
+/*map assmap;
+map<int> dangerousmap;
+map<> fuckmap;
+map<double,> bastardmap;*/
+
 for (;;);
 for (int i=0;i<10;i++)a=0
 for int i = 0; i < 10; i++ a=0
@@ -10,7 +16,7 @@ if 0 {} else {}
 for ;;;
 for (;;);
 
-long unsigned int a;
+global const char *a = "const char something";
 
 if (0)
 {
@@ -53,3 +59,6 @@ for int i = 0; i < 10; i++ a=0
 for (int i=0;i<10;i++)a=0
 for (int i=0i<10i++)a=0
 for int i=0i<10i++a=0
+
+room_speed.wtfh_man = 0;
+

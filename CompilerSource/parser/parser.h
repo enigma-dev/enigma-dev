@@ -30,4 +30,5 @@
 void parser_init();
 string file_parse(string filename,string outname);
 string parser_main(string code,parsed_event* x = NULL);
+int parser_secondary(string& code, string& synt);
 void print_to_file(string,string,unsigned int&,varray<string>&,int,ofstream&);

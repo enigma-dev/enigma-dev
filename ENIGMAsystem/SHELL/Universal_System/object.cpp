@@ -36,7 +36,7 @@
 
 namespace enigma
 {
-    int maxid = 100001;
+    extern int maxid;
     int instancecount = 0;
     int id_current =0;
     

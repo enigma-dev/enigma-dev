@@ -157,5 +157,6 @@ bool find_extname_global(string name,unsigned int flags = 0xFFFFFFFF);
 
 extern externs* builtin_type__int;
 extern externs* builtin_type__void;
+extern externs* builtin_type__float;
 
 #endif

@@ -64,8 +64,17 @@ extern void print_err_line_at(pt a);
 
 extern int establish_bearings();
 
-dllexport int libInit()
+#include "backend/JavaCallbacks.h"
+
+dllexport int libInit(EnigmaCallbacks* ecs)
 {
+  cout << "Linking up to IDE";
+  ide_dia_open     = ecs->dia_open;
+  ide_dia_add      = ecs->dia_add;
+  ide_dia_clear    = ecs->dia_clear;
+  ide_dia_progress = ecs->dia_progress;
+  ide_dia_progress_text = ecs->dia_progress_text;
+  
   cout << "Intializing Parsers.";
   cparse_init();
   

@@ -139,18 +139,20 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   if (es->fileVersion != 600)
     cout << "Error: Incorrect version. File is too " << ((es->fileVersion > 600)?"new":"old") << " for this compiler.";
   
-  /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    Segment One: This segment of the compile process is responsible for
-    translating the code into C++. Basically, anything essential to the
-    compilation of said code is dealt with during this segment.
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+  
+  
+  
+  /**** Segment One: This segment of the compile process is responsible for
+  * @ * translating the code into C++. Basically, anything essential to the
+  *//// compilation of said code is dealt with during this segment.
   
   ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.  
   
+  
   //First, we make a space to put our globals.
     globals_scope = scope_get_using(&global_scope);
+    extiter gso = globals_scope->members.find("ENIGMA Resources"); if (gso != globals_scope->members.end()) delete gso->second;
     globals_scope = globals_scope->members["ENIGMA Resources"] = new externs("ENIGMA Resources",globals_scope,NULL,EXTFLAG_NAMESPACE);
-  
   
   
   //Next, add the resource names to that list
@@ -194,7 +196,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   
   
-  ///Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
+  /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
+  
   cout << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
   
   cout << es->scriptCount << " Scripts:" << endl;
@@ -208,14 +211,17 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   res = compile_parseAndLink(es,scripts);
   if (res) return res;
   
+  
   //Export resources to each file.
   
   ofstream wto;
   
+  
+  // FIRST FILE
+  // Modes and settings.
+  
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
     wto << license;
-    wto << "#define SHOWERRORS 1\n";
-    wto << "#define ABORTONALL 0\n";
     wto << "#define ASSUMEZERO 0\n";
     wto << "#define PRIMBUFFER 0\n";
     wto << "#define PRIMDEPTH2 6\n";
@@ -273,17 +279,16 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << "};\n\n";
   wto.close();
   
-  parsed_object EGMglobal;
-  
-  link_globals(&EGMglobal,es,scripts);
-  if (res) return res;
-  
-  res = compile_writeGlobals(es,&EGMglobal);
-  if (res) return res;
   
   // Defragged events must be written before object data, or object data cannot determine which events were used.
   res = compile_writeDefraggedEvents(es);
   if (res) return res;
+  
+  parsed_object EGMglobal;
+  
+  res = link_globals(&EGMglobal,es,scripts);
+  if (res) return res;
+  
   res = compile_writeObjectData(es,&EGMglobal);
   if (res) return res;
   
@@ -293,6 +298,11 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   res = compile_writeRoomData(es);
   if (res) return res;
   
+  
+  
+  // Write the global variables to their own file to be included before any of the objects
+  res = compile_writeGlobals(es,&EGMglobal);
+  if (res) return res;
   
   
   

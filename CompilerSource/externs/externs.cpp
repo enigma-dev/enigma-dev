@@ -34,8 +34,6 @@ using namespace std;
 
 #define NAME__USING_SCOPE "<using>"
 
-extern externs* builtin_type__int;
-
 bool externs::is_function()
 {
   return refstack.is_function();

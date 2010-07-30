@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008 Josh Ventura, IsmAvatar                                  **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,27 +25,19 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
-#include "compile_organization.h"
+#include <stdio.h>
 
-namespace used_funcs
-{
-  extern bool object_set_sprite;
-  void zero();
-}
-extern std::map<string,parsed_script*> scr_lookup;
+void javano_signal() { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
+void javano_signal_i(int) { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
+void javano_signal_cstr(const char*) { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
 
-extern const char* license;
-extern string format_error(string code,string err,int pos);
-
-
-inline string tdefault(string t) {
-  return (t != "" ? t : "var");
-}
-inline void* lgmRoomBGColor(int c) {
-  return (void*)((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
-}
-
-inline string system_get_uppermost_tier() {
-  return "object_collisions";
-}
+//Opens the EnigmaFrame
+void (*ide_dia_open) () = javano_signal;
+//Appends a given text to the frame log
+void (*ide_dia_add) (const char *) = javano_signal_cstr;
+//Clears the frame log
+void (*ide_dia_clear) () = javano_signal;
+//Sets the progress bar (0-100)
+void (*ide_dia_progress) (int) = javano_signal_i;
+//Applies a given text to the progress bar
+void (*ide_dia_progress_text) (const char *) = javano_signal_cstr;

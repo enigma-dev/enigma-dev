@@ -29,6 +29,7 @@
 #include <stack>
 #include <string>
 #include <iostream>
+#include <stdio.h>
 #include "../general/darray.h"
 #include "../general/implicit_stack.h"
 
@@ -142,7 +143,7 @@ pt parse_cfile(string cftext)
   //stack<externs*> current_templates;
   bool handle_ids_next_iter = 0;
   string id_to_handle;
-  bool rconcat = false;
+  //bool rconcat = false; // This used to hold macros' hands, but ceased to ever be false after the system was rethought.
 
   for (;;)
   {
@@ -217,13 +218,13 @@ pt parse_cfile(string cftext)
       continue;
     }
     
-    if (rconcat and is_letterd(cfile[pos]))
-      goto is_letter__the_block_below_this_next_block;
+    //if (rconcat and is_letterd(cfile[pos]))
+    //  goto is_letter__the_block_below_this_next_block;
     
     if (handle_ids_next_iter)
     {
-      if (cfile[pos] != '#' or cfile[pos+1] != '#')
-      {
+      //if (cfile[pos] != '#' or cfile[pos+1] != '#')
+      //{
         bool at_scope_accessor = cfile[pos] == ':' and cfile[pos+1] == ':';
         bool at_template_param = cfile[pos] == '<';
         
@@ -231,8 +232,8 @@ pt parse_cfile(string cftext)
         if (diderrat != -1) return id_would_err_at; //Discard diderrat until future use
         
         if (at_scope_accessor) pos += 2;
-      }
-      else rconcat = true, pos += 2;
+      //}
+      //else { printf("ASSES!"); gets((char*)alloca(4)); rconcat = true, pos += 2; }
       handle_ids_next_iter = false;
       continue;
     }
@@ -241,17 +242,16 @@ pt parse_cfile(string cftext)
     //First, let's check if it's a letter.
     //This implies it's one of three things...
     if (is_letter(cfile[pos]))
-    { is_letter__the_block_below_this_next_block:
-      
+    {
       if (cfile[pos] == 'L' and (cfile[pos+1] == '"' or cfile[pos+1] == '\'')) {
-        rconcat = false;
+        //rconcat = false;
         pos++; continue;
       }
       
       pt sp = id_would_err_at = pos;
       while (is_letterd(cfile[++pos]));
       
-      string n = rconcat? id_to_handle + cfile.substr(sp,pos-sp) : cfile.substr(sp,pos-sp); //This is the word we're looking at.
+      string n = /*rconcat? id_to_handle + cfile.substr(sp,pos-sp) :*/ cfile.substr(sp,pos-sp); //This is the word we're looking at.
       
       //Macros get precedence. Check if it's one.
       const pt cm = handle_macros(n);
@@ -297,7 +297,7 @@ pt parse_cfile(string cftext)
       }
       continue;
     }
-    rconcat = false;
+    //rconcat = false;
     
     //There is a select number of symbols we are supposed to encounter.
     //A digit is actually not one of them. Digits, most operators, etc,
@@ -376,8 +376,7 @@ pt parse_cfile(string cftext)
               last_named_phase = DEC_FULL; //reset to 4 for next identifier.
             break;
           case LN_TEMPLATE:
-              if (cfile[pos] == ';')
-              {
+              if (cfile[pos] == ';') {
                 cferr="Unterminating template declaration; expected '>' before ';'";
                 return pos;
               }
@@ -461,13 +460,11 @@ pt parse_cfile(string cftext)
               }
             break;
           case LN_NAMESPACE:
-              if (cfile[pos] != ';')
-              {
+              if (cfile[pos] != ';') {
                 cferr="Expected ';' for namespace declarations, not ','";
                 return pos;
               }
-              if (last_named_phase != NS_COMPLETE_ASSIGN) //If it's not a complete assignment, shouldn't see ';'
-              {
+              if (last_named_phase != NS_COMPLETE_ASSIGN) { //If it's not a complete assignment, shouldn't see ';'
                 cferr = "Cannot define empty namespace; expect '=' and namespace identifier before ';'";
                 return pos;
               }
@@ -533,12 +530,12 @@ pt parse_cfile(string cftext)
         rf_stack refs_to_use = refstack.dissociate();
         
         if (type_to_use != NULL) //A case where it would be NULL is struct str;
-        while (type_to_use->flags & EXTFLAG_TYPEDEF)
-        {
-          refs_to_use += type_to_use->refstack;
-          if (type_to_use->type == NULL) break;
-          type_to_use = type_to_use->type;
-        }
+          while (type_to_use->flags & EXTFLAG_TYPEDEF) // Get to the bottom of the typedefs
+          {
+            refs_to_use += type_to_use->refstack; // Each typedef level can implement new references
+            if (type_to_use->type == NULL) break; // If we're at our end, stop
+            type_to_use = type_to_use->type; // Go to the next level otherwise
+          }
         
         if (last_identifier == "")
         {

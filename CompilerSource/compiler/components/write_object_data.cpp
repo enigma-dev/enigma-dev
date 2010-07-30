@@ -38,8 +38,6 @@ using namespace std;
 #include "../compile_common.h"
 #include "../event_reader/event_parser.h"
 
-#include <math.h> //log2 to calculate passes.
-
 int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 {
   //NEXT FILE ----------------------------------------
@@ -60,17 +58,24 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "\n    //Locals to instances of this object\n    ";
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
         {
-          bool writeit = true;
-          parsed_object::globit ve = global->globals.find(ii->first);
-          if (ve != global->globals.end()) {
-            if (ve->second.defined())
-              writeit = false;
-            cout << "enigma: scopedebug: variable `" << ii->first << "' from object `" << i->second->name << "' will be used from the " << (writeit ? "object" : "global") << " scope." << endl;
+          bool writeit = true; //Whether this "local" should be declared such
+          
+          // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
+          if (!ii->second.defined())
+          {
+            parsed_object::globit ve = global->globals.find(ii->first); // So, we look for a global by this name
+            if (ve != global->globals.end()) {  // If a global by this name is indeed found,
+              if (ve->second.defined()) // And this global is explicitely defined, not just accessed with a dot,
+                writeit = false; // We assume that its definition will cover us, and we do not redeclare it as a local.
+              cout << "enigma: scopedebug: variable `" << ii->first << "' from object `" << i->second->name << "' will be used from the " << (writeit ? "object" : "global") << " scope." << endl;
+            }
           }
           if (writeit)
             wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
         }
         
+        
+        // Next, we write the list of all the scripts this object will hoard a copy of for itself.
         wto << "\n    //Scripts called by this object\n    ";
         parsed_object* t = i->second;
         for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
@@ -89,40 +94,54 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           }
         } wto << "\n    ";
         
+        
+        // Now we output all the events this object uses
+        // Defaulted events were already added into this array.
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
-        if  (i->second->events[ii].code != "")
-        {
-          //Look up the event name
-          string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
-          wto << "\n    #define ENIGMAEVENT_" << evname << " 1\n";
-          wto << "    variant myevent_" << evname << "();\n    ";
-        }
+          if  (i->second->events[ii].code != "")
+          {
+            //Look up the event name
+            string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
+            // wto << "\n    #define ENIGMAEVENT_" << evname << " 1\n";
+            wto << "    variant myevent_" << evname << "();\n    ";
+          }
         
-        //Callable unlinker
+        
+        
+        /**** Now we write the callable unlinker. Its job is to disconnect the instance for destroy.
+        * @ * This is an important component that tracks multiple pieces of the instance. These pieces
+        *//// are created for efficiency. See the instance system documentation for full details.
+        
+        // Here we write the pieces it tracks
         wto << "\n    // Self-tracking\n";
-          // Variables to track self in lists
-            // Instance system interface
-              wto << "      enigma::instance_list_iterator ENOBJ_ITER_me;\n";
-              for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
-                wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n";
-            
-            // Event system interface
-              for (unsigned ii = 0; ii < i->second->events.size; ii++)
-                wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
         
+        // This tracks components of the instance system.
+        wto << "      enigma::instance_list_iterator ENOBJ_ITER_me;\n";
+        for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) // For this object and each parent thereof
+          wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
+        
+        // This tracks components of the event system.
+          for (unsigned ii = 0; ii < i->second->events.size; ii++)
+            wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+        
+        //This is the actual call to remove the current instance from all linked records before destroying it.
         wto << "\n    void unlink()\n    {\n";
           wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me->second); // Queue for delete while we're still valid\n";
-          wto << "      enigma::unlink_main(ENOBJ_ITER_me);\n";
+          wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
           for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
             wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
           for (unsigned ii = 0; ii < i->second->events.size; ii++) {
             const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
             wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
-          }
-        wto << "\n    }\n    ";
+          } wto << "\n    }\n    ";
         
-        //Automatic constructor
-        //Directed constructor (ID is specified)
+        
+        
+        
+        /**** Next are the constructors. One is automated, the other directed.
+        * @ *   Automatic constructor:  The constructor generates the ID from a global maximum and links by that alias.
+        *////   Directed constructor:   Meant for use by the room system, the constructor uses a specified ID alias assumed to have been checked for conflict.
+        
         wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++))";
           wto << ": object_locals(id, " << i->second->id << ")";
           wto << "\n    {\n";
@@ -165,8 +184,12 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     wto << "}\n";
   wto.close();
   
-  //NEXT FILE ----------------------------------------
-  //Object functions: events, constructors, other codes.
+  
+  
+  // NEXT FILE `---------------------------------------
+  // Object functions: events, constructors, other codes.
+  // -----------------------------------------------------
+  
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out);
     wto << license;
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)

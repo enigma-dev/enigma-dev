@@ -48,51 +48,72 @@ int compile_writeRoomData(EnigmaStruct* es)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out);
   
-  wto << license;
+  wto << license << "namespace enigma {\n"
+  << "  int room_loadtimecount = " << es->roomCount << ";\n"
+  << "  roomstruct grd_rooms[" << es->roomCount << "] = {\n";
   int room_highid = 0, room_highinstid = 100000;
   for (int i = 0; i < es->roomCount; i++) 
   {
-    wto << "//Room " << es->rooms[i].id << "\n" <<
-    "  enigma::roomdata[" << es->rooms[i].id << "].name = \"" << es->rooms[i].name << "\";\n"
-    "  enigma::roomdata[" << es->rooms[i].id << "].cap = \"" << es->rooms[i].caption << "\";\n"
-    "  enigma::roomdata[" << es->rooms[i].id << "].backcolor = " << lgmRoomBGColor(es->rooms[i].backgroundColor) << ";\n"
-    "  enigma::roomdata[" << es->rooms[i].id << "].spd = " << es->rooms[i].speed << ";\n"
-    "  enigma::roomdata[" << es->rooms[i].id << "].width = " << es->rooms[i].width << ";\n"
-    "  enigma::roomdata[" << es->rooms[i].id << "].height = " << es->rooms[i].height << ";\n"
-    "  enigma::roomdata[" << es->rooms[i].id << "].views_enabled = " << es->rooms[i].enableViews << ";\n";
-    for (int ii = 0; ii < es->rooms[i].viewCount; ii++)
+    wto << "    //Room " << es->rooms[i].id << "\n" <<
+    "    { " 
+    << es->rooms[i].id << ", \"" // The ID of this room
+    << es->rooms[i].name << "\",  \""  // The name of this room
+    << es->rooms[i].caption << "\",\n      " // The caption of this room
+    
+    << lgmRoomBGColor(es->rooms[i].backgroundColor) //Background color
+    << ", roomcreate" << es->rooms[i].id << ",\n      " // Creation code
+    
+    << es->rooms[i].width << ", " << es->rooms[i].height << ", " // Width and Height
+    << es->rooms[i].speed << ",  "  // Speed
+    
+    << (es->rooms[i].enableViews ? "true" : "false") << ", {\n"; // Views Enabled
+    
+    for (int ii = 0; ii < es->rooms[i].viewCount; ii++) // For each view
     {
-      wto << 
-      "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].start_vis = 0;\n"
-      "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_x = 0; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_y = 0;"
-         " enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_w = 640; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].area_h = 480;\n"
-      "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_x = 0;   enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_y = 0;"
-         " enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_w = 640; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].port_h = 480;\n"
-      "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].object2follow = 0;\n"
-      "    enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].hborder=32; enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].vborder = 32;"
-         " enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].hspd = -1;  enigma::roomdata[" << es->rooms[i].id << "].views[" << ii << "].vspd = -1;\n";
+      wto << "      { "
+      << es->rooms[i].views[i].visible << ",   " // Visible
+      
+      << es->rooms[i].views[i].viewX << ", " << es->rooms[i].views[i].viewY << ", "   // Xview and Yview
+      << es->rooms[i].views[i].viewW << ", " << es->rooms[i].views[i].viewH << ",   " // Wview and Hview
+      
+      << es->rooms[i].views[i].portX << ", " << es->rooms[i].views[i].portY << ", "   // Xport and Yport
+      << es->rooms[i].views[i].portW << ", " << es->rooms[i].views[i].portH << ",   " // Wport and Hport
+      
+      << es->rooms[i].views[i].objectId << ",   " // Object2Follow
+      
+      << es->rooms[i].views[i].borderH << ", " << es->rooms[i].views[i].borderV << ",   " //Hborder and Vborder
+      << es->rooms[i].views[i].speedH<< ", " << es->rooms[i].views[i].speedV //Hborder and Vborder
+      
+      << " },\n";
     }
     wto << 
-    "  enigma::roomdata[" << es->rooms[i].id << "].instancecount = " << es->rooms[i].instanceCount << ";\n"
-    "  enigma::roomdata[" << es->rooms[i].id << "].createcode = (void(*)())roomcreate" << es->rooms[i].id << ";";
+    "      }," <<
+    "      " << es->rooms[i].instanceCount << ", "
+    "      (enigma::inst*)(int[]){";
+      int modme = 0;
+      for (int ii = 0; ii < es->rooms[i].instanceCount; ii++) {
+        wto << 
+          es->rooms[i].instances[ii].id << "," << 
+          es->rooms[i].instances[ii].objectId << "," << 
+          es->rooms[i].instances[ii].x << "," << 
+          es->rooms[i].instances[ii].y << ",";
+          if (++modme % 16 == 0) wto << "\n        ";
+        if (es->rooms[i].instances[ii].id > room_highinstid)
+          room_highinstid = es->rooms[i].instances[ii].id;
+      }
+    wto << "  0,0,0,0}\n"; // End of the instances
+    
+    // End of this room
+    wto << "    },\n";
     
     if (es->rooms[i].id > room_highid)
       room_highid = es->rooms[i].id;
   }
   
-  wto << "int instdata[] = {";
-  for (int i = 0; i < es->roomCount; i++)
-    for (int ii = 0; ii < es->rooms[i].instanceCount; ii++) {
-      wto << 
-        es->rooms[i].instances[ii].id << "," << 
-        es->rooms[i].instances[ii].objectId << "," << 
-        es->rooms[i].instances[ii].x << "," << 
-        es->rooms[i].instances[ii].y << ",";
-      if (es->rooms[i].instances[ii].id > room_highinstid)
-        room_highinstid = es->rooms[i].instances[ii].id;
-    }
-  wto << "};\n\n";
-  wto << "enigma::room_max = " <<  room_highid << " + 1;\nenigma::maxid = " << room_highinstid << " + 1;\n";
+  wto << "  };\n  \n"; // End of all rooms
+  wto << "  int room_max = " <<  room_highid << " + 1;\n  int maxid = " << room_highinstid << " + 1;\n";
+  
+  wto << "} // Namespace enigma\n";
 wto.close();
 
 

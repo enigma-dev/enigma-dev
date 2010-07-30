@@ -127,6 +127,7 @@ int establish_bearings()
   cout << "Successfully loaded GCC definitions\n";
   cout << "Undefining _GLIBCXX_EXPORT_TEMPLATE\n";
   macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0"; //Save us some work
+  macros["_GLIBCXX_EXTERN_TEMPLATE"] = "0"; //Save us some work
   
   //Read the search dirs
   fclose(fopen("blank.txt","wb"));

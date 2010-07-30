@@ -25,14 +25,13 @@
 **                                                                              **
 \********************************************************************************/
 
-int room_goto(double roomind);
+int room_goto(int roomind);
 int room_restart();
-int room_goto_absolute(double index);
+int room_goto_absolute(int index);
 int room_goto_first();
 int room_goto_next();
-int room_next(double num);
-int room_previous(double num);
-
+int room_next(int num);
+int room_previous(int num);
 
 extern int background_color;
 extern int background_showcolor;
@@ -43,6 +42,11 @@ extern int room_last;
 extern int room_persistent;
 extern int room_speed;
 extern int room_width;
+
+extern string room_caption;
+
+int room_count();
+#define room_count room_count()
 
 extern int view_angle;
 extern int view_current;
@@ -62,25 +66,10 @@ extern int view_xview[9];
 extern int view_yport[9];
 extern int view_yview[9];
 
-#include <map>
-#include <string>
-#include "var4.h"
-
-extern string room_caption;
-
-//Make "room" globsl work
-#define TYPEPURPOSE roomv
-#define TYPEVARIABLES 
-#define TYPEFUNCTION() room_goto((int)rval.d);
-#include "multifunction_variant.h"
-#undef TYPEFUNCTION
-#undef TYPEVARIABLES
-#undef TYPEPURPOSE
-
 namespace enigma
 {
   struct inst {
-    int x,y,id,obj;
+    int id,obj,x,y;
   };
   struct viewstruct
   {
@@ -92,25 +81,31 @@ namespace enigma
   };
   struct roomstruct
   {
+    int id;
     string name;
+    string cap;
+    
     int backcolor;
     void(*createcode)();
-    string cap;
     int width, height, spd;
     int views_enabled;
     viewstruct views[8];
-    int instancecount;
     
-    std::map<int,inst> instances;
+    int instancecount;
+    inst *instances;
+    
     void gotome();
-    roomstruct();
   };
-  
-  
-  extern int room_max;
-  extern std::map<int,roomstruct> roomdata;
-  extern std::map<int,enigma::roomstruct>::iterator roomiter;
-  
   void room_update();
+  extern int room_max, maxid;
+  void rooms_load();
 }
 
+// room variable
+#include "var4.h"
+  #define TYPEPURPOSE roomv
+  #define TYPEVARIABLES
+    #include "multifunction_variant.h"
+  #undef TYPEVARIABLES
+  #undef TYPEPURPOSE
+extern enigma::roomv room;

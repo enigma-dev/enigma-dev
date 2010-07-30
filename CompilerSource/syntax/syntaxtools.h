@@ -431,11 +431,11 @@ int close_statement(string& code,pt& pos)
   if (plevel > 0)
   {
     if (plevel > 1) {
-      error = plevelt[plevel] == PLT_BRACKET ? "Expected at least one closing bracket at this point" : "Expected at least one closing parenthesis at this point";
+      error = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? "Expected at least a closing triangle bracket at this point" : plevelt[plevel] == PLT_BRACKET ? "Expected at least a closing bracket at this point" : "Expected at least one closing parenthesis at this point";
       return pos;
     }
     if (plevelt[plevel] != PLT_FORSTATEMENT) {
-      error = plevelt[plevel] == PLT_BRACKET?"Expected closing bracket before this point" : "Expected closing brace before this point";
+      error = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? "Expected closing triangle bracket at this point" : plevelt[plevel] == PLT_BRACKET?"Expected closing bracket before this point" : "Expected closing parenthesis before this point";
       return pos;
     }
     // So, we're closing a for()

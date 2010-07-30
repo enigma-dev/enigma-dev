@@ -78,7 +78,7 @@ inline void regmacro(string m,string val,string arg1)
   mac->addarg(arg1);
 }
 
-externs *builtin_type__int, *builtin_type__void;
+externs *builtin_type__int, *builtin_type__void, *builtin_type__float;
 extern varray<string> include_directories;
 extern unsigned int include_directory_count;
 
@@ -90,10 +90,10 @@ void cparse_init()
   regt("bool");
   regt("char");
   builtin_type__int = regt("int");
-  regt("float");
+  builtin_type__float = regt("float");
   regt("double");
   
-  builtin_type__void = regt("void"); //this was only after careful consideration
+  builtin_type__void = regt("void"); //this was added only after careful consideration
   
   //lesser used types
   //regt("size_t"); //size_t doesn't need registered here as it is typdef'd in stdio somewhere.
@@ -132,8 +132,6 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
   if (name != "")
   {
     extiter it = scope_to_use->members.find(name);
-    
-    //cout << "  Receiving " << (refs.empty()?"empty":"unempty") << " reference stack\r\n";
     
     if (it != scope_to_use->members.end())
     {
@@ -198,11 +196,9 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
               }
               for (int i=0; i<tpc; i++)
               {
-                ext_retriever_var->tempargs[i]->name = tparams[i].name;
-                if (tparams[i].def) { // cferr = "Implementing `"+ext_retriever_var->name+"'"; print_err_line_at(pos);
-                 // ext_retriever_var->tempargs[i]->type = tparams[i].def;
+                ext_retriever_var->tempargs[i]->name = tparams[i].name; // Copy over the more specific name
+                if (tparams[i].def) // New template listings are also allowed to default old parameters.
                   ext_retriever_var->tempargs[i]->flags |= EXTFLAG_DEFAULTED;
-                }
               }
             }
           tmplate_params_clear(tparams,tpc);

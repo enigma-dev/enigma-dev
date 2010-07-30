@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include "../../backend/ideprint.h"
 
 using namespace std;
 
@@ -41,12 +42,6 @@ using namespace std;
 
 #include <math.h> //log2 to calculate passes.
 
-#define flushl '\n' << flush
-#define flushs flush
-
-#define user (cout << "enigma: ")
-#define edbg (cout << "info: ")
-
 int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
 {
   //First we just parse the scripts to add semicolons and collect variable names
@@ -54,7 +49,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   {
     int a = syncheck::syntacheck(es->scripts[i].code);
     if (a != -1) {
-      user << "Syntax error in script `" << es->scripts[i].name << "'" << endl << syncheck::error << flushl;
+      user << "Syntax error in script `" << es->scripts[i].name << "'\n" << syncheck::error << flushl;
       return E_ERROR_SYNTAX;
     }
     scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
@@ -106,7 +101,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   edbg << "Done." << flushl;
   
   
-  edbg << es->gmObjectCount << " Objects:" << endl;
+  edbg << es->gmObjectCount << " Objects:\n";
   for (int i = 0; i < es->gmObjectCount; i++)
   {
     //For every object in Ism's struct, make our own
@@ -141,7 +136,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
         //Syntax check the code
         
         // Print debug info
-          edbg << "Check `" << es->gmObjects[i].name << "::" << event_get_function_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << "..." << flushs;
+          edbg << "Check `" << es->gmObjects[i].name << "::" << event_get_function_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << "...";
         
         // Check the code
         int sc = syncheck::syntacheck(code);
@@ -153,7 +148,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
           return E_ERROR_SYNTAX;
         }
         
-        edbg << "Done. Starting parse..." << flushs;
+        edbg << "Done. Starting parse...";
         
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
@@ -162,7 +157,6 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
         edbg << "Done." << flushl;
       }
     }
-    fflush(stdout);
   }
   
   //Next we link the scripts into the objects.

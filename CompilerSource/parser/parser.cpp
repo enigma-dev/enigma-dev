@@ -50,8 +50,8 @@
 #include <iostream> //Print shit
 #include <stdio.h> //stdout, fflush
 using namespace std; //More ease
-#include "parser_components.h" //duh
 #include "../externs/externs.h" //To interface with externally defined types and functions
+#include "parser_components.h" //duh
 
 #include "../general/darray.h"
 #include "../general/parse_basics.h"
@@ -155,13 +155,8 @@ string parser_main(string code, parsed_event* pev = NULL)
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
   
-  //To preserve efficiency, however, we will reduce the number of passes by replacing multiple things at once.
+  //For the sake of efficiency, however, we will reduce the number of passes by replacing multiple things at once.
   
-  /*/First off, remove comments, strings, and whitespace.
-  parser_remove_whitespace(code,0);
-  
-  //Next, we generate a syntax map
-  parser_buffer_syntax_map(code,synt,0);*/
   string synt;
   
   //Reset things
@@ -195,3 +190,96 @@ string parser_main(string code, parsed_event* pev = NULL)
   return code;
 }
 
+#include "../cfile_parse/type_resolver.h"
+
+typedef map<string,dectrip> localscope;
+
+int parser_secondary(string& code, string& synt)
+{
+  // We'll have to again keep track of temporaries
+  // Fortunately, this time, there are no context-dependent tokens to resolve
+  
+  int slev = 0;
+  darray<localscope*> sstack;
+  sstack[slev] = new localscope();
+  
+  for (pt pos = 0; pos < synt.length(); pos++)
+  {
+    if (synt[pos] == 't')
+    {
+      pt spos = pos;
+      while (synt[++pos] == 't');
+      parser_fix_templates(code,pos,spos,&synt);
+      continue;
+    }
+    else if (synt[pos] == '.' and synt[pos+1] == 'n')
+    {
+      const pt epos = pos--; backloop:
+      while (synt[pos] == ']' or synt[pos] == ')' or synt[pos] == 'n' or synt[pos] == 't')
+      {
+        if (synt[pos] == ']' or synt[pos] == ')')
+        {
+          for (int cnt = (pos--, 1); cnt; pos--)
+            if (synt[pos] == '[' or synt[pos] == '(') cnt--;
+            else if (synt[pos] == ')' or synt[pos] == ']') cnt++;
+          pos++;
+        }
+        else
+          for (char c = synt[pos--]; pos and synt[pos] == c; pos--);
+      }
+      if (pos) {
+        if (synt[pos-1] == '.')
+          { pos--; goto backloop; }
+        if (synt[pos-1] == '>' and synt[pos-2] == '-')
+          { pos -= 2; goto backloop; }
+        if (synt[pos-1] == ':' and synt[pos-2] == ':')
+          { pos -= 2; goto backloop; }
+      }
+      
+      string exp = code.substr(pos,epos-pos), // Copy the expression being operated upon by .
+         expsynt = synt.substr(pos,epos-pos); // Copy the lex of it, too
+      const pt ebp = pos; // Expression's beginning position
+      pt ep = pos = epos; // Restore our original ending position.
+      
+      // Determine the member being accessed
+      while (synt[++ep] == 'n');
+      string member = code.substr(epos,ep-epos);
+      
+      // Determine the type of the left-hand expression
+      onode n = exp_typeof(exp);
+      
+      if (n.type->members.find(member) == n.type->members.end()) // No member by this name can be accessed
+      {
+        string repstr = "enigma::varaccess_";
+        string repsyn = "nnnnnnnnnnnnnnnnnn";
+        
+        repstr += member;
+        repsyn += string('n',member.length());
+        
+        repstr += "(int(";
+        repsyn += "(ttt(";
+        
+        repstr += exp;
+        repsyn += expsynt;
+        
+        repstr += "))->";
+        repsyn += "))->";
+        
+        code.replace(ebp,exp.length() + 1 + member.length(),repstr);
+        synt.replace(ebp,exp.length() + 1 + member.length(),repsyn);
+      }
+      else // There is a member by this name in the type of that expression
+      {
+        if (n.deref) { // The type is a pointer. This dot should be a ->
+          code.replace(epos,1,"->");
+          synt.replace(epos,1,"->");
+        }
+      }
+    }
+    else {
+      while (synt[pos] == synt[pos+1]) pos++;
+      break;
+    }
+  }
+  return -1;
+}

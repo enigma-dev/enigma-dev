@@ -352,7 +352,14 @@ int parser_reinterpret(string &code,string &synt)
           for (pt i = sp; i <= pos; i++)
             synt[i] = 'c';
       }
-      //else if (synt[pos+1]  == '(') // This case doesn't need handled. int() is fine.s
+      //else if (synt[pos+1]  == '(') // This case doesn't need handled. ttt() is fine as-is.
+    }
+    else if(synt[pos] == '<' and synt[pos-1] == 't')
+    {
+      synt[pos++] = 't';
+      for (int pc = 1; pc > 0; synt[pos++] = 't')
+        if (synt[pos] == '>') pc--;
+        else if (synt[pos] == '<') pc++;
     }
   }
   cout << "done. ";
@@ -493,8 +500,6 @@ void parser_add_semicolons(string &code,string &synt)
         while (synt[pos] == 'r' and code[pos] != ' ') pos++;
         continue;
       }
-
-      cout << "At do\r\n>>" << code << "\r\n>>" << synt << "\r\n\r\n";
 
       //Begin do handling
 
@@ -705,7 +710,7 @@ void print_to_file(string code,string synt,unsigned int &strc, varray<string> &s
       case '"':
           if (pars) pars--;
             if (str_ind >= strc) cout << "What the crap.\n";
-            of.write(string_in_code[str_ind].c_str(),string_in_code[str_ind].length());
+            of << string_in_code[str_ind].c_str();
             str_ind++;
             if (synt[pos+1] == '+' and synt[pos+2] == '"')
               synt[pos+1] = code[pos+1] = ' ';
@@ -726,4 +731,67 @@ void print_to_file(string code,string synt,unsigned int &strc, varray<string> &s
   /*if (system("\"/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt\""))
   if (system("gedit \"/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt\""))
     printf("zomg fnf\r\n");*/
+}
+
+void parser_fix_templates(string &code,pt pos,pt spos,string *synt)
+{
+  pt epos = pos;
+  int a2i = 0;
+  
+  if (code[--epos] == '>')
+  {
+    --epos;
+    int ac = 0; bool ga = false;
+    for (int tbc = 1; tbc > 0; epos--)
+    {
+      if (code[epos] == '<')
+        { tbc--; continue; }
+      tbc += (code[epos] == '>');
+      ac +=  (code[epos] == ',') and ga and (tbc == 1);
+      ga |=  (code[epos] != '<'  and code[epos] != '>');
+      ga &=  (code[epos] != ',');
+    }
+    a2i = ac + ga;
+  }
+  
+  pt sp2 = spos;
+  while (code[sp2] != '<' and sp2 < epos)
+    if (code[sp2++] == ' ') spos = sp2;
+  
+  string ptname = code.substr(spos,epos-spos+1); // Isolate the potential template's name
+  bool fnd = find_extname(ptname,0xFFFFFFFF);
+  if (!fnd) return;
+  
+  externs *a = ext_retriever_var;
+  if (a->flags & EXTFLAG_TEMPLATE)
+  {
+    int tmc = a->tempargs.size - 1;
+    for (int i = tmc; i >= 0; i--)
+      if (a->tempargs[i]->flags & EXTFLAG_DEFAULTED) tmc = i;
+    a2i = tmc - a2i;
+    string iseg;
+    for (int i = 0; i < a2i;)
+      iseg += (++i < a2i) ? "variant," : "variant";
+    if (code[pos-1] == '>')
+      if (code[pos-2] == ',' or code[pos-2] == '<')
+        code.insert(pos-1, iseg),
+        synt && (synt->insert(pos-1, string(iseg.length(),'t')),   true);
+      else
+        code.insert(pos-1, ","+iseg),
+        synt && (synt->insert(pos-1, string(iseg.length()+1,'t')), true);
+    else
+      code.insert(pos,   "<"+iseg+">"),
+      synt && (synt->insert(pos,   string(iseg.length()+2,'t')),   true);
+  }
+}
+
+#include <stack>
+
+// Return whether or not the left hand side of a dot requires an ENIGMA access function
+bool parse_dot(string exp)
+{
+  enum { DT_BRACKET, DT_PAR, DT_LEVEL };
+  stack<int> dts;
+  int level = 0;
+  return !level;
 }

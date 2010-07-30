@@ -54,25 +54,11 @@ enigma::sprite_idmax = 0;
 enigma::exe_loadsprs();
 
 //Load rooms
-#include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
-int instarpos=0;
-for (enigma::roomiter=enigma::roomdata.begin();
-     enigma::roomiter!=enigma::roomdata.end(); enigma::roomiter++){
-	int troc=(*enigma::roomiter).second.instancecount;
-	for(int i=0;i<troc;i++)
-	{
-    int idn = instdata[instarpos];
-		(*enigma::roomiter).second.instances[i].id=idn;
-		if (idn >= enigma::maxid) enigma::maxid=idn+1;
-		(*enigma::roomiter).second.instances[i].obj=instdata[instarpos+1];
-		(*enigma::roomiter).second.instances[i].x=instdata[instarpos+2];
-		(*enigma::roomiter).second.instances[i].y=instdata[instarpos+3];
-		instarpos+=4;
-	}
-}
+enigma::rooms_load();
 
 //Go to the first room
-room_goto_absolute(0);
+if (room_count)
+  room_goto_absolute(0);
 /*
 FILE* a=fopen("shit!.txt","wb");
 if (a)

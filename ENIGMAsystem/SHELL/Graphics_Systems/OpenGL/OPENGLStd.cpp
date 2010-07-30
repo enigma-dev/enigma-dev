@@ -40,7 +40,9 @@ namespace enigma
   bool pbo_isgo;
 }
 
-#include "../../Universal_System/roomsystem.h"
+#include <string>
+using namespace std;
+#include "../../Universal_System/roomsystem.h" // Room dimensions.
 
 void graphicssystem_initialize()
 {
@@ -76,4 +78,22 @@ void graphicssystem_initialize()
     
     glColor4f(0,0,0,1);
     glBindTexture(GL_TEXTURE_2D,0);
+}
+
+// Stolen entirely from the documentation and thrown into a switch() structure.
+const char* draw_get_graphics_error()
+{
+  GLenum err = glGetError();
+  switch (err)
+  {
+    case GL_NO_ERROR:         return "";
+    case GL_INVALID_ENUM:     return "An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag.";
+    case GL_INVALID_VALUE:    return "A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag.";
+    case GL_INVALID_OPERATION:return "The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag.";
+    case GL_STACK_OVERFLOW:   return "This command would cause a stack overflow. The offending command is ignored and has no other side effect than to set the error flag.";
+    case GL_STACK_UNDERFLOW:  return "This command would cause a stack underflow. The offending command is ignored and has no other side effect than to set the error flag.";
+    case GL_OUT_OF_MEMORY:    return "There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded.";
+    case GL_TABLE_TOO_LARGE:  return "The specified table exceeds the implementation's maximum supported table size. The offending command is ignored and has no other side effect than to set the error flag.";
+  }
+  return "Unspecified error.";
 }

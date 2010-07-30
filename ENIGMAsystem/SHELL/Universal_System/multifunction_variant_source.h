@@ -34,7 +34,11 @@
   keeps tabs on the other three. When one is modified, it modifies the other three as needed.
 */
 
+#ifndef MFV_ALREADY_INCLUDED
 #include "multifunction_variant.h"
+#else
+#undef MFV_ALREADY_INCLUDED
+#endif
 #include "var_te.h"
 
 #undef  types_extrapolate_alldec_i

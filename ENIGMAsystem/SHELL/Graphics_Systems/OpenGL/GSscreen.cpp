@@ -29,7 +29,10 @@
 int screen_redraw(int dontswap)
 **********************************************/
 
+#include <string>
 #include <GL/gl.h>
+
+using namespace std;
 
 #define __GETR(x) (((unsigned int)x & 0x0000FF))
 #define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)

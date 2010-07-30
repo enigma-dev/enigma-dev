@@ -25,27 +25,22 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
-#include "compile_organization.h"
+#include <string>
+#define flushl '\n'
 
-namespace used_funcs
-{
-  extern bool object_set_sprite;
-  void zero();
-}
-extern std::map<string,parsed_script*> scr_lookup;
+struct ideprint {
+  void (*f)(const char*);
+  ideprint &operator<< (std::string);
+  ideprint &operator<< (const char* x);
+  ideprint &operator<< (size_t x);
+  ideprint &operator<< (char x);
+  ideprint &operator<< (int x);
+  ideprint &operator<< (double x);
+  ideprint(void (*f)(const char*));
+};
 
-extern const char* license;
-extern string format_error(string code,string err,int pos);
+void ide_dia_add_direct(const char*);
+void ide_dia_add_debug(const char*);
 
-
-inline string tdefault(string t) {
-  return (t != "" ? t : "var");
-}
-inline void* lgmRoomBGColor(int c) {
-  return (void*)((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
-}
-
-inline string system_get_uppermost_tier() {
-  return "object_collisions";
-}
+extern ideprint user;
+extern ideprint edbg;

@@ -25,27 +25,23 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
-#include "compile_organization.h"
+#include "../externs/externs.h"
 
-namespace used_funcs
+struct onode
 {
-  extern bool object_set_sprite;
-  void zero();
-}
-extern std::map<string,parsed_script*> scr_lookup;
+  string op; // What would follow the word "operator" if overloaded
+  externs *type; // The type we would return if this were it for the stack: this tracks all referencing!
+  unsigned otype; // The kind of operator this is; binary or unary, for example
+  unsigned short prec;  // The precedence integer of this level.
+  unsigned short pad;  // The number of & referencers on top of our existing ref stack
+  rf_node *deref;     // The rf_node of the next dereference needed, or NULL if conked out
+  
+  onode();
+  onode(externs* t);
+  onode(string oN,unsigned oT,short pr,externs *e);
+  void operator <= (const onode &t);
+};
 
-extern const char* license;
-extern string format_error(string code,string err,int pos);
-
-
-inline string tdefault(string t) {
-  return (t != "" ? t : "var");
-}
-inline void* lgmRoomBGColor(int c) {
-  return (void*)((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
-}
-
-inline string system_get_uppermost_tier() {
-  return "object_collisions";
-}
+extern void exp_typeof_init();
+extern string externs_name(onode e);
+extern onode exp_typeof(string exp);

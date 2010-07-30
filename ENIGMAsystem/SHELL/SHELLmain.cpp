@@ -144,6 +144,7 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
+#include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
 
 
 

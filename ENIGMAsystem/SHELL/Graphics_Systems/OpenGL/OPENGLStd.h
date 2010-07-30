@@ -59,3 +59,4 @@ namespace enigma
 #include "GSmiscextra.h"
 
 void graphicssystem_initialize();
+const char* draw_get_graphics_error();

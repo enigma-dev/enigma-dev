@@ -146,6 +146,7 @@
 		<Unit filename="cfile_parse/skipping.cpp" />
 		<Unit filename="cfile_parse/template_handlers.cpp" />
 		<Unit filename="cfile_parse/template_handlers.h" />
+		<Unit filename="cfile_parse/type_resolver.cpp" />
 		<Unit filename="cfile_parse/value.h" />
 		<Unit filename="compiler/compile.cpp" />
 		<Unit filename="compiler/compile.h" />

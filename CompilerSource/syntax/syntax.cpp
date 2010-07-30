@@ -90,6 +90,7 @@ namespace syncheck
        LEVELTYPE_SWITCH_BLOCK,
        LEVELTYPE_FOR_PARAMETERS,
        LEVELTYPE_GENERAL_STATEMENT,
+       LEVELTYPE_TEMPLATE_P,
        LEVELTYPE_TERNARY,
        LEVELTYPE_STRUCT,
        LEVELTYPE_LOOP
@@ -110,6 +111,7 @@ namespace syncheck
       PLT_BRACKET,
       PLT_FUNCTION,
       PLT_FORSTATEMENT,
+      PLT_TEMPLATE_PARAMS,
       PLT_CAST
      };
 
@@ -221,7 +223,7 @@ namespace syncheck
                 if (plevelt[plevel] == PLT_PARENTH)
                   plevelt[plevel] = PLT_CAST;
                 else if (plevelt[plevel] != PLT_FORSTATEMENT) {
-                  lastnamed[level] = LN_OPERATOR; //Cast ~= Unary operator
+                  lastnamed[level] = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? LN_TYPE_NAME : LN_OPERATOR; //Cast ~= Unary operator
                 }
               }
             }
@@ -508,7 +510,7 @@ namespace syncheck
               if (lastnamed[level] == LN_OPERATOR)
               { error="Unexpected brace at this point"; return pos; }
               if (plevel) {
-                error = plevelt[plevel] == PLT_BRACKET ? "Expected closing bracket before brace" : "Expected closing parenthesis before brace";
+                error = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? "Expected closing triangle bracket before brace" : plevelt[plevel] == PLT_BRACKET ? "Expected closing bracket before brace" : "Expected closing parenthesis before brace";
                 return pos;
               }
               
@@ -796,8 +798,14 @@ namespace syncheck
                       pos++; continue;
                     }
                   //overflow into next otherwise
-                case '%': case '|':
-                case '^': case '>': case '<':
+                  goto they_see_me_rollin; // Skip the next case. It's pure evil :3
+                
+                case '>': case '<':
+                  if (lastnamed[level] == LN_TYPE_NAME or (plevel and plevelt[plevel] == PLT_TEMPLATE_PARAMS))
+                    goto FUCKING_HELL_A_TEMPLATE;
+                
+                case '%': case '|': case '^':
+                  they_see_me_rollin:
                     if ((!assop[level] && !(plevel>0)) and !(levelt[level] == LEVELTYPE_FOR_PARAMETERS and statement_pad[level] == 2))
                     { error="Assignment operator expected before any secondary operators"; return pos; }
                     if (lastnamed[level] != LN_VARNAME && lastnamed[level] != LN_DIGIT && lastnamed[level] != LN_VALUE)
@@ -813,13 +821,29 @@ namespace syncheck
                       pos++;
                     pos++;
                   break;
-
+                
+                FUCKING_HELL_A_TEMPLATE:
+                    if (code[pos] == '<')
+                    {
+                      plevel++; plevelt[plevel] = PLT_TEMPLATE_PARAMS;
+                      level++;   levelt[ level] = LEVELTYPE_TEMPLATE_P;
+                      lastnamed[level] = LN_NOTHING; pos++;
+                    }
+                    else if (code[pos] == '>')
+                    {
+                      if (lastnamed[level] != LN_NOTHING and lastnamed[level] != LN_VALUE and lastnamed[level] != LN_DIGIT and lastnamed[level] != LN_TYPE_NAME)
+                        { error = "Dunno what the hell that is, but it doesn't belong in a template hurrr"; return pos; }
+                      plevel--; level--;
+                      lastnamed[level] = LN_TYPE_NAME; pos++;
+                    }
+                  break;
+                
                 case '!': case '~': //we already know the next symbol is not '=', so this is unary
                     if (lastnamed[level] != LN_OPERATOR and lastnamed[level] != LN_NOTHING)
                     { error="Unexpected unary operator following value"; return pos; }
                     pos++;
                   break; //lastnamed is already operator, so just break
-
+                
                 default:
                     error="Unexpected symbol reached";
                   return pos;

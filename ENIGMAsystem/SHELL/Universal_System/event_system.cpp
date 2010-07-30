@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
-#include "object.h"
+//#include <map>
+//#include "object.h"
 
 //std::map<int, object_basic*> depth;

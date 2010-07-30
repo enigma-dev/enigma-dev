@@ -25,27 +25,43 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
-#include "compile_organization.h"
+#include "ideprint.h"
+using std::string;
+#include "../general/estring.h"
+#include "JavaCallbacks.h"
 
-namespace used_funcs
-{
-  extern bool object_set_sprite;
-  void zero();
+ideprint &ideprint::operator<< (string x) {
+  f(x.c_str()); return *this;
 }
-extern std::map<string,parsed_script*> scr_lookup;
-
-extern const char* license;
-extern string format_error(string code,string err,int pos);
-
-
-inline string tdefault(string t) {
-  return (t != "" ? t : "var");
+ideprint &ideprint::operator<< (const char* x) {
+  f(x); return *this;
 }
-inline void* lgmRoomBGColor(int c) {
-  return (void*)((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
+ideprint &ideprint::operator<< (int x) {
+  f(tostring(x).c_str()); return *this;
+}
+ideprint &ideprint::operator<< (size_t x) {
+  f(tostring(x).c_str()); return *this;
+}
+ideprint &ideprint::operator<< (char x) {
+  char a[2]; a[1] = 0; a[0] = x;
+  f(a); return *this;
+}
+ideprint &ideprint::operator<< (double x) {
+  f(tostringd(x).c_str()); return *this;
 }
 
-inline string system_get_uppermost_tier() {
-  return "object_collisions";
+ideprint::ideprint(void(*ftu)(const char*)): f(ftu) {}
+
+#include <stdio.h>
+
+// Now specialize it 
+// Declare functions it'll call
+void ide_dia_add_direct(const char* x) {
+  printf("%s",x);//ide_dia_add(x);
 }
+void ide_dia_add_debug(const char* x) {
+  printf("%s",x);//ide_dia_add(x);
+}
+// Link them together
+ideprint user(ide_dia_add_direct);
+ideprint edbg(ide_dia_add_debug);

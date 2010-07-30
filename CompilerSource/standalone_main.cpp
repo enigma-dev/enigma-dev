@@ -71,6 +71,9 @@ extern void print_definition(string);
 extern  int ext_count;
 extern  map<externs*, int> bigmap;
 
+#include "cfile_parse/type_resolver.h"
+
+extern char getch();
 extern int cfile_parse_main();
 int main(int argc, char *argv[])
 {
@@ -83,23 +86,25 @@ int main(int argc, char *argv[])
   
   //m_prog_loop_cfp();
   
-  string EGMmain = fc("./ENIGMAsystem/SHELL/SHELLmain.cpp");
+  string EGMmain = fc(1 ? "./CompilerSource/cfile_parse/auxilary.h" : "./ENIGMAsystem/SHELL/SHELLmain.cpp");
   if (EGMmain == "") {
     cout << "ERROR: Failed to read main engine file\n";
     getchar(); return 1;
   }
   
-  ofstream wto("freezway.txt",ios_base::out);
+  /*ofstream wto("freezway.txt",ios_base::out);
     wto << "This is what ENIGMA read for SHELL: \n";
     wto << EGMmain;
-  wto.close();
+  wto.close();*/
   
-  EGMmain += "\n\n";
+  EGMmain += "\n\n#include <map>\n\nstd::map<float,float> testmap;\n\n";
   //EGMmain = fc("./CompilerSource/cfile_parse/auxilary.h");
   
   
   clock_t cs = clock();
+  timeval ts; gettimeofday(&ts,NULL);
   pt a = parse_cfile(EGMmain);
+  timeval tn; gettimeofday(&tn,NULL);
   clock_t ce = clock();
   
   if (a != pt(-1))
@@ -142,9 +147,10 @@ int main(int argc, char *argv[])
   varray<string> empty;
   
   cout << "\nParsed to:\n" << b;
+  parser_secondary(ev.code,ev.synt);
   ofstream fpsd("parse_output.txt",ios_base::out);
   print_to_file(ev.code,ev.synt,sc,empty,0,fpsd); fpsd.close();
-  system("notepad parse_output.txt || gedit parse_output.txt");
+  system("gedit parse_output.txt || notepad parse_output.txt");
   cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
   
   cout << "Locals declared:\n";
@@ -153,14 +159,35 @@ int main(int argc, char *argv[])
     cout << "  " << (i->second.type != ""? i->second.type : "var") << " " << i->second.prefix << " " << i->first << " " << i->second.suffix << "\n";
   }
   
+  exp_typeof_init();
+  
+  cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nOne more thing: Resolving types\n";
+  cout << externs_name(exp_typeof("room_speed")) << endl;
+  cout << externs_name(exp_typeof("var")) << endl;
+  cout << externs_name(exp_typeof("*var")) << endl;
+  cout << externs_name(exp_typeof("room")) << endl;
+  cout << externs_name(exp_typeof("room + room")) << endl;
+  cout << externs_name(exp_typeof("room + 1")) << endl;
+  cout << externs_name(exp_typeof("room - 1")) << endl;
+  cout << externs_name(exp_typeof("var[5]")) << endl;
+  cout << externs_name(exp_typeof("testmap")) << endl;
+  cout << externs_name(exp_typeof("testmap[5]")) << endl;
+  cout << (find_extname("testmap",0xFFFFFFFF) ? externs_name(ext_retriever_var) : "wut") << endl;
+  
+  cout << "And just for the record, parsing the C stuff took " << (double(tn.tv_sec - ts.tv_sec) + double(tn.tv_usec - ts.tv_usec)/1000000.0) << " seconds" << endl;
+  cout << "\n\n\n\n\n\n\n\n\nPress Enter to continue" << endl;
+  
+  getch();
+  
   cout << "% Testing free % \n";
   cout << "Freeing global scope... "; global_scope.clear_all(); cout << "Done.\n";
-  cout << "Clearing parser lists... "; int cfp_clear_lists(); cout << "Done.\n";
+  cout << "Clearing parser lists... "; cfp_clear_lists(); cout << "Done.\n";
   /*
   cout << "Free completed successfully (" << global_scope.members.size() << "): " << ext_count << " remaining\n";
   cout << "(Or, if you want a second opinion, there are apparently " << bigmap.size() << " remaining)\n";
   for (map<externs*,int>::iterator i = bigmap.begin(); i != bigmap.end(); i++)
     cout << i->first->name << " ("<<(i->second)<<"), "; cout << "end\n";*/
+  
   
   return 0;
 }
