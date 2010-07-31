@@ -19,16 +19,16 @@ echo "# OPTIMIZATION_FLAGS = -Os # Optimize for size" >> Makefile;
 echo "" >> Makefile;
 
 echo "# OS and default target" >> Makefile;
-echo "OS := $(shell uname -s)" >> Makefile;
-echo "ifeq ($(OS), Linux)" >> Makefile;
-echo " TARGET := linux" >> Makefile;
+echo "OS := \$(shell uname -s)" >> Makefile;
+echo "ifeq (\$(OS), Linux)" >> Makefile;
+echo "	TARGET := linux" >> Makefile;
 echo "else" >> Makefile;
-echo " TARGET := win" >> Makefile;
+echo "	TARGET := win" >> Makefile;
 echo "endif" >> Makefile;
 echo "" >> Makefile;
 
 echo "# default target (because it appears first)" >> Makefile;
-echo "default: $(TARGET)" >> Makefile;
+echo "default: \$(TARGET)" >> Makefile;
 echo "" >> Makefile;
 
 for subdir in */ */*/ ./; #Iterate 
@@ -47,7 +47,6 @@ for subdir in */ */*/ ./; #Iterate
         done;
         echo "" >> Makefile;
         
-#        echo "	-mkdir .eobjs" >> Makefile;
         echo "	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c  $file		-o .eobjs/${pathless%.cpp}.o \$(FLAGS)"  >> Makefile;
       };
       done;
