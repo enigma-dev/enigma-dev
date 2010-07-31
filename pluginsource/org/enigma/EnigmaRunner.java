@@ -380,8 +380,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		//		ef = new EnigmaFrame();
 		//				System.out.println("Compiling with " + enigma);
 
-		EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
-		System.out.println(EnigmaDriver.compileEGMf(es,exef.getAbsolutePath(),mode));
+		final File ef = exef;
+		new Thread()
+			{
+				public void run()
+					{
+					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
+					System.out.println(EnigmaDriver.compileEGMf(es,ef.getAbsolutePath(),mode));
+					}
+			}.start();
 		//ok to GC es now
 
 		if (mode == 2) //build
