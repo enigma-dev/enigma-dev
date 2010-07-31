@@ -143,6 +143,10 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
 
           if (itm->second.argc != -1) //Expect ()
           {
+            pt cwp = pos;
+            while (is_useless(code[cwp])) cwp++;
+            if (code[cwp] != '(')
+              goto out_of_here;
             if (!macro_function_parse(code,name,pos,macrostr,itm->second.args,itm->second.argc,itm->second.args_uat)) {
               cout << "UNEXPECTED ERROR: " << macrostr;
               cout << "\nThis error should have been reported during a previous syntax check\n";
@@ -156,6 +160,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         }
       }
       
+      out_of_here:
       char c = 'n';
       
       if (name == "sometype")

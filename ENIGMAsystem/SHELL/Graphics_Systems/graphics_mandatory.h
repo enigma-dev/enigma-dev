@@ -25,18 +25,12 @@
 **                                                                              **
 \********************************************************************************/
 
-// This file contains functions that are required to be implemented by any API
-// under this directory, /Platforms/. They are not required to do anything at all
-// if the platform in question lacks support for them entirely.
+/*\\\ This file contains prototypes for functions that must be defined by the graphics
+|*||| library modules. Each of these is used by other systems throughout the engine.
+\*/// Accidental failure to implement them could cause error.
 
-namespace enigma
-{
-  // This method should write the name of the running module to exenamehere.
-  void windowsystem_write_exename(char* exenamehere);
+void graphicssystem_initialize(); // Called at game load to allow the system to set up.
+// This function can be implemented as an empty call if it is not needed.
 
-  // This method should take an integer framerate and perform the necessary operations to limit fps to that rate.
-  void sleep_for_framerate(int framerate);
-  
-  // This method is called at load time. It allows for initializing arrays for input.
-  void input_initialize();
-}
+const char* draw_get_graphics_error(); // Return a const char* error string, if any
+// error has occurred, or an empty string otherwise.

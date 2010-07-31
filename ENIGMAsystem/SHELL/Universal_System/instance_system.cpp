@@ -106,7 +106,7 @@ namespace enigma
   vector<inst_iter*> cleanups; // We'll use vector
   
   // It's a good idea to centralize an event iterator so error reporting can tell where it is.
-  inst_iter *instance_event_iterator; // Not bad for efficiency, either.
+  inst_iter *instance_event_iterator = NULL;; // Not bad for efficiency, either.
   
   /* **  Methods ** */
   // Retrieve the first instance on the complete list.

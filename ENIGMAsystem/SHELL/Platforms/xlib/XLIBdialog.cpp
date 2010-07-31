@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <string>
+#include <stdio.h>
+using namespace std;
 
 int show_message(string message)
 {

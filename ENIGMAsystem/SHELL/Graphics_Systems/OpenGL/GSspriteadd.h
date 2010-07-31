@@ -25,10 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-//#include "../../Universal_System/spritestruct.h"
-
-int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset);
-
 /* These functions are primarily for use of the engine. Experienced users
  * who are familiar with C++ can make use of these, but they were made to
  * use at load time with data read from the executable. These both expect

@@ -2,6 +2,8 @@
 
 .eobjs_$(MODE)/file_manip.o: file_manip.cpp
 	g++ -c file_manip.cpp		-o .eobjs_$(MODE)/file_manip.o $(FLAGS)
+.eobjs_$(MODE)/XLIBdialog.o: XLIBdialog.cpp
+	g++ -c XLIBdialog.cpp		-o .eobjs_$(MODE)/XLIBdialog.o $(FLAGS)
 .eobjs_$(MODE)/XLIBmain.o: XLIBmain.cpp XLIBwindow.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
 	g++ -c XLIBmain.cpp		-o .eobjs_$(MODE)/XLIBmain.o $(FLAGS)
 .eobjs_$(MODE)/XLIBwindow.o: XLIBwindow.cpp
@@ -10,10 +12,10 @@
 mkObjDir:
 	-mkdir .eobjs_$(MODE)
 
-Run: mkObjDir .eobjs_Run/file_manip.o .eobjs_Run/XLIBmain.o .eobjs_Run/XLIBwindow.o 
-Debug: mkObjDir .eobjs_Debug/file_manip.o .eobjs_Debug/XLIBmain.o .eobjs_Debug/XLIBwindow.o 
-Build: mkObjDir .eobjs_Build/file_manip.o .eobjs_Build/XLIBmain.o .eobjs_Build/XLIBwindow.o 
-Release: mkObjDir .eobjs_Release/file_manip.o .eobjs_Release/XLIBmain.o .eobjs_Release/XLIBwindow.o 
+Run: mkObjDir .eobjs_Run/file_manip.o .eobjs_Run/XLIBdialog.o .eobjs_Run/XLIBmain.o .eobjs_Run/XLIBwindow.o 
+Debug: mkObjDir .eobjs_Debug/file_manip.o .eobjs_Debug/XLIBdialog.o .eobjs_Debug/XLIBmain.o .eobjs_Debug/XLIBwindow.o 
+Build: mkObjDir .eobjs_Build/file_manip.o .eobjs_Build/XLIBdialog.o .eobjs_Build/XLIBmain.o .eobjs_Build/XLIBwindow.o 
+Release: mkObjDir .eobjs_Release/file_manip.o .eobjs_Release/XLIBdialog.o .eobjs_Release/XLIBmain.o .eobjs_Release/XLIBwindow.o 
 
 clean:
 	rm -f .eobjs*/*

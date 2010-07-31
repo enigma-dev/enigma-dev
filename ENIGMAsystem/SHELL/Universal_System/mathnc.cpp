@@ -65,7 +65,8 @@ double point_distance(double x1,double y1,double x2,double y2)  { return hypot(x
 #define LOWER_MASK 0x7fffffff // least significant r bits
 
 namespace enigma {
-  extern unsigned int Random_Seed,mt[625];
+	unsigned int Random_Seed;
+	unsigned long mt[625];
 }
 
 

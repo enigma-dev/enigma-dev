@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-namespace enigma
-{
+#include "spritestruct.h"
+namespace enigma {
   void exe_loadsprs();
 }

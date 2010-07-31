@@ -25,18 +25,69 @@
 **                                                                              **
 \********************************************************************************/
 
-// This file contains functions that are required to be implemented by any API
-// under this directory, /Platforms/. They are not required to do anything at all
-// if the platform in question lacks support for them entirely.
+#include <time.h>
+#include <string>
+using std::string;
 
+#include "mathnc.h"
+#include "spriteinit.h"
+#include "../Platforms/platforms_mandatory.h"
+#include "../Graphics_Systems/graphics_mandatory.h"
+#include "roomsystem.h"
+
+
+namespace enigma {
+  extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
+}
+
+//This is like main(), only cross-api
 namespace enigma
 {
-  // This method should write the name of the running module to exenamehere.
-  void windowsystem_write_exename(char* exenamehere);
-
-  // This method should take an integer framerate and perform the necessary operations to limit fps to that rate.
-  void sleep_for_framerate(int framerate);
-  
-  // This method is called at load time. It allows for initializing arrays for input.
-  void input_initialize();
+  int initialize_everything()
+  {
+    mtrandom_seed(enigma::Random_Seed=time(0));
+    #if BUILDMODE
+      buildmode::buildinit();
+    #endif
+    graphicssystem_initialize();
+    #if ENIGMA_WS_WINDOWS!=0
+      enigma::init_fonts();
+    #endif
+    
+    event_system_initialize();
+    input_initialize();
+    
+    //Take care of sprites;
+    enigma::sprite_idmax = 0;
+    enigma::exe_loadsprs();
+    
+    //Load rooms
+    enigma::rooms_load();
+    
+    //Go to the first room
+    if (room_count)
+      room_goto_absolute(0);
+    /*
+    FILE* a=fopen("shit!.txt","wb");
+    if (a)
+    {
+      fprintf(a,"Listing of all instances:\r\n");
+      for (enigma::instance_iterator=enigma::instance_list.begin();
+      enigma::instance_iterator!=enigma::instance_list.end();
+      enigma::instance_iterator++)
+      {
+        fprintf(a,"IND: %d | ID: %d   | obj: %3d   | x: %3d   | y: %3d\r\n",
+          (int)(*enigma::instance_iterator).first,
+          (int)(*enigma::instance_iterator).second->id,
+          (int)(*enigma::instance_iterator).second->object_index,
+          (int)(*enigma::instance_iterator).second->x,
+          (int)(*enigma::instance_iterator).second->y);
+      }
+      fclose(a);
+    }
+    
+    system("shit!.txt");*/
+    
+    return 0;
+  }
 }

@@ -88,7 +88,22 @@ int handleEvents()
   //Restore = MapNotify
 }
 
-namespace enigma{void initkeymap();}
+namespace enigma
+{
+  void initkeymap();
+  void input_initialize()
+  {
+    //Clear the input arrays
+    for(int i=0;i<3;i++){
+      enigma::last_mousestatus[i]=0;
+      enigma::mousestatus[i]=0;
+    }
+    for(int i=0;i<256;i++){
+      enigma::last_keybdstatus[i]=0;
+      enigma::keybdstatus[i]=0;
+    }
+  }
+}
 
 int main(int argc,char** argv)
 {

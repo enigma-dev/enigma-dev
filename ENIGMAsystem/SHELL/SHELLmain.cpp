@@ -25,23 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-/*#define tits int
-typedef tits nigr;
-
-
-#define __CONCAT(x,y)	x ## y
-#define unchange(x,y) __CONCAT(x,y)
-int unchange(__CONCAT(one,tawoo),athree);
-
-
-#define test(x)
-#define attest(x)
-#define detest(x) error here x D
-#define goforit(x) x ## test(:O)
-
-goforit(at);*/
-
-#include <stdio.h>
+//#include <stdio.h>
 #include <stdlib.h>
 #include <string>
 
@@ -65,7 +49,6 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 
 //#include <vector> //COLLIGMA
 
-#include <time.h>
 
 #include "API_Switchboard.h"
 
@@ -87,6 +70,7 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 #include "Universal_System/mathnc.h"
 
 #if ENIGMA_GS_OPENGL
+    #include "Graphics_Systems/graphics_mandatory.h"
     #include "Graphics_Systems/OpenGL/OPENGLStd.h"
 #endif
 #if ENIGMA_WS_WINDOWS != 0
@@ -111,7 +95,6 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 
 #include "Universal_System/IMGloading.h"
 #include "Graphics_Systems/OpenGL/GSsprite.h"
-#include "Graphics_Systems/OpenGL/GSspriteadd.h"
 
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h"
@@ -137,6 +120,8 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 #include "Universal_System/instance_system.h"
 #include "Platforms/platforms_mandatory.h"
 
+#include "Universal_System/syntax_quirks.h"
+
 #include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
 	#include "Graphics_Systems/OpenGL/GSscreen.h" // TODO: Move this declaration to its own header called *mandatory*.h in the root of /Graphics_Systems/.
@@ -146,31 +131,9 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
 
-
-
-
 #if BUILDMODE
 	#include "Modes/buildmode.h"
 #endif
 
-
-#include "Universal_System/spriteinit.h"
 #include "Universal_System/instance_create.h"
 
-//#include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"
-namespace enigma {
-  extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
-}
-
-//This is like main(), only cross-api
-namespace enigma
-{
-  int initialize_everything()
-  {
-    #include "initialize.h"
-    return 0;
-  }
-}
-
-//int main() { enigma::inst_iter *a = new enigma::inst_iter(NULL,NULL,NULL); }
-  

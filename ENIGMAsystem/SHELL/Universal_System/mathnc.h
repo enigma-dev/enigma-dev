@@ -25,52 +25,11 @@
 **                                                                              **
 \********************************************************************************/
 
-/**Standard math functions*****************************************************\
-
-double random(double n)
-int random_set_seed(int seed)
-int random_get_seed()
-int randomize()
-int random_integer(double x)
-
-double round(double x)
-double sqr(double x)
-double power(double x,double power)
-double ln(double x)
-double logn(double n,double x)
-double log2(double x)
-double arcsin(double x)
-double arccos(double x)
-double arctan(double x)
-double arctan2(double y,double x)
-double min(double value1, double value2)
-double max(double value1, double value2)
-int sign(double x)
-double frac(double x)
-double degtorad(double x)
-double radtodeg(double x)
-double lengthdir_x(double len,double dir)
-double lengthdir_y(double len,double dir)
-double direction_difference(double dir1,double dir2)
-
-double sin(double x)
-double cos(double x)
-double tan(double x)
-double log10(double x)
-double abs(double x)
-double ceil(double x)
-double floor(double x)
-double sqrt(double x)
-double exp(double x)
-point_direction
-point_distance
-\******************************************************************************/
-
 #include <math.h>
 
 namespace enigma {
-	unsigned int Random_Seed;
-	unsigned long mt[625];
+	extern unsigned int Random_Seed;
+	extern unsigned long mt[625];
 }
 
 const double pi = M_PI;

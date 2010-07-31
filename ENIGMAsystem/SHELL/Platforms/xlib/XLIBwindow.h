@@ -132,6 +132,9 @@ window_set_sizeable(sizeable)
 window_get_sizeable()*/
 
 
+int show_message(string str);
+
+
 namespace enigma {
   extern char** parameters;
   //void writename(char* x);
