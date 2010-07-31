@@ -47,6 +47,7 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
+#include "../backend/JavaCallbacks.h"
 #include "../externs/externs.h"
 #include "../syntax/syncheck.h"
 #include "../parser/parser.h"
@@ -115,6 +116,9 @@ void clear_ide_editables()
 enum { emode_run, emode_debug, emode_build, emode_compile };
 dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
+    ide_dia_clear();
+    ide_dia_open();
+
   // CLean up from any previous executions.
     parsed_objects.clear(); //Make sure we don't dump in any old object code...
     shared_locals_clear();  //Forget inherited locals, we'll reparse them

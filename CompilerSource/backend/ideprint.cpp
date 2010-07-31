@@ -57,10 +57,10 @@ ideprint::ideprint(void(*ftu)(const char*)): f(ftu) {}
 // Now specialize it 
 // Declare functions it'll call
 void ide_dia_add_direct(const char* x) {
-  printf("%s",x);//ide_dia_add(x);
+  printf("%s",x);ide_dia_add(x);
 }
 void ide_dia_add_debug(const char* x) {
-  printf("%s",x);//ide_dia_add(x);
+  printf("%s",x);ide_dia_add(x);
 }
 // Link them together
 ideprint user(ide_dia_add_direct);
