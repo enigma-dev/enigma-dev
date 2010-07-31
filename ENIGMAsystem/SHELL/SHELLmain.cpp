@@ -77,7 +77,6 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
     #include "Platforms/windows/WINDOWSStd.h"
 #elif ENIGMA_WS_XLIB != 0
     #include "Platforms/xlib/XLIBwindow.h"
-    #include "Platforms/xlib/XLIBdialog.h"
 #endif
 
 
