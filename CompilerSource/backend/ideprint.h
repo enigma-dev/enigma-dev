@@ -32,6 +32,7 @@ struct ideprint {
   void (*f)(const char*);
   ideprint &operator<< (std::string);
   ideprint &operator<< (const char* x);
+  ideprint &operator<< (void* x);
   ideprint &operator<< (size_t x);
   ideprint &operator<< (char x);
   ideprint &operator<< (int x);

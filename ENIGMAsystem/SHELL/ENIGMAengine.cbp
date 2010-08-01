@@ -48,6 +48,8 @@
 				<Linker>
 					<Add library="GL" />
 					<Add library="z" />
+					<Add library="openal" />
+					<Add library="./Audio_Systems/OpenAL/alure/libalure-static.a" />
 				</Linker>
 			</Target>
 			<Target title="lin-profile">
@@ -106,6 +108,7 @@
 			<Add option="-DCODEBLOX" />
 		</Compiler>
 		<Unit filename="API_Switchboard.h" />
+		<Unit filename="Audio_Systems/OpenAL/as_basic.cpp" />
 		<Unit filename="Colligma/Checks/data_check.h" />
 		<Unit filename="Colligma/Checks/linear_check.h" />
 		<Unit filename="Colligma/Checks/shape_check.h" />
@@ -333,6 +336,7 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 		</Unit>
+		<Unit filename="Graphics_Systems/graphics_mandatory.h" />
 		<Unit filename="Modes/buildmode.h" />
 		<Unit filename="Platforms/platforms_mandatory.h" />
 		<Unit filename="Platforms/windows/WINDOWSStd.h">
@@ -379,6 +383,7 @@
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
+		<Unit filename="Platforms/xlib/XLIBdialog.cpp" />
 		<Unit filename="Platforms/xlib/XLIBdialog.h">
 			<Option target="lin-debug" />
 			<Option target="lin-build" />
@@ -484,6 +489,7 @@
 		<Unit filename="Universal_System/instance_system.cpp" />
 		<Unit filename="Universal_System/instance_system.h" />
 		<Unit filename="Universal_System/key_game_globals.h" />
+		<Unit filename="Universal_System/loading.cpp" />
 		<Unit filename="Universal_System/lua_table.h" />
 		<Unit filename="Universal_System/mathnc.cpp" />
 		<Unit filename="Universal_System/mathnc.h" />
@@ -506,6 +512,7 @@
 		<Unit filename="Universal_System/spritestruct.cpp" />
 		<Unit filename="Universal_System/spritestruct.h" />
 		<Unit filename="Universal_System/switch_stuff.h" />
+		<Unit filename="Universal_System/syntax_quirks.h" />
 		<Unit filename="Universal_System/terminal_io.cpp" />
 		<Unit filename="Universal_System/terminal_io.h" />
 		<Unit filename="Universal_System/transform_object.cpp" />

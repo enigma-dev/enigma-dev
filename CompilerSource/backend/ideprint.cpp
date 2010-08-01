@@ -42,6 +42,9 @@ ideprint &ideprint::operator<< (int x) {
 ideprint &ideprint::operator<< (size_t x) {
   f(tostring(x).c_str()); return *this;
 }
+ideprint &ideprint::operator<< (void *x) {
+  f(tostringv(x).c_str()); return *this;
+}
 ideprint &ideprint::operator<< (char x) {
   char a[2]; a[1] = 0; a[0] = x;
   f(a); return *this;

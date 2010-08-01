@@ -85,6 +85,7 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 #include "Universal_System/switch_stuff.h"
 #include "Universal_System/CallbackArrays.h"
 
+extern int amain();
 
 
 #if COLLIGMA

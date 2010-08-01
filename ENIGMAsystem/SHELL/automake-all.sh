@@ -14,5 +14,8 @@ then
 	cd Platforms/xlib
 	  ../../Developer/automake.sh
 	  cd ../../
+	cd Audio_Systems/OpenAL
+	  ../../Developer/automake.sh
+	  cd ../../
 	echo Done
 fi

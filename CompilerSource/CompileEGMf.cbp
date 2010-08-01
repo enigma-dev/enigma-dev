@@ -80,13 +80,27 @@
 					<Add option="-DENIGMA_PARSERS_DEBUG" />
 				</Compiler>
 			</Target>
+			<Target title="StandAloneND">
+				<Option output="bin/exec/CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+				</Compiler>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="OS_Switchboard.h" />
 		<Unit filename="backend/EnigmaStruct.h" />
+		<Unit filename="backend/JavaCallbacks.cpp" />
+		<Unit filename="backend/JavaCallbacks.h" />
 		<Unit filename="backend/JavaStruct.h" />
+		<Unit filename="backend/ideprint.cpp" />
+		<Unit filename="backend/ideprint.h" />
 		<Unit filename="backend/other/Constant.h" />
 		<Unit filename="backend/other/Include.h" />
 		<Unit filename="backend/other/Trigger.h" />
@@ -147,6 +161,7 @@
 		<Unit filename="cfile_parse/template_handlers.cpp" />
 		<Unit filename="cfile_parse/template_handlers.h" />
 		<Unit filename="cfile_parse/type_resolver.cpp" />
+		<Unit filename="cfile_parse/type_resolver.h" />
 		<Unit filename="cfile_parse/value.h" />
 		<Unit filename="compiler/compile.cpp" />
 		<Unit filename="compiler/compile.h" />
@@ -199,6 +214,7 @@
 		<Unit filename="settings.h" />
 		<Unit filename="standalone_main.cpp">
 			<Option target="StandAlone" />
+			<Option target="StandAloneND" />
 		</Unit>
 		<Unit filename="syntax/checkfile.cpp" />
 		<Unit filename="syntax/checkfile.h" />

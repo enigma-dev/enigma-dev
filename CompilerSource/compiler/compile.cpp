@@ -37,15 +37,16 @@
  #include <cstdio>
 #endif
 
+#define idpr(x,y) \
+  ide_dia_progress_text(x); \
+  ide_dia_progress(y);
 
 #include <string>
 #include <iostream>
 #include <fstream>
+#include "../backend/ideprint.h"
 
 using namespace std;
-
-#define flushl '\n' << flush
-#define flushs flush
 
 #include "../backend/JavaCallbacks.h"
 #include "../externs/externs.h"
@@ -127,21 +128,23 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   // Re-establish ourself
     // Read the locals that will be included with each instance
     if (shared_locals_load() != 0) {
-      cout << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
-      return E_ERROR_LOAD_LOCALS;
+      user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
+      idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
     }
   
   //Read the types of events
   event_parse_resourcefile();
   
   // Pick apart the sent resources
-  cout << "Location in memory of structure: " << es << flushl;
-  if (es == NULL)
-    return -1;//E_ERROR_PLUGIN_FUCKED_UP;
+  edbg << "Location in memory of structure: " << (void*)es << flushl;
+  if (es == NULL) {
+    idpr("Java ENIGMA plugin dropped its ass.",-1);
+    return E_ERROR_PLUGIN_FUCKED_UP;
+  }
   
-  cout << "File version: " << es->fileVersion << endl << flushl;
-  if (es->fileVersion != 600)
-    cout << "Error: Incorrect version. File is too " << ((es->fileVersion > 600)?"new":"old") << " for this compiler.";
+  edbg << "File version: " << es->fileVersion << flushl << flushl;
+  if (es->fileVersion != 800)
+    edbg << "Error: Incorrect version. File is too " << ((es->fileVersion > 800)?"new":"old") << " for this compiler.";
   
   
   
@@ -158,43 +161,44 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     extiter gso = globals_scope->members.find("ENIGMA Resources"); if (gso != globals_scope->members.end()) delete gso->second;
     globals_scope = globals_scope->members["ENIGMA Resources"] = new externs("ENIGMA Resources",globals_scope,NULL,EXTFLAG_NAMESPACE);
   
+  idpr("Copying resources",1);
   
   //Next, add the resource names to that list
-  cout << "COPYING SOME FUCKING RESOURCES:" << flushl;
+  edbg << "COPYING SOME F*CKING RESOURCES:" << flushl;
   
-  cout << "Copying sprite names [" << es->spriteCount << "]" << flushl;
+  edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
   for (int i = 0; i < es->spriteCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->sprites[i].name);
     
-  cout << "Copying sound names [" << es->soundCount << "]" << flushl;
+  edbg << "Copying sound names [" << es->soundCount << "]" << flushl;
   for (int i = 0; i < es->soundCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->sounds[i].name);
     
-  cout << "Copying background names [" << es->backgroundCount << "]" << flushl;
+  edbg << "Copying background names [" << es->backgroundCount << "]" << flushl;
   for (int i = 0; i < es->backgroundCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->backgrounds[i].name);
     
-  cout << "Copying path names [kidding, these are totally not implemented :P] [" << es->pathCount << "]" << flushl;
+  edbg << "Copying path names [kidding, these are totally not implemented :P] [" << es->pathCount << "]" << flushl;
   for (int i = 0; i < es->pathCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->paths[i].name);
     
-  cout << "Copying script names [" << es->scriptCount << "]" << flushl;
+  edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
   for (int i = 0; i < es->scriptCount; i++)
     quickmember_script(globals_scope,es->scripts[i].name);
     
-  cout << "Copying font names [kidding, these are totally not implemented :P] [" << es->fontCount << "]" << flushl;
+  edbg << "Copying font names [kidding, these are totally not implemented :P] [" << es->fontCount << "]" << flushl;
   for (int i = 0; i < es->fontCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->fonts[i].name);
     
-  cout << "Copying timeline names [kidding, these are totally not implemented :P] [" << es->timelineCount << "]" << flushl;
+  edbg << "Copying timeline names [kidding, these are totally not implemented :P] [" << es->timelineCount << "]" << flushl;
   for (int i = 0; i < es->timelineCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->timelines[i].name);
   
-  cout << "Copying object names [" << es->gmObjectCount << "]" << flushl;
+  edbg << "Copying object names [" << es->gmObjectCount << "]" << flushl;
   for (int i = 0; i < es->gmObjectCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->gmObjects[i].name);
   
-  cout << "Copying room names [" << es->roomCount << "]" << flushl;
+  edbg << "Copying room names [" << es->roomCount << "]" << flushl;
   for (int i = 0; i < es->roomCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->rooms[i].name);
   
@@ -202,24 +206,27 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
   
-  cout << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
+  idpr("Checking Syntax and performing Preliminary Parsing",2);
   
-  cout << es->scriptCount << " Scripts:" << endl;
+  edbg << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
+  
+  edbg << es->scriptCount << " Scripts:" << flushl;
   parsed_script *scripts[es->scriptCount];
   
   scr_lookup.clear();
   used_funcs::zero();
   
   int res;
+  #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
   
   res = compile_parseAndLink(es,scripts);
-  if (res) return res;
+  irrr();
   
   
   //Export resources to each file.
   
   ofstream wto;
-  
+  idpr("Outputting Resources in Various Places...",10);
   
   // FIRST FILE
   // Modes and settings.
@@ -283,30 +290,31 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << "};\n\n";
   wto.close();
   
+  idpr("Performing Secondary Parsing and Writing Globals",25);
   
   // Defragged events must be written before object data, or object data cannot determine which events were used.
   res = compile_writeDefraggedEvents(es);
-  if (res) return res;
+  irrr();
   
   parsed_object EGMglobal;
   
   res = link_globals(&EGMglobal,es,scripts);
-  if (res) return res;
+  irrr();
   
   res = compile_writeObjectData(es,&EGMglobal);
-  if (res) return res;
+  irrr();
   
   res = compile_writeRoomData(es);
-  if (res) return res;
+  irrr();
   
   res = compile_writeRoomData(es);
-  if (res) return res;
+  irrr();
   
   
   
   // Write the global variables to their own file to be included before any of the objects
   res = compile_writeGlobals(es,&EGMglobal);
-  if (res) return res;
+  irrr();
   
   
   
@@ -315,13 +323,15 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     resources, our task is to compile the game itself via GNU Make.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
+  idpr("Starting compile (This may take a while...)",40);
+  
   string gflags = "-g";
   #if   TARGET_PLATFORM_ID == OS_WINDOWS
     string glinks = "-lopengl32 '../additional/zlib/libzlib.a' -lcomdlg32 -lgdi32";
     string graphics = "OpenGL";
     string platform = "windows";
   #else
-    string glinks = "-lGL -lz";
+    string glinks = "-lGL -lz -lopenal ./Audio_Systems/OpenAL/alure/libalure-static.a";
     string graphics = "OpenGL";
     string platform = "xlib";
   #endif
@@ -333,14 +343,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   make += "GRAPHICS=" + graphics + " ";
   make += "PLATFORM=" + platform + " ";
   
-  cout << "Running make from `" << MAKE_location << "'" << flushl;
-  cout << "Full command line: " << MAKE_location << " " << make << flushl;
+  edbg << "Running make from `" << MAKE_location << "'" << flushl;
+  edbg << "Full command line: " << MAKE_location << " " << make << flushl;
   int makeres = better_system(MAKE_location,make);
   if (makeres) {
-    cout << "----Make returned error " << makeres << "----------------------------------\n";
-    return E_ERROR_BUILD;
+    user << "----Make returned error " << makeres << "----------------------------------\n";
+    idpr("Compile failed at C++ level.",-1); return E_ERROR_BUILD;
   }
-  cout << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";
+  user << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";
   
   
   
@@ -353,18 +363,20 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     linker sometime in the future.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
+  idpr("Adding resources...",90);
+  
   FILE *gameModule = fopen("ENIGMAsystem/SHELL/game.exe","ab");
   if (!gameModule) {
-    cout << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
-    return 12;
+    user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
+    idpr("Failed to add resources.",-1); return 12;
   }
   
   fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
   int resourceblock_start = ftell(gameModule);
   
   if (resourceblock_start < 128) {
-    cout << "Compiled game is clearly not a working module; cannot continue" << flushl;
-    return 13;
+    user << "Compiled game is clearly not a working module; cannot continue" << flushl;
+    idpr("Failed to add resources.",-1); return 13;
   }
   
   
@@ -372,7 +384,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   fwrite("\0\0\0",1,4,gameModule);
   
   res = module_write_sprites(es, gameModule);
-  if (res) return res;
+  irrr();
   
   
   // Tell where the sprites are
@@ -380,25 +392,26 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   fwrite(&resourceblock_start,4,1,gameModule);
   
   // Debug print; we're done
-  cout << "Finalized sprites." << flushl;
+  edbg << "Finalized sprites." << flushl;
   
-  cout << es->soundCount << " Sounds:" << endl;
+  edbg << es->soundCount << " Sounds:" << flushl;
   for (int i = 0; i < es->soundCount; i++) {
-    cout << " " << es->sounds[i].name << endl;
+    edbg << " " << es->sounds[i].name << flushl;
     fflush(stdout);
   }
   
   
   //Close the game module; we're done adding resources
-  cout << "Closing game module and running if requested." << flushl;
+  idpr("Closing game module and running if requested.",95);
+  edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
   
   if (mode == emode_run or mode == emode_build or true)
   {
     int gameres = better_system("ENIGMAsystem/SHELL/game.exe","");
-    cout << "Game returned " << gameres << "\n";
+    user << "Game returned " << gameres << "\n";
   }
   
-  
+  idpr("Done.", 100);
   return 0;
 };

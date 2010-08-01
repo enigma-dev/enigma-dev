@@ -27,6 +27,7 @@
 
 string tostring(int val);
 string tostringd(double val);
+string tostringv(void* val);
 int string_count(char c, char* str);
 string arraybounds_as_str(string str);
 string string_replace_all(string str,string substr,string nstr);
