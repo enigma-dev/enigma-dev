@@ -15,11 +15,11 @@ public class EnigmaCallbacks extends Structure
 
 	public EnigmaCallbacks(EnigmaFrame ef)
 		{
-		((OutputHolder)coo).ef = ef;
-		((OutputHolder)coa).ef = ef;
-		((OutputHolder)cock).ef = ef;
-		((OutputHolder)cop).ef = ef;
-		((OutputHolder)cot).ef = ef;
+		((OutputHolder) coo).ef = ef;
+		((OutputHolder) coa).ef = ef;
+		((OutputHolder) cock).ef = ef;
+		((OutputHolder) cop).ef = ef;
+		((OutputHolder) cot).ef = ef;
 		}
 
 	public static class OutputHolder
@@ -40,6 +40,7 @@ public class EnigmaCallbacks extends Structure
 		public void callback(String msg)
 			{
 			ef.ta.append(msg);
+			ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
 			}
 		}
 
