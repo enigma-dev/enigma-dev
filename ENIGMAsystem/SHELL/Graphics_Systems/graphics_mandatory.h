@@ -26,11 +26,31 @@
 \********************************************************************************/
 
 /*\\\ This file contains prototypes for functions that must be defined by the graphics
-|*||| library modules. Each of these is used by other systems throughout the engine.
+|*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
 
-void graphicssystem_initialize(); // Called at game load to allow the system to set up.
-// This function can be implemented as an empty call if it is not needed.
+namespace enigma
+{
+  // Called at game load to allow the system to set up.
+  void graphicssystem_initialize(); // This function can be implemented as an empty call if it is not needed.
+  
+  // Called at game start if no resource data can be loaded.
+  void sprite_safety_override(); // This function should ensure a reasonable number of sprite indexes won't segfault.
+  
+  // Called at game start.
+  void sprites_allocate_initial(int); // This should allocate a certain number of sprites.
+  
+  //Adds an empty sprite to the list, presumably to be loaded from the exe.
+  int sprite_new_empty(unsigned sprid,unsigned subc,int w,int h,int x,int y,int pl,int sm); // Called at load time.
+  
+  //Adds a subimage to an existing sprite from the exe
+  void sprite_add_subimage(int sprid, int x, int y, unsigned int w, unsigned int h, unsigned char* chunk);  // Called at load time.
+  
+  #if COLLIGMA // FIXME: This doesn't belong here.
+  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h);
+  #endif
+}
 
+// Called at random. Maybe.
 const char* draw_get_graphics_error(); // Return a const char* error string, if any
 // error has occurred, or an empty string otherwise.

@@ -30,19 +30,3 @@
  * use at load time with data read from the executable. These both expect
  * RAW format, RGB only.
  */
-
-namespace enigma
-{
-  void sprite_safety_override();
-  void sprites_allocate_initial(int);
-  
-  //Adds an empty sprite to the list
-  int new_sprexe(unsigned sprid,unsigned subc,int w,int h,int x,int y,int pl,int sm);
-  
-  #if COLLIGMA
-  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h);
-  #endif
-  
-  //Adds a subimage to an existing sprite from the exe
-  void sprexe(int sprid, int x, int y, unsigned int w, unsigned int h, unsigned char* chunk);
-}

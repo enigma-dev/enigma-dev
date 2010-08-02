@@ -25,84 +25,51 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <time.h>
-#include <stdio.h>
-
 #include <string>
-using std::string;
+#include <stdio.h>
+using namespace std;
 
-#include "mathnc.h"
-#include "resinit.h"
-#include "../Platforms/platforms_mandatory.h"
+#include "../Graphics_Systems/OpenGL/GSspriteadd.h"
 #include "../Audio_Systems/audio_mandatory.h"
-#include "../Graphics_Systems/graphics_mandatory.h"
-#include "roomsystem.h"
-
+#include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"
+#include "compression.h"
 
-namespace enigma {
-  extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
-}
+void sound_play(int sound);
 
-//This is like main(), only cross-api
 namespace enigma
 {
-  int initialize_everything()
-  {
-    mtrandom_seed(enigma::Random_Seed=time(0));
-    graphicssystem_initialize();
-    audiosystem_initialize();
-    #if ENIGMA_WS_WINDOWS!=0
-      enigma::init_fonts();
-    #endif
-    #if BUILDMODE
-      buildmode::buildinit();
-    #endif
+  void exe_loadsounds(FILE *exe)
+  { 
+    int nullhere;
     
-    event_system_initialize();
-    input_initialize();
+    fread(&nullhere,4,1,exe);
+    if (nullhere != *(int*)"sndn")
+      return;
     
-    // Open the exe for resource load
-    char exename[1025];
-    windowsystem_write_exename(exename);
-    FILE* exe = fopen(exename,"rb");
-    if (!exe)
-      show_error("Resource load fail: exe unopenable",0);
-    else do
+    // Determine how many sprites we have
+    int sndcount;
+    fread(&sndcount,4,1,exe);
+    
+    // Fetch the highest ID we will be using
+    int snd_highid;
+    fread(&snd_highid,4,1,exe);
+    
+    for (int i = 0; i < sndcount; i++)
     {
-      int nullhere;
-      // Read the magic number so we know we're looking at our own data
-      fseek(exe,-8,SEEK_END);
-      char str_quad[4];
-      fread(str_quad,1,4,exe);
-      if (str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
-        printf("No resource data in exe\n");
-        break;
-      }
+      int id;
+      fread(&id,1,4,exe);
       
-      // Get where our resources are located in the module
-      int pos;
-      fread(&pos,4,1,exe);
+      unsigned size;
+      fread(&size,1,4,exe);
       
-      // Go to the start of the resource data
-      fseek(exe,pos,SEEK_SET);
-      fread(&nullhere,4,1,exe);
-      if(nullhere) break;
+      char fdata[size];
+      fread(fdata,1,size,exe);
       
-      enigma::exe_loadsprs(exe);
-      enigma::exe_loadsounds(exe);
+      printf("Read %d bytes; first several are %s",size, string(fdata,50).c_str());
       
-      fclose(exe);
+      if (sound_add_from_buffer(id,fdata,size))
+        printf("Failed to load sound%d\n",i);
     }
-    while (false);
-    
-    //Load rooms
-    enigma::rooms_load();
-    
-    //Go to the first room
-    if (room_count)
-      room_goto_absolute(0);
-    
-    return 0;
   }
 }

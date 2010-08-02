@@ -30,53 +30,22 @@
 #include <iostream>
 using namespace std;
 
-#include "../Graphics_Systems/OpenGL/GSspriteadd.h"
+#include "../Graphics_Systems/graphics_mandatory.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"
 #include "compression.h"
 
-using namespace std;
-
-inline string tostring(int x)
-{
-  char a[20];
-  sprintf(a,"%d",x);
-  return a;
-}
-
 namespace enigma
 {
-  void exe_loadsprs()
+  void exe_loadsprs(FILE *exe)
   {
     int nullhere;
-    char exename[1025];
-    windowsystem_write_exename(exename);
-    FILE* exe=fopen(exename,"rb");
-    if (!exe) {
-      show_error("Resource load fail: exe unopenable",0);
-      return;
-    }
-    
-    // Read the magic number so we know we're looking at our own data
-    fseek(exe,-8,SEEK_END);
-    char str_quad[4];
-    fread(str_quad,1,4,exe);
-    if (str_quad[0] != 's' or str_quad[1] != 'p' or str_quad[2] != 'r' or str_quad[3] != 'n') {
-      printf("No resource data in exe\n");
-      sprite_safety_override();
-      return;
-    }
-    
-    // Get where our resources are located in the module
-    int pos;
-    fread(&pos,4,1,exe);
     unsigned sprid, width, height;
     int xorig, yorig;
     
-    // Go to the start of the resource data
-    fseek(exe,pos,SEEK_SET);
     fread(&nullhere,4,1,exe);
-    if(nullhere) return;
+    if (nullhere != *(int*)"sprn")
+      return;
     
     // Determine how many sprites we have
     int sprcount;
@@ -87,19 +56,19 @@ namespace enigma
     fread(&spr_highid,4,1,exe);
     sprites_allocate_initial(spr_highid);
     
-    for (int i=0;i<sprcount;i++)
+    for (int i = 0; i < sprcount; i++)
     {
-      fread(&sprid,4,1,exe);
-      fread(&width,4,1,exe);
+      fread(&sprid, 4,1,exe);
+      fread(&width, 4,1,exe);
       fread(&height,4,1,exe);
-      fread(&xorig,4,1,exe);
-      fread(&yorig,4,1,exe);
+      fread(&xorig, 4,1,exe);
+      fread(&yorig, 4,1,exe);
       
       int subimages;
       fread(&subimages,4,1,exe); cout << "Subimages: " << subimages << endl;
       
       
-      new_sprexe(sprid,subimages,width,height,xorig,yorig,1,0);
+      sprite_new_empty(sprid,subimages,width,height,xorig,yorig,1,0);
       for (int ii=0;ii<subimages;ii++) 
       {
         int unpacked;
@@ -109,14 +78,13 @@ namespace enigma
         unsigned char* cpixels=new unsigned char[size+1];
         if (!cpixels)
         {  //FIXME: Uncomment these when tostring is available
-          show_error("Failed to load sprite: Cannot allocate enough memory "+tostring(unpacked),0);
+          show_error("Failed to load sprite: Cannot allocate enough memory "+toString(unpacked),0);
           break;
         }
         unsigned int sz2=fread(cpixels,1,size,exe);
-        if (size!=sz2)
-        {
-          show_error("Failed to load sprite: Data is truncated before exe end. Read "+tostring(sz2)+" out of expected "+tostring(size),0);
-          goto break2;
+        if (size!=sz2) {
+          show_error("Failed to load sprite: Data is truncated before exe end. Read "+toString(sz2)+" out of expected "+toString(size),0);
+          return;
         }
         unsigned char* pixels=new unsigned char[unpacked+1];
         if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
@@ -126,7 +94,7 @@ namespace enigma
         }
         delete[] cpixels;
         cout << "Adding subimage...\n";
-        sprexe(sprid, xorig, yorig, width, height, pixels);
+        sprite_add_subimage(sprid, xorig, yorig, width, height, pixels);
         
         delete[] pixels;
         fread(&nullhere,1,4,exe);
@@ -138,11 +106,5 @@ namespace enigma
         }
       }
     }
-    break2:
-    #if SHOWERRORS
-      fread(&nullhere,1,4,exe);
-      if(nullhere) show_error("Sprite load error: Final null terminator expected, world cannot end",0);
-    #endif
-    fclose(exe);
   }
 }

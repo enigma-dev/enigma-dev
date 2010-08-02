@@ -277,12 +277,12 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << "enum //sprite names\n{\n";
     for (int i = 0; i < es->spriteCount; i++)
       wto << "  " << es->sprites[i].name << " = " << es->sprites[i].id << ",\n"; 
-    wto << "};\n\n";
+    wto << "};\nnamespace enigma { int sprite_loadmaxid = " << es->spriteCount << "; }\n\n";
     
     wto << "enum //sound names\n{\n";
     for (int i = 0; i < es->soundCount; i++)
       wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n"; 
-    wto << "};\n\n";
+    wto << "};\nnamespace enigma { int sound_loadmaxid = " << es->soundCount << "; }\n\n";
     
     wto << "enum //room names\n{\n";
     for (int i = 0; i < es->roomCount; i++)
@@ -383,26 +383,22 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   // Start by setting off our location with a DWord of NULLs
   fwrite("\0\0\0",1,4,gameModule);
   
+  idpr("Adding Sprites",90);
+  
   res = module_write_sprites(es, gameModule);
   irrr();
   
+  edbg << "Finalized sprites." << flushl;
+  idpr("Adding Sounds",93);
   
-  // Tell where the sprites are
-  fwrite("\0\0\0\0sprn",8,1,gameModule);
+  module_write_sounds(es,gameModule);
+  
+  // Tell where the resources start
+  fwrite("\0\0\0\0res0",8,1,gameModule);
   fwrite(&resourceblock_start,4,1,gameModule);
   
-  // Debug print; we're done
-  edbg << "Finalized sprites." << flushl;
-  
-  edbg << es->soundCount << " Sounds:" << flushl;
-  for (int i = 0; i < es->soundCount; i++) {
-    edbg << " " << es->sounds[i].name << flushl;
-    fflush(stdout);
-  }
-  
-  
   //Close the game module; we're done adding resources
-  idpr("Closing game module and running if requested.",95);
+  idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
   

@@ -30,7 +30,10 @@
 #else
 #  include <../additional/glee/GLee.h>
 #endif*/
+#include <string>
 #include <GL/gl.h>
+using namespace std;
+#include "../../Universal_System/roomsystem.h" // Room dimensions.
 
 namespace enigma
 {
@@ -38,46 +41,42 @@ namespace enigma
   unsigned char currentcolor[4] = {0,0,0,255};
   bool glew_isgo;
   bool pbo_isgo;
-}
-
-#include <string>
-using namespace std;
-#include "../../Universal_System/roomsystem.h" // Room dimensions.
-
-void graphicssystem_initialize()
-{
-	#if GMSURFACE
-	glBindFramebufferEXT   =    (PFNGLBINDFRAMEBUFFEREXTPROC) wglGetProcAddress("glBindFramebufferEXT");
-	glGenFramebuffersEXT   =    (PFNGLGENFRAMEBUFFERSEXTPROC) wglGetProcAddress("glGenFramebuffersEXT");
-	glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) wglGetProcAddress("glFramebufferTexture2DEXT");
-	if (!(glBindFramebufferEXT&&glGenFramebuffersEXT&&glFramebufferTexture2DEXT))
-		MessageBox(0,"Additional drawing surfaces cannot be created. Extension unsupported by graphics card","Error",MB_OK);
-	#endif
-	//enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
-	glMatrixMode(GL_PROJECTION);
-	  glClearColor(1,1,1,1);
-	glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glLoadIdentity();
-    
-    glViewport(0,0,(int)room_width,(int)room_height);
-    glOrtho(0,(int)room_width-1,(int)room_height-1,0,-1,1);
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glDisable(GL_DEPTH_TEST);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearDepth(1.0);
-    
-    glDepthFunc(GL_LEQUAL); //FIXME: Calling this after disabling depth test?
-    
-    glEnable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glAlphaFunc(GL_ALWAYS,0);
-    
-    glColor4f(0,0,0,1);
-    glBindTexture(GL_TEXTURE_2D,0);
+  
+  void graphicssystem_initialize()
+  {
+    #if GMSURFACE
+      glBindFramebufferEXT   =    (PFNGLBINDFRAMEBUFFEREXTPROC) wglGetProcAddress("glBindFramebufferEXT");
+      glGenFramebuffersEXT   =    (PFNGLGENFRAMEBUFFERSEXTPROC) wglGetProcAddress("glGenFramebuffersEXT");
+      glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) wglGetProcAddress("glFramebufferTexture2DEXT");
+      if (!(glBindFramebufferEXT and glGenFramebuffersEXT and glFramebufferTexture2DEXT))
+        MessageBox(0,"Additional drawing surfaces cannot be created. Extension unsupported by graphics card","Error",MB_OK);
+    #endif
+    //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
+    glMatrixMode(GL_PROJECTION);
+      glClearColor(1,1,1,1);
+    glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+      glLoadIdentity();
+      
+      glViewport(0,0,(int)room_width,(int)room_height);
+      glOrtho(0,(int)room_width-1,(int)room_height-1,0,-1,1);
+      glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      
+      glDisable(GL_DEPTH_TEST);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glClearDepth(1.0);
+      
+      glDepthFunc(GL_LEQUAL); //FIXME: Calling this after disabling depth test?
+      
+      glEnable(GL_BLEND);
+      glEnable(GL_ALPHA_TEST);
+      glEnable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glAlphaFunc(GL_ALWAYS,0);
+      
+      glColor4f(0,0,0,1);
+      glBindTexture(GL_TEXTURE_2D,0);
+  }
 }
 
 // Stolen entirely from the documentation and thrown into a switch() structure.

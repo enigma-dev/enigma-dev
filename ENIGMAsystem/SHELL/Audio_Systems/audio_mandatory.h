@@ -25,84 +25,18 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <time.h>
-#include <stdio.h>
+/*\\\ This file contains prototypes for functions that must be defined by the audio
+|*||| library wrapper modules. Each of these is used by other systems throughout the engine.
+\*/// Accidental failure to implement them could cause error.
 
-#include <string>
-using std::string;
-
-#include "mathnc.h"
-#include "resinit.h"
-#include "../Platforms/platforms_mandatory.h"
-#include "../Audio_Systems/audio_mandatory.h"
-#include "../Graphics_Systems/graphics_mandatory.h"
-#include "roomsystem.h"
-
-#include "../libEGMstd.h"
-
-namespace enigma {
-  extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
-}
-
-//This is like main(), only cross-api
 namespace enigma
 {
-  int initialize_everything()
-  {
-    mtrandom_seed(enigma::Random_Seed=time(0));
-    graphicssystem_initialize();
-    audiosystem_initialize();
-    #if ENIGMA_WS_WINDOWS!=0
-      enigma::init_fonts();
-    #endif
-    #if BUILDMODE
-      buildmode::buildinit();
-    #endif
-    
-    event_system_initialize();
-    input_initialize();
-    
-    // Open the exe for resource load
-    char exename[1025];
-    windowsystem_write_exename(exename);
-    FILE* exe = fopen(exename,"rb");
-    if (!exe)
-      show_error("Resource load fail: exe unopenable",0);
-    else do
-    {
-      int nullhere;
-      // Read the magic number so we know we're looking at our own data
-      fseek(exe,-8,SEEK_END);
-      char str_quad[4];
-      fread(str_quad,1,4,exe);
-      if (str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
-        printf("No resource data in exe\n");
-        break;
-      }
-      
-      // Get where our resources are located in the module
-      int pos;
-      fread(&pos,4,1,exe);
-      
-      // Go to the start of the resource data
-      fseek(exe,pos,SEEK_SET);
-      fread(&nullhere,4,1,exe);
-      if(nullhere) break;
-      
-      enigma::exe_loadsprs(exe);
-      enigma::exe_loadsounds(exe);
-      
-      fclose(exe);
-    }
-    while (false);
-    
-    //Load rooms
-    enigma::rooms_load();
-    
-    //Go to the first room
-    if (room_count)
-      room_goto_absolute(0);
-    
-    return 0;
-  }
+  // This function is called at the beginning of the game.
+  int audiosystem_initialize(); // In it, the audio system can make its startup calls.
+  
+  // This function is called for each sound in the game's module.
+  int sound_add_from_buffer(int id, void* buffer, size_t size); // It should add the sound under the given ID.
+  
+  // This function is called at the end of the game, as it closes.
+  void audiosystem_cleanup(); // It should free memory and shut down the audio library.
 }

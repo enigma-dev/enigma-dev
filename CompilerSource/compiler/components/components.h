@@ -37,3 +37,4 @@ int compile_writeDefraggedEvents(EnigmaStruct* es);
 
 // Resources added to module
 int module_write_sprites(EnigmaStruct *es, FILE *gameModule);
+int module_write_sounds(EnigmaStruct *es, FILE *gameModule);

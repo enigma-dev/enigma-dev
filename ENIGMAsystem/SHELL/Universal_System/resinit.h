@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "spritestruct.h"
 namespace enigma {
-  void exe_loadsprs();
+  void exe_loadsprs(FILE* exe);
+  void exe_loadsounds(FILE* exe);
 }

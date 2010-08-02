@@ -95,6 +95,7 @@ extern int amain();
 
 #include "Universal_System/IMGloading.h"
 #include "Graphics_Systems/OpenGL/GSsprite.h"
+#include "Audio_Systems/OpenAL/as_basic.h"
 
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h"

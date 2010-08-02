@@ -111,7 +111,7 @@ namespace enigma
   }
   
   //Adds an empty sprite to the list
-  int new_sprexe(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm)
+  int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm)
   {
     int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
     sprite *as = new sprite(subc);
@@ -144,7 +144,7 @@ namespace enigma
 
 
   //Adds a subimage to an existing sprite from the exe
-  void sprexe(int sprid, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
+  void sprite_add_subimage(int sprid, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
   {
     GLuint texture;
     unsigned int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h);

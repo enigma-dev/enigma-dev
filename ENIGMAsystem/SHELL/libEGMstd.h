@@ -29,6 +29,7 @@
 // They are also, directly or otherwise, available to the user.
 
 string toString(int);
+string toString(unsigned);
 string toString(long long n);
 string toString(char);
 string toString(char*);

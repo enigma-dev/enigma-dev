@@ -39,10 +39,7 @@ using namespace std;
 #include "../../parser/object_storage.h"
 #include "../compile_common.h"
 
-#include <math.h> //log2 to calculate passes.
-
-#define flushl '\n' << flush
-#define flushs flush
+#include "../../backend/ideprint.h"
 
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
@@ -51,7 +48,10 @@ inline void writei(int x, FILE *f) {
 int module_write_sprites(EnigmaStruct *es, FILE *gameModule)
 {
   // Now we're going to add sprites
-  cout << es->spriteCount << " Adding Sprites to Game Module: " << flushl;
+  edbg << es->spriteCount << " Adding Sprites to Game Module: " << flushl;
+  
+  //Magic Number
+  fwrite("sprn",4,1,gameModule);
   
   //Indicate how many
   int sprite_count = es->spriteCount;
@@ -78,12 +78,12 @@ int module_write_sprites(EnigmaStruct *es, FILE *gameModule)
         sheight = es->sprites[i].subImages[ii].height;
       }
       else if (swidth != es->sprites[i].subImages[ii].width or sheight != es->sprites[i].subImages[ii].height) {
-        cout << "Subimages of sprite `" << es->sprites[i].name << "' vary in dimensions; do not want." << flushl;
+        user << "Subimages of sprite `" << es->sprites[i].name << "' vary in dimensions; do not want." << flushl;
         return 14;
       }
     }
-    if (!swidth and !sheight and subCount) {
-      cout << "Subimages of sprite `" << es->sprites[i].name << "' have zero size." << flushl;
+    if (!(swidth and sheight and subCount)) {
+      user << "Subimages of sprite `" << es->sounds[i].name << "' have zero size." << flushl;
       return 14;
     }
     
@@ -104,6 +104,6 @@ int module_write_sprites(EnigmaStruct *es, FILE *gameModule)
     }
   }
  
-  cout << "Done writing sprites." << flushl;
+  edbg << "Done writing sprites." << flushl;
   return 0;
 }

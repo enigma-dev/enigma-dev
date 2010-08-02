@@ -39,13 +39,29 @@ ideprint &ideprint::operator<< (const char* x) {
 ideprint &ideprint::operator<< (int x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (size_t x) {
+ideprint &ideprint::operator<< (long x) {
+  f(tostring(x).c_str()); return *this;
+}
+ideprint &ideprint::operator<< (long long x) {
+  f(tostring(x).c_str()); return *this;
+}
+ideprint &ideprint::operator<< (unsigned x) {
+  f(tostring(x).c_str()); return *this;
+}
+ideprint &ideprint::operator<< (unsigned long x) {
+  f(tostring(x).c_str()); return *this;
+}
+ideprint &ideprint::operator<< (unsigned long long x) {
   f(tostring(x).c_str()); return *this;
 }
 ideprint &ideprint::operator<< (void *x) {
   f(tostringv(x).c_str()); return *this;
 }
 ideprint &ideprint::operator<< (char x) {
+  char a[2]; a[1] = 0; a[0] = x;
+  f(a); return *this;
+}
+ideprint &ideprint::operator<< (unsigned char x) {
   char a[2]; a[1] = 0; a[0] = x;
   f(a); return *this;
 }

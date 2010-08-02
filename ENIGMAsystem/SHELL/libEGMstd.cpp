@@ -34,6 +34,7 @@
 using namespace std;
 
 string toString(int n)            { char buf[12]; return string(buf,sprintf(buf,"%d", n)); }
+string toString(unsigned n)       { char buf[12]; return string(buf,sprintf(buf,"%ud", n)); }
 string toString(long long n)      { char buf[32]; return string(buf,sprintf(buf,"%lld", n)); }
 string toString(char n)           { char buf[8];  return string(buf,sprintf(buf,"%d", n)); }
 string toString(char* n)          { return string(n); }
