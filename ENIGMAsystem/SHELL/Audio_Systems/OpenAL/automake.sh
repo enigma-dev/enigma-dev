@@ -33,6 +33,7 @@ do
   echo "	cd alure && \$(MAKE) avail DEST=\"../.eobjs_$modename\"" >> Makefile;
   echo "	cd ogg    && \$(MAKE) avail DEST=\"../.eobjs_$modename\"" >> Makefile;
   echo "	cd vorbis && \$(MAKE) avail DEST=\"../.eobjs_$modename\"" >> Makefile;
+  echo "	cd dumb   && \$(MAKE) avail DEST=\"../.eobjs_$modename\"" >> Makefile;
   echo "" >> Makefile;
 done;
 
@@ -45,5 +46,7 @@ cd ./alure/
 cd ../ogg
 ./automake.sh
 cd ../vorbis
+./automake.sh
+cd ../dumb
 ./automake.sh
 
