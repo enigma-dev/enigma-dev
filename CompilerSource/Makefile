@@ -65,6 +65,8 @@ default: $(TARGET)
 	g++ -Wall   -fPIC -c  externs/ext_iteration.cpp		-o .eobjs/ext_iteration.o $(FLAGS)
 .eobjs/references.o: externs/references.cpp externs/references.h
 	g++ -Wall   -fPIC -c  externs/references.cpp		-o .eobjs/references.o $(FLAGS)
+.eobjs/file_find.o: filesystem/file_find.cpp OS_Switchboard.h
+	g++ -Wall   -fPIC -c  filesystem/file_find.cpp		-o .eobjs/file_find.o $(FLAGS)
 .eobjs/gcc_backend.o: gcc_interface/gcc_backend.cpp externs/externs.h general/darray.h externs/references.h cfile_parse/cfile_parse.h syntax/checkfile.h general/parse_basics.h
 	g++ -Wall   -fPIC -c  gcc_interface/gcc_backend.cpp		-o .eobjs/gcc_backend.o $(FLAGS)
 .eobjs/bettersystem.o: general/bettersystem.cpp OS_Switchboard.h
@@ -118,7 +120,7 @@ default: $(TARGET)
 mkeobjs:
 	-mkdir .eobjs
 
-link: mkeobjs .eobjs/ideprint.o .eobjs/JavaCallbacks.o .eobjs/cfile_parse.o .eobjs/cfile_parse_macros.o .eobjs/cfile_pushing.o .eobjs/cparse_components.o .eobjs/cparse_shared.o .eobjs/cpmain.o .eobjs/expression_evaluator.o .eobjs/handle_letters.o .eobjs/keyword_operator.o .eobjs/macro_functions.o .eobjs/skipping.o .eobjs/template_handlers.o .eobjs/type_resolver.o .eobjs/compile_common.o .eobjs/compile.o .eobjs/compile_includes.o .eobjs/output_locals.o .eobjs/externs.o .eobjs/ext_iteration.o .eobjs/references.o .eobjs/gcc_backend.o .eobjs/bettersystem.o .eobjs/darray.o .eobjs/string.o .eobjs/textfile.o .eobjs/collect_variables.o .eobjs/object_storage.o .eobjs/parser_components.o .eobjs/parser.o .eobjs/checkfile.o .eobjs/syntax.o .eobjs/varnames.o .eobjs/module_write_sounds.o .eobjs/module_write_sprites.o .eobjs/parse_and_link.o .eobjs/write_defragged_events.o .eobjs/write_event_code.o .eobjs/write_globals.o .eobjs/write_object_data.o .eobjs/write_room_data.o .eobjs/event_parser.o .eobjs/pcs.o .eobjs/main.o
+link: mkeobjs .eobjs/ideprint.o .eobjs/JavaCallbacks.o .eobjs/cfile_parse.o .eobjs/cfile_parse_macros.o .eobjs/cfile_pushing.o .eobjs/cparse_components.o .eobjs/cparse_shared.o .eobjs/cpmain.o .eobjs/expression_evaluator.o .eobjs/handle_letters.o .eobjs/keyword_operator.o .eobjs/macro_functions.o .eobjs/skipping.o .eobjs/template_handlers.o .eobjs/type_resolver.o .eobjs/compile_common.o .eobjs/compile.o .eobjs/compile_includes.o .eobjs/output_locals.o .eobjs/externs.o .eobjs/ext_iteration.o .eobjs/references.o .eobjs/file_find.o .eobjs/gcc_backend.o .eobjs/bettersystem.o .eobjs/darray.o .eobjs/string.o .eobjs/textfile.o .eobjs/collect_variables.o .eobjs/object_storage.o .eobjs/parser_components.o .eobjs/parser.o .eobjs/checkfile.o .eobjs/syntax.o .eobjs/varnames.o .eobjs/module_write_sounds.o .eobjs/module_write_sprites.o .eobjs/parse_and_link.o .eobjs/write_defragged_events.o .eobjs/write_event_code.o .eobjs/write_globals.o .eobjs/write_object_data.o .eobjs/write_room_data.o .eobjs/event_parser.o .eobjs/pcs.o .eobjs/main.o
 	g++ -shared -fPIC .eobjs/*.o -o ../compileEGMf
 
 win windows: link

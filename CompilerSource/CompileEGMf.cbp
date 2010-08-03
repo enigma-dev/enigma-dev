@@ -171,6 +171,7 @@
 		<Unit filename="compiler/compile_includes.h" />
 		<Unit filename="compiler/compile_organization.h" />
 		<Unit filename="compiler/components/components.h" />
+		<Unit filename="compiler/components/module_write_sounds.cpp" />
 		<Unit filename="compiler/components/module_write_sprites.cpp" />
 		<Unit filename="compiler/components/parse_and_link.cpp" />
 		<Unit filename="compiler/components/write_defragged_events.cpp" />
@@ -190,6 +191,7 @@
 		<Unit filename="externs/externs.h" />
 		<Unit filename="externs/references.cpp" />
 		<Unit filename="externs/references.h" />
+		<Unit filename="filesystem/file_find.cpp" />
 		<Unit filename="gcc_interface/gcc_backend.cpp" />
 		<Unit filename="general/bettersystem.cpp" />
 		<Unit filename="general/bettersystem.h" />
