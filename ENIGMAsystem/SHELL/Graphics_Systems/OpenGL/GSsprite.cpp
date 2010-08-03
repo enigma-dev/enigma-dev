@@ -35,8 +35,7 @@
 
 namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
 
-int sprite_exists(int spr)
-{
+int sprite_exists(int spr) {
   return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
 }
 

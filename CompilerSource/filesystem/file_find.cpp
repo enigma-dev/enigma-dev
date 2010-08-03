@@ -25,24 +25,93 @@
 **                                                                              **
 \********************************************************************************/
 
-/*\\\ This file contains prototypes for functions that must be defined by the audio
-|*||| library wrapper modules. Each of these is used by other systems throughout the engine.
-\*/// Accidental failure to implement them could cause error.
+#include <iostream>
+using namespace std;
 
-namespace enigma
-{
-  // This function is called at the beginning of the game.
-  int audiosystem_initialize(); // In it, the audio system can make its startup calls.
-  
-  // This function is called multiple times each frame, and can be invoked by the API in sound playing calls.
-  void audiosystem_update(); // In it, the audio system can track what is happening with each sound.
-  
-  // This function allocates memory for sounds to avoid segfault.
-  void sound_safety_override(); // It is called if resource load fails.
-  
-  // This function is called for each sound in the game's module.
-  int sound_add_from_buffer(int id, void* buffer, size_t size); // It should add the sound under the given ID.
-  
-  // This function is called at the end of the game, as it closes.
-  void audiosystem_cleanup(); // It should free memory and shut down the audio library.
-}
+#include "../OS_Switchboard.h"
+
+#if TARGET_PLATFORM_ID == OS_WINDOWS
+  #include <windows.h>
+  const int fa_archive=FILE_ATTRIBUTE_ARCHIVE;
+  const int fa_directory=FILE_ATTRIBUTE_DIRECTORY;
+  const int fa_hidden=FILE_ATTRIBUTE_HIDDEN;
+  const int fa_readonly=FILE_ATTRIBUTE_READONLY;
+  const int fa_sysfile=FILE_ATTRIBUTE_SYSTEM;
+  const int fa_volumeid=0x00000008;
+
+  static int ff_attribs=0;
+  static HANDLE current_find = INVALID_HANDLE_VALUE;
+  static WIN32_FIND_DATA found;
+
+  string file_find_first(string name,int attributes) 
+  {
+    if (current_find!=INVALID_HANDLE_VALUE)
+    { FindClose(current_find); current_find=INVALID_HANDLE_VALUE; }
+    
+    ff_attribs=attributes;
+    
+    HANDLE d=FindFirstFile(name.c_str(),&found);
+    if (d==INVALID_HANDLE_VALUE) return "";
+    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
+    {
+      if (FindNextFile(d,&found)==0)
+      return "";
+    }
+    
+    current_find=d;
+    return found.cFileName;
+  }
+
+  string file_find_next()
+  {
+    if (current_find==INVALID_HANDLE_VALUE)
+    return "";
+    
+    if (FindNextFile(current_find,&found)==0)
+    return "";
+    
+    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
+    {
+      if (FindNextFile(current_find,&found)==0)
+      return "";
+    }
+    
+    return found.cFileName;
+  }
+
+  int file_find_close()
+  {
+    FindClose(current_find);
+    return 0;
+  }
+#else
+  #include <sys/types.h>
+  #include <dirent.h>
+
+  DIR* fff_dir_open = NULL;
+  char *fff_mask; int fff_attrib;
+  string file_find_next()
+  {
+    if (fff_dir_open == NULL)
+      return "";
+    
+    dirent *rd = readdir(fff_dir_open);
+    if (rd==NULL) 
+      return "";
+    return rd->d_name;
+  }
+  string file_find_first(string name,int attrib)
+  {
+    if (fff_dir_open != NULL)
+      closedir(fff_dir_open);
+    
+    fff_dir_open = opendir(name.c_str());
+    return file_find_next();
+  }
+  void file_find_close()
+  {
+    if (fff_dir_open != NULL)
+      closedir(fff_dir_open);
+    fff_dir_open = NULL;
+  }
+#endif

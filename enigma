@@ -1,0 +1,6 @@
+#!/bin/bash
+
+PREVIOUS_DIR=$(pwd)
+cd /opt/enigma
+java -jar lgm* $@
+cd $PREVIOUS_DIR

@@ -5,17 +5,32 @@ then
 	cd ./Universal_System
 	  ../Developer/automake.sh
 	  cd ../
-	cd Graphics_Systems/OpenGL
-	  ../../Developer/automake.sh
-	  cd ../../
-	cd Platforms/windows
-	  ../../Developer/automake.sh
-	  cd ../../
-	cd Platforms/xlib
-	  ../../Developer/automake.sh
-	  cd ../../
-	cd Audio_Systems/OpenAL
-	  ../../Developer/automake.sh
-	  cd ../../
+      for dir in Graphics_Systems/*/ ; do
+		cd $dir
+		if [ -e automake.sh ]
+		then
+			./automake.sh
+		else
+		  	../../Developer/automake.sh
+		fi; cd ../../
+	done
+	for dir in Platforms/*/ ; do
+		cd $dir
+		if [ -e automake.sh ]
+		then
+			./automake.sh
+		else
+		  	../../Developer/automake.sh
+		fi; cd ../../
+	done
+	for dir in Audio_Systems/*/ ; do
+		cd $dir
+		if [ -e automake.sh ]
+		then
+			./automake.sh
+		else
+		  	../../Developer/automake.sh
+		fi; cd ../../
+	done
 	echo Done
 fi

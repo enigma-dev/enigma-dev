@@ -1,14 +1,7 @@
 #include <stdio.h>
-
+#include <stddef.h>
 #include "alure/include/AL/alure.h"
 
-volatile int isdone = 0;
-static void eos_callback(void *unused, ALuint unused2)
-{
-    isdone = 1;
-    (void)unused;
-    (void)unused2;
-}
 
 namespace enigma
 {
@@ -20,13 +13,21 @@ namespace enigma
     bool playing; // True if this sound is playing; not paused or idle.
     sound(): src(0), buf(0), loaded(0), idle(1), playing(0) {}
   };
+  
   sound *sounds;
   size_t numSounds;
-  extern int sound_loadmaxid;
+  extern int sound_idmax;
+  
+  static void eos_callback(void *soundID, ALuint src)
+  {
+    puts ("The sound has stopped. The universe is at peace.");
+    sounds[(ptrdiff_t)soundID].playing = false;
+    sounds[(ptrdiff_t)soundID].idle = true;
+  }
 
   int audiosystem_initialize()
   {
-    numSounds = sound_loadmaxid > 0 ? sound_loadmaxid : 1;
+    numSounds = sound_idmax > 0 ? sound_idmax : 1;
     sounds = new sound[numSounds];
     
     if(!alureInitDevice(NULL, NULL)) {
@@ -65,14 +66,10 @@ namespace enigma
     return 0;
   }
   
-
+  void audiosystem_update(void) { alureUpdate(); }
+  
   void audiosystem_cleanup()
   {
-    /*while(!isdone) {
-      alureSleep(0.125);
-      alureUpdate();
-    }*/
-    
     for (size_t i = 0; i < numSounds; i++) 
     {
       switch (sounds[i].loaded)
@@ -88,10 +85,14 @@ namespace enigma
   }
 };
 
-void sound_play(int sound)
+bool sound_play(int sound) // Returns nonzero if an error occurred
 {
   enigma::sound &snd = enigma::sounds[sound];
-  snd.playing = alurePlaySource(snd.src, eos_callback, NULL) != AL_FALSE;
+  return snd.idle = !(snd.playing = (alurePlaySource(snd.src, enigma::eos_callback, (void*)sound) != AL_FALSE));
+}
+
+const char* sound_get_audio_error() {
+  return alureGetErrorString();
 }
 
 int amain()

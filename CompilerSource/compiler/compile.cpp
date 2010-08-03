@@ -277,12 +277,12 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << "enum //sprite names\n{\n";
     for (int i = 0; i < es->spriteCount; i++)
       wto << "  " << es->sprites[i].name << " = " << es->sprites[i].id << ",\n"; 
-    wto << "};\nnamespace enigma { int sprite_loadmaxid = " << es->spriteCount << "; }\n\n";
+    wto << "};\nnamespace enigma { unsigned int sprite_idmax = " << es->spriteCount << "; }\n\n";
     
     wto << "enum //sound names\n{\n";
     for (int i = 0; i < es->soundCount; i++)
       wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n"; 
-    wto << "};\nnamespace enigma { int sound_loadmaxid = " << es->soundCount << "; }\n\n";
+    wto << "};\nnamespace enigma { unsigned int sound_idmax = " << es->soundCount << "; }\n\n";
     
     wto << "enum //room names\n{\n";
     for (int i = 0; i < es->roomCount; i++)
@@ -323,7 +323,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     resources, our task is to compile the game itself via GNU Make.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
-  idpr("Starting compile (This may take a while...)",40);
+  idpr("Starting compile (This may take a while...)",30);
   
   string gflags = "-g";
   #if   TARGET_PLATFORM_ID == OS_WINDOWS
@@ -331,7 +331,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     string graphics = "OpenGL";
     string platform = "windows";
   #else
-    string glinks = "-lGL -lz -lopenal ./Audio_Systems/OpenAL/alure/libalure-static.a";
+    string glinks = "-lGL -lz -lopenal";
     string graphics = "OpenGL";
     string platform = "xlib";
   #endif

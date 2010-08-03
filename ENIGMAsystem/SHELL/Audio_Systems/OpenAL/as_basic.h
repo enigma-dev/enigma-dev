@@ -32,3 +32,5 @@ void sound_resume(int sound);
 
 bool sound_isplaying(int sound);
 bool sound_ispaused(int sound);
+
+const char* sound_get_audio_error();

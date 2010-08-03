@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-gm5">
+    <comment>Game Maker 5 Project</comment>
+    <glob pattern="*.gm5"/>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="100">
+      <match type="little32" offset="4" value="530"/>
+    </magic>
+    <magic priority="50">
+      <match type="little32" offset="0" value="1234321"/>
+    </magic>
+  </mime-type>
+  <mime-type type="application/x-gm6">
+    <comment>Game Maker 6 Project</comment>
+    <glob pattern="*.gm6"/>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="100">
+      <match type="little32" offset="4" value="600"/>
+    </magic>
+    <magic priority="50">
+      <match type="little32" offset="0" value="1234321"/>
+    </magic>
+  </mime-type>
+  <mime-type type="application/x-gmk">
+    <comment>Game Maker 7 Project</comment>
+    <glob pattern="*.gmk"/>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="100">
+      <match type="little32" offset="4" value="701"/>
+    </magic>
+    <magic priority="50">
+      <match type="little32" offset="0" value="1234321"/>
+    </magic>
+  </mime-type>
+  <mime-type type="application/x-gmk">
+    <comment>Game Maker 8 Project</comment>
+    <glob pattern="*.gmk"/>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="100">
+      <match type="little32" offset="4" value="800"/>
+    </magic>
+    <magic priority="50">
+      <match type="little32" offset="0" value="1234321"/>
+    </magic>
+  </mime-type>
+</mime-info>

@@ -39,6 +39,11 @@ void sound_play(int sound);
 
 namespace enigma
 {
+  void sound_safety_override()
+  {
+    
+  }
+  
   void exe_loadsounds(FILE *exe)
   { 
     int nullhere;

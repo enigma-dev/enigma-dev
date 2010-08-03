@@ -49,7 +49,6 @@
 					<Add library="GL" />
 					<Add library="z" />
 					<Add library="openal" />
-					<Add library="./Audio_Systems/OpenAL/alure/libalure-static.a" />
 				</Linker>
 			</Target>
 			<Target title="lin-profile">
@@ -108,7 +107,107 @@
 			<Add option="-DCODEBLOX" />
 		</Compiler>
 		<Unit filename="API_Switchboard.h" />
+		<Unit filename="Audio_Systems/OpenAL/alure/alure.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/buffer.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/config.h" />
+		<Unit filename="Audio_Systems/OpenAL/alure/istream.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/main.h" />
+		<Unit filename="Audio_Systems/OpenAL/alure/stream.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/streamdec.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/streamplay.cpp" />
 		<Unit filename="Audio_Systems/OpenAL/as_basic.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/as_basic.h" />
+		<Unit filename="Audio_Systems/OpenAL/ogg/bitwise.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/ogg/framing.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/ogg/include/ogg.h" />
+		<Unit filename="Audio_Systems/OpenAL/ogg/include/os_types.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/analysis.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/backends.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/bitrate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/bitrate.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/block.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/codebook.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/codebook.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/codec_internal.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/envelope.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/envelope.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/floor0.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/floor1.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/highlevel.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/info.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/lookup.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/lookup.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/lookup_data.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/lpc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/lpc.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/lsp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/lsp.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/mapping0.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/masking.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/mdct.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/mdct.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/misc.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/os.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/psy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/psy.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/registry.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/registry.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/res0.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/scales.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/sharedbook.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/smallft.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/smallft.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/synthesis.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/vorbisfile.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/window.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/window.h" />
+		<Unit filename="Audio_Systems/audio_mandatory.h" />
 		<Unit filename="Colligma/Checks/data_check.h" />
 		<Unit filename="Colligma/Checks/linear_check.h" />
 		<Unit filename="Colligma/Checks/shape_check.h" />
@@ -503,12 +602,13 @@
 		<Unit filename="Universal_System/planar_object.h" />
 		<Unit filename="Universal_System/reflexive_types.cpp" />
 		<Unit filename="Universal_System/reflexive_types.h" />
+		<Unit filename="Universal_System/resinit.h" />
 		<Unit filename="Universal_System/roomsystem.cpp" />
 		<Unit filename="Universal_System/roomsystem.h" />
 		<Unit filename="Universal_System/simplecollisions.cpp" />
 		<Unit filename="Universal_System/simplecollisions.h" />
+		<Unit filename="Universal_System/soundinit.cpp" />
 		<Unit filename="Universal_System/spriteinit.cpp" />
-		<Unit filename="Universal_System/spriteinit.h" />
 		<Unit filename="Universal_System/spritestruct.cpp" />
 		<Unit filename="Universal_System/spritestruct.h" />
 		<Unit filename="Universal_System/switch_stuff.h" />

@@ -106,8 +106,7 @@ namespace enigma
   }
   
   void sprite_safety_override() {
-    sprites_allocate_initial(15); //15's a good number.
-                                 //...Fuck you.
+    sprites_allocate_initial(sprite_idmax);
   }
   
   //Adds an empty sprite to the list
