@@ -1,4 +1,4 @@
-echo "#Awesome Generated Makefile" > Makefile
+echo "#Awesome Locally Generated Makefile" > Makefile
 echo "" >> Makefile;
 
 for file in *.cpp ;
@@ -30,10 +30,10 @@ do
     do printf ".eobjs_$modename/${file%.cpp}.o " >> Makefile; 
     done;
   printf "\n" >> Makefile;
-  echo "	cd alure && \$(MAKE) avail DEST=\"../.eobjs_$modename\"" >> Makefile;
-  echo "	cd ogg    && \$(MAKE) avail DEST=\"../.eobjs_$modename\"" >> Makefile;
-  echo "	cd vorbis && \$(MAKE) avail DEST=\"../.eobjs_$modename\"" >> Makefile;
-  echo "	cd dumb   && \$(MAKE) avail DEST=\"../.eobjs_$modename\"" >> Makefile;
+  echo "	cd alure && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
+  echo "	cd ogg    && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
+  echo "	cd vorbis && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
+  echo "	cd dumb   && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
   echo "" >> Makefile;
 done;
 

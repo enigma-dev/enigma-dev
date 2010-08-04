@@ -117,14 +117,140 @@
 		<Unit filename="Audio_Systems/OpenAL/alure/streamplay.cpp" />
 		<Unit filename="Audio_Systems/OpenAL/as_basic.cpp" />
 		<Unit filename="Audio_Systems/OpenAL/as_basic.h" />
+		<Unit filename="Audio_Systems/OpenAL/dumb/include/aldumb.h" />
+		<Unit filename="Audio_Systems/OpenAL/dumb/include/dumb.h" />
+		<Unit filename="Audio_Systems/OpenAL/dumb/include/internal/aldumb.h" />
+		<Unit filename="Audio_Systems/OpenAL/dumb/include/internal/dumb.h" />
+		<Unit filename="Audio_Systems/OpenAL/dumb/include/internal/it.h" />
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/atexit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/duhlen.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/duhtag.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/dumbfile.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/loadduh.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/makeduh.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/rawsig.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/readduh.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/register.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/rendduh.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/rendsig.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/core/unload.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/helpers/clickrem.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/helpers/memfile.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/helpers/resample.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/helpers/sampbuf.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/helpers/silence.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/helpers/stdfile.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/itload.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/itload2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/itmisc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/itorder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/itread.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/itread2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/itrender.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/itunload.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/loadmod.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/loadmod2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/loads3m.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/loads3m2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/loadxm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/loadxm2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/readmod.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/readmod2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/reads3m.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/reads3m2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/readxm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/readxm2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/dumb/src/it/xmeffect.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="Audio_Systems/OpenAL/ogg/bitwise.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="Audio_Systems/OpenAL/ogg/framing.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/ogg/include/config_types.h" />
 		<Unit filename="Audio_Systems/OpenAL/ogg/include/ogg.h" />
 		<Unit filename="Audio_Systems/OpenAL/ogg/include/os_types.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/include/codec.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/include/vorbisenc.h" />
+		<Unit filename="Audio_Systems/OpenAL/vorbis/include/vorbisfile.h" />
 		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/analysis.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -9,7 +9,7 @@ all:
 	cd Universal_System/				&& $(MAKE) $(GMODE) MODE=$(GMODE) FLAGS="$(GFLAGS)"
 	cd Audio_Systems/OpenAL/			&& $(MAKE) $(GMODE) MODE=$(GMODE) FLAGS="$(GFLAGS)"
 	
-	g++ SHELLmain.cpp libEGMstd.cpp Graphics_Systems/$(GRAPHICS)/.eobjs_$(GMODE)/*.o Platforms/$(PLATFORM)/.eobjs_$(GMODE)/*.o Universal_System/.eobjs_$(GMODE)/*.o Audio_Systems/OpenAL/.eobjs_$(GMODE)/*.o $(GLINKS) -o game.exe
+	g++ SHELLmain.cpp libEGMstd.cpp Graphics_Systems/$(GRAPHICS)/.eobjs_$(GMODE)/*.o Platforms/$(PLATFORM)/.eobjs_$(GMODE)/*.o Universal_System/.eobjs_$(GMODE)/*.o Audio_Systems/OpenAL/.eobjs_$(GMODE)/*.o Audio_Systems/OpenAL/.eobjs_$(GMODE)/*.a Audio_Systems/OpenAL/.eobjs_$(GMODE)/libogg.a $(GLINKS) -o game.exe
 
 clean:
 	cd Graphics_Systems/OpenGL/ 	&& $(MAKE) clean
