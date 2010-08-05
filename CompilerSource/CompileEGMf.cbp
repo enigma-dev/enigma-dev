@@ -213,6 +213,9 @@
 		<Unit filename="parser/parser.h" />
 		<Unit filename="parser/parser_components.cpp" />
 		<Unit filename="parser/parser_components.h" />
+		<Unit filename="settings-parse/crawler.cpp" />
+		<Unit filename="settings-parse/eyaml.cpp" />
+		<Unit filename="settings-parse/eyaml.h" />
 		<Unit filename="settings.h" />
 		<Unit filename="standalone_main.cpp">
 			<Option target="StandAlone" />

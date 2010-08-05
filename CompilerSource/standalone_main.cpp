@@ -79,13 +79,6 @@ extern char getch();
 extern int cfile_parse_main();
 int main(int argc, char *argv[])
 {
-  string n = file_find_first("ENIGMAsystem/SHELL/Graphics_Systems/*",fa_directory | fa_nofiles);
-  while (n != "")
-    cout << n << endl,
-    n = file_find_next();
-  cout << "Done." << endl;
-  return 0;
-  
   cparse_init();
   
   if (establish_bearings()) {

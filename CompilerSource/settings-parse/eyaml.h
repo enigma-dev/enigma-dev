@@ -25,14 +25,15 @@
 **                                                                              **
 \********************************************************************************/
 
-void sound_play(int sound);
-void sound_stop(int sound);
-void sound_pause(int sound);
-void sound_resume(int sound);
+#include <string>
+using std::string;
 
-bool sound_isplaying(int sound);
-bool sound_ispaused(int sound);
-
-int sound_add(string fname, int kind, bool preload);
-
-const char* sound_get_audio_error();
+struct ey_data
+{
+  string name;
+  union eyd_pair {
+    ey_data *subcat;
+    char* sval;
+  } value;
+  bool is_subcat;
+};

@@ -95,25 +95,47 @@ const char* sound_get_audio_error() {
   return alureGetErrorString();
 }
 
-int amain()
+#include <string>
+using namespace std;
+extern void show_message(string);
+int sound_add(string fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
 {
-  /*puts("Initializing sound.");
-  if (enigma::audiosystem_initialize())
-    return 1;
+  // Open sound
+  FILE *afile = fopen(fname.c_str(),"rb");
+  if (!afile)
+    return -1;
   
-  puts("Loading sound.");
-  FILE *afile = fopen("FancyPants.ogg","rb");
-  if (!afile) return 1;
+  // Buffer sound
   fseek(afile,0,SEEK_END);
   const ALsizei flen = ftell(afile);
   char fdata[flen];
   fseek(afile,0,SEEK_SET);
   fread(fdata,1,flen,afile);
-  puts("Decoding sound.");
-  if (enigma::sound_add_from_buffer(0,fdata,flen))
-    return 1;
-  puts("Playing Sound.");
-  sound_play(0);
-  puts("Done.");*/
-  return 0;
+  
+  // Make room for sound
+  const size_t osc = enigma::numSounds;
+  if (osc <= enigma::sound_idmax)
+  {
+    enigma::sound *nsounds = new enigma::sound[enigma::numSounds = enigma::sound_idmax+1];
+    for (size_t i = 0; i < osc; i++)
+      nsounds[i] = enigma::sounds[i];
+    for (size_t i = osc; i < enigma::numSounds; i++)
+    {
+      alGenSources(1, &nsounds[i].src);
+      if(alGetError() != AL_NO_ERROR) {
+        fprintf(stderr, "Failed to create OpenAL source!\n");
+        return 1;
+      }
+      nsounds[i].loaded = 1;
+    }
+    delete[] enigma::sounds;
+    enigma::sounds = nsounds;
+  }
+  
+  // Decode sound
+  int rid;
+  if (enigma::sound_add_from_buffer(rid = enigma::sound_idmax++,fdata,flen))
+    return (--enigma::sound_idmax, -1);
+  
+  return rid;
 }

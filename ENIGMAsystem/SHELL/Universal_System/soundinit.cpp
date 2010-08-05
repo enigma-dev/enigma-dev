@@ -71,8 +71,6 @@ namespace enigma
       char fdata[size];
       fread(fdata,1,size,exe);
       
-      printf("Read %d bytes; first several are %s",size, string(fdata,50).c_str());
-      
       if (sound_add_from_buffer(id,fdata,size))
         printf("Failed to load sound%d\n",i);
     }

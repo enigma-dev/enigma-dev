@@ -25,14 +25,21 @@
 **                                                                              **
 \********************************************************************************/
 
-void sound_play(int sound);
-void sound_stop(int sound);
-void sound_pause(int sound);
-void sound_resume(int sound);
+/**
+  @brief E-Yaml is a compromise format between my original idea of "a good way
+         to store user-editable information" and, well, the official YAML spec.
+         I wanted something lightweight and very easy to implement, too. Hence,
+         E-YAML was born as a forwards-compatible implementation of YAML for my
+         uses. E-YAML files can be read by official YAML readers, but are much
+         easier to write a custom reader for since the format doesn't implement
+         most of the noise that makes YAML general-purpose.
+*/
 
-bool sound_isplaying(int sound);
-bool sound_ispaused(int sound);
+#include <stdio.h>
+#include <map>
 
-int sound_add(string fname, int kind, bool preload);
+using namespace std;
 
-const char* sound_get_audio_error();
+#include "eyaml.h"
+
+map<string,ey_data> parse_eyaml(FILE* file);

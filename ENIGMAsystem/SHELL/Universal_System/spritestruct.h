@@ -46,7 +46,7 @@ namespace enigma
     sprite(unsigned int);
   };
   extern sprite** spritestructarray;
-	extern unsigned int sprite_idmax;
+	extern size_t sprite_idmax;
 }
 
 extern int sprite_get_width(int sprite);

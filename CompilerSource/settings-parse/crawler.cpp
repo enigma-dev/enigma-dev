@@ -25,14 +25,31 @@
 **                                                                              **
 \********************************************************************************/
 
-void sound_play(int sound);
-void sound_stop(int sound);
-void sound_pause(int sound);
-void sound_resume(int sound);
+#include <stdio.h>
+#include <string>
+#include <list>
 
-bool sound_isplaying(int sound);
-bool sound_ispaused(int sound);
+using namespace std;
 
-int sound_add(string fname, int kind, bool preload);
+#include "../filesystem/file_find.h"
+#include "eyaml.h"
 
-const char* sound_get_audio_error();
+namespace settings
+{
+  list<string> systems;
+  
+}
+
+int scour_settings()
+{
+  string bdir = "ENIGMAsystem/SHELL/";
+  for (string mdir = file_find_first("ENIGMAsystem/SHELL/*",fa_directory | fa_nofiles); mdir != ""; mdir = file_find_next())
+  {
+    FILE *module_descriptor = fopen((bdir+mdir).c_str(),"rb");
+    if (module_descriptor)
+    {
+      
+    }
+  }
+  return 0;
+}

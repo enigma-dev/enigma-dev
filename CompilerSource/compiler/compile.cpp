@@ -266,6 +266,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   
   //NEXT FILE ----------------------------------------
   //Resource names: Defines integer constants for all resources.
+  int max;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out);
     wto << license;
     
@@ -274,15 +275,19 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       wto << "  " << i->second->name << " = " << i->first << ",\n"; 
     wto << "};\n\n";
     
+    max = 0;
     wto << "enum //sprite names\n{\n";
-    for (int i = 0; i < es->spriteCount; i++)
+    for (int i = 0; i < es->spriteCount; i++) {
+      if (es->sprites[i].id >= max) max = es->sprites[i].id + 1;
       wto << "  " << es->sprites[i].name << " = " << es->sprites[i].id << ",\n"; 
-    wto << "};\nnamespace enigma { unsigned int sprite_idmax = " << es->spriteCount << "; }\n\n";
+    } wto << "};\nnamespace enigma { size_t sprite_idmax = " << max << "; }\n\n";
     
+    max = 0;
     wto << "enum //sound names\n{\n";
-    for (int i = 0; i < es->soundCount; i++)
+    for (int i = 0; i < es->soundCount; i++) {
+      if (es->sounds[i].id >= max) max = es->sounds[i].id + 1;
       wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n"; 
-    wto << "};\nnamespace enigma { unsigned int sound_idmax = " << es->soundCount << "; }\n\n";
+    } wto << "};\nnamespace enigma { size_t sound_idmax = " <<max << "; }\n\n";
     
     wto << "enum //room names\n{\n";
     for (int i = 0; i < es->roomCount; i++)
@@ -323,9 +328,10 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     resources, our task is to compile the game itself via GNU Make.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
-  idpr("Starting compile (This may take a while...)",30);
+  idpr("Starting compile (This may take a while...)", 30);
   
-  string gflags = "-g";
+  string gflags = "-O3 -s";
+  
   #if   TARGET_PLATFORM_ID == OS_WINDOWS
     string glinks = "-lopengl32 '../additional/zlib/libzlib.a' -lcomdlg32 -lgdi32";
     string graphics = "OpenGL";

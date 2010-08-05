@@ -145,7 +145,7 @@ using namespace std;
     size_t lp = name.find_last_of("/");
     if (lp != string::npos)
       fff_mask = name.substr(lp+1),
-      fff_path = name.substr(0,lp),
+      fff_path = name.substr(0,lp+1),
       fff_dir_open = opendir(fff_path.c_str());
     else
       fff_mask = name,

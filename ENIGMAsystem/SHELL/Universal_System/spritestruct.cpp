@@ -34,7 +34,7 @@ using namespace std;
 
 namespace enigma {
   sprite** spritestructarray;
-	extern unsigned int sprite_idmax;
+	extern size_t sprite_idmax;
 	sprite::sprite(): texturearray(NULL) {}
   sprite::sprite(unsigned int x): texturearray(new unsigned int[x]) {}
 }
