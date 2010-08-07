@@ -85,7 +85,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
 	public EnigmaSettings es = new EnigmaSettings();
 	public EnigmaSettingsFrame esf = new EnigmaSettingsFrame(es);
-	public JMenuItem run, debug, build, compile;
+	public JMenuItem run, debug, build, compile, rebuild;
 	public JMenuItem showFunctions, showGlobals, showTypes;
 	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
 	public static boolean GCC_LOCATED = false;
@@ -208,6 +208,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		compile = new JMenuItem("Compile");
 		compile.addActionListener(this);
 		menu.add(compile);
+		rebuild = new JMenuItem("Rebuild All");
+		rebuild.addActionListener(this);
+		menu.add(rebuild);
 
 		menu.addSeparator();
 
@@ -345,64 +348,64 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
+	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_BUILD = 2, MODE_COMPILE = 3,
+			MODE_REBUILD = 4;
+
 	public void compile(final int mode)
 		{
-		//modes: 0=run, 1=debug, 2=build, 3=compile
 		if (!GCC_LOCATED)
 			{
 			JOptionPane.showMessageDialog(null,"You can't compile without GCC.");
 			return;
 			}
 
-		//determine where to output the exe
-		File exef = null;
+		//determine `outname` (rebuild has no `outname`)
+		File outname = null;
 		try
 			{
-			if (mode < 2) //run/debug
-				exef = File.createTempFile("egm",".exe");
-			else if (mode == 2) exef = File.createTempFile("egm",".emd"); //build
-			if (exef != null) exef.deleteOnExit();
+			if (mode < MODE_BUILD) //run/debug
+				outname = File.createTempFile("egm",".exe");
+			else if (mode == MODE_BUILD) outname = File.createTempFile("egm",".emd"); //build
+			if (outname != null) outname.deleteOnExit();
 			}
 		catch (IOException e)
 			{
 			e.printStackTrace();
 			return;
 			}
-		if (mode == 3) //compile
+		if (mode == MODE_COMPILE)
 			{
 			JFileChooser fc = new JFileChooser();
 			fc.setFileFilter(new CustomFileFilter(".exe","Executable files"));
 			if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
-			exef = fc.getSelectedFile();
+			outname = fc.getSelectedFile();
 			}
 
 		LGM.commitAll();
-		//		ef = new EnigmaFrame();
-		//				System.out.println("Compiling with " + enigma);
+		//System.out.println("Compiling with " + enigma);
 
-		final File ef = exef;
+		final File ef = outname;
 		new Thread()
 			{
 				public void run()
 					{
 					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
-					System.out.println(EnigmaDriver.compileEGMf(es,ef.getAbsolutePath(),mode));
+					System.out.println(EnigmaDriver.compileEGMf(es,ef == null ? null : ef.getAbsolutePath(),
+							mode));
 					}
 			}.start();
-		//ok to GC es now
 
-		if (mode == 2) //build
+		if (mode == MODE_BUILD) //build
 			{
 			try
 				{
-				EnigmaReader.readChanges(exef);
+				EnigmaReader.readChanges(outname);
 				}
 			catch (Exception e)
 				{
 				e.printStackTrace();
 				}
 			}
-
 		}
 
 	//This can be static since the GCC_LOCATED and Enigma dll are both static.
@@ -424,10 +427,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public void actionPerformed(ActionEvent e)
 		{
 		Object s = e.getSource();
-		if (s == run) compile(1);
-		if (s == debug) compile(2);
-		if (s == build) compile(3);
-		if (s == compile) compile(4);
+		if (s == run) compile(MODE_RUN);
+		if (s == debug) compile(MODE_DEBUG);
+		if (s == build) compile(MODE_BUILD);
+		if (s == compile) compile(MODE_COMPILE);
+		if (s == rebuild) compile(MODE_REBUILD);
 
 		if (s == showFunctions) showKeywordListFrame(0);
 		if (s == showGlobals) showKeywordListFrame(1);
