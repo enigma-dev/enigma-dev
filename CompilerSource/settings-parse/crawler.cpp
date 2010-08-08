@@ -25,31 +25,85 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <stdio.h>
+#include <iostream>
 #include <string>
 #include <list>
 
 using namespace std;
 
 #include "../filesystem/file_find.h"
+#include "crawler.h"
 #include "eyaml.h"
 
 namespace settings
 {
   list<string> systems;
   
+  int scour_settings()
+  {
+    string bdir = "ENIGMAsystem/SHELL/";
+    for (string mdir = file_find_first("ENIGMAsystem/SHELL/*",fa_directory | fa_nofiles); mdir != ""; mdir = file_find_next())
+    {
+      FILE *module_descriptor = fopen((bdir+mdir).c_str(),"rt");
+      if (module_descriptor)
+      {
+        
+      }
+    }
+    return 0;
+  }
 }
 
-int scour_settings()
+#include "../parser/object_storage.h"
+
+namespace extensions
 {
-  string bdir = "ENIGMAsystem/SHELL/";
-  for (string mdir = file_find_first("ENIGMAsystem/SHELL/*",fa_directory | fa_nofiles); mdir != ""; mdir = file_find_next())
+  map<string, string> locals;
+  string unmangled_type_pre(string str) { 
+    size_t pm = str.find_first_of(")[");
+    return pm == string::npos ? str : str.substr(0,pm);
+  }
+  string unmangled_type_suf(string str) {
+    size_t pm = str.find_first_of(")[");
+    return pm == string::npos ? "" : str.substr(pm);
+  }
+  string compile_local_string()
   {
-    FILE *module_descriptor = fopen((bdir+mdir).c_str(),"rb");
-    if (module_descriptor)
+    string res;
+    for (map<string, string>::iterator it = locals.begin(); it != locals.end(); it++)
+      res += unmangled_type_pre(it->second) + " " + it->first + unmangled_type_suf(it->second) + ";\n";
+    return res;
+  }
+  void dump_read_locals(map<string,int> &lmap)
+  {
+    for (map<string,string>::iterator it = locals.begin(); it != locals.end(); it++)
+      lmap[it->first]++;
+  }
+  void crawl_for_locals()
+  {
+    locals.clear();
+    for (string ef = file_find_first("ENIGMAsystem/Extensions/*",0); ef != ""; ef = file_find_next())
     {
-      
+      ifstream ext(("ENIGMAsystem/Extensions/" + ef).c_str(), ios_base::in);
+      if (ext.is_open())
+      {
+        ey_data dat = parse_eyaml(ext, ef);
+        for (eyit it = dat.values.begin(); it != dat.values.end(); it++)
+        {
+          if (it->second->is_scalar)
+            continue;
+          
+          eyit locs = ((ey_data*)it->second)->values.find("locals");
+          if (locs != ((ey_data*)it->second)->values.end())
+          {
+            if (locs->second->is_scalar)
+              continue;
+            ey_data *ld = (ey_data*)locs->second;
+            for (eycit cit = ld->values_order.next; cit; cit = cit->next)
+              locals[cit->value->name] = ((ey_string*)cit->value)->value;
+          }
+        }
+      }
     }
   }
-  return 0;
 }

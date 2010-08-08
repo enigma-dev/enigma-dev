@@ -72,7 +72,7 @@ extern  int ext_count;
 extern  map<externs*, int> bigmap;
 
 #include "cfile_parse/type_resolver.h"
-
+#include "settings-parse/crawler.h"
 #include "filesystem/file_find.h"
 
 extern char getch();
@@ -85,6 +85,12 @@ int main(int argc, char *argv[])
     cout << "ERROR: Failed to locate the GCC";
     getchar(); return 1;
   }
+  
+  
+  cout << "Grabbing locals" << endl;  
+    string localstring = extensions::compile_local_string();
+  cout << "Ass." << endl;
+  return 0;
   
   //m_prog_loop_cfp();
   

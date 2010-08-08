@@ -41,6 +41,8 @@ using namespace std;
 
 #include "../settings.h"
 
+#include "../parser/object_storage.h"
+
 string tostring(int val);
 
 
@@ -202,7 +204,7 @@ namespace syncheck
           { error="Operator expected at this point"; return pos; }
           
           const pt issr = handle_if_statement(code,name,pos); //Check *if* it's a statement, handle it *if* it is.
-          if (issr != pt(-2)) { 
+          if (issr != pt(-2)) {
             if (issr != pt(-1))
               return issr;
           }
@@ -211,6 +213,8 @@ namespace syncheck
           else if (name == "long" or name == "short" or name == "signed" or name == "register"
                or  name == "unsigned" or name == "const" or name == "volatile" or name == "static")
             goto lbl_typename;
+          else if (shared_object_locals.find(name) != shared_object_locals.end())
+            goto just_an_identifier;
           else if (find_extname(name,0xFFFFFFFF))
           {
             if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
@@ -473,8 +477,8 @@ namespace syncheck
         
         case '[':
             {
-              if (lastnamed[level] != LN_VARNAME)
-              { error="Invalid use of `[' symbol"; return pos; }
+              if (lastnamed[level] != LN_VARNAME and lastnamed[level] != LN_VALUE)
+              { error="Invalid use of `[' symbol for " + tostring(lastnamed[level]); return pos; }
               plevel++;
               plevelt[plevel]=PLT_BRACKET;
               lastnamed[level]=LN_OPERATOR;

@@ -55,20 +55,20 @@ enum p_type {
 
 struct event_info
 {
-  string name;
-  int    gmid;
+  string name; // The identifier-compliant name of this event.
+  int    gmid; // The ID used in the popular Game Maker format.
   
-  string humanname;
-  p_type par2type;
+  string humanname; // The name the user sees
+  p_type par2type; // The type of any parameters in the name; a resource name? keyboard key?
   
-  e_type mode;
-  int    mmod;
+  e_type mode; // Executed each step in-line? System called?
+  int    mmod; // Specialization ID, or other generic integer info
   
-  string def;
-  string cons;
-  string super;
-  string sub;
-  string instead;
+  string def;  // Default code -- In place if nothing else is given
+  string cons; // Constant code -- Added whether the event exists or not
+  string super; // Check made before iteration begins
+  string sub;   // Check made by each instance in each execution
+  string instead; // Overrides all other options: Replaces the event loop for this event
   
   event_info();
   event_info(string n,int i);
@@ -76,8 +76,8 @@ struct event_info
 
 struct main_event_info
 {
-  string name;
-  bool is_group;
+  string name; // The name of this event. Set by "Group:", defaults to first sub event name.
+  bool is_group; // Whether or not this event 
   map<int,event_info*> specs;
   typedef map<int,event_info*>::iterator iter;
   main_event_info();
@@ -95,7 +95,13 @@ extern string event_get_instead(int mid, int id);
 extern bool   event_has_super_check(int mid, int id);
 extern string event_get_super_check_condition(int mid, int id);
 extern string event_get_super_check_function(int mid, int id);
+extern bool   event_has_sub_check(int mid, int id);
+extern string event_get_sub_check_condition(int mid, int id);
+extern bool   event_has_const_code(int mid, int id);
+extern string event_get_const_code(int mid, int id);
 extern bool   event_execution_uses_default(int mid, int id);
+bool event_is_instance(int mid, int id);
+string event_stacked_get_root_name(int mid);
 
 // This is implemented in write_defragged_events.
 extern bool   event_used_by_something(string name);

@@ -179,8 +179,6 @@ namespace enigma
     delete[] imgpxdata;
     
     enigma::sprite* sprstr = enigma::spritestructarray[sprid];
-    if(!sprstr)
-      show_error("THE WORLD CAN NO LONGER BE TRUSTED! HEAD FOR THE HILLS!",1);
     
     sprstr->texturearray[sprstr->subcount] = texture;
     #if COLLIGMA

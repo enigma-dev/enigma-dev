@@ -1,0 +1,13 @@
+%E-YAML
+---
+
+Paths:
+	Locals:
+		path_endaction: int
+		path_index: int
+		path_orientation: bool
+		path_position: double
+		path_positionprevious: double
+		path_scale: double
+		path_speed: double
+

@@ -87,6 +87,7 @@ inline void event_add(int evid,event_info* last)
     lid = last->mmod;
   else
     lid = main_event_infos[evid].specs.rbegin() != main_event_infos[evid].specs.rend() ? main_event_infos[evid].specs.rbegin()->first + 1 : 0;
+  if (lid) main_event_infos[evid].is_group = true;
   main_event_infos[evid].specs[lid] = last;
   event_sequence.push_back(evpair(evid,lid));
 }
@@ -299,63 +300,184 @@ int event_parse_resourcefile()
   return 0;
 }
 
+extern string tostring(int);
+string format_lookup(int id, p_type t)
+{
+  switch (t)
+  {
+    case p2t_sprite:     return "spr_" + tostring(id);
+    case p2t_sound:      return "snd_" + tostring(id);
+    case p2t_background: return "bk_" + tostring(id);
+    case p2t_path:       return "pth_" + tostring(id);
+    case p2t_script:     return "scr_" + tostring(id);
+    case p2t_font:       return "fnt_" + tostring(id);
+    case p2t_timeline:   return "tl_" + tostring(id);
+    case p2t_object:     return "obj_" + tostring(id);
+    case p2t_room:       return "rm_" + tostring(id);
+    case p2t_key:        return "key" + tostring(id);
+    case p2t_error:      return "...";
+  }
+  return tostring(id);
+}
+string format_lookup_econstant(int id, p_type t)
+{
+  switch (t)
+  {
+    case p2t_sprite:     return tostring(id);
+    case p2t_sound:      return tostring(id);
+    case p2t_background: return tostring(id);
+    case p2t_path:       return tostring(id);
+    case p2t_script:     return tostring(id);
+    case p2t_font:       return tostring(id);
+    case p2t_timeline:   return tostring(id);
+    case p2t_object:     return tostring(id);
+    case p2t_room:       return tostring(id);
+    case p2t_key:        return tostring(id);
+    case p2t_error:      return tostring(id);
+  }
+  return tostring(id);
+}
+
+inline string autoparam(string x,string y)
+{
+  const size_t p = x.find("%1");
+  if (p != string::npos) return x.replace(p,2,y);
+  return x;
+}
+
 // Query for a name suitable for use as
 // an identifier. No spaces or specials.
 string event_get_function_name(int mid, int id)
 {
-  main_event_info::iter i = main_event_infos[mid].specs.find(id);
-  return i != main_event_infos[mid].specs.end() ? i->second->name : "undefinedEventERROR";
+  main_event_info &mei = main_event_infos[mid];
+  if (mei.is_group or mei.specs[0]->mode != et_stacked) {
+    main_event_info::iter i = main_event_infos[mid].specs.find(id);
+    return i != main_event_infos[mid].specs.end() ? i->second->name : "undefinedEventERROR";
+  }
+  string buf = mei.specs[0]->name;
+  size_t pp = buf.find("%1");
+  if (pp != string::npos)
+    buf.replace(pp,2,format_lookup(id, mei.specs[0]->par2type));
+  else
+    buf += "_" + tostring(id);
+  return buf;
+}
+
+string event_stacked_get_root_name(int mid) {
+  main_event_info &mei = main_event_infos[mid];
+  return autoparam(mei.specs[0]->name,"stackroot");
 }
 
 // Fetch a user-friendly name for the event
 // with the given credentials.
 string event_get_human_name(int mid, int id)
 {
-  char buf[48]; *buf = 0;
-  main_event_info::iter i = main_event_infos[mid].specs.find(id);
-  return i != main_event_infos[mid].specs.end() ? i->second->humanname : (sprintf(buf,"Undefined or Unsupported (%d,%d)",mid,id),buf);
+  main_event_info &mei = main_event_infos[mid];
+  if (mei.is_group) {
+    char buf[64];
+    main_event_info::iter i = main_event_infos[mid].specs.find(id);
+    return i != main_event_infos[mid].specs.end() ? i->second->humanname : (sprintf(buf,"Undefined or Unsupported (%d,%d)",mid,id),buf);
+  }
+  string buf = mei.specs[0]->humanname;
+  size_t pp = buf.find("%1");
+  if (pp != string::npos)
+    buf.replace(pp,2,format_lookup(id, mei.specs[0]->par2type));
+  return buf;
+}
+string event_get_human_name_min(int mid, int id)
+{
+  main_event_info &mei = main_event_infos[mid];
+  if (mei.is_group) {
+    char buf[64];
+    main_event_info::iter i = main_event_infos[mid].specs.find(id);
+    return i != main_event_infos[mid].specs.end() ? i->second->humanname : (sprintf(buf,"Undefined or Unsupported (%d,%d)",mid,id),buf);
+  }
+  if (mei.specs[0]->mode == et_stacked)
+    return mei.name;
+  string buf = mei.specs[0]->humanname;
+  size_t pp = buf.find("%1");
+  if (pp != string::npos)
+    buf.replace(pp,2,format_lookup(id, mei.specs[0]->par2type));
+  return buf;
+}
+
+// Used by the rest of these functions
+event_info *event_access(int mid, int id)
+{
+  main_event_info &mei = main_event_infos[mid];
+  return (mei.is_group) ? mei.specs[id] : mei.specs[0];
 }
 
 // Test whether there is code that will remain
 // active if a user has not declared this event.
 bool event_has_default_code(int mid, int id) {
-  return main_event_infos[mid].specs[id]->def != "" or main_event_infos[mid].specs[id]->cons != "";
+  return event_access(mid,id)->def != "" or event_access(mid,id)->cons != "";
 }
 
 string event_get_default_code(int mid, int id) {
-  return main_event_infos[mid].specs[id]->def + main_event_infos[mid].specs[id]->cons;
+  return event_access(mid,id)->def + event_access(mid,id)->cons;
+}
+
+
+// Test whether there is code that will remain
+// active whether or not a user has declared this event.
+bool event_has_const_code(int mid, int id) {
+  return event_access(mid,id)->cons != "";
+}
+
+string event_get_const_code(int mid, int id) {
+  return event_access(mid,id)->cons;
 }
 
 // Some events have special behavior as placeholders, instead of simple iteration.
 // These two functions will test for and return such.
 
 bool event_has_instead(int mid, int id) {
-  return main_event_infos[mid].specs[id]->instead != "";
+  return event_access(mid,id)->instead != "";
 }
 
 string event_get_instead(int mid, int id) {
-  return main_event_infos[mid].specs[id]->instead;
+  return event_access(mid,id)->instead;
 }
 
+
+// The rest of these functions use this
+string evres_code_substitute(string code, int sid, p_type t)
+{
+  for (size_t i = code.find("%1"); i != string::npos; i = code.find("%1"))
+    code.replace(i, 2, format_lookup_econstant(sid, t));
+  return code;
+}
 
 // Many events check things before executing, some before starting the loop. Deal with them.
 
 bool event_has_super_check(int mid, int id) {
-  return main_event_infos[mid].specs[id]->super != "";
+  return event_access(mid,id)->super != "";
+}
+
+bool event_has_sub_check(int mid, int id) {
+  return event_access(mid,id)->sub != "";
 }
 
 string event_get_super_check_condition(int mid, int id) {
-  return main_event_infos[mid].specs[id]->super;
+  event_info* ei = event_access(mid,id);
+  return evres_code_substitute(ei->super, id, ei->par2type);
 }
 
 string event_get_super_check_function(int mid, int id) {
-  event_info *e = main_event_infos[mid].specs[id];
+  event_info *e = event_access(mid,id);
   return (e->super != "" and e->super[0] == '{') ? "inline bool supercheck_" + e->name + "() " + e->super + "\n\n" : "";
+}
+
+string event_get_sub_check_condition(int mid, int id) {
+  event_info* ei = event_access(mid,id);
+  const string res = evres_code_substitute(ei->sub, id, ei->par2type);
+  return res[0] == '{' ? res : "if (!(" + res + ")) return 0;";
 }
 
 // Does this event belong on the list of events to execute?
 bool event_execution_uses_default(int mid, int id) {
-  event_info *e = main_event_infos[mid].specs[id];
+  event_info *e = event_access(mid,id);
   return e->mode == et_inline or e->mode == et_special or e->mode == et_stacked;
 }
 
@@ -366,6 +488,11 @@ void event_info_clear()
   for (unsigned i=0; i<main_event_infos.size; i++)
     main_event_infos[i].specs.clear();
   event_sequence.clear();
+}
+
+bool event_is_instance(int mid, int id) { // Returns if the event with the given ID pair is an instance of a stacked event
+  main_event_info &mei = main_event_infos[mid];
+  return !mei.is_group and mei.specs[0]->mode == et_stacked;
 }
 
 /*

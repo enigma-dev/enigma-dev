@@ -35,7 +35,7 @@ int draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h
 //enigma::4args int draw_sprite_tiled(ARG sprite,ARG2 subimg,ARG3 x,ARG4 y)
 int draw_sprite_part(int spr,int subimg,double left,double top,double width,double height,double x,double y);
 int draw_sprite_part_offset(int spr,int subimg,double left,double top,double width,double height,double x,double y);
-int draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double yscale,double rot,double color,double alpha);
+int draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double yscale,double rot,int color,double alpha);
 //draw_sprite_stretched_ext(sprite,subimg,x,y,w,h,color,alpha)
 //draw_sprite_tiled_ext(sprite,subimg,x,y,xscale,yscale,color,alpha)
 int draw_sprite_part_ext(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha);

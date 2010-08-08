@@ -55,6 +55,8 @@ using namespace std;
 #include "compile_includes.h"
 #include "compile_common.h"
 
+#include "../settings-parse/crawler.h"
+
 #include "components/components.h"
 #include "../gcc_interface/gcc_backend.h"
 
@@ -88,13 +90,6 @@ void clear_ide_editables()
     wto << "int instdata[] = { 0 }; //Empty until game is built via ENIGMA\n";
     //wto << "enigma::room_max = 1;\nenigma::maxid = 100001;\n";
   wto.close();
-  
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h",ios_base::out);
-    wto <<
-    "var  alarm;\nvar  image_single;\nvar  image_speed;\nvar  path_endaction;\nvar  path_index;\nvar  path_orientation;\n"
-    "var  path_position;\nvar  path_positionprevious;\nvar  path_scale;\nvar  path_speed;\nvar  timeline_index;\n"
-    "var  timeline_position;\nvar  timeline_speed;\n";
-  wto.close();
 
 //FIXME: Accessors are required for sprite_width and height, as well as all bbox_ variables
   
@@ -114,13 +109,18 @@ void clear_ide_editables()
 }
 
 // modes: 0=run, 1=debug, 2=build, 3=compile
-enum { emode_run, emode_debug, emode_build, emode_compile };
+enum { emode_run, emode_debug, emode_build, emode_compile, emode_rebuild };
 dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
 {
+  cout << "Initializing dialog boxes" << endl;
     ide_dia_clear();
     ide_dia_open();
-
+  cout << "Initialized." << endl;
+  
+  edbg << "Building for mode (" << mode << ")" << flushl;
+  
   // CLean up from any previous executions.
+  edbg << "Cleaning up from previous executions" << flushl;
     parsed_objects.clear(); //Make sure we don't dump in any old object code...
     shared_locals_clear();  //Forget inherited locals, we'll reparse them
     event_info_clear();     //Forget event definitions, we'll re-get them
@@ -131,6 +131,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
       user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
       idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
     }
+    edbg << "Grabbing locals" << flushl;  
+      string high_level_shared_locals = extensions::compile_local_string();
   
   //Read the types of events
   event_parse_resourcefile();
@@ -231,6 +233,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   // FIRST FILE
   // Modes and settings.
   
+  edbg << "Writing modes and settings" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
     wto << license;
     wto << "#define ASSUMEZERO 0\n";
@@ -249,9 +252,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << '\n';
   wto.close();
   
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h",ios_base::out);
+    wto << high_level_shared_locals;
+  wto.close();
+  
   
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
+  edbg << "Writing object switch" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out);
     wto << license;
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
@@ -267,6 +275,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   //NEXT FILE ----------------------------------------
   //Resource names: Defines integer constants for all resources.
   int max;
+  edbg << "Writing resource names and maxima" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out);
     wto << license;
     
@@ -298,14 +307,17 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   idpr("Performing Secondary Parsing and Writing Globals",25);
   
   // Defragged events must be written before object data, or object data cannot determine which events were used.
+  edbg << "Writing events" << flushl;
   res = compile_writeDefraggedEvents(es);
   irrr();
   
   parsed_object EGMglobal;
   
+  edbg << "Linking globals" << flushl;
   res = link_globals(&EGMglobal,es,scripts);
   irrr();
   
+  edbg << "Writing object data" << flushl;
   res = compile_writeObjectData(es,&EGMglobal);
   irrr();
   

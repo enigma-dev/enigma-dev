@@ -161,9 +161,13 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
   << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
   //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   
-  cout << "Initializing EDL Parser...";
+  cout << "Initializing EDL Parser...\n";
   
   parser_init();
+  
+  cout << "Grabbing locals...\n";
+  
+  shared_locals_load();
   
   cout << " Done.\n";
   
@@ -176,6 +180,8 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
   //First, we make a space to put our scripts.
   globals_scope = scope_get_using(&global_scope);
   globals_scope = globals_scope->members["ENIGMA Resources"] = new externs("ENIGMA Resources",NULL,globals_scope,EXTFLAG_NAMESPACE);
+  
+  shared_locals_load();
   
   for (int i = 0; i < script_count; i++)
     quickmember_script(globals_scope,script_names[i]);

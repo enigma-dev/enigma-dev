@@ -118,8 +118,8 @@ using namespace std;
     
     const int not_attrib = ~fff_attrib;
     
-    if (r == "." or r == ".."                    // Don't return ./ and ../
-    or (r[0] == '.' and not_attrib & fa_hidden) // Filter hidden files
+    if (r == "." or r == ".." // Don't return ./ and ../
+    or ((r[0] == '.' or r[r.length()-1] == '~') and not_attrib & fa_hidden) // Filter hidden files
     ) return file_find_next(); 
     
     struct stat sb;
@@ -127,7 +127,7 @@ using namespace std;
     stat(fqfn.c_str(), &sb);
     
     if ((sb.st_mode & S_IFDIR     and not_attrib & fa_directory) // Filter out/for directories
-    or  (sb.st_uid == u_root      and not_attrib & fa_hidden)    // Filter hidden files
+    or  (sb.st_uid == u_root      and not_attrib & fa_hidden)    // Filter system files
     or  (not_attrib & fa_readonly and access(fqfn.c_str(),W_OK)) // Filter read-only files
     ) return file_find_next();
     

@@ -36,6 +36,7 @@ using namespace std;
 
 #include "object_storage.h"
 #include "../externs/externs.h"
+#include "../settings-parse/crawler.h"
 
 
 map<string,int> shared_object_locals;
@@ -63,6 +64,9 @@ int shared_locals_load()
     for (extiter mem = cs->members.begin(); mem != cs->members.end(); mem++)
       shared_object_locals[mem->first] = 0;
   }
+  
+  extensions::crawl_for_locals();
+  extensions::dump_read_locals(shared_object_locals);
   return 0;
 }
 

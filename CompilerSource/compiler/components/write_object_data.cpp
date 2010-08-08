@@ -38,6 +38,7 @@ using namespace std;
 #include "../compile_common.h"
 #include "../event_reader/event_parser.h"
 
+struct cspair { string c, s; };
 int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 {
   //NEXT FILE ----------------------------------------
@@ -97,15 +98,24 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         
         // Now we output all the events this object uses
         // Defaulted events were already added into this array.
+        map<int, cspair> nemap; // Keep track of events that need added to honor et_stacked
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
           if  (i->second->events[ii].code != "")
           {
             //Look up the event name
             string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
-            // wto << "\n    #define ENIGMAEVENT_" << evname << " 1\n";
+            if (event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id))
+              nemap[i->second->events[ii].mainId].c += (event_has_super_check(i->second->events[ii].mainId,i->second->events[ii].id) ? 
+                "        if (" + event_get_super_check_condition(i->second->events[ii].mainId,i->second->events[ii].id) + ") myevent_" : "        myevent_") + evname + "();\n",
+              nemap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
             wto << "    variant myevent_" << evname << "();\n    ";
           }
-        
+        if (nemap.size())
+        {
+          wto << "\n    \n    // Grouped event bases\n    ";
+          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
+            wto << "  void myevent_" << it->second.s << "()\n      {\n" << it->second.c << "      }\n    ";
+        }
         
         
         /**** Now we write the callable unlinker. Its job is to disconnect the instance for destroy.
@@ -121,8 +131,11 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
         
         // This tracks components of the event system.
-          for (unsigned ii = 0; ii < i->second->events.size; ii++)
-            wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+          for (unsigned ii = 0; ii < i->second->events.size; ii++) // Export a tracker for all events
+            if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) //...well, all events which aren't stacked
+              wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
+            wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << it->second.s << ";\n";
         
         //This is the actual call to remove the current instance from all linked records before destroying it.
         wto << "\n    void unlink()\n    {\n";
@@ -130,12 +143,14 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
           for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
             wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
-          for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-            const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
-            wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
-          } wto << "\n    }\n    ";
-        
-        
+          for (unsigned ii = 0; ii < i->second->events.size; ii++)
+            if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
+              const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
+              wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
+          } 
+          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
+            wto << "      enigma::event_" << it->second.s << "->unlink(ENOBJ_ITER_myevent_" << it->second.s << ");\n";
+          wto << "\n    }\n    ";
         
         
         /**** Next are the constructors. One is automated, the other directed.
@@ -157,10 +172,13 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 wto << "      ENOBJ_ITER_myobj" << her->second->id << " = enigma::link_obj_instance(this, " << her->second->id << ");\n";
             
             // Event system interface
-              for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-                const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
-                wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
+              for (unsigned ii = 0; ii < i->second->events.size; ii++) 
+                if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
+                  const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
+                  wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
               }
+              for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
+                wto << "      ENOBJ_ITER_myevent_" << it->second.s << " = enigma::event_" << it->second.s << "->add_inst(this);\n";
             
             // Coordinates
               wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
@@ -176,7 +194,10 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
               wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
             for (unsigned ii = 0; ii < i->second->events.size; ii++)
-              wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+              if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id))
+                wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+            for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
+              wto << "      delete ENOBJ_ITER_myevent_" << it->second.s << ";\n";
           wto << "\n    }\n    ";
           
         wto << "  };\n";
@@ -197,8 +218,13 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
       if  (i->second->events[ii].code != "")
       {
-        string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
+        const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
+        string evname = event_get_function_name(mid,id);
         wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
+          if (event_has_sub_check(mid, id))
+            wto << event_get_sub_check_condition(mid, id) << endl;
+          if (event_has_const_code(mid, id))
+            wto << event_get_const_code(mid, id) << endl;
           print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
         wto << "\n  return 0;\n}\n\n";
       }
@@ -234,7 +260,8 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     instance->solid = enigma::objectdata[instance->obj].solid;
     instance->persistent = enigma::objectdata[instance->obj].persistent;
     instance->depth = enigma::objectdata[instance->obj].depth;*/
-    "    for(int i=0;i<16;i++)\n      instance->alarm[i]=-1;\n\n"
+    "    instance->visible = true;\n    \n"
+    "    for(int i=0;i<16;i++)\n      instance->alarm[i]=-1;\n    \n"
     
     "    if(instance->sprite_index!=-1)\n    {\n      instance->bbox_bottom  =   sprite_get_bbox_bottom(instance->sprite_index);\n      "
     "    instance->bbox_left    =   sprite_get_bbox_left(instance->sprite_index);\n      instance->bbox_right   =   sprite_get_bbox_right(instance->sprite_index);\n      "

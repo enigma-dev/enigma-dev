@@ -1,0 +1,21 @@
+%E-YAML
+---
+
+# This file implements locals used by upper-level systems, such as events.
+# It can be partitioned and separated into multple smaller files if desired.
+
+General Locals:
+	Locals:
+		alarm: int[8]
+
+Typical Status Locals:
+	Locals:
+		health: int
+		score: int
+		lives: int
+
+Automatic Imaging Locals:
+	Locals:
+		image_single: int
+		image_speed: int
+

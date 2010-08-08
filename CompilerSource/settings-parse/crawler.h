@@ -25,42 +25,22 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <string>
-#include <fstream>
-using std::string;
+#include <list>
+#include <map>
 
-struct ey_base {
-  string name;
-  const bool is_scalar;
-  ey_base(bool);
-  ey_base(string,bool);
-};
-
-struct ey_string: ey_base {
-  string value;
-  ey_string();
-  ey_string(string);
-  ey_string(string, string);
-};
-
-struct ey_data: ey_base
+namespace settings
 {
-  map<string, ey_base*> values;
-  struct eylist {
-    ey_base *value; eylist *next;
-    eylist(); eylist(eylist*);
-  } values_order, *values_order_last;
-  
-  operator char*();
-  operator ey_data*();
-  
-  ey_data();
-  ey_data(string);
-  ~ey_data();
-};
-typedef map<string, ey_base*>::iterator eyit;
-typedef pair<string, ey_base*> eypair;
-typedef ey_data::eylist *eycit;
+  struct system_descriptor
+  {
+    string name;
+  };
+  extern list<string> systems;
+  int scour_settings();
+}
 
-ey_data parse_eyaml(ifstream &file, string fname = "");
-eyit eyaml_ci_find(ey_data &dat, string str);
+namespace extensions
+{
+  string compile_local_string();
+  void dump_read_locals(map<string,int>&);
+  void crawl_for_locals();
+}

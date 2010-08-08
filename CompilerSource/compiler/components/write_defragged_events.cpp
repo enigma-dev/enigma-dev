@@ -31,6 +31,8 @@
 #include <string>
 #include <map>
 
+#include "../../backend/ideprint.h"
+
 using namespace std;
 
 #include "../../externs/externs.h"
@@ -54,9 +56,13 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   used_events.clear();
   for (int i = 0; i < es->gmObjectCount; i++)
     for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
-      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++) {
-        int mid = es->gmObjects[i].mainEvents[ii].id, id = es->gmObjects[i].mainEvents[ii].events[iii].id;
-        used_events[event_get_function_name(mid,id)].inc(mid,id);
+      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
+      {
+        const int mid = es->gmObjects[i].mainEvents[ii].id, id = es->gmObjects[i].mainEvents[ii].events[iii].id;
+        if (event_is_instance(mid,id))
+          used_events[event_stacked_get_root_name(mid)].inc(mid,id);
+        else
+          used_events[event_get_function_name(mid,id)].inc(mid,id);
       }
   
   for (size_t i=0; i<event_sequence.size(); i++)
@@ -83,10 +89,12 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   wto << "  {" << endl;
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
   {
-    wto << "    virtual variant myevent_" << it->first << "()";
+    const bool eii = event_is_instance(it->second.mid, it->second.id);
+    wto << (eii ? "    virtual void    myevent_" : "    virtual variant myevent_") << it->first << "()";
+    edbg << "Checking for default code in ev[" << it->second.mid << ", " << it->second.id << ".\n";
     if (event_has_default_code(it->second.mid,it->second.id))
-      wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << "    return 0;" << endl << "    }" << endl;
-    else wto << " { return 0; } // No default " << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
+      wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << (eii ? "    }" : "    return 0;\n    }") << endl;
+    else wto << (eii ? " { } // No default " : " { return 0; } // No default ") << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
   }
   wto << "    //virtual void unlink() {} // This is already declared at the super level." << endl;
   wto << "    event_parent() {}" << endl;
@@ -94,6 +102,7 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   wto << "  };" << endl;
   wto << "}" << endl;
   wto.close();
+  
   
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.h");
   wto << license;
@@ -116,11 +125,12 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
     wto << event_get_super_check_function(it->second.mid, it->second.id);
   
+  edbg << "cp4" << flushl;
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
     for (size_t i=0; i<event_sequence.size(); i++)
     {
       const int mid = event_sequence[i].first, id = event_sequence[i].second;
-      evfit it = used_events.find(event_get_function_name(mid,id));
+      evfit it = used_events.find(event_is_instance(mid,id) ? event_stacked_get_root_name(mid) : event_get_function_name(mid,id));
       if (it == used_events.end()) continue;
       
       if (event_has_instead(mid,id))
@@ -133,8 +143,8 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
       else
         if (event_execution_uses_default(mid,id))
         {
-          if (event_has_super_check(mid,id))
-            wto << "    if (" << event_get_super_check_condition(mid,id) << ")" << endl
+          if (event_has_super_check(mid,id) and !event_is_instance(mid,id))
+            wto << "    if (!(" << event_get_super_check_condition(mid,id) << "))" << endl
                 << "      for (instance_event_iterator = event_" << it->first << "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)" << endl
                 << "        ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" << it->first << "();" << endl;
           else

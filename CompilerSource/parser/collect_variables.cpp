@@ -311,7 +311,7 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
     }
   }
   
-  cout << "**Finished collections in " << (pev==NULL ? "some event for some unspecified object" : pev->myObj->name + ", event " + event_get_human_name(pev->mainId,pev->id))<< "\n";
+  //cout << "**Finished collections in " << (pev==NULL ? "some event for some unspecified object" : pev->myObj->name + ", event " + event_get_human_name(pev->mainId,pev->id))<< "\n";
   
   //Store these for later.
   pev->code = code;
