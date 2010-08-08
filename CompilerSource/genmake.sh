@@ -14,7 +14,7 @@ echo "# OPTIMIZATION_FLAGS =" >> Makefile;
 echo "" >> Makefile;
 echo "# RELEASE (faster runtime)" >> Makefile;
 echo "SYMBOL_FLAGS       = -s # Strip symbol table" >> Makefile;
-echo "OPTIMIZATION_FLAGS = -O2 # Optimize for speed" >> Makefile;
+echo "OPTIMIZATION_FLAGS = -O3 # Optimize for speed" >> Makefile;
 echo "# OPTIMIZATION_FLAGS = -Os # Optimize for size" >> Makefile;
 echo "" >> Makefile;
 
@@ -22,8 +22,10 @@ echo "# OS and default target" >> Makefile;
 echo "OS := \$(shell uname -s)" >> Makefile;
 echo "ifeq (\$(OS), Linux)" >> Makefile;
 echo "	TARGET := linux" >> Makefile;
+echo "	CREMOVE := rm" >> Makefile;
 echo "else" >> Makefile;
 echo "	TARGET := win" >> Makefile;
+echo "	CREMOVE := del" >> Makefile;
 echo "endif" >> Makefile;
 echo "" >> Makefile;
 
@@ -78,14 +80,12 @@ printf "link: mkeobjs" >> Makefile;
 
 echo "" >> Makefile;
 echo "win windows: link" >> Makefile;
-echo "	-move ../compileEGMf.exe ../compileEGMf" >> Makefile;
-echo "	move ../compileEGMf ../compileEGMf.dll" >> Makefile;
 echo "lin linux unix: link" >> Makefile;
-echo "	mv ../compileEGMf ../libcompileEGMf.so" >> Makefile;
+echo "	mv ../compileEGMf.dll ../libcompileEGMf.so" >> Makefile;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	-rm -f .eobjs/*" >> Makefile;
-echo "	-rm ../*compileEGMf.*" >> Makefile;
+echo "	-\$(CREMOVE) -f .eobjs/*" >> Makefile;
+echo "	-\$(CREMOVE) ../*compileEGMf.*" >> Makefile;
 
 echo "" >> Makefile;

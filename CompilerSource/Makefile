@@ -7,15 +7,17 @@
 
 # RELEASE (faster runtime)
 SYMBOL_FLAGS       = -s # Strip symbol table
-OPTIMIZATION_FLAGS = -O2 # Optimize for speed
+OPTIMIZATION_FLAGS = -O3 # Optimize for speed
 # OPTIMIZATION_FLAGS = -Os # Optimize for size
 
 # OS and default target
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	TARGET := linux
+	CREMOVE := rm
 else
 	TARGET := win
+	CREMOVE := del
 endif
 
 # default target (because it appears first)
@@ -53,7 +55,7 @@ default: $(TARGET)
 	g++ -Wall   -fPIC -c  cfile_parse/type_resolver.cpp		-o .eobjs/type_resolver.o $(FLAGS)
 .eobjs/compile_common.o: compiler/compile_common.cpp parser/object_storage.h general/darray.h compiler/compile_organization.h
 	g++ -Wall   -fPIC -c  compiler/compile_common.cpp		-o .eobjs/compile_common.o $(FLAGS)
-.eobjs/compile.o: compiler/compile.cpp OS_Switchboard.h backend/EnigmaStruct.h backend/JavaStruct.h backend/resources/Sprite.h backend/sub/Image.h backend/resources/Sound.h backend/resources/Background.h backend/resources/Path.h backend/sub/PathPoint.h backend/resources/Script.h backend/resources/Font.h backend/resources/Timeline.h backend/sub/Moment.h backend/sub/Action.h backend/resources/GmObject.h backend/sub/MainEvent.h backend/sub/Event.h backend/resources/Room.h backend/sub/BackgroundDef.h backend/sub/Instance.h backend/sub/Tile.h backend/sub/View.h backend/other/Trigger.h backend/other/Constant.h backend/other/Include.h general/darray.h backend/ideprint.h backend/JavaCallbacks.h externs/externs.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h compiler/compile_includes.h compiler/compile_common.h compiler/compile_organization.h compiler/components/components.h gcc_interface/gcc_backend.h general/bettersystem.h compiler/event_reader/event_parser.h
+.eobjs/compile.o: compiler/compile.cpp OS_Switchboard.h backend/EnigmaStruct.h backend/JavaStruct.h backend/resources/Sprite.h backend/sub/Image.h backend/resources/Sound.h backend/resources/Background.h backend/resources/Path.h backend/sub/PathPoint.h backend/resources/Script.h backend/resources/Font.h backend/resources/Timeline.h backend/sub/Moment.h backend/sub/Action.h backend/resources/GmObject.h backend/sub/MainEvent.h backend/sub/Event.h backend/resources/Room.h backend/sub/BackgroundDef.h backend/sub/Instance.h backend/sub/Tile.h backend/sub/View.h backend/other/Trigger.h backend/other/Constant.h backend/other/Include.h general/darray.h backend/ideprint.h backend/JavaCallbacks.h externs/externs.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h compiler/compile_includes.h compiler/compile_common.h compiler/compile_organization.h settings-parse/crawler.h compiler/components/components.h gcc_interface/gcc_backend.h general/bettersystem.h compiler/event_reader/event_parser.h
 	g++ -Wall   -fPIC -c  compiler/compile.cpp		-o .eobjs/compile.o $(FLAGS)
 .eobjs/compile_includes.o: compiler/compile_includes.cpp general/estring.h general/darray.h
 	g++ -Wall   -fPIC -c  compiler/compile_includes.cpp		-o .eobjs/compile_includes.o $(FLAGS)
@@ -79,15 +81,19 @@ default: $(TARGET)
 	g++ -Wall   -fPIC -c  general/textfile.cpp		-o .eobjs/textfile.o $(FLAGS)
 .eobjs/collect_variables.o: parser/collect_variables.cpp compiler/event_reader/event_parser.h parser/object_storage.h general/darray.h externs/externs.h externs/references.h
 	g++ -Wall   -fPIC -c  parser/collect_variables.cpp		-o .eobjs/collect_variables.o $(FLAGS)
-.eobjs/object_storage.o: parser/object_storage.cpp general/darray.h parser/object_storage.h externs/externs.h externs/references.h
+.eobjs/object_storage.o: parser/object_storage.cpp general/darray.h parser/object_storage.h externs/externs.h externs/references.h settings-parse/crawler.h
 	g++ -Wall   -fPIC -c  parser/object_storage.cpp		-o .eobjs/object_storage.o $(FLAGS)
 .eobjs/parser_components.o: parser/parser_components.cpp general/darray.h externs/externs.h externs/references.h general/parse_basics.h compiler/output_locals.h settings.h cfile_parse/macro_functions.h
 	g++ -Wall   -fPIC -c  parser/parser_components.cpp		-o .eobjs/parser_components.o $(FLAGS)
 .eobjs/parser.o: parser/parser.cpp externs/externs.h general/darray.h externs/references.h parser/parser_components.h general/parse_basics.h parser/object_storage.h parser/collect_variables.h cfile_parse/type_resolver.h
 	g++ -Wall   -fPIC -c  parser/parser.cpp		-o .eobjs/parser.o $(FLAGS)
+.eobjs/crawler.o: settings-parse/crawler.cpp filesystem/file_find.h settings-parse/crawler.h settings-parse/eyaml.h parser/object_storage.h general/darray.h
+	g++ -Wall   -fPIC -c  settings-parse/crawler.cpp		-o .eobjs/crawler.o $(FLAGS)
+.eobjs/eyaml.o: settings-parse/eyaml.cpp settings-parse/eyaml.h general/parse_basics.h
+	g++ -Wall   -fPIC -c  settings-parse/eyaml.cpp		-o .eobjs/eyaml.o $(FLAGS)
 .eobjs/checkfile.o: syntax/checkfile.cpp general/darray.h syntax/syncheck.h parser/parser.h parser/object_storage.h general/parse_basics.h
 	g++ -Wall   -fPIC -c  syntax/checkfile.cpp		-o .eobjs/checkfile.o $(FLAGS)
-.eobjs/syntax.o: syntax/syntax.cpp general/textfile.h general/darray.h general/parse_basics.h externs/externs.h externs/references.h settings.h syntax/chkfunction.h syntax/syntaxtools.h
+.eobjs/syntax.o: syntax/syntax.cpp general/textfile.h general/darray.h general/parse_basics.h externs/externs.h externs/references.h settings.h parser/object_storage.h syntax/chkfunction.h syntax/syntaxtools.h
 	g++ -Wall   -fPIC -c  syntax/syntax.cpp		-o .eobjs/syntax.o $(FLAGS)
 .eobjs/varnames.o: varnames/varnames.cpp general/darray.h
 	g++ -Wall   -fPIC -c  varnames/varnames.cpp		-o .eobjs/varnames.o $(FLAGS)
@@ -97,7 +103,7 @@ default: $(TARGET)
 	g++ -Wall   -fPIC -c  compiler/components/module_write_sprites.cpp		-o .eobjs/module_write_sprites.o $(FLAGS)
 .eobjs/parse_and_link.o: compiler/components/parse_and_link.cpp backend/ideprint.h externs/externs.h general/darray.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h backend/EnigmaStruct.h backend/JavaStruct.h backend/resources/Sprite.h backend/sub/Image.h backend/resources/Sound.h backend/resources/Background.h backend/resources/Path.h backend/sub/PathPoint.h backend/resources/Script.h backend/resources/Font.h backend/resources/Timeline.h backend/sub/Moment.h backend/sub/Action.h backend/resources/GmObject.h backend/sub/MainEvent.h backend/sub/Event.h backend/resources/Room.h backend/sub/BackgroundDef.h backend/sub/Instance.h backend/sub/Tile.h backend/sub/View.h backend/other/Trigger.h backend/other/Constant.h backend/other/Include.h compiler/compile_common.h compiler/compile_organization.h compiler/event_reader/event_parser.h
 	g++ -Wall   -fPIC -c  compiler/components/parse_and_link.cpp		-o .eobjs/parse_and_link.o $(FLAGS)
-.eobjs/write_defragged_events.o: compiler/components/write_defragged_events.cpp externs/externs.h general/darray.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h backend/EnigmaStruct.h backend/JavaStruct.h backend/resources/Sprite.h backend/sub/Image.h backend/resources/Sound.h backend/resources/Background.h backend/resources/Path.h backend/sub/PathPoint.h backend/resources/Script.h backend/resources/Font.h backend/resources/Timeline.h backend/sub/Moment.h backend/sub/Action.h backend/resources/GmObject.h backend/sub/MainEvent.h backend/sub/Event.h backend/resources/Room.h backend/sub/BackgroundDef.h backend/sub/Instance.h backend/sub/Tile.h backend/sub/View.h backend/other/Trigger.h backend/other/Constant.h backend/other/Include.h compiler/compile_common.h compiler/compile_organization.h compiler/event_reader/event_parser.h
+.eobjs/write_defragged_events.o: compiler/components/write_defragged_events.cpp backend/ideprint.h externs/externs.h general/darray.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h backend/EnigmaStruct.h backend/JavaStruct.h backend/resources/Sprite.h backend/sub/Image.h backend/resources/Sound.h backend/resources/Background.h backend/resources/Path.h backend/sub/PathPoint.h backend/resources/Script.h backend/resources/Font.h backend/resources/Timeline.h backend/sub/Moment.h backend/sub/Action.h backend/resources/GmObject.h backend/sub/MainEvent.h backend/sub/Event.h backend/resources/Room.h backend/sub/BackgroundDef.h backend/sub/Instance.h backend/sub/Tile.h backend/sub/View.h backend/other/Trigger.h backend/other/Constant.h backend/other/Include.h compiler/compile_common.h compiler/compile_organization.h compiler/event_reader/event_parser.h
 	g++ -Wall   -fPIC -c  compiler/components/write_defragged_events.cpp		-o .eobjs/write_defragged_events.o $(FLAGS)
 .eobjs/write_event_code.o: compiler/components/write_event_code.cpp externs/externs.h general/darray.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h backend/EnigmaStruct.h backend/JavaStruct.h backend/resources/Sprite.h backend/sub/Image.h backend/resources/Sound.h backend/resources/Background.h backend/resources/Path.h backend/sub/PathPoint.h backend/resources/Script.h backend/resources/Font.h backend/resources/Timeline.h backend/sub/Moment.h backend/sub/Action.h backend/resources/GmObject.h backend/sub/MainEvent.h backend/sub/Event.h backend/resources/Room.h backend/sub/BackgroundDef.h backend/sub/Instance.h backend/sub/Tile.h backend/sub/View.h backend/other/Trigger.h backend/other/Constant.h backend/other/Include.h compiler/compile_common.h compiler/compile_organization.h compiler/event_reader/event_parser.h
 	g++ -Wall   -fPIC -c  compiler/components/write_event_code.cpp		-o .eobjs/write_event_code.o $(FLAGS)
@@ -113,23 +119,21 @@ default: $(TARGET)
 	g++ -Wall   -fPIC -c  compiler/pcs/pcs.cpp		-o .eobjs/pcs.o $(FLAGS)
 .eobjs/main.o: ./main.cpp general/darray.h externs/externs.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h compiler/compile.h cfile_parse/cfile_parse.h syntax/checkfile.h cfile_parse/cfile_pushing.h cfile_parse/cparse_shared.h backend/JavaCallbacks.h
 	g++ -Wall   -fPIC -c  ./main.cpp		-o .eobjs/main.o $(FLAGS)
-.eobjs/standalone_main.o: ./standalone_main.cpp general/darray.h externs/externs.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h compiler/compile.h cfile_parse/cfile_parse.h syntax/checkfile.h cfile_parse/cfile_pushing.h cfile_parse/cparse_shared.h cfile_parse/type_resolver.h
+.eobjs/standalone_main.o: ./standalone_main.cpp general/darray.h externs/externs.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h compiler/compile.h cfile_parse/cfile_parse.h syntax/checkfile.h cfile_parse/cfile_pushing.h cfile_parse/cparse_shared.h cfile_parse/type_resolver.h settings-parse/crawler.h filesystem/file_find.h
 	g++ -Wall   -fPIC -c  ./standalone_main.cpp		-o .eobjs/standalone_main.o $(FLAGS)
 
 # Nobody knows the trouble I've seen, no... no... nooo...
 mkeobjs:
 	-mkdir .eobjs
 
-link: mkeobjs .eobjs/ideprint.o .eobjs/JavaCallbacks.o .eobjs/cfile_parse.o .eobjs/cfile_parse_macros.o .eobjs/cfile_pushing.o .eobjs/cparse_components.o .eobjs/cparse_shared.o .eobjs/cpmain.o .eobjs/expression_evaluator.o .eobjs/handle_letters.o .eobjs/keyword_operator.o .eobjs/macro_functions.o .eobjs/skipping.o .eobjs/template_handlers.o .eobjs/type_resolver.o .eobjs/compile_common.o .eobjs/compile.o .eobjs/compile_includes.o .eobjs/output_locals.o .eobjs/externs.o .eobjs/ext_iteration.o .eobjs/references.o .eobjs/file_find.o .eobjs/gcc_backend.o .eobjs/bettersystem.o .eobjs/darray.o .eobjs/string.o .eobjs/textfile.o .eobjs/collect_variables.o .eobjs/object_storage.o .eobjs/parser_components.o .eobjs/parser.o .eobjs/checkfile.o .eobjs/syntax.o .eobjs/varnames.o .eobjs/module_write_sounds.o .eobjs/module_write_sprites.o .eobjs/parse_and_link.o .eobjs/write_defragged_events.o .eobjs/write_event_code.o .eobjs/write_globals.o .eobjs/write_object_data.o .eobjs/write_room_data.o .eobjs/event_parser.o .eobjs/pcs.o .eobjs/main.o
+link: mkeobjs .eobjs/ideprint.o .eobjs/JavaCallbacks.o .eobjs/cfile_parse.o .eobjs/cfile_parse_macros.o .eobjs/cfile_pushing.o .eobjs/cparse_components.o .eobjs/cparse_shared.o .eobjs/cpmain.o .eobjs/expression_evaluator.o .eobjs/handle_letters.o .eobjs/keyword_operator.o .eobjs/macro_functions.o .eobjs/skipping.o .eobjs/template_handlers.o .eobjs/type_resolver.o .eobjs/compile_common.o .eobjs/compile.o .eobjs/compile_includes.o .eobjs/output_locals.o .eobjs/externs.o .eobjs/ext_iteration.o .eobjs/references.o .eobjs/file_find.o .eobjs/gcc_backend.o .eobjs/bettersystem.o .eobjs/darray.o .eobjs/string.o .eobjs/textfile.o .eobjs/collect_variables.o .eobjs/object_storage.o .eobjs/parser_components.o .eobjs/parser.o .eobjs/crawler.o .eobjs/eyaml.o .eobjs/checkfile.o .eobjs/syntax.o .eobjs/varnames.o .eobjs/module_write_sounds.o .eobjs/module_write_sprites.o .eobjs/parse_and_link.o .eobjs/write_defragged_events.o .eobjs/write_event_code.o .eobjs/write_globals.o .eobjs/write_object_data.o .eobjs/write_room_data.o .eobjs/event_parser.o .eobjs/pcs.o .eobjs/main.o
 	g++ -shared -fPIC .eobjs/*.o -o ../compileEGMf
 
 win windows: link
-	-move ../compileEGMf.exe ../compileEGMf
-	move ../compileEGMf ../compileEGMf.dll
 lin linux unix: link
-	mv ../compileEGMf ../libcompileEGMf.so
+	mv ../compileEGMf.dll ../libcompileEGMf.so
 
 clean:
-	-rm -f .eobjs/*
-	-rm ../*compileEGMf.*
+	-$(CREMOVE) -f .eobjs/*
+	-$(CREMOVE) ../*compileEGMf.*
 
