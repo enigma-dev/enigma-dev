@@ -44,7 +44,9 @@ int better_system(const char* jname, const char* param)
   
   ZeroMemory(&ProcessInformation, sizeof(ProcessInformation));
   
-  if (CreateProcess(jname,(CHAR*)param,NULL,NULL,TRUE,CREATE_DEFAULT_ERROR_MODE,NULL,NULL,&StartupInfo,&ProcessInformation ))
+  char buf[2048];
+  sprintf(buf, "\"%s\" %s", jname, param);
+  if (CreateProcess(jname,(CHAR*)buf,NULL,NULL,TRUE,CREATE_DEFAULT_ERROR_MODE,NULL,NULL,&StartupInfo,&ProcessInformation ))
   {
     WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
     GetExitCodeProcess(ProcessInformation.hProcess, &exit_status);
@@ -58,34 +60,48 @@ int better_system(const char* jname, const char* param)
 
 int main()
 {
-  char buf[2048];
+  int a;
+  puts("Scouring for Make");
+  const char *mpath = "make";
+  a = better_system(mpath, "--ver");
+  if (a) a = better_system(mpath = "mingw32-make", "--ver");
+  if (a) a = better_system(mpath = "\\MinGW\\bin\\make.exe", "--ver");
+  if (a) a = better_system(mpath = "\\MinGW\\bin\\mingw32-make.exe", "--ver");
+  if (a) a = better_system(mpath = "C:\\MinGW\\bin\\mingw32-make.exe", "--ver");
+  if (a) a = better_system(mpath = "C:\\MinGW\\bin\\make.exe", "--ver");
+  if (a) puts("I hope you built ENIGMA yourself, because I sure as hell can't.");
+  else { 
+    a = better_system(mpath,"ENIGMA");
+    if (a) { 
+      puts("I found make, and I asked it to build ENIGMA for you,");
+      puts("but it couldn't for some reason. I hope you did.");
+      puts("Press Enter. If you enter an 'N', I'll just close");
+      if (getchar() == 'N') return 0;
+    }
+  }
+  
   puts("Scouring for Java");
   const char *jpath = "java";
-    sprintf(buf, "\"%s\" -version", jpath);
-  int a = better_system(jpath, buf);
+  a = better_system(jpath, "-version");
   if (a)
   {
     jpath = "\\Program Files (x86)\\Java\\jre6\\bin\\java.exe";
-    sprintf(buf, "\"%s\" -version", jpath);
-      a = better_system(jpath, buf);
+      a = better_system(jpath, "-version");
     if (a)
     {
       jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe";
-      sprintf(buf, "\"%s\" -version", jpath);
-        a = better_system(jpath, buf);
+        a = better_system(jpath, "-version");
       if (a)
       {
         jpath = "C:\\Program Files\\Java\\jre6\\bin\\java.exe"; //At this point, they're probably running something that uses C:.
-        sprintf(buf, "\"%s\" -version", jpath);
-          a = better_system(jpath, buf);
+          a = better_system(jpath, "-version");
       }
     }
   }
   if (!a)
   {
-    sprintf(buf, "\"%s\" -jar l*.jar", jpath);
-    printf("Calling `%s`\n\n",buf);
-    better_system(jpath,buf);
+    printf("Calling `%s -jar l*.jar`\n\n",jpath);
+    better_system(jpath,"-jar l*.jar");
   }
   else
     puts("Could not find Java.exe. You could try adding it to your PATH variable.");
