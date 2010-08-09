@@ -105,7 +105,10 @@ int main()
         {
           int mgi = better_system("Autoconf\\MinGW.exe","");
           if (!mgi) puts("Thanks for installing!");
-          else puts("Somehow, I don't think you installed it.\nContinuing anyway...");
+          else {
+            puts("Somehow, I don't think you installed it.\nContinuing anyway... Will check again next run.");
+            goto confused_cancel;
+          }
         }
       }
       if (tf = fopen("instconf","wb")) fclose(tf);
