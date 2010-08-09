@@ -22,12 +22,12 @@ echo "# OS and default target" >> Makefile;
 echo "OS := \$(shell uname -s)" >> Makefile;
 echo "ifeq (\$(OS), Linux)" >> Makefile;
 echo "	ONAME := ../libcompileEGMf.so" >> Makefile;
-echo "	INPLACEPARAM := -fPIC"
+echo "	INPLACEPARAM := -fPIC" >> Makefile;
 echo "	CREMOVE := rm -f" >> Makefile;
 echo "	SLASHC := /" >> Makefile;
 echo "else" >> Makefile;
 echo "	ONAME := ..\\\\compileEGMf.dll" >> Makefile;
-echo "	INPLACEPARAM := "
+echo "	INPLACEPARAM := " >> Makefile;
 echo "	CREMOVE := del /F" >> Makefile;
 echo "	SLASHC := \\\\" >> Makefile;
 echo "endif" >> Makefile;
