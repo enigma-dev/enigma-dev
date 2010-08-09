@@ -69,12 +69,55 @@ int main()
   if (a) a = better_system(mpath = "\\MinGW\\bin\\mingw32-make.exe", "--ver");
   if (a) a = better_system(mpath = "C:\\MinGW\\bin\\mingw32-make.exe", "--ver");
   if (a) a = better_system(mpath = "C:\\MinGW\\bin\\make.exe", "--ver");
-  if (a) puts("I hope you built ENIGMA yourself, because I sure as hell can't.");
+  /*
+    if (a) a = better_system(mpath = "\\Program Files\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--ver");
+    if (a) a = better_system(mpath = "\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--ver");
+    if (a) a = better_system(mpath = "\\Program Files\\CodeBlocks\\MinGW\\bin\\make.exe", "--ver");
+    if (a) a = better_system(mpath = "\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\make.exe", "--ver");
+    if (a) a = better_system(mpath = "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--ver");
+    if (a) a = better_system(mpath = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--ver");
+    if (a) a = better_system(mpath = "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\make.exe", "--ver");
+    if (a) a = better_system(mpath = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\make.exe", "--ver");
+  */
+  if (a) // If we didn't find it
+  {
+    FILE *tf = fopen("instconf","rb"); // Config file
+    if (tf) { // If we've been down this road before
+      puts("I hope you built ENIGMA yourself, because I can't.");
+      fclose(tf);
+    }
+    else // First time run
+    {
+      if (MessageBox(NULL,"MinGW was not detected on this system. Would you like to install it now? "
+                          "If you are certain you have a stable version, you can decline now and help ENIGMA find said "
+                          "version later.\n\nIf you are clueless, press \"Yes\".", "Welcome to ENIGMA!", MB_YESNO) == IDYES)
+      {
+        if (MessageBox(NULL,"ENIGMA will now run the MinGW installer. It should default to C:\\MinGW, or whatever your main drive is in place of C:\\. "
+                            "Such is the recommended location (it's easiest to find).\n\nWhen prompted, please check that you would like three items:\n"
+                            " = The GCC C Compiler\n"
+                            " = The G++ C++ Compiler\n"
+                            " = The GDB GNU Debugging Program", "MinGW Install", MB_OKCANCEL) == IDCANCEL)
+        {
+          MessageBox(NULL, "Don't you cancel on me. <__<\"\nAll you had to do was run through the installer.\n\n*sigh*, We'll see how this works for you, then I'll ask you again next time.", "ENIGMA", MB_OK);
+          goto confused_cancel;
+        }
+        else
+        {
+          int mgi = better_system("Autoconf\\MinGW.exe","");
+          if (!mgi) puts("Thanks for installing!");
+          else puts("Somehow, I don't think you installed it.\nContinuing anyway...");
+        }
+      }
+      if (tf = fopen("instconf","wb")) fclose(tf);
+      else puts("\nI believe there's something wrong with your system. Ignoring and continuing...\n");
+      confused_cancel: ;
+    }
+  }
   else { 
     a = better_system(mpath,"ENIGMA");
     if (a) { 
       puts("I found make, and I asked it to build ENIGMA for you,");
-      puts("but it couldn't for some reason. I hope you did.");
+      puts("but it couldn't for some reason. I hope you did.\n");
       puts("Press Enter. If you enter an 'N', I'll just close");
       if (getchar() == 'N') return 0;
     }
@@ -85,17 +128,12 @@ int main()
   a = better_system(jpath, "-version");
   if (a)
   {
-    jpath = "\\Program Files (x86)\\Java\\jre6\\bin\\java.exe";
-      a = better_system(jpath, "-version");
+    a = better_system(jpath = "\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version");
     if (a)
     {
-      jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe";
-        a = better_system(jpath, "-version");
+      a = better_system(jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe", "-version");
       if (a)
-      {
-        jpath = "C:\\Program Files\\Java\\jre6\\bin\\java.exe"; //At this point, they're probably running something that uses C:.
-          a = better_system(jpath, "-version");
-      }
+        a = better_system(jpath = "C:\\Program Files\\Java\\jre6\\bin\\java.exe", "-version"); //At this point, they're probably running something that uses C:.
     }
   }
   if (!a)
