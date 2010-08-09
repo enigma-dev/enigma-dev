@@ -21,16 +21,20 @@ echo "" >> Makefile;
 echo "# OS and default target" >> Makefile;
 echo "OS := \$(shell uname -s)" >> Makefile;
 echo "ifeq (\$(OS), Linux)" >> Makefile;
-echo "	TARGET := linux" >> Makefile;
-echo "	CREMOVE := rm" >> Makefile;
+echo "	ONAME := ../libcompileEGMf.so" >> Makefile;
+echo "	INPLACEPARAM := -fPIC"
+echo "	CREMOVE := rm -f" >> Makefile;
+echo "	SLASHC := /" >> Makefile;
 echo "else" >> Makefile;
-echo "	TARGET := win" >> Makefile;
-echo "	CREMOVE := del" >> Makefile;
+echo "	ONAME := ..\\\\compileEGMf.dll" >> Makefile;
+echo "	INPLACEPARAM := "
+echo "	CREMOVE := del /F" >> Makefile;
+echo "	SLASHC := \\\\" >> Makefile;
 echo "endif" >> Makefile;
 echo "" >> Makefile;
 
 echo "# default target (because it appears first)" >> Makefile;
-echo "default: \$(TARGET)" >> Makefile;
+echo "default: \$(ONAME)" >> Makefile;
 echo "" >> Makefile;
 
 for subdir in */ */*/ ./; #Iterate 
@@ -49,7 +53,7 @@ for subdir in */ */*/ ./; #Iterate
         done;
         echo "" >> Makefile;
         
-        echo "	g++ -Wall ${SYMBOL_FLAGS} ${OPTIMIZATION_FLAGS} -fPIC -c  $file		-o .eobjs/${pathless%.cpp}.o \$(FLAGS)"  >> Makefile;
+        echo "	g++ -Wall \$(SYMBOL_FLAGS) \$(OPTIMIZATION_FLAGS) \$(INPLACEPARAM) -c  $file		-o .eobjs/${pathless%.cpp}.o \$(FLAGS)"  >> Makefile;
       };
       done;
   done;
@@ -59,7 +63,7 @@ echo "# Nobody knows the trouble I've seen, no... no... nooo..." >> Makefile;
 echo "mkeobjs:" >> Makefile;
 echo "	-mkdir .eobjs" >> Makefile;
 echo "" >> Makefile;
-printf "link: mkeobjs" >> Makefile;
+printf "\$(ONAME): mkeobjs" >> Makefile;
   for subdir in */ */*/ ./; #Iterate 
     do
       for file in $subdir*.cpp;
@@ -76,16 +80,15 @@ printf "link: mkeobjs" >> Makefile;
     done;
     echo "" >> Makefile;
   
-  echo "	g++ -shared -fPIC .eobjs/*.o -o ../compileEGMf" >> Makefile;
+  echo "	g++ -shared \$(INPLACEPARAM) .eobjs/*.o -o \$(ONAME)" >> Makefile;
 
 echo "" >> Makefile;
-echo "win windows: link" >> Makefile;
-echo "lin linux unix: link" >> Makefile;
-echo "	mv ../compileEGMf.dll ../libcompileEGMf.so" >> Makefile;
+echo "win windows: \$(ONAME)" >> Makefile;
+echo "lin linux unix: \$(ONAME)" >> Makefile;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	-\$(CREMOVE) -f .eobjs/*" >> Makefile;
-echo "	-\$(CREMOVE) ../*compileEGMf.*" >> Makefile;
+echo "	-\$(CREMOVE) \".eobjs\$(SLASHC)*\"" >> Makefile;
+echo "	-\$(CREMOVE) \"\$(ONAME)\"" >> Makefile;
 
 echo "" >> Makefile;

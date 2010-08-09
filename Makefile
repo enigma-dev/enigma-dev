@@ -1,6 +1,7 @@
-ENIGMA:
+ENIGMA: DUMMYDEPENDENCY
 	cd CompilerSource && $(MAKE) $(PLATFORM)
-
+DUMMYDEPENDENCY:
+	
 # Target takes the following parameters:
 #	GMODE{run,build,debug,compile}
 #	GRAPHICS{<anything under graphics_systems>}
@@ -11,6 +12,4 @@ Game:
 	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GFLAGS="$(GFLAGS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM)
 
 clean:
-	-rm -f CompilerSource/.eobjs/*
-	-rm ./*compileEGMf.*
-
+	cd CompilerSource && $(MAKE) clean

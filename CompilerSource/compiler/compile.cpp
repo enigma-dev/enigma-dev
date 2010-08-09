@@ -345,7 +345,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   string gflags = "-O3 -s";
   
   #if   TARGET_PLATFORM_ID == OS_WINDOWS
-    string glinks = "-lopengl32 '../additional/zlib/libzlib.a' -lcomdlg32 -lgdi32";
+    string glinks = "-lopengl32 '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' -lcomdlg32 -lgdi32";
     string graphics = "OpenGL";
     string platform = "windows";
   #else

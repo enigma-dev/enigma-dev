@@ -16,7 +16,7 @@ namespace enigma
   
   sound *sounds;
   size_t numSounds;
-  extern int sound_idmax;
+  extern size_t sound_idmax;
   
   static void eos_callback(void *soundID, ALuint src)
   {

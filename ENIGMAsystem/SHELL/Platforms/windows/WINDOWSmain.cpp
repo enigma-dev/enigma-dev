@@ -26,6 +26,9 @@
 \********************************************************************************/
 
 #include <windows.h>
+#include <string>
+using std::string;
+
 #include "../../Universal_System/roomsystem.h"
 
 namespace enigma //TODO: Find where this belongs
