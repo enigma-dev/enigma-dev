@@ -37,5 +37,5 @@ done;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	rm -f .eobjs*/*" >> Makefile;
+echo "	\$(CREMOVE) .eobjs*\$(SLASHC)*" >> Makefile;
 
