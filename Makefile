@@ -13,3 +13,6 @@ Game:
 
 clean:
 	cd CompilerSource && $(MAKE) clean
+
+clean-game:
+	cd ENIGMAsystem/SHELL/ && $(MAKE) clean

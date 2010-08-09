@@ -28,7 +28,7 @@ echo "	SLASHC := /" >> Makefile;
 echo "else" >> Makefile;
 echo "	ONAME := ..\\\\compileEGMf.dll" >> Makefile;
 echo "	INPLACEPARAM := " >> Makefile;
-echo "	CREMOVE := del /F" >> Makefile;
+echo "	CREMOVE := del /Q" >> Makefile;
 echo "	SLASHC := \\\\" >> Makefile;
 echo "endif" >> Makefile;
 echo "" >> Makefile;

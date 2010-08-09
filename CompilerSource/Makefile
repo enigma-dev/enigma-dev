@@ -20,7 +20,7 @@ ifeq ($(OS), Linux)
 else
 	ONAME := ..\\compileEGMf.dll
 	INPLACEPARAM := 
-	CREMOVE := del /F
+	CREMOVE := del /Q
 	SLASHC := \\
 endif
 
