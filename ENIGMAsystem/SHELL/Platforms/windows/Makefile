@@ -24,4 +24,4 @@ Build: mkObjDir .eobjs_Build/file_manip.o .eobjs_Build/WINDOWScallback.o .eobjs_
 Release: mkObjDir .eobjs_Release/file_manip.o .eobjs_Release/WINDOWScallback.o .eobjs_Release/WINDOWSfonts.o .eobjs_Release/WINDOWSmain.o .eobjs_Release/WINDOWSshow_error.o .eobjs_Release/WINDOWSstd.o .eobjs_Release/WINDOWSwindow.o 
 
 clean:
-	rm -f .eobjs*/*
+	$(CREMOVE) .eobjs*$(SLASHC)*

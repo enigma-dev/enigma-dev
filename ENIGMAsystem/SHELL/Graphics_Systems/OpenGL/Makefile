@@ -34,4 +34,4 @@ Build: mkObjDir .eobjs_Build/graphics_object.o .eobjs_Build/GSblend.o .eobjs_Bui
 Release: mkObjDir .eobjs_Release/graphics_object.o .eobjs_Release/GSblend.o .eobjs_Release/GScolors.o .eobjs_Release/GSenable.o .eobjs_Release/GSmiscextra.o .eobjs_Release/GSprmtvs.o .eobjs_Release/GSscreen.o .eobjs_Release/GSspriteadd.o .eobjs_Release/GSsprite.o .eobjs_Release/GSstdraw.o .eobjs_Release/GSsurface.o .eobjs_Release/OPENGLStd.o 
 
 clean:
-	rm -f .eobjs*/*
+	$(CREMOVE) .eobjs*$(SLASHC)*

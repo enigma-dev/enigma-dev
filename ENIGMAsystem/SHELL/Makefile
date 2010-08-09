@@ -22,8 +22,8 @@ else
 endif
 
 clean:
-	cd Graphics_Systems/OpenGL/ 	&& $(MAKE) clean CREMOVE=$(CREMOVE) SLASHC=$(SLASHC)
-	cd Audio_Systems/OpenAL/ 		&& $(MAKE) clean CREMOVE=$(CREMOVE) SLASHC=$(SLASHC)
-	cd Platforms/windows/ 			&& $(MAKE) clean CREMOVE=$(CREMOVE) SLASHC=$(SLASHC)
-	cd Platforms/xlib/ 				&& $(MAKE) clean CREMOVE=$(CREMOVE) SLASHC=$(SLASHC)
-	cd Universal_System/			&& $(MAKE) clean CREMOVE=$(CREMOVE) SLASHC=$(SLASHC)
+	cd Graphics_Systems/OpenGL/ 	&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	cd Audio_Systems/OpenAL/ 		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	cd Platforms/windows/ 			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	cd Platforms/xlib/ 				&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	cd Universal_System/			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"

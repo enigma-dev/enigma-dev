@@ -117,6 +117,15 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     ide_dia_open();
   cout << "Initialized." << endl;
   
+  if (mode == emode_rebuild)
+  {
+    edbg << "Rebuilding all..." << flushl;
+    edbg << "Running make from `" << MAKE_location << "'" << flushl;
+    edbg << "Done." << flushl;
+    better_system(MAKE_location, "clean-game");
+    return 0;
+  }
+  
   edbg << "Building for mode (" << mode << ")" << flushl;
   
   // CLean up from any previous executions.

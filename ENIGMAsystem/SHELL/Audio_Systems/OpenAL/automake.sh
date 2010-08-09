@@ -39,7 +39,11 @@ done;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	rm -f .eobjs*/*" >> Makefile;
+echo "	\$(CREMOVE) .eobjs*\$(SLASHC)*" >> Makefile;
+echo "	cd alure	&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\"" >> Makefile;
+echo "	cd ogg		&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\"" >> Makefile;
+echo "	cd vorbis	&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\"" >> Makefile;
+echo "	cd dumb		&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\"" >> Makefile;
 
 cd ./alure/
 ./automake.sh

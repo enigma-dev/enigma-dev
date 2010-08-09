@@ -1,6 +1,6 @@
 #Awesome Locally Generated Makefile
 
-.eobjs_$(MODE)/as_basic.o: as_basic.cpp alure/include/AL/alure.h
+.eobjs_$(MODE)/as_basic.o: as_basic.cpp alure/include/AL/alure.h alure/config.h ../../../additional/al/include/alc.h ../../../additional/al/include/al.h
 	g++ -c as_basic.cpp		-o .eobjs_$(MODE)/as_basic.o $(FLAGS)
 
 mkObjDir:
@@ -32,4 +32,8 @@ Release: mkObjDir .eobjs_Release/as_basic.o
 
 
 clean:
-	rm -f .eobjs*/*
+	$(CREMOVE) .eobjs*$(SLASHC)*
+	cd alure	&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	cd ogg		&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	cd vorbis	&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	cd dumb		&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"

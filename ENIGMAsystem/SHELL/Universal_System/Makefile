@@ -72,4 +72,4 @@ Build: mkObjDir .eobjs_Build/CallbackArrays.o .eobjs_Build/collisions.o .eobjs_B
 Release: mkObjDir .eobjs_Release/CallbackArrays.o .eobjs_Release/collisions.o .eobjs_Release/collisions_object.o .eobjs_Release/compression.o .eobjs_Release/darray.o .eobjs_Release/ENIGMA_GLOBALS.o .eobjs_Release/estring.o .eobjs_Release/events.o .eobjs_Release/event_system.o .eobjs_Release/fileio.o .eobjs_Release/globalupdate.o .eobjs_Release/IMGloading.o .eobjs_Release/instance.o .eobjs_Release/instance_system.o .eobjs_Release/loading.o .eobjs_Release/mathnc.o .eobjs_Release/OBJaccess.o .eobjs_Release/object.o .eobjs_Release/objecttable.o .eobjs_Release/planar_object.o .eobjs_Release/reflexive_types.o .eobjs_Release/roomsystem.o .eobjs_Release/simplecollisions.o .eobjs_Release/soundinit.o .eobjs_Release/spriteinit.o .eobjs_Release/spritestruct.o .eobjs_Release/terminal_io.o .eobjs_Release/transform_object.o .eobjs_Release/var4.o .eobjs_Release/var4_lua.o .eobjs_Release/WITHconstruct.o 
 
 clean:
-	rm -f .eobjs*/*
+	$(CREMOVE) .eobjs*$(SLASHC)*

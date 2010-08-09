@@ -18,4 +18,4 @@ Build: mkObjDir .eobjs_Build/file_manip.o .eobjs_Build/XLIBdialog.o .eobjs_Build
 Release: mkObjDir .eobjs_Release/file_manip.o .eobjs_Release/XLIBdialog.o .eobjs_Release/XLIBmain.o .eobjs_Release/XLIBwindow.o 
 
 clean:
-	rm -f .eobjs*/*
+	$(CREMOVE) .eobjs*$(SLASHC)*

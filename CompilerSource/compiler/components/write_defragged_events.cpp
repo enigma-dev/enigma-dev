@@ -125,7 +125,6 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
     wto << event_get_super_check_function(it->second.mid, it->second.id);
   
-  edbg << "cp4" << flushl;
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
     for (size_t i=0; i<event_sequence.size(); i++)
     {
