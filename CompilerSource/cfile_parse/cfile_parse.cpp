@@ -89,6 +89,11 @@ string strace(externs *f)
 
 extern pt handle_skip();
 
+int debug_ent() {
+  cout << "Asses";
+  return 0;
+}
+
 pt parse_cfile(string cftext)
 {
   cferr="No error";
@@ -96,7 +101,7 @@ pt parse_cfile(string cftext)
     included_files.pop();
   
   included_files.push(includings("SHELLmain.cpp","./ENIGMAsystem/SHELL/"));
-
+  
   bool preprocallowed=1;
   
   cfile = cftext;

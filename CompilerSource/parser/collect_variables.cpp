@@ -117,8 +117,7 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
           else //Add to this scope
           {
             igstack[igpos]->ignore[dec_name] = pos;
-            pos++;
-            cout << "Added `" << dec_name << "' to ig\n";
+            pos++; //cout << "Added `" << dec_name << "' to ig\n";
           }
         }
         

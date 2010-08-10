@@ -419,8 +419,9 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
         return immediate_scope = NULL, true;
 
       if (expect_find) {
-        cferr = "Unable to locate member `" + name + "' in scope `" + strace(iscope) + "' (" + strace(immediate_scope) + ")";
-        print_err_line_at();
+        cout << "Unable to locate member `" + name + "' in scope `" + strace(iscope) + "' (" + strace(immediate_scope) + ")" << endl;
+        print_err_line_at(); immediate_scope = NULL;
+        return find_extname(name,flags,expect_find);
       }
       return false;
     }

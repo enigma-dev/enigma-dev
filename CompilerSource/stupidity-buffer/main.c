@@ -81,9 +81,9 @@ int main()
   */
   if (a) // If we didn't find it
   {
-    FILE *tf = fopen("instconf","rb"); // Config file
+    FILE *tf = fopen("winmake.txt","rb"); // Config file
     if (tf) { // If we've been down this road before
-      puts("I hope you built ENIGMA yourself, because I can't.");
+      puts("I hope this file is accurate.");
       fclose(tf);
     }
     else // First time run
@@ -111,19 +111,14 @@ int main()
           }
         }
       }
-      if (tf = fopen("instconf","wb")) fclose(tf);
+      if (tf = fopen("winmake.txt","wb")) { fputs(mpath, tf); fclose(tf); }
       else puts("\nI believe there's something wrong with your system. Ignoring and continuing...\n");
       confused_cancel: ;
     }
   }
   else { 
-    a = better_system(mpath,"ENIGMA");
-    if (a) { 
-      puts("I found make, and I asked it to build ENIGMA for you,");
-      puts("but it couldn't for some reason. I hope you did.\n");
-      puts("Press Enter. If you enter an 'N', I'll just close");
-      if (getchar() == 'N') return 0;
-    }
+    printf("Make detected. Accessile from `%s`. Informing the Environment.\n\n", mpath);
+    if (FILE *tf = fopen("winmake.txt","wb")) { fputs(mpath, tf); fclose(tf); }
   }
   
   puts("Scouring for Java");

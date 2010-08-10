@@ -38,6 +38,7 @@ referencer::referencer(char s,int c): symbol(s), count(c), completed(1) {}
 referencer::referencer(char s,int c,char complete): symbol(s), count(c), completed(complete) {}
 referencer::referencer(char s,short cn,short cx,char complete): symbol(s), count((cn << 16) + cx), completed(complete) {}
 referencer::referencer(const referencer &r): symbol(r.symbol), count(r.count), completed(r.completed) {}
+referencer::~referencer() { }
 
 rf_node::rf_node(): next(NULL), prev(NULL), ref(0,0,0) {}
 rf_node::rf_node(const referencer &r): next(NULL), prev(NULL), ref(r) {}
@@ -167,13 +168,13 @@ rf_stack &rf_stack::operator += (referencer r)
   {
     if (now->ref.completed)
     {
-      if (last == now) last = now = new rf_node(last,r);
-      else if (now->next != NULL) now = now->next = now->next->prev = new rf_node(now,r,now->next);
-      else now = now->next = new rf_node(now,r,now->next);
+      if (last == now) last = last->next = now = new rf_node(last,r);
+      else now = now->next = now->next->prev = new rf_node(now,r,now->next);
     }
   }
   return *this;
 }
+
 rf_stack &rf_stack::operator += (const rf_stack &r)
 {
   for (rf_node* i = r.first; i != NULL; i = i->next)

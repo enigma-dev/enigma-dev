@@ -222,7 +222,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   edbg << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
   
   edbg << es->scriptCount << " Scripts:" << flushl;
-  parsed_script *scripts[es->scriptCount];
+  parsed_script *parsed_scripts[es->scriptCount];
   
   scr_lookup.clear();
   used_funcs::zero();
@@ -230,7 +230,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   int res;
   #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
   
-  res = compile_parseAndLink(es,scripts);
+  res = compile_parseAndLink(es,parsed_scripts);
   irrr();
   
   
@@ -323,8 +323,11 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   parsed_object EGMglobal;
   
   edbg << "Linking globals" << flushl;
-  res = link_globals(&EGMglobal,es,scripts);
+  res = link_globals(&EGMglobal,es,parsed_scripts);
   irrr();
+  
+  edbg << "Running Secondary Parse Passes" << flushl;
+  res = compile_parseSecondary(parsed_objects,parsed_scripts,&EGMglobal);
   
   edbg << "Writing object data" << flushl;
   res = compile_writeObjectData(es,&EGMglobal);

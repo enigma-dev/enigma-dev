@@ -36,6 +36,7 @@ struct referencer
   referencer(char s,int c,char complete);
   referencer(char s,short cn,short cx,char complete);
   referencer(const referencer &r);
+  ~referencer();
 };
 
 struct rf_node

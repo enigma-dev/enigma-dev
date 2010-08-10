@@ -87,10 +87,11 @@ int main(int argc, char *argv[])
   }
   
   
-  cout << "Grabbing locals" << endl;  
+  cout << "Grabbing locals" << endl;
+    extensions::crawl_for_locals();
     string localstring = extensions::compile_local_string();
+    cout << localstring << endl;
   cout << "Ass." << endl;
-  return 0;
   
   //m_prog_loop_cfp();
   

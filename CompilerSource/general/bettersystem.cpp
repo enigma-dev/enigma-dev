@@ -43,7 +43,7 @@ using namespace std;
   #endif
 
 
-int better_system(string program,string arguments)
+int better_system(string program,string arguments, const char* redirf = NULL)
 {
   sys_result_type exit_status = sys_result_type(-1);
   
@@ -56,7 +56,24 @@ int better_system(string program,string arguments)
     
     ZeroMemory(&ProcessInformation, sizeof(ProcessInformation));
     
-    if (CreateProcess(NULL,(CHAR*)(program + " " + arguments).c_str(),NULL,NULL,TRUE,CREATE_DEFAULT_ERROR_MODE,NULL,NULL,&StartupInfo,&ProcessInformation ))
+    SECURITY_ATTRIBUTES inheritibility;
+        inheritibility.nLength = sizeof(inheritibility);
+        inheritibility.lpSecurityDescriptor = NULL;
+        inheritibility.bInheritHandle = TRUE;
+    
+    // Output redirection
+    HANDLE of = NULL;
+    if (redirf) 
+    {
+      of = CreateFile(redirf, FILE_WRITE_DATA, FILE_SHARE_READ|FILE_SHARE_WRITE, &inheritibility, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+      if (of != NULL)
+      {
+        StartupInfo.dwFlags = STARTF_USESTDHANDLES;
+        StartupInfo.hStdOutput = StartupInfo.hStdError = of;
+      }
+    }
+    
+    if (CreateProcess(program.c_str(),(CHAR*)("\"" + program + "\" " + arguments).c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,NULL,NULL,&StartupInfo,&ProcessInformation ))
     {
       WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
       GetExitCodeProcess(ProcessInformation.hProcess, &exit_status);
@@ -68,8 +85,10 @@ int better_system(string program,string arguments)
       cout << "ENIGMA: Failed to create process `" << program << "'.\n";
       exit_status = DWORD(-1);
     }
+    
+    if (of) CloseHandle(of);
   #else
-    exit_status = system((program + " " + arguments).c_str());
+    exit_status = system((program + " " + (redirf ? arguments : arguments + " &> " + redirf)).c_str());
   #endif
   
   return exit_status;

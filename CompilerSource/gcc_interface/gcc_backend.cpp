@@ -40,6 +40,7 @@ using namespace std;
     #include "../cfile_parse/cfile_parse.h"
     #include "../syntax/checkfile.h"
     #include "../general/parse_basics.h"
+    #include "../general/bettersystem.h"
 
 string fc(const char* fn);
 
@@ -60,6 +61,11 @@ unsigned int include_directory_count;
 
 string GCC_location, MAKE_location;
 
+inline int rdir_system(string x, string y)
+{
+  return system((x + " " + y).c_str());
+}
+
 //Find us the GCC, get info about it and ourself
 int establish_bearings()
 {
@@ -79,8 +85,8 @@ int establish_bearings()
   
   if (bin_path != "") //We have in fact been down this road before...
   {
-    string cm = "\"" + bin_path + "cpp\" -dM -x c++ -E  blank.txt > defines.txt";
-    got_success = !system(cm.c_str());
+    string cm = bin_path + "cpp";
+    got_success = !better_system(cm.c_str(), "-dM -x c++ -E blank.txt", "defines.txt");
     if (!got_success)
       cout << "Failed to load GCC from Ad-Hoc location:\n" << bin_path << endl;
     else
@@ -91,37 +97,43 @@ int establish_bearings()
   }
   if (!got_success)
   {
-    got_success = !system(((bin_path = "") + "cpp -dM -x c++ -E  blank.txt > defines.txt").c_str());
-  
-    if (!got_success)
-      got_success = !system(((bin_path = "/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
+    puts("Scouring for Make");
+    const char *cpath;
+    int failing = better_system(cpath = "cpp", "-dM -x c++ -E blank.txt", "defines.txt");
+    if (failing) failing = better_system(cpath = "/MinGW/bin/cpp.exe", "-dM -x c++ -E blank.txt", "defines.txt");
+    if (failing) failing = better_system(cpath = "\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", "defines.txt");
+    if (failing) failing = better_system(cpath = "C:\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", "defines.txt");
     
-    if (!got_success)
-      got_success = !system(((bin_path = "C:/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
-    
-    if (!got_success)
-      got_success = !system(((bin_path = "./ENIGMAsystem/MinGW/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
-      
-    if (!got_success)
-      got_success = !system(((bin_path = "./ENIGMAsystem/bin/") + "cpp -dM -x c++ -E blank.txt > defines.txt").c_str());
-    
-    if (!got_success)
+    if (failing)
       return (cout << "Bailing: Error 1\n" , 1);
     
-    GCC_location = bin_path + "gcc";
-    MAKE_location = bin_path + "make";
+    string scpath = cpath;
+    size_t sp = scpath.find_last_of("/\\");
+    bin_path = sp == string::npos? "" : scpath.erase(sp+1);
+    
+    failing = better_system(MAKE_location = bin_path + "make", "--ver");
+    if (failing) failing = better_system(MAKE_location = bin_path + "make.exe", "--ver");
+    if (failing) failing = better_system(MAKE_location = bin_path + "mingw32-make.exe", "--ver");
+    if (failing) failing = better_system(MAKE_location = bin_path + "mingw64-make.exe", "--ver");
+    if (failing)
+      return (cout << "Bailing: Error 2\n" , 1);
+    
+    cout << "Good news; it should seem I can reach make from `" << MAKE_location << "'\n";
   }
   
+  int gfailing = better_system(GCC_location = bin_path + "gcc", "-dumpversion");
+  if (gfailing) gfailing = better_system(GCC_location = bin_path + "gcc.exe", "-dumpversion");
+  if (gfailing) return (cout << "Can't find GCC for some reason. Error PI.", 3);
   cout << "GCC located. Path: `" << bin_path << '\'' << endl;
   
   defs = fc("defines.txt");
   if (defs == "")
-    return (cout << "Bailing: Error 2\n" , 1);
+    return (cout << "Bailing: Error 3\n" , 1);
   
   pt a = parse_cfile(defs);
   if (a != pt(-1)) {
     cout << "Highly unlikely error. But stupid things can happen when working with files.\n\n";
-    return (cout << "Bailing: Error 3\n" , 1);
+    return (cout << "Bailing: Error 4\n" , 1);
   }
   
   cout << "Successfully loaded GCC definitions\n";
@@ -131,22 +143,22 @@ int establish_bearings()
   
   //Read the search dirs
   fclose(fopen("blank.txt","wb"));
-  got_success = !system((GCC_location + " -E -x c++ -v blank.txt 2> searchdirs.txt").c_str()); //For some reason, the info we want is written to stderr
+  got_success = !better_system(GCC_location, " -E -x c++ -v blank.txt", "searchdirs.txt"); //For some reason, the info we want is written to stderr
   if (!got_success) {
-    cout << "Failed to read search directories. Error 4.\n";
-    return 4;
+    cout << "Failed to read search directories. Error 5.\n";
+    return 5;
   }
   
   string idirs = fc("searchdirs.txt");
   if (idirs == "") {
-    cout << "Invalid search directories returned. Error 5.\n";
-    return 5;
+    cout << "Invalid search directories returned. Error 6.\n";
+    return 6;
   }
   
   pt pos = idirs.find("#include <...> search starts here:");
   if (pos == string::npos or (pos > 0 and idirs[pos-1] != '\n' and idirs[pos-1] != '\r')) {
-    cout << "Invalid search directories returned. Error 5: " << (pos == string::npos?"former":"latter") << ".\n";
-    return 5;
+    cout << "Invalid search directories returned. Error 7: " << (pos == string::npos?"former":"latter") << ".\n";
+    return 7;
   }
   
   pos += 34;
@@ -169,25 +181,6 @@ int establish_bearings()
   cout << include_directory_count << "dirs:\n";
   for (unsigned i = 0; i < include_directory_count; i++)
     cout << '"' << include_directories[i] << '"' << endl;
-  
-  
-  //Now we'll look for make
-  cout << "All that worked. Trying to find make.\n";
-  
-  int askmake = 1;
-  //At present, MAKE_location = "\"" + bin_path + "make\"";
-  askmake = system((MAKE_location + " --version").c_str());
-  if (askmake) //Didn't answer us right; let's try someone else
-  {
-    askmake = system(((MAKE_location = "\"" + bin_path + "mingw32-make\"") + " --version").c_str());
-    if (askmake)
-    {
-      cout << "Sir, I can't find make.\n";
-      return 6;
-    }
-  }
-  
-  cout << "Good news; it should seem I can reach make from `" << MAKE_location << "'\n";
   
   return 0;
 }

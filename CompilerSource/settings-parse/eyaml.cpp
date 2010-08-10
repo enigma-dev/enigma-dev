@@ -154,7 +154,7 @@ ey_data parse_eyaml(ifstream &file, string filename)
       latestc = new ey_data::eylist(latestc);
     }
     
-    cout << endl << nname << endl;
+   // cout << endl << nname << endl;
     unlowered = nname;
     if (line[pos] != ':')
       continue;
@@ -166,7 +166,7 @@ ey_data parse_eyaml(ifstream &file, string filename)
     while (is_useless(line[--pos]));
     
     if (++pos > vsp) {
-      cout << "Added " << unlowered << " as '" << line.substr(vsp, pos - vsp) << "' naturally.\n";
+      //cout << "Added " << unlowered << " as '" << line.substr(vsp, pos - vsp) << "' naturally.\n";
       latest->second = latestc->value = new ey_string(unlowered, line.substr(vsp, pos - vsp));
     }
   }

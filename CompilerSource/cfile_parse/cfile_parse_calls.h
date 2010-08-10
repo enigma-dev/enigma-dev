@@ -169,6 +169,10 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
             {
               if (is_tdef and last_type == it->second)
                 return 1;
+              cout << it->second->name << endl;
+              cout << it->second->is_function() << endl;
+              if (it->second->is_function())
+                return 1;
               cferr = "Redeclaration of `"+name+"' at this point";
               return 0;
             }
@@ -266,7 +270,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
   tpc = -1;
   
   e->value_of = last_value;
-  e->refstack = refs;
+  e->refstack += refs;
   
   if (ihc)
   {
