@@ -1251,29 +1251,32 @@ value evaluate_expression(string expr)
           else if (exp[pos+1]=='*')
           { pos+=3; while (pos<len and exp[pos]!='/' and exp[pos-1]!='*') pos++; }
         }
-        else if (exp[pos+1]=='"')
+        else if (pos + 1 < len)
         {
-         #if USETYPE_STRING
-           #if STRINGS_IGNORE_BACKSLASH
-              pos++; while (pos<len and exp[pos]!='"') pos++;
+          if (exp[pos+1]=='"')
+          {
+           #if USETYPE_STRING
+             #if STRINGS_IGNORE_BACKSLASH
+                pos++; while (pos<len and exp[pos]!='"') pos++;
+             #else
+                pos++; while (pos<len and exp[pos]!='"')
+                { if (exp[pos]=='\\' and (exp[pos+1]=='\\' or exp[pos+1]=='"')) pos++; pos++; }
+             #endif
            #else
-              pos++; while (pos<len and exp[pos]!='"')
+              rerr="String constants not allowed here";
+              rerrpos=pos;
+              return 0;
+           #endif
+          }
+          else if (exp[pos+1]=='\'')
+          {
+           #if STRINGS_IGNORE_BACKSLASH
+              pos++; while (pos<len and exp[pos]!='\'') pos++;
+           #else
+              pos++; while (pos<len and exp[pos]!='\'')
               { if (exp[pos]=='\\' and (exp[pos+1]=='\\' or exp[pos+1]=='"')) pos++; pos++; }
            #endif
-         #else
-            rerr="String constants not allowed here";
-            rerrpos=pos;
-            return 0;
-         #endif
-        }
-        else if (exp[pos+1]=='\'')
-        {
-         #if STRINGS_IGNORE_BACKSLASH
-            pos++; while (pos<len and exp[pos]!='\'') pos++;
-         #else
-            pos++; while (pos<len and exp[pos]!='\'')
-            { if (exp[pos]=='\\' and (exp[pos+1]=='\\' or exp[pos+1]=='"')) pos++; pos++; }
-         #endif
+          }
         }
       }
       continue;

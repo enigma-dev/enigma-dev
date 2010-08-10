@@ -92,6 +92,10 @@ int main(int argc, char *argv[])
     string localstring = extensions::compile_local_string();
     cout << localstring << endl;
   cout << "Ass." << endl;
+<<<<<<< .mine
+  //return 0;
+=======
+>>>>>>> .r322
   
   //m_prog_loop_cfp();
   
