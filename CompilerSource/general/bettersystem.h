@@ -25,5 +25,5 @@
 **                                                                              **
 \********************************************************************************/
 
-int better_system(string,string,const char* = NULL);
+int better_system(string,string,string=">",const char* = NULL);
 

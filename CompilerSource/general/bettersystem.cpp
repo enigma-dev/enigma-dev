@@ -43,7 +43,7 @@ using namespace std;
   #endif
 
 
-int better_system(string program,string arguments, const char* redirf = NULL)
+int better_system(string program,string arguments, string redirchar = "", const char* redirf = NULL)
 {
   sys_result_type exit_status = sys_result_type(-1);
   
@@ -69,7 +69,8 @@ int better_system(string program,string arguments, const char* redirf = NULL)
       if (of != NULL)
       {
         StartupInfo.dwFlags = STARTF_USESTDHANDLES;
-        StartupInfo.hStdOutput = StartupInfo.hStdError = of;
+        if (redirchar == ">" or redirchar == "1>" or redirchar == "2>") StartupInfo.hStdOutput = of;
+        if (redirchar == "2>" or redirchar == "&>") StartupInfo.hStdError = of;
       }
     }
     
@@ -88,7 +89,11 @@ int better_system(string program,string arguments, const char* redirf = NULL)
     
     if (of) CloseHandle(of);
   #else
-    exit_status = system((program + " " + (redirf ? arguments : arguments + " &> " + redirf)).c_str());
+    string rd = redirf ? " " + redirchar + " " + string(redirf) : "";
+    string cmd = program + " " + arguments + rd;
+    cout << cmd << endl;
+    exit_status = system(cmd.c_str());
+    cout << flush;
   #endif
   
   return exit_status;

@@ -69,13 +69,10 @@ inline int rdir_system(string x, string y)
 //Find us the GCC, get info about it and ourself
 int establish_bearings()
 {
-  // Clear some files
+  // Clear a blank file
   fclose(fopen("blank.txt","wb"));
-  fclose(fopen("defines.txt","wb"));
-  fclose(fopen("searchdirs.txt","wb"));
   
   string defs;
-  fclose(fopen("defines.txt","wb"));
   bool got_success = false;
   
   cout << "Probing for GCC..." << endl;
@@ -86,49 +83,45 @@ int establish_bearings()
   if (bin_path != "") //We have in fact been down this road before...
   {
     string cm = bin_path + "cpp";
-    got_success = !better_system(cm.c_str(), "-dM -x c++ -E blank.txt", "defines.txt");
+    got_success = !better_system(cm.c_str(), "-dM -x c++ -E blank.txt", ">", "defines.txt");
     if (!got_success)
       cout << "Failed to load GCC from Ad-Hoc location:\n" << bin_path << endl;
-    else
-    {
-      GCC_location = "\"" + bin_path + "gcc\"";
-      MAKE_location = "\"" + bin_path + "make\"";
-    }
+    defs = fc("defines.txt");
+    if (defs == "") return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
   }
   if (!got_success)
   {
     puts("Scouring for Make");
     const char *cpath;
-    int failing = better_system(cpath = "cpp", "-dM -x c++ -E blank.txt", "defines.txt");
-    if (failing) failing = better_system(cpath = "/MinGW/bin/cpp.exe", "-dM -x c++ -E blank.txt", "defines.txt");
-    if (failing) failing = better_system(cpath = "\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", "defines.txt");
-    if (failing) failing = better_system(cpath = "C:\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", "defines.txt");
+    int failing = better_system(cpath = "cpp", "-dM -x c++ -E blank.txt", ">", "defines.txt");
+    if (failing) failing = better_system(cpath = "/MinGW/bin/cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
+    if (failing) failing = better_system(cpath = "\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
+    if (failing) failing = better_system(cpath = "C:\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
     
     if (failing)
       return (cout << "Bailing: Error 1\n" , 1);
+    
+    defs = fc("defines.txt");
+    if (defs == "") return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
     
     string scpath = cpath;
     size_t sp = scpath.find_last_of("/\\");
     bin_path = sp == string::npos? "" : scpath.erase(sp+1);
     
-    failing = better_system(MAKE_location = bin_path + "make", "--ver");
-    if (failing) failing = better_system(MAKE_location = bin_path + "make.exe", "--ver");
-    if (failing) failing = better_system(MAKE_location = bin_path + "mingw32-make.exe", "--ver");
-    if (failing) failing = better_system(MAKE_location = bin_path + "mingw64-make.exe", "--ver");
-    if (failing)
-      return (cout << "Bailing: Error 2\n" , 1);
-    
     cout << "Good news; it should seem I can reach make from `" << MAKE_location << "'\n";
   }
+  
+  int failing = better_system(MAKE_location = bin_path + "make", "--ver");
+  if (failing) failing = better_system(MAKE_location = bin_path + "make.exe", "--ver");
+  if (failing) failing = better_system(MAKE_location = bin_path + "mingw32-make.exe", "--ver");
+  if (failing) failing = better_system(MAKE_location = bin_path + "mingw64-make.exe", "--ver");
+  if (failing)
+    return (cout << "Bailing: Error 2\n" , 1);
   
   int gfailing = better_system(GCC_location = bin_path + "gcc", "-dumpversion");
   if (gfailing) gfailing = better_system(GCC_location = bin_path + "gcc.exe", "-dumpversion");
   if (gfailing) return (cout << "Can't find GCC for some reason. Error PI.", 3);
-  cout << "GCC located. Path: `" << bin_path << '\'' << endl;
-  
-  defs = fc("defines.txt");
-  if (defs == "")
-    return (cout << "Bailing: Error 3\n" , 1);
+  cout << "GCC located. Path: `" << GCC_location << '\'' << endl;
   
   pt a = parse_cfile(defs);
   if (a != pt(-1)) {
@@ -143,8 +136,8 @@ int establish_bearings()
   
   //Read the search dirs
   fclose(fopen("blank.txt","wb"));
-  got_success = !better_system(GCC_location, " -E -x c++ -v blank.txt", "searchdirs.txt"); //For some reason, the info we want is written to stderr
-  if (!got_success) {
+  int sdfail = better_system(GCC_location, "-E -x c++ -v blank.txt", "2>", "searchdirs.txt"); //For some reason, the info we want is written to stderr
+  if (sdfail) {
     cout << "Failed to read search directories. Error 5.\n";
     return 5;
   }

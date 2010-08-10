@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
   cparse_init();
   
   if (establish_bearings()) {
-    cout << "ERROR: Failed to locate the GCC";
+    cout << "ERROR: Failed to locate the GCC" << endl;
     getchar(); return 1;
   }
   
@@ -92,10 +92,6 @@ int main(int argc, char *argv[])
     string localstring = extensions::compile_local_string();
     cout << localstring << endl;
   cout << "Ass." << endl;
-<<<<<<< .mine
-  //return 0;
-=======
->>>>>>> .r322
   
   //m_prog_loop_cfp();
   
