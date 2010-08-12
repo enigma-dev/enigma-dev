@@ -639,6 +639,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
     else //Last isn't a declarator
     if ((last_named &~ LN_TYPEDEF) == LN_STRUCT
     or  (last_named &~ LN_TYPEDEF) == LN_CLASS
+    or  (last_named &~ LN_TYPEDEF) == LN_UNION
     or  (last_named &~ LN_TYPEDEF) == LN_STRUCT_DD)
     {
       //We're dealing with struct structid
