@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include <windows.h>
+#include <time.h>
 #include <string>
 using std::string;
 
