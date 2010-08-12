@@ -209,7 +209,7 @@ int parser_secondary(string& code, string& synt)
     {
       pt spos = pos;
       while (synt[++pos] == 't');
-      parser_fix_templates(code,pos,spos,&synt);
+      pos += parser_fix_templates(code,pos,spos,&synt);
       continue;
     }
     else if (synt[pos] == '.' and synt[pos+1] == 'n')
@@ -278,7 +278,6 @@ int parser_secondary(string& code, string& synt)
     }
     else {
       while (synt[pos] == synt[pos+1]) pos++;
-      break;
     }
   }
   return -1;

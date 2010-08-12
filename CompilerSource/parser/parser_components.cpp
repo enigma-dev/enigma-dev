@@ -738,22 +738,24 @@ void print_to_file(string code,string synt,unsigned int &strc, varray<string> &s
     printf("zomg fnf\r\n");*/
 }
 
-void parser_fix_templates(string &code,pt pos,pt spos,string *synt)
+int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
 {
   pt epos = pos;
   int a2i = 0;
   
+  puts("CALLED FIX TEMPLATES\n\n\n");
+  
   if (code[--epos] == '>')
   {
     --epos;
-    int ac = 0; bool ga = false;
-    for (int tbc = 1; tbc > 0; epos--)
+    int ac = 0; bool ga = false; // argument count, given argument = whether or not anything other than whitespace was specified for the arg type
+    for (int tbc = 1; tbc > 0; epos--) // track triangle bracket count 
     {
       if (code[epos] == '<')
         { tbc--; continue; }
       tbc += (code[epos] == '>');
       ac +=  (code[epos] == ',') and ga and (tbc == 1);
-      ga |=  (code[epos] != '<'  and code[epos] != '>');
+      ga |=  (code[epos] != '<'  and code[epos] != '>' and !is_useless(code[epos]));
       ga &=  (code[epos] != ',');
     }
     a2i = ac + ga;
@@ -765,7 +767,7 @@ void parser_fix_templates(string &code,pt pos,pt spos,string *synt)
   
   string ptname = code.substr(spos,epos-spos+1); // Isolate the potential template's name
   bool fnd = find_extname(ptname,0xFFFFFFFF);
-  if (!fnd) return;
+  if (!fnd) return 0;
   
   externs *a = ext_retriever_var;
   if (a->flags & EXTFLAG_TEMPLATE)
@@ -778,16 +780,37 @@ void parser_fix_templates(string &code,pt pos,pt spos,string *synt)
     for (int i = 0; i < a2i;)
       iseg += (++i < a2i) ? "variant," : "variant";
     if (code[pos-1] == '>')
+    {
       if (code[pos-2] == ',' or code[pos-2] == '<')
-        code.insert(pos-1, iseg),
-        synt && (synt->insert(pos-1, string(iseg.length(),'t')),   true);
-      else
+      {
+        if (iseg.length())
+        {
+          code.insert(pos-1, iseg);
+          synt && (synt->insert(pos-1, string(iseg.length(),'t')),   true);
+          return iseg.length();
+        }
+        else if (code[pos-2] == ',')
+        {
+          code.erase(pos-2,1);
+          synt->erase(pos-2,1);
+          return -1;
+        }
+      }
+      else if (iseg.length())
+      {
         code.insert(pos-1, ","+iseg),
         synt && (synt->insert(pos-1, string(iseg.length()+1,'t')), true);
+        return iseg.length() + 1;
+      }
+    }
     else
+    {
       code.insert(pos,   "<"+iseg+">"),
       synt && (synt->insert(pos,   string(iseg.length()+2,'t')),   true);
+      return iseg.length() + 2;
+    }
   }
+  return 0;
 }
 
 #include <stack>
