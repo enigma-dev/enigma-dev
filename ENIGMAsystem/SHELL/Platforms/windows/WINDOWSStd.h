@@ -42,3 +42,5 @@ void enigma_catchmouse_backend(bool x);
 #if FONTPOLYS
 #include "WINDOWSfonts.h"
 #endif
+
+#include "externals.h"
