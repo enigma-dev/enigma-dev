@@ -567,6 +567,10 @@
 		<Unit filename="Graphics_Systems/graphics_mandatory.h" />
 		<Unit filename="Modes/buildmode.h" />
 		<Unit filename="Platforms/platforms_mandatory.h" />
+		<Unit filename="Platforms/windows/Makefile">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
 		<Unit filename="Platforms/windows/WINDOWSStd.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
@@ -624,6 +628,14 @@
 			<Option target="win-build" />
 		</Unit>
 		<Unit filename="Platforms/windows/ffi/ffitarget.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/windows/file_manip.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/windows/file_manip.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
