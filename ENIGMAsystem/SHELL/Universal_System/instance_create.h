@@ -45,7 +45,7 @@ int instance_create(int x,int y,int object)
 namespace enigma
 {
   void instance_create_id(int x,int y,int object,int idn)
-  { //This is for use by the system only. Please leave be
+  { //This is for use by the system only. Please leave be.
     if (enigma::maxid<idn)
       enigma::maxid = idn;
     switch (object)

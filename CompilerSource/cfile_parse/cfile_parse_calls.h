@@ -78,13 +78,16 @@ inline void regmacro(string m,string val,string arg1)
   mac->addarg(arg1);
 }
 
+pt parse_cfile(string);
 externs *builtin_type__int, *builtin_type__void, *builtin_type__float;
 extern varray<string> include_directories;
 extern unsigned int include_directory_count;
+string GCC_MACRO_STRING;
 
 void cparse_init()
 {
   current_scope = &global_scope;
+  parse_cfile(GCC_MACRO_STRING);
   
   regt("auto");
   regt("bool");
@@ -116,6 +119,13 @@ void cparse_init()
   
   regmacro("__typeof","int","x"); //__typeof(x) 
   regmacro("sizeof","4","x"); //sizeof(x)
+  
+  
+  // Skip out on some of the more difficlt aspects of the GNU standard
+  cout << "Undefining _GLIBCXX_EXPORT_TEMPLATE\n";
+  macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0"; // Save us some work
+  macros["_GLIBCXX_EXTERN_TEMPLATE"] = "0"; // Save us some work
+  macros["ENIGMA_PARSER_RUN"] = "1"; // Skip ENIGMA-written segments
 }
 
 

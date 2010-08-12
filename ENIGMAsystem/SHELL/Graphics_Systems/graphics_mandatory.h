@@ -51,6 +51,13 @@ namespace enigma
   #endif
 }
 
+// These functions are available to the user to be called on a whim.
+
 // Called at random. Maybe.
-const char* draw_get_graphics_error(); // Return a const char* error string, if any
-// error has occurred, or an empty string otherwise.
+const char* draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
+
+// Called each step, or by the user randomly.
+void screen_refresh(); // Without invoking any events, refresh the contents of the screen.
+
+// Called each step, or by the user randomly.
+void screen_redraw(); // Invoke all the draw events, but do not refresh the screen.

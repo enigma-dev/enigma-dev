@@ -27,7 +27,7 @@
 
 
 void windowsystem_write_exename(char* exenamehere);
-int screen_refresh();
+void screen_refresh();
 
 int sleep(int millis);
 void enigma_catchmouse_backend(bool x);

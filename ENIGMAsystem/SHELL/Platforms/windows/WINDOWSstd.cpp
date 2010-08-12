@@ -77,10 +77,8 @@ namespace enigma
     #endif
 }
 
-int screen_refresh()
-{
+void screen_refresh() {
     SwapBuffers(enigma::window_hDC);
-    return 0;
 }
 
 void enigma_catchmouse_backend(bool x) {

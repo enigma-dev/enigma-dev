@@ -25,13 +25,17 @@
 **                                                                              **
 \********************************************************************************/
 
-void sound_play(int sound);
+bool sound_play(int sound);
+bool sound_loop(int sound);
 void sound_stop(int sound);
-void sound_pause(int sound);
-void sound_resume(int sound);
+bool sound_pause(int sound);
+bool sound_resume(int sound);
 
 bool sound_isplaying(int sound);
 bool sound_ispaused(int sound);
+
+void sound_pan(int sound, float value);
+void sound_volume(int sound, float value);
 
 int sound_add(string fname, int kind, bool preload);
 

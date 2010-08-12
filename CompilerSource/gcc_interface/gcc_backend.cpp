@@ -66,6 +66,8 @@ inline int rdir_system(string x, string y)
   return system((x + " " + y).c_str());
 }
 
+extern string GCC_MACRO_STRING;
+
 //Find us the GCC, get info about it and ourself
 int establish_bearings()
 {
@@ -128,11 +130,9 @@ int establish_bearings()
     cout << "Highly unlikely error. But stupid things can happen when working with files.\n\n";
     return (cout << "Bailing: Error 4\n" , 1);
   }
+  GCC_MACRO_STRING = defs;
   
   cout << "Successfully loaded GCC definitions\n";
-  cout << "Undefining _GLIBCXX_EXPORT_TEMPLATE\n";
-  macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0"; //Save us some work
-  macros["_GLIBCXX_EXTERN_TEMPLATE"] = "0"; //Save us some work
   
   //Read the search dirs
   fclose(fopen("blank.txt","wb"));

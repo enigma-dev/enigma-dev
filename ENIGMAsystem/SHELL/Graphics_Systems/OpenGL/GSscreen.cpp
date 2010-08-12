@@ -25,10 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-/*********************************************
-int screen_redraw(int dontswap)
-**********************************************/
-
 #include <string>
 #include <GL/gl.h>
 
@@ -50,7 +46,7 @@ namespace enigma {
 
 using namespace enigma;
 
-int screen_redraw()
+void screen_redraw()
 {
     if (!view_enabled)
     {
@@ -113,8 +109,6 @@ int screen_redraw()
       for (enigma::instance_event_iterator = event_draw->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
         enigma::instance_event_iterator->inst->myevent_draw();
     }
-    
-    return 0;
 }
 
 

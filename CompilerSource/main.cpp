@@ -75,9 +75,6 @@ dllexport int libInit(EnigmaCallbacks* ecs)
   ide_dia_progress = ecs->dia_progress;
   ide_dia_progress_text = ecs->dia_progress_text;
   
-  cout << "Intializing Parsers.";
-  cparse_init();
-  
   int a = establish_bearings();
   if (a) {
     cout << "ERROR: See scrollback for information.\n";
@@ -126,11 +123,24 @@ const char* heaping_pile_of_dog_shit = "\
       ^^^^^^^^^^^\n\n";
 
 extern void print_definition(string n);
+static bool firstpass = true;
 dllexport syntax_error *whitespaceModified(const char* wscode)
 {
   cout << "Clearing IDE editables... " << flushs;
     clear_ide_editables();
   cout << "Done." << flushl;
+  
+  cout << "Creating swap." << flushl;
+  externs oldglobal; map<string,macro_type> oldmacs; // These will essentially garbage collect at the end of this call
+  oldglobal.members.swap(global_scope.members);
+  oldmacs.swap(macros);
+  
+  cout << "Initializing global scope.";
+  cparse_init();
+  
+  cout << "Dumping whiteSpace definitions...";
+  FILE *of = fopen("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h","wb");
+  if (of) fputs(wscode,of), fclose(of);
   
   cout << "Opening ENIGMA for parse..." << flushl;
   string EGMmain = fc("ENIGMAsystem/SHELL/SHELLmain.cpp");
@@ -140,7 +150,8 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
     GetCurrentDirectory(600,d);*/
     cout << "ERROR: Failed to read main engine";
     ide_passback_error.set(0,0,0,"ENIGMAsystem/SHELL/SHELLmain.cpp: File not found; parse cannot continue");
-    return &ide_passback_error;
+    if (!firstpass) oldglobal.members.swap(global_scope.members), oldmacs.swap(macros); // Restore the original... unless there wasn't one.
+    firstpass = false; return &ide_passback_error;
   }
   
   clock_t cs = clock();
@@ -154,8 +165,11 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
     print_definition("__builtin_huge_val");
     print_err_line_at(a);
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
+    if (!firstpass) oldglobal.members.swap(global_scope.members), oldmacs.swap(macros);
+    firstpass = false;
     return &ide_passback_error;
   }
+  firstpass = false;
   
   cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n"
   << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";

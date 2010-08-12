@@ -97,9 +97,6 @@ extern int amain();
 #include "Graphics_Systems/OpenGL/GSsprite.h"
 #include "Audio_Systems/OpenAL/as_basic.h"
 
-
-#include "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h"
-
 #include "Universal_System/collisions_object.h"
 
 #include "Universal_System/objecttable.h"
@@ -120,20 +117,24 @@ extern int amain();
 
 #include "Universal_System/instance_system.h"
 #include "Platforms/platforms_mandatory.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 #include "Universal_System/syntax_quirks.h"
 
-#include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
-#include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
-	#include "Graphics_Systems/OpenGL/GSscreen.h" // TODO: Move this declaration to its own header called *mandatory*.h in the root of /Graphics_Systems/.
-#include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"
-#include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
-#include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
-#include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
-#include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
+#include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
 
-#if BUILDMODE
-	#include "Modes/buildmode.h"
+#ifndef ENIGMA_PARSER_RUN
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
+  
+  #if BUILDMODE
+    #include "Modes/buildmode.h"
+  #endif
 #endif
 
 #include "Universal_System/instance_create.h"

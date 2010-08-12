@@ -793,7 +793,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
     }
   }
   if (last_named == LN_TYPEDEF) { //plain typedef, not typedef | declarator
-    cferr = "Type definition does not specify a type";
+    cferr = "Type definition does not specify a type: `" + n + "' is not a type.";
     return pos;
   }
   
@@ -806,7 +806,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         {
           if (refstack.currentsymbol() != '(')
           {
-            cferr = "Expected ',' or ';' before identifier";
+            cferr = last_named & LN_TYPEDEF ? "Two names given in typedef: currently typedef " + last_type->name + " " + last_identifier : "Expected ',' or ';' before identifier";
             return pos;
           }
           fparam_named = 1;

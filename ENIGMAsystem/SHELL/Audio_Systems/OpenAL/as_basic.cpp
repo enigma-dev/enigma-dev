@@ -1,5 +1,9 @@
+#include <string>
 #include <stdio.h>
 #include <stddef.h>
+#include <math.h>
+using std::string;
+#include "as_basic.h"
 #include "alure/include/AL/alure.h"
 
 
@@ -20,9 +24,14 @@ namespace enigma
   
   static void eos_callback(void *soundID, ALuint src)
   {
-    puts ("The sound has stopped. The universe is at peace.");
-    sounds[(ptrdiff_t)soundID].playing = false;
-    sounds[(ptrdiff_t)soundID].idle = true;
+    sound &snd = sounds[(ptrdiff_t)soundID];
+    puts("The sound has stopped...Is the universe at peace?");
+    /*if (snd.looping)
+      snd.idle = !(snd.looping = snd.playing = (alurePlaySource(snd.src, eos_callback, soundID) != AL_FALSE));
+    else {*/
+      snd.playing = false;
+      snd.idle = true;
+    //}
   }
 
   int audiosystem_initialize()
@@ -62,6 +71,8 @@ namespace enigma
     }
     
     alSourcei(sounds[id].src, AL_BUFFER, buf);
+    alSourcei(sounds[id].src, AL_SOURCE_RELATIVE, AL_TRUE);
+    alSourcei(sounds[id].src, AL_REFERENCE_DISTANCE, 1);
     sounds[id].loaded = 2;
     return 0;
   }
@@ -87,9 +98,41 @@ namespace enigma
 
 bool sound_play(int sound) // Returns nonzero if an error occurred
 {
-  enigma::sound &snd = enigma::sounds[sound];
+  enigma::sound &snd = enigma::sounds[sound]; //snd.looping = false;
+  alSourcei(snd.src, AL_LOOPING, AL_FALSE); //Just playing
   return snd.idle = !(snd.playing = (alurePlaySource(snd.src, enigma::eos_callback, (void*)sound) != AL_FALSE));
 }
+bool sound_loop(int sound)
+{
+  enigma::sound &snd = enigma::sounds[sound];
+  alSourcei(snd.src, AL_LOOPING, AL_TRUE); //Looping now
+  return snd.idle = !(/*snd.looping =*/ snd.playing = (alurePlaySource(snd.src, enigma::eos_callback, (void*)sound) != AL_FALSE));
+}
+bool sound_pause(int sound)
+{
+  enigma::sound &snd = enigma::sounds[sound];
+  return snd.playing = !alurePauseSource(snd.src);
+}
+bool sound_resume(int sound)
+{
+  enigma::sound &snd = enigma::sounds[sound];
+  return snd.playing = alureResumeSource(snd.src);
+}
+
+bool sound_isplaying(int sound) {
+  return enigma::sounds[sound].playing;
+}
+bool sound_ispaused(int sound) {
+  return !enigma::sounds[sound].idle and !enigma::sounds[sound].playing;
+}
+
+void sound_pan(int sound, float value)
+{
+  enigma::sound &snd = enigma::sounds[sound];
+  const float pan = value*2-1;
+  alSource3f(snd.src,AL_POSITION,pan,sqrt(1-pan*pan),0);
+}
+
 
 const char* sound_get_audio_error() {
   return alureGetErrorString();
