@@ -1,6 +1,6 @@
 #Awesome Locally Generated Makefile
 
-.eobjs_$(MODE)/as_basic.o: as_basic.cpp alure/include/AL/alure.h alure/config.h ../../../additional/al/include/alc.h ../../../additional/al/include/al.h
+.eobjs_$(MODE)/as_basic.o: as_basic.cpp as_basic.h alure/include/AL/alure.h alure/config.h ../../../additional/al/include/alc.h ../../../additional/al/include/al.h
 	g++ -c as_basic.cpp		-o .eobjs_$(MODE)/as_basic.o $(FLAGS)
 
 mkObjDir:
