@@ -85,9 +85,9 @@ int establish_bearings()
   if (bin_path != "") //We have in fact been down this road before...
   {
     string cm = bin_path + "cpp";
-    got_success = !better_system(cm.c_str(), "-dM -x c++ -E blank.txt", ">", "defines.txt");
-    if (!got_success)
-      cout << "Failed to load GCC from Ad-Hoc location:\n" << bin_path << endl;
+    got_success = !better_system(cm, "-dM -x c++ -E blank.txt", ">", "defines.txt");
+    if (!got_success) got_success = !better_system(cm = bin_path + "cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
+    if (!got_success) cout << "Failed to load GCC from Ad-Hoc location:\n" << bin_path << endl;
     defs = fc("defines.txt");
     if (defs == "") return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
   }
