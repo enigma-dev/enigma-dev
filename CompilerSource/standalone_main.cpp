@@ -77,7 +77,7 @@ extern  map<externs*, int> bigmap;
 
 extern char getch();
 extern int cfile_parse_main();
-int main(int argc, char *argv[])
+int mainr(int argc, char *argv[])
 {
   cparse_init();
   
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
   if (EGMmain == "") {
     cout << "ERROR: Failed to read main engine file\n";
     getchar(); return 1;
-  }
+  } else cout << "Opened Engine file.\n";
   
   /*ofstream wto("freezway.txt",ios_base::out);
     wto << "This is what ENIGMA read for SHELL: \n";
@@ -200,3 +200,5 @@ int main(int argc, char *argv[])
   
   return 0;
 }
+
+int main(int argc, char* argv[]) { mainr(argc,argv); getchar(); return 0; }

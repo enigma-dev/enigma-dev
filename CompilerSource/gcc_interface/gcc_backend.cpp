@@ -73,15 +73,15 @@ int establish_bearings()
 {
   // Clear a blank file
   fclose(fopen("blank.txt","wb"));
-  
+
   string defs;
   bool got_success = false;
-  
+
   cout << "Probing for GCC..." << endl;
-  
+
   // See if we've been down this road before
   string bin_path = fc("gcc_adhoc.txt");
-  
+
   if (bin_path != "") //We have in fact been down this road before...
   {
     string cm = bin_path + "cpp";
@@ -95,45 +95,45 @@ int establish_bearings()
   {
     puts("Scouring for Make");
     const char *cpath;
-    int failing = better_system(cpath = "cpp", "-dM -x c++ -E blank.txt", ">", "defines.txt");
+    int failing = better_system(cpath = "cpp", "-dM -xc++ -E blank.txt", ">", "defines.txt");
     if (failing) failing = better_system(cpath = "/MinGW/bin/cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
     if (failing) failing = better_system(cpath = "\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
     if (failing) failing = better_system(cpath = "C:\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
-    
+
     if (failing)
       return (cout << "Bailing: Error 1\n" , 1);
-    
+
     defs = fc("defines.txt");
     if (defs == "") return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
-    
+
     string scpath = cpath;
     size_t sp = scpath.find_last_of("/\\");
     bin_path = sp == string::npos? "" : scpath.erase(sp+1);
-    
+
     cout << "Good news; it should seem I can reach make from `" << MAKE_location << "'\n";
   }
-  
+
   int failing = better_system(MAKE_location = bin_path + "make", "--ver");
   if (failing) failing = better_system(MAKE_location = bin_path + "make.exe", "--ver");
   if (failing) failing = better_system(MAKE_location = bin_path + "mingw32-make.exe", "--ver");
   if (failing) failing = better_system(MAKE_location = bin_path + "mingw64-make.exe", "--ver");
   if (failing)
     return (cout << "Bailing: Error 2\n" , 1);
-  
+
   int gfailing = better_system(GCC_location = bin_path + "gcc", "-dumpversion");
   if (gfailing) gfailing = better_system(GCC_location = bin_path + "gcc.exe", "-dumpversion");
   if (gfailing) return (cout << "Can't find GCC for some reason. Error PI.", 3);
   cout << "GCC located. Path: `" << GCC_location << '\'' << endl;
-  
+
   pt a = parse_cfile(defs);
   if (a != pt(-1)) {
     cout << "Highly unlikely error. But stupid things can happen when working with files.\n\n";
     return (cout << "Bailing: Error 4\n" , 1);
   }
   GCC_MACRO_STRING = defs;
-  
+
   cout << "Successfully loaded GCC definitions\n";
-  
+
   //Read the search dirs
   fclose(fopen("blank.txt","wb"));
   int sdfail = better_system(GCC_location, "-E -x c++ -v blank.txt", "2>", "searchdirs.txt"); //For some reason, the info we want is written to stderr
@@ -141,24 +141,24 @@ int establish_bearings()
     cout << "Failed to read search directories. Error 5.\n";
     return 5;
   }
-  
+
   string idirs = fc("searchdirs.txt");
   if (idirs == "") {
     cout << "Invalid search directories returned. Error 6.\n";
     return 6;
   }
-  
+
   pt pos = idirs.find("#include <...> search starts here:");
   if (pos == string::npos or (pos > 0 and idirs[pos-1] != '\n' and idirs[pos-1] != '\r')) {
     cout << "Invalid search directories returned. Error 7: " << (pos == string::npos?"former":"latter") << ".\n";
     return 7;
   }
-  
+
   pos += 34;
   while (is_useless(idirs[++pos]));
   const pt endpos = idirs.find("End of search list.");
   idirs = idirs.substr(pos,endpos-pos); //Assume the rest of the file is full of these
-  
+
   pt spos = 0;
   for (pos = 0; pos < idirs.length(); pos++)
   {
@@ -170,11 +170,11 @@ int establish_bearings()
       spos = pos--;
     }
   }
-  
+
   cout << include_directory_count << "dirs:\n";
   for (unsigned i = 0; i < include_directory_count; i++)
     cout << '"' << include_directories[i] << '"' << endl;
-  
+
   return 0;
 }
 

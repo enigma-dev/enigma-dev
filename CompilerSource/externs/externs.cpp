@@ -157,7 +157,7 @@ bool macro_type::check_recurse_danger(string n)
     if (is_letter(val[i]))
     {
       const unsigned si = i;
-      while (is_letterd(val[i])) i++;
+      while (is_letterd(val.c_str()[i])) i++;
       if (val.substr(si,i-si) == n)
       { dgr = 1; break; }
     }

@@ -191,6 +191,8 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           {
             if (last_named != LN_TYPEDEF)
             {
+              if (last_named == LN_DECLARATOR and last_named_phase == DEC_IDENTIFIER)
+                return pt(-1);
               cferr="Unexpected `union' token";
               return pos;
             }
@@ -652,6 +654,8 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           if (last_named_phase == SP_COLON)
             last_named_phase = SP_PUBLIC;
           else {
+            if (last_type->parent == current_scope)
+              return (last_named = LN_DECLARATOR, last_named_phase = DEC_IDENTIFIER, last_identifier = n, pt(-1));
             cferr = "Structure already identified, expected undeclared identifier";
             return pos;
           }

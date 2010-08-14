@@ -11,6 +11,7 @@
   #define TARGET_PLATFORM_ID   OS_LINUX
 #elif defined(__APPLE__) || defined(MACOSX) || defined(__MACH__) || defined(macintosh) || defined(Macintosh)
   #define TARGET_PLATFORM_NAME "ENIGMA_WS_COCOA"
+  #define TARGET_PLATFORM_ID   OS_MACOSX
 #elif defined(unix) || defined(__unix) || defined(__unix__)
   #define TARGET_PLATFORM_NAME "ENIGMA_WS_XLIB"
   #define TARGET_PLATFORM_ID   OS_MACOSX

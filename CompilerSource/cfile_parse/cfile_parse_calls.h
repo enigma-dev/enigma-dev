@@ -32,14 +32,16 @@
 
 bool is_tflag(string x)
 {
-  return 
-     x=="signed" 
-  or x=="unsigned" 
-  or x=="short" 
-  or x=="long" 
-  or x=="static" 
-  or x=="extern" 
-  or x=="mutable" 
+  return
+     x=="signed"
+  or x=="unsigned"
+  or x=="__signed"
+  or x=="__unsigned"
+  or x=="short"
+  or x=="long"
+  or x=="static"
+  or x=="extern"
+  or x=="mutable"
   or x=="volatile"
   or x=="register" ;
 }
@@ -49,10 +51,12 @@ bool is_tflag(string x)
 //Picture any of these flags prefixed to string
 bool tflag_atomic(string x)
 {
-  return 
-     x=="unsigned" 
+  return
+     x=="unsigned"
   or x=="signed"
-  or x=="short" 
+  or x=="__unsigned"
+  or x=="__signed"
+  or x=="short"
   or x=="long";
 }
 
@@ -88,39 +92,39 @@ void cparse_init()
 {
   current_scope = &global_scope;
   parse_cfile(GCC_MACRO_STRING);
-  
+
   regt("auto");
   regt("bool");
   regt("char");
   builtin_type__int = regt("int");
   builtin_type__float = regt("float");
   regt("double");
-  
+
   builtin_type__void = regt("void"); //this was added only after careful consideration
-  
+
   //lesser used types
   //regt("size_t"); //size_t doesn't need registered here as it is typdef'd in stdio somewhere.
   regt("wchar_t");
-  
+
   //__builtin_ grabbage
   regt("__builtin_va_list");
   regt("__PTRDIFF_TYPE__");
-  
+
   #undef regt
-  
+
   //These are GCC things and must be hard coded in
-  regmacro("__attribute__","","x"); //__attribute__(x) 
-  regmacro("__typeof__","int","x"); //__typeof__(x) 
+  regmacro("__attribute__","","x"); //__attribute__(x)
+  regmacro("__typeof__","int","x"); //__typeof__(x)
   regmacro("__extension__"); //__extension__
   regmacro("false","0"); //false
   regmacro("true","1"); //true
-  
+
   //Cheap hacks
-  
-  regmacro("__typeof","int","x"); //__typeof(x) 
+
+  regmacro("__typeof","int","x"); //__typeof(x)
   regmacro("sizeof","4","x"); //sizeof(x)
-  
-  
+
+
   // Skip out on some of the more difficlt aspects of the GNU standard
   cout << "Undefining _GLIBCXX_EXPORT_TEMPLATE\n";
   macros["_GLIBCXX_EXPORT_TEMPLATE"] = "0"; // Save us some work
@@ -137,12 +141,12 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
 {
   unsigned int is_tdef = last & LN_TYPEDEF;
   last &= ~LN_TYPEDEF;
-  
+
   externs *scope_to_use = immediate_scope ? immediate_scope : current_scope;
   if (name != "")
   {
     extiter it = scope_to_use->members.find(name);
-    
+
     if (it != scope_to_use->members.end())
     {
       if (last == LN_NAMESPACE and (it->second->flags & EXTFLAG_NAMESPACE)) {
@@ -152,7 +156,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
       else //Potentially redeclaring X, X is not a namespace
       {
         ext_retriever_var = it->second; //Assuming we don't error, this is what we will return
-        
+
         if (it->second->is_function() and refs.is_function())
           it->second->parameter_unify(refs);
         else
@@ -174,7 +178,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
               immediate_scope = NULL;
               return -1;
             }
-            
+
             if (it->second->parent == current_scope)
             {
               if (is_tdef and last_type == it->second)
@@ -190,7 +194,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
               cferr = "Cannot declare that here.";
               return 0;
             }
-            
+
             //Inheritance
             if (ext_retriever_var->ancestors.size != 0) {
               cferr = "Implementing structure that has already been given inheritance";
@@ -217,8 +221,8 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
             }
           tmplate_params_clear(tparams,tpc);
           tpc = -1;
-        }        
-        
+        }
+
         //Success
         immediate_scope = NULL;
         return 1;
@@ -235,30 +239,30 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
       return 0;
     }
   }
-  
+
   //Determine what flags will mark the externs we're about to instantiate
   unsigned eflags = 0;
   if (last == LN_CLASS)
     eflags = EXTFLAG_CLASS | EXTFLAG_TYPENAME;
   else if (last == LN_STRUCT)
     eflags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME;
-  else if (last == LN_UNION) // Same as struct, for our purposes. 
+  else if (last == LN_UNION) // Same as struct, for our purposes.
     eflags = EXTFLAG_STRUCT | EXTFLAG_TYPENAME; //sizeof() can't be used in Macros, you bunch of arses.
   else if (last == LN_ENUM)
     eflags = (phase == EN_IDENTIFIER or phase == EN_NOTHING) ? EXTFLAG_ENUM | EXTFLAG_TYPENAME : EXTFLAG_VALUED;
   else if (last == LN_NAMESPACE)
     eflags = EXTFLAG_NAMESPACE;
-  
+
   if (is_tdef)
     eflags |= EXTFLAG_PENDING_TYPEDEF; //If this is a new type being typedef'd, it will later be undone
   if (flag_extern)
     eflags |= EXTFLAG_EXTERN;
-  
+
   externs* e = new externs(name,type,scope_to_use,eflags);
   scope_to_use->members[name] = e;
   ext_retriever_var = e;
-  
-  
+
+
   if (tpc > 0)
   {
     e->flags |= EXTFLAG_TEMPLATE;
@@ -278,10 +282,10 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
     tmplate_params_clear_used(tparams);
   }
   tpc = -1;
-  
+
   e->value_of = last_value;
   e->refstack += refs;
-  
+
   if (ihc)
   {
     if (last != LN_STRUCT and last != LN_CLASS) {
@@ -294,7 +298,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
     }
     ihc = 0;
   }
-  
+
   immediate_scope = NULL;
   return 1;
 }
@@ -314,14 +318,14 @@ pt handle_comments()
   {
     int spos=pos;
     pos+=2;
-    
+
     while ((cfile[pos] != '/' or cfile[pos-1] != '*') and (pos++)<len);
     if (pos>=len)
     {
       cferr="Unterminating comment";
       return spos;
     }
-    
+
     pos++;
     return pt(-2);
   }

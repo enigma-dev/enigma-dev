@@ -47,12 +47,12 @@ pt handle_skip()
   {
     if (specializing and pos-specialize_start)
       specialize_string += cfile.substr(specialize_start,pos-specialize_start);
-    
+
     //This segment is completely stolen from below and should be functionized ASAP
     pt sp = pos;
     while (is_letterd(cfile[++pos]));
     string n = cfile.substr(sp,pos-sp); //This is the word we're looking at.
-    
+
     //This piece is also stolen from below, but is simple enough as-is
     const pt cm = handle_macros(n);
     if (cm == pt(-2)) // Was a macro
@@ -62,7 +62,7 @@ pt handle_skip()
       return pt(-1);
     }
     if (cm != pt(-1)) return cm;
-    
+
     //Not a macro
     if (specializing) {
       specialize_start = pos;
@@ -71,11 +71,11 @@ pt handle_skip()
     //skiping_last_id = n;
     return pt(-1);
   }
-  
+
   /*if (is_useless(cfile[pos])) continue; //If anything ever needs to skip to whitespace, change "continue;" to "else"
   skiping_last_id = "";*/
-  
-  
+
+
   if (skipto == ';' and skipto2 == ';') //Special case.
   {
     if (cfile[pos] == ';' or cfile[pos] == ',')
@@ -123,7 +123,7 @@ pt handle_skip()
       }*/
     }
   }
-  
+
   if (skipto == 0)
   {
     if (specializing)
@@ -148,7 +148,7 @@ pt handle_skip()
           last_named_phase = TMP_SIMPLE_DEFAULTED;
           pos--;
         }
-        else 
+        else
         {
           if (!access_specialization(last_type,specialize_string))
             return pos;
@@ -178,6 +178,7 @@ pt handle_skip()
       }
       else if ((last_named & ~LN_TYPEDEF) == LN_STRUCT
            or  (last_named & ~LN_TYPEDEF) == LN_CLASS
+           or  (last_named & ~LN_TYPEDEF) == LN_UNION
            or  (last_named & ~LN_TYPEDEF) == LN_STRUCT_DD)
       {
         if (last_named_phase == SP_PUBLIC or last_named_phase == SP_PRIVATE or last_named_phase == SP_PROTECTED)
