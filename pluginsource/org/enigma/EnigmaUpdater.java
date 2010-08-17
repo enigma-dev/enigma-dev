@@ -1,6 +1,9 @@
 package org.enigma;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -22,12 +25,14 @@ import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNStatus;
 import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
+import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 //TODO: Thread
 public class EnigmaUpdater
 	{
-	public static final String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev";
+	public static final String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev/";
+	public static final String svn_trunk = svn + "tags/stable-update";
 	public static final boolean SUBFOLDER = false;
 
 	public static void checkForUpdates()
@@ -39,7 +44,12 @@ public class EnigmaUpdater
 				{
 				if (JOptionPane.showConfirmDialog(null,
 						"Enigma is missing libraries. Would you like us to fetch these libraries for you?",
-						"Checkout",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.checkout();
+						"Checkout",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+					{
+					svn.checkout();
+					svn.revert();
+					make();
+					}
 				return;
 				}
 			if (svn.needsUpdate())
@@ -47,7 +57,11 @@ public class EnigmaUpdater
 				if (JOptionPane.showConfirmDialog(
 						null,
 						"Enigma has detected that newer libraries may exist. Would you like us to fetch these for you?",
-						"Update",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
+						"Update",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+					{
+					svn.update();
+					make();
+					}
 				return;
 				}
 			}
@@ -88,6 +102,45 @@ public class EnigmaUpdater
 		return stat.getRemoteContentsStatus() != SVNStatusType.STATUS_NONE;
 		}
 
+	private static boolean make()
+		{
+		File f = new File("winmake.txt");
+		String make = "make";
+		try
+			{
+			BufferedReader in = new BufferedReader(new FileReader(f));
+			make = in.readLine();
+			}
+		catch (IOException e)
+			{
+			make = "make";
+			}
+		try
+			{
+			Runtime.getRuntime().exec(make);
+			}
+		catch (IOException e)
+			{
+			try
+				{
+				Runtime.getRuntime().exec("make");
+				}
+			catch (IOException e1)
+				{
+				GmFormatException e2 = new GmFormatException(null,e);
+				new ErrorDialog(
+						null,
+						"Unable to Update Enigma",
+						"Enigma cannot run because it requires the `make` tool, which could not be found.\n"
+								+ "Please ensure that `make` is properly installed and then restart the application.",
+						Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
+								e2.getClass().getName(),e2.getMessage(),e2.stackAsString())).setVisible(true);
+				return false;
+				}
+			}
+		return true;
+		}
+
 	/**
 	 * This is debug code that checks out a given revision.
 	 * This allows me to test that update works.
@@ -98,7 +151,7 @@ public class EnigmaUpdater
 	private void checkoutRev(int rev) throws SVNException
 		{
 		SVNUpdateClient upCli = cliMan.getUpdateClient();
-		SVNURL url = SVNURL.parseURIDecoded(svn);
+		SVNURL url = SVNURL.parseURIDecoded(svn_trunk);
 		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.create(rev),SVNDepth.INFINITY,
 				true);
 		System.out.println("Checked out " + r);
@@ -107,9 +160,16 @@ public class EnigmaUpdater
 	private void checkout() throws SVNException
 		{
 		SVNUpdateClient upCli = cliMan.getUpdateClient();
-		SVNURL url = SVNURL.parseURIDecoded(svn);
+		SVNURL url = SVNURL.parseURIDecoded(svn_trunk);
 		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.HEAD,SVNDepth.INFINITY,true);
 		System.out.println("Checked out " + r);
+		}
+
+	private void revert() throws SVNException
+		{
+		SVNWCClient wcCli = cliMan.getWCClient();
+		wcCli.doRevert(new File[] { path },SVNDepth.INFINITY,null);
+		System.out.println("Reverted");
 		}
 
 	private void update() throws SVNException
