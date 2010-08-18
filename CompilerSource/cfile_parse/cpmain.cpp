@@ -43,7 +43,7 @@ extern string rerr; extern int rerrpos;
 void cparse_init();
 
 extern string cferr;
-pt parse_cfile(string cfile);
+#include "cfile_parse.h"
 
 
 string file_contents(string file)
@@ -66,7 +66,7 @@ string file_contents(string file)
 
 void print_ext_data(externs *ext,int indent, int depth);
 
-void print_scope_members(externs* gscope, int indent,int depth = 100)
+void print_scope_members(externs* gscope, int indent,int depth)
 {
   if (depth--)
   for (extiter i=gscope->members.begin();i!=gscope->members.end();i++)
@@ -177,17 +177,20 @@ void print_ext_data(externs *ext,int indent,int depth)
   cout << "\r\n";
 }
 
+#include "cparse_shared.h"
+
+extern my_string fca(const char *fn);
 int cfile_parse_main()
 {
   cparse_init();
 
-  string fc=file_contents("./ENIGMAsystem/SHELL/SHELLmain.cpp");
-  if (fc == "") cout << "FAILOOS.";
+  my_string fc = fca("./ENIGMAsystem/SHELL/SHELLmain.cpp");
+  if (fc == NULL) cout << "FAILOOS.";
   
   cout << fc;
   
   time_t ts = clock();
-  int a=parse_cfile(fc);
+  int a = parse_cfile(fc);
   time_t te = clock();
   cout << "Parse time: " << ((te-ts) * 1000) / CLOCKS_PER_SEC << " milliseconds";
   
@@ -240,7 +243,6 @@ string getst()
 
 #include "cfile_parse.h"
 #include "../general/implicit_stack.h"
-extern string cfile;
 
 void print_err_line_at(pt a)
 {
@@ -333,7 +335,7 @@ int test_exp_eval()
 
 int m_prog_loop_cfp()
 {
-  string cftp = fc(0 ? "./ENIGMAsystem/SHELL/SHELLmain.cpp" : "./CompilerSource/cfile_parse/parsein.h");
+  my_string cftp = fca(0 ? "./ENIGMAsystem/SHELL/SHELLmain.cpp" : "./CompilerSource/cfile_parse/parsein.h");
 
   #ifdef linux
     timeval ts; gettimeofday(&ts,NULL);

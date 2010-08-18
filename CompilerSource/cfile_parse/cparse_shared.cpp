@@ -30,6 +30,7 @@ using namespace std;
 
 #include "../externs/externs.h"
 #include "cfile_parse_constants.h"
+#include "cparse_shared.h"
 
 char skipto, skipto2, skip_inc_on;
 bool skippast;
@@ -37,9 +38,9 @@ bool skippast;
 string cferr;
 //string tostring(int val);
 
-string cfile;
+my_string cfile;
 pt pos = 0;
-pt len = cfile.length();
+pt len = 0;
 
 int skip_depth;
 int specialize_start;
@@ -57,3 +58,54 @@ long long last_value = 0;
 unsigned id_would_err_at = 0;
 
 bool cfile_debug = 0;
+
+#include <string.h>
+#include <stdio.h>
+
+my_string::operator const char* ()
+{
+  return value;
+}
+my_string::my_string(int* e)
+{
+  value = (char*)e;
+}
+my_string::my_string()
+{
+  int* a = new int[2]; a[0] = a[1] = 0; value = (char*)(a + 1);
+}
+
+my_string &my_string::operator= (const my_string &x)
+{
+  value = x.value;
+  value = x.value;
+  return *this;
+}
+
+bool my_string::operator==(int a) {
+  return value == NULL;
+}
+bool my_string::operator!=(int a) {
+  return value != NULL;
+}
+
+my_string &my_string::operator= (string x)
+{
+  const size_t LEN = x.length();
+  int *val = (int*)new char[LEN + sizeof(int) + sizeof(int)];
+  
+  *(val++) = LEN;
+  memcpy(val,x.c_str(),LEN);
+  *(int*)((char*)val + LEN) = 0;
+  
+  value = (char*)val;
+  return *this;
+}
+
+size_t my_string::length() {
+  return (-1)[(int*)value];
+}
+string my_string::substr(size_t x, size_t y) {
+  return string(value+x,y);
+}
+

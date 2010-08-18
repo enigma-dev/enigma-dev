@@ -238,12 +238,12 @@ int parser_secondary(string& code, string& synt)
       
       string exp = code.substr(pos,epos-pos), // Copy the expression being operated upon by .
          expsynt = synt.substr(pos,epos-pos); // Copy the lex of it, too
-      const pt ebp = pos; // Expression's beginning position
+      const pt ebp = pos; // Expression's beginning position, not a register.
       pt ep = pos = epos; // Restore our original ending position.
       
       // Determine the member being accessed
       while (synt[++ep] == 'n');
-      string member = code.substr(epos,ep-epos);
+      string member = code.substr(epos+1,ep-epos-1);
       
       // Determine the type of the left-hand expression
       onode n = exp_typeof(exp);
@@ -254,7 +254,7 @@ int parser_secondary(string& code, string& synt)
         string repsyn = "nnnnnnnnnnnnnnnnnn";
         
         repstr += member;
-        repsyn += string('n',member.length());
+        repsyn += string(member.length(),'n');
         
         repstr += "(int(";
         repsyn += "(ttt(";

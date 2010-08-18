@@ -147,7 +147,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
             while (is_useless(code[cwp])) cwp++;
             if (code[cwp] != '(')
               goto out_of_here;
-            if (!macro_function_parse(code,name,pos,macrostr,itm->second.args,itm->second.argc,itm->second.args_uat)) {
+            if (!macro_function_parse(code.c_str(),code.length(),name,pos,macrostr,itm->second.args,itm->second.argc,itm->second.args_uat)) {
               cout << "UNEXPECTED ERROR: " << macrostr;
               cout << "\nThis error should have been reported during a previous syntax check\n";
               continue;
@@ -740,10 +740,9 @@ void print_to_file(string code,string synt,unsigned int &strc, varray<string> &s
 
 int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
 {
+  cout << "qass: " << pos << " <" << ((synt && code.length()) == (synt && synt->length()) ? "equivalent" : "UNEQUAL") << "> [" << (pos > code.length()) << "]";
   pt epos = pos;
   int a2i = 0;
-  
-  puts("CALLED FIX TEMPLATES\n\n\n");
   
   if (code[--epos] == '>')
   {
@@ -765,6 +764,8 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
   while (code[sp2] != '<' and sp2 < epos)
     if (code[sp2++] == ' ') spos = sp2;
   
+  cout << " <" << ((synt && code.length()) == (synt && synt->length()) ? "equivalent" : "UNEQUAL") << "> [" << (pos > code.length()) << "]";
+  cout << "ass: " << spos << ", " << epos << ": " << code.length() << endl;
   string ptname = code.substr(spos,epos-spos+1); // Isolate the potential template's name
   bool fnd = find_extname(ptname,0xFFFFFFFF);
   if (!fnd) return 0;
@@ -805,7 +806,7 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
     }
     else
     {
-      code.insert(pos,   "<"+iseg+">"),
+      code.insert(pos, "<"+iseg+">"),
       synt && (synt->insert(pos,   string(iseg.length()+2,'t')),   true);
       return iseg.length() + 2;
     }

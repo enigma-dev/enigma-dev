@@ -41,13 +41,10 @@ bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2)
 {
   for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
   {
-    int ox=((enigma::object_collisions*)it->inst)->x;
-    int oy=((enigma::object_collisions*)it->inst)->y;
-    
-    int bl=((enigma::object_collisions*)it->inst)->bbox_left;
-    int br=((enigma::object_collisions*)it->inst)->bbox_right;
-    int bt=((enigma::object_collisions*)it->inst)->bbox_top;
-    int bb=((enigma::object_collisions*)it->inst)->bbox_bottom;
+    const enigma::object_collisions* inst = (enigma::object_collisions*)it->inst;
+    const int ox = inst->x,         oy = inst->y,
+              bl = inst->bbox_left, br = inst->bbox_right,
+              bt = inst->bbox_top,  bb = inst->bbox_bottom;
     if (x1<ox+br && x2>ox+bl && y1<oy+bb && y2>oy+bt)
     return 1;
   }

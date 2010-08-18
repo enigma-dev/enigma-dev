@@ -82,11 +82,11 @@ inline void regmacro(string m,string val,string arg1)
   mac->addarg(arg1);
 }
 
-pt parse_cfile(string);
+#include "cfile_parse.h"
 externs *builtin_type__int, *builtin_type__void, *builtin_type__float;
 extern varray<string> include_directories;
 extern unsigned int include_directory_count;
-string GCC_MACRO_STRING;
+my_string GCC_MACRO_STRING;
 
 void cparse_init()
 {

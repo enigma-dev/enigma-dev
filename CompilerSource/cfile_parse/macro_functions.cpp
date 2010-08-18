@@ -55,8 +55,7 @@ bool is_entirely_white(string x)
   return 1;
 }
 
-bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments = true);
-
+#include "macro_functions.h"
 
 //This function has its own recursion stack.
 //It is only called when a parameter is passed to a macro function.
@@ -109,7 +108,7 @@ bool preprocess_separately(string &macs)
           
           if (t->second.argc != -1) //Expect ()
           {
-            if (!macro_function_parse(macs,n,i,macrostr,t->second.args,t->second.argc,t->second.args_uat)) {
+            if (!macro_function_parse(macs.c_str(),macs.length(),n,i,macrostr,t->second.args,t->second.argc,t->second.args_uat)) {
               cferr = macrostr;
               return false;
             }
@@ -149,7 +148,7 @@ bool preprocess_separately(string &macs)
   return true;
 }
 
-bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments)
+bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments)
 {
   //cout << "parse " << macrostr << endl;
   //Skip comments. Ignore this block; it's savage but efficient.
@@ -171,7 +170,6 @@ bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr
   
   int args_given = 0;
   varray<string> macro_args;
-  const size_t len = cfile.length();
   
   unsigned lvl = 1;
   for (int i = 0; i < numparams or lvl > 0; i++) //parse out each parameter value into an array
@@ -192,7 +190,7 @@ bool macro_function_parse(string cfile,string macroname,pt &pos,string& macrostr
     }
     //Comma drops out as soon as cfile[pos] == ','
     //End Parenth will not increment if !lvl, so cfile[pos] == ')'
-    const string rw = cfile.substr(spos,pos-spos);
+    const string rw(cfile,spos,pos-spos);
     if (args_given or cfile[pos] != ')' or !is_entirely_white(rw))
       macro_args[args_given++] = rw;
     //cout << "Argument " << i << ": " << cfile.substr(spos,pos-spos) << endl;

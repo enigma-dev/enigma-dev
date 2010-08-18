@@ -47,6 +47,7 @@ using namespace std;
     #include "syntax/checkfile.h"
 
 string fc(const char* fn);
+my_string fca(const char* fn);
 
 int m_prog_loop_cfp();
 
@@ -79,12 +80,24 @@ extern char getch();
 extern int cfile_parse_main();
 int mainr(int argc, char *argv[])
 {
-  cparse_init();
+  /*my_string atest = fca("test.txt");
+  if (!atest) cout << "Open fail." << endl;
+  else {
+    cout << "a.length: " << atest.length() << endl;
+    cout << '"' << atest << '"' << endl;
+  }
+  string attn = "NIGGAR TITTZ";
+  atest = attn;
+    cout << "a.length: " << atest.length() << endl;
+    cout << '"' << atest << '"' << endl;
+  return -1;*/
   
   if (establish_bearings()) {
     cout << "ERROR: Failed to locate the GCC" << endl;
     getchar(); return 1;
   }
+  
+  cparse_init();
   
   
   cout << "Grabbing locals" << endl;
@@ -95,8 +108,8 @@ int mainr(int argc, char *argv[])
   
   //m_prog_loop_cfp();
   
-  string EGMmain = fc(1 ? "./CompilerSource/cfile_parse/auxilary.h" : "./ENIGMAsystem/SHELL/SHELLmain.cpp");
-  if (EGMmain == "") {
+  my_string EGMmain = fca(1 ? "./CompilerSource/cfile_parse/auxilary.h" : "./ENIGMAsystem/SHELL/SHELLmain.cpp");
+  if (EGMmain == NULL) {
     cout << "ERROR: Failed to read main engine file\n";
     getchar(); return 1;
   } else cout << "Opened Engine file.\n";
@@ -106,14 +119,15 @@ int mainr(int argc, char *argv[])
     wto << EGMmain;
   wto.close();*/
   
-  EGMmain += "\n\n#include <map>\n\nstd::map<float,float> testmap;\n\n";
+  //EGMmain += "\n\n#include <map>\n\nstd::map<float,float> testmap;\n\n";
   //EGMmain = fc("./CompilerSource/cfile_parse/auxilary.h");
   
+  //my_string EGMmain_e = EGMmain;
   
   clock_t cs = clock();
-  timeval ts; gettimeofday(&ts,NULL);
+  timeval ts, tn; gettimeofday(&ts,NULL);
   pt a = parse_cfile(EGMmain);
-  timeval tn; gettimeofday(&tn,NULL);
+  gettimeofday(&tn,NULL);
   clock_t ce = clock();
   
   if (a != pt(-1))
@@ -201,4 +215,9 @@ int mainr(int argc, char *argv[])
   return 0;
 }
 
-int main(int argc, char* argv[]) { mainr(argc,argv); getchar(); return 0; }
+int main(int argc, char* argv[])
+{
+  mainr(argc,argv);
+  getchar();
+  return 0;
+}

@@ -1,10 +1,3 @@
-struct a {
-  int a : 2,
-  b : 3,
-  : 1,
-  c: 2;
-};
-
 #include <map>
 #include <list>
 #include <stack>

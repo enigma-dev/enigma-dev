@@ -282,7 +282,7 @@ value evaluate_expression(string expr)
             if (i->second.argc != -1) //Expect ()
             {
               pt pst = pos;
-              if (!macro_function_parse(exp,n,pst,macrostr,i->second.args,i->second.argc,i->second.args_uat))
+              if (!macro_function_parse(exp.c_str(),len,n,pst,macrostr,i->second.args,i->second.argc,i->second.args_uat))
               {
                 rerr = macrostr;
                 rerrpos = pos;

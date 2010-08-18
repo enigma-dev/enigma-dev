@@ -72,14 +72,15 @@ inline void move_newline()
   }
 }
 
-bool fnf = 0;
+
+bool fc_fnf = 0;
 string fc(const char* fn)
 {
-    fnf = 0;
+    fc_fnf = 0;
     FILE *pt = fopen(fn,"rb");
     if (pt==NULL)
     {
-      fnf=1;
+      fc_fnf=1;
       return "";
     }
     else
@@ -95,6 +96,24 @@ string fc(const char* fn)
       a[sz] = 0;
       return a;
     }
+}
+my_string fca(const char* fn)
+{
+    FILE *pt = fopen(fn,"rb");
+    if (pt==NULL)
+      return NULL;
+    
+    fseek(pt,0,SEEK_END);
+    size_t sz = ftell(pt);
+    fseek(pt,0,SEEK_SET);
+
+    int *a = (int*)new char[sz+sizeof(int)+sizeof(int)];
+    sz = fread(a+1,1,sz,pt);
+    fclose(pt);
+    
+    (a++)[0] = sz;
+    *(int*)((char*)a + sz) = 0;
+    return a;
 };
 
 struct flow_stack
@@ -260,7 +279,7 @@ pt cfile_parse_macro()
         move_newline();
         
         //Find the file and include it
-        string ins;
+        my_string ins;
         string include_from;
         if (c == '"')
         {
@@ -277,8 +296,8 @@ pt cfile_parse_macro()
           else
             include_from = included_files.top().path + qpath;
           
-          ins = fc( (include_from+file).c_str() );
-          if (fnf) {
+          ins = fca( (include_from+file).c_str() );
+          if (!ins) {
             cferr = "Failed to include `" + file + "' from " + include_from + ": File not found";
             return pos;
           }
@@ -290,15 +309,19 @@ pt cfile_parse_macro()
             return pos;
           }
           
+          bool found = false;
+          
           // Loop through the search path, seeking the header
           for (unsigned int i = 0; i < include_directory_count; i++)
           {
             include_from = include_directories[i];
-            ins = fc( (include_from+file).c_str() );
-            if (!fnf) break;
+            ins = fca( (include_from+file).c_str() );
+            if (ins) { 
+              found = true; break;
+            }
           }
           
-          if (fnf) {
+          if (!found) {
             cferr = "Failed to include " + file + " from " + include_from + ": File not found";
             return pos;
           }
@@ -306,6 +329,7 @@ pt cfile_parse_macro()
         
         cfstack.push(new cfnode);
         cfile = ins;
+        
         len = cfile.length();
         pos = 0;
         

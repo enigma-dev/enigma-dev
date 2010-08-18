@@ -25,7 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-pt parse_cfile(string cftext);
+#include "cparse_shared.h"
+pt parse_cfile(my_string cftext);
 extern string cferr;
 void cparse_init();
 string cferr_get_file();

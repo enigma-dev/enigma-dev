@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _CPARSE_SHARED__H
+#define _CPARSE_SHARED__H
+
 //This file is mostly documentation.
 #include "../externs/externs.h"
 
@@ -54,7 +57,20 @@ extern bool flag_extern;
 extern string cferr;
 extern string tostring(int val);
 
-extern string cfile;
+struct my_string {
+  const char* value;
+  operator const char* ();
+  size_t length(); const char c_str();
+  string substr(size_t x, size_t y);
+  my_string &operator= (const my_string&);
+  my_string &operator= (string);
+  bool operator==(int);
+  bool operator!=(int);
+  my_string(int*);
+  my_string();
+};
+
+extern my_string cfile;
 extern pt pos;
 extern pt len;
 
@@ -65,3 +81,5 @@ extern bool cfile_debug;
 void print_scope_members(externs*,int indent = 2,int depth = 100);
 #define tree_scope_members(x,y) print_scope_members(x,2,y);
 string strace(externs*);
+
+#endif

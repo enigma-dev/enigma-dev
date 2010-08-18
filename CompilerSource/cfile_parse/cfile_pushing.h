@@ -41,7 +41,7 @@ extern stack<includings> included_files;
 
 struct cfnode
 {
-  string scfile;
+  my_string scfile;
   pt spos;
   pt slen;
   cfnode();

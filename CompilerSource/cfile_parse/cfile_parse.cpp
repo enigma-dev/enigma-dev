@@ -94,7 +94,7 @@ int debug_ent() {
   return 0;
 }
 
-pt parse_cfile(string cftext)
+pt parse_cfile(my_string cftext)
 {
   cferr="No error";
   while (!included_files.empty())
@@ -166,18 +166,16 @@ pt parse_cfile(string cftext)
       }
       else break;
     }
-
-	  string a = ""; cout << (int)a[0];
-
+    
     if (is_useless(cfile[pos]))
     {
-      do if (cfile.c_str()[pos]=='\r' or cfile.c_str()[pos]=='\n')
+      do if (cfile[pos]=='\r' or cfile[pos]=='\n')
         preprocallowed=true;
       while (is_useless(cfile[++pos]));
       continue;
     }
-
-
+    
+    
     //If it's a macro, deal with it here
     if (cfile[pos]=='#')
     {

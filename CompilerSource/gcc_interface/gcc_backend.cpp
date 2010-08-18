@@ -66,7 +66,8 @@ inline int rdir_system(string x, string y)
   return system((x + " " + y).c_str());
 }
 
-extern string GCC_MACRO_STRING;
+extern my_string fca(const char*);
+extern my_string GCC_MACRO_STRING;
 
 //Find us the GCC, get info about it and ourself
 int establish_bearings()
@@ -74,7 +75,7 @@ int establish_bearings()
   // Clear a blank file
   fclose(fopen("blank.txt","wb"));
 
-  string defs;
+  my_string defs;
   bool got_success = false;
 
   cout << "Probing for GCC..." << endl;
@@ -89,7 +90,7 @@ int establish_bearings()
     if (!got_success) got_success = !better_system(cm = bin_path + "cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
     if (!got_success) cout << "Failed to load GCC from Ad-Hoc location:\n" << bin_path << endl;
     defs = fc("defines.txt");
-    if (defs == "") return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
+    if (defs == NULL) return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
   }
   if (!got_success)
   {
@@ -103,8 +104,8 @@ int establish_bearings()
     if (failing)
       return (cout << "Bailing: Error 1\n" , 1);
 
-    defs = fc("defines.txt");
-    if (defs == "") return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
+    defs = fca("defines.txt");
+    if (defs == NULL) return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
 
     string scpath = cpath;
     size_t sp = scpath.find_last_of("/\\");

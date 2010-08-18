@@ -70,9 +70,10 @@ void externs::parameter_unify(rf_stack& x)
   #define ecmm
   #define tp_just_instd__TRUE
 #endif
-extern string cfile; extern pt pos;
-#define other if (n == "x" and p == &global_scope)
-#define other1(s) cout << "\n\n\n\n\n\n\n\n\n\n\n" << cfile.substr(pos-10,12) << "\n\n\n\n\n\n\n\n" << s;
+
+#include "../cfile_parse/cparse_shared.h"
+#define other //if (n == "x" and p == &global_scope)
+#define other1(s) //cout << "\n\n\n\n\n\n\n\n\n\n\n" << cfile.substr(pos-10,12) << "\n\n\n\n\n\n\n\n" << s;
 
 externs::externs(): flags(0), name(), type(NULL), parent(NULL), value_of(0)
 {
@@ -373,7 +374,6 @@ bool find_in_specializations(externs* inscope,string name, unsigned flags)
 //template parameters and scope names, and filters by type.
 
 extern string cferr;
-  #include "../cfile_parse/cparse_shared.h"
   #include "../cfile_parse/cfile_parse_constants.h"
 void print_err_line_at(pt a = pos);
 bool find_extname(string name,unsigned int flags,bool expect_find)

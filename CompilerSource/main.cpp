@@ -45,7 +45,7 @@ using namespace std;
     #include "cfile_parse/cfile_parse.h"
     #include "syntax/checkfile.h"
 
-string fc(const char* fn);
+my_string fca(const char* fn);
 
 int m_prog_loop_cfp();
 
@@ -54,9 +54,17 @@ int m_prog_loop_cfp();
 #ifdef _WIN32
  #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)
+   #define DECLARE_TIME() clock_t cs, ce
+   #define START_TIME() cs = clock()
+   #define STOP_TIME() ce = clock()
+   #define PRINT_TIME() (((ce - cs) * 1000)/CLOCKS_PER_SEC)
 #else
  #define dllexport extern "C"
  #include <cstdio>
+   #define DECLARE_TIME()  timeval ts, tn
+   #define START_TIME() gettimeofday(&ts,NULL);
+   #define STOP_TIME() gettimeofday(&tn,NULL);
+   #define PRINT_TIME() ((double(tn.tv_sec - ts.tv_sec) + double(tn.tv_usec - ts.tv_usec)/1000000.0)*1000)
 #endif
 
 extern void clear_ide_editables();
@@ -144,8 +152,8 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
   if (of) fputs(wscode,of), fclose(of);
   
   cout << "Opening ENIGMA for parse..." << flushl;
-  string EGMmain = fc("ENIGMAsystem/SHELL/SHELLmain.cpp");
-  if (EGMmain == "")
+  my_string EGMmain = fca("ENIGMAsystem/SHELL/SHELLmain.cpp");
+  if (EGMmain == NULL)
   {
     /*char d[600];
     GetCurrentDirectory(600,d);*/
@@ -155,9 +163,10 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
     firstpass = false; return &ide_passback_error;
   }
   
-  clock_t cs = clock();
+  DECLARE_TIME();
+  START_TIME();
   pt a = parse_cfile(EGMmain);
-  clock_t ce = clock();
+  STOP_TIME();
   
   if (a != pt(-1)) {
     cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
@@ -172,7 +181,7 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
   }
   firstpass = false;
   
-  cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n"
+  cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME() << "ms)\n"
   << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
   //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   
