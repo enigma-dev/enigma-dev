@@ -27,7 +27,9 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -61,12 +63,15 @@ import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaStruct;
+import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
+import org.lateralgm.file.GmFormatException;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
+import org.lateralgm.messages.Messages;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
 import org.lateralgm.subframes.ActionFrame;
@@ -94,6 +99,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public EnigmaRunner()
 		{
 		attemptUpdate();
+		make();
 		LGM.addReloadListener(this);
 		initEnigmaLib();
 		populateMenu();
@@ -104,6 +110,60 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		LGM.mdi.add(esf);
 
 		if (GCC_LOCATED) EnigmaDriver.whitespaceModified(es.definitions);
+		}
+
+	public static boolean make()
+		{
+		File f = new File("winmake.txt");
+		String make = "make";
+		try
+			{
+			BufferedReader in = new BufferedReader(new FileReader(f));
+			make = in.readLine();
+			}
+		catch (IOException e)
+			{
+			System.out.println("winmake.txt error: " + e.getMessage());
+			make = "make";
+			}
+		System.out.print("Attempting (1): " + make + "... ");
+		Process p;
+		try
+			{
+			p = Runtime.getRuntime().exec(make);
+			}
+		catch (IOException e)
+			{
+			System.out.println("Failed\nAttempting (2): make... ");
+			try
+				{
+				p = Runtime.getRuntime().exec("make");
+				}
+			catch (IOException e1)
+				{
+				System.out.println("Failed");
+				GmFormatException e2 = new GmFormatException(null,e);
+				e2.printStackTrace();
+				new ErrorDialog(
+						null,
+						"Unable to Update Enigma",
+						"Enigma cannot run because it requires the `make` tool, which could not be found.\n"
+								+ "Please ensure that `make` is properly installed and then restart the application.",
+						Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
+								e2.getClass().getName(),e2.getMessage(),e2.stackAsString())).setVisible(true);
+				return false;
+				}
+			}
+		try
+			{
+			System.out.println(p.waitFor()); //p cannot be null at this point
+			}
+		catch (InterruptedException e)
+			{
+			System.out.println("wut?");
+			e.printStackTrace();
+			}
+		return true;
 		}
 
 	private void initEnigmaLib()

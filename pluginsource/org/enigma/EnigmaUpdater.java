@@ -1,9 +1,6 @@
 package org.enigma;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -48,7 +45,6 @@ public class EnigmaUpdater
 					{
 					svn.checkout();
 					svn.revert();
-					make();
 					}
 				return;
 				}
@@ -57,11 +53,7 @@ public class EnigmaUpdater
 				if (JOptionPane.showConfirmDialog(
 						null,
 						"Enigma has detected that newer libraries may exist. Would you like us to fetch these for you?",
-						"Update",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
-					{
-					svn.update();
-					make();
-					}
+						"Update",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
 				return;
 				}
 			}
@@ -100,45 +92,6 @@ public class EnigmaUpdater
 		SVNStatusType st = stat.getRemoteContentsStatus();
 		System.out.println(st);
 		return stat.getRemoteContentsStatus() != SVNStatusType.STATUS_NONE;
-		}
-
-	private static boolean make()
-		{
-		File f = new File("winmake.txt");
-		String make = "make";
-		try
-			{
-			BufferedReader in = new BufferedReader(new FileReader(f));
-			make = in.readLine();
-			}
-		catch (IOException e)
-			{
-			make = "make";
-			}
-		try
-			{
-			Runtime.getRuntime().exec(make);
-			}
-		catch (IOException e)
-			{
-			try
-				{
-				Runtime.getRuntime().exec("make");
-				}
-			catch (IOException e1)
-				{
-				GmFormatException e2 = new GmFormatException(null,e);
-				new ErrorDialog(
-						null,
-						"Unable to Update Enigma",
-						"Enigma cannot run because it requires the `make` tool, which could not be found.\n"
-								+ "Please ensure that `make` is properly installed and then restart the application.",
-						Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
-								e2.getClass().getName(),e2.getMessage(),e2.stackAsString())).setVisible(true);
-				return false;
-				}
-			}
-		return true;
 		}
 
 	/**
