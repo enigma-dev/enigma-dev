@@ -1,6 +1,7 @@
 package org.enigma;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -17,10 +18,10 @@ import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.ISVNStatusHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNStatus;
-import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
@@ -29,8 +30,12 @@ import org.tmatesoft.svn.core.wc.SVNWCUtil;
 public class EnigmaUpdater
 	{
 	public static final String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev/";
-	public static final String svn_trunk = svn + "tags/stable-update";
+	public static final String svn_trunk = svn + "tags/update-stable";
 	public static final boolean SUBFOLDER = false;
+
+	private SVNClientManager cliMan = null;
+	/** Path to the working copy */
+	private File path = null;
 
 	public static void checkForUpdates()
 		{
@@ -78,9 +83,6 @@ public class EnigmaUpdater
 			}
 		}
 
-	private SVNClientManager cliMan = null;
-	private File path = null;
-
 	private boolean needsCheckout()
 		{
 		return !SVNWCUtil.isVersionedDirectory(path);
@@ -88,10 +90,18 @@ public class EnigmaUpdater
 
 	private boolean needsUpdate() throws SVNException
 		{
-		SVNStatus stat = cliMan.getStatusClient().doStatus(path,true);
-		SVNStatusType st = stat.getRemoteContentsStatus();
-		System.out.println(st);
-		return stat.getRemoteContentsStatus() != SVNStatusType.STATUS_NONE;
+		final ArrayList<SVNStatus> changes = new ArrayList<SVNStatus>();
+		ISVNStatusHandler ish = new ISVNStatusHandler()
+			{
+				public void handleStatus(SVNStatus status) throws SVNException
+					{
+					changes.add(status);
+					}
+			};
+		/*long revision = */cliMan.getStatusClient().doStatus(path,SVNRevision.HEAD,SVNDepth.UNKNOWN,
+				true,false,false,false,ish,null);
+
+		return !changes.isEmpty();
 		}
 
 	/**
