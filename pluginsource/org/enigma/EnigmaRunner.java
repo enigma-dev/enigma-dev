@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -61,8 +62,8 @@ import javax.swing.event.DocumentListener;
 import org.enigma.EnigmaSettingsFrame.EnigmaSettings;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
-import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaStruct;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -112,36 +113,30 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (GCC_LOCATED) EnigmaDriver.whitespaceModified(es.definitions);
 		}
 
-	public static boolean make()
+	public boolean make()
 		{
 		File f = new File("winmake.txt");
-		String make = "make";
+		Process p;
+		InputStream stdin, stder;
 		try
 			{
 			BufferedReader in = new BufferedReader(new FileReader(f));
-			make = in.readLine();
-			}
-		catch (IOException e)
-			{
-			System.out.println("winmake.txt error: " + e.getMessage());
-			make = "make";
-			}
-		System.out.print("Attempting (1): " + make + "... ");
-		Process p;
-		try
-			{
+			String make = in.readLine();
+			in.close();
 			p = Runtime.getRuntime().exec(make);
+			stdin = p.getInputStream();
+			stder = p.getErrorStream();
 			}
 		catch (IOException e)
 			{
-			System.out.println("Failed\nAttempting (2): make... ");
 			try
 				{
 				p = Runtime.getRuntime().exec("make");
+				stdin = p.getInputStream();
+				stder = p.getErrorStream();
 				}
 			catch (IOException e1)
 				{
-				System.out.println("Failed");
 				GmFormatException e2 = new GmFormatException(null,e);
 				e2.printStackTrace();
 				new ErrorDialog(
@@ -154,6 +149,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				return false;
 				}
 			}
+		System.out.println("Calling `make`");
+		new EnigmaThread(ef,stdin);
+		new EnigmaThread(ef,stder);
+		ef.setVisible(true);
+		ef.ta.append("Calling `make`");
 		try
 			{
 			System.out.println(p.waitFor()); //p cannot be null at this point
@@ -163,6 +163,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			System.out.println("wut?");
 			e.printStackTrace();
 			}
+		ef.setVisible(false);
 		return true;
 		}
 
