@@ -21,6 +21,10 @@ public class EnigmaDriver
 		public int absoluteIndex;
 		}
 
+	public static void init()
+		{
+		}
+
 	public static native int libInit(EnigmaCallbacks ef);
 
 	public static native int gccDefinePath(String path);

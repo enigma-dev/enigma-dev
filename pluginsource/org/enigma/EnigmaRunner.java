@@ -94,23 +94,49 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public JMenuItem run, debug, build, compile, rebuild;
 	public JMenuItem showFunctions, showGlobals, showTypes;
 	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
-	public static boolean GCC_LOCATED = false;
+	public static boolean GCC_LOCATED = false, ENIGMA_READY = false;
 	public final EnigmaNode node = new EnigmaNode();
 
 	public EnigmaRunner()
 		{
-		attemptUpdate();
-		make();
-		LGM.addReloadListener(this);
-		initEnigmaLib();
 		populateMenu();
 		populateTree();
+		LGM.addReloadListener(this);
 		SubframeInformer.addSubframeListener(this);
 		applyBackground("org/enigma/enigma.png");
-
 		LGM.mdi.add(esf);
 
-		if (GCC_LOCATED) EnigmaDriver.whitespaceModified(es.definitions);
+		new Thread()
+			{
+				public void run()
+					{
+					attemptUpdate();
+					make();
+					if (attemptLib())
+						{
+						ENIGMA_READY = true;
+						initEnigmaLib();
+						if (GCC_LOCATED) EnigmaDriver.whitespaceModified(es.definitions);
+						}
+					}
+			}.start();
+		}
+
+	private boolean attemptLib()
+		{
+		try
+			{
+			EnigmaDriver.init();
+			return true;
+			}
+		catch (UnsatisfiedLinkError e)
+			{
+			String err = "ENIGMA: Unable to communicate with the library,\n"
+					+ "either because it could not be found or uses methods different from those expected.\n"
+					+ "The exact error is:\n" + e.getMessage();
+			JOptionPane.showMessageDialog(null,err);
+			return false;
+			}
 		}
 
 	public boolean make()
@@ -169,7 +195,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	private void initEnigmaLib()
 		{
-		System.out.print("Initializing Enigma: ");
+		System.out.println("Initializing Enigma: ");
 		int ret = EnigmaDriver.libInit(ec);
 		if (ret == 0)
 			{
@@ -472,6 +498,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	//This can be static since the GCC_LOCATED and Enigma dll are both static.
 	public static SyntaxError checkSyntax(String code)
 		{
+		if (!ENIGMA_READY)
+			{
+			JOptionPane.showMessageDialog(null,"ENIGMA isn't ready yet.");
+			return null;
+			}
 		if (!GCC_LOCATED)
 			{
 			JOptionPane.showMessageDialog(null,"You can't compile without GCC.");
@@ -487,6 +518,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public void actionPerformed(ActionEvent e)
 		{
+		if (!ENIGMA_READY)
+			{
+			JOptionPane.showMessageDialog(null,"ENIGMA isn't ready yet.");
+			return;
+			}
+
 		Object s = e.getSource();
 		if (s == run) compile(MODE_RUN);
 		if (s == debug) compile(MODE_DEBUG);
