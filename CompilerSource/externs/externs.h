@@ -47,7 +47,8 @@ enum
   EXTFLAG_DEFAULTED =       1 << 10,
   EXTFLAG_TEMPPARAM =       1 << 11,
   EXTFLAG_EXTERN =          1 << 12,
-  EXTFLAG_HYPOTHETICAL =    1 << 13
+  EXTFLAG_HYPOTHETICAL =    1 << 13,
+  EXTFLAG_C99_STRUCT =      1 << 14
 };
 //#define EXTFLAG_NAMESPACE 2048
 

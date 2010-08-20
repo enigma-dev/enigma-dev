@@ -64,6 +64,8 @@ int get_line()
 extern int negative_one;
 bool ExtRegister(unsigned int last,unsigned phase,string name,bool,rf_stack refs,externs *type,varray<tpdata> &tparams, int &tpc = negative_one, long long last_value = 0);
 
+extern void print_definition(string);
+
 //struct a { struct a *b; }, not struct a { a *b }
 bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_named,int & last_named_phase, externs *&last_type)
 {
@@ -72,11 +74,12 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
     cferr = "Identifier expected";
     return 0;
   }
-  if (!find_extname(last_identifier,EXTFLAG_TYPENAME))
+  if (!find_extname(last_identifier,EXTFLAG_TYPENAME | EXTFLAG_STRUCT | EXTFLAG_C99_STRUCT))
   {
     if (current_scope->members.find(last_identifier) != current_scope->members.end())
     {
-      cferr = "`"+last_identifier+"' does not name a type.";
+      cferr = "`"+last_identifier+"' is not a type. " + tostring(current_scope->members.find(last_identifier)->second->flags);
+      print_definition(last_identifier);
       return 0;
     }
     rf_stack NO_REFS;
@@ -614,6 +617,14 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             last_named_phase = DEC_IDENTIFIER;
             return pt(-1);
           }
+          if (last_named == LN_DECLARATOR and ext_retriever_var->flags & EXTFLAG_STRUCT) // Extern "C" nonsense we'll assume
+          {
+            last_named_phase = DEC_IDENTIFIER;
+            immediate_scope = ext_retriever_var;
+            ext_retriever_var->flags &= ~EXTFLAG_STRUCT; // This type can no longer be called struct, as it conflicts with a scalar
+            ext_retriever_var->flags |= EXTFLAG_C99_STRUCT; // So now we're a C99 struct. The nasty kind that has to be invoked.
+            return pt(-1);
+          }
           cferr = "Two types named in declaration: `"+ext_retriever_var->name+"' cannot be declared in this scope";
           return pos;
         }
@@ -654,8 +665,15 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           if (last_named_phase == SP_COLON)
             last_named_phase = SP_PUBLIC;
           else {
+            if (last_type == NULL)
+              { cferr = "Wat hel"; return pos; }
             if (last_type->parent == current_scope)
-              return (last_named = LN_DECLARATOR, last_named_phase = DEC_IDENTIFIER, last_identifier = n, pt(-1));
+            {
+              last_named = LN_DECLARATOR;
+              last_named_phase = DEC_IDENTIFIER;
+              last_identifier = n;
+              return pt(-1);
+            }
             cferr = "Structure already identified, expected undeclared identifier";
             return pos;
           }

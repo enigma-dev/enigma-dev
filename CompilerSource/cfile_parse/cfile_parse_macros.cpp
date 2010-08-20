@@ -60,11 +60,11 @@ inline void move_newline()
     {
       if (cfile[pos+1]=='/')
         cancomment = 0;
-      else if (cfile[pos+1]=='*')
+      else if (cfile[pos+1] == '*')
       {
         pos+=2;
         if (pos<len) pos++;
-        while (pos<len and cfile[pos] != '/' and cfile[pos-1] != '*') pos++;
+        while (pos<len and (cfile[pos] != '/' or cfile[pos-1] != '*')) pos++;
         continue;
       }
     }
@@ -355,11 +355,11 @@ pt cfile_parse_macro()
   if (next=="pragma") //Visit this even in a false conditional for print and debug
   {
     // This is my beautiful debugging suite during development of the parser.
-      #ifdef ENIGMA_PARSERS_DEBUG
+      #ifndef ENIGMA_PARSERS_DEBUG_NOT_LOLT0L
         const pt sp = pos;
       #endif
     move_newline();
-      #ifdef ENIGMA_PARSERS_DEBUG
+      #ifndef ENIGMA_PARSERS_DEBUG_NOT_LOLT0L
         const string pc = cfile.substr(sp,pos-sp);
         if (pc == "debug_entry_point" and !in_false_conditional())
           cout << "#pragma: debug_entry_point\r\n";

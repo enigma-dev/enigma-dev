@@ -1,3 +1,24 @@
+#include <sys/signal.h>
+
+#include <cpio.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <sys/sem.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/utsname.h>
+#include <sys/wait.h>
+#include <tar.h>
+#include <termios.h>
+#include <unistd.h>
+#include <utime.h>
+
 #include <map>
 #include <list>
 #include <stack>

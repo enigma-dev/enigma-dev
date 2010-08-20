@@ -116,6 +116,8 @@ void cparse_init()
   regmacro("__attribute__","","x"); //__attribute__(x)
   regmacro("__typeof__","int","x"); //__typeof__(x)
   regmacro("__extension__"); //__extension__
+  regmacro("__restrict"); //__restrict
+  regmacro("restrict"); //restrict
   regmacro("false","0"); //false
   regmacro("true","1"); //true
 
@@ -164,11 +166,17 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
           // struct a {}; will declare 'a' at '{' and then again at the first ';' after '}'.
           // This is not because the type is not zeroed at '{', but rather because it is reenabled at '}' to allow instantiation.
           // In the case of "struct a {};", it looks identical to "struct a {}; struct a;".
-          if (!(it->second->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT)))
+          if (!(it->second->flags & (EXTFLAG_CLASS | EXTFLAG_STRUCT | EXTFLAG_C99_STRUCT)))
           {
             if (flag_extern)
             {
               flag_extern = 0;
+              immediate_scope = NULL;
+              return -1;
+            }
+            if (last == LN_STRUCT or last == LN_STRUCT_DD) // Nasty C quirk
+            {
+              ext_retriever_var->flags |= EXTFLAG_C99_STRUCT;
               immediate_scope = NULL;
               return -1;
             }
@@ -187,6 +195,12 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
               cout << it->second->is_function() << endl;
               if (it->second->is_function())
                 return 1;
+              if (last_named == LN_STRUCT and !(ext_retriever_var->flags & EXTFLAG_TYPENAME))
+              {
+                ext_retriever_var->flags |= EXTFLAG_C99_STRUCT;
+                return 1;
+              }
+                
               cferr = "Redeclaration of `"+name+"' at this point";
               return 0;
             }

@@ -25,8 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _CPARSE_CONSTS_H
+#define _CPARSE_CONSTS_H
 
-enum
+enum c_last_named
 {
   LN_NOTHING,     //Nothing named
   LN_DECLARATOR,  //int, struct {}, you name it
@@ -173,3 +175,5 @@ inline short switch_hash(string x) {
   const int l = x.length();
   return l>2 ? (x[0]+x[1]+x[1]+x[2]+l) : 0;
 }
+
+#endif

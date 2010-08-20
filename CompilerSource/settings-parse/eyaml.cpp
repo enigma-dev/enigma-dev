@@ -67,7 +67,7 @@ ey_data::~ey_data()
   for (eycit it = values_order.next; it != NULL; )
   {
     eycit t = it; it = it->next;
-    t->value->is_scalar ? delete (ey_string*)t->value : delete (ey_data*)t->value;
+    if (t->value) t->value->is_scalar ? delete (ey_string*)t->value : delete (ey_data*)t->value;
     delete t;
   }
 }
@@ -88,6 +88,7 @@ ey_data parse_eyaml(ifstream &file, string filename)
   string line;
   ey_data res;
   getline(file,line);
+  line.append(1,0);
   
   if (tolower(line.substr(0,7)) != "%e-yaml")
     return res;
@@ -104,6 +105,7 @@ ey_data parse_eyaml(ifstream &file, string filename)
   while (!file.eof())
   {
     getline(file,line); linenum++;
+    line.append(1,0);
     if (line.substr(0,3) == "---") continue;
     int inds = 0; pt pos = 0;
     while (is_useless(line[pos])) pos++, inds++;

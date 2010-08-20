@@ -262,7 +262,7 @@ pt parse_cfile(my_string cftext)
       if (cm == pt(-2)) continue;
       if (cm != pt(-1)) return cm;
 
-      if (n=="__asm") //now we have a problem
+      if (n == "__asm" or n == "__asm__") //now we have a problem
       {
         while (is_useless(cfile[pos])) pos++;
         if (cfile[pos] != '(')
@@ -1365,6 +1365,10 @@ pt parse_cfile(my_string cftext)
               cferr = "Stray backslash in program";
               return pos-1;
             }
+          break;
+          
+        case 0x0C:
+            pos++;
           break;
 
         default:
