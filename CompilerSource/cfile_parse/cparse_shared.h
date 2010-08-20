@@ -64,8 +64,8 @@ struct my_string {
   string substr(size_t x, size_t y);
   my_string &operator= (const my_string&);
   my_string &operator= (string);
-  bool operator==(int);
-  bool operator!=(int);
+  bool operator==(const char*);
+  bool operator!=(const char*);
   my_string(int*);
   my_string();
 };

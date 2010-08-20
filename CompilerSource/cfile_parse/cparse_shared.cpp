@@ -82,11 +82,11 @@ my_string &my_string::operator= (const my_string &x)
   return *this;
 }
 
-bool my_string::operator==(int a) {
-  return value == NULL;
+bool my_string::operator==(const char* a) {
+  return value == a;
 }
-bool my_string::operator!=(int a) {
-  return value != NULL;
+bool my_string::operator!=(const char* a) {
+  return value != a;
 }
 
 my_string &my_string::operator= (string x)
