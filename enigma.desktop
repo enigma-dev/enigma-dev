@@ -1,5 +1,5 @@
 [Desktop Entry]
-Exec=java -jar /opt/enigma/lgm*.jar
+Exec=lateralgm %U
 Icon=enigma
 Type=Application
 Terminal=true
