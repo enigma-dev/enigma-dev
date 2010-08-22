@@ -81,6 +81,7 @@ import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
 import org.lateralgm.subframes.SubframeInformer.SubframeListener;
 
+import com.sun.jna.Platform;
 import com.sun.jna.StringArray;
 
 public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListener
@@ -110,8 +111,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 				public void run()
 					{
-					attemptUpdate();
-					make();
+					if (!Platform.isLinux())
+						{
+						attemptUpdate();
+						make();
+						}
 					if (attemptLib())
 						{
 						ENIGMA_READY = true;
