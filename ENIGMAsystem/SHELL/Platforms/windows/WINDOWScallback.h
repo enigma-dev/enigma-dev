@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-//namespace enigma
-//{
-  //LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
-//}
+namespace enigma
+{
+  void input_push();
+}

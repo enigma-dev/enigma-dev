@@ -34,8 +34,8 @@ namespace enigma
 
     LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam)
     {
-        switch (message)
-        {
+      switch (message)
+      {
         case WM_CREATE:
             return 0;
         case WM_CLOSE:
@@ -93,7 +93,7 @@ namespace enigma
 
         default:
             return DefWindowProc (hWnd, message, wParam, lParam);
-        }
+      }
     }
     
     void input_initialize()
@@ -106,6 +106,16 @@ namespace enigma
       for(int i=0;i<256;i++){
         enigma::last_keybdstatus[i]=0;
         enigma::keybdstatus[i]=0;
+      }
+    }
+    
+    void input_push()
+    {
+      for(int i=0;i<3;i++){
+        enigma::last_mousestatus[i] = enigma::mousestatus[i];
+      }
+      for(int i=0;i<256;i++){
+        enigma::last_keybdstatus[i] = enigma::keybdstatus[i];
       }
     }
 }

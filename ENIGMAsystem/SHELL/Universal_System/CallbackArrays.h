@@ -50,6 +50,9 @@ const int mb_left   =1;
 const int mb_right  =2;
 const int mb_middle =3;
 
+const int vk_anykey = 1;
+const int vk_nokey  = 0;
+
 const int vk_left  =37;
 const int vk_right =39;
 const int vk_up    =38;
@@ -101,10 +104,10 @@ const int vk_insert   =45;
 const int vk_delete   =46;
 
 
-bool mouse_check_button(double button);
-bool mouse_check_button_pressed(double button);
-bool mouse_check_button_released(double button);
+bool mouse_check_button(int button);
+bool mouse_check_button_pressed(int button);
+bool mouse_check_button_released(int button);
 
-bool keyboard_check(double key);
-bool keyboard_check_pressed(double key);
-bool keyboard_check_released(double key);
+bool keyboard_check(int key);
+bool keyboard_check_pressed(int key);
+bool keyboard_check_released(int key);

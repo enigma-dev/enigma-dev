@@ -34,86 +34,102 @@ namespace enigma
 	short mousewheel;
 }
 
-bool mouse_check_button(double button)
-{
-	int b=(int)button;
-	switch(b){
-	case-1:return enigma::mousestatus[0]+enigma::mousestatus[1]+enigma::mousestatus[2]>0;
-	case 0:return !(enigma::mousestatus[0]+enigma::mousestatus[1]+enigma::mousestatus[2]);
-	case 1:case 2:case 3:return enigma::mousestatus[b-1];
-	default:return 0;
-	}
-}
+#include "CallbackArrays.h"
 
-bool mouse_check_button_pressed(double button)
+bool mouse_check_button(int button)
 {
 	int b=(int)button;
-    switch(b){
-    case-1:return (enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==0)
-           ||(enigma::mousestatus[1]==1 && enigma::last_mousestatus[1]==0)
-           ||(enigma::mousestatus[2]==1 && enigma::last_mousestatus[2]==0);
-    case 0:return (enigma::mousestatus[0]!=1 || enigma::last_mousestatus[0]!=0)
-           &&(enigma::mousestatus[1]!=1 || enigma::last_mousestatus[1]!=0)
-           &&(enigma::mousestatus[2]!=1 || enigma::last_mousestatus[2]!=0);
-    case 1:case 2:case 3:return enigma::mousestatus[b-1]==1 && enigma::last_mousestatus[b-1]==0;
+	switch(b)
+	{
+    case mb_any:
+      return enigma::mousestatus[0] | enigma::mousestatus[1] | enigma::mousestatus[2];
+    case mb_none:
+      return !(enigma::mousestatus[0] | enigma::mousestatus[1] | enigma::mousestatus[2]);
+    case 1: case 2: case 3:
+      return enigma::mousestatus[b-1];
     default:return 0;
-    }
+	}
 }
 
-bool mouse_check_button_released(double button)
+bool mouse_check_button_pressed(int button)
+{
+	int b=(int)button;
+  switch(b)
+  {
+    case mb_any:
+      return (enigma::mousestatus[0] && !enigma::last_mousestatus[0]) // The trend is "pressed this step, but not last step"
+          || (enigma::mousestatus[1] && !enigma::last_mousestatus[1])
+          || (enigma::mousestatus[2] && !enigma::last_mousestatus[2]);
+    case mb_none:
+      return !((enigma::mousestatus[0] && !enigma::last_mousestatus[0]) // The trend is "pressed this step, but not last step"
+          ||   (enigma::mousestatus[1] && !enigma::last_mousestatus[1])
+          ||   (enigma::mousestatus[2] && !enigma::last_mousestatus[2]));
+    case  1: case 2: case 3:
+      return enigma::mousestatus[b-1] && !enigma::last_mousestatus[b-1];
+    default:return 0;
+  }
+}
+
+bool mouse_check_button_released(int button)
 {
 	int b=(int)button;
 	switch(b){
-	case-1:return (enigma::mousestatus[0]==0 && enigma::last_mousestatus[0]==1)
-           ||(enigma::mousestatus[1]==0 && enigma::last_mousestatus[1]==1)
-           ||(enigma::mousestatus[2]==0 && enigma::last_mousestatus[2]==1);
-	case 0:return (enigma::mousestatus[0]!=0 || enigma::last_mousestatus[0]!=1)
-           &&(enigma::mousestatus[1]!=0 || enigma::last_mousestatus[1]!=1)
-           &&(enigma::mousestatus[2]!=0 || enigma::last_mousestatus[2]!=1);
-	case 1:case 2:case 3:return enigma::mousestatus[b-1]==0 && enigma::last_mousestatus[b-1]==1;
+	case mb_any:
+	  return (!enigma::mousestatus[0] && enigma::last_mousestatus[0])
+        || (!enigma::mousestatus[1] && enigma::last_mousestatus[1])
+        || (!enigma::mousestatus[2] && enigma::last_mousestatus[2]);
+	case mb_none:
+	  return !((!enigma::mousestatus[0] && enigma::last_mousestatus[0])
+        ||   (!enigma::mousestatus[1] && enigma::last_mousestatus[1])
+        ||   (!enigma::mousestatus[2] && enigma::last_mousestatus[2]));
+	case 1: case 2: case 3:
+	  return !enigma::mousestatus[b-1] && enigma::last_mousestatus[b-1];
 	default:return 0;
 	}
 }
 
-bool keyboard_check(double key)
+bool keyboard_check(int key)
 {
-	int b=(unsigned int)key;
-    if(b==0){
-		for(int i=0;i<255;i++)
-			if(enigma::keybdstatus[i]==1) return 0;
-		return 1;}
-    if(b==-1){
-		for(int i=0;i<255;i++)
-			if (enigma::keybdstatus[i]==1) return 1;
-		return 0;}
-	return b<256 && enigma::keybdstatus[b]==1;
+  if(key == vk_anykey) {
+    for(int i=0; i<255; i++)
+      if (enigma::keybdstatus[i]==1) return 1;
+    return 0;
+  }
+  if(key == vk_nokey) {
+    for(int i=0;i<255;i++)
+      if(enigma::keybdstatus[i]==1) return 0;
+    return 1;
+  }
+	return enigma::keybdstatus[key & 0xFF];
 }
 
-bool keyboard_check_pressed(double key)
+bool keyboard_check_pressed(int key)
 {
-	int b=(unsigned int)key;
-    if(b==0){
-		for(int i=0;i<255;i++)
-			if(enigma::keybdstatus[i]==1 && enigma::last_keybdstatus[i]==0) return 0;
-		return 1;}
-    if(b==-1){
-		for(int i=0;i<255;i++)
-			if(enigma::keybdstatus[i]==1 && enigma::last_keybdstatus[i]==0) return 1;
-		return 0;}
-    return b<256 && enigma::keybdstatus[b]==1 && enigma::last_keybdstatus[b]==0;
+  if (key == vk_anykey) {
+    for(int i=0;i<255;i++)
+      if (enigma::keybdstatus[i] && !enigma::last_keybdstatus[i]) return 1;
+    return 0;
+  }
+  if (key == vk_nokey) {
+    for(int i=0;i<255;i++)
+      if (enigma::keybdstatus[i] && !enigma::last_keybdstatus[i]) return 0;
+    return 1;
+  }
+  return enigma::keybdstatus[key & 0xFF] && !enigma::last_keybdstatus[key & 0xFF];
 }
 
-bool keyboard_check_released(double key)
+bool keyboard_check_released(int key)
 {
-	int b=(unsigned int)key;
-    if(b==0){
+  if(key == vk_anykey) {
 		for(int i=0;i<255;i++)
-			if(enigma::keybdstatus[i]==0 && enigma::last_keybdstatus[i]==1) return 0;
-		return 1;}
-    if(b==1){
+			if (!enigma::keybdstatus[i] && enigma::last_keybdstatus[i]) return 1;
+		return 0;
+  }
+  if(key == vk_nokey) {
 		for(int i=0;i<255;i++)
-			if(enigma::keybdstatus[i]==0 && enigma::last_keybdstatus[i]==1) return 1;
-		return 0;}
-	return b<256 && enigma::keybdstatus[b]==0 && enigma::last_keybdstatus[b]==1;
+			if (!enigma::keybdstatus[i] && enigma::last_keybdstatus[i]) return 0;
+		return 1;
+  }
+	return enigma::keybdstatus[key & 0xFF]==0 && enigma::last_keybdstatus[key & 0xFF]==1;
 }
 

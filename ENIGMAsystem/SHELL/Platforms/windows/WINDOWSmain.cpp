@@ -30,6 +30,7 @@
 #include <string>
 using std::string;
 
+#include "WINDOWScallback.h"
 #include "../../Universal_System/roomsystem.h"
 
 namespace enigma //TODO: Find where this belongs
@@ -141,6 +142,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
             else
             {
                 enigma::ENIGMA_events();
+                enigma::input_push();
             }
         }
     
