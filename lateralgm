@@ -2,5 +2,5 @@
 
 PREVIOUS_DIR=$(pwd)
 cd /opt/enigma
-java -jar lgm* $@
+java -jar lateralgm.jar $@
 cd $PREVIOUS_DIR
