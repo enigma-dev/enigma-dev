@@ -54,7 +54,7 @@ namespace enigma
     // Fetch the highest ID we will be using
     int spr_highid;
     fread(&spr_highid,4,1,exe);
-    sprites_allocate_initial(spr_highid);
+    sprites_init();
     
     for (int i = 0; i < sprcount; i++)
     {

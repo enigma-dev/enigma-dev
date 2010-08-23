@@ -122,7 +122,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     edbg << "Rebuilding all..." << flushl;
     edbg << "Running make from `" << MAKE_location << "'" << flushl;
     edbg << "Done." << flushl;
-    better_system(MAKE_location, "clean-game");
+     better_system(MAKE_location, "clean-game");
     return 0;
   }
   
@@ -422,6 +422,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   idpr("Adding Sounds",93);
   
   module_write_sounds(es,gameModule);
+  
+  module_write_backgrounds(es,gameModule);
   
   // Tell where the resources start
   fwrite("\0\0\0\0res0",8,1,gameModule);

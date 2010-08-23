@@ -25,7 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
 #include <string>
 using namespace std;
 
@@ -135,7 +134,8 @@ int sprite_get_texture(int sprite,int subimage)
 	return ps->texturearray[subimage % ps->subcount];
 }
 
-int sprite_get_xoffset(int sprite){
+int sprite_get_xoffset(int sprite)
+{
 	enigma::sprite* fnd = enigma::spritestructarray[sprite];
 	#ifdef DEBUGMODE
   if (!fnd) {
@@ -146,7 +146,8 @@ int sprite_get_xoffset(int sprite){
 	return fnd->xoffset;
 }
 
-int sprite_get_yoffset(int sprite){
+int sprite_get_yoffset(int sprite)
+{
 	enigma::sprite* fnd = enigma::spritestructarray[sprite];
 	#ifdef DEBUGMODE
   if (!fnd) {

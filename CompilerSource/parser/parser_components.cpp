@@ -98,23 +98,39 @@ int quicktype(unsigned flags, string name)
   return 0;
 }
 
+struct macpinfo {
+  string name, code;
+  pt pos;
+  void grab(string id, string c, pt p) {
+    name = id;
+    code = c; pos = p;
+  }
+  void release(string &c, pt &p) {
+    c = code; p = pos;
+  }
+};
+
 
 ///Remove whitespace, unfold macros,
 ///And lex code into synt.
 //Compatibility considerations:
-//123.45 with 000.00, then .0 with 00. Do *not* replace 0. with 00
+//'123.45' with '000.00', then '.0' with '00'. Do *not* replace '0.' with '00'.
 int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<string> &string_in_code)
 {
-  synt = code;
+  string codo = synt = code;
   pt pos = 0, bpos = 0;
   char last_token = ' '; //Space is actually invalid. Heh.
   
-  unsigned mymacroc = 0;
-  darray<pt> mymacroend;
-  varray<string> mymacros;
+  unsigned mymacroind = 0;
+  varray<macpinfo> mymacrostack;
   
-  while (pos < code.length())
-  {
+  for (;;)
+  { if (pos >= code.length()) {
+      if (mymacroind)
+        mymacrostack[--mymacroind].release(code,pos);
+      else break; continue;
+    }
+    
     if (is_letter(code[pos]))
     {
       //This is a word of some sort. Could be a keyword, a type, a macro... maybe just a varname
@@ -126,15 +142,9 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       if (itm != macros.end())
       {
         bool recurs=0;
-        for (unsigned int iii=0;iii<mymacroc;iii++)
-           if (mymacros[iii] == name)
-           {
-             if (pos <= mymacroend[iii]) {
-               recurs=1; break;
-             }
-             else for (int k = 0, kn = 0, ic = mymacroc; k<ic; k++)
-               if (pos > mymacroend[iii])
-                 mymacros[kn++] = mymacros[k], mymacroc--;
+        for (unsigned int iii = 0; iii < mymacroind; iii++)
+           if (mymacrostack[iii].name == name) {
+             recurs=1; break;
            }
         
         if (!recurs)
@@ -153,9 +163,10 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
               continue;
             }
           }
-          mymacros[mymacroc] = name;
-          mymacroend[mymacroc++] = pos + string(itm->second).length();
-          code.insert(pos,macrostr);
+          mymacrostack[mymacroind++].grab(name,code,pos);
+          code = macrostr; pos = 0;
+          codo.reserve(codo.length() + macrostr.length());
+          synt.reserve(codo.length() + macrostr.length());
           continue;
         }
       }
@@ -181,16 +192,16 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       if (last_token == c)
       {
         if (c != 'r' and c != 't')
-          code[bpos] = synt[bpos] = ' ', bpos++;
+          codo[bpos] = synt[bpos] = ' ', bpos++;
         else {
-          code[bpos] = ' ';
+          codo[bpos] = ' ';
           synt[bpos++] = c;
         }
       }
       
       //Copy the identifier and its token over
       for (pt i = 0; i < name.length(); i++) {
-        code[bpos]   = name[i];
+        codo[bpos]   = name[i];
         synt[bpos++] = c;
       }
       
@@ -212,11 +223,11 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
           pos++;
       if (is_digit(code[pos]))
         do {
-          code[bpos] = code[pos];
+          codo[bpos] = code[pos];
           synt[bpos++] = '0';
         } while (is_digit(code[++pos]));
       else
-       code[bpos] = synt[bpos] = last_token = '0', bpos++;
+       codo[bpos] = synt[bpos] = last_token = '0', bpos++;
       
       continue;
     }
@@ -237,7 +248,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       }
       string_in_code[strc++] = str;
       cout << "\n\n\nCut string " << str << "\n\n\n";
-      code[bpos] = synt[bpos] = last_token = '"', bpos++;
+      codo[bpos] = synt[bpos] = last_token = '"', bpos++;
       continue;
     }
     if (code[pos] == '\'')
@@ -256,7 +267,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         str = string_escape(code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
-      code[bpos] = synt[bpos] = last_token = '"', bpos++;
+      codo[bpos] = synt[bpos] = last_token = '"', bpos++;
       continue;
     }
     if (code[pos] == '/')
@@ -271,7 +282,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         while (code[pos++] != '*' or code[pos] != '/');
         pos++; continue;
       }
-      code[bpos] = synt[bpos] = last_token = '/', bpos++;
+      codo[bpos] = synt[bpos] = last_token = '/', bpos++;
       continue;
     }
     
@@ -282,10 +293,12 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     
     //Wasn't anything usable
     if (!is_useless(code[pos]))
-      code[bpos] = synt[bpos] = last_token = code[pos], bpos++;
+      codo[bpos] = synt[bpos] = last_token = code[pos], bpos++;
     
     pos++;
   }
+  
+  code = codo;
   
   code.erase(bpos);
   synt.erase(bpos);
@@ -299,11 +312,11 @@ struct stackif
 {
   stackif* prev;
   char value,popifc;
-
+  
   stackif(void):prev(NULL) { }
   stackif(char v):prev(NULL),value(v) { }
   stackif(stackif* p,char v,char i):prev(p),value(v),popifc(i) { }
-
+  
   stackif* push(char v,char i)
   {
     stackif* r = new stackif(this,v,i);

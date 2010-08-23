@@ -38,7 +38,7 @@ namespace enigma
   void sprite_safety_override(); // This function should ensure a reasonable number of sprite indexes won't segfault.
   
   // Called at game start.
-  void sprites_allocate_initial(int); // This should allocate a certain number of sprites.
+  void sprites_init(); // This should allocate room for sprites and perform any other necessary actions.
   
   //Adds an empty sprite to the list, presumably to be loaded from the exe.
   int sprite_new_empty(unsigned sprid,unsigned subc,int w,int h,int x,int y,int pl,int sm); // Called at load time.

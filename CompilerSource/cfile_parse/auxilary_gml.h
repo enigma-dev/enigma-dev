@@ -16,6 +16,8 @@ if 0 {} else {}
 for ;;;
 for (;;);
 
+a = string(x + 5) + string(x + 10);
+
 global const char *a = "const char something";
 
 if (0)

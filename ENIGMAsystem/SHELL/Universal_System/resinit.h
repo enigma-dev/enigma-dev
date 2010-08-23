@@ -28,4 +28,5 @@
 namespace enigma {
   void exe_loadsprs(FILE* exe);
   void exe_loadsounds(FILE* exe);
+  void exe_loadbackgrounds(FILE* exe);
 }

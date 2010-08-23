@@ -29,7 +29,6 @@
 #include <stdio.h>
 using namespace std;
 
-#include "../Graphics_Systems/OpenGL/GSspriteadd.h"
 #include "../Audio_Systems/audio_mandatory.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"

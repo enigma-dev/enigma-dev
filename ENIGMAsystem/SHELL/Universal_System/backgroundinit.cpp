@@ -25,95 +25,30 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <time.h>
-#include <stdio.h>
-
 #include <string>
-using std::string;
+#include <stdio.h>
+using namespace std;
 
-#include "mathnc.h"
-#include "resinit.h"
+#include "../Graphics_Systems/OpenGL/GSspriteadd.h"
 #include "../Platforms/platforms_mandatory.h"
-#include "../Audio_Systems/audio_mandatory.h"
-#include "../Graphics_Systems/graphics_mandatory.h"
-#include "roomsystem.h"
-
 #include "../libEGMstd.h"
+#include "compression.h"
 
-namespace enigma {
-  extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
-}
 
-//This is like main(), only cross-api
 namespace enigma
 {
-  inline void default_all()
+  void exe_loadbackgrounds(FILE *exe)
   {
-    sprite_safety_override();
-    sound_safety_override();
-  }
-  int initialize_everything()
-  {
-    mtrandom_seed(enigma::Random_Seed=time(0));
-    graphicssystem_initialize();
-    audiosystem_initialize();
-    #if ENIGMA_WS_WINDOWS!=0
-      enigma::init_fonts();
-    #endif
-    #if BUILDMODE
-      buildmode::buildinit();
-    #endif
+    int nullhere;
     
-    event_system_initialize();
-    input_initialize();
+    fread(&nullhere,4,1,exe);
+    if (nullhere != *(int*)"bkgn")
+      return;
     
-    // Open the exe for resource load
-    char exename[1025];
-    windowsystem_write_exename(exename);
-    FILE* exe = fopen(exename,"rb");
-    if (!exe)
-    {
-      show_error("Resource load fail: exe unopenable",0);
-      default_all();
-    }
-    else do
-    {
-      int nullhere;
-      // Read the magic number so we know we're looking at our own data
-      fseek(exe,-8,SEEK_END);
-      char str_quad[4];
-      fread(str_quad,1,4,exe);
-      if (str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0')
-      {
-        printf("No resource data in exe\n");
-        default_all();
-        break;
-      }
-      
-      // Get where our resources are located in the module
-      int pos;
-      fread(&pos,4,1,exe);
-      
-      // Go to the start of the resource data
-      fseek(exe,pos,SEEK_SET);
-      fread(&nullhere,4,1,exe);
-      if(nullhere) break;
-      
-      enigma::exe_loadsprs(exe);
-      enigma::exe_loadsounds(exe);
-      enigma::exe_loadbackgrounds(exe);
-      
-      fclose(exe);
-    }
-    while (false);
+    // Determine how many sprites we have
+    int bkgcount;
+    fread(&bkgcount,4,1,exe);
     
-    //Load rooms
-    enigma::rooms_load();
     
-    //Go to the first room
-    if (room_count)
-      room_goto_absolute(0);
-    
-    return 0;
   }
 }

@@ -98,15 +98,15 @@ inline unsigned int nlpo2dc(unsigned int x) //Next largest power of two minus on
 namespace enigma
 {
   //Allocates and zero-fills the array at game start
-  void sprites_allocate_initial(int spr_highid)
+  void sprites_init()
   {
-    spritestructarray = new sprite*[spr_highid+1];
-    for (int i = 0; i < spr_highid; i++)
+    spritestructarray = new sprite*[enigma::sprite_idmax+1];
+    for (unsigned i = 0; i < enigma::sprite_idmax; i++)
       spritestructarray[i] = NULL;
   }
   
   void sprite_safety_override() {
-    sprites_allocate_initial(sprite_idmax);
+    sprites_init();
   }
   
   //Adds an empty sprite to the list

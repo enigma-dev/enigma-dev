@@ -4,7 +4,7 @@
 # This file implements locals used by upper-level systems, such as events.
 # It can be partitioned and separated into multple smaller files if desired.
 
-General Locals:
+Alarms:
 	Locals:
 		alarm: int[8]
 
