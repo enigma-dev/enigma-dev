@@ -95,10 +95,15 @@ types_extrapolate_string_p(variant& variant::operator*=, { terrortrue(); return 
 variant& variant::operator*=(const variant x)            { terror2(real); rval.d *= x.rval.d; return *this; }
 variant& variant::operator*=(const var &x)               { return *this *= *x; }
 
-types_extrapolate_real_p  (variant& variant::operator/=, { terror(real); div0c(x); rval.d *= x; return *this; })
-types_extrapolate_string_p(variant& variant::operator/=, { terrortrue(); div0c(x); return *this; })
-variant& variant::operator/=(const variant x)            { terror2(real); div0c(x); rval.d /= x.rval.d; return *this; }
+types_extrapolate_real_p  (variant& variant::operator/=, { terror(real); div0c(x); rval.d /= x; return *this; })
+types_extrapolate_string_p(variant& variant::operator/=, { terrortrue(); return *this; })
+variant& variant::operator/=(const variant x)            { terror2(real); div0c(x.rval.d); rval.d /= x.rval.d; return *this; }
 variant& variant::operator/=(const var &x)               { return *this /= *x; }
+
+types_extrapolate_real_p  (variant& variant::operator%=, { terror(real); div0c(x); rval.d = fmod(rval.d, x); return *this; })
+types_extrapolate_string_p(variant& variant::operator%=, { terrortrue(); return *this; })
+variant& variant::operator%=(const variant x)            { terror2(real); div0c(x.rval.d); rval.d = fmod(rval.d, x.rval.d); return *this; }
+variant& variant::operator%=(const var &x)               { div0c((*x).rval.d) rval.d = fmod(rval.d, (*x).rval.d); return *this; }
 
 
 types_extrapolate_real_p  (variant& variant::operator<<=, { terror(real); rval.d = long(rval.d) << int(x); return *this; })
@@ -147,6 +152,11 @@ types_extrapolate_real_p  (double  variant::operator/, { terror(real); div0c(x);
 types_extrapolate_string_p(double  variant::operator/, { terrortrue(); return rval.d; })
 double variant::operator/(const variant x)             { terror2(real); return rval.d / x.rval.d; }
 double variant::operator/(const var &x)                { return *this / *x; }
+
+types_extrapolate_real_p  (double  variant::operator%, { terror(real); div0c(x); return fmod(rval.d, x); })
+types_extrapolate_string_p(double  variant::operator%, { terrortrue(); return rval.d; })
+double variant::operator%(const variant x)             { terror2(real); div0c(x.rval.d); return fmod(rval.d, x.rval.d); }
+double variant::operator%(const var &x)                { div0c((*x).rval.d); return fmod(this->rval.d, (*x).rval.d); }
 
 
 types_extrapolate_real_p  (long variant::operator<<, { terror(real); return long(rval.d) << long(x); })
@@ -331,12 +341,14 @@ types_binary_bitwise_assign_extrapolate_implement(^,  variant, terror(real);)
 
 types_binary_extrapolate_real_p  (double operator+, variant, { terror(real); return x + y.rval.d; })
 types_binary_extrapolate_string_p(string operator+, variant, { terror(tstr); return x + y.sval; })
-types_binary_extrapolate_real_p  (double operator-, variant, { terror(real); return x + y.rval.d; })
+types_binary_extrapolate_real_p  (double operator-, variant, { terror(real); return x - y.rval.d; })
 types_binary_extrapolate_string_p(string operator-, variant, { terrortrue(); return 0; })
-types_binary_extrapolate_real_p  (double operator*, variant, { terror(real); return x + y.rval.d; })
+types_binary_extrapolate_real_p  (double operator*, variant, { terror(real); return x * y.rval.d; })
 types_binary_extrapolate_string_p(string operator*, variant, { terrortrue(); return 0; })
-types_binary_extrapolate_real_p  (double operator/, variant, { terror(real); return x + y.rval.d; })
+types_binary_extrapolate_real_p  (double operator/, variant, { terror(real); div0c(y.rval.d); return x / y.rval.d; })
 types_binary_extrapolate_string_p(string operator/, variant, { terrortrue(); return 0; })
+types_binary_extrapolate_real_p  (double operator%, variant, { terror(real); div0c(y.rval.d); return fmod(x, y.rval.d); })
+types_binary_extrapolate_string_p(string operator%, variant, { terrortrue(); return 0; })
 
 types_binary_bitwise_extrapolate_real_p(<<, variant, terror(real); )
 types_binary_extrapolate_string_p      (string operator<<, variant, { terrortrue(); return 0; })
@@ -383,8 +395,10 @@ types_binary_extrapolate_real_p  (double operator-, var, {  return x - (*y).rval
 types_binary_extrapolate_string_p(string operator-, var, { terrortrue(); return 0; })
 types_binary_extrapolate_real_p  (double operator*, var, {  return x * (*y).rval.d; })
 types_binary_extrapolate_string_p(string operator*, var, { terrortrue(); return 0; })
-types_binary_extrapolate_real_p  (double operator/, var, {  return x / (*y).rval.d; })
+types_binary_extrapolate_real_p  (double operator/, var, { div0c((*y).rval.d); return x / (*y).rval.d; })
 types_binary_extrapolate_string_p(string operator/, var, { terrortrue(); return 0; })
+types_binary_extrapolate_real_p  (double operator%, var, { div0c((*y).rval.d); return fmod(x, (*y).rval.d); })
+types_binary_extrapolate_string_p(string operator%, var, { terrortrue(); return 0; })
 
 types_binary_bitwise_extrapolate_real_p(<<, var,  )
 types_binary_extrapolate_string_p      (string operator<<, var, { terrortrue(); return 0; })

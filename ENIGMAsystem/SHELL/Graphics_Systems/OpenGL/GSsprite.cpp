@@ -27,6 +27,7 @@
 
 #include <math.h>
 #include <GL/gl.h>
+#include <string.h>
 #include "../../Universal_System/spritestruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))

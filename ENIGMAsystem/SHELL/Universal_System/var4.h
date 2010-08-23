@@ -91,6 +91,7 @@ struct variant
   types_extrapolate_alldec(variant& operator-=)
   types_extrapolate_alldec(variant& operator*=)
   types_extrapolate_alldec(variant& operator/=)
+  types_extrapolate_alldec(variant& operator%=)
   
   types_extrapolate_alldec(variant& operator<<=)
   types_extrapolate_alldec(variant& operator>>=)
@@ -102,6 +103,7 @@ struct variant
   types_extrapolate_alldec(double  operator-)
   types_extrapolate_alldec(double  operator*)
   types_extrapolate_alldec(double  operator/)
+  types_extrapolate_alldec(double  operator%)
   
   types_extrapolate_alldec(long operator<<)
   types_extrapolate_alldec(long operator>>)
@@ -280,6 +282,7 @@ types_binary_extrapolate_alldecc(double, operator+, variant)
 types_binary_extrapolate_alldecc(double, operator-, variant)
 types_binary_extrapolate_alldecc(double, operator*, variant)
 types_binary_extrapolate_alldecc(double, operator/, variant)
+types_binary_extrapolate_alldecc(double, operator%, variant)
 
 types_binary_bitwise_extrapolate_alldecc(operator<<, variant)
 types_binary_bitwise_extrapolate_alldecc(operator>>, variant)
@@ -314,6 +317,7 @@ types_binary_extrapolate_alldecc(double, operator+, var)
 types_binary_extrapolate_alldecc(double, operator-, var)
 types_binary_extrapolate_alldecc(double, operator*, var)
 types_binary_extrapolate_alldecc(double, operator/, var)
+types_binary_extrapolate_alldecc(double, operator%, var)
 
 types_binary_bitwise_extrapolate_alldecc(operator<<, var)
 types_binary_bitwise_extrapolate_alldecc(operator>>, var)
