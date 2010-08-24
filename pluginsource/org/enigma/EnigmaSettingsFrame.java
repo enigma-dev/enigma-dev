@@ -9,18 +9,17 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-import org.enigma.backend.EnigmaDriver;
 import org.lateralgm.components.impl.IndexButtonGroup;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.main.LGM;
@@ -86,7 +85,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		increment.add(incrementGML);
 		increment.add(incrementCPP);
 		increment.setValue(es.cppOperators);
-		
+
 		JLabel l3 = new JLabel("Inherit = (e.g. a=b=c) from:");
 		equal = new IndexButtonGroup(2,true,false);
 		JRadioButton equalGML = new JRadioButton("GML (a=(b==c))");
@@ -353,7 +352,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		if (!es.definitions.equals(sDef.getCode()))
 			{
 			es.definitions = sDef.getCode();
-			if (EnigmaRunner.GCC_LOCATED) EnigmaDriver.whitespaceModified(es.definitions);
+			if (EnigmaRunner.GCC_LOCATED) EnigmaRunner.DRIVER.whitespaceModified(es.definitions);
 			}
 		es.globalLocals = sGlobLoc.getCode();
 		es.initialization = sInit.getCode();

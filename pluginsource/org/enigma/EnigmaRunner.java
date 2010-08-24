@@ -62,8 +62,8 @@ import javax.swing.event.DocumentListener;
 import org.enigma.EnigmaSettingsFrame.EnigmaSettings;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
-import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
+import org.enigma.backend.EnigmaStruct;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -81,7 +81,8 @@ import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
 import org.lateralgm.subframes.SubframeInformer.SubframeListener;
 
-import com.sun.jna.Platform;
+import com.sun.jna.Native;
+import com.sun.jna.NativeLibrary;
 import com.sun.jna.StringArray;
 
 public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListener
@@ -94,6 +95,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public EnigmaSettingsFrame esf = new EnigmaSettingsFrame(es);
 	public JMenuItem run, debug, build, compile, rebuild;
 	public JMenuItem showFunctions, showGlobals, showTypes;
+	public static EnigmaDriver DRIVER;
 	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
 	public static boolean GCC_LOCATED = false, ENIGMA_READY = false;
 	public final EnigmaNode node = new EnigmaNode();
@@ -111,35 +113,38 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 				public void run()
 					{
-					if (!Platform.isLinux())
+					//TODO: Let Linux packages handle updates
+					//if (!Platform.isLinux())
+					if (attemptUpdate() || attemptLib() != null) make();
+					Error e = attemptLib();
+					if (e != null)
 						{
-						attemptUpdate();
-						make();
+						String err = "ENIGMA: Unable to communicate with the library,\n"
+								+ "either because it could not be found or uses methods different from those expected.\n"
+								+ "The exact error is:\n" + e.getMessage();
+						JOptionPane.showMessageDialog(null,err);
+						return;
 						}
-					if (attemptLib())
-						{
-						ENIGMA_READY = true;
-						initEnigmaLib();
-						if (GCC_LOCATED) EnigmaDriver.whitespaceModified(es.definitions);
-						}
+
+					ENIGMA_READY = true;
+					initEnigmaLib();
+					if (GCC_LOCATED) DRIVER.whitespaceModified(es.definitions);
 					}
 			}.start();
 		}
 
-	private boolean attemptLib()
+	private UnsatisfiedLinkError attemptLib()
 		{
 		try
 			{
-			EnigmaDriver.init();
-			return true;
+			String lib = "compileEGMf";
+			NativeLibrary.addSearchPath(lib,".");
+			DRIVER = (EnigmaDriver) Native.loadLibrary(lib,EnigmaDriver.class);
+			return null;
 			}
 		catch (UnsatisfiedLinkError e)
 			{
-			String err = "ENIGMA: Unable to communicate with the library,\n"
-					+ "either because it could not be found or uses methods different from those expected.\n"
-					+ "The exact error is:\n" + e.getMessage();
-			JOptionPane.showMessageDialog(null,err);
-			return false;
+			return e;
 			}
 		}
 
@@ -153,6 +158,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			BufferedReader in = new BufferedReader(new FileReader(f));
 			String make = in.readLine();
 			in.close();
+			//prepend root
 			p = Runtime.getRuntime().exec(make);
 			stdin = p.getInputStream();
 			stder = p.getErrorStream();
@@ -200,7 +206,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	private void initEnigmaLib()
 		{
 		System.out.println("Initializing Enigma: ");
-		int ret = EnigmaDriver.libInit(ec);
+		int ret = DRIVER.libInit(ec);
 		if (ret == 0)
 			{
 			GCC_LOCATED = true;
@@ -238,7 +244,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		fc.setDialogTitle("ENIGMA: Please locate the GCC directory (containing bin/, lib/ etc)");
 		fc.setAcceptAllFileFilterUsed(false);
 		if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) return 0;
-		int ret = EnigmaDriver.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
+		int ret = DRIVER.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
 		if (ret == 0) GCC_LOCATED = true;
 		return ret;
 		}
@@ -344,11 +350,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		LGM.mdi.add(new MDIBackground(bg),JLayeredPane.FRAME_CONTENT_LAYER);
 		}
 
-	public void attemptUpdate()
+	/** Attempts to update, and returns whether it needed one. Also returns false on error. */
+	public boolean attemptUpdate()
 		{
 		try
 			{
-			EnigmaUpdater.checkForUpdates();
+			return EnigmaUpdater.checkForUpdates();
 			}
 		/**
 		 * Usually you shouldn't catch an Error, however,
@@ -361,6 +368,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			String error = "SvnKit missing, corrupted, or unusable. Please download and "
 					+ "place next to the enigma plugin in order to enable auto-update.";
 			System.err.println(error);
+			return false;
 			}
 		}
 
@@ -481,8 +489,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				public void run()
 					{
 					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
-					System.out.println(EnigmaDriver.compileEGMf(es,ef == null ? null : ef.getAbsolutePath(),
-							mode));
+					System.out.println(DRIVER.compileEGMf(es,ef == null ? null : ef.getAbsolutePath(),mode));
 					}
 			}.start();
 
@@ -517,7 +524,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
 		for (int i = 0; i < osl.length; i++)
 			osl[i] = isl[i].getName();
-		return EnigmaDriver.syntaxCheck(osl.length,new StringArray(osl),code);
+		return DRIVER.syntaxCheck(osl.length,new StringArray(osl),code);
 		}
 
 	public void actionPerformed(ActionEvent e)
@@ -643,30 +650,30 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public static List<String> getKeywordList(int type)
 		{
 		List<String> rl = new ArrayList<String>();
-		String res = EnigmaDriver.first_available_resource();
+		String res = DRIVER.first_available_resource();
 		while (res != null)
 			{
 			if (nameRegex.matcher(res).matches()) switch (type)
 				{
 				case 0:
-					if (EnigmaDriver.resource_isFunction())
+					if (DRIVER.resource_isFunction())
 						{
-						int min = EnigmaDriver.resource_argCountMin();
-						int max = EnigmaDriver.resource_argCountMax();
-						res += "(" + EnigmaDriver.resource_argCountMin();
-						if (min != max) res += "-" + EnigmaDriver.resource_argCountMax();
+						int min = DRIVER.resource_argCountMin();
+						int max = DRIVER.resource_argCountMax();
+						res += "(" + DRIVER.resource_argCountMin();
+						if (min != max) res += "-" + DRIVER.resource_argCountMax();
 						res += ")";
 						rl.add(res);
 						}
 					break;
 				case 1:
-					if (EnigmaDriver.resource_isGlobal()) rl.add(res);
+					if (DRIVER.resource_isGlobal()) rl.add(res);
 					break;
 				case 2:
-					if (EnigmaDriver.resource_isTypeName()) rl.add(res);
+					if (DRIVER.resource_isTypeName()) rl.add(res);
 					break;
 				}
-			res = EnigmaDriver.next_available_resource();
+			res = DRIVER.next_available_resource();
 			}
 		return rl;
 		}

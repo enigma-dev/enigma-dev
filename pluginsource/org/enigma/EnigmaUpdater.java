@@ -5,7 +5,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.file.GmFormatException;
@@ -30,28 +36,27 @@ import org.tmatesoft.svn.core.wc.SVNWCUtil;
 public class EnigmaUpdater
 	{
 	public static final String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev/";
-	public static final String svn_trunk = svn + "tags/update-stable";
 	public static final boolean SUBFOLDER = false;
+	public static boolean revert;
 
 	private SVNClientManager cliMan = null;
 	/** Path to the working copy */
 	private File path = null;
 
-	public static void checkForUpdates()
+	public static boolean checkForUpdates()
 		{
 		EnigmaUpdater svn = new EnigmaUpdater();
 		try
 			{
 			if (svn.needsCheckout())
 				{
-				if (JOptionPane.showConfirmDialog(null,
-						"Enigma is missing libraries. Would you like us to fetch these libraries for you?",
-						"Checkout",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+				String repo = askCheckout();
+				if (repo != null)
 					{
-					svn.checkout();
-					svn.revert();
+					svn.checkout(repo);
+					if (revert) svn.revert();
 					}
-				return;
+				return true;
 				}
 			if (svn.needsUpdate())
 				{
@@ -59,13 +64,14 @@ public class EnigmaUpdater
 						null,
 						"Enigma has detected that newer libraries may exist. Would you like us to fetch these for you?",
 						"Update",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
-				return;
+				return true;
 				}
 			}
 		catch (SVNException e)
 			{
 			showUpdateError(e);
 			}
+		return false;
 		}
 
 	private EnigmaUpdater()
@@ -81,6 +87,49 @@ public class EnigmaUpdater
 			DAVRepositoryFactory.setup();
 			cliMan = SVNClientManager.newInstance();
 			}
+		}
+
+	public static String askCheckout()
+		{
+		JRadioButton stable, testing, trunk;
+		JCheckBox noRevert;
+
+		Box box = new Box(BoxLayout.Y_AXIS);
+
+		//		JPanel p = new JPanel();
+		//		p.setLayout(new BoxLayout(p,));
+
+		JLabel l = new JLabel(
+				"Enigma is missing libraries.\nWould you like us to fetch these libraries for you?");
+		l.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+		box.add(l);
+
+		Box p2 = new Box(BoxLayout.X_AXIS);
+		box.setAlignmentX(Box.CENTER_ALIGNMENT);
+		box.add(p2);
+
+		ButtonGroup bg = new ButtonGroup();
+		stable = new JRadioButton("Stable",true);
+		bg.add(stable);
+		p2.add(stable);
+		testing = new JRadioButton("Testing");
+		bg.add(testing);
+		p2.add(testing);
+		trunk = new JRadioButton("Dev Trunk");
+		bg.add(trunk);
+		p2.add(trunk);
+
+		noRevert = new JCheckBox("I'm a dev, don't touch my changes.");
+		noRevert.setAlignmentX(JCheckBox.CENTER_ALIGNMENT);
+		box.add(noRevert);
+
+		if (JOptionPane.showConfirmDialog(null,box,"Checkout",JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+			return null;
+
+		revert = !noRevert.isSelected();
+		if (stable.isSelected()) return svn + "tags/update-stable";
+		if (testing.isSelected()) return svn + "tags/update-test";
+		return svn + "trunk";
 		}
 
 	private boolean needsCheckout()
@@ -111,19 +160,19 @@ public class EnigmaUpdater
 	 * @throws SVNException
 	 */
 	@SuppressWarnings("unused")
-	private void checkoutRev(int rev) throws SVNException
+	private void checkoutRev(String trunk, int rev) throws SVNException
 		{
 		SVNUpdateClient upCli = cliMan.getUpdateClient();
-		SVNURL url = SVNURL.parseURIDecoded(svn_trunk);
+		SVNURL url = SVNURL.parseURIDecoded(trunk);
 		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.create(rev),SVNDepth.INFINITY,
 				true);
 		System.out.println("Checked out " + r);
 		}
 
-	private void checkout() throws SVNException
+	private void checkout(String trunk) throws SVNException
 		{
 		SVNUpdateClient upCli = cliMan.getUpdateClient();
-		SVNURL url = SVNURL.parseURIDecoded(svn_trunk);
+		SVNURL url = SVNURL.parseURIDecoded(trunk);
 		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.HEAD,SVNDepth.INFINITY,true);
 		System.out.println("Checked out " + r);
 		}
