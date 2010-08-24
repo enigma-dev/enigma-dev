@@ -47,11 +47,6 @@ namespace enigma {
 //This is like main(), only cross-api
 namespace enigma
 {
-  inline void default_all()
-  {
-    sprite_safety_override();
-    sound_safety_override();
-  }
   int initialize_everything()
   {
     mtrandom_seed(enigma::Random_Seed=time(0));
@@ -66,16 +61,15 @@ namespace enigma
     
     event_system_initialize();
     input_initialize();
+    sprites_init();
+    //backgrounds_init();
     
     // Open the exe for resource load
     char exename[1025];
     windowsystem_write_exename(exename);
     FILE* exe = fopen(exename,"rb");
     if (!exe)
-    {
       show_error("Resource load fail: exe unopenable",0);
-      default_all();
-    }
     else do
     {
       int nullhere;
@@ -83,10 +77,8 @@ namespace enigma
       fseek(exe,-8,SEEK_END);
       char str_quad[4];
       fread(str_quad,1,4,exe);
-      if (str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0')
-      {
+      if (str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
         printf("No resource data in exe\n");
-        default_all();
         break;
       }
       

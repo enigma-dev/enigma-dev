@@ -25,36 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
-/*\\\ This file contains prototypes for functions that must be defined by the graphics
-|*||| library wrapper modules. Each of these is used by other systems throughout the engine.
-\*/// Accidental failure to implement them could cause error.
-
 namespace enigma
 {
-  // Called at game load to allow the system to set up.
-  void graphicssystem_initialize(); // This function can be implemented as an empty call if it is not needed.
-  
-  // Called at game start if no resource data can be loaded.
-  void sprite_safety_override(); // This function should ensure a reasonable number of sprite indexes won't segfault.
-  
-  // Called at game start.
-  void sprites_init(); // This should allocate room for sprites and perform any other necessary actions.
-  
-  //Generate a texture from image data.
-  unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata);
-  
-  #if COLLIGMA // FIXME: This doesn't belong here.
-  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h);
-  #endif
-}
-
-// These functions are available to the user to be called on a whim.
-
-// Called at random. Maybe.
-const char* draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
-
-// Called each step, or by the user randomly.
-void screen_refresh(); // Without invoking any events, refresh the contents of the screen.
-
-// Called each step, or by the user randomly.
-void screen_redraw(); // Invoke all the draw events, but do not refresh the screen.
+  void *collisionsystem_sprite_data_create(char*,int,int,int,int) // It is called for every subimage of every sprite loaded.
+  {
+    return 0;
+  }
+};

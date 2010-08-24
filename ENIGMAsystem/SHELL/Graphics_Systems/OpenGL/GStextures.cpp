@@ -25,51 +25,20 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <GL/gl.h>
+
 namespace enigma
 {
-  struct sprite
+  unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
   {
-    int width,height,subcount,xoffset,yoffset,id;
-    unsigned int *texturearray; //Each subimage has a texture
-    void **colldata; // Each subimage has collision data
-    
-    //void*  *pixeldata;
-    double texbordx, texbordy;
-    int bbox_bottom, bbox_left, bbox_right, bbox_top;
-    bool where,smooth;
-    
-    sprite();
-    sprite(unsigned int);
-  };
-  extern sprite** spritestructarray;
-  extern size_t sprite_idmax;
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+    return texture;
+  }
 }
-
-//int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset);
-
-namespace enigma
-{
-  //Allocates and zero-fills the array at game start
-  void sprites_init();
-  
-  //Adds an empty sprite to the list
-  int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm);
-  
-  //Adds a subimage to an existing sprite from the exe
-  void sprite_add_subimage(int sprid, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk);
-}
-
-extern int sprite_get_width(int sprite);
-extern int sprite_get_height(int sprite);
-extern int sprite_get_bbox_bottom(int sprite);
-extern int sprite_get_bbox_left(int sprite);
-extern int sprite_get_bbox_right(int sprite);
-extern int sprite_get_bbox_top(int sprite);
-extern int sprite_get_bbox_mode(int sprite);
-extern int sprite_get_number(int sprite);
-extern int sprite_get_texture(int sprite, int subimage);
-extern int sprite_get_xoffset(int sprite);
-extern int sprite_get_yoffset(int sprite);
-
-
-

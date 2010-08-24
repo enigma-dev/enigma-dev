@@ -460,7 +460,7 @@ string toString(const variant &a)
 {
   char buf[32];
   if (a.type == real)
-    return string(buf,sprintf(buf,"%lf",a.rval.d));
+    return string(buf,sprintf(buf,"%g",a.rval.d));
   return a.sval;
 }
 string toString(const var &a) {
@@ -471,7 +471,7 @@ string toString(variant &a)
 {
   char buf[32];
   if (a.type == real)
-    return string(buf,sprintf(buf,"%lf",a.rval.d));
+    return string(buf,sprintf(buf,"%g",a.rval.d));
   return a.sval;
 }
 string toString(var &a) {

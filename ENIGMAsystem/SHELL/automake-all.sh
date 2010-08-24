@@ -5,32 +5,16 @@ then
 	cd ./Universal_System
 	  ../Developer/automake.sh
 	  cd ../
-      for dir in Graphics_Systems/*/ ; do
-		cd $dir
-		if [ -e automake.sh ]
-		then
-			./automake.sh
-		else
-		  	../../Developer/automake.sh
-		fi; cd ../../
-	done
-	for dir in Platforms/*/ ; do
-		cd $dir
-		if [ -e automake.sh ]
-		then
-			./automake.sh
-		else
-		  	../../Developer/automake.sh
-		fi; cd ../../
-	done
-	for dir in Audio_Systems/*/ ; do
-		cd $dir
-		if [ -e automake.sh ]
-		then
-			./automake.sh
-		else
-		  	../../Developer/automake.sh
-		fi; cd ../../
+	for bigdir in Graphics_Systems Platforms Audio_Systems Collision_Systems ; do
+        	for dir in $bigdir/*/ ; do
+			cd $dir
+			if [ -e automake.sh ]
+			then
+				./automake.sh
+			else
+			  	../../Developer/automake.sh
+			fi; cd ../../
+		done
 	done
 	echo Done
 fi

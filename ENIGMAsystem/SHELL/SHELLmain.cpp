@@ -69,8 +69,9 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 #include "Universal_System/terminal_io.h"
 #include "Universal_System/mathnc.h"
 
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
 #if ENIGMA_GS_OPENGL
-    #include "Graphics_Systems/graphics_mandatory.h"
     #include "Graphics_Systems/OpenGL/OPENGLStd.h"
 #endif
 #if ENIGMA_WS_WINDOWS != 0
@@ -116,9 +117,6 @@ extern int amain();
 #endif
 
 #include "Universal_System/instance_system.h"
-#include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-
 #include "Universal_System/syntax_quirks.h"
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"

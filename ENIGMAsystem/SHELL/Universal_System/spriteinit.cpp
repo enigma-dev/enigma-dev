@@ -30,7 +30,7 @@
 #include <iostream>
 using namespace std;
 
-#include "../Graphics_Systems/graphics_mandatory.h"
+#include "spritestruct.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"
 #include "compression.h"
@@ -66,7 +66,6 @@ namespace enigma
       
       int subimages;
       fread(&subimages,4,1,exe); cout << "Subimages: " << subimages << endl;
-      
       
       sprite_new_empty(sprid,subimages,width,height,xorig,yorig,1,0);
       for (int ii=0;ii<subimages;ii++) 

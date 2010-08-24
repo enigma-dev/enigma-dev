@@ -29,7 +29,7 @@
 #include <stdio.h>
 using namespace std;
 
-#include "../Graphics_Systems/OpenGL/GSspriteadd.h"
+#include "../Graphics_Systems/graphics_mandatory.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"
 #include "compression.h"

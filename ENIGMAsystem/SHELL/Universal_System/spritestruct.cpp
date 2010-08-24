@@ -26,10 +26,14 @@
 \********************************************************************************/
 
 #include <string>
+#include <string.h>
 using namespace std;
 
+#include "../Graphics_Systems/graphics_mandatory.h"
+#include "../Collision_Systems/collision_mandatory.h"
 #include "spritestruct.h"
 #include "../libEGMstd.h"
+#include "IMGloading.h"
 
 namespace enigma {
   sprite** spritestructarray;
@@ -37,6 +41,121 @@ namespace enigma {
 	sprite::sprite(): texturearray(NULL) {}
   sprite::sprite(unsigned int x): texturearray(new unsigned int[x]) {}
 }
+
+int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)
+{
+	int width,height,fullwidth,fullheight;
+	
+	char *pxdata = enigma::load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
+	unsigned texture = enigma::graphics_create_texture(fullwidth, fullheight, pxdata);
+	delete[] pxdata;
+	
+	//ns.pixeldata=(void**) malloc(sizeof(void*));
+	//ns.pixeldata[0]=bitmapbuffer;
+	enigma::sprite *ns = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
+	ns->id = enigma::sprite_idmax;
+	ns->subcount  = 1;
+	ns->width     = width;
+	ns->height    = height;
+	ns->xoffset   = (int)x_offset;
+	ns->yoffset   = (int)y_offset;
+	ns->texbordx  = (double) width/fullwidth;
+	ns->texbordy  = (double) height/fullheight;
+	ns->texturearray[0] = texture;
+	return enigma::sprite_idmax++;
+}
+
+
+
+/* These functions are primarily for use of the engine. Experienced users
+ * who are familiar with C++ can make use of these, but they were made to
+ * use at load time with data read from the executable. These both expect
+ * RAW format, RGB only.
+ */
+inline unsigned int nlpo2dc(unsigned int x) //Next largest power of two minus one
+{
+	x |= x>>1;
+	x |= x>>2;
+	x |= x>>4;
+	x |= x>>8;
+	return x | (x>>16);
+}
+
+namespace enigma
+{
+  //Allocates and zero-fills the array at game start
+  void sprites_init()
+  {
+    spritestructarray = new sprite*[enigma::sprite_idmax+1];
+    for (unsigned i = 0; i < enigma::sprite_idmax; i++)
+      spritestructarray[i] = NULL;
+  }
+  
+  //Adds an empty sprite to the list
+  int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm)
+  {
+    int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
+    sprite *as = new sprite(subc);
+    spritestructarray[sprid] = as;
+    
+    as->id=sprid;
+    as->subcount=0;
+    as->width=w;
+    as->height=h;
+    as->xoffset=x;
+    as->yoffset=y;
+    as->texbordx=(double)w/fullwidth;
+    as->texbordy=(double)h/fullheight;
+    
+    if (enigma::sprite_idmax < sprid+1)
+      enigma::sprite_idmax = sprid+1;
+    
+    return sprid;
+  }
+
+  #if COLLIGMA
+  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h)
+  {
+    collCustom* thenewmask = new collCustom(w,h,x,y,x,y);
+    for(int xp=0;xp<w*h;xp++)
+      collbitSet(*thenewmask,xp % w,xp/w,pixdata[xp*4+3]>0); //the width times the number of rows, the current column*4, then 3
+    return thenewmask;
+  }
+  #endif
+  
+  
+  //Adds a subimage to an existing sprite from the exe
+  void sprite_add_subimage(int sprid, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
+  {
+    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h);
+    char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
+    unsigned int rowindex,colindex;
+    for (rowindex = 0; rowindex < h; rowindex++)
+    {
+      for(colindex = 0; colindex < w; colindex++)
+      {
+        *imgpxptr++ = *chunk++;
+        *imgpxptr++ = *chunk++;
+        *imgpxptr++ = *chunk++;
+        *imgpxptr++ = *chunk++;
+      }
+      memset(imgpxptr, 0, (fullwidth-colindex) << 2);
+      imgpxptr += (fullwidth-colindex) << 2;
+    }
+    memset(imgpxptr,0,(fullheight-h) * fullwidth);
+    
+    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
+    delete[] imgpxdata;
+    
+    enigma::sprite* sprstr = enigma::spritestructarray[sprid];
+    
+    sprstr->texturearray[sprstr->subcount] = texture;
+    sprstr->colldata[sprstr->subcount] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
+    
+    sprstr->subcount++;
+  }
+}
+
 
 #define DEBUGMODE 1
 

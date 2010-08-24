@@ -1,3 +1,7 @@
+template<class a> struct b {};
+typedef b<int> c;
+
+/*
 #include <sys/signal.h>
 
 #include <cpio.h>

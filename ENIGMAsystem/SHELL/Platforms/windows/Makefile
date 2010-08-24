@@ -8,7 +8,7 @@
 	g++ -c WINDOWScallback.cpp		-o .eobjs_$(MODE)/WINDOWScallback.o $(FLAGS)
 .eobjs_$(MODE)/WINDOWSfonts.o: WINDOWSfonts.cpp ../../libEGMstd.h
 	g++ -c WINDOWSfonts.cpp		-o .eobjs_$(MODE)/WINDOWSfonts.o $(FLAGS)
-.eobjs_$(MODE)/WINDOWSmain.o: WINDOWSmain.cpp ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
+.eobjs_$(MODE)/WINDOWSmain.o: WINDOWSmain.cpp WINDOWScallback.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
 	g++ -c WINDOWSmain.cpp		-o .eobjs_$(MODE)/WINDOWSmain.o $(FLAGS)
 .eobjs_$(MODE)/WINDOWSshow_error.o: WINDOWSshow_error.cpp
 	g++ -c WINDOWSshow_error.cpp		-o .eobjs_$(MODE)/WINDOWSshow_error.o $(FLAGS)
