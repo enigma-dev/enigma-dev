@@ -58,12 +58,15 @@ public class EnigmaUpdater
 					}
 				return true;
 				}
-			if (svn.needsUpdate())
+			long lrev = svn.workingRev();
+			long rev = svn.needsUpdate();
+			if (rev != -1L)
 				{
+				String title = "Update" + (lrev == -1 ? " from r" + lrev : "") + " to r" + rev;
 				if (JOptionPane.showConfirmDialog(
 						null,
 						"Enigma has detected that newer libraries may exist. Would you like us to fetch these for you?",
-						"Update",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
+						title,JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
 				return true;
 				}
 			}
@@ -137,7 +140,7 @@ public class EnigmaUpdater
 		return !SVNWCUtil.isVersionedDirectory(path);
 		}
 
-	private boolean needsUpdate() throws SVNException
+	private long needsUpdate() throws SVNException
 		{
 		final ArrayList<SVNStatus> changes = new ArrayList<SVNStatus>();
 		ISVNStatusHandler ish = new ISVNStatusHandler()
@@ -147,10 +150,22 @@ public class EnigmaUpdater
 					changes.add(status);
 					}
 			};
-		/*long revision = */cliMan.getStatusClient().doStatus(path,SVNRevision.HEAD,SVNDepth.UNKNOWN,
-				true,false,false,false,ish,null);
+		long revision = cliMan.getStatusClient().doStatus(path,SVNRevision.HEAD,SVNDepth.UNKNOWN,true,
+				false,false,false,ish,null);
 
-		return !changes.isEmpty();
+		return !changes.isEmpty() ? revision : -1L;
+		}
+
+	private long workingRev()
+		{
+		try
+			{
+			return cliMan.getStatusClient().doStatus(path,false).getRevision().getNumber();
+			}
+		catch (SVNException e)
+			{
+			return -1L;
+			}
 		}
 
 	/**
