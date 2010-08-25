@@ -16,3 +16,9 @@ clean:
 
 clean-game:
 	cd ENIGMAsystem/SHELL/ && $(MAKE) clean
+
+iphone:
+	cd MacOS/ && xcodebuild -target EnigmaIphone -sdk iphonesimulator3.0
+
+iphonedevice:
+	cd MacOS/ && xcodebuild -target EnigmaIphone -sdk iphoneos2.2.1
