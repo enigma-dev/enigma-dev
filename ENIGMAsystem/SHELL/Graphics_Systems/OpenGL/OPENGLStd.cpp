@@ -31,7 +31,7 @@
 #  include <../additional/glee/GLee.h>
 #endif*/
 #include <string>
-#include <GL/gl.h>
+#include "../OpenGLHeaders.h"
 using namespace std;
 #include "../../Universal_System/roomsystem.h" // Room dimensions.
 

@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include <string>
-#include <GL/gl.h>
+#include "../OpenGLHeaders.h"
 
 using namespace std;
 

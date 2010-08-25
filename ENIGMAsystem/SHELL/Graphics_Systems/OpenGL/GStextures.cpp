@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <GL/gl.h>
+#include "../OpenGLHeaders.h"
 #include <stdio.h>
 
 namespace enigma

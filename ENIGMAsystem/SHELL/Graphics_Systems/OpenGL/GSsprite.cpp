@@ -26,12 +26,15 @@
 \********************************************************************************/
 
 #include <math.h>
-#include <GL/gl.h>
-#include <string.h>
+
+#include "../OpenGLHeaders.h"
+
 #include "../../Universal_System/spritestruct.h"
+
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
+
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
@@ -52,9 +55,11 @@ int draw_sprite(int spr,int subimg,double x,double y)
     enigma::cur_bou_tha_noo_sho_eve_cha_eve = spr2d->texturearray[subimg % spr2d->subcount];
   }
   
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
   
+
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
     
@@ -69,6 +74,7 @@ int draw_sprite(int spr,int subimg,double x,double y)
       glTexCoord2f(0,tby);
         glVertex2f(x-spr2d->xoffset,y+spr2d->height-spr2d->yoffset);
     glEnd();
+	
 	glPopAttrib();
 	return 0;
 }

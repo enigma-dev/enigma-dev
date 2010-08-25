@@ -35,8 +35,8 @@ int draw_surface(double id, double x, double y)
 
 \******************************************************************************/
 
-//#include <GL/glew.h>
-#include <GL/gl.h>
+//#include <OpenGL/glew.h>
+#include "../OpenGLHeaders.h"
 
 extern int room_width, room_height;
 /*
