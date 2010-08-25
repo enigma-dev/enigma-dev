@@ -139,6 +139,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 			String lib = "compileEGMf";
 			NativeLibrary.addSearchPath(lib,".");
+			NativeLibrary.addSearchPath(lib,LGM.workDir.getParent());
 			DRIVER = (EnigmaDriver) Native.loadLibrary(lib,EnigmaDriver.class);
 			return null;
 			}
@@ -159,7 +160,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			String make = in.readLine();
 			in.close();
 			//prepend root
-			p = Runtime.getRuntime().exec(make);
+			p = Runtime.getRuntime().exec(make,null,LGM.workDir.getParentFile());
 			stdin = p.getInputStream();
 			stder = p.getErrorStream();
 			}
@@ -167,7 +168,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 			try
 				{
-				p = Runtime.getRuntime().exec("make");
+				p = Runtime.getRuntime().exec("make",null,LGM.workDir.getParentFile());
 				stdin = p.getInputStream();
 				stder = p.getErrorStream();
 				}
@@ -186,10 +187,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				}
 			}
 		System.out.println("Calling `make`");
+		ef.ta.append("Calling `make`");
 		new EnigmaThread(ef,stdin);
 		new EnigmaThread(ef,stder);
 		ef.setVisible(true);
-		ef.ta.append("Calling `make`");
 		try
 			{
 			System.out.println(p.waitFor()); //p cannot be null at this point
