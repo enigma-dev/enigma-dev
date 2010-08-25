@@ -349,6 +349,8 @@
 		<Unit filename="Colligma/colligma_end.h" />
 		<Unit filename="Colligma/colligma_start.h" />
 		<Unit filename="Colligma/structures.h" />
+		<Unit filename="Collision_Systems/collision_mandatory.h" />
+		<Unit filename="Collision_Systems/none/placeholderlinks.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL/GSblend.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
@@ -475,24 +477,6 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 		</Unit>
-		<Unit filename="Graphics_Systems/OpenGL/GSspriteadd.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems/OpenGL/GSspriteadd.h">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSstdraw.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
@@ -521,6 +505,24 @@
 			<Option target="mac-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSsurface.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL/GStextures.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL/GStextures.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 			<Option target="lin-debug" />

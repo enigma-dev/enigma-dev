@@ -30,14 +30,18 @@ namespace enigma
   struct background
   {
     int width, height;
+    unsigned texture;
     
     bool transparent;
     bool smooth;
     bool preload;
     
     const bool tileset;
-    background(const bool);
+    
     background();
+    background(const bool);
+    background(int w,int h,unsigned tex,bool trans,bool smth,bool prel);
+    background(const bool,int w,int h,unsigned tex,bool trans,bool smth,bool prel);
   };
   struct background_tileset: background
   {
@@ -49,5 +53,10 @@ namespace enigma
     int vSep;
     
     background_tileset();
+    background_tileset(int tw, int th, int ho, int vo, int hs, int vs);
+    background_tileset(int w,int h,unsigned tex,bool trans,bool smth,bool prel,int tw, int th, int ho, int vo, int hs, int vs);
   };
+  
+  background* *backgroundarray; // Since we use pointers for NULL checking, anyway, we can save up to seven bytes per structure by using this configuration
+  void background_new(int bkgid, int w, int h, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep);
 }
