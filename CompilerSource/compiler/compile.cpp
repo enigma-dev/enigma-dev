@@ -85,19 +85,19 @@ void clear_ide_editables()
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.cpp"); wto.close();
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.h"); wto.close();
-  
+
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h",ios_base::out);
     wto << "int instdata[] = { 0 }; //Empty until game is built via ENIGMA\n";
     //wto << "enigma::room_max = 1;\nenigma::maxid = 100001;\n";
   wto.close();
 
 //FIXME: Accessors are required for sprite_width and height, as well as all bbox_ variables
-  
+
   wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
     wto << license;
-    wto << "#define ENIGMA_GS_OPENGL 1\n#define " << TARGET_PLATFORM_NAME << " 1\n";
+    wto << "#define " << TARGET_PLATFORM_GRAPHICS << " 1\n#define " << TARGET_PLATFORM_NAME << " 1\n";
   wto.close();
-  
+
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/LIBINCLUDE.h");
     wto << license;
     wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
@@ -105,7 +105,7 @@ void clear_ide_editables()
            "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n#define COLLIGMA  0\n";
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
-  
+
 }
 
 // modes: 0=run, 1=debug, 2=build, 3=compile
@@ -116,7 +116,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     ide_dia_clear();
     ide_dia_open();
   cout << "Initialized." << endl;
-  
+
   if (mode == emode_rebuild)
   {
     edbg << "Rebuilding all..." << flushl;
@@ -125,123 +125,123 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
      better_system(MAKE_location, "clean-game");
     return 0;
   }
-  
+
   edbg << "Building for mode (" << mode << ")" << flushl;
-  
+
   // CLean up from any previous executions.
   edbg << "Cleaning up from previous executions" << flushl;
     parsed_objects.clear(); //Make sure we don't dump in any old object code...
     shared_locals_clear();  //Forget inherited locals, we'll reparse them
     event_info_clear();     //Forget event definitions, we'll re-get them
-  
+
   // Re-establish ourself
     // Read the locals that will be included with each instance
     if (shared_locals_load() != 0) {
       user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
       idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
     }
-    edbg << "Grabbing locals" << flushl;  
+    edbg << "Grabbing locals" << flushl;
       string high_level_shared_locals = extensions::compile_local_string();
-  
+
   //Read the types of events
   event_parse_resourcefile();
-  
+
   // Pick apart the sent resources
   edbg << "Location in memory of structure: " << (void*)es << flushl;
   if (es == NULL) {
     idpr("Java ENIGMA plugin dropped its ass.",-1);
     return E_ERROR_PLUGIN_FUCKED_UP;
   }
-  
+
   edbg << "File version: " << es->fileVersion << flushl << flushl;
   if (es->fileVersion != 800)
     edbg << "Error: Incorrect version. File is too " << ((es->fileVersion > 800)?"new":"old") << " for this compiler.";
-  
-  
-  
-  
+
+
+
+
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the
   *//// compilation of said code is dealt with during this segment.
-  
-  ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.  
-  
-  
+
+  ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.
+
+
   //First, we make a space to put our globals.
     globals_scope = scope_get_using(&global_scope);
     extiter gso = globals_scope->members.find("ENIGMA Resources"); if (gso != globals_scope->members.end()) delete gso->second;
     globals_scope = globals_scope->members["ENIGMA Resources"] = new externs("ENIGMA Resources",globals_scope,NULL,EXTFLAG_NAMESPACE);
-  
+
   idpr("Copying resources",1);
-  
+
   //Next, add the resource names to that list
   edbg << "COPYING SOME F*CKING RESOURCES:" << flushl;
-  
+
   edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
   for (int i = 0; i < es->spriteCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->sprites[i].name);
-    
+
   edbg << "Copying sound names [" << es->soundCount << "]" << flushl;
   for (int i = 0; i < es->soundCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->sounds[i].name);
-    
+
   edbg << "Copying background names [" << es->backgroundCount << "]" << flushl;
   for (int i = 0; i < es->backgroundCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->backgrounds[i].name);
-    
+
   edbg << "Copying path names [kidding, these are totally not implemented :P] [" << es->pathCount << "]" << flushl;
   for (int i = 0; i < es->pathCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->paths[i].name);
-    
+
   edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
   for (int i = 0; i < es->scriptCount; i++)
     quickmember_script(globals_scope,es->scripts[i].name);
-    
+
   edbg << "Copying font names [kidding, these are totally not implemented :P] [" << es->fontCount << "]" << flushl;
   for (int i = 0; i < es->fontCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->fonts[i].name);
-    
+
   edbg << "Copying timeline names [kidding, these are totally not implemented :P] [" << es->timelineCount << "]" << flushl;
   for (int i = 0; i < es->timelineCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->timelines[i].name);
-  
+
   edbg << "Copying object names [" << es->gmObjectCount << "]" << flushl;
   for (int i = 0; i < es->gmObjectCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->gmObjects[i].name);
-  
+
   edbg << "Copying room names [" << es->roomCount << "]" << flushl;
   for (int i = 0; i < es->roomCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->rooms[i].name);
-  
-  
-  
+
+
+
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
-  
+
   idpr("Checking Syntax and performing Preliminary Parsing",2);
-  
+
   edbg << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
-  
+
   edbg << es->scriptCount << " Scripts:" << flushl;
   parsed_script *parsed_scripts[es->scriptCount];
-  
+
   scr_lookup.clear();
   used_funcs::zero();
-  
+
   int res;
   #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
-  
+
   res = compile_parseAndLink(es,parsed_scripts);
   irrr();
-  
-  
+
+
   //Export resources to each file.
-  
+
   ofstream wto;
   idpr("Outputting Resources in Various Places...",10);
-  
+
   // FIRST FILE
   // Modes and settings.
-  
+
   edbg << "Writing modes and settings" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
     wto << license;
@@ -253,19 +253,19 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"exit(0);":"") << " }\n";
     wto << '\n';
   wto.close();
-  
+
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h",ios_base::out);
     wto << license;
     wto << "#define BUILDMODE " << 0 << "\n";
     wto << "#define DEBUGMODE " << 0 << "\n";
     wto << '\n';
   wto.close();
-  
+
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h",ios_base::out);
     wto << high_level_shared_locals;
   wto.close();
-  
-  
+
+
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
   edbg << "Writing object switch" << flushl;
@@ -279,167 +279,206 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     }
     wto << '\n';
   wto.close();
-  
-  
+
+
   //NEXT FILE ----------------------------------------
   //Resource names: Defines integer constants for all resources.
   int max;
   edbg << "Writing resource names and maxima" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out);
     wto << license;
-    
+
     wto << "enum //object names\n{\n";
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
-      wto << "  " << i->second->name << " = " << i->first << ",\n"; 
+      wto << "  " << i->second->name << " = " << i->first << ",\n";
     wto << "};\n\n";
-    
+
     max = 0;
     wto << "enum //sprite names\n{\n";
     for (int i = 0; i < es->spriteCount; i++) {
       if (es->sprites[i].id >= max) max = es->sprites[i].id + 1;
-      wto << "  " << es->sprites[i].name << " = " << es->sprites[i].id << ",\n"; 
+      wto << "  " << es->sprites[i].name << " = " << es->sprites[i].id << ",\n";
     } wto << "};\nnamespace enigma { size_t sprite_idmax = " << max << "; }\n\n";
-    
+
     max = 0;
     wto << "enum //sound names\n{\n";
     for (int i = 0; i < es->soundCount; i++) {
       if (es->sounds[i].id >= max) max = es->sounds[i].id + 1;
-      wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n"; 
+      wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n";
     } wto << "};\nnamespace enigma { size_t sound_idmax = " <<max << "; }\n\n";
-    
+
     wto << "enum //room names\n{\n";
     for (int i = 0; i < es->roomCount; i++)
-      wto << "  " << es->rooms[i].name << " = " << es->rooms[i].id << ",\n"; 
+      wto << "  " << es->rooms[i].name << " = " << es->rooms[i].id << ",\n";
     wto << "};\n\n";
   wto.close();
-  
+
   idpr("Performing Secondary Parsing and Writing Globals",25);
-  
+
   // Defragged events must be written before object data, or object data cannot determine which events were used.
   edbg << "Writing events" << flushl;
   res = compile_writeDefraggedEvents(es);
   irrr();
-  
+
   parsed_object EGMglobal;
-  
+
   edbg << "Linking globals" << flushl;
   res = link_globals(&EGMglobal,es,parsed_scripts);
   irrr();
-  
+
   edbg << "Running Secondary Parse Passes" << flushl;
   res = compile_parseSecondary(parsed_objects,parsed_scripts,&EGMglobal);
-  
+
   edbg << "Writing object data" << flushl;
   res = compile_writeObjectData(es,&EGMglobal);
   irrr();
-  
+
   res = compile_writeRoomData(es);
   irrr();
-  
+
   res = compile_writeRoomData(es);
   irrr();
-  
-  
-  
+
+
+
   // Write the global variables to their own file to be included before any of the objects
   res = compile_writeGlobals(es,&EGMglobal);
   irrr();
-  
-  
-  
+
+
+
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment two: Now that the game has been exported as C++ and raw
     resources, our task is to compile the game itself via GNU Make.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-  
+
   idpr("Starting compile (This may take a while...)", 30);
-  
+
   string gflags = "-O3 -s";
-  
+
   #if   TARGET_PLATFORM_ID == OS_WINDOWS
-    string glinks = "-lopengl32 '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/windows/ffi/libFFI.a' -lcomdlg32 -lgdi32";
+    string glinks = "-lopengl32 '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/windows/ffi/libFFI.a' -lcomdlg32 -lgdi32 -o game.exe";
     string graphics = "OpenGL";
     string platform = "windows";
-  #else
-    string glinks = "-lGL -lz -lopenal";
+#elif TARGET_PLATFORM_ID == OS_MACOSX
+    string glinks = "-lz -framework OpenGL -framework OpenAL -framework Cocoa -o  ../../MacOS/Build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode";
+    string graphics = "OpenGL"; //For now
+    string platform = "Cocoa";
+/*#elif TARGET_PLATFORM_ID == OS_IPHONE
+gflags = " -arch armv6 -I/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.3.sdk/";//-arch i386 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.3.sdk
+string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
+    string graphics = "OpenGLES";
+    string platform = "iPhone";*/
+#else
+    string glinks = "-lGL -lz -lopenal -o game.exe";
     string graphics = "OpenGL";
     string platform = "xlib";
   #endif
-  
+
   string make = "Game ";
   make += "GMODE=Run ";
   make += "GFLAGS=\"" + gflags   + "\" ";
   make += "GLINKS=\"" + glinks   + "\" ";
   make += "GRAPHICS=" + graphics + " ";
   make += "PLATFORM=" + platform + " ";
-  
+
   edbg << "Running make from `" << MAKE_location << "'" << flushl;
   edbg << "Full command line: " << MAKE_location << " " << make << flushl;
+
+//  #if TARGET_PLATFORM_ID == OS_MACOSX
+  //int makeres = better_system("cd ","/MacOS/");
+//  int makeres = better_system(MAKE_location,"MacOS");
+  #if TARGET_PLATFORM_ID == OS_IPHONE
+    #if IPHONE_DEVICE == 1
+    int makeres = better_system(MAKE_location,"iphonedevice");//iphone |iphonedevice
+    #else
+    int makeres = better_system(MAKE_location,"iphone");//iphone |iphonedevice
+    #endif
+  #else
   int makeres = better_system(MAKE_location,make);
+  #endif
   if (makeres) {
     user << "----Make returned error " << makeres << "----------------------------------\n";
     idpr("Compile failed at C++ level.",-1); return E_ERROR_BUILD;
   }
   user << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";
-  
-  
-  
-  
-  
+
+
+
+
+
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment three: Add resources into the game executable. They are
     literally tacked on to the end of the file for now. They should
     have an option in the config file to pass them to some resource
     linker sometime in the future.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-  
+
   idpr("Adding resources...",90);
-  
+#if TARGET_PLATFORM_ID ==  OS_MACOSX
+FILE *gameModule = fopen("MacOS/Build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode","ab");
+#elif TARGET_PLATFORM_ID ==  OS_IPHONE
+    #if IPHONE_DEVICE == 1
+    FILE *gameModule = fopen("MacOS/build/Release-iphoneos/EnigmaIphone.app/EnigmaIphone","ab");
+    #else
+    FILE *gameModule = fopen("MacOS/build/Release-iphonesimulator/EnigmaIphone.app/EnigmaIphone","ab");
+    #endif
+#elif TARGET_PLATFORM_ID ==  OS_ANDROID
+FILE *gameModule = fopen("/Users/alasdairmorrison/Documents/workspace/NDKDemo/libs/armeabi/libndkMathsDemo.so","ab"); //change to relative directory!
+#else
   FILE *gameModule = fopen("ENIGMAsystem/SHELL/game.exe","ab");
+#endif
   if (!gameModule) {
     user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
     idpr("Failed to add resources.",-1); return 12;
   }
-  
+
   fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
   int resourceblock_start = ftell(gameModule);
-  
+
   if (resourceblock_start < 128) {
     user << "Compiled game is clearly not a working module; cannot continue" << flushl;
     idpr("Failed to add resources.",-1); return 13;
   }
-  
-  
+
+
   // Start by setting off our location with a DWord of NULLs
   fwrite("\0\0\0",1,4,gameModule);
-  
+
   idpr("Adding Sprites",90);
-  
+
   res = module_write_sprites(es, gameModule);
   irrr();
-  
+
   edbg << "Finalized sprites." << flushl;
   idpr("Adding Sounds",93);
-  
+
   module_write_sounds(es,gameModule);
-  
+
   module_write_backgrounds(es,gameModule);
-  
+
   // Tell where the resources start
   fwrite("\0\0\0\0res0",8,1,gameModule);
   fwrite(&resourceblock_start,4,1,gameModule);
-  
+
   //Close the game module; we're done adding resources
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
-  
+
   if (mode == emode_run or mode == emode_build or true)
   {
-    int gameres = better_system("ENIGMAsystem/SHELL/game.exe","");
+#if TARGET_PLATFORM_ID ==  OS_MACOSX
+int gameres = better_system("open","//Game2.app");
+#elif TARGET_PLATFORM_ID ==  OS_IPHONE
+int gameres = better_system("MacOS/build/Release-iphonesimulator/iphonesim"," launch EnigmaIphone.app");
+#else
+  int gameres = better_system("ENIGMAsystem/SHELL/game.exe","");
+#endif
+
     user << "Game returned " << gameres << "\n";
   }
-  
+
   idpr("Done.", 100);
   return 0;
 };
