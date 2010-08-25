@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include <string>
+#include <iostream>
 #include <string.h>
 using namespace std;
 
@@ -42,7 +43,7 @@ namespace enigma {
   sprite::sprite(unsigned int x): texturearray(new unsigned int[x]) {}
 }
 
-int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)
+int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
 {
 	int width,height,fullwidth,fullheight;
 	
@@ -94,18 +95,21 @@ namespace enigma
   //Adds an empty sprite to the list
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm)
   {
-    int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
+    int fullwidth=nlpo2dc(w-1)+1,fullheight=nlpo2dc(h-1)+1;
     sprite *as = new sprite(subc);
     spritestructarray[sprid] = as;
     
     as->id=sprid;
-    as->subcount=0;
+    as->subcount=subc;
     as->width=w;
     as->height=h;
     as->xoffset=x;
     as->yoffset=y;
     as->texbordx=(double)w/fullwidth;
     as->texbordy=(double)h/fullheight;
+    
+    as->texturearray = new unsigned int[subc];
+    as->colldata = new void*[subc];
     
     if (enigma::sprite_idmax < sprid+1)
       enigma::sprite_idmax = sprid+1;
@@ -125,9 +129,9 @@ namespace enigma
   
   
   //Adds a subimage to an existing sprite from the exe
-  void sprite_add_subimage(int sprid, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
+  void sprite_set_subimage(int sprid, int imgindex, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
   {
-    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h);
+    unsigned int fullwidth = nlpo2dc(w-1)+1, fullheight = nlpo2dc(h-1)+1;
     char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
     unsigned int rowindex,colindex;
     for (rowindex = 0; rowindex < h; rowindex++)
@@ -149,10 +153,8 @@ namespace enigma
     
     enigma::sprite* sprstr = enigma::spritestructarray[sprid];
     
-    sprstr->texturearray[sprstr->subcount] = texture;
-    sprstr->colldata[sprstr->subcount] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
-    
-    sprstr->subcount++;
+    sprstr->texturearray[imgindex] = texture;
+    sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
   }
 }
 

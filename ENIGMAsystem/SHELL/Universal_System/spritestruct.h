@@ -56,7 +56,7 @@ namespace enigma
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm);
   
   //Adds a subimage to an existing sprite from the exe
-  void sprite_add_subimage(int sprid, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk);
+  void sprite_set_subimage(int sprid, int imgindex, int x, int y, unsigned int w,unsigned int h,unsigned char*chunk);
 }
 
 extern int sprite_get_width(int sprite);

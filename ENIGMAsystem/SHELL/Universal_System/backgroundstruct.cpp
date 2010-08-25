@@ -63,7 +63,7 @@ namespace enigma
     background(true, w, h, tex, trans, smth, prel), tileWidth(tw), tileHeight(th), hOffset(ho), vOffset(vo), hSep(hs), vSep(vs) {}
   
   //Adds a subimage to an existing sprite from the exe
-  void background_new(int bkgid, int w, int h, char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep)
+  void background_new(int bkgid, unsigned w, unsigned h, char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep)
   {
     unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h);
     char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
@@ -85,6 +85,6 @@ namespace enigma
     unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
     delete[] imgpxdata;
     
-    background* bkgstr = backgroundarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);  
+    backgroundarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);  
   }
 }

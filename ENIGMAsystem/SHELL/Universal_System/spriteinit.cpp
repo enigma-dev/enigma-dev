@@ -93,7 +93,8 @@ namespace enigma
         }
         delete[] cpixels;
         cout << "Adding subimage...\n";
-        sprite_add_subimage(sprid, xorig, yorig, width, height, pixels);
+        sprite_set_subimage(sprid, ii, xorig, yorig, width, height, pixels);
+        cout << "...done\n";
         
         delete[] pixels;
         fread(&nullhere,1,4,exe);
