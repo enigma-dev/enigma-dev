@@ -24,7 +24,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include "../OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 
 int draw_set_blend_mode(int mode){
 	switch (mode){//0norm 1add 2bm_max 3bm_subtract

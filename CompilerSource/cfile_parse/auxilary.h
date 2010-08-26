@@ -1,7 +1,17 @@
-template<class a> struct b {};
-typedef b<int> c;
+//template<class a> struct b {};
+//typedef b<int> c;
 
-/*
+/* union for signal handlers */
+struct ass {
+};
+
+/* Signal vector template for Kernel user boundary */
+struct	cunt {
+	struct ass 
+	#pragma debug_entry_point
+	ass;  /* signal handler */
+};
+
 #include <sys/signal.h>
 
 #include <cpio.h>

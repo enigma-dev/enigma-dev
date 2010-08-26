@@ -27,7 +27,7 @@
 
 #include <math.h>
 
-#include "../OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 
 #include "../../Universal_System/spritestruct.h"
 
@@ -176,7 +176,6 @@ int draw_sprite_part_offset(int spr,int subimg,double left,double top,double wid
 
 int draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double yscale,double rot,int blend,double alpha)
 {
-  return draw_sprite(spr,subimg,x,y);
   enigma::sprite *spr2d = enigma::spritestructarray[spr];
   if (!spr2d)
     return -1;
@@ -197,8 +196,8 @@ int draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double ys
       rot *= M_PI/180;
       
       float
-        ulcx = x + spr2d->xoffset * cos(M_PI+rot) + spr2d->yoffset * cos(M_PI/2+rot),
-        ulcy = y - spr2d->xoffset * sin(M_PI+rot) - spr2d->yoffset * sin(M_PI/2+rot);
+        ulcx = x + xscale * spr2d->xoffset * cos(M_PI+rot) + yscale * spr2d->yoffset * cos(M_PI/2+rot),
+        ulcy = y - yscale * spr2d->xoffset * sin(M_PI+rot) - yscale * spr2d->yoffset * sin(M_PI/2+rot);
       
       glColor4ub(__GETR(blend),__GETG(blend),__GETB(blend),char(alpha*255)); //Implement "blend" parameter
         glTexCoord2f(0,0);

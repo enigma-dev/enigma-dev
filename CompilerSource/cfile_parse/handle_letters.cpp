@@ -665,8 +665,15 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           if (last_named_phase == SP_COLON)
             last_named_phase = SP_PUBLIC;
           else {
-            if (last_type == NULL)
-              { cferr = "Wat hel"; return pos; }
+            if (last_type == NULL) { // We thought we were declaring a structure, but we're actually using one from a higher scope.
+              last_named = LN_DECLARATOR;
+              last_named_phase = DEC_FULL;
+              if (!find_extname(last_identifier, EXTFLAG_STRUCT | EXTFLAG_CLASS))
+                { cferr = "Erroneous type to be instantiated"; return pos; }
+              last_type = ext_retriever_var;
+              last_identifier = n;
+              return pt(-1);
+            }
             if (last_type->parent == current_scope)
             {
               last_named = LN_DECLARATOR;

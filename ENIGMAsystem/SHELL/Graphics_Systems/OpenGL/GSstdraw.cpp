@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include <math.h>
-#include "../OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include <stdio.h>
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -531,14 +531,18 @@ int draw_healthbar(float x1,float y1,float x2,float y2,float amount,int backcol,
 	return 0;
 }
 
+#include <endian.h>
+
 int draw_getpixel(int x,int y)
 {
-  #ifdef __BIG_ENDIAN__
-    glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&x);
-    return x;
-  #elif defined __LITTLE_ENDIAN__
-    glReadPixels(x,y,1,1,GL_BGR,GL_UNSIGNED_BYTE,&x);
-    return x>>8;
+  #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
+    int ret;
+    glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&ret);
+    return ret;
+  #elif defined __LITTLE_ENDIAN__ || defined __LITTLE_ENDIAN
+    int ret;
+    glReadPixels(x,y,1,1,GL_BGR,GL_UNSIGNED_BYTE,&ret);
+    return ret>>8;
   #else
     char r,g,b;
     glReadPixels(x,y,1,1,GL_RED,GL_UNSIGNED_BYTE,&r);
@@ -553,11 +557,11 @@ int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned i
 	int c=0;
 	glBegin(GL_POINTS);
 	for(int i=y; i<y+w; i++)
-		for(int j=x;j<x+w;j++){
+		for(int j=x;j<x+w;j++) {
 			double zx=Zx+(j-x)*(Zw/w),zy=Zy+(i-y)*(Zw/w),cx=zx,cy=zy;
 			for(unsigned k=0;k<iter;k++)
 				if(zx*zx+zy*zy>=4) goto UNMANLY;
-				else{
+				else {
 					zx=zx*zx-zy*zy+cx;
 					zy=2*zx*zy+cy;
 				}
@@ -568,3 +572,4 @@ int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned i
 	glEnd();
 	return c;
 }
+

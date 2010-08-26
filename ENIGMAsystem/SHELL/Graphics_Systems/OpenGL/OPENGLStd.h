@@ -31,7 +31,7 @@
 #  include <../additional/glee/GLee.h>
 #endif*/
 
-//#include "../OpenGLHeaders.h"
+//#include "OpenGLHeaders.h"
 
 namespace enigma
 {

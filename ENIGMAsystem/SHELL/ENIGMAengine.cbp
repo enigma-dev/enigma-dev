@@ -98,6 +98,25 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
+			<Target title="iphone-debug">
+				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="iphone-build">
+				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
 			<Target title="wii-build">
 				<Option output="ENIGMAengine" prefix_auto="1" extension_auto="1" />
 				<Option type="0" />
@@ -359,6 +378,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSblend.h">
 			<Option target="win-debug" />
@@ -368,6 +389,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GScolors.cpp">
 			<Option target="win-debug" />
@@ -377,6 +400,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GScolors.h">
 			<Option target="win-debug" />
@@ -386,6 +411,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSenable.cpp">
 			<Option target="win-debug" />
@@ -395,6 +422,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSenable.h">
 			<Option target="win-debug" />
@@ -404,6 +433,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSmiscextra.cpp">
 			<Option target="win-debug" />
@@ -413,6 +444,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSmiscextra.h">
 			<Option target="win-debug" />
@@ -422,6 +455,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSprmtvs.cpp">
 			<Option target="win-debug" />
@@ -431,6 +466,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSprmtvs.h">
 			<Option target="win-debug" />
@@ -440,6 +477,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSscreen.cpp">
 			<Option target="win-debug" />
@@ -449,6 +488,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSscreen.h">
 			<Option target="win-debug" />
@@ -458,6 +499,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSsprite.cpp">
 			<Option target="win-debug" />
@@ -467,6 +510,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSsprite.h">
 			<Option target="win-debug" />
@@ -476,6 +521,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSstdraw.cpp">
 			<Option target="win-debug" />
@@ -485,6 +532,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSstdraw.h">
 			<Option target="win-debug" />
@@ -494,6 +543,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSsurface.cpp">
 			<Option target="win-debug" />
@@ -503,6 +554,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GSsurface.h">
 			<Option target="win-debug" />
@@ -512,6 +565,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GStextures.cpp">
 			<Option target="win-debug" />
@@ -521,6 +576,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/GStextures.h">
 			<Option target="win-debug" />
@@ -530,6 +587,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.cpp">
 			<Option target="win-debug" />
@@ -539,6 +598,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.h">
 			<Option target="win-debug" />
@@ -548,6 +609,19 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL/OpenGLHeaders.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/graphics_object.cpp">
 			<Option target="win-debug" />
@@ -557,6 +631,8 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL/graphics_object.h">
 			<Option target="win-debug" />
@@ -566,6 +642,148 @@
 			<Option target="lin-build" />
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/EGMenable.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMblend.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMcolors.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMprmtvs.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMscreen.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMsprite.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMspriteadd.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMstdraw.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMsurface.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSblend.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSblend.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GScolors.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GScolors.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSenable.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSenable.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSmiscextra.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSmiscextra.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSprmtvs.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSprmtvs.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSscreen.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSscreen.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsprite.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsprite.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSspriteadd.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSspriteadd.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSstdraw.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSstdraw.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsurface.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsurface.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GStextures.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GStextures.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/OPENGLStd.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/OPENGLStd.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/graphics_object.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/graphics_object.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Graphics_Systems/graphics_mandatory.h" />
 		<Unit filename="Modes/buildmode.h" />
@@ -645,6 +863,8 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 			<Option target="wii-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBdialog.h">
 			<Option target="lin-debug" />
@@ -652,6 +872,8 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 			<Option target="lin-profile" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBmain.cpp">
 			<Option target="lin-debug" />
@@ -664,6 +886,8 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 			<Option target="lin-profile" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBwindow.cpp">
 			<Option target="lin-debug" />
@@ -671,6 +895,8 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 			<Option target="lin-profile" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBwindow.h">
 			<Option target="lin-debug" />
@@ -678,6 +904,8 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 			<Option target="lin-profile" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Platforms/xlib/xwindow_gml.h">
 			<Option target="lin-debug" />
@@ -685,6 +913,8 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 			<Option target="lin-profile" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Preprocessor_Environment_Editable/GAME_SETTINGS.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_eventpointers.h" />

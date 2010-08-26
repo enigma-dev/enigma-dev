@@ -24,11 +24,13 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
-#include "../API_Switchboard.h"
+
+#include "../../API_Switchboard.h"
+
 #if ENIGMA_WS_COCOA !=0
-#include <OpenGL/gl.h>	
+  #include <OpenGL/gl.h>	
 #elif ENIGMA_WS_IPHONE != 0
-#include <OpenGLES/ES1/gl.h>
+  #include <OpenGLES/ES1/gl.h>
 #else
-#include <GL/gl.h>
+  #include <GL/gl.h>
 #endif

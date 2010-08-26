@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "../OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #include <string>
 #include <stdio.h>
 

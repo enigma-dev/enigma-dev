@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "../OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 #if PRIMBUFFER
 GLenum __primitivetype[PRIMDEPTH2];
 int __primitivelength[PRIMDEPTH2];

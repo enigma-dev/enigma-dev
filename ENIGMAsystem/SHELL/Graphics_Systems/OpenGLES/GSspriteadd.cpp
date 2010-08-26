@@ -34,7 +34,7 @@ int sprite_add(string filename,double imgnumb,double precise,double transparent,
 #include <string>
 #include <cstring>
 #include <iostream>
-#include "../OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 using namespace std;
 
 #include "../../Universal_System/IMGloading.h"

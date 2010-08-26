@@ -30,7 +30,7 @@ int screen_redraw(int dontswap)
 **********************************************/
 
 #include <string>
-#include "../OpenGLHeaders.h"
+#include "OpenGLHeaders.h"
 
 using namespace std;
 

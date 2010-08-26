@@ -170,15 +170,22 @@ namespace enigma
   {
     inst_iter *ins = new inst_iter(who);
     pair<iliter,bool> it = instance_list.insert(inode_pair(who->id,ins));
-    if (!it.second)
-      puts("System error: Leak probable");
-    if (it.first != instance_list.begin()) {
-      iliter ib = it.first; ib--;
-      ins->prev = ib->second;
+    if (!it.second) {
+      delete ins;
+      return it.first;
     }
-    iliter in = it.first; in++;
-    if (in != instance_list.end())
-      ins->next = in->second;
+    if (it.first != instance_list.begin())
+    {
+      iliter ib = it.first; ib--; // Find the previous iterator
+      ins->prev = ib->second; // Link this to previous instance
+      ib->second->next = ins; // Link previous instance to this
+    } 
+    else ins->prev = NULL; // Found nothing.
+    
+    iliter in = it.first; in++; // Find next iterator
+    if (in != instance_list.end()) // If it exists
+      ins->next = in->second, // Link this to next instance
+      in->second->prev = ins; // Link next to this
     return it.first;
   }
   inst_iter *link_obj_instance(object_basic* who, int oid)
