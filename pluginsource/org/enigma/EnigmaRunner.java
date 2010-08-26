@@ -93,7 +93,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
 	public EnigmaSettings es = new EnigmaSettings();
 	public EnigmaSettingsFrame esf = new EnigmaSettingsFrame(es);
-	public JMenuItem run, debug, build, compile, rebuild;
+	public JMenuItem run, debug, design, compile, rebuild;
 	public JMenuItem showFunctions, showGlobals, showTypes;
 	public static EnigmaDriver DRIVER;
 	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
@@ -300,9 +300,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		debug = new JMenuItem("Debug");
 		debug.addActionListener(this);
 		menu.add(debug);
-		build = new JMenuItem("Build");
-		build.addActionListener(this);
-		menu.add(build);
+		design = new JMenuItem("Design");
+		design.addActionListener(this);
+		menu.add(design);
 		compile = new JMenuItem("Compile");
 		compile.addActionListener(this);
 		menu.add(compile);
@@ -448,7 +448,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
-	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_BUILD = 2, MODE_COMPILE = 3,
+	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2, MODE_COMPILE = 3,
 			MODE_REBUILD = 4;
 
 	public void compile(final int mode)
@@ -463,9 +463,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		File outname = null;
 		try
 			{
-			if (mode < MODE_BUILD) //run/debug
+			if (mode < MODE_DESIGN) //run/design
 				outname = File.createTempFile("egm",".exe");
-			else if (mode == MODE_BUILD) outname = File.createTempFile("egm",".emd"); //build
+			else if (mode == MODE_DESIGN) outname = File.createTempFile("egm",".emd"); //build
 			if (outname != null) outname.deleteOnExit();
 			}
 		catch (IOException e)
@@ -494,7 +494,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					}
 			}.start();
 
-		if (mode == MODE_BUILD) //build
+		if (mode == MODE_DESIGN) //build
 			{
 			try
 				{
@@ -539,7 +539,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		Object s = e.getSource();
 		if (s == run) compile(MODE_RUN);
 		if (s == debug) compile(MODE_DEBUG);
-		if (s == build) compile(MODE_BUILD);
+		if (s == design) compile(MODE_DESIGN);
 		if (s == compile) compile(MODE_COMPILE);
 		if (s == rebuild) compile(MODE_REBUILD);
 

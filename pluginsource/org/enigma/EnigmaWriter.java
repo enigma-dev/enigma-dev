@@ -757,9 +757,12 @@ public final class EnigmaWriter
 					if (la.execType == Action.EXEC_FUNCTION)
 						{
 						code += "(";
-						for (int i = 0; i < args.size() - 1; i++)
-							code += args.get(i).getVal() + ",";
-						if (args.size() != 0) code += args.get(args.size() - 1) + ")";
+						for (int i = 0; i < args.size(); i++)
+							{
+							if (i != 0) code += ",";
+							code += toString(args.get(i));
+							}
+						code += ")";
 						}
 					code += nl;
 					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF) code += "}";
@@ -768,6 +771,39 @@ public final class EnigmaWriter
 				}
 			}
 		return code;
+		}
+
+	public static String toString(Argument arg)
+		{
+		String val = arg.getVal();
+		switch (arg.kind)
+			{
+			case Argument.ARG_STRING:
+				return "\"" + val + "\"";
+			case Argument.ARG_BOOLEAN:
+				return Boolean.toString(!val.equals("0"));
+			case Argument.ARG_MENU:
+				return val;
+			case Argument.ARG_COLOR:
+				try
+					{
+					return String.format("#%06X",Integer.parseInt(val));
+					}
+				catch (NumberFormatException e)
+					{
+					}
+				return val;
+			default:
+				if (Argument.getResourceKind(arg.kind) == null) return val;
+				try
+					{
+					return arg.getRes().get().getName();
+					}
+				catch (NullPointerException e)
+					{
+					}
+				return val;
+			}
 		}
 
 	//in order to allow question actions to get converted to code, we treat their internal code as scripts
