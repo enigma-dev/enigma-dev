@@ -776,9 +776,11 @@ public final class EnigmaWriter
 	public static String toString(Argument arg)
 		{
 		String val = arg.getVal();
+		JOptionPane.showMessageDialog(null,arg.kind);
 		switch (arg.kind)
 			{
 			case Argument.ARG_STRING:
+			case Argument.ARG_BOTH:
 				return "\"" + val + "\"";
 			case Argument.ARG_BOOLEAN:
 				return Boolean.toString(!val.equals("0"));
