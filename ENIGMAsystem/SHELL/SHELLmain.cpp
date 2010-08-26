@@ -74,7 +74,8 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 #if ENIGMA_GS_OPENGL
     #include "Graphics_Systems/OpenGL/OPENGLStd.h"
 #include "Graphics_Systems/OpenGL/GSsprite.h"
-#elif ENIGMA_GS_OPENGLES
+#endif
+#if ENIGMA_GS_OPENGLES
 #include "Graphics_Systems/OpenGLES/OPENGLStd.h"
 #include "Graphics_Systems/OpenGLES/GSsprite.h"
 #endif
@@ -135,7 +136,7 @@ extern int amain();
   #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
-  
+
   #if BUILDMODE
     #include "Modes/buildmode.h"
   #endif
