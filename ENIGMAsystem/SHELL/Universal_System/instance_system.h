@@ -25,8 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <vector>
+#include <map>
 #include <string>
+#include <vector>
 #include "var4.h"
 #include "reflexive_types.h"
 

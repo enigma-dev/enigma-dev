@@ -531,7 +531,10 @@ int draw_healthbar(float x1,float y1,float x2,float y2,float amount,int backcol,
 	return 0;
 }
 
-#include <endian.h>
+//#include <endian.h>
+//TODO: Though serprex, the author of the function below, never included endian.h,
+//   // Doing so is necessary for the function to work at its peak.
+//   // When ENIGMA generates configuration files, one should be included here.
 
 int draw_getpixel(int x,int y)
 {

@@ -415,19 +415,21 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 
   idpr("Adding resources...",90);
-#if TARGET_PLATFORM_ID ==  OS_MACOSX
-FILE *gameModule = fopen("MacOS/Build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode","ab");
-#elif TARGET_PLATFORM_ID ==  OS_IPHONE
-    #if IPHONE_DEVICE == 1
-    FILE *gameModule = fopen("MacOS/build/Release-iphoneos/EnigmaIphone.app/EnigmaIphone","ab");
-    #else
-    FILE *gameModule = fopen("MacOS/build/Release-iphonesimulator/EnigmaIphone.app/EnigmaIphone","ab");
-    #endif
-#elif TARGET_PLATFORM_ID ==  OS_ANDROID
-FILE *gameModule = fopen("/Users/alasdairmorrison/Documents/workspace/NDKDemo/libs/armeabi/libndkMathsDemo.so","ab"); //change to relative directory!
-#else
-  FILE *gameModule = fopen("ENIGMAsystem/SHELL/game.exe","ab");
-#endif
+  const char *gameFname = // We will be using this first to write, then to run
+  #if TARGET_PLATFORM_ID ==  OS_MACOSX
+    "MacOS/Build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode"
+  #elif TARGET_PLATFORM_ID ==  OS_IPHONE
+      #if IPHONE_DEVICE == 1
+        "MacOS/build/Release-iphoneos/EnigmaIphone.app/EnigmaIphone"
+      #else
+        "MacOS/build/Release-iphonesimulator/EnigmaIphone.app/EnigmaIphone"
+      #endif
+  #elif TARGET_PLATFORM_ID ==  OS_ANDROID
+    "/Users/alasdairmorrison/Documents/workspace/NDKDemo/libs/armeabi/libndkMathsDemo.so";
+  #else
+    "ENIGMAsystem/SHELL/game.exe";
+  #endif
+  FILE *gameModule = fopen(gameFname,"ab");
   if (!gameModule) {
     user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
     idpr("Failed to add resources.",-1); return 12;
@@ -468,14 +470,14 @@ FILE *gameModule = fopen("/Users/alasdairmorrison/Documents/workspace/NDKDemo/li
 
   if (mode == emode_run or mode == emode_build or true)
   {
-#if TARGET_PLATFORM_ID ==  OS_MACOSX
-int gameres = better_system("open","//Game2.app");
-#elif TARGET_PLATFORM_ID ==  OS_IPHONE
-int gameres = better_system("MacOS/build/Release-iphonesimulator/iphonesim"," launch EnigmaIphone.app");
-#else
-  int gameres = better_system("ENIGMAsystem/SHELL/game.exe","");
-#endif
-
+    #if TARGET_PLATFORM_ID ==  OS_MACOSX
+    int gameres = better_system("open",gameFname);
+    #elif TARGET_PLATFORM_ID ==  OS_IPHONE
+    int gameres = better_system("MacOS/build/Release-iphonesimulator/iphonesim"," launch " + string(gameFname));
+    #else
+      int gameres = better_system(gameFname,"");
+    #endif
+    
     user << "Game returned " << gameres << "\n";
   }
 

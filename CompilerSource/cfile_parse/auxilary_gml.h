@@ -4,6 +4,8 @@ map<int> dangerousmap;
 map<> fuckmap;
 map<double,> bastardmap;*/
 
+local int *seven = 7, *six = 6;
+
 for (;;);
 for (int i=0;i<10;i++)a=0
 for int i = 0; i < 10; i++ a=0

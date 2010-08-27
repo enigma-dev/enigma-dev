@@ -62,6 +62,7 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
   int in_decl = 0, dec_out_of_scope = 0; //Not declaring, not declaring outside this scope via global or local
   string dec_prefixes, dec_type, dec_suffixes; //Unary referencers, type names and flags, and unary-postfix array subscripts
   int dec_initializing = false; //This tells us we've passed an = in our initialization
+  pt dec_equals_at = 0;
   int bracklevel = 0; //This will help us make sure not to add unwanted unary symbols or miss variables/scripts.
   
   bool dec_name_givn = false; //Has an identifier been named in this declaration?
@@ -99,6 +100,7 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
           if (dec_out_of_scope) //Designated for a different scope: global or local
           {
             //Declare this as a specific type
+            cout << "Declared " << dec_type << " " << dec_prefixes << dec_name << dec_suffixes << " as " << (dec_out_of_scope-1 ? "global" : "local") << endl;
             if (dec_out_of_scope - 1) //to be placed at global scope
               pev->myObj->globals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
             else
@@ -106,12 +108,18 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
 
             if (!dec_initializing) //If this statement does nothing other than declare, remove it
             {
-              cout << "ERASE FROM CODE: " << code.substr(dec_start_pos,pos+1-dec_start_pos) << endl << endl << endl;
+              cout << "ERASE FROM CODE: " << code.substr(dec_start_pos,pos+1-dec_start_pos) << endl;
               code.erase(dec_start_pos,pos+1-dec_start_pos);
               synt.erase(dec_start_pos,pos+1-dec_start_pos);
               pos = dec_start_pos;
             }
-            else pos++;
+            else
+            {
+              cout << "ERASE FROM CODE: " << code.substr(dec_start_pos,dec_equals_at-dec_start_pos) << endl;
+              code.replace(dec_start_pos,dec_equals_at-dec_start_pos, dec_name);
+              synt.replace(dec_start_pos,dec_equals_at-dec_start_pos, string(dec_name.length(),'n'));
+              pos -= dec_equals_at - dec_start_pos - 1 - dec_name.length();
+            }
             dec_start_pos = pos;
           }
           else //Add to this scope
@@ -140,6 +148,7 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
         }
         if (synt[pos] == '=') {
           dec_initializing = true;
+          dec_equals_at = pos;
           continue;
         }
         if (synt[pos] == '(') {
@@ -192,13 +201,12 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
       synt.erase(sp,pos-sp);
       pos = sp;
       
-      cout << "\\"; fflush(stdout);
+      fflush(stdout);
       goto past_this_if;
     }
     if (synt[pos] == 't')
     {
       past_this_if:
-      cout << "t"; fflush(stdout);
       
       //Skip to the end of the typename, remember where we started
       const int tsp = pos;
@@ -220,7 +228,8 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
       in_decl = true;
       
       // Log this position
-      dec_start_pos = pos; 
+      dec_start_pos = pos--;
+      continue;
     }
     if (synt[pos] == 'n')
     {

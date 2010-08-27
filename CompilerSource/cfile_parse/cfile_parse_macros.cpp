@@ -481,6 +481,7 @@ pt cfile_parse_macro()
             flowstack.invert_top();
           else //elif
           {
+            rerrpos = -1;
             flowstack.set_top(flowstack.topval() == 0 and !flowstack.topused() and evaluate_expression(exp));
             if (rerrpos != -1) { cferr = "In #if expression at position " + tostring(rerrpos) + ": " + rerr; return spos+rerrpos; }
           }

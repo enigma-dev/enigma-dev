@@ -40,7 +40,6 @@ const int noone =  -4;
 const int global = -5;
 const int local =  -7;
 
-#include <map>
 #include "var4.h"
 
 namespace enigma
