@@ -297,6 +297,18 @@ pt parse_cfile(my_string cftext)
             if (cm != pt(-1)) return cm;
             return (cferr = "Unexpected identifier in assembly parameters", sp);
           }
+          else if (cfile[pos] == '/')
+          {
+            pos++;
+            if (cfile[pos] == '/')
+              while (cfile[pos] != '\r' and cfile[pos] != '\n')
+                pos++;
+            else if (cfile[pos] == '*') {
+              while (pos < len and (cfile[++pos] != '*' or cfile[pos + 1] != '/'))
+                pos++; pos += 2;
+            }
+            else return (cferr = "Unexpected symbol in assembly parameters", pos);
+          }
           else if (!is_useless(cfile[pos])) {
             cferr = "Unexpected symbol in assembly expression";
             return pos;

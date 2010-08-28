@@ -14,7 +14,8 @@ struct	cunt {
 
 #define __STRING(x) #x
 
-__asm("asm" "asskaec" __STRING(ass));
+__asm("asm" "asskaec" __STRING(ass) /* fuck all */ "ASS" //Fuck ALL!
+);
 
 #include <sys/signal.h>
 

@@ -25,12 +25,24 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <math.h>
+//Before anyone else includes math.h, let's make sure we
+//Don't get bitten by those damn bessel functions.
+#define j0 bessel_j0
+  #define j1 bessel_j1
+  #define jn bessel_jn
+  #define y0 bessel_y0
+  #define y1 bessel_y1
+  #define yn bessel_yn
+    #include <cmath>
+  #undef j1
+  #undef j0
+  #undef jn
+  #undef y1
+  #undef y0
+#undef yn
 
-namespace enigma {
-	extern unsigned int Random_Seed;
-	extern unsigned long mt[625];
-}
+double abs(struct variant x);
+double abs(struct var x);
 
 const double pi = M_PI;
 
@@ -68,14 +80,3 @@ double lengthdir_y(double len,double dir);
 double direction_difference(double dir1,double dir2);
 double point_direction(double x1,double y1,double x2,double y2);
 double point_distance(double x1, double y1, double x2, double y2);
-
-
-/*double sin(double x);
-double cos(double x);
-double tan(double x);
-double log10(double x);
-double abs(double x);
-double ceil(double x);
-double floor(double x);
-double sqrt(double x);
-double exp(double x);*/

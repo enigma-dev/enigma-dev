@@ -49,7 +49,7 @@ namespace enigma
 {
   int initialize_everything()
   {
-    mtrandom_seed(enigma::Random_Seed=time(0));
+    mtrandom_seed(random_set_seed(time(0)));
     graphicssystem_initialize();
     audiosystem_initialize();
     #if ENIGMA_WS_WINDOWS!=0

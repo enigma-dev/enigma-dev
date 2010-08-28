@@ -29,23 +29,15 @@
 #include <stdlib.h>
 #include <string>
 
+// Simple Universal libraries
+///////////////////////////////
+
 #include "Universal_System/var4.h"
 
-//Before anyone else includes math.h, let's make sure we
-//Don't get bitten by those damn bessel functions.
-#define y0 bessel_y0
-  #define y1 bessel_y1
-  #define jn bessel_jn
-  #define j0 bessel_j0
-  #define j1 bessel_j1
-    #include <cmath>
-  #undef j1
-  #undef j0
-  #undef jn
-  #undef y1
-#undef y0
-inline double abs(variant x) { return fabs((double)x); } // cmath introduces a number of overloads for this that will ambiguate variant.
-inline double abs(var     x) { return fabs((double)x); } // cmath introduces a number of overloads for this that will ambiguate var.
+#include "Universal_System/mathnc.h"
+#include "Universal_System/estring.h"
+#include "Universal_System/fileio.h"
+#include "Universal_System/terminal_io.h"
 
 //#include <vector> //COLLIGMA
 
@@ -62,12 +54,6 @@ inline double abs(var     x) { return fabs((double)x); } // cmath introduces a n
 
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
-
-// Simple Universal libraries
-#include "Universal_System/estring.h"
-#include "Universal_System/fileio.h"
-#include "Universal_System/terminal_io.h"
-#include "Universal_System/mathnc.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
