@@ -125,7 +125,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
      better_system(MAKE_location, "clean-game");
     return 0;
   }
-
+  
   edbg << "Building for mode (" << mode << ")" << flushl;
 
   // CLean up from any previous executions.
@@ -135,7 +135,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     event_info_clear();     //Forget event definitions, we'll re-get them
 
   // Re-establish ourself
-    // Read the locals that will be included with each instance
+    // Read the global locals: locals that will be included with each instance
     if (shared_locals_load() != 0) {
       user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
       idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;

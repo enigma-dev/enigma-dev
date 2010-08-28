@@ -203,6 +203,10 @@ int parser_secondary(string& code, string& synt)
   darray<localscope*> sstack;
   sstack[slev] = new localscope();
   
+  bool indecl = 0, deceq = 0;
+  string dtype, dname, dpre, dsuf;
+  int inbrack = 0;
+  
   for (pt pos = 0; pos < synt.length(); pos++)
   {
     if (synt[pos] == 't')
@@ -210,23 +214,31 @@ int parser_secondary(string& code, string& synt)
       pt spos = pos;
       while (synt[++pos] == 't');
       pos += parser_fix_templates(code,pos,spos,&synt);
-      continue;
+      indecl = true; dtype = code.substr(spos,pos-spos);
+      dpre = dsuf = "";
+      cout << "TYPE[" << dtype << "]" << endl;
+      pos--; continue;
     }
     else if (synt[pos] == '.' and synt[pos+1] == 'n')
     {
       const pt epos = pos--; backloop:
-      while (synt[pos] == ']' or synt[pos] == ')' or synt[pos] == 'n' or synt[pos] == 't')
+      while (synt[pos] == ']' or synt[pos] == ')') // Seek to beginning of array subscripts and function args
       {
         if (synt[pos] == ']' or synt[pos] == ')')
         {
           for (int cnt = (pos--, 1); cnt; pos--)
+          {
             if (synt[pos] == '[' or synt[pos] == '(') cnt--;
             else if (synt[pos] == ')' or synt[pos] == ']') cnt++;
+            if (!pos) goto hell; //Break 2;
+          }
           pos++;
         }
-        else
-          for (char c = synt[pos--]; pos and synt[pos] == c; pos--);
-      }
+      } // at beginning of function args/array subscripts
+      for (char c = synt[pos--]; pos and synt[pos] == c; pos--) if (!pos) goto hell;
+      pos++;
+      hell: 
+      
       if (pos) {
         if (synt[pos-1] == '.')
           { pos--; goto backloop; }
@@ -246,27 +258,42 @@ int parser_secondary(string& code, string& synt)
       string member = code.substr(epos+1,ep-epos-1);
       
       // Determine the type of the left-hand expression
-      onode n = exp_typeof(exp);
+      onode n = exp_typeof(exp,sstack.where,slev+1);
+      externs* ct = n.type;
+      bool tf = (ct->members.find(member) != ct->members.end());
+      while (!tf and ct->flags & EXTFLAG_TYPEDEF and ct->type)
+        ct = ct->type, tf = (ct->members.find(member) != ct->members.end());
       
-      if (n.type->members.find(member) == n.type->members.end()) // No member by this name can be accessed
+      cout << exp << ": " << n.type->name << " :: " << member << " => " << tf << endl;
+      
+      if (!tf) // No member by this name can be accessed
       {
-        string repstr = "enigma::varaccess_";
-        string repsyn = "nnnnnnnnnnnnnnnnnn";
-        
-        repstr += member;
-        repsyn += string(member.length(),'n');
-        
-        repstr += "(int(";
-        repsyn += "(ttt(";
-        
-        repstr += exp;
-        repsyn += expsynt;
-        
-        repstr += "))->";
-        repsyn += "))->";
-        
-        code.replace(ebp,exp.length() + 1 + member.length(),repstr);
-        synt.replace(ebp,exp.length() + 1 + member.length(),repsyn);
+        string repstr;
+        string repsyn;
+        if (shared_object_locals.find(member) != shared_object_locals.end())
+        {
+          repstr = "enigma::glaccess()->" + member;
+          repsyn = "nnnnnnnnnnnnnnnn()->" + string(member.length(),'n');
+        }
+        else
+        {
+          repstr = "enigma::varaccess_";
+          repsyn = "nnnnnnnnnnnnnnnnnn";
+          
+          repstr += member;
+          repsyn += string(member.length(),'n');
+          
+          repstr += "(int(";
+          repsyn += "(ccc(";
+          
+          repstr += exp;
+          repsyn += expsynt;
+          
+          repstr += "))";
+          repsyn += "))";
+        }
+        code.replace(ebp, exp.length() + 1 + member.length(),repstr);
+        synt.replace(ebp, exp.length() + 1 + member.length(),repsyn);
       }
       else // There is a member by this name in the type of that expression
       {
@@ -276,9 +303,41 @@ int parser_secondary(string& code, string& synt)
         }
       }
     }
-    else {
-      while (synt[pos] == synt[pos+1]) pos++;
+    else switch (synt[pos])
+    {
+      case '*':
+        if (!inbrack and !deceq)
+          dpre += '*';
+        break;
+      case '[':
+        if (!inbrack and !deceq)
+          dsuf += "[]", inbrack++;
+        break;
+      case ']':
+        inbrack--;
+        break;
+      case ';':
+      case ',':
+        if (indecl and !inbrack)
+        {
+          (*sstack[slev])[dname] = dectrip(dtype,dpre,dsuf);
+          cout << "DECLARE " << dtype << " " << dpre << dname << dsuf << endl;
+          if (synt[pos] == ';') indecl = false;
+          deceq = false;
+        }
+        break;
+      case 'n':
+          if (!inbrack and !deceq) {
+            const pt sp = pos;
+            while (synt[++pos] == 'n');
+            dname = code.substr(sp,pos-- - sp);
+            break;
+          }
+      default:
+        while (synt[pos] == synt[pos+1]) pos++;
     }
   }
+  while (slev) delete sstack[slev--];
+  delete sstack[0];
   return -1;
 }

@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include "../externs/externs.h"
+#include "../parser/object_storage.h"
 
 struct onode
 {
@@ -44,4 +45,4 @@ struct onode
 
 extern void exp_typeof_init();
 extern string externs_name(onode e);
-extern onode exp_typeof(string exp);
+extern onode exp_typeof(string exp,map<string,dectrip>** lvars = NULL,int lvarc = 0);

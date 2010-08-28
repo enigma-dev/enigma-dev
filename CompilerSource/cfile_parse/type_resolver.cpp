@@ -182,7 +182,21 @@ onode type_op_resolve_upost(const onode &t, string op) // Evaluates `t1 op`, whe
   return onode(t);
 }
 
-onode exp_typeof(string exp)
+void onode_from_dectrip(onode& x, const dectrip& y)
+{
+  pt pos = y.type.length();
+  while (!is_letterd(y.type[pos])) pos--;
+  const pt epos = pos;
+  while (is_letterd(y.type[--pos]));
+  pos++;
+  
+  if (!find_extname(y.type.substr(pos,epos-pos+1), EXTFLAG_TYPENAME))
+    return (printf("Error: type not a type, derp\n"), void(0));
+  
+  x.type = ext_retriever_var;
+}
+
+onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc)
 {
   pt pos = 0;
   const pt len = exp.length();
@@ -213,8 +227,19 @@ onode exp_typeof(string exp)
       while (is_letterd(exp[++pos]));
       const string tn = exp.substr(spos,pos);
       
-      bool nt = find_extname(tn,0xFFFFFFFF);
-      externs *t = ext_retriever_var;
+      bool nt = false;
+      map<string,dectrip>::iterator it;
+      for (int i = 0; i < lvarc; i++)
+        if ((it = lvars[i]->find(tn)) != lvars[i]->end()) {
+          onode_from_dectrip(perf.top(), it->second);
+          isol = false, nt = true; break;
+        }
+      
+      if (nt)
+        continue;
+      
+      nt = find_extname(tn,0xFFFFFFFF);
+      externs* t = ext_retriever_var;
       
       string oname = ""; // We'll push an operator-less type to the stack
       

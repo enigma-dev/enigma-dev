@@ -144,7 +144,11 @@ int mainr(int argc, char *argv[])
   cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
   //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   
+  cout << "Initializing GML parser..." << endl;
   parser_init();
+  cout << "Loading locals..." << endl;
+  shared_locals_load();
+  cout << "Getting data..." << endl;
   string pf = fc("./CompilerSource/cfile_parse/auxilary_gml.h");
   
   a = syncheck::syntacheck(pf);

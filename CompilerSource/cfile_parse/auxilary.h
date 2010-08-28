@@ -12,6 +12,10 @@ struct	cunt {
 	ass;  /* signal handler */
 };
 
+#define __STRING(x) #x
+
+__asm("asm" "asskaec" __STRING(ass));
+
 #include <sys/signal.h>
 
 #include <cpio.h>

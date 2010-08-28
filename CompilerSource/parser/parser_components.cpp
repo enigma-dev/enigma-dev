@@ -628,15 +628,15 @@ void parser_add_semicolons(string &code,string &synt)
 
 
 /**
-This part outputs well-formatted code.
+  This part outputs somewhat well-formatted code.
 
-@func likesaspace(char c, char d)
-  @return returns whether or not the two characters (as seen
-  in syntax string) @param c and @param d should be separated
-  by a space in the outputted code.
+  @func likesaspace(char c, char d)
+    @return returns whether or not the two characters (as seen
+    in syntax string) @param c and @param d should be separated
+    by a space in the outputted code.
 
-@func print_the_fucker(string code,string synt)
-  @summary Outputs the code in a well-formatted fashion.
+  @func print_the_fucker(string code,string synt)
+    @summary Outputs the code in a well-formatted fashion.
 
 **/
 
@@ -655,6 +655,10 @@ inline bool likesaspace(char c,char d)
   if ((c=='(' or c=='[') and is_letterd(d))
     return 0;
   if ((d=='(' or d=='[' or d==']' or d==')') and is_letterd(c))
+    return 0;
+  if (c == '-' and d == '>')
+    return 0;
+  if (c == '.' or d == '.')
     return 0;
   return 1;
 }

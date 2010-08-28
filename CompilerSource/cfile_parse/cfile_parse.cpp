@@ -271,26 +271,37 @@ pt parse_cfile(my_string cftext)
           return pos;
         }
         pos++;
-        while (is_useless(cfile[pos])) pos++;
-        if (cfile[pos] != '"')
+        while (cfile[pos] != ')')
         {
-          cferr = "Expected string of assembly instructions";
-          return pos;
-        }
-        pos++;
-        while (pos<len and cfile[pos] != '"')
-          { if (cfile[pos] == '\\') pos++; pos++; }
-        if (cfile[pos] != '"')
-        {
-          cferr = "Expected string of assembly instructions";
-          return pos;
-        }
-        pos++;
-        while (is_useless(cfile[pos])) pos++;
-        if (cfile[pos] != ')')
-        {
-          cferr = "Expected closing parenthesis after assembly string";
-          return pos;
+          if (pos >= len)
+          {
+            if (!cfstack.empty()) //If we're in a macro
+              handle_macro_pop();
+            else
+              return (cferr = "Unterminated assembly parameters at this point", pos);
+            continue;
+          }
+          if (cfile[pos] == '"')
+          {
+            while (pos<len and cfile[++pos] != '"')
+              { if (cfile[pos] == '\\') pos++; }
+            pos++;
+          }
+          else if (is_letter(cfile[pos]))
+          {
+            const pt sp = pos;
+            while (is_letterd(cfile[++pos]));
+            string mn = cfile.substr(sp,pos-sp);
+            const pt cm = handle_macros(mn);
+            if (cm == pt(-2)) continue;
+            if (cm != pt(-1)) return cm;
+            return (cferr = "Unexpected identifier in assembly parameters", sp);
+          }
+          else if (!is_useless(cfile[pos])) {
+            cferr = "Unexpected symbol in assembly expression";
+            return pos;
+          }
+          else pos++;
         }
         pos++;
       }
