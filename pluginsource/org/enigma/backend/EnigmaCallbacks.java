@@ -12,6 +12,8 @@ public class EnigmaCallbacks extends Structure
 	public Callback cock = new OutputClear(); //void (*cock) (void)
 	public Callback cop = new OutputProgress(); //void (*cop) (int)
 	public Callback cot = new OutputTip(); //void (*cot) (String)
+	public Callback cof = new OpenFile(); //void (*cof) (String)
+	public Callback ccf = new CloseFile(); //void (*ccf) ()
 
 	public EnigmaCallbacks(EnigmaFrame ef)
 		{
@@ -65,6 +67,22 @@ public class EnigmaCallbacks extends Structure
 		public void callback(String tip)
 			{
 			ef.pb.setString(tip);
+			}
+		}
+
+	public static class OpenFile extends OutputHolder implements Callback
+		{
+		public void callback(String file)
+			{
+
+			}
+		}
+
+	public static class CloseFile extends OutputHolder implements Callback
+		{
+		public void callback()
+			{
+
 			}
 		}
 	}
