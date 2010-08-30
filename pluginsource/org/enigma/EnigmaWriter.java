@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.DeflaterOutputStream;
@@ -56,7 +57,9 @@ import org.enigma.backend.sub.Moment;
 import org.enigma.backend.sub.PathPoint;
 import org.enigma.backend.sub.Tile;
 import org.enigma.backend.sub.View;
+import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
+import org.lateralgm.main.LGM;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
@@ -478,13 +481,25 @@ public final class EnigmaWriter
 
 	protected void populateRooms()
 		{
-		int size = i.rooms.size();
+		ArrayList<org.lateralgm.resources.Room> irooms = new ArrayList<org.lateralgm.resources.Room>();
+		Enumeration<?> e = LGM.root.preorderEnumeration();
+		while (e.hasMoreElements())
+			{
+			ResNode node = (ResNode) e.nextElement();
+			if (node.kind == org.lateralgm.resources.Resource.Kind.ROOM)
+				{
+				org.lateralgm.resources.Room r = (org.lateralgm.resources.Room) deRef((ResourceReference<?>) node.getRes());
+				if (r != null) irooms.add(r); //is this null check even necessary?
+				}
+			}
+
+		int size = irooms.size();
 		o.roomCount = size;
 		if (size == 0) return;
 
 		o.rooms = new Room.ByReference();
 		Room[] orly = (Room[]) o.rooms.toArray(size);
-		org.lateralgm.resources.Room[] irl = i.rooms.toArray(new org.lateralgm.resources.Room[0]);
+		org.lateralgm.resources.Room[] irl = irooms.toArray(new org.lateralgm.resources.Room[0]);
 		for (int s = 0; s < size; s++)
 			{
 			Room or = orly[s];
