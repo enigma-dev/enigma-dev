@@ -97,16 +97,17 @@ namespace enigma
   inst_iter ENIGMA_global_instance_iterator(ENIGMA_global_instance,0,0);
   
   // With() will operate on this
-  with_iter::with_iter(inst_iter* i,object_basic* o, with_iter* l): it(i), other(o), last(l) {}
-  void with_iter::push(inst_iter* i,object_basic* o) { wi_top = new with_iter(i,o,wi_top); }
-  void with_iter::pop() { wi_top = wi_top->last; }
-  with_iter *wi_top = new with_iter(instance_event_iterator,NULL,NULL);
+  iterator_level::iterator_level(inst_iter* i,object_basic* o, iterator_level* l): it(i), other(o), last(l) {}
+  void iterator_level::push(inst_iter* i,object_basic* o) { il_top = new iterator_level(i,o,il_top); }
+  void iterator_level::pop() { il_top = il_top->last; }
+  iterator_level *il_top = NULL;
   
   // This is basically a garbage collection list for when instances are destroyed
   vector<inst_iter*> cleanups; // We'll use vector
   
   // It's a good idea to centralize an event iterator so error reporting can tell where it is.
-  inst_iter *instance_event_iterator = NULL;; // Not bad for efficiency, either.
+  inst_iter *instance_event_iterator = NULL; // Not bad for efficiency, either.
+  object_basic *instance_other = NULL;
   
   /* **  Methods ** */
   // Retrieve the first instance on the complete list.
@@ -121,7 +122,7 @@ namespace enigma
     if (x < 0) switch (x)
     {
       case self:
-      case local:  return NULL;
+      case local:  return instance_event_iterator ? instance_event_iterator->inst : NULL;
       case other:  return NULL;
       case all: {  inst_iter *i = instance_list_first();
                    return  i ? i->inst : NULL; }
@@ -140,7 +141,7 @@ namespace enigma
     if (x < 0) switch (x) // Keyword-based lookup
     {
       case self:
-      case local:  return NULL;
+      case local:  return instance_event_iterator;
       case other:  return NULL;
       case all:    return instance_list_first();
       case global: return &ENIGMA_global_instance_iterator;

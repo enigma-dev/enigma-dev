@@ -255,24 +255,24 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
           cout << "Ignoring `" << nname << "' because it's a global.\n"; continue;
         }
         
-        //Check shared locals to see if we already have one
-        if (shared_object_locals.find(nname) != shared_object_locals.end()) {
-          cout << "Ignoring `" << nname << "' because it's a shared local.\n"; continue;
-        }
-        
-        //Now make sure we're not specifically ignoring it
+        //Next make sure we're not specifically ignoring it
         map<string,int>::iterator ex;
         for (int i = igpos; i >= 0; i--)
           if ((ex = igstack[i]->ignore.find(nname)) != igstack[i]->ignore.end()) {
             cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n"; goto continue_2;
           }
         
-        //Finally, make sure we're not in a with.
+        //Now make sure we're not in a with.
         if (with_until_semi or igstack[igpos]->is_with)
         {
           pos += 5;
           code.insert(spos,"self.");
           synt.insert(spos,"nnnn.");
+        }
+        
+        //Finally, check shared locals to see if we already have one
+        if (shared_object_locals.find(nname) != shared_object_locals.end()) {
+          cout << "Ignoring `" << nname << "' because it's a shared local.\n"; continue;
         }
         
         //Of course, we also don't want to risk overwriting a typed version

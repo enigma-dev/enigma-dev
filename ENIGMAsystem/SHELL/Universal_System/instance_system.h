@@ -71,15 +71,15 @@ namespace enigma
   
   // Centralized stack of iterators in use by with() statements and the like.
   // Never empty; always contains a pointer to the instance_event_iterator.
-  struct with_iter {
+  struct iterator_level {
     inst_iter* it;
     object_basic* other;
-    with_iter *last;
-    with_iter(inst_iter*,object_basic*,with_iter*);
-    void push(inst_iter*,object_basic*);
+    iterator_level *last;
+    iterator_level(inst_iter*,object_basic* oth,iterator_level*);
+    void push(inst_iter*,object_basic* oth);
     void pop();
   };
-  extern with_iter *wi_base, *wi_top;
+  extern iterator_level *il_base, *il_top;
   
   // The rest is decently commented on in the corresponding source file.
   extern event_iter *events;
@@ -87,6 +87,7 @@ namespace enigma
   extern std::map<int,inst_iter*> instance_list;
   extern object_basic *ENIGMA_global_instance;
   extern inst_iter *instance_event_iterator;
+  extern object_basic *instance_other;
   extern std::vector<inst_iter*> cleanups;
   
   inst_iter*    instance_list_first();

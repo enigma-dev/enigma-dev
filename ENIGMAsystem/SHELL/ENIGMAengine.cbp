@@ -1017,6 +1017,7 @@
 		<Unit filename="Universal_System/var4.h" />
 		<Unit filename="Universal_System/var4_lua.cpp" />
 		<Unit filename="Universal_System/var_te.h" />
+		<Unit filename="Universal_System/with.h" />
 		<Unit filename="initialize.h" />
 		<Unit filename="libEGMstd.cpp" />
 		<Unit filename="libEGMstd.h" />

@@ -17,3 +17,8 @@ er.ar.bar = car;
 
 string *xstr;
 xstr.length = 0;
+
+if (cat.speed == wasp.speed)
+  with cat
+    x = random(640),
+    speed = random(480);

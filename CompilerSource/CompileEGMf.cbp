@@ -178,6 +178,7 @@
 		<Unit filename="compiler/components/parse_secondary.cpp" />
 		<Unit filename="compiler/components/write_defragged_events.cpp" />
 		<Unit filename="compiler/components/write_globals.cpp" />
+		<Unit filename="compiler/components/write_object_access.cpp" />
 		<Unit filename="compiler/components/write_object_data.cpp" />
 		<Unit filename="compiler/components/write_room_data.cpp" />
 		<Unit filename="compiler/event_ids.h" />
