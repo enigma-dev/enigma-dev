@@ -1,5 +1,26 @@
+#define __MAC_10_0      1000
+
+#define __AVAILABILITY_INTERNAL_DEPRECATED         __attribute__((deprecated,visibility("default")))
+#define __AVAILABILITY_INTERNAL_UNAVAILABLE        __attribute__((unavailable,visibility("default")))
+#define __AVAILABILITY_INTERNAL_WEAK_IMPORT        __attribute__((weak_import,visibility("default")))
+#define __AVAILABILITY_INTERNAL_REGULAR            __attribute__((visibility("default")))
+#define __AVAILABILITY_INTERNAL__MAC_10_0 __AVAILABILITY_INTERNAL_REGULAR
+#define __AVAILABILITY_INTERNAL__MAC_10_0_DEP__MAC_10_5 __AVAILABILITY_INTERNAL__MAC_10_0
+
+#define	__CONCAT(x,y)	x/**/y
+#define	__STRING(x)	"x"
+
+#define __OSX_AVAILABLE_STARTING(_mac, _iphone) __AVAILABILITY_INTERNAL##_mac
+#define __OSX_AVAILABLE_BUT_DEPRECATED(_macIntro, _macDep, _iphoneIntro, _iphoneDep) __AVAILABILITY_INTERNAL##_macIntro##_DEP##_macDep
+
+#    define __DARWIN_SUF_1050
+
+#define __DARWIN_1050(sym)		__asm("_" __STRING(sym) __DARWIN_SUF_1050)
+int	 daemon(int, int) __OSX_AVAILABLE_BUT_DEPRECATED(__MAC_10_0,__MAC_10_5,__IPHONE_2_0,__IPHONE_2_0);
+
 //template<class a> struct b {};
 //typedef b<int> c;
+
 
 /* union for signal handlers */
 struct ass {

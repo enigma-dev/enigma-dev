@@ -208,7 +208,7 @@ bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt
   
   //cout << "Params: "; for (int i=0; i<args_given; i++) cout << macro_args[i] << ", "; cout << "end.";
   
-  bool stringify = 0;
+  bool stringify = 0, concat = 0;
   
   for (pt i = 0; i < macrostr.length(); ) //unload the array of values we created before into the macro's definiens
   {
@@ -220,6 +220,7 @@ bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt
         macrostr.replace(is,i,"\""+macrostr.substr(is,i)+"\"");
         stringify = false;
       }
+      concat = false;
       continue;
     }
     if (is_letter(macrostr[i]))
@@ -238,14 +239,16 @@ bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt
             macrostr.replace(si,i-si,escaped_string(iinto));
           else
           {
-            if (!preprocess_separately(iinto))
-              return false;
+            if (!concat)
+              if (!preprocess_separately(iinto))
+                return false;
             macrostr.replace(si,i-si,iinto);
           }
               
           i = si + iinto.length();
           break;
         }
+      concat = false;
       stringify = false;
     }
     //Be on the lookout for such homosexualities as # and ##
@@ -259,6 +262,7 @@ bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt
         while (end < macrostr.length() and is_useless(macrostr[end]))
           if (macrostr[end++] == '\\') end++;
         macrostr.erase(i,end-i);
+        concat = true;
       }
       else
       {

@@ -231,7 +231,7 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
       dec_start_pos = pos--;
       continue;
     }
-    if (synt[pos] == 'n')
+    if (synt[pos] == 'n' and (!pos or synt[pos-1] != '.'))
     {
       const pt spos = pos;
       while (synt[++pos] == 'n');
