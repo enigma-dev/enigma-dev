@@ -40,6 +40,7 @@ using namespace std;
 
 
 map<string,int> shared_object_locals;
+map<string,dectrip> dot_accessed_locals;
 int shared_locals_load()
 {
   cout << "Finding parent..."; fflush(stdout);
@@ -145,4 +146,86 @@ void parsed_object::copy_calls_from(parsed_object& source)
     int &x = funcs[sit->first]; //copy the function into curscript's called list.
     x = x > sit->second ? x : sit->second; //use larger max param count
   }
+}
+
+#include <vector>
+#include "../backend/ideprint.h"
+
+typedef map<string,dectrip> msi;
+void add_dot_accessed_local(string name)
+{
+  pair<msi::iterator, bool> insd = dot_accessed_locals.insert(msi::value_type(name,dectrip()));
+  if (!insd.second) // If we didn't insert new, 
+    return; // all this figuring has been done already
+  
+  bool ft = true; string chckpre, chcksuf;
+  map<string, vector<string> > acs, pres, sufs;
+  for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
+  {
+    msi::iterator itt = it->second->locals.find(name);
+    if (itt != it->second->locals.end())
+    {
+      if (itt->second.type != "")
+        acs[itt->second.type].push_back(it->second->name);
+      chckpre = itt->second.prefix; chcksuf = itt->second.suffix;
+      pres[itt->second.type].push_back(chckpre);
+      sufs[itt->second.type].push_back(chcksuf);
+      ft = false;
+    }
+  }
+  string rest, resp, ress;
+  unsigned maxagree = 0;
+  if (acs.size() > 1)
+  {
+    user << "Warning: variable `" << name << "` is accessed via GM1 Integer, but defined differently between objects.";
+    for (map<string, vector<string> >::iterator it = acs.begin(); it != acs.end(); it++)
+    {
+      user << "Info: Declared as `" << it->first << "` in " << it->second.size() << " objects: ";
+      for (size_t i = 0; i < it->second.size() and i <= 10; i++)
+         user << (i == 10 ? "..." : it->second[i]) << (i+1 < it->second.size() and i+1 < 10 ? ", " : "");
+      user << flushl;
+      if (it->second.size() > maxagree)
+        rest = it->first, maxagree = it->second.size();
+    }
+  }
+  else if (!acs.size())
+    rest = "var";
+  else
+    rest = acs.begin()->first;
+  
+  maxagree = 0;
+  if (pres.size() > 1)
+  {
+    user << "Warning: variable `" << name << "` is accessed via GM1 Integer, but varies in reference path.";
+    for (map<string, vector<string> >::iterator it = pres.begin(); it != pres.end(); it++)
+    {
+      user << "Info: Declared with `" << it->first << "` in " << it->second.size() << " objects: ";
+      for (size_t i = 0; i < it->second.size() and i <= 10; i++)
+         user << (i == 10 ? "..." : it->second[i]) << (i+1 < it->second.size() and i+1 < 10 ? ", " : "");
+      user << flushl;
+      if (it->second.size() > maxagree)
+        resp = it->first, maxagree = it->second.size();
+    }
+  }
+  else if (pres.size() == 1)
+    resp = pres.begin()->first;
+    
+  maxagree = 0;
+  if (sufs.size() > 1)
+  {
+    user << "Warning: variable `" << name << "` is accessed via GM1 Integer, but varies in postfix reference path.";
+    for (map<string, vector<string> >::iterator it = sufs.begin(); it != sufs.end(); it++)
+    {
+      user << "Info: Declared with `" << it->first << "` in " << it->second.size() << " objects: ";
+      for (size_t i = 0; i < it->second.size() and i <= 10; i++)
+         user << (i == 10 ? "..." : it->second[i]) << (i+1 < it->second.size() and i+1 < 10 ? ", " : "");
+      user << flushl;
+      if (it->second.size() > maxagree)
+        ress = it->first, maxagree = it->second.size();
+    }
+  }
+  else if (sufs.size() == 1)
+    ress = sufs.begin()->first;
+  
+  insd.first->second.type = rest;
 }

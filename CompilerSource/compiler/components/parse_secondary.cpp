@@ -42,6 +42,10 @@ using namespace std;
 
 int compile_parseSecondary(map<int,parsed_object*> &parsed_objects,parsed_script* scripts[],parsed_object* EGMglobal)
 {
+  // Dump our list of dot-accessed locals
+  dot_accessed_locals.clear();
+  
+  // Give all objects and events a second pass
   for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
   {
     parsed_object *ito = it->second;

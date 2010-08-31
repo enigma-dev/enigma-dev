@@ -319,28 +319,29 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   edbg << "Writing events" << flushl;
   res = compile_writeDefraggedEvents(es);
   irrr();
-
+  
   parsed_object EGMglobal;
-
+  
   edbg << "Linking globals" << flushl;
   res = link_globals(&EGMglobal,es,parsed_scripts);
   irrr();
-
+  
   edbg << "Running Secondary Parse Passes" << flushl;
   res = compile_parseSecondary(parsed_objects,parsed_scripts,&EGMglobal);
-
+  
   edbg << "Writing object data" << flushl;
   res = compile_writeObjectData(es,&EGMglobal);
   irrr();
-
+  
+  edbg << "Writing local accessors" << flushl;
+  res = compile_writeObjAccess(parsed_objects, &EGMglobal);
+  irrr();
+  
   res = compile_writeRoomData(es);
   irrr();
-
-  res = compile_writeRoomData(es);
-  irrr();
-
-
-
+  
+  
+  
   // Write the global variables to their own file to be included before any of the objects
   res = compile_writeGlobals(es,&EGMglobal);
   irrr();

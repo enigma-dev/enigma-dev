@@ -42,12 +42,12 @@ namespace enigma
   struct object_planar: object_basic
   {
     //Position
-      var  x, y;
-      var  xprevious, yprevious;
-      var  xstart, ystart;
+      double  x, y;
+      double  xprevious, yprevious;
+      double  xstart, ystart;
     
     //Persistence
-      var  persistent;
+      bool  persistent;
     
     //Motion
       directionv direction;
@@ -56,9 +56,9 @@ namespace enigma
       vspeedv    vspeed;
       
     //Accelerators
-      var  gravity;
-      var  gravity_direction;
-      var  friction;
+      double  gravity;
+      double  gravity_direction;
+      double  friction;
     
     //Constructors
       object_planar();

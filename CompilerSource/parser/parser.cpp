@@ -28,13 +28,12 @@
 //Welcome to the ENIGMA EDL-to-C++ parser; just add semicolons.
 //No, it's not really that simple.
 
-/*/
+/*/\*\
   As a fun fact, this parser was the first one I ever wrote, and was originally
   coded in GML. When it was complete, it parsed itself to C++.
-  Large parts of it have since undergone recode to account for new features and
-  for reasons of efficiency as well as overall legibility. (The parser does not
-  preserve whitespace or comments, for one thing, so that was all lost when the
-  original parsed itself over.)
+  Since then, however, the entire parser has been recoded, mostly for concerns
+  of efficiency. and legibility. Also, the original wasn't built with some of
+  C++'s features in mind.
 
   It's also worth noting that this is my only parser which incorporates a lexer
   or conducts multiple passes. It uses what I call a syntax string, which some-
@@ -43,7 +42,7 @@
 
   At any rate, this means that this parser is really easy to follow as far as
   telling what's going on, as it can be divided into separate sections.
-/*/
+\*\/*/
 
 #include <map> //Log lookup
 #include <string> //Ease of use
@@ -199,6 +198,8 @@ int parser_secondary(string& code, string& synt)
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
   
+  cout << "Fix dots and shit in: \n\n" << code << endl << endl;
+  
   int slev = 0;
   darray<localscope*> sstack;
   sstack[slev] = new localscope();
@@ -232,7 +233,6 @@ int parser_secondary(string& code, string& synt)
             else if (synt[pos] == ')' or synt[pos] == ']') cnt++;
             if (!pos) goto hell; //Break 2;
           }
-          pos++;
         }
       } // at beginning of function args/array subscripts
       for (char c = synt[pos--]; pos and synt[pos] == c; pos--) if (!pos) goto hell;
@@ -259,6 +259,7 @@ int parser_secondary(string& code, string& synt)
       
       // Determine the type of the left-hand expression
       onode n = exp_typeof(exp,sstack.where,slev+1);
+      if (n.type == NULL) n.type = builtin_type__int;
       externs* ct = n.type;
       bool tf = (ct->members.find(member) != ct->members.end());
       while (!tf and ct->flags & EXTFLAG_TYPEDEF and ct->type)
@@ -272,8 +273,8 @@ int parser_secondary(string& code, string& synt)
         string repsyn;
         if (shared_object_locals.find(member) != shared_object_locals.end())
         {
-          repstr = "enigma::glaccess()->" + member;
-          repsyn = "nnnnnnnnnnnnnnnn()->" + string(member.length(),'n');
+          repstr = "enigma::glaccess(int("   + exp +   "))->" + member;
+          repsyn = "nnnnnnnnnnnnnnnn(ccc(" + expsynt + "))->" + string(member.length(),'n');
         }
         else
         {
@@ -291,13 +292,16 @@ int parser_secondary(string& code, string& synt)
           
           repstr += "))";
           repsyn += "))";
+          
+          add_dot_accessed_local(member);
         }
         code.replace(ebp, exp.length() + 1 + member.length(),repstr);
         synt.replace(ebp, exp.length() + 1 + member.length(),repsyn);
+        cout << code << endl << endl << endl;
       }
       else // There is a member by this name in the type of that expression
       {
-        if (n.deref) { // The type is a pointer. This dot should be a ->
+        if (n.pad > 0 or n.deref) { // The type is a pointer. This dot should be a ->
           code.replace(epos,1,"->");
           synt.replace(epos,1,"->");
         }
@@ -311,7 +315,7 @@ int parser_secondary(string& code, string& synt)
         break;
       case '[':
         if (!inbrack and !deceq)
-          dsuf += "[]", inbrack++;
+          dpre += "*", inbrack++; // Call it what you will. Knowing how many [] there are is unnecessary.
         break;
       case ']':
         inbrack--;

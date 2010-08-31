@@ -33,8 +33,11 @@
 
 //Locals that are inherited by all instances of all objects from the core system.
 extern map<string,int> shared_object_locals;
+extern map<string,struct dectrip> dot_accessed_locals;
 extern int shared_locals_load();
 extern int shared_locals_clear();
+
+void add_dot_accessed_local(string name);
 
 //These parallel ism's structs, but offer additional properties we need to finish compile
 struct parsed_object;

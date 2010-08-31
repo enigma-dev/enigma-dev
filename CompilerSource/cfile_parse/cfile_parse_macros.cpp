@@ -152,6 +152,8 @@ pt cfile_parse_macro()
   
   pt poss=pos;
   if (!is_letter(cfile[pos])) {
+    move_newline();
+    return pt(-1);
     cferr="Preprocessor directive expected";
     return pos;
   }
