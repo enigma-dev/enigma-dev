@@ -26,8 +26,8 @@
 \********************************************************************************/
 
 externs *globals_scope;
-externs *enigma_type__var = builtin_type__int;
-externs *enigma_type__variant = builtin_type__int;
+extern externs *enigma_type__var;
+extern externs *enigma_type__variant;
 
 extern string tostring(int val);
 

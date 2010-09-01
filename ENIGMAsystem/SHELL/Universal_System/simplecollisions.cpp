@@ -46,7 +46,7 @@ bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2)
               bl = inst->bbox_left, br = inst->bbox_right,
               bt = inst->bbox_top,  bb = inst->bbox_bottom;
     if (x1<ox+br && x2>ox+bl && y1<oy+bb && y2>oy+bt)
-    return 1;
+      return 1;
   }
   return 0;
 }

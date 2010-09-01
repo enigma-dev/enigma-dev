@@ -84,6 +84,7 @@ inline void regmacro(string m,string val,string arg1)
 
 #include "cfile_parse.h"
 externs *builtin_type__int, *builtin_type__void, *builtin_type__float;
+externs *enigma_type__var, *enigma_type__variant;
 extern varray<string> include_directories;
 extern unsigned int include_directory_count;
 my_string GCC_MACRO_STRING;

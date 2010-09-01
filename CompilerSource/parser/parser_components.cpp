@@ -165,8 +165,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
           }
           mymacrostack[mymacroind++].grab(name,code,pos);
           code = macrostr; pos = 0;
-          codo.reserve(codo.length() + macrostr.length());
-          synt.reserve(codo.length() + macrostr.length());
+          codo.reserve(codo.capacity() + macrostr.length());
+          synt.reserve(codo.capacity() + macrostr.length());
           continue;
         }
       }
@@ -283,6 +283,17 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         pos++; continue;
       }
       codo[bpos] = synt[bpos] = last_token = '/', bpos++;
+      continue;
+    }
+    
+    if (code[pos] == '$')
+    {
+      codo.reserve(codo.capacity() + 1);
+      synt.reserve(synt.capacity() + 1);
+      codo[bpos] = synt[bpos] = '0', bpos++;
+      codo[bpos] = 'x', synt[bpos] = '0', bpos++;
+      while (is_hexdigit(code[++pos]))
+        codo[bpos] = code[pos], synt[bpos] = '0', bpos++;
       continue;
     }
     

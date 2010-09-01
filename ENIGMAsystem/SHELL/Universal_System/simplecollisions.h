@@ -25,10 +25,4 @@
 **                                                                              **
 \********************************************************************************/
 
-/*************************************************
-
-bool collision_bbox_rect(double object,double x1,double y1,double x2,double y2)
-
-*************************************************/
-
-bool collision_bbox_rect(double object,double x1,double y1,double x2,double y2);
+bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2);

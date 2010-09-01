@@ -78,6 +78,7 @@ extern  map<externs*, int> bigmap;
 
 extern char getch();
 extern int cfile_parse_main();
+extern externs *enigma_type__var, *enigma_type__variant;
 int mainr(int argc, char *argv[])
 {
   /*my_string atest = fca("test.txt");
@@ -144,6 +145,11 @@ int mainr(int argc, char *argv[])
   cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
   //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   
+  if (find_extname("var", EXTFLAG_TYPENAME))
+    enigma_type__var = ext_retriever_var;
+  if (find_extname("variant",EXTFLAG_TYPENAME))
+    enigma_type__variant = ext_retriever_var;
+  
   cout << "Initializing GML parser..." << endl;
   parser_init();
   cout << "Loading locals..." << endl;
@@ -151,6 +157,7 @@ int mainr(int argc, char *argv[])
   cout << "Getting data..." << endl;
   string pf = fc("./CompilerSource/cfile_parse/auxilary_gml.h");
   
+  cout << "Checking syntax" << endl;
   a = syncheck::syntacheck(pf);
   if (a != pt(-1))
   {

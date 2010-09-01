@@ -196,8 +196,8 @@ step: 3
 		xprevious = x, yprevious = y;
 		x += hspeed, y += vspeed;
 		speed -= friction; 
-		vspeed -= gravity * sin(gravity_direction * pi/180),
-		hspeed += gravity * cos(gravity_direction * pi/180);
+		vspeed.rval.d -= gravity * sin(gravity_direction * pi/180),
+		hspeed.rval.d += gravity * cos(gravity_direction * pi/180);
 	}
 
 

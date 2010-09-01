@@ -192,7 +192,38 @@ string parser_main(string code, parsed_event* pev = NULL)
 #include "../cfile_parse/type_resolver.h"
 
 typedef map<string,dectrip> localscope;
+pt move_to_beginning(string& code, string& synt, pt pos)
+{
+  backloop:
+  while (synt[pos] == ']' or synt[pos] == ')') // Seek to beginning of array subscripts and function args
+  {
+    if (synt[pos] == ']' or synt[pos] == ')')
+    {
+      for (int cnt = (pos--, 1); cnt; pos--)
+      {
+        if (synt[pos] == '[' or synt[pos] == '(') cnt--;
+        else if (synt[pos] == ')' or synt[pos] == ']') cnt++;
+        if (!pos) goto hell; //Break 2;
+      }
+    }
+  } // at beginning of function args/array subscripts
+  for (char c = synt[pos--]; pos and synt[pos] == c; pos--) if (!pos) goto hell;
+  pos++;
+  hell: 
+  
+  if (pos) {
+    if (synt[pos-1] == '.')
+      { pos--; goto backloop; }
+    if (synt[pos-1] == '>' and pos - 1 and synt[pos-2] == '-')
+      { pos -= 2; goto backloop; }
+    if (synt[pos-1] == ':' and synt[pos-2] == ':')
+      { pos -= 2; goto backloop; }
+  }
+  
+  return pos;
+}
 
+extern externs *enigma_type__var, *enigma_type__variant;
 int parser_secondary(string& code, string& synt)
 {
   // We'll have to again keep track of temporaries
@@ -222,31 +253,8 @@ int parser_secondary(string& code, string& synt)
     }
     else if (synt[pos] == '.' and synt[pos+1] == 'n')
     {
-      const pt epos = pos--; backloop:
-      while (synt[pos] == ']' or synt[pos] == ')') // Seek to beginning of array subscripts and function args
-      {
-        if (synt[pos] == ']' or synt[pos] == ')')
-        {
-          for (int cnt = (pos--, 1); cnt; pos--)
-          {
-            if (synt[pos] == '[' or synt[pos] == '(') cnt--;
-            else if (synt[pos] == ')' or synt[pos] == ']') cnt++;
-            if (!pos) goto hell; //Break 2;
-          }
-        }
-      } // at beginning of function args/array subscripts
-      for (char c = synt[pos--]; pos and synt[pos] == c; pos--) if (!pos) goto hell;
-      pos++;
-      hell: 
-      
-      if (pos) {
-        if (synt[pos-1] == '.')
-          { pos--; goto backloop; }
-        if (synt[pos-1] == '>' and synt[pos-2] == '-')
-          { pos -= 2; goto backloop; }
-        if (synt[pos-1] == ':' and synt[pos-2] == ':')
-          { pos -= 2; goto backloop; }
-      }
+      const pt epos = pos--;
+      pos = move_to_beginning(code,synt,pos);
       
       string exp = code.substr(pos,epos-pos), // Copy the expression being operated upon by .
          expsynt = synt.substr(pos,epos-pos); // Copy the lex of it, too
@@ -305,6 +313,22 @@ int parser_secondary(string& code, string& synt)
           code.replace(epos,1,"->");
           synt.replace(epos,1,"->");
         }
+      }
+    }
+    else if (synt[pos] == '[')
+    {
+      const pt sp = move_to_beginning(code,synt,pos-1);
+      const string exp = code.substr(sp,pos-sp);
+      onode n = exp_typeof(exp,sstack.where,slev+1);
+      if (n.type == enigma_type__var and n.pad == 0)
+      {
+        pt cp = pos;
+        code[cp++] = '(';
+        for (int cnt = 1; cnt; cp++)
+          if (synt[cp] == '[') cnt++;
+          else if (synt[cp] == ']') cnt--;
+        if (synt[--cp] == ']')
+          code[cp] = ')';
       }
     }
     else switch (synt[pos])

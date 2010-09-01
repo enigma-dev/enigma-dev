@@ -22,3 +22,6 @@ if (cat.speed == wasp.speed)
   with cat
     x = random(640),
     speed = random(480);
+
+var a;
+a[1,2] = $0FFD00;

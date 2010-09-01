@@ -259,7 +259,7 @@ namespace syncheck
           {
             if (!assop[level] && !(plevel>0)) //randomly placed 'varname and varname'
             { error="Assignment operator expected before this point"; return pos; }
-            if (lastnamed[level] != LN_VARNAME and lastnamed[level] != LN_DIGIT)
+            if (lastnamed[level] != LN_VARNAME and lastnamed[level] != LN_DIGIT and lastnamed[level] != LN_VALUE)
             { error="Expected primary expression before operator"; return pos; }
             lastnamed[level] = LN_OPERATOR;
           }
@@ -847,6 +847,13 @@ namespace syncheck
                     { error="Unexpected unary operator following value"; return pos; }
                     pos++;
                   break; //lastnamed is already operator, so just break
+                  
+                case '$':
+                  if (!is_hexdigit(code[pos+1]))
+                    return (error = "Unexpected dollar sign: used to indixate hex literal", pos);
+                  while (is_hexdigit(code[++pos]));
+                  lastnamed[level] = LN_DIGIT;
+                break;
                 
                 default:
                     error="Unexpected symbol reached";

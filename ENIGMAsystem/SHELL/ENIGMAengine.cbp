@@ -934,8 +934,6 @@
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_scriptdeclarations.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_wildclass.cpp" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_withdeclarations.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_withfunctionality.h" />
 		<Unit filename="Preprocessor_Environment_Editable/LIBINCLUDE.h" />
 		<Unit filename="SHELLmain.cpp" />
 		<Unit filename="Universal_System/CallbackArrays.cpp" />

@@ -37,6 +37,11 @@ inline bool is_digit(char x)
   return x>='0' and x<='9';
 }
 
+inline bool is_hexdigit(char x)
+{
+  return (x>='0' and x<='9') or (x>='A' and x<='F') or (x>='a' and x<='f');
+}
+
 inline bool is_letterd(char x)
 {
   return  (x>='a' and x<='z') or (x>='A' and x<='Z') or (x=='_') or (x>='0' and x<='9');

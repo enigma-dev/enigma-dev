@@ -133,6 +133,7 @@ const char* heaping_pile_of_dog_shit = "\
 
 extern void print_definition(string n);
 static bool firstpass = true;
+extern externs *enigma_type__var, *enigma_type__variant;
 dllexport syntax_error *whitespaceModified(const char* wscode)
 {
   cout << "Clearing IDE editables... " << flushs;
@@ -167,6 +168,11 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
   START_TIME();
   pt a = parse_cfile(EGMmain);
   STOP_TIME();
+  
+  if (find_extname("var", EXTFLAG_TYPENAME))
+    enigma_type__var = ext_retriever_var;
+  if (find_extname("variant",EXTFLAG_TYPENAME))
+    enigma_type__variant = ext_retriever_var;
   
   if (a != pt(-1)) {
     cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
