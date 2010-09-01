@@ -231,13 +231,18 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
       dec_start_pos = pos--;
       continue;
     }
-    if (synt[pos] == 'n' and (!pos or synt[pos-1] != '.'))
+    if (synt[pos] == 'n')
     {
+      bool nts = !pos or synt[pos-1] != '.';
+      
       const pt spos = pos;
       while (synt[++pos] == 'n');
       
       //Looking at a straight identifier. Make sure it actually needs declared.
       const string nname = code.substr(spos,pos-spos);
+      
+      if (!nts)
+        { pos--; continue; }
       
       //Decrement pos to avoid skipping a char on continue
       if (synt[pos--] != '(') // If it isn't a function (we assume it's nothing other than a function or varname)

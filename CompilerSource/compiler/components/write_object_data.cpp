@@ -54,7 +54,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "    object_locals(unsigned x, int y): event_parent(x,y) {}\n  };\n";
       for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
       {
-        wto << "  struct OBJ_" << i->second->name << ": object_locals\n  {";
+        wto << "  \n  struct OBJ_" << i->second->name << ": object_locals\n  {";
         
         wto << "\n    //Locals to instances of this object\n    ";
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
@@ -150,7 +150,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           } 
           for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
             wto << "      enigma::event_" << it->second.s << "->unlink(ENOBJ_ITER_myevent_" << it->second.s << ");\n";
-          wto << "\n    }\n    ";
+          wto << "    }\n    ";
         
         
         /**** Next are the constructors. One is automated, the other directed.
@@ -189,7 +189,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           wto << "\n    }\n";
           
           // Destructor
-          wto <<   "\n    ~OBJ_" <<  i->second->name << "()\n    {\n";
+          wto <<   "    \n    ~OBJ_" <<  i->second->name << "()\n    {\n";
             //wto << "      delete ENOBJ_ITER_me;\n"; // Don't think you can delete this. :P
             for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
               wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
@@ -198,7 +198,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
             for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
               wto << "      delete ENOBJ_ITER_myevent_" << it->second.s << ";\n";
-          wto << "\n    }\n    ";
+          wto << "    }\n";
           
         wto << "  };\n";
       }

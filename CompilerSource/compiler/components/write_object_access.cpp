@@ -48,8 +48,9 @@ int compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_objec
     wto << "namespace enigma" << endl << "{" << endl;
     
     wto <<
+    "  object_locals ldummy;" << endl <<
     "  object_locals *glaccess(int x)" << endl <<
-    "  {" << endl << "    return (object_locals*)fetch_instance_by_int(x);" << endl << "  }" << endl << endl;
+    "  {" << endl << "    object_locals* ri = (object_locals*)fetch_instance_by_int(x);" << endl << "    return ri ? ri : &ldummy;" << endl << "  }" << endl << endl;
     
     map<string,int> usedtypes;
     for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++)

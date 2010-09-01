@@ -21,6 +21,7 @@ int	 daemon(int, int) __OSX_AVAILABLE_BUT_DEPRECATED(__MAC_10_0,__MAC_10_5,__IPH
 //template<class a> struct b {};
 //typedef b<int> c;
 
+int __inline assy() {}
 
 /* union for signal handlers */
 struct ass {
