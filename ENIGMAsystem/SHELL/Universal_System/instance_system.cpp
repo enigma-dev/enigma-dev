@@ -133,6 +133,7 @@ namespace enigma
     
     if (x < 100000)
       return objects[x].next ? objects[x].next->inst : NULL;
+    
     iliter a = instance_list.find(x);
     return a != instance_list.end() ? a->second->inst : NULL;
   }

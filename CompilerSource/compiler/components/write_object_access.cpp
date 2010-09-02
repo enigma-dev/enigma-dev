@@ -67,7 +67,10 @@ int compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_objec
     {
       const string& pmember = dait->first;
       wto << "  " << dait->second.type << " " << dait->second.prefix << dait->second.suffix << " &varaccess_" << pmember << "(int x)" << endl;
-      wto << "  {" << endl << "    switch (x)" << endl << "    {" << endl;
+      wto << "  {" << endl;
+      
+      wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
+      wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
       
       for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
       {
@@ -76,11 +79,13 @@ int compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_objec
         {
           string tot = x->second.type != "" ? x->second.type : "var";
           if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
-            wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)fetch_instance_by_int(x))->" << pmember << ";" << endl;
+            wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)inst)->" << pmember << ";" << endl;
         }
       }
-      wto << "      default: return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix] << ";" << endl;
-      wto << "    }" << endl << "  }" << endl;
+      
+      wto << "    }";
+      wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix] << ";" << endl;
+      wto << "  }" << endl;
     }
     wto << "} // namespace enigma" << endl;
   wto.close();
