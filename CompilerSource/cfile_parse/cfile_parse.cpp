@@ -306,8 +306,8 @@ pt parse_cfile(my_string cftext)
               while (cfile[pos] != '\r' and cfile[pos] != '\n')
                 pos++;
             else if (cfile[pos] == '*') {
-              while (pos < len and (cfile[++pos] != '*' or cfile[pos + 1] != '/'))
-                pos++; pos += 2;
+              while (pos < len and (cfile[++pos] != '*' or cfile[pos + 1] != '/'));
+                pos += 2;
             }
             else return (cferr = "Unexpected symbol in assembly parameters", pos);
             continue;

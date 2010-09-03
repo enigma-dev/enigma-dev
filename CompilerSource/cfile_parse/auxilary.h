@@ -18,13 +18,16 @@
 #define __DARWIN_1050(sym)		__asm("_" __STRING(sym) __DARWIN_SUF_1050)
 int	 daemon(int, int) __OSX_AVAILABLE_BUT_DEPRECATED(__MAC_10_0,__MAC_10_5,__IPHONE_2_0,__IPHONE_2_0);
 
+#define __DARWIN_SUF_UNIX03 /* Nothing */
+#define __DARWIN_10_6_AND_LATER_ALIAS(x) x
+#define __DARWIN_ALIAS(sym) __asm("_" __STRING(sym) __DARWIN_SUF_UNIX03)
+__DARWIN_10_6_AND_LATER_ALIAS(__DARWIN_ALIAS(fopen));
+
 //template<class a> struct b {};
 //typedef b<int> c;
 
 #define SUFFIXTHING /* NOTHING */
-__asm__ ( "addl %%ebx, %%eax;"
-        : "=a" (add)
-        : "a" (arg1), "b" (arg2) SUFFIXTHING );
+__asm__ ("addl %%ebx, %%eax;":"=a"(add):"a"(arg1),"b"(arg2)SUFFIXTHING);
 
 /* union for signal handlers */
 struct ass {
