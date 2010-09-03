@@ -36,7 +36,20 @@ struct includings {
   string name, path;
   includings(string n,string p);
 };
-extern stack<includings> included_files;
+struct ifstack {
+  struct ifnode {
+    includings *i;
+    ifnode *prev;
+    ifnode(includings *ia, ifnode *p);
+  };
+  ifnode* last;
+  void push(const includings&);
+  includings &top();
+  bool empty();
+  void pop();
+  ifstack();
+};
+extern ifstack included_files;
 
 
 struct cfnode

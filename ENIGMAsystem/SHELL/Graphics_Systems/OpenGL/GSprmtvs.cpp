@@ -37,7 +37,7 @@ int __currentpdepth;
 
 //namespace enigma{extern void untexture();}
 namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
-#define untexture() if(enigma::cur_bou_tha_noo_sho_eve_cha_eve) glBindTexture(GL_TEXTURE_2D,enigma::cur_bou_tha_noo_sho_eve_cha_eve=0);
+#define untexture() if(enigma::cur_bou_tha_noo_sho_eve_cha_eve) glBindTexture(GL_TEXTURE_2D,enigma::cur_bou_tha_noo_sho_eve_cha_eve = 0);
 
 GLenum ptypes_by_id[16] = { 
   GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, 

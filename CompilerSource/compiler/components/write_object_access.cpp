@@ -83,7 +83,7 @@ int compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_objec
         }
       }
       
-      wto << "    }";
+      wto << "    }" << endl;
       wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix] << ";" << endl;
       wto << "  }" << endl;
     }

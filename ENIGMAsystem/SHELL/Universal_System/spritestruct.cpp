@@ -103,6 +103,10 @@ namespace enigma
     as->subcount=subc;
     as->width=w;
     as->height=h;
+    as->bbox_left=0;
+    as->bbox_top=0;
+    as->bbox_right=w;
+    as->bbox_bottom=h;
     as->xoffset=x;
     as->yoffset=y;
     as->texbordx=(double)w/fullwidth;

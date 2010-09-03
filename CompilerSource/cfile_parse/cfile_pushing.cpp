@@ -35,8 +35,14 @@ using namespace std;
 #include "macro_functions.h"
 #include "../externs/externs.h"
 
-includings::includings(string n,string p):name(n), path(p) {} 
-stack<includings> included_files;
+includings::includings(string n,string p):name(n), path(p) {}
+ifstack::ifnode::ifnode(includings *ia, ifnode *p): i(ia), prev(p) {}
+void ifstack::push(const includings &ni) { last = new ifnode(new includings(ni), last); }
+includings &ifstack::top() { return *last->i; }
+void ifstack::pop() { delete last->i; ifnode *dm = last; last = last->prev; delete dm; };
+bool ifstack::empty() { return last == NULL; };
+ifstack::ifstack(): last(NULL) { }
+ifstack included_files;
 
 cfnode::cfnode(): scfile(cfile), spos(pos), slen(len) { }
 cfnode::~cfnode()

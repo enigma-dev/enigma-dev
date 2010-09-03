@@ -329,6 +329,16 @@ pt cfile_parse_macro()
           }
         }
         
+        int ic = 0;
+        string ffn = include_from + file;
+        for (ifstack::ifnode *i = included_files.last; i; i = i->prev)
+          ic += (i->i->name + i->i->path == ffn);
+        if (ic > 10)
+        {
+          printf("Too many recursive includes of %s\n", ffn.c_str());
+          return pt(-1);
+        }
+        
         cfstack.push(new cfnode);
         cfile = ins;
         
