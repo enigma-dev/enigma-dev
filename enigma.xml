@@ -22,7 +22,7 @@
       <match type="little32" offset="0" value="1234321"/>
     </magic>
   </mime-type>
-  <mime-type type="application/x-gmk">
+  <mime-type type="application/x-gm7">
     <comment>Game Maker 7 Project</comment>
     <glob pattern="*.gmk"/>
     <sub-class-of type="application/octet-stream"/>
@@ -33,7 +33,7 @@
       <match type="little32" offset="0" value="1234321"/>
     </magic>
   </mime-type>
-  <mime-type type="application/x-gmk">
+  <mime-type type="application/x-gm8">
     <comment>Game Maker 8 Project</comment>
     <glob pattern="*.gmk"/>
     <sub-class-of type="application/octet-stream"/>

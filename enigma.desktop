@@ -7,4 +7,5 @@ Name=ENIGMA Game Maker
 GenericName=ENIGMA Game Maker
 StartupNotify=true
 Categories=Application;Development;
+MimeType=application/x-gm5;application/x-gm6;application/x-gm7;application/x-gm8;
 
