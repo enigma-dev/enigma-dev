@@ -105,7 +105,9 @@ void cparse_init()
 
   //lesser used types
   //regt("size_t"); //size_t doesn't need registered here as it is typdef'd in stdio somewhere.
+  
   regt("wchar_t");
+  regmacro("_WCHAR_T","1"); // This prevents redeclaration of wchar_t on Apple.
 
   //__builtin_ grabbage
   regt("__builtin_va_list");

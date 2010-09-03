@@ -426,10 +426,11 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
         "MacOS/build/Release-iphonesimulator/EnigmaIphone.app/EnigmaIphone"
       #endif
   #elif TARGET_PLATFORM_ID ==  OS_ANDROID
-    "/Users/alasdairmorrison/Documents/workspace/NDKDemo/libs/armeabi/libndkMathsDemo.so";
+    "/Users/alasdairmorrison/Documents/workspace/NDKDemo/libs/armeabi/libndkMathsDemo.so"
   #else
-    "ENIGMAsystem/SHELL/game.exe";
+    "ENIGMAsystem/SHELL/game.exe"
   #endif
+  ;
   FILE *gameModule = fopen(gameFname,"ab");
   if (!gameModule) {
     user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;

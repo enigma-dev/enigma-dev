@@ -253,7 +253,7 @@ pt parse_cfile(my_string cftext)
       }
 
       pt sp = id_would_err_at = pos;
-      while (is_letterd(cfile[++pos]));
+      while (is_letterd(cfile[++pos]) or cfile[pos] == '$');
 
       string n = /*rconcat? id_to_handle + cfile.substr(sp,pos-sp) :*/ cfile.substr(sp,pos-sp); //This is the word we're looking at.
 
@@ -1393,7 +1393,7 @@ pt parse_cfile(my_string cftext)
         case 0x0C:
             pos++;
           break;
-
+        
         default:
             cferr = string("Unexpected symbol '")+cfile[pos]+"'";
           return pos;
