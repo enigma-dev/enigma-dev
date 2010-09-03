@@ -50,7 +50,7 @@ int compile_parseSecondary(map<int,parsed_object*> &parsed_objects,parsed_script
   {
     parsed_object *ito = it->second;
     for (unsigned iit = 0; iit < ito->events.size; iit++)
-      parser_secondary(ito->events[iit].code,ito->events[iit].synt);
+      parser_secondary(ito->events[iit].code,ito->events[iit].synt,EGMglobal,it->second);
   }
   return 0;
 }

@@ -29,6 +29,7 @@
 #include <stack>
 #include <string>
 #include <stdio.h>
+#include <iostream>
 using namespace std;
 
 #include "type_resolver.h"
@@ -184,20 +185,28 @@ onode type_op_resolve_upost(const onode &t, string op) // Evaluates `t1 op`, whe
 
 void onode_from_dectrip(onode& x, const dectrip& y)
 {
-  pt pos = y.type.length();
-  while (pos > 0 and !is_letterd(y.type[pos])) pos--;
-  const pt epos = pos;
-  while (pos > 0 and is_letterd(y.type[--pos]));
-  if (!is_letter(y.type[pos])) pos++;
+  string tts = y.type;
   
-  if (!find_extname(y.type.substr(pos,epos-pos+1), EXTFLAG_TYPENAME))
+  if (tts == "")
+    tts = "var";
+  else
+  {
+    pt pos = y.type.length();
+    while (pos > 0 and !is_letterd(y.type[pos])) pos--;
+    const pt epos = pos;
+    while (pos > 0 and is_letterd(y.type[--pos]));
+    if (!is_letter(y.type[pos])) pos++;
+    tts = tts.substr(pos,epos-pos+1);
+  }
+  
+  if (!find_extname(tts, EXTFLAG_TYPENAME))
     return (printf("Error: type not a type, derp\n"), void(0));
   
   x.type = ext_retriever_var;
   x.pad = y.prefix.length();
 }
 
-onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc)
+onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_object* globj, parsed_object* pobj)
 {
   pt pos = 0;
   const pt len = exp.length();
@@ -235,6 +244,24 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc)
           onode_from_dectrip(perf.top(), it->second);
           isol = false, nt = true; break;
         }
+      
+      if (!nt and pobj)
+      {
+        it = pobj->locals.find(tn);
+        if (it != pobj->locals.end()) {
+          onode_from_dectrip(perf.top(), it->second);
+          isol = false, nt = true;
+        }
+      }
+      
+      if (!nt and globj)
+      {
+        it = globj->globals.find(tn);
+        if (it != globj->globals.end()) {
+          onode_from_dectrip(perf.top(), it->second);
+          isol = false, nt = true;
+        }
+      }
       
       if (nt)
         continue;

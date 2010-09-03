@@ -45,4 +45,4 @@ struct onode
 
 extern void exp_typeof_init();
 extern string externs_name(onode e);
-extern onode exp_typeof(string exp,map<string,dectrip>** lvars = NULL,int lvarc = 0);
+extern onode exp_typeof(string exp,map<string,dectrip>** lvars = NULL,int lvarc = 0, parsed_object* = NULL, parsed_object* = NULL);

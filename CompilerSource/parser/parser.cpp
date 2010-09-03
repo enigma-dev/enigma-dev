@@ -224,7 +224,7 @@ pt move_to_beginning(string& code, string& synt, pt pos)
 }
 
 extern externs *enigma_type__var, *enigma_type__variant;
-int parser_secondary(string& code, string& synt)
+int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_object* obj)
 {
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
@@ -266,7 +266,7 @@ int parser_secondary(string& code, string& synt)
       string member = code.substr(epos+1,ep-epos-1);
       
       // Determine the type of the left-hand expression
-      onode n = exp_typeof(exp,sstack.where,slev+1);
+      onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
       if (n.type == NULL) n.type = builtin_type__int;
       externs* ct = n.type;
       bool tf = (ct->members.find(member) != ct->members.end());
@@ -303,8 +303,8 @@ int parser_secondary(string& code, string& synt)
           
           add_dot_accessed_local(member);
         }
-        code.replace(ebp, exp.length() + 1 + member.length(),repstr);
-        synt.replace(ebp, exp.length() + 1 + member.length(),repsyn);
+        code.replace(ebp, exp.length() + 1 + member.length(), repstr);
+        synt.replace(ebp, exp.length() + 1 + member.length(), repsyn);
         cout << code << endl << endl << endl;
       }
       else // There is a member by this name in the type of that expression
@@ -319,7 +319,7 @@ int parser_secondary(string& code, string& synt)
     {
       const pt sp = move_to_beginning(code,synt,pos-1);
       const string exp = code.substr(sp,pos-sp);
-      onode n = exp_typeof(exp,sstack.where,slev+1);
+      onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
       if (n.type == enigma_type__var and n.pad == 0)
       {
         pt cp = pos;

@@ -25,8 +25,21 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <math.h>
 #include <stdlib.h>
+#include <cmath>
+#include "var4.h"
+
+double bessel_j0(double x) { return j0(x); }
+double bessel_j1(double x) { return j1(x); }
+double bessel_jn(double x, double y) { return jn(x,y); }
+double bessel_y0(double x) { return y0(x); }
+double bessel_y1(double x) { return y1(x); }
+double bessel_yn(double x, double y) { return yn(x,y); }
+
+double abs(variant x) { return abs(double(x)); }
+double abs(var x)     { return abs(double(x)); }
+
+
 
 //double log10(double x){return log10(x);}
 //double sin(double x){return sin(x);}
