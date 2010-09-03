@@ -430,7 +430,7 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
     const bool ret = ((f->second->flags & flags) != 0) or (flags == 0xFFFFFFFF);
     if (ret) immediate_scope = NULL;
     return ret;
-  }
+  } // immediate_scope != NULL
 
   //Start looking in this scope
   externs* inscope = current_scope;

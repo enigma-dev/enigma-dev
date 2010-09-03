@@ -50,8 +50,12 @@ struct init_const_types { init_const_types() { //These are acceptable for const-
   constant_types["int"] = 1; 
   constant_types["signed"] = 1; 
   constant_types["unsigned"] = 1; 
+  constant_types["__signed"] = 1; 
+  constant_types["__unsigned"] = 1; 
   constant_types["const"] = 1; 
+  constant_types["__const"] = 1; 
   constant_types["static"] = 1; 
+  constant_types["__static"] = 1; 
   } } init_const_types_now;
 
 extern externs* builtin_type__int;
@@ -80,7 +84,13 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
           continue; //Extraneous, useless.
         }
         
-        if (!find_extname(tn,EXTFLAG_TYPENAME | EXTFLAG_NAMESPACE))
+        bool fen = find_extname(tn,EXTFLAG_TYPENAME | EXTFLAG_NAMESPACE);
+        if (!fen) {
+          immediate_scope = tparam_ext;
+          fen = find_extname(tn, EXTFLAG_TYPENAME | EXTFLAG_NAMESPACE);
+          immediate_scope = NULL;
+        }
+        if (!fen)
         {
           if (hypothesize and move_into) //This is a new typename! Yay standard! Looks like this:  template<...> ... typename a::doesnotexist b;
           {
@@ -91,6 +101,9 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
             ext_retriever_var = builtin_type__int;
           else
           {
+            cout << "\n\n\n\nList of constant types:" << endl;
+            for (map<string,bool>::iterator i = constant_types.begin(); i != constant_types.end(); i++)
+              cout << "  --  " << i->first << endl;
             cferr = "`"+tn+"' cannot be used in a constant expression: not found in `" + 
                     (immediate_scope?strace(immediate_scope):strace(current_scope)) + 
                     "' <" + tparam_ext->name + ":" + tostring(tparam_ext->flags) + "> [" + seg + "] in ";
@@ -109,6 +122,18 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
         lvl++;
       else if (seg[i] == '>')
         lvl--;
+      else if (seg[i] == '/')
+      {
+        if (seg[i + 1] == '/') {
+          while (i < seg.length() and seg[++i] != '\n' and seg[i] != '\r');
+          continue;
+        }
+        if (seg[i + 1] == '*') {
+          i+= 2;
+          while (i < seg.length() and (seg[i++] != '*' or seg[i] != '/'));
+          i += 2; continue;
+        }
+      }
       else if (!lvl and seg[i] == ':' and seg[i+1] == ':')
         immediate_scope = move_into;
     }
