@@ -271,6 +271,7 @@ pt parse_cfile(my_string cftext)
           return pos;
         }
         pos++;
+        int icolon = 0;
         while (cfile[pos] != ')')
         {
           if (pos >= len)
@@ -285,9 +286,9 @@ pt parse_cfile(my_string cftext)
           {
             while (pos<len and cfile[++pos] != '"')
               { if (cfile[pos] == '\\') pos++; }
-            pos++;
+            pos++, icolon--; continue;
           }
-          else if (is_letter(cfile[pos]))
+          if (is_letter(cfile[pos]))
           {
             const pt sp = pos;
             while (is_letterd(cfile[++pos]));
@@ -296,8 +297,9 @@ pt parse_cfile(my_string cftext)
             if (cm == pt(-2)) continue;
             if (cm != pt(-1)) return cm;
             return (cferr = "Unexpected identifier in assembly parameters", sp);
+            continue;
           }
-          else if (cfile[pos] == '/')
+          if (cfile[pos] == '/')
           {
             pos++;
             if (cfile[pos] == '/')
@@ -308,12 +310,41 @@ pt parse_cfile(my_string cftext)
                 pos++; pos += 2;
             }
             else return (cferr = "Unexpected symbol in assembly parameters", pos);
+            continue;
           }
-          else if (!is_useless(cfile[pos])) {
-            cferr = "Unexpected symbol in assembly expression";
+          if (cfile[pos] == ':') {
+            icolon = 3, pos++;
+            continue;
+          }
+          if (cfile[pos] == '(') {
+            if (icolon != 2)
+              return (cferr = "Unexpected parentheses: should follow colon and string combo", pos);
+            
+            while (is_useless(cfile[++pos]));
+            
+            if (!is_letter(cfile[pos]))
+              return (cferr = "Expected identifier between parentheses", pos);
+            
+            while (is_letterd(cfile[++pos]));
+            while (is_useless(cfile[pos]))
+              pos++;
+              
+            if (cfile[pos] != ')')
+              return (cferr = "Unexpected parentheses: should follow colon and string combo", pos);
+            pos++, icolon--; continue;
+          }
+          if (cfile[pos] == ',')
+          {
+            if (icolon != 1)
+              return (cferr = "Unexpected comma in assembly parameters", pos);
+            icolon = 3, pos++; continue;
+          }
+            
+          if (!is_useless(cfile[pos])) {
+            cferr = "Unexpected symbol '" + string(1,cfile[pos]) + "' in assembly expression";
             return pos;
           }
-          else pos++;
+          pos++;
         }
         pos++;
       }
