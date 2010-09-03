@@ -145,6 +145,7 @@ enum
 enum
 {
   SH___CONST = 391,
+  SH___INLINE = 398,
   SH___INLINE__ = 400,
   SH_CLASS = 417,
   SH_CONST = 436,

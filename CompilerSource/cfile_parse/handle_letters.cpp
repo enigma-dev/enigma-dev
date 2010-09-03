@@ -95,8 +95,6 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
 
 pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bool at_template_param)
 {
-  if (n == "__inline")
-    cout << switch_hash(n) << endl;
   switch (switch_hash(n))
   {
     case SH_STRUCT: case SH_CLASS:
@@ -342,7 +340,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           return pt(-1);
         }
       break;
-    case SH_INLINE: case SH___INLINE__: if (n == "inline" or n == "__inline" or n == "__inline__")
+    case SH_INLINE: case SH___INLINE: case SH___INLINE__: if (n == "inline" or n == "__inline" or n == "__inline__")
         return pt(-1);
       break;
     case SH_THROW: if (n == "throw")
