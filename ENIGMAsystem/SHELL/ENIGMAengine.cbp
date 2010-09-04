@@ -932,6 +932,7 @@
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_scriptdeclarations.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_wildclass.cpp" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h" />
 		<Unit filename="Preprocessor_Environment_Editable/LIBINCLUDE.h" />

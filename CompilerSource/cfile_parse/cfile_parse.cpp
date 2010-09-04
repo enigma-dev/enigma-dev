@@ -549,10 +549,10 @@ pt parse_cfile(my_string cftext)
                   {
                     if (pu->second->is_function() and last_type->is_function())
                       pu->second->parameter_unify(last_type->refstack);
-                    else {
+                    /* else { //IGNORE: They are allowed to conflict, but will throw ambiguity errors when called in a standard compiler
                       cferr = "Using `" + last_type->name + "' conflicts with previous `using' directive";
                       return pos;
-                    }
+                    } */
                   }
                 }
                 else

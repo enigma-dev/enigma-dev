@@ -85,6 +85,11 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
         }
         
         bool fen = find_extname(tn,EXTFLAG_TYPENAME | EXTFLAG_NAMESPACE);
+        if (!fen) {
+          immediate_scope = tparam_ext;
+          fen = find_extname(tn, EXTFLAG_TYPENAME | EXTFLAG_NAMESPACE,false);
+          immediate_scope = NULL;
+        }
         if (!fen)
         {
           if (hypothesize and move_into) //This is a new typename! Yay standard! Looks like this:  template<...> ... typename a::doesnotexist b;

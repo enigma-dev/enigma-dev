@@ -208,6 +208,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
               return 0;
             }
             if (!(it->second->parent->flags & EXTFLAG_TEMPLATE)) {
+              return 1;
               cferr = "Cannot declare that here.";
               return 0;
             }
@@ -226,8 +227,10 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
             if (tpc > 0)
             {
               if ((unsigned)tpc != ext_retriever_var->tempargs.size) {
-                cferr = "Template parameter mismatch in implementation of `" + name + "' as `"+strace(ext_retriever_var)+"': Set from " + tostring(ext_retriever_var->tempargs.size) + " to " + tostring(tpc);
-                return 0;
+                //IGNORE: This is allowed when specializing the type of access rather than the variable.
+                //cferr = "Template parameter mismatch in implementation of `" + name + "' as `"+strace(ext_retriever_var)+"': Set from " + tostring(ext_retriever_var->tempargs.size) + " to " + tostring(tpc);
+                immediate_scope = NULL;
+                return 1;
               }
               for (int i=0; i<tpc; i++)
               {
