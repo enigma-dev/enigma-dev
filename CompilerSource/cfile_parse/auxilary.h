@@ -29,6 +29,8 @@ __DARWIN_10_6_AND_LATER_ALIAS(__DARWIN_ALIAS(fopen));
 #define SUFFIXTHING /* NOTHING */
 __asm__ ("addl %%ebx, %%eax;":"=a"(add):"a"(arg1),"b"(arg2)SUFFIXTHING);
 
+#include <bits/stl_iterator_base_types.h>
+
 /* union for signal handlers */
 struct ass {
 };

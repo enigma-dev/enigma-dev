@@ -482,7 +482,7 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
         return 1;
       }
     }
-  }
+  } // Looking for typename
 
   //Check all scopes here and above.
   extiter it = inscope->members.find(name);
@@ -495,6 +495,27 @@ bool find_extname(string name,unsigned int flags,bool expect_find)
     for (unsigned i = 0; i < inscope->ancestors.size; i++)
       if (find_in_parents(inscope->ancestors[i],name,flags))
         return 1;
+    
+    //Check all typedefs
+    externs *tdscope = inscope;
+    while (tdscope->flags & EXTFLAG_TYPEDEF and tdscope)
+    {
+      it = tdscope->members.find(name);
+      if (it != tdscope->members.end() and it->second->flags & flags)
+        return (ext_retriever_var = it->second, 1);
+      
+      //Check scope's own templates
+      for (unsigned ti=0; ti<tdscope->tempargs.size; ti++)
+      {
+        //cout << "if ("<<current_scope->tempargs[ti]->name<<" == "<<name<<") {\n";
+        if (tdscope->tempargs[ti]->name == name) {
+          ext_retriever_var = tdscope->tempargs[ti];
+          return 1;
+        }
+      }
+      
+      tdscope = tdscope->type;
+    }
 
     if (inscope != &global_scope) //If we're not at global scope, move up
       inscope = inscope->parent; //This must ALWAYS be nonzero when != global_scope
