@@ -109,7 +109,7 @@ int mainr(int argc, char *argv[])
   
   //m_prog_loop_cfp();
   
-  my_string EGMmain = fca(1 ? "./outputmac.txt" : "./CompilerSource/cfile_parse/auxilary.h");
+  my_string EGMmain = fca(0 ? "./outputmac.txt" : "./CompilerSource/cfile_parse/auxilary.h");
   if (EGMmain == NULL) {
     cout << "ERROR: Failed to read main engine file\n";
     getchar(); return 1;

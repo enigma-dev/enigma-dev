@@ -67,6 +67,8 @@ inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
+string fc(const char*);
+
 void clear_ide_editables()
 {
   ofstream wto;
@@ -92,11 +94,18 @@ void clear_ide_editables()
   wto.close();
 
 //FIXME: Accessors are required for sprite_width and height, as well as all bbox_ variables
-
-  wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
-    wto << license;
-    wto << "#define " << TARGET_PLATFORM_GRAPHICS << " 1\n#define " << TARGET_PLATFORM_NAME << " 1\n";
-  wto.close();
+  
+  
+  string f2comp = fc("ENIGMAsystem/SHELL/API_Switchboard.h");
+  string f2write = license;
+    f2write += "#define " TARGET_PLATFORM_GRAPHICS " 1\n#define " TARGET_PLATFORM_NAME " 1\n";
+  if (f2comp != f2write)
+  {
+    user << "Rewriting API switchboard header... This could hurt compile time." << flushl;
+    wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
+      wto << f2write;
+    wto.close();
+  }
 
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/LIBINCLUDE.h");
     wto << license;

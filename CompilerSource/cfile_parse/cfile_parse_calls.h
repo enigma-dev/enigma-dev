@@ -43,6 +43,7 @@ bool is_tflag(string x)
   or x=="extern"
   or x=="mutable"
   or x=="volatile"
+  or x=="__volatile"
   or x=="register" ;
 }
 
