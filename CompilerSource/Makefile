@@ -15,12 +15,14 @@ OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	ONAME := ../libcompileEGMf.so
 	INPLACEPARAM := -fPIC
-	CREMOVE := rm -f
+	CREMOVE := rm -f 
+	ENDCREMOVE := 
 	SLASHC := /
 else
 	ONAME := ..\\compileEGMf.dll
 	INPLACEPARAM := 
-	CREMOVE := del /Q
+	CREMOVE := del /Q \'
+	ENDCREMOVE := \'
 	SLASHC := \\
 endif
 
@@ -143,6 +145,6 @@ win windows: $(ONAME)
 lin linux unix: $(ONAME)
 
 clean:
-	-$(CREMOVE) ".eobjs$(SLASHC)*"
-	-$(CREMOVE) "$(ONAME)"
+	-$(CREMOVE).eobjs$(SLASHC)*$(ENDCREMOVE)
+	-$(CREMOVE)$(ONAME)$(ENDCREMOVE)
 

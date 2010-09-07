@@ -2,7 +2,7 @@
 
 .eobjs_$(MODE)/backgroundinit.o: backgroundinit.cpp ../Graphics_Systems/graphics_mandatory.h ../Platforms/platforms_mandatory.h ../libEGMstd.h compression.h ../../additional/zlib/zlib.h ../../additional/zlib/zconf.h
 	g++ -c backgroundinit.cpp		-o .eobjs_$(MODE)/backgroundinit.o $(FLAGS)
-.eobjs_$(MODE)/backgroundstruct.o: backgroundstruct.cpp spritestruct.h ../libEGMstd.h backgroundstruct.h
+.eobjs_$(MODE)/backgroundstruct.o: backgroundstruct.cpp ../Graphics_Systems/graphics_mandatory.h spritestruct.h ../libEGMstd.h backgroundstruct.h
 	g++ -c backgroundstruct.cpp		-o .eobjs_$(MODE)/backgroundstruct.o $(FLAGS)
 .eobjs_$(MODE)/CallbackArrays.o: CallbackArrays.cpp CallbackArrays.h
 	g++ -c CallbackArrays.cpp		-o .eobjs_$(MODE)/CallbackArrays.o $(FLAGS)
@@ -34,7 +34,7 @@
 	g++ -c instance_system.cpp		-o .eobjs_$(MODE)/instance_system.o $(FLAGS)
 .eobjs_$(MODE)/loading.o: loading.cpp mathnc.h resinit.h ../Platforms/platforms_mandatory.h ../Audio_Systems/audio_mandatory.h ../Graphics_Systems/graphics_mandatory.h roomsystem.h var4.h var_te.h multifunction_variant.h ../libEGMstd.h
 	g++ -c loading.cpp		-o .eobjs_$(MODE)/loading.o $(FLAGS)
-.eobjs_$(MODE)/mathnc.o: mathnc.cpp
+.eobjs_$(MODE)/mathnc.o: mathnc.cpp var4.h var_te.h
 	g++ -c mathnc.cpp		-o .eobjs_$(MODE)/mathnc.o $(FLAGS)
 .eobjs_$(MODE)/OBJaccess.o: OBJaccess.cpp
 	g++ -c OBJaccess.cpp		-o .eobjs_$(MODE)/OBJaccess.o $(FLAGS)
@@ -48,7 +48,7 @@
 	g++ -c reflexive_types.cpp		-o .eobjs_$(MODE)/reflexive_types.o $(FLAGS)
 .eobjs_$(MODE)/roomsystem.o: roomsystem.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h ../Platforms/windows/WINDOWSwindow.h ../Platforms/windows/WINDOWSStd.h ../Platforms/windows/WINDOWSfonts.h ../Platforms/windows/externals.h ../libEGMstd.h instance_system.h object.h instance.h planar_object.h roomsystem.h multifunction_variant_source.h key_game_globals.h
 	g++ -c roomsystem.cpp		-o .eobjs_$(MODE)/roomsystem.o $(FLAGS)
-.eobjs_$(MODE)/simplecollisions.o: simplecollisions.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h collisions_object.h transform_object.h ../Graphics_Systems/OpenGL/graphics_object.h ../Universal_System/planar_object.h ../Universal_System/object.h ../Universal_System/var4.h ../Universal_System/var_te.h ../Universal_System/reflexive_types.h ../Universal_System/multifunction_variant.h instance_system.h object.h
+.eobjs_$(MODE)/simplecollisions.o: simplecollisions.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h collisions_object.h transform_object.h ../Graphics_Systems/OpenGL/graphics_object.h ../Universal_System/planar_object.h ../Universal_System/object.h ../Universal_System/var4.h ../Universal_System/var_te.h ../Universal_System/reflexive_types.h ../Universal_System/multifunction_variant.h instance_system.h object.h ../Graphics_Systems/OpenGL/GSstdraw.h ../Graphics_Systems/OpenGL/GScolors.h
 	g++ -c simplecollisions.cpp		-o .eobjs_$(MODE)/simplecollisions.o $(FLAGS)
 .eobjs_$(MODE)/soundinit.o: soundinit.cpp ../Audio_Systems/audio_mandatory.h ../Platforms/platforms_mandatory.h ../libEGMstd.h compression.h ../../additional/zlib/zlib.h ../../additional/zlib/zconf.h
 	g++ -c soundinit.cpp		-o .eobjs_$(MODE)/soundinit.o $(FLAGS)
@@ -76,4 +76,4 @@ Build: mkObjDir .eobjs_Build/backgroundinit.o .eobjs_Build/backgroundstruct.o .e
 Release: mkObjDir .eobjs_Release/backgroundinit.o .eobjs_Release/backgroundstruct.o .eobjs_Release/CallbackArrays.o .eobjs_Release/collisions.o .eobjs_Release/collisions_object.o .eobjs_Release/compression.o .eobjs_Release/darray.o .eobjs_Release/ENIGMA_GLOBALS.o .eobjs_Release/estring.o .eobjs_Release/events.o .eobjs_Release/event_system.o .eobjs_Release/fileio.o .eobjs_Release/globalupdate.o .eobjs_Release/IMGloading.o .eobjs_Release/instance.o .eobjs_Release/instance_system.o .eobjs_Release/loading.o .eobjs_Release/mathnc.o .eobjs_Release/OBJaccess.o .eobjs_Release/object.o .eobjs_Release/objecttable.o .eobjs_Release/planar_object.o .eobjs_Release/reflexive_types.o .eobjs_Release/roomsystem.o .eobjs_Release/simplecollisions.o .eobjs_Release/soundinit.o .eobjs_Release/spriteinit.o .eobjs_Release/spritestruct.o .eobjs_Release/terminal_io.o .eobjs_Release/transform_object.o .eobjs_Release/var4.o .eobjs_Release/var4_lua.o .eobjs_Release/WITHconstruct.o 
 
 clean:
-	$(CREMOVE) .eobjs*$(SLASHC)*
+	$(CREMOVE).eobjs*$(SLASHC)*$(ENDCREMOVE)

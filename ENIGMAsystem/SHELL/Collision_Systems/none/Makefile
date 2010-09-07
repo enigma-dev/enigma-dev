@@ -12,4 +12,4 @@ Build: mkObjDir .eobjs_Build/placeholderlinks.o
 Release: mkObjDir .eobjs_Release/placeholderlinks.o 
 
 clean:
-	$(CREMOVE) .eobjs*$(SLASHC)*
+	$(CREMOVE).eobjs*$(SLASHC)*$(ENDCREMOVE)

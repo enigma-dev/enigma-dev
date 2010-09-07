@@ -39,11 +39,11 @@ done;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	\$(CREMOVE) .eobjs*\$(SLASHC)*" >> Makefile;
-echo "	cd alure	&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\"" >> Makefile;
-echo "	cd ogg		&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\"" >> Makefile;
-echo "	cd vorbis	&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\"" >> Makefile;
-echo "	cd dumb		&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\"" >> Makefile;
+echo "	\$(CREMOVE).eobjs*\$(SLASHC)*\$(ENDCREMOVE)" >> Makefile;
+echo "	cd alure	&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\" ENDCREMOVE=\"\$(ENDCREMOVE)\"" >> Makefile;
+echo "	cd ogg		&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\" ENDCREMOVE=\"\$(ENDCREMOVE)\"" >> Makefile;
+echo "	cd vorbis	&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\" ENDCREMOVE=\"\$(ENDCREMOVE)\"" >> Makefile;
+echo "	cd dumb		&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\" ENDCREMOVE=\"\$(ENDCREMOVE)\"" >> Makefile;
 
 cd ./alure/
 ./automake.sh

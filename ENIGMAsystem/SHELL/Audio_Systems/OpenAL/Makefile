@@ -32,8 +32,8 @@ Release: mkObjDir .eobjs_Release/as_basic.o
 
 
 clean:
-	$(CREMOVE) .eobjs*$(SLASHC)*
-	cd alure	&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd ogg		&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd vorbis	&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd dumb		&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	$(CREMOVE).eobjs*$(SLASHC)*$(ENDCREMOVE)
+	cd alure	&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"
+	cd ogg		&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"
+	cd vorbis	&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"
+	cd dumb		&& make clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"

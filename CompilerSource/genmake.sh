@@ -23,12 +23,14 @@ echo "OS := \$(shell uname -s)" >> Makefile;
 echo "ifeq (\$(OS), Linux)" >> Makefile;
 echo "	ONAME := ../libcompileEGMf.so" >> Makefile;
 echo "	INPLACEPARAM := -fPIC" >> Makefile;
-echo "	CREMOVE := rm -f" >> Makefile;
+echo "	CREMOVE := rm -f " >> Makefile;
+echo "	ENDCREMOVE := " >> Makefile;
 echo "	SLASHC := /" >> Makefile;
 echo "else" >> Makefile;
 echo "	ONAME := ..\\\\compileEGMf.dll" >> Makefile;
 echo "	INPLACEPARAM := " >> Makefile;
-echo "	CREMOVE := del /Q" >> Makefile;
+echo "	CREMOVE := del /Q \\\"" >> Makefile;
+echo "	CREMOVE := del /Q \\\"" >> Makefile;
 echo "	SLASHC := \\\\" >> Makefile;
 echo "endif" >> Makefile;
 echo "" >> Makefile;
@@ -88,7 +90,7 @@ echo "lin linux unix: \$(ONAME)" >> Makefile;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	-\$(CREMOVE) \".eobjs\$(SLASHC)*\"" >> Makefile;
-echo "	-\$(CREMOVE) \"\$(ONAME)\"" >> Makefile;
+echo "	-\$(CREMOVE).eobjs\$(SLASHC)*\$(ENDCREMOVE)" >> Makefile;
+echo "	-\$(CREMOVE)\$(ONAME)\$(ENDCREMOVE)" >> Makefile;
 
 echo "" >> Makefile;

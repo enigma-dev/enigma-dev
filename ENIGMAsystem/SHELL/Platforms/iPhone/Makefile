@@ -2,9 +2,9 @@
 
 .eobjs_$(MODE)/CocoaDialog.o: CocoaDialog.cpp
 	g++ -c CocoaDialog.cpp		-o .eobjs_$(MODE)/CocoaDialog.o $(FLAGS)
-.eobjs_$(MODE)/CocoaFunctions.o: CocoaFunctions.cpp
+.eobjs_$(MODE)/CocoaFunctions.o: CocoaFunctions.cpp CocoaFunctions.h CocoaWindow.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
 	g++ -c CocoaFunctions.cpp		-o .eobjs_$(MODE)/CocoaFunctions.o $(FLAGS)
-.eobjs_$(MODE)/CocoaMain.o: CocoaMain.cpp
+.eobjs_$(MODE)/CocoaMain.o: CocoaMain.cpp CocoaWindow.h ObjectiveC.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
 	g++ -c CocoaMain.cpp		-o .eobjs_$(MODE)/CocoaMain.o $(FLAGS)
 .eobjs_$(MODE)/CocoaWindow.o: CocoaWindow.cpp
 	g++ -c CocoaWindow.cpp		-o .eobjs_$(MODE)/CocoaWindow.o $(FLAGS)
@@ -12,29 +12,18 @@
 	g++ -c file_manip.cpp		-o .eobjs_$(MODE)/file_manip.o $(FLAGS)
 .eobjs_$(MODE)/EnigmaXcodeAppDelegate.o: EnigmaXcodeAppDelegate.m
 	g++ -c EnigmaXcodeAppDelegate.m		-o .eobjs_$(MODE)/EnigmaXcodeAppDelegate.o $(FLAGS)
-.eobjs_$(MODE)/GLString.o: GLString.m
-	g++ -c GLString.m		-o .eobjs_$(MODE)/GLString.o $(FLAGS)
-.eobjs_$(MODE)/OpenGLView.o: OpenGLView.m
-	g++ -c OpenGLView.m		-o .eobjs_$(MODE)/OpenGLView.o $(FLAGS)
-.eobjs_$(MODE)/drawInfo.o: drawInfo.m
-	g++ -c drawInfo.m		-o .eobjs_$(MODE)/drawInfo.o $(FLAGS)
-.eobjs_$(MODE)/kGLView.o: kGLView.m
-	g++ -c kGLView.m		-o .eobjs_$(MODE)/kGLView.o $(FLAGS)
+.eobjs_$(MODE)/iPhoneEnigmaView.o: iPhoneEnigmaView.m CocoaFunctions.h
+	g++ -c iPhoneEnigmaView.m		-o .eobjs_$(MODE)/iPhoneEnigmaView.o $(FLAGS)
 .eobjs_$(MODE)/main.o: main.m
 	g++ -c main.m		-o .eobjs_$(MODE)/main.o $(FLAGS)
 
 mkObjDir:
 	-mkdir .eobjs_$(MODE)
 
-Run: 
-SETENV=	PATH=/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:$$PATH;
-mkObjDir .eobjs_Run/CocoaDialog.o .eobjs_Run/CocoaFunctions.o .eobjs_Run/CocoaMain.o .eobjs_Run/CocoaWindow.o .eobjs_Run/file_manip.o .eobjs_Run/EnigmaXcodeAppDelegate.o .eobjs_Run/GLString.o .eobjs_Run/drawInfo.o .eobjs_Run/main.o .eobjs_Run/kGLView.o  
-
-Debug: mkObjDir .eobjs_Debug/CocoaDialog.o .eobjs_Debug/CocoaFunctions.o .eobjs_Debug/CocoaMain.o .eobjs_Debug/CocoaWindow.o .eobjs_Debug/file_manip.o .eobjs_Debug/EnigmaXcodeAppDelegate.o .eobjs_Debug/GLString.o .eobjs_Debug/OpenGLView.o .eobjs_Debug/drawInfo.o .eobjs_Debug/kGLView.o .eobjs_Debug/main.o 
-
-Build: mkObjDir .eobjs_Build/CocoaDialog.o .eobjs_Build/CocoaFunctions.o .eobjs_Build/CocoaMain.o .eobjs_Build/CocoaWindow.o .eobjs_Build/file_manip.o .eobjs_Build/EnigmaXcodeAppDelegate.o .eobjs_Build/GLString.o .eobjs_Build/OpenGLView.o .eobjs_Build/drawInfo.o .eobjs_Build/kGLView.o .eobjs_Build/main.o 
-
-Release: mkObjDir .eobjs_Release/CocoaDialog.o .eobjs_Release/CocoaFunctions.o .eobjs_Release/CocoaMain.o .eobjs_Release/CocoaWindow.o .eobjs_Release/file_manip.o .eobjs_Release/EnigmaXcodeAppDelegate.o .eobjs_Release/GLString.o .eobjs_Release/OpenGLView.o .eobjs_Release/drawInfo.o .eobjs_Release/kGLView.o .eobjs_Release/main.o 
+Run: mkObjDir .eobjs_Run/CocoaDialog.o .eobjs_Run/CocoaFunctions.o .eobjs_Run/CocoaMain.o .eobjs_Run/CocoaWindow.o .eobjs_Run/file_manip.o .eobjs_Run/EnigmaXcodeAppDelegate.o .eobjs_Run/iPhoneEnigmaView.o .eobjs_Run/main.o 
+Debug: mkObjDir .eobjs_Debug/CocoaDialog.o .eobjs_Debug/CocoaFunctions.o .eobjs_Debug/CocoaMain.o .eobjs_Debug/CocoaWindow.o .eobjs_Debug/file_manip.o .eobjs_Debug/EnigmaXcodeAppDelegate.o .eobjs_Debug/iPhoneEnigmaView.o .eobjs_Debug/main.o 
+Build: mkObjDir .eobjs_Build/CocoaDialog.o .eobjs_Build/CocoaFunctions.o .eobjs_Build/CocoaMain.o .eobjs_Build/CocoaWindow.o .eobjs_Build/file_manip.o .eobjs_Build/EnigmaXcodeAppDelegate.o .eobjs_Build/iPhoneEnigmaView.o .eobjs_Build/main.o 
+Release: mkObjDir .eobjs_Release/CocoaDialog.o .eobjs_Release/CocoaFunctions.o .eobjs_Release/CocoaMain.o .eobjs_Release/CocoaWindow.o .eobjs_Release/file_manip.o .eobjs_Release/EnigmaXcodeAppDelegate.o .eobjs_Release/iPhoneEnigmaView.o .eobjs_Release/main.o 
 
 clean:
-	$(CREMOVE) .eobjs*$(SLASHC)*
+	$(CREMOVE).eobjs*$(SLASHC)*$(ENDCREMOVE)

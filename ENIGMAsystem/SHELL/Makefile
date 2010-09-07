@@ -16,13 +16,16 @@ all:
 # Figure platform
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
-	CREMOVE := rm -f
+	CREMOVE := rm -f 
+	ENDCREMOVE :=
 	SLASHC := /
 else ifeq ($(OS), Darwin)
-	CREMOVE := rm -f
+	CREMOVE := rm -f 
+	ENDCREMOVE :=
 	SLASHC := /
 else
-	CREMOVE := del /Q
+	CREMOVE := del /Q \'
+	ENDCREMOVE :=\'
 	SLASHC := \\
 endif
 
@@ -34,4 +37,4 @@ clean:
 	cd Platforms/windows/ 			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
 	cd Platforms/xlib/ 				&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
 	cd Universal_System/			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd Collisions_System/none		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	cd Collision_Systems/none		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
