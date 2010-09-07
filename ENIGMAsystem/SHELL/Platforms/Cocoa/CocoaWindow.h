@@ -32,12 +32,13 @@ void gmw_init();
 
 void Sleep(int ms);
 
+void window_set_position(int x,int y);
 
 /////////////
 // VISIBLE //
 /////////////
 
-int window_set_visible(double visible);
+int window_set_visible(int visible);
 int window_get_visible();
 
 /////////////

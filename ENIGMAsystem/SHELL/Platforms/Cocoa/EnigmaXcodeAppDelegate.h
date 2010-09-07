@@ -35,4 +35,6 @@
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication;
 
+- (void)changeVisible;
+
 @end

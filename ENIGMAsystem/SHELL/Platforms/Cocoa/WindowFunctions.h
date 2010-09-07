@@ -28,11 +28,6 @@
 #import <Cocoa/Cocoa.h>
 #import "EnigmaXcodeAppDelegate.h"
 
-@interface WindowFunctions : NSObject {
-
-}
-
-@end
 
 
 extern EnigmaXcodeAppDelegate* delegate;

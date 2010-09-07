@@ -33,7 +33,9 @@ extern "C" {
 	void cocoa_window_set_size(unsigned int w,unsigned int h);
 	int getMouse(int i);
 	void cocoa_window_set_caption(const char* caption);
-	const char* cocoa_window_get_caption()
+	const char* cocoa_window_get_caption();
+	void cocoa_screen_refresh();
+	int cocoa_window_set_visible(int visible);
 #ifdef __cplusplus
 }
 #endif

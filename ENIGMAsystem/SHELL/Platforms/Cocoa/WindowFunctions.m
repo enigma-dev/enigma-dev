@@ -29,10 +29,6 @@
 #import "EnigmaXcodeAppDelegate.h"
 
 
-@implementation WindowFunctions
-
-@end
-
 EnigmaXcodeAppDelegate* delegate;
 NSPoint mouse; 
 
@@ -76,5 +72,32 @@ int getMouse(int i)
 void cocoa_window_set_caption(const char* caption)
 {
 	[[delegate window] setTitle:[NSString stringWithCString:caption length:strlen(caption)]];
+}
+
+void cocoa_screen_refresh()
+{
+	//[[self openGLContext] flushBuffer];
+}
+
+int cocoa_window_set_visible(int visible)
+{
+	if(visible==1)
+	{
+		/*XMapRaised(disp,win);
+		 GLXContext glxc = glXGetCurrentContext();
+		 glXMakeCurrent(disp,win,glxc);
+		 if(visx != -1 && visy != -1)
+		 window_set_position(visx,visy);*/
+	}
+	else {
+		// Hide 
+		[[delegate window] orderOut:[delegate window]]; 
+	}
+	return 0;
+}
+
+int cocoa_window_get_visible()
+{
+	
 }
 

@@ -37,4 +37,12 @@
     return YES;
 }
 
+- (void)changeVisible { 
+	if ([window isVisible]) { 
+		[window orderOut:self]; 
+	} else { 
+		[window makeKeyAndOrderFront:self]; 
+	} 
+} 
+
 @end

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 IsmAvatar <cmagicj@nni.com>
- * Copyright (C) 2008 Alasdair Morrison <ali@alasdairmorrison.com>
+ * Copyright (C) 2010 Alasdair Morrison <ali@alasdairmorrison.com>
  *
  * This file is part of ENIGMA.
  *
@@ -42,19 +42,6 @@ using namespace std;
 Cursor NoCursor,DefCursor;
 void gmw_init()
 {
-	//Default cursor
-	//DefCursor = XCreateFontCursor(disp,68);
-	//Blank cursor
-	//XColor dummy;
-	//Pixmap blank = XCreateBitmapFromData(disp,win,"",1,1);
-	//if(blank == None) { //out of memory
-	//	printf("Failed to create no cursor. lulz\n");
-	//	NoCursor = DefCursor;
-	//}
-	//else {
-		//NoCursor = XCreatePixmapCursor(disp,blank,blank,&dummy,&dummy,0,0);
-		//XFreePixmap(disp,blank);
-	//}
 }
 
 
@@ -63,23 +50,14 @@ void sleep(int ms){
     usleep((ms % 1000) *1000);
     };
 
-void window_set_position(int x,int y);
+
 int visx = -1, visy = -1;
 
-int window_set_visible(const bool visible)
+int window_set_visible(int visible)
 {
-	/*if(visible)
-	{
-		XMapRaised(disp,win);
-		GLXContext glxc = glXGetCurrentContext();
-		glXMakeCurrent(disp,win,glxc);
-		if(visx != -1 && visy != -1)
-			window_set_position(visx,visy);
-	}
-	else
-		XUnmapWindow(disp, win);
-	return 0;*/
+	return cocoa_window_set_visible(visible);
 }
+
 int window_get_visible()
 {
 	/*XWindowAttributes wa;
@@ -89,16 +67,11 @@ int window_get_visible()
 
 int window_set_caption(string caption)
 {
-	/*XStoreName(disp,win,caption.c_str());
-	return 0;*/
 	cocoa_window_set_caption(caption.c_str());
 }
 string window_get_caption()
 {
-	/*char *caption;
-	XFetchName(disp,win,&caption);
-	string r=caption;
-	return r;*/
+	cocoa_window_get_caption();
 }
 
 
@@ -202,7 +175,7 @@ int window_set_cursor(int c)
 }
 
 void screen_refresh() {
-	//glXSwapBuffers(disp,win);
+	cocoa_screen_refresh();
 }
 
 namespace enigma
