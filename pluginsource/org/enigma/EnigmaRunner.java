@@ -100,6 +100,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public static boolean GCC_LOCATED = false, ENIGMA_READY = false;
 	public final EnigmaNode node = new EnigmaNode();
 
+	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2, MODE_COMPILE = 3,
+			MODE_REBUILD = 4;
+
 	public EnigmaRunner()
 		{
 		populateMenu();
@@ -434,7 +437,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		public DataFlavor[] getTransferDataFlavors()
 			{
-			return null;
+			return new DataFlavor[0];
 			}
 
 		public boolean isDataFlavorSupported(DataFlavor flavor)
@@ -447,9 +450,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			throw new UnsupportedFlavorException(flavor);
 			}
 		}
-
-	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2, MODE_COMPILE = 3,
-			MODE_REBUILD = 4;
 
 	public void compile(final int mode)
 		{

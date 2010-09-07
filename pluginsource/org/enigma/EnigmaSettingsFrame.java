@@ -6,15 +6,20 @@ import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -323,7 +328,11 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		public void internalFrameClosed(InternalFrameEvent e)
 			{
 			CodeFrame cf = (CodeFrame) e.getSource();
-			if (cf == cfDef) cfDef = null;
+			if (cf == cfDef)
+				{
+				es.saveDefinitions();
+				cfDef = null;
+				}
 			if (cf == cfGlobLoc) cfGlobLoc = null;
 			if (cf == cfInit) cfInit = null;
 			if (cf == cfClean) cfClean = null;
@@ -352,6 +361,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		if (!es.definitions.equals(sDef.getCode()))
 			{
 			es.definitions = sDef.getCode();
+			es.saveDefinitions();
 			if (EnigmaRunner.GCC_LOCATED) EnigmaRunner.DRIVER.whitespaceModified(es.definitions);
 			}
 		es.globalLocals = sGlobLoc.getCode();
@@ -392,5 +402,51 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 
 		String definitions = "", globalLocals = "";
 		String initialization = "", cleanup = "";
+
+		public EnigmaSettings()
+			{
+			loadDefinitions();
+			}
+
+		void loadDefinitions()
+			{
+			definitions = fileToString(new File(LGM.workDir.getParentFile(),"definitions.h"));
+			}
+
+		public void saveDefinitions()
+			{
+			writeString(new File(LGM.workDir.getParentFile(),"definitions.h"),definitions);
+			}
+
+		String fileToString(File f)
+			{
+			StringBuffer sb = new StringBuffer(1024);
+			try
+				{
+				FileReader in = new FileReader(f);
+				char[] cbuf = new char[1024];
+				int size = 0;
+				while ((size = in.read(cbuf)) > -1)
+					sb.append(cbuf,0,size);
+				in.close();
+				}
+			catch (IOException e)
+				{
+				}
+			return sb.toString();
+			}
+
+		void writeString(File f, String s)
+			{
+			try
+				{
+				PrintStream ps = new PrintStream(f);
+				ps.print(s);
+				ps.close();
+				}
+			catch (FileNotFoundException e)
+				{
+				}
+			}
 		}
 	}
