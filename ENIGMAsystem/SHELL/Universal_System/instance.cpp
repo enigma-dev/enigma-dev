@@ -57,7 +57,7 @@ bool instance_exists(int obj)
   return enigma::fetch_instance_by_int(obj) != NULL;
 }
 
-int instance_find(double obj,double n)
+int instance_find(int obj,int n)
 {
   int num=(int)n;
   int nth=0;
