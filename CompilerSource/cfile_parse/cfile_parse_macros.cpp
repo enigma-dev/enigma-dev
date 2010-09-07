@@ -116,6 +116,13 @@ my_string fca(const char* fn)
     return a;
 };
 
+string fnpath(const string& x)
+{
+  const size_t lsp = x.find_last_of("\\/");
+  if (lsp == string::npos) return x;
+  return x.substr(0,lsp);
+}
+
 struct flow_stack
 {
   struct n
@@ -284,14 +291,15 @@ pt cfile_parse_macro()
         //Find the file and include it
         my_string ins;
         string include_from;
+        bool found = false;
         if (c == '"' and !ignoreit)
         {
-          string qpath;
+          string qpath, filen = file;
           for (unsigned i = file.length(); i; i--)
             if (file[i] == '\\' or file[i] == '/')
             {
               qpath = file.substr(0,i+1);
-              file.erase(0,i+1);
+              filen.erase(0,i+1);
               break;
             }
           if (included_files.empty())
@@ -299,20 +307,25 @@ pt cfile_parse_macro()
           else
             include_from = included_files.top().path + qpath;
           
-          ins = fca( (include_from+file).c_str() );
-          if (!ins) {
-            cferr = "Failed to include `" + file + "' from " + include_from + ": File not found";
-            return pos;
+          ins = fca( (include_from+filen).c_str() );
+          if (ins)
+            found = true;
+          else
+          {
+            // ISO says the next thing we do is search the directories of the files that include this file.
+            for (ifstack::ifnode *i = included_files.last; i; i = i->prev)
+            {
+              ins = fca( (i->i->path+fnpath(i->i->name) + file).c_str() );
+              if (ins) { found = true; break; }
+            }
           }
         }
-        else
+        if (!found)
         {
           if (!include_directory_count) {
             cferr = "Failed to include " + file + ": Search path is empty!!!111111!!112";
             return pos;
           }
-          
-          bool found = false;
           
           // Loop through the search path, seeking the header
           unsigned int i = 0;
@@ -335,7 +348,7 @@ pt cfile_parse_macro()
           }
           
           if (!found) {
-            cferr = "Failed to include " + file + " from " + include_from + ": File not found" + (ignoreit ? " after current file." : ".");
+            cferr = "Failed to include " + file + " from " + include_from + ": File not found" + (ignoreit ? " after current file." : "...");
             return pos;
           }
         }
