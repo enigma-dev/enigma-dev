@@ -137,8 +137,8 @@ extern externs *enigma_type__var, *enigma_type__variant;
 dllexport syntax_error *whitespaceModified(const char* wscode)
 {
   cout << "Clearing IDE editables... " << flushs;
-    clear_ide_editables();
-  cout << "Done." << flushl;
+    //clear_ide_editables();
+  cout << "I lied." << flushl;
   
   cout << "Creating swap." << flushl;
   externs oldglobal; map<string,macro_type> oldmacs; // These will essentially garbage collect at the end of this call

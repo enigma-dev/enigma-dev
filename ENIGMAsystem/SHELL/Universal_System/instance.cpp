@@ -119,8 +119,7 @@ int instance_nearest(int x,int y,int obj)
 
 int instance_furthest(int x,int y,int obj)
 {
-  double dist_highest=0;
-  bool found=0;
+  double dist_highest = -1;
   int retid = noone;
   double xl,yl;
   double dstclc;
@@ -130,14 +129,24 @@ int instance_furthest(int x,int y,int obj)
     xl=((enigma::object_planar*)it->inst)->x - x;
     yl=((enigma::object_planar*)it->inst)->y - y;
     dstclc = hypot(xl,yl);
-    if (dstclc > dist_highest or !found)
+    if (dstclc > dist_highest)
     {
       dist_highest = dstclc;
       retid = it->inst->id;
-      found = 1;
     }
   }
 
   return retid;
 }
 
+int instance_place(int x,int y,int obj)
+{
+  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(obj); it != NULL; it = it->next)
+  {
+    if (x == ((enigma::object_planar*)it->inst)->x
+    and y == ((enigma::object_planar*)it->inst)->y)
+      return it->inst->id;
+  }
+
+  return noone;
+}

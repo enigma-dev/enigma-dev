@@ -137,6 +137,7 @@ namespace enigma
     iliter a = instance_list.find(x);
     return a != instance_list.end() ? a->second->inst : NULL;
   }
+  inst_iter dummy_iterator(NULL,NULL,NULL);
   inst_iter* fetch_inst_iter_by_int(int x)
   {
     if (x < 0) switch (x) // Keyword-based lookup
@@ -155,7 +156,7 @@ namespace enigma
     
     // ID-based lookup
     iliter a = instance_list.find(x);
-    return a != instance_list.end() ? a->second : NULL;
+    return a != instance_list.end() ? (dummy_iterator.inst = a->second->inst, &dummy_iterator) : NULL;
   }
   inst_iter* fetch_inst_iter_by_id(int x)
   {

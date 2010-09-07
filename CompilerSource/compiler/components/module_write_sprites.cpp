@@ -83,7 +83,7 @@ int module_write_sprites(EnigmaStruct *es, FILE *gameModule)
       }
     }
     if (!(swidth and sheight and subCount)) {
-      user << "Subimages of sprite `" << es->sounds[i].name << "' have zero size." << flushl;
+      user << "Subimages of sprite `" << es->sprites[i].name << "' have zero size." << flushl;
       return 14;
     }
     

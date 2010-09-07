@@ -40,6 +40,7 @@ int  instance_destroy(int id);
 bool instance_exists (int obj);
 int  instance_find   (int obj,int n);
 int  instance_number (int obj);
+int  instance_place   (int x,int y,int obj);
 int  instance_position(int x,int y,int obj);
 int  instance_nearest (int x,int y,int obj);
 int  instance_furthest(int x,int y,int obj);
