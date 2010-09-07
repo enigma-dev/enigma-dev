@@ -26,7 +26,7 @@
  \********************************************************************************/
 
 #import <Cocoa/Cocoa.h>
-
+#import "EnigmaXcodeAppDelegate.h"
 
 @interface WindowFunctions : NSObject {
 
@@ -34,5 +34,7 @@
 
 @end
 
-int window_get_caption();
 
+extern EnigmaXcodeAppDelegate* delegate;
+extern NSPoint mouse; 
+extern int cocoa_mouse_x,cocoa_mouse_y;

@@ -26,16 +26,55 @@
  \********************************************************************************/
 
 #import "WindowFunctions.h"
+#import "EnigmaXcodeAppDelegate.h"
 
 
 @implementation WindowFunctions
 
 @end
 
-int window_get_caption()
+EnigmaXcodeAppDelegate* delegate;
+NSPoint mouse; 
+
+const char* cocoa_window_get_caption()
 {
-/*NSWindow StartingWindow = [NSApp keyWindow];
-	NSScreen contentRect    = [[NSScreen mainScreen] frame];
-	return [StartingWindow frame].height;
-	*/
+	return [[[delegate window] title] UTF8String];	
 }
+
+int getWindowDimension(int i)
+{
+	if(i == 0) return [[delegate window] frame].origin.x;
+	if(i == 1) return [[delegate window] frame].origin.y;
+	if(i == 2) return [[delegate window] frame].size.width;
+	if(i == 3) return [[delegate window] frame].size.height-22;
+	return 0;
+}
+
+void cocoa_window_set_size(unsigned int w,unsigned int h) {
+	NSRect rect = NSMakeRect(0,0,w,h+22);
+	[[delegate window] setFrame:rect display:YES ];
+	
+}
+void cocoa_window_set_rectangle(int x,int y,int w,int h) {
+	NSRect rect = NSMakeRect(x,y,w,h+22);
+	[[delegate window] setFrame:rect display:YES ];
+}
+
+int getMouse(int i)
+{
+	switch(i)
+	{
+		case 0:  return mouse.x; //room
+		case 1:  return -(mouse.y-480);
+		case 2:  return mouse.x; //window
+		case 3:  return  -(mouse.y-480)+22;
+		default: return -1;
+	}
+	
+}
+
+void cocoa_window_set_caption(const char* caption)
+{
+	[[delegate window] setTitle:[NSString stringWithCString:caption length:strlen(caption)]];
+}
+

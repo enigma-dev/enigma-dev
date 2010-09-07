@@ -29,6 +29,11 @@
 extern "C" {
 #endif
 	int mainO(int argc, char *argv[]);
+	int getWindowDimension(int i);
+	void cocoa_window_set_size(unsigned int w,unsigned int h);
+	int getMouse(int i);
+	void cocoa_window_set_caption(const char* caption);
+	const char* cocoa_window_get_caption()
 #ifdef __cplusplus
 }
 #endif

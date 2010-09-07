@@ -27,7 +27,9 @@
 
 #import "EnigmaView.h"
 #include "CocoaFunctions.h"
-
+#import "WindowFunctions.h"
+#import <Cocoa/Cocoa.h>
+#import "WindowFunctions.h"
 
 
 
@@ -77,8 +79,10 @@
     [[NSRunLoop currentRunLoop] addTimer: time forMode: NSEventTrackingRunLoopMode];
     
     [[NSRunLoop currentRunLoop] addTimer: time forMode: NSModalPanelRunLoopMode];
-	
+	[[self window] makeFirstResponder:self];
+    [[self window] setAcceptsMouseMovedEvents:YES];
 	//init enigma
+	delegate = (EnigmaXcodeAppDelegate *)[NSApp delegate];
 	init();
     
 }
@@ -121,10 +125,11 @@
     NSLog(@"EVENT %f %f", pt.x, pt.y);
 }
 // handle mouse movement events (left mouse button)
-- (void)mouseMoved:(NSEvent *)theEvent
+- (void)mouseMoved:(NSEvent *)event
 {
-    NSPoint pt = [theEvent locationInWindow];
-    NSLog(@"EVENT %f %f", pt.x, pt.y);
+	//mouse = event;
+    mouse = [event locationInWindow];
+   // NSLog(@"EVENT %f %f", mouse.x, -(mouse.y-480));
 }
 // handle mouse up events (right mouse button)
 - (void)rightMouseUp:(NSEvent *)theEvent

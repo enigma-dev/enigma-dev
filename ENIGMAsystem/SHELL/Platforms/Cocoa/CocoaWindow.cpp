@@ -24,6 +24,7 @@
 #include <time.h> //clock
 #include <string> //Return strings without needing a GC
 #include <X11/Xlib.h>
+#include "ObjectiveC.h"
 
 Display *disp;
 Window win;
@@ -90,6 +91,7 @@ int window_set_caption(string caption)
 {
 	/*XStoreName(disp,win,caption.c_str());
 	return 0;*/
+	cocoa_window_set_caption(caption.c_str());
 }
 string window_get_caption()
 {
@@ -99,21 +101,7 @@ string window_get_caption()
 	return r;*/
 }
 
-inline int getMouse(int i)
-{
-	/*Window r1,r2;
-	int rx,ry,wx,wy;
-	unsigned int mask;
-	XQueryPointer(disp,win,&r1,&r2,&rx,&ry,&wx,&wy,&mask);
-	switch(i)
-	{
-		case 0:  return rx;
-		case 1:  return ry;
-		case 2:  return wx;
-		case 3:  return wy;
-		default: return -1;
-	}*/
-}
+
 
 int display_mouse_get_x() { return getMouse(0); }
 int display_mouse_get_y() { return getMouse(1); }
@@ -130,26 +118,12 @@ void display_mouse_set(double x,double y) {
 ////////////
 // WINDOW //
 ////////////
-int getWindowDimension(int i)
-{
-	/*XFlush(disp);
-	XWindowAttributes wa;
-	XGetWindowAttributes(disp,win,&wa);
-	if(i == 2) return wa.width;
-	if(i == 3) return wa.height;
-	Window root, parent, *child;
-	uint children;
-	XQueryTree(disp,win,&root,&parent,&child,&children);
-	XWindowAttributes pwa;
-	XGetWindowAttributes(disp,parent,&pwa);
-	return i?(i==1?pwa.y+wa.y:-1):pwa.x+wa.x;*/
-}
 
 //Getters
 int window_get_x()      { return 0;}//return getWindowDimension(0); }
 int window_get_y()      { return 0;}//return getWindowDimension(1); }
-int window_get_width()  { return 480;}//getWindowDimension(2); }
-int window_get_height() { return 480;}//getWindowDimension(3); }
+int window_get_width()  { return getWindowDimension(2); }
+int window_get_height() { return getWindowDimension(3); }
 
 //Setters
 void window_set_position(int x,int y)
@@ -158,11 +132,10 @@ void window_set_position(int x,int y)
 	XGetWindowAttributes(disp,win,&wa);
 	XMoveWindow(disp,win,(int) x  - wa.x,(int) y - wa.y);*/
 }
-void window_set_size(unsigned int w,unsigned int h) {
-	//XResizeWindow(disp,win, w, h);
-}
-void window_set_rectangle(int x,int y,int w,int h) {
-	//XMoveResizeWindow(disp, win, x, y, w, h);
+
+int window_set_size(unsigned int w,unsigned int h)
+{
+	cocoa_window_set_size(w,h);
 }
 
 //Center
