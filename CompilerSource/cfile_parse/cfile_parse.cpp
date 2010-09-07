@@ -66,7 +66,7 @@ string cferr_get_file()
 {
   if (included_files.empty())
     return "";
-  return "In file included from " + included_files.top().name + ": ";
+  return "In file included from " + included_files.top().path + included_files.top().name + ": ";
 }
 
 string cferr_get_file_orfirstfile()

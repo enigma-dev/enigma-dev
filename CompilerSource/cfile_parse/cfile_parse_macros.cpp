@@ -263,6 +263,7 @@ pt cfile_parse_macro()
     {
       if (next=="include" or next=="include_next")
       {
+        bool ignoreit = next == "include_next";
         while (cfile[pos]==' ' or cfile[pos]=='\t') pos++;
         
         const char c = cfile[pos];
@@ -283,7 +284,7 @@ pt cfile_parse_macro()
         //Find the file and include it
         my_string ins;
         string include_from;
-        if (c == '"')
+        if (c == '"' and !ignoreit)
         {
           string qpath;
           for (unsigned i = file.length(); i; i--)
@@ -314,17 +315,27 @@ pt cfile_parse_macro()
           bool found = false;
           
           // Loop through the search path, seeking the header
-          for (unsigned int i = 0; i < include_directory_count; i++)
+          unsigned int i = 0;
+          if (ignoreit)
+          {
+            for (; i < include_directory_count; i++)
+              if (include_directories[i] == included_files.top().path)
+                { found = true; break; }
+            if (!found)
+              return (cferr = "Could not include next file: Could not find this file in path list!", pos);
+            found = false, i++;
+          }
+          for (; i < include_directory_count; i++)
           {
             include_from = include_directories[i];
             ins = fca( (include_from+file).c_str() );
-            if (ins) { 
+            if (ins) {
               found = true; break;
             }
           }
           
           if (!found) {
-            cferr = "Failed to include " + file + " from " + include_from + ": File not found";
+            cferr = "Failed to include " + file + " from " + include_from + ": File not found" + (ignoreit ? " after current file." : ".");
             return pos;
           }
         }

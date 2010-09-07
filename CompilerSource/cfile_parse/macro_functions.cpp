@@ -190,7 +190,7 @@ bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt
     }
     //Comma drops out as soon as cfile[pos] == ','
     //End Parenth will not increment if !lvl, so cfile[pos] == ')'
-    const string rw(cfile,spos,pos-spos);
+    const string rw(cfile,spos,pos-spos);//47922
     if (args_given or cfile[pos] != ')' or !is_entirely_white(rw))
       macro_args[args_given++] = rw;
     //cout << "Argument " << i << ": " << cfile.substr(spos,pos-spos) << endl;

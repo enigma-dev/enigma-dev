@@ -131,7 +131,7 @@ string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
         if (seg[i + 1] == '*') {
           i+= 2;
           while (i < seg.length() and (seg[i++] != '*' or seg[i] != '/'));
-          i += 2; continue;
+          continue;
         }
       }
       else if (!lvl and seg[i] == ':' and seg[i+1] == ':')
