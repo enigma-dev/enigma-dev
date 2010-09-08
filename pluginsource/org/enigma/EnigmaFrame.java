@@ -48,6 +48,7 @@ public class EnigmaFrame extends JFrame
 
 		setContentPane(p);
 		pack();
+		setAlwaysOnTop(true);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		}

@@ -1,5 +1,10 @@
 package org.enigma.backend;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.enigma.EnigmaFrame;
 
 import com.sun.jna.Callback;
@@ -22,6 +27,8 @@ public class EnigmaCallbacks extends Structure
 		((OutputHolder) cock).ef = ef;
 		((OutputHolder) cop).ef = ef;
 		((OutputHolder) cot).ef = ef;
+		((OutputHolder) cof).ef = ef;
+		((OutputHolder) ccf).ef = ef;
 		}
 
 	public static class OutputHolder
@@ -72,9 +79,35 @@ public class EnigmaCallbacks extends Structure
 
 	public static class OpenFile extends OutputHolder implements Callback
 		{
-		public void callback(String file)
+		public void callback(final String file)
 			{
-
+			new Thread()
+				{
+					public void run()
+						{
+						int data;
+						try
+							{
+							InputStream in = new FileInputStream(new File(file));
+							while (true)
+								{
+								if (in.available() > 0)
+									{
+									data = in.read();
+									if (data == -1) break;
+									ef.ta.append("" + (char) data);
+									ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
+									System.out.print(data);
+									}
+								}
+							in.close();
+							}
+						catch (IOException e)
+							{
+							e.printStackTrace();
+							}
+						}
+				}.start();
 			}
 		}
 
