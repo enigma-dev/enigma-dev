@@ -28,6 +28,7 @@ import org.tmatesoft.svn.core.wc.ISVNStatusHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNStatus;
+import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
@@ -62,7 +63,7 @@ public class EnigmaUpdater
 			long rev = svn.needsUpdate();
 			if (rev != -1L)
 				{
-				String title = "Update" + (lrev == -1 ? " from r" + lrev : "") + " to r" + rev;
+				String title = "Update" + (lrev != -1 ? " from r" + lrev : "") + " to r" + rev;
 				if (JOptionPane.showConfirmDialog(
 						null,
 						"Enigma has detected that newer libraries may exist. Would you like us to fetch these for you?",
@@ -147,6 +148,9 @@ public class EnigmaUpdater
 			{
 				public void handleStatus(SVNStatus status) throws SVNException
 					{
+					SVNStatusType type = status.getContentsStatus();
+					if (type == SVNStatusType.STATUS_UNVERSIONED) return;
+					System.out.println(status.getContentsStatus() + " " + status.getFile());
 					changes.add(status);
 					}
 			};
@@ -160,7 +164,8 @@ public class EnigmaUpdater
 		{
 		try
 			{
-			return cliMan.getStatusClient().doStatus(path,false).getRevision().getNumber();
+			SVNStatus status = cliMan.getStatusClient().doStatus(path,false);
+			return status.getRevision().getNumber();
 			}
 		catch (SVNException e)
 			{
