@@ -59,10 +59,10 @@ import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.enigma.EnigmaSettingsFrame.EnigmaSettings;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
+import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;

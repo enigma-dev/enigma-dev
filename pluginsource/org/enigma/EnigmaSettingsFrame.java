@@ -1,33 +1,44 @@
 package org.enigma;
 
-import static java.lang.Integer.MAX_VALUE;
-import static javax.swing.GroupLayout.DEFAULT_SIZE;
-
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.JToolBar;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
+import org.enigma.backend.EnigmaSettings;
+import org.lateralgm.compare.CollectionComparator;
+import org.lateralgm.compare.MapComparator;
+import org.lateralgm.compare.ObjectComparator;
+import org.lateralgm.compare.ReflectionComparator;
+import org.lateralgm.compare.SimpleCasesComparator;
+import org.lateralgm.components.CustomFileChooser;
+import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
 import org.lateralgm.components.mdi.MDIFrame;
+import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.main.LGM;
+import org.lateralgm.messages.Messages;
 import org.lateralgm.subframes.CodeFrame;
 import org.lateralgm.subframes.CodeFrame.CodeHolder;
 
@@ -36,7 +47,10 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon CODE_ICON = LGM.getIconForKey("Resource.SCRIPT"); //$NON-NLS-1$
 
-	private EnigmaSettings es;
+	private EnigmaSettings oldEs, es;
+
+	protected JToolBar toolbar;
+	protected JButton save, saveFile, loadFile;
 
 	private IndexButtonGroup strings, increment, equal, literal, struct;
 	private IndexButtonGroup instance, storage;
@@ -44,7 +58,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	private JButton bInit, bClean;
 	private CodeFrame cfDef, cfGlobLoc, cfInit, cfClean;
 	private CodeHolder sDef, sGlobLoc, sInit, sClean;
-	private JButton bSave, bDiscard;
+	private CustomFileChooser fc;
 
 	class SimpleCodeHolder implements CodeHolder
 		{
@@ -214,13 +228,53 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 
 	public EnigmaSettingsFrame(EnigmaSettings es)
 		{
-		super("Enigma Settings",true,true,true,true); //$NON-NLS-1$
+		super("Enigma Settings",false,true,true,true); //$NON-NLS-1$
 		setDefaultCloseOperation(HIDE_ON_CLOSE);
 		setFrameIcon(LGM.findIcon("restree/gm.png")); //$NON-NLS-1$
-		GroupLayout layout = new GroupLayout(getContentPane());
-		setLayout(layout);
-		setResizable(false);
-		this.es = es;
+		this.oldEs = es;
+		this.es = es.copy();
+
+		fc = new CustomFileChooser("/org/enigma","LAST_SETTINGS_DIR"); //$NON-NLS-1$ //$NON-NLS-2$
+		fc.setFileFilter(new CustomFileFilter(".esf","Enigma Settings File")); //$NON-NLS-1$
+
+		toolbar = makeToolBar();
+		add(toolbar,BorderLayout.NORTH);
+		add(makeSettings(),BorderLayout.CENTER);
+		pack();
+		}
+
+	private JToolBar makeToolBar()
+		{
+		JToolBar tool = new JToolBar();
+		tool.setFloatable(false);
+
+		// Setup the buttons
+		save = new JButton(LGM.getIconForKey("ResourceFrame.SAVE")); //$NON-NLS-1$
+		save.setRequestFocusEnabled(false);
+		save.addActionListener(this);
+		tool.add(save);
+		tool.addSeparator();
+
+		loadFile = new JButton(LGM.getIconForKey("LGM.OPEN"));
+		loadFile.setToolTipText("Load from file");
+		loadFile.setRequestFocusEnabled(false);
+		loadFile.addActionListener(this);
+		tool.add(loadFile);
+		saveFile = new JButton(LGM.getIconForKey("LGM.SAVEAS"));
+		saveFile.setToolTipText("Save to file");
+		saveFile.setRequestFocusEnabled(false);
+		saveFile.addActionListener(this);
+		tool.add(saveFile);
+
+		tool.addSeparator();
+		return tool;
+		}
+
+	private JPanel makeSettings()
+		{
+		JPanel p = new JPanel();
+		GroupLayout layout = new GroupLayout(p);
+		p.setLayout(layout);
 
 		JPanel compatPane = makeCompatPane();
 		JPanel advPane = makeAdvPane();
@@ -240,11 +294,6 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		bInit.addActionListener(this);
 		bClean.addActionListener(this);
 
-		bSave = new JButton("Save");
-		bSave.addActionListener(this);
-		bDiscard = new JButton("Discard");
-		bDiscard.addActionListener(this);
-
 		layout.setHorizontalGroup(layout.createParallelGroup()
 		/**/.addComponent(compatPane)
 		/**/.addComponent(advPane)
@@ -253,12 +302,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/*	*/.addComponent(bGlobLoc))
 		/**/.addGroup(layout.createSequentialGroup()
 		/*	*/.addComponent(bInit)
-		/*	*/.addComponent(bClean))
-		/**/.addGroup(layout.createSequentialGroup()
-		/*		*/.addContainerGap()
-		/*		*/.addComponent(bSave,DEFAULT_SIZE,DEFAULT_SIZE,MAX_VALUE)
-		/*		*/.addComponent(bDiscard,DEFAULT_SIZE,DEFAULT_SIZE,MAX_VALUE)
-		/*		*/.addContainerGap()));
+		/*	*/.addComponent(bClean)));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 		/**/.addComponent(compatPane)
 		/**/.addComponent(advPane)
@@ -268,12 +312,146 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/**/.addGroup(layout.createParallelGroup()
 		/*	*/.addComponent(bInit)
 		/*	*/.addComponent(bClean))
-		/**/.addPreferredGap(ComponentPlacement.UNRELATED)
-		/**/.addGroup(layout.createParallelGroup()
-		/*		*/.addComponent(bSave)
-		/*		*/.addComponent(bDiscard))
 		/**/.addContainerGap());
-		pack();
+
+		return p;
+		}
+
+	public void loadFromFile()
+		{
+		fc.setDialogTitle("File to load information from");
+		while (true)
+			{
+			if (fc.showOpenDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
+			if (fc.getSelectedFile().exists()) break;
+			JOptionPane.showMessageDialog(null,
+					fc.getSelectedFile().getName() + Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
+					"File to load information from",JOptionPane.WARNING_MESSAGE);
+			}
+		try
+			{
+			FileInputStream i = new FileInputStream(fc.getSelectedFile());
+			int ver = i.read();
+			if (ver != 1) throw new IOException("Incorrect version: " + ver);
+			es.cppStrings = i.read();
+			es.cppOperators = i.read();
+			es.cppEquals = i.read();
+			es.literalHandling = i.read();
+			es.structHandling = i.read();
+
+			es.instanceTypes = i.read();
+			es.storageClass = i.read();
+
+			es.definitions = readStr(i);
+			if (!es.definitions.equals(sDef.getCode()))
+				{
+				es.definitions = sDef.getCode();
+				es.saveDefinitions();
+				if (EnigmaRunner.GCC_LOCATED) EnigmaRunner.DRIVER.whitespaceModified(es.definitions);
+				}
+			es.globalLocals = readStr(i);
+			es.initialization = readStr(i);
+			es.cleanup = readStr(i);
+			setComponents(es);
+			i.close();
+			}
+		catch (IOException e)
+			{
+			e.printStackTrace();
+			}
+		}
+
+	public void saveToFile()
+		{
+		commitChanges();
+		fc.setDialogTitle("File to write information to"); //$NON-NLS-1$
+		if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+		String name = fc.getSelectedFile().getPath();
+		if (CustomFileFilter.getExtension(name) == null) name += ".esf"; //$NON-NLS-1$
+		try
+			{
+			FileOutputStream i = new FileOutputStream(new File(name));
+
+			i.write(1);
+			i.write(es.cppStrings);
+			i.write(es.cppOperators);
+			i.write(es.cppEquals);
+			i.write(es.literalHandling);
+			i.write(es.structHandling);
+
+			i.write(es.instanceTypes);
+			i.write(es.storageClass);
+
+			writeStr(i,es.definitions);
+			writeStr(i,es.globalLocals);
+			writeStr(i,es.initialization);
+			writeStr(i,es.cleanup);
+			i.close();
+
+			i.close();
+			}
+		catch (Exception e)
+			{
+			e.printStackTrace();
+			}
+		}
+
+	String readStr(InputStream is) throws IOException
+		{
+		int a = is.read();
+		int b = is.read();
+		int c = is.read();
+		int d = is.read();
+		int size = (a | (b << 8) | (c << 16) | (d << 24));
+
+		byte data[] = new byte[size];
+		is.read(data);
+		return new String(data,GmStreamDecoder.CHARSET);
+		}
+
+	void writeStr(OutputStream os, String str) throws IOException
+		{
+		int val = str.length();
+		os.write(val & 255);
+		os.write((val >>> 8) & 255);
+		os.write((val >>> 16) & 255);
+		os.write((val >>> 24) & 255);
+		os.write(str.getBytes(GmStreamDecoder.CHARSET));
+		}
+
+	public void updateResource()
+		{
+		commitChanges();
+		oldEs = es.copy();
+		}
+
+	public void commitChanges()
+		{
+		es.cppStrings = strings.getValue();
+		es.cppOperators = increment.getValue();
+		es.literalHandling = literal.getValue();
+		es.structHandling = struct.getValue();
+
+		es.instanceTypes = instance.getValue();
+		es.storageClass = storage.getValue();
+
+		es.definitions = sDef.getCode();
+		es.globalLocals = sGlobLoc.getCode();
+		es.initialization = sInit.getCode();
+		es.cleanup = sClean.getCode();
+		}
+
+	public void revertResource()
+		{
+		setComponents(oldEs);
+		}
+
+	public boolean resourceChanged()
+		{
+		commitChanges();
+		ReflectionComparator rc = new SimpleCasesComparator(new CollectionComparator(new MapComparator(
+				new ObjectComparator(null))));
+		return !rc.areEqual(oldEs,es);
 		}
 
 	@Override
@@ -281,17 +459,22 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		{
 		Object s = e.getSource();
 
-		if (s == bSave)
+		if (s == save)
 			{
-			commitChanges();
+			updateResource();
 			setVisible(false);
 			return;
 			}
 
-		if (s == bDiscard)
+		if (s == loadFile)
 			{
-			setComponents(es);
-			setVisible(false);
+			loadFromFile();
+			return;
+			}
+
+		if (s == saveFile)
+			{
+			saveToFile();
 			return;
 			}
 
@@ -321,6 +504,35 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			}
 		}
 
+	protected void fireInternalFrameEvent(int id)
+		{
+		if (id == InternalFrameEvent.INTERNAL_FRAME_CLOSING)
+			{
+			if (resourceChanged())
+				{
+				int ret = JOptionPane.showConfirmDialog(LGM.frame,
+						Messages.format("ResourceFrame.KEEPCHANGES","Enigma Settings"), //$NON-NLS-1$
+						Messages.getString("ResourceFrame.KEEPCHANGES_TITLE"),JOptionPane.YES_NO_CANCEL_OPTION); //$NON-NLS-1$
+				if (ret == JOptionPane.YES_OPTION)
+					{
+					updateResource();
+					setVisible(false);
+					}
+				else if (ret == JOptionPane.NO_OPTION)
+					{
+					revertResource();
+					setVisible(false);
+					}
+				}
+			else
+				{
+				updateResource();
+				setVisible(false);
+				}
+			}
+		super.fireInternalFrameEvent(id);
+		}
+
 	private final InternalFrameListener ifl = new CodeFrameListener();
 
 	private class CodeFrameListener extends InternalFrameAdapter
@@ -330,7 +542,12 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			CodeFrame cf = (CodeFrame) e.getSource();
 			if (cf == cfDef)
 				{
-				es.saveDefinitions();
+				if (!es.definitions.equals(sDef.getCode()))
+					{
+					es.definitions = sDef.getCode();
+					es.saveDefinitions();
+					if (EnigmaRunner.GCC_LOCATED) EnigmaRunner.DRIVER.whitespaceModified(es.definitions);
+					}
 				cfDef = null;
 				}
 			if (cf == cfGlobLoc) cfGlobLoc = null;
@@ -346,27 +563,6 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		LGM.mdi.add(cf);
 		LGM.mdi.addZChild(this,cf);
 		return cf;
-		}
-
-	public void commitChanges()
-		{
-		es.cppStrings = strings.getValue();
-		es.cppOperators = increment.getValue();
-		es.literalHandling = literal.getValue();
-		es.structHandling = struct.getValue();
-
-		es.instanceTypes = instance.getValue();
-		es.storageClass = storage.getValue();
-
-		if (!es.definitions.equals(sDef.getCode()))
-			{
-			es.definitions = sDef.getCode();
-			es.saveDefinitions();
-			if (EnigmaRunner.GCC_LOCATED) EnigmaRunner.DRIVER.whitespaceModified(es.definitions);
-			}
-		es.globalLocals = sGlobLoc.getCode();
-		es.initialization = sInit.getCode();
-		es.cleanup = sClean.getCode();
 		}
 
 	public void setComponents(EnigmaSettings es)
@@ -385,68 +581,5 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		sGlobLoc.setCode(es.globalLocals);
 		sInit.setCode(es.initialization);
 		sClean.setCode(es.cleanup);
-		}
-
-	public static class EnigmaSettings
-		{
-		//Compatibility / Progess options
-		int cppStrings = 0; // Defines what language strings are inherited from.               0 = GML,               1 = C
-		int cppOperators = 0; // Defines what language operators ++ and -- are inherited from. 0 = GML,               1 = C
-		int cppEquals = 0; // Defines whether = should be exclusively treated as a setter.     0 = GML (= or ==)      1 = C (= only)
-		int literalHandling = 0; // Determines how literals are treated.                       0 = enigma::variant,   1 = C-scalar
-		int structHandling = 0; // Defines behavior of the closing brace of struct {}.         0 = Implied semicolon, 1 = ISO C
-
-		//Advanced options
-		int instanceTypes = 0; // Defines how to represent instances.           0 = Integer, 1 = Pointer
-		int storageClass = 0; // Determines how instances are stored in memory. 0 = Map,     1 = List,    2 = Array
-
-		String definitions = "", globalLocals = "";
-		String initialization = "", cleanup = "";
-
-		public EnigmaSettings()
-			{
-			loadDefinitions();
-			}
-
-		void loadDefinitions()
-			{
-			definitions = fileToString(new File(LGM.workDir.getParentFile(),"definitions.h"));
-			}
-
-		public void saveDefinitions()
-			{
-			writeString(new File(LGM.workDir.getParentFile(),"definitions.h"),definitions);
-			}
-
-		String fileToString(File f)
-			{
-			StringBuffer sb = new StringBuffer(1024);
-			try
-				{
-				FileReader in = new FileReader(f);
-				char[] cbuf = new char[1024];
-				int size = 0;
-				while ((size = in.read(cbuf)) > -1)
-					sb.append(cbuf,0,size);
-				in.close();
-				}
-			catch (IOException e)
-				{
-				}
-			return sb.toString();
-			}
-
-		void writeString(File f, String s)
-			{
-			try
-				{
-				PrintStream ps = new PrintStream(f);
-				ps.print(s);
-				ps.close();
-				}
-			catch (FileNotFoundException e)
-				{
-				}
-			}
 		}
 	}
