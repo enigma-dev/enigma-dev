@@ -74,7 +74,6 @@
 
 
 
-#include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
 #include "Universal_System/switch_stuff.h"
 #include "Universal_System/CallbackArrays.h"
 
@@ -99,7 +98,6 @@ extern int amain();
 
 #include "Universal_System/globalupdate.h"
 
-#include "Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h"
 #include "Universal_System/WITHconstruct.h"
 #include "Universal_System/OBJaccess.h"
 
@@ -115,6 +113,7 @@ extern int amain();
 
 #ifndef ENIGMA_PARSER_RUN
   #include "Universal_System/with.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"
@@ -127,7 +126,6 @@ extern int amain();
   #if BUILDMODE
     #include "Modes/buildmode.h"
   #endif
+  
+  #include "Universal_System/instance_create.h"
 #endif
-
-#include "Universal_System/instance_create.h"
-

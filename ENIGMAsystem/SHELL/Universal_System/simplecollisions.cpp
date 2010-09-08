@@ -42,7 +42,7 @@ bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2)
   for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
   {
     const enigma::object_collisions* inst = (enigma::object_collisions*)it->inst;
-    const int ox = inst->x,         oy = inst->y,
+    const int ox = (int)inst->x,         oy = (int)inst->y,
               bl = inst->bbox_left, br = inst->bbox_right,
               bt = inst->bbox_top,  bb = inst->bbox_bottom;
     if (x1<ox+br && x2>ox+bl && y1<oy+bb && y2>oy+bt)
@@ -60,7 +60,7 @@ void draw_bbox_rects(int object,double x1,double y1,double x2,double y2)
   for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
   {
     const enigma::object_collisions* inst = (enigma::object_collisions*)it->inst;
-    const int ox = inst->x,         oy = inst->y,
+    const int ox = (int)inst->x,         oy = (int)inst->y,
               bl = inst->bbox_left, br = inst->bbox_right,
               bt = inst->bbox_top,  bb = inst->bbox_bottom;
     draw_set_color(c_green);

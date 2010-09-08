@@ -95,6 +95,17 @@ void clear_ide_editables()
            "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n#define COLLIGMA  0\n";
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
+  
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
+    wto << license;
+    wto << "#define ASSUMEZERO 0\n";
+    wto << "#define PRIMBUFFER 0\n";
+    wto << "#define PRIMDEPTH2 6\n";
+    wto << "#define AUTOLOCALS 0\n";
+    wto << "#define MODE3DVARS 0\n";
+    wto << "void ABORT_ON_ALL_ERRORS() { }\n";
+    wto << '\n';
+  wto.close();
 }
 
 // modes: 0=run, 1=debug, 2=build, 3=compile
