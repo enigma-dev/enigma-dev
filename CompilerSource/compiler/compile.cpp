@@ -77,30 +77,6 @@ string fc(const char*);
 void clear_ide_editables()
 {
   ofstream wto;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h",ios_base::out); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_eventpointers.h"); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_wildclass.cpp"); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h"); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.cpp"); wto.close();
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.h"); wto.close();
-
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h",ios_base::out);
-    wto << "int instdata[] = { 0 }; //Empty until game is built via ENIGMA\n";
-    //wto << "enigma::room_max = 1;\nenigma::maxid = 100001;\n";
-  wto.close();
-
-//FIXME: Accessors are required for sprite_width and height, as well as all bbox_ variables
-  
-  
   string f2comp = fc("ENIGMAsystem/SHELL/API_Switchboard.h");
   string f2write = license;
     f2write += "#define " TARGET_PLATFORM_GRAPHICS " 1\n#define " TARGET_PLATFORM_NAME " 1\n";
@@ -119,7 +95,6 @@ void clear_ide_editables()
            "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n#define COLLIGMA  0\n";
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
-
 }
 
 // modes: 0=run, 1=debug, 2=build, 3=compile
