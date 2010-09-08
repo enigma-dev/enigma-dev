@@ -59,3 +59,7 @@ struct EnigmaStruct
 	int lastInstanceId;
 	int lastTileId;
 };
+
+#undef String
+#undef boolean
+#undef byte

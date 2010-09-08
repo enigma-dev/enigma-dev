@@ -137,7 +137,7 @@ int establish_bearings()
 
   //Read the search dirs
   fclose(fopen("blank.txt","wb"));
-  int sdfail = better_system(GCC_location, "-E -x c++ -v blank.txt", "2>", "searchdirs.txt"); //For some reason, the info we want is written to stderr
+  int sdfail = better_system(GCC_location, "-E -x c++ -v blank.txt", "&>", "searchdirs.txt"); //For some reason, the info we want is written to stderr on Linux
   if (sdfail) {
     cout << "Failed to read search directories. Error 5.\n";
     return 5;

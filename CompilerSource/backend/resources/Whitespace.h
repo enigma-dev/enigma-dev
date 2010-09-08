@@ -6,7 +6,6 @@
  * See LICENSE for details.
  */
 
-#include "JavaStruct.h"
 #include "resources/Sprite.h"
 
 struct Keywords {

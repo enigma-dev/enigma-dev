@@ -8,7 +8,7 @@
 
 #ifndef JAVASTRUCT_H
 #define JAVASTRUCT_H
-typedef const char* String;
-typedef int boolean;
-typedef char byte;
+#define String const char*
+#define boolean int
+#define byte unsigned char
 #endif

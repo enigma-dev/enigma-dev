@@ -24,17 +24,17 @@ else ifeq ($(OS), Darwin)
 	ENDCREMOVE :=
 	SLASHC := /
 else
-	CREMOVE := del /Q \'
-	ENDCREMOVE :=\'
+	CREMOVE := del /Q '
+	ENDCREMOVE :='
 	SLASHC := \\
 endif
 
 clean:
 	echo $(OS)
-	cd Graphics_Systems/OpenGL/ 	&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd Graphics_Systems/OpenGLES/ 	&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd Audio_Systems/OpenAL/ 		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd Platforms/windows/ 			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd Platforms/xlib/ 				&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd Universal_System/			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
-	cd Collision_Systems/none		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)"
+	cd Graphics_Systems/OpenGL/ 	&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
+	cd Graphics_Systems/OpenGLES/ 	&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
+	cd Audio_Systems/OpenAL/ 		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
+	cd Platforms/windows/ 			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
+	cd Platforms/xlib/ 				&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
+	cd Universal_System/			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
+	cd Collision_Systems/none		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"

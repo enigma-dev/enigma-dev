@@ -69,7 +69,10 @@ int better_system(string program,string arguments, string redirchar = "", const 
       if (of != NULL)
       {
         StartupInfo.dwFlags = STARTF_USESTDHANDLES;
-        if (redirchar == ">" or redirchar == "1>" or redirchar == "2>") StartupInfo.hStdOutput = of;
+        StartupInfo.hStdInput = GetStdHandle((DWORD)-10);
+        StartupInfo.hStdOutput = GetStdHandle((DWORD)-11);
+        StartupInfo.hStdError = GetStdHandle((DWORD)-12);
+        if (redirchar == ">" or redirchar == "1>" or redirchar == "&>") StartupInfo.hStdOutput = of;
         if (redirchar == "2>" or redirchar == "&>") StartupInfo.hStdError = of;
       }
     }
