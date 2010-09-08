@@ -84,6 +84,9 @@ dllexport int libInit(EnigmaCallbacks* ecs)
   ide_dia_progress = ecs->dia_progress;
   ide_dia_progress_text = ecs->dia_progress_text;
   
+  ide_output_redirect_file = ecs->output_redirect_file;
+  ide_output_redirect_reset = ecs->output_redirect_reset;
+  
   int a = establish_bearings();
   if (a) {
     cout << "ERROR: See scrollback for information.\n";

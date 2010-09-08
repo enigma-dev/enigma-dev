@@ -89,7 +89,7 @@ int better_system(string program,string arguments, string redirchar = "", const 
     
     if (of) CloseHandle(of);
   #else
-    string rd = redirf ? " " + redirchar + " " + string(redirf) : "";
+    string rd = redirf ? ((redirchar == "&>") ? " 1>" + string(redirf) + " 2>&1" : " " + redirchar + " " + string(redirf)) : "";
     string cmd = program + " " + arguments + rd;
     cout << cmd << endl;
     exit_status = system(cmd.c_str());

@@ -30,11 +30,16 @@
 
 #include "../general/darray.h"
 
+ #include <cstdio>
+ 
 #ifdef _WIN32
  #define dllexport extern "C" __declspec(dllexport)
+ #include <windows.h>
+ #define sleep Sleep
 #else
  #define dllexport extern "C"
- #include <cstdio>
+ #include <unistd.h>
+ #define sleep(x) usleep(x * 1000)
 #endif
 
 #define idpr(x,y) \
@@ -398,15 +403,26 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
 //  #if TARGET_PLATFORM_ID == OS_MACOSX
   //int makeres = better_system("cd ","/MacOS/");
 //  int makeres = better_system(MAKE_location,"MacOS");
+  
+  // Pick a file
+  const char* redirfile = "redirfile.txt";
+  
+  // Redirect it
+  ide_output_redirect_file(redirfile);
+  
   #if TARGET_PLATFORM_ID == OS_IPHONE
     #if IPHONE_DEVICE == 1
-    int makeres = better_system(MAKE_location,"iphonedevice");//iphone |iphonedevice
+    int makeres = better_system(MAKE_location,"iphonedevice","&>",redirfile);//iphone |iphonedevice
     #else
-    int makeres = better_system(MAKE_location,"iphone");//iphone |iphonedevice
+    int makeres = better_system(MAKE_location,"iphone","&>",redirfile);//iphone |iphonedevice
     #endif
   #else
-  int makeres = better_system(MAKE_location,make);
+  int makeres = better_system(MAKE_location,make,"&>",redirfile);
   #endif
+  
+  // Stop redirecting GCC output
+  ide_output_redirect_reset();
+  
   if (makeres) {
     user << "----Make returned error " << makeres << "----------------------------------\n";
     idpr("Compile failed at C++ level.",-1); return E_ERROR_BUILD;
@@ -478,8 +494,10 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
+  
+  // Take a chill pill so the filesystem can settle
 
-  if (mode == emode_run or mode == emode_build or true)
+  if (mode == emode_run or mode == emode_build)
   {
     #if TARGET_PLATFORM_ID ==  OS_MACOSX
     int gameres = better_system("open",gameFname);

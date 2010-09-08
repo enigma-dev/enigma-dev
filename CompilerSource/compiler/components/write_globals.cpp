@@ -49,5 +49,6 @@ int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
     //for (globit i = global->dots.begin(); i != global->globals.end(); i++)
     //  wto << i->second->type << " " << i->second->prefixes << i->second->name << i->second->suffixes << ";" << endl;
     wto << endl;
+  wto.close();
   return 0;
 }

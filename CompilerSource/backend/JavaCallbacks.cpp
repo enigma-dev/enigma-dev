@@ -41,3 +41,8 @@ void (*ide_dia_clear) () = javano_signal;
 void (*ide_dia_progress) (int) = javano_signal_i;
 //Applies a given text to the progress bar
 void (*ide_dia_progress_text) (const char *) = javano_signal_cstr;
+
+//Applies a given text to the progress bar
+void (*ide_output_redirect_file) (const char *) = javano_signal_cstr;
+//Opens the EnigmaFrame
+void (*ide_output_redirect_reset) () = javano_signal;

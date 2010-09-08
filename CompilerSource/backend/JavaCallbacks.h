@@ -24,6 +24,13 @@ struct EnigmaCallbacks
 
  //Applies a given text to the progress bar
  void (*dia_progress_text) (const char *);
+ 
+ 
+ //Sets the file from which data is redirected.
+ void (*output_redirect_file) (const char *);
+ 
+ //Ceases to redirect from a file.
+ void (*output_redirect_reset) ();
 };
 
 //Opens the EnigmaFrame
@@ -36,4 +43,8 @@ extern void (*ide_dia_clear) ();
 extern void (*ide_dia_progress) (int);
 //Applies a given text to the progress bar
 extern void (*ide_dia_progress_text) (const char *);
-
+ 
+//Sets the file from which data is redirected.
+extern void (*ide_output_redirect_file) (const char *);
+//Ceases to redirect from a file.
+extern void (*ide_output_redirect_reset) ();
