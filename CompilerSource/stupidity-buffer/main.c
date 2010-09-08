@@ -32,6 +32,21 @@
 
 using namespace std;
 
+string fixdrive(string p)
+{
+  if (p[0] == '\\' or p[0]=='/')
+    return p;
+  
+  size_t bs = GetCurrentDirectory(0,NULL);
+  
+  char buf[bs];
+  GetCurrentDirectory(bs,buf);
+  
+  if (((*buf >= 'A' and *buf <= 'Z') or (*buf >= '0' and *buf <= '9')) and buf[1] == ':')
+    return string(buf,2) + p;
+  return p;
+}
+
 int better_system(const char* jname, const char* param)
 {
   DWORD exit_status;
@@ -94,9 +109,9 @@ int main()
       {
         if (MessageBox(NULL,"ENIGMA will now run the MinGW installer. It should default to C:\\MinGW, or whatever your main drive is in place of C:\\. "
                             "Such is the recommended location (it's easiest to find).\n\nWhen prompted, please check that you would like three items:\n"
-                            " = The GCC C Compiler\n"
-                            " = The G++ C++ Compiler\n"
-                            " = The GDB GNU Debugging Program", "MinGW Install", MB_OKCANCEL) == IDCANCEL)
+                            " = The GCC C Compiler (If it's on the list, which it probably won't be)\n"
+                            " = The G++ C++ Compiler (Make sure this is checked! It's probably called just \"g++ compiler\")\n"
+                            " = The GDB GNU Debugging Program (If this isn't on the list, don't worry)", "MinGW Install", MB_OKCANCEL) == IDCANCEL)
         {
           MessageBox(NULL, "Don't you cancel on me. <__<\"\nAll you had to do was run through the installer.\n\n*sigh*, We'll see how this works for you, then I'll ask you again next time.", "ENIGMA", MB_OK);
           goto confused_cancel;
@@ -118,7 +133,7 @@ int main()
   }
   else { 
     printf("Make detected. Accessile from `%s`. Informing the Environment.\n\n", mpath);
-    if (FILE *tf = fopen("winmake.txt","wb")) { fputs(mpath, tf); fclose(tf); }
+    if (FILE *tf = fopen("winmake.txt","wb")) { fputs(fixdrive(mpath).c_str(), tf); fclose(tf); }
   }
   
   puts("Scouring for Java");
@@ -144,7 +159,7 @@ int main()
     better_system(jpath,"-jar l*.jar");
   }
   else
-    puts("Could not find Java.exe. You could try adding it to your PATH variable.");
+    puts("Could not find Java.exe. Please install Sun's Java runtime environment so LGM can run.\r\nhttp://www.java.com/en/download/manual.jsp\r\n\r\nIf you already have Java, You could try adding it to your PATH variable.");
   system("pause");
   return 0;
 }
