@@ -78,22 +78,6 @@ int instance_number(int obj)
 //TODO: Move these to an instance_planar
 #include "planar_object.h"
 
-int instance_position(int x,int y,int obj)
-{
-  int xl,yl;
-  int xc=(int)x,yc=(int)y;
-  
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(obj); it != NULL; it = it->next)
-  {
-    xl=(int)((enigma::object_planar*)it->inst)->x;
-    yl=(int)((enigma::object_planar*)it->inst)->y;
-    
-    if (xl==xc && yl==yc)
-    return (int)it->inst->id;
-  }
-  return noone;
-}
-
 //TODO: replace all these fucking enigma::instance_iterators with enigma::institer_t i or something
 
 int instance_nearest(int x,int y,int obj)
@@ -139,7 +123,7 @@ int instance_furthest(int x,int y,int obj)
   return retid;
 }
 
-int instance_place(int x,int y,int obj)
+int instance_position(int x,int y,int obj)
 {
   for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(obj); it != NULL; it = it->next)
   {
