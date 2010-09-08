@@ -369,8 +369,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		 */
 		catch (NoClassDefFoundError e)
 			{
-			String error = "SvnKit missing, corrupted, or unusable. Please download and "
-					+ "place next to the enigma plugin in order to enable auto-update.";
+			String error = "Auto-update disabled: SvnKit missing, corrupted, or unusable."
+					+ "Please download to plugins/shared/svnkit.jar in order to enable auto-update.";
 			System.err.println(error);
 			return false;
 			}
