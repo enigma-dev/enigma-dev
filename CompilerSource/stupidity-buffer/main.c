@@ -141,15 +141,23 @@ int main()
   a = better_system(jpath, "-version");
   if (a)
   {
-    a = better_system(jpath = "\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version");
+    a = better_system(jpath = "%programfiles%\\Java\\jre6\\bin\\java.exe", "-version"); // This should hopefully take care of most of it
     if (a)
     {
-      a = better_system(jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe", "-version");
+      a = better_system(jpath = "%programfiles(x86)%\\Java\\jre6\\bin\\java.exe", "-version"); //One would think this would take care of the rest
       if (a)
       {
-        a = better_system(jpath = "C:\\Program Files\\Java\\jre6\\bin\\java.exe", "-version"); //At this point, they're probably running something that uses C:.
+        a = better_system(jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe", "-version");
         if (a)
-          a = better_system(jpath = "C:\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version"); //What a fucked up configuration. *cough* dazappa *cough*
+        {
+          a = better_system(jpath = "\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version");
+          if (a)
+          {
+            a = better_system(jpath = "C:\\Program Files\\Java\\jre6\\bin\\java.exe", "-version"); //At this point, they're probably running something that uses C:.
+            if (a)
+              a = better_system(jpath = "C:\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version"); //What a fucked up configuration. *cough* dazappa *cough*
+          }
+        }
       }
     }
   }
