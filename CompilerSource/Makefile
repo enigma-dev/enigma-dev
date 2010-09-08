@@ -18,21 +18,27 @@ ifeq ($(OS), Linux)
 	CREMOVE := rm -f 
 	ENDCREMOVE := 
 	SLASHC := /
+else ifeq ($(OS), Darwin)
+	ONAME := ../libcompileEGMf.dylib
+	INPLACEPARAM := -fPIC
+	CREMOVE := rm -f 
+	ENDCREMOVE := 
+	SLASHC := /
 else
 	ONAME := ..\\compileEGMf.dll
 	INPLACEPARAM := 
-	CREMOVE := del /Q \'
-	ENDCREMOVE := \'
+	CREMOVE := del /Q \"
+	CREMOVE := del /Q \"
 	SLASHC := \\
 endif
 
 # default target (because it appears first)
 default: $(ONAME)
 
-.eobjs/ideprint.o: backend/ideprint.cpp backend/ideprint.h general/estring.h backend/JavaCallbacks.h
-	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  backend/ideprint.cpp		-o .eobjs/ideprint.o $(FLAGS)
 .eobjs/JavaCallbacks.o: backend/JavaCallbacks.cpp
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  backend/JavaCallbacks.cpp		-o .eobjs/JavaCallbacks.o $(FLAGS)
+.eobjs/ideprint.o: backend/ideprint.cpp backend/ideprint.h general/estring.h backend/JavaCallbacks.h
+	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  backend/ideprint.cpp		-o .eobjs/ideprint.o $(FLAGS)
 .eobjs/cfile_parse.o: cfile_parse/cfile_parse.cpp general/darray.h general/implicit_stack.h cfile_parse/value.h cfile_parse/expression_evaluator_settings.h externs/externs.h externs/references.h cfile_parse/expression_evaluator.h cfile_parse/cfile_pushing.h cfile_parse/cparse_shared.h cfile_parse/cfile_parse_constants.h cfile_parse/cfile_parse_calls.h general/parse_basics.h cfile_parse/cfile_parse.h cfile_parse/cparse_components.h cfile_parse/handle_letters.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  cfile_parse/cfile_parse.cpp		-o .eobjs/cfile_parse.o $(FLAGS)
 .eobjs/cfile_parse_macros.o: cfile_parse/cfile_parse_macros.cpp general/darray.h general/implicit_stack.h cfile_parse/value.h cfile_parse/expression_evaluator_settings.h externs/externs.h externs/references.h cfile_parse/expression_evaluator.h general/parse_basics.h cfile_parse/cfile_pushing.h cfile_parse/cparse_shared.h cfile_parse/cfile_parse_constants.h
@@ -59,18 +65,18 @@ default: $(ONAME)
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  cfile_parse/template_handlers.cpp		-o .eobjs/template_handlers.o $(FLAGS)
 .eobjs/type_resolver.o: cfile_parse/type_resolver.cpp cfile_parse/type_resolver.h externs/externs.h general/darray.h externs/references.h parser/object_storage.h general/parse_basics.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  cfile_parse/type_resolver.cpp		-o .eobjs/type_resolver.o $(FLAGS)
-.eobjs/compile_common.o: compiler/compile_common.cpp parser/object_storage.h general/darray.h compiler/compile_organization.h
-	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  compiler/compile_common.cpp		-o .eobjs/compile_common.o $(FLAGS)
 .eobjs/compile.o: compiler/compile.cpp OS_Switchboard.h backend/EnigmaStruct.h backend/JavaStruct.h backend/resources/Sprite.h backend/sub/Image.h backend/resources/Sound.h backend/resources/Background.h backend/resources/Path.h backend/sub/PathPoint.h backend/resources/Script.h backend/resources/Font.h backend/resources/Timeline.h backend/sub/Moment.h backend/sub/Action.h backend/resources/GmObject.h backend/sub/MainEvent.h backend/sub/Event.h backend/resources/Room.h backend/sub/BackgroundDef.h backend/sub/Instance.h backend/sub/Tile.h backend/sub/View.h backend/other/Trigger.h backend/other/Constant.h backend/other/Include.h general/darray.h backend/ideprint.h backend/JavaCallbacks.h externs/externs.h externs/references.h syntax/syncheck.h parser/parser.h parser/object_storage.h compiler/compile_includes.h compiler/compile_common.h compiler/compile_organization.h settings-parse/crawler.h compiler/components/components.h gcc_interface/gcc_backend.h general/bettersystem.h compiler/event_reader/event_parser.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  compiler/compile.cpp		-o .eobjs/compile.o $(FLAGS)
+.eobjs/compile_common.o: compiler/compile_common.cpp parser/object_storage.h general/darray.h compiler/compile_organization.h
+	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  compiler/compile_common.cpp		-o .eobjs/compile_common.o $(FLAGS)
 .eobjs/compile_includes.o: compiler/compile_includes.cpp general/estring.h general/darray.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  compiler/compile_includes.cpp		-o .eobjs/compile_includes.o $(FLAGS)
 .eobjs/output_locals.o: compiler/output_locals.cpp
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  compiler/output_locals.cpp		-o .eobjs/output_locals.o $(FLAGS)
-.eobjs/externs.o: externs/externs.cpp general/darray.h externs/externs.h externs/references.h cfile_parse/cparse_shared.h cfile_parse/cfile_parse_constants.h general/parse_basics.h
-	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  externs/externs.cpp		-o .eobjs/externs.o $(FLAGS)
 .eobjs/ext_iteration.o: externs/ext_iteration.cpp general/darray.h externs/externs.h externs/references.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  externs/ext_iteration.cpp		-o .eobjs/ext_iteration.o $(FLAGS)
+.eobjs/externs.o: externs/externs.cpp general/darray.h externs/externs.h externs/references.h cfile_parse/cparse_shared.h cfile_parse/cfile_parse_constants.h general/parse_basics.h
+	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  externs/externs.cpp		-o .eobjs/externs.o $(FLAGS)
 .eobjs/references.o: externs/references.cpp externs/references.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  externs/references.cpp		-o .eobjs/references.o $(FLAGS)
 .eobjs/file_find.o: filesystem/file_find.cpp OS_Switchboard.h
@@ -89,10 +95,10 @@ default: $(ONAME)
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  parser/collect_variables.cpp		-o .eobjs/collect_variables.o $(FLAGS)
 .eobjs/object_storage.o: parser/object_storage.cpp general/darray.h parser/object_storage.h externs/externs.h externs/references.h settings-parse/crawler.h backend/ideprint.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  parser/object_storage.cpp		-o .eobjs/object_storage.o $(FLAGS)
-.eobjs/parser_components.o: parser/parser_components.cpp general/darray.h externs/externs.h externs/references.h general/parse_basics.h compiler/output_locals.h settings.h cfile_parse/macro_functions.h
-	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  parser/parser_components.cpp		-o .eobjs/parser_components.o $(FLAGS)
 .eobjs/parser.o: parser/parser.cpp externs/externs.h general/darray.h externs/references.h parser/parser_components.h general/parse_basics.h parser/object_storage.h parser/collect_variables.h cfile_parse/type_resolver.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  parser/parser.cpp		-o .eobjs/parser.o $(FLAGS)
+.eobjs/parser_components.o: parser/parser_components.cpp general/darray.h externs/externs.h externs/references.h general/parse_basics.h compiler/output_locals.h settings.h cfile_parse/macro_functions.h
+	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  parser/parser_components.cpp		-o .eobjs/parser_components.o $(FLAGS)
 .eobjs/crawler.o: settings-parse/crawler.cpp filesystem/file_find.h settings-parse/crawler.h settings-parse/eyaml.h parser/object_storage.h general/darray.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(INPLACEPARAM) -c  settings-parse/crawler.cpp		-o .eobjs/crawler.o $(FLAGS)
 .eobjs/eyaml.o: settings-parse/eyaml.cpp settings-parse/eyaml.h general/parse_basics.h
@@ -138,7 +144,7 @@ default: $(ONAME)
 mkeobjs:
 	-mkdir .eobjs
 
-$(ONAME): mkeobjs .eobjs/ideprint.o .eobjs/JavaCallbacks.o .eobjs/cfile_parse.o .eobjs/cfile_parse_macros.o .eobjs/cfile_pushing.o .eobjs/cparse_components.o .eobjs/cparse_shared.o .eobjs/cpmain.o .eobjs/expression_evaluator.o .eobjs/handle_letters.o .eobjs/keyword_operator.o .eobjs/macro_functions.o .eobjs/skipping.o .eobjs/template_handlers.o .eobjs/type_resolver.o .eobjs/compile_common.o .eobjs/compile.o .eobjs/compile_includes.o .eobjs/output_locals.o .eobjs/externs.o .eobjs/ext_iteration.o .eobjs/references.o .eobjs/file_find.o .eobjs/gcc_backend.o .eobjs/bettersystem.o .eobjs/darray.o .eobjs/string.o .eobjs/textfile.o .eobjs/collect_variables.o .eobjs/object_storage.o .eobjs/parser_components.o .eobjs/parser.o .eobjs/crawler.o .eobjs/eyaml.o .eobjs/checkfile.o .eobjs/syntax.o .eobjs/varnames.o .eobjs/module_write_backgrounds.o .eobjs/module_write_sounds.o .eobjs/module_write_sprites.o .eobjs/parse_and_link.o .eobjs/parse_secondary.o .eobjs/write_defragged_events.o .eobjs/write_event_code.o .eobjs/write_globals.o .eobjs/write_object_access.o .eobjs/write_object_data.o .eobjs/write_room_data.o .eobjs/event_parser.o .eobjs/pcs.o .eobjs/main.o
+$(ONAME): mkeobjs .eobjs/JavaCallbacks.o .eobjs/ideprint.o .eobjs/cfile_parse.o .eobjs/cfile_parse_macros.o .eobjs/cfile_pushing.o .eobjs/cparse_components.o .eobjs/cparse_shared.o .eobjs/cpmain.o .eobjs/expression_evaluator.o .eobjs/handle_letters.o .eobjs/keyword_operator.o .eobjs/macro_functions.o .eobjs/skipping.o .eobjs/template_handlers.o .eobjs/type_resolver.o .eobjs/compile.o .eobjs/compile_common.o .eobjs/compile_includes.o .eobjs/output_locals.o .eobjs/ext_iteration.o .eobjs/externs.o .eobjs/references.o .eobjs/file_find.o .eobjs/gcc_backend.o .eobjs/bettersystem.o .eobjs/darray.o .eobjs/string.o .eobjs/textfile.o .eobjs/collect_variables.o .eobjs/object_storage.o .eobjs/parser.o .eobjs/parser_components.o .eobjs/crawler.o .eobjs/eyaml.o .eobjs/checkfile.o .eobjs/syntax.o .eobjs/varnames.o .eobjs/module_write_backgrounds.o .eobjs/module_write_sounds.o .eobjs/module_write_sprites.o .eobjs/parse_and_link.o .eobjs/parse_secondary.o .eobjs/write_defragged_events.o .eobjs/write_event_code.o .eobjs/write_globals.o .eobjs/write_object_access.o .eobjs/write_object_data.o .eobjs/write_room_data.o .eobjs/event_parser.o .eobjs/pcs.o .eobjs/main.o
 	g++ -shared $(INPLACEPARAM) .eobjs/*.o -o $(ONAME)
 
 win windows: $(ONAME)
