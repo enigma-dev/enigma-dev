@@ -97,7 +97,7 @@ public class EnigmaCallbacks extends Structure
 									if (data == -1) break;
 									ef.ta.append("" + (char) data);
 									ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
-									System.out.print(data);
+									System.out.print("" + (char) data);
 									}
 								}
 							in.close();
