@@ -126,7 +126,7 @@ int main()
           }
         }
       }
-      if (tf = fopen("winmake.txt","wb")) { fputs(fixdrive(mpath), tf); fclose(tf); }
+      if (tf = fopen("winmake.txt","wb")) { fputs(fixdrive(mpath).c_str(), tf); fclose(tf); }
       else puts("\nI believe there's something wrong with your system. Ignoring and continuing...\n");
       confused_cancel: ;
     }
@@ -140,9 +140,9 @@ int main()
   const char *jpath = "java";
   
   char buf[MAX_PATH];
-  DWORD WINAPI GetEnvironmentVariable("programfiles", buf, MAX_PATH);
+  GetEnvironmentVariable("programfiles", buf, MAX_PATH);
   string pfp = buf; pfp += "\\Java\\jre6\\bin\\java.exe";
-  DWORD WINAPI GetEnvironmentVariable("programfiles(x86)", buf, MAX_PATH);
+  GetEnvironmentVariable("programfiles(x86)", buf, MAX_PATH);
   string pfx86p = buf; pfx86p += "\\Java\\jre6\\bin\\java.exe";
   
   a = better_system(jpath, "-version");
