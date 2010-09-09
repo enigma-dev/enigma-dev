@@ -602,11 +602,11 @@ namespace syncheck
         
         case '.':
             {
-              if (lastnamed[level] == LN_DIGIT || lastnamed[level]==LN_VARNAME || lastnamed[level]==LN_VALUE)
+              if (lastnamed[level] == LN_DIGIT || lastnamed[level]==LN_VARNAME || lastnamed[level]==LN_VALUE || lastnamed[level]==LN_LOCGLOBAL)
               {
                 pos++;
                 while (is_useless(code[pos])) pos++;
-                if (!is_letter(code[pos])) { error="Identifier expected following `.' symbol"; return pos; }
+                if (!is_letter(code[pos])) { error="Identifier expected following '.' symbol"; return pos; }
                 lastnamed[level]=LN_OPERATOR;
                 continue;
               }
@@ -614,11 +614,12 @@ namespace syncheck
               {
                 //in this case, there could be a number following
                 //Syntax checking on the positioning of the number will be handled next iteration
+                const int dpos = pos;
                 while (is_useless(code[++pos]));
                 if (is_digit(code[pos]))
                 { decimal_named=1; continue; }
                 else
-                { error="Unexpected symbol `.' in expression"; return pos; }
+                { error="Unexpected symbol '.' in expression"; return dpos; }
               }
             }
           break;

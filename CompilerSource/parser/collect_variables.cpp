@@ -190,7 +190,7 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
       if (synt[pos] != 't')
       {
         for (pt i = sp; i < pos; i++)
-          synt[pos] = 'n'; //convert to regular identifier; in this case marking a constant.
+          synt[i] = 'n'; //convert to regular identifier; in this case marking a constant.
         continue;
       }
       //We're at either global declarator or local declarator: record which scope it is.

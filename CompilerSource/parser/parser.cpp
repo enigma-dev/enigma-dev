@@ -207,10 +207,11 @@ pt move_to_beginning(string& code, string& synt, pt pos)
       }
     }
   } // at beginning of function args/array subscripts
-  for (char c = synt[pos--]; pos and synt[pos] == c; pos--) if (!pos) goto hell;
+  for (const char c = synt[pos--]; synt[pos] == c; pos--)
+    if (!pos) goto hell;
   pos++;
-  hell: 
   
+  hell:
   if (pos) {
     if (synt[pos-1] == '.')
       { pos--; goto backloop; }
@@ -229,7 +230,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
   
-  cout << "Fix dots and shit in: \n\n" << code << endl << endl;
+  cout << "Fix dots and shit in: \n\n" << code << endl << synt << endl << endl;
   
   int slev = 0;
   darray<localscope*> sstack;
@@ -305,7 +306,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         }
         code.replace(ebp, exp.length() + 1 + member.length(), repstr);
         synt.replace(ebp, exp.length() + 1 + member.length(), repsyn);
-        cout << code << endl << endl << endl;
+        cout << synt << endl << endl << endl;
       }
       else // There is a member by this name in the type of that expression
       {

@@ -131,6 +131,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       else break; continue;
     }
     
+    cout << synt.substr(0,bpos) << endl;
+    
     if (is_letter(code[pos]))
     {
       //This is a word of some sort. Could be a keyword, a type, a macro... maybe just a varname
@@ -274,12 +276,12 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     {
       if (code[++pos] == '/')
       {
-        while (code[++pos] != '\n' and code[pos] != '\r');
+        while (pos < code.length() and code[++pos] != '\n' and code[pos] != '\r');
         continue;
       }
       else if (code[pos] == '*')
       {
-        while (code[pos++] != '*' or code[pos] != '/');
+        while (pos < code.length() and (code[pos++] != '*' or code[pos] != '/'));
         pos++; continue;
       }
       codo[bpos] = synt[bpos] = last_token = '/', bpos++;
@@ -391,7 +393,7 @@ int parser_reinterpret(string &code,string &synt)
         else if (synt[pos] == '<') pc++;
     }
   }
-  cout << "done. ";
+  cout << "done. " << synt << endl << endl;
   return 0;
 }
 

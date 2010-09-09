@@ -1,3 +1,6 @@
+ass.tit = ass;
+global.tits = ass;
+
 int cfp;
 cfp.x = 0;
 cfp.y = 0;
@@ -25,3 +28,4 @@ if (cat.speed == wasp.speed)
 
 var a;
 a[1,2] = $0FFD00;
+/*

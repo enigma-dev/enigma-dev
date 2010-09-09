@@ -138,13 +138,20 @@ int main()
   
   puts("Scouring for Java");
   const char *jpath = "java";
+  
+  char buf[MAX_PATH];
+  DWORD WINAPI GetEnvironmentVariable("programfiles", buf, MAX_PATH);
+  string pfp = buf; pfp += "\\Java\\jre6\\bin\\java.exe";
+  DWORD WINAPI GetEnvironmentVariable("programfiles(x86)", buf, MAX_PATH);
+  string pfx86p = buf; pfx86p += "\\Java\\jre6\\bin\\java.exe";
+  
   a = better_system(jpath, "-version");
   if (a)
   {
-    a = better_system(jpath = "%programfiles%\\Java\\jre6\\bin\\java.exe", "-version"); // This should hopefully take care of most of it
+    a = better_system(jpath = pfp.c_str(), "-version"); // This should hopefully take care of most of it
     if (a)
     {
-      a = better_system(jpath = "%programfiles(x86)%\\Java\\jre6\\bin\\java.exe", "-version"); //One would think this would take care of the rest
+      a = better_system(jpath = pfx86p.c_str(), "-version"); //One would think this would take care of the rest
       if (a)
       {
         a = better_system(jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe", "-version");

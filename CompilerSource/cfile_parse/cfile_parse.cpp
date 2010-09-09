@@ -403,8 +403,11 @@ pt parse_cfile(my_string cftext)
             cferr = "Program error: Type does not exist. An error should have been reported earlier.";
             return pos;
           }
-
-          externs *n = new externs(last_identifier,last_type,current_scope,last_type->flags | EXTFLAG_TYPEDEF,0,refstack.dissociate());
+          
+          unsigned flagstotdef = last_type->flags | EXTFLAG_TYPEDEF;
+          if (tpc == -1) flagstotdef &= ~EXTFLAG_TEMPLATE;
+          
+          externs *n = new externs(last_identifier,last_type,current_scope,flagstotdef,0,refstack.dissociate());
           current_scope->members[last_identifier] = n;
           last_named_phase = DEC_FULL;
         }
