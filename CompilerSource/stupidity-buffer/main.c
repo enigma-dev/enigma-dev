@@ -34,7 +34,7 @@ using namespace std;
 
 string fixdrive(string p)
 {
-  if (p[0] == '\\' or p[0]=='/')
+  if (p[0] != '\\' and p[0] != '/')
     return p;
   
   size_t bs = GetCurrentDirectory(0,NULL);
@@ -126,7 +126,7 @@ int main()
           }
         }
       }
-      if (tf = fopen("winmake.txt","wb")) { fputs(mpath, tf); fclose(tf); }
+      if (tf = fopen("winmake.txt","wb")) { fputs(fixdrive(mpath), tf); fclose(tf); }
       else puts("\nI believe there's something wrong with your system. Ignoring and continuing...\n");
       confused_cancel: ;
     }
