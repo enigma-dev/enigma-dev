@@ -139,6 +139,9 @@ inline bool check_level_breakable()
     cout << "ENUM " << levelt[chklvl] << " " << LEVELTYPE_SWITCH_BLOCK << endl;
     if (levelt[chklvl]==LEVELTYPE_LOOP)
       return 1;
+    
+    if (levelt[chklvl]==LEVELTYPE_BRACE)
+      return 1;
 
     if (levelt[chklvl]==LEVELTYPE_DO or levelt[chklvl]==LEVELTYPE_SWITCH_BLOCK)
       return 1;
