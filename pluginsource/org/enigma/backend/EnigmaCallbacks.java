@@ -2,10 +2,12 @@ package org.enigma.backend;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.enigma.EnigmaFrame;
+import org.lateralgm.file.GmStreamDecoder;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Structure;
@@ -79,27 +81,78 @@ public class EnigmaCallbacks extends Structure
 
 	public static class OpenFile extends OutputHolder implements Callback
 		{
-		public void callback(final String file)
+		static boolean running = true;
+
+		public void callback(final String filename)
 			{
+			final File file = new File(filename);
+			running = true;
 			new Thread()
 				{
 					public void run()
 						{
-						int data;
-						try
+						InputStream in = null;
+						while (in == null)
 							{
-							InputStream in = new FileInputStream(new File(file));
-							while (true)
+							try
 								{
-								if (in.available() > 0)
+								in = new FileInputStream(file);
+								}
+							catch (FileNotFoundException e)
+								{
+								if (!running)
 									{
-									data = in.read();
-									if (data == -1) break;
-									ef.ta.append("" + (char) data);
-									ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
-									System.out.print("" + (char) data);
+									e.printStackTrace();
+									return;
+									}
+								try
+									{
+									Thread.sleep(100);
+									}
+								catch (InterruptedException e1)
+									{
 									}
 								}
+							}
+						try
+							{
+							StringBuilder sb = new StringBuilder();
+							while (true)
+								{
+								int size;
+								byte[] data;
+								size = in.available();
+								if (size > 0)
+									{
+									data = new byte[size];
+									size = in.read(data,0,size);
+									if (size == -1) break;
+									sb.append(new String(data,0,size,GmStreamDecoder.CHARSET));
+									int p = sb.indexOf("\n");
+									while (p != -1)
+										{
+										String dat = sb.substring(0,p + 1);
+										ef.ta.append(dat);
+										ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
+										System.out.print(dat);
+										sb.delete(0,p + 1);
+										p = sb.indexOf("\n");
+										}
+									}
+								else
+									{
+									try
+										{
+										Thread.sleep(100);
+										}
+									catch (InterruptedException e1)
+										{
+										}
+									}
+								}
+							ef.ta.append(sb.toString() + "\n");
+							ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
+							System.out.println(sb.toString());
 							in.close();
 							}
 						catch (IOException e)
@@ -115,7 +168,7 @@ public class EnigmaCallbacks extends Structure
 		{
 		public void callback()
 			{
-
+			OpenFile.running = false;
 			}
 		}
 	}

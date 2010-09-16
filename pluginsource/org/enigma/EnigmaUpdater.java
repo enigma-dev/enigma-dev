@@ -17,6 +17,7 @@ import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.main.LGM;
 import org.lateralgm.messages.Messages;
+import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNLogEntry;
@@ -24,8 +25,11 @@ import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.ISVNEventHandler;
 import org.tmatesoft.svn.core.wc.ISVNStatusHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNEvent;
+import org.tmatesoft.svn.core.wc.SVNEventAction;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNStatus;
 import org.tmatesoft.svn.core.wc.SVNStatusType;
@@ -33,7 +37,6 @@ import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
-//TODO: Thread
 public class EnigmaUpdater
 	{
 	public static final String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev/";
@@ -204,9 +207,39 @@ public class EnigmaUpdater
 		System.out.println("Reverted");
 		}
 
+	public static boolean needsRestart = false;
+
 	private void update() throws SVNException
 		{
 		SVNUpdateClient upCli = cliMan.getUpdateClient();
+
+		File fme = null;
+		try
+			{
+			fme = new File(EnigmaRunner.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			}
+		catch (Exception e)
+			{
+			e.printStackTrace();
+			}
+		final File me = fme;
+
+		upCli.setEventHandler(new ISVNEventHandler()
+			{
+				@Override
+				public void checkCancelled() throws SVNCancelException
+					{
+					}
+
+				@Override
+				public void handleEvent(SVNEvent event, double progress) throws SVNException
+					{
+					SVNEventAction act = event.getAction();
+					if (act.equals(SVNEventAction.UPDATE_UPDATE))
+						if (event.getFile().equals(LGM.workDir) || event.getFile().equals(me))
+							needsRestart = true;
+					}
+			});
 		long r = upCli.doUpdate(path,SVNRevision.HEAD,SVNDepth.INFINITY,true,false);
 		System.out.println("Updated to " + r);
 		}

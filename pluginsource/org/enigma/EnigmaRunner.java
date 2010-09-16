@@ -36,6 +36,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractListModel;
@@ -100,8 +101,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public static boolean GCC_LOCATED = false, ENIGMA_READY = false;
 	public final EnigmaNode node = new EnigmaNode();
 
-	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2, MODE_COMPILE = 3,
-			MODE_REBUILD = 4;
+	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2;
+	static final int MODE_COMPILE = 3, MODE_REBUILD = 4;
 
 	public EnigmaRunner()
 		{
@@ -118,7 +119,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					{
 					//TODO: Let Linux packages handle updates
 					//if (!Platform.isLinux())
-					if (attemptUpdate() || attemptLib() != null) make();
+					boolean rebuild = Preferences.userRoot().node("/org/enigma").getBoolean("NEEDS_REBUILD",
+							false);
+					if (attemptUpdate() || attemptLib() != null || rebuild) make();
 					Error e = attemptLib();
 					if (e != null)
 						{
@@ -359,7 +362,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		try
 			{
-			return EnigmaUpdater.checkForUpdates();
+			boolean up = EnigmaUpdater.checkForUpdates();
+			if (EnigmaUpdater.needsRestart)
+				{
+				Preferences.userRoot().node("/org/enigma").putBoolean("NEEDS_REBUILD",true);
+				JOptionPane.showMessageDialog(null,
+						"Update completed. The program will need to be restarted to complete the process.");
+				System.exit(0);
+				}
+			return up;
 			}
 		/**
 		 * Usually you shouldn't catch an Error, however,
@@ -463,9 +474,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		File outname = null;
 		try
 			{
-			if (mode < MODE_DESIGN) //run/design
+			if (mode < MODE_DESIGN) //run/debug
 				outname = File.createTempFile("egm",".exe");
-			else if (mode == MODE_DESIGN) outname = File.createTempFile("egm",".emd"); //build
+			else if (mode == MODE_DESIGN) outname = File.createTempFile("egm",".emd"); //design
 			if (outname != null) outname.deleteOnExit();
 			}
 		catch (IOException e)
@@ -494,7 +505,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					}
 			}.start();
 
-		if (mode == MODE_DESIGN) //build
+		if (mode == MODE_DESIGN) //design
 			{
 			try
 				{
