@@ -36,8 +36,7 @@
 #include "ENIGMA_GLOBALS.h"
 //#include "EGMstd.h"
 
-#include "../Platforms/windows/WINDOWSwindow.h"
-#include "../Platforms/windows/WINDOWSStd.h"
+#include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"
 #include "instance_system.h"
 #include "instance.h"

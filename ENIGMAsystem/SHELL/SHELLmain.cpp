@@ -65,7 +65,7 @@
 #include "Graphics_Systems/OpenGLES/GSsprite.h"
 #endif
 #if ENIGMA_WS_WINDOWS != 0
-    #include "Platforms/windows/WINDOWSStd.h"
+    #include "Platforms/Win32/WINDOWSStd.h"
 #elif ENIGMA_WS_XLIB != 0
     #include "Platforms/xlib/XLIBwindow.h"
 #elif ENIGMA_WS_COCOA != 0

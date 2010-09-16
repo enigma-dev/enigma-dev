@@ -40,3 +40,15 @@ namespace enigma
   // This method is called at load time. It allows for initializing arrays for input.
   void input_initialize();
 }
+
+// These functions are standard GML that are an integral part of the system.
+// Each instance must implement these, even if they are unable to do anything on the target platform.
+
+// This obviously displays an error message.
+void show_error(string, const bool); // It should offer a button to end the game.
+
+// This function sets the game window caption, if there is a place reserved for such.
+void window_set_caption(string caption);
+
+// This function should resize the window, meaning a lowered resolution if the device displays all windows full screen.
+void window_set_size(unsigned int width, unsigned int height);

@@ -55,7 +55,9 @@ namespace settings
 }
 
 #include "../parser/object_storage.h"
+#include "../OS_Switchboard.h"
 
+extern string toUpper(string);
 namespace extensions
 {
   map<string, string> locals;
@@ -93,16 +95,68 @@ namespace extensions
           if (it->second->is_scalar)
             continue;
           
-          eyit locs = ((ey_data*)it->second)->values.find("locals");
-          if (locs != ((ey_data*)it->second)->values.end())
+          eyit locs = it->second->getit("locals");
+          if (locs != it->second->itend())
           {
             if (locs->second->is_scalar)
               continue;
             ey_data *ld = (ey_data*)locs->second;
             for (eycit cit = ld->values_order.next; cit; cit = cit->next)
-              locals[cit->value->name] = ((ey_string*)cit->value)->value;
+              locals[cit->value->name] = eycit_str(cit);
           }
         }
+      }
+    }
+  }
+  
+  os_descriptor targetOS;
+  api_descriptor targetAPI;
+  map<string, os_descriptor> all_platforms;
+  typedef map<string, os_descriptor>::iterator platIter;
+  
+  string uname_s = CURRENT_PLATFORM_NAME;
+  
+  void determine_target()
+  {
+    all_platforms.clear();
+    cout << "\n\n\n\nStarting platform inspection\n";
+    for (string ef = file_find_first("ENIGMAsystem/SHELL/Platforms/*",fa_directory | fa_nofiles); ef != ""; ef = file_find_next())
+    {
+      cout << " - ENIGMAsystem/SHELL/Platforms/" + ef + "/About.ey: ";
+      ifstream ext(("ENIGMAsystem/SHELL/Platforms/" + ef + "/About.ey").c_str(), ios_base::in);
+      if (ext.is_open())
+      {
+        cout << "Opened.\n";
+        ey_data dat = parse_eyaml(ext,ef);
+        eyit hasname = dat.values.find("represents");
+        if (hasname == dat.values.end())
+        {
+          cout << "Skipping invalid operating system under `" << ef << "': File does not specify an OS it represents.";
+          continue;
+        }
+        
+        os_descriptor& os = all_platforms[toUpper(ef)];
+        os.name   = dat.gets("name");
+        os.author = dat.gets("author");
+        os.build_extension = dat.gets("build-extension");
+        os.build_platforms = dat.gets("build-platforms");
+        os.description = dat.gets("description");
+        os.identifier  = dat.gets("identifier");
+        os.represents  = dat.gets("represents");
+        os.run_params  = dat.gets("run-params");
+        os.run_program = dat.gets("run-program"); 
+      } else cout << "Failed!\n";
+    }
+    if (targetAPI.windowSys != "")
+      targetOS = all_platforms[toUpper(targetAPI.windowSys)];
+    else
+    {
+      string iun = toUpper(uname_s);
+      for (platIter i = all_platforms.begin(); i != all_platforms.end(); i++)
+        if (toUpper(i->second.represents) == iun)
+      {
+        targetOS = i->second;
+        break;
       }
     }
   }

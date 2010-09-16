@@ -9,7 +9,7 @@ DUMMYDEPENDENCY:
 #	GLINKS{<requirements of anything above>}
 Game:
 	echo Okay.
-	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GFLAGS="$(GFLAGS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM)
+	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GFLAGS="$(GFLAGS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM) OUTPUTNAME="$(OUTPUTNAME)"
 
 clean:
 	cd CompilerSource && $(MAKE) clean

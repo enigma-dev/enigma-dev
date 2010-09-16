@@ -75,17 +75,26 @@ extern int establish_bearings();
 
 #include "backend/JavaCallbacks.h"
 
+#ifdef NOT_A_DLL
+#  undef dllexport
+#  define dllexport 
+#endif
+
 dllexport int libInit(EnigmaCallbacks* ecs)
 {
-  cout << "Linking up to IDE";
-  ide_dia_open     = ecs->dia_open;
-  ide_dia_add      = ecs->dia_add;
-  ide_dia_clear    = ecs->dia_clear;
-  ide_dia_progress = ecs->dia_progress;
-  ide_dia_progress_text = ecs->dia_progress_text;
-  
-  ide_output_redirect_file = ecs->output_redirect_file;
-  ide_output_redirect_reset = ecs->output_redirect_reset;
+  if (ecs)
+  {
+    cout << "Linking up to IDE";
+    ide_dia_open     = ecs->dia_open;
+    ide_dia_add      = ecs->dia_add;
+    ide_dia_clear    = ecs->dia_clear;
+    ide_dia_progress = ecs->dia_progress;
+    ide_dia_progress_text = ecs->dia_progress_text;
+    
+    ide_output_redirect_file = ecs->output_redirect_file;
+    ide_output_redirect_reset = ecs->output_redirect_reset;
+  }
+  else cout << "IDE Not Found.";
   
   int a = establish_bearings();
   if (a) {
@@ -134,11 +143,22 @@ const char* heaping_pile_of_dog_shit = "\
   \\___    #     #___--^\n\
       ^^^^^^^^^^^\n\n";
 
+#include "OS_Switchboard.h"
+#include "settings-parse/crawler.h"
+#include "settings-parse/parse_ide_settings.h"
+
 extern void print_definition(string n);
 static bool firstpass = true;
 extern externs *enigma_type__var, *enigma_type__variant;
+
 dllexport syntax_error *whitespaceModified(const char* wscode)
 {
+  cout << "Parsing settings..." << flushl;
+    parse_ide_settings((string() +
+      "%e-yaml\n"
+      "---\n"
+      "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n"
+      "target-graphics: OpenGL\n").c_str());
   cout << "Clearing IDE editables... " << flushs;
     clear_ide_editables();
   cout << "Clearance checked." << flushl;
@@ -200,6 +220,10 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
   cout << "Grabbing locals...\n";
   
   shared_locals_load();
+  
+  cout << "Determining build target...\n";
+  
+  extensions::determine_target();
   
   cout << " Done.\n";
   

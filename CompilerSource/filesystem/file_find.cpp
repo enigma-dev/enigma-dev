@@ -30,7 +30,7 @@ using namespace std;
 
 #include "../OS_Switchboard.h"
 
-#if TARGET_PLATFORM_ID == OS_WINDOWS
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
   #include <windows.h>
   const int fa_archive   = FILE_ATTRIBUTE_ARCHIVE;   //0x0020
   const int fa_directory = FILE_ATTRIBUTE_DIRECTORY; //0x0010

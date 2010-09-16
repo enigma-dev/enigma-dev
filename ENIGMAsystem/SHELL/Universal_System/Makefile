@@ -46,7 +46,7 @@
 	g++ -c planar_object.cpp		-o .eobjs_$(MODE)/planar_object.o $(FLAGS)
 .eobjs_$(MODE)/reflexive_types.o: reflexive_types.cpp var4.h var_te.h multifunction_variant_source.h multifunction_variant.h
 	g++ -c reflexive_types.cpp		-o .eobjs_$(MODE)/reflexive_types.o $(FLAGS)
-.eobjs_$(MODE)/roomsystem.o: roomsystem.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h ../Platforms/windows/WINDOWSwindow.h ../Platforms/windows/WINDOWSStd.h ../Platforms/windows/WINDOWSfonts.h ../Platforms/windows/externals.h ../libEGMstd.h instance_system.h object.h instance.h planar_object.h roomsystem.h multifunction_variant_source.h key_game_globals.h
+.eobjs_$(MODE)/roomsystem.o: roomsystem.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h ../Platforms/platforms_mandatory.h ../libEGMstd.h instance_system.h object.h instance.h planar_object.h roomsystem.h multifunction_variant_source.h key_game_globals.h
 	g++ -c roomsystem.cpp		-o .eobjs_$(MODE)/roomsystem.o $(FLAGS)
 .eobjs_$(MODE)/simplecollisions.o: simplecollisions.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h collisions_object.h transform_object.h ../Graphics_Systems/OpenGL/graphics_object.h ../Universal_System/planar_object.h ../Universal_System/object.h ../Universal_System/var4.h ../Universal_System/var_te.h ../Universal_System/reflexive_types.h ../Universal_System/multifunction_variant.h instance_system.h object.h ../Graphics_Systems/OpenGL/GSstdraw.h ../Graphics_Systems/OpenGL/GScolors.h
 	g++ -c simplecollisions.cpp		-o .eobjs_$(MODE)/simplecollisions.o $(FLAGS)

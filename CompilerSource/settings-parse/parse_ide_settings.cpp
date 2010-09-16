@@ -25,56 +25,34 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <iostream>
 #include <string>
-#include <fstream>
-using std::string;
+#include <list>
 
-typedef map<string, struct ey_base*>::iterator eyit;
-typedef pair<string, struct ey_base*> eypair;
+using namespace std;
 
-struct ey_base {
-  string name;
-  const bool is_scalar;
-  string gets(string);
-  eyit getit(string);
-  eyit itend(void);
-  ey_base(bool);
-  ey_base(string,bool);
-};
+#include "../filesystem/file_find.h"
+#include "../OS_Switchboard.h"
+#include "crawler.h"
+#include "eyaml.h"
 
-struct ey_string: ey_base {
-  string value;
-  ey_string();
-  ey_string(string);
-  ey_string(string, string);
-};
-
-struct ey_data: ey_base
+void parse_ide_settings(const char* eyaml)
 {
-  map<string, ey_base*> values;
-  struct eylist {
-    ey_base *value; eylist *next;
-    eylist(); eylist(eylist*);
-  } values_order, *values_order_last;
+  ey_data settree = parse_eyaml_str(eyaml);
   
-  operator char*();
-  operator ey_data*();
+  // Get target platform
+  eyit it = settree.getit("target-windowing");
+  if (it == settree.itend()) {
+     cout << "ERROR! IDE has not specified a target windowing API!" << endl;
+     extensions::targetAPI.windowSys = "";
+  } else  extensions::targetAPI.windowSys = eyit_str(it);
   
-  string gets(string);
-  eyit getit(string);
-  eyit itend(void);
+  // Get best graphics system
+  it = settree.getit("target-graphics");
+  if (it == settree.itend()) {
+     cout << "ERROR! IDE has not specified a graphics system!" << endl;
+     extensions::targetAPI.graphicsSys = "";
+  } else extensions::targetAPI.graphicsSys = eyit_str(it);
   
-  ey_data();
-  ey_data(string);
-  ~ey_data();
-};
+}
 
-typedef ey_data::eylist *eycit;
-
-ey_data parse_eyaml(istream &file, string fname = "");
-ey_data parse_eyaml_str(string);
-
-eyit eyaml_ci_find(ey_data &dat, string str);
-
-string eycit_str(eycit);
-string eyit_str(eyit);

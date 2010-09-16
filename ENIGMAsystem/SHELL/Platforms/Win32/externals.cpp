@@ -27,12 +27,12 @@
 
 #include <map>
 #include <string>
-#include <stdio.h>
-#include <iostream>
 #include <windows.h>
 
 #include "ffi/ffi.h"
 #include "../../Universal_System/var4.h"
+
+#include "../platforms_mandatory.h"
 
 using namespace std;
 
@@ -98,7 +98,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   
   if (status != FFI_OK)
   {
-    std::cout << "Defining DLL failed.\r\n";
+    show_error("Defining DLL failed.",0);
     return -1;
   }
   

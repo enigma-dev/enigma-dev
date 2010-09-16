@@ -81,18 +81,6 @@ extern int cfile_parse_main();
 extern externs *enigma_type__var, *enigma_type__variant;
 int mainr(int argc, char *argv[])
 {
-  /*my_string atest = fca("test.txt");
-  if (!atest) cout << "Open fail." << endl;
-  else {
-    cout << "a.length: " << atest.length() << endl;
-    cout << '"' << atest << '"' << endl;
-  }
-  string attn = "NIGGAR TITTZ";
-  atest = attn;
-    cout << "a.length: " << atest.length() << endl;
-    cout << '"' << atest << '"' << endl;
-  return -1;*/
-  
   if (establish_bearings()) {
     cout << "ERROR: Failed to locate the GCC" << endl;
     getchar(); return 1;
@@ -226,9 +214,22 @@ int mainr(int argc, char *argv[])
   return 0;
 }
 
+
+struct syntax_error {
+  const char*err_str;
+  int line, position;
+  int absolute_index;
+  void set(int x, int
+  y,int a, string s);
+};
+int libInit(struct EnigmaCallbacks* ecs);
+syntax_error whitespaceModified(const char*);
+
 int main(int argc, char* argv[])
 {
-  mainr(argc,argv);
+  //mainr(argc,argv);
+  libInit(NULL);
+  whitespaceModified("");
   getchar();
   return 0;
 }

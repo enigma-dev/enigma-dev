@@ -301,7 +301,6 @@ void show_error(string err, const bool fatal)
 }
 
 #include <sys/time.h>
-#include <iostream>
 
 extern double fps;
 namespace enigma {

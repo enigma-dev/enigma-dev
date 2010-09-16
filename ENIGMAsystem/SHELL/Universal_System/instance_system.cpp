@@ -31,7 +31,6 @@
 #include <string>
 #include "var4.h"
 #include "reflexive_types.h"
-#include <iostream>
 #include <stdio.h>
 
 #include "instance_system.h"

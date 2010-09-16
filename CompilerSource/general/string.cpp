@@ -68,14 +68,4 @@ int string_count(char c, char* str)
     while (*str) occ+=*(str++)==c;
     return occ;
 }
-/*
-string string_replace_all(string str,string substr,string nstr)
-{
-  pt pos=0;
-  while ((pos=str.find(substr,pos)) != string::npos)
-  {
-    str.replace(pos,substr.length(),nstr);
-    pos+=nstr.length();
-  }
-  return str;
-}*/
+/* */

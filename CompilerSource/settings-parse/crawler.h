@@ -43,4 +43,20 @@ namespace extensions
   string compile_local_string();
   void dump_read_locals(map<string,int>&);
   void crawl_for_locals();
+  void determine_target();
+  
+  struct os_descriptor
+  {
+    string 
+      name, identifier, represents, description, author,
+      build_platforms, build_extension,
+      run_program, run_params;
+  };
+  struct api_descriptor
+  {
+    string
+      windowSys, graphicsSys, collisionSys;
+  };
+  extern os_descriptor targetOS;
+  extern api_descriptor targetAPI;
 }

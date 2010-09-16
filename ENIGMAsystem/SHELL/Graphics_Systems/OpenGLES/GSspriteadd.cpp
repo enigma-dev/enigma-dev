@@ -33,7 +33,6 @@ int sprite_add(string filename,double imgnumb,double precise,double transparent,
 
 #include <string>
 #include <cstring>
-#include <iostream>
 #include "OpenGLHeaders.h"
 using namespace std;
 
@@ -194,6 +193,6 @@ namespace enigma
     sprstr->bitmask[as->subcount] = themask;
     #endif
     sprstr->subcount++;
-    std::cout << "Added subimage " << sprstr->subcount << " to sprite " << sprid << std::endl;
+    //std::c out << "Added subimage " << sprstr->subcount << " to sprite " << sprid << std::endl;
   }
 }

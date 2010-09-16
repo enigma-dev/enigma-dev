@@ -32,11 +32,11 @@ using namespace std;
 
 #include "../OS_Switchboard.h"
 
-#if TARGET_PLATFORM_ID == OS_WINDOWS
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
   #include <windows.h>
 #endif
 
-  #if TARGET_PLATFORM_ID == OS_WINDOWS
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
     typedef DWORD sys_result_type;
   #else
     typedef int sys_result_type;
@@ -46,7 +46,7 @@ int better_system(string program,string arguments, string redirchar = "", const 
 {
   sys_result_type exit_status = sys_result_type(-1);
   
-  #if TARGET_PLATFORM_ID == OS_WINDOWS
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
     STARTUPINFO StartupInfo;
     PROCESS_INFORMATION ProcessInformation;
     
@@ -108,7 +108,7 @@ int better_system(string program,string arguments, string redirchar = "", const 
     
     if (of) CloseHandle(of);
   #else
-    string rd = redirf ? ((redirchar == "&>") ? " 1>" + string(redirf) + " 2>&1" : " " + redirchar + " " + string(redirf)) : "";
+    string rd = redirf ? ((redirchar == "&>") ? " >" + string(redirf) + " 2>&1" : " " + redirchar + " " + string(redirf)) : "";
     string cmd = program + " " + arguments + rd;
     cout << cmd << endl;
     exit_status = system(cmd.c_str());

@@ -72,14 +72,25 @@ inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-string fc(const char*);
+string string_replace_all(string str,string substr,string nstr)
+{
+  pt pos=0;
+  while ((pos=str.find(substr,pos)) != string::npos)
+  {
+    str.replace(pos,substr.length(),nstr);
+    pos+=nstr.length();
+  }
+  return str;
+}
 
+string fc(const char*);
+string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); i++) res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i]; return res; }
 void clear_ide_editables()
 {
   ofstream wto;
   string f2comp = fc("ENIGMAsystem/SHELL/API_Switchboard.h");
   string f2write = license;
-    f2write += "#define " TARGET_PLATFORM_GRAPHICS " 1\n#define " TARGET_PLATFORM_NAME " 1\n";
+    f2write += "#define ENIGMA_WS_" + toUpper(extensions::targetAPI.windowSys) + " 1\n#define ENIGMA_GS_" + toUpper(extensions::targetAPI.graphicsSys) + " 1\n";
   if (f2comp != f2write)
   {
     user << "Rewriting API switchboard header... This could hurt compile time." << flushl;
@@ -110,7 +121,7 @@ void clear_ide_editables()
 
 // modes: 0=run, 1=debug, 2=build, 3=compile
 enum { emode_run, emode_debug, emode_build, emode_compile, emode_rebuild };
-dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
+dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 {
   cout << "Initializing dialog boxes" << endl;
     ide_dia_clear();
@@ -352,20 +363,24 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     Segment two: Now that the game has been exported as C++ and raw
     resources, our task is to compile the game itself via GNU Make.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+  
+  idpr("Adding resources...",90);
+  string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.build_extension;
+  const char *gameFname = mode == emode_build ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
 
   idpr("Starting compile (This may take a while...)", 30);
 
   string gflags = "-O3 -s";
 
-  #if   TARGET_PLATFORM_ID == OS_WINDOWS
+  #if   CURRENT_PLATFORM_ID == OS_WINDOWS
     string glinks = "-lopengl32 '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/windows/ffi/libFFI.a' -lcomdlg32 -lgdi32 -o game.exe";
     string graphics = "OpenGL";
     string platform = "windows";
-#elif TARGET_PLATFORM_ID == OS_MACOSX
+#elif CURRENT_PLATFORM_ID == OS_MACOSX
     string glinks = "-lz -framework OpenGL -framework OpenAL -framework Cocoa -o  ../../MacOS/Build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode";
     string graphics = "OpenGL"; //For now
     string platform = "Cocoa";
-/*#elif TARGET_PLATFORM_ID == OS_IPHONE
+/*#elif CURRENT_PLATFORM_ID == OS_IPHONE
 gflags = " -arch armv6 -I/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.3.sdk/";//-arch i386 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.3.sdk
 string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
     string graphics = "OpenGLES";
@@ -382,11 +397,13 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
   make += "GLINKS=\"" + glinks   + "\" ";
   make += "GRAPHICS=" + graphics + " ";
   make += "PLATFORM=" + platform + " ";
+  
+  make += string("OUTPUTNAME=\"") + gameFname + "\" ";
 
   edbg << "Running make from `" << MAKE_location << "'" << flushl;
   edbg << "Full command line: " << MAKE_location << " " << make << flushl;
 
-//  #if TARGET_PLATFORM_ID == OS_MACOSX
+//  #if CURRENT_PLATFORM_ID == OS_MACOSX
   //int makeres = better_system("cd ","/MacOS/");
 //  int makeres = better_system(MAKE_location,"MacOS");
   
@@ -396,7 +413,7 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
   // Redirect it
   ide_output_redirect_file(redirfile);
   
-  #if TARGET_PLATFORM_ID == OS_IPHONE
+  #if CURRENT_PLATFORM_ID == OS_IPHONE
     #if IPHONE_DEVICE == 1
     int makeres = better_system(MAKE_location,"iphonedevice","&>",redirfile);//iphone |iphonedevice
     #else
@@ -425,21 +442,9 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
     have an option in the config file to pass them to some resource
     linker sometime in the future.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-
-  idpr("Adding resources...",90);
-  const char *gameFname = // We will be using this first to write, then to run
-  #if TARGET_PLATFORM_ID ==  OS_MACOSX
-    "MacOS/Build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode"
-  #elif TARGET_PLATFORM_ID ==  OS_IPHONE
-      #if IPHONE_DEVICE == 1
-        "MacOS/build/Release-iphoneos/EnigmaIphone.app/EnigmaIphone"
-      #else
-        "MacOS/build/Release-iphonesimulator/EnigmaIphone.app/EnigmaIphone"
-      #endif
-  #elif TARGET_PLATFORM_ID ==  OS_ANDROID
+  
+  #if CURRENT_PLATFORM_ID ==  OS_ANDROID
     "/Users/alasdairmorrison/Documents/workspace/NDKDemo/libs/armeabi/libndkMathsDemo.so"
-  #else
-    "ENIGMAsystem/SHELL/game.exe"
   #endif
   ;
   FILE *gameModule = fopen(gameFname,"ab");
@@ -481,18 +486,13 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
   
-  // Take a chill pill so the filesystem can settle
-
   if (mode == emode_run or mode == emode_build)
   {
-    #if TARGET_PLATFORM_ID ==  OS_MACOSX
-    int gameres = better_system("open",gameFname);
-    #elif TARGET_PLATFORM_ID ==  OS_IPHONE
-    int gameres = better_system("MacOS/build/Release-iphonesimulator/iphonesim"," launch " + string(gameFname));
-    #else
-      int gameres = better_system(gameFname,"");
-    #endif
-    
+    string rprog = extensions::targetOS.run_program, rparam = extensions::targetOS.run_params;
+    rprog = string_replace_all(rprog,"$game",gameFname);
+    rparam = string_replace_all(rparam,"$game",gameFname);
+    user << "Running \"" << rprog << "\" " << rparam << flushl;
+    int gameres = better_system(rprog, rparam);
     user << "Game returned " << gameres << "\n";
   }
 

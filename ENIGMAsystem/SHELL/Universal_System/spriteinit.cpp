@@ -27,7 +27,6 @@
 
 #include <string>
 #include <stdio.h>
-#include <iostream>
 using namespace std;
 
 #include "spritestruct.h"
@@ -65,7 +64,7 @@ namespace enigma
       fread(&yorig, 4,1,exe);
       
       int subimages;
-      fread(&subimages,4,1,exe); cout << "Subimages: " << subimages << endl;
+      fread(&subimages,4,1,exe); //co//ut << "Subimages: " << subimages << endl;
       
       sprite_new_empty(sprid,subimages,width,height,xorig,yorig,1,0);
       for (int ii=0;ii<subimages;ii++) 
@@ -73,7 +72,7 @@ namespace enigma
         int unpacked;
         fread(&unpacked,1,4,exe);
         unsigned int size;
-        fread(&size,4,1,exe); cout << "Alloc size: " << size << endl;
+        fread(&size,4,1,exe); //co//ut << "Alloc size: " << size << endl;
         unsigned char* cpixels=new unsigned char[size+1];
         if (!cpixels)
         {  //FIXME: Uncomment these when tostring is available
@@ -92,9 +91,9 @@ namespace enigma
           continue;
         }
         delete[] cpixels;
-        cout << "Adding subimage...\n";
+        //co//ut << "Adding subimage...\n";
         sprite_set_subimage(sprid, ii, xorig, yorig, width, height, pixels);
-        cout << "...done\n";
+        //co//ut << "...done\n";
         
         delete[] pixels;
         fread(&nullhere,1,4,exe);

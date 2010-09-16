@@ -1,0 +1,16 @@
+%e-yaml
+---
+
+Name: Windows
+Identifier: Win32
+Represents: Windows
+Description: Run on Microsoft Windows.
+Author: Josh Ventura
+
+Build-Platforms: Windows
+Build-Extension: .exe
+
+Run-Program: $game
+Run-Params:
+
+
