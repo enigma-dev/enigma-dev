@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.enigma.EnigmaFrame;
-import org.lateralgm.file.GmStreamDecoder;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Structure;
@@ -138,7 +137,7 @@ public class EnigmaCallbacks extends Structure
 								data = new byte[size];
 								size = in.read(data,0,size);
 								if (size == -1) break;
-								sb.append(new String(data,0,size,GmStreamDecoder.CHARSET));
+								sb.append(new String(data,0,size,"UTF-8"));
 								int p = sb.indexOf("\n");
 								while (p != -1)
 									{
