@@ -25,7 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-//#include <stdio.h>
 #include <stdlib.h>
 #include <string>
 
@@ -70,6 +69,10 @@
     #include "Platforms/xlib/XLIBwindow.h"
 #elif ENIGMA_WS_COCOA != 0
 #include "Platforms/Cocoa/CocoaWindow.h"
+#elif ENIGMA_WS_IPHONE != 0
+#include "Platforms/iPhone/CocoaWindow.h"
+#elif ENIGMA_WS_ANDROID != 0
+#include "Platforms/Android/AndroidWindow.h"
 #endif
 
 
