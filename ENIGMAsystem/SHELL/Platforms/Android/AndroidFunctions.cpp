@@ -76,3 +76,17 @@ int init() {
 	enigma::parameters[0]="/data/data/org.enigmadev/lib/libndkEnigmaGame.so";
 enigma::initialize_everything();
 }
+
+extern int imousex,imousey;
+
+int mouse_press(int x, int y) {
+	enigma::mousestatus[mb_left-1]=1;
+	imousex=x;
+	imousey=y;
+}
+
+int mouse_release(int x, int y) {
+	enigma::mousestatus[mb_left-1]=0;
+	imousex=x;
+	imousey=y;
+}

@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 #include "org_enigmadev_EnigmaRenderer.h"
+#include "org_enigmadev_EnigmaGLSurfaceView.h"
 #include <stdio.h>
 #include "AndroidFunctions.h"
 
@@ -38,7 +39,7 @@
 #define  LOG_TAG    "libenigma"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-
+#include <jni.h>
 
 int   gAppAlive   = 1;
 
@@ -58,11 +59,15 @@ _getTime(void)
     return (long)(now.tv_sec*1000 + now.tv_usec/1000);
 }
 
+JNIEnv *_my_jnienv = 0;
+void set_jnienv(JNIEnv *env) { _my_jnienv = env; }
+JNIEnv* /**env*/ get_jnienv() { return _my_jnienv; }
 
 JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeInit
-(JNIEnv *, jclass)
+(JNIEnv * env, jclass)
 {
 	LOGE("Starting enigma Game!",1,1);
+	set_jnienv(env);
 	init();
 }
 
@@ -73,6 +78,18 @@ JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeResize
   //call to resize
 }
 
+JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaGLSurfaceView_nativeMouse_1Press
+(JNIEnv *, jclass, jint x, jint y) 
+{
+	mouse_press(x, y);
+}
+
+JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaGLSurfaceView_nativeMouse_1Release
+(JNIEnv *, jclass, jint x, jint y)
+{
+	mouse_release(x, y);
+}
+
 
 JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeDone
 (JNIEnv *, jclass)
@@ -81,11 +98,11 @@ JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeDone
 }
 
 
-JNIEXPORT void
+/*JNIEXPORT void
 Java_org_enigmadev_SanAngeles_EnigmaGLSurfaceView_nativePause( JNIEnv*  env )
 {
  //pause
-}
+}*/
 
 
 JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeRender
@@ -94,3 +111,7 @@ JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeRender
 	//run the main loop
 	loopy();
 }
+
+
+
+

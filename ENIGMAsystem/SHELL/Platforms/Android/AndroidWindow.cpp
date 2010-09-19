@@ -34,6 +34,9 @@
 
 using namespace std;
 
+
+int imousex,imousey;
+
 //////////
 // INIT //
 //////////
@@ -99,18 +102,14 @@ string window_get_caption()
 
 inline int getMouse(int i)
 {
-	/*Window r1,r2;
-	int rx,ry,wx,wy;
-	unsigned int mask;
-	XQueryPointer(disp,win,&r1,&r2,&rx,&ry,&wx,&wy,&mask);
 	switch(i)
 	{
-		case 0:  return rx;
-		case 1:  return ry;
-		case 2:  return wx;
-		case 3:  return wy;
+		case 0:  return imousex;
+		case 1:  return imousey;
+		case 2:  return imousex;
+		case 3:  return imousey;
 		default: return -1;
-	}*/
+	}
 }
 
 int display_mouse_get_x() { return getMouse(0); }

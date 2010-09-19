@@ -39,6 +39,8 @@ JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeRender
 JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeDone
   (JNIEnv *, jclass);
 
+
+	
 #ifdef __cplusplus
 }
 #endif
