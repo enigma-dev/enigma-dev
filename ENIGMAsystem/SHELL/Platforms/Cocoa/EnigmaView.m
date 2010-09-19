@@ -83,6 +83,7 @@
     [[self window] setAcceptsMouseMovedEvents:YES];
 	//init enigma
 	delegate = (EnigmaXcodeAppDelegate *)[NSApp delegate];
+	delegate.visible= YES;
 	init();
     
 }
