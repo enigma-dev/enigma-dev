@@ -31,6 +31,8 @@
   #include <OpenGL/gl.h>	
 #elif ENIGMA_WS_IPHONE != 0
   #include <OpenGLES/ES1/gl.h>
+#elif ENIGMA_WS_ANDROID
+#include <GLES/gl.h>
 #else
   #include <GL/gl.h>
 #endif

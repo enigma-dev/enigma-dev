@@ -541,9 +541,9 @@ int draw_getpixel(int x,int y)
     return x>>8;
   #else
     char r,g,b;
-    glReadPixels(x,y,1,1,GL_RED,GL_UNSIGNED_BYTE,&r);
-    glReadPixels(x,y,1,1,GL_GREEN,GL_UNSIGNED_BYTE,&g);
-    glReadPixels(x,y,1,1,GL_BLUE,GL_UNSIGNED_BYTE,&b);
+    //glReadPixels(x,y,1,1,GL_RED,GL_UNSIGNED_BYTE,&r);
+    //glReadPixels(x,y,1,1,GL_GREEN,GL_UNSIGNED_BYTE,&g);
+    //glReadPixels(x,y,1,1,GL_BLUE,GL_UNSIGNED_BYTE,&b);
     return r|(g<<8)|(b<<16);
   #endif
 }
