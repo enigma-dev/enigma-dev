@@ -30,6 +30,8 @@ extern "C" {
 #endif
 int loopy();
 	int init();
+	int  mouse_press(int x, int y);
+	int mouse_release(int x, int y);
 #ifdef __cplusplus
 }
 #endif
