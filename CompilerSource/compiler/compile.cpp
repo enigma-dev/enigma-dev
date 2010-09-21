@@ -31,7 +31,7 @@
 #include "../general/darray.h"
 
  #include <cstdio>
- 
+
 #ifdef _WIN32
  #define dllexport extern "C" __declspec(dllexport)
  #include <windows.h>
@@ -95,7 +95,7 @@ void clear_ide_editables()
            "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n#define COLLIGMA  0\n";
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
-  
+
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
     wto << license;
     wto << "#define ASSUMEZERO 0\n";
@@ -125,7 +125,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
      better_system(MAKE_location, "clean-game");
     return 0;
   }
-  
+
   edbg << "Building for mode (" << mode << ")" << flushl;
 
   // CLean up from any previous executions.
@@ -319,29 +319,29 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   edbg << "Writing events" << flushl;
   res = compile_writeDefraggedEvents(es);
   irrr();
-  
+
   parsed_object EGMglobal;
-  
+
   edbg << "Linking globals" << flushl;
   res = link_globals(&EGMglobal,es,parsed_scripts);
   irrr();
-  
+
   edbg << "Running Secondary Parse Passes" << flushl;
   res = compile_parseSecondary(parsed_objects,parsed_scripts,&EGMglobal);
-  
+
   edbg << "Writing object data" << flushl;
   res = compile_writeObjectData(es,&EGMglobal);
   irrr();
-  
+
   edbg << "Writing local accessors" << flushl;
   res = compile_writeObjAccess(parsed_objects, &EGMglobal);
   irrr();
-  
+
   res = compile_writeRoomData(es);
   irrr();
-  
-  
-  
+
+
+
   // Write the global variables to their own file to be included before any of the objects
   res = compile_writeGlobals(es,&EGMglobal);
   irrr();
@@ -358,7 +358,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
   string gflags = "-O3 -s";
 
   #if   TARGET_PLATFORM_ID == OS_WINDOWS
-    string glinks = "-lopengl32 '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/windows/ffi/libFFI.a' -lcomdlg32 -lgdi32 -o game.exe";
+    string glinks = "-lopengl32 -lglu32 '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/windows/ffi/libFFI.a' -lcomdlg32 -lgdi32 -o game.exe";
     string graphics = "OpenGL";
     string platform = "windows";
 #elif TARGET_PLATFORM_ID == OS_MACOSX
@@ -389,13 +389,13 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
 //  #if TARGET_PLATFORM_ID == OS_MACOSX
   //int makeres = better_system("cd ","/MacOS/");
 //  int makeres = better_system(MAKE_location,"MacOS");
-  
+
   // Pick a file
   const char* redirfile = "redirfile.txt";
-  
+
   // Redirect it
   ide_output_redirect_file(redirfile);
-  
+
   #if TARGET_PLATFORM_ID == OS_IPHONE
     #if IPHONE_DEVICE == 1
     int makeres = better_system(MAKE_location,"iphonedevice","&>",redirfile);//iphone |iphonedevice
@@ -405,10 +405,10 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
   #else
   int makeres = better_system(MAKE_location,make,"&>",redirfile);
   #endif
-  
+
   // Stop redirecting GCC output
   ide_output_redirect_reset();
-  
+
   if (makeres) {
     user << "----Make returned error " << makeres << "----------------------------------\n";
     idpr("Compile failed at C++ level.",-1); return E_ERROR_BUILD;
@@ -480,7 +480,7 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
-  
+
   // Take a chill pill so the filesystem can settle
 
   if (mode == emode_run or mode == emode_build)
@@ -492,7 +492,7 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
     #else
       int gameres = better_system(gameFname,"");
     #endif
-    
+
     user << "Game returned " << gameres << "\n";
   }
 
