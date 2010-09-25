@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <list>
 
@@ -36,23 +37,48 @@ using namespace std;
 #include "crawler.h"
 #include "eyaml.h"
 
+inline string tolower(string x) {
+  for (size_t i = 0; i < x.length(); i++)
+    if (x[i] >= 'A' and x[i] <= 'Z') x[i] -= 'A' - 'a';
+  return x;
+}
+
 void parse_ide_settings(const char* eyaml)
 {
   ey_data settree = parse_eyaml_str(eyaml);
+  eyit it;
   
-  // Get target platform
-  eyit it = settree.getit("target-windowing");
-  if (it == settree.itend()) {
-     cout << "ERROR! IDE has not specified a target windowing API!" << endl;
-     extensions::targetAPI.windowSys = "";
-  } else  extensions::targetAPI.windowSys = eyit_str(it);
+  #define ey_cp(v,x,y) \
+  it = settree.getit("target-" #x); \
+  if (it == settree.itend()) { \
+     cout << "ERROR! IDE has not specified a target " #x " " #y "!" << endl; \
+     extensions::targetAPI.v ## Sys = ""; \
+  } else  extensions::targetAPI.v ## Sys = eyit_str(it);
   
-  // Get best graphics system
-  it = settree.getit("target-graphics");
-  if (it == settree.itend()) {
-     cout << "ERROR! IDE has not specified a graphics system!" << endl;
-     extensions::targetAPI.graphicsSys = "";
-  } else extensions::targetAPI.graphicsSys = eyit_str(it);
+  // Get target's windowing api
+  ey_cp(window,   windowing,api)
+  // Get requested graphics system
+  ey_cp(graphics,  graphics,system)
+  // Get requested audio system
+  ey_cp(audio,     audio,system)
+  // Get requested collision system
+  ey_cp(collision, collision,system)
+  // Get requested networking library
+  ey_cp(network,   networking,library)
   
+  ifstream ifs; string eyname;
+  ifs.open((eyname = "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/About.ey").c_str());
+  if (ifs.is_open()) { ey_data l = parse_eyaml(ifs, eyname.c_str());
+    it = l.getit("links"); if (it != l.itend()) extensions::targetAPI.windowLinks = eyit_str(it);
+    ifs.close();
+  }
+  string platn = tolower(extensions::targetAPI.windowSys);
+  #define eygl(fn,v) \
+  ifs.open((eyname = "ENIGMAsystem/SHELL/" #fn "/" + extensions::targetAPI.v ## Sys + "/Config/" + platn + ".ey").c_str()); \
+  if (ifs.is_open()) { ey_data l = parse_eyaml(ifs, eyname.c_str()); cout << "Opened " << eyname << endl; \
+    it = l.getit("links"); if (it != l.itend()) extensions::targetAPI.v ## Links = eyit_str(it); else cout << "Links not named in " << eyname << endl; ifs.close(); \
+  } else cout << "Could not open " << eyname << ".\n";
+  eygl(Graphics_Systems, graphics);
+  eygl(Audio_Systems, audio);
 }
 

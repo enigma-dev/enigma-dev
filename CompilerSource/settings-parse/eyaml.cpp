@@ -165,7 +165,7 @@ ey_data parse_eyaml(istream &file, string filename)
           else
           {
             cur->s->values_order_last = latestc;
-            cur = new y_level(cur, (ey_data*)(latest->second = latest->second = latestc->value = new ey_data(unlowered)), inds);
+            cur = new y_level(cur, (ey_data*)(latest->second = latestc->value = new ey_data(unlowered)), inds);
             latest = cur->s->values.insert(eypair(tolower(nname), NULL)) . first;
             latestc = new ey_data::eylist(&cur->s->values_order);
           }
@@ -203,10 +203,8 @@ ey_data parse_eyaml(istream &file, string filename)
     while (line[pos] and line[pos] != '#') pos++;
     while (is_useless(line[--pos]));
     
-    if (++pos > vsp) {
-      //cout << "Added " << unlowered << " as '" << line.substr(vsp, pos - vsp) << "' naturally.\n";
+    if (++pos > vsp)
       latest->second = latestc->value = new ey_string(unlowered, line.substr(vsp, pos - vsp));
-    }
   }
   if (latest != cur->s->values.end() and latest->second == NULL)
     latest->second = latestc->value =  new ey_string(unlowered,"");

@@ -158,7 +158,9 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
       "%e-yaml\n"
       "---\n"
       "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n"
-      "target-graphics: OpenGL\n").c_str());
+      "target-graphics: OpenGL\n"
+      "target-audio: OpenAL\n"
+      ).c_str());
   cout << "Clearing IDE editables... " << flushs;
     clear_ide_editables();
   cout << "Clearance checked." << flushl;

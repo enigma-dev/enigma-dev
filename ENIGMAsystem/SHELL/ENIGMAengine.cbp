@@ -787,12 +787,76 @@
 		</Unit>
 		<Unit filename="Graphics_Systems/graphics_mandatory.h" />
 		<Unit filename="Modes/buildmode.h" />
-		<Unit filename="Platforms/platforms_mandatory.h" />
-		<Unit filename="Platforms/windows/WINDOWSStd.h">
+		<Unit filename="Platforms/Win32/WINDOWSStd.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms/windows/WINDOWScallback.cpp">
+		<Unit filename="Platforms/Win32/WINDOWScallback.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/WINDOWScallback.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/WINDOWSfonts.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/WINDOWSfonts.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/WINDOWSmain.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/WINDOWSmain.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/WINDOWSshow_error.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/WINDOWSstd.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/WINDOWSwindow.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/WINDOWSwindow.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/externals.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/externals.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/ffi/ffi.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/ffi/ffitarget.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/file_manip.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/file_manip.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/platforms_mandatory.h" />
+		<Unit filename="Platforms/windows/WINDOWSStd.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
@@ -800,15 +864,7 @@
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms/windows/WINDOWSfonts.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
 		<Unit filename="Platforms/windows/WINDOWSfonts.h">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
-		<Unit filename="Platforms/windows/WINDOWSmain.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
@@ -816,23 +872,7 @@
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms/windows/WINDOWSshow_error.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
-		<Unit filename="Platforms/windows/WINDOWSstd.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
-		<Unit filename="Platforms/windows/WINDOWSwindow.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
 		<Unit filename="Platforms/windows/WINDOWSwindow.h">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
-		<Unit filename="Platforms/windows/externals.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
@@ -845,10 +885,6 @@
 			<Option target="win-build" />
 		</Unit>
 		<Unit filename="Platforms/windows/ffi/ffitarget.h">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
-		<Unit filename="Platforms/windows/file_manip.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>

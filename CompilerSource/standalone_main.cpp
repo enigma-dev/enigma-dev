@@ -81,14 +81,6 @@ extern int cfile_parse_main();
 extern externs *enigma_type__var, *enigma_type__variant;
 int mainr(int argc, char *argv[])
 {
-  if (establish_bearings()) {
-    cout << "ERROR: Failed to locate the GCC" << endl;
-    getchar(); return 1;
-  }
-  
-  cparse_init();
-  
-  
   cout << "Grabbing locals" << endl;
     extensions::crawl_for_locals();
     string localstring = extensions::compile_local_string();
@@ -97,7 +89,7 @@ int mainr(int argc, char *argv[])
   
   //m_prog_loop_cfp();
   
-  my_string EGMmain = fca(0 ? "./CompilerSource/cfile_parse/auxilary.h" : "./CompilerSource/cfile_parse/auxilary.h");
+  my_string EGMmain = fca("./CompilerSource/cfile_parse/auxilary.h");
   if (EGMmain == NULL) {
     cout << "ERROR: Failed to read main engine file\n";
     getchar(); return 1;
@@ -227,9 +219,9 @@ syntax_error whitespaceModified(const char*);
 
 int main(int argc, char* argv[])
 {
-  //mainr(argc,argv);
   libInit(NULL);
   whitespaceModified("");
+  mainr(argc,argv);
   getchar();
   return 0;
 }

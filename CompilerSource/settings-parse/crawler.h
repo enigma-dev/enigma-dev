@@ -55,7 +55,9 @@ namespace extensions
   struct api_descriptor
   {
     string
-      windowSys, graphicsSys, collisionSys;
+      windowSys,   graphicsSys,   audioSys,   collisionSys,   networkSys;
+    string
+      windowLinks, graphicsLinks, audioLinks, collisionLinks, networkLinks;
   };
   extern os_descriptor targetOS;
   extern api_descriptor targetAPI;

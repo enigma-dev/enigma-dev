@@ -190,7 +190,7 @@ pt parse_cfile(my_string cftext)
           specialize_start = pos;
 
         if (a != pt(-1)) return a;
-          continue;
+        continue;
       }
       else
       {
@@ -405,9 +405,12 @@ pt parse_cfile(my_string cftext)
           }
           
           unsigned flagstotdef = last_type->flags | EXTFLAG_TYPEDEF;
-          if (tpc == -1) flagstotdef &= ~EXTFLAG_TEMPLATE;
+          if (tpc == -2) flagstotdef &= ~EXTFLAG_TEMPLATE;
           
           externs *n = new externs(last_identifier,last_type,current_scope,flagstotdef,0,refstack.dissociate());
+          if (tpc > -2) for (unsigned i = 0; i < last_type->tempargs.size; i++)
+            n->tempargs[i] = new externs(last_type->tempargs[i]->name,last_type->tempargs[i]->type,last_type->tempargs[i]->parent,last_type->tempargs[i]->flags);
+          
           current_scope->members[last_identifier] = n;
           last_named_phase = DEC_FULL;
         }
@@ -1098,7 +1101,11 @@ pt parse_cfile(my_string cftext)
                     return pos;
                   }
                   if (tpc == -1) //tname<(*)...>
+                  {
                     last_named = LN_TEMPARGS | (last_named & LN_TYPEDEF);
+                    tpc = -2; // Somewhat hackish afterthought; track whether we tried to specialize but named no additionals
+                    // Scenario: typedef basic_string<char> string;   vs   typedef stl_map map;
+                  }
                 }
 
               the_next_block_up:

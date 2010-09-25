@@ -1,5 +1,12 @@
-template<class a> struct b {};
-typedef b<int> c;
+namespace ass
+{
+  template<class a> struct b {};
+  typedef b
+  #pragma debug_entry_point
+  <int> d;
+  typedef b c;
+  c<int> e;
+}
 
 #include <sys/signal.h>
 
@@ -34,7 +41,9 @@ typedef b<int> c;
 #include <cstdio>
 #include <cmath>
 
-#include "../../ENIGMAsystem/SHELL/SHELLmain.cpp"
+using namespace std;
+
+//#include "../../ENIGMAsystem/SHELL/SHELLmain.cpp"
 
 /*#define concat(x,y) x ## y
 #define conc(x,y) concat(x,y)

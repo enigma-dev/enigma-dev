@@ -371,32 +371,19 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   idpr("Starting compile (This may take a while...)", 30);
 
   string gflags = "-O3 -s";
-
-  #if   CURRENT_PLATFORM_ID == OS_WINDOWS
-    string glinks = "-lopengl32 '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/windows/ffi/libFFI.a' -lcomdlg32 -lgdi32 -o game.exe";
-    string graphics = "OpenGL";
-    string platform = "windows";
-#elif CURRENT_PLATFORM_ID == OS_MACOSX
-    string glinks = "-lz -framework OpenGL -framework OpenAL -framework Cocoa -o  ../../MacOS/Build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode";
-    string graphics = "OpenGL"; //For now
-    string platform = "Cocoa";
-/*#elif CURRENT_PLATFORM_ID == OS_IPHONE
-gflags = " -arch armv6 -I/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.3.sdk/";//-arch i386 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.3.sdk
-string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
-    string graphics = "OpenGLES";
-    string platform = "iPhone";*/
-#else
-    string glinks = "-lGL -lz -lopenal -o game.exe";
-    string graphics = "OpenGL";
-    string platform = "xlib";
-  #endif
-
   string make = "Game ";
+  
+  string glinks   = extensions::targetAPI.windowLinks;
+    glinks += " " + extensions::targetAPI.graphicsLinks;
+    glinks += " " + extensions::targetAPI.audioLinks;
+    glinks += " " + extensions::targetAPI.collisionLinks;
+    glinks += " " + extensions::targetAPI.networkLinks;
+  
   make += "GMODE=Run ";
-  make += "GFLAGS=\"" + gflags   + "\" ";
-  make += "GLINKS=\"" + glinks   + "\" ";
-  make += "GRAPHICS=" + graphics + " ";
-  make += "PLATFORM=" + platform + " ";
+  make += "GFLAGS=\"" + gflags + "\" ";
+  make += "GLINKS=\"" + glinks + "\" ";
+  make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
+  make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
   
   make += string("OUTPUTNAME=\"") + gameFname + "\" ";
 
