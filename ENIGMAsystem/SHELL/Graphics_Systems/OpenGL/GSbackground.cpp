@@ -30,15 +30,15 @@
 #include "../../Universal_System/backgroundstruct.h"
 
 
-//TGMG move these to GSbackground.cpp
+
 int draw_background(int back, double x, double y)
 {
-	enigma::background *spr2d = enigma::backgroundstructarray[back];
-	if (!spr2d)
+	enigma::background *bck2d = enigma::backgroundstructarray[back];
+	if (!bck2d)
 		return -1;
 	
-	spr2d->texture;
-	glBindTexture(GL_TEXTURE_2D,spr2d->texture);
+	bck2d->texture;
+	glBindTexture(GL_TEXTURE_2D,bck2d->texture);
 	
 	
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -48,16 +48,16 @@ int draw_background(int back, double x, double y)
 	glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
     
-    const float tbx=1,tby=1;//for now
+	const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
     glBegin(GL_QUADS);
 	glTexCoord2f(0,0);
 	glVertex2f(x,y);
 	glTexCoord2f(tbx,0);
-	glVertex2f(x+spr2d->width,y);
+	glVertex2f(x+bck2d->width,y);
 	glTexCoord2f(tbx,tby);
-	glVertex2f(x+spr2d->width,y+spr2d->height);
+	glVertex2f(x+bck2d->width,y+bck2d->height);
 	glTexCoord2f(0,tby);
-	glVertex2f(x,y+spr2d->height);
+	glVertex2f(x,y+bck2d->height);
     glEnd();
 	
 	glPopAttrib();
