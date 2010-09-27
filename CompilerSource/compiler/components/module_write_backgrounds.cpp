@@ -68,7 +68,18 @@ int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule)
       writei(es->backgrounds[i].id,gameModule); //id
     writei(es->backgrounds[i].backgroundImage.width, gameModule); // width
     writei(es->backgrounds[i].backgroundImage.height, gameModule); // height
-    //need to add: transparent, smooth, preload, tileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep
+
+
+    writei(es->backgrounds[i].transparent,gameModule);
+    writei(es->backgrounds[i].smoothEdges,gameModule);
+    writei(es->backgrounds[i].preload,gameModule);
+    writei(es->backgrounds[i].useAsTileset,gameModule);
+    writei(es->backgrounds[i].tileWidth,gameModule);
+    writei(es->backgrounds[i].tileHeight,gameModule);
+    writei(es->backgrounds[i].hOffset,gameModule);
+    writei(es->backgrounds[i].vOffset,gameModule);
+    writei(es->backgrounds[i].hSep,gameModule);
+    writei(es->backgrounds[i].vSep,gameModule);
 
     const int sz = es->backgrounds[i].backgroundImage.dataSize;
     writei(sz, gameModule); // size
