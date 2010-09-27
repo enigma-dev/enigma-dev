@@ -59,6 +59,7 @@
 #if ENIGMA_GS_OPENGL
     #include "Graphics_Systems/OpenGL/OPENGLStd.h"
 #include "Graphics_Systems/OpenGL/GSsprite.h"
+#include "Graphics_Systems/OpenGL/GSbackground.h"
 #elif ENIGMA_GS_OPENGLES
 #include "Graphics_Systems/OpenGLES/OPENGLStd.h"
 #include "Graphics_Systems/OpenGLES/GSsprite.h"
@@ -104,6 +105,8 @@ extern int amain();
 #include "Universal_System/WITHconstruct.h"
 #include "Universal_System/OBJaccess.h"
 
+
+
 #include "Universal_System/simplecollisions.h"
 #if COLLIGMA
     #include "Universal_System/collisions.h"
@@ -111,6 +114,7 @@ extern int amain();
 
 #include "Universal_System/instance_system.h"
 #include "Universal_System/syntax_quirks.h"
+
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
 
