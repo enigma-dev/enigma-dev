@@ -49,30 +49,32 @@ int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule)
 {
   // Now we're going to add backgrounds
   edbg << es->backgroundCount << " Adding Backgrounds to Game Module: " << flushl;
-  
+
   //Magic Number
   fwrite("bkgn",4,1,gameModule);
-  
+
   //Indicate how many
   int back_count = es->backgroundCount;
   fwrite(&back_count,4,1,gameModule);
-  
+
   int back_maxid = 0;
   for (int i = 0; i < back_count; i++)
     if (es->backgrounds[i].id > back_maxid)
       back_maxid = es->backgrounds[i].id;
   fwrite(&back_maxid,4,1,gameModule);
-  
+
   for (int i = 0; i < back_count; i++)
   {
+      writei(es->backgrounds[i].id,gameModule); //id
     writei(es->backgrounds[i].backgroundImage.width, gameModule); // width
     writei(es->backgrounds[i].backgroundImage.height, gameModule); // height
-    
+    //need to add: transparent, smooth, preload, tileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep
+
     const int sz = es->backgrounds[i].backgroundImage.dataSize;
     writei(sz, gameModule); // size
     fwrite(es->backgrounds[i].backgroundImage.data, 1, sz, gameModule); // data
   }
- 
+
   edbg << "Done writing backgrounds." << flushl;
   return 0;
 }
