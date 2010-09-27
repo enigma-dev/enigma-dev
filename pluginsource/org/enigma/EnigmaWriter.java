@@ -803,7 +803,7 @@ public final class EnigmaWriter
 			case Argument.ARG_COLOR:
 				try
 					{
-					return String.format("#%06X",Integer.parseInt(val));
+					return String.format("$%06X",Integer.parseInt(val));
 					}
 				catch (NumberFormatException e)
 					{
