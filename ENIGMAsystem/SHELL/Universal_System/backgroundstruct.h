@@ -36,6 +36,7 @@ namespace enigma
     bool transparent;
     bool smooth;
     bool preload;
+	  double texbordx, texbordy;
     
     const bool tileset;
     

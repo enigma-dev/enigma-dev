@@ -77,7 +77,7 @@ namespace enigma
   //Adds a subimage to an existing sprite from the exe
   void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep)
   {
-    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h);
+    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
     char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
     unsigned int rowindex,colindex;
     for (rowindex = 0; rowindex < h; rowindex++)
@@ -98,6 +98,10 @@ namespace enigma
     delete[] imgpxdata;
     
    backgroundstructarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);  
+	  enigma::background *bak = backgroundstructarray[bkgid];
+	  bak->texbordx  = (double) w/fullwidth;
+	  bak->texbordy  = (double) h/fullheight;
+	  
   }
 	
 	//Allocates and zero-fills the array at game start

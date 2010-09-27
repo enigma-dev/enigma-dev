@@ -42,7 +42,7 @@ namespace enigma
   void exe_loadbackgrounds(FILE *exe)
   {
     int nullhere;
-	  unsigned bkgid, width, height;
+	  unsigned bkgid, width, height,transparent,smoothEdges,preload,useAsTileset,tileWidth,tileHeight,hOffset,vOffset,hSep,vSep;
     
     fread(&nullhere,4,1,exe);
     if (nullhere != *(int*)"bkgn")
@@ -71,6 +71,28 @@ namespace enigma
 		  fread(&height,4,1,exe);
 		  printf("height: %d", height);
 		  
+		  fread(&transparent,4,1,exe);
+		  printf("transparent: %d", transparent);
+		  fread(&smoothEdges,4,1,exe);
+		  printf("smoothEdges: %d", smoothEdges);
+		  fread(&preload,4,1,exe);
+		  printf("preload: %d", preload);
+		  fread(&useAsTileset,4,1,exe);
+		  printf("useAsTileset: %d", useAsTileset);
+		  fread(&tileWidth,4,1,exe);
+		  printf("tileWidth: %d", tileWidth);
+		  fread(&tileHeight,4,1,exe);
+		  printf("tileHeight: %d", tileHeight);
+		  fread(&hOffset,4,1,exe);
+		  printf("hOffset: %d", hOffset);
+		  fread(&vOffset,4,1,exe);
+		  printf("vOffset: %d", vOffset);
+		  fread(&hSep,4,1,exe);
+		  printf("hSep: %d", hSep);
+		  fread(&vSep,4,1,exe);
+		  printf("vSep: %d", vSep);
+		  
+		 
 		  //need to add: transparent, smooth, preload, tileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep
 		  
 		  unpacked = width*height*4;
