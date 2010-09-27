@@ -25,14 +25,5 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "../../API_Switchboard.h"
 
-#if ENIGMA_WS_COCOA !=0
-  #include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#elif ENIGMA_WS_IPHONE != 0
-  #include <OpenGLES/ES1/gl.h>
-#else
-  #include <GL/gl.h>
-  #include <GL/glu.h>
-#endif
+int draw_background(int back, double x, double y);

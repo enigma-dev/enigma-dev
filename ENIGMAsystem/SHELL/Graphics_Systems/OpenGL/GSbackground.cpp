@@ -25,14 +25,41 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "../../API_Switchboard.h"
+#include "GSbackground.h"
+#include "OpenGLHeaders.h"
+#include "../../Universal_System/backgroundstruct.h"
 
-#if ENIGMA_WS_COCOA !=0
-  #include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#elif ENIGMA_WS_IPHONE != 0
-  #include <OpenGLES/ES1/gl.h>
-#else
-  #include <GL/gl.h>
-  #include <GL/glu.h>
-#endif
+
+//TGMG move these to GSbackground.cpp
+int draw_background(int back, double x, double y)
+{
+	enigma::background *spr2d = enigma::backgroundstructarray[back];
+	if (!spr2d)
+		return -1;
+	
+	spr2d->texture;
+	glBindTexture(GL_TEXTURE_2D,spr2d->texture);
+	
+	
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+	
+	
+	glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(1,1,1,1);
+    
+    const float tbx=1,tby=1;//for now
+    glBegin(GL_QUADS);
+	glTexCoord2f(0,0);
+	glVertex2f(x,y);
+	glTexCoord2f(tbx,0);
+	glVertex2f(x+spr2d->width,y);
+	glTexCoord2f(tbx,tby);
+	glVertex2f(x+spr2d->width,y+spr2d->height);
+	glTexCoord2f(0,tby);
+	glVertex2f(x,y+spr2d->height);
+    glEnd();
+	
+	glPopAttrib();
+	return 0;
+}
