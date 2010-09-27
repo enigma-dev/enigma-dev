@@ -39,8 +39,12 @@ void action_cd_playing() {}
 void action_cd_present() {}
 void action_cd_resume() {}
 void action_cd_stop() {}
-void action_change_object(int changeInto, int performEvents) {}
-*/
+ */
+void action_change_object(int changeInto, int performEvents) {
+	
+	//((enigma::object_locals*)enigma::instance_event_iterator->inst);
+}
+
 void action_color(int color) {
 	draw_set_color(color);
 }
@@ -92,8 +96,14 @@ void action_end_game() {
 void action_end_sound(int sound) {
 	//sound_stop(sound);
 }
-/*void action_execute_script(string script,double argument0,double argument1,double argument2,double argument3,double argument4) {}
-void action_font(int font,int align) {}
+
+//action_execute_script should be macro but defined so that enigma parser can detect it
+//void action_execute_script(string script,double argument0,double argument1,double argument2,double argument3,double argument4) {
+//}
+
+#define action_execute_script(script,argument0,argument1,argument2,argument3,argument4) script(argument0,argument1,argument2,argument3,argument4)
+
+/*void action_font(int font,int align) {}
 */
 void action_fullscreen(int action) {
 //action : switch, window, fullscreen (need to find out exact numbers, just guessed)
@@ -113,8 +123,11 @@ void action_load_game(string filename) {}
 void action_message(string message) {
 	show_message(message);
 }
-/*void action_move(string directions,double speed) {}
-void action_move_contact(double direction,double maximum, int against) {}
+void action_move(string directions,double newspeed) {
+printf("directions: %s",directions);
+	((enigma::object_graphics*)enigma::instance_event_iterator->inst)->speed=newspeed;
+}
+/*void action_move_contact(double direction,double maximum, int against) {}
 void action_move_point(double x,double y,double speed) {}
 void action_move_random(double snapHor,double snapVer) {} */
 
@@ -174,7 +187,9 @@ void action_reverse_ydir() {
 void action_set_alarm(int steps,int alarmno) {
 	//((enigma::object_graphics*)enigma::instance_event_iterator->inst)->alarm[alarmno]=steps;
 }
-/*
+
+string caption_score, caption_lives, caption_health;
+bool show_score, show_lives, show_health;
 void action_set_caption(int score,string scoreCaption,int lives,string livesCaption, int health, string healthCaption) {
  show_score=score;
  caption_score=scoreCaption;
@@ -183,7 +198,7 @@ void action_set_caption(int score,string scoreCaption,int lives,string livesCapt
  show_health=0;
  caption_health=healthCaption;
  }
-void action_set_cursor(int sprite, int cursor) { cursor_sprite=sprite;}*/
+/*void action_set_cursor(int sprite, int cursor) { cursor_sprite=sprite;}*/
 
 void action_set_friction(double newfriction) {
 	((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction=newfriction;
@@ -200,15 +215,16 @@ void action_set_hspeed(double newhspeed) {
 	((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed=newhspeed;
 }
 
-//void action_set_life(double newlives) {lives = newlives; } 
+int lives;
+void action_set_life(double newlives) {lives = newlives; } 
 
 void action_set_motion(double newdirection,double newspeed) {
 	((enigma::object_graphics*)enigma::instance_event_iterator->inst)->direction=newdirection;
 	((enigma::object_graphics*)enigma::instance_event_iterator->inst)->speed=newspeed;
 }
 
-//extern int score;
-//void action_set_score(double newscore) { score = (int)newscore;}
+int score;
+void action_set_score(double newscore) { score = (int)newscore;}
 
 /*
  void action_set_timeline(int timeline, double position) {}
@@ -267,20 +283,46 @@ void action_wrap(int direction) { move_wrap(0,0,0);}
 ///
 
 //void action_if(x) (x)
-bool action_if(bool expression) {return expression; }
-bool action_if_aligned(double snapHor, double snapVer) { return 0;}
+bool action_if(bool expression) {return expression; } */
+bool action_if_aligned(double snapHor, double snapVer) { 
+	// return place_snapped(snapHor, snapVer);
+	return 0;
+}
+/*
 bool action_if_collision(double x, double y, int objects) {return 0;}
 bool action_if_dice(int sides) {return 0;}
-bool action_if_empty(double x, double y,int object) {return 0;}
+ */
+bool action_if_empty(double x, double y,int object) {
+	return 0;}
+/*
 bool action_if_health(double value, int operation) {return 0;}
 bool action_if_life(double value, int operation) {return 0;}
-bool action_if_mouse(int button) {return 0;}
-bool action_if_next_room() {return 0;}
-bool action_if_number(int object, double number, int operation) {return 0;}
+bool action_if_mouse(int button) {return 0;} */
+
+bool action_if_next_room() {
+	return room_next(room) != -1;
+}
+
+bool action_if_number(int object, double number, int operation) {
+	if (operation == 0) //equal to
+		return (instance_number(object) == number);
+	if (operation == 1) //less than
+		return (instance_number(object) < number);
+	if (operation == 2) //greater than
+		return (instance_number(object) > number);
+	return 0;
+}
+/*
 bool action_if_object(int object, double x, double y) {return 0;}
-bool action_if_previous_room() {return 0;}
+ */
+bool action_if_previous_room() {
+return room_previous(room) != -1;
+}
+/*
 bool action_if_question(string question) {return 0;}
 bool action_if_score(double value, int operation) {return 0;}
-bool action_if_sound(int sound) {return 0;}
-bool action_if_variable(var variable, double value, int operation) {return 0;}
- */
+bool action_if_sound(int sound) {return 0;} */
+bool action_if_variable(var variable, double value, int operation) {
+	printf("operation: %d \n",operation);
+	return 0;}
+

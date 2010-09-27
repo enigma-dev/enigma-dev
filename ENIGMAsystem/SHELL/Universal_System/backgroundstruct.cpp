@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -30,11 +31,22 @@
 using namespace std;
 
 #include "../Graphics_Systems/graphics_mandatory.h"
-#include "spritestruct.h"
 #include "../libEGMstd.h"
 
 #include "backgroundstruct.h"
 
+
+namespace enigma {
+	background** backgroundstructarray;
+	extern size_t background_idmax;
+}
+
+
+/* These functions are primarily for use of the engine. Experienced users
+ * who are familiar with C++ can make use of these, but they were made to
+ * use at load time with data read from the executable. These both expect
+ * RAW format, RGB only.
+ */
 inline unsigned int nlpo2dc(unsigned int x) //Next largest power of two minus one
 {
 	x |= x>>1;
@@ -63,7 +75,7 @@ namespace enigma
     background(true, w, h, tex, trans, smth, prel), tileWidth(tw), tileHeight(th), hOffset(ho), vOffset(vo), hSep(hs), vSep(vs) {}
   
   //Adds a subimage to an existing sprite from the exe
-  void background_new(int bkgid, unsigned w, unsigned h, char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep)
+  void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep)
   {
     unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h);
     char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
@@ -85,6 +97,16 @@ namespace enigma
     unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
     delete[] imgpxdata;
     
-    backgroundarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);  
+   backgroundstructarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);  
   }
+	
+	//Allocates and zero-fills the array at game start
+	void backgrounds_init()
+	{
+		backgroundstructarray = new background*[enigma::background_idmax+1];
+		for (unsigned i = 0; i < enigma::background_idmax; i++)
+			backgroundstructarray[i] = NULL;
+	}
+	
+	
 }

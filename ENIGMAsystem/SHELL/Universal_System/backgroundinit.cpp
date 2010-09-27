@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -29,6 +30,7 @@
 #include <stdio.h>
 using namespace std;
 
+#include "backgroundstruct.h"
 #include "../Graphics_Systems/graphics_mandatory.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"
@@ -40,15 +42,73 @@ namespace enigma
   void exe_loadbackgrounds(FILE *exe)
   {
     int nullhere;
+	  unsigned bkgid, width, height;
     
     fread(&nullhere,4,1,exe);
     if (nullhere != *(int*)"bkgn")
       return;
     
-    // Determine how many sprites we have
+    // Determine how many backgrounds we have
     int bkgcount;
     fread(&bkgcount,4,1,exe);
     
-    
+	  
+	  
+	  // Fetch the highest ID we will be using
+	  int bkg_highid;
+	  fread(&bkg_highid,4,1,exe);
+	  
+	  printf("highestid: %d", bkg_highid);
+	  
+	  backgrounds_init();
+	  
+	  for (int i = 0; i < bkgcount; i++)
+	  {
+		  int unpacked;
+		  fread(&bkgid, 4,1,exe);
+		  fread(&width, 4,1,exe);
+		  printf("width: %d", width);
+		  fread(&height,4,1,exe);
+		  printf("height: %d", height);
+		  
+		  //need to add: transparent, smooth, preload, tileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep
+		  
+		  unpacked = width*height*4;
+		  
+		  unsigned int size;
+		  fread(&size,4,1,exe); 
+		  printf("Alloc size: %d", size);
+		  
+		  unsigned char* cpixels=new unsigned char[size+1];
+		  if (!cpixels)
+		  {  
+			  show_error("Failed to load background: Cannot allocate enough memory "+toString(unpacked),0);
+			  break;
+		  }
+		  unsigned int sz2=fread(cpixels,1,size,exe);
+		  if (size!=sz2) {
+			  show_error("Failed to load background: Data is truncated before exe end. Read "+toString(sz2)+" out of expected "+toString(size),0);
+			  return;
+		  }
+		  unsigned char* pixels=new unsigned char[unpacked+1];
+		  if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
+		  {
+			  show_error("Background load error: Background does not match expected size",0);
+			  continue;
+		  }
+		  delete[] cpixels;
+		 
+		  printf("Adding background: %d", i);
+		  background_new(bkgid, width, height, pixels, false, false, true, false, 32, 32, 0, 0, 1,1);
+		  
+		  delete[] pixels;
+		  
+		  
+	  }
+	  
+	  
+	 
+	  
+	  
   }
 }
