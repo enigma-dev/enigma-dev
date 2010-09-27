@@ -301,6 +301,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* filename, int mode)
     } wto << "};\nnamespace enigma { size_t sprite_idmax = " << max << "; }\n\n";
 
     max = 0;
+    wto << "enum //background names\n{\n";
+    for (int i = 0; i < es->backgroundCount; i++) {
+      if (es->backgrounds[i].id >= max) max = es->backgrounds[i].id + 1;
+      wto << "  " << es->backgrounds[i].name << " = " << es->backgrounds[i].id << ",\n";
+    } wto << "};\nnamespace enigma { size_t background_idmax = " << max << "; }\n\n";
+
+
+    max = 0;
     wto << "enum //sound names\n{\n";
     for (int i = 0; i < es->soundCount; i++) {
       if (es->sounds[i].id >= max) max = es->sounds[i].id + 1;
@@ -398,10 +406,12 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
 
   #if TARGET_PLATFORM_ID == OS_IPHONE
     #if IPHONE_DEVICE == 1
-    int makeres = better_system(MAKE_location,"iphonedevice","&>",redirfile);//iphone |iphonedevice
+    int makeres = better_system(MAKE_location,"iphonedevice","&>",redirfile);
     #else
-    int makeres = better_system(MAKE_location,"iphone","&>",redirfile);//iphone |iphonedevice
+    int makeres = better_system(MAKE_location,"iphone","&>",redirfile);
     #endif
+#elif TARGET_PLATFORM_ID == OS_ANDROID
+    int makeres = better_system(MAKE_location,"android","&>",redirfile);
   #else
   int makeres = better_system(MAKE_location,make,"&>",redirfile);
   #endif
@@ -432,12 +442,12 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
     "MacOS/Build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode"
   #elif TARGET_PLATFORM_ID ==  OS_IPHONE
       #if IPHONE_DEVICE == 1
-        "MacOS/build/Release-iphoneos/EnigmaIphone.app/EnigmaIphone"
+        "MacOS/build/Release-iphoneos/EnigmaIphone.app/EnigmaIphone.data"
       #else
-        "MacOS/build/Release-iphonesimulator/EnigmaIphone.app/EnigmaIphone"
+        "MacOS/build/Release-iphonesimulator/EnigmaIphone.app/EnigmaIphone.data"
       #endif
   #elif TARGET_PLATFORM_ID ==  OS_ANDROID
-    "/Users/alasdairmorrison/Documents/workspace/NDKDemo/libs/armeabi/libndkMathsDemo.so"
+    "ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so"
   #else
     "ENIGMAsystem/SHELL/game.exe"
   #endif
@@ -451,11 +461,14 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
   fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
   int resourceblock_start = ftell(gameModule);
 
+#if TARGET_PLATFORM_ID ==  OS_IPHONE
+//don't check this
+#else
   if (resourceblock_start < 128) {
     user << "Compiled game is clearly not a working module; cannot continue" << flushl;
     idpr("Failed to add resources.",-1); return 13;
   }
-
+#endif
 
   // Start by setting off our location with a DWord of NULLs
   fwrite("\0\0\0",1,4,gameModule);
@@ -488,7 +501,9 @@ string glinks = "-lz -framework OpenGLES -framework OpenAL -framework Cocoa";
     #if TARGET_PLATFORM_ID ==  OS_MACOSX
     int gameres = better_system("open",gameFname);
     #elif TARGET_PLATFORM_ID ==  OS_IPHONE
-    int gameres = better_system("MacOS/build/Release-iphonesimulator/iphonesim"," launch " + string(gameFname));
+    int gameres = better_system("MacOS/build/Release-iphonesimulator/iphonesim"," launch EnigmaIphone.app");
+    #elif TARGET_PLATFORM_ID == OS_ANDROID
+    int gameres = better_system(MAKE_location,"androidrun");
     #else
       int gameres = better_system(gameFname,"");
     #endif
