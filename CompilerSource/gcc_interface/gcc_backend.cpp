@@ -114,10 +114,10 @@ int establish_bearings()
     cout << "Good news; it should seem I can reach make from `" << MAKE_location << "'\n";
   }
 
-  int failing = better_system(MAKE_location = bin_path + "make", "--ver");
-  if (failing) failing = better_system(MAKE_location = bin_path + "make.exe", "--ver");
-  if (failing) failing = better_system(MAKE_location = bin_path + "mingw32-make.exe", "--ver");
-  if (failing) failing = better_system(MAKE_location = bin_path + "mingw64-make.exe", "--ver");
+  int failing = better_system(MAKE_location = bin_path + "make", "--version");
+  if (failing) failing = better_system(MAKE_location = bin_path + "make.exe", "--version");
+  if (failing) failing = better_system(MAKE_location = bin_path + "mingw32-make.exe", "--version");
+  if (failing) failing = better_system(MAKE_location = bin_path + "mingw64-make.exe", "--version");
   if (failing)
     return (cout << "Bailing: Error 2\n" , 1);
 

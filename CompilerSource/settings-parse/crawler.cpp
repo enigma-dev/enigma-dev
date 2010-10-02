@@ -42,7 +42,7 @@ namespace settings
   int scour_settings()
   {
     string bdir = "ENIGMAsystem/SHELL/";
-    for (string mdir = file_find_first("ENIGMAsystem/SHELL/*",fa_directory | fa_nofiles); mdir != ""; mdir = file_find_next())
+    for (string mdir = file_find_first("ENIGMAsystem/SHELL/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); mdir != ""; mdir = file_find_next())
     {
       FILE *module_descriptor = fopen((bdir+mdir).c_str(),"rt");
       if (module_descriptor)
@@ -84,7 +84,7 @@ namespace extensions
   void crawl_for_locals()
   {
     locals.clear();
-    for (string ef = file_find_first("ENIGMAsystem/Extensions/*",0); ef != ""; ef = file_find_next())
+    for (string ef = file_find_first("ENIGMAsystem/Extensions/*", fa_sysfile | fa_readonly); ef != ""; ef = file_find_next())
     {
       ifstream ext(("ENIGMAsystem/Extensions/" + ef).c_str(), ios_base::in);
       if (ext.is_open())
@@ -120,7 +120,7 @@ namespace extensions
   {
     all_platforms.clear();
     cout << "\n\n\n\nStarting platform inspection\n";
-    for (string ef = file_find_first("ENIGMAsystem/SHELL/Platforms/*",fa_directory | fa_nofiles); ef != ""; ef = file_find_next())
+    for (string ef = file_find_first("ENIGMAsystem/SHELL/Platforms/*",fa_sysfile | fa_readonly | fa_directory | fa_nofiles); ef != ""; ef = file_find_next())
     {
       cout << " - ENIGMAsystem/SHELL/Platforms/" + ef + "/About.ey: ";
       ifstream ext(("ENIGMAsystem/SHELL/Platforms/" + ef + "/About.ey").c_str(), ios_base::in);
