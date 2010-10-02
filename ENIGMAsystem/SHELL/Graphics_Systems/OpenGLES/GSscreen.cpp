@@ -57,7 +57,7 @@ int screen_redraw()
        glViewport(0,0,window_get_width(),window_get_height());
        glLoadIdentity();
        glScalef(1,-1,1); //OPENGLES
-#if ENIGMA_WS_IPHONE !=0
+#if ENIGMA_WS_IPHONE !=0 || ENIGMA_WS_ANDROID !=0
 		glOrthof(0,room_width,0,room_height,0,1); //OPENGLES put f back in
 #else
 		glOrtho(0,room_width,0,room_height,0,1); //OPENGLES put f back in
@@ -106,7 +106,7 @@ int screen_redraw()
       glViewport((int)view_xport[vc],(int)view_yport[vc],(int)view_wport[vc],(int)view_hport[vc]);
       glLoadIdentity();
       glScalef(1,-1,1);
-#if ENIGMA_WS_IPHONE !=0
+#if ENIGMA_WS_IPHONE !=0 || ENIGMA_WS_ANDROID !=0
 		glOrthof((int)view_xview[vc],(int)view_wview[vc]+(int)view_xview[vc],(int)view_yview[vc],(int)view_hview[vc]+(int)view_yview[vc],0,1); //OPENGLES put f back in
 #else
       glOrtho((int)view_xview[vc],(int)view_wview[vc]+(int)view_xview[vc],(int)view_yview[vc],(int)view_hview[vc]+(int)view_yview[vc],0,1); //OPENGLES put f back in

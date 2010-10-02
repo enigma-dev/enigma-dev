@@ -29,12 +29,16 @@
 
 @interface EnigmaXcodeAppDelegate : NSObject <NSApplicationDelegate> {
     NSWindow *window;
+	BOOL visible;
 }
 
 @property (assign) IBOutlet NSWindow *window;
+@property (readwrite) BOOL visible;
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication;
 
 - (void)changeVisible;
+
+
 
 @end

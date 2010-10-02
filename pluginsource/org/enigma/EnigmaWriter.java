@@ -470,8 +470,11 @@ public final class EnigmaWriter
 					Event oe = oel[e];
 					org.lateralgm.resources.sub.Event ie = iel.get(e);
 
-					oe.id = ie.id;
-					oe.otherObjectId = toId(ie.other,-1);
+
+					if (me == org.lateralgm.resources.sub.MainEvent.EV_COLLISION)
+						oe.id = toId(ie.other,-1);
+					else
+						oe.id = ie.id;
 
 					oe.code = getActionsCode(ie);
 					}
@@ -803,7 +806,7 @@ public final class EnigmaWriter
 			case Argument.ARG_COLOR:
 				try
 					{
-					return String.format("#%06X",Integer.parseInt(val));
+					return String.format("$%06X",Integer.parseInt(val));
 					}
 				catch (NumberFormatException e)
 					{

@@ -83,6 +83,7 @@
     [[self window] setAcceptsMouseMovedEvents:YES];
 	//init enigma
 	delegate = (EnigmaXcodeAppDelegate *)[NSApp delegate];
+	delegate.visible= YES;
 	init();
     
 }
@@ -114,17 +115,31 @@
     return YES;
 }
 
+- (void)keyUp:(NSEvent *)theEvent
+{
+   // NSLog( @"Key Up" );
+	key_release([theEvent keyCode]);
+}
+
 - (void)keyDown:(NSEvent *)theEvent
 {
-    NSLog( @"Key Down" );
+    //NSLog( @"Key Down %d", [theEvent keyCode] );
+	key_press([theEvent keyCode]);
 }
-// handle mouse up events (left mouse button)
+
+
 - (void)mouseUp:(NSEvent *)theEvent
 {
     NSPoint pt = [theEvent locationInWindow];
-    NSLog(@"EVENT %f %f", pt.x, pt.y);
+	mouse_release(pt.x, pt.y);
 }
-// handle mouse movement events (left mouse button)
+- (void)mouseDown:(NSEvent *)theEvent
+{
+    NSPoint pt = [theEvent locationInWindow];
+	mouse_press(pt.x, pt.y);
+}
+
+
 - (void)mouseMoved:(NSEvent *)event
 {
 	//mouse = event;

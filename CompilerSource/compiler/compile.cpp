@@ -31,7 +31,7 @@
 #include "../general/darray.h"
 
  #include <cstdio>
- 
+
 #ifdef _WIN32
  #define dllexport extern "C" __declspec(dllexport)
  #include <windows.h>
@@ -106,7 +106,7 @@ void clear_ide_editables()
            "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n#define COLLIGMA  0\n";
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
-  
+
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
     wto << license;
     wto << "#define ASSUMEZERO 0\n";
@@ -136,7 +136,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
      better_system(MAKE_location, "clean-game");
     return 0;
   }
-  
+
   edbg << "Building for mode (" << mode << ")" << flushl;
 
   // CLean up from any previous executions.
@@ -312,6 +312,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     } wto << "};\nnamespace enigma { size_t sprite_idmax = " << max << "; }\n\n";
 
     max = 0;
+    wto << "enum //background names\n{\n";
+    for (int i = 0; i < es->backgroundCount; i++) {
+      if (es->backgrounds[i].id >= max) max = es->backgrounds[i].id + 1;
+      wto << "  " << es->backgrounds[i].name << " = " << es->backgrounds[i].id << ",\n";
+    } wto << "};\nnamespace enigma { size_t background_idmax = " << max << "; }\n\n";
+
+
+    max = 0;
     wto << "enum //sound names\n{\n";
     for (int i = 0; i < es->soundCount; i++) {
       if (es->sounds[i].id >= max) max = es->sounds[i].id + 1;
@@ -330,29 +338,29 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Writing events" << flushl;
   res = compile_writeDefraggedEvents(es);
   irrr();
-  
+
   parsed_object EGMglobal;
-  
+
   edbg << "Linking globals" << flushl;
   res = link_globals(&EGMglobal,es,parsed_scripts);
   irrr();
-  
+
   edbg << "Running Secondary Parse Passes" << flushl;
   res = compile_parseSecondary(parsed_objects,parsed_scripts,&EGMglobal);
-  
+
   edbg << "Writing object data" << flushl;
   res = compile_writeObjectData(es,&EGMglobal);
   irrr();
-  
+
   edbg << "Writing local accessors" << flushl;
   res = compile_writeObjAccess(parsed_objects, &EGMglobal);
   irrr();
-  
+
   res = compile_writeRoomData(es);
   irrr();
-  
-  
-  
+
+
+
   // Write the global variables to their own file to be included before any of the objects
   res = compile_writeGlobals(es,&EGMglobal);
   irrr();
@@ -393,26 +401,28 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 //  #if CURRENT_PLATFORM_ID == OS_MACOSX
   //int makeres = better_system("cd ","/MacOS/");
 //  int makeres = better_system(MAKE_location,"MacOS");
-  
+
   // Pick a file
   const char* redirfile = "redirfile.txt";
-  
+
   // Redirect it
   ide_output_redirect_file(redirfile);
-  
+  /*
   #if CURRENT_PLATFORM_ID == OS_IPHONE
     #if IPHONE_DEVICE == 1
-    int makeres = better_system(MAKE_location,"iphonedevice","&>",redirfile);//iphone |iphonedevice
+    int makeres = better_system(MAKE_location,"iphonedevice","&>",redirfile);
     #else
-    int makeres = better_system(MAKE_location,"iphone","&>",redirfile);//iphone |iphonedevice
+    int makeres = better_system(MAKE_location,"iphone","&>",redirfile);
     #endif
-  #else
+  #elif TARGET_PLATFORM_ID == OS_ANDROID
+    int makeres = better_system(MAKE_location,"android","&>",redirfile);
+  #else*/
   int makeres = better_system(MAKE_location,make,"&>",redirfile);
-  #endif
-  
+  //#endif
+
   // Stop redirecting GCC output
   ide_output_redirect_reset();
-  
+
   if (makeres) {
     user << "----Make returned error " << makeres << "----------------------------------\n";
     idpr("Compile failed at C++ level.",-1); return E_ERROR_BUILD;
@@ -431,7 +441,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
   #if CURRENT_PLATFORM_ID ==  OS_ANDROID
-    "/Users/alasdairmorrison/Documents/workspace/NDKDemo/libs/armeabi/libndkMathsDemo.so"
+    "ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so"
   #endif
   ;
   FILE *gameModule = fopen(gameFname,"ab");
@@ -443,11 +453,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
   int resourceblock_start = ftell(gameModule);
 
+#if TARGET_PLATFORM_ID ==  OS_IPHONE
+//don't check this
+#else
   if (resourceblock_start < 128) {
     user << "Compiled game is clearly not a working module; cannot continue" << flushl;
     idpr("Failed to add resources.",-1); return 13;
   }
-
+#endif
 
   // Start by setting off our location with a DWord of NULLs
   fwrite("\0\0\0",1,4,gameModule);
@@ -472,7 +485,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
-  
+
   if (mode == emode_run or mode == emode_build)
   {
     string rprog = extensions::targetOS.run_program, rparam = extensions::targetOS.run_params;

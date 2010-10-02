@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout 
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical" 
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+  
+  <TextView 
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:text="NDK Demo"
+     android:textSize="22sp" 
+    />
+    
+  
+	<LinearLayout 
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal" 
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+  
+    <EditText 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" 
+    android:id="@+id/value1"
+    android:hint="Value 1">
+    </EditText>
+  <EditText 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dip"
+    android:id="@+id/value2"
+    android:hint="Value 2">
+    </EditText>
+    </LinearLayout>
+    <LinearLayout 
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal" 
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+    <Button
+    android:id="@+id/add" 
+    android:layout_width="50dip"
+    android:layout_height="wrap_content" 
+    android:text="+"
+    android:textSize="36sp">
+    </Button>
+      <Button
+    android:id="@+id/mul" 
+    android:layout_width="50dip"
+    android:layout_height="wrap_content" 
+    android:layout_marginLeft="30dip"
+    android:text="*"
+    android:textSize="36sp">
+    </Button>
+      <Button
+    android:id="@+id/div" 
+    android:layout_width="50dip"
+    android:layout_height="wrap_content" 
+    android:text="/"
+    android:layout_marginLeft="30dip"
+    android:textSize="36sp">
+    </Button>
+    </LinearLayout>
+  <Button 
+    android:layout_width="50dip"
+    android:layout_height="wrap_content" 
+    android:id="@+id/buttonCalc"
+    android:text="=">
+    </Button>
+    
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content" 
+    android:text="result"
+    android:textSize="36sp" 
+    android:id="@+id/result">
+    </TextView>
+    
+    
+    
+    
+    
+    
+    
+</LinearLayout>

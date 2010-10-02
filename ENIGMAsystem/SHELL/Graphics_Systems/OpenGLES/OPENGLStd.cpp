@@ -59,7 +59,7 @@ namespace enigma
       glLoadIdentity();
       
       glViewport(0,0,(int)room_width,(int)room_height);
-#if ENIGMA_WS_IPHONE !=0
+#if ENIGMA_WS_IPHONE !=0 || ENIGMA_WS_ANDROID !=0
 	  glOrthof(0,(int)room_width-1,(int)room_height-1,0,-1,1); //OPENGLES
 #else
 	  glOrtho(0,(int)room_width-1,(int)room_height-1,0,-1,1); //
@@ -68,7 +68,7 @@ namespace enigma
       
       glDisable(GL_DEPTH_TEST);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#if ENIGMA_WS_IPHONE !=0
+#if ENIGMA_WS_IPHONE !=0 || ENIGMA_WS_ANDROID !=0
 	  glClearDepthf(1.0); //OPENGLES put f back in
 #else
 	  glClearDepth(1.0); 

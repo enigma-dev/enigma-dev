@@ -47,6 +47,9 @@ namespace enigma
 #if PRIMTVLIB
     #include "GSprmtvs.h"
 #endif
+#if PRIMTVLIB //Temp until Josh adds D3DLIB
+    #include "GSd3d.h"
+#endif
 #if STDRAWLIB
     #include "GSstdraw.h"
 #endif

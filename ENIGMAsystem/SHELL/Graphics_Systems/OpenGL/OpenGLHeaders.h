@@ -28,7 +28,9 @@
 //#include "../../OS_Switchboard.h"
 
 #if ENIGMA_OS_MACOSX
-  #include <OpenGL/gl.h>	
+  #include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
 #else
   #include <GL/gl.h>
+  #include <GL/glu.h>
 #endif

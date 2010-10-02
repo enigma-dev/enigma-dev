@@ -95,7 +95,12 @@
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event 
 { 
+	UITouch *firstTouch=[[touches allObjects] objectAtIndex:0]; 
+	//get the the point inside the view 
+	currentTouchPoint=[firstTouch locationInView:self]; 
+	mouse_release(currentTouchPoint.x,currentTouchPoint.y);
 } 
+
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event 
 { 
@@ -103,7 +108,8 @@
 	UITouch *firstTouch=[[touches allObjects] objectAtIndex:0]; 
 	//get the the point inside the view 
 	currentTouchPoint=[firstTouch locationInView:self]; 
-	NSLog(@"TOUCHED!");
+	
+	mouse_press(currentTouchPoint.x,currentTouchPoint.y);
 }
 
 

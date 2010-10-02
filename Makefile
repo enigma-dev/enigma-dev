@@ -22,3 +22,20 @@ iphone:
 
 iphonedevice:
 	cd MacOS/ && xcodebuild -target EnigmaIphone -sdk iphoneos2.2.1
+
+# Figure platform
+OS := $(shell uname -s)
+ifeq ($(OS), Linux)
+	CREMOVE := rm -r 
+	ENDCREMOVE :=
+	SLASHC := /
+else ifeq ($(OS), Darwin)
+	CREMOVE := rm -r 
+	ENDCREMOVE :=
+	SLASHC := /
+else
+	CREMOVE := del /Q '
+	ENDCREMOVE :='
+	SLASHC := \\
+endif
+

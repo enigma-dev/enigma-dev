@@ -30,11 +30,16 @@
 @implementation EnigmaXcodeAppDelegate
 
 @synthesize window;
+@synthesize visible;
 
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
 {
+	if (visible) {
     return YES;
+	} else {
+		return NO; //the screen is just hidden
+	}
 }
 
 - (void)changeVisible { 

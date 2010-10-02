@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.enigma.EnigmaFrame;
+import org.lateralgm.file.GmStreamDecoder;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Structure;
@@ -120,10 +121,25 @@ public class EnigmaCallbacks extends Structure
 								{
 								int size;
 								byte[] data;
-								//in this case we can use available() because
-								//FileInputStream shouldn't return a blocking value
-								size = running ? in.available() : 2048;
-								if (size <= 0)
+								size = in.available();
+								if (size > 0)
+									{
+									data = new byte[size];
+									size = in.read(data,0,size);
+									if (size == -1) break;
+									sb.append(new String(data,0,size,GmStreamDecoder.CHARSET));
+									int p = sb.indexOf("\n");
+									while (p != -1)
+										{
+										String dat = sb.substring(0,p + 1);
+										ef.ta.append(dat);
+										ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
+										System.out.print(dat);
+										sb.delete(0,p + 1);
+										p = sb.indexOf("\n");
+										}
+									}
+								else
 									{
 									try
 										{
@@ -132,21 +148,6 @@ public class EnigmaCallbacks extends Structure
 									catch (InterruptedException e1)
 										{
 										}
-									continue;
-									}
-								data = new byte[size];
-								size = in.read(data,0,size);
-								if (size == -1) break;
-								sb.append(new String(data,0,size,"UTF-8"));
-								int p = sb.indexOf("\n");
-								while (p != -1)
-									{
-									String dat = sb.substring(0,p + 1);
-									ef.ta.append(dat);
-									ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
-									System.out.print(dat);
-									sb.delete(0,p + 1);
-									p = sb.indexOf("\n");
 									}
 								}
 							ef.ta.append(sb.toString() + "\n");

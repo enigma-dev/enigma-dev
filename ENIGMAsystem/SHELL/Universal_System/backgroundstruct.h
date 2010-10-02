@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -35,6 +36,7 @@ namespace enigma
     bool transparent;
     bool smooth;
     bool preload;
+	  double texbordx, texbordy;
     
     const bool tileset;
     
@@ -57,6 +59,13 @@ namespace enigma
     background_tileset(int w,int h,unsigned tex,bool trans,bool smth,bool prel,int tw, int th, int ho, int vo, int hs, int vs);
   };
   
-  background* *backgroundarray; // Since we use pointers for NULL checking, anyway, we can save up to seven bytes per structure by using this configuration
-  void background_new(int bkgid, int w, int h, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep);
+  extern background** backgroundstructarray;
+	void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep);
+
+}
+
+namespace enigma
+{
+	//Allocates and zero-fills the array at game start
+	void backgrounds_init();
 }

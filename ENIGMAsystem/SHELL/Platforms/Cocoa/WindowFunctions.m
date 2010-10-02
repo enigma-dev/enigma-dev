@@ -83,21 +83,21 @@ int cocoa_window_set_visible(int visible)
 {
 	if(visible==1)
 	{
-		/*XMapRaised(disp,win);
-		 GLXContext glxc = glXGetCurrentContext();
-		 glXMakeCurrent(disp,win,glxc);
-		 if(visx != -1 && visy != -1)
-		 window_set_position(visx,visy);*/
+		[[delegate window] makeKeyAndOrderFront:nil]; 
+		delegate.visible= YES;
 	}
 	else {
+		if ([[delegate window] isVisible]) {
 		// Hide 
-		[[delegate window] orderOut:[delegate window]]; 
+		[[delegate window] orderOut:nil]; 
+			delegate.visible= NO;
+		}
 	}
 	return 0;
 }
 
 int cocoa_window_get_visible()
 {
-	
+	return (delegate.visible) ? 1 : 0;
 }
 

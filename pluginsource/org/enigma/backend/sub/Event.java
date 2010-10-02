@@ -13,8 +13,6 @@ import com.sun.jna.Structure;
 public class Event extends Structure
 	{
 	public int id;
-	public int otherObjectId; //collision, etc
-
 	public String code;
 
 	public static class ByReference extends Event implements Structure.ByReference

@@ -66,7 +66,20 @@ int loopy() {
 	return 0;
 }
 
+extern int imousex,imousey;
 
 int init() {
 enigma::initialize_everything();
+}
+
+int mouse_press(int x, int y) {
+	enigma::mousestatus[mb_left-1]=1;
+	imousex=x;
+	imousey=y;
+}
+
+int mouse_release(int x, int y) {
+enigma::mousestatus[mb_left-1]=0;
+	imousex=x;
+	imousey=y;
 }
