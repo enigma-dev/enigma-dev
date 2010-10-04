@@ -78,6 +78,7 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-DENIGMA_PARSERS_DEBUG" />
+					<Add option="-DNOT_A_DLL" />
 				</Compiler>
 			</Target>
 			<Target title="StandAloneND">
@@ -88,6 +89,7 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add option="-DNOT_A_DLL" />
 				</Compiler>
 			</Target>
 		</Build>
@@ -220,6 +222,8 @@
 		<Unit filename="settings-parse/crawler.h" />
 		<Unit filename="settings-parse/eyaml.cpp" />
 		<Unit filename="settings-parse/eyaml.h" />
+		<Unit filename="settings-parse/parse_ide_settings.cpp" />
+		<Unit filename="settings-parse/parse_ide_settings.h" />
 		<Unit filename="settings.h" />
 		<Unit filename="standalone_main.cpp">
 			<Option target="StandAlone" />

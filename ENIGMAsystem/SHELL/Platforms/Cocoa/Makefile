@@ -14,18 +14,18 @@
 	g++ -c EnigmaView.m		-o .eobjs_$(MODE)/EnigmaView.o $(FLAGS)
 .eobjs_$(MODE)/EnigmaXcodeAppDelegate.o: EnigmaXcodeAppDelegate.m
 	g++ -c EnigmaXcodeAppDelegate.m		-o .eobjs_$(MODE)/EnigmaXcodeAppDelegate.o $(FLAGS)
-.eobjs_$(MODE)/WindowFunctions.o: WindowFunctions.m
-	g++ -c WindowFunctions.m		-o .eobjs_$(MODE)/WindowFunctions.o $(FLAGS)
 .eobjs_$(MODE)/main.o: main.m
 	g++ -c main.m		-o .eobjs_$(MODE)/main.o $(FLAGS)
+.eobjs_$(MODE)/WindowFunctions.o: WindowFunctions.m
+	g++ -c WindowFunctions.m		-o .eobjs_$(MODE)/WindowFunctions.o $(FLAGS)
 
 mkObjDir:
 	-mkdir .eobjs_$(MODE)
 
-Run: mkObjDir .eobjs_Run/CocoaDialog.o .eobjs_Run/CocoaFunctions.o .eobjs_Run/CocoaMain.o .eobjs_Run/CocoaWindow.o .eobjs_Run/file_manip.o .eobjs_Run/EnigmaView.o .eobjs_Run/EnigmaXcodeAppDelegate.o .eobjs_Run/WindowFunctions.o .eobjs_Run/main.o 
-Debug: mkObjDir .eobjs_Debug/CocoaDialog.o .eobjs_Debug/CocoaFunctions.o .eobjs_Debug/CocoaMain.o .eobjs_Debug/CocoaWindow.o .eobjs_Debug/file_manip.o .eobjs_Debug/EnigmaView.o .eobjs_Debug/EnigmaXcodeAppDelegate.o .eobjs_Debug/WindowFunctions.o .eobjs_Debug/main.o 
-Build: mkObjDir .eobjs_Build/CocoaDialog.o .eobjs_Build/CocoaFunctions.o .eobjs_Build/CocoaMain.o .eobjs_Build/CocoaWindow.o .eobjs_Build/file_manip.o .eobjs_Build/EnigmaView.o .eobjs_Build/EnigmaXcodeAppDelegate.o .eobjs_Build/WindowFunctions.o .eobjs_Build/main.o 
-Release: mkObjDir .eobjs_Release/CocoaDialog.o .eobjs_Release/CocoaFunctions.o .eobjs_Release/CocoaMain.o .eobjs_Release/CocoaWindow.o .eobjs_Release/file_manip.o .eobjs_Release/EnigmaView.o .eobjs_Release/EnigmaXcodeAppDelegate.o .eobjs_Release/WindowFunctions.o .eobjs_Release/main.o 
+Run: mkObjDir .eobjs_Run/CocoaDialog.o .eobjs_Run/CocoaFunctions.o .eobjs_Run/CocoaMain.o .eobjs_Run/CocoaWindow.o .eobjs_Run/file_manip.o .eobjs_Run/EnigmaView.o .eobjs_Run/EnigmaXcodeAppDelegate.o .eobjs_Run/main.o .eobjs_Run/WindowFunctions.o 
+Debug: mkObjDir .eobjs_Debug/CocoaDialog.o .eobjs_Debug/CocoaFunctions.o .eobjs_Debug/CocoaMain.o .eobjs_Debug/CocoaWindow.o .eobjs_Debug/file_manip.o .eobjs_Debug/EnigmaView.o .eobjs_Debug/EnigmaXcodeAppDelegate.o .eobjs_Debug/main.o .eobjs_Debug/WindowFunctions.o 
+Build: mkObjDir .eobjs_Build/CocoaDialog.o .eobjs_Build/CocoaFunctions.o .eobjs_Build/CocoaMain.o .eobjs_Build/CocoaWindow.o .eobjs_Build/file_manip.o .eobjs_Build/EnigmaView.o .eobjs_Build/EnigmaXcodeAppDelegate.o .eobjs_Build/main.o .eobjs_Build/WindowFunctions.o 
+Release: mkObjDir .eobjs_Release/CocoaDialog.o .eobjs_Release/CocoaFunctions.o .eobjs_Release/CocoaMain.o .eobjs_Release/CocoaWindow.o .eobjs_Release/file_manip.o .eobjs_Release/EnigmaView.o .eobjs_Release/EnigmaXcodeAppDelegate.o .eobjs_Release/main.o .eobjs_Release/WindowFunctions.o 
 
 clean:
 	$(CREMOVE).eobjs*$(SLASHC)*$(ENDCREMOVE)

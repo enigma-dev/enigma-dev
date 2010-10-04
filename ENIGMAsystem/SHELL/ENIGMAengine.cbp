@@ -785,58 +785,238 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
-		<Unit filename="Graphics_Systems\graphics_mandatory.h" />
-		<Unit filename="Modes\buildmode.h" />
-		<Unit filename="Platforms\platforms_mandatory.h" />
-		<Unit filename="Platforms\windows\WINDOWSStd.h">
+		<Unit filename="Graphics_Systems/OpenGLES/EGMenable.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMblend.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMcolors.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMprmtvs.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMscreen.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMsprite.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMspriteadd.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMstdraw.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GMsurface.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSblend.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSblend.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GScolors.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GScolors.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSenable.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSenable.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSmiscextra.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSmiscextra.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSprmtvs.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSprmtvs.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSscreen.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSscreen.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsprite.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsprite.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSspriteadd.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSspriteadd.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSstdraw.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSstdraw.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsurface.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsurface.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GStextures.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GStextures.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/OPENGLStd.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/OPENGLStd.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/graphics_object.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/graphics_object.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/graphics_mandatory.h" />
+		<Unit filename="Modes/buildmode.h" />
+		<Unit filename="Platforms/Win32/WINDOWSStd.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWScallback.cpp">
+		<Unit filename="Platforms/Win32/WINDOWScallback.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWScallback.h">
+		<Unit filename="Platforms/Win32/WINDOWScallback.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWSfonts.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSfonts.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWSfonts.h">
+		<Unit filename="Platforms/Win32/WINDOWSfonts.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWSmain.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSmain.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWSmain.h">
+		<Unit filename="Platforms/Win32/WINDOWSmain.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWSshow_error.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSshow_error.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWSstd.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSstd.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWSwindow.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSwindow.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\WINDOWSwindow.h">
+		<Unit filename="Platforms/Win32/WINDOWSwindow.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\externals.cpp">
+		<Unit filename="Platforms/Win32/externals.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\windows\externals.h">
+		<Unit filename="Platforms/Win32/externals.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/ffi/ffi.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/ffi/ffitarget.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/file_manip.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/Win32/file_manip.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/platforms_mandatory.h" />
+		<Unit filename="Platforms/windows/WINDOWSStd.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/windows/WINDOWScallback.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/windows/WINDOWSfonts.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/windows/WINDOWSmain.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/windows/WINDOWSwindow.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Platforms/windows/externals.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
@@ -845,10 +1025,6 @@
 			<Option target="win-build" />
 		</Unit>
 		<Unit filename="Platforms\windows\ffi\ffitarget.h">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
-		<Unit filename="Platforms\windows\file_manip.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>

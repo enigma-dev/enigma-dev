@@ -30,7 +30,7 @@ using namespace std;
 
 #include "../OS_Switchboard.h"
 
-#if TARGET_PLATFORM_ID == OS_WINDOWS
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
   #include <windows.h>
   const int fa_archive   = FILE_ATTRIBUTE_ARCHIVE;   //0x0020
   const int fa_directory = FILE_ATTRIBUTE_DIRECTORY; //0x0010
@@ -127,7 +127,7 @@ using namespace std;
     stat(fqfn.c_str(), &sb);
     
     if ((sb.st_mode & S_IFDIR     and not_attrib & fa_directory) // Filter out/for directories
-    or  (sb.st_uid == u_root      and not_attrib & fa_hidden)    // Filter system files
+    or  (sb.st_uid == u_root      and not_attrib & fa_sysfile)    // Filter system files
     or  (not_attrib & fa_readonly and access(fqfn.c_str(),W_OK)) // Filter read-only files
     ) return file_find_next();
     

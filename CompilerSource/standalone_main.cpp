@@ -81,26 +81,6 @@ extern int cfile_parse_main();
 extern externs *enigma_type__var, *enigma_type__variant;
 int mainr(int argc, char *argv[])
 {
-  /*my_string atest = fca("test.txt");
-  if (!atest) cout << "Open fail." << endl;
-  else {
-    cout << "a.length: " << atest.length() << endl;
-    cout << '"' << atest << '"' << endl;
-  }
-  string attn = "NIGGAR TITTZ";
-  atest = attn;
-    cout << "a.length: " << atest.length() << endl;
-    cout << '"' << atest << '"' << endl;
-  return -1;*/
-  
-  if (establish_bearings()) {
-    cout << "ERROR: Failed to locate the GCC" << endl;
-    getchar(); return 1;
-  }
-  
-  cparse_init();
-  
-  
   cout << "Grabbing locals" << endl;
     extensions::crawl_for_locals();
     string localstring = extensions::compile_local_string();
@@ -109,7 +89,7 @@ int mainr(int argc, char *argv[])
   
   //m_prog_loop_cfp();
   
-  my_string EGMmain = fca(0 ? "./CompilerSource/cfile_parse/auxilary.h" : "./CompilerSource/cfile_parse/auxilary.h");
+  my_string EGMmain = fca("./CompilerSource/cfile_parse/auxilary.h");
   if (EGMmain == NULL) {
     cout << "ERROR: Failed to read main engine file\n";
     getchar(); return 1;
@@ -226,8 +206,21 @@ int mainr(int argc, char *argv[])
   return 0;
 }
 
+
+struct syntax_error {
+  const char*err_str;
+  int line, position;
+  int absolute_index;
+  void set(int x, int
+  y,int a, string s);
+};
+int libInit(struct EnigmaCallbacks* ecs);
+syntax_error whitespaceModified(const char*);
+
 int main(int argc, char* argv[])
 {
+  libInit(NULL);
+  whitespaceModified("");
   mainr(argc,argv);
   getchar();
   return 0;

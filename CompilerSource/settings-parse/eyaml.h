@@ -29,9 +29,15 @@
 #include <fstream>
 using std::string;
 
+typedef map<string, struct ey_base*>::iterator eyit;
+typedef pair<string, struct ey_base*> eypair;
+
 struct ey_base {
   string name;
   const bool is_scalar;
+  string gets(string);
+  eyit getit(string);
+  eyit itend(void);
   ey_base(bool);
   ey_base(string,bool);
 };
@@ -54,13 +60,21 @@ struct ey_data: ey_base
   operator char*();
   operator ey_data*();
   
+  string gets(string);
+  eyit getit(string);
+  eyit itend(void);
+  
   ey_data();
   ey_data(string);
   ~ey_data();
 };
-typedef map<string, ey_base*>::iterator eyit;
-typedef pair<string, ey_base*> eypair;
+
 typedef ey_data::eylist *eycit;
 
-ey_data parse_eyaml(ifstream &file, string fname = "");
+ey_data parse_eyaml(istream &file, string fname = "");
+ey_data parse_eyaml_str(string);
+
 eyit eyaml_ci_find(ey_data &dat, string str);
+
+string eycit_str(eycit);
+string eyit_str(eyit);

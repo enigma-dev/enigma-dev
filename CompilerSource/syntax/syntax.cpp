@@ -227,7 +227,7 @@ namespace syncheck
                 if (plevelt[plevel] == PLT_PARENTH)
                   plevelt[plevel] = PLT_CAST;
                 else if (plevelt[plevel] != PLT_FORSTATEMENT) {
-                  lastnamed[level] = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? LN_TYPE_NAME : LN_OPERATOR; //Cast ~= Unary operator
+                  lastnamed[level] = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? LN_TYPE_NAME : LN_OPERATOR; //Cast ~~= Unary operator
                 }
               }
             }
@@ -563,9 +563,9 @@ namespace syncheck
         case '"':
             {
               if (!assop[level] && !(plevel>0))
-              { error="Assignment operator expected before string constant"; return pos; }
-              if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
-              { error="Operator expected before string constant"; return pos; }
+              { error="Assignment operator expected before string literal"; return pos; }
+              if (lastnamed[level] != LN_OPERATOR && !(plevel>0) && !(inlist() and lastnamed[level]==LN_NOTHING))
+              { error="Operator expected before string literal"; return pos; }
               
               if (OPTION_CPP_STRINGS)
                 while (code[++pos]!='"') { 
@@ -582,9 +582,9 @@ namespace syncheck
         case '\'':
             {
               if (!assop[level] && !(plevel>0))
-              { error="Assignment operator expected before string constant"; return pos; }
-              if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
-              { error="Operator expected before string constant"; return pos; }
+              { error="Assignment operator expected before string literal"; return pos; }
+              if (lastnamed[level] != LN_OPERATOR && !(plevel>0) && !(inlist() and lastnamed[level]==LN_NOTHING))
+              { error="Operator expected before string literal"; return pos; }
               
               if (OPTION_CPP_STRINGS)
                 while (code[++pos]!='\'') { 

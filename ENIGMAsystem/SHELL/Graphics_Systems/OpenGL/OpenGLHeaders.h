@@ -25,13 +25,11 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "../../API_Switchboard.h"
+//#include "../../OS_Switchboard.h"
 
-#if ENIGMA_WS_COCOA !=0
+#if ENIGMA_OS_MACOSX
   #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
-#elif ENIGMA_WS_IPHONE != 0
-  #include <OpenGLES/ES1/gl.h>
 #else
   #include <GL/gl.h>
   #include <GL/glu.h>

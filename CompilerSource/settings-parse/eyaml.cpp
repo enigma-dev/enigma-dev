@@ -72,6 +72,41 @@ ey_data::~ey_data()
   }
 }
 
+string ey_data::gets(string n)
+{
+  eyit it = values.find(n);
+  if (it == values.end())
+    return "";
+  if (it->second->is_scalar)
+    return ((ey_string*)it->second)->value;
+  return "";
+}
+string ey_base::gets(string n) {
+  return (is_scalar) ? "" : ((ey_data*)this)->gets(n);
+}
+
+eyit ey_data::getit(string n) {
+  return values.find(n);
+}
+eyit ey_base::getit(string n) {
+  return ((ey_data*)this)->values.find(n);
+}
+
+eyit ey_data::itend() {
+  return values.end();
+}
+eyit ey_base::itend() {
+  return ((ey_data*)this)->values.end();
+}
+
+string eycit_str(eycit x) {
+  return x->value->is_scalar ? ((ey_string*)x->value)->value : "";
+}
+string eyit_str(eyit x) {
+  const ey_base* xx = x->second;
+  return xx->is_scalar ? ((ey_string*)xx)->value : "";
+}
+
 eyit eyaml_ci_find(ey_data &dat, string str) {
   return dat.values.find(str);
 }
@@ -83,7 +118,7 @@ struct y_level {
   y_level(y_level* a, ey_data *b, int c): prev(a), s(b), i(c) {}
 };
 
-ey_data parse_eyaml(ifstream &file, string filename)
+ey_data parse_eyaml(istream &file, string filename)
 {
   string line;
   ey_data res;
@@ -126,10 +161,11 @@ ey_data parse_eyaml(ifstream &file, string filename)
         else
         {
           if (latest->second != NULL)
-            cout << "Indent increased unexpectedly on line " << linenum << " of file " << filename;
-          else {
+            cout << "Indent increased unexpectedly on line " << linenum << " of file " << filename << endl;
+          else
+          {
             cur->s->values_order_last = latestc;
-            cur = new y_level(cur, (ey_data*)(latest->second = latest->second = latestc->value = new ey_data(unlowered)), inds);
+            cur = new y_level(cur, (ey_data*)(latest->second = latestc->value = new ey_data(unlowered)), inds);
             latest = cur->s->values.insert(eypair(tolower(nname), NULL)) . first;
             latestc = new ey_data::eylist(&cur->s->values_order);
           }
@@ -167,12 +203,17 @@ ey_data parse_eyaml(ifstream &file, string filename)
     while (line[pos] and line[pos] != '#') pos++;
     while (is_useless(line[--pos]));
     
-    if (++pos > vsp) {
-      //cout << "Added " << unlowered << " as '" << line.substr(vsp, pos - vsp) << "' naturally.\n";
+    if (++pos > vsp)
       latest->second = latestc->value = new ey_string(unlowered, line.substr(vsp, pos - vsp));
-    }
   }
   if (latest != cur->s->values.end() and latest->second == NULL)
     latest->second = latestc->value =  new ey_string(unlowered,"");
   return res;
+}
+
+#include <sstream>
+ey_data parse_eyaml_str(string yaml)
+{
+  istringstream iss(yaml);
+  return parse_eyaml(iss,"LGM Settings");
 }

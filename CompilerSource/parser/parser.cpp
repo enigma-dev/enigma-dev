@@ -230,7 +230,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
   
-  cout << "Fix dots and shit in: \n\n" << code << endl << synt << endl << endl;
+  //cout << "Fix dots and shit in: \n\n" << code << endl << synt << endl << endl;
   
   int slev = 0;
   darray<localscope*> sstack;
@@ -306,7 +306,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         }
         code.replace(ebp, exp.length() + 1 + member.length(), repstr);
         synt.replace(ebp, exp.length() + 1 + member.length(), repsyn);
-        cout << synt << endl << endl << endl;
+        //cout << synt << endl << endl << endl;
       }
       else // There is a member by this name in the type of that expression
       {

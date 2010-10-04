@@ -10,7 +10,7 @@ all:
 	cd Audio_Systems/OpenAL/			&& $(MAKE) $(GMODE) MODE=$(GMODE) FLAGS="$(GFLAGS)"
 	cd Collision_Systems/none/			&& $(MAKE) $(GMODE) MODE=$(GMODE) FLAGS="$(GFLAGS)"
 	
-	g++ SHELLmain.cpp libEGMstd.cpp Graphics_Systems/$(GRAPHICS)/.eobjs_$(GMODE)/*.o Platforms/$(PLATFORM)/.eobjs_$(GMODE)/*.o Universal_System/.eobjs_$(GMODE)/*.o Audio_Systems/OpenAL/.eobjs_$(GMODE)/*.o Collision_Systems/none/.eobjs_$(GMODE)/*.o Audio_Systems/OpenAL/.eobjs_$(GMODE)/*.a Audio_Systems/OpenAL/.eobjs_$(GMODE)/libogg.a $(GLINKS) 
+	g++ SHELLmain.cpp libEGMstd.cpp Graphics_Systems/$(GRAPHICS)/.eobjs_$(GMODE)/*.o Platforms/$(PLATFORM)/.eobjs_$(GMODE)/*.o Universal_System/.eobjs_$(GMODE)/*.o Audio_Systems/OpenAL/.eobjs_$(GMODE)/*.o Collision_Systems/none/.eobjs_$(GMODE)/*.o Audio_Systems/OpenAL/.eobjs_$(GMODE)/*.a Audio_Systems/OpenAL/.eobjs_$(GMODE)/libogg.a $(GLINKS) -o $(OUTPUTNAME)
 
 
 # Figure platform
@@ -31,10 +31,10 @@ endif
 
 clean:
 	echo $(OS)
-	cd Graphics_Systems/OpenGL/ 	&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
-	cd Graphics_Systems/OpenGLES/ 	&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
-	cd Audio_Systems/OpenAL/ 		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
-	cd Platforms/windows/ 			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
-	cd Platforms/xlib/ 				&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
-	cd Universal_System/			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
-	cd Collision_Systems/none		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="'"
+	cd Graphics_Systems/OpenGL/ 	&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"
+	cd Graphics_Systems/OpenGLES/ 	&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"
+	cd Audio_Systems/OpenAL/ 		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"
+	cd Platforms/Win32/ 			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"
+	cd Platforms/xlib/ 				&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"
+	cd Universal_System/			&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"
+	cd Collision_Systems/none		&& $(MAKE) clean CREMOVE="$(CREMOVE)" SLASHC="$(SLASHC)" ENDCREMOVE="$(ENDCREMOVE)"

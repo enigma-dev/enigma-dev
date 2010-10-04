@@ -131,7 +131,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       else break; continue;
     }
     
-    cout << synt.substr(0,bpos) << endl;
+    //cout << synt.substr(0,bpos) << endl;
     
     if (is_letter(code[pos]))
     {
@@ -316,7 +316,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
   code.erase(bpos);
   synt.erase(bpos);
   
-  cout << code << endl << synt << endl << endl;
+  //cout << code << endl << synt << endl << endl;
   return 0;
 }
 
@@ -393,7 +393,7 @@ int parser_reinterpret(string &code,string &synt)
         else if (synt[pos] == '<') pc++;
     }
   }
-  cout << "done. " << synt << endl << endl;
+  //cout << "done. " << synt << endl << endl;
   return 0;
 }
 

@@ -1,0 +1,17 @@
+%e-yaml
+---
+
+Name: Mac OS X
+Identifier: Cocoa
+Represents: MacOSX
+Description: Run on Apple Mac OS X, or other Cocoa-enabled Apple systems.
+Author: TGMG
+
+Build-Platforms: MacOSX
+Build-Extension: .app
+
+Run-Program: open
+Run-Params: $game
+
+Links: -lz -framework Cocoa
+
