@@ -1,0 +1,17 @@
+%e-yaml
+---
+
+
+test: test
+
+testest:
+  -test1: blah
+  -test2: blah
+  -test3: blah
+  -test2: |
+    blah
+    blah
+    blah
+  -test1: blah
+
+testestest: fuuu

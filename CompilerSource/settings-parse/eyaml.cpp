@@ -113,18 +113,17 @@ eyit eyaml_ci_find(ey_data &dat, string str) {
 
 struct y_level {
   y_level *prev;
-  ey_data *s;
-  int i;
+  ey_data *s; int i;
   y_level(y_level* a, ey_data *b, int c): prev(a), s(b), i(c) {}
 };
 
 ey_data parse_eyaml(istream &file, string filename)
 {
-  string line;
   ey_data res;
-  getline(file,line);
-  line.append(1,0);
+  string line, unlowered;
+  int linenum = 1, multi = false;
   
+  getline(file,line);
   if (tolower(line.substr(0,7)) != "%e-yaml")
     return res;
   
@@ -134,19 +133,34 @@ ey_data parse_eyaml(istream &file, string filename)
   eycit latestc = &cur->s->values_order;
   eyit latest = cur->s->values.end();
   
-  string unlowered = "pizza, lol";
-  int linenum = 1;
   continue_2:
   while (!file.eof())
   {
     getline(file,line); linenum++;
-    line.append(1,0);
     if (line.substr(0,3) == "---") continue;
     int inds = 0; pt pos = 0;
-    while (is_useless(line[pos])) pos++, inds++;
+    
+    while (pos < line.length() and is_useless(line[pos])) pos++, inds++;
+    
+    if (multi != 0)
+    {
+      if (multi == -1)
+        multi = inds;
+      else if (inds < multi)
+        multi = 0;
+      if (multi) {
+        cout << '"' << line << '"' << ".substr(" << multi << ")\n";
+        string &str = ((ey_string*)latest->second)->value;
+        str == "" ? str = line.substr(multi) : str += "\n" + line.substr(multi);
+        continue;
+      }
+    }
     
     if (!(pos < line.length()) or line[pos] == '#' or line[pos] == '%')
       continue;
+    
+    if (line[pos] == '-')
+      while (++pos < line.length() and is_useless(line[pos]));
     
     const pt nsp = pos;
     while (line[pos] != ':' and pos < line.length()) if (line[pos++] == '#') goto continue_2;
@@ -161,7 +175,7 @@ ey_data parse_eyaml(istream &file, string filename)
         else
         {
           if (latest->second != NULL)
-            cout << "Indent increased unexpectedly on line " << linenum << " of file " << filename << endl;
+              cout << "Indent increased unexpectedly on line " << linenum << " of file " << filename << endl;
           else
           {
             cur->s->values_order_last = latestc;
@@ -180,7 +194,9 @@ ey_data parse_eyaml(istream &file, string filename)
           cur = cur->prev;
           delete cd;
         }
-        latest = cur->s->values.insert(eypair(tolower(nname), NULL)) . first;
+        pair<eyit,bool> insd = cur->s->values.insert(eypair(tolower(nname), NULL));
+        latest = insd.first; if (insd.second)
+          { delete latest->second; latest->second = NULL; }
         latestc = new ey_data::eylist(cur->s->values_order_last);
       }
     }
@@ -192,19 +208,27 @@ ey_data parse_eyaml(istream &file, string filename)
       latestc = new ey_data::eylist(latestc);
     }
     
-   // cout << endl << nname << endl;
+    // cout << endl << nname << endl;
     unlowered = nname;
     if (line[pos] != ':')
       continue;
     
-    while (is_useless(line[++pos]));
+    /* Get the value
+    *********************/
     
-    const pt vsp = pos;
-    while (line[pos] and line[pos] != '#') pos++;
-    while (is_useless(line[--pos]));
+    while (is_useless(line[++pos])); // Skip the whitespace between colon and value
     
-    if (++pos > vsp)
-      latest->second = latestc->value = new ey_string(unlowered, line.substr(vsp, pos - vsp));
+    const pt vsp = pos; // Store value start position
+    while (pos < line.length() and line[pos] != '#' and line[pos] != '%') pos++; // Find end of line (or start of comment)
+    while (is_useless(line[--pos])); // Trim trailing whitespace
+    
+    if (++pos > vsp) // If we have any non-white value after this colon at all...
+      if (pos - vsp == 1 and line[vsp] == '|') // Pipe => Multiline value
+        latest->second = latestc->value = new ey_string(unlowered, ""), // Store this value as a string
+        multi = -1; // Indicate that we are starting a multiline value
+      else // Otherwise, just an ordinary scalar
+        latest->second = latestc->value = new ey_string(unlowered, line.substr(vsp, pos - vsp)); // Store this value as a string
+    else;
   }
   if (latest != cur->s->values.end() and latest->second == NULL)
     latest->second = latestc->value =  new ey_string(unlowered,"");
