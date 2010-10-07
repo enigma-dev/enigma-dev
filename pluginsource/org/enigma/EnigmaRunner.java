@@ -29,13 +29,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 
@@ -54,7 +55,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
@@ -62,9 +62,9 @@ import javax.swing.event.DocumentListener;
 
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
-import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -256,44 +256,59 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		return ret;
 		}
 
-	public class TextAreaOutputStream extends OutputStream
+	private List<PlatformSelection> findTargets()
 		{
-		StringBuilder sb = new StringBuilder();
-		JTextArea ta;
+		String platform = normalize(System.getProperty("os.name"));
+		ArrayList<PlatformSelection> targets = new ArrayList<PlatformSelection>();
 
-		public TextAreaOutputStream(JTextArea ta)
+		File f = new File(LGM.workDir.getParentFile(),"ENIGMAsystem");
+		f = new File(f,"SHELL");
+		f = new File(f,"Platforms");
+		File files[] = f.listFiles();
+		for (File dir : files)
 			{
-			this.ta = ta;
-			}
-
-		@Override
-		public void write(byte[] b) throws IOException
-			{
-			flush();
-			ta.append(new String(b));
-			}
-
-		public void write(byte[] b, int off, int len) throws IOException
-			{
-			flush();
-			ta.append(new String(b,off,len));
-			}
-
-		@Override
-		public void write(int b) throws IOException
-			{
-			sb.append((char) b);
-			if (b == '\n') flush();
-			}
-
-		public void flush() throws IOException
-			{
-			if (sb.length() != 0)
+			if (!dir.isDirectory()) continue;
+			//technically this could stand to be a .properties file, rather than e-yaml
+			File prop = new File(dir,"About.ey");
+			try
 				{
-				ta.append(sb.toString());
-				sb = new StringBuilder();
+				YamlNode node = EYamlParser.parse(new Scanner(prop));
+				for (String s : normalize(node.getMC("Build-Platforms")).split(","))
+					if (platform.startsWith(s))
+						{
+						PlatformSelection ps = new PlatformSelection();
+						ps.name = node.getMC("Name");
+						ps.id = node.getMC("Identifier");
+						ps.rep = node.getMC("Represents",null);
+						ps.desc = node.getMC("Description",null);
+						ps.auth = node.getMC("Author",null);
+						ps.ext = node.getMC("Build-Extension",null);
+						targets.add(ps);
+						break;
+						}
+				}
+			catch (FileNotFoundException e)
+				{
+				//yaml file missing, skip to next file
+				}
+			catch (IndexOutOfBoundsException e)
+				{
+				//insufficient yaml, skip to next file
 				}
 			}
+		//if not empty, we may safely assume that the first one is the default selection,
+		//or technically, that any of them is the default. The user can/will change it in UI.
+		return targets;
+		}
+
+	class PlatformSelection
+		{
+		String name, id, rep, desc, auth, ext;
+		}
+
+	private String normalize(String s)
+		{
+		return s.toLowerCase().replaceAll("[ _\\-]","");
 		}
 
 	public void populateMenu()
