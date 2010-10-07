@@ -49,11 +49,11 @@ void parse_ide_settings(const char* eyaml)
   eyit it;
   
   #define ey_cp(v,x,y) \
-  it = settree.getit("target-" #x); \
-  if (it == settree.itend()) { \
+  it = settree.find("target-" #x); \
+  if (it == settree.end()) { \
      cout << "ERROR! IDE has not specified a target " #x " " #y "!" << endl; \
      extensions::targetAPI.v ## Sys = ""; \
-  } else  extensions::targetAPI.v ## Sys = eyit_str(it);
+  } else  extensions::targetAPI.v ## Sys = eyscalar(it);
   
   // Get target's windowing api
   ey_cp(window,   windowing,api)
@@ -69,14 +69,14 @@ void parse_ide_settings(const char* eyaml)
   ifstream ifs; string eyname;
   ifs.open((eyname = "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/About.ey").c_str());
   if (ifs.is_open()) { ey_data l = parse_eyaml(ifs, eyname.c_str());
-    it = l.getit("links"); if (it != l.itend()) extensions::targetAPI.windowLinks = eyit_str(it);
+    it = l.find("links"); if (it != l.end()) extensions::targetAPI.windowLinks = eyscalar(it);
     ifs.close();
   }
   string platn = tolower(extensions::targetAPI.windowSys);
   #define eygl(fn,v) \
   ifs.open((eyname = "ENIGMAsystem/SHELL/" #fn "/" + extensions::targetAPI.v ## Sys + "/Config/" + platn + ".ey").c_str()); \
   if (ifs.is_open()) { ey_data l = parse_eyaml(ifs, eyname.c_str()); cout << "Opened " << eyname << endl; \
-    it = l.getit("links"); if (it != l.itend()) extensions::targetAPI.v ## Links = eyit_str(it); else cout << "Links not named in " << eyname << endl; ifs.close(); \
+    it = l.find("links"); if (it != l.end()) extensions::targetAPI.v ## Links = eyscalar(it); else cout << "Links not named in " << eyname << endl; ifs.close(); \
   } else cout << "Could not open " << eyname << ".\n";
   eygl(Graphics_Systems, graphics);
   eygl(Audio_Systems, audio);

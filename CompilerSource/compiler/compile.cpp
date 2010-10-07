@@ -440,10 +440,10 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     linker sometime in the future.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
-  #if CURRENT_PLATFORM_ID ==  OS_ANDROID
-    "ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so"
+  #if OS_ANDROID
+    "ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
   #endif
-  ;
+  
   FILE *gameModule = fopen(gameFname,"ab");
   if (!gameModule) {
     user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;

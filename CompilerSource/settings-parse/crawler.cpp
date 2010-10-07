@@ -90,19 +90,19 @@ namespace extensions
       if (ext.is_open())
       {
         ey_data dat = parse_eyaml(ext, ef);
-        for (eyit it = dat.values.begin(); it != dat.values.end(); it++)
+        for (eyit it = dat.begin(); it != dat.end(); it++)
         {
           if (it->second->is_scalar)
             continue;
           
-          eyit locs = it->second->getit("locals");
-          if (locs != it->second->itend())
+          eyit locs = it->second->data().find("locals");
+          if (locs != it->second->data().end())
           {
             if (locs->second->is_scalar)
               continue;
             ey_data *ld = (ey_data*)locs->second;
-            for (eycit cit = ld->values_order.next; cit; cit = cit->next)
-              locals[cit->value->name] = eycit_str(cit);
+            for (eycit cit = ld->first(); cit; cit = cit->next)
+              locals[cit->value->name] = eyscalar(cit);
           }
         }
       }
@@ -136,15 +136,15 @@ namespace extensions
         }
         
         os_descriptor& os = all_platforms[toUpper(ef)];
-        os.name   = dat.gets("name");
-        os.author = dat.gets("author");
-        os.build_extension = dat.gets("build-extension");
-        os.build_platforms = dat.gets("build-platforms");
-        os.description = dat.gets("description");
-        os.identifier  = dat.gets("identifier");
-        os.represents  = dat.gets("represents");
-        os.run_params  = dat.gets("run-params");
-        os.run_program = dat.gets("run-program"); 
+        os.name   = dat.get("name");
+        os.author = dat.get("author");
+        os.build_extension = dat.get("build-extension");
+        os.build_platforms = dat.get("build-platforms");
+        os.description = dat.get("description");
+        os.identifier  = dat.get("identifier");
+        os.represents  = dat.get("represents");
+        os.run_params  = dat.get("run-params");
+        os.run_program = dat.get("run-program"); 
       } else cout << "Failed!\n";
     }
     if (targetAPI.windowSys != "")

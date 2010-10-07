@@ -62,54 +62,46 @@ ey_string::ey_string(string x, string y): ey_base(x, true), value(y) {}
 
 ey_data::ey_data(): ey_base(false), values(), values_order() {}
 ey_data::ey_data(string n): ey_base(n, false), values(), values_order() {}
-ey_data::~ey_data()
-{
-  for (eycit it = values_order.next; it != NULL; )
-  {
+ey_data::~ey_data() {
+  for (eycit it = values_order.next; it != NULL; ) {
     eycit t = it; it = it->next;
     if (t->value) t->value->is_scalar ? delete (ey_string*)t->value : delete (ey_data*)t->value;
     delete t;
   }
 }
 
-string ey_data::gets(string n)
-{
-  eyit it = values.find(n);
-  if (it == values.end())
-    return "";
-  if (it->second->is_scalar)
-    return ((ey_string*)it->second)->value;
-  return "";
-}
-string ey_base::gets(string n) {
-  return (is_scalar) ? "" : ((ey_data*)this)->gets(n);
+// The error message should never be seen
+static ey_string eys_empty("[ERROR: REQUESTED VALUE NOT SCALAR]","");
+
+ey_string &ey_data::get(string n) { //Fetch a key's value as a scalar
+  eyit it = values.find(n); // Find it
+  if (it != values.end() and it->second->is_scalar) // Make sure it's alive and scalar
+    return *((ey_string*)it->second); // Return it if so
+  return eys_empty; // Otherwise, return empty
 }
 
-eyit ey_data::getit(string n) {
-  return values.find(n);
-}
-eyit ey_base::getit(string n) {
-  return ((ey_data*)this)->values.find(n);
-}
+// Tree iteration
+eyit ey_data::find(string n)  { return values.find(n); }
+eyit ey_data::begin()         { return values.begin(); }
+eyit ey_data::end()           { return values.end(); }
+eycit ey_data::first()     { return values_order.next; }
 
-eyit ey_data::itend() {
-  return values.end();
-}
-eyit ey_base::itend() {
-  return ((ey_data*)this)->values.end();
-}
+ey_data   &ey_base::data()   { return *(ey_data*)this; }
+ey_string &ey_base::scalar() { return *(ey_string*)this; }
 
-string eycit_str(eycit x) {
-  return x->value->is_scalar ? ((ey_string*)x->value)->value : "";
-}
-string eyit_str(eyit x) {
-  const ey_base* xx = x->second;
-  return xx->is_scalar ? ((ey_string*)xx)->value : "";
-}
+ey_string &eyscalar(ey_base* x)
+{  return x->is_scalar ? *((ey_string*)x) : eys_empty; }
+ey_string &eyscalar(eycit x) // Get a string from an eYAML chronological iterator
+{  return x->value->is_scalar ? *((ey_string*)x->value) : eys_empty; }
+ey_string &eyscalar(eyit x)   
+{ ey_base *const xx = x->second; return xx->is_scalar ? *((ey_string*)xx): eys_empty; }
 
-eyit eyaml_ci_find(ey_data &dat, string str) {
-  return dat.values.find(str);
-}
+#include <cstdlib>
+ey_string::operator string&() { return value; }
+char ey_string::toByte()      { return atoi(value.c_str()); }
+double ey_string::toDouble()  { return atof(value.c_str()); }
+int ey_string::toInt()        { return atoi(value.c_str()); }
+long long ey_string::toLong() { return atoll(value.c_str()); }
 
 struct y_level {
   y_level *prev;
@@ -149,7 +141,6 @@ ey_data parse_eyaml(istream &file, string filename)
       else if (inds < multi)
         multi = 0;
       if (multi) {
-        cout << '"' << line << '"' << ".substr(" << multi << ")\n";
         string &str = ((ey_string*)latest->second)->value;
         str == "" ? str = line.substr(multi) : str += "\n" + line.substr(multi);
         continue;
@@ -180,8 +171,9 @@ ey_data parse_eyaml(istream &file, string filename)
           {
             cur->s->values_order_last = latestc;
             cur = new y_level(cur, (ey_data*)(latest->second = latestc->value = new ey_data(unlowered)), inds);
-            latest = cur->s->values.insert(eypair(tolower(nname), NULL)) . first;
+            latest = cur->s->values.insert(eypair(tolower(nname), NULL)) . first; // We're only interested in the iterator; if a value exists, it's referenced in the linear area anyway.
             latestc = new ey_data::eylist(&cur->s->values_order);
+            latest->second = NULL; // We do want to keep this open, thogh.
           }
         }
       }
@@ -194,10 +186,9 @@ ey_data parse_eyaml(istream &file, string filename)
           cur = cur->prev;
           delete cd;
         }
-        pair<eyit,bool> insd = cur->s->values.insert(eypair(tolower(nname), NULL));
-        latest = insd.first; if (insd.second)
-          { delete latest->second; latest->second = NULL; }
+        latest = cur->s->values.insert(eypair(tolower(nname), NULL)) . first;
         latestc = new ey_data::eylist(cur->s->values_order_last);
+        latest->second = NULL; // We do want to keep this open, thogh.
       }
     }
     else // We are at the same indentation as before, and so we will simply add an item to this current scope
@@ -206,9 +197,9 @@ ey_data parse_eyaml(istream &file, string filename)
         latest->second = latestc->value =  new ey_string(unlowered,""); 
       latest = cur->s->values.insert(eypair(tolower(nname), NULL)) . first;
       latestc = new ey_data::eylist(latestc);
+      latest->second = NULL; // We do want to keep this open, thogh.
     }
     
-    // cout << endl << nname << endl;
     unlowered = nname;
     if (line[pos] != ':')
       continue;
@@ -232,6 +223,12 @@ ey_data parse_eyaml(istream &file, string filename)
   }
   if (latest != cur->s->values.end() and latest->second == NULL)
     latest->second = latestc->value =  new ey_string(unlowered,"");
+  
+  while (cur) { // Clean up
+    y_level *const curd = cur; cur = cur->prev;
+    delete curd;
+  }
+  
   return res;
 }
 
