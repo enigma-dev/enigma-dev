@@ -267,6 +267,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       string member = code.substr(epos+1,ep-epos-1);
       
       // Determine the type of the left-hand expression
+      cout << "GET TYPE OF " << exp << endl;
       onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
       if (n.type == NULL) n.type = builtin_type__int;
       externs* ct = n.type;
@@ -320,6 +321,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     {
       const pt sp = move_to_beginning(code,synt,pos-1);
       const string exp = code.substr(sp,pos-sp);
+      cout << "GET TYPE2 OF " << exp << endl;
       onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
       if (n.type == enigma_type__var and n.pad == 0)
       {

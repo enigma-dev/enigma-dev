@@ -110,7 +110,7 @@ externs *type_lookup_op_result(externs* t1, string op, externs* t2 = NULL)
   return ext_retriever_var->type;
 }
 
-onode type_op_resolve(const onode &t1, const onode &t2) // Evaluates `t1 t2.op t2` for type
+inline onode type_op_resolve(const onode &t1, const onode &t2, bool &isol) // Evaluates `t1 t2.op t2` for type
 {
   string op = t2.op;
   if (t2.prec) // If the operator associated with t1 has any precedence
@@ -159,13 +159,15 @@ onode type_op_resolve(const onode &t1, const onode &t2) // Evaluates `t1 t2.op t
     else //We have something[somethingelse] or something(somethingelse)
     {
       if (op == "(") {
-        onode res = t2;
+        onode res = t1;
         if (res.deref && res.deref->ref.symbol == '(')
           return type_lookup_op_result(t1.type,"()",t2.type);
-        return (res.deref = res.deref->prev, res);
+        if (res.deref)
+          res.deref = res.deref->prev;
+        return res;
       }
       else if (op == "[") {
-        onode res = t2;
+        onode res = t1;
         if (res.pad)
           return (res.pad--, res);
         if (res.deref)
@@ -235,7 +237,12 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
     {
       const pt spos = pos;
       while (is_letterd(exp[++pos]));
-      const string tn = exp.substr(spos,pos);
+      string tn = exp.substr(spos,pos-spos);
+      
+      if (tn.length() > 10 and tn.substr(0,10) == "varaccess_" // If we're looking at ::enigma::varaccess_*
+      and immediate_scope and immediate_scope->name == "enigma" and immediate_scope->parent == &global_scope)
+        cout << "***   ***  RESEARCH FOR `" << (tn = tn.substr(10)) << "`" << endl, // This gets a special case. One of the very few modifications can break if pissed with from the game.
+        immediate_scope = NULL; // We found what we were looking for; reset the immediate scope.
       
       bool nt = false;
       map<string,dectrip>::iterator it;
@@ -244,6 +251,24 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
           onode_from_dectrip(perf.top(), it->second);
           isol = false, nt = true; break;
         }
+      
+      if (!nt and globj)
+      {
+        cout << ">> Searching for `" << tn << "` in globj->locals (" << globj->locals.size() << " entries)" << endl; cout << "{ ";
+        for (it = globj->locals.begin(); it != globj->locals.end(); it++) cout << it->first << ", "; cout << "end }" << endl;
+        it = globj->locals.find(tn);
+        if (it != globj->locals.end()) {
+          onode_from_dectrip(perf.top(), it->second);
+          isol = false, nt = true;
+          cout << "Found it! Added " << perf.top().type->name << endl;
+        }
+        
+        it = globj->globals.find(tn);
+        if (it != globj->globals.end()) {
+          onode_from_dectrip(perf.top(), it->second);
+          isol = false, nt = true;
+        }
+      }
       
       if (!nt and pobj)
       {
@@ -254,14 +279,6 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
         }
       }
       
-      if (!nt and globj)
-      {
-        it = globj->globals.find(tn);
-        if (it != globj->globals.end()) {
-          onode_from_dectrip(perf.top(), it->second);
-          isol = false, nt = true;
-        }
-      }
       
       if (nt)
         continue;
@@ -276,22 +293,36 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
         if (!isol) return NULL; // Must be a prefix;
         oname = "cast";        //  This is a cast.
       }
-      else if (!(t = t->type)) // It's a global. Does it have an valid type?
-        return NULL; // If not, return NULL.
+      else if (!t->type) // It's a global. Does it have an valid type?
+      {
+        if (!(t->flags & EXTFLAG_NAMESPACE)) // Heh, guess not. Bet it's a namespace.
+          return NULL; // If not, return NULL.
+        immediate_scope = t;
+        continue;
+      }
       
-      perf.top().type = t;
+      perf.top().type = t = t->type;
       isol = false;
       continue;
     }
     
-    opiter it;
+    string findme;
     if (exp[pos] == exp[pos+1])
       if (exp[pos+2] == '=')
-        it = ops.find(exp.substr(pos,3));
-      else it = ops.find(exp.substr(pos,2));
+        findme = exp.substr(pos,3);
+      else findme = exp.substr(pos,2);
     else if (exp[pos+1] == '=')
-      it = ops.find(exp.substr(pos,2));
-    else it = ops.find(exp.substr(pos,1));
+      findme = exp.substr(pos,2);
+    else findme = exp.substr(pos,1);
+    
+    if (findme == "::") {
+      pos += 2; continue;
+    }
+    
+    opiter it;
+    it = ops.find(findme);
+    if (findme.length() > 1 and it == ops.end())
+      it = ops.find(findme.erase(1));
     
     if (it != ops.end())
     {
@@ -325,22 +356,20 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
             while (perf.top().prec)
             {
               onode opand1 = perf.top(); perf.pop();
-              onode ee = type_op_resolve(opand1, perf.top());
+              onode ee = type_op_resolve(opand1, perf.top(), isol);
               if (!ee.type) { puts("SingleResultNull"); return NULL; }
             }
           }
       }
       else // Not a postfix unary: either binary or prefix unary
+      if (perf.top().type) // Well, there needs to be something at the top ready to be operated on.
       {
-        // Well, there'd better be some type at the top ready to be operated on.
-        if (!perf.top().type) { puts("typeless"); return NULL; }
-        
         // Traverse the stack for anything of higher precedence to take care of first.
         if (pprec) // But not for parentheses
           while (perf.top().prec > pprec)
           {
             onode opand2 = perf.top(); perf.pop();
-            onode ee = type_op_resolve(perf.top(), opand2);
+            onode ee = type_op_resolve(perf.top(), opand2, isol);
             if (!ee.type) { puts("SingleResultNull"); return NULL; }
             perf.top() <= ee;
           }
@@ -348,6 +377,8 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
         // Push an operator with the current string and classification with the given precedence
         perf.push(onode(it->first,pflags,pprec,NULL)); // But leave the type section blank.
       }
+      else
+        cout << "Typeless" << endl;
       continue;
     }
     pos++;
@@ -355,7 +386,7 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
   while (perf.size() > 1)
   {
     onode opand2 = perf.top(); perf.pop();
-    onode ee = type_op_resolve(perf.top(), opand2);
+    onode ee = type_op_resolve(perf.top(), opand2, isol);
     if (!ee.type) { puts("SingleResultNull"); return NULL; }
     perf.top() <= ee;
   }

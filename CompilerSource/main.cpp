@@ -43,6 +43,7 @@ using namespace std;
     #include "parser/parser.h"
     #include "compiler/compile.h"
     #include "cfile_parse/cfile_parse.h"
+    #include "cfile_parse/type_resolver.h"
     #include "syntax/checkfile.h"
 
 my_string fca(const char* fn);
@@ -171,7 +172,8 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
   oldmacs.swap(macros);
   
   cout << "Initializing global scope.";
-  cparse_init();
+  cparse_init(); // Set up token info for the C header parser.
+  exp_typeof_init(); // Set up token info for the type coercion module.
   
   cout << "Dumping whiteSpace definitions...";
   FILE *of = fopen("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h","wb");

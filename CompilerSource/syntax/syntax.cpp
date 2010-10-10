@@ -120,6 +120,7 @@ namespace syncheck
 
     array assop; //Whether we have an assignment operator, organized per-level
     array lastnamed; //The last thing that was named
+    array lastnamedatt; //The last thing that was named
     //Values for type of last named token:
       enum { 
         LN_NOTHING,        //
@@ -131,7 +132,13 @@ namespace syncheck
         LN_TYPE_NAME,      // int, double, whatever 
         LN_CLOSING_SYMBOL, // { ; }
         LN_LOCGLOBAL,      // global/local
-        LN_FOR             // for
+        LN_FOR,            // for
+      };
+      
+      enum {
+        LNA_NOTHING,
+        LNA_DOT, // a.b, 1.2, 1.a
+        LNA_MEMBERVAR
       };
 
     //For declarations based on a typename
@@ -173,7 +180,8 @@ namespace syncheck
     level=0; plevel=0;
     assop[level]=0;
     lastnamed[level]=LN_NOTHING;
-
+    lastnamedatt[level]=LNA_NOTHING;
+    
     statement_pad[level]=0;
     
     initscope("script0 | Syntax");
@@ -209,7 +217,8 @@ namespace syncheck
               return issr;
           }
           else if (name == "local" or name == "global") //These two are very special...
-            lastnamed[level] = LN_LOCGLOBAL;
+            lastnamed[level] = LN_LOCGLOBAL,
+            lastnamedatt[level]=LNA_NOTHING;
           else if (name == "long" or name == "short" or name == "signed" or name == "register"
                or  name == "unsigned" or name == "const" or name == "volatile" or name == "static")
             goto lbl_typename;
@@ -221,18 +230,21 @@ namespace syncheck
             {
               lbl_typename:
               indeclist[level] = true;
-              lastnamed[level] = LN_TYPE_NAME;
+              lastnamed[level] = LN_TYPE_NAME,
+                lastnamedatt[level]=LNA_NOTHING;
               if (plevel > 0)
               {
                 if (plevelt[plevel] == PLT_PARENTH)
                   plevelt[plevel] = PLT_CAST;
                 else if (plevelt[plevel] != PLT_FORSTATEMENT) {
                   lastnamed[level] = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? LN_TYPE_NAME : LN_OPERATOR; //Cast ~~= Unary operator
+                  lastnamedatt[level] = LNA_NOTHING;
                 }
               }
             }
             else if (ext_retriever_var->is_function()) {
               lastnamed[level] = LN_FUNCTION_NAME;
+              lastnamedatt[level] = LNA_NOTHING;
               function_ext = ext_retriever_var;
             }
             else goto just_an_identifier;
@@ -244,6 +256,7 @@ namespace syncheck
             if (levelt[level] == LEVELTYPE_STRUCT and statement_pad[level] == PAD_STRUCT_NOTHING)
               quicktype(EXTFLAG_STRUCT,last_identifier);
             lastnamed[level] = LN_VARNAME;
+            lastnamedatt[level] = lastnamedatt[level] == LNA_DOT ? LNA_MEMBERVAR : LNA_NOTHING;
           }
         }
         else //this is actually a word-based operator, such as `and' and `or'
@@ -262,6 +275,7 @@ namespace syncheck
             if (lastnamed[level] != LN_VARNAME and lastnamed[level] != LN_DIGIT and lastnamed[level] != LN_VALUE)
             { error="Expected primary expression before operator"; return pos; }
             lastnamed[level] = LN_OPERATOR;
+            lastnamedatt[level] = LNA_NOTHING;
           }
         }
         continue;
@@ -275,7 +289,7 @@ namespace syncheck
         {
           if (!assop[level] and !(levelt[level] == LEVELTYPE_FOR_PARAMETERS and statement_pad[level] == 2))
           introuble=1;//{ error="Assignment operator expected before numeric constant"; return pos; }
-          if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level]==LN_NOTHING))
+          if (lastnamed[level] != LN_OPERATOR && !(inlist() and lastnamed[level] == LN_NOTHING))
           introuble=2;//{ error="Operator expected before numeric constant"; return pos; }
         }
 
@@ -329,7 +343,8 @@ namespace syncheck
           }
         }
         decimal_named=0; //reset this, it serves only one purpose
-        lastnamed[level]=LN_DIGIT;
+        lastnamed[level]=LN_DIGIT,
+        lastnamedatt[level] = LNA_NOTHING;
         continue;
       }
       
@@ -353,7 +368,8 @@ namespace syncheck
               else if (plevel > 0 and plevelt[plevel] == PLT_FORSTATEMENT)
                 statement_pad[level]--;
               indeclist[level] = false;
-              lastnamed[level] = LN_NOTHING;
+              lastnamed[level] = LN_NOTHING,
+              lastnamedatt[level] = LNA_NOTHING;
             }
           pos++; continue;
         
@@ -362,13 +378,14 @@ namespace syncheck
             {
               //if (!inlist())
                //{ error="Comma outside of function parameters or declarations"; return pos; }
-              if (lastnamed[level]==LN_OPERATOR)
+              if (lastnamed[level] == LN_OPERATOR)
                 { error="Secondary expression expected before comma"; return pos; }
               
               //The beauty: if we have unterminated parentheses before the comma, the first error is true.
               //There does not need to be an assignment operator in either case.
               
-              lastnamed[level] = LN_NOTHING;
+              lastnamed[level] = LN_NOTHING,
+              lastnamedatt[level] = LNA_NOTHING;
             }
           pos++; continue;
         
@@ -381,30 +398,39 @@ namespace syncheck
               if (lastnamed[level] == LN_VARNAME) //May be a script.
               {
                 //but we can't check that now
-                error = "Unrecognized function or script `" + last_identifier + "'";
-                return pos;
-//                int cf=checkfunction(function_ext,code,pos,len);
-//                if (cf!=-1) return cf;
-//                lastnamed[level] = LN_NOTHING;
-//                plevelt[plevel] = PLT_FUNCTION;
+                if (lastnamedatt[level] == LNA_MEMBERVAR) // We can't check if it's a member, either, since the type system is so flexible.
+                {
+                  plevelt[plevel] = PLT_FUNCTION;
+                  lastnamed[level] = LN_NOTHING; // So we'll just assume it was.
+                  lastnamedatt[level] = LNA_NOTHING; // Unset our member flag
+                  assop[level] = true; // And we'll treat it like a function.
+                }
+                else {
+                  error = "Unrecognized function or script `" + last_identifier + "'"; // Otherwise, we can't find any such function or script.
+                  return pos; // So we'll bail in error.
+                }
               }
               else if (lastnamed[level] == LN_FUNCTION_NAME) //Is a C++ function.
               {
                 plevelt[plevel] = PLT_FUNCTION;
                 int cf=checkfunction(function_ext,code,pos,len);
-                if (cf!=-1) return cf;
+                if (cf!=-1)
+                  return cf;
                 lastnamed[level] = LN_NOTHING;
+                lastnamedatt[level] = LNA_NOTHING;
                 assop[level] = true;
               }
               else if (lastnamed[level] == LN_TYPE_NAME) //Is a C++ function.
               {
                 plevelt[plevel] = PLT_PARENTH;
                 lastnamed[level] = LN_NOTHING;
+                lastnamedatt[level] = LNA_NOTHING;
               }
               else if (lastnamed[level] == LN_FOR)
               {
                 plevelt[plevel] = PLT_FORSTATEMENT;
                 lastnamed[level] = LN_NOTHING;
+                lastnamedatt[level] = LNA_NOTHING;
               }
               else
               {
@@ -462,6 +488,7 @@ namespace syncheck
                 
                 if (plevelt[plevel] == PLT_CAST) {
                   plevel--; lastnamed[level] = LN_OPERATOR; //Casts are the equivalent to unary operators
+                  lastnamedatt[level] = LNA_NOTHING;
                   pos++; continue;
                 }
                 
@@ -469,7 +496,8 @@ namespace syncheck
                 return pos;
               }
               else
-                lastnamed[level] = LN_VALUE;
+                lastnamed[level] = LN_VALUE,
+                lastnamedatt[level] = LNA_NOTHING;
               plevel--;
             }
           pos++; continue;
@@ -478,10 +506,11 @@ namespace syncheck
         case '[':
             {
               if (lastnamed[level] != LN_VARNAME and lastnamed[level] != LN_VALUE)
-              { error="Invalid use of `[' symbol for " + tostring(lastnamed[level]); return pos; }
+                { error="Invalid use of `[' symbol for " + tostring(lastnamed[level]); return pos; }
               plevel++;
-              plevelt[plevel]=PLT_BRACKET;
-              lastnamed[level]=LN_OPERATOR;
+              plevelt[plevel] = PLT_BRACKET;
+              lastnamed[level] = LN_OPERATOR,
+              lastnamedatt[level] = LNA_NOTHING;
               pos++;
               continue;
             }
@@ -490,7 +519,8 @@ namespace syncheck
             {
               if (plevelt[plevel] != PLT_BRACKET)
               { error="Unexpected closing bracket at this point"; return pos; }
-              lastnamed[level]=LN_VARNAME;
+              lastnamed[level]=LN_VARNAME,
+              lastnamedatt[level] = LNA_NOTHING;
               plevel--;
             }
           pos++; continue;
@@ -532,6 +562,7 @@ namespace syncheck
               level += !isbr;
               levelt[level] = (isbr?LEVELTYPE_SWITCH_BLOCK:LEVELTYPE_BRACE);
               lastnamed[level] = LN_NOTHING; //This is the beginning of a glorious new level
+              lastnamedatt[level] = LNA_NOTHING;
               statement_pad[level] = -1;
               assop[level] = 0;
             }
@@ -555,6 +586,7 @@ namespace syncheck
               level--;
               //statement_pad[level] = -1;
               lastnamed[level] = LN_NOTHING;//LN_CLOSING_SYMBOL; //We closed at the beginning of this group.
+              lastnamedatt[level] = LNA_NOTHING;
               //this will invoke the next statement to close the current statement
             }
           pos++; continue;
@@ -576,6 +608,7 @@ namespace syncheck
                 while (code[++pos]!='"');
               
               lastnamed[level] = LN_DIGIT;
+              lastnamedatt[level] = LNA_NOTHING;
             }
           pos++; continue;
         
@@ -595,6 +628,7 @@ namespace syncheck
                 while (code[++pos]!='\'');
               
               lastnamed[level]=LN_DIGIT;
+              lastnamedatt[level] = LNA_NOTHING;
             }
           pos++; continue;
         
@@ -608,6 +642,7 @@ namespace syncheck
                 while (is_useless(code[pos])) pos++;
                 if (!is_letter(code[pos])) { error="Identifier expected following '.' symbol"; return pos; }
                 lastnamed[level]=LN_OPERATOR;
+                lastnamedatt[level] = LNA_DOT;
                 continue;
               }
               else
@@ -636,6 +671,7 @@ namespace syncheck
                 if (lastnamed[level]==LN_CLOSING_SYMBOL || lastnamed[level]==LN_OPERATOR || lastnamed[level]==LN_NOTHING)
                 { error="Expected primary expression before comparison operator"; return pos; }
                 pos+=2; lastnamed[level]=LN_OPERATOR;
+                lastnamedatt[level] = LNA_NOTHING;
               }
               else //operator=
               {
@@ -644,8 +680,8 @@ namespace syncheck
                 if (lastnamed[level]!=LN_VARNAME && !assop[level])
                 { error="Variable name expected before assignment operator"; return pos; }
                 assop[level]=1;
-                lastnamed[level]=LN_OPERATOR;
-                pos+=1;
+                pos+=1; lastnamed[level]=LN_OPERATOR;
+                lastnamedatt[level] = LNA_NOTHING;
               }
             }
           continue;
@@ -655,6 +691,7 @@ namespace syncheck
             if (lastnamed[level] != LN_VARNAME and lastnamed[level] != LN_VALUE and lastnamed[level] != LN_DIGIT)
             { error = "Unexpected ternary operator at this point"; return pos; }
             levelt[++level] = LEVELTYPE_TERNARY;
+            lastnamedatt[level] = LNA_NOTHING;
             lastnamed[level] = LN_OPERATOR;
             statement_pad[level] = 2;
             assop[level] = true;
@@ -675,6 +712,7 @@ namespace syncheck
                 { error = "Expected secondary expression to ternary operator before colon"; return pos; }
                 statement_pad[level]--;
                 lastnamed[level] = LN_OPERATOR;
+                lastnamedatt[level] = LNA_NOTHING;
               }
               else if (plevel>0)
                 { error="Unexpected colon at this point"; return pos; }
@@ -683,11 +721,13 @@ namespace syncheck
                 if (statement_pad[level] != 1 || lastnamed[level]==LN_OPERATOR)
                 { error="Expression expected before `:' symbol"; return pos; }
                 lastnamed[level]=LN_CLOSING_SYMBOL;
+                lastnamedatt[level] = LNA_NOTHING;
               }
               else if (lastnamed[level]==LN_VARNAME and !assop[level])
               {
                 error="Goto labels not yet supported"; return pos;
                 lastnamed[level]=LN_NOTHING; //Pretend you never saw the identifier
+                lastnamedatt[level] = LNA_NOTHING;
               }
               else
               {

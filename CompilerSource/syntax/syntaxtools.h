@@ -250,6 +250,9 @@ inline pt handle_if_statement(string& code,string name,pt& pos)
       statement_pad[level] = 3;
     return ret;
   label_then:
+    if (levelt[level] != LEVELTYPE_IF or statement_pad[level] != 2)
+      { error="Unexpected `then' statement at this point"; return pos; }
+    statement_pad[level]--;
     return ret;
   label_do:
       level++;
