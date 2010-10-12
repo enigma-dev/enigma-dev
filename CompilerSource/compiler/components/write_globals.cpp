@@ -49,6 +49,13 @@ int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
     //for (globit i = global->dots.begin(); i != global->globals.end(); i++)
     //  wto << i->second->type << " " << i->second->prefixes << i->second->name << i->second->suffixes << ";" << endl;
     wto << endl;
+    
+    wto << "namespace enigma" << endl << "{" << endl << "  struct ENIGMA_global_structure: object_locals" << endl << "  {" << endl;
+    for (deciter i = dot_accessed_locals.begin(); i != dot_accessed_locals.end(); i++) // Dots are vars that are accessed as something.varname.
+      wto << "    " << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;
+    
+    wto << "    ENIGMA_global_structure(const int x, const int y): object_locals(x,y) {}" << endl << "  };" << endl << "  object_basic *ENIGMA_global_instance = new ENIGMA_global_structure(global,global);" << endl << "}";
+    wto << endl;
   wto.close();
   return 0;
 }

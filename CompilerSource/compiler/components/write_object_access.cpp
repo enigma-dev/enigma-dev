@@ -83,6 +83,7 @@ int compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_objec
         }
       }
       
+      wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
       wto << "    }" << endl;
       wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix] << ";" << endl;
       wto << "  }" << endl;

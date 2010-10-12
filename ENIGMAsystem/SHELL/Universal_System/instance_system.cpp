@@ -92,7 +92,7 @@ namespace enigma
   typedef pair<int,inst_iter*> inode_pair;
   
   // When you say "global.vname", this is the structure that answers
-  object_basic *ENIGMA_global_instance; // We also need an iterator for only global.
+  extern object_basic *ENIGMA_global_instance; // We also need an iterator for only global.
   inst_iter ENIGMA_global_instance_iterator(ENIGMA_global_instance,0,0);
   
   // With() will operate on this
