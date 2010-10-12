@@ -285,6 +285,10 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         pos++; continue;
       }
       codo[bpos] = synt[bpos] = last_token = '/', bpos++;
+      codo += "(double)";
+      synt += "(double)";
+      for (int i = 0; "(double)"[i]; i++)
+        codo[bpos] = "(double)"[i], synt[bpos] = 'c', bpos++;
       continue;
     }
     
