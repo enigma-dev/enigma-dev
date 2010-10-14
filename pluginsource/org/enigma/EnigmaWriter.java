@@ -22,6 +22,11 @@ package org.enigma;
 import static org.lateralgm.main.Util.deRef;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -387,6 +392,75 @@ public final class EnigmaWriter
 			}
 		}
 
+	private void writeFontTemporary(Font font)
+		{
+		//		out.fill(6 * font.rangeMin);
+
+		//because Java makes it so easy to get glyph information
+		int style = (font.italic ? java.awt.Font.ITALIC : 0) | (font.bold ? java.awt.Font.BOLD : 0);
+		int screenRes = Toolkit.getDefaultToolkit().getScreenResolution();
+		int size = (int) Math.round(font.size * screenRes / 72.0); //Java assumes 72 dps
+		java.awt.Font fnt = new java.awt.Font(font.fontName,style,size);
+		FontRenderContext frc = new BufferedImage(1,1,BufferedImage.TYPE_INT_RGB).createGraphics().getFontRenderContext();
+		int x = 0, y = 0;
+
+		//get the height and an image to draw a row of glyphs to
+		//			TextLayout tl = new TextLayout("M",fnt,frc);
+		//			int height = (int) (tl.getAscent() + tl.getDescent() + tl.getLeading()) + 1; //off-by-one for efficiency
+		int height = (int) (fnt.createGlyphVector(frc,"M").getLogicalBounds().getHeight() + 1.5);
+		//			System.out.println(tl.get);
+		//			System.out.println(height);
+		//			System.exit(-1);
+		BufferedImage bi = new BufferedImage(256,height,BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = bi.createGraphics();
+		g.setFont(fnt);
+		g.setBackground(new Color(0,0,0,0));
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		//now start iterating through glyphs
+		for (char c = (char) font.rangeMin; c <= font.rangeMax; c++)
+			{
+			TextLayout tl = new TextLayout(String.valueOf(c),fnt,frc);
+			Rectangle r = tl.getPixelBounds(frc,0,0);
+
+			//if we've hit the end of the row, flush line and return carriage
+			if (x + r.width > 255)
+				{
+				y += height;
+				x = 0;
+				for (int yy = 0; yy < height; yy++)
+					for (int xx = 0; xx < 256; xx++)
+						baos.write((bi.getRGB(xx,yy) >> 24) & 0xff);
+				g.clearRect(0,0,256,height);
+				}
+
+			System.out.format("%d %d %d %d %d %d\n",x,y,Math.max(2,r.width + 1),height - 1,
+					(int) tl.getAdvance(),r.x);
+			//x,y,width,height,advance,kerning
+			//			out.write4(x);
+			//			out.write4(y);
+			//			out.write4(Math.max(2,r.width + 1));
+			//			out.write4(height - 1); //intentional off-by-one for efficiency
+			//			out.write4((int) tl.getAdvance());
+			//			out.write4(r.x);
+
+			//print glyph to image and advance carriage
+			g.drawString("" + c,x - r.x,(int) (tl.getAscent() + tl.getLeading()));
+			x += Math.max(3,r.width + 2);
+			}
+
+		//flush final row
+		for (int yy = 0; yy < height; yy++)
+			for (int xx = 0; xx < 256; xx++)
+				baos.write((bi.getRGB(xx,yy) >> 24) & 0xff);
+
+		//		out.fill(6 * (255 - rangeMax));
+
+		//		out.write4(256); //alpha channel width
+		//		out.write4(y + height); //alpha channel height
+		//		out.compress(baos.toByteArray()); //zlib compressed raw alpha channel
+		}
+
 	protected void populateTimelines()
 		{
 		int size = i.timelines.size();
@@ -469,7 +543,6 @@ public final class EnigmaWriter
 					{
 					Event oe = oel[e];
 					org.lateralgm.resources.sub.Event ie = iel.get(e);
-
 
 					if (me == org.lateralgm.resources.sub.MainEvent.EV_COLLISION)
 						oe.id = toId(ie.other,-1);

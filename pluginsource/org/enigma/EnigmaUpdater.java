@@ -12,7 +12,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
-import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.lateralgm.components.ErrorDialog;
