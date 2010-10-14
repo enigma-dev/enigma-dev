@@ -60,6 +60,7 @@ import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.enigma.EYamlParser.YamlNode;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaSettings;
@@ -377,7 +378,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		try
 			{
-			boolean up = EnigmaUpdater.checkForUpdates();
+			boolean up = EnigmaUpdater.checkForUpdates(ef.ta);
 			if (EnigmaUpdater.needsRestart)
 				{
 				Preferences.userRoot().node("/org/enigma").putBoolean("NEEDS_REBUILD",true);

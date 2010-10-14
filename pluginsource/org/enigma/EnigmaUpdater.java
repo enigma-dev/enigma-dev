@@ -12,6 +12,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
 
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.file.GmFormatException;
@@ -47,7 +48,7 @@ public class EnigmaUpdater
 	/** Path to the working copy */
 	private File path = null;
 
-	public static boolean checkForUpdates()
+	public static boolean checkForUpdates(final JTextArea ta)
 		{
 		EnigmaUpdater svn = new EnigmaUpdater();
 		try
@@ -57,7 +58,23 @@ public class EnigmaUpdater
 				String repo = askCheckout();
 				if (repo != null)
 					{
-					svn.checkout(repo);
+					ta.append("Downloading libraries. This may take a while.\n");
+					ta.setVisible(true);
+
+					svn.checkout(repo,new ISVNEventHandler()
+						{
+							@Override
+							public void handleEvent(SVNEvent event, double progress) throws SVNException
+								{
+								if (event.getAction() != SVNEventAction.UPDATE_ADD) return;
+								ta.append("Added " + event.getFile() + "\n");
+								}
+
+							@Override
+							public void checkCancelled() throws SVNCancelException
+								{
+								}
+						});
 					if (revert) svn.revert();
 					}
 				return true;
@@ -183,19 +200,20 @@ public class EnigmaUpdater
 	 * @throws SVNException
 	 */
 	@SuppressWarnings("unused")
-	private void checkoutRev(String trunk, int rev) throws SVNException
+	private void checkoutRev(String repo, int rev) throws SVNException
 		{
 		SVNUpdateClient upCli = cliMan.getUpdateClient();
-		SVNURL url = SVNURL.parseURIDecoded(trunk);
+		SVNURL url = SVNURL.parseURIDecoded(repo);
 		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.create(rev),SVNDepth.INFINITY,
 				true);
 		System.out.println("Checked out " + r);
 		}
 
-	private void checkout(String trunk) throws SVNException
+	private void checkout(String repo, ISVNEventHandler eventHandler) throws SVNException
 		{
 		SVNUpdateClient upCli = cliMan.getUpdateClient();
-		SVNURL url = SVNURL.parseURIDecoded(trunk);
+		SVNURL url = SVNURL.parseURIDecoded(repo);
+		upCli.setEventHandler(eventHandler);
 		long r = upCli.doCheckout(url,path,SVNRevision.HEAD,SVNRevision.HEAD,SVNDepth.INFINITY,true);
 		System.out.println("Checked out " + r);
 		}

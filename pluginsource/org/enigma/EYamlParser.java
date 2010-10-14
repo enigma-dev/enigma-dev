@@ -206,95 +206,69 @@ public class EYamlParser
 		return b;
 		}
 
-	public static void main(String[] args)
+	public static class YamlNode
 		{
-		try
+		Map<String,YamlNode> maps = new HashMap<String,YamlNode>();
+		List<YamlNode> seqs = new ArrayList<YamlNode>();
+		String content = "";
+		protected int lvl = -1; // indentation
+		protected int type = -1; // whether it's a map/seq node
+
+		public YamlNode()
 			{
-			//			String loc = "C:\\Users\\Owner\\Documents\\NetBeansProjects\\byamltest\\build\\classes\\test.yml";
-			YamlNode myyml = EYamlParser.parse(new Scanner(System.in));
-			System.out.println("-----");
-			System.out.println(myyml.getM("Universe").getM("Galaxies").getS(1));
-
-			if (true) return;
-			System.out.println(myyml.getM("Universe").getM("Galaxies").getM("Solar Systems").getM("Ours").getS(
-					1).getS(2).content);
-			System.out.println(myyml.getM("Universe").content);
-			System.out.println(myyml.getM("Universe").getM("Ethereal").getS(3).content);
-			System.out.println(myyml.getM("Universe").getM("Galaxies").getM("Solar Systems").getM("Ours").content);
-			System.out.println(myyml.getM("Universe").getS(0).content);
-			System.out.println(myyml.getM("Universe").getM("Bio").content);
-			System.out.println(myyml.getM("Universe").getM("Ethereal").getS(5).content);
 			}
-		catch (Exception e)
+
+		public YamlNode(int lvl, int type)
 			{
-			//System.out.println("I failed.");
-			e.printStackTrace();
+			set(lvl,type);
 			}
-		}
-	}
 
-class YamlNode
-	{
-	public Map<String,YamlNode> maps = new HashMap<String,YamlNode>();
-	public List<YamlNode> seqs = new ArrayList<YamlNode>();
-	public String content = "";
-	public int lvl = -1; // indentation
-	private int type = -1; // whether it's a map/seq node
+		void set(int lvl, int type)
+			{
+			this.lvl = lvl;
+			this.type = type;
+			}
 
-	public YamlNode()
-		{
-		}
+		boolean isMap()
+			{
+			return type == 0;
+			}
 
-	public YamlNode(int lvl, int type)
-		{
-		set(lvl,type);
-		}
+		public YamlNode getM(String s) throws IndexOutOfBoundsException
+			{
+			YamlNode r = maps.get(s.toLowerCase());
+			if (r == null) throw new IndexOutOfBoundsException(s);
+			return r;
+			}
 
-	void set(int lvl, int type)
-		{
-		this.lvl = lvl;
-		this.type = type;
-		}
+		public String getMC(String s) throws IndexOutOfBoundsException
+			{
+			return getM(s).content;
+			}
 
-	boolean isMap()
-		{
-		return type == 0;
-		}
+		public String getMC(String s, String def)
+			{
+			YamlNode r = maps.get(s.toLowerCase());
+			if (r == null) return def;
+			return r.content;
+			}
 
-	public YamlNode getM(String s) throws IndexOutOfBoundsException
-		{
-		YamlNode r = maps.get(s.toLowerCase());
-		if (r == null) throw new IndexOutOfBoundsException(s);
-		return r;
-		}
+		public YamlNode getS(int k) throws IndexOutOfBoundsException
+			{
+			return seqs.get(k);
+			}
 
-	public String getMC(String s) throws IndexOutOfBoundsException
-		{
-		return getM(s).content;
-		}
+		// There is no reason to use this. I included it just in case you forgot content was public and
+		// were just going along with the general naming convention.
+		public String getC()
+			{
+			return content;
+			}
 
-	public String getMC(String s, String def)
-		{
-		YamlNode r = maps.get(s.toLowerCase());
-		if (r == null) return def;
-		return r.content;
-		}
-
-	public YamlNode getS(int k) throws IndexOutOfBoundsException
-		{
-		return seqs.get(k);
-		}
-
-	// There is no reason to use this. I included it just in case you forgot content was public and
-	// were just going along with the general naming convention.
-	public String getC()
-		{
-		return content;
-		}
-
-	public String toString()
-		{
-		return "{" + lvl + ",content=" + content + ",seq[" + seqs.size() + "],map:" + maps.keySet()
-				+ "}";
+		public String toString()
+			{
+			return "{" + lvl + ",content=" + content + ",seq[" + seqs.size() + "],map:" + maps.keySet()
+					+ "}";
+			}
 		}
 	}
