@@ -378,7 +378,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		try
 			{
-			boolean up = EnigmaUpdater.checkForUpdates(ef.ta);
+			boolean up = EnigmaUpdater.checkForUpdates(ef);
 			if (EnigmaUpdater.needsRestart)
 				{
 				Preferences.userRoot().node("/org/enigma").putBoolean("NEEDS_REBUILD",true);

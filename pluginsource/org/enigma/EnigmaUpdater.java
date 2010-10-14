@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.file.GmFormatException;
@@ -48,7 +49,7 @@ public class EnigmaUpdater
 	/** Path to the working copy */
 	private File path = null;
 
-	public static boolean checkForUpdates(final JTextArea ta)
+	public static boolean checkForUpdates(final EnigmaFrame ef)
 		{
 		EnigmaUpdater svn = new EnigmaUpdater();
 		try
@@ -58,8 +59,8 @@ public class EnigmaUpdater
 				String repo = askCheckout();
 				if (repo != null)
 					{
-					ta.append("Downloading libraries. This may take a while.\n");
-					ta.setVisible(true);
+					ef.ta.append("Downloading libraries. This may take a while.\n");
+					ef.setVisible(true);
 
 					svn.checkout(repo,new ISVNEventHandler()
 						{
@@ -67,7 +68,14 @@ public class EnigmaUpdater
 							public void handleEvent(SVNEvent event, double progress) throws SVNException
 								{
 								if (event.getAction() != SVNEventAction.UPDATE_ADD) return;
-								ta.append("Added " + event.getFile() + "\n");
+								ef.ta.append("Added " + event.getFile() + "\n");
+								SwingUtilities.invokeLater(new Thread()
+									{
+										public void run()
+											{
+											ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
+											}
+									});
 								}
 
 							@Override
