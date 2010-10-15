@@ -21,4 +21,6 @@ struct Font
 	boolean italic;
 	int rangeMin;
 	int rangeMax;
+
+	Glyph *glyphs; //count = rangeMax - rangeMin
 };

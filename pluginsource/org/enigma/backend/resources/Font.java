@@ -8,6 +8,8 @@
 
 package org.enigma.backend.resources;
 
+import org.enigma.backend.sub.Glyph;
+
 import com.sun.jna.Structure;
 
 public class Font extends Structure
@@ -21,6 +23,8 @@ public class Font extends Structure
 	public boolean italic;
 	public int rangeMin;
 	public int rangeMax;
+
+	public Glyph.ByReference glyphs; //count = rangeMax - rangeMin
 
 	public static class ByReference extends Font implements Structure.ByReference
 		{
