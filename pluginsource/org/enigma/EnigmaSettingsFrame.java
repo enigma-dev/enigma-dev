@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -239,7 +240,11 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 
 		toolbar = makeToolBar();
 		add(toolbar,BorderLayout.NORTH);
-		add(makeSettings(),BorderLayout.CENTER);
+		JTabbedPane tabs = new JTabbedPane();
+		tabs.add("General",makeSettings());
+		tabs.add("API",makeAPI());
+		//		add(makeSettings(),BorderLayout.CENTER);
+		add(tabs,BorderLayout.CENTER);
 		pack();
 		}
 
@@ -313,6 +318,13 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/*	*/.addComponent(bInit)
 		/*	*/.addComponent(bClean))
 		/**/.addContainerGap());
+
+		return p;
+		}
+
+	private JPanel makeAPI()
+		{
+		JPanel p = new JPanel();
 
 		return p;
 		}
