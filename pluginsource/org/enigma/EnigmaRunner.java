@@ -265,6 +265,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		File f = new File(LGM.workDir.getParentFile(),"ENIGMAsystem");
 		f = new File(f,"SHELL");
 		f = new File(f,"Platforms");
+		//also fetch "audio_systems" "graphics_systems" "collision_systems"
 		File files[] = f.listFiles();
 		for (File dir : files)
 			{

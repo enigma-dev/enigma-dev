@@ -11,9 +11,9 @@
 
 struct Glyph
 {
-	int origin;
-	int baseline;
-	int advance;
+	double origin; //to convert to int, these should be rounded on .5
+	double baseline;
+	double advance;
 	int width;
 	int height;
 	byte *data; //size = width * height

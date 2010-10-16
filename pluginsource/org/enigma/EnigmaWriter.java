@@ -28,7 +28,6 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -67,11 +66,11 @@ import org.enigma.backend.sub.View;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.main.LGM;
-import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Path.PPath;
+import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
@@ -204,20 +203,14 @@ public final class EnigmaWriter
 			os.id = is.getId();
 
 			os.transparent = is.get(PSprite.TRANSPARENT);
-			os.shape = SPRITE_MASK_CODE.get(is.get(PSprite.SHAPE)); // 0*=Precise,
-			// 1=Rectangle,
-			// 2=Disk,
-			// 3=Diamond
+			os.shape = SPRITE_MASK_CODE.get(is.get(PSprite.SHAPE)); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
 			os.alphaTolerance = is.get(PSprite.ALPHA_TOLERANCE);
 			os.separateMask = is.get(PSprite.SEPARATE_MASK);
 			os.smoothEdges = is.get(PSprite.SMOOTH_EDGES);
 			os.preload = is.get(PSprite.PRELOAD);
 			os.originX = is.get(PSprite.ORIGIN_X);
 			os.originY = is.get(PSprite.ORIGIN_Y);
-			os.bbMode = SPRITE_BB_CODE.get(is.get(PSprite.BB_MODE)); // 0*=Automatic,
-			// 1=Full
-			// image,
-			// 2=Manual
+			os.bbMode = SPRITE_BB_CODE.get(is.get(PSprite.BB_MODE)); //0*=Automatic, 1=Full image, 2=Manual
 			os.bbLeft = is.get(PSprite.BB_LEFT);
 			os.bbRight = is.get(PSprite.BB_RIGHT);
 			os.bbTop = is.get(PSprite.BB_TOP);
@@ -404,16 +397,15 @@ public final class EnigmaWriter
 		{
 		int style = (font.italic ? java.awt.Font.ITALIC : 0) | (font.bold ? java.awt.Font.BOLD : 0);
 		int screenRes = Toolkit.getDefaultToolkit().getScreenResolution();
-		int size = (int) Math.round(font.size * screenRes / 72.0); // Java
-		// assumes
-		// 72 dps
+		int size = (int) Math.round(font.size * screenRes / 72.0); // Java assumes 72 dps
 		java.awt.Font fnt = new java.awt.Font(font.fontName,style,size);
-		FontRenderContext frc = new FontRenderContext(null,true,false);
 
-		BufferedImage rasters[] = new BufferedImage[font.rangeMax - font.rangeMin + 1];
+		font.glyphs = new Glyph.ByReference();
+		Glyph[] ofgl = (Glyph[]) font.glyphs.toArray(font.rangeMax - font.rangeMin);
 		for (char c = (char) font.rangeMin; c <= font.rangeMax; c++)
 			{
-			GlyphVector gv = fnt.createGlyphVector(frc,String.valueOf(c));
+			GlyphVector gv = fnt.createGlyphVector(new FontRenderContext(null,true,false),
+					String.valueOf(c));
 			Rectangle2D r = gv.getVisualBounds();
 
 			// Generate a raster of the glyph vector
@@ -428,48 +420,27 @@ public final class EnigmaWriter
 
 			// Produce the relevant stats
 			int ind = c - font.rangeMin;
-			rasters[ind] = bi;
-			double origin = r.getX(); // bump image right X pixels
-			double baseline = r.getY(); // bump image down X pixels (usually
-			// negative, since baseline is at
-			// bottom)
-			double advance = gv.getGlyphPosition(gv.getNumGlyphs()).getX(); // advance
-			// X
-			// pixels
-			// from
-			// origin
+			ofgl[ind].origin = r.getX(); // bump image right X pixels
+			ofgl[ind].baseline = r.getY(); // bump image down X pixels (usually negative, since baseline is at bottom)
+			ofgl[ind].advance = gv.getGlyphPosition(gv.getNumGlyphs()).getX(); // advance X pixels from origin
+
+			// Copy over the raster
+			byte raster[] = new byte[bi.getWidth() * bi.getHeight()];
+			// XXX: see if we can just get the Grayscale channel
+			int rasterRGB[] = new int[raster.length];
+			bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),rasterRGB,0,bi.getWidth());
+			for (int j = 0; j < rasterRGB.length; j++)
+				raster[j] = (byte) (rasterRGB[j] & 0xFF);
+			ofgl[ind].raster = ByteBuffer.allocateDirect(raster.length).put(raster);
 
 			// Output the results
-			System.out.println(origin + ", " + baseline + ", " + advance);
-			int raster[] = new int[bi.getWidth() * bi.getHeight() * 4];
-			bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),raster,0,bi.getWidth()); // XXX: see if I can just get the Grayscale
-			// channel
+			System.out.println(ofgl[ind].origin + ", " + ofgl[ind].baseline + ", " + ofgl[ind].advance);
 			for (int ry = 0; ry < bi.getHeight(); ry++)
 				{
 				for (int rx = 0; rx < bi.getWidth(); rx++)
 					System.out.format("%02X ",bi.getRGB(rx,ry) & 0xFF);
 				System.out.println();
 				}
-			}
-
-		if (true) return;
-
-		font.glyphs = new Glyph.ByReference();
-		Glyph[] ofgl = (Glyph[]) font.glyphs.toArray(font.rangeMax - font.rangeMin);
-		for (int i = 0; i < ofgl.length; i++)
-			{
-			BufferedImage bi = rasters[i];
-			byte raster[] = new byte[bi.getWidth() * bi.getHeight()];
-			//XXX: see if I can just get the Grayscale channel
-
-			//			bi.getRaster().getPixels(0,0,bi.getWidth(),bi.getHeight(),(int[]) null);
-			//			bi.getRaster().getDataBuffer().;
-			int rasterRGB[] = new int[raster.length];
-			//			ColorModel cm = bi.getColorModel();
-			//			cm.getRGB(bi.getRaster().getDataElements(,,));
-			bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),rasterRGB,0,bi.getWidth());
-
-			ofgl[i].raster = ByteBuffer.allocateDirect(raster.length).put(raster);
 			}
 		}
 
@@ -612,7 +583,7 @@ public final class EnigmaWriter
 			or.drawBackgroundColor = is.get(PRoom.DRAW_BACKGROUND_COLOR);
 			or.creationCode = is.get(PRoom.CREATION_CODE);
 
-			// / vvv useless stuff vvv //
+			// vvv useless stuff vvv //
 			or.rememberWindowSize = is.get(PRoom.REMEMBER_WINDOW_SIZE);
 			or.editorWidth = is.get(PRoom.EDITOR_WIDTH);
 			or.editorHeight = is.get(PRoom.EDITOR_HEIGHT);
@@ -759,10 +730,9 @@ public final class EnigmaWriter
 			e.printStackTrace();
 			}
 
-		// //we assume an int is 4 bytes
-		// o.pixels = ByteBuffer.allocateDirect(o.width * o.height *
-		// 4).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(
-		// pixels);
+		////we assume an int is 4 bytes
+		//o.pixels = ByteBuffer.allocateDirect(o.width * o.height * 4).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(
+		//		pixels);
 		}
 
 	public static int ARGBtoRGBA(int argb)
@@ -911,8 +881,7 @@ public final class EnigmaWriter
 			}
 		}
 
-	// in order to allow question actions to get converted to code, we treat
-	// their internal code as scripts
+	//in order to allow question actions to get converted to code, we treat their internal code as scripts
 	public static ArrayList<LibAction> getQuestionLibActions()
 		{
 		ArrayList<LibAction> ala = new ArrayList<LibAction>();
