@@ -390,6 +390,8 @@ public final class EnigmaWriter
 			of.italic = ifont.get(PFont.ITALIC);
 			of.rangeMin = ifont.get(PFont.RANGE_MIN);
 			of.rangeMax = ifont.get(PFont.RANGE_MAX);
+
+			populateGlyphs(ofl[f]);
 			}
 		}
 
@@ -889,15 +891,5 @@ public final class EnigmaWriter
 			for (LibAction act : lib.libActions)
 				if (act.question && act.execType == Action.EXEC_CODE) ala.add(act);
 		return ala;
-		}
-
-	public static void main(String[] args)
-		{
-		Font f = new Font();
-		f.fontName = java.awt.Font.DIALOG;
-		f.rangeMin = 'a';
-		f.rangeMax = 'c';
-		f.size = 12;
-		populateGlyphs(f);
 		}
 	}
