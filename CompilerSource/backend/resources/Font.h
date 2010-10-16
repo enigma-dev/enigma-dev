@@ -9,6 +9,7 @@
 
 
 #include "../JavaStruct.h"
+#include "../sub/Glyph.h"
 
 struct Font
 {
