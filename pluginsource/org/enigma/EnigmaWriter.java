@@ -28,6 +28,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -55,6 +56,7 @@ import org.enigma.backend.resources.Sprite;
 import org.enigma.backend.resources.Timeline;
 import org.enigma.backend.sub.BackgroundDef;
 import org.enigma.backend.sub.Event;
+import org.enigma.backend.sub.Glyph;
 import org.enigma.backend.sub.Image;
 import org.enigma.backend.sub.Instance;
 import org.enigma.backend.sub.MainEvent;
@@ -65,11 +67,11 @@ import org.enigma.backend.sub.View;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.main.LGM;
+import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Path.PPath;
-import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
@@ -398,11 +400,13 @@ public final class EnigmaWriter
 			}
 		}
 
-	private static void writeFontTemporary(Font font)
+	private static void populateGlyphs(Font font)
 		{
 		int style = (font.italic ? java.awt.Font.ITALIC : 0) | (font.bold ? java.awt.Font.BOLD : 0);
 		int screenRes = Toolkit.getDefaultToolkit().getScreenResolution();
-		int size = (int) Math.round(font.size * screenRes / 72.0); // Java assumes 72 dps
+		int size = (int) Math.round(font.size * screenRes / 72.0); // Java
+		// assumes
+		// 72 dps
 		java.awt.Font fnt = new java.awt.Font(font.fontName,style,size);
 		FontRenderContext frc = new FontRenderContext(null,true,false);
 
@@ -412,7 +416,7 @@ public final class EnigmaWriter
 			GlyphVector gv = fnt.createGlyphVector(frc,String.valueOf(c));
 			Rectangle2D r = gv.getVisualBounds();
 
-			//Generate a raster of the glyph vector
+			// Generate a raster of the glyph vector
 			BufferedImage bi = new BufferedImage((int) Math.round(r.getWidth()),
 					(int) Math.round(r.getHeight()),BufferedImage.TYPE_BYTE_GRAY);
 			Graphics2D g = bi.createGraphics();
@@ -422,17 +426,24 @@ public final class EnigmaWriter
 			g.setColor(Color.WHITE);
 			g.drawGlyphVector(gv,(float) -r.getX(),(float) -r.getY());
 
-			//Produce the relevant stats
+			// Produce the relevant stats
 			int ind = c - font.rangeMin;
 			rasters[ind] = bi;
-			double origin = r.getX(); //bump image right X pixels
-			double baseline = r.getY(); //bump image down X pixels (usually negative, since baseline is at bottom)
-			double advance = gv.getGlyphPosition(gv.getNumGlyphs()).getX(); //advance X pixels from origin
+			double origin = r.getX(); // bump image right X pixels
+			double baseline = r.getY(); // bump image down X pixels (usually
+			// negative, since baseline is at
+			// bottom)
+			double advance = gv.getGlyphPosition(gv.getNumGlyphs()).getX(); // advance
+			// X
+			// pixels
+			// from
+			// origin
 
-			//Output the results
+			// Output the results
 			System.out.println(origin + ", " + baseline + ", " + advance);
 			int raster[] = new int[bi.getWidth() * bi.getHeight() * 4];
-			bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),raster,0,bi.getWidth()); //XXX: see if I can just get the Grayscale channel
+			bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),raster,0,bi.getWidth()); // XXX: see if I can just get the Grayscale
+			// channel
 			for (int ry = 0; ry < bi.getHeight(); ry++)
 				{
 				for (int rx = 0; rx < bi.getWidth(); rx++)
@@ -441,8 +452,25 @@ public final class EnigmaWriter
 				}
 			}
 
-		//		int raster[] = new int[bi.getWidth() * bi.getHeight() * 4];
-		//		bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),raster,0,bi.getWidth()); //XXX: see if I can just get the Grayscale channel
+		if (true) return;
+
+		font.glyphs = new Glyph.ByReference();
+		Glyph[] ofgl = (Glyph[]) font.glyphs.toArray(font.rangeMax - font.rangeMin);
+		for (int i = 0; i < ofgl.length; i++)
+			{
+			BufferedImage bi = rasters[i];
+			byte raster[] = new byte[bi.getWidth() * bi.getHeight()];
+			//XXX: see if I can just get the Grayscale channel
+
+			//			bi.getRaster().getPixels(0,0,bi.getWidth(),bi.getHeight(),(int[]) null);
+			//			bi.getRaster().getDataBuffer().;
+			int rasterRGB[] = new int[raster.length];
+			//			ColorModel cm = bi.getColorModel();
+			//			cm.getRGB(bi.getRaster().getDataElements(,,));
+			bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),rasterRGB,0,bi.getWidth());
+
+			ofgl[i].raster = ByteBuffer.allocateDirect(raster.length).put(raster);
+			}
 		}
 
 	protected void populateTimelines()
@@ -901,6 +929,6 @@ public final class EnigmaWriter
 		f.rangeMin = 'a';
 		f.rangeMax = 'c';
 		f.size = 12;
-		writeFontTemporary(f);
+		populateGlyphs(f);
 		}
 	}
