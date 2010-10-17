@@ -21,13 +21,16 @@ package org.enigma;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-public class EnigmaFrame extends JFrame
+import org.lateralgm.main.LGM;
+
+public class EnigmaFrame extends JDialog
 	{
 	private static final long serialVersionUID = 1L;
 	public JTextArea ta;
@@ -35,7 +38,7 @@ public class EnigmaFrame extends JFrame
 
 	public EnigmaFrame()
 		{
-		super("Enigma Progress Console");
+		super(LGM.frame,"Enigma Progress Console");
 		JPanel p = new JPanel(new BorderLayout());
 		ta = new JTextArea(10,40);
 		ta.setEditable(false);
@@ -48,7 +51,6 @@ public class EnigmaFrame extends JFrame
 
 		setContentPane(p);
 		pack();
-		setAlwaysOnTop(true);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		}
