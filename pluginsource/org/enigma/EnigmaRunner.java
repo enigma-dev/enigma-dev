@@ -257,14 +257,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		return ret;
 		}
 
-	private List<PlatformSelection> findTargets()
+	//target is one of ""Platforms","Audio_Systems","Graphics_Systems","Collision_Systems"
+	static List<TargetSelection> findTargets(String target)
 		{
 		String platform = normalize(System.getProperty("os.name"));
-		ArrayList<PlatformSelection> targets = new ArrayList<PlatformSelection>();
+		ArrayList<TargetSelection> targets = new ArrayList<TargetSelection>();
 
 		File f = new File(LGM.workDir.getParentFile(),"ENIGMAsystem");
 		f = new File(f,"SHELL");
-		f = new File(f,"Platforms");
+		f = new File(f,target);
 		//also fetch "audio_systems" "graphics_systems" "collision_systems"
 		File files[] = f.listFiles();
 		for (File dir : files)
@@ -272,13 +273,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			if (!dir.isDirectory()) continue;
 			//technically this could stand to be a .properties file, rather than e-yaml
 			File prop = new File(dir,"About.ey");
+			System.out.println(prop);
 			try
 				{
 				YamlNode node = EYamlParser.parse(new Scanner(prop));
 				for (String s : normalize(node.getMC("Build-Platforms")).split(","))
 					if (platform.startsWith(s))
 						{
-						PlatformSelection ps = new PlatformSelection();
+						TargetSelection ps = new TargetSelection();
 						ps.name = node.getMC("Name");
 						ps.id = node.getMC("Identifier");
 						ps.rep = node.getMC("Represents",null);
@@ -303,12 +305,17 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		return targets;
 		}
 
-	class PlatformSelection
+	static class TargetSelection
 		{
 		String name, id, rep, desc, auth, ext;
+
+		public String toString()
+			{
+			return name;
+			}
 		}
 
-	private String normalize(String s)
+	private static String normalize(String s)
 		{
 		return s.toLowerCase().replaceAll("[ _\\-]","");
 		}

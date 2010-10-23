@@ -16,6 +16,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -85,7 +86,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 
 	private JPanel makeCompatPane()
 		{
-		JPanel compatPane = new JPanel(new GridLayout(4,3));
+		JPanel compatPane = new JPanel();
 		compatPane.setBorder(BorderFactory.createTitledBorder("Compatability/Progress"));
 		GroupLayout compat = new GroupLayout(compatPane);
 		compatPane.setLayout(compat);
@@ -177,7 +178,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 
 	private JPanel makeAdvPane()
 		{
-		JPanel advPane = new JPanel(new GridLayout(2,4));
+		JPanel advPane = new JPanel();
 		advPane.setBorder(BorderFactory.createTitledBorder("Advanced"));
 		GroupLayout adv = new GroupLayout(advPane);
 		advPane.setLayout(adv);
@@ -325,6 +326,20 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	private JPanel makeAPI()
 		{
 		JPanel p = new JPanel();
+		GroupLayout layout = new GroupLayout(p);
+		p.setLayout(layout);
+
+		JPanel platPane = new JPanel(new GridLayout(4,3));
+		platPane.setBorder(BorderFactory.createTitledBorder("Platform"));
+		GroupLayout plat = new GroupLayout(platPane);
+		platPane.setLayout(plat);
+
+		JComboBox cb = new JComboBox(EnigmaRunner.findTargets("Platforms").toArray());
+
+		layout.setHorizontalGroup(layout.createParallelGroup()
+		/**/.addComponent(cb));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+		/**/.addComponent(cb));
 
 		return p;
 		}

@@ -20,6 +20,8 @@
 
 package org.enigma;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -52,7 +54,7 @@ public class EYamlParser
 
 			if (s.startsWith("---") || st.startsWith("#")) continue;
 
-			if (!sblock && st.indexOf(":") == -1)
+			if (!sblock && st.indexOf(":") == -1 && !st.isEmpty())
 				{
 				// I couldn't think of any more reasonable way to determine if it was a non-literal text block...
 				sblock = true;
@@ -85,6 +87,7 @@ public class EYamlParser
 				}
 			else
 				{
+				if (st.isEmpty()) continue;
 				if (st.startsWith("- "))
 					{
 					v.addFirst(new YamlNode());
