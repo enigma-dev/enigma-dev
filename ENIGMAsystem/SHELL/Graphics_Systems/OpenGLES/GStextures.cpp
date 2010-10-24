@@ -46,28 +46,4 @@ namespace enigma
     glBindTexture(GL_TEXTURE_2D, 0);
     return texture;
   }
-  
-  //Retrieve image data from a texture, in unsigned char, RGBA format.
-  unsigned char* graphics_get_texture_rgba(unsigned texture)
-  {
-    if (texture != enigma::cur_bou_tha_noo_sho_eve_cha_eve)
-      glBindTexture(GL_TEXTURE_2D, texture);
-    
-    int r,g,b,a;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_RED_SIZE,  &r);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_GREEN_SIZE,&g);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_BLUE_SIZE, &b);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_ALPHA_SIZE,&a);
-    
-    // Set r to the largest of the four
-    r = r > g ? r : g, r = r > b ? r : b, r = r > a ? r : a;
-    
-    unsigned char* ret = new unsigned char[r << 2];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
-    
-    if (texture != enigma::cur_bou_tha_noo_sho_eve_cha_eve)
-      glBindTexture(GL_TEXTURE_2D, enigma::cur_bou_tha_noo_sho_eve_cha_eve);
-    
-    return ret;
-  }
 }

@@ -27,4 +27,5 @@
 
 void draw_set_font(int fnt);
 void draw_text(int x,int y,string str);
+unsigned int font_get_texture(int fnt);
 int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);

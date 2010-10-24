@@ -55,22 +55,30 @@ void draw_text(int x,int y,string str)
       xx = x, yy += fnt->height, i += str[i+1] == '\n';
     else if (str[i] == '\n')
       xx = x, yy += fnt->height;
+    else if (str[i] == ' ')
+      xx += fnt->height/3; // FIXME: what's GM do about this?
     else
     {
-      fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) & fnt->glyphcount];
+      fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
       glBegin(GL_QUADS);
         glTexCoord2f(g.tx,  g.ty);
-          glVertex2i(x + g.x,  y + g.y);
+          glVertex2i(xx + g.x,  yy + g.y);
         glTexCoord2f(g.tx2, g.ty);
-          glVertex2i(x + g.x2, y + g.y);
+          glVertex2i(xx + g.x2, yy + g.y);
         glTexCoord2f(g.tx2, g.ty2);
-          glVertex2i(x + g.x2, y + g.y2);
+          glVertex2i(xx + g.x2, yy + g.y2);
         glTexCoord2f(g.tx,  g.ty2);
-          glVertex2i(x + g.x,  y + g.y2);
+          glVertex2i(xx + g.x,  yy + g.y2);
       glEnd();
       xx += g.xs;
     }
   }
+}
+
+unsigned int font_get_texture(int fnt)
+{
+  font *f = fontstructarray[fnt];
+  return f ? f->texture : unsigned(-1);
 }
 
 void draw_set_font(int fnt)

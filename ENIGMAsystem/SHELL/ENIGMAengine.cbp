@@ -436,6 +436,8 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL/GSfont.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSfont.h" />
 		<Unit filename="Graphics_Systems/OpenGL/GSmiscextra.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />

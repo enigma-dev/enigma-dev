@@ -66,6 +66,25 @@ int draw_primitive_begin(int dink)
   return 0;
 }
 
+int draw_primitive_begin_texture(int dink,unsigned tex)
+{
+  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != tex)
+    glBindTexture(GL_TEXTURE_2D, enigma::cur_bou_tha_noo_sho_eve_cha_eve = tex);
+	GLenum kind = ptypes_by_id[ dink & 15 ];
+	#if !PRIMBUFFER
+	  glBegin(kind);
+	#else
+    if(++__currentpdepth>PRIMDEPTH2)
+    {
+      show_error("Max open primitive count exceeded. Disable the limit via the buffer option, or increase buffer depth",0);
+      return -1;
+    }
+    __currentpcount[__currentpdepth]=0;
+    __primitivetype[__currentpdepth]=kind;
+  #endif
+  return 0;
+}
+
 int draw_vertex(double x, double y)
 {
 	#if !PRIMBUFFER
@@ -82,53 +101,99 @@ int draw_vertex(double x, double y)
 	return 0;
 }
 
-int draw_vertex_color(float x, float y, int color, float alpha)
+int draw_vertex_color(float x, float y, int col, float alpha)
 {
-	unsigned int col=color;
 	#if !PRIMBUFFER
-	glPushAttrib(GL_CURRENT_BIT);
-	untexture();
-	glColor4f(
-		(col&0xFF)/255.0,
-		((col&0xFF00)>>8)/255.0,
-		((col&0xFF0000)>>16)/255.0,
-		alpha);
-	glVertex2f(x,y);
-	glPopAttrib();
+    glPushAttrib(GL_CURRENT_BIT);
+      glColor4f(
+        (col&0xFF)/255.0,
+        ((col&0xFF00)>>8)/255.0,
+        ((col&0xFF0000)>>16)/255.0,
+        alpha);
+      glVertex2f(x,y);
+    glPopAttrib();
 	#else
-	int pco=__currentpcount[__currentpdepth]++;
-	__primitivecolor[pco][__currentpdepth][0]=(col&0xFF)/255.0;
-	__primitivecolor[pco][__currentpdepth][1]=((col&0xFF00)>>8)/255.0;
-	__primitivecolor[pco][__currentpdepth][2]=((col&0xFF0000)>>16)/255.0;
-	__primitivecolor[pco][__currentpdepth][3]=alpha;
-	__primitivexy[pco][__currentpdepth][0]=x;
-	__primitivexy[pco][__currentpdepth][1]=y;
-	#if SHOWERRORS
-	if(pco+1>PRIMBUFFER) show_error("Max point count exceeded",0);
+    int pco=__currentpcount[__currentpdepth]++;
+    __primitivecolor[pco][__currentpdepth][0]=(col&0xFF)/255.0;
+    __primitivecolor[pco][__currentpdepth][1]=((col&0xFF00)>>8)/255.0;
+    __primitivecolor[pco][__currentpdepth][2]=((col&0xFF0000)>>16)/255.0;
+    __primitivecolor[pco][__currentpdepth][3]=alpha;
+    __primitivexy[pco][__currentpdepth][0]=x;
+    __primitivexy[pco][__currentpdepth][1]=y;
+    #if SHOWERRORS
+      if(pco+1>PRIMBUFFER) show_error("Max point count exceeded",0);
+    #endif
 	#endif
+	return 0;
+}
+int draw_vertex_texture(float x, float y, float tx, float ty)
+{
+	#if !PRIMBUFFER
+    glPushAttrib(GL_CURRENT_BIT);
+      glColor4f(1,1,1,1);
+      glTexCoord2f(tx,ty);
+      glVertex2f(x,y);
+    glPopAttrib();
+	#else
+    int pco=__currentpcount[__currentpdepth]++;
+    __primitivecolor[pco][__currentpdepth][0]=(col&0xFF)/255.0;
+    __primitivecolor[pco][__currentpdepth][1]=((col&0xFF00)>>8)/255.0;
+    __primitivecolor[pco][__currentpdepth][2]=((col&0xFF0000)>>16)/255.0;
+    __primitivecolor[pco][__currentpdepth][3]=alpha;
+    __primitivexy[pco][__currentpdepth][0]=x;
+    __primitivexy[pco][__currentpdepth][1]=y;
+    #if SHOWERRORS
+      if(pco+1>PRIMBUFFER) show_error("Max point count exceeded",0);
+    #endif
+	#endif
+	return 0;
+}
+int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha)
+{
+	#if !PRIMBUFFER
+    glPushAttrib(GL_CURRENT_BIT);
+      glColor4f(
+        (col&0xFF)/255.0,
+        ((col&0xFF00)>>8)/255.0,
+        ((col&0xFF0000)>>16)/255.0,
+        alpha);
+      glTexCoord2f(tx,ty);
+      glVertex2f(x,y);
+    glPopAttrib();
+	#else
+      int pco=__currentpcount[__currentpdepth]++;
+      __primitivecolor[pco][__currentpdepth][0]=(col&0xFF)/255.0;
+      __primitivecolor[pco][__currentpdepth][1]=((col&0xFF00)>>8)/255.0;
+      __primitivecolor[pco][__currentpdepth][2]=((col&0xFF0000)>>16)/255.0;
+      __primitivecolor[pco][__currentpdepth][3]=alpha;
+      __primitivexy[pco][__currentpdepth][0]=x;
+      __primitivexy[pco][__currentpdepth][1]=y;
+    #if SHOWERRORS
+      if(pco+1>PRIMBUFFER) show_error("Max point count exceeded",0);
+    #endif
 	#endif
 	return 0;
 }
 int draw_primitive_end()
 {
 	#if PRIMBUFFER
-	glPushAttrib(GL_CURRENT_BIT);
-	glBegin(__primitivetype[__currentpdepth]);
-	for (int DPEinx=0;DPEinx<__currentpcount[__currentpdepth];DPEinx++){
-		glColor4fv(__primitivecolor[DPEinx][__currentpdepth]);
-		glVertex2fv(__primitivexy[DPEinx][__currentpdepth]);
-		__primitivecolor[DPEinx][__currentpdepth][0]=0;
-		__primitivecolor[DPEinx][__currentpdepth][1]=0;
-		__primitivecolor[DPEinx][__currentpdepth][2]=0;
-		__primitivecolor[DPEinx][__currentpdepth][3]=0;
-		__primitivexy[DPEinx][__currentpdepth][0]=0;
-		__primitivexy[DPEinx][__currentpdepth][1]=0;
-	}
-	__currentpcount[__currentpdepth]=0;
-	__primitivetype[__currentpdepth]=0;
-	__primitivelength[__currentpdepth]=0;
-	__currentpdepth--;
-	glPopAttrib();
+    glPushAttrib(GL_CURRENT_BIT);
+    glBegin(__primitivetype[__currentpdepth]);
+    for (int DPEinx=0;DPEinx<__currentpcount[__currentpdepth];DPEinx++){
+      glColor4fv(__primitivecolor[DPEinx][__currentpdepth]);
+      glVertex2fv(__primitivexy[DPEinx][__currentpdepth]);
+      __primitivecolor[DPEinx][__currentpdepth][0]=0;
+      __primitivecolor[DPEinx][__currentpdepth][1]=0;
+      __primitivecolor[DPEinx][__currentpdepth][2]=0;
+      __primitivecolor[DPEinx][__currentpdepth][3]=0;
+      __primitivexy[DPEinx][__currentpdepth][0]=0;
+      __primitivexy[DPEinx][__currentpdepth][1]=0;
+    }
+    __currentpcount[__currentpdepth]=0;
+    __primitivetype[__currentpdepth]=0;
+    __primitivelength[__currentpdepth]=0;
+    __currentpdepth--;
+    glPopAttrib();
 	#endif
 	glEnd();
 	return 0;

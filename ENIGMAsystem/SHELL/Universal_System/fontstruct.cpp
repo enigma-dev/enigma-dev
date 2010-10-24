@@ -169,19 +169,26 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
     
     // Here we calculate the bbox
     if (!prop)
-       glyphmetrics[i].x = gwm, glyphmetrics[i].y = ghm,
-       glyphmetrics[i].w = 0,   glyphmetrics[i].h = 0;
+       glyphmetrics[i].x = 0,   glyphmetrics[i].y = 0,
+       glyphmetrics[i].w = gwm, glyphmetrics[i].h = ghm;
     else
-    for (int bx = 0; bx < gwm; bx++)
-    for (int by = 0; by < ghm; by++)
     {
-      if (data[(by*gtw + bx)<<2]) // If this pixel isn't completely transparent
+      glyphmetrics[i].x = gwm, glyphmetrics[i].y = ghm,
+      glyphmetrics[i].w = 0,   glyphmetrics[i].h = 0;
+      for (int bx = 0; bx < gwm; bx++)
+      for (int by = 0; by < ghm; by++)
       {
-        if (bx < glyphmetrics[i].x) glyphmetrics[i].x = bx;
-        if (bx > glyphmetrics[i].w) glyphmetrics[i].w = bx; // Treat width as right for now
-        if (by < glyphmetrics[i].y) glyphmetrics[i].y = by;
-        if (by > glyphmetrics[i].h) glyphmetrics[i].h = by; // Treat height as bottom for now
+        if (data[(by*gtw + bx)<<2]) // If this pixel isn't completely transparent
+        {
+          if (bx < glyphmetrics[i].x) glyphmetrics[i].x = bx;
+          if (bx > glyphmetrics[i].w) glyphmetrics[i].w = bx; // Treat width as right for now
+          if (by < glyphmetrics[i].y) glyphmetrics[i].y = by;
+          if (by > glyphmetrics[i].h) glyphmetrics[i].h = by; // Treat height as bottom for now
+        }
       }
+      if (glyphmetrics[i].x > glyphmetrics[i].w)
+        glyphmetrics[i].x = 0, glyphmetrics[i].y = 0,
+        glyphmetrics[i].w = 0, glyphmetrics[i].h = 0;
     }
     font->glyphs[i].x = glyphmetrics[i].x; // Save these metrics while x and y are still relative to each glyph
     font->glyphs[i].y = glyphmetrics[i].y;
@@ -205,7 +212,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
   for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
   {
-    printf("Add rectangle %d, which is of size %d x %d, to main cell of size %d x %d (%d, %d)\n", *i & 255, glyphmetrics[*i & 255].x, glyphmetrics[*i & 255].y, rectplane->wid, rectplane->hgt, w, h);
+    printf("Add rectangle %d, which is of size %d x %d, to main cell of size %d x %d (%d, %d)\n", *i & 255, glyphmetrics[*i & 255].w, glyphmetrics[*i & 255].h, rectplane->wid, rectplane->hgt, w, h);
     enigma::rect_packer::rectpnode *nn = enigma::rect_packer::rninsert(rectplane, *i & 0xFF, glyphmetrics);
     if (nn)
       enigma::rect_packer::rncopy(nn, glyphmetrics, *i & 0xFF),
@@ -224,7 +231,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   {
     for (int yy = 0; yy < glyphmetrics[i].h; yy++)
       for (int xx = 0; xx < glyphmetrics[i].w; xx++)
-        bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = glyphdata[i][gtw*(glyphy[i] + yy) + xx + glyphx[i]];
+        bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = ((unsigned int*)glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
     delete[] glyphdata[i];
     
     font->glyphs[i].tx = glyphmetrics[i].x / double(w);
@@ -232,5 +239,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
     font->glyphs[i].tx2 = (glyphmetrics[i].x + glyphmetrics[i].w) / double(w);
     font->glyphs[i].ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
   }
+  
+  font->texture = enigma::graphics_create_texture(w,h,bigtex);
   return idfont;
 }
