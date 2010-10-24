@@ -31,7 +31,7 @@ bool is_real(variant val);
 string chr(char val);
 
 int ord(char str);
-int ord(char* str);
+int ord(const char* str);
 int ord(string str);
 
 double real(string str);

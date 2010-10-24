@@ -54,9 +54,9 @@ string chr(char val){
 	return ret;
 }
 
-int ord(char str){return str;}
-int ord(char* str){return *str;}
-int ord(string str){return str[0];}
+int ord(char str)        { return str; }
+int ord(const char* str) { return *str; }
+int ord(string str)      { return str[0]; }
 
 double real(string str) { return atof(str.c_str()); }
 double real(char* str)  { return atof(str); }

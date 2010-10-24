@@ -25,44 +25,55 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <math.h>
+#include <string>
 #include "OpenGLHeaders.h"
-#include <stdio.h>
+#include "../../Universal_System/fontstruct.h"
 
-namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
+namespace enigma {
+  static int currentfont = -1;
+  extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;
+}
 
-namespace enigma
+using namespace enigma;
+using namespace std;
+
+void draw_text(int x,int y,string str)
 {
-  unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
-  {
-    GLuint texture;
-    printf("Texture %d x %d\n",fullwidth,fullheight);
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    return texture;
-  }
+  if (currentfont == -1)
+    return;
   
-  //Retrieve image data from a texture, in unsigned char, RGBA format.
-  unsigned char* graphics_get_texture_rgba(unsigned texture)
+  font *fnt = fontstructarray[currentfont];
+  
+  if (cur_bou_tha_noo_sho_eve_cha_eve != fnt->texture)
+    glBindTexture(GL_TEXTURE_2D, cur_bou_tha_noo_sho_eve_cha_eve = fnt->texture);
+  
+  int xx = x, yy = y;
+  for (unsigned i = 0; i < str.length(); i++)
   {
-    if (texture != enigma::cur_bou_tha_noo_sho_eve_cha_eve)
-      glBindTexture(GL_TEXTURE_2D, texture);
-    
-    int w,h;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
-    
-    unsigned char* ret = new unsigned char[(w*h) << 2];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
-    
-    if (texture != enigma::cur_bou_tha_noo_sho_eve_cha_eve)
-      glBindTexture(GL_TEXTURE_2D, enigma::cur_bou_tha_noo_sho_eve_cha_eve);
-    
-    return ret;
+    if (str[i] == '\r')
+      xx = x, yy += fnt->height, i += str[i+1] == '\n';
+    else if (str[i] == '\n')
+      xx = x, yy += fnt->height;
+    else
+    {
+      fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) & fnt->glyphcount];
+      glBegin(GL_QUADS);
+        glTexCoord2f(g.tx,  g.ty);
+          glVertex2i(x + g.x,  y + g.y);
+        glTexCoord2f(g.tx2, g.ty);
+          glVertex2i(x + g.x2, y + g.y);
+        glTexCoord2f(g.tx2, g.ty2);
+          glVertex2i(x + g.x2, y + g.y2);
+        glTexCoord2f(g.tx,  g.ty2);
+          glVertex2i(x + g.x,  y + g.y2);
+      glEnd();
+      xx += g.xs;
+    }
   }
+}
+
+void draw_set_font(int fnt)
+{
+  enigma::currentfont = fnt;
 }

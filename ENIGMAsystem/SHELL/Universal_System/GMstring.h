@@ -78,15 +78,15 @@ char cchr(double val)
 
 
 
-double ord(char str)
+int ord(char str)
 {
   return (double) str;
 }
-double ord(char* str)
+int ord(char char* str)
 {
   return (double) str[0];
 }
-double ord(string str)
+int ord(string str)
 {
   return (double) str[0];
 }

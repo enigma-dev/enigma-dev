@@ -378,7 +378,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   idpr("Starting compile (This may take a while...)", 30);
 
-  string gflags = "-O3 -s";
+  string gflags = "-g";
   string make = "Game ";
   
   string glinks   = extensions::targetAPI.windowLinks;

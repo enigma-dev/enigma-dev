@@ -60,6 +60,7 @@
     #include "Graphics_Systems/OpenGL/OPENGLStd.h"
 #include "Graphics_Systems/OpenGL/GSsprite.h"
 #include "Graphics_Systems/OpenGL/GSbackground.h"
+#include "Graphics_Systems/OpenGL/GSfont.h"
 #elif ENIGMA_GS_OPENGLES
 #include "Graphics_Systems/OpenGLES/OPENGLStd.h"
 #include "Graphics_Systems/OpenGLES/GSsprite.h"

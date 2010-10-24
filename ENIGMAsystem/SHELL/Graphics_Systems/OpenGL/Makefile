@@ -2,7 +2,7 @@
 
 .eobjs_$(MODE)/graphics_object.o: graphics_object.cpp graphics_object.h ../../Universal_System/planar_object.h ../../Universal_System/object.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/reflexive_types.h ../../Universal_System/multifunction_variant.h
 	g++ -c graphics_object.cpp		-o .eobjs_$(MODE)/graphics_object.o $(FLAGS)
-.eobjs_$(MODE)/GSbackground.o: GSbackground.cpp GSbackground.h OpenGLHeaders.h ../../Universal_System/backgroundstruct.h
+.eobjs_$(MODE)/GSbackground.o: GSbackground.cpp OpenGLHeaders.h ../../Universal_System/backgroundstruct.h
 	g++ -c GSbackground.cpp		-o .eobjs_$(MODE)/GSbackground.o $(FLAGS)
 .eobjs_$(MODE)/GSblend.o: GSblend.cpp OpenGLHeaders.h
 	g++ -c GSblend.cpp		-o .eobjs_$(MODE)/GSblend.o $(FLAGS)
@@ -12,13 +12,15 @@
 	g++ -c GSd3d.cpp		-o .eobjs_$(MODE)/GSd3d.o $(FLAGS)
 .eobjs_$(MODE)/GSenable.o: GSenable.cpp OpenGLHeaders.h
 	g++ -c GSenable.cpp		-o .eobjs_$(MODE)/GSenable.o $(FLAGS)
+.eobjs_$(MODE)/GSfont.o: GSfont.cpp OpenGLHeaders.h ../../Universal_System/fontstruct.h
+	g++ -c GSfont.cpp		-o .eobjs_$(MODE)/GSfont.o $(FLAGS)
 .eobjs_$(MODE)/GSmiscextra.o: GSmiscextra.cpp OpenGLHeaders.h
 	g++ -c GSmiscextra.cpp		-o .eobjs_$(MODE)/GSmiscextra.o $(FLAGS)
 .eobjs_$(MODE)/GSprmtvs.o: GSprmtvs.cpp OpenGLHeaders.h
 	g++ -c GSprmtvs.cpp		-o .eobjs_$(MODE)/GSprmtvs.o $(FLAGS)
 .eobjs_$(MODE)/GSscreen.o: GSscreen.cpp OpenGLHeaders.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h ../../Universal_System/instance_system.h ../../Universal_System/reflexive_types.h ../../Universal_System/object.h graphics_object.h ../../Universal_System/planar_object.h
 	g++ -c GSscreen.cpp		-o .eobjs_$(MODE)/GSscreen.o $(FLAGS)
-.eobjs_$(MODE)/GSsprite.o: GSsprite.cpp OpenGLHeaders.h ../../Universal_System/spritestruct.h
+.eobjs_$(MODE)/GSsprite.o: GSsprite.cpp OpenGLHeaders.h ../../Universal_System/spritestruct.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
 	g++ -c GSsprite.cpp		-o .eobjs_$(MODE)/GSsprite.o $(FLAGS)
 .eobjs_$(MODE)/GSstdraw.o: GSstdraw.cpp OpenGLHeaders.h
 	g++ -c GSstdraw.cpp		-o .eobjs_$(MODE)/GSstdraw.o $(FLAGS)
@@ -32,10 +34,10 @@
 mkObjDir:
 	-mkdir .eobjs_$(MODE)
 
-Run: mkObjDir .eobjs_Run/graphics_object.o .eobjs_Run/GSbackground.o .eobjs_Run/GSblend.o .eobjs_Run/GScolors.o .eobjs_Run/GSd3d.o .eobjs_Run/GSenable.o .eobjs_Run/GSmiscextra.o .eobjs_Run/GSprmtvs.o .eobjs_Run/GSscreen.o .eobjs_Run/GSsprite.o .eobjs_Run/GSstdraw.o .eobjs_Run/GSsurface.o .eobjs_Run/GStextures.o .eobjs_Run/OPENGLStd.o 
-Debug: mkObjDir .eobjs_Debug/graphics_object.o .eobjs_Debug/GSbackground.o .eobjs_Debug/GSblend.o .eobjs_Debug/GScolors.o .eobjs_Debug/GSd3d.o .eobjs_Debug/GSenable.o .eobjs_Debug/GSmiscextra.o .eobjs_Debug/GSprmtvs.o .eobjs_Debug/GSscreen.o .eobjs_Debug/GSsprite.o .eobjs_Debug/GSstdraw.o .eobjs_Debug/GSsurface.o .eobjs_Debug/GStextures.o .eobjs_Debug/OPENGLStd.o 
-Build: mkObjDir .eobjs_Build/graphics_object.o .eobjs_Build/GSbackground.o .eobjs_Build/GSblend.o .eobjs_Build/GScolors.o .eobjs_Build/GSd3d.o .eobjs_Build/GSenable.o .eobjs_Build/GSmiscextra.o .eobjs_Build/GSprmtvs.o .eobjs_Build/GSscreen.o .eobjs_Build/GSsprite.o .eobjs_Build/GSstdraw.o .eobjs_Build/GSsurface.o .eobjs_Build/GStextures.o .eobjs_Build/OPENGLStd.o 
-Release: mkObjDir .eobjs_Release/graphics_object.o .eobjs_Release/GSbackground.o .eobjs_Release/GSblend.o .eobjs_Release/GScolors.o .eobjs_Release/GSd3d.o .eobjs_Release/GSenable.o .eobjs_Release/GSmiscextra.o .eobjs_Release/GSprmtvs.o .eobjs_Release/GSscreen.o .eobjs_Release/GSsprite.o .eobjs_Release/GSstdraw.o .eobjs_Release/GSsurface.o .eobjs_Release/GStextures.o .eobjs_Release/OPENGLStd.o 
+Run: mkObjDir .eobjs_Run/graphics_object.o .eobjs_Run/GSbackground.o .eobjs_Run/GSblend.o .eobjs_Run/GScolors.o .eobjs_Run/GSd3d.o .eobjs_Run/GSenable.o .eobjs_Run/GSfont.o .eobjs_Run/GSmiscextra.o .eobjs_Run/GSprmtvs.o .eobjs_Run/GSscreen.o .eobjs_Run/GSsprite.o .eobjs_Run/GSstdraw.o .eobjs_Run/GSsurface.o .eobjs_Run/GStextures.o .eobjs_Run/OPENGLStd.o 
+Debug: mkObjDir .eobjs_Debug/graphics_object.o .eobjs_Debug/GSbackground.o .eobjs_Debug/GSblend.o .eobjs_Debug/GScolors.o .eobjs_Debug/GSd3d.o .eobjs_Debug/GSenable.o .eobjs_Debug/GSfont.o .eobjs_Debug/GSmiscextra.o .eobjs_Debug/GSprmtvs.o .eobjs_Debug/GSscreen.o .eobjs_Debug/GSsprite.o .eobjs_Debug/GSstdraw.o .eobjs_Debug/GSsurface.o .eobjs_Debug/GStextures.o .eobjs_Debug/OPENGLStd.o 
+Build: mkObjDir .eobjs_Build/graphics_object.o .eobjs_Build/GSbackground.o .eobjs_Build/GSblend.o .eobjs_Build/GScolors.o .eobjs_Build/GSd3d.o .eobjs_Build/GSenable.o .eobjs_Build/GSfont.o .eobjs_Build/GSmiscextra.o .eobjs_Build/GSprmtvs.o .eobjs_Build/GSscreen.o .eobjs_Build/GSsprite.o .eobjs_Build/GSstdraw.o .eobjs_Build/GSsurface.o .eobjs_Build/GStextures.o .eobjs_Build/OPENGLStd.o 
+Release: mkObjDir .eobjs_Release/graphics_object.o .eobjs_Release/GSbackground.o .eobjs_Release/GSblend.o .eobjs_Release/GScolors.o .eobjs_Release/GSd3d.o .eobjs_Release/GSenable.o .eobjs_Release/GSfont.o .eobjs_Release/GSmiscextra.o .eobjs_Release/GSprmtvs.o .eobjs_Release/GSscreen.o .eobjs_Release/GSsprite.o .eobjs_Release/GSstdraw.o .eobjs_Release/GSsurface.o .eobjs_Release/GStextures.o .eobjs_Release/OPENGLStd.o 
 
 clean:
 	$(CREMOVE).eobjs*$(SLASHC)*$(ENDCREMOVE)

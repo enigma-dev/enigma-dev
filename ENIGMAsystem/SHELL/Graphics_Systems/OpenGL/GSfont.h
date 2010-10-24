@@ -25,44 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "OpenGLHeaders.h"
-#include <stdio.h>
-
-namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
-
-namespace enigma
-{
-  unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
-  {
-    GLuint texture;
-    printf("Texture %d x %d\n",fullwidth,fullheight);
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    return texture;
-  }
-  
-  //Retrieve image data from a texture, in unsigned char, RGBA format.
-  unsigned char* graphics_get_texture_rgba(unsigned texture)
-  {
-    if (texture != enigma::cur_bou_tha_noo_sho_eve_cha_eve)
-      glBindTexture(GL_TEXTURE_2D, texture);
-    
-    int w,h;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
-    
-    unsigned char* ret = new unsigned char[(w*h) << 2];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
-    
-    if (texture != enigma::cur_bou_tha_noo_sho_eve_cha_eve)
-      glBindTexture(GL_TEXTURE_2D, enigma::cur_bou_tha_noo_sho_eve_cha_eve);
-    
-    return ret;
-  }
-}
+void draw_set_font(int fnt);
+void draw_text(int x,int y,string str);
+int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);
