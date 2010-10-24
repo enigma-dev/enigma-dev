@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -67,7 +68,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	private CodeHolder sDef, sGlobLoc, sInit, sClean;
 	private CustomFileChooser fc;
 
-	private JComboBox cbPlat;
+	private JComboBox targPlat, targGfx, targSound, targColl;
 	private JTextField tfAuth;
 	private JTextArea taDesc;
 
@@ -342,29 +343,67 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		GroupLayout plat = new GroupLayout(platPane);
 		platPane.setLayout(plat);
 
-		cbPlat = new JComboBox(EnigmaRunner.findTargets("Platforms").toArray());
-		cbPlat.addActionListener(this);
-		tfAuth = new JTextField();
+		String curPlat = EnigmaRunner.normalize(System.getProperty("os.name"));
+		targPlat = new JComboBox(EnigmaRunner.findTargets("Platforms",curPlat).toArray());
+		TargetSelection ts = (TargetSelection) targPlat.getSelectedItem();
+		String defPlat = ts == null ? null : ts.id;
+		targGfx = new JComboBox(EnigmaRunner.findTargets("Graphics_Systems",defPlat).toArray());
+		targSound = new JComboBox(EnigmaRunner.findTargets("Audio_Systems",defPlat).toArray());
+		targColl = new JComboBox(EnigmaRunner.findTargets("Collision_Systems",defPlat).toArray());
+		targPlat.addActionListener(this);
+		targGfx.addActionListener(this);
+		targSound.addActionListener(this);
+		targColl.addActionListener(this);
+
+		tfAuth = new JTextField(ts == null ? null : ts.auth);
+		taDesc = new JTextArea(ts == null ? null : ts.desc);
 		tfAuth.setEditable(false);
-		taDesc = new JTextArea();
 		taDesc.setEditable(false);
-		if (cbPlat.getModel().getSize() > 0) cbPlat.setSelectedIndex(0);
-		JLabel auth_label = new JLabel("Author: ");
+		taDesc.setLineWrap(true);
+		taDesc.setWrapStyleWord(true);
+
+		JLabel lPlat = new JLabel("Platform: ");
+		JLabel lGfx = new JLabel("Graphics: ");
+		JLabel lSound = new JLabel("Audio: ");
+		JLabel lColl = new JLabel("Collision: ");
+		JLabel lAuth = new JLabel("Author: ");
 		JScrollPane desc = new JScrollPane(taDesc);
 
 		int pref = GroupLayout.PREFERRED_SIZE;
 		layout.setHorizontalGroup(layout.createParallelGroup()
-		/**/.addComponent(cbPlat)
 		/**/.addGroup(layout.createSequentialGroup()
-		/*	*/.addComponent(auth_label)
+		/*	*/.addGroup(layout.createParallelGroup()
+		/*		*/.addComponent(lPlat)
+		/*		*/.addComponent(lGfx)
+		/*		*/.addComponent(lSound)
+		/*		*/.addComponent(lColl))
+		/*	*/.addPreferredGap(ComponentPlacement.RELATED)
+		/*	*/.addGroup(layout.createParallelGroup()
+		/*		*/.addComponent(targPlat)
+		/*		*/.addComponent(targGfx)
+		/*		*/.addComponent(targSound)
+		/*		*/.addComponent(targColl)))
+		/**/.addGroup(layout.createSequentialGroup()
+		/*	*/.addComponent(lAuth)
 		/*	*/.addPreferredGap(ComponentPlacement.RELATED)
 		/*	*/.addComponent(tfAuth))
 		/**/.addComponent(desc));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-		/**/.addComponent(cbPlat,pref,pref,pref)
+		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+		/*	*/.addComponent(lPlat)
+		/*	*/.addComponent(targPlat,pref,pref,pref))
+		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+		/*	*/.addComponent(lGfx)
+		/*	*/.addComponent(targGfx,pref,pref,pref))
+		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+		/*	*/.addComponent(lSound)
+		/*	*/.addComponent(targSound,pref,pref,pref))
+		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+		/*	*/.addComponent(lColl)
+		/*	*/.addComponent(targColl,pref,pref,pref))
 		/**/.addPreferredGap(ComponentPlacement.RELATED)
-		/**/.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-		/*	*/.addComponent(auth_label)
+		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+		/*	*/.addComponent(lAuth)
 		/*	*/.addComponent(tfAuth))
 		/**/.addPreferredGap(ComponentPlacement.RELATED)
 		/**/.addComponent(desc));
@@ -494,6 +533,15 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		es.globalLocals = sGlobLoc.getCode();
 		es.initialization = sInit.getCode();
 		es.cleanup = sClean.getCode();
+
+		TargetSelection ts = (TargetSelection) targPlat.getSelectedItem();
+		es.targetPlatform = (ts == null ? null : ts.id);
+		ts = (TargetSelection) targGfx.getSelectedItem();
+		es.targetGraphics = (ts == null ? null : ts.id);
+		ts = (TargetSelection) targSound.getSelectedItem();
+		es.targetSound = (ts == null ? null : ts.id);
+		ts = (TargetSelection) targColl.getSelectedItem();
+		es.targetCollision = (ts == null ? null : ts.id);
 		}
 
 	public void revertResource()
@@ -558,12 +606,21 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			return;
 			}
 
-		if (s == cbPlat)
+		if (s == targPlat || s == targGfx || s == targSound || s == targColl)
 			{
-			TargetSelection ts = (TargetSelection) cbPlat.getSelectedItem();
-			if (ts == null) return;
-			if (ts.auth != null) tfAuth.setText(ts.auth);
-			if (ts.desc != null) taDesc.setText(ts.desc);
+			TargetSelection ts = (TargetSelection) ((JComboBox) s).getSelectedItem();
+			if (s == targPlat)
+				{
+				String defPlat = ts == null ? null : ts.id;
+				targGfx.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Graphics_Systems",
+						defPlat).toArray()));
+				targSound.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Audio_Systems",
+						defPlat).toArray()));
+				targColl.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Collision_Systems",
+						defPlat).toArray()));
+				}
+			tfAuth.setText(ts == null ? null : ts.auth);
+			taDesc.setText(ts == null ? null : ts.desc);
 			return;
 			}
 		}

@@ -258,15 +258,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		}
 
 	//target is one of ""Platforms","Audio_Systems","Graphics_Systems","Collision_Systems"
-	static List<TargetSelection> findTargets(String target)
+	static List<TargetSelection> findTargets(String target, String current)
 		{
-		String platform = normalize(System.getProperty("os.name"));
 		ArrayList<TargetSelection> targets = new ArrayList<TargetSelection>();
+		if (current == null || current.isEmpty()) return targets;
 
 		File f = new File(LGM.workDir.getParentFile(),"ENIGMAsystem");
 		f = new File(f,"SHELL");
 		f = new File(f,target);
-		//also fetch "audio_systems" "graphics_systems" "collision_systems"
 		File files[] = f.listFiles();
 		for (File dir : files)
 			{
@@ -275,20 +274,43 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			File prop = new File(dir,"About.ey");
 			try
 				{
+				boolean match = false;
+
+				if (!target.equals("Platforms"))
+					{
+					String[] configs = new File(dir,"Config").list();
+					if (configs == null) continue;
+					for (String conf : configs)
+						if (conf.equals(current + ".ey"))
+							{
+							match = true;
+							break;
+							}
+					if (!match) continue;
+					}
+
 				YamlNode node = EYamlParser.parse(new Scanner(prop));
-				for (String s : normalize(node.getMC("Build-Platforms")).split(","))
-					if (platform.startsWith(s))
-						{
-						TargetSelection ps = new TargetSelection();
-						ps.name = node.getMC("Name");
-						ps.id = node.getMC("Identifier");
-						ps.rep = node.getMC("Represents",null);
-						ps.desc = node.getMC("Description",null);
-						ps.auth = node.getMC("Author",null);
-						ps.ext = node.getMC("Build-Extension",null);
-						targets.add(ps);
-						break;
-						}
+
+				if (target.equals("Platforms"))
+					{
+					for (String s : normalize(node.getMC("Build-Platforms")).split(","))
+						if (current.startsWith(s))
+							{
+							match = true;
+							break;
+							}
+					}
+
+				if (!match) continue;
+
+				TargetSelection ps = new TargetSelection();
+				ps.name = node.getMC("Name");
+				ps.id = node.getMC("Identifier");
+				ps.rep = node.getMC("Represents",null);
+				ps.desc = node.getMC("Description",null);
+				ps.auth = node.getMC("Author",null);
+				ps.ext = node.getMC("Build-Extension",null);
+				targets.add(ps);
 				}
 			catch (FileNotFoundException e)
 				{
@@ -315,7 +337,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
-	private static String normalize(String s)
+	static String normalize(String s)
 		{
 		return s.toLowerCase().replaceAll("[ _\\-]","");
 		}

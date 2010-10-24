@@ -24,6 +24,8 @@ public class EnigmaSettings
 	public String definitions = "", globalLocals = "";
 	public String initialization = "", cleanup = "";
 
+	public String targetPlatform, targetGraphics, targetSound, targetCollision;
+
 	public EnigmaSettings()
 		{
 		this(true);
@@ -90,6 +92,11 @@ public class EnigmaSettings
 		es.globalLocals = globalLocals;
 		es.initialization = initialization;
 		es.cleanup = cleanup;
+
+		es.targetPlatform = targetPlatform;
+		es.targetGraphics = targetGraphics;
+		es.targetSound = targetSound;
+		es.targetCollision = targetCollision;
 		return es;
 		}
 	}
