@@ -22,12 +22,17 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
+import org.enigma.EnigmaRunner.TargetSelection;
 import org.enigma.backend.EnigmaSettings;
 import org.lateralgm.compare.CollectionComparator;
 import org.lateralgm.compare.MapComparator;
@@ -61,6 +66,10 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	private CodeFrame cfDef, cfGlobLoc, cfInit, cfClean;
 	private CodeHolder sDef, sGlobLoc, sInit, sClean;
 	private CustomFileChooser fc;
+
+	private JComboBox cbPlat;
+	private JTextField tfAuth;
+	private JTextArea taDesc;
 
 	class SimpleCodeHolder implements CodeHolder
 		{
@@ -244,7 +253,6 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		JTabbedPane tabs = new JTabbedPane();
 		tabs.add("General",makeSettings());
 		tabs.add("API",makeAPI());
-		//		add(makeSettings(),BorderLayout.CENTER);
 		add(tabs,BorderLayout.CENTER);
 		pack();
 		}
@@ -334,12 +342,32 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		GroupLayout plat = new GroupLayout(platPane);
 		platPane.setLayout(plat);
 
-		JComboBox cb = new JComboBox(EnigmaRunner.findTargets("Platforms").toArray());
+		cbPlat = new JComboBox(EnigmaRunner.findTargets("Platforms").toArray());
+		cbPlat.addActionListener(this);
+		tfAuth = new JTextField();
+		tfAuth.setEditable(false);
+		taDesc = new JTextArea();
+		taDesc.setEditable(false);
+		if (cbPlat.getModel().getSize() > 0) cbPlat.setSelectedIndex(0);
+		JLabel auth_label = new JLabel("Author: ");
+		JScrollPane desc = new JScrollPane(taDesc);
 
+		int pref = GroupLayout.PREFERRED_SIZE;
 		layout.setHorizontalGroup(layout.createParallelGroup()
-		/**/.addComponent(cb));
+		/**/.addComponent(cbPlat)
+		/**/.addGroup(layout.createSequentialGroup()
+		/*	*/.addComponent(auth_label)
+		/*	*/.addPreferredGap(ComponentPlacement.RELATED)
+		/*	*/.addComponent(tfAuth))
+		/**/.addComponent(desc));
 		layout.setVerticalGroup(layout.createSequentialGroup()
-		/**/.addComponent(cb));
+		/**/.addComponent(cbPlat,pref,pref,pref)
+		/**/.addPreferredGap(ComponentPlacement.RELATED)
+		/**/.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+		/*	*/.addComponent(auth_label)
+		/*	*/.addComponent(tfAuth))
+		/**/.addPreferredGap(ComponentPlacement.RELATED)
+		/**/.addComponent(desc));
 
 		return p;
 		}
@@ -527,6 +555,15 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 				if (cfClean == null) cfClean = newCodeFrame(sClean,"Enigma Cleanup");
 				cfClean.toTop();
 				}
+			return;
+			}
+
+		if (s == cbPlat)
+			{
+			TargetSelection ts = (TargetSelection) cbPlat.getSelectedItem();
+			if (ts == null) return;
+			if (ts.auth != null) tfAuth.setText(ts.auth);
+			if (ts.desc != null) taDesc.setText(ts.desc);
 			return;
 			}
 		}

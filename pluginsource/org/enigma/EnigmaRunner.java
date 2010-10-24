@@ -273,7 +273,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			if (!dir.isDirectory()) continue;
 			//technically this could stand to be a .properties file, rather than e-yaml
 			File prop = new File(dir,"About.ey");
-			System.out.println(prop);
 			try
 				{
 				YamlNode node = EYamlParser.parse(new Scanner(prop));
@@ -307,7 +306,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	static class TargetSelection
 		{
-		String name, id, rep, desc, auth, ext;
+		public String name, id; //mandatory
+		public String rep, desc, auth, ext; //optional
 
 		public String toString()
 			{
