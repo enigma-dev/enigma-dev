@@ -889,8 +889,8 @@ pt parse_cfile(my_string cftext)
                   //This means we're at "struct named_earlier <{> ... }"
                   if (!last_type->members.empty())
                   {
-                    cferr = "Attempting to redeclare struct `"+last_type->name+"'";
-                    return pos;
+                    //cferr = "Attempting to redeclare struct `"+last_type->name+"'";
+                    //return pos;
                   }
                   else
                   {

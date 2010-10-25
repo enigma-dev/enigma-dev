@@ -239,18 +239,22 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   bool indecl = 0, deceq = 0;
   string dtype, dname, dpre, dsuf;
   int inbrack = 0;
+  bool justnewd = true;
   
   for (pt pos = 0; pos < synt.length(); pos++)
   {
     if (synt[pos] == 't')
     {
-      pt spos = pos;
-      while (synt[++pos] == 't');
-      pos += parser_fix_templates(code,pos,spos,&synt);
-      indecl = true; dtype = code.substr(spos,pos-spos);
-      dpre = dsuf = "";
-      cout << "TYPE[" << dtype << "]" << endl;
-      pos--; continue;
+      if (!indecl or !justnewd)
+      {
+        pt spos = pos;
+        while (synt[++pos] == 't');
+        pos += parser_fix_templates(code,pos,spos,&synt);
+        indecl = true; dtype = code.substr(spos,pos-spos);
+        dpre = dsuf = "";
+        cout << "TYPE[" << dtype << "]" << endl;
+        pos--; continue;
+      }
     }
     else if (synt[pos] == '.' and synt[pos+1] == 'n')
     {
@@ -345,7 +349,8 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           dpre += "*", inbrack++; // Call it what you will. Knowing how many [] there are is unnecessary.
         break;
       case ']':
-        inbrack--;
+        if (inbrack)
+          inbrack--;
         break;
       case ';':
       case ',':

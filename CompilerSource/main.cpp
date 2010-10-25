@@ -176,7 +176,7 @@ dllexport syntax_error *whitespaceModified(const char* wscode)
   exp_typeof_init(); // Set up token info for the type coercion module.
   
   cout << "Dumping whiteSpace definitions...";
-  FILE *of = fopen("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h","wb");
+  FILE *of = wscode ? fopen("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h","wb") : NULL;
   if (of) fputs(wscode,of), fclose(of);
   
   cout << "Opening ENIGMA for parse..." << flushl;

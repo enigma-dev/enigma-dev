@@ -25,37 +25,27 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <stdio.h>
-#include <iostream>
-#include "../../backend/ideprint.h"
-
-using namespace std;
-
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
-
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../../parser/object_storage.h"
-#include "../compile_common.h"
-#include "../event_reader/event_parser.h"
-
-int compile_parseSecondary(map<int,parsed_object*> &parsed_objects,parsed_script* scripts[], int scrcount,parsed_object* EGMglobal)
+namespace enigma
 {
-  // Dump our list of dot-accessed locals
-  dot_accessed_locals.clear();
-  
-  // Give all objects and events a second pass
-  for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
+  namespace rect_packer
   {
-    parsed_object *ito = it->second;
-    for (unsigned iit = 0; iit < ito->events.size; iit++)
-      parser_secondary(ito->events[iit].code,ito->events[iit].synt,EGMglobal,it->second);
+    struct pvrect {
+      int x,y,w,h, placed;
+      pvrect(); pvrect(int a,int b,int c,int d,int e);
+    };
+    
+    struct rectpnode
+    {
+      rectpnode* child[2];
+      int x,y,wid,hgt;
+      int c;
+      rectpnode();
+      rectpnode(int xx,int yy,int w,int h,rectpnode* c1=NULL,rectpnode* c2=NULL);
+      void rect(int xx, int yy, int w, int h);
+    };
+    
+    void rncopy(rectpnode *h, pvrect *boxes, unsigned char c);
+    rectpnode *rninsert(rectpnode* who, unsigned char c, pvrect* boxes);
+    rectpnode *expand(rectpnode* who, int w, int h);
   }
-  
-  for (int i = 0; i < scrcount; i++)
-    parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj);
-  
-  return 0;
 }
-

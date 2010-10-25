@@ -193,8 +193,15 @@ void onode_from_dectrip(onode& x, const dectrip& y)
     tts = "var";
   else
   {
-    pt pos = y.type.length();
-    while (pos > 0 and !is_letterd(y.type[pos])) pos--;
+    int tbc = 0; // Triangle bracket count
+    pt pos = y.type.length(); // Iteration position, as always
+    while (pos > 0 and (tbc or !is_letterd(y.type[pos]))) // Skip to the last type name on the list, which will be before any <>s
+    {
+      if (tts[pos] == '>') tbc++;
+      else if (tts[pos] == '<') tbc--;
+      pos--;
+    }
+    
     const pt epos = pos;
     while (pos > 0 and is_letterd(y.type[--pos]));
     if (!is_letter(y.type[pos])) pos++;

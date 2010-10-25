@@ -41,6 +41,8 @@ namespace ass
 #include <cstdio>
 #include <cmath>
 
+#include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
+
 using namespace std;
 
 //#include "../../ENIGMAsystem/SHELL/SHELLmain.cpp"

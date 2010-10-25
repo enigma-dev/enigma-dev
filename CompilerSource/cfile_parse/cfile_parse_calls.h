@@ -204,7 +204,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
                 ext_retriever_var->flags |= EXTFLAG_C99_STRUCT;
                 return 1;
               }
-                
+              return 1;
               cferr = "Redeclaration of `"+name+"' at this point";
               return 0;
             }

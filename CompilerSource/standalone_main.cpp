@@ -214,12 +214,12 @@ struct syntax_error {
   y,int a, string s);
 };
 int libInit(struct EnigmaCallbacks* ecs);
-syntax_error whitespaceModified(const char*);
+syntax_error *whitespaceModified(const char*);
 
 int main(int argc, char* argv[])
 {
   libInit(NULL);
-  whitespaceModified("");
+  whitespaceModified(NULL);
   mainr(argc,argv);
   getchar();
   return 0;

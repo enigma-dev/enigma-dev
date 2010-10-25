@@ -30,7 +30,7 @@ int link_globals(parsed_object*, EnigmaStruct*,parsed_script*[]);
 
 // IDE_EDITABLEs added before compile
 int compile_parseAndLink(EnigmaStruct*,parsed_script*[]);
-int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],parsed_object*);
+int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,parsed_object*);
 int compile_writeGlobals(EnigmaStruct*,parsed_object*);
 int compile_writeObjectData(EnigmaStruct*,parsed_object*);
 int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*);
