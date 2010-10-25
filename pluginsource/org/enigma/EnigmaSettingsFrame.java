@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2008, 2009 IsmAvatar <IsmAvatar@gmail.com>
+ * 
+ * This file is part of Enigma Plugin.
+ * 
+ * Enigma Plugin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Enigma Plugin is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License (COPYING) for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.enigma;
 
 import java.awt.BorderLayout;
@@ -418,8 +437,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			{
 			if (fc.showOpenDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			if (fc.getSelectedFile().exists()) break;
-			JOptionPane.showMessageDialog(null,
-					fc.getSelectedFile().getName() + Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
+			JOptionPane.showMessageDialog(null,fc.getSelectedFile().getName()
+					+ Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
 					"File to load information from",JOptionPane.WARNING_MESSAGE);
 			}
 		try
@@ -631,8 +650,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			{
 			if (resourceChanged())
 				{
-				int ret = JOptionPane.showConfirmDialog(LGM.frame,
-						Messages.format("ResourceFrame.KEEPCHANGES","Enigma Settings"), //$NON-NLS-1$
+				int ret = JOptionPane.showConfirmDialog(LGM.frame,Messages.format(
+						"ResourceFrame.KEEPCHANGES","Enigma Settings"), //$NON-NLS-1$
 						Messages.getString("ResourceFrame.KEEPCHANGES_TITLE"),JOptionPane.YES_NO_CANCEL_OPTION); //$NON-NLS-1$
 				if (ret == JOptionPane.YES_OPTION)
 					{
