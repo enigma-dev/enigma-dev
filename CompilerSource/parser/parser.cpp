@@ -239,22 +239,21 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   bool indecl = 0, deceq = 0;
   string dtype, dname, dpre, dsuf;
   int inbrack = 0;
-  bool justnewd = true;
   
   for (pt pos = 0; pos < synt.length(); pos++)
   {
     if (synt[pos] == 't')
     {
-      if (!indecl or !justnewd)
+      pt spos = pos;
+      while (synt[++pos] == 't');
+      pos += parser_fix_templates(code,pos,spos,&synt);
+      if (!indecl or !deceq) // If we're not in a declaration; or we are, but are not to the right of an =.
       {
-        pt spos = pos;
-        while (synt[++pos] == 't');
-        pos += parser_fix_templates(code,pos,spos,&synt);
         indecl = true; dtype = code.substr(spos,pos-spos);
         dpre = dsuf = "";
         cout << "TYPE[" << dtype << "]" << endl;
-        pos--; continue;
       }
+      pos--; continue;
     }
     else if (synt[pos] == '.' and synt[pos+1] == 'n')
     {
@@ -361,6 +360,9 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           if (synt[pos] == ';') indecl = false;
           deceq = false;
         }
+        break;
+      case '=':
+        deceq |= indecl;
         break;
       case 'n':
           if (!inbrack and !deceq) {
