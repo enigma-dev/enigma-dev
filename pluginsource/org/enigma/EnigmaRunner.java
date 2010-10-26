@@ -281,7 +281,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					String[] configs = new File(dir,"Config").list();
 					if (configs == null) continue;
 					for (String conf : configs)
-						if (conf.equals(current + ".ey"))
+						if (conf.equalsIgnoreCase(current + ".ey"))
 							{
 							match = true;
 							break;
