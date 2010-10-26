@@ -35,10 +35,17 @@
 using namespace std;
 
 /**
-  This file implements a copy-on-write, Lua-table-like structure. It borrows ideas
-  not only from Lua, but from STL containers. It also borrows the entirety of map.
-  This should be replaced with a sparse hash map container when it's a "good time"
-  to do so.
+  This file implements a Lua-table-like structure. It borrows ideas not only from 
+  Lua, but from STL containers. It also borrows the entirety of std::map. This should
+  be replaced with a sparse hash map container when it's a "good time" to do so.
+  
+  By ENIGMA-defined standard, this table class takes up sizeof(void*) bytes. The class
+  itself contains a single pointer to a dense part (dynamic array). This ctually points
+  to a fixed-length position from the beginning of an allocated block. At the beginning
+  of this block is precisely enough room for the table's map component. The implication
+  is that the dense segment can be dereferenced without additional arithmetic (by unary
+  operator*), while the map section requires taking dense[-sizeof(map)],  where `dense`
+  has been cast to char*, then casting back to maptype*.
 */
 
 template <class T> struct lua_table
@@ -124,13 +131,19 @@ template <class T> struct lua_table
     
     // Restore our map
     new(databuf) lua_map_type(); // Recreate our map
-    base_map(databuf).swap(tmp); // Move our old content into it
+    lua_map_type& nmap = base_map(databuf); // Reference our new map
+    nmap.swap(tmp); // Move our old content into it
     // I know this looks like tail-chasing, but map<> WILL segfault otherwise. I can't tell why.
     
     // Finish our move
     dense = base_to_TA(databuf);   // Get back our array pointer
     new(dense + dense_size) T[c - dense_size]; // Construct new array elements
     
+    for (shiterator i = nmap.begin(); i != nmap.end(); ) {
+      if (i->first >= c) break;
+      dense[i->first] = i->second;
+      nmap.erase(i++);
+    }
     TA_length(dense) = c;    // Store new alloc size for dense array
   }
   
@@ -152,7 +165,7 @@ template <class T> struct lua_table
     return dense[ind];
   }
   T& operator*() {
-    return dense[0];
+    return *dense;
   }
   
   lua_table<T>& operator= (const lua_table<T>& x)
