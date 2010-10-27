@@ -103,6 +103,16 @@ namespace enigma
       enigma::keybdstatus[i]=0;
     }
   }
+  
+  void input_push()
+  {
+    for(int i=0;i<3;i++){
+      enigma::last_mousestatus[i] = enigma::mousestatus[i];
+    }
+    for(int i=0;i<256;i++){
+      enigma::last_keybdstatus[i] = enigma::keybdstatus[i];
+    }
+  }
 }
 
 int main(int argc,char** argv)
@@ -198,6 +208,7 @@ int main(int argc,char** argv)
 				return 0;
 			}
 		enigma::ENIGMA_events();
+		enigma::input_push();
 	}
 }
 
