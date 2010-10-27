@@ -1,5 +1,5 @@
 %e-yaml
 ---
 
-Links: -lopengl32
+Links: -lopengl32 -lglu32
 

@@ -33,11 +33,7 @@ int sleep(int millis);
 void enigma_catchmouse_backend(bool x);
 
 #define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
-
-
-#if WINDOWLIB
-#include"WINDOWSwindow.h"
-#endif
+#include "WINDOWSwindow.h"
 
 #if FONTPOLYS
 #include "WINDOWSfonts.h"

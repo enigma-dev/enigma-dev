@@ -13,5 +13,5 @@ Build-Extension: .exe
 Run-Program: $game
 Run-Params:
 
-Links: '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/windows/ffi/libFFI.a' -lcomdlg32 -lgdi32
+Links: '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/Win32/ffi/libFFI.a' -lcomdlg32 -lgdi32
 

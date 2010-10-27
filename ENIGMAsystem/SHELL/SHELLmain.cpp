@@ -58,23 +58,23 @@
 #include "Platforms/platforms_mandatory.h"
 #if ENIGMA_GS_OPENGL
     #include "Graphics_Systems/OpenGL/OPENGLStd.h"
-#include "Graphics_Systems/OpenGL/GSsprite.h"
-#include "Graphics_Systems/OpenGL/GSbackground.h"
-#include "Graphics_Systems/OpenGL/GSfont.h"
+    #include "Graphics_Systems/OpenGL/GSsprite.h"
+    #include "Graphics_Systems/OpenGL/GSbackground.h"
+    #include "Graphics_Systems/OpenGL/GSfont.h"
 #elif ENIGMA_GS_OPENGLES
-#include "Graphics_Systems/OpenGLES/OPENGLStd.h"
-#include "Graphics_Systems/OpenGLES/GSsprite.h"
+    #include "Graphics_Systems/OpenGLES/OPENGLStd.h"
+    #include "Graphics_Systems/OpenGLES/GSsprite.h"
 #endif
-#if ENIGMA_WS_WINDOWS != 0
+#if ENIGMA_WS_WIN32 != 0
     #include "Platforms/Win32/WINDOWSStd.h"
 #elif ENIGMA_WS_XLIB != 0
     #include "Platforms/xlib/XLIBwindow.h"
 #elif ENIGMA_WS_COCOA != 0
-#include "Platforms/Cocoa/CocoaWindow.h"
+    #include "Platforms/Cocoa/CocoaWindow.h"
 #elif ENIGMA_WS_IPHONE != 0
-#include "Platforms/iPhone/CocoaWindow.h"
+    #include "Platforms/iPhone/CocoaWindow.h"
 #elif ENIGMA_WS_ANDROID != 0
-#include "Platforms/Android/AndroidWindow.h"
+    #include "Platforms/Android/AndroidWindow.h"
 #endif
 
 

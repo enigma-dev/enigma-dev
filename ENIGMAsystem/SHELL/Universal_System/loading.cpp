@@ -55,9 +55,7 @@ namespace enigma
     
     graphicssystem_initialize();
     audiosystem_initialize();
-    #if ENIGMA_WS_WINDOWS!=0
-      enigma::init_fonts();
-    #endif
+    
     #if BUILDMODE
       buildmode::buildinit();
     #endif

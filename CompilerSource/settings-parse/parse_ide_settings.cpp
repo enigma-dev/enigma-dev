@@ -43,15 +43,23 @@ inline string tolower(string x) {
   return x;
 }
 
+//#include "../backend/ideprint.h"
+//#include "../backend/JavaCallbacks.h"
+
+#define user cout << "\n\n\n\n\n"
+#define flushl "\n\n\n\n\n"
+
 void parse_ide_settings(const char* eyaml)
 {
   ey_data settree = parse_eyaml_str(eyaml);
   eyit it;
   
+  //ide_dia_open();
+  
   #define ey_cp(v,x,y) \
   it = settree.find("target-" #x); \
   if (it == settree.end()) { \
-     cout << "ERROR! IDE has not specified a target " #x " " #y "!" << endl; \
+     user << "ERROR! IDE has not specified a target " #x " " #y "!" << flushl; \
      extensions::targetAPI.v ## Sys = ""; \
   } else  extensions::targetAPI.v ## Sys = eyscalar(it);
   
@@ -68,16 +76,32 @@ void parse_ide_settings(const char* eyaml)
   
   ifstream ifs; string eyname;
   ifs.open((eyname = "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/About.ey").c_str());
-  if (ifs.is_open()) { ey_data l = parse_eyaml(ifs, eyname.c_str());
-    it = l.find("links"); if (it != l.end()) extensions::targetAPI.windowLinks = eyscalar(it);
+  if (ifs.is_open())
+  {
+    ey_data l = parse_eyaml(ifs, eyname.c_str());
+    it = l.find("links");
+    if (it != l.end())
+      extensions::targetAPI.windowLinks = eyscalar(it);
     ifs.close();
   }
   string platn = tolower(extensions::targetAPI.windowSys);
+  
   #define eygl(fn,v) \
-  ifs.open((eyname = "ENIGMAsystem/SHELL/" #fn "/" + extensions::targetAPI.v ## Sys + "/Config/" + platn + ".ey").c_str()); \
-  if (ifs.is_open()) { ey_data l = parse_eyaml(ifs, eyname.c_str()); cout << "Opened " << eyname << endl; \
-    it = l.find("links"); if (it != l.end()) extensions::targetAPI.v ## Links = eyscalar(it); else cout << "Links not named in " << eyname << endl; ifs.close(); \
-  } else cout << "Could not open " << eyname << ".\n";
+  {\
+    ifstream ifs((eyname = "ENIGMAsystem/SHELL/" #fn "/" + extensions::targetAPI.v ## Sys + "/Config/" + platn + ".ey").c_str()); \
+    if (ifs.is_open()) \
+    { \
+      ey_data l = parse_eyaml(ifs, eyname.c_str()); \
+      user << "Opened " << eyname << flushl; \
+      if ((it = l.find("links")) != l.end()) \
+        extensions::targetAPI.v ## Links = eyscalar(it); \
+      else \
+        user << "Links not named in " << eyname << flushl; \
+      ifs.close(); \
+    } \
+    else user << "Could not open " << eyname << ".\n"; \
+  }
+  
   eygl(Graphics_Systems, graphics);
   eygl(Audio_Systems, audio);
 }

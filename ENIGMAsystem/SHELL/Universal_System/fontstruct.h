@@ -30,16 +30,15 @@ namespace enigma
 {
   struct fontglyph
   {
-    float
-      x, y, x2, y2, // Draw coordinates, relative to the top-left corner of a full glyph. Added to xx and yy for draw.
-      tx, ty, tx2, ty2, // Texture coords: used to locate glyph on bound font texture
-      xs; // Spacing: used to increment xx
+    int   x,  y,  x2,  y2; // Draw coordinates, relative to the top-left corner of a full glyph. Added to xx and yy for draw.
+    float tx, ty, tx2, ty2; // Texture coords: used to locate glyph on bound font texture
+    int   xs; // Spacing: used to increment xx
   };
   struct font
   {
     unsigned char glyphstart, glyphcount;
     fontglyph *glyphs;
-    float height;
+    int height;
     unsigned int texture;
   };
   extern font **fontstructarray;
