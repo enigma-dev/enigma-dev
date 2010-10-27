@@ -152,16 +152,10 @@ extern void print_definition(string n);
 static bool firstpass = true;
 extern externs *enigma_type__var, *enigma_type__variant;
 
-dllexport syntax_error *whitespaceModified(const char* wscode)
+dllexport syntax_error *whitespaceModified(const char* wscode, const char* targetYaml)
 {
   cout << "Parsing settings..." << flushl;
-    parse_ide_settings((string() +
-      "%e-yaml\n"
-      "---\n"
-      "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n"
-      "target-graphics: OpenGL\n"
-      "target-audio: OpenAL\n"
-      ).c_str());
+    parse_ide_settings(targetYaml);
   cout << "Clearing IDE editables... " << flushs;
     clear_ide_editables();
   cout << "Clearance checked." << flushl;

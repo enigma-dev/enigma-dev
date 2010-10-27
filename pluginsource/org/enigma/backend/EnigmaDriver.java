@@ -25,7 +25,7 @@ public interface EnigmaDriver extends Library
 
 	public int gccDefinePath(String path);
 
-	public SyntaxError whitespaceModified(String wscode);
+	public SyntaxError definitionsModified(String wscode, String yaml);
 
 	/** @param scriptNames (StringArray) */
 	public SyntaxError syntaxCheck(int scriptCount, Pointer scriptNames, String code);

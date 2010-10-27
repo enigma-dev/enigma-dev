@@ -135,9 +135,17 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 					ENIGMA_READY = true;
 					initEnigmaLib();
-					if (GCC_LOCATED) DRIVER.whitespaceModified(es.definitions);
+					if (GCC_LOCATED) DRIVER.definitionsModified(es.definitions,targetYaml(es));
 					}
 			}.start();
+		}
+
+	public static String targetYaml(EnigmaSettings es)
+		{
+		return "%e-yaml\n---\n"//
+				+ "target-windowing: " + es.targetPlatform + "\n"//
+				+ "target-graphics: " + es.targetGraphics + "\n"//
+				+ "target-audio: " + es.targetSound + "\n";//
 		}
 
 	private UnsatisfiedLinkError attemptLib()

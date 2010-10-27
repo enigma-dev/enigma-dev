@@ -437,8 +437,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			{
 			if (fc.showOpenDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			if (fc.getSelectedFile().exists()) break;
-			JOptionPane.showMessageDialog(null,fc.getSelectedFile().getName()
-					+ Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
+			JOptionPane.showMessageDialog(null,
+					fc.getSelectedFile().getName() + Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
 					"File to load information from",JOptionPane.WARNING_MESSAGE);
 			}
 		try
@@ -460,7 +460,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 				{
 				es.definitions = sDef.getCode();
 				es.saveDefinitions();
-				if (EnigmaRunner.GCC_LOCATED) EnigmaRunner.DRIVER.whitespaceModified(es.definitions);
+				if (EnigmaRunner.GCC_LOCATED)
+					EnigmaRunner.DRIVER.definitionsModified(es.definitions,EnigmaRunner.targetYaml(es));
 				}
 			es.globalLocals = readStr(i);
 			es.initialization = readStr(i);
@@ -650,8 +651,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			{
 			if (resourceChanged())
 				{
-				int ret = JOptionPane.showConfirmDialog(LGM.frame,Messages.format(
-						"ResourceFrame.KEEPCHANGES","Enigma Settings"), //$NON-NLS-1$
+				int ret = JOptionPane.showConfirmDialog(LGM.frame,
+						Messages.format("ResourceFrame.KEEPCHANGES","Enigma Settings"), //$NON-NLS-1$
 						Messages.getString("ResourceFrame.KEEPCHANGES_TITLE"),JOptionPane.YES_NO_CANCEL_OPTION); //$NON-NLS-1$
 				if (ret == JOptionPane.YES_OPTION)
 					{
@@ -686,7 +687,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 					{
 					es.definitions = sDef.getCode();
 					es.saveDefinitions();
-					if (EnigmaRunner.GCC_LOCATED) EnigmaRunner.DRIVER.whitespaceModified(es.definitions);
+					if (EnigmaRunner.GCC_LOCATED)
+						EnigmaRunner.DRIVER.definitionsModified(es.definitions,EnigmaRunner.targetYaml(es));
 					}
 				cfDef = null;
 				}

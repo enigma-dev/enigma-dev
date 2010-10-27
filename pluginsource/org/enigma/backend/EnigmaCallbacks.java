@@ -27,7 +27,8 @@ public class EnigmaCallbacks extends Structure
 	public Callback cop = new OutputProgress(); //void (*cop) (int)
 	public Callback cot = new OutputTip(); //void (*cot) (String)
 	public Callback cof = new OpenFile(); //void (*cof) (String)
-	public Callback ccf = new CloseFile(); //void (*ccf) ()
+	public Callback ccf = new CloseFile(); //void (*ccf) (void)
+//	public Callback ccd = new CompressData(); //void (*ccd) ()
 
 	public EnigmaCallbacks(EnigmaFrame ef)
 		{
@@ -178,4 +179,24 @@ public class EnigmaCallbacks extends Structure
 			OpenFile.running = false;
 			}
 		}
+
+	/*public static class CompressData implements Callback
+		{
+		public int callback(byte[] inData, int size, ByteBuffer outData)
+			{
+			Deflater compresser = new Deflater();
+			compresser.setInput(inData,0,size);
+			compresser.finish();
+			byte[] buffer = new byte[100];
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			while (!compresser.finished())
+				{
+				int len = compresser.deflate(buffer);
+				baos.write(buffer,0,len);
+				}
+			baos.toByteArray();
+
+			return baos.size();
+			}
+		}*/
 	}
