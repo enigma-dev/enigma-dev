@@ -29,14 +29,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 
@@ -60,12 +58,10 @@ import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.enigma.EYamlParser.YamlNode;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaSettings;
-import org.enigma.backend.EnigmaSettings.TargetSelection;
 import org.enigma.backend.EnigmaStruct;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
@@ -258,80 +254,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		return ret;
 		}
 
-	//target is one of ""Platforms","Audio_Systems","Graphics_Systems","Collision_Systems"
-	static List<TargetSelection> findTargets(String target, String current)
-		{
-		ArrayList<TargetSelection> targets = new ArrayList<TargetSelection>();
-		if (current == null || current.isEmpty()) return targets;
-
-		File f = new File(LGM.workDir.getParentFile(),"ENIGMAsystem");
-		f = new File(f,"SHELL");
-		f = new File(f,target);
-		File files[] = f.listFiles();
-		for (File dir : files)
-			{
-			if (!dir.isDirectory()) continue;
-			//technically this could stand to be a .properties file, rather than e-yaml
-			File prop = new File(dir,"About.ey");
-			try
-				{
-				boolean match = false;
-
-				if (!target.equals("Platforms"))
-					{
-					String[] configs = new File(dir,"Config").list();
-					if (configs == null) continue;
-					for (String conf : configs)
-						if (conf.equalsIgnoreCase(current + ".ey"))
-							{
-							match = true;
-							break;
-							}
-					if (!match) continue;
-					}
-
-				YamlNode node = EYamlParser.parse(new Scanner(prop));
-
-				if (target.equals("Platforms"))
-					{
-					for (String s : normalize(node.getMC("Build-Platforms")).split(","))
-						if (current.startsWith(s))
-							{
-							match = true;
-							break;
-							}
-					}
-
-				if (!match) continue;
-
-				TargetSelection ps = new TargetSelection();
-				ps.name = node.getMC("Name");
-				ps.id = node.getMC("Identifier");
-				ps.rep = node.getMC("Represents",null);
-				ps.desc = node.getMC("Description",null);
-				ps.auth = node.getMC("Author",null);
-				ps.ext = node.getMC("Build-Extension",null);
-				targets.add(ps);
-				}
-			catch (FileNotFoundException e)
-				{
-				//yaml file missing, skip to next file
-				}
-			catch (IndexOutOfBoundsException e)
-				{
-				//insufficient yaml, skip to next file
-				}
-			}
-		//if not empty, we may safely assume that the first one is the default selection,
-		//or technically, that any of them is the default. The user can/will change it in UI.
-		return targets;
-		}
-
-	static String normalize(String s)
-		{
-		return s.toLowerCase().replaceAll("[ _\\-]","");
-		}
-
 	public void populateMenu()
 		{
 		JMenu menu = new JMenu("Enigma");
@@ -416,7 +338,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		 */
 		catch (NoClassDefFoundError e)
 			{
-			String error = "Auto-update disabled: SvnKit missing, corrupted, or unusable."
+			String error = "Auto-update disabled: SvnKit missing, corrupted, or unusable. "
 					+ "Please download to plugins/shared/svnkit.jar in order to enable auto-update.";
 			System.err.println(error);
 			return false;

@@ -31,7 +31,7 @@ import java.util.Scanner;
 
 public class EYamlParser
 	{
-	static YamlNode parse(Scanner sc)
+	public static YamlNode parse(Scanner sc)
 		{
 		Deque<YamlNode> v = new ArrayDeque<YamlNode>();
 		YamlNode b = new YamlNode(); // base ymlnode from which all life springs forth

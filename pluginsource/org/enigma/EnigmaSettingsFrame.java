@@ -362,20 +362,17 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		GroupLayout plat = new GroupLayout(platPane);
 		platPane.setLayout(plat);
 
-		String curPlat = EnigmaRunner.normalize(System.getProperty("os.name"));
-		targPlat = new JComboBox(EnigmaRunner.findTargets("Platforms",curPlat).toArray());
-		TargetSelection ts = (TargetSelection) targPlat.getSelectedItem();
-		String defPlat = ts == null ? null : ts.id;
-		targGfx = new JComboBox(EnigmaRunner.findTargets("Graphics_Systems",defPlat).toArray());
-		targAudio = new JComboBox(EnigmaRunner.findTargets("Audio_Systems",defPlat).toArray());
-		targColl = new JComboBox(EnigmaRunner.findTargets("Collision_Systems",defPlat).toArray());
+		targPlat = new JComboBox(es.getTargetPlatformsArray());
+		targGfx = new JComboBox(es.getTargetGraphicsArray());
+		targAudio = new JComboBox(es.getTargetAudiosArray());
+		targColl = new JComboBox(es.getTargetCollisionsArray());
 		targPlat.addActionListener(this);
 		targGfx.addActionListener(this);
 		targAudio.addActionListener(this);
 		targColl.addActionListener(this);
 
-		tfAuth = new JTextField(ts == null ? null : ts.auth);
-		taDesc = new JTextArea(ts == null ? null : ts.desc);
+		tfAuth = new JTextField(es.targetPlatform == null ? null : es.targetPlatform.auth);
+		taDesc = new JTextArea(es.targetPlatform == null ? null : es.targetPlatform.desc);
 		tfAuth.setEditable(false);
 		taDesc.setEditable(false);
 		taDesc.setLineWrap(true);
@@ -627,13 +624,10 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			TargetSelection ts = (TargetSelection) ((JComboBox) s).getSelectedItem();
 			if (s == targPlat)
 				{
-				String defPlat = ts == null ? null : ts.id;
-				targGfx.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Graphics_Systems",
-						defPlat).toArray()));
-				targAudio.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Audio_Systems",
-						defPlat).toArray()));
-				targColl.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Collision_Systems",
-						defPlat).toArray()));
+				es.targetPlatform = ts;
+				targGfx.setModel(new DefaultComboBoxModel(es.getTargetGraphicsArray()));
+				targAudio.setModel(new DefaultComboBoxModel(es.getTargetAudiosArray()));
+				targColl.setModel(new DefaultComboBoxModel(es.getTargetCollisionsArray()));
 				}
 			tfAuth.setText(ts == null ? null : ts.auth);
 			taDesc.setText(ts == null ? null : ts.desc);

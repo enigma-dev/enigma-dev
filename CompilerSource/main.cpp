@@ -152,7 +152,7 @@ extern void print_definition(string n);
 static bool firstpass = true;
 extern externs *enigma_type__var, *enigma_type__variant;
 
-dllexport syntax_error *whitespaceModified(const char* wscode, const char* targetYaml)
+dllexport syntax_error *definitionsModified(const char* wscode, const char* targetYaml)
 {
   cout << "Parsing settings..." << flushl;
     parse_ide_settings(targetYaml);
