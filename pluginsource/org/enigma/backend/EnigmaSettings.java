@@ -101,7 +101,7 @@ public class EnigmaSettings
 
 				TargetSelection ps = new TargetSelection();
 				ps.name = node.getMC("Name");
-				ps.id = node.getMC("Identifier");
+				ps.id = node.getMC("Identifier").toLowerCase();
 				ps.depends = depends;
 				ps.rep = node.getMC("Represents",null);
 				ps.desc = node.getMC("Description",null);
