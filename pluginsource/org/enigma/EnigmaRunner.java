@@ -63,9 +63,10 @@ import javax.swing.event.DocumentListener;
 import org.enigma.EYamlParser.YamlNode;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
-import org.enigma.backend.EnigmaSettings;
-import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
+import org.enigma.backend.EnigmaSettings;
+import org.enigma.backend.EnigmaSettings.TargetSelection;
+import org.enigma.backend.EnigmaStruct;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -135,17 +136,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 					ENIGMA_READY = true;
 					initEnigmaLib();
-					if (GCC_LOCATED) DRIVER.definitionsModified(es.definitions,targetYaml(es));
+					if (GCC_LOCATED) DRIVER.definitionsModified(es.definitions,es.toTargetYaml());
 					}
 			}.start();
-		}
-
-	public static String targetYaml(EnigmaSettings es)
-		{
-		return "%e-yaml\n---\n"//
-				+ "target-windowing: " + es.targetPlatform + "\n"//
-				+ "target-graphics: " + es.targetGraphics + "\n"//
-				+ "target-audio: " + es.targetSound + "\n";//
 		}
 
 	private UnsatisfiedLinkError attemptLib()
@@ -334,17 +327,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		return targets;
 		}
 
-	static class TargetSelection
-		{
-		public String name, id; //mandatory
-		public String rep, desc, auth, ext; //optional
-
-		public String toString()
-			{
-			return name;
-			}
-		}
-
 	static String normalize(String s)
 		{
 		return s.toLowerCase().replaceAll("[ _\\-]","");
@@ -524,12 +506,21 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			return;
 			}
 
+		if (es.targetPlatform == null)
+			{
+			JOptionPane.showMessageDialog(null,
+					"Unknown compilation settings for your platform. Perhaps your platform isn't supported.");
+			return;
+			}
+
+		String exe = es.targetPlatform.ext;
+
 		//determine `outname` (rebuild has no `outname`)
 		File outname = null;
 		try
 			{
 			if (mode < MODE_DESIGN) //run/debug
-				outname = File.createTempFile("egm",".exe");
+				outname = File.createTempFile("egm",exe);
 			else if (mode == MODE_DESIGN) outname = File.createTempFile("egm",".emd"); //design
 			if (outname != null) outname.deleteOnExit();
 			}
@@ -541,7 +532,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (mode == MODE_COMPILE)
 			{
 			JFileChooser fc = new JFileChooser();
-			fc.setFileFilter(new CustomFileFilter(".exe","Executable files"));
+			fc.setFileFilter(new CustomFileFilter(exe,"Executable files"));
 			if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			outname = fc.getSelectedFile();
 			}

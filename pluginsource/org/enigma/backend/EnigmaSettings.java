@@ -32,7 +32,18 @@ public class EnigmaSettings
 	public String definitions = "", globalLocals = "";
 	public String initialization = "", cleanup = "";
 
-	public String targetPlatform, targetGraphics, targetSound, targetCollision;
+	public TargetSelection targetPlatform, targetGraphics, targetAudio, targetCollision;
+
+	public static class TargetSelection
+		{
+		public String name, id; //mandatory
+		public String rep, desc, auth, ext; //optional
+
+		public String toString()
+			{
+			return name;
+			}
+		}
 
 	public EnigmaSettings()
 		{
@@ -85,6 +96,15 @@ public class EnigmaSettings
 			}
 		}
 
+	public String toTargetYaml()
+		{
+		return "%e-yaml\n---\n"//
+				+ "target-windowing: " + (targetPlatform == null ? "" : targetPlatform.id) + "\n"//
+				+ "target-graphics: " + (targetGraphics == null ? "" : targetGraphics.id) + "\n"//
+				+ "target-audio: " + (targetAudio == null ? "" : targetAudio.id) + "\n"//
+				+ "target-collision: " + (targetCollision == null ? "" : targetCollision.id) + "\n";//
+		}
+
 	public EnigmaSettings copy()
 		{
 		EnigmaSettings es = new EnigmaSettings(false);
@@ -103,7 +123,7 @@ public class EnigmaSettings
 
 		es.targetPlatform = targetPlatform;
 		es.targetGraphics = targetGraphics;
-		es.targetSound = targetSound;
+		es.targetAudio = targetAudio;
 		es.targetCollision = targetCollision;
 		return es;
 		}

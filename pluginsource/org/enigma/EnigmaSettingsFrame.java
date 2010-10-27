@@ -31,9 +31,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -52,8 +52,8 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-import org.enigma.EnigmaRunner.TargetSelection;
 import org.enigma.backend.EnigmaSettings;
+import org.enigma.backend.EnigmaSettings.TargetSelection;
 import org.lateralgm.compare.CollectionComparator;
 import org.lateralgm.compare.MapComparator;
 import org.lateralgm.compare.ObjectComparator;
@@ -87,7 +87,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	private CodeHolder sDef, sGlobLoc, sInit, sClean;
 	private CustomFileChooser fc;
 
-	private JComboBox targPlat, targGfx, targSound, targColl;
+	private JComboBox targPlat, targGfx, targAudio, targColl;
 	private JTextField tfAuth;
 	private JTextArea taDesc;
 
@@ -367,11 +367,11 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		TargetSelection ts = (TargetSelection) targPlat.getSelectedItem();
 		String defPlat = ts == null ? null : ts.id;
 		targGfx = new JComboBox(EnigmaRunner.findTargets("Graphics_Systems",defPlat).toArray());
-		targSound = new JComboBox(EnigmaRunner.findTargets("Audio_Systems",defPlat).toArray());
+		targAudio = new JComboBox(EnigmaRunner.findTargets("Audio_Systems",defPlat).toArray());
 		targColl = new JComboBox(EnigmaRunner.findTargets("Collision_Systems",defPlat).toArray());
 		targPlat.addActionListener(this);
 		targGfx.addActionListener(this);
-		targSound.addActionListener(this);
+		targAudio.addActionListener(this);
 		targColl.addActionListener(this);
 
 		tfAuth = new JTextField(ts == null ? null : ts.auth);
@@ -400,7 +400,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/*	*/.addGroup(layout.createParallelGroup()
 		/*		*/.addComponent(targPlat)
 		/*		*/.addComponent(targGfx)
-		/*		*/.addComponent(targSound)
+		/*		*/.addComponent(targAudio)
 		/*		*/.addComponent(targColl)))
 		/**/.addGroup(layout.createSequentialGroup()
 		/*	*/.addComponent(lAuth)
@@ -416,7 +416,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/*	*/.addComponent(targGfx,pref,pref,pref))
 		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
 		/*	*/.addComponent(lSound)
-		/*	*/.addComponent(targSound,pref,pref,pref))
+		/*	*/.addComponent(targAudio,pref,pref,pref))
 		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
 		/*	*/.addComponent(lColl)
 		/*	*/.addComponent(targColl,pref,pref,pref))
@@ -461,7 +461,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 				es.definitions = sDef.getCode();
 				es.saveDefinitions();
 				if (EnigmaRunner.GCC_LOCATED)
-					EnigmaRunner.DRIVER.definitionsModified(es.definitions,EnigmaRunner.targetYaml(es));
+					EnigmaRunner.DRIVER.definitionsModified(es.definitions,es.toTargetYaml());
 				}
 			es.globalLocals = readStr(i);
 			es.initialization = readStr(i);
@@ -554,14 +554,10 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		es.initialization = sInit.getCode();
 		es.cleanup = sClean.getCode();
 
-		TargetSelection ts = (TargetSelection) targPlat.getSelectedItem();
-		es.targetPlatform = (ts == null ? null : ts.id);
-		ts = (TargetSelection) targGfx.getSelectedItem();
-		es.targetGraphics = (ts == null ? null : ts.id);
-		ts = (TargetSelection) targSound.getSelectedItem();
-		es.targetSound = (ts == null ? null : ts.id);
-		ts = (TargetSelection) targColl.getSelectedItem();
-		es.targetCollision = (ts == null ? null : ts.id);
+		es.targetPlatform = (TargetSelection) targPlat.getSelectedItem();
+		es.targetGraphics = (TargetSelection) targGfx.getSelectedItem();
+		es.targetAudio = (TargetSelection) targAudio.getSelectedItem();
+		es.targetCollision = (TargetSelection) targColl.getSelectedItem();
 		}
 
 	public void revertResource()
@@ -626,7 +622,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			return;
 			}
 
-		if (s == targPlat || s == targGfx || s == targSound || s == targColl)
+		if (s == targPlat || s == targGfx || s == targAudio || s == targColl)
 			{
 			TargetSelection ts = (TargetSelection) ((JComboBox) s).getSelectedItem();
 			if (s == targPlat)
@@ -634,7 +630,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 				String defPlat = ts == null ? null : ts.id;
 				targGfx.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Graphics_Systems",
 						defPlat).toArray()));
-				targSound.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Audio_Systems",
+				targAudio.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Audio_Systems",
 						defPlat).toArray()));
 				targColl.setModel(new DefaultComboBoxModel(EnigmaRunner.findTargets("Collision_Systems",
 						defPlat).toArray()));
@@ -688,7 +684,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 					es.definitions = sDef.getCode();
 					es.saveDefinitions();
 					if (EnigmaRunner.GCC_LOCATED)
-						EnigmaRunner.DRIVER.definitionsModified(es.definitions,EnigmaRunner.targetYaml(es));
+						EnigmaRunner.DRIVER.definitionsModified(es.definitions,es.toTargetYaml());
 					}
 				cfDef = null;
 				}
