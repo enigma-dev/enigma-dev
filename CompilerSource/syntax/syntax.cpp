@@ -470,6 +470,8 @@ namespace syncheck
                 error = "Expected secondary expression before closing parenthesis";
                 return pos;
               }
+              if (!plevel)
+                return (error="Unpaired closing parenthesis at this point", pos);
               if (plevelt[plevel] != PLT_PARENTH and plevelt[plevel] != PLT_FUNCTION)
               {
                 if (plevelt[plevel] == PLT_FORSTATEMENT)
@@ -517,8 +519,10 @@ namespace syncheck
           pos++; continue;
         case ']':
             {
+              if (!plevel)
+                return (error="Unpaired closing bracket at this point", pos);
               if (plevelt[plevel] != PLT_BRACKET)
-              { error="Unexpected closing bracket at this point"; return pos; }
+                return (error="Unexpected closing bracket at this point", pos);
               lastnamed[level]=LN_VARNAME,
               lastnamedatt[level] = LNA_NOTHING;
               plevel--;

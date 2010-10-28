@@ -122,7 +122,7 @@ namespace enigma
     {
       case self:
       case local:  return instance_event_iterator ? instance_event_iterator->inst : NULL;
-      case other:  return NULL;
+      case other:  return instance_other;
       case all: {  inst_iter *i = instance_list_first();
                    return  i ? i->inst : NULL; }
       case global: return ENIGMA_global_instance;
@@ -143,7 +143,7 @@ namespace enigma
     {
       case self:
       case local:  return instance_event_iterator;
-      case other:  return NULL;
+      case other:  return instance_other ? (dummy_iterator.inst = instance_other, &dummy_iterator) : NULL;
       case all:    return instance_list_first();
       case global: return &ENIGMA_global_instance_iterator;
       case noone:
