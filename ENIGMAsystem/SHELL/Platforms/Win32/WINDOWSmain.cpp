@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
@@ -39,12 +39,12 @@ namespace enigma //TODO: Find where this belongs
     HWND hWnd;
     LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
     HDC window_hDC;
-    
+
     int windowcolor; double viewscale; bool windowIsTop;
-    
+
     void EnableDrawing (HGLRC *hRC);
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-    
+
     #ifdef ENIGMA_GS_OPENGL
     void EnableDrawing (HGLRC *hRC);
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
@@ -56,13 +56,23 @@ namespace enigma {
   int ENIGMA_events();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
+extern double fps;
 namespace enigma {
   clock_t lc;
   void sleep_for_framerate(int rs)
   {
     clock_t nc = clock();
     int sdur = 1000/rs - 1 - (nc - lc)*1000 / CLOCKS_PER_SEC;
-    if (sdur > 0) Sleep(sdur);
+    if (sdur > 0)
+    {
+        Sleep(sdur);
+        fps = room_speed;
+    }
+    else
+    {
+        fps = CLOCKS_PER_SEC / (nc - lc);
+        if(fps > room_speed){ fps = room_speed; }
+    }
     lc = nc;
   }
 }
@@ -70,13 +80,13 @@ namespace enigma {
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
     int wid=(int)room_width, hgt=(int)room_height;
-    
+
     //Create the window
         WNDCLASS wcontainer,wmain;
-        HGLRC hRC;        
+        HGLRC hRC;
         MSG msg;
-        
-        //Register window class 
+
+        //Register window class
         wcontainer.style = CS_OWNDC;
         wcontainer.lpfnWndProc = enigma::WndProc;
         wcontainer.cbClsExtra = 0;
@@ -88,7 +98,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         wcontainer.lpszMenuName = NULL;
         wcontainer.lpszClassName = "TMain";
         RegisterClass (&wcontainer);
-        
+
         //Register other window class
         wmain.style = 0;
         wmain.lpfnWndProc = enigma::WndProc;
@@ -101,27 +111,27 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         wmain.lpszMenuName = NULL;
         wmain.lpszClassName = "TSub";
         RegisterClass (&wmain);
-        
-        
+
+
         //Create the parent window
         enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_SIZEBOX, 0, 0,wid, hgt,
           NULL, NULL, hInstance, NULL);
-        
+
         //Create a child window to put into that
         enigma::hWnd = CreateWindow ("TSub", "", WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
-        
+
         //Get new window size
         RECT c = {256, 256, wid+256, hgt+256};
         AdjustWindowRect(&c, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_SIZEBOX, FALSE);
-        
+
         //Set the size of the parent window
         SetWindowPos(enigma::hWndParent,NULL,c.left,c.top,c.right-c.left,c.bottom-c.top,SWP_NOZORDER);
-    
-    
-    
+
+
+
     enigma::EnableDrawing (&hRC);
     enigma::initialize_everything();
-    
+
     //Main loop
         char bQuit=0;
         while (!bQuit)
@@ -145,14 +155,14 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                 enigma::input_push();
             }
         }
-    
-    
+
+
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
     DestroyWindow (enigma::hWnd);
-    
+
     #if BUILDMODE
     buildmode::finishup();
     #endif
-    
+
     return 0;
 }
