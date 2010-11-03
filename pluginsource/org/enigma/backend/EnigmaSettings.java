@@ -101,7 +101,7 @@ public class EnigmaSettings
 
 				TargetSelection ps = new TargetSelection();
 				ps.name = node.getMC("Name");
-				ps.id = node.getMC("Identifier").toLowerCase();
+				ps.id = node.getMC("Identifier");
 				ps.depends = depends;
 				ps.rep = node.getMC("Represents",null);
 				ps.desc = node.getMC("Description",null);
@@ -161,7 +161,7 @@ public class EnigmaSettings
 	private static TargetSelection findFirst(List<TargetSelection> tsl, String depends)
 		{
 		for (TargetSelection ts : tsl)
-			if (ts.depends.contains(depends)) return ts;
+			if (ts.depends.contains(depends.toLowerCase())) return ts;
 		return null;
 		}
 
@@ -178,7 +178,7 @@ public class EnigmaSettings
 			}
 
 		for (TargetSelection ts : itsl)
-			if (ts.depends.contains(depends)) otsl.add(ts);
+			if (ts.depends.contains(depends.toLowerCase())) otsl.add(ts);
 
 		return otsl;
 		}
