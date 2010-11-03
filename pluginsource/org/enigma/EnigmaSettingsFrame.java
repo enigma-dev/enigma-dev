@@ -266,7 +266,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		this.es = es.copy();
 
 		fc = new CustomFileChooser("/org/enigma","LAST_SETTINGS_DIR"); //$NON-NLS-1$ //$NON-NLS-2$
-		fc.setFileFilter(new CustomFileFilter(".esf","Enigma Settings File")); //$NON-NLS-1$
+		fc.setFileFilter(new CustomFileFilter(".esf","Enigma Settings File (.esf)")); //$NON-NLS-1$
 
 		toolbar = makeToolBar();
 		add(toolbar,BorderLayout.NORTH);

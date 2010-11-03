@@ -25,7 +25,7 @@ import org.lateralgm.main.LGM;
 
 public class EnigmaSettings
 	{
-	//Compatibility / Progess options
+	//Compatibility / Progress options
 	public int cppStrings = 0; // Defines what language strings are inherited from.               0 = GML,               1 = C
 	public int cppOperators = 0; // Defines what language operators ++ and -- are inherited from. 0 = GML,               1 = C
 	public int cppEquals = 0; // Defines whether = should be exclusively treated as a setter.     0 = GML (= or ==)      1 = C (= only)

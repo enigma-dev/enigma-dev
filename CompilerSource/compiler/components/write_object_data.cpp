@@ -221,6 +221,8 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
         string evname = event_get_function_name(mid,id);
         wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
+          if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
+            wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
           if (event_has_sub_check(mid, id))
             wto << event_get_sub_check_condition(mid, id) << endl;
           if (event_has_const_code(mid, id))

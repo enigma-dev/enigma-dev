@@ -402,8 +402,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   //int makeres = better_system("cd ","/MacOS/");
 //  int makeres = better_system(MAKE_location,"MacOS");
 
-  // Pick a file
+  // Pick a file and flush it
   const char* redirfile = "redirfile.txt";
+  fclose(fopen(redirfile,"wb"));
 
   // Redirect it
   ide_output_redirect_file(redirfile);
