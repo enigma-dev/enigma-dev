@@ -42,7 +42,16 @@ namespace enigma
     bool dead;              // Whether or not this instance has been destroyed. Should be accessed rarely.
     inst_iter(object_basic* i,inst_iter *n,inst_iter *p);
   };
-  
+
+  class temp_event_scope
+  {
+    inst_iter *oiter;
+    object_basic *oinst;
+    public:
+    temp_event_scope(object_basic*);
+    ~temp_event_scope();
+  };
+
   // This structure is for composing lists of events to execute.
   struct event_iter: inst_iter
   {
@@ -54,7 +63,7 @@ namespace enigma
     void unlink(inst_iter*);
     event_iter();
   };
-  
+
   // This structure will store info about and lists of each object by index.
   struct objectid_base: inst_iter
   {
@@ -65,10 +74,10 @@ namespace enigma
     inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
     objectid_base();
   };
-  
+
   // This is an iterator typedef for use with the red-black backbone of the instance list.
   typedef std::map<int,inst_iter*>::iterator instance_list_iterator;
-  
+
   // Centralized stack of iterators in use by with() statements and the like.
   // Never empty; always contains a pointer to the instance_event_iterator.
   struct iterator_level {
@@ -80,7 +89,7 @@ namespace enigma
     void pop();
   };
   extern iterator_level *il_base, *il_top;
-  
+
   // The rest is decently commented on in the corresponding source file.
   extern event_iter *events;
   extern objectid_base *objects;
@@ -89,16 +98,16 @@ namespace enigma
   extern inst_iter *instance_event_iterator;
   extern object_basic *instance_other;
   extern std::vector<inst_iter*> cleanups;
-  
+
   inst_iter*    instance_list_first();
   inst_iter*    fetch_inst_iter_by_id(int id);
   inst_iter*    fetch_inst_iter_by_int(int x);
   object_basic* fetch_instance_by_int(int x);
-  
+
   // Linking
   instance_list_iterator link_instance(object_basic* who);
   inst_iter *link_obj_instance(object_basic* who, int oid);
-  
+
   // Unlinking/Destroying
   void instance_iter_queue_for_destroy(inst_iter* who);
   void dispose_destroyed_instances();
