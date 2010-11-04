@@ -71,6 +71,20 @@ int handleEvents()
         enigma::keybdstatus[actualKey]=0;
       return 0;
     }
+    case ButtonPress: {
+        printf("Pressed a button: %d\n", e.xbutton.button);
+        if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button - 1] = 1;
+        else if (e.xbutton.button == 4) enigma::mousewheel++;
+        else if (e.xbutton.button == 5) enigma::mousewheel--;
+      return 0;
+    }
+    case ButtonRelease: {
+        printf("Released a button: %d\n", e.xbutton.button);
+        if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button - 1] = 0;
+        else if (e.xbutton.button == 4) enigma::mousewheel++;
+        else if (e.xbutton.button == 5) enigma::mousewheel--;
+      return 0;
+    }
     case Expose: {
         //screen_refresh();
       return 0;
@@ -82,7 +96,7 @@ int handleEvents()
     default:
         printf("%d\n",e.type);
       return 0;
-    }
+  }
   //Move/Resize = ConfigureNotify
   //Min = UnmapNotify
   //Restore = MapNotify
@@ -95,24 +109,27 @@ namespace enigma
   {
     //Clear the input arrays
     for(int i=0;i<3;i++){
-      enigma::last_mousestatus[i]=0;
-      enigma::mousestatus[i]=0;
+      last_mousestatus[i]=0;
+      mousestatus[i]=0;
     }
     for(int i=0;i<256;i++){
-      enigma::last_keybdstatus[i]=0;
-      enigma::keybdstatus[i]=0;
+      last_keybdstatus[i]=0;
+      keybdstatus[i]=0;
     }
   }
   
   void input_push()
   {
     for(int i=0;i<3;i++){
-      enigma::last_mousestatus[i] = enigma::mousestatus[i];
+      last_mousestatus[i] = mousestatus[i];
     }
     for(int i=0;i<256;i++){
-      enigma::last_keybdstatus[i] = enigma::keybdstatus[i];
+      last_keybdstatus[i] = keybdstatus[i];
     }
+    mousewheel = 0;
   }
+  
+  int game_ending();
 }
 
 int main(int argc,char** argv)
@@ -147,7 +164,7 @@ int main(int argc,char** argv)
 	swa.border_pixel = 0;
 	swa.background_pixel = 0;
 	swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
-	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask;// | StructureNotifyMask;
+	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask;// | StructureNotifyMask;
 	unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
 
 	//default window size
@@ -197,18 +214,20 @@ int main(int argc,char** argv)
 	glXDestroyContext(disp,glxc);
 	XCloseDisplay(disp);
 	return 0;*/
+	
 	for(;;)
 	{
 		while(XQLength(disp))
 			if(handleEvents() > 0)
-			{
-				glxc = glXGetCurrentContext();
-				glXDestroyContext(disp,glxc);
-				XCloseDisplay(disp);
-				return 0;
-			}
+				goto end;
 		enigma::ENIGMA_events();
 		enigma::input_push();
 	}
+	
+	end:
+	enigma::game_ending();
+  glXDestroyContext(disp,glxc);
+  XCloseDisplay(disp);
+	return 0;
 }
 

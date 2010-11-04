@@ -45,8 +45,9 @@ namespace enigma
 
   class temp_event_scope
   {
-    inst_iter *oiter;
     object_basic *oinst;
+    inst_iter *oiter;
+    
     public:
     temp_event_scope(object_basic*);
     ~temp_event_scope();
@@ -58,7 +59,7 @@ namespace enigma
     // Inherits object_basic *inst: should be NULL
     // Inherits inst_iter *next:    First of instances for which to perform this event (Can be NULL)
     // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
-    string name; // Event name
+    const char* name; // Event name
     inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
     void unlink(inst_iter*);
     event_iter();

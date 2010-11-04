@@ -38,23 +38,21 @@ namespace enigma
 
 bool mouse_check_button(int button)
 {
-	int b=(int)button;
-	switch(b)
+	switch (button)
 	{
     case mb_any:
       return enigma::mousestatus[0] | enigma::mousestatus[1] | enigma::mousestatus[2];
     case mb_none:
       return !(enigma::mousestatus[0] | enigma::mousestatus[1] | enigma::mousestatus[2]);
     case 1: case 2: case 3:
-      return enigma::mousestatus[b-1];
+      return enigma::mousestatus[button-1];
     default:return 0;
 	}
 }
 
 bool mouse_check_button_pressed(int button)
 {
-	int b=(int)button;
-  switch(b)
+  switch (button)
   {
     case mb_any:
       return (enigma::mousestatus[0] && !enigma::last_mousestatus[0]) // The trend is "pressed this step, but not last step"
@@ -65,37 +63,42 @@ bool mouse_check_button_pressed(int button)
           ||   (enigma::mousestatus[1] && !enigma::last_mousestatus[1])
           ||   (enigma::mousestatus[2] && !enigma::last_mousestatus[2]));
     case  1: case 2: case 3:
-      return enigma::mousestatus[b-1] && !enigma::last_mousestatus[b-1];
+      return enigma::mousestatus[button-1] && !enigma::last_mousestatus[button-1];
     default:return 0;
   }
 }
 
 bool mouse_check_button_released(int button)
 {
-	int b=(int)button;
-	switch(b){
-	case mb_any:
-	  return (!enigma::mousestatus[0] && enigma::last_mousestatus[0])
-        || (!enigma::mousestatus[1] && enigma::last_mousestatus[1])
-        || (!enigma::mousestatus[2] && enigma::last_mousestatus[2]);
-	case mb_none:
-	  return !((!enigma::mousestatus[0] && enigma::last_mousestatus[0])
-        ||   (!enigma::mousestatus[1] && enigma::last_mousestatus[1])
-        ||   (!enigma::mousestatus[2] && enigma::last_mousestatus[2]));
-	case 1: case 2: case 3:
-	  return !enigma::mousestatus[b-1] && enigma::last_mousestatus[b-1];
-	default:return 0;
+	switch (button)
+	{
+    case mb_any:
+      return (!enigma::mousestatus[0] && enigma::last_mousestatus[0])
+          || (!enigma::mousestatus[1] && enigma::last_mousestatus[1])
+          || (!enigma::mousestatus[2] && enigma::last_mousestatus[2]);
+    case mb_none:
+      return !((!enigma::mousestatus[0] && enigma::last_mousestatus[0])
+          ||   (!enigma::mousestatus[1] && enigma::last_mousestatus[1])
+          ||   (!enigma::mousestatus[2] && enigma::last_mousestatus[2]));
+    case 1: case 2: case 3:
+      return !enigma::mousestatus[button-1] && enigma::last_mousestatus[button-1];
+    default: return 0;
 	}
+}
+
+int mouse_get_wheel_vangle()
+{
+  return enigma::mousewheel;
 }
 
 bool keyboard_check(int key)
 {
-  if(key == vk_anykey) {
+  if (key == vk_anykey) {
     for(int i=0; i<255; i++)
       if (enigma::keybdstatus[i]==1) return 1;
     return 0;
   }
-  if(key == vk_nokey) {
+  if (key == vk_nokey) {
     for(int i=0;i<255;i++)
       if(enigma::keybdstatus[i]==1) return 0;
     return 1;

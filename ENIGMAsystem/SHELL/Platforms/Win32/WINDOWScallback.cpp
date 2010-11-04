@@ -81,7 +81,7 @@ namespace enigma
             return 0;
 
         case WM_MOUSEWHEEL:
-             mousewheel=(int)HIWORD(wParam);
+             mousewheel += (int)HIWORD(wParam) / 60;
              return 0;
 
         case WM_LBUTTONUP:   mousestatus[0]=0; return 0;
@@ -100,22 +100,23 @@ namespace enigma
     {
       //Clear the input arrays
       for(int i=0;i<3;i++){
-        enigma::last_mousestatus[i]=0;
-        enigma::mousestatus[i]=0;
+        last_mousestatus[i]=0;
+        mousestatus[i]=0;
       }
       for(int i=0;i<256;i++){
-        enigma::last_keybdstatus[i]=0;
-        enigma::keybdstatus[i]=0;
+        last_keybdstatus[i]=0;
+        keybdstatus[i]=0;
       }
     }
     
     void input_push()
     {
       for(int i=0;i<3;i++){
-        enigma::last_mousestatus[i] = enigma::mousestatus[i];
+        last_mousestatus[i] = mousestatus[i];
       }
       for(int i=0;i<256;i++){
-        enigma::last_keybdstatus[i] = enigma::keybdstatus[i];
+        last_keybdstatus[i] = keybdstatus[i];
       }
+      mousewheel = 0;
     }
 }

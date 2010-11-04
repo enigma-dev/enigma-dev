@@ -137,3 +137,13 @@ extern int amain();
   
   #include "Universal_System/instance_create.h"
 #endif
+
+namespace enigma
+{
+  int game_ending()
+  {
+    for (inst_iter *i = instance_list_first(); i != NULL; i = i->next)
+      { i->inst->unlink(); delete i->inst; }
+    return 0;
+  }
+}

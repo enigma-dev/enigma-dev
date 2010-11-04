@@ -107,6 +107,7 @@ const int vk_delete   =46;
 bool mouse_check_button(int button);
 bool mouse_check_button_pressed(int button);
 bool mouse_check_button_released(int button);
+int mouse_get_wheel_vangle();
 
 bool keyboard_check(int key);
 bool keyboard_check_pressed(int key);

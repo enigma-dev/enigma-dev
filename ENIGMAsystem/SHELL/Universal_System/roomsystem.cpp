@@ -90,7 +90,7 @@ namespace enigma
     
     view_enabled = views_enabled;
     
-    for(int i=0;i<7;i++)
+    for (int i=0;i<7;i++)
     {
       view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
       view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
@@ -105,9 +105,9 @@ namespace enigma
       for (int i=0;i<7;i++)
         if (view_visible[i])
         {
-          if(view_xview[i]+view_wview[i]>xm)
+          if (view_xview[i]+view_wview[i]>xm)
             xm=(int)(view_xview[i]+view_wview[i]);
-          if(view_yview[i]+view_hview[i]>ym)
+          if (view_yview[i]+view_hview[i]>ym)
             ym=(int)(view_yview[i]+view_hview[i]);
         }
     }
@@ -150,7 +150,7 @@ enigma::roomv room;
 int room_goto(int indx)
 {
 	#if SHOWERRORS
-	if(enigma::roomdata.find(indx)==enigma::roomdata.end())
+	if (enigma::roomdata.find(indx)==enigma::roomdata.end())
 	{
 		show_error("Attempting to go to nonexisting room",0);
 		return 0;
@@ -162,13 +162,14 @@ int room_goto(int indx)
 	for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
 	{
 		it->inst->myevent_roomend();
-		if(!((enigma::object_planar*)(it->inst))->persistent)
-      instance_destroy(it->inst->id);
+		#ifdef ISCONTROLLER_persistent
+		if (!it->inst->persistent)
+		#endif
+		instance_destroy(it->inst->id);
 	}
 	enigma::nodestroy = 0;
 	
 	room.rval.d = indx;
-	
 	enigma::roomdata[indx]->gotome();
 	return 0;
 }
@@ -186,7 +187,7 @@ int room_restart()
 	
 	//Destroy all objects
 	enigma::nodestroy=1;
-	for(enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
+	for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
 	{
 		it->inst->myevent_roomend();
 		#ifdef ISCONTROLLER_persistent
@@ -220,7 +221,7 @@ int room_goto_absolute(int index)
 	{
 		it->inst->myevent_roomend();
 		#ifdef ISCONTROLLER_persistent
-		if(!it->inst->persistent)
+		if (!it->inst->persistent)
 		#endif
 		instance_destroy(it->inst->id);
 	}
@@ -334,11 +335,11 @@ namespace enigma
   void room_update()
   {
     window_set_caption(room_caption);
-    if(view_enabled)
+    if (view_enabled)
     {
-      for(int i=0;i<7;i++)
+      for (int i=0;i<7;i++)
       {
-        if(mouse_x>=view_xport[i] && mouse_x<view_xport[i]+view_wport[i]
+        if (mouse_x>=view_xport[i] && mouse_x<view_xport[i]+view_wport[i]
         && mouse_y>=view_yport[i] && mouse_y<view_yport[i]+view_hport[i]){
           mouse_x=view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
           mouse_y=view_yview[i]+((mouse_y-view_yport[i])/(double)view_hport[i])*view_hview[i];

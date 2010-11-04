@@ -87,7 +87,7 @@ template <class T> struct lua_table
       TA_map(dense).erase(it++);
     }
   }
-  void destroy()
+  inline void destroy()
   {
     // Iterate the dense part, destroying everything.
     const size_t dlen = TA_length(dense);
@@ -113,6 +113,7 @@ template <class T> struct lua_table
     new(databuf) lua_map_type(TA_map(who.dense));
     
     base_length(databuf) = len;   // We share a length in common, though.... 
+    if (dense) destroy();
     dense = base_to_TA(databuf); // Re-establish our array's location.
     for (size_t i=0; i<len; i++) // Copy the array elements
       new(dense+i) T(who.dense[i]);

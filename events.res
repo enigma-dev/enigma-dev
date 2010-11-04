@@ -75,116 +75,148 @@ leftbutton: 6
 	Name: Left Button
 	Mode: Special
 	Case: 0
+	Super Check: mouse_check_button(mb_left)
+	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
 
 rightbutton: 6
 	Name: Right Button
 	Mode: Special
 	Case: 1
+	Super Check: mouse_check_button(mb_right)
+	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
 
 middlebutton: 6
 	Name: Middle Button
 	Mode: Special
 	Case: 2
+	Super Check: mouse_check_button(mb_middle)
+	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
 
 nobutton: 6
 	Name: No Button
 	Mode: Special
 	Case: 3
+	Sub Check:   mouse_check_button(mb_none) !(mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom)
 
 leftpress: 6
 	Name: Left Press
 	Mode: Special
 	Case: 4
+	Super Check: mouse_check_button_pressed(mb_left)
+	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
 
 rightpress: 6
 	Name: Right Press
 	Mode: Special
 	Case: 5
+	Super Check: mouse_check_button_pressed(mb_right)
+	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
 
 middlepress: 6
 	Name: Middle Press
 	Mode: Special
 	Case: 6
+	Super Check: mouse_check_button_pressed(mb_middle)
+	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
 
 leftrelease: 6
 	Name: Left Release
 	Mode: Special
 	Case: 7
+	Super Check: mouse_check_button_released(mb_left)
+	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
 
 rightrelease: 6
 	Name: Right Release
 	Mode: Special
 	Case: 8
+	Super Check: mouse_check_button_released(mb_right)
+	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
 
 middlerelease: 6
 	Name: Middle Release
 	Mode: Special
 	Case: 9
+	Super Check: mouse_check_button_released(mb_middle)
+	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
 
 mouseenter: 6
 	Name: Mouse Enter
 	Mode: Special
 	Case: 10
+	Sub Check: { static bool innow = false; const bool wasin = innow; innow = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (!in or wasin) return 0; }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
+	Sub Check: { static bool innow = false; const bool wasin = innow; innow = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (in or !wasin) return 0; }
 
 mousewheelup: 6
 	Name: Mouse Wheel Up
 	Mode: Special
 	Case: 60
+	Super Check: mouse_get_wheel_vangle() > 0
 
 mousewheeldown: 6
 	Name: Mouse Wheel Down
 	Mode: Special
 	Case: 61
+	Super Check: mouse_get_wheel_vangle() < 0
 
 globalleftbutton: 6
 	Name: Global Left Button
 	Mode: Special
 	Case: 50
+	Super Check: mouse_check_button(mb_left)
 
 globalrightbutton: 6
 	Name: Global Right Button
 	Mode: Special
 	Case: 51
+	Super Check: mouse_check_button(mb_right)
 
 globalmiddlebutton: 6
 	Name: Global Middle Button
 	Mode: Special
 	Case: 52
+	Super Check: mouse_check_button(mb_middle)
 
 globalleftpress: 6
 	Name: Global Left Press
 	Mode: Special
 	Case: 53
+	Super Check: mouse_check_button_pressed(mb_left)
 
 globalrightpress: 6
 	Name: Global Right Press
 	Mode: Special
 	Case: 54
+	Super Check: mouse_check_button_pressed(mb_right)
 
 globalmiddlepress: 6
 	Name: Global Middle press
 	Mode: Special
 	Case: 55
+	Super Check: mouse_check_button_pressed(mb_middle)
 
 globalleftrelease: 6
 	Name: Global Left Release
 	Mode: Special
 	Case: 56
+	Super Check: mouse_check_button_released(mb_left)
 
 globalrightrelease: 6
 	Name: Global Right Release
 	Mode: Special
 	Case: 57
+	Super Check: mouse_check_button_released(mb_right)
 
 globalmiddlerelease: 6
 	Name: Global Middle Release
 	Mode: Special
 	Case: 57
+	Super Check: mouse_check_button_released(mb_middle)
 
 # Finally, some general-purpose events
 
@@ -217,7 +249,7 @@ boundary: 7
 	Name: Intersect Boundary
 	Mode: Special
 	Case: 1
-	Super Check: (bbox_left < 0) or (bbox_right > room_width) or (bbox_top < 0) or (bbox_bottom > room_height)
+	Sub Check: (bbox_left < 0) or (bbox_right > room_width) or (bbox_top < 0) or (bbox_bottom > room_height)
 
 
 # Collisions stuck here for some reason, possibly so that you

@@ -80,7 +80,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   int glyphx[gcount], glyphy[gcount];
   
   int gwm = sspr->width, // Glyph width max: sprite width
-      ghm = sspr->height, // Glyph width max: sprite width
+      ghm = sspr->height, // Glyph height max: sprite height
       gtw = int((double)sspr->width / sspr->texbordy);
   
   font->height = ghm;
@@ -115,15 +115,15 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
     }
     font->glyphs[i].x = glyphmetrics[i].x; // Save these metrics while x and y are still relative to each glyph
     font->glyphs[i].y = glyphmetrics[i].y;
-    font->glyphs[i].x2 = glyphmetrics[i].w; // And while w and h are still the right and bottom edge coordinates
-    font->glyphs[i].y2 = glyphmetrics[i].h;
-    
-    glyphmetrics[i].w -= glyphmetrics[i].x; // Fix width and height to be such
-    glyphmetrics[i].h -= glyphmetrics[i].y; // instead of right and bottom
-    glyphx[i] = glyphmetrics[i].x, glyphy[i] = glyphmetrics[i].y;
-    glyphmetrics[i].placed = -1;
+    font->glyphs[i].x2 = glyphmetrics[i].w+1; // And while w and h are still the right and bottom edge coordinates
+    font->glyphs[i].y2 = glyphmetrics[i].h+1;
     
     font->glyphs[i].xs = glyphmetrics[i].w + sep; // This is just user-specified for sprite-loaded fonts
+    
+    glyphmetrics[i].w -= glyphmetrics[i].x - 1; // Fix width and height to be such
+    glyphmetrics[i].h -= glyphmetrics[i].y - 1; // instead of right and bottom
+    glyphx[i] = glyphmetrics[i].x, glyphy[i] = glyphmetrics[i].y;
+    glyphmetrics[i].placed = -1;
   }
   
   list<unsigned int> boxes;
@@ -131,7 +131,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
     boxes.push_back((glyphmetrics[i].w * glyphmetrics[i].h << 8) + i);
   boxes.sort();
   
-  int w = 256, h = 256;
+  int w = 64, h = 64;
   enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
   for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
   {

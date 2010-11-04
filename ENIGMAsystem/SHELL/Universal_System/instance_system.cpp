@@ -55,7 +55,7 @@ namespace enigma
 
   void event_iter::unlink(inst_iter* which)
   {
-    which->prev->next = which->next;
+    if (which->prev) which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
     if (prev == which) prev = which->prev;
   }
@@ -70,7 +70,7 @@ namespace enigma
 
   void unlink_object_id_iter(inst_iter* which, int oid)
   {
-    which->prev->next = which->next;
+    if (which->prev) which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
     objectid_base *a = objects + oid;
     if (a->prev == which) a->prev = which->prev;
@@ -111,7 +111,7 @@ namespace enigma
 
   temp_event_scope::temp_event_scope(object_basic* ninst): oinst(instance_event_iterator->inst), oiter(instance_event_iterator)
     { instance_event_iterator = &dummy_event_iterator; instance_event_iterator->inst = ninst; }
-  temp_event_scope::~temp_event_scope() { instance_event_iterator = oiter; instance_event_iterator->inst = oinst; }
+  temp_event_scope::~temp_event_scope() { instance_event_iterator->inst = oinst; instance_event_iterator = oiter; }
 
   /* **  Methods ** */
   // Retrieve the first instance on the complete list.
@@ -193,6 +193,7 @@ namespace enigma
     if (in != instance_list.end()) // If it exists
       ins->next = in->second, // Link this to next instance
       in->second->prev = ins; // Link next to this
+    else ins->next = NULL;
     return it.first;
   }
   inst_iter *link_obj_instance(object_basic* who, int oid)
