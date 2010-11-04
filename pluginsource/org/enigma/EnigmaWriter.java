@@ -798,8 +798,9 @@ public final class EnigmaWriter
 					{
 					if (la.execType == Action.EXEC_NONE) break;
 					ResourceReference<org.lateralgm.resources.GmObject> apto = act.getAppliesTo();
-					if (la.question)
-						if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF)
+					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF)
+						{
+						if (la.question)
 							{
 							if (!actionDemise)
 								{
@@ -816,14 +817,12 @@ public final class EnigmaWriter
 								}
 							continue;
 							}
-					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF)
-						{
 						if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
 							code += "with (other) {";
 						else
 							code += "with (" + apto.get().getName() + ") {";
 						}
-					if (act.isRelative()) code += "argument_relative = true" + nl;
+					if (la.allowRelative) code += "argument_relative = " + act.isRelative() + nl;
 					if (la.question) code += "if ";
 					if (act.isNot()) code += "!";
 					if (la.question && la.execType == Action.EXEC_CODE)
