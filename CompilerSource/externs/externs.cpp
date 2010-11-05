@@ -295,6 +295,26 @@ bool find_in_parents(externs* whose, string name,unsigned int flags);
 bool find_in_using(externs* inscope,string name, unsigned flags);
 bool find_in_specializations(externs* inscope,string name, unsigned flags);
 
+bool find_in_all_ancestors_generic(externs* whose, string name)
+{
+  extiter it = whose->members.find(name);
+  if (it != whose->members.end())
+  {
+    ext_retriever_var = it->second;
+    return 1;
+  }
+
+  if (find_in_specializations(whose,name,0xFFFFFFFF))
+    return true;
+
+  for (unsigned i=0; i<whose->ancestors.size; i++)
+  {
+    if (find_in_all_ancestors_generic(whose->ancestors[i],name))
+      return 1;
+  }
+  return 0;
+}
+
 
 bool find_in_parents(externs* whose, string name,unsigned int flags)
 {
@@ -318,7 +338,7 @@ bool find_in_parents(externs* whose, string name,unsigned int flags)
   for (unsigned i=0; i<whose->ancestors.size; i++)
   {
     externs* a = whose->ancestors[i];
-    for (unsigned ii = 0; ii < a->ancestors.size; ii++)
+    for (unsigned ii = 0; ii < a->ancestors.size; ii++) //FIXME: Should this function really be skipping whose->ancestors?
       if (find_in_parents(a->ancestors[ii],name,flags))
         return 1;
   }

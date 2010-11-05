@@ -1,9 +1,8 @@
 
-list<unsigned int> unsorted;
-for (int i = 0; i < GLYPHCOUNT; i++) {
-  unsorted.push_back(rw[i]*rh[i] << 8 | i);
-}
+testStruct<int> po4;
+po4.x = 1;
+po4.y = 1;
 
-unsorted.sort();
-
-int aaa = lololol[sfdsf];
+testStructi po5;
+po5.x = 1;
+po5.y = 1;

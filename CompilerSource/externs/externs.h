@@ -152,9 +152,11 @@ externs* scope_get_using_ie(externs* scope);
 externs* temp_get_specializations(externs* scope);
 externs* temp_get_specializations_ie(externs* scope);
 extiter scope_find_member(string name);
+
 extern externs* ext_retriever_var;
 bool find_extname(string name,unsigned int flags,bool expect_find = 1);
 bool find_extname_global(string name,unsigned int flags = 0xFFFFFFFF);
+bool find_in_all_ancestors_generic(externs* whose, string name);
 
 extern externs* builtin_type__int;
 extern externs* builtin_type__void;

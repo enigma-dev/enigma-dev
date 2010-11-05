@@ -214,12 +214,19 @@ struct syntax_error {
   y,int a, string s);
 };
 int libInit(struct EnigmaCallbacks* ecs);
-syntax_error *whitespaceModified(const char*);
+syntax_error *definitionsModified(const char*,const char*);
+
+#include "OS_Switchboard.h"
 
 int main(int argc, char* argv[])
 {
   libInit(NULL);
-  whitespaceModified(NULL);
+  definitionsModified(NULL, ((string) "%e-yaml\n"
+	       "---\n" 	 
+	       "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n" 	 
+	       "target-graphics: OpenGL\n" 	 
+	       "target-audio: OpenAL\n" 	 
+	       ).c_str());
   mainr(argc,argv);
   getchar();
   return 0;

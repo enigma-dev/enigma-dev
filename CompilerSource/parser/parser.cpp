@@ -277,6 +277,8 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       bool tf = (ct->members.find(member) != ct->members.end());
       while (!tf and ct->flags & EXTFLAG_TYPEDEF and ct->type)
         ct = ct->type, tf = (ct->members.find(member) != ct->members.end());
+      if (!tf and find_in_all_ancestors_generic(ct,member))
+        ct = ext_retriever_var->parent, tf = true;
       
       cout << exp << ": " << n.type->name << " :: " << member << " => " << tf << endl;
       
