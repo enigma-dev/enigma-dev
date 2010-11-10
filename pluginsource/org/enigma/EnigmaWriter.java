@@ -410,6 +410,8 @@ public final class EnigmaWriter
 					String.valueOf(c));
 			Rectangle2D r = gv.getVisualBounds();
 
+			if (r.getWidth() == 0 || r.getHeight() == 0) continue;
+
 			// Generate a raster of the glyph vector
 			BufferedImage bi = new BufferedImage((int) Math.round(r.getWidth()),
 					(int) Math.round(r.getHeight()),BufferedImage.TYPE_BYTE_GRAY);
@@ -433,15 +435,20 @@ public final class EnigmaWriter
 			bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),rasterRGB,0,bi.getWidth());
 			for (int j = 0; j < rasterRGB.length; j++)
 				raster[j] = (byte) (rasterRGB[j] & 0xFF);
+			ofgl[ind].width = bi.getWidth();
+			ofgl[ind].height = bi.getWidth();
 			ofgl[ind].raster = ByteBuffer.allocateDirect(raster.length).put(raster);
 
-			// Output the results
-			System.out.println(ofgl[ind].origin + ", " + ofgl[ind].baseline + ", " + ofgl[ind].advance);
-			for (int ry = 0; ry < bi.getHeight(); ry++)
+			if (false)
 				{
-				for (int rx = 0; rx < bi.getWidth(); rx++)
-					System.out.format("%02X ",bi.getRGB(rx,ry) & 0xFF);
-				System.out.println();
+				// Output the results
+				System.out.println(ofgl[ind].origin + ", " + ofgl[ind].baseline + ", " + ofgl[ind].advance);
+				for (int ry = 0; ry < bi.getHeight(); ry++)
+					{
+					for (int rx = 0; rx < bi.getWidth(); rx++)
+						System.out.format("%02X ",bi.getRGB(rx,ry) & 0xFF);
+					System.out.println();
+					}
 				}
 			}
 		}
