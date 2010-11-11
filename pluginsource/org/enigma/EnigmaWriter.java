@@ -438,18 +438,6 @@ public final class EnigmaWriter
 			ofgl[ind].width = bi.getWidth();
 			ofgl[ind].height = bi.getWidth();
 			ofgl[ind].raster = ByteBuffer.allocateDirect(raster.length).put(raster);
-
-			if (false)
-				{
-				// Output the results
-				System.out.println(ofgl[ind].origin + ", " + ofgl[ind].baseline + ", " + ofgl[ind].advance);
-				for (int ry = 0; ry < bi.getHeight(); ry++)
-					{
-					for (int rx = 0; rx < bi.getWidth(); rx++)
-						System.out.format("%02X ",bi.getRGB(rx,ry) & 0xFF);
-					System.out.println();
-					}
-				}
 			}
 		}
 

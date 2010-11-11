@@ -198,6 +198,7 @@ namespace enigma
   }
   inst_iter *link_obj_instance(object_basic* who, int oid)
   {
+    objects[oid].count++;
     return objects[oid].add_inst(who);
   }
 
