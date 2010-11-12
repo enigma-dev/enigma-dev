@@ -6,6 +6,8 @@
  * See LICENSE for details.
  */
 
+#include "sub/Image.h"
+
 struct EnigmaCallbacks
 {
  //Opens the EnigmaFrame
@@ -22,4 +24,7 @@ struct EnigmaCallbacks
 
  //Applies a given text to the progress bar
  void (*cot) (const char *);
+
+ //Compresses data. Note image width/height unused.
+ Image* (*ccd) (char *, int);
 };

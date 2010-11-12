@@ -8,6 +8,8 @@
  * instead, if you like. Version 3, or any later version.
  */
 
+#include "sub/Image.h"
+
 struct EnigmaCallbacks
 {
  //Opens the EnigmaFrame
@@ -31,6 +33,10 @@ struct EnigmaCallbacks
  
  //Ceases to redirect from a file.
  void (*output_redirect_reset) ();
+
+
+ //Compresses data. Note image width/height unused.
+ Image* (*ide_compress_data) (char *, int);
 };
 
 //Opens the EnigmaFrame
@@ -48,3 +54,6 @@ extern void (*ide_dia_progress_text) (const char *);
 extern void (*ide_output_redirect_file) (const char *);
 //Ceases to redirect from a file.
 extern void (*ide_output_redirect_reset) ();
+
+//Compresses data. Note image width/height unused.
+extern Image* (*ide_compress_data) (char *, int);

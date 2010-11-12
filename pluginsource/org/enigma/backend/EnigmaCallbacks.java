@@ -8,15 +8,20 @@
 
 package org.enigma.backend;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.zip.Deflater;
 
 import org.enigma.EnigmaFrame;
+import org.enigma.backend.sub.Image;
 
 import com.sun.jna.Callback;
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 public class EnigmaCallbacks extends Structure
@@ -28,7 +33,7 @@ public class EnigmaCallbacks extends Structure
 	public Callback cot = new OutputTip(); //void (*cot) (String)
 	public Callback cof = new OpenFile(); //void (*cof) (String)
 	public Callback ccf = new CloseFile(); //void (*ccf) (void)
-//	public Callback ccd = new CompressData(); //void (*ccd) ()
+	public Callback ccd = new CompressData(); //Image (*ccd) (byte[], int)
 
 	public EnigmaCallbacks(EnigmaFrame ef)
 		{
@@ -180,10 +185,13 @@ public class EnigmaCallbacks extends Structure
 			}
 		}
 
-	/*public static class CompressData implements Callback
+	public static class CompressData implements Callback
 		{
-		public int callback(byte[] inData, int size, ByteBuffer outData)
+		public Image callback(Pointer data, int size)
 			{
+			byte[] inData = data.getByteArray(0,size);
+			Image ret = new Image.ByReference();
+
 			Deflater compresser = new Deflater();
 			compresser.setInput(inData,0,size);
 			compresser.finish();
@@ -196,7 +204,10 @@ public class EnigmaCallbacks extends Structure
 				}
 			baos.toByteArray();
 
-			return baos.size();
+			ret.dataSize = baos.size();
+			ret.data = ByteBuffer.allocateDirect(baos.size()).put(baos.toByteArray());
+
+			return ret;
 			}
-		}*/
+		}
 	}

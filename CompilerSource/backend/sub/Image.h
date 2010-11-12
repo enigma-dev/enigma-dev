@@ -13,7 +13,7 @@ struct Image
 {
 	int width;
 	int height;
-	byte *data; //zlib compressed RGBA
+	char *data; //zlib compressed RGBA
 	int dataSize;
 };
 

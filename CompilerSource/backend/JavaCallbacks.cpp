@@ -26,10 +26,12 @@
 \********************************************************************************/
 
 #include <stdio.h>
+#include "sub/Image.h"
 
 void javano_signal() { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
 void javano_signal_i(int) { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
 void javano_signal_cstr(const char*) { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
+Image *javano_signal_buffer(char *, int) { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); return NULL; }
 
 //Opens the EnigmaFrame
 void (*ide_dia_open) () = javano_signal;
@@ -46,3 +48,6 @@ void (*ide_dia_progress_text) (const char *) = javano_signal_cstr;
 void (*ide_output_redirect_file) (const char *) = javano_signal_cstr;
 //Opens the EnigmaFrame
 void (*ide_output_redirect_reset) () = javano_signal;
+
+//Compresses data. Note image width/height unused.
+Image* (*ide_compress_data) (char *, int) = javano_signal_buffer;
