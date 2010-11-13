@@ -1026,7 +1026,7 @@
 		<Unit filename="Universal_System/object.h" />
 		<Unit filename="Universal_System/planar_object.cpp" />
 		<Unit filename="Universal_System/planar_object.h" />
-		<Unit filename="Universal_System/psuedo_components.h" />
+		<Unit filename="Universal_System/pseudo_components.h" />
 		<Unit filename="Universal_System/rectpack.cpp" />
 		<Unit filename="Universal_System/rectpack.h" />
 		<Unit filename="Universal_System/reflexive_types.cpp" />
