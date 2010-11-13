@@ -96,7 +96,6 @@ extern int amain();
 
 #include "Universal_System/collisions_object.h"
 
-#include "Universal_System/objecttable.h"
 #include "Universal_System/object.h"
 #include "Universal_System/instance.h"
 #include "Universal_System/roomsystem.h"
@@ -104,7 +103,6 @@ extern int amain();
 #include "Universal_System/globalupdate.h"
 
 #include "Universal_System/WITHconstruct.h"
-#include "Universal_System/OBJaccess.h"
 
 
 
@@ -137,6 +135,8 @@ extern int amain();
   
   #include "Universal_System/instance_create.h"
 #endif
+
+#include "Universal_System/pseudo_components.h"
 
 namespace enigma
 {
