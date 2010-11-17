@@ -34,7 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 
@@ -69,6 +71,9 @@ import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.file.GmFormatException;
+import org.lateralgm.jedit.GMLKeywords;
+import org.lateralgm.jedit.GMLKeywords.Construct;
+import org.lateralgm.jedit.GMLKeywords.Function;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.messages.Messages;
@@ -132,7 +137,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 					ENIGMA_READY = true;
 					initEnigmaLib();
-					if (GCC_LOCATED) DRIVER.definitionsModified(es.definitions,es.toTargetYaml());
+					if (GCC_LOCATED)
+						{
+						DRIVER.definitionsModified(es.definitions,es.toTargetYaml());
+						populateKeywords();
+						}
 					}
 			}.start();
 		}
@@ -307,6 +316,34 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		node.add(new EnigmaNode("Enigma Term"));*/
 
 		LGM.tree.updateUI();
+		}
+
+	public void populateKeywords()
+		{
+		List<Function> fl = new ArrayList<Function>();
+		Set<Construct> cl = new HashSet<Construct>();
+		String res = DRIVER.first_available_resource();
+		while (res != null)
+			{
+			if (nameRegex.matcher(res).matches())
+				{
+				if (DRIVER.resource_isFunction())
+					{
+					int min = DRIVER.resource_argCountMin();
+					int max = DRIVER.resource_argCountMax();
+					String args = Integer.toString(min);
+					if (min != max) args += "-" + max;
+					fl.add(new Function(res,args,""));
+					}
+				//					else if (DRIVER.resource_isGlobal()) rl.add(res);
+				else if (DRIVER.resource_isTypeName()) cl.add(new Construct(res));
+				}
+			res = DRIVER.next_available_resource();
+			}
+		GMLKeywords.FUNCTIONS = fl.toArray(new Function[0]);
+		for (Construct c : GMLKeywords.CONSTRUCTS)
+			cl.add(c);
+		GMLKeywords.CONSTRUCTS = cl.toArray(new Construct[0]);
 		}
 
 	public void applyBackground(String bgloc)
@@ -528,7 +565,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	private MDIFrame keywordListFrames[] = new MDIFrame[3];
 	private KeywordListModel keywordLists[] = new KeywordListModel[3];
-	private final static Pattern nameRegex = Pattern.compile("[a-zA-][a-zA-Z0-9_]*");
+	private final static Pattern nameRegex = Pattern.compile("[a-zA-Z][a-zA-Z0-9_]*");
 
 	public void showKeywordListFrame(final int mode)
 		{
@@ -639,8 +676,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						{
 						int min = DRIVER.resource_argCountMin();
 						int max = DRIVER.resource_argCountMax();
-						res += "(" + DRIVER.resource_argCountMin();
-						if (min != max) res += "-" + DRIVER.resource_argCountMax();
+						res += "(" + min;
+						if (min != max) res += "-" + max;
 						res += ")";
 						rl.add(res);
 						}
