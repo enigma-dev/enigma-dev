@@ -93,7 +93,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
     // Here we calculate the bbox
     if (!prop)
        glyphmetrics[i].x = 0,   glyphmetrics[i].y = 0,
-       glyphmetrics[i].w = gwm, glyphmetrics[i].h = ghm;
+       glyphmetrics[i].w = gwm-1, glyphmetrics[i].h = ghm-1;
     else
     {
       glyphmetrics[i].x = gwm, glyphmetrics[i].y = ghm,
@@ -115,8 +115,8 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
     }
     font->glyphs[i].x = glyphmetrics[i].x; // Save these metrics while x and y are still relative to each glyph
     font->glyphs[i].y = glyphmetrics[i].y;
-    font->glyphs[i].x2 = glyphmetrics[i].w+1; // And while w and h are still the right and bottom edge coordinates
-    font->glyphs[i].y2 = glyphmetrics[i].h+1;
+    font->glyphs[i].x2 = glyphmetrics[i].w + 1; // And while w and h are still the right and bottom edge coordinates
+    font->glyphs[i].y2 = glyphmetrics[i].h + 1;
     
     font->glyphs[i].xs = glyphmetrics[i].w + sep; // This is just user-specified for sprite-loaded fonts
     

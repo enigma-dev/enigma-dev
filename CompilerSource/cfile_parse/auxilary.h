@@ -2,7 +2,6 @@ namespace ass
 {
   template<class a> struct b {};
   typedef b
-  #pragma debug_entry_point
   <int> d;
   typedef b c;
   c<int> e;
@@ -41,9 +40,14 @@ namespace ass
 #include <cstdio>
 #include <cmath>
 
+#include <string.h>
+
 //#include "../ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
 
 using namespace std;
+vector<int
+#pragma debug_entry_point
+> a;
 
 //#include "../../ENIGMAsystem/SHELL/SHELLmain.cpp"
 

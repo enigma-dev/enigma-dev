@@ -151,6 +151,7 @@ externs* scope_get_using(externs* scope);
 externs* scope_get_using_ie(externs* scope);
 externs* temp_get_specializations(externs* scope);
 externs* temp_get_specializations_ie(externs* scope);
+externs* temp_get_instantiations(externs* scope);
 extiter scope_find_member(string name);
 
 extern externs* ext_retriever_var;

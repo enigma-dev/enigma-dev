@@ -107,6 +107,9 @@ externs *type_lookup_op_result(externs* t1, string op, externs* t2 = NULL)
   current_scope = t;
   if (!f)
     return NULL;
+  externs *rt = ext_retriever_var->type;
+  if (rt->parent == t1) // t1's type is a member of t1: must be a template
+    return ext_retriever_var->type;
   return ext_retriever_var->type;
 }
 
@@ -326,6 +329,36 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
       pos += 2; continue;
     }
     
+    if (findme == "." or (findme == "-" and exp[pos+1] == '>'))
+    {
+      cout << "DOT LOL" << endl;
+      pos += 1 + (exp[pos+1]=='>');
+      const pt spos = pos;
+      if (!is_letter(exp[pos]))
+        return NULL;
+      while (is_letterd(exp[++pos]));
+      string member = exp.substr(spos,pos-spos);
+      
+      externs *ct = perf.top().type, *nt = NULL; extiter qit;
+      bool tf = ((qit = ct->members.find(member)) != ct->members.end());
+      if (tf) nt = qit->second;
+        
+      while (!tf and ct->flags & EXTFLAG_TYPEDEF and ct->type) {
+        ct = ct->type, tf = ((qit = ct->members.find(member)) != ct->members.end());
+        if (tf) nt = qit->second;
+      }
+      if (!tf and find_in_all_ancestors_generic(ct,member))
+        ct = ext_retriever_var->parent, nt = ext_retriever_var, tf = true;
+      
+      if (!tf)
+        return NULL;
+      
+      perf.top().type = nt->type;
+      perf.top().pad  = 0; // FIXME: FIX ME
+      
+      continue;
+    }
+    
     opiter it;
     it = ops.find(findme);
     if (findme.length() > 1 and it == ops.end())
@@ -355,18 +388,23 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
       // But if it's a postfix unary, it automatically gets immediate precedence
       if (pflags == ot_unary_post)
       {
-         if (perf.top().prec) // Typical unary postfix
+         if (it->first != "]" and it->first != ")") // Typical unary postfix
            perf.top() = type_op_resolve_upost(perf.top(),it->first);
-           
-          else // Closing parenthesis of some sort
+         else // Closing parenthesis of some sort
+         {
+          while (perf.top().prec) // Pop these until we find matching parenthesis
           {
-            while (perf.top().prec)
-            {
-              onode opand1 = perf.top(); perf.pop();
-              onode ee = type_op_resolve(opand1, perf.top(), isol);
-              if (!ee.type) { puts("SingleResultNull"); return NULL; }
-            }
+            onode opand1 = perf.top(); perf.pop();
+            onode ee = type_op_resolve(opand1, perf.top(), isol);
+            if (!ee.type) { puts("SingleResultNull"); return NULL; }
           }
+          
+          // Evaluate our array subscript/function/whatever.
+          onode opand2 = perf.top(); perf.pop();
+          onode ee = type_op_resolve(perf.top(), opand2, isol);
+          if (!ee.type) { puts("SingleResultNull"); return NULL; }
+          perf.top() <= ee;
+         }
       }
       else // Not a postfix unary: either binary or prefix unary
       if (perf.top().type) // Well, there needs to be something at the top ready to be operated on.

@@ -64,6 +64,7 @@ int handleEvents()
     }
     case KeyRelease: {
         gk=XLookupKeysym(&e.xkey,0);
+        printf("Pressed a key: %d : %d\n", gk, gk & 0xFF);
         if (gk==NoSymbol) return 0;
         if (!(gk & 0xFF00)) actualKey=gk;
         else actualKey=enigma::keymap[gk & 0xFF];
@@ -72,15 +73,13 @@ int handleEvents()
       return 0;
     }
     case ButtonPress: {
-        printf("Pressed a button: %d\n", e.xbutton.button);
-        if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button - 1] = 1;
+        if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 1;
         else if (e.xbutton.button == 4) enigma::mousewheel++;
         else if (e.xbutton.button == 5) enigma::mousewheel--;
       return 0;
     }
     case ButtonRelease: {
-        printf("Released a button: %d\n", e.xbutton.button);
-        if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button - 1] = 0;
+        if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 0;
         else if (e.xbutton.button == 4) enigma::mousewheel++;
         else if (e.xbutton.button == 5) enigma::mousewheel--;
       return 0;

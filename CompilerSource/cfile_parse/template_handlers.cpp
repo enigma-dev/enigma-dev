@@ -58,6 +58,55 @@ struct init_const_types { init_const_types() { //These are acceptable for const-
   constant_types["__static"] = 1; 
   } } init_const_types_now;
 
+string typestring_cram(string exp)
+{
+  pt spos = 0; string ret;
+  for (pt pos = 0; pos < exp.length(); pos++)
+  {
+    if (!is_letter(exp[pos]))
+      goto lbl_constexpression;
+    while (is_letterd(exp[++pos]));
+    cout << "<<";
+    if (!find_extname(exp.substr(spos, pos-spos), 0xFFFFFFFF, 0)) {
+      cout << ">>";
+      goto lbl_constexpression;
+    }
+    cout << ">>";
+    externs *fin = ext_retriever_var;
+    while (fin->flags & EXTFLAG_TYPEDEF and fin->type)
+      fin = fin->type;
+    ret = fin->name;
+  }
+  
+  return ret;
+  
+  lbl_constexpression:
+  return "0";
+}
+
+string typestring_boil_down(string str)
+{
+  string ret; pt spos = 0;
+  for (pt pos = 0; pos < str.length(); pos++)
+  {
+    if (str[pos] == ',' or str[pos] == '<' or str[pos] == '>')
+    {
+      while (is_useless(str[pos]))
+        if (pos++ == spos)
+          spos++;
+      if (pos - spos)
+      {
+        string ttn = str.substr(spos, pos - spos);
+        cout << ttn << " : " << (ttn = typestring_cram(ttn)) << endl;
+        ret += ttn;
+      }
+      spos = pos + 1;
+    }
+    
+  }
+  return ret;
+}
+
 extern externs* builtin_type__int;
 string temp_parse_seg(string seg, externs* tparam_ext, externs **kt = NULL)
 {
@@ -312,7 +361,17 @@ bool access_specialization(externs* &whom, string specs)
     }
     */
     if (it != s->members.end())
+    {
       whom = it->second;
+      return 1;
+    }
   }
+  s = temp_get_instantiations(whom);
+  /*
+  string ospec = typestring_boil_down(specs);
+  pair<extiter,bool> ninst = s->members.insert(pair<string, externs*>(ospec, NULL));
+  if (ninst.second) {
+    ninst.first->second = NULL;
+  }*/
   return 1;
 }

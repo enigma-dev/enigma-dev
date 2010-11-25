@@ -1,8 +1,2 @@
-
-testStruct<int> po4;
-po4.x = 1;
-po4.y = 1;
-
-testStructi po5;
-po5.x = 1;
-po5.y = 1;
+gtklike_table *mt;
+draw_rectangle(do_x+mt.w[i].dx,do_y+mt.w[i].dy,do_x+mt.w[i].dx+mt.w[i].dw,do_y+mt.w[i].dy+mt.w[i].dh,1),

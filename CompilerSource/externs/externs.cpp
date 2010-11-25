@@ -215,6 +215,17 @@ externs* temp_get_specializations_ie(externs* scope)
   return NULL;
 }
 
+externs* temp_get_instantiations(externs* scope)
+{
+  extiter u = scope->members.find("<instantiations>");
+  if (u != scope->members.end())
+    return u->second;
+
+  externs* rv = new externs("<instantiations>",scope,NULL,EXTFLAG_NAMESPACE);
+  //scope->members["<instantiations>"] = rv;
+  return rv;
+}
+
 externs* scope_get_using_ie(externs* scope)
 {
   extiter u = scope->members.find(NAME__USING_SCOPE);

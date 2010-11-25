@@ -218,6 +218,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     }
     else if (is_digit(code[pos]))
     {
+      if (code[pos] == '0' and code[pos + 1] == 'x')
+        { pos++; goto HEXADECIMAL_LABEL; }
       if (bpos and synt[bpos-1] == '.')
         synt[bpos-1] = '0';
       else //We don't want to remove significant zeroes, only octal-inducing ones
@@ -284,16 +286,22 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         while (pos < code.length() and (code[pos++] != '*' or code[pos] != '/'));
         pos++; continue;
       }
+      else if (code[pos] != '=')
+      {
+        codo[bpos] = synt[bpos] = last_token = '/', bpos++;
+        codo += "(double)";
+        synt += "(double)";
+        for (int i = 0; "(double)"[i]; i++)
+          codo[bpos] = "(double)"[i], synt[bpos] = 'c', bpos++;
+        continue;
+      }
       codo[bpos] = synt[bpos] = last_token = '/', bpos++;
-      codo += "(double)";
-      synt += "(double)";
-      for (int i = 0; "(double)"[i]; i++)
-        codo[bpos] = "(double)"[i], synt[bpos] = 'c', bpos++;
       continue;
     }
     
     if (code[pos] == '$')
     {
+      HEXADECIMAL_LABEL:
       codo.append(1,' ');
       synt.append(1,' ');
       codo[bpos] = synt[bpos] = '0', bpos++;

@@ -214,11 +214,11 @@ pt move_to_beginning(string& code, string& synt, pt pos)
   hell:
   if (pos) {
     if (synt[pos-1] == '.')
-      { pos--; goto backloop; }
+      { pos-=2; goto backloop; }
     if (synt[pos-1] == '>' and pos - 1 and synt[pos-2] == '-')
-      { pos -= 2; goto backloop; }
+      { pos -= 3; goto backloop; }
     if (synt[pos-1] == ':' and synt[pos-2] == ':')
-      { pos -= 2; goto backloop; }
+      { pos -= 3; goto backloop; }
   }
   
   return pos;
@@ -251,7 +251,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       {
         indecl = true; dtype = code.substr(spos,pos-spos);
         dpre = dsuf = "";
-        cout << "TYPE[" << dtype << "]" << endl;
+        cout << "TYPE [" << dtype << "]" << endl;
       }
       pos--; continue;
     }

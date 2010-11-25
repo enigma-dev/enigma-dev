@@ -250,8 +250,11 @@ namespace enigma
     keymap[0x53] = 39;  //vk_right;
     keymap[0x52] = 38;  //vk_up;
     keymap[0x54] = 40;  //vk_down;
+    keymap[0xE3] = 17;  //vk_control;
     keymap[0xE4] = 17;  //vk_control;
+    keymap[0xE9] = 18;  //vk_alt;
     keymap[0xEA] = 18;  //vk_alt;
+    keymap[0xE1] = 16;  //vk_shift;
     keymap[0xE2] = 16;  //vk_shift;
     keymap[0x0D] = 13;  //vk_enter;
     keymap[0x9E] = 96;  //vk_numpad0;
