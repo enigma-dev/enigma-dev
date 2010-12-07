@@ -60,7 +60,9 @@
     #include "Graphics_Systems/OpenGL/OPENGLStd.h"
     #include "Graphics_Systems/OpenGL/GSsprite.h"
     #include "Graphics_Systems/OpenGL/GSbackground.h"
+
     #include "Graphics_Systems/OpenGL/GSfont.h"
+    #include "Graphics_Systems/OpenGL/GScurves.h"
 #elif ENIGMA_GS_OPENGLES
     #include "Graphics_Systems/OpenGLES/OPENGLStd.h"
     #include "Graphics_Systems/OpenGLES/GSsprite.h"
@@ -128,11 +130,11 @@ extern int amain();
   #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
-  
+
   #if BUILDMODE
     #include "Modes/buildmode.h"
   #endif
-  
+
   #include "Universal_System/instance_create.h"
 #endif
 

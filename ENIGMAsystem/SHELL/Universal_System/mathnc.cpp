@@ -71,6 +71,8 @@ double radtodeg(double x)         { return x*(180.0/M_PI);}
 double lengthdir_x(double len,double dir) { return len *  cos(dir*M_PI/180); }
 double lengthdir_y(double len,double dir) { return len * -sin(dir*M_PI/180); }
 
+double lerp(double x, double y, double a) { return x + ((y-x)*a); }
+
 double direction_difference(double dir1,double dir2) {
 	dir1=fmod(dir2-dir1,360)+180;
 	return dir1-(dir1>360?540:(dir1<0?360:180));
@@ -152,7 +154,7 @@ unsigned int random32()
 			y = (enigma::mt[kk]&UPPER_MASK)|(enigma::mt[kk+1]&LOWER_MASK);
 			enigma::mt[kk] = enigma::mt[kk-227] ^ (y >> 1) ^ mag01[y&1];
 		}
-		
+
 		y = (enigma::mt[623]&UPPER_MASK) | (enigma::mt[0]&LOWER_MASK);
 		enigma::mt[623] = enigma::mt[396] ^ (y >> 1) ^ mag01[y & 1];
 		enigma::mt[624] = 0;

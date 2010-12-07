@@ -61,11 +61,12 @@ void draw_clear(int col)
 int merge_color(int c1,int c2,double amount)
 {
 	amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);
-	return
-    (unsigned char)(__GETR(c1)+(__GETR(c1)-__GETR(c2))*(1-amount))
-  | (unsigned char)(__GETG(c1)+(__GETG(c1)-__GETG(c2))*(1-amount))<<8
-  | (unsigned char)(__GETB(c1)+(__GETB(c1)-__GETB(c2))*(1-amount))<<16;
+    return
+    (unsigned char)(fabs(__GETR(c1)+(__GETR(c2)-__GETR(c1))*amount))
+    | (unsigned char)(fabs(__GETG(c1)+(__GETG(c2)-__GETG(c1))*amount))<<8
+    | (unsigned char)(fabs(__GETB(c1)+(__GETB(c2)-__GETB(c1))*amount))<<16;
 }
+
 void draw_set_color(int color)
 {
 	enigma::currentcolor[0] = __GETR(color);
@@ -117,7 +118,7 @@ int color_get_hue(int c)
 	int r = __GETR(c),g = __GETG(c),b = __GETB(c);
 	int cmpmax = r>g ? (r>b?r:b) : (g>b?g:b);
 	if(!cmpmax) return 0;
-	
+
 	double cmpdel = cmpmax - (r<g ? (r<b?r:b) : (g<b?g:b)); //Maximum difference
 	double h = (r == cmpmax ? (g-b)/cmpdel : (g==cmpmax ? 2-(r-g)/cmpdel : 4+(r-g)/cmpdel));
 	return int((h<0 ? h+6 : h) * 42.5); //42.5 = 60/360*255
@@ -146,14 +147,14 @@ int make_color_hsv(int hue,int saturation,int value)
     red   = bclamp(510 - min(h,     255-h) * 6) * vf,
     green = bclamp(510 - max(85-h,   h-85) * 6) * vf,
     blue  = bclamp(510 - max(170-h, h-170) * 6) * vf;
-  
+
   red   += (v-red)   * (1 - s/255.0);
   green += (v-green) * (1 - s/255.0);
   blue  += (v-blue)  * (1 - s/255.0);
-  
+
   int redr   = int(red);
   int greenr = int(green);
   int bluer  = int(blue);
-  
+
   return (redr>0 ? redr : 0) | (greenr>0 ? (greenr<<8) : 0) | (bluer>0 ? (bluer<<16) : 0);
 }

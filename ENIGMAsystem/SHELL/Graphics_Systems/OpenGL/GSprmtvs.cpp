@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include "OpenGLHeaders.h"
+
 #if PRIMBUFFER
 GLenum __primitivetype[PRIMDEPTH2];
 int __primitivelength[PRIMDEPTH2];
@@ -39,14 +40,24 @@ int __currentpdepth;
 namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
 #define untexture() if(enigma::cur_bou_tha_noo_sho_eve_cha_eve) glBindTexture(GL_TEXTURE_2D,enigma::cur_bou_tha_noo_sho_eve_cha_eve = 0);
 
-GLenum ptypes_by_id[16] = { 
-  GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, 
+GLenum ptypes_by_id[16] = {
+  GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES,
   GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_LINE_LOOP, GL_QUADS,
-  GL_QUAD_STRIP, GL_POLYGON, 
-  
+  GL_QUAD_STRIP, GL_POLYGON,
+
   //These are padding.
   GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS
 };
+
+void draw_set_primitive_aa(bool enable, int quality)
+{
+    if (enable==1){
+        glEnable(GL_LINE_SMOOTH);
+        glHint(GL_LINE_SMOOTH_HINT, quality);
+    }else{
+        glDisable(GL_LINE_SMOOTH);
+    }
+}
 
 int draw_primitive_begin(int dink)
 {
@@ -95,7 +106,7 @@ int draw_vertex(double x, double y)
     untexture();
     __primitivexy[pco][__currentpdepth][0]=x;
     __primitivexy[pco][__currentpdepth][1]=y;
-    
+
     if(pco+1>PRIMBUFFER) show_error("Max point count exceeded",0);
 	#endif
 	return 0;

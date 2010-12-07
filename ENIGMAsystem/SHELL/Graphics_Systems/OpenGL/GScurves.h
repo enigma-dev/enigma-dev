@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2010 Harijs Grînbergs                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,60 +25,25 @@
 **                                                                              **
 \********************************************************************************/
 
-//Before anyone else includes math.h, let's make sure we
-//Don't get bitten by those damn bessel functions.
-#define j0 bessel_j0
-  #define j1 bessel_j1
-  #define jn bessel_jn
-  #define y0 bessel_y0
-  #define y1 bessel_y1
-  #define yn bessel_yn
-    #include <cmath>
-  #undef j1
-  #undef j0
-  #undef jn
-  #undef y1
-  #undef y0
-#undef yn
-
-double abs(struct variant x);
-double abs(struct var x);
-
-const double pi = M_PI;
-
-extern double random(double n);
-int random_set_seed(int seed);
-int random_get_seed();
-int randomize();
-int random_integer(int x);
-int random32();
-double mtrandom();
-int mtrandom_seed(int x);
-
-double round(double x);
-double sqr(double x);
-double power(double x,double power);
-double ln(double x);
-double logn(double n,double x);
-double log2(double x);
-
-double arcsin(double x);
-double arccos(double x);
-double arctan(double x);
-double arctan2(double y,double x);
-
-double min(double value1, double value2);
-double max(double value1, double value2);
-int sign(double x);
-double frac(double x);
-
-double degtorad(double x);
-double radtodeg(double x);
-
-double lerp(double x, double y, double a);
-
-double lengthdir_x(double len,double dir);
-double lengthdir_y(double len,double dir);
-double direction_difference(double dir1,double dir2);
-double point_direction(double x1,double y1,double x2,double y2);
-double point_distance(double x1, double y1, double x2, double y2);
+void draw_bezier_quadratic(float x1,float y1,float x2,float y2,float x3,float y3);
+void draw_bezier_cubic(float x1,float y1,float x2,float y2,float x3,float y3, float x4, float y4);
+void draw_set_curve_color(int c1, int c2);
+void draw_set_curve_alpha(float a1, float a2);
+void draw_set_curve_mode(int mode);
+void draw_set_curve_detail(int detail);
+void draw_set_curve_width(int width);
+float draw_bezier_quadratic_x(float x1,float y1,float x2,float y2,float x3,float y3, float t);
+float draw_bezier_quadratic_y(float x1,float y1,float x2,float y2,float x3,float y3, float t);
+float draw_bezier_cubic_x(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float t);
+float draw_bezier_cubic_y(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float t);
+void draw_spline_part(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2);
+void draw_spline2c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
+void draw_spline3(float x1, float y1, float x2, float y2, float x3, float y3);
+void draw_spline3c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5);
+void draw_spline4(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
+void draw_spline4c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5, float x6, float y6);
+void draw_spline_begin(int mode);
+int draw_spline_vertex(float x, float y);
+int draw_spline_vertex_color(float x, float y, int col, float alpha);
+void draw_spline_end();
+int draw_spline_optimized_end();
