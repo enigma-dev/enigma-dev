@@ -38,6 +38,7 @@ enum {
   c_maroon  = 0x000080,
   c_navy    = 0x800000,
   c_olive   = 0x008080,
+  c_orange  = 0x0080FF,
   c_purple  = 0x800080,
   c_red     = 0x0000FF,
   c_silver  = 0xC0C0C0,

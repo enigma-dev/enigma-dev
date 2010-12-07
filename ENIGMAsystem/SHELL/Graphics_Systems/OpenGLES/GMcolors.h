@@ -28,7 +28,7 @@
 /**Some color functions********************************************************\
 
 c_aqua, c_black, c_blue, c_dkgray, c_fuchsia, c_gray, c_green, c_lime, c_ltgray,
-c_maroon, c_navy, c_olive, c_purple, c_red, c_silver ,c_teal, c_white, c_yellow
+c_maroon, c_navy, c_olive, c_orange, c_purple, c_red, c_silver ,c_teal, c_white, c_yellow
 
 int draw_clear(double color)
 int draw_clear_alpha(double color, double alpha)
@@ -61,6 +61,7 @@ int make_color_hsv(double hue,double saturation,double value)
 #define c_maroon    128
 #define c_navy      8388608
 #define c_olive     32896
+#define c_orange    33023
 #define c_purple    8388736
 #define c_red       255
 #define c_silver    12632256
