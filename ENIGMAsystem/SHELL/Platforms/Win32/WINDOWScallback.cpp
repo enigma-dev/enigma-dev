@@ -27,6 +27,10 @@
 
 #include <windows.h>
 
+#ifndef WM_MOUSEHWHEEL
+  #define WM_MOUSEHWHEEL 0x020E
+#endif
+
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
 
