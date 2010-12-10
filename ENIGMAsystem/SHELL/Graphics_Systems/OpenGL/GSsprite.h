@@ -21,11 +21,11 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 /*
- * Sprite structure. 
+ * Sprite structure.
  * All sprites are stored in this
  */
 #include "../../Universal_System/spritestruct.h"
@@ -36,10 +36,13 @@ int draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h
 int draw_sprite_part(int spr,int subimg,double left,double top,double width,double height,double x,double y);
 int draw_sprite_part_offset(int spr,int subimg,double left,double top,double width,double height,double x,double y);
 int draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double yscale,double rot,int color,double alpha);
-//draw_sprite_stretched_ext(sprite,subimg,x,y,w,h,color,alpha)
 //draw_sprite_tiled_ext(sprite,subimg,x,y,xscale,yscale,color,alpha)
+int draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,double h, int blend, double alpha);
 int draw_sprite_part_ext(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha);
-int draw_sprite_general(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double alpha);
+int draw_sprite_general(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1, double a2, double a3, double a4);
+
+int draw_sprite_tiled(int spr,int subimg,double x,double y);
+int draw_sprite_tiled_ext(int spr,int subimg,double x,double y,double xscale,double yscale,int color,double alpha);
 
 int sprite_exists(int sprite);
 int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset);
