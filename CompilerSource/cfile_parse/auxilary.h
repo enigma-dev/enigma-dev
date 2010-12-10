@@ -40,13 +40,12 @@ namespace ass
 #include <cstdio>
 #include <cmath>
 
-#include <string.h>
+//#include "Universal_System/lua_table.h"
 
 //#include "../ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
 
 using namespace std;
 vector<int
-#pragma debug_entry_point
 > a;
 
 //#include "../../ENIGMAsystem/SHELL/SHELLmain.cpp"

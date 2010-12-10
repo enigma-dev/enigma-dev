@@ -32,8 +32,6 @@
 #include <string.h> // Memcpy
 #include <stdlib.h> // Malloc, Realloc, Free
 
-using namespace std;
-
 /**
   This file implements a Lua-table-like structure. It borrows ideas not only from 
   Lua, but from STL containers. It also borrows the entirety of std::map. This should
@@ -51,7 +49,7 @@ using namespace std;
 template <class T> struct lua_table
 {
   // This is what kind of sparse container we'll be using
-  typedef map<size_t,T> lua_map_type;
+  typedef std::map<size_t,T> lua_map_type;
   typedef typename lua_map_type::iterator shiterator;
 
   // These are size calculations for the buffer we'll keep

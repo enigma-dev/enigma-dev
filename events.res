@@ -156,13 +156,13 @@ mousewheelup: 6
 	Name: Mouse Wheel Up
 	Mode: Special
 	Case: 60
-	Super Check: mouse_get_wheel_vangle() > 0
+	Super Check: mouse_vscrolls > 0
 
 mousewheeldown: 6
 	Name: Mouse Wheel Down
 	Mode: Special
 	Case: 61
-	Super Check: mouse_get_wheel_vangle() < 0
+	Super Check: mouse_vscrolls < 0
 
 globalleftbutton: 6
 	Name: Global Left Button

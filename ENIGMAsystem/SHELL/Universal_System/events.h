@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+This file is antiquated. It is to be deleted ASAP.
+If this is erroring, we have a problem.
 
 namespace enigma
 {
@@ -192,7 +194,7 @@ void ENIGMA_events(void)
 	for (int i=0;i<3;i++)
 		enigma::last_mousestatus[i]=enigma::mousestatus[i];
   
-	enigma::mousewheel=0;
+	enigma::mouse GARBAGE wheel=0;
 	window_set_caption(room_caption);
 	
 	for (int i=0; i<enigma::cleancount; i++)

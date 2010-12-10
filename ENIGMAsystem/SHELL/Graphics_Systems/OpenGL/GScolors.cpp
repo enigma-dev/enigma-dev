@@ -61,10 +61,9 @@ void draw_clear(int col)
 int merge_color(int c1,int c2,double amount)
 {
 	amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);
-    return
-    (unsigned char)(fabs(__GETR(c1)+(__GETR(c2)-__GETR(c1))*amount))
-    | (unsigned char)(fabs(__GETG(c1)+(__GETG(c2)-__GETG(c1))*amount))<<8
-    | (unsigned char)(fabs(__GETB(c1)+(__GETB(c2)-__GETB(c1))*amount))<<16;
+  return (unsigned char)(fabs(__GETR(c1)+(__GETR(c2)-__GETR(c1))*amount))
+  |      (unsigned char)(fabs(__GETG(c1)+(__GETG(c2)-__GETG(c1))*amount))<<8
+  |      (unsigned char)(fabs(__GETB(c1)+(__GETB(c2)-__GETB(c1))*amount))<<16;
 }
 
 void draw_set_color(int color)

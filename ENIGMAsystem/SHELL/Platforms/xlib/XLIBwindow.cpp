@@ -34,6 +34,8 @@
 //#include <GL/gl.h>
 //#include <GL/glu.h>
 
+#include "../../Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+
 Display *disp;
 Window win;
 GC gc;
@@ -246,52 +248,58 @@ namespace enigma
   char keymap[256];
   void initkeymap()
   {
-    keymap[0x51] = 37;  //vk_left;
-    keymap[0x53] = 39;  //vk_right;
-    keymap[0x52] = 38;  //vk_up;
-    keymap[0x54] = 40;  //vk_down;
-    keymap[0xE3] = 17;  //vk_control;
-    keymap[0xE4] = 17;  //vk_control;
-    keymap[0xE9] = 18;  //vk_alt;
-    keymap[0xEA] = 18;  //vk_alt;
-    keymap[0xE1] = 16;  //vk_shift;
-    keymap[0xE2] = 16;  //vk_shift;
-    keymap[0x0D] = 13;  //vk_enter;
-    keymap[0x9E] = 96;  //vk_numpad0;
-    keymap[0x9C] = 97;  //vk_numpad1;
-    keymap[0x99] = 98;  //vk_numpad2;
-    keymap[0x9B] = 99;  //vk_numpad3;
-    keymap[0x96] = 100; //vk_numpad4;
-    keymap[0x9D] = 101; //vk_numpad5;
-    keymap[0x98] = 102; //vk_numpad6;
-    keymap[0x95] = 103; //vk_numpad7;
-    keymap[0x97] = 104; //vk_numpad8;
-    keymap[0x9A] = 105; //vk_numpad9;
-    keymap[0xAF] = 111; //vk_divide;
-    keymap[0xAA] = 106; //vk_multiply;
-    keymap[0xAD] = 109; //vk_subtract;
-    keymap[0xAB] = 107; //vk_add;
-    keymap[0x9F] = 110; //vk_decimal;
-    keymap[0xBE] = 112; //vk_f1;
-    keymap[0xBF] = 113; //vk_f2;
-    keymap[0xC0] = 114; //vk_f3;
-    keymap[0xC1] = 115; //vk_f4;
-    keymap[0xC2] = 116; //vk_f5;
-    keymap[0xC3] = 117; //vk_f6;
-    keymap[0xC4] = 118; //vk_f7;
-    keymap[0xC5] = 119; //vk_f8;
-    keymap[0xC6] = 120; //vk_f9;
-    keymap[0xC7] = 121; //vk_f10;
-    keymap[0xC8] = 122; //vk_f11;
-    keymap[0xC9] = 123; //vk_f12;
-    keymap[0x08] = 8;   //vk_backspace;
-    keymap[0x1B] = 27;  //vk_escape;
-    keymap[0x50] = 36;  //vk_home;
-    keymap[0x57] = 35;  //vk_end;
-    keymap[0x55] = 33;  //vk_pageup;
-    keymap[0x56] = 34;  //vk_pagedown;
-    keymap[0xFF] = 46;  //vk_delete;
-    keymap[0x63] = 45;  //vk_insert;
+    keymap[0x51] = vk_left;
+    keymap[0x53] = vk_right;
+    keymap[0x52] = vk_up;
+    keymap[0x54] = vk_down;
+    keymap[0xE3] = vk_control;
+    keymap[0xE4] = vk_control;
+    keymap[0xE9] = vk_alt;
+    keymap[0xEA] = vk_alt;
+    keymap[0xE1] = vk_shift;
+    keymap[0xE2] = vk_shift;
+    keymap[0x0D] = vk_enter;
+    keymap[0x85] = vk_lsuper;
+    keymap[0x86] = vk_rsuper;
+    keymap[0x17] = vk_tab;
+    keymap[0x42] = vk_caps;
+    keymap[0x4E] = vk_scroll;
+    keymap[0x7F] = vk_pause;
+    keymap[0x9E] = vk_numpad0;
+    keymap[0x9C] = vk_numpad1;
+    keymap[0x99] = vk_numpad2;
+    keymap[0x9B] = vk_numpad3;
+    keymap[0x96] = vk_numpad4;
+    keymap[0x9D] = vk_numpad5;
+    keymap[0x98] = vk_numpad6;
+    keymap[0x95] = vk_numpad7;
+    keymap[0x97] = vk_numpad8;
+    keymap[0x9A] = vk_numpad9;
+    keymap[0xAF] = vk_divide;
+    keymap[0xAA] = vk_multiply;
+    keymap[0xAD] = vk_subtract;
+    keymap[0xAB] = vk_add;
+    keymap[0x9F] = vk_decimal;
+    keymap[0xBE] = vk_f1;
+    keymap[0xBF] = vk_f2;
+    keymap[0xC0] = vk_f3;
+    keymap[0xC1] = vk_f4;
+    keymap[0xC2] = vk_f5;
+    keymap[0xC3] = vk_f6;
+    keymap[0xC4] = vk_f7;
+    keymap[0xC5] = vk_f8;
+    keymap[0xC6] = vk_f9;
+    keymap[0xC7] = vk_f10;
+    keymap[0xC8] = vk_f11;
+    keymap[0xC9] = vk_f12;
+    keymap[0x08] = vk_backspace;
+    keymap[0x1B] = vk_escape;
+    keymap[0x50] = vk_home;
+    keymap[0x57] = vk_end;
+    keymap[0x55] = vk_pageup;
+    keymap[0x56] = vk_pagedown;
+    keymap[0xFF] = vk_delete;
+    keymap[0x63] = vk_insert;
    }
 }
 

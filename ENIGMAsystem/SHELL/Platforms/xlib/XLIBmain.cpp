@@ -74,14 +74,22 @@ int handleEvents()
     }
     case ButtonPress: {
         if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 1;
-        else if (e.xbutton.button == 4) enigma::mousewheel++;
-        else if (e.xbutton.button == 5) enigma::mousewheel--;
+        else switch (e.xbutton.button) {
+          case 4: mouse_vscrolls++;
+          case 5: mouse_vscrolls--;
+          case 6: mouse_hscrolls++;
+          case 7: mouse_hscrolls--;
+        }
       return 0;
     }
     case ButtonRelease: {
         if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 0;
-        else if (e.xbutton.button == 4) enigma::mousewheel++;
-        else if (e.xbutton.button == 5) enigma::mousewheel--;
+        else switch (e.xbutton.button) {
+          case 4: mouse_vscrolls++;
+          case 5: mouse_vscrolls--;
+          case 6: mouse_hscrolls++;
+          case 7: mouse_hscrolls--;
+        }
       return 0;
     }
     case Expose: {
@@ -125,7 +133,7 @@ namespace enigma
     for(int i=0;i<256;i++){
       last_keybdstatus[i] = keybdstatus[i];
     }
-    mousewheel = 0;
+    mouse_hscrolls = mouse_vscrolls = 0;
   }
   
   int game_ending();

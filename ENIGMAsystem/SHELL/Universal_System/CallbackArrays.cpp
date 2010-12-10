@@ -31,7 +31,6 @@ namespace enigma
 	char last_mousestatus[3];
 	char last_keybdstatus[256];
 	char keybdstatus[256];
-	short mousewheel;
 }
 
 #include "CallbackArrays.h"
@@ -86,10 +85,9 @@ bool mouse_check_button_released(int button)
 	}
 }
 
-int mouse_get_wheel_vangle()
-{
-  return enigma::mousewheel;
-}
+
+short mouse_hscrolls = 0;
+short mouse_vscrolls = 0;
 
 bool keyboard_check(int key)
 {

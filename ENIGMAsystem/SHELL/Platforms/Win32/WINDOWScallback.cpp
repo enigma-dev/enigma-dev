@@ -27,10 +27,13 @@
 
 #include <windows.h>
 
+extern short mouse_hscrolls;
+extern short mouse_vscrolls;
+
 namespace enigma
 {
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
-    extern short mousewheel;
+    static short hdeltadelta = 0, vdeltadelta = 0;
 
     LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam)
     {
@@ -81,7 +84,15 @@ namespace enigma
             return 0;
 
         case WM_MOUSEWHEEL:
-             mousewheel += (int)HIWORD(wParam) / 60;
+             vdeltadelta += (int)HIWORD(wParam);
+             mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
+             vdeltadelta %= WHEEL_DELTA;
+             return 0;
+        
+        case WM_MOUSEHWHEEL:
+             hdeltadelta += (int)HIWORD(wParam);
+             mouse_hscrolls += hdeltadelta / WHEEL_DELTA;
+             hdeltadelta %= WHEEL_DELTA;
              return 0;
 
         case WM_LBUTTONUP:   mousestatus[0]=0; return 0;
@@ -117,6 +128,6 @@ namespace enigma
       for(int i=0;i<256;i++){
         last_keybdstatus[i] = keybdstatus[i];
       }
-      mousewheel = 0;
+      mouse_hscrolls = mouse_vscrolls = 0;
     }
 }

@@ -25,30 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-/**Standard drawing functions**************************************************\
-
-int draw_point(double x, double y)
-int draw_point_color(double x, double y,int color)
-int draw_line(double x1,double y1,double x2,double y2)
-int draw_line_width(double x1,double y1,double x2,double y2,double width)
-int draw_line_color(double x1,double y1,double x2,double y2,int color1,int color2)
-int draw_line_width_color(double x1,double y1,double x2,double y2,double width,int color1,int color2)
-int draw_rectangle(double x1,double y1,double x2,double y2,double outline)
-int draw_rectangle_angle(double x1,double y1,double x2,double y2,int outline,double angle)
-int draw_rectangle_color(double x1,double y1,double x2,double y2,int color1,int color2,int color3,int color4,int outline)
-int draw_set_circle_precision(int precision)
-int draw_circle(double x, double y, double radius, double outline)
-int draw_circle_color(double x, double y, double radius, int color1, int color2, double outline)
-int draw_circle_smooth(double x, double y, double radius, int outline)
-int draw_circle_smooth_color(double x, double y, double radius, double outline, int color1, int color2)
-int draw_ellipse(double x1,double y1,double x2,double y2,double outline)
-int draw_triangle(double x1,double y1,double x2,double y2,double x3,double y3,double outline)
-int draw_triangle_color(double x1,double y1,double x2,double y2,double x3,double y3,int col1,int col2,int col3,double outline)
-int draw_roundrect(double x1,double y1,double x2,double y2,double outline)
-
-\******************************************************************************/
-
-
 int draw_point(float x, float y);
 int draw_point_color(float x, float y,int color);
 int draw_line(float x1,float y1,float x2,float y2);

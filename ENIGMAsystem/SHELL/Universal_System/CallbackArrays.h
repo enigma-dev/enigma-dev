@@ -41,73 +41,94 @@ namespace enigma
   extern char last_mousestatus[3];
   extern char last_keybdstatus[256];
   extern char keybdstatus[256];
-  extern short mousewheel;
 }
 
-const int mb_any    =-1;
-const int mb_none   =0;
-const int mb_left   =1;
-const int mb_right  =2;
-const int mb_middle =3;
+enum {
+  mb_any    = -1,
+  mb_none   =  0,
+  mb_left   =  1,
+  mb_right  =  2,
+  mb_middle =  3,
+};
 
-const int vk_anykey = 1;
-const int vk_nokey  = 0;
+enum {
+  vk_anykey = 1,
+  vk_nokey  = 0,
+  
+  vk_left  = 37,
+  vk_right = 39,
+  vk_up    = 38,
+  vk_down  = 40,
+  
+  vk_tab    = 9,
+  vk_enter  = 13,
+  vk_shift  = 16,
+  vk_control= 17,
+  vk_alt    = 18,
+  vk_space  = 32,
+  
+  vk_numpad0 = 96,
+  vk_numpad1 = 97,
+  vk_numpad2 = 98,
+  vk_numpad3 = 99,
+  vk_numpad4 = 100,
+  vk_numpad5 = 101,
+  vk_numpad6 = 102,
+  vk_numpad7 = 103,
+  vk_numpad8 = 104,
+  vk_numpad9 = 105,
+  
+  vk_multiply = 106,
+  vk_add      = 107,
+  vk_subtract = 109,
+  vk_decimal  = 110,
+  vk_divide   = 111,
+  
+  vk_f1  = 112,
+  vk_f2  = 113,
+  vk_f3  = 114,
+  vk_f4  = 115,
+  vk_f5  = 116,
+  vk_f6  = 117,
+  vk_f7  = 118,
+  vk_f8  = 119,
+  vk_f9  = 120,
+  vk_f10 = 121,
+  vk_f11 = 122,
+  vk_f12 = 123,
 
-const int vk_left  =37;
-const int vk_right =39;
-const int vk_up    =38;
-const int vk_down  =40;
-
-const int vk_enter  =13;
-const int vk_shift  =16;
-const int vk_control=17;
-const int vk_alt    =18;
-const int vk_space  =32;
-
-const int vk_numpad0=96;
-const int vk_numpad1=97;
-const int vk_numpad2=98;
-const int vk_numpad3=99;
-const int vk_numpad4=100;
-const int vk_numpad5=101;
-const int vk_numpad6=102;
-const int vk_numpad7=103;
-const int vk_numpad8=104;
-const int vk_numpad9=105;
-
-const int vk_multiply=106;
-const int vk_add     =107;
-const int vk_subtract=109;
-const int vk_decimal =110;
-const int vk_divide  =111;
-
-const int vk_f1 =112;
-const int vk_f2 =113;
-const int vk_f3 =114;
-const int vk_f4 =115;
-const int vk_f5 =116;
-const int vk_f6 =117;
-const int vk_f7 =118;
-const int vk_f8 =119;
-const int vk_f9 =120;
-const int vk_f10=121;
-const int vk_f11=122;
-const int vk_f12=123;
-
-const int vk_backspace=8;
-const int vk_escape   =27;
-const int vk_pageup   =33;
-const int vk_pagedown =34;
-const int vk_end      =35;
-const int vk_home     =36;
-const int vk_insert   =45;
-const int vk_delete   =46;
-
+  vk_backspace = 8,
+  vk_escape    = 27,
+  vk_pageup    = 33,
+  vk_pagedown  = 34,
+  vk_end       = 35,
+  vk_home      = 36,
+  vk_insert    = 45,
+  vk_delete    = 46,
+  
+  // These are for check_direct only
+  vk_lcontrol = 162,
+  vk_rcontrol = 163,
+  vk_lalt     = 164,
+  vk_ralt     = 165,
+  
+  // This one's Windows only
+  vk_printscreen = 42,
+  
+  //These are ENIGMA-only
+  vk_caps   = 20,
+  vk_scroll = 145,
+  vk_pause  = 19,
+  vk_lsuper = 91,
+  vk_rsuper = 92,
+};
 
 bool mouse_check_button(int button);
 bool mouse_check_button_pressed(int button);
 bool mouse_check_button_released(int button);
-int mouse_get_wheel_vangle();
+
+extern short mouse_hscrolls;
+extern short mouse_vscrolls;
 
 bool keyboard_check(int key);
 bool keyboard_check_pressed(int key);

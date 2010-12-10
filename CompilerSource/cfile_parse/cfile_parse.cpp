@@ -1076,6 +1076,8 @@ pt parse_cfile(my_string cftext)
                         skippast = true;
                         pos++; continue;
                       }
+                      if (last_identifier[0] == '~')
+                        goto the_end_of_this_if_block;
                       if (find_extname(last_identifier,0xFFFFFFFF,0))
                       {
                         if (ext_retriever_var->is_function())
@@ -1100,6 +1102,7 @@ pt parse_cfile(my_string cftext)
                     cferr = "Unexpected '<' in declaration";
                     return pos;
                   }
+                  the_end_of_this_if_block:
                   if (tpc == -1) //tname<(*)...>
                   {
                     last_named = LN_TEMPARGS | (last_named & LN_TYPEDEF);
