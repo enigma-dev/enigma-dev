@@ -32,9 +32,7 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="main.c">
-			<Option compilerVar="CPP" />
-		</Unit>
+		<Unit filename="main.cpp" />
 		<Unit filename="stupid-candy.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

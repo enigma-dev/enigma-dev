@@ -78,21 +78,21 @@ int main()
   int a;
   puts("Scouring for Make");
   const char *mpath = "make";
-  a = better_system(mpath, "--ver");
-  if (a) a = better_system(mpath = "mingw32-make", "--ver");
-  if (a) a = better_system(mpath = "\\MinGW\\bin\\make.exe", "--ver");
-  if (a) a = better_system(mpath = "\\MinGW\\bin\\mingw32-make.exe", "--ver");
-  if (a) a = better_system(mpath = "C:\\MinGW\\bin\\mingw32-make.exe", "--ver");
-  if (a) a = better_system(mpath = "C:\\MinGW\\bin\\make.exe", "--ver");
+  a = better_system(mpath, "--version");
+  if (a) a = better_system(mpath = "mingw32-make", "--version");
+  if (a) a = better_system(mpath = "\\MinGW\\bin\\make.exe", "--version");
+  if (a) a = better_system(mpath = "\\MinGW\\bin\\mingw32-make.exe", "--version");
+  if (a) a = better_system(mpath = "C:\\MinGW\\bin\\mingw32-make.exe", "--version");
+  if (a) a = better_system(mpath = "C:\\MinGW\\bin\\make.exe", "--version");
   /*
-    if (a) a = better_system(mpath = "\\Program Files\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--ver");
-    if (a) a = better_system(mpath = "\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--ver");
-    if (a) a = better_system(mpath = "\\Program Files\\CodeBlocks\\MinGW\\bin\\make.exe", "--ver");
-    if (a) a = better_system(mpath = "\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\make.exe", "--ver");
-    if (a) a = better_system(mpath = "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--ver");
-    if (a) a = better_system(mpath = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--ver");
-    if (a) a = better_system(mpath = "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\make.exe", "--ver");
-    if (a) a = better_system(mpath = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\make.exe", "--ver");
+    if (a) a = better_system(mpath = "\\Program Files\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--version");
+    if (a) a = better_system(mpath = "\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--version");
+    if (a) a = better_system(mpath = "\\Program Files\\CodeBlocks\\MinGW\\bin\\make.exe", "--version");
+    if (a) a = better_system(mpath = "\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\make.exe", "--version");
+    if (a) a = better_system(mpath = "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--version");
+    if (a) a = better_system(mpath = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--version");
+    if (a) a = better_system(mpath = "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\make.exe", "--version");
+    if (a) a = better_system(mpath = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\make.exe", "--version");
   */
   if (a) // If we didn't find it
   {
@@ -126,7 +126,7 @@ int main()
           }
         }
       }
-      if (tf = fopen("winmake.txt","wb")) { fputs(fixdrive(mpath).c_str(), tf); fclose(tf); }
+      if ((tf = fopen("winmake.txt","wb"))) { fputs(fixdrive(mpath).c_str(), tf); fclose(tf); }
       else puts("\nI believe there's something wrong with your system. Ignoring and continuing...\n");
       confused_cancel: ;
     }
