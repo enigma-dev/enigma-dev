@@ -31,4 +31,7 @@ struct Sprite
   
   Image *subImages;
   int subImageCount;
+
+  Point *maskPoints;
+  int maskPointCount;
 };
