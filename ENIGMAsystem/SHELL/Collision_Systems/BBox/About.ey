@@ -1,0 +1,8 @@
+%e-yaml
+---
+
+Name: BBox
+Identifier: BBox
+Description: Collisions register using simple sprite bounding box (rectangle) checking.
+Author: IsmAvatar
+

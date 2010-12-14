@@ -81,7 +81,19 @@ public class EnigmaSettings
 				Set<String> depends = new HashSet<String>();
 				YamlNode node;
 
-				if (!target.equals("Platforms"))
+				if (target.equals("Platforms"))
+					{
+					node = EYamlParser.parse(new Scanner(prop));
+					String norm = normalize(node.getMC("Build-Platforms"));
+					if (norm.isEmpty()) continue;
+					for (String s : norm.split(","))
+						if (!s.isEmpty()) depends.add(s);
+					}
+				else if (target.equals("Collision_Systems"))
+					{
+					node = EYamlParser.parse(new Scanner(prop));
+					}
+				else
 					{
 					String[] configs = new File(dir,"Config").list();
 					if (configs == null) continue;
@@ -89,14 +101,6 @@ public class EnigmaSettings
 						if (conf.endsWith(".ey")) depends.add(normalize(conf.substring(0,conf.length() - 3)));
 					if (depends.isEmpty()) continue;
 					node = EYamlParser.parse(new Scanner(prop));
-					}
-				else
-					{
-					node = EYamlParser.parse(new Scanner(prop));
-					String norm = normalize(node.getMC("Build-Platforms"));
-					if (norm.isEmpty()) continue;
-					for (String s : norm.split(","))
-						if (!s.isEmpty()) depends.add(s);
 					}
 
 				TargetSelection ps = new TargetSelection();
