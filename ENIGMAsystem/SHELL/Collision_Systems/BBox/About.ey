@@ -1,7 +1,7 @@
 %e-yaml
 ---
 
-Name: BBox
+Name: Bounding Box
 Identifier: BBox
 Represents: All
 Description: Collisions register using simple sprite bounding box (rectangle) checking.
