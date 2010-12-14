@@ -453,15 +453,11 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
   int resourceblock_start = ftell(gameModule);
-
-#if TARGET_PLATFORM_ID ==  OS_IPHONE
-//don't check this
-#else
+  
   if (resourceblock_start < 128) {
     user << "Compiled game is clearly not a working module; cannot continue" << flushl;
     idpr("Failed to add resources.",-1); return 13;
   }
-#endif
 
   // Start by setting off our location with a DWord of NULLs
   fwrite("\0\0\0",1,4,gameModule);

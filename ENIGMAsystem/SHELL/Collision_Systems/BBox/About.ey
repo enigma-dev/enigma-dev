@@ -3,6 +3,7 @@
 
 Name: BBox
 Identifier: BBox
+Represents: All
 Description: Collisions register using simple sprite bounding box (rectangle) checking.
 Author: IsmAvatar
 
