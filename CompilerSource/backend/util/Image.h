@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
  
-#ifndef _SUB_IMAGE_H
-#define _SUB_IMAGE_H
+#ifndef _IMAGE_H
+#define _IMAGE_H
 
 struct Image
 {

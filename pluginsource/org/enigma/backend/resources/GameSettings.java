@@ -8,7 +8,7 @@
 
 package org.enigma.backend.resources;
 
-import org.enigma.backend.sub.Image;
+import org.enigma.backend.util.Image;
 import org.lateralgm.file.iconio.ICOFile;
 
 import com.sun.jna.Structure;

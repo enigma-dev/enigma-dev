@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include <stdio.h>
-#include "sub/Image.h"
+#include "util/Image.h"
 
 void javano_signal() { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
 void javano_signal_i(int) { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }

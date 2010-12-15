@@ -74,10 +74,10 @@ int module_write_sprites(EnigmaStruct *es, FILE *gameModule)
     for (int ii = 0; ii < subCount; ii++)
     {
       if (!swidth and !sheight) {
-        swidth =  es->sprites[i].subImages[ii].width;
-        sheight = es->sprites[i].subImages[ii].height;
+        swidth =  es->sprites[i].subImages[ii].image.width;
+        sheight = es->sprites[i].subImages[ii].image.height;
       }
-      else if (swidth != es->sprites[i].subImages[ii].width or sheight != es->sprites[i].subImages[ii].height) {
+      else if (swidth != es->sprites[i].subImages[ii].image.width or sheight != es->sprites[i].subImages[ii].image.height) {
         user << "Subimages of sprite `" << es->sprites[i].name << "' vary in dimensions; do not want." << flushl;
         return 14;
       }
@@ -98,8 +98,8 @@ int module_write_sprites(EnigmaStruct *es, FILE *gameModule)
     {
       //strans = es->sprites[i].subImages[ii].transColor, fwrite(&idttrans,4,1,exe); //Transparent color
       writei(swidth * sheight * 4,gameModule); //size when unpacked
-      writei(es->sprites[i].subImages[ii].dataSize,gameModule); //size when unpacked
-      fwrite(es->sprites[i].subImages[ii].data, 1, es->sprites[i].subImages[ii].dataSize, gameModule); //sprite data
+      writei(es->sprites[i].subImages[ii].image.dataSize,gameModule); //size when unpacked
+      fwrite(es->sprites[i].subImages[ii].image.data, 1, es->sprites[i].subImages[ii].image.dataSize, gameModule); //sprite data
       writei(0,gameModule);
     }
   }

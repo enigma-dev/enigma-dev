@@ -6,7 +6,7 @@
  * See LICENSE for details.
  */
 
-package org.enigma.backend.sub;
+package org.enigma.backend.util;
 
 import java.nio.Buffer;
 

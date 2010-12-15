@@ -8,10 +8,10 @@
 
 
 
-import org.enigma.backend.sub.Image;
-import org.lateralgm.file.iconio.ICOFile;
 
 #include "../JavaStruct.h"
+#include "../util/Image.h"
+import org.lateralgm.file.iconio.ICOFile;
 
 struct GameSettings
 	{

@@ -8,7 +8,7 @@
  * instead, if you like. Version 3, or any later version.
  */
 
-#include "sub/Image.h"
+#include "util/Image.h"
 
 struct EnigmaCallbacks
 {
