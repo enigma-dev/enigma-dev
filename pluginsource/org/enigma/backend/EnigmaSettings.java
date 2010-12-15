@@ -48,13 +48,16 @@ public class EnigmaSettings
 		tGraphics = findTargets("Graphics_Systems");
 		tAudios = findTargets("Audio_Systems");
 		tCollisions = findTargets("Collision_Systems");
+		for (TargetSelection t : tCollisions)
+			System.out.println(t.depends + " " + t.defaultOn);
 		}
 
 	public static class TargetSelection
 		{
 		public String name, id; //mandatory
 		public Set<String> depends; //mandatory, non-empty
-		public String rep, desc, auth, ext; //optional
+		public Set<String> defaultOn; //optional
+		public String desc, auth, ext; //optional
 
 		public String toString()
 			{
@@ -79,6 +82,7 @@ public class EnigmaSettings
 			try
 				{
 				Set<String> depends = new HashSet<String>();
+				Set<String> defaultOn = new HashSet<String>();
 				YamlNode node;
 
 				if (target.equals("Platforms"))
@@ -92,6 +96,7 @@ public class EnigmaSettings
 				else if (target.equals("Collision_Systems"))
 					{
 					node = EYamlParser.parse(new Scanner(prop));
+					depends.add("all");
 					}
 				else
 					{
@@ -103,11 +108,15 @@ public class EnigmaSettings
 					node = EYamlParser.parse(new Scanner(prop));
 					}
 
+				String norm = normalize(node.getMC("Represents",""));
+				for (String s : norm.split(","))
+					if (!s.isEmpty()) defaultOn.add(s);
+
 				TargetSelection ps = new TargetSelection();
 				ps.name = node.getMC("Name");
 				ps.id = node.getMC("Identifier");
 				ps.depends = depends;
-				ps.rep = node.getMC("Represents",null);
+				ps.defaultOn = defaultOn;
 				ps.desc = node.getMC("Description",null);
 				ps.auth = node.getMC("Author",null);
 				ps.ext = node.getMC("Build-Extension",null);
@@ -144,12 +153,12 @@ public class EnigmaSettings
 
 		loadDefinitions();
 
-		targetPlatform = findFirst(tPlatforms,getOS());
+		targetPlatform = findDefault(tPlatforms,getOS());
 		if (targetPlatform != null)
 			{
-			targetGraphics = findFirst(tGraphics,targetPlatform.id);
-			targetAudio = findFirst(tAudios,targetPlatform.id);
-			targetCollision = findFirst(tCollisions,targetPlatform.id);
+			targetGraphics = findDefault(tGraphics,targetPlatform.id);
+			targetAudio = findDefault(tAudios,targetPlatform.id);
+			targetCollision = findDefault(tCollisions,targetPlatform.id);
 			}
 		}
 
@@ -162,10 +171,16 @@ public class EnigmaSettings
 		return os;
 		}
 
-	private static TargetSelection findFirst(List<TargetSelection> tsl, String depends)
+	private static TargetSelection findDefault(List<TargetSelection> tsl, String depends)
 		{
+		depends = depends.toLowerCase();
 		for (TargetSelection ts : tsl)
-			if (ts.depends.contains(depends.toLowerCase())) return ts;
+			if ((ts.depends.contains("all") || ts.depends.contains(depends))
+					&& (ts.defaultOn.contains("all") || ts.defaultOn.contains(depends))) return ts;
+		//if none are marked as default, just use the first one
+		for (TargetSelection ts : tsl)
+			if (ts.depends.contains("all") || ts.depends.contains(depends)
+					&& !ts.defaultOn.contains("none")) return ts;
 		return null;
 		}
 
@@ -175,6 +190,8 @@ public class EnigmaSettings
 		String depends;
 		if (itsl == tPlatforms)
 			depends = getOS();
+		else if (itsl == tCollisions)
+			return itsl;
 		else
 			{
 			if (targetPlatform == null) return otsl;

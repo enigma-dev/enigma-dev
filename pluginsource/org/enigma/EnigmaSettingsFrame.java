@@ -366,6 +366,10 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		targGfx = new JComboBox(es.getTargetGraphicsArray());
 		targAudio = new JComboBox(es.getTargetAudiosArray());
 		targColl = new JComboBox(es.getTargetCollisionsArray());
+		targPlat.setSelectedItem(es.targetPlatform);
+		targGfx.setSelectedItem(es.targetGraphics);
+		targAudio.setSelectedItem(es.targetAudio);
+		targColl.setSelectedItem(es.targetCollision);
 		targPlat.addActionListener(this);
 		targGfx.addActionListener(this);
 		targAudio.addActionListener(this);
