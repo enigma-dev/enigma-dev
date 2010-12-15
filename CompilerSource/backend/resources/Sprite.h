@@ -8,6 +8,7 @@
 
 #include "../JavaStruct.h"
 #include "../sub/Image.h"
+#include "../sub/Point.h"
 
 struct Sprite
 {
