@@ -41,6 +41,7 @@ import java.util.zip.DeflaterOutputStream;
 
 import javax.swing.JOptionPane;
 
+import org.enigma.Masker.Mask;
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.other.Constant;
 import org.enigma.backend.other.Include;
@@ -56,21 +57,24 @@ import org.enigma.backend.resources.Timeline;
 import org.enigma.backend.sub.BackgroundDef;
 import org.enigma.backend.sub.Event;
 import org.enigma.backend.sub.Glyph;
-import org.enigma.backend.sub.Image;
 import org.enigma.backend.sub.Instance;
 import org.enigma.backend.sub.MainEvent;
 import org.enigma.backend.sub.Moment;
 import org.enigma.backend.sub.PathPoint;
+import org.enigma.backend.sub.SubImage;
 import org.enigma.backend.sub.Tile;
 import org.enigma.backend.sub.View;
+import org.enigma.backend.util.Image;
+import org.enigma.backend.util.Point;
+import org.enigma.backend.util.Polygon;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.main.LGM;
+import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Path.PPath;
-import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
@@ -219,10 +223,56 @@ public final class EnigmaWriter
 			os.subImageCount = is.subImages.size();
 			if (os.subImageCount == 0) continue;
 
-			os.subImages = new Image.ByReference();
-			Image[] osil = (Image[]) os.subImages.toArray(os.subImageCount);
+			os.subImages = new SubImage.ByReference();
+			SubImage[] osil = (SubImage[]) os.subImages.toArray(os.subImageCount);
 			for (int i = 0; i < os.subImageCount; i++)
-				populateImage(is.subImages.get(i),osil[i],os.transparent);
+				{
+				BufferedImage img = is.subImages.get(i);
+				osil[i].image = new Image.ByReference();
+				populateImage(img,osil[i].image,os.transparent);
+
+				//for now, polygon masking is disabled
+				if (true)
+					{
+					osil[i].maskShapeCount = 0;
+					continue;
+					}
+
+				//Individual SubImage Polygon Masking
+				int w = img.getWidth();
+				int h = img.getHeight();
+				int pixels[] = img.getRGB(0,0,w,h,null,0,w);
+				Mask m = new Mask(pixels,w,h);
+
+				osil[i].maskShapeCount = m.pts.size();
+				if (osil[i].maskShapeCount == 0) continue;
+
+				osil[i].maskShapes = new Polygon.ByReference();
+				Polygon[] opl = (Polygon[]) osil[i].maskShapes.toArray(osil[i].maskShapeCount);
+
+				//populate each polygon
+				for (int j = 0; j < opl.length; j++)
+					{
+					System.out.println("Populating polygon " + j);
+					List<java.awt.Point> ippl = m.getRayOutline(m.pts.get(j));
+					opl[j].pointCount = ippl.size();
+					if (opl[j].pointCount == 0) continue;
+
+					System.out.println("Test1");
+
+					opl[j].points = new Point.ByReference();
+					Point[] oppl = (Point[]) opl[j].points.toArray(opl[j].pointCount);
+					System.out.println("Test2");
+
+					//populate each point
+					for (int k = 0; k < oppl.length; k++)
+						{
+						System.out.println(" " + ippl.get(k));
+						oppl[k].x = ippl.get(k).x;
+						oppl[k].y = ippl.get(k).y;
+						}
+					}
+				}
 			}
 		}
 

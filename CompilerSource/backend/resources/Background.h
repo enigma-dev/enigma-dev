@@ -7,7 +7,7 @@
  */
 
 #include "../JavaStruct.h"
-#include "../sub/Image.h"
+#include "../util/Image.h"
 
 struct Background
 {

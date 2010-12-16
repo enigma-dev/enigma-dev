@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
 import java.util.zip.Deflater;
 
 import org.enigma.EnigmaFrame;
-import org.enigma.backend.sub.Image;
+import org.enigma.backend.util.Image;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Pointer;

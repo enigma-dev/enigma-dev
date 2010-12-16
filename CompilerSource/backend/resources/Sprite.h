@@ -7,8 +7,7 @@
  */
 
 #include "../JavaStruct.h"
-#include "../sub/Image.h"
-#include "../sub/Point.h"
+#include "../sub/SubImage.h"
 
 struct Sprite
 {
@@ -30,9 +29,6 @@ struct Sprite
   int bbTop;
   int bbBottom;
   
-  Image *subImages;
+  SubImage *subImages;
   int subImageCount;
-
-  Point *maskPoints;
-  int maskPointCount;
 };

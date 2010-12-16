@@ -8,8 +8,7 @@
 
 package org.enigma.backend.resources;
 
-import org.enigma.backend.sub.Image;
-import org.enigma.backend.sub.Point;
+import org.enigma.backend.sub.SubImage;
 
 import com.sun.jna.Structure;
 
@@ -32,11 +31,8 @@ public class Sprite extends Structure
 	public int bbTop;
 	public int bbBottom;
 
-	public Image.ByReference subImages;
+	public SubImage.ByReference subImages;
 	public int subImageCount;
-
-	public Point.ByReference maskPoints;
-	public int maskPointCount;
 
 	public static class ByReference extends Sprite implements Structure.ByReference
 		{
