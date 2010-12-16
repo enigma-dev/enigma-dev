@@ -120,8 +120,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 				public void run()
 					{
-					//TODO: Let Linux packages handle updates
-					//if (!Platform.isLinux())
+					//Disable updates by removing plugins/shared/svnkit.jar (e.g. linux packages)
 					boolean rebuild = Preferences.userRoot().node("/org/enigma").getBoolean("NEEDS_REBUILD",
 							false);
 					if (attemptUpdate() || attemptLib() != null || rebuild) make();
