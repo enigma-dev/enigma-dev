@@ -231,6 +231,13 @@ public final class EnigmaWriter
 				osil[i].image = new Image.ByReference();
 				populateImage(img,osil[i].image,os.transparent);
 
+				//for now, polygon masking is disabled
+				if (true)
+					{
+					osil[i].maskShapeCount = 0;
+					continue;
+					}
+
 				//Individual SubImage Polygon Masking
 				int w = img.getWidth();
 				int h = img.getHeight();
@@ -246,16 +253,21 @@ public final class EnigmaWriter
 				//populate each polygon
 				for (int j = 0; j < opl.length; j++)
 					{
+					System.out.println("Populating polygon " + j);
 					List<java.awt.Point> ippl = m.getRayOutline(m.pts.get(j));
 					opl[j].pointCount = ippl.size();
 					if (opl[j].pointCount == 0) continue;
 
+					System.out.println("Test1");
+
 					opl[j].points = new Point.ByReference();
 					Point[] oppl = (Point[]) opl[j].points.toArray(opl[j].pointCount);
+					System.out.println("Test2");
 
 					//populate each point
 					for (int k = 0; k < oppl.length; k++)
 						{
+						System.out.println(" " + ippl.get(k));
 						oppl[k].x = ippl.get(k).x;
 						oppl[k].y = ippl.get(k).y;
 						}
