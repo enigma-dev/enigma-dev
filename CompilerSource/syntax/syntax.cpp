@@ -576,7 +576,7 @@ namespace syncheck
               dropscope();
               
               if (level<=0)
-              { error="Unexpected closing brace at this point"; return pos; }
+                { error="Unexpected closing brace at this point"; return pos; }
               
               if (lastnamed[level]==LN_OPERATOR)
               { error="Expected secondary expression before closing brace"; return pos; }
@@ -587,6 +587,8 @@ namespace syncheck
               }
               
               lower_to_level(LEVELTYPE_BRACE,"`}' symbol");
+              if (level<=0)
+                { error="Unexpected closing brace at this point"; return pos; }
               level--;
               //statement_pad[level] = -1;
               lastnamed[level] = LN_NOTHING;//LN_CLOSING_SYMBOL; //We closed at the beginning of this group.
