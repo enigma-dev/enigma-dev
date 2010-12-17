@@ -25,48 +25,56 @@
 **                                                                              **
 \********************************************************************************/
 
-bool place_free(double x,double y) {
- enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
- const int ox1 = (int)x,           oy1 = (int)y,
-           bl1 = inst1->bbox_left, br1 = inst1->bbox_right,
-           bt1 = inst1->bbox_top,  bb1 = inst1->bbox_bottom;
- for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next) {
-  const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
-  if (inst2->id == inst1->id) continue;
-  if (!inst2->solid) continue;
-  const int ox2 = (int)inst2->x,    oy2 = (int)inst2->y,
-            bl2 = inst2->bbox_left, br2 = inst2->bbox_right,
-            bt2 = inst2->bbox_top,  bb2 = inst2->bbox_bottom;
-  if (ox1+bl1<ox2+br2 && ox1+br1>ox2+bl2
-  &&  oy1+bt1<oy2+bb2 && oy1+bb1>oy2+bt2)
-   return false;
- }
- return true;
+#include "../../Universal_System/collisions_object.h"
+#include "../../Universal_System/simplecollisions.h"
+#include "../../Universal_System/instance_system.h"
+
+bool place_free(double x,double y)
+{
+  enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+  const int ox1 = (int)x,           oy1 = (int)y,
+            bl1 = inst1->bbox_left, br1 = inst1->bbox_right,
+            bt1 = inst1->bbox_top,  bb1 = inst1->bbox_bottom;
+  for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
+  {
+    const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
+    if (inst2->id == inst1->id) continue;
+    if (!inst2->solid) continue;
+    const int ox2 = (int)inst2->x,    oy2 = (int)inst2->y,
+              bl2 = inst2->bbox_left, br2 = inst2->bbox_right,
+              bt2 = inst2->bbox_top,  bb2 = inst2->bbox_bottom;
+    if (ox1+bl1<ox2+br2 && ox1+br1>ox2+bl2
+    &&  oy1+bt1<oy2+bb2 && oy1+bb1>oy2+bt2)
+      return false;
+  }
+  return true;
 }
 
-bool place_empty(double x,double y) {
- enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
- const int ox1 = (int)x,           oy1 = (int)y,
-           bl1 = inst1->bbox_left, br1 = inst1->bbox_right,
-           bt1 = inst1->bbox_top,  bb1 = inst1->bbox_bottom;
- for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next) {
-  const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
-  if (inst2->id == inst1->id) continue;
-  const int ox2 = (int)inst2->x,    oy2 = (int)inst2->y,
-            bl2 = inst2->bbox_left, br2 = inst2->bbox_right,
-            bt2 = inst2->bbox_top,  bb2 = inst2->bbox_bottom;
-  if (ox1+bl1<ox2+br2 && ox1+br1>ox2+bl2
-  &&  oy1+bt1<oy2+bb2 && oy1+bb1>oy2+bt2)
-   return false;
- }
- return true;
+bool place_empty(double x,double y)
+{
+  enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+  const int ox1 = (int)x,           oy1 = (int)y,
+            bl1 = inst1->bbox_left, br1 = inst1->bbox_right,
+            bt1 = inst1->bbox_top,  bb1 = inst1->bbox_bottom;
+  for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
+  {
+    const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
+    if (inst2->id == inst1->id) continue;
+    const int ox2 = (int)inst2->x,    oy2 = (int)inst2->y,
+              bl2 = inst2->bbox_left, br2 = inst2->bbox_right,
+              bt2 = inst2->bbox_top,  bb2 = inst2->bbox_bottom;
+    if (ox1+bl1<ox2+br2 && ox1+br1>ox2+bl2
+    &&  oy1+bt1<oy2+bb2 && oy1+bb1>oy2+bt2)
+      return false;
+  }
+  return true;
 }
 
 bool place_meeting(double x, double y, int object) {
- enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
- const int ox = (int)x,          oy = (int)y,
-           bl = inst->bbox_left, br = inst->bbox_right,
-           bt = inst->bbox_top,  bb = inst->bbox_bottom;
- return collision_bbox_rect(object,ox+bl,oy+bt,ox+br,oy+bb);
+  enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+  const int ox = (int)x,          oy = (int)y,
+            bl = inst->bbox_left, br = inst->bbox_right,
+            bt = inst->bbox_top,  bb = inst->bbox_bottom;
+  return collision_bbox_rect(object,ox+bl,oy+bt,ox+br,oy+bb);
 }
 

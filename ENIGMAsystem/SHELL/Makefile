@@ -21,7 +21,7 @@ ifndef AUDIO
 	GLINKS := $(GLINKS) -lopenal
 endif
 ifndef COLLISION
-	COLLISION := none
+	COLLISION := BBox
 endif
 ifndef GRAPHICS
 	GRAPHICS := OpenGL
