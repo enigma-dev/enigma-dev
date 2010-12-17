@@ -25,12 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-//A stand-in for obj->solid, since enigma doesn't populate that yet.
-bool is_solid(const enigma::object_collisions *obj) {
- return true;
- //return obj->solid > 0.5;
-}
-
 bool place_free(double x,double y) {
  enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
  const int ox1 = (int)x,           oy1 = (int)y,
@@ -39,7 +33,7 @@ bool place_free(double x,double y) {
  for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next) {
   const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
   if (inst2->id == inst1->id) continue;
-  if (!is_solid(inst2)) continue;
+  if (!inst2->solid) continue;
   const int ox2 = (int)inst2->x,    oy2 = (int)inst2->y,
             bl2 = inst2->bbox_left, br2 = inst2->bbox_right,
             bt2 = inst2->bbox_top,  bb2 = inst2->bbox_bottom;
