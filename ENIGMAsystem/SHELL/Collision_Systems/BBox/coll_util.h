@@ -25,13 +25,13 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "../../Universal_System/collisions_object.h"
-
 bool collide_rect_line(double rx1, double ry1, double rx2, double ry2,
                        double px1, double py1, double px2, double py2);
 bool collide_rect_rect(double r1x1, double r1y1, double r1x2, double r1y2,
                        double r2x1, double r2y1, double r2x2, double r2y2);
 bool collide_rect_point(double rx1, double ry1, double rx2, double ry2, double px, double py);
+
+#include "../../Universal_System/collisions_object.h"
 
 bool collide_bbox_line(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2);
 bool collide_bbox_bbox(const enigma::object_collisions* inst1, double ox1, double oy1, const enigma::object_collisions* inst2, double ox2, double oy2);

@@ -31,8 +31,6 @@
 
 #include "../../Universal_System/collisions_object.h"
 #include "coll_impl.h"
-//#include "../../Universal_System/simplecollisions.h"
-//#include "../../Universal_System/instance_system.h"
 
 bool place_free(double x,double y)
 {
@@ -64,10 +62,6 @@ bool position_meeting(double x, double y, int object)
 {
   return collide_inst_point(object,false,true,x,y);
 }
-
-#ifndef noone
- #define noone -4
-#endif
 
 int instance_place(double x, double y, int object)
 {
