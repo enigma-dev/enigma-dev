@@ -26,8 +26,11 @@
 \********************************************************************************/
 
 bool place_free(double x,double y);
-
 bool place_empty(double x,double y);
-
 bool place_meeting(double x, double y, int object);
+int instance_place(double x, double y, int object);
+bool position_free(double x,double y);
+bool position_empty(double x, double y);
+bool position_meeting(double x, double y, int object);
+int instance_position(double x, double y, int object);
 

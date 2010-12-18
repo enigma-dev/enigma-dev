@@ -78,3 +78,49 @@ bool place_meeting(double x, double y, int object) {
   return collision_bbox_rect(object,ox+bl,oy+bt,ox+br,oy+bb);
 }
 
+bool position_free(double x,double y)
+{
+  for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
+  {
+    const enigma::object_collisions* inst = (enigma::object_collisions*)it->inst;
+    if (!inst->solid) continue;
+    const int ox = (int)inst->x,    oy = (int)inst->y,
+              bl = inst->bbox_left, br = inst->bbox_right,
+              bt = inst->bbox_top,  bb = inst->bbox_bottom;
+    if (x<ox+br && x>ox+bl
+    &&  y<oy+bb && y>oy+bt)
+      return false;
+  }
+  return true;
+}
+
+bool position_empty(double x, double y)
+{
+  for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
+  {
+    const enigma::object_collisions* inst = (enigma::object_collisions*)it->inst;
+    const int ox = (int)inst->x,    oy = (int)inst->y,
+              bl = inst->bbox_left, br = inst->bbox_right,
+              bt = inst->bbox_top,  bb = inst->bbox_bottom;
+    if (x<ox+br && x>ox+bl
+    &&  y<oy+bb && y>oy+bt)
+      return false;
+  }
+  return true;
+}
+
+bool position_meeting(double x, double y, int object)
+{
+  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+  {
+    const enigma::object_collisions* inst = (enigma::object_collisions*)it->inst;
+    const int ox = (int)inst->x,    oy = (int)inst->y,
+              bl = inst->bbox_left, br = inst->bbox_right,
+              bt = inst->bbox_top,  bb = inst->bbox_bottom;
+    if (x<ox+br && x>ox+bl
+    &&  y<oy+bb && y>oy+bt)
+      return true;
+  }
+  return false;
+}
+
