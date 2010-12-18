@@ -25,65 +25,15 @@
 **                                                                              **
 \********************************************************************************/
 
-////////////////////////////////////
-// GM front-end functions - Implementations of standard GM collision functions.
-////////////////////////////////////
-
 #include "../../Universal_System/collisions_object.h"
-#include "coll_impl.h"
-//#include "../../Universal_System/simplecollisions.h"
-//#include "../../Universal_System/instance_system.h"
 
-bool place_free(double x,double y)
-{
-  return collide_inst_inst(all,true,true,x,y) == NULL;
-}
+bool collide_rect_line(double rx1, double ry1, double rx2, double ry2,
+                       double px1, double py1, double px2, double py2);
+bool collide_rect_rect(double r1x1, double r1y1, double r1x2, double r1y2,
+                       double r2x1, double r2y1, double r2x2, double r2y2);
+bool collide_rect_point(double rx1, double ry1, double rx2, double ry2, double px, double py);
 
-bool place_empty(double x,double y)
-{
-  return collide_inst_inst(all,false,true,x,y) == NULL;
-}
-
-bool place_meeting(double x, double y, int object)
-{
-  return collide_inst_inst(object,false,true,x,y);
-}
-
-
-bool position_free(double x,double y)
-{
-  return collide_inst_point(all,true,true,x,y) == NULL;
-}
-
-bool position_empty(double x, double y)
-{
-  return collide_inst_point(all,false,true,x,y) == NULL;
-}
-
-bool position_meeting(double x, double y, int object)
-{
-  return collide_inst_point(object,false,true,x,y);
-}
-
-#ifndef noone
- #define noone -4
-#endif
-
-int instance_place(double x, double y, int object)
-{
-  const enigma::object_collisions* r = collide_inst_inst(object,false,true,x,y);
-  return r == NULL ? noone : r->id;
-}
-
-int instance_position(double x, double y, int object)
-{
-  const enigma::object_collisions* r = collide_inst_point(object,false,true,x,y);
-  return r == NULL ? noone : r->id;
-}
-
-int collision_line(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme)
-{
-  const enigma::object_collisions* r = collide_inst_line(obj,false,notme,x1,y1,x2,y2); //false is for solid_only, not prec
-  return r == NULL ? noone : r->id;
-}
+bool collide_bbox_line(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2);
+bool collide_bbox_bbox(const enigma::object_collisions* inst1, double ox1, double oy1, const enigma::object_collisions* inst2, double ox2, double oy2);
+bool collide_bbox_point(const enigma::object_collisions* inst, double ox, double oy, double x, double y);
 

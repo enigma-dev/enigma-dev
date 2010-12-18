@@ -25,65 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-////////////////////////////////////
-// GM front-end functions - Implementations of standard GM collision functions.
-////////////////////////////////////
-
 #include "../../Universal_System/collisions_object.h"
-#include "coll_impl.h"
-//#include "../../Universal_System/simplecollisions.h"
-//#include "../../Universal_System/instance_system.h"
 
-bool place_free(double x,double y)
-{
-  return collide_inst_inst(all,true,true,x,y) == NULL;
-}
-
-bool place_empty(double x,double y)
-{
-  return collide_inst_inst(all,false,true,x,y) == NULL;
-}
-
-bool place_meeting(double x, double y, int object)
-{
-  return collide_inst_inst(object,false,true,x,y);
-}
-
-
-bool position_free(double x,double y)
-{
-  return collide_inst_point(all,true,true,x,y) == NULL;
-}
-
-bool position_empty(double x, double y)
-{
-  return collide_inst_point(all,false,true,x,y) == NULL;
-}
-
-bool position_meeting(double x, double y, int object)
-{
-  return collide_inst_point(object,false,true,x,y);
-}
-
-#ifndef noone
- #define noone -4
-#endif
-
-int instance_place(double x, double y, int object)
-{
-  const enigma::object_collisions* r = collide_inst_inst(object,false,true,x,y);
-  return r == NULL ? noone : r->id;
-}
-
-int instance_position(double x, double y, int object)
-{
-  const enigma::object_collisions* r = collide_inst_point(object,false,true,x,y);
-  return r == NULL ? noone : r->id;
-}
-
-int collision_line(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme)
-{
-  const enigma::object_collisions* r = collide_inst_line(obj,false,notme,x1,y1,x2,y2); //false is for solid_only, not prec
-  return r == NULL ? noone : r->id;
-}
-
+const enigma::object_collisions* collide_inst_line(int object, bool solid_only, bool notme, double x1, double y1, double x2, double y2);
+const enigma::object_collisions* collide_inst_inst(int object, bool solid_only, bool notme, double x, double y);
+const enigma::object_collisions* collide_inst_point(int object, bool solid_only, bool notme, double x, double y);
