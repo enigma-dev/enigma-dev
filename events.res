@@ -224,13 +224,7 @@ step: 3
 	Name: Step
 	Mode: Special
 	Case: 0
-	Constant: { 
-		xprevious = x, yprevious = y;
-		x += hspeed, y += vspeed;
-		speed -= friction; 
-		vspeed.rval.d -= gravity * sin(gravity_direction * pi/180),
-		hspeed.rval.d += gravity * cos(gravity_direction * pi/180);
-	}
+	Constant: enigma::propagate_locals(this);
 
 
 # Lump of "Other" events.

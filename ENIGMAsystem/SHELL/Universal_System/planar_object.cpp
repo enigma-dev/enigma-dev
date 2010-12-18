@@ -74,14 +74,15 @@ namespace enigma
   //This just needs implemented virtually so instance_destroy works.
   object_planar::~object_planar() {}
   
-  void step_basic(object_basic* instance_b)
+  void propagate_locals(object_planar* instance)
   {
-    object_planar *instance = (object_planar*)instance_b;
     instance->xprevious = instance->x;
     instance->yprevious=instance->y;
     if(instance->gravity || instance->friction)
     {
-      double hb4 = instance->hspeed.rval.d, vb4 = instance->vspeed.rval.d;
+      double
+        hb4 = instance->hspeed.rval.d,
+        vb4 = instance->vspeed.rval.d;
       int sign = (instance->speed > 0) - (instance->speed < 0);
       
       instance->hspeed.rval.d -= (sign * instance->friction) * cos(instance->direction.rval.d * M_PI/180);
@@ -92,20 +93,19 @@ namespace enigma
         instance->vspeed.rval.d=0;
       
       instance->hspeed.rval.d += (instance->gravity) * cos(instance->gravity_direction * M_PI/180);
-      instance->vspeed.rval.d += (instance->gravity) * -sin(instance->gravity_direction * M_PI/180);
+      instance->vspeed.rval.d += (instance->gravity) *-sin(instance->gravity_direction * M_PI/180);
       
-      if(instance->speed.rval.d<0) {
-        instance->direction.rval.d=fmod(180+instance->direction.rval.d,360);//180+(int(180+180*(1-atan2(instance->vspeed.rval.d,instance->hspeed.rval.d)/pi)))%360;
-        instance->speed.rval.d=-hypotf((instance->hspeed.rval.d),(instance->vspeed.rval.d));
-      }
-      else {
-        instance->direction.rval.d=fmod(instance->direction.rval.d,360);//(int(180+180*(1-atan2(instance->vspeed.rval.d,instance->hspeed.rval.d)/pi)))%360;
-        instance->speed.rval.d=hypotf((instance->hspeed.rval.d),(instance->vspeed.rval.d));
-      }
-      if(instance->direction.rval.d<0) instance->direction.rval.d+=360;
+      if(instance->speed.rval.d<0)
+        instance->direction.rval.d = fmod(instance->direction.rval.d + 180, 360),
+        instance->speed.    rval.d = -hypotf(instance->hspeed.rval.d, instance->vspeed.rval.d);
+      else
+        instance->direction.rval.d = fmod(instance->direction.rval.d, 360),
+        instance->speed.    rval.d =  hypotf(instance->hspeed.rval.d, instance->vspeed.rval.d);
+      if(instance->direction.rval.d < 0)
+        instance->direction.rval.d += 360;
     }
     
-    instance->x+=instance->hspeed.rval.d;
-    instance->y+=instance->vspeed.rval.d;
+    instance->x += instance->hspeed.rval.d;
+    instance->y += instance->vspeed.rval.d;
   }
 }

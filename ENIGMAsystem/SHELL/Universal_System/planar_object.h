@@ -26,8 +26,8 @@
 \********************************************************************************/
 
 /**
-  @file    graphics_object.h
-  @summary Adds a planar tier following the main tier.
+  @file  graphics_object.h
+  @brief Adds a planar tier following the main tier.
 */
 
 #ifndef _planar_object_h
@@ -66,7 +66,7 @@ namespace enigma
       virtual ~object_planar();
   };
   
-  void step_basic(object_basic* instance_b);
+  void propagate_locals(object_planar*);
 }
 
 #endif //_planar_object_h

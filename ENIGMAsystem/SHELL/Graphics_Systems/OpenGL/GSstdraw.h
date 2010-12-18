@@ -53,4 +53,4 @@ int draw_getpixel(int,int);
 int(*const draw_get_pixel)(int,int)=draw_getpixel;
 int draw_mandelbrot(float x, float y, float w, double Zx, double Zy, double Zw, unsigned iter);
 int draw_arrow(float x1, float y1, float x2, float y2, float arrow_size, float line_size, bool outline);
-int draw_button(float x1, float y1, float x2, float y2, float border_width, bool up);
+void draw_button(float x1, float y1, float x2, float y2, float border_width, bool up);

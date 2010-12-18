@@ -226,5 +226,4 @@ namespace enigma
 
   //This is the universal create event code
   void constructor(object_basic* instance);
-  void step_basic(object_basic* instance);
 }

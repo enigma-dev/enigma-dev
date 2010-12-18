@@ -69,7 +69,6 @@ namespace enigma
 namespace enigma
 {
     void constructor(object_basic* instance);
-    void step_basic(object_basic* instance);
 }
 
 #endif //_object_h

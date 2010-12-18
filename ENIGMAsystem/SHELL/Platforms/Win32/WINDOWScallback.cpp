@@ -71,8 +71,8 @@ namespace enigma
             if (wParam!=18)
             {
               if ((lParam&(1<<29))>0)
-              { last_keybdstatus[18]=keybdstatus[18]; keybdstatus[18]=1; }
-              else { last_keybdstatus[18]=keybdstatus[18]; keybdstatus[18]=0;}
+                   last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
+              else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
             }
             return 0;
 
@@ -82,8 +82,8 @@ namespace enigma
             if (wParam!=(unsigned int)18)
             {
               if ((lParam&(1<<29))>0)
-              { last_keybdstatus[18]=keybdstatus[18]; keybdstatus[18]=0;}
-              else { last_keybdstatus[18]=keybdstatus[18]; keybdstatus[18]=1; }
+                   last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
+              else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
             }
             return 0;
 
