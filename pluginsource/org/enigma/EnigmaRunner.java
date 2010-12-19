@@ -34,9 +34,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 
@@ -319,31 +322,40 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public void populateKeywords()
 		{
-		List<Function> fl = new ArrayList<Function>();
-		Set<Construct> cl = new HashSet<Construct>();
-		String res = DRIVER.first_available_resource();
-		while (res != null)
-			{
-			if (nameRegex.matcher(res).matches())
-				{
-				if (DRIVER.resource_isFunction())
+		SortedSet<Function> fl = new TreeSet<Function>(new Comparator<Function>()
 					{
-					int min = DRIVER.resource_argCountMin();
-					int max = DRIVER.resource_argCountMax();
-					String args = Integer.toString(min);
-					if (min != max) args += "-" + max;
-					fl.add(new Function(res,args,""));
+						@Override
+						public int compare(Function o1, Function o2)
+							{
+							return o1.getName().compareTo(o2.getName());
+							}
+					});
+				for (Function f : GMLKeywords.FUNCTIONS)
+					fl.add(f);
+				Set<Construct> cl = new HashSet<Construct>();
+				String res = DRIVER.first_available_resource();
+				while (res != null)
+					{
+					if (nameRegex.matcher(res).matches())
+						{
+						if (DRIVER.resource_isFunction())
+							{
+							int min = DRIVER.resource_argCountMin();
+							int max = DRIVER.resource_argCountMax();
+							String args = Integer.toString(min);
+							if (min != max) args += "-" + max;
+							fl.add(new Function(res,args,""));
+							}
+						//					else if (DRIVER.resource_isGlobal()) rl.add(res);
+						else if (DRIVER.resource_isTypeName()) cl.add(new Construct(res));
+						}
+					res = DRIVER.next_available_resource();
 					}
-				//					else if (DRIVER.resource_isGlobal()) rl.add(res);
-				else if (DRIVER.resource_isTypeName()) cl.add(new Construct(res));
+				GMLKeywords.FUNCTIONS = fl.toArray(new Function[0]);
+				for (Construct c : GMLKeywords.CONSTRUCTS)
+					cl.add(c);
+				GMLKeywords.CONSTRUCTS = cl.toArray(new Construct[0]);
 				}
-			res = DRIVER.next_available_resource();
-			}
-		GMLKeywords.FUNCTIONS = fl.toArray(new Function[0]);
-		for (Construct c : GMLKeywords.CONSTRUCTS)
-			cl.add(c);
-		GMLKeywords.CONSTRUCTS = cl.toArray(new Construct[0]);
-		}
 
 	public void applyBackground(String bgloc)
 		{
