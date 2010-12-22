@@ -44,7 +44,7 @@ int window_get_visible();
 /////////////
 // CAPTION //
 /////////////
-int window_set_caption(std::string caption);
+void window_set_caption(std::string caption);
 char *window_get_caption();
 
 ///////////
@@ -71,7 +71,7 @@ int window_get_height();
 
 //Setters
 int window_set_position(double x,double y);
-int window_set_size(unsigned int w,unsigned int h);
+void window_set_size(unsigned int w,unsigned int h);
 int window_set_rectangle(double x,double y,double w,double h);
 
 //Center

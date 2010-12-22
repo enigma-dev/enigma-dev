@@ -1,0 +1,16 @@
+%e-yaml
+---
+
+Name: android
+Identifier: Android
+Represents: Android
+Description: Build for Android.
+Author: TGMG
+
+Build-Platforms: MacOSX
+Build-Extension: .app
+
+Run-Program: make androidrun
+Run-Params:  launch $game
+
+

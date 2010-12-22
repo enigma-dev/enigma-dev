@@ -46,4 +46,25 @@ namespace enigma
     glBindTexture(GL_TEXTURE_2D, 0);
     return texture;
   }
+    
+    //Retrieve image data from a texture, in unsigned char, RGBA format.
+    //OpenGLES doesn't have support for glGetTexImage!!!
+    unsigned char* graphics_get_texture_rgba(unsigned texture)
+    {
+        if (texture != enigma::cur_bou_tha_noo_sho_eve_cha_eve)
+            glBindTexture(GL_TEXTURE_2D, texture);
+        
+        int w,h;
+        //glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
+        //glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
+        
+        unsigned char* ret = new unsigned char[(w*h) << 2];
+        //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
+        
+        if (texture != enigma::cur_bou_tha_noo_sho_eve_cha_eve)
+            glBindTexture(GL_TEXTURE_2D, enigma::cur_bou_tha_noo_sho_eve_cha_eve);
+        
+        return ret;
+  }
+    
 }

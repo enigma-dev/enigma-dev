@@ -124,9 +124,7 @@
 		9CD0E2C11211552800A01347 /* instance_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1E81211552700A01347 /* instance_system.cpp */; };
 		9CD0E2C21211552800A01347 /* loading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1EB1211552700A01347 /* loading.cpp */; };
 		9CD0E2C41211552800A01347 /* mathnc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1EE1211552700A01347 /* mathnc.cpp */; };
-		9CD0E2C51211552800A01347 /* OBJaccess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1F21211552700A01347 /* OBJaccess.cpp */; };
 		9CD0E2C61211552800A01347 /* object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1F41211552700A01347 /* object.cpp */; };
-		9CD0E2C71211552800A01347 /* objecttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1F61211552700A01347 /* objecttable.cpp */; };
 		9CD0E2C81211552800A01347 /* planar_object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1F81211552700A01347 /* planar_object.cpp */; };
 		9CD0E2C91211552800A01347 /* reflexive_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1FA1211552700A01347 /* reflexive_types.cpp */; };
 		9CD0E2CA1211552800A01347 /* roomsystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1FD1211552700A01347 /* roomsystem.cpp */; };
@@ -241,9 +239,7 @@
 		9CEBA631121381B600FC1D14 /* instance_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1E81211552700A01347 /* instance_system.cpp */; };
 		9CEBA632121381B600FC1D14 /* loading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1EB1211552700A01347 /* loading.cpp */; };
 		9CEBA633121381B600FC1D14 /* mathnc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1EE1211552700A01347 /* mathnc.cpp */; };
-		9CEBA634121381B600FC1D14 /* OBJaccess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1F21211552700A01347 /* OBJaccess.cpp */; };
 		9CEBA635121381B600FC1D14 /* object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1F41211552700A01347 /* object.cpp */; };
-		9CEBA636121381B600FC1D14 /* objecttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1F61211552700A01347 /* objecttable.cpp */; };
 		9CEBA637121381B600FC1D14 /* planar_object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1F81211552700A01347 /* planar_object.cpp */; };
 		9CEBA638121381B600FC1D14 /* reflexive_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1FA1211552700A01347 /* reflexive_types.cpp */; };
 		9CEBA639121381B600FC1D14 /* roomsystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1FD1211552700A01347 /* roomsystem.cpp */; };
@@ -623,13 +619,6 @@
 		9CD0E1CC1211552700A01347 /* GAME_GLOBALS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAME_GLOBALS.h; sourceTree = "<group>"; };
 		9CD0E1CD1211552700A01347 /* globalupdate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = globalupdate.cpp; sourceTree = "<group>"; };
 		9CD0E1CE1211552700A01347 /* globalupdate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = globalupdate.h; sourceTree = "<group>"; };
-		9CD0E1CF1211552700A01347 /* GMcollisions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMcollisions.h; sourceTree = "<group>"; };
-		9CD0E1D01211552700A01347 /* GMexternals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMexternals.h; sourceTree = "<group>"; };
-		9CD0E1D11211552700A01347 /* GMinstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMinstance.h; sourceTree = "<group>"; };
-		9CD0E1D21211552700A01347 /* GMmathnc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMmathnc.h; sourceTree = "<group>"; };
-		9CD0E1D31211552700A01347 /* GMobject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMobject.h; sourceTree = "<group>"; };
-		9CD0E1D41211552700A01347 /* GMroomsystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMroomsystem.h; sourceTree = "<group>"; };
-		9CD0E1D51211552700A01347 /* GMstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMstring.h; sourceTree = "<group>"; };
 		9CD0E1D61211552700A01347 /* imap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imap.h; sourceTree = "<group>"; };
 		9CD0E1D71211552700A01347 /* IMGloading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IMGloading.cpp; sourceTree = "<group>"; };
 		9CD0E1D81211552700A01347 /* IMGloading.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IMGloading.h; sourceTree = "<group>"; };
@@ -657,12 +646,8 @@
 		9CD0E1EF1211552700A01347 /* mathnc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mathnc.h; sourceTree = "<group>"; };
 		9CD0E1F01211552700A01347 /* multifunction_variant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = multifunction_variant.h; sourceTree = "<group>"; };
 		9CD0E1F11211552700A01347 /* multifunction_variant_source.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = multifunction_variant_source.h; sourceTree = "<group>"; };
-		9CD0E1F21211552700A01347 /* OBJaccess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OBJaccess.cpp; sourceTree = "<group>"; };
-		9CD0E1F31211552700A01347 /* OBJaccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBJaccess.h; sourceTree = "<group>"; };
 		9CD0E1F41211552700A01347 /* object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = object.cpp; sourceTree = "<group>"; };
 		9CD0E1F51211552700A01347 /* object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = object.h; sourceTree = "<group>"; };
-		9CD0E1F61211552700A01347 /* objecttable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objecttable.cpp; sourceTree = "<group>"; };
-		9CD0E1F71211552700A01347 /* objecttable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = objecttable.h; sourceTree = "<group>"; };
 		9CD0E1F81211552700A01347 /* planar_object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = planar_object.cpp; sourceTree = "<group>"; };
 		9CD0E1F91211552700A01347 /* planar_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = planar_object.h; sourceTree = "<group>"; };
 		9CD0E1FA1211552700A01347 /* reflexive_types.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reflexive_types.cpp; sourceTree = "<group>"; };
@@ -1735,13 +1720,6 @@
 				9CD0E1CC1211552700A01347 /* GAME_GLOBALS.h */,
 				9CD0E1CD1211552700A01347 /* globalupdate.cpp */,
 				9CD0E1CE1211552700A01347 /* globalupdate.h */,
-				9CD0E1CF1211552700A01347 /* GMcollisions.h */,
-				9CD0E1D01211552700A01347 /* GMexternals.h */,
-				9CD0E1D11211552700A01347 /* GMinstance.h */,
-				9CD0E1D21211552700A01347 /* GMmathnc.h */,
-				9CD0E1D31211552700A01347 /* GMobject.h */,
-				9CD0E1D41211552700A01347 /* GMroomsystem.h */,
-				9CD0E1D51211552700A01347 /* GMstring.h */,
 				9CD0E1D61211552700A01347 /* imap.h */,
 				9CD0E1D71211552700A01347 /* IMGloading.cpp */,
 				9CD0E1D81211552700A01347 /* IMGloading.h */,
@@ -1759,12 +1737,8 @@
 				9CD0E1EF1211552700A01347 /* mathnc.h */,
 				9CD0E1F01211552700A01347 /* multifunction_variant.h */,
 				9CD0E1F11211552700A01347 /* multifunction_variant_source.h */,
-				9CD0E1F21211552700A01347 /* OBJaccess.cpp */,
-				9CD0E1F31211552700A01347 /* OBJaccess.h */,
 				9CD0E1F41211552700A01347 /* object.cpp */,
 				9CD0E1F51211552700A01347 /* object.h */,
-				9CD0E1F61211552700A01347 /* objecttable.cpp */,
-				9CD0E1F71211552700A01347 /* objecttable.h */,
 				9CD0E1F81211552700A01347 /* planar_object.cpp */,
 				9CD0E1F91211552700A01347 /* planar_object.h */,
 				9CD0E1FA1211552700A01347 /* reflexive_types.cpp */,
@@ -2164,9 +2138,7 @@
 				9CD0E2C11211552800A01347 /* instance_system.cpp in Sources */,
 				9CD0E2C21211552800A01347 /* loading.cpp in Sources */,
 				9CD0E2C41211552800A01347 /* mathnc.cpp in Sources */,
-				9CD0E2C51211552800A01347 /* OBJaccess.cpp in Sources */,
 				9CD0E2C61211552800A01347 /* object.cpp in Sources */,
-				9CD0E2C71211552800A01347 /* objecttable.cpp in Sources */,
 				9CD0E2C81211552800A01347 /* planar_object.cpp in Sources */,
 				9CD0E2C91211552800A01347 /* reflexive_types.cpp in Sources */,
 				9CD0E2CA1211552800A01347 /* roomsystem.cpp in Sources */,
@@ -2289,9 +2261,7 @@
 				9CEBA631121381B600FC1D14 /* instance_system.cpp in Sources */,
 				9CEBA632121381B600FC1D14 /* loading.cpp in Sources */,
 				9CEBA633121381B600FC1D14 /* mathnc.cpp in Sources */,
-				9CEBA634121381B600FC1D14 /* OBJaccess.cpp in Sources */,
 				9CEBA635121381B600FC1D14 /* object.cpp in Sources */,
-				9CEBA636121381B600FC1D14 /* objecttable.cpp in Sources */,
 				9CEBA637121381B600FC1D14 /* planar_object.cpp in Sources */,
 				9CEBA638121381B600FC1D14 /* reflexive_types.cpp in Sources */,
 				9CEBA639121381B600FC1D14 /* roomsystem.cpp in Sources */,

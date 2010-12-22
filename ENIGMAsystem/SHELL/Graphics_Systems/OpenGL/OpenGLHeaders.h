@@ -25,9 +25,9 @@
  **                                                                              **
  \********************************************************************************/
 
-//#include "../../OS_Switchboard.h"
+#include "../../API_Switchboard.h"
 
-#if ENIGMA_OS_MACOSX
+#ifdef ENIGMA_WS_COCOA
   #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #else
