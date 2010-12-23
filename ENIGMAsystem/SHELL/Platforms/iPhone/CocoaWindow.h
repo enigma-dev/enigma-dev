@@ -43,7 +43,7 @@ int window_get_visible();
 /////////////
 // CAPTION //
 /////////////
-int window_set_caption(std::string caption);
+void window_set_caption(std::string caption);
 char *window_get_caption();
 
 ///////////
