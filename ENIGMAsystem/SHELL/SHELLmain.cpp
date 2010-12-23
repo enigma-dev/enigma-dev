@@ -120,12 +120,14 @@ extern int amain();
 #include "Universal_System/instance_system.h"
 #include "Universal_System/syntax_quirks.h"
 
+#ifndef ENIGMA_PARSER_RUN
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
+#endif
 
 #include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
 
 #ifndef ENIGMA_PARSER_RUN
   #include "Universal_System/with.h"
-  #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
