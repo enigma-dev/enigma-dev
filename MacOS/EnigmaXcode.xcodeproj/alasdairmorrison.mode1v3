@@ -216,7 +216,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9CB916AC12C1FE0D006A4F45</string>
+						<string>9CB916E212C31A1A006A4F45</string>
 						<key>history</key>
 						<array>
 							<string>9CB9169A12C1FA35006A4F45</string>
@@ -256,7 +256,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9CB916AF12C1FE0D006A4F45</string>
+						<string>9CB916E312C31A1A006A4F45</string>
 						<key>history</key>
 						<array>
 							<string>9CB9169912C1FA2F006A4F45</string>
@@ -296,7 +296,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9CB916B212C1FE0D006A4F45</string>
+						<string>9CB916E412C31A1A006A4F45</string>
 						<key>history</key>
 						<array>
 							<string>9CB9169712C1F958006A4F45</string>
@@ -336,7 +336,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9CB916B512C1FE0D006A4F45</string>
+						<string>9CB916E512C31A1A006A4F45</string>
 						<key>history</key>
 						<array>
 							<string>9CB9167412C1F8DD006A4F45</string>
@@ -376,7 +376,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9CB916B612C1FE0D006A4F45</string>
+						<string>9CB916E612C31A1A006A4F45</string>
 						<key>history</key>
 						<array>
 							<string>9C1B5F1912C1F8BE0056EDCC</string>
@@ -416,7 +416,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9CB916B712C1FE0D006A4F45</string>
+						<string>9CB916E712C31A1A006A4F45</string>
 						<key>history</key>
 						<array>
 							<string>9C1B5F1A12C1F8BE0056EDCC</string>
@@ -456,7 +456,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9CB916B812C1FE0D006A4F45</string>
+						<string>9CB916E812C31A1A006A4F45</string>
 						<key>history</key>
 						<array>
 							<string>9C1B5F1B12C1F8BE0056EDCC</string>
@@ -496,7 +496,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9CB916B912C1FE0D006A4F45</string>
+						<string>9CB916E912C31A1A006A4F45</string>
 						<key>history</key>
 						<array>
 							<string>9C1B5F1C12C1F8BE0056EDCC</string>
@@ -550,8 +550,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -593,6 +591,7 @@
 								<string>9CD0E16B1211552700A01347</string>
 								<string>9CD0E16D1211552700A01347</string>
 								<string>9CD0E1B51211552700A01347</string>
+								<string>9CD0E1B81211552700A01347</string>
 								<string>29B97315FDCFA39411CA2CEA</string>
 								<string>29B97317FDCFA39411CA2CEA</string>
 								<string>1C37FBAC04509CD000000102</string>
@@ -602,16 +601,14 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>24</integer>
-									<integer>23</integer>
-									<integer>19</integer>
+									<integer>127</integer>
 									<integer>5</integer>
 									<integer>2</integer>
 									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 199}, {322, 594}}</string>
+							<string>{{0, 1880}, {322, 594}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -641,12 +638,14 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>CocoaWindow.h</string>
+								<string>API_Switchboard.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -654,11 +653,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>CocoaWindow.h</string>
+										<string>API_Switchboard.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>9CB916A712C1FE0D006A4F45</string>
+										<string>9CB916E112C31A1A006A4F45</string>
 										<key>history</key>
 										<array>
 											<string>9CD0E3BA12125F8500A01347</string>
@@ -816,15 +815,23 @@
 											<string>9C4A23991236F7420043E9EF</string>
 											<string>9C4A239A1236F7420043E9EF</string>
 											<string>9C1B5EF712C1F8BB0056EDCC</string>
-											<string>9C1B5EF812C1F8BB0056EDCC</string>
 											<string>9C1B5EFA12C1F8BB0056EDCC</string>
-											<string>9C1B5EFC12C1F8BB0056EDCC</string>
 											<string>9C1B5EFD12C1F8BB0056EDCC</string>
 											<string>9C1B5EFE12C1F8BB0056EDCC</string>
 											<string>9CB916A312C1FE0D006A4F45</string>
 											<string>9CB916A412C1FE0D006A4F45</string>
 											<string>9CB916A512C1FE0D006A4F45</string>
-											<string>9CB916A612C1FE0D006A4F45</string>
+											<string>9CB916C412C3197E006A4F45</string>
+											<string>9CB916C512C3197E006A4F45</string>
+											<string>9CB916C712C3197E006A4F45</string>
+											<string>9CB916C912C3197E006A4F45</string>
+											<string>9CB916CB12C3197E006A4F45</string>
+											<string>9CB916CD12C3197E006A4F45</string>
+											<string>9CB916CF12C3197E006A4F45</string>
+											<string>9CB916D112C3197E006A4F45</string>
+											<string>9CB916D212C3197E006A4F45</string>
+											<string>9CB916E012C31A1A006A4F45</string>
+											<string>9C1B5EFC12C1F8BB0056EDCC</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -1052,14 +1059,12 @@
 					<key>Dock</key>
 					<array>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>CocoaWindow.h</string>
+								<string>OpenGLHeaders.h</string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
@@ -1076,6 +1081,8 @@
 							<string>274pt</string>
 						</dict>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>

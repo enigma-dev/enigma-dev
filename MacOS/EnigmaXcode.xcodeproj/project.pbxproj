@@ -300,7 +300,6 @@
 		9C3829531215459C007B24C5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		9C382B221215685D007B24C5 /* iPhone-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "iPhone-Info.plist"; sourceTree = "<group>"; };
 		9C6FA5811213ABF300F930EA /* TestEnigmaIphone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = TestEnigmaIphone.app; path = build/Debug/TestEnigmaIphone.app; sourceTree = "<group>"; };
-		9C6FA67C1213BECB00F930EA /* OpenGLHeaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenGLHeaders.h; sourceTree = "<group>"; };
 		9CAB7F0F12245C1B00B1DAD6 /* GStextures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GStextures.cpp; sourceTree = "<group>"; };
 		9CAB7F1012245C1B00B1DAD6 /* GStextures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GStextures.h; sourceTree = "<group>"; };
 		9CAB7F1312245C3700B1DAD6 /* backgroundinit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = backgroundinit.cpp; sourceTree = "<group>"; };
@@ -560,14 +559,6 @@
 		9CD0E1691211552700A01347 /* simple_makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = simple_makefile; sourceTree = "<group>"; };
 		9CD0E16C1211552700A01347 /* graphics_mandatory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = graphics_mandatory.h; sourceTree = "<group>"; };
 		9CD0E16E1211552700A01347 /* EGMenable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EGMenable.h; sourceTree = "<group>"; };
-		9CD0E16F1211552700A01347 /* GMblend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMblend.h; sourceTree = "<group>"; };
-		9CD0E1701211552700A01347 /* GMcolors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMcolors.h; sourceTree = "<group>"; };
-		9CD0E1711211552700A01347 /* GMprmtvs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMprmtvs.h; sourceTree = "<group>"; };
-		9CD0E1721211552700A01347 /* GMscreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMscreen.h; sourceTree = "<group>"; };
-		9CD0E1731211552700A01347 /* GMsprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMsprite.h; sourceTree = "<group>"; };
-		9CD0E1741211552700A01347 /* GMspriteadd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMspriteadd.h; sourceTree = "<group>"; };
-		9CD0E1751211552700A01347 /* GMstdraw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMstdraw.h; sourceTree = "<group>"; };
-		9CD0E1761211552700A01347 /* GMsurface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMsurface.h; sourceTree = "<group>"; };
 		9CD0E1771211552700A01347 /* graphics_object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = graphics_object.cpp; sourceTree = "<group>"; };
 		9CD0E1781211552700A01347 /* graphics_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = graphics_object.h; sourceTree = "<group>"; };
 		9CD0E1791211552700A01347 /* GSblend.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GSblend.cpp; sourceTree = "<group>"; };
@@ -1627,7 +1618,6 @@
 		9CD0E16B1211552700A01347 /* Graphics_Systems */ = {
 			isa = PBXGroup;
 			children = (
-				9C6FA67C1213BECB00F930EA /* OpenGLHeaders.h */,
 				9CEBA82A12138F3F00FC1D14 /* OpenGLES */,
 				9CD0E16C1211552700A01347 /* graphics_mandatory.h */,
 				9CD0E16D1211552700A01347 /* OpenGL */,
@@ -1641,14 +1631,6 @@
 				9CAB7F0F12245C1B00B1DAD6 /* GStextures.cpp */,
 				9CAB7F1012245C1B00B1DAD6 /* GStextures.h */,
 				9CD0E16E1211552700A01347 /* EGMenable.h */,
-				9CD0E16F1211552700A01347 /* GMblend.h */,
-				9CD0E1701211552700A01347 /* GMcolors.h */,
-				9CD0E1711211552700A01347 /* GMprmtvs.h */,
-				9CD0E1721211552700A01347 /* GMscreen.h */,
-				9CD0E1731211552700A01347 /* GMsprite.h */,
-				9CD0E1741211552700A01347 /* GMspriteadd.h */,
-				9CD0E1751211552700A01347 /* GMstdraw.h */,
-				9CD0E1761211552700A01347 /* GMsurface.h */,
 				9CD0E1771211552700A01347 /* graphics_object.cpp */,
 				9CD0E1781211552700A01347 /* graphics_object.h */,
 				9CD0E1791211552700A01347 /* GSblend.cpp */,
