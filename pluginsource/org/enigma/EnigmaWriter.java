@@ -453,7 +453,7 @@ public final class EnigmaWriter
 		java.awt.Font fnt = new java.awt.Font(font.fontName,style,size);
 
 		font.glyphs = new Glyph.ByReference();
-		Glyph[] ofgl = (Glyph[]) font.glyphs.toArray(font.rangeMax - font.rangeMin);
+		Glyph[] ofgl = (Glyph[]) font.glyphs.toArray(font.rangeMax - font.rangeMin + 1);
 		for (char c = (char) font.rangeMin; c <= font.rangeMax; c++)
 			{
 			GlyphVector gv = fnt.createGlyphVector(new FontRenderContext(null,true,false),

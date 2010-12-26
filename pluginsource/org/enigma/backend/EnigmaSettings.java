@@ -48,8 +48,6 @@ public class EnigmaSettings
 		tGraphics = findTargets("Graphics_Systems");
 		tAudios = findTargets("Audio_Systems");
 		tCollisions = findTargets("Collision_Systems");
-		for (TargetSelection t : tCollisions)
-			System.out.println(t.depends + " " + t.defaultOn);
 		}
 
 	public static class TargetSelection
