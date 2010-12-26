@@ -92,9 +92,8 @@ extern int amain();
     #include "Colligma/colligma_end.h"
 #endif
 
-#include "Collision_Systems/BBox/coll_util.h"
-#include "Collision_Systems/BBox/coll_impl.h"
-#include "Collision_Systems/BBox/coll_funcs.h"
+//TODO: modularize this
+#include "Collision_Systems/BBox/include.h"
 
 #include "Universal_System/IMGloading.h"
 
