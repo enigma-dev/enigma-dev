@@ -834,7 +834,7 @@ public final class EnigmaWriter
 					code += "exit ";
 					break;
 				case Action.ACT_REPEAT:
-					code += "repeat (" + args.get(0) + ") ";
+					code += "repeat (" + args.get(0).getVal() + ") ";
 					break;
 				case Action.ACT_VARIABLE:
 					code += args.get(0).getVal() + " = " + args.get(1).getVal() + nl;
@@ -898,9 +898,12 @@ public final class EnigmaWriter
 		String val = arg.getVal();
 		switch (arg.kind)
 			{
-			case Argument.ARG_STRING:
 			case Argument.ARG_BOTH:
-				return "\"" + val + "\"";
+				//treat as literal if starts with quote (")
+				if (val.startsWith("\"")) return val;
+				//else fall through
+			case Argument.ARG_STRING:
+				return "\"" + val.replaceAll("\"", "\\\"").replaceAll("\\", "\\\\") + "\"";
 			case Argument.ARG_BOOLEAN:
 				return Boolean.toString(!val.equals("0"));
 			case Argument.ARG_MENU:
