@@ -34,6 +34,19 @@
 #include "../../Universal_System/instance_system.h" //iter
 #include "coll_util.h"
 
+const enigma::object_collisions* collide_inst_rect(int object, bool solid_only, bool notme, double x1, double y1, double x2, double y2)
+{
+  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+  {
+    const enigma::object_collisions* inst = (enigma::object_collisions*)it->inst;
+    if (notme && inst->id == enigma::instance_event_iterator->inst->id) continue;
+    if (solid_only && !inst->solid) continue;
+    if (collide_bbox_rect(inst,inst->x,inst->y, x1,y1,x2,y2))
+      return inst;
+  }
+  return NULL;
+}
+
 const enigma::object_collisions* collide_inst_line(int object, bool solid_only, bool notme, double x1, double y1, double x2, double y2)
 {
   for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)

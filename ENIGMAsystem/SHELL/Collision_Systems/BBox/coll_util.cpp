@@ -96,6 +96,15 @@ bool collide_rect_point(double rx1, double ry1, double rx2, double ry2, double p
 
 #include "../../Universal_System/collisions_object.h"
 
+bool collide_bbox_rect(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2)
+{
+  return collide_rect_rect(ox+inst->bbox_left,
+                           oy+inst->bbox_top,
+                           ox+inst->bbox_right,
+                           oy+inst->bbox_bottom,
+                           x1,y1,x2,y2);
+}
+
 bool collide_bbox_line(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2)
 {
   return collide_rect_line(ox+inst->bbox_left,

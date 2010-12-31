@@ -75,6 +75,12 @@ int instance_position(double x, double y, int object)
   return r == NULL ? noone : r->id;
 }
 
+int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme)
+{
+  const enigma::object_collisions* r = collide_inst_rect(obj,false,notme,x1,y1,x2,y2); //false is for solid_only, not prec
+  return r == NULL ? noone : r->id;
+}
+
 int collision_line(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_line(obj,false,notme,x1,y1,x2,y2); //false is for solid_only, not prec
