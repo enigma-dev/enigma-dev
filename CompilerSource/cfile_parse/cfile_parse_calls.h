@@ -124,6 +124,9 @@ void cparse_init()
   regmacro("restrict"); //restrict
   regmacro("false","0"); //false
   regmacro("true","1"); //true
+  
+  regmacro("__GNUC__"); // These two are for compliance
+  regmacro("__STDC__"); // Some code #errors if they aren't defined.
 
   //Cheap hacks
 

@@ -175,7 +175,8 @@ inline onode type_op_resolve(const onode &t1, const onode &t2, bool &isol) // Ev
           return (res.pad--, res);
         if (res.deref)
           return (res.deref = res.deref->prev, res);
-        return type_lookup_op_result(t1.type,"[]",t2.type);
+        externs *rt = type_lookup_op_result(t1.type,"[]",t2.type);
+        return rt? rt: t1;
       }
     }
   }
@@ -218,8 +219,10 @@ void onode_from_dectrip(onode& x, const dectrip& y)
   x.pad = y.prefix.length();
 }
 
+struct bullshit{bullshit(){cout<<"enter"<<endl;}~bullshit(){cout<<"LEAVE"<<endl;}};
 onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_object* globj, parsed_object* pobj)
 {
+  bullshit IcallIt;
   pt pos = 0;
   const pt len = exp.length();
   current_scope = &global_scope;
@@ -278,20 +281,25 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
           onode_from_dectrip(perf.top(), it->second);
           isol = false, nt = true;
         }
+        cout << ">>>" << (nt?"Found it" : "No dice") << endl;
       }
       
       if (!nt and pobj)
       {
+        cout << ">> Searching for `" << tn << "` in pobj->locals (" << pobj->locals.size() << " entries)" << endl;
         it = pobj->locals.find(tn);
         if (it != pobj->locals.end()) {
           onode_from_dectrip(perf.top(), it->second);
           isol = false, nt = true;
         }
+        cout << ">>>" << (nt?"Found it" : "No dice") << endl;
       }
       
       
       if (nt)
         continue;
+      
+      cout << ">> Searching for `" << tn << "` everywhere" << endl;
       
       nt = find_extname(tn,0xFFFFFFFF);
       externs* t = ext_retriever_var;
@@ -300,18 +308,25 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
       
       if (!nt) default_var(t); // Not a valid type; default to var if legal, or return error otherwise
       else if (t->flags & EXTFLAG_TYPENAME) { // Turns out, this is not a global, but a typename.
-        if (!isol) return NULL; // Must be a prefix;
+        if (!isol) { cout<<"NULL"<<endl; return NULL; } // Must be a prefix;
         oname = "cast";        //  This is a cast.
       }
       else if (!t->type) // It's a global. Does it have an valid type?
       {
         if (!(t->flags & EXTFLAG_NAMESPACE)) // Heh, guess not. Bet it's a namespace.
-          return NULL; // If not, return NULL.
+          { cout<<"NULL2"<<endl; return NULL; } // If not, return NULL.
         immediate_scope = t;
+        cout << "FOUND AND INSCOPED" << endl;
         continue;
       }
+      else
+        t = t->type,
+        perf.top().pad = 0,
+        perf.top().deref = refstack.last;
       
-      perf.top().type = t = t->type;
+      perf.top().type = t;
+      
+      cout << "ACCEPTED" << endl;
       isol = false;
       continue;
     }
@@ -396,14 +411,19 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
           {
             onode opand1 = perf.top(); perf.pop();
             onode ee = type_op_resolve(opand1, perf.top(), isol);
-            if (!ee.type) { puts("SingleResultNull"); return NULL; }
+            if (!ee.type) { 
+              puts("SingleResultNull"); return NULL;
+            }
           }
           
           // Evaluate our array subscript/function/whatever.
-          onode opand2 = perf.top(); perf.pop();
-          onode ee = type_op_resolve(perf.top(), opand2, isol);
-          if (!ee.type) { puts("SingleResultNull"); return NULL; }
-          perf.top() <= ee;
+          if (perf.size() > 1) {
+            onode opand2 = perf.top(); perf.pop();
+            onode ee = type_op_resolve(perf.top(), opand2, isol);
+            if (!ee.type) { puts("SingleResultNull"); return NULL; }
+            perf.top() <= ee;
+          }
+          else printf("ERROR! Stack not large enough to accomodate matching parenthesis. Should be more than one item on stack.");
          }
       }
       else // Not a postfix unary: either binary or prefix unary

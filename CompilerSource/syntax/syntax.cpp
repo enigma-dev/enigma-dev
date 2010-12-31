@@ -133,6 +133,8 @@ namespace syncheck
         LN_CLOSING_SYMBOL, // { ; }
         LN_LOCGLOBAL,      // global/local
         LN_FOR,            // for
+        LN_NEW,            // new
+        LN_NEW_TYPE        // new int
       };
       
       enum {
@@ -222,6 +224,13 @@ namespace syncheck
           else if (name == "long" or name == "short" or name == "signed" or name == "register"
                or  name == "unsigned" or name == "const" or name == "volatile" or name == "static")
             goto lbl_typename;
+          else if (name == "new")
+          {
+            if (lastnamed[level] != LN_OPERATOR and lastnamed[level] != LN_NOTHING)
+              return (error = "Unexpected token `new' at this point", pos);
+            lastnamed[level] = LN_NEW;
+              lastnamedatt[level] = LNA_NOTHING;
+          }
           else if (shared_object_locals.find(name) != shared_object_locals.end())
             goto just_an_identifier;
           else if (find_extname(name,0xFFFFFFFF))
@@ -229,6 +238,11 @@ namespace syncheck
             if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
             {
               lbl_typename:
+              if (lastnamed[level] == LN_NEW or lastnamed[level] == LN_NEW_TYPE)
+              {
+                lastnamed[level] = LN_NEW_TYPE;
+                continue;
+              }
               indeclist[level] = true;
               lastnamed[level] = LN_TYPE_NAME,
                 lastnamedatt[level]=LNA_NOTHING;
@@ -237,7 +251,7 @@ namespace syncheck
                 if (plevelt[plevel] == PLT_PARENTH)
                   plevelt[plevel] = PLT_CAST;
                 else if (plevelt[plevel] != PLT_FORSTATEMENT) {
-                  lastnamed[level] = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? LN_TYPE_NAME : LN_OPERATOR; //Cast ~~= Unary operator
+                  lastnamed[level] = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? LN_TYPE_NAME : LN_OPERATOR; //Cast ~~ Unary operator
                   lastnamedatt[level] = LNA_NOTHING;
                 }
               }
@@ -507,7 +521,7 @@ namespace syncheck
         
         case '[':
             {
-              if (lastnamed[level] != LN_VARNAME and lastnamed[level] != LN_VALUE)
+              if (lastnamed[level] != LN_VARNAME and lastnamed[level] != LN_VALUE and lastnamed[level] != LN_NEW_TYPE)
                 { error="Invalid use of `[' symbol for " + tostring(lastnamed[level]); return pos; }
               plevel++;
               plevelt[plevel] = PLT_BRACKET;

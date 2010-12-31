@@ -140,6 +140,13 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       while (is_letterd(code[++pos]));
       const string name = code.substr(spos,pos-spos);
       
+      if (name == "div")
+      {
+        codo[bpos]   = '/';
+        synt[bpos++] = '/';
+        continue;
+      }
+      
       maciter itm = macros.find(name);
       if (itm != macros.end())
       {
@@ -175,9 +182,6 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       
       out_of_here:
       char c = 'n';
-      
-      if (name == "sometype")
-        cout << "LOL SOMETYPE\n";
       
       tokiter itt = edl_tokens.find(name);
       if (itt != edl_tokens.end()) {

@@ -224,6 +224,18 @@ pt move_to_beginning(string& code, string& synt, pt pos)
   return pos;
 }
 
+pt end_of_brackets(const string& synt, pt pos) // Given a string and the index OF the first bracket, find the matching right bracket.
+{
+  for (int lvl=0; synt[pos]; pos++)
+  {
+    if (synt[pos] == '[') lvl++;
+    if (synt[pos] == '(') lvl++;
+    if (synt[pos] == ')') if (!--lvl) return pos;
+    if (synt[pos] == ']') if (!--lvl) return pos;
+  }
+  return pos;
+}
+
 extern externs *enigma_type__var, *enigma_type__variant;
 int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_object* obj)
 {
@@ -328,7 +340,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       const string exp = code.substr(sp,pos-sp);
       cout << "GET TYPE2 OF " << exp << endl;
       onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
-      if (n.type == enigma_type__var and n.pad == 0)
+      if (n.type == enigma_type__var and !n.pad and !n.deref)
       {
         pt cp = pos;
         code[cp++] = '(';
@@ -337,6 +349,15 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           else if (synt[cp] == ']') cnt--;
         if (synt[--cp] == ']')
           code[cp] = ')';
+      }
+      else if (n.pad or n.deref) // Regardless of type, as long as we have some kind of pointer to be dereferenced
+      {
+        const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
+        code.insert(ep, 1, ')');
+        synt.insert(ep, 1, ')');
+        pos++; // Move after the '['
+        code.insert(pos, "int(");
+        synt.insert(pos, "ccc(");
       }
     }
     else switch (synt[pos])
