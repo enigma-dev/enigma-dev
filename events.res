@@ -255,7 +255,7 @@ collision: 4
 	Type: Object
 	Mode: Stacked
 	Super Check: instance_number(%1)
-	Sub Check: place_meeting(x,y,%1)
+	Sub Check: (instance_other = enigma::place_meeting_inst(x,y,%1)) # Parenthesize assignment used as truth
 
 
 # Check for detriment from collision events above

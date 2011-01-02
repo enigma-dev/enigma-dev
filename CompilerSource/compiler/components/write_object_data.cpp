@@ -208,9 +208,9 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
   
   
   
-  // NEXT FILE `---------------------------------------
-  // Object functions: events, constructors, other codes.
-  // -----------------------------------------------------
+  /* NEXT FILE `******************************************\
+  ** Object functions: events, constructors, other codes.
+  ********************************************************/
   
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out);
     wto << license;
@@ -228,7 +228,11 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             wto << event_get_sub_check_condition(mid, id) << endl;
           if (event_has_const_code(mid, id))
             wto << event_get_const_code(mid, id) << endl;
+          if (event_has_prefix_code(mid, id))
+            wto << event_get_prefix_code(mid, id) << endl;
           print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
+          if (event_has_suffix_code(mid, id))
+            wto << event_get_suffix_code(mid, id) << endl;
         wto << "\n  return 0;\n}\n\n";
       }
       

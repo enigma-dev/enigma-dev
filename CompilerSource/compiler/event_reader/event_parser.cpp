@@ -109,7 +109,7 @@ int event_parse_resourcefile()
   int braces = 0;   // Number of curly braces we are in
   int iq = 0;      // In a quote in an expression
   
-  enum { exp_default, exp_constant, exp_sub, exp_super, exp_instead } last_exp = exp_default; // Whether last EXPRESSION was sub or super
+  enum { exp_default, exp_constant, exp_sub, exp_super, exp_instead, exp_prefix, exp_suffix } last_exp = exp_default; // Whether last EXPRESSION was sub or super
   
   while (!feof(events) and fgets(line,4096,events))
   {
@@ -132,6 +132,8 @@ int event_parse_resourcefile()
         case exp_sub:      last->super   += string(line,i); continue;
         case exp_super:    last->sub     += string(line,i); continue;
         case exp_instead:  last->instead += string(line,i); continue;
+        case exp_prefix:   last->prefix  += string(line,i); continue;
+        case exp_suffix:   last->suffix  += string(line,i); continue;
         default: puts("THIS ERROR IS IMPOSSIBLE"); return 2;
       }
     }
@@ -222,6 +224,14 @@ int event_parse_resourcefile()
       }
       else if (lc(str,"Super check")) {
         last->super = v, last_exp = exp_super;
+        goto EXPRESSION;
+      }
+      else if (lc(str,"Prefix")) {
+        last->prefix = v, last_exp = exp_prefix;
+        goto EXPRESSION;
+      }
+      else if (lc(str,"Suffix")) {
+        last->suffix= v, last_exp = exp_suffix;
         goto EXPRESSION;
       }
       else if (lc(str,"Instead")) {
@@ -440,6 +450,25 @@ string event_get_instead(int mid, int id) {
   return event_access(mid,id)->instead;
 }
 
+// Some events have special behavior as placeholders, instead of simple iteration.
+// These two functions will test for and return such.
+
+bool event_has_prefix_code(int mid, int id) {
+  return event_access(mid,id)->prefix != "";
+}
+
+string event_get_prefix_code(int mid, int id) {
+  return event_access(mid,id)->prefix;
+}
+
+bool event_has_suffix_code(int mid, int id) {
+  return event_access(mid,id)->suffix != "";
+}
+
+string event_get_suffix_code(int mid, int id) {
+  return event_access(mid,id)->suffix;
+}
+
 
 // The rest of these functions use this
 string evres_code_substitute(string code, int sid, p_type t)
@@ -466,7 +495,7 @@ string event_get_super_check_condition(int mid, int id) {
 
 string event_get_super_check_function(int mid, int id) {
   event_info *e = event_access(mid,id);
-  return (e->super != "" and e->super[0] == '{') ? "inline bool supercheck_" + e->name + "() " + e->super + "\n\n" : "";
+  return (e->super != "" and e->super[0] == '{') ? "static inline bool supercheck_" + e->name + "() " + e->super + "\n\n" : "";
 }
 
 string event_get_sub_check_condition(int mid, int id) {
@@ -495,6 +524,27 @@ bool event_is_instance(int mid, int id) { // Returns if the event with the given
   return !mei.is_group and mei.specs[0]->mode == et_stacked;
 }
 
+string event_forge_sequence_code(int mid, int id, string preferred_name)
+{
+  string base_indent = string(4, ' ');
+  event_info *const ev = event_access(mid,id);
+  if (ev->instead != "")
+  {
+    return base_indent + ev->instead + base_indent + '\n';
+  }
+  else
+    if (event_execution_uses_default(mid,id))
+    {
+      if (event_has_super_check(mid,id) and !event_is_instance(mid,id))
+        return base_indent + "if (" + event_get_super_check_condition(mid,id) + ")\n" +
+               base_indent + "  for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)\n" +
+               base_indent + "    ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
+      else
+         return base_indent + "for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)\n"
+              + base_indent + "  ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
+    }
+  return "";
+}
 /*
 int main(int,char**)
 {

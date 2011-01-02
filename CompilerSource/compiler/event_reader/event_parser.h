@@ -68,6 +68,8 @@ struct event_info
   string cons; // Constant code -- Added whether the event exists or not
   string super; // Check made before iteration begins
   string sub;   // Check made by each instance in each execution
+  string prefix; // Inserted at the beginning of existing events
+  string suffix; // Appended to the end of existing events
   string instead; // Overrides all other options: Replaces the event loop for this event
   
   event_info();
@@ -99,9 +101,15 @@ extern bool   event_has_sub_check(int mid, int id);
 extern string event_get_sub_check_condition(int mid, int id);
 extern bool   event_has_const_code(int mid, int id);
 extern string event_get_const_code(int mid, int id);
+extern bool   event_has_prefix_code(int mid, int id);
+extern string event_get_prefix_code(int mid, int id);
+extern bool   event_has_suffix_code(int mid, int id);
+extern string event_get_suffix_code(int mid, int id);
 extern bool   event_execution_uses_default(int mid, int id);
 bool event_is_instance(int mid, int id);
 string event_stacked_get_root_name(int mid);
+
+string event_forge_sequence_code(int mid,int id, string preferred_name);
 
 // This is implemented in write_defragged_events.
 extern bool   event_used_by_something(string name);

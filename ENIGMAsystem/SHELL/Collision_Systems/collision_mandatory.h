@@ -31,4 +31,11 @@ namespace enigma
   // Offsets (origin point) x and y, and dimensions w and h. This function is intended to generate
   // a collision object, such as a bitmask or polygon mesh, and return a void* pointer to it.
   void *collisionsystem_sprite_data_create(char*,int,int,int,int); // It is called for every subimage of every sprite loaded.
+  
+  #ifdef _COLLISIONS_OBJECT_H
+    // This function will be invoked each collision event to obtain a pointer to any
+    // instance being collided with. It is expected to return NULL for no collision, or
+    // an object_basic* pointing to the first instance found.
+    object_basic *place_meeting_inst(double x, double y, int object);
+  #endif
 }

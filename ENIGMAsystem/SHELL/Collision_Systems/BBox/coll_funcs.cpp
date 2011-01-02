@@ -47,6 +47,13 @@ bool place_meeting(double x, double y, int object)
   return collide_inst_inst(object,false,true,x,y);
 }
 
+namespace enigma {
+  object_basic *place_meeting_inst(double x, double y, int object)
+  {
+    return collide_inst_inst(object,false,true,x,y);
+  }
+}
+
 
 bool position_free(double x,double y)
 {
@@ -65,7 +72,7 @@ bool position_meeting(double x, double y, int object)
 
 int instance_place(double x, double y, int object)
 {
-  const enigma::object_collisions* r = collide_inst_inst(object,false,true,x,y);
+  enigma::object_collisions* const r = collide_inst_inst(object,false,true,x,y);
   return r == NULL ? noone : r->id;
 }
 

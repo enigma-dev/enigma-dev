@@ -51,8 +51,10 @@
 #include "libEGMstd.h"
 
 
+#include "Universal_System/collisions_object.h"
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
+#include "Collision_Systems/collision_mandatory.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
@@ -98,8 +100,6 @@ extern int amain();
 #include "Universal_System/IMGloading.h"
 
 #include "Audio_Systems/OpenAL/as_basic.h"
-
-#include "Universal_System/collisions_object.h"
 
 #include "Universal_System/object.h"
 #include "Universal_System/instance.h"

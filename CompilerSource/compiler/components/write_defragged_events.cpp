@@ -53,6 +53,10 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h");
   wto << license;
   
+  
+  /* Generate a new list of events used by the objects in
+  ** this game. Only events on this list will be exported.
+  ***********************************************************/
   used_events.clear();
   for (int i = 0; i < es->gmObjectCount; i++)
     for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
@@ -65,6 +69,9 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
           used_events[event_get_function_name(mid,id)].inc(mid,id);
       }
   
+  /* Some events are included in all objects, even if the user 
+  ** hasn't specified code for them. Account for those here.
+  ***********************************************************/
   for (size_t i=0; i<event_sequence.size(); i++)
   {
     const int mid = event_sequence[i].first, id = event_sequence[i].second;
@@ -84,18 +91,21 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
     }
   }
   
+  /* Now we forge a top-level tier for object declaration
+  ** that defines default behavior for any obect's unused events.
+  *****************************************************************/
   wto << "namespace enigma" << endl << "{" << endl;
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
-  for (evfit it = used_events.begin(); it != used_events.end(); it++)
-  {
-    const bool eii = event_is_instance(it->second.mid, it->second.id);
-    wto << (eii ? "    virtual void    myevent_" : "    virtual variant myevent_") << it->first << "()";
-    edbg << "Checking for default code in ev[" << it->second.mid << ", " << it->second.id << ".\n";
-    if (event_has_default_code(it->second.mid,it->second.id))
-      wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << (eii ? "    }" : "    return 0;\n    }") << endl;
-    else wto << (eii ? " { } // No default " : " { return 0; } // No default ") << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
-  }
+            for (evfit it = used_events.begin(); it != used_events.end(); it++)
+            {
+              const bool e_is_inst = event_is_instance(it->second.mid, it->second.id);
+              wto << (e_is_inst ? "    virtual void    myevent_" : "    virtual variant myevent_") << it->first << "()";
+              edbg << "Checking for default code in ev[" << it->second.mid << ", " << it->second.id << ".\n";
+              if (event_has_default_code(it->second.mid,it->second.id))
+                wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << (e_is_inst ? "    }" : "    return 0;\n    }") << endl;
+              else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
+            }
   wto << "    //virtual void unlink() {} // This is already declared at the super level." << endl;
   wto << "    event_parent() {}" << endl;
   wto << "    event_parent(unsigned x, int y): " << system_get_uppermost_tier() << "(x,y) {}" << endl;
@@ -104,17 +114,22 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   wto.close();
   
   
+  /* Now we write the actual event sequence code, as
+  ** well as an initializer function for the whole system.
+  ***************************************************************/
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.h");
   wto << license;
   wto << "namespace enigma" << endl << "{" << endl;
   
+  // Start by defining storage locations for our event lists to iterate.
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
     wto  << "  event_iter *event_" << it->first << "; // Defined in " << it->second.count << " objects" << endl;
   
+  // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
     wto  << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
-    int o_hiid = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 1;
-    wto  << "    objects = new objectid_base[" << (o_hiid+1) << "]; // Allocated here; not really meant to change." << endl;
+    int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
+    wto  << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
     
     int ind = 0;
     for (evfit it = used_events.begin(); it != used_events.end(); it++)
@@ -122,37 +137,25 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
   
+  /* Some Super Checks are more complicated than others, requiring a function. Export those functions here. */
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
     wto << event_get_super_check_function(it->second.mid, it->second.id);
   
+  /* Now the event sequence */
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
     for (size_t i=0; i<event_sequence.size(); i++)
     {
+      // First, make sure we're actually using this event in some object
       const int mid = event_sequence[i].first, id = event_sequence[i].second;
       evfit it = used_events.find(event_is_instance(mid,id) ? event_stacked_get_root_name(mid) : event_get_function_name(mid,id));
       if (it == used_events.end()) continue;
       
-      if (event_has_instead(mid,id))
-      {
-        wto << "    " << event_get_instead(mid,id) << endl;
+      string seqcode = event_forge_sequence_code(mid,id,it->first);
+      if (seqcode != "")
+        wto << seqcode,
+        wto << "    " << endl,
+        wto << "    enigma::update_globals();" << endl,
         wto << "    " << endl;
-        wto << "    enigma::update_globals();" << endl;
-        wto << "    " << endl;
-      }
-      else
-        if (event_execution_uses_default(mid,id))
-        {
-          if (event_has_super_check(mid,id) and !event_is_instance(mid,id))
-            wto << "    if (" << event_get_super_check_condition(mid,id) << ")" << endl
-                << "      for (instance_event_iterator = event_" << it->first << "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)" << endl
-                << "        ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" << it->first << "();" << endl;
-          else
-            wto << "    for (instance_event_iterator = event_" << it->first << "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)" << endl
-                << "      ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" << it->first << "();" << endl;
-          wto << "    " << endl;
-          wto << "    enigma::update_globals();" << endl;
-          wto << "    " << endl;
-        }
     }
     wto << "    enigma::dispose_destroyed_instances();" << endl;
     wto << "    enigma::sleep_for_framerate(room_speed);" << endl;
