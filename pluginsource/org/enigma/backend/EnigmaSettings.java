@@ -160,12 +160,12 @@ public class EnigmaSettings
 			}
 		}
 
-	private static String getOS()
+	public static String getOS()
 		{
 		String os = normalize(System.getProperty("os.name"));
-		if (os.contains("nux") || os.contains("nix")) return "linux";
-		if (os.contains("win")) return "windows";
-		if (os.contains("mac")) return "macosx";
+		if (os.contains("nux") || os.contains("nix")) return "Linux";
+		if (os.contains("win")) return "Windows";
+		if (os.contains("mac")) return "MacOSX";
 		return os;
 		}
 

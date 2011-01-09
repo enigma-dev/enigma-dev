@@ -166,7 +166,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public boolean make()
 		{
-		String platform = "Linux";
+		String platform = EnigmaSettings.getOS();
+		String root = new File("/").getAbsolutePath();
 		String make, paths[];
 
 		//try to read the YAML definition for `make` on this platform
@@ -209,7 +210,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			try
 				{
 				String target = pth;
-				if (target.length() != 0 && (target.endsWith("/") || target.endsWith("\\"))) target += "/";
+				if (!target.isEmpty())
+					{
+					if (target.startsWith("\\")) target = root + target.substring(1);
+					if (target.endsWith("/") || target.endsWith("\\")) target += "/";
+					}
 				target += make;
 				p = Runtime.getRuntime().exec(target,null,LGM.workDir.getParentFile());
 				break;
