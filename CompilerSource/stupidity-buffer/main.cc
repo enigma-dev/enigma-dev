@@ -37,12 +37,10 @@ string fixdrive(string p)
   if (p[0] != '\\' and p[0] != '/')
     return p;
   
-  size_t bs = GetCurrentDirectory(0,NULL);
+  char buf[3];
+  GetCurrentDirectory(3,buf);
   
-  char buf[bs];
-  GetCurrentDirectory(bs,buf);
-  
-  if (((*buf >= 'A' and *buf <= 'Z') or (*buf >= '0' and *buf <= '9')) and buf[1] == ':')
+  if (((*buf >= 'A' and *buf <= 'Z') or (*buf >= 'a' and *buf <= 'z')) and buf[1] == ':')
     return string(buf,2) + p;
   return p;
 }
@@ -73,67 +71,122 @@ int better_system(const char* jname, const char* param)
   return exit_status;
 }
 
+typedef const char* const EMessage;
+EMessage
+ welcome__caption =
+  "Welcome to ENIGMA!",
+ welcome__gnu_not_found = 
+  "Welcome to ENIGMA!\n"
+  "This seems to be the first time you've run ENIGMA. I looked around, but I was unable "
+  "to locate the GCC G++ compiler. Would you like me to install it for you?\n\n"
+  "If you are clueless, press \"Yes\".",
+ welcome__gnu_found = 
+  "Welcome to ENIGMA!\n"
+  "This seems to be the first time you've run ENIGMA. I looked around, and I found a "
+  "copy of MinGW at the following location:\n%s\r\n\r\n Would you like to use this version?\n\n"
+  "Note that this version must include a working MSys distribution in order to comply "
+  "with the newest version. ENIGMA is capable of installing this"
+  "If you are somehow clueless as to how this got there, press \"Yes\", then ask "
+  "for help if it doesn't work.",
+ install_drive_ok =
+  "ENIGMA will install the GCC on the root of this drive by default. The assigned "
+  "letter for this drive is \"%s\". Is this drive OK? (You can select a different "
+  "drive by pressing \"no\".",
+ mingw__already_installed_here = 
+  "It seems that MinGW may already be installed. At least one key subdirectory of \\MinGW\\ "
+  "on the selected drive was found to already exist. Would you like to continue anyway?\n\n"
+  "Selecting \"yes\" will continue the installation, ignoring this warning.\n"
+  "Selecting \"No\" will retry creating the directories (this is so you can uninstall the current MinGW and try again)\n"
+  "Selecting \"Cancel\" will abort this installation, sending you back to the drive selection window",
+ java_not_found =
+  "Could not find Java.exe. Please install Sun's Java runtime environment so LGM can run.\r\n"
+  "http://www.java.com/en/download/manual.jsp\r\n\r\n"
+  "If you already have Java, and believe you have received this message in error, you could "
+  "try adding it to your system PATH variable.";
+
+string expand_message(string msg, string arg1)
+{
+  size_t p = msg.find("%s");
+  if (p != string::npos)
+    msg.replace(p,2,arg1);
+  return msg;
+}
+
+void get_new_drive_letter(char dl[4])
+{
+  dl[0] = 'C';
+  dl[1] = ':';
+  dl[2] = '/';
+  dl[3] = 0;
+}
+
+string dirpart(string fqp)
+{
+  size_t lp = fqp.find_last_of("/\\");
+  if (lp == string::npos) return "";
+  return fqp.erase(lp+1);
+}
+string filepart(string fqp)
+{
+  size_t lp = fqp.find_last_of("/\\");
+  if (lp == string::npos) return fqp;
+  return fqp.substr(lp+1);
+}
+
+bool e_install_mingw(string drive_letter);
+bool e_use_existing_install(const char* mpath, const char* make);
+
+const char* const CONFIG_FILE = "Compilers\\Windows\\gcc.ey";
+
 int main()
 {
-  int a;
-  puts("Scouring for Make");
-  const char *mpath = "make";
-  a = better_system(mpath, "--version");
-  if (a) a = better_system(mpath = "mingw32-make", "--version");
-  if (a) a = better_system(mpath = "\\MinGW\\bin\\make.exe", "--version");
-  if (a) a = better_system(mpath = "\\MinGW\\bin\\mingw32-make.exe", "--version");
-  if (a) a = better_system(mpath = "C:\\MinGW\\bin\\mingw32-make.exe", "--version");
-  if (a) a = better_system(mpath = "C:\\MinGW\\bin\\make.exe", "--version");
-  /*
-    if (a) a = better_system(mpath = "\\Program Files\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--version");
-    if (a) a = better_system(mpath = "\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--version");
-    if (a) a = better_system(mpath = "\\Program Files\\CodeBlocks\\MinGW\\bin\\make.exe", "--version");
-    if (a) a = better_system(mpath = "\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\make.exe", "--version");
-    if (a) a = better_system(mpath = "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--version");
-    if (a) a = better_system(mpath = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\mingw32-make.exe", "--version");
-    if (a) a = better_system(mpath = "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\make.exe", "--version");
-    if (a) a = better_system(mpath = "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\make.exe", "--version");
-  */
-  if (a) // If we didn't find it
+  /* Check if we've already installed. **/
+  puts("Checking configuration");
+  FILE *ey = fopen(CONFIG_FILE, "rb"); // The GCC.ey file does not exist until installation has finished, be it manually or by this installer.
+  if (!ey)
   {
-    FILE *tf = fopen("winmake.txt","rb"); // Config file
-    if (tf) { // If we've been down this road before
-      puts("I hope this file is accurate.");
-      fclose(tf);
-    }
-    else // First time run
+    /* No Compiler descriptor was found. Start probing around. */
+    puts("First time run. Scouring for Make...");
+    
+    const char *mpath = "make";
+    int a = better_system(mpath, "--version");
+    if (a) a = better_system(mpath = "mingw32-make", "--version");
+    if (a) a = better_system(mpath = "\\MinGW\\bin\\make.exe", "--version");
+    if (a) a = better_system(mpath = "\\MinGW\\bin\\mingw32-make.exe", "--version");
+    if (a) a = better_system(mpath = "C:\\MinGW\\bin\\mingw32-make.exe", "--version");
+    if (a) a = better_system(mpath = "C:\\MinGW\\bin\\make.exe", "--version");
+    
+    if (a) // If we didn't find it
     {
-      if (MessageBox(NULL,"MinGW was not detected on this system. Would you like to install it now? "
-                          "If you are certain you have a stable version, you can decline now and help ENIGMA find said "
-                          "version later.\n\nIf you are clueless, press \"Yes\".", "Welcome to ENIGMA!", MB_YESNO) == IDYES)
+      if (MessageBox(NULL, welcome__gnu_not_found, welcome__caption, MB_YESNO) == IDYES)
       {
-        if (MessageBox(NULL,"ENIGMA will now run the MinGW installer. It should default to C:\\MinGW, or whatever your main drive is in place of C:\\. "
-                            "Such is the recommended location (it's easiest to find).\n\nWhen prompted, please check that you would like three items:\n"
-                            " = The GCC C Compiler (If it's on the list, which it probably won't be)\n"
-                            " = The G++ C++ Compiler (Make sure this is checked! It's probably called just \"g++ compiler\")\n"
-                            " = The GDB GNU Debugging Program (If this isn't on the list, don't worry)", "MinGW Install", MB_OKCANCEL) == IDCANCEL)
+        install_mingw:
+        char drive_letter[4];
+        GetCurrentDirectory(4,drive_letter);
+        
+        label_get_install_drive:
+        string install_drive_confirm = expand_message(install_drive_ok, drive_letter);
+        if (MessageBox(NULL,install_drive_confirm.c_str(), "Install Drive", MB_YESNO) == IDNO)
         {
-          MessageBox(NULL, "Don't you cancel on me. <__<\"\nAll you had to do was run through the installer.\n\n*sigh*, We'll see how this works for you, then I'll ask you again next time.", "ENIGMA", MB_OK);
-          goto confused_cancel;
+          get_new_drive_letter(drive_letter);
+          if (!*drive_letter)
+            goto confused_cancel;
+          goto label_get_install_drive;
         }
         else
-        {
-          int mgi = better_system("Autoconf\\MinGW.exe","");
-          if (!mgi) puts("Thanks for installing!");
-          else {
-            puts("Somehow, I don't think you installed it.\nContinuing anyway... Will check again next run.");
-            goto confused_cancel;
-          }
-        }
+          e_install_mingw(drive_letter);
       }
-      if ((tf = fopen("winmake.txt","wb"))) { fputs(fixdrive(mpath).c_str(), tf); fclose(tf); }
-      else puts("\nI believe there's something wrong with your system. Ignoring and continuing...\n");
       confused_cancel: ;
     }
-  }
-  else { 
-    printf("Make detected. Accessile from `%s`. Informing the Environment.\n\n", mpath);
-    if (FILE *tf = fopen("winmake.txt","wb")) { fputs(fixdrive(mpath).c_str(), tf); fclose(tf); }
+    else // We located the GCC. 
+    { 
+      printf("Make detected. Accessible from `%s`.\n\n", mpath);
+      string msg = expand_message(welcome__gnu_found, mpath); 
+      if (MessageBox(NULL, msg.c_str(), welcome__caption, MB_YESNO) == IDYES)
+        e_use_existing_install(dirpart(mpath).c_str(), filepart(mpath).c_str());
+      else
+        goto install_mingw;
+    }
   }
   
   puts("Scouring for Java");
@@ -145,7 +198,7 @@ int main()
   GetEnvironmentVariable("programfiles(x86)", buf, MAX_PATH);
   string pfx86p = buf; pfx86p += "\\Java\\jre6\\bin\\java.exe";
   
-  a = better_system(jpath, "-version");
+  int a = better_system(jpath, "-version");
   if (a)
   {
     a = better_system(jpath = pfp.c_str(), "-version"); // This should hopefully take care of most of it
@@ -173,8 +226,102 @@ int main()
     printf("Calling `%s -jar l*.jar`\n\n",jpath);
     better_system(jpath,"-jar l*.jar");
   }
-  else
-    puts("Could not find Java.exe. Please install Sun's Java runtime environment so LGM can run.\r\nhttp://www.java.com/en/download/manual.jsp\r\n\r\nIf you already have Java, You could try adding it to your PATH variable.");
+  else {
+    puts(java_not_found);
+    MessageBox(NULL, welcome__gnu_not_found, "Java Problem", MB_OK);
+  }
+  
   system("pause");
   return 0;
 }
+
+#define ierror(x) return (puts(x), FALSE)
+#define or_toggle_potential_error() and (++potentialError, (GetLastError() != ERROR_ALREADY_EXISTS))
+bool e_install_mingw(string dl)
+{
+  for (int i=0; i<10; i++)
+    putc('\n',stdout);
+  puts("Starting MinGW Install.");
+  
+  puts("* Creating MinGW install directory.");
+  if (!CreateDirectory((dl + "MinGW").c_str(), NULL) and GetLastError() != ERROR_ALREADY_EXISTS)
+    ierror("Failed to create main MinGW directory. Abort.");
+  
+  // Warn the user if MinGW was already installed
+  bool potentialError = false;
+  
+  install_begin:
+  puts("* Installing MinGW-Get.");
+    puts("   * Creating Directories");
+      if (!CreateDirectory((dl + "MinGW\\bin\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW binary directory. Abort.");
+      if (!CreateDirectory((dl + "MinGW\\libexec\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW libexec directory. Abort.");
+      if (!CreateDirectory((dl + "MinGW\\libexec\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get LibExec directory. Abort.");
+      if (!CreateDirectory((dl + "MinGW\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get directory. Abort.");
+      if (!CreateDirectory((dl + "MinGW\\mingw-get\\var\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get var directory. Abort.");
+      if (!CreateDirectory((dl + "MinGW\\mingw-get\\var\\lib\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get lib directory. Abort.");
+      if (!CreateDirectory((dl + "MinGW\\mingw-get\\var\\lib\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get lib subdirectory. Abort.");
+      if (!CreateDirectory((dl + "MinGW\\mingw-get\\var\\lib\\mingw-get\\data\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get data directory. Abort.");
+    
+    if (potentialError)
+      switch (MessageBox(NULL,mingw__already_installed_here, "Warning", MB_YESNOCANCEL))
+      {
+        case IDYES:    break;
+        case IDNO:     goto install_begin;
+        case IDCANCEL: return FALSE;
+      }
+    
+    puts("   * Copying Files");
+    string mget = dl + "MinGW\\mingw-get\\bin\\mingw-get.exe";
+      if (!CopyFile("Autoconf\\mingw-get\\bin\\mingw-get.exe", mget.c_str(), FALSE))
+        ierror("Failed to copy MinGW-Get's defaults!");
+      if (!CopyFile("Autoconf\\mingw-get\\libexec\\mingw-get\\lastrites.exe", (dl + "MinGW\\mingw-get\\libexec\\mingw-get\\lastrites.exe").c_str(), FALSE))
+        ierror("Failed to copy MinGW-Get's defaults!");
+      if (!CopyFile("Autoconf\\mingw-get\\libexec\\mingw-get\\mingw-get-0.dll", (dl + "MinGW\\mingw-get\\libexec\\mingw-get\\mingw-get-0.dll").c_str(), FALSE))
+        ierror("Failed to copy MinGW-Get's defaults!");
+      if (!CopyFile("Autoconf\\mingw-get\\var\\lib\\mingw-get\\data\\defaults.xml", (dl + "MinGW\\mingw-get\\var\\lib\\mingw-get\\data\\defaults.xml").c_str(), FALSE))
+        ierror("Failed to copy MinGW-Get's defaults!");
+    
+    int install_p[4] = {0,0,0,0};
+    puts("   * Calling MinGW-Get");
+    /*install_p[0] = better_system(mget, "install mingw32-make");
+      install_p[1] = better_system(mget, "install gcc");
+      install_p[2] = better_system(mget, "install g++ ");
+      install_p[3] = better_system(mget, "install gdb");*/
+    int fi = bool(install_p[0]) + bool(install_p[1]) + bool(install_p[2]) + bool(install_p[3]);
+    if (fi)
+      printf ("FAILED TO INSTALL %d COMPONENTS!\n",fi);
+    else puts("All requested components were installed correctly.");
+  
+  return TRUE;
+}
+
+bool e_use_existing_install(const char* mpath, const char* make)
+{
+  FILE *cff = fopen(CONFIG_FILE, "wb");
+  if (cff)
+  {
+    fprintf(cff,
+            "%%e-yaml\n"
+            "---\n"
+            "Name: GNU GCC G++\n"
+            "Native: Yes\n"
+            "Maintainer: Josh / ENIGMA.exe #This is a generated file\n"
+            "\n"
+            "# Some info about it\n"
+            "Path: %s\n"
+            "Make: %s\n"
+            "\n",
+            mpath, make);
+    fclose(cff);
+  }
+  return TRUE;
+}
+

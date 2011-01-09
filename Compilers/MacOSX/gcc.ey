@@ -1,0 +1,8 @@
+%e-yaml
+---
+Name: GNU GCC G++
+Native: Yes
+Maintainer: TGMG
+
+# Some info about it
+Path: 

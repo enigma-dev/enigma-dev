@@ -1,0 +1,9 @@
+%e-yaml
+---
+Name: GNU GCC G++
+Native: Yes
+Maintainer: Josh
+
+# Some info about it
+Path: 
+Make: make
