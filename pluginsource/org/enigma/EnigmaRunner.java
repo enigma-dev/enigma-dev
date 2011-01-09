@@ -27,16 +27,15 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -63,11 +62,12 @@ import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.enigma.EYamlParser.YamlNode;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
-import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -166,49 +166,83 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public boolean make()
 		{
-		File f = new File("winmake.txt");
-		Process p;
-		InputStream stdin, stder;
+		String platform = "Linux";
+		String make, paths[];
+
+		//try to read the YAML definition for `make` on this platform
 		try
-			{
-			BufferedReader in = new BufferedReader(new FileReader(f));
-			String make = in.readLine();
-			in.close();
-			//prepend root
-			p = Runtime.getRuntime().exec(make,null,LGM.workDir.getParentFile());
-			stdin = p.getInputStream();
-			stder = p.getErrorStream();
-			}
-		catch (IOException e)
 			{
 			try
 				{
-				p = Runtime.getRuntime().exec("make",null,LGM.workDir.getParentFile());
-				stdin = p.getInputStream();
-				stder = p.getErrorStream();
+				File gccey = new File(new File("Compilers",platform),"gcc.ey");
+				YamlNode n = EYamlParser.parse(new Scanner(gccey));
+				make = n.getMC("Make"); //or OOB
+
+				//should already include user's system paths
+				//split on comma delimiter
+				paths = n.getMC("Path","").split(",");
 				}
-			catch (IOException e1)
+			catch (FileNotFoundException e)
 				{
-				GmFormatException e2 = new GmFormatException(null,e);
-				e2.printStackTrace();
-				new ErrorDialog(
-						null,
-						"Unable to Update Enigma",
-						"Enigma cannot run because it requires the `make` tool, which could not be found.\n"
-								+ "Please ensure that `make` is properly installed and then restart the application.",
-						Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
-								e2.getClass().getName(),e2.getMessage(),e2.stackAsString())).setVisible(true);
-				return false;
+				throw new GmFormatException(null,e);
+				}
+			catch (IndexOutOfBoundsException e)
+				{
+				throw new GmFormatException(null,e);
 				}
 			}
+		catch (GmFormatException e2)
+			{
+			e2.printStackTrace();
+			new ErrorDialog(null,"Unable to Update Enigma",
+					"Enigma cannot run because it does not recognize your platform,"
+							+ " or does not have `make` definitions for your platform.",Messages.format(
+							"Listener.DEBUG_INFO", //$NON-NLS-1$
+							e2.getClass().getName(),e2.getMessage(),e2.stackAsString())).setVisible(true);
+			return false;
+			}
+
+		//Try to run make from each path until one works
+		Process p = null;
+		IOException lastErr = null;
+		for (String pth : paths)
+			try
+				{
+				String target = pth;
+				if (target.length() != 0 && (target.endsWith("/") || target.endsWith("\\"))) target += "/";
+				target += make;
+				p = Runtime.getRuntime().exec(target,null,LGM.workDir.getParentFile());
+				break;
+				}
+			catch (IOException e)
+				{
+				lastErr = e;
+				}
+
+		//If none of them worked
+		if (p == null)
+			{
+			GmFormatException e2 = new GmFormatException(null,lastErr);
+			e2.printStackTrace();
+			new ErrorDialog(
+					null,
+					"Unable to Update Enigma",
+					"Enigma cannot run because it requires the `make` tool, which could not be found.\n"
+							+ "Please ensure that `make` is properly installed and then restart the application.",
+					Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
+							e2.getClass().getName(),e2.getMessage(),e2.stackAsString())).setVisible(true);
+			return false;
+			}
+
+		//Set up listeners, waitFor, finish successfully
 		System.out.println("Calling `make`");
 		ef.ta.append("Calling `make`");
-		new EnigmaThread(ef,stdin);
-		new EnigmaThread(ef,stder);
+		new EnigmaThread(ef,p.getInputStream());
+		new EnigmaThread(ef,p.getErrorStream());
 		ef.setVisible(true);
 		try
 			{
-			System.out.println(p.waitFor()); //p cannot be null at this point
+			System.out.println(p.waitFor());
 			}
 		catch (InterruptedException e)
 			{
@@ -323,39 +357,39 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public void populateKeywords()
 		{
 		SortedSet<Function> fl = new TreeSet<Function>(new Comparator<Function>()
+			{
+				@Override
+				public int compare(Function o1, Function o2)
 					{
-						@Override
-						public int compare(Function o1, Function o2)
-							{
-							return o1.getName().compareTo(o2.getName());
-							}
-					});
-				for (Function f : GMLKeywords.FUNCTIONS)
-					fl.add(f);
-				Set<Construct> cl = new HashSet<Construct>();
-				String res = DRIVER.first_available_resource();
-				while (res != null)
-					{
-					if (nameRegex.matcher(res).matches())
-						{
-						if (DRIVER.resource_isFunction())
-							{
-							int min = DRIVER.resource_argCountMin();
-							int max = DRIVER.resource_argCountMax();
-							String args = Integer.toString(min);
-							if (min != max) args += "-" + max;
-							fl.add(new Function(res,args,""));
-							}
-						//					else if (DRIVER.resource_isGlobal()) rl.add(res);
-						else if (DRIVER.resource_isTypeName()) cl.add(new Construct(res));
-						}
-					res = DRIVER.next_available_resource();
+					return o1.getName().compareTo(o2.getName());
 					}
-				GMLKeywords.FUNCTIONS = fl.toArray(new Function[0]);
-				for (Construct c : GMLKeywords.CONSTRUCTS)
-					cl.add(c);
-				GMLKeywords.CONSTRUCTS = cl.toArray(new Construct[0]);
+			});
+		for (Function f : GMLKeywords.FUNCTIONS)
+			fl.add(f);
+		Set<Construct> cl = new HashSet<Construct>();
+		String res = DRIVER.first_available_resource();
+		while (res != null)
+			{
+			if (nameRegex.matcher(res).matches())
+				{
+				if (DRIVER.resource_isFunction())
+					{
+					int min = DRIVER.resource_argCountMin();
+					int max = DRIVER.resource_argCountMax();
+					String args = Integer.toString(min);
+					if (min != max) args += "-" + max;
+					fl.add(new Function(res,args,""));
+					}
+				//					else if (DRIVER.resource_isGlobal()) rl.add(res);
+				else if (DRIVER.resource_isTypeName()) cl.add(new Construct(res));
 				}
+			res = DRIVER.next_available_resource();
+			}
+		GMLKeywords.FUNCTIONS = fl.toArray(new Function[0]);
+		for (Construct c : GMLKeywords.CONSTRUCTS)
+			cl.add(c);
+		GMLKeywords.CONSTRUCTS = cl.toArray(new Construct[0]);
+		}
 
 	public void applyBackground(String bgloc)
 		{
