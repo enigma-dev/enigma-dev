@@ -14,7 +14,7 @@ for file in *.cpp ;
     done;
     echo "" >> Makefile;
     
-    echo "	g++ -c $file		-o .eobjs_\$(MODE)/${file%.cpp}.o \$(FLAGS)"  >> Makefile;
+    echo "	\$(CXX) -c $file		-o .eobjs_\$(MODE)/${file%.cpp}.o \$(FLAGS)"  >> Makefile;
   };
   done;
 
@@ -37,5 +37,5 @@ done;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	\$(CREMOVE).eobjs*\$(SLASHC)*\$(ENDCREMOVE)" >> Makefile;
+echo "	-rm .eobjs*/*" >> Makefile;
 

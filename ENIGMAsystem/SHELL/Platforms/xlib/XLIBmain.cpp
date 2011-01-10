@@ -75,20 +75,20 @@ int handleEvents()
     case ButtonPress: {
         if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 1;
         else switch (e.xbutton.button) {
-          case 4: mouse_vscrolls++;
-          case 5: mouse_vscrolls--;
-          case 6: mouse_hscrolls++;
-          case 7: mouse_hscrolls--;
+          case 4: mouse_vscrolls++; break;
+          case 5: mouse_vscrolls--; break;
+          case 6: mouse_hscrolls++; break;
+          case 7: mouse_hscrolls--; break;
         }
       return 0;
     }
     case ButtonRelease: {
         if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 0;
         else switch (e.xbutton.button) {
-          case 4: mouse_vscrolls++;
-          case 5: mouse_vscrolls--;
-          case 6: mouse_hscrolls++;
-          case 7: mouse_hscrolls--;
+          case 4: mouse_vscrolls++; break;
+          case 5: mouse_vscrolls--; break;
+          case 6: mouse_hscrolls++; break;
+          case 7: mouse_hscrolls--; break;
         }
       return 0;
     }

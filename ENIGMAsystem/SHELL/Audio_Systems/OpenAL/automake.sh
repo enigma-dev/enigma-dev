@@ -11,7 +11,7 @@ for file in *.cpp ;
     done;
     echo "" >> Makefile;
     
-    echo "	g++ -c $file		-o .eobjs_\$(MODE)/${file%.cpp}.o \$(FLAGS)"  >> Makefile;
+    echo "	\$(CXX) -c $file		-o .eobjs_\$(MODE)/${file%.cpp}.o \$(FLAGS)"  >> Makefile;
   };
   done;
 
@@ -30,7 +30,7 @@ do
     do printf ".eobjs_$modename/${file%.cpp}.o " >> Makefile; 
     done;
   printf "\n" >> Makefile;
-  echo "	cd alure && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
+  echo "	cd alure  && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
   echo "	cd ogg    && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
   echo "	cd vorbis && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
   echo "	cd dumb   && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
@@ -39,11 +39,11 @@ done;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	\$(CREMOVE).eobjs*\$(SLASHC)*\$(ENDCREMOVE)" >> Makefile;
-echo "	cd alure	&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\" ENDCREMOVE=\"\$(ENDCREMOVE)\"" >> Makefile;
-echo "	cd ogg		&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\" ENDCREMOVE=\"\$(ENDCREMOVE)\"" >> Makefile;
-echo "	cd vorbis	&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\" ENDCREMOVE=\"\$(ENDCREMOVE)\"" >> Makefile;
-echo "	cd dumb		&& make clean CREMOVE=\"\$(CREMOVE)\" SLASHC=\"\$(SLASHC)\" ENDCREMOVE=\"\$(ENDCREMOVE)\"" >> Makefile;
+echo "	-rm .eobjs*/*" >> Makefile;
+echo "	cd alure	&& make clean" >> Makefile;
+echo "	cd ogg		&& make clean" >> Makefile;
+echo "	cd vorbis	&& make clean" >> Makefile;
+echo "	cd dumb		&& make clean" >> Makefile;
 
 cd ./alure/
 ./automake.sh
