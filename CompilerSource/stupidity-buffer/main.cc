@@ -88,6 +88,12 @@ EMessage
   "with the newest version. ENIGMA is capable of installing this"
   "If you are somehow clueless as to how this got there, press \"Yes\", then ask "
   "for help if it doesn't work.",
+ welcome__msys_found =
+  "Welcome to ENIGMA!\n"
+  "This seems to be the first time you've run ENIGMA. I looked around, and I found "
+  "what looks like an operable installation of GNU MSys Make, accessible from `make`. "
+  "Does this belong to a valid and properly configured installation of MinGW?\n\n"
+  "If you are unsure, select \"No\" and ENIGMA can install a new one for you.",
  install_drive_ok =
   "ENIGMA will install the GCC on the root of this drive by default. The assigned "
   "letter for this drive is \"%s\". Is this drive OK? (You can select a different "
@@ -98,6 +104,10 @@ EMessage
   "Selecting \"yes\" will continue the installation, ignoring this warning.\n"
   "Selecting \"No\" will retry creating the directories (this is so you can uninstall the current MinGW and try again)\n"
   "Selecting \"Cancel\" will abort this installation, sending you back to the drive selection window",
+ install_failure =
+  "Installation failed. Please submit the feedback in the console window as a bug report on "
+  "the forums. You can copy by right clicking the console and choosing \"Mark\", then using "
+  "ENTER to copy.",
  java_not_found =
   "Could not find Java.exe. Please install Sun's Java runtime environment so LGM can run.\r\n"
   "http://www.java.com/en/download/manual.jsp\r\n\r\n"
@@ -134,12 +144,18 @@ string filepart(string fqp)
 }
 
 bool e_install_mingw(string drive_letter);
-bool e_use_existing_install(const char* mpath, const char* make);
+bool e_use_existing_install(const char* mpath, const char* make, const char *auxpath);
 
 const char* const CONFIG_FILE = "Compilers\\Windows\\gcc.ey";
 
 int main()
 {
+  char drive_letter[44] = "\\";
+  GetCurrentDirectory(44,drive_letter);
+  
+  puts(drive_letter);
+  return 0;
+  
   /* Check if we've already installed. **/
   puts("Checking configuration");
   FILE *ey = fopen(CONFIG_FILE, "rb"); // The GCC.ey file does not exist until installation has finished, be it manually or by this installer.
@@ -148,7 +164,7 @@ int main()
     /* No Compiler descriptor was found. Start probing around. */
     puts("First time run. Scouring for Make...");
     
-    const char *mpath = "make";
+    const char *mpath = "make", *msmpath = "make";
     int a = better_system(mpath, "--version");
     if (a) a = better_system(mpath = "mingw32-make", "--version");
     if (a) a = better_system(mpath = "\\MinGW\\bin\\make.exe", "--version");
@@ -161,7 +177,7 @@ int main()
       if (MessageBox(NULL, welcome__gnu_not_found, welcome__caption, MB_YESNO) == IDYES)
       {
         install_mingw:
-        char drive_letter[4];
+        char drive_letter[4] = "\\";
         GetCurrentDirectory(4,drive_letter);
         
         label_get_install_drive:
@@ -174,68 +190,87 @@ int main()
           goto label_get_install_drive;
         }
         else
-          e_install_mingw(drive_letter);
+          if (!e_install_mingw(drive_letter))
+          {
+            MessageBox(NULL,install_failure,"Error",MB_OK);
+            goto end;
+          }
       }
       confused_cancel: ;
     }
     else // We located the GCC. 
     { 
-      printf("Make detected. Accessible from `%s`.\n\n", mpath);
+      printf("MinGW32 Make detected. Accessible from `%s`.\nVerifying MSys...\n\n", mpath);
+      
+      if (string("make") == mpath)
+      {
+        if (MessageBox(NULL, welcome__msys_found, welcome__caption, MB_YESNO) == IDYES)
+      }
+      
       string msg = expand_message(welcome__gnu_found, mpath); 
       if (MessageBox(NULL, msg.c_str(), welcome__caption, MB_YESNO) == IDYES)
         e_use_existing_install(dirpart(mpath).c_str(), filepart(mpath).c_str());
       else
         goto install_mingw;
     }
-  }
+  } else fclose(ey);
   
   puts("Scouring for Java");
-  const char *jpath = "java";
-  
-  char buf[MAX_PATH];
-  GetEnvironmentVariable("programfiles", buf, MAX_PATH);
-  string pfp = buf; pfp += "\\Java\\jre6\\bin\\java.exe";
-  GetEnvironmentVariable("programfiles(x86)", buf, MAX_PATH);
-  string pfx86p = buf; pfx86p += "\\Java\\jre6\\bin\\java.exe";
-  
-  int a = better_system(jpath, "-version");
-  if (a)
   {
-    a = better_system(jpath = pfp.c_str(), "-version"); // This should hopefully take care of most of it
+    const char *jpath = "java";
+    
+    char buf[MAX_PATH];
+    GetEnvironmentVariable("programfiles", buf, MAX_PATH);
+    string pfp = buf; pfp += "\\Java\\jre6\\bin\\java.exe";
+    GetEnvironmentVariable("programfiles(x86)", buf, MAX_PATH);
+    string pfx86p = buf; pfx86p += "\\Java\\jre6\\bin\\java.exe";
+    
+    int a = better_system(jpath, "-version");
     if (a)
     {
-      a = better_system(jpath = pfx86p.c_str(), "-version"); //One would think this would take care of the rest
+      a = better_system(jpath = pfp.c_str(), "-version"); // This should hopefully take care of most of it
       if (a)
       {
-        a = better_system(jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe", "-version");
+        a = better_system(jpath = pfx86p.c_str(), "-version"); //One would think this would take care of the rest
         if (a)
         {
-          a = better_system(jpath = "\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version");
+          a = better_system(jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe", "-version");
           if (a)
           {
-            a = better_system(jpath = "C:\\Program Files\\Java\\jre6\\bin\\java.exe", "-version"); //At this point, they're probably running something that uses C:.
+            a = better_system(jpath = "\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version");
             if (a)
-              a = better_system(jpath = "C:\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version"); //What a fucked up configuration. *cough* dazappa *cough*
+            {
+              a = better_system(jpath = "C:\\Program Files\\Java\\jre6\\bin\\java.exe", "-version"); //At this point, they're probably running something that uses C:.
+              if (a)
+                a = better_system(jpath = "C:\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version"); //What a fucked up configuration. *cough* dazappa *cough*
+            }
           }
         }
       }
     }
-  }
-  if (!a)
-  {
-    printf("Calling `%s -jar l*.jar`\n\n",jpath);
-    better_system(jpath,"-jar l*.jar");
-  }
-  else {
-    puts(java_not_found);
-    MessageBox(NULL, welcome__gnu_not_found, "Java Problem", MB_OK);
+    if (!a)
+    {
+      printf("Calling `%s -jar l*.jar`\n\n",jpath);
+      better_system(jpath,"-jar l*.jar");
+    }
+    else {
+      puts(java_not_found);
+      MessageBox(NULL, welcome__gnu_not_found, "Java Problem", MB_OK);
+    }
   }
   
+  end:
   system("pause");
   return 0;
 }
 
-#define ierror(x) return (puts(x), FALSE)
+static inline bool CopyFile2(const char* x, const char* y)
+{
+  printf("      => Copy `%s`\n",x);
+  return CopyFile(x,y,FALSE);
+}
+
+#define ierror(x...) return (printf(x), puts("\n"), FALSE)
 #define or_toggle_potential_error() and (++potentialError, (GetLastError() != ERROR_ALREADY_EXISTS))
 bool e_install_mingw(string dl)
 {
@@ -259,15 +294,13 @@ bool e_install_mingw(string dl)
         ierror("Failed to create MinGW libexec directory. Abort.");
       if (!CreateDirectory((dl + "MinGW\\libexec\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
         ierror("Failed to create MinGW-Get LibExec directory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
-        ierror("Failed to create MinGW-Get directory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\mingw-get\\var\\").c_str(), NULL) or_toggle_potential_error())
+      if (!CreateDirectory((dl + "MinGW\\var\\").c_str(), NULL) or_toggle_potential_error())
         ierror("Failed to create MinGW-Get var directory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\mingw-get\\var\\lib\\").c_str(), NULL) or_toggle_potential_error())
+      if (!CreateDirectory((dl + "MinGW\\var\\lib\\").c_str(), NULL) or_toggle_potential_error())
         ierror("Failed to create MinGW-Get lib directory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\mingw-get\\var\\lib\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
+      if (!CreateDirectory((dl + "MinGW\\var\\lib\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
         ierror("Failed to create MinGW-Get lib subdirectory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\mingw-get\\var\\lib\\mingw-get\\data\\").c_str(), NULL) or_toggle_potential_error())
+      if (!CreateDirectory((dl + "MinGW\\var\\lib\\mingw-get\\data\\").c_str(), NULL) or_toggle_potential_error())
         ierror("Failed to create MinGW-Get data directory. Abort.");
     
     if (potentialError)
@@ -279,31 +312,32 @@ bool e_install_mingw(string dl)
       }
     
     puts("   * Copying Files");
-    string mget = dl + "MinGW\\mingw-get\\bin\\mingw-get.exe";
-      if (!CopyFile("Autoconf\\mingw-get\\bin\\mingw-get.exe", mget.c_str(), FALSE))
-        ierror("Failed to copy MinGW-Get's defaults!");
-      if (!CopyFile("Autoconf\\mingw-get\\libexec\\mingw-get\\lastrites.exe", (dl + "MinGW\\mingw-get\\libexec\\mingw-get\\lastrites.exe").c_str(), FALSE))
-        ierror("Failed to copy MinGW-Get's defaults!");
-      if (!CopyFile("Autoconf\\mingw-get\\libexec\\mingw-get\\mingw-get-0.dll", (dl + "MinGW\\mingw-get\\libexec\\mingw-get\\mingw-get-0.dll").c_str(), FALSE))
-        ierror("Failed to copy MinGW-Get's defaults!");
-      if (!CopyFile("Autoconf\\mingw-get\\var\\lib\\mingw-get\\data\\defaults.xml", (dl + "MinGW\\mingw-get\\var\\lib\\mingw-get\\data\\defaults.xml").c_str(), FALSE))
-        ierror("Failed to copy MinGW-Get's defaults!");
+    string mget = dl + "MinGW\\bin\\mingw-get.exe";
+      if (!CopyFile2("Autoconf\\mingw-get\\bin\\mingw-get.exe", mget.c_str()))
+        ierror("Failed to copy MinGW-Get's executable! (error code %d)",(int)GetLastError());
+      if (!CopyFile2("Autoconf\\mingw-get\\libexec\\mingw-get\\lastrites.exe", (dl + "MinGW\\libexec\\mingw-get\\lastrites.exe").c_str()))
+        ierror("Failed to copy MinGW-Get's lastrites! (error code %d)",(int)GetLastError());
+      if (!CopyFile2("Autoconf\\mingw-get\\libexec\\mingw-get\\mingw-get-0.dll", (dl + "MinGW\\libexec\\mingw-get\\mingw-get-0.dll").c_str()))
+        ierror("Failed to copy MinGW-Get's DLL! (error code %d)",(int)GetLastError());
+      if (!CopyFile2("Autoconf\\mingw-get\\var\\lib\\mingw-get\\data\\defaults.xml", (dl + "MinGW\\var\\lib\\mingw-get\\data\\defaults.xml").c_str()))
+        ierror("Failed to copy MinGW-Get's defaults! (error code %d)",(int)GetLastError());
     
-    int install_p[4] = {0,0,0,0};
+    int install_p = 0;
     puts("   * Calling MinGW-Get");
-    /*install_p[0] = better_system(mget, "install mingw32-make");
-      install_p[1] = better_system(mget, "install gcc");
-      install_p[2] = better_system(mget, "install g++ ");
-      install_p[3] = better_system(mget, "install gdb");*/
-    int fi = bool(install_p[0]) + bool(install_p[1]) + bool(install_p[2]) + bool(install_p[3]);
-    if (fi)
-      printf ("FAILED TO INSTALL %d COMPONENTS!\n",fi);
+      install_p = better_system(mget.c_str(), "install mingw32-make gcc g++ gdb msys-base msys-bash msys-make");
+    if (install_p) {
+      char m[512]; sprintf(m,"MinGW-Get failed! This application is outside the control of the ENIGMA team and so most likely"
+                             "failed due to a change in package names. Please report this incident on ENIGMA's forums.\n\n"
+                             "mingw-get error code: %d",install_p);
+      MessageBox (NULL,m,"WARNING",MB_OK);
+    }
     else puts("All requested components were installed correctly.");
   
+    e_use_existing_install((dl + "MinGW\msys\1.0\bin").c_str(), "mingw32-make.exe", (dl + "MinGW\msys\1.0\bin; " + dl + "MinGW\\bin\\").c_str());
   return TRUE;
 }
 
-bool e_use_existing_install(const char* mpath, const char* make)
+bool e_use_existing_install(const char* mpath, const char* make, const char *auxpath)
 {
   FILE *cff = fopen(CONFIG_FILE, "wb");
   if (cff)
@@ -318,8 +352,9 @@ bool e_use_existing_install(const char* mpath, const char* make)
             "# Some info about it\n"
             "Path: %s\n"
             "Make: %s\n"
+            "AuxPath: %s\n",
             "\n",
-            mpath, make);
+            mpath, make, auxpath);
     fclose(cff);
   }
   return TRUE;

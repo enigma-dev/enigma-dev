@@ -64,7 +64,7 @@ void parse_ide_settings(const char* eyaml)
   } else  extensions::targetAPI.v ## Sys = eyscalar(it);
   
   // Get target's windowing api
-  ey_cp(window,   windowing,api)
+  ey_cp(window,    windowing,api)
   // Get requested graphics system
   ey_cp(graphics,  graphics,system)
   // Get requested audio system
