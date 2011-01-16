@@ -65,9 +65,9 @@ import javax.swing.event.DocumentListener;
 import org.enigma.EYamlParser.YamlNode;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
-import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -104,7 +104,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public JMenuItem showFunctions, showGlobals, showTypes;
 	public static EnigmaDriver DRIVER;
 	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
-	public static boolean GCC_LOCATED = false, ENIGMA_READY = false;
+	public static boolean GCC_LOCATED = false, ENIGMA_READY = false, ENIGMA_FAIL = false;
 	public final EnigmaNode node = new EnigmaNode();
 
 	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2;
@@ -126,7 +126,20 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					//Disable updates by removing plugins/shared/svnkit.jar (e.g. linux packages)
 					boolean rebuild = Preferences.userRoot().node("/org/enigma").getBoolean("NEEDS_REBUILD",
 							false);
-					if (attemptUpdate() || attemptLib() != null || rebuild) make();
+					int updates = attemptUpdate();
+					if (updates == -1)
+						{
+						ENIGMA_FAIL = true;
+						return;
+						}
+					if (updates == 1 || rebuild || attemptLib() != null)
+						{
+						if (!make())
+							{
+							ENIGMA_FAIL = true;
+							return;
+							}
+						}
 					Error e = attemptLib();
 					if (e != null)
 						{
@@ -134,6 +147,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 								+ "either because it could not be found or uses methods different from those expected.\n"
 								+ "The exact error is:\n" + e.getMessage();
 						JOptionPane.showMessageDialog(null,err);
+						ENIGMA_FAIL = true;
 						return;
 						}
 
@@ -402,12 +416,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		LGM.mdi.add(new MDIBackground(bg),JLayeredPane.FRAME_CONTENT_LAYER);
 		}
 
-	/** Attempts to update, and returns whether it needed one. Also returns false on error. */
-	public boolean attemptUpdate()
+	/** Attempts to checkout/update. Returns 0/1 on success, -1 on aborted checkout, -2 on failure, -3 on missing SvnKit */
+	public int attemptUpdate()
 		{
 		try
 			{
-			boolean up = EnigmaUpdater.checkForUpdates(ef);
+			int up = EnigmaUpdater.checkForUpdates(ef);
 			if (EnigmaUpdater.needsRestart)
 				{
 				Preferences.userRoot().node("/org/enigma").putBoolean("NEEDS_REBUILD",true);
@@ -428,7 +442,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			String error = "Auto-update disabled: SvnKit missing, corrupted, or unusable. "
 					+ "Please download to plugins/shared/svnkit.jar in order to enable auto-update.";
 			System.err.println(error);
-			return false;
+			return -3;
 			}
 		}
 
@@ -577,7 +591,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		if (!ENIGMA_READY)
 			{
-			JOptionPane.showMessageDialog(null,"ENIGMA isn't ready yet.");
+			JOptionPane.showMessageDialog(null,
+					ENIGMA_FAIL ? "ENIGMA is not functional due to prior errors." : "ENIGMA isn't ready yet.");
 			return null;
 			}
 		if (!GCC_LOCATED)
@@ -597,7 +612,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		if (!ENIGMA_READY)
 			{
-			JOptionPane.showMessageDialog(null,"ENIGMA isn't ready yet.");
+			JOptionPane.showMessageDialog(null,
+					ENIGMA_FAIL ? "ENIGMA is not functional due to prior errors." : "ENIGMA isn't ready yet.");
 			return;
 			}
 

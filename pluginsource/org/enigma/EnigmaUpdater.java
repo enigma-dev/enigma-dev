@@ -47,6 +47,7 @@ import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
 import org.tmatesoft.svn.core.wc.ISVNStatusHandler;
+import org.tmatesoft.svn.core.wc.SVNBasicClient;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNEvent;
 import org.tmatesoft.svn.core.wc.SVNEventAction;
@@ -67,7 +68,8 @@ public class EnigmaUpdater
 	/** Path to the working copy */
 	private File path = null;
 
-	public static boolean checkForUpdates(final EnigmaFrame ef)
+	/** Returns -2 on error, -1 on aborted checkout, 0 on no update, 1 on finished update */
+	public static int checkForUpdates(final EnigmaFrame ef)
 		{
 		EnigmaUpdater svn = new EnigmaUpdater();
 		try
@@ -75,36 +77,35 @@ public class EnigmaUpdater
 			if (svn.needsCheckout())
 				{
 				String repo = askCheckout();
-				if (repo != null)
+				if (repo == null) return -1;
+				ef.ta.append("Downloading libraries. This may take a while.\n");
+				ef.setVisible(true);
+
+				svn.checkout(repo,new ISVNEventHandler()
 					{
-					ef.ta.append("Downloading libraries. This may take a while.\n");
-					ef.setVisible(true);
-
-					svn.checkout(repo,new ISVNEventHandler()
-						{
-							@Override
-							public void handleEvent(SVNEvent event, double progress) throws SVNException
+						@Override
+						public void handleEvent(SVNEvent event, double progress) throws SVNException
+							{
+							if (event.getAction() != SVNEventAction.UPDATE_ADD) return;
+							ef.ta.append("Added " + event.getFile() + "\n");
+							SwingUtilities.invokeLater(new Thread()
 								{
-								if (event.getAction() != SVNEventAction.UPDATE_ADD) return;
-								ef.ta.append("Added " + event.getFile() + "\n");
-								SwingUtilities.invokeLater(new Thread()
-									{
-										public void run()
-											{
-											ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
-											}
-									});
-								}
+									public void run()
+										{
+										ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
+										}
+								});
+							}
 
-							@Override
-							public void checkCancelled() throws SVNCancelException
-								{
-								}
-						});
-					if (revert) svn.revert();
-					}
-				return true;
+						@Override
+						public void checkCancelled() throws SVNCancelException
+							{
+							}
+					});
+				if (revert) svn.revert();
+				return 1;
 				}
+			svn.cleanup();
 			long lrev = svn.workingRev();
 			long rev = svn.needsUpdate();
 			if (rev != -1L)
@@ -114,14 +115,15 @@ public class EnigmaUpdater
 						null,
 						"Enigma has detected that newer libraries may exist. Would you like us to fetch these for you?",
 						title,JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
-				return true;
+				return 1;
 				}
 			}
 		catch (SVNException e)
 			{
 			showUpdateError(e);
+			return -2;
 			}
-		return false;
+		return 0;
 		}
 
 	private EnigmaUpdater()
@@ -244,19 +246,8 @@ public class EnigmaUpdater
 		System.out.println("Checked out " + r);
 		}
 
-	private void revert() throws SVNException
+	private void listenForChangesRequiringRestart(SVNBasicClient cli)
 		{
-		SVNWCClient wcCli = cliMan.getWCClient();
-		wcCli.doRevert(new File[] { path },SVNDepth.INFINITY,null);
-		System.out.println("Reverted");
-		}
-
-	public static boolean needsRestart = false;
-
-	private void update() throws SVNException
-		{
-		SVNUpdateClient upCli = cliMan.getUpdateClient();
-
 		File fme = null;
 		try
 			{
@@ -268,7 +259,7 @@ public class EnigmaUpdater
 			}
 		final File me = fme;
 
-		upCli.setEventHandler(new ISVNEventHandler()
+		cli.setEventHandler(new ISVNEventHandler()
 			{
 				@Override
 				public void checkCancelled() throws SVNCancelException
@@ -284,6 +275,30 @@ public class EnigmaUpdater
 							needsRestart = true;
 					}
 			});
+		}
+
+	/** Releases locks and finished unfinished operations. Idempotent (calling when unneeded has no effect) */
+	private void cleanup() throws SVNException
+		{
+		SVNWCClient wcc = cliMan.getWCClient();
+		listenForChangesRequiringRestart(wcc);
+		wcc.doCleanup(path);
+		System.out.println("Cleaned up");
+		}
+
+	private void revert() throws SVNException
+		{
+		SVNWCClient wcCli = cliMan.getWCClient();
+		wcCli.doRevert(new File[] { path },SVNDepth.INFINITY,null);
+		System.out.println("Reverted");
+		}
+
+	public static boolean needsRestart = false;
+
+	private void update() throws SVNException
+		{
+		SVNUpdateClient upCli = cliMan.getUpdateClient();
+		listenForChangesRequiringRestart(upCli);
 		long r = upCli.doUpdate(path,SVNRevision.HEAD,SVNDepth.INFINITY,true,false);
 		System.out.println("Updated to " + r);
 		}

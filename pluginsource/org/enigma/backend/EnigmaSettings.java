@@ -72,6 +72,7 @@ public class EnigmaSettings
 		f = new File(f,"SHELL");
 		f = new File(f,target);
 		File files[] = f.listFiles();
+		if (files == null) return targets;
 		for (File dir : files)
 			{
 			if (!dir.isDirectory()) continue;
