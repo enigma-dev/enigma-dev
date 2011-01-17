@@ -59,7 +59,7 @@ bool init_load_successful = false;
 varray<string> include_directories;
 unsigned int include_directory_count;
 
-string MAKE_location;
+string MAKE_location, MAKE_paths;
 
 inline int rdir_system(string x, string y)
 {
@@ -227,12 +227,13 @@ int establish_bearings(const char *compiler)
   *****************************/
   
   if ((cmd = compey.get("make")) == "")
-    cmd = "make",
-    cout << "WARNING: Compiler descriptor file `" << compfq <<"` does not specify 'make' executable. Using 'make'.\n";
+    cmd = "make", cout << "WARNING: Compiler descriptor file `" << compfq <<"` does not specify 'make' executable. Using 'make'.\n";
   toolchain_parseout(cmd, toolchainexec,parameters);
   MAKE_location = toolchainexec;
   if (parameters != "")
     cout << "WARNING: Discarding parameters `" << parameters << "` to " << MAKE_location << "." << endl;
+  
+  MAKE_paths = compey.get("path");
   
   return 0;
 }

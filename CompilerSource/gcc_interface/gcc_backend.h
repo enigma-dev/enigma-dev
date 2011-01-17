@@ -27,4 +27,4 @@
 
 //Sometimes I wonder if licenses waste space. *Whistles*
 
-extern string GCC_location, MAKE_location;
+extern string MAKE_paths, MAKE_location;

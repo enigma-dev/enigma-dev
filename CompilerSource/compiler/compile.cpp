@@ -394,6 +394,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
   
   make += string("OUTPUTNAME=\"") + gameFname + "\" ";
+  make += "eTCpath=\"" + MAKE_paths + "\"";
 
   edbg << "Running make from `" << MAKE_location << "'" << flushl;
   edbg << "Full command line: " << MAKE_location << " " << make << flushl;
@@ -408,18 +409,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   // Redirect it
   ide_output_redirect_file(redirfile);
-  /*
-  #if CURRENT_PLATFORM_ID == OS_IPHONE
-    #if IPHONE_DEVICE == 1
-    int makeres = better_system(MAKE_location,"iphonedevice","&>",redirfile);
-    #else
-    int makeres = better_system(MAKE_location,"iphone","&>",redirfile);
-    #endif
-  #elif TARGET_PLATFORM_ID == OS_ANDROID
-    int makeres = better_system(MAKE_location,"android","&>",redirfile);
-  #else*/
   int makeres = better_system(MAKE_location,make,"&>",redirfile);
-  //#endif
 
   // Stop redirecting GCC output
   ide_output_redirect_reset();
