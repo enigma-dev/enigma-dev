@@ -72,7 +72,7 @@ extern void clear_ide_editables();
 extern void print_err_line_at(pt a);
 #include "cfile_parse/cfile_pushing.h"
 
-extern int establish_bearings();
+extern int establish_bearings(const char *compiler);
 
 #include "backend/JavaCallbacks.h"
 
@@ -95,9 +95,9 @@ dllexport int libInit(EnigmaCallbacks* ecs)
     ide_output_redirect_file = ecs->output_redirect_file;
     ide_output_redirect_reset = ecs->output_redirect_reset;
   }
-  else cout << "IDE Not Found.";
+  else cout << "IDE Not Found. Continuing without graphical output.\n";
   
-  int a = establish_bearings();
+  int a = establish_bearings("gcc");
   if (a) {
     cout << "ERROR: See scrollback for information.\n";
     return a;

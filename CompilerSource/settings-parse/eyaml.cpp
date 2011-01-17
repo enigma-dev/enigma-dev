@@ -102,6 +102,49 @@ char ey_string::toByte()      { return atoi(value.c_str()); }
 double ey_string::toDouble()  { return atof(value.c_str()); }
 int ey_string::toInt()        { return atoi(value.c_str()); }
 long long ey_string::toLong() { return atoll(value.c_str()); }
+string ey_string::toString()
+{
+  if (value[0] != '"')
+    return value;
+  string ret = value.substr(1);
+  for (size_t i = 0; i < ret.length(); i++)
+  {
+    if (ret[i] == '\\')
+    switch (ret[i+1])
+    {
+      case 'r':
+          ret[i] = '\r';
+        goto accepted_escape;
+      case 'n':
+          ret[i] = '\n';
+        goto accepted_escape;
+      case 't':
+          ret[i] = '\t';
+        goto accepted_escape;
+      case '"':
+          ret[i] = '\"';
+        goto accepted_escape;
+      case '\'':
+          ret[i] = '\'';
+        goto accepted_escape;
+      case '#':
+          ret[i] = '#';
+        goto accepted_escape;
+      case '%':
+          ret[i] = '%';
+        goto accepted_escape;
+      case '\\':
+        goto accepted_escape;
+        
+      accepted_escape:
+        ret.erase(i+1,1);
+    }
+    else if (ret[i] == '"') {
+      ret.erase(i); break;
+    }
+  }
+  return ret;
+}
 
 struct y_level {
   y_level *prev;
@@ -113,7 +156,8 @@ ey_data parse_eyaml(istream &file, string filename)
 {
   ey_data res;
   string line, unlowered;
-  int linenum = 1, multi = false;
+  int linenum = 1, multi = false; // Line number for error reporting, multiline representing not in multi (false), starting multi (-1), or in multi (multiple line count)
+  char mchar = 0; // The character that started a multiline entry
   
   getline(file,line);
   if (tolower(line.substr(0,7)) != "%e-yaml")
@@ -210,13 +254,18 @@ ey_data parse_eyaml(istream &file, string filename)
     while (is_useless(line[++pos])); // Skip the whitespace between colon and value
     
     const pt vsp = pos; // Store value start position
+    if (line[pos] == '"')
+    {
+      while (++pos < line.length() and line[pos] != '"')
+        if (line[pos] == '"') pos++;
+    }
     while (pos < line.length() and line[pos] != '#' and line[pos] != '%') pos++; // Find end of line (or start of comment)
     while (is_useless(line[--pos])); // Trim trailing whitespace
     
     if (++pos > vsp) // If we have any non-white value after this colon at all...
-      if (pos - vsp == 1 and line[vsp] == '|') // Pipe => Multiline value
+      if (pos - vsp == 1 and (line[vsp] == '|' or line[vsp] == '>')) // Pipe => Multiline value
         latest->second = latestc->value = new ey_string(unlowered, ""), // Store this value as a string
-        multi = -1; // Indicate that we are starting a multiline value
+        multi = -1, mchar = line[pos]; // Indicate that we are starting a multiline value, and note the character invoking it
       else // Otherwise, just an ordinary scalar
         latest->second = latestc->value = new ey_string(unlowered, line.substr(vsp, pos - vsp)); // Store this value as a string
     else;

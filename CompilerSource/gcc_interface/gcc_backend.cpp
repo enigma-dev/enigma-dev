@@ -59,7 +59,7 @@ bool init_load_successful = false;
 varray<string> include_directories;
 unsigned int include_directory_count;
 
-string GCC_location, MAKE_location;
+string MAKE_location;
 
 inline int rdir_system(string x, string y)
 {
@@ -68,123 +68,176 @@ inline int rdir_system(string x, string y)
 
 extern my_string fca(const char*);
 extern my_string GCC_MACRO_STRING;
-
-//Find us the GCC, get info about it and ourself
-int establish_bearings()
+    
+#include "../OS_Switchboard.h"
+#include "../settings-parse/eyaml.h"
+    
+// This function parses one command line specified to the eYAML into a filename string and a parameter string,
+// then returns whether or not the output from this call must be manually redirected to the output file ofile.
+static inline bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
 {
-  // Clear a blank file
-  fclose(fopen("blank.txt","wb"));
+  pt pos = 0, spos;
+  
+  /* Isolate the executable path and filename
+  ***********************************************/
+    while (is_useless(line[pos]) and pos<line.length()) pos++; // Skip leading whitespace
+    if (pos == line.length()) return false;
+    spos = pos;
+    
+    if (line[pos] == '"' and ++spos)
+      while (line[++pos] != '"' and pos<line.length())
+        if (line[pos] == '\\') pos++; else;
+    else if (line[pos] == '\'' and ++spos)
+      while (line[++pos] != '\'' and pos<line.length())
+        if (line[pos] == '\\') pos++; else;
+    else while (!is_useless(line[++pos]) and pos<line.length());
+  
+  exename = line.substr(spos,pos-spos);
+  if (pos >= line.length())
+    return (command = "", true);
+  
+  /* Isolate the command part of our input line
+  **********************************************/
+  while (is_useless(line[++pos]));
+  command = line.substr(pos);
+  
+  /* Parse the command for keywords such as $out and $blank
+  ************************************************************/
+    size_t srp = command.find("$out");
+    
+    bool redir = true;
+    while (srp != string::npos) {
+      redir = false;
+      command.replace(srp,4,ofile);
+      srp = command.find("$out");
+    }
+    
+    bool mblank = false;
+    srp = command.find("$blank");
+    while (srp != string::npos) {
+      command.replace(srp,6,"blank.txt");
+      srp = command.find("$blank");
+      mblank = true;
+    }
+    if (mblank)
+      fclose(fopen("blank.txt","wb"));
+  
+  /* Return whether or not to redirect */
+  return redir;
+}
+
+// Read info about our compiler configuration and run with it
+int establish_bearings(const char *compiler)
+{
+  string GCC_location;
+  string compfq = "Compilers/" CURRENT_PLATFORM_NAME "/"; compfq += compiler; compfq += ".ey";
+  ifstream compis(compfq.c_str());
+  
+  // Bail if error
+  if (!compis.is_open())
+    return ((cout << "Bailing: Error 1: Could not open compiler descriptor `" << compfq << "`." << endl,1));
+  
+  // Parse our compiler data file
+  ey_data compey = parse_eyaml(compis,compiler);
   
   my_string defs;
   bool got_success = false;
   
-  cout << "Probing for GCC..." << endl;
+  // Now we begin interfacing with the toolchain.
+  string cmd, toolchainexec, parameters; // Full command line, executable part, parameter part
+  bool redir; // Whether or not to redirect the output manually
   
-  // See if we've been down this road before
-  string bin_path = fc("gcc_adhoc.txt");
+  /* Get a list of all macros defined by our compiler.
+  ** These will help us through parsing available libraries.
+  ***********************************************************/
+  if ((cmd = compey.get("defines")) == "")
+    return (cout << "Bailing: Error 3: Compiler descriptor file `" << compfq <<"` does not specify 'defines' executable.\n" , 1);
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,"defines.txt");
+  cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
+  got_success = !(redir? better_system(toolchainexec, parameters, ">", "defines.txt") : better_system(toolchainexec, parameters));
+  if (!got_success) return (cout << "ERROR! Call returned non-zero!\n" << endl, 2);
+  else cout << "Call succeeded" << endl;
   
-  if (bin_path != "") //We have in fact been down this road before...
-  {
-    string cm = bin_path + "cpp";
-    got_success = !better_system(cm, "-dM -x c++ -E blank.txt", ">", "defines.txt");
-    if (!got_success) got_success = !better_system(cm = bin_path + "cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
-    if (!got_success) cout << "Failed to load GCC from Ad-Hoc location:\n" << bin_path << endl;
-    defs = fc("defines.txt");
-    if (defs == NULL) return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
-  }
-  if (!got_success)
-  {
-    puts("Scouring for Make");
-    const char *cpath;
-    int failing = better_system(cpath = "cpp", "-dM -xc++ -E blank.txt", ">", "defines.txt");
-    if (failing) failing = better_system(cpath = "/MinGW/bin/cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
-    if (failing) failing = better_system(cpath = "\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
-    if (failing) failing = better_system(cpath = "C:\\MinGW\\bin\\cpp.exe", "-dM -x c++ -E blank.txt", ">", "defines.txt");
-    
-    if (failing)
-      return (cout << "Bailing: Error 1\n" , 1);
-    
-    defs = fca("defines.txt");
-    if (defs == NULL) return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
-    
-    string scpath = cpath;
-    size_t sp = scpath.find_last_of("/\\");
-    bin_path = sp == string::npos? "" : scpath.erase(sp+1);
-    
-    cout << "Good news; it should seem I can reach make from `" << MAKE_location << "'\n";
-  }
+  /* Get a list of all available search directories.
+  ** These are where we'll look for headers to parse.
+  ****************************************************/
+  if ((cmd = compey.get("searchdirs")) == "")
+    return (cout << "Bailing: Error 3: Compiler descriptor file `" << compfq <<"` does not specify 'searchdirs' executable.\n" , 1);
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,"searchdirs.txt");
+  cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
+  got_success = !(redir? better_system(toolchainexec, parameters, "&>", "searchdirs.txt") : better_system(toolchainexec, parameters));
+  if (!got_success) return (cout << "ERROR! Call returned non-zero!\n" << endl, 2);
+  else cout << "Call succeeded" << endl;
   
-  int failing = better_system(MAKE_location = bin_path + "make", "--version");
-  if (failing) failing = better_system(MAKE_location = bin_path + "make.exe", "--version");
-  if (failing) failing = better_system(MAKE_location = bin_path + "mingw32-make.exe", "--version");
-  if (failing) failing = better_system(MAKE_location = bin_path + "mingw64-make.exe", "--version");
-  if (failing)
-    return (cout << "Bailing: Error 2\n" , 1);
-  
-  int gfailing = better_system(GCC_location = bin_path + "gcc", "-dumpversion");
-  if (gfailing) gfailing = better_system(GCC_location = bin_path + "gcc.exe", "-dumpversion");
-  if (gfailing) return (cout << "Can't find GCC for some reason. Error PI.", 3);
-  cout << "GCC located. Path: `" << GCC_location << '\'' << endl;
-  
-  pt a = parse_cfile(defs);
-  if (a != pt(-1)) {
-    cout << "Highly unlikely error. But stupid things can happen when working with files.\n\n";
-    return (cout << "Bailing: Error 4\n" , 1);
-  }
-  GCC_MACRO_STRING = defs;
-  
-  cout << "Successfully loaded GCC definitions\n";
-  
-  //Read the search dirs
-  fclose(fopen("blank.txt","wb"));
-  int sdfail = better_system(GCC_location, "-E -x c++ -v blank.txt", "&>", "searchdirs.txt"); //For some reason, the info we want is written to stderr on Linux
-  if (sdfail) {
-    cout << "Failed to read search directories. Error 5.\n";
-    return 5;
-  }
-  
-  string idirs = fc("searchdirs.txt");
-  if (idirs == "") {
-    cout << "Invalid search directories returned. Error 6.\n";
-    return 6;
-  }
-  
-  pt pos = idirs.find("#include <...> search starts here:");
-  if (pos == string::npos or (pos > 0 and idirs[pos-1] != '\n' and idirs[pos-1] != '\r')) {
-    cout << "Invalid search directories returned. Error 7: " << (pos == string::npos?"former":"latter") << ".\n";
-    return 7;
-  }
-  
-  pos += 34;
-  while (is_useless(idirs[++pos]));
-  const pt endpos = idirs.find("End of search list.");
-  idirs = idirs.substr(pos,endpos-pos); //Assume the rest of the file is full of these
-  
-  pt spos = 0;
-  for (pos = 0; pos < idirs.length(); pos++)
-  {
-    if (idirs[pos] == '\r' or idirs[pos] == '\n')
-    {
-      idirs[pos] = '/';
-      include_directories[include_directory_count++] = idirs.substr(spos,pos-spos+(idirs[pos-1] != '/'));
-      while (is_useless(idirs[++pos]));
-      spos = pos--;
+  /* Parse include directories
+  ****************************************/
+    string idirs = fc("searchdirs.txt");
+    if (idirs == "") {
+      cout << "Invalid search directories returned. Error 6.\n";
+      return (6);
     }
-  }
+    
+    pt pos;
+    string idirstart = compey.get("searchdirs-start").toString(), idirend = compey.get("searchdirs-end").toString();
+    cout << "Searching for directories between \"" << idirstart << "\" and \"" << idirend << "\"" << endl;
+    if (idirstart != "")
+    {
+      pos = idirs.find(idirstart);
+      if (pos == string::npos or (pos > 0 and idirs[pos-1] != '\n' and idirs[pos-1] != '\r')) {
+        cout << "Invalid search directories returned. Error 7: " << (pos == string::npos?"former":"latter") << ".\n";
+        return (7);
+      }
+      pos += idirstart.length();
+    }
+    
+    while (is_useless(idirs[++pos]));
+    
+    const pt endpos = (idirend != "")? idirs.find(idirend): string::npos;
+    idirs = idirs.substr(pos, endpos-pos); //Assume the rest of the file is full of these
+    
+    pt spos = 0;
+    for (pos = 0; pos < idirs.length(); pos++)
+    {
+      if (idirs[pos] == '\r' or idirs[pos] == '\n')
+      {
+        idirs[pos] = '/';
+        include_directories[include_directory_count++] = idirs.substr(spos,pos-spos+(idirs[pos-1] != '/'));
+        while (is_useless(idirs[++pos]));
+        spos = pos--;
+      }
+    }
+    
+    cout << "Toolchain returned " << include_directory_count << " search directories:\n";
+    for (unsigned i = 0; i < include_directory_count; i++)
+      cout << " =>  \"" << include_directories[i] << '"' << endl;
   
-  cout << include_directory_count << "dirs:\n";
-  for (unsigned i = 0; i < include_directory_count; i++)
-    cout << '"' << include_directories[i] << '"' << endl;
+  /* Parse built-in #defines
+  ****************************/
+    defs = fc("defines.txt");
+    if (!defs or !*defs) return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
+    
+    pt a = parse_cfile(defs);
+    if (a != pt(-1)) {
+      cout << "Highly unlikely error. But stupid things can happen when working with files.\n\n";
+      return (cout << "Bailing: Error 4\n" , 1);
+    }
+    GCC_MACRO_STRING = defs;
+  
+  /* Note `make` location
+  *****************************/
+  
+  if ((cmd = compey.get("make")) == "")
+    cmd = "make",
+    cout << "WARNING: Compiler descriptor file `" << compfq <<"` does not specify 'make' executable. Using 'make'.\n";
+  toolchain_parseout(cmd, toolchainexec,parameters);
+  MAKE_location = toolchainexec;
+  if (parameters != "")
+    cout << "WARNING: Discarding parameters `" << parameters << "` to " << MAKE_location << "." << endl;
   
   return 0;
 }
 
-dllexport int gccDefinePath(const char* gccPath)
+dllexport int gccDefinePath(const char* compiler)
 {
-  ofstream a("gcc_adhoc.txt");
-  if (a.is_open()) {
-    a << gccPath << "/bin/";
-    a.close();
-  }
-  return establish_bearings();
+  return establish_bearings(compiler);
 }

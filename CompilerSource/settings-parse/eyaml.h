@@ -44,6 +44,7 @@ struct ey_string: ey_base { // If it doesn't contain more named members, it's a 
   string value; // Scalars have a single value
   operator string&(); // Implicitly behave as a string
   int toInt(); double toDouble(); // Offer methods to convert to reals
+  string toString(); // Offer a method to parse the string
   long long toLong(); char toByte(); // And oddly-sized reals
   ey_string(string, string);
   ey_string(string); ey_string();
@@ -60,7 +61,7 @@ struct ey_data: ey_base // Contains multiple members
   operator const char*(); // Implicitly return name when char* casted, i.e. for print
   struct ey_string &get(string); // Get the value of a scalar
   eyit find(string), // Get an iterator to an element by that name
-       begin(), end(); // Iterator to first element and to end of data,
+       begin(), end(); // Iterator to first element and to end of data map (an invalid iterator)
   eylist* first(); // Get the first element defined chronologically
   
   ey_data(string); // Construct with a name

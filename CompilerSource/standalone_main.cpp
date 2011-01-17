@@ -65,7 +65,7 @@ extern void clear_ide_editables();
 extern void print_err_line_at(pt a);
 #include "cfile_parse/cfile_pushing.h"
 
-extern int establish_bearings();
+extern int establish_bearings(const char* compiler);
 extern void print_definition(string);
 
 
