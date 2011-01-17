@@ -26,11 +26,13 @@
 \********************************************************************************/
 
 #include <windows.h>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 
 using namespace std;
+string msys_path_from_mingw = "MinGW\\msys\\1.0\\bin";
 
 string fixdrive(string p)
 {
@@ -59,7 +61,7 @@ int better_system(const char* jname, const char* param)
   
   char buf[2048];
   sprintf(buf, "\"%s\" %s", jname, param);
-  if (CreateProcess(jname,(CHAR*)buf,NULL,NULL,TRUE,CREATE_DEFAULT_ERROR_MODE,NULL,NULL,&StartupInfo,&ProcessInformation ))
+  if (CreateProcess(0,(CHAR*)buf,NULL,NULL,TRUE,CREATE_DEFAULT_ERROR_MODE,NULL,NULL,&StartupInfo,&ProcessInformation ))
   {
     WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
     GetExitCodeProcess(ProcessInformation.hProcess, &exit_status);
@@ -73,27 +75,42 @@ int better_system(const char* jname, const char* param)
 
 typedef const char* const EMessage;
 EMessage
- welcome__caption =
+ msg_welcome__caption =
   "Welcome to ENIGMA!",
- welcome__gnu_not_found = 
+ msg_welcome__gnu_not_found = 
   "Welcome to ENIGMA!\n"
   "This seems to be the first time you've run ENIGMA. I looked around, but I was unable "
   "to locate the GCC G++ compiler. Would you like me to install it for you?\n\n"
   "If you are clueless, press \"Yes\".",
- welcome__gnu_found = 
+ msg_welcome__gnu_found = 
   "Welcome to ENIGMA!\n"
   "This seems to be the first time you've run ENIGMA. I looked around, and I found a "
   "copy of MinGW at the following location:\n%s\r\n\r\n Would you like to use this version?\n\n"
   "Note that this version must include a working MSys distribution in order to comply "
-  "with the newest version. ENIGMA is capable of installing this"
+  "with the newest version. ENIGMA is capable of installing this for you."
   "If you are somehow clueless as to how this got there, press \"Yes\", then ask "
   "for help if it doesn't work.",
- welcome__msys_found =
+ msg_welcome__msys_found =
   "Welcome to ENIGMA!\n"
   "This seems to be the first time you've run ENIGMA. I looked around, and I found "
-  "what looks like an operable installation of GNU MSys Make, accessible from `make`. "
+  "what looks like an operable installation of GNU MSys, with make accessible from `make`. "
   "Does this belong to a valid and properly configured installation of MinGW?\n\n"
   "If you are unsure, select \"No\" and ENIGMA can install a new one for you.",
+ msg_welcome__gnu_not_msys_found =
+  "Welcome to ENIGMA!\n"
+  "This seems to be the first time you've run ENIGMA. I looked around, and I found "
+  "what looks like an operable installation of MinGW32. The issue is, no installation "
+  "of GNU MSys was detected. ENIGMA can attempt to install this over your current "
+  "MinGW installation. Would you like to try?\n\nIf you want to be completely safe, "
+  "you can click 'no,' uninstall your current MinGW and have ENIGMA install a new one.",
+ msg_welcome__gnu_not_msys_found_in_path =
+  "This seems to be the first time you've run ENIGMA. I looked around, and I found "
+  "what looks like an operable installation of MinGW32. I was unable, however, to "
+  "find a working MSys make. On top of that, Windows was the one to locate it via "
+  "PATH, so I don't know where it's actually installed. Would you like me to look "
+  "for then install MSys in the default location? If not, please install and configure "
+  "GNU MSys yourself (the mingw-get packages are msys-base msys-make) and re-run ENIGMA."
+  "\n\nOtherwise, press 'yes' to install.",
  install_drive_ok =
   "ENIGMA will install the GCC on the root of this drive by default. The assigned "
   "letter for this drive is \"%s\". Is this drive OK? (You can select a different "
@@ -101,9 +118,9 @@ EMessage
  mingw__already_installed_here = 
   "It seems that MinGW may already be installed. At least one key subdirectory of \\MinGW\\ "
   "on the selected drive was found to already exist. Would you like to continue anyway?\n\n"
-  "Selecting \"yes\" will continue the installation, ignoring this warning.\n"
-  "Selecting \"No\" will retry creating the directories (this is so you can uninstall the current MinGW and try again)\n"
-  "Selecting \"Cancel\" will abort this installation, sending you back to the drive selection window",
+  "Selecting \"Yes\" will continue the installation, ignoring this warning.\n"
+  "Selecting \"No\" will retry creating the directories (this option exists so you can uninstall the current MinGW and try again)\n"
+  "Selecting \"Cancel\" will abort this installation.",
  install_failure =
   "Installation failed. Please submit the feedback in the console window as a bug report on "
   "the forums. You can copy by right clicking the console and choosing \"Mark\", then using "
@@ -112,7 +129,17 @@ EMessage
   "Could not find Java.exe. Please install Sun's Java runtime environment so LGM can run.\r\n"
   "http://www.java.com/en/download/manual.jsp\r\n\r\n"
   "If you already have Java, and believe you have received this message in error, you could "
-  "try adding it to your system PATH variable.";
+  "try adding it to your system PATH variable.",
+ msg_error_nomingw_get =
+  "It seems that you have a version of MinGW installed that was not unpacked via mingw-get. "
+  "This makes it difficult to install new MinGW packages (including MSys). ENIGMA can install "
+  "mingw-get for you, but if this is an older version, it may be best to cancel this install, "
+  "uninstall MinGW, then have ENIGMA re-install it. Continue anyway?",
+ msg_mgwget_fail =
+  "MinGW-Get failed! This application is outside the control of the ENIGMA team and so most likely"
+  "failed due to a change in package names. Please report this incident on ENIGMA's forums.\n\n"
+  "mingw-get error code: %d",
+ msg_caption_problem = "Warning";
 
 string expand_message(string msg, string arg1)
 {
@@ -144,18 +171,15 @@ string filepart(string fqp)
 }
 
 bool e_install_mingw(string drive_letter);
-bool e_use_existing_install(const char* mpath, const char* make, const char *auxpath);
+bool e_use_existing_install(const char* make,const char *mingwbinpath, const char *auxpath);
+bool install_gnu_msys(string mingw_path);
+int create_mingw_get_dirs(string path);
+string copy_mingw_get_files(string path);
 
 const char* const CONFIG_FILE = "Compilers\\Windows\\gcc.ey";
 
 int main()
 {
-  char drive_letter[44] = "\\";
-  GetCurrentDirectory(44,drive_letter);
-  
-  puts(drive_letter);
-  return 0;
-  
   /* Check if we've already installed. **/
   puts("Checking configuration");
   FILE *ey = fopen(CONFIG_FILE, "rb"); // The GCC.ey file does not exist until installation has finished, be it manually or by this installer.
@@ -164,17 +188,31 @@ int main()
     /* No Compiler descriptor was found. Start probing around. */
     puts("First time run. Scouring for Make...");
     
-    const char *mpath = "make", *msmpath = "make";
-    int a = better_system(mpath, "--version");
-    if (a) a = better_system(mpath = "mingw32-make", "--version");
-    if (a) a = better_system(mpath = "\\MinGW\\bin\\make.exe", "--version");
-    if (a) a = better_system(mpath = "\\MinGW\\bin\\mingw32-make.exe", "--version");
-    if (a) a = better_system(mpath = "C:\\MinGW\\bin\\mingw32-make.exe", "--version");
-    if (a) a = better_system(mpath = "C:\\MinGW\\bin\\make.exe", "--version");
+    #define tritier(mingw,bin,make) ((mingw_bin_path = ((mingw_path = mingw) + bin)) + (makename = make)).c_str()
+    string mingw_path, mingw_bin_path, makename;
+    tritier("\\MinGW\\","bin\\","mingw32-make");
+    cout << "THIS IS WHAT I THINK: " << mingw_path << " : " << mingw_bin_path << " : " << makename << endl << tritier("\\MinGW\\","bin\\","mingw32-make") << endl;
+    int    a = better_system(tritier("","","make"),         "--version");
+      cout << "tried 1" << endl;
+    if (a)
+    {
+      a = better_system(tritier("","","mingw32-make"), "--version");
+      cout << "tried 2" << endl;
+      if (a) 
+      {
+        search_manually:
+        a = better_system(tritier("\\MinGW\\","bin\\","mingw32-make"), "--version");
+        cout << "tried 3" << endl;
+        if (a) {
+          a = better_system(tritier("C:\\MinGW\\","bin\\","mingw32-make"), "--version");
+          cout << "tried 4" << endl;
+        }
+      }
+    }
     
     if (a) // If we didn't find it
     {
-      if (MessageBox(NULL, welcome__gnu_not_found, welcome__caption, MB_YESNO) == IDYES)
+      if (MessageBox(NULL, msg_welcome__gnu_not_found, msg_welcome__caption, MB_YESNO) == IDYES)
       {
         install_mingw:
         char drive_letter[4] = "\\";
@@ -200,18 +238,45 @@ int main()
     }
     else // We located the GCC. 
     { 
-      printf("MinGW32 Make detected. Accessible from `%s`.\nVerifying MSys...\n\n", mpath);
+      printf("MinGW32 Make detected. Accessible from `%s`.\nVerifying MSys...\n\n", mingw_bin_path.c_str());
       
-      if (string("make") == mpath)
+      if (mingw_bin_path == "")
       {
-        if (MessageBox(NULL, welcome__msys_found, welcome__caption, MB_YESNO) == IDYES)
+        if (makename == "make")
+        {
+          if (MessageBox(NULL, msg_welcome__msys_found, msg_welcome__caption, MB_YESNO) == IDYES)
+            e_use_existing_install("make","","");
+        }
+        else
+        {
+          if (MessageBox(NULL, msg_welcome__gnu_not_msys_found_in_path, msg_welcome__caption, MB_YESNO) == IDYES)
+            goto search_manually;
+          else goto end;
+        }
       }
       
-      string msg = expand_message(welcome__gnu_found, mpath); 
-      if (MessageBox(NULL, msg.c_str(), welcome__caption, MB_YESNO) == IDYES)
-        e_use_existing_install(dirpart(mpath).c_str(), filepart(mpath).c_str());
-      else
-        goto install_mingw;
+      recheck_msys:
+      string msys_make_path = mingw_path + msys_path_from_mingw + "make.exe";
+      bool msys_installed_too = !better_system(msys_make_path.c_str(), "--version");
+      if (!msys_installed_too)
+      {
+        if (MessageBox(NULL, msg_welcome__gnu_not_msys_found, msg_welcome__caption, MB_YESNO) == IDYES)
+          if (install_gnu_msys(mingw_path))
+            goto recheck_msys;
+          else
+            goto end;
+        else goto end;
+      }
+      
+      string allpaths = mingw_bin_path + ";" + mingw_path + msys_path_from_mingw + ";";
+      
+      string msg = expand_message(msg_welcome__gnu_found, mingw_path);
+      switch (MessageBox(NULL, msg.c_str(), msg_welcome__caption, MB_YESNOCANCEL))
+      {
+        case IDYES:    e_use_existing_install(msys_make_path.c_str(), mingw_bin_path.c_str(), allpaths.c_str());
+        case IDNO:     goto install_mingw;
+        case IDCANCEL: goto end;
+      }
     }
   } else fclose(ey);
   
@@ -255,7 +320,7 @@ int main()
     }
     else {
       puts(java_not_found);
-      MessageBox(NULL, welcome__gnu_not_found, "Java Problem", MB_OK);
+      MessageBox(NULL, msg_welcome__gnu_not_found, "Java Problem", MB_OK);
     }
   }
   
@@ -282,62 +347,31 @@ bool e_install_mingw(string dl)
   if (!CreateDirectory((dl + "MinGW").c_str(), NULL) and GetLastError() != ERROR_ALREADY_EXISTS)
     ierror("Failed to create main MinGW directory. Abort.");
   
-  // Warn the user if MinGW was already installed
-  bool potentialError = false;
-  
   install_begin:
-  puts("* Installing MinGW-Get.");
-    puts("   * Creating Directories");
-      if (!CreateDirectory((dl + "MinGW\\bin\\").c_str(), NULL) or_toggle_potential_error())
-        ierror("Failed to create MinGW binary directory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\libexec\\").c_str(), NULL) or_toggle_potential_error())
-        ierror("Failed to create MinGW libexec directory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\libexec\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
-        ierror("Failed to create MinGW-Get LibExec directory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\var\\").c_str(), NULL) or_toggle_potential_error())
-        ierror("Failed to create MinGW-Get var directory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\var\\lib\\").c_str(), NULL) or_toggle_potential_error())
-        ierror("Failed to create MinGW-Get lib directory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\var\\lib\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
-        ierror("Failed to create MinGW-Get lib subdirectory. Abort.");
-      if (!CreateDirectory((dl + "MinGW\\var\\lib\\mingw-get\\data\\").c_str(), NULL) or_toggle_potential_error())
-        ierror("Failed to create MinGW-Get data directory. Abort.");
-    
-    if (potentialError)
+    if (create_mingw_get_dirs(dl)) // Warn the user if MinGW-get was already installed
       switch (MessageBox(NULL,mingw__already_installed_here, "Warning", MB_YESNOCANCEL))
       {
         case IDYES:    break;
         case IDNO:     goto install_begin;
         case IDCANCEL: return FALSE;
       }
+   string mget = copy_mingw_get_files(dl);
+   if (mget == "") ierror("Failed to copy MinGW-Get files. Abort.");
     
-    puts("   * Copying Files");
-    string mget = dl + "MinGW\\bin\\mingw-get.exe";
-      if (!CopyFile2("Autoconf\\mingw-get\\bin\\mingw-get.exe", mget.c_str()))
-        ierror("Failed to copy MinGW-Get's executable! (error code %d)",(int)GetLastError());
-      if (!CopyFile2("Autoconf\\mingw-get\\libexec\\mingw-get\\lastrites.exe", (dl + "MinGW\\libexec\\mingw-get\\lastrites.exe").c_str()))
-        ierror("Failed to copy MinGW-Get's lastrites! (error code %d)",(int)GetLastError());
-      if (!CopyFile2("Autoconf\\mingw-get\\libexec\\mingw-get\\mingw-get-0.dll", (dl + "MinGW\\libexec\\mingw-get\\mingw-get-0.dll").c_str()))
-        ierror("Failed to copy MinGW-Get's DLL! (error code %d)",(int)GetLastError());
-      if (!CopyFile2("Autoconf\\mingw-get\\var\\lib\\mingw-get\\data\\defaults.xml", (dl + "MinGW\\var\\lib\\mingw-get\\data\\defaults.xml").c_str()))
-        ierror("Failed to copy MinGW-Get's defaults! (error code %d)",(int)GetLastError());
-    
-    int install_p = 0;
     puts("   * Calling MinGW-Get");
-      install_p = better_system(mget.c_str(), "install mingw32-make gcc g++ gdb msys-base msys-bash msys-make");
+    
+    int install_p = better_system(mget.c_str(), "install mingw32-make gcc g++ gdb msys-base msys-bash msys-make");
     if (install_p) {
-      char m[512]; sprintf(m,"MinGW-Get failed! This application is outside the control of the ENIGMA team and so most likely"
-                             "failed due to a change in package names. Please report this incident on ENIGMA's forums.\n\n"
-                             "mingw-get error code: %d",install_p);
+      char m[1024]; sprintf(m,msg_mgwget_fail,install_p);
       MessageBox (NULL,m,"WARNING",MB_OK);
     }
     else puts("All requested components were installed correctly.");
   
-    e_use_existing_install((dl + "MinGW\msys\1.0\bin").c_str(), "mingw32-make.exe", (dl + "MinGW\msys\1.0\bin; " + dl + "MinGW\\bin\\").c_str());
+    e_use_existing_install((dl + msys_path_from_mingw).c_str(), "mingw32-make.exe", (dl + "MinGW\\msys\\1.0\\bin; " + dl + "MinGW\\bin\\").c_str());
   return TRUE;
 }
 
-bool e_use_existing_install(const char* mpath, const char* make, const char *auxpath)
+bool e_use_existing_install(const char* make,const char *binpath, const char *auxpath)
 {
   FILE *cff = fopen(CONFIG_FILE, "wb");
   if (cff)
@@ -350,13 +384,76 @@ bool e_use_existing_install(const char* mpath, const char* make, const char *aux
             "Maintainer: Josh / ENIGMA.exe #This is a generated file\n"
             "\n"
             "# Some info about it\n"
-            "Path: %s\n"
-            "Make: %s\n"
-            "AuxPath: %s\n",
+            "path: %s\n"
+            "make: %s\n"
+            "defines:  %scpp -dM -x c++ -E $blank\n"
+            "searchdirs: %sgcc -E -x c++ -v $blank\n"
+            "searchdirs-start: \"#include <...> search starts here:\"\n"
+            "searchdirs-end: \"End of search list.\"\n"
             "\n",
-            mpath, make, auxpath);
+            auxpath, make, binpath, binpath);
     fclose(cff);
   }
   return TRUE;
 }
 
+bool install_gnu_msys(string mingw_path)
+{
+  string mget = mingw_path + msys_path_from_mingw;
+  bool mingwget = !better_system((mingw_path + "mingw-get").c_str(), "--version");
+  if (!mingwget)
+  {
+    if (create_mingw_get_dirs(mingw_path))
+      MessageBox(NULL, "NOTHING MAKES SENSE ANYMORE!\n\nENIGMA will attempt to recover.", "ERROR", MB_OK);
+    mget = copy_mingw_get_files(mingw_path);
+    if (mget == "") return (MessageBox(NULL, "Failed to copy MinGW-Get files. Could not install MSys.", "ERROR", MB_OK), 0);
+  }
+  
+  int install_p = better_system(mget.c_str(), "install msys-base msys-bash msys-make");
+  if (install_p) {
+    char m[1024]; sprintf(m,msg_mgwget_fail,install_p);
+    MessageBox (NULL,m,"WARNING",MB_OK);
+  }
+  
+  return 1;
+}
+
+int create_mingw_get_dirs(string path)
+{
+  int potentialError = 0;
+  puts("* Installing MinGW-Get.");
+    puts("   * Creating Directories");
+      if (!CreateDirectory((path + "MinGW\\bin\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW binary directory. Abort.");
+      if (!CreateDirectory((path + "MinGW\\libexec\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW libexec directory. Abort.");
+      if (!CreateDirectory((path + "MinGW\\libexec\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get LibExec that is 1/2 pint of ice creamdirectory. Abort.");
+      if (!CreateDirectory((path + "MinGW\\var\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get var directory. Abort.");
+      if (!CreateDirectory((path + "MinGW\\var\\lib\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get lib directory. Abort.");
+      if (!CreateDirectory((path + "MinGW\\var\\lib\\mingw-get\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get lib subdirectory. Abort.");
+      if (!CreateDirectory((path + "MinGW\\var\\lib\\mingw-get\\data\\").c_str(), NULL) or_toggle_potential_error())
+        ierror("Failed to create MinGW-Get data directory. Abort.");
+    
+  return potentialError;
+}
+
+#undef ierror
+#define ierror(x...) return (printf(x), puts("\n"), "")
+string copy_mingw_get_files(string path)
+{
+    puts("   * Copying Files");
+    string mget = path + "MinGW\\bin\\mingw-get.exe";
+      if (!CopyFile2("Autoconf\\mingw-get\\bin\\mingw-get.exe", mget.c_str()))
+        ierror("Failed to copy MinGW-Get's executable! (error code %d)",(int)GetLastError());
+      if (!CopyFile2("Autoconf\\mingw-get\\libexec\\mingw-get\\lastrites.exe", (path + "MinGW\\libexec\\mingw-get\\lastrites.exe").c_str()))
+        ierror("Failed to copy MinGW-Get's lastrites! (error code %d)",(int)GetLastError());
+      if (!CopyFile2("Autoconf\\mingw-get\\libexec\\mingw-get\\mingw-get-0.dll", (path + "MinGW\\libexec\\mingw-get\\mingw-get-0.dll").c_str()))
+        ierror("Failed to copy MinGW-Get's DLL! (error code %d)",(int)GetLastError());
+      if (!CopyFile2("Autoconf\\mingw-get\\var\\lib\\mingw-get\\data\\defaults.xml", (path + "MinGW\\var\\lib\\mingw-get\\data\\defaults.xml").c_str()))
+        ierror("Failed to copy MinGW-Get's defaults! (error code %d)",(int)GetLastError());
+    return mget;
+}

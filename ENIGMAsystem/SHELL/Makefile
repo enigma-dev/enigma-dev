@@ -27,7 +27,7 @@ ifndef GRAPHICS
 	GRAPHICS := OpenGL
 	GLINKS := $(GLINKS) -lGL -lGLU
 endif
-
+	
 #figure platform
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)

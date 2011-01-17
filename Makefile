@@ -1,3 +1,7 @@
+ifdef eTCpath
+	PATH := $(eTCpath)$(PATH)
+endif
+
 ENIGMA: DUMMYDEPENDENCY
 	cd CompilerSource && $(MAKE) $(PLATFORM)
 DUMMYDEPENDENCY:
