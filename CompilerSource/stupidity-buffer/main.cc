@@ -32,7 +32,7 @@
 #include <string>
 
 using namespace std;
-string msys_path_from_mingw = "MinGW\\msys\\1.0\\bin";
+string msys_path_from_mingw = "msys\\1.0\\bin";
 
 string fixdrive(string p)
 {
@@ -367,7 +367,7 @@ bool e_install_mingw(string dl)
     }
     else puts("All requested components were installed correctly.");
   
-    e_use_existing_install((dl + msys_path_from_mingw).c_str(), "mingw32-make.exe", (dl + "MinGW\\msys\\1.0\\bin; " + dl + "MinGW\\bin\\").c_str());
+    e_use_existing_install((dl + "MinGW\\" + msys_path_from_mingw + "make.exe").c_str(), (dl + "MinGW\\bin\\").c_str(), (dl + "MinGW\\msys\\1.0\\bin;" + dl + "MinGW\\bin\\;").c_str());
   return TRUE;
 }
 
