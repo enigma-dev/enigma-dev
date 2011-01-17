@@ -181,8 +181,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public boolean make()
 		{
 		String platform = EnigmaSettings.getOS();
-		String root = new File("/").getAbsolutePath();
-		String make, paths[];
+		String make, path;
 
 		//try to read the YAML definition for `make` on this platform
 		try
@@ -192,10 +191,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				File gccey = new File(new File("Compilers",platform),"gcc.ey");
 				YamlNode n = EYamlParser.parse(new Scanner(gccey));
 				make = n.getMC("Make"); //or OOB
-
-				//should already include user's system paths
-				//split on comma delimiter
-				paths = n.getMC("Path","").split(",");
+				path = n.getMC("Path","");
+				//replace starting \ with root
+				if (make.startsWith("\\")) make = new File("/").getAbsolutePath() + make.substring(1);
 				}
 			catch (FileNotFoundException e)
 				{
@@ -220,23 +218,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		//Try to run make from each path until one works
 		Process p = null;
 		IOException lastErr = null;
-		for (String pth : paths)
-			try
-				{
-				String target = pth;
-				if (!target.isEmpty())
-					{
-					if (target.startsWith("\\")) target = root + target.substring(1);
-					if (target.endsWith("/") || target.endsWith("\\")) target += "/";
-					}
-				target += make;
-				p = Runtime.getRuntime().exec(target,null,LGM.workDir.getParentFile());
-				break;
-				}
-			catch (IOException e)
-				{
-				lastErr = e;
-				}
+		try
+			{
+			p = Runtime.getRuntime().exec(make + " eTCpath=\"" + path + "\"",null,
+					LGM.workDir.getParentFile());
+			}
+		catch (IOException e)
+			{
+			lastErr = e;
+			}
 
 		//If none of them worked
 		if (p == null)
