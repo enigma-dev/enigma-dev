@@ -15,22 +15,15 @@ OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	ONAME := ../libcompileEGMf.so
 	INPLACEPARAM := -fPIC
-	CREMOVE := rm -f 
-	ENDCREMOVE := 
-	SLASHC := /
+	MISCFLAGS := 
 else ifeq ($(OS), Darwin)
 	ONAME := ../libcompileEGMf.dylib
 	INPLACEPARAM := -fPIC
-	CREMOVE := rm -f 
-	ENDCREMOVE := 
-	SLASHC := /
+	MISCFLAGS := 
 else
 	ONAME := ..\\compileEGMf.dll
 	INPLACEPARAM := 
-	CREMOVE := del /Q \"
-	CREMOVE := del /Q \"
-	SLASHC := \\
-	MISCFLAGS = -static
+	MISCFLAGS := -static-libstdc++ -static-libgcc
 endif
 
 # default target (because it appears first)
@@ -148,12 +141,12 @@ mkeobjs:
 	-mkdir .eobjs
 
 $(ONAME): mkeobjs .eobjs/ideprint.o .eobjs/JavaCallbacks.o .eobjs/cfile_parse.o .eobjs/cfile_parse_macros.o .eobjs/cfile_pushing.o .eobjs/cparse_components.o .eobjs/cparse_shared.o .eobjs/cpmain.o .eobjs/expression_evaluator.o .eobjs/handle_letters.o .eobjs/keyword_operator.o .eobjs/macro_functions.o .eobjs/skipping.o .eobjs/template_handlers.o .eobjs/type_resolver.o .eobjs/compile_common.o .eobjs/compile.o .eobjs/compile_includes.o .eobjs/output_locals.o .eobjs/externs.o .eobjs/ext_iteration.o .eobjs/references.o .eobjs/file_find.o .eobjs/gcc_backend.o .eobjs/bettersystem.o .eobjs/darray.o .eobjs/string.o .eobjs/textfile.o .eobjs/collect_variables.o .eobjs/object_storage.o .eobjs/parser_components.o .eobjs/parser.o .eobjs/crawler.o .eobjs/eyaml.o .eobjs/parse_ide_settings.o .eobjs/checkfile.o .eobjs/syntax.o .eobjs/varnames.o .eobjs/module_write_backgrounds.o .eobjs/module_write_sounds.o .eobjs/module_write_sprites.o .eobjs/parse_and_link.o .eobjs/parse_secondary.o .eobjs/write_defragged_events.o .eobjs/write_event_code.o .eobjs/write_globals.o .eobjs/write_object_access.o .eobjs/write_object_data.o .eobjs/write_room_data.o .eobjs/event_parser.o .eobjs/pcs.o .eobjs/main.o
-	g++ -shared -static-libgcc -static-libstdc++ $(INPLACEPARAM) .eobjs/*.o -o $(ONAME)
+	g++ -shared $(MISCFLAGS) $(INPLACEPARAM) .eobjs/*.o -o $(ONAME)
 
 win windows: $(ONAME)
 lin linux unix: $(ONAME)
 
 clean:
-	-$(CREMOVE).eobjs$(SLASHC)*$(ENDCREMOVE)
-	-$(CREMOVE)$(ONAME)$(ENDCREMOVE)
+	-rm .eobjs/*
+	-rm $(ONAME)
 

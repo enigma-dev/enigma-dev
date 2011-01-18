@@ -76,28 +76,30 @@ int window_get_fullscreen();
 ////////////
 // CURSOR //
 ////////////
-#define cr_default 0
-#define cr_none -1
-#define cr_arrow -2
-#define cr_cross -3
-#define cr_beam -4
-#define cr_size_nesw -6
-#define cr_size_ns -7
-#define cr_size_nwse -8
-#define cr_size_we -9
-#define cr_uparrow -10
-#define cr_hourglass -11
-#define cr_drag -12
-#define cr_nodrop -13
-#define cr_hsplit -14
-#define cr_vsplit -15
-#define cr_multidrag -16
-#define cr_sqlwait -17
-#define cr_no -18
-#define cr_appstart -19
-#define cr_help -20
-#define cr_handpoint -21
-#define cr_size_all -22
+enum {
+  cr_default = 0,
+  cr_none    = -1,
+  cr_arrow   = -2,
+  cr_cross   = -3,
+  cr_beam    = -4,
+  cr_size_nesw = -6,
+  cr_size_ns   = -7,
+  cr_size_nwse = -8,
+  cr_size_we   = -9,
+  cr_uparrow   = -10,
+  cr_hourglass = -11,
+  cr_drag      = -12,
+  cr_nodrop    = -13,
+  cr_hsplit    = -14,
+  cr_vsplit    = -15,
+  cr_multidrag = -16,
+  cr_sqlwait   = -17,
+  cr_no        = -18,
+  cr_appstart  = -19,
+  cr_help      = -20,
+  cr_handpoint = -21,
+  cr_size_all  = -22
+};
 
 int window_set_cursor(double c);
 
