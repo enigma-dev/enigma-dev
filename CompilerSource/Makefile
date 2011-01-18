@@ -15,14 +15,14 @@ OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	ONAME := ../libcompileEGMf.so
 	INPLACEPARAM := -fPIC
-	MISCFLAGS := 
+	MISCFLAGS :=
 else ifeq ($(OS), Darwin)
 	ONAME := ../libcompileEGMf.dylib
 	INPLACEPARAM := -fPIC
-	MISCFLAGS := 
+	MISCFLAGS :=
 else
-	ONAME := ..\\compileEGMf.dll
-	INPLACEPARAM := 
+	ONAME := ../compileEGMf.dll
+	INPLACEPARAM :=
 	MISCFLAGS := -static-libstdc++ -static-libgcc
 endif
 
@@ -75,7 +75,7 @@ default: $(ONAME)
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(MISCFLAGS) $(INPLACEPARAM) -c  externs/references.cpp		-o .eobjs/references.o $(FLAGS)
 .eobjs/file_find.o: filesystem/file_find.cpp OS_Switchboard.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(MISCFLAGS) $(INPLACEPARAM) -c  filesystem/file_find.cpp		-o .eobjs/file_find.o $(FLAGS)
-.eobjs/gcc_backend.o: gcc_interface/gcc_backend.cpp externs/externs.h general/darray.h externs/references.h cfile_parse/cfile_parse.h cfile_parse/cparse_shared.h cfile_parse/cfile_parse_constants.h syntax/checkfile.h general/parse_basics.h general/bettersystem.h
+.eobjs/gcc_backend.o: gcc_interface/gcc_backend.cpp externs/externs.h general/darray.h externs/references.h cfile_parse/cfile_parse.h cfile_parse/cparse_shared.h cfile_parse/cfile_parse_constants.h syntax/checkfile.h general/parse_basics.h general/bettersystem.h OS_Switchboard.h settings-parse/eyaml.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(MISCFLAGS) $(INPLACEPARAM) -c  gcc_interface/gcc_backend.cpp		-o .eobjs/gcc_backend.o $(FLAGS)
 .eobjs/bettersystem.o: general/bettersystem.cpp OS_Switchboard.h
 	g++ -Wall $(SYMBOL_FLAGS) $(OPTIMIZATION_FLAGS) $(MISCFLAGS) $(INPLACEPARAM) -c  general/bettersystem.cpp		-o .eobjs/bettersystem.o $(FLAGS)

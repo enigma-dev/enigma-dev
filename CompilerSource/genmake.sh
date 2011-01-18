@@ -23,21 +23,15 @@ echo "OS := \$(shell uname -s)" >> Makefile;
 echo "ifeq (\$(OS), Linux)" >> Makefile;
 echo "	ONAME := ../libcompileEGMf.so" >> Makefile;
 echo "	INPLACEPARAM := -fPIC" >> Makefile;
-echo "	CREMOVE := rm -f " >> Makefile;
-echo "	ENDCREMOVE := " >> Makefile;
-echo "	SLASHC := /" >> Makefile;
+echo "	MISCFLAGS :="  >> Makefile;
 echo "else ifeq (\$(OS), Darwin)" >> Makefile;
 echo "	ONAME := ../libcompileEGMf.dylib" >> Makefile;
 echo "	INPLACEPARAM := -fPIC" >> Makefile;
-echo "	CREMOVE := rm -f " >> Makefile;
-echo "	ENDCREMOVE := " >> Makefile;
-echo "	SLASHC := /" >> Makefile;
+echo "	MISCFLAGS :="  >> Makefile;
 echo "else" >> Makefile;
-echo "	ONAME := ..\\\\compileEGMf.dll" >> Makefile;
-echo "	INPLACEPARAM := " >> Makefile;
-echo "	CREMOVE := del /Q \\\"" >> Makefile;
-echo "	CREMOVE := del /Q \\\"" >> Makefile;
-echo "	SLASHC := \\\\" >> Makefile;
+echo "	ONAME := ../compileEGMf.dll" >> Makefile;
+echo "	INPLACEPARAM :="  >> Makefile;
+echo "	MISCFLAGS := -static-libstdc++ -static-libgcc" >> Makefile;
 echo "endif" >> Makefile;
 echo "" >> Makefile;
 
@@ -61,7 +55,7 @@ for subdir in */ */*/ ./; #Iterate
         done;
         echo "" >> Makefile;
         
-        echo "	g++ -Wall \$(SYMBOL_FLAGS) \$(OPTIMIZATION_FLAGS) \$(INPLACEPARAM) -c  $file		-o .eobjs/${pathless%.cpp}.o \$(FLAGS)"  >> Makefile;
+        echo "	g++ -Wall \$(SYMBOL_FLAGS) \$(OPTIMIZATION_FLAGS) \$(MISCFLAGS) \$(INPLACEPARAM) -c  $file		-o .eobjs/${pathless%.cpp}.o \$(FLAGS)"  >> Makefile;
       };
       done;
   done;
@@ -88,7 +82,7 @@ printf "\$(ONAME): mkeobjs" >> Makefile;
     done;
     echo "" >> Makefile;
   
-  echo "	g++ -shared \$(INPLACEPARAM) .eobjs/*.o -o \$(ONAME)" >> Makefile;
+  echo "	g++ -shared \$(MISCFLAGS) \$(INPLACEPARAM) .eobjs/*.o -o \$(ONAME)" >> Makefile;
 
 echo "" >> Makefile;
 echo "win windows: \$(ONAME)" >> Makefile;
@@ -96,7 +90,7 @@ echo "lin linux unix: \$(ONAME)" >> Makefile;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	-\$(CREMOVE).eobjs\$(SLASHC)*\$(ENDCREMOVE)" >> Makefile;
-echo "	-\$(CREMOVE)\$(ONAME)\$(ENDCREMOVE)" >> Makefile;
+echo "	-rm .eobjs/*" >> Makefile;
+echo "	-rm \$(ONAME)" >> Makefile;
 
 echo "" >> Makefile;
