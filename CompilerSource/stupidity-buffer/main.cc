@@ -32,7 +32,7 @@
 #include <string>
 
 using namespace std;
-string msys_path_from_mingw = "msys\\1.0\\bin";
+string msys_path_from_mingw = "msys\\1.0\\bin\\";
 
 string fixdrive(string p)
 {
@@ -153,7 +153,7 @@ void get_new_drive_letter(char dl[4])
 {
   dl[0] = 'C';
   dl[1] = ':';
-  dl[2] = '/';
+  dl[2] = '\\';
   dl[3] = 0;
 }
 
