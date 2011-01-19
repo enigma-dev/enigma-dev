@@ -104,7 +104,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public JMenuItem showFunctions, showGlobals, showTypes;
 	public static EnigmaDriver DRIVER;
 	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
-	public static boolean GCC_LOCATED = false, ENIGMA_READY = false, ENIGMA_FAIL = false;
+	public static boolean ENIGMA_READY = false, ENIGMA_FAIL = false;
 	public final EnigmaNode node = new EnigmaNode();
 
 	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2;
@@ -126,7 +126,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					//Disable updates by removing plugins/shared/svnkit.jar (e.g. linux packages)
 					boolean rebuild = Preferences.userRoot().node("/org/enigma").getBoolean("NEEDS_REBUILD",
 							false);
-					int updates = attemptUpdate();
+					int updates = attemptUpdate(); //displays own error
 					if (updates == -1)
 						{
 						ENIGMA_FAIL = true;
@@ -134,7 +134,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						}
 					if (updates == 1 || rebuild || attemptLib() != null)
 						{
-						if (!make())
+						if (!make()) //displays own error
 							{
 							ENIGMA_FAIL = true;
 							return;
@@ -151,13 +151,18 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						return;
 						}
 
-					ENIGMA_READY = true;
-					initEnigmaLib();
-					if (GCC_LOCATED)
+					System.out.println("Initializing Enigma: ");
+					String err = DRIVER.libInit(ec);
+					if (err != null)
 						{
-						DRIVER.definitionsModified(es.definitions,es.toTargetYaml());
-						populateKeywords();
+						JOptionPane.showMessageDialog(null,err);
+						ENIGMA_FAIL = true;
+						return;
 						}
+
+					ENIGMA_READY = true;
+					es.commitToDriver();
+					populateKeywords();
 					}
 			}.start();
 		}
@@ -180,7 +185,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public boolean make()
 		{
-		String platform = EnigmaSettings.getOS();
 		String make, path;
 
 		//try to read the YAML definition for `make` on this platform
@@ -188,7 +192,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 			try
 				{
-				File gccey = new File(new File("Compilers",platform),"gcc.ey");
+				File gccey = new File(new File("Compilers",EnigmaSettings.getOS()),"gcc.ey");
 				YamlNode n = EYamlParser.parse(new Scanner(gccey));
 				make = n.getMC("Make"); //or OOB
 				path = n.getMC("Path","");
@@ -215,9 +219,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			return false;
 			}
 
-		//Try to run make from each path until one works
+		//run make
 		Process p = null;
-		IOException lastErr = null;
 		try
 			{
 			p = Runtime.getRuntime().exec(make + " eTCpath=\"" + path + "\"",null,
@@ -225,13 +228,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		catch (IOException e)
 			{
-			lastErr = e;
-			}
-
-		//If none of them worked
-		if (p == null)
-			{
-			GmFormatException e2 = new GmFormatException(null,lastErr);
+			GmFormatException e2 = new GmFormatException(null,e);
 			e2.printStackTrace();
 			new ErrorDialog(
 					null,
@@ -260,52 +257,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		ef.setVisible(false);
 		return true;
-		}
-
-	private void initEnigmaLib()
-		{
-		System.out.println("Initializing Enigma: ");
-		int ret = DRIVER.libInit(ec);
-		if (ret == 0)
-			{
-			GCC_LOCATED = true;
-			return;
-			}
-
-		if (ret == 1) ret = locateGCC();
-		if (ret != 0)
-			{
-			String err;
-			switch (ret)
-				{
-				case 1:
-					err = "ENIGMA: GCC not found";
-					break;
-				case 2:
-					err = "ENIGMA: No output gained from call to GCC";
-					break;
-				case 3:
-					err = "ENIGMA: Output from GCC doesn't make sense";
-					break;
-				default:
-					err = "ENIGMA: Undefined error " + ret;
-					break;
-				}
-			JOptionPane.showMessageDialog(null,err);
-			}
-		}
-
-	public int locateGCC()
-		{
-		//this is my sad attempt at trying to get the user to locate GCC
-		JFileChooser fc = new JFileChooser();
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		fc.setDialogTitle("ENIGMA: Please locate the GCC directory (containing bin/, lib/ etc)");
-		fc.setAcceptAllFileFilterUsed(false);
-		if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) return 0;
-		int ret = DRIVER.gccDefinePath(fc.getSelectedFile().getAbsolutePath());
-		if (ret == 0) GCC_LOCATED = true;
-		return ret;
 		}
 
 	public void populateMenu()
@@ -513,9 +464,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public void compile(final int mode)
 		{
-		if (!GCC_LOCATED)
+		if (!ENIGMA_READY)
 			{
-			JOptionPane.showMessageDialog(null,"You can't compile without GCC.");
+			JOptionPane.showMessageDialog(null,
+					ENIGMA_FAIL ? "ENIGMA is not functional due to prior errors." : "ENIGMA isn't ready yet.");
 			return;
 			}
 
@@ -576,18 +528,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
-	//This can be static since the GCC_LOCATED and Enigma dll are both static.
+	//This can be static since the ENIGMA_READY and Enigma dll are both static.
 	public static SyntaxError checkSyntax(String code)
 		{
 		if (!ENIGMA_READY)
 			{
 			JOptionPane.showMessageDialog(null,
 					ENIGMA_FAIL ? "ENIGMA is not functional due to prior errors." : "ENIGMA isn't ready yet.");
-			return null;
-			}
-		if (!GCC_LOCATED)
-			{
-			JOptionPane.showMessageDialog(null,"You can't compile without GCC.");
 			return null;
 			}
 

@@ -20,7 +20,9 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.enigma.EYamlParser;
+import org.enigma.EnigmaRunner;
 import org.enigma.EYamlParser.YamlNode;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.main.LGM;
 
 public class EnigmaSettings
@@ -264,13 +266,18 @@ public class EnigmaSettings
 			}
 		}
 
-	public String toTargetYaml()
+	private String toTargetYaml()
 		{
 		return "%e-yaml\n---\n"//
 				+ "target-windowing: " + (targetPlatform == null ? "" : targetPlatform.id) + "\n"//
 				+ "target-graphics: " + (targetGraphics == null ? "" : targetGraphics.id) + "\n"//
 				+ "target-audio: " + (targetAudio == null ? "" : targetAudio.id) + "\n"//
 				+ "target-collision: " + (targetCollision == null ? "" : targetCollision.id) + "\n";//
+		}
+
+	public SyntaxError commitToDriver()
+		{
+		return EnigmaRunner.DRIVER.definitionsModified(definitions,toTargetYaml());
 		}
 
 	public EnigmaSettings copy()

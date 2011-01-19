@@ -21,9 +21,7 @@ public interface EnigmaDriver extends Library
 		public int absoluteIndex;
 		}
 
-	public int libInit(EnigmaCallbacks ef);
-
-	public int gccDefinePath(String path);
+	public String libInit(EnigmaCallbacks ef);
 
 	public SyntaxError definitionsModified(String wscode, String yaml);
 

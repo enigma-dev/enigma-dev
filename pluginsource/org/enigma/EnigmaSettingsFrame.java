@@ -461,8 +461,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 				{
 				es.definitions = sDef.getCode();
 				es.saveDefinitions();
-				if (EnigmaRunner.GCC_LOCATED)
-					EnigmaRunner.DRIVER.definitionsModified(es.definitions,es.toTargetYaml());
+				if (EnigmaRunner.ENIGMA_READY) es.commitToDriver();
 				}
 			es.globalLocals = readStr(i);
 			es.initialization = readStr(i);
@@ -681,8 +680,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 					{
 					es.definitions = sDef.getCode();
 					es.saveDefinitions();
-					if (EnigmaRunner.GCC_LOCATED)
-						EnigmaRunner.DRIVER.definitionsModified(es.definitions,es.toTargetYaml());
+					if (EnigmaRunner.ENIGMA_READY) es.commitToDriver();
 					}
 				cfDef = null;
 				}
