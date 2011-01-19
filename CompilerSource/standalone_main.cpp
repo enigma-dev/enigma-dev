@@ -65,7 +65,7 @@ extern void clear_ide_editables();
 extern void print_err_line_at(pt a);
 #include "cfile_parse/cfile_pushing.h"
 
-extern int establish_bearings(const char* compiler);
+extern const char* establish_bearings(const char* compiler);
 extern void print_definition(string);
 
 
@@ -213,7 +213,7 @@ struct syntax_error {
   void set(int x, int
   y,int a, string s);
 };
-int libInit(struct EnigmaCallbacks* ecs);
+const char* libInit(struct EnigmaCallbacks* ecs);
 syntax_error *definitionsModified(const char*,const char*);
 
 #include "OS_Switchboard.h"

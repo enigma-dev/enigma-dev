@@ -3,7 +3,7 @@ ifdef eTCpath
 endif
 
 ENIGMA: DUMMYDEPENDENCY
-	cd CompilerSource && $(MAKE) $(PLATFORM)
+	cd CompilerSource && $(MAKE)
 DUMMYDEPENDENCY:
 	
 # Target takes the following parameters:

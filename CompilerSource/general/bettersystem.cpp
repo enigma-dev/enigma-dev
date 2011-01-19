@@ -94,7 +94,7 @@ int better_system(string program,string arguments, string redirchar = "", const 
       }
     }
 
-    if (CreateProcess(program.c_str(),(CHAR*)("\"" + program + "\" " + arguments).c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,NULL,NULL,&StartupInfo,&ProcessInformation ))
+    if (CreateProcess(NULL,(CHAR*)("\"" + program + "\" " + arguments).c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,NULL,NULL,&StartupInfo,&ProcessInformation ))
     {
       WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
       GetExitCodeProcess(ProcessInformation.hProcess, &exit_status);

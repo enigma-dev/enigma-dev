@@ -72,7 +72,7 @@ extern void clear_ide_editables();
 extern void print_err_line_at(pt a);
 #include "cfile_parse/cfile_pushing.h"
 
-extern int establish_bearings(const char *compiler);
+extern const char* establish_bearings(const char *compiler);
 
 #include "backend/JavaCallbacks.h"
 
@@ -81,7 +81,7 @@ extern int establish_bearings(const char *compiler);
 #  define dllexport 
 #endif
 
-dllexport int libInit(EnigmaCallbacks* ecs)
+dllexport const char* libInit(EnigmaCallbacks* ecs)
 {
   if (ecs)
   {
@@ -97,12 +97,10 @@ dllexport int libInit(EnigmaCallbacks* ecs)
   }
   else cout << "IDE Not Found. Continuing without graphical output.\n";
   
-  int a = establish_bearings("gcc");
-  if (a) {
-    cout << "ERROR: See scrollback for information.\n";
-    return a;
-  }
-  return 0;
+  const char* a = establish_bearings("gcc");
+  if (a)
+    cout << "ERROR: " << a << endl << "See scrollback for more information.\n";
+  return a;
 }
 
 struct syntax_error {

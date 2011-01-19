@@ -126,8 +126,10 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
   return redir;
 }
 
+static char errbuf[1024];
+
 // Read info about our compiler configuration and run with it
-int establish_bearings(const char *compiler)
+const char* establish_bearings(const char *compiler)
 {
   string GCC_location;
   string compfq = "Compilers/" CURRENT_PLATFORM_NAME "/"; compfq += compiler; compfq += ".ey";
@@ -135,7 +137,7 @@ int establish_bearings(const char *compiler)
   
   // Bail if error
   if (!compis.is_open())
-    return ((cout << "Bailing: Error 1: Could not open compiler descriptor `" << compfq << "`." << endl,1));
+    return (sprintf(errbuf,"Could not open compiler descriptor `%s`.", compfq.c_str()), errbuf);
   
   // Parse our compiler data file
   ey_data compey = parse_eyaml(compis,compiler);
@@ -151,31 +153,29 @@ int establish_bearings(const char *compiler)
   ** These will help us through parsing available libraries.
   ***********************************************************/
   if ((cmd = compey.get("defines")) == "")
-    return (cout << "Bailing: Error 3: Compiler descriptor file `" << compfq <<"` does not specify 'defines' executable.\n" , 1);
+    return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compfq.c_str()), errbuf);
   redir = toolchain_parseout(cmd, toolchainexec,parameters,"defines.txt");
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? better_system(toolchainexec, parameters, ">", "defines.txt") : better_system(toolchainexec, parameters));
-  if (!got_success) return (cout << "ERROR! Call returned non-zero!\n" << endl, 2);
+  if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
   
   /* Get a list of all available search directories.
   ** These are where we'll look for headers to parse.
   ****************************************************/
   if ((cmd = compey.get("searchdirs")) == "")
-    return (cout << "Bailing: Error 3: Compiler descriptor file `" << compfq <<"` does not specify 'searchdirs' executable.\n" , 1);
+    return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compfq.c_str()), errbuf);
   redir = toolchain_parseout(cmd, toolchainexec,parameters,"searchdirs.txt");
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? better_system(toolchainexec, parameters, "&>", "searchdirs.txt") : better_system(toolchainexec, parameters));
-  if (!got_success) return (cout << "ERROR! Call returned non-zero!\n" << endl, 2);
+  if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
   
   /* Parse include directories
   ****************************************/
     string idirs = fc("searchdirs.txt");
-    if (idirs == "") {
-      cout << "Invalid search directories returned. Error 6.\n";
-      return (6);
-    }
+    if (idirs == "")
+      return "Invalid search directories returned. Error 6.";
     
     pt pos;
     string idirstart = compey.get("searchdirs-start").toString(), idirend = compey.get("searchdirs-end").toString();
@@ -184,8 +184,7 @@ int establish_bearings(const char *compiler)
     {
       pos = idirs.find(idirstart);
       if (pos == string::npos or (pos > 0 and idirs[pos-1] != '\n' and idirs[pos-1] != '\r')) {
-        cout << "Invalid search directories returned. Error 7: " << (pos == string::npos?"former":"latter") << ".\n";
-        return (7);
+        return "Invalid search directories returned. Start search string does not match a line.";
       }
       pos += idirstart.length();
     }
@@ -214,12 +213,11 @@ int establish_bearings(const char *compiler)
   /* Parse built-in #defines
   ****************************/
     defs = fc("defines.txt");
-    if (!defs or !*defs) return (cout << "Bailing: Error 3: Defines are empty.\n" , 1);
+    if (!defs or !*defs) return "Call to toolchain executable returned no data.\n";
     
     pt a = parse_cfile(defs);
     if (a != pt(-1)) {
-      cout << "Highly unlikely error. But stupid things can happen when working with files.\n\n";
-      return (cout << "Bailing: Error 4\n" , 1);
+      return "Highly unlikely error. But stupid things can happen when working with files.";
     }
     GCC_MACRO_STRING = defs;
   
@@ -238,7 +236,7 @@ int establish_bearings(const char *compiler)
   return 0;
 }
 
-dllexport int gccDefinePath(const char* compiler)
+/*dllexport const char* gccDefinePath(const char* compiler)
 {
   return establish_bearings(compiler);
-}
+}*/
