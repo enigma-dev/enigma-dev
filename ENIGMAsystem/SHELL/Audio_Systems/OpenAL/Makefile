@@ -1,7 +1,7 @@
 #Awesome Locally Generated Makefile
 
 .eobjs_$(MODE)/as_basic.o: as_basic.cpp as_basic.h alure/include/AL/alure.h alure/config.h ../../../additional/al/include/alc.h ../../../additional/al/include/al.h
-	$(CXX) -c as_basic.cpp		-o .eobjs_$(MODE)/as_basic.o $(FLAGS)
+	g++ -c as_basic.cpp		-o .eobjs_$(MODE)/as_basic.o $(FLAGS)
 
 mkObjDir:
 	-mkdir .eobjs_$(MODE)
@@ -33,7 +33,7 @@ Release: mkObjDir .eobjs_Release/as_basic.o
 
 clean:
 	-rm .eobjs*/*
-	cd alure	&& make clean
-	cd ogg		&& make clean
-	cd vorbis	&& make clean
-	cd dumb		&& make clean
+	cd alure	&& $(MAKE) clean
+	cd ogg		&& $(MAKE) clean
+	cd vorbis	&& $(MAKE) clean
+	cd dumb		&& $(MAKE) clean

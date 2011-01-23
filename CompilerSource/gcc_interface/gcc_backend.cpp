@@ -42,6 +42,8 @@ using namespace std;
     #include "../general/parse_basics.h"
     #include "../general/bettersystem.h"
 
+#include "gcc_backend.h"
+
 string fc(const char* fn);
 
 #include <sys/time.h>
@@ -59,7 +61,7 @@ bool init_load_successful = false;
 varray<string> include_directories;
 unsigned int include_directory_count;
 
-string MAKE_location, MAKE_paths;
+string MAKE_location, MAKE_paths, TOPLEVEL_flags;
 
 inline int rdir_system(string x, string y)
 {
@@ -149,6 +151,11 @@ const char* establish_bearings(const char *compiler)
   string cmd, toolchainexec, parameters; // Full command line, executable part, parameter part
   bool redir; // Whether or not to redirect the output manually
   
+  /* Write down our PATHs
+  ****************************/
+  MAKE_paths = compey.get("path");
+  TOPLEVEL_flags = compey.get("flags");
+  
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.
   ***********************************************************/
@@ -156,7 +163,7 @@ const char* establish_bearings(const char *compiler)
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compfq.c_str()), errbuf);
   redir = toolchain_parseout(cmd, toolchainexec,parameters,"defines.txt");
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? better_system(toolchainexec, parameters, ">", "defines.txt") : better_system(toolchainexec, parameters));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, "> defines.txt",MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
   
@@ -167,7 +174,7 @@ const char* establish_bearings(const char *compiler)
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compfq.c_str()), errbuf);
   redir = toolchain_parseout(cmd, toolchainexec,parameters,"searchdirs.txt");
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? better_system(toolchainexec, parameters, "&>", "searchdirs.txt") : better_system(toolchainexec, parameters));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, "&> searchdirs.txt", MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
   
@@ -230,8 +237,6 @@ const char* establish_bearings(const char *compiler)
   MAKE_location = toolchainexec;
   if (parameters != "")
     cout << "WARNING: Discarding parameters `" << parameters << "` to " << MAKE_location << "." << endl;
-  
-  MAKE_paths = compey.get("path");
   
   return 0;
 }

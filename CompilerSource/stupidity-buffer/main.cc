@@ -105,12 +105,12 @@ EMessage
   "you can click 'no,' uninstall your current MinGW and have ENIGMA install a new one.",
  msg_welcome__gnu_not_msys_found_in_path =
   "This seems to be the first time you've run ENIGMA. I looked around, and I found "
-  "what looks like an operable installation of MinGW32. I was unable, however, to "
-  "find a working MSys make. On top of that, Windows was the one to locate it via "
-  "PATH, so I don't know where it's actually installed. Would you like me to look "
-  "for then install MSys in the default location? If not, please install and configure "
-  "GNU MSys yourself (the mingw-get packages are msys-base msys-make) and re-run ENIGMA."
-  "\n\nOtherwise, press 'yes' to install.",
+  "what looks like an operable installation of MinGW32. It is referenced in your "
+  "system PATH, so I don't know where it's actually installed. Would you like me to look "
+  "for or install MSys in the default location?\n\n"
+  "If you have configured MinGW somewhere other than \\MinGW\\ on this drive, please install and "
+  "configure GNU MSys yourself (the mingw-get packages are msys-base msys-make) and re-run ENIGMA."
+  "\n\nOtherwise, press 'yes' to search and install.",
  install_drive_ok =
   "ENIGMA will install the GCC on the root of this drive by default. The assigned "
   "letter for this drive is \"%s\". Is this drive OK? (You can select a different "
@@ -238,14 +238,17 @@ int main()
     }
     else // We located the GCC. 
     { 
-      printf("MinGW32 Make detected. Accessible from `%s`.\nVerifying MSys...\n\n", mingw_bin_path.c_str());
+      printf("MinGW32 Make detected. Accessible from `%s`.\nVerifying MSys...\n\n", (mingw_bin_path + makename).c_str());
       
       if (mingw_bin_path == "")
       {
         if (makename == "make")
         {
           if (MessageBox(NULL, msg_welcome__msys_found, msg_welcome__caption, MB_YESNO) == IDYES)
-            e_use_existing_install("make","","");
+          {
+            e_use_existing_install("mingw32-make","","");
+            goto java;
+          }
         }
         else
         {
@@ -273,13 +276,14 @@ int main()
       string msg = expand_message(msg_welcome__gnu_found, mingw_path);
       switch (MessageBox(NULL, msg.c_str(), msg_welcome__caption, MB_YESNOCANCEL))
       {
-        case IDYES:    e_use_existing_install(msys_make_path.c_str(), mingw_bin_path.c_str(), allpaths.c_str());
+        case IDYES:    e_use_existing_install((mingw_bin_path+"mingw32-make.exe").c_str(), mingw_bin_path.c_str(), allpaths.c_str()); goto java;
         case IDNO:     goto install_mingw;
         case IDCANCEL: goto end;
       }
     }
   } else fclose(ey);
   
+  java:
   puts("Scouring for Java");
   {
     const char *jpath = "java";
@@ -367,7 +371,7 @@ bool e_install_mingw(string dl)
     }
     else puts("All requested components were installed correctly.");
   
-    e_use_existing_install((dl + "MinGW\\" + msys_path_from_mingw + "make.exe").c_str(), (dl + "MinGW\\bin\\").c_str(), (dl + "MinGW\\msys\\1.0\\bin;" + dl + "MinGW\\bin\\;").c_str());
+    e_use_existing_install((dl + "MinGW\\bin\\mingw32-make.exe").c_str(), (dl + "MinGW\\bin\\").c_str(), (dl + "MinGW\\msys\\1.0\\bin;" + dl + "MinGW\\bin\\;").c_str());
   return TRUE;
 }
 
@@ -390,6 +394,7 @@ bool e_use_existing_install(const char* make,const char *binpath, const char *au
             "searchdirs: %sgcc -E -x c++ -v $blank\n"
             "searchdirs-start: \"#include <...> search starts here:\"\n"
             "searchdirs-end: \"End of search list.\"\n"
+            "flags: -static-libstdc++ -static-libgcc\n"
             "\n",
             auxpath, make, binpath, binpath);
     fclose(cff);

@@ -217,9 +217,14 @@ const char* libInit(struct EnigmaCallbacks* ecs);
 syntax_error *definitionsModified(const char*,const char*);
 
 #include "OS_Switchboard.h"
+#include "general/bettersystem.h"
 
 int main(int argc, char* argv[])
 {
+  puts("Attempting to run");
+  e_execp("test test=\"test\" test \"pest\"","\\MinGW\\bin;\\MinGW\\msys\\1.0\\bin");
+  puts("done");
+  return 0;
   libInit(NULL);
   definitionsModified(NULL, ((string) "%e-yaml\n"
 	       "---\n" 	 

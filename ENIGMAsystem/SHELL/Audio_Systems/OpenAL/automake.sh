@@ -11,7 +11,7 @@ for file in *.cpp ;
     done;
     echo "" >> Makefile;
     
-    echo "	\$(CXX) -c $file		-o .eobjs_\$(MODE)/${file%.cpp}.o \$(FLAGS)"  >> Makefile;
+    echo "	g++ -c $file		-o .eobjs_\$(MODE)/${file%.cpp}.o \$(FLAGS)"  >> Makefile;
   };
   done;
 
@@ -40,10 +40,10 @@ done;
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
 echo "	-rm .eobjs*/*" >> Makefile;
-echo "	cd alure	&& make clean" >> Makefile;
-echo "	cd ogg		&& make clean" >> Makefile;
-echo "	cd vorbis	&& make clean" >> Makefile;
-echo "	cd dumb		&& make clean" >> Makefile;
+echo "	cd alure	&& \$(MAKE) clean" >> Makefile;
+echo "	cd ogg		&& \$(MAKE) clean" >> Makefile;
+echo "	cd vorbis	&& \$(MAKE) clean" >> Makefile;
+echo "	cd dumb		&& \$(MAKE) clean" >> Makefile;
 
 cd ./alure/
 ./automake.sh

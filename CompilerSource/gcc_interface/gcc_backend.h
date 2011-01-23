@@ -27,4 +27,4 @@
 
 //Sometimes I wonder if licenses waste space. *Whistles*
 
-extern string MAKE_paths, MAKE_location;
+extern string MAKE_paths, MAKE_location, TOPLEVEL_flags;

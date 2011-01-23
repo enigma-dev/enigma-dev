@@ -37,25 +37,9 @@ iphone:
 iphonedevice:
 	cd MacOS/ && xcodebuild -target EnigmaIphone -sdk iphoneos2.2.1
 
-# Figure platform
-OS := $(shell uname -s)
-ifeq ($(OS), Linux)
-	CREMOVE := rm -r 
-	ENDCREMOVE :=
-	SLASHC := /
-else ifeq ($(OS), Darwin)
-	CREMOVE := rm -r 
-	ENDCREMOVE :=
-	SLASHC := /
-else
-	CREMOVE := del /Q '
-	ENDCREMOVE :='
-	SLASHC := \\
-endif
-
 
 android:
-	$(CREMOVE)ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/obj/local*$(SLASHC)*$(ENDCREMOVE) #first of all delete objects
+	-rm ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/obj/local*/* #first of all delete objects
 	cd ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/jni && /Users/alasdairmorrison/Documents/AndroidSDK/crystax/ndk-build
 
 androidrun:

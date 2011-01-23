@@ -133,7 +133,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     edbg << "Rebuilding all..." << flushl;
     edbg << "Running make from `" << MAKE_location << "'" << flushl;
     edbg << "Done." << flushl;
-     better_system(MAKE_location, "clean-game");
+    e_execs(MAKE_location + " clean-game eTCpath=\"" + MAKE_paths + "\"");
     return 0;
   }
 
@@ -374,7 +374,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   
   idpr("Adding resources...",90);
   string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.build_extension;
-  const char *gameFname = mode == emode_build ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
+  string gameFname = mode == emode_build ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
 
   idpr("Starting compile (This may take a while...)", 30);
 
@@ -388,12 +388,15 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     glinks += " " + extensions::targetAPI.networkLinks;
   
   make += "GMODE=Run ";
-  make += "GFLAGS=\"" + gflags + "\" ";
+  make += "GFLAGS=\"" + TOPLEVEL_flags + " " + gflags + "\" ";
   make += "GLINKS=\"" + glinks + "\" ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
   
-  make += string("OUTPUTNAME=\"") + gameFname + "\" ";
+  string mfgfn = gameFname; 
+  for (size_t i = 0; i < mfgfn.length(); i++)
+    if (mfgfn[i] == '\\') mfgfn[i] = '/';
+  make += string("OUTPUTNAME=\"") + mfgfn + "\" ";
   make += "eTCpath=\"" + MAKE_paths + "\"";
 
   edbg << "Running make from `" << MAKE_location << "'" << flushl;
@@ -409,7 +412,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   // Redirect it
   ide_output_redirect_file(redirfile);
-  int makeres = better_system(MAKE_location,make,"&>",redirfile);
+  int makeres = e_execs(MAKE_location,make,"&>",redirfile);
 
   // Stop redirecting GCC output
   ide_output_redirect_reset();
@@ -435,7 +438,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     "ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
   #endif
   
-  FILE *gameModule = fopen(gameFname,"ab");
+  FILE *gameModule = fopen(gameFname.c_str(),"ab");
   if (!gameModule) {
     user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
     idpr("Failed to add resources.",-1); return 12;
@@ -479,7 +482,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     rprog = string_replace_all(rprog,"$game",gameFname);
     rparam = string_replace_all(rparam,"$game",gameFname);
     user << "Running \"" << rprog << "\" " << rparam << flushl;
-    int gameres = better_system(rprog, rparam);
+    int gameres = e_execs(rprog, rparam);
     user << "Game returned " << gameres << "\n";
   }
 

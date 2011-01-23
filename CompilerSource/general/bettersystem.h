@@ -25,5 +25,16 @@
 **                                                                              **
 \********************************************************************************/
 
-int better_system(string,string,string=">",const char* = NULL);
+int e_exec(const char* fcmd, const char* *Cenviron = NULL);
+int e_execp(const char* cmd, string path);
+int e_execs(string cmd);
+int e_execs(string cmd, string cat1);
+int e_execs(string cmd, string cat1, string cat2);
+int e_execs(string cmd, string cat1, string cat2, string cat3);
+int e_execsp(string cmd, string path);
+int e_execsp(string cmd, string cat1, string path);
+int e_execsp(string cmd, string cat1, string cat2, string path);
+int e_execsp(string cmd, string cat1, string cat2, string cat3, string path);
+
+//int better_system(string,string,string="",const char* = NULL);
 
