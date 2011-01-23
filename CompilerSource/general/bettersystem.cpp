@@ -2,7 +2,7 @@
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **                                                                              **
-**  This file is a part of the ENIGMA Development Cenvironment.                  **
+**  This file is a part of the ENIGMA Development environment.                  **
 **                                                                              **
 **                                                                              **
 **  ENIGMA is free software: you can redistribute it and/or modify it under the **
@@ -48,7 +48,7 @@ inline char* scopy(string& str)
   #define cut_termining_string(x) ((x)+1)
 #else
   #define cut_beginning_string(x) ((x)+1)
-  #define cut_termining_string(x) (x)
+  #define cut_termining_string(x) ((x)-1)
 #endif
 inline string cutout_block(const char* source, pt& pos, bool& qed)
 {
@@ -57,26 +57,30 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
   string ret;
   
   if (source[pos] == '"' and (qed = true))
-  {
+  { DoubleQuoteInBlock:
     while (source[++pos] and source[pos] != '"')
       if (source[pos] == '\\') pos++;
-    ret = string(source + cut_beginning_string(spos), cut_termining_string(pos-spos));
+    ret += string(source + cut_beginning_string(spos), cut_termining_string(pos-spos));
+    pos++;
   }
   else if (source[pos] == '\'' and (qed = true))
-  {
+  { SingleQuoteInBlock:
     while (source[++pos] and source[pos] != '\'')
       if (source[pos] == '\\') pos++;
-    ret = string(source + cut_beginning_string(spos), cut_termining_string(pos-spos));
+    ret += string(source + cut_beginning_string(spos), cut_termining_string(pos-spos));
+    pos++;
   }
   else
   {
     while (source[pos] and !is_useless(source[pos]))
-      if (source[++pos] == '"')
-        while (source[++pos] and source[pos] != '"')
-           if (source[pos] == '\\') pos++; else;
-      else if (source[pos] == '\'')
-        while (source[++pos] and source[pos] != '\'')
-           if (source[pos] == '\\') pos++; else;
+      if (source[++pos] == '"') {
+        ret = string(source + spos, pos - spos); spos=pos;
+        goto DoubleQuoteInBlock;
+      }
+      else if (source[pos] == '\'') {
+        ret = string(source + spos, pos - spos); spos=pos;
+        goto SingleQuoteInBlock;
+      }
     ret = string(source + spos, pos - spos);
   }
   
@@ -215,8 +219,32 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
     #include <fcntl.h> 
     #include <unistd.h>
     #include <sys/wait.h>
+    #include <sys/stat.h>
     
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+    
+    void path_coerce(string &ename)
+    {
+      char* a = getenv("PATH");
+      size_t len = strlen(a) + 1;
+      char* b = (char*)malloc(len);
+      memcpy(b,a,len);
+      a = b;
+      
+      struct stat st;
+      for (char* c = b; *b; b++) if (*b == ':')
+      {
+        *b = 0;
+        string fn = string(c) + "/" + ename;
+        if (!stat(fn.c_str(), &st))
+        {
+          ename = fn;
+          break;
+        }
+        c = b + 1;
+      }
+      free(a);
+    }
     
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
@@ -229,6 +257,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
       string ename = cutout_block(fcmd, pos, qued);
       if (ename == "")
         return 0;
+      path_coerce(ename);
       
       string redirout, redirerr; int argc = 0, argcmax = 16;
       char* *argv = (char**)malloc(sizeof(char*) * (argcmax+1));
@@ -269,6 +298,11 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
       // Cap our parameters
       argv[argc] = NULL;
       
+      printf("\n\n*********** EXECUTE \n");
+      for (char **i = argv; *i; i++)
+        printf("  `%s`\n",*i);
+      puts("\n\n");
+      
       int result = -1;
       pid_t fk = fork();
       if (!fk)
@@ -298,7 +332,23 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
         else if (redirerr != redirout)
           close(STDERR_FILENO),
           dup(creat(redirerr.c_str(),laxpermissions));
-        execvpe(ename.c_str(), (char*const*)argv, (char*const*)Cenviron);
+        
+        char** usenviron;
+        if (Cenviron)
+        {
+          size_t envl = 1;
+          for (char** i = environ;  *i; i++, envl++);
+          for (char** i = (char**)Cenviron; *i; i++, envl++);
+          usenviron = new char*[envl];
+          char ** dest = usenviron;
+          for (char ** i = (char**)Cenviron; *i; i++) *dest++ = *i;
+          for (char ** i = environ;  *i; i++) *dest++ = *i;
+          *dest = NULL;
+        }
+        else usenviron = environ;
+        
+          execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
+        exit(-1);
       }
       
       waitpid(fk,&result,0);
@@ -310,8 +360,10 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
     
     int e_execp(const char* cmd, string path)
     {
+      puts ("TRUE\n\n");
       path.insert(0, "PATH=");
-      path += ":"; path += getenv("PATH");
+      if (path != "PATH=") path += ":";
+      path += getenv("PATH");
       const char *Cenviron[2] = { path.c_str(), NULL };
       return e_exec(cmd, Cenviron);
     }

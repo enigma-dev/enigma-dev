@@ -1,3 +1,5 @@
+# Makefile generator instantiated from /ENIGMAsystem/SHELL/Developer/.
+
 echo "#Awesome Locally Generated Makefile" > Makefile
 echo "" >> Makefile;
 
@@ -30,10 +32,10 @@ do
     do printf ".eobjs_$modename/${file%.cpp}.o " >> Makefile; 
     done;
   printf "\n" >> Makefile;
-  echo "	cd alure  && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
-  echo "	cd ogg    && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
-  echo "	cd vorbis && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
-  echo "	cd dumb   && \$(MAKE) static DEST=\"../.eobjs_$modename\"" >> Makefile;
+  echo "	cd alure  && \$(MAKE) static DEST=\"../.eobjs_$modename\" GFLAGS=\"\$(FLAGS)\"" >> Makefile;
+  echo "	cd dumb   && \$(MAKE) static DEST=\"../.eobjs_$modename\" GFLAGS=\"\$(FLAGS)\"" >> Makefile;
+  echo "	cd ogg    && \$(MAKE) static DEST=\"../.eobjs_$modename\" GFLAGS=\"\$(FLAGS)\"" >> Makefile;
+  echo "	cd vorbis && \$(MAKE) static DEST=\"../.eobjs_$modename\" GFLAGS=\"\$(FLAGS)\"" >> Makefile;
   echo "" >> Makefile;
 done;
 
@@ -41,9 +43,9 @@ echo "" >> Makefile;
 echo "clean:" >> Makefile;
 echo "	-rm .eobjs*/*" >> Makefile;
 echo "	cd alure	&& \$(MAKE) clean" >> Makefile;
+echo "	cd dumb		&& \$(MAKE) clean" >> Makefile;
 echo "	cd ogg		&& \$(MAKE) clean" >> Makefile;
 echo "	cd vorbis	&& \$(MAKE) clean" >> Makefile;
-echo "	cd dumb		&& \$(MAKE) clean" >> Makefile;
 
 cd ./alure/
 ./automake.sh

@@ -222,7 +222,8 @@ syntax_error *definitionsModified(const char*,const char*);
 int main(int argc, char* argv[])
 {
   puts("Attempting to run");
-  e_execp("test test=\"test\" test \"pest\"","\\MinGW\\bin;\\MinGW\\msys\\1.0\\bin");
+  e_execp("gcc -E -x c++ -v blank.txt","");
+  //e_exec("gcc -E -x c++ -v blank.txt");
   puts("done");
   return 0;
   libInit(NULL);

@@ -7,33 +7,33 @@ mkObjDir:
 	-mkdir .eobjs_$(MODE)
 
 Run: mkObjDir .eobjs_Run/as_basic.o 
-	cd alure  && $(MAKE) static DEST="../.eobjs_Run"
-	cd ogg    && $(MAKE) static DEST="../.eobjs_Run"
-	cd vorbis && $(MAKE) static DEST="../.eobjs_Run"
-	cd dumb   && $(MAKE) static DEST="../.eobjs_Run"
+	cd alure  && $(MAKE) static DEST="../.eobjs_Run" GFLAGS="$(FLAGS)"
+	cd dumb   && $(MAKE) static DEST="../.eobjs_Run" GFLAGS="$(FLAGS)"
+	cd ogg    && $(MAKE) static DEST="../.eobjs_Run" GFLAGS="$(FLAGS)"
+	cd vorbis && $(MAKE) static DEST="../.eobjs_Run" GFLAGS="$(FLAGS)"
 
 Debug: mkObjDir .eobjs_Debug/as_basic.o 
-	cd alure  && $(MAKE) static DEST="../.eobjs_Debug"
-	cd ogg    && $(MAKE) static DEST="../.eobjs_Debug"
-	cd vorbis && $(MAKE) static DEST="../.eobjs_Debug"
-	cd dumb   && $(MAKE) static DEST="../.eobjs_Debug"
+	cd alure  && $(MAKE) static DEST="../.eobjs_Debug" GFLAGS="$(FLAGS)"
+	cd dumb   && $(MAKE) static DEST="../.eobjs_Debug" GFLAGS="$(FLAGS)"
+	cd ogg    && $(MAKE) static DEST="../.eobjs_Debug" GFLAGS="$(FLAGS)"
+	cd vorbis && $(MAKE) static DEST="../.eobjs_Debug" GFLAGS="$(FLAGS)"
 
 Build: mkObjDir .eobjs_Build/as_basic.o 
-	cd alure  && $(MAKE) static DEST="../.eobjs_Build"
-	cd ogg    && $(MAKE) static DEST="../.eobjs_Build"
-	cd vorbis && $(MAKE) static DEST="../.eobjs_Build"
-	cd dumb   && $(MAKE) static DEST="../.eobjs_Build"
+	cd alure  && $(MAKE) static DEST="../.eobjs_Build" GFLAGS="$(FLAGS)"
+	cd dumb   && $(MAKE) static DEST="../.eobjs_Build" GFLAGS="$(FLAGS)"
+	cd ogg    && $(MAKE) static DEST="../.eobjs_Build" GFLAGS="$(FLAGS)"
+	cd vorbis && $(MAKE) static DEST="../.eobjs_Build" GFLAGS="$(FLAGS)"
 
 Release: mkObjDir .eobjs_Release/as_basic.o 
-	cd alure  && $(MAKE) static DEST="../.eobjs_Release"
-	cd ogg    && $(MAKE) static DEST="../.eobjs_Release"
-	cd vorbis && $(MAKE) static DEST="../.eobjs_Release"
-	cd dumb   && $(MAKE) static DEST="../.eobjs_Release"
+	cd alure  && $(MAKE) static DEST="../.eobjs_Release" GFLAGS="$(FLAGS)"
+	cd dumb   && $(MAKE) static DEST="../.eobjs_Release" GFLAGS="$(FLAGS)"
+	cd ogg    && $(MAKE) static DEST="../.eobjs_Release" GFLAGS="$(FLAGS)"
+	cd vorbis && $(MAKE) static DEST="../.eobjs_Release" GFLAGS="$(FLAGS)"
 
 
 clean:
 	-rm .eobjs*/*
 	cd alure	&& $(MAKE) clean
+	cd dumb		&& $(MAKE) clean
 	cd ogg		&& $(MAKE) clean
 	cd vorbis	&& $(MAKE) clean
-	cd dumb		&& $(MAKE) clean
