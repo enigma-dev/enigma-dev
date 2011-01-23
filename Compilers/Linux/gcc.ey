@@ -12,4 +12,7 @@ searchdirs: gcc -E -x c++ -v $blank
 searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
-flags:
+cppflags:
+cflags:
+links:
+

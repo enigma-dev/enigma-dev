@@ -14,7 +14,7 @@ for file in *.cpp ;
     done;
     echo "" >> Makefile;
     
-    echo "	\$(CXX) -c $file		-o .eobjs_\$(MODE)/${file%.cpp}.o \$(FLAGS)"  >> Makefile;
+    echo "	\$(CXX) -c $file		-o .eobjs_\$(MODE)/${file%.cpp}.o \$(GFLAGS) \$(ECPPFLAGS)"  >> Makefile;
   };
   done;
 

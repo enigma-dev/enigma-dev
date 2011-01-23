@@ -388,8 +388,10 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     glinks += " " + extensions::targetAPI.networkLinks;
   
   make += "GMODE=Run ";
-  make += "GFLAGS=\"" + TOPLEVEL_flags + " " + gflags + "\" ";
-  make += "GLINKS=\"" + glinks + "\" ";
+  make += "GFLAGS=\"" + gflags + "\" ";
+  make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
+  make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
+  make += "GLINKS=\"" + (TOPLEVEL_links == ""? "" : TOPLEVEL_links + " ") + glinks + "\" ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
   

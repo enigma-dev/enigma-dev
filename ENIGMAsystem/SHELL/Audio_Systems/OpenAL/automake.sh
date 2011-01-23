@@ -32,10 +32,10 @@ do
     do printf ".eobjs_$modename/${file%.cpp}.o " >> Makefile; 
     done;
   printf "\n" >> Makefile;
-  echo "	cd alure  && \$(MAKE) static DEST=\"../.eobjs_$modename\" GFLAGS=\"\$(FLAGS)\"" >> Makefile;
-  echo "	cd dumb   && \$(MAKE) static DEST=\"../.eobjs_$modename\" GFLAGS=\"\$(FLAGS)\"" >> Makefile;
-  echo "	cd ogg    && \$(MAKE) static DEST=\"../.eobjs_$modename\" GFLAGS=\"\$(FLAGS)\"" >> Makefile;
-  echo "	cd vorbis && \$(MAKE) static DEST=\"../.eobjs_$modename\" GFLAGS=\"\$(FLAGS)\"" >> Makefile;
+  echo "	cd alure  && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS) ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
+  echo "	cd dumb   && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS) ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
+  echo "	cd ogg    && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS) ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
+  echo "	cd vorbis && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS) ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
   echo "" >> Makefile;
 done;
 

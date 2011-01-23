@@ -61,7 +61,7 @@ bool init_load_successful = false;
 varray<string> include_directories;
 unsigned int include_directory_count;
 
-string MAKE_location, MAKE_paths, TOPLEVEL_flags;
+string MAKE_location, MAKE_paths, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_links;
 
 inline int rdir_system(string x, string y)
 {
@@ -151,10 +151,12 @@ const char* establish_bearings(const char *compiler)
   string cmd, toolchainexec, parameters; // Full command line, executable part, parameter part
   bool redir; // Whether or not to redirect the output manually
   
-  /* Write down our PATHs
+  /* Write down our PATH, etc
   ****************************/
   MAKE_paths = compey.get("path");
-  TOPLEVEL_flags = compey.get("flags");
+  TOPLEVEL_cflags = compey.get("cflags");
+  TOPLEVEL_cppflags = compey.get("cppflags");
+  TOPLEVEL_links = compey.get("links");
   
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.

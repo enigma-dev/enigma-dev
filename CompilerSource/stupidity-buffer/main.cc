@@ -394,7 +394,9 @@ bool e_use_existing_install(const char* make,const char *binpath, const char *au
             "searchdirs: %sgcc -E -x c++ -v $blank\n"
             "searchdirs-start: \"#include <...> search starts here:\"\n"
             "searchdirs-end: \"End of search list.\"\n"
-            "flags: -static-libstdc++ -static-libgcc\n"
+            "cppflags: -static-libstdc++ -static-libgcc\n"
+            "cflags: -static-libgcc\n"
+            "links: -static-libstdc++ -static-libgcc\n"
             "\n",
             auxpath, make, binpath, binpath);
     fclose(cff);
