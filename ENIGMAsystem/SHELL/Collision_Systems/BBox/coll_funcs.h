@@ -35,4 +35,4 @@ int instance_place(double x, double y, int object);
 int instance_position(double x, double y, int object);
 int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme);
 int collision_line(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme);
-
+int collision_point(double x, double y, int obj, bool prec, bool notme);

@@ -94,3 +94,9 @@ int collision_line(double x1, double y1, double x2, double y2, int obj, bool pre
   return r == NULL ? noone : r->id;
 }
 
+int collision_point(double x, double y, int obj, bool prec /*ignored*/, bool notme)
+{
+  const enigma::object_collisions* r = collide_inst_point(obj,false,notme,x,y); //false is for solid_only, not prec
+  return r == NULL ? noone : r->id;
+}
+
