@@ -27,15 +27,15 @@ echo "" >> Makefile;
 #generate targets for each ENIGMA mode.
 for modename in Run Debug Build Release;
 do
-  printf "$modename: mkObjDir " >> Makefile;
+  printf "$modename: .eobjs_\$(MODE) " >> Makefile;
   for file in *.cpp ;
     do printf ".eobjs_$modename/${file%.cpp}.o " >> Makefile; 
     done;
   printf "\n" >> Makefile;
-  echo "	cd alure  && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS) ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
-  echo "	cd dumb   && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS) ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
-  echo "	cd ogg    && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS) ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
-  echo "	cd vorbis && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS) ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
+  echo "	cd alure  && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS)\" ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
+  echo "	cd dumb   && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS)\" ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
+  echo "	cd ogg    && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS)\" ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
+  echo "	cd vorbis && \$(MAKE) static DEST=\"../.eobjs_$modename\" ECFLAGS=\"\$(ECFLAGS)\" ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
   echo "" >> Makefile;
 done;
 
