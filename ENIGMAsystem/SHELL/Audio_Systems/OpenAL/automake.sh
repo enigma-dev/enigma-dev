@@ -20,7 +20,7 @@ for file in *.cpp ;
 echo "" >> Makefile;
 
 #create the eobjs folder
-echo "mkObjDir:" >> Makefile;
+echo ".eobjs_\$(MODE):" >> Makefile;
 echo "	-mkdir .eobjs_\$(MODE)" >> Makefile;
 echo "" >> Makefile;
 
