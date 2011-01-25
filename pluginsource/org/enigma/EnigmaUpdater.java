@@ -100,6 +100,7 @@ public class EnigmaUpdater
 						@Override
 						public void checkCancelled() throws SVNCancelException
 							{
+							if (EnigmaRunner.SHUTDOWN) throw new SVNCancelException();
 							}
 					});
 				if (revert) svn.revert();
@@ -117,6 +118,11 @@ public class EnigmaUpdater
 						title,JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
 				return 1;
 				}
+			}
+		catch (SVNCancelException e)
+			{
+			System.out.println("Checkout cancelled. It will hopefully be resumed next time.");
+			return -1;
 			}
 		catch (SVNException e)
 			{

@@ -98,13 +98,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public EnigmaFrame ef = new EnigmaFrame();
 	/** This is global scoped so that it doesn't get GC'd */
 	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
-	public EnigmaSettings es = new EnigmaSettings();
-	public EnigmaSettingsFrame esf = new EnigmaSettingsFrame(es);
+	public EnigmaSettings es;
+	public EnigmaSettingsFrame esf;
 	public JMenuItem run, debug, design, compile, rebuild;
 	public JMenuItem showFunctions, showGlobals, showTypes;
 	public static EnigmaDriver DRIVER;
 	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
-	public static boolean ENIGMA_READY = false, ENIGMA_FAIL = false;
+	public static boolean ENIGMA_READY = false, ENIGMA_FAIL = false, SHUTDOWN = false;
 	public final EnigmaNode node = new EnigmaNode();
 
 	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2;
@@ -117,7 +117,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		LGM.addReloadListener(this);
 		SubframeInformer.addSubframeListener(this);
 		applyBackground("org/enigma/enigma.png");
-		LGM.mdi.add(esf);
+
+		Runtime.getRuntime().addShutdownHook(new Thread()
+			{
+				public void run()
+					{
+					SHUTDOWN = true;
+					}
+			});
 
 		new Thread()
 			{
@@ -161,6 +168,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						}
 
 					ENIGMA_READY = true;
+					es = new EnigmaSettings();
+					esf = new EnigmaSettingsFrame(es);
+					LGM.mdi.add(esf);
 					es.commitToDriver();
 					populateKeywords();
 					}
@@ -433,7 +443,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		public void openFrame()
 			{
-			esf.toTop();
+			if (ENIGMA_READY) esf.toTop();
 			}
 
 		public void showMenu(MouseEvent e)

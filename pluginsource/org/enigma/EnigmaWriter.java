@@ -903,7 +903,7 @@ public final class EnigmaWriter
 				if (val.startsWith("\"")) return val;
 				//else fall through
 			case Argument.ARG_STRING:
-				return "\"" + val.replaceAll("\"", "\\\"").replaceAll("\\", "\\\\") + "\"";
+				return "\"" + val.replace("\\","\\\\").replace("\"","\\\"") + "\"";
 			case Argument.ARG_BOOLEAN:
 				return Boolean.toString(!val.equals("0"));
 			case Argument.ARG_MENU:
