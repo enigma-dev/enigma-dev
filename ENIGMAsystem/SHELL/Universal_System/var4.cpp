@@ -43,11 +43,12 @@ variant::operator short()     { return short(rval.d); }
 variant::operator unsigned()           { return (unsigned int)       (rval.d); }
 variant::operator unsigned char()      { return (unsigned char)      (rval.d); }
 variant::operator unsigned short()     { return (unsigned short)     (rval.d); }
+variant::operator unsigned long()      { return (unsigned long) (rval.d); }
 variant::operator unsigned long long() { return (unsigned long long) (rval.d); }
 variant::operator long long() { return (long long)(rval.d); }
 variant::operator double()    { return double     (rval.d); }
 variant::operator float()     { return float      (rval.d); }
-  
+
 variant::operator string() { return sval; }
 
 variant::operator int()       const { return int  (rval.d); }
@@ -58,11 +59,12 @@ variant::operator short()     const { return short(rval.d); }
 variant::operator unsigned()           const { return (unsigned int)       (rval.d); }
 variant::operator unsigned char()      const { return (unsigned char)      (rval.d); }
 variant::operator unsigned short()     const { return (unsigned short)     (rval.d); }
+variant::operator unsigned long()      const { return (unsigned long) (rval.d); }
 variant::operator unsigned long long() const { return (unsigned long long) (rval.d); }
 variant::operator long long() const { return (long long)(rval.d); }
 variant::operator double()    const { return double     (rval.d); }
 variant::operator float()     const { return float      (rval.d); }
-  
+
 variant::operator string() const { return sval; }
 
 #define real enigma::vt_real
@@ -247,6 +249,7 @@ var::operator short()     { return short(**this); }
 var::operator unsigned()           { return (unsigned int)       (**this); }
 var::operator unsigned char()      { return (unsigned char)      (**this); }
 var::operator unsigned short()     { return (unsigned short)     (**this); }
+var::operator unsigned long()      { return (unsigned long) (**this); }
 var::operator unsigned long long() { return (unsigned long long) (**this); }
 var::operator long long() { return (long long)(**this); }
 var::operator double()    { return double     (**this); }
@@ -263,6 +266,7 @@ var::operator short()     const { return short(**this); }
 var::operator unsigned()           const { return (unsigned int)       (**this); }
 var::operator unsigned char()      const { return (unsigned char)      (**this); }
 var::operator unsigned short()     const { return (unsigned short)     (**this); }
+var::operator unsigned long()      const { return (unsigned long) (**this); }
 var::operator unsigned long long() const { return (unsigned long long) (**this); }
 var::operator long long() const { return (long long)(**this); }
 var::operator double()    const { return double     (**this); }
@@ -332,10 +336,10 @@ types_binary_assign_extrapolate_implement(-, variant, terror(real);)
 types_binary_assign_extrapolate_implement(*, variant, terror(real);)
 types_binary_assign_extrapolate_implement(/, variant, terror(real);)
 
-types_binary_bitwise_assign_extrapolate_implement(<<, variant, terror(real);) 
-types_binary_bitwise_assign_extrapolate_implement(>>, variant, terror(real);) 
-types_binary_bitwise_assign_extrapolate_implement(&,  variant, terror(real);) 
-types_binary_bitwise_assign_extrapolate_implement(|,  variant, terror(real);) 
+types_binary_bitwise_assign_extrapolate_implement(<<, variant, terror(real);)
+types_binary_bitwise_assign_extrapolate_implement(>>, variant, terror(real);)
+types_binary_bitwise_assign_extrapolate_implement(&,  variant, terror(real);)
+types_binary_bitwise_assign_extrapolate_implement(|,  variant, terror(real);)
 types_binary_bitwise_assign_extrapolate_implement(^,  variant, terror(real);)
 
 types_binary_extrapolate_real_p  (double operator+, variant, { terror(real); return x + y.rval.d; })
@@ -382,10 +386,10 @@ types_binary_assign_extrapolate_implement(-, var, )
 types_binary_assign_extrapolate_implement(*, var, )
 types_binary_assign_extrapolate_implement(/, var, )
 
-types_binary_bitwise_assign_extrapolate_implement(<<, var, ) 
-types_binary_bitwise_assign_extrapolate_implement(>>, var, ) 
-types_binary_bitwise_assign_extrapolate_implement(&,  var, ) 
-types_binary_bitwise_assign_extrapolate_implement(|,  var, ) 
+types_binary_bitwise_assign_extrapolate_implement(<<, var, )
+types_binary_bitwise_assign_extrapolate_implement(>>, var, )
+types_binary_bitwise_assign_extrapolate_implement(&,  var, )
+types_binary_bitwise_assign_extrapolate_implement(|,  var, )
 types_binary_bitwise_assign_extrapolate_implement(^,  var, )
 
 types_binary_extrapolate_real_p  (double operator+, var, {  return x + (*y).rval.d; })
