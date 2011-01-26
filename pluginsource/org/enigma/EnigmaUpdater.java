@@ -116,8 +116,10 @@ public class EnigmaUpdater
 						null,
 						"Enigma has detected that newer libraries may exist. Would you like us to fetch these for you?",
 						title,JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
+				System.out.println("ENIGMA r" + rev);
 				return 1;
 				}
+			System.out.println("ENIGMA r" + lrev);
 			}
 		catch (SVNCancelException e)
 			{
