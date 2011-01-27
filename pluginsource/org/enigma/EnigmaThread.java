@@ -88,13 +88,7 @@ public class EnigmaThread extends Thread
 					{
 					System.out.println("> " + line);
 					ef.ta.append(line + "\n");
-					SwingUtilities.invokeLater(new Thread()
-						{
-							public void run()
-								{
-								ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
-								}
-						});
+					ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
 					}
 				else
 					g_out.print(line);

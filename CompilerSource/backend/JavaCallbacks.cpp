@@ -26,12 +26,15 @@
 \********************************************************************************/
 
 #include <stdio.h>
+#include "JavaStruct.h"
 #include "util/Image.h"
 
-void javano_signal() { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
-void javano_signal_i(int) { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
-void javano_signal_cstr(const char*) { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); }
-Image *javano_signal_buffer(char *, int) { puts("ERROR: Call to IDE-supplied function not substantiated by signaled memory block"); return NULL; }
+#define ER_NoIdeFunc "ERROR: Call to IDE-supplied function not substantiated by signaled memory block"
+void javano_signal() { puts(ER_NoIdeFunc); }
+void javano_signal_i(int) { puts(ER_NoIdeFunc); }
+void javano_signal_cstr(const char*) { puts(ER_NoIdeFunc); }
+int javano_signal_exec(String, String *, boolean) { puts(ER_NoIdeFunc); return -1; }
+Image *javano_signal_buffer(char *, int) { puts(ER_NoIdeFunc); return NULL; }
 
 //Opens the EnigmaFrame
 void (*ide_dia_open) () = javano_signal;
@@ -49,5 +52,7 @@ void (*ide_output_redirect_file) (const char *) = javano_signal_cstr;
 //Opens the EnigmaFrame
 void (*ide_output_redirect_reset) () = javano_signal;
 
+//Executes a given command, returns errors or ret val
+int (*ide_execute) (String, String *, boolean) = javano_signal_exec;
 //Compresses data. Note image width/height unused.
 Image* (*ide_compress_data) (char *, int) = javano_signal_buffer;

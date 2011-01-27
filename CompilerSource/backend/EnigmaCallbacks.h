@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-#include "sub/Image.h"
+#include "JavaStruct.h"
+#include "util/Image.h"
 
 struct EnigmaCallbacks
 {
@@ -14,7 +15,7 @@ struct EnigmaCallbacks
  void (*coo) ();
 
  //Appends a given text to the frame log
- void (*coa) (const char *);
+ void (*coa) (String);
 
  //Clears the frame log
  void (*cock) ();
@@ -23,8 +24,17 @@ struct EnigmaCallbacks
  void (*cop) (int);
 
  //Applies a given text to the progress bar
- void (*cot) (const char *);
+ void (*cot) (String);
 
- //Compresses data. Note image width/height unused.
+ //Sets the file from which data is redirected to frame log
+ void (*cof) (String)
+
+ //Indicates file completion, dumps remainder to frame log
+ void (*ccf) (void)
+
+ //Executes a given command, returns errors or ret val
+ int (*cex) (String, String *, boolean)
+
+ //Compresses data. Note image width/height unused
  Image* (*ccd) (char *, int);
 };

@@ -8,6 +8,7 @@
  * instead, if you like. Version 3, or any later version.
  */
 
+#include "JavaStruct.h"
 #include "util/Image.h"
 
 struct EnigmaCallbacks
@@ -28,14 +29,17 @@ struct EnigmaCallbacks
  void (*dia_progress_text) (const char *);
  
  
- //Sets the file from which data is redirected.
+ //Sets the file from which data is redirected to frame log
  void (*output_redirect_file) (const char *);
  
- //Ceases to redirect from a file.
+ //Indicates file completion, dumps remainder to frame log
  void (*output_redirect_reset) ();
 
 
- //Compresses data. Note image width/height unused.
+ //Executes a given command, returns errors or ret val
+ int (*ide_execute) (String, String *, boolean);
+
+ //Compresses data. Note image width/height unused
  Image* (*ide_compress_data) (char *, int);
 };
 
@@ -50,10 +54,12 @@ extern void (*ide_dia_progress) (int);
 //Applies a given text to the progress bar
 extern void (*ide_dia_progress_text) (const char *);
  
-//Sets the file from which data is redirected.
+//Sets the file from which data is redirected to frame log
 extern void (*ide_output_redirect_file) (const char *);
-//Ceases to redirect from a file.
+//Indicates file completion, dumps remainder to frame log
 extern void (*ide_output_redirect_reset) ();
 
-//Compresses data. Note image width/height unused.
+ //Executes a given command, returns errors or ret val
+extern int (*ide_execute) (String, String *, boolean);
+//Compresses data. Note image width/height unused
 extern Image* (*ide_compress_data) (char *, int);
