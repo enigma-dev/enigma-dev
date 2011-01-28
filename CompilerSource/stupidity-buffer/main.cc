@@ -224,7 +224,7 @@ int main()
         {
           get_new_drive_letter(drive_letter);
           if (!*drive_letter)
-            goto confused_cancel;
+            goto end;
           goto label_get_install_drive;
         }
         else
@@ -234,7 +234,6 @@ int main()
             goto end;
           }
       }
-      confused_cancel: ;
     }
     else // We located the GCC. 
     { 
@@ -247,7 +246,7 @@ int main()
           if (MessageBox(NULL, msg_welcome__msys_found, msg_welcome__caption, MB_YESNO) == IDYES)
           {
             e_use_existing_install("mingw32-make","","");
-            goto java;
+            goto oalinst;
           }
         }
         else
@@ -276,14 +275,15 @@ int main()
       string msg = expand_message(msg_welcome__gnu_found, mingw_path);
       switch (MessageBox(NULL, msg.c_str(), msg_welcome__caption, MB_YESNOCANCEL))
       {
-        case IDYES:    e_use_existing_install((mingw_bin_path+"mingw32-make.exe").c_str(), mingw_bin_path.c_str(), allpaths.c_str()); goto java;
+        case IDYES:    e_use_existing_install((mingw_bin_path+"mingw32-make.exe").c_str(), mingw_bin_path.c_str(), allpaths.c_str()); goto oalinst;
         case IDNO:     goto install_mingw;
         case IDCANCEL: goto end;
       }
     }
+    
+    oalinst:
+      better_system("Autoconf/oalinst.exe","");
   } else fclose(ey);
-  
-  java:
   puts("Scouring for Java");
   {
     const char *jpath = "java";
