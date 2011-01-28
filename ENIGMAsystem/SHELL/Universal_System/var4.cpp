@@ -236,6 +236,7 @@ var::operator variant&() { return **this; }
 var::operator const variant&() const { return **this; }
 
 var::var() { initialize(); }
+var::var(variant x) { initialize(); **this = x; }
 types_extrapolate_real_p  (var::var, { initialize(); **this = x; })
 types_extrapolate_string_p(var::var, { initialize(); **this = x; })
 

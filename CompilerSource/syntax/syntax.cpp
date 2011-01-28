@@ -446,35 +446,6 @@ namespace syncheck
                 lastnamed[level] = LN_NOTHING;
                 lastnamedatt[level] = LNA_NOTHING;
               }
-              else
-              {
-                if (lastnamed[level] != LN_OPERATOR)
-                {
-                  pt cpos = pos+1, qc = 1;
-                  while (qc>0)
-                  {
-                    if (code[cpos]=='(') qc++; if (code[cpos]==')') qc--;
-                    if (cpos>=len) break; //Ensure we don't overflow
-                    cpos++;
-                  }
-                  
-                  if (qc>0)
-                  { error="Unterminated parenthesis at this point"; return pos; }
-                  
-                  while (is_useless(code[cpos])) cpos++;
-                  if (!assop[level] and code[cpos]!='.')
-                  { error="Unexpected parenthesis at this point"; return pos; }
-                  
-                  if (statement_completed(lastnamed[level])) {
-                    int cs = close_statement(code,pos);
-                    if (cs != -1) return cs;
-                  }
-                }
-                else if (!assop[level] && !(plevel>0))
-                { error="Parenthetical expression outside of assignment operator: This is what makes C taste bitter"; return pos; }
-                plevelt[plevel] = PLT_PARENTH;
-                //lastnamed[level] should remain the same... it should be an operator.
-              }
             }
           pos++; continue;
         
@@ -695,10 +666,6 @@ namespace syncheck
               }
               else //operator=
               {
-                if (lastnamed[level]==LN_VALUE && !assop[level])
-                { error="Cannot assign to a function, use == to test equality"; return pos; }
-                if (lastnamed[level]!=LN_VARNAME && !assop[level])
-                { error="Variable name expected before assignment operator"; return pos; }
                 assop[level]=1;
                 pos+=1; lastnamed[level]=LN_OPERATOR;
                 lastnamedatt[level] = LNA_NOTHING;

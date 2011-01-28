@@ -142,8 +142,9 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       
       if (name == "div")
       {
-        codo[bpos]   = '/';
-        synt[bpos++] = '/';
+        codo[bpos] = 'd', synt[bpos++] = '@';
+        codo[bpos] = 'i', synt[bpos++] = '@';
+        codo[bpos] = 'v', synt[bpos++] = '@';
         continue;
       }
       
