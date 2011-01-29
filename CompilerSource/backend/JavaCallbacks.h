@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>, Josh Ventura
- * 
+ *
  * This file is part of Enigma Plugin.
  * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
  * See LICENSE for details. If you can find it. But I mean, this is just
@@ -27,11 +27,11 @@ struct EnigmaCallbacks
 
  //Applies a given text to the progress bar
  void (*dia_progress_text) (const char *);
- 
- 
+
+
  //Sets the file from which data is redirected to frame log
  void (*output_redirect_file) (const char *);
- 
+
  //Indicates file completion, dumps remainder to frame log
  void (*output_redirect_reset) ();
 
@@ -53,7 +53,7 @@ extern void (*ide_dia_clear) ();
 extern void (*ide_dia_progress) (int);
 //Applies a given text to the progress bar
 extern void (*ide_dia_progress_text) (const char *);
- 
+
 //Sets the file from which data is redirected to frame log
 extern void (*ide_output_redirect_file) (const char *);
 //Indicates file completion, dumps remainder to frame log
