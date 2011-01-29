@@ -37,7 +37,7 @@ struct EnigmaCallbacks
 
 
  //Executes a given command, returns errors or ret val
- int (*ide_execute) (String, String *, boolean);
+ int (*ide_execute) (const char*, const char**, bool);
 
  //Compresses data. Note image width/height unused
  Image* (*ide_compress_data) (char *, int);
@@ -60,6 +60,6 @@ extern void (*ide_output_redirect_file) (const char *);
 extern void (*ide_output_redirect_reset) ();
 
  //Executes a given command, returns errors or ret val
-extern int (*ide_execute) (String, String *, boolean);
+extern int (*ide_execute) (const char*, const char**, bool);
 //Compresses data. Note image width/height unused
 extern Image* (*ide_compress_data) (char *, int);
