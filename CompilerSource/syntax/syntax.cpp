@@ -407,8 +407,16 @@ namespace syncheck
         //Moving on...
         //first priority is to check for a bracket of any sort; () [] {}
         case '(':
+            plevel++;
+            if (lastnamed[level] == LN_NOTHING or lastnamed[level] == LN_OPERATOR)
             {
-              plevel++;
+              plevelt[plevel] = PLT_PARENTH;
+              lastnamed[level] = LN_NOTHING; // So we'll just assume it was.
+              lastnamedatt[level] = LNA_NOTHING; // Unset our member flag
+              assop[level] = true; // And we'll treat it like a function.
+            }
+            else
+            {
               if (lastnamed[level] == LN_VARNAME) //May be a script.
               {
                 //but we can't check that now

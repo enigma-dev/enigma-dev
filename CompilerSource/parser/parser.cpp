@@ -334,7 +334,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         }
       }
     }
-    else if (synt[pos] == '[')
+    else if (synt[pos] == '[' and (!indecl or deceq))
     {
       const pt sp = move_to_beginning(code,synt,pos-1);
       const string exp = code.substr(sp,pos-sp);
