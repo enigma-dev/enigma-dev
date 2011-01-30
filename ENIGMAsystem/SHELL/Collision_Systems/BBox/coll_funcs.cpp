@@ -104,6 +104,7 @@ int collision_point(double x, double y, int obj, bool prec /*ignored*/, bool not
   return r == NULL ? noone : r->id;
 }
 
+
 double distance_to_object(int object)
 {
   const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
@@ -119,8 +120,8 @@ double distance_to_object(int object)
     const double left2  = inst2->x + inst1->bbox_left,  top2    = inst2->y + inst1->bbox_top,
                  right2 = inst2->x + inst1->bbox_right, bottom2 = inst2->y + inst1->bbox_bottom;
 
-    const double right = min(right1, right2), left   = max(left1, left2),
-                 top   = min(top1, top2),     bottom = max(bottom1, bottom2);
+    const double right  = min(right1, right2),   left = max(left1, left2),
+                 bottom = min(bottom1, bottom2), top  = max(top1, top2);
 
     tempdist = hypot((left > right ? left - right : 0),
                      (top > bottom ? top - bottom : 0));
@@ -132,7 +133,6 @@ double distance_to_object(int object)
   }
   return (distance == std::numeric_limits<double>::infinity() ? -1 : distance);
 }
-
 
 double distance_to_point(double x, double y)
 {
