@@ -700,7 +700,36 @@ const char * indent_chars   =  "\n                                \
                                                                   \
                                                                   \
                                                                   ";
-
+static inline string string_settings_escape(string n)
+{
+  for (size_t pos = 0; pos < n.length(); pos++)
+  {
+    switch (n[pos])
+    {
+      case '\\':
+          if (n[pos+1] == '#') // Backslashes can only escape number signs
+            n.erase(pos,1); // It happens to be escaping this one
+          else
+            n.insert(pos++,1,'\\'); // Ordinary backslash; escape it for C++.
+        break;
+      case '#':
+          n[pos] = 'n'; // Newlines are expressed with #
+          n.insert(pos++,1,'\\');
+        break;
+      case '\n': // Newlines are allowed in strings in GML, but not in C
+          n[pos] = 'n';
+          n.insert(pos++,1,'\\');
+        break;
+      case '\r': // Handle odd cases
+          n[pos] = '\\';
+          if (n[++pos] == '\n')
+            n[pos] = 'n';
+          else n.insert(pos,1,'n');
+        break;
+    } 
+  }
+  return n;
+}
 void print_to_file(string code,string synt,unsigned int &strc, varray<string> &string_in_code,int indentmin_b4,ofstream &of)
 {
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
@@ -762,7 +791,7 @@ void print_to_file(string code,string synt,unsigned int &strc, varray<string> &s
       case '"':
           if (pars) pars--;
             if (str_ind >= strc) cout << "What the crap.\n";
-            of << string_in_code[str_ind].c_str();
+            of << string_settings_escape(string_in_code[str_ind]).c_str();
             str_ind++;
             if (synt[pos+1] == '+' and synt[pos+2] == '"')
               synt[pos+1] = code[pos+1] = ' ';

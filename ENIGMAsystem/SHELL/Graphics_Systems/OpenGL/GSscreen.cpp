@@ -30,6 +30,8 @@
 
 using namespace std;
 
+#include "../../Universal_System/var4.h"
+
 #define __GETR(x) (((unsigned int)x & 0x0000FF))
 #define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
 #define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)

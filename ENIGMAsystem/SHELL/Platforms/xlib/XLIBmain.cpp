@@ -30,6 +30,7 @@ extern Display *disp;
 extern GLXDrawable win;
 extern Atom wm_delwin;
 
+#include "../../Universal_System/var4.h"
 #include "../../Universal_System/CallbackArrays.h"
 #include "../../Universal_System/roomsystem.h"
 

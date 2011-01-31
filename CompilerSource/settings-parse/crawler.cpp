@@ -129,8 +129,7 @@ namespace extensions
         cout << "Opened.\n";
         ey_data dat = parse_eyaml(ext,ef);
         eyit hasname = dat.values.find("represents");
-        if (hasname == dat.values.end())
-        {
+        if (hasname == dat.values.end()) {
           cout << "Skipping invalid operating system under `" << ef << "': File does not specify an OS it represents.";
           continue;
         }

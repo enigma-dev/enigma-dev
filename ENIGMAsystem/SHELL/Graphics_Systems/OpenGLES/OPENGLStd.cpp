@@ -33,6 +33,7 @@
 #include <string>
 #include "OpenGLHeaders.h"
 using namespace std;
+#include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h" // Room dimensions.
 
 namespace enigma

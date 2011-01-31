@@ -60,7 +60,7 @@ void parse_ide_settings(const char* eyaml)
   it = settree.find("target-" #x); \
   if (it == settree.end()) { \
      user << "ERROR! IDE has not specified a target " #x " " #y "!" << flushl; \
-     extensions::targetAPI.v ## Sys = ""; \
+     extensions::targetAPI.v ## Sys = "None"; \
   } else  extensions::targetAPI.v ## Sys = eyscalar(it);
   
   // Get target's windowing api
@@ -71,6 +71,8 @@ void parse_ide_settings(const char* eyaml)
   ey_cp(audio,     audio,system)
   // Get requested collision system
   ey_cp(collision, collision,system)
+  // Get requested widget system
+  ey_cp(widget,    widget,system)
   // Get requested networking library
   ey_cp(network,   networking,library)
   
@@ -103,6 +105,7 @@ void parse_ide_settings(const char* eyaml)
   }
   
   eygl(Graphics_Systems, graphics);
+  eygl(Widget_Systems, widget);
   eygl(Audio_Systems, audio);
 }
 

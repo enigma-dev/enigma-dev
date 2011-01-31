@@ -71,9 +71,10 @@ build:
 	cd Universal_System/               && $(MAKE) $(GMODE) MODE=$(GMODE) GFLAGS="$(GFLAGS)" ECFLAGS="$(ECFLAGS)" ECPPFLAGS="$(ECPPFLAGS)"
 	cd Audio_Systems/$(AUDIO)/         && $(MAKE) $(GMODE) MODE=$(GMODE) GFLAGS="$(GFLAGS)" ECFLAGS="$(ECFLAGS)" ECPPFLAGS="$(ECPPFLAGS)"
 	cd Collision_Systems/$(COLLISION)/ && $(MAKE) $(GMODE) MODE=$(GMODE) GFLAGS="$(GFLAGS)" ECFLAGS="$(ECFLAGS)" ECPPFLAGS="$(ECPPFLAGS)"
+	cd Widget_Systems/$(WIDGETS)/      && $(MAKE) $(GMODE) MODE=$(GMODE) GFLAGS="$(GFLAGS)" ECFLAGS="$(ECFLAGS)" ECPPFLAGS="$(ECPPFLAGS)"
 
 link: needout
-	g++ SHELLmain.cpp libEGMstd.cpp Graphics_Systems/$(GRAPHICS)/.eobjs_$(GMODE)/*.o Platforms/$(PLATFORM)/.eobjs_$(GMODE)/*.o Universal_System/.eobjs_$(GMODE)/*.o Audio_Systems/$(AUDIO)/.eobjs_$(GMODE)/*.o Collision_Systems/$(COLLISION)/.eobjs_$(GMODE)/*.o Audio_Systems/$(AUDIO)/.eobjs_$(GMODE)/*.a Audio_Systems/$(AUDIO)/.eobjs_$(GMODE)/libogg.a $(GLINKS) -o $(OUTPUTNAME)
+	g++ SHELLmain.cpp libEGMstd.cpp Graphics_Systems/$(GRAPHICS)/.eobjs_$(GMODE)/*.o Platforms/$(PLATFORM)/.eobjs_$(GMODE)/*.o Universal_System/.eobjs_$(GMODE)/*.o Audio_Systems/$(AUDIO)/.eobjs_$(GMODE)/*.o Collision_Systems/$(COLLISION)/.eobjs_$(GMODE)/*.o Audio_Systems/$(AUDIO)/.eobjs_$(GMODE)/*.a Audio_Systems/$(AUDIO)/.eobjs_$(GMODE)/libogg.a Widget_Systems/$(WIDGETS)/.eobjs_$(GMODE)/*.o $(GLINKS) -o $(OUTPUTNAME)
 	@echo Built to "$(OUTPUTNAME)"
 
 clean:

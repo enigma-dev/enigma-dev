@@ -29,9 +29,10 @@
 #include <windows.h>
 using namespace std;
 
-extern int room_width,room_height,view_enabled,view_visible[8],
-           view_xview[8],view_yview[8],view_wview[8],view_hview[8],
-           view_xport[8],view_yport[8],view_wport[8],view_hport[8];
+extern int room_width,room_height,view_enabled,
+extern var view_visible,
+           view_xview,view_yview,view_wview,view_hview,
+           view_xport,view_yport,view_wport,view_hport;
 
 namespace enigma
 {

@@ -58,20 +58,8 @@ int background_showcolor=1;
 int view_angle   = 0;
 int view_current = 0;
 int view_enabled = 0;
-int view_hborder[9] = {0,0,0,0,0,0,0,0};
-int view_hport[9]   = {0,0,0,0,0,0,0,0};
-int view_hspeed[9]  = {0,0,0,0,0,0,0,0};
-int view_hview[9]   = {0,0,0,0,0,0,0,0};
-int view_object[9]  = {0,0,0,0,0,0,0,0};
-int view_vborder[9] = {0,0,0,0,0,0,0,0};
-int view_visible[9] = {0,0,0,0,0,0,0,0};
-int view_vspeed[9]  = {0,0,0,0,0,0,0,0};
-int view_wport[9]   = {0,0,0,0,0,0,0,0};
-int view_wview[9]   = {0,0,0,0,0,0,0,0};
-int view_xport[9]   = {0,0,0,0,0,0,0,0};
-int view_xview[9]   = {0,0,0,0,0,0,0,0};
-int view_yport[9]   = {0,0,0,0,0,0,0,0};
-int view_yview[9]   = {0,0,0,0,0,0,0,0};
+var view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
+    view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview;
 
 namespace enigma
 {

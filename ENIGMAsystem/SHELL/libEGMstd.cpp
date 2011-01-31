@@ -41,4 +41,11 @@ string toString(char* n)          { return string(n); }
 string toString(float n)          { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
 string toString(double n)         { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
 
+string toString()                                        { return string ();     }
+string toString(const string& str)                       { return string (str);  }
+string toString(const string& str, size_t pos, size_t n) { return string (str, pos, n); }
+string toString(const char *s, size_t n)                 { return string (s, n); }
+string toString(const char *s)                           { return string (s);    }
+string toString(size_t n, char c)                        { return string (n, c); }
+
 void show_error(string, const bool);

@@ -334,6 +334,7 @@ int draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,doub
 
 #include <string>
 using std::string;
+#include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h"
 
 int draw_sprite_tiled(int spr,int subimg,double x,double y)
@@ -358,8 +359,8 @@ int draw_sprite_tiled(int spr,int subimg,double x,double y)
       tbx  = spr2d->texbordx,  tby  = spr2d->texbordy,
       xoff = spr2d->xoffset+x, yoff = spr2d->yoffset+y;
     const int
-      hortil = int (ceil(   (view_enabled ? view_xview[view_current] + view_wview[view_current] : room_width)    / (spr2d->width*tbx))),
-      vertil = int (ceil(   (view_enabled ? view_yview[view_current] + view_hview[view_current] : room_height)   / (spr2d->height*tby)));
+      hortil = int (ceil(   (view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width)    / (spr2d->width*tbx))),
+      vertil = int (ceil(   (view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height)   / (spr2d->height*tby)));
     
     glBegin(GL_QUADS);
     for (int i=0; i<hortil; i++)
@@ -404,8 +405,8 @@ int draw_sprite_tiled_ext(int spr,int subimg,double x,double y, double xscale,do
       tbx  = spr2d->texbordx,         tby  = spr2d->texbordy,
       xoff = spr2d->xoffset*xscale+x, yoff = spr2d->yoffset*yscale+y;
     const int
-      hortil= int (ceil(   (view_enabled ? view_xview[view_current] + view_wview[view_current] : room_width)    / (spr2d->width*tbx*xscale))),
-      vertil= int (ceil(   (view_enabled ? view_yview[view_current] + view_hview[view_current] : room_height)   / (spr2d->height*tby*yscale)));
+      hortil= int (ceil(   (view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width)    / (spr2d->width*tbx*xscale))),
+      vertil= int (ceil(   (view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height)   / (spr2d->height*tby*yscale)));
     
     glBegin(GL_QUADS);
     for (int i=0; i<hortil; i++)

@@ -381,11 +381,12 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   string gflags = "-s -O3";
   string make = "Game ";
   
-  string glinks   = extensions::targetAPI.windowLinks;
-    glinks += " " + extensions::targetAPI.graphicsLinks;
-    glinks += " " + extensions::targetAPI.audioLinks;
-    glinks += " " + extensions::targetAPI.collisionLinks;
-    glinks += " " + extensions::targetAPI.networkLinks;
+  string glinks = extensions::targetAPI.windowLinks;
+    if (extensions::targetAPI.graphicsLinks  != "") glinks += " " + extensions::targetAPI.graphicsLinks;
+    if (extensions::targetAPI.audioLinks     != "") glinks += " " + extensions::targetAPI.audioLinks;
+    if (extensions::targetAPI.widgetLinks    != "") glinks += " " + extensions::targetAPI.widgetLinks;
+    if (extensions::targetAPI.collisionLinks != "") glinks += " " + extensions::targetAPI.collisionLinks;
+    if (extensions::targetAPI.networkLinks   != "") glinks += " " + extensions::targetAPI.networkLinks;
   
   make += "GMODE=Run ";
   make += "GFLAGS=\"" + gflags + "\" ";
@@ -393,6 +394,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
   make += "GLINKS=\"" + (TOPLEVEL_links == ""? "" : TOPLEVEL_links + " ") + glinks + "\" ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
+  make += "WIDGETS="  + extensions::targetAPI.widgetSys + " ";
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
   
   string mfgfn = gameFname; 

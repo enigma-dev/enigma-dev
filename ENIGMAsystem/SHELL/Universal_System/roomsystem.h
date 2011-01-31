@@ -51,20 +51,8 @@ int room_count();
 extern int view_angle;
 extern int view_current;
 extern int view_enabled;
-extern int view_hborder[9];
-extern int view_hport[9];
-extern int view_hspeed[9];
-extern int view_hview[9];
-extern int view_object[9];
-extern int view_vborder[9];
-extern int view_visible[9];
-extern int view_vspeed[9];
-extern int view_wport[9];
-extern int view_wview[9];
-extern int view_xport[9];
-extern int view_xview[9];
-extern int view_yport[9];
-extern int view_yview[9];
+extern var view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible, 
+           view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview;
 
 namespace enigma
 {

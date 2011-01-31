@@ -35,6 +35,7 @@ using std::string;
 #include "resinit.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../Audio_Systems/audio_mandatory.h"
+#include "../Widget_Systems/widgets_mandatory.h"
 #include "../Graphics_Systems/graphics_mandatory.h"
 #include "roomsystem.h"
 
@@ -64,6 +65,7 @@ namespace enigma
     input_initialize();
     sprites_init();
     //backgrounds_init();
+    widget_system_initialize();
     
     // Open the exe for resource load
     char exename[1025];
