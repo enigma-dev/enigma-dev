@@ -139,7 +139,7 @@ double string_width(char* text)
     double length = 0;
     
     for( ; *p; ++p)
-       length += enigma::currentFont->metrics[*p].gmfCellIncX;
+       length += enigma::currentFont->metrics[(int)(unsigned char)*p].gmfCellIncX;
     
     return length;
 }
@@ -150,7 +150,7 @@ double string_height(char* text)
     double height = 0;
     
     for( ; *p; ++p) {
-       double newHeight = enigma::currentFont->metrics[*p].gmfCellIncY;
+       double newHeight = enigma::currentFont->metrics[(int)(unsigned char)*p].gmfCellIncY;
 
        if(newHeight > height)
 	       height = newHeight;

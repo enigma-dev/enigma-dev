@@ -386,6 +386,7 @@ bool e_use_existing_install(const char* make,const char *binpath, const char *au
             "Name: GNU GCC G++\n"
             "Native: Yes\n"
             "Maintainer: Josh / ENIGMA.exe #This is a generated file\n"
+            "Target-platform: Windows\n"
             "\n"
             "# Some info about it\n"
             "path: %s\n"
