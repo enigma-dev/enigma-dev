@@ -31,7 +31,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
-import javax.swing.SwingUtilities;
 
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.file.GmFormatException;
@@ -81,20 +80,16 @@ public class EnigmaUpdater
 				ef.ta.append("Downloading libraries. This may take a while.\n");
 				ef.setVisible(true);
 
+				final File me = getThisFile();
 				svn.checkout(repo,new ISVNEventHandler()
 					{
 						@Override
 						public void handleEvent(SVNEvent event, double progress) throws SVNException
 							{
-							if (event.getAction() != SVNEventAction.UPDATE_ADD) return;
-							ef.ta.append("Added " + event.getFile() + "\n");
-							SwingUtilities.invokeLater(new Thread()
-								{
-									public void run()
-										{
-										ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
-										}
-								});
+							if (event.getFile().equals(LGM.workDir) || event.getFile().equals(me))
+								needsRestart = true;
+							ef.ta.append(event.getAction() + " " + event.getFile() + "\n");
+							ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
 							}
 
 						@Override
@@ -254,19 +249,23 @@ public class EnigmaUpdater
 		System.out.println("Checked out " + r);
 		}
 
-	private void listenForChangesRequiringRestart(SVNBasicClient cli)
+	private static File getThisFile()
 		{
-		File fme = null;
 		try
 			{
-			fme = new File(EnigmaRunner.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			return new File(
+					EnigmaRunner.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 			}
 		catch (Exception e)
 			{
 			e.printStackTrace();
 			}
-		final File me = fme;
+		return null;
+		}
 
+	private void listenForChangesRequiringRestart(SVNBasicClient cli)
+		{
+		final File me = getThisFile();
 		cli.setEventHandler(new ISVNEventHandler()
 			{
 				@Override
@@ -291,7 +290,6 @@ public class EnigmaUpdater
 		SVNWCClient wcc = cliMan.getWCClient();
 		listenForChangesRequiringRestart(wcc);
 		wcc.doCleanup(path);
-		System.out.println("Cleaned up");
 		}
 
 	private void revert() throws SVNException
