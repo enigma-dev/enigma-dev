@@ -251,8 +251,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 
 		//Set up listeners, waitFor, finish successfully
-		System.out.println("Calling `make`");
-		ef.ta.append("Calling `make`");
+		System.out.println("Calling `" + make + " eTCpath=\"" + path + "\"" + "`");
+		ef.ta.append("Calling `" + make + " eTCpath=\"" + path + "\"" + "`");
 		new EnigmaThread(ef,p.getInputStream());
 		new EnigmaThread(ef,p.getErrorStream());
 		ef.setVisible(true);

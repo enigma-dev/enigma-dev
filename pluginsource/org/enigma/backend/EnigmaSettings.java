@@ -273,7 +273,8 @@ public class EnigmaSettings
 				+ "target-graphics: " + (targetGraphics == null ? "" : targetGraphics.id) + "\n"//
 				+ "target-audio: " + (targetAudio == null ? "" : targetAudio.id) + "\n"//
 				+ "target-collision: " + (targetCollision == null ? "" : targetCollision.id) + "\n"//
-				+ "target-networking: " + "" + "\n";//
+				+ "target-widget: " + "None" + "\n"//
+				+ "target-networking: " + "None" + "\n";//
 		}
 
 	public SyntaxError commitToDriver()
