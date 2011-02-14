@@ -22,9 +22,9 @@ import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 
 import org.enigma.EnigmaFrame;
+import org.enigma.EnigmaRunner;
 import org.enigma.Pump;
 import org.enigma.backend.util.Image;
-import org.lateralgm.main.LGM;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Pointer;
@@ -239,7 +239,7 @@ public class EnigmaCallbacks extends Structure
 
 			try
 				{
-				final Process pr = Runtime.getRuntime().exec(cmd,envp,LGM.workDir.getParentFile());
+				final Process pr = Runtime.getRuntime().exec(cmd,envp,EnigmaRunner.WORKDIR);
 				InputStream in = pr.getInputStream();
 				InputStream er = pr.getErrorStream();
 				if (redir.equals(REDIR_IDE))

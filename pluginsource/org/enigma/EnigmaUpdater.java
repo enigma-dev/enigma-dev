@@ -133,7 +133,7 @@ public class EnigmaUpdater
 		{
 		if (path == null)
 			{
-			path = LGM.workDir.getParentFile();
+			path = EnigmaRunner.WORKDIR;
 			if (SUBFOLDER) path = new File(path,"enigma");
 			}
 

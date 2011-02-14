@@ -23,7 +23,6 @@ import org.enigma.EYamlParser;
 import org.enigma.EnigmaRunner;
 import org.enigma.EYamlParser.YamlNode;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
-import org.lateralgm.main.LGM;
 
 public class EnigmaSettings
 	{
@@ -70,7 +69,7 @@ public class EnigmaSettings
 		{
 		ArrayList<TargetSelection> targets = new ArrayList<TargetSelection>();
 
-		File f = new File(LGM.workDir.getParentFile(),"ENIGMAsystem");
+		File f = new File(EnigmaRunner.WORKDIR,"ENIGMAsystem");
 		f = new File(f,"SHELL");
 		f = new File(f,target);
 		File files[] = f.listFiles();
@@ -227,12 +226,12 @@ public class EnigmaSettings
 
 	void loadDefinitions()
 		{
-		definitions = fileToString(new File(LGM.workDir.getParentFile(),"definitions.h"));
+		definitions = fileToString(new File(EnigmaRunner.WORKDIR,"definitions.h"));
 		}
 
 	public void saveDefinitions()
 		{
-		writeString(new File(LGM.workDir.getParentFile(),"definitions.h"),definitions);
+		writeString(new File(EnigmaRunner.WORKDIR,"definitions.h"),definitions);
 		}
 
 	String fileToString(File f)

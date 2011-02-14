@@ -95,6 +95,14 @@ import com.sun.jna.StringArray;
 public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListener
 	{
 	public static final String ENIGMA = "compileEGMf.exe";
+	public static boolean ENIGMA_READY = false, ENIGMA_FAIL = false, SHUTDOWN = false;
+	public static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2;
+	public static final int MODE_COMPILE = 3, MODE_REBUILD = 4;
+	public static final File WORKDIR = LGM.workDir.getParentFile();
+
+	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
+	public static EnigmaDriver DRIVER;
+
 	public EnigmaFrame ef = new EnigmaFrame();
 	/** This is global scoped so that it doesn't get GC'd */
 	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
@@ -102,13 +110,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public EnigmaSettingsFrame esf;
 	public JMenuItem run, debug, design, compile, rebuild;
 	public JMenuItem showFunctions, showGlobals, showTypes;
-	public static EnigmaDriver DRIVER;
-	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
-	public static boolean ENIGMA_READY = false, ENIGMA_FAIL = false, SHUTDOWN = false;
 	public final EnigmaNode node = new EnigmaNode();
-
-	static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2;
-	static final int MODE_COMPILE = 3, MODE_REBUILD = 4;
 
 	public EnigmaRunner()
 		{
