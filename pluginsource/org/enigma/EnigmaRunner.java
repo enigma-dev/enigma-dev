@@ -133,8 +133,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				public void run()
 					{
 					//Disable updates by removing plugins/shared/svnkit.jar (e.g. linux packages)
-					boolean rebuild = Preferences.userRoot().node("/org/enigma").getBoolean("NEEDS_REBUILD",
-							false);
+					Preferences root = Preferences.userRoot().node("/org/enigma");
+					boolean rebuild = root.getBoolean("NEEDS_REBUILD",false);
+					root.putBoolean("NEEDS_REBUILD",false);
 					int updates = attemptUpdate(); //displays own error
 					if (updates == -1)
 						{
@@ -380,7 +381,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				Preferences.userRoot().node("/org/enigma").putBoolean("NEEDS_REBUILD",true);
 				JOptionPane.showMessageDialog(null,
 						"Update completed. The program will need to be restarted to complete the process.");
-				System.exit(0);
+				System.exit(120); //exit code 120 lets our launcher know to restart us.
 				}
 			return up;
 			}

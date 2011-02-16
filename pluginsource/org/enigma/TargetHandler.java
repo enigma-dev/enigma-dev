@@ -13,10 +13,47 @@ import org.enigma.EYamlParser.YamlNode;
 public class TargetHandler
 	{
 	public TargetSelection targetPlatform, targetGraphics, targetAudio, targetCollision;
-	static final List<TargetSelection> tPlatforms, tGraphics, tAudios, tCollisions;
+	static List<TargetSelection> tCompilers, tPlatforms, tGraphics, tAudios, tCollisions;
 
 	static
 		{
+		tPlatforms = findTargets("Platforms");
+		tGraphics = findTargets("Graphics_Systems");
+		tAudios = findTargets("Audio_Systems");
+		tCollisions = findTargets("Collision_Systems");
+		}
+
+	public TargetHandler()
+		{
+		tCompilers = new ArrayList<TargetSelection>();
+		File f = new File(EnigmaRunner.WORKDIR,"Compilers");
+		File[] files = new File(f,getOS()).listFiles();
+		if (files != null)
+			{
+			for (File file : files)
+				{
+				String ey = file.getName();
+				if (ey.endsWith(".ey"))
+					{
+					try
+						{
+						YamlNode node = EYamlParser.parse(new Scanner(file));
+
+						TargetSelection ps = new TargetSelection();
+						ps.id = ey.substring(0,ey.length() - 3);
+						ps.name = node.getMC("Name");
+						ps.desc = node.getMC("Description",null);
+						ps.auth = node.getMC("Maintainer",null);
+
+						tCompilers.add(ps);
+						}
+					catch (FileNotFoundException e)
+						{
+						}
+					}
+				}
+			}
+
 		tPlatforms = findTargets("Platforms");
 		tGraphics = findTargets("Graphics_Systems");
 		tAudios = findTargets("Audio_Systems");
