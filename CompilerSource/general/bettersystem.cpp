@@ -55,7 +55,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
   pt spos = pos;
   qed = false;
   string ret;
-  
+
   if (source[pos] == '"' and (qed = true))
   { DoubleQuoteInBlock:
     while (source[++pos] and source[pos] != '"')
@@ -83,35 +83,35 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
       }
     ret = string(source + spos, pos - spos);
   }
-  
+
   while (is_useless(source[pos])) pos++;
-  
+
   return ret;
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
     #include <windows.h>
-	  
+
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
       while (is_useless(*fcmd))
         fcmd++;
       if (!*fcmd)
         return 0;
-      
+
       DWORD result;
       bool qued; pt pos = 0;
       string ename = cutout_block(fcmd, pos, qued);
       if (ename == "")
         return 0;
-      
+
       string parameters = ename, redirout, redirerr;
-      
+
       while (fcmd[pos])
       {
         int redirchr = 0;
         string pcur = cutout_block(fcmd, pos, qued);
-        
+
         if (!redirchr and !qued and
         (  ((pcur[0] == '>' or pcur.substr(0,2) == "1>") and (redirchr = 1))
         or ((pcur.substr(0,2) == "2>") and (redirchr = 2))
@@ -131,21 +131,21 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           parameters += " " + pcur;
         }
       }
-      
-      
+
+
       STARTUPINFO StartupInfo;
       PROCESS_INFORMATION ProcessInformation;
-      
+
       ZeroMemory(&StartupInfo, sizeof(StartupInfo));
       StartupInfo.cb = sizeof(StartupInfo);
-      
+
       ZeroMemory(&ProcessInformation, sizeof(ProcessInformation));
-      
+
       SECURITY_ATTRIBUTES inheritibility;
           inheritibility.nLength = sizeof(inheritibility);
           inheritibility.lpSecurityDescriptor = NULL;
           inheritibility.bInheritHandle = TRUE;
-      
+
       // Output redirection
       HANDLE handleout = NULL, handleerr = NULL;
       if (redirout != "" or redirerr != "")
@@ -156,7 +156,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           handleerr = handleout;
         else
           handleerr = CreateFile(redirerr.c_str(), FILE_WRITE_DATA, FILE_SHARE_READ|FILE_SHARE_WRITE, &inheritibility, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-        
+
         if (handleout or handleerr)
         {
           StartupInfo.dwFlags = STARTF_USESTDHANDLES;
@@ -181,7 +181,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           }
         }
       }
-      
+
       void* Cenviron_use = NULL;
       string Cenviron_flat;
       if (Cenviron)
@@ -192,7 +192,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
         Cenviron_flat.append(1,0);
         Cenviron_use = (void*)Cenviron_flat.c_str();
       }
-      
+
       printf("\n\n********* EXECUTE:\n%s\n\n",parameters.c_str());
       if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
@@ -207,7 +207,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
       }
       return (int)result;
     }
-    
+
     int e_execp(const char* cmd, string path)
     {
       path.insert(0, "PATH=");
@@ -216,13 +216,19 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
       return e_exec(cmd, eCenviron);
     }
 #else
-    #include <fcntl.h> 
+    #include <fcntl.h>
     #include <unistd.h>
     #include <sys/wait.h>
     #include <sys/stat.h>
-    
+
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    
+
+#if CURRENT_PLATFORM_ID ==  OS_MACOSX
+    #include <crt_externs.h>
+    #define environ (*_NSGetEnviron())
+    extern char **environ;
+#endif
+
     void path_coerce(string &ename)
     {
       char* a = getenv("PATH");
@@ -230,7 +236,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
       char* b = (char*)malloc(len);
       memcpy(b,a,len);
       a = b;
-      
+
       struct stat st;
       for (char* c = b; *b; b++) if (*b == ':')
       {
@@ -245,29 +251,29 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
       }
       free(a);
     }
-    
+
     int e_exec(const char* fcmd, const char* *Cenviron)
     {
       while (is_useless(*fcmd))
         fcmd++;
       if (!*fcmd)
         return 0;
-      
+
       bool qued; pt pos = 0;
       string ename = cutout_block(fcmd, pos, qued);
       if (ename == "")
         return 0;
       path_coerce(ename);
-      
+
       string redirout, redirerr; int argc = 0, argcmax = 16;
       char* *argv = (char**)malloc(sizeof(char*) * (argcmax+1));
       argv[0] = (char*)ename.c_str(); argc = 1;
-      
+
       while (fcmd[pos])
       {
         int redirchr = 0;
         string pcur = cutout_block(fcmd, pos, qued);
-        
+
         if (!redirchr and !qued and
         (  ((pcur[0] == '>' or pcur.substr(0,2) == "1>") and (redirchr = 1))
         or ((pcur.substr(0,2) == "2>") and (redirchr = 2))
@@ -294,15 +300,15 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           argv[argc++] = np;
         }
       }
-      
+
       // Cap our parameters
       argv[argc] = NULL;
-      
+
       printf("\n\n*********** EXECUTE \n");
       for (char **i = argv; *i; i++)
         printf("  `%s`\n",*i);
       puts("\n\n");
-      
+
       int result = -1;
       pid_t fk = fork();
       if (!fk)
@@ -321,7 +327,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           if (redirerr == redirout)
             dup2(1,2);
         }
-        
+
         // Redirect STDERR
         if (redirerr == "") {
             int flags = fcntl(STDERR_FILENO, F_GETFD);
@@ -332,7 +338,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
         else if (redirerr != redirout)
           close(STDERR_FILENO),
           dup(creat(redirerr.c_str(),laxpermissions));
-        
+
         char** usenviron;
         if (Cenviron)
         {
@@ -346,18 +352,18 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           *dest = NULL;
         }
         else usenviron = environ;
-        
+
           execve(ename.c_str(), (char*const*)argv, (char*const*)usenviron);
         exit(-1);
       }
-      
+
       waitpid(fk,&result,0);
       for (char** i = argv+1; *i; i++)
         free(*i);
       free(argv);
       return WEXITSTATUS(result);
     }
-    
+
     int e_execp(const char* cmd, string path)
     {
       puts ("TRUE\n\n");
