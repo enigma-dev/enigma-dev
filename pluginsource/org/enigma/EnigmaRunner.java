@@ -780,8 +780,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public void reloadPerformed(boolean newRoot)
 		{
 		if (newRoot) populateTree();
-		es = new EnigmaSettings();
-		esf.setComponents(es);
+		if (ENIGMA_READY)
+			{
+			es = new EnigmaSettings();
+			esf.setComponents(es);
+			}
 		}
 
 	public ImageIcon findIcon(String loc)
