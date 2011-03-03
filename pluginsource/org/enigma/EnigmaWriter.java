@@ -798,8 +798,8 @@ public final class EnigmaWriter
 
 	public static String getActionsCode(ActionContainer ac)
 		{
-		String nl = System.getProperty("line.separator");
-		String code = "";
+		final String nl = System.getProperty("line.separator");
+		StringBuilder code = new StringBuilder();
 		for (Action act : ac.actions)
 			{
 			LibAction la = act.getLibAction();
@@ -819,25 +819,25 @@ public final class EnigmaWriter
 			switch (la.actionKind)
 				{
 				case Action.ACT_BEGIN:
-					code += "{";
+					code.append('{');
 					break;
 				case Action.ACT_CODE:
-					code += args.get(0).getVal() + nl;
+					code.append(args.get(0).getVal()).append(nl);
 					break;
 				case Action.ACT_ELSE:
-					code += "else ";
+					code.append("else ");
 					break;
 				case Action.ACT_END:
-					code += "}";
+					code.append('}');
 					break;
 				case Action.ACT_EXIT:
-					code += "exit ";
+					code.append("exit ");
 					break;
 				case Action.ACT_REPEAT:
-					code += "repeat (" + args.get(0).getVal() + ") ";
+					code.append("repeat (").append(args.get(0).getVal()).append(") ");
 					break;
 				case Action.ACT_VARIABLE:
-					code += args.get(0).getVal() + " = " + args.get(1).getVal() + nl;
+					code.append(args.get(0).getVal()).append(" = ").append(args.get(1).getVal()).append(nl);
 					break;
 				case Action.ACT_NORMAL:
 					{
@@ -863,34 +863,36 @@ public final class EnigmaWriter
 							continue;
 							}
 						if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
-							code += "with (other) {";
+							code.append("with (other) {");
 						else
-							code += "with (" + apto.get().getName() + ") {";
+							code.append("with (").append(apto.get().getName()).append(") {");
 						}
-					if (la.allowRelative) code += "argument_relative = " + act.isRelative() + nl;
-					if (la.question) code += "if ";
-					if (act.isNot()) code += "!";
+					if (la.question) code.append("if ");
+					if (act.isNot()) code.append('!');
+					if (la.allowRelative)
+						code.append("(argument_relative = ").append(act.isRelative()).append(", ");
 					if (la.question && la.execType == Action.EXEC_CODE)
-						code += "lib" + la.parentId + "_action" + la.id;
+						code.append("lib").append(la.parentId).append("_action").append(la.id);
 					else
-						code += la.execInfo;
+						code.append(la.execInfo);
 					if (la.execType == Action.EXEC_FUNCTION)
 						{
-						code += "(";
+						code.append('(');
 						for (int i = 0; i < args.size(); i++)
 							{
-							if (i != 0) code += ",";
-							code += toString(args.get(i));
+							if (i != 0) code.append(',');
+							code.append(toString(args.get(i)));
 							}
-						code += ")";
+						code.append(')');
 						}
-					code += nl;
-					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF) code += "}";
+					if (la.allowRelative) code.append(')');
+					code.append(nl);
+					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF) code.append('}');
 					}
 					break;
 				}
 			}
-		return code;
+		return code.toString();
 		}
 
 	public static String toString(Argument arg)
