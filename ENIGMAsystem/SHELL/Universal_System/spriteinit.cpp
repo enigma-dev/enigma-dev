@@ -39,7 +39,7 @@ namespace enigma
   void exe_loadsprs(FILE *exe)
   {
     int nullhere;
-    unsigned sprid, width, height;
+    unsigned sprid, width, height, bbt, bbb, bbl, bbr;
     int xorig, yorig;
     
     fread(&nullhere,4,1,exe);
@@ -62,11 +62,15 @@ namespace enigma
       fread(&height,4,1,exe);
       fread(&xorig, 4,1,exe);
       fread(&yorig, 4,1,exe);
+      fread(&bbt, 4,1,exe);
+      fread(&bbb, 4,1,exe);
+      fread(&bbl, 4,1,exe);
+      fread(&bbr, 4,1,exe);
       
       int subimages;
       fread(&subimages,4,1,exe); //co//ut << "Subimages: " << subimages << endl;
       
-      sprite_new_empty(sprid,subimages,width,height,xorig,yorig,1,0);
+      sprite_new_empty(sprid, subimages, width, height, xorig, yorig, bbt, bbb, bbl, bbr, 1,0);
       for (int ii=0;ii<subimages;ii++) 
       {
         int unpacked;

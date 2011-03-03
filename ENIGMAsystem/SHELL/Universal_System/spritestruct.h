@@ -54,7 +54,7 @@ namespace enigma
   void sprites_init();
   
   //Adds an empty sprite to the list
-  int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm);
+  int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm);
   
   //Adds a subimage to an existing sprite from the exe
   void sprite_set_subimage(int sprid, int imgindex, int x, int y, unsigned int w,unsigned int h,unsigned char*chunk);

@@ -92,24 +92,24 @@ namespace enigma
   }
   
   //Adds an empty sprite to the list
-  int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm)
+  int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm)
   {
     int fullwidth=nlpo2dc(w-1)+1,fullheight=nlpo2dc(h-1)+1;
     sprite *as = new sprite(subc);
     spritestructarray[sprid] = as;
     
-    as->id=sprid;
-    as->subcount=subc;
-    as->width=w;
-    as->height=h;
-    as->bbox_left=0;
-    as->bbox_top=0;
-    as->bbox_right=w;
-    as->bbox_bottom=h;
-    as->xoffset=x;
-    as->yoffset=y;
-    as->texbordx=(double)w/fullwidth;
-    as->texbordy=(double)h/fullheight;
+    as->id = sprid;
+    as->subcount = subc;
+    as->width  = w;
+    as->height = h;
+    as->bbox_bottom  = bbb;
+      as->bbox_left  = bbl;
+      as->bbox_top   = bbt;
+      as->bbox_right = bbr;
+    as->xoffset = x;
+    as->yoffset = y;
+    as->texbordx = (double)w/fullwidth;
+    as->texbordy = (double)h/fullheight;
     
     as->texturearray = new unsigned int[subc];
     as->colldata = new void*[subc];

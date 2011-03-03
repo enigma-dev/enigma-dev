@@ -91,6 +91,10 @@ int module_write_sprites(EnigmaStruct *es, FILE *gameModule)
     writei(sheight,gameModule); //height
     writei(es->sprites[i].originX,gameModule); //xorig
     writei(es->sprites[i].originY,gameModule); //yorig
+    writei(es->sprites[i].bbTop,gameModule);    //BBox Top
+    writei(es->sprites[i].bbBottom,gameModule); //BBox Bottom
+    writei(es->sprites[i].bbLeft,gameModule);   //BBox Left
+    writei(es->sprites[i].bbRight,gameModule);  //BBox Right
     
     writei(subCount,gameModule); //subimages
     
