@@ -147,6 +147,13 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         codo[bpos] = 'v', synt[bpos++] = '@';
         continue;
       }
+      if (name == "mod")
+      {
+        codo[bpos] = 'm', synt[bpos++] = '@';
+        codo[bpos] = 'o', synt[bpos++] = '@';
+        codo[bpos] = 'd', synt[bpos++] = '@';
+        continue;
+      }
       
       maciter itm = macros.find(name);
       if (itm != macros.end())
@@ -332,8 +339,6 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
   
   code.erase(bpos);
   synt.erase(bpos);
-  
-  //cout << code << endl << synt << endl << endl;
   return 0;
 }
 

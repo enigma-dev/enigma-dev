@@ -117,9 +117,9 @@ extern int amain();
 #endif
 
 #include "Universal_System/instance_system.h"
-#include "Universal_System/syntax_quirks.h"
 
 #ifndef ENIGMA_PARSER_RUN
+  #include "Universal_System/syntax_quirks.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
 #endif
 

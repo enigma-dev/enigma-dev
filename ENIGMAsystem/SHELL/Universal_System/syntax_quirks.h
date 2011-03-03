@@ -16,5 +16,5 @@ struct INTEGER_DIVISION
     int v;
     INTEGER_DIVISION(int a): v(a) {}
 };
-template<typename real>  int operator/ (real x, INTEGER_DIVISION y) { return x/y.v; }
+template<typename real>  int operator/ (real x, INTEGER_DIVISION y) { return int(x)/y.v; }
 #define div /(INTEGER_DIVISION)(int)
