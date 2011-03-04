@@ -35,7 +35,7 @@
 
 #include "../../Universal_System/planar_object.h"
 #include "../../Universal_System/mathnc.h"
-#include "spritestruct.h"
+#include "../../Universal_System/spritestruct.h"
 namespace enigma
 {
   struct object_graphics: object_planar
