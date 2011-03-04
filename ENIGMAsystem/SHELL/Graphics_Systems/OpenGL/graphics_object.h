@@ -59,7 +59,7 @@ namespace enigma
       int width()  { return (sprite_index >= 0 ? spritestructarray[sprite_index]->width  : 0); }
       int height() { return (sprite_index >= 0 ? spritestructarray[sprite_index]->height : 0); }
 
-      double bbox_left()
+      double calculate_bbox_left()
       {
         const l = -sprite_xoffset             * cosd(image_angle),
               t = -sprite_yoffset             * cosd(image_angle + 90.0),
@@ -69,7 +69,7 @@ namespace enigma
       }
 
       // NOTE: sind(x + 180.0) == -sind(x)
-      double bbox_top()
+      double calculate_bbox_top()
       {
         const l = -sprite_xoffset             * sind(image_angle + 90.0),
               t = -sprite_yoffset             * sind(image_angle + 180.0),
@@ -78,7 +78,7 @@ namespace enigma
         return min(min(l, r), min(t, b));
       }
 
-      double bbox_right()
+      double calculate_bbox_right()
       {
         const l = -sprite_xoffset             * cosd(image_angle + 180.0),
               t = -sprite_yoffset             * cosd(image_angle + 270.0),
@@ -88,7 +88,7 @@ namespace enigma
       }
 
       // NOTE: sind(x + 180.0) == -sind(x)
-      double bbox_bottom()
+      double calculate_bbox_bottom()
       {
         const l = -sprite_xoffset             * sind(image_angle + 270.0),
               t = -sprite_yoffset             * sind(image_angle),
