@@ -67,6 +67,19 @@ double arccos(double x);
 double arctan(double x);
 double arctan2(double y,double x);
 
+double sind(double x);
+double cosd(double x);
+double tand(double x);
+//double tand2(double x);
+double asind(double x);
+double acosd(double x);
+double atand(double x);
+double atand2(double y,double x);
+double arcsind(double x);
+double arccosd(double x);
+double arctand(double x);
+double arctand2(double y,double x);
+
 double min(double value1, double value2);
 double max(double value1, double value2);
 int sign(double x);

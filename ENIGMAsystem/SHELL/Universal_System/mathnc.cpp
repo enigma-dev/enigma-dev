@@ -59,6 +59,20 @@ double arcsin(double x)           { return asin(x);     }
 double arccos(double x)           { return acos(x);     }
 double arctan(double x)           { return atan(x);     }
 double arctan2(double y,double x) { return atan2(y,x);  }
+
+double sind(double x)              { return sin(x * M_PI / 180.0); }
+double cosd(double x)              { return cos(x * M_PI / 180.0); }
+double tand(double x)              { return tan(x * M_PI / 180.0); }
+//double tand2(double y,double x);
+double asind(double x)             { return asin(x)    * 180.0 / M_PI; }
+double acosd(double x)             { return acos(x)    * 180.0 / M_PI; }
+double atand(double x)             { return atan(x)    * 180.0 / M_PI; }
+double atand2(double y,double x)   { return atan2(y,x) * 180.0 / M_PI; }
+double arcsind(double x)           { return asin(x)    * 180.0 / M_PI; }
+double arccosd(double x)           { return acos(x)    * 180.0 / M_PI; }
+double arctand(double x)           { return atan(x)    * 180.0 / M_PI; }
+double arctand2(double y,double x) { return atan2(y,x) * 180.0 / M_PI; }
+
 double min(double x,double y)     { return fmin(x,y);   }
 double max(double x,double y)     { return fmax(x,y);   }
 int sign(double x)                { return (x>0)-(x<0); }
@@ -68,8 +82,8 @@ double frac(double x)             { return x-(int)x;    }
 double degtorad(double x)         { return x*(M_PI/180.0);}
 double radtodeg(double x)         { return x*(180.0/M_PI);}
 
-double lengthdir_x(double len,double dir) { return len *  cos(dir*M_PI/180); }
-double lengthdir_y(double len,double dir) { return len * -sin(dir*M_PI/180); }
+double lengthdir_x(double len,double dir) { return len *  cosd(dir); }
+double lengthdir_y(double len,double dir) { return len * -sind(dir); }
 
 double lerp(double x, double y, double a) { return x + ((y-x)*a); }
 
