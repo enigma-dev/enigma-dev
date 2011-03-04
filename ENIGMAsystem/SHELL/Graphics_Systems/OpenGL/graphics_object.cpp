@@ -37,32 +37,4 @@ namespace enigma
   object_graphics::object_graphics() {}
   object_graphics::object_graphics(unsigned x, int y): object_planar(x,y) {}
   object_graphics::~object_graphics() {};
-
-  int object_graphics::bbox_left()
-  {
-    const l = -sprite_xoffset             * cosd(image_angle),
-          t = -sprite_yoffset             * cosd(image_angle + 270),
-          r = (width()  - sprite_xoffset) * cosd(image_angle + 180),
-          b = (height() - sprite_xoffset) * cosd(image_angle + 90);
-    return max(max(l, r), max(t, b));
-  }
-
-  int object_graphics::bbox_top()
-  {
-    const l = -sprite_xoffset             * sind(image_angle),
-          t = -sprite_yoffset             * cosd(image_angle + 270),
-          r = (width()  - sprite_xoffset) * cosd(image_angle + 180),
-          b = (height() - sprite_xoffset) * cosd(image_angle + 90);
-    return max(max(l, r), max(t, b));
-  }
-
-  int object_graphics::bbox_right()
-  {
-    const c = cosd(image_angle);
-  }
-
-  int object_graphics::bbox_bottom()
-  {
-    const s = sind(image_angle);
-  }
 }
