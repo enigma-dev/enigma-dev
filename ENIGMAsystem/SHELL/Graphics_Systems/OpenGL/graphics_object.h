@@ -61,39 +61,39 @@ namespace enigma
 
       double calculate_bbox_left()
       {
-        const l = -sprite_xoffset             * cosd(image_angle),
-              t = -sprite_yoffset             * cosd(image_angle + 90.0),
-              r = (width()  - sprite_xoffset) * cosd(image_angle + 180.0),
-              b = (height() - sprite_xoffset) * cosd(image_angle + 270.0);
+        const double l = -sprite_xoffset             * cosd(image_angle),
+                     t = -sprite_yoffset             * cosd(image_angle + 90.0),
+                     r = (width()  - sprite_xoffset) * cosd(image_angle + 180.0),
+                     b = (height() - sprite_xoffset) * cosd(image_angle + 270.0);
         return min(min(l, r), min(t, b));
       }
 
       // NOTE: sind(x + 180.0) == -sind(x)
       double calculate_bbox_top()
       {
-        const l = -sprite_xoffset             * sind(image_angle + 90.0),
-              t = -sprite_yoffset             * sind(image_angle + 180.0),
-              r = (width()  - sprite_xoffset) * sind(image_angle + 270.0),
-              b = (height() - sprite_xoffset) * sind(image_angle);
+        const double l = -sprite_xoffset             * sind(image_angle + 90.0),
+                     t = -sprite_yoffset             * sind(image_angle + 180.0),
+                     r = (width()  - sprite_xoffset) * sind(image_angle + 270.0),
+                     b = (height() - sprite_xoffset) * sind(image_angle);
         return min(min(l, r), min(t, b));
       }
 
       double calculate_bbox_right()
       {
-        const l = -sprite_xoffset             * cosd(image_angle + 180.0),
-              t = -sprite_yoffset             * cosd(image_angle + 270.0),
-              r = (width()  - sprite_xoffset) * cosd(image_angle),
-              b = (height() - sprite_xoffset) * cosd(image_angle + 90.0);
+        const double l = -sprite_xoffset             * cosd(image_angle + 180.0),
+                     t = -sprite_yoffset             * cosd(image_angle + 270.0),
+                     r = (width()  - sprite_xoffset) * cosd(image_angle),
+                     b = (height() - sprite_xoffset) * cosd(image_angle + 90.0);
         return max(max(l, r), max(t, b));
       }
 
       // NOTE: sind(x + 180.0) == -sind(x)
       double calculate_bbox_bottom()
       {
-        const l = -sprite_xoffset             * sind(image_angle + 270.0),
-              t = -sprite_yoffset             * sind(image_angle),
-              r = (width()  - sprite_xoffset) * sind(image_angle + 90.0),
-              b = (height() - sprite_xoffset) * sind(image_angle + 180.0);
+        const double l = -sprite_xoffset             * sind(image_angle + 270.0),
+                     t = -sprite_yoffset             * sind(image_angle),
+                     r = (width()  - sprite_xoffset) * sind(image_angle + 90.0),
+                     b = (height() - sprite_xoffset) * sind(image_angle + 180.0);
         return max(max(l, r), max(t, b));
       }
 
