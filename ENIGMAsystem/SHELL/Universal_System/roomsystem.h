@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "var4.h"
+
 int room_goto(int roomind);
 int room_restart();
 int room_goto_absolute(int index);
@@ -90,7 +92,7 @@ namespace enigma
 }
 
 // room variable
-#include "var4.h"
+
   #define TYPEPURPOSE roomv
   #define TYPEVARIABLES
     #include "multifunction_variant.h"
