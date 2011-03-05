@@ -24,6 +24,10 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+
+#ifndef ENIGMA_SPRITESTRUCT
+#define ENIGMA_SPRITESTRUCT
+
 #include <map>
 
 namespace enigma
@@ -33,12 +37,12 @@ namespace enigma
     int width,height,subcount,xoffset,yoffset,id;
     unsigned int *texturearray; //Each subimage has a texture
     void **colldata; // Each subimage has collision data
-    
+
     //void*  *pixeldata;
     double texbordx, texbordy;
     int bbox_bottom, bbox_left, bbox_right, bbox_top;
     bool where,smooth;
-    
+
     sprite();
     sprite(unsigned int);
   };
@@ -52,10 +56,10 @@ namespace enigma
 {
   //Allocates and zero-fills the array at game start
   void sprites_init();
-  
+
   //Adds an empty sprite to the list
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm);
-  
+
   //Adds a subimage to an existing sprite from the exe
   void sprite_set_subimage(int sprid, int imgindex, int x, int y, unsigned int w,unsigned int h,unsigned char*chunk);
 }
@@ -72,5 +76,5 @@ extern int sprite_get_texture(int sprite, int subimage);
 extern int sprite_get_xoffset(int sprite);
 extern int sprite_get_yoffset(int sprite);
 
-
+#endif // ENIGMA_SPRITESTRUCT
 
