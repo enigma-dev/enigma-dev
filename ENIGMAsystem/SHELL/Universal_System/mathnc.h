@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef ENIGMA_MATHNC
+#define ENIGMA_MATHNC
+
 //Before anyone else includes math.h, let's make sure we
 //Don't get bitten by those damn bessel functions.
 #define j0 bessel_j0
@@ -95,3 +98,5 @@ double lengthdir_y(double len,double dir);
 double direction_difference(double dir1,double dir2);
 double point_direction(double x1,double y1,double x2,double y2);
 double point_distance(double x1, double y1, double x2, double y2);
+
+#endif // ENIGMA_MATHNC
