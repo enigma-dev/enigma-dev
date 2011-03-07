@@ -28,9 +28,9 @@
 /*************************************************************
 GM Global variables
 ******************/
-/*
-global:     argument_relative
-global:     background_alpha
+
+bool argument_relative=false;
+/*global:     background_alpha
 global:     background_blend
 global:     background_foreground
 global:     background_height
