@@ -232,7 +232,7 @@ void screen_refresh() {
 
 namespace enigma
 {
-	char keymap[256];
+	char keymap[256]; /* WARNING: This is iphone version, will be used for onscreen mapping of buttons to keys */
 	void initkeymap()
 	{
 		keymap[0x51] = 37;  //vk_left;

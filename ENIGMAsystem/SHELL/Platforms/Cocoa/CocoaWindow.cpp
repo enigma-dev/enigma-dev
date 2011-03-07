@@ -181,7 +181,7 @@ void screen_refresh() {
 namespace enigma
 {	
 	char keymap[256];
-	void initkeymap()
+	void initkeymap() // To create this table print the values passed to keypress put it in the array indice and set the value to vk_whatever
 	{
 		keymap[0] = 65; //vk_A
 		keymap[0x01] = 83; //vk_S
@@ -269,6 +269,8 @@ namespace enigma
 		keymap[0x56] = 34;  //vk_pagedown;
 		keymap[0xFF] = 46;  //vk_delete; //no delete
 		keymap[0x63] = 45;  //vk_insert; //no ins
+        keymap[49] = 32; //vk_space
+        
 	}
 }
 

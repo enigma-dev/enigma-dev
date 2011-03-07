@@ -86,8 +86,9 @@ namespace enigma
           background_foreground[i] = backs[i].foreground;
           background_index[i] = backs[i].background;
           background_x[i] = backs[i].area_x; background_y[i] = backs[i].area_y;
-          background_hspeed = backs[i].horSpeed; background_vspeed = backs[i].verSpeed;
-          background_htiled = backs[i].tileHor; background_vtiled = backs[i].tileVert;
+          background_hspeed[i] = backs[i].horSpeed; background_vspeed[i] = backs[i].verSpeed;
+          background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
+         
           //background_stretch? = backs[i].stretch;
       
       }
