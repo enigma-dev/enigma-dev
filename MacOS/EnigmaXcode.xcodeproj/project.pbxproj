@@ -9,6 +9,29 @@
 /* Begin PBXBuildFile section */
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		9C0ACE2B13252E7300AB1FCD /* coll_funcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE1D13252E7300AB1FCD /* coll_funcs.cpp */; };
+		9C0ACE2C13252E7300AB1FCD /* coll_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE1F13252E7300AB1FCD /* coll_impl.cpp */; };
+		9C0ACE2D13252E7300AB1FCD /* coll_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE2113252E7300AB1FCD /* coll_util.cpp */; };
+		9C0ACE2F13252E7300AB1FCD /* placeholderlinks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE2513252E7300AB1FCD /* placeholderlinks.cpp */; };
+		9C0ACE3413252E7300AB1FCD /* About.ey in Resources */ = {isa = PBXBuildFile; fileRef = 9C0ACE1C13252E7300AB1FCD /* About.ey */; };
+		9C0ACE3513252E7300AB1FCD /* coll_funcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE1D13252E7300AB1FCD /* coll_funcs.cpp */; };
+		9C0ACE3613252E7300AB1FCD /* coll_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE1F13252E7300AB1FCD /* coll_impl.cpp */; };
+		9C0ACE3713252E7300AB1FCD /* coll_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE2113252E7300AB1FCD /* coll_util.cpp */; };
+		9C0ACE3913252E7300AB1FCD /* placeholderlinks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE2513252E7300AB1FCD /* placeholderlinks.cpp */; };
+		9C0ACE6A13252F3C00AB1FCD /* nowidget_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5C13252F3C00AB1FCD /* nowidget_impl.cpp */; };
+		9C0ACE6B13252F3C00AB1FCD /* About.ey in Resources */ = {isa = PBXBuildFile; fileRef = 9C0ACE4B13252F3C00AB1FCD /* About.ey */; };
+		9C0ACE6C13252F3C00AB1FCD /* automake.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9C0ACE4C13252F3C00AB1FCD /* automake.sh */; };
+		9C0ACE6D13252F3C00AB1FCD /* cocoa.ey in Resources */ = {isa = PBXBuildFile; fileRef = 9C0ACE4E13252F3C00AB1FCD /* cocoa.ey */; };
+		9C0ACE6E13252F3C00AB1FCD /* win32.ey in Resources */ = {isa = PBXBuildFile; fileRef = 9C0ACE4F13252F3C00AB1FCD /* win32.ey */; };
+		9C0ACE6F13252F3C00AB1FCD /* xlib.ey in Resources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5013252F3C00AB1FCD /* xlib.ey */; };
+		9C0ACE7013252F3C00AB1FCD /* dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5113252F3C00AB1FCD /* dialogs.cpp */; };
+		9C0ACE7113252F3C00AB1FCD /* gtk_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5313252F3C00AB1FCD /* gtk_impl.cpp */; };
+		9C0ACE7213252F3C00AB1FCD /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5413252F3C00AB1FCD /* Makefile */; };
+		9C0ACE7313252F3C00AB1FCD /* widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5513252F3C00AB1FCD /* widgets.cpp */; };
+		9C0ACE7513252F3C00AB1FCD /* About.ey in Resources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5A13252F3C00AB1FCD /* About.ey */; };
+		9C0ACE7613252F3C00AB1FCD /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5B13252F3C00AB1FCD /* Makefile */; };
+		9C0ACE7713252F3C00AB1FCD /* nowidget_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5C13252F3C00AB1FCD /* nowidget_impl.cpp */; };
+		9C0ACEBF13253B4600AB1FCD /* CocoaDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E36D1211960600A01347 /* CocoaDialog.cpp */; };
 		9C3829541215459C007B24C5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C3829531215459C007B24C5 /* CoreGraphics.framework */; };
 		9C382B231215685D007B24C5 /* iPhone-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9C382B221215685D007B24C5 /* iPhone-Info.plist */; };
 		9CAB7F1212245C1B00B1DAD6 /* GStextures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB7F0F12245C1B00B1DAD6 /* GStextures.cpp */; };
@@ -17,8 +40,6 @@
 		9CAB7F1812245C3700B1DAD6 /* backgroundinit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB7F1312245C3700B1DAD6 /* backgroundinit.cpp */; };
 		9CAB7F1912245C3700B1DAD6 /* backgroundstruct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB7F1412245C3700B1DAD6 /* backgroundstruct.cpp */; };
 		9CAB7F3912246A1C00B1DAD6 /* placeholderlinks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB7F3712246A1C00B1DAD6 /* placeholderlinks.cpp */; };
-		9CAB7F3A12246A1C00B1DAD6 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB7F3612246A1C00B1DAD6 /* Makefile */; };
-		9CAB7F3B12246A1C00B1DAD6 /* placeholderlinks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB7F3712246A1C00B1DAD6 /* placeholderlinks.cpp */; };
 		9CAB807012255FCD00B1DAD6 /* GStextures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB806E12255FCD00B1DAD6 /* GStextures.cpp */; };
 		9CAB80FA1225750F00B1DAD6 /* file_manip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB80F81225750F00B1DAD6 /* file_manip.cpp */; };
 		9CD0E2221211552700A01347 /* alure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E0781211552700A01347 /* alure.cpp */; };
@@ -107,7 +128,6 @@
 		9CD0E29C1211552800A01347 /* libEGMstd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1911211552700A01347 /* libEGMstd.cpp */; };
 		9CD0E2AF1211552800A01347 /* SHELLmain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1B71211552700A01347 /* SHELLmain.cpp */; };
 		9CD0E2B01211552800A01347 /* CallbackArrays.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1B91211552700A01347 /* CallbackArrays.cpp */; };
-		9CD0E2B11211552800A01347 /* collisions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1BB1211552700A01347 /* collisions.cpp */; };
 		9CD0E2B21211552800A01347 /* collisions_object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1BD1211552700A01347 /* collisions_object.cpp */; };
 		9CD0E2B31211552800A01347 /* compression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1BF1211552700A01347 /* compression.cpp */; };
 		9CD0E2B41211552800A01347 /* darray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1C11211552700A01347 /* darray.cpp */; };
@@ -222,7 +242,6 @@
 		9CEBA620121381B600FC1D14 /* libEGMstd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1911211552700A01347 /* libEGMstd.cpp */; };
 		9CEBA621121381B600FC1D14 /* SHELLmain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1B71211552700A01347 /* SHELLmain.cpp */; };
 		9CEBA622121381B600FC1D14 /* CallbackArrays.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1B91211552700A01347 /* CallbackArrays.cpp */; };
-		9CEBA623121381B600FC1D14 /* collisions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1BB1211552700A01347 /* collisions.cpp */; };
 		9CEBA624121381B600FC1D14 /* collisions_object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1BD1211552700A01347 /* collisions_object.cpp */; };
 		9CEBA625121381B600FC1D14 /* compression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1BF1211552700A01347 /* compression.cpp */; };
 		9CEBA626121381B600FC1D14 /* darray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E1C11211552700A01347 /* darray.cpp */; };
@@ -297,6 +316,35 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* EnigmaXcode-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "EnigmaXcode-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* EnigmaXcode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EnigmaXcode.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9C0ACE1C13252E7300AB1FCD /* About.ey */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = About.ey; sourceTree = "<group>"; };
+		9C0ACE1D13252E7300AB1FCD /* coll_funcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coll_funcs.cpp; sourceTree = "<group>"; };
+		9C0ACE1E13252E7300AB1FCD /* coll_funcs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coll_funcs.h; sourceTree = "<group>"; };
+		9C0ACE1F13252E7300AB1FCD /* coll_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coll_impl.cpp; sourceTree = "<group>"; };
+		9C0ACE2013252E7300AB1FCD /* coll_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coll_impl.h; sourceTree = "<group>"; };
+		9C0ACE2113252E7300AB1FCD /* coll_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coll_util.cpp; sourceTree = "<group>"; };
+		9C0ACE2213252E7300AB1FCD /* coll_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coll_util.h; sourceTree = "<group>"; };
+		9C0ACE2313252E7300AB1FCD /* include.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = include.h; sourceTree = "<group>"; };
+		9C0ACE2513252E7300AB1FCD /* placeholderlinks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = placeholderlinks.cpp; sourceTree = "<group>"; };
+		9C0ACE4B13252F3C00AB1FCD /* About.ey */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = About.ey; sourceTree = "<group>"; };
+		9C0ACE4C13252F3C00AB1FCD /* automake.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = automake.sh; sourceTree = "<group>"; };
+		9C0ACE4E13252F3C00AB1FCD /* cocoa.ey */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cocoa.ey; sourceTree = "<group>"; };
+		9C0ACE4F13252F3C00AB1FCD /* win32.ey */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = win32.ey; sourceTree = "<group>"; };
+		9C0ACE5013252F3C00AB1FCD /* xlib.ey */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = xlib.ey; sourceTree = "<group>"; };
+		9C0ACE5113252F3C00AB1FCD /* dialogs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dialogs.cpp; sourceTree = "<group>"; };
+		9C0ACE5213252F3C00AB1FCD /* dialogs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dialogs.h; sourceTree = "<group>"; };
+		9C0ACE5313252F3C00AB1FCD /* gtk_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gtk_impl.cpp; sourceTree = "<group>"; };
+		9C0ACE5413252F3C00AB1FCD /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		9C0ACE5513252F3C00AB1FCD /* widgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = widgets.cpp; sourceTree = "<group>"; };
+		9C0ACE5613252F3C00AB1FCD /* widgets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = widgets.h; sourceTree = "<group>"; };
+		9C0ACE5A13252F3C00AB1FCD /* About.ey */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = About.ey; sourceTree = "<group>"; };
+		9C0ACE5B13252F3C00AB1FCD /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		9C0ACE5C13252F3C00AB1FCD /* nowidget_impl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nowidget_impl.cpp; sourceTree = "<group>"; };
+		9C0ACE5D13252F3C00AB1FCD /* widgets_mandatory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = widgets_mandatory.h; sourceTree = "<group>"; };
+		9C0ACE891325314700AB1FCD /* IDE_EDIT_events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_events.h; sourceTree = "<group>"; };
+		9C0ACE8A1325314700AB1FCD /* IDE_EDIT_evparent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_evparent.h; sourceTree = "<group>"; };
+		9C0ACE8B1325314700AB1FCD /* IDE_EDIT_globals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_globals.h; sourceTree = "<group>"; };
+		9C0ACE8C1325314700AB1FCD /* IDE_EDIT_objectaccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_objectaccess.h; sourceTree = "<group>"; };
+		9C0ACE8D1325314700AB1FCD /* IDE_EDIT_whitespace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_whitespace.h; sourceTree = "<group>"; };
 		9C3829531215459C007B24C5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		9C382B221215685D007B24C5 /* iPhone-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "iPhone-Info.plist"; sourceTree = "<group>"; };
 		9C6FA5811213ABF300F930EA /* TestEnigmaIphone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = TestEnigmaIphone.app; path = build/Debug/TestEnigmaIphone.app; sourceTree = "<group>"; };
@@ -586,12 +634,9 @@
 		9CD0E1911211552700A01347 /* libEGMstd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = libEGMstd.cpp; sourceTree = "<group>"; };
 		9CD0E1921211552700A01347 /* libEGMstd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libEGMstd.h; sourceTree = "<group>"; };
 		9CD0E1951211552700A01347 /* buildmode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buildmode.h; sourceTree = "<group>"; };
-		9CD0E1B61211552700A01347 /* readme */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme; sourceTree = "<group>"; };
 		9CD0E1B71211552700A01347 /* SHELLmain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SHELLmain.cpp; sourceTree = "<group>"; };
 		9CD0E1B91211552700A01347 /* CallbackArrays.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CallbackArrays.cpp; sourceTree = "<group>"; };
 		9CD0E1BA1211552700A01347 /* CallbackArrays.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallbackArrays.h; sourceTree = "<group>"; };
-		9CD0E1BB1211552700A01347 /* collisions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = collisions.cpp; sourceTree = "<group>"; };
-		9CD0E1BC1211552700A01347 /* collisions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = collisions.h; sourceTree = "<group>"; };
 		9CD0E1BD1211552700A01347 /* collisions_object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = collisions_object.cpp; sourceTree = "<group>"; };
 		9CD0E1BE1211552700A01347 /* collisions_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = collisions_object.h; sourceTree = "<group>"; };
 		9CD0E1BF1211552700A01347 /* compression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = compression.cpp; sourceTree = "<group>"; };
@@ -671,16 +716,11 @@
 		9CD0E30112115C9B00A01347 /* IDE_EDIT_inherited_locals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_inherited_locals.h; sourceTree = "<group>"; };
 		9CD0E30212115C9B00A01347 /* IDE_EDIT_modesenabled.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_modesenabled.h; sourceTree = "<group>"; };
 		9CD0E30312115C9B00A01347 /* IDE_EDIT_object_switch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_object_switch.h; sourceTree = "<group>"; };
-		9CD0E30412115C9B00A01347 /* IDE_EDIT_objectdata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_objectdata.h; sourceTree = "<group>"; };
 		9CD0E30512115C9B00A01347 /* IDE_EDIT_objectdeclarations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_objectdeclarations.h; sourceTree = "<group>"; };
 		9CD0E30612115C9B00A01347 /* IDE_EDIT_objectfunctionality.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_objectfunctionality.h; sourceTree = "<group>"; };
 		9CD0E30712115C9B00A01347 /* IDE_EDIT_resourcenames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_resourcenames.h; sourceTree = "<group>"; };
 		9CD0E30812115C9B00A01347 /* IDE_EDIT_roomarrays.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_roomarrays.h; sourceTree = "<group>"; };
 		9CD0E30912115C9B00A01347 /* IDE_EDIT_roomcreates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_roomcreates.h; sourceTree = "<group>"; };
-		9CD0E30A12115C9B00A01347 /* IDE_EDIT_scriptdeclarations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_scriptdeclarations.h; sourceTree = "<group>"; };
-		9CD0E30B12115C9B00A01347 /* IDE_EDIT_wildclass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_wildclass.h; sourceTree = "<group>"; };
-		9CD0E30C12115C9B00A01347 /* IDE_EDIT_withdeclarations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_withdeclarations.h; sourceTree = "<group>"; };
-		9CD0E30D12115C9B00A01347 /* IDE_EDIT_withfunctionality.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_withfunctionality.h; sourceTree = "<group>"; };
 		9CD0E30E12115C9B00A01347 /* LIBINCLUDE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LIBINCLUDE.h; sourceTree = "<group>"; };
 		9CD0E30F12115C9B00A01347 /* readme */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme; sourceTree = "<group>"; };
 		9CD0E36D1211960600A01347 /* CocoaDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CocoaDialog.cpp; sourceTree = "<group>"; };
@@ -868,9 +908,73 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		9C0ACE1613252E7200AB1FCD /* BBox */ = {
+			isa = PBXGroup;
+			children = (
+				9C0ACE1C13252E7300AB1FCD /* About.ey */,
+				9C0ACE1D13252E7300AB1FCD /* coll_funcs.cpp */,
+				9C0ACE1E13252E7300AB1FCD /* coll_funcs.h */,
+				9C0ACE1F13252E7300AB1FCD /* coll_impl.cpp */,
+				9C0ACE2013252E7300AB1FCD /* coll_impl.h */,
+				9C0ACE2113252E7300AB1FCD /* coll_util.cpp */,
+				9C0ACE2213252E7300AB1FCD /* coll_util.h */,
+				9C0ACE2313252E7300AB1FCD /* include.h */,
+				9C0ACE2513252E7300AB1FCD /* placeholderlinks.cpp */,
+			);
+			path = BBox;
+			sourceTree = "<group>";
+		};
+		9C0ACE4913252F3C00AB1FCD /* Widget_Systems */ = {
+			isa = PBXGroup;
+			children = (
+				9C0ACE4A13252F3C00AB1FCD /* GTK+ */,
+				9C0ACE5713252F3C00AB1FCD /* None */,
+				9C0ACE5D13252F3C00AB1FCD /* widgets_mandatory.h */,
+			);
+			name = Widget_Systems;
+			path = SHELL/Widget_Systems;
+			sourceTree = "<group>";
+		};
+		9C0ACE4A13252F3C00AB1FCD /* GTK+ */ = {
+			isa = PBXGroup;
+			children = (
+				9C0ACE4B13252F3C00AB1FCD /* About.ey */,
+				9C0ACE4C13252F3C00AB1FCD /* automake.sh */,
+				9C0ACE4D13252F3C00AB1FCD /* Config */,
+				9C0ACE5113252F3C00AB1FCD /* dialogs.cpp */,
+				9C0ACE5213252F3C00AB1FCD /* dialogs.h */,
+				9C0ACE5313252F3C00AB1FCD /* gtk_impl.cpp */,
+				9C0ACE5413252F3C00AB1FCD /* Makefile */,
+				9C0ACE5513252F3C00AB1FCD /* widgets.cpp */,
+				9C0ACE5613252F3C00AB1FCD /* widgets.h */,
+			);
+			path = "GTK+";
+			sourceTree = "<group>";
+		};
+		9C0ACE4D13252F3C00AB1FCD /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				9C0ACE4E13252F3C00AB1FCD /* cocoa.ey */,
+				9C0ACE4F13252F3C00AB1FCD /* win32.ey */,
+				9C0ACE5013252F3C00AB1FCD /* xlib.ey */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		9C0ACE5713252F3C00AB1FCD /* None */ = {
+			isa = PBXGroup;
+			children = (
+				9C0ACE5A13252F3C00AB1FCD /* About.ey */,
+				9C0ACE5B13252F3C00AB1FCD /* Makefile */,
+				9C0ACE5C13252F3C00AB1FCD /* nowidget_impl.cpp */,
+			);
+			path = None;
+			sourceTree = "<group>";
+		};
 		9CAB7F3312246A1C00B1DAD6 /* Collision_Systems */ = {
 			isa = PBXGroup;
 			children = (
+				9C0ACE1613252E7200AB1FCD /* BBox */,
 				9CAB7F3412246A1C00B1DAD6 /* collision_mandatory.h */,
 				9CAB7F3512246A1C00B1DAD6 /* none */,
 			);
@@ -889,6 +993,7 @@
 		9CD0E0381211552600A01347 /* ENIGMAsystem */ = {
 			isa = PBXGroup;
 			children = (
+				9C0ACE4913252F3C00AB1FCD /* Widget_Systems */,
 				9CD0E0391211552600A01347 /* additional */,
 				9CD0E06F1211552700A01347 /* Extensions */,
 				9CD0E0731211552700A01347 /* SHELL */,
@@ -1089,7 +1194,6 @@
 				9CD0E1911211552700A01347 /* libEGMstd.cpp */,
 				9CD0E1921211552700A01347 /* libEGMstd.h */,
 				9CD0E1941211552700A01347 /* Modes */,
-				9CD0E1B51211552700A01347 /* Preprocessor_Environment_Editable */,
 				9CD0E1B71211552700A01347 /* SHELLmain.cpp */,
 				9CD0E1B81211552700A01347 /* Universal_System */,
 				9CD0E2D812115A8300A01347 /* API_Switchboard.h */,
@@ -1666,14 +1770,6 @@
 			path = Modes;
 			sourceTree = "<group>";
 		};
-		9CD0E1B51211552700A01347 /* Preprocessor_Environment_Editable */ = {
-			isa = PBXGroup;
-			children = (
-				9CD0E1B61211552700A01347 /* readme */,
-			);
-			path = Preprocessor_Environment_Editable;
-			sourceTree = "<group>";
-		};
 		9CD0E1B81211552700A01347 /* Universal_System */ = {
 			isa = PBXGroup;
 			children = (
@@ -1682,8 +1778,6 @@
 				9CAB7F1512245C3700B1DAD6 /* backgroundstruct.h */,
 				9CD0E1B91211552700A01347 /* CallbackArrays.cpp */,
 				9CD0E1BA1211552700A01347 /* CallbackArrays.h */,
-				9CD0E1BB1211552700A01347 /* collisions.cpp */,
-				9CD0E1BC1211552700A01347 /* collisions.h */,
 				9CD0E1BD1211552700A01347 /* collisions_object.cpp */,
 				9CD0E1BE1211552700A01347 /* collisions_object.h */,
 				9CD0E1BF1211552700A01347 /* compression.cpp */,
@@ -1772,20 +1866,20 @@
 		9CD0E2FF12115C9B00A01347 /* Preprocessor_Environment_Editable */ = {
 			isa = PBXGroup;
 			children = (
+				9C0ACE891325314700AB1FCD /* IDE_EDIT_events.h */,
+				9C0ACE8A1325314700AB1FCD /* IDE_EDIT_evparent.h */,
+				9C0ACE8B1325314700AB1FCD /* IDE_EDIT_globals.h */,
+				9C0ACE8C1325314700AB1FCD /* IDE_EDIT_objectaccess.h */,
+				9C0ACE8D1325314700AB1FCD /* IDE_EDIT_whitespace.h */,
 				9CD0E30012115C9B00A01347 /* GAME_SETTINGS.h */,
 				9CD0E30112115C9B00A01347 /* IDE_EDIT_inherited_locals.h */,
 				9CD0E30212115C9B00A01347 /* IDE_EDIT_modesenabled.h */,
 				9CD0E30312115C9B00A01347 /* IDE_EDIT_object_switch.h */,
-				9CD0E30412115C9B00A01347 /* IDE_EDIT_objectdata.h */,
 				9CD0E30512115C9B00A01347 /* IDE_EDIT_objectdeclarations.h */,
 				9CD0E30612115C9B00A01347 /* IDE_EDIT_objectfunctionality.h */,
 				9CD0E30712115C9B00A01347 /* IDE_EDIT_resourcenames.h */,
 				9CD0E30812115C9B00A01347 /* IDE_EDIT_roomarrays.h */,
 				9CD0E30912115C9B00A01347 /* IDE_EDIT_roomcreates.h */,
-				9CD0E30A12115C9B00A01347 /* IDE_EDIT_scriptdeclarations.h */,
-				9CD0E30B12115C9B00A01347 /* IDE_EDIT_wildclass.h */,
-				9CD0E30C12115C9B00A01347 /* IDE_EDIT_withdeclarations.h */,
-				9CD0E30D12115C9B00A01347 /* IDE_EDIT_withfunctionality.h */,
 				9CD0E30E12115C9B00A01347 /* LIBINCLUDE.h */,
 				9CD0E30F12115C9B00A01347 /* readme */,
 			);
@@ -2004,6 +2098,13 @@
 			files = (
 				9CEBA9741213A62700FC1D14 /* iPhone.xib in Resources */,
 				9C382B231215685D007B24C5 /* iPhone-Info.plist in Resources */,
+				9C0ACE3413252E7300AB1FCD /* About.ey in Resources */,
+				9C0ACE6B13252F3C00AB1FCD /* About.ey in Resources */,
+				9C0ACE6C13252F3C00AB1FCD /* automake.sh in Resources */,
+				9C0ACE6D13252F3C00AB1FCD /* cocoa.ey in Resources */,
+				9C0ACE6E13252F3C00AB1FCD /* win32.ey in Resources */,
+				9C0ACE6F13252F3C00AB1FCD /* xlib.ey in Resources */,
+				9C0ACE7513252F3C00AB1FCD /* About.ey in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2020,6 +2121,7 @@
 				9CE203B21212AE37006BDA4B /* CocoaFunctions.h in Sources */,
 				9CE2038E1212AA37006BDA4B /* CocoaFunctions.cpp in Sources */,
 				9CD0E2281211552700A01347 /* stream.cpp in Sources */,
+				9C0ACEBF13253B4600AB1FCD /* CocoaDialog.cpp in Sources */,
 				9CD0E2291211552700A01347 /* streamdec.cpp in Sources */,
 				9CD0E44A12128B4600A01347 /* CocoaMain.cpp in Sources */,
 				9CD0E22A1211552700A01347 /* streamplay.cpp in Sources */,
@@ -2103,7 +2205,6 @@
 				9CD0E29C1211552800A01347 /* libEGMstd.cpp in Sources */,
 				9CD0E2AF1211552800A01347 /* SHELLmain.cpp in Sources */,
 				9CD0E2B01211552800A01347 /* CallbackArrays.cpp in Sources */,
-				9CD0E2B11211552800A01347 /* collisions.cpp in Sources */,
 				9CD0E2B21211552800A01347 /* collisions_object.cpp in Sources */,
 				9CD0E2B31211552800A01347 /* compression.cpp in Sources */,
 				9CD0E2B41211552800A01347 /* darray.cpp in Sources */,
@@ -2141,9 +2242,12 @@
 				9CAB7F1212245C1B00B1DAD6 /* GStextures.cpp in Sources */,
 				9CAB7F1812245C3700B1DAD6 /* backgroundinit.cpp in Sources */,
 				9CAB7F1912245C3700B1DAD6 /* backgroundstruct.cpp in Sources */,
-				9CAB7F3A12246A1C00B1DAD6 /* Makefile in Sources */,
-				9CAB7F3B12246A1C00B1DAD6 /* placeholderlinks.cpp in Sources */,
 				9CAB80FA1225750F00B1DAD6 /* file_manip.cpp in Sources */,
+				9C0ACE2B13252E7300AB1FCD /* coll_funcs.cpp in Sources */,
+				9C0ACE2C13252E7300AB1FCD /* coll_impl.cpp in Sources */,
+				9C0ACE2D13252E7300AB1FCD /* coll_util.cpp in Sources */,
+				9C0ACE2F13252E7300AB1FCD /* placeholderlinks.cpp in Sources */,
+				9C0ACE6A13252F3C00AB1FCD /* nowidget_impl.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2226,7 +2330,6 @@
 				9CEBA621121381B600FC1D14 /* SHELLmain.cpp in Sources */,
 				9CEBA620121381B600FC1D14 /* libEGMstd.cpp in Sources */,
 				9CEBA622121381B600FC1D14 /* CallbackArrays.cpp in Sources */,
-				9CEBA623121381B600FC1D14 /* collisions.cpp in Sources */,
 				9CEBA624121381B600FC1D14 /* collisions_object.cpp in Sources */,
 				9CEBA625121381B600FC1D14 /* compression.cpp in Sources */,
 				9CEBA626121381B600FC1D14 /* darray.cpp in Sources */,
@@ -2286,6 +2389,16 @@
 				9CAB7F1712245C3700B1DAD6 /* backgroundstruct.cpp in Sources */,
 				9CAB7F3912246A1C00B1DAD6 /* placeholderlinks.cpp in Sources */,
 				9CAB807012255FCD00B1DAD6 /* GStextures.cpp in Sources */,
+				9C0ACE3513252E7300AB1FCD /* coll_funcs.cpp in Sources */,
+				9C0ACE3613252E7300AB1FCD /* coll_impl.cpp in Sources */,
+				9C0ACE3713252E7300AB1FCD /* coll_util.cpp in Sources */,
+				9C0ACE3913252E7300AB1FCD /* placeholderlinks.cpp in Sources */,
+				9C0ACE7013252F3C00AB1FCD /* dialogs.cpp in Sources */,
+				9C0ACE7113252F3C00AB1FCD /* gtk_impl.cpp in Sources */,
+				9C0ACE7213252F3C00AB1FCD /* Makefile in Sources */,
+				9C0ACE7313252F3C00AB1FCD /* widgets.cpp in Sources */,
+				9C0ACE7613252F3C00AB1FCD /* Makefile in Sources */,
+				9C0ACE7713252F3C00AB1FCD /* nowidget_impl.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
