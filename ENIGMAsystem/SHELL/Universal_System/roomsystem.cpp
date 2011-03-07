@@ -55,6 +55,9 @@ string room_caption = "ENIGMA Engine";
 int background_color = 16777215;
 int background_showcolor=1;
 
+var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
+background_vtiled, background_hspeed, background_vspeed;
+
 int view_angle   = 0;
 int view_current = 0;
 int view_enabled = 0;
@@ -75,6 +78,21 @@ namespace enigma
     
     background_color = backcolor;
     background_showcolor = (backcolor!=-1);
+      
+      //Backgrounds start
+      for (int i=0;i<7;i++)
+      {
+          background_visible[i] = backs[i].visible;
+          background_foreground[i] = backs[i].foreground;
+          background_index[i] = backs[i].background;
+          background_x[i] = backs[i].area_x; background_y[i] = backs[i].area_y;
+          background_hspeed = backs[i].horSpeed; background_vspeed = backs[i].verSpeed;
+          background_htiled = backs[i].tileHor; background_vtiled = backs[i].tileVert;
+          //background_stretch? = backs[i].stretch;
+      
+      }
+      
+      //Backgrounds end
     
     view_enabled = views_enabled;
     
