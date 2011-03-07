@@ -86,8 +86,26 @@ int compile_writeRoomData(EnigmaStruct* es)
 
       << " },\n";
     }
+    //Start of Backgrounds
+    wto << "}, {";
+     for (int ii = 0; ii < es->rooms[i].backgroundDefCount; ii++) // For each background
+     {
+        wto << "      { "
+        << (es->rooms[i].backgroundDefs[ii].visible ? "true" : "false") << ",   " // Visible
+        << (es->rooms[i].backgroundDefs[ii].foreground ? "true" : "false") << ",   " // Foreground
+        << es->rooms[i].backgroundDefs[ii].backgroundId << ",   " // Background
+        << es->rooms[i].backgroundDefs[ii].x << ",   " // X
+        << es->rooms[i].backgroundDefs[ii].y << ",   " // Y
+        << es->rooms[i].backgroundDefs[ii].hSpeed << ",   " // HSpeed
+        << es->rooms[i].backgroundDefs[ii].vSpeed << ",   " // VSpeed
+        << (es->rooms[i].backgroundDefs[ii].tileHoriz ? "true" : "false") << ",   " // tileHor
+        << (es->rooms[i].backgroundDefs[ii].tileVert ? "true" : "false") << ",   " // tileVert
+        << (es->rooms[i].backgroundDefs[ii].stretch ? "true" : "false") // Stretch
+        << " },\n";
+     }
     wto <<
-    "      }," <<
+    "      },"; //End of Backgrounds
+    wto <<
     "      " << es->rooms[i].instanceCount << ", "
     "      (enigma::inst*)(int[]){";
       int modme = 0;
