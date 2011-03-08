@@ -47,14 +47,14 @@ void action_move_point(double x,double y,double speed);
 //Relocate
 void move_towards_point ( double point_x, double point_y, double newspeed );*/
 
-bool action_if_variable(const variant& variable, const variant& value, int operation) {
+inline bool action_if_variable(const variant& variable, const variant& value, int operation) {
     if (operation==0) return (variable==value);
     else if (operation==1) return (variable<value);
     else if (operation==2) return (variable>value);
     else return 0; //invalid operation
 }
 
-void action_move_to(double xx,double yy) {
+inline void action_move_to(double xx,double yy) {
     if (argument_relative) {
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+=xx;
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+=yy;
@@ -65,7 +65,7 @@ void action_move_to(double xx,double yy) {
 	}
 }
 
-void action_create_object(int object, double x, double y) {
+inline void action_create_object(int object, double x, double y) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         instance_create(x+inst->x, y+inst->y, object);
@@ -73,17 +73,17 @@ void action_create_object(int object, double x, double y) {
     else instance_create(x, y, object);
 }
 
-void action_set_score(double newscore) { 
+inline void action_set_score(double newscore) { 
     if (argument_relative) score+= (int)newscore;
     else score = (int)newscore;
 }
 
-void action_set_life(double newlives) {
+inline void action_set_life(double newlives) {
     if (argument_relative) lives+= (int)newlives;
     else lives = newlives; 
 } 
 
-void action_set_caption(int score,string scoreCaption,int lives,string livesCaption, int health, string healthCaption) {
+inline void action_set_caption(int score,string scoreCaption,int lives,string livesCaption, int health, string healthCaption) {
     show_score=score;
     caption_score=scoreCaption;
     show_lives=lives;
@@ -92,16 +92,16 @@ void action_set_caption(int score,string scoreCaption,int lives,string livesCapt
     caption_health=healthCaption;
 }
 
-void action_sound(int sound,int loop) {
+inline void action_sound(int sound,int loop) {
 	if (loop==0) sound_play(sound);
 	else sound_loop(sound);
 }
 
-void action_color(int color) {
+inline void action_color(int color) {
 	draw_set_color(color);
 }
 
-bool action_if_number(int object, double number, int operation) {
+inline bool action_if_number(int object, double number, int operation) {
 	if (operation == 0) //equal to
 		return (instance_number(object) == number);
 	if (operation == 1) //less than
@@ -111,23 +111,23 @@ bool action_if_number(int object, double number, int operation) {
 	return 0;
 }
 
-void action_kill_object() { instance_destroy(); }
+inline void action_kill_object() { instance_destroy(); }
 
-void action_set_vspeed(double newvspeed) {
+inline void action_set_vspeed(double newvspeed) {
     if (argument_relative) {
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed+=newvspeed;
     } else
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed=newvspeed;
 }
 
-void action_draw_score(double x,double y, string caption) {
+inline void action_draw_score(double x,double y, string caption) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_text(x+inst->x,y+inst->y,caption+string(score));
     } else draw_text(x,y,caption+string(score));
 }
 
-void action_draw_sprite(int sprite,double x,double y, int subimage) {
+inline void action_draw_sprite(int sprite,double x,double y, int subimage) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_sprite(sprite,subimage,x+inst->x,y+inst->y);
@@ -136,12 +136,12 @@ void action_draw_sprite(int sprite,double x,double y, int subimage) {
         draw_sprite(sprite,subimage,x,y);
 }
 
-void action_set_health(double value) { 
+inline void action_set_health(double value) { 
     if (argument_relative) health+= (int)value;
     else health = value;    
 }
 
-void action_draw_health(double x1,double y1,double x2,double y2,double backColor,double barColor) {
+inline void action_draw_health(double x1,double y1,double x2,double y2,double backColor,double barColor) {
 	if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_healthbar(x1+inst->x, y1+inst->y, x2+inst->x, y2+inst->y, health, backColor, barColor, barColor, 1, 1, 1);
@@ -149,7 +149,7 @@ void action_draw_health(double x1,double y1,double x2,double y2,double backColor
         draw_healthbar(x1, y1, x2, y2, health, backColor, barColor, barColor, 1, 1, 1);
 }
 
-void action_draw_life_images(double x,double y, int image) {
+inline void action_draw_life_images(double x,double y, int image) {
     int actualX=x, actualY=y;
     const int width = sprite_get_width(image);
     
@@ -163,15 +163,15 @@ void action_draw_life_images(double x,double y, int image) {
         draw_sprite(image,-1, actualX+(i*width), actualY);
 }
 
-bool action_if_dice(int sides) {return !(floor(random(sides)));}
+inline bool action_if_dice(int sides) {return !(floor(random(sides)));}
 
-void move_towards_point ( double point_x, double point_y, double newspeed ) {
+inline void move_towards_point ( double point_x, double point_y, double newspeed ) {
     enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
     inst->direction = point_direction ( inst->x,inst->y, (point_x), (point_y) );
     inst->speed = (newspeed);
 } //RELOCATE ME
 
-void action_move_point(double x,double y,double speed) {
+inline void action_move_point(double x,double y,double speed) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         move_towards_point(x+inst->x,y+inst->y,speed); } //is speed also relative?
