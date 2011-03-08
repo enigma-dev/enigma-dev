@@ -123,6 +123,7 @@ extern int amain();
   #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
 #endif
 
+#include "Universal_System/actions.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
 
 #ifndef ENIGMA_PARSER_RUN

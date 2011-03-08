@@ -691,7 +691,7 @@ int draw_healthbar(float x1,float y1,float x2,float y2,float amount,int backcol,
         B = __GETB(mincol);
   
     glColor4ub(R+(unsigned char)((__GETR(maxcol)-R)*amount),G+(unsigned char)((__GETG(maxcol)-G)*amount),B+(unsigned char)((__GETB(maxcol)-B)*amount),enigma::currentcolor[3]);
-    printf("%d\n",mincol);
+    //printf("%d\n",mincol);
     glRectf(x1,y1,x2,y2);
     glColor4ubv(enigma::currentcolor);
     return 0;

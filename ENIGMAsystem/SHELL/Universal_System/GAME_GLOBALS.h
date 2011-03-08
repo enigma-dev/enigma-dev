@@ -45,9 +45,10 @@ global:     background_x
 global:     background_xscale
 global:     background_y
 global:     background_yscale
-global:     caption_health
-global:     caption_lives
-global:     caption_score
+ */
+string caption_score="Score:", caption_lives="Lives:", caption_health="Health:";
+
+/*
 global:     current_day
 global:     current_hour
 global:     current_minute
@@ -65,22 +66,26 @@ global:     event_object
 global:     event_type*/
 double      fps;/*
 global:     game_id
-global:     health*//*
+*/
+double health=100;
+/*
 global:     instance_id
 global:     keyboard_key
 global:     keyboard_lastchar
 global:     keyboard_lastkey
 global:     keyboard_string
-global:     lives*/
+*/
+double lives=3;
 double      mouse_button;
 double      mouse_lastbutton;
 double      mouse_x;
 double      mouse_y;
-/*global:   score
+double score=0;
+/*
 global:     secure_mode
-global:     show_health
-global:     show_lives
-global:     show_score
+ */
+bool show_score=0, show_lives=0, show_health=0;
+/*
 global:     temp_directory
 global:     transition_kind
 global:     transition_steps
