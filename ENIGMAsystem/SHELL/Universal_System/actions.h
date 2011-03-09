@@ -177,3 +177,106 @@ inline void action_move_point(double x,double y,double speed) {
         move_towards_point(x+inst->x,y+inst->y,speed); } //is speed also relative?
     else move_towards_point(x,y,speed);
 }
+
+
+inline bool action_if(double x) { 
+    return x >= .5; 
+}
+
+inline bool action_if_object(int object, double xx, double yy) {
+    if (argument_relative) {
+        enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+        return place_meeting(inst->x+xx,inst->y+yy,object);
+    }
+    else {
+        return place_meeting(xx,yy,object);
+    }
+    return 0;
+}
+
+inline bool action_if_next_room() {
+	return room_next(room) != -1;
+}
+
+/*
+ Fixed version of IsmAvatars action_move
+ */
+inline void action_move(const char dir[9], int argspeed) {
+    int dirs[9] = {  225, 270, 315, 180, -1, 0, 135, 90, 45 };
+    int chosendirs[9];
+    int choices = 0;
+    for (int i = 0; i < 9; i++)
+        if (dir[i] == '1') chosendirs[choices++] = dirs[i];
+    if (choices == 0) return;
+    choices = int(random(choices)); //choices is now chosen
+    
+    bool argument_relative = false;
+    
+    //We use rval.d for efficiency, so hspeed/vspeed aren't set twice.
+    const double newdir =
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->direction.rval.d = chosendirs[choices];
+    if (argument_relative)
+        argspeed += ((enigma::object_planar*)enigma::instance_event_iterator->inst)->speed;
+    const double newspd =
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->speed.rval.d = chosendirs[choices] == -1 ? 0 : argspeed;
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->hspeed.rval.d = newspd * cos(degtorad(newdir));
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->vspeed.rval.d = -newspd * sin(degtorad(newdir));
+}
+
+inline void action_reverse_xdir() {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed=-((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed;
+}
+
+inline void action_reverse_ydir() { 
+	((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed=-((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed;
+}
+
+inline bool place_snapped(int hsnap, int vsnap) {
+    enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+    return  ((((int) inst->x) % ((int) hsnap) == 0) &&  (((int) inst->y) % ((int) vsnap)==0));
+} //RELOCATE ME
+
+inline bool action_if_aligned(double snapHor, double snapVer) { 
+	return place_snapped(snapHor, snapVer);
+}
+
+inline bool action_if_empty(double xx, double yy, int objects) {
+    if (argument_relative) {
+        if (objects == 0)
+            return place_free(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+xx,((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+yy);
+        else
+            return place_empty(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+xx,((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+yy);
+    }
+    else {
+        if (objects == 0)
+            return place_free(xx,yy);
+        else
+            return place_empty(xx,yy);
+    }
+    return 0;
+}
+
+inline void action_move_start() {
+    enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+	inst->x=inst->xstart;
+	inst->y=inst->ystart;
+}
+
+void action_execute_script(string script,string argument0,string argument1,string argument2,string argument3,string argument4) {}
+#define action_execute_script(script,argument0,argument1,argument2,argument3,argument4) script((argument0),(argument1),(argument2),(argument3),(argument4))
+
+inline void action_draw_rectangle(double x1,double y1,double x2,double y2,int filled) {
+    if (argument_relative) {
+        enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+        draw_rectangle(x1+inst->x,y1+inst->y,x2+inst->x,y2+inst->y,filled);
+    }
+    else draw_rectangle(x1,y1,x2,y2,filled);
+}
+
+void action_set_alarm(int steps,int alarmno);
+#define action_set_alarm(steps,alarmno) if (argument_relative) alarm[(alarmno)] += (steps); else alarm[(alarmno)] = (steps);
+
+
+
+
+
