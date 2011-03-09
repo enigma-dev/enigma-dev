@@ -256,6 +256,7 @@ collision: 4
 	Mode: Stacked
 	Super Check: instance_number(%1)
 	Sub Check: (instance_other = enigma::place_meeting_inst(x,y,%1)) # Parenthesize assignment used as truth
+	prefix: if (solid ||  enigma::glaccess(int(other))->solid) {x=xprevious; y=yprevious;}
 
 
 # Check for detriment from collision events above
@@ -294,7 +295,7 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Sub Check: !(int(image_index) % image_count)
+	Sub Check: !(int(image_index) % image_number)
 
 
 # End of in-linked events
