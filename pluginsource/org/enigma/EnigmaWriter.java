@@ -837,6 +837,9 @@ public final class EnigmaWriter
 					code.append("repeat (").append(args.get(0).getVal()).append(") ");
 					break;
 				case Action.ACT_VARIABLE:
+					if (act.isRelative()) 
+						code.append(args.get(0).getVal()).append(" += ").append(args.get(1).getVal()).append(nl);
+					else
 					code.append(args.get(0).getVal()).append(" = ").append(args.get(1).getVal()).append(nl);
 					break;
 				case Action.ACT_NORMAL:
@@ -869,8 +872,12 @@ public final class EnigmaWriter
 						}
 					if (la.question) code.append("if ");
 					if (act.isNot()) code.append('!');
-					if (la.allowRelative)
+					if (la.allowRelative) {
+						if (la.question)
 						code.append("(argument_relative = ").append(act.isRelative()).append(", ");
+						else
+							code.append("{argument_relative = ").append(act.isRelative()).append("; ");
+					}
 					if (la.question && la.execType == Action.EXEC_CODE)
 						code.append("lib").append(la.parentId).append("_action").append(la.id);
 					else
@@ -885,8 +892,14 @@ public final class EnigmaWriter
 							}
 						code.append(')');
 						}
-					if (la.allowRelative) code.append(')');
+					if (la.allowRelative) {
+						if (la.question)
+						code.append(')');
+						else
+							code.append('}');
+						}
 					code.append(nl);
+					
 					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF) code.append('}');
 					}
 					break;
