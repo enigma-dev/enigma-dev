@@ -104,11 +104,11 @@ inline void action_color(int color) {
 inline bool action_if_number(int object, double number, int operation) {
 	if (operation == 0) //equal to
 		return (instance_number(object) == number);
-	if (operation == 1) //less than
+	else if (operation == 1) //less than
 		return (instance_number(object) < number);
-	if (operation == 2) //greater than
+	else if (operation == 2) //greater than
 		return (instance_number(object) > number);
-	return 0;
+	 else return 0; //invalid operation
 }
 
 inline void action_kill_object() { instance_destroy(); }
@@ -162,6 +162,12 @@ inline void action_draw_life_images(double x,double y, int image) {
     for (int i=0; i<lives; i++)
         draw_sprite(image,-1, actualX+(i*width), actualY);
 }
+
+/*inline bool action_if_dice(int sides) {
+    if (sides!=0)
+        return !(random(1) < 1/sides);
+    else return false;
+}*/
 
 inline bool action_if_dice(int sides) {return !(floor(random(sides)));}
 
@@ -276,7 +282,13 @@ inline void action_draw_rectangle(double x1,double y1,double x2,double y2,int fi
 void action_set_alarm(int steps,int alarmno);
 #define action_set_alarm(steps,alarmno) if (argument_relative) alarm[(alarmno)] += (steps); else alarm[(alarmno)] = (steps);
 
-
+void action_sprite_set(double spritep,double subimage, double speed) {
+    enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
+    inst->sprite_index=spritep;
+	if (subimage !=-1) inst->image_index=subimage;
+	inst->image_speed=speed;
+}
+//#define action_sprite_set(spritep,subimg, imgspeed) sprite_index=(spritep); if (subimg !=-1) {image_index=subimg;} image_speed=imgspeed;
 
 
 

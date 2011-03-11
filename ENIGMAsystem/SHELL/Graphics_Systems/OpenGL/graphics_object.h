@@ -42,9 +42,14 @@ namespace enigma
   {
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
-      int image_index;
+      double image_index;
+      double image_speed;
+      
+      int image_number; //read only
+      
 
-    //Depth
+      
+      //Depth
       int  depth;
       bool visible;
 

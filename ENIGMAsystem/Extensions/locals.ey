@@ -10,12 +10,10 @@ Alarms:
 
 Typical Status Locals:
 	Locals:
-		health: int
-		score: int
-		lives: int
+
 
 Automatic Imaging Locals:
 	Locals:
 		image_single: int
-		image_speed: int
+		
 
