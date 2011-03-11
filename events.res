@@ -238,12 +238,12 @@ outsideroom: 7
 	Name: Outside Room
 	Mode: Special
 	Case: 0
-	Sub Check: (bbox_right < 0) or (bbox_left > room_width) or (bbox_bottom < 0) or (bbox_top > room_height)
+	Sub Check: (x+bbox_right < 0) || (x+bbox_left > room_width) || (y+bbox_bottom < 0) || (y+bbox_top > room_height)
 boundary: 7
 	Name: Intersect Boundary
 	Mode: Special
 	Case: 1
-	Sub Check: (bbox_left < 0) or (bbox_right > room_width) or (bbox_top < 0) or (bbox_bottom > room_height)
+	Sub Check: (x+bbox_left < 0) or (x+bbox_right > room_width) or (y+bbox_top < 0) or (y+bbox_bottom > room_height)
 
 
 # Collisions stuck here for some reason, possibly so that you
@@ -286,7 +286,7 @@ draw: 8
 	Mode: Inline
 	Sub Check: visible
 	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
-	Constant: image_index++;
+	Constant: image_index+=image_speed;
 	Instead: screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
 
 
