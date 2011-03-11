@@ -278,9 +278,10 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     "      instance->bbox_right   =  sprite_get_bbox_right(instance->sprite_index)   - instance->sprite_xoffset;\n"
     "      instance->bbox_top     =   sprite_get_bbox_top (instance->sprite_index)   - instance->sprite_yoffset;\n"
     "      instance->bbox_bottom  =   sprite_get_bbox_bottom(instance->sprite_index) - instance->sprite_xoffset;\n"
-    "      instance->sprite_height =  sprite_get_height(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
-    "      instance->sprite_width  =  sprite_get_width(instance->sprite_index);  //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
+    "      //instance->sprite_height =  sprite_get_height(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
+    "      //instance->sprite_width  =  sprite_get_width(instance->sprite_index);  //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
     "      instance->image_number  =  sprite_get_number(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
+
     "    }\n    \n"
 
     "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
