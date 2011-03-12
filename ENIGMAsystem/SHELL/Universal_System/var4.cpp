@@ -302,6 +302,7 @@ types_extrapolate_all_fromvariant(variant , +)
 types_extrapolate_all_fromvariant(double  , -)
 types_extrapolate_all_fromvariant(double  , *)
 types_extrapolate_all_fromvariant(double  , /)
+types_extrapolate_all_fromvariant(double  , %)
 
 types_extrapolate_all_fromvariant(long , <<)
 types_extrapolate_all_fromvariant(long , >>)

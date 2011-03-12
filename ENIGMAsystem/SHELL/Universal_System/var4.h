@@ -218,6 +218,7 @@ struct var
   types_extrapolate_alldec(double  operator-)
   types_extrapolate_alldec(double  operator*)
   types_extrapolate_alldec(double  operator/)
+  types_extrapolate_alldec(double  operator%)
   
   types_extrapolate_alldec(long operator<<)
   types_extrapolate_alldec(long operator>>)

@@ -4,6 +4,7 @@
 **  See the license of local files for more details.
 **/
 
+#define unsigl  unsigned long
 #define unsigll unsigned long long
 
 
@@ -36,6 +37,8 @@
  
 #define types_extrapolate_real_p(prefix,suffix...)\
  prefix (int x)       suffix\
+ prefix (long x)      suffix\
+ prefix (unsigl x)    suffix\
  prefix (unsigned x)  suffix\
  prefix (long long x) suffix\
  prefix (unsigll x)   suffix\
@@ -44,6 +47,8 @@
 
 #define types_binary_extrapolate_real_p(prefix,type2,suffix...)\
  prefix (int x,type2 y)       suffix\
+ prefix (long x,type2 y)    suffix\
+ prefix (unsigl x,type2 y)    suffix\
  prefix (unsigned x,type2 y)  suffix\
  prefix (long long x,type2 y) suffix\
  prefix (unsigll x,type2 y)   suffix\
@@ -52,7 +57,9 @@
  
 #define types_binary_bitwise_extrapolate_real_p(op,type2,sentiment...)\
  int       operator op(int x,type2 y)       { sentiment; return x op int(y); }\
+ long      operator op(long x,type2 y)      { sentiment; return x op int(y); }\
  unsigned  operator op(unsigned x,type2 y)  { sentiment; return x op int(y); }\
+ unsigl    operator op(unsigl x,type2 y)    { sentiment; return x op int(y); }\
  long long operator op(long long x,type2 y) { sentiment; return x op (long long)(y); }\
  unsigll   operator op(unsigll x,type2 y)   { sentiment; return x op (unsigll)(y); }\
  long      operator op(double x,type2 y)    { sentiment; return long(x) op long(y); }\
@@ -60,7 +67,9 @@
  
 #define types_binary_bitwise_extrapolate_alldecc(func, type2)\
  int       func(int x,type2 y);\
+ long      func(long x,type2 y);\
  unsigned  func(unsigned x,type2 y);\
+ unsigl    func(unsigl x,type2 y);\
  long long func(long long x,type2 y);\
  unsigll   func(unsigll x,type2 y);\
  long      func(double x,type2 y);\
@@ -68,6 +77,8 @@
  
 #define types_binary_assign_extrapolate_declare(op,type2)\
  int&       operator op##= (int &x,type2 y);\
+ long&      operator op##= (long &x,type2 y);\
+ unsigl&    operator op##= (unsigl &x,type2 y);\
  unsigned&  operator op##= (unsigned &x,type2 y);\
  long long& operator op##= (long long &x,type2 y);\
  unsigll&   operator op##= (unsigll &x,type2 y);\
@@ -76,6 +87,8 @@
  
 #define types_binary_assign_extrapolate_implement(op,type2, sentiment...)\
  int&       operator op##= (int &x,type2 y)        { sentiment; return x op##= (int)y; }\
+ long&      operator op##= (long &x,type2 y)       { sentiment; return x op##= (long)y; }\
+ unsigl&    operator op##= (unsigl &x,type2 y)     { sentiment; return x op##= (long)y; }\
  unsigned&  operator op##= (unsigned &x,type2 y)   { sentiment; return x op##= (int)y; }\
  long long& operator op##= (long long &x,type2 y)  { sentiment; return x op##= (long long)y; }\
  unsigll&   operator op##= (unsigll &x,type2 y)    { sentiment; return x op##= (unsigll)y; }\
@@ -84,6 +97,8 @@
  
 #define types_binary_bitwise_assign_extrapolate_implement(op,type2, sentiment...)\
  int&       operator op##= (int &x,type2 y)        { sentiment; return x op##= (int)y; }\
+ long&      operator op##= (long &x,type2 y)       { sentiment; return x op##= (long)y; }\
+ unsigl&    operator op##= (unsigl &x,type2 y)     { sentiment; return x op##= (long)y; }\
  unsigned&  operator op##= (unsigned &x,type2 y)   { sentiment; return x op##= (int)y; }\
  long long& operator op##= (long long &x,type2 y)  { sentiment; return x op##= (long long)y; }\
  unsigll&   operator op##= (unsigll &x,type2 y)    { sentiment; return x op##= (unsigll)y; }\
