@@ -18,4 +18,5 @@ struct Timeline
 	int id;
 
 	Moment *moments;
+	int momentCount;
 };

@@ -20,7 +20,7 @@ public class Path extends Structure
 	public boolean smooth;
 	public boolean closed;
 	public int precision;
-	public int backgroundRoomId;
+
 	public int snapX;
 	public int snapY;
 

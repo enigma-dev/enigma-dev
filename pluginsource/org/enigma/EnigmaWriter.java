@@ -363,12 +363,13 @@ public final class EnigmaWriter
 			org.lateralgm.resources.Path ip = ipl[p];
 
 			op.name = ip.getName();
+			System.out.println(op.name + "~");
 			op.id = ip.getId();
 
 			op.smooth = ip.get(PPath.SMOOTH);
 			op.closed = ip.get(PPath.CLOSED);
 			op.precision = ip.get(PPath.PRECISION);
-			op.backgroundRoomId = toId(ip.get(PPath.BACKGROUND_ROOM),-1);
+			//don't need background room ID
 			op.snapX = ip.get(PPath.SNAP_X);
 			op.snapY = ip.get(PPath.SNAP_Y);
 
@@ -837,10 +838,10 @@ public final class EnigmaWriter
 					code.append("repeat (").append(args.get(0).getVal()).append(") ");
 					break;
 				case Action.ACT_VARIABLE:
-					if (act.isRelative()) 
+					if (act.isRelative())
 						code.append(args.get(0).getVal()).append(" += ").append(args.get(1).getVal()).append(nl);
 					else
-					code.append(args.get(0).getVal()).append(" = ").append(args.get(1).getVal()).append(nl);
+						code.append(args.get(0).getVal()).append(" = ").append(args.get(1).getVal()).append(nl);
 					break;
 				case Action.ACT_NORMAL:
 					{
@@ -872,12 +873,13 @@ public final class EnigmaWriter
 						}
 					if (la.question) code.append("if ");
 					if (act.isNot()) code.append('!');
-					if (la.allowRelative) {
+					if (la.allowRelative)
+						{
 						if (la.question)
-						code.append("(argument_relative = ").append(act.isRelative()).append(", ");
+							code.append("(argument_relative = ").append(act.isRelative()).append(", ");
 						else
 							code.append("{argument_relative = ").append(act.isRelative()).append("; ");
-					}
+						}
 					if (la.question && la.execType == Action.EXEC_CODE)
 						code.append("lib").append(la.parentId).append("_action").append(la.id);
 					else
@@ -892,14 +894,9 @@ public final class EnigmaWriter
 							}
 						code.append(')');
 						}
-					if (la.allowRelative) {
-						if (la.question)
-						code.append(')');
-						else
-							code.append('}');
-						}
+					if (la.allowRelative) code.append(la.question ? ')' : '}');
 					code.append(nl);
-					
+
 					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF) code.append('}');
 					}
 					break;
