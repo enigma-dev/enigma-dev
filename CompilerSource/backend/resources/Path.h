@@ -25,4 +25,5 @@ struct Path
 	int snapY;
 
 	PathPoint *points;
+	int pointCount;
 };
