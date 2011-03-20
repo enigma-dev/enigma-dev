@@ -690,6 +690,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				case 0:
 					if (DRIVER.resource_isFunction())
 						{
+						int overloads = DRIVER.resource_overloadCount();
+						if (overloads > 0)
+							{
+							rl.add(res + DRIVER.resource_parameters(0));
+							break;
+							}
 						int min = DRIVER.resource_argCountMin();
 						int max = DRIVER.resource_argCountMax();
 						res += "(" + min;

@@ -30,24 +30,37 @@ public interface EnigmaDriver extends Library
 
 	public int compileEGMf(EnigmaStruct es, String outname, int mode);
 
+	// Keyword and Function Names //
+
 	/** Returns the name of the first resource on the list, or null if there is no first element. */
 	public String first_available_resource();
 
 	/** Returns the name of the next resource on the list, or null if there is no first element. */
 	public String next_available_resource();
 
-	/** Returns the minimum number of arguments to the function; the names cannot be fetched. */
-	public int resource_argCountMin();
-
-	/** Returns the maximum number of arguments to the function; the names cannot be fetched. */
-	public int resource_argCountMax();
-
-	/** Returns whether the resource can be called as a function */
-	public boolean resource_isFunction();
-
 	/** Returns whether the resource is nothing but a global variable. */
 	public boolean resource_isGlobal();
 
 	/** Returns whether the resource can be used as a typename. */
 	public boolean resource_isTypeName();
+
+	/** Returns whether the resource can be called as a function */
+	public boolean resource_isFunction();
+
+	/** Returns the minimum number of arguments to the function. */
+	public int resource_argCountMin();
+
+	/** Returns the maximum number of arguments to the function. */
+	public int resource_argCountMax();
+
+	/** Returns the number of times the function was declared in the parsed sources. */
+	public int resource_overloadCount();
+
+	/**
+	 * Returns a simple string of parameters and defaults that would
+	 * serve as the prototype of this function. Includes braces.
+	 * WARNING: Returned string invalidated upon next call to definitionsModified().
+	 * @param i The number of the overload.
+	 */
+	public String resource_parameters(int i);
 	}

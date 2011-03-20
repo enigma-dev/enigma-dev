@@ -363,7 +363,6 @@ public final class EnigmaWriter
 			org.lateralgm.resources.Path ip = ipl[p];
 
 			op.name = ip.getName();
-			System.out.println(op.name + "~");
 			op.id = ip.getId();
 
 			op.smooth = ip.get(PPath.SMOOTH);
