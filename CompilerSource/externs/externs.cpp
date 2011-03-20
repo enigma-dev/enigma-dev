@@ -48,12 +48,14 @@ int externs::parameter_count_max()
 {
   return refstack.parameter_count_max();
 }
-void externs::parameter_unify(rf_stack& x)
+void externs::parameter_unify(rf_stack& x, string& fparams)
 {
   const unsigned short n1 = parameter_count_min(), n2 = x.parameter_count_min();
   const unsigned short x1 = parameter_count_max(), x2 = x.parameter_count_max();
   const int nn = n1<n2?n1:n2, nx = x1>x2?x1:x2;
   refstack.parameter_count_set(nn,nx);
+  sparams[sparams.size] = fparams;
+  fparams = "";
 }
 
 #ifdef ENIGMA_PARSERS_DEBUG
@@ -79,25 +81,57 @@ externs::externs(): flags(0), name(), type(NULL), parent(NULL), value_of(0)
 {
   ecpp;
 }
+
 externs::externs(string n,externs* p,unsigned int f): flags(f), name(n), type(NULL), parent(p), value_of(0)
 {
   ecpp; other
     other1(1)
 }
+externs::externs(string n,externs* p,unsigned int f,string& fp): flags(f), name(n), type(NULL), parent(p), value_of(0)
+{
+  sparams[sparams.size] = fp;
+  fp = "";
+  ecpp; other
+    other1(1)
+}
+
 externs::externs(string n,externs* t,externs* p,unsigned int f): flags(f), name(n), type(t), parent(p), value_of(0)
 {
   ecpp; other
     other1(2)
 }
+externs::externs(string n,externs* t,externs* p,unsigned int f,string& fp): flags(f), name(n), type(t), parent(p), value_of(0)
+{
+  sparams[sparams.size] = fp;
+  fp = "";
+  ecpp; other
+    other1(2)
+}
+
 externs::externs(string n,externs* t,externs* p,unsigned int f,long long v): flags(f), name(n), type(t), parent(p), value_of(v)
 {
   ecpp; other
     other1(3)
 }
+externs::externs(string n,externs* t,externs* p,unsigned int f,long long v,string& fp): flags(f), name(n), type(t), parent(p), value_of(v)
+{
+  sparams[sparams.size] = fp;
+  fp = "";
+  ecpp; other
+    other1(3)
+}
+
 externs::externs(string n,externs* t,externs* p,unsigned int f,long long v,rf_stack rfs): flags(f), name(n), type(t), parent(p), value_of(v), refstack(rfs)
 {
   ecpp; other
     other1(4)
+}
+externs::externs(string n,externs* t,externs* p,unsigned int f,long long v,rf_stack rfs,string& fp): flags(f), name(n), type(t), parent(p), value_of(v), refstack(rfs)
+{
+  sparams[sparams.size] = fp;
+  fp = "";
+  ecpp; other
+    other1(5)
 }
 
 bool externs::is_using_scope()

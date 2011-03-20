@@ -43,6 +43,8 @@ enum cmodes {
   mode_compile
 };
 
+#include "../parser/object_storage.h"
+
 struct parsed_script
 {
   parsed_object obj; //Script will pretend to be an object, having locals and globals inherited by all who call it.

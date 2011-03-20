@@ -208,7 +208,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   for (int i = 0; i < es->scriptCount; i++)
     quickmember_script(globals_scope,es->scripts[i].name);
 
-  edbg << "Copying font names [kidding, these are totally not implemented :P] [" << es->fontCount << "]" << flushl;
+  edbg << "Copying font names [" << es->fontCount << "]" << flushl;
   for (int i = 0; i < es->fontCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->fonts[i].name);
 
@@ -355,7 +355,12 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Writing local accessors" << flushl;
   res = compile_writeObjAccess(parsed_objects, &EGMglobal);
   irrr();
-
+  
+  edbg << "Writing font data" << flushl;
+  res = compile_writeFontInfo(es);
+  irrr();
+  
+  edbg << "Writing room data" << flushl;
   res = compile_writeRoomData(es);
   irrr();
 

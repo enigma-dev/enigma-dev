@@ -63,6 +63,7 @@ struct externs
   externs* parent;
   long long  value_of;
   rf_stack refstack;
+  varray<string> sparams;
   
   varray<externs*> tempargs;
   darray_s<externs*> ancestors;
@@ -73,14 +74,18 @@ struct externs
   bool is_function(); //test if this is a function
   int parameter_count_min(); //returns topmost function argument count
   int parameter_count_max(); //returns topmost function argument count
-  void parameter_unify(rf_stack&); //Set parameter set to union of this and another
+  void parameter_unify(rf_stack&, string&); //Set parameter set to union of this and another
   bool is_using_scope(); //test if we are someone's using scope
   
   externs();
   externs(string n,externs* p,unsigned int f);
+  externs(string n,externs* p,unsigned int f,string& fparams);
   externs(string n,externs* t,externs* p,unsigned int f);
+  externs(string n,externs* t,externs* p,unsigned int f,string& fparams);
   externs(string n,externs* t,externs* p,unsigned int f,long long vof);
+  externs(string n,externs* t,externs* p,unsigned int f,long long vof,string& fparams);
   externs(string n,externs* t,externs* p,unsigned int f,long long vof,rf_stack rfs);
+  externs(string n,externs* t,externs* p,unsigned int f,long long vof,rf_stack rfs,string& fparams);
   
   void clear_all();
   ~externs();

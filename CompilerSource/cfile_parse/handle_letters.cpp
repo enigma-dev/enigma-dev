@@ -62,7 +62,7 @@ int get_line()
 
 #include "../general/parse_basics.h"
 extern int negative_one;
-bool ExtRegister(unsigned int last,unsigned phase,string name,bool,rf_stack refs,externs *type,varray<tpdata> &tparams, int &tpc = negative_one, long long last_value = 0);
+bool ExtRegister(unsigned int last,unsigned phase,string name,string& fparam,bool,rf_stack refs,externs *type,varray<tpdata> &tparams, int &tpc = negative_one, long long last_value = 0);
 
 extern void print_definition(string);
 
@@ -83,8 +83,8 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
       return 0;
     }
     rf_stack NO_REFS;
-    varray<tpdata> EMPTY;
-    if (!ExtRegister(LN_STRUCT,last_named_phase,last_identifier,flag_extern=0,NO_REFS,NULL,EMPTY,tpc = -1))
+    varray<tpdata> EMPTY; string fparams;
+    if (!ExtRegister(LN_STRUCT,last_named_phase,last_identifier,fparams,flag_extern=0,NO_REFS,NULL,EMPTY,tpc = -1))
       return 0;
   }
   last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); //Switch to declarator, but preserve typedef status
@@ -93,7 +93,7 @@ bool extreg_deprecated_struct(bool idnamed,string &last_identifier,int &last_nam
   return 1;
 }
 
-pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bool at_template_param)
+pt handle_identifiers(const string n,int &fparam_named,string& fparams,bool at_scope_accessor,bool at_template_param)
 {
   switch (switch_hash(n))
   {
@@ -513,6 +513,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             cferr = "Expected ';' before new declaration";
             return pos;
           }
+          fparams += n + " ";
           fparam_named = 1;
           return pt(-1);
         }
@@ -594,6 +595,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
           return pos;
         }
         else argument_type = ext_retriever_var;
+        fparams += ext_retriever_var->name + " ";
         fparam_named = 1;
         return pt(-1);
       } 
@@ -839,6 +841,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
             cferr = last_named & LN_TYPEDEF ? "Two names given in typedef: currently typedef " + last_type->name + " " + last_identifier : "Expected ',' or ';' before identifier (" + last_identifier + ")";
             return pos;
           }
+          fparams += n;
           fparam_named = 1;
           return pt(-1);
         }
@@ -942,7 +945,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         if (last_named_phase == TN_NOTHING)
         {
           varray<tpdata> empty;
-          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,0,0,NULL,empty,negative_one,0) ? ext_retriever_var : NULL;
+          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,fparams,0,0,NULL,empty,negative_one,0) ? ext_retriever_var : NULL;
           last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); last_named_phase = last_named == LN_TYPENAME_P ? DEC_IDENTIFIER : DEC_FULL;
           if (last_type)
           {
@@ -956,7 +959,7 @@ pt handle_identifiers(const string n,int &fparam_named,bool at_scope_accessor,bo
         {
           varray<tpdata> single; int one = 1;
           single[0] = tpdata("",builtin_type__int,0,true,true);
-          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,flag_extern=0,0,NULL,single,one,0) ? ext_retriever_var : NULL;
+          last_type = ExtRegister(LN_TYPEDEF | LN_DECLARATOR,DEC_IDENTIFIER,n,fparams,flag_extern=0,0,NULL,single,one,0) ? ext_retriever_var : NULL;
           last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF); last_named_phase = last_named == LN_TYPENAME_P ? DEC_IDENTIFIER : DEC_FULL;
           
           if (last_type)

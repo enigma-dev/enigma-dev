@@ -87,12 +87,7 @@ string strace(externs *f)
   return o;
 }
 
-extern pt handle_skip();
-
-int debug_ent() {
-  cout << "Asses";
-  return 0;
-}
+extern pt handle_skip(string &fparams);
 
 pt parse_cfile(my_string cftext)
 {
@@ -122,12 +117,14 @@ pt parse_cfile(my_string cftext)
 
   int fparam_named = 0;
   int fparam_defaulted = 0;
+  string fparams;
 
   skip_depth = 0;
   specialize_start = 0;
   specialize_string = "";
   specializing = false;
   skipto = skipto2 = skip_inc_on = 0;
+  
 
   /*
     Okay, we have to break this into sections.
@@ -216,7 +213,7 @@ pt parse_cfile(my_string cftext)
 
     if (skipto)
     {
-      pt a = handle_skip(); // Too huge to display here. May need maintenance in the future anyway.
+      pt a = handle_skip(fparams); // Too huge to display here. May need maintenance in the future anyway.
       if (a != pt(-1))
         return a;
       continue;
@@ -232,7 +229,7 @@ pt parse_cfile(my_string cftext)
         bool at_scope_accessor = cfile[pos] == ':' and cfile[pos+1] == ':';
         bool at_template_param = cfile[pos] == '<';
 
-        int diderrat = handle_identifiers(id_to_handle,fparam_named,at_scope_accessor,at_template_param);
+        int diderrat = handle_identifiers(id_to_handle,fparam_named,fparams,at_scope_accessor,at_template_param);
         if (diderrat != -1) return id_would_err_at; //Discard diderrat until future use
 
         if (at_scope_accessor) pos += 2;
@@ -407,9 +404,9 @@ pt parse_cfile(my_string cftext)
           unsigned flagstotdef = last_type->flags | EXTFLAG_TYPEDEF;
           if (tpc == -2) flagstotdef &= ~EXTFLAG_TEMPLATE;
           
-          externs *n = new externs(last_identifier,last_type,current_scope,flagstotdef,0,refstack.dissociate());
+          externs *n = new externs(last_identifier,last_type,current_scope,flagstotdef,0,refstack.dissociate(),fparams);
           if (tpc > -2) for (unsigned i = 0; i < last_type->tempargs.size; i++)
-            n->tempargs[i] = new externs(last_type->tempargs[i]->name,last_type->tempargs[i]->type,last_type->tempargs[i]->parent,last_type->tempargs[i]->flags);
+            n->tempargs[i] = new externs(last_type->tempargs[i]->name,last_type->tempargs[i]->type,last_type->tempargs[i]->parent,last_type->tempargs[i]->flags,fparams);
           
           current_scope->members[last_identifier] = n;
           last_named_phase = DEC_FULL;
@@ -432,6 +429,7 @@ pt parse_cfile(my_string cftext)
                 {
                   if (!fparam_defaulted)
                     refstack.inc_current_min();
+                  fparams += ", ";
                   refstack.inc_current_max();
                   fparam_defaulted = 0;
                 }
@@ -508,10 +506,10 @@ pt parse_cfile(my_string cftext)
                   TPDATA_CONSTRUCT(1);
                   externs* enuScope = current_scope; //Store where we are
                   current_scope = current_scope->parent; //Move up a scope: ENUMs declare in two scopes
-                  if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refstack,builtin_type__int,tmplate_params,tpc,last_value))
+                  if (!ExtRegister(last_named,last_named_phase,last_identifier,fparams,flag_extern,refstack,builtin_type__int,tmplate_params,tpc,last_value))
                     return pos;
                   current_scope = enuScope; //Move back where we started and declare in that scope
-                  if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refstack,builtin_type__int,tmplate_params,tpc,last_value))
+                  if (!ExtRegister(last_named,last_named_phase,last_identifier,fparams,flag_extern,refstack,builtin_type__int,tmplate_params,tpc,last_value))
                     return pos;
                 }
                 else {
@@ -554,7 +552,7 @@ pt parse_cfile(my_string cftext)
                   if (pu->second != last_type)
                   {
                     if (pu->second->is_function() and last_type->is_function())
-                      pu->second->parameter_unify(last_type->refstack);
+                      pu->second->parameter_unify(last_type->refstack,fparams);
                     /* else { //IGNORE: They are allowed to conflict, but will throw ambiguity errors when called in a standard compiler
                       cferr = "Using `" + last_type->name + "' conflicts with previous `using' directive";
                       return pos;
@@ -620,14 +618,14 @@ pt parse_cfile(my_string cftext)
               last_named = LN_STRUCT;
               last_named_phase = SP_IDENTIFIER;
               TPDATA_CONSTRUCT(2);
-              if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refs_to_use,type_to_use,tmplate_params,tpc))
+              if (!ExtRegister(last_named,last_named_phase,last_identifier,fparams,flag_extern,refs_to_use,type_to_use,tmplate_params,tpc))
                 return pos;
             }
           }
         }
         else {
           TPDATA_CONSTRUCT(3);
-          if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern,refs_to_use,type_to_use,tmplate_params,tpc))
+          if (!ExtRegister(last_named,last_named_phase,last_identifier,fparams,flag_extern,refs_to_use,type_to_use,tmplate_params,tpc))
           return pos;
         }
 
@@ -794,6 +792,9 @@ pt parse_cfile(my_string cftext)
               else
               {
                 refstack += referencer(last_named_phase == DEC_IDENTIFIER ? '(' : ')',0,last_named_phase != DEC_IDENTIFIER);
+                if (last_named_phase == DEC_IDENTIFIER)  {
+                  fparams = "(";
+                }
                 argument_type = NULL;
                 plevel++;
               }
@@ -810,6 +811,7 @@ pt parse_cfile(my_string cftext)
                 return pos;
               }
               if (refstack.currentsymbol() == '(')
+              {
                 if (fparam_named)
                 {
                   if (!fparam_defaulted)
@@ -817,6 +819,8 @@ pt parse_cfile(my_string cftext)
                   refstack.inc_current_max();
                   fparam_defaulted = 0;
                 }
+                fparams += ")";
+              }
 
               plevel--;
               refstack--; //Move past previous parenthesis
@@ -836,7 +840,7 @@ pt parse_cfile(my_string cftext)
             if (last_named_raw == LN_NAMESPACE or last_named_raw == LN_STRUCT or last_named_raw == LN_CLASS or last_named_raw == LN_UNION)
             {
               TPDATA_CONSTRUCT(4);
-              if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern=0,0,NULL,tmplate_params,tpc))
+              if (!ExtRegister(last_named,last_named_phase,last_identifier,fparams,flag_extern=0,0,NULL,tmplate_params,tpc))
                 return pos;
               current_scope = ext_retriever_var;
             }
@@ -851,7 +855,7 @@ pt parse_cfile(my_string cftext)
             else if (last_named_raw == LN_ENUM)
             {
               TPDATA_CONSTRUCT(5);
-              if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern=0,0,NULL,tmplate_params,tpc))
+              if (!ExtRegister(last_named,last_named_phase,last_identifier,fparams,flag_extern=0,0,NULL,tmplate_params,tpc))
                 return pos;
               scope_stack.push(current_scope);
               current_scope = ext_retriever_var;
@@ -872,7 +876,7 @@ pt parse_cfile(my_string cftext)
               {
                 //Register the function in the current scope
                 TPDATA_CONSTRUCT(6);
-                if (!ExtRegister(last_named,last_named_phase,last_identifier,0,refstack.dissociate(),last_type,tmplate_params,tpc))
+                if (!ExtRegister(last_named,last_named_phase,last_identifier,fparams,0,refstack.dissociate(),last_type,tmplate_params,tpc))
                   return pos;
 
                 //Skip the code: we don't need to know it ^_^
@@ -978,7 +982,7 @@ pt parse_cfile(my_string cftext)
                   }
                   if (last_named_phase != EN_WAITING) {
                     TPDATA_CONSTRUCT(7);
-                  if (!ExtRegister(last_named,last_named_phase,last_identifier,flag_extern=0,refstack.dissociate(),builtin_type__int,tmplate_params,tpc,last_value))
+                  if (!ExtRegister(last_named,last_named_phase,last_identifier,fparams,flag_extern=0,refstack.dissociate(),builtin_type__int,tmplate_params,tpc,last_value))
                     return pos;
                   }
                 /*}
@@ -1341,6 +1345,11 @@ pt parse_cfile(my_string cftext)
                 skipto = ';';
                 skipto2 = ';';
                 skippast = false;
+                specializing = true; // We'll want to know the default value.
+                specialize_start = pos;
+                while (is_useless(cfile[++specialize_start]));
+                specialize_string = "";
+                fparams += " = ";
                 continue;
               }
               if ((last_named & ~LN_TYPEDEF) == LN_ENUM)
@@ -1362,7 +1371,7 @@ pt parse_cfile(my_string cftext)
               return pos;
             }
           break;
-        //...
+        // Handle '...'
         case '.':
             if (cfile[pos+1] == '.' and cfile[pos+2] == '.')
             {
@@ -1379,6 +1388,7 @@ pt parse_cfile(my_string cftext)
                 return pos;
               }
               pos += 3;
+              fparams += "... ";
               continue;
             }
             else {
@@ -1421,9 +1431,10 @@ pt parse_cfile(my_string cftext)
               }
               cferr = "String literal not allowed here";
               return pos;
-            }//Backslash. This is actually not that common.
+            }
           break;
-
+        
+        //Backslash. This is actually not that common.
         case '\\':
             {
               pos++;
@@ -1449,6 +1460,7 @@ pt parse_cfile(my_string cftext)
   string pname = "";
   if (last_typedef != NULL) pname=last_typedef->name;
   cout << '"' << last_typename << "\":" << pname << " \"" << last_identifier << "\"\r\n";*/
+  cout << fparams << endl;
   return pt(-1);
 }
 

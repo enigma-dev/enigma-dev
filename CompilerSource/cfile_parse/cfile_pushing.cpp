@@ -56,7 +56,7 @@ cfnode::~cfnode()
 unsigned int macrod = 0;
 varray<string> inmacros;
 
-stack<cfnode*> cfstack;
+dlstack<cfnode*> cfstack;
 void handle_macro_pop()
 {
   delete cfstack.top();

@@ -84,13 +84,21 @@ dllexport bool resource_isFunction() //Returns whether the resource can be calle
 {
   return it->second->is_function();
 }
-dllexport int resource_argCountMin() //Returns the minimum number of arguments to the function; the names cannot be fetched.
+dllexport int resource_argCountMin() //Returns the minimum number of arguments to the function
 {
   return it->second->parameter_count_min();
 }
-dllexport int resource_argCountMax() //Returns the maximum number of arguments to the function; again, the names cannot be fetched.
+dllexport int resource_argCountMax() //Returns the maximum number of arguments to the function
 {
   return it->second->parameter_count_max();
+}
+dllexport int resource_overloadCount() //Returns the number of times the function was declared in the parsed sources
+{
+  return it->second->sparams.size;
+}
+dllexport const char* resource_parameters(int i) //Returns a simple string of parameters and defaults that would serve as the prototype of this function
+{ // The returned pointer to the string is INVALIDATED upon the next call to definitionsModified().
+  return it->second->sparams[i].c_str();
 }
 dllexport bool resource_isTypeName() //Returns whether the resource can be used as a typename.
 {

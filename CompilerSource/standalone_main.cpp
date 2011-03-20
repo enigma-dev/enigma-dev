@@ -79,6 +79,16 @@ extern  map<externs*, int> bigmap;
 extern char getch();
 extern int cfile_parse_main();
 extern externs *enigma_type__var, *enigma_type__variant;
+
+inline void povers(string n)
+{
+  if (find_extname(n,0xFFFFFFFF))
+  {
+    cout << ext_retriever_var->name;
+    for (int i = 0; i < ext_retriever_var->sparams.size; i++)
+      cout << "   " << ext_retriever_var->sparams[i] << endl;
+  }
+}
 int mainr(int argc, char *argv[])
 {
   cout << "Grabbing locals" << endl;
@@ -123,6 +133,22 @@ int mainr(int argc, char *argv[])
   //print_scope_members(&global_scope);
   
   cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
+  cout << "Name lookups: " << endl;
+  povers("draw_sprite");
+  povers("show_message");
+  povers("max");
+  povers("sin");
+  povers("fork");
+  povers("toString");
+  povers("draw_triangle");
+  povers("draw_text");
+  povers("draw_primitive_begin");
+  povers("room_goto");
+  povers("printf");
+  povers("draw_background_tiled_area_ext");
+  povers("draw_roundrect_color");
+  
+  return 0;
   //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   
   if (find_extname("var", EXTFLAG_TYPENAME))
@@ -224,8 +250,7 @@ int main(int argc, char* argv[])
   puts("Attempting to run");
   e_execp("gcc -E -x c++ -v blank.txt","");
   //e_exec("gcc -E -x c++ -v blank.txt");
-  puts("done");
-  return 0;
+  
   libInit(NULL);
   definitionsModified(NULL, ((string) "%e-yaml\n"
 	       "---\n" 	 

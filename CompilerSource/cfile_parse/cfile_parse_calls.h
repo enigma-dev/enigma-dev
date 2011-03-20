@@ -146,7 +146,7 @@ void cparse_init()
 int anoncount = 0;
 extern void print_err_line_at(pt a);
 int negative_one = -1;
-bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int &tpc = negative_one,long long last_value = 0)
+bool ExtRegister(unsigned int last,unsigned phase,string name,string& fparams,bool flag_extern, rf_stack refs,externs *type = NULL,varray<tpdata> &tparams = tmplate_params, int &tpc = negative_one,long long last_value = 0)
 {
   unsigned int is_tdef = last & LN_TYPEDEF;
   last &= ~LN_TYPEDEF;
@@ -167,7 +167,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
         ext_retriever_var = it->second; //Assuming we don't error, this is what we will return
 
         if (it->second->is_function() and refs.is_function())
-          it->second->parameter_unify(refs);
+          it->second->parameter_unify(refs,fparams);
         else
         {
           // struct a {}; will declare 'a' at '{' and then again at the first ';' after '}'.
@@ -282,7 +282,7 @@ bool ExtRegister(unsigned int last,unsigned phase,string name,bool flag_extern, 
   if (flag_extern)
     eflags |= EXTFLAG_EXTERN;
 
-  externs* e = new externs(name,type,scope_to_use,eflags);
+  externs* e = new externs(name,type,scope_to_use,eflags,fparams);
   scope_to_use->members[name] = e;
   ext_retriever_var = e;
 

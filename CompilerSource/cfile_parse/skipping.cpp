@@ -41,7 +41,7 @@ using namespace std;
 #include "expression_evaluator.h"
 #include "template_handlers.h"
 
-pt handle_skip()
+pt handle_skip(string &fparams)
 {
   if (is_letter(cfile[pos]))
   {
@@ -154,12 +154,17 @@ pt handle_skip()
             return pos;
         }
       }
-      else if ((last_named & ~LN_TYPEDEF) == LN_DECLARATOR and last_named_phase == DEC_FULL)
+      else if ((last_named & ~LN_TYPEDEF) == LN_DECLARATOR)
       {
-        last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
-        last_type = TemplateSpecialize(last_type,specialize_string);
-        if (!last_type)
-          return pos;
+        if (last_named_phase == DEC_FULL)
+        {
+          last_named = LN_DECLARATOR | (last_named & LN_TYPEDEF);
+          last_type = TemplateSpecialize(last_type,specialize_string);
+          if (!last_type)
+            return pos;
+        }
+        else if (last_named_phase == DEC_IDENTIFIER)
+          fparams += specialize_string;
       }
       else if ((last_named & ~LN_TYPEDEF) == LN_ENUM)
       {
@@ -218,11 +223,9 @@ pt handle_skip()
       }
       specializing = false;
       specialize_string = "";
-      if (skippast)
-        pos++;
+      pos += skippast;
     }
-    else if (skippast)
-      pos++;
+    else pos += skippast;
     skippast = 0;
   }
   else pos++;

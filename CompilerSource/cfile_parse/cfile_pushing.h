@@ -64,7 +64,23 @@ struct cfnode
 //extern unsigned int macrod=0;
 //extern varray<string> inmacros;
 
-extern stack<cfnode*> cfstack;
+template<typename r> struct dlstack {
+  struct node {
+    r m;
+    node *prev, *next;
+    node(r nm, node* np): m(nm), prev(np), next(NULL) {}
+  } *m;
+  r &top() { return m->m; };
+  void push(r v) { if (m->next) m = m->next, m->m = v; else m = m->next = new node(v,m); }
+  void pop() { m = m->prev; }
+  bool empty() { return !m->m; }
+  
+  node* peek() { return m->prev; }
+  node* peek(node* m) { return m->prev; }
+  
+  dlstack(): m(new node(NULL,NULL)) {}
+};
+extern dlstack<cfnode*> cfstack;
 void handle_macro_pop();
 pt handle_macros(const string n);
 
