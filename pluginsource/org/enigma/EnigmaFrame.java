@@ -55,6 +55,12 @@ public class EnigmaFrame extends JDialog
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		}
 
+	public void append(String text)
+		{
+		ta.append(text);
+		ta.setCaretPosition(ta.getDocument().getLength());
+		}
+
 	void progress(int pos, String tip)
 		{
 		progress(pos,tip,tip);

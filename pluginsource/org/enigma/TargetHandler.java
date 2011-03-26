@@ -12,52 +12,21 @@ import org.enigma.EYamlParser.YamlNode;
 
 public class TargetHandler
 	{
-	public TargetSelection targetPlatform, targetGraphics, targetAudio, targetCollision;
+	public static TargetSelection defaultPlatform, defaultGraphics, defaultAudio, defaultCollision;
 	static List<TargetSelection> tCompilers, tPlatforms, tGraphics, tAudios, tCollisions;
 
 	static
 		{
+		findCompilers();
 		tPlatforms = findTargets("Platforms");
 		tGraphics = findTargets("Graphics_Systems");
 		tAudios = findTargets("Audio_Systems");
 		tCollisions = findTargets("Collision_Systems");
+		findDefaults();
 		}
 
-	public TargetHandler()
+	private TargetHandler()
 		{
-		tCompilers = new ArrayList<TargetSelection>();
-		File f = new File(EnigmaRunner.WORKDIR,"Compilers");
-		File[] files = new File(f,getOS()).listFiles();
-		if (files != null)
-			{
-			for (File file : files)
-				{
-				String ey = file.getName();
-				if (ey.endsWith(".ey"))
-					{
-					try
-						{
-						YamlNode node = EYamlParser.parse(new Scanner(file));
-
-						TargetSelection ps = new TargetSelection();
-						ps.id = ey.substring(0,ey.length() - 3);
-						ps.name = node.getMC("Name");
-						ps.desc = node.getMC("Description",null);
-						ps.auth = node.getMC("Maintainer",null);
-
-						tCompilers.add(ps);
-						}
-					catch (FileNotFoundException e)
-						{
-						}
-					}
-				}
-			}
-
-		tPlatforms = findTargets("Platforms");
-		tGraphics = findTargets("Graphics_Systems");
-		tAudios = findTargets("Audio_Systems");
-		tCollisions = findTargets("Collision_Systems");
 		}
 
 	public static String getOS()
@@ -80,6 +49,35 @@ public class TargetHandler
 			{
 			return name;
 			}
+		}
+
+	private static ArrayList<TargetSelection> findCompilers()
+		{
+		ArrayList<TargetSelection> tCompilers = new ArrayList<TargetSelection>();
+		File f = new File(EnigmaRunner.WORKDIR,"Compilers");
+		File[] files = new File(f,getOS()).listFiles();
+		if (files == null) return tCompilers;
+		for (File file : files)
+			{
+			String ey = file.getName();
+			if (!ey.endsWith(".ey")) continue;
+			try
+				{
+				YamlNode node = EYamlParser.parse(new Scanner(file));
+
+				TargetSelection ps = new TargetSelection();
+				ps.id = ey.substring(0,ey.length() - 3);
+				ps.name = node.getMC("Name");
+				ps.desc = node.getMC("Description",null);
+				ps.auth = node.getMC("Maintainer",null);
+
+				tCompilers.add(ps);
+				}
+			catch (FileNotFoundException e)
+				{
+				}
+			}
+		return tCompilers;
 		}
 
 	//target is one of ""Platforms","Audio_Systems","Graphics_Systems","Collision_Systems"
@@ -160,14 +158,14 @@ public class TargetHandler
 		return s.toLowerCase().replaceAll("[\\[\\]\\-\\s_]","");
 		}
 
-	private void setup()
+	private static void findDefaults()
 		{
-		targetPlatform = findDefault(tPlatforms,getOS());
-		if (targetPlatform != null)
+		defaultPlatform = findDefault(tPlatforms,getOS());
+		if (defaultPlatform != null)
 			{
-			targetGraphics = findDefault(tGraphics,targetPlatform.id);
-			targetAudio = findDefault(tAudios,targetPlatform.id);
-			targetCollision = findDefault(tCollisions,targetPlatform.id);
+			defaultGraphics = findDefault(tGraphics,defaultPlatform.id);
+			defaultAudio = findDefault(tAudios,defaultPlatform.id);
+			defaultCollision = findDefault(tCollisions,defaultPlatform.id);
 			}
 		}
 
@@ -184,7 +182,7 @@ public class TargetHandler
 		return null;
 		}
 
-	private List<TargetSelection> getTargetArray(List<TargetSelection> itsl)
+	private static List<TargetSelection> getTargetArray(List<TargetSelection> itsl)
 		{
 		List<TargetSelection> otsl = new ArrayList<TargetSelection>();
 		String depends;
@@ -194,8 +192,8 @@ public class TargetHandler
 			return itsl;
 		else
 			{
-			if (targetPlatform == null) return otsl;
-			depends = targetPlatform.id;
+			if (defaultPlatform == null) return otsl;
+			depends = defaultPlatform.id;
 			}
 
 		for (TargetSelection ts : itsl)
@@ -204,22 +202,22 @@ public class TargetHandler
 		return otsl;
 		}
 
-	public Object[] getTargetPlatformsArray()
+	public static Object[] getTargetPlatformsArray()
 		{
 		return getTargetArray(tPlatforms).toArray();
 		}
 
-	public Object[] getTargetGraphicsArray()
+	public static Object[] getTargetGraphicsArray()
 		{
 		return getTargetArray(tGraphics).toArray();
 		}
 
-	public Object[] getTargetAudiosArray()
+	public static Object[] getTargetAudiosArray()
 		{
 		return getTargetArray(tAudios).toArray();
 		}
 
-	public Object[] getTargetCollisionsArray()
+	public static Object[] getTargetCollisionsArray()
 		{
 		return getTargetArray(tCollisions).toArray();
 		}

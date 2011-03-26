@@ -205,7 +205,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 			try
 				{
-				File gccey = new File(new File("Compilers",EnigmaSettings.getOS()),"gcc.ey");
+				File gccey = new File(new File("Compilers",TargetHandler.getOS()),"gcc.ey");
 				YamlNode n = EYamlParser.parse(new Scanner(gccey));
 				make = n.getMC("Make"); //or OOB
 				path = n.getMC("Path","");
@@ -518,13 +518,16 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		LGM.commitAll();
 		//System.out.println("Compiling with " + enigma);
 
-		final File ef = outname;
+		final File efi = outname;
 		new Thread()
 			{
 				public void run()
 					{
+					ef.setVisible(true);
+					ef.append("Populating communication buffer. This may take a while on large files...");
 					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
-					System.out.println(DRIVER.compileEGMf(es,ef == null ? null : ef.getAbsolutePath(),mode));
+					ef.append("Calling compiler.");
+					System.out.println(DRIVER.compileEGMf(es,efi == null ? null : efi.getAbsolutePath(),mode));
 					}
 			}.start();
 

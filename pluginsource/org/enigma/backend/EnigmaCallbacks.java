@@ -71,8 +71,7 @@ public class EnigmaCallbacks extends Structure
 		{
 		public void callback(String msg)
 			{
-			ef.ta.append(msg);
-			ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
+			ef.append(msg);
 			}
 		}
 

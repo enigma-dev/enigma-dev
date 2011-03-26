@@ -33,7 +33,6 @@ import java.io.OutputStream;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -47,13 +46,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
+import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaSettings;
-import org.enigma.backend.EnigmaSettings.TargetSelection;
 import org.lateralgm.compare.CollectionComparator;
 import org.lateralgm.compare.MapComparator;
 import org.lateralgm.compare.ObjectComparator;
@@ -362,10 +362,10 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		GroupLayout plat = new GroupLayout(platPane);
 		platPane.setLayout(plat);
 
-		targPlat = new JComboBox(es.getTargetPlatformsArray());
-		targGfx = new JComboBox(es.getTargetGraphicsArray());
-		targAudio = new JComboBox(es.getTargetAudiosArray());
-		targColl = new JComboBox(es.getTargetCollisionsArray());
+		targPlat = new JComboBox(TargetHandler.getTargetPlatformsArray());
+		targGfx = new JComboBox(TargetHandler.getTargetGraphicsArray());
+		targAudio = new JComboBox(TargetHandler.getTargetAudiosArray());
+		targColl = new JComboBox(TargetHandler.getTargetCollisionsArray());
 		targPlat.setSelectedItem(es.targetPlatform);
 		targGfx.setSelectedItem(es.targetGraphics);
 		targAudio.setSelectedItem(es.targetAudio);
@@ -628,9 +628,9 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			if (s == targPlat)
 				{
 				es.targetPlatform = ts;
-				targGfx.setModel(new DefaultComboBoxModel(es.getTargetGraphicsArray()));
-				targAudio.setModel(new DefaultComboBoxModel(es.getTargetAudiosArray()));
-				targColl.setModel(new DefaultComboBoxModel(es.getTargetCollisionsArray()));
+				targGfx.setModel(new DefaultComboBoxModel(TargetHandler.getTargetGraphicsArray()));
+				targAudio.setModel(new DefaultComboBoxModel(TargetHandler.getTargetAudiosArray()));
+				targColl.setModel(new DefaultComboBoxModel(TargetHandler.getTargetCollisionsArray()));
 				}
 			tfAuth.setText(ts == null ? null : ts.auth);
 			taDesc.setText(ts == null ? null : ts.desc);
