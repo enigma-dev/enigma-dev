@@ -99,6 +99,7 @@ public class EnigmaSettings
 	private String toTargetYaml()
 		{
 		return "%e-yaml\n---\n"//
+				+ "target-compiler: " + (selCompiler == null ? "" : selCompiler.id) + "\n"//
 				+ "target-windowing: " + (selPlatform == null ? "" : selPlatform.id) + "\n"//
 				+ "target-graphics: " + (selGraphics == null ? "" : selGraphics.id) + "\n"//
 				+ "target-audio: " + (selAudio == null ? "" : selAudio.id) + "\n"//
