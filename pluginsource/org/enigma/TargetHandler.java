@@ -12,12 +12,12 @@ import org.enigma.EYamlParser.YamlNode;
 
 public class TargetHandler
 	{
-	public static TargetSelection defaultPlatform, defaultGraphics, defaultAudio, defaultCollision;
-	static List<TargetSelection> tCompilers, tPlatforms, tGraphics, tAudios, tCollisions;
+	public static TargetSelection defCompiler, defPlatform, defGraphics, defAudio, defCollision;
+	private static List<TargetSelection> tCompilers, tPlatforms, tGraphics, tAudios, tCollisions;
 
 	static
 		{
-		findCompilers();
+		tCompilers = findCompilers();
 		tPlatforms = findTargets("Platforms");
 		tGraphics = findTargets("Graphics_Systems");
 		tAudios = findTargets("Audio_Systems");
@@ -70,7 +70,8 @@ public class TargetHandler
 				ps.name = node.getMC("Name");
 				ps.desc = node.getMC("Description",null);
 				ps.auth = node.getMC("Maintainer",null);
-
+				String nat = node.getMC("Native","No").toLowerCase(); //native is a keyword
+				if (nat.equals("yes") || nat.equals("true")) defCompiler = ps;
 				tCompilers.add(ps);
 				}
 			catch (FileNotFoundException e)
@@ -160,12 +161,12 @@ public class TargetHandler
 
 	private static void findDefaults()
 		{
-		defaultPlatform = findDefault(tPlatforms,getOS());
-		if (defaultPlatform != null)
+		defPlatform = findDefault(tPlatforms,getOS());
+		if (defPlatform != null)
 			{
-			defaultGraphics = findDefault(tGraphics,defaultPlatform.id);
-			defaultAudio = findDefault(tAudios,defaultPlatform.id);
-			defaultCollision = findDefault(tCollisions,defaultPlatform.id);
+			defGraphics = findDefault(tGraphics,defPlatform.id);
+			defAudio = findDefault(tAudios,defPlatform.id);
+			defCollision = findDefault(tCollisions,defPlatform.id);
 			}
 		}
 
@@ -192,14 +193,19 @@ public class TargetHandler
 			return itsl;
 		else
 			{
-			if (defaultPlatform == null) return otsl;
-			depends = defaultPlatform.id;
+			if (defPlatform == null) return otsl;
+			depends = defPlatform.id;
 			}
 
 		for (TargetSelection ts : itsl)
 			if (ts.depends.contains(depends.toLowerCase())) otsl.add(ts);
 
 		return otsl;
+		}
+
+	public static Object[] getTargetCompilersArray()
+		{
+		return tCompilers.toArray();
 		}
 
 	public static Object[] getTargetPlatformsArray()

@@ -484,14 +484,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			return;
 			}
 
-		if (es.targetPlatform == null)
+		if (es.selCompiler == null || es.selPlatform == null)
 			{
 			JOptionPane.showMessageDialog(null,
 					"Unknown compilation settings for your platform. Perhaps your platform isn't supported.");
 			return;
 			}
 
-		String exe = es.targetPlatform.ext;
+		String exe = es.selPlatform.ext;
 
 		//determine `outname` (rebuild has no `outname`)
 		File outname = null;

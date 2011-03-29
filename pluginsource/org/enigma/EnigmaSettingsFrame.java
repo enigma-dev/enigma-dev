@@ -87,7 +87,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	private CodeHolder sDef, sGlobLoc, sInit, sClean;
 	private CustomFileChooser fc;
 
-	private JComboBox targPlat, targGfx, targAudio, targColl;
+	private JComboBox targComp, targPlat, targGfx, targAudio, targColl;
 	private JTextField tfAuth;
 	private JTextArea taDesc;
 
@@ -362,26 +362,30 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		GroupLayout plat = new GroupLayout(platPane);
 		platPane.setLayout(plat);
 
+		targComp = new JComboBox(TargetHandler.getTargetCompilersArray());
 		targPlat = new JComboBox(TargetHandler.getTargetPlatformsArray());
 		targGfx = new JComboBox(TargetHandler.getTargetGraphicsArray());
 		targAudio = new JComboBox(TargetHandler.getTargetAudiosArray());
 		targColl = new JComboBox(TargetHandler.getTargetCollisionsArray());
-		targPlat.setSelectedItem(es.targetPlatform);
-		targGfx.setSelectedItem(es.targetGraphics);
-		targAudio.setSelectedItem(es.targetAudio);
-		targColl.setSelectedItem(es.targetCollision);
+		targComp.setSelectedItem(es.selCompiler);
+		targPlat.setSelectedItem(es.selPlatform);
+		targGfx.setSelectedItem(es.selGraphics);
+		targAudio.setSelectedItem(es.selAudio);
+		targColl.setSelectedItem(es.selCollision);
+		targComp.addActionListener(this);
 		targPlat.addActionListener(this);
 		targGfx.addActionListener(this);
 		targAudio.addActionListener(this);
 		targColl.addActionListener(this);
 
-		tfAuth = new JTextField(es.targetPlatform == null ? null : es.targetPlatform.auth);
-		taDesc = new JTextArea(es.targetPlatform == null ? null : es.targetPlatform.desc);
+		tfAuth = new JTextField(es.selCompiler == null ? null : es.selCompiler.auth);
+		taDesc = new JTextArea(es.selCompiler == null ? null : es.selCompiler.desc);
 		tfAuth.setEditable(false);
 		taDesc.setEditable(false);
 		taDesc.setLineWrap(true);
 		taDesc.setWrapStyleWord(true);
 
+		JLabel lComp = new JLabel("Compiler: ");
 		JLabel lPlat = new JLabel("Platform: ");
 		JLabel lGfx = new JLabel("Graphics: ");
 		JLabel lSound = new JLabel("Audio: ");
@@ -393,12 +397,14 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		layout.setHorizontalGroup(layout.createParallelGroup()
 		/**/.addGroup(layout.createSequentialGroup()
 		/*	*/.addGroup(layout.createParallelGroup()
+		/*		*/.addComponent(lComp)
 		/*		*/.addComponent(lPlat)
 		/*		*/.addComponent(lGfx)
 		/*		*/.addComponent(lSound)
 		/*		*/.addComponent(lColl))
 		/*	*/.addPreferredGap(ComponentPlacement.RELATED)
 		/*	*/.addGroup(layout.createParallelGroup()
+		/*		*/.addComponent(targComp)
 		/*		*/.addComponent(targPlat)
 		/*		*/.addComponent(targGfx)
 		/*		*/.addComponent(targAudio)
@@ -409,6 +415,9 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/*	*/.addComponent(tfAuth))
 		/**/.addComponent(desc));
 		layout.setVerticalGroup(layout.createSequentialGroup()
+		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+		/*	*/.addComponent(lComp)
+		/*	*/.addComponent(targComp,pref,pref,pref))
 		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
 		/*	*/.addComponent(lPlat)
 		/*	*/.addComponent(targPlat,pref,pref,pref))
@@ -554,10 +563,11 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		es.initialization = sInit.getCode();
 		es.cleanup = sClean.getCode();
 
-		es.targetPlatform = (TargetSelection) targPlat.getSelectedItem();
-		es.targetGraphics = (TargetSelection) targGfx.getSelectedItem();
-		es.targetAudio = (TargetSelection) targAudio.getSelectedItem();
-		es.targetCollision = (TargetSelection) targColl.getSelectedItem();
+		es.selCompiler = (TargetSelection) targComp.getSelectedItem();
+		es.selPlatform = (TargetSelection) targPlat.getSelectedItem();
+		es.selGraphics = (TargetSelection) targGfx.getSelectedItem();
+		es.selAudio = (TargetSelection) targAudio.getSelectedItem();
+		es.selCollision = (TargetSelection) targColl.getSelectedItem();
 		}
 
 	public void revertResource()
@@ -627,7 +637,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			TargetSelection ts = (TargetSelection) ((JComboBox) s).getSelectedItem();
 			if (s == targPlat)
 				{
-				es.targetPlatform = ts;
+				es.selPlatform = ts;
 				targGfx.setModel(new DefaultComboBoxModel(TargetHandler.getTargetGraphicsArray()));
 				targAudio.setModel(new DefaultComboBoxModel(TargetHandler.getTargetAudiosArray()));
 				targColl.setModel(new DefaultComboBoxModel(TargetHandler.getTargetCollisionsArray()));

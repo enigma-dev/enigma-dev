@@ -35,7 +35,7 @@ public class EnigmaSettings
 	public String definitions = "", globalLocals = "";
 	public String initialization = "", cleanup = "";
 
-	public TargetSelection targetPlatform, targetGraphics, targetAudio, targetCollision;
+	public TargetSelection selCompiler, selPlatform, selGraphics, selAudio, selCollision;
 
 	public EnigmaSettings()
 		{
@@ -48,10 +48,11 @@ public class EnigmaSettings
 
 		loadDefinitions();
 
-		targetPlatform = TargetHandler.defaultPlatform;
-		targetGraphics = TargetHandler.defaultGraphics;
-		targetAudio = TargetHandler.defaultAudio;
-		targetCollision = TargetHandler.defaultCollision;
+		selCompiler = TargetHandler.defCompiler;
+		selPlatform = TargetHandler.defPlatform;
+		selGraphics = TargetHandler.defGraphics;
+		selAudio = TargetHandler.defAudio;
+		selCollision = TargetHandler.defCollision;
 		}
 
 	void loadDefinitions()
@@ -98,10 +99,10 @@ public class EnigmaSettings
 	private String toTargetYaml()
 		{
 		return "%e-yaml\n---\n"//
-				+ "target-windowing: " + (targetPlatform == null ? "" : targetPlatform.id) + "\n"//
-				+ "target-graphics: " + (targetGraphics == null ? "" : targetGraphics.id) + "\n"//
-				+ "target-audio: " + (targetAudio == null ? "" : targetAudio.id) + "\n"//
-				+ "target-collision: " + (targetCollision == null ? "" : targetCollision.id) + "\n"//
+				+ "target-windowing: " + (selPlatform == null ? "" : selPlatform.id) + "\n"//
+				+ "target-graphics: " + (selGraphics == null ? "" : selGraphics.id) + "\n"//
+				+ "target-audio: " + (selAudio == null ? "" : selAudio.id) + "\n"//
+				+ "target-collision: " + (selCollision == null ? "" : selCollision.id) + "\n"//
 				+ "target-widget: " + "None" + "\n"//
 				+ "target-networking: " + "None" + "\n";//
 		}
@@ -127,10 +128,11 @@ public class EnigmaSettings
 		es.initialization = initialization;
 		es.cleanup = cleanup;
 
-		es.targetPlatform = targetPlatform;
-		es.targetGraphics = targetGraphics;
-		es.targetAudio = targetAudio;
-		es.targetCollision = targetCollision;
+		es.selCompiler = selCompiler;
+		es.selPlatform = selPlatform;
+		es.selGraphics = selGraphics;
+		es.selAudio = selAudio;
+		es.selCollision = selCollision;
 		return es;
 		}
 	}
