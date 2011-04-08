@@ -419,17 +419,33 @@ public final class EnigmaWriter
 
 	protected void populateFonts()
 		{
-		int size = i.fonts.size();
+		int size = i.fonts.size() + 1;
 		o.fontCount = size;
-		if (size == 0) return;
 
 		o.fonts = new Font.ByReference();
 		Font[] ofl = (Font[]) o.fonts.toArray(size);
+
+		//Populate the default font, called "EnigmaDefault"
+		java.awt.Font iF = new java.awt.Font(java.awt.Font.DIALOG,java.awt.Font.PLAIN,12);
+		Font oF = ofl[0];
+		oF.name = "EnigmaDefault";
+		oF.id = -1;
+		oF.fontName = iF.getFontName();
+		oF.size = iF.getSize();
+		oF.bold = false;
+		oF.italic = false;
+		oF.rangeMin = 0;
+		oF.rangeMax = 256;
+
+		populateGlyphs(ofl[0]);
+
+		if (size == 1) return;
+
 		org.lateralgm.resources.Font[] ifl = i.fonts.toArray(new org.lateralgm.resources.Font[0]);
-		for (int f = 0; f < size; f++)
+		for (int f = 1; f < size; f++)
 			{
 			Font of = ofl[f];
-			org.lateralgm.resources.Font ifont = ifl[f];
+			org.lateralgm.resources.Font ifont = ifl[f - 1];
 
 			of.name = ifont.getName();
 			of.id = ifont.getId();
