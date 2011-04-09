@@ -502,7 +502,8 @@ public final class EnigmaWriter
 			for (int j = 0; j < rasterRGB.length; j++)
 				raster[j] = (byte) (rasterRGB[j] & 0xFF);
 			ofgl[ind].width = bi.getWidth();
-			ofgl[ind].height = bi.getWidth();
+			ofgl[ind].height = bi.getHeight();
+			
 			ofgl[ind].raster = ByteBuffer.allocateDirect(raster.length).put(raster);
 			}
 		}
