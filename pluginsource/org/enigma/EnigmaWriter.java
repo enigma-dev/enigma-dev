@@ -434,8 +434,8 @@ public final class EnigmaWriter
 		oF.size = iF.getSize();
 		oF.bold = false;
 		oF.italic = false;
-		oF.rangeMin = 0;
-		oF.rangeMax = 256;
+		oF.rangeMin = 32;
+		oF.rangeMax = 127;
 
 		populateGlyphs(ofl[0]);
 
