@@ -4,7 +4,7 @@
 	$(CXX) -c file_manip.cpp		-o .eobjs_$(MODE)/file_manip.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/XLIBdialog.o: XLIBdialog.cpp
 	$(CXX) -c XLIBdialog.cpp		-o .eobjs_$(MODE)/XLIBdialog.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/XLIBmain.o: XLIBmain.cpp XLIBwindow.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
+.eobjs_$(MODE)/XLIBmain.o: XLIBmain.cpp XLIBwindow.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c XLIBmain.cpp		-o .eobjs_$(MODE)/XLIBmain.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/XLIBwindow.o: XLIBwindow.cpp ../../Universal_System/CallbackArrays.h
 	$(CXX) -c XLIBwindow.cpp		-o .eobjs_$(MODE)/XLIBwindow.o $(GFLAGS) $(ECPPFLAGS)

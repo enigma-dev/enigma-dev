@@ -35,10 +35,10 @@
 
 namespace enigma{
 float circleprecision=24;
-extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;
+extern unsigned bound_texture;
 extern unsigned char currentcolor[4];
 }
-#define untexture() if(enigma::cur_bou_tha_noo_sho_eve_cha_eve) glBindTexture(GL_TEXTURE_2D,enigma::cur_bou_tha_noo_sho_eve_cha_eve=0);
+#define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
 
 void draw_set_line_pattern(unsigned short pattern, int scale)
 {

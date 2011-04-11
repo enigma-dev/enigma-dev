@@ -12,7 +12,7 @@
 	$(CXX) -c GSmiscextra.cpp		-o .eobjs_$(MODE)/GSmiscextra.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/GSprmtvs.o: GSprmtvs.cpp OpenGLHeaders.h ../../API_Switchboard.h
 	$(CXX) -c GSprmtvs.cpp		-o .eobjs_$(MODE)/GSprmtvs.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSscreen.o: GSscreen.cpp OpenGLHeaders.h ../../API_Switchboard.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h ../../Universal_System/instance_system.h ../../Universal_System/reflexive_types.h ../../Universal_System/object.h graphics_object.h ../../Universal_System/planar_object.h
+.eobjs_$(MODE)/GSscreen.o: GSscreen.cpp OpenGLHeaders.h ../../API_Switchboard.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h ../../Universal_System/instance_system.h ../../Universal_System/reflexive_types.h ../../Universal_System/object.h graphics_object.h ../../Universal_System/planar_object.h
 	$(CXX) -c GSscreen.cpp		-o .eobjs_$(MODE)/GSscreen.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/GSspriteadd.o: GSspriteadd.cpp OpenGLHeaders.h ../../API_Switchboard.h ../../Universal_System/IMGloading.h ../../Universal_System/spritestruct.h ../../libEGMstd.h
 	$(CXX) -c GSspriteadd.cpp		-o .eobjs_$(MODE)/GSspriteadd.o $(GFLAGS) $(ECPPFLAGS)
@@ -24,7 +24,7 @@
 	$(CXX) -c GSsurface.cpp		-o .eobjs_$(MODE)/GSsurface.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/GStextures.o: GStextures.cpp OpenGLHeaders.h ../../API_Switchboard.h
 	$(CXX) -c GStextures.cpp		-o .eobjs_$(MODE)/GStextures.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/OPENGLStd.o: OPENGLStd.cpp OpenGLHeaders.h ../../API_Switchboard.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
+.eobjs_$(MODE)/OPENGLStd.o: OPENGLStd.cpp OpenGLHeaders.h ../../API_Switchboard.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c OPENGLStd.cpp		-o .eobjs_$(MODE)/OPENGLStd.o $(GFLAGS) $(ECPPFLAGS)
 
 .eobjs_$(MODE):

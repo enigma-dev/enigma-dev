@@ -35,7 +35,7 @@
 
 namespace enigma
 {
-  extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;
+  extern unsigned bound_texture;
   extern unsigned char currentcolor[4];
   extern bool glew_isgo;
   extern bool pbo_isgo;

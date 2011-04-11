@@ -32,15 +32,31 @@ namespace enigma
   {
     int   x,  y,  x2,  y2; // Draw coordinates, relative to the top-left corner of a full glyph. Added to xx and yy for draw.
     float tx, ty, tx2, ty2; // Texture coords: used to locate glyph on bound font texture
-    int   xs; // Spacing: used to increment xx
+    float xs; // Spacing: used to increment xx
   };
   struct font
   {
+    // Trivia
+    string name, fontname;
+    int fontsize; bool bold, italic;
+    
+    // Metrics and such
     unsigned char glyphstart, glyphcount;
     fontglyph *glyphs;
     int height;
     unsigned int texture;
   };
+  struct rawfont {
+    string name;
+    int id;
+    
+    string fontname;
+    int fontsize; bool bold, italic;
+    unsigned char glyphstart, glyphcount;
+  };
+  extern rawfont rawfontdata[];
   extern font **fontstructarray;
+  
+  extern int rawfontcount, rawfontmaxid;
   int font_new(unsigned char gs, unsigned char gc); // Creates a new font, allocating 'gc' glyphs
 }

@@ -37,10 +37,10 @@
 
 
 namespace enigma{
-    extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;
+    extern unsigned bound_texture;
     extern unsigned char currentcolor[4];
 }
-#define untexture() if(enigma::cur_bou_tha_noo_sho_eve_cha_eve) glBindTexture(GL_TEXTURE_2D,enigma::cur_bou_tha_noo_sho_eve_cha_eve=0);
+#define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
 
 int pr_curve_detail = 20;
 float pr_curve_alpha1 = 1;
@@ -311,16 +311,13 @@ void draw_spline_end()
 {
     untexture();
     glPushAttrib(GL_LINE_BIT);
-    glLineWidth(pr_curve_width);
-    glBegin(startedSplinesMode.top());
-    spline &arr = *startedSplines.top();
-    if (arr.size()>4){
-        for (int i = 3; i < arr.size(); i++)
-        {
-            draw_spline_part(arr[i-3].x, arr[i-3].y, arr[i-2].x, arr[i-2].y, arr[i-1].x, arr[i-1].y, arr[i].x, arr[i].y, arr[i-2].col, arr[i-1].col, arr[i-2].al, arr[i-1].al);
-        }
-   }
-    glEnd();
+      glLineWidth(pr_curve_width);
+      glBegin(startedSplinesMode.top());
+        spline &arr = *startedSplines.top();
+        if (arr.size()>4)
+          for (int i = 3; i < arr.size(); i++)
+              draw_spline_part(arr[i-3].x, arr[i-3].y, arr[i-2].x, arr[i-2].y, arr[i-1].x, arr[i-1].y, arr[i].x, arr[i].y, arr[i-2].col, arr[i-1].col, arr[i-2].al, arr[i-1].al);
+      glEnd();
     glPopAttrib();
     glColor4ubv(enigma::currentcolor);
     delete &arr;

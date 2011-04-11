@@ -174,11 +174,13 @@
 		<Unit filename="compiler/compile_organization.h" />
 		<Unit filename="compiler/components/components.h" />
 		<Unit filename="compiler/components/module_write_backgrounds.cpp" />
+		<Unit filename="compiler/components/module_write_fonts.cpp" />
 		<Unit filename="compiler/components/module_write_sounds.cpp" />
 		<Unit filename="compiler/components/module_write_sprites.cpp" />
 		<Unit filename="compiler/components/parse_and_link.cpp" />
 		<Unit filename="compiler/components/parse_secondary.cpp" />
 		<Unit filename="compiler/components/write_defragged_events.cpp" />
+		<Unit filename="compiler/components/write_font_info.cpp" />
 		<Unit filename="compiler/components/write_globals.cpp" />
 		<Unit filename="compiler/components/write_object_access.cpp" />
 		<Unit filename="compiler/components/write_object_data.cpp" />
@@ -191,6 +193,8 @@
 		<Unit filename="compiler/output_locals.h" />
 		<Unit filename="compiler/pcs/pcs.cpp" />
 		<Unit filename="compiler/pcs/pcs.h" />
+		<Unit filename="compiler/reshandlers/rectpack.cpp" />
+		<Unit filename="compiler/reshandlers/rectpack.h" />
 		<Unit filename="externs/ext_iteration.cpp" />
 		<Unit filename="externs/externs.cpp" />
 		<Unit filename="externs/externs.h" />

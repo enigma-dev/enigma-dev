@@ -37,8 +37,8 @@ int __currentpdepth;
 #endif
 
 //namespace enigma{extern void untexture();}
-namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
-#define untexture() if(enigma::cur_bou_tha_noo_sho_eve_cha_eve) glBindTexture(GL_TEXTURE_2D,enigma::cur_bou_tha_noo_sho_eve_cha_eve = 0);
+namespace enigma{extern unsigned bound_texture;}
+#define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
 
 GLenum ptypes_by_id[16] = {
   GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES,
@@ -79,8 +79,8 @@ int draw_primitive_begin(int dink)
 
 int draw_primitive_begin_texture(int dink,unsigned tex)
 {
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != tex)
-    glBindTexture(GL_TEXTURE_2D, enigma::cur_bou_tha_noo_sho_eve_cha_eve = tex);
+  if (enigma::bound_texture != tex)
+    glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = tex);
 	GLenum kind = ptypes_by_id[ dink & 15 ];
 	#if !PRIMBUFFER
 	  glBegin(kind);

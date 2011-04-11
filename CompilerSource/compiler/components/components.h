@@ -42,3 +42,4 @@ int compile_writeDefraggedEvents(EnigmaStruct* es);
 int module_write_sprites(EnigmaStruct *es, FILE *gameModule);
 int module_write_sounds(EnigmaStruct *es, FILE *gameModule);
 int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule);
+int module_write_fonts(EnigmaStruct *es, FILE *gameModule);

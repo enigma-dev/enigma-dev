@@ -34,7 +34,7 @@
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 extern int room_width, room_height;
-namespace enigma{extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;}
+namespace enigma{extern unsigned bound_texture;}
 
 int draw_background(int back, double x, double y)
 {
@@ -42,10 +42,10 @@ int draw_background(int back, double x, double y)
   if (!bck2d)
     return -1;
   
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+  if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+      enigma::bound_texture = bck2d->texture;
   }
   
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -76,10 +76,10 @@ int draw_background_stretched(int back, double x, double y, double w, double h)
   if (!bck2d)
     return -1;
   
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+  if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+      enigma::bound_texture = bck2d->texture;
   }
   
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -110,10 +110,10 @@ int draw_background_part(int back,double left,double top,double width,double hei
     if (!bck2d)
         return -1;
 
-    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+    if (enigma::bound_texture != bck2d->texture)
     {
         glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-        enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+        enigma::bound_texture = bck2d->texture;
     }
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -145,10 +145,10 @@ int draw_background_tiled(int back,double x,double y)
   if (!bck2d)
       return -1;
   
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+  if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+      enigma::bound_texture = bck2d->texture;
   }
   
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -188,10 +188,10 @@ int draw_background_tiled_area(int back,double x,double y,double x1,double y1,do
     if (!bck2d)
       return -1;
 
-    if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+    if (enigma::bound_texture != bck2d->texture)
     {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+      enigma::bound_texture = bck2d->texture;
     }
 
 
@@ -251,10 +251,10 @@ int draw_background_ext(int back,double x,double y,double xscale,double yscale,d
   if (!bck2d)
       return -1;
   
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+  if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+      enigma::bound_texture = bck2d->texture;
   }
   
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -291,10 +291,10 @@ int draw_background_stretched_ext(int back,double x,double y,double w,double h,i
   if (!bck2d)
       return -1;
   
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+  if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+      enigma::bound_texture = bck2d->texture;
   }
   
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -325,10 +325,10 @@ int draw_background_part_ext(int back,double left,double top,double width,double
   if (!bck2d)
       return -1;
   
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+  if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+      enigma::bound_texture = bck2d->texture;
   }
   
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -362,10 +362,10 @@ int draw_background_tiled_ext(int back,double x,double y,double xscale,double ys
   if (!bck2d)
     return -1;
   
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+  if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+      enigma::bound_texture = bck2d->texture;
   }
   
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -404,10 +404,10 @@ int draw_background_tiled_area_ext(int back,double x,double y,double x1,double y
   if (!bck2d)
     return -1;
   
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+  if (enigma::bound_texture != bck2d->texture)
   {
     glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-    enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+    enigma::bound_texture = bck2d->texture;
   }
   
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
@@ -466,10 +466,10 @@ int draw_background_general(int back,double left,double top,double width,double 
   if (!bck2d)
       return -1;
   
-  if (enigma::cur_bou_tha_noo_sho_eve_cha_eve != bck2d->texture)
+  if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
-      enigma::cur_bou_tha_noo_sho_eve_cha_eve = bck2d->texture;
+      enigma::bound_texture = bck2d->texture;
   }
   
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);

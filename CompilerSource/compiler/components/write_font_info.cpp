@@ -36,25 +36,33 @@ using namespace std;
 
 int compile_writeFontInfo(EnigmaStruct* es)
 {
-  ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out);
-  wto << license << "namespace enigma {" << endl;
-    wto << "  fontstruct baseFonts[] = {" << endl;
+  ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h",ios_base::out);
+  wto << license << "#include \"../Universal_System/fontstruct.h\"" << endl
+      << endl;
+  
+  int maxid = -1, rawfontcount = 0;
+  wto << "namespace enigma {" << endl;
+    wto << "  rawfont rawfontdata[] = {" << endl;
     for (int i = 0; i < es->fontCount; i++)
     {
-      wto << "    {" <<
-      es->fonts[i].name     << ", " << //  string name;
-      es->fonts[i].id       << ", " << //  int id;
+      wto << "    {\"" <<
+      es->fonts[i].name   << "\", " <<   // string name;
+      es->fonts[i].id     << ", \"" <<   // int id;
       
-      es->fonts[i].fontName << ", " << //  string fontName;
-      es->fonts[i].size     << ", " << //  int size;
-      es->fonts[i].bold     << ", " << //  bool bold;
-      es->fonts[i].italic   << ", " << //  bool italic;
-      es->fonts[i].rangeMin << ", " << //  int rangeMin;
-      es->fonts[i].rangeMax << "}," << //  int rangeMax;
+      es->fonts[i].fontName << "\", " << // string fontName;
+      es->fonts[i].size     <<   ", " << // int size;
+      es->fonts[i].bold     <<   ", " << // bool bold;
+      es->fonts[i].italic   <<   ", " << // bool italic;
+      es->fonts[i].rangeMin <<   ", " << // int rangeMin;
+      es->fonts[i].rangeMax - es->fonts[i].rangeMin //  int rangeMax;
+      << "}," << endl;
       
-      endl;
+      if (es->fonts[i].id > maxid)
+        maxid = es->fonts[i].id;
+      rawfontcount++;
     }
-    wto << "  }" << endl;
+    wto << "  };" << endl;
+    wto << endl << "  int rawfontcount = " << rawfontcount << ", rawfontmaxid = " << maxid << ";" << endl;
 	wto << "}" << endl;
 	wto.close();
 	return 0;

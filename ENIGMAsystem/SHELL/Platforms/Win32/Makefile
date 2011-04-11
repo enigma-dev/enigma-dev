@@ -8,13 +8,13 @@
 	$(CXX) -c WINDOWScallback.cpp		-o .eobjs_$(MODE)/WINDOWScallback.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/WINDOWSfonts.o: WINDOWSfonts.cpp ../../libEGMstd.h
 	$(CXX) -c WINDOWSfonts.cpp		-o .eobjs_$(MODE)/WINDOWSfonts.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/WINDOWSmain.o: WINDOWSmain.cpp WINDOWScallback.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
+.eobjs_$(MODE)/WINDOWSmain.o: WINDOWSmain.cpp WINDOWScallback.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c WINDOWSmain.cpp		-o .eobjs_$(MODE)/WINDOWSmain.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/WINDOWSshow_error.o: WINDOWSshow_error.cpp
 	$(CXX) -c WINDOWSshow_error.cpp		-o .eobjs_$(MODE)/WINDOWSshow_error.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/WINDOWSstd.o: WINDOWSstd.cpp ../../API_Switchboard.h ../../libEGMstd.h
 	$(CXX) -c WINDOWSstd.cpp		-o .eobjs_$(MODE)/WINDOWSstd.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/WINDOWSwindow.o: WINDOWSwindow.cpp
+.eobjs_$(MODE)/WINDOWSwindow.o: WINDOWSwindow.cpp ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c WINDOWSwindow.cpp		-o .eobjs_$(MODE)/WINDOWSwindow.o $(GFLAGS) $(ECPPFLAGS)
 
 .eobjs_$(MODE):

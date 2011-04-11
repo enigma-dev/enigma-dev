@@ -75,7 +75,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   // This algorithm will try to fit as many glyphs as possible into
   // a square space based on the max height of the font.
   
-  unsigned char* glyphdata[gcount];
+  unsigned char* glyphdata[gcount]; // Raw font image data
   enigma::rect_packer::pvrect glyphmetrics[gcount];
   int glyphx[gcount], glyphy[gcount];
   
@@ -152,10 +152,11 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   int bigtex[w*h];
   for (int i = 0; i < gcount; i++)
   {
+    // Copy the font glyph image into the big texture we just allocated
     for (int yy = 0; yy < glyphmetrics[i].h; yy++)
       for (int xx = 0; xx < glyphmetrics[i].w; xx++)
         bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = ((unsigned int*)glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
-    delete[] glyphdata[i];
+    delete[] glyphdata[i]; // Delete the image data we just copied
     
     font->glyphs[i].tx = glyphmetrics[i].x / double(w);
     font->glyphs[i].ty = glyphmetrics[i].y / double(h);

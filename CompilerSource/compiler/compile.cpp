@@ -71,6 +71,9 @@ using namespace std;
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
+inline void writef(float x, FILE *f) {
+  fwrite(&x,4,1,f);
+}
 
 string string_replace_all(string str,string substr,string nstr)
 {
@@ -317,7 +320,13 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
       if (es->backgrounds[i].id >= max) max = es->backgrounds[i].id + 1;
       wto << "  " << es->backgrounds[i].name << " = " << es->backgrounds[i].id << ",\n";
     } wto << "};\nnamespace enigma { size_t background_idmax = " << max << "; }\n\n";
-
+    
+    max = 0;
+    wto << "enum //font names\n{\n";
+    for (int i = 0; i < es->fontCount; i++) {
+      if (es->fonts[i].id >= max) max = es->fonts[i].id + 1;
+      wto << "  " << es->fonts[i].name << " = " << es->fonts[i].id << ",\n";
+    } wto << "};\nnamespace enigma { size_t font_idmax = " << max << "; }\n\n";
 
     max = 0;
     wto << "enum //sound names\n{\n";
@@ -475,6 +484,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   module_write_sounds(es,gameModule);
 
   module_write_backgrounds(es,gameModule);
+  
+  module_write_fonts(es,gameModule);
 
   // Tell where the resources start
   fwrite("\0\0\0\0res0",8,1,gameModule);
@@ -494,7 +505,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     int gameres = e_execs(rprog, rparam);
     user << "Game returned " << gameres << "\n";
   }
-
+ 
   idpr("Done.", 100);
   return 0;
 };

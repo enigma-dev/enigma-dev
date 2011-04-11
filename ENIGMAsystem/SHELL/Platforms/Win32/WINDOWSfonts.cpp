@@ -51,8 +51,8 @@ namespace enigma
     extern HDC window_hDC;
     
     //FIXME: Serp thought this should be a macro since only two files use it on Linux. Now it looks filthy.
-    extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;
-    #define untexture() if(enigma::cur_bou_tha_noo_sho_eve_cha_eve) glBindTexture(GL_TEXTURE_2D,enigma::cur_bou_tha_noo_sho_eve_cha_eve=0);
+    extern unsigned bound_texture;
+    #define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
     
     font* font_add_struct(const char* name,int size,int bold,int italic,int underline,int strike,int first,int last) 
     {

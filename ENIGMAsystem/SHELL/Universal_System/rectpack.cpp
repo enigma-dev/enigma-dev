@@ -32,21 +32,27 @@ namespace enigma
 {
   namespace rect_packer
   {
+    // This is a simple rectangle to be mass-instantiated; you should probably allocate a large array statically, one per glyph.
     pvrect::pvrect(): x(0),y(0),w(1),h(1),placed(-1) {}
     pvrect::pvrect(int a,int b,int c,int d,int e):
         x(a), y(b), w(c), h(d), placed(e) {}
     
+    // This is a container of which you will allocate and refer to precisely one instance.
+    // It is best to use new and keep a reference to it, in case an insert() leads to an overflow,
+    // in which case you may want to point to a new, bigger box created with expand().
     rectpnode::rectpnode(): x(0),y(0), c(-1) { child[0] = NULL, child[1] = NULL; }
     rectpnode::rectpnode(int xx,int yy,int w,int h,rectpnode* c1,rectpnode* c2):
         x(xx), y(yy), wid(w), hgt(h), c(-1) { child[0] = c1, child[1]=c2; }
     void rectpnode::rect(int xx, int yy, int w, int h) { x=xx, y=yy, wid=w, hgt=h; }
     
+    // Copies the content of a element `c` of pvrect array `boxes` into container `h`
     void rncopy(rectpnode *h, pvrect *boxes, unsigned char c)
     {
       boxes[c].x = h->x,   boxes[c].y = h->y;
       boxes[c].w = h->wid, boxes[c].h = h->hgt;
     }
     
+    // Inserts a new node into container `who` using metrics obtained from `boxes`[`c`]
     rectpnode *rninsert(rectpnode* who, unsigned char c, pvrect* boxes)
     {
       rectpnode *newNode;
@@ -64,7 +70,7 @@ namespace enigma
         if (boxes[c].w > who->wid or boxes[c].h > who->hgt) //doesn't fit
           return NULL;
 
-        if (who->wid - boxes[c].w < 2 and who->hgt - boxes[c].h < 2) //tight squeeze
+        if (who->wid - boxes[c].w < 2 and who->hgt - boxes[c].h < 2) //tight squeeze; too tight to fit a glyph inside, I promise.
           return (who->c = c, who);
         
         // split node in two
@@ -86,6 +92,7 @@ namespace enigma
       }
     }
     
+    // Automatically allocates a container around existing container `who`, returning it.
     rectpnode *expand(rectpnode* who, int w, int h)
     {
       rectpnode *ret = who;

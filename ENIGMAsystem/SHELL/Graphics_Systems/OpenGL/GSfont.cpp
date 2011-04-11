@@ -28,11 +28,13 @@
 #include <math.h>
 #include <string>
 #include "OpenGLHeaders.h"
+using namespace std;
+
 #include "../../Universal_System/fontstruct.h"
 
 namespace enigma {
   static int currentfont = -1;
-  extern unsigned cur_bou_tha_noo_sho_eve_cha_eve;
+  extern unsigned bound_texture;
 }
 
 using namespace enigma;
@@ -40,13 +42,10 @@ using namespace std;
 
 void draw_text(int x,int y,string str)
 {
-  if (currentfont == -1)
-    return;
-  
   font *fnt = fontstructarray[currentfont];
   
-  if (cur_bou_tha_noo_sho_eve_cha_eve != fnt->texture)
-    glBindTexture(GL_TEXTURE_2D, cur_bou_tha_noo_sho_eve_cha_eve = fnt->texture);
+  if (bound_texture != fnt->texture)
+    glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
   
   int xx = x, yy = y;
   for (unsigned i = 0; i < str.length(); i++)

@@ -28,10 +28,8 @@
 #include <stdlib.h>
 #include "rectpack.h"
 
-namespace enigma
+namespace rect_packer
 {
-  namespace rect_packer
-  {
     pvrect::pvrect(): x(0),y(0),w(1),h(1),placed(-1) {}
     pvrect::pvrect(int a,int b,int c,int d,int e):
         x(a), y(b), w(c), h(d), placed(e) {}
@@ -97,5 +95,4 @@ namespace enigma
               new rectpnode(ret->x + who->wid, ret->y, w-ret->wid, ret->hgt, NULL, NULL));
       return ret;
     }
-  }
 }
