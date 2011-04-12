@@ -108,7 +108,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
 	public EnigmaSettings es;
 	public EnigmaSettingsFrame esf;
-	public JMenuItem run, debug, design, compile, rebuild;
+	public JMenuItem busy, run, debug, design, compile, rebuild;
 	public JMenuItem showFunctions, showGlobals, showTypes;
 	public final EnigmaNode node = new EnigmaNode();
 
@@ -276,6 +276,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		JMenu menu = new JMenu("Enigma");
 
+		busy = new JMenuItem("Busy...");
+		busy.setEnabled(false);
+		busy.setVisible(false);
+		menu.add(busy);
 		run = new JMenuItem("Run");
 		run.addActionListener(this);
 		menu.add(run);
@@ -475,6 +479,16 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
+	public void setMenuEnabled(boolean en)
+		{
+		busy.setVisible(!en);
+		run.setEnabled(en);
+		debug.setEnabled(en);
+		design.setEnabled(en);
+		compile.setEnabled(en);
+		rebuild.setEnabled(en);
+		}
+
 	public void compile(final int mode)
 		{
 		if (!ENIGMA_READY)
@@ -515,6 +529,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			outname = fc.getSelectedFile();
 			}
 
+		setMenuEnabled(false);
 		LGM.commitAll();
 		//System.out.println("Compiling with " + enigma);
 
@@ -528,6 +543,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
 					ef.append("Calling compiler.");
 					System.out.println(DRIVER.compileEGMf(es,efi == null ? null : efi.getAbsolutePath(),mode));
+
+					setMenuEnabled(true);
 					}
 			}.start();
 
