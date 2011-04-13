@@ -504,7 +504,8 @@ public final class EnigmaWriter
 			ofgl[ind].width = bi.getWidth();
 			ofgl[ind].height = bi.getHeight();
 
-			if (c == 'F')
+			//XXX: The following is debug code to print out glyph info + raster
+			if (false && c == 'H')
 				{
 				System.out.println(ofgl[ind].origin + " " + ofgl[ind].advance + " " + ofgl[ind].baseline);
 				System.out.println(ofgl[ind].width + " x " + ofgl[ind].height);
@@ -516,6 +517,16 @@ public final class EnigmaWriter
 					}
 				System.out.println();
 				System.out.println();
+				//sleep for a second so we can view it before ENIGMA floods us with its own debug info
+				try
+					{
+					Thread.sleep(1000);
+					}
+				catch (InterruptedException e)
+					{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					}
 				}
 
 			ofgl[ind].raster = ByteBuffer.allocateDirect(raster.length).put(raster);

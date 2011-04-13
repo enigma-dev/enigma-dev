@@ -128,8 +128,8 @@ namespace enigma
         
         fontstructarray[i]->glyphs[gi].x = origin;
         fontstructarray[i]->glyphs[gi].y = baseline;
-        fontstructarray[i]->glyphs[gi].x2 = origin + gwid;
-        fontstructarray[i]->glyphs[gi].y2 = baseline + ghgt;
+        fontstructarray[i]->glyphs[gi].x2 = origin + gwid + 1;
+        fontstructarray[i]->glyphs[gi].y2 = baseline + ghgt + 1;
         fontstructarray[i]->glyphs[gi].tx = gtx;
         fontstructarray[i]->glyphs[gi].ty = gty;
         fontstructarray[i]->glyphs[gi].tx2 = gtx2;

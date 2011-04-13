@@ -128,14 +128,14 @@ int module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     cout << "Allocated a big texture. Moving shit into it..." << endl;
     for (int ii = 0; ii < gc; ii++)
     {
-      for (int yy = 0; yy < boxes[ii].h; yy++)
-        for (int xx = 0; xx < boxes[ii].w; xx++)
-          bigtex[w*(boxes[ii].y + yy) + boxes[ii].x + xx] = es->fonts[i].glyphs[ii].data[yy*boxes[ii].w + xx];
+      for (int yy = 0; yy < es->fonts[i].glyphs[ii].height; yy++)
+        for (int xx = 0; xx < es->fonts[i].glyphs[ii].width; xx++)
+          bigtex[w*(boxes[ii].y + yy) + boxes[ii].x + xx] = es->fonts[i].glyphs[ii].data[yy*es->fonts[i].glyphs[ii].width + xx];
       
       glyphtexc[ii].x  = boxes[ii].x / double(w);
       glyphtexc[ii].y  = boxes[ii].y / double(h);
-      glyphtexc[ii].x2 = (boxes[ii].x + boxes[ii].w) / double(w);
-      glyphtexc[ii].y2 = (boxes[ii].y + boxes[ii].h) / double(h);
+      glyphtexc[ii].x2 = (boxes[ii].x + es->fonts[i].glyphs[ii].width) / double(w);
+      glyphtexc[ii].y2 = (boxes[ii].y + es->fonts[i].glyphs[ii].height) / double(h);
     }
     
     /*cout << "Populated. Debugging..." << endl;
