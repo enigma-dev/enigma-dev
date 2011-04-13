@@ -425,7 +425,7 @@ public final class EnigmaWriter
 		o.fonts = new Font.ByReference();
 		Font[] ofl = (Font[]) o.fonts.toArray(size);
 
-		//Populate the default font, called "EnigmaDefault"
+		// Populate the default font, called "EnigmaDefault", id -1
 		java.awt.Font iF = new java.awt.Font(java.awt.Font.DIALOG,java.awt.Font.PLAIN,12);
 		Font oF = ofl[0];
 		oF.name = "EnigmaDefault";
@@ -436,8 +436,7 @@ public final class EnigmaWriter
 		oF.italic = false;
 		oF.rangeMin = 32;
 		oF.rangeMax = 127;
-
-		populateGlyphs(ofl[0]);
+		oF.glyphs = populateGlyphs(iF,oF.rangeMin,oF.rangeMax);
 
 		if (size == 1) return;
 
@@ -457,80 +456,56 @@ public final class EnigmaWriter
 			of.rangeMin = ifont.get(PFont.RANGE_MIN);
 			of.rangeMax = ifont.get(PFont.RANGE_MAX);
 
-			populateGlyphs(ofl[f]);
+			// Generate a Java font for glyph population
+			int style = (of.italic ? java.awt.Font.ITALIC : 0) | (of.bold ? java.awt.Font.BOLD : 0);
+			int screenRes = Toolkit.getDefaultToolkit().getScreenResolution();
+			int fsize = (int) Math.round(of.size * screenRes / 72.0); // Java assumes 72 dps
+			java.awt.Font fnt = new java.awt.Font(of.fontName,style,fsize);
+
+			of.glyphs = populateGlyphs(fnt,of.rangeMin,of.rangeMax);
 			}
 		}
 
-	private static void populateGlyphs(Font font)
+	private static Glyph.ByReference populateGlyphs(java.awt.Font fnt, int rangeMin, int rangeMax)
 		{
-		int style = (font.italic ? java.awt.Font.ITALIC : 0) | (font.bold ? java.awt.Font.BOLD : 0);
-		int screenRes = Toolkit.getDefaultToolkit().getScreenResolution();
-		int size = (int) Math.round(font.size * screenRes / 72.0); // Java assumes 72 dps
-		java.awt.Font fnt = new java.awt.Font(font.fontName,style,size);
+		Glyph.ByReference glyphs = new Glyph.ByReference();
+		Glyph[] ofgl = (Glyph[]) glyphs.toArray(rangeMax - rangeMin + 1);
+		for (char c = (char) rangeMin; c <= rangeMax; c++)
+			populateGlyph(ofgl[c - rangeMin],fnt,c);
+		return glyphs;
+		}
 
-		font.glyphs = new Glyph.ByReference();
-		Glyph[] ofgl = (Glyph[]) font.glyphs.toArray(font.rangeMax - font.rangeMin + 1);
-		for (char c = (char) font.rangeMin; c <= font.rangeMax; c++)
-			{
-			GlyphVector gv = fnt.createGlyphVector(new FontRenderContext(null,true,false),
-					String.valueOf(c));
-			Rectangle2D r = gv.getVisualBounds();
+	private static void populateGlyph(Glyph og, java.awt.Font fnt, char c)
+		{
+		GlyphVector gv = fnt.createGlyphVector(new FontRenderContext(null,true,false),String.valueOf(c));
+		Rectangle2D r = gv.getVisualBounds();
+		if (r.getWidth() == 0 || r.getHeight() == 0) return;
 
-			if (r.getWidth() == 0 || r.getHeight() == 0) continue;
+		// Generate a raster of the glyph vector
+		BufferedImage bi = new BufferedImage((int) Math.round(r.getWidth()),
+				(int) Math.round(r.getHeight()),BufferedImage.TYPE_BYTE_GRAY);
+		Graphics2D g = bi.createGraphics();
+		g.setFont(fnt);
+		g.setColor(Color.BLACK);
+		g.fill(r);
+		g.setColor(Color.WHITE);
+		g.drawGlyphVector(gv,(float) -r.getX(),(float) -r.getY());
 
-			// Generate a raster of the glyph vector
-			BufferedImage bi = new BufferedImage((int) Math.round(r.getWidth()),
-					(int) Math.round(r.getHeight()),BufferedImage.TYPE_BYTE_GRAY);
-			Graphics2D g = bi.createGraphics();
-			g.setFont(fnt);
-			g.setColor(Color.BLACK);
-			g.fill(r);
-			g.setColor(Color.WHITE);
-			g.drawGlyphVector(gv,(float) -r.getX(),(float) -r.getY());
+		// Produce the relevant stats
+		og.origin = r.getX(); // bump image right X pixels
+		og.baseline = r.getY(); // bump image down X pixels (usually negative, since baseline is at bottom)
+		og.advance = gv.getGlyphPosition(gv.getNumGlyphs()).getX(); // advance X pixels from origin
 
-			// Produce the relevant stats
-			int ind = c - font.rangeMin;
-			ofgl[ind].origin = r.getX(); // bump image right X pixels
-			ofgl[ind].baseline = r.getY(); // bump image down X pixels (usually negative, since baseline is at bottom)
-			ofgl[ind].advance = gv.getGlyphPosition(gv.getNumGlyphs()).getX(); // advance X pixels from origin
-
-			// Copy over the raster
-			byte raster[] = new byte[bi.getWidth() * bi.getHeight()];
-			// XXX: see if we can just get the Grayscale channel
-			int rasterRGB[] = new int[raster.length];
-			bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),rasterRGB,0,bi.getWidth());
-			for (int j = 0; j < rasterRGB.length; j++)
-				raster[j] = (byte) (rasterRGB[j] & 0xFF);
-			ofgl[ind].width = bi.getWidth();
-			ofgl[ind].height = bi.getHeight();
-
-			//XXX: The following is debug code to print out glyph info + raster
-			if (false && c == 'H')
-				{
-				System.out.println(ofgl[ind].origin + " " + ofgl[ind].advance + " " + ofgl[ind].baseline);
-				System.out.println(ofgl[ind].width + " x " + ofgl[ind].height);
-				for (int y = 0; y < ofgl[ind].height; y++)
-					{
-					for (int x = 0; x < ofgl[ind].width; x++)
-						System.out.format("%02X ",raster[y * ofgl[ind].width + x]);
-					System.out.println();
-					}
-				System.out.println();
-				System.out.println();
-				//sleep for a second so we can view it before ENIGMA floods us with its own debug info
-				try
-					{
-					Thread.sleep(1000);
-					}
-				catch (InterruptedException e)
-					{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					}
-				}
-
-			ofgl[ind].raster = ByteBuffer.allocateDirect(raster.length).put(raster);
-			}
+		// Copy over the raster
+		byte raster[] = new byte[bi.getWidth() * bi.getHeight()];
+		// XXX: see if we can just get the Grayscale channel
+		int rasterRGB[] = new int[raster.length];
+		bi.getRGB(0,0,bi.getWidth(),bi.getHeight(),rasterRGB,0,bi.getWidth());
+		for (int j = 0; j < rasterRGB.length; j++)
+			raster[j] = (byte) (rasterRGB[j] & 0xFF);
+		og.width = bi.getWidth();
+		og.height = bi.getHeight();
+		og.raster = ByteBuffer.allocateDirect(raster.length).put(raster);
 		}
 
 	protected void populateTimelines()
