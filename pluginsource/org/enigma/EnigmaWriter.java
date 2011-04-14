@@ -478,7 +478,7 @@ public final class EnigmaWriter
 	private static void populateGlyph(Glyph og, java.awt.Font fnt, char c)
 		{
 		GlyphVector gv = fnt.createGlyphVector(new FontRenderContext(null,true,false),String.valueOf(c));
-		Rectangle2D r = gv.getVisualBounds();
+		Rectangle2D r = gv.getPixelBounds(null,0,0); //don't know why it needs coordinates
 		if (r.getWidth() == 0 || r.getHeight() == 0) return;
 
 		// Generate a raster of the glyph vector
