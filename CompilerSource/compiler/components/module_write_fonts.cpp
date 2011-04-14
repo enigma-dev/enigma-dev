@@ -156,7 +156,7 @@ int module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     
     for (int ii = 0; ii < gc; ii++)
       writef(es->fonts[i].glyphs[ii].advance, gameModule),
-      writef(es->fonts[i].glyphs[ii].baseline + .5,gameModule),
+      writef(es->fonts[i].glyphs[ii].baseline,gameModule),
       writef(es->fonts[i].glyphs[ii].origin, gameModule),
       writei(es->fonts[i].glyphs[ii].width,  gameModule),
       writei(es->fonts[i].glyphs[ii].height, gameModule),

@@ -112,7 +112,7 @@ namespace enigma
 		  }
 		  delete[] cpixels;*/
 		  
-		  
+		  int ymin=100, ymax=-100;
 		  cout << "Allocations done. Doing some other shit." << endl;
 		  for (int gi = 0; gi < enigma::fontstructarray[i]->glyphcount; gi++)
 		  {
@@ -126,21 +126,24 @@ namespace enigma
         fread(&gtx2,4,1,exe);
         fread(&gty2,4,1,exe);
         
-        fontstructarray[i]->glyphs[gi].x = origin;
-        fontstructarray[i]->glyphs[gi].y = baseline;
-        fontstructarray[i]->glyphs[gi].x2 = origin + gwid + 1;
-        fontstructarray[i]->glyphs[gi].y2 = baseline + ghgt + 1;
+        fontstructarray[i]->glyphs[gi].x = int(origin + .5);
+        fontstructarray[i]->glyphs[gi].y = int(baseline + .5);
+        fontstructarray[i]->glyphs[gi].x2 = int(origin + .5) + gwid;
+        fontstructarray[i]->glyphs[gi].y2 = int(baseline + .5) + ghgt;
         fontstructarray[i]->glyphs[gi].tx = gtx;
         fontstructarray[i]->glyphs[gi].ty = gty;
         fontstructarray[i]->glyphs[gi].tx2 = gtx2;
         fontstructarray[i]->glyphs[gi].ty2 = gty2;
-        fontstructarray[i]->glyphs[gi].xs = advance;
+        fontstructarray[i]->glyphs[gi].xs = advance + .5;
         
-        if (fontstructarray[i]->glyphs[gi].y2 > fontstructarray[i]->height)
-          fontstructarray[i]->height = fontstructarray[i]->glyphs[gi].y2;
+        if (fontstructarray[i]->glyphs[gi].y < ymin)
+          ymin = fontstructarray[i]->glyphs[gi].y;
+        if (fontstructarray[i]->glyphs[gi].y2 > ymax)
+          ymax = fontstructarray[i]->glyphs[gi].y2;
         
         printf("fntid%d, twid%d, thgt%d, advance%f, baseline%f, origin%f, gwid%d, ghgt%d, gtx%f, gty%f, gtx2%f, gty2%f\n",fntid, twid, thgt, advance, baseline, origin, gwid, ghgt, gtx, gty, gtx2, gty2);
 		  }
+		  fontstructarray[i]->height = ymax - ymin + 1;
 		  
       cout << "Did other shit." << endl;
 		  fontstructarray[i]->texture = graphics_create_texture(twid,thgt,pixels);

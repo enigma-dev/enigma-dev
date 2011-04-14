@@ -43,33 +43,6 @@ typedef size_t pt; //Use size_t as our pos type; helps on 64bit systems.
 map<string,char> edl_tokens; // Logarithmic lookup, with token.
 typedef map<string,char>::iterator tokiter;
 
-string string_escape(string s)
-{
-  cout << "format " << s << endl;
-  const pt il = s.length()-1;
-  
-  //allocate enough space to hold it
-  char* out = new char[il*2 + 1];
-  
-  out[0] = '"';
-  
-  pt opos = 1;
-  for (pt pos = 1; pos < il; pos++)
-  {
-    if (s[pos] == '\'' or s[pos]=='"' or s[pos]=='\\')
-      out[opos++] = '\\';
-    out[opos++] = s[pos];
-  }
-  
-  out[opos++] = '"';
-  
-  string ret(out,opos);
-  delete[] out;
-  
-  cout << "  as " << ret;
-  return ret;
-}
-
 #include "../cfile_parse/macro_functions.h"
 
 
@@ -260,7 +233,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       else
       {
         while (code[++pos] != '"');
-        str = string_escape(code.substr(spos,++pos-spos));
+        str = (code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
       cout << "\n\n\nCut string " << str << "\n\n\n";
@@ -280,7 +253,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       else
       {
         while (code[++pos] != '\'');
-        str = string_escape(code.substr(spos,++pos-spos));
+        str = (code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
       codo[bpos] = synt[bpos] = last_token = '"', bpos++;
@@ -707,7 +680,9 @@ const char * indent_chars   =  "\n                                \
                                                                   ";
 static inline string string_settings_escape(string n)
 {
-  for (size_t pos = 0; pos < n.length(); pos++)
+  if (n[0] == '\'' and n[n.length()-1] == '\'')
+    n[0] = n[n.length() - 1] = '"';
+  for (size_t pos = 1; pos < n.length()-1; pos++)
   {
     switch (n[pos])
     {
@@ -730,6 +705,9 @@ static inline string string_settings_escape(string n)
           if (n[++pos] == '\n')
             n[pos] = 'n';
           else n.insert(pos,1,'n');
+        break;
+      case '"':
+          n.insert(pos++,1,'\\');
         break;
     } 
   }
