@@ -54,7 +54,7 @@ int compile_writeFontInfo(EnigmaStruct* es)
       es->fonts[i].bold     <<   ", " << // bool bold;
       es->fonts[i].italic   <<   ", " << // bool italic;
       es->fonts[i].rangeMin <<   ", " << // int rangeMin;
-      es->fonts[i].rangeMax - es->fonts[i].rangeMin //  int rangeMax;
+      es->fonts[i].rangeMax - es->fonts[i].rangeMin + 1 //  int rangeMax;
       << "}," << endl;
       
       if (es->fonts[i].id > maxid)

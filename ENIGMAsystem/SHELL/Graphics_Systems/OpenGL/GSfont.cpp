@@ -48,30 +48,30 @@ void draw_text(int x,int y,string str)
     glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
   
   int xx = x, yy = y;
-  for (unsigned i = 0; i < str.length(); i++)
-  {
-    if (str[i] == '\r')
-      xx = x, yy += fnt->height, i += str[i+1] == '\n';
-    else if (str[i] == '\n')
-      xx = x, yy += fnt->height;
-    else if (str[i] == ' ')
-      xx += fnt->height/3; // FIXME: what's GM do about this?
-    else
+  glBegin(GL_QUADS);
+    for (unsigned i = 0; i < str.length(); i++)
     {
-      fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-      glBegin(GL_QUADS);
-        glTexCoord2f(g.tx,  g.ty);
-          glVertex2i(xx + g.x,  yy + g.y);
-        glTexCoord2f(g.tx2, g.ty);
-          glVertex2i(xx + g.x2, yy + g.y);
-        glTexCoord2f(g.tx2, g.ty2);
-          glVertex2i(xx + g.x2, yy + g.y2);
-        glTexCoord2f(g.tx,  g.ty2);
-          glVertex2i(xx + g.x,  yy + g.y2);
-      glEnd();
-      xx += g.xs;
+      if (str[i] == '\r')
+        xx = x, yy += fnt->height, i += str[i+1] == '\n';
+      else if (str[i] == '\n')
+        xx = x, yy += fnt->height;
+      else if (str[i] == ' ')
+        xx += fnt->height/3; // FIXME: what's GM do about this?
+      else
+      {
+        fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
+          glTexCoord2f(g.tx,  g.ty);
+            glVertex2i(xx + g.x,  yy + g.y);
+          glTexCoord2f(g.tx2, g.ty);
+            glVertex2i(xx + g.x2, yy + g.y);
+          glTexCoord2f(g.tx2, g.ty2);
+            glVertex2i(xx + g.x2, yy + g.y2);
+          glTexCoord2f(g.tx,  g.ty2);
+            glVertex2i(xx + g.x,  yy + g.y2);
+        xx += g.xs;
+      }
     }
-  }
+  glEnd();
 }
 
 unsigned int font_get_texture(int fnt)

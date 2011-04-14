@@ -164,6 +164,9 @@ int module_write_fonts(EnigmaStruct *es, FILE *gameModule)
       writef(glyphtexc[ii].y,  gameModule),
       writef(glyphtexc[ii].x2, gameModule),
       writef(glyphtexc[ii].y2, gameModule);
+    
+    fwrite("endf",1,4,gameModule);
+    cout << "Wrote all data for font " << i << endl;
   }
 
   edbg << "Done writing fonts." << flushl;

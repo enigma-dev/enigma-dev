@@ -102,7 +102,10 @@ namespace enigma
 		  }
       fread(&nullhere,4,1,exe);
       if (nullhere != *(int*)"done")
+      {
+        cout << "Unexpected end; eof:" << (feof(exe)?"true":"false") << endl;
         return;
+      }
 		  //unpacked = width*height*4;
 		  /*unsigned char* pixels=new unsigned char[unpacked+1];
 		  if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
@@ -141,7 +144,7 @@ namespace enigma
         if (fontstructarray[i]->glyphs[gi].y2 > ymax)
           ymax = fontstructarray[i]->glyphs[gi].y2;
         
-        printf("fntid%d, twid%d, thgt%d, advance%f, baseline%f, origin%f, gwid%d, ghgt%d, gtx%f, gty%f, gtx2%f, gty2%f\n",fntid, twid, thgt, advance, baseline, origin, gwid, ghgt, gtx, gty, gtx2, gty2);
+        //printf("fntid%d, twid%d, thgt%d, advance%f, baseline%f, origin%f, gwid%d, ghgt%d, gtx%f, gty%f, gtx2%f, gty2%f\n", fntid, twid, thgt, advance, baseline, origin, gwid, ghgt, gtx, gty, gtx2, gty2);
 		  }
 		  fontstructarray[i]->height = ymax - ymin + 1;
 		  
@@ -160,6 +163,14 @@ namespace enigma
       fontstructarray[i]->glyphs[sss].ty2 = 1;*/
 		  
 		  delete[] pixels;
+		  
+      fread(&nullhere,4,1,exe);
+      if (nullhere != *(int*)"endf")
+      {
+        cout << "ERROR! Uncapped font. Incorrect read size. EOF:" << (feof(exe)?"true":"false") << endl;
+        return;
+      }
+		  
 	  }
   }
 }
