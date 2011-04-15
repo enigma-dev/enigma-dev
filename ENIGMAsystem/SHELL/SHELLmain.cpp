@@ -25,7 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <cstdlib>
+#include <stdlib.h>
+#include <stddef.h>
 #include <string>
 
 // Simple Universal libraries
