@@ -12,8 +12,10 @@ import org.enigma.EYamlParser.YamlNode;
 
 public class TargetHandler
 	{
-	public static TargetSelection defCompiler, defPlatform, defGraphics, defAudio, defCollision;
-	private static List<TargetSelection> tCompilers, tPlatforms, tGraphics, tAudios, tCollisions;
+	public static TargetSelection defCompiler, defPlatform, defGraphics, defAudio, defCollision,
+			defWidgets;
+	private static List<TargetSelection> tCompilers, tPlatforms, tGraphics, tAudios, tCollisions,
+			tWidgets;
 
 	static
 		{
@@ -22,6 +24,8 @@ public class TargetHandler
 		tGraphics = findTargets("Graphics_Systems");
 		tAudios = findTargets("Audio_Systems");
 		tCollisions = findTargets("Collision_Systems");
+		tWidgets = findTargets("Widget_Systems");
+
 		findDefaults();
 		}
 
@@ -117,11 +121,17 @@ public class TargetHandler
 					}
 				else
 					{
-					String[] configs = new File(dir,"Config").list();
-					if (configs == null) continue;
-					for (String conf : configs)
-						if (conf.endsWith(".ey")) depends.add(normalize(conf.substring(0,conf.length() - 3)));
-					if (depends.isEmpty()) continue;
+					if (dir.getName().equals("None"))
+						depends.add("all");
+					else
+						{
+						String[] configs = new File(dir,"Config").list();
+						if (configs == null) continue;
+						for (String conf : configs)
+							if (conf.endsWith(".ey"))
+								depends.add(normalize(conf.substring(0,conf.length() - 3)));
+						if (depends.isEmpty()) continue;
+						}
 					node = EYamlParser.parse(new Scanner(prop));
 					}
 
@@ -167,15 +177,24 @@ public class TargetHandler
 			defGraphics = findDefault(tGraphics,defPlatform.id);
 			defAudio = findDefault(tAudios,defPlatform.id);
 			defCollision = findDefault(tCollisions,defPlatform.id);
+			defWidgets = findDefault(tWidgets,defPlatform.id);
 			}
 		}
 
 	private static TargetSelection findDefault(List<TargetSelection> tsl, String depends)
 		{
 		depends = depends.toLowerCase();
+		TargetSelection allTs = null;
+
 		for (TargetSelection ts : tsl)
-			if ((ts.depends.contains("all") || ts.depends.contains(depends))
-					&& (ts.defaultOn.contains("all") || ts.defaultOn.contains(depends))) return ts;
+			if (ts.depends.contains("all") || ts.depends.contains(depends))
+				{
+				//specific platforms always take precedence over the "all" keyword
+				if (ts.defaultOn.contains(depends)) return ts;
+				//to avoid looping again for "all" keyword if no specific platform found, store it
+				if (ts.defaultOn.contains("all") && allTs == null) allTs = ts;
+				}
+		if (allTs != null) return allTs;
 		//if none are marked as default, just use the first one
 		for (TargetSelection ts : tsl)
 			if (ts.depends.contains("all") || ts.depends.contains(depends)
@@ -198,7 +217,7 @@ public class TargetHandler
 			}
 
 		for (TargetSelection ts : itsl)
-			if (ts.depends.contains(depends.toLowerCase())) otsl.add(ts);
+			if (ts.depends.contains(depends.toLowerCase()) || ts.depends.contains("all")) otsl.add(ts);
 
 		return otsl;
 		}
@@ -226,5 +245,10 @@ public class TargetHandler
 	public static Object[] getTargetCollisionsArray()
 		{
 		return getTargetArray(tCollisions).toArray();
+		}
+
+	public static Object[] getTargetWidgetsArray()
+		{
+		return getTargetArray(tWidgets).toArray();
 		}
 	}

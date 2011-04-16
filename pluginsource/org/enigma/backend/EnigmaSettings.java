@@ -35,7 +35,7 @@ public class EnigmaSettings
 	public String definitions = "", globalLocals = "";
 	public String initialization = "", cleanup = "";
 
-	public TargetSelection selCompiler, selPlatform, selGraphics, selAudio, selCollision;
+	public TargetSelection selCompiler, selPlatform, selGraphics, selAudio, selCollision, selWidgets;
 
 	public EnigmaSettings()
 		{
@@ -53,6 +53,7 @@ public class EnigmaSettings
 		selGraphics = TargetHandler.defGraphics;
 		selAudio = TargetHandler.defAudio;
 		selCollision = TargetHandler.defCollision;
+		selWidgets = TargetHandler.defWidgets;
 		}
 
 	void loadDefinitions()
@@ -104,7 +105,7 @@ public class EnigmaSettings
 				+ "target-graphics: " + (selGraphics == null ? "" : selGraphics.id) + "\n"//
 				+ "target-audio: " + (selAudio == null ? "" : selAudio.id) + "\n"//
 				+ "target-collision: " + (selCollision == null ? "" : selCollision.id) + "\n"//
-				+ "target-widget: " + "None" + "\n"//
+				+ "target-widget: " + (selWidgets == null ? "" : selWidgets.id) + "\n"//
 				+ "target-networking: " + "None" + "\n";//
 		}
 
@@ -134,6 +135,7 @@ public class EnigmaSettings
 		es.selGraphics = selGraphics;
 		es.selAudio = selAudio;
 		es.selCollision = selCollision;
+		es.selWidgets = selWidgets;
 		return es;
 		}
 	}
