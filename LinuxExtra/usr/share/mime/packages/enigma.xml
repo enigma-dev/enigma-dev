@@ -5,8 +5,8 @@
     <glob pattern="*.gm5"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
-      <match type="little32" offset="4" value="530">
-        <match type="little32" offset="0" value="1234321"/>
+      <match type="little32" offset="0" value="1234321">
+        <match type="little32" offset="4" value="530"/>
       </match>
     </magic>
   </mime-type>
@@ -15,8 +15,8 @@
     <glob pattern="*.gm6"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
-      <match type="little32" offset="4" value="600">
-        <match type="little32" offset="0" value="1234321"/>
+      <match type="little32" offset="0" value="1234321">
+        <match type="little32" offset="4" value="600"/>
       </match>
     </magic>
   </mime-type>
@@ -25,8 +25,8 @@
     <glob pattern="*.gmk"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
-      <match type="little32" offset="4" value="701">
-        <match type="little32" offset="0" value="1234321"/>
+      <match type="little32" offset="0" value="1234321">
+        <match type="little32" offset="4" value="701"/>
       </match>
     </magic>
   </mime-type>
@@ -35,8 +35,8 @@
     <glob pattern="*.gmk"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
-      <match type="little32" offset="4" value="800">
-        <match type="little32" offset="0" value="1234321"/>
+      <match type="little32" offset="0" value="1234321">
+        <match type="little32" offset="4" value="800"/>
       </match>
     </magic>
   </mime-type>
@@ -45,8 +45,8 @@
     <glob pattern="*.gmk"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
-      <match type="little32" offset="4" value="800">
-        <match type="little32" offset="0" value="1234321"/>
+      <match type="little32" offset="0" value="1234321">
+        <match type="little32" offset="4" value="810"/>
       </match>
     </magic>
   </mime-type>
