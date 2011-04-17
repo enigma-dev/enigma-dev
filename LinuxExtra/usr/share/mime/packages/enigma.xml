@@ -1,47 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
-  <mime-type type="application/x-gm5">
-    <comment>Game Maker 5 Project</comment>
+  <mime-type type="application/x-gm53">
+    <comment>Game Maker 5.3 Project</comment>
     <glob pattern="*.gm5"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
-      <match type="little32" offset="4" value="530"/>
-    </magic>
-    <magic priority="50">
-      <match type="little32" offset="0" value="1234321"/>
+      <match type="little32" offset="4" value="530">
+        <match type="little32" offset="0" value="1234321"/>
+      </match>
     </magic>
   </mime-type>
-  <mime-type type="application/x-gm6">
-    <comment>Game Maker 6 Project</comment>
+  <mime-type type="application/x-gm60">
+    <comment>Game Maker 6.0 Project</comment>
     <glob pattern="*.gm6"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
-      <match type="little32" offset="4" value="600"/>
-    </magic>
-    <magic priority="50">
-      <match type="little32" offset="0" value="1234321"/>
+      <match type="little32" offset="4" value="600">
+        <match type="little32" offset="0" value="1234321"/>
+      </match>
     </magic>
   </mime-type>
-  <mime-type type="application/x-gm7">
-    <comment>Game Maker 7 Project</comment>
+  <mime-type type="application/x-gm71">
+    <comment>Game Maker 7.1 Project</comment>
     <glob pattern="*.gmk"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
-      <match type="little32" offset="4" value="701"/>
-    </magic>
-    <magic priority="50">
-      <match type="little32" offset="0" value="1234321"/>
+      <match type="little32" offset="4" value="701">
+        <match type="little32" offset="0" value="1234321"/>
+      </match>
     </magic>
   </mime-type>
-  <mime-type type="application/x-gm8">
+  <mime-type type="application/x-gm80">
     <comment>Game Maker 8 Project</comment>
     <glob pattern="*.gmk"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
-      <match type="little32" offset="4" value="800"/>
+      <match type="little32" offset="4" value="800">
+        <match type="little32" offset="0" value="1234321"/>
+      </match>
     </magic>
-    <magic priority="50">
-      <match type="little32" offset="0" value="1234321"/>
+  </mime-type>
+  <mime-type type="application/x-gm81">
+    <comment>Game Maker 8.1 Project</comment>
+    <glob pattern="*.gmk"/>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="100">
+      <match type="little32" offset="4" value="800">
+        <match type="little32" offset="0" value="1234321"/>
+      </match>
     </magic>
   </mime-type>
 </mime-info>
