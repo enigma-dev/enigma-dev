@@ -1,5 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-gm50">
+    <comment>Game Maker Project (Unknown Version)</comment>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="90">
+      <match type="little32" offset="0" value="1234321"/>
+    </magic>
+  </mime-type>
+    <comment>Game Maker 5.0 Project</comment>
+    <glob pattern="*.gm5"/>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="100">
+      <match type="little32" offset="0" value="1234321">
+        <match type="little32" offset="4" value="500"/>
+      </match>
+    </magic>
+  </mime-type>
+  <mime-type type="application/x-gm51">
+    <comment>Game Maker 5.1 Project</comment>
+    <glob pattern="*.gm5"/>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="100">
+      <match type="little32" offset="0" value="1234321">
+        <match type="little32" offset="4" value="510"/>
+      </match>
+    </magic>
+  </mime-type>
+  <mime-type type="application/x-gm52">
+    <comment>Game Maker 5.2 Project</comment>
+    <glob pattern="*.gm5"/>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="100">
+      <match type="little32" offset="0" value="1234321">
+        <match type="little32" offset="4" value="520"/>
+      </match>
+    </magic>
+  </mime-type>
   <mime-type type="application/x-gm53">
     <comment>Game Maker 5.3 Project</comment>
     <glob pattern="*.gm5"/>
@@ -17,6 +53,16 @@
     <magic priority="100">
       <match type="little32" offset="0" value="1234321">
         <match type="little32" offset="4" value="600"/>
+      </match>
+    </magic>
+  </mime-type>
+  <mime-type type="application/x-gm61">
+    <comment>Game Maker 6.1 Project</comment>
+    <glob pattern="*.gm6"/>
+    <sub-class-of type="application/octet-stream"/>
+    <magic priority="100">
+      <match type="little32" offset="0" value="1234321">
+        <match type="little32" offset="4" value="610"/>
       </match>
     </magic>
   </mime-type>
