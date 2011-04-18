@@ -117,6 +117,12 @@ public class EnigmaSettings
 	public EnigmaSettings copy()
 		{
 		EnigmaSettings es = new EnigmaSettings(false);
+		copyInto(es);
+		return es;
+		}
+
+	public void copyInto(EnigmaSettings es)
+		{
 		es.cppStrings = cppStrings;
 		es.cppOperators = cppOperators;
 		es.literalHandling = literalHandling;
@@ -136,6 +142,5 @@ public class EnigmaSettings
 		es.selAudio = selAudio;
 		es.selCollision = selCollision;
 		es.selWidgets = selWidgets;
-		return es;
 		}
 	}

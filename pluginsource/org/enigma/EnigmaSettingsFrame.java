@@ -74,7 +74,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon CODE_ICON = LGM.getIconForKey("Resource.SCRIPT"); //$NON-NLS-1$
 
-	private EnigmaSettings oldEs, es;
+	private final EnigmaSettings oldEs;
+	private EnigmaSettings es;
 
 	protected JToolBar toolbar;
 	protected JButton save, saveFile, loadFile;
@@ -554,7 +555,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	public void updateResource()
 		{
 		commitChanges();
-		oldEs = es.copy();
+		es.copyInto(oldEs);
 		}
 
 	public void commitChanges()

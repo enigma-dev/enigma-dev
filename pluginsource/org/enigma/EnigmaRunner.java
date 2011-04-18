@@ -531,6 +531,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		setMenuEnabled(false);
 		LGM.commitAll();
+		esf.updateResource();
+		es.commitToDriver();
 		//System.out.println("Compiling with " + enigma);
 
 		final File efi = outname;
