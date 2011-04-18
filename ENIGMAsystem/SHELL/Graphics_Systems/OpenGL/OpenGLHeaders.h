@@ -25,11 +25,12 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "../../API_Switchboard.h"
+// TGMG: I've replaced your include of the switchboard with this hard-coded job until I find
+// something more elegant.          -Josh
 
-#ifdef ENIGMA_WS_COCOA
+#if defined(__APPLE__) || defined(MACOSX) || defined(__MACH__) || defined(macintosh) || defined(Macintosh)
   #include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+  #include <OpenGL/glu.h>
 #else
   #include <GL/gl.h>
   #include <GL/glu.h>

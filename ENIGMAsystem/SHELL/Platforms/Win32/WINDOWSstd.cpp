@@ -30,7 +30,6 @@
 #include <windows.h>
 using namespace std;
 
-#include "../../API_Switchboard.h"
 #include "../../libEGMstd.h"
 
 
@@ -44,7 +43,7 @@ namespace enigma
       GetModuleFileName(NULL, exenamehere, 1024);
     }
     
-    #ifdef ENIGMA_GS_OPENGL
+    #ifndef NOT_ENIGMA_GS_OPENGL // FIXME: This shit needs moved, as you can plainly see.
     void EnableDrawing (HGLRC *hRC)
     {
         PIXELFORMATDESCRIPTOR pfd;

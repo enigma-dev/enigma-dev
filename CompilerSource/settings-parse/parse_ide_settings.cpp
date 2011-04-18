@@ -107,5 +107,15 @@ void parse_ide_settings(const char* eyaml)
   eygl(Graphics_Systems, graphics);
   eygl(Widget_Systems, widget);
   eygl(Audio_Systems, audio);
+  
+  string cinffile = settree.get("target-compiler");
+  cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + cinffile + ".ey";
+  
+  ifstream cinfstream(cinffile.c_str());
+  ey_data cinfo = parse_eyaml(cinfstream,cinffile);
+  extensions::targetOS.buildext  = cinfo.get("build-extension");
+  extensions::targetOS.buildname = cinfo.get("build-output");
+  extensions::targetOS.runprog   = cinfo.get("run-program");
+  extensions::targetOS.runparam  = cinfo.get("run-params");
 }
 

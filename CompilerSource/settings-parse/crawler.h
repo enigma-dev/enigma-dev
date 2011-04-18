@@ -45,12 +45,9 @@ namespace extensions
   void crawl_for_locals();
   void determine_target();
   
-  struct os_descriptor
-  {
-    string 
-      name, identifier, represents, description, author,
-      build_platforms, build_extension,
-      run_program, run_params;
+  struct os_descriptor {
+    string name, identifier, represents, description, author, build_platforms;
+    string buildext, buildname, runprog, runparam;
   };
   struct api_descriptor
   {

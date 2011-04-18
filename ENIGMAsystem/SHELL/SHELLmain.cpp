@@ -41,7 +41,8 @@
 
 //#include <vector> //COLLIGMA
 
-
+#include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
+#include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
 #include "API_Switchboard.h"
 
 #include "Universal_System/reflexive_types.h"
@@ -53,54 +54,17 @@
 
 
 #include "Universal_System/collisions_object.h"
-#include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
-#include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
-#include "Collision_Systems/collision_mandatory.h"
 
+#include "Collision_Systems/collision_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
-#if ENIGMA_GS_OPENGL
-    #include "Graphics_Systems/OpenGL/OPENGLStd.h"
-    #include "Graphics_Systems/OpenGL/GSsprite.h"
-    #include "Graphics_Systems/OpenGL/GSbackground.h"
-
-    #include "Graphics_Systems/OpenGL/GSfont.h"
-    #include "Graphics_Systems/OpenGL/GScurves.h"
-#elif ENIGMA_GS_OPENGLES
-    #include "Graphics_Systems/OpenGLES/OPENGLStd.h"
-    #include "Graphics_Systems/OpenGLES/GSsprite.h"
-#endif
-#if ENIGMA_WS_WIN32 != 0
-    #include "Platforms/Win32/WINDOWSStd.h"
-#elif ENIGMA_WS_XLIB != 0
-    #include "Platforms/xlib/XLIBwindow.h"
-#elif ENIGMA_WS_COCOA != 0
-    #include "Platforms/Cocoa/CocoaWindow.h"
-#elif ENIGMA_WS_IPHONE != 0
-    #include "Platforms/iPhone/CocoaWindow.h"
-#elif ENIGMA_WS_ANDROID != 0
-    #include "Platforms/Android/AndroidWindow.h"
-#endif
-
-
 
 #include "Universal_System/switch_stuff.h"
 #include "Universal_System/CallbackArrays.h"
 
 extern int amain();
 
-
-#if COLLIGMA
-    #include "Colligma/colligma_start.h"
-    #include "Colligma/colligma_end.h"
-#endif
-
-//TODO: modularize this
-#include "Collision_Systems/BBox/include.h"
-
 #include "Universal_System/IMGloading.h"
-
-#include "Audio_Systems/OpenAL/as_basic.h"
 
 #include "Universal_System/object.h"
 #include "Universal_System/instance.h"
@@ -109,8 +73,6 @@ extern int amain();
 #include "Universal_System/globalupdate.h"
 
 #include "Universal_System/WITHconstruct.h"
-
-
 
 #include "Universal_System/simplecollisions.h"
 #if COLLIGMA

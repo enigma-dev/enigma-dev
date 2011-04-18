@@ -8,10 +8,5 @@ Description: Run on any Linux distribution powered by the X Window Server.
 Author: IsmAvatar, Josh Ventura
 
 Build-Platforms: Linux
-Build-Extension: 
-
-Run-Program: $game
-Run-Params:
 
 Links: -lz
-

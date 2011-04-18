@@ -36,7 +36,7 @@
 	$(CXX) -c instance_system.cpp		-o .eobjs_$(MODE)/instance_system.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/loading.o: loading.cpp mathnc.h resinit.h ../Platforms/platforms_mandatory.h ../Audio_Systems/audio_mandatory.h ../Widget_Systems/widgets_mandatory.h ../Graphics_Systems/graphics_mandatory.h roomsystem.h var4.h var_te.h multifunction_variant.h ../libEGMstd.h
 	$(CXX) -c loading.cpp		-o .eobjs_$(MODE)/loading.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/mathnc.o: mathnc.cpp var4.h var_te.h ../API_Switchboard.h
+.eobjs_$(MODE)/mathnc.o: mathnc.cpp var4.h var_te.h
 	$(CXX) -c mathnc.cpp		-o .eobjs_$(MODE)/mathnc.o $(GFLAGS) $(ECPPFLAGS)
 .eobjs_$(MODE)/object.o: object.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h object.h ../libEGMstd.h
 	$(CXX) -c object.cpp		-o .eobjs_$(MODE)/object.o $(GFLAGS) $(ECPPFLAGS)

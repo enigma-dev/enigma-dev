@@ -93,12 +93,16 @@ void clear_ide_editables()
   ofstream wto;
   string f2comp = fc("ENIGMAsystem/SHELL/API_Switchboard.h");
   string f2write = license;
-    f2write += "#define ENIGMA_WS_" + toUpper(extensions::targetAPI.windowSys) + " 1\n#define ENIGMA_GS_" + toUpper(extensions::targetAPI.graphicsSys) + " 1\n";
+    f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys) + "/include.h\"\n"
+               "#include \"Graphics_Systems/" + (extensions::targetAPI.graphicsSys) + "/include.h\"\n"
+               "#include \"Audio_Systems/" + (extensions::targetAPI.audioSys) + "/include.h\"\n"
+               "#include \"Collision_Systems/" + (extensions::targetAPI.collisionSys) + "/include.h\"\n"
+               "#include \"Widget_Systems/" + (extensions::targetAPI.widgetSys) + "/include.h\"\n";
   if (f2comp != f2write)
   {
     user << "Rewriting API switchboard header... This could hurt compile time." << flushl;
     wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
-      wto << f2write;
+      wto << f2write << endl;
     wto.close();
   }
 
@@ -387,7 +391,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
   
   idpr("Adding resources...",90);
-  string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.build_extension;
+  string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.buildext;
   string gameFname = mode == emode_build ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
 
   idpr("Starting compile (This may take a while...)", 30);
@@ -498,7 +502,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   if (mode == emode_run or mode == emode_build)
   {
-    string rprog = extensions::targetOS.run_program, rparam = extensions::targetOS.run_params;
+    string rprog = extensions::targetOS.runprog, rparam = extensions::targetOS.runparam;
     rprog = string_replace_all(rprog,"$game",gameFname);
     rparam = string_replace_all(rparam,"$game",gameFname);
     user << "Running \"" << rprog << "\" " << rparam << flushl;

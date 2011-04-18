@@ -3,6 +3,7 @@
 Name: GNU GCC G++
 Native: Yes
 Maintainer: Josh
+Target-platform: Linux
 
 # Some info about it
 path: 
@@ -15,4 +16,9 @@ resources: $exe
 cppflags:
 cflags:
 links:
+
+Build-Extension: 
+Run-output: [Temp files]
+Run-Program: $game
+Run-Params:
 

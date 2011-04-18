@@ -2,35 +2,35 @@
 
 .eobjs_$(MODE)/graphics_object.o: graphics_object.cpp graphics_object.h ../../Universal_System/planar_object.h ../../Universal_System/object.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/reflexive_types.h ../../Universal_System/multifunction_variant.h ../../Universal_System/mathnc.h ../../Universal_System/spritestruct.h
 	$(CXX) -c graphics_object.cpp		-o .eobjs_$(MODE)/graphics_object.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSbackground.o: GSbackground.cpp OpenGLHeaders.h ../../API_Switchboard.h ../../Universal_System/backgroundstruct.h
+.eobjs_$(MODE)/GSbackground.o: GSbackground.cpp OpenGLHeaders.h ../../Universal_System/backgroundstruct.h
 	$(CXX) -c GSbackground.cpp		-o .eobjs_$(MODE)/GSbackground.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSblend.o: GSblend.cpp OpenGLHeaders.h ../../API_Switchboard.h
+.eobjs_$(MODE)/GSblend.o: GSblend.cpp OpenGLHeaders.h
 	$(CXX) -c GSblend.cpp		-o .eobjs_$(MODE)/GSblend.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GScolors.o: GScolors.cpp OpenGLHeaders.h ../../API_Switchboard.h
+.eobjs_$(MODE)/GScolors.o: GScolors.cpp OpenGLHeaders.h
 	$(CXX) -c GScolors.cpp		-o .eobjs_$(MODE)/GScolors.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GScurves.o: GScurves.cpp OpenGLHeaders.h ../../API_Switchboard.h GScolors.h
+.eobjs_$(MODE)/GScurves.o: GScurves.cpp OpenGLHeaders.h GScolors.h
 	$(CXX) -c GScurves.cpp		-o .eobjs_$(MODE)/GScurves.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSd3d.o: GSd3d.cpp OpenGLHeaders.h ../../API_Switchboard.h GSprmtvs.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
+.eobjs_$(MODE)/GSd3d.o: GSd3d.cpp OpenGLHeaders.h GSprmtvs.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c GSd3d.cpp		-o .eobjs_$(MODE)/GSd3d.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSenable.o: GSenable.cpp OpenGLHeaders.h ../../API_Switchboard.h
+.eobjs_$(MODE)/GSenable.o: GSenable.cpp OpenGLHeaders.h
 	$(CXX) -c GSenable.cpp		-o .eobjs_$(MODE)/GSenable.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSfont.o: GSfont.cpp OpenGLHeaders.h ../../API_Switchboard.h ../../Universal_System/fontstruct.h
+.eobjs_$(MODE)/GSfont.o: GSfont.cpp OpenGLHeaders.h ../../Universal_System/fontstruct.h
 	$(CXX) -c GSfont.cpp		-o .eobjs_$(MODE)/GSfont.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSmiscextra.o: GSmiscextra.cpp OpenGLHeaders.h ../../API_Switchboard.h
+.eobjs_$(MODE)/GSmiscextra.o: GSmiscextra.cpp OpenGLHeaders.h
 	$(CXX) -c GSmiscextra.cpp		-o .eobjs_$(MODE)/GSmiscextra.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSprmtvs.o: GSprmtvs.cpp OpenGLHeaders.h ../../API_Switchboard.h
+.eobjs_$(MODE)/GSprmtvs.o: GSprmtvs.cpp OpenGLHeaders.h
 	$(CXX) -c GSprmtvs.cpp		-o .eobjs_$(MODE)/GSprmtvs.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSscreen.o: GSscreen.cpp OpenGLHeaders.h ../../API_Switchboard.h GSbackground.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h ../../Universal_System/instance_system.h ../../Universal_System/reflexive_types.h ../../Universal_System/object.h graphics_object.h ../../Universal_System/planar_object.h ../../Universal_System/mathnc.h ../../Universal_System/spritestruct.h
+.eobjs_$(MODE)/GSscreen.o: GSscreen.cpp OpenGLHeaders.h GSbackground.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h ../../Universal_System/instance_system.h ../../Universal_System/reflexive_types.h ../../Universal_System/object.h graphics_object.h ../../Universal_System/planar_object.h ../../Universal_System/mathnc.h ../../Universal_System/spritestruct.h
 	$(CXX) -c GSscreen.cpp		-o .eobjs_$(MODE)/GSscreen.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSsprite.o: GSsprite.cpp OpenGLHeaders.h ../../API_Switchboard.h ../../Universal_System/spritestruct.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
+.eobjs_$(MODE)/GSsprite.o: GSsprite.cpp OpenGLHeaders.h ../../Universal_System/spritestruct.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c GSsprite.cpp		-o .eobjs_$(MODE)/GSsprite.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSstdraw.o: GSstdraw.cpp OpenGLHeaders.h ../../API_Switchboard.h
+.eobjs_$(MODE)/GSstdraw.o: GSstdraw.cpp OpenGLHeaders.h
 	$(CXX) -c GSstdraw.cpp		-o .eobjs_$(MODE)/GSstdraw.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GSsurface.o: GSsurface.cpp OpenGLHeaders.h ../../API_Switchboard.h
+.eobjs_$(MODE)/GSsurface.o: GSsurface.cpp OpenGLHeaders.h
 	$(CXX) -c GSsurface.cpp		-o .eobjs_$(MODE)/GSsurface.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/GStextures.o: GStextures.cpp OpenGLHeaders.h ../../API_Switchboard.h
+.eobjs_$(MODE)/GStextures.o: GStextures.cpp OpenGLHeaders.h
 	$(CXX) -c GStextures.cpp		-o .eobjs_$(MODE)/GStextures.o $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/OPENGLStd.o: OPENGLStd.cpp OpenGLHeaders.h ../../API_Switchboard.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
+.eobjs_$(MODE)/OPENGLStd.o: OPENGLStd.cpp OpenGLHeaders.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c OPENGLStd.cpp		-o .eobjs_$(MODE)/OPENGLStd.o $(GFLAGS) $(ECPPFLAGS)
 
 .eobjs_$(MODE):

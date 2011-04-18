@@ -54,7 +54,7 @@ int random_set_seed(int seed);
 int random_get_seed();
 int randomize();
 int random_integer(int x);
-int random32();
+unsigned int random32();
 double mtrandom();
 int mtrandom_seed(int x);
 

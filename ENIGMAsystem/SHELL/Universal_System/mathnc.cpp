@@ -28,17 +28,13 @@
 #include <stdlib.h>
 #include <cmath>
 #include "var4.h"
-#include "../API_Switchboard.h"
 
-#if ENIGMA_WS_IPHONE == 1
-#else
 double bessel_j0(double x) { return j0(x); }
 double bessel_j1(double x) { return j1(x); }
 double bessel_jn(int x, double y) { return jn(x,y); }
 double bessel_y0(double x) { return y0(x); }
 double bessel_y1(double x) { return y1(x); }
 double bessel_yn(int x, double y) { return yn(x,y); }
-#endif
 
 double abs(variant x) { return fabs(double(x)); }
 double abs(var x)     { return fabs(double(x)); }

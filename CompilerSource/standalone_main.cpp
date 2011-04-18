@@ -85,7 +85,7 @@ inline void povers(string n)
   if (find_extname(n,0xFFFFFFFF))
   {
     cout << ext_retriever_var->name;
-    for (int i = 0; i < ext_retriever_var->sparams.size; i++)
+    for (unsigned i = 0; i < ext_retriever_var->sparams.size; i++)
       cout << "   " << ext_retriever_var->sparams[i] << endl;
   }
 }

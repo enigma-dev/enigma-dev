@@ -137,24 +137,27 @@ namespace extensions
         os_descriptor& os = all_platforms[toUpper(ef)];
         os.name   = dat.get("name");
         os.author = dat.get("author");
-        os.build_extension = dat.get("build-extension");
         os.build_platforms = dat.get("build-platforms");
         os.description = dat.get("description");
         os.identifier  = dat.get("identifier");
         os.represents  = dat.get("represents");
-        os.run_params  = dat.get("run-params");
-        os.run_program = dat.get("run-program"); 
       } else cout << "Failed!\n";
     }
     if (targetAPI.windowSys != "")
-      targetOS = all_platforms[toUpper(targetAPI.windowSys)];
+    {
+      os_descriptor &n = all_platforms[toUpper(targetAPI.windowSys)];
+      n.buildext = targetOS.buildext, n.buildname = targetOS.buildname, n.runprog = targetOS.runprog, n.runparam = targetOS.runparam;
+      targetOS = n;
+    }
     else
     {
       string iun = toUpper(uname_s);
       for (platIter i = all_platforms.begin(); i != all_platforms.end(); i++)
         if (toUpper(i->second.represents) == iun)
       {
-        targetOS = i->second;
+        os_descriptor &n = i->second;
+        n.buildext = targetOS.buildext, n.buildname = targetOS.buildname, n.runprog = targetOS.runprog, n.runparam = targetOS.runparam;
+        targetOS = n;
         break;
       }
     }

@@ -7,10 +7,4 @@ Represents: iPhone
 Description: Build for Apple iPhone.
 Author: TGMG
 
-Build-Platforms: MacOSX
-Build-Extension: .app
-
-Run-Program: MacOS/build/Release-iphonesimulator/iphonesim
-Run-Params:  launch $game
-
-
+Build-Platforms: iPhone

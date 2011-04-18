@@ -104,7 +104,6 @@ int module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     rectpnode *rectplane = new rectpnode(0,0,w,h);
     for (list<unsigned int>::reverse_iterator ii = box_order.rbegin(); ii != box_order.rend(); )
     {
-      printf("Add rectangle %d, which is of size %d x %d, to main cell of size %d x %d (%d, %d)\n", *ii & 255, boxes[*ii & 255].w, boxes[*ii & 255].h, rectplane->wid, rectplane->hgt, w, h);
       rectpnode *nn = rninsert(rectplane, *ii & 0xFF, boxes);
       if (nn)
         rncopy(nn, boxes, *ii & 0xFF),

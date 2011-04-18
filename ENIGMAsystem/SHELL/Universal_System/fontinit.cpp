@@ -36,8 +36,6 @@ using namespace std;
 #include "../libEGMstd.h"
 #include "compression.h"
 
-#include <iostream>
-
 namespace enigma
 {
   void exe_loadfonts(FILE *exe)
@@ -55,7 +53,6 @@ namespace enigma
       show_error("Resource data does not match up with game metrics. Unable to improvise.",0);
       return;
     }
-    printf("Reading %d fonts\n", fontcount);
 	  
 	  fontstructarray = (new font*[rawfontmaxid + 2]) + 1;
 	  
@@ -63,14 +60,10 @@ namespace enigma
 	  {
 		  // int unpacked;
 		  fread(&fntid, 4,1,exe);
-		  printf("id: %d\n", fntid);
 		  fread(&twid, 4,1,exe);
-		  printf("width: %d\n", twid);
 		  fread(&thgt,4,1,exe);
-		  printf("height: %d\n", thgt);
 		  const int i = fntid;
 		  
-		  cout << "Assign some shit for font " << i << endl;
 		  fontstructarray[i] = new font;
 		  
 		  fontstructarray[i]->name = rawfontdata[rf].name;
@@ -83,8 +76,6 @@ namespace enigma
 		  fontstructarray[i]->glyphcount = rawfontdata[rf].glyphcount;
 		  
 		  fontstructarray[i]->height = 0;
-		  
-		  cout << "Assigned some shit for font. Doing allocations." << endl;
 		  
 		  fontstructarray[i]->glyphs = new fontglyph[fontstructarray[i]->glyphcount];
 		  
@@ -103,7 +94,7 @@ namespace enigma
       fread(&nullhere,4,1,exe);
       if (nullhere != *(int*)"done")
       {
-        cout << "Unexpected end; eof:" << (feof(exe)?"true":"false") << endl;
+        printf("Unexpected end; eof:%s\n",feof(exe)?"true":"false");
         return;
       }
 		  //unpacked = width*height*4;
@@ -116,7 +107,6 @@ namespace enigma
 		  delete[] cpixels;*/
 		  
 		  int ymin=100, ymax=-100;
-		  cout << "Allocations done. Doing some other shit." << endl;
 		  for (int gi = 0; gi < enigma::fontstructarray[i]->glyphcount; gi++)
 		  {
 		    fread(&advance,4,1,exe);
@@ -148,9 +138,7 @@ namespace enigma
 		  }
 		  fontstructarray[i]->height = ymax - ymin + 1;
 		  
-      cout << "Did other shit." << endl;
 		  fontstructarray[i]->texture = graphics_create_texture(twid,thgt,pixels);
-      cout << "Applied for texture. Received id " << fontstructarray[i]->texture << endl;
       
       /*int sss = 'A' - fontstructarray[i]->glyphstart;
       fontstructarray[i]->glyphs[sss].x = 0;
@@ -166,11 +154,7 @@ namespace enigma
 		  
       fread(&nullhere,4,1,exe);
       if (nullhere != *(int*)"endf")
-      {
-        cout << "ERROR! Uncapped font. Incorrect read size. EOF:" << (feof(exe)?"true":"false") << endl;
         return;
-      }
-		  
 	  }
   }
 }

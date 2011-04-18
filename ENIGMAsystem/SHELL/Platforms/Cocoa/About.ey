@@ -8,10 +8,5 @@ Description: Run on Apple Mac OS X, or other Cocoa-enabled Apple systems.
 Author: TGMG
 
 Build-Platforms: MacOSX
-Build-Extension: ../trunk/MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
-
-Run-Program: open
-Run-Params: $game
 
 Links: -lz -framework Cocoa
-

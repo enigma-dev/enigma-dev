@@ -7,10 +7,4 @@ Represents: Android
 Description: Build for Android.
 Author: TGMG
 
-Build-Platforms: MacOSX, Linux, Windows
-Build-Extension: .app
-
-Run-Program: make androidrun
-Run-Params:  launch $game
-
-
+Build-Platforms: Android
