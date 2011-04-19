@@ -26,12 +26,11 @@
 \********************************************************************************/
 
 #include <windows.h>
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 
-using namespace std;
+using std::string;
 string msys_path_from_mingw = "msys\\1.0\\bin\\";
 
 string fixdrive(string p)
@@ -191,21 +190,21 @@ int main()
     #define tritier(mingw,bin,make) ((mingw_bin_path = ((mingw_path = mingw) + bin)) + (makename = make)).c_str()
     string mingw_path, mingw_bin_path, makename;
     tritier("\\MinGW\\","bin\\","mingw32-make");
-    cout << "THIS IS WHAT I THINK: " << mingw_path << " : " << mingw_bin_path << " : " << makename << endl << tritier("\\MinGW\\","bin\\","mingw32-make") << endl;
+    printf("THIS IS WHAT I THINK: %s : %s : %s\n%s\n", mingw_path.c_str(), mingw_bin_path.c_str(), makename.c_str(), tritier("\\MinGW\\","bin\\","mingw32-make"));
     int    a = better_system(tritier("","","make"),         "--version");
-      cout << "tried 1" << endl;
+    puts("tried 1");
     if (a)
     {
       a = better_system(tritier("","","mingw32-make"), "--version");
-      cout << "tried 2" << endl;
+      puts("tried 2");
       if (a) 
       {
         search_manually:
         a = better_system(tritier("\\MinGW\\","bin\\","mingw32-make"), "--version");
-        cout << "tried 3" << endl;
+        puts("tried 3");
         if (a) {
           a = better_system(tritier("C:\\MinGW\\","bin\\","mingw32-make"), "--version");
-          cout << "tried 4" << endl;
+          puts("tried 4");
         }
       }
     }
@@ -378,28 +377,12 @@ bool e_install_mingw(string dl)
 bool e_use_existing_install(const char* make,const char *binpath, const char *auxpath)
 {
   FILE *cff = fopen(CONFIG_FILE, "wb");
+  FILE *iff = fopen("Autoconf/wingcc_template.eyt","rb");
+  fseek(iff, 0, SEEK_END); size_t tmplen = ftell(iff); fseek(iff, 0, SEEK_SET);
+  char wingcc_template[tmplen+1]; wingcc_template[fread(wingcc_template,1,tmplen,iff)] = 0;
   if (cff)
   {
-    fprintf(cff,
-            "%%e-yaml\n"
-            "---\n"
-            "Name: GNU GCC G++\n"
-            "Native: Yes\n"
-            "Maintainer: Josh / ENIGMA.exe #This is a generated file\n"
-            "Target-platform: Windows\n"
-            "\n"
-            "# Some info about it\n"
-            "path: %s\n"
-            "make: %s\n"
-            "defines:  %scpp -dM -x c++ -E $blank\n"
-            "searchdirs: %sgcc -E -x c++ -v $blank\n"
-            "searchdirs-start: \"#include <...> search starts here:\"\n"
-            "searchdirs-end: \"End of search list.\"\n"
-            "cppflags: -static-libstdc++ -static-libgcc\n"
-            "cflags: -static-libgcc\n"
-            "links: -static-libstdc++ -static-libgcc\n"
-            "\n",
-            auxpath, make, binpath, binpath);
+    fprintf(cff, wingcc_template, auxpath, make, binpath, binpath);
     fclose(cff);
   }
   return TRUE;

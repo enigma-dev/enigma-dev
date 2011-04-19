@@ -29,8 +29,13 @@
 // They are also, directly or otherwise, available to the user.
 
 string toString(int);
+string toString(long);
+string toString(short);
 string toString(unsigned);
+string toString(unsigned long);
+string toString(unsigned short);
 string toString(long long n);
+string toString(unsigned long long n);
 string toString(char);
 string toString(char*);
 string toString(float);
