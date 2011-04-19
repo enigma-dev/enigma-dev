@@ -45,9 +45,8 @@ namespace extensions
   void crawl_for_locals();
   void determine_target();
   
-  struct os_descriptor {
+  struct sdk_descriptor {
     string name, identifier, represents, description, author, build_platforms;
-    string buildext, buildname, runprog, runparam;
   };
   struct api_descriptor
   {
@@ -56,6 +55,10 @@ namespace extensions
     string
       windowLinks, graphicsLinks, audioLinks, collisionLinks, widgetLinks, networkLinks;
   };
-  extern os_descriptor targetOS;
+  struct compiler_descriptor {
+    string identifier, resfile, buildext, buildname, runprog, runparam;
+  };
+  extern sdk_descriptor targetSDK;
   extern api_descriptor targetAPI;
+  extern compiler_descriptor targetOS;
 }

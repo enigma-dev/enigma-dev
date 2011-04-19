@@ -77,18 +77,18 @@ int module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     cout << "Basic metric info: " << (es->fonts[i].rangeMax - es->fonts[i].rangeMin + 1)
          << " glyphs from " << (int)es->fonts[i].rangeMin << " to " << (int)es->fonts[i].rangeMax
          << ", glyph pointer is at " << es->fonts[i].glyphs << "." << endl;
-    cout << "Dump of concerned memory: " << endl;*/
+    cout << "Dump of concerned memory: " << endl;
     
     for (size_t ii = 0; ii < sizeof(Font); ii++)
       printf("%02X%c",((const unsigned char*)(es->fonts+i))[ii],((ii+1)%16)?' ':'\n');
     cout << endl;
     for (int ii = 0; ii < gc; ii++)
     cout << "The dimensions of glyph " << ii << "are " << flush << es->fonts[i].glyphs[ii].width << "x" << es->fonts[i].glyphs[ii].height << "." << endl;
-    cout << "End of list." << endl;
+    cout << "End of list." << endl;*/
     
     // Copy our glyph metrics into it
     for (int ii = 0; ii < gc; ii++)
-    cout << "The dimensions of glyph " << ii << "are " << flush, cout << es->fonts[i].glyphs[ii].width << "x" << es->fonts[i].glyphs[ii].height << "." << endl,
+    //cout << "The dimensions of glyph " << ii << "are " << flush, cout << es->fonts[i].glyphs[ii].width << "x" << es->fonts[i].glyphs[ii].height << "." << endl,
       boxes[ii].w = es->fonts[i].glyphs[ii].width,
       boxes[ii].h = es->fonts[i].glyphs[ii].height;
     cout << "Copied metrics" << endl;

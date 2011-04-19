@@ -79,6 +79,16 @@ unsigned int font_get_texture(int fnt)
   font *f = fontstructarray[fnt];
   return f ? f->texture : unsigned(-1);
 }
+unsigned int font_get_texture_width(int fnt)
+{
+  font *f = fontstructarray[fnt];
+  return f ? f->twid: unsigned(-1);
+}
+unsigned int font_get_texture_height(int fnt)
+{
+  font *f = fontstructarray[fnt];
+  return f ? f->thgt: unsigned(-1);
+}
 
 void draw_set_font(int fnt)
 {

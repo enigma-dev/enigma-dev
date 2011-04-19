@@ -414,6 +414,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "WIDGETS="  + extensions::targetAPI.widgetSys + " ";
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
+  make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier + " ";
   
   string mfgfn = gameFname; 
   for (size_t i = 0; i < mfgfn.length(); i++)
@@ -460,18 +461,35 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     "ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
   #endif
   
-  FILE *gameModule = fopen(gameFname.c_str(),"ab");
-  if (!gameModule) {
-    user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
-    idpr("Failed to add resources.",-1); return 12;
+  FILE *gameModule;
+  int resourceblock_start = 0;
+  cout << "`" << extensions::targetOS.resfile << "` == '$exe': " << (extensions::targetOS.resfile == "$game"?"true":"FALSE") << endl;
+  if (extensions::targetOS.resfile == "$exe")
+  {
+    gameModule = fopen(gameFname.c_str(),"ab");
+    if (!gameModule) {
+      user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
+      idpr("Failed to add resources.",-1); return 12;
+    }
+    
+    fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
+    resourceblock_start = ftell(gameModule);
+    
+    if (resourceblock_start < 128) {
+      user << "Compiled game is clearly not a working module; cannot continue" << flushl;
+      idpr("Failed to add resources.",-1); return 13;
+    }
   }
-
-  fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
-  int resourceblock_start = ftell(gameModule);
-  
-  if (resourceblock_start < 128) {
-    user << "Compiled game is clearly not a working module; cannot continue" << flushl;
-    idpr("Failed to add resources.",-1); return 13;
+  else
+  {
+    string resname = extensions::targetOS.buildname;
+    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
+      resname.replace(p,4,gameFname);
+    gameModule = fopen(resname.c_str(),"wb");
+    if (!gameModule) {
+      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
+      idpr("Failed to write resources.",-1); return 12;
+    }
   }
 
   // Start by setting off our location with a DWord of NULLs

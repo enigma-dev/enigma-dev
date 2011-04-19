@@ -44,7 +44,10 @@ namespace enigma
     unsigned char glyphstart, glyphcount;
     fontglyph *glyphs;
     int height;
+    
+    // Texture layer
     unsigned int texture;
+    int twid, thgt;
   };
   struct rawfont {
     string name;

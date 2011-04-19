@@ -139,6 +139,8 @@ namespace enigma
 		  fontstructarray[i]->height = ymax - ymin + 1;
 		  
 		  fontstructarray[i]->texture = graphics_create_texture(twid,thgt,pixels);
+		  fontstructarray[i]->twid = twid;
+		  fontstructarray[i]->thgt = thgt;
       
       /*int sss = 'A' - fontstructarray[i]->glyphstart;
       fontstructarray[i]->glyphs[sss].x = 0;

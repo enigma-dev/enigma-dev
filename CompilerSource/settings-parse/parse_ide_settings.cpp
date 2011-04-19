@@ -113,9 +113,11 @@ void parse_ide_settings(const char* eyaml)
   
   ifstream cinfstream(cinffile.c_str());
   ey_data cinfo = parse_eyaml(cinfstream,cinffile);
+  extensions::targetOS.resfile   = cinfo.get("resources");
   extensions::targetOS.buildext  = cinfo.get("build-extension");
-  extensions::targetOS.buildname = cinfo.get("build-output");
+  extensions::targetOS.buildname = cinfo.get("run-output");
   extensions::targetOS.runprog   = cinfo.get("run-program");
   extensions::targetOS.runparam  = cinfo.get("run-params");
+  extensions::targetOS.identifier = cinfo.get("target-platform");
 }
 

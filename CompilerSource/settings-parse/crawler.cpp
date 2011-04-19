@@ -109,10 +109,11 @@ namespace extensions
     }
   }
   
-  os_descriptor targetOS;
+  sdk_descriptor targetSDK;
   api_descriptor targetAPI;
-  map<string, os_descriptor> all_platforms;
-  typedef map<string, os_descriptor>::iterator platIter;
+  compiler_descriptor targetOS;
+  map<string, sdk_descriptor> all_platforms;
+  typedef map<string, sdk_descriptor>::iterator platIter;
   
   string uname_s = CURRENT_PLATFORM_NAME;
   
@@ -134,30 +135,24 @@ namespace extensions
           continue;
         }
         
-        os_descriptor& os = all_platforms[toUpper(ef)];
-        os.name   = dat.get("name");
-        os.author = dat.get("author");
-        os.build_platforms = dat.get("build-platforms");
-        os.description = dat.get("description");
-        os.identifier  = dat.get("identifier");
-        os.represents  = dat.get("represents");
+        sdk_descriptor& sdk = all_platforms[toUpper(ef)];
+        sdk.name   = dat.get("name");
+        sdk.author = dat.get("author");
+        sdk.build_platforms = dat.get("build-platforms");
+        sdk.description = dat.get("description");
+        sdk.identifier  = dat.get("identifier");
+        sdk.represents  = dat.get("represents");
       } else cout << "Failed!\n";
     }
     if (targetAPI.windowSys != "")
-    {
-      os_descriptor &n = all_platforms[toUpper(targetAPI.windowSys)];
-      n.buildext = targetOS.buildext, n.buildname = targetOS.buildname, n.runprog = targetOS.runprog, n.runparam = targetOS.runparam;
-      targetOS = n;
-    }
+      targetSDK = all_platforms[toUpper(targetAPI.windowSys)];
     else
     {
       string iun = toUpper(uname_s);
       for (platIter i = all_platforms.begin(); i != all_platforms.end(); i++)
         if (toUpper(i->second.represents) == iun)
       {
-        os_descriptor &n = i->second;
-        n.buildext = targetOS.buildext, n.buildname = targetOS.buildname, n.runprog = targetOS.runprog, n.runparam = targetOS.runparam;
-        targetOS = n;
+        targetSDK = i->second;
         break;
       }
     }

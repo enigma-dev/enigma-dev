@@ -165,5 +165,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   }
   
   font->texture = enigma::graphics_create_texture(w,h,bigtex);
+  font->twid = w;
+  font->thgt = h;
   return idfont;
 }
