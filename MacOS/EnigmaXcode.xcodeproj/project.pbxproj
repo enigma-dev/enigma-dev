@@ -32,6 +32,16 @@
 		9C0ACE7613252F3C00AB1FCD /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5B13252F3C00AB1FCD /* Makefile */; };
 		9C0ACE7713252F3C00AB1FCD /* nowidget_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0ACE5C13252F3C00AB1FCD /* nowidget_impl.cpp */; };
 		9C0ACEBF13253B4600AB1FCD /* CocoaDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CD0E36D1211960600A01347 /* CocoaDialog.cpp */; };
+		9C0D004313605BB70083E470 /* GSbackground.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D003F13605BB70083E470 /* GSbackground.cpp */; };
+		9C0D004413605BB70083E470 /* GSfont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004113605BB70083E470 /* GSfont.cpp */; };
+		9C0D004513605BB70083E470 /* GSbackground.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D003F13605BB70083E470 /* GSbackground.cpp */; };
+		9C0D004613605BB70083E470 /* GSfont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004113605BB70083E470 /* GSfont.cpp */; };
+		9C0D005013605BEB0083E470 /* fontinit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004A13605BEB0083E470 /* fontinit.cpp */; };
+		9C0D005113605BEB0083E470 /* fontstruct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004B13605BEB0083E470 /* fontstruct.cpp */; };
+		9C0D005213605BEB0083E470 /* rectpack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004E13605BEB0083E470 /* rectpack.cpp */; };
+		9C0D005313605BEB0083E470 /* fontinit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004A13605BEB0083E470 /* fontinit.cpp */; };
+		9C0D005413605BEB0083E470 /* fontstruct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004B13605BEB0083E470 /* fontstruct.cpp */; };
+		9C0D005513605BEB0083E470 /* rectpack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004E13605BEB0083E470 /* rectpack.cpp */; };
 		9C3829541215459C007B24C5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C3829531215459C007B24C5 /* CoreGraphics.framework */; };
 		9C382B231215685D007B24C5 /* iPhone-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9C382B221215685D007B24C5 /* iPhone-Info.plist */; };
 		9CAB7F1212245C1B00B1DAD6 /* GStextures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB7F0F12245C1B00B1DAD6 /* GStextures.cpp */; };
@@ -345,6 +355,17 @@
 		9C0ACE8B1325314700AB1FCD /* IDE_EDIT_globals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_globals.h; sourceTree = "<group>"; };
 		9C0ACE8C1325314700AB1FCD /* IDE_EDIT_objectaccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_objectaccess.h; sourceTree = "<group>"; };
 		9C0ACE8D1325314700AB1FCD /* IDE_EDIT_whitespace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDE_EDIT_whitespace.h; sourceTree = "<group>"; };
+		9C0D003F13605BB70083E470 /* GSbackground.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GSbackground.cpp; sourceTree = "<group>"; };
+		9C0D004013605BB70083E470 /* GSbackground.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GSbackground.h; sourceTree = "<group>"; };
+		9C0D004113605BB70083E470 /* GSfont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GSfont.cpp; sourceTree = "<group>"; };
+		9C0D004213605BB70083E470 /* GSfont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GSfont.h; sourceTree = "<group>"; };
+		9C0D004913605BEB0083E470 /* actions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = actions.h; sourceTree = "<group>"; };
+		9C0D004A13605BEB0083E470 /* fontinit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fontinit.cpp; sourceTree = "<group>"; };
+		9C0D004B13605BEB0083E470 /* fontstruct.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fontstruct.cpp; sourceTree = "<group>"; };
+		9C0D004C13605BEB0083E470 /* fontstruct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fontstruct.h; sourceTree = "<group>"; };
+		9C0D004D13605BEB0083E470 /* pseudo_components.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pseudo_components.h; sourceTree = "<group>"; };
+		9C0D004E13605BEB0083E470 /* rectpack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rectpack.cpp; sourceTree = "<group>"; };
+		9C0D004F13605BEB0083E470 /* rectpack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rectpack.h; sourceTree = "<group>"; };
 		9C3829531215459C007B24C5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		9C382B221215685D007B24C5 /* iPhone-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "iPhone-Info.plist"; sourceTree = "<group>"; };
 		9C6FA5811213ABF300F930EA /* TestEnigmaIphone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = TestEnigmaIphone.app; path = build/Debug/TestEnigmaIphone.app; sourceTree = "<group>"; };
@@ -1732,6 +1753,10 @@
 		9CD0E16D1211552700A01347 /* OpenGL */ = {
 			isa = PBXGroup;
 			children = (
+				9C0D003F13605BB70083E470 /* GSbackground.cpp */,
+				9C0D004013605BB70083E470 /* GSbackground.h */,
+				9C0D004113605BB70083E470 /* GSfont.cpp */,
+				9C0D004213605BB70083E470 /* GSfont.h */,
 				9CAB7F0F12245C1B00B1DAD6 /* GStextures.cpp */,
 				9CAB7F1012245C1B00B1DAD6 /* GStextures.h */,
 				9CD0E16E1211552700A01347 /* EGMenable.h */,
@@ -1773,6 +1798,13 @@
 		9CD0E1B81211552700A01347 /* Universal_System */ = {
 			isa = PBXGroup;
 			children = (
+				9C0D004913605BEB0083E470 /* actions.h */,
+				9C0D004A13605BEB0083E470 /* fontinit.cpp */,
+				9C0D004B13605BEB0083E470 /* fontstruct.cpp */,
+				9C0D004C13605BEB0083E470 /* fontstruct.h */,
+				9C0D004D13605BEB0083E470 /* pseudo_components.h */,
+				9C0D004E13605BEB0083E470 /* rectpack.cpp */,
+				9C0D004F13605BEB0083E470 /* rectpack.h */,
 				9CAB7F1312245C3700B1DAD6 /* backgroundinit.cpp */,
 				9CAB7F1412245C3700B1DAD6 /* backgroundstruct.cpp */,
 				9CAB7F1512245C3700B1DAD6 /* backgroundstruct.h */,
@@ -2248,6 +2280,11 @@
 				9C0ACE2D13252E7300AB1FCD /* coll_util.cpp in Sources */,
 				9C0ACE2F13252E7300AB1FCD /* placeholderlinks.cpp in Sources */,
 				9C0ACE6A13252F3C00AB1FCD /* nowidget_impl.cpp in Sources */,
+				9C0D004313605BB70083E470 /* GSbackground.cpp in Sources */,
+				9C0D004413605BB70083E470 /* GSfont.cpp in Sources */,
+				9C0D005013605BEB0083E470 /* fontinit.cpp in Sources */,
+				9C0D005113605BEB0083E470 /* fontstruct.cpp in Sources */,
+				9C0D005213605BEB0083E470 /* rectpack.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2399,6 +2436,11 @@
 				9C0ACE7313252F3C00AB1FCD /* widgets.cpp in Sources */,
 				9C0ACE7613252F3C00AB1FCD /* Makefile in Sources */,
 				9C0ACE7713252F3C00AB1FCD /* nowidget_impl.cpp in Sources */,
+				9C0D004513605BB70083E470 /* GSbackground.cpp in Sources */,
+				9C0D004613605BB70083E470 /* GSfont.cpp in Sources */,
+				9C0D005313605BEB0083E470 /* fontinit.cpp in Sources */,
+				9C0D005413605BEB0083E470 /* fontstruct.cpp in Sources */,
+				9C0D005513605BEB0083E470 /* rectpack.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
