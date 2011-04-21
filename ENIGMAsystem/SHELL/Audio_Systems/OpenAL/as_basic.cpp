@@ -113,6 +113,10 @@ bool sound_pause(int sound)
   enigma::sound &snd = enigma::sounds[sound];
   return snd.playing = !alurePauseSource(snd.src);
 }
+void sound_stop(int sound) {
+    enigma::sound &snd = enigma::sounds[sound];
+    alureStopSource(snd.src,AL_FALSE);
+}
 bool sound_resume(int sound)
 {
   enigma::sound &snd = enigma::sounds[sound];

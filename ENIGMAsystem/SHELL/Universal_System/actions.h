@@ -339,4 +339,30 @@ inline void action_draw_text(string text,double x,double y) {
     }
 }
 
+inline bool action_if_sound(int sound) {return sound_isplaying(sound);}
+
+inline void action_end_sound(int sound) {
+    sound_stop(sound);
+}
+
+inline void action_sleep(double milliseconds,int redraw) {
+    sleep(milliseconds/1000);
+}
+
+inline void action_current_room(int transition) {
+    //transition_kind=transition;
+    room_restart();
+}
+
+inline void action_next_room(int transition) {
+    //transition_kind=transition;
+    room_goto_next();
+}
+
+inline void action_font(int font,int align) {
+    draw_set_font(font); 
+    // draw_set_halign(align);
+}
+
+
 
