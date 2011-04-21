@@ -955,6 +955,7 @@ public final class EnigmaWriter
 					}
 				catch (NullPointerException e)
 					{
+					val="-1";
 					}
 				return val;
 			}

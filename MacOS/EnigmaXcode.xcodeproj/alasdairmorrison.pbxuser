@@ -247,6 +247,11 @@
 			9C0D00861360B3980083E470 /* PBXTextBookmark */ = 9C0D00861360B3980083E470 /* PBXTextBookmark */;
 			9C0D00871360B3980083E470 /* PBXTextBookmark */ = 9C0D00871360B3980083E470 /* PBXTextBookmark */;
 			9C0D00881360B3980083E470 /* PBXTextBookmark */ = 9C0D00881360B3980083E470 /* PBXTextBookmark */;
+			9C0D00891360B4870083E470 /* PBXTextBookmark */ = 9C0D00891360B4870083E470 /* PBXTextBookmark */;
+			9C0D008A1360B4870083E470 /* PBXTextBookmark */ = 9C0D008A1360B4870083E470 /* PBXTextBookmark */;
+			9C0D008B1360B4870083E470 /* PBXTextBookmark */ = 9C0D008B1360B4870083E470 /* PBXTextBookmark */;
+			9C0D008C1360B4870083E470 /* PBXTextBookmark */ = 9C0D008C1360B4870083E470 /* PBXTextBookmark */;
+			9C0D008D1360B4870083E470 /* PBXTextBookmark */ = 9C0D008D1360B4870083E470 /* PBXTextBookmark */;
 			9C1B5EDB12C1E7A50056EDCC = 9C1B5EDB12C1E7A50056EDCC /* PBXTextBookmark */;
 			9C1B5EF712C1F8BB0056EDCC = 9C1B5EF712C1F8BB0056EDCC /* PBXTextBookmark */;
 			9C1B5EF812C1F8BB0056EDCC = 9C1B5EF812C1F8BB0056EDCC /* PBXTextBookmark */;
@@ -1528,6 +1533,56 @@
 		vrLoc = 0;
 	};
 	9C0D00881360B3980083E470 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9CD0E2D812115A8300A01347 /* API_Switchboard.h */;
+		name = "API_Switchboard.h: 37";
+		rLen = 0;
+		rLoc = 2516;
+		rType = 0;
+		vrLen = 1603;
+		vrLoc = 913;
+	};
+	9C0D00891360B4870083E470 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9C0D004913605BEB0083E470 /* actions.h */;
+		name = "actions.h: 348";
+		rLen = 0;
+		rLoc = 14369;
+		rType = 0;
+		vrLen = 493;
+		vrLoc = 14220;
+	};
+	9C0D008A1360B4870083E470 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9CD0E30612115C9B00A01347 /* IDE_EDIT_objectfunctionality.h */;
+		name = "IDE_EDIT_objectfunctionality.h: 573";
+		rLen = 0;
+		rLoc = 13082;
+		rType = 0;
+		vrLen = 915;
+		vrLoc = 12167;
+	};
+	9C0D008B1360B4870083E470 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9CD0E30612115C9B00A01347 /* IDE_EDIT_objectfunctionality.h */;
+		name = "IDE_EDIT_objectfunctionality.h: 297";
+		rLen = 0;
+		rLoc = 6893;
+		rType = 0;
+		vrLen = 404;
+		vrLoc = 6577;
+	};
+	9C0D008C1360B4870083E470 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9CD0E0891211552700A01347 /* as_basic.h */;
+		name = "as_basic.h: 30";
+		rLen = 10;
+		rLoc = 2220;
+		rType = 0;
+		vrLen = 2544;
+		vrLoc = 0;
+	};
+	9C0D008D1360B4870083E470 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 9CD0E2D812115A8300A01347 /* API_Switchboard.h */;
 		name = "API_Switchboard.h: 37";
@@ -4701,9 +4756,9 @@
 	};
 	9CD0E30612115C9B00A01347 /* IDE_EDIT_objectfunctionality.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1111, 20280}}";
-			sepNavSelRange = "{19561, 0}";
-			sepNavVisRange = "{19352, 631}";
+			sepNavIntBoundsRect = "{{0, 0}, {1118, 7150}}";
+			sepNavSelRange = "{6893, 0}";
+			sepNavVisRange = "{6577, 404}";
 		};
 	};
 	9CD0E30712115C9B00A01347 /* IDE_EDIT_resourcenames.h */ = {

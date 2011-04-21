@@ -216,7 +216,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9C0D00871360B3980083E470</string>
+						<string>9C0D008C1360B4870083E470</string>
 						<key>history</key>
 						<array>
 							<string>9C0D005F1360B0480083E470</string>
@@ -256,7 +256,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>9C0D00881360B3980083E470</string>
+						<string>9C0D008D1360B4870083E470</string>
 						<key>history</key>
 						<array>
 							<string>9C0D005C1360671C0083E470</string>
@@ -365,15 +365,15 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>87</integer>
-									<integer>86</integer>
+									<integer>68</integer>
+									<integer>57</integer>
 									<integer>21</integer>
 									<integer>2</integer>
 									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 1156}, {322, 594}}</string>
+							<string>{{0, 873}, {322, 594}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -410,7 +410,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>actions.h</string>
+								<string>IDE_EDIT_objectfunctionality.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -418,11 +418,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>actions.h</string>
+										<string>IDE_EDIT_objectfunctionality.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>9C0D00861360B3980083E470</string>
+										<string>9C0D008B1360B4870083E470</string>
 										<key>history</key>
 										<array>
 											<string>9CD0E3BA12125F8500A01347</string>
@@ -599,10 +599,10 @@
 											<string>9C0ACEEB1325451A00AB1FCD</string>
 											<string>9C0D006E1360B0EF0083E470</string>
 											<string>9C0D006F1360B0EF0083E470</string>
-											<string>9C0D00701360B0EF0083E470</string>
 											<string>9C0D00711360B0EF0083E470</string>
 											<string>9C0D00721360B0EF0083E470</string>
-											<string>9C0D00731360B0EF0083E470</string>
+											<string>9C0D00891360B4870083E470</string>
+											<string>9C0D008A1360B4870083E470</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
