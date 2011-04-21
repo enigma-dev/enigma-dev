@@ -85,7 +85,7 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
 {
   if (ecs)
   {
-    cout << "Linking up to IDE";
+    cout << "Linking up to IDE" << endl;
     ide_dia_open     = ecs->dia_open;
     ide_dia_add      = ecs->dia_add;
     ide_dia_clear    = ecs->dia_clear;
@@ -95,7 +95,7 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
     ide_output_redirect_file = ecs->output_redirect_file;
     ide_output_redirect_reset = ecs->output_redirect_reset;
   }
-  else cout << "IDE Not Found. Continuing without graphical output.\n";
+  else cout << "IDE Not Found. Continuing without graphical output." << endl;
   
   const char* a = establish_bearings("gcc");
   if (a)

@@ -249,17 +249,25 @@ void print_err_line_at(pt a)
   int line=0,pos=0;
   for (int i=0; i<(signed)a; i++,pos++)
   {
+    if (i >= cfile.length()) {
+      line = -1, pos = a;
+      break;
+    }
     if (cfile[i]=='\r')
       i++;
     if (cfile[i]=='\n')
       line++, pos=0;
   }
   printf("%sLine %d, position %d: %s\r\n",cferr_get_file().c_str(),line+1,pos,cferr.c_str());
-  const int margin = 100;
-  const pt
-    begin = (a < (margin/2))?0:a-(margin/2),
-    end = (a+pt(margin/2)>cfile.length())?cfile.length():a+(margin/2);
-  cout << "code snippet: " << cfile.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
+  if (line >= 0)
+  {
+    const int margin = 100;
+    const pt
+      begin = (a < (margin/2))?0:a-(margin/2),
+      end = (a+pt(margin/2)>cfile.length())?cfile.length():a+(margin/2);
+    cout << "code snippet: " << cfile.substr(begin,end-begin).insert((a-begin<end)?a-begin:end,"<<>>") << endl;
+  }
+  cout << "Code snippet unavailable; possibly heavily buried in untraceable macros or instantiations." << endl;
   cout << "------------------------------------------------\r\n\r\n";
 }
 
