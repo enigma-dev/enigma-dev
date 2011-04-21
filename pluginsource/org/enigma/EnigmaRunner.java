@@ -506,12 +506,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 
 		String exe = es.selPlatform.ext;
-
+		
 		//determine `outname` (rebuild has no `outname`)
 		File outname = null;
 		try
 			{
-			if (mode < MODE_DESIGN) //run/debug
+			if (!es.selCompiler.outputexe.equals("[Temp files]"))
+				outname = new File(es.selCompiler.outputexe);
+		else if (mode < MODE_DESIGN) //run/debug
 				outname = File.createTempFile("egm",exe);
 			else if (mode == MODE_DESIGN) outname = File.createTempFile("egm",".emd"); //design
 			if (outname != null) outname.deleteOnExit();

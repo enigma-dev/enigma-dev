@@ -48,6 +48,7 @@ public class TargetHandler
 		public Set<String> depends; //mandatory, non-empty
 		public Set<String> defaultOn; //optional
 		public String desc, auth, ext; //optional
+		public String outputexe;
 
 		public String toString()
 			{
@@ -74,6 +75,8 @@ public class TargetHandler
 				ps.name = node.getMC("Name");
 				ps.desc = node.getMC("Description",null);
 				ps.auth = node.getMC("Maintainer",null);
+				ps.ext = node.getMC("Build-Extension",null);
+				ps.outputexe = node.getMC("Run-output",null);
 				String nat = node.getMC("Native","No").toLowerCase(); //native is a keyword
 				if (nat.equals("yes") || nat.equals("true")) defCompiler = ps;
 				tCompilers.add(ps);
