@@ -436,7 +436,7 @@ public final class EnigmaWriter
 		oF.italic = false;
 		oF.rangeMin = 32;
 		oF.rangeMax = 127;
-		oF.glyphs = populateGlyphs(iF,oF.rangeMin,oF.rangeMax);
+		oF.glyphs = populateGlyphs(iF,oF.rangeMin,oF.rangeMax,true);
 
 		if (size == 1) return;
 
@@ -462,24 +462,27 @@ public final class EnigmaWriter
 			int fsize = (int) Math.round(of.size * screenRes / 72.0); // Java assumes 72 dps
 			java.awt.Font fnt = new java.awt.Font(of.fontName,style,fsize);
 
-			of.glyphs = populateGlyphs(fnt,of.rangeMin,of.rangeMax);
+			of.glyphs = populateGlyphs(fnt,of.rangeMin,of.rangeMax,
+					(Integer) ifont.get(PFont.ANTIALIAS) > 0);
 			}
 		}
 
-	private static Glyph.ByReference populateGlyphs(java.awt.Font fnt, int rangeMin, int rangeMax)
+	private static Glyph.ByReference populateGlyphs(java.awt.Font fnt, int rangeMin, int rangeMax,
+			boolean aa)
 		{
 		Glyph.ByReference glyphs = new Glyph.ByReference();
 		Glyph[] ofgl = (Glyph[]) glyphs.toArray(rangeMax - rangeMin + 1);
 		for (char c = (char) rangeMin; c <= rangeMax; c++)
-			populateGlyph(ofgl[c - rangeMin],fnt,c);
+			populateGlyph(ofgl[c - rangeMin],fnt,c,aa);
 		return glyphs;
 		}
 
-	private static void populateGlyph(Glyph og, java.awt.Font fnt, char c)
+	private static void populateGlyph(Glyph og, java.awt.Font fnt, char c, boolean aa)
 		{
-		GlyphVector gv = fnt.createGlyphVector(new FontRenderContext(null,true,false),String.valueOf(c));
+		GlyphVector gv = fnt.createGlyphVector(new FontRenderContext(null,aa,false),String.valueOf(c));
 		Rectangle2D r = gv.getPixelBounds(null,0,0); //don't know why it needs coordinates
 		if (r.getWidth() <= 0 || r.getHeight() <= 0) return;
+
 		// Generate a raster of the glyph vector
 		BufferedImage bi = new BufferedImage((int) Math.round(r.getWidth()),
 				(int) Math.round(r.getHeight()),BufferedImage.TYPE_BYTE_GRAY);
