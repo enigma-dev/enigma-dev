@@ -364,5 +364,45 @@ inline void action_font(int font,int align) {
     // draw_set_halign(align);
 }
 
+/*
+ move_wrap by Polygone
+ */
+void move_wrap(bool hor, bool vert, double margin)
+{
+    enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+    if (hor)
+    {
+        const double wdis = room_width + margin*2;
+        if (inst->x < -margin)
+        {
+            inst->x += wdis*ceil(((-margin) - inst->x)/wdis);
+        }
+        if (inst->x > room_width + margin)
+        {
+            inst->x -= wdis*ceil((inst->x - (room_width + margin))/wdis);
+        }
+    }
+    if (vert)
+    {
+        const double hdis = room_height + margin*2;
+        if (inst->y < -margin)
+        {
+            inst->y += hdis*ceil(((-margin) - inst->y)/hdis);
+        }
+        if (inst->y > room_height + margin)
+        {
+            inst->y -= hdis*ceil((inst->y - (room_height + margin))/hdis);
+        }
+    }
+} //RELOCATE ME
+
+void action_wrap(int direction) {
+    if (direction == 0)
+        move_wrap(1,0,0);
+    if (direction == 1)
+        move_wrap(0,1,0);
+    if (direction == 2)
+        move_wrap(1,1,0);
+}
 
 
