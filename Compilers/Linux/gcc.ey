@@ -18,7 +18,7 @@ cflags:
 links:
 
 Build-Extension: 
-Run-output: [Temp files]
+Run-output: $tempfile
 Run-Program: $game
 Run-Params:
 
