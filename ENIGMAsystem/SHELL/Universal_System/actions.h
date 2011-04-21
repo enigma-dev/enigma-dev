@@ -142,11 +142,53 @@ inline void action_set_health(double value) {
 }
 
 inline void action_draw_health(double x1,double y1,double x2,double y2,double backColor,double barColor) {
+   // printf("barColor: %f",barColor);
+    double realbar1, realbar2;
+    if (barColor==0) { realbar1=c_green; realbar2=c_red;  //green to red
+    }
+    else if (barColor==1) { realbar1=c_white; realbar2=c_black;  //white to black
+    }
+    else if (barColor==2) { realbar1=c_black; realbar2=c_black;  //white to black
+    }
+    else if (barColor==3) { realbar1=c_gray; realbar2=c_gray;  
+    }
+    else if (barColor==4) { realbar1=c_silver; realbar2=c_silver;  
+    }
+    else if (barColor==5) { realbar1=c_white; realbar2=c_white;  
+    }
+    else if (barColor==6) { realbar1=c_maroon; realbar2=c_maroon;  
+    }
+    else if (barColor==7) { realbar1=c_green; realbar2=c_green; 
+    }
+    else if (barColor==8) { realbar1=c_olive; realbar2=c_olive;  
+    }
+    else if (barColor==9) { realbar1=c_navy; realbar2=c_navy;  
+    }
+    else if (barColor==10) { realbar1=c_purple; realbar2=c_purple;  
+    }
+    else if (barColor==11) { realbar1=c_teal; realbar2=c_teal;  
+    }
+    else if (barColor==12) { realbar1=c_red; realbar2=c_red;  
+    }
+    else if (barColor==13) { realbar1=c_lime; realbar2=c_lime;  
+    }
+    else if (barColor==14) { realbar1=c_yellow; realbar2=c_yellow;  
+    }
+    else if (barColor==15) { realbar1=c_blue; realbar2=c_blue;  
+    }
+    else if (barColor==16) { realbar1=c_fuchsia; realbar2=c_fuchsia;  
+    }
+    else if (barColor==17) { realbar1=c_aqua; realbar2=c_aqua; 
+    }
+    else {
+        //default
+        realbar1=c_green; realbar2=c_red;
+    }
 	if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-        draw_healthbar(x1+inst->x, y1+inst->y, x2+inst->x, y2+inst->y, health, backColor, barColor, barColor, 1, 1, 1);
+        draw_healthbar(x1+inst->x, y1+inst->y, x2+inst->x, y2+inst->y, health, backColor, realbar2, realbar1, 1, 1, 1);
 	} else
-        draw_healthbar(x1, y1, x2, y2, health, backColor, barColor, barColor, 1, 1, 1);
+        draw_healthbar(x1, y1, x2, y2, health, backColor, realbar2, realbar1, 1, 1, 1);
 }
 
 inline void action_draw_life_images(double x,double y, int image) {
