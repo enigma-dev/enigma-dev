@@ -31,3 +31,5 @@ unsigned int font_get_texture(int fnt);
 int font_get_texture_width(int fnt);
 int font_get_texture_height(int fnt);
 int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);
+int string_width(string str);
+int string_height(string str);

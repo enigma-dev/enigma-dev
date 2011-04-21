@@ -30,6 +30,6 @@ namespace enigma
     void init_fonts();
 }
 
-int draw_text(double x,double y,string text);
+/*int draw_text(double x,double y,string text);
 double string_width(char* text);
-double string_height(char* text);
+double string_height(char* text);*/

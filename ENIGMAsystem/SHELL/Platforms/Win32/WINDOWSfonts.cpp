@@ -106,7 +106,7 @@ namespace enigma
     }
 }
 
-int draw_text(double x,double y,string text)
+/*int draw_text(double x,double y,string text)
 {
     untexture();
     
@@ -157,4 +157,4 @@ double string_height(char* text)
     }
     
     return height;
-}
+}*/

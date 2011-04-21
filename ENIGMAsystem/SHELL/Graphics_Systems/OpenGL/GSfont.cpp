@@ -42,7 +42,7 @@ using namespace std;
 
 void draw_text(int x,int y,string str)
 {
-  font *fnt = fontstructarray[currentfont];
+  const font *const fnt = fontstructarray[currentfont];
   
   if (bound_texture != fnt->texture)
     glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
@@ -93,4 +93,32 @@ unsigned int font_get_texture_height(int fnt)
 void draw_set_font(int fnt)
 {
   enigma::currentfont = fnt;
+}
+
+int string_width(string str)
+{
+  const font *const fnt = fontstructarray[currentfont];
+  int mlen = 0, tlen = 0;
+  for (unsigned i = 0; i < str.length(); i++)
+  {
+    if (str[i] == '\r' or str[i] == '\n')
+      tlen = 0;
+    else if (str[i] == ' ')
+      tlen += fnt->height/3; // FIXME: what's GM do about this?
+    else {
+      tlen += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount].xs;
+      if (tlen > mlen) mlen = tlen;
+    }
+  }
+  return mlen;
+}
+
+int string_height(string str)
+{
+  const font *const fnt = fontstructarray[currentfont];
+  int hgt = fnt->height;
+  for (unsigned i = 0; i < str.length(); i++)
+    if (str[i] == '\r' or str[i] == '\n')
+      hgt += fnt->height;
+  return hgt;
 }
