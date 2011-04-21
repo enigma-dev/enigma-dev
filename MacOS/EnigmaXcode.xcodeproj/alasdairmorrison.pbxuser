@@ -589,7 +589,7 @@
 	};
 	9C0ACE1C13252E7300AB1FCD /* About.ey */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {875, 326}}";
+			sepNavIntBoundsRect = "{{0, 0}, {875, 294}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRange = "{0, 172}";
 		};

@@ -930,7 +930,7 @@ public final class EnigmaWriter
 			{
 			case Argument.ARG_BOTH:
 				//treat as literal if starts with quote (")
-				if (val.startsWith("\"")) return val;
+				if (val.startsWith("\"") || val.startsWith("'")) return val;
 				//else fall through
 			case Argument.ARG_STRING:
 				return "\"" + val.replace("\\","\\\\").replace("\"","\\\"") + "\"";

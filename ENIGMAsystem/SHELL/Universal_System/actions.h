@@ -142,7 +142,6 @@ inline void action_set_health(double value) {
 }
 
 inline void action_draw_health(double x1,double y1,double x2,double y2,double backColor,double barColor) {
-   // printf("barColor: %f",barColor);
     double realbar1, realbar2;
     if (barColor==0) { realbar1=c_green; realbar2=c_red;  //green to red
     }
@@ -324,13 +323,20 @@ inline void action_draw_rectangle(double x1,double y1,double x2,double y2,int fi
 void action_set_alarm(int steps,int alarmno);
 #define action_set_alarm(steps,alarmno) if (argument_relative) alarm[(alarmno)] += (steps); else alarm[(alarmno)] = (steps);
 
-void action_sprite_set(double spritep,double subimage, double speed) {
+inline void action_sprite_set(double spritep,double subimage, double speed) {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
     inst->sprite_index=spritep;
 	if (subimage !=-1) inst->image_index=subimage;
 	inst->image_speed=speed;
 }
-//#define action_sprite_set(spritep,subimg, imgspeed) sprite_index=(spritep); if (subimg !=-1) {image_index=subimg;} image_speed=imgspeed;
 
+inline void action_draw_text(string text,double x,double y) {
+    if (argument_relative) {
+        enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+        draw_text(x+inst->x,y+inst->y,text); }
+    else {
+        draw_text(x,y,text);
+    }
+}
 
 
