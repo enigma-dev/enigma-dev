@@ -78,13 +78,13 @@ void print_ext_data(externs *ext,int indent,int depth)
 {
   bool comma=0;
   string indstr(indent,' ');
-  
+
   if (ext == NULL) {
     cout <<  indstr << "error\n";
     return;
   }
   cout << indstr << ext->name << ":  ";
-  
+
   if (ext->is_function())
   {
     const int pcn = ext->parameter_count_min();
@@ -186,14 +186,14 @@ int cfile_parse_main()
 
   my_string fc = fca("./ENIGMAsystem/SHELL/SHELLmain.cpp");
   if (fc == NULL) cout << "FAILOOS.";
-  
+
   cout << fc;
-  
+
   time_t ts = clock();
   int a = parse_cfile(fc);
   time_t te = clock();
   cout << "Parse time: " << ((te-ts) * 1000) / CLOCKS_PER_SEC << " milliseconds";
-  
+
   if (a != -1)
   {
     int line=0,pos=0;
@@ -206,15 +206,15 @@ int cfile_parse_main()
     }
     printf("Line %d, position %d: %s\r\n",line+1,pos,cferr.c_str());
   }
-  
+
   cout << "Macros:\r\n";
   for (maciter i=macros.begin(); i!=macros.end();i++)
     cout<<"  "<<(string)i->second<<"\r\n";
-  
+
   print_scope_members(&global_scope, 0);
-  
+
   //system("pause");
-  
+
   return 0;
 }
 
@@ -249,7 +249,7 @@ void print_err_line_at(pt a)
   int line=0,pos=0;
   for (int i=0; i<(signed)a; i++,pos++)
   {
-    if (i >= cfile.length()) {
+    if (i >= (signed)cfile.length()) {
       line = -1, pos = a;
       break;
     }
@@ -350,7 +350,7 @@ int m_prog_loop_cfp()
   #else
     time_t ts = clock();
   #endif
-  
+
   int a = parse_cfile(cftp);
   int wret;
 
