@@ -89,7 +89,7 @@
   </mime-type>
   <mime-type type="application/x-gm81">
     <comment>Game Maker 8.1 Project</comment>
-    <glob pattern="*.gmk"/>
+    <glob pattern="*.gm81"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
       <match type="little32" offset="0" value="1234321">
