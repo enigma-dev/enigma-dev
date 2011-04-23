@@ -1,6 +1,8 @@
 #!/bin/bash
 
+# NOTE: forces Java into English locale because it breaks ENIGMA otherwise
+
 PREVIOUS_DIR=`pwd`
 cd /opt/enigma
-java -jar lateralgm.jar $@
+LC_ALL=en_US java -jar lateralgm.jar $@
 cd $PREVIOUS_DIR
