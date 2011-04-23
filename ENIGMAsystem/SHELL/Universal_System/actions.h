@@ -405,4 +405,25 @@ void action_wrap(int direction) {
         move_wrap(1,1,0);
 }
 
+void action_set_motion(double dir,double nspeed) {
+    enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
+    if (argument_relative) {
+        inst->hspeed+= (nspeed) * cos(degtorad((dir))); 
+        inst->vspeed-= (nspeed) * sin(degtorad((dir)));
+    }
+    else  {
+        inst->direction=dir;
+        inst->speed=nspeed;
+    }
+}
+
+
+
+
+void motion_set(int dir, double speed); //RELOCATE ME
+#define motion_set(newdirection,newspeed) direction=(newdirection); speed=(newspeed);
+
+void motion_add(double dir, double speed); //RELOCATE ME
+#define motion_add(newdirection,newspeed) hspeed+= (newspeed) * cos(degtorad((newdirection))); vspeed-= (newspeed) * sin(degtorad((newdirection)));
+
 

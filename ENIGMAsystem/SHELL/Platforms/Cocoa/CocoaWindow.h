@@ -143,6 +143,7 @@ int window_set_cursor(double c);
 
 int show_message(string str);
 
+void io_handle();
 
 namespace enigma {
 	extern char** parameters;

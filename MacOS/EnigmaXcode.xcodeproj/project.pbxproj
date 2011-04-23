@@ -42,6 +42,8 @@
 		9C0D005313605BEB0083E470 /* fontinit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004A13605BEB0083E470 /* fontinit.cpp */; };
 		9C0D005413605BEB0083E470 /* fontstruct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004B13605BEB0083E470 /* fontstruct.cpp */; };
 		9C0D005513605BEB0083E470 /* rectpack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D004E13605BEB0083E470 /* rectpack.cpp */; };
+		9C0D01DA1361E2A00083E470 /* highscore_functions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D01D91361E2A00083E470 /* highscore_functions.cpp */; };
+		9C0D01DB1361E2A00083E470 /* highscore_functions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D01D91361E2A00083E470 /* highscore_functions.cpp */; };
 		9C3829541215459C007B24C5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C3829531215459C007B24C5 /* CoreGraphics.framework */; };
 		9C382B231215685D007B24C5 /* iPhone-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9C382B221215685D007B24C5 /* iPhone-Info.plist */; };
 		9CAB7F1212245C1B00B1DAD6 /* GStextures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CAB7F0F12245C1B00B1DAD6 /* GStextures.cpp */; };
@@ -367,6 +369,8 @@
 		9C0D004E13605BEB0083E470 /* rectpack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rectpack.cpp; sourceTree = "<group>"; };
 		9C0D004F13605BEB0083E470 /* rectpack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rectpack.h; sourceTree = "<group>"; };
 		9C0D005B136066860083E470 /* unimplemented.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unimplemented.h; sourceTree = "<group>"; };
+		9C0D00C21360D68B0083E470 /* highscore_functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = highscore_functions.h; sourceTree = "<group>"; };
+		9C0D01D91361E2A00083E470 /* highscore_functions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = highscore_functions.cpp; sourceTree = "<group>"; };
 		9C3829531215459C007B24C5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		9C382B221215685D007B24C5 /* iPhone-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "iPhone-Info.plist"; sourceTree = "<group>"; };
 		9C6FA5811213ABF300F930EA /* TestEnigmaIphone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = TestEnigmaIphone.app; path = build/Debug/TestEnigmaIphone.app; sourceTree = "<group>"; };
@@ -1875,6 +1879,8 @@
 				9CD0E20F1211552700A01347 /* WITHconstruct.cpp */,
 				9CD0E2101211552700A01347 /* WITHconstruct.h */,
 				9CD0E2111211552700A01347 /* WITHconstructClose.h */,
+				9C0D00C21360D68B0083E470 /* highscore_functions.h */,
+				9C0D01D91361E2A00083E470 /* highscore_functions.cpp */,
 			);
 			path = Universal_System;
 			sourceTree = "<group>";
@@ -2287,6 +2293,7 @@
 				9C0D005013605BEB0083E470 /* fontinit.cpp in Sources */,
 				9C0D005113605BEB0083E470 /* fontstruct.cpp in Sources */,
 				9C0D005213605BEB0083E470 /* rectpack.cpp in Sources */,
+				9C0D01DA1361E2A00083E470 /* highscore_functions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2443,6 +2450,7 @@
 				9C0D005313605BEB0083E470 /* fontinit.cpp in Sources */,
 				9C0D005413605BEB0083E470 /* fontstruct.cpp in Sources */,
 				9C0D005513605BEB0083E470 /* rectpack.cpp in Sources */,
+				9C0D01DB1361E2A00083E470 /* highscore_functions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

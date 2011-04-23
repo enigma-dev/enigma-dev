@@ -62,24 +62,14 @@ namespace enigma
 char cocoa_last_keybdstatus[256];
 char cocoa_keybdstatus[256];
 
+
+
 int loopy() {
 	
 	enigma::ENIGMA_events();
 	
+	io_handle();
 	
-	
-	for(int i=0;i<256;i++){
-		if (enigma::last_keybdstatus[i]==0 && enigma::keybdstatus[i]==1) {
-		//in the last frame, i was pressed event, so make last_keybdstatus now equal 1
-			cocoa_last_keybdstatus[i]=1;
-		}
-		else if (enigma::last_keybdstatus[i]==1 && enigma::keybdstatus[i]==0) {
-			//in the last frame, i was released event, so make last_keybdstatus now equal 0
-			cocoa_last_keybdstatus[i]=0;
-		}
-	}
-	memcpy(enigma::keybdstatus, cocoa_keybdstatus, sizeof(enigma::keybdstatus));
-	memcpy(enigma::last_keybdstatus, cocoa_last_keybdstatus, sizeof(enigma::last_keybdstatus));
 
 	return 0;
 }
@@ -119,4 +109,20 @@ void mouse_press(int x, int y) {
 
 void mouse_release(int x, int y) {
 	enigma::mousestatus[mb_left-1]=0;
+}
+
+void io_handle() {
+    
+	for(int i=0;i<256;i++){
+		if (enigma::last_keybdstatus[i]==0 && enigma::keybdstatus[i]==1) {
+            //in the last frame, i was pressed event, so make last_keybdstatus now equal 1
+			cocoa_last_keybdstatus[i]=1;
+		}
+		else if (enigma::last_keybdstatus[i]==1 && enigma::keybdstatus[i]==0) {
+			//in the last frame, i was released event, so make last_keybdstatus now equal 0
+			cocoa_last_keybdstatus[i]=0;
+		}
+	}
+	memcpy(enigma::keybdstatus, cocoa_keybdstatus, sizeof(enigma::keybdstatus));
+	memcpy(enigma::last_keybdstatus, cocoa_last_keybdstatus, sizeof(enigma::last_keybdstatus));
 }
