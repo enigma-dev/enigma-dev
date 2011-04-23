@@ -2,13 +2,16 @@
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-gm-project">
     <comment>Game Maker Project (Unknown Version)</comment>
+    <comment xml:lang="en">Game Maker Project (Unknown Version)</comment>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="90">
       <match type="little32" offset="0" value="1234321"/>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm50">
     <comment>Game Maker 5.0 Project</comment>
+    <comment xml:lang="en">Game Maker 5.0 Project</comment>
     <glob pattern="*.gm5"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
@@ -16,9 +19,11 @@
         <match type="little32" offset="4" value="500"/>
       </match>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm51">
     <comment>Game Maker 5.1 Project</comment>
+    <comment xml:lang="en">Game Maker 5.1 Project</comment>
     <glob pattern="*.gm5"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
@@ -26,9 +31,11 @@
         <match type="little32" offset="4" value="510"/>
       </match>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm52">
     <comment>Game Maker 5.2 Project</comment>
+    <comment xml:lang="en">Game Maker 5.2 Project</comment>
     <glob pattern="*.gm5"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
@@ -36,9 +43,11 @@
         <match type="little32" offset="4" value="520"/>
       </match>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm53">
     <comment>Game Maker 5.3 Project</comment>
+    <comment xml:lang="en">Game Maker 5.3 Project</comment>
     <glob pattern="*.gm5"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
@@ -46,9 +55,11 @@
         <match type="little32" offset="4" value="530"/>
       </match>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm60">
     <comment>Game Maker 6.0 Project</comment>
+    <comment xml:lang="en">Game Maker 6.0 Project</comment>
     <glob pattern="*.gm6"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
@@ -56,9 +67,11 @@
         <match type="little32" offset="4" value="600"/>
       </match>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm61">
     <comment>Game Maker 6.1 Project</comment>
+    <comment xml:lang="en">Game Maker 6.1 Project</comment>
     <glob pattern="*.gm6"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
@@ -66,9 +79,11 @@
         <match type="little32" offset="4" value="610"/>
       </match>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm71">
-    <comment>Game Maker 7.1 Project</comment>
+    <comment>Game Maker 7.0 Project</comment>
+    <comment xml:lang="en">Game Maker 7.0 Project</comment>
     <glob pattern="*.gmk"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
@@ -76,9 +91,11 @@
         <match type="little32" offset="4" value="701"/>
       </match>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm80">
-    <comment>Game Maker 8 Project</comment>
+    <comment>Game Maker 8.0 Project</comment>
+    <comment xml:lang="en">Game Maker 8.0 Project</comment>
     <glob pattern="*.gmk"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
@@ -86,9 +103,11 @@
         <match type="little32" offset="4" value="800"/>
       </match>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm81">
     <comment>Game Maker 8.1 Project</comment>
+    <comment xml:lang="en">Game Maker 8.1 Project</comment>
     <glob pattern="*.gm81"/>
     <sub-class-of type="application/octet-stream"/>
     <magic priority="100">
@@ -96,5 +115,6 @@
         <match type="little32" offset="4" value="810"/>
       </match>
     </magic>
+    <icon name="package-x-generic"/>
   </mime-type>
 </mime-info>
