@@ -27,13 +27,16 @@
 
 
 #include "highscore_functions.h"
+#include "../libEGMstd.h"
+#include <algorithm>
+#include <vector>
 
 
 
 extern double score;
 
 namespace enigma {
-    
+
     int highscore_background;
     bool highscore_border;
     int highscore_back_color;
@@ -43,21 +46,21 @@ namespace enigma {
     std::string highscore_nobody;
     std::string highscore_escape;
     std::vector< playerScore > highscore_list;
-    
+
 bool cmp_highscore( const playerScore& a, const playerScore& b ) {
     return a > b;
 }
-    
+
     playerScore::playerScore(std::string name, int score) {
         player_name=name;
         player_score = score;
-        
+
     }
-    
+
     playerScore::playerScore() {
-        
+
     }
-    
+
     void highscore_init() {
         highscore_background=-1;
         highscore_border=true;
@@ -68,9 +71,9 @@ bool cmp_highscore( const playerScore& a, const playerScore& b ) {
         highscore_nobody="<nobody>";
         highscore_escape="press <Escape> to close";
         highscore_clear();
-        
+
     }
-    
+
 }
 
 extern int room_width;
@@ -95,14 +98,14 @@ void highscore_set_border(bool show) {enigma::highscore_border=show;}
 
 void highscore_set_font(std::string name, int size, int style) {
     //not cross platform compatible?
-    printf("Warning function: highscore_set_font doesn't work, please use draw_set_font");
-} 
+    show_error("Warning function: highscore_set_font doesn't work, please use draw_set_font", false);
+}
 
 void highscore_set_colors(int back, int newcol, int othercol) {
     enigma::highscore_back_color=back;
     enigma::highscore_new_entry_color=newcol;
     enigma::highscore_other_entries_color=othercol;
-} 
+}
 
 void highscore_set_strings(std::string caption, std::string nobody, std::string escape) {
     enigma::highscore_caption=caption;
@@ -114,7 +117,7 @@ void highscore_show_ext(int numb, int back, int show, int newcol, int othercol, 
     enigma::highscore_border=show;
     enigma::highscore_new_entry_color=newcol;
     enigma::highscore_other_entries_color=othercol;
-    
+
     highscore_show(numb);
 }
 
@@ -130,11 +133,11 @@ void highscore_add(std::string str, int numb) {
     std::sort( enigma::highscore_list.begin(), enigma::highscore_list.end(), enigma::cmp_highscore );
     if (enigma::highscore_list.size()>10)
     enigma::highscore_list.resize(10);
-} 
+}
 
 void highscore_add_current() {
     highscore_add("Ask for Name!", score);
-} 
+}
 
 int highscore_value(int place) {
     try {
@@ -153,7 +156,7 @@ int string_width(std::string str);
 #include "var4.h"
 
 void draw_highscore(int x1, int y1, int x2, int y2) {
-    
+
     for (int i=0; i<enigma::highscore_list.size(); i++) {
         draw_text(x1, (i*((y2-y1)/10))+y1+10, enigma::highscore_list[i].player_name.c_str());
         draw_text(x2-string_width(toString((var)enigma::highscore_list[i].player_score)), (i*((y2-y1)/10))+y1+10 , toString((var)enigma::highscore_list[i].player_score));

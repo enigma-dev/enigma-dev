@@ -30,28 +30,27 @@
 #define HIGHSCORE_FUNCTIONS_H 1
 
 #include <string>
-#include <vector>
 
 
 namespace enigma {
-    
+
 class playerScore
 {
 public:
     std::string player_name;
     int player_score;
-    
+
     playerScore();
     playerScore(std::string name, int score);
-    
-    
+
+
     bool operator<(const playerScore& other) const
     {
-        return player_score < other.player_score; 
+        return player_score < other.player_score;
     }
     bool operator>(const playerScore& other) const
     {
-        return player_score > other.player_score; 
+        return player_score > other.player_score;
     }
 };
 
@@ -62,7 +61,7 @@ public:
  HighScore functions
  */
 
-   
+
 
 void highscore_show(int numb);
 
@@ -70,9 +69,9 @@ void highscore_set_background(int back) ;
 
 void highscore_set_border(bool show) ;
 
-void highscore_set_font(std::string name, int size, int style) ; 
+void highscore_set_font(std::string name, int size, int style) ;
 
-void highscore_set_colors(int back, int newcol, int othercol) ; 
+void highscore_set_colors(int back, int newcol, int othercol) ;
 
 void highscore_set_strings(std::string caption, std::string nobody, std::string escape) ;
 void highscore_show_ext(int numb, int back, int show, int newcol, int othercol, std::string name, int size) ;
@@ -82,7 +81,7 @@ void highscore_add_current() ;
 int highscore_value(int place);
 std::string highscore_name(int place) ;
 void draw_highscore(int x1, int y1, int x2, int y2) ;namespace enigma {
-    
+
     void highscore_init();
 }
 

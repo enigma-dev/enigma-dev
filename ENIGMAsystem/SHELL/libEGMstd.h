@@ -28,6 +28,8 @@
 // This file contains functions that are used by virtually all components of ENIGMA.
 // They are also, directly or otherwise, available to the user.
 
+using namespace std;
+
 string toString(int);
 string toString(long);
 string toString(short);
