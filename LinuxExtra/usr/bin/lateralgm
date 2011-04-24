@@ -4,5 +4,5 @@
 
 PREVIOUS_DIR=`pwd`
 cd /opt/enigma
-LC_ALL=en_US java -jar lateralgm.jar $@
+LC_ALL=en_US.UTF-8 java -jar lateralgm.jar $@
 cd $PREVIOUS_DIR
