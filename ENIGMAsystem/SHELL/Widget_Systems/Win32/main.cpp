@@ -62,11 +62,12 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
     ShowWindow (enigmaHwnd, nCmdShow);
     
     int mywin = wgt_window_create(320,240);
-    int layout = wgt_layout_create(mywin,"abc\nddd",4,4);
+    int layout = wgt_layout_create(mywin,"eee\nabc\nddd",4,4);
     wgt_layout_insert_widget(layout,"a",wgt_button_create("Button1"));
     wgt_layout_insert_widget(layout,"b",wgt_button_create("Button2"));
     wgt_layout_insert_widget(layout,"c",wgt_button_create("Button3"));
-    wgt_layout_insert_widget(layout,"d",wgt_button_create("Isn't this EXCITING?!"));
+    wgt_layout_insert_widget(layout,"d",wgt_textline_create("Isn't this EXCITING?!",80));
+    wgt_layout_insert_widget(layout,"e",wgt_combobox_create("Item A|Item B|Item C"));
     wgt_window_show(mywin);
     
     /* Run the message loop. It will run until GetMessage() returns 0 */

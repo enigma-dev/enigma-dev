@@ -29,6 +29,7 @@
 // porting to competent widget systems. Use this only for low-level APIs.
 
 #include <windows.h>
+#include <windowsx.h>
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -51,13 +52,7 @@ struct enigma_window: gtkl_widget {
   enigma_window(int id,HWND hwnd, int w, int h): gtkl_widget(id,hwnd,8,8), layout_id(-1) {}
 };
 
-struct enigma_button: gtkl_widget {
-  enigma_button(int id,HWND hwnd): gtkl_widget(id,hwnd,8,8) {
-    
-  }
-  void resolve() {}
-  void resize(int x,int y,int w,int h) { MoveWindow(me,x,y,w,h,1); printf("Resize button to %d, %d\n",w,h); }
-};
+void enigma_widget::resize(int x,int y,int w,int h) { MoveWindow(me,x,y,w,h,1); }
 
 struct enigma_widget_alignment: gtkl_container
 {
@@ -209,10 +204,10 @@ void wgt_layout_insert_widget(int layout, string cell, int wgt) {
 
 int wgt_button_create(string text)
 {
-  HWND butn = CreateWindow("button", text.c_str(), BS_PUSHBUTTON, 0, 0, 90, 20, NULL, (HMENU) NULL, NULL, NULL);
+  HWND butn = CreateWindow("button", text.c_str(), BS_PUSHBUTTON, 0, 0, 8, 8, NULL, (HMENU)NULL, NULL, (LPVOID*)widget_idmax);
   if (!butn) return -1;
   
-  log_enigma_widget(new enigma_button(widget_idmax,butn));
+  log_enigma_widget(new enigma_widget(widget_idmax,butn,8,8));
   return widget_idmax++;
 }
 
@@ -224,35 +219,46 @@ int wgt_button_get_pressed(int butn)
 }
 
 
-/*/ Combo boxes
+// Combo boxes
+
+struct enigma_combobox: enigma_widget
+{
+  void resolve() { srw = 24, srh = 24; }
+  void resize(int xr, int yr, int wr, int hr) { x=xr, y=yr, w=wr, h=24; MoveWindow(me,x,y,w,h+128,1); }
+  enigma_combobox(HWND me,int w,int h): enigma_widget(me,w,h) {}
+};
 
 int wgt_combobox_create(string contents)
 {
-  HWND *cbox = gtk_combo_box_new_text();
+  HWND cbox = CreateWindow("combobox", "", CBS_DROPDOWNLIST | CBS_HASSTRINGS , 0, 0, 24, 144, NULL, (HMENU) NULL, NULL, NULL);
   const char *st = contents.c_str();
-  for (char *mt = (char*)st; *mt; mt++)
+  char *mt;
+  for (mt = (char*)st; *mt; mt++)
   if (*mt == '|')
   {
     *mt = 0;
-    gtk_combo_box_append_text(GTK_COMBO_BOX(cbox), st);
+    ComboBox_AddString(cbox, st);
     st = mt + 1;
     *mt = '|';
   }
-  log_enigma_widget(new enigma_widget(cbox));
+  if (mt > st) ComboBox_AddString(cbox, st);
+  log_enigma_widget(new enigma_combobox(cbox,24,16));
   return widget_idmax++;
 }
 
 int wgt_combobox_get_selection(int cbbox) {
-  return gtk_combo_box_get_active(GTK_COMBO_BOX(widgets[cbbox]->me));
+  return ComboBox_GetCurSel(getWidget(cbbox)->me);
 }
 
 string wgt_combobox_get_selected_text(int cbbox) {
-  const char* et = gtk_combo_box_get_active_text(GTK_COMBO_BOX(widgets[cbbox]->me));
-  return et ? et : "";
+  HWND cbox = getWidget(cbbox)->me;
+  const int tl = ComboBox_GetTextLength(cbox);
+  char et[tl];
+  return string(et,ComboBox_GetText(cbox,et,tl));
 }
 
 
-// Checkboxes
+/*/ Checkboxes
 
 int wgt_checkbox_create(string text)
 {
@@ -264,24 +270,26 @@ bool wgt_checkbox_get_checked(int cbox) {
 }
 
 
-// Text entry line
+*/// Text entry line
 
 int wgt_textline_create(string text, int numchars)
 {
-  HWND *ent = gtk_entry_new_with_buffer(gtk_entry_buffer_new(text.c_str(),text.length()));
-  gtk_entry_set_width_chars(GTK_ENTRY(ent), numchars);
-  log_enigma_widget(new enigma_widget(ent));
+  HWND ent = CreateWindow("edit", text.c_str(), BS_PUSHBUTTON, 0, 0, 8, 8, NULL, (HMENU) NULL, NULL, NULL);
+  Edit_LimitText(ent, numchars);
+  log_enigma_widget(new enigma_widget(ent,8,16));
   return widget_idmax++;
 }
 
 string wgt_textline_get_text(int tline)
 {
-  GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY(widgets[tline]->me));
-  return string(gtk_entry_buffer_get_text(buf),gtk_entry_buffer_get_bytes(buf));
+  HWND ent = getWidget(tline)->me;
+  const int bl = Edit_GetTextLength(ent);
+  char str[bl];
+  return string(str,Edit_GetText(ent,str,bl));
 }
 
 
-// Radio buttons
+/*/ Radio buttons
 int wgt_radio_create(string text)
 {
   HWND rb = gtk_radio_button_new_with_label(NULL, text.c_str());

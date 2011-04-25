@@ -59,6 +59,7 @@ struct gtkl_widget: gtkl_placer
   gtkl_widget(int w, int h): gtkl_placer(w,h,o_widget), me(NULL), actions(0) {}
   gtkl_widget(ui_handle me, int w, int h): gtkl_placer(w,h,o_widget), me(me), actions(0) {}
   gtkl_widget(int id,ui_handle me, int w, int h): gtkl_placer(id,w,h,o_widget), me(me), actions(0) {}
+  void resize(int,int,int,int); // IMPLEMENT this
 };
 struct gtkl_container: gtkl_placer
 {
