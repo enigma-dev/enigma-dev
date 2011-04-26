@@ -92,7 +92,7 @@ void highscore_show(int numb) {
     highscore_add("player name",numb);
      while(!keyboard_check(27 /*vk_escape*/)) {
     draw_highscore(20, 0, room_width-20, room_height);
-         
+
          screen_refresh();
          io_handle();
          sleep(1/1000);
@@ -124,6 +124,7 @@ void highscore_set_strings(std::string caption, std::string nobody, std::string 
     enigma::highscore_nobody=nobody;
     enigma::highscore_escape=escape;
 }
+#ifdef __APPLE__
 void highscore_show_ext(int numb, int back, int show, int newcol, int othercol, std::string name, int size) {
     enigma::highscore_background=back;
     enigma::highscore_border=show;
@@ -132,7 +133,7 @@ void highscore_show_ext(int numb, int back, int show, int newcol, int othercol, 
 
     highscore_show(numb);
 }
-
+#endif
 void highscore_clear() {
     enigma::highscore_list.clear();
     for (int i=0; i < 10; i++) {
