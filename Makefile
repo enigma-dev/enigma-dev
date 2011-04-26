@@ -5,14 +5,14 @@ endif
 ENIGMA: DUMMYDEPENDENCY
 	cd CompilerSource && $(MAKE)
 DUMMYDEPENDENCY:
-	
+
 # Target takes the following parameters:
 #	GMODE{run,build,debug,compile}
 #	GRAPHICS{<anything under graphics_systems>}
 #	PLATFORM{<anything under platforms>}
 #	GLINKS{<requirements of anything above>}
 Game:
-	echo Okay.
+	echo Okay.zzzzz
   ifeq	"$(PLATFORM)" 	"iPhone"
 
 	cd MacOS/ && xcodebuild -target EnigmaIphone -sdk iphonesimulator3.0
@@ -23,7 +23,7 @@ Game:
 	cd ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/jni && /Users/alasdairmorrison/Documents/AndroidSDK/crystax/ndk-build
 
   else
-	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GFLAGS="$(GFLAGS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM) OUTPUTNAME="$(OUTPUTNAME)"
+	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GFLAGS="$(GFLAGS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM) COMPILEPATH=$(COMPILEPATH) OUTPUTNAME="$(OUTPUTNAME)"
   endif
 clean:
 	cd CompilerSource && $(MAKE) clean

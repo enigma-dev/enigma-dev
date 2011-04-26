@@ -1,17 +1,17 @@
 %e-yaml
 ---
-Name: GNU GCC G++
-Native: Yes
+Name: GNU GCC G++ (Cross MinGW on Arch Linux, 32-bit)
+Native: No
 Maintainer: RetroX
-Target-platform: Linux
+Target-platform: Windows
 
 # Some info about it
 path:
 make: make
-gcc: gcc
-g++: g++
-defines: cpp -dM -x c++ -E $blank
-searchdirs: gcc -E -x c++ -v $blank
+gcc: i486-mingw32-gcc -m64
+g++: i486-mingw32-g++ -m64
+defines: i486-mingw32-cpp -m64 -dM -x c++ -E $blank
+searchdirs: i486-mingw32-gcc -m64 -E -x c++ -v $blank
 searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe

@@ -28,21 +28,21 @@ ifndef GRAPHICS
 	GRAPHICS := OpenGL
 	GLINKS := $(GLINKS) -lGL -lGLU
 endif
-	
+
 #figure platform
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	ifndef PLATFORM
 		PLATFORM := xlib
 	endif
-	CREMOVE := rm -f 
+	CREMOVE := rm -f
 	ENDCREMOVE :=
 	SLASHC := /
 else ifeq ($(OS), Darwin)
 	ifndef PLATFORM
 		PLATFORM := Cocoa
 	endif
-	CREMOVE := rm -f 
+	CREMOVE := rm -f
 	ENDCREMOVE :=
 	SLASHC := /
 else
@@ -53,6 +53,13 @@ else
 	ENDCREMOVE :='
 	SLASHC := \\
 endif
+
+#figure compilepath
+COMPILEPATH := Default
+if $(wildcard Makefiles/$(COMPILEPATH)/Makefile)
+	COMPILEPATH = Default
+endif
+
 
 default: all
 
