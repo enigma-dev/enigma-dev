@@ -27,7 +27,7 @@
 
 #import "WindowFunctions.h"
 #import "EnigmaXcodeAppDelegate.h"
-
+#import "EnigmaView.h"
 
 EnigmaXcodeAppDelegate* delegate;
 NSPoint mouse; 
@@ -76,6 +76,9 @@ void cocoa_window_set_caption(const char* caption)
 
 void cocoa_screen_refresh()
 {
+    [[delegate enigmaview] flushOpenGL];
+    
+    //[[[[delegate window] contentView] openGLContext] flushBuffer];
 	//[[self openGLContext] flushBuffer];
 }
 
@@ -99,5 +102,15 @@ int cocoa_window_set_visible(int visible)
 int cocoa_window_get_visible()
 {
 	return (delegate.visible) ? 1 : 0;
+}
+
+void cocoa_flush_opengl() {
+    //[delegate applicationDidUpdate:NULL];
+    //[delegate flushOpenGL];
+    //[[delegate window] update];
+    //[[delegate window] flushWindow];
+    //EnigmaView* ev = (EnigmaView*)[[delegate window] contentView];
+    //[ev flushOpenGL];
+    //contentView
 }
 

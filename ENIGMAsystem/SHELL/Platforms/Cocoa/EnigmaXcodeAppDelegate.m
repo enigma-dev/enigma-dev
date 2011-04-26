@@ -31,6 +31,7 @@
 
 @synthesize window;
 @synthesize visible;
+@synthesize enigmaview;
 
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication

@@ -79,18 +79,30 @@ bool cmp_highscore( const playerScore& a, const playerScore& b ) {
 extern int room_width;
 extern int room_height;
 void screen_refresh();
-//void io_handle();
+
+#ifdef __APPLE__
+/*
+ Only on mac(cocoa) due to lack of io_handle() on other platforms
+ */
+extern void io_handle();
+bool keyboard_check(int i);
+void screen_redraw();
 
 void highscore_show(int numb) {
     highscore_add("player name",numb);
-   /* //loop until user presses ESC
-     while(!keyboard_check(vk_escape)) {
+     while(!keyboard_check(27 /*vk_escape*/)) {
     draw_highscore(20, 0, room_width-20, room_height);
+         
          screen_refresh();
-         //io_handle();
+         io_handle();
          sleep(1/1000);
-     }*/
+     }
 }
+
+void action_highscore_show(int background,int border,double newColor,double otherColor,std::string font,int a,int b,int c,int d,int e,int f) {
+    highscore_show(score);
+}
+#endif
 
 void highscore_set_background(int back) {enigma::highscore_background=back;}
 
@@ -166,6 +178,4 @@ void draw_highscore(int x1, int y1, int x2, int y2) {
 
 
 
-void action_highscore_show(int background,int border,double newColor,double otherColor,std::string font,int a,int b,int c,int d,int e,int f) {
-    highscore_show(score);
-}
+

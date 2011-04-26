@@ -26,14 +26,17 @@
  \********************************************************************************/
 
 #import <Cocoa/Cocoa.h>
+#import "EnigmaView.h"
 
 @interface EnigmaXcodeAppDelegate : NSObject <NSApplicationDelegate> {
     NSWindow *window;
 	BOOL visible;
+    EnigmaView *enigmaview;
 }
 
 @property (assign) IBOutlet NSWindow *window;
 @property (readwrite) BOOL visible;
+@property (assign) IBOutlet EnigmaView *enigmaview;
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication;
 

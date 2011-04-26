@@ -62,8 +62,12 @@ public:
  */
 
 
-
+#ifdef __APPLE__
 void highscore_show(int numb);
+
+void action_highscore_show(int background,int border,double newColor,double otherColor,std::string font,int a,int b,int c,int d,int e,int f);
+
+#endif
 
 void highscore_set_background(int back) ;
 
@@ -84,8 +88,6 @@ void draw_highscore(int x1, int y1, int x2, int y2) ;namespace enigma {
 
     void highscore_init();
 }
-
-void action_highscore_show(int background,int border,double newColor,double otherColor,std::string font,int a,int b,int c,int d,int e,int f);
 
 
 

@@ -62,9 +62,14 @@
     
     if(!self) { NSLog(@"Error self is nil!"); return nil; }
 	
-    [[self openGLContext] makeCurrentContext];
-	
     first=YES;
+    
+    //  [self startTimer];
+    
+   // [[self openGLContext] makeCurrentContext];
+	
+   
+    
     return self;
 }
 
@@ -73,25 +78,32 @@
 {
     NSLog(@"awakeFromNib");
     time = [ [NSTimer scheduledTimerWithTimeInterval: DEFAULT_TIME_INTERVAL
-											  target:self selector:@selector(drawFrame) userInfo:nil repeats:YES]
+											  target:self selector:@selector(/*drawFrame*/startTimer) userInfo:nil repeats:NO/*YES*/]
 			retain];
     
-    [[NSRunLoop currentRunLoop] addTimer: time forMode: NSEventTrackingRunLoopMode];
     
-    [[NSRunLoop currentRunLoop] addTimer: time forMode: NSModalPanelRunLoopMode];
+    //[[NSRunLoop currentRunLoop] addTimer: time forMode: NSEventTrackingRunLoopMode];
+    
+    //[[NSRunLoop currentRunLoop] addTimer: time forMode: NSModalPanelRunLoopMode];
 	[[self window] makeFirstResponder:self];
     [[self window] setAcceptsMouseMovedEvents:YES];
 	//init enigma
 	delegate = (EnigmaXcodeAppDelegate *)[NSApp delegate];
 	delegate.visible= YES;
-	init();
+	//init();
+    
     
 }
+
+extern bool keyboard_check(int i);
 
 - (void)drawFrame
 {
     if( first )
     {
+        
+        [[self openGLContext] makeCurrentContext];
+        init();
         first = NO; 
         if ([[NSApp keyWindow] makeFirstResponder:self] ) 
             NSLog( @"self apparently made first responder" );
@@ -99,10 +111,39 @@
             NSLog( @"self is not first responder"); 
     }
 	
-	loopy();
+    loopy();
+	[self flushOpenGL];
+}
+
+
+-(void) startTimer
+{
+   
+    NSThread* timerThread = [[NSThread alloc] initWithTarget:self selector:@selector(startTimerThread) object:nil]; //Create a new thread
+    [timerThread start]; //start the thread
+}
+
+//the thread starts by sending this message
+-(void) startTimerThread
+{
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    NSRunLoop* runLoop = [NSRunLoop currentRunLoop];
+    [[NSTimer scheduledTimerWithTimeInterval: DEFAULT_TIME_INTERVAL
+                                      target: self
+                                    selector: @selector(drawFrame)
+                                    userInfo: nil
+                                     repeats: YES] retain];
     
+    [runLoop run];
+    [pool release];
+}
+
+
+
+
+
+- (void) flushOpenGL {
     [[self openGLContext] flushBuffer];
-	
 }
 
 
@@ -156,5 +197,28 @@
 {
     NSLog( @"Mouse O up");
 }
+
+/*
+ Capture shift, ctrl, opt and command press & release
+ */
+- (void)flagsChanged:(NSEvent *)theEvent
+{
+	int flags = [theEvent modifierFlags];
+    BOOL newopt, newctrl, newcommand, newshift;
+	newopt = (flags & NSAlternateKeyMask) ? YES : NO;
+	newctrl = (flags & NSControlKeyMask) ? YES : NO;
+	newcommand = (flags & NSCommandKeyMask) ? YES : NO;
+	newshift = ( flags & NSShiftKeyMask ) ? YES : NO;
+    
+    if(newctrl!=ctrl && newctrl) key_press(0xE4);
+    else if (newctrl!=ctrl && !newctrl) key_release(0xE4);
+    if(newshift!=shift && newshift) key_press(0xE2);
+    else if (newshift!=shift && !newshift) key_release(0xE2);
+    ctrl=newctrl;
+    newopt=opt;
+    newcommand=command;
+    newshift=shift;
+}
+
 
 @end

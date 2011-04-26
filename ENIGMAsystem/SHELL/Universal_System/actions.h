@@ -426,4 +426,9 @@ void motion_set(int dir, double speed); //RELOCATE ME
 void motion_add(double dir, double speed); //RELOCATE ME
 #define motion_add(newdirection,newspeed) hspeed+= (newspeed) * cos(degtorad((newdirection))); vspeed-= (newspeed) * sin(degtorad((newdirection)));
 
+void game_restart() { //RELOCATE ME
+    room_goto_first();
+}
 
+void action_restart_game();
+#define action_restart_game game_restart

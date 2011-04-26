@@ -25,6 +25,9 @@
  **                                                                              **
  \********************************************************************************/
 
+#ifndef ObjectiveC_h
+#define ObjectiveC_h
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,6 +39,8 @@ extern "C" {
 	const char* cocoa_window_get_caption();
 	void cocoa_screen_refresh();
 	int cocoa_window_set_visible(int visible);
+    void cocoa_flush_opengl();
 #ifdef __cplusplus
 }
+#endif
 #endif

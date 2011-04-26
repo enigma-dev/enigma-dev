@@ -121,15 +121,3 @@ int instance_furthest(int x,int y,int obj)
 
   return retid;
 }
-
-int instance_position(int x,int y,int obj)
-{
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(obj); it != NULL; it = it->next)
-  {
-    if (x == ((enigma::object_planar*)it->inst)->x
-    and y == ((enigma::object_planar*)it->inst)->y)
-      return it->inst->id;
-  }
-
-  return noone;
-}

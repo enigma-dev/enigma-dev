@@ -68,7 +68,7 @@ int loopy() {
 	
 	enigma::ENIGMA_events();
 	
-	io_handle();
+	cocoa_io_handle();
 	
 
 	return 0;
@@ -84,7 +84,7 @@ enigma::initialize_everything();
 
 
 void key_press(int keycode) {
-   // printf("Keycode pressed: %d",keycode); //useful to create the keymap array
+    printf("Keycode pressed: %d",keycode); //useful to create the keymap array
 	int actualKey = enigma::keymap[keycode];
 	
 	if (cocoa_keybdstatus[actualKey]==1) {
@@ -111,7 +111,7 @@ void mouse_release(int x, int y) {
 	enigma::mousestatus[mb_left-1]=0;
 }
 
-void io_handle() {
+void cocoa_io_handle() {
     
 	for(int i=0;i<256;i++){
 		if (enigma::last_keybdstatus[i]==0 && enigma::keybdstatus[i]==1) {
@@ -126,3 +126,6 @@ void io_handle() {
 	memcpy(enigma::keybdstatus, cocoa_keybdstatus, sizeof(enigma::keybdstatus));
 	memcpy(enigma::last_keybdstatus, cocoa_last_keybdstatus, sizeof(enigma::last_keybdstatus));
 }
+
+
+

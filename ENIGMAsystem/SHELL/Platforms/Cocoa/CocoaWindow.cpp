@@ -36,6 +36,12 @@ Atom wm_delwin;
 
 using namespace std;
 
+
+
+
+
+
+
 //////////
 // INIT //
 //////////
@@ -176,6 +182,7 @@ int window_set_cursor(int c)
 
 void screen_refresh() {
 	cocoa_screen_refresh();
+    cocoa_flush_opengl();
 }
 
 namespace enigma
@@ -270,7 +277,7 @@ namespace enigma
 		keymap[0xFF] = 46;  //vk_delete; //no delete
 		keymap[0x63] = 45;  //vk_insert; //no ins
         keymap[49] = 32; //vk_space
-        
+        //keymap[mac] = gm;
 	}
 }
 
@@ -351,3 +358,18 @@ namespace enigma {
  window_set_sizeable(sizeable)
  window_get_sizeable()
  */
+#include "CocoaFunctions.h"
+extern void cocoa_io_handle();
+void io_handle() {
+    
+    cocoa_io_handle();
+}
+
+
+void game_end() {
+    //audiosystem_cleanup();
+    exit(0);
+}
+void action_end_game() {
+    game_end();
+} 
