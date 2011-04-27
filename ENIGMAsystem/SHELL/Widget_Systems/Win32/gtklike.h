@@ -36,9 +36,9 @@ struct gtkl_object
   virtual void reposition() {}
   
   gtkl_object(): type(o_incomplete) {}
-  gtkl_object(int t): type(t), srw(0), srh(0) { printf("My size request: %d,%d\n",srw,srh); }
-  gtkl_object(int w, int h, int t): type(t), srw(w), srh(h) { printf("My size request: %d,%d",srw,srh); printf("My size request: %d,%d\n",srw,srh); }
-  gtkl_object(int id, int w, int h, int t): id(id), type(t), srw(w), srh(h) { printf("My size request: %d,%d\n",srw,srh); }
+  gtkl_object(int t): type(t), srw(0), srh(0) { }
+  gtkl_object(int w, int h, int t): type(t), srw(w), srh(h) { }
+  gtkl_object(int id, int w, int h, int t): id(id), type(t), srw(w), srh(h) { }
   virtual ~gtkl_object() {}
 };
 struct gtkl_placer: gtkl_object
@@ -112,7 +112,6 @@ struct gtkl_table: gtkl_container
   void resize(int xnew, int ynew, int dwid, int dhgt)
   {
     x=xnew, y=ynew, w=dwid, h=dhgt;
-    printf("Resize %d,%d %d,%d (R%d, %d)\n",x,y,w,h,srw,srh);
     int cw = dwid / gsx, ch = dhgt / gsy;
     if (ch<gsy) ch=gsy; if (cw<gsx) cw=gsx;
     
@@ -183,7 +182,6 @@ struct gtkl_table: gtkl_container
   }
   void resolve()
   {
-    printf("Resolve %d,%d %d,%d\n",x,y,w,h);
     srw = 0; srh = 0;
     
     for (atti mi = atts.begin(); mi != atts.end(); mi++)
@@ -193,14 +191,11 @@ struct gtkl_table: gtkl_container
     for (int xx = 0; xx < gsx; xx++)
     {
       int tc = 0;
-      printf("**   Resolve column %d:\n",xx);
       for (atti mi = atts.begin(); mi != atts.end(); mi++)
         if (mi->second.x <= xx and mi->second.r > xx)
-          tc += mi->second.child->srh,
-          printf("**     Add in %d\n",mi->second.child->srh);
+          tc += mi->second.child->srh;
       if (tc > srh)
         srh = tc;
-      printf("**    Result: %d :: Run with %d\n",tc,srh);
     }
     // Calculate minimal Y size
     for (int yy = 0; yy < gsy; yy++)
@@ -213,12 +208,9 @@ struct gtkl_table: gtkl_container
         srw = tr;
     }
     srw += 8, srh += 8;
-    printf("Resolved: %d,%d\n",srw,srh);
   }
   
-  gtkl_table(int ch, int cw): gtkl_container(cw*4,ch*4,false), gsx(cw), gsy(ch)
-  {
-  }
+  gtkl_table(int ch, int cw): gtkl_container(cw*4,ch*4,false), gsx(cw), gsy(ch) { }
   ~gtkl_table() {}
 } mytable(3,3);
 /*

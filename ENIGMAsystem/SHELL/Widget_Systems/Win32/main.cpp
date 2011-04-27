@@ -1,4 +1,5 @@
 #include <string>
+#include <stdio.h>
 #define WINVER 9001
 #include <windows.h>
 #define _WIN32_IE 9001
@@ -24,7 +25,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
     
     INITCOMMONCONTROLSEX iccex;
     iccex.dwSize = sizeof(iccex);
-    iccex.dwICC  = ICC_STANDARD_CLASSES;
+    iccex.dwICC  = ICC_STANDARD_CLASSES | 0xFFF;
     InitCommonControlsEx(&iccex);
     
     enigmaHinstance = hThisInstance;
@@ -75,17 +76,18 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
                                    "puxywhs\n"
                                    "frggiis",
                                    4,4);
+    int stp, iso, xe;
     wgt_layout_insert_widget(layout,"p",wgt_button_create("Pause"));
     wgt_layout_insert_widget(layout,"u",wgt_button_create("Undo"));
     wgt_layout_insert_widget(layout,"f",wgt_button_create("Freeze"));
     wgt_layout_insert_widget(layout,"r",wgt_button_create("Redo"));
-    wgt_layout_insert_widget(layout,"s",wgt_button_create("Stop"));
-    wgt_layout_insert_widget(layout,"x",wgt_textline_create("X",4));
+    wgt_layout_insert_widget(layout,"s",stp = wgt_button_create("Stop"));
+    wgt_layout_insert_widget(layout,"x",xe = wgt_textline_create("X",4));
     wgt_layout_insert_widget(layout,"y",wgt_textline_create("Y",4));
     wgt_layout_insert_widget(layout,"w",wgt_textline_create("W",4));
     wgt_layout_insert_widget(layout,"h",wgt_textline_create("H",4));
     wgt_layout_insert_widget(layout,"g",wgt_checkbox_create("Grid"));
-    wgt_layout_insert_widget(layout,"i",wgt_checkbox_create("Iso"));
+    wgt_layout_insert_widget(layout,"i",iso = wgt_checkbox_create("Iso"));
     wgt_layout_insert_widget(layout,"o",wgt_combobox_create("Item A|Item B|Item C"));
     wgt_window_show(mywin);
     
@@ -96,7 +98,8 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
         TranslateMessage(&messages);
         /* Send message to WindowProcedure */
         DispatchMessage(&messages);
-        if (!wgt_exists(mywin)) { messages.wParam = 0; break; }
+        if (!wgt_exists(mywin) or wgt_button_get_pressed(stp) or wgt_checkbox_get_checked(iso)) { messages.wParam = 0; break; }
+        printf("%s\n",wgt_textline_get_text(xe).c_str());
     }
 
     /* The program return-value is 0 - The value that PostQuitMessage() gave */

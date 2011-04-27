@@ -47,15 +47,6 @@ using namespace std;
 vector<gtkl_object*> widgets;
 static unsigned widget_idmax = 0;
 
-#define d_widget_ctor(name,ctor_etc...) struct enigma_##name: enigma_widget {\
-  void resolve();\
-  enigma_##name(int id,HWND hwnd, int w, int h): ctor_etc\
-}
-#define d_widget(name,code...) struct enigma_##name: enigma_widget {\
-  void resolve();\
-  code\
-  enigma_##name(int id,HWND hwnd, int at, int w, int h): gtkl_widget(id,hwnd,w,h) {}\
-}
 
 void enigma_widget::resize(int x,int y,int w,int h) { MoveWindow(me,x,y,w,h,1); }
 
@@ -84,10 +75,11 @@ extern HINSTANCE enigmaHinstance;
 #define setID(hwnd,id) SetWindowLong((HWND)(hwnd),GWL_USERDATA,(id))
 #define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0); 
 
-d_widget_ctor(window, gtkl_widget(id,hwnd,w,h), layout_id(-1) {}
+struct enigma_window: enigma_widget {
   int layout_id;
-);
-void enigma_window::resolve() {}
+  void resolve() {}
+  enigma_window(int id,HWND hwnd, int w, int h): gtkl_widget(id,hwnd,w,h), layout_id(-1) {}
+};
 
 static LRESULT CALLBACK GenWindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 { 
@@ -95,12 +87,11 @@ static LRESULT CALLBACK GenWindowProcedure (HWND hwnd, UINT message, WPARAM wPar
   {
     case WM_COMMAND:
         if (HIWORD(wParam) == BN_CLICKED)
-          printf("Command: clicked button %d\n", (int)getID(lParam));
+          getWidget((int)getID(lParam))->actions++;
       break;
     case WM_SIZE:
       {
         if (!widget_idmax) break;
-        printf("And then, suddenly, %d, %d\n",LOWORD(lParam),HIWORD(lParam));
         const int lid = ((enigma_window*)widgets[wParam])->layout_id;
         if (lid != -1) getContainer(lid)->resize(4,4,LOWORD(lParam)-8,HIWORD(lParam)-8);
       }
@@ -111,7 +102,6 @@ static LRESULT CALLBACK GenWindowProcedure (HWND hwnd, UINT message, WPARAM wPar
         const int lid = ((enigma_window*)widgets[wParam])->layout_id;
         if (lid != -1) {
           getContainer(lid)->resolve();
-          printf("Repeat: resolved to %d, %d\n",getContainer(lid)->srw,getContainer(lid)->srh);
           LPMINMAXINFO mmi = (LPMINMAXINFO)lParam;
           RECT r;
           r.left = 0, r.right  = getContainer(lid)->srw;
@@ -228,14 +218,18 @@ int wgt_layout_create(int win, string layout, int hpad, int vpad)
 void wgt_layout_insert_widget(int layout, string cell, int wgt) {
   ((enigma_widget_alignment*)getTable(layout)->atts[cell[0]].child)->insert(getWidget(wgt));
   SetParent(getWidget(wgt)->me,getWidget(getContainer(layout)->parent_id)->me);
-  SetWindowLong(getWidget(wgt)->me,GWL_STYLE,WS_VISIBLE | WS_CHILD | getWidget(wgt)->attribs);
+  SetWindowLong(getWidget(wgt)->me, GWL_STYLE, WS_VISIBLE | WS_CHILD | getWidget(wgt)->attribs);
   getTable(layout)->resolve();
 }
 
 
 // Buttons
 
-d_widget(button);
+struct enigma_button: enigma_widget {
+  void resolve();
+  enigma_button(int id,HWND hwnd, int at, int w, int h): gtkl_widget(id,hwnd,at,w,h) {}
+};
+
 void enigma_button::resolve()
 {
   HDC dc = GetDC(me);
@@ -305,11 +299,25 @@ string wgt_combobox_get_selected_text(int cbbox) {
 
 // Checkboxes
 
+struct enigma_checkbox: enigma_button {
+  void resolve()
+  {
+    HDC dc = GetDC(me);
+    int tl = Button_GetTextLength(me); 
+    char t[tl+1]; Button_GetText(me,t,tl+1);
+    SIZE d; GetTextExtentPoint32(dc,t,tl,&d);
+    ReleaseDC(me,dc);
+    srw = d.cx+8, srh = d.cy+8;
+    srw = 24, srh = 24;
+  }
+  enigma_checkbox(int id,HWND me,int at,int w,int h): enigma_button(id,me,at,w,h) {}
+};
+
 int wgt_checkbox_create(string text)
 {
   HWND chbox = CreateWindow("button", text.c_str(), BS_AUTOCHECKBOX, 0, 0, 24, 144, NULL, (HMENU) NULL, NULL, NULL);
   setID(chbox,widget_idmax); fixFont(chbox);
-  log_enigma_widget(new enigma_widget(widget_idmax,chbox,BS_AUTOCHECKBOX,24,24));
+  log_enigma_widget(new enigma_checkbox(widget_idmax,chbox,BS_AUTOCHECKBOX,24,24));
   return widget_idmax++;
 }
 bool wgt_checkbox_get_checked(int cbox) {
@@ -319,7 +327,11 @@ bool wgt_checkbox_get_checked(int cbox) {
 
 // Text entry line
 
-d_widget(textline);
+struct enigma_textline: enigma_widget {
+  void resolve();
+  enigma_textline(int id,HWND hwnd, int at, int w, int h): gtkl_widget(id,hwnd,at,w,h) {}
+};
+
 void enigma_textline::resolve() { 
   TEXTMETRIC tm; 
   HDC dc = GetDC(me);
@@ -327,7 +339,6 @@ void enigma_textline::resolve() {
   ReleaseDC(me,dc);
   int cc = SendMessage(me,EM_GETLIMITTEXT,0,0);
   srw = tm.tmMaxCharWidth * (cc > 20 ? 20 : cc);
-  printf("Max edit size: %d",srw);
   srh = 16;
 }
 
