@@ -47,10 +47,15 @@ using namespace std;
 vector<gtkl_object*> widgets;
 static unsigned widget_idmax = 0;
 
-struct enigma_window: gtkl_widget {
-  int layout_id;
-  enigma_window(int id,HWND hwnd, int w, int h): gtkl_widget(id,hwnd,8,8), layout_id(-1) {}
-};
+#define d_widget_ctor(name,ctor_etc...) struct enigma_##name: enigma_widget {\
+  void resolve();\
+  enigma_##name(int id,HWND hwnd, int w, int h): ctor_etc\
+}
+#define d_widget(name,code...) struct enigma_##name: enigma_widget {\
+  void resolve();\
+  code\
+  enigma_##name(int id,HWND hwnd, int at, int w, int h): gtkl_widget(id,hwnd,w,h) {}\
+}
 
 void enigma_widget::resize(int x,int y,int w,int h) { MoveWindow(me,x,y,w,h,1); }
 
@@ -62,7 +67,7 @@ struct enigma_widget_alignment: gtkl_container
   void insert(enigma_widget* whom) { child = whom; }
   
   void clear()   { delete child; }
-  void resolve() { if (child) srw = child->srw+8, srh = child->srh+8; }
+  void resolve() { if (child) child->resolve(), srw = child->srw+8, srh = child->srh+8; }
   void resize(int x,int y,int w,int h)  { if (child) child->resize(x+4,y+4,w-8,h-8); }
 };
 
@@ -75,22 +80,47 @@ extern HWND enigmaHwnd;
 extern HINSTANCE enigmaHinstance;
 #define enigma_window_generic_class "enigma_window_generic_class"
 
+#define getID(hwnd) GetWindowLong((HWND)(hwnd),GWL_USERDATA)
+#define setID(hwnd,id) SetWindowLong((HWND)(hwnd),GWL_USERDATA,(id))
+#define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0); 
+
+d_widget_ctor(window, gtkl_widget(id,hwnd,w,h), layout_id(-1) {}
+  int layout_id;
+);
+void enigma_window::resolve() {}
+
 static LRESULT CALLBACK GenWindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 { 
   switch (message)
   {
     case WM_COMMAND:
         if (HIWORD(wParam) == BN_CLICKED)
-          printf("Command: clicked button %d\n", LOWORD(wParam));
+          printf("Command: clicked button %d\n", (int)getID(lParam));
       break;
     case WM_SIZE:
       {
         if (!widget_idmax) break;
+        printf("And then, suddenly, %d, %d\n",LOWORD(lParam),HIWORD(lParam));
         const int lid = ((enigma_window*)widgets[wParam])->layout_id;
-        printf("Resize %d to %d x %d\n",wParam,LOWORD(lParam),HIWORD(lParam));
-        if (lid != -1) getContainer(lid)->resize(0,0,LOWORD(lParam),HIWORD(lParam));
+        if (lid != -1) getContainer(lid)->resize(4,4,LOWORD(lParam)-8,HIWORD(lParam)-8);
       }
       break;
+    case WM_GETMINMAXINFO:
+      if (widget_idmax)
+      {
+        const int lid = ((enigma_window*)widgets[wParam])->layout_id;
+        if (lid != -1) {
+          getContainer(lid)->resolve();
+          printf("Repeat: resolved to %d, %d\n",getContainer(lid)->srw,getContainer(lid)->srh);
+          LPMINMAXINFO mmi = (LPMINMAXINFO)lParam;
+          RECT r;
+          r.left = 0, r.right  = getContainer(lid)->srw;
+          r.top  = 0, r.bottom = getContainer(lid)->srh;
+          AdjustWindowRect(&r,WS_CAPTION|WS_THICKFRAME,FALSE);
+          mmi->ptMinTrackSize.x = r.right- r.left;
+          mmi->ptMinTrackSize.y = r.bottom - r.top;
+        }
+      }
     default:
       return DefWindowProc (hwnd, message, wParam, lParam);
   }
@@ -124,7 +154,7 @@ struct Sgeneric_window
     wincl.cbClsExtra = 0;                      /* No extra bytes after the window class */
     wincl.cbWndExtra = 0;                      /* structure or the window instance */
     
-    wincl.hbrBackground = (HBRUSH) COLOR_BACKGROUND;
+    wincl.hbrBackground = (HBRUSH)COLOR_WINDOW;
     
     RegisterClassEx (&wincl);
   }
@@ -137,13 +167,16 @@ struct Sgeneric_window
 int wgt_window_create(int w, int h)
 {
   HWND win = CreateWindowEx(0, enigma_window_generic_class, "caption", WS_POPUP | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, w, h, enigmaHwnd, (HMENU)widget_idmax, enigmaHinstance, (LPVOID)widget_idmax);
+  setID(win,widget_idmax); fixFont(win);
   log_enigma_widget(new enigma_window(widget_idmax,win,w,h));
   return widget_idmax++;
 }
 
-void wgt_window_show(int wgt)
-{
-  ShowWindow(getWidget(wgt)->me, true);
+void wgt_window_show(int wgt) {
+  RECT r;
+  GetWindowRect(getWidget(wgt)->me, &r);
+  AdjustWindowRect(&r, WS_CAPTION|WS_THICKFRAME, FALSE);
+  SetWindowPos(getWidget(wgt)->me, NULL, 0, 0, r.right - r.left, r.bottom - r.top, SWP_SHOWWINDOW | SWP_NOZORDER | SWP_NOREPOSITION);
 }
 
 
@@ -188,26 +221,37 @@ int wgt_layout_create(int win, string layout, int hpad, int vpad)
   log_enigma_widget(table);
   window->layout_id = widget_idmax;
   RECT wr; GetClientRect(window->me, &wr);
-  table->resize(0,0,wr.right-wr.left,wr.bottom-wr.top);
+  table->resize(4,4,wr.right-wr.left-8,wr.bottom-wr.top-8);
   return widget_idmax++;
 }
 
 void wgt_layout_insert_widget(int layout, string cell, int wgt) {
   ((enigma_widget_alignment*)getTable(layout)->atts[cell[0]].child)->insert(getWidget(wgt));
   SetParent(getWidget(wgt)->me,getWidget(getContainer(layout)->parent_id)->me);
-  SetWindowLong(getWidget(wgt)->me,GWL_STYLE,WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON);
+  SetWindowLong(getWidget(wgt)->me,GWL_STYLE,WS_VISIBLE | WS_CHILD | getWidget(wgt)->attribs);
   getTable(layout)->resolve();
 }
 
 
 // Buttons
 
+d_widget(button);
+void enigma_button::resolve()
+{
+  HDC dc = GetDC(me);
+  int tl = Button_GetTextLength(me); 
+  char t[tl+1]; Button_GetText(me,t,tl+1);
+  SIZE d; GetTextExtentPoint32(dc,t,tl,&d);
+  ReleaseDC(me,dc);
+  srw = d.cx+8, srh = d.cy+8;
+}
+
 int wgt_button_create(string text)
 {
-  HWND butn = CreateWindow("button", text.c_str(), BS_PUSHBUTTON, 0, 0, 8, 8, NULL, (HMENU)NULL, NULL, (LPVOID*)widget_idmax);
+  HWND butn = CreateWindow("button", text.c_str(), BS_PUSHBUTTON, 0, 0, 24, 24, NULL, (HMENU)NULL, NULL, (LPVOID*)widget_idmax);
   if (!butn) return -1;
-  
-  log_enigma_widget(new enigma_widget(widget_idmax,butn,8,8));
+  setID(butn,widget_idmax); fixFont(butn);
+  log_enigma_widget(new enigma_button(widget_idmax,butn,BS_PUSHBUTTON,24,24));
   return widget_idmax++;
 }
 
@@ -225,12 +269,13 @@ struct enigma_combobox: enigma_widget
 {
   void resolve() { srw = 24, srh = 24; }
   void resize(int xr, int yr, int wr, int hr) { x=xr, y=yr, w=wr, h=24; MoveWindow(me,x,y,w,h+128,1); }
-  enigma_combobox(HWND me,int w,int h): enigma_widget(me,w,h) {}
+  enigma_combobox(int id,HWND me,int at,int w,int h): enigma_widget(id,me,at,w,h) {}
 };
 
 int wgt_combobox_create(string contents)
 {
   HWND cbox = CreateWindow("combobox", "", CBS_DROPDOWNLIST | CBS_HASSTRINGS , 0, 0, 24, 144, NULL, (HMENU) NULL, NULL, NULL);
+  setID(cbox,widget_idmax); fixFont(cbox);
   const char *st = contents.c_str();
   char *mt;
   for (mt = (char*)st; *mt; mt++)
@@ -242,7 +287,7 @@ int wgt_combobox_create(string contents)
     *mt = '|';
   }
   if (mt > st) ComboBox_AddString(cbox, st);
-  log_enigma_widget(new enigma_combobox(cbox,24,16));
+  log_enigma_widget(new enigma_combobox(widget_idmax,cbox,CBS_DROPDOWNLIST | CBS_HASSTRINGS,24,24));
   return widget_idmax++;
 }
 
@@ -258,25 +303,40 @@ string wgt_combobox_get_selected_text(int cbbox) {
 }
 
 
-/*/ Checkboxes
+// Checkboxes
 
 int wgt_checkbox_create(string text)
 {
-  log_enigma_widget(new enigma_widget(gtk_check_button_new_with_label(text.c_str())));
+  HWND chbox = CreateWindow("button", text.c_str(), BS_AUTOCHECKBOX, 0, 0, 24, 144, NULL, (HMENU) NULL, NULL, NULL);
+  setID(chbox,widget_idmax); fixFont(chbox);
+  log_enigma_widget(new enigma_widget(widget_idmax,chbox,BS_AUTOCHECKBOX,24,24));
   return widget_idmax++;
 }
 bool wgt_checkbox_get_checked(int cbox) {
-  return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widgets[cbox]->me));
+  return Button_GetCheck(getWidget(cbox)->me);
 }
 
 
-*/// Text entry line
+// Text entry line
+
+d_widget(textline);
+void enigma_textline::resolve() { 
+  TEXTMETRIC tm; 
+  HDC dc = GetDC(me);
+  GetTextMetrics(dc,&tm);
+  ReleaseDC(me,dc);
+  int cc = SendMessage(me,EM_GETLIMITTEXT,0,0);
+  srw = tm.tmMaxCharWidth * (cc > 20 ? 20 : cc);
+  printf("Max edit size: %d",srw);
+  srh = 16;
+}
 
 int wgt_textline_create(string text, int numchars)
 {
-  HWND ent = CreateWindow("edit", text.c_str(), BS_PUSHBUTTON, 0, 0, 8, 8, NULL, (HMENU) NULL, NULL, NULL);
+  HWND ent = CreateWindowEx(WS_EX_CLIENTEDGE,"edit", text.c_str(), 0, 0, 0, 8, 16, NULL, (HMENU) NULL, NULL, NULL);
   Edit_LimitText(ent, numchars);
-  log_enigma_widget(new enigma_widget(ent,8,16));
+  setID(ent,widget_idmax); fixFont(ent);
+  log_enigma_widget(new enigma_textline(widget_idmax,ent,0,12,24));
   return widget_idmax++;
 }
 

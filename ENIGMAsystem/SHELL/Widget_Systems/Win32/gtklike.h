@@ -36,9 +36,9 @@ struct gtkl_object
   virtual void reposition() {}
   
   gtkl_object(): type(o_incomplete) {}
-  gtkl_object(int t): type(t) {}
-  gtkl_object(int w, int h, int t): type(t), srw(w), srh(h) {}
-  gtkl_object(int id, int w, int h, int t): id(id), type(t), srw(w), srh(h) {}
+  gtkl_object(int t): type(t), srw(0), srh(0) { printf("My size request: %d,%d\n",srw,srh); }
+  gtkl_object(int w, int h, int t): type(t), srw(w), srh(h) { printf("My size request: %d,%d",srw,srh); printf("My size request: %d,%d\n",srw,srh); }
+  gtkl_object(int id, int w, int h, int t): id(id), type(t), srw(w), srh(h) { printf("My size request: %d,%d\n",srw,srh); }
   virtual ~gtkl_object() {}
 };
 struct gtkl_placer: gtkl_object
@@ -46,7 +46,7 @@ struct gtkl_placer: gtkl_object
   int x,y,w, h;  // My metrics, relative to my parent
   int parent_id; // The ID of my parent
   char child_id; // My ID according to my parent
-  virtual void resolve() { x=4, y=4, srw = w+8, srh = h+8; }
+  virtual void resolve() { x=4, y=4, srw = 2, srh = 2; }
   virtual void resize(int xr, int yr, int wr, int hr) { x=xr, y=yr, srw = wr, srh = hr; }
   gtkl_placer(int t): gtkl_object(t) {}
   gtkl_placer(int w, int h, int t): gtkl_object(w,h,t) {}
@@ -56,9 +56,11 @@ struct gtkl_widget: gtkl_placer
 {
   ui_handle me; // The handle the OS knows my control by
   int actions; // Action messages received from OS, such as click
+  long attribs; // Anything the API needs to know
   gtkl_widget(int w, int h): gtkl_placer(w,h,o_widget), me(NULL), actions(0) {}
   gtkl_widget(ui_handle me, int w, int h): gtkl_placer(w,h,o_widget), me(me), actions(0) {}
-  gtkl_widget(int id,ui_handle me, int w, int h): gtkl_placer(id,w,h,o_widget), me(me), actions(0) {}
+  gtkl_widget(int id,ui_handle me, int w, int h): gtkl_placer(id,w,h,o_widget), me(me), actions(0), attribs(0) {}
+  gtkl_widget(int id,ui_handle me, int at, int w, int h): gtkl_placer(id,w,h,o_widget), me(me), actions(0), attribs(at) {}
   void resize(int,int,int,int); // IMPLEMENT this
 };
 struct gtkl_container: gtkl_placer
@@ -110,7 +112,7 @@ struct gtkl_table: gtkl_container
   void resize(int xnew, int ynew, int dwid, int dhgt)
   {
     x=xnew, y=ynew, w=dwid, h=dhgt;
-    printf("Resize %d,%d %d,%d\n",x,y,w,h);
+    printf("Resize %d,%d %d,%d (R%d, %d)\n",x,y,w,h,srw,srh);
     int cw = dwid / gsx, ch = dhgt / gsy;
     if (ch<gsy) ch=gsy; if (cw<gsx) cw=gsx;
     
@@ -127,23 +129,23 @@ struct gtkl_table: gtkl_container
         givex[xz][yz] = givey[xz][yz] = 0;
       // Make not-completely-occupied allocated cells have max give
       for (int xz = mi->second.x; xz < mi->second.r; xz++)
-      for (int yz = mi->second.y + mi->second.child->h/ch; yz < mi->second.b; yz++)
+      for (int yz = mi->second.y + (mi->second.child->srh+8)/ch; yz < mi->second.b; yz++)
         givey[xz][yz] = ch;
       for (int yz = mi->second.y; yz < mi->second.b; yz++)
-      for (int xz = mi->second.x + mi->second.child->w/cw; xz < mi->second.r; xz++)
+      for (int xz = mi->second.x + (mi->second.child->srw+8)/cw; xz < mi->second.r; xz++)
         givex[xz][yz] = cw;
       // Decrease vertical give (for each horizontal unit)
-      for (int xz = min(mi->second.x + mi->second.child->w/cw, mi->second.r-1), yz = mi->second.y; yz < mi->second.b; yz++)
-        givex[xz][yz] = cw*(xz+1-mi->second.x) - mi->second.child->w;
+      for (int xz = min(mi->second.x + (mi->second.child->srw+8)/cw, mi->second.r-1), yz = mi->second.y; yz < mi->second.b; yz++)
+        givex[xz][yz] = cw*(xz+1-mi->second.x) - (mi->second.child->srw+8);
       // Decrease horizontal give (for each vertical unit)
-      for (int yz = min(mi->second.y + mi->second.child->h/ch, mi->second.b-1), xz = mi->second.x; xz < mi->second.r; xz++)
-        givey[xz][yz] = ch*(yz+1-mi->second.y) - mi->second.child->h;
+      for (int yz = min(mi->second.y + (mi->second.child->srh+8)/ch, mi->second.b-1), xz = mi->second.x; xz < mi->second.r; xz++)
+        givey[xz][yz] = ch*(yz+1-mi->second.y) - (mi->second.child->srh+8);
       //cons_show_message("");
     }
     
     // Lay everything out as-is first, ignoring overlap.
     for (atti mi = atts.begin(); mi != atts.end(); mi++)
-      mi->second.d.x = mi->second.x*cw, mi->second.d.y = mi->second.y*ch, mi->second.d.w = mi->second.child->w, mi->second.d.h = mi->second.child->h;
+      mi->second.d.x = mi->second.x*cw, mi->second.d.y = mi->second.y*ch, mi->second.d.w = (mi->second.child->srw+8), mi->second.d.h = (mi->second.child->srh+8);
     
     // Expand grid where absolutely necessary
     int maxgx[gsx], maxgy[gsy]; //Compute resize allotment
@@ -152,22 +154,14 @@ struct gtkl_table: gtkl_container
     for (int yy = 0; yy < gsy; yy++)
       maxgy[yy] = ch;
     for (int xx = 0; xx < gsx; xx++)
-    {
       for (int yy = 0; yy < gsy; yy++)
       {
-        if (givex[xx][yy] < maxgx[xx]) {
-          if (givex[xx][yy] < 0)
-            break; // This is bad
+        if (givex[xx][yy] < maxgx[xx])
           maxgx[xx] = givex[xx][yy];
-        }
-        if (givey[xx][yy] < maxgy[xx]) {
-          if (givey[xx][yy] < 0)
-            break; // This is bad
+        if (givey[xx][yy] < maxgy[xx])
           maxgy[xx] = givey[xx][yy];
-        }
-        //room_caption += string(givex[xx][yy]) + " " + string(givey[xx][yy]) + "   ";
       }
-    }
+    
     int losx = 0, losy = 0; // Total left-over space (always <= 0)
     for (int i = 0; i < gsx; i++)
       losx += maxgx[i];
@@ -190,7 +184,36 @@ struct gtkl_table: gtkl_container
   void resolve()
   {
     printf("Resolve %d,%d %d,%d\n",x,y,w,h);
-    resize(x,y,w,h);
+    srw = 0; srh = 0;
+    
+    for (atti mi = atts.begin(); mi != atts.end(); mi++)
+      mi->second.child->resolve();
+    
+    // Calculate minimal X size
+    for (int xx = 0; xx < gsx; xx++)
+    {
+      int tc = 0;
+      printf("**   Resolve column %d:\n",xx);
+      for (atti mi = atts.begin(); mi != atts.end(); mi++)
+        if (mi->second.x <= xx and mi->second.r > xx)
+          tc += mi->second.child->srh,
+          printf("**     Add in %d\n",mi->second.child->srh);
+      if (tc > srh)
+        srh = tc;
+      printf("**    Result: %d :: Run with %d\n",tc,srh);
+    }
+    // Calculate minimal Y size
+    for (int yy = 0; yy < gsy; yy++)
+    {
+      int tr = 0;
+      for (atti mi = atts.begin(); mi != atts.end(); mi++)
+        if (mi->second.y <= yy and mi->second.b > yy)
+          tr += mi->second.child->srw;
+      if (tr > srw)
+        srw = tr;
+    }
+    srw += 8, srh += 8;
+    printf("Resolved: %d,%d\n",srw,srh);
   }
   
   gtkl_table(int ch, int cw): gtkl_container(cw*4,ch*4,false), gsx(cw), gsy(ch)
