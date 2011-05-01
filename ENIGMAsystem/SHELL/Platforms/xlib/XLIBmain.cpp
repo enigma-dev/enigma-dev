@@ -142,13 +142,14 @@ namespace enigma
 
 int main(int argc,char** argv)
 {
+  // Copy our parameters
 	enigma::parameters=new char* [argc];
 	for (int i=0; i<argc; i++)
 		enigma::parameters[i]=argv[i];
 	enigma::initkeymap();
 
 
-	//initiate display
+	// Initiate display
 	disp = XOpenDisplay(NULL);
 	if(!disp){
 		printf("Display failed\n");

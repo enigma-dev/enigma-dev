@@ -44,7 +44,6 @@ using std::string;
 
 namespace enigma {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
-extern void highscore_init();
 }
 
 //This is like main(), only cross-api
@@ -58,7 +57,6 @@ namespace enigma
     
     graphicssystem_initialize();
     audiosystem_initialize();
-      highscore_init();
     
     #if BUILDMODE
       buildmode::buildinit();
