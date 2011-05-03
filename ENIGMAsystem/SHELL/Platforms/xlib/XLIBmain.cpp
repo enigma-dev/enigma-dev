@@ -155,12 +155,13 @@ int main(int argc,char** argv)
 		printf("Display failed\n");
 		return -1;
 	}
+	
 
-	//identify components (close button, root pane)
+	// Identify components (close button, root pane)
 	wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
 	Window root = DefaultRootWindow(disp);
 
-	//Prepare openGL
+	// Prepare openGL
 	GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, None };
 	XVisualInfo *vi = glXChooseVisual(disp,0,att);
 	if(!vi){
@@ -168,7 +169,7 @@ int main(int argc,char** argv)
 		return -2;
 	}
 
-	//window event listening and coloring
+	// Window event listening and coloring
 	XSetWindowAttributes swa;
 	swa.border_pixel = 0;
 	swa.background_pixel = 0;

@@ -26,4 +26,4 @@
 \********************************************************************************/
 
 bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2);
-void draw_bbox_rects(int object,double x1,double y1,double x2,double y2);
+int collision_bbox_rect_first(int object,double x1,double y1,double x2,double y2);

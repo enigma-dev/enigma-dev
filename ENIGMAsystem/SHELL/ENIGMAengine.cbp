@@ -800,6 +800,7 @@
 		<Unit filename="Universal_System/var_te.h" />
 		<Unit filename="Universal_System/with.h" />
 		<Unit filename="Widget_Systems/None/nowidget_impl.cpp" />
+		<Unit filename="Widget_Systems/widgets_mandatory.h" />
 		<Unit filename="initialize.h" />
 		<Unit filename="libEGMstd.cpp" />
 		<Unit filename="libEGMstd.h" />

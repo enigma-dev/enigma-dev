@@ -56,7 +56,8 @@ int room_count();
 extern int view_angle;
 extern int view_current;
 extern int view_enabled;
-extern var view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible, 
+typedef variant rvt[8];
+extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible, 
            view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview;
 
 

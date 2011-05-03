@@ -61,7 +61,7 @@ background_vtiled, background_hspeed, background_vspeed;
 int view_angle   = 0;
 int view_current = 0;
 int view_enabled = 0;
-var view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
+rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
     view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview;
 
 namespace enigma
@@ -79,49 +79,44 @@ namespace enigma
     background_color = backcolor;
     background_showcolor = (backcolor!=-1);
       
-      //Backgrounds start
-      for (int i=0;i<7;i++)
-      {
-          background_visible[i] = backs[i].visible;
-          background_foreground[i] = backs[i].foreground;
-          background_index[i] = backs[i].background;
-          background_x[i] = backs[i].area_x; background_y[i] = backs[i].area_y;
-          background_hspeed[i] = backs[i].horSpeed; background_vspeed[i] = backs[i].verSpeed;
-          background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
-         
-          //background_stretch? = backs[i].stretch;
-      
-      }
-      
-      //Backgrounds end
+    //Backgrounds start
+    for (int i=0;i<8;i++)
+    {
+      background_visible[i] = backs[i].visible;
+      background_foreground[i] = backs[i].foreground;
+      background_index[i] = backs[i].background;
+      background_x[i] = backs[i].area_x; background_y[i] = backs[i].area_y;
+      background_hspeed[i] = backs[i].horSpeed; background_vspeed[i] = backs[i].verSpeed;
+      background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
+      //background_stretch? = backs[i].stretch;
+    }
+    //Backgrounds end
     
     view_enabled = views_enabled;
     
-    for (int i=0;i<7;i++)
+    for (int i=0;i<8;i++)
     {
       view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
       view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
       view_object[i] = views[i].object2follow;
       view_hborder[i] = views[i].hborder; view_vborder[i] = views[i].vborder; view_hspeed[i] = views[i].hspd; view_vspeed[i] = views[i].vspd;
-      view_visible[i] = views[i].start_vis;
+      view_visible[i] = (bool)views[i].start_vis;
     }
     
-    int xm = 0,ym = 0;
+    int xm = int(room_width), ym = int(room_height);
     if (view_enabled)
     {
-      for (int i=0;i<7;i++)
+      int tx = 0, ty = 0;
+      for (int i = 0; i < 8; i++)
         if (view_visible[i])
         {
-          if (view_xview[i]+view_wview[i]>xm)
-            xm=(int)(view_xview[i]+view_wview[i]);
-          if (view_yview[i]+view_hview[i]>ym)
-            ym=(int)(view_yview[i]+view_hview[i]);
+          if (view_xview[i]+view_wview[i] > tx)
+            tx = (int)(view_xview[i]+view_wview[i]);
+          if (view_yview[i]+view_hview[i] > ty)
+            ty = (int)(view_yview[i]+view_hview[i]);
         }
-    }
-    else
-    {
-      xm = int(room_width);
-      ym = int(room_height);
+      if (tx and ty)
+        xm = tx, ym = ty;
     }
     window_set_size(xm,ym);
     for (int i=0; i<instancecount; i++) {
@@ -344,7 +339,7 @@ namespace enigma
     window_set_caption(room_caption);
     if (view_enabled)
     {
-      for (int i=0;i<7;i++)
+      for (int i=0;i<8;i++)
       {
         if (mouse_x>=view_xport[i] && mouse_x<view_xport[i]+view_wport[i]
         && mouse_y>=view_yport[i] && mouse_y<view_yport[i]+view_hport[i]){
