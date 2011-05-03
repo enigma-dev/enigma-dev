@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Josh Ventura, Harijs Grînbergs                           **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -27,9 +27,28 @@
 
 void draw_set_font(int fnt);
 void draw_text(int x,int y,string str);
+void draw_text_color(int x,int y,string str,int c1,int c2,int c3,int c4,double a);
+
+void draw_text_ext(int x,int y,string str, int sep, int w);
+void draw_text_ext_color(int x,int y,string str, int sep,int w,int c1,int c2,int c3,int c4,double a);
+
+void draw_text_transformed(double x,double y,string str,double xscale,double yscale,double rot);
+void draw_text_transformed_color(double x,double y,string str,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
+
+void draw_text_ext_transformed(double x,double y,string str,int sep,int w, double xscale,double yscale,double rot);
+void draw_text_ext_transformed_color(double x,double y,string str,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
+
 unsigned int font_get_texture(int fnt);
-int font_get_texture_width(int fnt);
-int font_get_texture_height(int fnt);
 int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);
-int string_width(string str);
-int string_height(string str);
+unsigned int font_get_texture_width(int fnt);
+unsigned int font_get_texture_height(int fnt);
+
+unsigned int string_width(string str);
+unsigned int string_height(string str);
+
+unsigned int string_width_ext(string str, int sep, int w);
+unsigned int string_height_ext(string str, int sep, int w);
+
+unsigned int string_width_line(string str, int line);
+unsigned int string_width_ext_line(string str, int w, int line);
+unsigned int string_width_ext_line_count(string str, int w);
