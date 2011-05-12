@@ -66,7 +66,7 @@ public class EnigmaSettings
 		writeString(new File(EnigmaRunner.WORKDIR,"definitions.h"),definitions);
 		}
 
-	String fileToString(File f)
+	static String fileToString(File f)
 		{
 		StringBuffer sb = new StringBuffer(1024);
 		try
@@ -84,7 +84,7 @@ public class EnigmaSettings
 		return sb.toString();
 		}
 
-	void writeString(File f, String s)
+	static void writeString(File f, String s)
 		{
 		try
 			{
@@ -109,9 +109,9 @@ public class EnigmaSettings
 				+ "target-networking: " + "None" + "\n";//
 		}
 
-	public SyntaxError commitToDriver()
+	public SyntaxError commitToDriver(EnigmaDriver driver)
 		{
-		return EnigmaRunner.DRIVER.definitionsModified(definitions,toTargetYaml());
+		return driver.definitionsModified(definitions,toTargetYaml());
 		}
 
 	public EnigmaSettings copy()

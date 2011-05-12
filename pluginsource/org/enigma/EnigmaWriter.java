@@ -69,7 +69,6 @@ import org.enigma.backend.util.Point;
 import org.enigma.backend.util.Polygon;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
-import org.lateralgm.main.LGM;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
@@ -97,16 +96,18 @@ public final class EnigmaWriter
 	{
 	protected GmFile i;
 	protected EnigmaStruct o;
+	protected ResNode root;
 
-	private EnigmaWriter(GmFile in, EnigmaStruct out)
+	private EnigmaWriter(GmFile in, EnigmaStruct out, ResNode root)
 		{
 		i = in;
 		o = out;
+		this.root = root;
 		}
 
-	public static EnigmaStruct prepareStruct(GmFile f)
+	public static EnigmaStruct prepareStruct(GmFile f, ResNode root)
 		{
-		return new EnigmaWriter(f,new EnigmaStruct()).populateStruct();
+		return new EnigmaWriter(f,new EnigmaStruct(),root).populateStruct();
 		}
 
 	protected EnigmaStruct populateStruct()
@@ -607,7 +608,7 @@ public final class EnigmaWriter
 	protected void populateRooms()
 		{
 		ArrayList<org.lateralgm.resources.Room> irooms = new ArrayList<org.lateralgm.resources.Room>();
-		Enumeration<?> e = LGM.root.preorderEnumeration();
+		Enumeration<?> e = root.preorderEnumeration();
 		while (e.hasMoreElements())
 			{
 			ResNode node = (ResNode) e.nextElement();
@@ -955,7 +956,7 @@ public final class EnigmaWriter
 					}
 				catch (NullPointerException e)
 					{
-					val="-1";
+					val = "-1";
 					}
 				return val;
 			}

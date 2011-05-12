@@ -65,9 +65,9 @@ import javax.swing.event.DocumentListener;
 import org.enigma.EYamlParser.YamlNode;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
-import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -174,7 +174,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					es = new EnigmaSettings();
 					esf = new EnigmaSettingsFrame(es);
 					LGM.mdi.add(esf);
-					es.commitToDriver();
+					es.commitToDriver(DRIVER);
 					populateKeywords();
 					}
 			}.start();
@@ -534,7 +534,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		setMenuEnabled(false);
 		LGM.commitAll();
 		esf.updateResource();
-		es.commitToDriver();
+		es.commitToDriver(DRIVER);
 		//System.out.println("Compiling with " + enigma);
 
 		final File efi = outname;
@@ -544,7 +544,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					{
 					ef.setVisible(true);
 					ef.append("Populating communication buffer. This may take a while on large files...");
-					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile);
+					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile,LGM.root);
 					ef.append("Calling compiler.");
 					System.out.println(DRIVER.compileEGMf(es,efi == null ? null : efi.getAbsolutePath(),mode));
 

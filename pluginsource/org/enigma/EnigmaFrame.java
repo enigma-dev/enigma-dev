@@ -28,9 +28,10 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.enigma.backend.EnigmaCallbacks.OutputHandler;
 import org.lateralgm.main.LGM;
 
-public class EnigmaFrame extends JDialog
+public class EnigmaFrame extends JDialog implements OutputHandler
 	{
 	private static final long serialVersionUID = 1L;
 	public JTextArea ta;
@@ -59,6 +60,29 @@ public class EnigmaFrame extends JDialog
 		{
 		ta.append(text);
 		ta.setCaretPosition(ta.getDocument().getLength());
+		}
+
+	public void progress(int pos)
+		{
+		pb.setValue(pos);
+		}
+
+	@Override
+	public void clear()
+		{
+		ta.setText("");
+		}
+
+	@Override
+	public void open()
+		{
+		setVisible(true);
+		}
+
+	@Override
+	public void tip(String tip)
+		{
+		pb.setString(tip);
 		}
 
 	void progress(int pos, String tip)

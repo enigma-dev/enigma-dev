@@ -6,13 +6,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-import javax.swing.JTextArea;
+import org.enigma.backend.EnigmaCallbacks.OutputHandler;
 
 public class Pump extends Thread
 	{
 	private InputStream is;
 	private OutputStream os = null;
-	private JTextArea ot = null;
+	private OutputHandler oh = null;
 
 	public Pump(InputStream is, OutputStream os)
 		{
@@ -20,17 +20,17 @@ public class Pump extends Thread
 		this.os = os;
 		}
 
-	public Pump(InputStream is, JTextArea ot)
+	public Pump(InputStream is, OutputHandler oh)
 		{
 		this.is = is;
-		this.ot = ot;
+		this.oh = oh;
 		}
 
 	@Override
 	public void run()
 		{
 		if (os == null)
-			if (ot == null)
+			if (oh == null)
 				runDump();
 			else
 				runText();
@@ -91,10 +91,7 @@ public class Pump extends Thread
 		try
 			{
 			while ((line = br.readLine()) != null)
-				{
-				ot.append(line);
-				ot.setCaretPosition(ot.getDocument().getLength());
-				}
+				oh.append(line);
 			}
 		catch (IOException e)
 			{

@@ -1,11 +1,3 @@
-/*
- * Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>
- * 
- * This file is part of Enigma Plugin.
- * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
- * See LICENSE for details.
- */
-
 package org.enigma.backend;
 
 import java.io.ByteArrayOutputStream;
@@ -21,7 +13,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 
-import org.enigma.EnigmaFrame;
 import org.enigma.EnigmaRunner;
 import org.enigma.Pump;
 import org.enigma.backend.util.Image;
@@ -37,33 +28,46 @@ public class EnigmaCallbacks extends Structure
 	public Callback cock = new OutputClear(); //void (*cock) (void)
 	public Callback cop = new OutputProgress(); //void (*cop) (int)
 	public Callback cot = new OutputTip(); //void (*cot) (String)
+
 	public Callback cof = new OpenFile(); //void (*cof) (String)
 	public Callback ccf = new CloseFile(); //void (*ccf) (void)
 	public Callback cex = new Execute(); //int (*cex) (String, String[], boolean)
 	public Callback ccd = new CompressData(); //Image* (*ccd) (byte[], int)
 
-	public EnigmaCallbacks(EnigmaFrame ef)
+	public static interface OutputHandler
 		{
-		((OutputHolder) coo).ef = ef;
-		((OutputHolder) coa).ef = ef;
-		((OutputHolder) cock).ef = ef;
-		((OutputHolder) cop).ef = ef;
-		((OutputHolder) cot).ef = ef;
-		((OutputHolder) cof).ef = ef;
-		((OutputHolder) ccf).ef = ef;
-		((OutputHolder) cex).ef = ef;
+		public abstract void open();
+
+		public abstract void append(String s);
+
+		public abstract void clear();
+
+		public abstract void progress(int i);
+
+		public abstract void tip(String s);
+		}
+
+	public EnigmaCallbacks(OutputHandler out)
+		{
+		((OutputHolder) coo).out = out;
+		((OutputHolder) coa).out = out;
+		((OutputHolder) cock).out = out;
+		((OutputHolder) cop).out = out;
+		((OutputHolder) cot).out = out;
+		((OutputHolder) cof).out = out;
+		((OutputHolder) cex).out = out;
 		}
 
 	public static class OutputHolder
 		{
-		EnigmaFrame ef;
+		OutputHandler out;
 		}
 
 	public static class OutputOpen extends OutputHolder implements Callback
 		{
 		public void callback()
 			{
-			ef.setVisible(true);
+			out.open();
 			}
 		}
 
@@ -71,7 +75,7 @@ public class EnigmaCallbacks extends Structure
 		{
 		public void callback(String msg)
 			{
-			ef.append(msg);
+			out.append(msg);
 			}
 		}
 
@@ -79,7 +83,7 @@ public class EnigmaCallbacks extends Structure
 		{
 		public void callback()
 			{
-			ef.ta.setText("");
+			out.clear();
 			}
 		}
 
@@ -87,7 +91,7 @@ public class EnigmaCallbacks extends Structure
 		{
 		public void callback(int amt)
 			{
-			ef.pb.setValue(amt);
+			out.progress(amt);
 			}
 		}
 
@@ -95,7 +99,7 @@ public class EnigmaCallbacks extends Structure
 		{
 		public void callback(String tip)
 			{
-			ef.pb.setString(tip);
+			out.tip(tip);
 			}
 		}
 
@@ -152,9 +156,7 @@ public class EnigmaCallbacks extends Structure
 									while (p != -1)
 										{
 										String dat = sb.substring(0,p + 1);
-										ef.ta.append(dat);
-										ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
-										System.out.print(dat);
+										out.append(dat);
 										sb.delete(0,p + 1);
 										p = sb.indexOf("\n");
 										}
@@ -170,9 +172,7 @@ public class EnigmaCallbacks extends Structure
 										}
 									}
 								}
-							ef.ta.append(sb.toString() + "\n");
-							ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
-							System.out.println(sb.toString());
+							out.append(sb.toString() + "\n");
 							in.close();
 							}
 						catch (IOException e)
@@ -184,7 +184,7 @@ public class EnigmaCallbacks extends Structure
 			}
 		}
 
-	public static class CloseFile extends OutputHolder implements Callback
+	public static class CloseFile implements Callback
 		{
 		public void callback()
 			{
@@ -243,8 +243,8 @@ public class EnigmaCallbacks extends Structure
 				InputStream er = pr.getErrorStream();
 				if (redir.equals(REDIR_IDE))
 					{
-					new Pump(in,mod == '2' ? null : ef.ta).start();
-					new Pump(er,mod == '2' || mod == '&' ? ef.ta : null).start();
+					new Pump(in,mod == '2' ? null : out).start();
+					new Pump(er,mod == '2' || mod == '&' ? out : null).start();
 					}
 				else
 					{
