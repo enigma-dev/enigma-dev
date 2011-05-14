@@ -284,58 +284,7 @@ public class EnigmaCallbacks extends Structure
 				System.err.println("Exec: " + e.getLocalizedMessage());
 				return -4;
 				}
-
-			if (true) return 0;
-
-			int state = 0; //0 _
-			boolean space = true;
-			boolean quoted = false;
-			boolean escaped = false;
-
-			for (char c : cmd.toCharArray())
-				{
-				if (escaped)
-					escaped = false;
-				else if (c == '\\')
-					{
-					if (space)
-						{
-						//insert root
-						space = false;
-						continue;
-						}
-					else
-						escaped = true;
-					}
-				else if (space && c != ' ')
-					{
-					space = false;
-					quoted = c == '"';
-					}
-
-				if (state == 2 || state == 4)
-					{
-					state--;
-					continue;
-					}
-				switch (c)
-					{
-					case ' ':
-						if (state == 2)
-							state = 1;
-						else if (state == 3)
-							state = 3;
-						else if (state == 4)
-							state = 3;
-						else
-							state = 0; //(1,_) |- 0
-						break;
-					case '"':
-
-					} //switch
-				} //for
-
-			return -2;
+			return 0;
 			}
 		}
 	}

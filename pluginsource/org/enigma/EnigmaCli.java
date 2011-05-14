@@ -1,7 +1,6 @@
 package org.enigma;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import org.enigma.backend.EnigmaCallbacks;
@@ -66,7 +65,6 @@ public class EnigmaCli
 	public static void compile(String fn, ResNode root) throws FileNotFoundException,
 			GmFormatException
 		{
-		new FileInputStream(fn);
 		if (!new File(fn).exists()) throw new FileNotFoundException(fn);
 		if (root == null) root = new ResNode("Root",(byte) 0,null,null); //$NON-NLS-1$;
 		GmFile f = GmFileReader.readGmFile(fn,root);

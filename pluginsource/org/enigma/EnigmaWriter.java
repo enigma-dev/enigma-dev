@@ -233,11 +233,8 @@ public final class EnigmaWriter
 				populateImage(img,osil[i].image,os.transparent);
 
 				//for now, polygon masking is disabled
-				if (true)
-					{
-					osil[i].maskShapeCount = 0;
-					continue;
-					}
+				if (true) osil[i].maskShapeCount = 0;
+				if (osil[i].maskShapeCount == 0) continue;
 
 				//Individual SubImage Polygon Masking
 				int w = img.getWidth();

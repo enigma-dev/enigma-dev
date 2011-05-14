@@ -191,7 +191,7 @@ public class EYamlParser
 						else
 							{
 							// Inline Comments...
-							if (val.indexOf("#") > -1) val = val.substring(0,val.indexOf("#") - 1);
+							if (val.indexOf("#") > -1) val = val.substring(0,val.indexOf("#"));
 							// If it's empty, there's no value given = just leave the string empty.
 							// It really seams pointless because if val is "", might as well save
 							// the overhead of the if statement. Maybe I'll remove this if statement
@@ -257,6 +257,11 @@ public class EYamlParser
 		public YamlNode getS(int k) throws IndexOutOfBoundsException
 			{
 			return seqs.get(k);
+			}
+
+		public int getSS()
+			{
+			return seqs.size();
 			}
 
 		// There is no reason to use this. I included it just in case you forgot content was public and
