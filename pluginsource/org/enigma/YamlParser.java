@@ -58,7 +58,7 @@ public class YamlParser
 
 		public String getMC(String key, String def)
 			{
-			YamlElement e = values.get(key);
+			YamlElement e = values.get(key.toLowerCase());
 			if (e == null) return def;
 			return ((YamlContent) e).getValue();
 			}
