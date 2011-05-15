@@ -80,7 +80,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	protected JToolBar toolbar;
 	protected JButton save, saveFile, loadFile;
 
-	private IndexButtonGroup strings, increment, equal, literal, struct;
+	private IndexButtonGroup strings, increment, equal, literal, escape;
 	private IndexButtonGroup instance, storage;
 	private JButton bDef, bGlobLoc;
 	private JButton bInit, bClean;
@@ -145,21 +145,21 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		equal.add(equalCPP);
 		equal.setValue(es.cppEquals);
 
-		JLabel l4 = new JLabel("Treat literals as:");
+		JLabel l4 = new JLabel("Closing brace of struct:");
+		escape = new IndexButtonGroup(2,true,false);
+		JRadioButton escapeGML = new JRadioButton("Implied Semicolon");
+		JRadioButton escapeCPP = new JRadioButton("ISO C");
+		escape.add(escapeGML);
+		escape.add(escapeCPP);
+		escape.setValue(es.cppEscapes);
+
+		JLabel l5 = new JLabel("Treat literals as:");
 		literal = new IndexButtonGroup(2,true,false);
 		JRadioButton literalVar = new JRadioButton("Enigma (Variant)");
 		JRadioButton literalScalar = new JRadioButton("C++ (Scalar)");
 		literal.add(literalVar);
 		literal.add(literalScalar);
 		literal.setValue(es.literalHandling);
-
-		JLabel l5 = new JLabel("Closing brace of struct:");
-		struct = new IndexButtonGroup(2,true,false);
-		JRadioButton structSemi = new JRadioButton("Implied Semicolon");
-		JRadioButton structISO = new JRadioButton("ISO C");
-		struct.add(structSemi);
-		struct.add(structISO);
-		struct.setValue(es.structHandling);
 
 		compat.setHorizontalGroup(compat.createSequentialGroup()
 		/**/.addGroup(compat.createParallelGroup()
@@ -172,14 +172,14 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/*	*/.addComponent(stringsGML)
 		/*	*/.addComponent(incrementGML)
 		/*	*/.addComponent(equalGML)
-		/*	*/.addComponent(literalVar)
-		/*	*/.addComponent(structSemi))
+		/*	*/.addComponent(escapeGML)
+		/*	*/.addComponent(literalVar))
 		/**/.addGroup(compat.createParallelGroup()
 		/*	*/.addComponent(stringsCPP)
 		/*	*/.addComponent(incrementCPP)
 		/*	*/.addComponent(equalCPP)
-		/*	*/.addComponent(literalScalar)
-		/*	*/.addComponent(structISO)));
+		/*	*/.addComponent(escapeCPP)
+		/*	*/.addComponent(literalScalar)));
 
 		compat.setVerticalGroup(compat.createSequentialGroup()
 		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
@@ -196,12 +196,12 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		/*	*/.addComponent(equalCPP))
 		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
 		/*	*/.addComponent(l4)
-		/*	*/.addComponent(literalVar)
-		/*	*/.addComponent(literalScalar))
+		/*	*/.addComponent(escapeGML)
+		/*	*/.addComponent(escapeCPP))
 		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
 		/*	*/.addComponent(l5)
-		/*	*/.addComponent(structSemi)
-		/*	*/.addComponent(structISO)));
+		/*	*/.addComponent(literalVar)
+		/*	*/.addComponent(literalScalar)));
 
 		return compatPane;
 		}
@@ -450,6 +450,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		return p;
 		}
 
+	//TODO: use yaml instead
 	public void loadFromFile()
 		{
 		fc.setDialogTitle("File to load information from");
@@ -470,7 +471,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			es.cppOperators = i.read();
 			es.cppEquals = i.read();
 			es.literalHandling = i.read();
-			es.structHandling = i.read();
+			es.cppEscapes = i.read();
 
 			es.instanceTypes = i.read();
 			es.storageClass = i.read();
@@ -510,7 +511,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			i.write(es.cppOperators);
 			i.write(es.cppEquals);
 			i.write(es.literalHandling);
-			i.write(es.structHandling);
+			i.write(es.cppEscapes);
 
 			i.write(es.instanceTypes);
 			i.write(es.storageClass);
@@ -562,8 +563,9 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		{
 		es.cppStrings = strings.getValue();
 		es.cppOperators = increment.getValue();
+		es.cppEquals = equal.getValue();
+		es.cppEscapes = escape.getValue();
 		es.literalHandling = literal.getValue();
-		es.structHandling = struct.getValue();
 
 		es.instanceTypes = instance.getValue();
 		es.storageClass = storage.getValue();
@@ -728,8 +730,9 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 
 		strings.setValue(es.cppStrings);
 		increment.setValue(es.cppOperators);
+		equal.setValue(es.cppEquals);
+		escape.setValue(es.cppEscapes);
 		literal.setValue(es.literalHandling);
-		struct.setValue(es.structHandling);
 
 		instance.setValue(es.instanceTypes);
 		storage.setValue(es.storageClass);

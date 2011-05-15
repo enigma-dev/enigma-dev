@@ -13,10 +13,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Scanner;
 
 import org.enigma.EnigmaRunner;
 import org.enigma.TargetHandler;
+import org.enigma.YamlParser;
 import org.enigma.TargetHandler.TargetSelection;
+import org.enigma.YamlParser.YamlElement;
+import org.enigma.YamlParser.YamlNode;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
 
 public class EnigmaSettings
@@ -25,8 +29,8 @@ public class EnigmaSettings
 	public int cppStrings = 0; // Defines what language strings are inherited from.               0 = GML,               1 = C
 	public int cppOperators = 0; // Defines what language operators ++ and -- are inherited from. 0 = GML,               1 = C
 	public int cppEquals = 0; // Defines whether = should be exclusively treated as a setter.     0 = GML (= or ==)      1 = C (= only)
+	public int cppEscapes = 0; // Defines what language string escapes are inherited from.        0 = GML (#),           1 = ISO C (\n)
 	public int literalHandling = 0; // Determines how literals are treated.                       0 = enigma::variant,   1 = C-scalar
-	public int structHandling = 0; // Defines behavior of the closing brace of struct {}.         0 = Implied semicolon, 1 = ISO C
 
 	//Advanced options
 	public int instanceTypes = 0; // Defines how to represent instances.           0 = Integer, 1 = Pointer
@@ -99,7 +103,17 @@ public class EnigmaSettings
 
 	private String toTargetYaml()
 		{
+		int[] setvals = { cppStrings,cppOperators,cppEscapes,cppEquals,literalHandling,instanceTypes,
+				storageClass };
+		String[] setnames = { "inherit-strings-from","inherit-increment-from","inherit-escapes-from",
+				"inherit-equivalence-from","treat-literals-as","instance-types","storage-class" };
+
+		StringBuilder general = new StringBuilder();
+		for (int i = 0; i < setvals.length; i++)
+			general.append(setnames[i]).append(": ").append(setvals[i]).append("\n");
+
 		return "%e-yaml\n---\n"//
+				+ general.toString() + "\n"//
 				+ "target-compiler: " + (selCompiler == null ? "" : selCompiler.id) + "\n"//
 				+ "target-windowing: " + (selPlatform == null ? "" : selPlatform.id) + "\n"//
 				+ "target-graphics: " + (selGraphics == null ? "" : selGraphics.id) + "\n"//
@@ -125,8 +139,9 @@ public class EnigmaSettings
 		{
 		es.cppStrings = cppStrings;
 		es.cppOperators = cppOperators;
+		es.cppEquals = cppEquals;
+		es.cppEscapes = cppEscapes;
 		es.literalHandling = literalHandling;
-		es.structHandling = structHandling;
 
 		es.instanceTypes = instanceTypes;
 		es.storageClass = storageClass;
@@ -142,5 +157,12 @@ public class EnigmaSettings
 		es.selAudio = selAudio;
 		es.selCollision = selCollision;
 		es.selWidgets = selWidgets;
+		}
+
+	public static void main(String[] args) throws FileNotFoundException
+		{
+		YamlNode n = YamlParser.parse(new Scanner(new File("/home/ismavatar/test/settings.ey")));
+		for (YamlElement e : n.chronos)
+			System.out.println(e);
 		}
 	}
