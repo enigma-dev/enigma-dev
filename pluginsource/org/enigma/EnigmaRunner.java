@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008, 2009, 2010 IsmAvatar <IsmAvatar@gmail.com>
+ * Copyright (C) 2008-2011 IsmAvatar <IsmAvatar@gmail.com>
  * 
  * This file is part of Enigma Plugin.
  * 
@@ -62,7 +62,7 @@ import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.enigma.EYamlParser.YamlNode;
+import org.enigma.YamlParser.YamlNode;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaSettings;
@@ -206,7 +206,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			try
 				{
 				File gccey = new File(new File("Compilers",TargetHandler.getOS()),"gcc.ey");
-				YamlNode n = EYamlParser.parse(new Scanner(gccey));
+				YamlNode n = YamlParser.parse(new Scanner(gccey));
 				make = n.getMC("Make"); //or OOB
 				path = n.getMC("Path","");
 				//replace starting \ with root
@@ -505,7 +505,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			return;
 			}
 
-		String exe = es.selPlatform.ext;
+		String ext = es.selPlatform.ext;
 
 		//determine `outname` (rebuild has no `outname`)
 		File outname = null;
@@ -514,7 +514,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			if (!es.selCompiler.outputexe.equals("$tempfile"))
 				outname = new File(es.selCompiler.outputexe);
 			else if (mode < MODE_DESIGN) //run/debug
-				outname = File.createTempFile("egm",exe);
+				outname = File.createTempFile("egm",ext);
 			else if (mode == MODE_DESIGN) outname = File.createTempFile("egm",".emd"); //design
 			if (outname != null) outname.deleteOnExit();
 			}
@@ -526,7 +526,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (mode == MODE_COMPILE)
 			{
 			JFileChooser fc = new JFileChooser();
-			fc.setFileFilter(new CustomFileFilter(exe,"Executable files"));
+			fc.setFileFilter(new CustomFileFilter(ext,"Executable files"));
 			if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			outname = fc.getSelectedFile();
 			}

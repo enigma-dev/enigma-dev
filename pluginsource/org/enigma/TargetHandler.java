@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>
+ * 
+ * This file is part of Enigma Plugin.
+ * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
+ * See LICENSE for details.
+ */
+
 package org.enigma;
 
 import java.io.File;
@@ -8,7 +16,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
-import org.enigma.EYamlParser.YamlNode;
+import org.enigma.YamlParser.YamlNode;
 
 public class TargetHandler
 	{
@@ -68,7 +76,7 @@ public class TargetHandler
 			if (!ey.endsWith(".ey")) continue;
 			try
 				{
-				YamlNode node = EYamlParser.parse(new Scanner(file));
+				YamlNode node = YamlParser.parse(new Scanner(file));
 
 				TargetSelection ps = new TargetSelection();
 				ps.id = ey.substring(0,ey.length() - 3);
@@ -111,7 +119,7 @@ public class TargetHandler
 
 				if (target.equals("Platforms"))
 					{
-					node = EYamlParser.parse(new Scanner(prop));
+					node = YamlParser.parse(new Scanner(prop));
 					String norm = normalize(node.getMC("Build-Platforms"));
 					if (norm.isEmpty()) continue;
 					for (String s : norm.split(","))
@@ -119,7 +127,7 @@ public class TargetHandler
 					}
 				else if (target.equals("Collision_Systems"))
 					{
-					node = EYamlParser.parse(new Scanner(prop));
+					node = YamlParser.parse(new Scanner(prop));
 					depends.add("all");
 					}
 				else
@@ -135,7 +143,7 @@ public class TargetHandler
 								depends.add(normalize(conf.substring(0,conf.length() - 3)));
 						if (depends.isEmpty()) continue;
 						}
-					node = EYamlParser.parse(new Scanner(prop));
+					node = YamlParser.parse(new Scanner(prop));
 					}
 
 				String norm = normalize(node.getMC("Represents",""));

@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>
+ * 
+ * This file is part of Enigma Plugin.
+ * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
+ * See LICENSE for details.
+ */
+
 package org.enigma;
 
 import java.io.File;
@@ -80,11 +88,22 @@ public class EnigmaCli
 			}
 		DRIVER.libInit(new EnigmaCallbacks(new CliOutputHandler())); //returns String on toolchain failure
 		EnigmaSettings ess = new EnigmaSettings();
-		//Handle custom settings
+		//TODO: Handle custom settings
 		ess.commitToDriver(DRIVER); //returns SyntaxError
+
+		//Generate arguments for compile
 		EnigmaStruct es = EnigmaWriter.prepareStruct(f,root);
-		//Generate an outname
-		//compileEGMf(EnigmaStruct es, String outname, EnigmaRunner.MODE_COMPILE);
+
+		//XXX: Handle custom modes?
+		int mode = EnigmaRunner.MODE_COMPILE;
+
+		//TODO: Handle custom outname
+		//FIXME: Make compliant with spec2
+		File outname = new File(fn.substring(0,fn.lastIndexOf('.')) + ess.selPlatform.ext);
+		if (!ess.selCompiler.outputexe.equals("$tempfile"))
+			outname = new File(ess.selCompiler.outputexe);
+
+		DRIVER.compileEGMf(es, outname.getAbsolutePath(), mode);
 		}
 
 	private static UnsatisfiedLinkError attemptLib()
