@@ -1,0 +1,50 @@
+%e-yaml
+---
+
+-Compatibility/Progress:
+    Layout: Grid
+    Columns: 3
+    -inherit-strings-from:
+        Type: Radio-1
+        Label: Inherit strings from: 
+        Options: "GML ('A'=\"A\"), C++ ('A'=65)"
+    -inherit-escapes-from:
+        Type: Radio-1
+        Label: Inherit escape sequences: 
+        Options: "GML (#), C++ (\\n)"
+    -inherit-increment-from:
+        Type: Radio-1
+        Label: Inherit ++/-- from: 
+        Options: "GML (+), C++ (+=1/-=1)"
+    -inherit-equivalence-from:
+        Type: Radio-1
+        Label: Inherit a=b=c from: 
+        Options: "GML (a=b==c), C++ (b=c;a=c)"
+    -treat-literals-as:
+        Type: Radio-1
+        Label: Treat literals as: 
+        Options: "EDL (variant), C++ (scalar)"
+
+-Sample: #to be removed
+    Layout: Grid
+    Columns: 1
+    -sample-combobox:
+        Type: Combobox
+        Label: #Combo box takes whole area
+        Options: Be really sluggish to better emulate GM, Be fast to not suck eggs
+    -sample-lots-of-radios:
+        Type: Radio-Multi
+        Label: Pick one
+        Options: Lots, Of, Different, Options, Which, Take, Multiple, Lines
+
+-More Samples: #also to be removed
+    Layout: Grid
+    Columns: 2
+    -sample-edit:
+        Type: Edit
+        Label: Encryption key
+        Default: DEADBEEF
+    -sample-checkbox:
+        Type: Checkbox
+        Label: Do stuff
+        Default: on

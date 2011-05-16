@@ -9,6 +9,8 @@
 
 package org.enigma;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -19,7 +21,10 @@ public class YamlParser
 		{
 		//Each one has a name, mostly to preserve case
 		public String name;
-		//Tells whether this contains a single data entry (including [] lists) or more attributes
+		/**
+		 * True if this contains a single data entry (including [] lists).
+		 * If false, this can be cast to a YamlNode and contains more elements.
+		 */
 		public final boolean isScalar;
 
 		public YamlElement(String name, boolean scalar)
@@ -108,39 +113,39 @@ public class YamlParser
 						{
 						case 'r':
 							ret.setCharAt(i,'\r');
-							ret.delete(i + 1,1);
+							ret.delete(i + 1,i + 2);
 							break;
 						case 'n':
 							ret.setCharAt(i,'\n');
-							ret.delete(i + 1,1);
+							ret.delete(i + 1,i + 2);
 							break;
 						case 't':
 							ret.setCharAt(i,'\t');
-							ret.delete(i + 1,1);
+							ret.delete(i + 1,i + 2);
 							break;
 						case '"':
-							ret.setCharAt(i,'\"');
-							ret.delete(i + 1,1);
+							ret.setCharAt(i,'"');
+							ret.delete(i + 1,i + 2);
 							break;
 						case '\'':
 							ret.setCharAt(i,'\'');
-							ret.delete(i + 1,1);
+							ret.delete(i + 1,i + 2);
 							break;
 						case '#':
 							ret.setCharAt(i,'#');
-							ret.delete(i + 1,1);
+							ret.delete(i + 1,i + 2);
 							break;
 						case '%':
 							ret.setCharAt(i,'%');
-							ret.delete(i + 1,1);
+							ret.delete(i + 1,i + 2);
 							break;
 						case '\\':
-							ret.delete(i + 1,1);
+							ret.delete(i + 1,i + 2);
 							break;
 						}
 				else if (ret.charAt(i) == '"')
 					{
-					ret.delete(i,ret.length() - i);
+					ret.delete(i,ret.length());
 					break;
 					}
 				}
@@ -160,6 +165,11 @@ public class YamlParser
 			s = b;
 			i = c;
 			}
+		}
+
+	public static YamlNode parse(File file) throws FileNotFoundException
+		{
+		return parse(new Scanner(file));
 		}
 
 	/** @author Josh Ventura */

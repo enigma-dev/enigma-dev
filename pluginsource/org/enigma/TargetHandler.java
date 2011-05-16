@@ -76,7 +76,7 @@ public class TargetHandler
 			if (!ey.endsWith(".ey")) continue;
 			try
 				{
-				YamlNode node = YamlParser.parse(new Scanner(file));
+				YamlNode node = YamlParser.parse(file);
 
 				TargetSelection ps = new TargetSelection();
 				ps.id = ey.substring(0,ey.length() - 3);
@@ -119,7 +119,7 @@ public class TargetHandler
 
 				if (target.equals("Platforms"))
 					{
-					node = YamlParser.parse(new Scanner(prop));
+					node = YamlParser.parse(prop);
 					String norm = normalize(node.getMC("Build-Platforms"));
 					if (norm.isEmpty()) continue;
 					for (String s : norm.split(","))

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008, 2009 IsmAvatar <IsmAvatar@gmail.com>
+ * Copyright (C) 2008-2011 IsmAvatar <IsmAvatar@gmail.com>
  * 
  * This file is part of Enigma Plugin.
  * 
@@ -25,10 +25,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -36,6 +42,7 @@ import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -47,12 +54,16 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.GroupLayout.Alignment;
+import javax.swing.GroupLayout.Group;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
 import org.enigma.TargetHandler.TargetSelection;
+import org.enigma.YamlParser.YamlElement;
+import org.enigma.YamlParser.YamlNode;
 import org.enigma.backend.EnigmaSettings;
 import org.lateralgm.compare.CollectionComparator;
 import org.lateralgm.compare.MapComparator;
@@ -80,8 +91,9 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 	protected JToolBar toolbar;
 	protected JButton save, saveFile, loadFile;
 
-	private IndexButtonGroup strings, increment, equal, literal, escape;
-	private IndexButtonGroup instance, storage;
+	private Map<String,Option> options;
+	//	private IndexButtonGroup strings, increment, equal, literal, escape;
+	//	private IndexButtonGroup instance, storage;
 	private JButton bDef, bGlobLoc;
 	private JButton bInit, bClean;
 	private CodeFrame cfDef, cfGlobLoc, cfInit, cfClean;
@@ -114,148 +126,101 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			}
 		}
 
-	private JPanel makeCompatPane()
+	class YamlException extends Exception
 		{
-		JPanel compatPane = new JPanel();
-		compatPane.setBorder(BorderFactory.createTitledBorder("Compatability/Progress"));
-		GroupLayout compat = new GroupLayout(compatPane);
-		compatPane.setLayout(compat);
+		private static final long serialVersionUID = 1L;
 
-		JLabel l1 = new JLabel("Inherit strings from:");
-		strings = new IndexButtonGroup(2,true,false);
-		JRadioButton stringsGML = new JRadioButton("GML (#)");
-		JRadioButton stringsCPP = new JRadioButton("C (\\n)");
-		strings.add(stringsGML);
-		strings.add(stringsCPP);
-		strings.setValue(es.cppStrings);
-
-		JLabel l2 = new JLabel("Inherit ++/-- from:");
-		increment = new IndexButtonGroup(2,true,false);
-		JRadioButton incrementGML = new JRadioButton("GML (+)");
-		JRadioButton incrementCPP = new JRadioButton("C (+=1/-=1)");
-		increment.add(incrementGML);
-		increment.add(incrementCPP);
-		increment.setValue(es.cppOperators);
-
-		JLabel l3 = new JLabel("Inherit = (e.g. a=b=c) from:");
-		equal = new IndexButtonGroup(2,true,false);
-		JRadioButton equalGML = new JRadioButton("GML (a=(b==c))");
-		JRadioButton equalCPP = new JRadioButton("C (a=c; b=c)");
-		equal.add(equalGML);
-		equal.add(equalCPP);
-		equal.setValue(es.cppEquals);
-
-		JLabel l4 = new JLabel("Closing brace of struct:");
-		escape = new IndexButtonGroup(2,true,false);
-		JRadioButton escapeGML = new JRadioButton("Implied Semicolon");
-		JRadioButton escapeCPP = new JRadioButton("ISO C");
-		escape.add(escapeGML);
-		escape.add(escapeCPP);
-		escape.setValue(es.cppEscapes);
-
-		JLabel l5 = new JLabel("Treat literals as:");
-		literal = new IndexButtonGroup(2,true,false);
-		JRadioButton literalVar = new JRadioButton("Enigma (Variant)");
-		JRadioButton literalScalar = new JRadioButton("C++ (Scalar)");
-		literal.add(literalVar);
-		literal.add(literalScalar);
-		literal.setValue(es.literalHandling);
-
-		compat.setHorizontalGroup(compat.createSequentialGroup()
-		/**/.addGroup(compat.createParallelGroup()
-		/*	*/.addComponent(l1)
-		/*	*/.addComponent(l2)
-		/*	*/.addComponent(l3)
-		/*	*/.addComponent(l4)
-		/*	*/.addComponent(l5))
-		/**/.addGroup(compat.createParallelGroup()
-		/*	*/.addComponent(stringsGML)
-		/*	*/.addComponent(incrementGML)
-		/*	*/.addComponent(equalGML)
-		/*	*/.addComponent(escapeGML)
-		/*	*/.addComponent(literalVar))
-		/**/.addGroup(compat.createParallelGroup()
-		/*	*/.addComponent(stringsCPP)
-		/*	*/.addComponent(incrementCPP)
-		/*	*/.addComponent(equalCPP)
-		/*	*/.addComponent(escapeCPP)
-		/*	*/.addComponent(literalScalar)));
-
-		compat.setVerticalGroup(compat.createSequentialGroup()
-		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(l1)
-		/*	*/.addComponent(stringsGML)
-		/*	*/.addComponent(stringsCPP))
-		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(l2)
-		/*	*/.addComponent(incrementGML)
-		/*	*/.addComponent(incrementCPP))
-		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(l3)
-		/*	*/.addComponent(equalGML)
-		/*	*/.addComponent(equalCPP))
-		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(l4)
-		/*	*/.addComponent(escapeGML)
-		/*	*/.addComponent(escapeCPP))
-		/**/.addGroup(compat.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(l5)
-		/*	*/.addComponent(literalVar)
-		/*	*/.addComponent(literalScalar)));
-
-		return compatPane;
+		YamlException(String s)
+			{
+			super(s);
+			}
 		}
 
-	private JPanel makeAdvPane()
+	class Option
 		{
-		JPanel advPane = new JPanel();
-		advPane.setBorder(BorderFactory.createTitledBorder("Advanced"));
-		GroupLayout adv = new GroupLayout(advPane);
-		advPane.setLayout(adv);
+		JComponent[] cChoices;
 
-		JLabel l5 = new JLabel("Represent instances as:");
-		instance = new IndexButtonGroup(2,true,false);
-		JRadioButton instanceInt = new JRadioButton("Integer");
-		JRadioButton instancePnt = new JRadioButton("Pointer");
-		instance.add(instanceInt);
-		instance.add(instancePnt);
-		instance.setValue(es.instanceTypes);
+		IndexButtonGroup ibg = null;
+		JComboBox cb = null;
+		String other = null;
 
-		JLabel l6 = new JLabel("Store instances as:");
-		storage = new IndexButtonGroup(3,true,false);
-		JRadioButton storageMap = new JRadioButton("Map");
-		JRadioButton storageList = new JRadioButton("List");
-		JRadioButton storageArray = new JRadioButton("Array");
-		storage.add(storageMap);
-		storage.add(storageList);
-		storage.add(storageArray);
-		storage.setValue(es.storageClass);
+		Option(String name, String type, int cnum, String choices)
+		//				throws IllegalArgumentException
+			{
+			if (name != null && name.isEmpty()) name = null;
+			if (type.equalsIgnoreCase("Label"))
+				populateLabel(type,name,choices);
+			else if (type.equalsIgnoreCase("Radio-1"))
+				populateRadio1(name,choices == null ? null : choices.split(","));
+			else if (type.equalsIgnoreCase("Combobox"))
+				populateCombo(name,choices == null ? null : choices.split(","));
+			else
+				populateLabel(type,name,choices);
+			//				throw new IllegalArgumentException(type);
 
-		adv.setHorizontalGroup(adv.createSequentialGroup()
-		/**/.addGroup(adv.createParallelGroup()
-		/*	*/.addComponent(l5)
-		/*	*/.addComponent(l6))
-		/**/.addGroup(adv.createParallelGroup()
-		/*	*/.addComponent(instanceInt)
-		/*	*/.addComponent(storageMap))
-		/**/.addGroup(adv.createParallelGroup()
-		/*	*/.addComponent(instancePnt)
-		/*	*/.addComponent(storageList))
-		/**/.addGroup(adv.createParallelGroup()
-		/*	*/.addComponent(storageArray)));
+			JComponent[] bc = cChoices;
+			cChoices = new JComponent[cnum];
+			System.arraycopy(bc,0,cChoices,0,bc.length);
+			for (int i = bc.length; i < cnum; i++)
+				cChoices[i] = new JLabel();
+			}
 
-		adv.setVerticalGroup(adv.createSequentialGroup()
-		/**/.addGroup(adv.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(l5)
-		/*	*/.addComponent(instanceInt)
-		/*	*/.addComponent(instancePnt))
-		/**/.addGroup(adv.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(l6)
-		/*	*/.addComponent(storageMap)
-		/*	*/.addComponent(storageList)
-		/*	*/.addComponent(storageArray)));
+		void populateLabel(String type, String name, String choices)
+			{
+			cChoices = new JComponent[1];
+			String fmt = "Unsupported option: [%s] [%s]";
+			JLabel lab = new JLabel(String.format(fmt,type,name));
+			lab.setToolTipText(other = choices);
+			cChoices[0] = lab;
+			}
 
-		return advPane;
+		void populateRadio1(String name, String...choices)
+			{
+			cChoices = new JComponent[choices.length + (name == null ? 0 : 1)];
+			if (name != null) cChoices[0] = new JLabel(name);
+			ibg = new IndexButtonGroup(2,true,false);
+			for (int i = 0; i < choices.length; i++)
+				{
+				JRadioButton but = new JRadioButton(choices[i]);
+				cChoices[i + (name == null ? 0 : 1)] = but;
+				ibg.add(but);
+				}
+			}
+
+		void populateCombo(String name, String...choices)
+			{
+			cChoices = new JComponent[name == null ? 1 : 2];
+			if (name != null) cChoices[0] = new JLabel(name);
+			cChoices[name == null ? 0 : 1] = cb = new JComboBox(choices);
+			}
+
+		void setValue(String val)
+			{
+			other = val;
+			if (val == null) return;
+			try
+				{
+				setValue(Integer.parseInt(val));
+				}
+			catch (NumberFormatException e)
+				{
+				return;
+				}
+			}
+
+		void setValue(int val)
+			{
+			if (ibg != null)
+				ibg.setValue(val);
+			else if (cb != null) cb.setSelectedIndex(val);
+			}
+
+		String getValue()
+			{
+			if (ibg != null) return Integer.toString(ibg.getValue());
+			if (cb != null) return Integer.toString(cb.getSelectedIndex());
+			return other;
+			}
 		}
 
 	public EnigmaSettingsFrame(EnigmaSettings es)
@@ -305,14 +270,125 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		return tool;
 		}
 
+	private JPanel makePane(String name, int choiceCount, Option...opts)
+		{
+		JPanel pane = new JPanel();
+		pane.setBorder(BorderFactory.createTitledBorder(name));
+		GroupLayout layout = new GroupLayout(pane);
+		pane.setLayout(layout);
+
+		Group g = layout.createSequentialGroup();
+		Group g1 = layout.createParallelGroup();
+		for (int i = 0; i < choiceCount; i++)
+			{
+			g1 = layout.createParallelGroup();
+			for (Option o : opts)
+				g1.addComponent(o.cChoices[i]);
+			g.addGroup(g1);
+			}
+		layout.setHorizontalGroup(g);
+
+		g = layout.createSequentialGroup();
+		for (Option o : opts)
+			{
+			g1 = layout.createParallelGroup(Alignment.BASELINE);
+			for (int i = 0; i < choiceCount; i++)
+				g1.addComponent(o.cChoices[i]);
+			g.addGroup(g1);
+			}
+		layout.setVerticalGroup(g);
+
+		return pane;
+		}
+
+	private List<JPanel> parsePanels() throws YamlException
+		{
+		options = new HashMap<String,Option>();
+		ArrayList<JPanel> panels = new ArrayList<JPanel>();
+		File settings = new File(EnigmaRunner.WORKDIR,"settings.ey");
+		YamlNode n;
+		try
+			{
+			n = YamlParser.parse(settings);
+			}
+		catch (FileNotFoundException fnfe)
+			{
+			throw new YamlException(settings.getPath() + ": File not found");
+			}
+		if (n.chronos.isEmpty()) throw new YamlException(settings.getName() + ": Empty");
+
+		//loop through panels
+		for (YamlElement ge : n.chronos)
+			{
+			String name = ge.name;
+			String error = settings.getName() + ": " + name + ": ";
+
+			if (ge.isScalar) throw new YamlException(error + "Scalar");
+
+			n = (YamlNode) ge;
+			if (!n.getMC("Layout","Grid").equalsIgnoreCase("Grid"))
+				throw new YamlException(error + "Layout: Grid only supported");
+
+			int columns;
+			try
+				{
+				columns = Integer.parseInt(n.getMC("Columns","null"));
+				}
+			catch (NumberFormatException nfe)
+				{
+				throw new YamlException(error + "Must be a positive integer");
+				}
+
+			//loop through options in panel
+			ArrayList<Option> opts = new ArrayList<Option>(n.chronos.size());
+			for (YamlElement oe : n.chronos)
+				{
+				if (oe.name.equalsIgnoreCase("Layout") || oe.name.equalsIgnoreCase("Columns")) continue;
+
+				if (oe.isScalar)
+					{
+					System.err.println(oe.name + ": Scalar");
+					continue;
+					}
+				YamlNode on = (YamlNode) oe;
+
+				Option opt;
+				try
+					{
+					opt = new Option(on.getMC("Label",null),on.getMC("Type","<no type>"),columns,on.getMC(
+							"Options",null));
+					opt.setValue(on.getMC("Default","0"));
+					}
+				catch (IllegalArgumentException e)
+					{
+					System.err.println(error + on.name + ": Type: " + e.getMessage() + ": Unsupported");
+					continue;
+					}
+				opts.add(opt);
+				options.put(on.name,opt);
+				} //each option in panel
+
+			panels.add(makePane(name,columns,opts.toArray(new Option[0])));
+			}
+		return panels;
+		}
+
 	private JPanel makeSettings()
 		{
 		JPanel p = new JPanel();
 		GroupLayout layout = new GroupLayout(p);
 		p.setLayout(layout);
 
-		JPanel compatPane = makeCompatPane();
-		JPanel advPane = makeAdvPane();
+		List<JPanel> panels = null;
+		try
+			{
+			panels = parsePanels();
+			}
+		catch (YamlException e)
+			{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			}
 
 		sDef = new SimpleCodeHolder(es.definitions);
 		sGlobLoc = new SimpleCodeHolder(es.globalLocals);
@@ -329,18 +405,22 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		bInit.addActionListener(this);
 		bClean.addActionListener(this);
 
-		layout.setHorizontalGroup(layout.createParallelGroup()
-		/**/.addComponent(compatPane)
-		/**/.addComponent(advPane)
+		Group gh = layout.createParallelGroup();
+		SequentialGroup gv = layout.createSequentialGroup();
+		if (panels != null) for (JPanel pp : panels)
+			{
+			gh.addComponent(pp);
+			gv.addComponent(pp);
+			}
+
+		layout.setHorizontalGroup(gh
 		/**/.addGroup(layout.createSequentialGroup()
 		/*	*/.addComponent(bDef)
 		/*	*/.addComponent(bGlobLoc))
 		/**/.addGroup(layout.createSequentialGroup()
 		/*	*/.addComponent(bInit)
 		/*	*/.addComponent(bClean)));
-		layout.setVerticalGroup(layout.createSequentialGroup()
-		/**/.addComponent(compatPane)
-		/**/.addComponent(advPane)
+		layout.setVerticalGroup(gv
 		/**/.addGroup(layout.createParallelGroup()
 		/*	*/.addComponent(bDef)
 		/*	*/.addComponent(bGlobLoc))
@@ -467,14 +547,15 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			FileInputStream i = new FileInputStream(fc.getSelectedFile());
 			int ver = i.read();
 			if (ver != 1) throw new IOException("Incorrect version: " + ver);
-			es.cppStrings = i.read();
-			es.cppOperators = i.read();
-			es.cppEquals = i.read();
-			es.literalHandling = i.read();
-			es.cppEscapes = i.read();
-
-			es.instanceTypes = i.read();
-			es.storageClass = i.read();
+			//			es.cppStrings = i.read();
+			//			es.cppOperators = i.read();
+			//			es.cppEquals = i.read();
+			//			es.literalHandling = i.read();
+			//			es.cppEscapes = i.read();
+			//
+			//			es.instanceTypes = i.read();
+			//			es.storageClass = i.read();
+			i.skip(7);
 
 			es.definitions = readStr(i);
 			if (!es.definitions.equals(sDef.getCode()))
@@ -507,14 +588,17 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 			FileOutputStream i = new FileOutputStream(new File(name));
 
 			i.write(1);
-			i.write(es.cppStrings);
-			i.write(es.cppOperators);
-			i.write(es.cppEquals);
-			i.write(es.literalHandling);
-			i.write(es.cppEscapes);
 
-			i.write(es.instanceTypes);
-			i.write(es.storageClass);
+			for (int j = 0; j < 7; j++)
+				i.write(0);
+			//			i.write(es.cppStrings);
+			//			i.write(es.cppOperators);
+			//			i.write(es.cppEquals);
+			//			i.write(es.literalHandling);
+			//			i.write(es.cppEscapes);
+			//
+			//			i.write(es.instanceTypes);
+			//			i.write(es.storageClass);
 
 			writeStr(i,es.definitions);
 			writeStr(i,es.globalLocals);
@@ -561,14 +645,9 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 
 	public void commitChanges()
 		{
-		es.cppStrings = strings.getValue();
-		es.cppOperators = increment.getValue();
-		es.cppEquals = equal.getValue();
-		es.cppEscapes = escape.getValue();
-		es.literalHandling = literal.getValue();
-
-		es.instanceTypes = instance.getValue();
-		es.storageClass = storage.getValue();
+		es.options.clear();
+		for (Entry<String,Option> entry : options.entrySet())
+			es.options.put(entry.getKey(),entry.getValue() == null ? null : entry.getValue().getValue());
 
 		es.definitions = sDef.getCode();
 		es.globalLocals = sGlobLoc.getCode();
@@ -581,6 +660,22 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		es.selAudio = (TargetSelection) targAudio.getSelectedItem();
 		es.selCollision = (TargetSelection) targColl.getSelectedItem();
 		es.selWidgets = (TargetSelection) targWidg.getSelectedItem();
+		}
+
+	public void setComponents(EnigmaSettings es)
+		{
+		this.es = es;
+
+		for (Entry<String,String> entry : es.options.entrySet())
+			{
+			Option opt = options.get(entry.getKey());
+			if (opt != null) opt.setValue(entry.getValue());
+			}
+
+		sDef.setCode(es.definitions);
+		sGlobLoc.setCode(es.globalLocals);
+		sInit.setCode(es.initialization);
+		sClean.setCode(es.cleanup);
 		}
 
 	public void revertResource()
@@ -722,24 +817,5 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		LGM.mdi.add(cf);
 		LGM.mdi.addZChild(this,cf);
 		return cf;
-		}
-
-	public void setComponents(EnigmaSettings es)
-		{
-		this.es = es;
-
-		strings.setValue(es.cppStrings);
-		increment.setValue(es.cppOperators);
-		equal.setValue(es.cppEquals);
-		escape.setValue(es.cppEscapes);
-		literal.setValue(es.literalHandling);
-
-		instance.setValue(es.instanceTypes);
-		storage.setValue(es.storageClass);
-
-		sDef.setCode(es.definitions);
-		sGlobLoc.setCode(es.globalLocals);
-		sInit.setCode(es.initialization);
-		sClean.setCode(es.cleanup);
 		}
 	}

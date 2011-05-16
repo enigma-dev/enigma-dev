@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -206,7 +205,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			try
 				{
 				File gccey = new File(new File("Compilers",TargetHandler.getOS()),"gcc.ey");
-				YamlNode n = YamlParser.parse(new Scanner(gccey));
+				YamlNode n = YamlParser.parse(gccey);
 				make = n.getMC("Make"); //or OOB
 				path = n.getMC("Path","");
 				//replace starting \ with root
