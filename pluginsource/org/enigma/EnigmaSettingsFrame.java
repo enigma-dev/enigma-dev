@@ -23,6 +23,8 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -77,7 +79,7 @@ import org.lateralgm.messages.Messages;
 import org.lateralgm.subframes.CodeFrame;
 import org.lateralgm.subframes.CodeFrame.CodeHolder;
 
-public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
+public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,FocusListener
 	{
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon CODE_ICON = LGM.getIconForKey("Resource.SCRIPT"); //$NON-NLS-1$
@@ -441,23 +443,38 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		platPane.setLayout(plat);
 
 		targComp = new JComboBox(TargetHandler.getTargetCompilersArray());
-		targPlat = new JComboBox(TargetHandler.getTargetPlatformsArray());
-		targGfx = new JComboBox(TargetHandler.getTargetGraphicsArray());
-		targAudio = new JComboBox(TargetHandler.getTargetAudiosArray());
+		targPlat = new JComboBox(
+				TargetHandler.getTargetPlatformsArray(TargetHandler.defCompiler.depends.isEmpty() ? null
+						: TargetHandler.defCompiler.depends.iterator().next()));
+		targGfx = new JComboBox(TargetHandler.getTargetGraphicsArray(TargetHandler.defPlatform.id));
+		targAudio = new JComboBox(TargetHandler.getTargetAudiosArray(TargetHandler.defPlatform.id));
 		targColl = new JComboBox(TargetHandler.getTargetCollisionsArray());
-		targWidg = new JComboBox(TargetHandler.getTargetWidgetsArray());
-		targComp.setSelectedItem(es.selCompiler);
-		targPlat.setSelectedItem(es.selPlatform);
-		targGfx.setSelectedItem(es.selGraphics);
-		targAudio.setSelectedItem(es.selAudio);
-		targColl.setSelectedItem(es.selCollision);
-		targWidg.setSelectedItem(es.selWidgets);
-		targComp.addActionListener(this);
-		targPlat.addActionListener(this);
-		targGfx.addActionListener(this);
-		targAudio.addActionListener(this);
-		targColl.addActionListener(this);
-		targWidg.addActionListener(this);
+		targWidg = new JComboBox(TargetHandler.getTargetWidgetsArray(TargetHandler.defPlatform.id));
+
+		JComboBox[] targs = { targComp,targPlat,targGfx,targAudio,targColl,targWidg };
+		TargetSelection[] sels = { es.selCompiler,es.selPlatform,es.selGraphics,es.selAudio,
+				es.selCollision,es.selWidgets };
+		String[] labels = { "Compiler: ","Platform: ","Graphics: ","Audio: ","Collision: ","Widgets: " };
+
+		Group hg1 = layout.createParallelGroup();
+		Group hg2 = layout.createParallelGroup();
+		SequentialGroup vg = layout.createSequentialGroup();
+		final int pref = GroupLayout.PREFERRED_SIZE;
+
+		for (int i = 0; i < targs.length; i++)
+			{
+			targs[i].setSelectedItem(sels[i]);
+			targs[i].addActionListener(this);
+			targs[i].addFocusListener(this);
+			JLabel label = new JLabel(labels[i]);
+
+			hg1.addComponent(label);
+			hg2.addComponent(targs[i]);
+
+			vg.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+			/**/.addComponent(label)
+			/**/.addComponent(targs[i],pref,pref,pref));
+			}
 
 		tfAuth = new JTextField(es.selCompiler == null ? null : es.selCompiler.auth);
 		taDesc = new JTextArea(es.selCompiler == null ? null : es.selCompiler.desc);
@@ -466,57 +483,20 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		taDesc.setLineWrap(true);
 		taDesc.setWrapStyleWord(true);
 
-		JLabel lComp = new JLabel("Compiler: ");
-		JLabel lPlat = new JLabel("Platform: ");
-		JLabel lGfx = new JLabel("Graphics: ");
-		JLabel lSound = new JLabel("Audio: ");
-		JLabel lColl = new JLabel("Collision: ");
-		JLabel lWidg = new JLabel("Widgets: ");
 		JLabel lAuth = new JLabel("Author: ");
 		JScrollPane desc = new JScrollPane(taDesc);
 
-		int pref = GroupLayout.PREFERRED_SIZE;
 		layout.setHorizontalGroup(layout.createParallelGroup()
 		/**/.addGroup(layout.createSequentialGroup()
-		/*	*/.addGroup(layout.createParallelGroup()
-		/*		*/.addComponent(lComp)
-		/*		*/.addComponent(lPlat)
-		/*		*/.addComponent(lGfx)
-		/*		*/.addComponent(lSound)
-		/*		*/.addComponent(lColl)
-		/*		*/.addComponent(lWidg))
+		/*	*/.addGroup(hg1)
 		/*	*/.addPreferredGap(ComponentPlacement.RELATED)
-		/*	*/.addGroup(layout.createParallelGroup()
-		/*		*/.addComponent(targComp)
-		/*		*/.addComponent(targPlat)
-		/*		*/.addComponent(targGfx)
-		/*		*/.addComponent(targAudio)
-		/*		*/.addComponent(targColl)
-		/*		*/.addComponent(targWidg)))
+		/*	*/.addGroup(hg2))
 		/**/.addGroup(layout.createSequentialGroup()
 		/*	*/.addComponent(lAuth)
 		/*	*/.addPreferredGap(ComponentPlacement.RELATED)
 		/*	*/.addComponent(tfAuth))
 		/**/.addComponent(desc));
-		layout.setVerticalGroup(layout.createSequentialGroup()
-		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(lComp)
-		/*	*/.addComponent(targComp,pref,pref,pref))
-		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(lPlat)
-		/*	*/.addComponent(targPlat,pref,pref,pref))
-		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(lGfx)
-		/*	*/.addComponent(targGfx,pref,pref,pref))
-		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(lSound)
-		/*	*/.addComponent(targAudio,pref,pref,pref))
-		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(lColl)
-		/*	*/.addComponent(targColl,pref,pref,pref))
-		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
-		/*	*/.addComponent(lWidg)
-		/*	*/.addComponent(targWidg,pref,pref,pref))
+		layout.setVerticalGroup(vg
 		/**/.addPreferredGap(ComponentPlacement.RELATED)
 		/**/.addGroup(layout.createParallelGroup(Alignment.BASELINE)
 		/*	*/.addComponent(lAuth)
@@ -700,18 +680,39 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 				|| s == targWidg)
 			{
 			TargetSelection ts = (TargetSelection) ((JComboBox) s).getSelectedItem();
+			if (s == targComp)
+				{
+				es.selCompiler = ts;
+				//this is such a hack...
+				String dep = ts.depends.isEmpty() ? null : ts.depends.iterator().next();
+				targPlat.setModel(new DefaultComboBoxModel(TargetHandler.getTargetPlatformsArray(dep)));
+				ts = (TargetSelection) targPlat.getSelectedItem();
+				if (ts == null && targPlat.getModel().getSize() != 0)
+					ts = (TargetSelection) targPlat.getModel().getElementAt(0);
+				s = targPlat;
+				}
+
 			if (s == targPlat)
 				{
 				es.selPlatform = ts;
-				targGfx.setModel(new DefaultComboBoxModel(TargetHandler.getTargetGraphicsArray()));
-				targAudio.setModel(new DefaultComboBoxModel(TargetHandler.getTargetAudiosArray()));
+				targGfx.setModel(new DefaultComboBoxModel(TargetHandler.getTargetGraphicsArray(ts.id)));
+				targAudio.setModel(new DefaultComboBoxModel(TargetHandler.getTargetAudiosArray(ts.id)));
 				targColl.setModel(new DefaultComboBoxModel(TargetHandler.getTargetCollisionsArray()));
-				targWidg.setModel(new DefaultComboBoxModel(TargetHandler.getTargetWidgetsArray()));
+				targWidg.setModel(new DefaultComboBoxModel(TargetHandler.getTargetWidgetsArray(ts.id)));
 				}
-			tfAuth.setText(ts == null ? null : ts.auth);
-			taDesc.setText(ts == null ? null : ts.desc);
 			return;
 			}
+		}
+
+	@Override
+	public void focusGained(FocusEvent e)
+		{
+		if (!(e.getSource() instanceof JComboBox)) return;
+		Object o = ((JComboBox) e.getSource()).getSelectedItem();
+		if (!(o instanceof TargetSelection)) return;
+		TargetSelection ts = (TargetSelection) o;
+		tfAuth.setText(ts.auth);
+		taDesc.setText(ts.desc);
 		}
 
 	protected void fireInternalFrameEvent(int id)
@@ -773,5 +774,11 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		LGM.mdi.add(cf);
 		LGM.mdi.addZChild(this,cf);
 		return cf;
+		}
+
+	//Unused
+	@Override
+	public void focusLost(FocusEvent e)
+		{
 		}
 	}

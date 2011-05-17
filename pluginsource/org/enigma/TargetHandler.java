@@ -24,7 +24,6 @@ public class TargetHandler
 			defWidgets;
 	private static List<TargetSelection> tCompilers, tPlatforms, tGraphics, tAudios, tCollisions,
 			tWidgets;
-
 	static
 		{
 		tCompilers = findCompilers();
@@ -85,6 +84,8 @@ public class TargetHandler
 				ps.auth = node.getMC("Maintainer",null);
 				ps.ext = node.getMC("Build-Extension",null);
 				ps.outputexe = node.getMC("Run-output",null);
+				ps.depends = new HashSet<String>();
+				ps.depends.add(node.getMC("Target-platform",null)); //actually a target, not a dependency
 				String nat = node.getMC("Native","No").toLowerCase(); //native is a keyword
 				if (nat.equals("yes") || nat.equals("true")) defCompiler = ps;
 				tCompilers.add(ps);
@@ -213,23 +214,12 @@ public class TargetHandler
 		return null;
 		}
 
-	private static List<TargetSelection> getTargetArray(List<TargetSelection> itsl)
+	private static List<TargetSelection> getTargetArray(List<TargetSelection> itsl, String depends)
 		{
+		if (itsl == tCollisions) return itsl;
 		List<TargetSelection> otsl = new ArrayList<TargetSelection>();
-		String depends;
-		if (itsl == tPlatforms)
-			depends = getOS();
-		else if (itsl == tCollisions)
-			return itsl;
-		else
-			{
-			if (defPlatform == null) return otsl;
-			depends = defPlatform.id;
-			}
-
 		for (TargetSelection ts : itsl)
 			if (ts.depends.contains(depends.toLowerCase()) || ts.depends.contains("all")) otsl.add(ts);
-
 		return otsl;
 		}
 
@@ -238,28 +228,28 @@ public class TargetHandler
 		return tCompilers.toArray();
 		}
 
-	public static Object[] getTargetPlatformsArray()
+	public static Object[] getTargetPlatformsArray(String depends)
 		{
-		return getTargetArray(tPlatforms).toArray();
+		return getTargetArray(tPlatforms,depends).toArray();
 		}
 
-	public static Object[] getTargetGraphicsArray()
+	public static Object[] getTargetGraphicsArray(String depends)
 		{
-		return getTargetArray(tGraphics).toArray();
+		return getTargetArray(tGraphics,depends).toArray();
 		}
 
-	public static Object[] getTargetAudiosArray()
+	public static Object[] getTargetAudiosArray(String depends)
 		{
-		return getTargetArray(tAudios).toArray();
+		return getTargetArray(tAudios,depends).toArray();
 		}
 
 	public static Object[] getTargetCollisionsArray()
 		{
-		return getTargetArray(tCollisions).toArray();
+		return tCollisions.toArray();
 		}
 
-	public static Object[] getTargetWidgetsArray()
+	public static Object[] getTargetWidgetsArray(String depends)
 		{
-		return getTargetArray(tWidgets).toArray();
+		return getTargetArray(tWidgets,depends).toArray();
 		}
 	}
