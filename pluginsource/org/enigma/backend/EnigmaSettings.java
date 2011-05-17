@@ -91,28 +91,33 @@ public class EnigmaSettings
 			}
 		}
 
-	private String toTargetYaml()
+	private String toYaml()
 		{
-		StringBuilder general = new StringBuilder();
+		StringBuilder yaml = new StringBuilder("%e-yaml\n---\n");
 		for (Entry<String,String> entry : options.entrySet())
-			general.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+			yaml.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
 
-		System.out.println(general);
+		yaml.append("\n");
 
-		return "%e-yaml\n---\n"//
-				+ general.toString() + "\n"//
-				+ "target-compiler: " + (selCompiler == null ? "" : selCompiler.id) + "\n"//
-				+ "target-windowing: " + (selPlatform == null ? "" : selPlatform.id) + "\n"//
-				+ "target-graphics: " + (selGraphics == null ? "" : selGraphics.id) + "\n"//
-				+ "target-audio: " + (selAudio == null ? "" : selAudio.id) + "\n"//
-				+ "target-collision: " + (selCollision == null ? "" : selCollision.id) + "\n"//
-				+ "target-widget: " + (selWidgets == null ? "" : selWidgets.id) + "\n"//
-				+ "target-networking: " + "None" + "\n";//
+		String targs[] = { "compiler","windowing","graphics","audio","collision","widget" };
+		TargetSelection ts[] = { selCompiler,selPlatform,selGraphics,selAudio,selCollision,selWidgets };
+
+		for (int i = 0; i < targs.length; i++)
+			{
+			if (ts[i] == null) continue;
+			yaml.append("target-").append(targs[i]).append(": ").append(ts[i].id).append("\n");
+			}
+		yaml.append("target-networking: None\n");
+
+		System.out.println();
+		System.out.println(yaml);
+
+		return yaml.toString();
 		}
 
 	public SyntaxError commitToDriver(EnigmaDriver driver)
 		{
-		return driver.definitionsModified(definitions,toTargetYaml());
+		return driver.definitionsModified(definitions,toYaml());
 		}
 
 	public EnigmaSettings copy()

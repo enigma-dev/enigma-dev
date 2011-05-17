@@ -24,12 +24,9 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +59,7 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
 import org.enigma.TargetHandler.TargetSelection;
+import org.enigma.YamlParser.YamlContent;
 import org.enigma.YamlParser.YamlElement;
 import org.enigma.YamlParser.YamlNode;
 import org.enigma.backend.EnigmaSettings;
@@ -74,7 +72,6 @@ import org.lateralgm.components.CustomFileChooser;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
 import org.lateralgm.components.mdi.MDIFrame;
-import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.main.LGM;
 import org.lateralgm.messages.Messages;
 import org.lateralgm.subframes.CodeFrame;
@@ -232,7 +229,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		this.es = es.copy();
 
 		fc = new CustomFileChooser("/org/enigma","LAST_SETTINGS_DIR"); //$NON-NLS-1$ //$NON-NLS-2$
-		fc.setFileFilter(new CustomFileFilter(".esf","Enigma Settings File (.esf)")); //$NON-NLS-1$
+		fc.setFileFilter(new CustomFileFilter(".ey","Enigma Settings File (.ey)")); //$NON-NLS-1$
 
 		toolbar = makeToolBar();
 		add(toolbar,BorderLayout.NORTH);
@@ -530,7 +527,6 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		return p;
 		}
 
-	//TODO: use yaml instead
 	public void loadFromFile()
 		{
 		fc.setDialogTitle("File to load information from");
@@ -542,33 +538,18 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 					+ Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
 					"File to load information from",JOptionPane.WARNING_MESSAGE);
 			}
+
+		es.options.clear();
 		try
 			{
-			FileInputStream i = new FileInputStream(fc.getSelectedFile());
-			int ver = i.read();
-			if (ver != 1) throw new IOException("Incorrect version: " + ver);
-			//			es.cppStrings = i.read();
-			//			es.cppOperators = i.read();
-			//			es.cppEquals = i.read();
-			//			es.literalHandling = i.read();
-			//			es.cppEscapes = i.read();
-			//
-			//			es.instanceTypes = i.read();
-			//			es.storageClass = i.read();
-			i.skip(7);
-
-			es.definitions = readStr(i);
-			if (!es.definitions.equals(sDef.getCode()))
+			YamlNode n = YamlParser.parse(fc.getSelectedFile());
+			for (YamlElement e : n.chronos)
 				{
-				es.definitions = sDef.getCode();
-				es.saveDefinitions();
-				if (EnigmaRunner.ENIGMA_READY) es.commitToDriver(EnigmaRunner.DRIVER);
+				if (!e.isScalar) continue;
+				String val = ((YamlContent) e).getValue();
+				es.options.put(e.name,val);
 				}
-			es.globalLocals = readStr(i);
-			es.initialization = readStr(i);
-			es.cleanup = readStr(i);
 			setComponents(es);
-			i.close();
 			}
 		catch (IOException e)
 			{
@@ -582,59 +563,34 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener
 		fc.setDialogTitle("File to write information to"); //$NON-NLS-1$
 		if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
 		String name = fc.getSelectedFile().getPath();
-		if (CustomFileFilter.getExtension(name) == null) name += ".esf"; //$NON-NLS-1$
+		if (CustomFileFilter.getExtension(name) == null) name += ".ey"; //$NON-NLS-1$
+
 		try
 			{
-			FileOutputStream i = new FileOutputStream(new File(name));
+			PrintStream ps = new PrintStream(new File(name));
 
-			i.write(1);
+			ps.println("%e-yaml");
+			ps.println("---");
 
-			for (int j = 0; j < 7; j++)
-				i.write(0);
-			//			i.write(es.cppStrings);
-			//			i.write(es.cppOperators);
-			//			i.write(es.cppEquals);
-			//			i.write(es.literalHandling);
-			//			i.write(es.cppEscapes);
-			//
-			//			i.write(es.instanceTypes);
-			//			i.write(es.storageClass);
+			//general
+			for (Entry<String,String> entry : es.options.entrySet())
+				ps.println(entry.getKey() + ": " + entry.getValue());
+			ps.println();
 
-			writeStr(i,es.definitions);
-			writeStr(i,es.globalLocals);
-			writeStr(i,es.initialization);
-			writeStr(i,es.cleanup);
-			i.close();
+			//targets
+			String targs[] = { "compiler","windowing","graphics","audio","collision","widget" };
+			TargetSelection ts[] = { es.selCompiler,es.selPlatform,es.selGraphics,es.selAudio,
+					es.selCollision,es.selWidgets };
+			for (int i = 0; i < targs.length; i++)
+				ps.println("target-" + targs[i] + ": " + (ts[i] == null ? "" : ts[i].id));
+			ps.println("target-networking: None");
 
-			i.close();
+			ps.close();
 			}
-		catch (Exception e)
+		catch (FileNotFoundException e)
 			{
 			e.printStackTrace();
 			}
-		}
-
-	String readStr(InputStream is) throws IOException
-		{
-		int a = is.read();
-		int b = is.read();
-		int c = is.read();
-		int d = is.read();
-		int size = (a | (b << 8) | (c << 16) | (d << 24));
-
-		byte data[] = new byte[size];
-		is.read(data);
-		return new String(data,GmStreamDecoder.CHARSET);
-		}
-
-	void writeStr(OutputStream os, String str) throws IOException
-		{
-		int val = str.length();
-		os.write(val & 255);
-		os.write((val >>> 8) & 255);
-		os.write((val >>> 16) & 255);
-		os.write((val >>> 24) & 255);
-		os.write(str.getBytes(GmStreamDecoder.CHARSET));
 		}
 
 	public void updateResource()

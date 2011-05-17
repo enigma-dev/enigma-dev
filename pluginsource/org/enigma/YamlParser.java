@@ -183,7 +183,11 @@ public class YamlParser
 		char mchar = 0; // The character that started a multiline entry
 
 		line = file.nextLine();
-		if (line.length() < 7 || !line.substring(0,7).toLowerCase().equals("%e-yaml")) return res;
+		if (line.length() < 7 || !line.substring(0,7).toLowerCase().equals("%e-yaml"))
+			{
+			file.close();
+			return res;
+			}
 
 		YamlLevel cur = new YamlLevel(null,res,0);
 		String latestkey = null;
@@ -334,6 +338,7 @@ public class YamlParser
 			else
 				;
 			}
+		file.close();
 		if (latestkey != null && latest == null)
 			{
 			latest = new YamlContent(unlowered,"");
