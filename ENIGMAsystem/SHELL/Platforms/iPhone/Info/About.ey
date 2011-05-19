@@ -1,0 +1,10 @@
+%e-yaml
+---
+
+Name: iPhone
+Identifier: iPhone
+Represents: iPhone
+Description: Build for Apple iPhone.
+Author: TGMG
+
+Build-Platforms: iPhone

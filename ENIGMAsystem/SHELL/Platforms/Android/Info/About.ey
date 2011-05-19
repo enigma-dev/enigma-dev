@@ -1,0 +1,10 @@
+%e-yaml
+---
+
+Name: Android
+Identifier: Android
+Represents: Android
+Description: Build for Android.
+Author: TGMG
+
+Build-Platforms: Android

@@ -6,52 +6,49 @@ echo "" >> Makefile;
 for file in *.cpp ;
   do
   {
-    printf ".eobjs_\$(MODE)/${file%.cpp}.o: $file" >> Makefile;
+    printf "\$(OBJECTS)/${file%.cpp}.o: $file" >> Makefile;
     for i in `c_incl $file | gawk '/\/usr\/include/ { next } { print } '`;
     do
       printf " $i" >> Makefile;
     done;
     echo "" >> Makefile;
     
-    echo "	\$(CXX) -c $file		-o .eobjs_\$(MODE)/${file%.cpp}.o \$(GFLAGS) \$(ECPPFLAGS)"  >> Makefile;
+    echo "	\$(CXX) -c $file		-o \$(OBJECTS)/${file%.cpp}.o \$(GFLAGS) \$(ECPPFLAGS)"  >> Makefile;
   };
   done;
 
 for file in *.m ;
   do
   {
-    printf ".eobjs_\$(MODE)/${file%.m}.o: $file" >> Makefile;
+    printf "\$(OBJECTS)/${file%.m}.o: $file" >> Makefile;
     for i in `c_incl $file | gawk '/\/usr\/include/ { next } { print } '`;
     do
       printf " $i" >> Makefile;
     done;
     echo "" >> Makefile;
     
-    echo "	\$(CXX) -c $file		-o .eobjs_\$(MODE)/${file%.m}.o \$(GFLAGS) \$(ECPPFLAGS)"  >> Makefile;
+    echo "	\$(CXX) -c $file		-o \$(OBJECTS)/${file%.m}.o \$(GFLAGS) \$(ECPPFLAGS)"  >> Makefile;
   };
   done;
 
 echo "" >> Makefile;
 
-#create the eobjs folder
-echo ".eobjs_\$(MODE):" >> Makefile;
-echo "	-mkdir .eobjs_\$(MODE)" >> Makefile;
+# Create the eobjs folder
+echo "\$(OBJECTS):" >> Makefile;
+echo "	-mkdir -p \$(OBJECTS)" >> Makefile;
 echo "" >> Makefile;
 
-#generate targets for each ENIGMA mode.
-for modename in Run Debug Build Release;
-do
-  printf "$modename: .eobjs_\$(MODE) " >> Makefile;
-  for file in *.cpp ;
-    do printf ".eobjs_$modename/${file%.cpp}.o " >> Makefile; 
-    done;
-  for file in *.m ;
-    do printf ".eobjs_$modename/${file%.m}.o " >> Makefile; 
-    done;
-  echo "" >> Makefile;
-done;
+# Generate target
+printf "this: \$(OBJECTS) " >> Makefile;
+for file in *.cpp ;
+  do printf "\$(OBJECTS)/${file%.cpp}.o " >> Makefile; 
+  done;
+for file in *.m ;
+  do printf "\$(OBJECTS)/${file%.m}.o " >> Makefile; 
+  done;
+echo "" >> Makefile;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	-rm .eobjs*/*" >> Makefile;
+echo "	-rm .eobjs/*/*/*" >> Makefile;
 

@@ -2,20 +2,17 @@
 
 PKGARGS:=$(shell pkg-config --cflags gtk+-2.0)
 
-.eobjs_$(MODE)/dialogs.o: dialogs.cpp
-	$(CXX) -c dialogs.cpp		-o .eobjs_$(MODE)/dialogs.o $(PKGARGS) $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/gtk_impl.o: gtk_impl.cpp ../widgets_mandatory.h
-	$(CXX) -c gtk_impl.cpp		-o .eobjs_$(MODE)/gtk_impl.o $(PKGARGS) $(GFLAGS) $(ECPPFLAGS)
-.eobjs_$(MODE)/widgets.o: widgets.cpp
-	$(CXX) -c widgets.cpp		-o .eobjs_$(MODE)/widgets.o $(PKGARGS) $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/dialogs.o: dialogs.cpp
+	$(CXX) -c dialogs.cpp		-o $(OBJECTS)/dialogs.o $(PKGARGS) $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/gtk_impl.o: gtk_impl.cpp ../widgets_mandatory.h
+	$(CXX) -c gtk_impl.cpp		-o $(OBJECTS)/gtk_impl.o $(PKGARGS) $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/widgets.o: widgets.cpp
+	$(CXX) -c widgets.cpp		-o $(OBJECTS)/widgets.o $(PKGARGS) $(GFLAGS) $(ECPPFLAGS)
 
-.eobjs_$(MODE):
-	-mkdir .eobjs_$(MODE)
+$(OBJECTS):
+	-mkdir -p $(OBJECTS)
 
-Run: .eobjs_$(MODE) .eobjs_Run/dialogs.o .eobjs_Run/gtk_impl.o .eobjs_Run/widgets.o 
-Debug: .eobjs_$(MODE) .eobjs_Debug/dialogs.o .eobjs_Debug/gtk_impl.o .eobjs_Debug/widgets.o 
-Build: .eobjs_$(MODE) .eobjs_Build/dialogs.o .eobjs_Build/gtk_impl.o .eobjs_Build/widgets.o 
-Release: .eobjs_$(MODE) .eobjs_Release/dialogs.o .eobjs_Release/gtk_impl.o .eobjs_Release/widgets.o 
+this: $(OBJECTS) $(OBJECTS)/dialogs.o $(OBJECTS)/gtk_impl.o $(OBJECTS)/widgets.o 
 
 clean:
-	-rm .eobjs*/*
+	-rm .eobjs/*/*/*

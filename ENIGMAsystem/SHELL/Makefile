@@ -47,6 +47,10 @@ else
 	endif
 endif
 
+#Allow including info about the systems being compiled for
+GFLAGS := $(GFLAGS) -I"$(CURDIR)/Platforms/$(PLATFORM)/Info/" -I"$(CURDIR)/Graphics_Systems/$(GRAPHICS)/Info/" -I"$(CURDIR)/Audio_Systems/$(AUDIO)/Info/" -I"$(CURDIR)/Collision_Systems/$(COLLISION)/Info/" -I"$(CURDIR)/Widget_Systems/$(WIDGETS)/Info/"
+OBJECTS := .eobjs/$(COMPILEPATH)/$(GMODE)
+
 default: game
 all: game
 
