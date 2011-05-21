@@ -700,6 +700,12 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 				targColl.setModel(new DefaultComboBoxModel(TargetHandler.getTargetCollisionsArray()));
 				targWidg.setModel(new DefaultComboBoxModel(TargetHandler.getTargetWidgetsArray(ts.id)));
 				}
+
+			if (((JComboBox) s).hasFocus())
+				{
+				tfAuth.setText(ts.auth);
+				taDesc.setText(ts.desc);
+				}
 			return;
 			}
 		}

@@ -1,8 +1,0 @@
-%e-yaml
----
-
-Name: OpenAL
-Identifier: OpenAL
-Description: Play sounds using OpenAL, which is standard on Mac OSX and Linux, but requires a DLL on Windows.
-Author: Josh Ventura
-

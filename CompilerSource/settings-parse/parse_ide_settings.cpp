@@ -77,7 +77,7 @@ void parse_ide_settings(const char* eyaml)
   ey_cp(network,   networking,library)
   
   ifstream ifs; string eyname;
-  ifs.open((eyname = "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/About.ey").c_str());
+  ifs.open((eyname = "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/Info/About.ey").c_str());
   if (ifs.is_open())
   {
     ey_data l = parse_eyaml(ifs, eyname.c_str());

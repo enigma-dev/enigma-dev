@@ -97,7 +97,7 @@ public class TargetHandler
 		return tCompilers;
 		}
 
-	//target is one of ""Platforms","Audio_Systems","Graphics_Systems","Collision_Systems"
+	//target is one of "Platforms","Audio_Systems","Graphics_Systems","Collision_Systems","Widget_Systems"
 	private static List<TargetSelection> findTargets(String target)
 		{
 		ArrayList<TargetSelection> targets = new ArrayList<TargetSelection>();
@@ -110,8 +110,9 @@ public class TargetHandler
 		for (File dir : files)
 			{
 			if (!dir.isDirectory()) continue;
+			File prop = new File(dir,"Info");
 			//technically this could stand to be a .properties file, rather than e-yaml
-			File prop = new File(dir,"About.ey");
+			prop = new File(prop,"About.ey");
 			try
 				{
 				Set<String> depends = new HashSet<String>();
