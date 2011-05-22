@@ -34,7 +34,9 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="Makefile" />
 		<Unit filename="main.cc" />
+		<Unit filename="manifest.xml" />
 		<Unit filename="stupid-candy.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

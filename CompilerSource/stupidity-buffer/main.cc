@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include <windows.h>
+#include <windowsx.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -86,7 +87,7 @@ EMessage
   "This seems to be the first time you've run ENIGMA. I looked around, and I found a "
   "copy of MinGW at the following location:\n%s\r\n\r\n Would you like to use this version?\n\n"
   "Note that this version must include a working MSys distribution in order to comply "
-  "with the newest version. ENIGMA is capable of installing this for you."
+  "with the newest version. ENIGMA is capable of installing this for you.\n\n"
   "If you are somehow clueless as to how this got there, press \"Yes\", then ask "
   "for help if it doesn't work.",
  msg_welcome__msys_found =
@@ -140,6 +141,8 @@ EMessage
   "mingw-get error code: %d",
  msg_caption_problem = "Warning";
 
+#define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0); 
+
 string expand_message(string msg, string arg1)
 {
   size_t p = msg.find("%s");
@@ -148,12 +151,96 @@ string expand_message(string msg, string arg1)
   return msg;
 }
 
-void get_new_drive_letter(char dl[4])
+char drive_letter[4] = { '\\', 0, 0, 0 };
+static int keepgoing; HWND cbb = NULL;
+LRESULT CALLBACK getproc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+  
+  /*  Switch according to what type of message we have received  */
+        printf("Message %d %s %d\n",msg,msg==WM_COMMAND?"==":"!=",WM_COMMAND);
+  switch (msg) {
+    case WM_COMMAND:
+        puts("Notified.");
+        if (HIWORD(wParam) == BN_CLICKED)
+        {
+          if (LOWORD(wParam) == 4)
+          {
+            int sel = ComboBox_GetCurSel(cbb);
+            if (sel) ComboBox_GetText(cbb,drive_letter,4);
+            else drive_letter[0] = '\\', drive_letter[1] = drive_letter[2] = drive_letter[3] = 0;
+          }
+          keepgoing = 0;
+          break;
+        }
+      break;
+    case WM_CLOSE:
+      keepgoing = 0;
+      break;
+  }
+  return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+void get_new_drive_letter()
 {
-  dl[0] = 'C';
-  dl[1] = ':';
-  dl[2] = '\\';
-  dl[3] = 0;
+  WNDCLASSEX wndclass;
+    wndclass.cbSize         = sizeof(wndclass);
+    wndclass.style          = 0;
+    wndclass.lpfnWndProc    = getproc;
+    wndclass.cbClsExtra     = 0;
+    wndclass.cbWndExtra     = 0;
+    wndclass.hInstance      = NULL;
+    wndclass.hIcon          = LoadIcon(NULL, IDI_QUESTION);
+    wndclass.hIconSm        = LoadIcon(NULL, IDI_QUESTION);
+    wndclass.hCursor        = LoadCursor(NULL, IDC_ARROW);
+    wndclass.hbrBackground  = (HBRUSH)COLOR_WINDOW;
+    wndclass.lpszClassName  = "DrivePicker";
+    wndclass.lpszMenuName   = NULL;
+  
+  if (!RegisterClassEx(&wndclass))
+    return;
+  
+  const int WIDTH = 320, HEIGHT = 96;
+  
+  RECT n; n.top = 0, n.bottom = HEIGHT, n.left = 0, n.right = WIDTH;
+  AdjustWindowRect(&n,WS_BORDER|WS_CAPTION,false);
+  HWND hwnd = CreateWindow("DrivePicker", "Drive Selection",
+      WS_OVERLAPPED,
+      CW_USEDEFAULT, CW_USEDEFAULT,
+      n.right - n.left, n.bottom - n.top,
+      NULL, NULL, NULL , NULL);
+  
+  SIZE tsz; int y = 4;
+  LPCSTR tt = "Please select a drive onto which ENIGMA will install MinGW:";
+  HWND tr = CreateWindow("STATIC",tt,WS_CHILD,4,y,WIDTH-8,32,hwnd,(HMENU)(1),NULL,NULL);
+  fixFont(tr); ShowWindow(tr,SW_SHOW); HDC dc = GetDC(tr); GetTextExtentPoint32(dc,tt,strlen(tt),&tsz); ReleaseDC(tr,dc);
+  SetWindowPos(tr,NULL,0,0,WIDTH-8,tsz.cy+4,SWP_NOMOVE|SWP_NOZORDER); y += 4 + tsz.cy;
+  
+  cbb = CreateWindow("COMBOBOX","Drive",WS_CHILD | CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_SORT,4,y,WIDTH-8,320,hwnd,(HMENU)(2),NULL,NULL);
+  fixFont(cbb); ShowWindow(cbb,SW_SHOW);
+  y += 24 + 4;
+  
+  HWND bc = CreateWindow("BUTTON","Cancel",WS_CHILD | BS_DEFPUSHBUTTON,4,y,64,24,hwnd,(HMENU)(3),NULL,NULL);
+  fixFont(bc); ShowWindow(bc,SW_SHOW);
+  HWND bk = CreateWindow("BUTTON","OK",WS_CHILD | BS_DEFPUSHBUTTON,WIDTH-8-64,y,64,24,hwnd,(HMENU)(4),NULL,NULL);
+  fixFont(bk); ShowWindow(bk,SW_SHOW);
+  y += 24 + 4;
+  
+  n.top = 0, n.bottom = y, n.left = 0, n.right = WIDTH;
+  AdjustWindowRect(&n,WS_BORDER|WS_CAPTION,false);
+  SetWindowPos(hwnd,NULL,0,0,n.right - n.left, n.bottom - n.top,SWP_NOMOVE|SWP_NOZORDER);
+  
+  ComboBox_AddString(cbb,"\\ (Whatever drive ENIGMA is installed on)");
+  DWORD drives = GetLogicalDrives();
+  char drivename[4] = { 'A', ':', '\\', 0 };
+  for (int i = 0; i < 26; i++)
+    if (drives & (1 << i))
+      drivename[0] = 'A' + i, ComboBox_AddString(cbb,drivename);
+  ShowWindow(hwnd, SW_SHOW);
+  UpdateWindow(hwnd);
+  
+  MSG msg; keepgoing = 1;
+  while (keepgoing and GetMessage(&msg, NULL, 0, 0)) {
+    TranslateMessage(&msg);    /*  for certain keyboard messages  */
+    DispatchMessage(&msg);     /*  send message to WndProc        */
+  }
 }
 
 string dirpart(string fqp)
@@ -214,14 +301,13 @@ int main()
       if (MessageBox(NULL, msg_welcome__gnu_not_found, msg_welcome__caption, MB_YESNO) == IDYES)
       {
         install_mingw:
-        char drive_letter[4] = "\\";
         GetCurrentDirectory(4,drive_letter);
         
         label_get_install_drive:
         string install_drive_confirm = expand_message(install_drive_ok, drive_letter);
         if (MessageBox(NULL,install_drive_confirm.c_str(), "Install Drive", MB_YESNO) == IDNO)
         {
-          get_new_drive_letter(drive_letter);
+          get_new_drive_letter();
           if (!*drive_letter)
             goto end;
           goto label_get_install_drive;
