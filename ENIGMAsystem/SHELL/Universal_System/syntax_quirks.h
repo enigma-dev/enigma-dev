@@ -18,3 +18,5 @@ struct INTEGER_DIVISION
 };
 template<typename real>  int operator/ (real x, INTEGER_DIVISION y) { return int(x)/y.v; }
 #define div /(INTEGER_DIVISION)(int)
+
+#define until(x) while(!(x))
