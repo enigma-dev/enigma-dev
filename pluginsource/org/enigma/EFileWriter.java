@@ -1,6 +1,7 @@
 package org.enigma;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -21,32 +22,89 @@ import java.util.zip.ZipOutputStream;
 
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.main.LGM;
+import org.lateralgm.main.Util;
 import org.lateralgm.resources.Resource;
+import org.lateralgm.resources.ResourceReference;
+import org.lateralgm.resources.Script;
 import org.lateralgm.resources.Resource.Kind;
 
 public class EFileWriter
 	{
-	public void writeEgmFile(File loc)
+	public static final String EY = ".ey";
+
+	//Modularity Classes
+	/**
+	 * Convenience wrapper to allow writing buffered text to a zip.
+	 * Always invoke "next" prior to attempting to write any data.
+	 */
+	public static class ZipOutputWriter extends BufferedWriter
 		{
-		try
+		protected ZipOutputStream os;
+
+		public ZipOutputWriter(OutputStream os)
 			{
-			writeEgmFile(new FileOutputStream(loc));
+			this(new ZipOutputStream(os));
 			}
-		catch (IOException e)
+
+		public ZipOutputWriter(ZipOutputStream os)
 			{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			super(new OutputStreamWriter(os));
+			this.os = os;
+			}
+
+		public void next(String next) throws IOException
+			{
+			flush();
+			os.putNextEntry(new ZipEntry(next));
 			}
 		}
 
-	public void writeEgmFile(OutputStream os) throws IOException
+	/**
+	 * Interface for registering a method for writing for a kind of resource.
+	 * An inheritor would get mapped to a Kind via the <code>writers</code> map.
+	 */
+	public static interface ResourceWriter
 		{
-		writeEgmFile(new ZipOutputStream(os));
+		public void write(ZipOutputWriter os, ResNode child, String dir) throws IOException;
 		}
 
-	static Map<Resource.Kind,String> typestrs = new HashMap<Resource.Kind,String>();
+	/**
+	 * Convenience wrapper module manager for standard resources.
+	 * A standard resource will have an ey properties file which
+	 * points to a data file with a designated extension.
+	 * This eliminates the need to deal with ResNodes and Zip technicalities
+	 * and just focus on writing the respective files.
+	 */
+	public static abstract class DataResourceWriter implements ResourceWriter
+		{
+		public void write(ZipOutputWriter os, ResNode child, String dir) throws IOException
+			{
+			String name = (String) child.getUserObject();
+			Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
+
+			os.next(dir + name + EY);
+			os.write("Data: " + name + getExt());
+			writeProperties(os,r);
+
+			os.next(dir + name + getExt());
+			writeData(os,r);
+			}
+
+		public abstract String getExt();
+
+		public abstract void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException;
+
+		public abstract void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException;
+		}
+
+	//Module maps
+	/** Used to register writers with their resource kinds. */
+	static Map<Kind,ResourceWriter> writers = new HashMap<Kind,ResourceWriter>();
+	static Map<Kind,String> typestrs = new HashMap<Kind,String>();
 	static
 		{
+		writers.put(Kind.SCRIPT,new ScriptIO());
+
 		typestrs.put(Kind.SPRITE,"spr");
 		typestrs.put(Kind.SOUND,"snd");
 		typestrs.put(Kind.BACKGROUND,"bkg");
@@ -61,37 +119,100 @@ public class EFileWriter
 		typestrs.put(Kind.EXTENSIONS,"ext");
 		}
 
-	public void writeEgmFile(ZipOutputStream os) throws IOException
+	//Constructors
+	public void writeEgmFile(File loc)
 		{
-		ResNode root = LGM.root;
-		os.putNextEntry(new ZipEntry("toc.txt"));
-
-		OutputStreamWriter out = new OutputStreamWriter(os); //charset?
-		int children = root.getChildCount();
-		for (int i = 0; i < children; i++)
+		try
 			{
-			ResNode node = (ResNode) root.getChildAt(i);
-			out.write(typestrs.get(node.kind));
-			out.write(' ');
-			out.write((String) node.getUserObject());
-			out.write("\r\n"); //newline?
+			FileOutputStream fos = new FileOutputStream(loc);
+			writeEgmFile(fos);
+			fos.close();
 			}
-		out.flush();
-
-		for (int i = 0; i < children; i++)
+		catch (IOException e)
 			{
-			String dir = (String) ((ResNode) root.getChildAt(i)).getUserObject() + "/";
-			os.putNextEntry(new ZipEntry(dir));
-			os.putNextEntry(new ZipEntry(dir + "toc.txt"));
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 			}
-
-		os.close();
 		}
 
-	public void writeSprite()
+	public void writeEgmFile(OutputStream os) throws IOException
 		{
-
+		writeEgmFile(new ZipOutputWriter(os));
 		}
+
+	public void writeEgmFile(ZipOutputWriter os) throws IOException
+		{
+		writeNodeChildren(os,LGM.root,"");
+		os.flush();
+		}
+
+	//Workhorse methods
+	/** Recursively writes out the tree nodes into the zip. */
+	public void writeNodeChildren(ZipOutputWriter os, ResNode node, String dir) throws IOException
+		{
+		os.next(dir + "toc.txt");
+
+		int children = node.getChildCount();
+		for (int i = 0; i < children; i++)
+			{
+			ResNode child = (ResNode) node.getChildAt(i);
+			os.write((String) child.getUserObject());
+			os.newLine();
+			}
+
+		for (int i = 0; i < children; i++)
+			{
+			ResNode child = ((ResNode) node.getChildAt(i));
+
+			if (child.status == ResNode.STATUS_SECONDARY)
+				{
+				writeResource(os,child,dir);
+				}
+			else
+				{
+				String cdir = dir + child.getUserObject() + "/";
+				os.next(cdir);
+				writeNodeChildren(os,child,cdir);
+				}
+			}
+		}
+
+	/** Looks up the registered writer for this resource and invokes the write method */
+	public void writeResource(ZipOutputWriter os, ResNode child, String dir) throws IOException
+		{
+		ResourceWriter writer = writers.get(child.kind);
+		if (writer == null)
+			{
+			System.err.println("No registered writers for resource of kind " + child.kind);
+			return;
+			}
+		writer.write(os,child,dir);
+		}
+
+	//Modules
+	static class ScriptIO extends DataResourceWriter
+		{
+		@Override
+		public String getExt()
+			{
+			return ".scr";
+			}
+
+		@Override
+		public void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException
+			{
+			os.write(((Script) r).getCode());
+			}
+
+		@Override
+		public void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException
+			{
+			}
+		}
+
+	/////////////////////////////////////////////////
+	// Below are experimental APNG support methods //
+	/////////////////////////////////////////////////
 
 	APNG readApng(File f) throws IOException
 		{
