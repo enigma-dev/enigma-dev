@@ -186,7 +186,7 @@ namespace syncheck
     
     statement_pad[level]=0;
     
-    initscope("script0 | Syntax");
+    initscope("script scope | Syntax");
 
     while (pos < len)
     {

@@ -162,7 +162,7 @@ string parser_main(string code, parsed_event* pev = NULL)
     //Nothing to reset :trollface:
   
   //Initialize us a spot in the global scope
-  initscope("script0");
+  initscope("script scope");
   
   if (pev) {
     pev->strc = 0; //Number of strings in this code

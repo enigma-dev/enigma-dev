@@ -189,6 +189,10 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
         for (const char** i = Cenviron; *i; i++)
           Cenviron_flat.append(*i),
           Cenviron_flat.append(1,0);
+        
+        Cenviron_flat.append("LC_ALL=C");
+        Cenviron_flat.append(1,0); 
+        
         Cenviron_flat.append(1,0);
         Cenviron_use = (void*)Cenviron_flat.c_str();
       }

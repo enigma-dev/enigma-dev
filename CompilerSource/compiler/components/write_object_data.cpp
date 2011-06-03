@@ -47,6 +47,15 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
     wto << license;
     wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
+    
+    wto << "// Script identifiers\n";
+    for (int i = 0; i < es->scriptCount; i++)
+      wto << "const int " << es->scripts[i].name << " = " << es->scripts[i].id << ";\n";
+    wto << "\n";
+    for (int i = 0; i < es->scriptCount; i++)
+      wto << "#define " << es->scripts[i].name << "(arguments...) _SCR_" << es->scripts[i].name << "(arguments)\n";
+    wto << "\n\n";
+    
     wto << "namespace enigma\n{\n";
       wto << "  struct object_locals: event_parent\n  {\n";
         wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
@@ -85,7 +94,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           if (subscr != scr_lookup.end()) //If we've got ourselves a script
           {
             const char* comma = "";
-            wto << "\n    variant " << it->first << "(";
+            wto << "\n    variant _SCR_" << it->first << "(";
             for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
             {
               wto << comma << "variant argument" << argn << " = 0";
@@ -243,7 +252,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         if (subscr != scr_lookup.end()) //If we've got ourselves a script
         {
           const char* comma = "";
-          wto << "variant enigma::OBJ_" << i->second->name << "::" << it->first << "(";
+          wto << "variant enigma::OBJ_" << i->second->name << "::_SCR_" << it->first << "(";
           for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
           {
             wto << comma << "variant argument" << argn;
