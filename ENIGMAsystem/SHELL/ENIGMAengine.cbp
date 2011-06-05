@@ -780,6 +780,8 @@
 		<Unit filename="Universal_System/reflexive_types.cpp" />
 		<Unit filename="Universal_System/reflexive_types.h" />
 		<Unit filename="Universal_System/resinit.h" />
+		<Unit filename="Universal_System/resource_data.cpp" />
+		<Unit filename="Universal_System/resource_data.h" />
 		<Unit filename="Universal_System/roomsystem.cpp" />
 		<Unit filename="Universal_System/roomsystem.h" />
 		<Unit filename="Universal_System/simplecollisions.cpp" />

@@ -48,6 +48,8 @@ $(OBJECTS)/rectpack.o: rectpack.cpp rectpack.h
 	$(CXX) -c rectpack.cpp		-o $(OBJECTS)/rectpack.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/reflexive_types.o: reflexive_types.cpp var4.h var_te.h multifunction_variant_source.h multifunction_variant.h
 	$(CXX) -c reflexive_types.cpp		-o $(OBJECTS)/reflexive_types.o $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/resource_data.o: resource_data.cpp var4.h var_te.h resource_data.h
+	$(CXX) -c resource_data.cpp		-o $(OBJECTS)/resource_data.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/roomsystem.o: roomsystem.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h ../Platforms/platforms_mandatory.h ../libEGMstd.h instance_system.h object.h instance.h planar_object.h roomsystem.h multifunction_variant_source.h key_game_globals.h
 	$(CXX) -c roomsystem.cpp		-o $(OBJECTS)/roomsystem.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/simplecollisions.o: simplecollisions.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h collisions_object.h transform_object.h ../Graphics_Systems/OpenGL/graphics_object.h ../Universal_System/planar_object.h ../Universal_System/object.h ../Universal_System/var4.h ../Universal_System/var_te.h ../Universal_System/reflexive_types.h ../Universal_System/multifunction_variant.h ../Universal_System/mathnc.h ../Universal_System/spritestruct.h instance_system.h object.h
@@ -72,7 +74,7 @@ $(OBJECTS)/WITHconstruct.o: WITHconstruct.cpp
 $(OBJECTS):
 	-mkdir -p $(OBJECTS)
 
-this: $(OBJECTS) $(OBJECTS)/backgroundinit.o $(OBJECTS)/backgroundstruct.o $(OBJECTS)/CallbackArrays.o $(OBJECTS)/collisions_object.o $(OBJECTS)/compression.o $(OBJECTS)/darray.o $(OBJECTS)/ENIGMA_GLOBALS.o $(OBJECTS)/estring.o $(OBJECTS)/events.o $(OBJECTS)/event_system.o $(OBJECTS)/fileio.o $(OBJECTS)/fontinit.o $(OBJECTS)/fontstruct.o $(OBJECTS)/globalupdate.o $(OBJECTS)/highscore_functions.o $(OBJECTS)/IMGloading.o $(OBJECTS)/instance.o $(OBJECTS)/instance_system.o $(OBJECTS)/loading.o $(OBJECTS)/mathnc.o $(OBJECTS)/object.o $(OBJECTS)/planar_object.o $(OBJECTS)/rectpack.o $(OBJECTS)/reflexive_types.o $(OBJECTS)/roomsystem.o $(OBJECTS)/simplecollisions.o $(OBJECTS)/soundinit.o $(OBJECTS)/spriteinit.o $(OBJECTS)/spritestruct.o $(OBJECTS)/terminal_io.o $(OBJECTS)/transform_object.o $(OBJECTS)/var4.o $(OBJECTS)/var4_lua.o $(OBJECTS)/WITHconstruct.o 
+this: $(OBJECTS) $(OBJECTS)/backgroundinit.o $(OBJECTS)/backgroundstruct.o $(OBJECTS)/CallbackArrays.o $(OBJECTS)/collisions_object.o $(OBJECTS)/compression.o $(OBJECTS)/darray.o $(OBJECTS)/ENIGMA_GLOBALS.o $(OBJECTS)/estring.o $(OBJECTS)/events.o $(OBJECTS)/event_system.o $(OBJECTS)/fileio.o $(OBJECTS)/fontinit.o $(OBJECTS)/fontstruct.o $(OBJECTS)/globalupdate.o $(OBJECTS)/highscore_functions.o $(OBJECTS)/IMGloading.o $(OBJECTS)/instance.o $(OBJECTS)/instance_system.o $(OBJECTS)/loading.o $(OBJECTS)/mathnc.o $(OBJECTS)/object.o $(OBJECTS)/planar_object.o $(OBJECTS)/rectpack.o $(OBJECTS)/reflexive_types.o $(OBJECTS)/resource_data.o $(OBJECTS)/roomsystem.o $(OBJECTS)/simplecollisions.o $(OBJECTS)/soundinit.o $(OBJECTS)/spriteinit.o $(OBJECTS)/spritestruct.o $(OBJECTS)/terminal_io.o $(OBJECTS)/transform_object.o $(OBJECTS)/var4.o $(OBJECTS)/var4_lua.o $(OBJECTS)/WITHconstruct.o 
 
 clean:
 	-rm .eobjs/*/*/*

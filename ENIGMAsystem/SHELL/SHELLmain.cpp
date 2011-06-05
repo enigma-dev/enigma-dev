@@ -86,6 +86,7 @@ extern int amain();
   #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
 #endif
 
+#include "Universal_System/resource_data.h"
 #include "Universal_System/highscore_functions.h" 
 
 #include "Universal_System/actions.h"

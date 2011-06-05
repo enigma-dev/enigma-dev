@@ -25,37 +25,38 @@
 **                                                                              **
 \********************************************************************************/
 
-// This file contains functions that are used by virtually all components of ENIGMA.
-// They are also, directly or otherwise, available to the user.
-
-#include <string>
-#include <stdio.h>
-
+#include <map>
+#include "var4.h"
+#include "resource_data.h"
 using namespace std;
 
-string toString(int n)                { char buf[12]; return string(buf,sprintf(buf,"%d",  n)); }
-string toString(long n)               { char buf[12]; return string(buf,sprintf(buf,"%ld", n)); }
-string toString(short n)              { char buf[12]; return string(buf,sprintf(buf,"%d",  n)); }
-string toString(unsigned n)           { char buf[12]; return string(buf,sprintf(buf,"%u",  n)); }
-string toString(unsigned long n)      { char buf[12]; return string(buf,sprintf(buf,"%lu", n)); }
-string toString(unsigned short n)     { char buf[12]; return string(buf,sprintf(buf,"%u",  n)); }
-#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-string toString(long long n)          { char buf[32]; return string(buf,sprintf(buf,"%I64d", n)); }
-string toString(unsigned long long n) { char buf[32]; return string(buf,sprintf(buf,"%I64u", n)); }
-#else
-string toString(long long n)          { char buf[32]; return string(buf,sprintf(buf,"%lld", n)); }
-string toString(unsigned long long n) { char buf[32]; return string(buf,sprintf(buf,"%llu", n)); }
-#endif
-string toString(char n)               { char buf[8];  return string(buf,sprintf(buf,"%d", n)); }
-string toString(char* n)              { return string(n); }
-string toString(float n)              { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
-string toString(double n)             { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
+static map<string,int> resources;
+namespace enigma
+{
+  void map_resource_ids(nameid_pair* n)
+  {
+    for (nameid_pair* i = n; i->id != -1; i++)
+    {
+      
+    }
+  }
+}
 
-string toString()                                        { return string ();     }
-string toString(const string& str)                       { return string (str);  }
-string toString(const string& str, size_t pos, size_t n) { return string (str, pos, n); }
-string toString(const char *s, size_t n)                 { return string (s, n); }
-string toString(const char *s)                           { return string (s);    }
-string toString(size_t n, char c)                        { return string (n, c); }
-
-void show_error(string, const bool);
+int resource_get_id(string name);
+variant script_execute(int scr, variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7)
+{
+  enigma::callable_script &i = enigma::callable_scripts[scr];
+  switch (i.argnum)
+  {
+    case 0: return ((variant(*)())i.base)                                                                 ();
+    case 1: return ((variant(*)(variant))i.base)                                                          (arg0);
+    case 2: return ((variant(*)(variant,variant))i.base)                                                  (arg0,arg1);
+    case 3: return ((variant(*)(variant,variant,variant))i.base)                                          (arg0,arg1,arg2);
+    case 4: return ((variant(*)(variant,variant,variant,variant))i.base)                                  (arg0,arg1,arg2,arg3);
+    case 5: return ((variant(*)(variant,variant,variant,variant,variant))i.base)                          (arg0,arg1,arg2,arg3,arg4);
+    case 6: return ((variant(*)(variant,variant,variant,variant,variant,variant))i.base)                  (arg0,arg1,arg2,arg3,arg4,arg5);
+    case 7: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant))i.base)          (arg0,arg1,arg2,arg3,arg4,arg5,arg6);
+    case 8: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant))i.base)  (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+  }
+  return 0;
+}

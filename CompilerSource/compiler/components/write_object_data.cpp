@@ -299,8 +299,17 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       }
     }
 
-    wto <<
-    "namespace enigma\n{\n  void constructor(object_basic* instance_b)\n  {\n"
+    wto << "namespace enigma\n{\n"
+    "  callable_script callable_scripts[] = {\n";
+    for (int i = 0; i < es->scriptCount; i++)
+    {
+      if (es->scripts[i].id < i) cout << "ERROR! Why the HELL does this script have a lower ID than the last one sent?" << endl;
+      else if (es->scripts[i].id > i) wto << "    { NULL, -1 }\n";
+      else wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " }\n";
+    }
+    wto << "  };\n  \n";
+    
+    wto << "  void constructor(object_basic* instance_b)\n  {\n"
     "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"
     "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
     "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
