@@ -48,6 +48,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     wto << license;
     wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
     
+    // Write the script names
     wto << "// Script identifiers\n";
     for (int i = 0; i < es->scriptCount; i++)
       wto << "const int " << es->scripts[i].name << " = " << es->scripts[i].id << ";\n";
@@ -56,6 +57,18 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       wto << "#define " << es->scripts[i].name << "(arguments...) _SCR_" << es->scripts[i].name << "(arguments)\n";
     wto << "\n\n";
     
+    for (int i = 0; i < es->scriptCount; i++)
+    {
+      parsed_script* scr = scr_lookup[es->scripts[i].name];
+      const char* comma = "";
+      wto << "variant _SCR_" << es->scripts[i].name << "(";
+      for (int argn = 0; argn < scr->globargs; argn++) {
+        wto << comma << "variant argument" << argn << "=0";
+        comma = ", ";
+      }
+      wto << ");\n";
+    }
+    wto << "\n";
     wto << "namespace enigma\n{\n";
       wto << "  struct object_locals: event_parent\n  {\n";
         wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
@@ -91,11 +104,12 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
         {
           map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-          if (subscr != scr_lookup.end()) //If we've got ourselves a script
+          if (subscr != scr_lookup.end() // If we've got ourselves a script
+          and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally)
           {
             const char* comma = "";
             wto << "\n    variant _SCR_" << it->first << "(";
-            for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
+            for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
             {
               wto << comma << "variant argument" << argn << " = 0";
               comma = ", ";
@@ -223,6 +237,25 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out);
     wto << license;
+    
+    // Export globalized scripts
+    for (int i = 0; i < es->scriptCount; i++)
+    {
+      parsed_script* scr = scr_lookup[es->scripts[i].name];
+      const char* comma = "";
+      wto << "variant _SCR_" << es->scripts[i].name << "(";
+      for (int argn = 0; argn < scr->globargs; argn++) //it->second gives max argument count used
+      {
+        wto << comma << "variant argument" << argn;
+        comma = ", ";
+      }
+      wto << ")\n{\n  ";
+      parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
+      print_to_file(upev.code,upev.synt,upev.strc,upev.strs,2,wto);
+      wto << "\n  return 0;\n}\n\n";
+    }
+    
+    // Export everything else
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
@@ -249,11 +282,12 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
       {
         map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-        if (subscr != scr_lookup.end()) //If we've got ourselves a script
+        if (subscr != scr_lookup.end() // If we've got ourselves a script
+        and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally)
         {
           const char* comma = "";
           wto << "variant enigma::OBJ_" << i->second->name << "::_SCR_" << it->first << "(";
-          for (int argn = 0; argn <= it->second; argn++) //it->second gives max argument count used
+          for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
           {
             wto << comma << "variant argument" << argn;
             comma = ", ";

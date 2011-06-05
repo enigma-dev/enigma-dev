@@ -52,9 +52,18 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
       user << "Syntax error in script `" << es->scripts[i].name << "'\n" << syncheck::error << flushl;
       return E_ERROR_SYNTAX;
     }
+    // Keep a parsed record of this script
     scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
     parser_main(es->scripts[i].code,&scripts[i]->pev);
     edbg << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
+    
+    // If the script accesses variables from outside its scope implicitly
+    if (scripts[i]->obj.locals.size()) {
+      parsed_object temporary_object = *scripts[i]->pev.myObj;
+      scripts[i]->pev_global = new parsed_event(&temporary_object);
+      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n}",scripts[i]->pev_global);
+      scripts[i]->pev_global->myObj = NULL;
+    }
     fflush(stdout);
   }
   
@@ -178,6 +187,19 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
     }
   }
   edbg << "\"Link\" complete." << flushl;
+  
+  // Sort through object calls finding max script arg counts
+  edbg << "Tabulating maximum argument passes to each script" << flushl;
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+    for (parsed_object::funcit it = i->second->funcs.begin(); it != i->second->funcs.end(); it++) //For each function called by this object
+  {
+    map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+    if (subscr != scr_lookup.end() and subscr->second->globargs < it->second)
+      subscr->second->globargs = it->second,
+      edbg << "  Object `" << i->second->name << "' calls " << it->first << " with " << it->second << " parameters." << flushl;
+  }
+  edbg << "Finished" << flushl;
+  
   return 0;
 }
 

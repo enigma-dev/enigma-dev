@@ -53,8 +53,11 @@ int compile_parseSecondary(map<int,parsed_object*> &parsed_objects,parsed_script
       parser_secondary(ito->events[iit].code,ito->events[iit].synt,EGMglobal,it->second);
   }
   
-  for (int i = 0; i < scrcount; i++)
+  for (int i = 0; i < scrcount; i++) {
     parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj);
+    if (scripts[i]->pev_global)
+      parser_secondary(scripts[i]->pev_global->code,scripts[i]->pev_global->synt,EGMglobal,&scripts[i]->obj);
+  }
   
   return 0;
 }

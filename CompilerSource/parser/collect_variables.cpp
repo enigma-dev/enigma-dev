@@ -300,16 +300,18 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
             args += contented;
             contented = false; continue;
           }
+          if (synt[i] == ')') { //TODO: if (a,) is one arg according to ISO, move this before contented = true;
+            pars--; continue;
+          }
           contented = true;
           if (synt[i] == '(') {
             pars++; continue;
           }
-          if (synt[i] == ')') { //TODO: if (a,) is one arg according to ISO, move this before contented = true;
-            pars--; continue;
-          }
         }
         args += contented; //Final arg for closing parentheses
-        pev->myObj->funcs[nname] = args;
+        pair<parsed_object::funcit,bool> a = pev->myObj->funcs.insert(pair<string,int>(nname,args));
+        if (!a.second and a.first->second < signed(args))
+          a.first->second = args;
         cout << "  Calls script `" << nname << "'\n";
       }
     }

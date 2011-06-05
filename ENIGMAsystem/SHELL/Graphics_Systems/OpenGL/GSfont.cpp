@@ -102,7 +102,7 @@ unsigned int string_width_ext_line(string str, int w, int line)
 {
   font *fnt = fontstructarray[currentfont];
 
-  unsigned int width = 0, tw = 0, cl = 0;
+  unsigned int width = 0, tw = 0; int cl = 0;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r' or str[i] == '\n')
@@ -115,8 +115,9 @@ unsigned int string_width_ext_line(string str, int w, int line)
           break;
         tw += fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount].xs;
       }
-      if (width+tw >= w && w != -1)
+      if (width+tw >= unsigned(w) && w != -1)
         if (cl == line) return width; else width = 0, cl +=1;
+      else;
     }else
       width += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount].xs;
   }
@@ -140,7 +141,7 @@ unsigned int string_width_ext_line_count(string str, int w)
           break;
         tw += fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount].xs;
       }
-      if (width+tw >= w && w != -1)
+      if (width+tw >= unsigned(w) && w != -1)
         width = 0, cl +=1;
     }else
       width += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount].xs;
@@ -633,7 +634,7 @@ unsigned int string_width_ext(string str, int sep, int w) //here sep doesn't do 
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == ' '){
-        if (width >= w && w!=-1)
+        if (width >= unsigned(w) && w!=-1)
             (width>maxwidth ? maxwidth=width, width = 0 : width = 0);
         else
             width += fnt->height/3; // FIXME: what's GM do about this?
@@ -665,7 +666,7 @@ unsigned int string_height_ext(string str, int sep, int w)
         tw += g.xs;
       }
 
-      if (width+tw >= w && w != -1)
+      if (width+tw >= unsigned(w) && w != -1)
         height += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
     }else{
         fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
