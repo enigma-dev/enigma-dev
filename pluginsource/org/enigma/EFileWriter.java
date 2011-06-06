@@ -29,8 +29,9 @@ import org.lateralgm.resources.Background;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Script;
-import org.lateralgm.resources.Background.PBackground;
+import org.lateralgm.resources.Sound;
 import org.lateralgm.resources.Resource.Kind;
+import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.util.PropertyMap;
 
 public class EFileWriter
@@ -55,6 +56,11 @@ public class EFileWriter
 			{
 			super(new OutputStreamWriter(os));
 			this.os = os;
+			}
+
+		public void write(byte[] data) throws IOException
+			{
+			os.write(data);
 			}
 
 		public void writeln(String str) throws IOException
@@ -112,21 +118,43 @@ public class EFileWriter
 			{
 			String name = (String) child.getUserObject();
 			Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
+			String fn = name + getExt(r);
 
 			os.next(dir + name + EY);
-			os.writeln("Data: " + name + getExt());
+			os.writeln("Data: " + fn);
 			writeProperties(os,r);
 
-			os.next(dir + name + getExt());
+			os.next(dir + fn);
 			writeData(os,r);
 			}
 
-		/** The extension, which must include the preceding dot, e.g. ".ext" */
-		public abstract String getExt();
+		/**
+		 * The extension, which must include the preceding dot, e.g. ".ext".
+		 * Resource provided in case extension is chosen on an individual resource basis.
+		 */
+		public abstract String getExt(Resource<?,?> r);
 
 		public abstract void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException;
 
 		public abstract void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException;
+		}
+
+	/**
+	 * Convenience wrapper for automatically writing allowed properties.
+	 * @see DataResourceWriter
+	 */
+	static abstract class DataPropWriter extends DataResourceWriter
+		{
+		@Override
+		public void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException
+			{
+			PropertyMap<? extends Enum<?>> p = r.properties;
+			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
+				if (allowProperty(e.getKey().name())) os.writeln(e.getKey().name() + ": " + e.getValue());
+			}
+
+		/** Returns whether the following property should be allowed in the properties file */
+		public abstract boolean allowProperty(String name);
 		}
 
 	//Module maps
@@ -135,6 +163,8 @@ public class EFileWriter
 	static Map<Kind,String> typestrs = new HashMap<Kind,String>();
 	static
 		{
+		//SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
+		writers.put(Kind.SOUND,new SoundIO());
 		writers.put(Kind.BACKGROUND,new BackgroundIO());
 		writers.put(Kind.SCRIPT,new ScriptIO());
 
@@ -229,10 +259,31 @@ public class EFileWriter
 	//Modules
 	//SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
 
-	static class BackgroundIO extends DataResourceWriter
+	static class SoundIO extends DataPropWriter
 		{
 		@Override
-		public String getExt()
+		public String getExt(Resource<?,?> r)
+			{
+			return ((Sound) r).properties.get(PSound.FILE_TYPE);
+			}
+
+		@Override
+		public void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException
+			{
+			os.write(((Sound) r).data);
+			}
+
+		@Override
+		public boolean allowProperty(String name)
+			{
+			return true;
+			}
+		}
+
+	static class BackgroundIO extends DataPropWriter
+		{
+		@Override
+		public String getExt(Resource<?,?> r)
 			{
 			return ".png";
 			}
@@ -244,20 +295,16 @@ public class EFileWriter
 			}
 
 		@Override
-		public void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException
+		public boolean allowProperty(String name)
 			{
-			PropertyMap<PBackground> p = ((Background) r).properties;
-			for (Entry<PBackground,Object> e : p.entrySet())
-				os.writeln(e.getKey().name() + ": " + e.getValue());
-			//TRANSPARENT,SMOOTH_EDGES,PRELOAD,USE_AS_TILESET,TILE_WIDTH,TILE_HEIGHT
-			//H_OFFSET,V_OFFSET,H_SEP,V_SEP
+			return true;
 			}
 		}
 
-	static class ScriptIO extends DataResourceWriter
+	static class ScriptIO extends DataPropWriter
 		{
 		@Override
-		public String getExt()
+		public String getExt(Resource<?,?> r)
 			{
 			return ".scr";
 			}
@@ -269,8 +316,9 @@ public class EFileWriter
 			}
 
 		@Override
-		public void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException
+		public boolean allowProperty(String name)
 			{
+			return false;
 			}
 		}
 
