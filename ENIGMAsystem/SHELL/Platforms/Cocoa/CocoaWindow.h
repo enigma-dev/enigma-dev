@@ -26,6 +26,8 @@
  \********************************************************************************/
 #include <string>
 
+#include "file_manip.h"
+
 using std::string;
 
 void gmw_init();
@@ -70,7 +72,6 @@ int window_get_width();
 int window_get_height();
 
 //Setters
-int window_set_position(double x,double y);
 void window_set_size(unsigned int w,unsigned int h);
 int window_set_rectangle(double x,double y,double w,double h);
 
@@ -80,7 +81,7 @@ int window_center();
 ////////////////
 // FULLSCREEN //
 ////////////////
-int window_set_fullscreen(double full);
+int window_set_fullscreen(const bool full);
 int window_get_fullscreen();
 
 ////////////
@@ -110,6 +111,17 @@ int window_get_fullscreen();
 #define cr_size_all -22
 
 int window_set_cursor(double c);
+
+void window_set_showicons(bool show);
+void window_set_color(int color);
+
+int window_view_mouse_get_x(int wid);
+int window_view_mouse_get_y(int wid);
+void window_view_mouse_set(int wid, int x, int y);
+int window_views_mouse_get_x();
+int window_views_mouse_get_y();
+void window_views_mouse_set(int x, int y);
+
 
 /*
  display_get_width() // Returns the width of the display in pixels.

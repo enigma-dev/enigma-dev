@@ -111,6 +111,14 @@ void mouse_release(int x, int y) {
 	enigma::mousestatus[mb_left-1]=0;
 }
 
+void mouse_right_press(int x, int y) {
+	enigma::mousestatus[mb_right-1]=1;
+}
+
+void mouse_right_release(int x, int y) {
+	enigma::mousestatus[mb_right-1]=0;
+}
+
 void cocoa_io_handle() {
     
 	for(int i=0;i<256;i++){

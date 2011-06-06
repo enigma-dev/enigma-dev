@@ -32,6 +32,8 @@ int loopy();
 	int init();
 	void  mouse_press(int x, int y);
 	void mouse_release(int x, int y);
+    void  mouse_right_press(int x, int y);
+	void mouse_right_release(int x, int y);
 	void key_press(int keycode);
 	void key_release(int keycode);
     void cocoa_io_handle();

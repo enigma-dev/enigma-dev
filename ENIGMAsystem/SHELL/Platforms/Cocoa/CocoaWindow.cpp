@@ -26,6 +26,8 @@
 #include <X11/Xlib.h>
 #include "ObjectiveC.h"
 
+std::string working_directory;
+
 Display *disp;
 Window win;
 GC gc;
@@ -173,12 +175,28 @@ int window_get_fullscreen()
 
 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
 short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
-int window_set_cursor(int c)
+int window_set_cursor(double c)
 {
 	/*XUndefineCursor(disp,win);
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
 	return 0;*/
 }
+
+
+void window_set_showicons(bool show) {
+    
+}
+
+void window_set_color(int color) {}
+
+int window_view_mouse_get_x(int wid) {}
+int window_view_mouse_get_y(int wid) {}
+void window_view_mouse_set(int wid, int x, int y) {}
+int window_views_mouse_get_x() {}
+int window_views_mouse_get_y() {}
+void window_views_mouse_set(int x, int y) {}
+
+
 
 void screen_refresh() {
 	cocoa_screen_refresh();

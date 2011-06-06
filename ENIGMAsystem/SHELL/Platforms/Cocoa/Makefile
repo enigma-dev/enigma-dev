@@ -2,27 +2,29 @@
 
 $(OBJECTS)/CocoaDialog.o: CocoaDialog.cpp
 	$(CXX) -c CocoaDialog.cpp		-o $(OBJECTS)/CocoaDialog.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/CocoaFunctions.o: CocoaFunctions.cpp CocoaFunctions.h CocoaWindow.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
+$(OBJECTS)/CocoaFunctions.o: CocoaFunctions.cpp CocoaFunctions.h CocoaWindow.h file_manip.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c CocoaFunctions.cpp		-o $(OBJECTS)/CocoaFunctions.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/CocoaMain.o: CocoaMain.cpp CocoaWindow.h ObjectiveC.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
+$(OBJECTS)/CocoaMain.o: CocoaMain.cpp CocoaWindow.h file_manip.h ObjectiveC.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c CocoaMain.cpp		-o $(OBJECTS)/CocoaMain.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/CocoaWindow.o: CocoaWindow.cpp ObjectiveC.h CocoaFunctions.h
 	$(CXX) -c CocoaWindow.cpp		-o $(OBJECTS)/CocoaWindow.o $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/XLIBthreads.o: XLIBthreads.cpp ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/resource_data.h XLIBthreads.h
+	$(CXX) -c XLIBthreads.cpp		-o $(OBJECTS)/XLIBthreads.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/file_manip.o: file_manip.cpp
 	$(CXX) -c file_manip.cpp		-o $(OBJECTS)/file_manip.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/EnigmaView.o: EnigmaView.m CocoaFunctions.h
 	$(CXX) -c EnigmaView.m		-o $(OBJECTS)/EnigmaView.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/EnigmaXcodeAppDelegate.o: EnigmaXcodeAppDelegate.m
 	$(CXX) -c EnigmaXcodeAppDelegate.m		-o $(OBJECTS)/EnigmaXcodeAppDelegate.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/main.o: main.m
-	$(CXX) -c main.m		-o $(OBJECTS)/main.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/WindowFunctions.o: WindowFunctions.m
 	$(CXX) -c WindowFunctions.m		-o $(OBJECTS)/WindowFunctions.o $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/main.o: main.m
+	$(CXX) -c main.m		-o $(OBJECTS)/main.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
 	-mkdir -p $(OBJECTS)
 
-this: $(OBJECTS) $(OBJECTS)/CocoaDialog.o $(OBJECTS)/CocoaFunctions.o $(OBJECTS)/CocoaMain.o $(OBJECTS)/CocoaWindow.o $(OBJECTS)/file_manip.o $(OBJECTS)/EnigmaView.o $(OBJECTS)/EnigmaXcodeAppDelegate.o $(OBJECTS)/main.o $(OBJECTS)/WindowFunctions.o 
+this: $(OBJECTS) $(OBJECTS)/CocoaDialog.o $(OBJECTS)/CocoaFunctions.o $(OBJECTS)/CocoaMain.o $(OBJECTS)/CocoaWindow.o $(OBJECTS)/XLIBthreads.o $(OBJECTS)/file_manip.o $(OBJECTS)/EnigmaView.o $(OBJECTS)/EnigmaXcodeAppDelegate.o $(OBJECTS)/WindowFunctions.o $(OBJECTS)/main.o 
 
 clean:
 	-rm .eobjs/*/*/*

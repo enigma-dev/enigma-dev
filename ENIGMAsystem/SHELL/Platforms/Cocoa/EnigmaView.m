@@ -112,7 +112,7 @@ extern bool keyboard_check(int i);
     }
 	
     loopy();
-	[self flushOpenGL];
+	//[self flushOpenGL];
 }
 
 
@@ -191,7 +191,17 @@ extern bool keyboard_check(int i);
 - (void)rightMouseUp:(NSEvent *)theEvent
 {
     NSLog( @"Mouse R up");
+    NSPoint pt = [theEvent locationInWindow];
+	mouse_right_release(pt.x, pt.y);
 }
+
+- (void)rightMouseDown:(NSEvent *)theEvent
+{
+    NSLog( @"Mouse R down");
+    NSPoint pt = [theEvent locationInWindow];
+	mouse_right_press(pt.x, pt.y);
+}
+
 // handle mouse up events (other mouse button)
 - (void)otherMouseUp:(NSEvent *)theEvent
 {
