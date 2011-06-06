@@ -35,6 +35,8 @@
 using namespace std;
 #include "../compiler/event_reader/event_parser.h"
 
+extern int global_script_argument_count;
+
 struct scope_ignore {
   map<string,int> ignore;
   bool is_with;
@@ -257,15 +259,26 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
         
         //First, check that it's not a global
         if (find_extname(nname,0xFFFFFFFF)) {
-          cout << "Ignoring `" << nname << "' because it's a global.\n"; continue;
+          cout << "Ignoring `" << nname << "' because it's a global.\n";
+          continue;
         }
         
         //Next make sure we're not specifically ignoring it
         map<string,int>::iterator ex;
         for (int i = igpos; i >= 0; i--)
           if ((ex = igstack[i]->ignore.find(nname)) != igstack[i]->ignore.end()) {
-            cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n"; goto continue_2;
+            cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n";
+            goto continue_2;
           }
+        
+        int argnum, iscr;
+        iscr = sscanf(nname.c_str(),"argument%d",&argnum);
+        if (iscr == 1)
+        { //  not in a script or are but have exceeded arg number
+          if (global_script_argument_count < argnum + 1)
+            global_script_argument_count = argnum + 1;
+          continue;
+        }
         
         //Now make sure we're not in a with.
         if (with_until_semi or igstack[igpos]->is_with)

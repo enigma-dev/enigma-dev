@@ -182,7 +182,7 @@ string parser_main(string code, parsed_event* pev = NULL)
   //cout << synt << endl;
   //cout << code << endl;
   
-  if (pev) { cout << "<collecting variables..."; fflush(stdout);
+  if (pev) { cout << "collecting variables..."; fflush(stdout);
     collect_variables(code,synt,pev); cout << " done>"; fflush(stdout);
   }
   

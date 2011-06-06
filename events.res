@@ -144,13 +144,13 @@ mouseenter: 6
 	Name: Mouse Enter
 	Mode: Special
 	Case: 10
-	Sub Check: { static bool innow = false; const bool wasin = innow; innow = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (!in or wasin) return 0; }
+	Sub Check: { static bool innow = false; const bool wasin = innow; innow = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (!innow or wasin) return 0; }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
-	Sub Check: { static bool innow = false; const bool wasin = innow; innow = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (in or !wasin) return 0; }
+	Sub Check: { static bool innow = false; const bool wasin = innow; innow = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (innow or !wasin) return 0; }
 
 mousewheelup: 6
 	Name: Mouse Wheel Up

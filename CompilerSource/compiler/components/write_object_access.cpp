@@ -39,6 +39,30 @@ using namespace std;
 #include "../event_reader/event_parser.h"
 #include "../../parser/object_storage.h"
 
+string REFERENCE_POSTFIX(string ref) {
+  unsigned pos, spos;
+  bool makeItConst = true;
+  int lvl = 0;
+  for (pos = 0; pos < ref.length(); pos++)
+  {
+    if (ref[pos] == '[')
+    {
+      if (!lvl) spos = pos;
+      makeItConst = true;
+      lvl++;
+    }
+    else if (ref[pos] == ']')
+    {
+      if (--lvl = 0);
+        ref.replace(spos,pos-spos+1,"*");
+    }
+  }
+  if (makeItConst)
+    ref += " const ";
+  return ref;
+}
+
+struct usedtype { int uc; dectrip original; usedtype(): uc(0) {} }; // uc is the use count, then after polling, the dummy number.
 int compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global)
 {
   ofstream wto;
@@ -52,21 +76,24 @@ int compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_objec
     "  object_locals *glaccess(int x)" << endl <<
     "  {" << endl << "    object_locals* ri = (object_locals*)fetch_instance_by_int(x);" << endl << "    return ri ? ri : &ldummy;" << endl << "  }" << endl << endl;
     
-    map<string,int> usedtypes;
-    for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++)
-      usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix]++;
+    map<string,usedtype> usedtypes;
+    for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
+      usedtype &ut = usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix];
+      if (!ut.uc) ut.original = dait->second;
+      ut.uc++;
+    }
     int dummynumber = 0;
-    for (map<string,int>::iterator i = usedtypes.begin(); i != usedtypes.end(); i++)
+    for (map<string,usedtype>::iterator i = usedtypes.begin(); i != usedtypes.end(); i++)
     {
-      int uc = i->second;
-      i->second = dummynumber++;
-      wto << "  " << i->first << " dummy_" << i->second << "; // Referenced by " << uc << " accessors" << endl;
+      int uc = i->second.uc;
+      i->second.uc = dummynumber++;
+      wto << "  " << i->second.original.type << " " << i->second.original.prefix << "dummy_" << i->second.uc << i->second.original.suffix << "; // Referenced by " << uc << " accessors" << endl;
     }
     
     for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++)
     {
       const string& pmember = dait->first;
-      wto << "  " << dait->second.type << " " << dait->second.prefix << dait->second.suffix << " &varaccess_" << pmember << "(int x)" << endl;
+      wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
       wto << "  {" << endl;
       
       wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
@@ -85,7 +112,7 @@ int compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_objec
       
       wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
       wto << "    }" << endl;
-      wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix] << ";" << endl;
+      wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc << ";" << endl;
       wto << "  }" << endl;
     }
     wto << "} // namespace enigma" << endl;

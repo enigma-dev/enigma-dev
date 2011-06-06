@@ -38,11 +38,22 @@ using namespace std;
 #include "../../backend/EnigmaStruct.h" //LateralGM interface structures
 #include "../compile_common.h"
 
+int global_script_argument_count = 0;
+
 int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
 {
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out);
     wto << license;
+    
+    if (global_script_argument_count) {
+      wto << "// Script arguments\n";
+      wto << "variant argument0 = 0";
+      for (int i = 1; i < global_script_argument_count; i++)
+        wto << ", argument" << i << " = 0";
+      wto << ";\n\n";
+    }
+    
     for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
       wto << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;
     //This part needs written into a global object_parent class instance elsewhere.
