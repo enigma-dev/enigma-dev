@@ -304,8 +304,8 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     for (int i = 0; i < es->scriptCount; i++)
     {
       if (es->scripts[i].id < i) cout << "ERROR! Why the HELL does this script have a lower ID than the last one sent?" << endl;
-      else if (es->scripts[i].id > i) wto << "    { NULL, -1 }\n";
-      else wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " }\n";
+      else if (es->scripts[i].id > i) wto << "    { NULL, -1 },\n";
+      else wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " },\n";
     }
     wto << "  };\n  \n";
     

@@ -6,13 +6,15 @@ $(OBJECTS)/XLIBdialog.o: XLIBdialog.cpp
 	$(CXX) -c XLIBdialog.cpp		-o $(OBJECTS)/XLIBdialog.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/XLIBmain.o: XLIBmain.cpp XLIBwindow.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/CallbackArrays.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
 	$(CXX) -c XLIBmain.cpp		-o $(OBJECTS)/XLIBmain.o $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/XLIBthreads.o: XLIBthreads.cpp ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/resource_data.h XLIBthreads.h
+	$(CXX) -c XLIBthreads.cpp		-o $(OBJECTS)/XLIBthreads.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/XLIBwindow.o: XLIBwindow.cpp ../../Universal_System/CallbackArrays.h
 	$(CXX) -c XLIBwindow.cpp		-o $(OBJECTS)/XLIBwindow.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
 	-mkdir -p $(OBJECTS)
 
-this: $(OBJECTS) $(OBJECTS)/file_manip.o $(OBJECTS)/XLIBdialog.o $(OBJECTS)/XLIBmain.o $(OBJECTS)/XLIBwindow.o 
+this: $(OBJECTS) $(OBJECTS)/file_manip.o $(OBJECTS)/XLIBdialog.o $(OBJECTS)/XLIBmain.o $(OBJECTS)/XLIBthreads.o $(OBJECTS)/XLIBwindow.o 
 
 clean:
 	-rm .eobjs/*/*/*

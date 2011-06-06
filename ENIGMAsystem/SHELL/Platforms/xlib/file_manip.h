@@ -26,16 +26,12 @@
 \********************************************************************************/
 
 
-/* OS Specific; should be moved */
-
 int file_exists(std::string fname);           
 int file_delete(std::string fname);           
 int file_rename(std::string oldname,std::string newname); 
 int file_copy(std::string fname,std::string newname);     
 int directory_exists(std::string dname);      
 int directory_create(std::string dname);      
-
-
 
 std::string file_find_first(std::string mask,int attr);   
 

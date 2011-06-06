@@ -647,16 +647,7 @@
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/XLIBdialog.cpp">
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="wii-build" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
+		<Unit filename="Platforms/xlib/XLIBdialog.cpp" />
 		<Unit filename="Platforms/xlib/XLIBdialog.h">
 			<Option target="lin-debug" />
 			<Option target="lin-build" />
@@ -666,38 +657,15 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/XLIBmain.cpp">
-			<Option target="lin-debug" />
-			<Option target="lin-build" />
-			<Option target="lin-profile" />
-		</Unit>
-		<Unit filename="Platforms/xlib/XLIBmain.h">
-			<Option target="lin-debug" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="lin-profile" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Platforms/xlib/XLIBwindow.cpp">
-			<Option target="lin-debug" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="lin-profile" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Platforms/xlib/XLIBwindow.h">
-			<Option target="lin-debug" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="lin-profile" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
+		<Unit filename="Platforms/xlib/XLIBmain.cpp" />
+		<Unit filename="Platforms/xlib/XLIBmain.h" />
+		<Unit filename="Platforms/xlib/XLIBthreads.cpp" />
+		<Unit filename="Platforms/xlib/XLIBthreads.h" />
+		<Unit filename="Platforms/xlib/XLIBwindow.cpp" />
+		<Unit filename="Platforms/xlib/XLIBwindow.h" />
+		<Unit filename="Platforms/xlib/file_manip.cpp" />
+		<Unit filename="Platforms/xlib/file_manip.h" />
+		<Unit filename="Platforms/xlib/include.h" />
 		<Unit filename="Platforms/xlib/xwindow_gml.h">
 			<Option target="lin-debug" />
 			<Option target="lin-build" />
