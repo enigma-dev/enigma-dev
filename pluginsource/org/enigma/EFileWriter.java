@@ -16,17 +16,22 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.imageio.ImageIO;
+
 import org.lateralgm.components.impl.ResNode;
-import org.lateralgm.main.LGM;
 import org.lateralgm.main.Util;
+import org.lateralgm.resources.Background;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Script;
+import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Resource.Kind;
+import org.lateralgm.util.PropertyMap;
 
 public class EFileWriter
 	{
@@ -52,10 +57,36 @@ public class EFileWriter
 			this.os = os;
 			}
 
-		public void next(String next) throws IOException
+		public void writeln(String str) throws IOException
+			{
+			write(str);
+			newLine();
+			}
+
+		/**
+		 * Begins writing a new ZIP file entry and positions the stream to the
+		 * start of the entry data. Closes the current entry if still active.
+		 */
+		public void next(String name) throws IOException
 			{
 			flush();
-			os.putNextEntry(new ZipEntry(next));
+			os.putNextEntry(new ZipEntry(name));
+			}
+
+		/**
+		 * Finishes writing the contents of the ZIP output stream without closing
+		 * the underlying stream. This is useful if you wish to use another compression
+		 * method or wish to write more data beside the zip file.
+		 */
+		public void finish() throws IOException
+			{
+			os.finish();
+			}
+
+		public OutputStream toStream() throws IOException
+			{
+			flush();
+			return os;
 			}
 		}
 
@@ -83,13 +114,14 @@ public class EFileWriter
 			Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
 
 			os.next(dir + name + EY);
-			os.write("Data: " + name + getExt());
+			os.writeln("Data: " + name + getExt());
 			writeProperties(os,r);
 
 			os.next(dir + name + getExt());
 			writeData(os,r);
 			}
 
+		/** The extension, which must include the preceding dot, e.g. ".ext" */
 		public abstract String getExt();
 
 		public abstract void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException;
@@ -103,6 +135,7 @@ public class EFileWriter
 	static Map<Kind,String> typestrs = new HashMap<Kind,String>();
 	static
 		{
+		writers.put(Kind.BACKGROUND,new BackgroundIO());
 		writers.put(Kind.SCRIPT,new ScriptIO());
 
 		typestrs.put(Kind.SPRITE,"spr");
@@ -120,12 +153,12 @@ public class EFileWriter
 		}
 
 	//Constructors
-	public void writeEgmFile(File loc)
+	public static void writeEgmFile(File loc, ResNode tree)
 		{
 		try
 			{
 			FileOutputStream fos = new FileOutputStream(loc);
-			writeEgmFile(fos);
+			writeEgmFile(fos,tree);
 			fos.close();
 			}
 		catch (IOException e)
@@ -135,20 +168,23 @@ public class EFileWriter
 			}
 		}
 
-	public void writeEgmFile(OutputStream os) throws IOException
+	public static void writeEgmFile(OutputStream os, ResNode tree) throws IOException
 		{
-		writeEgmFile(new ZipOutputWriter(os));
+		ZipOutputWriter z = new ZipOutputWriter(os);
+		writeEgmFile(z,tree);
+		z.finish();
 		}
 
-	public void writeEgmFile(ZipOutputWriter os) throws IOException
+	public static void writeEgmFile(ZipOutputWriter os, ResNode tree) throws IOException
 		{
-		writeNodeChildren(os,LGM.root,"");
+		writeNodeChildren(os,tree,"");
 		os.flush();
 		}
 
 	//Workhorse methods
 	/** Recursively writes out the tree nodes into the zip. */
-	public void writeNodeChildren(ZipOutputWriter os, ResNode node, String dir) throws IOException
+	public static void writeNodeChildren(ZipOutputWriter os, ResNode node, String dir)
+			throws IOException
 		{
 		os.next(dir + "toc.txt");
 
@@ -178,7 +214,8 @@ public class EFileWriter
 		}
 
 	/** Looks up the registered writer for this resource and invokes the write method */
-	public void writeResource(ZipOutputWriter os, ResNode child, String dir) throws IOException
+	public static void writeResource(ZipOutputWriter os, ResNode child, String dir)
+			throws IOException
 		{
 		ResourceWriter writer = writers.get(child.kind);
 		if (writer == null)
@@ -190,6 +227,33 @@ public class EFileWriter
 		}
 
 	//Modules
+	//SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
+
+	static class BackgroundIO extends DataResourceWriter
+		{
+		@Override
+		public String getExt()
+			{
+			return ".png";
+			}
+
+		@Override
+		public void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException
+			{
+			ImageIO.write(((Background) r).getBackgroundImage(),"png",os.toStream());
+			}
+
+		@Override
+		public void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException
+			{
+			PropertyMap<PBackground> p = ((Background) r).properties;
+			for (Entry<PBackground,Object> e : p.entrySet())
+				os.writeln(e.getKey().name() + ": " + e.getValue());
+			//TRANSPARENT,SMOOTH_EDGES,PRELOAD,USE_AS_TILESET,TILE_WIDTH,TILE_HEIGHT
+			//H_OFFSET,V_OFFSET,H_SEP,V_SEP
+			}
+		}
+
 	static class ScriptIO extends DataResourceWriter
 		{
 		@Override
