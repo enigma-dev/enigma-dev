@@ -35,7 +35,7 @@ int compile_writeGlobals(EnigmaStruct*,parsed_object*);
 int compile_writeObjectData(EnigmaStruct*,parsed_object*);
 int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*);
 int compile_writeFontInfo(EnigmaStruct* es);
-int compile_writeRoomData(EnigmaStruct* es);
+int compile_writeRoomData(EnigmaStruct* es,parsed_object *EGMglobal);
 int compile_writeDefraggedEvents(EnigmaStruct* es);
 
 // Resources added to module

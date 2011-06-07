@@ -374,7 +374,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   irrr();
   
   edbg << "Writing room data" << flushl;
-  res = compile_writeRoomData(es);
+  res = compile_writeRoomData(es,&EGMglobal);
   irrr();
 
 

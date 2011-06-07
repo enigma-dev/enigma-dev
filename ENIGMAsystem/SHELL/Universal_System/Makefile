@@ -12,6 +12,8 @@ $(OBJECTS)/compression.o: compression.cpp ../../additional/zlib/zlib.h ../../add
 	$(CXX) -c compression.cpp		-o $(OBJECTS)/compression.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/darray.o: darray.cpp
 	$(CXX) -c darray.cpp		-o $(OBJECTS)/darray.o $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/dynamic_args.o: dynamic_args.cpp var4.h var_te.h dynamic_args.h
+	$(CXX) -c dynamic_args.cpp		-o $(OBJECTS)/dynamic_args.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/ENIGMA_GLOBALS.o: ENIGMA_GLOBALS.cpp
 	$(CXX) -c ENIGMA_GLOBALS.cpp		-o $(OBJECTS)/ENIGMA_GLOBALS.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/estring.o: estring.cpp var4.h var_te.h
@@ -74,7 +76,7 @@ $(OBJECTS)/WITHconstruct.o: WITHconstruct.cpp
 $(OBJECTS):
 	-mkdir -p $(OBJECTS)
 
-this: $(OBJECTS) $(OBJECTS)/backgroundinit.o $(OBJECTS)/backgroundstruct.o $(OBJECTS)/CallbackArrays.o $(OBJECTS)/collisions_object.o $(OBJECTS)/compression.o $(OBJECTS)/darray.o $(OBJECTS)/ENIGMA_GLOBALS.o $(OBJECTS)/estring.o $(OBJECTS)/events.o $(OBJECTS)/event_system.o $(OBJECTS)/fileio.o $(OBJECTS)/fontinit.o $(OBJECTS)/fontstruct.o $(OBJECTS)/globalupdate.o $(OBJECTS)/highscore_functions.o $(OBJECTS)/IMGloading.o $(OBJECTS)/instance.o $(OBJECTS)/instance_system.o $(OBJECTS)/loading.o $(OBJECTS)/mathnc.o $(OBJECTS)/object.o $(OBJECTS)/planar_object.o $(OBJECTS)/rectpack.o $(OBJECTS)/reflexive_types.o $(OBJECTS)/resource_data.o $(OBJECTS)/roomsystem.o $(OBJECTS)/simplecollisions.o $(OBJECTS)/soundinit.o $(OBJECTS)/spriteinit.o $(OBJECTS)/spritestruct.o $(OBJECTS)/terminal_io.o $(OBJECTS)/transform_object.o $(OBJECTS)/var4.o $(OBJECTS)/var4_lua.o $(OBJECTS)/WITHconstruct.o 
+this: $(OBJECTS) $(OBJECTS)/backgroundinit.o $(OBJECTS)/backgroundstruct.o $(OBJECTS)/CallbackArrays.o $(OBJECTS)/collisions_object.o $(OBJECTS)/compression.o $(OBJECTS)/darray.o $(OBJECTS)/dynamic_args.o $(OBJECTS)/ENIGMA_GLOBALS.o $(OBJECTS)/estring.o $(OBJECTS)/events.o $(OBJECTS)/event_system.o $(OBJECTS)/fileio.o $(OBJECTS)/fontinit.o $(OBJECTS)/fontstruct.o $(OBJECTS)/globalupdate.o $(OBJECTS)/highscore_functions.o $(OBJECTS)/IMGloading.o $(OBJECTS)/instance.o $(OBJECTS)/instance_system.o $(OBJECTS)/loading.o $(OBJECTS)/mathnc.o $(OBJECTS)/object.o $(OBJECTS)/planar_object.o $(OBJECTS)/rectpack.o $(OBJECTS)/reflexive_types.o $(OBJECTS)/resource_data.o $(OBJECTS)/roomsystem.o $(OBJECTS)/simplecollisions.o $(OBJECTS)/soundinit.o $(OBJECTS)/spriteinit.o $(OBJECTS)/spritestruct.o $(OBJECTS)/terminal_io.o $(OBJECTS)/transform_object.o $(OBJECTS)/var4.o $(OBJECTS)/var4_lua.o $(OBJECTS)/WITHconstruct.o 
 
 clean:
 	-rm .eobjs/*/*/*

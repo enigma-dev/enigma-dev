@@ -44,7 +44,7 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-int compile_writeRoomData(EnigmaStruct* es)
+int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out);
 
@@ -146,7 +146,11 @@ wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcrea
       cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::error << flushl;
       return E_ERROR_SYNTAX;
     }
-    wto << parser_main(cme);
+    parsed_object par;
+    parsed_event ev(&par);
+    parser_main(cme,&ev);
+    parser_secondary(ev.code,ev.synt,EGMglobal,&par);
+    print_to_file(ev.code,ev.synt,ev.strc,ev.strs,2,wto);
     wto << "\n}\n";
   }
 

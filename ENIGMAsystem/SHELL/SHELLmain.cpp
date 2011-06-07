@@ -33,6 +33,7 @@
 ///////////////////////////////
 
 #include "Universal_System/var4.h"
+#include "Universal_System/dynamic_args.h"
 
 #include "Universal_System/mathnc.h"
 #include "Universal_System/estring.h"
@@ -91,6 +92,17 @@ extern int amain();
 
 #include "Universal_System/actions.h"
 #include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
+
+double max(varargs t)
+{
+  register int ret = 0, tst;
+  for (int i = 0; i < t.argc; i++)
+    if ((tst = t.get(i)) > ret)
+      ret = tst;
+  return ret;
+}
+#define max(args...) max((varargs(),args))
+
 
 #ifndef ENIGMA_PARSER_RUN
   #include "Universal_System/with.h"
