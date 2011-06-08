@@ -41,7 +41,7 @@ using namespace std;
 
 string REFERENCE_POSTFIX(string ref) {
   unsigned pos, spos;
-  bool makeItConst = true;
+  bool makeItConst = false;
   int lvl = 0;
   for (pos = 0; pos < ref.length(); pos++)
   {
