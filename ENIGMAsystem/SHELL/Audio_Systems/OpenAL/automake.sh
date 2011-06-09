@@ -21,7 +21,7 @@ echo "" >> Makefile;
 
 #create the eobjs folder
 echo "\$(OBJECTS):" >> Makefile;
-echo "	-mkdir -p \$(OBJECTS)" >> Makefile;
+echo "	-mkdir -p \$(OBJECTS) || mkdir \"\$(OBJECTS)\"" >> Makefile;
 echo "" >> Makefile;
 
 #generate targets for each ENIGMA mode.

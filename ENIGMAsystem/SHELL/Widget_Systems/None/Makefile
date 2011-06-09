@@ -4,7 +4,7 @@ $(OBJECTS)/nowidget_impl.o: nowidget_impl.cpp
 	$(CXX) -c nowidget_impl.cpp		-o $(OBJECTS)/nowidget_impl.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/nowidget_impl.o 
 

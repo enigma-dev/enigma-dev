@@ -35,7 +35,7 @@ echo "" >> Makefile;
 
 # Create the eobjs folder
 echo "\$(OBJECTS):" >> Makefile;
-echo "	-mkdir -p \$(OBJECTS)" >> Makefile;
+echo "	-mkdir -p \$(OBJECTS) || mkdir \"\$(OBJECTS)\"" >> Makefile;
 echo "" >> Makefile;
 
 # Generate target

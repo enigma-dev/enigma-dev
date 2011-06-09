@@ -4,7 +4,7 @@ $(OBJECTS)/iphoneOpenAL.o: iphoneOpenAL.cpp iphoneOpenAL.h
 	$(CXX) -c iphoneOpenAL.cpp		-o $(OBJECTS)/iphoneOpenAL.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/iphoneOpenAL.o 
 

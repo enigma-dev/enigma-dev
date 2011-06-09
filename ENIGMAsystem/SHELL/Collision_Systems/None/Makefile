@@ -4,7 +4,7 @@ $(OBJECTS)/placeholderlinks.o: placeholderlinks.cpp
 	$(CXX) -c placeholderlinks.cpp		-o $(OBJECTS)/placeholderlinks.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/placeholderlinks.o 
 

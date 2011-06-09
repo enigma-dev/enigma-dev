@@ -10,7 +10,7 @@ $(OBJECTS)/widgets.o: widgets.cpp
 	$(CXX) -c widgets.cpp		-o $(OBJECTS)/widgets.o $(PKGARGS) $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/dialogs.o $(OBJECTS)/gtk_impl.o $(OBJECTS)/widgets.o 
 

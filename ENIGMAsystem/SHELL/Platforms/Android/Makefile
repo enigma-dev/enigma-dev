@@ -12,7 +12,7 @@ $(OBJECTS)/file_manip.o: file_manip.cpp
 	$(CXX) -c file_manip.cpp		-o $(OBJECTS)/file_manip.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/AndroidDialog.o $(OBJECTS)/AndroidFunctions.o $(OBJECTS)/AndroidWindow.o $(OBJECTS)/app-android.o $(OBJECTS)/file_manip.o 
 

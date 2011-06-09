@@ -4,7 +4,7 @@ $(OBJECTS)/as_basic.o: as_basic.cpp as_basic.h alure/include/AL/alure.h alure/co
 	g++ -c as_basic.cpp		-o $(OBJECTS)/as_basic.o $(FLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/as_basic.o 
 	cd alure  && $(MAKE) static DEST="../$(OBJECTS)" ECFLAGS="$(ECFLAGS)" ECPPFLAGS="$(ECPPFLAGS)"

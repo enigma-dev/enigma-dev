@@ -74,7 +74,7 @@ $(OBJECTS)/WITHconstruct.o: WITHconstruct.cpp
 	$(CXX) -c WITHconstruct.cpp		-o $(OBJECTS)/WITHconstruct.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/backgroundinit.o $(OBJECTS)/backgroundstruct.o $(OBJECTS)/CallbackArrays.o $(OBJECTS)/collisions_object.o $(OBJECTS)/compression.o $(OBJECTS)/darray.o $(OBJECTS)/dynamic_args.o $(OBJECTS)/ENIGMA_GLOBALS.o $(OBJECTS)/estring.o $(OBJECTS)/events.o $(OBJECTS)/event_system.o $(OBJECTS)/fileio.o $(OBJECTS)/fontinit.o $(OBJECTS)/fontstruct.o $(OBJECTS)/globalupdate.o $(OBJECTS)/highscore_functions.o $(OBJECTS)/IMGloading.o $(OBJECTS)/instance.o $(OBJECTS)/instance_system.o $(OBJECTS)/loading.o $(OBJECTS)/mathnc.o $(OBJECTS)/object.o $(OBJECTS)/planar_object.o $(OBJECTS)/rectpack.o $(OBJECTS)/reflexive_types.o $(OBJECTS)/resource_data.o $(OBJECTS)/roomsystem.o $(OBJECTS)/simplecollisions.o $(OBJECTS)/soundinit.o $(OBJECTS)/spriteinit.o $(OBJECTS)/spritestruct.o $(OBJECTS)/terminal_io.o $(OBJECTS)/transform_object.o $(OBJECTS)/var4.o $(OBJECTS)/var4_lua.o $(OBJECTS)/WITHconstruct.o 
 

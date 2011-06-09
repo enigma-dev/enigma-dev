@@ -34,7 +34,7 @@ $(OBJECTS)/OPENGLStd.o: OPENGLStd.cpp OpenGLHeaders.h ../../Universal_System/var
 	$(CXX) -c OPENGLStd.cpp		-o $(OBJECTS)/OPENGLStd.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/graphics_object.o $(OBJECTS)/GSbackground.o $(OBJECTS)/GSblend.o $(OBJECTS)/GScolors.o $(OBJECTS)/GScurves.o $(OBJECTS)/GSd3d.o $(OBJECTS)/GSenable.o $(OBJECTS)/GSfont.o $(OBJECTS)/GSmiscextra.o $(OBJECTS)/GSprmtvs.o $(OBJECTS)/GSscreen.o $(OBJECTS)/GSsprite.o $(OBJECTS)/GSstdraw.o $(OBJECTS)/GSsurface.o $(OBJECTS)/GStextures.o $(OBJECTS)/OPENGLStd.o 
 

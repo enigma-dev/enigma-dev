@@ -12,7 +12,7 @@ $(OBJECTS)/XLIBwindow.o: XLIBwindow.cpp ../../Universal_System/CallbackArrays.h
 	$(CXX) -c XLIBwindow.cpp		-o $(OBJECTS)/XLIBwindow.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/file_manip.o $(OBJECTS)/XLIBdialog.o $(OBJECTS)/XLIBmain.o $(OBJECTS)/XLIBthreads.o $(OBJECTS)/XLIBwindow.o 
 

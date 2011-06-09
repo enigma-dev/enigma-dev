@@ -4,7 +4,7 @@ $(OBJECTS)/AndroidAudio.o: AndroidAudio.cpp
 	$(CXX) -c AndroidAudio.cpp		-o $(OBJECTS)/AndroidAudio.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/AndroidAudio.o 
 

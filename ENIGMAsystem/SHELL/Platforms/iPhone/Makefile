@@ -18,7 +18,7 @@ $(OBJECTS)/main.o: main.m
 	$(CXX) -c main.m		-o $(OBJECTS)/main.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/CocoaDialog.o $(OBJECTS)/CocoaFunctions.o $(OBJECTS)/CocoaMain.o $(OBJECTS)/CocoaWindow.o $(OBJECTS)/file_manip.o $(OBJECTS)/EnigmaXcodeAppDelegate.o $(OBJECTS)/iPhoneEnigmaView.o $(OBJECTS)/main.o 
 

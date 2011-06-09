@@ -18,7 +18,7 @@ $(OBJECTS)/WINDOWSwindow.o: WINDOWSwindow.cpp ../../Universal_System/var4.h ../.
 	$(CXX) -c WINDOWSwindow.cpp		-o $(OBJECTS)/WINDOWSwindow.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
-	-mkdir -p $(OBJECTS)
+	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
 this: $(OBJECTS) $(OBJECTS)/externals.o $(OBJECTS)/file_manip.o $(OBJECTS)/WINDOWScallback.o $(OBJECTS)/WINDOWSfonts.o $(OBJECTS)/WINDOWSmain.o $(OBJECTS)/WINDOWSshow_error.o $(OBJECTS)/WINDOWSstd.o $(OBJECTS)/WINDOWSwindow.o 
 
