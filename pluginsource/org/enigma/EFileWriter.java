@@ -23,6 +23,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
+import org.enigma.messages.Messages;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
@@ -36,7 +37,8 @@ import org.lateralgm.util.PropertyMap;
 
 public class EFileWriter
 	{
-	public static final String EY = ".ey";
+	public static final String EY = ".ey"; //$NON-NLS-1$
+	public static final String SEPARATOR = "/"; //$NON-NLS-1$
 
 	//Modularity Classes
 	/**
@@ -121,7 +123,7 @@ public class EFileWriter
 			String fn = name + getExt(r);
 
 			os.next(dir + name + EY);
-			os.writeln("Data: " + fn);
+			os.writeln("Data: " + fn); //$NON-NLS-1$
 			writeProperties(os,r);
 
 			os.next(dir + fn);
@@ -150,7 +152,7 @@ public class EFileWriter
 			{
 			PropertyMap<? extends Enum<?>> p = r.properties;
 			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
-				if (allowProperty(e.getKey().name())) os.writeln(e.getKey().name() + ": " + e.getValue());
+				if (allowProperty(e.getKey().name())) os.writeln(e.getKey().name() + ": " + e.getValue()); //$NON-NLS-1$
 			}
 
 		/** Returns whether the following property should be allowed in the properties file */
@@ -168,18 +170,18 @@ public class EFileWriter
 		writers.put(Kind.BACKGROUND,new BackgroundIO());
 		writers.put(Kind.SCRIPT,new ScriptIO());
 
-		typestrs.put(Kind.SPRITE,"spr");
-		typestrs.put(Kind.SOUND,"snd");
-		typestrs.put(Kind.BACKGROUND,"bkg");
-		typestrs.put(Kind.PATH,"pth");
-		typestrs.put(Kind.SCRIPT,"scr");
-		typestrs.put(Kind.FONT,"fnt");
-		typestrs.put(Kind.TIMELINE,"tml");
-		typestrs.put(Kind.OBJECT,"obj");
-		typestrs.put(Kind.ROOM,"rom");
-		typestrs.put(Kind.GAMEINFO,"inf");
-		typestrs.put(Kind.GAMESETTINGS,"set");
-		typestrs.put(Kind.EXTENSIONS,"ext");
+		typestrs.put(Kind.SPRITE,"spr"); //$NON-NLS-1$
+		typestrs.put(Kind.SOUND,"snd"); //$NON-NLS-1$
+		typestrs.put(Kind.BACKGROUND,"bkg"); //$NON-NLS-1$
+		typestrs.put(Kind.PATH,"pth"); //$NON-NLS-1$
+		typestrs.put(Kind.SCRIPT,"scr"); //$NON-NLS-1$
+		typestrs.put(Kind.FONT,"fnt"); //$NON-NLS-1$
+		typestrs.put(Kind.TIMELINE,"tml"); //$NON-NLS-1$
+		typestrs.put(Kind.OBJECT,"obj"); //$NON-NLS-1$
+		typestrs.put(Kind.ROOM,"rom"); //$NON-NLS-1$
+		typestrs.put(Kind.GAMEINFO,"inf"); //$NON-NLS-1$
+		typestrs.put(Kind.GAMESETTINGS,"set"); //$NON-NLS-1$
+		typestrs.put(Kind.EXTENSIONS,"ext"); //$NON-NLS-1$
 		}
 
 	//Constructors
@@ -207,7 +209,7 @@ public class EFileWriter
 
 	public static void writeEgmFile(ZipOutputWriter os, ResNode tree) throws IOException
 		{
-		writeNodeChildren(os,tree,"");
+		writeNodeChildren(os,tree,""); //$NON-NLS-1$
 		os.flush();
 		}
 
@@ -216,7 +218,7 @@ public class EFileWriter
 	public static void writeNodeChildren(ZipOutputWriter os, ResNode node, String dir)
 			throws IOException
 		{
-		os.next(dir + "toc.txt");
+		os.next(dir + "toc.txt"); //$NON-NLS-1$
 
 		int children = node.getChildCount();
 		for (int i = 0; i < children; i++)
@@ -236,7 +238,7 @@ public class EFileWriter
 				}
 			else
 				{
-				String cdir = dir + child.getUserObject() + "/";
+				String cdir = dir + child.getUserObject() + SEPARATOR;
 				os.next(cdir);
 				writeNodeChildren(os,child,cdir);
 				}
@@ -250,7 +252,7 @@ public class EFileWriter
 		ResourceWriter writer = writers.get(child.kind);
 		if (writer == null)
 			{
-			System.err.println("No registered writers for resource of kind " + child.kind);
+			System.err.println(Messages.format("EFileWriter.NO_WRITER",child.kind)); //$NON-NLS-1$
 			return;
 			}
 		writer.write(os,child,dir);
@@ -285,13 +287,13 @@ public class EFileWriter
 		@Override
 		public String getExt(Resource<?,?> r)
 			{
-			return ".png";
+			return ".png"; //$NON-NLS-1$
 			}
 
 		@Override
 		public void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException
 			{
-			ImageIO.write(((Background) r).getBackgroundImage(),"png",os.toStream());
+			ImageIO.write(((Background) r).getBackgroundImage(),"png",os.toStream()); //$NON-NLS-1$
 			}
 
 		@Override
@@ -306,7 +308,7 @@ public class EFileWriter
 		@Override
 		public String getExt(Resource<?,?> r)
 			{
-			return ".scr";
+			return ".scr"; //$NON-NLS-1$
 			}
 
 		@Override
@@ -356,10 +358,10 @@ public class EFileWriter
 		{
 		DataInputStream in = new DataInputStream(is);
 		long magic = in.readLong();
-		if (magic != PNG_MAGIC) throw new IOException(String.format("%016X",magic) + " != png");
+		if (magic != PNG_MAGIC) throw new IOException(String.format("%016X",magic) + " != png"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Chunk c = readChunk(in);
-		if (c.id != IHDR_TYPE) throw new IOException(String.format("%08X",c.id) + " != IHDR");
+		if (c.id != IHDR_TYPE) throw new IOException(String.format("%08X",c.id) + " != IHDR"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		IHDR h = new IHDR();
 		DataInputStream d = new DataInputStream(c.data);
@@ -398,7 +400,7 @@ public class EFileWriter
 		byte[] buf = new byte[size + 4];
 		in.read(buf);
 		int crc1 = crc(buf), crc2 = in.readInt();
-		if (crc1 != crc2) throw new IOException("CRC " + crc1 + " != " + crc2);
+		if (crc1 != crc2) throw new IOException("CRC " + crc1 + " != " + crc2); //$NON-NLS-1$ //$NON-NLS-2$
 		ByteArrayInputStream data = new ByteArrayInputStream(buf);
 
 		byte[] bid = new byte[4];

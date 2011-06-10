@@ -86,8 +86,8 @@ public class EnigmaThread extends Thread
 				{
 				if (g_out == null)
 					{
-					System.out.println("> " + line);
-					ef.ta.append(line + "\n");
+					System.out.println("> " + line); //$NON-NLS-1$
+					ef.ta.append(line + '\n'); //internally stored as \n according to java
 					ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
 					}
 				else

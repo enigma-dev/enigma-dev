@@ -8,16 +8,14 @@
 
 package org.enigma.backend.other;
 
-import org.lateralgm.resources.sub.Event;
-
 import com.sun.jna.Structure;
 
 public class Trigger extends Structure
 	{
-	String name = "";
-	String condition = "";
-	int checkStep = Event.EV_STEP_NORMAL;
-	String constant = "";
+	String name;
+	String condition;
+	int checkStep;
+	String constant;
 
 	public static class ByReference extends Trigger implements Structure.ByReference
 		{

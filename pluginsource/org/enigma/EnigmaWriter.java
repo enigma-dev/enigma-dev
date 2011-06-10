@@ -92,6 +92,8 @@ import org.lateralgm.resources.sub.Instance.PInstance;
 import org.lateralgm.resources.sub.Tile.PTile;
 import org.lateralgm.resources.sub.View.PView;
 
+import com.sun.xml.internal.bind.marshaller.Messages;
+
 public final class EnigmaWriter
 	{
 	protected GmFile i;
@@ -409,7 +411,7 @@ public final class EnigmaWriter
 		for (int s = 0; s < qs.size(); s++)
 			{
 			Script oo = osl[s + isl.length];
-			oo.name = "lib" + qs.get(s).parentId + "_action" + qs.get(s).id;
+			oo.name = "lib" + qs.get(s).parentId + "_action" + qs.get(s).id; //$NON-NLS-1$ //$NON-NLS-2$
 			oo.id = -s - 2;
 			oo.code = qs.get(s).execInfo;
 			}
@@ -426,7 +428,7 @@ public final class EnigmaWriter
 		// Populate the default font, called "EnigmaDefault", id -1
 		java.awt.Font iF = new java.awt.Font(java.awt.Font.DIALOG,java.awt.Font.PLAIN,12);
 		Font oF = ofl[0];
-		oF.name = "EnigmaDefault";
+		oF.name = "EnigmaDefault"; //$NON-NLS-1$
 		oF.id = -1;
 		oF.fontName = iF.getFontName();
 		oF.size = iF.getSize();
@@ -815,7 +817,7 @@ public final class EnigmaWriter
 
 	public static String getActionsCode(ActionContainer ac)
 		{
-		final String nl = System.getProperty("line.separator");
+		final String nl = System.getProperty("line.separator"); //$NON-NLS-1$
 		StringBuilder code = new StringBuilder();
 		for (Action act : ac.actions)
 			{
@@ -824,10 +826,8 @@ public final class EnigmaWriter
 				{
 				if (!actionDemise)
 					{
-					String mess = "Warning, you have a D&D action which is unsupported by this compiler."
-							+ " This and future unsupported D&D actions will be discarded. (LibAction not found"
-							+ " in moment/event " + ac.toString() + ")";
-					JOptionPane.showMessageDialog(null,mess);
+					JOptionPane.showMessageDialog(null,Messages.format(
+							"EnigmaWriter.UNSUPPORTED_DND",ac.toString())); //$NON-NLS-1$
 					actionDemise = true;
 					}
 				continue;
@@ -842,22 +842,22 @@ public final class EnigmaWriter
 					code.append(args.get(0).getVal()).append(nl);
 					break;
 				case Action.ACT_ELSE:
-					code.append("else ");
+					code.append("else "); //$NON-NLS-1$
 					break;
 				case Action.ACT_END:
 					code.append('}');
 					break;
 				case Action.ACT_EXIT:
-					code.append("exit ");
+					code.append("exit "); //$NON-NLS-1$
 					break;
 				case Action.ACT_REPEAT:
-					code.append("repeat (").append(args.get(0).getVal()).append(") ");
+					code.append("repeat (").append(args.get(0).getVal()).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
 				case Action.ACT_VARIABLE:
 					if (act.isRelative())
-						code.append(args.get(0).getVal()).append(" += ").append(args.get(1).getVal()).append(nl);
+						code.append(args.get(0).getVal()).append(" += ").append(args.get(1).getVal()).append(nl); //$NON-NLS-1$
 					else
-						code.append(args.get(0).getVal()).append(" = ").append(args.get(1).getVal()).append(nl);
+						code.append(args.get(0).getVal()).append(" = ").append(args.get(1).getVal()).append(nl); //$NON-NLS-1$
 					break;
 				case Action.ACT_NORMAL:
 					{
@@ -869,35 +869,40 @@ public final class EnigmaWriter
 							{
 							if (!actionDemise)
 								{
-								String mess = "Warning, you have a D&D action which is unsupported by this compiler."
-										+ " This and future unsupported D&D actions will be discarded. (Question + Applies To"
-										+ " in moment/event " + ac.toString() + " in library ";
-								if (la.parent == null || la.parent.tabCaption.length() == 0)
-									mess += la.parentId;
-								else
-									mess += la.parent.tabCaption;
-								mess += " action " + (la.name.length() == 0 ? la.id : la.name) + ")";
+								//								String mess = "Warning, you have a D&D action which is unsupported by this compiler."
+								//										+ " This and future unsupported D&D actions will be discarded. (Question + Applies To"
+								//										+ " in moment/event " + ac.toString() + " in library ";
+								String library = (la.parent == null || la.parent.tabCaption.isEmpty()) ? Integer.toString(la.parentId)
+										: la.parent.tabCaption;
+								//								if (la.parent == null || la.parent.tabCaption.length() == 0)
+								//									mess += la.parentId;
+								//								else
+								//									mess += la.parent.tabCaption;
+								String action = la.name.length() == 0 ? Integer.toString(la.id) : la.name;
+								//								mess += " action " + (la.name.length() == 0 ? la.id : la.name) + ")";
+								String mess = Messages.format(
+										"EnigmaWriter.UNSUPPORTED_DND_QA",ac.toString(),library,action); //$NON-NLS-1$
 								JOptionPane.showMessageDialog(null,mess);
 								actionDemise = true;
 								}
 							continue;
 							}
 						if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
-							code.append("with (other) {");
+							code.append("with (other) {"); //$NON-NLS-1$
 						else
-							code.append("with (").append(apto.get().getName()).append(") {");
+							code.append("with (").append(apto.get().getName()).append(") {"); //$NON-NLS-1$ //$NON-NLS-2$
 						}
-					if (la.question) code.append("if ");
+					if (la.question) code.append("if "); //$NON-NLS-1$
 					if (act.isNot()) code.append('!');
 					if (la.allowRelative)
 						{
 						if (la.question)
-							code.append("(argument_relative = ").append(act.isRelative()).append(", ");
+							code.append("(argument_relative = ").append(act.isRelative()).append(", "); //$NON-NLS-1$ //$NON-NLS-2$
 						else
-							code.append("{argument_relative = ").append(act.isRelative()).append("; ");
+							code.append("{argument_relative = ").append(act.isRelative()).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					if (la.question && la.execType == Action.EXEC_CODE)
-						code.append("lib").append(la.parentId).append("_action").append(la.id);
+						code.append("lib").append(la.parentId).append("_action").append(la.id); //$NON-NLS-1$ //$NON-NLS-2$
 					else
 						code.append(la.execInfo);
 					if (la.execType == Action.EXEC_FUNCTION)
@@ -928,18 +933,18 @@ public final class EnigmaWriter
 			{
 			case Argument.ARG_BOTH:
 				//treat as literal if starts with quote (")
-				if (val.startsWith("\"") || val.startsWith("'")) return val;
+				if (val.startsWith("\"") || val.startsWith("'")) return val; //$NON-NLS-1$ //$NON-NLS-2$
 				//else fall through
 			case Argument.ARG_STRING:
-				return "\"" + val.replace("\\","\\\\").replace("\"","\\\"") + "\"";
+				return "\"" + val.replace("\\","\\\\").replace("\"","\\\"") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 			case Argument.ARG_BOOLEAN:
-				return Boolean.toString(!val.equals("0"));
+				return Boolean.toString(!val.equals("0")); //$NON-NLS-1$
 			case Argument.ARG_MENU:
 				return val;
 			case Argument.ARG_COLOR:
 				try
 					{
-					return String.format("$%06X",Integer.parseInt(val));
+					return String.format("$%06X",Integer.parseInt(val)); //$NON-NLS-1$
 					}
 				catch (NumberFormatException e)
 					{
@@ -953,7 +958,7 @@ public final class EnigmaWriter
 					}
 				catch (NullPointerException e)
 					{
-					val = "-1";
+					val = "-1"; //$NON-NLS-1$
 					}
 				return val;
 			}

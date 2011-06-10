@@ -32,10 +32,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 
+import org.enigma.messages.Messages;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.main.LGM;
-import org.lateralgm.messages.Messages;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
@@ -59,7 +59,7 @@ import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 public class EnigmaUpdater
 	{
-	public static final String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev/";
+	public static final String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev/"; //$NON-NLS-1$
 	public static final boolean SUBFOLDER = false;
 	public static boolean revert;
 
@@ -77,7 +77,7 @@ public class EnigmaUpdater
 				{
 				String repo = askCheckout();
 				if (repo == null) return -1;
-				ef.ta.append("Downloading libraries. This may take a while.\n");
+				ef.ta.append(Messages.getString("EnigmaUpdater.DO_UPDATE") + '\n'); //$NON-NLS-1$
 				ef.setVisible(true);
 
 				final File me = getThisFile();
@@ -88,7 +88,7 @@ public class EnigmaUpdater
 							{
 							if (event.getFile().equals(LGM.workDir) || event.getFile().equals(me))
 								needsRestart = true;
-							ef.ta.append(event.getAction() + " " + event.getFile() + "\n");
+							ef.ta.append(event.getAction() + " " + event.getFile() + '\n'); //$NON-NLS-1$
 							ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
 							}
 
@@ -107,9 +107,7 @@ public class EnigmaUpdater
 			if (rev != -1L)
 				{
 				String title = "Update" + (lrev != -1 ? " from r" + lrev : "") + " to r" + rev;
-				if (JOptionPane.showConfirmDialog(
-						null,
-						"Enigma has detected that newer libraries may exist. Would you like us to fetch these for you?",
+				if (JOptionPane.showConfirmDialog(null,Messages.getString("EnigmaUpdater.ASK_UPDATE"), //$NON-NLS-1$
 						title,JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) svn.update();
 				System.out.println("ENIGMA r" + rev);
 				return 1;
@@ -118,7 +116,7 @@ public class EnigmaUpdater
 			}
 		catch (SVNCancelException e)
 			{
-			System.out.println("Checkout cancelled. It will hopefully be resumed next time.");
+			System.out.println(Messages.getString("EnigmaUpdater.CHECKOUT_CANCELLED")); //$NON-NLS-1$
 			return -1;
 			}
 		catch (SVNException e)
@@ -134,7 +132,7 @@ public class EnigmaUpdater
 		if (path == null)
 			{
 			path = EnigmaRunner.WORKDIR;
-			if (SUBFOLDER) path = new File(path,"enigma");
+			if (SUBFOLDER) path = new File(path,"enigma"); //$NON-NLS-1$
 			}
 
 		if (cliMan == null)
@@ -154,8 +152,7 @@ public class EnigmaUpdater
 		//		JPanel p = new JPanel();
 		//		p.setLayout(new BoxLayout(p,));
 
-		JLabel l = new JLabel(
-				"Enigma is missing libraries.\nWould you like us to fetch these libraries for you?");
+		JLabel l = new JLabel(Messages.getString("EnigmaUpdater.ASK_CHECKOUT")); //$NON-NLS-1$
 		l.setAlignmentX(JLabel.CENTER_ALIGNMENT);
 		box.add(l);
 
@@ -164,27 +161,28 @@ public class EnigmaUpdater
 		box.add(p2);
 
 		ButtonGroup bg = new ButtonGroup();
-		stable = new JRadioButton("Stable",true);
+		stable = new JRadioButton(Messages.getString("EnigmaUpdater.CO_STABLE"),true); //$NON-NLS-1$
 		bg.add(stable);
 		p2.add(stable);
-		testing = new JRadioButton("Testing");
+		testing = new JRadioButton(Messages.getString("EnigmaUpdater.CO_TESTING")); //$NON-NLS-1$
 		bg.add(testing);
 		p2.add(testing);
-		trunk = new JRadioButton("Dev Trunk");
+		trunk = new JRadioButton(Messages.getString("EnigmaUpdater.CO_DEV_TRUNK")); //$NON-NLS-1$
 		bg.add(trunk);
 		p2.add(trunk);
 
-		noRevert = new JCheckBox("I'm a dev, don't touch my changes.");
+		noRevert = new JCheckBox(Messages.getString("EnigmaUpdater.CO_NO_REVERT")); //$NON-NLS-1$
 		noRevert.setAlignmentX(JCheckBox.CENTER_ALIGNMENT);
 		box.add(noRevert);
 
-		if (JOptionPane.showConfirmDialog(null,box,"Checkout",JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+		String title = Messages.getString("EnigmaUpdater.ASK_CHECKOUT_TITLE"); //$NON-NLS-1$
+		if (JOptionPane.showConfirmDialog(null,box,title,JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
 			return null;
 
 		revert = !noRevert.isSelected();
-		if (stable.isSelected()) return svn + "tags/update-stable";
-		if (testing.isSelected()) return svn + "tags/update-test";
-		return svn + "trunk";
+		if (stable.isSelected()) return svn + "tags/update-stable"; //$NON-NLS-1$
+		if (testing.isSelected()) return svn + "tags/update-test"; //$NON-NLS-1$
+		return svn + "trunk"; //$NON-NLS-1$
 		}
 
 	private boolean needsCheckout()
@@ -201,7 +199,7 @@ public class EnigmaUpdater
 					{
 					SVNStatusType type = status.getContentsStatus();
 					if (type == SVNStatusType.STATUS_UNVERSIONED) return;
-					System.out.println(status.getContentsStatus() + " " + status.getFile());
+					System.out.println(status.getContentsStatus() + " " + status.getFile()); //$NON-NLS-1$
 					changes.add(status);
 					}
 			};
@@ -339,13 +337,10 @@ public class EnigmaUpdater
 
 	public static void showUpdateError(GmFormatException e)
 		{
-		new ErrorDialog(
-				null,
-				"Unable to Update Enigma",
-				"The Enigma Auto-Updater was unable to run due to some miscommunication with the server.\n"
-						+ "This may be temporary, or you may be required to visit http://www.enigma-dev.org\n"
-						+ "to find out what's going on or to get a more up-to-date version of the Lgm-Enigma plugin.",
-				Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
-						e.getClass().getName(),e.getMessage(),e.stackAsString())).setVisible(true);
+		String title = Messages.getString("EnigmaUpdater.ERROR_TITLE"); //$NON-NLS-1$
+		String message = Messages.getString("EnigmaUpdater.ERROR_MISCOMMUNICATION"); //$NON-NLS-1$
+		new ErrorDialog(null,title,message,org.lateralgm.messages.Messages.format(
+				"Listener.DEBUG_INFO", //$NON-NLS-1$
+				e.getClass().getName(),e.getMessage(),e.stackAsString())).setVisible(true);
 		}
 	}

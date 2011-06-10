@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import org.enigma.backend.EnigmaCallbacks.OutputHandler;
+import org.enigma.messages.Messages;
 import org.lateralgm.main.LGM;
 
 public class EnigmaFrame extends JDialog implements OutputHandler
@@ -39,16 +40,16 @@ public class EnigmaFrame extends JDialog implements OutputHandler
 
 	public EnigmaFrame()
 		{
-		super(LGM.frame,"Enigma Progress Console");
+		super(LGM.frame,Messages.getString("EnigmaFrame.TITLE")); //$NON-NLS-1$
 		JPanel p = new JPanel(new BorderLayout());
 		ta = new JTextArea(10,40);
 		ta.setEditable(false);
 		p.add(new JScrollPane(ta,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),"Center");
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),BorderLayout.CENTER);
 		pb = new JProgressBar();
 		pb.setStringPainted(true);
-		pb.setString("Starting");
-		p.add(pb,"South");
+		pb.setString(Messages.getString("EnigmaFrame.STARTING")); //$NON-NLS-1$
+		p.add(pb,BorderLayout.SOUTH);
 
 		setContentPane(p);
 		pack();
@@ -70,7 +71,7 @@ public class EnigmaFrame extends JDialog implements OutputHandler
 	@Override
 	public void clear()
 		{
-		ta.setText("");
+		ta.setText(null);
 		}
 
 	@Override
@@ -94,6 +95,6 @@ public class EnigmaFrame extends JDialog implements OutputHandler
 		{
 		pb.setValue(pos);
 		pb.setString(tip);
-		ta.append(text + "\n");
+		ta.append(text + '\n'); //\n is internal representation of newlines, according to java
 		}
 	}

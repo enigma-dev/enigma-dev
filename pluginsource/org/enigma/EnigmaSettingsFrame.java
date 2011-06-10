@@ -65,6 +65,7 @@ import org.enigma.YamlParser.YamlContent;
 import org.enigma.YamlParser.YamlElement;
 import org.enigma.YamlParser.YamlNode;
 import org.enigma.backend.EnigmaSettings;
+import org.enigma.messages.Messages;
 import org.lateralgm.compare.CollectionComparator;
 import org.lateralgm.compare.MapComparator;
 import org.lateralgm.compare.ObjectComparator;
@@ -75,7 +76,6 @@ import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.main.LGM;
-import org.lateralgm.messages.Messages;
 import org.lateralgm.subframes.CodeFrame;
 import org.lateralgm.subframes.CodeFrame.CodeHolder;
 
@@ -137,6 +137,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 
 	class Option
 		{
+		final static String UNKNOWN = "<no type>"; //$NON-NLS-1$
+
 		JComponent[] cChoices;
 
 		IndexButtonGroup ibg = null;
@@ -147,12 +149,12 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		//				throws IllegalArgumentException
 			{
 			if (name != null && name.isEmpty()) name = null;
-			if (type.equalsIgnoreCase("Label"))
+			if (type.equalsIgnoreCase("Label")) //$NON-NLS-1$
 				populateLabel(type,name,choices);
-			else if (type.equalsIgnoreCase("Radio-1"))
-				populateRadio1(name,choices == null ? null : choices.split(","));
-			else if (type.equalsIgnoreCase("Combobox"))
-				populateCombo(name,choices == null ? null : choices.split(","));
+			else if (type.equalsIgnoreCase("Radio-1")) //$NON-NLS-1$
+				populateRadio1(name,choices == null ? null : choices.split(",")); //$NON-NLS-1$
+			else if (type.equalsIgnoreCase("Combobox")) //$NON-NLS-1$
+				populateCombo(name,choices == null ? null : choices.split(",")); //$NON-NLS-1$
 			else
 				populateLabel(type,name,choices);
 			//				throw new IllegalArgumentException(type);
@@ -167,7 +169,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		void populateLabel(String type, String name, String choices)
 			{
 			cChoices = new JComponent[1];
-			String fmt = "Unsupported option: [%s] [%s]";
+			String fmt = org.enigma.messages.Messages.getString("EnigmaSettingsFrame.OPTION_UNSUPPORTED"); //$NON-NLS-1$
 			JLabel lab = new JLabel(String.format(fmt,type,name));
 			lab.setToolTipText(other = choices);
 			cChoices[0] = lab;
@@ -231,13 +233,14 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		this.es = es.copy();
 
 		fc = new CustomFileChooser("/org/enigma","LAST_SETTINGS_DIR"); //$NON-NLS-1$ //$NON-NLS-2$
-		fc.setFileFilter(new CustomFileFilter(".ey","Enigma Settings File (.ey)")); //$NON-NLS-1$
+		fc.setFileFilter(new CustomFileFilter(
+				".ey",Messages.getString("EnigmaSettingsFrame.EY_DESCRIPTION"))); //$NON-NLS-1$ //$NON-NLS-2$
 
 		toolbar = makeToolBar();
 		add(toolbar,BorderLayout.NORTH);
 		JTabbedPane tabs = new JTabbedPane();
-		tabs.add("General",makeSettings());
-		tabs.add("API",makeAPI());
+		tabs.add(Messages.getString("EnigmaSettingsFrame.TAB_GENERAL"),makeSettings()); //$NON-NLS-1$
+		tabs.add(Messages.getString("EnigmaSettingsFrame.TAB_API"),makeAPI()); //$NON-NLS-1$
 		add(tabs,BorderLayout.CENTER);
 		pack();
 		}
@@ -254,13 +257,13 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		tool.add(save);
 		tool.addSeparator();
 
-		loadFile = new JButton(LGM.getIconForKey("LGM.OPEN"));
-		loadFile.setToolTipText("Load from file");
+		loadFile = new JButton(LGM.getIconForKey("LGM.OPEN")); //$NON-NLS-1$
+		loadFile.setToolTipText(Messages.getString("EnigmaSettingsFrame.LOAD_TIP")); //$NON-NLS-1$
 		loadFile.setRequestFocusEnabled(false);
 		loadFile.addActionListener(this);
 		tool.add(loadFile);
-		saveFile = new JButton(LGM.getIconForKey("LGM.SAVEAS"));
-		saveFile.setToolTipText("Save to file");
+		saveFile = new JButton(LGM.getIconForKey("LGM.SAVEAS")); //$NON-NLS-1$
+		saveFile.setToolTipText(Messages.getString("EnigmaSettingsFrame.SAVE_TIP")); //$NON-NLS-1$
 		saveFile.setRequestFocusEnabled(false);
 		saveFile.addActionListener(this);
 		tool.add(saveFile);
@@ -304,7 +307,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		{
 		options = new HashMap<String,Option>();
 		ArrayList<JPanel> panels = new ArrayList<JPanel>();
-		File settings = new File(EnigmaRunner.WORKDIR,"settings.ey");
+		File settings = new File(EnigmaRunner.WORKDIR,"settings.ey"); //$NON-NLS-1$
 		YamlNode n;
 		try
 			{
@@ -312,41 +315,45 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			}
 		catch (FileNotFoundException fnfe)
 			{
-			throw new YamlException(settings.getPath() + ": File not found");
+			throw new YamlException(settings.getPath()
+					+ Messages.getString("EnigmaSettingsFrame.YERR_NO_FILE")); //$NON-NLS-1$
 			}
-		if (n.chronos.isEmpty()) throw new YamlException(settings.getName() + ": Empty");
+		if (n.chronos.isEmpty())
+			throw new YamlException(settings.getName()
+					+ Messages.getString("EnigmaSettingsFrame.YERR_EMPTY")); //$NON-NLS-1$
 
 		//loop through panels
 		for (YamlElement ge : n.chronos)
 			{
 			String name = ge.name;
-			String error = settings.getName() + ": " + name + ": ";
+			String error = settings.getName() + ": " + name + ": "; //$NON-NLS-1$ //$NON-NLS-2$
 
-			if (ge.isScalar) throw new YamlException(error + "Scalar");
+			if (ge.isScalar)
+				throw new YamlException(error + Messages.getString("EnigmaSettingsFrame.YERR_SCALAR")); //$NON-NLS-1$
 
 			n = (YamlNode) ge;
-			if (!n.getMC("Layout","Grid").equalsIgnoreCase("Grid"))
-				throw new YamlException(error + "Layout: Grid only supported");
+			if (!n.getMC("Layout","Grid").equalsIgnoreCase("Grid")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				throw new YamlException(error + Messages.getString("EnigmaSettingsFrame.YERR_LAYOUT")); //$NON-NLS-1$
 
 			int columns;
 			try
 				{
-				columns = Integer.parseInt(n.getMC("Columns","null"));
+				columns = Integer.parseInt(n.getMC("Columns",null)); //$NON-NLS-1$
 				}
 			catch (NumberFormatException nfe)
 				{
-				throw new YamlException(error + "Must be a positive integer");
+				throw new YamlException(error + Messages.getString("EnigmaSettingsFrame.YERR_INTEGER")); //$NON-NLS-1$
 				}
 
 			//loop through options in panel
 			ArrayList<Option> opts = new ArrayList<Option>(n.chronos.size());
 			for (YamlElement oe : n.chronos)
 				{
-				if (oe.name.equalsIgnoreCase("Layout") || oe.name.equalsIgnoreCase("Columns")) continue;
+				if (oe.name.equalsIgnoreCase("Layout") || oe.name.equalsIgnoreCase("Columns")) continue; //$NON-NLS-1$ //$NON-NLS-2$
 
 				if (oe.isScalar)
 					{
-					System.err.println(oe.name + ": Scalar");
+					System.err.println(Messages.format("EnigmaSettingsFrame.YWARN_Scalar",oe.name)); //$NON-NLS-1$
 					continue;
 					}
 				YamlNode on = (YamlNode) oe;
@@ -354,13 +361,15 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 				Option opt;
 				try
 					{
-					opt = new Option(on.getMC("Label",null),on.getMC("Type","<no type>"),columns,on.getMC(
-							"Options",null));
-					opt.setValue(on.getMC("Default","0"));
+					opt = new Option(on.getMC("Label",null), //$NON-NLS-1$
+							on.getMC("Type",Option.UNKNOWN), //$NON-NLS-1$
+							columns,on.getMC("Options",null)); //$NON-NLS-1$
+					opt.setValue(on.getMC("Default","0")); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				catch (IllegalArgumentException e)
 					{
-					System.err.println(error + on.name + ": Type: " + e.getMessage() + ": Unsupported");
+					System.err.println(error
+							+ Messages.format("EnigmaSettingsFrame.YWARN_OPTION_TYPE",on.name,e.getMessage())); //$NON-NLS-1$
 					continue;
 					}
 				opts.add(opt);
@@ -394,10 +403,10 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		sInit = new SimpleCodeHolder(es.initialization);
 		sClean = new SimpleCodeHolder(es.cleanup);
 
-		bDef = new JButton("Definitions",CODE_ICON);
-		bGlobLoc = new JButton("Global Locals",CODE_ICON);
-		bInit = new JButton("Initialization",CODE_ICON);
-		bClean = new JButton("Cleanup",CODE_ICON);
+		bDef = new JButton(Messages.getString("EnigmaSettingsFrame.BUTTON_DEFINITIONS"),CODE_ICON); //$NON-NLS-1$
+		bGlobLoc = new JButton(Messages.getString("EnigmaSettingsFrame.BUTTON_GLOBAL_LOCALS"),CODE_ICON); //$NON-NLS-1$
+		bInit = new JButton(Messages.getString("EnigmaSettingsFrame.BUTTON_INITIALIZATION"),CODE_ICON); //$NON-NLS-1$
+		bClean = new JButton(Messages.getString("EnigmaSettingsFrame.BUTTON_CLEANUP"),CODE_ICON); //$NON-NLS-1$
 
 		bDef.addActionListener(this);
 		bGlobLoc.addActionListener(this);
@@ -438,7 +447,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		p.setLayout(layout);
 
 		JPanel platPane = new JPanel(new GridLayout(4,3));
-		platPane.setBorder(BorderFactory.createTitledBorder("Platform"));
+		platPane.setBorder(BorderFactory.createTitledBorder(Messages.getString("EnigmaSettingsFrame.TITLE_PLATFORM"))); //$NON-NLS-1$
 		GroupLayout plat = new GroupLayout(platPane);
 		platPane.setLayout(plat);
 
@@ -454,7 +463,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		JComboBox[] targs = { targComp,targPlat,targGfx,targAudio,targColl,targWidg };
 		TargetSelection[] sels = { es.selCompiler,es.selPlatform,es.selGraphics,es.selAudio,
 				es.selCollision,es.selWidgets };
-		String[] labels = { "Compiler: ","Platform: ","Graphics: ","Audio: ","Collision: ","Widgets: " };
+		String[] labels = {
+				Messages.getString("EnigmaSettingsFrame.LABEL_COMPILER"),Messages.getString("EnigmaSettingsFrame.LABEL_PLATFORM"),Messages.getString("EnigmaSettingsFrame.LABEL_GRAPHICS"),Messages.getString("EnigmaSettingsFrame.LABEL_AUDIO"),Messages.getString("EnigmaSettingsFrame.LABEL_COLLISION"),Messages.getString("EnigmaSettingsFrame.LABEL_WIDGETS") }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 
 		Group hg1 = layout.createParallelGroup();
 		Group hg2 = layout.createParallelGroup();
@@ -483,7 +493,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		taDesc.setLineWrap(true);
 		taDesc.setWrapStyleWord(true);
 
-		JLabel lAuth = new JLabel("Author: ");
+		JLabel lAuth = new JLabel(Messages.getString("EnigmaSettingsFrame.LABEL_AUTHOR")); //$NON-NLS-1$
 		JScrollPane desc = new JScrollPane(taDesc);
 
 		layout.setHorizontalGroup(layout.createParallelGroup()
@@ -509,14 +519,14 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 
 	public void loadFromFile()
 		{
-		fc.setDialogTitle("File to load information from");
+		fc.setDialogTitle(Messages.getString("EnigmaSettingsFrame.27")); //$NON-NLS-1$
 		while (true)
 			{
 			if (fc.showOpenDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			if (fc.getSelectedFile().exists()) break;
 			JOptionPane.showMessageDialog(null,fc.getSelectedFile().getName()
-					+ Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
-					"File to load information from",JOptionPane.WARNING_MESSAGE);
+					+ org.lateralgm.messages.Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
+					Messages.getString("EnigmaSettingsFrame.28"),JOptionPane.WARNING_MESSAGE); //$NON-NLS-1$
 			}
 
 		es.options.clear();
@@ -549,21 +559,21 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			{
 			PrintStream ps = new PrintStream(new File(name));
 
-			ps.println("%e-yaml");
-			ps.println("---");
+			ps.println("%e-yaml"); //$NON-NLS-1$
+			ps.println("---"); //$NON-NLS-1$
 
 			//general
 			for (Entry<String,String> entry : es.options.entrySet())
-				ps.println(entry.getKey() + ": " + entry.getValue());
+				ps.println(entry.getKey() + ": " + entry.getValue()); //$NON-NLS-1$
 			ps.println();
 
 			//targets
-			String targs[] = { "compiler","windowing","graphics","audio","collision","widget" };
+			String targs[] = { "compiler","windowing","graphics","audio","collision","widget" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 			TargetSelection ts[] = { es.selCompiler,es.selPlatform,es.selGraphics,es.selAudio,
 					es.selCollision,es.selWidgets };
 			for (int i = 0; i < targs.length; i++)
-				ps.println("target-" + targs[i] + ": " + (ts[i] == null ? "" : ts[i].id));
-			ps.println("target-networking: None");
+				ps.println("target-" + targs[i] + ": " + (ts[i] == null ? "" : ts[i].id)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			ps.println("target-networking: None"); //$NON-NLS-1$
 
 			ps.close();
 			}
@@ -655,22 +665,30 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			{
 			if (s == bDef)
 				{
-				if (cfDef == null) cfDef = newCodeFrame(sDef,"Enigma Definitions");
+				if (cfDef == null)
+					cfDef = newCodeFrame(sDef,
+							Messages.getString("EnigmaSettingsFrame.CODE_TITLE_DEFINITIONS")); //$NON-NLS-1$
 				cfDef.toTop();
 				}
 			if (s == bGlobLoc)
 				{
-				if (cfDef == null) cfGlobLoc = newCodeFrame(sGlobLoc,"Enigma Global Locals");
+				if (cfDef == null)
+					cfGlobLoc = newCodeFrame(sGlobLoc,
+							Messages.getString("EnigmaSettingsFrame.CODE_TITLE_GLOBAL_LOCALS")); //$NON-NLS-1$
 				cfGlobLoc.toTop();
 				}
 			if (s == bInit)
 				{
-				if (cfInit == null) cfInit = newCodeFrame(sInit,"Enigma Initialization");
+				if (cfInit == null)
+					cfInit = newCodeFrame(sInit,
+							Messages.getString("EnigmaSettingsFrame.CODE_TITLE_INITIALIZATION")); //$NON-NLS-1$
 				cfInit.toTop();
 				}
 			if (s == bClean)
 				{
-				if (cfClean == null) cfClean = newCodeFrame(sClean,"Enigma Cleanup");
+				if (cfClean == null)
+					cfClean = newCodeFrame(sClean,
+							Messages.getString("EnigmaSettingsFrame.CODE_TITLE_CLEANUP")); //$NON-NLS-1$
 				cfClean.toTop();
 				}
 			return;
@@ -727,9 +745,11 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			{
 			if (resourceChanged())
 				{
-				int ret = JOptionPane.showConfirmDialog(LGM.frame,Messages.format(
-						"ResourceFrame.KEEPCHANGES","Enigma Settings"), //$NON-NLS-1$
-						Messages.getString("ResourceFrame.KEEPCHANGES_TITLE"),JOptionPane.YES_NO_CANCEL_OPTION); //$NON-NLS-1$
+				String resource = Messages.getString("EnigmaSettingsFrame.DIALOG_KEEPCHANGES_RESOURCE"); //$NON-NLS-1$
+				int ret = JOptionPane.showConfirmDialog(
+						LGM.frame,
+						org.lateralgm.messages.Messages.format("ResourceFrame.KEEPCHANGES",resource), //$NON-NLS-1$
+						org.lateralgm.messages.Messages.getString("ResourceFrame.KEEPCHANGES_TITLE"),JOptionPane.YES_NO_CANCEL_OPTION); //$NON-NLS-1$
 				if (ret == JOptionPane.YES_OPTION)
 					{
 					updateResource();
@@ -775,7 +795,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 
 	private CodeFrame newCodeFrame(CodeHolder ch, String title)
 		{
-		CodeFrame cf = new CodeFrame(ch,"{0}",title);
+		CodeFrame cf = new CodeFrame(ch,"{0}",title); //$NON-NLS-1$
 		cf.addInternalFrameListener(ifl);
 		LGM.mdi.add(cf);
 		LGM.mdi.addZChild(this,cf);

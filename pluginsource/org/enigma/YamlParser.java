@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Scanner;
 
+import org.enigma.messages.Messages;
+
 public class YamlParser
 	{
 	public static class YamlElement
@@ -66,6 +68,15 @@ public class YamlParser
 			YamlElement e = values.get(key.toLowerCase());
 			if (e == null) return def;
 			return ((YamlContent) e).getValue();
+			}
+
+		public boolean getBool(String key, boolean def)
+			{
+			String r = getMC(key,null);
+			if (r == null || r.isEmpty()) return def;
+			r = r.toLowerCase();
+			if (r.startsWith("0") || r.startsWith("f") || r.startsWith("n")) return false; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return true;
 			}
 
 		public String toString()
@@ -175,15 +186,15 @@ public class YamlParser
 	/** @author Josh Ventura */
 	public static YamlNode parse(Scanner file)
 		{
-		YamlNode res = new YamlNode("Root");
-		String line, unlowered = "PROGRAM ERROR!";
+		YamlNode res = new YamlNode("Root"); //$NON-NLS-1$
+		String line, unlowered = Messages.getString("YamlParser.INVALID_NODE_NAME"); //$NON-NLS-1$
 		int linenum = 1, multi = 0; // Line number for error reporting, multiline representing not in multi (false), starting multi (-1), or in multi (multiple line count)
 		@SuppressWarnings("unused")
 		// I never really got around to doing this, but it's not difficult.
 		char mchar = 0; // The character that started a multiline entry
 
 		line = file.nextLine();
-		if (line.length() < 7 || !line.substring(0,7).toLowerCase().equals("%e-yaml"))
+		if (line.length() < 7 || !line.substring(0,7).toLowerCase().equals("%e-yaml")) //$NON-NLS-1$
 			{
 			file.close();
 			return res;
@@ -197,8 +208,9 @@ public class YamlParser
 			{
 			line = file.nextLine();
 			linenum++;
-			if (line.length() >= 3
-					&& (line.substring(0,3).equals("---") || line.substring(0,3).equals("..."))) continue;
+			if (line.length() >= 3 && (line.substring(0,3).equals("---") //$NON-NLS-1$
+					|| line.substring(0,3).equals("..."))) //$NON-NLS-1$
+				continue;
 			int inds = 0, pos = 0;
 
 			while (pos < line.length() && Character.isWhitespace(line.charAt(pos)))
@@ -215,10 +227,10 @@ public class YamlParser
 					multi = 0;
 				if (multi != 0)
 					{ // If our multi isn't canceled, append it.
-					if (((YamlContent) latest).rawValue == "")
+					if (((YamlContent) latest).rawValue == null)
 						((YamlContent) latest).rawValue = line.substring(multi);
 					else
-						((YamlContent) latest).rawValue += "\n" + line.substring(multi);
+						((YamlContent) latest).rawValue += '\n' + line.substring(multi);
 					continue;
 					}
 				}
@@ -243,7 +255,7 @@ public class YamlParser
 					else
 						{
 						if (latest != null) // If we've already assigned to this key happily
-							System.out.println("Indent increased unexpectedly on line " + linenum);
+							System.out.println(Messages.format("YamlParser.UNEXPECTED_INDENT",linenum)); //$NON-NLS-1$
 						else
 							// There's indeed a key we didn't know what to do with. Now we do.
 							{
@@ -266,7 +278,7 @@ public class YamlParser
 					{
 					if (latest == null)
 						{
-						latest = new YamlContent(unlowered,"");
+						latest = new YamlContent(unlowered,null);
 						cur.s.values.put(latestkey,latest);
 						cur.s.chronos.removeLast();
 						cur.s.chronos.addLast(latest);
@@ -285,7 +297,7 @@ public class YamlParser
 				{
 				if (latestkey != null && latest == null)
 					{
-					latest = new YamlContent(unlowered,"");
+					latest = new YamlContent(unlowered,null);
 					cur.s.values.put(latestkey,latest);
 					cur.s.chronos.removeLast();
 					cur.s.chronos.addLast(latest);
@@ -321,7 +333,7 @@ public class YamlParser
 			if (++pos > vsp) // If we have any non-white value after this colon at all...
 				if (pos - vsp == 1 && (line.charAt(vsp) == '|' || line.charAt(vsp) == '>'))
 					{ // Pipe => Multiline value
-					latest = new YamlContent(unlowered,"");
+					latest = new YamlContent(unlowered,null);
 					cur.s.values.put(latestkey,latest);
 					cur.s.chronos.removeLast();
 					cur.s.chronos.addLast(latest);
@@ -341,7 +353,7 @@ public class YamlParser
 		file.close();
 		if (latestkey != null && latest == null)
 			{
-			latest = new YamlContent(unlowered,"");
+			latest = new YamlContent(unlowered,null);
 			cur.s.values.put(latestkey,latest);
 			cur.s.chronos.removeLast();
 			cur.s.chronos.addLast(latest);

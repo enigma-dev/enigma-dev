@@ -12,16 +12,16 @@ import com.sun.jna.Structure;
 
 public class GameInformation extends Structure
 	{
-	int backgroundColor = 0xFFFFE100; //GM color
-	boolean mimicGameWindow = false;
-	String formCaption = "";
-	int left = -1;
-	int top = -1;
-	int width = 600;
-	int height = 400;
-	boolean showBorder = true;
-	boolean allowResize = true;
-	boolean stayOnTop = false;
-	boolean pauseGame = true;
+	int backgroundColor; //default GM color 0xFFFFE100
+	boolean mimicGameWindow;
+	String formCaption;
+	int left;
+	int top;
+	int width;
+	int height;
+	boolean showBorder;
+	boolean allowResize;
+	boolean stayOnTop;
+	boolean pauseGame;
 	String gameInfoStr;
 	}

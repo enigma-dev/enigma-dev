@@ -26,8 +26,8 @@ public class EnigmaSettings
 	{
 	public Map<String,String> options = new HashMap<String,String>();
 
-	public String definitions = "", globalLocals = "";
-	public String initialization = "", cleanup = "";
+	public String definitions = "", globalLocals = ""; //$NON-NLS-1$ //$NON-NLS-2$
+	public String initialization = "", cleanup = ""; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public TargetSelection selCompiler, selPlatform, selGraphics, selAudio, selCollision, selWidgets;
 
@@ -52,12 +52,12 @@ public class EnigmaSettings
 
 	void loadDefinitions()
 		{
-		definitions = fileToString(new File(EnigmaRunner.WORKDIR,"definitions.h"));
+		definitions = fileToString(new File(EnigmaRunner.WORKDIR,"definitions.h")); //$NON-NLS-1$
 		}
 
 	public void saveDefinitions()
 		{
-		writeString(new File(EnigmaRunner.WORKDIR,"definitions.h"),definitions);
+		writeString(new File(EnigmaRunner.WORKDIR,"definitions.h"),definitions); //$NON-NLS-1$
 		}
 
 	static String fileToString(File f)
@@ -93,21 +93,21 @@ public class EnigmaSettings
 
 	private String toYaml()
 		{
-		StringBuilder yaml = new StringBuilder("%e-yaml\n---\n");
+		StringBuilder yaml = new StringBuilder("%e-yaml\n---\n"); //$NON-NLS-1$
 		for (Entry<String,String> entry : options.entrySet())
-			yaml.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+			yaml.append(entry.getKey()).append(": ").append(entry.getValue()).append('\n'); //$NON-NLS-1$
 
-		yaml.append("\n");
+		yaml.append('\n');
 
-		String targs[] = { "compiler","windowing","graphics","audio","collision","widget" };
+		String targs[] = { "compiler","windowing","graphics","audio","collision","widget" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		TargetSelection ts[] = { selCompiler,selPlatform,selGraphics,selAudio,selCollision,selWidgets };
 
 		for (int i = 0; i < targs.length; i++)
 			{
 			if (ts[i] == null) continue;
-			yaml.append("target-").append(targs[i]).append(": ").append(ts[i].id).append("\n");
+			yaml.append("target-").append(targs[i]).append(": ").append(ts[i].id).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-		yaml.append("target-networking: None\n");
+		yaml.append("target-networking: None\n"); //$NON-NLS-1$
 
 		System.out.println();
 		System.out.println(yaml);

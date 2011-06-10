@@ -27,12 +27,12 @@ import com.sun.jna.NativeLibrary;
 
 public class EnigmaCli
 	{
-	public static final String prog = "enigma";
+	public static final String prog = "enigma"; //$NON-NLS-1$
 	public static EnigmaDriver DRIVER;
 
 	public static void error(String err)
 		{
-		System.err.println(prog + ": " + err);
+		System.err.println(prog + ": " + err); //$NON-NLS-1$
 		System.exit(-1);
 		}
 
@@ -100,7 +100,7 @@ public class EnigmaCli
 		//TODO: Handle custom outname
 		//FIXME: Make compliant with spec2
 		File outname = new File(fn.substring(0,fn.lastIndexOf('.')) + ess.selPlatform.ext);
-		if (!ess.selCompiler.outputexe.equals("$tempfile"))
+		if (!ess.selCompiler.outputexe.equals("$tempfile")) //$NON-NLS-1$
 			outname = new File(ess.selCompiler.outputexe);
 
 		DRIVER.compileEGMf(es, outname.getAbsolutePath(), mode);
@@ -110,8 +110,8 @@ public class EnigmaCli
 		{
 		try
 			{
-			String lib = "compileEGMf";
-			NativeLibrary.addSearchPath(lib,".");
+			String lib = "compileEGMf"; //$NON-NLS-1$
+			NativeLibrary.addSearchPath(lib,"."); //$NON-NLS-1$
 			NativeLibrary.addSearchPath(lib,LGM.workDir.getParent());
 			DRIVER = (EnigmaDriver) Native.loadLibrary(lib,EnigmaDriver.class);
 			return null;

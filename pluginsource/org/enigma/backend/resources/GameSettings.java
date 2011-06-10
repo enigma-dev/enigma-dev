@@ -51,10 +51,10 @@ public class GameSettings extends Structure
 	boolean writeToLog = false;
 	boolean abortOnError = false;
 	boolean treatUninitializedAs0 = false;
-	String author = "";
-	String version = "100";
+	String author;
+	String version;
 	double lastChanged;
-	String information = "";
+	String information;
 
 	//FIXME: Includes information moved
 	int includeFolder;
@@ -65,10 +65,10 @@ public class GameSettings extends Structure
 	int versionMinor = 0;
 	int versionRelease = 0;
 	int versionBuild = 0;
-	String company = "";
-	String product = "";
-	String copyright = "";
-	String description = "";
+	String company;
+	String product;
+	String copyright;
+	String description;
 
 	ICOFile gameIcon;
 	}

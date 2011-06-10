@@ -15,11 +15,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.enigma.YamlParser.YamlNode;
 
 public class TargetHandler
 	{
+	private static final Pattern normalizer = Pattern.compile("[\\[\\]\\-\\s_]"); //$NON-NLS-1$
+
 	public static TargetSelection defCompiler, defPlatform, defGraphics, defAudio, defCollision,
 			defWidgets;
 	private static List<TargetSelection> tCompilers, tPlatforms, tGraphics, tAudios, tCollisions,
@@ -27,11 +30,11 @@ public class TargetHandler
 	static
 		{
 		tCompilers = findCompilers();
-		tPlatforms = findTargets("Platforms");
-		tGraphics = findTargets("Graphics_Systems");
-		tAudios = findTargets("Audio_Systems");
-		tCollisions = findTargets("Collision_Systems");
-		tWidgets = findTargets("Widget_Systems");
+		tPlatforms = findTargets("Platforms"); //$NON-NLS-1$
+		tGraphics = findTargets("Graphics_Systems"); //$NON-NLS-1$
+		tAudios = findTargets("Audio_Systems"); //$NON-NLS-1$
+		tCollisions = findTargets("Collision_Systems"); //$NON-NLS-1$
+		tWidgets = findTargets("Widget_Systems"); //$NON-NLS-1$
 
 		findDefaults();
 		}
@@ -42,10 +45,10 @@ public class TargetHandler
 
 	public static String getOS()
 		{
-		String os = normalize(System.getProperty("os.name"));
-		if (os.contains("nux") || os.contains("nix")) return "Linux";
-		if (os.contains("win")) return "Windows";
-		if (os.contains("mac")) return "MacOSX";
+		String os = normalize(System.getProperty("os.name")); //$NON-NLS-1$
+		if (os.contains("nux") || os.contains("nix")) return "Linux"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (os.contains("win")) return "Windows"; //$NON-NLS-1$ //$NON-NLS-2$
+		if (os.contains("mac")) return "MacOSX"; //$NON-NLS-1$ //$NON-NLS-2$
 		return os;
 		}
 
@@ -66,28 +69,27 @@ public class TargetHandler
 	private static ArrayList<TargetSelection> findCompilers()
 		{
 		ArrayList<TargetSelection> tCompilers = new ArrayList<TargetSelection>();
-		File f = new File(EnigmaRunner.WORKDIR,"Compilers");
+		File f = new File(EnigmaRunner.WORKDIR,"Compilers"); //$NON-NLS-1$
 		File[] files = new File(f,getOS()).listFiles();
 		if (files == null) return tCompilers;
 		for (File file : files)
 			{
 			String ey = file.getName();
-			if (!ey.endsWith(".ey")) continue;
+			if (!ey.endsWith(".ey")) continue; //$NON-NLS-1$
 			try
 				{
 				YamlNode node = YamlParser.parse(file);
 
 				TargetSelection ps = new TargetSelection();
 				ps.id = ey.substring(0,ey.length() - 3);
-				ps.name = node.getMC("Name");
-				ps.desc = node.getMC("Description",null);
-				ps.auth = node.getMC("Maintainer",null);
-				ps.ext = node.getMC("Build-Extension",null);
-				ps.outputexe = node.getMC("Run-output",null);
+				ps.name = node.getMC("Name"); //$NON-NLS-1$
+				ps.desc = node.getMC("Description",null); //$NON-NLS-1$
+				ps.auth = node.getMC("Maintainer",null); //$NON-NLS-1$
+				ps.ext = node.getMC("Build-Extension",null); //$NON-NLS-1$
+				ps.outputexe = node.getMC("Run-output",null); //$NON-NLS-1$
 				ps.depends = new HashSet<String>();
-				ps.depends.add(node.getMC("Target-platform",null)); //actually a target, not a dependency
-				String nat = node.getMC("Native","No").toLowerCase(); //native is a keyword
-				if (nat.equals("yes") || nat.equals("true")) defCompiler = ps;
+				ps.depends.add(node.getMC("Target-platform",null)); //actually a target, not a dependency //$NON-NLS-1$
+				if (node.getBool("Native",false)) defCompiler = ps; //$NON-NLS-1$
 				tCompilers.add(ps);
 				}
 			catch (FileNotFoundException e)
@@ -102,64 +104,64 @@ public class TargetHandler
 		{
 		ArrayList<TargetSelection> targets = new ArrayList<TargetSelection>();
 
-		File f = new File(EnigmaRunner.WORKDIR,"ENIGMAsystem");
-		f = new File(f,"SHELL");
+		File f = new File(EnigmaRunner.WORKDIR,"ENIGMAsystem"); //$NON-NLS-1$
+		f = new File(f,"SHELL"); //$NON-NLS-1$
 		f = new File(f,target);
 		File files[] = f.listFiles();
 		if (files == null) return targets;
 		for (File dir : files)
 			{
 			if (!dir.isDirectory()) continue;
-			File prop = new File(dir,"Info");
+			File prop = new File(dir,"Info"); //$NON-NLS-1$
 			//technically this could stand to be a .properties file, rather than e-yaml
-			prop = new File(prop,"About.ey");
+			prop = new File(prop,"About.ey"); //$NON-NLS-1$
 			try
 				{
 				Set<String> depends = new HashSet<String>();
 				Set<String> defaultOn = new HashSet<String>();
 				YamlNode node;
 
-				if (target.equals("Platforms"))
+				if (target.equals("Platforms")) //$NON-NLS-1$
 					{
 					node = YamlParser.parse(prop);
-					String norm = normalize(node.getMC("Build-Platforms"));
+					String norm = normalize(node.getMC("Build-Platforms")); //$NON-NLS-1$
 					if (norm.isEmpty()) continue;
-					for (String s : norm.split(","))
+					for (String s : norm.split(",")) //$NON-NLS-1$
 						if (!s.isEmpty()) depends.add(s);
 					}
-				else if (target.equals("Collision_Systems"))
+				else if (target.equals("Collision_Systems")) //$NON-NLS-1$
 					{
 					node = YamlParser.parse(new Scanner(prop));
-					depends.add("all");
+					depends.add("all"); //$NON-NLS-1$
 					}
 				else
 					{
-					if (dir.getName().equals("None"))
-						depends.add("all");
+					if (dir.getName().equals("None")) //$NON-NLS-1$
+						depends.add("all"); //$NON-NLS-1$
 					else
 						{
-						String[] configs = new File(dir,"Config").list();
+						String[] configs = new File(dir,"Config").list(); //$NON-NLS-1$
 						if (configs == null) continue;
 						for (String conf : configs)
-							if (conf.endsWith(".ey"))
+							if (conf.endsWith(".ey")) //$NON-NLS-1$
 								depends.add(normalize(conf.substring(0,conf.length() - 3)));
 						if (depends.isEmpty()) continue;
 						}
 					node = YamlParser.parse(new Scanner(prop));
 					}
 
-				String norm = normalize(node.getMC("Represents",""));
-				for (String s : norm.split(","))
+				String norm = normalize(node.getMC("Represents","")); //$NON-NLS-1$ //$NON-NLS-2$
+				for (String s : norm.split(",")) //$NON-NLS-1$
 					if (!s.isEmpty()) defaultOn.add(s);
 
 				TargetSelection ps = new TargetSelection();
-				ps.name = node.getMC("Name");
-				ps.id = node.getMC("Identifier");
+				ps.name = node.getMC("Name"); //$NON-NLS-1$
+				ps.id = node.getMC("Identifier"); //$NON-NLS-1$
 				ps.depends = depends;
 				ps.defaultOn = defaultOn;
-				ps.desc = node.getMC("Description",null);
-				ps.auth = node.getMC("Author",null);
-				ps.ext = node.getMC("Build-Extension",null);
+				ps.desc = node.getMC("Description",null); //$NON-NLS-1$
+				ps.auth = node.getMC("Author",null); //$NON-NLS-1$
+				ps.ext = node.getMC("Build-Extension",null); //$NON-NLS-1$
 				targets.add(ps);
 				}
 			catch (FileNotFoundException e)
@@ -179,7 +181,7 @@ public class TargetHandler
 	//get rid of any "[]-_ " (and space), and convert to lowercase.
 	private static String normalize(String s)
 		{
-		return s.toLowerCase().replaceAll("[\\[\\]\\-\\s_]","");
+		return normalizer.matcher(s.toLowerCase()).replaceAll(""); //$NON-NLS-1$
 		}
 
 	private static void findDefaults()
@@ -200,18 +202,18 @@ public class TargetHandler
 		TargetSelection allTs = null;
 
 		for (TargetSelection ts : tsl)
-			if (ts.depends.contains("all") || ts.depends.contains(depends))
+			if (ts.depends.contains("all") || ts.depends.contains(depends)) //$NON-NLS-1$
 				{
 				//specific platforms always take precedence over the "all" keyword
 				if (ts.defaultOn.contains(depends)) return ts;
 				//to avoid looping again for "all" keyword if no specific platform found, store it
-				if (ts.defaultOn.contains("all") && allTs == null) allTs = ts;
+				if (ts.defaultOn.contains("all") && allTs == null) allTs = ts; //$NON-NLS-1$
 				}
 		if (allTs != null) return allTs;
 		//if none are marked as default, just use the first one
 		for (TargetSelection ts : tsl)
-			if (ts.depends.contains("all") || ts.depends.contains(depends)
-					&& !ts.defaultOn.contains("none")) return ts;
+			if (ts.depends.contains("all") || ts.depends.contains(depends) //$NON-NLS-1$
+					&& !ts.defaultOn.contains("none")) return ts; //$NON-NLS-1$
 		return null;
 		}
 
@@ -220,7 +222,7 @@ public class TargetHandler
 		if (itsl == tCollisions) return itsl;
 		List<TargetSelection> otsl = new ArrayList<TargetSelection>();
 		for (TargetSelection ts : itsl)
-			if (ts.depends.contains(depends.toLowerCase()) || ts.depends.contains("all")) otsl.add(ts);
+			if (ts.depends.contains(depends.toLowerCase()) || ts.depends.contains("all")) otsl.add(ts); //$NON-NLS-1$
 		return otsl;
 		}
 

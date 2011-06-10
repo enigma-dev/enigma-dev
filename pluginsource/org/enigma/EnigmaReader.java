@@ -30,6 +30,8 @@ import org.lateralgm.resources.Room;
 import org.lateralgm.resources.sub.Instance;
 import org.lateralgm.resources.sub.Instance.PInstance;
 
+import com.sun.xml.internal.bind.marshaller.Messages;
+
 public final class EnigmaReader
 	{
 	private EnigmaReader()
@@ -40,7 +42,9 @@ public final class EnigmaReader
 		{
 		GmStreamDecoder f = new GmStreamDecoder(emd);
 		int ver = f.read4();
-		if (ver != 1) throw new GmFormatException(LGM.currentFile,"Unsupported version " + ver);
+		if (ver != 1)
+			throw new GmFormatException(LGM.currentFile,Messages.format(
+					"EnigmaReader.UNKNOWN_VERSION",ver)); //$NON-NLS-1$
 		Room r = LGM.currentFile.rooms.getUnsafe(f.read4());
 		if (r == null) r = LGM.currentFile.rooms.add();
 		int mods = f.read4();
@@ -66,7 +70,8 @@ public final class EnigmaReader
 					f.skip(8);
 					break;
 				default:
-					throw new GmFormatException(LGM.currentFile,"Unsupported action type " + action);
+					throw new GmFormatException(LGM.currentFile,Messages.format(
+							"EnigmaReader.UNKNOWN_ACTION",action)); //$NON-NLS-1$
 				} //type
 			} //mods
 		} //readChanges

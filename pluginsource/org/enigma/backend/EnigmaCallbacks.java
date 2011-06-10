@@ -24,6 +24,7 @@ import java.util.zip.Deflater;
 import org.enigma.EnigmaRunner;
 import org.enigma.Pump;
 import org.enigma.backend.util.Image;
+import org.enigma.messages.Messages;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Pointer;
@@ -159,14 +160,14 @@ public class EnigmaCallbacks extends Structure
 									data = new byte[size];
 									size = in.read(data,0,size);
 									if (size == -1) break;
-									sb.append(new String(data,0,size,"UTF-8"));
-									int p = sb.indexOf("\n");
+									sb.append(new String(data,0,size,"UTF-8")); //$NON-NLS-1$
+									int p = sb.indexOf("\n"); //$NON-NLS-1$
 									while (p != -1)
 										{
 										String dat = sb.substring(0,p + 1);
 										out.append(dat);
 										sb.delete(0,p + 1);
-										p = sb.indexOf("\n");
+										p = sb.indexOf("\n"); //$NON-NLS-1$
 										}
 									}
 								else
@@ -180,7 +181,7 @@ public class EnigmaCallbacks extends Structure
 										}
 									}
 								}
-							out.append(sb.toString() + "\n");
+							out.append(sb.toString() + '\n');
 							in.close();
 							}
 						catch (IOException e)
@@ -232,15 +233,17 @@ public class EnigmaCallbacks extends Structure
 		//on success, returns 0 for no wait, or the executed return value on wait
 		public int callback(String cmd, String[] envp, boolean wait)
 			{
-			int p = cmd.lastIndexOf(">");
+			final String error = Messages.getString("EnigmaCallbacks.Execute.ERROR_PREFIX"); //$NON-NLS-1$
+
+			int p = cmd.lastIndexOf('>');
 			if (p < 2) return -1; //no > or starts with >
 			char mod = cmd.charAt(p - 1);
 			cmd = cmd.substring(0,p - 1);
 			String redir = cmd.substring(p + 1).trim();
-			final String REDIR_IDE = "IDE_CONSOLE";
+			final String REDIR_IDE = "IDE_CONSOLE"; //$NON-NLS-1$
 
-			Pattern regex = Pattern.compile("^\\s*(\"?)\\\\"); //^\s*("?)\\
-			String replace = "$1" + Matcher.quoteReplacement(new File("/").getAbsolutePath());
+			Pattern regex = Pattern.compile("^\\s*(\"?)\\\\"); //^\s*("?)\\ //$NON-NLS-1$
+			String replace = "$1" + Matcher.quoteReplacement(new File("/").getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 			cmd = regex.matcher(cmd).replaceFirst(replace);
 			redir = regex.matcher(redir).replaceFirst(replace);
 
@@ -272,24 +275,24 @@ public class EnigmaCallbacks extends Structure
 								}
 							catch (InterruptedException e)
 								{
-								System.err.println("Exec: " + e.getLocalizedMessage());
+								System.err.println(error + e.getLocalizedMessage());
 								}
 							}
 					}.start();
 				}
 			catch (FileNotFoundException e)
 				{
-				System.err.println("Exec: " + e.getLocalizedMessage());
+				System.err.println(error + e.getLocalizedMessage());
 				return -2;
 				}
 			catch (IOException e)
 				{
-				System.err.println("Exec: " + e.getLocalizedMessage());
+				System.err.println(error + e.getLocalizedMessage());
 				return -3;
 				}
 			catch (InterruptedException e)
 				{
-				System.err.println("Exec: " + e.getLocalizedMessage());
+				System.err.println(error + e.getLocalizedMessage());
 				return -4;
 				}
 			return 0;
