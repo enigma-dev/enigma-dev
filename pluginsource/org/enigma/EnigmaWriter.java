@@ -44,6 +44,7 @@ import javax.swing.JOptionPane;
 import org.enigma.Masker.Mask;
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.other.Constant;
+import org.enigma.backend.other.Extension;
 import org.enigma.backend.other.Include;
 import org.enigma.backend.resources.Background;
 import org.enigma.backend.resources.Font;
@@ -155,6 +156,12 @@ public final class EnigmaWriter
 		o.packageCount = 0;
 		// o.packageCount = packages.length;
 		// o.packages = new StringArray(packages);
+
+		o.extensionCount = 1;
+		o.extensions = new Extension.ByReference();
+		Extension[] oix = (Extension[]) o.extensions.toArray(o.extensionCount);
+		oix[0].name = "Alarms";
+		oix[0].path = "Universal_System/Extensions";
 
 		o.lastInstanceId = i.lastInstanceId;
 		o.lastTileId = i.lastTileId;

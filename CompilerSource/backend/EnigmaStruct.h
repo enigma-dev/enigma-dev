@@ -20,6 +20,7 @@
 #include "other/Trigger.h"
 #include "other/Constant.h"
 #include "other/Include.h"
+#include "other/Extension.h"
 
 struct EnigmaStruct
 {
@@ -53,6 +54,9 @@ struct EnigmaStruct
 	int includeCount;
 	char *packages[];
 	int packageCount;
+
+	int extensionCount;
+	Extension *extensions;
 
 	//GameInformation gameInfo;
 	//GameSettings gameSettings;

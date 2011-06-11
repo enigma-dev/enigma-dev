@@ -9,6 +9,7 @@
 package org.enigma.backend;
 
 import org.enigma.backend.other.Constant;
+import org.enigma.backend.other.Extension;
 import org.enigma.backend.other.Include;
 import org.enigma.backend.other.Trigger;
 import org.enigma.backend.resources.Background;
@@ -57,6 +58,9 @@ public class EnigmaStruct extends Structure
 	public int includeCount;
 	public Pointer packages; //StringArray
 	public int packageCount;
+
+	public Extension.ByReference extensions;
+	public int extensionCount;
 
 	//public GameInformation gameInfo;
 	//public GameSettings gameSettings;
