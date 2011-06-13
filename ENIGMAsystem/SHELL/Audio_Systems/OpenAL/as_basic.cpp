@@ -25,7 +25,6 @@ namespace enigma
   static void eos_callback(void *soundID, ALuint src)
   {
     sound &snd = sounds[(ptrdiff_t)soundID];
-    puts("The sound has stopped...Is the universe at peace?");
     /*if (snd.looping)
       snd.idle = !(snd.looping = snd.playing = (alurePlaySource(snd.src, eos_callback, soundID) != AL_FALSE));
     else {*/

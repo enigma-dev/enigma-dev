@@ -32,5 +32,5 @@ clean:
 	cd Platforms/Win32/           && $(MAKE) clean
 	cd Platforms/xlib/            && $(MAKE) clean
 	cd Universal_System/          && $(MAKE) clean
-	cd Collision_Systems/none     && $(MAKE) clean
+	cd Collision_Systems/None     && $(MAKE) clean
 
