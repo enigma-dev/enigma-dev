@@ -1,6 +1,6 @@
 [Desktop Entry]
-Exec=lateralgm %U
-Icon=enigma
+Exec=enigma-dev %U
+Icon=enigma-dev
 Type=Application
 Terminal=true
 Name=ENIGMA Game Maker
