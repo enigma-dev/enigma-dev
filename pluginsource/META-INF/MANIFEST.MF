@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 Main-Class: org.enigma.EnigmaCli
 LGM-Plugin: org.enigma.EnigmaRunner
-Class-Path: ../lgm16b4.jar shared/svnkit.jar shared/jna.jar
+Class-Path: /usr/share/java/lateralgm/lateralgm.jar ../Autoconf/svnkit.jar /usr/share/java/jna/jna.jar
 
