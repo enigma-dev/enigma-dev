@@ -111,6 +111,9 @@ void cparse_init()
   regmacro("_WCHAR_T","1"); // This prevents redeclaration of wchar_t on Apple.
 
   //__builtin_ grabbage
+  regt("__u32");
+  regt("__u16");
+  regt("__u8");
   regt("__builtin_va_list");
   regt("__PTRDIFF_TYPE__");
 

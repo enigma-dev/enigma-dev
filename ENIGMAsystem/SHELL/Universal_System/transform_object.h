@@ -40,8 +40,9 @@ namespace enigma
   struct object_transform: object_graphics
   {
     //Other attributes that logically don't belong here
-        var  image_alpha;
-        var  image_blend;
+        double image_alpha;
+        int    image_blend;
+        int    image_single;
     //Constructors
       object_transform();
       object_transform(unsigned x, int y);

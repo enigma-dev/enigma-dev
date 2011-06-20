@@ -25,6 +25,7 @@
 #include <stdio.h>
 
 #include "XLIBwindow.h"
+#include "LINUXjoystick.h"
 
 extern Display *disp;
 extern GLXDrawable win;
@@ -37,8 +38,9 @@ extern Atom wm_delwin;
 namespace enigma
 {
   extern char keymap[256];
+  extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-extern int initialize_everything();
+  extern int initialize_everything();
 }
 
 int handleEvents()
@@ -50,10 +52,11 @@ int handleEvents()
   {
     case KeyPress: {
           gk=XLookupKeysym(&e.xkey,0);
-          if (gk==NoSymbol) return 0;
+          if (gk==NoSymbol)
+            return 0;
 
-          if (!(gk & 0xFF00)) actualKey=gk;
-          else actualKey=enigma::keymap[gk & 0xFF];
+          if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
+          else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
 
           if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
             enigma::keybdstatus[actualKey]=1;
@@ -66,9 +69,12 @@ int handleEvents()
     case KeyRelease: {
         gk=XLookupKeysym(&e.xkey,0);
         printf("Pressed a key: %d : %d\n", gk, gk & 0xFF);
-        if (gk==NoSymbol) return 0;
-        if (!(gk & 0xFF00)) actualKey=gk;
-        else actualKey=enigma::keymap[gk & 0xFF];
+        if (gk == NoSymbol)
+          return 0;
+        
+        if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
+        else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
+        
         enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
         enigma::keybdstatus[actualKey]=0;
       return 0;
@@ -124,6 +130,8 @@ namespace enigma
       last_keybdstatus[i]=0;
       keybdstatus[i]=0;
     }
+    
+    init_joysticks();
   }
   
   void input_push()
@@ -230,6 +238,7 @@ int main(int argc,char** argv)
 		while(XQLength(disp))
 			if(handleEvents() > 0)
 				goto end;
+    enigma::handle_joysticks();
 		enigma::ENIGMA_events();
 		enigma::input_push();
 	}

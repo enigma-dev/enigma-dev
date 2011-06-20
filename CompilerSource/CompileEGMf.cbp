@@ -228,6 +228,7 @@
 		<Unit filename="settings-parse/eyaml.h" />
 		<Unit filename="settings-parse/parse_ide_settings.cpp" />
 		<Unit filename="settings-parse/parse_ide_settings.h" />
+		<Unit filename="settings-parse/settings.cpp" />
 		<Unit filename="settings.h" />
 		<Unit filename="standalone_main.cpp">
 			<Option target="StandAlone" />

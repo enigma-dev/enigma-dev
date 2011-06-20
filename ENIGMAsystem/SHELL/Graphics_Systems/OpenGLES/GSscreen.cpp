@@ -59,9 +59,9 @@ int screen_redraw()
        glLoadIdentity();
        glScalef(1,-1,1); //OPENGLES
 #if ENIGMA_WS_IPHONE !=0 || ENIGMA_WS_ANDROID !=0
-		glOrthof(0,room_width,0,room_height,0,1); //OPENGLES put f back in
+		glOrthof(0,room_width-1,0,room_height-1,0,1); //OPENGLES put f back in
 #else
-		glOrtho(0,room_width,0,room_height,0,1); //OPENGLES put f back in
+		glOrtho(-1,room_width,-1,room_height,0,1); //OPENGLES put f back in
 #endif 
        
 	

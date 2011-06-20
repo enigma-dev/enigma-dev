@@ -70,7 +70,7 @@ void screen_redraw()
        glViewport(0,0,window_get_width(),window_get_height());
        glLoadIdentity();
        glScaled(1,-1,1);
-       glOrtho(0,room_width,0,room_height,0,1);
+       glOrtho(-1,room_width,-1,room_height,0,1);
 
       if (background_showcolor)
       {
@@ -115,7 +115,7 @@ void screen_redraw()
       glViewport((int)view_xport[vc],(int)view_yport[vc],(int)view_wport[vc],(int)view_hport[vc]);
       glLoadIdentity();
       glScaled(1,-1,1);
-      glOrtho((int)view_xview[vc],(int)view_wview[vc]+(int)view_xview[vc],(int)view_yview[vc],(int)view_hview[vc]+(int)view_yview[vc],0,1);
+      glOrtho(view_xview[vc]-1,view_wview[vc]+view_xview[vc],view_yview[vc]-1,view_hview[vc]+view_yview[vc],0,1);
       
       if (background_showcolor)
       {

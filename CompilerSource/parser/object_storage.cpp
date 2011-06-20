@@ -37,11 +37,12 @@ using namespace std;
 #include "object_storage.h"
 #include "../externs/externs.h"
 #include "../settings-parse/crawler.h"
+#include "../compiler/compile_common.h"
 
 
 map<string,int> shared_object_locals;
 map<string,dectrip> dot_accessed_locals;
-int shared_locals_load()
+int shared_locals_load(vector<string> exts)
 {
   cout << "Finding parent..."; fflush(stdout);
   
@@ -52,11 +53,13 @@ int shared_locals_load()
 
   // Find the parent object
   if (ns_enigma != current_scope->members.end()) {
-    extiter parent = ns_enigma->second->members.find("object_collisions");
+    extiter parent = ns_enigma->second->members.find(system_get_uppermost_tier());
     if (parent != ns_enigma->second->members.end())
       pscope = parent->second;
   }
   cout << "found"; fflush(stdout);
+  
+  shared_object_locals.clear();
   
   //Iterate the tiers of the parent object
   for (externs *cs = pscope; cs; cs = (cs->ancestors.size ? cs->ancestors[0] : NULL) )
@@ -66,7 +69,7 @@ int shared_locals_load()
       shared_object_locals[mem->first] = 0;
   }
   
-  extensions::crawl_for_locals();
+  extensions::crawl_for_locals(exts);
   extensions::dump_read_locals(shared_object_locals);
   return 0;
 }
@@ -106,6 +109,9 @@ parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), co
 parsed_object::parsed_object() {}
 parsed_object::parsed_object(string n, int i, int s, int p, bool vis, bool sol): name(n), id(i), sprite_index(s), parent(p), visible(vis), solid(sol) {}
 map<int,parsed_object*> parsed_objects;
+
+vector<parsed_extension> parsed_extensions;
+vector<string> requested_extensions;
 
 void parsed_object::copy_from(parsed_object& source, string sourcename, string destname)
 {

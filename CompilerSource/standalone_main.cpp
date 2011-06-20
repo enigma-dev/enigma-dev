@@ -61,7 +61,6 @@ int m_prog_loop_cfp();
  #include <cstdio>
 #endif
 
-extern void clear_ide_editables();
 extern void print_err_line_at(pt a);
 #include "cfile_parse/cfile_pushing.h"
 
@@ -92,7 +91,7 @@ inline void povers(string n)
 int mainr(int argc, char *argv[])
 {
   cout << "Grabbing locals" << endl;
-    extensions::crawl_for_locals();
+    extensions::crawl_for_locals(requested_extensions);
     string localstring = extensions::compile_local_string();
     cout << localstring << endl;
   cout << "Ass." << endl;
@@ -159,7 +158,7 @@ int mainr(int argc, char *argv[])
   cout << "Initializing GML parser..." << endl;
   parser_init();
   cout << "Loading locals..." << endl;
-  shared_locals_load();
+  shared_locals_load(requested_extensions);
   cout << "Getting data..." << endl;
   string pf = fc("./CompilerSource/cfile_parse/auxilary_gml.h");
   
@@ -256,7 +255,8 @@ int main(int argc, char* argv[])
 	       "---\n" 	 
 	       "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n" 	 
 	       "target-graphics: OpenGL\n" 	 
-	       "target-audio: OpenAL\n" 	 
+	       "target-audio: OpenAL\n"
+	       "target-collision: BBox\n"
 	       ).c_str());
   mainr(argc,argv);
   getchar();

@@ -246,8 +246,10 @@ void screen_refresh() {
 namespace enigma
 {
   char keymap[256];
+  char usermap[256];
   void initkeymap()
   {
+    // Pretend this part doesn't exist
     keymap[0x51] = vk_left;
     keymap[0x53] = vk_right;
     keymap[0x52] = vk_up;
@@ -300,6 +302,14 @@ namespace enigma
     keymap[0x56] = vk_pagedown;
     keymap[0xFF] = vk_delete;
     keymap[0x63] = vk_insert;
+    
+    // Set up identity map...
+    for (int i = 0; i < 'a'; i++)
+      usermap[i] = i;
+    for (int i = 'a'; i <= 'z'; i++) // 'a' to 'z' wrap to 'A' to 'Z'
+      usermap[i] = i + 'A' - 'a';
+    for (int i = 'z'+1; i < 255; i++)
+      usermap[i] = i;
    }
 }
 

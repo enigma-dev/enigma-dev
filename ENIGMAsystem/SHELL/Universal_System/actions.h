@@ -320,9 +320,6 @@ inline void action_draw_rectangle(double x1,double y1,double x2,double y2,int fi
     else draw_rectangle(x1,y1,x2,y2,filled);
 }
 
-void action_set_alarm(int steps,int alarmno);
-#define action_set_alarm(steps,alarmno) if (argument_relative) alarm[(alarmno)] += (steps); else alarm[(alarmno)] = (steps);
-
 inline void action_sprite_set(double spritep,double subimage, double speed) {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
     inst->sprite_index=spritep;

@@ -29,12 +29,13 @@
 #define _OBJECT_STORAGE_H
 
 #include <map>
+#include <vector>
 #include "../general/darray.h"
 
 //Locals that are inherited by all instances of all objects from the core system.
 extern map<string,int> shared_object_locals;
 extern map<string,struct dectrip> dot_accessed_locals;
-extern int shared_locals_load();
+extern int shared_locals_load(vector<string> exts);
 extern int shared_locals_clear();
 
 void add_dot_accessed_local(string name);
@@ -104,5 +105,14 @@ typedef map<int,parsed_object*>  :: iterator po_i;
 typedef map<int,parsed_event*>   :: iterator pe_i;
 
 typedef map<string,dectrip>::iterator deciter;
+
+struct parsed_extension {
+  string name, path;
+  string pathname;
+  string implements;
+};
+
+extern vector<parsed_extension> parsed_extensions;
+extern vector<string> requested_extensions;
 
 #endif

@@ -54,6 +54,9 @@ OBJECTS := .eobjs/$(COMPILEPATH)/$(GMODE)
 default: game
 all: game
 
+%/Extension:
+	cd $* && $(MAKE) extension COMPILEPATH="$(COMPILEPATH)"
+
 ifeq ($(wildcard Makefiles/$(COMPILEPATH)/Makef*), Makefiles/$(COMPILEPATH)/Makefile)
   include Makefiles/$(COMPILEPATH)/Makefile
 else

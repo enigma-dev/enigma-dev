@@ -61,6 +61,7 @@ using namespace std;
 #include "compile_common.h"
 
 #include "../settings-parse/crawler.h"
+#include "../settings-parse/eyaml.h"
 
 #include "components/components.h"
 #include "../gcc_interface/gcc_backend.h"
@@ -93,14 +94,26 @@ void clear_ide_editables()
   ofstream wto;
   string f2comp = fc("ENIGMAsystem/SHELL/API_Switchboard.h");
   string f2write = license;
-    f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys) + "/include.h\"\n"
-               "#include \"Graphics_Systems/" + (extensions::targetAPI.graphicsSys) + "/include.h\"\n"
-               "#include \"Audio_Systems/" + (extensions::targetAPI.audioSys) + "/include.h\"\n"
+    string inc = "/include.h\"\n";
+    f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
+               "#include \"Graphics_Systems/" + (extensions::targetAPI.graphicsSys)   + "/include.h\"\n"
+               "#include \"Audio_Systems/" + (extensions::targetAPI.audioSys)         + "/include.h\"\n"
                "#include \"Collision_Systems/" + (extensions::targetAPI.collisionSys) + "/include.h\"\n"
-               "#include \"Widget_Systems/" + (extensions::targetAPI.widgetSys) + "/include.h\"\n";
+               "#include \"Widget_Systems/" + (extensions::targetAPI.widgetSys)       + inc;
+    
+    const string incg = "#include \"", impl = "/implement.h\"\n";
+    f2write += "\n// Extensions selected by user\n";
+    for (unsigned i = 0; i < parsed_extensions.size(); i++)
+    {
+      ifstream ifabout((parsed_extensions[i].pathname + "/About.ey").c_str());
+      ey_data about = parse_eyaml(ifabout,parsed_extensions[i].path + parsed_extensions[i].name + "/About.ey");
+      f2write += incg + parsed_extensions[i].pathname + inc;
+      if (parsed_extensions[i].implements != "")
+        f2write += incg + parsed_extensions[i].pathname + impl;
+    }
+  
   if (f2comp != f2write)
   {
-    user << "Rewriting API switchboard header... This could hurt compile time." << flushl;
     wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
       wto << f2write << endl;
     wto.close();
@@ -154,9 +167,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   // Re-establish ourself
     // Read the global locals: locals that will be included with each instance
-    if (shared_locals_load() != 0) {
-      user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
-      idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
+    {
+      vector<string> extnp;
+      for (int i = 0; i < es->extensionCount; i++)
+        extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
+      if (shared_locals_load(extnp) != 0) {
+        user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
+        idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
+      }
     }
     edbg << "Grabbing locals" << flushl;
       string high_level_shared_locals = extensions::compile_local_string();
@@ -173,7 +191,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   edbg << "File version: " << es->fileVersion << flushl << flushl;
   if (es->fileVersion != 800)
-    edbg << "Error: Incorrect version. File is too " << ((es->fileVersion > 800)?"new":"old") << " for this compiler.";
+    edbg << "Incorrect version. File is too " << ((es->fileVersion > 800)?"new":"old") << " for this compiler. Continuing anyway, because this number is always wrong.";
 
 
 
@@ -414,7 +432,22 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "WIDGETS="  + extensions::targetAPI.widgetSys + " ";
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
-  make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier + " ";
+  
+  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+  make += "COMPILEPATH=" + compilepath + " ";
+  
+  string extstr = "EXTENSIONS=\"", extlinks = "EXTLINKS=\"";
+  if (parsed_extensions.size())
+  {
+    string objdir = "/.eobjs/" + compilepath + "/*.o";
+    extstr += parsed_extensions[0].pathname + "/Extension";
+    extlinks += parsed_extensions[0].pathname + objdir;
+    for (unsigned i = 1; i < parsed_extensions.size(); i++)
+      extstr += " " + parsed_extensions[i].pathname + "/Extension",
+      extlinks += " " + parsed_extensions[i].pathname + objdir;
+  }
+  make += extstr + "\" " + extlinks + "\" ";
+  
   
   string mfgfn = gameFname; 
   for (size_t i = 0; i < mfgfn.length(); i++)

@@ -25,72 +25,28 @@
 **                                                                              **
 \********************************************************************************/
 
-/*************************************************************
-GM Global variables
-******************/
+namespace enigma {
+  void init_joysticks();
+  void handle_joysticks();
+}
 
-bool argument_relative=false;
-/*global:     background_alpha
-global:     background_blend
-global:     background_foreground
-global:     background_height
-global:     background_hspeed
-global:     background_htiled
-global:     background_index
-global:     background_visible
-global:     background_vspeed
-global:     background_vtiled
-global:     background_width
-global:     background_x
-global:     background_xscale
-global:     background_y
-global:     background_yscale
- */
-string caption_score="Score:", caption_lives="Lives:", caption_health="Health:";
+bool joystick_exists(int id);
+string joystick_name(int id);
+int joystick_axes(int id);
+int joystick_buttons(int id);
+bool joystick_has_pov(int id);
+int joystick_direction(int id); // Numpad key style. WTF.
+#define joystick_check_button(id, numb) joystick_button(id, numb)
+#define joystick_xpos(id) joystick_axis(id,1)
+#define joystick_ypos(id) joystick_axis(id,2)
+#define joystick_zpos(id) joystick_axis(id,3)
+#define joystick_rpos(id) joystick_axis(id,4)
+#define joystick_upos(id) joystick_axis(id,5)
+#define joystick_vpos(id) joystick_axis(id,6)
+double joystick_pov(int id);
 
-/*
-global:     current_day
-global:     current_hour
-global:     current_minute
-global:     current_month
-global:     current_second
-global:     current_time
-global:     current_weekday
-global:     current_year
-global:     cursor_sprite
-global:     error_last
-global:     error_occurred
-global:     event_action
-global:     event_number
-global:     event_object
-global:     event_type*/
-double      fps;/*
-global:     game_id
-*/
-double health=100;
-/*
-global:     instance_id
-global:     keyboard_key
-global:     keyboard_lastchar
-global:     keyboard_lastkey
-global:     keyboard_string
-*/
-double lives=3;
-double mouse_button;
-double mouse_lastbutton;
-double mouse_x;
-double mouse_y;
-double score=0;
-/*
-global:     secure_mode
- */
-bool show_score=0, show_lives=0, show_health=0;
-/*
-global:     temp_directory
-global:     transition_kind
-global:     transition_steps
-global:     transition_time*/
-/*global:  working_directory*/
-/*********************
-End GM global variables
- *********************/
+double joystick_axis(int id, int axis);
+bool joystick_button(int id, int button);
+void joystick_map_button(int id, int butnum, char key);
+void joystick_map_axis(int id, int axisnum, char keyneg, char keypos);
+bool joystick_load(int id);

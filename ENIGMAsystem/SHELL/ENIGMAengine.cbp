@@ -364,8 +364,16 @@
 		</Unit>
 		<Unit filename="Audio_Systems/OpenAL/vorbis/lib/window.h" />
 		<Unit filename="Audio_Systems/audio_mandatory.h" />
+		<Unit filename="Collision_Systems/BBox/Info/collision_info.h" />
+		<Unit filename="Collision_Systems/BBox/coll_funcs.cpp" />
+		<Unit filename="Collision_Systems/BBox/coll_funcs.h" />
+		<Unit filename="Collision_Systems/BBox/coll_impl.cpp" />
+		<Unit filename="Collision_Systems/BBox/coll_impl.h" />
+		<Unit filename="Collision_Systems/BBox/coll_util.cpp" />
+		<Unit filename="Collision_Systems/BBox/coll_util.h" />
+		<Unit filename="Collision_Systems/BBox/include.h" />
+		<Unit filename="Collision_Systems/BBox/placeholderlinks.cpp" />
 		<Unit filename="Collision_Systems/collision_mandatory.h" />
-		<Unit filename="Collision_Systems/none/placeholderlinks.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL/EGMenable.h" />
 		<Unit filename="Graphics_Systems/OpenGL/GSbackground.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL/GSbackground.h" />
@@ -647,6 +655,8 @@
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
+		<Unit filename="Platforms/xlib/LINUXjoystick.cpp" />
+		<Unit filename="Platforms/xlib/LINUXjoystick.h" />
 		<Unit filename="Platforms/xlib/XLIBdialog.cpp" />
 		<Unit filename="Platforms/xlib/XLIBdialog.h">
 			<Option target="lin-debug" />
@@ -712,6 +722,8 @@
 		<Unit filename="Universal_System/compression.h" />
 		<Unit filename="Universal_System/darray.cpp" />
 		<Unit filename="Universal_System/darray.h" />
+		<Unit filename="Universal_System/dynamic_args.cpp" />
+		<Unit filename="Universal_System/dynamic_args.h" />
 		<Unit filename="Universal_System/estring.cpp" />
 		<Unit filename="Universal_System/estring.h" />
 		<Unit filename="Universal_System/event_system.cpp" />

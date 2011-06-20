@@ -28,6 +28,7 @@
 #include <time.h>
 #include <string>
 #include <iostream>
+#include <vector>
 #include <cstdlib>
 #include <stdio.h>
 #include <map>
@@ -68,7 +69,6 @@ int m_prog_loop_cfp();
    #define PRINT_TIME() ((double(tn.tv_sec - ts.tv_sec) + double(tn.tv_usec - ts.tv_usec)/1000000.0)*1000)
 #endif
 
-extern void clear_ide_editables();
 extern void print_err_line_at(pt a);
 #include "cfile_parse/cfile_pushing.h"
 
@@ -145,6 +145,7 @@ const char* heaping_pile_of_dog_shit = "\
 #include "OS_Switchboard.h"
 #include "settings-parse/crawler.h"
 #include "settings-parse/parse_ide_settings.h"
+#include "parser/object_storage.h"
 
 extern void print_definition(string n);
 static bool firstpass = true;
@@ -154,9 +155,6 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
 {
   cout << "Parsing settings..." << flushl;
     parse_ide_settings(targetYaml);
-  cout << "Clearing IDE editables... " << flushs;
-    clear_ide_editables();
-  cout << "Clearance checked." << flushl;
   
   cout << "Creating swap." << flushl;
   externs oldglobal; map<string,macro_type> oldmacs; // These will essentially garbage collect at the end of this call
@@ -215,7 +213,7 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
   
   cout << "Grabbing locals...\n";
   
-  shared_locals_load();
+  shared_locals_load(requested_extensions);
   
   cout << "Determining build target...\n";
   
@@ -232,8 +230,6 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
   //First, we make a space to put our scripts.
   globals_scope = scope_get_using(&global_scope);
   globals_scope = globals_scope->members["ENIGMA Resources"] = new externs("ENIGMA Resources",NULL,globals_scope,EXTFLAG_NAMESPACE);
-  
-  shared_locals_load();
   
   for (int i = 0; i < script_count; i++)
     quickmember_script(globals_scope,script_names[i]);

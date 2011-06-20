@@ -60,7 +60,7 @@ int d3d_start()
 int d3d_end()
 {
     glDisable(GL_DEPTH_TEST);
-    glOrtho(0,room_width,0,room_height,0,1);
+    glOrtho(-1,room_width,-1,room_height,0,1);
 
     return 0;
 }

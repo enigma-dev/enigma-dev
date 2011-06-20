@@ -28,14 +28,31 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <list>
 
 using namespace std;
 
 #include "../filesystem/file_find.h"
+#include "../general/parse_basics.h"
 #include "../OS_Switchboard.h"
+#include "../parser/object_storage.h"
 #include "crawler.h"
 #include "eyaml.h"
+
+void clear_ide_editables();
+vector<string> explode(string n) {
+  vector<string> ret;
+  size_t pos = 0, epos;
+  while (is_useless(n[pos])) pos++;
+  for (epos = n.find(','); epos != string::npos; epos = n.find(',',pos)) {
+    ret.push_back(n.substr(pos,epos));
+    pos = epos; while (is_useless(n[++pos]));
+  }
+  if (n.length() > pos)
+    ret.push_back(n.substr(pos));
+  return ret;
+}
 
 inline string tolower(string x) {
   for (size_t i = 0; i < x.length(); i++)
@@ -119,5 +136,10 @@ void parse_ide_settings(const char* eyaml)
   extensions::targetOS.runprog   = cinfo.get("run-program");
   extensions::targetOS.runparam  = cinfo.get("run-params");
   extensions::targetOS.identifier = cinfo.get("target-platform");
+  
+  cout << "Setting up IDE editables... " << endl;
+  requested_extensions.clear();
+  requested_extensions = explode((cinfo.find("extensions") == cinfo.end()) ? (string)"Universal_System/Extensions/Alarms" : (string)cinfo.get("extensions"));
+  clear_ide_editables();
 }
 

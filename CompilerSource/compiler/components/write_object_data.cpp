@@ -70,7 +70,12 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     }
     wto << "\n";
     wto << "namespace enigma\n{\n";
-      wto << "  struct object_locals: event_parent\n  {\n";
+      wto << "  struct object_locals: event_parent";
+        for (unsigned i = 0; i < parsed_extensions.size(); i++)
+          if (parsed_extensions[i].implements != "")
+            wto << ", virtual " << parsed_extensions[i].implements;
+          else wto << " /*" << parsed_extensions[i].name << "*/";
+        wto << "\n  {\n";
         wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
         wto << "    object_locals() {}\n";
         wto << "    object_locals(unsigned x, int y): event_parent(x,y) {}\n  };\n";
@@ -320,7 +325,6 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     instance->persistent = enigma::objectdata[instance->obj].persistent;
     instance->depth = enigma::objectdata[instance->obj].depth;*/
     "    \n"
-    "    for(int i=0;i<16;i++)\n      instance->alarm[i]=-1;\n    \n"
 
     "    if(instance->sprite_index!=-1)\n"
     "    {\n"
@@ -338,17 +342,6 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
     "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
     "    instance->image_single = -1;\n    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
-    /*instance->path_endaction;
-    instance->path_index;
-    instance->path_orientation;
-        instance->path_position;
-        instance->path_positionprevious;
-        instance->path_scale;
-        instance->path_speed;
-        instance->timeline_index;
-        instance->timeline_position;
-        instance->timeline_speed;     */
-        //instance->sprite_index = enigma::objectinfo[newinst_obj].sprite_index;
     "instancecount++;\n    instance_count++;\n  }\n}\n";
   wto.close();
 
