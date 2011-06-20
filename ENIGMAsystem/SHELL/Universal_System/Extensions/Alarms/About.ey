@@ -1,0 +1,12 @@
+%E-YAML
+---
+
+Name: Alarms
+ID: Alarms
+Description: Adds the alarm variable.
+Build-date: 6/17/2011
+
+Depends: None
+Dependencies: None
+Implement: extension_alarm
+Links: $objects 
