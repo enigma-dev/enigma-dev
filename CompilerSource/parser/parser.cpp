@@ -58,6 +58,8 @@ using namespace std; //More ease
 
 #include "collect_variables.h"
 
+#include "../settings.h"
+
 
 //This adds all keywords to a tree structure for quick lookup of their token.
 void parser_init()
@@ -242,15 +244,15 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
   
-  //cout << "Fix dots and shit in: \n\n" << code << endl << synt << endl << endl;
-  
   int slev = 0;
   darray<localscope*> sstack;
   sstack[slev] = new localscope();
   
   bool indecl = 0, deceq = 0;
   string dtype, dname, dpre, dsuf;
-  int inbrack = 0;
+  int inbrack = 0, level = 0;
+  bool rhs = false;
+  int infor = 0;
   
   for (pt pos = 0; pos < synt.length(); pos++)
   {
@@ -359,22 +361,36 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         code.insert(pos, "int(");
         synt.insert(pos, "ccc(");
       }
+      level++;
     }
     else switch (synt[pos])
     {
       case '*':
-        if (!inbrack and !deceq)
-          dpre += '*';
+        if (inbrack or deceq or !indecl)
+          goto Ass;
+        dpre += '*';
         break;
       case '[':
         if (!inbrack and !deceq)
-          dpre += "*", inbrack++; // Call it what you will. Knowing how many [] there are is unnecessary.
+          dpre += "*", inbrack++; // Just increment the ref count; Knowing how many [] there are is unnecessary.
+        level++;
         break;
       case ']':
         if (inbrack)
           inbrack--;
+        level--;
         break;
+      
+      
       case ';':
+        if (level and !infor)
+          cout << "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
+                  "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
+                  "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
+                  "ERROR! ERROR! ERROR! THIS SHOULD NOT HAVE FUCKING HAPPENED! DAMN IT! SOMETHING IS REALLY WRONG WITH THE FOUNDATION OF "
+                  "THIS SYSTEM! Or, I mean, maybe I just skipped a small block of text; point is, let me know this happened, please. Level = " << level << endl;
+        if (infor) infor--;
+        rhs = false;
       case ',':
         if (indecl and !inbrack)
         {
@@ -383,9 +399,17 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           if (synt[pos] == ';') indecl = false;
           deceq = false;
         }
+        rhs &= (level>0);
         break;
       case '=':
         deceq |= indecl;
+        if (setting::use_gml_equals and (level or rhs))
+        {
+          if (synt[++pos] != '=' and infor != 3 and infor != 1)
+            code.insert(pos,"="),
+            synt.insert(pos,"=");
+        }
+        rhs |= !level;
         break;
       case 'n':
           if (!inbrack and !deceq) {
@@ -394,6 +418,46 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
             dname = code.substr(sp,pos-- - sp);
             break;
           }
+          while (synt[++pos] == 'n');
+          pos--; break;
+      
+      case '(': level++; break;
+      case ')':
+          if (level == 1 and infor == 1)
+            infor = 0;
+          level--; 
+        break;
+      case ':':
+        if (synt[pos + 1] == '=') // EXPLICIT assign
+        {
+          code.erase(pos,1);
+          synt.erase(pos,1);
+          deceq |= indecl;
+          rhs |= !level;
+        }
+        break;
+      
+      
+      case '!':
+          goto notAss;
+      case '>': case '<':
+        if (synt[pos-1] != synt[pos]) // Handles <=, >=, which are not assignment operators!
+          goto notAss;
+      case '&': case '|': case '^': case '~':
+      case '+': case '-': case '/':
+          Ass: // Assignment operator
+          if (synt[pos+1] == '=') {
+            deceq |= indecl;
+            rhs |= !level;
+            pos++; break;
+          }
+          notAss: //Not an assignment operator; !=, >=, <=
+            if (synt[pos+1] == '=')
+              pos++; // Already know it isn't an assignment; already handled.
+        break;
+      
+      case 'f': // We need to be aware of for loops.
+        infor = 3;
       default:
         while (synt[pos] == synt[pos+1]) pos++;
     }

@@ -224,7 +224,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     {
       string str;
       const pt spos = pos;
-      if (OPTION_CPP_STRINGS)
+      if (setting::use_cpp_escapes)
       {
         while (code[++pos] != '"')
           if (code[pos] == '\\') pos++;
@@ -244,7 +244,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
     {
       string str;
       const pt spos = pos;
-      if (OPTION_CPP_STRINGS)
+      if (setting::use_cpp_escapes)
       {
         while (code[++pos] != '\'')
           if (code[pos] == '\\') pos++;
@@ -436,6 +436,9 @@ void parser_add_semicolons(string &code,string &synt)
       }
       if (synt[pos]==':')
       {
+        if (synt[pos+1] == '=')
+          continue;
+        // TODO: This segment will potentially hurt goto labels
         if (*sy_semi != ';' and *sy_semi != ':')
         {
           codebuf[bufpos-1] = *sy_semi;

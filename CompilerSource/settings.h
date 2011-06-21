@@ -24,6 +24,42 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+#ifndef _SETTINGS_H
+#define _SETTINGS_H
+#include <string>
+using std::string;
 
-const bool OPTION_CPP_UNARY = true; //Allow opertors ++ and --
-const bool OPTION_CPP_STRINGS = false; //Use escape codes in strings and use '' for integers
+namespace extensions
+{
+  struct sdk_descriptor {
+    string name, identifier, represents, description, author, build_platforms;
+  };
+  struct api_descriptor
+  {
+    string
+      windowSys,   graphicsSys,   audioSys,   collisionSys,   widgetSys,   networkSys;
+    string
+      windowLinks, graphicsLinks, audioLinks, collisionLinks, widgetLinks, networkLinks;
+  };
+  struct compiler_descriptor {
+    string identifier, resfile, buildext, buildname, runprog, runparam;
+  };
+
+  extern sdk_descriptor targetSDK;
+  extern api_descriptor targetAPI;
+  extern compiler_descriptor targetOS;
+}
+
+namespace setting
+{
+  //Compatibility / Progess options
+  extern bool use_cpp_strings;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
+  extern bool use_cpp_escapes;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
+  extern bool use_gml_equals;   // Defines what language operator= is inherited from.   0 = GML,               1 = C++
+  extern bool use_incrementals; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
+  extern bool literal_autocast; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
+};
+
+#endif
+
+

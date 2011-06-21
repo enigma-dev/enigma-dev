@@ -156,6 +156,8 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
   cout << "Parsing settings..." << flushl;
     parse_ide_settings(targetYaml);
   
+  cout << targetYaml << endl;
+  
   cout << "Creating swap." << flushl;
   externs oldglobal; map<string,macro_type> oldmacs; // These will essentially garbage collect at the end of this call
   oldglobal.members.swap(global_scope.members);

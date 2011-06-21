@@ -598,7 +598,7 @@ namespace syncheck
               if (lastnamed[level] != LN_OPERATOR && !(plevel>0) && !(inlist() and lastnamed[level]==LN_NOTHING))
               { error="Operator expected before string literal"; return pos; }
               
-              if (OPTION_CPP_STRINGS)
+              if (setting::use_cpp_escapes)
                 while (code[++pos]!='"') { 
                   if (code[pos] == '\\')
                     pos++;
@@ -618,7 +618,7 @@ namespace syncheck
               if (lastnamed[level] != LN_OPERATOR && !(plevel>0) && !(inlist() and lastnamed[level]==LN_NOTHING))
               { error="Operator expected before string literal"; return pos; }
               
-              if (OPTION_CPP_STRINGS)
+              if (setting::use_cpp_escapes)
                 while (code[++pos]!='\'') { 
                   if (code[pos] == '\\')
                     pos++;
@@ -694,6 +694,8 @@ namespace syncheck
         
         case ':': //The unhappiest symbol in the C language!
             {
+              if (code[pos+1] == '=')
+                { pos++; continue; }
               if (levelt[level] == LEVELTYPE_TERNARY)
               {
                 while (statement_pad[level] != 2)
@@ -793,7 +795,7 @@ namespace syncheck
               switch (code[pos])
               {
                 case '+': case '-':
-                    if (OPTION_CPP_UNARY and code[pos+1] == code[pos]) //Operators ++ and --
+                    if (setting::use_incrementals and code[pos+1] == code[pos]) //Operators ++ and --
                     {
                       if (lastnamed[level] == LN_OPERATOR) {
                         pos += 2;

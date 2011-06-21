@@ -25,21 +25,23 @@
 **                                                                              **
 \********************************************************************************/
 
-typedef size_t pt; //Use size_t as our pos type; this will prevent errors with size_t's like std::string::npos
+#include "settings.h"
 
-#include "../general/darray.h"
+namespace extensions
+{
+  sdk_descriptor targetSDK;
+  api_descriptor targetAPI;
+  compiler_descriptor targetOS;
+}
 
-extern map<string,char> edl_tokens;
-int parser_ready_input(string&,string&,unsigned int&,varray<string>&);
-void parser_buffer_syntax_map(string &code,string &syntax,const int use_cpp_numbers = 0);
-int  parser_fix_templates(string &code,pt pos,pt spos,string *synt);
-void parser_add_semicolons(string &code,string &synt);
-void print_the_fucker(string code,string synt);
-int parser_reinterpret(string&,string&);
-
-int dropscope();
-int quickscope();
-int initscope(string name);
-int quicktype(unsigned flags, string name);
+namespace setting
+{
+  //Compatibility / Progess options
+  bool use_cpp_strings = 0;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
+  bool use_cpp_escapes = 0;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
+  bool use_gml_equals = 0;   // Defines what language operator= is inherited from.   0 = C++,               1 = GML
+  bool use_incrementals = 0; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
+  bool literal_autocast = 0; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
+};
 
 

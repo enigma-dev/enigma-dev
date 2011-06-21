@@ -707,6 +707,12 @@
 		<Unit filename="Universal_System/CallbackArrays.h" />
 		<Unit filename="Universal_System/ENIGMA_GLOBALS.cpp" />
 		<Unit filename="Universal_System/ENIGMA_GLOBALS.h" />
+		<Unit filename="Universal_System/Extensions/Alarms/alarmcode.cpp" />
+		<Unit filename="Universal_System/Extensions/Alarms/implement.h" />
+		<Unit filename="Universal_System/Extensions/Alarms/include.h" />
+		<Unit filename="Universal_System/Extensions/Paths/implement.h" />
+		<Unit filename="Universal_System/Extensions/Timelines/implement.h" />
+		<Unit filename="Universal_System/Extensions/recast.h" />
 		<Unit filename="Universal_System/GAME_GLOBALS.h" />
 		<Unit filename="Universal_System/IMGloading.cpp" />
 		<Unit filename="Universal_System/IMGloading.h" />
@@ -729,7 +735,6 @@
 		<Unit filename="Universal_System/event_system.cpp" />
 		<Unit filename="Universal_System/events.cpp" />
 		<Unit filename="Universal_System/events.h" />
-		<Unit filename="Universal_System/extensions/alarmcode.cpp" />
 		<Unit filename="Universal_System/fileio.cpp" />
 		<Unit filename="Universal_System/fileio.h" />
 		<Unit filename="Universal_System/fontinit.cpp" />
