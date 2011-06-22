@@ -100,7 +100,7 @@ ey_string &eyscalar(eyit x)
 ey_string::operator string&() { return value; }
 char ey_string::toByte()      { return atoi(value.c_str()); }
 double ey_string::toDouble()  { return atof(value.c_str()); }
-int ey_string::toInt()        { return atoi(value.c_str()); }
+int ey_string::toInt()        { cout << "TOINT: " << value << endl; return atoi(value.c_str()); }
 long long ey_string::toLong() { return atoll(value.c_str()); }
 string ey_string::toString()
 {
