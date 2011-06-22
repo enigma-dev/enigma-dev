@@ -48,6 +48,8 @@ public class EnigmaSettings
 		selAudio = TargetHandler.defAudio;
 		selCollision = TargetHandler.defCollision;
 		selWidgets = TargetHandler.defWidgets;
+
+		//default options are populated in EnigmaSettingsFrame.parsePanels to avoid reading file twice
 		}
 
 	void loadDefinitions()

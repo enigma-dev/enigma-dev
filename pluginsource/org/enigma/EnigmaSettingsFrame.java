@@ -378,6 +378,14 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 
 			panels.add(makePane(name,columns,opts.toArray(new Option[0])));
 			}
+
+		//Populate the default options so they're ready for first call to definitionsModified.
+		//Technically it would make more sense to do this in EnigmaSettings c'tor,
+		//but then we'd need to either parse this file twice or keep a reference to it.
+		oldEs.options.clear();
+		for (Entry<String,Option> entry : options.entrySet())
+			oldEs.options.put(entry.getKey(),entry.getValue() == null ? null : entry.getValue().getValue());
+
 		return panels;
 		}
 
