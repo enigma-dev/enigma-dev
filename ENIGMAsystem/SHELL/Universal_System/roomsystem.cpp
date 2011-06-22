@@ -110,10 +110,10 @@ namespace enigma
       for (int i = 0; i < 8; i++)
         if (view_visible[i])
         {
-          if (view_xview[i]+view_wview[i] > tx)
-            tx = (int)(view_xview[i]+view_wview[i]);
-          if (view_yview[i]+view_hview[i] > ty)
-            ty = (int)(view_yview[i]+view_hview[i]);
+          if (view_xport[i]+view_wport[i] > tx)
+            tx = (int)(view_xport[i]+view_wport[i]);
+          if (view_yport[i]+view_hport[i] > ty)
+            ty = (int)(view_yport[i]+view_hport[i]);
         }
       if (tx and ty)
         xm = tx, ym = ty;
@@ -340,6 +340,7 @@ namespace enigma
     if (view_enabled)
     {
       for (int i=0;i<8;i++)
+      if (view_visible[i])
       {
         if (mouse_x>=view_xport[i] && mouse_x<view_xport[i]+view_wport[i]
         && mouse_y>=view_yport[i] && mouse_y<view_yport[i]+view_hport[i]){
