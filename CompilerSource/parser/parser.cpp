@@ -259,14 +259,15 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     if (synt[pos] == 't')
     {
       pt spos = pos;
-      while (synt[++pos] == 't');
-      pos += parser_fix_templates(code,pos,spos,&synt);
-      if (!indecl or !deceq) // If we're not in a declaration; or we are, but are not to the right of an =.
-      {
-        indecl = true; dtype = code.substr(spos,pos-spos);
-        dpre = dsuf = "";
-        cout << "TYPE [" << dtype << "]" << endl;
-      }
+      while (synt[++pos] == 't'); // Move to end of type
+      pos += parser_fix_templates(code,pos,spos,&synt); // This will default template parameters for you and return the change in end position
+      
+      if (rhs or indecl or synt[pos] == '(') // It's not a declaration if we're on the right of an =, already in a declaration, or are a cast (followed by a parenthesis)
+        { pos--; continue; }
+      
+      indecl = true; dtype = code.substr(spos,pos-spos);
+      dpre = dsuf = "";
+      cout << "TYPE [" << dtype << "]" << endl;
       pos--; continue;
     }
     else if (synt[pos] == '.' and synt[pos+1] == 'n')
@@ -390,13 +391,12 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
                   "ERROR! ERROR! ERROR! THIS SHOULD NOT HAVE FUCKING HAPPENED! DAMN IT! SOMETHING IS REALLY WRONG WITH THE FOUNDATION OF "
                   "THIS SYSTEM! Or, I mean, maybe I just skipped a small block of text; point is, let me know this happened, please. Level = " << level << endl;
         if (infor) infor--;
-        rhs = false;
+        rhs = indecl = false;
       case ',':
         if (indecl and !inbrack)
         {
           (*sstack[slev])[dname] = dectrip(dtype,dpre,dsuf);
           cout << "DECLARE " << dtype << " " << dpre << dname << dsuf << endl;
-          if (synt[pos] == ';') indecl = false;
           deceq = false;
         }
         rhs &= (level>0);

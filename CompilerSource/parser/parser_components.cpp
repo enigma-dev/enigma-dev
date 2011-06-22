@@ -147,7 +147,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
             while (is_useless(code[cwp])) cwp++;
             if (code[cwp] != '(')
               goto out_of_here;
-            if (!macro_function_parse(code.c_str(),code.length(),name,pos,macrostr,itm->second.args,itm->second.argc,itm->second.args_uat)) {
+            if (!macro_function_parse(code.c_str(),code.length(),name,pos,macrostr,itm->second.args,itm->second.argc,itm->second.args_uat,false,true)) {
               cout << "UNEXPECTED ERROR: " << macrostr;
               cout << "\nThis error should have been reported during a previous syntax check\n";
               continue;

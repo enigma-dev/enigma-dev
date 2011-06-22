@@ -148,7 +148,7 @@ bool preprocess_separately(string &macs)
   return true;
 }
 
-bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments)
+bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt &pos,string& macrostr, varray<string> &args, const int numparams, const int au_at, bool cppcomments, bool gmlbrackets)
 {
   //cout << "parse " << macrostr << endl;
   //Skip comments. Ignore this block; it's savage but efficient.
@@ -179,22 +179,25 @@ bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt
     if (lvl <= 0)
       return macrostr = "Expected additional macro parameters before end parenthesis: function requires " + tostring(numparams) + " parameters, passed only " + tostring(args_given), false;
     const pt spos = pos;
-    while (is_useless(cfile[pos])) pos++;
+    
+    // Skip whitespace after opening parenthesis
+    while (is_useless(cfile[pos])) pos++; // Now we are at first argument or closing parenthesis
+    
     while ((lvl > 1 or (cfile[pos] != ',' or args_given == au_at)) and pos < len and lvl)
     {
       if (cfile[pos] == ')') lvl--;
       else if (cfile[pos] == '(') lvl++;
+      else if (cfile[pos] == '[') lvl+=gmlbrackets;
+      else if (cfile[pos] == ']') lvl-=gmlbrackets;
       else if (cfile[pos] == '\"') { pos++; while (cfile[pos] != '\"' and pos < len) { if (cfile[pos] == '\\') pos++; pos++; } } 
       else if (cfile[pos] == '\'') { pos++; while (cfile[pos] != '\'' and pos < len) { if (cfile[pos] == '\\') pos++; pos++; } }  
       if (lvl) pos++; 
     }
     //Comma drops out as soon as cfile[pos] == ','
     //End Parenth will not increment if !lvl, so cfile[pos] == ')'
-    const string rw(cfile,spos,pos-spos);//47922
+    const string rw(cfile,spos,pos-spos);
     if (args_given or cfile[pos] != ')' or !is_entirely_white(rw))
       macro_args[args_given++] = rw;
-    //cout << "Argument " << i << ": " << cfile.substr(spos,pos-spos) << endl;
-    //cout << "This: '"<<cfile[pos]<<"'\r\n";
     pos++;
   }
   

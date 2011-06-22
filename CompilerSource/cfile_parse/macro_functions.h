@@ -26,4 +26,4 @@
 \********************************************************************************/
 
 extern string macro_function_parsed;
-bool macro_function_parse(const char*,const size_t,string,pt &,string&, varray<string>&, const int, const int, bool = true);
+bool macro_function_parse(const char*,const size_t,string,pt &,string&, varray<string>&, const int, const int, bool = true, bool = false);
