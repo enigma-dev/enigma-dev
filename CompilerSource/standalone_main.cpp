@@ -91,7 +91,7 @@ inline void povers(string n)
 int mainr(int argc, char *argv[])
 {
   cout << "Grabbing locals" << endl;
-    extensions::crawl_for_locals(requested_extensions);
+    extensions::crawl_for_locals();
     string localstring = extensions::compile_local_string();
     cout << localstring << endl;
   cout << "Ass." << endl;

@@ -176,8 +176,6 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
         idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
       }
     }
-    edbg << "Grabbing locals" << flushl;
-      string high_level_shared_locals = extensions::compile_local_string();
 
   //Read the types of events
   event_parse_resourcefile();
@@ -298,7 +296,6 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.close();
 
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h",ios_base::out);
-    wto << high_level_shared_locals;
   wto.close();
 
 

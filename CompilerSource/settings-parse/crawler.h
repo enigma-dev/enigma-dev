@@ -45,6 +45,7 @@ namespace extensions
 {
   string compile_local_string();
   void dump_read_locals(map<string,int>&);
-  void crawl_for_locals(vector<string> exts);
+  void parse_extensions(vector<string> exts);
+  void crawl_for_locals();
   void determine_target();
 }

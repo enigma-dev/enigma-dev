@@ -148,6 +148,7 @@ void parse_ide_settings(const char* eyaml)
   cout << "Setting up IDE editables... " << endl;
   requested_extensions.clear();
   requested_extensions = explode((cinfo.find("extensions") == cinfo.end()) ? (string)"Universal_System/Extensions/Alarms" : (string)cinfo.get("extensions"));
+  extensions::parse_extensions(requested_extensions);
   clear_ide_editables();
 }
 

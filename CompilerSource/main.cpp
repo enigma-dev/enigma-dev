@@ -241,6 +241,9 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
   
   ide_passback_error.err_str = error_sstring.c_str();
   
+  delete globals_scope;
+  scope_get_using(&global_scope)->members.erase("ENIGMA Resources");
+  
   if (ide_passback_error.absolute_index != -1)
   {
     int line = 1, lp = 1;

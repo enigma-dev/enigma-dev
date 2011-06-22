@@ -32,6 +32,7 @@
 using namespace std;
 
 #include "../filesystem/file_find.h"
+#include "../externs/externs.h"
 #include "crawler.h"
 #include "eyaml.h"
 
@@ -81,7 +82,7 @@ namespace extensions
     for (map<string,string>::iterator it = locals.begin(); it != locals.end(); it++)
       lmap[it->first]++;
   }
-  void crawl_for_locals(vector<string> exts)
+  void parse_extensions(vector<string> exts)
   {
     if (exts.empty())
       return;  //IsmAvatar: Remove this if() return.
@@ -105,6 +106,26 @@ namespace extensions
       pe.implements = about.get("implement");
       
       parsed_extensions.push_back(pe);
+    }
+  }
+  void crawl_for_locals()
+  {
+    locals.clear();
+    for (unsigned i = 0; i < parsed_extensions.size(); i++)
+    {
+      current_scope = &global_scope, immediate_scope = NULL;
+      find_extname("enigma", 0xFFFFFFFF);
+      
+      immediate_scope = ext_retriever_var;
+      bool found = find_extname(parsed_extensions[i].implements,0xFFFFFFFF);
+      
+      if (!found)
+        cout << "ERROR! Extension implements " << parsed_extensions[i].implements << " without defining it!" << endl;
+      else
+      {
+        for (extiter it = ext_retriever_var->members.begin(); it != ext_retriever_var->members.end(); it++)
+          locals[it->second->name] = it->second->type ? it->second->type->name : "var";
+      }
     }
   }
   

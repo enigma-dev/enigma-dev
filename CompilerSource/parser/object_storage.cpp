@@ -69,7 +69,7 @@ int shared_locals_load(vector<string> exts)
       shared_object_locals[mem->first] = 0;
   }
   
-  extensions::crawl_for_locals(exts);
+  extensions::crawl_for_locals();
   extensions::dump_read_locals(shared_object_locals);
   return 0;
 }
