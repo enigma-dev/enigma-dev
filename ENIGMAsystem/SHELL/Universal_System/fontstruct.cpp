@@ -41,7 +41,7 @@ using namespace std;
 namespace enigma
 {
   font **fontstructarray = NULL;
-  static size_t fontcount = 0;
+  extern size_t font_idmax;
 
   int font_new(unsigned char gs, unsigned char gc) // Creates a new font, allocating 'gc' glyphs
   {
@@ -51,14 +51,16 @@ namespace enigma
     ret->glyphs = new fontglyph[gc];
     ret->height = 0;
     
-    font **fsan = new font*[fontcount+1];
-    for (unsigned i = 0; i < fontcount; i++)
-      fsan[i] = fontstructarray[i];
-    delete fontstructarray;
-    fontstructarray = fsan;
-    
-    fontstructarray[fontcount] = ret;
-    return fontcount++;
+    font **fsan = new font*[font_idmax+2];
+    font ** const fold = fontstructarray - 1;
+    if (fontstructarray and fold) {
+      for (unsigned i = 0; i <= font_idmax; i++)
+        fsan[i] = fold[i];
+      delete fold;
+    }
+    fontstructarray = fsan + 1;
+    fontstructarray[font_idmax] = ret;
+    return font_idmax++;
   }
 }
 
@@ -66,7 +68,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
 {
   enigma::sprite *sspr = enigma::spritestructarray[spr];
   if (!sspr) return -1;
-  
+
   unsigned char gcount = sspr->subcount;
   int idfont = enigma::font_new(first, gcount);
   enigma::font *font = enigma::fontstructarray[idfont];
@@ -135,7 +137,6 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
   for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
   {
-    printf("Add rectangle %d, which is of size %d x %d, to main cell of size %d x %d (%d, %d)\n", *i & 255, glyphmetrics[*i & 255].w, glyphmetrics[*i & 255].h, rectplane->wid, rectplane->hgt, w, h);
     enigma::rect_packer::rectpnode *nn = enigma::rect_packer::rninsert(rectplane, *i & 0xFF, glyphmetrics);
     if (nn)
       enigma::rect_packer::rncopy(nn, glyphmetrics, *i & 0xFF),

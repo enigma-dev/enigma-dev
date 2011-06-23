@@ -35,7 +35,6 @@ namespace enigma
   unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
   {
     GLuint texture;
-    printf("Texture %d x %d\n",fullwidth,fullheight);
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata);
