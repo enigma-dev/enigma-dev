@@ -82,11 +82,12 @@ struct parsed_object
   int id, sprite_index, parent;
   bool visible, solid;
   
-  map<string,dectrip> locals;  //Any variable KEY used but not declared, or declared as local VALUE.
-  map<string,dectrip> globals; //Any variable KEY declared as global VALUE.
-  map<string,decquad> consts;  //Any variable KEY declared as constant VALUE.
-  map<string,int> funcs;       //Any function KEY called with at most VALUE parameters.
-  map<string,int> dots;        //Any attribute KEY accessed via a dot, as in a.KEY
+  map<string,dectrip> locals;   //Any variable KEY used but not declared, or declared as local VALUE.
+  map<string,dectrip> globals;  //Any variable KEY declared as global VALUE.
+  map<string,decquad> consts;   //Any variable KEY declared as constant VALUE.
+  map<string,int> globallocals; //Any shared local variable KEY used.
+  map<string,int> funcs;        //Any function KEY called with at most VALUE parameters.
+  map<string,int> dots;         //Any attribute KEY accessed via a dot, as in a.KEY
   
   typedef map<string,dectrip>::iterator locit;
   typedef map<string,dectrip>::iterator globit;

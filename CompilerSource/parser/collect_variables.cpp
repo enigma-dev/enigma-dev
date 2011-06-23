@@ -290,6 +290,7 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
         
         //Finally, check shared locals to see if we already have one
         if (shared_object_locals.find(nname) != shared_object_locals.end()) {
+          pev->myObj->globallocals[nname]++;
           cout << "Ignoring `" << nname << "' because it's a shared local.\n"; continue;
         }
         

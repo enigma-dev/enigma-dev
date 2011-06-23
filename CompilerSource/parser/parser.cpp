@@ -59,6 +59,7 @@ using namespace std; //More ease
 #include "collect_variables.h"
 
 #include "../settings.h"
+#include "parser.h"
 
 
 //This adds all keywords to a tree structure for quick lookup of their token.
@@ -151,7 +152,7 @@ void parser_init()
 
 
 
-string parser_main(string code, parsed_event* pev = NULL)
+string parser_main(string code, parsed_event* pev)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
