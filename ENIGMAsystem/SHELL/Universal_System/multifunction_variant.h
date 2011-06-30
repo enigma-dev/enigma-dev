@@ -25,14 +25,15 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _MULTIFUNCTION_VARIANT__H
+#define _MULTIFUNCTION_VARIANT__H
+
 #include "var_te.h"
 
 namespace enigma
 {
-  struct TYPEPURPOSE:variant
+  struct multifunction_variant: variant
   {
-    TYPEVARIABLES;
-    
     #undef  types_extrapolate_alldec
     #define types_extrapolate_alldec(prefix)\
      types_extrapolate_real_p  (prefix,;)\
@@ -40,18 +41,26 @@ namespace enigma
      prefix (const variant &x);\
      prefix (const var &x);
     
-    //These are assignment operators and require a reference to be passed
-    types_extrapolate_alldec(TYPEPURPOSE& operator=);
-    types_extrapolate_alldec(TYPEPURPOSE& operator+=);
-    types_extrapolate_alldec(TYPEPURPOSE& operator-=);
-    types_extrapolate_alldec(TYPEPURPOSE& operator*=);
-    types_extrapolate_alldec(TYPEPURPOSE& operator/=);
-    types_extrapolate_alldec(TYPEPURPOSE& operator<<=);
-    types_extrapolate_alldec(TYPEPURPOSE& operator>>=);
-    types_extrapolate_alldec(TYPEPURPOSE& operator&=);
-    types_extrapolate_alldec(TYPEPURPOSE& operator|=);
-    types_extrapolate_alldec(TYPEPURPOSE& operator^=);
+    virtual void function();
     
+    //These are assignment operators and require a reference to be passed
+    types_extrapolate_alldec(multifunction_variant& operator=);
+    types_extrapolate_alldec(multifunction_variant& operator+=);
+    types_extrapolate_alldec(multifunction_variant& operator-=);
+    types_extrapolate_alldec(multifunction_variant& operator*=);
+    types_extrapolate_alldec(multifunction_variant& operator/=);
+    types_extrapolate_alldec(multifunction_variant& operator<<=);
+    types_extrapolate_alldec(multifunction_variant& operator>>=);
+    types_extrapolate_alldec(multifunction_variant& operator&=);
+    types_extrapolate_alldec(multifunction_variant& operator|=);
+    types_extrapolate_alldec(multifunction_variant& operator^=);
+    
+    virtual ~multifunction_variant();
     #undef  types_extrapolate_alldec
   };
 }
+
+#define INHERIT_OPERATORS()\
+  using multifunction_variant::operator=;
+
+#endif

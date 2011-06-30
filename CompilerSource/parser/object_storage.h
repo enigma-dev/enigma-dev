@@ -29,8 +29,11 @@
 #define _OBJECT_STORAGE_H
 
 #include <map>
+#include <string>
 #include <vector>
 #include "../general/darray.h"
+
+using namespace std;
 
 //Locals that are inherited by all instances of all objects from the core system.
 extern map<string,int> shared_object_locals;
@@ -39,6 +42,9 @@ extern int shared_locals_load(vector<string> exts);
 extern int shared_locals_clear();
 
 void add_dot_accessed_local(string name);
+
+//Represent an initializer (name(value) in constructor)
+typedef pair<string,string> initpair;
 
 //These parallel ism's structs, but offer additional properties we need to finish compile
 struct parsed_object;
@@ -81,13 +87,16 @@ struct parsed_object
   string name;
   int id, sprite_index, parent;
   bool visible, solid;
+  double depth;
   
-  map<string,dectrip> locals;   //Any variable KEY used but not declared, or declared as local VALUE.
-  map<string,dectrip> globals;  //Any variable KEY declared as global VALUE.
-  map<string,decquad> consts;   //Any variable KEY declared as constant VALUE.
-  map<string,int> globallocals; //Any shared local variable KEY used.
-  map<string,int> funcs;        //Any function KEY called with at most VALUE parameters.
-  map<string,int> dots;         //Any attribute KEY accessed via a dot, as in a.KEY
+  map<string,dectrip> locals;   // Any variable KEY used but not declared, or declared as local VALUE.
+  map<string,dectrip> globals;  // Any variable KEY declared as global VALUE.
+  map<string,decquad> consts;   // Any variable KEY declared as constant VALUE.
+  map<string,int> globallocals; // Any shared local variable KEY used.
+  map<string,int> funcs;        // Any function KEY called with at most VALUE parameters.
+  map<string,int> dots;         // Any attribute KEY accessed via a dot, as in a.KEY
+  
+  vector<initpair> initializers; // Variables that need initialized in the constructor for this object
   
   typedef map<string,dectrip>::iterator locit;
   typedef map<string,dectrip>::iterator globit;
@@ -99,7 +108,7 @@ struct parsed_object
   void copy_calls_from(parsed_object&);
   
   parsed_object();
-  parsed_object(string,int,int,int,bool,bool);
+  parsed_object(string,int,int,int,bool,bool,double);
 };
 extern map<int,parsed_object*> parsed_objects;
 typedef map<int,parsed_object*>  :: iterator po_i;

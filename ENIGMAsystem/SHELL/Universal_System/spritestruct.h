@@ -28,8 +28,6 @@
 #ifndef ENIGMA_SPRITESTRUCT
 #define ENIGMA_SPRITESTRUCT
 
-#include <map>
-
 namespace enigma
 {
   struct sprite

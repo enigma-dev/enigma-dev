@@ -33,11 +33,22 @@
 #ifndef _GRAPHICS_OBJECT_H
 #define _GRAPHICS_OBJECT_H
 
-#include "../../Universal_System/planar_object.h"
-#include "../../Universal_System/mathnc.h"
-#include "../../Universal_System/spritestruct.h"
+#include "var4.h"
+#include "multifunction_variant.h"
+#include "planar_object.h"
+#include "mathnc.h"
+#include "spritestruct.h"
+
 namespace enigma
 {
+  struct depthv:multifunction_variant {
+    INHERIT_OPERATORS();
+    struct inst_iter *myiter;
+    void function();
+    void init(double depth, object_basic* who);
+    void remove();
+    ~depthv();
+  };
   struct object_graphics: object_planar
   {
     //Sprites: these are mostly for higher tiers...
@@ -47,10 +58,8 @@ namespace enigma
       
       int image_number; //read only
       
-
-      
       //Depth
-      int  depth;
+      enigma::depthv  depth;
       bool visible;
 
     //Transformations: these are mostly for higher tiers...

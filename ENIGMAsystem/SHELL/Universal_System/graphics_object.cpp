@@ -25,33 +25,37 @@
 **                                                                              **
 \********************************************************************************/
 
+/**
+  @file  graphics_object.cpp
+  @brief Adds a graphics-related tier following the planar tier.
+*/
+
 #include <math.h>
-#include <string>
-#include "var4.h"
-#include "reflexive_types.h"
+#include "depth_draw.h"
+#include "graphics_object.h"
 
-namespace enigma {
-  //Make direction work
-  void directionv::function() {
-    *reflex2 = *reflex1 * cos(rval.d*M_PI/180);
-    *reflex3 = *reflex1 * -sin(rval.d*M_PI/180);
+namespace enigma
+{
+  object_graphics::object_graphics() {}
+  object_graphics::object_graphics(unsigned x, int y): object_planar(x,y) {}
+  object_graphics::~object_graphics() {};
+  
+  void depthv::function() {
+    rval.d = floor(rval.d);
+    drawing_depths[rval.d].draw_events->unlink(myiter);
+    inst_iter* mynewiter = drawing_depths[rval.d].draw_events->add_inst(myiter->inst);
+     if (instance_event_iterator == myiter)
+       instance_event_iterator = myiter->prev;
+     myiter = mynewiter;
   }
-
-  //Make speed work -- same as above, but rval.d and reflex1 are switched.
-  void speedv::function() {
-    *reflex2 = rval.d * cos(*reflex1*M_PI/180);
-    *reflex3 = rval.d * -sin(*reflex1*M_PI/180);
+  void depthv::init(double d,object_basic* who) {
+    myiter = drawing_depths[rval.d = floor(d)].draw_events->add_inst(who);
   }
-
-  //Make hspeed work
-  void hspeedv::function() {
-    *reflex2 = (int(180+180*(1-atan2(*reflex1,rval.d)/M_PI)))%360;
-    *reflex3 = hypot(rval.d,*reflex1);
+  void depthv::remove() {
+     drawing_depths[rval.d].draw_events->unlink(myiter);
+     if (instance_event_iterator == myiter)
+       instance_event_iterator = myiter->prev;
+     myiter = NULL;
   }
-
-  //Make vspeed work -- Same as above, except the arguments to atan2 are reversed
-  void vspeedv::function() {
-    *reflex2 = (int(180+180*(1-atan2(rval.d,*reflex1)/M_PI)))%360;
-    *reflex3 = hypot(rval.d,*reflex1);
-  }
+  depthv::~depthv() {}
 }

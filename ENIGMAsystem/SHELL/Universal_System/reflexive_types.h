@@ -28,36 +28,32 @@
 #ifndef _reflexive_types_h
 #define _reflexive_types_h
 
-#define TYPEVARIABLES double *reflex1, *reflex2, *reflex3;
-
-//Make direction work
-#define TYPEPURPOSE directionv
-#define TYPEFUNCTION() *reflex2=*reflex1*cos(rval.d/180*PI); *reflex3=*reflex1*-sin(rval.d/180*PI);
 #include "multifunction_variant.h"
-#undef TYPEFUNCTION
-#undef TYPEPURPOSE
 
-//Make speed work -- same as above, but rval.d and reflex1 are switched.
-#define TYPEPURPOSE speedv
-#define TYPEFUNCTION() *reflex2=rval.d*cos(*reflex1/180*PI); *reflex3=rval.d*-sin(*reflex1/180*PI);
-#include "multifunction_variant.h"
-#undef TYPEFUNCTION
-#undef TYPEPURPOSE
+namespace enigma {
+  struct directionv: multifunction_variant {
+    INHERIT_OPERATORS();
+    double *reflex1, *reflex2, *reflex3;
+    void function();
+  };
 
-//Make hspeed work
-#define TYPEPURPOSE hspeedv
-#define TYPEFUNCTION() *reflex2=(int(180+180*(1-atan2(*reflex1,rval.d)/PI)))%360; *reflex3=sqrt(rval.d*rval.d+(*reflex1)*(*reflex1));
-#include "multifunction_variant.h"
-#undef TYPEFUNCTION
-#undef TYPEPURPOSE
+  struct speedv: multifunction_variant {
+    INHERIT_OPERATORS();
+    double *reflex1, *reflex2, *reflex3;
+    void function();
+  };
 
-//Make vspeed work -- Same as above, except the arguments to atan2 are reversed
-#define TYPEPURPOSE vspeedv
-#define TYPEFUNCTION() *reflex2=(int(180+180*(1-atan2(rval.d,*reflex1)/PI)))%360; *reflex3=sqrt(rval.d*rval.d+(*reflex1)*(*reflex1));
-#include "multifunction_variant.h"
-#undef TYPEFUNCTION
-#undef TYPEPURPOSE
+  struct hspeedv: multifunction_variant {
+    INHERIT_OPERATORS();
+    double *reflex1, *reflex2, *reflex3;
+    void function();
+  };
 
-#undef TYPEVARIABLES
+  struct vspeedv: multifunction_variant {
+    INHERIT_OPERATORS();
+    double *reflex1, *reflex2, *reflex3;
+    void function();
+  };
+}
 
 #endif //_reflexive_types_h

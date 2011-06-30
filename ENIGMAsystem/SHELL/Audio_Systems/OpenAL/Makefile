@@ -14,7 +14,7 @@ this: $(OBJECTS) $(OBJECTS)/as_basic.o
 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*
 	cd alure	&& $(MAKE) clean
 	cd dumb		&& $(MAKE) clean
 	cd ogg		&& $(MAKE) clean

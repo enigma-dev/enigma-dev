@@ -87,7 +87,7 @@ double direction_difference(double dir1,double dir2) {
 	dir1=fmod(dir2-dir1,360)+180;
 	return dir1-(dir1>360?540:(dir1<0?360:180));
 }
-double point_direction(double x1,double y1,double x2,double y2) { return ((y1<y2?2*M_PI:0)-atan2(y2-y1,x2-x1))*(180/M_PI); }
+double point_direction(double x1,double y1,double x2,double y2) { return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }
 double point_distance(double x1,double y1,double x2,double y2)  { return hypot(x2-x1,y2-y1); }
 
 #define UPPER_MASK 0x80000000 // most significant w-r bits

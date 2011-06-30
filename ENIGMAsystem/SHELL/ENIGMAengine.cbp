@@ -406,8 +406,6 @@
 		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.h" />
 		<Unit filename="Graphics_Systems/OpenGL/OpenGLHeaders.h" />
-		<Unit filename="Graphics_Systems/OpenGL/graphics_object.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/graphics_object.h" />
 		<Unit filename="Graphics_Systems/OpenGLES/EGMenable.h">
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
@@ -742,6 +740,8 @@
 		<Unit filename="Universal_System/fontstruct.h" />
 		<Unit filename="Universal_System/globalupdate.cpp" />
 		<Unit filename="Universal_System/globalupdate.h" />
+		<Unit filename="Universal_System/graphics_object.cpp" />
+		<Unit filename="Universal_System/graphics_object.h" />
 		<Unit filename="Universal_System/imap.h" />
 		<Unit filename="Universal_System/instance.cpp" />
 		<Unit filename="Universal_System/instance.h" />
@@ -753,6 +753,7 @@
 		<Unit filename="Universal_System/lua_table.h" />
 		<Unit filename="Universal_System/mathnc.cpp" />
 		<Unit filename="Universal_System/mathnc.h" />
+		<Unit filename="Universal_System/multifunction_variant.cpp" />
 		<Unit filename="Universal_System/multifunction_variant.h" />
 		<Unit filename="Universal_System/multifunction_variant_source.h" />
 		<Unit filename="Universal_System/object.cpp" />

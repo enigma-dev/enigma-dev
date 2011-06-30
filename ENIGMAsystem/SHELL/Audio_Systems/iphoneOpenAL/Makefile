@@ -9,4 +9,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/iphoneOpenAL.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

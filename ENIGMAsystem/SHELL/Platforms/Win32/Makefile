@@ -23,4 +23,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/externals.o $(OBJECTS)/file_manip.o $(OBJECTS)/WINDOWScallback.o $(OBJECTS)/WINDOWSfonts.o $(OBJECTS)/WINDOWSmain.o $(OBJECTS)/WINDOWSshow_error.o $(OBJECTS)/WINDOWSstd.o $(OBJECTS)/WINDOWSwindow.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

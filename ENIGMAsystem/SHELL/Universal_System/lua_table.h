@@ -32,6 +32,10 @@
 #include <string.h> // Memcpy
 #include <stdlib.h> // Malloc, Realloc, Free
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+#error This file is high-impact and should not be included from SHELLmain.cpp.
+#endif
+
 /**
   This file implements a Lua-table-like structure. It borrows ideas not only from 
   Lua, but from STL containers. It also borrows the entirety of std::map. This should

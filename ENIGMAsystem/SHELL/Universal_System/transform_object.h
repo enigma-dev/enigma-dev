@@ -33,7 +33,7 @@
 #ifndef _TRANSFORM_OBJECT_H
 #define _TRANSFORM_OBJECT_H
 
-#include "../Graphics_Systems/OpenGL/graphics_object.h"
+#include "graphics_object.h"
 
 namespace enigma
 {

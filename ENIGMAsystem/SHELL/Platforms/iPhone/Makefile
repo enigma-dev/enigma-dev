@@ -23,4 +23,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/CocoaDialog.o $(OBJECTS)/CocoaFunctions.o $(OBJECTS)/CocoaMain.o $(OBJECTS)/CocoaWindow.o $(OBJECTS)/file_manip.o $(OBJECTS)/EnigmaXcodeAppDelegate.o $(OBJECTS)/iPhoneEnigmaView.o $(OBJECTS)/main.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

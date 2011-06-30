@@ -29,6 +29,8 @@
 #include <stddef.h>
 #include <string>
 
+#define INCLUDED_FROM_SHELLMAIN 1
+
 // Simple Universal libraries
 ///////////////////////////////
 
@@ -80,7 +82,7 @@ extern int amain();
     #include "Universal_System/collisions.h"
 #endif
 
-#include "Universal_System/instance_system.h"
+#include "Universal_System/instance_system_frontend.h"
 
 #ifndef ENIGMA_PARSER_RUN
   #include "Universal_System/syntax_quirks.h"

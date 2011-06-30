@@ -25,91 +25,21 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "var4.h"
-
-int room_goto(int roomind);
-int room_restart();
-int room_goto_absolute(int index);
-int room_goto_first();
-int room_goto_next();
-int room_next(int num);
-int room_previous(int num);
-
-extern int background_color;
-extern int background_showcolor;
-
-extern var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed;
-
-extern int room_first;
-extern int room_height;
-extern int room_last;
-extern int room_persistent;
-extern int room_speed;
-extern int room_width;
-
-extern string room_caption;
-
-int room_count();
-#define room_count room_count()
-
-extern int view_angle;
-extern int view_current;
-extern int view_enabled;
-typedef variant rvt[8];
-extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible, 
-           view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview;
-
+#include "instance_system_base.h"
 
 namespace enigma
 {
-  struct inst {
-    int id,obj,x,y;
-  };
-  struct viewstruct
-  {
-    int start_vis;
-    int area_x,area_y,area_w,area_h;
-    int port_x,port_y,port_w,port_h;
-    int object2follow;
-    int hborder,vborder,hspd,vspd;
-  };
-    struct backstruct {
-        int visible;
-        int foreground;
-        int background;
-        int area_x, area_y, horSpeed, verSpeed;
-        int tileHor, tileVert;
-        int stretch;
-    };
-  struct roomstruct
-  {
-    int id;
-    string name;
-    string cap;
-    
-    int backcolor;
-    void(*createcode)();
-    int width, height, spd;
-    int views_enabled;
-    viewstruct views[8];
-    
-    backstruct backs[8];
-      
-    int instancecount;
-    inst *instances;
-    
-    void gotome();
-  };
-  void room_update();
-  extern int room_max, maxid;
-  void rooms_load();
+  // This is an iterator typedef for use with the red-black backbone of the instance list.
+  typedef struct winstance_list_iterator *pinstance_list_iterator;
+  void winstance_list_iterator_delete(pinstance_list_iterator);
+
+  // Linking
+  pinstance_list_iterator link_instance(object_basic* who);
+  inst_iter *link_obj_instance(object_basic* who, int oid);
+
+  // Unlinking/Destroying
+  void instance_iter_queue_for_destroy(pinstance_list_iterator whop);
+  void dispose_destroyed_instances();
+  void unlink_main(pinstance_list_iterator);
+  void unlink_object_id_iter(inst_iter*,int);
 }
-
-// room variable
-
-#include "multifunction_variant.h"
-namespace enigma { struct roomv: multifunction_variant {
-  void function();
-}; }
-extern enigma::roomv room;

@@ -249,7 +249,17 @@ pt handle_identifiers(const string n,int &fparam_named,string& fparams,bool at_s
           }
           if (last_named != LN_DECLARATOR or last_named_phase < 1)
           {
-            //cferr="Expected declarator before `operator' token";
+            if (last_named == LN_USING) {
+              skipto = ';';
+              skipto2 = ';';
+              skippast = false;
+              immediate_scope = NULL;
+              last_named = LN_NOTHING;
+              last_named_phase = 0;
+              return pt(-1);
+            }
+            // Since we're at an operator and no type was given (we're not in a declarator),
+            // We assume it's a cast operator of form "; operator ... type_name()"
             last_named = LN_OPERATOR;
             last_named_phase = OP_CAST;
             last_identifier = "operator";

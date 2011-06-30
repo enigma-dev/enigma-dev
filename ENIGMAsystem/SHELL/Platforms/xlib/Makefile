@@ -19,4 +19,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/file_manip.o $(OBJECTS)/LINUXjoystick.o $(OBJECTS)/XLIBdialog.o $(OBJECTS)/XLIBmain.o $(OBJECTS)/XLIBthreads.o $(OBJECTS)/XLIBwindow.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

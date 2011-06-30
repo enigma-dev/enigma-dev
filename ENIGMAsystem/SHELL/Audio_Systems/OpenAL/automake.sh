@@ -39,7 +39,7 @@ echo "" >> Makefile;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	-rm .eobjs/*/*/*" >> Makefile;
+echo "	-rm .eobjs/*/*/*/*" >> Makefile;
 echo "	cd alure	&& \$(MAKE) clean" >> Makefile;
 echo "	cd dumb		&& \$(MAKE) clean" >> Makefile;
 echo "	cd ogg		&& \$(MAKE) clean" >> Makefile;

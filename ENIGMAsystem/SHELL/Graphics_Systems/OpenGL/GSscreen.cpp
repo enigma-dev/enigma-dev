@@ -39,13 +39,9 @@ using namespace std;
 
 #include "../../Universal_System/roomsystem.h"
 #include "../../Universal_System/instance_system.h"
-#include "graphics_object.h"
-
-extern int window_get_width(), window_get_height();
-
-namespace enigma {
-  extern event_iter *event_draw;
-}
+#include "../../Universal_System/graphics_object.h"
+#include "../../Universal_System/depth_draw.h"
+#include "../../Platforms/platforms_mandatory.h"
 
 using namespace enigma;
 
@@ -65,73 +61,70 @@ static inline void draw_back()
 
 void screen_redraw()
 {
-    if (!view_enabled)
-    {
-       glViewport(0,0,window_get_width(),window_get_height());
-       glLoadIdentity();
-       glScaled(1,-1,1);
-       glOrtho(-1,room_width,-1,room_height,0,1);
+  if (!view_enabled)
+  {
+     glViewport(0,0,window_get_width(),window_get_height());
+     glLoadIdentity();
+     glScaled(1,-1,1);
+     glOrtho(-1,room_width,-1,room_height,0,1);
 
-      if (background_showcolor)
-      {
-         int clearcolor=((int)background_color)&0xFFFFFF;
-         glClearColor(__GETR(clearcolor)/255.0,__GETG(clearcolor)/255.0,__GETB(clearcolor)/255.0, 1);
-         glClear(GL_COLOR_BUFFER_BIT);
-      }
-      draw_back();
-        
-      for (enigma::instance_event_iterator = event_draw->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
-        enigma::instance_event_iterator->inst->myevent_draw();
-    }
-    else 
-    for (view_current=0; view_current<7; view_current++)
-    if (view_visible[(int)view_current])
+    if (background_showcolor)
     {
-      int vc=(int)view_current;
-      int vob=(int)view_object[vc];
-      
-      if (vob != -1)
-      {
-        object_basic *instanceexists = fetch_instance_by_int(vob);
-        
-        if (instanceexists)
-        {
-          object_planar* vobr = (object_planar*)instanceexists;
-          
-          int vobx=(int)(vobr->x),voby=(int)(vobr->y);
-          //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
-          //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
-          if (vobx<view_xview[vc]+view_hborder[vc]) view_xview[vc]=vobx-view_hborder[vc];
-          if (vobx>view_xview[vc]+view_wview[vc]-view_hborder[vc]) view_xview[vc]=vobx+view_hborder[vc]-view_wview[vc];
-          if (voby<view_yview[vc]+view_vborder[vc]) view_yview[vc]=voby-view_vborder[vc];
-          if (voby>view_yview[vc]+view_hview[vc]-view_vborder[vc]) view_yview[vc]=voby+view_vborder[vc]-view_hview[vc];
-          if (view_xview[vc]<0) view_xview[vc]=0;
-          if (view_yview[vc]<0) view_yview[vc]=0;
-          if (view_xview[vc]>room_width-view_wview[vc]) view_xview[vc]=room_width-view_wview[vc];
-          if (view_yview[vc]>room_height-view_hview[vc]) view_yview[vc]=room_height-view_hview[vc];
-        }
-      }
-      
-      glViewport((int)view_xport[vc],(int)view_yport[vc],(int)view_wport[vc],(int)view_hport[vc]);
-      glLoadIdentity();
-      glScaled(1,-1,1);
-      glOrtho(view_xview[vc]-1,view_wview[vc]+view_xview[vc],view_yview[vc]-1,view_hview[vc]+view_yview[vc],0,1);
-      
-      if (background_showcolor)
-      {
-         int clearcolor=((int)background_color)&0xFFFFFF;
-         glClearColor(__GETR(clearcolor)/255.0,__GETG(clearcolor)/255.0,__GETB(clearcolor)/255.0, 1);
-         glClear(GL_COLOR_BUFFER_BIT);
-      }
-      draw_back();
-        
-      for (enigma::instance_event_iterator = event_draw->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
-        enigma::instance_event_iterator->inst->myevent_draw();
+       int clearcolor=((int)background_color)&0xFFFFFF;
+       glClearColor(__GETR(clearcolor)/255.0,__GETG(clearcolor)/255.0,__GETB(clearcolor)/255.0, 1);
+       glClear(GL_COLOR_BUFFER_BIT);
     }
+    draw_back();
+    
+    for (enigma::diter dit = drawing_depths.begin(); dit != drawing_depths.end(); dit++)
+      for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
+        enigma::instance_event_iterator->inst->myevent_draw();
+  }
+  else 
+  for (view_current=0; view_current<7; view_current++)
+  if (view_visible[(int)view_current])
+  {
+    int vc=(int)view_current;
+    int vob=(int)view_object[vc];
+    
+    if (vob != -1)
+    {
+      object_basic *instanceexists = fetch_instance_by_int(vob);
+      
+      if (instanceexists)
+      {
+        object_planar* vobr = (object_planar*)instanceexists;
+        
+        int vobx=(int)(vobr->x),voby=(int)(vobr->y);
+        //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
+        //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
+        if (vobx<view_xview[vc]+view_hborder[vc]) view_xview[vc]=vobx-view_hborder[vc];
+        if (vobx>view_xview[vc]+view_wview[vc]-view_hborder[vc]) view_xview[vc]=vobx+view_hborder[vc]-view_wview[vc];
+        if (voby<view_yview[vc]+view_vborder[vc]) view_yview[vc]=voby-view_vborder[vc];
+        if (voby>view_yview[vc]+view_hview[vc]-view_vborder[vc]) view_yview[vc]=voby+view_vborder[vc]-view_hview[vc];
+        if (view_xview[vc]<0) view_xview[vc]=0;
+        if (view_yview[vc]<0) view_yview[vc]=0;
+        if (view_xview[vc]>room_width-view_wview[vc]) view_xview[vc]=room_width-view_wview[vc];
+        if (view_yview[vc]>room_height-view_hview[vc]) view_yview[vc]=room_height-view_hview[vc];
+      }
+    }
+    
+    glViewport((int)view_xport[vc],(int)view_yport[vc],(int)view_wport[vc],(int)view_hport[vc]);
+    glLoadIdentity();
+    glScaled(1,-1,1);
+    glOrtho(view_xview[vc]-1,view_wview[vc]+view_xview[vc],view_yview[vc]-1,view_hview[vc]+view_yview[vc],0,1);
+    
+    if (background_showcolor)
+    {
+       int clearcolor=((int)background_color)&0xFFFFFF;
+       glClearColor(__GETR(clearcolor)/255.0,__GETG(clearcolor)/255.0,__GETB(clearcolor)/255.0, 1);
+       glClear(GL_COLOR_BUFFER_BIT);
+    }
+    draw_back();
+    
+    for (enigma::diter dit = drawing_depths.begin(); dit != drawing_depths.end(); dit++)
+      for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
+        enigma::instance_event_iterator->inst->myevent_draw();
+  }
 }
-
-
-#undef __GETR
-#undef __GETG
-#undef __GETB
 

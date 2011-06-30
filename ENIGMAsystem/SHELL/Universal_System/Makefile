@@ -6,12 +6,14 @@ $(OBJECTS)/backgroundstruct.o: backgroundstruct.cpp ../Graphics_Systems/graphics
 	$(CXX) -c backgroundstruct.cpp		-o $(OBJECTS)/backgroundstruct.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/CallbackArrays.o: CallbackArrays.cpp CallbackArrays.h
 	$(CXX) -c CallbackArrays.cpp		-o $(OBJECTS)/CallbackArrays.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/collisions_object.o: collisions_object.cpp collisions_object.h transform_object.h ../Graphics_Systems/OpenGL/graphics_object.h ../Universal_System/planar_object.h ../Universal_System/object.h ../Universal_System/var4.h ../Universal_System/var_te.h ../Universal_System/reflexive_types.h ../Universal_System/multifunction_variant.h ../Universal_System/mathnc.h ../Universal_System/spritestruct.h
+$(OBJECTS)/collisions_object.o: collisions_object.cpp collisions_object.h transform_object.h graphics_object.h var4.h var_te.h multifunction_variant.h planar_object.h object.h reflexive_types.h mathnc.h spritestruct.h
 	$(CXX) -c collisions_object.cpp		-o $(OBJECTS)/collisions_object.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/compression.o: compression.cpp ../../additional/zlib/zlib.h ../../additional/zlib/zconf.h
 	$(CXX) -c compression.cpp		-o $(OBJECTS)/compression.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/darray.o: darray.cpp
 	$(CXX) -c darray.cpp		-o $(OBJECTS)/darray.o $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/depth_draw.o: depth_draw.cpp depth_draw.h instance_system.h var4.h var_te.h reflexive_types.h multifunction_variant.h object.h instance_system_base.h
+	$(CXX) -c depth_draw.cpp		-o $(OBJECTS)/depth_draw.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/dynamic_args.o: dynamic_args.cpp var4.h var_te.h dynamic_args.h
 	$(CXX) -c dynamic_args.cpp		-o $(OBJECTS)/dynamic_args.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/ENIGMA_GLOBALS.o: ENIGMA_GLOBALS.cpp
@@ -30,31 +32,35 @@ $(OBJECTS)/fontstruct.o: fontstruct.cpp ../Graphics_Systems/graphics_mandatory.h
 	$(CXX) -c fontstruct.cpp		-o $(OBJECTS)/fontstruct.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/globalupdate.o: globalupdate.cpp
 	$(CXX) -c globalupdate.cpp		-o $(OBJECTS)/globalupdate.o $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/graphics_object.o: graphics_object.cpp graphics_object.h var4.h var_te.h multifunction_variant.h planar_object.h object.h reflexive_types.h mathnc.h spritestruct.h
+	$(CXX) -c graphics_object.cpp		-o $(OBJECTS)/graphics_object.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/highscore_functions.o: highscore_functions.cpp highscore_functions.h ../libEGMstd.h var4.h var_te.h
 	$(CXX) -c highscore_functions.cpp		-o $(OBJECTS)/highscore_functions.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/IMGloading.o: IMGloading.cpp
 	$(CXX) -c IMGloading.cpp		-o $(OBJECTS)/IMGloading.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/instance.o: instance.cpp object.h var4.h var_te.h instance_system.h reflexive_types.h multifunction_variant.h planar_object.h
+$(OBJECTS)/instance.o: instance.cpp object.h var4.h var_te.h instance_system.h reflexive_types.h multifunction_variant.h instance_system_base.h planar_object.h
 	$(CXX) -c instance.cpp		-o $(OBJECTS)/instance.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/instance_system.o: instance_system.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h instance_system.h object.h
+$(OBJECTS)/instance_system.o: instance_system.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h instance_system.h object.h instance_system_base.h
 	$(CXX) -c instance_system.cpp		-o $(OBJECTS)/instance_system.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/loading.o: loading.cpp mathnc.h resinit.h ../Platforms/platforms_mandatory.h ../Audio_Systems/audio_mandatory.h ../Widget_Systems/widgets_mandatory.h ../Graphics_Systems/graphics_mandatory.h roomsystem.h var4.h var_te.h multifunction_variant.h ../libEGMstd.h
 	$(CXX) -c loading.cpp		-o $(OBJECTS)/loading.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/mathnc.o: mathnc.cpp var4.h var_te.h
 	$(CXX) -c mathnc.cpp		-o $(OBJECTS)/mathnc.o $(GFLAGS) $(ECPPFLAGS)
+$(OBJECTS)/multifunction_variant.o: multifunction_variant.cpp var4.h var_te.h multifunction_variant.h
+	$(CXX) -c multifunction_variant.cpp		-o $(OBJECTS)/multifunction_variant.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/object.o: object.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h object.h ../libEGMstd.h
 	$(CXX) -c object.cpp		-o $(OBJECTS)/object.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/planar_object.o: planar_object.cpp object.h var4.h var_te.h reflexive_types.h multifunction_variant.h planar_object.h
 	$(CXX) -c planar_object.cpp		-o $(OBJECTS)/planar_object.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/rectpack.o: rectpack.cpp rectpack.h
 	$(CXX) -c rectpack.cpp		-o $(OBJECTS)/rectpack.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/reflexive_types.o: reflexive_types.cpp var4.h var_te.h multifunction_variant_source.h multifunction_variant.h
+$(OBJECTS)/reflexive_types.o: reflexive_types.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h
 	$(CXX) -c reflexive_types.cpp		-o $(OBJECTS)/reflexive_types.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/resource_data.o: resource_data.cpp var4.h var_te.h resource_data.h
 	$(CXX) -c resource_data.cpp		-o $(OBJECTS)/resource_data.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/roomsystem.o: roomsystem.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h ../Platforms/platforms_mandatory.h ../libEGMstd.h instance_system.h object.h instance.h planar_object.h roomsystem.h multifunction_variant_source.h key_game_globals.h
+$(OBJECTS)/roomsystem.o: roomsystem.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h ../Platforms/platforms_mandatory.h ../libEGMstd.h instance_system.h object.h instance_system_base.h instance.h planar_object.h roomsystem.h key_game_globals.h
 	$(CXX) -c roomsystem.cpp		-o $(OBJECTS)/roomsystem.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/simplecollisions.o: simplecollisions.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h collisions_object.h transform_object.h ../Graphics_Systems/OpenGL/graphics_object.h ../Universal_System/planar_object.h ../Universal_System/object.h ../Universal_System/var4.h ../Universal_System/var_te.h ../Universal_System/reflexive_types.h ../Universal_System/multifunction_variant.h ../Universal_System/mathnc.h ../Universal_System/spritestruct.h instance_system.h object.h
+$(OBJECTS)/simplecollisions.o: simplecollisions.cpp var4.h var_te.h reflexive_types.h multifunction_variant.h ENIGMA_GLOBALS.h collisions_object.h transform_object.h graphics_object.h planar_object.h object.h mathnc.h spritestruct.h instance_system.h instance_system_base.h
 	$(CXX) -c simplecollisions.cpp		-o $(OBJECTS)/simplecollisions.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/soundinit.o: soundinit.cpp ../Audio_Systems/audio_mandatory.h ../Platforms/platforms_mandatory.h ../libEGMstd.h compression.h ../../additional/zlib/zlib.h ../../additional/zlib/zconf.h
 	$(CXX) -c soundinit.cpp		-o $(OBJECTS)/soundinit.o $(GFLAGS) $(ECPPFLAGS)
@@ -64,7 +70,7 @@ $(OBJECTS)/spritestruct.o: spritestruct.cpp ../Graphics_Systems/graphics_mandato
 	$(CXX) -c spritestruct.cpp		-o $(OBJECTS)/spritestruct.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/terminal_io.o: terminal_io.cpp
 	$(CXX) -c terminal_io.cpp		-o $(OBJECTS)/terminal_io.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/transform_object.o: transform_object.cpp transform_object.h ../Graphics_Systems/OpenGL/graphics_object.h ../Universal_System/planar_object.h ../Universal_System/object.h ../Universal_System/var4.h ../Universal_System/var_te.h ../Universal_System/reflexive_types.h ../Universal_System/multifunction_variant.h ../Universal_System/mathnc.h ../Universal_System/spritestruct.h
+$(OBJECTS)/transform_object.o: transform_object.cpp transform_object.h graphics_object.h var4.h var_te.h multifunction_variant.h planar_object.h object.h reflexive_types.h mathnc.h spritestruct.h
 	$(CXX) -c transform_object.cpp		-o $(OBJECTS)/transform_object.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/var4.o: var4.cpp var4.h var_te.h
 	$(CXX) -c var4.cpp		-o $(OBJECTS)/var4.o $(GFLAGS) $(ECPPFLAGS)
@@ -76,7 +82,7 @@ $(OBJECTS)/WITHconstruct.o: WITHconstruct.cpp
 $(OBJECTS):
 	-mkdir -p $(OBJECTS) || mkdir "$(OBJECTS)"
 
-this: $(OBJECTS) $(OBJECTS)/backgroundinit.o $(OBJECTS)/backgroundstruct.o $(OBJECTS)/CallbackArrays.o $(OBJECTS)/collisions_object.o $(OBJECTS)/compression.o $(OBJECTS)/darray.o $(OBJECTS)/dynamic_args.o $(OBJECTS)/ENIGMA_GLOBALS.o $(OBJECTS)/estring.o $(OBJECTS)/events.o $(OBJECTS)/event_system.o $(OBJECTS)/fileio.o $(OBJECTS)/fontinit.o $(OBJECTS)/fontstruct.o $(OBJECTS)/globalupdate.o $(OBJECTS)/highscore_functions.o $(OBJECTS)/IMGloading.o $(OBJECTS)/instance.o $(OBJECTS)/instance_system.o $(OBJECTS)/loading.o $(OBJECTS)/mathnc.o $(OBJECTS)/object.o $(OBJECTS)/planar_object.o $(OBJECTS)/rectpack.o $(OBJECTS)/reflexive_types.o $(OBJECTS)/resource_data.o $(OBJECTS)/roomsystem.o $(OBJECTS)/simplecollisions.o $(OBJECTS)/soundinit.o $(OBJECTS)/spriteinit.o $(OBJECTS)/spritestruct.o $(OBJECTS)/terminal_io.o $(OBJECTS)/transform_object.o $(OBJECTS)/var4.o $(OBJECTS)/var4_lua.o $(OBJECTS)/WITHconstruct.o 
+this: $(OBJECTS) $(OBJECTS)/backgroundinit.o $(OBJECTS)/backgroundstruct.o $(OBJECTS)/CallbackArrays.o $(OBJECTS)/collisions_object.o $(OBJECTS)/compression.o $(OBJECTS)/darray.o $(OBJECTS)/depth_draw.o $(OBJECTS)/dynamic_args.o $(OBJECTS)/ENIGMA_GLOBALS.o $(OBJECTS)/estring.o $(OBJECTS)/events.o $(OBJECTS)/event_system.o $(OBJECTS)/fileio.o $(OBJECTS)/fontinit.o $(OBJECTS)/fontstruct.o $(OBJECTS)/globalupdate.o $(OBJECTS)/graphics_object.o $(OBJECTS)/highscore_functions.o $(OBJECTS)/IMGloading.o $(OBJECTS)/instance.o $(OBJECTS)/instance_system.o $(OBJECTS)/loading.o $(OBJECTS)/mathnc.o $(OBJECTS)/multifunction_variant.o $(OBJECTS)/object.o $(OBJECTS)/planar_object.o $(OBJECTS)/rectpack.o $(OBJECTS)/reflexive_types.o $(OBJECTS)/resource_data.o $(OBJECTS)/roomsystem.o $(OBJECTS)/simplecollisions.o $(OBJECTS)/soundinit.o $(OBJECTS)/spriteinit.o $(OBJECTS)/spritestruct.o $(OBJECTS)/terminal_io.o $(OBJECTS)/transform_object.o $(OBJECTS)/var4.o $(OBJECTS)/var4_lua.o $(OBJECTS)/WITHconstruct.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

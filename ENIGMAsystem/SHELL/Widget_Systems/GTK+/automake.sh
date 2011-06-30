@@ -36,5 +36,5 @@ echo "" >> Makefile;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
-echo "	-rm .eobjs/*/*/*" >> Makefile;
+echo "	-rm .eobjs/*/*/*/*" >> Makefile;
 

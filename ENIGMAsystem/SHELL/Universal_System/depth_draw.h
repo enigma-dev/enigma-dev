@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,16 +25,24 @@
 **                                                                              **
 \********************************************************************************/
 
-/**
-  @file    graphics_object.cpp
-  @summary Adds a graphics-related tier following the planar tier.
-*/
+/// While the code that manages tiles and drawing is to be declared and managed
+/// by the files under Graphics_Systems, this file exists to provide a way to
+/// structure layers of depth, for both tiles and instances.
 
-#include "graphics_object.h"
+#include <map>
+#include "instance_system.h"
+using namespace std;
 
-namespace enigma
-{
-  object_graphics::object_graphics() {}
-  object_graphics::object_graphics(unsigned x, int y): object_planar(x,y) {}
-  object_graphics::~object_graphics() {};
+#ifdef INCLUDED_FROM_SHELLMAIN
+#error This file is high-impact and should not be included from SHELLmain.cpp.
+#endif
+
+namespace enigma {
+  struct depth_layer {
+    struct tile_layer* tiles;
+    event_iter* draw_events;
+    depth_layer();
+  };
+  extern map<double,depth_layer> drawing_depths;
+  typedef map<double,depth_layer>::iterator diter;
 }

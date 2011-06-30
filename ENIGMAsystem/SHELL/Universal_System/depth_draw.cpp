@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,33 +25,14 @@
 **                                                                              **
 \********************************************************************************/
 
+/// While the code that manages tiles and drawing is to be declared and managed
+/// by the files under Graphics_Systems, this file exists to provide a way to
+/// structure layers of depth, for both tiles and instances.
+
 #include <math.h>
-#include <string>
-#include "var4.h"
-#include "reflexive_types.h"
+#include "depth_draw.h"
 
 namespace enigma {
-  //Make direction work
-  void directionv::function() {
-    *reflex2 = *reflex1 * cos(rval.d*M_PI/180);
-    *reflex3 = *reflex1 * -sin(rval.d*M_PI/180);
-  }
-
-  //Make speed work -- same as above, but rval.d and reflex1 are switched.
-  void speedv::function() {
-    *reflex2 = rval.d * cos(*reflex1*M_PI/180);
-    *reflex3 = rval.d * -sin(*reflex1*M_PI/180);
-  }
-
-  //Make hspeed work
-  void hspeedv::function() {
-    *reflex2 = (int(180+180*(1-atan2(*reflex1,rval.d)/M_PI)))%360;
-    *reflex3 = hypot(rval.d,*reflex1);
-  }
-
-  //Make vspeed work -- Same as above, except the arguments to atan2 are reversed
-  void vspeedv::function() {
-    *reflex2 = (int(180+180*(1-atan2(rval.d,*reflex1)/M_PI)))%360;
-    *reflex3 = hypot(rval.d,*reflex1);
-  }
+  depth_layer::depth_layer(): tiles(NULL), draw_events(new event_iter("Draw")) {}
+  map<double,depth_layer> drawing_depths;
 }

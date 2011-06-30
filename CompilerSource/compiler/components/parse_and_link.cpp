@@ -119,7 +119,8 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
       new parsed_object(
         es->gmObjects[i].name, es->gmObjects[i].id, es->gmObjects[i].spriteId,
         es->gmObjects[i].parentId,
-        es->gmObjects[i].visible, es->gmObjects[i].solid
+        es->gmObjects[i].visible, es->gmObjects[i].solid,
+        es->gmObjects[i].depth
       );
     
     edbg << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " events: " << flushl;

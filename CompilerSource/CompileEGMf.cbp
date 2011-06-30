@@ -107,7 +107,6 @@
 		<Unit filename="backend/other/Include.h" />
 		<Unit filename="backend/other/Trigger.h" />
 		<Unit filename="backend/resources/Background.h" />
-		<Unit filename="backend/resources/EnigmaSettings.cpp" />
 		<Unit filename="backend/resources/EnigmaSettings.h" />
 		<Unit filename="backend/resources/Font.h" />
 		<Unit filename="backend/resources/GameInformation.h" />
@@ -229,7 +228,6 @@
 		<Unit filename="settings-parse/eyaml.h" />
 		<Unit filename="settings-parse/parse_ide_settings.cpp" />
 		<Unit filename="settings-parse/parse_ide_settings.h" />
-		<Unit filename="settings-parse/settings.cpp" />
 		<Unit filename="settings.cpp" />
 		<Unit filename="settings.h" />
 		<Unit filename="standalone_main.cpp">

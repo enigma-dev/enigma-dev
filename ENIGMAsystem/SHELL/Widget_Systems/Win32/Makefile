@@ -11,4 +11,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/main.o $(OBJECTS)/widgets.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

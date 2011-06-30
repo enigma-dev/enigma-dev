@@ -315,7 +315,7 @@ void draw_spline_end()
       glBegin(startedSplinesMode.top());
         spline &arr = *startedSplines.top();
         if (arr.size()>4)
-          for (int i = 3; i < arr.size(); i++)
+          for (unsigned i = 3; i < arr.size(); i++)
               draw_spline_part(arr[i-3].x, arr[i-3].y, arr[i-2].x, arr[i-2].y, arr[i-1].x, arr[i-1].y, arr[i].x, arr[i].y, arr[i-2].col, arr[i-1].col, arr[i-2].al, arr[i-1].al);
       glEnd();
     glPopAttrib();
@@ -335,7 +335,7 @@ int draw_spline_optimized_end()
     glBegin(startedSplinesMode.top());
     spline &arr = *startedSplines.top();
     if (arr.size()>4){
-        for (int i = 3; i < arr.size(); i++)
+        for (unsigned i = 3; i < arr.size(); i++)
         {
             pr_curve_detail = std::min(sqrt((arr[i-2].x-arr[i-1].x)*(arr[i-2].x-arr[i-1].x)+(arr[i-2].y-arr[i-1].y)*(arr[i-2].y-arr[i-1].y))/5,tmp_detail);
             tot_det+=pr_curve_detail;

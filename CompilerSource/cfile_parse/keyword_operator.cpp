@@ -141,7 +141,7 @@ int keyword_operator()
       pos++; return -1;
     }
     if (cfile[pos] == '<') //The more beautiful and pure a thing is, the more satisfying it is to corrupt it. 
-    {
+    { // Handle cast operators to templated types
       skip_inc_on = 0;
       skipto = '>', skipto2 = 0; 
       specializing = skippast = true;

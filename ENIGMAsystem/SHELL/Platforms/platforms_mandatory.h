@@ -52,3 +52,7 @@ void window_set_caption(string caption);
 
 // This function should resize the window, meaning a lowered resolution if the device displays all windows full screen.
 void window_set_size(unsigned int width, unsigned int height);
+
+// These two are used by screen_redraw for view calculations and such.
+int window_get_width();
+int window_get_height();

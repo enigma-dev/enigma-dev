@@ -39,7 +39,7 @@ inline bool is_letterh(char x) { return is_letter(x) or x == '-' or x == ' '; }
 
 #include "event_parser.h"
 
-inline bool lc(string s, string ss)
+inline bool lc(const string &s, const string &ss)
 {
   const size_t l = s.length();
   if (l != ss.length())
@@ -109,7 +109,10 @@ int event_parse_resourcefile()
   int braces = 0;   // Number of curly braces we are in
   int iq = 0;      // In a quote in an expression
   
-  enum { exp_default, exp_constant, exp_sub, exp_super, exp_instead, exp_prefix, exp_suffix } last_exp = exp_default; // Whether last EXPRESSION was sub or super
+  enum {
+    exp_default, exp_constant, exp_sub, exp_super, exp_instead, exp_prefix, exp_suffix,
+    exp_locals, exp_iterdec, exp_iterinit, exp_iterrm, exp_iterdel
+  } last_exp = exp_default; // Whether last EXPRESSION was sub or super
   
   while (!feof(events) and fgets(line,4096,events))
   {
@@ -127,13 +130,18 @@ int event_parse_resourcefile()
           i += (line[i] == '\\');
         }
       switch (last_exp) {
-        case exp_default:  last->def     += string(line,i); continue;
-        case exp_constant: last->cons    += string(line,i); continue;
-        case exp_sub:      last->super   += string(line,i); continue;
-        case exp_super:    last->sub     += string(line,i); continue;
-        case exp_instead:  last->instead += string(line,i); continue;
-        case exp_prefix:   last->prefix  += string(line,i); continue;
-        case exp_suffix:   last->suffix  += string(line,i); continue;
+        case exp_default:  last->def      += string(line,i); continue;
+        case exp_constant: last->cons     += string(line,i); continue;
+        case exp_sub:      last->super    += string(line,i); continue;
+        case exp_super:    last->sub      += string(line,i); continue;
+        case exp_instead:  last->instead  += string(line,i); continue;
+        case exp_prefix:   last->prefix   += string(line,i); continue;
+        case exp_suffix:   last->suffix   += string(line,i); continue;
+        case exp_locals:   last->locals   += string(line,i); continue;
+        case exp_iterdec:  last->iterdec  += string(line,i); continue;
+        case exp_iterdel:  last->iterdel  += string(line,i); continue;
+        case exp_iterinit: last->iterinit += string(line,i); continue;
+        case exp_iterrm:   last->iterrm   += string(line,i); continue;
         default: puts("THIS ERROR IS IMPOSSIBLE"); return 2;
       }
     }
@@ -178,11 +186,11 @@ int event_parse_resourcefile()
     
     if (lw) // If the leading character was white
     {
-      char *begin = line + pos++;
+      char *begin = line + pos;
       while (line[pos] and line[pos] != '#') pos++;
       while (is_useless(line[--pos])); pos++;
       
-      string v(begin,line+pos-begin);
+      string v(begin,line+pos-begin > 0 ? line+pos-begin : 0);
       
       if (lc(str,"Mode"))
       {
@@ -236,6 +244,26 @@ int event_parse_resourcefile()
       }
       else if (lc(str,"Instead")) {
         last->instead = v, last_exp = exp_instead;
+        goto EXPRESSION;
+      }
+      else if (lc(str,"Locals")) {
+        last->locals = v, last_exp = exp_locals;
+        goto EXPRESSION;
+      }
+      else if (lc(str,"Iterator-declare")) {
+        last->iterdec = v, last_exp = exp_iterdec;
+        goto EXPRESSION;
+      }
+      else if (lc(str,"Iterator-init") or lc(str,"Iterator-initialize")) {
+        last->iterinit = v, last_exp = exp_iterinit;
+        goto EXPRESSION;
+      }
+      else if (lc(str,"Iterator-remove")) {
+        last->iterrm = v, last_exp = exp_iterrm;
+        goto EXPRESSION;
+      }
+      else if (lc(str,"Iterator-delete")) {
+        last->iterdel = v, last_exp = exp_iterdel;
         goto EXPRESSION;
       }
       else if (lc(str,"Case"))
@@ -545,6 +573,36 @@ string event_forge_sequence_code(int mid, int id, string preferred_name)
     }
   return "";
 }
+
+bool event_has_iterator_declare_code(int mid, int id) {
+  return event_access(mid,id)->iterdec != "";
+}
+bool event_has_iterator_initialize_code(int mid, int id) {
+  return event_access(mid,id)->iterinit != "";
+}
+bool event_has_iterator_unlink_code(int mid, int id) {
+  return event_access(mid,id)->iterrm != "";
+}
+bool event_has_iterator_delete_code(int mid, int id) {
+  return event_access(mid,id)->iterdel != "";
+}
+string event_get_iterator_declare_code(int mid, int id) {
+  return event_access(mid,id)->iterdec;
+}
+string event_get_iterator_initialize_code(int mid, int id) {
+  return event_access(mid,id)->iterinit;
+}
+string event_get_iterator_unlink_code(int mid, int id) {
+  return event_access(mid,id)->iterrm;
+}
+string event_get_iterator_delete_code(int mid, int id) {
+  return event_access(mid,id)->iterdel;
+}
+
+string event_get_locals(int mid, int id) {
+  return event_access(mid,id)->locals;
+}
+
 /*
 int main(int,char**)
 {

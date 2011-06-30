@@ -9,4 +9,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/nowidget_impl.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

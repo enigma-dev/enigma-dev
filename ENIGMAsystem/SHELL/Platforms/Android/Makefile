@@ -17,4 +17,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/AndroidDialog.o $(OBJECTS)/AndroidFunctions.o $(OBJECTS)/AndroidWindow.o $(OBJECTS)/app-android.o $(OBJECTS)/file_manip.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

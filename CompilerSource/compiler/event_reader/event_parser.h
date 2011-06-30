@@ -72,6 +72,9 @@ struct event_info
   string suffix; // Appended to the end of existing events
   string instead; // Overrides all other options: Replaces the event loop for this event
   
+  string locals; // Any variables that the event requires to perform correctly
+  string iterdec, iterdel, iterinit, iterrm; // Overrides iterator code
+  
   event_info();
   event_info(string n,int i);
 };
@@ -116,3 +119,15 @@ extern bool   event_used_by_something(string name);
 
 typedef pair<int, int> evpair;
 extern  vector<evpair> event_sequence;
+
+
+bool event_has_iterator_declare_code(int mid, int id);
+bool event_has_iterator_initialize_code(int mid, int id);
+bool event_has_iterator_unlink_code(int mid, int id);
+bool event_has_iterator_delete_code(int mid, int id);
+string event_get_iterator_declare_code(int mid, int id);
+string event_get_iterator_initialize_code(int mid, int id);
+string event_get_iterator_unlink_code(int mid, int id);
+string event_get_iterator_delete_code(int mid, int id);
+
+string event_get_locals(int mid, int id);

@@ -43,7 +43,8 @@ namespace enigma
 {
   inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL): inst(i), next(n), prev(p) {}
   objectid_base::objectid_base(): inst_iter(NULL,NULL,this), count(0) {}
-  event_iter::event_iter(): inst_iter(NULL,NULL,this), name() {}
+  event_iter::event_iter(string n): inst_iter(NULL,NULL,this), name(n) {}
+  event_iter::event_iter(): inst_iter(NULL,NULL,this) {}
 
   inst_iter *event_iter::add_inst(object_basic* inst)
   {
@@ -76,9 +77,7 @@ namespace enigma
     if (a->prev == which) a->prev = which->prev;
     a->count--;
   }
-
-
-
+  
   /* **  Variables ** */
   // This will be instantiated for each event with a unique ID or Sub ID.
   event_iter *events; // It will be allocated towards the beginning.
@@ -170,16 +169,25 @@ namespace enigma
     iliter a = instance_list.find(x);
     return a != instance_list.end() ? a->second : NULL;
   }
-
-
+  
+  // Implementation for frontend
+  // (Wrapper struct to lower compile time)
+  typedef struct winstance_list_iterator {
+    instance_list_iterator w;
+    winstance_list_iterator(instance_list_iterator n): w(n) {}
+  } *pinstance_list_iterator;
+  void winstance_list_iterator_delete(pinstance_list_iterator whop) {
+    delete whop;
+  }
+  
   //Link in an instance
-  iliter link_instance(object_basic* who)
+  pinstance_list_iterator link_instance(object_basic* who)
   {
     inst_iter *ins = new inst_iter(who);
     pair<iliter,bool> it = instance_list.insert(inode_pair(who->id,ins));
     if (!it.second) {
       delete ins;
-      return it.first;
+      return new winstance_list_iterator(it.first);
     }
     if (it.first != instance_list.begin())
     {
@@ -194,19 +202,17 @@ namespace enigma
       ins->next = in->second, // Link this to next instance
       in->second->prev = ins; // Link next to this
     else ins->next = NULL;
-    return it.first;
+    return new winstance_list_iterator(it.first);
   }
   inst_iter *link_obj_instance(object_basic* who, int oid)
   {
     objects[oid].count++;
     return objects[oid].add_inst(who);
   }
-
-
-
-  void instance_iter_queue_for_destroy(inst_iter* who)
+  
+  void instance_iter_queue_for_destroy(pinstance_list_iterator whop)
   {
-    enigma::cleanups.push_back(who);
+    enigma::cleanups.push_back(whop->w->second);
     enigma::instancecount--;
     instance_count--;
   }
@@ -222,6 +228,13 @@ namespace enigma
     if (a->prev) a->prev->next = a->next;
     if (a->next) a->next->prev = a->prev;
     instance_list.erase(who);
+  }
+  void unlink_main(pinstance_list_iterator whop)
+  {
+    inst_iter *a = whop->w->second;
+    if (a->prev) a->prev->next = a->next;
+    if (a->next) a->next->prev = a->prev;
+    instance_list.erase(whop->w);
   }
 
   //This is the universal create event code

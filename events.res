@@ -144,13 +144,15 @@ mouseenter: 6
 	Name: Mouse Enter
 	Mode: Special
 	Case: 10
-	Sub Check: { static bool innow = false; const bool wasin = innow; innow = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (!innow or wasin) return 0; }
+	Locals: bool $innowEnter = false;
+	Sub Check: { const bool wasin = $innowEnter; $innowEnter = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (!$innowEnter or wasin) return 0; }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
-	Sub Check: { static bool innow = false; const bool wasin = innow; innow = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (innow or !wasin) return 0; }
+	Locals: bool $innowLeave = false;
+	Sub Check: { const bool wasin = $innowLeave; $innowLeave = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if ($innowLeave or !wasin) return 0; }
 
 mousewheelup: 6
 	Name: Mouse Wheel Up
@@ -285,8 +287,12 @@ draw: 8
 	Name: Draw
 	Mode: Inline
 	Sub Check: visible
+	Iterator-declare: /* Draw is handled by depth */
+	Iterator-initialize: /* Draw is initialized in the constructor */
+	Iterator-remove: depth.remove();
+	Iterator-delete: /* Draw will destruct with this */
 	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
-	Constant: image_index+=image_speed;
+	Constant: image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index));
 	Instead: screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
 
 
@@ -295,7 +301,8 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Sub Check: !(int(image_index) % image_number)
+	Locals: float $iip = -1;
+	Sub Check: { const bool r = ($iip < image_index); $iip = image_index; if (r) return 0; }
 
 
 # End of in-linked events
@@ -304,7 +311,7 @@ animationend: 7
 roomend: 7
 	Name: Room End
 	Mode: Spec-sys
-	Case: 5
+	Case: 5n
 
 gameend: 7
 	Name: Game End

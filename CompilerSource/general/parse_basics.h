@@ -46,6 +46,10 @@ inline bool is_letterd(char x)
 {
   return  (x>='a' and x<='z') or (x>='A' and x<='Z') or (x=='_') or (x>='0' and x<='9');
 }
+inline bool is_letterdd(char x)
+{
+  return  (x>='a' and x<='z') or (x>='A' and x<='Z') or (x=='_' or x=='$') or (x>='0' and x<='9');
+}
 
 inline bool is_useless(char x) 
 {

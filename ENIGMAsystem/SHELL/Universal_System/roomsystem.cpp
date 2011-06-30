@@ -138,15 +138,10 @@ namespace enigma
 
 //Implement the "room" global before we continue
 int room_goto(int roomind);
-  #define MFV_ALREADY_INCLUDED 1
-  #define TYPEPURPOSE roomv
-  #define TYPEVARIABLES
-  #define TYPEFUNCTION room_goto((int)rval.d);
-  #include "multifunction_variant_source.h"
-  #undef TYPEFUNCTION
-  #undef TYPEVARIABLES
-  #undef TYPEPURPOSE
-enigma::roomv room;
+
+void enigma::roomv::function() {
+  room_goto((int)rval.d);
+} enigma::roomv room;
 
 
 int room_goto(int indx)

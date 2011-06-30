@@ -107,7 +107,7 @@ parsed_event::parsed_event():                               id(0), mainId(0), co
 parsed_event::parsed_event(parsed_object *po):              id(0), mainId(0), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_object::parsed_object() {}
-parsed_object::parsed_object(string n, int i, int s, int p, bool vis, bool sol): name(n), id(i), sprite_index(s), parent(p), visible(vis), solid(sol) {}
+parsed_object::parsed_object(string n, int i, int s, int p, bool vis, bool sol, double d): name(n), id(i), sprite_index(s), parent(p), visible(vis), solid(sol), depth(d) {}
 map<int,parsed_object*> parsed_objects;
 
 vector<parsed_extension> parsed_extensions;

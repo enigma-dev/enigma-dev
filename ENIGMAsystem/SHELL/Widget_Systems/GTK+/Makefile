@@ -15,4 +15,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/dialogs.o $(OBJECTS)/gtk_impl.o $(OBJECTS)/widgets.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

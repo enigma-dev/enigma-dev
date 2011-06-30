@@ -37,6 +37,19 @@ using namespace std;
 #include "../../backend/EnigmaStruct.h" //LateralGM interface structures
 #include "../compile_common.h"
 #include "../event_reader/event_parser.h"
+#include "../../general/parse_basics.h"
+
+inline bool iscomment(const string &n) {
+  if (n.length() < 2 or n[0] != '/') return false;
+  if (n[1] == '/') return true;
+  if (n[1] != '*') return false;
+  for (unsigned i = 2; i < n.length(); i++)
+  {
+    if (n[i] == '*' and n[i+1] == '/')
+      return (i + 2 >= n.length());
+  }
+  return true;
+}
 
 struct cspair { string c, s; };
 int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
@@ -82,12 +95,62 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
       {
         wto << "  \n  struct OBJ_" << i->second->name << ": object_locals\n  {";
-
+        
+        for (unsigned ii = 0; ii < i->second->events.size; ii++)
+        {
+          string addls = event_get_locals(i->second->events[ii].mainId,i->second->events[ii].id);
+          if (addls != "")
+          {
+            pt pos;
+            string type, name, pres, sufs;
+            for (pos = 0; pos < addls.length(); pos++)
+            {
+              if (is_useless(addls[pos])) continue;
+              if (addls[pos] == ';') { i->second->locals[name] = dectrip(type, pres, sufs); type = pres = sufs = ""; continue; }
+              if (addls[pos] == ',') { i->second->locals[name] = dectrip(type, pres, sufs); pres = sufs = ""; continue; }
+              if (is_letter(addls[pos]) or addls[pos] == '$') {
+                const pt spos = pos;
+                while (is_letterdd(addls[++pos]));
+                string tn = addls.substr(spos,pos-spos);
+                (find_extname(tn,EXTFLAG_TYPENAME) ? type : name) = tn;
+                pos--; continue;
+              }
+              if (addls[pos] == '*') { pres += '*'; continue; }
+              if (addls[pos] == '[') {
+                int cnt = 1;
+                const pt spos = pos;
+                while (cnt and ++pos < addls.length())
+                  if (addls[pos] == '[' or addls[pos] == '(') cnt++;
+                  else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
+                sufs += addls.substr(spos,pos-spos+1);
+                continue;
+              }
+              if (addls[pos] == '=') {
+                int cnt = 0;
+                
+                pt spos = ++pos;
+                while (is_useless(addls[spos])) spos++;
+                pos = spos - 1;
+                
+                while (++pos < addls.length() and (cnt or (addls[pos] != ',' and addls[pos] != ';')))
+                  if (addls[pos] == '[' or addls[pos] == '(') cnt++;
+                  else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
+                bool redundant = false;
+                for (size_t ii = 0; ii < i->second->initializers.size(); ii++)
+                  if (i->second->initializers[ii].first == name) { redundant = true; break; }
+                if (!redundant)
+                  i->second->initializers.push_back(initpair(name,addls.substr(spos,pos-spos)));
+                pos--; continue;
+              }
+            }
+          }
+        }
+        
         wto << "\n    //Locals to instances of this object\n    ";
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
         {
           bool writeit = true; //Whether this "local" should be declared such
-
+          
           // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
           if (!ii->second.defined())
           {
@@ -101,8 +164,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           if (writeit)
             wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
         }
-
-
+        
         // Next, we write the list of all the scripts this object will hoard a copy of for itself.
         wto << "\n    //Scripts called by this object\n    ";
         parsed_object* t = i->second;
@@ -154,27 +216,36 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "\n    // Self-tracking\n";
 
         // This tracks components of the instance system.
-        wto << "      enigma::instance_list_iterator ENOBJ_ITER_me;\n";
+        wto << "      enigma::pinstance_list_iterator ENOBJ_ITER_me;\n";
         for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) // For this object and each parent thereof
           wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
 
         // This tracks components of the event system.
           for (unsigned ii = 0; ii < i->second->events.size; ii++) // Export a tracker for all events
-            if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) //...well, all events which aren't stacked
-              wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+            if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) { //...well, all events which aren't stacked
+              if (event_has_iterator_declare_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
+                if (!iscomment(event_get_iterator_declare_code(i->second->events[ii].mainId,i->second->events[ii].id)))
+                  wto << "      " << event_get_iterator_declare_code(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+              } else
+                wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+            }
           for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
             wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << it->second.s << ";\n";
 
         //This is the actual call to remove the current instance from all linked records before destroying it.
         wto << "\n    void unlink()\n    {\n";
-          wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me->second); // Queue for delete while we're still valid\n";
+          wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
           wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
           for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
             wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
           for (unsigned ii = 0; ii < i->second->events.size; ii++)
             if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
               const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
-              wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
+              if (event_has_iterator_unlink_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
+                if (!iscomment(event_get_iterator_unlink_code(i->second->events[ii].mainId,i->second->events[ii].id)))
+                  wto << "      " << event_get_iterator_unlink_code(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+              } else
+                wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
           }
           for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
             wto << "      enigma::event_" << it->second.s << "->unlink(ENOBJ_ITER_myevent_" << it->second.s << ");\n";
@@ -187,6 +258,8 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
         wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++))";
           wto << ": object_locals(id, " << i->second->id << ")";
+          for (size_t ii = 0; ii < i->second->initializers.size(); ii++)
+            wto << ", " << i->second->initializers[ii].first << "(" << i->second->initializers[ii].second << ")";
           wto << "\n    {\n";
             // Sprite index
               if (used_funcs::object_set_sprite) //We want to initialize
@@ -194,6 +267,9 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               else
                 wto << "      sprite_index = " << i->second->sprite_index << ";\n";
               wto << "      visible = " << i->second->visible << ";\n      solid = " << i->second->solid << ";\n";
+              
+            // Depth
+              wto << "      depth.init(" << i->second->depth << ", this);\n";
 
             // Instance system interface
               wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
@@ -204,7 +280,11 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               for (unsigned ii = 0; ii < i->second->events.size; ii++)
                 if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
                   const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
-                  wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
+                  if (event_has_iterator_initialize_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
+                    if (!iscomment(event_get_iterator_initialize_code(i->second->events[ii].mainId,i->second->events[ii].id)))
+                      wto << "      " << event_get_iterator_initialize_code(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+                  } else
+                    wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
               }
               for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
                 wto << "      ENOBJ_ITER_myevent_" << it->second.s << " = enigma::event_" << it->second.s << "->add_inst(this);\n";
@@ -219,12 +299,17 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
           // Destructor
           wto <<   "    \n    ~OBJ_" <<  i->second->name << "()\n    {\n";
-            //wto << "      delete ENOBJ_ITER_me;\n"; // Don't think you can delete this. :P
+            wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
             for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
               wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
             for (unsigned ii = 0; ii < i->second->events.size; ii++)
-              if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id))
-                wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+              if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
+                if (event_has_iterator_delete_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
+                  if (!iscomment(event_get_iterator_delete_code(i->second->events[ii].mainId,i->second->events[ii].id)))
+                    wto << "      " << event_get_iterator_delete_code(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+                } else
+                  wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
+              }
             for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
               wto << "      delete ENOBJ_ITER_myevent_" << it->second.s << ";\n";
           wto << "    }\n";

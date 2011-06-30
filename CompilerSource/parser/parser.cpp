@@ -328,7 +328,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         }
         code.replace(ebp, exp.length() + 1 + member.length(), repstr);
         synt.replace(ebp, exp.length() + 1 + member.length(), repsyn);
-        //cout << synt << endl << endl << endl;
+        pos = ebp + exp.length() + member.length();
       }
       else // There is a member by this name in the type of that expression
       {

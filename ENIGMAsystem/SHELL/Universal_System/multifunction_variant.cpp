@@ -34,38 +34,38 @@
   keeps tabs on the other three. When one is modified, it modifies the other three as needed.
 */
 
-#ifndef MFV_ALREADY_INCLUDED
+#include "var4.h"
 #include "multifunction_variant.h"
-#else
-#undef MFV_ALREADY_INCLUDED
-#endif
 #include "var_te.h"
 
 #undef  types_extrapolate_alldec_i
 #undef  types_extrapolate_alldec_ib
 #define types_extrapolate_alldec_i(op, stringops, sentiments)\
- types_extrapolate_real_p  (TYPEPURPOSE& TYPEPURPOSE::operator op, { rval.d op x; sentiments;  return *this; } )\
- types_extrapolate_string_p(TYPEPURPOSE& TYPEPURPOSE::operator op, { stringops;   sentiments; return *this; } )\
- TYPEPURPOSE& TYPEPURPOSE::operator op (const variant &x)          { rval.d op x; sentiments; return *this; }\
- TYPEPURPOSE& TYPEPURPOSE::operator op(const var &x)               { rval.d op x; sentiments; return *this; }
+ types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator op, { rval.d op x; sentiments;  return *this; } )\
+ types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator op, { stringops;   sentiments; return *this; } )\
+ multifunction_variant& multifunction_variant::operator op (const variant &x)          { rval.d op x; sentiments; return *this; }\
+ multifunction_variant& multifunction_variant::operator op(const var &x)               { rval.d op x; sentiments; return *this; }
 #define types_extrapolate_alldec_ib(op, sentiments)\
- types_extrapolate_real_p  (TYPEPURPOSE& TYPEPURPOSE::operator op##=, { rval.d = long(rval.d) op long(x); sentiments;  return *this; } )\
- types_extrapolate_string_p(TYPEPURPOSE& TYPEPURPOSE::operator op##=, { terrortrue();                     sentiments; return *this; } )\
- TYPEPURPOSE& TYPEPURPOSE::operator op##= (const variant &x)          { rval.d = long(rval.d) op long(x); sentiments; return *this; }\
- TYPEPURPOSE& TYPEPURPOSE::operator op##= (const var &x)              { rval.d = long(rval.d) op long(x); sentiments; return *this; }
+ types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator op##=, { rval.d = long(rval.d) op long(x); sentiments;  return *this; } )\
+ types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator op##=, { terrortrue();                     sentiments; return *this; } )\
+ multifunction_variant& multifunction_variant::operator op##= (const variant &x)          { rval.d = long(rval.d) op long(x); sentiments; return *this; }\
+ multifunction_variant& multifunction_variant::operator op##= (const var &x)              { rval.d = long(rval.d) op long(x); sentiments; return *this; }
 
 namespace enigma
 {
-  types_extrapolate_alldec_i(=,   sval = x,     TYPEFUNCTION; );
-  types_extrapolate_alldec_i(+=,  sval += x,    TYPEFUNCTION; );
-  types_extrapolate_alldec_i(-=,  terrortrue(), TYPEFUNCTION; );
-  types_extrapolate_alldec_i(*=,  terrortrue(), TYPEFUNCTION; );
-  types_extrapolate_alldec_i(/=,  terrortrue(), div0c(x); TYPEFUNCTION; );
-  types_extrapolate_alldec_ib(<<, TYPEFUNCTION; );
-  types_extrapolate_alldec_ib(>>, TYPEFUNCTION; );
-  types_extrapolate_alldec_ib(&,  TYPEFUNCTION; );
-  types_extrapolate_alldec_ib(|,  TYPEFUNCTION; );
-  types_extrapolate_alldec_ib(^,  TYPEFUNCTION; );
+  types_extrapolate_alldec_i(=,   sval = x,     function(); );
+  types_extrapolate_alldec_i(+=,  sval += x,    function(); );
+  types_extrapolate_alldec_i(-=,  terrortrue(), function(); );
+  types_extrapolate_alldec_i(*=,  terrortrue(), function(); );
+  types_extrapolate_alldec_i(/=,  terrortrue(), div0c(x); function(); );
+  types_extrapolate_alldec_ib(<<, function(); );
+  types_extrapolate_alldec_ib(>>, function(); );
+  types_extrapolate_alldec_ib(&,  function(); );
+  types_extrapolate_alldec_ib(|,  function(); );
+  types_extrapolate_alldec_ib(^,  function(); );
+  
+  void multifunction_variant::function() {}
+  multifunction_variant::~multifunction_variant() {}
 }
 
 #undef  types_extrapolate_alldec_i

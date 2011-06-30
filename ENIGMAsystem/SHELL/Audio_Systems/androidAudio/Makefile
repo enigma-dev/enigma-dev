@@ -9,4 +9,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/AndroidAudio.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*

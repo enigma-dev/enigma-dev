@@ -9,4 +9,4 @@ $(OBJECTS):
 this: $(OBJECTS) $(OBJECTS)/placeholderlinks.o 
 
 clean:
-	-rm .eobjs/*/*/*
+	-rm .eobjs/*/*/*/*
