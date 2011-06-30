@@ -120,6 +120,7 @@ namespace enigma
     return a != instance_list.end() ? a->second : NULL;
   }
 
+  extern int object_idmax;
   object_basic* fetch_instance_by_int(int x)
   {
     if (x < 0) switch (x)
@@ -135,7 +136,7 @@ namespace enigma
     }
 
     if (x < 100000)
-      return objects[x].next ? objects[x].next->inst : NULL;
+      return x < object_idmax ? objects[x].next ? objects[x].next->inst : NULL : NULL;
 
     iliter a = instance_list.find(x);
     return a != instance_list.end() ? a->second->inst : NULL;

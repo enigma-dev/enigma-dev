@@ -684,7 +684,6 @@
 			<Option target="iphone-build" />
 		</Unit>
 		<Unit filename="Preprocessor_Environment_Editable/GAME_SETTINGS.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_eventpointers.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_events.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_evparent.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_globals.h" />
@@ -698,7 +697,6 @@
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_wildclass.h" />
 		<Unit filename="Preprocessor_Environment_Editable/LIBINCLUDE.h" />
 		<Unit filename="SHELLmain.cpp" />
 		<Unit filename="Universal_System/CallbackArrays.cpp" />
@@ -726,6 +724,8 @@
 		<Unit filename="Universal_System/compression.h" />
 		<Unit filename="Universal_System/darray.cpp" />
 		<Unit filename="Universal_System/darray.h" />
+		<Unit filename="Universal_System/depth_draw.cpp" />
+		<Unit filename="Universal_System/depth_draw.h" />
 		<Unit filename="Universal_System/dynamic_args.cpp" />
 		<Unit filename="Universal_System/dynamic_args.h" />
 		<Unit filename="Universal_System/estring.cpp" />
@@ -748,6 +748,8 @@
 		<Unit filename="Universal_System/instance_create.h" />
 		<Unit filename="Universal_System/instance_system.cpp" />
 		<Unit filename="Universal_System/instance_system.h" />
+		<Unit filename="Universal_System/instance_system_base.h" />
+		<Unit filename="Universal_System/instance_system_frontend.h" />
 		<Unit filename="Universal_System/key_game_globals.h" />
 		<Unit filename="Universal_System/loading.cpp" />
 		<Unit filename="Universal_System/lua_table.h" />

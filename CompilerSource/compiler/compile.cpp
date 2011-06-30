@@ -320,11 +320,13 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Writing resource names and maxima" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out);
     wto << license;
-
+    
+    max = 0;
     wto << "enum //object names\n{\n";
-    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++) {
+      if (i->first >= max) max = i->first + 1;
       wto << "  " << i->second->name << " = " << i->first << ",\n";
-    wto << "};\n\n";
+    } wto << "};\nnamespace enigma { size_t object_idmax = " << max << "; }\n\n";
 
     max = 0;
     wto << "enum //sprite names\n{\n";

@@ -296,7 +296,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       if (!tf and find_in_all_ancestors_generic(ct,member))
         ct = ext_retriever_var->parent, tf = true;
       
-      cout << exp << ": " << n.type->name << " :: " << member << " => " << tf << endl;
+      cout << exp << ": " << n.type->name << " :: " << member << " => " << tf << " _ " << level << endl;
       
       if (!tf) // No member by this name can be accessed
       {
@@ -328,15 +328,18 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         }
         code.replace(ebp, exp.length() + 1 + member.length(), repstr);
         synt.replace(ebp, exp.length() + 1 + member.length(), repsyn);
-        pos = ebp + exp.length() + member.length();
+        pos = ebp + repstr.length() - 1;
       }
       else // There is a member by this name in the type of that expression
       {
         if (n.pad > 0 or n.deref) { // The type is a pointer. This dot should be a ->
           code.replace(epos,1,"->");
           synt.replace(epos,1,"->");
+          pos = epos + 1;
         }
       }
+      cout << "New level: " << level << endl << "code from here: " << code.substr(pos) << endl;
+      continue;
     }
     else if (synt[pos] == '[' and (!indecl or deceq))
     {
