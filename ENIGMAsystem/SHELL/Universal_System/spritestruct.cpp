@@ -237,6 +237,8 @@ int sprite_get_bbox_top(int sprite)
 
 int sprite_get_number(int sprite)
 {
+  if (sprite == -1)
+    return 0;
 	#ifdef DEBUGMODE
   if (!enigma::spritestructarray[sprite]) {
 	  show_error("Trying to retrieve subimage count of non-existing sprite "+toString(sprite),0);
