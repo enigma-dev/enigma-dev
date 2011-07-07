@@ -39,12 +39,12 @@ namespace enigma
     // Trivia
     string name, fontname;
     int fontsize; bool bold, italic;
-    
+
     // Metrics and such
     unsigned char glyphstart, glyphcount;
     fontglyph *glyphs;
-    int height;
-    
+    unsigned int height, yoffset;
+
     // Texture layer
     unsigned int texture;
     int twid, thgt;
@@ -52,14 +52,14 @@ namespace enigma
   struct rawfont {
     string name;
     int id;
-    
+
     string fontname;
     int fontsize; bool bold, italic;
     unsigned char glyphstart, glyphcount;
   };
   extern rawfont rawfontdata[];
   extern font **fontstructarray;
-  
+
   extern int rawfontcount, rawfontmaxid;
   int font_new(unsigned char gs, unsigned char gc); // Creates a new font, allocating 'gc' glyphs
 }

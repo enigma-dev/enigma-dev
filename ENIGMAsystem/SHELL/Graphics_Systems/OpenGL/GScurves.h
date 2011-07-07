@@ -36,6 +36,7 @@ float draw_bezier_quadratic_x(float x1,float y1,float x2,float y2,float x3,float
 float draw_bezier_quadratic_y(float x1,float y1,float x2,float y2,float x3,float y3, float t);
 float draw_bezier_cubic_x(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float t);
 float draw_bezier_cubic_y(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float t);
+void draw_bezier_quadratic_spline_part(float x1, float y1, float x2, float y2, float x3, float y3, int c1, int c2, float a1, float a2);
 void draw_spline_part(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2);
 void draw_spline2c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
 void draw_spline3(float x1, float y1, float x2, float y2, float x3, float y3);
@@ -46,4 +47,5 @@ void draw_spline_begin(int mode);
 int draw_spline_vertex(float x, float y);
 int draw_spline_vertex_color(float x, float y, int col, float alpha);
 void draw_spline_end();
+void draw_bezier_quadratic_spline_end();
 int draw_spline_optimized_end();

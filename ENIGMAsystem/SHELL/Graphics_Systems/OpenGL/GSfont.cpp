@@ -51,7 +51,7 @@ void draw_text(int x,int y,string str)
   if (bound_texture != fnt->texture)
     glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
 
-  int xx = x, yy = y+fnt->height;
+  int xx = x, yy = y+fnt->yoffset;
   glBegin(GL_QUADS);
   for (unsigned i = 0; i < str.length(); i++)
   {
@@ -109,7 +109,7 @@ unsigned int string_width_ext_line(string str, int w, int line)
       if (cl == line) return width; else width = 0, cl +=1;
     else if (str[i] == ' '){
       width += fnt->height/3, tw = 0;
-      for (unsigned c = i+1; c < str.length(); c++) //This is getting messy
+      for (unsigned c = i+1; c < str.length(); c++)
       {
         if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
           break;
@@ -135,7 +135,7 @@ unsigned int string_width_ext_line_count(string str, int w)
       width = 0, cl +=1;
     else if (str[i] == ' '){
       width += fnt->height/3, tw = 0;
-      for (unsigned c = i+1; c < str.length(); c++) //This is getting messy
+      for (unsigned c = i+1; c < str.length(); c++)
       {
         if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
           break;
@@ -148,8 +148,7 @@ unsigned int string_width_ext_line_count(string str, int w)
   }
   return cl;
 }
-///////////////////////////////////////////////////////
-//The following is certainly not pretty, but this is the best way I thought of to replicate GM's function
+
 void draw_text_ext(int x,int y,string str, int sep, int w)
 {
   font *fnt = fontstructarray[currentfont];
@@ -157,7 +156,7 @@ void draw_text_ext(int x,int y,string str, int sep, int w)
   if (bound_texture != fnt->texture)
     glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
 
-  int xx = x, yy = y+fnt->height, width = 0, tw = 0;
+  int xx = x, yy = y+fnt->yoffset, width = 0, tw = 0;
   glBegin(GL_QUADS);
   for (unsigned i = 0; i < str.length(); i++)
   {
@@ -168,7 +167,7 @@ void draw_text_ext(int x,int y,string str, int sep, int w)
     else if (str[i] == ' '){
       xx += fnt->height/3, width = xx-x;
       tw = 0;
-      for (unsigned c = i+1; c < str.length(); c++) //This is getting messy
+      for (unsigned c = i+1; c < str.length(); c++)
       {
         if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
           break;
@@ -212,7 +211,7 @@ void draw_text_transformed(double x,double y,string str,double xscale,double ysc
     cvy = cv*yscale, sw = fnt->height/3 * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx = x + shi, yy = y + chi;
+  float xx = x + shi, yy = y + fnt->yoffset * cvy;
 
   int lines = 1, w;
   glBegin(GL_QUADS);
@@ -266,7 +265,7 @@ void draw_text_ext_transformed(double x,double y,string str,int sep, int w, doub
     cvy = cv*yscale, sw = fnt->height/3 * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx = x + shi, yy = y + chi, wi;
+  float xx = x + shi, yy = y + fnt->yoffset * cvy, wi;
 
   int lines = 1,width = 0, tw = 0;
   glBegin(GL_QUADS);
@@ -335,7 +334,7 @@ void draw_text_transformed_color(double x,double y,string str,double xscale,doub
     cvy = cv*yscale, sw = fnt->height/3 * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx = x + shi, yy = y + chi, tx1, tx2, width = 0;
+  float xx = x + shi, yy = y + fnt->yoffset * cvy, tx1, tx2, width = 0;
 
   int lines = 1, w, hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4, lw = string_width_line(str, lines-1);
   glPushAttrib(GL_CURRENT_BIT);
@@ -401,7 +400,7 @@ void draw_text_ext_transformed_color(double x,double y,string str,int sep,int w,
     cvy = cv*yscale, sw = fnt->height/3 * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx = x + shi, yy = y + chi, tx1, tx2, width = 0;
+  float xx = x + shi, yy = y + fnt->yoffset * cvy, tx1, tx2, width = 0;
 
   int lines = 1, wi, hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4, lw = string_width_ext_line(str, w, lines-1), tw;
   glPushAttrib(GL_CURRENT_BIT);
@@ -470,7 +469,7 @@ void draw_text_color(int x,int y,string str,int c1,int c2,int c3,int c4,double a
 
 
   glPushAttrib(GL_CURRENT_BIT);
-  int xx = x, yy = y+fnt->height, hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0, sw = string_width_line(str, line);
+  int xx = x, yy = y+fnt->yoffset, hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0, sw = string_width_line(str, line);
   float tx1, tx2;
   glBegin(GL_QUADS);
   for (unsigned i = 0; i < str.length(); i++)
@@ -523,7 +522,7 @@ void draw_text_ext_color(int x,int y,string str,int sep, int w, int c1,int c2,in
     glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
 
   glPushAttrib(GL_CURRENT_BIT);
-  int xx = x, yy = y+fnt->height, width = 0, tw = 0, hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0, sw = string_width_ext_line(str, w, line);
+  int xx = x, yy = y+fnt->yoffset, width = 0, tw = 0, hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0, sw = string_width_ext_line(str, w, line);
   glBegin(GL_QUADS);
   for (unsigned i = 0; i < str.length(); i++)
   {
@@ -535,7 +534,7 @@ void draw_text_ext_color(int x,int y,string str,int sep, int w, int c1,int c2,in
       xx += fnt->height/3;
       width = xx-x;
       tw = 0;
-      for (unsigned c = i+1; c < str.length(); c++) //This is getting messy
+      for (unsigned c = i+1; c < str.length(); c++)
       {
         if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
           break;
@@ -619,12 +618,6 @@ int string_height(string str)
       hgt += fnt->height;
   return hgt;
 }
-/*
-unsigned int string_height(string str = "") //this is funny argument. Even in GM it doesn't do anything, as fonts have only one height when drawn in one line
-{ //So I added a default argument, so the function can be called without any (e.g. string_height())
-  font *fnt = fontstructarray[currentfont];
-  return fnt->height;
-}*/
 
 unsigned int string_width_ext(string str, int sep, int w) //here sep doesn't do anything, but I can't make it 'default = ""', because its the second argument
 {
@@ -658,7 +651,7 @@ unsigned int string_height_ext(string str, int sep, int w)
     else if (str[i] == ' '){
       width += fnt->height/3;
       tw = 0;
-      for (unsigned c = i+1; c < str.length(); c++) //This is getting messy
+      for (unsigned c = i+1; c < str.length(); c++)
       {
         if (str[c] == ' ' or str[i] == '\r' or str[i] == '\n')
           break;

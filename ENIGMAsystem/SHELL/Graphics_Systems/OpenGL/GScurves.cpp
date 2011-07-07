@@ -325,6 +325,41 @@ void draw_spline_end()
     startedSplinesMode.pop();
 }
 
+void draw_bezier_quadratic_spline_part(float x1, float y1, float x2, float y2, float x3, float y3, int c1, int c2, float a1, float a2)
+{
+    int col;
+    float x, y, al, t = 0, det = 1/(float)pr_curve_detail;
+    for (int i=0; i<=pr_curve_detail; i++){
+        al = a1 + (a2-a1)*t;
+        col = merge_color(c1, c2, t);
+
+        x = 0.5 * (((x1 - 2 * x2 + x3) * t + 2 * x2 - 2 * x1) * t + x1 + x2);
+        y = 0.5 * (((y1 - 2 * y2 + y3) * t + 2 * y2 - 2 * y1) * t + y1 + y2);
+        glColor4f(__GETR(col),__GETG(col),__GETB(col),al);
+        glVertex2f(x, y);
+        t += det;
+    }
+}
+
+//first and last point is used as control points, so they will not be drawn
+void draw_bezier_quadratic_spline_end()
+{
+    untexture();
+    glPushAttrib(GL_LINE_BIT);
+      glLineWidth(pr_curve_width);
+      glBegin(startedSplinesMode.top());
+        spline &arr = *startedSplines.top();
+        if (arr.size()>3)
+          for (unsigned i = 2; i < arr.size(); i++)
+              draw_bezier_quadratic_spline_part(arr[i-2].x, arr[i-2].y, arr[i-1].x, arr[i-1].y, arr[i].x, arr[i].y, arr[i-2].col, arr[i-1].col, arr[i-2].al, arr[i-1].al);
+      glEnd();
+    glPopAttrib();
+    glColor4ubv(enigma::currentcolor);
+    delete &arr;
+    startedSplines.pop();
+    startedSplinesMode.pop();
+}
+
 int draw_spline_optimized_end()
 {
     double tmp_detail = (double)pr_curve_detail;
