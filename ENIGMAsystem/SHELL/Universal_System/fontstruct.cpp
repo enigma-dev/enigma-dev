@@ -50,7 +50,7 @@ namespace enigma
     ret->glyphcount = gc;
     ret->glyphs = new fontglyph[gc];
     ret->height = 0;
-    
+
     font **fsan = new font*[font_idmax+2];
     font ** const fold = fontstructarray - 1;
     if (fontstructarray and fold) {
@@ -72,26 +72,27 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   unsigned char gcount = sspr->subcount;
   int idfont = enigma::font_new(first, gcount);
   enigma::font *font = enigma::fontstructarray[idfont];
-  
+
   // Now, what we'll implement is a packing algorithm.
   // This algorithm will try to fit as many glyphs as possible into
   // a square space based on the max height of the font.
-  
+
   unsigned char* glyphdata[gcount]; // Raw font image data
   enigma::rect_packer::pvrect glyphmetrics[gcount];
   int glyphx[gcount], glyphy[gcount];
-  
+
   int gwm = sspr->width, // Glyph width max: sprite width
       ghm = sspr->height, // Glyph height max: sprite height
-      gtw = int((double)sspr->width / sspr->texbordy);
-  
+      gtw = int((double)sspr->width / sspr->texbordy),
+      maxy2 = 0;
+
   font->height = ghm;
-  
+
   for (int i = 0; i < gcount; i++)
   {
     unsigned char* data = enigma::graphics_get_texture_rgba(sspr->texturearray[i]);
     glyphdata[i] = data;
-    
+
     // Here we calculate the bbox
     if (!prop)
        glyphmetrics[i].x = 0,   glyphmetrics[i].y = 0,
@@ -119,20 +120,22 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
     font->glyphs[i].y = glyphmetrics[i].y;
     font->glyphs[i].x2 = glyphmetrics[i].w + 1; // And while w and h are still the right and bottom edge coordinates
     font->glyphs[i].y2 = glyphmetrics[i].h + 1;
-    
+    if (font->glyphs[i].y2 > maxy2)
+        maxy2 = font->glyphs[i].y2;
+
     font->glyphs[i].xs = glyphmetrics[i].w + sep; // This is just user-specified for sprite-loaded fonts
-    
+
     glyphmetrics[i].w -= glyphmetrics[i].x - 1; // Fix width and height to be such
     glyphmetrics[i].h -= glyphmetrics[i].y - 1; // instead of right and bottom
     glyphx[i] = glyphmetrics[i].x, glyphy[i] = glyphmetrics[i].y;
     glyphmetrics[i].placed = -1;
   }
-  
+
   list<unsigned int> boxes;
   for (int i = 0; i < gcount; i++)
     boxes.push_back((glyphmetrics[i].w * glyphmetrics[i].h << 8) + i);
   boxes.sort();
-  
+
   int w = 64, h = 64;
   enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
   for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
@@ -149,7 +152,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
       if (!w or !h) return -1;
     }
   }
-  
+
   int bigtex[w*h];
   for (int i = 0; i < gcount; i++)
   {
@@ -158,15 +161,16 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
       for (int xx = 0; xx < glyphmetrics[i].w; xx++)
         bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = ((unsigned int*)glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
     delete[] glyphdata[i]; // Delete the image data we just copied
-    
+
     font->glyphs[i].tx = glyphmetrics[i].x / double(w);
     font->glyphs[i].ty = glyphmetrics[i].y / double(h);
     font->glyphs[i].tx2 = (glyphmetrics[i].x + glyphmetrics[i].w) / double(w);
     font->glyphs[i].ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
   }
-  
+
   font->texture = enigma::graphics_create_texture(w,h,bigtex);
   font->twid = w;
   font->thgt = h;
+  font->yoffset = maxy2;
   return idfont;
 }
