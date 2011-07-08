@@ -83,8 +83,8 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
 
   int gwm = sspr->width, // Glyph width max: sprite width
       ghm = sspr->height, // Glyph height max: sprite height
-      gtw = int((double)sspr->width / sspr->texbordy),
-      maxy2 = 0;
+      gtw = int((double)sspr->width / sspr->texbordy);
+      //maxy2 = 0;
 
   font->height = ghm;
 
@@ -120,8 +120,9 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
     font->glyphs[i].y = glyphmetrics[i].y;
     font->glyphs[i].x2 = glyphmetrics[i].w + 1; // And while w and h are still the right and bottom edge coordinates
     font->glyphs[i].y2 = glyphmetrics[i].h + 1;
-    if (font->glyphs[i].y2 > maxy2)
-        maxy2 = font->glyphs[i].y2;
+    //printf("x:%d y:%d x2:%d y2:%d \n", font->glyphs[i].x,font->glyphs[i].y,font->glyphs[i].x2,font->glyphs[i].y2);
+    //if (font->glyphs[i].y2 > maxy2)
+    //  maxy2 = font->glyphs[i].y2;
 
     font->glyphs[i].xs = glyphmetrics[i].w + sep; // This is just user-specified for sprite-loaded fonts
 
@@ -171,6 +172,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   font->texture = enigma::graphics_create_texture(w,h,bigtex);
   font->twid = w;
   font->thgt = h;
-  font->yoffset = maxy2;
+  font->yoffset = 0;
+  //printf("yoffset = %d \n", font->yoffset);
   return idfont;
 }
