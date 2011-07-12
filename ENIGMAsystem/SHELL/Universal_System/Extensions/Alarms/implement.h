@@ -6,6 +6,7 @@ namespace enigma {
   struct extension_alarm
   {
     var alarm;
+    extension_alarm();
   };
 }
 
