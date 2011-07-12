@@ -1,0 +1,26 @@
+%e-yaml
+---
+Name: GNU GCC G++ (Cross MinGW on Intel mac, 32-bit)
+Native: No
+Maintainer: TGMG
+Target-platform: Windows
+
+# Some info about it
+path:
+make: make
+gcc: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-gcc
+g++: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-g++
+defines: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-cpp -dM -x c++ -E $blank
+searchdirs: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-gcc -E -x c++ -v $blank
+searchdirs-start: "#include <...> search starts here:"
+searchdirs-end: "End of search list."
+resources: $exe
+cppflags:
+cflags:
+links: 
+
+Build-Extension:
+Run-output: game.exe
+Run-Program: $game
+Run-Params:
+
