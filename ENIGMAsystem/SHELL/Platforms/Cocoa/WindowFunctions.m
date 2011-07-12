@@ -47,7 +47,7 @@ int getWindowDimension(int i)
 }
 
 void cocoa_window_set_size(unsigned int w,unsigned int h) {
-	NSRect rect = NSMakeRect(0,0,w,h+22);
+	NSRect rect = NSMakeRect([[delegate window] frame].origin.x,[[delegate window] frame].origin.y,w,h+22);
 	[[delegate window] setFrame:rect display:YES ];
 	
 }
@@ -61,9 +61,9 @@ int getMouse(int i)
 	switch(i)
 	{
 		case 0:  return mouse.x; //room
-		case 1:  return -(mouse.y-480);
+		case 1:  return -(mouse.y-[[delegate window] frame].size.height);
 		case 2:  return mouse.x; //window
-		case 3:  return  -(mouse.y-480)+22;
+        case 3: return -(mouse.y-[[delegate window] frame].size.height)-22;
 		default: return -1;
 	}
 	

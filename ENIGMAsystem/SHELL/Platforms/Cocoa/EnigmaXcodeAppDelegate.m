@@ -51,4 +51,8 @@
 	} 
 } 
 
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
+    [enigmaview terminateEnigma];
+}
+
 @end

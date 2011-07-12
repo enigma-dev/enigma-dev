@@ -40,6 +40,8 @@
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication;
 
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
+
 - (void)changeVisible;
 
 

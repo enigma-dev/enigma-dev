@@ -63,7 +63,9 @@ int directory_create(string dname) {
 
 
 
-string file_find_first(string mask,int attr);   
+string file_find_first(string mask,int attr) {
+    
+}   
 
 enum {
   fa_readonly  = 1,
@@ -95,7 +97,13 @@ extern string program_directory;
 extern string temp_directory;
 
 
-int parameter_count();
-string parameter_string(int n);
+int parameter_count(){
+    
+}
+string parameter_string(int n) {
+    
+}
 
-string environment_get_variable(string name);
+string environment_get_variable(string name) {
+    
+}

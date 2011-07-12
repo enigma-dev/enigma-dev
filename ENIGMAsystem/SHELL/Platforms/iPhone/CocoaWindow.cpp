@@ -36,6 +36,11 @@
 
 using namespace std;
 
+
+void io_handle() {
+    cocoa_io_handle();
+}
+
 //////////
 // INIT //
 //////////
@@ -219,7 +224,7 @@ int window_get_fullscreen()
 
 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
 short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
-int window_set_cursor(int c)
+int window_set_cursor(double c)
 {
 	/*XUndefineCursor(disp,win);
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));

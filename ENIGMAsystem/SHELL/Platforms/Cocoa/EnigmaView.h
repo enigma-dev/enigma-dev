@@ -43,11 +43,14 @@
     NSTimer  *time;
    
 	BOOL opt, ctrl, command, shift;
+    NSThread* timerThread;
+    NSRunLoop* runLoop;
 }
 
 - (id)initWithFrame:(NSRect) frameRect;
 - (void) flushOpenGL;
 -(void) startTimer;
 -(void) startTimerThread;
+-(void) terminateEnigma;
 
 @end

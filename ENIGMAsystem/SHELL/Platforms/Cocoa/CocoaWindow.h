@@ -156,6 +156,8 @@ void window_views_mouse_set(int x, int y);
 int show_message(string str);
 
 void io_handle();
+void io_clear();
+void keyboard_wait();
 
 namespace enigma {
 	extern char** parameters;

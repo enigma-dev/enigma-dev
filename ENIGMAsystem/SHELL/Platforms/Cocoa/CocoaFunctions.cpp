@@ -61,6 +61,8 @@ namespace enigma
 
 char cocoa_last_keybdstatus[256];
 char cocoa_keybdstatus[256];
+char cocoa_mousestatus[3];
+char cocoa_last_mousestatus[3];
 
 
 
@@ -84,7 +86,7 @@ enigma::initialize_everything();
 
 
 void key_press(int keycode) {
-    printf("Keycode pressed: %d",keycode); //useful to create the keymap array
+    //printf("Keycode pressed: %d",keycode); //useful to create the keymap array
 	int actualKey = enigma::keymap[keycode];
 	
 	if (cocoa_keybdstatus[actualKey]==1) {
@@ -104,19 +106,30 @@ void key_release(int keycode) {
 }
 
 void mouse_press(int x, int y) {
-	enigma::mousestatus[mb_left-1]=1;
+    
+    if (cocoa_mousestatus[mb_left-1]==1) {
+		cocoa_last_mousestatus[mb_left-1]=1; //its already handeled the mouse press
+		
+	} else {
+		cocoa_mousestatus[mb_left-1]=1;
+        cocoa_last_mousestatus[mb_left-1]=0; //handle mouse press
+		
+	}
+    
 }
 
+
+
 void mouse_release(int x, int y) {
-	enigma::mousestatus[mb_left-1]=0;
+	cocoa_mousestatus[mb_left-1]=0;
 }
 
 void mouse_right_press(int x, int y) {
-	enigma::mousestatus[mb_right-1]=1;
+	cocoa_mousestatus[mb_right-1]=1;
 }
 
 void mouse_right_release(int x, int y) {
-	enigma::mousestatus[mb_right-1]=0;
+	cocoa_mousestatus[mb_right-1]=0;
 }
 
 void cocoa_io_handle() {
@@ -131,9 +144,23 @@ void cocoa_io_handle() {
 			cocoa_last_keybdstatus[i]=0;
 		}
 	}
+    for(int i=0;i<3;i++){
+		if (enigma::last_mousestatus[i]==0 && enigma::mousestatus[i]==1) {
+            //in the last frame, i was pressed event, so make last_keybdstatus now equal 1
+			cocoa_last_mousestatus[i]=1;
+		}
+		else if (enigma::last_mousestatus[i]==1 && enigma::mousestatus[i]==0) {
+			//in the last frame, i was released event, so make last_keybdstatus now equal 0
+			cocoa_last_mousestatus[i]=0;
+		}
+	}
 	memcpy(enigma::keybdstatus, cocoa_keybdstatus, sizeof(enigma::keybdstatus));
 	memcpy(enigma::last_keybdstatus, cocoa_last_keybdstatus, sizeof(enigma::last_keybdstatus));
+    memcpy(enigma::mousestatus, cocoa_mousestatus, sizeof(enigma::mousestatus));
+	memcpy(enigma::last_mousestatus, cocoa_last_mousestatus, sizeof(enigma::last_mousestatus));
 }
+
+
 
 
 

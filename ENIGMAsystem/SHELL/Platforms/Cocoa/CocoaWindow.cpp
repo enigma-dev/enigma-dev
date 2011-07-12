@@ -203,6 +203,19 @@ void screen_refresh() {
     cocoa_flush_opengl();
 }
 
+namespace enigma {
+    extern char keybdstatus[256];
+}
+
+extern char cocoa_keybdstatus[256];
+void io_clear() {
+    for(int i=0; i<255; i++) {
+        enigma::keybdstatus[i]=0;
+        cocoa_keybdstatus[i]=0;
+    }
+}
+
+
 namespace enigma
 {	
 	char keymap[256];
@@ -315,10 +328,15 @@ namespace enigma {
 	char** parameters;
 	void windowsystem_write_exename(char* x)
 	{
+        const char* resourcefile = enigma::parameters[0];
 		unsigned irx;
-		for (irx = 0; enigma::parameters[0][irx] != 0; irx++)
-			x[irx] = enigma::parameters[0][irx];
-		x[irx] = 0;
+		for (irx = 0; resourcefile[irx] != 0; irx++)
+			x[irx] = resourcefile[irx];
+        x[irx]= '.';
+        x[irx+1]= 'r';
+        x[irx+2]= 'e';
+        x[irx+3]= 's';
+		x[irx+4] = 0;
 	}
 #define hielem 9
 	static int last_second[hielem+1] = {0},last_microsecond[hielem+1] = {0};
@@ -381,6 +399,16 @@ extern void cocoa_io_handle();
 void io_handle() {
     
     cocoa_io_handle();
+}
+
+bool keyboard_check(int key);
+
+
+void keyboard_wait() {
+    io_clear();
+    while(!keyboard_check(1/*vk_anykey*/)) {
+        io_handle();
+    }
 }
 
 
