@@ -76,9 +76,9 @@ void screen_redraw()
     }
     draw_back();
     
-    for (enigma::diter dit = drawing_depths.begin(); dit != drawing_depths.end(); dit++)
-      for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
-        enigma::instance_event_iterator->inst->myevent_draw();
+      for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+          for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
+              enigma::instance_event_iterator->inst->myevent_draw();
   }
   else 
   for (view_current=0; view_current<7; view_current++)
@@ -122,7 +122,7 @@ void screen_redraw()
     }
     draw_back();
     
-    for (enigma::diter dit = drawing_depths.begin(); dit != drawing_depths.end(); dit++)
+    for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
       for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
         enigma::instance_event_iterator->inst->myevent_draw();
   }
