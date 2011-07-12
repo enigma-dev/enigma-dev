@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <stdlib.h>
+
 #ifndef ENIGMA_SPRITESTRUCT
 #define ENIGMA_SPRITESTRUCT
 

@@ -67,11 +67,12 @@ namespace enigma
       unsigned size;
       fread(&size,1,4,exe);
       
-      char fdata[size];
+      char* fdata = new char[size];
       fread(fdata,1,size,exe);
       
       if (sound_add_from_buffer(id,fdata,size))
         printf("Failed to load sound%d\n",i);
+      delete fdata;
     }
   }
 }

@@ -44,5 +44,5 @@ namespace enigma {
     depth_layer();
   };
   extern map<double,depth_layer> drawing_depths;
-  typedef map<double,depth_layer>::iterator diter;
+  typedef map<double,depth_layer>::reverse_iterator diter;
 }

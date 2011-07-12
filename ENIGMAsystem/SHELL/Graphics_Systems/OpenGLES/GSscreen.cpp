@@ -31,14 +31,17 @@ int screen_redraw(int dontswap)
 
 #include <string>
 #include "OpenGLHeaders.h"
+#include "GSbackground.h"
 
 using namespace std;
+
+#include "../../Universal_System/var4.h"
 
 #define __GETR(x) (((unsigned int)x & 0x0000FF))
 #define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
 #define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)
 
-#include "../../Universal_System/var4.h"
+
 #include "../../Universal_System/roomsystem.h"
 #include "../../Universal_System/instance_system.h"
 #include "graphics_object.h"
@@ -50,6 +53,20 @@ namespace enigma {
 }
 
 using namespace enigma;
+
+static inline void draw_back()
+{
+    //Draw backgrounds
+    for (int back_current=0; back_current<7; back_current++)
+    {
+        if (background_visible[back_current] == 1) {
+            // if (background_stretched) draw_background_stretched(back, x, y, w, h);
+            draw_background_tiled(background_index[back_current], background_x[back_current], background_y[back_current]);
+        }
+        // background_foreground, background_index, background_x, background_y, background_htiled,
+        // background_vtiled, background_hspeed, background_vspeed;
+    }
+}
 
 int screen_redraw()
 {
@@ -71,7 +88,8 @@ int screen_redraw()
          glClearColor(__GETR(clearcolor)/255.0,__GETG(clearcolor)/255.0,__GETB(clearcolor)/255.0, 1);
          glClear(GL_COLOR_BUFFER_BIT);
       }
-
+        draw_back();
+        
       for (enigma::instance_event_iterator = event_draw->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
         enigma::instance_event_iterator->inst->myevent_draw();
     }
@@ -118,7 +136,8 @@ int screen_redraw()
          glClearColor(__GETR(clearcolor)/255.0,__GETG(clearcolor)/255.0,__GETB(clearcolor)/255.0, 1);
          glClear(GL_COLOR_BUFFER_BIT);
       }
-      
+      draw_back();
+        
       for (enigma::instance_event_iterator = event_draw->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
         enigma::instance_event_iterator->inst->myevent_draw();
     }

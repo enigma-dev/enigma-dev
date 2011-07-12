@@ -120,6 +120,24 @@ inline void action_set_vspeed(double newvspeed) {
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed=newvspeed;
 }
 
+void action_set_hspeed(double newhspeed) {
+	if (argument_relative) {
+        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed+=newhspeed;
+    } else
+        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed=newhspeed;
+}
+
+inline void action_set_gravity(double direction,double newgravity) { 
+    if (argument_relative) {
+        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction+=direction;
+        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity+=newgravity;
+    } else {
+        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction=direction;
+        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity=newgravity;
+    }
+}
+
+
 inline void action_draw_score(double x,double y, string caption) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
@@ -417,11 +435,22 @@ void action_set_motion(double dir,double nspeed) {
 
 
 
-void motion_set(int dir, double speed); //RELOCATE ME
-#define motion_set(newdirection,newspeed) direction=(newdirection); speed=(newspeed);
+void motion_set(int dir, double newspeed) //RELOCATE ME
+{
+    enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
+    inst->direction=dir;
+    inst->speed=newspeed;
+}
+//#define motion_set(newdirection,newspeed) {direction=(newdirection); speed=(newspeed);}
 
-void motion_add(double dir, double speed); //RELOCATE ME
-#define motion_add(newdirection,newspeed) hspeed+= (newspeed) * cos(degtorad((newdirection))); vspeed-= (newspeed) * sin(degtorad((newdirection)));
+void motion_add(double newdirection, double newspeed) //RELOCATE ME
+{
+    enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
+    
+    inst->hspeed+= (newspeed) * cos(degtorad((newdirection)));
+    inst->vspeed-= (newspeed) * sin(degtorad((newdirection)));  
+}
+//#define motion_add(newdirection,newspeed) hspeed+= (newspeed) * cos(degtorad((newdirection))); vspeed-= (newspeed) * sin(degtorad((newdirection)));
 
 void game_restart() { //RELOCATE ME
     room_goto_first();
