@@ -21,7 +21,6 @@ package org.enigma;
 
 import java.awt.BorderLayout;
 
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -32,7 +31,7 @@ import org.enigma.backend.EnigmaCallbacks.OutputHandler;
 import org.enigma.messages.Messages;
 import org.lateralgm.main.LGM;
 
-public class EnigmaFrame extends JDialog implements OutputHandler
+public class EnigmaFrame extends JFrame implements OutputHandler
 	{
 	private static final long serialVersionUID = 1L;
 	public JTextArea ta;
@@ -40,7 +39,8 @@ public class EnigmaFrame extends JDialog implements OutputHandler
 
 	public EnigmaFrame()
 		{
-		super(LGM.frame,Messages.getString("EnigmaFrame.TITLE")); //$NON-NLS-1$
+		super(Messages.getString("EnigmaFrame.TITLE")); //$NON-NLS-1$
+		setLocationRelativeTo(LGM.frame);
 		JPanel p = new JPanel(new BorderLayout());
 		ta = new JTextArea(10,40);
 		ta.setEditable(false);

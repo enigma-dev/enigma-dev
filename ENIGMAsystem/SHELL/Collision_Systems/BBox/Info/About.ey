@@ -7,3 +7,6 @@ Represents: All
 Description: Collisions register using simple sprite bounding box (rectangle) checking.
 Author: IsmAvatar
 
+Represents:
+	Build-platforms: All
+

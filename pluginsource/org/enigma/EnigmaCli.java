@@ -11,6 +11,7 @@ package org.enigma;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaSettings;
@@ -99,11 +100,12 @@ public class EnigmaCli
 
 		//TODO: Handle custom outname
 		//FIXME: Make compliant with spec2
-		File outname = new File(fn.substring(0,fn.lastIndexOf('.')) + ess.selPlatform.ext);
-		if (!ess.selCompiler.outputexe.equals("$tempfile")) //$NON-NLS-1$
-			outname = new File(ess.selCompiler.outputexe);
+		File outname = new File(fn.substring(0,fn.lastIndexOf('.')) + ess.targets.get("windowing").ext);
+		TargetSelection compiler = ess.targets.get("compiler");
+		if (!compiler.outputexe.equals("$tempfile")) //$NON-NLS-1$
+			outname = new File(compiler.outputexe);
 
-		DRIVER.compileEGMf(es, outname.getAbsolutePath(), mode);
+		DRIVER.compileEGMf(es,outname.getAbsolutePath(),mode);
 		}
 
 	private static UnsatisfiedLinkError attemptLib()

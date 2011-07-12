@@ -6,3 +6,8 @@ Identifier: OpenGL
 Description: Render using OpenGL, offering high portability but requiring specific graphics card features to run.
 Author: Josh Ventura, serprex
 
+Depends:
+	Windowing: xlib, Win32, Cocoa
+Represents:
+	Build-platforms: Linux, MacOSX
+

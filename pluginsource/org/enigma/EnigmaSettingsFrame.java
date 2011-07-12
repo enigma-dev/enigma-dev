@@ -20,7 +20,7 @@
 package org.enigma;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -30,13 +30,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
+import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
+import javax.swing.ComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -59,6 +63,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.YamlParser.YamlContent;
@@ -79,7 +85,8 @@ import org.lateralgm.main.LGM;
 import org.lateralgm.subframes.CodeFrame;
 import org.lateralgm.subframes.CodeFrame.CodeHolder;
 
-public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,FocusListener
+public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,FocusListener,
+		PopupMenuListener
 	{
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon CODE_ICON = LGM.getIconForKey("Resource.SCRIPT"); //$NON-NLS-1$
@@ -91,15 +98,14 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 	protected JButton save, saveFile, loadFile;
 
 	private Map<String,Option> options;
-	//	private IndexButtonGroup strings, increment, equal, literal, escape;
-	//	private IndexButtonGroup instance, storage;
+	private Map<String,TargetSelection> userPicks = new HashMap<String,TargetSelection>();
+	private Map<JComboBox,String> targets;
 	private JButton bDef, bGlobLoc;
 	private JButton bInit, bClean;
 	private CodeFrame cfDef, cfGlobLoc, cfInit, cfClean;
 	private CodeHolder sDef, sGlobLoc, sInit, sClean;
 	private CustomFileChooser fc;
 
-	private JComboBox targComp, targPlat, targGfx, targAudio, targColl, targWidg;
 	private JTextField tfAuth;
 	private JTextArea taDesc;
 
@@ -169,8 +175,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		void populateLabel(String type, String name, String choices)
 			{
 			cChoices = new JComponent[1];
-			String fmt = org.enigma.messages.Messages.getString("EnigmaSettingsFrame.OPTION_UNSUPPORTED"); //$NON-NLS-1$
-			JLabel lab = new JLabel(String.format(fmt,type,name));
+			JLabel lab = new JLabel(Messages.format("EnigmaSettingsFrame.OPTION_UNSUPPORTED",type,name)); //$NON-NLS-1$
 			lab.setToolTipText(other = choices);
 			cChoices[0] = lab;
 			}
@@ -384,7 +389,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		//but then we'd need to either parse this file twice or keep a reference to it.
 		oldEs.options.clear();
 		for (Entry<String,Option> entry : options.entrySet())
-			oldEs.options.put(entry.getKey(),entry.getValue() == null ? null : entry.getValue().getValue());
+			oldEs.options.put(entry.getKey(),entry.getValue() == null ? null
+					: entry.getValue().getValue());
 
 		return panels;
 		}
@@ -454,36 +460,16 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		GroupLayout layout = new GroupLayout(p);
 		p.setLayout(layout);
 
-		JPanel platPane = new JPanel(new GridLayout(4,3));
-		platPane.setBorder(BorderFactory.createTitledBorder(Messages.getString("EnigmaSettingsFrame.TITLE_PLATFORM"))); //$NON-NLS-1$
-		GroupLayout plat = new GroupLayout(platPane);
-		platPane.setLayout(plat);
-
-		targComp = new JComboBox(TargetHandler.getTargetCompilersArray());
-		targPlat = new JComboBox(
-				TargetHandler.getTargetPlatformsArray(TargetHandler.defCompiler.depends.isEmpty() ? null
-						: TargetHandler.defCompiler.depends.iterator().next()));
-		targGfx = new JComboBox(TargetHandler.getTargetGraphicsArray(TargetHandler.defPlatform.id));
-		targAudio = new JComboBox(TargetHandler.getTargetAudiosArray(TargetHandler.defPlatform.id));
-		targColl = new JComboBox(TargetHandler.getTargetCollisionsArray());
-		targWidg = new JComboBox(TargetHandler.getTargetWidgetsArray(TargetHandler.defPlatform.id));
-
-		JComboBox[] targs = { targComp,targPlat,targGfx,targAudio,targColl,targWidg };
-		TargetSelection[] sels = { es.selCompiler,es.selPlatform,es.selGraphics,es.selAudio,
-				es.selCollision,es.selWidgets };
-		String[] labels = {
-				Messages.getString("EnigmaSettingsFrame.LABEL_COMPILER"),Messages.getString("EnigmaSettingsFrame.LABEL_PLATFORM"),Messages.getString("EnigmaSettingsFrame.LABEL_GRAPHICS"),Messages.getString("EnigmaSettingsFrame.LABEL_AUDIO"),Messages.getString("EnigmaSettingsFrame.LABEL_COLLISION"),Messages.getString("EnigmaSettingsFrame.LABEL_WIDGETS") }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-
 		Group hg1 = layout.createParallelGroup();
 		Group hg2 = layout.createParallelGroup();
 		SequentialGroup vg = layout.createSequentialGroup();
 		final int pref = GroupLayout.PREFERRED_SIZE;
 
+		String[] labels = { "Compiler: ","Platform: ","Graphics: ","Audio: ","Collision: ","Widgets: " };
+		JComponent[] targs = initializeTargets();
+
 		for (int i = 0; i < targs.length; i++)
 			{
-			targs[i].setSelectedItem(sels[i]);
-			targs[i].addActionListener(this);
-			targs[i].addFocusListener(this);
 			JLabel label = new JLabel(labels[i]);
 
 			hg1.addComponent(label);
@@ -494,8 +480,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			/**/.addComponent(targs[i],pref,pref,pref));
 			}
 
-		tfAuth = new JTextField(es.selCompiler == null ? null : es.selCompiler.auth);
-		taDesc = new JTextArea(es.selCompiler == null ? null : es.selCompiler.desc);
+		tfAuth = new JTextField(null);
+		taDesc = new JTextArea();
 		tfAuth.setEditable(false);
 		taDesc.setEditable(false);
 		taDesc.setLineWrap(true);
@@ -527,14 +513,14 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 
 	public void loadFromFile()
 		{
-		fc.setDialogTitle(Messages.getString("EnigmaSettingsFrame.27")); //$NON-NLS-1$
+		fc.setDialogTitle(Messages.getString("EnigmaSettingsFrame.LOAD_TITLE")); //$NON-NLS-1$
 		while (true)
 			{
 			if (fc.showOpenDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			if (fc.getSelectedFile().exists()) break;
 			JOptionPane.showMessageDialog(null,fc.getSelectedFile().getName()
 					+ org.lateralgm.messages.Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
-					Messages.getString("EnigmaSettingsFrame.28"),JOptionPane.WARNING_MESSAGE); //$NON-NLS-1$
+					Messages.getString("EnigmaSettingsFrame.LOAD_MISSING_TITLE"),JOptionPane.WARNING_MESSAGE); //$NON-NLS-1$
 			}
 
 		es.options.clear();
@@ -558,7 +544,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 	public void saveToFile()
 		{
 		commitChanges();
-		fc.setDialogTitle("File to write information to"); //$NON-NLS-1$
+		fc.setDialogTitle(Messages.getString("EnigmaSettingsFrame.SAVE_TITLE")); //$NON-NLS-1$
 		if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
 		String name = fc.getSelectedFile().getPath();
 		if (CustomFileFilter.getExtension(name) == null) name += ".ey"; //$NON-NLS-1$
@@ -570,17 +556,17 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			ps.println("%e-yaml"); //$NON-NLS-1$
 			ps.println("---"); //$NON-NLS-1$
 
-			//general
+			//options
 			for (Entry<String,String> entry : es.options.entrySet())
 				ps.println(entry.getKey() + ": " + entry.getValue()); //$NON-NLS-1$
 			ps.println();
 
 			//targets
-			String targs[] = { "compiler","windowing","graphics","audio","collision","widget" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-			TargetSelection ts[] = { es.selCompiler,es.selPlatform,es.selGraphics,es.selAudio,
-					es.selCollision,es.selWidgets };
-			for (int i = 0; i < targs.length; i++)
-				ps.println("target-" + targs[i] + ": " + (ts[i] == null ? "" : ts[i].id)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			for (Entry<String,TargetSelection> entry : es.targets.entrySet())
+				{
+				if (entry.getValue() == null) continue;
+				ps.format("target-%s: %s\n",entry.getKey(),entry.getValue().id); //$NON-NLS-1$
+				}
 			ps.println("target-networking: None"); //$NON-NLS-1$
 
 			ps.close();
@@ -608,12 +594,9 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		es.initialization = sInit.getCode();
 		es.cleanup = sClean.getCode();
 
-		es.selCompiler = (TargetSelection) targComp.getSelectedItem();
-		es.selPlatform = (TargetSelection) targPlat.getSelectedItem();
-		es.selGraphics = (TargetSelection) targGfx.getSelectedItem();
-		es.selAudio = (TargetSelection) targAudio.getSelectedItem();
-		es.selCollision = (TargetSelection) targColl.getSelectedItem();
-		es.selWidgets = (TargetSelection) targWidg.getSelectedItem();
+		es.targets.clear();
+		for (Entry<JComboBox,String> box : targets.entrySet())
+			es.targets.put(box.getValue(),(TargetSelection) box.getKey().getSelectedItem());
 		}
 
 	public void setComponents(EnigmaSettings es)
@@ -630,6 +613,13 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		sGlobLoc.setCode(es.globalLocals);
 		sInit.setCode(es.initialization);
 		sClean.setCode(es.cleanup);
+
+		for (Entry<JComboBox,String> box : targets.entrySet())
+			{
+			TargetSelection targ = es.targets.get(box.getValue());
+			if (targ != null) box.getKey().setSelectedItem(targ);
+			userPicks.clear();
+			}
 		}
 
 	public void revertResource()
@@ -644,6 +634,133 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 				new ObjectComparator(null))));
 		return !rc.areEqual(oldEs,es);
 		}
+
+	/** A special ComboBoxModel to alleviate repopulation */
+	private class TargetCombo extends AbstractListModel implements ComboBoxModel
+		{
+		private static final long serialVersionUID = 1L;
+
+		private List<TargetSelection> data;
+		private TargetSelection selection;
+
+		public TargetCombo()
+			{
+			data = new ArrayList<TargetSelection>();
+			}
+
+		public void setData(Collection<TargetSelection> data)
+			{
+			this.data = new ArrayList<TargetSelection>(data);
+			fireContentsChanged(this,0,data.size() - 1);
+			}
+
+		@Override
+		public void setSelectedItem(Object anItem)
+			{
+			if (anItem instanceof TargetSelection && data.contains(anItem))
+				selection = (TargetSelection) anItem;
+			}
+
+		//These methods may be called frequently...
+		@Override
+		public Object getElementAt(int index)
+			{
+			return data.get(index);
+			}
+
+		@Override
+		public int getSize()
+			{
+			return data.size();
+			}
+
+		@Override
+		public Object getSelectedItem()
+			{
+			return selection;
+			}
+		}
+
+	private JComponent[] initializeTargets()
+		{
+		//first, initialize the boxes
+		JComboBox[] targs = new JComboBox[TargetHandler.targets.size()];
+		targets = new HashMap<JComboBox,String>(targs.length);
+		for (int i = 0; i < targs.length; i++)
+			targets.put(targs[i] = new JComboBox(new TargetCombo()),TargetHandler.ids[i]);
+
+		//now populate them
+		userPicks.put(TargetHandler.ids[0],TargetHandler.defaults.get(TargetHandler.ids[0]));
+		targs[0].setFont(targs[0].getFont().deriveFont(Font.BOLD));
+		populateTargets();
+
+		//now set their selection and listeners
+		for (int i = 0; i < targs.length; i++)
+			{
+			targs[i].setSelectedIndex(0);
+			targs[i].addPopupMenuListener(this);
+			targs[i].addActionListener(this);
+			targs[i].addFocusListener(this);
+			}
+
+		return targs;
+		}
+
+	/**
+	 * This method populates each combo box with valid choices for if it is activated.
+	 * The boxes are populated with a choice for any system that does not violate the
+	 * dependencies of a locked system. For example, if the compiler isn't locked, we
+	 * can offer Win32 and X11 assuming we have a MinGW cross compiler and the Linux
+	 * GCC installed. If we have locked the compiler to MinGW-cross, the only option
+	 * for the windowing API is Win32.
+	 * 
+	 * Use this function whenever anything should change about the available or locked
+	 * systems that would affect the combo box contents.
+	 */
+	void populateTargets()
+		{
+		for (Entry<JComboBox,String> target : targets.entrySet()) // Iterate our combo boxes.
+			{ // We will need a handle to the combobox and the system it represents (ie, "windowing").
+			Set<TargetSelection> options = new LinkedHashSet<TargetSelection>(); // Keep a list of valid systems to assign to the combobox
+			for (Map<String,TargetSelection> combo : TargetHandler.combos) // Iterate our combinations.
+				{
+				boolean addMe = true; // Does this combination contain all the locked systems (the ones the user specifically assigned)?
+				for (Entry<String,TargetSelection> estarget : userPicks.entrySet()) // For each lock (used-assigned system)
+					{
+					if (estarget.getKey().equals(target.getValue())) continue; // If the lock is actually for this combobox's system, ignore the lock; the user is in the process of changing its lock
+					if (combo.get(estarget.getKey()) != estarget.getValue()) addMe = false; // If this combo does not employ a system the user specified, do not use it.
+					}
+				if (addMe) options.add(combo.get(target.getValue())); // If the system meets all criteria, add it to the list.
+				}
+			//			target.getKey().setModel(new DefaultComboBoxModel(options.toArray(new TargetSelection[0])));
+			// Finally, set the values of the combobox to the list we just generated.
+			// Since we iterated the main combo list linearly, and that list was sorted by score,
+			//   we can assume that the new list is likewise sorted by score.
+			((TargetCombo) target.getKey().getModel()).setData(options);
+			}
+		}
+
+	/**
+	 * This method is invoked when the user clicks away from the target selection dropdown menu.
+	 * It behaves as more of a feature than a necessary part of the system; canceling the selection
+	 * functions like a reset button for the current item. It removes the lock from the previously
+	 * selected target, allowing systems to be selected in other dropdowns which are not compatible
+	 * with the current system (thus leading to its replacement).
+	 */
+	@Override
+	public void popupMenuCanceled(PopupMenuEvent e)
+		{
+		JComboBox changedSystem = (JComboBox) e.getSource();
+		String current = targets.get(changedSystem); // Get the category of the changed system
+		if (current == null) return;
+		userPicks.remove(current); // Clear the lock on this system
+		changedSystem.setFont(changedSystem.getFont().deriveFont(Font.PLAIN)); // Unbold the box
+		populateTargets(); // Re-populate our combo boxes to reflect that they no longer need to
+		// fill this system's dependencies
+		}
+
+	//prevents recursively firing a changed selection while trampling selections
+	private boolean changing = false;
 
 	@Override
 	public void actionPerformed(ActionEvent e)
@@ -702,37 +819,32 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			return;
 			}
 
-		if (s == targComp || s == targPlat || s == targGfx || s == targAudio || s == targColl
-				|| s == targWidg)
+		String targSys = targets.get(s);
+		if (targSys != null)
 			{
-			TargetSelection ts = (TargetSelection) ((JComboBox) s).getSelectedItem();
-			if (s == targComp)
+			if (changing) return;
+
+			JComboBox changedSystem = (JComboBox) s;
+			TargetSelection changedSelection = (TargetSelection) changedSystem.getSelectedItem();
+
+			//Update author and description
+			if (changedSystem.hasFocus())
 				{
-				es.selCompiler = ts;
-				//this is such a hack...
-				String dep = ts.depends.isEmpty() ? null : ts.depends.iterator().next();
-				targPlat.setModel(new DefaultComboBoxModel(TargetHandler.getTargetPlatformsArray(dep)));
-				ts = (TargetSelection) targPlat.getSelectedItem();
-				if (ts == null && targPlat.getModel().getSize() != 0)
-					ts = (TargetSelection) targPlat.getModel().getElementAt(0);
-				s = targPlat;
+				tfAuth.setText(changedSelection.auth);
+				taDesc.setText(changedSelection.desc);
 				}
 
-			if (s == targPlat)
-				{
-				es.selPlatform = ts;
-				targGfx.setModel(new DefaultComboBoxModel(TargetHandler.getTargetGraphicsArray(ts.id)));
-				targAudio.setModel(new DefaultComboBoxModel(TargetHandler.getTargetAudiosArray(ts.id)));
-				targColl.setModel(new DefaultComboBoxModel(TargetHandler.getTargetCollisionsArray()));
-				targWidg.setModel(new DefaultComboBoxModel(TargetHandler.getTargetWidgetsArray(ts.id)));
-				}
+			//repopulate the boxes
+			userPicks.put(targSys,changedSelection);
+			changedSystem.setFont(changedSystem.getFont().deriveFont(Font.BOLD));
+			populateTargets();
 
-			if (((JComboBox) s).hasFocus())
-				{
-				tfAuth.setText(ts.auth);
-				taDesc.setText(ts.desc);
-				}
-			return;
+			//now trample the other cancelled selections
+			changing = true;
+			for (Entry<JComboBox,String> systems : targets.entrySet())
+				if (systems.getKey() != changedSystem && userPicks.get(systems.getValue()) == null)
+					systems.getKey().setSelectedIndex(0);
+			changing = false;
 			}
 		}
 
@@ -813,6 +925,16 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 	//Unused
 	@Override
 	public void focusLost(FocusEvent e)
+		{
+		}
+
+	@Override
+	public void popupMenuWillBecomeVisible(PopupMenuEvent e)
+		{
+		}
+
+	@Override
+	public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
 		{
 		}
 	}

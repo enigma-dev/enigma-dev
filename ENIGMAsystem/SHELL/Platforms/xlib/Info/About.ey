@@ -7,6 +7,7 @@ Represents: Linux
 Description: Run on any Linux distribution powered by the X Window Server.
 Author: IsmAvatar, Josh Ventura
 
-Build-Platforms: Linux
+Depends:
+	Build-Platforms: Linux
 
 Links: -lz

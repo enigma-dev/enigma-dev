@@ -7,6 +7,7 @@ Represents: MacOSX
 Description: Run on Apple Mac OS X, or other Cocoa-enabled Apple systems.
 Author: TGMG
 
-Build-Platforms: MacOSX
+Depends:
+	Build-Platforms: MacOSX
 
 Links: -lz -framework Cocoa

@@ -6,3 +6,8 @@ Identifier: OpenGLES
 Description: Render using OpenGLES, offering high portability but requiring specific graphics card features to run.
 Author: Josh Ventura, serprex, TGMG
 
+Depends:
+	Build-platforms: iPhone, Android
+Represents:
+	Build-platforms: iPhone, Android
+

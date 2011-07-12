@@ -7,6 +7,7 @@ Represents: Windows
 Description: Run on Microsoft Windows.
 Author: Josh Ventura
 
-Build-Platforms: Windows
+Depends:
+	Build-Platforms: Windows
 
 Links: '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/Win32/ffi/libFFI.a' -lcomdlg32 -lgdi32

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>
+ * Copyright (C) 2011 Josh Ventura <JoshV10@gmail.com>
  * 
  * This file is part of Enigma Plugin.
  * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -11,36 +12,294 @@ package org.enigma;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import org.enigma.YamlParser.YamlContent;
+import org.enigma.YamlParser.YamlElement;
 import org.enigma.YamlParser.YamlNode;
 
 public class TargetHandler
 	{
-	private static final Pattern normalizer = Pattern.compile("[\\[\\]\\-\\s_]"); //$NON-NLS-1$
-
-	public static TargetSelection defCompiler, defPlatform, defGraphics, defAudio, defCollision,
-			defWidgets;
-	private static List<TargetSelection> tCompilers, tPlatforms, tGraphics, tAudios, tCollisions,
-			tWidgets;
-	static
-		{
-		tCompilers = findCompilers();
-		tPlatforms = findTargets("Platforms"); //$NON-NLS-1$
-		tGraphics = findTargets("Graphics_Systems"); //$NON-NLS-1$
-		tAudios = findTargets("Audio_Systems"); //$NON-NLS-1$
-		tCollisions = findTargets("Collision_Systems"); //$NON-NLS-1$
-		tWidgets = findTargets("Widget_Systems"); //$NON-NLS-1$
-
-		findDefaults();
-		}
-
 	private TargetHandler()
 		{
+		}
+
+	static final boolean DEBUG = false; //TODO: Get rid of this.
+
+	private static final Pattern NORMALIZER = Pattern.compile("[\\[\\]\\-\\s_]"); //$NON-NLS-1$
+	private static final Pattern SPLITTER = Pattern.compile("\\s*,\\s*"); //$NON-NLS-1$
+
+	public static final String[] ids = { "compiler","windowing","graphics","audio","collision",
+			"widget" };
+
+	public static TargetSelection defCompiler;
+	public static Map<String,List<TargetSelection>> targets;
+	public static Collection<Combo> combos;
+	public static Map<String,TargetSelection> defaults;
+
+	private static void debug(String s)
+		{
+		debug(false,s);
+		}
+
+	private static void debug(boolean special, String s)
+		{
+		if (!DEBUG) return;
+		if (special)
+			{
+			System.out.println("==================");
+			System.out.println(s);
+			System.out.println("==================");
+			}
+		else
+			System.out.println(s);
+		}
+
+	static
+		{
+		String[] folders = { null,"Platforms","Graphics_Systems","Audio_Systems","Collision_Systems",
+				"Widget_Systems" };
+		targets = new HashMap<String,List<TargetSelection>>();
+		targets.put(ids[0],findCompilers());
+		for (int i = 1; i < folders.length; i++)
+			targets.put(ids[i],findTargets(folders[i]));
+
+		combos = dependencyResolution();
+		findDefaults(combos);
+
+		debug(true,"~~~" + combos.size() + "~~~");
+
+		int scoreIndex = 0;
+		int score[] = new int[combos.size()];
+		for (Map<String,TargetSelection> i : combos)
+			score[scoreIndex++] = scoreCombo(i);
+
+		debug(true,"~~~ RESULTS ~~~");
+
+		scoreIndex = 0;
+		for (Map<String,TargetSelection> i : combos)
+			debug(score[scoreIndex++] + ": " + i);
+		}
+
+	/**
+	 * Generates a combination of systems, tests if they work, and returns the
+	 * working ones. Inefficient, because it generates a O(N^M) map, but there's
+	 * not many systems and it gets the job done. If you can think up a more
+	 * efficient solution, please do. For internal workings, see internal
+	 * comments.
+	 * 
+	 * Note: System = Entry<String,Set<TargetSelection>>, or may omit the String
+	 */
+	private static Collection<Combo> dependencyResolution()
+		{
+		List<Combo> r = new ArrayList<Combo>();
+
+		// This counter keeps track of which systems we're looking at.
+		// Increment one at a time, and roll over into the next system counter.
+		int[] systemCounter = new int[targets.size()];
+		// Provide a integer pairing for each mapped key, in consistent order.
+		String[] systemOrder = targets.keySet().toArray(new String[0]);
+
+		debug("");
+		for (int t = 0; t < targets.size(); t++)
+			{
+			debug("System: " + systemOrder[t] + "[" + targets.get(systemOrder[t]).size() + "]");
+			for (int i = 0; i < targets.get(systemOrder[t]).size(); i++)
+				debug("        " + targets.get(systemOrder[t]).get(i));
+			}
+
+		// For efficiency, we could also populate a List of systems.
+		for (;;)
+			{
+			boolean valid = true;
+			for (int i = 0; i < systemOrder.length && valid; i++)
+				{
+				// compiler is already accounted for; why would platform be?
+				if (systemOrder[i].equals(ids[0])) continue;
+				List<TargetSelection> system = targets.get(systemOrder[i]);
+				// This is usually a sign that something went wrong during system population.
+				// A "None" system should have at least been available, but wasn't.
+				if (system.isEmpty())
+					{
+					debug("Info: Empty");
+					continue; // for now we just ignore it as though the
+					// dependencies resolved.
+					}
+
+				TargetSelection targ = system.get(systemCounter[i]);
+				if (!isResolvable(targ,systemOrder,systemCounter))
+					{
+					valid = false;
+					break;
+					}
+				}
+
+			if (valid)
+				{
+				// add to list of acceptable resolutions
+				Combo rr = new Combo(targets.size());
+				for (int i = 0; i < targets.size(); i++)
+					{
+					List<TargetSelection> system = targets.get(systemOrder[i]);
+					rr.put(systemOrder[i],system.size() <= systemCounter[i] ? null
+							: system.get(systemCounter[i]));
+					}
+				rr.finish();
+				r.add(rr);
+				}
+
+			// count (little endian)
+			int ind = 0;
+			while (ind < systemCounter.length
+					&& ++systemCounter[ind] >= targets.get(systemOrder[ind]).size())
+				systemCounter[ind++] = 0;
+			if (ind >= systemCounter.length) break;
+			}
+
+		Collections.sort(r);
+		return r;
+		}
+
+	private static boolean isResolvable(TargetSelection selection, String[] systemOrder,
+			int[] systemCounter)
+		{
+		Set<Entry<String,Set<String>>> entrySet = selection.depends.entrySet();
+		depcheck: for (Entry<String,Set<String>> entry : entrySet)
+			{
+			final String key = entry.getKey().toLowerCase();
+
+			if (key.equalsIgnoreCase("build-platforms")) // System depends on a certain OS's headers
+				{
+				//debug("************ " + selection.name + " depends on platform " + entry.getValue());
+				List<TargetSelection> allCompilers = targets.get(ids[0]);
+				int whichIndex = 0; // This is the index of the compiler we've chosen
+				for (int j = 0; j < systemOrder.length; j++)
+					if (systemOrder[j].equals(ids[0]))
+						{
+						whichIndex = systemCounter[j];
+						break;
+						}
+				for (String value : entry.getValue())
+					{
+					for (String asshat : allCompilers.get(whichIndex).depends.get("target"))
+						{
+						//debug("\"" + asshat + "\" ?= \"" + normalize(value) + "\"");
+						if (asshat.equals(value)) continue depcheck;
+						}
+					}
+				return false;
+				}
+
+			List<TargetSelection> all = targets.get(key);
+			if (all == null)
+				{
+				debug("all == null for key " + key);
+				return false; // Invalid dependency system specified.
+				}
+			// The dependent system has no available targets because dependencies populated wrong.
+			// A "None" system should have at least been available, but wasn't.
+			if (all.isEmpty())
+				{
+				debug("This shouldn't really happen; system by key " + key + " is empty.");
+				for (Entry<String,List<TargetSelection>> a : targets.entrySet())
+					{
+					debug("  Candidate: " + a.getKey());
+					for (TargetSelection b : a.getValue())
+						debug("    > " + b);
+					}
+				return false;
+				}
+			/// Ism: What the fuck is this shit?
+			/*/ Hunt for the current system. For efficiency, we could use a
+			// pre-populated List
+			TargetSelection current = null;
+			for (int j = 0; j < systemOrder.length && current == null; j++)
+				if (systemOrder[j].equals(key))
+					current = all.get(systemCounter[j]);
+			// Now see if one of the needed dependencies happens to be the
+			// system we're testing against.
+			// We need all systems to pass in order to allow this combination.
+			if (!entry.getValue().contains(current))
+				return false;*/
+
+			for (int j = 0; j < systemOrder.length; j++)
+				if (systemOrder[j].equals(key))
+					{
+					debug(entry.getValue() + ".contains(" + targets.get(key).get(systemCounter[j]).id + "): "
+							+ entry.getValue().contains(targets.get(key).get(systemCounter[j]).id.toLowerCase()));
+					if (!entry.getValue().contains(targets.get(key).get(systemCounter[j]).id.toLowerCase()))
+						return false;
+					}
+			}
+		// All systems pass. If they didn't, they would have failed out early.
+		// Also, pass if this doesn't specify any dependencies (loop never executes).
+		return true;
+		}
+
+	private static int scoreCombo(Map<String,TargetSelection> combo)
+		{
+		int score = 0;
+		debug("Score combination " + combo);
+		for (Entry<String,TargetSelection> pair : combo.entrySet())
+			{
+			TargetSelection selection = pair.getValue();
+			if (selection.defaultOn == null) continue;
+			Set<Entry<String,Set<String>>> entrySet = selection.defaultOn.entrySet();
+
+			// For each represented system Value of category Key
+			for (Entry<String,Set<String>> rep : entrySet)
+				{
+				Set<String> acceptable = rep.getValue();
+				if (acceptable == null) continue;
+				/*if (rep.getKey().equals("target"))
+					continue;*/
+				if (rep.getKey().equalsIgnoreCase("build-platforms"))
+					{
+					//debug(rep.getValue() + ".contains" + (combo.get("compiler").depends.get("target")));
+					if (rep.getValue().contains(combo.get(ids[0]).depends.get("target").iterator().next()))
+						{
+						debug(" + 1 point for " + pair.getKey() + " representing this platform");
+						score += 2;
+						}
+					else if (rep.getValue().contains("All") || rep.getValue().contains("all")
+							|| rep.getValue().contains("Any") || rep.getValue().contains("any"))
+						{
+						debug(" + 1/2 point for " + pair.getKey() + " representing any platform");
+						score += 1;
+						}
+					continue;
+					}
+				TargetSelection cmp = combo.get(rep.getKey().toLowerCase());
+				//debug("TargetSelection cmp = combo.get(" + rep.getKey() + ")");
+				//debug(acceptable+".contains("+cmp.id.toLowerCase()+")");
+				if (acceptable.contains(cmp.id.toLowerCase()))
+					{
+					debug(" + 1 point for " + pair.getKey() + " representing " + rep.getKey());
+					score += 2;
+					}
+				else if (acceptable.contains("all") || acceptable.contains("All"))
+					{
+					debug(" + 1/2 point for " + pair.getKey() + " representing all " + rep.getKey());
+					score += 1;
+					}
+				else if ((acceptable.contains("any") || acceptable.contains("Any"))
+						&& !cmp.id.equals("None"))
+					{
+					debug(" + 1/2 point for " + pair.getKey() + " representing any " + rep.getKey());
+					score += 1;
+					}
+				}
+			}
+		debug("Final score: " + score + " points");
+		return score;
 		}
 
 	public static String getOS()
@@ -52,12 +311,37 @@ public class TargetHandler
 		return os;
 		}
 
+	static class Combo extends HashMap<String,TargetSelection> implements Comparable<Combo>
+		{
+		private static final long serialVersionUID = 1L;
+
+		//we could add some failsafes in to prevent playing with unset scores, but there's no sense
+		public int score = -1;
+
+		public Combo(int size)
+			{
+			super(size);
+			}
+
+		/** Indicates that we are done adding elements so we can calculate its score */
+		public void finish()
+			{
+			score = scoreCombo(this);
+			}
+
+		@Override
+		public int compareTo(Combo c)
+			{
+			return c.score - score;
+			}
+		}
+
 	public static class TargetSelection
 		{
-		public String name, id; //mandatory
-		public Set<String> depends; //mandatory, non-empty
-		public Set<String> defaultOn; //optional
-		public String desc, auth, ext; //optional
+		public String name, id; // mandatory
+		public Map<String,Set<String>> depends; // mandatory
+		public Map<String,Set<String>> defaultOn; // optional
+		public String desc, auth, ext; // optional
 		public String outputexe;
 
 		public String toString()
@@ -87,8 +371,12 @@ public class TargetHandler
 				ps.auth = node.getMC("Maintainer",null); //$NON-NLS-1$
 				ps.ext = node.getMC("Build-Extension",null); //$NON-NLS-1$
 				ps.outputexe = node.getMC("Run-output",null); //$NON-NLS-1$
-				ps.depends = new HashSet<String>();
-				ps.depends.add(node.getMC("Target-platform",null)); //actually a target, not a dependency //$NON-NLS-1$
+				ps.depends = new HashMap<String,Set<String>>();
+				Set<String> target = new HashSet<String>();
+				String targplat = node.getMC("Target-platform",null); //$NON-NLS-1$
+				if (target != null) targplat = normalize(targplat);
+				target.add(targplat);
+				ps.depends.put("target",target); //$NON-NLS-1$
 				if (node.getBool("Native",false)) defCompiler = ps; //$NON-NLS-1$
 				tCompilers.add(ps);
 				}
@@ -113,46 +401,49 @@ public class TargetHandler
 			{
 			if (!dir.isDirectory()) continue;
 			File prop = new File(dir,"Info"); //$NON-NLS-1$
-			//technically this could stand to be a .properties file, rather than e-yaml
 			prop = new File(prop,"About.ey"); //$NON-NLS-1$
 			try
 				{
-				Set<String> depends = new HashSet<String>();
-				Set<String> defaultOn = new HashSet<String>();
-				YamlNode node;
+				Map<String,Set<String>> depends = new HashMap<String,Set<String>>();
+				Map<String,Set<String>> defaultOn = new HashMap<String,Set<String>>();
+				YamlNode node = YamlParser.parse(prop);
 
-				if (target.equals("Platforms")) //$NON-NLS-1$
+					/*if (target.equals("Platforms")) //$NON-NLS-1$
 					{
-					node = YamlParser.parse(prop);
-					String norm = normalize(node.getMC("Build-Platforms")); //$NON-NLS-1$
-					if (norm.isEmpty()) continue;
-					for (String s : norm.split(",")) //$NON-NLS-1$
-						if (!s.isEmpty()) depends.add(s);
-					}
-				else if (target.equals("Collision_Systems")) //$NON-NLS-1$
+						depends = new HashMap<String, Set<String>>();
+						String norm = normalize(node.getMC("Build-Platforms")); //$NON-NLS-1$
+						if (norm.isEmpty())
+							continue;
+						Set<String> targs = new HashSet<String>();
+						for (String s : SPLITTER.split(norm))
+							if (!s.isEmpty())
+								targs.add(s);
+						depends.put("targets", targs); //$NON-NLS-1$
+					} else*/
 					{
-					node = YamlParser.parse(new Scanner(prop));
-					depends.add("all"); //$NON-NLS-1$
-					}
-				else
-					{
-					if (dir.getName().equals("None")) //$NON-NLS-1$
-						depends.add("all"); //$NON-NLS-1$
-					else
+					try
 						{
-						String[] configs = new File(dir,"Config").list(); //$NON-NLS-1$
-						if (configs == null) continue;
-						for (String conf : configs)
-							if (conf.endsWith(".ey")) //$NON-NLS-1$
-								depends.add(normalize(conf.substring(0,conf.length() - 3)));
-						if (depends.isEmpty()) continue;
+						populateMap(depends,node,"Depends"); //$NON-NLS-1$
 						}
-					node = YamlParser.parse(new Scanner(prop));
+					catch (IndexOutOfBoundsException ee)
+						{
+						// getM found no "Depends" key, so there are no
+						// dependencies.
+						}
+					try
+						{
+						populateMap(defaultOn,node,"Represents"); //$NON-NLS-1$
+						}
+					catch (IndexOutOfBoundsException ee)
+						{
+						// getM found no "Represents" key, so it's not trying to
+						// be a default for anything.
+						}
 					}
 
-				String norm = normalize(node.getMC("Represents","")); //$NON-NLS-1$ //$NON-NLS-2$
-				for (String s : norm.split(",")) //$NON-NLS-1$
-					if (!s.isEmpty()) defaultOn.add(s);
+				//				String norm = normalize(node.getMC("Represents","")); //$NON-NLS-1$ //$NON-NLS-2$
+				// for (String s : SPLITTER.split(norm))
+				// if (!s.isEmpty()) defaultOn.add(s);
 
 				TargetSelection ps = new TargetSelection();
 				ps.name = node.getMC("Name"); //$NON-NLS-1$
@@ -166,93 +457,51 @@ public class TargetHandler
 				}
 			catch (FileNotFoundException e)
 				{
-				//yaml file missing, skip to next file
+				// yaml file missing, skip to next file
 				}
 			catch (IndexOutOfBoundsException e)
 				{
-				//insufficient yaml, skip to next file
+				// insufficient yaml, skip to next file
 				}
 			}
-		//if not empty, we may safely assume that the first one is the default selection,
-		//or technically, that any of them is the default. The user can/will change it in UI.
+		// if not empty, we may safely assume that the first one is the default
+		// selection,
+		// or technically, that any of them is the default. The user can/will
+		// change it in UI.
 		return targets;
 		}
 
-	//get rid of any "[]-_ " (and space), and convert to lowercase.
-	private static String normalize(String s)
+	private static void populateMap(Map<String,Set<String>> map, YamlNode node, String key)
 		{
-		return normalizer.matcher(s.toLowerCase()).replaceAll(""); //$NON-NLS-1$
-		}
-
-	private static void findDefaults()
-		{
-		defPlatform = findDefault(tPlatforms,getOS());
-		if (defPlatform != null)
+		YamlElement e = node.getM(key);
+		if (e.isScalar) return; //scalar usually a sign that the map is empty. Treat as empty either way.
+		YamlNode n = ((YamlNode) e);
+		for (YamlElement el : n.chronos)
 			{
-			defGraphics = findDefault(tGraphics,defPlatform.id);
-			defAudio = findDefault(tAudios,defPlatform.id);
-			defCollision = findDefault(tCollisions,defPlatform.id);
-			defWidgets = findDefault(tWidgets,defPlatform.id);
+			Set<String> dep = new HashSet<String>();
+			for (String s : SPLITTER.split(((YamlContent) el).getValue().toLowerCase()))
+				if (!s.isEmpty()) dep.add(s);
+			map.put(el.name,dep);
 			}
 		}
 
-	private static TargetSelection findDefault(List<TargetSelection> tsl, String depends)
+	/** get rid of any "[]-_ " (and space), and convert to lowercase. */
+	private static String normalize(String s)
 		{
-		depends = depends.toLowerCase();
-		TargetSelection allTs = null;
+		return NORMALIZER.matcher(s.toLowerCase()).replaceAll(""); //$NON-NLS-1$
+		}
 
-		for (TargetSelection ts : tsl)
-			if (ts.depends.contains("all") || ts.depends.contains(depends)) //$NON-NLS-1$
+	private static void findDefaults(Collection<Combo> combos)
+		{
+		int bestVal = 0;
+		for (Combo combo : combos)
+			{
+			int val = scoreCombo(combo);
+			if (val > bestVal)
 				{
-				//specific platforms always take precedence over the "all" keyword
-				if (ts.defaultOn.contains(depends)) return ts;
-				//to avoid looping again for "all" keyword if no specific platform found, store it
-				if (ts.defaultOn.contains("all") && allTs == null) allTs = ts; //$NON-NLS-1$
+				bestVal = val;
+				defaults = combo;
 				}
-		if (allTs != null) return allTs;
-		//if none are marked as default, just use the first one
-		for (TargetSelection ts : tsl)
-			if (ts.depends.contains("all") || ts.depends.contains(depends) //$NON-NLS-1$
-					&& !ts.defaultOn.contains("none")) return ts; //$NON-NLS-1$
-		return null;
-		}
-
-	private static List<TargetSelection> getTargetArray(List<TargetSelection> itsl, String depends)
-		{
-		if (itsl == tCollisions) return itsl;
-		List<TargetSelection> otsl = new ArrayList<TargetSelection>();
-		for (TargetSelection ts : itsl)
-			if (ts.depends.contains(depends.toLowerCase()) || ts.depends.contains("all")) otsl.add(ts); //$NON-NLS-1$
-		return otsl;
-		}
-
-	public static Object[] getTargetCompilersArray()
-		{
-		return tCompilers.toArray();
-		}
-
-	public static Object[] getTargetPlatformsArray(String depends)
-		{
-		return getTargetArray(tPlatforms,depends).toArray();
-		}
-
-	public static Object[] getTargetGraphicsArray(String depends)
-		{
-		return getTargetArray(tGraphics,depends).toArray();
-		}
-
-	public static Object[] getTargetAudiosArray(String depends)
-		{
-		return getTargetArray(tAudios,depends).toArray();
-		}
-
-	public static Object[] getTargetCollisionsArray()
-		{
-		return tCollisions.toArray();
-		}
-
-	public static Object[] getTargetWidgetsArray(String depends)
-		{
-		return getTargetArray(tWidgets,depends).toArray();
+			}
 		}
 	}

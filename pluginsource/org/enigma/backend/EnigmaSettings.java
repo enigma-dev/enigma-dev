@@ -29,7 +29,10 @@ public class EnigmaSettings
 	public String definitions = "", globalLocals = ""; //$NON-NLS-1$ //$NON-NLS-2$
 	public String initialization = "", cleanup = ""; //$NON-NLS-1$ //$NON-NLS-2$
 
-	public TargetSelection selCompiler, selPlatform, selGraphics, selAudio, selCollision, selWidgets;
+	//	public TargetSelection selCompiler, selPlatform, selGraphics, selAudio, selCollision, selWidgets;
+
+	//Strings one of: "compiler","windowing","graphics","audio","collision","widget"
+	public Map<String,TargetSelection> targets = new HashMap<String,TargetSelection>();
 
 	public EnigmaSettings()
 		{
@@ -41,14 +44,7 @@ public class EnigmaSettings
 		if (!load) return;
 
 		loadDefinitions();
-
-		selCompiler = TargetHandler.defCompiler;
-		selPlatform = TargetHandler.defPlatform;
-		selGraphics = TargetHandler.defGraphics;
-		selAudio = TargetHandler.defAudio;
-		selCollision = TargetHandler.defCollision;
-		selWidgets = TargetHandler.defWidgets;
-
+		targets.putAll(TargetHandler.defaults);
 		//default options are populated in EnigmaSettingsFrame.parsePanels to avoid reading file twice
 		}
 
@@ -101,14 +97,12 @@ public class EnigmaSettings
 
 		yaml.append('\n');
 
-		String targs[] = { "compiler","windowing","graphics","audio","collision","widget" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-		TargetSelection ts[] = { selCompiler,selPlatform,selGraphics,selAudio,selCollision,selWidgets };
-
-		for (int i = 0; i < targs.length; i++)
+		for (Entry<String,TargetSelection> entry : targets.entrySet())
 			{
-			if (ts[i] == null) continue;
-			yaml.append("target-").append(targs[i]).append(": ").append(ts[i].id).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
+			if (entry.getValue() == null) continue;
+			yaml.append("target-").append(entry.getKey()).append(": ").append(entry.getValue().id).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
 			}
+
 		yaml.append("target-networking: None\n"); //$NON-NLS-1$
 
 		System.out.println();
@@ -138,11 +132,6 @@ public class EnigmaSettings
 		es.initialization = initialization;
 		es.cleanup = cleanup;
 
-		es.selCompiler = selCompiler;
-		es.selPlatform = selPlatform;
-		es.selGraphics = selGraphics;
-		es.selAudio = selAudio;
-		es.selCollision = selCollision;
-		es.selWidgets = selWidgets;
+		es.targets.putAll(targets);
 		}
 	}

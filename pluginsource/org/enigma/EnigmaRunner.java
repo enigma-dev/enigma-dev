@@ -33,10 +33,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
@@ -77,6 +75,7 @@ import org.lateralgm.file.GmFormatException;
 import org.lateralgm.jedit.GMLKeywords;
 import org.lateralgm.jedit.GMLKeywords.Construct;
 import org.lateralgm.jedit.GMLKeywords.Function;
+import org.lateralgm.jedit.GMLKeywords.Keyword;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
@@ -337,17 +336,19 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public void populateKeywords()
 		{
-		SortedSet<Function> fl = new TreeSet<Function>(new Comparator<Function>()
+		Comparator<Keyword> nameComp = new Comparator<Keyword>()
 			{
 				@Override
-				public int compare(Function o1, Function o2)
+				public int compare(Keyword o1, Keyword o2)
 					{
 					return o1.getName().compareTo(o2.getName());
 					}
-			});
+			};
+
+		Set<Function> fl = new TreeSet<Function>(nameComp);
 		for (Function f : GMLKeywords.FUNCTIONS)
 			fl.add(f);
-		Set<Construct> cl = new HashSet<Construct>();
+		Set<Construct> cl = new TreeSet<Construct>(nameComp);
 		String res = DRIVER.first_available_resource();
 		while (res != null)
 			{
@@ -504,20 +505,22 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		if (!assertReady()) return;
 
-		if (es.selCompiler == null || es.selPlatform == null)
+		if (es.targets.get(TargetHandler.ids[0]) == null
+				|| es.targets.get(TargetHandler.ids[1]) == null)
 			{
 			JOptionPane.showMessageDialog(null,Messages.getString("EnigmaRunner.UNABLE_SETTINGS_NULL")); //$NON-NLS-1$
 			return;
 			}
 
-		String ext = es.selPlatform.ext;
+		String ext = es.targets.get(TargetHandler.ids[1]).ext;
 
 		//determine `outname` (rebuild has no `outname`)
 		File outname = null;
 		try
 			{
-			if (!es.selCompiler.outputexe.equals("$tempfile")) //$NON-NLS-1$
-				outname = new File(es.selCompiler.outputexe);
+			String outputexe = es.targets.get(TargetHandler.ids[0]).outputexe;
+			if (!outputexe.equals("$tempfile")) //$NON-NLS-1$
+				outname = new File(outputexe);
 			else if (mode < MODE_DESIGN) //run/debug
 				outname = File.createTempFile("egm",ext); //$NON-NLS-1$
 			else if (mode == MODE_DESIGN) outname = File.createTempFile("egm",".emd"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -549,9 +552,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				public void run()
 					{
 					ef.setVisible(true);
-					ef.append(Messages.getString("EnigmaRunner.POPULATING")); //$NON-NLS-1$
+					ef.progress(10,Messages.getString("EnigmaRunner.POPULATING")); //$NON-NLS-1$
 					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile,LGM.root);
-					ef.append(Messages.getString("EnigmaRunner.CALLING")); //$NON-NLS-1$
+					ef.progress(20,Messages.getString("EnigmaRunner.CALLING")); //$NON-NLS-1$
 					System.out.println(DRIVER.compileEGMf(es,efi == null ? null : efi.getAbsolutePath(),mode));
 
 					setMenuEnabled(true);

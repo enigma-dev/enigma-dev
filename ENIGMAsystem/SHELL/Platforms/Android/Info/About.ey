@@ -7,4 +7,5 @@ Represents: Android
 Description: Build for Android.
 Author: TGMG
 
-Build-Platforms: Android
+Depends:
+	Build-Platforms: Android
