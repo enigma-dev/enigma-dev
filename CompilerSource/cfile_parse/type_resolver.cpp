@@ -219,6 +219,7 @@ void onode_from_dectrip(onode& x, const dectrip& y)
   x.pad = y.prefix.length();
 }
 
+extern externs *enigma_type__var;
 struct bullshit{bullshit(){cout<<"enter"<<endl;}~bullshit(){cout<<"LEAVE"<<endl;}};
 onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_object* globj, parsed_object* pobj)
 {
@@ -355,6 +356,11 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
       string member = exp.substr(spos,pos-spos);
       
       externs *ct = perf.top().type, *nt = NULL; extiter qit;
+      if (!ct) { //-> without a type before it
+        perf.top().type = enigma_type__var;
+        continue;
+      }
+      
       bool tf = ((qit = ct->members.find(member)) != ct->members.end());
       if (tf) nt = qit->second;
         

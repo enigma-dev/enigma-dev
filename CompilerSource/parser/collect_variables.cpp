@@ -257,13 +257,25 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
           } continue;
         }
         
-        //First, check that it's not a global
+        //First, check shared locals to see if we already have one
+        if (shared_object_locals.find(nname) != shared_object_locals.end()) {
+          pev->myObj->globallocals[nname]++;
+          if (with_until_semi or igstack[igpos]->is_with) {
+            pos += 5;
+            cout << "Add a self. before " << nname;
+            code.insert(spos,"self.");
+            synt.insert(spos,"nnnn.");
+          }
+          cout << "Ignoring `" << nname << "' because it's a shared local.\n"; continue;
+        }
+        
+        //Second, check that it's not a global
         if (find_extname(nname,0xFFFFFFFF)) {
           cout << "Ignoring `" << nname << "' because it's a global.\n";
           continue;
         }
         
-        //Next make sure we're not specifically ignoring it
+        //Next, make sure we're not specifically ignoring it
         map<string,int>::iterator ex;
         for (int i = igpos; i >= 0; i--)
           if ((ex = igstack[i]->ignore.find(nname)) != igstack[i]->ignore.end()) {
@@ -280,18 +292,12 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
           continue;
         }
         
-        //Now make sure we're not in a with.
+        //Last, make sure we're not in a with.
         if (with_until_semi or igstack[igpos]->is_with)
         {
           pos += 5;
           code.insert(spos,"self.");
           synt.insert(spos,"nnnn.");
-        }
-        
-        //Finally, check shared locals to see if we already have one
-        if (shared_object_locals.find(nname) != shared_object_locals.end()) {
-          pev->myObj->globallocals[nname]++;
-          cout << "Ignoring `" << nname << "' because it's a shared local.\n"; continue;
         }
         
         //Of course, we also don't want to risk overwriting a typed version
