@@ -123,6 +123,10 @@ enum {
   vk_rsuper = 92,
 };
 
+
+extern double mouse_x, mouse_y;
+extern int mouse_button, mouse_lastbutton;
+
 bool mouse_check_button(int button);
 bool mouse_check_button_pressed(int button);
 bool mouse_check_button_released(int button);

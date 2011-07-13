@@ -35,6 +35,9 @@ namespace enigma
 
 #include "CallbackArrays.h"
 
+double mouse_x, mouse_y;
+int mouse_button, mouse_lastbutton;
+
 bool mouse_check_button(int button)
 {
 	switch (button)

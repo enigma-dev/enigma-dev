@@ -32,7 +32,7 @@
 #include "var4.h"
 #include "reflexive_types.h"
 
-#include "ENIGMA_GLOBALS.h"
+#include "ENIGMA_GLOBALS.h" // TODO: Do away with this sloppy infestation permanently!
 
 #include "collisions_object.h"
 #include "instance_system.h"

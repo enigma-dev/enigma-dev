@@ -36,15 +36,23 @@
 
 #include "../../Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 
-Display *disp;
-Window win;
-GC gc;
-Atom wm_delwin;
+namespace enigma {
+  void input_push();
+  namespace x11 {
+    Display *disp;
+    Window win;
+    GC gc;
+    Atom wm_delwin;
+    
+    int handleEvents();
+  }
+}
 
 #include <X11/Xlib.h>
 #define uint unsigned int
 
 using namespace std;
+using namespace enigma::x11;
 
 //////////
 // INIT //
@@ -356,6 +364,36 @@ namespace enigma {
     gettimeofday(&tv, NULL);
     last_second[hielem] = tv.tv_sec, last_microsecond[hielem] = tv.tv_usec;
     fps = (hielem+1)*1000000 / ((last_second[hielem] - last_second[0]) * 1000000 + (last_microsecond[hielem] - last_microsecond[0]));
+  }
+}
+
+#include "../../Universal_System/globalupdate.h"
+void io_handle()
+{
+  enigma::input_push();
+  while(XQLength(disp)) {
+    printf("processing an event...\n");
+    if(handleEvents() > 0)
+      exit(0);
+  }
+  enigma::update_globals();
+}
+void io_clear()
+{
+  for (int i = 0; i < 255; i++)
+    enigma::keybdstatus[i] = enigma::last_keybdstatus[i] = 0;
+  for (int i = 0; i < 3; i++)
+    enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
+}
+void keyboard_wait()
+{
+  for (;;)
+  {
+    io_handle();
+    for (int i = 0; i < 255; i++)
+      if (enigma::keybdstatus[i])
+        return;
+    usleep(10000); // Sleep 1/100 second
   }
 }
 

@@ -42,8 +42,6 @@ char *window_get_caption();
 ///////////
 int display_mouse_get_x();
 int display_mouse_get_y();
-int window_mouse_get_x();
-int window_mouse_get_y();
 
 int window_mouse_set(double x,double y);
 int display_mouse_set(double x,double y);
@@ -102,6 +100,9 @@ enum {
 };
 
 int window_set_cursor(double c);
+
+void io_handle(), io_clear();
+void keyboard_wait();
 
 /*
 display_get_width() // Returns the width of the display in pixels.

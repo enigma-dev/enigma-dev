@@ -73,10 +73,6 @@ extern global:     keyboard_lastchar
 extern global:     keyboard_lastkey
 extern global:     keyboard_string
 extern global:     lives*/
-extern double      mouse_button;
-extern double      mouse_lastbutton;
-extern double      mouse_x;
-extern double      mouse_y;
 /*extern global:   score
 extern global:     secure_mode
 extern global:     show_health

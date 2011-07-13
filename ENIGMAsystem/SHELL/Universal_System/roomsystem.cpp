@@ -32,9 +32,7 @@
 #include "var4.h"
 #include "reflexive_types.h"
 
-//#include "GAME_GLOBALS.h"
-#include "ENIGMA_GLOBALS.h"
-//#include "EGMstd.h"
+#include "ENIGMA_GLOBALS.h" // TODO: Do away with this sloppy infestation permanently!
 
 #include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"
@@ -325,7 +323,7 @@ int room_previous(int num)
     return rit->first;
 }
 
-#include "key_game_globals.h" //TODO: Remove all instances of this line. It's just sloppy. Figure out the dependencies manually.
+#include "CallbackArrays.h"
 
 namespace enigma
 {
@@ -337,8 +335,8 @@ namespace enigma
       for (int i=0;i<8;i++)
       if (view_visible[i])
       {
-        if (mouse_x>=view_xport[i] && mouse_x<view_xport[i]+view_wport[i]
-        && mouse_y>=view_yport[i] && mouse_y<view_yport[i]+view_hport[i]){
+        if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i]
+        &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
           mouse_x=view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
           mouse_y=view_yview[i]+((mouse_y-view_yport[i])/(double)view_hport[i])*view_hview[i];
           break;

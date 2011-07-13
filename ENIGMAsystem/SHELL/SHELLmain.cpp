@@ -50,7 +50,7 @@
 
 #include "Universal_System/reflexive_types.h"
 
-#include "Universal_System/GAME_GLOBALS.h"
+#include "Universal_System/GAME_GLOBALS.h" // TODO: Do away with this sloppy infestation permanently!
 #include "Universal_System/ENIGMA_GLOBALS.h"
 
 #include "libEGMstd.h"

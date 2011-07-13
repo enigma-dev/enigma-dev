@@ -27,10 +27,6 @@
 #include "XLIBwindow.h"
 #include "LINUXjoystick.h"
 
-extern Display *disp;
-extern GLXDrawable win;
-extern Atom wm_delwin;
-
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/CallbackArrays.h"
 #include "../../Universal_System/roomsystem.h"
@@ -41,80 +37,89 @@ namespace enigma
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   extern int initialize_everything();
-}
-
-int handleEvents()
-{
-  XEvent e;
-  XNextEvent(disp, &e);
-  int gk; unsigned char actualKey;
-  switch (e.type)
+  
+  namespace x11
   {
-    case KeyPress: {
-          gk=XLookupKeysym(&e.xkey,0);
-          if (gk==NoSymbol)
-            return 0;
+    extern Display *disp;
+    extern GLXDrawable win;
+    extern Atom wm_delwin;
+    
+    int handleEvents()
+    {
+      XEvent e;
+      XNextEvent(disp, &e);
+      int gk; unsigned char actualKey;
+      switch (e.type)
+      {
+        case KeyPress: {
+              gk=XLookupKeysym(&e.xkey,0);
+              if (gk==NoSymbol)
+                return 0;
 
-          if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
-          else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
+              if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
+              else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
 
-          if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
-            enigma::keybdstatus[actualKey]=1;
+              if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
+                enigma::keybdstatus[actualKey]=1;
+                return 0;
+              }
+              enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
+              enigma::keybdstatus[actualKey]=1;
             return 0;
-          }
-          enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
-          enigma::keybdstatus[actualKey]=1;
-        return 0;
-    }
-    case KeyRelease: {
-        gk=XLookupKeysym(&e.xkey,0);
-        printf("Pressed a key: %d : %d\n", gk, gk & 0xFF);
-        if (gk == NoSymbol)
+        }
+        case KeyRelease: {
+            gk=XLookupKeysym(&e.xkey,0);
+            printf("Pressed a key: %d : %d\n", gk, gk & 0xFF);
+            if (gk == NoSymbol)
+              return 0;
+            
+            if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
+            else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
+            
+            enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
+            enigma::keybdstatus[actualKey]=0;
           return 0;
-        
-        if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
-        else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
-        
-        enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
-        enigma::keybdstatus[actualKey]=0;
-      return 0;
-    }
-    case ButtonPress: {
-        if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 1;
-        else switch (e.xbutton.button) {
-          case 4: mouse_vscrolls++; break;
-          case 5: mouse_vscrolls--; break;
-          case 6: mouse_hscrolls++; break;
-          case 7: mouse_hscrolls--; break;
         }
-      return 0;
-    }
-    case ButtonRelease: {
-        if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 0;
-        else switch (e.xbutton.button) {
-          case 4: mouse_vscrolls++; break;
-          case 5: mouse_vscrolls--; break;
-          case 6: mouse_hscrolls++; break;
-          case 7: mouse_hscrolls--; break;
+        case ButtonPress: {
+            if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 1;
+            else switch (e.xbutton.button) {
+              case 4: mouse_vscrolls++; break;
+              case 5: mouse_vscrolls--; break;
+              case 6: mouse_hscrolls++; break;
+              case 7: mouse_hscrolls--; break;
+            }
+          return 0;
         }
-      return 0;
+        case ButtonRelease: {
+            if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 0;
+            else switch (e.xbutton.button) {
+              case 4: mouse_vscrolls++; break;
+              case 5: mouse_vscrolls--; break;
+              case 6: mouse_hscrolls++; break;
+              case 7: mouse_hscrolls--; break;
+            }
+          return 0;
+        }
+        case Expose: {
+            //screen_refresh();
+          return 0;
+        }
+        case ClientMessage:
+          if ((unsigned)e.xclient.data.l[0] == (unsigned)wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
+            return 1;
+          //else fall through
+        default:
+            printf("%d\n",e.type);
+          return 0;
+      }
+      //Move/Resize = ConfigureNotify
+      //Min = UnmapNotify
+      //Restore = MapNotify
     }
-    case Expose: {
-        //screen_refresh();
-      return 0;
-    }
-    case ClientMessage:
-      if ((unsigned)e.xclient.data.l[0] == (unsigned)wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
-        return 1;
-      //else fall through
-    default:
-        printf("%d\n",e.type);
-      return 0;
   }
-  //Move/Resize = ConfigureNotify
-  //Min = UnmapNotify
-  //Restore = MapNotify
 }
+
+using namespace enigma::x11;
 
 namespace enigma
 {

@@ -76,10 +76,6 @@ global:     keyboard_lastkey
 global:     keyboard_string
 */
 double lives=3;
-double mouse_button;
-double mouse_lastbutton;
-double mouse_x;
-double mouse_y;
 double score=0;
 /*
 global:     secure_mode
