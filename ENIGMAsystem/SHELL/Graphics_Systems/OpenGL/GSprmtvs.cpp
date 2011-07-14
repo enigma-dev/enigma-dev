@@ -53,9 +53,19 @@ void draw_set_primitive_aa(bool enable, int quality)
 {
     if (enable==1){
         glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_POINT_SMOOTH);
+        glEnable(GL_POLYGON_SMOOTH);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
         glHint(GL_LINE_SMOOTH_HINT, quality);
+        glHint(GL_POINT_SMOOTH_HINT, quality);
+        glHint(GL_POLYGON_SMOOTH_HINT, quality);
+        glPointSize(1.1);
+        glLineWidth(1.1);
     }else{
         glDisable(GL_LINE_SMOOTH);
+        glPointSize(1);
+        glLineWidth(1);
     }
 }
 

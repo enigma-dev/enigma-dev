@@ -96,8 +96,6 @@ void highscore_show(int numb) {
 
          screen_refresh();
          io_handle();
-    //keyboard_wait();
-      //   sleep(1/1000);
      }
 }
 
@@ -167,8 +165,8 @@ std::string highscore_name(int place) {
 }
 
 #include "var4.h"
-void draw_text(int x,int y,var str);
-int string_width(std::string str);
+void draw_text(int x,int y,variant str);
+int string_width(variant str);
 
 
 void draw_highscore(int x1, int y1, int x2, int y2) {

@@ -24,33 +24,41 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+const int fa_left = 0;
+const int fa_center = 1;
+const int fa_right = 2;
+const int fa_top = 0;
+const int fa_middle = 1;
+const int fa_bottom = 2;
 
-#include "../../Universal_System/var4.h"
-
+void draw_set_halign(int align);
+void draw_set_valign(int align);
+int draw_get_halign(int align);
+int draw_get_valign(int align);
 void draw_set_font(int fnt);
-void draw_text(int x,int y,var str);
-void draw_text_color(int x,int y,var str,int c1,int c2,int c3,int c4,double a);
+void draw_text(int x,int y,variant str);
+void draw_text_color(int x,int y,variant str,int c1,int c2,int c3,int c4,double a);
 
-void draw_text_ext(int x,int y,var str, int sep, int w);
-void draw_text_ext_color(int x,int y,var str, int sep,int w,int c1,int c2,int c3,int c4,double a);
+void draw_text_ext(int x,int y,variant str, int sep, int w);
+void draw_text_ext_color(int x,int y,variant str, int sep,int w,int c1,int c2,int c3,int c4,double a);
 
-void draw_text_transformed(double x,double y,var str,double xscale,double yscale,double rot);
-void draw_text_transformed_color(double x,double y,var str,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
+void draw_text_transformed(double x,double y,variant str,double xscale,double yscale,double rot);
+void draw_text_transformed_color(double x,double y,variant str,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
 
-void draw_text_ext_transformed(double x,double y,var str,int sep,int w, double xscale,double yscale,double rot);
-void draw_text_ext_transformed_color(double x,double y,var str,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
+void draw_text_ext_transformed(double x,double y,variant str,int sep,int w, double xscale,double yscale,double rot);
+void draw_text_ext_transformed_color(double x,double y,variant str,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
 
 unsigned int font_get_texture(int fnt);
 int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);
 unsigned int font_get_texture_width(int fnt);
 unsigned int font_get_texture_height(int fnt);
 
-unsigned int string_width(string str);
-unsigned int string_height(string str);
+unsigned int string_width(variant str);
+unsigned int string_height(variant str);
 
-unsigned int string_width_ext(string str, int sep, int w);
-unsigned int string_height_ext(string str, int sep, int w);
+unsigned int string_width_ext(variant str, int sep, int w);
+unsigned int string_height_ext(variant str, int sep, int w);
 
-unsigned int string_width_line(string str, int line);
-unsigned int string_width_ext_line(string str, int w, int line);
-unsigned int string_width_ext_line_count(string str, int w);
+unsigned int string_width_line(variant str, int line);
+unsigned int string_width_ext_line(variant str, int w, int line);
+unsigned int string_width_ext_line_count(variant str, int w);
