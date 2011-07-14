@@ -51,7 +51,7 @@ int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
   wto << license << "namespace enigma {\n"
   << "  int room_loadtimecount = " << es->roomCount << ";\n"
   << "  roomstruct grd_rooms[" << es->roomCount << "] = {\n";
-  int room_highid = 0, room_highinstid = 100000;
+  int room_highid = 0, room_highinstid = 100000,room_hightileid=10000000;
   for (int i = 0; i < es->roomCount; i++)
   {
     wto << "    //Room " << es->rooms[i].id << "\n" <<
@@ -121,6 +121,29 @@ int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
           room_highinstid = es->rooms[i].instances[ii].id;
       }
     wto << "  0,0,0,0}\n"; // End of the instances
+
+    //Tiles
+    wto <<
+    "      ," << es->rooms[i].tileCount << ", "
+    "      (enigma::tile*)(int[]){";
+      modme = 0;
+      for (int ii = 0; ii < es->rooms[i].tileCount; ii++) {
+        wto <<
+          es->rooms[i].tiles[ii].id << "," <<
+          es->rooms[i].tiles[ii].backgroundId << "," <<
+          es->rooms[i].tiles[ii].bgX << "," <<
+          es->rooms[i].tiles[ii].bgY << "," <<
+          es->rooms[i].tiles[ii].depth << "," <<
+          es->rooms[i].tiles[ii].height << "," <<
+          es->rooms[i].tiles[ii].width << "," <<
+          es->rooms[i].tiles[ii].roomX << "," <<
+          es->rooms[i].tiles[ii].roomY << ",";
+          if (++modme % 16 == 0) wto << "\n        ";
+        if (es->rooms[i].tiles[ii].id > room_hightileid)
+          room_hightileid = es->rooms[i].tiles[ii].id;
+
+      }
+    wto << "  0,0,0,0,0,0,0,0,0}\n"; // End of the tiles
 
     // End of this room
     wto << "    },\n";

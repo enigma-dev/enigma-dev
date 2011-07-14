@@ -33,6 +33,6 @@
 #include "depth_draw.h"
 
 namespace enigma {
-  depth_layer::depth_layer(): tiles(NULL), draw_events(new event_iter("Draw")) {}
+  depth_layer::depth_layer(): draw_events(new event_iter("Draw")) {}
   map<double,depth_layer> drawing_depths;
 }

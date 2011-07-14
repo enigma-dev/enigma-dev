@@ -140,6 +140,6 @@ double distance_to_point(double x, double y)
   const double left1  = inst1->x + inst1->bbox_left,  top1    = inst1->y + inst1->bbox_top,
                right1 = inst1->x + inst1->bbox_right, bottom1 = inst1->y + inst1->bbox_bottom;
   return fabs(hypot(min(left1 - x, right1 -x),
-                    min(top1 - x, bottom1 -x)));
+                    min(top1 - y, bottom1 -y)));
 }
 

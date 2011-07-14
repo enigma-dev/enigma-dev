@@ -31,15 +31,18 @@
 
 #include <map>
 #include "instance_system.h"
+#include <vector>
+#include "roomsystem.h"
 using namespace std;
 
 #ifdef INCLUDED_FROM_SHELLMAIN
 #error This file is high-impact and should not be included from SHELLmain.cpp.
 #endif
 
+
 namespace enigma {
   struct depth_layer {
-    struct tile_layer* tiles;
+     vector<tile> tiles;
     event_iter* draw_events;
     depth_layer();
   };

@@ -26,7 +26,8 @@
 \********************************************************************************/
 
 #include "var4.h"
-
+#ifndef room_system_h
+#define room_system_h
 int room_goto(int roomind);
 int room_restart();
 int room_goto_absolute(int index);
@@ -39,7 +40,7 @@ extern int background_color;
 extern int background_showcolor;
 
 extern var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed;
+background_vtiled, background_hspeed, background_vspeed,background_alpha;
 
 extern int room_first;
 extern int room_height;
@@ -48,17 +49,17 @@ extern int room_persistent;
 extern int room_speed;
 extern int room_width;
 
-extern string room_caption;
+extern var room_caption;
 
 int room_count();
 #define room_count room_count()
 
-extern int view_angle;
+
 extern int view_current;
 extern int view_enabled;
 typedef variant rvt[8];
 extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible, 
-           view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview;
+           view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
 
 
 namespace enigma
@@ -66,6 +67,9 @@ namespace enigma
   struct inst {
     int id,obj,x,y;
   };
+    struct tile {
+        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
+    };
   struct viewstruct
   {
     int start_vis;
@@ -99,6 +103,8 @@ namespace enigma
       
     int instancecount;
     inst *instances;
+    int tilecount;
+    tile *tiles;
     
     void gotome();
   };
@@ -114,3 +120,4 @@ namespace enigma { struct roomv: multifunction_variant {
   void function();
 }; }
 extern enigma::roomv room;
+#endif

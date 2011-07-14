@@ -84,11 +84,12 @@ namespace enigma
         hb4 = instance->hspeed.rval.d,
         vb4 = instance->vspeed.rval.d;
       int sign = (instance->speed > 0) - (instance->speed < 0);
-      
-      instance->hspeed.rval.d -= (sign * instance->friction) * cos(instance->direction.rval.d * M_PI/180);
+      if (instance->hspeed!=0)
+        instance->hspeed.rval.d -= (sign * instance->friction) * cos(instance->direction.rval.d * M_PI/180); 
       if ((hb4>0 && instance->hspeed.rval.d<0) || (hb4<0 && instance->hspeed.rval.d>0))
         instance->hspeed.rval.d=0;
-      instance->vspeed.rval.d -= (sign * instance->friction) * -sin(instance->direction.rval.d * M_PI/180);
+        if (instance->vspeed!=0)
+        instance->vspeed.rval.d -= (sign * instance->friction) * -sin(instance->direction.rval.d * M_PI/180); 
       if ((vb4>0 && instance->vspeed.rval.d<0) || (vb4<0 && instance->vspeed.rval.d>0))
         instance->vspeed.rval.d=0;
       

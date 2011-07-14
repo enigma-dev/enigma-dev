@@ -96,7 +96,7 @@ nobutton: 6
 	Name: No Button
 	Mode: Special
 	Case: 3
-	Sub Check:   mouse_check_button(mb_none) !(mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom)
+	Sub Check:   mouse_check_button(mb_none) && !(mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom)
 
 leftpress: 6
 	Name: Left Press
@@ -153,6 +153,17 @@ mouseleave: 6
 	Case: 11
 	Locals: bool $innowLeave = false;
 	Sub Check: { const bool wasin = $innowLeave; $innowLeave = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if ($innowLeave or !wasin) return 0; }
+
+mouseunknown: 6
+	Name: Mouse Unknown (old? LGM doesn't even know!)
+	Mode: Special
+	Case: 12
+	Super Check: 
+mouseunknowntwo: 6
+	Name: Mouse Unknown (old? LGM doesn't even know!)
+	Mode: Special
+	Case: 13
+	Super Check: 
 
 mousewheelup: 6
 	Name: Mouse Wheel Up
@@ -217,7 +228,7 @@ globalrightrelease: 6
 globalmiddlerelease: 6
 	Name: Global Middle Release
 	Mode: Special
-	Case: 57
+	Case: 58
 	Super Check: mouse_check_button_released(mb_middle)
 
 # Finally, some general-purpose events
@@ -258,9 +269,7 @@ collision: 4
 	Mode: Stacked
 	Super Check: instance_number(%1)
 	Sub Check: (instance_other = enigma::place_meeting_inst(x,y,%1)) # Parenthesize assignment used as truth
-	prefix: if (solid ||  enigma::glaccess(int(other))->solid) {x=xprevious; y=yprevious;}
-
-
+	prefix: if (solid ||  enigma::glaccess(int(other))->solid) {if (enigma::place_meeting_inst(xprevious+hspeed,yprevious,%1)){x=xprevious;} if (enigma::place_meeting_inst(xprevious,yprevious+vspeed,%1)) { y=yprevious;}}
 # Check for detriment from collision events above
 
 nomorelives: 7
@@ -282,6 +291,7 @@ endstep: 3
 	Mode: Special
 	Case: 2
 
+
 # Fun fact: Draw comes after End Step.
 draw: 8
 	Name: Draw
@@ -291,7 +301,7 @@ draw: 8
 	Iterator-initialize: /* Draw is initialized in the constructor */
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw will destruct with this */
-	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
+	Default: if (image_single!=-1) {image_speed=0;image_index=image_single;} if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
 	Constant: image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index));
 	Instead: screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
 
@@ -317,6 +327,194 @@ gameend: 7
 	Name: Game End
 	Mode: Spec-sys
 	Case: 3
+
+# user events
+
+userzero: 7
+	Name: User defined 0
+	Mode: Special
+	Case: 10
+
+userone: 7
+	Name: User defined 1
+	Mode: Special
+	Case: 11
+usertwo: 7
+	Name: User defined 2
+	Mode: Special
+	Case: 12
+userthree: 7
+	Name: User defined 3
+	Mode: Special
+	Case: 13
+userfour: 7
+	Name: User defined 4
+	Mode: Special
+	Case: 14
+userfive: 7
+	Name: User defined 5
+	Mode: Special
+	Case: 15
+usersix: 7
+	Name: User defined 6
+	Mode: Special
+	Case: 16
+userseven: 7
+	Name: User defined 7
+	Mode: Special
+	Case: 17
+usereight: 7
+	Name: User defined 8
+	Mode: Special
+	Case: 18
+usernine: 7
+	Name: User defined 9
+	Mode: Special
+	Case: 19
+userten: 7
+	Name: User defined 10
+	Mode: Special
+	Case: 20
+usereleven: 7
+	Name: User defined 11
+	Mode: Special
+	Case: 21
+usertwelve: 7
+	Name: User defined 12
+	Mode: Special
+	Case: 22
+userthirteen: 7
+	Name: User defined 13
+	Mode: Special
+	Case: 23
+userfourteen: 7
+	Name: User defined 14
+	Mode: Special
+	Case: 24
+
+#other mouse events
+joystickoneleft: 6
+	Name: Joystick 1 Left
+	Mode: Special
+	Case: 16
+	Super Check: 
+joystickoneright: 6
+	Name: Joystick 1 Right
+	Mode: Special
+	Case: 17
+	Super Check: 
+joystickoneup: 6
+	Name: Joystick 1 Up
+	Mode: Special
+	Case: 18
+	Super Check: 
+joystickonedown: 6
+	Name: Joystick 1 Down
+	Mode: Special
+	Case: 19
+	Super Check: 
+joystickonebuttonone: 6
+	Name: Joystick 1 Button 1
+	Mode: Special
+	Case: 21
+	Super Check: 
+joystickonebuttontwo: 6
+	Name: Joystick 1 Button 2
+	Mode: Special
+	Case: 22
+	Super Check: 
+joystickonebuttonthree: 6
+	Name: Joystick 1 Button 3
+	Mode: Special
+	Case: 23
+	Super Check: 
+joystickonebuttonfour: 6
+	Name: Joystick 1 Button 4
+	Mode: Special
+	Case: 24
+	Super Check: 
+joystickonebuttonfive: 6
+	Name: Joystick 1 Button 5
+	Mode: Special
+	Case: 25
+	Super Check: 
+joystickonebuttonsix: 6
+	Name: Joystick 1 Button 6
+	Mode: Special
+	Case: 26
+	Super Check: 
+joystickonebuttonseven: 6
+	Name: Joystick 1 Button 7
+	Mode: Special
+	Case: 27
+	Super Check: 
+joystickonebuttoneight: 6
+	Name: Joystick 1 Button 8
+	Mode: Special
+	Case: 28
+	Super Check: 
+
+#joystick 2
+joysticktwoleft: 6
+	Name: Joystick 2 Left
+	Mode: Special
+	Case: 31
+	Super Check: 
+joysticktworight: 6
+	Name: Joystick 2 Right
+	Mode: Special
+	Case: 32
+	Super Check: 
+joysticktwoup: 6
+	Name: Joystick 2 Up
+	Mode: Special
+	Case: 33
+	Super Check: 
+joysticktwodown: 6
+	Name: Joystick 2 Down
+	Mode: Special
+	Case: 34
+	Super Check: 
+joysticktwobuttonone: 6
+	Name: Joystick 2 Button 1
+	Mode: Special
+	Case: 36
+	Super Check: 
+joysticktwobuttontwo: 6
+	Name: Joystick 2 Button 2
+	Mode: Special
+	Case: 37
+	Super Check: 
+joysticktwobuttonthree: 6
+	Name: Joystick 2 Button 3
+	Mode: Special
+	Case: 38
+	Super Check: 
+joysticktwobuttonfour: 6
+	Name: Joystick 2 Button 4
+	Mode: Special
+	Case: 39
+	Super Check: 
+joysticktwobuttonfive: 6
+	Name: Joystick 2 Button 5
+	Mode: Special
+	Case: 40
+	Super Check: 
+joysticktwobuttonsix: 6
+	Name: Joystick 2 Button 6
+	Mode: Special
+	Case: 41
+	Super Check: 
+joysticktwobuttonseven: 6
+	Name: Joystick 2 Button 7
+	Mode: Special
+	Case: 42
+	Super Check: 
+joysticktwobuttoneight: 6
+	Name: Joystick 2 Button 8
+	Mode: Special
+	Case: 43
+	Super Check: 
 
 
 #  EV_BOUNDARY = 1,

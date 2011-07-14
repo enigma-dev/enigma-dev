@@ -29,6 +29,7 @@
 #include <string>
 #include "OpenGLHeaders.h"
 #include "GScolors.h"
+#include "../../Universal_System/var4.h"
 
 using namespace std;
 #include "../../Universal_System/fontstruct.h"
@@ -44,8 +45,9 @@ namespace enigma {
 
 using namespace enigma;
 
-void draw_text(int x,int y,string str)
+void draw_text(int x,int y,var vstring)
 {
+    string str = string(vstring);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -149,8 +151,9 @@ unsigned int string_width_ext_line_count(string str, int w)
   return cl;
 }
 
-void draw_text_ext(int x,int y,string str, int sep, int w)
+void draw_text_ext(int x,int y,var vstring, int sep, int w)
 {
+    string str = string(vstring);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -194,8 +197,9 @@ void draw_text_ext(int x,int y,string str, int sep, int w)
   glEnd();
 }
 
-void draw_text_transformed(double x,double y,string str,double xscale,double yscale,double rot)
+void draw_text_transformed(double x,double y,var vstring,double xscale,double yscale,double rot)
 {
+    string str = string(vstring);
   if (currentfont == -1)
     return;
 
@@ -248,8 +252,9 @@ void draw_text_transformed(double x,double y,string str,double xscale,double ysc
   glEnd();
 }
 
-void draw_text_ext_transformed(double x,double y,string str,int sep, int w, double xscale,double yscale,double rot)
+void draw_text_ext_transformed(double x,double y,var vstring,int sep, int w, double xscale,double yscale,double rot)
 {
+    string str = string(vstring);
   if (currentfont == -1)
     return;
 
@@ -317,8 +322,9 @@ void draw_text_ext_transformed(double x,double y,string str,int sep, int w, doub
   glEnd();
 }
 
-void draw_text_transformed_color(double x,double y,string str,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
+void draw_text_transformed_color(double x,double y,var vstring,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
 {
+    string str = string(vstring);
   if (currentfont == -1)
     return;
 
@@ -383,8 +389,9 @@ void draw_text_transformed_color(double x,double y,string str,double xscale,doub
   glPopAttrib();
 }
 
-void draw_text_ext_transformed_color(double x,double y,string str,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
+void draw_text_ext_transformed_color(double x,double y,var vstring,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
 {
+    string str = string(vstring);
   if (currentfont == -1)
     return;
 
@@ -460,8 +467,9 @@ void draw_text_ext_transformed_color(double x,double y,string str,int sep,int w,
   glPopAttrib();
 }
 
-void draw_text_color(int x,int y,string str,int c1,int c2,int c3,int c4,double a)
+void draw_text_color(int x,int y,var vstring,int c1,int c2,int c3,int c4,double a)
 {
+    string str = string(vstring);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -514,8 +522,9 @@ void draw_text_color(int x,int y,string str,int c1,int c2,int c3,int c4,double a
   glPopAttrib();
 }
 
-void draw_text_ext_color(int x,int y,string str,int sep, int w, int c1,int c2,int c3,int c4,double a)
+void draw_text_ext_color(int x,int y,var vstring,int sep, int w, int c1,int c2,int c3,int c4,double a)
 {
+    string str = string(vstring);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)

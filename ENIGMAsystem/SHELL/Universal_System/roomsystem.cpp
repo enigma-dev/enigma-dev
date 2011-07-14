@@ -41,6 +41,7 @@
 #include "planar_object.h"
 
 #include "roomsystem.h"
+#include "depth_draw.h"
 
 int room_first  = 0;
 int room_last   = 0;
@@ -48,19 +49,18 @@ int room_speed  = 60;
 int room_width  = 640;
 int room_height = 480;
 int room_persistent = 0;
-string room_caption = "ENIGMA Engine";
+var room_caption = "ENIGMA Engine";
 
 int background_color = 16777215;
 int background_showcolor=1;
 
 var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed;
+background_vtiled, background_hspeed, background_vspeed,background_alpha;
 
-int view_angle   = 0;
 int view_current = 0;
 int view_enabled = 0;
 rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
-    view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview;
+    view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
 
 namespace enigma
 {
@@ -104,6 +104,14 @@ namespace enigma
       //background_stretch? = backs[i].stretch;
     }
     //Backgrounds end
+      
+      //Tiles start
+      drawing_depths.clear();
+      for (int tilei=0; tilei<enigma::roomdata[room]->tilecount; tilei++) {
+          tile t = enigma::roomdata[room]->tiles[tilei];
+          drawing_depths[t.depth].tiles.push_back(enigma::roomdata[room]->tiles[tilei]);
+      }
+      //Tiles end
     
     view_enabled = views_enabled;
     

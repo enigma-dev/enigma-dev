@@ -54,4 +54,4 @@ const int bm_inv_dest_color   =10; ///GL_ONE_MINUS_DST_COLOR    //only for src
 const int bm_src_alpha_sat    =11; ///GL_SRC_ALPHA_SATURATE     //only for src
 
 int draw_set_blend_mode(int mode);
-int draw_set_blend_mode_ext(int src,int dest);
+int draw_set_blend_mode_ext(double src,double dest);

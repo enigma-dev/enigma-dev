@@ -59,6 +59,7 @@ namespace enigma
       virtual void unlink();
       virtual variant myevent_draw();
       virtual variant myevent_roomend();
+      virtual variant myevent_destroy();
       
       object_basic();
       object_basic(int uid, int uoid);

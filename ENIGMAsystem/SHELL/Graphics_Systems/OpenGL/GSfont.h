@@ -25,18 +25,20 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "../../Universal_System/var4.h"
+
 void draw_set_font(int fnt);
-void draw_text(int x,int y,string str);
-void draw_text_color(int x,int y,string str,int c1,int c2,int c3,int c4,double a);
+void draw_text(int x,int y,var str);
+void draw_text_color(int x,int y,var str,int c1,int c2,int c3,int c4,double a);
 
-void draw_text_ext(int x,int y,string str, int sep, int w);
-void draw_text_ext_color(int x,int y,string str, int sep,int w,int c1,int c2,int c3,int c4,double a);
+void draw_text_ext(int x,int y,var str, int sep, int w);
+void draw_text_ext_color(int x,int y,var str, int sep,int w,int c1,int c2,int c3,int c4,double a);
 
-void draw_text_transformed(double x,double y,string str,double xscale,double yscale,double rot);
-void draw_text_transformed_color(double x,double y,string str,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
+void draw_text_transformed(double x,double y,var str,double xscale,double yscale,double rot);
+void draw_text_transformed_color(double x,double y,var str,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
 
-void draw_text_ext_transformed(double x,double y,string str,int sep,int w, double xscale,double yscale,double rot);
-void draw_text_ext_transformed_color(double x,double y,string str,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
+void draw_text_ext_transformed(double x,double y,var str,int sep,int w, double xscale,double yscale,double rot);
+void draw_text_ext_transformed_color(double x,double y,var str,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
 
 unsigned int font_get_texture(int fnt);
 int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);

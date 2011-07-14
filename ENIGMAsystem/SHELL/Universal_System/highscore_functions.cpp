@@ -87,6 +87,7 @@ void screen_refresh();
 extern void io_handle();
 bool keyboard_check(int i);
 void screen_redraw();
+void keyboard_wait();
 
 void highscore_show(int numb) {
     highscore_add("player name",numb);
@@ -95,7 +96,8 @@ void highscore_show(int numb) {
 
          screen_refresh();
          io_handle();
-         sleep(1/1000);
+    //keyboard_wait();
+      //   sleep(1/1000);
      }
 }
 
@@ -164,9 +166,10 @@ std::string highscore_name(int place) {
     return enigma::highscore_list[place].player_name;
 }
 
-void draw_text(int x,int y,std::string str);
-int string_width(std::string str);
 #include "var4.h"
+void draw_text(int x,int y,var str);
+int string_width(std::string str);
+
 
 void draw_highscore(int x1, int y1, int x2, int y2) {
 

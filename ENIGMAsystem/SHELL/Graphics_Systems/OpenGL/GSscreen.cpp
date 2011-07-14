@@ -59,6 +59,11 @@ static inline void draw_back()
   }
 }
 
+namespace enigma
+{
+    extern std::map<int,roomstruct*> roomdata;
+}
+
 void screen_redraw()
 {
   if (!view_enabled)
@@ -74,11 +79,21 @@ void screen_redraw()
        glClearColor(__GETR(clearcolor)/255.0,__GETG(clearcolor)/255.0,__GETB(clearcolor)/255.0, 1);
        glClear(GL_COLOR_BUFFER_BIT);
     }
-    draw_back();
-    
-      for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+      draw_back();
+      
+      
+      for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
+          
+          //loop tiles
+          for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++) {
+              tile t = dit->second.tiles[i];
+              draw_background_part(t.bckid,t.bgx,t.bgy,t.width,t.height,t.roomX,t.roomY);
+          }
+          
           for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
               enigma::instance_event_iterator->inst->myevent_draw();
+          
+      }
   }
   else 
   for (view_current=0; view_current<7; view_current++)
@@ -122,9 +137,25 @@ void screen_redraw()
     }
     draw_back();
     
-    for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+    
+      
+    for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
+        
+        //loop tiles
+        for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++) {
+            tile t = dit->second.tiles[i];
+            draw_background_part(t.bckid,t.bgx,t.bgy,t.width,t.height,t.roomX,t.roomY);
+        }
+        
+        //loop instances
       for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
         enigma::instance_event_iterator->inst->myevent_draw();
+        
+       
+        
+    }
+        
+    
   }
 }
 

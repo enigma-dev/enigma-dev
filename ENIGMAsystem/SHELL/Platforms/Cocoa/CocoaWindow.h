@@ -122,6 +122,8 @@ int window_views_mouse_get_x();
 int window_views_mouse_get_y();
 void window_views_mouse_set(int x, int y);
 
+int window_get_region_width();
+int window_get_region_height();
 
 /*
  display_get_width() // Returns the width of the display in pixels.
