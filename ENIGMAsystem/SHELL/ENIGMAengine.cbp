@@ -742,6 +742,7 @@
 		<Unit filename="Universal_System/globalupdate.h" />
 		<Unit filename="Universal_System/graphics_object.cpp" />
 		<Unit filename="Universal_System/graphics_object.h" />
+		<Unit filename="Universal_System/highscore_functions.cpp" />
 		<Unit filename="Universal_System/imap.h" />
 		<Unit filename="Universal_System/instance.cpp" />
 		<Unit filename="Universal_System/instance.h" />

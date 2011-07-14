@@ -64,11 +64,26 @@ rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder
 
 namespace enigma
 {
-  std::map<int,roomstruct*> roomdata;
-  typedef std::map<int,enigma::roomstruct*>::iterator roomiter;
+  roomstruct** roomdata;
+  roomstruct** roomorder;
   
   void roomstruct::gotome()
   {
+    //Destroy all objects
+    enigma::nodestroy=1;
+    for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
+    {
+      it->inst->myevent_roomend();
+      #ifdef ISCONTROLLER_persistent
+      if (!it->inst->persistent)
+      #endif
+      instance_destroy(it->inst->id);
+    }
+    enigma::nodestroy = 0;
+    
+    // Set the index to self
+    room.rval.d = id;
+    
     room_caption = cap;
     room_width   = width;
     room_height  = height;
@@ -126,10 +141,17 @@ namespace enigma
   
   extern int room_loadtimecount;
   extern roomstruct grd_rooms[];
+  extern int room_idmax;
   void rooms_load()
   {
-    for (int i = 0; i < room_loadtimecount; i++)
-      roomdata[i] = &grd_rooms[i];
+    roomdata = new roomstruct*[room_idmax];
+    roomorder = new roomstruct*[room_loadtimecount];
+    for (int i = 0; i < room_idmax; i++)
+      roomdata[i] = 0;
+    for (int i = 0; i < room_loadtimecount; i++) {
+      roomdata[grd_rooms[i].id] = &grd_rooms[i];
+      roomorder[i] = &grd_rooms[i];
+    }
   }
 }
 
@@ -141,30 +163,21 @@ void enigma::roomv::function() {
   room_goto((int)rval.d);
 } enigma::roomv room;
 
+#if SHOWERRORS
+  #define errcheck(indx,err) \
+	if (indx < 0 or indx >= enigma::room_idmax or !enigma::roomdata[indx]) \
+		return (show_error(err,0), 0)
+  #define errcheck_o(indx,err) \
+	if (indx < 0 or indx >= enigma::room_loadcount) \
+		return (show_error(err,0), 0)
+#else
+  #define errcheck(indx,err)
+  #define errcheck_o(indx,err)
+#endif
 
 int room_goto(int indx)
 {
-	#if SHOWERRORS
-	if (enigma::roomdata.find(indx)==enigma::roomdata.end())
-	{
-		show_error("Attempting to go to nonexisting room",0);
-		return 0;
-	}
-	#endif
-	
-	//Destroy all objects
-	enigma::nodestroy=1;
-	for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
-	{
-		it->inst->myevent_roomend();
-		#ifdef ISCONTROLLER_persistent
-		if (!it->inst->persistent)
-		#endif
-		instance_destroy(it->inst->id);
-	}
-	enigma::nodestroy = 0;
-	
-	room.rval.d = indx;
+	errcheck(indx,"Attempting to go to nonexisting room");
 	enigma::roomdata[indx]->gotome();
 	return 0;
 }
@@ -172,155 +185,65 @@ int room_goto(int indx)
 int room_restart()
 {
 	int indx=(int)room.rval.d;
-	
-	#if SHOWERRORS
-	if (enigma::roomdata.find(indx) == enigma::roomdata.end()) {
-		show_error("Is this some kind of joke? <__<",0);
-		return 0;
-	}
-  #endif
-	
-	//Destroy all objects
-	enigma::nodestroy=1;
-	for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
-	{
-		it->inst->myevent_roomend();
-		#ifdef ISCONTROLLER_persistent
-		if (!it->inst->persistent)
-		#endif
-		instance_destroy(it->inst->id);
-	}
-	enigma::nodestroy=0;
+	errcheck(indx,"Is this some kind of joke?");
 	enigma::roomdata[indx]->gotome();
 	return 0;
 }
 
 int room_goto_absolute(int index)
 {
-	enigma::roomiter rit = enigma::roomdata.begin();
-	//for (int ii=0; ii<(int)index; ii++) if (rit == enigma::roomdata.end()) { break; } else rit++;
-  
-  #ifdef DEBUGMODE
-	if (rit == enigma::roomdata.end())
-	{
-		if (enigma::roomdata.empty())
-			show_error("Game must have at least one room to run",0);
-		else show_error("Attempting to go to nonexisting room",0);
-		return 0;
-	}
-  #endif
-	int indx = (*rit).first;
-	//Destroy all objects
-	enigma::nodestroy=1;
-	for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
-	{
-		it->inst->myevent_roomend();
-		#ifdef ISCONTROLLER_persistent
-		if (!it->inst->persistent)
-		#endif
-		instance_destroy(it->inst->id);
-	}
-	enigma::nodestroy=0;
-	room.rval.d=indx;
+	errcheck_o(index,"Room index out of range");
+	enigma::roomstruct *rit = enigma::roomorder[0];
+	int indx = rit->id;
+	
 	enigma::roomdata[indx]->gotome();
 	return 0;
 }
 
 #undef room_count
 int room_count() {
-  return enigma::roomdata.size();
+  return enigma::room_loadtimecount;
 }
 
 int room_goto_first()
 {
-    enigma::roomiter rit = enigma::roomdata.begin();
-    #ifdef DEBUGMODE
-    if (rit == enigma::roomdata.end())
-    {
-        show_error("Game must have at least one room to run",0);
-        return 0;
-    }
-    #endif
-
-    int indx = rit->first;
-
-    //Destroy all objects
-    enigma::nodestroy=1;
-    for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
-    {
-      it->inst->myevent_roomend();
-      #ifdef ISCONTROLLER_persistent
-      if (!it->inst->persistent)
-      #endif
-      instance_destroy(it->inst->id);
-    }
-    enigma::nodestroy=0;
-
-    room.rval.d=indx;
-    enigma::roomdata[indx]->gotome();
-
+    enigma::roomstruct *rit = enigma::roomorder[0];
+    errcheck_o(0,"Game must have at least one room to do anything");
+    rit->gotome();
     return 0;
 }
 
-
+#include <stdio.h>
 int room_goto_next()
 {
-    enigma::roomiter rit = enigma::roomdata.find(int(room));
-    #ifdef DEBUGMODE
-    if (rit == enigma::roomdata.end())
-    {
-      show_error("Going to next room from unexisting room (?)",0);
-      return 0;
-    } //error like GM here
-    #endif
+    enigma::roomstruct *rit = enigma::roomdata[(int)room.rval.d];
+    errcheck((int)room.rval.d,"Going to next room from invalid room. wat");
     
-    rit++;
-
-    #ifdef DEBUGMODE
-    if (rit == enigma::roomdata.end())
-    {
-      show_error("Going to next room after last",0);
-      return 0;
-    } //error like GM here
-    #endif
+    rit = enigma::roomorder[rit->order + 1];
+    errcheck(rit->order+1,"Going to next room after last");
     
-    //Destroy all objects
-    enigma::nodestroy = 1;
-    for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
-    {
-      it->inst->myevent_roomend();
-      #ifdef ISCONTROLLER_persistent
-      if (!it->inst->persistent)
-      #endif
-      instance_destroy(it->inst->id);
-    }
-    enigma::nodestroy=0;
-
-    room.rval.d = rit->first;
-    rit->second->gotome();
+    rit->gotome();
     return 0;
 }
 
 
 int room_next(int num)
 {
-    enigma::roomiter rit = enigma::roomdata.find((int)num);
-    if (rit == enigma::roomdata.end())
+    if (num < 0 or num >= enigma::room_idmax)
       return -1;
-    rit++;
-    if (rit == enigma::roomdata.end())
+    enigma::roomstruct *rit = enigma::roomdata[num];
+    if (!rit or rit->order+1 >= enigma::room_loadtimecount)
       return -1;
-    return rit->first;
+    return rit->order + 1;
 }
 int room_previous(int num)
 {
-    enigma::roomiter rit = enigma::roomdata.find((int)num);
-    if (rit == enigma::roomdata.end())
+    if (num < 0 or num >= enigma::room_idmax)
       return -1;
-    rit--; 
-    if (rit == enigma::roomdata.end())
+    enigma::roomstruct *rit = enigma::roomdata[num];
+    if (!rit or rit->order-1 < 0)
       return -1;
-    return rit->first;
+    return rit->order - 1;
 }
 
 #include "CallbackArrays.h"

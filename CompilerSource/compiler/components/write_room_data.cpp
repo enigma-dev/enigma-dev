@@ -56,7 +56,8 @@ int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
   {
     wto << "    //Room " << es->rooms[i].id << "\n" <<
     "    { "
-    << es->rooms[i].id << ", \"" // The ID of this room
+    << es->rooms[i].id << ", " // The ID of this room
+    << i << ", \"" // The tree order index of this room
     << es->rooms[i].name << "\",  \""  // The name of this room
     << es->rooms[i].caption << "\",\n      " // The caption of this room
 

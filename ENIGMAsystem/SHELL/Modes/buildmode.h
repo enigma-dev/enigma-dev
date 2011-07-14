@@ -41,15 +41,18 @@ std::map<int,int> changecount;
 std::map<int,std::map<int,instchng> > changes;
 std::map<int,std::map<int,instchng> >::iterator rciter;
 std::map<int,instchng>::iterator citer;
-void bmain(){
+void bmain()
+{
 	enigma::update_globals();
 	int w=window_get_width(),h=window_get_height();
-	if(pausing){
+	if(pausing)
+	{
 		if(enigma::keybdstatus[vk_space]) return;
 	pausing=0;}
     if(enigma::keybdstatus[vk_enter]==1 || SendMessage(resume,BM_GETSTATE,0,0))
 		unpausing=1;
-    else if (unpausing){
+    else if (unpausing)
+    {
 		paused=0;
 		unpausing=0;
 		delete[] scrpixels;
@@ -57,110 +60,136 @@ void bmain(){
 	}
 	if((enigma::last_keybdstatus[vk_right]==1 && enigma::keybdstatus[vk_right]==0))
 		stepping=1;
-	else if (stepping) { stepping=0; take_a_step=1; }
+	else if (stepping) 
+	{ stepping=0; take_a_step=1; }
 	if((stepdown=SendMessage(step,BM_GETSTATE,0,0)==108)&& !stepdown) take_a_step=1;
-	if(shifted){
+	if(shifted)
+	{
 		draw_clear(255);
 		glRasterPos2f(0,w);
 		glDrawPixels(w,h,GL_RGBA,GL_UNSIGNED_BYTE,scrpixels);
-    }
+  }
 	else screen_redraw(1);
 	char itemtext[512];
 	GetWindowText(object,itemtext,512);
 	int objnum=-1;
 	for (enigma::objiter=enigma::objectdata.begin();enigma::objiter!=enigma::objectdata.end();enigma::objiter++)
-		if ((*enigma::objiter).second.name==itemtext){
+		if ((*enigma::objiter).second.name==itemtext)
+		{
 			objnum=(*enigma::objiter).first;
 			break;
 		}
 	room_caption=string(objnum)+" "+itemtext;
-	if(!enigma::keybdstatus[vk_control]){
+	if(!enigma::keybdstatus[vk_control])
+	{
 		dragid=-4;
-		if(objnum != -1){
-			if(!enigma::mousestatus[0] && enigma::objectdata[objnum].sprite_index != -1){
+		if(objnum != -1)
+		{
+			if(!enigma::mousestatus[0] && enigma::objectdata[objnum].sprite_index != -1)
+			{
 				int xx=mouse_x,yy=mouse_y;
-				if(!enigma::keybdstatus[vk_alt]){
+				if(!enigma::keybdstatus[vk_alt])
+				{
 					xx=gridx*(int)(xx/gridx);
 					yy=gridy*(int)(yy/gridy);
 				}
 				draw_sprite(enigma::objectdata[objnum].sprite_index,0,xx,yy);
 			}
-		} else {
-			if(!enigma::last_mousestatus[0] || enigma::keybdstatus[vk_shift]){
+		} else 
+		{
+			if(!enigma::last_mousestatus[0] || enigma::keybdstatus[vk_shift])
+			{
 				int xx=mouse_x,yy=mouse_y;
-				if(!enigma::keybdstatus[vk_alt]){
+				if(!enigma::keybdstatus[vk_alt])
+				{
 					xx=gridx*(int)(xx/gridx);
 					yy=gridy*(int)(yy/gridy);
 				}
 				int insthere=0;
 				for(int i=0;i<changecount[room];i++)
-					if(changes[room][i].x==xx && changes[room][i].y==yy){
+					if(changes[room][i].x==xx && changes[room][i].y==yy)
+					{
 						insthere=1;
 						break;
 					}
-				if(!insthere){
-				//add to room changes
-				int nobj=instance_create(xx,yy,objnum);
-				changes[room][changecount[room]].x=xx;
-				changes[room][changecount[room]].y=yy;
-				changes[room][changecount[room]].id=objnum;
-				changes[room][changecount[room]].type=0;
-				changecount[room]++;
-				//add to room data
-				enigma::roomdata[room].instances[enigma::roomdata[room].instancecount++].x=xx;
-				enigma::roomdata[room].instances[enigma::roomdata[room].instancecount++].y=yy;
-				enigma::roomdata[room].instances[enigma::roomdata[room].instancecount++].id=nobj;
-				enigma::roomdata[room].instances[enigma::roomdata[room].instancecount++].obj=objnum;
+				if(!insthere)
+				{
+          //add to room changes
+          int nobj=instance_create(xx,yy,objnum);
+          changes[room][changecount[room]].x=xx;
+          changes[room][changecount[room]].y=yy;
+          changes[room][changecount[room]].id=objnum;
+          changes[room][changecount[room]].type=0;
+          changecount[room]++;
+          //add to room data
+          enigma::roomdata[room].instances[enigma::roomdata[room].instancecount++].x=xx;
+          enigma::roomdata[room].instances[enigma::roomdata[room].instancecount++].y=yy;
+          enigma::roomdata[room].instances[enigma::roomdata[room].instancecount++].id=nobj;
+          enigma::roomdata[room].instances[enigma::roomdata[room].instancecount++].obj=objnum;
 				}
 			}
 		}
-	}else{
-		if(!enigma::last_mousestatus[0]){
+	}
+	else
+	{
+		if(!enigma::last_mousestatus[0])
+		{
 			dragid=-4;
-			for(enigma::instance_iterator= enigma::instance_list.begin();enigma::instance_iterator!=enigma::instance_list.end();enigma::instance_iterator++){
+			for(enigma::instance_iterator= enigma::instance_list.begin();enigma::instance_iterator!=enigma::instance_list.end();enigma::instance_iterator++)
+			{
 				enigma::object *fobj=(*enigma::instance_iterator).second;
-				if(fobj){
+				if(fobj)
+				{
 					int bx=fobj->sprite_width,by=fobj->sprite_height;
 					if(bx<16) bx=16;
 					if(by<16) by=16;
-					if(mouse_x>fobj->x && mouse_y>fobj->y && mouse_x<fobj->x+bx && mouse_y<fobj->x+by){
+					if(mouse_x>fobj->x && mouse_y>fobj->y && mouse_x<fobj->x+bx && mouse_y<fobj->x+by)
+					{
 						dragid=(*enigma::instance_iterator).first;
 						break;
 					}
 				}
 			}
-		}else if (dragid>0){
+		}else if (dragid>0)
+		{
 			enigma::instance_iterator=enigma::instance_list.find(dragid);
 			if (enigma::instance_iterator==enigma::instance_list.end())
 				dragid=-4;
-			else{
+			else
+			{
 				enigma::object *fobj=(*enigma::instance_iterator).second;
 				fobj->x=mouse_x; fobj->y=mouse_y;
 				bool instthere=0;
 				for(int i=0; i<enigma::roomdata[room].instancecount;i++)
-					if(enigma::roomdata[room].instances[i].id==dragid){
+					if(enigma::roomdata[room].instances[i].id==dragid)
+					{
 						instthere=1;
 						break;
 					}
-				if(instthere){
+				if(instthere)
+				{
 					int armoved=0;
 					for(int i=0; i<changecount[room];i++)
-						if (changes[room][i].id==dragid){
+						if (changes[room][i].id==dragid)
+						{
 							changes[room][i].x=(int)mouse_x;
 							changes[room][i].y=(int)mouse_y;
 							armoved=1;
 							break;
 						}
-					if(!armoved){
+					if(!armoved)
+					{
 						changes[room][changecount[room]].x=(int)mouse_x;
 						changes[room][changecount[room]].y=(int)mouse_y;
 						changes[room][changecount[room]].id=dragid;
 						changes[room][changecount[room]].type=1;
 						changecount[room]++;
 					}
-				}else{
+				}else
+				{
 					for (int i=0; i<changecount[room];i++)
-						if (changes[room][i].id==dragid && changes[room][i].type==0){
+						if (changes[room][i].id==dragid && changes[room][i].type==0)
+						{
 							changes[room][i].x=(int)mouse_x;
 							changes[room][i].y=(int)mouse_y;
 							break;
@@ -169,20 +198,25 @@ void bmain(){
 			}
 		}
 	}
-    if (!enigma::last_mousestatus[1] && enigma::mousestatus[1]){
+    if (!enigma::last_mousestatus[1] && enigma::mousestatus[1])
+    {
 		int fnd=-4;
-		for (enigma::instance_iterator= enigma::instance_list.begin();enigma::instance_iterator!=enigma::instance_list.end();enigma::instance_iterator++){
+		for (enigma::instance_iterator= enigma::instance_list.begin();enigma::instance_iterator!=enigma::instance_list.end();enigma::instance_iterator++)
+		{
 			enigma::object *fobj=(*enigma::instance_iterator).second;
-			if (fobj){
+			if (fobj)
+			{
 				int bx=fobj->sprite_width,by=fobj->sprite_height;
 				if (bx<16) bx=16; if (by<16) by=16;
-				if ((mouse_x>fobj->x) && (mouse_y>fobj->y) && (mouse_x<(fobj->x+bx)) && (mouse_y<(fobj->x+by))){
+				if ((mouse_x>fobj->x) && (mouse_y>fobj->y) && (mouse_x<(fobj->x+bx)) && (mouse_y<(fobj->x+by)))
+				{
 					fnd=(*enigma::instance_iterator).first;
 					break;
 				}
 			}
 		}
-		if (fnd>0){
+		if (fnd>0)
+		{
 			instance_destroy(fnd);
 			changes[room][changecount[room]].x=0;
 			changes[room][changecount[room]].y=0;
@@ -233,23 +267,24 @@ void bmain(){
   bool checkpause()
   {
     int w=window_get_width(),h=window_get_height();
-
-
-    if (take_a_step>0){
+    
+    if (take_a_step>0)
+    {
       take_a_step--;
       return 0;
     }
-    if (take_a_step==0){
+    if (take_a_step==0)
+    {
       take_a_step--;
       delete[]scrpixels;
       scrpixels=new unsigned char[w*h*4+1];
       glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,scrpixels);
       return 1;
     }
-    if (paused==64) return 1;
-    if( (enigma::keybdstatus[vk_control]==1 && enigma::last_keybdstatus[vk_space]==0 && enigma::keybdstatus[vk_space]==1)
-    ||  ((SendMessage(pause,BM_GETSTATE,0,0)) || (SendMessage(freeze,BM_GETSTATE,0,0)))
-    )
+    if (paused==64)
+      return 1;
+    if ((enigma::keybdstatus[vk_control]==1 && enigma::last_keybdstatus[vk_space]==0 && enigma::keybdstatus[vk_space]==1)
+    ||  ((SendMessage(pause,BM_GETSTATE,0,0)) || (SendMessage(freeze,BM_GETSTATE,0,0))))
     {
       pausing=1;
 

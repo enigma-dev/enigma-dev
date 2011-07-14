@@ -74,17 +74,18 @@ namespace enigma
     int object2follow;
     int hborder,vborder,hspd,vspd;
   };
-    struct backstruct {
-        int visible;
-        int foreground;
-        int background;
-        int area_x, area_y, horSpeed, verSpeed;
-        int tileHor, tileVert;
-        int stretch;
-    };
+  struct backstruct {
+    int visible;
+    int foreground;
+    int background;
+    int area_x, area_y, horSpeed, verSpeed;
+    int tileHor, tileVert;
+    int stretch;
+  };
   struct roomstruct
   {
     int id;
+    int order;
     string name;
     string cap;
     

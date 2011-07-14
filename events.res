@@ -302,7 +302,7 @@ animationend: 7
 	Mode: Special
 	Case: 7
 	Locals: float $iip = -1;
-	Sub Check: { const bool r = ($iip < image_index); $iip = image_index; if (r) return 0; }
+	Sub Check: { const bool r = ($iip <= (float)image_index); $iip = image_index; if (r) return 0; }
 
 
 # End of in-linked events

@@ -371,11 +371,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
       if (es->sounds[i].id >= max) max = es->sounds[i].id + 1;
       wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n";
     } wto << "};\nnamespace enigma { size_t sound_idmax = " <<max << "; }\n\n";
-
+    
+    max = 0;
     wto << "enum //room names\n{\n";
-    for (int i = 0; i < es->roomCount; i++)
+    for (int i = 0; i < es->roomCount; i++) {
+      if (es->rooms[i].id >= max) max = es->rooms[i].id + 1;
       wto << "  " << es->rooms[i].name << " = " << es->rooms[i].id << ",\n";
-    wto << "};\n\n";
+    }
+    wto << "};\nnamespace enigma { size_t room_idmax = " <<max << "; }\n\n";
   wto.close();
 
   idpr("Performing Secondary Parsing and Writing Globals",25);
