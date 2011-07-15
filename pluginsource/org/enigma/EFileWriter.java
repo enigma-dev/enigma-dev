@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.zip.CRC32;
@@ -46,23 +48,112 @@ import org.lateralgm.util.PropertyMap;
 public class EFileWriter
 	{
 	public static final String EY = ".ey"; //$NON-NLS-1$
-	public static final String SEPARATOR = "/"; //$NON-NLS-1$
 
 	//Modularity Classes
-	/**
-	 * Convenience wrapper to allow writing buffered text to a zip.
-	 * Always invoke "next" prior to attempting to write any data.
-	 */
-	public static class ZipOutputWriter extends BufferedWriter
+	public static abstract class EGMOutputStream
 		{
+		protected PrintStream last;
+
+		public PrintStream next(final List<String> directory, String filename) throws IOException
+			{
+			if (last != null) _finishLast();
+			return last = _next(directory,filename);
+			}
+
+		protected abstract PrintStream _next(final List<String> directory, String filename)
+				throws IOException;
+
+		protected abstract void _finishLast();
+
+		public abstract void finish() throws IOException;
+		}
+
+	public static class EGMZip extends EGMOutputStream
+		{
+		public static final String SEPARATOR = "/"; //$NON-NLS-1$
+
 		protected ZipOutputStream os;
 
-		public ZipOutputWriter(OutputStream os)
+		public EGMZip(OutputStream os)
 			{
 			this(new ZipOutputStream(os));
 			}
 
-		public ZipOutputWriter(ZipOutputStream os)
+		public EGMZip(ZipOutputStream os)
+			{
+			this.os = os;
+			}
+
+		@Override
+		protected void _finishLast()
+			{
+			last.flush();
+			}
+
+		@Override
+		protected PrintStream _next(List<String> directory, String filename) throws IOException
+			{
+			StringBuilder path = new StringBuilder();
+			for (String s : directory)
+				path.append(s).append(SEPARATOR);
+			path.append(filename);
+			os.putNextEntry(new ZipEntry(path.toString()));
+			return last;
+			}
+
+		@Override
+		public void finish() throws IOException
+			{
+			last.flush();
+			os.finish();
+			}
+		}
+
+	public static class EGMFolder extends EGMOutputStream
+		{
+		File root;
+
+		public EGMFolder(File root)
+			{
+			this.root = root;
+			}
+
+		@Override
+		protected void _finishLast()
+			{
+			last.close();
+			}
+
+		@Override
+		protected PrintStream _next(List<String> directory, String filename) throws IOException
+			{
+			File f = root;
+			for (String s : directory)
+				f = new File(root,s);
+			return new PrintStream(new File(f,filename));
+			}
+
+		@Override
+		public void finish() throws IOException
+			{
+			last.close();
+			}
+		}
+
+	/**
+	 * Convenience wrapper to allow writing buffered text to a zip.
+	 * Always invoke "next" prior to attempting to write any data.
+	 */
+	public static class ZipOutputWriter2 extends BufferedWriter
+		{
+		protected ZipOutputStream os;
+
+		public ZipOutputWriter2(OutputStream os)
+			{
+			this(new ZipOutputStream(os));
+			}
+
+		public ZipOutputWriter2(ZipOutputStream os)
 			{
 			super(new OutputStreamWriter(os));
 			this.os = os;
@@ -112,7 +203,7 @@ public class EFileWriter
 	 */
 	public static interface ResourceWriter
 		{
-		public void write(ZipOutputWriter os, ResNode child, String dir) throws IOException;
+		public void write(EGMOutputStream os, ResNode child, List<String> dir) throws IOException;
 		}
 
 	/**
@@ -124,18 +215,18 @@ public class EFileWriter
 	 */
 	public static abstract class DataResourceWriter implements ResourceWriter
 		{
-		public void write(ZipOutputWriter os, ResNode child, String dir) throws IOException
+		public void write(EGMOutputStream os, ResNode child, List<String> dir) throws IOException
 			{
 			String name = (String) child.getUserObject();
 			Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
 			String fn = name + getExt(r);
 
-			os.next(dir + name + EY);
-			os.writeln("Data: " + fn); //$NON-NLS-1$
-			writeProperties(os,r);
+			PrintStream ps = os.next(dir,name + EY);
+			ps.println("Data: " + fn); //$NON-NLS-1$
+			writeProperties(ps,r);
 
-			os.next(dir + fn);
-			writeData(os,r);
+			ps = os.next(dir,fn);
+			writeData(ps,r);
 			}
 
 		/**
@@ -144,9 +235,9 @@ public class EFileWriter
 		 */
 		public abstract String getExt(Resource<?,?> r);
 
-		public abstract void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException;
+		public abstract void writeProperties(PrintStream os, Resource<?,?> r) throws IOException;
 
-		public abstract void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException;
+		public abstract void writeData(PrintStream os, Resource<?,?> r) throws IOException;
 		}
 
 	/**
@@ -156,11 +247,11 @@ public class EFileWriter
 	static abstract class DataPropWriter extends DataResourceWriter
 		{
 		@Override
-		public void writeProperties(ZipOutputWriter os, Resource<?,?> r) throws IOException
+		public void writeProperties(PrintStream os, Resource<?,?> r) throws IOException
 			{
 			PropertyMap<? extends Enum<?>> p = r.properties;
 			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
-				if (allowProperty(e.getKey().name())) os.writeln(e.getKey().name() + ": " + e.getValue()); //$NON-NLS-1$
+				if (allowProperty(e.getKey().name())) os.println(e.getKey().name() + ": " + e.getValue()); //$NON-NLS-1$
 			}
 
 		/** Returns whether the following property should be allowed in the properties file */
@@ -210,30 +301,28 @@ public class EFileWriter
 
 	public static void writeEgmFile(OutputStream os, ResNode tree) throws IOException
 		{
-		ZipOutputWriter z = new ZipOutputWriter(os);
+		EGMOutputStream z = new EGMZip(os);
 		writeEgmFile(z,tree);
 		z.finish();
 		}
 
-	public static void writeEgmFile(ZipOutputWriter os, ResNode tree) throws IOException
+	public static void writeEgmFile(EGMOutputStream os, ResNode tree) throws IOException
 		{
-		writeNodeChildren(os,tree,""); //$NON-NLS-1$
-		os.flush();
+		writeNodeChildren(os,tree,new ArrayList<String>());
 		}
 
 	//Workhorse methods
 	/** Recursively writes out the tree nodes into the zip. */
-	public static void writeNodeChildren(ZipOutputWriter os, ResNode node, String dir)
+	public static void writeNodeChildren(EGMOutputStream os, ResNode node, List<String> dir)
 			throws IOException
 		{
-		os.next(dir + "toc.txt"); //$NON-NLS-1$
+		PrintStream ps = os.next(dir,"toc.txt"); //$NON-NLS-1$
 
 		int children = node.getChildCount();
 		for (int i = 0; i < children; i++)
 			{
 			ResNode child = (ResNode) node.getChildAt(i);
-			os.write((String) child.getUserObject());
-			os.newLine();
+			ps.println((String) child.getUserObject());
 			}
 
 		for (int i = 0; i < children; i++)
@@ -246,15 +335,18 @@ public class EFileWriter
 				}
 			else
 				{
-				String cdir = dir + child.getUserObject() + SEPARATOR;
-				os.next(cdir);
-				writeNodeChildren(os,child,cdir);
+				String cn = (String) child.getUserObject();
+				//				String cdir = dir + child.getUserObject() + SEPARATOR;
+				os.next(dir,cn);
+				ArrayList<String> newDir = new ArrayList<String>(dir);
+				newDir.add(cn);
+				writeNodeChildren(os,child,newDir);
 				}
 			}
 		}
 
 	/** Looks up the registered writer for this resource and invokes the write method */
-	public static void writeResource(ZipOutputWriter os, ResNode child, String dir)
+	public static void writeResource(EGMOutputStream os, ResNode child, List<String> dir)
 			throws IOException
 		{
 		ResourceWriter writer = writers.get(child.kind);
@@ -278,7 +370,7 @@ public class EFileWriter
 			}
 
 		@Override
-		public void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException
+		public void writeData(PrintStream os, Resource<?,?> r) throws IOException
 			{
 			os.write(((Sound) r).data);
 			}
@@ -299,9 +391,9 @@ public class EFileWriter
 			}
 
 		@Override
-		public void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException
+		public void writeData(PrintStream os, Resource<?,?> r) throws IOException
 			{
-			ImageIO.write(((Background) r).getBackgroundImage(),"png",os.toStream()); //$NON-NLS-1$
+			ImageIO.write(((Background) r).getBackgroundImage(),"png",os); //$NON-NLS-1$
 			}
 
 		@Override
@@ -320,9 +412,9 @@ public class EFileWriter
 			}
 
 		@Override
-		public void writeData(ZipOutputWriter os, Resource<?,?> r) throws IOException
+		public void writeData(PrintStream os, Resource<?,?> r) throws IOException
 			{
-			os.write(((Script) r).getCode());
+			os.print(((Script) r).getCode());
 			}
 
 		@Override
