@@ -1,19 +1,18 @@
 namespace enigma
 {
-  /*std::map<int,var> switchvalues;
-  std::map<int,bool> switch_active;
-  int switches_nested=0;
-  
-  void switchv(var argument)
-  {
-       switchvalues[switches_nested]=argument;
-       switch_active[switches_nested]=0;
-       switches_nested++;
+  int switch_hash(variant x) {
+    if (!x.type)
+      if (x == int(x))
+        return int(x);
+      else
+        return int(x * 65536);
+    else
+    {
+      int ret = 0;
+      const string& n = x.sval;
+      for (size_t i = 0; i < n.length(); i++)
+        ret = 31*ret + n[i];
+      return ret;
+    }
   }
-  
-  int casev(int layer,var value)
-  {
-      if (switch_active[layer]) return 1;
-      return switchvalues[layer]==value;
-  }*/
 }

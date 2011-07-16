@@ -50,13 +50,13 @@ int compile_parseSecondary(map<int,parsed_object*> &parsed_objects,parsed_script
   {
     parsed_object *ito = it->second;
     for (unsigned iit = 0; iit < ito->events.size; iit++)
-      parser_secondary(ito->events[iit].code,ito->events[iit].synt,EGMglobal,it->second);
+      parser_secondary(ito->events[iit].code,ito->events[iit].synt,EGMglobal,it->second,&ito->events[iit]);
   }
   
   for (int i = 0; i < scrcount; i++) {
-    parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj);
+    parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj,&scripts[i]->pev);
     if (scripts[i]->pev_global)
-      parser_secondary(scripts[i]->pev_global->code,scripts[i]->pev_global->synt,EGMglobal,&scripts[i]->obj);
+      parser_secondary(scripts[i]->pev_global->code,scripts[i]->pev_global->synt,EGMglobal,&scripts[i]->obj,scripts[i]->pev_global);
   }
   
   return 0;

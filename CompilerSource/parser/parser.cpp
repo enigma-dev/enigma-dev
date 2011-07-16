@@ -47,6 +47,7 @@
 #include <map> //Log lookup
 #include <string> //Ease of use
 #include <iostream> //Print shit
+#include <vector> //Store case labels
 #include <stdio.h> //stdout, fflush
 using namespace std; //More ease
 #include "../externs/externs.h" //To interface with externally defined types and functions
@@ -240,7 +241,59 @@ pt end_of_brackets(const string& synt, pt pos) // Given a string and the index O
 }
 
 extern externs *enigma_type__var, *enigma_type__variant;
-int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_object* obj)
+
+// A little structure to hold detatched cases.
+// Code and synt have their own, identical lengths; they are the expression following the `case` token.
+// pos and len are the position and length of the entire case label, for use when replacing the code.
+struct lexpair {
+  string code, synt, mylabel, mylsynt; pt pos, len; int stri, strc;
+  lexpair(string c, string s, pt p, pt l, int si, int sc): 
+    code(c), synt(s), mylabel(), mylsynt(), pos(p), len(l), stri(si), strc(sc) {}
+};
+bool is_integer(const lexpair& lp) {
+  for (pt i = 0; i < lp.code.length(); i++)
+    if (lp.synt[i] != '0' or lp.code[i] == '.') return 0;
+  return 1;
+}
+bool is_float(const lexpair& lp) {
+  for (pt i = 0; i < lp.code.length(); i++)
+    if (lp.synt[i] != '0' or lp.code[i] == '.') return 0;
+  return 1;
+}
+bool is_literal(const lexpair& lp) {
+  for (pt i = 0; i < lp.code.length(); i++)
+    if (lp.synt[i] != '0') {
+      if (i or (lp.synt[0] != '"' and lp.synt[0] != '\''))
+        return 0;
+      for (; i < lp.code.length(); i++)
+        if (lp.synt[i] != '"' and lp.synt[i] != '\'')
+          return 0;
+      break;
+    }
+  return 1;
+}
+int make_hash(const lexpair& lp, parsed_event* pev, FILE* _a) {
+  fprintf(_a,"Make hash of %s[%s]\n",lp.code.c_str(),lp.synt.c_str());
+  if (!is_literal(lp)) return -1;
+  if (is_integer(lp)) return atol(lp.code.c_str());
+  if (is_float(lp)) return atof(lp.code.c_str()) * 65536;
+  
+  // Now we assume it's a string and apply a simple hash
+  int r = 0;
+  for (int i = 0; i < lp.strc; i++) {
+    string a = pev->strs[lp.stri + i];
+    if (a.length() > 1) {
+      if (a[0] == '"' and a[a.length() - 1] == '"') a = a.substr(1,a.length()-2);
+      else if (a[0] == '\'' and a[a.length() - 1] == '\'') a = a.substr(1,a.length()-2);
+    }
+    fprintf(_a," => string(%s)\n",a.c_str());
+    for (pt ii = 0; ii < a.length(); ii++)
+      r = 31*r + a[ii];
+  }
+  return r;
+}
+
+int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_object* obj,parsed_event* pev)
 {
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
@@ -466,6 +519,203 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         while (synt[pos] == synt[pos+1]) pos++;
     }
   }
+  
+  // Handle switch statements. Badly.
+  if (pev) // We need to know this to deal with string hashes
+  {
+    FILE* a=fopen("/home/josh/Desktop/lex.txt","ab");
+    if (a) { fputs(code.c_str(),a);  fprintf(a,"\n"); fputs(synt.c_str(),a); fprintf(a,"\n"); }
+    static int switch_count = 0;
+    int string_index = 0; // Number of strings before this statement
+    for (pt pos = 0; pos < synt.length(); pos++)
+    {
+      if (synt[pos] != 's') {
+        string_index += synt[pos] == '"' or synt[pos] == '\'';
+        continue;
+      }
+      
+      const pt switch_start_pos = pos;
+      
+      while (synt[++pos] == 's');
+      string ss(code,switch_start_pos,pos-switch_start_pos);
+      if (ss != "switch")
+        continue;
+      
+      fprintf(a,"Found switch\n");
+      int strs_this_statement = 0;
+      const pt switch_value_spos = pos;
+      
+      while (synt[pos++] != '{') { // We can skip the first char, because at this juncture, it's garanteed to be an opening parenthesis.
+        string_index += synt[pos] == '"' or synt[pos] == '\''; // Increment the overall index here; we'll be skipping these strings later on.
+      }
+      const string
+        svalue   (code, switch_value_spos, pos - switch_value_spos - 1),
+        svaluelex(synt, switch_value_spos, pos - switch_value_spos - 1);
+      
+      // Some crap we need to know
+      int level = 1;
+      vector<lexpair> cases;
+      pt default_start_pos = 0; // 0 for no default, nonzero indicates position
+      
+      while (level)
+      {
+        if (synt[pos] == '{')
+        { level++; pos++; continue; }
+        if (synt[pos] == '}')
+        { level--; pos++; continue; }
+        if (synt[pos] == 's')
+        {
+          const pt cspos = pos;
+          while (synt[++pos] == 's');
+          if (code.substr(cspos,pos-cspos) != "case ")
+            continue;
+          const pt espos = pos;
+          const pt tstrc = string_index + strs_this_statement; // The number of strings before this case label
+          int strnum = 0; // The number of strings in this case label
+          while (synt[pos] != ':') {
+            if (synt[pos] == '"' or synt[pos] == '\'')
+              ++strs_this_statement, ++strnum;
+            ++pos;
+          }
+          cases.push_back(lexpair(string(code,espos,pos-espos),string(synt,espos,pos-espos),cspos,pos-cspos,tstrc,strnum));
+          pos++; continue;
+        }
+        if (synt[pos] == 'b')
+        {
+          const pt dspos = pos;
+          while (synt[++pos] == 'b');
+          if (code.substr(dspos, pos-dspos) == "default")
+            default_start_pos = dspos;
+        }
+        if (synt[pos] == '"' or synt[pos] == '\'')
+          strs_this_statement++;
+        pos++; 
+      }
+      int handicap = 0;
+      size_t ci = 0;
+      for (; ci < cases.size(); ci++)
+        if (!is_integer(cases[ci]))
+        { handicap = 1; break; }
+      if (handicap == 1)
+        for (; ci < cases.size(); ci++)
+          if (!is_literal(cases[ci]))
+          { handicap = 2; break; }
+      if (handicap)
+      {
+        int delta = 0;
+        code.insert(pos,"}");
+        synt.insert(pos,"}");
+        
+        char cname[12];
+        sprintf(cname,"%d",switch_count);
+        const string switch_index_code = cname;
+        const string switch_index_lexn(switch_index_code.length(), 'n'), switch_index_lexb(switch_index_code.length(), 'b');
+        
+        if (default_start_pos) {
+          code.replace(default_start_pos, 7, "$s" + switch_index_code + "default");
+          synt.replace(default_start_pos, 7, "bb" + switch_index_lexb + "bbbbbbb");
+        }
+        
+        for (size_t i = 0; i < cases.size(); i++)
+        {
+          sprintf(cname,"$s%dc%d",switch_count,(int)i);
+          string rep = cname, res = string(rep.length(),'b');
+          
+          code.replace(cases[i].pos + delta, cases[i].len, cases[i].mylabel = rep);
+          synt.replace(cases[i].pos + delta, cases[i].len, cases[i].mylsynt = res);
+          
+          delta += int(rep.length() - cases[i].len);
+        }
+        sprintf(cname,"$s%dvalue",switch_count);
+        string valuevar = cname;
+        
+        string icode = "{", isynt = "{";
+        icode += "const variant" + valuevar + "=" + svalue + ";";
+        isynt += "ttttttttttttt" + string(valuevar.length(),'n') + "=" + svaluelex + ";";
+        icode += "switch(enigma::switch_hash(" + valuevar + ")){";
+        isynt += "ssssss(nnnnnnnnnnnnnnnnnnn(" + string(valuevar.length(), 'n') + ")){";
+        
+        // Order hashes
+        map<int,vector<int> > hashes; // hash KEY by vector of case id's VALUE
+        for (size_t i = 0; i < cases.size(); i++) {
+          int hash = make_hash(cases[i], pev, a);
+          hashes[hash].push_back(i);
+        }
+        
+        // This'll be tacked on whenever the default is reached
+        string deflcode = "default:$s" + switch_index_code + "nohash:",
+               deflsynt = "bbbbbbb:bb" + switch_index_lexb + "bbbbbb:";
+        string deflsufcode = default_start_pos ? "goto $s" + switch_index_code + "default;" : "break;",
+               deflsufsynt = default_start_pos ? "bbbbbbb" + switch_index_lexb + "bbbbbbb;" : "bbbbb;";
+        
+        // Defragment string IDs and generate case labels
+        if (cases.size() > 1)
+        {
+          const int lower_bound = cases[0].stri, upper_bound = cases[cases.size()-1].stri + cases[cases.size()-1].strc - 1;
+          map<int,string> reorder;
+          for (int i = lower_bound; i <= upper_bound; i++)
+            reorder[i] = pev->strs[i];
+          
+          int overwrite_at = lower_bound;
+          for (map<int,vector<int> >::iterator i = hashes.begin(); i != hashes.end(); i++)
+          {
+            if (i->first == -1) {
+              icode += deflcode, isynt += deflsynt;
+              deflcode = deflsynt = "";
+            }
+            else {
+              sprintf(cname, "%d", i->first);
+              string thashstr = cname;
+              icode += "case " + thashstr + ":";
+              isynt += "sssss" + string(thashstr.length(), '0') + ":";
+            }
+            for (size_t ii = 0; ii < i->second.size(); ii++)
+            {
+              const int casenum = i->second[ii];
+              icode += "if($s" + switch_index_code + "value==" + cases[casenum].code + ")goto " + cases[casenum].mylabel + ';';
+              isynt += "ss(nn" + switch_index_lexn + "nnnnn==" + cases[casenum].synt + ")bbbbb" + cases[casenum].mylsynt + ';';
+              string_index += cases[casenum].strc;
+              
+              for (int iii = 0; iii < cases[casenum].strc; iii++)
+              {
+                int indx = cases[casenum].stri + iii;
+                pev->strs[overwrite_at++] = reorder[indx];
+                reorder.erase(indx);
+              }
+            }
+            if (i->first == -1) {
+              icode += deflsufcode, isynt += deflsufsynt;
+              deflsufcode = deflsufsynt = "";
+            }
+            else {
+              icode += "goto $s" + switch_index_code + "nohash;";
+              isynt += "bbbbbbb" + switch_index_lexb + "bbbbbb;";
+            }
+          }
+          
+          for (map<int,string>::iterator i = reorder.begin(); i != reorder.end(); i++)
+            pev->strs[overwrite_at++] = i->second;
+        }
+        icode += deflcode + deflsufcode;
+        isynt += deflsynt + deflsufsynt;
+        
+        pos = switch_start_pos;
+        code.replace(pos, switch_value_spos-pos + svalue.length() + 1, icode);
+        synt.replace(pos, switch_value_spos-pos + svalue.length() + 1, isynt);
+        
+        pos += icode.length();
+        switch_count++;
+      }
+      else {
+        pos = switch_start_pos + 5; 
+      }
+    }
+    if (a) { 
+      fprintf(a,"%s\n%s\n", code.c_str(), synt.c_str());
+      fprintf(a,"\n"); fclose(a);
+    }
+  }
+  
   while (slev) delete sstack[slev--];
   delete sstack[0];
   return -1;

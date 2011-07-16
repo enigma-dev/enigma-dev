@@ -105,7 +105,7 @@ inline int lower_to_level(int leveltype,string sn)
     //We would have just returned, so this next part won't error.
     if (levelt[level]==LEVELTYPE_DO)
     { error="Statement `until' expected before "+sn; return 1; }
-    if (levelt[level]==LEVELTYPE_SWITCH_BLOCK or levelt[level]==LEVELTYPE_BRACE)
+    if (levelt[level]==LEVELTYPE_BRACE)
     { error="Symbol `}' expected before "+sn; return 1; }
     level--;
     if (statement_pad[level]>0) statement_pad[level]--;
@@ -121,8 +121,6 @@ inline bool check_level_accessible(int leveltype)
       return 1;
 
     if (levelt[chklvl] == LEVELTYPE_DO)
-    { return 0; }
-    if (levelt[chklvl] == LEVELTYPE_SWITCH_BLOCK)
     { return 0; }
     if (levelt[chklvl] == LEVELTYPE_BRACE)
     { return 0; }
@@ -170,8 +168,83 @@ inline int get_closest_level_pad(int leveltype)
   return 0;
 }
 
-
 int close_statement(string& code,pt& pos);
+
+int handle_open_brace(string& code, pt &pos)
+{
+  /*int einfo;
+  if (levelt[level]==LEVELTYPE_SWITCH) einfo=LEXTRAINFO_SWITCHBLOCK;
+  if (levelt[level]==LEVELTYPE_DO) einfo=LEXTRAINFO_LOOPBLOCK;
+  if (levelt[level]==LEVELTYPE_FOR_PARAMETERS) einfo=LEXTRAINFO_LOOPBLOCK;
+  if (levelt[level]==LEVELTYPE_GENERAL_STATEMENT)
+  {
+    if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
+    if (levelei[level]==LEXTRAINFO_WHILE) einfo=LEXTRAINFO_LOOPBLOCK;
+  }*/
+  bool isbr = (levelt[level] == LEVELTYPE_SWITCH);
+  
+  quickscope();
+
+  if (lastnamed[level] == LN_OPERATOR)
+  { error="Unexpected brace at this point"; return pos; }
+  if (plevel) {
+    error = plevelt[plevel] == PLT_TEMPLATE_PARAMS ? "Expected closing triangle bracket before brace" : plevelt[plevel] == PLT_BRACKET ? "Expected closing bracket before brace" : "Expected closing parenthesis before brace";
+    return pos;
+  }
+  
+  if (statement_completed(lastnamed[level])) {
+    if((levelt[level] == LEVELTYPE_IF and statement_pad[level] == 3)
+    or (levelt[level] == LEVELTYPE_LOOP or levelt[level] == LEVELTYPE_FOR_PARAMETERS))
+      statement_pad[level]--;
+    int cs = close_statement(code,pos);
+    if (cs != -1) return cs;
+  }
+  
+  if (levelt[level] == LEVELTYPE_DO and statement_pad[level]-- != 2)
+  { error = "Unexpected '{' in `do' statement"; return pos; }
+  
+  levelt[++level] = LEVELTYPE_BRACE;
+  lastnamed[level] = LN_NOTHING; //This is the beginning of a glorious new level
+  lastnamedatt[level] = LNA_NOTHING;
+  statement_pad[level] = -1;
+  assop[level] = 0;
+  
+  if (isbr) {
+    levelt[++level] = LEVELTYPE_SWITCH_BLOCK;
+    lastnamed[level] = LN_NOTHING; //This is the beginning of a glorious new level
+    lastnamedatt[level] = LNA_NOTHING;
+    statement_pad[level] = -1;
+    assop[level] = 0;
+  }
+  return -1;
+}
+
+int handle_close_brace(string& code, pt& pos)
+{
+  dropscope();
+  
+  if (level<=0)
+    { error="Unexpected closing brace at this point!"; return pos; }
+  
+  
+  if (lastnamed[level]==LN_OPERATOR)
+  { error="Expected secondary expression before closing brace"; return pos; }
+  
+  if (statement_completed(lastnamed[level])) {
+    int cs=close_statement(code,pos);
+    if (cs != -1) return cs;
+  }
+  
+  lower_to_level(LEVELTYPE_BRACE,"`}' symbol");
+  if (level<=0)
+    { error="Unexpected closing brace at this point!!"; return pos; }
+  level--;
+  //statement_pad[level] = -1;
+  lastnamed[level] = LN_NOTHING;//LN_CLOSING_SYMBOL; //We closed at the beginning of this group.
+  lastnamedatt[level] = LNA_NOTHING;
+  //this will invoke the next statement to close the current statement
+  return -1;
+}
 
 enum {
   PAD_STRUCT_NOTHING,
@@ -325,7 +398,7 @@ inline pt handle_if_statement(string& code,string name,pt& pos)
   label_default:
       if (levelt[level] != LEVELTYPE_SWITCH_BLOCK)
       { error="Statement `default' expected only in switch statement"; return pos; }
-      pos += 7; while (is_useless(code[pos])) pos++;
+      while (is_useless(code[pos])) pos++;
       if (code[pos] == ':') pos++;
       lastnamed[level] = LN_NOTHING;
     return ret;
@@ -346,23 +419,11 @@ inline pt handle_if_statement(string& code,string name,pt& pos)
     goto label_general;
 
   label_begin:
-    {
-      bool isbr=levelt[level]==LEVELTYPE_SWITCH;
-
-      if (lastnamed[level]==LN_OPERATOR)
-      { error="Unexpected brace at this point"; return pos; }
-
-      level+=!isbr;
-      levelt[level]=(isbr?LEVELTYPE_SWITCH_BLOCK:LEVELTYPE_BRACE);
-      lastnamed[level]=LN_NOTHING; //This is the beginning of a glorious new level
-      statement_pad[level]=-1;
-      assop[level]=0;
-    }
-    return ret;
+    return handle_open_brace(code,pos);
 
   label_end:
       if (level<=0)
-      { error="Unexpected closing brace at this point"; return pos; }
+      { error="Unexpected closing brace at this point!!!"; return pos; }
 
       if (lastnamed[level]==LN_OPERATOR)
       { error="Expected secondary expression before closing brace"; return pos; }
@@ -373,7 +434,7 @@ inline pt handle_if_statement(string& code,string name,pt& pos)
         if (cs != -1) return cs;
       }
 
-      lower_to_level(LEVELTYPE_BRACE,"`}' symbol");
+      lower_to_level(LEVELTYPE_BRACE,"`end' statement");
       level--;
       statement_pad[level]=-1;
       lastnamed[level]=LN_CLOSING_SYMBOL;

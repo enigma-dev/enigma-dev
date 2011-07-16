@@ -325,9 +325,11 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
   ** Object functions: events, constructors, other codes.
   ********************************************************/
 
+    cout << "DBGMSG 1" << endl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out);
     wto << license;
     
+    cout << "DBGMSG 2" << endl;
     // Export globalized scripts
     for (int i = 0; i < es->scriptCount; i++)
     {
@@ -345,28 +347,36 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       wto << "\n  return 0;\n}\n\n";
     }
     
+    cout << "DBGMSG 3" << endl;
     // Export everything else
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
+    cout << "DBGMSG 4" << endl;
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
       if  (i->second->events[ii].code != "")
       {
+    cout << "DBGMSG 4-1" << endl;
         const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
         string evname = event_get_function_name(mid,id);
+    cout << "DBGMSG 4-2" << endl;
         wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
           if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
             wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
+    cout << "DBGMSG 4-3" << endl;
           if (event_has_sub_check(mid, id))
             wto << event_get_sub_check_condition(mid, id) << endl;
           if (event_has_const_code(mid, id))
             wto << event_get_const_code(mid, id) << endl;
           if (event_has_prefix_code(mid, id))
             wto << event_get_prefix_code(mid, id) << endl;
+    cout << "DBGMSG 4-4" << endl;
           print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
           if (event_has_suffix_code(mid, id))
             wto << event_get_suffix_code(mid, id) << endl;
+    cout << "DBGMSG 4-5" << endl;
         wto << "\n  return 0;\n}\n\n";
       }
+    cout << "DBGMSG 5" << endl;
 
       parsed_object* t = i->second;
       for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
@@ -387,7 +397,9 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           wto << "\n  return 0;\n}\n\n";
         }
       }
+    cout << "DBGMSG 6" << endl;
     }
+    cout << "DBGMSG 7" << endl;
 
     wto << "namespace enigma\n{\n"
     "  callable_script callable_scripts[] = {\n";
@@ -399,6 +411,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     }
     wto << "  };\n  \n";
     
+    cout << "DBGMSG 8" << endl;
     wto << "  void constructor(object_basic* instance_b)\n  {\n"
     "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"
     "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"

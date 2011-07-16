@@ -427,7 +427,7 @@ void parser_add_semicolons(string &code,string &synt)
         {
           codebuf[bufpos-1] = *sy_semi;
           syntbuf[bufpos-1] = *sy_semi;
-          codebuf[bufpos+0] = ';';
+          codebuf[bufpos  ] = ';';
           syntbuf[bufpos++] = ';';
           sy_semi = sy_semi->popif('s');
         }
@@ -443,7 +443,7 @@ void parser_add_semicolons(string &code,string &synt)
         {
           codebuf[bufpos-1] = *sy_semi;
           syntbuf[bufpos-1] = *sy_semi;
-          codebuf[bufpos+0] = ';';
+          codebuf[bufpos  ] = ';';
           syntbuf[bufpos++] = ';';
           sy_semi = sy_semi->popif('s');
         }
@@ -475,17 +475,26 @@ void parser_add_semicolons(string &code,string &synt)
     }
     if (synt[pos]=='s')
     {
+      string ts; ts.reserve(10);
+      ts += code[pos];
       while (synt[++pos] == 's')
       {
         codebuf[bufpos] = code[pos];
         syntbuf[bufpos++] = 's';
+        ts += code[pos];
       }
 
       if (synt[pos] != ' ')
         pos--;
-
-      codebuf[bufpos] = syntbuf[bufpos] = '(', bufpos++;
-      sy_semi=sy_semi->push(')','s');
+      
+      if (ts == "case") {
+        codebuf[bufpos] = ' ', syntbuf[bufpos] = 's', bufpos++;
+        sy_semi=sy_semi->push(':','s');
+      }
+      else {
+        codebuf[bufpos] = syntbuf[bufpos] = '(', bufpos++;
+        sy_semi=sy_semi->push(')','s');
+      }
     }
     else if (synt[pos] == 'f')
     {
@@ -647,7 +656,7 @@ void parser_add_semicolons(string &code,string &synt)
     by a space in the outputted code.
 
   @func print_the_fucker(string code,string synt)
-    @summary Outputs the code in a well-formatted fashion.
+  @summary Outputs the code in a well-formatted fashion.
 
 **/
 
@@ -683,6 +692,7 @@ const char * indent_chars   =  "\n                                \
                                                                   ";
 static inline string string_settings_escape(string n)
 {
+  if (!n.length()) return "\"\"";
   if (n[0] == '\'' and n[n.length()-1] == '\'')
     n[0] = n[n.length() - 1] = '"';
   for (size_t pos = 1; pos < n.length()-1; pos++)

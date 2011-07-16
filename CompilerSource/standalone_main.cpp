@@ -187,7 +187,7 @@ int mainr(int argc, char *argv[])
   
   cout << "\nParsed to:\n" << b;
   parsed_object tglob; tglob.locals["gstr"] = dectrip("string");
-  parser_secondary(ev.code,ev.synt, &tglob);
+  parser_secondary(ev.code,ev.synt, &tglob, NULL, &ev);
   ofstream fpsd("parse_output.txt",ios_base::out);
   print_to_file(ev.code,ev.synt,sc,empty,0,fpsd); fpsd.close();
   system("gedit parse_output.txt || notepad parse_output.txt");

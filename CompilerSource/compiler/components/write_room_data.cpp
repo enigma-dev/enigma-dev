@@ -173,7 +173,7 @@ wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcrea
     parsed_object par;
     parsed_event ev(&par);
     parser_main(cme,&ev);
-    parser_secondary(ev.code,ev.synt,EGMglobal,&par);
+    parser_secondary(ev.code,ev.synt,EGMglobal,&par,&ev);
     print_to_file(ev.code,ev.synt,ev.strc,ev.strs,2,wto);
     wto << "\n}\n";
   }

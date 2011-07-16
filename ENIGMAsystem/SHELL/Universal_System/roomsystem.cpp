@@ -201,7 +201,7 @@ int room_restart()
 int room_goto_absolute(int index)
 {
 	errcheck_o(index,"Room index out of range");
-	enigma::roomstruct *rit = enigma::roomorder[0];
+	enigma::roomstruct *rit = enigma::roomorder[index];
 	int indx = rit->id;
 	
 	enigma::roomdata[indx]->gotome();
@@ -229,6 +229,18 @@ int room_goto_next()
     
     rit = enigma::roomorder[rit->order + 1];
     errcheck(rit->order+1,"Going to next room after last");
+    
+    rit->gotome();
+    return 0;
+}
+
+int room_goto_previous()
+{
+    enigma::roomstruct *rit = enigma::roomdata[(int)room.rval.d];
+    errcheck((int)room.rval.d,"Going to next room from invalid room. wat");
+    
+    rit = enigma::roomorder[rit->order - 1];
+    errcheck(rit->order-1,"Going to next room after last");
     
     rit->gotome();
     return 0;
