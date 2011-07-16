@@ -44,6 +44,10 @@
   #undef y0
 #undef yn
 
+#ifndef INCLUDED_FROM_SHELLMAIN
+#error ln2math and stop including this damn header.
+#endif
+
 double abs(struct variant x);
 double abs(struct var x);
 
@@ -98,5 +102,9 @@ double lengthdir_y(double len,double dir);
 double direction_difference(double dir1,double dir2);
 double point_direction(double x1,double y1,double x2,double y2);
 double point_distance(double x1, double y1, double x2, double y2);
+
+#include "dynamic_args.h"
+double max(...), max(const enigma::varargs &t);
+#define max(args...) max((varargs(),args))
 
 #endif // ENIGMA_MATHNC

@@ -99,6 +99,8 @@ struct variant
   types_extrapolate_alldec(variant& operator|=)
   types_extrapolate_alldec(variant& operator^=)
   
+  #undef EVCONST
+  #define EVCONST const
   types_extrapolate_alldec(variant operator+)
   types_extrapolate_alldec(double  operator-)
   types_extrapolate_alldec(double  operator*)
@@ -116,8 +118,7 @@ struct variant
    types_extrapolate_real_p  (prefix,;)\
    types_extrapolate_string_p(prefix,;)\
    prefix (const variant &x) const;\
-   prefix (const variant x);\
-   prefix (const var &x);
+   prefix (const var &x) const;
   
   types_extrapolate_alldec(bool operator==)
   types_extrapolate_alldec(bool operator!=)
@@ -125,19 +126,28 @@ struct variant
   types_extrapolate_alldec(bool operator<=)
   types_extrapolate_alldec(bool operator>)
   types_extrapolate_alldec(bool operator<)
+  #undef EVCONST
+  #define EVCONST
   
   char&     operator[] (int);
   variant&  operator++();
   double    operator++(int);
   variant&  operator--();
   double    operator--(int);
-  bool      operator!();
   variant&  operator*();
+  
+  #undef EVCONST
+  #define EVCONST const
+  bool      operator!();
   double    operator-();
   double    operator+();
+  #undef EVCONST
+  #define EVCONST
   
   ~variant();
 };
+
+
 
 #undef types_extrapolate_alldec
 #define types_extrapolate_alldec(prefix)\
@@ -200,8 +210,8 @@ struct var
   #define types_extrapolate_alldec(prefix)\
    types_extrapolate_real_p  (prefix,;)\
    types_extrapolate_string_p(prefix,;)\
-   prefix (const var& x);\
-   prefix (variant x);
+   prefix (const var& x) EVCONST;\
+   prefix (variant x) EVCONST;
   
   types_extrapolate_alldec(variant& operator+=)
   types_extrapolate_alldec(variant& operator-=)
@@ -214,6 +224,8 @@ struct var
   types_extrapolate_alldec(variant& operator|=)
   types_extrapolate_alldec(variant& operator^=)
   
+  #undef EVCONST
+  #define EVCONST const
   types_extrapolate_alldec(variant operator+)
   types_extrapolate_alldec(double  operator-)
   types_extrapolate_alldec(double  operator*)
@@ -230,10 +242,8 @@ struct var
   #define types_extrapolate_alldec(prefix)\
    types_extrapolate_real_p  (prefix,;)\
    types_extrapolate_string_p(prefix,;)\
-   prefix (const variant &x) const;\
-   prefix (const variant x);\
-   prefix (const var& x) const;\
-   prefix (const var x);
+   prefix (const variant &x) EVCONST;\
+   prefix (const var& x) EVCONST;
   
   types_extrapolate_alldec(bool operator==)
   types_extrapolate_alldec(bool operator!=)
@@ -241,14 +251,21 @@ struct var
   types_extrapolate_alldec(bool operator<=)
   types_extrapolate_alldec(bool operator>)
   types_extrapolate_alldec(bool operator<)
+  #undef EVCONST
+  #define EVCONST
   
   variant&  operator++();
   double    operator++(int);
   variant&  operator--();
   double    operator--(int);
-  bool      operator!();
-  double    operator-();
-  double    operator+();
+  
+  #undef EVCONST
+  #define EVCONST
+  bool      operator!() EVCONST;
+  double    operator-() EVCONST;
+  double    operator+() EVCONST;
+  #undef EVCONST
+  #define EVCONST
   
   variant& operator*  ();
   variant& operator[] (int);

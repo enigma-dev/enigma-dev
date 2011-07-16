@@ -30,13 +30,14 @@
 #include <algorithm>
 #include <vector>
 using namespace std;
+using namespace enigma;
 
 #define v(argv) (*(vector<variant>*)argv)
 
 varargs& varargs::operator,(variant x) { v(argv).push_back(x); argc++; return *this; }
 void varargs::reverse() { std::reverse(v(argv).begin(),v(argv).end()); }
 void varargs::sort() { std::sort(v(argv).begin(),v(argv).end()); }
-variant varargs::get(int i) { return v(argv)[i]; }
+variant varargs::get(int i) const { return v(argv)[i]; }
 varargs::varargs(): argc(0), argv(new vector<variant>) {}
 varargs::varargs(variant x): argc(1), argv(new vector<variant>) { v(argv).push_back(x); }
 varargs::varargs(varargs& other): argc(other.argc), argv(new vector<variant>) { v(argv).swap(v(other.argv)); other.argc = 0; }

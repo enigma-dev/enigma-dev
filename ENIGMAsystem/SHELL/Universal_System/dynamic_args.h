@@ -25,19 +25,23 @@
 **                                                                              **
 \********************************************************************************/
 
-struct varargs
-{
-  int argc;
-  void *argv;
-  #ifndef ENIGMA_PARSER_RUN
-  void sort();
-  void reverse();
-  variant get(int);
-  varargs& operator,(variant);
-  varargs();
-  varargs(variant);
-  varargs(varargs&);
-  ~varargs();
-  #endif
-};
-
+#ifndef _VARARGS_H
+#define _VARARGS_H
+namespace enigma {
+  struct varargs
+  {
+    int argc;
+    void *argv;
+    #ifndef ENIGMA_PARSER_RUN
+    void sort();
+    void reverse();
+    variant get(int) const;
+    varargs& operator,(variant);
+    varargs();
+    varargs(variant);
+    varargs(varargs&);
+    ~varargs();
+    #endif
+  };
+}
+#endif

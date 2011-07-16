@@ -31,10 +31,14 @@
 
 #include "../../Universal_System/collisions_object.h"
 #include "../../Universal_System/instance_system.h" //iter
-#include "../../Universal_System/mathnc.h"
 #include "coll_impl.h"
-#include <cmath>
 #include <limits>
+#include <cmath>
+
+static inline int min(int x, int y) { return x<y? x : y; }
+static inline double min(double x, double y) { return x<y? x : y; }
+static inline int max(int x, int y) { return x>y? x : y; }
+static inline double max(double x, double y) { return x>y? x : y; }
 
 bool place_free(double x,double y)
 {

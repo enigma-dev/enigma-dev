@@ -31,7 +31,6 @@
 #include <string>
 using std::string;
 
-#include "mathnc.h"
 #include "resinit.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../Audio_Systems/audio_mandatory.h"
@@ -45,6 +44,8 @@ using std::string;
 namespace enigma {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
 }
+extern int random_set_seed(int ss);
+extern int mtrandom_seed(int ss);
 
 //This is like main(), only cross-api
 namespace enigma

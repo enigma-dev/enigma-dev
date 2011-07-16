@@ -33,11 +33,15 @@
 #ifndef _GRAPHICS_OBJECT_H
 #define _GRAPHICS_OBJECT_H
 
-#include "var4.h"
-#include "multifunction_variant.h"
+#ifndef INCLUDED_FROM_SHELLMAIN
+  #include "var4.h"
+  #include "spritestruct.h"
+  #include <cstdlib>
+  #include <cmath>
+#endif
+
 #include "planar_object.h"
-#include "mathnc.h"
-#include "spritestruct.h"
+#include "multifunction_variant.h"
 
 namespace enigma
 {
@@ -61,57 +65,14 @@ namespace enigma
       //Depth
       enigma::depthv  depth;
       bool visible;
-
+    
     //Transformations: these are mostly for higher tiers...
       int    sprite_xoffset;
       int    sprite_yoffset;
       double image_xscale;
       double image_yscale;
       double image_angle;
-
-    //Bounding boxes
-      int width()  { return (sprite_index >= 0 ? spritestructarray[sprite_index]->width  : 0); }
-      int height() { return (sprite_index >= 0 ? spritestructarray[sprite_index]->height : 0); }
-
-      double calculate_bbox_left()
-      {
-        const double l = -sprite_xoffset             * cosd(image_angle),
-                     t = -sprite_yoffset             * cosd(image_angle + 90.0),
-                     r = (width()  - sprite_xoffset) * cosd(image_angle + 180.0),
-                     b = (height() - sprite_xoffset) * cosd(image_angle + 270.0);
-        return min(min(l, r), min(t, b));
-      }
-
-      // NOTE: sind(x + 180.0) == -sind(x)
-      double calculate_bbox_top()
-      {
-        const double l = -sprite_xoffset             * sind(image_angle + 90.0),
-                     t = -sprite_yoffset             * sind(image_angle + 180.0),
-                     r = (width()  - sprite_xoffset) * sind(image_angle + 270.0),
-                     b = (height() - sprite_xoffset) * sind(image_angle);
-        return min(min(l, r), min(t, b));
-      }
-
-      double calculate_bbox_right()
-      {
-        const double l = -sprite_xoffset             * cosd(image_angle + 180.0),
-                     t = -sprite_yoffset             * cosd(image_angle + 270.0),
-                     r = (width()  - sprite_xoffset) * cosd(image_angle),
-                     b = (height() - sprite_xoffset) * cosd(image_angle + 90.0);
-        return max(max(l, r), max(t, b));
-      }
-
-      // NOTE: sind(x + 180.0) == -sind(x)
-      double calculate_bbox_bottom()
-      {
-        const double l = -sprite_xoffset             * sind(image_angle + 270.0),
-                     t = -sprite_yoffset             * sind(image_angle),
-                     r = (width()  - sprite_xoffset) * sind(image_angle + 90.0),
-                     b = (height() - sprite_xoffset) * sind(image_angle + 180.0);
-        return max(max(l, r), max(t, b));
-      }
-
-
+    
     //Constructors
       object_graphics();
       object_graphics(unsigned x, int y);

@@ -48,7 +48,8 @@
 #include <string> //Ease of use
 #include <iostream> //Print shit
 #include <vector> //Store case labels
-#include <stdio.h> //stdout, fflush
+#include <cstdlib> //stdout, fflush
+#include <cstdio> //stdout, fflush
 using namespace std; //More ease
 #include "../externs/externs.h" //To interface with externally defined types and functions
 #include "parser_components.h" //duh
@@ -257,7 +258,7 @@ bool is_integer(const lexpair& lp) {
 }
 bool is_float(const lexpair& lp) {
   for (pt i = 0; i < lp.code.length(); i++)
-    if (lp.synt[i] != '0' or lp.code[i] == '.') return 0;
+    if (lp.synt[i] != '0') return 0;
   return 1;
 }
 bool is_literal(const lexpair& lp) {
@@ -272,11 +273,10 @@ bool is_literal(const lexpair& lp) {
     }
   return 1;
 }
-int make_hash(const lexpair& lp, parsed_event* pev, FILE* _a) {
-  fprintf(_a,"Make hash of %s[%s]\n",lp.code.c_str(),lp.synt.c_str());
+int make_hash(const lexpair& lp, parsed_event* pev) {
   if (!is_literal(lp)) return -1;
   if (is_integer(lp)) return atol(lp.code.c_str());
-  if (is_float(lp)) return atof(lp.code.c_str()) * 65536;
+  if (is_float(lp)) return int(atof(lp.code.c_str()) * 65536);
   
   // Now we assume it's a string and apply a simple hash
   int r = 0;
@@ -286,7 +286,6 @@ int make_hash(const lexpair& lp, parsed_event* pev, FILE* _a) {
       if (a[0] == '"' and a[a.length() - 1] == '"') a = a.substr(1,a.length()-2);
       else if (a[0] == '\'' and a[a.length() - 1] == '\'') a = a.substr(1,a.length()-2);
     }
-    fprintf(_a," => string(%s)\n",a.c_str());
     for (pt ii = 0; ii < a.length(); ii++)
       r = 31*r + a[ii];
   }
@@ -523,8 +522,6 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   // Handle switch statements. Badly.
   if (pev) // We need to know this to deal with string hashes
   {
-    FILE* a=fopen("/home/josh/Desktop/lex.txt","ab");
-    if (a) { fputs(code.c_str(),a);  fprintf(a,"\n"); fputs(synt.c_str(),a); fprintf(a,"\n"); }
     static int switch_count = 0;
     int string_index = 0; // Number of strings before this statement
     for (pt pos = 0; pos < synt.length(); pos++)
@@ -541,7 +538,6 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       if (ss != "switch")
         continue;
       
-      fprintf(a,"Found switch\n");
       int strs_this_statement = 0;
       const pt switch_value_spos = pos;
       
@@ -638,7 +634,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         // Order hashes
         map<int,vector<int> > hashes; // hash KEY by vector of case id's VALUE
         for (size_t i = 0; i < cases.size(); i++) {
-          int hash = make_hash(cases[i], pev, a);
+          int hash = make_hash(cases[i], pev);
           hashes[hash].push_back(i);
         }
         
@@ -709,10 +705,6 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       else {
         pos = switch_start_pos + 5; 
       }
-    }
-    if (a) { 
-      fprintf(a,"%s\n%s\n", code.c_str(), synt.c_str());
-      fprintf(a,"\n"); fclose(a);
     }
   }
   

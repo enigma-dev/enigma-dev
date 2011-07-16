@@ -90,6 +90,20 @@ double direction_difference(double dir1,double dir2) {
 double point_direction(double x1,double y1,double x2,double y2) { return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }
 double point_distance(double x1,double y1,double x2,double y2)  { return hypot(x2-x1,y2-y1); }
 
+#include "dynamic_args.h"
+double max(const enigma::varargs &t) 
+{
+  register int ret = 0, tst;
+  for (int i = 0; i < t.argc; i++)
+    if ((tst = t.get(i)) > ret)
+      ret = tst;
+  return ret;
+}
+
+
+// For added randomness
+// ...................................................
+
 #define UPPER_MASK 0x80000000 // most significant w-r bits
 #define LOWER_MASK 0x7fffffff // least significant r bits
 

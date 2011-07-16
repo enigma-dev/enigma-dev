@@ -141,9 +141,9 @@ int color_get_saturation(int color)
 	return cmpmax  ?  255 - int(255 * (r<g ? (r<b?r:b) : (g<b?g:b)) / double(cmpmax))  :  0;
 }
 
-inline int min(int x,int y) { return x<y ? x:y; }
-inline int max(int x,int y) { return x>y ? x:y; }
-inline int bclamp(int x)    { return x > 255 ? 255 : x < 0 ? 0 : x; }
+static inline int min(int x,int y) { return x<y ? x:y; }
+static inline int max(int x,int y) { return x>y ? x:y; }
+static inline int bclamp(int x)    { return x > 255 ? 255 : x < 0 ? 0 : x; }
 
 int make_color_hsv(int hue,int saturation,int value)
 {
