@@ -9,7 +9,6 @@
 package org.enigma;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -20,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -137,63 +135,6 @@ public class EFileWriter
 		public void finish() throws IOException
 			{
 			last.close();
-			}
-		}
-
-	/**
-	 * Convenience wrapper to allow writing buffered text to a zip.
-	 * Always invoke "next" prior to attempting to write any data.
-	 */
-	public static class ZipOutputWriter2 extends BufferedWriter
-		{
-		protected ZipOutputStream os;
-
-		public ZipOutputWriter2(OutputStream os)
-			{
-			this(new ZipOutputStream(os));
-			}
-
-		public ZipOutputWriter2(ZipOutputStream os)
-			{
-			super(new OutputStreamWriter(os));
-			this.os = os;
-			}
-
-		public void write(byte[] data) throws IOException
-			{
-			os.write(data);
-			}
-
-		public void writeln(String str) throws IOException
-			{
-			write(str);
-			newLine();
-			}
-
-		/**
-		 * Begins writing a new ZIP file entry and positions the stream to the
-		 * start of the entry data. Closes the current entry if still active.
-		 */
-		public void next(String name) throws IOException
-			{
-			flush();
-			os.putNextEntry(new ZipEntry(name));
-			}
-
-		/**
-		 * Finishes writing the contents of the ZIP output stream without closing
-		 * the underlying stream. This is useful if you wish to use another compression
-		 * method or wish to write more data beside the zip file.
-		 */
-		public void finish() throws IOException
-			{
-			os.finish();
-			}
-
-		public OutputStream toStream() throws IOException
-			{
-			flush();
-			return os;
 			}
 		}
 

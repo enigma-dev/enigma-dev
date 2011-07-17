@@ -102,8 +102,9 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 	private Map<JComboBox,String> targets;
 	private JButton bDef, bGlobLoc;
 	private JButton bInit, bClean;
+	CodeHolder sDef;
 	private CodeFrame cfDef, cfGlobLoc, cfInit, cfClean;
-	private CodeHolder sDef, sGlobLoc, sInit, sClean;
+	private CodeHolder sGlobLoc, sInit, sClean;
 	private CustomFileChooser fc;
 
 	private JTextField tfAuth;

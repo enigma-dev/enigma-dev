@@ -756,6 +756,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		else if (source instanceof CodeFrame)
 			{
 			CodeFrame cf = (CodeFrame) source;
+			if (esf != null && cf.codeHolder == esf.sDef) return;
 			tool = cf.tool;
 			code = cf.code;
 			status = cf.status;
