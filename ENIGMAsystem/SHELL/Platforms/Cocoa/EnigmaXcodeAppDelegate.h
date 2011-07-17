@@ -42,6 +42,8 @@
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
 
+- (void)applicationWillTerminate:(NSNotification *)aNotification;
+
 - (void)changeVisible;
 
 

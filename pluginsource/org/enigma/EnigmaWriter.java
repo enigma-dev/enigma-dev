@@ -822,10 +822,17 @@ public final class EnigmaWriter
 
 	public static boolean actionDemise = false;
 
+	static int numberOfBraces=0; //gm ignores brace actions which are in the wrong place or missing
+	static int numberOfIfs=0; //gm allows multipe else actions after 1 if, so its important to track the number
+	
 	public static String getActionsCode(ActionContainer ac)
 		{
 		final String nl = System.getProperty("line.separator"); //$NON-NLS-1$
 		StringBuilder code = new StringBuilder();
+		
+		numberOfBraces=0;
+		numberOfIfs=0;
+		
 		for (Action act : ac.actions)
 			{
 			LibAction la = act.getLibAction();
@@ -844,15 +851,23 @@ public final class EnigmaWriter
 				{
 				case Action.ACT_BEGIN:
 					code.append('{');
+					numberOfBraces++;
 					break;
 				case Action.ACT_CODE:
-					code.append(args.get(0).getVal()).append(nl);
+					code.append("{"+args.get(0).getVal()+"/**/\n}").append(nl); //surround with '{'
 					break;
 				case Action.ACT_ELSE:
+				{
+					if (numberOfIfs>0) {
 					code.append("else "); //$NON-NLS-1$
+					numberOfIfs--;}
+				}
 					break;
 				case Action.ACT_END:
+					if (numberOfBraces>0) 
+					{
 					code.append('}');
+					numberOfBraces--; }
 					break;
 				case Action.ACT_EXIT:
 					code.append("exit "); //$NON-NLS-1$
@@ -873,40 +888,37 @@ public final class EnigmaWriter
 					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF)
 						{
 						if (la.question)
-							{
-							if (!actionDemise)
-								{
-								//								String mess = "Warning, you have a D&D action which is unsupported by this compiler."
-								//										+ " This and future unsupported D&D actions will be discarded. (Question + Applies To"
-								//										+ " in moment/event " + ac.toString() + " in library ";
-								String library = (la.parent == null || la.parent.tabCaption.isEmpty()) ? Integer.toString(la.parentId)
-										: la.parent.tabCaption;
-								//								if (la.parent == null || la.parent.tabCaption.length() == 0)
-								//									mess += la.parentId;
-								//								else
-								//									mess += la.parent.tabCaption;
-								String action = la.name.length() == 0 ? Integer.toString(la.id) : la.name;
-								//								mess += " action " + (la.name.length() == 0 ? la.id : la.name) + ")";
-								String mess = Messages.format(
-										"EnigmaWriter.UNSUPPORTED_DND_QA",ac.toString(),library,action); //$NON-NLS-1$
-								JOptionPane.showMessageDialog(null,mess);
-								actionDemise = true;
-								}
-							continue;
-							}
+							{ 
+							/* Question action using with statement */
+							if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
+								code.append("with (other) "); //$NON-NLS-1$
+							else
+								if (apto.get() !=null)
+								code.append("with (").append(apto.get().getName()).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
+								else
+									code.append("/*null with!*/"); //$NON-NLS-1$
+							
+							} else {
 						if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
 							code.append("with (other) {"); //$NON-NLS-1$
 						else
+							if (apto.get() !=null)
 							code.append("with (").append(apto.get().getName()).append(") {"); //$NON-NLS-1$ //$NON-NLS-2$
+							else
+								code.append("/*null with!*/{"); //$NON-NLS-1$
+							}
 						}
-					if (la.question) code.append("if "); //$NON-NLS-1$
+					if (la.question) {
+						code.append("if "); //$NON-NLS-1$
+						numberOfIfs++;
+					}
 					if (act.isNot()) code.append('!');
 					if (la.allowRelative)
 						{
 						if (la.question)
-							code.append("(argument_relative = ").append(act.isRelative()).append(", "); //$NON-NLS-1$ //$NON-NLS-2$
+							code.append("(argument_relative := ").append(act.isRelative()).append(", "); //$NON-NLS-1$ //$NON-NLS-2$
 						else
-							code.append("{argument_relative = ").append(act.isRelative()).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
+							code.append("{argument_relative := ").append(act.isRelative()).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					if (la.question && la.execType == Action.EXEC_CODE)
 						code.append("lib").append(la.parentId).append("_action").append(la.id); //$NON-NLS-1$ //$NON-NLS-2$
@@ -915,21 +927,32 @@ public final class EnigmaWriter
 					if (la.execType == Action.EXEC_FUNCTION)
 						{
 						code.append('(');
+						
 						for (int i = 0; i < args.size(); i++)
 							{
-							if (i != 0) code.append(',');
+							
+							if ( (toString(args.get(i)).equals("")||toString(args.get(i)).equals("  ")||toString(args.get(i)).equals(" ")) && args.size()>7) continue; //required with due to bug with CLI which thinks actions with no arguments have >7!
+							if (i != 0) code.append(" , ");
+							if (toString(args.get(i)).equals("")||toString(args.get(i)).equals(" ")||toString(args.get(i)).equals("  ")) code.append("0");
+							
 							code.append(toString(args.get(i)));
 							}
 						code.append(')');
 						}
-					if (la.allowRelative) code.append(la.question ? ')' : '}');
+					if (la.allowRelative) code.append(la.question ? ')' : "\n}");
 					code.append(nl);
 
-					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF) code.append('}');
+					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF && (!la.question)) code.append("\n}");
 					}
 					break;
 				}
 			}
+		if (numberOfBraces>0) {
+			//someone forgot the closing block action
+			for(int i=0;i<numberOfBraces;i++){
+				code.append("\n}");
+			}
+		}
 		return code.toString();
 		}
 
@@ -943,7 +966,7 @@ public final class EnigmaWriter
 				if (val.startsWith("\"") || val.startsWith("'")) return val; //$NON-NLS-1$ //$NON-NLS-2$
 				//else fall through
 			case Argument.ARG_STRING:
-				return "\"" + val.replace("\\","\\\\").replace("\"","\\\"") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				return "\"" + val.replace("\\","\\\\").replace("\"","'") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 			case Argument.ARG_BOOLEAN:
 				return Boolean.toString(!val.equals("0")); //$NON-NLS-1$
 			case Argument.ARG_MENU:

@@ -113,7 +113,7 @@ void parser_init()
   edl_tokens["with"]   = 's';
   //For gets an f
   edl_tokens["for"] = 'f';
-  
+
   //Type flags
   //token is 't'
   edl_tokens["unsigned"] = 't';
@@ -125,7 +125,7 @@ void parser_init()
   edl_tokens["const"]    = 't';
   edl_tokens["volatile"] = 't';
   edl_tokens["static"]   = 't';
-  
+
   //These are all templates, which can later be revised to 'd' when passed a parameter in <>
   //token is also 't'
   edl_tokens["const_cast"]       = 't';
@@ -158,17 +158,17 @@ string parser_main(string code, parsed_event* pev)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
-  
+
   //For the sake of efficiency, however, we will reduce the number of passes by replacing multiple things at once.
-  
+
   string synt;
-  
+
   //Reset things
     //Nothing to reset :trollface:
-  
+
   //Initialize us a spot in the global scope
   initscope("script scope");
-  
+
   if (pev) {
     pev->strc = 0; //Number of strings in this code
     parser_ready_input(code,synt,pev->strc,pev->strs);
@@ -179,18 +179,18 @@ string parser_main(string code, parsed_event* pev)
     unsigned int strct = 0;
     parser_ready_input(code,synt,strct,strst);
   }
-  
+
   parser_reinterpret(code,synt);
-  
+
   parser_add_semicolons(code,synt);
-  
+
   //cout << synt << endl;
   //cout << code << endl;
-  
+
   if (pev) { cout << "collecting variables..."; fflush(stdout);
     collect_variables(code,synt,pev); cout << " done>"; fflush(stdout);
   }
-  
+
   return code;
 }
 
@@ -215,7 +215,7 @@ pt move_to_beginning(string& code, string& synt, pt pos)
   for (const char c = synt[pos--]; synt[pos] == c; pos--)
     if (!pos) goto hell;
   pos++;
-  
+
   hell:
   if (pos) {
     if (synt[pos-1] == '.')
@@ -225,7 +225,7 @@ pt move_to_beginning(string& code, string& synt, pt pos)
     if (synt[pos-1] == ':' and synt[pos-2] == ':')
       { pos -= 3; goto backloop; }
   }
-  
+
   return pos;
 }
 
@@ -248,7 +248,7 @@ extern externs *enigma_type__var, *enigma_type__variant;
 // pos and len are the position and length of the entire case label, for use when replacing the code.
 struct lexpair {
   string code, synt, mylabel, mylsynt; pt pos, len; int stri, strc;
-  lexpair(string c, string s, pt p, pt l, int si, int sc): 
+  lexpair(string c, string s, pt p, pt l, int si, int sc):
     code(c), synt(s), mylabel(), mylsynt(), pos(p), len(l), stri(si), strc(sc) {}
 };
 bool is_integer(const lexpair& lp) {
@@ -277,7 +277,7 @@ int make_hash(const lexpair& lp, parsed_event* pev) {
   if (!is_literal(lp)) return -1;
   if (is_integer(lp)) return atol(lp.code.c_str());
   if (is_float(lp)) return int(atof(lp.code.c_str()) * 65536);
-  
+
   // Now we assume it's a string and apply a simple hash
   int r = 0;
   for (int i = 0; i < lp.strc; i++) {
@@ -296,17 +296,17 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
 {
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
-  
+
   int slev = 0;
   darray<localscope*> sstack;
   sstack[slev] = new localscope();
-  
+
   bool indecl = 0, deceq = 0;
   string dtype, dname, dpre, dsuf;
   int inbrack = 0, level = 0;
   bool rhs = false;
   int infor = 0;
-  
+
   for (pt pos = 0; pos < synt.length(); pos++)
   {
     if (synt[pos] == 't')
@@ -314,10 +314,10 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       pt spos = pos;
       while (synt[++pos] == 't'); // Move to end of type
       pos += parser_fix_templates(code,pos,spos,&synt); // This will default template parameters for you and return the change in end position
-      
+
       if (rhs or indecl or synt[pos] == '(') // It's not a declaration if we're on the right of an =, already in a declaration, or are a cast (followed by a parenthesis)
         { pos--; continue; }
-      
+
       indecl = true; dtype = code.substr(spos,pos-spos);
       dpre = dsuf = "";
       cout << "TYPE [" << dtype << "]" << endl;
@@ -327,16 +327,16 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     {
       const pt epos = pos--;
       pos = move_to_beginning(code,synt,pos);
-      
+
       string exp = code.substr(pos,epos-pos), // Copy the expression being operated upon by .
          expsynt = synt.substr(pos,epos-pos); // Copy the lex of it, too
       const pt ebp = pos; // Expression's beginning position, not a register.
       pt ep = pos = epos; // Restore our original ending position.
-      
+
       // Determine the member being accessed
       while (synt[++ep] == 'n');
       string member = code.substr(epos+1,ep-epos-1);
-      
+
       // Determine the type of the left-hand expression
       cout << "GET TYPE OF " << exp << endl;
       onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
@@ -347,9 +347,9 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         ct = ct->type, tf = (ct->members.find(member) != ct->members.end());
       if (!tf and find_in_all_ancestors_generic(ct,member))
         ct = ext_retriever_var->parent, tf = true;
-      
+
       cout << exp << ": " << n.type->name << " :: " << member << " => " << tf << " _ " << level << endl;
-      
+
       if (!tf) // No member by this name can be accessed
       {
         string repstr;
@@ -363,19 +363,19 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         {
           repstr = "enigma::varaccess_";
           repsyn = "nnnnnnnnnnnnnnnnnn";
-          
+
           repstr += member;
           repsyn += string(member.length(),'n');
-          
+
           repstr += "(int(";
           repsyn += "(ccc(";
-          
+
           repstr += exp;
           repsyn += expsynt;
-          
+
           repstr += "))";
           repsyn += "))";
-          
+
           add_dot_accessed_local(member);
         }
         code.replace(ebp, exp.length() + 1 + member.length(), repstr);
@@ -437,8 +437,8 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           inbrack--;
         level--;
         break;
-      
-      
+
+
       case ';':
         if (level and !infor)
           cout << "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
@@ -476,12 +476,12 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           }
           while (synt[++pos] == 'n');
           pos--; break;
-      
+
       case '(': level++; break;
       case ')':
           if (level == 1 and infor == 1)
             infor = 0;
-          level--; 
+          level--;
         break;
       case ':':
         if (synt[pos + 1] == '=') // EXPLICIT assign
@@ -492,8 +492,8 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           rhs |= !level;
         }
         break;
-      
-      
+
+
       case '!':
           goto notAss;
       case '>': case '<':
@@ -511,14 +511,14 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
             if (synt[pos+1] == '=')
               pos++; // Already know it isn't an assignment; already handled.
         break;
-      
+
       case 'f': // We need to be aware of for loops.
         infor = 3;
       default:
         while (synt[pos] == synt[pos+1]) pos++;
     }
   }
-  
+
   // Handle switch statements. Badly.
   if (pev) // We need to know this to deal with string hashes
   {
@@ -530,29 +530,29 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         string_index += synt[pos] == '"' or synt[pos] == '\'';
         continue;
       }
-      
+
       const pt switch_start_pos = pos;
-      
+
       while (synt[++pos] == 's');
       string ss(code,switch_start_pos,pos-switch_start_pos);
       if (ss != "switch")
         continue;
-      
+
       int strs_this_statement = 0;
       const pt switch_value_spos = pos;
-      
+
       while (synt[pos++] != '{') { // We can skip the first char, because at this juncture, it's garanteed to be an opening parenthesis.
         string_index += synt[pos] == '"' or synt[pos] == '\''; // Increment the overall index here; we'll be skipping these strings later on.
       }
       const string
         svalue   (code, switch_value_spos, pos - switch_value_spos - 1),
         svaluelex(synt, switch_value_spos, pos - switch_value_spos - 1);
-      
+
       // Some crap we need to know
       int level = 1;
       vector<lexpair> cases;
       pt default_start_pos = 0; // 0 for no default, nonzero indicates position
-      
+
       while (level)
       {
         if (synt[pos] == '{')
@@ -585,7 +585,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         }
         if (synt[pos] == '"' or synt[pos] == '\'')
           strs_this_statement++;
-        pos++; 
+        pos++;
       }
       int handicap = 0;
       size_t ci = 0;
@@ -601,49 +601,49 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         int delta = 0;
         code.insert(pos,"}");
         synt.insert(pos,"}");
-        
+
         char cname[12];
         sprintf(cname,"%d",switch_count);
         const string switch_index_code = cname;
         const string switch_index_lexn(switch_index_code.length(), 'n'), switch_index_lexb(switch_index_code.length(), 'b');
-        
+
         if (default_start_pos) {
           code.replace(default_start_pos, 7, "$s" + switch_index_code + "default");
           synt.replace(default_start_pos, 7, "bb" + switch_index_lexb + "bbbbbbb");
         }
-        
+
         for (size_t i = 0; i < cases.size(); i++)
         {
           sprintf(cname,"$s%dc%d",switch_count,(int)i);
           string rep = cname, res = string(rep.length(),'b');
-          
+
           code.replace(cases[i].pos + delta, cases[i].len, cases[i].mylabel = rep);
           synt.replace(cases[i].pos + delta, cases[i].len, cases[i].mylsynt = res);
-          
+
           delta += int(rep.length() - cases[i].len);
         }
         sprintf(cname,"$s%dvalue",switch_count);
         string valuevar = cname;
-        
+
         string icode = "{", isynt = "{";
         icode += "const variant" + valuevar + "=" + svalue + ";";
         isynt += "ttttttttttttt" + string(valuevar.length(),'n') + "=" + svaluelex + ";";
         icode += "switch(enigma::switch_hash(" + valuevar + ")){";
         isynt += "ssssss(nnnnnnnnnnnnnnnnnnn(" + string(valuevar.length(), 'n') + ")){";
-        
+
         // Order hashes
         map<int,vector<int> > hashes; // hash KEY by vector of case id's VALUE
         for (size_t i = 0; i < cases.size(); i++) {
           int hash = make_hash(cases[i], pev);
           hashes[hash].push_back(i);
         }
-        
+
         // This'll be tacked on whenever the default is reached
         string deflcode = "default:$s" + switch_index_code + "nohash:",
                deflsynt = "bbbbbbb:bb" + switch_index_lexb + "bbbbbb:";
         string deflsufcode = default_start_pos ? "goto $s" + switch_index_code + "default;" : "break;",
                deflsufsynt = default_start_pos ? "bbbbbbb" + switch_index_lexb + "bbbbbbb;" : "bbbbb;";
-        
+
         // Defragment string IDs and generate case labels
         if (cases.size() > 1)
         {
@@ -651,7 +651,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           map<int,string> reorder;
           for (int i = lower_bound; i <= upper_bound; i++)
             reorder[i] = pev->strs[i];
-          
+
           int overwrite_at = lower_bound;
           for (map<int,vector<int> >::iterator i = hashes.begin(); i != hashes.end(); i++)
           {
@@ -671,7 +671,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
               icode += "if($s" + switch_index_code + "value==" + cases[casenum].code + ")goto " + cases[casenum].mylabel + ';';
               isynt += "ss(nn" + switch_index_lexn + "nnnnn==" + cases[casenum].synt + ")bbbbb" + cases[casenum].mylsynt + ';';
               string_index += cases[casenum].strc;
-              
+
               for (int iii = 0; iii < cases[casenum].strc; iii++)
               {
                 int indx = cases[casenum].stri + iii;
@@ -688,26 +688,28 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
               isynt += "bbbbbbb" + switch_index_lexb + "bbbbbb;";
             }
           }
-          
+
           for (map<int,string>::iterator i = reorder.begin(); i != reorder.end(); i++)
             pev->strs[overwrite_at++] = i->second;
         }
         icode += deflcode + deflsufcode;
         isynt += deflsynt + deflsufsynt;
-        
+
         pos = switch_start_pos;
         code.replace(pos, switch_value_spos-pos + svalue.length() + 1, icode);
         synt.replace(pos, switch_value_spos-pos + svalue.length() + 1, isynt);
-        
+
         pos += icode.length();
         switch_count++;
       }
       else {
-        pos = switch_start_pos + 5; 
+       	code.replace(switch_value_spos, svalue.length(), "(int" + svalue + ')');
+        synt.replace(switch_value_spos, svalue.length(), "(ccc" + svaluelex + ')');
+        pos = switch_start_pos + 5;
       }
     }
   }
-  
+
   while (slev) delete sstack[slev--];
   delete sstack[0];
   return -1;

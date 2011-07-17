@@ -26,7 +26,7 @@
 #include <X11/Xlib.h>
 #include "ObjectiveC.h"
 
-std::string working_directory;
+std::string working_directory, temp_directory;
 
 Display *disp;
 Window win;

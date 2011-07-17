@@ -36,11 +36,14 @@
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
 {
-	if (visible) {
+	/*if (visible) {
     return YES;
 	} else {
 		return NO; //the screen is just hidden
-	}
+	}*/
+    [enigmaview terminateEnigma];
+    
+    return NO;
 }
 
 - (void)changeVisible { 
@@ -52,6 +55,12 @@
 } 
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
+     NSLog(@"applicationShouldTerminate");
+    [enigmaview terminateEnigma];
+}
+
+- (void)applicationWillTerminate:(NSNotification *)aNotification {
+    NSLog(@"applicationWillTerminate");
     [enigmaview terminateEnigma];
 }
 

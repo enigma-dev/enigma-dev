@@ -68,7 +68,7 @@ inline void action_move_to(double xx,double yy) {
 inline void action_create_object(int object, double x, double y) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-        instance_create(x+inst->x, y+inst->y, object);
+        instance_create(inst->x+x, inst->y+y, object);
     }
     else instance_create(x, y, object);
 }
@@ -134,6 +134,14 @@ inline void action_set_gravity(double direction,double newgravity) {
     } else {
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction=direction;
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity=newgravity;
+    }
+}
+
+inline void action_set_friction(double newfriction) {
+	if (argument_relative) {
+        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction+=newfriction;
+    } else {
+        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction=newfriction;
     }
 }
 
@@ -374,6 +382,11 @@ inline void action_next_room(int transition) {
     room_goto_next();
 }
 
+inline void action_another_room(int room, int transition) {
+	//transition_kind=transition;
+	room_goto(room);
+} 
+
 inline void action_font(int font,int align) {
     draw_set_font(font); 
     // draw_set_halign(align);
@@ -411,7 +424,7 @@ void move_wrap(bool hor, bool vert, double margin)
     }
 } //RELOCATE ME
 
-void action_wrap(int direction) {
+inline void action_wrap(int direction) {
     if (direction == 0)
         move_wrap(1,0,0);
     if (direction == 1)
@@ -420,7 +433,7 @@ void action_wrap(int direction) {
         move_wrap(1,1,0);
 }
 
-void action_set_motion(double dir,double nspeed) {
+inline void action_set_motion(double dir,double nspeed) {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
     if (argument_relative) {
         inst->hspeed+= (nspeed) * cos(degtorad((dir))); 
@@ -452,9 +465,17 @@ void motion_add(double newdirection, double newspeed) //RELOCATE ME
 }
 //#define motion_add(newdirection,newspeed) hspeed+= (newspeed) * cos(degtorad((newdirection))); vspeed-= (newspeed) * sin(degtorad((newdirection)));
 
-void game_restart() { //RELOCATE ME
+inline void game_restart() { //RELOCATE ME
     room_goto_first();
 }
 
 void action_restart_game();
 #define action_restart_game game_restart
+
+
+inline bool action_if_collision(double x, double y,int object) {
+        return !action_if_empty(x,y,object); //Already takes argument_relative into account
+}
+
+
+
