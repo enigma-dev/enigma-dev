@@ -66,7 +66,7 @@ namespace enigma
 {
   roomstruct** roomdata;
   roomstruct** roomorder;
-  
+
   void roomstruct::gotome()
   {
     //Destroy all objects
@@ -80,18 +80,18 @@ namespace enigma
       instance_destroy(it->inst->id);
     }
     enigma::nodestroy = 0;
-    
+
     // Set the index to self
     room.rval.d = id;
-    
+
     room_caption = cap;
     room_width   = width;
     room_height  = height;
     room_speed   = spd;
-    
+
     background_color = backcolor;
-    background_showcolor = (backcolor!=-1);
-      
+    background_showcolor = drawbackcolor;
+
     //Backgrounds start
     for (int i=0;i<8;i++)
     {
@@ -104,7 +104,7 @@ namespace enigma
       //background_stretch? = backs[i].stretch;
     }
     //Backgrounds end
-      
+
       //Tiles start
       drawing_depths.clear();
       for (int tilei=0; tilei<enigma::roomdata[room]->tilecount; tilei++) {
@@ -112,9 +112,9 @@ namespace enigma
           drawing_depths[t.depth].tiles.push_back(enigma::roomdata[room]->tiles[tilei]);
       }
       //Tiles end
-    
+
     view_enabled = views_enabled;
-    
+
     for (int i=0;i<8;i++)
     {
       view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
@@ -123,7 +123,7 @@ namespace enigma
       view_hborder[i] = views[i].hborder; view_vborder[i] = views[i].vborder; view_hspeed[i] = views[i].hspd; view_vspeed[i] = views[i].vspd;
       view_visible[i] = (bool)views[i].start_vis;
     }
-    
+
     int xm = int(room_width), ym = int(room_height);
     if (view_enabled)
     {
@@ -146,7 +146,7 @@ namespace enigma
     }
     createcode();
   }
-  
+
   extern int room_loadtimecount;
   extern roomstruct grd_rooms[];
   extern int room_idmax;
@@ -203,7 +203,7 @@ int room_goto_absolute(int index)
 	errcheck_o(index,"Room index out of range");
 	enigma::roomstruct *rit = enigma::roomorder[index];
 	int indx = rit->id;
-	
+
 	enigma::roomdata[indx]->gotome();
 	return 0;
 }
@@ -226,10 +226,10 @@ int room_goto_next()
 {
     enigma::roomstruct *rit = enigma::roomdata[(int)room.rval.d];
     errcheck((int)room.rval.d,"Going to next room from invalid room. wat");
-    
+
     rit = enigma::roomorder[rit->order + 1];
     errcheck(rit->order+1,"Going to next room after last");
-    
+
     rit->gotome();
     return 0;
 }
@@ -238,10 +238,10 @@ int room_goto_previous()
 {
     enigma::roomstruct *rit = enigma::roomdata[(int)room.rval.d];
     errcheck((int)room.rval.d,"Going to next room from invalid room. wat");
-    
+
     rit = enigma::roomorder[rit->order - 1];
     errcheck(rit->order-1,"Going to next room after last");
-    
+
     rit->gotome();
     return 0;
 }

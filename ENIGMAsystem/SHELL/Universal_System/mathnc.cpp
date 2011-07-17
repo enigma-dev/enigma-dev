@@ -36,15 +36,29 @@ double bessel_y0(double x) { return y0(x); }
 double bessel_y1(double x) { return y1(x); }
 double bessel_yn(int x, double y) { return yn(x,y); }
 
-double abs(variant x) { return fabs(double(x)); }
-double abs(var x)     { return fabs(double(x)); }
+double abs(const variant& x) { return fabs(double(x)); }
+double abs(const var& x)     { return fabs(double(x)); }
+
+//overloading
+double ceil(const variant& x)              { return ceil((double)x); }
+double floor(const variant& x)             { return floor((double)x); }
+double exp(const variant& x)               { return exp((double)x); }
+double sqrt(const variant& x)              { return sqrt((double)x); }
+double log10(const variant& x)             { return log10((double)x); }
+double sin(const variant& x)               { return sin((double)x); }
+double cos(const variant& x)               { return cos((double)x); }
+double tan(const variant& x)               { return tan((double)x); }
+
+double ceil(const var& x)              { return ceil((double)x); }
+double floor(const var& x)             { return floor((double)x); }
+double exp(const var& x)               { return exp((double)x); }
+double sqrt(const var& x)              { return sqrt((double)x); }
+double log10(const var& x)             { return log10((double)x); }
+double sin(const var& x)               { return sin((double)x); }
+double cos(const var& x)               { return cos((double)x); }
+double tan(const var& x)               { return tan((double)x); }
 
 
-
-//double log10(double x){return log10(x);}
-//double sin(double x){return sin(x);}
-//double cos(double x){return cos(x);}
-//double tan(double x){return tan(x);}
 double round(double x)            { return lrint(x); }
 double sqr(double x)              { return x*x;      }
 double power(double x,double p)   { return pow(x,p); }
@@ -69,8 +83,6 @@ double arccosd(double x)           { return acos(x)    * 180.0 / M_PI; }
 double arctand(double x)           { return atan(x)    * 180.0 / M_PI; }
 double arctand2(double y,double x) { return atan2(y,x) * 180.0 / M_PI; }
 
-double min(double x,double y)     { return fmin(x,y);   }
-double max(double x,double y)     { return fmax(x,y);   }
 int sign(double x)                { return (x>0)-(x<0); }
 int cmp(double x,double y)        { return (x>y)-(x<y); }
 double frac(double x)             { return x-(int)x;    }
@@ -91,15 +103,44 @@ double point_direction(double x1,double y1,double x2,double y2) { return fmod((a
 double point_distance(double x1,double y1,double x2,double y2)  { return hypot(x2-x1,y2-y1); }
 
 #include "dynamic_args.h"
-double max(const enigma::varargs &t) 
+#include <float.h> //maxiumum values for certain datatypes. Useful for min()
+#include <list>
+double max(const enigma::varargs &t)
 {
-  register int ret = 0, tst;
+  register double ret = 0, tst;
   for (int i = 0; i < t.argc; i++)
     if ((tst = t.get(i)) > ret)
       ret = tst;
   return ret;
 }
 
+double min(const enigma::varargs &t)
+{
+  register double ret = DBL_MAX, tst;
+  for (int i = 0; i < t.argc; i++)
+    if ((tst = t.get(i)) < ret)
+      ret = tst;
+  return ret;
+}
+
+double median(const enigma::varargs &t)
+{
+  std::list<double> numbers;
+  for (int i = 0; i < t.argc; i++)
+    numbers.push_back(t.get(i));
+  numbers.sort();
+  std::list<double>::iterator it = numbers.begin();
+  advance(it,(numbers.size()-1)/2);
+  return *it;
+}
+
+double mean(const enigma::varargs &t)
+{
+  register double ret = 0;
+  for (int i = 0; i < t.argc; i++)
+      ret += t.get(i);
+  return ret/t.argc;
+}
 
 // For added randomness
 // ...................................................
@@ -203,6 +244,7 @@ int mtrandom_seed(int x){
 }
 
 int random_integer(int x){return x>0?random32()*(x/0xFFFFFFFF):0;}
+int irandom(int x){return x>0?random32()*(x/0xFFFFFFFF):0;}
 //END MERSENNE
 
 double random(double n) //Do not fix. Based off of Delphi prng

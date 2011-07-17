@@ -48,8 +48,8 @@
 #error ln2math and stop including this damn header.
 #endif
 
-double abs(struct variant x);
-double abs(struct var x);
+double abs(struct variant& x);
+double abs(struct var& x);
 
 const double pi = M_PI;
 
@@ -61,6 +61,25 @@ int random_integer(int x);
 unsigned int random32();
 double mtrandom();
 int mtrandom_seed(int x);
+
+//overloading
+double ceil(const variant& x);
+double floor(const variant& x);
+double exp(const variant& x);
+double sqrt(const variant& x);
+double log10(const variant& x);
+double sin(const variant& x);
+double cos(const variant& x);
+double tan(const variant& x);
+
+double ceil(const var& x);
+double floor(const var& x);
+double exp(const var& x);
+double sqrt(const var& x);
+double log10(const var& x);
+double sin(const var& x);
+double cos(const var& x);
+double tan(const var& x);
 
 double round(double x);
 double sqr(double x);
@@ -87,8 +106,6 @@ double arccosd(double x);
 double arctand(double x);
 double arctand2(double y,double x);
 
-double min(double value1, double value2);
-double max(double value1, double value2);
 int sign(double x);
 double frac(double x);
 
@@ -107,4 +124,12 @@ double point_distance(double x1, double y1, double x2, double y2);
 double max(...), max(const enigma::varargs &t);
 #define max(args...) max((varargs(),args))
 
+double min(...), min(const enigma::varargs &t);
+#define min(args...) min((varargs(),args))
+
+double median(...), median(const enigma::varargs &t);
+#define median(args...) median((varargs(),args))
+
+double mean(...), mean(const enigma::varargs &t);
+#define mean(args...) mean((varargs(),args))
 #endif // ENIGMA_MATHNC

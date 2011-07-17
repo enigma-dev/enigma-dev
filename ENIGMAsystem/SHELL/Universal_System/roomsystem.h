@@ -58,7 +58,7 @@ int room_count();
 extern int view_current;
 extern int view_enabled;
 typedef variant rvt[8];
-extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible, 
+extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible,
            view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
 
 
@@ -92,20 +92,21 @@ namespace enigma
     int order;
     string name;
     string cap;
-    
+
     int backcolor;
+    bool drawbackcolor;
     void(*createcode)();
     int width, height, spd;
     int views_enabled;
     viewstruct views[8];
-    
+
     backstruct backs[8];
-      
+
     int instancecount;
     inst *instances;
     int tilecount;
     tile *tiles;
-    
+
     void gotome();
   };
   void room_update();

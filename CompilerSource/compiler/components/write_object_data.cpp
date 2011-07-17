@@ -60,7 +60,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
     wto << license;
     wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
-    
+
     // Write the script names
     wto << "// Script identifiers\n";
     for (int i = 0; i < es->scriptCount; i++)
@@ -69,7 +69,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     for (int i = 0; i < es->scriptCount; i++)
       wto << "#define " << es->scripts[i].name << "(arguments...) _SCR_" << es->scripts[i].name << "(arguments)\n";
     wto << "\n\n";
-    
+
     for (int i = 0; i < es->scriptCount; i++)
     {
       parsed_script* scr = scr_lookup[es->scripts[i].name];
@@ -95,7 +95,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
       {
         wto << "  \n  struct OBJ_" << i->second->name << ": object_locals\n  {";
-        
+
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
         {
           string addls = event_get_locals(i->second->events[ii].mainId,i->second->events[ii].id);
@@ -127,11 +127,11 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               }
               if (addls[pos] == '=') {
                 int cnt = 0;
-                
+
                 pt spos = ++pos;
                 while (is_useless(addls[spos])) spos++;
                 pos = spos - 1;
-                
+
                 while (++pos < addls.length() and (cnt or (addls[pos] != ',' and addls[pos] != ';')))
                   if (addls[pos] == '[' or addls[pos] == '(') cnt++;
                   else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
@@ -145,12 +145,12 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             }
           }
         }
-        
+
         wto << "\n    //Locals to instances of this object\n    ";
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
         {
           bool writeit = true; //Whether this "local" should be declared such
-          
+
           // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
           if (!ii->second.defined())
           {
@@ -164,7 +164,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           if (writeit)
             wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
         }
-        
+
         // Next, we write the list of all the scripts this object will hoard a copy of for itself.
         wto << "\n    //Scripts called by this object\n    ";
         parsed_object* t = i->second;
@@ -267,7 +267,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               else
                 wto << "      sprite_index = " << i->second->sprite_index << ";\n";
               wto << "      visible = " << i->second->visible << ";\n      solid = " << i->second->solid << ";\n";
-              
+
             // Depth
               wto << "      depth.init(" << i->second->depth << ", this);\n";
 
@@ -328,7 +328,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     cout << "DBGMSG 1" << endl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out);
     wto << license;
-    
+
     cout << "DBGMSG 2" << endl;
     // Export globalized scripts
     for (int i = 0; i < es->scriptCount; i++)
@@ -346,7 +346,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       print_to_file(upev.code,upev.synt,upev.strc,upev.strs,2,wto);
       wto << "\n  return 0;\n}\n\n";
     }
-    
+
     cout << "DBGMSG 3" << endl;
     // Export everything else
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
@@ -410,7 +410,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       else wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " },\n";
     }
     wto << "  };\n  \n";
-    
+
     cout << "DBGMSG 8" << endl;
     wto << "  void constructor(object_basic* instance_b)\n  {\n"
     "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"
@@ -431,7 +431,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     "      instance->bbox_left    =   sprite_get_bbox_left(instance->sprite_index)   - instance->sprite_xoffset;\n"
     "      instance->bbox_right   =  sprite_get_bbox_right(instance->sprite_index)   - instance->sprite_xoffset;\n"
     "      instance->bbox_top     =   sprite_get_bbox_top (instance->sprite_index)   - instance->sprite_yoffset;\n"
-    "      instance->bbox_bottom  =   sprite_get_bbox_bottom(instance->sprite_index) - instance->sprite_xoffset;\n"
+    "      instance->bbox_bottom  =   sprite_get_bbox_bottom(instance->sprite_index) - instance->sprite_yoffset;\n"
     "      //instance->sprite_height =  sprite_get_height(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
     "      //instance->sprite_width  =  sprite_get_width(instance->sprite_index);  //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
     "      instance->image_number  =  sprite_get_number(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
