@@ -59,13 +59,15 @@ import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.enigma.YamlParser.YamlNode;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.messages.Messages;
+import org.enigma.utility.EnigmaBuildReader;
+import org.enigma.utility.YamlParser;
+import org.enigma.utility.YamlParser.YamlNode;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
@@ -565,7 +567,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 			try
 				{
-				EnigmaReader.readChanges(outname);
+				EnigmaBuildReader.readChanges(outname);
 				}
 			catch (Exception e)
 				{

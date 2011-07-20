@@ -1,4 +1,12 @@
-package org.enigma;
+/*
+ * Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>
+ * 
+ * This file is part of Enigma Plugin.
+ * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
+ * See LICENSE for details.
+ */
+
+package org.enigma.utility;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -7,7 +7,7 @@
  * See LICENSE for details.
  */
 
-package org.enigma;
+package org.enigma.utility;
 
 import java.io.File;
 import java.io.FileNotFoundException;

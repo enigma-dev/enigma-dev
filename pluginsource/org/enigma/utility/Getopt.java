@@ -1,4 +1,4 @@
-package org.enigma;
+package org.enigma.utility;
 
 /**************************************************************************
 /* Getopt.java -- Java port of GNU getopt from glibc 2.0.6

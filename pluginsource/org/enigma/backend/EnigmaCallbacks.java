@@ -22,9 +22,9 @@ import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 
 import org.enigma.EnigmaRunner;
-import org.enigma.Pump;
 import org.enigma.backend.util.Image;
 import org.enigma.messages.Messages;
+import org.enigma.utility.Pump;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Pointer;

@@ -17,7 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enigma;
+package org.enigma.utility;
 
 import java.awt.Point;
 import java.io.File;
@@ -32,9 +32,9 @@ import org.lateralgm.resources.sub.Instance.PInstance;
 
 import com.sun.xml.internal.bind.marshaller.Messages;
 
-public final class EnigmaReader
+public final class EnigmaBuildReader
 	{
-	private EnigmaReader()
+	private EnigmaBuildReader()
 		{
 		}
 

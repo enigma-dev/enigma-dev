@@ -67,11 +67,12 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.enigma.TargetHandler.TargetSelection;
-import org.enigma.YamlParser.YamlContent;
-import org.enigma.YamlParser.YamlElement;
-import org.enigma.YamlParser.YamlNode;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.messages.Messages;
+import org.enigma.utility.YamlParser;
+import org.enigma.utility.YamlParser.YamlContent;
+import org.enigma.utility.YamlParser.YamlElement;
+import org.enigma.utility.YamlParser.YamlNode;
 import org.lateralgm.compare.CollectionComparator;
 import org.lateralgm.compare.MapComparator;
 import org.lateralgm.compare.ObjectComparator;

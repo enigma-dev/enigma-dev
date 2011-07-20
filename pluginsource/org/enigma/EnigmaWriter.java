@@ -41,7 +41,6 @@ import java.util.zip.DeflaterOutputStream;
 
 import javax.swing.JOptionPane;
 
-import org.enigma.Masker.Mask;
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.other.Constant;
 import org.enigma.backend.other.Extension;
@@ -68,6 +67,7 @@ import org.enigma.backend.sub.View;
 import org.enigma.backend.util.Image;
 import org.enigma.backend.util.Point;
 import org.enigma.backend.util.Polygon;
+import org.enigma.utility.Masker.Mask;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.resources.ResourceReference;

@@ -28,6 +28,8 @@ import java.io.PrintStream;
 
 import javax.swing.SwingUtilities;
 
+import org.enigma.utility.EnigmaBuildReader;
+
 public class EnigmaThread extends Thread
 	{
 	private EnigmaFrame ef;
@@ -126,7 +128,7 @@ public class EnigmaThread extends Thread
 				ef.progress(99,"Updating build changes");
 				try
 					{
-					EnigmaReader.readChanges(r_exef);
+					EnigmaBuildReader.readChanges(r_exef);
 					ef.progress(100,"Finished");
 					}
 				catch (Exception e)

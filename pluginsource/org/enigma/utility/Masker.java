@@ -1,4 +1,12 @@
-package org.enigma;
+/*
+ * Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>
+ * 
+ * This file is part of Enigma Plugin.
+ * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
+ * See LICENSE for details.
+ */
+
+package org.enigma.utility;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -51,12 +59,12 @@ public class Masker
 			}
 		}
 
-	static class Mask
+	public static class Mask
 		{
 		public static final int UNSET = 0, TRANS = 1;
 
 		int[][] mask;
-		List<Point> pts;
+		public List<Point> pts;
 		int[] cols = { 0x000000,0xFFFFFF,0xFF0000,0x00FF00,0x0000FF,0xFFFF00,0xFF00FF,0x00FFFF };
 
 		public Mask(int[][] image)
