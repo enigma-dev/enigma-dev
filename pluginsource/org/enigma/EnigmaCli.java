@@ -17,19 +17,24 @@ import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.EnigmaCallbacks.OutputHandler;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFileReader;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.main.LGM;
+import org.lateralgm.resources.Script;
 
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
+import com.sun.jna.StringArray;
 
 public class EnigmaCli
 	{
 	public static final String prog = "enigma"; //$NON-NLS-1$
 	public static EnigmaDriver DRIVER;
+
+	public static boolean syntax = false;
 
 	public static void error(String err)
 		{
@@ -47,9 +52,16 @@ public class EnigmaCli
 			System.exit(-1);
 			}
 
+		if (args[0].equals("-s") || args[0].equals("--syntax")) syntax = true;
+
 		try
 			{
-			compile(args[0]);
+			InitReturn r = initailize(args[0],null);
+			EnigmaSettings es = initSettings();
+			if (syntax)
+				syntaxChecker(r.f,r.root,es);
+			else
+				compile(r.f,r.root,es);
 			}
 		catch (FileNotFoundException e)
 			{
@@ -61,22 +73,30 @@ public class EnigmaCli
 			}
 		}
 
-	public static void compile(String fn) throws FileNotFoundException,GmFormatException
+	//	public static void compile(String fn) throws FileNotFoundException,GmFormatException
+	//		{
+	//		compile(fn,null);
+	//		}
+	//
+	//	public static void compile(File file) throws FileNotFoundException,GmFormatException
+	//		{
+	//		compile(file.getPath(),null);
+	//		}
+
+	static class InitReturn
 		{
-		compile(fn,null);
+		GmFile f;
+		ResNode root;
+		String error; //contains String on toolchain failure during libInit
 		}
 
-	public static void compile(File file) throws FileNotFoundException,GmFormatException
-		{
-		compile(file.getPath(),null);
-		}
-
-	public static void compile(String fn, ResNode root) throws FileNotFoundException,
+	public static InitReturn initailize(String fn, ResNode root) throws FileNotFoundException,
 			GmFormatException
 		{
 		if (!new File(fn).exists()) throw new FileNotFoundException(fn);
-		if (root == null) root = new ResNode("Root",(byte) 0,null,null); //$NON-NLS-1$;
-		GmFile f = GmFileReader.readGmFile(fn,root);
+		InitReturn r = new InitReturn();
+		r.root = root == null ? new ResNode("Root",(byte) 0,null,null) : root; //$NON-NLS-1$;
+		r.f = GmFileReader.readGmFile(fn,r.root);
 		try
 			{
 			attemptLib();
@@ -87,9 +107,46 @@ public class EnigmaCli
 					+ "either because it could not be found or uses methods different from those expected.\n"
 					+ "The exact error is:\n" + e.getMessage());
 			}
-		DRIVER.libInit(new EnigmaCallbacks(new CliOutputHandler())); //returns String on toolchain failure
-		EnigmaSettings ess = new EnigmaSettings();
-		//TODO: Handle custom settings
+		r.error = DRIVER.libInit(new EnigmaCallbacks(new CliOutputHandler())); //returns String on toolchain failure
+		return r;
+		}
+
+	//TODO: Handle custom settings
+	public static EnigmaSettings initSettings()
+		{
+		return new EnigmaSettings();
+		}
+
+	public static void syntaxChecker(GmFile f, ResNode root, EnigmaSettings ess)
+		{
+		SyntaxError se = syntaxCheck(f,root,ess);
+		if (se == null || se.absoluteIndex == -1)
+			System.out.println("No syntax errors found.");
+		else
+			error(se.line + ":" + se.position + "::" + se.errorString);
+		}
+
+	public static SyntaxError syntaxCheck(GmFile f, ResNode root, EnigmaSettings ess)
+		{
+		SyntaxError err = ess.commitToDriver(DRIVER); //returns SyntaxError
+		if (err.absoluteIndex != -1) return err;
+
+		int scrNum = LGM.currentFile.scripts.size();
+		String osl[] = new String[scrNum];
+		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
+		for (int i = 0; i < scrNum; i++)
+			osl[i] = isl[i].getName();
+		StringArray scripts = new StringArray(osl);
+
+		for (Script s : isl)
+			if ((err = DRIVER.syntaxCheck(scrNum,scripts,s.getCode())).absoluteIndex != -1) return err;
+
+		return null;
+		}
+
+	public static void compile(GmFile f, ResNode root, EnigmaSettings ess)
+			throws FileNotFoundException,GmFormatException
+		{
 		ess.commitToDriver(DRIVER); //returns SyntaxError
 
 		//Generate arguments for compile
@@ -100,7 +157,8 @@ public class EnigmaCli
 
 		//TODO: Handle custom outname
 		//FIXME: Make compliant with spec2
-		File outname = new File(fn.substring(0,fn.lastIndexOf('.')) + ess.targets.get("windowing").ext);
+		File outname = new File(f.filename.substring(0,f.filename.lastIndexOf('.'))
+				+ ess.targets.get("windowing").ext);
 		TargetSelection compiler = ess.targets.get("compiler");
 		if (!compiler.outputexe.equals("$tempfile")) //$NON-NLS-1$
 			outname = new File(compiler.outputexe);

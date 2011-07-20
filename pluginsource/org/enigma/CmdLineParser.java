@@ -356,8 +356,8 @@ public class CmdLineParser
 	 */
 	public final Option addOption(Option opt)
 		{
-		if (opt.shortForm() != null) options.put("-" + opt.shortForm(),opt);
-		options.put("--" + opt.longForm(),opt);
+		if (opt.shortForm() != null) options.put("-" + opt.shortForm(),opt); //$NON-NLS-1$
+		options.put("--" + opt.longForm(),opt); //$NON-NLS-1$
 		return opt;
 		}
 
@@ -549,17 +549,17 @@ public class CmdLineParser
 		while (position < argv.length)
 			{
 			String curArg = argv[position];
-			if (curArg.startsWith("-"))
+			if (curArg.startsWith("-")) //$NON-NLS-1$
 				{
-				if (curArg.equals("--"))
+				if (curArg.equals("--")) //$NON-NLS-1$
 					{ // end of options
 					position += 1;
 					break;
 					}
 				String valueArg = null;
-				if (curArg.startsWith("--"))
+				if (curArg.startsWith("--")) //$NON-NLS-1$
 					{ // handle --arg=value
-					int equalsPos = curArg.indexOf("=");
+					int equalsPos = curArg.indexOf("="); //$NON-NLS-1$
 					if (equalsPos != -1)
 						{
 						valueArg = curArg.substring(equalsPos + 1);
@@ -570,7 +570,7 @@ public class CmdLineParser
 					{ // handle -abcd
 					for (int i = 1; i < curArg.length(); i++)
 						{
-						Option opt = (Option) this.options.get("-" + curArg.charAt(i));
+						Option opt = (Option) this.options.get("-" + curArg.charAt(i)); //$NON-NLS-1$
 						if (opt == null) throw new UnknownSuboptionException(curArg,curArg.charAt(i));
 						if (opt.wantsValue()) throw new NotFlagException(curArg,curArg.charAt(i));
 						addValue(opt,opt.getValue(null,locale));
