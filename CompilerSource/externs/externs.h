@@ -29,7 +29,9 @@
 #define _INCLUDED_EXTERNS 1
 
 #include <map>
+#include <string>
 #include "../general/darray.h"
+using namespace std;
 typedef size_t pt;
 
 enum

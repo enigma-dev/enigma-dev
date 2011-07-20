@@ -25,5 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _MACRO_FUNCTIONS_H
+#define _MACRO_FUNCTIONS_H
 extern string macro_function_parsed;
 bool macro_function_parse(const char*,const size_t,string,pt &,string&, varray<string>&, const int, const int, bool = true, bool = false);
+#endif

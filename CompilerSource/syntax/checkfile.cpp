@@ -97,7 +97,7 @@ int file_check(string filename)
 
     int l=0,p=0; int i;
     for (i=0;i<retval;i++) { if (in2[i]=='\r') { l++; if (in2[i+1]=='\n') i++; p=i+1; } else if (in2[i]=='\n') { l++; p=i+1; } }
-    printf("Line %d, position %d (absolute index %d): %s\r\n",(l)+1,(retval-p)+1,retval,syncheck::error.c_str());
+    printf("Line %d, position %d (absolute index %d): %s\r\n",(l)+1,(retval-p)+1,retval,syncheck::syerr.c_str());
 
     delete []in2;
     return retval;

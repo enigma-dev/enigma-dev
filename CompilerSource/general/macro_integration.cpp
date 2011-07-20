@@ -25,101 +25,34 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "var4.h"
-#ifndef room_system_h
-#define room_system_h
-int room_goto(int roomind);
-int room_restart();
-int room_goto_absolute(int index);
-int room_goto_first();
-int room_goto_next();
-int room_next(int num);
-int room_previous(int num);
+#include <string>
+#include <cstdlib>
+using namespace std;
+#include "parse_basics.h"
+#include "macro_integration.h"
 
-extern int background_color;
-extern int background_showcolor;
-
-extern var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed,background_alpha;
-
-extern int room_first;
-extern int room_height;
-extern int room_last;
-extern int room_persistent;
-extern int room_speed;
-extern int room_width;
-
-extern var room_caption;
-
-int room_count();
-#define room_count room_count()
-
-
-extern int view_current;
-extern int view_enabled;
-typedef var rvt;
-extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible,
-           view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
-
-
-namespace enigma
-{
-  struct inst {
-    int id,obj,x,y;
-  };
-    struct tile {
-        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
-    };
-  struct viewstruct
-  {
-    int start_vis;
-    int area_x,area_y,area_w,area_h;
-    int port_x,port_y,port_w,port_h;
-    int object2follow;
-    int hborder,vborder,hspd,vspd;
-  };
-  struct backstruct {
-    int visible;
-    int foreground;
-    int background;
-    int area_x, area_y, horSpeed, verSpeed;
-    int tileHor, tileVert;
-    int stretch;
-  };
-  struct roomstruct
-  {
-    int id;
-    int order;
-    string name;
-    string cap;
-
-    int backcolor;
-    bool drawbackcolor;
-    void(*createcode)();
-    int width, height, spd;
-    int views_enabled;
-    viewstruct views[8];
-
-    backstruct backs[8];
-
-    int instancecount;
-    inst *instances;
-    int tilecount;
-    tile *tiles;
-
-    void gotome();
-  };
-  void room_update();
-  extern int room_max, maxid;
-  void rooms_load();
+void macro_push_info::grab(string id, string c, pt p) {
+  name = id;
+  code = c; pos = p;
+}
+void macro_push_info::release(string &c, pt &p) {
+  c = code; p = pos;
 }
 
-// room variable
+bool macro_recurses(string name, macro_stack_t &mymacrostack, unsigned mymacroind) {
+  for (unsigned int iii = 0; iii < mymacroind; iii++)
+   if (mymacrostack[iii].name == name)
+     return 1;
+  return 0;
+}
 
-#include "multifunction_variant.h"
-namespace enigma { struct roomv: multifunction_variant {
-  INHERIT_OPERATORS()
-  void function();
-}; }
-extern enigma::roomv room;
-#endif
+pt skip_comments(const string& code, pt cwp) {
+  while (is_useless(code[cwp]) or (code[cwp]=='/' and (code[cwp+1]=='/' or code[cwp+1]=='*')))
+  {
+    if (code[cwp++] == '*') {
+      if (code[cwp] == '/') while (cwp < code.length() and  code[cwp] != '\r' and code[cwp]   != '\n') cwp++;
+      else      { cwp += 2; while (cwp < code.length() and (code[cwp] != '/'  or  code[cwp-1] != '*')) cwp++; }
+    }
+  }
+  return cwp;
+}

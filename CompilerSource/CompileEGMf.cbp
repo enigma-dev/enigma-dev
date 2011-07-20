@@ -208,6 +208,8 @@
 		<Unit filename="general/darray.h" />
 		<Unit filename="general/estring.h" />
 		<Unit filename="general/implicit_stack.h" />
+		<Unit filename="general/macro_integration.cpp" />
+		<Unit filename="general/macro_integration.h" />
 		<Unit filename="general/parse_basics.h" />
 		<Unit filename="general/string.cpp" />
 		<Unit filename="general/textfile.cpp" />

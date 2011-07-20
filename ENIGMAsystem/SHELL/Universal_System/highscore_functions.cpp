@@ -171,7 +171,7 @@ int string_width(variant str);
 
 void draw_highscore(int x1, int y1, int x2, int y2) {
 
-    for (int i=0; i<enigma::highscore_list.size(); i++) {
+    for (size_t i=0; i<enigma::highscore_list.size(); i++) {
         draw_text(x1, (i*((y2-y1)/10))+y1+10, enigma::highscore_list[i].player_name.c_str());
         draw_text(x2-string_width(toString((var)enigma::highscore_list[i].player_score)), (i*((y2-y1)/10))+y1+10 , toString((var)enigma::highscore_list[i].player_score));
     }

@@ -168,7 +168,7 @@ wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcrea
     string cme = es->rooms[i].creationCode;
     int a = syncheck::syntacheck(cme);
     if (a != -1) {
-      cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::error << flushl;
+      cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
       return E_ERROR_SYNTAX;
     }
     parsed_object par;

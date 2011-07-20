@@ -29,10 +29,8 @@
 
 namespace syncheck
 {
-  extern int lastln;
-  extern string error;
+  extern string syerr;
   int syntacheck(string code);
-  
   void addscr(string name);
 }
 

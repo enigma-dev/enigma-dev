@@ -34,6 +34,7 @@ using namespace std;
 #include "../externs/externs.h"
 
 #include "../general/parse_basics.h"
+#include "../general/macro_integration.h"
 #include "../compiler/output_locals.h"
 
 #include "../settings.h"
@@ -71,18 +72,6 @@ int quicktype(unsigned flags, string name)
   return 0;
 }
 
-struct macpinfo {
-  string name, code;
-  pt pos;
-  void grab(string id, string c, pt p) {
-    name = id;
-    code = c; pos = p;
-  }
-  void release(string &c, pt &p) {
-    c = code; p = pos;
-  }
-};
-
 
 ///Remove whitespace, unfold macros,
 ///And lex code into synt.
@@ -95,7 +84,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
   char last_token = ' '; //Space is actually invalid. Heh.
   
   unsigned mymacroind = 0;
-  varray<macpinfo> mymacrostack;
+  macro_stack_t mymacrostack;
   
   for (;;)
   { if (pos >= code.length()) {
@@ -118,6 +107,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         codo[bpos] = 'd', synt[bpos++] = '@';
         codo[bpos] = 'i', synt[bpos++] = '@';
         codo[bpos] = 'v', synt[bpos++] = '@';
+        last_token = '@';
         continue;
       }
       if (name == "mod")
@@ -125,31 +115,31 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         codo[bpos] = 'm', synt[bpos++] = '@';
         codo[bpos] = 'o', synt[bpos++] = '@';
         codo[bpos] = 'd', synt[bpos++] = '@';
+        last_token = '@';
         continue;
       }
       
       maciter itm = macros.find(name);
       if (itm != macros.end())
       {
-        bool recurs=0;
-        for (unsigned int iii = 0; iii < mymacroind; iii++)
-           if (mymacrostack[iii].name == name) {
-             recurs=1; break;
-           }
-        
-        if (!recurs)
+        if (!macro_recurses(name,mymacrostack,mymacroind))
         {
           string macrostr = itm->second;
 
           if (itm->second.argc != -1) //Expect ()
           {
             pt cwp = pos;
-            while (is_useless(code[cwp])) cwp++;
+            while (is_useless(code[cwp]) or (code[cwp]=='/' and (code[cwp+1]=='/' or code[cwp+1]=='*'))) {
+              if (code[cwp++] == '*') {
+                if (code[cwp] == '/') while (cwp < code.length() and  code[cwp] != '\r' and code[cwp]   != '\n') pos++;
+                else {      cwp += 2; while (cwp < code.length() and (code[cwp] != '*'  or  code[cwp+1] != '/')) pos++; }
+              }
+            }
             if (code[cwp] != '(')
               goto out_of_here;
             if (!macro_function_parse(code.c_str(),code.length(),name,pos,macrostr,itm->second.args,itm->second.argc,itm->second.args_uat,false,true)) {
               cout << "UNEXPECTED ERROR: " << macrostr;
-              cout << "\nThis error should have been reported during a previous syntax check\n";
+              cout << "\nThis error should have been reported during a previous syntax check\n"; 
               continue;
             }
           }
@@ -312,6 +302,10 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
   
   code.erase(bpos);
   synt.erase(bpos);
+  
+  FILE *r = fopen("/home/josh/Desktop/asses.txt","ab");
+  if (r) { fprintf(r,"%s\n%s\n",code.c_str(), synt.c_str()); fclose(r); }
+  
   return 0;
 }
 
@@ -399,6 +393,9 @@ void parser_add_semicolons(string &code,string &synt)
   char *codebuf = new char[code.length()*2+1];
   char *syntbuf = new char[code.length()*2+1];
   int bufpos = 0;
+  
+  FILE *nnn = fopen("/home/josh/Desktop/b4a.txt","ab");
+  if (nnn) fprintf(nnn, "Before\n%s\n%s\n",code.c_str(), synt.c_str());
   
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
@@ -617,11 +614,11 @@ void parser_add_semicolons(string &code,string &synt)
   }
   
   //cout << "cp2"; fflush(stdout);
-
-  //now we'll do ONE MORE pass, to take care of (())
+  
+  //now we'll do ONE MORE pass, to take care of for(())
   len = code.length();
-  for (pt pos = 0; pos<len; pos++)
-  if (synt[pos] == '(' and synt[pos+1]=='(')
+  for (pt pos = 1; pos<len; pos++)
+  if (synt[pos-1] == 'f' and synt[pos] == '(' and synt[pos+1]=='(')
   {
     const pt sp = pos;
 
@@ -644,6 +641,7 @@ void parser_add_semicolons(string &code,string &synt)
     pos = sp;
   }
   cout << "done. "; fflush(stdout);
+  if (nnn) { fprintf(nnn, "After\n%s\n%s\n",code.c_str(), synt.c_str()); fclose(nnn); }
 }
 
 
@@ -729,7 +727,8 @@ static inline string string_settings_escape(string n)
 void print_to_file(string code,string synt,unsigned int &strc, varray<string> &string_in_code,int indentmin_b4,ofstream &of)
 {
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
-  //FILE* of = fopen("C:/Users/Josh/Desktop/parseout.txt","w+b");
+  FILE* of_ = fopen("/home/josh/Desktop/parseout.txt","ab");
+  if (of_) { fprintf(of_,"%s\n%s\n\n\n",code.c_str(), synt.c_str()); fclose(of_); }
   //if (of == NULL) return;
 
   const int indentmin = indentmin_b4 + 1;

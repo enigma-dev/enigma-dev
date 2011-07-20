@@ -49,7 +49,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   {
     int a = syncheck::syntacheck(es->scripts[i].code);
     if (a != -1) {
-      user << "Syntax error in script `" << es->scripts[i].name << "'\n" << syncheck::error << flushl;
+      user << "Syntax error in script `" << es->scripts[i].name << "'\n" << syncheck::syerr << flushl;
       return E_ERROR_SYNTAX;
     }
     // Keep a parsed record of this script
@@ -154,7 +154,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
         {
           // Error. Report it.
           user << "Syntax error in object `" << es->gmObjects[i].name << "', " << event_get_human_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << " event:"
-               << es->gmObjects[i].mainEvents[ii].events[iii].id << ":\n" << format_error(code,syncheck::error,sc) << flushl;
+               << es->gmObjects[i].mainEvents[ii].events[iii].id << ":\n" << format_error(code,syncheck::syerr,sc) << flushl;
           return E_ERROR_SYNTAX;
         }
         

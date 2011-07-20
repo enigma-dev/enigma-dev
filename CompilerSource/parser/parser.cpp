@@ -199,9 +199,11 @@ string parser_main(string code, parsed_event* pev)
 typedef map<string,dectrip> localscope;
 pt move_to_beginning(string& code, string& synt, pt pos)
 {
+  bool lparenth = false; // true if the last symbol set skipped from this block was a set of brackets
   backloop:
   while (synt[pos] == ']' or synt[pos] == ')') // Seek to beginning of array subscripts and function args
   {
+    lparenth = synt[pos] == ')';
     if (synt[pos] == ']' or synt[pos] == ')')
     {
       for (int cnt = (pos--, 1); cnt; pos--)
@@ -212,6 +214,8 @@ pt move_to_beginning(string& code, string& synt, pt pos)
       }
     }
   } // at beginning of function args/array subscripts
+  if (lparenth and synt[pos] != 'n')
+    return pos + 1;
   for (const char c = synt[pos--]; synt[pos] == c; pos--)
     if (!pos) goto hell;
   pos++;
@@ -323,6 +327,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       cout << "TYPE [" << dtype << "]" << endl;
       pos--; continue;
     }
+    // Handle parsing in dot access (add calls to dot-access routines)
     else if (synt[pos] == '.' and synt[pos+1] == 'n')
     {
       const pt epos = pos--;
@@ -563,7 +568,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         {
           const pt cspos = pos;
           while (synt[++pos] == 's');
-          if (code.substr(cspos,pos-cspos) != "case ")
+          if (level != 1 or code.substr(cspos,pos-cspos) != "case ")
             continue;
           const pt espos = pos;
           const pt tstrc = string_index + strs_this_statement; // The number of strings before this case label
@@ -580,7 +585,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         {
           const pt dspos = pos;
           while (synt[++pos] == 'b');
-          if (code.substr(dspos, pos-dspos) == "default")
+          if (level == 1 and code.substr(dspos, pos-dspos) == "default")
             default_start_pos = dspos;
         }
         if (synt[pos] == '"' or synt[pos] == '\'')
@@ -639,13 +644,16 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         }
 
         // This'll be tacked on whenever the default is reached
-        string deflcode = "default:$s" + switch_index_code + "nohash:",
-               deflsynt = "bbbbbbb:bb" + switch_index_lexb + "bbbbbb:";
+        string deflcode = "default:",
+               deflsynt = "bbbbbbb:";
         string deflsufcode = default_start_pos ? "goto $s" + switch_index_code + "default;" : "break;",
                deflsufsynt = default_start_pos ? "bbbbbbb" + switch_index_lexb + "bbbbbbb;" : "bbbbb;";
-
+        if (hashes.size() > 1 or (hashes.size() == 1 and hashes.begin()->first != -1))
+           deflcode += "$s" + switch_index_code + "nohash:",
+           deflsynt += "bb" + switch_index_lexb + "bbbbbb:";
+        
         // Defragment string IDs and generate case labels
-        if (cases.size() > 1)
+        if (cases.size())
         {
           const int lower_bound = cases[0].stri, upper_bound = cases[cases.size()-1].stri + cases[cases.size()-1].strc - 1;
           map<int,string> reorder;

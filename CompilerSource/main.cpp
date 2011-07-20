@@ -237,7 +237,7 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
     quickmember_script(globals_scope,script_names[i]);
   
   ide_passback_error.absolute_index = syncheck::syntacheck(code);
-  error_sstring = syncheck::error;
+  error_sstring = syncheck::syerr;
   
   ide_passback_error.err_str = error_sstring.c_str();
   

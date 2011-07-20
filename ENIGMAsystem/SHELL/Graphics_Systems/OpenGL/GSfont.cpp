@@ -118,7 +118,7 @@ unsigned int string_width_ext_line(variant vstr, int w, int line)
         tw += fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount].xs;
       }
       if (width+tw >= unsigned(w) && w != -1)
-        if (cl == line) return width; else width = 0, cl +=1;
+        if (cl == line) return width; else width = 0, cl +=1; else;
     }else
       width += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount].xs;
   }
@@ -922,7 +922,7 @@ void draw_text_color(int x,int y,variant vstr,int c1,int c2,int c3,int c4,double
 
   glPushAttrib(GL_CURRENT_BIT);
   int yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
-  int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0, sw = string_width_line(str, line), tmpx = 0;
+  int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0, sw = string_width_line(str, line);
   float tx1, tx2;
   glBegin(GL_QUADS);
   if (halign == fa_left){

@@ -138,9 +138,9 @@ struct variant
   
   #undef EVCONST
   #define EVCONST const
-  bool      operator!();
-  double    operator-();
-  double    operator+();
+  bool      operator!() EVCONST;
+  double    operator-() EVCONST;
+  double    operator+() EVCONST;
   #undef EVCONST
   #define EVCONST
   
@@ -260,7 +260,7 @@ struct var
   double    operator--(int);
   
   #undef EVCONST
-  #define EVCONST
+  #define EVCONST const
   bool      operator!() EVCONST;
   double    operator-() EVCONST;
   double    operator+() EVCONST;
@@ -284,71 +284,77 @@ string toString(const variant &a);
 string toString(const var &a);
 
 
-types_binary_assign_extrapolate_declare(+, variant)
-types_binary_assign_extrapolate_declare(-, variant)
-types_binary_assign_extrapolate_declare(*, variant)
-types_binary_assign_extrapolate_declare(/, variant)
+#undef EVCONST
+#define EVCONST
 
-types_binary_assign_extrapolate_declare(<<, variant) 
-types_binary_assign_extrapolate_declare(>>, variant) 
-types_binary_assign_extrapolate_declare(&,  variant) 
-types_binary_assign_extrapolate_declare(|,  variant) 
-types_binary_assign_extrapolate_declare(^,  variant)
+types_binary_assign_extrapolate_declare(+, const variant&)
+types_binary_assign_extrapolate_declare(-, const variant&)
+types_binary_assign_extrapolate_declare(*, const variant&)
+types_binary_assign_extrapolate_declare(/, const variant&)
+
+types_binary_assign_extrapolate_declare(<<, const variant&) 
+types_binary_assign_extrapolate_declare(>>, const variant&) 
+types_binary_assign_extrapolate_declare(&,  const variant&) 
+types_binary_assign_extrapolate_declare(|,  const variant&) 
+types_binary_assign_extrapolate_declare(^,  const variant&)
 
 
-types_binary_extrapolate_alldecc(double, operator+, variant)
-types_binary_extrapolate_alldecc(double, operator-, variant)
-types_binary_extrapolate_alldecc(double, operator*, variant)
-types_binary_extrapolate_alldecc(double, operator/, variant)
-types_binary_extrapolate_alldecc(double, operator%, variant)
+types_binary_extrapolate_alldecc(double, operator+, const variant&)
+types_binary_extrapolate_alldecc(double, operator-, const variant&)
+types_binary_extrapolate_alldecc(double, operator*, const variant&)
+types_binary_extrapolate_alldecc(double, operator/, const variant&)
+types_binary_extrapolate_alldecc(double, operator%, const variant&)
 
-types_binary_bitwise_extrapolate_alldecc(operator<<, variant)
-types_binary_bitwise_extrapolate_alldecc(operator>>, variant)
-types_binary_bitwise_extrapolate_alldecc(operator&,  variant)
-types_binary_bitwise_extrapolate_alldecc(operator|,  variant)
-types_binary_bitwise_extrapolate_alldecc(operator^,  variant)
+types_binary_bitwise_extrapolate_alldecc(operator<<, const variant&)
+types_binary_bitwise_extrapolate_alldecc(operator>>, const variant&)
+types_binary_bitwise_extrapolate_alldecc(operator&,  const variant&)
+types_binary_bitwise_extrapolate_alldecc(operator|,  const variant&)
+types_binary_bitwise_extrapolate_alldecc(operator^,  const variant&)
 
-types_binary_extrapolate_alldecce(bool, operator==, variant)
-types_binary_extrapolate_alldecce(bool, operator!=, variant)
-types_binary_extrapolate_alldecce(bool, operator>=, variant)
-types_binary_extrapolate_alldecce(bool, operator<=, variant)
-types_binary_extrapolate_alldecce(bool, operator>,  variant)
-types_binary_extrapolate_alldecce(bool, operator<,  variant)
+types_binary_extrapolate_alldecce(bool, operator==, const variant&)
+types_binary_extrapolate_alldecce(bool, operator!=, const variant&)
+types_binary_extrapolate_alldecce(bool, operator>=, const variant&)
+types_binary_extrapolate_alldecce(bool, operator<=, const variant&)
+types_binary_extrapolate_alldecce(bool, operator>,  const variant&)
+types_binary_extrapolate_alldecce(bool, operator<,  const variant&)
 
 
 /* Do the same for var
  *************************/
 
-types_binary_assign_extrapolate_declare(+, var)
-types_binary_assign_extrapolate_declare(-, var)
-types_binary_assign_extrapolate_declare(*, var)
-types_binary_assign_extrapolate_declare(/, var)
+types_binary_assign_extrapolate_declare(+, const var&)
+types_binary_assign_extrapolate_declare(-, const var&)
+types_binary_assign_extrapolate_declare(*, const var&)
+types_binary_assign_extrapolate_declare(/, const var&)
 
-types_binary_assign_extrapolate_declare(<<, var) 
-types_binary_assign_extrapolate_declare(>>, var) 
-types_binary_assign_extrapolate_declare(&,  var) 
-types_binary_assign_extrapolate_declare(|,  var) 
-types_binary_assign_extrapolate_declare(^,  var)
+types_binary_assign_extrapolate_declare(<<, const var&) 
+types_binary_assign_extrapolate_declare(>>, const var&) 
+types_binary_assign_extrapolate_declare(&,  const var&) 
+types_binary_assign_extrapolate_declare(|,  const var&) 
+types_binary_assign_extrapolate_declare(^,  const var&)
 
 
-types_binary_extrapolate_alldecc(double, operator+, var)
-types_binary_extrapolate_alldecc(double, operator-, var)
-types_binary_extrapolate_alldecc(double, operator*, var)
-types_binary_extrapolate_alldecc(double, operator/, var)
-types_binary_extrapolate_alldecc(double, operator%, var)
+types_binary_extrapolate_alldecc(double, operator+, const var&)
+types_binary_extrapolate_alldecc(double, operator-, const var&)
+types_binary_extrapolate_alldecc(double, operator*, const var&)
+types_binary_extrapolate_alldecc(double, operator/, const var&)
+types_binary_extrapolate_alldecc(double, operator%, const var&)
 
-types_binary_bitwise_extrapolate_alldecc(operator<<, var)
-types_binary_bitwise_extrapolate_alldecc(operator>>, var)
-types_binary_bitwise_extrapolate_alldecc(operator&,  var)
-types_binary_bitwise_extrapolate_alldecc(operator|,  var)
-types_binary_bitwise_extrapolate_alldecc(operator^,  var)
+types_binary_bitwise_extrapolate_alldecc(operator<<, const var&)
+types_binary_bitwise_extrapolate_alldecc(operator>>, const var&)
+types_binary_bitwise_extrapolate_alldecc(operator&,  const var&)
+types_binary_bitwise_extrapolate_alldecc(operator|,  const var&)
+types_binary_bitwise_extrapolate_alldecc(operator^,  const var&)
 
-types_binary_extrapolate_alldecce(bool, operator==, var)
-types_binary_extrapolate_alldecce(bool, operator!=, var)
-types_binary_extrapolate_alldecce(bool, operator>=, var)
-types_binary_extrapolate_alldecce(bool, operator<=, var)
-types_binary_extrapolate_alldecce(bool, operator>,  var)
-types_binary_extrapolate_alldecce(bool, operator<,  var)
+types_binary_extrapolate_alldecce(bool, operator==, const var&)
+types_binary_extrapolate_alldecce(bool, operator!=, const var&)
+types_binary_extrapolate_alldecce(bool, operator>=, const var&)
+types_binary_extrapolate_alldecce(bool, operator<=, const var&)
+types_binary_extrapolate_alldecce(bool, operator>,  const var&)
+types_binary_extrapolate_alldecce(bool, operator<,  const var&)
+
+#undef EVCONST
+#define EVCONST
 
 #undef types_extrapolate_real_p
 #undef types_extrapolate_string_p

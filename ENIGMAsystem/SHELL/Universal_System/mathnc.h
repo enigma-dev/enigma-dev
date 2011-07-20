@@ -48,9 +48,6 @@
 #error ln2math and stop including this damn header.
 #endif
 
-double abs(struct variant& x);
-double abs(struct var& x);
-
 const double pi = M_PI;
 
 extern double random(double n);
@@ -63,6 +60,8 @@ double mtrandom();
 int mtrandom_seed(int x);
 
 //overloading
+double abs(const variant& x);
+double abs(const var& x);
 double ceil(const variant& x);
 double floor(const variant& x);
 double exp(const variant& x);
@@ -122,14 +121,17 @@ double point_distance(double x1, double y1, double x2, double y2);
 
 #include "dynamic_args.h"
 double max(...), max(const enigma::varargs &t);
-#define max(args...) max((varargs(),args))
-
 double min(...), min(const enigma::varargs &t);
-#define min(args...) min((varargs(),args))
-
 double median(...), median(const enigma::varargs &t);
-#define median(args...) median((varargs(),args))
-
 double mean(...), mean(const enigma::varargs &t);
-#define mean(args...) mean((varargs(),args))
+
+// TODO: Make the compiler do this shit automatically so we can lose the
+//       stdargs declaration and the hackish define that fucks with everything
+#ifdef ENIGMA_PARSER_RUN
+  #define max(args...) max((varargs(),args))
+  #define min(args...) min((varargs(),args))
+  #define median(args...) median((varargs(),args))
+  #define mean(args...) mean((varargs(),args))
+#endif
+
 #endif // ENIGMA_MATHNC

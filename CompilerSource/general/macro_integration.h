@@ -25,101 +25,16 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "var4.h"
-#ifndef room_system_h
-#define room_system_h
-int room_goto(int roomind);
-int room_restart();
-int room_goto_absolute(int index);
-int room_goto_first();
-int room_goto_next();
-int room_next(int num);
-int room_previous(int num);
+#include "darray.h"
+#include "../cfile_parse/macro_functions.h"
 
-extern int background_color;
-extern int background_showcolor;
+struct macro_push_info {
+  pt pos;
+  string name, code;
+  void grab(string id, string c, pt p);
+  void release(string &c, pt &p);
+};
 
-extern var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed,background_alpha;
-
-extern int room_first;
-extern int room_height;
-extern int room_last;
-extern int room_persistent;
-extern int room_speed;
-extern int room_width;
-
-extern var room_caption;
-
-int room_count();
-#define room_count room_count()
-
-
-extern int view_current;
-extern int view_enabled;
-typedef var rvt;
-extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible,
-           view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
-
-
-namespace enigma
-{
-  struct inst {
-    int id,obj,x,y;
-  };
-    struct tile {
-        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
-    };
-  struct viewstruct
-  {
-    int start_vis;
-    int area_x,area_y,area_w,area_h;
-    int port_x,port_y,port_w,port_h;
-    int object2follow;
-    int hborder,vborder,hspd,vspd;
-  };
-  struct backstruct {
-    int visible;
-    int foreground;
-    int background;
-    int area_x, area_y, horSpeed, verSpeed;
-    int tileHor, tileVert;
-    int stretch;
-  };
-  struct roomstruct
-  {
-    int id;
-    int order;
-    string name;
-    string cap;
-
-    int backcolor;
-    bool drawbackcolor;
-    void(*createcode)();
-    int width, height, spd;
-    int views_enabled;
-    viewstruct views[8];
-
-    backstruct backs[8];
-
-    int instancecount;
-    inst *instances;
-    int tilecount;
-    tile *tiles;
-
-    void gotome();
-  };
-  void room_update();
-  extern int room_max, maxid;
-  void rooms_load();
-}
-
-// room variable
-
-#include "multifunction_variant.h"
-namespace enigma { struct roomv: multifunction_variant {
-  INHERIT_OPERATORS()
-  void function();
-}; }
-extern enigma::roomv room;
-#endif
+typedef varray<macro_push_info> macro_stack_t;
+bool macro_recurses(string name, macro_stack_t &mymacrostack, unsigned mymacroind);
+pt skip_comments(const string& code, pt cwp); // Useful for locating opening parenthesis to test if a macro is being called as a function

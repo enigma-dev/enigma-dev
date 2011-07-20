@@ -172,7 +172,7 @@ int mainr(int argc, char *argv[])
         line++, lp = 0, i += pf[i+1] == '\n';
       else if (pf[i] == '\n') line++, lp = 0;
     }
-    cout << "Line " << line << ", position " << lp << " (absolute " << a << "): " << syncheck::error <<  endl;
+    cout << "Line " << line << ", position " << lp << " (absolute " << a << "): " << syncheck::syerr <<  endl;
     return 0;
   }
   
@@ -258,7 +258,13 @@ int main(int argc, char* argv[])
 	       "target-audio: OpenAL\n"
 	       "target-collision: BBox\n"
 	       ).c_str());
-  mainr(argc,argv);
+  //mainr(argc,argv);
+  string in2 = fc("./CompilerSource/cfile_parse/auxilary_gml.h");
+  int retval = syncheck::syntacheck(in2);
+  int l=0,p=0;
+  for (int i=0;i<retval;i++) { if (in2[i]=='\r') { l++; if (in2[i+1]=='\n') i++; p=i+1; } else if (in2[i]=='\n') { l++; p=i+1; } }
+  printf("Line %d, position %d (absolute index %d): %s\r\n",(l)+1,(retval-p)+1,retval,syncheck::syerr.c_str());
+  
   getchar();
   return 0;
 }
