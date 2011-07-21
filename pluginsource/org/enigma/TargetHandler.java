@@ -37,12 +37,11 @@ public class TargetHandler
 	private static final Pattern SPLITTER = Pattern.compile("\\s*,\\s*"); //$NON-NLS-1$
 
 	public static final String COMPILER = "compiler"; //$NON-NLS-1$
-	public static final String[] ids = { COMPILER,"windowing","graphics","audio","collision",
-			"widget" };
+	public static final String[] ids = { COMPILER,"windowing","graphics","audio","collision","widget" };
 	private static final String[] folders = { null,"Platforms","Graphics_Systems","Audio_Systems",
 			"Collision_Systems","Widget_Systems" };
 
-	private static final String COMP_TARG = "target", OS_KEY = "build-target"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String COMP_TARG = "target", OS_KEY = "build-platforms"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public static TargetSelection defCompiler;
 	public static Map<String,List<TargetSelection>> targets;
@@ -187,11 +186,8 @@ public class TargetHandler
 				{
 				Set<String> acceptable = rep.getValue();
 				if (acceptable == null) continue;
-				/*if (rep.getKey().equals("target"))
-					continue;*/
 				if (rep.getKey().equalsIgnoreCase(OS_KEY))
 					{
-					//debug(rep.getValue() + ".contains" + (combo.get("compiler").depends.get("target")));
 					if (rep.getValue().contains(combo.get(COMPILER).depends.get(COMP_TARG).iterator().next()))
 						score += 2;
 					else if (rep.getValue().contains("All") || rep.getValue().contains("all")
