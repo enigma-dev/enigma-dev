@@ -43,7 +43,7 @@ namespace enigma
     int xorig, yorig;
     
     fread(&nullhere,4,1,exe);
-    if (nullhere != *(int*)"sprn")
+    if (nullhere != *(int*)"SPR ")
       return;
     
     // Determine how many sprites we have

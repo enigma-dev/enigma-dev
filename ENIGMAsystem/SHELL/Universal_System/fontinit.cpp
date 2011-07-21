@@ -45,7 +45,7 @@ namespace enigma
 	  float advance, baseline, origin, gtx, gty, gtx2, gty2;
 
     fread(&nullhere,4,1,exe);
-    if (nullhere != *(int*)"rfnt")
+    if (nullhere != *(int*)"FNT ")
       return;
 
     fread(&fontcount,4,1,exe);

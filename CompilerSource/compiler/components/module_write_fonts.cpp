@@ -58,7 +58,7 @@ int module_write_fonts(EnigmaStruct *es, FILE *gameModule)
   edbg << es->fontCount << " Adding Fonts to Game Module: " << flushl;
 
   //Magic Number
-  fwrite("rfnt",4,1,gameModule);
+  fwrite("FNT ",4,1,gameModule);
 
   //Indicate how many
   int font_count = es->fontCount;

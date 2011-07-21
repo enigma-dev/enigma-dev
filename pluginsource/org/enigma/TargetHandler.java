@@ -33,61 +33,36 @@ public class TargetHandler
 		{
 		}
 
-	static final boolean DEBUG = false; //TODO: Get rid of this.
-
 	private static final Pattern NORMALIZER = Pattern.compile("[\\[\\]\\-\\s_]"); //$NON-NLS-1$
 	private static final Pattern SPLITTER = Pattern.compile("\\s*,\\s*"); //$NON-NLS-1$
 
-	public static final String[] ids = { "compiler","windowing","graphics","audio","collision",
+	public static final String COMPILER = "compiler"; //$NON-NLS-1$
+	public static final String[] ids = { COMPILER,"windowing","graphics","audio","collision",
 			"widget" };
+	private static final String[] folders = { null,"Platforms","Graphics_Systems","Audio_Systems",
+			"Collision_Systems","Widget_Systems" };
+
+	private static final String COMP_TARG = "target", OS_KEY = "build-target"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public static TargetSelection defCompiler;
 	public static Map<String,List<TargetSelection>> targets;
 	public static Collection<Combo> combos;
 	public static Map<String,TargetSelection> defaults;
 
-	private static void debug(String s)
-		{
-		debug(false,s);
-		}
-
-	private static void debug(boolean special, String s)
-		{
-		if (!DEBUG) return;
-		if (special)
-			{
-			System.out.println("==================");
-			System.out.println(s);
-			System.out.println("==================");
-			}
-		else
-			System.out.println(s);
-		}
-
 	static
 		{
-		String[] folders = { null,"Platforms","Graphics_Systems","Audio_Systems","Collision_Systems",
-				"Widget_Systems" };
 		targets = new HashMap<String,List<TargetSelection>>();
-		targets.put(ids[0],findCompilers());
+		targets.put(COMPILER,findCompilers());
 		for (int i = 1; i < folders.length; i++)
 			targets.put(ids[i],findTargets(folders[i]));
 
 		combos = dependencyResolution();
 		findDefaults(combos);
 
-		debug(true,"~~~" + combos.size() + "~~~");
-
 		int scoreIndex = 0;
 		int score[] = new int[combos.size()];
 		for (Map<String,TargetSelection> i : combos)
 			score[scoreIndex++] = scoreCombo(i);
-
-		debug(true,"~~~ RESULTS ~~~");
-
-		scoreIndex = 0;
-		for (Map<String,TargetSelection> i : combos)
-			debug(score[scoreIndex++] + ": " + i);
 		}
 
 	/**
@@ -109,14 +84,6 @@ public class TargetHandler
 		// Provide a integer pairing for each mapped key, in consistent order.
 		String[] systemOrder = targets.keySet().toArray(new String[0]);
 
-		debug("");
-		for (int t = 0; t < targets.size(); t++)
-			{
-			debug("System: " + systemOrder[t] + "[" + targets.get(systemOrder[t]).size() + "]");
-			for (int i = 0; i < targets.get(systemOrder[t]).size(); i++)
-				debug("        " + targets.get(systemOrder[t]).get(i));
-			}
-
 		// For efficiency, we could also populate a List of systems.
 		for (;;)
 			{
@@ -124,16 +91,11 @@ public class TargetHandler
 			for (int i = 0; i < systemOrder.length && valid; i++)
 				{
 				// compiler is already accounted for; why would platform be?
-				if (systemOrder[i].equals(ids[0])) continue;
+				if (systemOrder[i].equals(COMPILER)) continue;
 				List<TargetSelection> system = targets.get(systemOrder[i]);
 				// This is usually a sign that something went wrong during system population.
 				// A "None" system should have at least been available, but wasn't.
-				if (system.isEmpty())
-					{
-					debug("Info: Empty");
-					continue; // for now we just ignore it as though the
-					// dependencies resolved.
-					}
+				if (system.isEmpty()) continue; // for now we just ignore it as though the dependencies resolved.
 
 				TargetSelection targ = system.get(systemCounter[i]);
 				if (!isResolvable(targ,systemOrder,systemCounter))
@@ -177,68 +139,34 @@ public class TargetHandler
 			{
 			final String key = entry.getKey().toLowerCase();
 
-			if (key.equalsIgnoreCase("build-platforms")) // System depends on a certain OS's headers
+			if (key.equalsIgnoreCase(OS_KEY)) // System depends on a certain OS's headers
 				{
-				//debug("************ " + selection.name + " depends on platform " + entry.getValue());
-				List<TargetSelection> allCompilers = targets.get(ids[0]);
+				List<TargetSelection> allCompilers = targets.get(COMPILER);
 				int whichIndex = 0; // This is the index of the compiler we've chosen
 				for (int j = 0; j < systemOrder.length; j++)
-					if (systemOrder[j].equals(ids[0]))
+					if (systemOrder[j].equals(COMPILER))
 						{
 						whichIndex = systemCounter[j];
 						break;
 						}
 				for (String value : entry.getValue())
 					{
-					for (String asshat : allCompilers.get(whichIndex).depends.get("target"))
-						{
-						//debug("\"" + asshat + "\" ?= \"" + normalize(value) + "\"");
-						if (asshat.equals(value)) continue depcheck;
-						}
+					for (String compTargs : allCompilers.get(whichIndex).depends.get(COMP_TARG))
+						if (compTargs.equals(value)) continue depcheck;
 					}
 				return false;
 				}
 
 			List<TargetSelection> all = targets.get(key);
-			if (all == null)
-				{
-				debug("all == null for key " + key);
-				return false; // Invalid dependency system specified.
-				}
+			if (all == null) return false; // Invalid dependency system specified.
 			// The dependent system has no available targets because dependencies populated wrong.
 			// A "None" system should have at least been available, but wasn't.
-			if (all.isEmpty())
-				{
-				debug("This shouldn't really happen; system by key " + key + " is empty.");
-				for (Entry<String,List<TargetSelection>> a : targets.entrySet())
-					{
-					debug("  Candidate: " + a.getKey());
-					for (TargetSelection b : a.getValue())
-						debug("    > " + b);
-					}
-				return false;
-				}
-			/// Ism: What the fuck is this shit?
-			/*/ Hunt for the current system. For efficiency, we could use a
-			// pre-populated List
-			TargetSelection current = null;
-			for (int j = 0; j < systemOrder.length && current == null; j++)
-				if (systemOrder[j].equals(key))
-					current = all.get(systemCounter[j]);
-			// Now see if one of the needed dependencies happens to be the
-			// system we're testing against.
-			// We need all systems to pass in order to allow this combination.
-			if (!entry.getValue().contains(current))
-				return false;*/
+			if (all.isEmpty()) return false;
 
 			for (int j = 0; j < systemOrder.length; j++)
-				if (systemOrder[j].equals(key))
-					{
-					debug(entry.getValue() + ".contains(" + targets.get(key).get(systemCounter[j]).id + "): "
-							+ entry.getValue().contains(targets.get(key).get(systemCounter[j]).id.toLowerCase()));
-					if (!entry.getValue().contains(targets.get(key).get(systemCounter[j]).id.toLowerCase()))
-						return false;
-					}
+				if (systemOrder[j].equals(key)
+						&& !entry.getValue().contains(targets.get(key).get(systemCounter[j]).id.toLowerCase()))
+					return false;
 			}
 		// All systems pass. If they didn't, they would have failed out early.
 		// Also, pass if this doesn't specify any dependencies (loop never executes).
@@ -248,7 +176,6 @@ public class TargetHandler
 	private static int scoreCombo(Map<String,TargetSelection> combo)
 		{
 		int score = 0;
-		debug("Score combination " + combo);
 		for (Entry<String,TargetSelection> pair : combo.entrySet())
 			{
 			TargetSelection selection = pair.getValue();
@@ -262,44 +189,24 @@ public class TargetHandler
 				if (acceptable == null) continue;
 				/*if (rep.getKey().equals("target"))
 					continue;*/
-				if (rep.getKey().equalsIgnoreCase("build-platforms"))
+				if (rep.getKey().equalsIgnoreCase(OS_KEY))
 					{
 					//debug(rep.getValue() + ".contains" + (combo.get("compiler").depends.get("target")));
-					if (rep.getValue().contains(combo.get(ids[0]).depends.get("target").iterator().next()))
-						{
-						debug(" + 1 point for " + pair.getKey() + " representing this platform");
+					if (rep.getValue().contains(combo.get(COMPILER).depends.get(COMP_TARG).iterator().next()))
 						score += 2;
-						}
 					else if (rep.getValue().contains("All") || rep.getValue().contains("all")
-							|| rep.getValue().contains("Any") || rep.getValue().contains("any"))
-						{
-						debug(" + 1/2 point for " + pair.getKey() + " representing any platform");
-						score += 1;
-						}
+							|| rep.getValue().contains("Any") || rep.getValue().contains("any")) score += 1;
 					continue;
 					}
 				TargetSelection cmp = combo.get(rep.getKey().toLowerCase());
-				//debug("TargetSelection cmp = combo.get(" + rep.getKey() + ")");
-				//debug(acceptable+".contains("+cmp.id.toLowerCase()+")");
 				if (acceptable.contains(cmp.id.toLowerCase()))
-					{
-					debug(" + 1 point for " + pair.getKey() + " representing " + rep.getKey());
 					score += 2;
-					}
 				else if (acceptable.contains("all") || acceptable.contains("All"))
-					{
-					debug(" + 1/2 point for " + pair.getKey() + " representing all " + rep.getKey());
 					score += 1;
-					}
 				else if ((acceptable.contains("any") || acceptable.contains("Any"))
-						&& !cmp.id.equals("None"))
-					{
-					debug(" + 1/2 point for " + pair.getKey() + " representing any " + rep.getKey());
-					score += 1;
-					}
+						&& !cmp.id.equals("None")) score += 1;
 				}
 			}
-		debug("Final score: " + score + " points");
 		return score;
 		}
 

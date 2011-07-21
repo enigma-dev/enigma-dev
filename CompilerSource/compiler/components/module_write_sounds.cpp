@@ -55,7 +55,7 @@ int module_write_sounds(EnigmaStruct *es, FILE *gameModule)
   }
   
   //Magic number
-  fwrite("sndn",4,1,gameModule);
+  fwrite("SND ",4,1,gameModule);
   
   //Indicate how many
   int sound_count = es->soundCount;

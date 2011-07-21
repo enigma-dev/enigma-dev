@@ -1,5 +1,6 @@
 /********************************************************************************\
 **                                                                              **
+**  Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>                          **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -25,54 +26,64 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <string>
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
+
 using namespace std;
 
-#include "../Audio_Systems/audio_mandatory.h"
-#include "../Platforms/platforms_mandatory.h"
-#include "../libEGMstd.h"
-#include "compression.h"
+#include "../../externs/externs.h"
+#include "../../syntax/syncheck.h"
+#include "../../parser/parser.h"
 
-void sound_play(int sound);
+#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
+#include "../../parser/object_storage.h"
+#include "../compile_common.h"
 
-namespace enigma
+#include "../../backend/ideprint.h"
+
+inline void writei(int x, FILE *f) {
+  fwrite(&x,4,1,f);
+}
+
+int module_write_paths(EnigmaStruct *es, FILE *gameModule)
 {
-  void sound_safety_override()
+  // Now we're going to add paths
+  edbg << es->pathCount << " Adding Fonts to Game Module: " << flushl;
+
+  //Magic Number
+  fwrite("PTH ",4,1,gameModule);
+
+  //Indicate how many
+  int path_count = es->pathCount;
+  fwrite(&path_count,4,1,gameModule);
+
+  int path_maxid = 0;
+  for (int i = 0; i < path_count; i++)
+    if (es->paths[i].id > path_maxid)
+      path_maxid = es->paths[i].id;
+  fwrite(&path_maxid,4,1,gameModule);
+
+  for (int i = 0; i < path_count; i++)
   {
+    writei(es->paths[i].id,gameModule); //id
     
-  }
-  
-  void exe_loadsounds(FILE *exe)
-  { 
-    int nullhere;
-    
-    fread(&nullhere,4,1,exe);
-    if (nullhere != *(int*)"SND ")
-      return;
-    
-    // Determine how many sprites we have
-    int sndcount;
-    fread(&sndcount,4,1,exe);
-    
-    // Fetch the highest ID we will be using
-    int snd_highid;
-    fread(&snd_highid,4,1,exe);
-    
-    for (int i = 0; i < sndcount; i++)
+    writei(es->paths[i].smooth,gameModule);
+    writei(es->paths[i].closed,gameModule);
+    writei(es->paths[i].precision,gameModule);
+    // possibly snapX/Y?
+
+    // Track how many path points we're copying
+    int pointCount = es->paths[i].pointCount;
+
+    for (int ii = 0; ii < pointCount; ii++)
     {
-      int id;
-      fread(&id,1,4,exe);
-      
-      unsigned size;
-      fread(&size,1,4,exe);
-      
-      char* fdata = new char[size];
-      fread(fdata,1,size,exe);
-      
-      if (sound_add_from_buffer(id,fdata,size))
-        printf("Failed to load sound%d\n",i);
-      delete fdata;
+      writei(es->paths[i].points[ii].x,gameModule);
+      writei(es->paths[i].points[ii].y,gameModule);
+      writei(es->paths[i].points[ii].speed,gameModule);
     }
   }
+
+  edbg << "Done writing paths." << flushl;
+  return 0;
 }

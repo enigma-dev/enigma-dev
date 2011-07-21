@@ -51,7 +51,7 @@ int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule)
   edbg << es->backgroundCount << " Adding Backgrounds to Game Module: " << flushl;
 
   //Magic Number
-  fwrite("bkgn",4,1,gameModule);
+  fwrite("BKG ",4,1,gameModule);
 
   //Indicate how many
   int back_count = es->backgroundCount;

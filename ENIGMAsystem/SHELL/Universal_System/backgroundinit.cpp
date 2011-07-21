@@ -45,7 +45,7 @@ namespace enigma
 	  unsigned bkgid, width, height,transparent,smoothEdges,preload,useAsTileset,tileWidth,tileHeight,hOffset,vOffset,hSep,vSep;
     
     fread(&nullhere,4,1,exe);
-    if (nullhere != *(int*)"bkgn")
+    if (nullhere != *(int*)"BKG ")
       return;
     
     // Determine how many backgrounds we have

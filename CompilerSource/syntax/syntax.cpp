@@ -133,7 +133,8 @@ namespace syncheck
       string str = string(TTN[type]) + "{" + buf + ", ";
       sprintf(buf,"%lu",length); str += buf; str += ", ";
       str += separator ? "separated, " : "unseparated, ";
-      str += separator ? "breakandfollow, " : "nobreak, ";
+      str += breakandfollow ? "breakandfollow, " : "nobreak, ";
+      str += operatorlike ? "operatorlike, " : "notoperator, ";
       sprintf(buf,"%d",macrolevel); str += buf;
       return str + "}";
     }
@@ -230,11 +231,11 @@ namespace syncheck
         not_a_macro:
         if (is_wordop(name)) { //this is actually a word-based operator, such as `and', `or', and `not' 
           bool unary = name[0] == 'n'; //not is the only unary word operator.
-          if (unary and (lex.size() and !lex[lexlast].separator and lex[lexlast].type != TT_OPERATOR and lex[lexlast].type != TT_UNARYPRE)) {
+          if (unary and (lex.size() and !lex[lexlast].separator and !lex[lexlast].operatorlike and lex[lexlast].type != TT_UNARYPRE)) {
             syerr = "Unexpected unary keyword `not'";
             return pos;
           }
-          if (!unary and (!lex.size() or lex[lexlast].separator or lex[lexlast].type == TT_OPERATOR or lex[lexlast].type == TT_ASSOP or lex[lexlast].type == TT_UNARYPRE)) {
+          if (!unary and (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike or lex[lexlast].type == TT_UNARYPRE)) {
             syerr = "Expected primary expression before `" + name + "' operator";
             return pos;
           }
@@ -260,7 +261,7 @@ namespace syncheck
         
         if (is_statement(name)) // Our control statements
         {
-          if (lex.size() and !lex[lexlast].separator and lex[lexlast].type != TT_OPERATOR and lex[lexlast].type != TT_UNARYPRE)
+          if (lex.size() and !lex[lexlast].separator and !lex[lexlast].operatorlike and lex[lexlast].type != TT_UNARYPRE)
           {
             if (lex[lexlast].breakandfollow)
               lex.push_back(token(TT_IMPLICIT_SEMICOLON, superPos, 0, true, false, false, mymacroind));
@@ -282,7 +283,7 @@ namespace syncheck
       
       if (is_digit(code[pos]))
       {
-        if (lex.size() and !lex[lexlast].separator and lex[lexlast].type != TT_OPERATOR) {
+        if (lex.size() and !lex[lexlast].separator and !lex[lexlast].operatorlike) {
           lex.push_back(token(TT_IMPLICIT_SEMICOLON, superPos, 0, true, false, false, mymacroind));
         }
         const pt spos = pos;
@@ -373,12 +374,12 @@ namespace syncheck
                   pos++;
               }
             else
-              while (code[++pos]!='"');
+              while (code[++pos]!='\'');
             lex.push_back(token(TT_STRING, superPos, pos-spos, false, true, false, mymacroind));
           pos++; break;
         
         case '?':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].type == TT_OPERATOR or lex[lexlast].type == TT_ASSOP or lex[lexlast].type == TT_UNARYPRE) {
+            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike or lex[lexlast].type == TT_UNARYPRE) {
               syerr = "Primary expression expected before ternary operator";
               return superPos;
             }
@@ -389,7 +390,7 @@ namespace syncheck
         int sz;
         case '+': case '-':
             sz = 1 + (code[pos+1] == code[pos] and setting::use_incrementals);
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].type == TT_OPERATOR or lex[lexlast].type == TT_ASSOP or lex[lexlast].type == TT_UNARYPRE)
+            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike or lex[lexlast].type == TT_UNARYPRE)
               lex.push_back(token(TT_UNARYPRE, superPos, sz, false, false, true, mymacroind));
             else if (sz == 2)
               lex.push_back(token(TT_UNARYPOST, superPos, sz, false, true, false, mymacroind));
@@ -400,7 +401,7 @@ namespace syncheck
             pos += sz;
           break;
         case '*':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].type == TT_OPERATOR or lex[lexlast].type == TT_ASSOP or lex[lexlast].type == TT_UNARYPRE)
+            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike or lex[lexlast].type == TT_UNARYPRE)
               lex.push_back(token(TT_UNARYPRE, superPos, 1, false, false, true, mymacroind)), ++pos;
             else if (code[pos+1] == '=')
               lex.push_back(token(TT_ASSOP, superPos, 2, false, false, true, mymacroind)), pos += 2;
@@ -408,7 +409,7 @@ namespace syncheck
               lex.push_back(token(TT_OPERATOR, superPos, 1, false, false, true, mymacroind)), ++pos;
           break;
         case '>': case '<': case '&': case '|': case '^':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].type == TT_OPERATOR or lex[lexlast].type == TT_ASSOP or lex[lexlast].type == TT_UNARYPRE) {
+            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike or lex[lexlast].type == TT_UNARYPRE) {
               if (code[pos] != '&') {
                 syerr = "Expected primary expression before operator";
                 return superPos;
@@ -436,7 +437,7 @@ namespace syncheck
               pos++; continue;
             }
         case '%': 
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].type == TT_OPERATOR or lex[lexlast].type == TT_ASSOP or lex[lexlast].type == TT_UNARYPRE) {
+            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike or lex[lexlast].type == TT_UNARYPRE) {
               syerr = "Primary expression expected before operator";
               return superPos;
             }
@@ -448,12 +449,12 @@ namespace syncheck
         
         case '!':
             if (code[pos+1] == '=') {
-              lex.push_back(token(TT_OPERATOR, superPos, 2, false, false, false, mymacroind)), pos += 2;
+              lex.push_back(token(TT_OPERATOR, superPos, 2, false, false, true, mymacroind)), pos += 2;
               continue;
             }
         case '~':
             if (!lex.size() or lex[lexlast].operatorlike or lex[lexlast].type == TT_UNARYPRE)
-              lex.push_back(token(TT_UNARYPRE, superPos, 1, false, false, false, mymacroind)), ++pos; // ~ !
+              lex.push_back(token(TT_UNARYPRE, superPos, 1, false, false, true, mymacroind)), ++pos; // ~ !
             else {
               ptrace();
               syerr = "Unexpected unary operator at this point";
@@ -462,7 +463,7 @@ namespace syncheck
           break;
         
         case '=':
-            if (!lex.size() or lex[lexlast].separator or lex[lexlast].type == TT_OPERATOR or lex[lexlast].type == TT_ASSOP or lex[lexlast].type == TT_UNARYPRE) {
+            if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike or lex[lexlast].type == TT_UNARYPRE) {
               syerr = "Primary expression expected before operator";
               return superPos;
             }
@@ -471,7 +472,7 @@ namespace syncheck
               return superPos;
             }
             sz = code[pos+1] == '=';
-            lex.push_back(token(sz==2 ? TT_OPERATOR : TT_ASSOP, superPos, 1, false, false, false, mymacroind)), pos += 1+sz; 
+            lex.push_back(token(sz==2 ? TT_OPERATOR : TT_ASSOP, superPos, 1, false, false, true, mymacroind)), pos += 1+sz; 
           break;
         default:
             syerr = "Unexpected symbol `" + code.substr(pos,1) + "': unknown to compiler";

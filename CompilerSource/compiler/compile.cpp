@@ -223,7 +223,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   for (int i = 0; i < es->backgroundCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->backgrounds[i].name);
 
-  edbg << "Copying path names [kidding, these are totally not implemented :P] [" << es->pathCount << "]" << flushl;
+  edbg << "Copying path names [" << es->pathCount << "]" << flushl;
   for (int i = 0; i < es->pathCount; i++)
     quickmember_variable(globals_scope,builtin_type__int,es->paths[i].name);
 

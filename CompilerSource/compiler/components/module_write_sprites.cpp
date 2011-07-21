@@ -51,7 +51,7 @@ int module_write_sprites(EnigmaStruct *es, FILE *gameModule)
   edbg << es->spriteCount << " Adding Sprites to Game Module: " << flushl;
   
   //Magic Number
-  fwrite("sprn",4,1,gameModule);
+  fwrite("SPR ",4,1,gameModule);
   
   //Indicate how many
   int sprite_count = es->spriteCount;

@@ -507,7 +507,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		if (!assertReady()) return;
 
-		if (es.targets.get(TargetHandler.ids[0]) == null
+		if (es.targets.get(TargetHandler.COMPILER) == null
 				|| es.targets.get(TargetHandler.ids[1]) == null)
 			{
 			JOptionPane.showMessageDialog(null,Messages.getString("EnigmaRunner.UNABLE_SETTINGS_NULL")); //$NON-NLS-1$
@@ -520,7 +520,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		File outname = null;
 		try
 			{
-			String outputexe = es.targets.get(TargetHandler.ids[0]).outputexe;
+			String outputexe = es.targets.get(TargetHandler.COMPILER).outputexe;
 			if (!outputexe.equals("$tempfile")) //$NON-NLS-1$
 				outname = new File(outputexe);
 			else if (mode < MODE_DESIGN) //run/debug

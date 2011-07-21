@@ -820,19 +820,18 @@ public final class EnigmaWriter
 		return def;
 		}
 
-	public static boolean actionDemise = false;
+	private static boolean actionDemise = false; //when unsupported actions are encountered, only report 1 error
+	private static int numberOfBraces = 0; //gm ignores brace actions which are in the wrong place or missing
+	private static int numberOfIfs = 0; //gm allows multipe else actions after 1 if, so its important to track the number
 
-	static int numberOfBraces=0; //gm ignores brace actions which are in the wrong place or missing
-	static int numberOfIfs=0; //gm allows multipe else actions after 1 if, so its important to track the number
-	
 	public static String getActionsCode(ActionContainer ac)
 		{
 		final String nl = System.getProperty("line.separator"); //$NON-NLS-1$
 		StringBuilder code = new StringBuilder();
-		
-		numberOfBraces=0;
-		numberOfIfs=0;
-		
+
+		numberOfBraces = 0;
+		numberOfIfs = 0;
+
 		for (Action act : ac.actions)
 			{
 			LibAction la = act.getLibAction();
@@ -854,20 +853,24 @@ public final class EnigmaWriter
 					numberOfBraces++;
 					break;
 				case Action.ACT_CODE:
-					code.append("{"+args.get(0).getVal()+"/**/\n}").append(nl); //surround with '{'
+					//surround with brackets (e.g. for if conditions before it) and terminate dangling comments
+					code.append('{').append(args.get(0).getVal()).append("/**/\n}").append(nl); //$NON-NLS-1$
 					break;
 				case Action.ACT_ELSE:
-				{
-					if (numberOfIfs>0) {
-					code.append("else "); //$NON-NLS-1$
-					numberOfIfs--;}
-				}
+					{
+					if (numberOfIfs > 0)
+						{
+						code.append("else "); //$NON-NLS-1$
+						numberOfIfs--;
+						}
+					}
 					break;
 				case Action.ACT_END:
-					if (numberOfBraces>0) 
-					{
-					code.append('}');
-					numberOfBraces--; }
+					if (numberOfBraces > 0)
+						{
+						code.append('}');
+						numberOfBraces--;
+						}
 					break;
 				case Action.ACT_EXIT:
 					code.append("exit "); //$NON-NLS-1$
@@ -888,30 +891,31 @@ public final class EnigmaWriter
 					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF)
 						{
 						if (la.question)
-							{ 
+							{
 							/* Question action using with statement */
 							if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
 								code.append("with (other) "); //$NON-NLS-1$
-							else
-								if (apto.get() !=null)
+							else if (apto.get() != null)
 								code.append("with (").append(apto.get().getName()).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
-								else
-									code.append("/*null with!*/"); //$NON-NLS-1$
-							
-							} else {
-						if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
-							code.append("with (other) {"); //$NON-NLS-1$
+							else
+								code.append("/*null with!*/"); //$NON-NLS-1$
+
+							}
 						else
-							if (apto.get() !=null)
-							code.append("with (").append(apto.get().getName()).append(") {"); //$NON-NLS-1$ //$NON-NLS-2$
+							{
+							if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
+								code.append("with (other) {"); //$NON-NLS-1$
+							else if (apto.get() != null)
+								code.append("with (").append(apto.get().getName()).append(") {"); //$NON-NLS-1$ //$NON-NLS-2$
 							else
 								code.append("/*null with!*/{"); //$NON-NLS-1$
 							}
 						}
-					if (la.question) {
+					if (la.question)
+						{
 						code.append("if "); //$NON-NLS-1$
 						numberOfIfs++;
-					}
+						}
 					if (act.isNot()) code.append('!');
 					if (la.allowRelative)
 						{
@@ -927,32 +931,28 @@ public final class EnigmaWriter
 					if (la.execType == Action.EXEC_FUNCTION)
 						{
 						code.append('(');
-						
 						for (int i = 0; i < args.size(); i++)
 							{
-							
-							if ( (toString(args.get(i)).equals("")||toString(args.get(i)).equals("  ")||toString(args.get(i)).equals(" ")) && args.size()>7) continue; //required with due to bug with CLI which thinks actions with no arguments have >7!
-							if (i != 0) code.append(" , ");
-							if (toString(args.get(i)).equals("")||toString(args.get(i)).equals(" ")||toString(args.get(i)).equals("  ")) code.append("0");
-							
+							if (i != 0) code.append(',');
 							code.append(toString(args.get(i)));
 							}
 						code.append(')');
 						}
-					if (la.allowRelative) code.append(la.question ? ')' : "\n}");
+					if (la.allowRelative) code.append(la.question ? ')' : "\n}"); //$NON-NLS-1$
 					code.append(nl);
 
-					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF && (!la.question)) code.append("\n}");
+					if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF && (!la.question))
+						code.append("\n}"); //$NON-NLS-1$
 					}
 					break;
 				}
 			}
-		if (numberOfBraces>0) {
+		if (numberOfBraces > 0)
+			{
 			//someone forgot the closing block action
-			for(int i=0;i<numberOfBraces;i++){
-				code.append("\n}");
+			for (int i = 0; i < numberOfBraces; i++)
+				code.append("\n}"); //$NON-NLS-1$
 			}
-		}
 		return code.toString();
 		}
 
@@ -966,7 +966,7 @@ public final class EnigmaWriter
 				if (val.startsWith("\"") || val.startsWith("'")) return val; //$NON-NLS-1$ //$NON-NLS-2$
 				//else fall through
 			case Argument.ARG_STRING:
-				return "\"" + val.replace("\\","\\\\").replace("\"","'") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				return "\"" + val.replace("\\","\\\\").replace("\"","\"+'\"'+\"") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 			case Argument.ARG_BOOLEAN:
 				return Boolean.toString(!val.equals("0")); //$NON-NLS-1$
 			case Argument.ARG_MENU:
