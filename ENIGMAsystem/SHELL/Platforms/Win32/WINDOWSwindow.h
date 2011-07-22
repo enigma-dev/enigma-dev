@@ -50,6 +50,7 @@ enum {
   cr_size_all   = -22
 };
 
+void io_handle();
 
 namespace enigma {
   void clampparent();

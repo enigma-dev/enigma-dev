@@ -48,13 +48,16 @@ void action_move_point(double x,double y,double speed);
 void move_towards_point ( double point_x, double point_y, double newspeed );*/
 
 inline bool action_if_variable(const variant& variable, const variant& value, int operation) {
-    if (operation==0) return (variable==value);
-    else if (operation==1) return (variable<value);
-    else if (operation==2) return (variable>value);
-    else return 0; //invalid operation
+    switch (operation)
+    {
+        case 0: return (variable==value); break;
+        case 1: return (variable<value); break;
+        case 2: return (variable>value); break;
+        default: return 0; //invalid operation
+    }
 }
 
-inline void action_move_to(double xx,double yy) {
+inline void action_move_to(const double xx, const double yy) {
     if (argument_relative) {
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+=xx;
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+=yy;
@@ -65,7 +68,7 @@ inline void action_move_to(double xx,double yy) {
 	}
 }
 
-inline void action_create_object(int object, double x, double y) {
+inline void action_create_object(const int object, const double x, const double y) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         instance_create(inst->x+x, inst->y+y, object);
@@ -73,17 +76,17 @@ inline void action_create_object(int object, double x, double y) {
     else instance_create(x, y, object);
 }
 
-inline void action_set_score(double newscore) { 
+inline void action_set_score(double newscore) {
     if (argument_relative) score+= (int)newscore;
     else score = (int)newscore;
 }
 
 inline void action_set_life(double newlives) {
     if (argument_relative) lives+= (int)newlives;
-    else lives = newlives; 
-} 
+    else lives = newlives;
+}
 
-inline void action_set_caption(int score,string scoreCaption,int lives,string livesCaption, int health, string healthCaption) {
+inline void action_set_caption(const int score, const string scoreCaption, const int lives,string livesCaption, const int health, const string healthCaption) {
     show_score=score;
     caption_score=scoreCaption;
     show_lives=lives;
@@ -92,42 +95,42 @@ inline void action_set_caption(int score,string scoreCaption,int lives,string li
     caption_health=healthCaption;
 }
 
-inline void action_sound(int sound,int loop) {
+inline void action_sound(const int sound, const int loop) {
 	if (loop==0) sound_play(sound);
 	else sound_loop(sound);
 }
 
-inline void action_color(int color) {
+inline void action_color(const int color) {
 	draw_set_color(color);
 }
 
-inline bool action_if_number(int object, double number, int operation) {
-	if (operation == 0) //equal to
-		return (instance_number(object) == number);
-	else if (operation == 1) //less than
-		return (instance_number(object) < number);
-	else if (operation == 2) //greater than
-		return (instance_number(object) > number);
-	 else return 0; //invalid operation
+inline bool action_if_number(const int object, const double number, const int operation) {
+	switch (operation)
+	{
+	    case 0: return (instance_number(object) == number); break;
+	    case 1:	return (instance_number(object) < number); break;
+	    case 2: return (instance_number(object) > number); break;
+	    default: return 0; //invalid operation
+    }
 }
 
 inline void action_kill_object() { instance_destroy(); }
 
-inline void action_set_vspeed(double newvspeed) {
+inline void action_set_vspeed(const double newvspeed) {
     if (argument_relative) {
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed+=newvspeed;
     } else
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed=newvspeed;
 }
 
-void action_set_hspeed(double newhspeed) {
+void action_set_hspeed(const double newhspeed) {
 	if (argument_relative) {
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed+=newhspeed;
     } else
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed=newhspeed;
 }
 
-inline void action_set_gravity(double direction,double newgravity) { 
+inline void action_set_gravity(const double direction, const double newgravity) {
     if (argument_relative) {
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction+=direction;
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity+=newgravity;
@@ -137,7 +140,7 @@ inline void action_set_gravity(double direction,double newgravity) {
     }
 }
 
-inline void action_set_friction(double newfriction) {
+inline void action_set_friction(const double newfriction) {
 	if (argument_relative) {
         ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction+=newfriction;
     } else {
@@ -146,14 +149,14 @@ inline void action_set_friction(double newfriction) {
 }
 
 
-inline void action_draw_score(double x,double y, string caption) {
+inline void action_draw_score(const double x, const double y, const string caption) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_text(x+inst->x,y+inst->y,caption+string(score));
     } else draw_text(x,y,caption+string(score));
 }
 
-inline void action_draw_sprite(int sprite,double x,double y, int subimage) {
+inline void action_draw_sprite(const int sprite, const double x, const double y, const int subimage) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_sprite(sprite,subimage,x+inst->x,y+inst->y);
@@ -162,52 +165,34 @@ inline void action_draw_sprite(int sprite,double x,double y, int subimage) {
         draw_sprite(sprite,subimage,x,y);
 }
 
-inline void action_set_health(double value) { 
+inline void action_set_health(double value) {
     if (argument_relative) health+= (int)value;
-    else health = value;    
+    else health = value;
 }
 
-inline void action_draw_health(double x1,double y1,double x2,double y2,double backColor,double barColor) {
+inline void action_draw_health(const double x1, const double y1, const double x2, const double y2, const double backColor, const int barColor) {
     double realbar1, realbar2;
-    if (barColor==0) { realbar1=c_green; realbar2=c_red;  //green to red
-    }
-    else if (barColor==1) { realbar1=c_white; realbar2=c_black;  //white to black
-    }
-    else if (barColor==2) { realbar1=c_black; realbar2=c_black;  //white to black
-    }
-    else if (barColor==3) { realbar1=c_gray; realbar2=c_gray;  
-    }
-    else if (barColor==4) { realbar1=c_silver; realbar2=c_silver;  
-    }
-    else if (barColor==5) { realbar1=c_white; realbar2=c_white;  
-    }
-    else if (barColor==6) { realbar1=c_maroon; realbar2=c_maroon;  
-    }
-    else if (barColor==7) { realbar1=c_green; realbar2=c_green; 
-    }
-    else if (barColor==8) { realbar1=c_olive; realbar2=c_olive;  
-    }
-    else if (barColor==9) { realbar1=c_navy; realbar2=c_navy;  
-    }
-    else if (barColor==10) { realbar1=c_purple; realbar2=c_purple;  
-    }
-    else if (barColor==11) { realbar1=c_teal; realbar2=c_teal;  
-    }
-    else if (barColor==12) { realbar1=c_red; realbar2=c_red;  
-    }
-    else if (barColor==13) { realbar1=c_lime; realbar2=c_lime;  
-    }
-    else if (barColor==14) { realbar1=c_yellow; realbar2=c_yellow;  
-    }
-    else if (barColor==15) { realbar1=c_blue; realbar2=c_blue;  
-    }
-    else if (barColor==16) { realbar1=c_fuchsia; realbar2=c_fuchsia;  
-    }
-    else if (barColor==17) { realbar1=c_aqua; realbar2=c_aqua; 
-    }
-    else {
-        //default
-        realbar1=c_green; realbar2=c_red;
+    switch (barColor)
+    {
+        case 0: realbar1=c_green; realbar2=c_red; break;
+        case 1: realbar1=c_white; realbar2=c_black; break;
+        case 2: realbar1=c_black; realbar2=c_black; break;
+        case 3: realbar1=c_gray; realbar2=c_gray; break;
+        case 4: realbar1=c_silver; realbar2=c_silver; break;
+        case 5: realbar1=c_white; realbar2=c_white; break;
+        case 6: realbar1=c_maroon; realbar2=c_maroon; break;
+        case 7: realbar1=c_green; realbar2=c_green; break;
+        case 8: realbar1=c_olive; realbar2=c_olive; break;
+        case 9: realbar1=c_navy; realbar2=c_navy; break;
+        case 10: realbar1=c_purple; realbar2=c_purple; break;
+        case 11: realbar1=c_teal; realbar2=c_teal; break;
+        case 12: realbar1=c_red; realbar2=c_red; break;
+        case 13: realbar1=c_lime; realbar2=c_lime; break;
+        case 14: realbar1=c_yellow; realbar2=c_yellow; break;
+        case 15: realbar1=c_blue; realbar2=c_blue; break;
+        case 16: realbar1=c_fuchsia; realbar2=c_fuchsia; break;
+        case 17: realbar1=c_aqua; realbar2=c_aqua; break;
+        default: realbar1=c_green; realbar2=c_red;
     }
 	if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
@@ -216,47 +201,43 @@ inline void action_draw_health(double x1,double y1,double x2,double y2,double ba
         draw_healthbar(x1, y1, x2, y2, health, backColor, realbar2, realbar1, 1, 1, 1);
 }
 
-inline void action_draw_life_images(double x,double y, int image) {
+inline void action_draw_life_images(const double x, const double y, const int image) {
     int actualX=x, actualY=y;
     const int width = sprite_get_width(image);
-    
+
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         actualX+=inst->x;
         actualY+=inst->y;
     }
-    
+
     for (int i=0; i<lives; i++)
         draw_sprite(image,-1, actualX+(i*width), actualY);
 }
 
-/*inline bool action_if_dice(int sides) {
-    if (sides!=0)
-        return !(random(1) < 1/sides);
-    else return false;
-}*/
+inline bool action_if_dice(double sides) {
+    if (sides == 0) {return false;}
+    return (random(1) < (double)1/sides);
+}
 
-inline bool action_if_dice(int sides) {return !(floor(random(sides)));}
-
-inline void move_towards_point ( double point_x, double point_y, double newspeed ) {
+inline void move_towards_point (const double point_x, const double point_y, const double newspeed) {
     enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
     inst->direction = point_direction ( inst->x,inst->y, (point_x), (point_y) );
     inst->speed = (newspeed);
 } //RELOCATE ME
 
-inline void action_move_point(double x,double y,double speed) {
+inline void action_move_point(const double x, const double y, const double speed) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         move_towards_point(x+inst->x,y+inst->y,speed); } //is speed also relative?
     else move_towards_point(x,y,speed);
 }
 
-
-inline bool action_if(double x) { 
-    return x >= .5; 
+inline bool action_if(const double x) {
+    return x != 0;
 }
 
-inline bool action_if_object(int object, double xx, double yy) {
+inline bool action_if_object(const int object, const double xx, const double yy) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         return place_meeting(inst->x+xx,inst->y+yy,object);
@@ -264,7 +245,7 @@ inline bool action_if_object(int object, double xx, double yy) {
     else {
         return place_meeting(xx,yy,object);
     }
-    return 0;
+    return false;
 }
 
 inline bool action_if_next_room() {
@@ -282,9 +263,9 @@ inline void action_move(const char dir[9], int argspeed) {
         if (dir[i] == '1') chosendirs[choices++] = dirs[i];
     if (choices == 0) return;
     choices = int(random(choices)); //choices is now chosen
-    
+
     bool argument_relative = false;
-    
+
     //We use rval.d for efficiency, so hspeed/vspeed aren't set twice.
     const double newdir =
     ((enigma::object_planar*)enigma::instance_event_iterator->inst)->direction.rval.d = chosendirs[choices];
@@ -300,7 +281,7 @@ inline void action_reverse_xdir() {
     ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed=-((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed;
 }
 
-inline void action_reverse_ydir() { 
+inline void action_reverse_ydir() {
 	((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed=-((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed;
 }
 
@@ -309,11 +290,11 @@ inline bool place_snapped(int hsnap, int vsnap) {
     return  ((((int) inst->x) % ((int) hsnap) == 0) &&  (((int) inst->y) % ((int) vsnap)==0));
 } //RELOCATE ME
 
-inline bool action_if_aligned(double snapHor, double snapVer) { 
+inline bool action_if_aligned(const double snapHor, const double snapVer) {
 	return place_snapped(snapHor, snapVer);
 }
 
-inline bool action_if_empty(double xx, double yy, int objects) {
+inline bool action_if_empty(const double xx, const double yy, const int objects) {
     if (argument_relative) {
         if (objects == 0)
             return place_free(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+xx,((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+yy);
@@ -326,7 +307,7 @@ inline bool action_if_empty(double xx, double yy, int objects) {
         else
             return place_empty(xx,yy);
     }
-    return 0;
+    return false;
 }
 
 inline void action_move_start() {
@@ -338,7 +319,7 @@ inline void action_move_start() {
 void action_execute_script(string script,string argument0,string argument1,string argument2,string argument3,string argument4) {}
 #define action_execute_script(script,argument0,argument1,argument2,argument3,argument4) script((argument0),(argument1),(argument2),(argument3),(argument4))
 
-inline void action_draw_rectangle(double x1,double y1,double x2,double y2,int filled) {
+inline void action_draw_rectangle(const double x1, const double y1, const double x2, const double y2, const int filled) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_rectangle(x1+inst->x,y1+inst->y,x2+inst->x,y2+inst->y,filled);
@@ -346,14 +327,14 @@ inline void action_draw_rectangle(double x1,double y1,double x2,double y2,int fi
     else draw_rectangle(x1,y1,x2,y2,filled);
 }
 
-inline void action_sprite_set(double spritep,double subimage, double speed) {
+inline void action_sprite_set(const double spritep, const  double subimage, const double speed) {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
     inst->sprite_index=spritep;
 	if (subimage !=-1) inst->image_index=subimage;
 	inst->image_speed=speed;
 }
 
-inline void action_draw_text(string text,double x,double y) {
+inline void action_draw_text(const string text, const double x, const double y) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_text(x+inst->x,y+inst->y,text); }
@@ -362,40 +343,41 @@ inline void action_draw_text(string text,double x,double y) {
     }
 }
 
-inline bool action_if_sound(int sound) {return sound_isplaying(sound);}
+inline bool action_if_sound(const int sound) {return sound_isplaying(sound);}
 
-inline void action_end_sound(int sound) {
+inline void action_end_sound(const int sound) {
     sound_stop(sound);
 }
 
-inline void action_sleep(double milliseconds,int redraw) {
+inline void action_sleep(const double milliseconds, const int redraw) {
+    if (redraw) {screen_redraw();}
     sleep(milliseconds/1000);
 }
 
-inline void action_current_room(int transition) {
+inline void action_current_room(const int transition) {
     //transition_kind=transition;
     room_restart();
 }
 
-inline void action_next_room(int transition) {
+inline void action_next_room(const int transition) {
     //transition_kind=transition;
     room_goto_next();
 }
 
-inline void action_another_room(int room, int transition) {
+inline void action_another_room(const int room, const int transition) {
 	//transition_kind=transition;
 	room_goto(room);
-} 
+}
 
-inline void action_font(int font,int align) {
-    draw_set_font(font); 
+inline void action_font(const int font, const int align) {
+    draw_set_font(font);
     // draw_set_halign(align);
 }
 
 /*
  move_wrap by Polygone
  */
-void move_wrap(bool hor, bool vert, double margin)
+void move_wrap(const bool hor, const bool vert, const double margin)
 {
     enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
     if (hor)
@@ -424,19 +406,141 @@ void move_wrap(bool hor, bool vert, double margin)
     }
 } //RELOCATE ME
 
-inline void action_wrap(int direction) {
-    if (direction == 0)
-        move_wrap(1,0,0);
-    if (direction == 1)
-        move_wrap(0,1,0);
-    if (direction == 2)
-        move_wrap(1,1,0);
+inline void action_wrap(const int direction) {
+    switch (direction)
+    {
+        case 0: move_wrap(1,0,0); break;
+        case 1: move_wrap(0,1,0); break;
+        case 2: move_wrap(1,1,0); break;
+    }
 }
 
-inline void action_set_motion(double dir,double nspeed) {
+/*
+move contact by Polygone
+*/
+
+double move_contact_object(double angle, double dist, const int object, const bool precise = false, const bool solid_only = false)
+{
+    const double DMIN = 0.000001, DMAX = 1000000;
+    const double contact_distance = ((precise) ? DMIN : 1);
+    if (dist <= 0)
+    {
+        dist = DMAX;
+    }
+    angle = ((angle mod 360) + 360) mod 360;
+    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    const int quad = int(angle/90.0);
+    for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+    {
+        const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
+        if (inst2->id == inst1->id || solid_only && !inst2->solid) {continue;}
+
+        if (inst2->x + inst2->bbox_right >= inst1->x + inst1->bbox_left && inst2->y + inst2->bbox_bottom >= inst1->y + inst1->bbox_top && inst2->x + inst2->bbox_left <= inst1->x + inst1->bbox_right && inst2->y + inst2->bbox_top <= inst1->y + inst1->bbox_bottom)
+        {
+            dist = 0;
+            break;
+        }
+
+        switch (quad)
+        {
+            case 0:
+            if ((inst2->x + inst2->bbox_left > inst1->x + inst1->bbox_right || inst1->y + inst1->bbox_top > inst2->y + inst2->bbox_bottom) &&
+            direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top)) >= 0  &&
+            direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom)) <= 0)
+            {
+                if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom)) > 0)
+                {
+                    dist = min(dist, (inst1->y + inst1->bbox_top - (inst2->y + inst2->bbox_bottom) - contact_distance)/sin(degtorad(angle)));
+                }
+                else
+                {
+                    dist = min(dist, (inst2->x + inst2->bbox_left - (inst1->x + inst1->bbox_right) - contact_distance)/cos(degtorad(angle)));
+                }
+            }
+            break;
+            case 1:
+            if ((inst1->x + inst1->bbox_left > inst2->x + inst2->bbox_right || inst1->y + inst1->bbox_top > inst2->y + inst2->bbox_bottom) &&
+            direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top)) <= 0  &&
+            direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom)) >= 0)
+            {
+                if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom)) > 0)
+                {
+                    dist = min(dist, (inst2->x + inst2->bbox_right - (inst1->x + inst1->bbox_left) + contact_distance)/cos(degtorad(angle)));
+                }
+                else
+                {
+                    dist = min(dist, (inst1->y + inst1->bbox_top - (inst2->y + inst2->bbox_bottom) - contact_distance)/sin(degtorad(angle)));
+                }
+            }
+            break;
+            case 2:
+            if ((inst1->x + inst1->bbox_left > inst2->x + inst2->bbox_right || inst2->y + inst2->bbox_top > inst1->y + inst1->bbox_bottom) &&
+            direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top)) <= 0  &&
+            direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom)) >= 0)
+            {
+                if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top)) > 0)
+                {
+                    dist = min(dist, (inst1->y + inst1->bbox_bottom - (inst2->y + inst2->bbox_top) + contact_distance)/sin(degtorad(angle)));
+                }
+                else
+                {
+                    dist = min(dist, (inst2->x + inst2->bbox_right - (inst1->x + inst1->bbox_left) + contact_distance)/cos(degtorad(angle)));
+                }
+            }
+            break;
+            case 3:
+            if ((inst2->x + inst2->bbox_left > inst1->x + inst1->bbox_right || inst2->y + inst2->bbox_top > inst1->y + inst1->bbox_bottom) &&
+            direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom)) <= 0  &&
+            direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top)) >= 0)
+            {
+                if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top)) > 0)
+                {
+                    dist = min(dist, (inst2->x + inst2->bbox_left - (inst1->x + inst1->bbox_right) - contact_distance)/cos(degtorad(angle)));
+                }
+                else
+                {
+                    dist = min(dist, (inst1->y + inst1->bbox_bottom - (inst2->y + inst2->bbox_top) + contact_distance)/sin(degtorad(angle)));
+                }
+            }
+            break;
+        }
+    }
+    inst1->x += cos(degtorad(angle))*dist;
+    inst1->y -= sin(degtorad(angle))*dist;
+    return dist;
+}
+
+inline int move_contact_all(const double direction, const double speed, const bool precise = false)
+{
+    return move_contact_object(direction, speed, all, precise);
+}
+
+inline int move_contact_solid(const double direction, const double speed, const bool precise = false)
+{
+    return move_contact_object(direction, speed, all, precise, true);
+}
+
+inline int move_contact(const double direction, const double speed, const bool precise = false)
+{
+    return move_contact_object(direction, speed, all, precise);
+} //RELOCATE US
+
+inline void action_move_contact(const double direction, const double speed, const int against)
+{
+    if (against == 0)
+    {
+        move_contact_object(direction, speed, all, false, true);
+    }
+    else if (against == 1)
+    {
+        move_contact_object(direction, speed, all, false, false);
+    }
+}
+
+inline void action_set_motion(const double dir, const double nspeed) {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
     if (argument_relative) {
-        inst->hspeed+= (nspeed) * cos(degtorad((dir))); 
+        inst->hspeed+= (nspeed) * cos(degtorad((dir)));
         inst->vspeed-= (nspeed) * sin(degtorad((dir)));
     }
     else  {
@@ -444,9 +548,6 @@ inline void action_set_motion(double dir,double nspeed) {
         inst->speed=nspeed;
     }
 }
-
-
-
 
 void motion_set(int dir, double newspeed) //RELOCATE ME
 {
@@ -459,9 +560,9 @@ void motion_set(int dir, double newspeed) //RELOCATE ME
 void motion_add(double newdirection, double newspeed) //RELOCATE ME
 {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
-    
+
     inst->hspeed+= (newspeed) * cos(degtorad((newdirection)));
-    inst->vspeed-= (newspeed) * sin(degtorad((newdirection)));  
+    inst->vspeed-= (newspeed) * sin(degtorad((newdirection)));
 }
 //#define motion_add(newdirection,newspeed) hspeed+= (newspeed) * cos(degtorad((newdirection))); vspeed-= (newspeed) * sin(degtorad((newdirection)));
 
@@ -473,9 +574,16 @@ void action_restart_game();
 #define action_restart_game game_restart
 
 
-inline bool action_if_collision(double x, double y,int object) {
+inline bool action_if_collision(const double x, const double y, const int object) {
         return !action_if_empty(x,y,object); //Already takes argument_relative into account
 }
+
+inline void action_message(string message) {
+show_message(message);
+}
+
+void show_info() {}  //TEMPORARY FILLER, RELOCATE ME
+void action_show_info() {show_info();}
 
 
 

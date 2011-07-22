@@ -373,4 +373,25 @@ int get_color(double defcolor)
     return (int)defc; else return -1;
 }
 
+#include "../../Universal_System/globalupdate.h"
+#include "WINDOWScallback.h"
 
+void io_handle()
+{
+  MSG msg;
+  enigma::input_push();
+  while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
+  {
+    if (msg.message == WM_QUIT)
+    {
+      PostQuitMessage(0);
+      break;
+    }
+    else
+    {
+      TranslateMessage (&msg);
+      DispatchMessage (&msg);
+    }
+  }
+  enigma::update_globals();
+}
