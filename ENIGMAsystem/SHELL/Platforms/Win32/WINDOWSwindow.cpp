@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
@@ -31,12 +31,15 @@ using namespace std;
 
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h"
+#include <unistd.h> //usleep
+#include "../../Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+
 
 namespace enigma
 {
   extern HWND hWnd,hWndParent;
   extern int windowcolor; extern double viewscale; extern bool windowIsTop;
-  
+
   void clampparent()
   {
     RECT c;
@@ -103,7 +106,7 @@ void window_set_stayontop(const bool stay)
    {
      SetWindowPos(enigma::hWnd,HWND_BOTTOM,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE);
      SetWindowPos(enigma::hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
-     enigma::windowIsTop=0; //Cheap hax, but every windows program I've experimented with does it, 
+     enigma::windowIsTop=0; //Cheap hax, but every windows program I've experimented with does it,
      //though GM changes it back every step if you try to make it stay on top. It does not notice if you send it back.
    }
 }
@@ -167,13 +170,13 @@ void window_set_rectangle(int x, int y, int width, int height)
 {
     SetWindowPos(enigma::hWnd, HWND_TOP, x, y, width, height, SWP_SHOWWINDOW);
     enigma::clampparent();
-}    
+}
 
 void window_center()
 {
     RECT window;
     GetWindowRect(enigma::hWnd,&window);
-    
+
     int tmp_wind_width = window.right - window.left;
     int tmp_wind_height = window.bottom - window.top;
     int screen_width = GetSystemMetrics(SM_CXBORDER);
@@ -185,15 +188,15 @@ void window_default()
 {
     RECT window;
     GetWindowRect(enigma::hWnd,&window);
-    
+
     int xm=0, ym=0;
-    if (view_enabled) for (int i=0;i<7;i++) 
+    if (view_enabled) for (int i=0;i<7;i++)
     {
-      if (view_visible[i]) 
-      { if (view_xview[i]+view_wview[i]>xm) xm=(int)(view_xview[i]+view_wview[i]); 
-        if (view_yview[i]+view_hview[i]>ym) ym=(int)(view_yview[i]+view_hview[i]); } 
+      if (view_visible[i])
+      { if (view_xview[i]+view_wview[i]>xm) xm=(int)(view_xview[i]+view_wview[i]);
+        if (view_yview[i]+view_hview[i]>ym) ym=(int)(view_yview[i]+view_hview[i]); }
     } else { xm=(int)room_width; ym=(int)room_height; }
-    
+
     int screen_width = GetSystemMetrics(SM_CXBORDER);
     int screen_height = GetSystemMetrics(SM_CYBORDER);
     SetWindowPos(enigma::hWnd, HWND_TOP, screen_width - xm/2, screen_height - ym/2, xm, ym, SWP_SHOWWINDOW);
@@ -205,7 +208,7 @@ int window_mouse_get_x()
     GetWindowRect(enigma::hWnd,&window);
     POINT mouse;
 	GetCursorPos(&mouse);
-	
+
 	return mouse.x-window.left;
 }
 int window_mouse_get_y()
@@ -214,7 +217,7 @@ int window_mouse_get_y()
     GetWindowRect(enigma::hWnd,&window);
     POINT mouse;
 	GetCursorPos(&mouse);
-	
+
 	return mouse.y-window.top;
 }
 void window_mouse_set(int x,int y)
@@ -298,14 +301,14 @@ namespace getstr
   HWND nwindow,ntextdp,bconfrm,bcancel,ninputf;
   HINSTANCE aninstance;
   bool initdstrfncs=0;
-  
+
   void init()
   {
     nwindow=CreateWindow("getStringForm","Input",WS_CAPTION|WS_POPUP,96,64,300,144,enigma::hWnd,NULL,aninstance,NULL);
     ntextdp=CreateWindow("STATIC","",WS_CHILD|WS_VISIBLE,8,8,240,56,nwindow,NULL,aninstance,NULL);
     bconfrm=CreateWindow("BUTTON","OK",WS_CHILD|WS_VISIBLE,256,8,64,24,nwindow,NULL,aninstance,NULL);
     bcancel=CreateWindow("BUTTON","Cancel",WS_CHILD|WS_VISIBLE,256,40,64,24,nwindow,NULL,aninstance,NULL);
-    
+
     ninputf=CreateWindow("EDIT","",WS_CHILD|WS_VISIBLE,8,72,304,16,nwindow,NULL,aninstance,NULL);
     initdstrfncs=1;
   }
@@ -313,14 +316,14 @@ namespace getstr
 
 string get_string(string message, string def)
 {
-  if (!getstr::initdstrfncs) 
+  if (!getstr::initdstrfncs)
   {
   #if SHOWERRORS
   show_error("ENIGMA Error: get_string not initialized.",0);
   #endif
   return "";
   }
-  
+
   RECT nwsizes; int wm=8,hm=8;
    SetWindowText(getstr::ntextdp,message.c_str());
    SetWindowText(getstr::ninputf,def.c_str());
@@ -329,14 +332,14 @@ string get_string(string message, string def)
     GetWindowRect(getstr::ninputf,&nwsizes); hm+=nwsizes.bottom-nwsizes.top+8;
   RECT nwnszwb; nwnszwb.left=0; nwnszwb.top=0; nwnszwb.right=wm; nwnszwb.bottom=hm;
     AdjustWindowRect(&nwnszwb,WS_CAPTION|WS_VISIBLE|WS_POPUP,0);
-  
+
   SetWindowPos(getstr::nwindow,HWND_TOPMOST,0,0,nwnszwb.right-nwnszwb.left,nwnszwb.bottom-nwnszwb.top,SWP_NOMOVE);
-  
+
   ShowWindow(getstr::nwindow,SW_SHOW);
-  
-  for (;;) 
+
+  for (;;)
   {
-    if (SendMessage(getstr::bconfrm,BM_GETSTATE,0,0)==108) { int sz=GetWindowTextLength(getstr::ninputf)+2; 
+    if (SendMessage(getstr::bconfrm,BM_GETSTATE,0,0)==108) { int sz=GetWindowTextLength(getstr::ninputf)+2;
         char sbuffer[sz]; GetWindowText(getstr::ninputf,sbuffer,sz); ShowWindow(getstr::nwindow,SW_HIDE); return sbuffer; }
     if (SendMessage(getstr::bcancel,BM_GETSTATE,0,0)==108) { ShowWindow(getstr::nwindow,SW_HIDE); return ""; }
     MSG msg;
@@ -360,15 +363,15 @@ int get_color(double defcolor)
 {
     COLORREF defc=(int)defcolor;
     static COLORREF custcs[16];
-    
+
     CHOOSECOLOR gcol;
     gcol.lStructSize=sizeof(CHOOSECOLOR);
     gcol.hwndOwner=enigma::hWnd;
     gcol.rgbResult=defc;
-    gcol.lpCustColors=custcs; 
-    gcol.Flags=CC_RGBINIT; 
-    gcol.lpTemplateName=""; 
-    
+    gcol.lpCustColors=custcs;
+    gcol.Flags=CC_RGBINIT;
+    gcol.lpTemplateName="";
+
     if (ChooseColor(&gcol))
     return (int)defc; else return -1;
 }
@@ -395,3 +398,50 @@ void io_handle()
   }
   enigma::update_globals();
 }
+
+void io_clear()
+{
+  for (int i = 0; i < 255; i++)
+    enigma::keybdstatus[i] = enigma::last_keybdstatus[i] = 0;
+  for (int i = 0; i < 3; i++)
+    enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
+}
+
+void keyboard_wait()
+{
+  for (;;)
+  {
+    io_handle();
+    for (int i = 0; i < 255; i++)
+      if (enigma::keybdstatus[i])
+        return;
+    usleep(10000); // Sleep 1/100 second
+  }
+}
+
+void mouse_wait()
+{
+  for (;;)
+  {
+    io_handle();
+    for (int i = 0; i < 3; i++)
+      if (enigma::mousestatus[i])
+        return;
+    usleep(10000); // Sleep 1/100 second
+  }
+}
+
+void keyboard_clear(const int key)
+{
+    enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
+}
+
+void mouse_clear(const int button)
+{
+    enigma::mousestatus[button] = enigma::last_mousestatus[button] = 0;
+}
+
+/*int window_set_cursor(double c)
+{
+    return 0;
+}*/

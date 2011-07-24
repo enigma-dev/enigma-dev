@@ -237,6 +237,10 @@ step: 3
 	Name: Step
 	Mode: Special
 	Case: 0
+
+localsweep: 100000 
+	Name: Locals sweep 
+	Mode: Inline
 	Constant: enigma::propagate_locals(this);
 
 
@@ -269,7 +273,7 @@ collision: 4
 	Mode: Stacked
 	Super Check: instance_number(%1)
 	Sub Check: (instance_other = enigma::place_meeting_inst(x,y,%1)) # Parenthesize assignment used as truth
-	prefix: if (solid ||  enigma::glaccess(int(other))->solid) {if (enigma::place_meeting_inst(xprevious+hspeed,yprevious,%1)){x=xprevious;} if (enigma::place_meeting_inst(xprevious,yprevious+vspeed,%1)) { y=yprevious;}}
+	prefix: if (solid ||  enigma::glaccess(int(other))->solid) {x = xprevious; y = yprevious;}
 # Check for detriment from collision events above
 
 nomorelives: 7
@@ -548,5 +552,4 @@ joysticktwobuttoneight: 6
 #gameend
 #
 #parent_endstep
-
 

@@ -51,6 +51,11 @@ enum {
 };
 
 void io_handle();
+void io_clear();
+void keyboard_wait();
+void mouse_wait();
+void keyboard_clear(const int key);
+void mouse_clear(const int button);
 
 namespace enigma {
   void clampparent();
@@ -82,6 +87,7 @@ int  window_mouse_get_y();
 void window_mouse_set(int x,int y);
 void window_set_fullscreen(const bool full);
 int  window_get_fullscreen();
+//int window_set_cursor(double c);
 
 namespace getstr {
   void init();
