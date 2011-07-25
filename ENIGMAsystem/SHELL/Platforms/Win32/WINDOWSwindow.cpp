@@ -355,7 +355,10 @@ string get_string(string message, string def)
 
 
 int game_end() { PostQuitMessage(0); return 0; }
-
+void action_end_game()
+{
+    game_end();
+}
 
 
 

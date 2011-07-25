@@ -809,12 +809,6 @@ inline void action_draw_variable(variant variable, const double x, const double 
     }
 }
 
-
-inline void action_end_game()
-{
-    game_end();
-}
-
 inline bool action_if_health(const double value, const int operation)
 {
 	switch (operation)

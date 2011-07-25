@@ -95,4 +95,5 @@ namespace getstr {
 
 string get_string(string message, string def);
 int game_end();
+void action_end_game();
 int get_color(double defcolor);

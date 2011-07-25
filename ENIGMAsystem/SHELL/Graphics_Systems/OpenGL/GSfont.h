@@ -32,10 +32,11 @@ const int fa_middle = 1;
 const int fa_bottom = 2;
 
 void draw_set_halign(int align);
+int draw_get_halign();
 void draw_set_valign(int align);
-int draw_get_halign(int align);
-int draw_get_valign(int align);
+int draw_get_valign();
 void draw_set_font(int fnt);
+int draw_get_font();
 void draw_text(int x,int y,variant str);
 void draw_text_color(int x,int y,variant str,int c1,int c2,int c3,int c4,double a);
 

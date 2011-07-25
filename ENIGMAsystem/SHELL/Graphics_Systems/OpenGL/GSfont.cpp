@@ -1132,3 +1132,9 @@ void draw_set_font(int fnt)
 {
   enigma::currentfont = fnt;
 }
+
+int draw_get_font(int fnt)
+{
+  return enigma::currentfont;
+}
+

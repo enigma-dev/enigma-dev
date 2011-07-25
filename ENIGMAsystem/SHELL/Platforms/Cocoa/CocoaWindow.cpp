@@ -419,3 +419,8 @@ void game_end() {
     //audiosystem_cleanup();
     exit(0);
 }
+
+void action_end_game()
+{
+    game_end();
+}
