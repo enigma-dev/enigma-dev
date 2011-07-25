@@ -25,18 +25,38 @@ import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
 
 import org.enigma.messages.Messages;
+import org.enigma.utility.APNGExperiments;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFileReader;
 import org.lateralgm.file.GmFormatException;
+import org.lateralgm.file.GmStreamEncoder;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
+import org.lateralgm.resources.GmObject;
+import org.lateralgm.resources.Path;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
+import org.lateralgm.resources.Room;
 import org.lateralgm.resources.Script;
 import org.lateralgm.resources.Sound;
 import org.lateralgm.resources.Sprite;
 import org.lateralgm.resources.Resource.Kind;
 import org.lateralgm.resources.Sound.PSound;
+import org.lateralgm.resources.library.LibAction;
+import org.lateralgm.resources.library.LibManager;
+import org.lateralgm.resources.sub.Action;
+import org.lateralgm.resources.sub.Argument;
+import org.lateralgm.resources.sub.BackgroundDef;
+import org.lateralgm.resources.sub.Event;
+import org.lateralgm.resources.sub.Instance;
+import org.lateralgm.resources.sub.MainEvent;
+import org.lateralgm.resources.sub.PathPoint;
+import org.lateralgm.resources.sub.Tile;
+import org.lateralgm.resources.sub.View;
+import org.lateralgm.resources.sub.BackgroundDef.PBackgroundDef;
+import org.lateralgm.resources.sub.Instance.PInstance;
+import org.lateralgm.resources.sub.Tile.PTile;
+import org.lateralgm.resources.sub.View.PView;
 import org.lateralgm.util.PropertyMap;
 
 public class EFileWriter
@@ -46,22 +66,22 @@ public class EFileWriter
 	// Modularity Classes
 	public static abstract class EGMOutputStream
 		{
-		protected PrintStream last;
+		protected OutputStream last;
 
-		public PrintStream next(final List<String> directory, String filename) throws IOException
+		public OutputStream next(final List<String> directory, String filename) throws IOException
 			{
 			if (last != null) _finishLast();
 			return last = _next(directory,filename);
 			}
 
-		protected abstract PrintStream _next(final List<String> directory, String filename)
+		protected abstract OutputStream _next(final List<String> directory, String filename)
 				throws IOException;
 
-		protected abstract void _finishLast();
+		protected abstract void _finishLast() throws IOException;
 
 		public abstract void finish() throws IOException;
 
-		public void close()
+		public void close() throws IOException
 			{
 			if (last == null) return;
 			_finishLast();
@@ -88,13 +108,13 @@ public class EFileWriter
 			}
 
 		@Override
-		protected void _finishLast()
+		protected void _finishLast() throws IOException
 			{
 			last.flush();
 			}
 
 		@Override
-		protected PrintStream _next(List<String> directory, String filename) throws IOException
+		protected OutputStream _next(List<String> directory, String filename) throws IOException
 			{
 			StringBuilder path = new StringBuilder();
 			for (String s : directory)
@@ -124,18 +144,18 @@ public class EFileWriter
 			}
 
 		@Override
-		protected void _finishLast()
+		protected void _finishLast() throws IOException
 			{
 			last.close();
 			}
 
 		@Override
-		protected PrintStream _next(List<String> directory, String filename) throws IOException
+		protected OutputStream _next(List<String> directory, String filename) throws IOException
 			{
 			File f = root;
 			for (String s : directory)
 				f = new File(root,s);
-			return new PrintStream(new File(f,filename));
+			return new FileOutputStream(new File(f,filename));
 			}
 
 		@Override
@@ -168,12 +188,11 @@ public class EFileWriter
 			Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
 			String fn = name + getExt(r);
 
-			PrintStream ps = os.next(dir,name + EY);
+			PrintStream ps = new PrintStream(os.next(dir,name + EY));
 			ps.println("Data: " + fn); //$NON-NLS-1$
 			writeProperties(ps,r);
 
-			ps = os.next(dir,fn);
-			writeData(ps,r);
+			writeData(os.next(dir,fn),r);
 			}
 
 		/**
@@ -185,7 +204,7 @@ public class EFileWriter
 
 		public abstract void writeProperties(PrintStream os, Resource<?,?> r) throws IOException;
 
-		public abstract void writeData(PrintStream os, Resource<?,?> r) throws IOException;
+		public abstract void writeData(OutputStream os, Resource<?,?> r) throws IOException;
 		}
 
 	/**
@@ -217,29 +236,32 @@ public class EFileWriter
 	static
 		{
 		// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
-		writers.put(Kind.SPRITE,new SpriteIO());
+		writers.put(Kind.SPRITE,new SpriteApngIO());
 		writers.put(Kind.SOUND,new SoundIO());
 		writers.put(Kind.BACKGROUND,new BackgroundIO());
-		// writers.put(Kind.PATH,new PathIO());
+		writers.put(Kind.PATH,new PathTextIO());
 		writers.put(Kind.SCRIPT,new ScriptIO());
-		// writers.put(Kind.FONT,new FontIO());
+		writers.put(Kind.FONT,new FontRawIO());
 		// writers.put(Kind.TIMELINE,new TimelineIO());
-		// writers.put(Kind.OBJECT,new ObjectIO());
-		// writers.put(Kind.ROOM,new RoomIO());
+		writers.put(Kind.OBJECT,new ObjectIO());
+		writers.put(Kind.ROOM,new RoomGmDataIO());
 		// TODO: MOAR
 
-		typestrs.put(Kind.SPRITE,"spr"); //$NON-NLS-1$
-		typestrs.put(Kind.SOUND,"snd"); //$NON-NLS-1$
-		typestrs.put(Kind.BACKGROUND,"bkg"); //$NON-NLS-1$
-		typestrs.put(Kind.PATH,"pth"); //$NON-NLS-1$
-		typestrs.put(Kind.SCRIPT,"scr"); //$NON-NLS-1$
-		typestrs.put(Kind.FONT,"fnt"); //$NON-NLS-1$
-		typestrs.put(Kind.TIMELINE,"tml"); //$NON-NLS-1$
-		typestrs.put(Kind.OBJECT,"obj"); //$NON-NLS-1$
-		typestrs.put(Kind.ROOM,"rom"); //$NON-NLS-1$
-		typestrs.put(Kind.GAMEINFO,"inf"); //$NON-NLS-1$
-		typestrs.put(Kind.GAMESETTINGS,"set"); //$NON-NLS-1$
-		typestrs.put(Kind.EXTENSIONS,"ext"); //$NON-NLS-1$
+		// Unused for now
+		/*
+		 * typestrs.put(Kind.SPRITE,"spr"); //$NON-NLS-1$
+		 * typestrs.put(Kind.SOUND,"snd"); //$NON-NLS-1$
+		 * typestrs.put(Kind.BACKGROUND,"bkg"); //$NON-NLS-1$
+		 * typestrs.put(Kind.PATH,"pth"); //$NON-NLS-1$
+		 * typestrs.put(Kind.SCRIPT,"scr"); //$NON-NLS-1$
+		 * typestrs.put(Kind.FONT,"fnt"); //$NON-NLS-1$
+		 * typestrs.put(Kind.TIMELINE,"tml"); //$NON-NLS-1$
+		 * typestrs.put(Kind.OBJECT,"obj"); //$NON-NLS-1$
+		 * typestrs.put(Kind.ROOM,"rom"); //$NON-NLS-1$
+		 * typestrs.put(Kind.GAMEINFO,"inf"); //$NON-NLS-1$
+		 * typestrs.put(Kind.GAMESETTINGS,"set"); //$NON-NLS-1$
+		 * typestrs.put(Kind.EXTENSIONS,"ext"); //$NON-NLS-1$
+		 */
 		}
 
 	// Constructors
@@ -272,7 +294,7 @@ public class EFileWriter
 	public static void writeNodeChildren(EGMOutputStream os, ResNode node, List<String> dir)
 			throws IOException
 		{
-		PrintStream ps = os.next(dir,"toc.txt"); //$NON-NLS-1$
+		PrintStream ps = new PrintStream(os.next(dir,"toc.txt")); //$NON-NLS-1$
 
 		int children = node.getChildCount();
 		for (int i = 0; i < children; i++)
@@ -295,7 +317,7 @@ public class EFileWriter
 				// String cdir = dir + child.getUserObject() + SEPARATOR;
 				ArrayList<String> newDir = new ArrayList<String>(dir);
 				newDir.add(cn);
-				//				os.next(newDir, null);
+				// os.next(newDir, null);
 				writeNodeChildren(os,child,newDir);
 				}
 			}
@@ -320,7 +342,7 @@ public class EFileWriter
 	// Modules
 	// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
 
-	static class SpriteIO extends DataPropWriter
+	static class SpriteApngIO extends DataPropWriter
 		{
 		@Override
 		public String getExt(Resource<?,?> r)
@@ -329,12 +351,11 @@ public class EFileWriter
 			}
 
 		@Override
-		public void writeData(PrintStream os, Resource<?,?> r) throws IOException
+		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
 			{
 			ArrayList<BufferedImage> subs = ((Sprite) r).subImages;
-			//TODO: Convert subs to APNG, write to os
+			APNGExperiments.imagesToApng(subs,os);
 			}
-		
 
 		@Override
 		public boolean allowProperty(String name)
@@ -352,7 +373,7 @@ public class EFileWriter
 			}
 
 		@Override
-		public void writeData(PrintStream os, Resource<?,?> r) throws IOException
+		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
 			{
 			os.write(((Sound) r).data);
 			}
@@ -373,9 +394,39 @@ public class EFileWriter
 			}
 
 		@Override
-		public void writeData(PrintStream os, Resource<?,?> r) throws IOException
+		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
 			{
 			ImageIO.write(((Background) r).getBackgroundImage(),"png",os); //$NON-NLS-1$
+			}
+
+		@Override
+		public boolean allowProperty(String name)
+			{
+			return true;
+			}
+		}
+
+	static class PathTextIO extends DataPropWriter
+		{
+		@Override
+		public String getExt(Resource<?,?> r)
+			{
+			return ".pth"; //$NON-NLS-1$
+			}
+
+		@Override
+		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
+			{
+			PrintStream ps = new PrintStream(os);
+			// space delimited, EOF terminated
+			for (PathPoint p : ((Path) r).points)
+				{
+				ps.print(p.getX());
+				ps.print(' ');
+				ps.print(p.getY());
+				ps.print(' ');
+				ps.println(p.getSpeed());
+				}
 			}
 
 		@Override
@@ -394,15 +445,165 @@ public class EFileWriter
 			}
 
 		@Override
-		public void writeData(PrintStream os, Resource<?,?> r) throws IOException
+		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
 			{
-			os.print(((Script) r).getCode());
+			os.write(((Script) r).getCode().getBytes()); // charset?
 			}
 
 		@Override
 		public boolean allowProperty(String name)
 			{
 			return false;
+			}
+		}
+
+	static class FontRawIO implements ResourceWriter
+		{
+		public void write(EGMOutputStream os, ResNode child, List<String> dir) throws IOException
+			{
+			String name = (String) child.getUserObject();
+			Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
+
+			writeProperties(new PrintStream(os.next(dir,name + EY)),r);
+			}
+
+		public void writeProperties(PrintStream os, Resource<?,?> r) throws IOException
+			{
+			PropertyMap<? extends Enum<?>> p = r.properties;
+			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
+				if (allowProperty(e.getKey().name())) os.println(e.getKey().name() + ": " + e.getValue()); //$NON-NLS-1$
+			}
+
+		public boolean allowProperty(String name)
+			{
+			return true;
+			}
+		}
+
+	static class ObjectIO extends DataPropWriter
+		{
+		@Override
+		public String getExt(Resource<?,?> r)
+			{
+			return ".obj"; //$NON-NLS-1$
+			}
+
+		@Override
+		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
+			{
+			GmObject obj = (GmObject) r;
+			PrintStream ps = new PrintStream(os);
+			int numEvents = 0;
+
+			// Write the Events super-key
+			for (MainEvent me : obj.mainEvents)
+				numEvents += me.events.size();
+			ps.println("Events{" + numEvents + "}");
+
+			// Write the events
+			for (MainEvent me : obj.mainEvents)
+				for (Event ev : me.events)
+					{
+					ps.println("  Event (" + ev.id + "," + ev.mainId + "): " + "Actions{" + ev.actions.size()
+							+ "}");
+					for (Action action : ev.actions)
+						{
+						LibAction la = action.getLibAction();
+						ps.print("    Action (" + la.id + "," + la.parentId + "): ");
+						if (action.isNot()) ps.print("\"Not\" ");
+						if (action.isRelative()) ps.print("\"Relative\" ");
+						if (action.getAppliesTo().get() != null)
+							ps.print("Applies(" + action.getAppliesTo().get() + ") ");
+						if (la.interfaceKind != LibAction.INTERFACE_CODE)
+							{
+							ps.println("Fields[" + action.getArguments().size() + "]");
+							for (Argument arg : action.getArguments())
+								ps.println("      " + arg.getVal());
+							}
+						else
+							{
+							// note: check size first
+							String code = action.getArguments().get(0).getVal();
+							ps.println("Code[" + code.split("\r\n|\r|\n").length + " lines]");
+							ps.println(code);
+							}
+						}
+					}
+			}
+
+		@Override
+		public boolean allowProperty(String name)
+			{
+			return true;
+			}
+		}
+
+	static class RoomGmDataIO extends DataPropWriter
+		{
+		@Override
+		public String getExt(Resource<?,?> r)
+			{
+			return ".rmg"; //$NON-NLS-1$
+			}
+
+		@Override
+		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
+			{
+			Room rm = (Room) r;
+			GmStreamEncoder out = new GmStreamEncoder(os);
+			out.write4(rm.backgroundDefs.size());
+			for (BackgroundDef back : rm.backgroundDefs)
+				{
+				out.writeBool(back.properties,PBackgroundDef.VISIBLE,PBackgroundDef.FOREGROUND);
+				out.writeId((ResourceReference<?>) back.properties.get(PBackgroundDef.BACKGROUND));
+				out.write4(back.properties,PBackgroundDef.X,PBackgroundDef.Y);
+				out.writeBool(back.properties,PBackgroundDef.TILE_HORIZ,PBackgroundDef.TILE_VERT);
+				out.write4(back.properties,PBackgroundDef.H_SPEED,PBackgroundDef.V_SPEED);
+				out.writeBool(back.properties,PBackgroundDef.STRETCH);
+				}
+			// out.writeBool(rm.properties,PRoom.ENABLE_VIEWS);
+			out.write4(rm.views.size());
+			for (View view : rm.views)
+				{
+				out.writeBool(view.properties,PView.VISIBLE);
+				out.write4(view.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,PView.VIEW_H,
+						PView.PORT_X,PView.PORT_Y,PView.PORT_W,PView.PORT_H,PView.BORDER_H,PView.BORDER_V,
+						PView.SPEED_H,PView.SPEED_V);
+				out.writeId((ResourceReference<?>) view.properties.get(PView.OBJECT));
+				}
+			out.write4(rm.instances.size());
+			for (Instance in : rm.instances)
+				{
+				out.write4(in.getPosition().x);
+				out.write4(in.getPosition().y);
+				ResourceReference<GmObject> or = in.properties.get(PInstance.OBJECT);
+				out.writeId(or);
+				out.write4((Integer) in.properties.get(PInstance.ID));
+				out.writeStr(in.getCreationCode());
+				out.writeBool(in.isLocked());
+				}
+			out.write4(rm.tiles.size());
+			for (Tile tile : rm.tiles)
+				{
+				out.write4(tile.getRoomPosition().x);
+				out.write4(tile.getRoomPosition().y);
+				ResourceReference<Background> rb = tile.properties.get(PTile.BACKGROUND);
+				out.writeId(rb);
+				out.write4(tile.getBackgroundPosition().x);
+				out.write4(tile.getBackgroundPosition().y);
+				out.write4(tile.getSize().width);
+				out.write4(tile.getSize().height);
+				out.write4(tile.getDepth());
+				out.write4((Integer) tile.properties.get(PTile.ID));
+				out.writeBool(tile.isLocked());
+				}
+			out.flush();
+			}
+
+		@Override
+		public boolean allowProperty(String name)
+			{
+			return true;
 			}
 		}
 
@@ -415,8 +616,8 @@ public class EFileWriter
 		File in = new File(home,"inputGmFile.gm81"); // any of gmd,gm6,gmk,gm81
 		File out = new File(home,"outputEgmFile.egm"); // must be egm
 
+		LibManager.autoLoad();
 		ResNode root = new ResNode("Root",(byte) 0,null,null); //$NON-NLS-1$;
-
 		GmFileReader.readGmFile(in.getPath(),root);
 
 		writeEgmFile(out,root,true);

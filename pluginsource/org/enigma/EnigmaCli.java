@@ -24,6 +24,7 @@ import org.lateralgm.file.GmFileReader;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.main.LGM;
 import org.lateralgm.resources.Script;
+import org.lateralgm.resources.library.LibManager;
 
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
@@ -95,6 +96,7 @@ public class EnigmaCli
 		{
 		if (!new File(fn).exists()) throw new FileNotFoundException(fn);
 		InitReturn r = new InitReturn();
+		LibManager.autoLoad();
 		r.root = root == null ? new ResNode("Root",(byte) 0,null,null) : root; //$NON-NLS-1$;
 		r.f = GmFileReader.readGmFile(fn,r.root);
 		try
