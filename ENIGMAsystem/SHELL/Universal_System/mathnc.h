@@ -128,6 +128,8 @@ double min(...), min(const enigma::varargs &t);
 double median(...), median(const enigma::varargs &t);
 double mean(...), mean(const enigma::varargs &t);
 
+variant choose(...);
+variant choose(const enigma::varargs& args);
 // TODO: Make the compiler do this shit automatically so we can lose the
 //       stdargs declaration and the hackish define that fucks with everything
 #ifdef ENIGMA_PARSER_RUN
@@ -135,6 +137,8 @@ double mean(...), mean(const enigma::varargs &t);
   #define min(args...) min((varargs(),args))
   #define median(args...) median((varargs(),args))
   #define mean(args...) mean((varargs(),args))
+  #define choose(x...) choose((varargs(), x))
+  #define globalvar global var
 #endif
 
 #endif // ENIGMA_MATHNC

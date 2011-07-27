@@ -10,7 +10,7 @@ $(OBJECTS)/XLIBmain.o: XLIBmain.cpp XLIBwindow.h LINUXjoystick.h ../../Universal
 	$(CXX) -c XLIBmain.cpp		-o $(OBJECTS)/XLIBmain.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/XLIBthreads.o: XLIBthreads.cpp ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/resource_data.h XLIBthreads.h
 	$(CXX) -c XLIBthreads.cpp		-o $(OBJECTS)/XLIBthreads.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/XLIBwindow.o: XLIBwindow.cpp ../../Universal_System/CallbackArrays.h
+$(OBJECTS)/XLIBwindow.o: XLIBwindow.cpp ../../Universal_System/CallbackArrays.h ../../Universal_System/globalupdate.h
 	$(CXX) -c XLIBwindow.cpp		-o $(OBJECTS)/XLIBwindow.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):

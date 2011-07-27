@@ -141,6 +141,11 @@ double mean(const enigma::varargs &t)
   return ret/t.argc;
 }
 
+
+variant choose(const enigma::varargs& args) {
+   return args.get(rand() % args.argc);
+};
+
 // For added randomness
 // ...................................................
 

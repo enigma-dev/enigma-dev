@@ -36,22 +36,25 @@ int draw_set_blend_mode_ext(ARG src,ARG2 dest)
 
 \******************************************************************************/
 
-const int bm_normal   =0;
-const int bm_add      =1;
-const int bm_max      =2;
-const int bm_subtract =3;
-
-const int bm_zero             =1;  //GL_ZERO
-const int bm_one              =2;  //GL_ONE
-const int bm_src_color        =3;  ////GL_SRC_COLOR             //only for dest
-const int bm_inv_src_color    =4;  ////GL_ONE_MINUS_SRC_COLOR   //only for dest
-const int bm_src_alpha        =5;  //GL_SRC_ALPHA
-const int bm_inv_src_alpha    =6;  //GL_ONE_MINUS_SRC_ALPHA
-const int bm_dest_alpha       =7;  //GL_DST_ALPHA
-const int bm_inv_dest_alpha   =8;  //GL_ONE_MINUS_DST_ALPHA
-const int bm_dest_color       =9;  ///GL_DST_COLOR              //only for src
-const int bm_inv_dest_color   =10; ///GL_ONE_MINUS_DST_COLOR    //only for src
-const int bm_src_alpha_sat    =11; ///GL_SRC_ALPHA_SATURATE     //only for src
+enum {
+  bm_normal   = 0,
+  bm_add      = 1,
+  bm_max      = 2,
+  bm_subtract = 3
+};
+enum {
+  bm_zero             =  1,  // GL_ZERO
+  bm_one              =  2,  // GL_ONE
+  bm_src_color        =  3,  // GL_SRC_COLOR             //only for dest
+  bm_inv_src_color    =  4,  // GL_ONE_MINUS_SRC_COLOR   //only for dest
+  bm_src_alpha        =  5,  // GL_SRC_ALPHA
+  bm_inv_src_alpha    =  6,  // GL_ONE_MINUS_SRC_ALPHA
+  bm_dest_alpha       =  7,  // GL_DST_ALPHA
+  bm_inv_dest_alpha   =  8,  // GL_ONE_MINUS_DST_ALPHA
+  bm_dest_color       =  9,  // GL_DST_COLOR              //only for src
+  bm_inv_dest_color   = 10,  // GL_ONE_MINUS_DST_COLOR    //only for src
+  bm_src_alpha_sat    = 11   // GL_SRC_ALPHA_SATURATE     //only for src
+};
 
 int draw_set_blend_mode(int mode);
 int draw_set_blend_mode_ext(double src,double dest);

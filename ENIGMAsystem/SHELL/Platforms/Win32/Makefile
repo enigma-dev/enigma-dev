@@ -14,7 +14,7 @@ $(OBJECTS)/WINDOWSshow_error.o: WINDOWSshow_error.cpp
 	$(CXX) -c WINDOWSshow_error.cpp		-o $(OBJECTS)/WINDOWSshow_error.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/WINDOWSstd.o: WINDOWSstd.cpp ../../libEGMstd.h
 	$(CXX) -c WINDOWSstd.cpp		-o $(OBJECTS)/WINDOWSstd.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/WINDOWSwindow.o: WINDOWSwindow.cpp ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
+$(OBJECTS)/WINDOWSwindow.o: WINDOWSwindow.cpp ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h ../../Universal_System/CallbackArrays.h ../../Universal_System/globalupdate.h WINDOWScallback.h
 	$(CXX) -c WINDOWSwindow.cpp		-o $(OBJECTS)/WINDOWSwindow.o $(GFLAGS) $(ECPPFLAGS)
 
 $(OBJECTS):
