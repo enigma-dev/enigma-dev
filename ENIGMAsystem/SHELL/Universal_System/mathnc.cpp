@@ -36,10 +36,8 @@ double bessel_y0(double x) { return y0(x); }
 double bessel_y1(double x) { return y1(x); }
 double bessel_yn(int x, double y) { return yn(x,y); }
 
-double abs(const variant& x) { return fabs(double(x)); }
-double abs(const var& x)     { return fabs(double(x)); }
-
 //overloading
+double abs(const variant& x) { return fabs(double(x)); }
 double ceil(const variant& x)              { return ceil((double)x); }
 double floor(const variant& x)             { return floor((double)x); }
 double exp(const variant& x)               { return exp((double)x); }
@@ -49,6 +47,7 @@ double sin(const variant& x)               { return sin((double)x); }
 double cos(const variant& x)               { return cos((double)x); }
 double tan(const variant& x)               { return tan((double)x); }
 
+double abs(const var& x)     { return fabs(double(x)); }
 double ceil(const var& x)              { return ceil((double)x); }
 double floor(const var& x)             { return floor((double)x); }
 double exp(const var& x)               { return exp((double)x); }
@@ -243,8 +242,7 @@ int mtrandom_seed(int x){
 	return 0;
 }
 
-int random_integer(int x){return x>0?random32()*(x/0xFFFFFFFF):0;}
-int irandom(int x){return x>0?random32()*(x/0xFFFFFFFF):0;}
+int random_integer(int x) {return x>0?random32()*(x/0xFFFFFFFF):0;}
 //END MERSENNE
 
 double random(double n) //Do not fix. Based off of Delphi prng
@@ -256,6 +254,19 @@ double random(double n) //Do not fix. Based off of Delphi prng
 	enigma::Random_Seed=random32();
 	return rval;
 }
+
+int irandom(int x) {return int(random(x + 1));}  //Mark made this inclusive of x...
+
+double random_range(double x1, double x2)
+{
+    return x1 + random(x2 - x1);
+}
+
+double irandom_range(int x1, int x2)
+{
+    return x1 + irandom(x2 - x1);
+}
+
 
 int random_set_seed(int seed){return enigma::Random_Seed=seed;}
 int random_get_seed(){return enigma::Random_Seed;}

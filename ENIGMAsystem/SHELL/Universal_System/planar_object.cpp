@@ -70,14 +70,12 @@ namespace enigma
       speed.reflex2 = &hspeed.rval.d;
       speed.reflex3 = &vspeed.rval.d;
   }
-  
+
   //This just needs implemented virtually so instance_destroy works.
   object_planar::~object_planar() {}
-  
+
   void propagate_locals(object_planar* instance)
   {
-    instance->xprevious = instance->x;
-    instance->yprevious=instance->y;
     if(instance->gravity || instance->friction)
     {
       double
@@ -85,17 +83,17 @@ namespace enigma
         vb4 = instance->vspeed.rval.d;
       int sign = (instance->speed > 0) - (instance->speed < 0);
       if (instance->hspeed!=0)
-        instance->hspeed.rval.d -= (sign * instance->friction) * cos(instance->direction.rval.d * M_PI/180); 
+        instance->hspeed.rval.d -= (sign * instance->friction) * cos(instance->direction.rval.d * M_PI/180);
       if ((hb4>0 && instance->hspeed.rval.d<0) || (hb4<0 && instance->hspeed.rval.d>0))
         instance->hspeed.rval.d=0;
         if (instance->vspeed!=0)
-        instance->vspeed.rval.d -= (sign * instance->friction) * -sin(instance->direction.rval.d * M_PI/180); 
+        instance->vspeed.rval.d -= (sign * instance->friction) * -sin(instance->direction.rval.d * M_PI/180);
       if ((vb4>0 && instance->vspeed.rval.d<0) || (vb4<0 && instance->vspeed.rval.d>0))
         instance->vspeed.rval.d=0;
-      
+
       instance->hspeed.rval.d += (instance->gravity) * cos(instance->gravity_direction * M_PI/180);
       instance->vspeed.rval.d += (instance->gravity) *-sin(instance->gravity_direction * M_PI/180);
-      
+
       if(instance->speed.rval.d<0)
         instance->direction.rval.d = fmod(instance->direction.rval.d + 180, 360),
         instance->speed.    rval.d = -hypotf(instance->hspeed.rval.d, instance->vspeed.rval.d);
@@ -105,7 +103,7 @@ namespace enigma
       if(instance->direction.rval.d < 0)
         instance->direction.rval.d += 360;
     }
-    
+
     instance->x += instance->hspeed.rval.d;
     instance->y += instance->vspeed.rval.d;
   }

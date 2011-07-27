@@ -80,11 +80,7 @@ extern int room_width;
 extern int room_height;
 void screen_refresh();
 
-#ifdef __APPLE__
-/*
- Only on mac(cocoa) due to lack of io_handle() on other platforms
- */
-extern void io_handle();
+void io_handle();
 bool keyboard_check(int i);
 void screen_redraw();
 void keyboard_wait();
@@ -102,7 +98,6 @@ void highscore_show(int numb) {
 void action_highscore_show(int background,int border,double newColor,double otherColor,std::string font,int a,int b,int c,int d,int e,int f) {
     highscore_show(score);
 }
-#endif
 
 void highscore_set_background(int back) {enigma::highscore_background=back;}
 
@@ -124,7 +119,7 @@ void highscore_set_strings(std::string caption, std::string nobody, std::string 
     enigma::highscore_nobody=nobody;
     enigma::highscore_escape=escape;
 }
-#ifdef __APPLE__
+
 void highscore_show_ext(int numb, int back, int show, int newcol, int othercol, std::string name, int size) {
     enigma::highscore_background=back;
     enigma::highscore_border=show;
@@ -133,7 +128,7 @@ void highscore_show_ext(int numb, int back, int show, int newcol, int othercol, 
 
     highscore_show(numb);
 }
-#endif
+
 void highscore_clear() {
     enigma::highscore_list.clear();
     for (int i=0; i < 10; i++) {

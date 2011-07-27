@@ -36,6 +36,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
+	Constant: {xprevious = x; yprevious = y;}
 
 alarm: 2
 	Group: Alarm

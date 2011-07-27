@@ -55,13 +55,15 @@ int random_set_seed(int seed);
 int random_get_seed();
 int randomize();
 int random_integer(int x);
+inline int irandom(int x);
+inline double random_range(double x1, double x2);
+inline double irandom_range(double x1, double x2);
 unsigned int random32();
 double mtrandom();
 int mtrandom_seed(int x);
 
 //overloading
 double abs(const variant& x);
-double abs(const var& x);
 double ceil(const variant& x);
 double floor(const variant& x);
 double exp(const variant& x);
@@ -71,6 +73,7 @@ double sin(const variant& x);
 double cos(const variant& x);
 double tan(const variant& x);
 
+double abs(const var& x);
 double ceil(const var& x);
 double floor(const var& x);
 double exp(const var& x);
