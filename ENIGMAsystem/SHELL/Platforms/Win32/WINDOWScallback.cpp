@@ -25,7 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <string>
+using std::string;
 #include <windows.h>
+#include "WINDOWSwindow.h"
 
 #ifndef WM_MOUSEHWHEEL
   #define WM_MOUSEHWHEEL 0x020E
@@ -53,6 +56,10 @@ namespace enigma
             return 0;
 
         case WM_SIZE:
+            return 0;
+
+        case WM_SETCURSOR:
+            SetCursor(LoadCursor(NULL, currentCursor));
             return 0;
 
         case WM_KEYDOWN:
@@ -92,7 +99,7 @@ namespace enigma
              mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
              vdeltadelta %= WHEEL_DELTA;
              return 0;
-        
+
         case WM_MOUSEHWHEEL:
              hdeltadelta += (int)HIWORD(wParam);
              mouse_hscrolls += hdeltadelta / WHEEL_DELTA;
@@ -110,7 +117,7 @@ namespace enigma
             return DefWindowProc (hWnd, message, wParam, lParam);
       }
     }
-    
+
     void input_initialize()
     {
       //Clear the input arrays
@@ -123,7 +130,7 @@ namespace enigma
         keybdstatus[i]=0;
       }
     }
-    
+
     void input_push()
     {
       for(int i=0;i<3;i++){

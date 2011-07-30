@@ -146,11 +146,6 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                     bQuit=1;
                     break;
                 }
-                else if (msg.message == WM_SIZING)
-                {
-                    bQuit = 1;
-                    break;
-                }
                 else
                 {
                     TranslateMessage (&msg);

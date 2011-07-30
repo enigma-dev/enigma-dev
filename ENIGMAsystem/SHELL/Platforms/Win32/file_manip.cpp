@@ -26,20 +26,92 @@
 \********************************************************************************/
 
 #include <string>
+#include <windows.h>
+
 using namespace std;
 
 /* OS Specific; should be moved */
 
-int file_exists(std::string fname);           
-int file_delete(std::string fname);           
-int file_rename(std::string oldname,std::string newname); 
-int file_copy(std::string fname,std::string newname);     
-int directory_exists(std::string dname);      
-int directory_create(std::string dname);      
+int file_exists(std::string fname) {
+    DWORD attributes = GetFileAttributes(fname.c_str());
+    if(attributes == 0xFFFFFFFF) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+int file_delete(std::string fname) {
+    DWORD result = DeleteFileA(fname.c_str());
+
+    switch(result) {
+        case 0:
+            return 0;
+            break;
+        case ERROR_FILE_NOT_FOUND:
+            return 0;
+            break;
+        case ERROR_ACCESS_DENIED:
+            return 0;
+            break;
+        default:
+            return 1;
+            break;
+    }
+}
+
+int file_rename(std::string oldname, std::string newname) {
+    DWORD result = MoveFileA(oldname.c_str(), newname.c_str());
+
+    switch(result) {
+        case 0:
+            return 0;
+            break;
+        default:
+            return 1;
+            break;
+    }
+}
+
+int file_copy(std::string fname, std::string newname) {
+    DWORD result = CopyFileA(fname.c_str(), newname.c_str(), false);
+
+    switch(result) {
+        case 0:
+            return 0;
+            break;
+        default:
+            return 1;
+            break;
+    }
+}
+
+int directory_exists(std::string dname);
+
+// NOTICE: May behave differently than GM. May fail if there are
+// directories in the path missing, whereas GM would create them all
+int directory_create(std::string dname) {
+    DWORD result = CreateDirectoryA(dname.c_str(), NULL);
+
+    switch(result) {
+        case 0:
+            return 0;
+            break;
+        case ERROR_ALREADY_EXISTS:
+            return 0;
+            break;
+        case ERROR_PATH_NOT_FOUND:
+            return 0;
+            break;
+        default:
+            return 1;
+            break;
+    }
+}
 
 
 
-std::string file_find_first(std::string mask,int attr);   
+std::string file_find_first(std::string mask,int attr);
 
 enum {
   fa_readonly  = 1,
@@ -50,20 +122,20 @@ enum {
   fa_archive   = 32
 };
 
-std::string file_find_next();                 
-void file_find_close();                
-bool file_attributes(std::string fname,int attr); 
+std::string file_find_next();
+void file_find_close();
+bool file_attributes(std::string fname,int attr);
 
-std::string filename_name(std::string fname);              
-std::string filename_path(std::string fname);              
-std::string filename_dir(std::string fname);               
-std::string filename_drive(std::string fname);             
-std::string filename_ext(std::string fname);               
-std::string filename_change_ext(std::string fname,std::string newext); 
+std::string filename_name(std::string fname);
+std::string filename_path(std::string fname);
+std::string filename_dir(std::string fname);
+std::string filename_drive(std::string fname);
+std::string filename_ext(std::string fname);
+std::string filename_change_ext(std::string fname,std::string newext);
 
-void export_include_file(std::string fname);                   
-void export_include_file_location(std::string fname,std::string location); 
-void discard_include_file(std::string fname);                  
+void export_include_file(std::string fname);
+void export_include_file_location(std::string fname,std::string location);
+void discard_include_file(std::string fname);
 
 extern unsigned game_id;
 extern std::string working_directory;
