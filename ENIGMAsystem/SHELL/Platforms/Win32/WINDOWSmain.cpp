@@ -33,6 +33,7 @@ using std::string;
 #include "WINDOWScallback.h"
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h"
+#include "WINDOWSwindow.h"
 
 namespace enigma //TODO: Find where this belongs
 {
@@ -115,19 +116,20 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
 
         //Create the parent window
-        enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_SIZEBOX, 0, 0,wid, hgt,
-          NULL, NULL, hInstance, NULL);
+        int screen_width = GetSystemMetrics(SM_CXSCREEN);
+        int screen_height = GetSystemMetrics(SM_CYSCREEN);
+        // TODO: Implement minimize button on both windows like GM
+        if(resizeableWindow) {
+            // TODO: Implement maximize button here like GM
+            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_SIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
+                NULL, NULL, hInstance, NULL);
+        } else {
+            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
+                NULL, NULL, hInstance, NULL);
+        }
 
         //Create a child window to put into that
         enigma::hWnd = CreateWindow ("TSub", "", WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
-
-        //Get new window size
-        RECT c = {256, 256, wid+256, hgt+256};
-        AdjustWindowRect(&c, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_SIZEBOX, FALSE);
-
-        //Set the size of the parent window
-        SetWindowPos(enigma::hWndParent,NULL,c.left,c.top,c.right-c.left,c.bottom-c.top,SWP_NOZORDER);
-
 
 
     enigma::EnableDrawing (&hRC);
@@ -142,6 +144,11 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                 if (msg.message == WM_QUIT)
                 {
                     bQuit=1;
+                    break;
+                }
+                else if (msg.message == WM_SIZING)
+                {
+                    bQuit = 1;
                     break;
                 }
                 else

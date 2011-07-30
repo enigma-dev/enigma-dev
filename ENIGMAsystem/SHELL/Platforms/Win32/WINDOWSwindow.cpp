@@ -34,6 +34,7 @@ using namespace std;
 #include <unistd.h> //usleep
 #include "../../Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 
+bool resizeableWindow = false;
 
 namespace enigma
 {
@@ -44,7 +45,13 @@ namespace enigma
   {
     RECT c;
     GetWindowRect(hWnd,&c);
-    AdjustWindowRect(&c, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_SIZEBOX, FALSE);
+
+    if(resizeableWindow) {
+        AdjustWindowRect(&c, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_SIZEBOX, FALSE);
+    } else {
+        AdjustWindowRect(&c, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE, FALSE);
+    }
+
     SetWindowPos(hWndParent,NULL,c.left,c.top,c.right-c.left,c.bottom-c.top,SWP_NOZORDER);
   }
 }
@@ -175,13 +182,13 @@ void window_set_rectangle(int x, int y, int width, int height)
 void window_center()
 {
     RECT window;
-    GetWindowRect(enigma::hWnd,&window);
+    GetWindowRect(enigma::hWndParent,&window);
 
     int tmp_wind_width = window.right - window.left;
     int tmp_wind_height = window.bottom - window.top;
-    int screen_width = GetSystemMetrics(SM_CXBORDER);
-    int screen_height = GetSystemMetrics(SM_CYBORDER);
-    SetWindowPos(enigma::hWnd, HWND_TOP, (screen_width-tmp_wind_width)/2, (screen_height-tmp_wind_height)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE|SWP_DRAWFRAME);
+    int screen_width = GetSystemMetrics(SM_CXSCREEN);
+    int screen_height = GetSystemMetrics(SM_CYSCREEN);
+    SetWindowPos(enigma::hWndParent, HWND_TOP, (screen_width-tmp_wind_width)/2, (screen_height-tmp_wind_height)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE|SWP_DRAWFRAME);
 }
 
 void window_default()
