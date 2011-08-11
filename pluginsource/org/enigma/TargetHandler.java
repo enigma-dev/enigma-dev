@@ -27,21 +27,19 @@ import org.enigma.utility.YamlParser.YamlContent;
 import org.enigma.utility.YamlParser.YamlElement;
 import org.enigma.utility.YamlParser.YamlNode;
 
-public class TargetHandler
+public final class TargetHandler
 	{
 	private TargetHandler()
 		{
 		}
 
-	private static final Pattern NORMALIZER = Pattern.compile("[\\[\\]\\-\\s_]"); //$NON-NLS-1$
-	private static final Pattern SPLITTER = Pattern.compile("\\s*,\\s*"); //$NON-NLS-1$
-
 	public static final String COMPILER = "compiler"; //$NON-NLS-1$
 	public static final String[] ids = { COMPILER,"windowing","graphics","audio","collision","widget" };
 	private static final String[] folders = { null,"Platforms","Graphics_Systems","Audio_Systems",
 			"Collision_Systems","Widget_Systems" };
-
 	private static final String COMP_TARG = "target", OS_KEY = "build-platforms"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern NORMALIZER = Pattern.compile("[\\[\\]\\-\\s_]"); //$NON-NLS-1$
+	private static final Pattern SPLITTER = Pattern.compile("\\s*,\\s*"); //$NON-NLS-1$
 
 	public static TargetSelection defCompiler;
 	public static Map<String,List<TargetSelection>> targets;
@@ -49,6 +47,11 @@ public class TargetHandler
 	public static Map<String,TargetSelection> defaults;
 
 	static
+		{
+		load();
+		}
+
+	public static void load()
 		{
 		targets = new HashMap<String,List<TargetSelection>>();
 		targets.put(COMPILER,findCompilers());
@@ -62,6 +65,29 @@ public class TargetHandler
 		int score[] = new int[combos.size()];
 		for (Map<String,TargetSelection> i : combos)
 			score[scoreIndex++] = scoreCombo(i);
+		}
+
+	public static class TargetSelection
+		{
+		public String name, id; // mandatory
+		public Map<String,Set<String>> depends; // mandatory
+		public Map<String,Set<String>> defaultOn; // optional
+		public String desc, auth, ext; // optional
+		public String outputexe;
+
+		public String toString()
+			{
+			return name;
+			}
+		}
+
+	public static String getOS()
+		{
+		String os = normalize(System.getProperty("os.name")); //$NON-NLS-1$
+		if (os.contains("nux") || os.contains("nix")) return "Linux"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (os.contains("win")) return "Windows"; //$NON-NLS-1$ //$NON-NLS-2$
+		if (os.contains("mac")) return "MacOSX"; //$NON-NLS-1$ //$NON-NLS-2$
+		return os;
 		}
 
 	/**
@@ -206,16 +232,7 @@ public class TargetHandler
 		return score;
 		}
 
-	public static String getOS()
-		{
-		String os = normalize(System.getProperty("os.name")); //$NON-NLS-1$
-		if (os.contains("nux") || os.contains("nix")) return "Linux"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		if (os.contains("win")) return "Windows"; //$NON-NLS-1$ //$NON-NLS-2$
-		if (os.contains("mac")) return "MacOSX"; //$NON-NLS-1$ //$NON-NLS-2$
-		return os;
-		}
-
-	static class Combo extends HashMap<String,TargetSelection> implements Comparable<Combo>
+	private static class Combo extends HashMap<String,TargetSelection> implements Comparable<Combo>
 		{
 		private static final long serialVersionUID = 1L;
 
@@ -237,20 +254,6 @@ public class TargetHandler
 		public int compareTo(Combo c)
 			{
 			return c.score - score;
-			}
-		}
-
-	public static class TargetSelection
-		{
-		public String name, id; // mandatory
-		public Map<String,Set<String>> depends; // mandatory
-		public Map<String,Set<String>> defaultOn; // optional
-		public String desc, auth, ext; // optional
-		public String outputexe;
-
-		public String toString()
-			{
-			return name;
 			}
 		}
 

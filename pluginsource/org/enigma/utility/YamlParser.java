@@ -51,14 +51,16 @@ public class YamlParser
 			chronos = new LinkedList<YamlElement>();
 			}
 
-		public YamlElement getM(String key)
+		/** @throws IndexOutOfBoundsException If the key doesn't exist. */
+		public YamlElement getM(String key) throws IndexOutOfBoundsException
 			{
 			YamlElement r = values.get(key.toLowerCase());
 			if (r == null) throw new IndexOutOfBoundsException(key);
 			return r;
 			}
 
-		public String getMC(String key)
+		/** @throws IndexOutOfBoundsException If the key doesn't exist. */
+		public String getMC(String key) throws IndexOutOfBoundsException
 			{
 			return ((YamlContent) getM(key)).getValue();
 			}

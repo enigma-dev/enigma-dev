@@ -20,6 +20,7 @@
 package org.enigma;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,6 +54,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -60,12 +62,18 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.Group;
 import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
+import org.enigma.SettingsHandler.ExtensionSetting;
+import org.enigma.SettingsHandler.OptionGroupSetting;
+import org.enigma.SettingsHandler.OptionSetting;
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.messages.Messages;
@@ -91,8 +99,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 	{
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon CODE_ICON = LGM.getIconForKey("Resource.SCRIPT"); //$NON-NLS-1$
-	private static final String[] labels = { "Compiler: ","Platform: ","Graphics: ","Audio: ",
-			"Collision: ","Widgets: " };
+	private static final String[] labels = { "Compiler: ","Platform: ","Graphics: ","Audio: ", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			"Collision: ","Widgets: " }; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private final EnigmaSettings oldEs;
 	private EnigmaSettings es;
@@ -103,6 +111,8 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 	private Map<String,Option> options;
 	private Map<String,TargetSelection> userPicks = new HashMap<String,TargetSelection>();
 	private Map<JComboBox,String> targets;
+	private Map<ExtensionSetting,Boolean> extensions;
+
 	private JButton bDef, bGlobLoc;
 	private JButton bInit, bClean;
 	CodeHolder sDef;
@@ -132,16 +142,6 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		public void setCode(String s)
 			{
 			code = s;
-			}
-		}
-
-	class YamlException extends Exception
-		{
-		private static final long serialVersionUID = 1L;
-
-		YamlException(String s)
-			{
-			super(s);
 			}
 		}
 
@@ -250,6 +250,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		JTabbedPane tabs = new JTabbedPane();
 		tabs.add(Messages.getString("EnigmaSettingsFrame.TAB_GENERAL"),makeSettings()); //$NON-NLS-1$
 		tabs.add(Messages.getString("EnigmaSettingsFrame.TAB_API"),makeAPI()); //$NON-NLS-1$
+		tabs.add(Messages.getString("EnigmaSettingsFrame.TAB_EXTENSIONS"),makeExtensions()); //$NON-NLS-1$
 		add(tabs,BorderLayout.CENTER);
 		pack();
 		}
@@ -312,90 +313,23 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		return pane;
 		}
 
-	private List<JPanel> parsePanels() throws YamlException
+	public List<JPanel> generateOptionPanels()
 		{
 		options = new HashMap<String,Option>();
-		ArrayList<JPanel> panels = new ArrayList<JPanel>();
-		File settings = new File(EnigmaRunner.WORKDIR,"settings.ey"); //$NON-NLS-1$
-		YamlNode n;
-		try
+		List<JPanel> panels = new ArrayList<JPanel>();
+		for (OptionGroupSetting ogs : SettingsHandler.optionGroups)
 			{
-			n = YamlParser.parse(settings);
-			}
-		catch (FileNotFoundException fnfe)
-			{
-			throw new YamlException(settings.getPath()
-					+ Messages.getString("EnigmaSettingsFrame.YERR_NO_FILE")); //$NON-NLS-1$
-			}
-		if (n.chronos.isEmpty())
-			throw new YamlException(settings.getName()
-					+ Messages.getString("EnigmaSettingsFrame.YERR_EMPTY")); //$NON-NLS-1$
-
-		//loop through panels
-		for (YamlElement ge : n.chronos)
-			{
-			String name = ge.name;
-			String error = settings.getName() + ": " + name + ": "; //$NON-NLS-1$ //$NON-NLS-2$
-
-			if (ge.isScalar)
-				throw new YamlException(error + Messages.getString("EnigmaSettingsFrame.YERR_SCALAR")); //$NON-NLS-1$
-
-			n = (YamlNode) ge;
-			if (!n.getMC("Layout","Grid").equalsIgnoreCase("Grid")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				throw new YamlException(error + Messages.getString("EnigmaSettingsFrame.YERR_LAYOUT")); //$NON-NLS-1$
-
-			int columns;
-			try
+			List<Option> opts = new ArrayList<Option>(ogs.opts.size());
+			for (OptionSetting os : ogs.opts)
 				{
-				columns = Integer.parseInt(n.getMC("Columns",null)); //$NON-NLS-1$
-				}
-			catch (NumberFormatException nfe)
-				{
-				throw new YamlException(error + Messages.getString("EnigmaSettingsFrame.YERR_INTEGER")); //$NON-NLS-1$
-				}
-
-			//loop through options in panel
-			ArrayList<Option> opts = new ArrayList<Option>(n.chronos.size());
-			for (YamlElement oe : n.chronos)
-				{
-				if (oe.name.equalsIgnoreCase("Layout") || oe.name.equalsIgnoreCase("Columns")) continue; //$NON-NLS-1$ //$NON-NLS-2$
-
-				if (oe.isScalar)
-					{
-					System.err.println(Messages.format("EnigmaSettingsFrame.YWARN_Scalar",oe.name)); //$NON-NLS-1$
-					continue;
-					}
-				YamlNode on = (YamlNode) oe;
-
-				Option opt;
-				try
-					{
-					opt = new Option(on.getMC("Label",null), //$NON-NLS-1$
-							on.getMC("Type",Option.UNKNOWN), //$NON-NLS-1$
-							columns,on.getMC("Options",null)); //$NON-NLS-1$
-					opt.setValue(on.getMC("Default","0")); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				catch (IllegalArgumentException e)
-					{
-					System.err.println(error
-							+ Messages.format("EnigmaSettingsFrame.YWARN_OPTION_TYPE",on.name,e.getMessage())); //$NON-NLS-1$
-					continue;
-					}
+				Option opt = new Option(os.label,os.type == null ? Option.UNKNOWN : os.type,os.columns,
+						os.options);
+				opt.setValue(os.def);
 				opts.add(opt);
-				options.put(on.name,opt);
-				} //each option in panel
-
-			panels.add(makePane(name,columns,opts.toArray(new Option[0])));
+				options.put(os.id,opt);
+				}
+			panels.add(makePane(ogs.name,ogs.columns,opts.toArray(new Option[0])));
 			}
-
-		//Populate the default options so they're ready for first call to definitionsModified.
-		//Technically it would make more sense to do this in EnigmaSettings c'tor,
-		//but then we'd need to either parse this file twice or keep a reference to it.
-		oldEs.options.clear();
-		for (Entry<String,Option> entry : options.entrySet())
-			oldEs.options.put(entry.getKey(),entry.getValue() == null ? null
-					: entry.getValue().getValue());
-
 		return panels;
 		}
 
@@ -405,16 +339,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		GroupLayout layout = new GroupLayout(p);
 		p.setLayout(layout);
 
-		List<JPanel> panels = null;
-		try
-			{
-			panels = parsePanels();
-			}
-		catch (YamlException e)
-			{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			}
+		List<JPanel> panels = generateOptionPanels();
 
 		sDef = new SimpleCodeHolder(es.definitions);
 		sGlobLoc = new SimpleCodeHolder(es.globalLocals);
@@ -514,6 +439,132 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		return p;
 		}
 
+	private JPanel makeExtensions()
+		{
+		extensions = new HashMap<ExtensionSetting,Boolean>();
+		for (ExtensionSetting es : SettingsHandler.extensions)
+			extensions.put(es,true);
+
+		JPanel p = new JPanel(new BorderLayout());
+		//		p.setLayout(new BoxLayout(p,BoxLayout.PAGE_AXIS));
+		p.add(new JLabel(Messages.getString("EnigmaSettingsFrame.EXTENSIONS_INFO")), //$NON-NLS-1$
+				BorderLayout.NORTH);
+		Component c = new JScrollPane(new ExtensionSelector());
+		p.add(c,BorderLayout.CENTER);
+		return p;
+		}
+
+	public class ExtensionSelector extends JTable
+		{
+		private static final long serialVersionUID = 1L;
+
+		public ExtensionSelector()
+			{
+			super(new ExtTableModel(extensions));
+			final int bdim = 36;
+			getColumnModel().getColumn(1).setCellRenderer(new ExtCellRenderer());
+			getColumnModel().getColumn(0).setPreferredWidth(bdim);
+			getColumnModel().getColumn(0).setMaxWidth(bdim);
+			getColumnModel().getColumn(0).setMinWidth(bdim);
+			getColumnModel().getColumn(1).setMinWidth(128);
+			getColumnModel().getColumn(1).setPreferredWidth(300);
+			getColumnModel().getColumn(2).setPreferredWidth(bdim);
+			getColumnModel().getColumn(2).setMaxWidth(bdim);
+			getColumnModel().getColumn(2).setMinWidth(12);
+			setRowHeight(bdim);
+			setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+			setShowVerticalLines(false);
+			}
+
+		class ExtCellRenderer extends DefaultTableCellRenderer
+			{
+			private static final long serialVersionUID = 1L;
+			public static final String FORMAT = "<html><b>%s</b><br/><i>%s</i></html>"; //$NON-NLS-1$
+
+			public void setValue(Object value)
+				{
+				if (value instanceof ExtensionSetting)
+					{
+					ExtensionSetting ext = (ExtensionSetting) value;
+					setText(String.format(FORMAT,ext.name,ext.desc));
+					}
+				else
+					super.setValue(value);
+				}
+			}
+		}
+
+	private static class ExtTableModel extends AbstractTableModel
+		{
+		private static final long serialVersionUID = 1L;
+
+		ArrayList<ExtensionSetting> rows = new ArrayList<ExtensionSetting>();
+		Map<ExtensionSetting,Boolean> extensions;
+
+		final String colNames[] = {
+				Messages.getString("EnigmaSettingsFrame.EXTENSIONS_ICON"),Messages.getString("EnigmaSettingsFrame.EXTENSIONS_NAME"),Messages.getString("EnigmaSettingsFrame.EXTENSIONS_SELECTED") }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		final Class<?> colClass[] = { ImageIcon.class,String.class,Boolean.class };
+
+		public ExtTableModel(Map<ExtensionSetting,Boolean> extensions)
+			{
+			this.extensions = extensions;
+			for (ExtensionSetting es : SettingsHandler.extensions)
+				rows.add(es);
+			}
+
+		@Override
+		public int getColumnCount()
+			{
+			return 3;
+			}
+
+		@Override
+		public Class<?> getColumnClass(int arg0)
+			{
+			return colClass[arg0];
+			}
+
+		@Override
+		public String getColumnName(int arg0)
+			{
+			return colNames[arg0];
+			}
+
+		@Override
+		public int getRowCount()
+			{
+			return rows.size();
+			}
+
+		@Override
+		public Object getValueAt(int i, int col)
+			{
+			ExtensionSetting es = rows.get(i);
+			switch (col)
+				{
+				case 0:
+					return es.icon == null ? null : new ImageIcon(es.icon.getPath());
+				case 1:
+					return es;
+				case 2:
+					return extensions.get(es);
+				}
+			return null;
+			}
+
+		@Override
+		public boolean isCellEditable(int row, int col)
+			{
+			return col == 2;
+			}
+
+		@Override
+		public void setValueAt(Object val, int row, int col)
+			{
+			if (col == 2) extensions.put(rows.get(row),(Boolean) val);
+			}
+		}
+
 	public void loadFromFile()
 		{
 		fc.setDialogTitle(Messages.getString("EnigmaSettingsFrame.LOAD_TITLE")); //$NON-NLS-1$
@@ -522,7 +573,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			if (fc.showOpenDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			if (fc.getSelectedFile().exists()) break;
 			JOptionPane.showMessageDialog(null,fc.getSelectedFile().getName()
-					+ org.lateralgm.messages.Messages.getString("SoundFrame.FILE_MISSING"), //$NON-NLS-1$
+					+ Messages.getString("EnigmaSettingsFrame.LOAD_MISSING"), //$NON-NLS-1$
 					Messages.getString("EnigmaSettingsFrame.LOAD_MISSING_TITLE"),JOptionPane.WARNING_MESSAGE); //$NON-NLS-1$
 			}
 
@@ -588,23 +639,32 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 
 	public void commitChanges()
 		{
-		es.options.clear();
-		for (Entry<String,Option> entry : options.entrySet())
-			es.options.put(entry.getKey(),entry.getValue() == null ? null : entry.getValue().getValue());
-
 		es.definitions = sDef.getCode();
 		es.globalLocals = sGlobLoc.getCode();
 		es.initialization = sInit.getCode();
 		es.cleanup = sClean.getCode();
 
+		es.options.clear();
+		for (Entry<String,Option> entry : options.entrySet())
+			es.options.put(entry.getKey(),entry.getValue() == null ? null : entry.getValue().getValue());
+
 		es.targets.clear();
 		for (Entry<JComboBox,String> box : targets.entrySet())
 			es.targets.put(box.getValue(),(TargetSelection) box.getKey().getSelectedItem());
+
+		es.extensions.clear();
+		for (Entry<ExtensionSetting,Boolean> entry : extensions.entrySet())
+			if (entry.getValue()) es.extensions.add(entry.getKey().path);
 		}
 
 	public void setComponents(EnigmaSettings es)
 		{
 		this.es = es;
+
+		sDef.setCode(es.definitions);
+		sGlobLoc.setCode(es.globalLocals);
+		sInit.setCode(es.initialization);
+		sClean.setCode(es.cleanup);
 
 		for (Entry<String,String> entry : es.options.entrySet())
 			{
@@ -612,17 +672,15 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			if (opt != null) opt.setValue(entry.getValue());
 			}
 
-		sDef.setCode(es.definitions);
-		sGlobLoc.setCode(es.globalLocals);
-		sInit.setCode(es.initialization);
-		sClean.setCode(es.cleanup);
-
 		for (Entry<JComboBox,String> box : targets.entrySet())
 			{
 			TargetSelection targ = es.targets.get(box.getValue());
 			if (targ != null) box.getKey().setSelectedItem(targ);
 			userPicks.clear();
 			}
+
+		for (Entry<ExtensionSetting,Boolean> entry : extensions.entrySet())
+			entry.setValue(es.extensions.contains(entry.getKey().path)); //writes through to map
 		}
 
 	public void revertResource()

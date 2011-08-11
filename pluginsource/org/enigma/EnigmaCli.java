@@ -161,7 +161,7 @@ public class EnigmaCli
 		//FIXME: Make compliant with spec2
 		File outname = new File(f.filename.substring(0,f.filename.lastIndexOf('.'))
 				+ ess.targets.get("windowing").ext);
-		TargetSelection compiler = ess.targets.get("compiler");
+		TargetSelection compiler = ess.targets.get(TargetHandler.COMPILER);
 		if (!compiler.outputexe.equals("$tempfile")) //$NON-NLS-1$
 			outname = new File(compiler.outputexe);
 

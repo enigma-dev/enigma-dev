@@ -14,25 +14,29 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.enigma.EnigmaRunner;
+import org.enigma.SettingsHandler;
 import org.enigma.TargetHandler;
+import org.enigma.SettingsHandler.ExtensionSetting;
+import org.enigma.SettingsHandler.OptionGroupSetting;
+import org.enigma.SettingsHandler.OptionSetting;
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
 
 public class EnigmaSettings
 	{
-	public Map<String,String> options = new HashMap<String,String>();
-
 	public String definitions = "", globalLocals = ""; //$NON-NLS-1$ //$NON-NLS-2$
 	public String initialization = "", cleanup = ""; //$NON-NLS-1$ //$NON-NLS-2$
 
-	//	public TargetSelection selCompiler, selPlatform, selGraphics, selAudio, selCollision, selWidgets;
-
+	public Map<String,String> options = new HashMap<String,String>();
 	//Strings one of: "compiler","windowing","graphics","audio","collision","widget"
 	public Map<String,TargetSelection> targets = new HashMap<String,TargetSelection>();
+	public Set<String> extensions = new HashSet<String>();
 
 	public EnigmaSettings()
 		{
@@ -45,7 +49,13 @@ public class EnigmaSettings
 
 		loadDefinitions();
 		targets.putAll(TargetHandler.defaults);
-		//default options are populated in EnigmaSettingsFrame.parsePanels to avoid reading file twice
+
+		for (OptionGroupSetting ogs : SettingsHandler.optionGroups)
+			for (OptionSetting os : ogs.opts)
+				options.put(os.id,os.def);
+
+		for (ExtensionSetting es : SettingsHandler.extensions)
+			extensions.add(es.path);
 		}
 
 	void loadDefinitions()
@@ -102,8 +112,20 @@ public class EnigmaSettings
 			if (entry.getValue() == null) continue;
 			yaml.append("target-").append(entry.getKey()).append(": ").append(entry.getValue().id).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-
 		yaml.append("target-networking: None\n"); //$NON-NLS-1$
+
+		if (extensions.size() > 0)
+			{
+			yaml.append('\n');
+			yaml.append("extensions: "); //$NON-NLS-1$
+
+			String[] exts = extensions.toArray(new String[0]);
+			yaml.append(exts[0]);
+			for (int i = 1; i < exts.length; i++)
+				yaml.append(',').append(exts[i]);
+
+			yaml.append('\n');
+			}
 
 		System.out.println();
 		System.out.println(yaml);
@@ -125,13 +147,16 @@ public class EnigmaSettings
 
 	public void copyInto(EnigmaSettings es)
 		{
-		es.options.putAll(options);
-
 		es.definitions = definitions;
 		es.globalLocals = globalLocals;
 		es.initialization = initialization;
 		es.cleanup = cleanup;
 
+		es.options.clear();
+		es.options.putAll(options);
+		es.targets.clear();
 		es.targets.putAll(targets);
+		es.extensions.clear();
+		es.extensions.addAll(extensions);
 		}
 	}
