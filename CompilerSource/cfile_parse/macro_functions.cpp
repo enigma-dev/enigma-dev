@@ -174,6 +174,10 @@ bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt
   unsigned lvl = 1;
   for (int i = 0; i < numparams or lvl > 0; i++) //parse out each parameter value into an array
   {
+    if (pos >= len) {
+      macrostr = "Macro function parameters unterminated: Unmatched parenthesis";
+      return false;
+    }
     if (i > numparams)
       return macrostr = "Expected closing parenthesis for macro function at this point: too many parameters", false;
     if (lvl <= 0)
@@ -183,7 +187,7 @@ bool macro_function_parse(const char* cfile,const size_t len,string macroname,pt
     // Skip whitespace after opening parenthesis
     while (is_useless(cfile[pos])) pos++; // Now we are at first argument or closing parenthesis
     
-    while ((lvl > 1 or (cfile[pos] != ',' or args_given == au_at)) and pos < len and lvl)
+    while (pos < len and (lvl > 1 or (cfile[pos] != ',' or args_given == au_at)) and lvl)
     {
       if (cfile[pos] == ')') lvl--;
       else if (cfile[pos] == '(') lvl++;
