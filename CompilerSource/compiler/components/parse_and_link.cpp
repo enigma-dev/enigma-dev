@@ -61,7 +61,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
     if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size()) {
       parsed_object temporary_object = *scripts[i]->pev.myObj;
       scripts[i]->pev_global = new parsed_event(&temporary_object);
-      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n}",scripts[i]->pev_global);
+      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n/* */}",scripts[i]->pev_global);
       scripts[i]->pev_global->myObj = NULL;
     }
     fflush(stdout);

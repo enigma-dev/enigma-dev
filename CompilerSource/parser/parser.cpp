@@ -505,8 +505,12 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       case '>': case '<':
         if (synt[pos-1] != synt[pos]) // Handles <=, >=, which are not assignment operators!
           goto notAss;
-      case '&': case '|': case '^': case '~':
-      case '+': case '-': case '/':
+        goto Ass;
+      
+      case '+': case '-': 
+          if (synt[pos] == synt[pos+1])
+          { pos++; continue; }
+      case '&': case '|': case '^': case '~': case '/':
           Ass: // Assignment operator
           if (synt[pos+1] == '=') {
             deceq |= indecl;

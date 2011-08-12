@@ -3,8 +3,10 @@
 
 Name: Timelines
 ID: Timelines
+Description: Adds timeline local variables and functions.
+Icon: timeline.png
+
 Depends: None
 Dependencies: None
-Description: Adds the timeline variables.
 Implements: extension_timelines
 

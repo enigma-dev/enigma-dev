@@ -828,6 +828,7 @@
 		<Unit filename="Universal_System/WITHconstruct.cpp" />
 		<Unit filename="Universal_System/WITHconstruct.h" />
 		<Unit filename="Universal_System/WITHconstructClose.h" />
+		<Unit filename="Universal_System/actions.cpp" />
 		<Unit filename="Universal_System/actions.h" />
 		<Unit filename="Universal_System/backgroundinit.cpp" />
 		<Unit filename="Universal_System/backgroundstruct.cpp" />
@@ -872,6 +873,8 @@
 		<Unit filename="Universal_System/lua_table.h" />
 		<Unit filename="Universal_System/mathnc.cpp" />
 		<Unit filename="Universal_System/mathnc.h" />
+		<Unit filename="Universal_System/move_functions.cpp" />
+		<Unit filename="Universal_System/move_functions.h" />
 		<Unit filename="Universal_System/multifunction_variant.cpp" />
 		<Unit filename="Universal_System/multifunction_variant.h" />
 		<Unit filename="Universal_System/multifunction_variant_source.h" />

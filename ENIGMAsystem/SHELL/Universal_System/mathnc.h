@@ -133,11 +133,11 @@ variant choose(const enigma::varargs& args);
 // TODO: Make the compiler do this shit automatically so we can lose the
 //       stdargs declaration and the hackish define that fucks with everything
 #ifdef ENIGMA_PARSER_RUN
-  #define max(args...) max((varargs(),args))
-  #define min(args...) min((varargs(),args))
-  #define median(args...) median((varargs(),args))
-  #define mean(args...) mean((varargs(),args))
-  #define choose(x...) choose((varargs(), x))
+  #define max(args...) max((enigma::varargs(),args))
+  #define min(args...) min((enigma::varargs(),args))
+  #define median(args...) median((enigma::varargs(),args))
+  #define mean(args...) mean((enigma::varargs(),args))
+  #define choose(x...) choose((enigma::varargs(), x))
   #define globalvar global var
 #endif
 

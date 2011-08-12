@@ -429,7 +429,7 @@ onode exp_typeof(string exp, map<string,dectrip>** lvars, int lvarc, parsed_obje
             if (!ee.type) { puts("SingleResultNull"); return NULL; }
             perf.top() <= ee;
           }
-          else printf("ERROR! Stack not large enough to accomodate matching parenthesis. Should be more than one item on stack.");
+          else printf("ERROR! Stack not large enough to accomodate matching parenthesis. Should be more than one item on stack.\nExpression: %s", exp.c_str());
          }
       }
       else // Not a postfix unary: either binary or prefix unary

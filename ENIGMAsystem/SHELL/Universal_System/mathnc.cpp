@@ -146,6 +146,15 @@ variant choose(const enigma::varargs& args) {
    return args.get(rand() % args.argc);
 };
 
+#ifdef ENIGMA_PARSER_RUN
+  #define max(args...) max((enigma::varargs(),args))
+  #define min(args...) min((enigma::varargs(),args))
+  #define median(args...) median((enigma::varargs(),args))
+  #define mean(args...) mean((enigma::varargs(),args))
+  #define choose(x...) choose((enigma::varargs(), x))
+  #define globalvar global var
+#endif
+
 // For added randomness
 // ...................................................
 

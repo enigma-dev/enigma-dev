@@ -341,13 +341,13 @@ struct stackif
 };
 
 //Check if semicolon is needed here
-inline bool need_semi(char c1,char c2)
+inline bool needs_semi(char c1,char c2)
 {
   if (c1 == c2) return 0; //if the two tokens are the same, we assume they are one word; if they are
   return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
   and (is_letterd(c2) or c2=='"' or c2=='{' or c2=='}');
 }
-inline bool need_semi_sepd(char c1,char c2)
+inline bool needs_semi_sepd(char c1,char c2)
 {
   if (c1 == c2) return 1; //if the two tokens are the same, we assume they are one word; if they are
   return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
@@ -381,6 +381,19 @@ int parser_reinterpret(string &code,string &synt)
         if (synt[pos] == '>') pc--;
         else if (synt[pos] == '<') pc++;
     }
+    else if (pos > 1 and synt[pos] == ':' and synt[pos-1] == ':')
+    {
+      char t = synt[pos+1];
+      synt[pos-1] = synt[pos] = t;
+      pt i = pos-2;
+      char s = synt[i];
+      
+      if (s == 'n') {
+        synt[i] = t;
+        while (i > 0 and synt[--i] == s)
+          synt[i] = t;
+      }
+    }
   }
   //cout << "done. " << synt << endl << endl;
   return 0;
@@ -412,7 +425,17 @@ void parser_add_semicolons(string &code,string &synt)
       codebuf[bufpos]=code[pos];
       syntbuf[bufpos++]=synt[pos];
       
-      if (synt[pos]=='(') { if (sy_semi->prev == NULL) sy_semi=sy_semi->push(',','('); continue; }
+      if (synt[pos]=='(') {
+        if (pos and (synt[pos-1]=='0' or synt[pos-1] == '\'' or synt[pos-1] == '"')) {
+          codebuf[bufpos-1] = *sy_semi;
+          syntbuf[bufpos-1] = *sy_semi;
+          codebuf[bufpos  ] = '(';
+          syntbuf[bufpos++] = '(';
+        }
+        if (sy_semi->prev == NULL)
+          sy_semi=sy_semi->push(',','(');
+        continue;
+      }
       if (synt[pos]==')') { sy_semi=sy_semi->popif('(');    continue; }
       if (synt[pos]==';')
       {
@@ -454,7 +477,7 @@ void parser_add_semicolons(string &code,string &synt)
         continue;
       }
 
-      if (pos and need_semi(synt[pos-1],synt[pos]))
+      if (pos and needs_semi(synt[pos-1],synt[pos]))
       {
         codebuf[bufpos-1] = *sy_semi;
         syntbuf[bufpos-1] = *sy_semi;
@@ -462,8 +485,8 @@ void parser_add_semicolons(string &code,string &synt)
         syntbuf[bufpos++] = synt[pos];
         sy_semi=sy_semi->popif('s');
       }
-      if((pos>2 and synt[pos] == '+' and synt[pos-1] == '+' and synt[pos-2] == 'n' and need_semi_sepd('n',synt[pos+1]))
-      or (pos>2 and synt[pos] == '-' and synt[pos-1] == '-' and synt[pos-2] == 'n' and need_semi_sepd('n',synt[pos+1])))
+      if((pos>2 and synt[pos] == '+' and synt[pos-1] == '+' and synt[pos-2] == 'n' and needs_semi_sepd('n',synt[pos+1]))
+      or (pos>2 and synt[pos] == '-' and synt[pos-1] == '-' and synt[pos-2] == 'n' and needs_semi_sepd('n',synt[pos+1])))
       {
         codebuf[bufpos  ] = *sy_semi;
         syntbuf[bufpos++] = *sy_semi;

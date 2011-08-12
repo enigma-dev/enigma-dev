@@ -45,6 +45,10 @@ variant& var::operator*  ()
 {
   return **as_lua(values);
 }
+variant& var::operator() ()
+{
+  return **as_lua(values);
+}
 variant& var::operator[] (int ind)
 {
   return (*as_lua(values))[size_t(ind)];
@@ -59,6 +63,10 @@ variant& var::operator() (int ind1,int ind2)
 }
 
 const variant& var::operator*  () const
+{
+  return **as_lua(values);
+}
+const variant& var::operator() () const
 {
   return **as_lua(values);
 }

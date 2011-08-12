@@ -115,10 +115,11 @@ template <class T> struct lua_table
     new(databuf) lua_map_type(TA_map(who.dense));
     
     base_length(databuf) = len;   // We share a length in common, though.... 
-    if (dense) destroy();
-    dense = base_to_TA(databuf); // Re-establish our array's location.
+    T* ndense = base_to_TA(databuf); // Re-establish our array's location.
     for (size_t i=0; i<len; i++) // Copy the array elements
-      new(dense+i) T(who.dense[i]);
+      new(ndense+i) T(who.dense[i]);
+    if (dense) destroy();
+    dense = ndense;
   }
   void upsize(const size_t c)
   {
@@ -173,7 +174,6 @@ template <class T> struct lua_table
   
   lua_table<T>& operator= (const lua_table<T>& x)
   {
-    destroy();
     pick_up(x);
     return *this;
   }

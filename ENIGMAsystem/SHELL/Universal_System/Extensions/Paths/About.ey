@@ -3,8 +3,10 @@
 
 Name: Paths
 ID: Paths
+Description: Adds path functions and local variables.
+Icon: path.png
+
 Depends: None
 Dependencies: None
-Description: Adds the path metric variables.
 Implement: extension_path
 

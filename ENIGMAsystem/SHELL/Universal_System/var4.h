@@ -269,10 +269,12 @@ struct var
   
   variant& operator*  ();
   variant& operator[] (int);
+  variant& operator() ();
   variant& operator() (int);
   variant& operator() (int,int);
   
   const variant& operator*  () const;
+  const variant& operator() () const;
   const variant& operator[] (int) const;
   const variant& operator() (int) const;
   const variant& operator() (int,int) const;

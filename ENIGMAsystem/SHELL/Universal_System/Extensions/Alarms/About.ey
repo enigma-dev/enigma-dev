@@ -3,10 +3,12 @@
 
 Name: Alarms
 ID: Alarms
-Description: Adds the alarm variable.
+Description: Adds the local alarm variable and alarm-related DND tiles.
 Build-date: 6/17/2011
+Icon: alarm.png
 
 Depends: None
 Dependencies: None
 Implement: extension_alarm
-Links: $objects 
+Links: $objects
+
