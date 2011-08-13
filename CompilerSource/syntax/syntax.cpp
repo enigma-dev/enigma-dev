@@ -36,6 +36,7 @@
 #include "../externs/externs.h"
 #include "../general/parse_basics.h"
 #include "../general/macro_integration.h"
+#include "../parser/object_storage.h"
 
 using namespace std;
 
@@ -262,55 +263,57 @@ namespace syncheck
           continue;
         }
         
-        if (find_extname(name, 0xFFFFFFFF))
+        if (shared_object_locals.find(name) == shared_object_locals.end())
         {
-          // Handle typenames
-          if (ext_retriever_var->flags & EXTFLAG_TYPENAME) {
-            if (lex[lexlast].type == TT_TYPE_NAME)
-              lex[lexlast].length = superPos - lex[lexlast].pos + name.length();
-            else {
-              if (lex[lexlast].breakandfollow)
-                lex.push_back(token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-              lex.push_back(token(TT_TYPE_NAME, ext_retriever_var, name, superPos, name.length(), false, false, false, mymacroind));
-            }
-            continue;
-          }
-          
-          if (lex[lexlast].breakandfollow)
-            lex.push_back(token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-          
-          if (ext_retriever_var->flags & EXTFLAG_NAMESPACE) {
-            lex.push_back(token(TT_NAMESPACE, ext_retriever_var, name, superPos, name.length(), false, false, false, mymacroind));
-            continue;
-          }
-          
-          if (ext_retriever_var->is_function()) {
-            lex.push_back(token(TT_FUNCTION, ext_retriever_var, name, superPos, name.length(), false, true, false, mymacroind));
-            continue;
-          }
-          // Global variables
-          lex.push_back(token(TT_VARNAME, ext_retriever_var, name, superPos, name.length(), false, true, false, mymacroind));
-          continue;
-        }
-        
-        if (is_statement(name)) // Our control statements
-        {
-          if (!lex[lexlast].separator and !lex[lexlast].operatorlike)
+          if (find_extname(name, 0xFFFFFFFF))
           {
+            // Handle typenames
+            if (ext_retriever_var->flags & EXTFLAG_TYPENAME) {
+              if (lex[lexlast].type == TT_TYPE_NAME)
+                lex[lexlast].length = superPos - lex[lexlast].pos + name.length();
+              else {
+                if (lex[lexlast].breakandfollow)
+                  lex.push_back(token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
+                lex.push_back(token(TT_TYPE_NAME, ext_retriever_var, name, superPos, name.length(), false, false, false, mymacroind));
+              }
+              continue;
+            }
+            
             if (lex[lexlast].breakandfollow)
               lex.push_back(token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-            else if (lex[lexlast].type != TT_S_ELSE and lex[lexlast].type != TT_S_TRY)
-            {
-              ptrace();
-              syerr = "Unexpected `" + name + "' statement at this point";
-              return superPos;
+            
+            if (ext_retriever_var->flags & EXTFLAG_NAMESPACE) {
+              lex.push_back(token(TT_NAMESPACE, ext_retriever_var, name, superPos, name.length(), false, false, false, mymacroind));
+              continue;
             }
+            
+            if (ext_retriever_var->is_function()) {
+              lex.push_back(token(TT_FUNCTION, ext_retriever_var, name, superPos, name.length(), false, true, false, mymacroind));
+              continue;
+            }
+            // Global variables
+            lex.push_back(token(TT_VARNAME, ext_retriever_var, name, superPos, name.length(), false, true, false, mymacroind));
+            continue;
           }
-          TT mt = statement_type(name);
-          lex.push_back(token(mt, name, superPos, name.length(), false, mt == TT_TINYSTATEMENT, mt != TT_TINYSTATEMENT, mymacroind));
-          continue;
+          
+          if (is_statement(name)) // Our control statements
+          {
+            if (!lex[lexlast].separator and !lex[lexlast].operatorlike)
+            {
+              if (lex[lexlast].breakandfollow)
+                lex.push_back(token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
+              else if (lex[lexlast].type != TT_S_ELSE and lex[lexlast].type != TT_S_TRY)
+              {
+                ptrace();
+                syerr = "Unexpected `" + name + "' statement at this point";
+                return superPos;
+              }
+            }
+            TT mt = statement_type(name);
+            lex.push_back(token(mt, name, superPos, name.length(), false, mt == TT_TINYSTATEMENT, mt != TT_TINYSTATEMENT, mymacroind));
+            continue;
+          }
         }
-        
         if (lex[lexlast].breakandfollow)
           lex.push_back(token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
         
@@ -442,7 +445,7 @@ namespace syncheck
               syerr = "Primary expression expected before ternary operator";
               return superPos;
             }
-            lex.push_back(token(TT_TERNARY, "?", superPos, pos-spos, false, true, true, mymacroind));
+            lex.push_back(token(TT_TERNARY, "?", superPos, 1, false, true, true, mymacroind));
             pos++;
           break;
         
