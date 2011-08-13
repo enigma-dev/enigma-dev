@@ -39,6 +39,7 @@
 
 using namespace std;
 
+extern string tostring(int);
 
 namespace syncheck
 {
@@ -64,7 +65,7 @@ namespace syncheck
     TT_DIGIT,           // 0 1 2... (...)
     TT_STRING,          // "", ''
     TT_SCOPEACCESS,     // ::
-    TT_FUNCTION_NAME,   // game_end
+    TT_FUNCTION,   // game_end
     TT_TYPE_NAME,       // int, double, whatever
     TT_NAMESPACE,       // std, enigma, sf
     TT_LOCGLOBAL,       // global/local
@@ -108,7 +109,7 @@ namespace syncheck
     "TT_DIGIT",
     "TT_STRING",
     "TT_SCOPEACCESS",
-    "TT_FUNCTION_NAME",
+    "TT_FUNCTION",
     "TT_TYPE_NAME",
     "TT_LOCGLOBAL",
     "TT_GEN_STATEMENT",
@@ -134,10 +135,13 @@ namespace syncheck
          breakandfollow, // Break and follow is true for "] )" and strings/varnames/digits.
          operatorlike;   // Operator like is true for OPERATOR, ASSOP, (, [, and statements expecting an expression.
     int macrolevel;
+    unsigned match;
     externs* ext;
+    
     token(): type(TT_ERROR) {}
-    token(TT t, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), ext(NULL) {}
-    token(TT t, externs *ex, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), ext(ex) {}
+    token(TT t, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(0), ext(NULL) {}
+    token(TT t, unsigned m, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(m), ext(NULL) {}
+    token(TT t, externs *ex, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(0), ext(ex) {}
     operator string() { 
       char buf[12]; sprintf(buf,"%lu",pos);
       string str = string(TTN[type]) + "{" + buf + ", ";
@@ -154,21 +158,24 @@ namespace syncheck
   vector<token> lex;
   
   struct open_parenth_info {
-    pt pos;
+    unsigned ind;
     int macrolevel;
-    char ptype;
+    char type;
     open_parenth_info() {}
-    open_parenth_info(pt pos, int ml, char ptype): pos(pos), macrolevel(ml), ptype(ptype) {}
+    open_parenth_info(unsigned i, int ml, char type): ind(i), macrolevel(ml), type(type) {}
   };
-  pt pop_open_parenthesis(vector<open_parenth_info> &ops, pt pos, char opener, string whathavewe) {
+  pt pop_open_parenthesis(vector<open_parenth_info> &ops, vector<token>& lex, pt pos, int ind, char opener, string whathavewe) {
     if (ops.empty()) {
       syerr = "Unexpected " + whathavewe + ": None open."; return pos;
     }
-    const char p = ops[ops.size()-1].ptype;
+    const char p = ops[ops.size()-1].type;
     if (p != opener) {
       syerr = "Expected closing " + string(p == '(' ? "parenthesis" : p == '[' ? "bracket" : p == '{' ? "brace" : "triangle bracket") + " before " + whathavewe;
       return pos;
     }
+    const int oi = ops[ops.size()-1].ind;
+    lex[oi].match = ind;
+    lex[ind].match = oi;
     ops.pop_back();
     return pt(-1);
   }
@@ -277,6 +284,10 @@ namespace syncheck
             continue;
           }
           
+          if (ext_retriever_var->is_function()) {
+            lex.push_back(token(TT_FUNCTION, ext_retriever_var, name, superPos, name.length(), false, true, false, mymacroind));
+            continue;
+          }
           // Global variables
           lex.push_back(token(TT_VARNAME, ext_retriever_var, name, superPos, name.length(), false, true, false, mymacroind));
           continue;
@@ -314,7 +325,7 @@ namespace syncheck
         }
         const pt spos = pos;
         while (is_digit(code[++pos]));
-        lex.push_back(token(TT_DIGIT, code.substr(spos,pos-spos+1), superPos, pos-spos, false, true, false, mymacroind));
+        lex.push_back(token(TT_DIGIT, code.substr(spos,pos-spos), superPos, pos-spos, false, true, false, mymacroind));
         continue;
       }
       
@@ -355,39 +366,39 @@ namespace syncheck
         case '{':
             if (lex[lexlast].type == TT_OPERATOR)
               return (syerr = "Expected secondary expression before brace", superPos);
-            open_parenths.push_back(open_parenth_info(pos, mymacroind, '{'));
             lex.push_back(token(TT_BEGINBRACE, "{", superPos, 1, true, false, false, mymacroind));
+            open_parenths.push_back(open_parenth_info(lexlast, mymacroind, '{'));
           pos++; continue;
         case '}':
             if (lex[lexlast].operatorlike)
               return (syerr = "Expected identifier before closing brace", superPos);
-            open_error = pop_open_parenthesis(open_parenths, pos, '{', "closing brace");
-            if (open_error != pt(-1)) return open_error;
             lex.push_back(token(TT_ENDBRACE, "}", superPos, 1, true, false, false, mymacroind));
+            open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '{', "closing brace");
+            if (open_error != pt(-1)) return open_error;
           pos++; continue;
         case '[':
             if (lex[lexlast].operatorlike)
               return (syerr = "Expected identifier before bracket; ENIGMA arrays not yet implemented", superPos);
-            open_parenths.push_back(open_parenth_info(pos, mymacroind, '['));
             lex.push_back(token(TT_BEGINBRACKET, "[", superPos, 1, true, false, true, mymacroind));
+            open_parenths.push_back(open_parenth_info(lexlast, mymacroind, '['));
           pos++; continue;
         case ']':
             if (lex[lexlast].operatorlike and lex[lexlast].type != TT_BEGINBRACKET)
               return (syerr = "Expected secondary expression before closing bracket", superPos);
-            open_error = pop_open_parenthesis(open_parenths, pos, '[', "closing bracket");
-            if (open_error != pt(-1)) return open_error;
             lex.push_back(token(TT_ENDBRACKET, "]",superPos, 1, false, true, false, mymacroind));
+            open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '[', "closing bracket");
+            if (open_error != pt(-1)) return open_error;
           pos++; continue;
         case '(':
-            open_parenths.push_back(open_parenth_info(pos, mymacroind, '('));
             lex.push_back(token(TT_BEGINPARENTH, "(", superPos, 1, true, false, true, mymacroind));
+            open_parenths.push_back(open_parenth_info(lexlast, mymacroind, '('));
           pos++; continue;
         case ')':
             if (lex[lexlast].operatorlike and lex[lexlast].type != TT_BEGINPARENTH)
               return (syerr = "Expected secondary expression before closing parenthesis", superPos);
-            open_error = pop_open_parenthesis(open_parenths, pos, '(', "closing parenthesis");
-            if (open_error != pt(-1)) return open_error;
             lex.push_back(token(TT_ENDPARENTH, ")", superPos, 1, false, lex[lexlast].type != TT_TYPE_NAME, false, mymacroind));
+            open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '(', "closing parenthesis");
+            if (open_error != pt(-1)) return open_error;
           pos++; continue;
         
         case '.': // We can't really do checking on this yet. It's one of the reasons we have two passes.
@@ -411,10 +422,11 @@ namespace syncheck
             lex.push_back(token(TT_STRING, code.substr(spos,pos-spos+1), superPos, pos-spos, false, true, false, mymacroind));
           pos++; break;
         case '\'':
+            spos = pos;
             if (setting::use_cpp_escapes)
-              while (code[++pos]!='\'') {
+              while (code[++pos] != '\'') {
                 if (pos >= code.length()) {
-                  syerr = "Unclosed double quote at this point";
+                  syerr = "Unclosed quote at this point";
                   return superPos;
                 }
                 if (code[pos] == '\\')
@@ -459,12 +471,13 @@ namespace syncheck
             if (code[pos] == '<')
               if (lex[lexlast].type == TT_TYPE_NAME) {
                 lex.push_back(token(TT_BEGINTRIANGLE, "<", superPos, 1, false, false, false, mymacroind)), pos++;
-                open_parenths.push_back(open_parenth_info(pos, mymacroind, '<'));
+                open_parenths.push_back(open_parenth_info(lexlast, mymacroind, '<'));
                 continue;
               } else;
-            else if (open_parenths.size() && open_parenths[open_parenths.size()-1].ptype == '<') {
+            else if (open_parenths.size() && open_parenths[open_parenths.size()-1].type == '<') {
               lex.push_back(token(TT_ENDTRIANGLE, ">", superPos, 1, false, false, false, mymacroind)), pos++;
-              open_parenths.pop_back();
+              open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '<', "closing triangle bracket");
+              if (open_error != pt(-1)) return open_error;
               pos++; continue;
             }
         case '&': case '|': case '^':
@@ -540,14 +553,54 @@ namespace syncheck
     }
     
     if (open_parenths.size()) {
-      const char p = open_parenths.rbegin()->ptype;
+      const char p = open_parenths.rbegin()->type;
       syerr = "Unterminated " + string (p == '(' ? "parenthesis" : p == '[' ? "bracket" : p == '{' ? "brace" : "triangle bracket")
               + " at this point";
-      return open_parenths.rbegin()->pos;
+      return lex[open_parenths.rbegin()->ind].pos;
     }
     
-    for (size_t i = 0; i < lex.size(); i++)
+    for (size_t i = 0; i < lex.size(); i++) {
       cout << lex[i].content << " ";
+      switch (lex[i].type) 
+      {
+        case TT_VARNAME:
+          if (lex[i+1].type == TT_BEGINPARENTH)
+          {
+            syerr = "Unknown function or script `" + lex[i].content + "'";
+            if (lex[lex[i+1].match+1].type == TT_DECIMAL)
+              syerr += ": use semicolon to separate object ID and variable name.";
+            return lex[i].pos;
+          }
+          break;
+        case TT_FUNCTION:
+          if (lex[i+1].type != TT_BEGINPARENTH)
+            return (syerr = "Misuse of function `" + lex[i].content + "': Add parameter list or rename to use as variable", pos);
+          else
+          {
+            bool contented = false;
+            unsigned params = 0, exceeded_at = 0;
+            const unsigned minarg = lex[i].ext->parameter_count_min();
+            const unsigned maxarg = lex[i].ext->parameter_count_max();
+            for (unsigned ii = i+2; ii < lex[i+1].match; ii++)
+            {
+              if (lex[ii].type == TT_COMMA) {
+                contented = false;
+                if (params++ == maxarg)
+                  exceeded_at = ii;
+                continue;
+              }
+              contented = true;
+              if (lex[ii].match)
+                ii = lex[ii].match;
+            }
+            params += contented;
+            if (exceeded_at)
+              return (syerr = "Too many arguments to function `" + lex[i].content + "': provided " + tostring(params) + " of " + tostring(maxarg) + ".", pos);
+          }
+          break;
+        default: ;
+      }
+    }
     
     return -1;
   }
