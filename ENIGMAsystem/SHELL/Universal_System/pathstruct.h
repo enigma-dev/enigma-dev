@@ -1,7 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>                          **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Harijs Grînbergs                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -26,65 +25,52 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
+#include <map>
+#include <vector>
+//#include "instance_system.h" //for path_inst struct JOSH DO THIS BETTER LATER!
+using std::vector;
+using std::map;
 
-using namespace std;
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
 
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
+namespace enigma
+{
+  struct path_point
+  {
+    double x, y, speed, length;
+  };
+  struct path
+  {
+    int id, precision;
+    bool smooth, closed;
+    vector<path_point> pointarray;
+    map<double,int> pointoffset;
+    double total_length, centerx, centery;
+    path(unsigned pathid, bool smooth, bool closed, int precision, unsigned pointcount);
+    ~path();
+  };
 
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../../parser/object_storage.h"
-#include "../compile_common.h"
+  /*struct path_inst
+  {
+    enigma::object_graphics inst;
+    unsigned path_index, path_endaction;
+    double path_position, path_speed;
+    bool absolute;
+  };*/
 
-#include "../../backend/ideprint.h"
-
-inline void writei(int x, FILE *f) {
-  fwrite(&x,4,1,f);
+  extern path** pathstructarray;
+	void path_add_point(unsigned pathid, double x, double y, double speed);
+  void path_recalculate(unsigned pathid);
+  void path_getXY(path *pth, double &x, double &y, double position);
+  void path_getspeed(path *pth, double &speed, double position);
+  void pathstructarray_reallocate();
+  typedef map<double,int>::iterator ppi_t;
 }
 
-int module_write_paths(EnigmaStruct *es, FILE *gameModule)
+namespace enigma
 {
-  // Now we're going to add paths
-  edbg << es->pathCount << " Adding Paths to Game Module: " << flushl;
-
-  //Magic Number
-  fwrite("PTH ",4,1,gameModule);
-
-  //Indicate how many
-  int path_count = es->pathCount;
-  fwrite(&path_count,4,1,gameModule);
-
-  int path_maxid = 0;
-  for (int i = 0; i < path_count; i++)
-    if (es->paths[i].id > path_maxid)
-      path_maxid = es->paths[i].id;
-  fwrite(&path_maxid,4,1,gameModule);
-
-  for (int i = 0; i < path_count; i++)
-  {
-    writei(es->paths[i].id,gameModule); //id
-
-    writei(es->paths[i].smooth,gameModule);
-    writei(es->paths[i].closed,gameModule);
-    writei(es->paths[i].precision,gameModule);
-    // possibly snapX/Y?
-
-    // Track how many path points we're copying
-    int pointCount = es->paths[i].pointCount;
-    writei(pointCount,gameModule);
-
-    for (int ii = 0; ii < pointCount; ii++)
-    {
-      writei(es->paths[i].points[ii].x,gameModule);
-      writei(es->paths[i].points[ii].y,gameModule);
-      writei(es->paths[i].points[ii].speed,gameModule);
-    }
-  }
-
-  edbg << "Done writing paths." << flushl;
-  return 0;
+	//Allocates and zero-fills the array at game start
+	void paths_init();
 }

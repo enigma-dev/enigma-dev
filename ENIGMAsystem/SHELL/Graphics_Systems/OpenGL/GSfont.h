@@ -24,17 +24,17 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-const int fa_left = 0;
-const int fa_center = 1;
-const int fa_right = 2;
-const int fa_top = 0;
-const int fa_middle = 1;
-const int fa_bottom = 2;
+const unsigned fa_left = 0;
+const unsigned fa_center = 1;
+const unsigned fa_right = 2;
+const unsigned fa_top = 0;
+const unsigned fa_middle = 1;
+const unsigned fa_bottom = 2;
 
-void draw_set_halign(int align);
-int draw_get_halign();
-void draw_set_valign(int align);
-int draw_get_valign();
+void draw_set_halign(unsigned align);
+unsigned draw_get_halign();
+void draw_set_valign(unsigned align);
+unsigned draw_get_valign();
 void draw_set_font(int fnt);
 int draw_get_font();
 void draw_text(int x,int y,variant str);

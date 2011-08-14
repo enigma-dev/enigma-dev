@@ -1,0 +1,12 @@
+%E-YAML
+---
+
+Name: Motion Planning
+ID: MotionPlanning
+Description: Adds motion planning functions.
+Icon: mp.png
+
+Depends: None
+Dependencies: Paths
+Implement: extension_mp
+

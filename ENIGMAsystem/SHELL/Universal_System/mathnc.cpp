@@ -106,7 +106,7 @@ double point_distance(double x1,double y1,double x2,double y2)  { return hypot(x
 #include <list>
 double max(const enigma::varargs &t)
 {
-  register double ret = 0, tst;
+  register double ret = -DBL_MAX, tst;
   for (int i = 0; i < t.argc; i++)
     if ((tst = t.get(i)) > ret)
       ret = tst;

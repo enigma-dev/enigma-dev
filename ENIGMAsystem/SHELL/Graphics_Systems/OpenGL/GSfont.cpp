@@ -52,20 +52,20 @@ const int fa_top = 0;
 const int fa_middle = 1;
 const int fa_bottom = 2;*/
 
-int halign = fa_left; //default alignment
-int valign = fa_top; //default alignment
+unsigned halign = fa_left; //default alignment
+unsigned valign = fa_top; //default alignment
 
-void draw_set_halign(int align){
+void draw_set_halign(unsigned align){
     halign = align;
 }
-void draw_set_valign(int align){
+void draw_set_valign(unsigned align){
     valign = align;
 }
 
-int draw_get_halign(){
+unsigned draw_get_halign(){
     return halign;
 }
-int draw_get_valign(){
+unsigned draw_get_valign(){
     return valign;
 }
 
@@ -1133,7 +1133,7 @@ void draw_set_font(int fnt)
   enigma::currentfont = fnt;
 }
 
-int draw_get_font(int fnt)
+int draw_get_font()
 {
   return enigma::currentfont;
 }

@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Harijs Grînbergs                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,10 +25,55 @@
 **                                                                              **
 \********************************************************************************/
 
-namespace enigma {
-  void exe_loadsprs(FILE* exe);
-  void exe_loadsounds(FILE* exe);
-  void exe_loadbackgrounds(FILE* exe);
-  void exe_loadfonts(FILE* exe);
-  void exe_loadpaths(FILE* exe);
+//#include <string>
+#include <stdio.h>
+using namespace std;
+
+#include "pathstruct.h"
+//#include "../Platforms/platforms_mandatory.h"
+//#include "../libEGMstd.h"
+
+namespace enigma
+{
+  void exe_loadpaths(FILE *exe)
+  {
+    unsigned pathid, pointcount;
+    bool smooth, closed;
+    int x, y, speed, nullhere, precision;
+
+    fread(&nullhere,4,1,exe);
+    if (nullhere != *(int*)"PTH ")
+      return;
+
+    // Determine how many paths we have
+    int pathcount;
+    fread(&pathcount,4,1,exe);
+
+    // Fetch the highest ID we will be using
+    int path_highid, buf;
+    fread(&path_highid,4,1,exe);
+    paths_init();
+
+    for (int i = 0; i < pathcount; i++)
+    {
+      fread(&pathid, 4,1,exe);
+      fread(&buf, 4,1,exe);
+      smooth = buf; //to fix int to bool issues
+      fread(&buf, 4,1,exe);
+      closed = buf;
+      fread(&precision, 4,1,exe);
+
+      fread(&pointcount,4,1,exe);
+
+      new path(pathid, smooth, closed, precision, pointcount);
+      for (int ii=0;ii<pointcount;ii++)
+      {
+        fread(&x, 4,1,exe);
+        fread(&y, 4,1,exe);
+        fread(&speed, 4,1,exe);
+        path_add_point(pathid, x, y, speed/100);
+      }
+      path_recalculate(pathid);
+    }
+  }
 }

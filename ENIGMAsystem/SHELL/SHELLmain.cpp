@@ -86,6 +86,8 @@ extern int amain();
 
 #include "Universal_System/resource_data.h"
 #include "Universal_System/highscore_functions.h"
+#include "Universal_System/path_functions.h"
+#include "Universal_System/motion_planning.h"
 
 #include "Universal_System/data_structures.h"
 #include "Universal_System/move_functions.h"
@@ -97,7 +99,7 @@ extern int amain();
 #ifndef ENIGMA_PARSER_RUN
   #include "Universal_System/syntax_quirks.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
-  
+
   #include "Universal_System/with.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"

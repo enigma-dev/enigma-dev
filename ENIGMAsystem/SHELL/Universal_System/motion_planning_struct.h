@@ -1,7 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>                          **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Harijs Grînbergs                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,66 +24,33 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+#include <vector>
+#include <map>
+using std::vector;
+using std::multimap;
 
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
 
-using namespace std;
-
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
-
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../../parser/object_storage.h"
-#include "../compile_common.h"
-
-#include "../../backend/ideprint.h"
-
-inline void writei(int x, FILE *f) {
-  fwrite(&x,4,1,f);
-}
-
-int module_write_paths(EnigmaStruct *es, FILE *gameModule)
+namespace enigma
 {
-  // Now we're going to add paths
-  edbg << es->pathCount << " Adding Paths to Game Module: " << flushl;
-
-  //Magic Number
-  fwrite("PTH ",4,1,gameModule);
-
-  //Indicate how many
-  int path_count = es->pathCount;
-  fwrite(&path_count,4,1,gameModule);
-
-  int path_maxid = 0;
-  for (int i = 0; i < path_count; i++)
-    if (es->paths[i].id > path_maxid)
-      path_maxid = es->paths[i].id;
-  fwrite(&path_maxid,4,1,gameModule);
-
-  for (int i = 0; i < path_count; i++)
+  struct node
   {
-    writei(es->paths[i].id,gameModule); //id
-
-    writei(es->paths[i].smooth,gameModule);
-    writei(es->paths[i].closed,gameModule);
-    writei(es->paths[i].precision,gameModule);
-    // possibly snapX/Y?
-
-    // Track how many path points we're copying
-    int pointCount = es->paths[i].pointCount;
-    writei(pointCount,gameModule);
-
-    for (int ii = 0; ii < pointCount; ii++)
-    {
-      writei(es->paths[i].points[ii].x,gameModule);
-      writei(es->paths[i].points[ii].y,gameModule);
-      writei(es->paths[i].points[ii].speed,gameModule);
-    }
-  }
-
-  edbg << "Done writing paths." << flushl;
-  return 0;
+    unsigned x, y, F, H, G, cost;
+    node* came_from;
+    vector<node*> neighbor_nodes;
+  };
+  struct grid
+  {
+    int id, left, top, hcells, vcells, cellwidth, cellheight;
+    vector<node> nodearray;
+    unsigned threshold;
+    double speed_modifier;
+    grid(unsigned id,int left,int top,int hcells,int vcells,int cellwidth,int cellheight, unsigned threshold, double speed_modifier);
+    ~grid();
+  };
+  extern grid** gridstructarray;
+  void gridstructarray_reallocate();
+  multimap<unsigned,node*> find_path(unsigned id, node* n0, node* n1, bool allow_diag, bool &status);
 }

@@ -1,7 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>                          **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Harijs Grînbergs                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,66 +24,19 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-
-using namespace std;
-
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
-
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../../parser/object_storage.h"
-#include "../compile_common.h"
-
-#include "../../backend/ideprint.h"
-
-inline void writei(int x, FILE *f) {
-  fwrite(&x,4,1,f);
-}
-
-int module_write_paths(EnigmaStruct *es, FILE *gameModule)
-{
-  // Now we're going to add paths
-  edbg << es->pathCount << " Adding Paths to Game Module: " << flushl;
-
-  //Magic Number
-  fwrite("PTH ",4,1,gameModule);
-
-  //Indicate how many
-  int path_count = es->pathCount;
-  fwrite(&path_count,4,1,gameModule);
-
-  int path_maxid = 0;
-  for (int i = 0; i < path_count; i++)
-    if (es->paths[i].id > path_maxid)
-      path_maxid = es->paths[i].id;
-  fwrite(&path_maxid,4,1,gameModule);
-
-  for (int i = 0; i < path_count; i++)
-  {
-    writei(es->paths[i].id,gameModule); //id
-
-    writei(es->paths[i].smooth,gameModule);
-    writei(es->paths[i].closed,gameModule);
-    writei(es->paths[i].precision,gameModule);
-    // possibly snapX/Y?
-
-    // Track how many path points we're copying
-    int pointCount = es->paths[i].pointCount;
-    writei(pointCount,gameModule);
-
-    for (int ii = 0; ii < pointCount; ii++)
-    {
-      writei(es->paths[i].points[ii].x,gameModule);
-      writei(es->paths[i].points[ii].y,gameModule);
-      writei(es->paths[i].points[ii].speed,gameModule);
-    }
-  }
-
-  edbg << "Done writing paths." << flushl;
-  return 0;
-}
+unsigned mp_grid_create(int left,int top,int hcells,int vcells,int cellwidth,int cellheight, double speed_modifier = 1);
+void mp_grid_destroy(unsigned id);
+unsigned mp_grid_get_cell(unsigned id,int h,int v);
+void mp_grid_draw(unsigned id, int mode = 0, unsigned color_mode = 0);
+void mp_grid_draw_neighbours(unsigned id,int h,int v, int mode = 0);
+void mp_grid_path(unsigned id,unsigned path,double xstart,double ystart,double xgoal,double ygoal,bool allowdiag);
+void mp_grid_clear_all(unsigned id, unsigned cost = 1);
+void mp_grid_clear_cell(unsigned id,int h,int v, unsigned cost = 1);
+void mp_grid_clear_rectangle(unsigned id,double x1,double y1,double x2,double y2, unsigned cost = 1);
+void mp_grid_add_rectangle(unsigned id,double x1,double y1,double x2,double y2, unsigned cost = 50000);
+void mp_grid_add_cell(unsigned id,int h,int v, unsigned cost = 50000);
+unsigned mp_grid_get_threshold(unsigned id);
+void mp_grid_set_threshold(unsigned id, unsigned threshold = 1);
+void mp_grid_reset_threshold(unsigned id);
+double mp_grid_get_speed_modifier(unsigned id);
+void mp_grid_get_speed_modifier(unsigned id, double value);

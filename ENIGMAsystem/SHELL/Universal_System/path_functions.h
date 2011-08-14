@@ -1,7 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>                          **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Harijs Grînbergs                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,66 +24,39 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-
-using namespace std;
-
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
-
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../../parser/object_storage.h"
-#include "../compile_common.h"
-
-#include "../../backend/ideprint.h"
-
-inline void writei(int x, FILE *f) {
-  fwrite(&x,4,1,f);
-}
-
-int module_write_paths(EnigmaStruct *es, FILE *gameModule)
-{
-  // Now we're going to add paths
-  edbg << es->pathCount << " Adding Paths to Game Module: " << flushl;
-
-  //Magic Number
-  fwrite("PTH ",4,1,gameModule);
-
-  //Indicate how many
-  int path_count = es->pathCount;
-  fwrite(&path_count,4,1,gameModule);
-
-  int path_maxid = 0;
-  for (int i = 0; i < path_count; i++)
-    if (es->paths[i].id > path_maxid)
-      path_maxid = es->paths[i].id;
-  fwrite(&path_maxid,4,1,gameModule);
-
-  for (int i = 0; i < path_count; i++)
-  {
-    writei(es->paths[i].id,gameModule); //id
-
-    writei(es->paths[i].smooth,gameModule);
-    writei(es->paths[i].closed,gameModule);
-    writei(es->paths[i].precision,gameModule);
-    // possibly snapX/Y?
-
-    // Track how many path points we're copying
-    int pointCount = es->paths[i].pointCount;
-    writei(pointCount,gameModule);
-
-    for (int ii = 0; ii < pointCount; ii++)
-    {
-      writei(es->paths[i].points[ii].x,gameModule);
-      writei(es->paths[i].points[ii].y,gameModule);
-      writei(es->paths[i].points[ii].speed,gameModule);
-    }
-  }
-
-  edbg << "Done writing paths." << flushl;
-  return 0;
-}
+bool path_start(unsigned pathid,double speed,unsigned endaction,bool absolute);
+bool path_exists(unsigned pathid);
+void path_delete(unsigned pathid);
+void path_assign(unsigned pathid,unsigned path);
+void path_append(unsigned pathid,unsigned path);
+int path_add();
+int path_duplicate(unsigned pathid);
+int path_get_number(unsigned pathid);
+double path_get_point_x(unsigned pathid, unsigned n);
+double path_get_point_y(unsigned pathid, unsigned n);
+double path_get_point_length(unsigned pathid, unsigned n);
+double path_get_point_speed(unsigned pathid, unsigned n);
+double path_get_center_x(unsigned pathid);
+double path_get_center_y(unsigned pathid);
+int path_get_precision(unsigned pathid);
+double path_get_length(unsigned pathid);
+bool path_get_kind(unsigned pathid);
+bool path_get_closed(unsigned pathid);
+void path_set_kind(unsigned pathid, bool val);
+void path_set_closed(unsigned pathid, bool val);
+void path_set_precision(unsigned pathid, int prec);
+void path_clear_points(unsigned pathid);
+void path_add_point(unsigned pathid,double x,double y,double speed);
+void path_insert_point(unsigned pathid,unsigned n,double x,double y,double speed);
+void path_change_point(unsigned pathid,unsigned n,double x,double y,double speed);
+void path_reverse(unsigned pathid);
+void path_shift(unsigned pathid,double xshift,double yshift);
+void path_flip(unsigned pathid);
+void path_mirror(unsigned pathid);
+void path_scale(unsigned pathid,double xscale,double yscale);
+void path_rotate(unsigned pathid,double angle);
+double path_get_x(unsigned pathid, double t);
+double path_get_y(unsigned pathid, double t);
+double path_get_speed(unsigned pathid, double t);
+double path_get_direction(unsigned pathid, double t);
+void draw_path(unsigned path,double x,double y,bool absolute);

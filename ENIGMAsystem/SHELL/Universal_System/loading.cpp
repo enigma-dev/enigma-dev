@@ -55,20 +55,20 @@ namespace enigma
     time_t ss = time(0);
     random_set_seed(ss);
     mtrandom_seed(ss);
-    
+
     graphicssystem_initialize();
     audiosystem_initialize();
-    
+
     #if BUILDMODE
       buildmode::buildinit();
     #endif
-    
+
     event_system_initialize();
     input_initialize();
     sprites_init();
     //backgrounds_init();
     widget_system_initialize();
-    
+
     // Open the exe for resource load
     char exename[1025];
     windowsystem_write_exename(exename);
@@ -86,32 +86,33 @@ namespace enigma
         printf("No resource data in exe\n");
         break;
       }
-      
+
       // Get where our resources are located in the module
       int pos;
       fread(&pos,4,1,exe);
-      
+
       // Go to the start of the resource data
       fseek(exe,pos,SEEK_SET);
       fread(&nullhere,4,1,exe);
       if(nullhere) break;
-      
+
       enigma::exe_loadsprs(exe);
       enigma::exe_loadsounds(exe);
       enigma::exe_loadbackgrounds(exe);
       enigma::exe_loadfonts(exe);
-      
+      enigma::exe_loadpaths(exe);
+
       fclose(exe);
     }
     while (false);
-    
+
     //Load rooms
     enigma::rooms_load();
-    
+
     //Go to the first room
     if (room_count)
       room_goto_absolute(0);
-    
+
     return 0;
   }
 }
