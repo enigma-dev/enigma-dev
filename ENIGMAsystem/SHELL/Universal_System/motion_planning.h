@@ -26,6 +26,8 @@
 \********************************************************************************/
 unsigned mp_grid_create(int left,int top,int hcells,int vcells,int cellwidth,int cellheight, double speed_modifier = 1);
 void mp_grid_destroy(unsigned id);
+unsigned mp_grid_duplicate(unsigned id);
+void mp_grid_copy(unsigned id, unsigned srcid);
 unsigned mp_grid_get_cell(unsigned id,int h,int v);
 void mp_grid_draw(unsigned id, int mode = 0, unsigned color_mode = 0);
 void mp_grid_draw_neighbours(unsigned id,int h,int v, int mode = 0);
@@ -35,6 +37,7 @@ void mp_grid_clear_cell(unsigned id,int h,int v, unsigned cost = 1);
 void mp_grid_clear_rectangle(unsigned id,double x1,double y1,double x2,double y2, unsigned cost = 1);
 void mp_grid_add_rectangle(unsigned id,double x1,double y1,double x2,double y2, unsigned cost = 50000);
 void mp_grid_add_cell(unsigned id,int h,int v, unsigned cost = 50000);
+void mp_grid_add_instances(unsigned id,int obj,bool prec, unsigned cost = 50000);
 unsigned mp_grid_get_threshold(unsigned id);
 void mp_grid_set_threshold(unsigned id, unsigned threshold = 1);
 void mp_grid_reset_threshold(unsigned id);

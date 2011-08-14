@@ -31,6 +31,7 @@ void path_assign(unsigned pathid,unsigned path);
 void path_append(unsigned pathid,unsigned path);
 int path_add();
 int path_duplicate(unsigned pathid);
+void path_copy(unsigned pathid,unsigned srcid);
 int path_get_number(unsigned pathid);
 double path_get_point_x(unsigned pathid, unsigned n);
 double path_get_point_y(unsigned pathid, unsigned n);

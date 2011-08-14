@@ -26,6 +26,7 @@
 \********************************************************************************/
 #include <vector>
 #include "../Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
+//#include "../Collision_Systems/BBox/coll_funcs.h" //For collision mp_grid_add_instances
 //#include "../Graphics_Systems/OpenGL/GSfont.h" //For drawing text
 //#include "var4.h"
 #include "pathstruct.h"
@@ -35,6 +36,7 @@
 #include <map>
 using std::multimap;
 //#include <iostream>
+int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme);
 
 namespace enigma {
 	extern size_t grid_idmax;
@@ -53,6 +55,59 @@ void mp_grid_destroy(unsigned id)
     delete enigma::gridstructarray[id];
 }
 
+unsigned mp_grid_duplicate(unsigned id)
+{
+    enigma::gridstructarray_reallocate();
+    enigma::gridstructarray[enigma::grid_idmax] = new enigma::grid(*enigma::gridstructarray[id]);
+    return enigma::grid_idmax-1;
+}
+
+void mp_grid_copy(unsigned id, unsigned srcid)
+{
+    enigma::grid *grid = enigma::gridstructarray[id];
+    enigma::grid *sgrid = enigma::gridstructarray[srcid];
+
+    grid->nodearray.clear();
+    grid->nodearray.reserve(sgrid->hcells*sgrid->vcells);
+    grid->vcells = sgrid->vcells;
+    grid->hcells = sgrid->hcells;
+    grid->cellwidth = sgrid->cellwidth;
+    grid->cellheight = sgrid->cellheight;
+    grid->speed_modifier = sgrid->speed_modifier;
+    grid->threshold = sgrid->threshold;
+    grid->left = sgrid->left;
+    grid->top = sgrid->top;
+    for (size_t i = 0; i < sgrid->hcells*sgrid->vcells; i++)
+    {
+        enigma::node node={floor(i / sgrid->vcells),i % sgrid->vcells,0,0,0,sgrid->nodearray[i].cost};
+        grid->nodearray.push_back(node);
+    }
+
+    for (size_t i = 0; i < grid->hcells; i++){
+        for (size_t c = 0; c < grid->vcells; c++){
+        if (i>0){
+            grid->nodearray[i*grid->vcells+c].neighbor_nodes.push_back(&grid->nodearray[(i-1)*grid->vcells+c]); //left
+            if (c>0)
+                grid->nodearray[i*grid->vcells+c].neighbor_nodes.push_back(&grid->nodearray[(i-1)*grid->vcells+c-1]); //top-left
+            if (c<grid->vcells-1)
+                grid->nodearray[i*grid->vcells+c].neighbor_nodes.push_back(&grid->nodearray[(i-1)*grid->vcells+c+1]); //bottom-left
+        }
+        if (c>0)
+            grid->nodearray[i*grid->vcells+c].neighbor_nodes.push_back(&grid->nodearray[i*grid->vcells+c-1]); //top
+        if (i<grid->hcells-1){
+            grid->nodearray[i*grid->vcells+c].neighbor_nodes.push_back(&grid->nodearray[(i+1)*grid->vcells+c]); //right
+            if (c>0)
+                grid->nodearray[i*grid->vcells+c].neighbor_nodes.push_back(&grid->nodearray[(i+1)*grid->vcells+c-1]); //top-right
+            if (c<grid->vcells-1)
+                grid->nodearray[i*grid->vcells+c].neighbor_nodes.push_back(&grid->nodearray[(i+1)*grid->vcells+c+1]); //bottom-bottom
+        }
+        if (c<grid->vcells-1)
+            grid->nodearray[i*grid->vcells+c].neighbor_nodes.push_back(&grid->nodearray[i*grid->vcells+c+1]); //bottom
+
+        }
+    }
+}
+
 void mp_grid_clear_all(unsigned id, unsigned cost)
 {
     for (vector<enigma::node>::iterator it = enigma::gridstructarray[id]->nodearray.begin(); it!=enigma::gridstructarray[id]->nodearray.end(); ++it)
@@ -64,6 +119,8 @@ void mp_grid_add_rectangle(unsigned id,double x1,double y1,double x2,double y2, 
 {
     enigma::grid *grid = enigma::gridstructarray[id];
     unsigned max_cost=0;
+    double x=grid->left, y=grid->top;
+    x1-=x, x2-=x, y1-=y, y2-=y;
     int tx1 = fmax(floor(fmin(x1,x2)/grid->cellwidth),0), tx2 = fmin(ceil((fmin(x1,x2)+fabs(x2-x1))/grid->cellwidth),grid->hcells),
     ty1 = fmax(floor(fmin(y1,y2)/grid->cellheight),0), ty2 = fmin(ceil((fmin(y1,y2)+fabs(y2-y1))/grid->cellheight),grid->vcells);
     for (unsigned i=tx1; i<tx2; i++){
@@ -75,6 +132,24 @@ void mp_grid_add_rectangle(unsigned id,double x1,double y1,double x2,double y2, 
     if (cost>max_cost){max_cost=cost;}
     if (grid->threshold<max_cost){grid->threshold=max_cost;}
     //std::cout << "mp_grid_add_rectangle(grid," << floor(x1/grid->cellwidth)*grid->cellwidth << "," << floor(y1/grid->cellheight)*grid->cellheight << "," << ceil(x2/grid->cellwidth)*grid->cellwidth << "," << ceil(y2/grid->cellheight)*grid->cellheight<< ");" << std::endl;
+}
+
+void mp_grid_add_instances(unsigned id,int obj,bool prec,unsigned cost)
+{
+    enigma::grid *grid = enigma::gridstructarray[id];
+    unsigned max_cost=0;
+    double x=grid->left, y=grid->top;
+    for (unsigned i=0; i<grid->hcells; i++){
+        for (unsigned c=0; c<grid->vcells; c++){
+            if (grid->nodearray[i*grid->vcells+c].cost>max_cost){max_cost=grid->nodearray[i*grid->vcells+c].cost;}
+            //std::cout<<"collision_rectangle("<<i*grid->cellwidth<<","<<c*grid->cellheight<<","<<(i+1)*grid->cellwidth<<","<<(c+1)*grid->cellheight<<","<<obj<<","<<prec<<","<<false<<")"<<std::endl;
+            if (collision_rectangle(x+i*grid->cellwidth,y+c*grid->cellheight,x+(i+1)*grid->cellwidth,y+(c+1)*grid->cellheight,obj,prec,false)!=-4){
+                grid->nodearray[i*grid->vcells+c].cost = cost;
+            }
+        }
+    }
+    if (cost>max_cost){max_cost=cost;}
+    if (grid->threshold<max_cost){grid->threshold=max_cost;}
 }
 
 void mp_grid_reset_threshold(unsigned id)
@@ -129,8 +204,8 @@ void mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
 {
     enigma::grid *gr = enigma::gridstructarray[id];
     int vc = enigma::gridstructarray[id]->vcells,
-    xs = floor(xstart/gr->cellwidth), ys = floor(ystart/gr->cellheight),
-    xg = floor(xgoal/gr->cellwidth), yg = floor(ygoal/gr->cellheight);
+    xs = floor((xstart-gr->left)/gr->cellwidth), ys = floor((ystart-gr->top)/gr->cellheight),
+    xg = floor((xgoal-gr->left)/gr->cellwidth), yg = floor((ygoal-gr->top)/gr->cellheight);
     if (xs<0 or xg<0) return;
     if (xs>gr->hcells-1 or xg>gr->hcells-1) return;
     if (ys<0 or yg<0) return;
@@ -146,9 +221,9 @@ void mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
     enigma::path_point point={xstart,ystart,gr->speed_modifier/double(gr->nodearray[xs*vc+ys].cost)};
     path->pointarray.push_back(point);
     multimap<unsigned,enigma::node*>::reverse_iterator it;
-    for (it=nodelist.rbegin() ; it != nodelist.rend(); it++)
+    for (it=nodelist.rbegin(); it != nodelist.rend(); it++)
     {
-            point=(enigma::path_point){((*it).second->x+0.5)*gr->cellwidth,((*it).second->y+0.5)*gr->cellheight,gr->speed_modifier/double((*it).second->cost)};
+            point=(enigma::path_point){gr->left+((*it).second->x+0.5)*gr->cellwidth,gr->top+((*it).second->y+0.5)*gr->cellheight,gr->speed_modifier/double((*it).second->cost)};
             path->pointarray.push_back(point);
     }
 
@@ -190,10 +265,10 @@ void mp_grid_draw_neighbours(unsigned id,int h,int v, int mode)
     glColor4f(0,0,1,mode==0?0.5:1);
     int vc = enigma::gridstructarray[id]->vcells;
     for (vector<enigma::node*>::iterator it = enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.begin(); it!=enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.end(); ++it){
-        glVertex2f((*it)->x*grid->cellwidth,(*it)->y*grid->cellheight);
-        glVertex2f(((*it)->x+1)*grid->cellwidth,(*it)->y*grid->cellheight);
-        glVertex2f(((*it)->x+1)*grid->cellwidth,((*it)->y+1)*grid->cellheight);
-        glVertex2f((*it)->x*grid->cellwidth,((*it)->y+1)*grid->cellheight);
+        glVertex2f(grid->left+(*it)->x*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
+        glVertex2f(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
+        glVertex2f(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);
+        glVertex2f(grid->left+(*it)->x*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);
     }
     glEnd();
     glPopAttrib();
@@ -210,7 +285,7 @@ void mp_grid_draw(unsigned id, int mode, unsigned color_mode)
     enigma::grid *grid = enigma::gridstructarray[id];
     glPushAttrib(GL_CURRENT_BIT);
     glBegin(GL_QUADS);
-    int x=grid->top, y=grid->left;
+    int x=grid->left, y=grid->top;
     for (unsigned i=0; i<grid->hcells; i++){
         for (unsigned c=0; c<grid->vcells; c++){
             if (color_mode==0){

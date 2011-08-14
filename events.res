@@ -36,7 +36,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
-	Constant: {xprevious = x; yprevious = y;}
+	Constant: {xprevious = x; yprevious = y; image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index));}
 
 alarm: 2
 	Group: Alarm
@@ -307,7 +307,6 @@ draw: 8
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw will destruct with this */
 	Default: if (image_single!=-1) {image_speed=0;image_index=image_single;} if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
-	Constant: image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index));
 	Instead: screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
 
 
@@ -316,8 +315,7 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Locals: float $iip = -1;
-	Sub Check: { const bool r = ($iip <= (float)image_index); $iip = image_index; if (r) return 0; }
+	Sub Check: {if (image_index + image_speed < sprite_get_number(sprite_index)) return 0; }
 
 
 # End of in-linked events

@@ -77,6 +77,18 @@ int path_duplicate(unsigned pathid)
     return enigma::path_idmax++;
 }
 
+void path_copy(unsigned pathid,unsigned srcid)
+{
+    enigma::pathstructarray[pathid]->pointarray.clear();
+    enigma::path *pa = enigma::pathstructarray[pathid];
+    enigma::path *pa2 = enigma::pathstructarray[srcid];
+    for (size_t i=0; i<pa2->pointarray.size(); i++){
+        enigma::path_point point={pa2->pointarray[i].x,pa2->pointarray[i].y,pa2->pointarray[i].speed};
+        pa->pointarray.push_back(point);
+    }
+    enigma::path_recalculate(pathid);
+}
+
 void path_assign(unsigned pathid,unsigned path)
 {
     delete enigma::pathstructarray[pathid];
