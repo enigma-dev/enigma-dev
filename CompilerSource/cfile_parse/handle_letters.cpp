@@ -604,9 +604,12 @@ pt handle_identifiers(const string n,int &fparam_named,string& fparams,bool at_s
           cferr = "Expected ';' before new declaration; old declaration is of type " + (last_type?last_type->name:string("NULL")) + " as " + last_identifier;
           return pos;
         }
-        else argument_type = ext_retriever_var;
-        fparams += ext_retriever_var->name + " ";
-        fparam_named = 1;
+        else
+        {
+          argument_type = ext_retriever_var; // Keep track of type of function parameter
+          fparams += ext_retriever_var->name + " ";
+          fparam_named = 1;
+        }
         return pt(-1);
       } 
       //If error, or if it was declared in this scope

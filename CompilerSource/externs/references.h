@@ -28,8 +28,9 @@
 struct referencer
 {
   char symbol;
-  unsigned count;
   char completed;
+  short varargs_at;
+  unsigned count;
   
   referencer(char s);
   referencer(char s,int c);
@@ -89,6 +90,9 @@ extern struct rf_stack
   
   bool empty(); //Any referencers at all
   bool is_function(); //test if this is a function
+  bool is_varargs(); //return if this is a varargs function
+  bool varargs_at(); //return if this is a varargs function
+  void set_varargs(); //return if this is a varargs function
   int parameter_count_min(); //returns topmost function argument count
   int parameter_count_max(); //returns topmost function argument count
   

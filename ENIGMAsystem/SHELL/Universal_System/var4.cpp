@@ -453,6 +453,7 @@ variant&  variant::operator*  ()         { return *this; }
 #undef EVCONST
 #define EVCONST const
 bool      variant::operator!  () EVCONST { return !bool(*this); }
+long      variant::operator~  () EVCONST { return ~long(*this); }
 double    variant::operator-  () EVCONST { return -rval.d; }
 double    variant::operator+  () EVCONST { return  rval.d; }
 #undef EVCONST
@@ -467,6 +468,7 @@ variant&  var::operator-- ()      { return --(**this); }
 double    var::operator-- (int)   { return (**this)--; }
 
 bool      var::operator! () const { return !bool(**this); }
+long      var::operator~ () const { return ~long(**this); }
 double    var::operator- () const { return -(double)(**this); }
 double    var::operator+ () const { return +(double)(**this); }
 

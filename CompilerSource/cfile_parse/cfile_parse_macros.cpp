@@ -391,11 +391,11 @@ pt cfile_parse_macro()
   if (next=="pragma") //Visit this even in a false conditional for print and debug
   {
     // This is my beautiful debugging suite during development of the parser.
-      #ifndef ENIGMA_PARSERS_DEBUG_NOT_LOLT0L
+      #ifndef ENIGMA_PARSERS_DEBUG_NOT_LOLT0LFG
         const pt sp = pos;
       #endif
     move_newline();
-      #ifndef ENIGMA_PARSERS_DEBUG_NOT_LOLT0L
+      #ifndef ENIGMA_PARSERS_DEBUG_NOT_LOLT0LDFG
         const string pc = cfile.substr(sp,pos-sp);
         if (pc == "debug_entry_point" and !in_false_conditional())
           cout << "#pragma: debug_entry_point\r\n";

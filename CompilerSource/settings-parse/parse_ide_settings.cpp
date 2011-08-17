@@ -46,7 +46,7 @@ vector<string> explode(string n) {
   size_t pos = 0, epos;
   while (is_useless(n[pos])) pos++;
   for (epos = n.find(','); epos != string::npos; epos = n.find(',',pos)) {
-    ret.push_back(n.substr(pos,epos));
+    ret.push_back(n.substr(pos,epos-pos));
     pos = epos; while (is_useless(n[++pos]));
   }
   if (n.length() > pos)
@@ -147,7 +147,7 @@ void parse_ide_settings(const char* eyaml)
   
   cout << "Setting up IDE editables... " << endl;
   requested_extensions.clear();
-  requested_extensions = explode((cinfo.find("extensions") == cinfo.end()) ? (string)"Universal_System/Extensions/Alarms" : (string)cinfo.get("extensions"));
+  requested_extensions = explode((string)settree.get("extensions"));
   extensions::parse_extensions(requested_extensions);
   clear_ide_editables();
 }

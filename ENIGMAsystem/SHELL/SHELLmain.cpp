@@ -25,8 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <stdlib.h>
-#include <stddef.h>
+#include <cstdlib>
+#include <cstddef>
 #include <string>
 
 #define INCLUDED_FROM_SHELLMAIN 1

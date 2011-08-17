@@ -162,6 +162,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       {
         if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
           c = 't';
+        else if (ext_retriever_var->is_function() and ext_retriever_var->refstack.is_varargs())
+          c = 'V';
       }
       else if (name == "then")
         continue; //"Then" is a truly useless keyword. I see no need to preserve it.
@@ -393,6 +395,35 @@ int parser_reinterpret(string &code,string &synt)
         while (i > 0 and synt[--i] == s)
           synt[i] = t;
       }
+    }
+    else if (synt[pos] == 'V')
+    {
+      const pt spos = pos;
+      while ((synt[pos] = 'n', synt[++pos] == 'V'));
+      find_extname(code.substr(spos,pos-spos),0xFFFFFFFF);
+      const pt epos = pos;
+      int en = ext_retriever_var->refstack.varargs_at();
+      if (en == -1) continue;
+      cout << "AND EN = " << en  << endl;
+      ++pos; for (unsigned lvl = 1; en and lvl; pos++)
+      {
+        if (synt[pos] == '(') { lvl++; continue; }
+        if (synt[pos] == ')') { lvl--; continue; }
+        if (lvl == 1 and synt[pos] == ',') en--;
+      }
+      if (!en) {
+        code.insert(pos,"(enigma::varargs(),");
+        synt.insert(pos,"(ttttttttttttttt(),");
+        for (unsigned lvl = 1; lvl; pos++)
+        {
+          if (synt[pos] == '(') { lvl++; continue; }
+          if (synt[pos] == ')') { lvl--; continue; }
+        }
+        pos--;
+        code.insert(pos,")");
+        synt.insert(pos,")");
+      }
+      pos = epos;
     }
   }
   //cout << "done. " << synt << endl << endl;

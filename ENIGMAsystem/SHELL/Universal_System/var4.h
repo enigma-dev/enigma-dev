@@ -139,6 +139,7 @@ struct variant
   #undef EVCONST
   #define EVCONST const
   bool      operator!() EVCONST;
+  long      operator~() EVCONST;
   double    operator-() EVCONST;
   double    operator+() EVCONST;
   #undef EVCONST
@@ -262,6 +263,7 @@ struct var
   #undef EVCONST
   #define EVCONST const
   bool      operator!() EVCONST;
+  long      operator~() EVCONST;
   double    operator-() EVCONST;
   double    operator+() EVCONST;
   #undef EVCONST

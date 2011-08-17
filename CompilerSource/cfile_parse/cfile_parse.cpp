@@ -430,7 +430,10 @@ pt parse_cfile(my_string cftext)
                   if (!fparam_defaulted)
                     refstack.inc_current_min();
                   fparams += ", ";
-                  refstack.inc_current_max();
+                  if (argument_type != NULL and argument_type->name == "varargs" and argument_type->parent and argument_type->parent->name == "enigma")
+                    refstack.set_varargs();
+                  else
+                    refstack.inc_current_max();
                   fparam_defaulted = 0;
                 }
                 pos++; continue;
@@ -816,8 +819,11 @@ pt parse_cfile(my_string cftext)
                 {
                   if (!fparam_defaulted)
                     refstack.inc_current_min();
-                  refstack.inc_current_max();
-                  fparam_defaulted = 0;
+                  if (argument_type != NULL and argument_type->name == "varargs" and argument_type->parent and argument_type->parent->name == "enigma")
+                    refstack.set_varargs();
+                  else
+                    refstack.inc_current_max();
+                  fparam_defaulted = fparam_named = 0;
                 }
                 fparams += ")";
               }
@@ -1199,7 +1205,7 @@ pt parse_cfile(my_string cftext)
         case ':':
             {
               const int last_named_raw = last_named & ~LN_TYPEDEF;
-              if (cfile[pos+1] == ':') //Handle '::'
+              if (cfile[pos+1] == ':') //Handle "::"
               {
                 if (last_named_raw == LN_DECLARATOR)
                 {
@@ -1380,7 +1386,7 @@ pt parse_cfile(my_string cftext)
                 cferr = "Token `...' expected only in function parameters";
                 return pos;
               }
-              if (refstack.parameter_count_max() != (unsigned char)(-1))
+              if (refstack.parameter_count_max() != (unsigned short)(-1))
                 refstack.set_current_max((unsigned char)(-1));
               else
               {

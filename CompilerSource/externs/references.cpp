@@ -33,14 +33,14 @@ using namespace std;
 
 rf_stack refstack;
 
-referencer::referencer(char s): symbol(s), count(0), completed(1) {}
-referencer::referencer(char s,int c): symbol(s), count(c), completed(1) {}
-referencer::referencer(char s,int c,char complete): symbol(s), count(c), completed(complete) {}
-referencer::referencer(char s,short cn,short cx,char complete): symbol(s), count((cn << 16) + cx), completed(complete) {}
-referencer::referencer(const referencer &r): symbol(r.symbol), count(r.count), completed(r.completed) {}
+referencer::referencer(char s): symbol(s), completed(1), varargs_at(-1), count(0) {}
+referencer::referencer(char s,int c): symbol(s), completed(1), varargs_at(-1), count(c) {}
+referencer::referencer(char s,int c,char complete): symbol(s), completed(complete), varargs_at(-1), count(c) {}
+referencer::referencer(char s,short cn,short cx,char complete): symbol(s), completed(complete), varargs_at(-1), count((cn << 16) + cx) {}
+referencer::referencer(const referencer &r): symbol(r.symbol), completed(r.completed), varargs_at(r.varargs_at), count(r.count) {}
 referencer::~referencer() { }
 
-rf_node::rf_node(): next(NULL), prev(NULL), ref(0,0,0) {}
+rf_node::rf_node(): next(NULL), prev(NULL), ref(0,0,0){}
 rf_node::rf_node(const referencer &r): next(NULL), prev(NULL), ref(r) {}
 rf_node::rf_node(rf_node* Prev,const referencer &r): next(NULL), prev(Prev), ref(r) {}
 rf_node::rf_node(const referencer &r,rf_node* Next): next(Next), prev(NULL), ref(r) {}
@@ -110,13 +110,13 @@ void rf_stack::inc_current_count()
 void rf_stack::inc_current_min()
 {
   if (now == NULL) return;
-  if ((now->ref.count >> 16) < 0xFFFF)
+  if ((now->ref.count >> 16) < 0xFFF0)
     now->ref.count += 0x00010000;
 }
 void rf_stack::inc_current_max()
 {
   if (now == NULL) return;
-  if ((now->ref.count & 0xFFFF) < 0xFFFF)
+  if ((now->ref.count & 0xFFFF) < 0xFFF0)
     now->ref.count++;
 }
 
@@ -157,7 +157,7 @@ void rf_stack::set_current_min(short x)
 void rf_stack::set_current_max(short x)
 {
   if (now == NULL) return;
-  now->ref.count = (x & 0xFFFF0000) + x;
+  now->ref.count = (now->ref.count & 0xFFFF0000) + x;
 }
 
 rf_stack &rf_stack::operator += (referencer r)
@@ -253,4 +253,28 @@ bool rf_stack::is_function()
   if (last != NULL and last->prev != NULL and last->prev->ref.symbol == '(')
     return true;
   return false; 
+}
+
+bool rf_stack::is_varargs()
+{
+  if (topmostsymbol() == '(')
+    return last->ref.varargs_at != -1;
+  if (last != NULL and last->prev != NULL and last->prev->ref.symbol == '(')
+    return last->prev->ref.varargs_at != -1;
+  return false; 
+}
+bool rf_stack::varargs_at()
+{
+  if (topmostsymbol() == '(')
+    return last->ref.varargs_at;
+  if (last != NULL and last->prev != NULL and last->prev->ref.symbol == '(')
+    return last->prev->ref.varargs_at;
+  return false; 
+}
+void rf_stack::set_varargs()
+{
+  if (topmostsymbol() == '(')
+    last->ref.varargs_at = last->ref.count & 0xFFFF;
+  else
+    last->prev->ref.varargs_at = last->prev->ref.count & 0xFFFF;
 }
