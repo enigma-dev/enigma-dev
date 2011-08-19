@@ -269,19 +269,6 @@ double random(double n) //Do not fix. Based off of Delphi prng
 	return rval;
 }
 
-int irandom(int x) {return int(random(x + 1));}  //Mark made this inclusive of x...
-
-double random_range(double x1, double x2)
-{
-    return x1 + random(x2 - x1);
-}
-
-double irandom_range(int x1, int x2)
-{
-    return x1 + irandom(x2 - x1);
-}
-
-
 int random_set_seed(int seed){return enigma::Random_Seed=seed;}
 int random_get_seed(){return enigma::Random_Seed;}
 int randomize(){return enigma::Random_Seed=random32();}

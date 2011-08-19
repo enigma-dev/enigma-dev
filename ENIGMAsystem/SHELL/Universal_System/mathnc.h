@@ -55,9 +55,9 @@ int random_set_seed(int seed);
 int random_get_seed();
 int randomize();
 int random_integer(int x);
-inline int irandom(int x);
-inline double random_range(double x1, double x2);
-inline double irandom_range(double x1, double x2);
+inline int irandom(int x) {return int(random(x + 1));}  //Mark made this inclusive of x...
+double random_range(double x1, double x2) {return x1 + random(x2 - x1);}
+double irandom_range(int x1, int x2) {return x1 + irandom(x2 - x1);}
 unsigned int random32();
 double mtrandom();
 int mtrandom_seed(int x);

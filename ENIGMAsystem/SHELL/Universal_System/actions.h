@@ -590,3 +590,10 @@ inline void action_create_object_motion(int object, double x, double y, double s
         ii->direction = direction;
     }
 }
+
+inline int draw_self()
+{
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    draw_sprite_ext(inst->sprite_index, inst->image_index, inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
+    return 0;
+}  //actions seemed the best place for this

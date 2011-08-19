@@ -88,6 +88,7 @@ extern int amain();
 #include "Universal_System/highscore_functions.h"
 #include "Universal_System/path_functions.h"
 #include "Universal_System/motion_planning.h"
+#include "Universal_System/mp_movement.h"
 
 #include "Universal_System/data_structures.h"
 #include "Universal_System/move_functions.h"
