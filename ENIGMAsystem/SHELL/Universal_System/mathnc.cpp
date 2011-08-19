@@ -104,6 +104,9 @@ double point_distance(double x1,double y1,double x2,double y2)  { return hypot(x
 #include "dynamic_args.h"
 #include <float.h> //maxiumum values for certain datatypes. Useful for min()
 #include <list>
+double min(double x, double y) { return x < y ? x : y; }
+double max(double x, double y) { return x > y ? x : y; }
+
 double max(const enigma::varargs &t)
 {
   register double ret = -DBL_MAX, tst;

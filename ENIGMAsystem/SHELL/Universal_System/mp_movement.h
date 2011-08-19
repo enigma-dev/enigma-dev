@@ -29,10 +29,10 @@
 #include <cmath>
 #include "path_functions.h"
 
-bool place_meeting(double x, double y, int object);
-bool place_free(double x, double y);
-extern double min(double x, double y) { return x < y ? x : y; }
-extern double max(double x, double y) { return x > y ? x : y; }
+extern bool place_meeting(double x, double y, int object);
+extern bool place_free(double x, double y);
+extern double min(double x, double y);
+extern double max(double x, double y);
 
 class mp_potential
 {

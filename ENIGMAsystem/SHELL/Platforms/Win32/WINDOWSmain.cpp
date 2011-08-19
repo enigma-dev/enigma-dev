@@ -64,16 +64,15 @@ namespace enigma {
   void sleep_for_framerate(int rs)
   {
     clock_t nc = clock();
-    int sdur = 1000/rs - 1 - (nc - lc)*1000 / CLOCKS_PER_SEC;
+    double sdur = 1000/rs - (nc - lc)*1000 / CLOCKS_PER_SEC;
     if (sdur > 0)
     {
         Sleep(sdur);
-        fps = room_speed;
+        fps = int(CLOCKS_PER_SEC / (nc - lc + sdur));
     }
     else
     {
-        fps = CLOCKS_PER_SEC / (nc - lc);
-        if(fps > room_speed){ fps = room_speed; }
+        fps = int(CLOCKS_PER_SEC / (nc - lc));
     }
     lc = nc;
   }
