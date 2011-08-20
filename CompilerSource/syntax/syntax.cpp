@@ -144,9 +144,9 @@ namespace syncheck
     token(TT t, unsigned m, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(m), ext(NULL) {}
     token(TT t, externs *ex, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(0), ext(ex) {}
     operator string() { 
-      char buf[12]; sprintf(buf,"%lu",pos);
+      char buf[12]; sprintf(buf,"%lu",(long unsigned)pos);
       string str = string(TTN[type]) + "{" + buf + ", ";
-      sprintf(buf,"%lu",length); str += buf; str += ", ";
+      sprintf(buf,"%lu",(long unsigned)length); str += buf; str += ", ";
       str += separator ? "separated, " : "unseparated, ";
       str += breakandfollow ? "breakandfollow, " : "nobreak, ";
       str += operatorlike ? "operatorlike, " : "notoperator, ";

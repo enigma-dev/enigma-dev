@@ -71,7 +71,7 @@ struct ey_data: ey_base // Contains multiple members
 typedef ey_data::eylist *eycit; // Quick access of chronological iterators
 
 ey_data parse_eyaml(istream &file, string fname = "");
-ey_data parse_eyaml_str(string);
+ey_data parse_eyaml_str(string, string = "LGM Settings");
 
 ey_string &eyscalar(ey_base* x);
 ey_string &eyscalar(eycit x);

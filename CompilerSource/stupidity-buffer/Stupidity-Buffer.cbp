@@ -4,11 +4,13 @@
 	<Project>
 		<Option title="Stupidity Buffer" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="./" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
 				<Option output="ENIGMA_debug" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\.." />
 				<Option object_output="obj\Debug\" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -18,6 +20,7 @@
 			</Target>
 			<Target title="Release">
 				<Option output="ENIGMA" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\.." />
 				<Option object_output="obj\Release\" />
 				<Option type="1" />
 				<Option compiler="gcc" />

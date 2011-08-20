@@ -40,7 +40,7 @@ using namespace std;
 #include "../../parser/object_storage.h"
 
 string REFERENCE_POSTFIX(string ref) {
-  unsigned pos, spos;
+  unsigned pos, spos = 0;
   bool makeItConst = false;
   int lvl = 0;
   for (pos = 0; pos < ref.length(); pos++)

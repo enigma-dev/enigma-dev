@@ -29,10 +29,14 @@
 #include <windowsx.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 #include <string>
+#include <map>
 
-using std::string;
+using namespace std;
 string msys_path_from_mingw = "msys\\1.0\\bin\\";
+
+#include "../settings-parse/eyaml.h"
 
 string fixdrive(string p)
 {
@@ -139,7 +143,19 @@ EMessage
   "MinGW-Get failed! This application is outside the control of the ENIGMA team and so most likely"
   "failed due to a change in package names. Please report this incident on ENIGMA's forums.\n\n"
   "mingw-get error code: %d",
- msg_caption_problem = "Warning";
+ msg_caption_problem = "Warning",
+ 
+ msg_update__ey_very_out_of_date =
+  "It seems you are using an old version of the Windows gcc.ey specification. Your gcc.ey file does "
+  "not list a version. Would you like ENIGMA to update it for you? If not, please manually add the "
+  "version to the top as in Autoconf/wingcc_template.eyt, and indicate that the Maintainer: CUSTOM."
+  "\n\nOtherwise, press \"yes,\" and ENIGMA will maintain this file for you from now on.",
+ msg_update__ey_out_of_date =
+  "It seems your repository has been updated! The update included a new version of gcc.ey. Yours is "
+  "marked 'custom' and so will not be modified automatically. Please update the template to reflect "
+  "the changes (see Autoconf/wingcc_template.eyt for comparison).",
+ msg_update__error =
+  "Failed to convert old gcc.ey! Edit manually or delete and let ENIGMA fix it.";
 
 #define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0); 
 
@@ -152,7 +168,7 @@ string expand_message(string msg, string arg1)
 }
 
 char drive_letter[4] = { '\\', 0, 0, 0 };
-static int keepgoing; HWND cbb = NULL;
+static int keepgoing; HWND dlb = NULL, cbb = NULL;
 LRESULT CALLBACK getproc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   
   /*  Switch according to what type of message we have received  */
@@ -169,6 +185,7 @@ LRESULT CALLBACK getproc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             else drive_letter[0] = '\\', drive_letter[1] = drive_letter[2] = drive_letter[3] = 0;
           }
           keepgoing = 0;
+          DestroyWindow(dlb);
           break;
         }
       break;
@@ -201,7 +218,7 @@ void get_new_drive_letter()
   
   RECT n; n.top = 0, n.bottom = HEIGHT, n.left = 0, n.right = WIDTH;
   AdjustWindowRect(&n,WS_BORDER|WS_CAPTION,false);
-  HWND hwnd = CreateWindow("DrivePicker", "Drive Selection",
+  dlb = CreateWindow("DrivePicker", "Drive Selection",
       WS_OVERLAPPED,
       CW_USEDEFAULT, CW_USEDEFAULT,
       n.right - n.left, n.bottom - n.top,
@@ -209,23 +226,23 @@ void get_new_drive_letter()
   
   SIZE tsz; int y = 4;
   LPCSTR tt = "Please select a drive onto which ENIGMA will install MinGW:";
-  HWND tr = CreateWindow("STATIC",tt,WS_CHILD,4,y,WIDTH-8,32,hwnd,(HMENU)(1),NULL,NULL);
+  HWND tr = CreateWindow("STATIC",tt,WS_CHILD,4,y,WIDTH-8,32,dlb,(HMENU)(1),NULL,NULL);
   fixFont(tr); ShowWindow(tr,SW_SHOW); HDC dc = GetDC(tr); GetTextExtentPoint32(dc,tt,strlen(tt),&tsz); ReleaseDC(tr,dc);
   SetWindowPos(tr,NULL,0,0,WIDTH-8,tsz.cy+4,SWP_NOMOVE|SWP_NOZORDER); y += 4 + tsz.cy;
   
-  cbb = CreateWindow("COMBOBOX","Drive",WS_CHILD | CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_SORT,4,y,WIDTH-8,320,hwnd,(HMENU)(2),NULL,NULL);
+  cbb = CreateWindow("COMBOBOX","Drive",WS_CHILD | CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_SORT,4,y,WIDTH-8,320,dlb,(HMENU)(2),NULL,NULL);
   fixFont(cbb); ShowWindow(cbb,SW_SHOW);
   y += 24 + 4;
   
-  HWND bc = CreateWindow("BUTTON","Cancel",WS_CHILD | BS_DEFPUSHBUTTON,4,y,64,24,hwnd,(HMENU)(3),NULL,NULL);
+  HWND bc = CreateWindow("BUTTON","Cancel",WS_CHILD | BS_DEFPUSHBUTTON,4,y,64,24,dlb,(HMENU)(3),NULL,NULL);
   fixFont(bc); ShowWindow(bc,SW_SHOW);
-  HWND bk = CreateWindow("BUTTON","OK",WS_CHILD | BS_DEFPUSHBUTTON,WIDTH-8-64,y,64,24,hwnd,(HMENU)(4),NULL,NULL);
+  HWND bk = CreateWindow("BUTTON","OK",WS_CHILD | BS_DEFPUSHBUTTON,WIDTH-8-64,y,64,24,dlb,(HMENU)(4),NULL,NULL);
   fixFont(bk); ShowWindow(bk,SW_SHOW);
   y += 24 + 4;
   
   n.top = 0, n.bottom = y, n.left = 0, n.right = WIDTH;
   AdjustWindowRect(&n,WS_BORDER|WS_CAPTION,false);
-  SetWindowPos(hwnd,NULL,0,0,n.right - n.left, n.bottom - n.top,SWP_NOMOVE|SWP_NOZORDER);
+  SetWindowPos(dlb,NULL,0,0,n.right - n.left, n.bottom - n.top,SWP_NOMOVE|SWP_NOZORDER);
   
   ComboBox_AddString(cbb,"\\ (Whatever drive ENIGMA is installed on)");
   DWORD drives = GetLogicalDrives();
@@ -233,8 +250,8 @@ void get_new_drive_letter()
   for (int i = 0; i < 26; i++)
     if (drives & (1 << i))
       drivename[0] = 'A' + i, ComboBox_AddString(cbb,drivename);
-  ShowWindow(hwnd, SW_SHOW);
-  UpdateWindow(hwnd);
+  ShowWindow(dlb, SW_SHOW);
+  UpdateWindow(dlb);
   
   MSG msg; keepgoing = 1;
   while (keepgoing and GetMessage(&msg, NULL, 0, 0)) {
@@ -268,8 +285,57 @@ int main()
 {
   /* Check if we've already installed. **/
   puts("Checking configuration");
-  FILE *ey = fopen(CONFIG_FILE, "rb"); // The GCC.ey file does not exist until installation has finished, be it manually or by this installer.
-  if (!ey)
+  ifstream ey(CONFIG_FILE); // The GCC.ey file does not exist until installation has finished, be it manually or by this installer.
+  
+  if (ey.is_open())
+  {
+    ey_data c = parse_eyaml(ey, CONFIG_FILE);
+    FILE *iff = fopen("Autoconf/wingcc_template.eyt","rb");
+    if (iff)
+    {
+      // Get the size of the template and allocate a buffer
+      fseek(iff, 0, SEEK_END); size_t tmplen = ftell(iff); fseek(iff, 0, SEEK_SET);
+      char wingcc_template[tmplen];
+      
+      // Read the template into `expected`
+      string expected(wingcc_template, fread(wingcc_template,1,tmplen,iff));
+      ey_data df = parse_eyaml_str(expected);
+      
+      puts("Found a configuration file. Checking version.");
+      
+      // Check version of template against actual
+      string oldv = c.get("template"), newv = df.get("template");
+      if (newv == "") {
+        puts("ERROR: Template file `wingcc_template.eyt` does not specify a template version.");
+        for (eyit i = df.values.begin(); i != df.values.end(); i++)
+          printf("  Checked %s\n",i->first.c_str());
+      }
+      else if (oldv == "") {
+        if (MessageBox(NULL, msg_update__ey_very_out_of_date, "Updated", MB_YESNO) == IDYES) {
+          string bp = string(c.get("binpath"));
+          if (bp == "") {
+            bp = string(c.get("defines"));
+            const size_t p = bp.find("cpp");
+            if (p == string::npos)
+              MessageBox(NULL, msg_update__error, "ERROR", MB_YESNO),
+              bp = "FIXME! I should point to the location of MinGW, e.g, C:\\MinGW\\bin.";
+            else
+              bp.erase(p);
+          }
+          e_use_existing_install(string(c.get("make")).c_str(), bp.c_str(), string(c.get("path")).c_str());
+        }
+      }
+      else if (atof(oldv.c_str()) < atof(newv.c_str()))
+      {
+        if ((string)c.get("maintainer") == "CUSTOM")
+          MessageBox(NULL,msg_update__ey_out_of_date,"Updated",MB_OK);
+        else
+          e_use_existing_install(string(c.get("make")).c_str(), string(c.get("binpath")).c_str(), string(c.get("path")).c_str());
+      }
+    }
+    ey.close();
+  }
+  else
   {
     /* No Compiler descriptor was found. Start probing around. */
     puts("First time run. Scouring for Make...");
@@ -368,7 +434,8 @@ int main()
     
     oalinst:
       better_system("Autoconf/oalinst.exe","");
-  } else fclose(ey);
+  }
+  
   puts("Scouring for Java");
   {
     const char *jpath = "java";
@@ -468,7 +535,26 @@ bool e_use_existing_install(const char* make,const char *binpath, const char *au
   char wingcc_template[tmplen+1]; wingcc_template[fread(wingcc_template,1,tmplen,iff)] = 0;
   if (cff)
   {
-    fprintf(cff, wingcc_template, auxpath, make, binpath, binpath);
+    map<string,string> subst;
+    subst["make"] = make;
+    subst["binpath"] = binpath;
+    subst["auxpath"] = auxpath;
+    
+    const char* pos = wingcc_template, *rpos;
+    while ((rpos = strstr(pos, "${")) != NULL)
+    {
+      if (rpos > pos)
+        fwrite(pos,1,rpos-pos,cff);
+      
+      pos = rpos + 2;
+      if ((rpos = strstr(pos,"}")))
+      {
+        string wme = subst[string(pos,rpos-pos)];
+        fwrite(wme.c_str(),1,wme.length(),cff);
+        pos = rpos+1;
+      }
+    }
+    fputs(pos, cff);
     fclose(cff);
   }
   return TRUE;

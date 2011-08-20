@@ -282,8 +282,8 @@ ey_data parse_eyaml(istream &file, string filename)
 }
 
 #include <sstream>
-ey_data parse_eyaml_str(string yaml)
+ey_data parse_eyaml_str(string yaml, string name)
 {
   istringstream iss(yaml);
-  return parse_eyaml(iss,"LGM Settings");
+  return parse_eyaml(iss,name);
 }
