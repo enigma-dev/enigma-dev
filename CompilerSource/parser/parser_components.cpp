@@ -411,9 +411,11 @@ int parser_reinterpret(string &code,string &synt)
         if (synt[pos] == ')') { lvl--; continue; }
         if (lvl == 1 and synt[pos] == ',') en--;
       }
+      cout << "CHECK POINT" << endl;
       if (!en) {
         code.insert(pos,"(enigma::varargs(),");
         synt.insert(pos,"(ttttttttttttttt(),");
+        pos += 19;
         for (unsigned lvl = 1; lvl; pos++)
         {
           if (synt[pos] == '(') { lvl++; continue; }
@@ -423,6 +425,7 @@ int parser_reinterpret(string &code,string &synt)
         code.insert(pos,")");
         synt.insert(pos,")");
       }
+      cout << "SUXXESS" << endl;
       pos = epos;
     }
   }

@@ -122,10 +122,10 @@ double direction_difference(double dir1,double dir2);
 double point_direction(double x1,double y1,double x2,double y2);
 double point_distance(double x1, double y1, double x2, double y2);
 
-double min(double x, double y);
-double max(double x, double y);
 double max(const enigma::varargs &t);
 double min(const enigma::varargs &t);
+double min(double x, double y);
+double max(double x, double y);
 double median(const enigma::varargs &t);
 double mean(const enigma::varargs &t);
 variant choose(const enigma::varargs& args);
