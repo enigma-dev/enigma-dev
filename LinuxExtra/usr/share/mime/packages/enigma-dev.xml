@@ -2,20 +2,20 @@
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-egm-project">
     <comment>ENIGMA Game Project</comment>
-    <comment xml:lang="en">ENIGMA Game Project</comment>
+    <comment xml:lang="en">ENIGMA game project</comment>
     <comment xml:lang="da">ENIGMA-spil projekt</comment>
-    <comment xml:lang="fr">Projet de Jeu ENIGMA</comment>
-    <comment xml:lang="pt">Projeto de Jugo ENIGMA</comment>
+    <comment xml:lang="fr">projet de jeu ENIGMA</comment>
+    <comment xml:lang="pt">projeto de jugo ENIGMA</comment>
     <glob pattern="*.egm"/>
     <sub-class-of type="application/zip"/>
     <icon name="application-x-egm-project"/>
   </mime-type>
   <mime-type type="application/x-gm-project">
-    <comment>Game Maker Project (Unknown Version)</comment>
-    <comment xml:lang="en">Game Maker Project (unknown version)</comment>
+    <comment>Game Maker project (unknown version)</comment>
+    <comment xml:lang="en">Game Maker project (unknown version)</comment>
     <comment xml:lang="da">Game Maker projekt (ukendt version)</comment>
-    <comment xml:lang="fr">Projet Game Maker (version inconnue)</comment>
-    <comment xml:lang="pt">Projeto Game Maker (versão desconhecido)</comment>
+    <comment xml:lang="fr">projet Game Maker (version inconnue)</comment>
+    <comment xml:lang="pt">projeto Game Maker (versão desconhecido)</comment>
       <magic priority="40">
       <match type="little32" offset="0" value="1234321"/>
     </magic>
@@ -23,11 +23,11 @@
     <icon name="application-x-egm-project"/>
   </mime-type>
   <mime-type type="application/x-gm50">
-    <comment>Game Maker 5.0 Project</comment>
-    <comment xml:lang="en">Game Maker 5.0 Project</comment>
+    <comment>Game Maker 5.0 project</comment>
+    <comment xml:lang="en">Game Maker 5.0 project</comment>
     <comment xml:lang="da">Game Maker 5.0 projekt</comment>
-    <comment xml:lang="fr">Projet Game Maker 5.0</comment>
-    <comment xml:lang="pt">Projeto Game Maker 5.0</comment>
+    <comment xml:lang="fr">projet Game Maker 5.0</comment>
+    <comment xml:lang="pt">projeto Game Maker 5.0</comment>
     <glob pattern="*.gm5"/>
       <magic priority="50">
       <match type="little32" offset="0" value="1234321">
@@ -38,11 +38,11 @@
     <icon name="application-x-egm-project"/>
   </mime-type>
   <mime-type type="application/x-gm51">
-    <comment>Game Maker 5.1 Project</comment>
-    <comment xml:lang="en">Game Maker 5.1 Project</comment>
+    <comment>Game Maker 5.1 project</comment>
+    <comment xml:lang="en">Game Maker 5.1 project</comment>
     <comment xml:lang="da">Game Maker 5.1 projekt</comment>
-    <comment xml:lang="fr">Projet Game Maker 5.1</comment>
-    <comment xml:lang="pt">Projeto Game Maker 5.1</comment>
+    <comment xml:lang="fr">projet Game Maker 5.1</comment>
+    <comment xml:lang="pt">projeto Game Maker 5.1</comment>
     <glob pattern="*.gm5"/>
       <magic priority="50">
       <match type="little32" offset="0" value="1234321">
@@ -53,11 +53,11 @@
     <icon name="application-x-egm-project"/>
   </mime-type>
   <mime-type type="application/x-gm52">
-    <comment>Game Maker 5.2 Project</comment>
-    <comment xml:lang="en">Game Maker 5.2 Project</comment>
+    <comment>Game Maker 5.2 project</comment>
+    <comment xml:lang="en">Game Maker 5.2 project</comment>
     <comment xml:lang="da">Game Maker 5.2 projekt</comment>
-    <comment xml:lang="fr">Projet Game Maker 5.2</comment>
-    <comment xml:lang="pt">Projeto Game Maker 5.2</comment>
+    <comment xml:lang="fr">projet Game Maker 5.2</comment>
+    <comment xml:lang="pt">projeto Game Maker 5.2</comment>
     <glob pattern="*.gm5"/>
       <magic priority="50">
       <match type="little32" offset="0" value="1234321">
@@ -68,11 +68,11 @@
     <icon name="application-x-egm-project"/>
   </mime-type>
   <mime-type type="application/x-gm53">
-    <comment>Game Maker 5.3 Project</comment>
-    <comment xml:lang="en">Game Maker 5.3 Project</comment>
+    <comment>Game Maker 5.3 project</comment>
+    <comment xml:lang="en">Game Maker 5.3 project</comment>
     <comment xml:lang="da">Game Maker 5.3 projekt</comment>
-    <comment xml:lang="fr">Projet Game Maker 5.3</comment>
-    <comment xml:lang="pt">Projeto Game Maker 5.3</comment>
+    <comment xml:lang="fr">projet Game Maker 5.3</comment>
+    <comment xml:lang="pt">projeto Game Maker 5.3</comment>
     <glob pattern="*.gm5"/>
       <magic priority="50">
       <match type="little32" offset="0" value="1234321">
@@ -83,11 +83,11 @@
     <icon name="application-x-egm-project"/>
   </mime-type>
   <mime-type type="application/x-gm60">
-    <comment>Game Maker 6.0 Project</comment>
-    <comment xml:lang="en">Game Maker 6.0 Project</comment>
+    <comment>Game Maker 6.0 project</comment>
+    <comment xml:lang="en">Game Maker 6.0 project</comment>
     <comment xml:lang="da">Game Maker 6.0 projekt</comment>
-    <comment xml:lang="fr">Projet Game Maker 6.0</comment>
-    <comment xml:lang="pt">Projeto Game Maker 6.0</comment>
+    <comment xml:lang="fr">projet Game Maker 6.0</comment>
+    <comment xml:lang="pt">projeto Game Maker 6.0</comment>
     <glob pattern="*.gm6"/>
       <magic priority="50">
       <match type="little32" offset="0" value="1234321">
@@ -98,11 +98,11 @@
     <icon name="application-x-egm-project"/>
   </mime-type>
   <mime-type type="application/x-gm61">
-    <comment>Game Maker 6.1 Project</comment>
-    <comment xml:lang="en">Game Maker 6.1 Project</comment>
+    <comment>Game Maker 6.1 project</comment>
+    <comment xml:lang="en">Game Maker 6.1 project</comment>
     <comment xml:lang="da">Game Maker 6.1 projekt</comment>
-    <comment xml:lang="fr">Projet Game Maker 6.1</comment>
-    <comment xml:lang="pt">Projeto Game Maker 6.1</comment>
+    <comment xml:lang="fr">projet Game Maker 6.1</comment>
+    <comment xml:lang="pt">projeto Game Maker 6.1</comment>
     <glob pattern="*.gm6"/>
       <magic priority="50">
       <match type="little32" offset="0" value="1234321">
@@ -113,11 +113,11 @@
     <icon name="package-x-generic"/>
   </mime-type>
   <mime-type type="application/x-gm71">
-    <comment>Game Maker 7.0 Project</comment>
-    <comment xml:lang="en">Game Maker 7.0 Project</comment>
+    <comment>Game Maker 7.0 project</comment>
+    <comment xml:lang="en">Game Maker 7.0 project</comment>
     <comment xml:lang="da">Game Maker 7.0 projekt</comment>
-    <comment xml:lang="fr">Projet Game Maker 7.0</comment>
-    <comment xml:lang="pt">Projeto Game Maker 7.0</comment>
+    <comment xml:lang="fr">projet Game Maker 7.0</comment>
+    <comment xml:lang="pt">projeto Game Maker 7.0</comment>
     <glob pattern="*.gmk"/>
       <magic priority="50">
       <match type="little32" offset="0" value="1234321">
@@ -128,11 +128,11 @@
     <icon name="application-x-egm-project"/>
   </mime-type>
   <mime-type type="application/x-gm80">
-    <comment>Game Maker 8.0 Project</comment>
-    <comment xml:lang="en">Game Maker 8.0 Project</comment>
+    <comment>Game Maker 8.0 project</comment>
+    <comment xml:lang="en">Game Maker 8.0 project</comment>
     <comment xml:lang="da">Game Maker 8.0 projekt</comment>
-    <comment xml:lang="fr">Projet Game Maker 8.0</comment>
-    <comment xml:lang="pt">Projeto Game Maker 8.0</comment>
+    <comment xml:lang="fr">projet Game Maker 8.0</comment>
+    <comment xml:lang="pt">projeto Game Maker 8.0</comment>
     <glob pattern="*.gmk"/>
       <magic priority="50">
       <match type="little32" offset="0" value="1234321">
@@ -143,11 +143,11 @@
     <icon name="application-x-egm-project"/>
   </mime-type>
   <mime-type type="application/x-gm81">
-    <comment>Game Maker 8.1 Project</comment>
-    <comment xml:lang="en">Game Maker 8.1 Project</comment>
+    <comment>Game Maker 8.1 project</comment>
+    <comment xml:lang="en">Game Maker 8.1 project</comment>
     <comment xml:lang="da">Game Maker 8.1 projekt</comment>
-    <comment xml:lang="fr">Projet Game Maker 8.1</comment>
-    <comment xml:lang="pt">Projeto Game Maker 8.1</comment>
+    <comment xml:lang="fr">projet Game Maker 8.1</comment>
+    <comment xml:lang="pt">projeto Game Maker 8.1</comment>
     <glob pattern="*.gm81"/>
       <magic priority="50">
       <match type="little32" offset="0" value="1234321">
