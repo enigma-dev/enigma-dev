@@ -36,6 +36,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
+	Constant: {xprevious = x; yprevious = y; image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index));}
 
 alarm: 2
 	Group: Alarm
@@ -237,7 +238,11 @@ step: 3
 	Name: Step
 	Mode: Special
 	Case: 0
-	Constant: {image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index)); xprevious = x; yprevious = y; enigma::propagate_locals(this);}
+
+localsweep: 100000 
+	Name: Locals sweep 
+	Mode: Inline
+	Constant: enigma::propagate_locals(this);
 
 
 # Lump of "Other" events.
@@ -310,8 +315,7 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Locals: float $iip = -1;
-	Sub Check: { const bool r = ($iip <= (float)image_index); $iip = image_index; if (r) return 0; }
+	Sub Check: {if (image_index + image_speed < sprite_get_number(sprite_index)) return 0; }
 
 
 # End of in-linked events
