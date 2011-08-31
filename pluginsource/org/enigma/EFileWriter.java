@@ -28,7 +28,6 @@ import org.enigma.messages.Messages;
 import org.enigma.utility.APNGExperiments;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFileReader;
-import org.lateralgm.file.GmFormatException;
 import org.lateralgm.file.GmStreamEncoder;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
@@ -128,7 +127,7 @@ public class EFileWriter
 		public void finish() throws IOException
 			{
 			last.flush();
-			os.finish();
+			os.finish(); //also closes the entry
 			}
 		}
 
@@ -247,21 +246,18 @@ public class EFileWriter
 		writers.put(Kind.ROOM,new RoomGmDataIO());
 		// TODO: MOAR
 
-		// Unused for now
-		/*
-		 * typestrs.put(Kind.SPRITE,"spr"); //$NON-NLS-1$
-		 * typestrs.put(Kind.SOUND,"snd"); //$NON-NLS-1$
-		 * typestrs.put(Kind.BACKGROUND,"bkg"); //$NON-NLS-1$
-		 * typestrs.put(Kind.PATH,"pth"); //$NON-NLS-1$
-		 * typestrs.put(Kind.SCRIPT,"scr"); //$NON-NLS-1$
-		 * typestrs.put(Kind.FONT,"fnt"); //$NON-NLS-1$
-		 * typestrs.put(Kind.TIMELINE,"tml"); //$NON-NLS-1$
-		 * typestrs.put(Kind.OBJECT,"obj"); //$NON-NLS-1$
-		 * typestrs.put(Kind.ROOM,"rom"); //$NON-NLS-1$
-		 * typestrs.put(Kind.GAMEINFO,"inf"); //$NON-NLS-1$
-		 * typestrs.put(Kind.GAMESETTINGS,"set"); //$NON-NLS-1$
-		 * typestrs.put(Kind.EXTENSIONS,"ext"); //$NON-NLS-1$
-		 */
+		typestrs.put(Kind.SPRITE,"spr"); //$NON-NLS-1$
+		typestrs.put(Kind.SOUND,"snd"); //$NON-NLS-1$
+		typestrs.put(Kind.BACKGROUND,"bkg"); //$NON-NLS-1$
+		typestrs.put(Kind.PATH,"pth"); //$NON-NLS-1$
+		typestrs.put(Kind.SCRIPT,"scr"); //$NON-NLS-1$
+		typestrs.put(Kind.FONT,"fnt"); //$NON-NLS-1$
+		typestrs.put(Kind.TIMELINE,"tml"); //$NON-NLS-1$
+		typestrs.put(Kind.OBJECT,"obj"); //$NON-NLS-1$
+		typestrs.put(Kind.ROOM,"rom"); //$NON-NLS-1$
+		typestrs.put(Kind.GAMEINFO,"inf"); //$NON-NLS-1$
+		typestrs.put(Kind.GAMESETTINGS,"set"); //$NON-NLS-1$
+		typestrs.put(Kind.EXTENSIONS,"ext"); //$NON-NLS-1$
 		}
 
 	// Constructors
@@ -300,7 +296,8 @@ public class EFileWriter
 		for (int i = 0; i < children; i++)
 			{
 			ResNode child = (ResNode) node.getChildAt(i);
-			ps.println((String) child.getUserObject());
+			if (node.isRoot()) ps.print(typestrs.get(child.kind) + ' ');
+			ps.println(child.getUserObject());
 			}
 
 		for (int i = 0; i < children; i++)
@@ -609,10 +606,9 @@ public class EFileWriter
 
 	// TODO: MOAR MODULES
 
-	public static void main(String[] args) throws GmFormatException
+	public static void main(String[] args) throws Exception
 		{
 		File home = new File(System.getProperty("user.home")); //$NON-NLS-1$
-
 		File in = new File(home,"inputGmFile.gm81"); // any of gmd,gm6,gmk,gm81
 		File out = new File(home,"outputEgmFile.egm"); // must be egm
 
@@ -621,5 +617,6 @@ public class EFileWriter
 		GmFileReader.readGmFile(in.getPath(),root);
 
 		writeEgmFile(out,root,true);
+
 		}
 	}
