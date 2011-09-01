@@ -94,12 +94,14 @@ extern int amain();
 #include "Universal_System/move_functions.h"
 
 #include "Universal_System/actions.h"
-#include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
 
 
 #ifndef ENIGMA_PARSER_RUN
-  #include "Universal_System/syntax_quirks.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
+  #endif
+#include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
+  #ifndef ENIGMA_PARSER_RUN
+  #include "Universal_System/syntax_quirks.h"
 
   #include "Universal_System/with.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
