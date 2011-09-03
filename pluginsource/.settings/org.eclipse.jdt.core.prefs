@@ -1,4 +1,4 @@
-#Thu Jun 09 15:29:55 EDT 2011
+#Sun Jul 17 15:26:28 EDT 2011
 eclipse.preferences.version=1
 org.eclipse.jdt.core.compiler.problem.annotationSuperInterface=warning
 org.eclipse.jdt.core.compiler.problem.autoboxing=ignore
@@ -15,7 +15,7 @@ org.eclipse.jdt.core.compiler.problem.fieldHiding=ignore
 org.eclipse.jdt.core.compiler.problem.finalParameterBound=warning
 org.eclipse.jdt.core.compiler.problem.finallyBlockNotCompletingNormally=warning
 org.eclipse.jdt.core.compiler.problem.forbiddenReference=warning
-org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock=warning
+org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock=error
 org.eclipse.jdt.core.compiler.problem.incompatibleNonInheritedInterfaceMethod=warning
 org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch=ignore
 org.eclipse.jdt.core.compiler.problem.indirectStaticAccess=ignore
@@ -28,7 +28,7 @@ org.eclipse.jdt.core.compiler.problem.missingSerialVersion=warning
 org.eclipse.jdt.core.compiler.problem.missingSynchronizedOnInheritedMethod=ignore
 org.eclipse.jdt.core.compiler.problem.noEffectAssignment=warning
 org.eclipse.jdt.core.compiler.problem.noImplicitStringConversion=warning
-org.eclipse.jdt.core.compiler.problem.nonExternalizedStringLiteral=warning
+org.eclipse.jdt.core.compiler.problem.nonExternalizedStringLiteral=ignore
 org.eclipse.jdt.core.compiler.problem.nullReference=warning
 org.eclipse.jdt.core.compiler.problem.overridingPackageDefaultMethod=warning
 org.eclipse.jdt.core.compiler.problem.parameterAssignment=ignore

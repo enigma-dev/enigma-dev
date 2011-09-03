@@ -104,252 +104,255 @@ public class EEFReader
 		}
 	}
 	
-	public static class Reader
+	Scanner file;
+	
+	EEFNode root_db;
+	String comment_str;
+	String separator_str;
+	
+	public EEFReader(InputStream is, String sepchar)
 	{
-		Scanner file;
-		
-		EEFNode root_db;
-		String comment_str;
-		
-		static boolean isWordChar(char charAt) {
-			return Character.isLetterOrDigit(charAt) | charAt == '_';
-		}
-		
-		class attrStruct
+		root_db = new EEFNode();
+		root_db.blockName = null;
+		separator_str = sepchar;
+		file = new Scanner(is);
+		String firstLine = file.nextLine();
+		int lenComment = 0;
+		for (lenComment = 0; commentSymbols.contains(firstLine.subSequence(
+				lenComment, lenComment + 1)); lenComment++);
+		if (lenComment > 0)
 		{
-			int children;
-			int lineAttrs;
-			String[] ids;
-			Map<String, String[]> other_attrs;
-			public String name;
-			
-			public attrStruct()
-			{
-				name = null;
-				ids = new String[0];
-				children = lineAttrs = 0;
-				other_attrs = new HashMap<String, String[]>();
-			}
+			comment_str = firstLine.substring(0, lenComment);
+			while (file.hasNextLine())
+				readItem(root_db, file.nextLine());
 		}
+		else
+		{
+			comment_str = null;
+			readItem(root_db, firstLine);
+			while (file.hasNextLine())
+				readItem(root_db, file.nextLine());
+		}
+	}
+	
+	static boolean isWordChar(char charAt) {
+		return Character.isLetterOrDigit(charAt) | charAt == '_';
+	}
+	
+	class attrStruct
+	{
+		int children;
+		int lineAttrs;
+		String[] ids;
+		Map<String, String[]> other_attrs;
+		public String name;
 		
-		attrStruct readAttrs(String line, String blockName) {
-			attrStruct res = new attrStruct();
-			int pos = 0;
-			if (blockName != null)
-				for (; pos < line.length(); pos++)
-				{
-					if (Character.isWhitespace(line.charAt(pos)))
-						continue;
-					if (!isWordChar(line.charAt(pos)))
-					{
-						System.err
-								.println("Child data must begin with identifier.");
-						break;
-					}
-					final int spos = pos;
-					while (++pos < line.length()
-							&& isWordChar(line.charAt(pos)));
-					final String elementName = line.substring(spos, pos);
-					if (blockName != null
-							&& !blockName.matches(elementName + "e?s"))
-					{
-						System.err.println("Warning: instance `" + elementName
-								+ "' Does not appear to be a member of `"
-								+ blockName + "'");
-					}
-					while (Character.isWhitespace(line.charAt(pos)))
-						++pos;
-					if (line.charAt(pos) == '(')
-					{
-						int[] rpos = new int[] { pos };
-						res.ids = parseParenths(rpos, line).toArray(res.ids);
-						pos = rpos[0] + 1;
-					}
-					if (line.charAt(pos) != ':')
-					{
-						System.err.println("Warning: Missing colon");
-						System.err.println("in `" + line + "` at " + pos);
-					}
-					else
-						pos++;
-					break;
-				}
+		public attrStruct()
+		{
+			name = null;
+			ids = new String[0];
+			children = lineAttrs = 0;
+			other_attrs = new HashMap<String, String[]>();
+		}
+	}
+	
+	attrStruct readAttrs(String line, String blockName) {
+		attrStruct res = new attrStruct();
+		int pos = 0;
+		if (blockName != null)
 			for (; pos < line.length(); pos++)
 			{
 				if (Character.isWhitespace(line.charAt(pos)))
 					continue;
-				if (comment_str != null
-						&& line.substring(pos, pos + comment_str.length())
-								.equals(comment_str))
+				if (!isWordChar(line.charAt(pos)))
+				{
+					System.err
+							.println("Child data must begin with identifier.");
 					break;
-				if (line.charAt(pos) == ',')
-					continue;
-				
-				String attrn;
-				if (line.charAt(pos) == '"')
-				{
-					final int spos = pos + 1;
-					while (line.charAt(++pos) != '"')
-						if (line.charAt(pos) == '\\')
-							++pos;
-					attrn = eefEsc(line.substring(spos, pos));
-					pos++;
 				}
-				else if (line.charAt(pos) == '\'')
+				final int spos = pos;
+				while (++pos < line.length() && isWordChar(line.charAt(pos)));
+				final String elementName = line.substring(spos, pos);
+				if (blockName != null
+						&& !blockName.matches(elementName + "e?s"))
 				{
-					final int spos = pos + 1;
-					while (line.charAt(++pos) != '\'')
-						if (line.charAt(pos) == '\\')
-							++pos;
-					attrn = eefEsc(line.substring(spos, pos));
-					pos++;
+					System.err.println("Warning: instance `" + elementName
+							+ "' Does not appear to be a member of `"
+							+ blockName + "'");
 				}
-				else if (isWordChar(line.charAt(pos)))
-				{
-					final int spos = pos;
-					while (++pos < line.length()
-							&& isWordChar(line.charAt(pos)));
-					attrn = line.substring(spos, pos);
-				}
-				else
-				{
-					System.err.println("Unexpected symbol '" + line.charAt(pos)
-							+ "' encountered");
-					continue;
-				}
-				
-				if (pos >= line.length())
-					continue;
-				
-				// Find next non-white char
 				while (Character.isWhitespace(line.charAt(pos)))
 					++pos;
-				
 				if (line.charAt(pos) == '(')
 				{
 					int[] rpos = new int[] { pos };
-					ArrayList<String> values = parseParenths(rpos, line);
-					res.other_attrs.put(attrn, values.toArray(new String[values
-							.size()]));
-					pos = rpos[0];
-					continue;
+					res.ids = parseParenths(rpos, line, separator_str).toArray(res.ids);
+					pos = rpos[0] + 1;
 				}
-				if (line.charAt(pos) == '[')
+				if (line.charAt(pos) != ':')
 				{
-					while (Character.isWhitespace(line.charAt(++pos)));
-					if (!Character.isDigit(line.charAt(pos)))
-					{
-						System.err.println("Expected number in []");
-					}
-					final int spos = pos;
-					while (Character.isDigit(line.charAt(++pos)));
-					res.lineAttrs = Integer.parseInt(line.substring(spos, pos));
-					while (pos < line.length() && line.charAt(pos) != ']')
-						pos++;
-					continue;
-				}
-				if (line.charAt(pos) == '{')
-				{
-					while (Character.isWhitespace(line.charAt(++pos)));
-					if (!Character.isDigit(line.charAt(pos)))
-					{
-						System.err.println("Expected number in {}");
-					}
-					final int spos = pos;
-					while (Character.isDigit(line.charAt(++pos)));
-					res.children = Integer.parseInt(line.substring(spos, pos));
-					res.name = attrn;
-					while (pos < line.length() && line.charAt(pos) != '}')
-						pos++;
-					continue;
-				}
-				res.other_attrs.put(attrn, new String[] {});
-				pos--;
-			}
-			return res;
-		}
-		
-		private ArrayList<String> parseParenths(int[] pos, String line) {
-			ArrayList<String> values = new ArrayList<String>();
-			while (Character.isWhitespace(line.charAt(++pos[0])));
-			int spos = pos[0];
-			while (line.charAt(pos[0]) != ')')
-			{
-				if (line.charAt(pos[0]) == '\'')
-				{
-					final int sspos = pos[0] + 1;
-					while (line.charAt(++pos[0]) != '\'')
-						if (line.charAt(pos[0]) == '\\')
-							++pos[0];
-					values.add(eefEsc(line.substring(sspos, pos[0])));
-					while (Character.isWhitespace(line.charAt(++pos[0])));
-					spos = pos[0];
-				}
-				else if (line.charAt(pos[0]) == '"')
-				{
-					final int sspos = pos[0] + 1;
-					while (line.charAt(++pos[0]) != '"')
-						if (line.charAt(pos[0]) == '\\')
-							++pos[0];
-					values.add(eefEsc(line.substring(sspos, pos[0])));
-					while (Character.isWhitespace(line.charAt(++pos[0])));
-					spos = pos[0];
+					System.err.println("Warning: Missing colon");
+					System.err.println("in `" + line + "` at " + pos);
 				}
 				else
-					pos[0]++;
+					pos++;
+				break;
 			}
-			if (pos[0] - spos > 1)
-				values.add(line.substring(spos, pos[0]));
-			return values;
-		}
-		
-		static String eefEsc(String str) {
-			return str.replace("\\\\", "\\"); //$NON-NLS-1$
-		}
-		
-		void readItem(EEFNode parent, String line) {
-			attrStruct read_attrs = readAttrs(line, parent.blockName);
-			EEFNode e = new EEFNode();
-			if (read_attrs.ids != null)
-				e.id = read_attrs.ids;
-			e.namedAttributes = read_attrs.other_attrs;
-			if (read_attrs.name != null)
-				e.blockName = read_attrs.name;
-			
-			for (int i = 0; i < read_attrs.lineAttrs; i++)
-				e.lineAttribs.add(file.nextLine());
-			for (int i = 0; i < read_attrs.children; i++)
-				readItem(e, file.nextLine());
-			
-			parent.children.add(e);
-		}
-		
-		public Reader(InputStream is)
+		for (; pos < line.length(); pos++)
 		{
-			root_db = new EEFNode();
-			root_db.blockName = null;
-			file = new Scanner(is);
-			String firstLine = file.nextLine();
-			int lenComment = 0;
-			for (lenComment = 0; commentSymbols.contains(firstLine.subSequence(
-					lenComment, lenComment + 1)); lenComment++);
-			if (lenComment > 0)
+			if (Character.isWhitespace(line.charAt(pos)))
+				continue;
+			if (comment_str != null
+					&& line.substring(pos, pos + comment_str.length()).equals(
+							comment_str))
+				break;
+			if (line.charAt(pos) == ',')
+				continue;
+			
+			String attrn;
+			if (line.charAt(pos) == '"')
 			{
-				comment_str = firstLine.substring(0, lenComment);
-				while (file.hasNextLine())
-					readItem(root_db, file.nextLine());
+				final int spos = pos + 1;
+				while (line.charAt(++pos) != '"')
+					if (line.charAt(pos) == '\\')
+						++pos;
+				attrn = eefEsc(line.substring(spos, pos));
+				pos++;
+			}
+			else if (line.charAt(pos) == '\'')
+			{
+				final int spos = pos + 1;
+				while (line.charAt(++pos) != '\'')
+					if (line.charAt(pos) == '\\')
+						++pos;
+				attrn = eefEsc(line.substring(spos, pos));
+				pos++;
+			}
+			else if (isWordChar(line.charAt(pos)))
+			{
+				final int spos = pos;
+				while (++pos < line.length() && isWordChar(line.charAt(pos)));
+				attrn = line.substring(spos, pos);
 			}
 			else
 			{
-				comment_str = null;
-				readItem(root_db, firstLine);
-				while (file.hasNextLine())
-					readItem(root_db, file.nextLine());
+				System.err.println("Unexpected symbol '" + line.charAt(pos)
+						+ "' encountered");
+				continue;
+			}
+			
+			if (pos >= line.length())
+				continue;
+			
+			// Find next non-white char
+			while (Character.isWhitespace(line.charAt(pos)))
+				++pos;
+			
+			if (line.charAt(pos) == '(')
+			{
+				int[] rpos = new int[] { pos };
+				ArrayList<String> values = parseParenths(rpos, line, separator_str);
+				res.other_attrs.put(attrn, values.toArray(new String[values
+						.size()]));
+				pos = rpos[0];
+				continue;
+			}
+			if (line.charAt(pos) == '[')
+			{
+				while (Character.isWhitespace(line.charAt(++pos)));
+				if (!Character.isDigit(line.charAt(pos)))
+				{
+					System.err.println("Expected number in []");
+				}
+				final int spos = pos;
+				while (Character.isDigit(line.charAt(++pos)));
+				res.lineAttrs = Integer.parseInt(line.substring(spos, pos));
+				while (pos < line.length() && line.charAt(pos) != ']')
+					pos++;
+				continue;
+			}
+			if (line.charAt(pos) == '{')
+			{
+				while (Character.isWhitespace(line.charAt(++pos)));
+				if (!Character.isDigit(line.charAt(pos)))
+				{
+					System.err.println("Expected number in {}");
+				}
+				final int spos = pos;
+				while (Character.isDigit(line.charAt(++pos)));
+				res.children = Integer.parseInt(line.substring(spos, pos));
+				res.name = attrn;
+				while (pos < line.length() && line.charAt(pos) != '}')
+					pos++;
+				continue;
+			}
+			res.other_attrs.put(attrn, new String[] {});
+			pos--;
+		}
+		return res;
+	}
+	
+	private ArrayList<String> parseParenths(int[] pos, String line, String sep) {
+		ArrayList<String> values = new ArrayList<String>();
+		while (Character.isWhitespace(line.charAt(++pos[0])));
+		int spos = pos[0];
+		while (line.charAt(pos[0]) != ')')
+		{
+			if (line.charAt(pos[0]) == '\'')
+			{
+				final int sspos = pos[0] + 1;
+				while (line.charAt(++pos[0]) != '\'')
+					if (line.charAt(pos[0]) == '\\')
+						++pos[0];
+				values.add(eefEsc(line.substring(sspos, pos[0])));
+				while (Character.isWhitespace(line.charAt(++pos[0])));
+				spos = pos[0];
+			}
+			else if (line.charAt(pos[0]) == '"')
+			{
+				final int sspos = pos[0] + 1;
+				while (line.charAt(++pos[0]) != '"')
+					if (line.charAt(pos[0]) == '\\')
+						++pos[0];
+				values.add(eefEsc(line.substring(sspos, pos[0])));
+				while (Character.isWhitespace(line.charAt(++pos[0])));
+				spos = pos[0];
+			}
+			else
+			{
+				if (line.substring(pos[0], pos[0]+sep.length()).equals(sep)) {
+					values.add(line.substring(spos, pos[0]).trim());
+					spos = pos[0]+1;
+				}
+				pos[0]++;
 			}
 		}
+		if (pos[0] - spos > 0)
+			values.add(line.substring(spos, pos[0]));
+		return values;
+	}
+	
+	static String eefEsc(String str) {
+		return str.replace("\\\\", "\\"); //$NON-NLS-1$
+	}
+	
+	void readItem(EEFNode parent, String line) {
+		attrStruct read_attrs = readAttrs(line, parent.blockName);
+		EEFNode e = new EEFNode();
+		if (read_attrs.ids != null)
+			e.id = read_attrs.ids;
+		e.namedAttributes = read_attrs.other_attrs;
+		if (read_attrs.name != null)
+			e.blockName = read_attrs.name;
 		
-		public EEFNode getRoot() {
-			return root_db;
-		}
+		for (int i = 0; i < read_attrs.lineAttrs; i++)
+			e.lineAttribs.add(file.nextLine());
+		for (int i = 0; i < read_attrs.children; i++)
+			readItem(e, file.nextLine());
+		
+		parent.children.add(e);
+	}
+	
+	public EEFNode getRoot() {
+		return root_db;
 	}
 }

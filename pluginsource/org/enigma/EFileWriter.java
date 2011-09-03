@@ -8,6 +8,7 @@
 
 package org.enigma;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -218,7 +219,23 @@ public class EFileWriter
 			{
 			PropertyMap<? extends Enum<?>> p = r.properties;
 			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
-				if (allowProperty(e.getKey().name())) os.println(e.getKey().name() + ": " + e.getValue()); //$NON-NLS-1$
+				if (allowProperty(e.getKey().name()))
+					os.println(e.getKey().name() + ": " + convert(e.getValue())); //$NON-NLS-1$
+			}
+
+		public static String convert(Object o)
+			{
+			if (o == null) return null;
+			if (o instanceof String || o instanceof Boolean || o instanceof Number
+					|| o instanceof Enum<?>) return o.toString();
+			if (o instanceof ResourceReference<?>)
+				{
+				Resource<?,?> r = Util.deRef((ResourceReference<?>) o);
+				return r == null ? null : r.getName();
+				}
+			if (o instanceof Color) return "0x" + Integer.toHexString(((Color) o).getRGB());
+			System.out.println("Unknown serialization: " + o.getClass() + " -> " + o);
+			return o.toString();
 			}
 
 		/**
@@ -501,12 +518,22 @@ public class EFileWriter
 			for (MainEvent me : obj.mainEvents)
 				for (Event ev : me.events)
 					{
-					ps.println("  Event (" + ev.id + "," + ev.mainId + "): " + "Actions{" + ev.actions.size()
-							+ "}");
+					ps.print("  Event (");
+
+					if (ev.mainId == MainEvent.EV_COLLISION)
+						{
+						Resource<?,?> cr = Util.deRef(ev.other);
+						ps.print(cr == null ? new String() : cr.getName());
+						}
+					else
+						ps.print(ev.id);
+
+					ps.println("," + ev.mainId + "): " + "Actions{" + ev.actions.size() + "}");
 					for (Action action : ev.actions)
 						{
 						LibAction la = action.getLibAction();
-						ps.print("    Action (" + la.id + "," + la.parentId + "): ");
+						ps.print("    Action (" + la.id + ","
+								+ (la.parent != null ? la.parent.id : la.parentId) + "): ");
 						if (action.isNot()) ps.print("\"Not\" ");
 						if (action.isRelative()) ps.print("\"Relative\" ");
 						if (action.getAppliesTo().get() != null)
@@ -515,7 +542,17 @@ public class EFileWriter
 							{
 							ps.println("Fields[" + action.getArguments().size() + "]");
 							for (Argument arg : action.getArguments())
-								ps.println("      " + arg.getVal());
+								{
+								ps.print("      ");
+								if (arg.getRes() == null)
+									ps.println(arg.getVal());
+								else
+									{
+									ResourceReference<?> rr = arg.getRes();
+									Resource<?,?> ar = Util.deRef(rr);
+									ps.println(ar == null ? new String() : ar.getName());
+									}
+								}
 							}
 						else
 							{
@@ -526,6 +563,12 @@ public class EFileWriter
 							}
 						}
 					}
+			}
+
+		void printName(PrintStream out, ResourceReference<?> rr) throws IOException
+			{
+			Resource<?,?> r = Util.deRef(rr);
+			out.print(r == null ? new String() : r.getName());
 			}
 
 		@Override
@@ -552,7 +595,7 @@ public class EFileWriter
 			for (BackgroundDef back : rm.backgroundDefs)
 				{
 				out.writeBool(back.properties,PBackgroundDef.VISIBLE,PBackgroundDef.FOREGROUND);
-				out.writeId((ResourceReference<?>) back.properties.get(PBackgroundDef.BACKGROUND));
+				writeName(out,(ResourceReference<?>) back.properties.get(PBackgroundDef.BACKGROUND));
 				out.write4(back.properties,PBackgroundDef.X,PBackgroundDef.Y);
 				out.writeBool(back.properties,PBackgroundDef.TILE_HORIZ,PBackgroundDef.TILE_VERT);
 				out.write4(back.properties,PBackgroundDef.H_SPEED,PBackgroundDef.V_SPEED);
@@ -566,15 +609,14 @@ public class EFileWriter
 				out.write4(view.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,PView.VIEW_H,
 						PView.PORT_X,PView.PORT_Y,PView.PORT_W,PView.PORT_H,PView.BORDER_H,PView.BORDER_V,
 						PView.SPEED_H,PView.SPEED_V);
-				out.writeId((ResourceReference<?>) view.properties.get(PView.OBJECT));
+				writeName(out,(ResourceReference<?>) view.properties.get(PView.OBJECT));
 				}
 			out.write4(rm.instances.size());
 			for (Instance in : rm.instances)
 				{
 				out.write4(in.getPosition().x);
 				out.write4(in.getPosition().y);
-				ResourceReference<GmObject> or = in.properties.get(PInstance.OBJECT);
-				out.writeId(or);
+				writeName(out,(ResourceReference<?>) in.properties.get(PInstance.OBJECT));
 				out.write4((Integer) in.properties.get(PInstance.ID));
 				out.writeStr(in.getCreationCode());
 				out.writeBool(in.isLocked());
@@ -584,8 +626,7 @@ public class EFileWriter
 				{
 				out.write4(tile.getRoomPosition().x);
 				out.write4(tile.getRoomPosition().y);
-				ResourceReference<Background> rb = tile.properties.get(PTile.BACKGROUND);
-				out.writeId(rb);
+				writeName(out,(ResourceReference<?>) tile.properties.get(PTile.BACKGROUND));
 				out.write4(tile.getBackgroundPosition().x);
 				out.write4(tile.getBackgroundPosition().y);
 				out.write4(tile.getSize().width);
@@ -595,6 +636,12 @@ public class EFileWriter
 				out.writeBool(tile.isLocked());
 				}
 			out.flush();
+			}
+
+		void writeName(GmStreamEncoder out, ResourceReference<?> rr) throws IOException
+			{
+			Resource<?,?> r = Util.deRef(rr);
+			out.writeStr(r == null ? new String() : r.getName());
 			}
 
 		@Override
@@ -609,14 +656,13 @@ public class EFileWriter
 	public static void main(String[] args) throws Exception
 		{
 		File home = new File(System.getProperty("user.home")); //$NON-NLS-1$
-		File in = new File(home,"inputGmFile.gm81"); // any of gmd,gm6,gmk,gm81
-		File out = new File(home,"outputEgmFile.egm"); // must be egm
+		File in = new File(home,"Dropbox/ENIGMA/inputGmFile.gm81"); // any of gmd,gm6,gmk,gm81
+		File out = new File(home,"Dropbox/ENIGMA/outputEgmFile.egm"); // must be egm
 
 		LibManager.autoLoad();
 		ResNode root = new ResNode("Root",(byte) 0,null,null); //$NON-NLS-1$;
 		GmFileReader.readGmFile(in.getPath(),root);
 
 		writeEgmFile(out,root,true);
-
 		}
 	}
