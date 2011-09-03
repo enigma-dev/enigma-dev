@@ -1,0 +1,14 @@
+%E-YAML
+---
+
+Name: Data Structures
+ID: DataStructures
+Description: Adds data structures and their functions.
+Build-date: 09/03/2011
+Icon: datastructures.png
+
+Depends: None
+Dependencies: None
+Implement: extension_ds
+Links: $objects
+
