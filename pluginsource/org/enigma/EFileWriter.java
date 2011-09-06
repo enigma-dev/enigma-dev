@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +29,14 @@ import javax.imageio.ImageIO;
 import org.enigma.messages.Messages;
 import org.enigma.utility.APNGExperiments;
 import org.lateralgm.components.impl.ResNode;
+import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFileReader;
 import org.lateralgm.file.GmStreamEncoder;
+import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
+import org.lateralgm.resources.GameInformation;
+import org.lateralgm.resources.GameSettings;
 import org.lateralgm.resources.GmObject;
 import org.lateralgm.resources.Path;
 import org.lateralgm.resources.Resource;
@@ -40,6 +45,8 @@ import org.lateralgm.resources.Room;
 import org.lateralgm.resources.Script;
 import org.lateralgm.resources.Sound;
 import org.lateralgm.resources.Sprite;
+import org.lateralgm.resources.GameInformation.PGameInformation;
+import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.Resource.Kind;
 import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.library.LibAction;
@@ -171,7 +178,8 @@ public class EFileWriter
 	 */
 	public static interface ResourceWriter
 		{
-		public void write(EGMOutputStream os, ResNode child, List<String> dir) throws IOException;
+		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+				throws IOException;
 		}
 
 	/**
@@ -182,7 +190,8 @@ public class EFileWriter
 	 */
 	public static abstract class DataResourceWriter implements ResourceWriter
 		{
-		public void write(EGMOutputStream os, ResNode child, List<String> dir) throws IOException
+		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+				throws IOException
 			{
 			String name = (String) child.getUserObject();
 			Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
@@ -190,7 +199,7 @@ public class EFileWriter
 
 			PrintStream ps = new PrintStream(os.next(dir,name + EY));
 			ps.println("Data: " + fn); //$NON-NLS-1$
-			writeProperties(ps,r);
+			writeProperties(ps,r.properties);
 
 			writeData(os.next(dir,fn),r);
 			}
@@ -202,7 +211,8 @@ public class EFileWriter
 		 */
 		public abstract String getExt(Resource<?,?> r);
 
-		public abstract void writeProperties(PrintStream os, Resource<?,?> r) throws IOException;
+		public abstract void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
+				throws IOException;
 
 		public abstract void writeData(OutputStream os, Resource<?,?> r) throws IOException;
 		}
@@ -215,11 +225,11 @@ public class EFileWriter
 	static abstract class DataPropWriter extends DataResourceWriter
 		{
 		@Override
-		public void writeProperties(PrintStream os, Resource<?,?> r) throws IOException
+		public void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
+				throws IOException
 			{
-			PropertyMap<? extends Enum<?>> p = r.properties;
 			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
-				if (allowProperty(e.getKey().name()))
+				if (allowProperty(e.getKey()))
 					os.println(e.getKey().name() + ": " + convert(e.getValue())); //$NON-NLS-1$
 			}
 
@@ -240,9 +250,12 @@ public class EFileWriter
 
 		/**
 		 * Returns whether the following property should be allowed in the
-		 * properties file
+		 * properties file. Override to disallow certain properties.
 		 */
-		public abstract boolean allowProperty(String name);
+		public boolean allowProperty(Enum<?> prop)
+			{
+			return true;
+			};
 		}
 
 	// Module maps
@@ -261,7 +274,8 @@ public class EFileWriter
 		// writers.put(Kind.TIMELINE,new TimelineIO());
 		writers.put(Kind.OBJECT,new ObjectIO());
 		writers.put(Kind.ROOM,new RoomGmDataIO());
-		// TODO: MOAR
+		writers.put(Kind.GAMEINFO,new GameInfoRtfIO());
+		writers.put(Kind.GAMESETTINGS,new GameSettingsThreeIO());
 
 		typestrs.put(Kind.SPRITE,"spr"); //$NON-NLS-1$
 		typestrs.put(Kind.SOUND,"snd"); //$NON-NLS-1$
@@ -278,7 +292,7 @@ public class EFileWriter
 		}
 
 	// Constructors
-	public static void writeEgmFile(File loc, ResNode tree, boolean zip)
+	public static void writeEgmFile(File loc, GmFile gf, ResNode tree, boolean zip)
 		{
 		try
 			{
@@ -287,7 +301,7 @@ public class EFileWriter
 				out = new EGMZip(new FileOutputStream(loc));
 			else
 				out = new EGMFolder(loc);
-			writeEgmFile(out,tree);
+			writeEgmFile(out,gf,tree);
 			out.close();
 			}
 		catch (IOException e)
@@ -297,14 +311,14 @@ public class EFileWriter
 			}
 		}
 
-	public static void writeEgmFile(EGMOutputStream os, ResNode tree) throws IOException
+	public static void writeEgmFile(EGMOutputStream os, GmFile gf, ResNode tree) throws IOException
 		{
-		writeNodeChildren(os,tree,new ArrayList<String>());
+		writeNodeChildren(os,gf,tree,new ArrayList<String>());
 		}
 
 	// Workhorse methods
 	/** Recursively writes out the tree nodes into the zip. */
-	public static void writeNodeChildren(EGMOutputStream os, ResNode node, List<String> dir)
+	public static void writeNodeChildren(EGMOutputStream os, GmFile gf, ResNode node, List<String> dir)
 			throws IOException
 		{
 		PrintStream ps = new PrintStream(os.next(dir,"toc.txt")); //$NON-NLS-1$
@@ -323,7 +337,7 @@ public class EFileWriter
 
 			if (child.status == ResNode.STATUS_SECONDARY)
 				{
-				writeResource(os,child,dir);
+				writeResource(os,gf,child,dir);
 				}
 			else
 				{
@@ -332,7 +346,7 @@ public class EFileWriter
 				ArrayList<String> newDir = new ArrayList<String>(dir);
 				newDir.add(cn);
 				// os.next(newDir, null);
-				writeNodeChildren(os,child,newDir);
+				writeNodeChildren(os,gf,child,newDir);
 				}
 			}
 		}
@@ -341,7 +355,7 @@ public class EFileWriter
 	 * Looks up the registered writer for this resource and invokes the write
 	 * method
 	 */
-	public static void writeResource(EGMOutputStream os, ResNode child, List<String> dir)
+	public static void writeResource(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
 			throws IOException
 		{
 		ResourceWriter writer = writers.get(child.kind);
@@ -350,7 +364,7 @@ public class EFileWriter
 			System.err.println(Messages.format("EFileWriter.NO_WRITER",child.kind)); //$NON-NLS-1$
 			return;
 			}
-		writer.write(os,child,dir);
+		writer.write(os,gf,child,dir);
 		}
 
 	// Modules
@@ -370,12 +384,6 @@ public class EFileWriter
 			ArrayList<BufferedImage> subs = ((Sprite) r).subImages;
 			APNGExperiments.imagesToApng(subs,os);
 			}
-
-		@Override
-		public boolean allowProperty(String name)
-			{
-			return true;
-			}
 		}
 
 	static class SoundIO extends DataPropWriter
@@ -391,12 +399,6 @@ public class EFileWriter
 			{
 			os.write(((Sound) r).data);
 			}
-
-		@Override
-		public boolean allowProperty(String name)
-			{
-			return true;
-			}
 		}
 
 	static class BackgroundIO extends DataPropWriter
@@ -411,12 +413,6 @@ public class EFileWriter
 		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
 			{
 			ImageIO.write(((Background) r).getBackgroundImage(),"png",os); //$NON-NLS-1$
-			}
-
-		@Override
-		public boolean allowProperty(String name)
-			{
-			return true;
 			}
 		}
 
@@ -442,12 +438,6 @@ public class EFileWriter
 				ps.println(p.getSpeed());
 				}
 			}
-
-		@Override
-		public boolean allowProperty(String name)
-			{
-			return true;
-			}
 		}
 
 	static class ScriptIO extends DataPropWriter
@@ -465,7 +455,7 @@ public class EFileWriter
 			}
 
 		@Override
-		public boolean allowProperty(String name)
+		public boolean allowProperty(Enum<?> prop)
 			{
 			return false;
 			}
@@ -473,24 +463,19 @@ public class EFileWriter
 
 	static class FontRawIO implements ResourceWriter
 		{
-		public void write(EGMOutputStream os, ResNode child, List<String> dir) throws IOException
+		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+				throws IOException
 			{
 			String name = (String) child.getUserObject();
 			Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
-
-			writeProperties(new PrintStream(os.next(dir,name + EY)),r);
+			writeProperties(new PrintStream(os.next(dir,name + EY)),r.properties);
 			}
 
-		public void writeProperties(PrintStream os, Resource<?,?> r) throws IOException
+		public void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
+				throws IOException
 			{
-			PropertyMap<? extends Enum<?>> p = r.properties;
 			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
-				if (allowProperty(e.getKey().name())) os.println(e.getKey().name() + ": " + e.getValue()); //$NON-NLS-1$
-			}
-
-		public boolean allowProperty(String name)
-			{
-			return true;
+				os.println(e.getKey().name() + ": " + e.getValue()); //$NON-NLS-1$
 			}
 		}
 
@@ -570,12 +555,6 @@ public class EFileWriter
 			Resource<?,?> r = Util.deRef(rr);
 			out.print(r == null ? new String() : r.getName());
 			}
-
-		@Override
-		public boolean allowProperty(String name)
-			{
-			return true;
-			}
 		}
 
 	static class RoomGmDataIO extends DataPropWriter
@@ -643,15 +622,102 @@ public class EFileWriter
 			Resource<?,?> r = Util.deRef(rr);
 			out.writeStr(r == null ? new String() : r.getName());
 			}
+		}
 
-		@Override
-		public boolean allowProperty(String name)
+	static class GameInfoRtfIO implements ResourceWriter
+		{
+		public static final String RTF = ".rtf";
+
+		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+				throws IOException
 			{
-			return true;
+			String name = (String) child.getUserObject();
+			String fn = name + RTF;
+
+			PrintStream ps = new PrintStream(os.next(dir,name + EY));
+			ps.println("Data: " + fn); //$NON-NLS-1$
+			writeProperties(ps,gf.gameInfo.properties);
+
+			writeData(os.next(dir,fn),gf.gameInfo);
+			}
+
+		public void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
+				throws IOException
+			{
+			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
+				if (allowProperty(e.getKey()))
+					os.println(e.getKey().name() + ": " + DataPropWriter.convert(e.getValue())); //$NON-NLS-1$
+			}
+
+		public boolean allowProperty(Enum<?> prop)
+			{
+			return prop != PGameInformation.TEXT;
+			}
+
+		public void writeData(OutputStream os, GameInformation r) throws IOException
+			{
+			os.write(((String) r.get(PGameInformation.TEXT)).getBytes()); // charset?
 			}
 		}
 
-	// TODO: MOAR MODULES
+	static class GameSettingsThreeIO implements ResourceWriter
+		{
+		@Override
+		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+				throws IOException
+			{
+			GameSettings gs = gf.gameSettings;
+			String name = (String) child.getUserObject();
+			String icon = "icon.ico", sSplash = "splash.png"; //$NON-NLS-1$ //$NON-NLS-2$
+			String sFiller = "filler.png", sProgress = "progress.png"; //$NON-NLS-1$ //$NON-NLS-2$
+
+			Object splash = gs.get(PGameSettings.LOADING_IMAGE);
+			Object filler = gs.get(PGameSettings.BACK_LOAD_BAR);
+			Object progress = gs.get(PGameSettings.FRONT_LOAD_BAR);
+
+			if (splash == null) sSplash = null;
+			if (filler == null) sFiller = null;
+			if (progress == null) sProgress = null;
+
+			PrintStream ps = new PrintStream(os.next(dir,name + EY));
+			ps.println("Icon: " + icon); //$NON-NLS-1$
+			ps.println("Splash: " + sSplash); //$NON-NLS-1$
+			ps.println("Filler: " + sFiller); //$NON-NLS-1$
+			ps.println("Progress: " + sProgress); //$NON-NLS-1$
+
+			//handle guid
+			ps.print(PGameSettings.DPLAY_GUID.name() + ": 0x");
+			byte[] dg = (byte[]) gs.get(PGameSettings.DPLAY_GUID);
+			ps.println(String.format("%032x",new BigInteger(1,dg)));
+
+			writeProperties(ps,gs.properties);
+
+			((ICOFile) gs.get(PGameSettings.GAME_ICON)).write(os.next(dir,icon));
+			if (splash != null) ImageIO.write((BufferedImage) splash,"png",os.next(dir,sSplash));
+			if (filler != null) ImageIO.write((BufferedImage) filler,"png",os.next(dir,sFiller));
+			if (progress != null) ImageIO.write((BufferedImage) progress,"png",os.next(dir,sProgress));
+			}
+
+		public void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
+				throws IOException
+			{
+			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
+				if (allowProperty(e.getKey()))
+					os.println(e.getKey().name() + ": " + DataPropWriter.convert(e.getValue())); //$NON-NLS-1$
+			}
+
+		public boolean allowProperty(Enum<?> prop)
+			{
+			return prop != PGameSettings.DPLAY_GUID && prop != PGameSettings.GAME_ICON
+					&& prop != PGameSettings.FRONT_LOAD_BAR && prop != PGameSettings.BACK_LOAD_BAR
+					&& prop != PGameSettings.LOADING_IMAGE;
+			}
+
+		public void writeData(OutputStream os, GameSettings r) throws IOException
+			{
+			((ICOFile) r.get(PGameSettings.GAME_ICON)).write(os);
+			}
+		}
 
 	public static void main(String[] args) throws Exception
 		{
@@ -661,8 +727,8 @@ public class EFileWriter
 
 		LibManager.autoLoad();
 		ResNode root = new ResNode("Root",(byte) 0,null,null); //$NON-NLS-1$;
-		GmFileReader.readGmFile(in.getPath(),root);
+		GmFile gf = GmFileReader.readGmFile(in.getPath(),root);
 
-		writeEgmFile(out,root,true);
+		writeEgmFile(out,gf,root,true);
 		}
 	}

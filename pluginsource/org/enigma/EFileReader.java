@@ -35,9 +35,12 @@ import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.file.ResourceList;
+import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.LGM;
 import org.lateralgm.resources.Background;
 import org.lateralgm.resources.Font;
+import org.lateralgm.resources.GameInformation;
+import org.lateralgm.resources.GameSettings;
 import org.lateralgm.resources.GmObject;
 import org.lateralgm.resources.Path;
 import org.lateralgm.resources.Resource;
@@ -48,6 +51,8 @@ import org.lateralgm.resources.Sound;
 import org.lateralgm.resources.Sprite;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
+import org.lateralgm.resources.GameInformation.PGameInformation;
+import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Path.PPath;
 import org.lateralgm.resources.Resource.Kind;
@@ -259,23 +264,22 @@ public class EFileReader
 
 			R r = construct();
 			r.setName(name);
-			readProperties(gf,r,i);
+			readProperties(gf,r.properties,i);
 			readDataFile(f,gf,r,i,dir);
 
 			getList(gf).add(r);
 			return r;
 			}
 
-		protected void readProperties(GmFile gf, R r, Properties i)
+		protected void readProperties(GmFile gf, PropertyMap<P> p, Properties i)
 			{
-			PropertyMap<P> p = r.properties;
 			for (Entry<P,Object> e : p.entrySet())
 				{
 				P key = e.getKey();
-				String kn = key.name();
-				if (allowProperty(kn))
+				if (allowProperty(key))
 					{
-					put(gf,r,key,i.get(kn));
+					String kn = key.name();
+					put(gf,p,key,i.get(kn));
 					i.remove(kn);
 					}
 				}
@@ -329,13 +333,13 @@ public class EFileReader
 		 * Subclasses should override this method to explicitly convert
 		 * special keys or keys whose default value is null.
 		 */
-		protected void put(GmFile gf, R r, P key, Object o)
+		protected void put(GmFile gf, PropertyMap<P> p, P key, Object o)
 			{
-			Object def = r.properties.get(key);
-			r.properties.put(key,convert(o.toString(),def == null ? null : def.getClass()));
+			Object def = p.get(key);
+			p.put(key,convert(o.toString(),def == null ? null : def.getClass()));
 			}
 
-		protected <K extends Enum<K>>void putRef(ResourceList<?> list, PropertyMap<K> p, K key,
+		public static <K extends Enum<K>>void putRef(ResourceList<?> list, PropertyMap<K> p, K key,
 				String name)
 			{
 			Resource<?,?> temp = list.get(name);
@@ -350,9 +354,13 @@ public class EFileReader
 		protected abstract ResourceList<R> getList(GmFile gf);
 
 		/**
-		 * Returns whether the following property is expected/should be read from the properties file
+		 * Returns whether the following property is expected/should be read from the properties file.
+		 * Override to exclude reading certain properties.
 		 */
-		protected abstract boolean allowProperty(String name);
+		protected boolean allowProperty(P key)
+			{
+			return true;
+			}
 		}
 
 	//probably won't need this, but in case I do (if not, delete)
@@ -401,7 +409,8 @@ public class EFileReader
 		//		readers.put(Kind.TIMELINE,new TimelineIO());
 		readers.put(Kind.OBJECT,new ObjectEefReader());
 		readers.put(Kind.ROOM,new RoomGmDataReader());
-		// TODO: MOAR
+		readers.put(Kind.GAMEINFO,new GameInfoRtfReader());
+		readers.put(Kind.GAMESETTINGS,new GameSettingsReader());
 
 		strtypes.put("spr",Kind.SPRITE); //$NON-NLS-1$
 		strtypes.put("snd",Kind.SOUND); //$NON-NLS-1$
@@ -506,7 +515,7 @@ public class EFileReader
 					{
 					ResourceReference<? extends Resource<?,?>> res = readResource(f,gf,parent,e.kind,
 							f.asInputStream(),dir,e.name);
-					if (res != null) parent.add(new ResNode(e.name,ResNode.STATUS_SECONDARY,e.kind,res));
+					parent.add(new ResNode(e.name,ResNode.STATUS_SECONDARY,e.kind,res));
 					}
 				else
 					System.out.println("Extraneous TOC entry: " + e.name + " (" + e.kind + ")");
@@ -555,22 +564,10 @@ public class EFileReader
 			{
 			return gf.sprites;
 			}
-
-		@Override
-		protected boolean allowProperty(String name)
-			{
-			return true;
-			}
 		}
 
 	static class SoundReader extends DataPropReader<Sound,PSound>
 		{
-		@Override
-		protected boolean allowProperty(String name)
-			{
-			return true;
-			}
-
 		@Override
 		protected Sound construct()
 			{
@@ -600,12 +597,6 @@ public class EFileReader
 	static class BackgroundReader extends DataPropReader<Background,PBackground>
 		{
 		@Override
-		protected boolean allowProperty(String name)
-			{
-			return true;
-			}
-
-		@Override
 		protected Background construct()
 			{
 			return new Background();
@@ -633,12 +624,6 @@ public class EFileReader
 
 	static class PathTextReader extends DataPropReader<Path,PPath>
 		{
-		@Override
-		protected boolean allowProperty(String name)
-			{
-			return true;
-			}
-
 		@Override
 		protected Path construct()
 			{
@@ -682,7 +667,7 @@ public class EFileReader
 	static class ScriptReader extends DataPropReader<Script,PScript>
 		{
 		@Override
-		protected boolean allowProperty(String name)
+		protected boolean allowProperty(PScript key)
 			{
 			return false;
 			}
@@ -715,12 +700,6 @@ public class EFileReader
 
 	static class FontRawReader extends DataPropReader<Font,PFont>
 		{
-		@Override
-		protected boolean allowProperty(String name)
-			{
-			return true;
-			}
-
 		@Override
 		protected Font construct()
 			{
@@ -878,38 +857,24 @@ public class EFileReader
 			}
 
 		@Override
-		protected boolean allowProperty(String name)
-			{
-			//FIXME: Fix the writer for these 3, and hopefully be able to return true.
-			PGmObject key = PGmObject.valueOf(name);
-			return !(key == PGmObject.PARENT/* || key == PGmObject.SPRITE || key == PGmObject.MASK*/);
-			//			return true;
-			}
-
-		protected void put(GmFile gf, GmObject r, PGmObject key, Object o)
+		protected void put(GmFile gf, PropertyMap<PGmObject> p, PGmObject key, Object o)
 			{
 			if (key == PGmObject.SPRITE || key == PGmObject.MASK)
 				{
-				putRef(gf.sprites,r.properties,key,o.toString());
+				putRef(gf.sprites,p,key,o.toString());
 				return;
 				}
 			if (key == PGmObject.PARENT)
 				{
-				putRef(gf.gmObjects,r.properties,key,o.toString());
+				putRef(gf.gmObjects,p,key,o.toString());
 				return;
 				}
-			super.put(gf,r,key,o);
+			super.put(gf,p,key,o);
 			}
 		}
 
 	static class RoomGmDataReader extends DataPropReader<Room,PRoom>
 		{
-		@Override
-		protected boolean allowProperty(String name)
-			{
-			return true;
-			}
-
 		@Override
 		protected Room construct()
 			{
@@ -988,6 +953,164 @@ public class EFileReader
 			catch (IOException e)
 				{
 				e.printStackTrace();
+				}
+			}
+		}
+
+	static class GameInfoRtfReader implements ResourceReader
+		{
+		@Override
+		public Resource<?,?> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
+				throws IOException
+			{
+			Properties i = new Properties();
+			i.load(in);
+
+			GameInformation r = gf.gameInfo;
+			readProperties(gf,r.properties,i);
+			readDataFile(f,gf,r,i,dir);
+
+			return null;
+			}
+
+		protected void put(GmFile gf, PropertyMap<PGameInformation> p, PGameInformation key, Object o)
+			{
+			Object def = p.get(key);
+			p.put(key,DataPropReader.convert(o.toString(),def == null ? null : def.getClass()));
+			}
+
+		protected void readProperties(GmFile gf, PropertyMap<PGameInformation> p, Properties i)
+			{
+			for (Entry<PGameInformation,Object> e : p.entrySet())
+				{
+				PGameInformation key = e.getKey();
+				if (allowProperty(key))
+					{
+					String kn = key.name();
+					put(gf,p,key,i.get(kn));
+					i.remove(kn);
+					}
+				}
+			}
+
+		protected boolean allowProperty(PGameInformation key)
+			{
+			return key != PGameInformation.TEXT;
+			}
+
+		private void readDataFile(EGMFile f, GmFile gf, GameInformation r, Properties i, String dir)
+				throws IOException
+			{
+			String fn = i.get("Data").toString(); //$NON-NLS-1$
+			if (!dir.isEmpty()) fn = dir + '/' + fn;
+			f.getEntry(fn);
+			if (f.exists())
+				{
+				InputStream in = null;
+				try
+					{
+					readData(gf,r,in = f.asInputStream());
+					}
+				finally
+					{
+					if (in != null) in.close();
+					}
+				}
+			else
+				System.err.println("Data file missing: " + fn);
+			}
+
+		private void readData(GmFile gf, GameInformation r, InputStream in)
+			{
+			try
+				{
+				r.put(PGameInformation.TEXT,readFully(in).toString());
+				}
+			catch (IOException e)
+				{
+				e.printStackTrace();
+				}
+			}
+		}
+
+	static class GameSettingsReader implements ResourceReader
+		{
+		@Override
+		public Resource<?,?> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
+				throws IOException
+			{
+			Properties i = new Properties();
+			i.load(in);
+
+			GameSettings r = gf.gameSettings;
+			//			for (Entry<?,?> e : r.properties.entrySet())
+			//				System.out.println(e.getKey() + ": " + e.getValue());
+			//
+			readProperties(gf,r.properties,i);
+			readDataFiles(f,gf,r,i,dir);
+
+			return null;
+			}
+
+		protected void put(GmFile gf, PropertyMap<PGameSettings> p, PGameSettings key, Object o)
+			{
+			Object def = p.get(key);
+			p.put(key,DataPropReader.convert(o.toString(),def == null ? null : def.getClass()));
+			}
+
+		protected void readProperties(GmFile gf, PropertyMap<PGameSettings> p, Properties i)
+			{
+			for (Entry<PGameSettings,Object> e : p.entrySet())
+				{
+				PGameSettings key = e.getKey();
+				if (allowProperty(key))
+					{
+					String kn = key.name();
+					put(gf,p,key,i.get(kn));
+					i.remove(kn);
+					}
+				}
+			}
+
+		protected boolean allowProperty(PGameSettings prop)
+			{
+			//			return false;
+			return prop != PGameSettings.DPLAY_GUID && prop != PGameSettings.GAME_ICON
+					&& prop != PGameSettings.FRONT_LOAD_BAR && prop != PGameSettings.BACK_LOAD_BAR
+					&& prop != PGameSettings.LOADING_IMAGE;
+			}
+
+		private void readDataFiles(EGMFile f, GmFile gf, GameSettings r, Properties i, String dir)
+				throws IOException
+			{
+			String[] entries = { "Icon","Splash","Filler","Progress" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			PGameSettings[] keys = { PGameSettings.GAME_ICON,PGameSettings.LOADING_IMAGE,
+					PGameSettings.BACK_LOAD_BAR,PGameSettings.FRONT_LOAD_BAR };
+
+			for (int j = 0; j < entries.length; j++)
+				{
+				Object o = i.get(entries[j]);
+				if (o == null) continue;
+				String fn = o.toString();
+				if (!dir.isEmpty()) fn = dir + '/' + fn;
+				f.getEntry(fn);
+				if (f.exists())
+					{
+					InputStream in = f.asInputStream();
+					try
+						{
+						if (j == 0)
+							r.put(keys[j],new ICOFile(in));
+						else
+							r.put(keys[j],ImageIO.read(in));
+						}
+					finally
+						{
+						if (in != null) in.close();
+						}
+					}
+				else
+					System.err.println("Data file missing: " + fn);
 				}
 			}
 		}
