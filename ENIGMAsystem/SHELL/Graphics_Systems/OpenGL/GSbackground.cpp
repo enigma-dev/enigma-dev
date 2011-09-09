@@ -43,19 +43,19 @@ int draw_background(int back, double x, double y)
   enigma::background *bck2d = enigma::backgroundstructarray[back];
   if (!bck2d)
     return -1;
-  
+
   if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-  
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
-  
+
   const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
   glBegin(GL_QUADS);
     glTexCoord2f(0,0);
@@ -67,7 +67,7 @@ int draw_background(int back, double x, double y)
     glTexCoord2f(0,tby);
       glVertex2f(x,y+bck2d->height);
   glEnd();
-  
+
   glPopAttrib();
   return 0;
 }
@@ -77,19 +77,19 @@ int draw_background_stretched(int back, double x, double y, double w, double h)
   enigma::background *bck2d = enigma::backgroundstructarray[back];
   if (!bck2d)
     return -1;
-  
+
   if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-  
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
-  
+
   const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
   glBegin(GL_QUADS);
     glTexCoord2f(0,0);
@@ -101,7 +101,7 @@ int draw_background_stretched(int back, double x, double y, double w, double h)
     glTexCoord2f(0,tby);
       glVertex2f(x,y+h);
   glEnd();
-  
+
   glPopAttrib();
   return 0;
 }
@@ -146,16 +146,16 @@ int draw_background_tiled(int back,double x,double y)
   enigma::background *bck2d = enigma::backgroundstructarray[back];
   if (!bck2d)
       return -1;
-  
+
   if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-  
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
     x=bck2d->width-fmod(x,bck2d->width);
@@ -163,7 +163,7 @@ int draw_background_tiled(int back,double x,double y)
     const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
     const int hortil= int (ceil(room_width/(bck2d->width*tbx))),
               vertil= int (ceil(room_height/(bck2d->height*tby)));
-    
+
     glBegin(GL_QUADS);
       for (int i=0; i<hortil; i++)
       {
@@ -220,17 +220,17 @@ int draw_background_tiled_area(int back,double x,double y,double x1,double y1,do
         if(i <= x1) left = x1-i;
         else left = 0;
         X = i+left;
-        
+
         if(j <= y1) top = y1-j;
         else top = 0;
         Y = j+top;
-        
+
         if(x2 <= i+sw) width = ((sw)-(i+sw-x2)+1)-left;
         else width = sw-left;
-        
+
         if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
         else height = sh-top;
-        
+
         glTexCoord2f(left/sw*tbx,top/sh*tby);
           glVertex2f(X,Y);
         glTexCoord2f((left+width)/sw*tbx,top/sh*tby);
@@ -252,25 +252,25 @@ int draw_background_ext(int back,double x,double y,double xscale,double yscale,d
   enigma::background *bck2d = enigma::backgroundstructarray[back];
   if (!bck2d)
       return -1;
-  
+
   if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-  
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-    
+
     const float tbx=bck2d->texbordx,tby=bck2d->texbordy, w=bck2d->width*xscale, h=bck2d->height*yscale;
     rot *= M_PI/180;
-    
+
     float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
-    
+
     glBegin(GL_QUADS);
       glTexCoord2f(0,0);
         glVertex2f(ulcx,ulcy);
@@ -292,21 +292,21 @@ int draw_background_stretched_ext(int back,double x,double y,double w,double h,i
   enigma::background *bck2d = enigma::backgroundstructarray[back];
   if (!bck2d)
       return -1;
-  
+
   if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-  
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-    
+
     const float tbx=bck2d->texbordx, tby=bck2d->texbordy;
-    
+
     glBegin(GL_QUADS);
       glTexCoord2f(0,0);
         glVertex2f(x,y);
@@ -326,23 +326,23 @@ int draw_background_part_ext(int back,double left,double top,double width,double
   enigma::background *bck2d = enigma::backgroundstructarray[back];
   if (!bck2d)
       return -1;
-  
+
   if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-  
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
   glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-  
-  const float 
+
+  const float
     tbx = bck2d->texbordx,  tby = bck2d->texbordy,
     tbw = bck2d->width/tbx, tbh = bck2d->height/tby;
-  
+
   glBegin(GL_QUADS);
     glTexCoord2f(left/tbw,top/tbh);
       glVertex2f(x,y);
@@ -353,7 +353,7 @@ int draw_background_part_ext(int back,double left,double top,double width,double
     glTexCoord2f(left/tbw,(top+height)/tbh);
       glVertex2f(x,y+height*yscale);
   glEnd();
-  
+
   glPopAttrib();
   return 0;
 }
@@ -363,16 +363,16 @@ int draw_background_tiled_ext(int back,double x,double y,double xscale,double ys
   enigma::background *bck2d = enigma::backgroundstructarray[back];
   if (!bck2d)
     return -1;
-  
+
   if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-  
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
     const float tbx=bck2d->texbordx,tby=bck2d->texbordy, w=bck2d->width*xscale, h=bck2d->height*yscale;
@@ -405,28 +405,28 @@ int draw_background_tiled_area_ext(int back,double x,double y,double x1,double y
   enigma::background *bck2d = enigma::backgroundstructarray[back];
   if (!bck2d)
     return -1;
-  
+
   if (enigma::bound_texture != bck2d->texture)
   {
     glBindTexture(GL_TEXTURE_2D,bck2d->texture);
     enigma::bound_texture = bck2d->texture;
   }
-  
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-    
+
     const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
     float sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = bck2d->width*xscale;
     sh = bck2d->height*yscale;
-    
+
     i = x1-(fmod(x1,sw) - fmod(x,sw)) - sw*(fmod(x1,sw)<fmod(x,sw));
     j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
     jj = j;
-    
+
     glBegin(GL_QUADS);
     for(i=i; i<=x2; i+=sw)
     {
@@ -435,17 +435,17 @@ int draw_background_tiled_area_ext(int back,double x,double y,double x1,double y
         if(i <= x1) left = x1-i;
         else left = 0;
         X = i+left;
-        
+
         if(j <= y1) top = y1-j;
         else top = 0;
         Y = j+top;
-        
+
         if(x2 <= i+sw) width = ((sw)-(i+sw-x2)+1)-left;
         else width = sw-left;
-        
+
         if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
         else height = sh-top;
-        
+
         glTexCoord2f(left/sw*tbx,top/sh*tby);
           glVertex2f(X,Y);
         glTexCoord2f((left+width)/sw*tbx,top/sh*tby);
@@ -467,42 +467,42 @@ int draw_background_general(int back,double left,double top,double width,double 
   enigma::background *bck2d = enigma::backgroundstructarray[back];
   if (!bck2d)
       return -1;
-  
+
   if (enigma::bound_texture != bck2d->texture)
   {
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-  
+
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
     const float
       tbx = bck2d->texbordx,  tby = bck2d->texbordy,
       tbw = bck2d->width/tbx, tbh = bck2d->height/tby,
       w = width*xscale, h = height*yscale;
-    
+
     rot *= M_PI/180;
-    
+
     float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
-    
+
     glBegin(GL_QUADS);
       glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),char(a1*255));
       glTexCoord2f(left/tbw,top/tbh);
         glVertex2f(ulcx,ulcy);
-      
+
       glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),char(a2*255));
       glTexCoord2f((left+width)/tbw,top/tbh);
         glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
-      
+
       ulcx += h * cos(3*M_PI/2 + rot);
       ulcy -= h * sin(3*M_PI/2 + rot);
       glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),char(a3*255));
       glTexCoord2f((left+width)/tbw,(top+height)/tbh);
         glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
-      
+
       glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),char(a4*255));
       glTexCoord2f(left/tbw,(top+height)/tbh);
         glVertex2f(ulcx,ulcy);
@@ -520,10 +520,10 @@ int background_get_texture(int backId)
 // Probably wrong file
 int texture_set_interpolation(int enable)
 {
-    if (enable)
+ /*   if (enable)
         glEnable(GL_INTERPOLATE);
     else
         glDisable(GL_INTERPOLATE);
-    return 0;
+    return 0;*/
 }
 
