@@ -198,6 +198,12 @@ int room_restart()
 	return 0;
 }
 
+string room_get_name(int index)
+{
+	errcheck(indx,"Room index out of range");
+	return enigma::roomdata[index]->name;
+}
+
 int room_goto_absolute(int index)
 {
 	errcheck_o(index,"Room index out of range");
@@ -254,7 +260,7 @@ int room_next(int num)
     enigma::roomstruct *rit = enigma::roomdata[num];
     if (!rit or rit->order+1 >= enigma::room_loadtimecount)
       return -1;
-    return rit->order + 1;
+    return enigma::roomorder[rit->order + 1]->id;
 }
 int room_previous(int num)
 {
@@ -263,7 +269,7 @@ int room_previous(int num)
     enigma::roomstruct *rit = enigma::roomdata[num];
     if (!rit or rit->order-1 < 0)
       return -1;
-    return rit->order - 1;
+    return enigma::roomorder[rit->order - 1]->id;
 }
 
 #include "CallbackArrays.h"

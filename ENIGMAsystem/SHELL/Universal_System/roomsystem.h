@@ -30,6 +30,7 @@
 #define room_system_h
 int room_goto(int roomind);
 int room_restart();
+string room_get_name(int index);
 int room_goto_absolute(int index);
 int room_goto_first();
 int room_goto_previous();

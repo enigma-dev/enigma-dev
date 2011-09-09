@@ -136,7 +136,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					Preferences root = Preferences.userRoot().node("/org/enigma"); //$NON-NLS-1$
 					boolean rebuild = root.getBoolean("NEEDS_REBUILD",false); //$NON-NLS-1$
 					root.putBoolean("NEEDS_REBUILD",false); //$NON-NLS-1$
-					int updates = -1; //displays own error
+					int updates = attemptUpdate(); //displays own error
 					if (updates == -1)
 						{
 						ENIGMA_FAIL = true;
