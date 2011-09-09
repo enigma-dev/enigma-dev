@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
@@ -37,7 +37,16 @@ const int pr_quadlist       =8;     //GL_QUADS
 const int pr_quadstrip      =9;     //GL_QUAD_STRIP
 const int pr_polygon       =10;     //GL_POLYGON
 
+const int pr_aa_nicest      =4354;  //GL_NICEST
+const int pr_aa_fastest     =4353;  //GL_FASTEST
+const int pr_aa_dontcare    =4352;  //GL_DONT_CARE
+
+void draw_set_primitive_aa(bool enable, int quality);
 int draw_primitive_begin(int kind);
+int draw_primitive_begin_texture(int dink,unsigned tex);
 int draw_vertex(double x, double y);
 int draw_vertex_color(float x, float y, int color, float alpha);
+int draw_vertex_texture(float x, float y, float tx, float ty);
+int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha);
+
 int draw_primitive_end();

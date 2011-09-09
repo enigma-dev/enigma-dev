@@ -40,6 +40,16 @@ extern unsigned char currentcolor[4];
 }
 #define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
 
+void draw_set_line_pattern(unsigned short pattern, int scale)
+{
+   /* if (pattern == -1){
+        glDisable(GL_LINE_STIPPLE);
+    }else{
+        glEnable(GL_LINE_STIPPLE);
+        glLineStipple(scale,pattern);
+    }*/
+}
+
 int draw_point(float x,float y)
 {
 	untexture();
@@ -417,67 +427,221 @@ int draw_triangle_color(float x1,float y1,float x2,float y2,float x3,float y3,in
 	return 0;
 }
 
-int draw_roundrect(float x1,float y1,float x2,float y2,bool outline)
+int draw_roundrect(float x1,float y1,float x2,float y2,float r, bool outline)
 {
-	untexture();
-	if(x1>x2)
-	{
-		float t=x2;
-		x2=x1;
-		x1=t;
-	}
-	if(y1>y2)
-	{
-		float t=y2;
-		y2=y1;
-		y1=t;
-	}
-	float
-		r=fmin(x2-x1,y2-y1)/3,
-		r2=r*r,r12=r*M_SQRT1_2,
-		bx1=x1+r,by1=y1+r,
-		bx2=x2-r,by2=y2-r;
-	/*glBegin(GL_LINES);
-	if(outline)
-	{
-		glVertex2f(x1,by1);glVertex2f(x1,by2);
-		glVertex2f(x2,by1);glVertex2f(x2,by2);
-		glVertex2f(bx1,y1);glVertex2f(bx2,y1);
-		glVertex2f(bx1,y2);glVertex2f(bx2,y2);
-		glEnd();
-		glBegin(GL_POINTS);
-		for(float xc=0,yc=r;xc<=r12;xc++)
-		{
-			if(xc*xc+yc*yc>r2) yc--;
-			glVertex2f(bx2+xc,by2+yc);
-			glVertex2f(bx2+xc,by1-yc);
-			glVertex2f(bx1-xc,by2+yc);
-			glVertex2f(bx1-xc,by1-yc);
-			glVertex2f(bx2+yc,by2+xc);
-			glVertex2f(bx2+yc,by1-xc);
-			glVertex2f(bx1-yc,by2+xc);
-			glVertex2f(bx1-yc,by1-xc);
-		}
-		glEnd();
-	}
-	else
-	{
-		for(float xc=0,yc=r;xc<=r12;xc++)
-		{
-			if(xc*xc+yc*yc>r2) yc--;
-			glVertex2f(bx2+xc,by2+yc);
-			glVertex2f(bx2+xc,by1-yc);
-			glVertex2f(bx1-xc,by2+yc);
-			glVertex2f(bx1-xc,by1-yc);
-			glVertex2f(bx2+yc,by2+xc);
-			glVertex2f(bx2+yc,by1-xc);
-			glVertex2f(bx1-yc,by2+xc);
-			glVertex2f(bx1-yc,by1-xc);
-		}
-		glEnd();
-		glRectf(bx1,y1,bx2,y2);
-	}OPENGLES */
-  return 0;
+    untexture();
+    if(x1>x2)
+    {
+        float t=x2;
+        x2=x1;
+        x1=t;
+    }
+    if(y1>y2)
+    {
+        float t=y2;
+        y2=y1;
+        y1=t;
+    }
+    if (x2-x1<r*2){r=(x2-x1)/2;}
+    if (y2-y1<r*2){r=(y2-y1)/2;}
+    if (r<0){r=0;}
+    float r2=r*r,r12=r*M_SQRT1_2,
+    bx1=x1+r,by1=y1+r,
+    bx2=x2-r,by2=y2-r;
+   /* glBegin(GL_LINES);
+    if(outline)
+    {
+        glVertex2f(x1,by1);glVertex2f(x1,by2);
+        glVertex2f(x2,by1);glVertex2f(x2,by2);
+        glVertex2f(bx1,y1);glVertex2f(bx2,y1);
+        glVertex2f(bx1,y2);glVertex2f(bx2,y2);
+        glEnd();
+        glBegin(GL_POINTS);
+        for(float xc=0,yc=r;xc<=r12;xc++)
+        {
+            if(xc*xc+yc*yc>r2) yc--;
+            glVertex2f(bx2+xc,by2+yc);
+            glVertex2f(bx2+xc,by1-yc);
+            glVertex2f(bx1-xc,by2+yc);
+            glVertex2f(bx1-xc,by1-yc);
+            glVertex2f(bx2+yc,by2+xc);
+            glVertex2f(bx2+yc,by1-xc);
+            glVertex2f(bx1-yc,by2+xc);
+            glVertex2f(bx1-yc,by1-xc);
+        }
+        glEnd();
+    }
+    else
+    {
+        for(float xc=0,yc=r;xc<=r12;xc++)
+        {
+            if(xc*xc+yc*yc>r2) yc--;
+            glVertex2f(bx2+xc,by2+yc);
+            glVertex2f(bx2+xc,by1-yc);
+            glVertex2f(bx1-xc,by2+yc);
+            glVertex2f(bx1-xc,by1-yc);
+            glVertex2f(bx2+yc,by2+xc);
+            glVertex2f(bx2+yc,by1-xc);
+            glVertex2f(bx1-yc,by2+xc);
+            glVertex2f(bx1-yc,by1-xc);
+        }
+        glEnd();
+        glRectf(bx1,y1,bx2,y2);
+    }*/
+    return 0;
+}
+
+int draw_roundrect_color(float x1, float y1, float x2, float y2, float r, int col1, int col2, bool outline)
+{
+    untexture();
+    if(x1>x2)
+    {
+        float t=x2;
+        x2=x1;
+        x1=t;
+    }
+    if(y1>y2)
+    {
+        float t=y2;
+        y2=y1;
+        y1=t;
+    }
+    if (x2-x1<r*2){r=(x2-x1)/2;}
+    if (y2-y1<r*2){r=(y2-y1)/2;}
+    if (r<0){r=0;}
+    float r2=r*r,r12=r*M_SQRT1_2,
+    bx1=x1+r,by1=y1+r,
+    bx2=x2-r,by2=y2-r;
+   /* glBegin(GL_LINES);
+    if(outline)
+    {
+        glColor4ub(__GETR(col2),__GETG(col2),__GETB(col2),enigma::currentcolor[3]);
+        glVertex2f(x1,by1);glVertex2f(x1,by2);
+        glVertex2f(x2,by1);glVertex2f(x2,by2);
+        glVertex2f(bx1,y1);glVertex2f(bx2,y1);
+        glVertex2f(bx1,y2);glVertex2f(bx2,y2);
+        glEnd();
+        glBegin(GL_POINTS);
+        for(float xc=0,yc=r;xc<=r12;xc++)
+        {
+            if(xc*xc+yc*yc>r2) yc--;
+            glVertex2f(bx2+xc,by2+yc);
+            glVertex2f(bx2+xc,by1-yc);
+            glVertex2f(bx1-xc,by2+yc);
+            glVertex2f(bx1-xc,by1-yc);
+            glVertex2f(bx2+yc,by2+xc);
+            glVertex2f(bx2+yc,by1-xc);
+            glVertex2f(bx1-yc,by2+xc);
+            glVertex2f(bx1-yc,by1-xc);
+        }
+        glEnd();
+    }
+    else
+    {
+        glColor4ub(__GETR(col2),__GETG(col2),__GETB(col2),enigma::currentcolor[3]);
+        for(float xc=0,yc=r;xc<=r12;xc++)
+        {
+            if(xc*xc+yc*yc>r2) yc--;
+            glVertex2f(bx2+xc,by2+yc);
+            glVertex2f(bx2+xc,by1-yc);
+            glVertex2f(bx1-xc,by2+yc);
+            glVertex2f(bx1-xc,by1-yc);
+            glVertex2f(bx2+yc,by2+xc);
+            glVertex2f(bx2+yc,by1-xc);
+            glVertex2f(bx1-yc,by2+xc);
+            glVertex2f(bx1-yc,by1-xc);
+        }
+        glEnd();
+        glBegin(GL_TRIANGLE_FAN);
+        glColor4ub(__GETR(col1),__GETG(col1),__GETB(col1),enigma::currentcolor[3]);
+        glVertex2f(x1+(x2-x1)/2,y1+(y2-y1)/2);
+        glColor4ub(__GETR(col2),__GETG(col2),__GETB(col2),enigma::currentcolor[3]);
+        glVertex2f(x1,by1);
+        glVertex2f(bx1,y1);
+        glVertex2f(bx2,y1);
+        glVertex2f(x2,by1);
+        glVertex2f(x2,by2);
+        glVertex2f(bx2,y2);
+        glVertex2f(bx1,y2);
+        glVertex2f(x1,by2);
+        glVertex2f(x1,by1);
+        glEnd();
+    }
+    glColor4ubv(enigma::currentcolor);
+    */ return 0;
+}
+
+int draw_arrow(float x1,float y1,float x2,float y2, float arrow_size, float line_size, bool outline)
+{
+    untexture();
+    double dir = atan2(y2-y1,x2-x1);
+    float tc = cos(dir), ts = sin(dir),
+    xs = x2-tc*arrow_size, ys = y2-ts*arrow_size,
+    lw = ts*(line_size/2), lh = tc*(line_size/2);
+    double at = atan2(ys-y1,xs-x1);
+  /*  if (fabs((dir<0?dir+2*M_PI:dir)-(at<0?at+2*M_PI:at)) < 0.01){
+        glBegin(outline?GL_LINE_LOOP:GL_QUADS);
+        glVertex2f(x1+lw,y1-lh);
+        glVertex2f(x1-lw,y1+lh);
+        glVertex2f(xs-lw,ys+lh);
+        glVertex2f(xs+lw,ys-lh);
+        glEnd();
+    }
+    glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
+    glVertex2f(x2,y2);
+    glVertex2f(xs-ts*(arrow_size/3),ys+tc*(arrow_size/3));
+    glVertex2f(xs+ts*(arrow_size/3),ys-tc*(arrow_size/3));
+    glEnd();
+    */ return 0;
+}
+
+void draw_button(float x1,float y1,float x2,float y2,float border_width,bool up)
+{
+    untexture();
+    if(x1>x2)
+    {
+        float t=x2;
+        x2=x1;
+        x1=t;
+    }
+    if(y1>y2)
+    {
+        float t=y2;
+        y2=y1;
+        y1=t;
+    }
+    if (x2-x1<border_width*2){border_width=(x2-x1)/2;}
+    if (y2-y1<border_width*2){border_width=(y2-y1)/2;}
+   /* glBegin(GL_QUADS);
+    glVertex2f(x1,y1);
+    glVertex2f(x2,y1);
+    glVertex2f(x2,y2);
+    glVertex2f(x1,y2);
+    
+    if (up == true){glColor4f(0.5,0.5,0.5,0.5);}else{glColor4f(1,1,1,0.5);}
+    glVertex2f(x1+border_width,y2-border_width);
+    glVertex2f(x2-border_width,y2-border_width);
+    glVertex2f(x2,y2);
+    glVertex2f(x1,y2);
+    
+    glVertex2f(x2-border_width,y1+border_width);
+    glVertex2f(x2,y1);
+    glVertex2f(x2,y2);
+    glVertex2f(x2-border_width,y2-border_width);
+    
+    if (up == true){glColor4f(1,1,1,0.5);}else{glColor4f(0.5,0.5,0.5,0.5);}
+    glVertex2f(x1,y1);
+    glVertex2f(x2,y1);
+    glVertex2f(x2-border_width,y1+border_width);
+    glVertex2f(x1+border_width,y1+border_width);
+    
+    glVertex2f(x1,y1);
+    glVertex2f(x1+border_width,y1+border_width);
+    glVertex2f(x1+border_width,y2-border_width);
+    glVertex2f(x1,y2);
+    
+    glEnd();
+    glColor4ubv(enigma::currentcolor);*/
 }
 
 //Mind that health is 1-100

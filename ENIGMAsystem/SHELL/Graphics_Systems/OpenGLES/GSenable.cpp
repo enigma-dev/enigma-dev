@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Alasdair Morrison                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -53,19 +54,13 @@ int gs_enable_smooth_lines(bool enable){
 }//If enabled, draw lines with correct filtering. If disabled, draw aliased lines. See glLineWidth.
 
 int gs_enable_stipple(bool enable){
-	//Opengles does not have line stipple
-	/*if(enable){
-		glEnable(GL_LINE_STIPPLE);
-		glEnable(GL_POLYGON_STIPPLE);
-	}else{
-		glDisable(GL_LINE_STIPPLE);
-		glDisable(GL_POLYGON_STIPPLE);
-	}*/
+	// Opengles does not have line stipple
+	// Could texture the line with alpha to produce a similar effect
 	return 0;
 }//If enabled, use the current polygon stipple pattern when rendering polygons. See glPolygonStipple.
 
 int gs_enable_logical_op(bool enable){
-	//(enable?glEnable:glDisable)(GL_LOGIC_OP); OPENGLES
+	(enable?glEnable:glDisable)(GL_COLOR_LOGIC_OP); //changed for OPENGLES
 	return 0;
 }//If enabled, apply the currently selected logical operation to the incoming and color-buffer indexes. See glLogicOp.
 
@@ -75,7 +70,7 @@ int gs_enable_smooth_points(bool enable){
 }//If enabled, draw points with proper filtering. If disabled, draw aliased points. See glPointSize.
 
 int gs_enable_smooth_polygons(bool enable){
-	//(enable?glEnable:glDisable)(GL_POLYGON_SMOOTH);
+	//(enable?glEnable:glDisable)(GL_POLYGON_SMOOTH); removed for OPENGLES
 	return 0;
 }//If enabled, draw polygons with proper filtering. If disabled, draw aliased polygons. See glPolygonMode.
 

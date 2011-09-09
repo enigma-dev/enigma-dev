@@ -30,19 +30,14 @@ bool is_real(variant val);
 
 string chr(char val);
 
-int ord(char str);
-int ord(const char* str);
 int ord(string str);
 
-double real(string str);
-double real(char* str);
-double real(double str);
-double real(var& str);
+double real(const var& str);
 
 size_t string_length(string str);
 size_t string_length(char* str);
 int string_pos(string substr,string str);
-int string_pos(char* substr,string str);
+
 
 string string_copy(string str,double index,double count);
 string string_char_at(string str,double index);

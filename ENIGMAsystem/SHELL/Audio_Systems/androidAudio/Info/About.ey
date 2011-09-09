@@ -1,0 +1,8 @@
+%e-yaml
+---
+
+Name: Android Audio
+Identifier: AndroidAudio
+Description: Play sounds using the android Java audio API through JNI
+Author: Alasdair Morrison
+

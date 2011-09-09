@@ -25,10 +25,24 @@
 **                                                                              **
 \********************************************************************************/
 
+extern bool d3dMode;
+
 int d3d_start();
 int d3d_end();
+int d3d_set_perspective(int enable);
+int d3d_set_hidden(int enable);
+
+int d3d_set_lighting(int enable);
+int d3d_set_culling(int enable);
+
+int d3d_set_fog(int enable, int color, int start, int end);
+
 int d3d_primitive_begin(int kind);
 int d3d_vertex(double x, double y, double z);
 int d3d_primitive_end();
 int d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,
                        double yto,double zto,double xup,double yup,double zup);
+int d3d_set_projection_ortho(int x, int y, int width, int height, int angle);
+
+int d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);
+int d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);

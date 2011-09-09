@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Alasdair Morrison                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -43,8 +44,8 @@ namespace enigma {
 
 void draw_unbind_all()
  	 {
-		 	   glBindTexture(GL_TEXTURE_2D, 0);
-		 }
+         glBindTexture(GL_TEXTURE_2D, 0);
+     }
 
 void draw_clear_alpha(int col,float alpha)
 {
@@ -72,7 +73,6 @@ void draw_set_color(int color)
 	enigma::currentcolor[0] = __GETR(color);
 	enigma::currentcolor[1] = __GETG(color);
 	enigma::currentcolor[2] = __GETB(color);
-	//glColor4ubv(enigma::currentcolor);
 	glColor4ub(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
 }
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
@@ -80,14 +80,12 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
-	//glColor4ubv(enigma::currentcolor);
 	glColor4ub(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
 
 }
 void draw_set_alpha(float alpha)
 {
 	enigma::currentcolor[3] = bind_alpha(alpha);
-	//glColor4ubv(enigma::currentcolor);
 	glColor4ub(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
 
 }
@@ -97,7 +95,6 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
 	enigma::currentcolor[3] = bind_alpha(alpha);
-	//glColor4ubv(enigma::currentcolor);
 	glColor4ub(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
 }
 

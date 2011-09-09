@@ -36,5 +36,5 @@ namespace enigma
 {
   object_graphics::object_graphics() {}
   object_graphics::object_graphics(unsigned x, int y): object_planar(x,y) {}
-	object_graphics::~object_graphics() {}
+  object_graphics::~object_graphics() {};
 }

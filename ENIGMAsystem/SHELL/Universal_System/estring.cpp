@@ -54,15 +54,11 @@ string chr(char val){
 	return ret;
 }
 
-int ord(char str)        { return str; }
-int ord(const char* str) { return *str; }
+
 int ord(string str)      { return str[0]; }
 
-double real(string str) { return atof(str.c_str()); }
-double real(char* str)  { return atof(str); }
-double real(double str) { return str; }
 double real(variant str){ return str.type ? atof(((string)str).c_str()) : (double) str; }
-double real(var& str)   { return (*str).type ? atof(((string)str).c_str()) : (double) str; }
+double real(const var& str)   { return (*str).type ? atof(((string)str).c_str()) : (double) str; }
 
 size_t string_length(string str) { return str.length(); }
 size_t string_length(const char* str)
@@ -131,7 +127,7 @@ string string_upper(string str){
 	return str;
 }
 
-string string_repeat(string str,int count){
+string string_repeat(string str,double count){
 	string ret;
 	for(int i=count;i;i--) ret.append(str);
 	return ret;

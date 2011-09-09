@@ -37,3 +37,6 @@ int draw_background_tiled_ext(int back,double x,double y,double xscale,double ys
 int draw_background_tiled_area_ext(int back,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha);
 int draw_background_general(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4);
 
+int background_get_texture(int backId);
+int texture_set_interpolation(int enable);
+

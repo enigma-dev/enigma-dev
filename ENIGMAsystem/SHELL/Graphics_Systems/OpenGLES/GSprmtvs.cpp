@@ -48,6 +48,16 @@ GLenum ptypes_by_id[16] = {
   GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS
 }; //OPENGLES replaced GL_QUADS, GL_QUAD_STRIP, GL_POLYGON, with GL_TRIANGLE_STRIP's
 
+void draw_set_primitive_aa(bool enable, int quality)
+{
+    if (enable==1){
+        glEnable(GL_LINE_SMOOTH);
+        glHint(GL_LINE_SMOOTH_HINT, quality);
+    }else{
+        glDisable(GL_LINE_SMOOTH);
+    }
+}
+
 int draw_primitive_begin(int dink)
 {
 	untexture();
@@ -64,6 +74,26 @@ int draw_primitive_begin(int dink)
     __primitivetype[__currentpdepth]=kind;
   #endif
   return 0;
+}
+
+
+int draw_primitive_begin_texture(int dink,unsigned tex)
+{
+    if (enigma::bound_texture != tex)
+        glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = tex);
+	GLenum kind = ptypes_by_id[ dink & 15 ];
+#if !PRIMBUFFER
+   // glBegin(kind);
+#else
+    if(++__currentpdepth>PRIMDEPTH2)
+    {
+        show_error("Max open primitive count exceeded. Disable the limit via the buffer option, or increase buffer depth",0);
+        return -1;
+    }
+    __currentpcount[__currentpdepth]=0;
+    __primitivetype[__currentpdepth]=kind;
+#endif
+    return 0;
 }
 
 int draw_vertex(double x, double y)
@@ -109,6 +139,56 @@ int draw_vertex_color(float x, float y, int color, float alpha)
 	#endif
 	return 0;
 }
+
+int draw_vertex_texture(float x, float y, float tx, float ty)
+{
+#if !PRIMBUFFER
+   /* glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(1,1,1,1);
+    glTexCoord2f(tx,ty);
+    glVertex2f(x,y);
+    glPopAttrib();*/
+#else
+    int pco=__currentpcount[__currentpdepth]++;
+    __primitivecolor[pco][__currentpdepth][0]=(col&0xFF)/255.0;
+    __primitivecolor[pco][__currentpdepth][1]=((col&0xFF00)>>8)/255.0;
+    __primitivecolor[pco][__currentpdepth][2]=((col&0xFF0000)>>16)/255.0;
+    __primitivecolor[pco][__currentpdepth][3]=alpha;
+    __primitivexy[pco][__currentpdepth][0]=x;
+    __primitivexy[pco][__currentpdepth][1]=y;
+#if SHOWERRORS
+    if(pco+1>PRIMBUFFER) show_error("Max point count exceeded",0);
+#endif
+#endif
+	return 0;
+}
+int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha)
+{
+#if !PRIMBUFFER
+   /* glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(
+              (col&0xFF)/255.0,
+              ((col&0xFF00)>>8)/255.0,
+              ((col&0xFF0000)>>16)/255.0,
+              alpha);
+    glTexCoord2f(tx,ty);
+    glVertex2f(x,y);
+    glPopAttrib();*/
+#else
+    int pco=__currentpcount[__currentpdepth]++;
+    __primitivecolor[pco][__currentpdepth][0]=(col&0xFF)/255.0;
+    __primitivecolor[pco][__currentpdepth][1]=((col&0xFF00)>>8)/255.0;
+    __primitivecolor[pco][__currentpdepth][2]=((col&0xFF0000)>>16)/255.0;
+    __primitivecolor[pco][__currentpdepth][3]=alpha;
+    __primitivexy[pco][__currentpdepth][0]=x;
+    __primitivexy[pco][__currentpdepth][1]=y;
+#if SHOWERRORS
+    if(pco+1>PRIMBUFFER) show_error("Max point count exceeded",0);
+#endif
+#endif
+	return 0;
+}
+
 int draw_primitive_end()
 {
 	#if PRIMBUFFER

@@ -8,7 +8,7 @@ $(OBJECTS)/GScolors.o: GScolors.cpp OpenGLHeaders.h
 	$(CXX) -c GScolors.cpp		-o $(OBJECTS)/GScolors.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/GScurves.o: GScurves.cpp OpenGLHeaders.h GScolors.h
 	$(CXX) -c GScurves.cpp		-o $(OBJECTS)/GScurves.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/GSd3d.o: GSd3d.cpp OpenGLHeaders.h GSprmtvs.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
+$(OBJECTS)/GSd3d.o: GSd3d.cpp OpenGLHeaders.h GSprmtvs.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h ../../Universal_System/backgroundstruct.h
 	$(CXX) -c GSd3d.cpp		-o $(OBJECTS)/GSd3d.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/GSenable.o: GSenable.cpp OpenGLHeaders.h
 	$(CXX) -c GSenable.cpp		-o $(OBJECTS)/GSenable.o $(GFLAGS) $(ECPPFLAGS)
