@@ -32,11 +32,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.DeflaterOutputStream;
 
 import javax.swing.JOptionPane;
@@ -47,6 +44,7 @@ import org.enigma.backend.other.Extension;
 import org.enigma.backend.other.Include;
 import org.enigma.backend.resources.Background;
 import org.enigma.backend.resources.Font;
+import org.enigma.backend.resources.GameSettings;
 import org.enigma.backend.resources.GmObject;
 import org.enigma.backend.resources.Path;
 import org.enigma.backend.resources.Room;
@@ -73,14 +71,12 @@ import org.lateralgm.file.GmFile;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
+import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Path.PPath;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
-import org.lateralgm.resources.Sound.SoundKind;
-import org.lateralgm.resources.Sprite.BBMode;
-import org.lateralgm.resources.Sprite.MaskShape;
 import org.lateralgm.resources.Sprite.PSprite;
 import org.lateralgm.resources.library.LibAction;
 import org.lateralgm.resources.library.LibManager;
@@ -118,6 +114,7 @@ public final class EnigmaWriter
 		o.fileVersion = i.fileVersion;
 		o.filename = i.filename;
 
+		populateSettings();
 		populateSprites();
 		populateSounds();
 		populateBackgrounds();
@@ -169,34 +166,66 @@ public final class EnigmaWriter
 		return o;
 		}
 
-	protected static final SoundKind[] SOUND_KIND = { SoundKind.NORMAL,SoundKind.BACKGROUND,
-			SoundKind.SPATIAL,SoundKind.MULTIMEDIA };
-	protected static final Map<SoundKind,Integer> SOUND_CODE;
-	static
+	protected void populateSettings()
 		{
-		EnumMap<SoundKind,Integer> m = new EnumMap<SoundKind,Integer>(SoundKind.class);
-		for (int i = 0; i < SOUND_KIND.length; i++)
-			m.put(SOUND_KIND[i],i);
-		SOUND_CODE = Collections.unmodifiableMap(m);
-		}
-	protected static final BBMode[] SPRITE_BB_MODE = { BBMode.AUTO,BBMode.FULL,BBMode.MANUAL };
-	protected static final Map<BBMode,Integer> SPRITE_BB_CODE;
-	static
-		{
-		EnumMap<BBMode,Integer> m = new EnumMap<BBMode,Integer>(BBMode.class);
-		for (int i = 0; i < SPRITE_BB_MODE.length; i++)
-			m.put(SPRITE_BB_MODE[i],i);
-		SPRITE_BB_CODE = Collections.unmodifiableMap(m);
-		}
-	protected static final MaskShape[] SPRITE_MASK_SHAPE = { MaskShape.PRECISE,MaskShape.RECTANGLE,
-			MaskShape.DISK,MaskShape.DIAMOND };
-	protected static final Map<MaskShape,Integer> SPRITE_MASK_CODE;
-	static
-		{
-		EnumMap<MaskShape,Integer> m = new EnumMap<MaskShape,Integer>(MaskShape.class);
-		for (int i = 0; i < SPRITE_MASK_SHAPE.length; i++)
-			m.put(SPRITE_MASK_SHAPE[i],i);
-		SPRITE_MASK_CODE = Collections.unmodifiableMap(m);
+		org.lateralgm.resources.GameSettings ig = i.gameSettings;
+		GameSettings og = o.gameSettings;
+
+		og.gameId = ig.get(PGameSettings.GAME_ID);
+		og.startFullscreen = ig.get(PGameSettings.START_FULLSCREEN);
+		og.interpolate = ig.get(PGameSettings.INTERPOLATE);
+		og.dontDrawBorder = ig.get(PGameSettings.DONT_DRAW_BORDER);
+		og.displayCursor = ig.get(PGameSettings.DISPLAY_CURSOR);
+		og.scaling = ig.get(PGameSettings.SCALING);
+		og.allowWindowResize = ig.get(PGameSettings.ALLOW_WINDOW_RESIZE);
+		og.alwaysOnTop = ig.get(PGameSettings.ALWAYS_ON_TOP);
+		og.colorOutsideRoom = ARGBtoRGBA(((Color) ig.get(PGameSettings.COLOR_OUTSIDE_ROOM)).getRGB());
+		og.setResolution = ig.get(PGameSettings.SET_RESOLUTION);
+		og.colorDepth = GmFile.GS_DEPTH_CODE.get(ig.get(PGameSettings.COLOR_DEPTH)).byteValue();
+		og.resolution = GmFile.GS_RESOL_CODE.get(ig.get(PGameSettings.RESOLUTION)).byteValue();
+		og.frequency = GmFile.GS_FREQ_CODE.get(ig.get(PGameSettings.FREQUENCY)).byteValue();
+		og.dontShowButtons = ig.get(PGameSettings.DONT_SHOW_BUTTONS);
+		og.useSynchronization = ig.get(PGameSettings.USE_SYNCHRONIZATION);
+		og.disableScreensavers = ig.get(PGameSettings.DISABLE_SCREENSAVERS);
+		og.letF4SwitchFullscreen = ig.get(PGameSettings.LET_F4_SWITCH_FULLSCREEN);
+		og.letF1ShowGameInfo = ig.get(PGameSettings.LET_F1_SHOW_GAME_INFO);
+		og.letEscEndGame = ig.get(PGameSettings.LET_ESC_END_GAME);
+		og.letF5SaveF6Load = ig.get(PGameSettings.LET_F5_SAVE_F6_LOAD);
+		og.letF9Screenshot = ig.get(PGameSettings.LET_F9_SCREENSHOT);
+		og.treatCloseAsEscape = ig.get(PGameSettings.TREAT_CLOSE_AS_ESCAPE);
+		og.gamePriority = GmFile.GS_PRIORITY_CODE.get(ig.get(PGameSettings.GAME_PRIORITY)).byteValue();
+		og.freezeOnLoseFocus = ig.get(PGameSettings.FREEZE_ON_LOSE_FOCUS);
+		og.loadBarMode = GmFile.GS_PROGBAR_CODE.get(ig.get(PGameSettings.LOAD_BAR_MODE)).byteValue();
+		//populateImage((BufferedImage) ig.get(PGameSettings.FRONT_LOAD_BAR),og.frontLoadBar,false);
+		//populateImage((BufferedImage) ig.get(PGameSettings.BACK_LOAD_BAR),og.backLoadBar,false);
+		og.showCustomLoadImage = ig.get(PGameSettings.SHOW_CUSTOM_LOAD_IMAGE);
+		//populateImage((BufferedImage) ig.get(PGameSettings.LOADING_IMAGE),og.loadingImage,false);
+		og.imagePartiallyTransparent = ig.get(PGameSettings.IMAGE_PARTIALLY_TRANSPARENTY);
+		og.loadImageAlpha = ig.get(PGameSettings.LOAD_IMAGE_ALPHA);
+		og.scaleProgressBar = ig.get(PGameSettings.SCALE_PROGRESS_BAR);
+		og.displayErrors = ig.get(PGameSettings.DISPLAY_ERRORS);
+		og.writeToLog = ig.get(PGameSettings.WRITE_TO_LOG);
+		og.abortOnError = ig.get(PGameSettings.ABORT_ON_ERROR);
+		og.treatUninitializedAs0 = ig.get(PGameSettings.TREAT_UNINIT_AS_0);
+		og.author = ig.get(PGameSettings.AUTHOR);
+		og.version = ig.get(PGameSettings.VERSION);
+		og.lastChanged = ig.get(PGameSettings.LAST_CHANGED);
+		og.information = ig.get(PGameSettings.INFORMATION);
+
+		og.includeFolder = GmFile.GS_INCFOLDER_CODE.get(ig.get(PGameSettings.INCLUDE_FOLDER));
+		og.overwriteExisting = ig.get(PGameSettings.OVERWRITE_EXISTING);
+		og.removeAtGameEnd = ig.get(PGameSettings.REMOVE_AT_GAME_END);
+
+		og.versionMajor = ig.get(PGameSettings.VERSION_MAJOR);
+		og.versionMinor = ig.get(PGameSettings.VERSION_MINOR);
+		og.versionRelease = ig.get(PGameSettings.VERSION_RELEASE);
+		og.versionBuild = ig.get(PGameSettings.VERSION_BUILD);
+		og.company = ig.get(PGameSettings.COMPANY);
+		og.product = ig.get(PGameSettings.PRODUCT);
+		og.copyright = ig.get(PGameSettings.COPYRIGHT);
+		og.description = ig.get(PGameSettings.DESCRIPTION);
+
+		og.gameIcon = new String();
 		}
 
 	protected void populateSprites()
@@ -217,14 +246,14 @@ public final class EnigmaWriter
 			os.id = is.getId();
 
 			os.transparent = is.get(PSprite.TRANSPARENT);
-			os.shape = SPRITE_MASK_CODE.get(is.get(PSprite.SHAPE)); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
+			os.shape = GmFile.SPRITE_MASK_CODE.get(is.get(PSprite.SHAPE)); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
 			os.alphaTolerance = is.get(PSprite.ALPHA_TOLERANCE);
 			os.separateMask = is.get(PSprite.SEPARATE_MASK);
 			os.smoothEdges = is.get(PSprite.SMOOTH_EDGES);
 			os.preload = is.get(PSprite.PRELOAD);
 			os.originX = is.get(PSprite.ORIGIN_X);
 			os.originY = is.get(PSprite.ORIGIN_Y);
-			os.bbMode = SPRITE_BB_CODE.get(is.get(PSprite.BB_MODE)); //0*=Automatic, 1=Full image, 2=Manual
+			os.bbMode = GmFile.SPRITE_BB_CODE.get(is.get(PSprite.BB_MODE)); //0*=Automatic, 1=Full image, 2=Manual
 			os.bbLeft = is.get(PSprite.BB_LEFT);
 			os.bbRight = is.get(PSprite.BB_RIGHT);
 			os.bbTop = is.get(PSprite.BB_TOP);
@@ -300,7 +329,7 @@ public final class EnigmaWriter
 			os.name = is.getName();
 			os.id = is.getId();
 
-			os.kind = SOUND_CODE.get(is.get(PSound.KIND));
+			os.kind = GmFile.SOUND_CODE.get(is.get(PSound.KIND));
 			os.fileType = is.get(PSound.FILE_TYPE);
 			os.fileName = is.get(PSound.FILE_NAME);
 			os.chorus = is.get(PSound.CHORUS);

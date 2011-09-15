@@ -14,6 +14,7 @@ import org.enigma.backend.other.Include;
 import org.enigma.backend.other.Trigger;
 import org.enigma.backend.resources.Background;
 import org.enigma.backend.resources.Font;
+import org.enigma.backend.resources.GameSettings;
 import org.enigma.backend.resources.GmObject;
 import org.enigma.backend.resources.Path;
 import org.enigma.backend.resources.Room;
@@ -63,7 +64,7 @@ public class EnigmaStruct extends Structure
 	public int extensionCount;
 
 	//public GameInformation gameInfo;
-	//public GameSettings gameSettings;
+	public GameSettings gameSettings;
 	public int lastInstanceId = 100000;
 	public int lastTileId = 10000000;
 

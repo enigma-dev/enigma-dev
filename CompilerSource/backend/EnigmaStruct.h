@@ -7,6 +7,7 @@
  */
 
 #include "JavaStruct.h"
+#include "resources/GameSettings.h"
 #include "resources/Sprite.h"
 #include "resources/Sound.h"
 #include "resources/Background.h"
@@ -59,7 +60,7 @@ struct EnigmaStruct
 	Extension *extensions;
 
 	//GameInformation gameInfo;
-	//GameSettings gameSettings;
+	GameSettings gameSettings;
 	int lastInstanceId;
 	int lastTileId;
 };

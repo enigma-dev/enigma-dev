@@ -11,9 +11,10 @@
 
 #include "../JavaStruct.h"
 #include "../util/Image.h"
+//import org.lateralgm.file.iconio.ICOFile;
 
 struct GameSettings
-{
+	{
 	int gameId; // randomized in GmFile constructor
 	boolean startFullscreen;
 	boolean interpolate;
@@ -39,10 +40,10 @@ struct GameSettings
 	byte gamePriority;
 	boolean freezeOnLoseFocus;
 	byte loadBarMode;
-	string frontLoadBar;
-	string backLoadBar;
+	//Image frontLoadBar;
+	//Image backLoadBar;
 	boolean showCustomLoadImage;
-	string loadingImage;
+	//Image loadingImage;
 	boolean imagePartiallyTransparent;
 	int loadImageAlpha;
 	boolean scaleProgressBar;
@@ -69,5 +70,5 @@ struct GameSettings
 	String copyright;
 	String description;
 
-	string gameIcon;
-};
+	String gameIcon; //filename
+	};

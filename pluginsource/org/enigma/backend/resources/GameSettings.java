@@ -8,67 +8,64 @@
 
 package org.enigma.backend.resources;
 
-import org.enigma.backend.util.Image;
-import org.lateralgm.file.iconio.ICOFile;
-
 import com.sun.jna.Structure;
 
 public class GameSettings extends Structure
 	{
-	int gameId; // randomized in GmFile constructor
-	boolean startFullscreen = false;
-	boolean interpolate = false;
-	boolean dontDrawBorder = false;
-	boolean displayCursor = true;
-	int scaling = -1;
-	boolean allowWindowResize = false;
-	boolean alwaysOnTop = false;
-	int colorOutsideRoom = 0x00000000; //color
-	boolean setResolution = false;
-	byte colorDepth;
-	byte resolution;
-	byte frequency;
-	boolean dontShowButtons = false;
-	boolean useSynchronization = false;
-	boolean disableScreensavers = true;
-	boolean letF4SwitchFullscreen = true;
-	boolean letF1ShowGameInfo = true;
-	boolean letEscEndGame = true;
-	boolean letF5SaveF6Load = true;
-	boolean letF9Screenshot = true;
-	boolean treatCloseAsEscape = true;
-	byte gamePriority;
-	boolean freezeOnLoseFocus = false;
-	byte loadBarMode;
-	Image frontLoadBar = null;
-	Image backLoadBar = null;
-	boolean showCustomLoadImage = false;
-	Image loadingImage = null;
-	boolean imagePartiallyTransparent = false;
-	int loadImageAlpha = 255;
-	boolean scaleProgressBar = true;
-	boolean displayErrors = true;
-	boolean writeToLog = false;
-	boolean abortOnError = false;
-	boolean treatUninitializedAs0 = false;
-	String author;
-	String version;
-	double lastChanged;
-	String information;
+	public int gameId; // randomized in GmFile constructor
+	public boolean startFullscreen = false;
+	public boolean interpolate = false;
+	public boolean dontDrawBorder = false;
+	public boolean displayCursor = true;
+	public int scaling = -1;
+	public boolean allowWindowResize = false;
+	public boolean alwaysOnTop = false;
+	public int colorOutsideRoom = 0x00000000; //color
+	public boolean setResolution = false;
+	public byte colorDepth;
+	public byte resolution;
+	public byte frequency;
+	public boolean dontShowButtons = false;
+	public boolean useSynchronization = false;
+	public boolean disableScreensavers = true;
+	public boolean letF4SwitchFullscreen = true;
+	public boolean letF1ShowGameInfo = true;
+	public boolean letEscEndGame = true;
+	public boolean letF5SaveF6Load = true;
+	public boolean letF9Screenshot = true;
+	public boolean treatCloseAsEscape = true;
+	public byte gamePriority;
+	public boolean freezeOnLoseFocus = false;
+	public byte loadBarMode;
+	//	public Image frontLoadBar = null;
+	//	public Image backLoadBar = null;
+	public boolean showCustomLoadImage = false;
+	//	public Image loadingImage = null;
+	public boolean imagePartiallyTransparent = false;
+	public int loadImageAlpha = 255;
+	public boolean scaleProgressBar = true;
+	public boolean displayErrors = true;
+	public boolean writeToLog = false;
+	public boolean abortOnError = false;
+	public boolean treatUninitializedAs0 = false;
+	public String author;
+	public String version;
+	public double lastChanged;
+	public String information;
 
 	//FIXME: Includes information moved
-	int includeFolder;
-	boolean overwriteExisting = false;
-	boolean removeAtGameEnd = false;
+	public int includeFolder;
+	public boolean overwriteExisting = false;
+	public boolean removeAtGameEnd = false;
 
-	int versionMajor = 1;
-	int versionMinor = 0;
-	int versionRelease = 0;
-	int versionBuild = 0;
-	String company;
-	String product;
-	String copyright;
-	String description;
+	public int versionMajor = 1;
+	public int versionMinor = 0;
+	public int versionRelease = 0;
+	public int versionBuild = 0;
+	public String company;
+	public String product;
+	public String copyright;
+	public String description;
 
-	ICOFile gameIcon;
+	public String gameIcon;
 	}

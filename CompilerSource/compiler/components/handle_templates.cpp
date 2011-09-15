@@ -72,10 +72,10 @@ int compile_handle_templates(EnigmaStruct* es)
 	values["cpupriority"] = gs->gamePriority;
 	values["focusfreeze"] = gs->freezeOnLoseFocus;
 	values["loadbarmode"] = gs->loadBarMode;
-	values["loadbarfore"] = gs->frontLoadBar;
-	values["loadbarback"] = gs->backLoadBar;
+	//values["loadbarfore"] = gs->frontLoadBar;
+	//values["loadbarback"] = gs->backLoadBar;
 	values["custloadimg"] = gs->showCustomLoadImage;
-	values["loadimage"]   = gs->loadingImage;
+	//values["loadimage"]   = gs->loadingImage;
 	values["imgtransp"]   = gs->imagePartiallyTransparent;
 	values["loadalpha"]   = gs->loadImageAlpha;
 	values["scalepbar"]   = gs->scaleProgressBar;
