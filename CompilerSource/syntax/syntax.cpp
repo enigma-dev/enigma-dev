@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -136,12 +136,12 @@ namespace syncheck
          breakandfollow, // Break and follow is true for "] )" and strings/varnames/digits.
          operatorlike;   // Operator like is true for OPERATOR, ASSOP, (, [, and statements expecting an expression.
     int macrolevel;
-    unsigned match;
+    unsigned match; // The index of the matching parenthesis/bracket/brace in the lex
     externs* ext;
     
     token(): type(TT_ERROR) {}
-    token(TT t, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(0), ext(NULL) {}
-    token(TT t, unsigned m, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(m), ext(NULL) {}
+    token(TT t,              string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(0), ext(NULL) {}
+    token(TT t, unsigned m,  string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(m), ext(NULL) {}
     token(TT t, externs *ex, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(0), ext(ex) {}
     operator string() { 
       char buf[12]; sprintf(buf,"%lu",(long unsigned)pos);
@@ -375,7 +375,8 @@ namespace syncheck
         case '}':
             if (lex[lexlast].operatorlike)
               return (syerr = "Expected identifier before closing brace", superPos);
-            lex.push_back(token(TT_ENDBRACE, "}", superPos, 1, true, false, false, mymacroind));
+            if (open_parenths.size())
+              lex.push_back(token(TT_ENDBRACE, open_parenths[open_parenths.size()-1].ind, "}", superPos, 1, true, false, false, mymacroind));
             open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '{', "closing brace");
             if (open_error != pt(-1)) return open_error;
           pos++; continue;
@@ -388,7 +389,8 @@ namespace syncheck
         case ']':
             if (lex[lexlast].operatorlike and lex[lexlast].type != TT_BEGINBRACKET)
               return (syerr = "Expected secondary expression before closing bracket", superPos);
-            lex.push_back(token(TT_ENDBRACKET, "]",superPos, 1, false, true, false, mymacroind));
+            if (open_parenths.size())
+              lex.push_back(token(TT_ENDBRACKET, open_parenths[open_parenths.size()-1].ind, "]",superPos, 1, false, true, false, mymacroind));
             open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '[', "closing bracket");
             if (open_error != pt(-1)) return open_error;
           pos++; continue;
@@ -399,7 +401,8 @@ namespace syncheck
         case ')':
             if (lex[lexlast].operatorlike and lex[lexlast].type != TT_BEGINPARENTH)
               return (syerr = "Expected secondary expression before closing parenthesis", superPos);
-            lex.push_back(token(TT_ENDPARENTH, ")", superPos, 1, false, lex[lexlast].type != TT_TYPE_NAME, false, mymacroind));
+            if (open_parenths.size())
+              lex.push_back(token(TT_ENDPARENTH, open_parenths[open_parenths.size()-1].ind, ")", superPos, 1, false, lex[lexlast].type != TT_TYPE_NAME, false, mymacroind));
             open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '(', "closing parenthesis");
             if (open_error != pt(-1)) return open_error;
           pos++; continue;
@@ -562,7 +565,7 @@ namespace syncheck
       return lex[open_parenths.rbegin()->ind].pos;
     }
     
-    for (size_t i = 0; i < lex.size(); i++) {
+    for (size_t i = 1; i < lex.size()-1; i++) {
       cout << lex[i].content << " ";
       switch (lex[i].type) 
       {
@@ -577,7 +580,13 @@ namespace syncheck
           break;
         case TT_FUNCTION:
           if (lex[i+1].type != TT_BEGINPARENTH)
-            return (syerr = "Misuse of function `" + lex[i].content + "': Add parameter list or rename to use as variable", pos);
+          {
+            if (lex[i+1].type == TT_ASSOP)
+              return (syerr = "Invalid assignment to function `" + lex[i].content + "'", lex[i+1].pos);
+            if (lex[i+1].type == TT_ASSOP)
+              return (syerr = "Invalid operation on function `" + lex[i].content + "'", lex[i+1].pos);
+            continue;
+          }
           else
           {
             bool contented = false;

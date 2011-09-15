@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -37,6 +37,7 @@ int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*);
 int compile_writeFontInfo(EnigmaStruct* es);
 int compile_writeRoomData(EnigmaStruct* es,parsed_object *EGMglobal);
 int compile_writeDefraggedEvents(EnigmaStruct* es);
+int compile_handle_templates(EnigmaStruct* es);
 
 // Resources added to module
 int module_write_sprites(EnigmaStruct *es, FILE *gameModule);

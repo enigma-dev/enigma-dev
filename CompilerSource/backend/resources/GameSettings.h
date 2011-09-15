@@ -11,64 +11,63 @@
 
 #include "../JavaStruct.h"
 #include "../util/Image.h"
-import org.lateralgm.file.iconio.ICOFile;
 
 struct GameSettings
-	{
+{
 	int gameId; // randomized in GmFile constructor
-	boolean startFullscreen = false;
-	boolean interpolate = false;
-	boolean dontDrawBorder = false;
-	boolean displayCursor = true;
-	int scaling = -1;
-	boolean allowWindowResize = false;
-	boolean alwaysOnTop = false;
-	int colorOutsideRoom = 0x00000000; //color
-	boolean setResolution = false;
+	boolean startFullscreen;
+	boolean interpolate;
+	boolean dontDrawBorder;
+	boolean displayCursor;
+	int scaling;
+	boolean allowWindowResize;
+	boolean alwaysOnTop;
+	int colorOutsideRoom; //color
+	boolean setResolution;
 	byte colorDepth;
 	byte resolution;
 	byte frequency;
-	boolean dontShowButtons = false;
-	boolean useSynchronization = false;
-	boolean disableScreensavers = true;
-	boolean letF4SwitchFullscreen = true;
-	boolean letF1ShowGameInfo = true;
-	boolean letEscEndGame = true;
-	boolean letF5SaveF6Load = true;
-	boolean letF9Screenshot = true;
-	boolean treatCloseAsEscape = true;
+	boolean dontShowButtons;
+	boolean useSynchronization;
+	boolean disableScreensavers;
+	boolean letF4SwitchFullscreen;
+	boolean letF1ShowGameInfo;
+	boolean letEscEndGame;
+	boolean letF5SaveF6Load;
+	boolean letF9Screenshot;
+	boolean treatCloseAsEscape;
 	byte gamePriority;
-	boolean freezeOnLoseFocus = false;
+	boolean freezeOnLoseFocus;
 	byte loadBarMode;
-	Image frontLoadBar = null;
-	Image backLoadBar = null;
-	boolean showCustomLoadImage = false;
-	Image loadingImage = null;
-	boolean imagePartiallyTransparent = false;
-	int loadImageAlpha = 255;
-	boolean scaleProgressBar = true;
-	boolean displayErrors = true;
-	boolean writeToLog = false;
-	boolean abortOnError = false;
-	boolean treatUninitializedAs0 = false;
-	String author = "";
-	String version = "100";
+	string frontLoadBar;
+	string backLoadBar;
+	boolean showCustomLoadImage;
+	string loadingImage;
+	boolean imagePartiallyTransparent;
+	int loadImageAlpha;
+	boolean scaleProgressBar;
+	boolean displayErrors;
+	boolean writeToLog;
+	boolean abortOnError;
+	boolean treatUninitializedAs0;
+	String author;
+	String version;
 	double lastChanged;
-	String information = "";
+	String information;
 
 	//FIXME: Includes information moved
 	int includeFolder;
-	boolean overwriteExisting = false;
-	boolean removeAtGameEnd = false;
+	boolean overwriteExisting;
+	boolean removeAtGameEnd;
 
-	int versionMajor = 1;
-	int versionMinor = 0;
-	int versionRelease = 0;
-	int versionBuild = 0;
-	String company = "";
-	String product = "";
-	String copyright = "";
-	String description = "";
+	int versionMajor;
+	int versionMinor;
+	int versionRelease;
+	int versionBuild;
+	String company;
+	String product;
+	String copyright;
+	String description;
 
-	ICOFile gameIcon;
-	}
+	string gameIcon;
+};

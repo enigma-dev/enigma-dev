@@ -6,9 +6,13 @@
  * See LICENSE for details.
  */
 
-#ifndef JAVASTRUCT_H
-#define JAVASTRUCT_H
+#ifdef JAVASTRUCT_H
+#  undef String
+#  undef boolean
+#  undef byte
+#else
+#  define JAVASTRUCT_H
+#endif
 #define String const char*
 #define boolean int
 #define byte unsigned char
-#endif

@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -419,6 +419,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   res = compile_writeGlobals(es,&EGMglobal);
   irrr();
 
+
+  // Now we write any additional templates requested by the window system.
+  // compile_handle_templates(es);
 
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

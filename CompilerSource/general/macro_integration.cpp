@@ -41,8 +41,8 @@ void macro_push_info::release(string &c, pt &p) {
 
 bool macro_recurses(string name, macro_stack_t &mymacrostack, unsigned mymacroind) {
   for (unsigned int iii = 0; iii < mymacroind; iii++)
-   if (mymacrostack[iii].name == name)
-     return 1;
+  if (mymacrostack[iii].name == name)
+    return 1;
   return 0;
 }
 

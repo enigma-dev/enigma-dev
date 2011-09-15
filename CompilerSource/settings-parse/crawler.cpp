@@ -111,13 +111,19 @@ namespace extensions
   void crawl_for_locals()
   {
     locals.clear();
+    
+    current_scope = &global_scope, immediate_scope = NULL;
+    if (!find_extname("enigma", 0xFFFFFFFF))
+      return (cout << "ERROR! ENIGMA NAMESPACE NOT FOUND. THIS SHOULD NEVER HAPPEN." << endl, void());
+    externs* namespace_enigma = ext_retriever_var;
+    
     for (unsigned i = 0; i < parsed_extensions.size(); i++)
     {
-      current_scope = &global_scope, immediate_scope = NULL;
-      find_extname("enigma", 0xFFFFFFFF);
+      if (parsed_extensions[i].implements == "")
+        continue;
       
-      immediate_scope = ext_retriever_var;
-      bool found = find_extname(parsed_extensions[i].implements,0xFFFFFFFF);
+      immediate_scope = namespace_enigma;
+      bool found = find_extname(parsed_extensions[i].implements,0xFFFFFFFF, false);
       
       if (!found)
         cout << "ERROR! Extension implements " << parsed_extensions[i].implements << " without defining it!" << endl;

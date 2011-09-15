@@ -94,12 +94,4 @@ extern string working_directory;
 extern string program_directory;
 extern string temp_directory;
 
-
-int parameter_count(){
-    
-}
-string parameter_string(int n){
-    
-}
-
 string environment_get_variable(string name);

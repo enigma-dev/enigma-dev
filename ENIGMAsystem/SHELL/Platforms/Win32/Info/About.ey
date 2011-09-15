@@ -11,3 +11,4 @@ Depends:
 	Build-Platforms: Windows
 
 Links: '../additional/zlib/libzlib.a' '../additional/al/lib/Win32/OpenAL32.lib' 'Platforms/Win32/ffi/libFFI.a' -lcomdlg32 -lgdi32
+Templates: game_info.rc.template
