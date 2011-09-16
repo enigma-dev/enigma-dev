@@ -40,7 +40,6 @@ using namespace std;
 #include "../../parser/parser.h"
 
 #include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../../backend/resources/GameSettings.h" //LateralGM interface structures
 #include "../compile_common.h"
 
 int compile_handle_templates(EnigmaStruct* es)

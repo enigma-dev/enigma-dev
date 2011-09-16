@@ -21,7 +21,7 @@ build:
 	cd Widget_Systems/$(WIDGETS)/      && $(MAKE) this MODE=$(GMODE) GFLAGS="$(GFLAGS)" ECFLAGS="$(ECFLAGS)" ECPPFLAGS="$(ECPPFLAGS)" OBJECTS="$(OBJECTS)"
 
 link: needout $(EXTENSIONS)
-	g++ SHELLmain.cpp libEGMstd.cpp Graphics_Systems/$(GRAPHICS)/$(OBJECTS)/*.o Platforms/$(PLATFORM)/$(OBJECTS)/*.o Universal_System/$(OBJECTS)/*.o Audio_Systems/$(AUDIO)/$(OBJECTS)/*.o Collision_Systems/$(COLLISION)/$(OBJECTS)/*.o Audio_Systems/$(AUDIO)/$(OBJECTS)/*.a Audio_Systems/$(AUDIO)/$(OBJECTS)/libogg.a Widget_Systems/$(WIDGETS)/$(OBJECTS)/*.o $(GLINKS) $(EXTLINKS) -o "$(OUTPUTNAME)"
+	g++ SHELLmain.cpp libEGMstd.cpp Graphics_Systems/$(GRAPHICS)/$(OBJECTS)/*.o Platforms/$(PLATFORM)/$(OBJECTS)/*.o Universal_System/$(OBJECTS)/*.o Audio_Systems/$(AUDIO)/$(OBJECTS)/*.o Collision_Systems/$(COLLISION)/$(OBJECTS)/*.o Widget_Systems/$(WIDGETS)/$(OBJECTS)/*.o $(GLINKS) $(EXTLINKS) Audio_Systems/Codecs/.eobjs/*.a Audio_Systems/Codecs/.eobjs/libogg.a -o "$(OUTPUTNAME)"
 	@echo Built to "$(OUTPUTNAME)"
 
 clean:

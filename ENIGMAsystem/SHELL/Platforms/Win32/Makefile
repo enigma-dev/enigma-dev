@@ -4,11 +4,11 @@ $(OBJECTS)/externals.o: externals.cpp ffi/ffi.h ffi/ffitarget.h ../../Universal_
 	$(CXX) -c externals.cpp		-o $(OBJECTS)/externals.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/file_manip.o: file_manip.cpp
 	$(CXX) -c file_manip.cpp		-o $(OBJECTS)/file_manip.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/WINDOWScallback.o: WINDOWScallback.cpp
+$(OBJECTS)/WINDOWScallback.o: WINDOWScallback.cpp WINDOWSwindow.h
 	$(CXX) -c WINDOWScallback.cpp		-o $(OBJECTS)/WINDOWScallback.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/WINDOWSfonts.o: WINDOWSfonts.cpp ../../libEGMstd.h
 	$(CXX) -c WINDOWSfonts.cpp		-o $(OBJECTS)/WINDOWSfonts.o $(GFLAGS) $(ECPPFLAGS)
-$(OBJECTS)/WINDOWSmain.o: WINDOWSmain.cpp WINDOWScallback.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h
+$(OBJECTS)/WINDOWSmain.o: WINDOWSmain.cpp WINDOWScallback.h ../../Universal_System/var4.h ../../Universal_System/var_te.h ../../Universal_System/roomsystem.h ../../Universal_System/multifunction_variant.h WINDOWSwindow.h
 	$(CXX) -c WINDOWSmain.cpp		-o $(OBJECTS)/WINDOWSmain.o $(GFLAGS) $(ECPPFLAGS)
 $(OBJECTS)/WINDOWSshow_error.o: WINDOWSshow_error.cpp
 	$(CXX) -c WINDOWSshow_error.cpp		-o $(OBJECTS)/WINDOWSshow_error.o $(GFLAGS) $(ECPPFLAGS)

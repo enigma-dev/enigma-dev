@@ -32,25 +32,14 @@ for file in *.cpp ;
   done;
 printf "\n" >> Makefile;
 echo "	cd alure  && \$(MAKE) static DEST=\"../\$(OBJECTS)\" ECFLAGS=\"\$(ECFLAGS)\" ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
-echo "	cd dumb   && \$(MAKE) static DEST=\"../\$(OBJECTS)\" ECFLAGS=\"\$(ECFLAGS)\" ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
-echo "	cd ogg    && \$(MAKE) static DEST=\"../\$(OBJECTS)\" ECFLAGS=\"\$(ECFLAGS)\" ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
-echo "	cd vorbis && \$(MAKE) static DEST=\"../\$(OBJECTS)\" ECFLAGS=\"\$(ECFLAGS)\" ECPPFLAGS=\"\$(ECPPFLAGS)\"" >> Makefile;
+echo "	cd ../Codecs &&\$(MAKE) " >> Makefile;
 echo "" >> Makefile;
 
 echo "" >> Makefile;
 echo "clean:" >> Makefile;
 echo "	-rm .eobjs/*/*/*/*" >> Makefile;
-echo "	cd alure	&& \$(MAKE) clean" >> Makefile;
-echo "	cd dumb		&& \$(MAKE) clean" >> Makefile;
-echo "	cd ogg		&& \$(MAKE) clean" >> Makefile;
-echo "	cd vorbis	&& \$(MAKE) clean" >> Makefile;
+echo "	cd alure && \$(MAKE) clean" >> Makefile;
 
-cd ./alure/
-./automake.sh
-cd ../ogg
-./automake.sh
-cd ../vorbis
-./automake.sh
-cd ../dumb
-./automake.sh
+cd ./alure/ && ./automake.sh
+
 

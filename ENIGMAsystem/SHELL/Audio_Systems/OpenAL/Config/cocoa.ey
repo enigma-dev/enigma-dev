@@ -1,5 +1,5 @@
 %e-yaml
 ---
 
-Links: -framework OpenAL
+Links: -framework OpenAL Audio_Systems/OpenAL/.eobjs/libalure.a
 

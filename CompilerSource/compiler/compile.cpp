@@ -451,6 +451,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
   make += "GLINKS=\"" + (TOPLEVEL_links == ""? "" : TOPLEVEL_links + " ") + glinks + "\" ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
+  make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
+  make += "COLLISION=" + extensions::targetAPI.collisionSys + " ";
   make += "WIDGETS="  + extensions::targetAPI.widgetSys + " ";
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
 

@@ -298,7 +298,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           if (argc >= argcmax)
           {
             argcmax += 16;
-            if (!realloc(argv, sizeof(char*) * (argcmax+1)))
+            if (!(argv = (char**)realloc(argv, sizeof(char*) * (argcmax+1))))
               return 0;
           }
           argv[argc++] = np;

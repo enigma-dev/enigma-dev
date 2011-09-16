@@ -66,10 +66,10 @@ inline void action_set_caption(const int score, const string scoreCaption, const
     caption_health=healthCaption;
 }
 
-inline void action_sound(const int sound, const int loop) {
-	if (loop==0) sound_play(sound);
-	else sound_loop(sound);
-}
+#define action_sound(snd,loop) ((loop?sound_play:sound_loop)(snd))
+#define action_if_sound sound_isplaying
+#define action_end_sound sound_stop
+
 
 inline void action_color(const int color) {
 	draw_set_color(color);
@@ -240,12 +240,6 @@ inline void action_draw_text(const string text, const double x, const double y) 
     else {
         draw_text(x,y,text);
     }
-}
-
-inline bool action_if_sound(const int sound) {return sound_isplaying(sound);}
-
-inline void action_end_sound(const int sound) {
-    sound_stop(sound);
 }
 
 inline void action_sleep(const double milliseconds, const int redraw) {
