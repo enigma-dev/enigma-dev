@@ -42,6 +42,9 @@ namespace enigma
   
   // This function is called for each sound in the game's module.
   int sound_add_from_buffer(int id, void* buffer, size_t size); // It should add the sound under the given ID.
+
+  // This function allocates a new sound resource but does not put anything in it.
+  int sound_allocate();
   
   // This function is called at the end of the game, as it closes.
   void audiosystem_cleanup(); // It should free memory and shut down the audio library.

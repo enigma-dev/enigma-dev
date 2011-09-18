@@ -105,6 +105,30 @@ namespace enigma
     sounds[id].loaded = 2;
     return 0;
   }
+
+  int sound_allocate() {
+    // Make room for sound
+    const size_t osc = enigma::numSounds;
+    if (osc <= enigma::sound_idmax)
+    {
+  	enigma::sound *nsounds = new enigma::sound[enigma::numSounds = enigma::sound_idmax+1];
+  	for (size_t i = 0; i < osc; i++)
+  	  nsounds[i] = enigma::sounds[i];
+  	for (size_t i = osc; i < enigma::numSounds; i++)
+  	{
+  	  alGenSources(1, &nsounds[i].src);
+  	  if(alGetError() != AL_NO_ERROR) {
+  		fprintf(stderr, "Failed to create OpenAL source!\n");
+  		return 1;
+  	  }
+  	  nsounds[i].loaded = 1;
+  	}
+  	delete[] enigma::sounds;
+  	enigma::sounds = nsounds;
+    }
+
+	return enigma::sound_idmax++;
+  }
   
   void audiosystem_update(void) { alureUpdate(); }
   
@@ -188,29 +212,9 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
   fseek(afile,0,SEEK_SET);
   fread(fdata,1,flen,afile);
   
-  // Make room for sound
-  const size_t osc = enigma::numSounds;
-  if (osc <= enigma::sound_idmax)
-  {
-    enigma::sound *nsounds = new enigma::sound[enigma::numSounds = enigma::sound_idmax+1];
-    for (size_t i = 0; i < osc; i++)
-      nsounds[i] = enigma::sounds[i];
-    for (size_t i = osc; i < enigma::numSounds; i++)
-    {
-      alGenSources(1, &nsounds[i].src);
-      if(alGetError() != AL_NO_ERROR) {
-        fprintf(stderr, "Failed to create OpenAL source!\n");
-        return 1;
-      }
-      nsounds[i].loaded = 1;
-    }
-    delete[] enigma::sounds;
-    enigma::sounds = nsounds;
-  }
-  
   // Decode sound
-  int rid;
-  if (enigma::sound_add_from_buffer(rid = enigma::sound_idmax++,fdata,flen))
+  int rid = enigma::sound_allocate();
+  if (enigma::sound_add_from_buffer(rid,fdata,flen))
     return (--enigma::sound_idmax, -1);
   
   return rid;
