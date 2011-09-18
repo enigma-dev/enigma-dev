@@ -10,5 +10,4 @@ Icon: datetime.png
 Depends: None
 Dependencies: None
 Implement: extension_datetime
-Links: $objects
 

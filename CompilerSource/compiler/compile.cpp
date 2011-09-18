@@ -465,9 +465,11 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     string objdir = "/.eobjs/" + compilepath + "/*.o";
     extstr += parsed_extensions[0].pathname + "/Extension";
     extlinks += parsed_extensions[0].pathname + objdir;
-    for (unsigned i = 1; i < parsed_extensions.size(); i++)
-      extstr += " " + parsed_extensions[i].pathname + "/Extension",
+    for (unsigned i = 1; i < parsed_extensions.size(); i++) {
+      extstr += " " + parsed_extensions[i].pathname + "/Extension";
       extlinks += " " + parsed_extensions[i].pathname + objdir;
+	  extlinks += " " + parsed_extensions[i].links;
+	}
   }
   make += extstr + "\" " + extlinks + "\" ";
 
