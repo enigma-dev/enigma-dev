@@ -89,13 +89,13 @@ import org.lateralgm.compare.SimpleCasesComparator;
 import org.lateralgm.components.CustomFileChooser;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
-import org.lateralgm.components.mdi.MDIFrame;
+import org.lateralgm.components.mdi.RevertableMDIFrame;
 import org.lateralgm.main.LGM;
 import org.lateralgm.subframes.CodeFrame;
 import org.lateralgm.subframes.CodeFrame.CodeHolder;
 
-public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,FocusListener,
-		PopupMenuListener
+public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionListener,
+		FocusListener,PopupMenuListener
 	{
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon CODE_ICON = LGM.getIconForKey("Resource.SCRIPT"); //$NON-NLS-1$
@@ -443,7 +443,7 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		{
 		extensions = new HashMap<ExtensionSetting,Boolean>();
 		for (ExtensionSetting es : SettingsHandler.extensions)
-			extensions.put(es,true);
+			extensions.put(es,es.def);
 
 		JPanel p = new JPanel(new BorderLayout());
 		//		p.setLayout(new BoxLayout(p,BoxLayout.PAGE_AXIS));
@@ -629,6 +629,12 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 			{
 			e.printStackTrace();
 			}
+		}
+
+	@Override
+	public String getConfirmationName()
+		{
+		return Messages.getString("EnigmaSettingsFrame.DIALOG_KEEPCHANGES_RESOURCE"); //$NON-NLS-1$
 		}
 
 	public void updateResource()
@@ -918,37 +924,6 @@ public class EnigmaSettingsFrame extends MDIFrame implements ActionListener,Focu
 		TargetSelection ts = (TargetSelection) o;
 		tfAuth.setText(ts.auth);
 		taDesc.setText(ts.desc);
-		}
-
-	protected void fireInternalFrameEvent(int id)
-		{
-		if (id == InternalFrameEvent.INTERNAL_FRAME_CLOSING)
-			{
-			if (resourceChanged())
-				{
-				String resource = Messages.getString("EnigmaSettingsFrame.DIALOG_KEEPCHANGES_RESOURCE"); //$NON-NLS-1$
-				int ret = JOptionPane.showConfirmDialog(
-						LGM.frame,
-						org.lateralgm.messages.Messages.format("ResourceFrame.KEEPCHANGES",resource), //$NON-NLS-1$
-						org.lateralgm.messages.Messages.getString("ResourceFrame.KEEPCHANGES_TITLE"),JOptionPane.YES_NO_CANCEL_OPTION); //$NON-NLS-1$
-				if (ret == JOptionPane.YES_OPTION)
-					{
-					updateResource();
-					setVisible(false);
-					}
-				else if (ret == JOptionPane.NO_OPTION)
-					{
-					revertResource();
-					setVisible(false);
-					}
-				}
-			else
-				{
-				updateResource();
-				setVisible(false);
-				}
-			}
-		super.fireInternalFrameEvent(id);
 		}
 
 	private final InternalFrameListener ifl = new CodeFrameListener();

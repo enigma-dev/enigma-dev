@@ -4,6 +4,7 @@
 Name: Game-Music-Emulator
 ID: GME
 Description: Loads sounds using libgme.
+Default: false
 
 Depends: None
 Dependencies: None
