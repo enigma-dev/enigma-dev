@@ -1,0 +1,10 @@
+%e-yaml
+---
+
+Name: Game-Music-Emulator
+ID: GME
+Description: Loads sounds using libgme.
+
+Depends: None
+Dependencies: None
+Links: -lgme
