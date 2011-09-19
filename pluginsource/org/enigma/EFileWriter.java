@@ -727,7 +727,7 @@ public class EFileWriter
 
 		LibManager.autoLoad();
 		ResNode root = new ResNode("Root",(byte) 0,null,null); //$NON-NLS-1$;
-		GmFile gf = GmFileReader.readGmFile(in.getPath(),root);
+		GmFile gf = GmFileReader.readGmFile(in,root);
 
 		writeEgmFile(out,gf,root,true);
 		}

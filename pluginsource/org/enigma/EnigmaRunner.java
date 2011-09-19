@@ -58,6 +58,7 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileFilter;
 
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
@@ -73,12 +74,14 @@ import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
+import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.jedit.GMLKeywords;
 import org.lateralgm.jedit.GMLKeywords.Construct;
 import org.lateralgm.jedit.GMLKeywords.Function;
 import org.lateralgm.jedit.GMLKeywords.Keyword;
 import org.lateralgm.main.LGM;
+import org.lateralgm.main.FileChooser.FileReader;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
@@ -114,6 +117,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public EnigmaRunner()
 		{
+		addReader();
 		populateMenu();
 		populateTree();
 		LGM.addReloadListener(this);
@@ -276,6 +280,41 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		ef.setVisible(false);
 		return true;
+		}
+
+	void addReader()
+		{
+		LGM.listener.fc.addReader(new EgmReader());
+		//		FileChooser.fileViews.add(new FileView()
+		//			{
+		//
+		//			});
+		}
+
+	class EgmReader implements FileReader
+		{
+		CustomFileFilter filter = new CustomFileFilter(
+				Messages.getString("EnigmaRunner.FORMAT_READER"),".egm"); //$NON-NLS-1$ //$NON-NLS-2$;
+
+		public FileFilter getGroupFilter()
+			{
+			return filter;
+			}
+
+		public FileFilter[] getFilters()
+			{
+			return new FileFilter[0];
+			}
+
+		public boolean canRead(File f)
+			{
+			return filter.accept(f);
+			}
+
+		public GmFile readFile(File f, ResNode root) throws GmFormatException
+			{
+			return EFileReader.readEgmFile(f,root,true);
+			}
 		}
 
 	public void populateMenu()

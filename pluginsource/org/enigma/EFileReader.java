@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,10 +32,12 @@ import org.enigma.utility.EEFReader;
 import org.enigma.utility.EEFReader.EEFNode;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
+import org.lateralgm.file.GmFormatException;
 import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.file.ResourceList;
 import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.LGM;
+import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
 import org.lateralgm.resources.Font;
 import org.lateralgm.resources.GameInformation;
@@ -363,36 +364,6 @@ public class EFileReader
 			}
 		}
 
-	//probably won't need this, but in case I do (if not, delete)
-	static class ZipOrFile extends ZipEntry
-		{
-		File f;
-
-		public ZipOrFile(File f)
-			{
-			super(f.getName());
-			this.f = f;
-			}
-
-		@Override
-		public boolean isDirectory()
-			{
-			return f.isDirectory();
-			}
-
-		@Override
-		public String getName()
-			{
-			return f.getName();
-			}
-
-		@Override
-		public long getSize()
-			{
-			return f.length();
-			}
-		}
-
 	// Module maps
 	/** Used to register readers with their resource kinds. */
 	static Map<Kind,ResourceReader> readers = new HashMap<Kind,ResourceReader>();
@@ -427,20 +398,23 @@ public class EFileReader
 		}
 
 	// Constructors
-	public static void readEgmFile(File f, boolean zip) throws IOException
+	public static GmFile readEgmFile(File f, ResNode root, boolean zip) throws GmFormatException
 		{
-		readEgmFile(zip ? new EGMZipFile(f) : new EGMFolderFile(f));
+		GmFile gf = new GmFile();
+		try
+			{
+			readEgmFile(zip ? new EGMZipFile(f) : new EGMFolderFile(f),gf,root);
+			return gf;
+			}
+		catch (IOException e)
+			{
+			throw new GmFormatException(gf,e);
+			}
 		}
 
-	public static void readEgmFile(EGMFile f) throws IOException
+	public static void readEgmFile(EGMFile f, GmFile gf, ResNode root) throws IOException
 		{
-		LGM.main(new String[0]);
-		GmFile gf = new GmFile();
-		ResNode root = new ResNode("Root",(byte) 0,null,null);
 		readNodeChildren(f,gf,root,null,new String());
-		LGM.currentFile = gf;
-		LGM.root = root;
-		LGM.reload(true);
 		}
 
 	// Workhorse methods
@@ -585,7 +559,7 @@ public class EFileReader
 			{
 			try
 				{
-				r.data = readFully(in).toByteArray();
+				r.data = Util.readFully(in).toByteArray();
 				}
 			catch (IOException e)
 				{
@@ -689,7 +663,7 @@ public class EFileReader
 			{
 			try
 				{
-				r.setCode(new String(readFully(in).toByteArray()));
+				r.setCode(new String(Util.readFully(in).toByteArray()));
 				}
 			catch (IOException e)
 				{
@@ -1024,7 +998,7 @@ public class EFileReader
 			{
 			try
 				{
-				r.put(PGameInformation.TEXT,readFully(in).toString());
+				r.put(PGameInformation.TEXT,Util.readFully(in).toString());
 				}
 			catch (IOException e)
 				{
@@ -1092,6 +1066,7 @@ public class EFileReader
 				Object o = i.get(entries[j]);
 				if (o == null) continue;
 				String fn = o.toString();
+				if (fn.isEmpty() || fn.equals("null")) continue;
 				if (!dir.isEmpty()) fn = dir + '/' + fn;
 				f.getEntry(fn);
 				if (f.exists())
@@ -1110,26 +1085,9 @@ public class EFileReader
 						}
 					}
 				else
-					System.err.println("Data file missing: " + fn);
+					System.err.println("3Data file missing: " + fn);
 				}
 			}
-		}
-
-	/** Use Util.readFully instead. */
-	@Deprecated
-	public static ByteArrayOutputStream readFully(InputStream in) throws IOException
-		{
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-		byte[] buffer = new byte[4096];
-
-		// Read in the bytes
-		int numRead = 0;
-		while ((numRead = in.read(buffer)) >= 0)
-			baos.write(buffer,0,numRead);
-
-		// Close the input stream and return bytes
-		return baos;
 		}
 
 	public static void mainEef(String args[])
@@ -1149,9 +1107,11 @@ public class EFileReader
 			}
 		}
 
-	public static void main(String args[]) throws IOException
+	public static void main(String args[]) throws GmFormatException
 		{
 		File f = new File(System.getProperty("user.home"),"Dropbox/ENIGMA/outputEgmFile.egm");
-		readEgmFile(f,true);
+		LGM.main(new String[0]);
+		LGM.currentFile = readEgmFile(f,LGM.newRoot(),true);
+		LGM.reload(true);
 		}
 	}

@@ -94,11 +94,12 @@ public class EnigmaCli
 	public static InitReturn initailize(String fn, ResNode root) throws FileNotFoundException,
 			GmFormatException
 		{
-		if (!new File(fn).exists()) throw new FileNotFoundException(fn);
+		File file = new File(fn);
+		if (!file.exists()) throw new FileNotFoundException(fn);
 		InitReturn r = new InitReturn();
 		LibManager.autoLoad();
 		r.root = root == null ? new ResNode("Root",(byte) 0,null,null) : root; //$NON-NLS-1$;
-		r.f = GmFileReader.readGmFile(fn,r.root);
+		r.f = GmFileReader.readGmFile(file,r.root);
 		try
 			{
 			attemptLib();
