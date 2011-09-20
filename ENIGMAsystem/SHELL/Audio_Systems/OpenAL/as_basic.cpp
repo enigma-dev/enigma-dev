@@ -37,11 +37,12 @@ namespace enigma
 {
   struct sound
   {
-    ALuint src, buf; // The source-id and buffer-id of the sound data
+    ALuint src, buf[3]; // The source-id and buffer-id of the sound data
+	alureStream *stream; // optional stream
     int loaded;   // Degree to which this sound has been loaded successfully
     bool idle;    // True if this sound is not being used, false if playing or paused.
     bool playing; // True if this sound is playing; not paused or idle.
-    sound(): src(0), buf(0), loaded(0), idle(1), playing(0) {}
+    sound(): src(0), stream(0), loaded(0), idle(1), playing(0) { buf[0] = 0; buf[1] = 0; buf[2] = 0; }
   };
   
   sound *sounds;
@@ -91,7 +92,7 @@ namespace enigma
     if (sounds[id].loaded != 1)
       return 1;
     
-    ALuint& buf = sounds[id].buf;
+    ALuint& buf = sounds[id].buf[0];
     buf = alureCreateBufferFromMemory((ALubyte*)buffer, bufsize);
     
     if(!buf) {
@@ -102,6 +103,23 @@ namespace enigma
     alSourcei(sounds[id].src, AL_BUFFER, buf);
     alSourcei(sounds[id].src, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(sounds[id].src, AL_REFERENCE_DISTANCE, 1);
+    sounds[id].loaded = 2;
+    return 0;
+  }
+
+  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void *userdata) {
+    if (sounds[id].loaded != 1)
+      return 1;
+
+    sounds[id].stream = alureCreateStreamFromCallback((ALuint (*)(void*, ALubyte*, ALuint))callback, userdata, AL_FORMAT_MONO16, 44100, 2048, 3, sounds[id].buf);
+    if (!sounds[id].stream) {
+      fprintf(stderr, "Could not create stream %d: %s\n", id, alureGetErrorString());
+      return 1;
+    }
+
+	/*alSourcei(sounds[id].src, AL_BUFFER, sounds[id].buf);
+	alSourcei(sounds[id].src, AL_SOURCE_RELATIVE, AL_TRUE);
+	alSourcei(sounds[id].src, AL_REFERENCE_DISTANCE, 1);*/
     sounds[id].loaded = 2;
     return 0;
   }
@@ -139,7 +157,7 @@ namespace enigma
       switch (sounds[i].loaded)
       {
         case 2:
-          alDeleteBuffers(1, &sounds[i].buf);
+          alDeleteBuffers(sounds[i].stream ? 3 : 1, sounds[i].buf);
         case 1:
           alDeleteSources(1, &sounds[i].src);
       }
@@ -153,7 +171,9 @@ bool sound_play(int sound) // Returns nonzero if an error occurred
 {
   enigma::sound &snd = enigma::sounds[sound]; //snd.looping = false;
   alSourcei(snd.src, AL_LOOPING, AL_FALSE); //Just playing
-  return snd.idle = !(snd.playing = (alurePlaySource(snd.src, enigma::eos_callback, (void*)sound) != AL_FALSE));
+  return snd.idle = !(snd.playing = !snd.stream ?
+	alurePlaySource(snd.src, enigma::eos_callback, (void*)sound) != AL_FALSE :
+	alurePlaySourceStream(snd.src, snd.stream, 3, -1, enigma::eos_callback, (void*)sound) != AL_FALSE);
 }
 bool sound_loop(int sound)
 {
