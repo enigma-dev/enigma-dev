@@ -79,7 +79,7 @@ int sound_add_from_gme(string filename) {
 		sample_t buffer[buffer_size / sizeof(sample_t)];
 		gme_play(emu, sizeof(buffer) / sizeof(sample_t), buffer);
 		
-		data.insert(data.end(), buffer, buffer + buffer_size);
+		data.insert(data.end(), (char*)buffer, (char*)buffer + sizeof(buffer));
 	}
 
 	gme_delete(emu);
