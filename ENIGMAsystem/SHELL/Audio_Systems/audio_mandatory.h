@@ -45,7 +45,7 @@ namespace enigma
 
   // This function creates a stream-based sound.
   // TODO: allow client to specify format and rate
-  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *data, size_t bytes), void *userdata);
+  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *data, size_t bytes), void (*cleanup)(void *userdata), void *userdata);
 
   // This function allocates a new sound resource but does not put anything in it.
   int sound_allocate();

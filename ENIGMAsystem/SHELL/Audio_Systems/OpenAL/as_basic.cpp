@@ -39,10 +39,16 @@ namespace enigma
   {
     ALuint src, buf[3]; // The source-id and buffer-id of the sound data
 	alureStream *stream; // optional stream
+	void (*cleanup)(void *userdata); // optional cleanup callback for streams
+	void *userdata; // optional userdata for streams
+
     int loaded;   // Degree to which this sound has been loaded successfully
     bool idle;    // True if this sound is not being used, false if playing or paused.
     bool playing; // True if this sound is playing; not paused or idle.
-    sound(): src(0), stream(0), loaded(0), idle(1), playing(0) { buf[0] = 0; buf[1] = 0; buf[2] = 0; }
+
+    sound(): src(0), stream(0), cleanup(0), userdata(0), loaded(0), idle(1), playing(0) {
+	  buf[0] = 0; buf[1] = 0; buf[2] = 0;
+	}
   };
   
   sound *sounds;
@@ -107,19 +113,18 @@ namespace enigma
     return 0;
   }
 
-  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void *userdata) {
+  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*cleanup)(void *userdata), void *userdata) {
     if (sounds[id].loaded != 1)
       return 1;
 
-    sounds[id].stream = alureCreateStreamFromCallback((ALuint (*)(void*, ALubyte*, ALuint))callback, userdata, AL_FORMAT_MONO16, 44100, 2048, 3, sounds[id].buf);
+    sounds[id].stream = alureCreateStreamFromCallback((ALuint (*)(void*, ALubyte*, ALuint))callback, userdata, AL_FORMAT_STEREO16, 44100, 4096, 3, sounds[id].buf);
     if (!sounds[id].stream) {
       fprintf(stderr, "Could not create stream %d: %s\n", id, alureGetErrorString());
       return 1;
     }
+	sounds[id].cleanup = cleanup;
+	sounds[id].userdata = userdata;
 
-	/*alSourcei(sounds[id].src, AL_BUFFER, sounds[id].buf);
-	alSourcei(sounds[id].src, AL_SOURCE_RELATIVE, AL_TRUE);
-	alSourcei(sounds[id].src, AL_REFERENCE_DISTANCE, 1);*/
     sounds[id].loaded = 2;
     return 0;
   }
@@ -158,6 +163,12 @@ namespace enigma
       {
         case 2:
           alDeleteBuffers(sounds[i].stream ? 3 : 1, sounds[i].buf);
+		  if (sounds[i].stream) {
+			alureStopSource(sounds[i].src, true);
+			alureDestroyStream(sounds[i].stream, 0, 0);
+			if (sounds[i].cleanup) sounds[i].cleanup(sounds[i].userdata);
+		  }
+		  // fallthrough
         case 1:
           alDeleteSources(1, &sounds[i].src);
       }
