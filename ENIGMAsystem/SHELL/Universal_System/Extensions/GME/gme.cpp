@@ -9,7 +9,6 @@ using std::string;
 typedef signed short sample_t;
 const int sample_rate = 44100;
 const int channels = 1;
-const int track = 0;
 const int buffer_size = 1024;
 
 size_t callback(void *userdata, void *buffer, size_t size) {
@@ -22,9 +21,9 @@ size_t callback(void *userdata, void *buffer, size_t size) {
 		return 0;
 }
 
-int sound_add_from_gme(string filename) {
+int sound_add_from_gme(string filename, int track) {
 	Music_Emu *emu;
-	gme_open_file("test.nsf", &emu, sample_rate);
+	gme_open_file(filename.c_str(), &emu, sample_rate);
 	gme_start_track(emu, track);
 
 	return enigma::sound_add_from_stream(
