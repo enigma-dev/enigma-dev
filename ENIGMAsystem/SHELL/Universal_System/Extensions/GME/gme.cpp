@@ -1,4 +1,4 @@
-#include "gme.h"
+#include <gme/gme.h>
 #include <stdint.h>
 #include <cstring>
 #include <vector>
@@ -7,9 +7,6 @@ using std::string;
 #include "../../../Audio_Systems/audio_mandatory.h"
 
 typedef signed short sample_t;
-const int sample_rate = 44100;
-const int channels = 1;
-const int buffer_size = 1024;
 
 size_t callback(void *userdata, void *buffer, size_t size) {
 	Music_Emu *emu = (Music_Emu*)userdata;
@@ -21,12 +18,19 @@ size_t callback(void *userdata, void *buffer, size_t size) {
 		return 0;
 }
 
+void cleanup(void *userdata) {
+	Music_Emu *emu = (Music_Emu*)userdata;
+	gme_delete(emu);
+}
+
 int sound_add_from_gme(string filename, int track) {
 	Music_Emu *emu;
-	gme_open_file(filename.c_str(), &emu, sample_rate);
-	gme_start_track(emu, track);
+	gme_open_file(filename.c_str(), &emu, 44100);
+	if (!emu)
+		return -1;
 
+	gme_start_track(emu, track - 1);
 	return enigma::sound_add_from_stream(
-		enigma::sound_allocate(), callback, (void*)emu
+		enigma::sound_allocate(), callback, cleanup, (void*)emu
 	);
 }
