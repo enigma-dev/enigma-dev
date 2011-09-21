@@ -30,7 +30,6 @@ int sound_add_from_gme(string filename, int track) {
 		return -1;
 
 	gme_start_track(emu, track - 1);
-	return enigma::sound_add_from_stream(
-		enigma::sound_allocate(), callback, cleanup, (void*)emu
-	);
+	const int sid = enigma::sound_allocate();
+	return enigma::sound_add_from_stream(sid,callback,cleanup,(void*)emu)?-1:sid;
 }

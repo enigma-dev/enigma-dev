@@ -3,8 +3,10 @@
 
 Name: Game-Music-Emulator
 ID: GME
-Description: Loads sounds using libgme.
+Author: Rusky
+Description: Loads emulator sounds and music using libgme.
 Default: false
+Icon: gme.png
 
 Depends: None
 Dependencies: None
