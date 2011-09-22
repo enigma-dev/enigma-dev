@@ -146,14 +146,15 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						ENIGMA_FAIL = true;
 						return;
 						}
-					if (updates == 1 || rebuild || attemptLib() != null)
-						{
+					// if (updates == 1 || rebuild || attemptLib() != null)
+					//	{
+					// just run make unconditionally as it checks for changes itself
 						if (!make()) //displays own error
 							{
 							ENIGMA_FAIL = true;
 							return;
 							}
-						}
+					//	}
 					Error e = attemptLib();
 					if (e != null)
 						{
@@ -247,7 +248,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		//run make
 		Process p = null;
-		String cmd = make + " eTCpath=\"" + path + '\"'; //$NON-NLS-1$
+		String cmd = make + " eTCpath=\"" + path + "\" -j"; //$NON-NLS-1$
 		try
 			{
 			p = Runtime.getRuntime().exec(cmd,null,LGM.workDir.getParentFile());
