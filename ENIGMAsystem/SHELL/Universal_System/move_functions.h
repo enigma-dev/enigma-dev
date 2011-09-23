@@ -146,10 +146,10 @@ double move_contact_object(double angle, double max_dist, const int object, cons
         {
             case 0:
                 if ((inst2->x + inst2->bbox_left > inst1->x + inst1->bbox_right || inst1->y + inst1->bbox_top > inst2->y + inst2->bbox_bottom) &&
-                direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top)) >= 0  &&
-                direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom)) <= 0)
+                direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top),angle) >= 0  &&
+                direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom),angle) <= 0)
                 {
-                    if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom)) > 0)
+                    if (direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom),angle) > 0)
                     {
                         max_dist = min(max_dist, ((inst1->y + inst1->bbox_top) - (inst2->y + inst2->bbox_bottom) - contact_distance)/sin_angle);
                     }
@@ -161,10 +161,10 @@ double move_contact_object(double angle, double max_dist, const int object, cons
             break;
             case 1:
                 if ((inst1->x + inst1->bbox_left > inst2->x + inst2->bbox_right || inst1->y + inst1->bbox_top > inst2->y + inst2->bbox_bottom) &&
-                direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top)) <= 0  &&
-                direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom)) >= 0)
+                direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top),angle) <= 0  &&
+                direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom),angle) >= 0)
                 {
-                    if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom)) > 0)
+                    if (direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom),angle) > 0)
                     {
                         max_dist = min(max_dist, ((inst2->x + inst2->bbox_right) - (inst1->x + inst1->bbox_left) + contact_distance)/cos_angle);
                     }
@@ -176,10 +176,10 @@ double move_contact_object(double angle, double max_dist, const int object, cons
             break;
             case 2:
                 if ((inst1->x + inst1->bbox_left > inst2->x + inst2->bbox_right || inst2->y + inst2->bbox_top > inst1->y + inst1->bbox_bottom) &&
-                direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top)) <= 0  &&
-                direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom)) >= 0)
+                direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top),angle) <= 0  &&
+                direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom),angle) >= 0)
                 {
-                    if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top)) > 0)
+                    if (direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top),angle) > 0)
                     {
                         max_dist = min(max_dist, ((inst1->y + inst1->bbox_bottom) - (inst2->y + inst2->bbox_top) + contact_distance)/sin_angle);
                     }
@@ -191,10 +191,10 @@ double move_contact_object(double angle, double max_dist, const int object, cons
             break;
             case 3:
                 if ((inst2->x + inst2->bbox_left > inst1->x + inst1->bbox_right || inst2->y + inst2->bbox_top > inst1->y + inst1->bbox_bottom) &&
-                direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom)) <= 0  &&
-                direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top)) >= 0)
+                direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom),angle) <= 0  &&
+                direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top),angle) >= 0)
                 {
-                    if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top)) > 0)
+                    if (direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top),angle) > 0)
                     {
                         max_dist = min(max_dist, ((inst2->x + inst2->bbox_left) - (inst1->x + inst1->bbox_right) - contact_distance)/cos_angle);
                     }
@@ -256,7 +256,7 @@ double move_outside_object(double angle, double max_dist, const int object, cons
         switch (quad)
         {
             case 0:
-                if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top)) < 0)
+                if (direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top),angle) < 0)
                 {
                     dist = max(dist, ((inst1->y + inst1->bbox_bottom) - (inst2->y + inst2->bbox_top) + contact_distance)/sin_angle);
                 }
@@ -266,7 +266,7 @@ double move_outside_object(double angle, double max_dist, const int object, cons
                 }
             break;
             case 1:
-                if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top)) < 0)
+                if (direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top),angle) < 0)
                 {
                     dist = max(dist, ((inst2->x + inst2->bbox_left) - (inst1->x + inst1->bbox_right) - contact_distance)/cos_angle);
                 }
@@ -276,7 +276,7 @@ double move_outside_object(double angle, double max_dist, const int object, cons
                 }
             break;
             case 2:
-                if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom)) < 0)
+                if (direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom),angle) < 0)
                 {
                     dist = max(dist, ((inst1->y + inst1->bbox_top) - (inst2->y + inst2->bbox_bottom) - contact_distance)/sin_angle);
                 }
@@ -286,7 +286,7 @@ double move_outside_object(double angle, double max_dist, const int object, cons
                 }
             break;
             case 3:
-                if (direction_difference(angle, point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom)) < 0)
+                if (direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom),angle) < 0)
                 {
                     dist = max(dist, ((inst2->x + inst2->bbox_right) - (inst1->x + inst1->bbox_left) + contact_distance)/cos_angle);
                 }

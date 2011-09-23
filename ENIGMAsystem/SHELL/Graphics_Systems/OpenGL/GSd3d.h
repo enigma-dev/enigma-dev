@@ -46,3 +46,19 @@ int d3d_set_projection_ortho(int x, int y, int width, int height, int angle);
 
 int d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);
 int d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);
+
+void d3d_transform_set_identity();
+void d3d_transform_add_translation(float xt,float yt,float zt);
+void d3d_transform_add_scaling(float xs,float ys,float zs);
+void d3d_transform_add_rotation_x(float angle);
+void d3d_transform_add_rotation_y(float angle);
+void d3d_transform_add_rotation_z(float angle);
+
+void d3d_transform_stack_push();
+void d3d_transform_stack_pop();
+
+void d3d_transform_set_translation(float xt,float yt,float zt);
+void d3d_transform_set_scaling(float xs,float ys,float zs);
+void d3d_transform_set_rotation_x(float angle);
+void d3d_transform_set_rotation_y(float angle);
+void d3d_transform_set_rotation_z(float angle);

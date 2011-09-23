@@ -31,6 +31,7 @@
 #include "../../Universal_System/var4.h"
 #include "GScolors.h"
 #include "GSfont.h"
+#include <iostream>
 
 using namespace std;
 #include "../../Universal_System/fontstruct.h"
@@ -265,21 +266,21 @@ void draw_text(int x,int y,variant vstr)
               glVertex2i(xx + g.x2, yy + g.y2);
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2i(xx + g.x,  yy + g.y2);
-          xx += g.xs;
+          xx += int(g.xs);
         }
       }
       glEnd();
   }else{
-      int xx = halign == fa_center ? x-string_width_line(str,0)/2 : x-string_width_line(str,0), line = 0;
+      int xx = halign == fa_center ? x-int(string_width_line(str,0)/2) : x-int(string_width_line(str,0)), line = 0;
       glBegin(GL_QUADS);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r'){
           line +=1, yy += fnt->height, i += str[i+1] == '\n';
-          xx = halign == fa_center ? x-string_width_line(str,line)/2 : x-string_width_line(str,line);
+          xx = halign == fa_center ? x-int(string_width_line(str,line)/2) : x-int(string_width_line(str,line));
         }else if (str[i] == '\n'){
           line +=1, yy += fnt->height;
-          xx = halign == fa_center ? x-string_width_line(str,line)/2 : x-string_width_line(str,line);
+          xx = halign == fa_center ? x-int(string_width_line(str,line)/2) : x-int(string_width_line(str,line));
         }else if (str[i] == ' ')
           xx += fnt->height/3; // FIXME: what's GM do about this?
         else
@@ -293,7 +294,7 @@ void draw_text(int x,int y,variant vstr)
               glVertex2i(xx + g.x2, yy + g.y2);
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2i(xx + g.x,  yy + g.y2);
-          xx += g.xs;
+          xx += int(g.xs);
         }
       }
       glEnd();
@@ -342,21 +343,21 @@ void draw_text_ext(int x,int y,variant vstr, int sep, int w)
               glVertex2i(xx + g.x2, yy + g.y2);
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2i(xx + g.x,  yy + g.y2);
-          xx += g.xs;
+          xx += int(g.xs);
         }
       }
       glEnd();
   }else{
-      int xx = halign == fa_center ? x-string_width_ext_line(str,w,0)/2 : x-string_width_ext_line(str,w,0), tmpx = xx, line = 0, width = 0, tw = 0;
+      int xx = halign == fa_center ? x-int(string_width_ext_line(str,w,0)/2) : x-int(string_width_ext_line(str,w,0)), line = 0, width = 0, tw = 0;
       glBegin(GL_QUADS);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
-          line += 1, xx = halign == fa_center ? x-string_width_ext_line(str,w,line)/2 : x-string_width_ext_line(str,w,line), tmpx = xx, yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n';
+          line += 1, xx = halign == fa_center ? x-int(string_width_ext_line(str,w,line)/2) : x-int(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n', width = 0;
         else if (str[i] == '\n')
-          line += 1, xx = halign == fa_center ? x-string_width_ext_line(str,w,line)/2 : x-string_width_ext_line(str,w,line), tmpx = xx, yy += (sep+2 ? fnt->height : sep);
+          line += 1, xx = halign == fa_center ? x-int(string_width_ext_line(str,w,line)/2) : x-int(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), width = 0;
         else if (str[i] == ' '){
-          xx += fnt->height/3, width = xx-tmpx, tw = 0;
+          xx += fnt->height/3, width += fnt->height/3, tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
           {
             if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
@@ -366,7 +367,7 @@ void draw_text_ext(int x,int y,variant vstr, int sep, int w)
           }
 
           if (width+tw >= w && w != -1)
-            line += 1, xx = halign == fa_center ? x-string_width_ext_line(str,w,line)/2 : x-string_width_ext_line(str,w,line), tmpx = xx, yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
+            line += 1, xx = halign == fa_center ? x-int(string_width_ext_line(str,w,line)/2) : x-int(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
         }else{
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
             glTexCoord2f(g.tx,  g.ty);
@@ -377,7 +378,8 @@ void draw_text_ext(int x,int y,variant vstr, int sep, int w)
               glVertex2i(xx + g.x2, yy + g.y2);
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2i(xx + g.x,  yy + g.y2);
-          xx += g.xs;
+          xx += int(g.xs);
+          width += g.xs;
         }
       }
       glEnd();
@@ -437,8 +439,8 @@ void draw_text_transformed(double x,double y,variant vstr,double xscale,double y
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
-          xx += g.xs * cvx;
-          yy -= g.xs * svx;
+          xx += int(g.xs) * cvx;
+          yy -= int(g.xs) * svx;
         }
       }
       glEnd();
@@ -484,8 +486,8 @@ void draw_text_transformed(double x,double y,variant vstr,double xscale,double y
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
-          xx += g.xs * cvx;
-          yy -= g.xs * svx;
+          xx += int(g.xs) * cvx;
+          yy -= int(g.xs) * svx;
         }
       }
       glEnd();
@@ -558,9 +560,9 @@ void draw_text_ext_transformed(double x,double y,variant vstr,int sep, int w, do
               glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
 
-          xx += g.xs * cvx;
-          yy -= g.xs * svx;
-          width += g.xs;
+          xx += int(g.xs) * cvx;
+          yy -= int(g.xs) * svx;
+          width += int(g.xs);
         }
       }
       glEnd();
@@ -624,9 +626,9 @@ void draw_text_ext_transformed(double x,double y,variant vstr,int sep, int w, do
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
-          xx += g.xs * cvx;
-          yy -= g.xs * svx;
-          width += g.xs;
+          xx += int(g.xs) * cvx;
+          yy -= int(g.xs) * svx;
+          width += int(g.xs);
         }
       }
       glEnd();
@@ -695,9 +697,9 @@ void draw_text_transformed_color(double x,double y,variant vstr,double xscale,do
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
-          xx += g.xs * cvx;
-          yy -= g.xs * svx;
-          width += g.xs;
+          xx += int(g.xs) * cvx;
+          yy -= int(g.xs) * svx;
+          width += int(g.xs);
         }
       }
     }else{
@@ -749,9 +751,9 @@ void draw_text_transformed_color(double x,double y,variant vstr,double xscale,do
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
-          xx += g.xs * cvx;
-          yy -= g.xs * svx;
-          width += g.xs;
+          xx += int(g.xs) * cvx;
+          yy -= int(g.xs) * svx;
+          width += int(g.xs);
         }
       }
     }
@@ -831,9 +833,9 @@ void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int 
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
-          xx += g.xs * cvx;
-          yy -= g.xs * svx;
-          width += g.xs;
+          xx += int(g.xs) * cvx;
+          yy -= int(g.xs) * svx;
+          width += int(g.xs);
         }
       }
     }else{
@@ -901,9 +903,9 @@ void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int 
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
-          xx += g.xs * cvx;
-          yy -= g.xs * svx;
-          width += g.xs;
+          xx += int(g.xs) * cvx;
+          yy -= int(g.xs) * svx;
+          width += int(g.xs);
         }
       }
     }
@@ -962,7 +964,7 @@ void draw_text_color(int x,int y,variant vstr,int c1,int c2,int c3,int c4,double
             glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2i(xx + g.x,  yy + g.y2);
-          xx += g.xs;
+          xx += int(g.xs);
         }
       }
   }else{
@@ -1001,7 +1003,7 @@ void draw_text_color(int x,int y,variant vstr,int c1,int c2,int c3,int c4,double
             glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2i(xx + g.x,  yy + g.y2);
-          xx += g.xs;
+          xx += int(g.xs);
         }
       }
   }
@@ -1061,7 +1063,7 @@ void draw_text_ext_color(int x,int y,variant vstr,int sep, int w, int c1,int c2,
             glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2i(xx + g.x,  yy + g.y2);
-          xx += g.xs;
+          xx += int(g.xs);
           width = xx-x;
         }
       }
@@ -1103,7 +1105,7 @@ void draw_text_ext_color(int x,int y,variant vstr,int sep, int w, int c1,int c2,
             glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
             glTexCoord2f(g.tx,  g.ty2);
               glVertex2i(xx + g.x,  yy + g.y2);
-          xx += g.xs;
+          xx += int(g.xs);
           width = xx-tmpx;
         }
       }
