@@ -372,6 +372,13 @@ public class EFileWriter
 			throws IOException
 		{
 		ResourceWriter writer = writers.get(child.kind);
+		if (child.kind == Resource.Kind.GAMESETTINGS
+				&& child.getUserObject().equals(Messages.getString("EnigmaRunner.RESNODE_NAME")))
+			{
+			System.err.println(Messages.format(
+					"EFileWriter.NO_WRITER",Messages.getString("EnigmaRunner.RESNODE_NAME"))); //$NON-NLS-1$
+			return;
+			}
 		if (writer == null)
 			{
 			System.err.println(Messages.format("EFileWriter.NO_WRITER",child.kind)); //$NON-NLS-1$
@@ -679,6 +686,7 @@ public class EFileWriter
 		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
 				throws IOException
 			{
+			System.out.println("Writing settings");
 			GameSettings gs = gf.gameSettings;
 			String name = (String) child.getUserObject();
 			String icon = "icon.ico", sSplash = "splash.png"; //$NON-NLS-1$ //$NON-NLS-2$
