@@ -30,13 +30,15 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractListModel;
@@ -59,6 +61,7 @@ import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileView;
 
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
@@ -80,8 +83,11 @@ import org.lateralgm.jedit.GMLKeywords;
 import org.lateralgm.jedit.GMLKeywords.Construct;
 import org.lateralgm.jedit.GMLKeywords.Function;
 import org.lateralgm.jedit.GMLKeywords.Keyword;
+import org.lateralgm.main.FileChooser;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.FileChooser.FileReader;
+import org.lateralgm.main.FileChooser.FileWriter;
+import org.lateralgm.main.FileChooser.GroupFilter;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
@@ -117,7 +123,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public EnigmaRunner()
 		{
-		addReader();
+		addReaderAndWriter();
 		populateMenu();
 		populateTree();
 		LGM.addReloadListener(this);
@@ -137,24 +143,18 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				public void run()
 					{
 					//Disable updates by removing plugins/shared/svnkit.jar (e.g. linux packages)
-					Preferences root = Preferences.userRoot().node("/org/enigma"); //$NON-NLS-1$
-					boolean rebuild = root.getBoolean("NEEDS_REBUILD",false); //$NON-NLS-1$
-					root.putBoolean("NEEDS_REBUILD",false); //$NON-NLS-1$
 					int updates = attemptUpdate(); //displays own error
 					if (updates == -1)
 						{
 						ENIGMA_FAIL = true;
 						return;
 						}
-					// if (updates == 1 || rebuild || attemptLib() != null)
-					//	{
-					// just run make unconditionally as it checks for changes itself
-						if (!make()) //displays own error
-							{
-							ENIGMA_FAIL = true;
-							return;
-							}
-					//	}
+					//Make checks for changes itself
+					if (!make()) //displays own error
+						{
+						ENIGMA_FAIL = true;
+						return;
+						}
 					Error e = attemptLib();
 					if (e != null)
 						{
@@ -283,19 +283,23 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		return true;
 		}
 
-	void addReader()
+	void addReaderAndWriter()
 		{
-		LGM.listener.fc.addReader(new EgmReader());
-		//		FileChooser.fileViews.add(new FileView()
-		//			{
-		//
-		//			});
+		EgmIO io = new EgmIO();
+		FileChooser.readers.add(io);
+		FileChooser.writers.add(io);
+
+		LGM.listener.fc.addOpenFilters(io);
+		LGM.listener.fc.addSaveFilters(io);
+
+		FileChooser.fileViews.add(io);
 		}
 
-	class EgmReader implements FileReader
+	class EgmIO extends FileView implements FileReader,FileWriter,GroupFilter
 		{
+		String ext = ".egm"; //$NON-NLS-1$
 		CustomFileFilter filter = new CustomFileFilter(
-				Messages.getString("EnigmaRunner.FORMAT_READER"),".egm"); //$NON-NLS-1$ //$NON-NLS-2$;
+				Messages.getString("EnigmaRunner.FORMAT_READER"),ext); //$NON-NLS-1$
 
 		public FileFilter getGroupFilter()
 			{
@@ -307,15 +311,37 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			return new FileFilter[0];
 			}
 
-		public boolean canRead(File f)
+		//Reader
+		public boolean canRead(URI uri)
 			{
-			return filter.accept(f);
+			return filter.accept(new File(uri));
 			}
 
-		public GmFile readFile(File f, ResNode root) throws GmFormatException
+		public GmFile read(InputStream in, URI uri, ResNode root) throws GmFormatException
 			{
-			return EFileReader.readEgmFile(f,root,true);
+			return EFileReader.readEgmFile(new File(uri),root,true);
 			}
+
+		//Writer
+		@Override
+		public String getExtension()
+			{
+			return ext;
+			}
+
+		@Override
+		public String getSelectionName()
+			{
+			return "EGM";
+			}
+
+		@Override
+		public void write(OutputStream out, GmFile gf, ResNode root) throws IOException
+			{
+			EFileWriter.writeEgmZipFile(out,gf,root);
+			}
+
+		//TODO: FileView
 		}
 
 	public void populateMenu()
@@ -439,7 +465,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			int up = EnigmaUpdater.checkForUpdates(ef);
 			if (EnigmaUpdater.needsRestart)
 				{
-				Preferences.userRoot().node("/org/enigma").putBoolean("NEEDS_REBUILD",true); //$NON-NLS-1$ //$NON-NLS-2$
 				JOptionPane.showMessageDialog(null,Messages.getString("EnigmaRunner.INFO_UPDATE_RESTART")); //$NON-NLS-1$
 				System.exit(120); //exit code 120 lets our launcher know to restart us.
 				}

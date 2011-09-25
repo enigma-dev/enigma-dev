@@ -112,7 +112,7 @@ public final class EnigmaWriter
 	protected EnigmaStruct populateStruct()
 		{
 		o.fileVersion = i.fileVersion;
-		o.filename = i.filename;
+		o.filename = i.uri.toString();
 
 		populateSettings();
 		populateSprites();

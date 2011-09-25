@@ -6,7 +6,6 @@ import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,7 +35,6 @@ import org.lateralgm.file.GmFormatException;
 import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.file.ResourceList;
 import org.lateralgm.file.iconio.ICOFile;
-import org.lateralgm.main.LGM;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
 import org.lateralgm.resources.Font;
@@ -1088,30 +1086,5 @@ public class EFileReader
 					System.err.println("3Data file missing: " + fn);
 				}
 			}
-		}
-
-	public static void mainEef(String args[])
-		{
-		File home = new File(System.getProperty("user.home")); //$NON-NLS-1$
-		File in = new File(home,"inputEEF.eef"); // any of gmd,gm6,gmk,gm81
-		try
-			{
-			EEFReader reader = new EEFReader(new FileInputStream(in),",");
-			EEFNode en = reader.getRoot();
-			System.out.println(en);
-			}
-		catch (FileNotFoundException e2)
-			{
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-			}
-		}
-
-	public static void main(String args[]) throws GmFormatException
-		{
-		File f = new File(System.getProperty("user.home"),"Dropbox/ENIGMA/outputEgmFile.egm");
-		LGM.main(new String[0]);
-		LGM.currentFile = readEgmFile(f,LGM.newRoot(),true);
-		LGM.reload(true);
 		}
 	}

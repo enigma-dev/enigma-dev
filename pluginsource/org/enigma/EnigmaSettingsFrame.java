@@ -20,7 +20,6 @@
 package org.enigma;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -449,8 +448,7 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 		//		p.setLayout(new BoxLayout(p,BoxLayout.PAGE_AXIS));
 		p.add(new JLabel(Messages.getString("EnigmaSettingsFrame.EXTENSIONS_INFO")), //$NON-NLS-1$
 				BorderLayout.NORTH);
-		Component c = new JScrollPane(new ExtensionSelector());
-		p.add(c,BorderLayout.CENTER);
+		p.add(new JScrollPane(new ExtensionSelector()),BorderLayout.CENTER);
 		return p;
 		}
 

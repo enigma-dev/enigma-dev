@@ -30,7 +30,6 @@ import org.enigma.messages.Messages;
 import org.enigma.utility.APNGExperiments;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmFileReader;
 import org.lateralgm.file.GmStreamEncoder;
 import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.Util;
@@ -50,7 +49,6 @@ import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.Resource.Kind;
 import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.library.LibAction;
-import org.lateralgm.resources.library.LibManager;
 import org.lateralgm.resources.sub.Action;
 import org.lateralgm.resources.sub.Argument;
 import org.lateralgm.resources.sub.BackgroundDef;
@@ -301,6 +299,21 @@ public class EFileWriter
 				out = new EGMZip(new FileOutputStream(loc));
 			else
 				out = new EGMFolder(loc);
+			writeEgmFile(out,gf,tree);
+			out.close();
+			}
+		catch (IOException e)
+			{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			}
+		}
+
+	public static void writeEgmZipFile(OutputStream os, GmFile gf, ResNode tree)
+		{
+		try
+			{
+			EGMOutputStream out = new EGMZip(os);
 			writeEgmFile(out,gf,tree);
 			out.close();
 			}
@@ -717,18 +730,5 @@ public class EFileWriter
 			{
 			((ICOFile) r.get(PGameSettings.GAME_ICON)).write(os);
 			}
-		}
-
-	public static void main(String[] args) throws Exception
-		{
-		File home = new File(System.getProperty("user.home")); //$NON-NLS-1$
-		File in = new File(home,"Dropbox/ENIGMA/inputGmFile.gm81"); // any of gmd,gm6,gmk,gm81
-		File out = new File(home,"Dropbox/ENIGMA/outputEgmFile.egm"); // must be egm
-
-		LibManager.autoLoad();
-		ResNode root = new ResNode("Root",(byte) 0,null,null); //$NON-NLS-1$;
-		GmFile gf = GmFileReader.readGmFile(in,root);
-
-		writeEgmFile(out,gf,root,true);
 		}
 	}

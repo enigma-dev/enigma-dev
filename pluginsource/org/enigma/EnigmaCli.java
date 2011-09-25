@@ -20,7 +20,6 @@ import org.enigma.backend.EnigmaCallbacks.OutputHandler;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmFileReader;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.main.LGM;
 import org.lateralgm.resources.Script;
@@ -57,12 +56,12 @@ public class EnigmaCli
 
 		try
 			{
-			InitReturn r = initailize(args[0],null);
+			initailize(args[0],null);
 			EnigmaSettings es = initSettings();
 			if (syntax)
-				syntaxChecker(r.f,r.root,es);
+				syntaxChecker(LGM.currentFile,LGM.root,es);
 			else
-				compile(r.f,r.root,es);
+				compile(LGM.currentFile,LGM.root,es);
 			}
 		catch (FileNotFoundException e)
 			{
@@ -84,22 +83,14 @@ public class EnigmaCli
 	//		compile(file.getPath(),null);
 	//		}
 
-	static class InitReturn
-		{
-		GmFile f;
-		ResNode root;
-		String error; //contains String on toolchain failure during libInit
-		}
-
-	public static InitReturn initailize(String fn, ResNode root) throws FileNotFoundException,
+	public static String initailize(String fn, ResNode root) throws FileNotFoundException,
 			GmFormatException
 		{
 		File file = new File(fn);
 		if (!file.exists()) throw new FileNotFoundException(fn);
-		InitReturn r = new InitReturn();
 		LibManager.autoLoad();
-		r.root = root == null ? new ResNode("Root",(byte) 0,null,null) : root; //$NON-NLS-1$;
-		r.f = GmFileReader.readGmFile(file,r.root);
+		//		r.root = root == null ? new ResNode("Root",(byte) 0,null,null) : root; //$NON-NLS-1$;
+		LGM.listener.fc.open(file.toURI());
 		try
 			{
 			attemptLib();
@@ -110,8 +101,7 @@ public class EnigmaCli
 					+ "either because it could not be found or uses methods different from those expected.\n"
 					+ "The exact error is:\n" + e.getMessage());
 			}
-		r.error = DRIVER.libInit(new EnigmaCallbacks(new CliOutputHandler())); //returns String on toolchain failure
-		return r;
+		return DRIVER.libInit(new EnigmaCallbacks(new CliOutputHandler())); //returns String on toolchain failure
 		}
 
 	//TODO: Handle custom settings
@@ -160,7 +150,7 @@ public class EnigmaCli
 
 		//TODO: Handle custom outname
 		//FIXME: Make compliant with spec2
-		File outname = new File(f.filename.substring(0,f.filename.lastIndexOf('.'))
+		File outname = new File(f.uri.toString().substring(0,f.uri.toString().lastIndexOf('.'))
 				+ ess.targets.get("windowing").ext);
 		TargetSelection compiler = ess.targets.get(TargetHandler.COMPILER);
 		if (!compiler.outputexe.equals("$tempfile")) //$NON-NLS-1$
