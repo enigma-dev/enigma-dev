@@ -50,7 +50,7 @@ void instance_destroy(int id)
 
 int instance_destroy()
 {
-    enigma::instance_event_iterator->inst->myevent_destroy();
+  enigma::instance_event_iterator->inst->myevent_destroy();
   enigma::instance_event_iterator->inst->unlink();
   return 0;
 }

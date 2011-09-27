@@ -305,9 +305,6 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
   code.erase(bpos);
   synt.erase(bpos);
   
-  FILE *r = fopen("/home/josh/Desktop/asses.txt","ab");
-  if (r) { fprintf(r,"%s\n%s\n",code.c_str(), synt.c_str()); fclose(r); }
-  
   return 0;
 }
 
@@ -440,9 +437,6 @@ void parser_add_semicolons(string &code,string &synt)
   char *codebuf = new char[code.length()*2+1];
   char *syntbuf = new char[code.length()*2+1];
   int bufpos = 0;
-  
-  FILE *nnn = fopen("/home/josh/Desktop/b4a.txt","ab");
-  if (nnn) fprintf(nnn, "Before\n%s\n%s\n",code.c_str(), synt.c_str());
   
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
@@ -698,7 +692,6 @@ void parser_add_semicolons(string &code,string &synt)
     pos = sp;
   }
   cout << "done. "; fflush(stdout);
-  if (nnn) { fprintf(nnn, "After\n%s\n%s\n",code.c_str(), synt.c_str()); fclose(nnn); }
 }
 
 

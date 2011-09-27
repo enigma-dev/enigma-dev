@@ -8,23 +8,6 @@
 #################
 # TODO: better config process based on features rather than OS
 
-CXX := g++
-CXXFLAGS := -Wall
-
-# Release/Debug
-CXXFLAGS += -s -O3
-# CXXFLAGS += -g
-
-SOURCES := $(shell find -name '\*.cpp' -and ! -name 'standalone_\*')
-OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
-DEPENDENCIES := $(OBJECTS:.o=.d)
-
-ifeq ($(wildcard .eobjs),)
-# sort has the nice side effect of removing duplicates. this may or may not be faster.
-# also, indenting this with a tab makes make think it's a command before a target
-$(shell mkdir -p $(sort $(dir $(OBJECTS))))
-endif
-
 BASE = compileEGMf
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
@@ -38,6 +21,20 @@ else
 	LDFLAGS += -static-libstdc++ -static-libgcc
 endif
 
+###########
+# options #
+###########
+
+CXX := g++
+CXXFLAGS += -Wall -s -O3
+LDFLAGS += -shared
+
+SOURCES := $(shell find -name '*.cpp' -and ! -name 'standalone_*')
+OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
+DEPENDENCIES := $(OBJECTS:.o=.d)
+
+OBJDIRS := $(sort $(dir $(OBJECTS)))
+
 ############
 # building #
 ############
@@ -50,15 +47,19 @@ clean:
 	$(RM) $(TARGET) $(OBJECTS) $(DEPENDENCIES)
 
 $(TARGET): $(OBJECTS) Makefile
-	$(CXX) -shared $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS)
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 DEPEND_OPTIONS = -MMD -MP -MT '.eobjs/$*.o' -MT '.eobjs/$*.d'
 
-.eobjs/%.o .eobjs/%.d: %.cpp Makefile
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(DEPEND_OPTIONS) -c -o .eobjs/$*.o $<
+.eobjs/%.o .eobjs/%.d: %.cpp Makefile | $(OBJDIRS)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(DEPEND_OPTIONS) -c -o .eobjs/$*.o $<
+
+# sort has the nice side effect of removing duplicates. this may or may not be faster.
+$(OBJDIRS):
+	mkdir -p $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPENDENCIES)

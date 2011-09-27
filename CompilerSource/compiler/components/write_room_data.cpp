@@ -171,14 +171,14 @@ wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcrea
       cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
       return E_ERROR_SYNTAX;
     }
-    parsed_object par;
-    parsed_event ev(&par);
-    parser_main(cme,&ev);
-    parser_secondary(ev.code,ev.synt,EGMglobal,&par,&ev);
+    //parsed_object par;
+    //parsed_event ev(&par);
+    parsed_event& ev = parsed_rooms[es->rooms[i].id]->events[0];
+    parser_secondary(ev.code,ev.synt,EGMglobal,parsed_rooms[es->rooms[i].id],&ev);
     print_to_file(ev.code,ev.synt,ev.strc,ev.strs,2,wto);
     wto << "\n}\n";
   }
+wto.close();
 
-  wto.close();
   return 0;
 }

@@ -110,7 +110,7 @@ namespace enigma
 
   temp_event_scope::temp_event_scope(object_basic* ninst): oinst(instance_event_iterator->inst), oiter(instance_event_iterator)
     { instance_event_iterator = &dummy_event_iterator; instance_event_iterator->inst = ninst; }
-  temp_event_scope::~temp_event_scope() { instance_event_iterator->inst = oinst; instance_event_iterator = oiter; }
+  temp_event_scope::~temp_event_scope() { instance_event_iterator = oiter; instance_event_iterator->inst = oinst; }
 
   /* **  Methods ** */
   // Retrieve the first instance on the complete list.

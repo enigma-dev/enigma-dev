@@ -162,6 +162,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   // CLean up from any previous executions.
   edbg << "Cleaning up from previous executions" << flushl;
     parsed_objects.clear(); //Make sure we don't dump in any old object code...
+    parsed_rooms.clear();   //Or that we dump any room code, for that matter...
     shared_locals_clear();  //Forget inherited locals, we'll reparse them
     event_info_clear();     //Forget event definitions, we'll re-get them
 

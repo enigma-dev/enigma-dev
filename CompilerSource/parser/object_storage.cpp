@@ -109,6 +109,7 @@ parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), co
 parsed_object::parsed_object() {}
 parsed_object::parsed_object(string n, int i, int s, int p, bool vis, bool sol, double d): name(n), id(i), sprite_index(s), parent(p), visible(vis), solid(sol), depth(d) {}
 map<int,parsed_object*> parsed_objects;
+map<int,parsed_object*> parsed_rooms;
 
 vector<parsed_extension> parsed_extensions;
 vector<string> requested_extensions;

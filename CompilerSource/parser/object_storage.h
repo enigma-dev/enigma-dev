@@ -111,6 +111,7 @@ struct parsed_object
   parsed_object(string,int,int,int,bool,bool,double);
 };
 extern map<int,parsed_object*> parsed_objects;
+extern map<int,parsed_object*> parsed_rooms;
 typedef map<int,parsed_object*>  :: iterator po_i;
 typedef map<int,parsed_event*>   :: iterator pe_i;
 

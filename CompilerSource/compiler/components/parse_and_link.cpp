@@ -158,15 +158,25 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
           return E_ERROR_SYNTAX;
         }
         
-        edbg << "Done. Starting parse...";
+        edbg << " Done. Parse...";
         
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
         parser_main(code,&pev); //Format it to C++
         
-        edbg << "Done." << flushl;
+        edbg << " Done." << flushl;
       }
     }
+  }
+  
+  //Now we parse the rooms
+  edbg << "Creating room creation code scope and parsing" << flushl;
+  for (int i = 0; i < es->roomCount; i++)
+  {
+    parsed_object *ro = parsed_rooms[es->rooms[i].id] = new parsed_object;
+    parsed_event &pev = ro->events[0]; //Make sure each sub event knows its main event's event ID.
+    pev.mainId = 0, pev.id = 0, pev.myObj = ro;
+    parser_main(es->rooms[i].creationCode,&pev);
   }
   
   //Next we link the scripts into the objects.
@@ -208,6 +218,8 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
 int link_globals(parsed_object *global, EnigmaStruct *es,parsed_script *scripts[])
 {
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+    global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
+  for (po_i i = parsed_rooms.begin(); i != parsed_rooms.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
   for (int i = 0; i < es->scriptCount; i++)
     global->copy_from(scripts[i]->obj,"script `"+scripts[i]->obj.name+"'","the Global Scope");
