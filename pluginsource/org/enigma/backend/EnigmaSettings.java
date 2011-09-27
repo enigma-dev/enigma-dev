@@ -55,7 +55,7 @@ public class EnigmaSettings
 				options.put(os.id,os.def);
 
 		for (ExtensionSetting es : SettingsHandler.extensions)
-			extensions.add(es.path);
+			if (es.def) extensions.add(es.path);
 		}
 
 	void loadDefinitions()
