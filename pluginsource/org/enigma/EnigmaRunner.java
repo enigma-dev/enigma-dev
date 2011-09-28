@@ -392,7 +392,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public void populateTree()
 		{
-		LGM.root.add(node);
+		if (!LGM.root.isNodeChild(node)) LGM.root.add(node);
 
 		/*EnigmaGroup node = new EnigmaGroup();
 		LGM.root.add(node);

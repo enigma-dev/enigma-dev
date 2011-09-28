@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>
+ * Copyright (C) 2011 Josh Ventura <JoshV10@gmail.com>
+ * 
+ * This file is part of Enigma Plugin.
+ * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
+ * See LICENSE for details.
+ */
+
 package org.enigma;
 
 import java.awt.Color;
@@ -37,6 +46,7 @@ import org.lateralgm.file.ResourceList;
 import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
+import org.lateralgm.resources.Extensions;
 import org.lateralgm.resources.Font;
 import org.lateralgm.resources.GameInformation;
 import org.lateralgm.resources.GameSettings;
@@ -399,6 +409,8 @@ public class EFileReader
 	public static void readEgmFile(EGMFile f, GmFile gf, ResNode root) throws IOException
 		{
 		readNodeChildren(f,gf,root,null,new String());
+		root.add(new ResNode(org.lateralgm.messages.Messages.getString("LGM.EXT"),
+				ResNode.STATUS_SECONDARY,Extensions.class,null));
 		}
 
 	// Workhorse methods
@@ -731,10 +743,10 @@ public class EFileReader
 
 					for (EEFNode actnode : evnode.children)
 						{
-						if (evnode.id == null || evnode.id.length < 2)
+						if (actnode.id == null || actnode.id.length < 2)
 							{
-							System.err.println("FUCK");
-							return;
+							System.err.println("actFUCK");
+							continue;
 							}
 						int aid = Integer.parseInt(actnode.id[0]), lid = Integer.parseInt(actnode.id[1]);
 						//LibAction la = new LibAction();
