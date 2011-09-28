@@ -34,6 +34,7 @@ import org.lateralgm.file.GmStreamEncoder;
 import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
+import org.lateralgm.resources.Font;
 import org.lateralgm.resources.GameInformation;
 import org.lateralgm.resources.GameSettings;
 import org.lateralgm.resources.GmObject;
@@ -46,7 +47,6 @@ import org.lateralgm.resources.Sound;
 import org.lateralgm.resources.Sprite;
 import org.lateralgm.resources.GameInformation.PGameInformation;
 import org.lateralgm.resources.GameSettings.PGameSettings;
-import org.lateralgm.resources.Resource.Kind;
 import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.library.LibAction;
 import org.lateralgm.resources.sub.Action;
@@ -258,35 +258,21 @@ public class EFileWriter
 
 	// Module maps
 	/** Used to register writers with their resource kinds. */
-	static Map<Kind,ResourceWriter> writers = new HashMap<Kind,ResourceWriter>();
-	static Map<Kind,String> typestrs = new HashMap<Kind,String>();
+	static Map<Class<? extends Resource<?,?>>,ResourceWriter> writers = new HashMap<Class<? extends Resource<?,?>>,ResourceWriter>();
 	static
 		{
 		// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
-		writers.put(Kind.SPRITE,new SpriteApngIO());
-		writers.put(Kind.SOUND,new SoundIO());
-		writers.put(Kind.BACKGROUND,new BackgroundIO());
-		writers.put(Kind.PATH,new PathTextIO());
-		writers.put(Kind.SCRIPT,new ScriptIO());
-		writers.put(Kind.FONT,new FontRawIO());
-		// writers.put(Kind.TIMELINE,new TimelineIO());
-		writers.put(Kind.OBJECT,new ObjectIO());
-		writers.put(Kind.ROOM,new RoomGmDataIO());
-		writers.put(Kind.GAMEINFO,new GameInfoRtfIO());
-		writers.put(Kind.GAMESETTINGS,new GameSettingsThreeIO());
-
-		typestrs.put(Kind.SPRITE,"spr"); //$NON-NLS-1$
-		typestrs.put(Kind.SOUND,"snd"); //$NON-NLS-1$
-		typestrs.put(Kind.BACKGROUND,"bkg"); //$NON-NLS-1$
-		typestrs.put(Kind.PATH,"pth"); //$NON-NLS-1$
-		typestrs.put(Kind.SCRIPT,"scr"); //$NON-NLS-1$
-		typestrs.put(Kind.FONT,"fnt"); //$NON-NLS-1$
-		typestrs.put(Kind.TIMELINE,"tml"); //$NON-NLS-1$
-		typestrs.put(Kind.OBJECT,"obj"); //$NON-NLS-1$
-		typestrs.put(Kind.ROOM,"rom"); //$NON-NLS-1$
-		typestrs.put(Kind.GAMEINFO,"inf"); //$NON-NLS-1$
-		typestrs.put(Kind.GAMESETTINGS,"set"); //$NON-NLS-1$
-		typestrs.put(Kind.EXTENSIONS,"ext"); //$NON-NLS-1$
+		writers.put(Sprite.class,new SpriteApngIO());
+		writers.put(Sound.class,new SoundIO());
+		writers.put(Background.class,new BackgroundIO());
+		writers.put(Path.class,new PathTextIO());
+		writers.put(Script.class,new ScriptIO());
+		writers.put(Font.class,new FontRawIO());
+		// writers.put(Timeline.class,new TimelineIO());
+		writers.put(GmObject.class,new ObjectIO());
+		writers.put(Room.class,new RoomGmDataIO());
+		writers.put(GameInformation.class,new GameInfoRtfIO());
+		writers.put(GameSettings.class,new GameSettingsThreeIO());
 		}
 
 	// Constructors
@@ -340,7 +326,7 @@ public class EFileWriter
 		for (int i = 0; i < children; i++)
 			{
 			ResNode child = (ResNode) node.getChildAt(i);
-			if (node.isRoot()) ps.print(typestrs.get(child.kind) + ' ');
+			if (node.isRoot()) ps.print(Resource.kindNames.get(child.kind) + ' ');
 			ps.println(child.getUserObject());
 			}
 
@@ -372,13 +358,6 @@ public class EFileWriter
 			throws IOException
 		{
 		ResourceWriter writer = writers.get(child.kind);
-		if (child.kind == Resource.Kind.GAMESETTINGS
-				&& child.getUserObject().equals(Messages.getString("EnigmaRunner.RESNODE_NAME")))
-			{
-			System.err.println(Messages.format(
-					"EFileWriter.NO_WRITER",Messages.getString("EnigmaRunner.RESNODE_NAME"))); //$NON-NLS-1$
-			return;
-			}
 		if (writer == null)
 			{
 			System.err.println(Messages.format("EFileWriter.NO_WRITER",child.kind)); //$NON-NLS-1$

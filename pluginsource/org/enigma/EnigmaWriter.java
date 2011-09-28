@@ -68,6 +68,8 @@ import org.enigma.backend.util.Polygon;
 import org.enigma.utility.Masker.Mask;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
+import org.lateralgm.resources.InstantiableResource;
+import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
@@ -647,7 +649,7 @@ public final class EnigmaWriter
 		while (e.hasMoreElements())
 			{
 			ResNode node = (ResNode) e.nextElement();
-			if (node.kind == org.lateralgm.resources.Resource.Kind.ROOM)
+			if (node.kind == org.lateralgm.resources.Room.class)
 				{
 				org.lateralgm.resources.Room r = (org.lateralgm.resources.Room) deRef((ResourceReference<?>) node.getRes());
 				if (r != null) irooms.add(r); // is this null check even necessary?
@@ -844,8 +846,8 @@ public final class EnigmaWriter
 
 	public static int toId(Object obj, int def)
 		{
-		ResourceReference<?> rr = (ResourceReference<?>) obj;
-		if (deRef(rr) != null) return rr.get().getId();
+		Resource<?,?> r = deRef((ResourceReference<?>) obj);
+		if (r != null) return ((InstantiableResource<?,?>) r).getId();
 		return def;
 		}
 

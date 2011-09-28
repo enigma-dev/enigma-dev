@@ -27,8 +27,11 @@ import org.enigma.SettingsHandler.OptionGroupSetting;
 import org.enigma.SettingsHandler.OptionSetting;
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
+import org.lateralgm.resources.Resource;
+import org.lateralgm.resources.ResourceReference;
+import org.lateralgm.util.PropertyMap;
 
-public class EnigmaSettings
+public class EnigmaSettings extends Resource<EnigmaSettings,EnigmaSettings.PEnigmaSettings>
 	{
 	public String definitions = "", globalLocals = ""; //$NON-NLS-1$ //$NON-NLS-2$
 	public String initialization = "", cleanup = ""; //$NON-NLS-1$ //$NON-NLS-2$
@@ -37,6 +40,10 @@ public class EnigmaSettings
 	//Strings one of: "compiler","windowing","graphics","audio","collision","widget"
 	public Map<String,TargetSelection> targets = new HashMap<String,TargetSelection>();
 	public Set<String> extensions = new HashSet<String>();
+
+	public enum PEnigmaSettings
+		{
+		}
 
 	public EnigmaSettings()
 		{
@@ -158,5 +165,23 @@ public class EnigmaSettings
 		es.targets.putAll(targets);
 		es.extensions.clear();
 		es.extensions.addAll(extensions);
+		}
+
+	@Override
+	public EnigmaSettings makeInstance(ResourceReference<EnigmaSettings> ref)
+		{
+		return new EnigmaSettings(false);
+		}
+
+	@Override
+	protected PropertyMap<PEnigmaSettings> makePropertyMap()
+		{
+		return new PropertyMap<PEnigmaSettings>(PEnigmaSettings.class,this,null);
+		}
+
+	@Override
+	protected void postCopy(EnigmaSettings dest)
+		{
+		copyInto(dest);
 		}
 	}

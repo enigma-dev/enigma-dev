@@ -523,7 +523,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		public EnigmaNode()
 			{
 			super(
-					Messages.getString("EnigmaRunner.RESNODE_NAME"),ResNode.STATUS_SECONDARY,Resource.Kind.GAMESETTINGS); //$NON-NLS-1$
+					Messages.getString("EnigmaRunner.RESNODE_NAME"),ResNode.STATUS_SECONDARY,EnigmaSettings.class); //$NON-NLS-1$
 			pm = new JPopupMenu();
 			pm.add(new JMenuItem(Messages.getString("EnigmaRunner.RESNODE_EDIT"))).addActionListener(this); //$NON-NLS-1$
 			}

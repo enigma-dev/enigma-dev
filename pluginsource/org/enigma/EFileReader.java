@@ -41,6 +41,7 @@ import org.lateralgm.resources.Font;
 import org.lateralgm.resources.GameInformation;
 import org.lateralgm.resources.GameSettings;
 import org.lateralgm.resources.GmObject;
+import org.lateralgm.resources.InstantiableResource;
 import org.lateralgm.resources.Path;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
@@ -54,7 +55,6 @@ import org.lateralgm.resources.GameInformation.PGameInformation;
 import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.Path.PPath;
-import org.lateralgm.resources.Resource.Kind;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
@@ -232,9 +232,9 @@ public class EFileReader
 	static class EgmEntry
 		{
 		String name;
-		Kind kind;
+		Class<? extends Resource<?,?>> kind;
 
-		EgmEntry(String name, Kind kind)
+		EgmEntry(String name, Class<? extends Resource<?,?>> kind)
 			{
 			this.name = name;
 			this.kind = kind;
@@ -251,8 +251,8 @@ public class EFileReader
 				throws IOException;
 		}
 
-	public static abstract class DataPropReader<R extends Resource<R,P>, P extends Enum<P>> implements
-			ResourceReader
+	public static abstract class DataPropReader<R extends InstantiableResource<R,P>, P extends Enum<P>>
+			implements ResourceReader
 		{
 		@Override
 		public Resource<R,P> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
@@ -364,35 +364,21 @@ public class EFileReader
 
 	// Module maps
 	/** Used to register readers with their resource kinds. */
-	static Map<Kind,ResourceReader> readers = new HashMap<Kind,ResourceReader>();
-	static Map<String,Kind> strtypes = new HashMap<String,Kind>();
+	static Map<Class<? extends Resource<?,?>>,ResourceReader> readers = new HashMap<Class<? extends Resource<?,?>>,ResourceReader>();
 	static
 		{
 		// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
-		readers.put(Kind.SPRITE,new SpriteApngReader());
-		readers.put(Kind.SOUND,new SoundReader());
-		readers.put(Kind.BACKGROUND,new BackgroundReader());
-		readers.put(Kind.PATH,new PathTextReader());
-		readers.put(Kind.SCRIPT,new ScriptReader());
-		readers.put(Kind.FONT,new FontRawReader());
-		//		readers.put(Kind.TIMELINE,new TimelineIO());
-		readers.put(Kind.OBJECT,new ObjectEefReader());
-		readers.put(Kind.ROOM,new RoomGmDataReader());
-		readers.put(Kind.GAMEINFO,new GameInfoRtfReader());
-		readers.put(Kind.GAMESETTINGS,new GameSettingsReader());
-
-		strtypes.put("spr",Kind.SPRITE); //$NON-NLS-1$
-		strtypes.put("snd",Kind.SOUND); //$NON-NLS-1$
-		strtypes.put("bkg",Kind.BACKGROUND); //$NON-NLS-1$
-		strtypes.put("pth",Kind.PATH); //$NON-NLS-1$
-		strtypes.put("scr",Kind.SCRIPT); //$NON-NLS-1$
-		strtypes.put("fnt",Kind.FONT); //$NON-NLS-1$
-		strtypes.put("tml",Kind.TIMELINE); //$NON-NLS-1$
-		strtypes.put("obj",Kind.OBJECT); //$NON-NLS-1$
-		strtypes.put("rom",Kind.ROOM); //$NON-NLS-1$
-		strtypes.put("inf",Kind.GAMEINFO); //$NON-NLS-1$
-		strtypes.put("set",Kind.GAMESETTINGS); //$NON-NLS-1$
-		strtypes.put("ext",Kind.EXTENSIONS); //$NON-NLS-1$
+		readers.put(Sprite.class,new SpriteApngReader());
+		readers.put(Sound.class,new SoundReader());
+		readers.put(Background.class,new BackgroundReader());
+		readers.put(Path.class,new PathTextReader());
+		readers.put(Script.class,new ScriptReader());
+		readers.put(Font.class,new FontRawReader());
+		//		readers.put(Timeline.class,new TimelineIO());
+		readers.put(GmObject.class,new ObjectEefReader());
+		readers.put(Room.class,new RoomGmDataReader());
+		readers.put(GameInformation.class,new GameInfoRtfReader());
+		readers.put(GameSettings.class,new GameSettingsReader());
 		}
 
 	// Constructors
@@ -416,8 +402,8 @@ public class EFileReader
 		}
 
 	// Workhorse methods
-	public static void readNodeChildren(EGMFile f, GmFile gf, ResNode parent, Kind k, String dir)
-			throws IOException
+	public static void readNodeChildren(EGMFile f, GmFile gf, ResNode parent,
+			Class<? extends Resource<?,?>> k, String dir) throws IOException
 		{
 		System.out.println(">" + dir);
 
@@ -436,10 +422,12 @@ public class EFileReader
 
 			for (String entry = in.readLine(); entry != null; entry = in.readLine())
 				{
-				Kind ck = k;
+				Class<? extends Resource<?,?>> ck = k;
 				if (entry.length() > 4 && entry.charAt(3) == ' ')
 					{
-					ck = strtypes.get(entry.substring(0,3));
+					String key = entry.substring(0,3);
+					ck = Resource.kindsByName.get(key);
+					if (ck == null) ck = Resource.kindsByName.get(key.toUpperCase());
 					if (ck == null)
 						ck = k;
 					else
@@ -496,7 +484,8 @@ public class EFileReader
 		}
 
 	public static ResourceReference<? extends Resource<?,?>> readResource(EGMFile f, GmFile gf,
-			ResNode parent, Kind kind, InputStream is, String dir, String name) throws IOException
+			ResNode parent, Class<? extends Resource<?,?>> kind, InputStream is, String dir, String name)
+			throws IOException
 		{
 		System.out.println("_" + dir + '/' + name);
 		ResourceReader reader = readers.get(kind);
