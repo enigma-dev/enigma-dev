@@ -267,10 +267,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		//Set up listeners, waitFor, finish successfully
 		String calling = Messages.format("EnigmaRunner.EXEC_CALLING",cmd); //$NON-NLS-1$
 		System.out.println(calling);
-		ef.ta.append(calling);
+		ef.append(calling);
 		new EnigmaThread(ef,p.getInputStream());
 		new EnigmaThread(ef,p.getErrorStream());
-		ef.setVisible(true);
+		ef.open();
 		try
 			{
 			System.out.println(p.waitFor());
@@ -619,7 +619,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 				public void run()
 					{
-					ef.setVisible(true);
+					ef.open();
 					ef.progress(10,Messages.getString("EnigmaRunner.POPULATING")); //$NON-NLS-1$
 					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile,LGM.root);
 					ef.progress(20,Messages.getString("EnigmaRunner.CALLING")); //$NON-NLS-1$

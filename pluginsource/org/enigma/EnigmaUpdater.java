@@ -77,8 +77,8 @@ public class EnigmaUpdater
 				{
 				String repo = askCheckout();
 				if (repo == null) return -1;
-				ef.ta.append(Messages.getString("EnigmaUpdater.DO_UPDATE") + '\n'); //$NON-NLS-1$
-				ef.setVisible(true);
+				ef.append(Messages.getString("EnigmaUpdater.DO_UPDATE") + '\n'); //$NON-NLS-1$
+				ef.open();
 
 				final File me = getThisFile();
 				svn.checkout(repo,new ISVNEventHandler()
@@ -88,8 +88,7 @@ public class EnigmaUpdater
 							{
 							if (event.getFile().equals(LGM.workDir) || event.getFile().equals(me))
 								needsRestart = true;
-							ef.ta.append(event.getAction() + " " + event.getFile() + '\n'); //$NON-NLS-1$
-							ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
+							ef.append(event.getAction() + " " + event.getFile() + '\n'); //$NON-NLS-1$
 							}
 
 						@Override
