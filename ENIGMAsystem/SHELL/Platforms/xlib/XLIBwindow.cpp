@@ -333,12 +333,14 @@ void show_error(string err, const bool fatal)
 
 extern double fps;
 namespace enigma {
-  char** parameters;
+  string* parameters;
+  unsigned int parameterc;
   void windowsystem_write_exename(char* x)
   {
-    unsigned irx;
-    for (irx = 0; enigma::parameters[0][irx] != 0; irx++)
-      x[irx] = enigma::parameters[0][irx];
+    unsigned irx = 0;
+    if (enigma::parameterc)
+      for (irx = 0; enigma::parameters[0][irx] != 0; irx++)
+        x[irx] = enigma::parameters[0][irx];
     x[irx] = 0;
   }
   #define hielem 9
@@ -397,6 +399,12 @@ void keyboard_wait()
   }
 }
 
+string parameter_string(unsigned num) {
+  return num < enigma::parameterc ? enigma::parameters[num] : "";
+}
+int parameter_string() {
+  return enigma::parameterc;
+}
 /*
 display_get_width() // Returns the width of the display in pixels.
 display_get_height() // Returns the height of the display in pixels.

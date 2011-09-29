@@ -156,7 +156,8 @@ namespace enigma
 int main(int argc,char** argv)
 {
   // Copy our parameters
-	enigma::parameters=new char* [argc];
+	enigma::parameters = new string[argc];
+	enigma::parameterc = argc;
 	for (int i=0; i<argc; i++)
 		enigma::parameters[i]=argv[i];
 	enigma::initkeymap();

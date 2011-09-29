@@ -139,8 +139,12 @@ int show_message(string str);
 
 
 namespace enigma {
-  extern char** parameters;
+  extern string*  parameters;
+  extern unsigned parameterc;
   //void writename(char* x);
 }
+
+string parameter_string(unsigned num);
+int parameter_count();
 
 #define enigmacatchmouse() //Linux should hopefully do that automatically.
