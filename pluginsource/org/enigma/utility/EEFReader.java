@@ -140,14 +140,22 @@ public class EEFReader
 			{
 			comment_str = firstLine.substring(0,lenComment);
 			while (file.hasNextLine())
-				readItem(root_db,nextLine());
+				{
+				String str = nextLine();
+				if (str.isEmpty()) continue;
+				readItem(root_db,str);
+				}
 			}
 		else
 			{
 			comment_str = null;
 			readItem(root_db,firstLine);
 			while (file.hasNextLine())
-				readItem(root_db,nextLine());
+				{
+				String str = nextLine();
+				if (str.isEmpty()) continue;
+				readItem(root_db,str);
+				}
 			}
 		}
 
@@ -360,7 +368,12 @@ public class EEFReader
 		for (int i = 0; i < read_attrs.lineAttrs; i++)
 			e.lineAttribs.add(nextLine());
 		for (int i = 0; i < read_attrs.children; i++)
-			readItem(e,nextLine());
+			{
+			String str = nextLine();
+			while (str.isEmpty())
+				str = nextLine();
+			readItem(e,str);
+			}
 
 		parent.children.add(e);
 		}

@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -543,8 +545,13 @@ public class EFileWriter
 							{
 							// note: check size first
 							String code = action.getArguments().get(0).getVal();
-							ps.println("Code[" + code.split("\r\n|\r|\n").length + " lines]");
-							ps.print(code);
+							//Java's lovely line-counting method... Note that split() discards eof newlines.
+							Matcher m = Pattern.compile("\r\n|\r|\n").matcher(code);
+							int lines = 1;
+							while (m.find())
+								lines++;
+							ps.println("Code[" + lines + " lines]");
+							ps.println(code);
 							}
 						}
 					}
