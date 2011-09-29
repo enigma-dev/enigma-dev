@@ -544,7 +544,7 @@ public class EFileWriter
 							// note: check size first
 							String code = action.getArguments().get(0).getVal();
 							ps.println("Code[" + code.split("\r\n|\r|\n").length + " lines]");
-							ps.println(code);
+							ps.print(code);
 							}
 						}
 					}
