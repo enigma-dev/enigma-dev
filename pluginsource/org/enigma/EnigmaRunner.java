@@ -275,12 +275,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		try
 			{
 			System.out.println(p.waitFor());
+			System.out.println("Process terminated");
 			}
 		catch (InterruptedException e)
 			{
 			e.printStackTrace();
 			}
-		ef.setVisible(false);
+		ef.close();
 		return true;
 		}
 

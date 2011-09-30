@@ -184,4 +184,15 @@ public class EnigmaSettings extends Resource<EnigmaSettings,EnigmaSettings.PEnig
 		{
 		copyInto(dest);
 		}
+
+	public boolean equals(Object o)
+		{
+		if (this == o) return true;
+		if (o == null || !(o instanceof EnigmaSettings)) return false;
+		EnigmaSettings es = (EnigmaSettings) o;
+		if (!es.definitions.equals(definitions) || !es.globalLocals.equals(globalLocals)
+				|| !es.initialization.equals(initialization) || !es.cleanup.equals(cleanup)) return false;
+		return es.options.equals(options) && es.targets.equals(targets)
+				&& es.extensions.equals(extensions);
+		}
 	}

@@ -80,11 +80,6 @@ import org.enigma.utility.YamlParser;
 import org.enigma.utility.YamlParser.YamlContent;
 import org.enigma.utility.YamlParser.YamlElement;
 import org.enigma.utility.YamlParser.YamlNode;
-import org.lateralgm.compare.CollectionComparator;
-import org.lateralgm.compare.MapComparator;
-import org.lateralgm.compare.ObjectComparator;
-import org.lateralgm.compare.ReflectionComparator;
-import org.lateralgm.compare.SimpleCasesComparator;
 import org.lateralgm.components.CustomFileChooser;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
@@ -695,9 +690,7 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 	public boolean resourceChanged()
 		{
 		commitChanges();
-		ReflectionComparator rc = new SimpleCasesComparator(new CollectionComparator(new MapComparator(
-				new ObjectComparator(null))));
-		return !rc.areEqual(oldEs,es);
+		return !es.equals(oldEs);
 		}
 
 	/** A special ComboBoxModel to alleviate repopulation */

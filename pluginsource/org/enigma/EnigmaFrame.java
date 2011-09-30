@@ -34,8 +34,8 @@ import org.lateralgm.main.LGM;
 public class EnigmaFrame extends JFrame implements OutputHandler
 	{
 	private static final long serialVersionUID = 1L;
-	public JTextArea ta;
-	public JProgressBar pb;
+	protected JTextArea ta;
+	protected JProgressBar pb;
 
 	public EnigmaFrame()
 		{
@@ -78,6 +78,11 @@ public class EnigmaFrame extends JFrame implements OutputHandler
 	public void open()
 		{
 		setVisible(true);
+		}
+
+	public void close()
+		{
+		dispose();
 		}
 
 	@Override
