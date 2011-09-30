@@ -34,6 +34,7 @@ import org.enigma.utility.APNGExperiments;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmStreamEncoder;
+import org.lateralgm.file.GmFile.FormatFlavor;
 import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
@@ -70,6 +71,7 @@ import org.lateralgm.util.PropertyMap;
 public class EFileWriter
 	{
 	public static final String EY = ".ey"; //$NON-NLS-1$
+	public static final FormatFlavor FLAVOR_EGM = new FormatFlavor("EGM",1);
 
 	// Modularity Classes
 	public static abstract class EGMOutputStream

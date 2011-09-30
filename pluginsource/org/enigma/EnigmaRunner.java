@@ -79,6 +79,7 @@ import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFormatException;
+import org.lateralgm.file.GmFile.FormatFlavor;
 import org.lateralgm.jedit.GMLKeywords;
 import org.lateralgm.jedit.GMLKeywords.Construct;
 import org.lateralgm.jedit.GMLKeywords.Function;
@@ -339,6 +340,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		public void write(OutputStream out, GmFile gf, ResNode root) throws IOException
 			{
 			EFileWriter.writeEgmZipFile(out,gf,root);
+			}
+
+		@Override
+		public FormatFlavor getFlavor()
+			{
+			return EFileWriter.FLAVOR_EGM;
 			}
 
 		//TODO: FileView
