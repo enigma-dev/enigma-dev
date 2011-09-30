@@ -573,13 +573,13 @@ inline void action_create_object_motion(int object, double x, double y, double s
     if (argument_relative)
     {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-        enigma::object_planar* const ii = ((enigma::object_planar*)enigma::fetch_inst_iter_by_int(instance_create(inst->x + x, inst->y + y, object))->inst);
+        enigma::object_planar* const ii = ((enigma::object_planar*)enigma::fetch_instance_by_int(instance_create(inst->x + x, inst->y + y, object)));
         ii->speed.rval.d = speed;
         ii->direction = direction;
     }
     else
     {
-        enigma::object_planar* const ii = ((enigma::object_planar*)enigma::fetch_inst_iter_by_int(instance_create(x, y, object))->inst);
+        enigma::object_planar* const ii = ((enigma::object_planar*)enigma::fetch_instance_by_int(instance_create(x, y, object)));
         ii->speed.rval.d = speed;
         ii->direction = direction;
     }

@@ -402,7 +402,7 @@ void keyboard_wait()
 string parameter_string(unsigned num) {
   return num < enigma::parameterc ? enigma::parameters[num] : "";
 }
-int parameter_string() {
+int parameter_count() {
   return enigma::parameterc;
 }
 /*

@@ -132,9 +132,9 @@ double move_contact_object(double angle, double max_dist, const int object, cons
     const double sin_angle = sin(degtorad(angle)), cos_angle = cos(degtorad(angle));
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     const int quad = int(angle/90.0);
-    for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
-        const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
+        const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid)) {continue;}
 
         if (inst2->x + inst2->bbox_right >= inst1->x + inst1->bbox_left && inst2->y + inst2->bbox_bottom >= inst1->y + inst1->bbox_top && inst2->x + inst2->bbox_left <= inst1->x + inst1->bbox_right && inst2->y + inst2->bbox_top <= inst1->y + inst1->bbox_bottom)
@@ -243,9 +243,9 @@ double move_outside_object(double angle, double max_dist, const int object, cons
     const double sin_angle = sin(degtorad(angle)), cos_angle = cos(degtorad(angle));
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     const int quad = int(angle/90.0);
-    for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
-        const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
+        const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid)) {continue;}
 
         if (!(inst2->x + inst2->bbox_right >= inst1->x + inst1->bbox_left && inst2->y + inst2->bbox_bottom >= inst1->y + inst1->bbox_top && inst2->x + inst2->bbox_left <= inst1->x + inst1->bbox_right && inst2->y + inst2->bbox_top <= inst1->y + inst1->bbox_bottom))
@@ -318,9 +318,9 @@ inline int move_ouside_solid(const double direction, const double speed)
 int move_bounce_object(const bool adv, const int object, const bool solid_only = false)
 {
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-    for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
-        const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
+        const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid)) {continue;}
 
         if (inst1->x + inst1->bbox_left <= inst2->x + inst2->bbox_right && inst1->y + inst1->bbox_top <= inst2->y + inst2->bbox_bottom && inst1->x + inst1->bbox_right >= inst2->x + inst2->bbox_left && inst1->y + inst1->bbox_bottom >= inst2->y + inst2->bbox_top)

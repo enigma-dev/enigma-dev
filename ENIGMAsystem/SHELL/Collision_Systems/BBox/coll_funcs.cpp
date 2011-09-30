@@ -116,9 +116,9 @@ double distance_to_object(int object)
                right1 = inst1->x + inst1->bbox_right, bottom1 = inst1->y + inst1->bbox_bottom;
   double distance = std::numeric_limits<double>::infinity();
   double tempdist;
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
   {
-    const enigma::object_collisions* inst2 = (enigma::object_collisions*)it->inst;
+    const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
     if (inst1 == inst2) continue;
 
     const double left2  = inst2->x + inst1->bbox_left,  top2    = inst2->y + inst1->bbox_top,

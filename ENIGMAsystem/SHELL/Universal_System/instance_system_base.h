@@ -27,6 +27,9 @@
 
 #ifndef _INSTANCE_SYSTEM_BASE__H
 #define _INSTANCE_SYSTEM_BASE__H
+
+#include "instance_iterator.h"
+
 namespace enigma
 {
   struct inst_iter
@@ -89,11 +92,13 @@ namespace enigma
   extern object_basic *ENIGMA_global_instance;
   extern inst_iter *instance_event_iterator;
   extern object_basic *instance_other;
-
+/* INSTANTLY ANTIQUATED
   inst_iter*    instance_list_first();
   inst_iter*    fetch_inst_iter_by_id(int id);
   inst_iter*    fetch_inst_iter_by_int(int x);
+*/
   object_basic* fetch_instance_by_int(int x);
+  object_basic* fetch_instance_by_id(int x);
 }
 
 // Other

@@ -39,9 +39,9 @@
 
 bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2)
 {
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
   {
-    const enigma::object_collisions* inst = (enigma::object_collisions*)it->inst;
+    const enigma::object_collisions* inst = (enigma::object_collisions*)*it;
     const int ox = (int)inst->x,         oy = (int)inst->y,
               bl = inst->bbox_left, br = inst->bbox_right,
               bt = inst->bbox_top,  bb = inst->bbox_bottom;
@@ -53,9 +53,9 @@ bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2)
 
 int collision_bbox_rect_first(int object,double x1,double y1,double x2,double y2)
 {
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
   {
-    const enigma::object_collisions* inst = (enigma::object_collisions*)it->inst;
+    const enigma::object_collisions* inst = (enigma::object_collisions*)*it;
     const int ox = (int)inst->x,         oy = (int)inst->y,
               bl = inst->bbox_left, br = inst->bbox_right,
               bt = inst->bbox_top,  bb = inst->bbox_bottom;

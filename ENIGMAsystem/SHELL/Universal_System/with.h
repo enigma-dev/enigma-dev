@@ -33,10 +33,11 @@ namespace enigma
   struct with_iter
   {
     iterator_level *my_il;
-    with_iter(inst_iter* nt, object_basic* other)
+    iterator my_iterator;
+    with_iter(enigma::iterator nt, object_basic* other): my_iterator(nt)
     {
       il_top = my_il = new iterator_level(instance_event_iterator,instance_other,il_top);
-      instance_event_iterator = nt;
+      instance_event_iterator = nt.it;
       instance_other = other;
     }
     ~with_iter()

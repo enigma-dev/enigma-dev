@@ -41,10 +41,10 @@ namespace enigma
 
 void instance_destroy(int id)
 {
-  enigma::inst_iter* who = enigma::fetch_inst_iter_by_id(id);
+  enigma::object_basic* who = enigma::fetch_instance_by_id(id);
   if (who) {
-      who->inst->myevent_destroy();
-    who->inst->unlink();
+    who->myevent_destroy();
+    who->unlink();
   }
 }
 
@@ -63,11 +63,11 @@ bool instance_exists(int obj)
 int instance_find(int obj, int num)
 {
   int nth=0;
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(obj); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
   {
     nth++;
     if (nth>num)
-    return (int) it->inst->id;
+    return (int) it->id;
   }
   return noone;
 }
@@ -88,15 +88,15 @@ int instance_nearest(int x,int y,int obj)
   int retid=-4;
   double xl,yl;
   
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(obj); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
   {
-    xl = ((enigma::object_planar*)it->inst)->x - x;
-    yl = ((enigma::object_planar*)it->inst)->y - y;
+    xl = ((enigma::object_planar*)*it)->x - x;
+    yl = ((enigma::object_planar*)*it)->y - y;
     const double dstclc = hypot(xl,yl);
     if (dstclc < dist_lowest or dist_lowest == -1)
     {
       dist_lowest = dstclc;
-      retid = it->inst->id;
+      retid = it->id;
     }
   }
   
@@ -110,15 +110,15 @@ int instance_furthest(int x,int y,int obj)
   double xl,yl;
   double dstclc;
 
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(obj); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
   {
-    xl=((enigma::object_planar*)it->inst)->x - x;
-    yl=((enigma::object_planar*)it->inst)->y - y;
+    xl=((enigma::object_planar*)*it)->x - x;
+    yl=((enigma::object_planar*)*it)->y - y;
     dstclc = hypot(xl,yl);
     if (dstclc > dist_highest)
     {
       dist_highest = dstclc;
-      retid = it->inst->id;
+      retid = it->id;
     }
   }
 

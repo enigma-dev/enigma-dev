@@ -36,9 +36,9 @@
 
 enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool notme, double x1, double y1, double x2, double y2)
 {
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
   {
-    enigma::object_collisions* const inst = (enigma::object_collisions*)it->inst;
+    enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
     if (notme && inst->id == enigma::instance_event_iterator->inst->id) continue;
     if (solid_only && !inst->solid) continue;
     if (collide_bbox_rect(inst,inst->x,inst->y, x1,y1,x2,y2))
@@ -49,9 +49,9 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
 enigma::object_collisions* const collide_inst_line(int object, bool solid_only, bool notme, double x1, double y1, double x2, double y2)
 {
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
   {
-    enigma::object_collisions* const inst = (enigma::object_collisions*)it->inst;
+    enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
     if (notme && inst->id == enigma::instance_event_iterator->inst->id) continue;
     if (solid_only && !inst->solid) continue;
     if (collide_bbox_line(inst,inst->x,inst->y, x1,y1,x2,y2))
@@ -63,9 +63,9 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
 enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, bool notme, double x, double y)
 {
   enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
   {
-    enigma::object_collisions* const inst2 = (enigma::object_collisions*)it->inst;
+    enigma::object_collisions* const inst2 = (enigma::object_collisions*)*it;
     if (notme && inst2->id == inst1->id) continue;
     if (solid_only && !inst2->solid) continue;
     if (collide_bbox_bbox(inst1,x,y,inst2,inst2->x,inst2->y))
@@ -76,9 +76,9 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
 enigma::object_collisions* const collide_inst_point(int object, bool solid_only, bool notme, double x, double y)
 {
-  for (enigma::inst_iter *it = enigma::fetch_inst_iter_by_int(object); it != NULL; it = it->next)
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
   {
-    enigma::object_collisions* const inst = (enigma::object_collisions*)it->inst;
+    enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
     if (notme && inst->id == enigma::instance_event_iterator->inst->id) continue;
     if (solid_only && !inst->solid) continue;
     if (collide_bbox_point(inst,inst->x,inst->y,x,y))

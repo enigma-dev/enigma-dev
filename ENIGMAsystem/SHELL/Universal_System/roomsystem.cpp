@@ -71,13 +71,13 @@ namespace enigma
   {
     //Destroy all objects
     enigma::nodestroy=1;
-    for (enigma::inst_iter *it = enigma::instance_list_first(); it != NULL; it = it->next)
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
-      it->inst->myevent_roomend();
+      it->myevent_roomend();
       #ifdef ISCONTROLLER_persistent
-      if (!it->inst->persistent)
+      if (!it->persistent)
       #endif
-      instance_destroy(it->inst->id);
+      instance_destroy(it->id);
     }
     enigma::nodestroy = 0;
 

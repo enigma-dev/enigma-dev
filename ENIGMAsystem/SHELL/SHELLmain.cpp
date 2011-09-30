@@ -126,8 +126,8 @@ namespace enigma
 {
   int game_ending()
   {
-    for (inst_iter *i = instance_list_first(); i != NULL; i = i->next)
-      { i->inst->unlink(); delete i->inst; }
+    for (enigma::iterator i = instance_list_first(); i; ++i)
+      { i->unlink(); delete *i; }
     return 0;
   }
 }
