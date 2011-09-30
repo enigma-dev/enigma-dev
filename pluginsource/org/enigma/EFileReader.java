@@ -408,6 +408,7 @@ public class EFileReader
 
 	public static void readEgmFile(EGMFile f, GmFile gf, ResNode root) throws IOException
 		{
+		System.out.println("Setting EGM Flavor");
 		gf.format = EFileWriter.FLAVOR_EGM;
 		readNodeChildren(f,gf,root,null,new String());
 		root.add(new ResNode(org.lateralgm.messages.Messages.getString("LGM.EXT"),

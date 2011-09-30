@@ -22,11 +22,8 @@ package org.enigma;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -54,7 +51,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -91,6 +87,7 @@ import org.lateralgm.main.FileChooser.FileWriter;
 import org.lateralgm.main.FileChooser.GroupFilter;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
+import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Script;
 import org.lateralgm.subframes.ActionFrame;
 import org.lateralgm.subframes.CodeFrame;
@@ -379,7 +376,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		menu.addSeparator();
 
 		JMenuItem mi = new JMenuItem(Messages.getString("EnigmaRunner.MENU_SETTINGS")); //$NON-NLS-1$
-		mi.addActionListener(node);
+		mi.addActionListener(new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent e)
+					{
+					node.openFrame();
+					}
+			});
 		menu.add(mi);
 
 		JMenu sub = new JMenu(Messages.getString("EnigmaRunner.MENU_KEYWORDS")); //$NON-NLS-1$
@@ -523,47 +527,24 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
-	public class EnigmaNode extends ResNode implements ActionListener
+	public class EnigmaNode extends ResNode
 		{
 		private static final long serialVersionUID = 1L;
-		private JPopupMenu pm;
 
 		public EnigmaNode()
 			{
-			super(
-					Messages.getString("EnigmaRunner.RESNODE_NAME"),ResNode.STATUS_SECONDARY,EnigmaSettings.class); //$NON-NLS-1$
-			pm = new JPopupMenu();
-			pm.add(new JMenuItem(Messages.getString("EnigmaRunner.RESNODE_EDIT"))).addActionListener(this); //$NON-NLS-1$
+			super(Messages.getString("EnigmaRunner.RESNODE_NAME"),ResNode.STATUS_SECONDARY, //$NON-NLS-1$
+					EnigmaSettings.class);
 			}
 
-		public void openFrame()
+		public ResourceReference<? extends Resource<?,?>> getRes()
+			{
+			return es == null ? null : es.reference;
+			}
+
+		public void openFrame(boolean newRes)
 			{
 			if (ENIGMA_READY) esf.toTop();
-			}
-
-		public void showMenu(MouseEvent e)
-			{
-			pm.show(e.getComponent(),e.getX(),e.getY());
-			}
-
-		public void actionPerformed(ActionEvent e)
-			{
-			openFrame();
-			}
-
-		public DataFlavor[] getTransferDataFlavors()
-			{
-			return new DataFlavor[0];
-			}
-
-		public boolean isDataFlavorSupported(DataFlavor flavor)
-			{
-			return false;
-			}
-
-		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException
-			{
-			throw new UnsupportedFlavorException(flavor);
 			}
 		}
 

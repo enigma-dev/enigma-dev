@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
+import org.enigma.backend.EnigmaSettings;
 import org.enigma.messages.Messages;
 import org.enigma.utility.APNGExperiments;
 import org.lateralgm.components.impl.ResNode;
@@ -72,6 +74,26 @@ public class EFileWriter
 	{
 	public static final String EY = ".ey"; //$NON-NLS-1$
 	public static final FormatFlavor FLAVOR_EGM = new FormatFlavor("EGM",1);
+
+	// Module maps
+	/** Used to register writers with their resource kinds. */
+	static Map<Class<? extends Resource<?,?>>,ResourceWriter> writers = new HashMap<Class<? extends Resource<?,?>>,ResourceWriter>();
+	static
+		{
+		// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
+		writers.put(Sprite.class,new SpriteApngWriter());
+		writers.put(Sound.class,new SoundWriter());
+		writers.put(Background.class,new BackgroundWriter());
+		writers.put(Path.class,new PathTextWriter());
+		writers.put(Script.class,new ScriptWriter());
+		writers.put(Font.class,new FontRawWriter());
+		// writers.put(Timeline.class,new TimelineIO());
+		writers.put(GmObject.class,new ObjectEefWriter());
+		writers.put(Room.class,new RoomGmDataWriter());
+		writers.put(GameInformation.class,new GameInfoRtfWriter());
+		writers.put(GameSettings.class,new GameSettingsThreeWriter());
+		writers.put(EnigmaSettings.class,new EnigmaSettingsWriter());
+		}
 
 	// Modularity Classes
 	public static abstract class EGMOutputStream
@@ -261,25 +283,6 @@ public class EFileWriter
 			};
 		}
 
-	// Module maps
-	/** Used to register writers with their resource kinds. */
-	static Map<Class<? extends Resource<?,?>>,ResourceWriter> writers = new HashMap<Class<? extends Resource<?,?>>,ResourceWriter>();
-	static
-		{
-		// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
-		writers.put(Sprite.class,new SpriteApngIO());
-		writers.put(Sound.class,new SoundIO());
-		writers.put(Background.class,new BackgroundIO());
-		writers.put(Path.class,new PathTextIO());
-		writers.put(Script.class,new ScriptIO());
-		writers.put(Font.class,new FontRawIO());
-		// writers.put(Timeline.class,new TimelineIO());
-		writers.put(GmObject.class,new ObjectIO());
-		writers.put(Room.class,new RoomGmDataIO());
-		writers.put(GameInformation.class,new GameInfoRtfIO());
-		writers.put(GameSettings.class,new GameSettingsThreeIO());
-		}
-
 	// Constructors
 	public static void writeEgmFile(File loc, GmFile gf, ResNode tree, boolean zip)
 		{
@@ -374,7 +377,7 @@ public class EFileWriter
 	// Modules
 	// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
 
-	static class SpriteApngIO extends DataPropWriter
+	static class SpriteApngWriter extends DataPropWriter
 		{
 		@Override
 		public String getExt(Resource<?,?> r)
@@ -390,7 +393,7 @@ public class EFileWriter
 			}
 		}
 
-	static class SoundIO extends DataPropWriter
+	static class SoundWriter extends DataPropWriter
 		{
 		@Override
 		public String getExt(Resource<?,?> r)
@@ -405,7 +408,7 @@ public class EFileWriter
 			}
 		}
 
-	static class BackgroundIO extends DataPropWriter
+	static class BackgroundWriter extends DataPropWriter
 		{
 		@Override
 		public String getExt(Resource<?,?> r)
@@ -420,7 +423,7 @@ public class EFileWriter
 			}
 		}
 
-	static class PathTextIO extends DataPropWriter
+	static class PathTextWriter extends DataPropWriter
 		{
 		@Override
 		public String getExt(Resource<?,?> r)
@@ -444,7 +447,7 @@ public class EFileWriter
 			}
 		}
 
-	static class ScriptIO extends DataPropWriter
+	static class ScriptWriter extends DataPropWriter
 		{
 		@Override
 		public String getExt(Resource<?,?> r)
@@ -465,7 +468,7 @@ public class EFileWriter
 			}
 		}
 
-	static class FontRawIO implements ResourceWriter
+	static class FontRawWriter implements ResourceWriter
 		{
 		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
 				throws IOException
@@ -483,7 +486,7 @@ public class EFileWriter
 			}
 		}
 
-	static class ObjectIO extends DataPropWriter
+	static class ObjectEefWriter extends DataPropWriter
 		{
 		@Override
 		public String getExt(Resource<?,?> r)
@@ -547,12 +550,7 @@ public class EFileWriter
 							{
 							// note: check size first
 							String code = action.getArguments().get(0).getVal();
-							//Java's lovely line-counting method... Note that split() discards eof newlines.
-							Matcher m = Pattern.compile("\r\n|\r|\n").matcher(code);
-							int lines = 1;
-							while (m.find())
-								lines++;
-							ps.println("Code[" + lines + " lines]");
+							ps.println("Code[" + countLines(code) + " lines]");
 							ps.println(code);
 							}
 						}
@@ -566,7 +564,7 @@ public class EFileWriter
 			}
 		}
 
-	static class RoomGmDataIO extends DataPropWriter
+	static class RoomGmDataWriter extends DataPropWriter
 		{
 		@Override
 		public String getExt(Resource<?,?> r)
@@ -633,7 +631,7 @@ public class EFileWriter
 			}
 		}
 
-	static class GameInfoRtfIO implements ResourceWriter
+	static class GameInfoRtfWriter implements ResourceWriter
 		{
 		public static final String RTF = ".rtf";
 
@@ -669,13 +667,12 @@ public class EFileWriter
 			}
 		}
 
-	static class GameSettingsThreeIO implements ResourceWriter
+	static class GameSettingsThreeWriter implements ResourceWriter
 		{
 		@Override
 		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
 				throws IOException
 			{
-			System.out.println("Writing settings");
 			GameSettings gs = gf.gameSettings;
 			String name = (String) child.getUserObject();
 			String icon = "icon.ico", sSplash = "splash.png"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -727,5 +724,52 @@ public class EFileWriter
 			{
 			((ICOFile) r.get(PGameSettings.GAME_ICON)).write(os);
 			}
+		}
+
+	static class EnigmaSettingsWriter implements ResourceWriter
+		{
+		@Override
+		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+				throws IOException
+			{
+			ResourceReference<? extends Resource<?,?>> ref = child.getRes();
+			Resource<?,?> r = ref == null ? null : ref.get();
+			EnigmaSettings es = (EnigmaSettings) r;
+
+			String name = (String) child.getUserObject();
+			String fn = name + ".eef"; //$NON-NLS-1$
+
+			PrintWriter pw = new PrintWriter(os.next(dir,name + EY));
+			pw.println("%e-yaml"); //$NON-NLS-1$
+			pw.println("---"); //$NON-NLS-1$
+			pw.println("Data: " + fn); //$NON-NLS-1$
+			es.toYaml(pw,false);
+
+			writeData(os.next(dir,fn),es);
+			}
+
+		public void writeData(OutputStream next, EnigmaSettings es) throws IOException
+			{
+			PrintStream ps = new PrintStream(next);
+			ps.println("Codes{4}");
+			ps.println(" Code(\"Definitions\"): Code[" + countLines(es.definitions) + "]");
+			ps.println(es.definitions);
+			ps.println(" Code(\"GlobalLocals\"): Code[" + countLines(es.globalLocals) + "]");
+			ps.println(es.globalLocals);
+			ps.println(" Code(\"Iinitialization\"): Code[" + countLines(es.initialization) + "]");
+			ps.println(es.initialization);
+			ps.println(" Code(\"Cleanup\"): Code[" + countLines(es.cleanup) + "]");
+			ps.println(es.cleanup);
+			}
+		}
+
+	public static int countLines(String s)
+		{
+		//Java's lovely line-counting method... Note that split() discards eof newlines.
+		Matcher m = Pattern.compile("\r\n|\r|\n").matcher(s);
+		int lines = 1;
+		while (m.find())
+			lines++;
+		return lines;
 		}
 	}

@@ -28,7 +28,7 @@ import java.awt.event.FocusListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -77,9 +77,6 @@ import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.messages.Messages;
 import org.enigma.utility.YamlParser;
-import org.enigma.utility.YamlParser.YamlContent;
-import org.enigma.utility.YamlParser.YamlElement;
-import org.enigma.utility.YamlParser.YamlNode;
 import org.lateralgm.components.CustomFileChooser;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
@@ -573,13 +570,7 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 		es.options.clear();
 		try
 			{
-			YamlNode n = YamlParser.parse(fc.getSelectedFile());
-			for (YamlElement e : n.chronos)
-				{
-				if (!e.isScalar) continue;
-				String val = ((YamlContent) e).getValue();
-				es.options.put(e.name,val);
-				}
+			es.fromYaml(YamlParser.parse(fc.getSelectedFile()));
 			setComponents(es);
 			}
 		catch (IOException e)
@@ -598,25 +589,9 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 
 		try
 			{
-			PrintStream ps = new PrintStream(new File(name));
-
-			ps.println("%e-yaml"); //$NON-NLS-1$
-			ps.println("---"); //$NON-NLS-1$
-
-			//options
-			for (Entry<String,String> entry : es.options.entrySet())
-				ps.println(entry.getKey() + ": " + entry.getValue()); //$NON-NLS-1$
-			ps.println();
-
-			//targets
-			for (Entry<String,TargetSelection> entry : es.targets.entrySet())
-				{
-				if (entry.getValue() == null) continue;
-				ps.format("target-%s: %s\n",entry.getKey(),entry.getValue().id); //$NON-NLS-1$
-				}
-			ps.println("target-networking: None"); //$NON-NLS-1$
-
-			ps.close();
+			PrintWriter pw = new PrintWriter(new File(name));
+			es.toYaml(pw,true);
+			pw.close();
 			}
 		catch (FileNotFoundException e)
 			{

@@ -13,6 +13,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +29,9 @@ import org.enigma.SettingsHandler.OptionGroupSetting;
 import org.enigma.SettingsHandler.OptionSetting;
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
+import org.enigma.utility.YamlParser.YamlContent;
+import org.enigma.utility.YamlParser.YamlElement;
+import org.enigma.utility.YamlParser.YamlNode;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.util.PropertyMap;
@@ -52,6 +57,7 @@ public class EnigmaSettings extends Resource<EnigmaSettings,EnigmaSettings.PEnig
 
 	private EnigmaSettings(boolean load)
 		{
+		super();
 		if (!load) return;
 
 		loadDefinitions();
@@ -106,43 +112,56 @@ public class EnigmaSettings extends Resource<EnigmaSettings,EnigmaSettings.PEnig
 			}
 		}
 
-	private String toYaml()
+	public void fromYaml(YamlNode n)
 		{
-		StringBuilder yaml = new StringBuilder("%e-yaml\n---\n"); //$NON-NLS-1$
-		for (Entry<String,String> entry : options.entrySet())
-			yaml.append(entry.getKey()).append(": ").append(entry.getValue()).append('\n'); //$NON-NLS-1$
+		for (YamlElement e : n.chronos)
+			{
+			if (!e.isScalar) continue;
+			String val = ((YamlContent) e).getValue();
+			options.put(e.name,val);
+			}
+		}
 
-		yaml.append('\n');
+	public void toYaml(PrintWriter out, boolean includeHeader)
+		{
+		if (includeHeader)
+			{
+			out.println("%e-yaml"); //$NON-NLS-1$
+			out.println("---"); //$NON-NLS-1$
+			}
+
+		for (Entry<String,String> entry : options.entrySet())
+			out.append(entry.getKey()).append(": ").append(entry.getValue()).println(); //$NON-NLS-1$
+
+		out.println();
 
 		for (Entry<String,TargetSelection> entry : targets.entrySet())
 			{
 			if (entry.getValue() == null) continue;
-			yaml.append("target-").append(entry.getKey()).append(": ").append(entry.getValue().id).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
+			out.append("target-").append(entry.getKey()).append(": ").append(entry.getValue().id).println(); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-		yaml.append("target-networking: None\n"); //$NON-NLS-1$
+		out.println("target-networking: None"); //$NON-NLS-1$
 
 		if (extensions.size() > 0)
 			{
-			yaml.append('\n');
-			yaml.append("extensions: "); //$NON-NLS-1$
+			out.println();
+			out.append("extensions: "); //$NON-NLS-1$
 
 			String[] exts = extensions.toArray(new String[0]);
-			yaml.append(exts[0]);
+			out.append(exts[0]);
 			for (int i = 1; i < exts.length; i++)
-				yaml.append(',').append(exts[i]);
+				out.append(',').append(exts[i]);
 
-			yaml.append('\n');
+			out.println();
 			}
-
-		System.out.println();
-		System.out.println(yaml);
-
-		return yaml.toString();
+		out.flush();
 		}
 
 	public SyntaxError commitToDriver(EnigmaDriver driver)
 		{
-		return driver.definitionsModified(definitions,toYaml());
+		StringWriter sw = new StringWriter();
+		toYaml(new PrintWriter(sw),true);
+		return driver.definitionsModified(definitions,sw.toString());
 		}
 
 	public EnigmaSettings copy()
