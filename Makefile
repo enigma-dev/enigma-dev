@@ -1,23 +1,17 @@
-ifdef eTCpath
-	PATH := $(eTCpath)$(PATH)
-endif
+PATH := $(eTCpath)$(PATH)
 
-ENIGMA: DUMMYDEPENDENCY
-	cd CompilerSource && $(MAKE)
-DUMMYDEPENDENCY:
+.PHONY: ENIGMA
 
-# Target takes the following parameters:
-#	GMODE{run,build,debug,compile}
-#	GRAPHICS{<anything under graphics_systems>}
-#	PLATFORM{<anything under platforms>}
-#	GLINKS{<requirements of anything above>}
-Game:
-	cd ENIGMAsystem/SHELL/ && $(MAKE) GMODE=$(GMODE) GLINKS="$(GLINKS)" GFLAGS="$(GFLAGS)" GRAPHICS=$(GRAPHICS) PLATFORM=$(PLATFORM) COMPILEPATH=$(COMPILEPATH) OUTPUTNAME="$(OUTPUTNAME)" EXTENSIONS="$(EXTENSIONS)" EXTLINKS="$(EXTLINKS)"
+ENIGMA:
+	$(MAKE) -C CompilerSource
 
 clean:
-	cd CompilerSource && $(MAKE) clean
+	$(MAKE) -C CompilerSource clean
+
+Game:
+	$(MAKE) -C ENIGMAsystem/SHELL
 
 clean-game:
-	cd ENIGMAsystem/SHELL/ && $(MAKE) clean
+	$(MAKE) -C ENIGMAsystem/SHELL clean
 
 

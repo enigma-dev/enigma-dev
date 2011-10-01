@@ -31,8 +31,9 @@ LDFLAGS += -shared
 
 SOURCES := $(shell find -name '*.cpp' -and ! -name 'standalone_*')
 OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
-DEPENDENCIES := $(OBJECTS:.o=.d)
+DEPENDS := $(OBJECTS:.o=.d)
 
+# sort has the nice side effect of removing duplicates. this may or may not be faster.
 OBJDIRS := $(sort $(dir $(OBJECTS)))
 
 ############
@@ -44,23 +45,22 @@ OBJDIRS := $(sort $(dir $(OBJECTS)))
 all: $(TARGET)
 
 clean:
-	$(RM) $(TARGET) $(OBJECTS) $(DEPENDENCIES)
+	$(RM) $(TARGET) $(OBJECTS) $(DEPENDS)
 
-$(TARGET): $(OBJECTS) Makefile
+$(TARGET): $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS)
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
-DEPEND_OPTIONS = -MMD -MP -MT '.eobjs/$*.o' -MT '.eobjs/$*.d'
+DEPEND_OPTIONS = -MMD -MP
 
-.eobjs/%.o .eobjs/%.d: %.cpp Makefile | $(OBJDIRS)
+.eobjs/%.o .eobjs/%.d: %.cpp | $(OBJDIRS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(DEPEND_OPTIONS) -c -o .eobjs/$*.o $<
 
-# sort has the nice side effect of removing duplicates. this may or may not be faster.
 $(OBJDIRS):
 	mkdir -p $@
 
 ifneq ($(MAKECMDGOALS),clean)
--include $(DEPENDENCIES)
+-include $(DEPENDS)
 endif
