@@ -150,11 +150,17 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   if (mode == emode_rebuild)
   {
-    edbg << "Rebuilding all..." << flushl;
-    edbg << "Running make from `" << MAKE_location << "'" << flushl;
-    edbg << "Done." << flushl;
-    e_execs(MAKE_location + " clean-game eTCpath=\"" + MAKE_paths + "\"");
-    return 0;
+    edbg << "Cleaning..." << flushl;
+
+	string make = "clean-game ";
+	make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier + " ";
+	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
+
+	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
+    e_execs(MAKE_location,make);
+
+    edbg << "Done.\n" << flushl;
+	return 0;
   }
 
   edbg << "Building for mode (" << mode << ")" << flushl;
@@ -479,7 +485,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   for (size_t i = 0; i < mfgfn.length(); i++)
     if (mfgfn[i] == '\\') mfgfn[i] = '/';
   make += string("OUTPUTNAME=\"") + mfgfn + "\" ";
-  make += "eTCpath=\"" + MAKE_paths + "\"";
+  make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
   edbg << "Running make from `" << MAKE_location << "'" << flushl;
   edbg << "Full command line: " << MAKE_location << " " << make << flushl;
@@ -500,7 +506,6 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   ide_output_redirect_reset();
 
   if (makeres) {
-    user << "----Make returned error " << makeres << "----------------------------------\n";
     idpr("Compile failed at C++ level.",-1); return E_ERROR_BUILD;
   }
   user << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";

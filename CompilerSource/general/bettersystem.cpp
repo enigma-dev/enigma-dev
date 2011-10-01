@@ -214,6 +214,8 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
 
     int e_execp(const char* cmd, string path)
     {
+      for (size_t pos = path.find(":"); pos != string::npos; pos = path.find(":", pos + 1))
+        path.replace(pos, 1, ";");
       path.insert(0, "PATH=");
       path += ";"; path += getenv("PATH");
       const char *eCenviron[2] = { path.c_str(), NULL };

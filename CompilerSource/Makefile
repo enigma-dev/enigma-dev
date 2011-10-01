@@ -53,10 +53,8 @@ $(TARGET): $(OBJECTS)
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
-DEPEND_OPTIONS = -MMD -MP
-
 .eobjs/%.o .eobjs/%.d: %.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(DEPEND_OPTIONS) -c -o .eobjs/$*.o $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -MMD -MP -c -o .eobjs/$*.o $<
 
 $(OBJDIRS):
 	mkdir -p $@

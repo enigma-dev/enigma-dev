@@ -210,7 +210,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public boolean make()
 		{
-		String make, path;
+		String make, tcpath, path;
 
 		//try to read the YAML definition for `make` on this platform
 		try
@@ -220,8 +220,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				File gccey = new File(new File("Compilers",TargetHandler.getOS()),"gcc.ey"); //$NON-NLS-1$ //$NON-NLS-2$
 				YamlNode n = YamlParser.parse(gccey);
 				make = n.getMC("Make"); //or OOB  //$NON-NLS-1$
+				tcpath = n.getMC("TCPath",new String()); //$NON-NLS-1$
 				path = n.getMC("Path",new String()); //$NON-NLS-1$
-				if (path == null) path = new String();
 				//replace starting \ with root
 				if (make.startsWith("\\")) make = new File("/").getAbsolutePath() + make.substring(1); //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -246,10 +246,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		//run make
 		Process p = null;
-		String cmd = make + " eTCpath=\"" + path + "\" -j"; //$NON-NLS-1$
+		String cmd = make + " eTCpath=\"" + tcpath + "\""; //$NON-NLS-1$
+		String[] env = null;
+		if (path != null) env = new String[] { "PATH=" + path };
 		try
 			{
-			p = Runtime.getRuntime().exec(cmd,null,LGM.workDir.getParentFile());
+			p = Runtime.getRuntime().exec(cmd,env,LGM.workDir.getParentFile());
 			}
 		catch (IOException e)
 			{
@@ -265,7 +267,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		//Set up listeners, waitFor, finish successfully
 		String calling = Messages.format("EnigmaRunner.EXEC_CALLING",cmd); //$NON-NLS-1$
 		System.out.println(calling);
-		ef.append(calling);
+		ef.append(calling + "\n");
 		new EnigmaThread(ef,p.getInputStream());
 		new EnigmaThread(ef,p.getErrorStream());
 		ef.open();
@@ -651,7 +653,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (s == debug) compile(MODE_DEBUG);
 		if (s == design) compile(MODE_DESIGN);
 		if (s == compile) compile(MODE_COMPILE);
-		if (s == rebuild) compile(MODE_REBUILD);
+		if (s == rebuild) {
+			compile(MODE_REBUILD);
+			compile(MODE_RUN);
+		}
 
 		if (s == showFunctions) showKeywordListFrame(FUNCTIONS);
 		if (s == showGlobals) showKeywordListFrame(GLOBALS);

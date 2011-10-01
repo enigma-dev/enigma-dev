@@ -61,7 +61,7 @@ bool init_load_successful = false;
 varray<string> include_directories;
 unsigned int include_directory_count;
 
-string MAKE_location, MAKE_paths, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_links;
+string MAKE_location, MAKE_paths, MAKE_tcpaths, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_links;
 
 inline int rdir_system(string x, string y)
 {
@@ -154,6 +154,7 @@ const char* establish_bearings(const char *compiler)
   /* Write down our PATH, etc
   ****************************/
   MAKE_paths = compey.get("path");
+  MAKE_tcpaths = compey.get("tcpath");
   TOPLEVEL_cflags = compey.get("cflags");
   TOPLEVEL_cppflags = compey.get("cppflags");
   TOPLEVEL_links = compey.get("links");

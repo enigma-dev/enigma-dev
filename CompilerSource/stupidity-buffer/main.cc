@@ -94,23 +94,16 @@ EMessage
   "with the newest version. ENIGMA is capable of installing this for you.\n\n"
   "If you are somehow clueless as to how this got there, press \"Yes\", then ask "
   "for help if it doesn't work.",
- msg_welcome__msys_found =
+ msg_welcome__gcc_found =
   "Welcome to ENIGMA!\n"
   "This seems to be the first time you've run ENIGMA. I looked around, and I found "
-  "what looks like an operable installation of GNU MSys, with make accessible from `make`. "
-  "Does this belong to a valid and properly configured installation of MinGW?\n\n"
+  "what looks like an operable installation of GNU G++, with make accessible from `g++`. "
+  "Does this belong to a valid and properly configured installation of MinGW with MSYS?\n\n"
   "If you are unsure, select \"No\" and ENIGMA can install a new one for you.",
- msg_welcome__gnu_not_msys_found =
-  "Welcome to ENIGMA!\n"
-  "This seems to be the first time you've run ENIGMA. I looked around, and I found "
-  "what looks like an operable installation of MinGW32. The issue is, no installation "
-  "of GNU MSys was detected. ENIGMA can attempt to install this over your current "
-  "MinGW installation. Would you like to try?\n\nIf you want to be completely safe, "
-  "you can click 'no,' uninstall your current MinGW and have ENIGMA install a new one.",
  msg_welcome__gnu_not_msys_found_in_path =
   "This seems to be the first time you've run ENIGMA. I looked around, and I found "
-  "what looks like an operable installation of MinGW32. It is referenced in your "
-  "system PATH, so I don't know where it's actually installed. Would you like me to look "
+  "what look like operable installations of MinGW32 and MSYS. They are referenced in your "
+  "system PATH, so I don't know where they're actually installed. Would you like me to look "
   "for or install MSys in the default location?\n\n"
   "If you have configured MinGW somewhere other than \\MinGW\\ on this drive, please install and "
   "configure GNU MSys yourself (the mingw-get packages are msys-base msys-make) and re-run ENIGMA."
@@ -274,7 +267,7 @@ string filepart(string fqp)
 }
 
 bool e_install_mingw(string drive_letter);
-bool e_use_existing_install(const char* make,const char *mingwbinpath, const char *auxpath);
+bool e_use_existing_install(const char* make,const char *mingwbinpath, const char *auxpath, const char *tcpath);
 bool install_gnu_msys(string mingw_path);
 int create_mingw_get_dirs(string path);
 string copy_mingw_get_files(string path);
@@ -322,15 +315,26 @@ int main()
             else
               bp.erase(p);
           }
-          e_use_existing_install(string(c.get("make")).c_str(), bp.c_str(), string(c.get("path")).c_str());
+
+		  string tc = string(c.get("tcpath"));
+		  if (tc == "") {
+			tc = "/MinGW/bin:/bin:";
+		  }
+
+          e_use_existing_install(string(c.get("make")).c_str(), bp.c_str(), string(c.get("path")).c_str(), tc.c_str());
         }
       }
       else if (atof(oldv.c_str()) < atof(newv.c_str()))
       {
         if ((string)c.get("maintainer") == "CUSTOM")
           MessageBox(NULL,msg_update__ey_out_of_date,"Updated",MB_OK);
-        else
-          e_use_existing_install(string(c.get("make")).c_str(), string(c.get("binpath")).c_str(), string(c.get("path")).c_str());
+        else {
+		  string tc = string(c.get("tcpath"));
+		  if (tc == "") {
+			tc = "/MinGW/bin:/bin:";
+		  }
+          e_use_existing_install(string(c.get("make")).c_str(), string(c.get("binpath")).c_str(), string(c.get("path")).c_str(), tc.c_str());
+		}
       }
     }
     ey.close();
@@ -338,31 +342,30 @@ int main()
   else
   {
     /* No Compiler descriptor was found. Start probing around. */
-    puts("First time run. Scouring for Make...");
-    
-    #define tritier(mingw,bin,make) ((mingw_bin_path = ((mingw_path = mingw) + bin)) + (makename = make)).c_str()
-    string mingw_path, mingw_bin_path, makename;
-    tritier("\\MinGW\\","bin\\","mingw32-make");
-    printf("THIS IS WHAT I THINK: %s : %s : %s\n%s\n", mingw_path.c_str(), mingw_bin_path.c_str(), makename.c_str(), tritier("\\MinGW\\","bin\\","mingw32-make"));
-    int    a = better_system(tritier("","","make"),         "--version");
+    puts("First time run. Scouring for MinGW...");
+
+    #define tritier(mingw,bin,gcc) ((mingw_bin_path = ((mingw_path = mingw) + bin)) + (gccname = gcc)).c_str()
+    string mingw_path, mingw_bin_path, gccname;
+    tritier("\\MinGW\\","bin\\","g++");
+    printf("THIS IS WHAT I THINK: %s : %s : %s\n%s\n", mingw_path.c_str(), mingw_bin_path.c_str(), gccname.c_str(), "\\MinGW\\bin\\make");
+
+    int    a = better_system(tritier("","","g++"),         "--version"),
+		   b = better_system("make", "--version");
     puts("tried 1");
-    if (a)
+    if (a || b)
     {
-      a = better_system(tritier("","","mingw32-make"), "--version");
+      search_manually:
+      a = better_system(tritier("\\MinGW\\","bin\\","g++"), "--version");
+	  b = better_system("\\MinGW\\msys\\1.0\\bin\\make", "--version");
       puts("tried 2");
-      if (a) 
-      {
-        search_manually:
-        a = better_system(tritier("\\MinGW\\","bin\\","mingw32-make"), "--version");
+      if (a || b) {
+        a = better_system(tritier("C:\\MinGW\\","bin\\","g++"), "--version");
+		b = better_system("C:\\MinGW\\msys\\1.0\\bin\\make", "--version");
         puts("tried 3");
-        if (a) {
-          a = better_system(tritier("C:\\MinGW\\","bin\\","mingw32-make"), "--version");
-          puts("tried 4");
-        }
       }
     }
     
-    if (a) // If we didn't find it
+    if (a || b) // If we didn't find it
     {
       if (MessageBox(NULL, msg_welcome__gnu_not_found, msg_welcome__caption, MB_YESNO) == IDYES)
       {
@@ -388,15 +391,15 @@ int main()
     }
     else // We located the GCC. 
     { 
-      printf("MinGW32 Make detected. Accessible from `%s`.\nVerifying MSys...\n\n", (mingw_bin_path + makename).c_str());
-      
+      printf("MinGW G++ and MSYS make detected. Accessible from `%s`.\n\n", (mingw_bin_path + gccname).c_str());
+
       if (mingw_bin_path == "")
       {
-        if (makename == "make")
+        if (gccname == "g++")
         {
-          if (MessageBox(NULL, msg_welcome__msys_found, msg_welcome__caption, MB_YESNO) == IDYES)
+          if (MessageBox(NULL, msg_welcome__gcc_found, msg_welcome__caption, MB_YESNO) == IDYES)
           {
-            e_use_existing_install("mingw32-make","","");
+            e_use_existing_install("make","","","/MinGW/bin:/bin:");
             goto oalinst;
           }
         }
@@ -408,25 +411,13 @@ int main()
         }
       }
       
-      recheck_msys:
-      string msys_make_path = mingw_path + msys_path_from_mingw + "make.exe";
-      bool msys_installed_too = !better_system(msys_make_path.c_str(), "--version");
-      if (!msys_installed_too)
-      {
-        if (MessageBox(NULL, msg_welcome__gnu_not_msys_found, msg_welcome__caption, MB_YESNO) == IDYES)
-          if (install_gnu_msys(mingw_path))
-            goto recheck_msys;
-          else
-            goto end;
-        else goto end;
-      }
-      
       string allpaths = mingw_bin_path + ";" + mingw_path + msys_path_from_mingw + ";";
-      
+	  string tcpaths = "/MinGW/bin:/bin:"; // these are always visible from a proper MSYS install
+
       string msg = expand_message(msg_welcome__gnu_found, mingw_path);
       switch (MessageBox(NULL, msg.c_str(), msg_welcome__caption, MB_YESNOCANCEL))
       {
-        case IDYES:    e_use_existing_install((mingw_bin_path+"mingw32-make.exe").c_str(), mingw_bin_path.c_str(), allpaths.c_str()); goto oalinst;
+        case IDYES:    e_use_existing_install((mingw_path+msys_path_from_mingw+"make.exe").c_str(), mingw_bin_path.c_str(), allpaths.c_str(), tcpaths.c_str()); goto oalinst;
         case IDNO:     goto install_mingw;
         case IDCANCEL: goto end;
       }
@@ -523,11 +514,11 @@ bool e_install_mingw(string dl)
     }
     else puts("All requested components were installed correctly.");
   
-    e_use_existing_install((dl + "MinGW\\bin\\mingw32-make.exe").c_str(), (dl + "MinGW\\bin\\").c_str(), (dl + "MinGW\\msys\\1.0\\bin;" + dl + "MinGW\\bin\\;").c_str());
+    e_use_existing_install((dl + "MinGW\\msys\\1.0\\bin\\make.exe").c_str(), (dl + "MinGW\\bin\\").c_str(), (dl + "MinGW\\msys\\1.0\\bin;" + dl + "MinGW\\bin\\;").c_str(), "/MinGW/bin:/bin:");
   return TRUE;
 }
 
-bool e_use_existing_install(const char* make,const char *binpath, const char *auxpath)
+bool e_use_existing_install(const char* make,const char *binpath, const char *auxpath, const char *tcpath)
 {
   FILE *cff = fopen(CONFIG_FILE, "wb");
   FILE *iff = fopen("Autoconf/wingcc_template.eyt","rb");
@@ -538,6 +529,7 @@ bool e_use_existing_install(const char* make,const char *binpath, const char *au
     map<string,string> subst;
     subst["make"] = make;
     subst["binpath"] = binpath;
+	subst["tcpath"] = tcpath;
     subst["auxpath"] = auxpath;
     
     const char* pos = wingcc_template, *rpos;
