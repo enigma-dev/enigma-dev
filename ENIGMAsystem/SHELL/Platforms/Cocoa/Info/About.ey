@@ -9,5 +9,3 @@ Author: TGMG
 
 Depends:
 	Build-Platforms: MacOSX
-
-Links: -lz -framework Cocoa

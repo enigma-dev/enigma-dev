@@ -1,5 +1,0 @@
-%e-yaml
----
-
-Links: `pkg-config --libs gtk+-2.0`
-

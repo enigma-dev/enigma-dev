@@ -121,7 +121,6 @@ struct parsed_extension {
   string name, path;
   string pathname;
   string implements;
-  string links;
 };
 
 extern vector<parsed_extension> parsed_extensions;

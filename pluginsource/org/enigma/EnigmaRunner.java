@@ -653,10 +653,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (s == debug) compile(MODE_DEBUG);
 		if (s == design) compile(MODE_DESIGN);
 		if (s == compile) compile(MODE_COMPILE);
-		if (s == rebuild) {
-			compile(MODE_REBUILD);
-			compile(MODE_RUN);
-		}
+		if (s == rebuild) compile(MODE_REBUILD);
 
 		if (s == showFunctions) showKeywordListFrame(FUNCTIONS);
 		if (s == showGlobals) showKeywordListFrame(GLOBALS);

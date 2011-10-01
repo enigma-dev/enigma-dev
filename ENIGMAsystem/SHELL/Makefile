@@ -1,65 +1,90 @@
+#################
+# configuration #
+#################
+# TODO: better config process based on features rather than OS
 
-# Target `all` takes the following parameters (or defaults will be used):
-#	GMODE{Run,Build,Debug,Compile}
-#	AUDIO{<anything under audio_systems>}
-#	COLLISION{<anything under collision_systems>}
-#	GRAPHICS{<anything under graphics_systems>}
-#	PLATFORM{<anything under platforms>}
-#	GLINKS{<any linker args needed by any of the above>}
-#	GFLAGS{<any additional flags to pass to g++>}
-# The following parameter is also needed, but has no defaults:
-#	OUTPUTNAME{<desired output name and directory>}
-
-#apply default values
-ifndef GMODE
-	GMODE := Run
-endif
-ifndef GLINKS
-	GLINKS := -lz
-endif
-ifndef AUDIO
-	AUDIO := OpenAL
-	GLINKS := $(GLINKS) -lopenal
-endif
-ifndef COLLISION
-	COLLISION := BBox
-endif
-ifndef GRAPHICS
-	GRAPHICS := OpenGL
-	GLINKS := $(GLINKS) -lGL -lGLU
-endif
-
-#figure platform
+# PLATFORM { Platforms/* }
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
-	ifndef PLATFORM
-		PLATFORM := xlib
-	endif
+	PLATFORM := xlib
+else ifeq ($(OS), Darwin)
+	PLATFORM := Cocoa
 else
-	ifeq ($(OS), Darwin)
-		ifndef PLATFORM
-			PLATFORM := Cocoa
-		endif
-	else
-		ifndef PLATFORM 
-			PLATFORM := Win32
-		endif
-	endif
+	PLATFORM := Win32
 endif
 
-#Allow including info about the systems being compiled for
-GFLAGS := $(GFLAGS) -I"$(CURDIR)/Platforms/$(PLATFORM)/Info/" -I"$(CURDIR)/Graphics_Systems/$(GRAPHICS)/Info/" -I"$(CURDIR)/Audio_Systems/$(AUDIO)/Info/" -I"$(CURDIR)/Collision_Systems/$(COLLISION)/Info/" -I"$(CURDIR)/Widget_Systems/$(WIDGETS)/Info/"
-OBJECTS := .eobjs/$(COMPILEPATH)/$(GMODE)
+# GMODE { Run, Build, Debug, Compile }
+GMODE := Run
 
-default: game
-all: game
+# GRAPHICS { Graphics_Systems/* }
+GRAPHICS := OpenGL
 
-%/Extension:
-	cd $* && $(MAKE) extension COMPILEPATH="$(COMPILEPATH)"
+# AUDIO { Audio_Systems/* }
+AUDIO := OpenAL
 
-ifeq ($(wildcard Makefiles/$(COMPILEPATH)/Makef*), Makefiles/$(COMPILEPATH)/Makefile)
-  include Makefiles/$(COMPILEPATH)/Makefile
-else
-  include Makefiles/Default/Makefile
+# COLLISION { Collision_Systems/* }
+COLLISION := BBox
+
+# WIDGETS { Widget_Systems/* }
+WIDGETS := None
+
+SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Universal_System
+
+OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
+
+###########
+# options #
+###########
+
+CXX := g++
+CXXFLAGS := -Wall -s -O3
+
+CC := gcc
+CFLAGS := -Wall -s -O3
+
+LDFLAGS := 
+ifeq ($(PLATFORM), Win32)
+	LDFLAGS += -static-libstdc++ -static-libgcc
 endif
 
+# CPPFLAGS needs these include dirs unconditionally
+override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
+
+SOURCES := $(wildcard *.cpp)
+include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
+
+OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES))))
+DEPENDS := $(OBJECTS:.o=.d)
+
+OBJDIRS := $(sort $(dir $(OBJECTS)))
+
+############
+# building #
+############
+
+.PHONY: all clean
+
+all: $(OUTPUTNAME)
+
+clean:
+	$(RM) $(OUTPUTNAME) $(OBJECTS) $(DEPENDS)
+
+$(OUTPUTNAME): $(OBJECTS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS)
+	@echo Built to "$(OUTPUTNAME)"
+
+# GCC will figure out dependencies and write out makefile rules in %.d when they change
+# -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
+# -MP gives phony rules for non-target files, avoiding problems with missing files
+$(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+
+$(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+
+$(OBJDIRS):
+	mkdir -p $@
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(DEPENDS)
+endif

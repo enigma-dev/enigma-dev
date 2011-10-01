@@ -160,6 +160,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     e_execs(MAKE_location,make);
 
     edbg << "Done.\n" << flushl;
+	idpr("Done.", 100);
 	return 0;
   }
 
@@ -442,21 +443,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   idpr("Starting compile (This may take a while...)", 30);
 
-  string gflags = "-s -O3";
   string make = "Game ";
 
-  string glinks = extensions::targetAPI.windowLinks;
-    if (extensions::targetAPI.graphicsLinks  != "") glinks += " " + extensions::targetAPI.graphicsLinks;
-    if (extensions::targetAPI.audioLinks     != "") glinks += " " + extensions::targetAPI.audioLinks;
-    if (extensions::targetAPI.widgetLinks    != "") glinks += " " + extensions::targetAPI.widgetLinks;
-    if (extensions::targetAPI.collisionLinks != "") glinks += " " + extensions::targetAPI.collisionLinks;
-    if (extensions::targetAPI.networkLinks   != "") glinks += " " + extensions::targetAPI.networkLinks;
-
   make += "GMODE=Run ";
-  make += "GFLAGS=\"" + gflags + "\" ";
-  make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
-  make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
-  make += "GLINKS=\"" + (TOPLEVEL_links == ""? "" : TOPLEVEL_links + " ") + glinks + "\" ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
   make += "COLLISION=" + extensions::targetAPI.collisionSys + " ";
@@ -466,20 +455,10 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
   make += "COMPILEPATH=" + compilepath + " ";
 
-  string extstr = "EXTENSIONS=\"", extlinks = "EXTLINKS=\"";
-  if (parsed_extensions.size())
-  {
-    string objdir = "/.eobjs/" + compilepath + "/*.o";
-    extstr += parsed_extensions[0].pathname + "/Extension";
-    extlinks += parsed_extensions[0].pathname + objdir;
-    for (unsigned i = 1; i < parsed_extensions.size(); i++) {
-      extstr += " " + parsed_extensions[i].pathname + "/Extension";
-      extlinks += " " + parsed_extensions[i].pathname + objdir;
-	  extlinks += " " + parsed_extensions[i].links;
-	}
-  }
-  make += extstr + "\" " + extlinks + "\" ";
-
+  string extstr = "EXTENSIONS=\"";
+  for (unsigned i = 0; i < parsed_extensions.size(); i++)
+  	extstr += " " + parsed_extensions[i].pathname;
+  make += extstr + "\"";
 
   string mfgfn = gameFname;
   for (size_t i = 0; i < mfgfn.length(); i++)

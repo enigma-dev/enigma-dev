@@ -3,7 +3,7 @@ PATH := $(eTCpath)$(PATH)
 .PHONY: ENIGMA
 
 ENIGMA:
-	$(MAKE) -C CompilerSource
+	$(MAKE) -j -C CompilerSource
 
 clean:
 	$(MAKE) -C CompilerSource clean

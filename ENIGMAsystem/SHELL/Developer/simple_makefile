@@ -1,7 +1,0 @@
-build:
-	-mkdir .eobjs/
-	g++ -c GSsprite.cpp
-	mv *.o .eobjs/
-
-clean:
-	rm -f .eobjs/*

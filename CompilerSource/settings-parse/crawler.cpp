@@ -104,7 +104,6 @@ namespace extensions
         cout << "ERROR! Failed to open extension descriptor for " << exts[i] << endl;
       ey_data about = parse_eyaml(iey,exts[i]);
       pe.implements = about.get("implement");
-	  pe.links = about.get("links");
       
       parsed_extensions.push_back(pe);
     }
