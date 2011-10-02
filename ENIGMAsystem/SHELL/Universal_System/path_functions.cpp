@@ -26,8 +26,8 @@
 \********************************************************************************/
 #include "pathstruct.h"
 #include "path_functions.h"
-#include "../Graphics_Systems/OpenGL/GScurves.h" //This should probably be changed later on, because this is clearly GL only and when d3d is added then this will break
-#include "../Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
+//#include "../Graphics_Systems/OpenGL/GScurves.h" //This should probably be changed later on, because this is clearly GL only and when d3d is added then this will break
+//#include "../Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
 //#include "instance_system.h" //for path_start()
 #include <algorithm>
 #include <cmath>
@@ -295,6 +295,19 @@ void path_reverse(unsigned pathid)
     enigma::path_recalculate(pathid);
 }
 
+//Declare drawing functions here, so it works no matter if GL, GLES or D3D is used
+void draw_spline_begin(int mode);
+int draw_spline_vertex(float x, float y);
+void draw_bezier_quadratic_spline_end();
+/*void glBegin(GLenum mode);
+void glEnd(void);
+void glVertex2f(GLfloat  x,  GLfloat  y);
+void glPushAttrib(GLbitfield mask);
+void glPopAttrib(void);*/
+int draw_primitive_begin(int kind);
+int draw_vertex(double x, double y);
+int draw_primitive_end();
+
 void draw_path(unsigned pathid,double x,double y,bool absolute)
 {
     enigma::path *path = enigma::pathstructarray[pathid];
@@ -320,17 +333,20 @@ void draw_path(unsigned pathid,double x,double y,bool absolute)
             draw_spline_vertex(x+path->pointarray.front().x,y+path->pointarray.front().y);
         draw_bezier_quadratic_spline_end();
     }else{ //Draw using lines
-        if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
-        glPushAttrib(GL_LINE_BIT);
-        glBegin(GL_LINE_STRIP);
-
+        //if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
+        //glPushAttrib(GL_LINE_BIT);
+        //glBegin(GL_LINE_STRIP);
+        draw_primitive_begin(3);
         if (path->closed)
-            glVertex2f(x+path->pointarray.back().x,y+path->pointarray.back().y);
+            //glVertex2f(x+path->pointarray.back().x,y+path->pointarray.back().y);
+            draw_vertex(x+path->pointarray.back().x,y+path->pointarray.back().y);
 
         for (int i=0; i<path->pointarray.size(); i++)
-            glVertex2f(x+path->pointarray[i].x,y+path->pointarray[i].y);
+            //glVertex2f(x+path->pointarray[i].x,y+path->pointarray[i].y);
+            draw_vertex(x+path->pointarray[i].x,y+path->pointarray[i].y);
 
-        glEnd();
-        glPopAttrib();
+        //glEnd();
+        //glPopAttrib();
+        draw_primitive_end();
     }
 }

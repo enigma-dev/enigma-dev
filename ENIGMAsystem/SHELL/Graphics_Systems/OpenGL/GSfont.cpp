@@ -31,7 +31,6 @@
 #include "../../Universal_System/var4.h"
 #include "GScolors.h"
 #include "GSfont.h"
-#include <iostream>
 
 using namespace std;
 #include "../../Universal_System/fontstruct.h"

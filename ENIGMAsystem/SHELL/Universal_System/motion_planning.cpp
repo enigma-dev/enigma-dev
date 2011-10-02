@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 #include <vector>
-#include "../Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
+//#include "../Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
 //#include "../Collision_Systems/BBox/coll_funcs.h" //For collision mp_grid_add_instances
 //#include "../Graphics_Systems/OpenGL/GSfont.h" //For drawing text
 //#include "var4.h"
@@ -240,11 +240,17 @@ void mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
 
 #include "var4.h"
 //#include "GScolors.h"
-#define __GETR(x) (((x & 0x0000FF))/255.0)
-#define __GETG(x) (((x & 0x00FF00)>>8)/255.0)
-#define __GETB(x) (((x & 0xFF0000)>>16)/255.0)
+#define __GETR(x) (((x & 0x0000FF)))
+#define __GETG(x) (((x & 0x00FF00)>>8))
+#define __GETB(x) (((x & 0xFF0000)>>16))
 void draw_text(int x,int y,variant str);
 int merge_color(int c1,int c2,double amount);
+int draw_primitive_begin(int kind);
+int draw_vertex(double x, double y);
+int draw_primitive_end();
+int draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
+double draw_get_color();
+int draw_set_color(int col);
 /*void draw_set_halign(int align);
 int draw_get_halign();
 void draw_set_valign(int align);
@@ -254,64 +260,85 @@ int draw_get_font();*/
 
 void mp_grid_draw_neighbours(unsigned id,int h,int v, int mode)
 {
-    if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
+    //if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
     enigma::grid *grid = enigma::gridstructarray[id];
     if (h<0) return;
     if (h>grid->hcells-1) return;
     if (v<0) return;
     if (v>grid->vcells-1) return;
-    glPushAttrib(GL_CURRENT_BIT);
-    glBegin(GL_QUADS);
-    glColor4f(0,0,1,mode==0?0.5:1);
+    //glPushAttrib(GL_CURRENT_BIT);
+    //glBegin(GL_QUADS);
+    double tc=draw_get_color();
+    draw_primitive_begin(8);
+    //glColor4f(0,0,1,mode==0?0.5:1);
+    draw_set_color_rgba(0,0,255,mode==0?0.5:1);
     int vc = enigma::gridstructarray[id]->vcells;
     for (vector<enigma::node*>::iterator it = enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.begin(); it!=enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.end(); ++it){
-        glVertex2f(grid->left+(*it)->x*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
+        /*glVertex2f(grid->left+(*it)->x*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
         glVertex2f(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
         glVertex2f(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);
-        glVertex2f(grid->left+(*it)->x*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);
+        glVertex2f(grid->left+(*it)->x*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);*/
+        draw_vertex(grid->left+(*it)->x*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
+        draw_vertex(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
+        draw_vertex(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);
+        draw_vertex(grid->left+(*it)->x*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);
     }
-    glEnd();
-    glPopAttrib();
+    //glEnd();
+    //glPopAttrib();
+    draw_set_color_rgba(255,255,255,1);
+    draw_primitive_end();
     if (mode==1){
         for (vector<enigma::node*>::iterator it = enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.begin(); it!=enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.end(); ++it){
             draw_text(((*it)->x+0.5)*grid->cellwidth,((*it)->y+0.5)*grid->cellheight,(*it)->x*grid->vcells+(*it)->y);
         }
     }
+    draw_set_color(tc);
 }
 
 void mp_grid_draw(unsigned id, int mode, unsigned color_mode)
 {
-    if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
+    //if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
     enigma::grid *grid = enigma::gridstructarray[id];
-    glPushAttrib(GL_CURRENT_BIT);
-    glBegin(GL_QUADS);
+    //glPushAttrib(GL_CURRENT_BIT);
+    //glBegin(GL_QUADS);
+    double tc=draw_get_color();
+    draw_primitive_begin(8);
     int x=grid->left, y=grid->top;
     for (unsigned i=0; i<grid->hcells; i++){
         for (unsigned c=0; c<grid->vcells; c++){
             if (color_mode==0){
                 if (grid->nodearray[i*grid->vcells+c].cost < grid->threshold)
-                    glColor4f(0,1,0,1);
+                    //glColor4f(0,1,0,1);
+                    draw_set_color_rgba(0,255,0,1);
                 else
-                    glColor4f(1,0,0,1);
+                    //glColor4f(1,0,0,1);
+                    draw_set_color_rgba(255,0,0,1);
             }else{
                 int col = merge_color(0x008000, 0x0000FF, (float)grid->nodearray[i*grid->vcells+c].cost/(float)color_mode);
-                glColor4f(__GETR(col),__GETG(col),__GETB(col),1);
+                //glColor4f(__GETR(col),__GETG(col),__GETB(col),1);
+                draw_set_color_rgba(__GETR(col),__GETG(col),__GETB(col),1);
             }
 
-            glVertex2f(x+i*grid->cellwidth,y+c*grid->cellheight);
+            /*glVertex2f(x+i*grid->cellwidth,y+c*grid->cellheight);
             glVertex2f(x+(i+1)*grid->cellwidth,y+c*grid->cellheight);
             glVertex2f(x+(i+1)*grid->cellwidth,y+(c+1)*grid->cellheight);
-            glVertex2f(x+i*grid->cellwidth,y+(c+1)*grid->cellheight);
+            glVertex2f(x+i*grid->cellwidth,y+(c+1)*grid->cellheight);*/
+            draw_vertex(x+i*grid->cellwidth,y+c*grid->cellheight);
+            draw_vertex(x+(i+1)*grid->cellwidth,y+c*grid->cellheight);
+            draw_vertex(x+(i+1)*grid->cellwidth,y+(c+1)*grid->cellheight);
+            draw_vertex(x+i*grid->cellwidth,y+(c+1)*grid->cellheight);
         }
     }
-    glEnd();
-    glPopAttrib();
+    //glEnd();
+    //glPopAttrib();
+    draw_primitive_end();
 
     if (mode){
         /*int temph, tempv, tempf;
         temph = draw_get_halign(), draw_set_halign(1);*/
         /*tempv = draw_get_valign(), draw_set_valign(1);*/
         /*tempf = draw_get_font(), draw_set_font(0);*/
+        draw_set_color_rgba(255,255,255,1);
         if (mode==1){ //draw cost
             for (unsigned i=0; i<grid->hcells; i++){
                 for (unsigned c=0; c<grid->vcells; c++){
@@ -329,4 +356,5 @@ void mp_grid_draw(unsigned id, int mode, unsigned color_mode)
         draw_set_valign(tempv);
         draw_set_font(tempf);*/
     }
+    draw_set_color(tc);
 }
