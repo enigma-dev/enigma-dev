@@ -29,6 +29,7 @@
 #include <string>
 #include "OpenGLHeaders.h"
 #include "../../Universal_System/var4.h"
+#include "../../libEGMstd.h"
 #include "GScolors.h"
 #include "GSfont.h"
 
@@ -72,7 +73,7 @@ unsigned draw_get_valign(){
 ///////////////////////////////////////////////////
 unsigned int string_width_line(variant vstr, int line)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   const font *const fnt = fontstructarray[currentfont];
   int len = 0, cl = 0;
   for (unsigned i = 0; i < str.length(); i++)
@@ -99,7 +100,7 @@ unsigned int string_width_line(variant vstr, int line)
 
 unsigned int string_width_ext_line(variant vstr, int w, int line)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   unsigned int width = 0, tw = 0; int cl = 0;
@@ -127,7 +128,7 @@ unsigned int string_width_ext_line(variant vstr, int w, int line)
 
 unsigned int string_width_ext_line_count(variant vstr, int w)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   unsigned int width = 0, tw = 0, cl = 1;
@@ -155,7 +156,7 @@ unsigned int string_width_ext_line_count(variant vstr, int w)
 
 unsigned int string_width(variant vstr)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   const font *const fnt = fontstructarray[currentfont];
   int mlen = 0, tlen = 0;
   for (unsigned i = 0; i < str.length(); i++)
@@ -174,7 +175,7 @@ unsigned int string_width(variant vstr)
 
 unsigned int string_height(variant vstr)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   const font *const fnt = fontstructarray[currentfont];
   int hgt = fnt->height;
   for (unsigned i = 0; i < str.length(); i++)
@@ -185,7 +186,7 @@ unsigned int string_height(variant vstr)
 
 unsigned int string_width_ext(variant vstr, int sep, int w) //here sep doesn't do anything, but I can't make it 'default = ""', because its the second argument
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   unsigned int width = 0, maxwidth = 0;
@@ -206,7 +207,7 @@ unsigned int string_width_ext(variant vstr, int sep, int w) //here sep doesn't d
 
 unsigned int string_height_ext(variant vstr, int sep, int w)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   unsigned int width = 0, tw = 0, height = fnt->height;
@@ -237,7 +238,7 @@ unsigned int string_height_ext(variant vstr, int sep, int w)
 ////////////////////////////////////////////////////
 void draw_text(int x,int y,variant vstr)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -302,7 +303,7 @@ void draw_text(int x,int y,variant vstr)
 
 void draw_text_ext(int x,int y,variant vstr, int sep, int w)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -387,7 +388,7 @@ void draw_text_ext(int x,int y,variant vstr, int sep, int w)
 
 void draw_text_transformed(double x,double y,variant vstr,double xscale,double yscale,double rot)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -495,7 +496,7 @@ void draw_text_transformed(double x,double y,variant vstr,double xscale,double y
 
 void draw_text_ext_transformed(double x,double y,variant vstr,int sep, int w, double xscale,double yscale,double rot)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -636,7 +637,7 @@ void draw_text_ext_transformed(double x,double y,variant vstr,int sep, int w, do
 
 void draw_text_transformed_color(double x,double y,variant vstr,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -661,7 +662,8 @@ void draw_text_transformed_color(double x,double y,variant vstr,double xscale,do
   glPushAttrib(GL_CURRENT_BIT);
   glBegin(GL_QUADS);
   if (halign == fa_left){
-      int lines = 0, w, tmpsize = string_width_line(str,0);
+      int lines = 0, w;
+      tmpsize = string_width_line(str,0);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -762,7 +764,7 @@ void draw_text_transformed_color(double x,double y,variant vstr,double xscale,do
 
 void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -787,7 +789,8 @@ void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int 
   glPushAttrib(GL_CURRENT_BIT);
   glBegin(GL_QUADS);
   if (halign == fa_left){
-      int lines = 0, tw = 0, wi, tmpsize = string_width_ext_line(str,w,0);
+      int lines = 0, tw = 0, wi;
+      tmpsize = string_width_ext_line(str,w,0);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -914,7 +917,7 @@ void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int 
 
 void draw_text_color(int x,int y,variant vstr,int c1,int c2,int c3,int c4,double a)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
@@ -1012,7 +1015,7 @@ void draw_text_color(int x,int y,variant vstr,int c1,int c2,int c3,int c4,double
 
 void draw_text_ext_color(int x,int y,variant vstr,int sep, int w, int c1,int c2,int c3,int c4,double a)
 {
-  string str = string(vstr);
+  string str = toString(vstr);
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)

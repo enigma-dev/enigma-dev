@@ -55,9 +55,9 @@ int random_set_seed(int seed);
 int random_get_seed();
 int randomize();
 int random_integer(int x);
-inline int irandom(int x) {return int(random(x + 1));}  //Mark made this inclusive of x...
-double random_range(double x1, double x2) {return x1 + random(x2 - x1);}
-double irandom_range(int x1, int x2) {return x1 + irandom(x2 - x1);}
+static inline int irandom(int x) {return int(random(x + 1));}  //Mark made this inclusive of x...
+static inline double random_range(double x1, double x2) {return x1 + random(x2 - x1);}
+static inline double irandom_range(int x1, int x2) {return x1 + irandom(x2 - x1);}
 unsigned int random32();
 double mtrandom();
 int mtrandom_seed(int x);
@@ -83,12 +83,10 @@ double sin(const var& x);
 double cos(const var& x);
 double tan(const var& x);
 
-double round(double x);
 double sqr(double x);
 double power(double x,double power);
 double ln(double x);
 double logn(double n,double x);
-double log2(double x);
 
 double arcsin(double x);
 double arccos(double x);
@@ -109,6 +107,7 @@ double arctand(double x);
 double arctand2(double y,double x);
 
 int sign(double x);
+int cmp(double x,double y);
 double frac(double x);
 
 double degtorad(double x);
@@ -126,7 +125,7 @@ double max(const enigma::varargs &t);
 double min(const enigma::varargs &t);
 double min(double x, double y);
 double max(double x, double y);
-double median(const enigma::varargs &t);
+double median(enigma::varargs t);
 double mean(const enigma::varargs &t);
 variant choose(const enigma::varargs& args);
 // TODO: Make the compiler do this shit automatically so we can lose the

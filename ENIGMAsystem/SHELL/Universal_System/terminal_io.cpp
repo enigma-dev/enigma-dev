@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string>
 using namespace std;
+#include "terminal_io.h"
 
 void cons_show_message(string message) {
   puts(message.c_str());

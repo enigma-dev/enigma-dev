@@ -364,15 +364,15 @@ types_binary_extrapolate_real_p  (double operator%, const variant&, { terror(rea
 types_binary_extrapolate_string_p(string operator%, const variant&, { terrortrue(); return 0; })
 
 types_binary_bitwise_extrapolate_real_p(<<, const variant&, terror(real);  )
-types_binary_extrapolate_string_p      (string operator<<, const variant&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator<<, const variant&, { terrortrue(); return 0; })
 types_binary_bitwise_extrapolate_real_p(>>, const variant&, terror(real);  )
-types_binary_extrapolate_string_p      (string operator>>, const variant&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator>>, const variant&, { terrortrue(); return 0; })
 types_binary_bitwise_extrapolate_real_p(&,  const variant&, terror(real);  )
-types_binary_extrapolate_string_p      (string operator&,  const variant&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator&,  const variant&, { terrortrue(); return 0; })
 types_binary_bitwise_extrapolate_real_p(|,  const variant&, terror(real);  )
-types_binary_extrapolate_string_p      (string operator|,  const variant&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator|,  const variant&, { terrortrue(); return 0; })
 types_binary_bitwise_extrapolate_real_p(^,  const variant&, terror(real);  )
-types_binary_extrapolate_string_p      (string operator^,  const variant&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator^,  const variant&, { terrortrue(); return 0; })
 
 // I have no fucking idea why C++0x can't do this for me.
 types_binary_extrapolate_real_p  (bool operator==, const variant&, { return y == x; })
@@ -414,15 +414,15 @@ types_binary_extrapolate_real_p  (double operator%, const var&, { div0c((*y).rva
 types_binary_extrapolate_string_p(string operator%, const var&, { terrortrue(); return 0; })
 
 types_binary_bitwise_extrapolate_real_p(<<, const var&,  )
-types_binary_extrapolate_string_p      (string operator<<, const var&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator<<, const var&, { terrortrue(); return 0; })
 types_binary_bitwise_extrapolate_real_p(>>, const var&,  )
-types_binary_extrapolate_string_p      (string operator>>, const var&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator>>, const var&, { terrortrue(); return 0; })
 types_binary_bitwise_extrapolate_real_p(&,  const var&,  )
-types_binary_extrapolate_string_p      (string operator&,  const var&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator&,  const var&, { terrortrue(); return 0; })
 types_binary_bitwise_extrapolate_real_p(|,  const var&,  )
-types_binary_extrapolate_string_p      (string operator|,  const var&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator|,  const var&, { terrortrue(); return 0; })
 types_binary_bitwise_extrapolate_real_p(^,  const var&,  )
-types_binary_extrapolate_string_p      (string operator^,  const var&, { terrortrue(); return 0; })
+//types_binary_extrapolate_string_p      (string operator^,  const var&, { terrortrue(); return 0; })
 
 // I have no fucking idea why C++0x can't do this for me.
 types_binary_extrapolate_real_p  (bool operator==, const var&, { return y == x; })
@@ -476,6 +476,7 @@ double    var::operator+ () const { return +(double)(**this); }
 
 
 #include <stdio.h>
+#include "../libEGMstd.h"
 string toString(const variant &a)
 {
   char buf[32];
@@ -487,13 +488,3 @@ string toString(const var &a) {
   return toString(*a);
 }
 
-string toString(variant &a)
-{
-  char buf[32];
-  if (a.type == real)
-    return string(buf,sprintf(buf,"%g",a.rval.d));
-  return a.sval;
-}
-string toString(var &a) {
-  return toString(*a);
-}

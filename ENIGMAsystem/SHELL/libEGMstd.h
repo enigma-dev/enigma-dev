@@ -50,4 +50,6 @@ string toString(const char *s, size_t n);
 string toString(const char *s);
 string toString(size_t n, char c);
 
-void show_error(string, const bool);
+string toString(const struct var&);
+string toString(const struct variant&);
+

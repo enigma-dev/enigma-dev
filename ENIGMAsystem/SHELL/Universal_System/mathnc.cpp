@@ -28,6 +28,17 @@
 #include <stdlib.h>
 #include <cmath>
 #include "var4.h"
+#include "dynamic_args.h"
+
+#define INCLUDED_FROM_SHELLMAIN Not really.
+#include "mathnc.h"
+
+double bessel_j0(double x);
+double bessel_j1(double x);
+double bessel_jn(int x, double y);
+double bessel_y0(double x);
+double bessel_y1(double x);
+double bessel_yn(int x, double y);
 
 double bessel_j0(double x) { return j0(x); }
 double bessel_j1(double x) { return j1(x); }
@@ -37,25 +48,25 @@ double bessel_y1(double x) { return y1(x); }
 double bessel_yn(int x, double y) { return yn(x,y); }
 
 //overloading
-double abs(const variant& x) { return fabs(double(x)); }
-double ceil(const variant& x)              { return ceil((double)x); }
-double floor(const variant& x)             { return floor((double)x); }
-double exp(const variant& x)               { return exp((double)x); }
-double sqrt(const variant& x)              { return sqrt((double)x); }
-double log10(const variant& x)             { return log10((double)x); }
-double sin(const variant& x)               { return sin((double)x); }
-double cos(const variant& x)               { return cos((double)x); }
-double tan(const variant& x)               { return tan((double)x); }
+double abs(const variant& x)   { return fabs(double(x)); }
+double ceil(const variant& x)  { return ceil((double)x); }
+double floor(const variant& x) { return floor((double)x); }
+double exp(const variant& x)   { return exp((double)x); }
+double sqrt(const variant& x)  { return sqrt((double)x); }
+double log10(const variant& x) { return log10((double)x); }
+double sin(const variant& x)   { return sin((double)x); }
+double cos(const variant& x)   { return cos((double)x); }
+double tan(const variant& x)   { return tan((double)x); }
 
 double abs(const var& x)     { return fabs(double(x)); }
-double ceil(const var& x)              { return ceil((double)x); }
-double floor(const var& x)             { return floor((double)x); }
-double exp(const var& x)               { return exp((double)x); }
-double sqrt(const var& x)              { return sqrt((double)x); }
-double log10(const var& x)             { return log10((double)x); }
-double sin(const var& x)               { return sin((double)x); }
-double cos(const var& x)               { return cos((double)x); }
-double tan(const var& x)               { return tan((double)x); }
+double ceil(const var& x)    { return ceil((double)x); }
+double floor(const var& x)   { return floor((double)x); }
+double exp(const var& x)     { return exp((double)x); }
+double sqrt(const var& x)    { return sqrt((double)x); }
+double log10(const var& x)   { return log10((double)x); }
+double sin(const var& x)     { return sin((double)x); }
+double cos(const var& x)     { return cos((double)x); }
+double tan(const var& x)     { return tan((double)x); }
 
 
 double round(double x)            { return lrint(x); }
@@ -100,16 +111,13 @@ double direction_difference(double dir1,double dir2) {
 double point_direction(double x1,double y1,double x2,double y2) { return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }
 double point_distance(double x1,double y1,double x2,double y2)  { return hypot(x2-x1,y2-y1); }
 
-#include "dynamic_args.h"
-#include <float.h> //maxiumum values for certain datatypes. Useful for min()
-#include <list>
 double min(double x, double y) { return x < y ? x : y; }
 double max(double x, double y) { return x > y ? x : y; }
 
 double max(const enigma::varargs &t)
 {
-  register double ret = -DBL_MAX, tst;
-  for (int i = 0; i < t.argc; i++)
+  register double ret = t.get(0), tst;
+  for (int i = 1; i < t.argc; i++)
     if ((tst = t.get(i)) > ret)
       ret = tst;
   return ret;
@@ -117,22 +125,19 @@ double max(const enigma::varargs &t)
 
 double min(const enigma::varargs &t)
 {
-  register double ret = DBL_MAX, tst;
-  for (int i = 0; i < t.argc; i++)
+  register double ret = t.get(0), tst;
+  for (int i = 1; i < t.argc; i++)
     if ((tst = t.get(i)) < ret)
       ret = tst;
   return ret;
 }
 
-double median(const enigma::varargs &t)
+double median(enigma::varargs t)
 {
-  std::list<double> numbers;
-  for (int i = 0; i < t.argc; i++)
-    numbers.push_back(t.get(i));
-  numbers.sort();
-  std::list<double>::iterator it = numbers.begin();
-  advance(it,(numbers.size()-1)/2);
-  return *it;
+  t.sort();
+  if (t.argc & 1)
+    return t.get(t.argc/2);
+  return (t.get(t.argc/2) + t.get(t.argc/2-1)) / 2.;
 }
 
 double mean(const enigma::varargs &t)

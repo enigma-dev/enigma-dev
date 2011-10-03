@@ -26,4 +26,14 @@
 \********************************************************************************/
 
 
-//int main();
+namespace enigma {
+  void input_push();
+  namespace x11 {
+    extern Display *disp;
+    extern Window win;
+    extern GC gc;
+    extern Atom wm_delwin;
+    
+    int handleEvents();
+  }
+}

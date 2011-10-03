@@ -23,28 +23,36 @@ using std::string;
 void gmw_init();
 
 void Sleep(int ms);
+#define sleep(x) Sleep(x)
 
 /////////////
 // VISIBLE //
 /////////////
 
-int window_set_visible(double visible);
+int window_set_visible(bool visible);
 int window_get_visible();
 
 /////////////
 // CAPTION //
 /////////////
+#ifndef PLATFORMS_MANDATORY__H
 void window_set_caption(string caption);
-char *window_get_caption();
+#endif
+string window_get_caption();
 
 ///////////
 // MOUSE //
 ///////////
+
+#ifndef PLATFORMS_MANDATORY__H
+int window_mouse_get_x();
+int window_mouse_get_y();
+#endif
 int display_mouse_get_x();
 int display_mouse_get_y();
 
-int window_mouse_set(double x,double y);
-int display_mouse_set(double x,double y);
+void window_mouse_set(double x,double y);
+void display_mouse_set(double x,double y);
 
 ////////////
 // WINDOW //
@@ -54,22 +62,27 @@ int display_mouse_set(double x,double y);
 //Getters
 int window_get_x();
 int window_get_y();
+
+#ifndef PLATFORMS_MANDATORY__H
 int window_get_width();
 int window_get_height();
+#endif
 
 //Setters
 void window_set_position(int x,int y);
-void window_set_size(unsigned int w,unsigned int h);
 void window_set_rectangle(int x,int y,int w,int h);
+#ifndef PLATFORMS_MANDATORY__H
+void window_set_size(unsigned int w,unsigned int h);
+#endif
 
 //Center
-int window_center();
+void window_center();
 
 ////////////////
 // FULLSCREEN //
 ////////////////
-void window_set_fullscreen(double full);
-int window_get_fullscreen();
+void window_set_fullscreen(bool full);
+bool window_get_fullscreen();
 
 ////////////
 // CURSOR //
@@ -99,7 +112,7 @@ enum {
   cr_size_all  = -22
 };
 
-int window_set_cursor(double c);
+void window_set_cursor(int c);
 
 void io_handle(), io_clear();
 void keyboard_wait();
@@ -142,6 +155,7 @@ namespace enigma {
   extern string*  parameters;
   extern unsigned parameterc;
   //void writename(char* x);
+  void initkeymap();
 }
 
 string parameter_string(unsigned num);

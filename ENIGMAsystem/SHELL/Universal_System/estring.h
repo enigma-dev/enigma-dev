@@ -32,10 +32,11 @@ string chr(char val);
 
 int ord(string str);
 
+double real(variant str);
 double real(const var& str);
 
 size_t string_length(string str);
-size_t string_length(char* str);
+size_t string_length(const char* str);
 int string_pos(string substr,string str);
 
 
@@ -56,3 +57,6 @@ string string_letters(string str);
 string string_digits(string str);
 string string_lettersdigits(string str);
 
+bool string_isletters(string str);
+bool string_isdigits(string str);
+bool string_islettersdigits(string str);

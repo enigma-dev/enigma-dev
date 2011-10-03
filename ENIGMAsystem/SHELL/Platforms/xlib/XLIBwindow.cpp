@@ -35,18 +35,10 @@
 //#include <GL/glu.h>
 
 #include "../../Universal_System/CallbackArrays.h" // For those damn vk_ constants.
-
-namespace enigma {
-  void input_push();
-  namespace x11 {
-    Display *disp;
-    Window win;
-    GC gc;
-    Atom wm_delwin;
-    
-    int handleEvents();
-  }
-}
+#include "../platforms_mandatory.h" // For type insurance
+#include "../../GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
+#include "XLIBwindow.h"
+#include "XLIBmain.h"
 
 #include <X11/Xlib.h>
 #define uint unsigned int
@@ -81,10 +73,9 @@ void sleep(int ms)
 	if(ms>0)	usleep(ms%1000*1000);
 }
 
-void window_set_position(int x,int y);
 int visx = -1, visy = -1;
 
-int window_set_visible(const bool visible)
+int window_set_visible(bool visible)
 {
 	if(visible)
 	{
@@ -105,10 +96,8 @@ int window_get_visible()
 	return wa.map_state != IsUnmapped;
 }
 
-int window_set_caption(string caption)
-{
+void window_set_caption(string caption) {
 	XStoreName(disp,win,caption.c_str());
-	return 0;
 }
 string window_get_caption()
 {
@@ -149,7 +138,7 @@ void display_mouse_set(double x,double y) {
 ////////////
 // WINDOW //
 ////////////
-int getWindowDimension(int i)
+static int getWindowDimension(int i)
 {
 	XFlush(disp);
 	XWindowAttributes wa;
@@ -204,7 +193,7 @@ enum {
   _NET_WM_STATE_TOGGLE
 };
 
-void window_set_fullscreen(const bool full)
+void window_set_fullscreen(bool full)
 {
 	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
 	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
@@ -220,7 +209,8 @@ void window_set_fullscreen(const bool full)
 	xev.xclient.data.l[2] = 0;
 	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
 }
-int window_get_fullscreen()
+// FIXME: Looks like I gave up on this one
+bool window_get_fullscreen()
 {
 	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN",False);
 	Atom ra;
@@ -240,13 +230,13 @@ int window_get_fullscreen()
 
                  //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
 short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
-int window_set_cursor(int c)
+void window_set_cursor(int c)
 {
 	XUndefineCursor(disp,win);
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
-	return 0;
 }
 
+// FIXME: MOVEME: I can't decide where the hell to put this.
 void screen_refresh() {
 	glXSwapBuffers(disp,win);
 }
@@ -319,14 +309,6 @@ namespace enigma
     for (int i = 'z'+1; i < 255; i++)
       usermap[i] = i;
    }
-}
-
-extern void ABORT_ON_ALL_ERRORS();
-void show_error(string err, const bool fatal)
-{
-  printf("ERROR: %s\n",err.c_str());
-  if (fatal) exit(0);
-  ABORT_ON_ALL_ERRORS();
 }
 
 #include <sys/time.h>

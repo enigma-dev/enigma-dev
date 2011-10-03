@@ -25,8 +25,12 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "OpenGLHeaders.h"
 #include <stdio.h>
+#include "OpenGLHeaders.h"
+#include <string>
+using std::string;
+#include "GStextures.h"
+#include "../graphics_mandatory.h"
 
 namespace enigma{extern unsigned bound_texture;}
 

@@ -791,7 +791,6 @@
 		<Unit filename="Universal_System/compression.h" />
 		<Unit filename="Universal_System/darray.cpp" />
 		<Unit filename="Universal_System/darray.h" />
-		<Unit filename="Universal_System/data_structures.h" />
 		<Unit filename="Universal_System/depth_draw.cpp" />
 		<Unit filename="Universal_System/depth_draw.h" />
 		<Unit filename="Universal_System/dynamic_args.cpp" />
@@ -822,10 +821,18 @@
 		<Unit filename="Universal_System/instance_system_frontend.h" />
 		<Unit filename="Universal_System/key_game_globals.h" />
 		<Unit filename="Universal_System/loading.cpp" />
+		<Unit filename="Universal_System/loading.h" />
 		<Unit filename="Universal_System/lua_table.h" />
 		<Unit filename="Universal_System/mathnc.cpp" />
 		<Unit filename="Universal_System/mathnc.h" />
+		<Unit filename="Universal_System/motion_planning.cpp" />
+		<Unit filename="Universal_System/motion_planning.h" />
+		<Unit filename="Universal_System/motion_planning_struct.cpp" />
+		<Unit filename="Universal_System/motion_planning_struct.h" />
+		<Unit filename="Universal_System/move_functions.cpp" />
 		<Unit filename="Universal_System/move_functions.h" />
+		<Unit filename="Universal_System/mp_movement.cpp" />
+		<Unit filename="Universal_System/mp_movement.h" />
 		<Unit filename="Universal_System/multifunction_variant.cpp" />
 		<Unit filename="Universal_System/multifunction_variant.h" />
 		<Unit filename="Universal_System/object.cpp" />

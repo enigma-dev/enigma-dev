@@ -32,9 +32,12 @@ using namespace std;
 
 #include "backgroundstruct.h"
 #include "../Graphics_Systems/graphics_mandatory.h"
+#include "../Platforms/platforms_mandatory.h"
+#include "../Widget_Systems/widgets_mandatory.h"
 #include "fontstruct.h"
 #include "../libEGMstd.h"
-#include "compression.h"
+#include "zlib.h"
+#include "resinit.h"
 
 namespace enigma
 {
@@ -44,11 +47,11 @@ namespace enigma
 	  unsigned fontcount, fntid, twid, thgt, gwid, ghgt;
 	  float advance, baseline, origin, gtx, gty, gtx2, gty2;
 
-    fread(&nullhere,4,1,exe);
+    if (!fread(&nullhere,4,1,exe)) return;
     if (nullhere != *(int*)"FNT ")
       return;
 
-    fread(&fontcount,4,1,exe);
+    if (!fread(&fontcount,4,1,exe)) return;
     if ((int)fontcount != rawfontcount) {
       show_error("Resource data does not match up with game metrics. Unable to improvise.",0);
       return;
@@ -59,9 +62,9 @@ namespace enigma
 	  for (int rf = 0; rf < rawfontcount; rf++)
 	  {
 		  // int unpacked;
-		  fread(&fntid, 4,1,exe);
-		  fread(&twid, 4,1,exe);
-		  fread(&thgt,4,1,exe);
+		  if (!fread(&fntid, 4,1,exe)) return;
+		  if (!fread(&twid, 4,1,exe)) return;
+		  if (!fread(&thgt,4,1,exe)) return;
 		  const int i = fntid;
 
 		  fontstructarray[i] = new font;
@@ -91,7 +94,7 @@ namespace enigma
 			  show_error("Failed to load font: Data is truncated before exe end. Read "+toString(sz2)+" out of expected "+toString(size),0);
 			  return;
 		  }
-      fread(&nullhere,4,1,exe);
+      if (!fread(&nullhere,4,1,exe)) return;
       if (nullhere != *(int*)"done")
       {
         printf("Unexpected end; eof:%s\n",feof(exe)?"true":"false");
@@ -109,15 +112,15 @@ namespace enigma
 		  int ymin=100, ymax=-100;
 		  for (int gi = 0; gi < enigma::fontstructarray[i]->glyphcount; gi++)
 		  {
-		    fread(&advance,4,1,exe);
-        fread(&baseline,4,1,exe);
-        fread(&origin,4,1,exe);
-        fread(&gwid,4,1,exe);
-        fread(&ghgt,4,1,exe);
-        fread(&gtx,4,1,exe);
-        fread(&gty,4,1,exe);
-        fread(&gtx2,4,1,exe);
-        fread(&gty2,4,1,exe);
+		    if (!fread(&advance,4,1,exe)) return;
+        if (!fread(&baseline,4,1,exe)) return;
+        if (!fread(&origin,4,1,exe)) return;
+        if (!fread(&gwid,4,1,exe)) return;
+        if (!fread(&ghgt,4,1,exe)) return;
+        if (!fread(&gtx,4,1,exe)) return;
+        if (!fread(&gty,4,1,exe)) return;
+        if (!fread(&gtx2,4,1,exe)) return;
+        if (!fread(&gty2,4,1,exe)) return;
 
         fontstructarray[i]->glyphs[gi].x = int(origin + .5);
         fontstructarray[i]->glyphs[gi].y = int(baseline + .5);
@@ -154,7 +157,7 @@ namespace enigma
 
 		  delete[] pixels;
 
-      fread(&nullhere,4,1,exe);
+      if (!fread(&nullhere,4,1,exe)) return;
       if (nullhere != *(int*)"endf")
         return;
 	  }

@@ -21,81 +21,9 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
+**  or programs made in the environment.                                        **                      
 **                                                                              **
 \********************************************************************************/
 
-//This is to be redone before official release.
-/*
-namespace enigma
-{
-  std::map<int,int> withid;
-  int withpush=0;
-
-  int pushwith(int level,double object2do);
-  void popOtherObject();
-
-  wildclass withcur[12];
-
-  struct withiter
-  {
-    bool stillgoing;
-    int level; wildclass mycur;
-    std::map<int,object_basic*>::iterator instit;
-
-    withiter(int a);
-
-    void operator++ (int a);
-  };
-}
-
-
-
-namespace enigma
-{
-
-  struct withstack { withstack* prev; object_basic* obj; } *withOTHERobject=NULL;
-  int pushwith(int level,double object2do)
-  {
-    withpush=level;
-    withid[withpush]=(int)object2do;
-    withstack *lastoo=withOTHERobject;
-    withOTHERobject=new withstack;
-    withOTHERobject->prev=lastoo;
-    return withpush;
-  }
-  void popOtherObject()
-  {
-    withstack *lastoo=withOTHERobject;
-    if (lastoo==NULL) { show_error("Unexpected end of with clause",0); return; }
-    withOTHERobject=lastoo->prev;
-    delete []lastoo;
-  }
-
-
-  withiter::withiter(int a)
-  {
-    stillgoing=1;
-    level=withpush; instit=enigma::instance_list.begin();
-    if (instit == enigma::instance_list.end())
-    stillgoing=0;
-    else
-    {
-      mycur=(*instit).second;
-      withcur[level]=mycur;
-    }
-  }
-
-  void withiter::operator++ (int a)
-  {
-    instit++;
-    if (instit == enigma::instance_list.end())
-    stillgoing=0;
-    else
-    {
-      mycur=(*instit).second;
-      withcur[level]=mycur;
-    }
-  }
-}
-*/
+unsigned char* zlib_compress(unsigned char* inbuffer, int actualsize);
+int zlib_decompress(unsigned char* inbuffer, int insize, int uncompresssize, unsigned char* outbytef);

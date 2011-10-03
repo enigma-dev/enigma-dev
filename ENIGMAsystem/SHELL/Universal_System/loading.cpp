@@ -29,7 +29,6 @@
 #include <stdio.h>
 
 #include <string>
-using std::string;
 
 #include "resinit.h"
 #include "../Platforms/platforms_mandatory.h"
@@ -40,6 +39,7 @@ using std::string;
 
 
 #include "../libEGMstd.h"
+#include "loading.h"
 
 namespace enigma {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
@@ -81,19 +81,18 @@ namespace enigma
       // Read the magic number so we know we're looking at our own data
       fseek(exe,-8,SEEK_END);
       char str_quad[4];
-      fread(str_quad,1,4,exe);
-      if (str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
+      if (!fread(str_quad,4,1,exe) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
         printf("No resource data in exe\n");
         break;
       }
 
       // Get where our resources are located in the module
       int pos;
-      fread(&pos,4,1,exe);
+      if (!fread(&pos,4,1,exe)) break;
 
       // Go to the start of the resource data
       fseek(exe,pos,SEEK_SET);
-      fread(&nullhere,4,1,exe);
+      if (!fread(&nullhere,4,1,exe)) break;
       if(nullhere) break;
 
       enigma::exe_loadsprs(exe);

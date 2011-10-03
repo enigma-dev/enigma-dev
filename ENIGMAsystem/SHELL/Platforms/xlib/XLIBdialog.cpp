@@ -28,7 +28,9 @@
 #include <string>
 #include <stdio.h>
 using namespace std;
+#include "XLIBwindow.h"
 
+// FIXME: MOVEME
 int show_message(string message)
 {
   printf("show_message: %s\n",message.c_str());

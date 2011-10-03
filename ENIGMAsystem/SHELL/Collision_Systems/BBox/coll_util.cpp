@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "coll_util.h"
+
 ////////////////////////////////////
 // utility intersection functions - test shape intersection, which is largely API independant
 ////////////////////////////////////

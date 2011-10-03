@@ -33,7 +33,7 @@ namespace enigma {
   struct nameid_pair {
     string name; int id;
   };
-  
+  void map_resource_ids(nameid_pair* n);
   extern callable_script callable_scripts[];
   extern nameid_pair resource_nameids[];
 };

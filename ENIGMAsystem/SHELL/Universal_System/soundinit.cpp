@@ -32,7 +32,8 @@ using namespace std;
 #include "../Audio_Systems/audio_mandatory.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"
-#include "compression.h"
+#include "resinit.h"
+#include "zlib.h"
 
 void sound_play(int sound);
 
@@ -47,28 +48,28 @@ namespace enigma
   { 
     int nullhere;
     
-    fread(&nullhere,4,1,exe);
+    if (!fread(&nullhere,4,1,exe)) return;
     if (nullhere != *(int*)"SND ")
       return;
     
     // Determine how many sprites we have
     int sndcount;
-    fread(&sndcount,4,1,exe);
+    if (!fread(&sndcount,4,1,exe)) return;
     
     // Fetch the highest ID we will be using
     int snd_highid;
-    fread(&snd_highid,4,1,exe);
+    if (!fread(&snd_highid,4,1,exe)) return;
     
     for (int i = 0; i < sndcount; i++)
     {
       int id;
-      fread(&id,1,4,exe);
+      if (!fread(&id,1,4,exe)) return;
       
       unsigned size;
-      fread(&size,1,4,exe);
+      if (!fread(&size,1,4,exe)) return;
       
       char* fdata = new char[size];
-      fread(fdata,1,size,exe);
+      if (!fread(fdata,1,size,exe)) return;
       
       if (sound_add_from_buffer(id,fdata,size))
         printf("Failed to load sound%d\n",i);

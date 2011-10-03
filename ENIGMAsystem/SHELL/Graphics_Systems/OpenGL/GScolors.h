@@ -47,19 +47,19 @@ enum {
   c_yellow  = 0x00FFFF
 };
 
-int draw_clear(int color);
-int draw_clear_alpha(int color, float alpha);
+void draw_clear(int color);
+void draw_clear_alpha(int color, float alpha);
 
 int merge_color(int col1, int col2, double amount);
 
-int draw_set_color(int col);
-int draw_set_color_rgb(unsigned char red, unsigned char green, unsigned char blue);
-int draw_set_alpha(float alpha);
-int draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
-double draw_get_color();
-float draw_get_red(void);
-float draw_get_green(void);
-float draw_get_blue(void);
+void draw_set_color(int col);
+void draw_set_color_rgb(unsigned char red, unsigned char green, unsigned char blue);
+void draw_set_alpha(float alpha);
+void draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
+int draw_get_color();
+int draw_get_red(void);
+int draw_get_green(void);
+int draw_get_blue(void);
 float draw_get_alpha(void);
 
 
@@ -75,3 +75,5 @@ int color_get_value(int color);
 int color_get_saturation(int color);
 
 int make_color_hsv(int hue,int saturation,int value);
+
+void draw_unbind_all();

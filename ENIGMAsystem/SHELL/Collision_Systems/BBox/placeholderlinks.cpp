@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008-2011 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -24,6 +24,8 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+
+#include "../collision_mandatory.h"
 
 namespace enigma
 {

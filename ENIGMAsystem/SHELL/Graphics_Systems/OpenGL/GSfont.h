@@ -50,7 +50,6 @@ void draw_text_ext_transformed(double x,double y,variant str,int sep,int w, doub
 void draw_text_ext_transformed_color(double x,double y,variant str,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
 
 unsigned int font_get_texture(int fnt);
-int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);
 unsigned int font_get_texture_width(int fnt);
 unsigned int font_get_texture_height(int fnt);
 

@@ -25,11 +25,13 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "OpenGLHeaders.h"
-#include "GScolors.h"
 #include <stack>
 #include <vector>
 #include <math.h>
+
+#include "OpenGLHeaders.h"
+#include "GScolors.h"
+#include "GScurves.h"
 
 #define __GETR(x) (((x & 0x0000FF))/255.0)
 #define __GETG(x) (((x & 0x00FF00)>>8)/255.0)

@@ -28,6 +28,7 @@
 #include <string>
 #include <stdio.h>
 using namespace std;
+#include "IMGloading.h"
 
 inline unsigned int nlpo2dc(unsigned int x){//Next largest power of two minus one
 	x|=x>>1;
@@ -52,12 +53,14 @@ namespace enigma
     int bmpstart,bmpwidth,bmpheight;
     if(!(imgfile=fopen(filename.c_str(),"r"))) return 0;
     fseek(imgfile,0,SEEK_END);
-    ftell(imgfile);//bmpsize
     fseek(imgfile,10,SEEK_SET);
-    fread(&bmpstart,1,4,imgfile);
+    if (fread(&bmpstart,1,4,imgfile) != 4)
+      return NULL;
     fseek(imgfile,18,SEEK_SET);
-    fread(&bmpwidth,1,4,imgfile);
-    fread(&bmpheight,1,4,imgfile);
+    if (fread(&bmpwidth,1,4,imgfile) != 4)
+      return NULL;
+    if (fread(&bmpheight,1,4,imgfile) != 4)
+      return NULL;
     fseek(imgfile,28,SEEK_SET);//color depth
     //int colordepth=fgetc(imgfile);
     //if(colordepth != 24) return 0; //Only take 24-bit bitmaps for now

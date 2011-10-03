@@ -284,9 +284,6 @@ struct var
   ~var();
 };
 
-string toString(const variant &a);
-string toString(const var &a);
-
 
 #undef EVCONST
 #define EVCONST
@@ -369,8 +366,5 @@ types_binary_extrapolate_alldecce(bool, operator<,  const var&)
 #define string(VALUE_TO_MAKE_A_STRING_OUT_OF) toString(VALUE_TO_MAKE_A_STRING_OUT_OF)
 
 #undef unsigll
-
-string toString(const variant &a);
-string toString(const var &a);
 
 #endif

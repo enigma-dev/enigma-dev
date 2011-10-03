@@ -31,6 +31,7 @@ using namespace std;
 
 #include "../Graphics_Systems/graphics_mandatory.h"
 #include "../Collision_Systems/collision_mandatory.h"
+#include "../Widget_Systems/widgets_mandatory.h"
 #include "spritestruct.h"
 #include "../libEGMstd.h"
 #include "IMGloading.h"
@@ -161,8 +162,6 @@ namespace enigma
   }
 }
 
-
-#define DEBUGMODE 1
 
 int sprite_get_width(int sprite)
 {

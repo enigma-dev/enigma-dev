@@ -42,10 +42,10 @@ namespace enigma {
     iterator &operator--();
     iterator operator--(int);
     
-    iterator &operator=(iterator&);
-    iterator &operator=(const iterator&);
-    iterator &operator=(inst_iter*);
-    iterator &operator=(object_basic*);
+    const iterator &operator=(iterator&);
+    const iterator &operator=(const iterator&);
+    const iterator &operator=(inst_iter*);
+    const iterator &operator=(object_basic*);
     
     iterator(iterator&);
     iterator(const iterator&);

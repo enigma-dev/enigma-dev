@@ -37,7 +37,8 @@ namespace enigma {
 	extern unsigned bound_texture;
 }
 
-////////THIS NEEDS TO BE FIXED/FINISHED
+////////FIXME: THIS NEEDS TO BE FIXED/FINISHED
+////////FIXME: MOVEME: THIS NEEDS MOVED TO THE PATH EXTENSION
 bool path_start(unsigned pathid,double speed,unsigned endaction,bool absolute)
 {
     //(pseudocode)
@@ -50,6 +51,7 @@ bool path_start(unsigned pathid,double speed,unsigned endaction,bool absolute)
     path_getXY(pathi->path_index,pathi->inst.x,pathi->inst.y,pathi->path_position);
     pathi->inst.direction = path_get_direction(pathi->path_index,pathi->path_position);
     pathi->path_position += pathi->path_speed/pathi->path_index.total_length*speed;*/
+    return false;
 }
 ///////////////////////////////////////
 
@@ -324,7 +326,7 @@ void draw_path(unsigned pathid,double x,double y,bool absolute)
         else
             draw_spline_vertex(x+path->pointarray.back().x,y+path->pointarray.back().y);
 
-        for (int i=0; i<path->pointarray.size(); i++)
+        for (unsigned i=0; i<path->pointarray.size(); i++)
             draw_spline_vertex(x+path->pointarray[i].x,y+path->pointarray[i].y);
 
         if (!path->closed)
@@ -341,7 +343,7 @@ void draw_path(unsigned pathid,double x,double y,bool absolute)
             //glVertex2f(x+path->pointarray.back().x,y+path->pointarray.back().y);
             draw_vertex(x+path->pointarray.back().x,y+path->pointarray.back().y);
 
-        for (int i=0; i<path->pointarray.size(); i++)
+        for (unsigned i=0; i<path->pointarray.size(); i++)
             //glVertex2f(x+path->pointarray[i].x,y+path->pointarray[i].y);
             draw_vertex(x+path->pointarray[i].x,y+path->pointarray[i].y);
 

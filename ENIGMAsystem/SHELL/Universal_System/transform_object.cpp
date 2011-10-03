@@ -35,6 +35,6 @@
 namespace enigma
 {
   object_transform::object_transform(): object_graphics() {}
-  object_transform::object_transform(unsigned x, int y): object_graphics(x,y) {}
+  object_transform::object_transform(unsigned _x, int _y): object_graphics(_x,_y) {}
   object_transform::~object_transform() {}
 }

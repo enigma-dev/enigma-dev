@@ -35,6 +35,7 @@
 #include <stdio.h>
 
 #include "instance_system.h"
+#include "instance_system_frontend.h"
 
 using namespace std;
 
@@ -65,12 +66,12 @@ namespace enigma
     iterator &iterator::operator--()    { it = it->prev; return *this; }
     iterator  iterator::operator--(int) { iterator ret(it,temp); it = it->prev; return ret; }
     
-    iterator &iterator::operator=(iterator& other)       { if (temp) delete it; it = other.it; temp = other.temp; other.temp = false; }
-    iterator &iterator::operator=(const iterator& other) { if (temp) delete it; it = other.it; temp = false; }
-    iterator &iterator::operator=(inst_iter* niter)      { if (temp) delete it; it = niter; temp = false; }
-    iterator &iterator::operator=(object_basic* object)  { if (temp) delete it; it = new inst_iter(object,NULL,NULL); temp = true; }
+    const iterator &iterator::operator=(iterator& other)       { if (temp) delete it; it = other.it; temp = other.temp; other.temp = false; return other; }
+    const iterator &iterator::operator=(const iterator& other) { if (temp) delete it; it = other.it; temp = false; return other; }
+    const iterator &iterator::operator=(inst_iter* niter)      { if (temp) delete it; it = niter; temp = false; return *this; }
+    const iterator &iterator::operator=(object_basic* object)  { if (temp) delete it; it = new inst_iter(object,NULL,NULL); temp = true; return *this; }
     
-    iterator::iterator(inst_iter*it, bool tmp): it(it), temp(tmp) { addme(); }
+    iterator::iterator(inst_iter*_it, bool tmp): it(_it), temp(tmp) { addme(); }
     iterator::iterator(const iterator&other): it(other.it?new inst_iter(*other.it):NULL), temp(true) { addme(); }
     iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = NULL; }
     iterator::iterator(object_basic*ob): it(new inst_iter(ob,NULL,NULL)), temp(true) { }
@@ -96,9 +97,9 @@ namespace enigma
   /*------Iterator methods ------------------------------------*\
   \*-----------------------------------------------------------*/
   
-  inst_iter *event_iter::add_inst(object_basic* inst)
+  inst_iter *event_iter::add_inst(object_basic* ninst)
   {
-    inst_iter *a = new inst_iter(inst,NULL,prev);
+    inst_iter *a = new inst_iter(ninst,NULL,prev);
     if (prev) prev->next = a;
     else next = a;
     return prev = a;
@@ -111,9 +112,9 @@ namespace enigma
     if (prev == which) prev = which->prev;
   }
 
-  inst_iter *objectid_base::add_inst(object_basic* inst)
+  inst_iter *objectid_base::add_inst(object_basic* ninst)
   {
-    inst_iter *a = new inst_iter(inst,NULL,prev);
+    inst_iter *a = new inst_iter(ninst,NULL,prev);
     if (prev) prev->next = a;
     else next = a;
     return prev = a;
@@ -292,7 +293,4 @@ namespace enigma
     if (a->next) a->next->prev = a->prev;
     instance_list.erase(whop->w);
   }
-
-  //This is the universal create event code
-  void constructor(object_basic* instance);
 }

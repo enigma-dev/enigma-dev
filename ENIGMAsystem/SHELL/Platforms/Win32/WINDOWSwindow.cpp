@@ -34,6 +34,8 @@ using namespace std;
 #include <unistd.h> //usleep
 #include "../../Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 
+#include "../../Widget_Systems/widgets_mandatory.h"
+
 bool resizeableWindow = false;
 char* currentCursor = IDC_ARROW;
 
@@ -419,10 +421,10 @@ string get_string(string message, string def)
 {
   if (!getstr::initdstrfncs)
   {
-  #if SHOWERRORS
-  show_error("ENIGMA Error: get_string not initialized.",0);
-  #endif
-  return "";
+    #if SHOWERRORS
+    show_error("ENIGMA Error: get_string not initialized.",0);
+    #endif
+    return "";
   }
 
   RECT nwsizes; int wm=8,hm=8;

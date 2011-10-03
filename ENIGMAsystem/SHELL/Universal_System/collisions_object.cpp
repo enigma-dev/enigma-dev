@@ -35,6 +35,6 @@
 namespace enigma
 {
   object_collisions::object_collisions(): object_transform() {}
-  object_collisions::object_collisions(unsigned id,int objid): object_transform(id,objid) {}
+  object_collisions::object_collisions(unsigned _id,int _objid): object_transform(_id,_objid) {}
   object_collisions::~object_collisions() {}
 }

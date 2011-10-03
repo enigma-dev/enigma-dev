@@ -29,6 +29,7 @@ using namespace std;
 
 #include "OpenGLHeaders.h"
 #include "GSprmtvs.h"
+#include "GSd3d.h"
 #include <string>
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h"

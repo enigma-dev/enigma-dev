@@ -26,6 +26,10 @@
 \********************************************************************************/
 
 #include "OpenGLHeaders.h"
+#include "GSprmtvs.h"
+
+#include <string>
+#include "../../Widget_Systems/widgets_mandatory.h"
 
 #if PRIMBUFFER
 GLenum __primitivetype[PRIMDEPTH2];

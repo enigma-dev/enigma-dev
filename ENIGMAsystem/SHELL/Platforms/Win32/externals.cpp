@@ -33,6 +33,7 @@
 #include "../../Universal_System/var4.h"
 
 #include "../platforms_mandatory.h"
+#include "../../Widget_Systems/widgets_mandatory.h"
 
 using namespace std;
 

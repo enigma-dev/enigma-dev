@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008-2011 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -26,31 +26,32 @@
 \********************************************************************************/
 
 void draw_set_line_pattern(unsigned short pattern, int scale);
-int draw_point(float x, float y);
-int draw_point_color(float x, float y,int color);
-int draw_line(float x1,float y1,float x2,float y2);
-int draw_line_width(float x1,float y1,float x2,float y2,float width);
-int draw_line_color(float x1,float y1,float x2,float y2,int color1,int color2);
-int draw_line_width_color(float x1,float y1,float x2,float y2,float width,int color1,int color2);
-int draw_rectangle(float x1,float y1,float x2,float y2,bool outline);
-int draw_rectangle_angle(float x1,float y1,float x2,float y2,float angle,bool outline);
-int draw_rectangle_color(float x1,float y1,float x2,float y2,int color1,int color2,int color3,int color4,bool outline = false);
-int draw_set_circle_precision(float precision);
+void draw_point(float x, float y);
+void draw_point_color(float x, float y,int color);
+void draw_line(float x1,float y1,float x2,float y2);
+void draw_line_width(float x1,float y1,float x2,float y2,float width);
+void draw_line_color(float x1,float y1,float x2,float y2,int color1,int color2);
+void draw_line_width_color(float x1,float y1,float x2,float y2,float width,int color1,int color2);
+void draw_rectangle(float x1,float y1,float x2,float y2,bool outline);
+void draw_rectangle_angle(float x1,float y1,float x2,float y2,float angle,bool outline);
+void draw_rectangle_color(float x1,float y1,float x2,float y2,int color1,int color2,int color3,int color4,bool outline = false);
+void draw_set_circle_precision(float precision);
 float draw_get_circle_precision(void);
-int draw_circle(float x, float y, float radius, bool outline);
-int draw_circle_color(float x, float y, float radius, int color1, int color2, bool outline = false);
-int draw_circle_perfect(float x, float y, float radius, bool outline);
-int draw_circle_color_perfect(float x, float y, float radius, int color1, int color2, bool outline = false);
-int draw_ellipse(float x1,float y1,float x2,float y2,bool outline);
-int draw_ellipse_color(float x1, float y1, float x2, float y2, int col1, int col2, bool outline = false);
-int draw_ellipse_perfect(float x1,float y1,float x2,float y2,bool outline);
-int draw_triangle(float x1,float y1,float x2,float y2,float x3,float y3,bool outline);
-int draw_triangle_color(float x1,float y1,float x2,float y2,float x3,float y3,int col1,int col2,int col3,bool outline = false);
-int draw_roundrect(float x1,float y1,float x2,float y2, float r, bool outline);
-int draw_roundrect_color(float x1, float y1, float x2, float y2, float r, int col1, int col2, bool outline = false);
-int draw_healthbar(float x1, float y1, float x2, float y2, float amount, int backcol, int mincol, int maxcol, int direction, bool showback, bool showborder);
-int draw_getpixel(int,int);
-int(*const draw_get_pixel)(int,int)=draw_getpixel;
-int draw_mandelbrot(float x, float y, float w, double Zx, double Zy, double Zw, unsigned iter);
-int draw_arrow(float x1, float y1, float x2, float y2, float arrow_size, float line_size = 1, bool outline = false);
+void draw_circle(float x, float y, float radius, bool outline);
+void draw_circle_color(float x, float y, float radius, int color1, int color2, bool outline = false);
+void draw_circle_perfect(float x, float y, float radius, bool outline);
+void draw_circle_color_perfect(float x, float y, float radius, int color1, int color2, bool outline = false);
+void draw_ellipse(float x1,float y1,float x2,float y2,bool outline);
+void draw_ellipse_color(float x1, float y1, float x2, float y2, int col1, int col2, bool outline = false);
+void draw_ellipse_perfect(float x1,float y1,float x2,float y2,bool outline);
+void draw_triangle(float x1,float y1,float x2,float y2,float x3,float y3,bool outline);
+void draw_triangle_color(float x1,float y1,float x2,float y2,float x3,float y3,int col1,int col2,int col3,bool outline = false);
+void draw_roundrect(float x1,float y1,float x2,float y2, float r, bool outline);
+void draw_roundrect_color(float x1, float y1, float x2, float y2, float r, int col1, int col2, bool outline = false);
+void draw_healthbar(float x1, float y1, float x2, float y2, float amount, int backcol, int mincol, int maxcol, int direction, bool showback, bool showborder);
+void draw_mandelbrot(float x, float y, float w, double Zx, double Zy, double Zw, unsigned iter);
+void draw_arrow(float x1, float y1, float x2, float y2, float arrow_size, float line_size = 1, bool outline = false);
 void draw_button(float x1, float y1, float x2, float y2, float border_width, bool up);
+int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned iter);
+int draw_getpixel(int,int);
+#define draw_get_pixel draw_getpixel

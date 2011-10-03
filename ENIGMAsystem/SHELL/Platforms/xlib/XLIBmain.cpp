@@ -23,26 +23,30 @@
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #include <stdio.h>
+#include <string>
 
+#include "../platforms_mandatory.h"
+
+#include "XLIBmain.h"
 #include "XLIBwindow.h"
 #include "LINUXjoystick.h"
 
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/CallbackArrays.h"
 #include "../../Universal_System/roomsystem.h"
+#include "../../Universal_System/loading.h"
 
 namespace enigma
 {
   extern char keymap[256];
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  extern int initialize_everything();
   
   namespace x11
   {
-    extern Display *disp;
-    extern GLXDrawable win;
-    extern Atom wm_delwin;
+    Display *disp;
+    Window win;
+    Atom wm_delwin;
     
     int handleEvents()
     {
@@ -123,7 +127,6 @@ using namespace enigma::x11;
 
 namespace enigma
 {
-  void initkeymap();
   void input_initialize()
   {
     //Clear the input arrays

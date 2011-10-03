@@ -31,6 +31,8 @@
 #include <string>
 #include <stdio.h>
 
+#include "libEGMstd.h"
+
 using namespace std;
 
 string toString(int n)                { char buf[12]; return string(buf,sprintf(buf,"%d",  n)); }
@@ -57,5 +59,3 @@ string toString(const string& str, size_t pos, size_t n) { return string (str, p
 string toString(const char *s, size_t n)                 { return string (s, n); }
 string toString(const char *s)                           { return string (s);    }
 string toString(size_t n, char c)                        { return string (n, c); }
-
-void show_error(string, const bool);

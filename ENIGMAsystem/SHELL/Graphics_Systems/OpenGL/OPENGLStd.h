@@ -41,23 +41,11 @@ namespace enigma
   extern bool pbo_isgo;
 }
 
-#if COLORSLIB
-    #include "GScolors.h"
-#endif
-#if PRIMTVLIB
-    #include "GSprmtvs.h"
-#endif
-#if PRIMTVLIB //Temp until Josh adds D3DLIB
-    #include "GSd3d.h"
-#endif
-#if STDRAWLIB
-    #include "GSstdraw.h"
-#endif
-#if BLENDMODE
-    #include "GSblend.h"
-#endif
-#if GMSURFACE
-    #include "GSsurface.h"
-#endif
+#include "GScolors.h"
+#include "GSprmtvs.h"
+#include "GSd3d.h"
+#include "GSstdraw.h"
+#include "GSblend.h"
+#include "GSsurface.h"
 #include "GSmiscextra.h"
 

@@ -33,6 +33,7 @@
 #include "object.h"
 
 #include "instance_system.h"
+#include "instance.h"
 
 namespace enigma
 {
@@ -48,11 +49,10 @@ void instance_destroy(int id)
   }
 }
 
-int instance_destroy()
+void instance_destroy()
 {
   enigma::instance_event_iterator->inst->myevent_destroy();
   enigma::instance_event_iterator->inst->unlink();
-  return 0;
 }
 
 bool instance_exists(int obj)

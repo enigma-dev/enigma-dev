@@ -63,3 +63,5 @@ namespace enigma
   extern int rawfontcount, rawfontmaxid;
   int font_new(unsigned char gs, unsigned char gc); // Creates a new font, allocating 'gc' glyphs
 }
+
+int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);

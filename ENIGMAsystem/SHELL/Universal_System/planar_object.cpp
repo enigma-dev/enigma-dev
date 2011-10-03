@@ -55,7 +55,7 @@ namespace enigma
       speed.reflex2 = &hspeed.rval.d;
       speed.reflex3 = &vspeed.rval.d;
   }
-  object_planar::object_planar(unsigned id, int objid): object_basic(id,objid)
+  object_planar::object_planar(unsigned _id, int objid): object_basic(_id,objid)
   {
     hspeed.reflex1   = &vspeed.rval.d;
       hspeed.reflex2 = &direction.rval.d;

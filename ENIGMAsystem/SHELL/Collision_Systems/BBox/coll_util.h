@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef COLL_UTIL_H
+#define COLL_UTIL_H
+
 bool collide_rect_line(double rx1, double ry1, double rx2, double ry2,
                        double px1, double py1, double px2, double py2);
 bool collide_rect_rect(double r1x1, double r1y1, double r1x2, double r1y2,
@@ -38,3 +41,4 @@ bool collide_bbox_line(const enigma::object_collisions* inst, double ox, double 
 bool collide_bbox_bbox(const enigma::object_collisions* inst1, double ox1, double oy1, const enigma::object_collisions* inst2, double ox2, double oy2);
 bool collide_bbox_point(const enigma::object_collisions* inst, double ox, double oy, double x, double y);
 
+#endif

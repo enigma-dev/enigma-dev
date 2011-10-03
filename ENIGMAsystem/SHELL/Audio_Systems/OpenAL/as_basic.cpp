@@ -31,6 +31,7 @@
 #include <math.h>
 using std::string;
 #include "as_basic.h"
+#include "../audio_mandatory.h"
 #include "alure/include/AL/alure.h"
 
 namespace enigma
@@ -238,10 +239,11 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
   
   // Buffer sound
   fseek(afile,0,SEEK_END);
-  const ALsizei flen = ftell(afile);
+  const size_t flen = ftell(afile);
   char fdata[flen];
   fseek(afile,0,SEEK_SET);
-  fread(fdata,1,flen,afile);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading sound data");
   
   // Decode sound
   int rid = enigma::sound_allocate();

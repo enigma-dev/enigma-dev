@@ -25,31 +25,14 @@
 **                                                                              **
 \********************************************************************************/
 
-/**Enabling functions**********************************************************\
-
-int gs_enable_alpha(double enable)
-int gs_enable_blending(double enable)
-int gs_enable_depthbuffer(double enable)
-int gs_enable_dither(double enable)
-int gs_enable_smooth_lines(double enable)
-int gs_enable_stipple(double enable)
-int gs_enable_logical_op(double enable)
-int gs_enable_smooth_points(double enable)
-int gs_enable_smooth_polygons(double enable)
-int gs_enable_stencil(double enable)
-int gs_enable_texture(double enable)
-
-\******************************************************************************/
-
-
-int gs_enable_alpha(double enable);
-int gs_enable_blending(double enable);
-int gs_enable_depthbuffer(double enable);
-int gs_enable_dither(double enable);
-int gs_enable_smooth_lines(double enable);
-int gs_enable_stipple(double enable);
-int gs_enable_logical_op(double enable);
-int gs_enable_smooth_points(double enable);
-int gs_enable_smooth_polygons(double enable);
-int gs_enable_stencil(double enable);
-int gs_enable_texture(double enable);
+void gs_enable_alpha(bool enable);
+void gs_enable_blending(bool enable);
+void gs_enable_depthbuffer(bool enable);
+void gs_enable_dither(bool enable);
+void gs_enable_smooth_lines(bool enable);
+void gs_enable_stipple(bool enable);
+void gs_enable_logical_op(bool enable);
+void gs_enable_smooth_points(bool enable);
+void gs_enable_smooth_polygons(bool enable);
+void gs_enable_stencil(bool enable);
+void gs_enable_texture(bool enable);

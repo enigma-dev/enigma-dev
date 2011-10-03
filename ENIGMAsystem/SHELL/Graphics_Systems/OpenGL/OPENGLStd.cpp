@@ -33,8 +33,10 @@
 #include <string>
 #include "OpenGLHeaders.h"
 using namespace std;
+#include "OPENGLStd.h"
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h" // Room dimensions.
+#include "../graphics_mandatory.h" // Room dimensions.
 
 namespace enigma
 {
@@ -80,7 +82,7 @@ namespace enigma
 }
 
 // Stolen entirely from the documentation and thrown into a switch() structure.
-const char* draw_get_graphics_error()
+string draw_get_graphics_error()
 {
   GLenum err = glGetError();
   switch (err)

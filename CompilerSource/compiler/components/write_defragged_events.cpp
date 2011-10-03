@@ -108,7 +108,7 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
             }
   wto << "    //virtual void unlink() {} // This is already declared at the super level." << endl;
   wto << "    event_parent() {}" << endl;
-  wto << "    event_parent(unsigned x, int y): " << system_get_uppermost_tier() << "(x,y) {}" << endl;
+  wto << "    event_parent(unsigned _x, int _y): " << system_get_uppermost_tier() << "(_x,_y) {}" << endl;
   wto << "  };" << endl;
   wto << "}" << endl;
   wto.close();

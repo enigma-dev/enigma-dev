@@ -30,7 +30,9 @@
 #include "../libEGMstd.h"
 #include <algorithm>
 #include <vector>
+#include <string>
 
+#include "../Widget_Systems/widgets_mandatory.h" // show_error
 
 
 extern double score;
@@ -47,7 +49,7 @@ namespace enigma {
     std::string highscore_escape;
     std::vector< playerScore > highscore_list;
 
-bool cmp_highscore( const playerScore& a, const playerScore& b ) {
+static bool cmp_highscore( const playerScore& a, const playerScore& b ) {
     return a > b;
 }
 

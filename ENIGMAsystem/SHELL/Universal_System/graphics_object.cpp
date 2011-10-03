@@ -37,7 +37,7 @@
 namespace enigma
 {
   object_graphics::object_graphics() {}
-  object_graphics::object_graphics(unsigned x, int y): object_planar(x,y) {}
+  object_graphics::object_graphics(unsigned _x, int _y): object_planar(_x,_y) {}
   object_graphics::~object_graphics() {};
   
   void depthv::function() {

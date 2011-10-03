@@ -24,18 +24,18 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+#include <string>
 #include <vector>
-//#include "../Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
-//#include "../Collision_Systems/BBox/coll_funcs.h" //For collision mp_grid_add_instances
-//#include "../Graphics_Systems/OpenGL/GSfont.h" //For drawing text
-//#include "var4.h"
-#include "pathstruct.h"
-#include "motion_planning_struct.h"
-#include "motion_planning.h"
 #include <cmath>
 #include <map>
-using std::multimap;
-//#include <iostream>
+using namespace std;
+
+//#include "../Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
+#include "pathstruct.h"
+#include "../libEGMstd.h"
+#include "motion_planning_struct.h"
+#include "motion_planning.h"
+
 int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme);
 
 namespace enigma {

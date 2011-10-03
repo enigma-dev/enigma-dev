@@ -91,7 +91,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "\n  {\n";
         wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
         wto << "    object_locals() {}\n";
-        wto << "    object_locals(unsigned x, int y): event_parent(x,y) {}\n  };\n";
+        wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {}\n  };\n";
       for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
       {
         wto << "  \n  struct OBJ_" << i->second->name << ": object_locals\n  {";

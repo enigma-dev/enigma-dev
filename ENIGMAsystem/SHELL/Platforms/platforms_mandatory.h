@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef PLATFORMS_MANDATORY__H
+#define PLATFORMS_MANDATORY__H
+
 // This file contains functions that are required to be implemented by any API
 // under this directory, /Platforms/. They are not required to do anything at all
 // if the platform in question lacks support for them entirely.
@@ -44,11 +47,8 @@ namespace enigma
 // These functions are standard GML that are an integral part of the system.
 // Each instance must implement these, even if they are unable to do anything on the target platform.
 
-// This obviously displays an error message.
-void show_error(string, const bool); // It should offer a button to end the game.
-
 // This function sets the game window caption, if there is a place reserved for such.
-void window_set_caption(string caption);
+void window_set_caption(std::string caption);
 
 // This function should resize the window, meaning a lowered resolution if the device displays all windows full screen.
 void window_set_size(unsigned int width, unsigned int height);
@@ -60,3 +60,5 @@ int window_mouse_get_y();
 // These two are used by screen_redraw for view calculations and such.
 int window_get_width();
 int window_get_height();
+
+#endif

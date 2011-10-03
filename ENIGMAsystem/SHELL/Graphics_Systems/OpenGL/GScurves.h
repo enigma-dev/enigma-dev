@@ -49,6 +49,8 @@ void draw_spline4(float x1, float y1, float x2, float y2, float x3, float y3, fl
 void draw_spline4_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2);
 void draw_spline4c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5, float x6, float y6);
 void draw_spline4c_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5, float x6, float y6, int c1, int c2, float a1, float a2);
+void draw_spline_part(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
+void draw_spline_part_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2);
 void draw_spline_begin(int mode);
 int draw_spline_vertex(float x, float y);
 int draw_spline_vertex_color(float x, float y, int col, float alpha);

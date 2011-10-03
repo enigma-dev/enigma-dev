@@ -35,8 +35,8 @@ namespace enigma {
   void instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
 }
 
-int  instance_destroy();
-int  instance_destroy(int id);
+void instance_destroy();
+void instance_destroy(int id);
 bool instance_exists (int obj);
 int  instance_find   (int obj,int n);
 int  instance_number (int obj);

@@ -28,8 +28,9 @@
 #include "OpenGLHeaders.h"
 #include <string>
 #include <stdio.h>
-
 using namespace std;
+
+#include "GSmiscextra.h"
 
 //Fuck whoever did this to the spec
 #ifndef GL_BGR

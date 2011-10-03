@@ -54,7 +54,7 @@ namespace enigma
 // These functions are available to the user to be called on a whim.
 
 // Called at random. Maybe.
-const char* draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
+std::string draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
 
 // Called each step, or by the user randomly.
 void screen_refresh(); // Without invoking any events, refresh the contents of the screen.

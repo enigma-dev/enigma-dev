@@ -45,4 +45,3 @@ int draw_sprite_tiled(int spr,int subimg,double x,double y);
 int draw_sprite_tiled_ext(int spr,int subimg,double x,double y,double xscale,double yscale,int color,double alpha);
 
 int sprite_exists(int sprite);
-int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset);

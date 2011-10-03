@@ -42,7 +42,11 @@ namespace enigma
   }
 }
 
-int resource_get_id(string name);
+int resource_get_id(string name)
+{
+  return -1;
+}
+
 variant script_execute(int scr, variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7)
 {
   enigma::callable_script &i = enigma::callable_scripts[scr];

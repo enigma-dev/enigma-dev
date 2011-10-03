@@ -33,6 +33,7 @@
 #include "../../Universal_System/collisions_object.h"
 #include "../../Universal_System/instance_system.h" //iter
 #include "coll_util.h"
+#include "coll_impl.h"
 
 enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool notme, double x1, double y1, double x2, double y2)
 {

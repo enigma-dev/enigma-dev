@@ -28,6 +28,7 @@
 #include <string>
 #include "OpenGLHeaders.h"
 #include "GSbackground.h"
+#include "GSscreen.h"
 #include "GSd3d.h"
 
 using namespace std;
@@ -43,6 +44,7 @@ using namespace std;
 #include "../../Universal_System/graphics_object.h"
 #include "../../Universal_System/depth_draw.h"
 #include "../../Platforms/platforms_mandatory.h"
+#include "../graphics_mandatory.h"
 
 using namespace enigma;
 

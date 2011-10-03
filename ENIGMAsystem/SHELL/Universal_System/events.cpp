@@ -29,10 +29,14 @@
 
 #include "object.h"
 
+// TODO: MOVEME
+//   Move this file to event_info.cpp.
+// TODO: GENERATEME
+//   This file should be generated.
 namespace enigma
 {
 	int event_current=-1;
-	string evname(int evnumb)
+	/*string evname(int evnumb)
 	{
 		switch (evnumb)
 		{
@@ -63,14 +67,14 @@ namespace enigma
       default: return "Unknown";
 		}
 	}
-	int getID()
+	static int getID()
 	{ //FIXME: Fix me.
 		return -4;//(instance_event_iterator!=NULL)?instance_event_iterator->first?instance_event_iterator->second?instance_event_iterator->second->object_index:-2:-1:-1;
-/*		if((*instance_event_iterator).first){
+		if((*instance_event_iterator).first){
 			if ((*instance_event_iterator).second)
 				return (int)(*instance_event_iterator).second->object_index;
 			else return -2;
 		}
-		return -1;*/
-	}
+		return -1;
+	}*/
 }

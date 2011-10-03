@@ -28,6 +28,7 @@
 #include <string>
 #include <cstdlib>
 #include "var4.h"
+#include "estring.h"
 
 const char ldgrs[256]={
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -53,7 +54,6 @@ string chr(char val){
 	char ret[2]={val,0};
 	return ret;
 }
-
 
 int ord(string str)      { return str[0]; }
 
@@ -152,4 +152,25 @@ string string_lettersdigits(string str){
 	for(const char*c=str.c_str();*c;c++)
 		if(ldgrs[(unsigned char)*c]) ret+=*c;
 	return ret;
+}
+
+bool string_isletters(string str) {
+	for(const char*c=str.c_str();*c;c++)
+		if(!(ldgrs[(unsigned char)*c]&3))
+      return false;
+	return true;
+}
+
+bool string_isdigits(string str) {
+	for(const char*c=str.c_str();*c;c++)
+		if(!(ldgrs[(unsigned char)*c]&4))
+		  return false;
+	return true;
+}
+
+bool string_islettersdigits(string str) {
+	for(const char*c=str.c_str();*c;c++)
+		if(!ldgrs[(unsigned char)*c])
+		  return false;
+	return true;
 }

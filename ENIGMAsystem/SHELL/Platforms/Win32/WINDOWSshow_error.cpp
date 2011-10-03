@@ -29,8 +29,8 @@
 #include <windows.h>
 #include <stdio.h>
 using namespace std;
+#include "../../GameSettings.h"
 
-extern void ABORT_ON_ALL_ERRORS();
 int show_error(string errortext,const bool fatal)
 {
   if (MessageBox(NULL,("Error in some event or another for some object I'm too lazy to look up: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)

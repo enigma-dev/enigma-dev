@@ -32,9 +32,11 @@ using namespace std;
 
 #include "backgroundstruct.h"
 #include "../Graphics_Systems/graphics_mandatory.h"
+#include "../Widget_Systems/widgets_mandatory.h"
 #include "../Platforms/platforms_mandatory.h"
 #include "../libEGMstd.h"
-#include "compression.h"
+#include "zlib.h"
+#include "resinit.h"
 
 
 namespace enigma
@@ -44,19 +46,19 @@ namespace enigma
     int nullhere;
 	  unsigned bkgid, width, height,transparent,smoothEdges,preload,useAsTileset,tileWidth,tileHeight,hOffset,vOffset,hSep,vSep;
     
-    fread(&nullhere,4,1,exe);
-    if (nullhere != *(int*)"BKG ")
+    if (!fread(&nullhere,4,1,exe) or nullhere != *(int*)"BKG ")
       return;
     
     // Determine how many backgrounds we have
     int bkgcount;
-    fread(&bkgcount,4,1,exe);
+    if (!fread(&bkgcount,4,1,exe))
+      return;
     
-	  
 	  
 	  // Fetch the highest ID we will be using
 	  int bkg_highid;
-	  fread(&bkg_highid,4,1,exe);
+	  if (!fread(&bkg_highid,4,1,exe))
+	    return;
 	  
 	  printf("highestid: %d", bkg_highid);
 	  
@@ -65,31 +67,31 @@ namespace enigma
 	  for (int i = 0; i < bkgcount; i++)
 	  {
 		  int unpacked;
-		  fread(&bkgid, 4,1,exe);
-		  fread(&width, 4,1,exe);
+		  if (!fread(&bkgid, 4,1,exe)) return;
+		  if (!fread(&width, 4,1,exe)) return;
 		  printf("width: %d", width);
-		  fread(&height,4,1,exe);
+		  if (!fread(&height,4,1,exe)) return;
 		  printf("height: %d", height);
 		  
-		  fread(&transparent,4,1,exe);
+		  if (!fread(&transparent,4,1,exe)) return;
 		  printf("transparent: %d", transparent);
-		  fread(&smoothEdges,4,1,exe);
+		  if (!fread(&smoothEdges,4,1,exe)) return;
 		  printf("smoothEdges: %d", smoothEdges);
-		  fread(&preload,4,1,exe);
+		  if (!fread(&preload,4,1,exe)) return;
 		  printf("preload: %d", preload);
-		  fread(&useAsTileset,4,1,exe);
+		  if (!fread(&useAsTileset,4,1,exe)) return;
 		  printf("useAsTileset: %d", useAsTileset);
-		  fread(&tileWidth,4,1,exe);
+		  if (!fread(&tileWidth,4,1,exe)) return;
 		  printf("tileWidth: %d", tileWidth);
-		  fread(&tileHeight,4,1,exe);
+		  if (!fread(&tileHeight,4,1,exe)) return;
 		  printf("tileHeight: %d", tileHeight);
-		  fread(&hOffset,4,1,exe);
+		  if (!fread(&hOffset,4,1,exe)) return;
 		  printf("hOffset: %d", hOffset);
-		  fread(&vOffset,4,1,exe);
+		  if (!fread(&vOffset,4,1,exe)) return;
 		  printf("vOffset: %d", vOffset);
-		  fread(&hSep,4,1,exe);
+		  if (!fread(&hSep,4,1,exe)) return;
 		  printf("hSep: %d", hSep);
-		  fread(&vSep,4,1,exe);
+		  if (!fread(&vSep,4,1,exe)) return;
 		  printf("vSep: %d", vSep);
 		  
 		 
@@ -98,7 +100,7 @@ namespace enigma
 		  unpacked = width*height*4;
 		  
 		  unsigned int size;
-		  fread(&size,4,1,exe); 
+		  if (!fread(&size,4,1,exe)); 
 		  printf("Alloc size: %d", size);
 		  
 		  unsigned char* cpixels=new unsigned char[size+1];

@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include "OpenGLHeaders.h"
+#include "GScolors.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))

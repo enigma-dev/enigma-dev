@@ -32,6 +32,9 @@
 using namespace std;
 
 #include "darray.h" //Simpler vector with logarithmic time
+#include "fileio.h" //Simpler vector with logarithmic time
+
+#include "../Widget_Systems/widgets_mandatory.h"
 
 // Implement a storage class for file information
 
@@ -58,7 +61,6 @@ namespace enigma
 // Function family file_text*
 // Uses enigma::files[] for storage, treats sdata as last read string.
 
-void file_text_readln(int);
 int file_text_open_read(string fname) // Opens the file with the indicated name for reading. The function returns the id of the file that must be used in the other functions. You can open multiple files at the same time (32 max). Don't forget to close them once you are finished with them.
 {
   FILE *a = fopen(fname.c_str(),"rt"); //Read as text file

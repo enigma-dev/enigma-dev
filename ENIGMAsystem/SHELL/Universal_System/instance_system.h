@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef INSTANCE_SYSTEM__H
+#define INSTANCE_SYSTEM__H
+
 #include <string>
 #include "var4.h"
 #include "reflexive_types.h"
@@ -44,4 +47,8 @@ namespace enigma {
   typedef std::map<int,inst_iter*>::iterator instance_list_iterator;
   extern std::map<int,inst_iter*> instance_list;
   extern std::vector<inst_iter*> cleanups;
+  
+  void unlink_main(instance_list_iterator who);
 }
+
+#endif

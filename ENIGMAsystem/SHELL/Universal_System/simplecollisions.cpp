@@ -36,6 +36,7 @@
 
 #include "collisions_object.h"
 #include "instance_system.h"
+#include "simplecollisions.h"
 
 bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2)
 {

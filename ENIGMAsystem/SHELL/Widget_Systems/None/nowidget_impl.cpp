@@ -25,6 +25,14 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <string>
+using namespace std;
+#include "../widgets_mandatory.h"
+#include <cstdlib>
+#include <cstdio>
+
+#include "../../GameSettings.h"
+
 namespace enigma
 {
   bool widget_system_initialize()
@@ -32,3 +40,11 @@ namespace enigma
     return 0;
   }
 }
+
+void show_error(string err, const bool fatal)
+{
+  printf("ERROR: %s\n",err.c_str());
+  if (fatal) exit(0);
+  ABORT_ON_ALL_ERRORS();
+}
+

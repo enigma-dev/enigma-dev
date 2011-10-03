@@ -27,8 +27,11 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <string>
+using std::string;
 
 #include "OpenGLHeaders.h"
+#include "GSsprite.h"
 
 #include "../../Universal_System/spritestruct.h"
 #include "../../Universal_System/instance_system.h"

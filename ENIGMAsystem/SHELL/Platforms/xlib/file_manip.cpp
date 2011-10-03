@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 
 #include <string>
+#include "file_manip.h"
 using namespace std;
 
 /* UNIX-ready port of file manipulation */
@@ -62,32 +63,23 @@ int directory_create(string dname) {
 }
 
 
-
-string file_find_first(string mask,int attr);   
-
-enum {
-  fa_readonly  = 1,
-  fa_hidden    = 2,
-  fa_sysfile   = 4,
-  fa_volumeid  = 8,
-  fa_directory = 16,
-  fa_archive   = 32
-};
-
+// TODO: Implement these...
+/*
+string file_find_first(string mask,int attr);
 string file_find_next();                 
-void file_find_close();                
-bool file_attributes(string fname,int attr); 
+void file_find_close();
+bool file_attributes(string fname,int attr);
 
-string filename_name(string fname);              
-string filename_path(string fname);              
-string filename_dir(string fname);               
-string filename_drive(string fname);             
-string filename_ext(string fname);               
-string filename_change_ext(string fname,string newext); 
+string filename_name(string fname);
+string filename_path(string fname);
+string filename_dir(string fname);
+string filename_drive(string fname);
+string filename_ext(string fname);
+string filename_change_ext(string fname,string newext);
 
-void export_include_file(string fname);                   
-void export_include_file_location(string fname,string location); 
-void discard_include_file(string fname);                  
+void export_include_file(string fname);   
+void export_include_file_location(string fname,string location);
+void discard_include_file(string fname);
 
 extern unsigned game_id;
 extern string working_directory;
@@ -95,3 +87,4 @@ extern string program_directory;
 extern string temp_directory;
 
 string environment_get_variable(string name);
+*/

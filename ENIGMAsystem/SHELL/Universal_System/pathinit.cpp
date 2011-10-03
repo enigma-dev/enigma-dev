@@ -30,6 +30,7 @@
 using namespace std;
 
 #include "pathstruct.h"
+#include "resinit.h"
 //#include "../Platforms/platforms_mandatory.h"
 //#include "../libEGMstd.h"
 
@@ -41,36 +42,36 @@ namespace enigma
     bool smooth, closed;
     int x, y, speed, nullhere, precision;
 
-    fread(&nullhere,4,1,exe);
+    if (!fread(&nullhere,4,1,exe)) return;
     if (nullhere != *(int*)"PTH ")
       return;
 
     // Determine how many paths we have
     int pathcount;
-    fread(&pathcount,4,1,exe);
+    if (!fread(&pathcount,4,1,exe)) return;
 
     // Fetch the highest ID we will be using
     int path_highid, buf;
-    fread(&path_highid,4,1,exe);
+    if (!fread(&path_highid,4,1,exe)) return;
     paths_init();
 
     for (int i = 0; i < pathcount; i++)
     {
-      fread(&pathid, 4,1,exe);
-      fread(&buf, 4,1,exe);
+      if (!fread(&pathid, 4,1,exe)) return;
+      if (!fread(&buf, 4,1,exe)) return;
       smooth = buf; //to fix int to bool issues
-      fread(&buf, 4,1,exe);
+      if (!fread(&buf, 4,1,exe)) return;
       closed = buf;
-      fread(&precision, 4,1,exe);
+      if (!fread(&precision, 4,1,exe)) return;
 
-      fread(&pointcount,4,1,exe);
+      if (!fread(&pointcount,4,1,exe)) return;
 
       new path(pathid, smooth, closed, precision, pointcount);
-      for (int ii=0;ii<pointcount;ii++)
+      for (unsigned ii=0;ii<pointcount;ii++)
       {
-        fread(&x, 4,1,exe);
-        fread(&y, 4,1,exe);
-        fread(&speed, 4,1,exe);
+        if (!fread(&x, 4,1,exe)) return;
+        if (!fread(&y, 4,1,exe)) return;
+        if (!fread(&speed, 4,1,exe)) return;
         path_add_point(pathid, x, y, speed/100);
       }
       path_recalculate(pathid);

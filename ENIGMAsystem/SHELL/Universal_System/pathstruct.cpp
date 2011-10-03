@@ -79,7 +79,7 @@ namespace enigma
       double x1=p0->x, y1=p0->y,
             x2=p1->x, y2=p1->y,
             x3=p2->x, y3=p2->y,
-            length=0,lx=0.5*(x1+x2), ly=0.5*(y1+y2),x,y,dx,dy;
+            length=0,lx=0.5*(x1+x2), ly=0.5*(y1+y2),x,y;
 
       double t=0;
       for (int i=0; i<=20; i++){
@@ -93,8 +93,8 @@ namespace enigma
       return length;
     };
 
-    path::path(unsigned pathid, bool smooth, bool closed, int precision, unsigned pointcount):
-        id(pathid), precision(precision), smooth(smooth), closed(closed), pointarray(), total_length(0)
+    path::path(unsigned pathid, bool smth, bool close, int prec, unsigned pointcount):
+        id(pathid), precision(prec), smooth(smth), closed(close), pointarray(), total_length(0)
     {
         pathstructarray[pathid] = this;
         pathstructarray[pathid]->pointarray.reserve(pointcount);
@@ -119,8 +119,8 @@ namespace enigma
         const size_t pc = pth->pointarray.size();
         const path_point& start = pth->closed ? pth->pointarray[pc-1] : pth->pointarray[0];
         const path_point& end  =  pth->closed ? pth->pointarray[0] : pth->pointarray[pc-1];
-        const path_point& beforestart  =  pth->closed ? pth->pointarray[pc-2] : pth->pointarray[0];
-        const path_point& afterend  =  pth->closed ? pth->pointarray[1] : pth->pointarray[pc-1];
+        //const path_point& beforestart  =  pth->closed ? pth->pointarray[pc-2] : pth->pointarray[0];
+        //const path_point& afterend  =  pth->closed ? pth->pointarray[1] : pth->pointarray[pc-1];
         double minx=DBL_MAX,miny=DBL_MAX,maxx=-DBL_MAX,maxy=-DBL_MAX;
         for (size_t i = 0; i < pc; i++)
         {
@@ -197,7 +197,7 @@ namespace enigma
       else if (pth->pointarray.size()==2 && x1==x2 && y1==y2){x=x1; y=y1; return;}
 
       if (pth->smooth && (pth->pointarray.size()>2 || pth->closed)){
-          if (sid+1==pc)
+          if (size_t(sid)+1 == pc)
               x3=end.x, y3=end.y;
           else
               x3=pth->pointarray[sid+1].x, y3=pth->pointarray[sid+1].y;
@@ -228,7 +228,7 @@ namespace enigma
           x1=pth->pointarray[sid-1].speed;
       x2=pth->pointarray[sid].speed;
       if (pth->smooth){
-          if (sid+1==pc)
+          if (size_t(sid)+1==pc)
               x3=end.speed;
           else
               x3=pth->pointarray[sid+1].speed;

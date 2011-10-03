@@ -44,6 +44,6 @@ bool    file_bin_rewrite(int fileid);
 void    file_bin_close(int fileid);           
 size_t  file_bin_size(int fileid);            
 size_t  file_bin_position(int fileid);        
-void    file_bin_seek(int fileid,int pos);        
+void    file_bin_seek(int fileid,size_t pos);        
 void    file_bin_write_byte(int fileid,unsigned char byte); 
 int     file_bin_read_byte(int fileid);       
