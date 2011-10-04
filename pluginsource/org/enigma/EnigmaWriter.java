@@ -29,7 +29,10 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -68,6 +71,7 @@ import org.enigma.backend.util.Polygon;
 import org.enigma.utility.Masker.Mask;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
+import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.resources.InstantiableResource;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
@@ -227,7 +231,32 @@ public final class EnigmaWriter
 		og.copyright = ig.get(PGameSettings.COPYRIGHT);
 		og.description = ig.get(PGameSettings.DESCRIPTION);
 
-		og.gameIcon = new String();
+		//All this shit is just to write the icon to a temp file and provide the filename...
+		ICOFile ico = ig.get(PGameSettings.GAME_ICON);
+		OutputStream os = null;
+		String fn = null;
+		if (ico != null) try
+			{
+			File f = File.createTempFile("gms_ico",".ico");
+			ico.write(os = new FileOutputStream(f));
+			fn = f.getAbsolutePath();
+			}
+		catch (IOException e)
+			{
+			e.printStackTrace();
+			}
+		finally
+			{
+			if (os != null) try
+				{
+				os.close();
+				}
+			catch (IOException e)
+				{
+				e.printStackTrace();
+				}
+			}
+		og.gameIcon = fn;
 		}
 
 	protected void populateSprites()

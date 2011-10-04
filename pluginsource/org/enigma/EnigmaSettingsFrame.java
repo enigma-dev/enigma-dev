@@ -75,29 +75,27 @@ import org.enigma.SettingsHandler.OptionGroupSetting;
 import org.enigma.SettingsHandler.OptionSetting;
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaSettings;
+import org.enigma.backend.EnigmaSettings.PEnigmaSettings;
 import org.enigma.messages.Messages;
 import org.enigma.utility.YamlParser;
 import org.lateralgm.components.CustomFileChooser;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
-import org.lateralgm.components.mdi.RevertableMDIFrame;
 import org.lateralgm.main.LGM;
 import org.lateralgm.subframes.CodeFrame;
+import org.lateralgm.subframes.ResourceFrame;
 import org.lateralgm.subframes.CodeFrame.CodeHolder;
 
-public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionListener,
-		FocusListener,PopupMenuListener
+public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSettings> implements
+		ActionListener,FocusListener,PopupMenuListener
 	{
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon CODE_ICON = LGM.getIconForKey("Resource.SCRIPT"); //$NON-NLS-1$
 	private static final String[] labels = { "Compiler: ","Platform: ","Graphics: ","Audio: ", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			"Collision: ","Widgets: " }; //$NON-NLS-1$ //$NON-NLS-2$
 
-	private final EnigmaSettings oldEs;
-	private EnigmaSettings es;
-
 	protected JToolBar toolbar;
-	protected JButton save, saveFile, loadFile;
+	protected JButton saveFile, loadFile;
 
 	private Map<String,Option> options;
 	private Map<String,TargetSelection> userPicks = new HashMap<String,TargetSelection>();
@@ -226,11 +224,8 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 
 	public EnigmaSettingsFrame(EnigmaSettings es)
 		{
-		super("Enigma Settings",false,true,true,true); //$NON-NLS-1$
+		super(es,null,"Enigma Settings",false,true,true,true); //$NON-NLS-1$
 		setDefaultCloseOperation(HIDE_ON_CLOSE);
-		setFrameIcon(LGM.findIcon("restree/gm.png")); //$NON-NLS-1$
-		this.oldEs = es;
-		this.es = es.copy();
 
 		fc = new CustomFileChooser("/org/enigma","LAST_SETTINGS_DIR"); //$NON-NLS-1$ //$NON-NLS-2$
 		fc.setFileFilter(new CustomFileFilter(
@@ -252,9 +247,7 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 		tool.setFloatable(false);
 
 		// Setup the buttons
-		save = new JButton(LGM.getIconForKey("ResourceFrame.SAVE")); //$NON-NLS-1$
 		save.setRequestFocusEnabled(false);
-		save.addActionListener(this);
 		tool.add(save);
 		tool.addSeparator();
 
@@ -332,10 +325,10 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 
 		List<JPanel> panels = generateOptionPanels();
 
-		sDef = new SimpleCodeHolder(es.definitions);
-		sGlobLoc = new SimpleCodeHolder(es.globalLocals);
-		sInit = new SimpleCodeHolder(es.initialization);
-		sClean = new SimpleCodeHolder(es.cleanup);
+		sDef = new SimpleCodeHolder(res.definitions);
+		sGlobLoc = new SimpleCodeHolder(res.globalLocals);
+		sInit = new SimpleCodeHolder(res.initialization);
+		sClean = new SimpleCodeHolder(res.cleanup);
 
 		bDef = new JButton(Messages.getString("EnigmaSettingsFrame.BUTTON_DEFINITIONS"),CODE_ICON); //$NON-NLS-1$
 		bGlobLoc = new JButton(Messages.getString("EnigmaSettingsFrame.BUTTON_GLOBAL_LOCALS"),CODE_ICON); //$NON-NLS-1$
@@ -567,11 +560,11 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 					Messages.getString("EnigmaSettingsFrame.LOAD_MISSING_TITLE"),JOptionPane.WARNING_MESSAGE); //$NON-NLS-1$
 			}
 
-		es.options.clear();
+		res.options.clear();
 		try
 			{
-			es.fromYaml(YamlParser.parse(fc.getSelectedFile()));
-			setComponents(es);
+			res.fromYaml(YamlParser.parse(fc.getSelectedFile()));
+			setComponents(res);
 			}
 		catch (IOException e)
 			{
@@ -590,7 +583,7 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 		try
 			{
 			PrintWriter pw = new PrintWriter(new File(name));
-			es.toYaml(pw,true);
+			res.toYaml(pw,true);
 			pw.close();
 			}
 		catch (FileNotFoundException e)
@@ -605,36 +598,28 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 		return Messages.getString("EnigmaSettingsFrame.DIALOG_KEEPCHANGES_RESOURCE"); //$NON-NLS-1$
 		}
 
-	public void updateResource()
-		{
-		commitChanges();
-		es.copyInto(oldEs);
-		}
-
 	public void commitChanges()
 		{
-		es.definitions = sDef.getCode();
-		es.globalLocals = sGlobLoc.getCode();
-		es.initialization = sInit.getCode();
-		es.cleanup = sClean.getCode();
+		res.definitions = sDef.getCode();
+		res.globalLocals = sGlobLoc.getCode();
+		res.initialization = sInit.getCode();
+		res.cleanup = sClean.getCode();
 
-		es.options.clear();
+		res.options.clear();
 		for (Entry<String,Option> entry : options.entrySet())
-			es.options.put(entry.getKey(),entry.getValue() == null ? null : entry.getValue().getValue());
+			res.options.put(entry.getKey(),entry.getValue() == null ? null : entry.getValue().getValue());
 
-		es.targets.clear();
+		res.targets.clear();
 		for (Entry<JComboBox,String> box : targets.entrySet())
-			es.targets.put(box.getValue(),(TargetSelection) box.getKey().getSelectedItem());
+			res.targets.put(box.getValue(),(TargetSelection) box.getKey().getSelectedItem());
 
-		es.extensions.clear();
+		res.extensions.clear();
 		for (Entry<ExtensionSetting,Boolean> entry : extensions.entrySet())
-			if (entry.getValue()) es.extensions.add(entry.getKey().path);
+			if (entry.getValue()) res.extensions.add(entry.getKey().path);
 		}
 
 	public void setComponents(EnigmaSettings es)
 		{
-		this.es = es;
-
 		sDef.setCode(es.definitions);
 		sGlobLoc.setCode(es.globalLocals);
 		sInit.setCode(es.initialization);
@@ -659,13 +644,9 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 
 	public void revertResource()
 		{
-		setComponents(oldEs);
-		}
-
-	public boolean resourceChanged()
-		{
-		commitChanges();
-		return !es.equals(oldEs);
+		//		super.revertResource();
+		resOriginal.copyInto(res);
+		setComponents(res);
 		}
 
 	/** A special ComboBoxModel to alleviate repopulation */
@@ -798,14 +779,8 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 	@Override
 	public void actionPerformed(ActionEvent e)
 		{
+		super.actionPerformed(e);
 		Object s = e.getSource();
-
-		if (s == save)
-			{
-			updateResource();
-			setVisible(false);
-			return;
-			}
 
 		if (s == loadFile)
 			{
@@ -901,11 +876,11 @@ public class EnigmaSettingsFrame extends RevertableMDIFrame implements ActionLis
 			CodeFrame cf = (CodeFrame) e.getSource();
 			if (cf == cfDef)
 				{
-				if (!es.definitions.equals(sDef.getCode()))
+				if (!res.definitions.equals(sDef.getCode()))
 					{
-					es.definitions = sDef.getCode();
-					es.saveDefinitions();
-					if (EnigmaRunner.ENIGMA_READY) es.commitToDriver(EnigmaRunner.DRIVER);
+					res.definitions = sDef.getCode();
+					res.saveDefinitions();
+					if (EnigmaRunner.ENIGMA_READY) res.commitToDriver(EnigmaRunner.DRIVER);
 					}
 				cfDef = null;
 				}

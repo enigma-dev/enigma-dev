@@ -28,7 +28,7 @@ public class EEFReader
 		public ArrayList<EEFNode> children;
 		public String[] id;
 
-		public EEFNode()
+		protected EEFNode()
 			{
 			blockName = "";
 			namedAttributes = new HashMap<String,String[]>();
@@ -37,7 +37,7 @@ public class EEFReader
 			id = new String[0];
 			}
 
-		static int tostring_calls = 0;
+		protected static int tostring_calls = 0;
 
 		public String toString()
 			{
@@ -83,53 +83,22 @@ public class EEFReader
 			tostring_calls--;
 			return res;
 			}
-
-		boolean hasNamedAttribute(String na)
-			{
-			return namedAttributes.containsKey(na);
-			}
-
-		String getNamedAttribute(String na)
-			{
-			return namedAttributes.get(na)[0];
-			}
-
-		String[] getNamedAttributes(String na)
-			{
-			return namedAttributes.get(na);
-			}
-
-		EEFNode getChild(int ind)
-			{
-			return children.get(ind);
-			}
-
-		int getChildCount()
-			{
-			return children.size();
-			}
-
-		String getLineAttribute(int ind)
-			{
-			return lineAttribs.get(ind);
-			}
-
-		int getLineAttributeCount()
-			{
-			return lineAttribs.size();
-			}
 		}
 
-	Scanner file;
+	private static Scanner file;
 
-	EEFNode root_db;
-	String comment_str;
-	String separator_str;
+	protected static String comment_str;
+	protected static String separator_str;
 
-	public EEFReader(InputStream is, String sepchar)
+	public static EEFNode parse(InputStream is)
 		{
-		root_db = new EEFNode();
-		root_db.blockName = null;
+		return parse(is,","); //$NON-NLS-1$
+		}
+
+	public static EEFNode parse(InputStream is, String sepchar)
+		{
+		EEFNode rootNode = new EEFNode();
+		rootNode.blockName = null;
 		separator_str = sepchar;
 		file = new Scanner(is);
 		String firstLine = nextLine();
@@ -143,28 +112,29 @@ public class EEFReader
 				{
 				String str = nextLine();
 				if (str.isEmpty()) continue;
-				readItem(root_db,str);
+				readItem(rootNode,str);
 				}
 			}
 		else
 			{
 			comment_str = null;
-			readItem(root_db,firstLine);
+			readItem(rootNode,firstLine);
 			while (file.hasNextLine())
 				{
 				String str = nextLine();
 				if (str.isEmpty()) continue;
-				readItem(root_db,str);
+				readItem(rootNode,str);
 				}
 			}
+		return rootNode;
 		}
 
-	static boolean isWordChar(char charAt)
+	protected static boolean isWordChar(char charAt)
 		{
 		return Character.isLetterOrDigit(charAt) | charAt == '_';
 		}
 
-	class attrStruct
+	protected static class MetaNode
 		{
 		int children;
 		int lineAttrs;
@@ -172,7 +142,7 @@ public class EEFReader
 		Map<String,String[]> other_attrs;
 		public String name;
 
-		public attrStruct()
+		public MetaNode()
 			{
 			name = null;
 			ids = new String[0];
@@ -181,9 +151,9 @@ public class EEFReader
 			}
 		}
 
-	attrStruct readAttrs(String line, String blockName)
+	protected static MetaNode readAttrs(String line, String blockName)
 		{
-		attrStruct res = new attrStruct();
+		MetaNode res = new MetaNode();
 		int pos = 0;
 		if (blockName != null)
 			for (; pos < line.length(); pos++)
@@ -310,7 +280,7 @@ public class EEFReader
 		return res;
 		}
 
-	private ArrayList<String> parseParenths(int[] pos, String line, String sep)
+	private static ArrayList<String> parseParenths(int[] pos, String line, String sep)
 		{
 		ArrayList<String> values = new ArrayList<String>();
 		while (Character.isWhitespace(line.charAt(++pos[0])))
@@ -352,14 +322,14 @@ public class EEFReader
 		return values;
 		}
 
-	static String eefEsc(String str)
+	protected static String eefEsc(String str)
 		{
 		return str.replace("\\\\","\\"); //$NON-NLS-1$
 		}
 
-	void readItem(EEFNode parent, String line)
+	protected static void readItem(EEFNode parent, String line)
 		{
-		attrStruct read_attrs = readAttrs(line,parent.blockName);
+		MetaNode read_attrs = readAttrs(line,parent.blockName);
 		EEFNode e = new EEFNode();
 		if (read_attrs.ids != null) e.id = read_attrs.ids;
 		e.namedAttributes = read_attrs.other_attrs;
@@ -378,16 +348,11 @@ public class EEFReader
 		parent.children.add(e);
 		}
 
-	int LINES = 0;
+	protected static int LINES = 0;
 
-	String nextLine()
+	protected static String nextLine()
 		{
 		LINES++;
 		return file.nextLine();
-		}
-
-	public EEFNode getRoot()
-		{
-		return root_db;
 		}
 	}

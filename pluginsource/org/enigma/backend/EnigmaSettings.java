@@ -164,13 +164,6 @@ public class EnigmaSettings extends Resource<EnigmaSettings,EnigmaSettings.PEnig
 		return driver.definitionsModified(definitions,sw.toString());
 		}
 
-	public EnigmaSettings copy()
-		{
-		EnigmaSettings es = new EnigmaSettings(false);
-		copyInto(es);
-		return es;
-		}
-
 	public void copyInto(EnigmaSettings es)
 		{
 		es.definitions = definitions;

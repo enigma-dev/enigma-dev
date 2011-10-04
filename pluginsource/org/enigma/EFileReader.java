@@ -19,11 +19,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -34,10 +36,13 @@ import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
 
+import org.enigma.backend.EnigmaSettings;
 import org.enigma.messages.Messages;
 import org.enigma.utility.APNGExperiments;
 import org.enigma.utility.EEFReader;
+import org.enigma.utility.YamlParser;
 import org.enigma.utility.EEFReader.EEFNode;
+import org.enigma.utility.YamlParser.YamlNode;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFormatException;
@@ -89,6 +94,26 @@ public class EFileReader
 	{
 	public static final String EY = ".ey"; //$NON-NLS-1$
 	public static final boolean ADD_EY_ORPHANS = true;
+
+	// Module maps
+	/** Used to register readers with their resource kinds. */
+	static Map<Class<? extends Resource<?,?>>,ResourceReader> readers = new HashMap<Class<? extends Resource<?,?>>,ResourceReader>();
+	static
+		{
+		// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
+		readers.put(Sprite.class,new SpriteApngReader());
+		readers.put(Sound.class,new SoundReader());
+		readers.put(Background.class,new BackgroundReader());
+		readers.put(Path.class,new PathTextReader());
+		readers.put(Script.class,new ScriptReader());
+		readers.put(Font.class,new FontRawReader());
+		//		readers.put(Timeline.class,new TimelineIO());
+		readers.put(GmObject.class,new ObjectEefReader());
+		readers.put(Room.class,new RoomGmDataReader());
+		readers.put(GameInformation.class,new GameInfoRtfReader());
+		readers.put(GameSettings.class,new GameSettingsReader());
+		readers.put(EnigmaSettings.class,new EnigmaSettingsReader());
+		}
 
 	// Modularity Classes
 	static abstract class EGMFile
@@ -370,25 +395,6 @@ public class EFileReader
 			{
 			return true;
 			}
-		}
-
-	// Module maps
-	/** Used to register readers with their resource kinds. */
-	static Map<Class<? extends Resource<?,?>>,ResourceReader> readers = new HashMap<Class<? extends Resource<?,?>>,ResourceReader>();
-	static
-		{
-		// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
-		readers.put(Sprite.class,new SpriteApngReader());
-		readers.put(Sound.class,new SoundReader());
-		readers.put(Background.class,new BackgroundReader());
-		readers.put(Path.class,new PathTextReader());
-		readers.put(Script.class,new ScriptReader());
-		readers.put(Font.class,new FontRawReader());
-		//		readers.put(Timeline.class,new TimelineIO());
-		readers.put(GmObject.class,new ObjectEefReader());
-		readers.put(Room.class,new RoomGmDataReader());
-		readers.put(GameInformation.class,new GameInfoRtfReader());
-		readers.put(GameSettings.class,new GameSettingsReader());
 		}
 
 	// Constructors
@@ -709,9 +715,8 @@ public class EFileReader
 
 		protected void readData(GmFile gf, GmObject r, InputStream in)
 			{
-			EEFReader eef = new EEFReader(in,",");
+			EEFNode en = EEFReader.parse(in);
 			System.out.println("EEF Contents:");
-			EEFNode en = eef.getRoot();
 			//return;
 
 			GmObject obj = (GmObject) r;
@@ -796,9 +801,10 @@ public class EFileReader
 						else
 							{
 							args = new Argument[1];
-							String code = new String();
-							for (int i = 0; i < actnode.lineAttribs.size(); i++)
-								code += actnode.lineAttribs.get(i) + "\n";
+							int size = actnode.lineAttribs.size();
+							String code = size == 0 ? new String() : actnode.lineAttribs.get(0);
+							for (int i = 1; i < size; i++)
+								code += '\n' + actnode.lineAttribs.get(i);
 							args[0] = new Argument(la.libArguments[0].kind,code,null);
 							}
 						a.setArguments(args);
@@ -1086,7 +1092,79 @@ public class EFileReader
 						}
 					}
 				else
-					System.err.println("3Data file missing: " + fn);
+					System.err.println("Game Settings Data file missing: " + fn);
+				}
+			}
+		}
+
+	static class EnigmaSettingsReader implements ResourceReader
+		{
+		@Override
+		public Resource<?,?> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
+				throws IOException
+			{
+			if (true) return null;
+			YamlNode node = YamlParser.parse(new Scanner(in));
+
+			EnigmaSettings es = null; //FIXME: get?
+
+			es.fromYaml(node);
+			readDataFile(f,gf,es,node,dir);
+			return null;
+			}
+
+		protected void readDataFile(EGMFile f, GmFile gf, EnigmaSettings r, YamlNode i, String dir)
+				throws IOException
+			{
+			String fn = i.getMC("Data",null); //$NON-NLS-1$
+			if (!dir.isEmpty()) fn = dir + '/' + fn;
+			f.getEntry(fn);
+			if (!f.exists())
+				{
+				System.err.println("Enigma Settings Data file missing: " + fn);
+				return;
+				}
+			InputStream in = null;
+			try
+				{
+				readData(f,gf,r,in = f.asInputStream());
+				}
+			finally
+				{
+				if (in != null) in.close();
+				}
+			}
+
+		private void readData(EGMFile f, GmFile gf, EnigmaSettings r, InputStream in)
+			{
+			List<String> names = Arrays.asList("definitions","globallocals","initialization","cleanup");
+
+			EEFNode en = EEFReader.parse(in);
+			if (en.children.size() < 1)
+				{
+				System.err.println("Enigma Settings Data file empty");
+				return;
+				}
+
+			en = en.children.get(0);
+			for (EEFNode code : en.children)
+				{
+				if (code.id.length == 0) continue;
+				String id = code.id[0].toLowerCase();
+				if (!names.remove(id)) continue;
+
+				int size = code.lineAttribs.size();
+				String str = size == 0 ? new String() : code.lineAttribs.get(0);
+				for (int i = 1; i < size; i++)
+					str += '\n' + code.lineAttribs.get(i);
+
+				if (id.equals("definitions"))
+					r.definitions = str;
+				else if (id.equals("globallocals"))
+					r.globalLocals = str;
+				else if (id.equals("initialization"))
+					r.initialization = str;
+				else if (id.equals("cleanup")) r.cleanup = str;
 				}
 			}
 		}

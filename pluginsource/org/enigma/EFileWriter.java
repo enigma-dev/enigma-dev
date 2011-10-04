@@ -756,7 +756,7 @@ public class EFileWriter
 			ps.println(es.definitions);
 			ps.println(" Code(\"GlobalLocals\"): Code[" + countLines(es.globalLocals) + "]");
 			ps.println(es.globalLocals);
-			ps.println(" Code(\"Iinitialization\"): Code[" + countLines(es.initialization) + "]");
+			ps.println(" Code(\"Initialization\"): Code[" + countLines(es.initialization) + "]");
 			ps.println(es.initialization);
 			ps.println(" Code(\"Cleanup\"): Code[" + countLines(es.cleanup) + "]");
 			ps.println(es.cleanup);

@@ -58,6 +58,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileView;
+import javax.swing.tree.TreeNode;
 
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
@@ -91,8 +92,10 @@ import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Script;
 import org.lateralgm.subframes.ActionFrame;
 import org.lateralgm.subframes.CodeFrame;
+import org.lateralgm.subframes.ResourceFrame;
 import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
+import org.lateralgm.subframes.ResourceFrame.ResourceFrameFactory;
 import org.lateralgm.subframes.SubframeInformer.SubframeListener;
 
 import com.sun.jna.Native;
@@ -294,6 +297,17 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		LGM.listener.fc.addSaveFilters(io);
 
 		FileChooser.fileViews.add(io);
+		ResNode.ICON.put(EnigmaSettings.class,LGM.findIcon("restree/gm.png"));
+
+		Resource.addKind("EGS",EnigmaSettings.class);
+		ResourceFrame.factories.put(EnigmaSettings.class,new ResourceFrameFactory()
+			{
+				@Override
+				public ResourceFrame<?,?> makeFrame(Resource<?,?> r, ResNode node)
+					{
+					return esf;
+					}
+			});
 		}
 
 	class EgmIO extends FileView implements FileReader,FileWriter,GroupFilter
@@ -406,15 +420,20 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public void populateTree()
 		{
-		if (!LGM.root.isNodeChild(node)) LGM.root.add(node);
-
-		/*EnigmaGroup node = new EnigmaGroup();
-		LGM.root.add(node);
-		node.add(new EnigmaNode("Whitespace"));
-		node.add(new EnigmaNode("Enigma Init"));
-		node.add(new EnigmaNode("Enigma Term"));*/
-
-		LGM.tree.updateUI();
+		if (!LGM.root.isNodeChild(node))
+			{
+			boolean found = false;
+			for (int i = 0; i < LGM.root.getChildCount() && !found; i++)
+				{
+				TreeNode n = LGM.root.getChildAt(i);
+				if (n instanceof ResNode && ((ResNode) n).kind == EnigmaSettings.class) found = true;
+				}
+			if (!found)
+				{
+				LGM.root.add(node);
+				LGM.tree.updateUI();
+				}
+			}
 		}
 
 	public void populateKeywords()
@@ -548,6 +567,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 			if (ENIGMA_READY) esf.toTop();
 			}
+
 		}
 
 	public void setMenuEnabled(boolean en)
@@ -873,8 +893,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (newRoot) populateTree();
 		if (ENIGMA_READY)
 			{
-			es = new EnigmaSettings();
-			esf.setComponents(es);
+			new EnigmaSettings().copyInto(esf.resOriginal);
+			esf.revertResource();
 			}
 		}
 
