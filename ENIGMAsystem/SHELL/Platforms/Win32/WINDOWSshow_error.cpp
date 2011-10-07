@@ -24,7 +24,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-
+/* FIXME: MOVEME
 #include <string>
 #include <windows.h>
 #include <stdio.h>
@@ -46,4 +46,4 @@ int show_error(string errortext,const bool fatal)
 
   ABORT_ON_ALL_ERRORS();
   return 0;
-}
+}*/
