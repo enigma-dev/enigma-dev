@@ -257,7 +257,9 @@ int window_mouse_get_y()
 }
 void window_mouse_set(int x,int y)
 {
-    SetCursorPos(x,y);
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+    SetCursorPos(window.left + x,window.top + y);
 }
 
 namespace enigma {
