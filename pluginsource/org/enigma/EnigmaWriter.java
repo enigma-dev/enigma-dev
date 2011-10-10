@@ -23,6 +23,7 @@ import static org.lateralgm.main.Util.deRef;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
@@ -503,7 +504,7 @@ public final class EnigmaWriter
 		oF.italic = false;
 		oF.rangeMin = 32;
 		oF.rangeMax = 127;
-		oF.glyphs = populateGlyphs(iF,oF.rangeMin,oF.rangeMax,true);
+		oF.glyphs = populateGlyphs(iF,oF.rangeMin,oF.rangeMax,0);
 
 		if (size == 1) return;
 
@@ -529,13 +530,12 @@ public final class EnigmaWriter
 			int fsize = (int) Math.round(of.size * screenRes / 72.0); // Java assumes 72 dps
 			java.awt.Font fnt = new java.awt.Font(of.fontName,style,fsize);
 
-			of.glyphs = populateGlyphs(fnt,of.rangeMin,of.rangeMax,
-					(Integer) ifont.get(PFont.ANTIALIAS) > 0);
+			of.glyphs = populateGlyphs(fnt,of.rangeMin,of.rangeMax,(Integer) ifont.get(PFont.ANTIALIAS));
 			}
 		}
 
 	private static Glyph.ByReference populateGlyphs(java.awt.Font fnt, int rangeMin, int rangeMax,
-			boolean aa)
+			int aa)
 		{
 		Glyph.ByReference glyphs = new Glyph.ByReference();
 		Glyph[] ofgl = (Glyph[]) glyphs.toArray(rangeMax - rangeMin + 1);
@@ -544,9 +544,14 @@ public final class EnigmaWriter
 		return glyphs;
 		}
 
-	private static void populateGlyph(Glyph og, java.awt.Font fnt, char c, boolean aa)
+	private static void populateGlyph(Glyph og, java.awt.Font fnt, char c, int aa)
 		{
-		GlyphVector gv = fnt.createGlyphVector(new FontRenderContext(null,aa,false),String.valueOf(c));
+		Object aaHints[] = { RenderingHints.VALUE_TEXT_ANTIALIAS_OFF,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_GASP,RenderingHints.VALUE_TEXT_ANTIALIAS_ON,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB };
+		if (aa < 0 || aa >= aaHints.length) aa = 0;
+		GlyphVector gv = fnt.createGlyphVector(new FontRenderContext(null,aaHints[aa],
+				RenderingHints.VALUE_FRACTIONALMETRICS_OFF),String.valueOf(c));
 		Rectangle2D r = gv.getPixelBounds(null,0,0); //don't know why it needs coordinates
 		if (r.getWidth() <= 0 || r.getHeight() <= 0) return;
 

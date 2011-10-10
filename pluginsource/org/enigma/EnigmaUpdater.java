@@ -336,10 +336,7 @@ public class EnigmaUpdater
 
 	public static void showUpdateError(GmFormatException e)
 		{
-		String title = Messages.getString("EnigmaUpdater.ERROR_TITLE"); //$NON-NLS-1$
-		String message = Messages.getString("EnigmaUpdater.ERROR_MISCOMMUNICATION"); //$NON-NLS-1$
-		new ErrorDialog(null,title,message,org.lateralgm.messages.Messages.format(
-				"Listener.DEBUG_INFO", //$NON-NLS-1$
-				e.getClass().getName(),e.getMessage(),e.stackAsString())).setVisible(true);
+		new ErrorDialog(null,Messages.getString("EnigmaUpdater.ERROR_TITLE"), //$NON-NLS-1$
+				Messages.getString("EnigmaUpdater.ERROR_MISCOMMUNICATION"),e).setVisible(true); //$NON-NLS-1$
 		}
 	}

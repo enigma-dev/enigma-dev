@@ -35,6 +35,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
+import javax.swing.Icon;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.filechooser.FileView;
 
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.messages.Messages;
@@ -49,6 +53,7 @@ import org.lateralgm.file.GmFormatException;
 import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.file.ResourceList;
 import org.lateralgm.file.iconio.ICOFile;
+import org.lateralgm.main.LGM;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
 import org.lateralgm.resources.Extensions;
@@ -398,6 +403,45 @@ public class EFileReader
 		}
 
 	// Constructors
+	//TODO: Improve the Folder Chooser
+	public static void importEgmFolder()
+		{
+		JFileChooser chooser = new JFileChooser(new File(".")); //FIXME: Not from there!
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setAcceptAllFileFilterUsed(false);
+
+		chooser.setAccessory(new JLabel("<html>This File Chooser is experimental. Use with care.<br/>"
+				+ "Select an EGM folder for importing.<br/>" + "Folders recognized as likely EGMs<br/>"
+				+ "are denoted with a special icon.</html>"));
+
+		//Any folder containing a "toc.txt" is marked with a special icon.
+		chooser.setFileView(new FileView()
+			{
+				public Icon getIcon(File f)
+					{
+					if (!new File(f,"toc.txt").exists()) return null;
+					return EnigmaRunner.findIcon("syntax.png"); //$NON-NLS-1$
+					}
+			});
+		if (chooser.showOpenDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
+		File f = chooser.getSelectedFile();
+		//FIXME: If this folder doesn't contain a toc.txt, ask for confirmation 
+		importEgmFolder(f);
+		}
+
+	public static void importEgmFolder(File folder)
+		{
+		if (folder == null || !folder.exists() || !folder.isDirectory()) return;
+		try
+			{
+			readEgmFile(folder,LGM.newRoot(),false);
+			}
+		catch (GmFormatException e)
+			{
+			e.printStackTrace();
+			}
+		}
+
 	public static GmFile readEgmFile(File f, ResNode root, boolean zip) throws GmFormatException
 		{
 		GmFile gf = new GmFile();

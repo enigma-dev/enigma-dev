@@ -119,7 +119,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public EnigmaSettings es;
 	public EnigmaSettingsFrame esf;
 	public JMenuItem busy, run, debug, design, compile, rebuild;
-	public JMenuItem showFunctions, showGlobals, showTypes;
+	public JMenuItem mImport, showFunctions, showGlobals, showTypes;
 	public final EnigmaNode node = new EnigmaNode();
 
 	public EnigmaRunner()
@@ -241,9 +241,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 			e2.printStackTrace();
 			new ErrorDialog(null,Messages.getString("EnigmaRunner.ERROR_YAML_MAKE_TITLE"), //$NON-NLS-1$
-					Messages.getString("EnigmaRunner.ERROR_YAML_MAKE"), //$NON-NLS-1$
-					org.lateralgm.messages.Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
-							e2.getClass().getName(),e2.getMessage(),e2.stackAsString())).setVisible(true);
+					Messages.getString("EnigmaRunner.ERROR_YAML_MAKE"),e2).setVisible(true); //$NON-NLS-1$
 			return false;
 			}
 
@@ -261,9 +259,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			GmFormatException e2 = new GmFormatException(null,e);
 			e2.printStackTrace();
 			new ErrorDialog(null,Messages.getString("EnigmaRunner.ERROR_MAKE_TITLE"), //$NON-NLS-1$
-					Messages.getString("EnigmaRunner.ERROR_MAKE"), //$NON-NLS-1$
-					org.lateralgm.messages.Messages.format("Listener.DEBUG_INFO", //$NON-NLS-1$
-							e2.getClass().getName(),e2.getMessage(),e2.stackAsString())).setVisible(true);
+					Messages.getString("EnigmaRunner.ERROR_MAKE"),e2).setVisible(true); //$NON-NLS-1$
 			return false;
 			}
 
@@ -388,6 +384,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		rebuild = new JMenuItem(Messages.getString("EnigmaRunner.MENU_REBUILD_ALL")); //$NON-NLS-1$
 		rebuild.addActionListener(this);
 		menu.add(rebuild);
+
+		menu.addSeparator();
+
+		mImport = new JMenuItem(Messages.getString("EnigmaRunner.MENU_IMPORT")); //$NON-NLS-1$
+		mImport.addActionListener(this);
+		menu.add(mImport);
 
 		menu.addSeparator();
 
@@ -675,6 +677,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (s == compile) compile(MODE_COMPILE);
 		if (s == rebuild) compile(MODE_REBUILD);
 
+		if (s == mImport) EFileReader.importEgmFolder();
 		if (s == showFunctions) showKeywordListFrame(FUNCTIONS);
 		if (s == showGlobals) showKeywordListFrame(GLOBALS);
 		if (s == showTypes) showKeywordListFrame(TYPES);
@@ -898,12 +901,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
-	public ImageIcon findIcon(String loc)
+	public static ImageIcon findIcon(String loc)
 		{
 		ImageIcon ico = new ImageIcon(loc);
 		if (ico.getIconWidth() != -1) return ico;
 
-		URL url = this.getClass().getClassLoader().getResource(loc);
+		URL url = EnigmaRunner.class.getClassLoader().getResource(loc);
 		if (url != null) ico = new ImageIcon(url);
 		if (ico.getIconWidth() != -1) return ico;
 
@@ -911,7 +914,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		ico = new ImageIcon(loc);
 		if (ico.getIconWidth() != -1) return ico;
 
-		url = this.getClass().getClassLoader().getResource(loc);
+		url = EnigmaRunner.class.getClassLoader().getResource(loc);
 		if (url != null) ico = new ImageIcon(url);
 		return ico;
 		}
