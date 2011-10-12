@@ -251,12 +251,12 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 		tool.add(save);
 		tool.addSeparator();
 
-		loadFile = new JButton(LGM.getIconForKey("LGM.OPEN")); //$NON-NLS-1$
+		loadFile = new JButton(LGM.getIconForKey("Toolbar.OPEN")); //$NON-NLS-1$
 		loadFile.setToolTipText(Messages.getString("EnigmaSettingsFrame.LOAD_TIP")); //$NON-NLS-1$
 		loadFile.setRequestFocusEnabled(false);
 		loadFile.addActionListener(this);
 		tool.add(loadFile);
-		saveFile = new JButton(LGM.getIconForKey("LGM.SAVEAS")); //$NON-NLS-1$
+		saveFile = new JButton(LGM.getIconForKey("Toolbar.SAVEAS")); //$NON-NLS-1$
 		saveFile.setToolTipText(Messages.getString("EnigmaSettingsFrame.SAVE_TIP")); //$NON-NLS-1$
 		saveFile.setRequestFocusEnabled(false);
 		saveFile.addActionListener(this);

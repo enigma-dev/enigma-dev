@@ -490,8 +490,8 @@ public class EFileReader
 				if (entry.length() > 4 && entry.charAt(3) == ' ')
 					{
 					String key = entry.substring(0,3);
-					ck = Resource.kindsByName.get(key);
-					if (ck == null) ck = Resource.kindsByName.get(key.toUpperCase());
+					ck = Resource.kindsByName3.get(key);
+					if (ck == null) ck = Resource.kindsByName3.get(key.toUpperCase());
 					if (ck == null)
 						ck = k;
 					else

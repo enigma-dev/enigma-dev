@@ -88,7 +88,6 @@ import org.lateralgm.main.FileChooser.FileWriter;
 import org.lateralgm.main.FileChooser.GroupFilter;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
-import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Script;
 import org.lateralgm.subframes.ActionFrame;
 import org.lateralgm.subframes.CodeFrame;
@@ -116,11 +115,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public EnigmaFrame ef = new EnigmaFrame();
 	/** This is global scoped so that it doesn't get GC'd */
 	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
-	public EnigmaSettings es;
+	public static EnigmaSettings es; //don't like this static, but it has to be for EFileWriter to see it.
 	public EnigmaSettingsFrame esf;
 	public JMenuItem busy, run, debug, design, compile, rebuild;
 	public JMenuItem mImport, showFunctions, showGlobals, showTypes;
-	public final EnigmaNode node = new EnigmaNode();
+	public ResNode node = new ResNode(Messages.getString("EnigmaRunner.RESNODE_NAME"), //$NON-NLS-1$
+			ResNode.STATUS_SECONDARY,EnigmaSettings.class);
 
 	public EnigmaRunner()
 		{
@@ -295,7 +295,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		FileChooser.fileViews.add(io);
 		ResNode.ICON.put(EnigmaSettings.class,LGM.findIcon("restree/gm.png"));
 
-		Resource.addKind("EGS",EnigmaSettings.class);
+		Resource.kinds.add(EnigmaSettings.class);
+		Resource.kindsByName3.put("EGS",EnigmaSettings.class);
+		String name = Messages.getString("EnigmaRunner.RESNODE_NAME"); //$NON-NLS-1$
+		Resource.kindNames.put(EnigmaSettings.class,name);
+		Resource.kindNamesPlural.put(EnigmaSettings.class,name);
+
 		ResourceFrame.factories.put(EnigmaSettings.class,new ResourceFrameFactory()
 			{
 				@Override
@@ -428,7 +433,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			for (int i = 0; i < LGM.root.getChildCount() && !found; i++)
 				{
 				TreeNode n = LGM.root.getChildAt(i);
-				if (n instanceof ResNode && ((ResNode) n).kind == EnigmaSettings.class) found = true;
+				if (n instanceof ResNode && ((ResNode) n).kind == EnigmaSettings.class)
+					{
+					node = (ResNode) n;
+					found = true;
+					}
 				}
 			if (!found)
 				{
@@ -548,28 +557,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 				for (int x = 0; x < getWidth(); x += image.getIconWidth())
 					g.drawImage(image.getImage(),x,y,null);
 			}
-		}
-
-	public class EnigmaNode extends ResNode
-		{
-		private static final long serialVersionUID = 1L;
-
-		public EnigmaNode()
-			{
-			super(Messages.getString("EnigmaRunner.RESNODE_NAME"),ResNode.STATUS_SECONDARY, //$NON-NLS-1$
-					EnigmaSettings.class);
-			}
-
-		public ResourceReference<? extends Resource<?,?>> getRes()
-			{
-			return es == null ? null : es.reference;
-			}
-
-		public void openFrame(boolean newRes)
-			{
-			if (ENIGMA_READY) esf.toTop();
-			}
-
 		}
 
 	public void setMenuEnabled(boolean en)

@@ -78,6 +78,7 @@ public class EFileWriter
 	// Module maps
 	/** Used to register writers with their resource kinds. */
 	static Map<Class<? extends Resource<?,?>>,ResourceWriter> writers = new HashMap<Class<? extends Resource<?,?>>,ResourceWriter>();
+	static Map<Class<? extends Resource<?,?>>,String> kindName3s = new HashMap<Class<? extends Resource<?,?>>,String>();
 	static
 		{
 		// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
@@ -93,6 +94,9 @@ public class EFileWriter
 		writers.put(GameInformation.class,new GameInfoRtfWriter());
 		writers.put(GameSettings.class,new GameSettingsThreeWriter());
 		writers.put(EnigmaSettings.class,new EnigmaSettingsWriter());
+
+		for (Entry<String,Class<? extends Resource<?,?>>> e : Resource.kindsByName3.entrySet())
+			kindName3s.put(e.getValue(),e.getKey());
 		}
 
 	// Modularity Classes
@@ -334,7 +338,7 @@ public class EFileWriter
 		for (int i = 0; i < children; i++)
 			{
 			ResNode child = (ResNode) node.getChildAt(i);
-			if (node.isRoot()) ps.print(Resource.kindNames.get(child.kind) + ' ');
+			if (node.isRoot()) ps.print(kindName3s.get(child.kind) + ' ');
 			ps.println(child.getUserObject());
 			}
 
@@ -732,9 +736,8 @@ public class EFileWriter
 		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
 				throws IOException
 			{
-			ResourceReference<? extends Resource<?,?>> ref = child.getRes();
-			Resource<?,?> r = ref == null ? null : ref.get();
-			EnigmaSettings es = (EnigmaSettings) r;
+			//			ResourceReference<? extends Resource<?,?>> ref = child.getRes();
+			//			EnigmaSettings es = ref == null ? null : (EnigmaSettings) ref.get();
 
 			String name = (String) child.getUserObject();
 			String fn = name + ".eef"; //$NON-NLS-1$
@@ -743,9 +746,9 @@ public class EFileWriter
 			pw.println("%e-yaml"); //$NON-NLS-1$
 			pw.println("---"); //$NON-NLS-1$
 			pw.println("Data: " + fn); //$NON-NLS-1$
-			es.toYaml(pw,false);
+			EnigmaRunner.es.toYaml(pw,false);
 
-			writeData(os.next(dir,fn),es);
+			writeData(os.next(dir,fn),EnigmaRunner.es);
 			}
 
 		public void writeData(OutputStream next, EnigmaSettings es) throws IOException
