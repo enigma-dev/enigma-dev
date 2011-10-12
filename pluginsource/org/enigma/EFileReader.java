@@ -19,13 +19,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -44,9 +44,7 @@ import org.enigma.backend.EnigmaSettings;
 import org.enigma.messages.Messages;
 import org.enigma.utility.APNGExperiments;
 import org.enigma.utility.EEFReader;
-import org.enigma.utility.YamlParser;
 import org.enigma.utility.EEFReader.EEFNode;
-import org.enigma.utility.YamlParser.YamlNode;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFormatException;
@@ -445,6 +443,7 @@ public class EFileReader
 	public static GmFile readEgmFile(File f, ResNode root, boolean zip) throws GmFormatException
 		{
 		GmFile gf = new GmFile();
+		gf.uri = f.toURI();
 		try
 			{
 			readEgmFile(zip ? new EGMZipFile(f) : new EGMFolderFile(f),gf,root);
@@ -458,7 +457,6 @@ public class EFileReader
 
 	public static void readEgmFile(EGMFile f, GmFile gf, ResNode root) throws IOException
 		{
-		System.out.println("Setting EGM Flavor");
 		gf.format = EFileWriter.FLAVOR_EGM;
 		readNodeChildren(f,gf,root,null,new String());
 		root.add(new ResNode(org.lateralgm.messages.Messages.getString("LGM.EXT"),
@@ -1147,20 +1145,20 @@ public class EFileReader
 		public Resource<?,?> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
 				throws IOException
 			{
-			if (true) return null;
-			YamlNode node = YamlParser.parse(new Scanner(in));
+			//			YamlNode node = YamlParser.parse(new Scanner(in));
+			Properties i = new Properties();
+			i.load(in);
 
-			EnigmaSettings es = null; //FIXME: get?
-
-			es.fromYaml(node);
-			readDataFile(f,gf,es,node,dir);
+			EnigmaSettings es = EnigmaRunner.es;
+			es.fromProperties(i);
+			readDataFile(f,gf,es,i,dir);
 			return null;
 			}
 
-		protected void readDataFile(EGMFile f, GmFile gf, EnigmaSettings r, YamlNode i, String dir)
+		protected void readDataFile(EGMFile f, GmFile gf, EnigmaSettings r, Properties i, String dir)
 				throws IOException
 			{
-			String fn = i.getMC("Data",null); //$NON-NLS-1$
+			String fn = i.getProperty("Data"); //$NON-NLS-1$
 			if (!dir.isEmpty()) fn = dir + '/' + fn;
 			f.getEntry(fn);
 			if (!f.exists())
@@ -1181,7 +1179,8 @@ public class EFileReader
 
 		private void readData(EGMFile f, GmFile gf, EnigmaSettings r, InputStream in)
 			{
-			List<String> names = Arrays.asList("definitions","globallocals","initialization","cleanup");
+			Set<String> names = new HashSet<String>();
+			Collections.addAll(names,"definitions","globallocals","initialization","cleanup");
 
 			EEFNode en = EEFReader.parse(in);
 			if (en.children.size() < 1)

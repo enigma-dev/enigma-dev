@@ -27,6 +27,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -77,7 +79,6 @@ import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaSettings.PEnigmaSettings;
 import org.enigma.messages.Messages;
-import org.enigma.utility.YamlParser;
 import org.lateralgm.components.CustomFileChooser;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
@@ -563,7 +564,10 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 		res.options.clear();
 		try
 			{
-			res.fromYaml(YamlParser.parse(fc.getSelectedFile()));
+			//res.fromYaml(YamlParser.parse(fc.getSelectedFile()));
+			Properties p = new Properties();
+			p.load(new FileReader(fc.getSelectedFile()));
+			res.fromProperties(p);
 			setComponents(res);
 			}
 		catch (IOException e)

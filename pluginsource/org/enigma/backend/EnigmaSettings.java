@@ -15,9 +15,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -29,8 +31,6 @@ import org.enigma.SettingsHandler.OptionGroupSetting;
 import org.enigma.SettingsHandler.OptionSetting;
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
-import org.enigma.utility.YamlParser.YamlContent;
-import org.enigma.utility.YamlParser.YamlElement;
 import org.enigma.utility.YamlParser.YamlNode;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
@@ -114,11 +114,51 @@ public class EnigmaSettings extends Resource<EnigmaSettings,EnigmaSettings.PEnig
 
 	public void fromYaml(YamlNode n)
 		{
-		for (YamlElement e : n.chronos)
+		for (String key : options.keySet())
+			options.put(key,n.getMC(key,null));
+
+		for (String key : targets.keySet())
 			{
-			if (!e.isScalar) continue;
-			String val = ((YamlContent) e).getValue();
-			options.put(e.name,val);
+			String targetName = n.getMC("target-" + key,null);
+			if (targetName == null) continue;
+			for (TargetSelection ts : TargetHandler.targets.get(key))
+				if (ts.id == targetName)
+					{
+					targets.put(key,ts);
+					break;
+					}
+			}
+
+		String ext = n.getMC("extensions",null);
+		if (ext != null)
+			{
+			extensions.clear();
+			Collections.addAll(extensions,ext.split(","));
+			}
+		}
+
+	public void fromProperties(Properties p)
+		{
+		for (String key : options.keySet())
+			options.put(key,p.getProperty(key));
+
+		for (String key : targets.keySet())
+			{
+			String targetName = p.getProperty("target-" + key);
+			if (targetName == null) continue;
+			for (TargetSelection ts : TargetHandler.targets.get(key))
+				if (ts.id == targetName)
+					{
+					targets.put(key,ts);
+					break;
+					}
+			}
+
+		String ext = p.getProperty("extensions");
+		if (ext != null)
+			{
+			extensions.clear();
+			Collections.addAll(extensions,ext.split(","));
 			}
 		}
 

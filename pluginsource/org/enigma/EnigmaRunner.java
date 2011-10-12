@@ -883,8 +883,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (newRoot) populateTree();
 		if (ENIGMA_READY)
 			{
-			new EnigmaSettings().copyInto(esf.resOriginal);
-			esf.revertResource();
+			es.copyInto(esf.resOriginal);
+			esf.revertResource(); //updates local es copy as well
 			}
 		}
 
