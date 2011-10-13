@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008-2011 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -14,7 +14,7 @@
 **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
 **  details.                                                                    **
 **                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
+**  You should have received a copy of the GNU General Public License along     **
 **  with this code. If not, see <http://www.gnu.org/licenses/>                  **
 **                                                                              **
 **  ENIGMA is an environment designed to create games and other programs with a **
@@ -37,20 +37,24 @@ using std::string;
 
 namespace enigma //TODO: Find where this belongs
 {
-    HWND hWndParent;
-    HWND hWnd;
-    LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
-    HDC window_hDC;
-
-    int windowcolor; double viewscale; bool windowIsTop;
-
-    void EnableDrawing (HGLRC *hRC);
-    void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-
-    #ifdef ENIGMA_GS_OPENGL
-    void EnableDrawing (HGLRC *hRC);
-    void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-    #endif
+  HINSTANCE hInstance;
+  HWND hWndParent;
+  HWND hWnd;
+  LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
+  HDC window_hDC;
+  
+  char** main_argv;
+  int main_argc;
+  
+  int windowcolor; double viewscale; bool windowIsTop;
+  
+  void EnableDrawing (HGLRC *hRC);
+  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
+  
+  #ifdef ENIGMA_GS_OPENGL
+  void EnableDrawing (HGLRC *hRC);
+  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
+  #endif
 }
 
 namespace enigma {
@@ -80,7 +84,10 @@ namespace enigma {
 
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
-    int wid=(int)room_width, hgt=(int)room_height;
+    int wid = (int)room_width, hgt = (int)room_height;
+    enigma::hInstance = hInstance;
+    //enigma::main_argc = argc;
+    //enigma::main_argv = argv;
 
     //Create the window
         WNDCLASS wcontainer,wmain;
@@ -168,3 +175,14 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
     return 0;
 }
+
+string parameter_string(int x)
+{
+  if (x < enigma::main_argc)
+  return enigma::main_argv[x];
+  return "";
+}
+int parameter_count() {
+  return enigma::main_argc;
+}
+

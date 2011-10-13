@@ -73,7 +73,8 @@ namespace enigma
     sounds = new sound[numSounds];
     
     #ifdef _WIN32
-    load_al_dll();
+    if (!load_al_dll())
+      return 1;
     #endif
     
     if(!alureInitDevice(NULL, NULL)) {

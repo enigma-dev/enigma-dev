@@ -1,1 +1,15 @@
-1                 24                "manifest.xml"
+1 24 "manifest.xml"
+
+getstringdialog DIALOG 0, 0, 185, 63
+
+#include <windows.h>
+
+STYLE DS_3DLOOK | DS_CENTER | DS_MODALFRAME | DS_FIXEDSYS | WS_VISIBLE | WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_POPUP | WS_SYSMENU
+CAPTION "Prompt"
+FONT 8, "Ms Shell Dlg 2"
+{
+    DEFPUSHBUTTON   "OK", 10, 129, 5, 50, 14, BS_DEFPUSHBUTTON
+    PUSHBUTTON      "Cancel", 11, 129, 21, 50, 14, BS_PUSHBUTTON
+    EDITTEXT        12, 5, 43, 174, 15, ES_AUTOHSCROLL | ES_LEFT | WS_BORDER | WS_TABSTOP
+    LTEXT           "Uninitialized message",13, 5, 5, 119, 33, SS_LEFT
+}

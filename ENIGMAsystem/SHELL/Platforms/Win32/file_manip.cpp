@@ -109,21 +109,59 @@ int directory_create(std::string dname) {
     }
 }
 
-
-
-std::string file_find_first(std::string mask,int attr);
-
+// Maintainer: If this segment errors, it is an error of philosophy.
+// The Game Maker constants do not have a standard, but line up with
+// their Windows equivalents. Should either change, we have an issue.
 enum {
-  fa_readonly  = 1,
-  fa_hidden    = 2,
-  fa_sysfile   = 4,
-  fa_volumeid  = 8,
-  fa_directory = 16,
-  fa_archive   = 32
+  fa_readonly  = FILE_ATTRIBUTE_READONLY,
+  fa_hidden    = FILE_ATTRIBUTE_HIDDEN,
+  fa_sysfile   = FILE_ATTRIBUTE_SYSTEM,
+  fa_volumeid  = 0x00000008,
+  fa_directory = FILE_ATTRIBUTE_DIRECTORY,
+  fa_archive   = FILE_ATTRIBUTE_ARCHIVE
 };
 
-std::string file_find_next();
-void file_find_close();
+
+static int ff_attribs = 0;
+static HANDLE current_find = INVALID_HANDLE_VALUE;
+static WIN32_FIND_DATA found;
+
+string file_find_first(string name,int attributes) 
+{
+  if (current_find != INVALID_HANDLE_VALUE)
+  { FindClose(current_find); current_find=INVALID_HANDLE_VALUE; }
+  
+  ff_attribs=attributes;
+  
+  HANDLE d=FindFirstFile(name.c_str(),&found);
+  if (d==INVALID_HANDLE_VALUE) return "";
+  while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
+  {
+    if (FindNextFile(d,&found)==0)
+    return "";
+  }
+  
+  current_find=d;
+  return found.cFileName;
+}
+
+string file_find_next()
+{
+  if (current_find==INVALID_HANDLE_VALUE) return "";
+  if (FindNextFile(current_find,&found)==0) return "";
+  
+  while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes)) {
+    if (FindNextFile(current_find,&found)==0)
+    return "";
+  }
+  return found.cFileName;
+}
+
+int file_find_close() {
+  FindClose(current_find);
+  return 0;
+}
+
 bool file_attributes(std::string fname,int attr);
 
 std::string filename_name(std::string fname);
@@ -144,6 +182,6 @@ extern std::string temp_directory;
 
 
 int parameter_count();
-std::string parameter_string(int n);
+string parameter_string(int n);
 
-std::string environment_get_variable(std::string name);
+string environment_get_variable(std::string name);

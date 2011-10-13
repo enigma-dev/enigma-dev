@@ -40,9 +40,10 @@
 			<Add library="user32" />
 			<Add library="kernel32" />
 		</Linker>
+		<Unit filename="dialogs.cpp" />
 		<Unit filename="gtklike.h" />
+		<Unit filename="include.h" />
 		<Unit filename="main.cpp" />
-		<Unit filename="manifest.xml" />
 		<Unit filename="res.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

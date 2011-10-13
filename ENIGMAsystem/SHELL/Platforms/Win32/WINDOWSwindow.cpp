@@ -35,34 +35,10 @@ using namespace std;
 #include "../../Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 
 #include "../../Widget_Systems/widgets_mandatory.h"
+#include "WINDOWSwindow.h"
 
 bool resizeableWindow = false;
 char* currentCursor = IDC_ARROW;
-
-enum {
-  cr_default    = 0,
-  cr_none       = -1,
-  cr_arrow      = -2,
-  cr_cross      = -3,
-  cr_beam       = -4,
-  cr_size_nesw  = -6,
-  cr_size_ns    = -7,
-  cr_size_nwse  = -8,
-  cr_size_we    = -9,
-  cr_uparrow    = -10,
-  cr_hourglass  = -11,
-  cr_drag       = -12,
-  cr_nodrop     = -13,
-  cr_hsplit     = -14,
-  cr_vsplit     = -15,
-  cr_multidrag  = -16,
-  cr_sqlwait    = -17,
-  cr_no         = -18,
-  cr_appstart   = -19,
-  cr_help       = -20,
-  cr_handpoint  = -21,
-  cr_size_all   = -22
-};
 
 namespace enigma
 {
@@ -166,13 +142,11 @@ string window_get_caption()
   return text_buffer;
 }
 
-void window_set_color(int color)
-{
+void window_set_color(int color) {
   enigma::windowcolor=(int)color;
 }
 
-int window_get_color()
-{
+int window_get_color() {
   return enigma::windowcolor;
 }
 
@@ -399,90 +373,8 @@ int window_get_curor()
 */
 
 
-
-
-namespace getstr
-{
-  HWND nwindow,ntextdp,bconfrm,bcancel,ninputf;
-  HINSTANCE aninstance;
-  bool initdstrfncs=0;
-
-  void init()
-  {
-    nwindow=CreateWindow("getStringForm","Input",WS_CAPTION|WS_POPUP,96,64,300,144,enigma::hWnd,NULL,aninstance,NULL);
-    ntextdp=CreateWindow("STATIC","",WS_CHILD|WS_VISIBLE,8,8,240,56,nwindow,NULL,aninstance,NULL);
-    bconfrm=CreateWindow("BUTTON","OK",WS_CHILD|WS_VISIBLE,256,8,64,24,nwindow,NULL,aninstance,NULL);
-    bcancel=CreateWindow("BUTTON","Cancel",WS_CHILD|WS_VISIBLE,256,40,64,24,nwindow,NULL,aninstance,NULL);
-
-    ninputf=CreateWindow("EDIT","",WS_CHILD|WS_VISIBLE,8,72,304,16,nwindow,NULL,aninstance,NULL);
-    initdstrfncs=1;
-  }
-}
-
-string get_string(string message, string def)
-{
-  if (!getstr::initdstrfncs)
-  {
-    #if SHOWERRORS
-    show_error("ENIGMA Error: get_string not initialized.",0);
-    #endif
-    return "";
-  }
-
-  RECT nwsizes; int wm=8,hm=8;
-   SetWindowText(getstr::ntextdp,message.c_str());
-   SetWindowText(getstr::ninputf,def.c_str());
-    GetWindowRect(getstr::ntextdp,&nwsizes); wm+=nwsizes.right-nwsizes.left+8; hm+=nwsizes.bottom-nwsizes.top+8;
-    GetWindowRect(getstr::bconfrm,&nwsizes); wm+=nwsizes.right-nwsizes.left+8;
-    GetWindowRect(getstr::ninputf,&nwsizes); hm+=nwsizes.bottom-nwsizes.top+8;
-  RECT nwnszwb; nwnszwb.left=0; nwnszwb.top=0; nwnszwb.right=wm; nwnszwb.bottom=hm;
-    AdjustWindowRect(&nwnszwb,WS_CAPTION|WS_VISIBLE|WS_POPUP,0);
-
-  SetWindowPos(getstr::nwindow,HWND_TOPMOST,0,0,nwnszwb.right-nwnszwb.left,nwnszwb.bottom-nwnszwb.top,SWP_NOMOVE);
-
-  ShowWindow(getstr::nwindow,SW_SHOW);
-
-  for (;;)
-  {
-    if (SendMessage(getstr::bconfrm,BM_GETSTATE,0,0)==108) { int sz=GetWindowTextLength(getstr::ninputf)+2;
-        char sbuffer[sz]; GetWindowText(getstr::ninputf,sbuffer,sz); ShowWindow(getstr::nwindow,SW_HIDE); return sbuffer; }
-    if (SendMessage(getstr::bcancel,BM_GETSTATE,0,0)==108) { ShowWindow(getstr::nwindow,SW_HIDE); return ""; }
-    MSG msg;
-    if (GetMessage (&msg, NULL, 0, 0))
-    {
-      if (msg.message == WM_QUIT) { ShowWindow(getstr::nwindow,SW_HIDE); return ""; }
-      TranslateMessage (&msg); DispatchMessage (&msg);
-    }
-    Sleep(1);
-  }
-}
-
-
-
-int game_end() { PostQuitMessage(0); return 0; }
-void action_end_game()
-{
-    game_end();
-}
-
-
-
-int get_color(double defcolor)
-{
-    COLORREF defc=(int)defcolor;
-    static COLORREF custcs[16];
-
-    CHOOSECOLOR gcol;
-    gcol.lStructSize=sizeof(CHOOSECOLOR);
-    gcol.hwndOwner=enigma::hWnd;
-    gcol.rgbResult=defc;
-    gcol.lpCustColors=custcs;
-    gcol.Flags=CC_RGBINIT;
-    gcol.lpTemplateName="";
-
-    if (ChooseColor(&gcol))
-    return (int)defc; else return -1;
-}
+void game_end() { PostQuitMessage(0); }
+void action_end_game() { game_end(); }
 
 #include "../../Universal_System/globalupdate.h"
 #include "WINDOWScallback.h"

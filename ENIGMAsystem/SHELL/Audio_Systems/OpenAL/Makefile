@@ -4,7 +4,8 @@ include $(addsuffix /Makefile, $(addprefix Audio_Systems/OpenAL/, alure ../Codec
 ifeq ($(PLATFORM), xlib)
 	LDLIBS += -lopenal
 else ifeq ($(PLATFORM), Win32)
-	LDLIBS += ../additional/al/lib/Win32/OpenAL32.lib ../additional/al/rc/oal32.res
+	LDLIBS += ../additional/al/lib/Win32/OpenAL32.lib
+	RESOURCES += ../additional/al/rc/oal32.rc
 else ifeq ($(PLATFORM), Cocoa)
 	LDLIBS += -framework OpenAL
 endif

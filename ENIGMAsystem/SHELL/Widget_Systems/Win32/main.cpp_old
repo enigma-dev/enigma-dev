@@ -8,6 +8,7 @@
 using namespace std;
 
 #include "widgets.h"
+#include "../widgets_mandatory.h"
 
 /*  Declare Windows procedure  */
 static LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
@@ -15,20 +16,19 @@ static LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
 /*  Make the class name into a global variable  */
 char szClassName[ ] = "CodeBlocksWindowsApp";
 
-HINSTANCE enigmaHinstance;
-HWND enigmaHwnd;
+namespace enigma {
+  HINSTANCE hInstance;
+  HWND hWndParent;
+}
 
 int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow)
 {
     MSG messages;            /* Here messages to the application are saved */
     WNDCLASSEX wincl;        /* Data structure for the windowclass */
     
-    INITCOMMONCONTROLSEX iccex;
-    iccex.dwSize = sizeof(iccex);
-    iccex.dwICC  = ICC_STANDARD_CLASSES | 0xFFF;
-    InitCommonControlsEx(&iccex);
+    enigma::widget_system_initialize();
     
-    enigmaHinstance = hThisInstance;
+    enigma::hInstance = hThisInstance;
     
     /* The Window structure */
     wincl.hInstance = hThisInstance;
@@ -52,7 +52,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
         return 0;
 
     /* The class is registered, let's create the program*/
-    enigmaHwnd = CreateWindowEx (
+    enigma::hWndParent = CreateWindowEx (
            0,                   /* Extended possibilites for variatigtkl_widgeton */
            szClassName,         /* Classname */
            "Code::Blocks Template Windows App",       /* Title Text */
@@ -68,7 +68,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
            );
 
     /* Make the window visible on the screen */
-    ShowWindow (enigmaHwnd, nCmdShow);
+    ShowWindow (enigma::hWndParent, nCmdShow);
     
     int mywin = wgt_window_create(128,24);
     int layout = wgt_layout_create(mywin,
@@ -99,7 +99,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
         /* Send message to WindowProcedure */
         DispatchMessage(&messages);
         if (!wgt_exists(mywin) or wgt_button_get_pressed(stp) or wgt_checkbox_get_checked(iso)) { messages.wParam = 0; break; }
-        printf("%s\n",wgt_textline_get_text(xe).c_str());
+        //printf("%s\n",wgt_textline_get_text(xe).c_str());
     }
 
     /* The program return-value is 0 - The value that PostQuitMessage() gave */

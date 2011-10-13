@@ -1,7 +1,6 @@
-
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -15,7 +14,7 @@
 **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
 **  details.                                                                    **
 **                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
+**  You should have received a copy of the GNU General Public License along     **
 **  with this code. If not, see <http://www.gnu.org/licenses/>                  **
 **                                                                              **
 **  ENIGMA is an environment designed to create games and other programs with a **

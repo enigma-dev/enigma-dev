@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -28,7 +28,10 @@
 // As is typical of Win32 code, this code is fuck-ugly. Refer to the GTK version for
 // porting to competent widget systems. Use this only for low-level APIs.
 
+#define WINVER 9001
 #include <windows.h>
+#define _WIN32_IE 9001
+#include <commctrl.h>
 #include <windowsx.h>
 #include <stdio.h>
 #include <string>
@@ -47,6 +50,18 @@ using namespace std;
 vector<gtkl_object*> widgets;
 static unsigned widget_idmax = 0;
 
+namespace enigma {
+  extern HWND hWndParent;
+  extern HINSTANCE hInstance;
+  bool widget_system_initialize()
+  {
+    INITCOMMONCONTROLSEX iccex;
+    iccex.dwSize = sizeof(iccex);
+    iccex.dwICC  = ICC_STANDARD_CLASSES | ICC_LISTVIEW_CLASSES;
+    InitCommonControlsEx(&iccex);
+    return true;
+  }
+}
 
 void enigma_widget::resize(int x,int y,int w,int h) { MoveWindow(me,x,y,w,h,1); }
 
@@ -67,8 +82,6 @@ bool wgt_exists(int id) {
   return unsigned(id) < widgets.size() and widgets[id] and (widgets[id]->type != o_widget or IsWindow(getWidget(id)->me));
 }
 
-extern HWND enigmaHwnd;
-extern HINSTANCE enigmaHinstance;
 #define enigma_window_generic_class "enigma_window_generic_class"
 
 #define getID(hwnd) GetWindowLong((HWND)(hwnd),GWL_USERDATA)
@@ -130,7 +143,7 @@ struct Sgeneric_window
   Sgeneric_window()
   {
     /* The Window structure */
-    wincl.hInstance = enigmaHinstance;
+    wincl.hInstance = enigma::hInstance;
     wincl.lpszClassName = enigma_window_generic_class;
     wincl.lpfnWndProc = GenWindowProcedure;      /* This function is called by windows */
     wincl.style = CS_DBLCLKS;                 /* Catch double-clicks */
@@ -156,7 +169,9 @@ struct Sgeneric_window
 
 int wgt_window_create(int w, int h)
 {
-  HWND win = CreateWindowEx(0, enigma_window_generic_class, "caption", WS_POPUP | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, w, h, enigmaHwnd, (HMENU)widget_idmax, enigmaHinstance, (LPVOID)widget_idmax);
+  HWND win = CreateWindowEx(0, enigma_window_generic_class, "caption", WS_POPUP | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, w, h, enigma::hWndParent, (HMENU)widget_idmax, enigma::hInstance, (LPVOID)widget_idmax);
+  if (!win)
+    return -1;
   setID(win,widget_idmax); fixFont(win);
   log_enigma_widget(new enigma_window(widget_idmax,win,w,h));
   return widget_idmax++;
@@ -167,6 +182,7 @@ void wgt_window_show(int wgt) {
   GetWindowRect(getWidget(wgt)->me, &r);
   AdjustWindowRect(&r, WS_CAPTION|WS_THICKFRAME, FALSE);
   SetWindowPos(getWidget(wgt)->me, NULL, 0, 0, r.right - r.left, r.bottom - r.top, SWP_SHOWWINDOW | SWP_NOZORDER | SWP_NOREPOSITION);
+  ShowWindow(getWidget(wgt)->me,SW_SHOW);
 }
 
 

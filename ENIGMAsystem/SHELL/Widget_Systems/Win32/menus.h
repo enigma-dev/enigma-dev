@@ -1,6 +1,6 @@
-/********************************************************************************\
+/*********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2009-2011 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -23,27 +23,8 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\********************************************************************************/
-/* DELETEME
-#include <string>
-#include <windows.h>
-#include <stdio.h>
-using namespace std;
-#include "../../GameSettings.h"
+\*********************************************************************************/
 
-int show_error(string errortext,const bool fatal)
-{
-  if (MessageBox(NULL,("Error in some event or another for some object I'm too lazy to look up: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
-    exit(0);
-
-  if (fatal)
-  {
-    printf("FATAL ERROR: %s\n",errortext.c_str());
-    exit(0);
-  }
-  else
-    printf("ERROR: %s\n",errortext.c_str());
-
-  ABORT_ON_ALL_ERRORS();
-  return 0;
-}*/
+int show_menu(int x, int y, string text);
+int show_menu_ext(int x, int y, string text);
+int show_menu_ext_nl(int x, int y, string text);

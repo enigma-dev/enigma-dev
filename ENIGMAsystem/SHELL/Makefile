@@ -54,9 +54,15 @@ SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES))))
+RCFILES := $(addprefix $(OBJDIR)/,$(RESOURCES))
 DEPENDS := $(OBJECTS:.o=.d)
 
-OBJDIRS := $(sort $(dir $(OBJECTS)))
+OBJDIRS := $(sort $(dir $(OBJECTS) $(RCFILES)))
+
+ifeq ($(RESOURCES),)
+else
+	RESOURCEBINARY := $(OBJDIR)/resources.res
+endif
 
 ############
 # building #
@@ -67,10 +73,10 @@ OBJDIRS := $(sort $(dir $(OBJECTS)))
 all: $(OUTPUTNAME)
 
 clean:
-	$(RM) $(OUTPUTNAME) $(OBJECTS) $(DEPENDS)
+	$(RM) $(OUTPUTNAME) $(OBJECTS) $(RESOURCEBINARY) $(DEPENDS)
 
-$(OUTPUTNAME): $(OBJECTS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS)
+$(OUTPUTNAME): $(OBJECTS) $(RCFILES) $(RESOURCEBINARY)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
@@ -81,6 +87,15 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+
+$(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
+	echo "// GENERATED RESOURCE FILE FRONTEND" > $(OBJDIR)/resources.rc
+	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
+	windres -o $@ -i $(OBJDIR)/resources.rc -O coff
+GENERATED_FILE:
+
+$(OBJDIR)/%.rc: %.rc
+	windres -o $@ -i $^ -O rc
 
 $(OBJDIRS):
 	mkdir -p $@

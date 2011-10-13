@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2011 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -14,7 +14,7 @@
 **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
 **  details.                                                                    **
 **                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
+**  You should have received a copy of the GNU General Public License along     **
 **  with this code. If not, see <http://www.gnu.org/licenses/>                  **
 **                                                                              **
 **  ENIGMA is an environment designed to create games and other programs with a **
@@ -25,73 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-extern bool resizeableWindow;
-extern char* currentCursor;
-
-enum {
-  cr_default    = 0,
-  cr_none       = -1,
-  cr_arrow      = -2,
-  cr_cross      = -3,
-  cr_beam       = -4,
-  cr_size_nesw  = -6,
-  cr_size_ns    = -7,
-  cr_size_nwse  = -8,
-  cr_size_we    = -9,
-  cr_uparrow    = -10,
-  cr_hourglass  = -11,
-  cr_drag       = -12,
-  cr_nodrop     = -13,
-  cr_hsplit     = -14,
-  cr_vsplit     = -15,
-  cr_multidrag  = -16,
-  cr_sqlwait    = -17,
-  cr_no         = -18,
-  cr_appstart   = -19,
-  cr_help       = -20,
-  cr_handpoint  = -21,
-  cr_size_all   = -22
-};
-
-void io_handle();
-void io_clear();
-void keyboard_wait();
-void mouse_wait();
-void keyboard_clear(const int key);
-void mouse_clear(const int button);
-
-namespace enigma {
-  void clampparent();
-}
-
-int  show_message(string str);
-int  window_get_x();
-int  window_get_y();
-int  window_get_width();
-int  window_get_height();
-void window_set_visible(int visible);
-int  window_get_visible();
-void window_set_stayontop(int stay);
-int  window_get_stayontop();
-void window_set_caption(char* caption);
-void window_set_caption(string caption);
-string window_get_caption();
-void window_set_color(int color);
-int  window_get_color();
-void window_set_region_scale(int scale, int adaptwindow);
-double window_get_region_scale();
-void window_set_position(int x, int y);
-void window_set_size(unsigned int width, unsigned int height);
-void window_set_rectangle(int x, int y, int width, int height);
-void window_center();
-void window_default();
-int  window_mouse_get_x();
-int  window_mouse_get_y();
-void window_mouse_set(int x,int y);
-int window_set_cursor(int curs);
-void window_set_fullscreen(const bool full);
-int  window_get_fullscreen();
-//int window_set_cursor(double c);
-
-void game_end();
-void action_end_game();
+#include "widgets.h"
+#include "dialogs.h"
+#include "menus.h"

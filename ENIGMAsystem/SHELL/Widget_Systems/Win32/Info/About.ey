@@ -1,0 +1,10 @@
+%e-yaml
+---
+
+Name: Windows Widgets
+Identifier: Win32
+Build-Platforms: Windows
+Represents: Windows
+Description: Create Widgets using Win32 API on Windows.
+Author: Josh Ventura
+
