@@ -345,7 +345,7 @@ public class EFileReader
 				System.err.println("Data file missing: " + fn);
 			}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked","rawtypes" })
 		public static Object convert(String s, Class c)
 			{
 			if (c == null) throw new ClassCastException(s + " -> null??");
@@ -735,7 +735,9 @@ public class EFileReader
 			return gf.fonts;
 			}
 
-		protected void readDataFile(EGMFile f, Font r, Properties i, String dir) throws IOException
+		@Override
+		protected void readDataFile(EGMFile f, GmFile gf, Font r, Properties i, String dir)
+				throws IOException
 			{
 			//Override as no-op. Raw fonts have no data file.
 			}
