@@ -62,9 +62,9 @@ import javax.swing.tree.TreeNode;
 
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
-import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.messages.Messages;
 import org.enigma.utility.EnigmaBuildReader;
 import org.enigma.utility.YamlParser;
@@ -75,26 +75,26 @@ import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmFormatException;
 import org.lateralgm.file.GmFile.FormatFlavor;
+import org.lateralgm.file.GmFormatException;
 import org.lateralgm.jedit.GMLKeywords;
 import org.lateralgm.jedit.GMLKeywords.Construct;
 import org.lateralgm.jedit.GMLKeywords.Function;
 import org.lateralgm.jedit.GMLKeywords.Keyword;
 import org.lateralgm.main.FileChooser;
-import org.lateralgm.main.LGM;
 import org.lateralgm.main.FileChooser.FileReader;
 import org.lateralgm.main.FileChooser.FileWriter;
 import org.lateralgm.main.FileChooser.GroupFilter;
+import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
 import org.lateralgm.subframes.ActionFrame;
 import org.lateralgm.subframes.CodeFrame;
 import org.lateralgm.subframes.ResourceFrame;
+import org.lateralgm.subframes.ResourceFrame.ResourceFrameFactory;
 import org.lateralgm.subframes.ScriptFrame;
 import org.lateralgm.subframes.SubframeInformer;
-import org.lateralgm.subframes.ResourceFrame.ResourceFrameFactory;
 import org.lateralgm.subframes.SubframeInformer.SubframeListener;
 
 import com.sun.jna.Native;
@@ -793,18 +793,18 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						int min = DRIVER.resource_argCountMin();
 						int max = DRIVER.resource_argCountMax();
 						res += "(" + min; //$NON-NLS-1$
-				if (min != max) res += "-" + max; //$NON-NLS-1$
-				res += ")"; //$NON-NLS-1$
-				rl.add(res);
+						if (min != max) res += "-" + max; //$NON-NLS-1$
+						res += ")"; //$NON-NLS-1$
+						rl.add(res);
+						}
+					break;
+				case 1:
+					if (DRIVER.resource_isGlobal()) rl.add(res);
+					break;
+				case 2:
+					if (DRIVER.resource_isTypeName()) rl.add(res);
+					break;
 				}
-			break;
-		case 1:
-			if (DRIVER.resource_isGlobal()) rl.add(res);
-			break;
-		case 2:
-			if (DRIVER.resource_isTypeName()) rl.add(res);
-			break;
-		}
 			res = DRIVER.next_available_resource();
 			}
 		return rl;

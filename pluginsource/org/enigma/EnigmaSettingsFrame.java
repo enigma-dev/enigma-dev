@@ -556,8 +556,8 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 			{
 			if (fc.showOpenDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			if (fc.getSelectedFile().exists()) break;
-			JOptionPane.showMessageDialog(null,fc.getSelectedFile().getName()
-					+ Messages.getString("EnigmaSettingsFrame.LOAD_MISSING"), //$NON-NLS-1$
+			JOptionPane.showMessageDialog(null,
+					fc.getSelectedFile().getName() + Messages.getString("EnigmaSettingsFrame.LOAD_MISSING"), //$NON-NLS-1$
 					Messages.getString("EnigmaSettingsFrame.LOAD_MISSING_TITLE"),JOptionPane.WARNING_MESSAGE); //$NON-NLS-1$
 			}
 
@@ -639,8 +639,8 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 			{
 			TargetSelection targ = es.targets.get(box.getValue());
 			if (targ != null) box.getKey().setSelectedItem(targ);
-			userPicks.clear();
 			}
+		userPicks.clear();
 
 		for (Entry<ExtensionSetting,Boolean> entry : extensions.entrySet())
 			entry.setValue(es.extensions.contains(entry.getKey().path)); //writes through to map
