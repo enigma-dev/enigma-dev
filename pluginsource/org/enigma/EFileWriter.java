@@ -532,8 +532,19 @@ public class EFileWriter
 								+ (la.parent != null ? la.parent.id : la.parentId) + "): ");
 						if (action.isNot()) ps.print("\"Not\" ");
 						if (action.isRelative()) ps.print("\"Relative\" ");
-						if (action.getAppliesTo().get() != null)
-							ps.print("Applies(" + action.getAppliesTo().get() + ") ");
+
+						//applies
+						ResourceReference<?> aplref = action.getAppliesTo();
+						String name = null;
+						if (aplref == GmObject.OBJECT_OTHER)
+							name = "other";
+						else if (aplref != GmObject.OBJECT_SELF)
+							{
+							Resource<?,?> apl = Util.deRef(aplref);
+							if (apl != null) name = apl.getName();
+							}
+						if (name != null) ps.print("Applies(" + name + ") ");
+
 						if (la.interfaceKind != LibAction.INTERFACE_CODE)
 							{
 							ps.println("Fields[" + action.getArguments().size() + "]");
@@ -544,8 +555,7 @@ public class EFileWriter
 									ps.println(arg.getVal());
 								else
 									{
-									ResourceReference<?> rr = arg.getRes();
-									Resource<?,?> ar = Util.deRef(rr);
+									Resource<?,?> ar = Util.deRef((ResourceReference<?>) arg.getRes());
 									ps.println(ar == null ? new String() : ar.getName());
 									}
 								}

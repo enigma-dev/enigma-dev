@@ -13,8 +13,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Map.Entry;
+import java.util.Scanner;
 
 public class EEFReader
 	{
@@ -88,19 +88,32 @@ public class EEFReader
 	private static Scanner file;
 
 	protected static String comment_str;
-	protected static String separator_str;
+	protected static String delimiter;
+	protected static boolean caseSensitive;
 
+	/**
+	 * Parses a node tree from an EEF-formatted input stream using
+	 * the default list-delimiter (",") and lowercased namedAttributes.
+	 * @param is The EEF-formatted input stream
+	 */
 	public static EEFNode parse(InputStream is)
 		{
-		return parse(is,","); //$NON-NLS-1$
+		return parse(new Scanner(is),",",false); //$NON-NLS-1$
 		}
 
-	public static EEFNode parse(InputStream is, String sepchar)
+	/**
+	 * Parses a node tree from an EEF-formatted input stream.
+	 * @param in The EEF-formatted input scanner
+	 * @param delim The delimiter string for parenthesized lists.
+	 * @param caseSensitive Whether namedAttributes should maintain case (true) or be lowercased (false)
+	 */
+	public static EEFNode parse(Scanner in, String delim, boolean caseSensitive)
 		{
 		EEFNode rootNode = new EEFNode();
 		rootNode.blockName = null;
-		separator_str = sepchar;
-		file = new Scanner(is);
+		delimiter = delim;
+		EEFReader.caseSensitive = caseSensitive;
+		file = in;
 		String firstLine = nextLine();
 		int lenComment = 0;
 		for (lenComment = 0; commentSymbols.contains(firstLine.subSequence(lenComment,lenComment + 1)); lenComment++)
@@ -178,7 +191,7 @@ public class EEFReader
 				if (line.charAt(pos) == '(')
 					{
 					int[] rpos = new int[] { pos };
-					res.ids = parseParenths(rpos,line,separator_str).toArray(res.ids);
+					res.ids = parseParenths(rpos,line,delimiter).toArray(res.ids);
 					pos = rpos[0] + 1;
 					}
 				if (line.charAt(pos) != ':')
@@ -236,8 +249,9 @@ public class EEFReader
 			if (line.charAt(pos) == '(')
 				{
 				int[] rpos = new int[] { pos };
-				ArrayList<String> values = parseParenths(rpos,line,separator_str);
-				res.other_attrs.put(attrn,values.toArray(new String[values.size()]));
+				ArrayList<String> values = parseParenths(rpos,line,delimiter);
+				res.other_attrs.put(caseSensitive ? attrn : attrn.toLowerCase(),
+						values.toArray(new String[values.size()]));
 				pos = rpos[0];
 				continue;
 				}
@@ -274,13 +288,13 @@ public class EEFReader
 					pos++;
 				continue;
 				}
-			res.other_attrs.put(attrn,new String[] {});
+			res.other_attrs.put(caseSensitive ? attrn : attrn.toLowerCase(),new String[] {});
 			pos--;
 			}
 		return res;
 		}
 
-	private static ArrayList<String> parseParenths(int[] pos, String line, String sep)
+	private static ArrayList<String> parseParenths(int[] pos, String line, String delim)
 		{
 		ArrayList<String> values = new ArrayList<String>();
 		while (Character.isWhitespace(line.charAt(++pos[0])))
@@ -310,7 +324,7 @@ public class EEFReader
 				}
 			else
 				{
-				if (line.substring(pos[0],pos[0] + sep.length()).equals(sep))
+				if (line.substring(pos[0],pos[0] + delim.length()).equals(delim))
 					{
 					values.add(line.substring(spos,pos[0]).trim());
 					spos = pos[0] + 1;

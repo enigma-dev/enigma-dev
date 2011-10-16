@@ -23,14 +23,15 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -54,42 +55,42 @@ import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
+import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Extensions;
 import org.lateralgm.resources.Font;
+import org.lateralgm.resources.Font.PFont;
 import org.lateralgm.resources.GameInformation;
+import org.lateralgm.resources.GameInformation.PGameInformation;
 import org.lateralgm.resources.GameSettings;
+import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.GmObject;
+import org.lateralgm.resources.GmObject.PGmObject;
 import org.lateralgm.resources.InstantiableResource;
 import org.lateralgm.resources.Path;
+import org.lateralgm.resources.Path.PPath;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room;
-import org.lateralgm.resources.Script;
-import org.lateralgm.resources.Sound;
-import org.lateralgm.resources.Sprite;
-import org.lateralgm.resources.Background.PBackground;
-import org.lateralgm.resources.Font.PFont;
-import org.lateralgm.resources.GameInformation.PGameInformation;
-import org.lateralgm.resources.GameSettings.PGameSettings;
-import org.lateralgm.resources.GmObject.PGmObject;
-import org.lateralgm.resources.Path.PPath;
 import org.lateralgm.resources.Room.PRoom;
+import org.lateralgm.resources.Script;
 import org.lateralgm.resources.Script.PScript;
+import org.lateralgm.resources.Sound;
 import org.lateralgm.resources.Sound.PSound;
+import org.lateralgm.resources.Sprite;
 import org.lateralgm.resources.Sprite.PSprite;
 import org.lateralgm.resources.library.LibAction;
 import org.lateralgm.resources.library.LibManager;
 import org.lateralgm.resources.sub.Action;
 import org.lateralgm.resources.sub.Argument;
 import org.lateralgm.resources.sub.BackgroundDef;
+import org.lateralgm.resources.sub.BackgroundDef.PBackgroundDef;
 import org.lateralgm.resources.sub.Event;
 import org.lateralgm.resources.sub.Instance;
+import org.lateralgm.resources.sub.Instance.PInstance;
 import org.lateralgm.resources.sub.PathPoint;
 import org.lateralgm.resources.sub.Tile;
-import org.lateralgm.resources.sub.View;
-import org.lateralgm.resources.sub.BackgroundDef.PBackgroundDef;
-import org.lateralgm.resources.sub.Instance.PInstance;
 import org.lateralgm.resources.sub.Tile.PTile;
+import org.lateralgm.resources.sub.View;
 import org.lateralgm.resources.sub.View.PView;
 import org.lateralgm.util.PropertyMap;
 
@@ -97,6 +98,37 @@ public class EFileReader
 	{
 	public static final String EY = ".ey"; //$NON-NLS-1$
 	public static final boolean ADD_EY_ORPHANS = true;
+
+	static List<PostponedRef> postpone = new LinkedList<PostponedRef>();
+
+	static interface PostponedRef
+		{
+		boolean invoke();
+		}
+
+	static class DefaultPostponedRef<K extends Enum<K>> implements PostponedRef
+		{
+		ResourceList<?> list;
+		String name;
+		PropertyMap<K> p;
+		K key;
+
+		DefaultPostponedRef(ResourceList<?> list, PropertyMap<K> p, K key, String name)
+			{
+			this.list = list;
+			this.p = p;
+			this.key = key;
+			this.name = name;
+			}
+
+		@Override
+		public boolean invoke()
+			{
+			Resource<?,?> temp = list.get(name);
+			if (temp != null) p.put(key,temp.reference);
+			return temp != null;
+			}
+		}
 
 	// Module maps
 	/** Used to register readers with their resource kinds. */
@@ -379,9 +411,8 @@ public class EFileReader
 		public static <K extends Enum<K>>void putRef(ResourceList<?> list, PropertyMap<K> p, K key,
 				String name)
 			{
-			Resource<?,?> temp = list.get(name);
-			if (temp != null) p.put(key,temp.reference);
-			//FIXME: If temp is null, postpone for later
+			PostponedRef pr = new DefaultPostponedRef<K>(list,p,key,name);
+			if (!pr.invoke()) postpone.add(pr);
 			}
 
 		protected abstract R construct();
@@ -813,6 +844,13 @@ public class EFileReader
 							return;
 							}
 						Action a = e.addAction(la); //assuming the Library was found and la != null
+
+						Map<String,String[]> attribs = actnode.namedAttributes;
+						if (attribs.containsKey("not")) a.setNot(true);
+						if (attribs.containsKey("relative")) a.setRelative(true);
+						String[] targets = attribs.get("applies");
+						if (targets != null && targets.length == 1) putAppliesRef(gf,a,targets[0]);
+
 						Argument args[];
 						if (la.interfaceKind != LibAction.INTERFACE_CODE)
 							{
@@ -852,27 +890,60 @@ public class EFileReader
 							args[0] = new Argument(la.libArguments[0].kind,code,null);
 							}
 						a.setArguments(args);
-						//arguments, relative, appliesTo
+						//arguments, relative, appliesTo, not
 						}
 					}
 			}
 
-		static void putAppliesRef(GmFile gf, Action act, String name)
+		static void putAppliesRef(final GmFile gf, final Action act, final String name)
 			{
-			GmObject temp = gf.gmObjects.get(name);
-			if (temp != null) act.setAppliesTo(temp.reference);
+			PostponedRef pr = new PostponedRef()
+				{
+					@Override
+					public boolean invoke()
+						{
+						if (name.equals("self") || name.equals("-1")) return true; //already self
+						if (name.equals("other") || name.equals("-2"))
+							{
+							act.setAppliesTo(GmObject.OBJECT_OTHER);
+							return true;
+							}
+						GmObject temp = gf.gmObjects.get(name);
+						if (temp != null) act.setAppliesTo(temp.reference);
+						return temp != null;
+						}
+				};
+			if (!pr.invoke()) postpone.add(pr);
 			}
 
-		static void putOtherRef(GmFile gf, Event e, String name)
+		static void putOtherRef(final GmFile gf, final Event e, final String name)
 			{
-			GmObject temp = gf.gmObjects.get(name);
-			if (temp != null) e.other = temp.reference;
+			PostponedRef pr = new PostponedRef()
+				{
+					@Override
+					public boolean invoke()
+						{
+						GmObject temp = gf.gmObjects.get(name);
+						if (temp != null) e.other = temp.reference;
+						return temp != null;
+						}
+				};
+			if (!pr.invoke()) postpone.add(pr);
 			}
 
-		static void putArgumentRef(GmFile gf, Argument arg, String name)
+		static void putArgumentRef(final GmFile gf, final Argument arg, final String name)
 			{
-			Resource<?,?> temp = gf.getList(Argument.getResourceKind(arg.kind)).get(name);
-			if (temp != null) arg.setRes(temp.reference);
+			PostponedRef pr = new PostponedRef()
+				{
+					@Override
+					public boolean invoke()
+						{
+						GmObject temp = gf.gmObjects.get(name);
+						if (temp != null) arg.setRes(temp.reference);
+						return temp != null;
+						}
+				};
+			if (!pr.invoke()) postpone.add(pr);
 			}
 
 		@Override
