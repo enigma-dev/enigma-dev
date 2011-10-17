@@ -195,6 +195,7 @@ public class EnigmaCallbacks extends Structure
 
 	public static class CloseFile implements Callback
 		{
+		@SuppressWarnings("static-method")
 		public void callback()
 			{
 			OpenFile.running = false;
@@ -203,6 +204,7 @@ public class EnigmaCallbacks extends Structure
 
 	public static class CompressData implements Callback
 		{
+		@SuppressWarnings("static-method")
 		public Image callback(Pointer data, int size)
 			{
 			byte[] inData = data.getByteArray(0,size);

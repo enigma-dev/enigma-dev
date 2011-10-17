@@ -113,7 +113,7 @@ public class YamlParser
 			}
 
 		// This function escapes yaml # and % too: don't just swap it blindly for some Java function
-		private String escape(String value)
+		private static String escape(String value)
 			{
 			if (value == null || value.isEmpty() || value.charAt(0) != '"') return value;
 

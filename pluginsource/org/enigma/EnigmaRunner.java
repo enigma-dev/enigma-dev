@@ -185,7 +185,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}.start();
 		}
 
-	private UnsatisfiedLinkError attemptLib()
+	private static UnsatisfiedLinkError attemptLib()
 		{
 		try
 			{
@@ -447,7 +447,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
-	public void populateKeywords()
+	public static void populateKeywords()
 		{
 		Comparator<Keyword> nameComp = new Comparator<Keyword>()
 			{

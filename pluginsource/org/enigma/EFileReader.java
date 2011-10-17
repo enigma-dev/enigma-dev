@@ -1069,13 +1069,13 @@ public class EFileReader
 			return null;
 			}
 
-		protected void put(GmFile gf, PropertyMap<PGameInformation> p, PGameInformation key, Object o)
+		protected static void put(GmFile gf, PropertyMap<PGameInformation> p, PGameInformation key, Object o)
 			{
 			Object def = p.get(key);
 			p.put(key,DataPropReader.convert(o.toString(),def == null ? null : def.getClass()));
 			}
 
-		protected void readProperties(GmFile gf, PropertyMap<PGameInformation> p, Properties i)
+		protected static void readProperties(GmFile gf, PropertyMap<PGameInformation> p, Properties i)
 			{
 			for (Entry<PGameInformation,Object> e : p.entrySet())
 				{
@@ -1089,12 +1089,12 @@ public class EFileReader
 				}
 			}
 
-		protected boolean allowProperty(PGameInformation key)
+		protected static boolean allowProperty(PGameInformation key)
 			{
 			return key != PGameInformation.TEXT;
 			}
 
-		private void readDataFile(EGMFile f, GmFile gf, GameInformation r, Properties i, String dir)
+		private static void readDataFile(EGMFile f, GmFile gf, GameInformation r, Properties i, String dir)
 				throws IOException
 			{
 			String fn = i.get("Data").toString(); //$NON-NLS-1$
@@ -1116,7 +1116,7 @@ public class EFileReader
 				System.err.println("Data file missing: " + fn);
 			}
 
-		private void readData(GmFile gf, GameInformation r, InputStream in)
+		private static void readData(GmFile gf, GameInformation r, InputStream in)
 			{
 			try
 				{
@@ -1148,13 +1148,13 @@ public class EFileReader
 			return null;
 			}
 
-		protected void put(GmFile gf, PropertyMap<PGameSettings> p, PGameSettings key, Object o)
+		protected static void put(GmFile gf, PropertyMap<PGameSettings> p, PGameSettings key, Object o)
 			{
 			Object def = p.get(key);
 			p.put(key,DataPropReader.convert(o.toString(),def == null ? null : def.getClass()));
 			}
 
-		protected void readProperties(GmFile gf, PropertyMap<PGameSettings> p, Properties i)
+		protected static void readProperties(GmFile gf, PropertyMap<PGameSettings> p, Properties i)
 			{
 			for (Entry<PGameSettings,Object> e : p.entrySet())
 				{
@@ -1168,7 +1168,7 @@ public class EFileReader
 				}
 			}
 
-		protected boolean allowProperty(PGameSettings prop)
+		protected static boolean allowProperty(PGameSettings prop)
 			{
 			//			return false;
 			return prop != PGameSettings.DPLAY_GUID && prop != PGameSettings.GAME_ICON
@@ -1176,7 +1176,7 @@ public class EFileReader
 					&& prop != PGameSettings.LOADING_IMAGE;
 			}
 
-		private void readDataFiles(EGMFile f, GmFile gf, GameSettings r, Properties i, String dir)
+		private static void readDataFiles(EGMFile f, GmFile gf, GameSettings r, Properties i, String dir)
 				throws IOException
 			{
 			String[] entries = { "Icon","Splash","Filler","Progress" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -1228,7 +1228,7 @@ public class EFileReader
 			return null;
 			}
 
-		protected void readDataFile(EGMFile f, GmFile gf, EnigmaSettings r, Properties i, String dir)
+		protected static void readDataFile(EGMFile f, GmFile gf, EnigmaSettings r, Properties i, String dir)
 				throws IOException
 			{
 			String fn = i.getProperty("Data"); //$NON-NLS-1$
@@ -1250,7 +1250,7 @@ public class EFileReader
 				}
 			}
 
-		private void readData(EGMFile f, GmFile gf, EnigmaSettings r, InputStream in)
+		private static void readData(EGMFile f, GmFile gf, EnigmaSettings r, InputStream in)
 			{
 			Set<String> names = new HashSet<String>();
 			Collections.addAll(names,"definitions","globallocals","initialization","cleanup");

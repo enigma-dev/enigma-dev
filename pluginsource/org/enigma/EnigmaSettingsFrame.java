@@ -267,7 +267,7 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 		return tool;
 		}
 
-	private JPanel makePane(String name, int choiceCount, Option...opts)
+	private static JPanel makePane(String name, int choiceCount, Option...opts)
 		{
 		JPanel pane = new JPanel();
 		pane.setBorder(BorderFactory.createTitledBorder(name));

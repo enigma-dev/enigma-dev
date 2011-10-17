@@ -260,7 +260,7 @@ public class EnigmaUpdater
 		return null;
 		}
 
-	private void listenForChangesRequiringRestart(SVNBasicClient cli)
+	private static void listenForChangesRequiringRestart(SVNBasicClient cli)
 		{
 		final File me = getThisFile();
 		cli.setEventHandler(new ISVNEventHandler()

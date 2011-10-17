@@ -281,6 +281,7 @@ public class EFileWriter
 		 * Returns whether the following property should be allowed in the
 		 * properties file. Override to disallow certain properties.
 		 */
+		@SuppressWarnings("static-method")
 		public boolean allowProperty(Enum<?> prop)
 			{
 			return true;
@@ -482,7 +483,7 @@ public class EFileWriter
 			writeProperties(new PrintStream(os.next(dir,name + EY)),r.properties);
 			}
 
-		public void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
+		public static void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
 				throws IOException
 			{
 			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
@@ -517,10 +518,7 @@ public class EFileWriter
 					ps.print("  Event (");
 
 					if (ev.mainId == MainEvent.EV_COLLISION)
-						{
-						Resource<?,?> cr = Util.deRef(ev.other);
-						ps.print(cr == null ? new String() : cr.getName());
-						}
+						printName(ps,ev.other);
 					else
 						ps.print(ev.id);
 
@@ -554,10 +552,7 @@ public class EFileWriter
 								if (arg.getRes() == null)
 									ps.println(arg.getVal());
 								else
-									{
-									Resource<?,?> ar = Util.deRef((ResourceReference<?>) arg.getRes());
-									ps.println(ar == null ? new String() : ar.getName());
-									}
+									printName(ps,arg.getRes());
 								}
 							}
 						else
@@ -571,7 +566,7 @@ public class EFileWriter
 					}
 			}
 
-		void printName(PrintStream out, ResourceReference<?> rr) throws IOException
+		private static void printName(PrintStream out, ResourceReference<?> rr) throws IOException
 			{
 			Resource<?,?> r = Util.deRef(rr);
 			out.print(r == null ? new String() : r.getName());
@@ -638,7 +633,7 @@ public class EFileWriter
 			out.flush();
 			}
 
-		void writeName(GmStreamEncoder out, ResourceReference<?> rr) throws IOException
+		private static void writeName(GmStreamEncoder out, ResourceReference<?> rr) throws IOException
 			{
 			Resource<?,?> r = Util.deRef(rr);
 			out.writeStr(r == null ? new String() : r.getName());
@@ -662,7 +657,7 @@ public class EFileWriter
 			writeData(os.next(dir,fn),gf.gameInfo);
 			}
 
-		public void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
+		public static void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
 				throws IOException
 			{
 			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
@@ -670,12 +665,12 @@ public class EFileWriter
 					os.println(e.getKey().name() + ": " + DataPropWriter.convert(e.getValue())); //$NON-NLS-1$
 			}
 
-		public boolean allowProperty(Enum<?> prop)
+		public static boolean allowProperty(Enum<?> prop)
 			{
 			return prop != PGameInformation.TEXT;
 			}
 
-		public void writeData(OutputStream os, GameInformation r) throws IOException
+		public static void writeData(OutputStream os, GameInformation r) throws IOException
 			{
 			os.write(((String) r.get(PGameInformation.TEXT)).getBytes()); // charset?
 			}
@@ -719,7 +714,7 @@ public class EFileWriter
 			if (progress != null) ImageIO.write((BufferedImage) progress,"png",os.next(dir,sProgress));
 			}
 
-		public void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
+		public static void writeProperties(PrintStream os, PropertyMap<? extends Enum<?>> p)
 				throws IOException
 			{
 			for (Entry<? extends Enum<?>,Object> e : p.entrySet())
@@ -727,14 +722,14 @@ public class EFileWriter
 					os.println(e.getKey().name() + ": " + DataPropWriter.convert(e.getValue())); //$NON-NLS-1$
 			}
 
-		public boolean allowProperty(Enum<?> prop)
+		public static boolean allowProperty(Enum<?> prop)
 			{
 			return prop != PGameSettings.DPLAY_GUID && prop != PGameSettings.GAME_ICON
 					&& prop != PGameSettings.FRONT_LOAD_BAR && prop != PGameSettings.BACK_LOAD_BAR
 					&& prop != PGameSettings.LOADING_IMAGE;
 			}
 
-		public void writeData(OutputStream os, GameSettings r) throws IOException
+		public static void writeData(OutputStream os, GameSettings r) throws IOException
 			{
 			((ICOFile) r.get(PGameSettings.GAME_ICON)).write(os);
 			}
@@ -761,7 +756,7 @@ public class EFileWriter
 			writeData(os.next(dir,fn),EnigmaRunner.es);
 			}
 
-		public void writeData(OutputStream next, EnigmaSettings es) throws IOException
+		public static void writeData(OutputStream next, EnigmaSettings es) throws IOException
 			{
 			PrintStream ps = new PrintStream(next);
 			ps.println("Codes{4}");
