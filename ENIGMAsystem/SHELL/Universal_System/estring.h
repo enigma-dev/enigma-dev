@@ -33,7 +33,6 @@ string chr(char val);
 int ord(string str);
 
 double real(variant str);
-double real(const var& str);
 
 size_t string_length(string str);
 size_t string_length(const char* str);
