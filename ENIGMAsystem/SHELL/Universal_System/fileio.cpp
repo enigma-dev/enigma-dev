@@ -150,7 +150,7 @@ int file_bin_open(string fname,int mode) // Opens the file with the indicated na
   if (mode & 2) {
     a = fopen(fname.c_str(),"r+b"); //Open for reading + writing if it exists, failing otherwise
     if (!a) a = fopen(fname.c_str(),"w+b"); //Open for writing + reading, overwriting if it exists or creating otherwise
-  } else a = fopen(fname.c_str(),(mode & 1) ? "rb" : "wb");
+  } else a = fopen(fname.c_str(),(mode & 1) ? "wb" : "rb");
   
   if (!a)      //Failure
     return -1; //Behavior for fail is -1 return
