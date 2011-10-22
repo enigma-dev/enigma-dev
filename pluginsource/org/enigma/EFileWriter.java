@@ -10,6 +10,8 @@
 package org.enigma;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,38 +37,39 @@ import org.enigma.messages.Messages;
 import org.enigma.utility.APNGExperiments;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmStreamEncoder;
 import org.lateralgm.file.GmFile.FormatFlavor;
+import org.lateralgm.file.GmStreamEncoder;
 import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
 import org.lateralgm.resources.Font;
 import org.lateralgm.resources.GameInformation;
+import org.lateralgm.resources.GameInformation.PGameInformation;
 import org.lateralgm.resources.GameSettings;
+import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.GmObject;
 import org.lateralgm.resources.Path;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room;
+import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script;
 import org.lateralgm.resources.Sound;
-import org.lateralgm.resources.Sprite;
-import org.lateralgm.resources.GameInformation.PGameInformation;
-import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.Sound.PSound;
+import org.lateralgm.resources.Sprite;
 import org.lateralgm.resources.library.LibAction;
 import org.lateralgm.resources.sub.Action;
 import org.lateralgm.resources.sub.Argument;
 import org.lateralgm.resources.sub.BackgroundDef;
+import org.lateralgm.resources.sub.BackgroundDef.PBackgroundDef;
 import org.lateralgm.resources.sub.Event;
 import org.lateralgm.resources.sub.Instance;
+import org.lateralgm.resources.sub.Instance.PInstance;
 import org.lateralgm.resources.sub.MainEvent;
 import org.lateralgm.resources.sub.PathPoint;
 import org.lateralgm.resources.sub.Tile;
-import org.lateralgm.resources.sub.View;
-import org.lateralgm.resources.sub.BackgroundDef.PBackgroundDef;
-import org.lateralgm.resources.sub.Instance.PInstance;
 import org.lateralgm.resources.sub.Tile.PTile;
+import org.lateralgm.resources.sub.View;
 import org.lateralgm.resources.sub.View.PView;
 import org.lateralgm.util.PropertyMap;
 
@@ -285,7 +288,7 @@ public class EFileWriter
 		public boolean allowProperty(Enum<?> prop)
 			{
 			return true;
-			};
+			}
 		}
 
 	// Constructors
@@ -570,6 +573,120 @@ public class EFileWriter
 			{
 			Resource<?,?> r = Util.deRef(rr);
 			out.print(r == null ? new String() : r.getName());
+			}
+		}
+
+	static class RoomEefWriter extends DataPropWriter
+		{
+		@Override
+		public String getExt(Resource<?,?> r)
+			{
+			return ".rme"; //$NON-NLS-1$
+			}
+
+		@Override
+		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
+			{
+			Room rm = (Room) r;
+			PrintStream ps = new PrintStream(os);
+
+			ps.println("Creation Codes{1}");
+			ps.println("  Creation Code: Code[" + countLines(rm.getCode()) + "]");
+			ps.println(rm.getCode());
+
+			ps.println("BackgroundDefs{" + rm.backgroundDefs.size() + "}");
+			for (BackgroundDef bd : rm.backgroundDefs)
+				{
+				ps.print("  BackgroundDef: ");
+				PBackgroundDef bools[] = { PBackgroundDef.VISIBLE,PBackgroundDef.FOREGROUND,
+						PBackgroundDef.TILE_HORIZ,PBackgroundDef.TILE_VERT,PBackgroundDef.STRETCH };
+				for (PBackgroundDef bool : bools)
+					if (bd.properties.get(bool)) ps.print(bool.name() + " ");
+				ps.println("Fields[5]");
+				String name = getName(bd.properties.get(PBackgroundDef.BACKGROUND));
+				ps.println("    source: " + name);
+				ps.println("    position: " + implode(bd.properties,PBackgroundDef.X,PBackgroundDef.Y));
+				ps.println("    speed: "
+						+ implode(bd.properties,PBackgroundDef.H_SPEED,PBackgroundDef.V_SPEED));
+				}
+
+			ps.println("Views{" + rm.views.size() + "}");
+			for (View v : rm.views)
+				{
+				ps.print("  View: ");
+				if (v.properties.get(PView.VISIBLE)) ps.print("VISIBLE ");
+				ps.println("Fields[5]");
+				String name = getName(v.properties.get(PView.OBJECT));
+				ps.println("    follow: " + name);
+				ps.println("    view: "
+						+ implode(v.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,PView.VIEW_H));
+				ps.println("    port: "
+						+ implode(v.properties,PView.PORT_X,PView.PORT_Y,PView.PORT_W,PView.PORT_H));
+				ps.println("    border: " + implode(v.properties,PView.BORDER_H,PView.BORDER_V));
+				ps.println("    speed: " + implode(v.properties,PView.SPEED_H,PView.SPEED_V));
+				}
+
+			ps.println("Instances{" + rm.instances.size() + "}");
+			for (Instance in : rm.instances)
+				{
+				ps.print("  Instance (" + in.properties.get(PInstance.ID) + "): ");
+				if (in.isLocked()) ps.print("LOCKED ");
+				ps.println("Properties{2}");
+				ps.println("    Property: Fields[2]");
+				String name = getName(in.properties.get(PInstance.OBJECT));
+				ps.println("      source: " + name);
+				ps.println("      position: " + implode(in.getPosition()));
+				ps.println("    Property: Code[" + countLines(in.getCreationCode()) + "]");
+				ps.println(in.properties.get(PInstance.CREATION_CODE));
+				}
+
+			ps.println("Tiles{" + rm.tiles.size() + "}");
+			for (Tile t : rm.tiles)
+				{
+				ps.print("  Tile (" + t.properties.get(PTile.ID) + "): ");
+				if (t.isLocked()) ps.print("LOCKED ");
+				ps.println("Fields[4]");
+				String name = getName(t.properties.get(PTile.BACKGROUND));
+				ps.println("    source: " + name);
+				ps.println("    depth: " + t.getDepth());
+				ps.println("    room position: " + implode(t.getRoomPosition()));
+				ps.println("    bkg position: " + implode(t.getBackgroundPosition()));
+				ps.println("    size: " + implode(t.getSize()));
+				}
+			}
+
+		@Override
+		public boolean allowProperty(Enum<?> prop)
+			{
+			return prop != PRoom.CREATION_CODE;
+			}
+
+		private static String implode(Point p)
+			{
+			if (p == null) return null;
+			return p.x + "," + p.y;
+			}
+
+		private static String implode(Dimension d)
+			{
+			if (d == null) return null;
+			return d.width + "," + d.height;
+			}
+
+		private static <K extends Enum<K>>String implode(PropertyMap<K> map, K...args)
+			{
+			if (args.length == 0) return null;
+			StringBuilder sb = new StringBuilder(map.get(args[0]).toString());
+			for (int i = 1; i < args.length; i++)
+				sb.append(",").append(map.get(args[i]).toString());
+			return sb.toString();
+			}
+
+		/** obj must be a ResourceReference */
+		private static String getName(Object obj)
+			{
+			Resource<?,?> r = Util.deRef((ResourceReference<?>) obj);
+			return r == null ? new String() : r.getName();
 			}
 		}
 

@@ -938,7 +938,7 @@ public class EFileReader
 					@Override
 					public boolean invoke()
 						{
-						GmObject temp = gf.gmObjects.get(name);
+						Resource<?,?> temp = gf.getList(Argument.getResourceKind(arg.kind)).get(name);
 						if (temp != null) arg.setRes(temp.reference);
 						return temp != null;
 						}
@@ -1069,7 +1069,8 @@ public class EFileReader
 			return null;
 			}
 
-		protected static void put(GmFile gf, PropertyMap<PGameInformation> p, PGameInformation key, Object o)
+		protected static void put(GmFile gf, PropertyMap<PGameInformation> p, PGameInformation key,
+				Object o)
 			{
 			Object def = p.get(key);
 			p.put(key,DataPropReader.convert(o.toString(),def == null ? null : def.getClass()));
@@ -1094,8 +1095,8 @@ public class EFileReader
 			return key != PGameInformation.TEXT;
 			}
 
-		private static void readDataFile(EGMFile f, GmFile gf, GameInformation r, Properties i, String dir)
-				throws IOException
+		private static void readDataFile(EGMFile f, GmFile gf, GameInformation r, Properties i,
+				String dir) throws IOException
 			{
 			String fn = i.get("Data").toString(); //$NON-NLS-1$
 			if (!dir.isEmpty()) fn = dir + '/' + fn;
@@ -1228,8 +1229,8 @@ public class EFileReader
 			return null;
 			}
 
-		protected static void readDataFile(EGMFile f, GmFile gf, EnigmaSettings r, Properties i, String dir)
-				throws IOException
+		protected static void readDataFile(EGMFile f, GmFile gf, EnigmaSettings r, Properties i,
+				String dir) throws IOException
 			{
 			String fn = i.getProperty("Data"); //$NON-NLS-1$
 			if (!dir.isEmpty()) fn = dir + '/' + fn;
