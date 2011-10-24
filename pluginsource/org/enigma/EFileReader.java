@@ -12,12 +12,14 @@ package org.enigma;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -32,6 +34,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -883,11 +887,7 @@ public class EFileReader
 						else
 							{
 							args = new Argument[1];
-							int size = actnode.lineAttribs.size();
-							String code = size == 0 ? new String() : actnode.lineAttribs.get(0);
-							for (int i = 1; i < size; i++)
-								code += '\n' + actnode.lineAttribs.get(i);
-							args[0] = new Argument(la.libArguments[0].kind,code,null);
+							args[0] = new Argument(la.libArguments[0].kind,implode(actnode.lineAttribs),null);
 							}
 						a.setArguments(args);
 						//arguments, relative, appliesTo, not
@@ -966,6 +966,162 @@ public class EFileReader
 				return;
 				}
 			super.put(gf,p,key,o);
+			}
+		}
+
+	static class RoomEefReader extends DataPropReader<Room,PRoom>
+		{
+		@Override
+		protected boolean allowProperty(PRoom key)
+			{
+			return key != PRoom.CREATION_CODE;
+			}
+
+		@Override
+		protected Room construct()
+			{
+			return new Room();
+			}
+
+		@Override
+		protected void readData(GmFile gf, Room r, InputStream in)
+			{
+			EEFNode en = EEFReader.parse(in);
+			for (EEFNode child : en.children)
+				{
+				String blockName = child.blockName.toLowerCase();
+				if (blockName.equals("creation codes") && !child.children.isEmpty())
+					{
+					r.setCode(implode(child.children.get(0).lineAttribs));
+					continue;
+					}
+				if (blockName.equals("backgrounddefs") || blockName.equals("backgroundefs"))
+					{
+					for (int i = 0; i < r.backgroundDefs.size() && i < child.children.size(); i++)
+						{
+						BackgroundDef bdo = r.backgroundDefs.get(i);
+						EEFNode bdi = child.children.get(i);
+
+						PBackgroundDef bools[] = { PBackgroundDef.VISIBLE,PBackgroundDef.FOREGROUND,
+								PBackgroundDef.TILE_HORIZ,PBackgroundDef.TILE_VERT,PBackgroundDef.STRETCH };
+						for (PBackgroundDef bool : bools)
+							bdo.properties.put(bool,bdi.namedAttributes.containsKey(bool.name().toLowerCase()));
+
+						Properties p = toProps(bdi.lineAttribs);
+						String source = p.getProperty("source");
+						if (source != null)
+							putRef(gf.backgrounds,bdo.properties,PBackgroundDef.BACKGROUND,source);
+						putPoint(p.getProperty("position"),bdo.properties,PBackgroundDef.X,PBackgroundDef.Y);
+						putPoint(p.getProperty("speed"),bdo.properties,PBackgroundDef.H_SPEED,
+								PBackgroundDef.V_SPEED);
+						}
+					} //BackgroundDefs
+				if (blockName.equals("views"))
+					{
+					for (int i = 0; i < r.views.size() && i < child.children.size(); i++)
+						{
+						View vo = r.views.get(i);
+						EEFNode vi = child.children.get(i);
+
+						vo.properties.put(PView.VISIBLE,vi.namedAttributes.containsKey("visible"));
+
+						Properties p = toProps(vi.lineAttribs);
+						String follow = p.getProperty("follow");
+						if (follow != null) putRef(gf.gmObjects,vo.properties,PView.OBJECT,follow);
+						putRect(p.getProperty("view"),vo.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,
+								PView.VIEW_H);
+						putRect(p.getProperty("port"),vo.properties,PView.PORT_X,PView.PORT_Y,PView.PORT_W,
+								PView.PORT_H);
+						putPoint(p.getProperty("border"),vo.properties,PView.BORDER_H,PView.BORDER_V);
+						putPoint(p.getProperty("speed"),vo.properties,PView.SPEED_H,PView.SPEED_V);
+						}
+					} //Views
+				} //each root node
+			} //readData
+
+		@Override
+		protected ResourceList<Room> getList(GmFile gf)
+			{
+			return gf.rooms;
+			}
+
+		static Properties toProps(List<String> lines)
+			{
+			Properties p = new Properties();
+			try
+				{
+				p.load(new StringReader(implode(lines)));
+				}
+			catch (IOException e)
+				{
+				//This should never happen, but assuming it could
+				//Unable to load properties can be treated as empty p
+				}
+			//At this point I'd love to ensure all the keys are lowercase
+			return p;
+			}
+
+		static String NUM = "\\s*([0-9]+)\\s*";
+		static Pattern PT = Pattern.compile("\\(?" + NUM + "," + NUM + "\\)?");
+		static Pattern RECT = Pattern.compile("\\(?" + NUM + "," + NUM + "," + NUM + "," + NUM + "\\)?");
+
+		static Point toPoint(String s)
+			{
+			if (s == null) return null;
+			Matcher m = PT.matcher(s);
+			if (m.matches() && m.groupCount() != 2) return null;
+			try
+				{
+				return new Point(Integer.parseInt(m.group(1)),Integer.parseInt(m.group(2)));
+				}
+			catch (NumberFormatException e)
+				{
+				return null;
+				}
+			}
+
+		static <K extends Enum<K>>void putPoint(Point pt, PropertyMap<K> map, K x, K y)
+			{
+			if (pt == null) return;
+			map.put(x,pt.x);
+			map.put(y,pt.y);
+			}
+
+		static <K extends Enum<K>>void putPoint(String s, PropertyMap<K> map, K x, K y)
+			{
+			putPoint(toPoint(s),map,x,y);
+			}
+
+		static Rectangle toRect(String s)
+			{
+			if (s == null) return null;
+			Matcher m = PT.matcher(s);
+			if (m.matches() && m.groupCount() != 4) return null;
+			try
+				{
+				int c[] = new int[4];
+				for (int i = 0; i < 4; i++)
+					c[i] = Integer.parseInt(m.group(i + 1));
+				return new Rectangle(c[0],c[1],c[2],c[3]);
+				}
+			catch (NumberFormatException e)
+				{
+				return null;
+				}
+			}
+
+		static <K extends Enum<K>>void putRect(Rectangle rect, PropertyMap<K> map, K x, K y, K w, K h)
+			{
+			if (rect == null) return;
+			map.put(x,rect.x);
+			map.put(y,rect.y);
+			map.put(w,rect.width);
+			map.put(h,rect.height);
+			}
+
+		static <K extends Enum<K>>void putRect(String s, PropertyMap<K> map, K x, K y, K w, K h)
+			{
+			putRect(toRect(s),map,x,y,w,h);
 			}
 		}
 
@@ -1284,5 +1440,14 @@ public class EFileReader
 				else if (id.equals("cleanup")) r.cleanup = str;
 				}
 			}
+		}
+
+	static String implode(List<String> lines)
+		{
+		if (lines.isEmpty()) return new String();
+		StringBuilder out = new StringBuilder(lines.get(0));
+		for (int i = 1; i < lines.size(); i++)
+			out.append('\n').append(lines.get(i));
+		return out.toString();
 		}
 	}

@@ -4,7 +4,7 @@
 Name: FMOD
 Identifier: FMODAudio
 Description: Play sounds using FMOD on Windows.
-Author: icuurd12b42, Harijs Grînbergs
+Author: icuurd12b42, Harijs GrÃ®nbergs
 
 Depends:
 	Build-platforms: Windows

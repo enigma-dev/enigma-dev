@@ -19,6 +19,9 @@ import org.enigma.messages.Messages;
 
 public class YamlParser
 	{
+	/** EY files must be encoded in UTF8 */
+	public static final String UTF8 = "UTF-8";
+
 	public static class YamlElement
 		{
 		//Each one has a name, mostly to preserve case
@@ -180,13 +183,18 @@ public class YamlParser
 			}
 		}
 
+	/** Parses an EY file using the UTF8 character encoding. */
 	public static YamlNode parse(File file) throws FileNotFoundException
 		{
-		return parse(new Scanner(file));
+		return parse(new Scanner(file,UTF8));
 		}
 
-	/** @author Josh Ventura */
-	public static YamlNode parse(Scanner file)
+	/**
+	 * Please ensure that the scanner uses the proper
+	 * character encoding for its source. EY prefers UTF8.
+	 * @author Josh Ventura
+	 */
+	public static YamlNode parse(Scanner scan)
 		{
 		YamlNode res = new YamlNode("Root"); //$NON-NLS-1$
 		String line, unlowered = Messages.getString("YamlParser.INVALID_NODE_NAME"); //$NON-NLS-1$
@@ -195,10 +203,10 @@ public class YamlParser
 		// I never really got around to doing this, but it's not difficult.
 		char mchar = 0; // The character that started a multiline entry
 
-		line = file.nextLine();
+		line = scan.nextLine();
 		if (line.length() < 7 || !line.substring(0,7).toLowerCase().equals("%e-yaml")) //$NON-NLS-1$
 			{
-			file.close();
+			scan.close();
 			return res;
 			}
 
@@ -206,9 +214,9 @@ public class YamlParser
 		String latestkey = null;
 		YamlElement latest = res;
 
-		continue_2: while (file.hasNext())
+		continue_2: while (scan.hasNext())
 			{
-			line = file.nextLine();
+			line = scan.nextLine();
 			linenum++;
 			if (line.length() >= 3 && (line.substring(0,3).equals("---") //$NON-NLS-1$
 					|| line.substring(0,3).equals("..."))) //$NON-NLS-1$
@@ -352,7 +360,7 @@ public class YamlParser
 			else
 				;
 			}
-		file.close();
+		scan.close();
 		if (latestkey != null && latest == null)
 			{
 			latest = new YamlContent(unlowered,null);

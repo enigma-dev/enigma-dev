@@ -502,6 +502,8 @@ public class EFileWriter
 			return ".obj"; //$NON-NLS-1$
 			}
 
+		static final String NONE = "none", OTHER = "other";
+
 		@Override
 		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
 			{
@@ -521,7 +523,7 @@ public class EFileWriter
 					ps.print("  Event (");
 
 					if (ev.mainId == MainEvent.EV_COLLISION)
-						printName(ps,ev.other);
+						ps.print(getName(ev.other,NONE));
 					else
 						ps.print(ev.id);
 
@@ -538,12 +540,8 @@ public class EFileWriter
 						ResourceReference<?> aplref = action.getAppliesTo();
 						String name = null;
 						if (aplref == GmObject.OBJECT_OTHER)
-							name = "other";
-						else if (aplref != GmObject.OBJECT_SELF)
-							{
-							Resource<?,?> apl = Util.deRef(aplref);
-							if (apl != null) name = apl.getName();
-							}
+							name = OTHER;
+						else if (aplref != GmObject.OBJECT_SELF) name = getName(aplref,null);
 						if (name != null) ps.print("Applies(" + name + ") ");
 
 						if (la.interfaceKind != LibAction.INTERFACE_CODE)
@@ -552,10 +550,11 @@ public class EFileWriter
 							for (Argument arg : action.getArguments())
 								{
 								ps.print("      ");
-								if (arg.getRes() == null)
-									ps.println(arg.getVal());
+								Class<? extends Resource<?,?>> kind = Argument.getResourceKind(arg.kind);
+								if (kind != null && Resource.class.isAssignableFrom(kind))
+									ps.println(getName(arg.getRes(),NONE));
 								else
-									printName(ps,arg.getRes());
+									ps.println(arg.getVal());
 								}
 							}
 						else
@@ -569,10 +568,10 @@ public class EFileWriter
 					}
 			}
 
-		private static void printName(PrintStream out, ResourceReference<?> rr) throws IOException
+		private static String getName(ResourceReference<?> rr, String def)
 			{
 			Resource<?,?> r = Util.deRef(rr);
-			out.print(r == null ? new String() : r.getName());
+			return r == null ? def : r.getName();
 			}
 		}
 
@@ -602,7 +601,7 @@ public class EFileWriter
 						PBackgroundDef.TILE_HORIZ,PBackgroundDef.TILE_VERT,PBackgroundDef.STRETCH };
 				for (PBackgroundDef bool : bools)
 					if (bd.properties.get(bool)) ps.print(bool.name() + " ");
-				ps.println("Fields[5]");
+				ps.println("Fields[3]");
 				String name = getName(bd.properties.get(PBackgroundDef.BACKGROUND));
 				ps.println("    source: " + name);
 				ps.println("    position: " + implode(bd.properties,PBackgroundDef.X,PBackgroundDef.Y));
