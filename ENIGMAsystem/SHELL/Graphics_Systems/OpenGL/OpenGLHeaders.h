@@ -32,6 +32,6 @@
   #include <OpenGL/gl.h>
   #include <OpenGL/glu.h>
 #else
-  #include <GL/gl.h>
-  #include <GL/glu.h>
+  #define GLEW_STATIC
+  #include <../../../../additional/glew/include/glew.h>
 #endif

@@ -43,12 +43,12 @@ namespace enigma
 
 namespace enigma
 {
-    grid::grid(unsigned id,int left,int top,int hcells,int vcells,int cellwidth,int cellheight,unsigned threshold,double speed_modifier):
+    grid::grid(unsigned int id,int left,int top,unsigned int hcells,unsigned int vcells,unsigned int cellwidth,unsigned int cellheight,unsigned threshold,double speed_modifier):
         id(id), left(left), top(top), hcells(hcells), vcells(vcells), cellwidth(cellwidth), cellheight(cellheight), threshold(threshold), speed_modifier(speed_modifier), nodearray()
     {
         gridstructarray[id] = this;
         gridstructarray[id]->nodearray.reserve(hcells*vcells);
-        for (size_t i = 0; i < hcells*vcells; i++)
+        for (unsigned int i = 0; i < hcells*vcells; i++)
         {
             node node={floor(i / vcells),i % vcells,0,0,0,1};
             gridstructarray[id]->nodearray.push_back(node);
@@ -56,8 +56,8 @@ namespace enigma
 
         grid *gr = gridstructarray[id];
 
-        for (size_t i = 0; i < hcells; i++){
-            for (size_t c = 0; c < vcells; c++){
+        for (unsigned int i = 0; i < hcells; i++){
+            for (unsigned int c = 0; c < vcells; c++){
             if (i>0){
                 gr->nodearray[i*vcells+c].neighbor_nodes.push_back(&gr->nodearray[(i-1)*vcells+c]); //left
                 if (c>0)
@@ -129,7 +129,7 @@ namespace enigma
     multimap<unsigned,node*> find_path(unsigned id, node* n0, node* n1, bool allow_diag, bool &status)
     {
         node* current;
-        for (size_t i = 0; i < gridstructarray[id]->hcells*gridstructarray[id]->vcells; i++)
+        for (unsigned int i = 0; i < gridstructarray[id]->hcells*gridstructarray[id]->vcells; i++)
         {
             gridstructarray[id]->nodearray[i].F=0;
             gridstructarray[id]->nodearray[i].G=0;

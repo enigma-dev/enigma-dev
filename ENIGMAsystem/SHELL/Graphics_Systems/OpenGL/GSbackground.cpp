@@ -507,6 +507,16 @@ int background_get_texture(int backId)
     return (size_t)(enigma::backgroundstructarray[backId]);
 }
 
+int background_get_width(int backId)
+{
+    return (enigma::backgroundstructarray[backId]->width);
+}
+
+int background_get_height(int backId)
+{
+    return (enigma::backgroundstructarray[backId]->height);
+}
+
 // Probably wrong file
 void texture_set_interpolation(int enable)
 {

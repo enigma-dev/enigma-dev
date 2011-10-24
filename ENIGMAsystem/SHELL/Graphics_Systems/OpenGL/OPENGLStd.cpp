@@ -30,14 +30,28 @@
 #else
 #  include <../additional/glee/GLee.h>
 #endif*/
+
+////TODO: THIS SHOULD BE MOVED
+/*#ifdef _WIN32
+    //#include <../../../../additional/glew/include/glew.h>
+    #include <../../../../additional/glew/src/glew.c>
+    #define GLEW_STATIC
+#endif*/
+
+#include <iostream>
 #include <string>
+
+//#include <../../../../additional/glew/src/glew.c>
+//#define GLEW_STATIC
+//#include <../../../../additional/glew/src/glew.c>
+//#define GLEW_STATIC
+//#define GLEW_STATIC
 #include "OpenGLHeaders.h"
 using namespace std;
 #include "OPENGLStd.h"
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h" // Room dimensions.
 #include "../graphics_mandatory.h" // Room dimensions.
-
 namespace enigma
 {
   unsigned bound_texture=0;
@@ -53,6 +67,15 @@ namespace enigma
       glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) wglGetProcAddress("glFramebufferTexture2DEXT");
       if (!(glBindFramebufferEXT and glGenFramebuffersEXT and glFramebufferTexture2DEXT))
         MessageBox(0,"Additional drawing surfaces cannot be created. Extension unsupported by graphics card","Error",MB_OK);
+    #endif
+
+    #ifdef _WIN32
+        GLenum err = glewInit();
+        if (GLEW_OK != err)
+        {
+            std::cout<<"GLEW ERROR!"<<std::endl;
+        }
+        std::cout<<"GLEW LOADED!"<<std::endl;
     #endif
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);

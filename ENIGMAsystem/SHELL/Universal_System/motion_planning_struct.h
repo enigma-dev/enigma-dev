@@ -43,11 +43,13 @@ namespace enigma
   };
   struct grid
   {
-    int id, left, top, hcells, vcells, cellwidth, cellheight;
-    vector<node> nodearray;
+    unsigned int id;
+    int left, top;
+    unsigned int hcells, vcells, cellwidth, cellheight;
     unsigned threshold;
     double speed_modifier;
-    grid(unsigned id,int left,int top,int hcells,int vcells,int cellwidth,int cellheight, unsigned threshold, double speed_modifier);
+    vector<node> nodearray;
+    grid(unsigned int id,int left,int top,unsigned int hcells,unsigned int vcells,unsigned int cellwidth,unsigned int cellheight, unsigned int threshold, double speed_modifier);
     ~grid();
   };
   extern grid** gridstructarray;
