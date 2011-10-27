@@ -9,6 +9,5 @@ Author: icuurd12b42, Harijs Grînbergs
 Depends:
 	Build-platforms: Windows
 Represents:
-	Build-platforms: Windows
 	Graphics: OpenGL
 
