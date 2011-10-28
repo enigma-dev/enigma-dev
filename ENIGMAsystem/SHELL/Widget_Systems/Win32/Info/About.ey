@@ -8,5 +8,5 @@ Represents: Windows
 Description: Create Widgets using Win32 API on Windows.
 Author: Josh Ventura
 
-Represents:
-	Build-platforms: Windows
+Depends:
+	Build-Platforms: Windows
