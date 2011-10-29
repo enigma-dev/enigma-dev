@@ -7,7 +7,7 @@ OUTPUT_FILE = ../plugins/enigma.jar
 .java.class:
 	$(JC) $(JFLAGS) $*.java
 
-JAVA_FILES = $(shell find org -name "*.java")
+JAVA_FILES = $(shell find . org -name "*.java")
 JAR_INC_FILES = $(shell find org -type f \( -not -wholename '*/.svn/*' \) -a \( -not -name "*.java" \) | sed 's/\$$/\\\$$/g')
 
 default: classes jar

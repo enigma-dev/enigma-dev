@@ -29,7 +29,7 @@ CXX := g++
 CXXFLAGS += -Wall -s -O3
 LDFLAGS += -shared
 
-SOURCES := $(shell find -name '*.cpp' -and ! -name 'standalone_*')
+SOURCES := $(shell find . -name '*.cpp' -and ! -name 'standalone_*')
 OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 
