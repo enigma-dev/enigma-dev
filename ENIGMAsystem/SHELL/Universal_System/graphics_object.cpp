@@ -58,4 +58,8 @@ namespace enigma
      myiter = NULL;
   }
   depthv::~depthv() {}
+  
+  
+  int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : sprite_get_width(sprite_index); }
+  int object_graphics::$sprite_height() const { return sprite_index == -1? 0 : sprite_get_width(sprite_index); }
 }

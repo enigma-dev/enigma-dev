@@ -485,7 +485,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   ide_output_redirect_reset();
 
   if (makeres) {
-    idpr("Compile failed at C++ level.",-1); return E_ERROR_BUILD;
+    idpr("Compile failed at C++ level.",-1);
+    return E_ERROR_BUILD;
   }
   user << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";
 
@@ -506,7 +507,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   FILE *gameModule;
   int resourceblock_start = 0;
-  cout << "`" << extensions::targetOS.resfile << "` == '$exe': " << (extensions::targetOS.resfile == "$game"?"true":"FALSE") << endl;
+  cout << "`" << extensions::targetOS.resfile << "` == '$exe': " << (extensions::targetOS.resfile == "$exe"?"true":"FALSE") << endl;
   if (extensions::targetOS.resfile == "$exe")
   {
     gameModule = fopen(gameFname.c_str(),"ab");

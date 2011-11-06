@@ -33,5 +33,5 @@
   #include <OpenGL/glu.h>
 #else
   #define GLEW_STATIC
-  #include <../../../../additional/glew/include/glew.h>
+  #include "glew.h"
 #endif

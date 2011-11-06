@@ -242,7 +242,7 @@ pt parse_cfile(my_string cftext)
 
     //First, let's check if it's a letter.
     //This implies it's one of three things...
-    if (is_letter(cfile[pos]))
+    if (is_letter(cfile[pos]) || cfile[pos] == '$')
     {
       if (cfile[pos] == 'L' and (cfile[pos+1] == '"' or cfile[pos+1] == '\'')) {
         //rconcat = false;

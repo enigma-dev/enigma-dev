@@ -174,5 +174,6 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   font->thgt = h;
   font->yoffset = 0;
   //printf("yoffset = %d \n", font->yoffset);
+  puts("Created font");
   return idfont;
 }

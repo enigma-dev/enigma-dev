@@ -73,6 +73,16 @@ namespace enigma
       double image_yscale;
       double image_angle;
     
+    //Accessors
+      #ifdef ENIGMA_PARSER_RUN
+        int sprite_width, sprite_height;
+      #else
+        int $sprite_width() const;
+        int $sprite_height() const;
+        #define sprite_width $sprite_width()
+        #define sprite_height $sprite_height()
+      #endif
+    
     //Constructors
       object_graphics();
       object_graphics(unsigned x, int y);

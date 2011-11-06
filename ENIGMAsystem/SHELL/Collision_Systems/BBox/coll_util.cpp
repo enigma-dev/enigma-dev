@@ -100,34 +100,34 @@ bool collide_rect_point(double rx1, double ry1, double rx2, double ry2, double p
 
 bool collide_bbox_rect(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2)
 {
-  return collide_rect_rect(ox+inst->bbox_left,
-                           oy+inst->bbox_top,
-                           ox+inst->bbox_right,
-                           oy+inst->bbox_bottom,
+  return collide_rect_rect(inst->$bbox_left(),
+                           inst->$bbox_top(),
+                           inst->$bbox_right(),
+                           inst->$bbox_bottom(),
                            x1,y1,x2,y2);
 }
 
 bool collide_bbox_line(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2)
 {
-  return collide_rect_line(ox+inst->bbox_left,
-                           oy+inst->bbox_top,
-                           ox+inst->bbox_right,
-                           oy+inst->bbox_bottom,
+  return collide_rect_line(inst->$bbox_left(),
+                           inst->$bbox_top(),
+                           inst->$bbox_right(),
+                           inst->$bbox_bottom(),
                            x1,y1,x2,y2);
 }
 
 bool collide_bbox_bbox(const enigma::object_collisions* inst1, double ox1, double oy1, const enigma::object_collisions* inst2, double ox2, double oy2)
 {
-  return (ox1+inst1->bbox_left < ox2+inst2->bbox_right
-       && ox2+inst2->bbox_left < ox1+inst1->bbox_right
-       && oy1+inst1->bbox_top  < oy2+inst2->bbox_bottom
-       && oy2+inst2->bbox_top  < oy1+inst1->bbox_bottom);
+  return (inst1->$bbox_left() < inst2->$bbox_right()
+       && inst2->$bbox_left() < inst1->$bbox_right()
+       && inst1->$bbox_top()  < inst2->$bbox_bottom()
+       && inst2->$bbox_top()  < inst1->$bbox_bottom());
 }
 
 bool collide_bbox_point(const enigma::object_collisions* inst, double ox, double oy, double x, double y)
 {
-  return (x < ox + inst->bbox_right
-       && x > ox + inst->bbox_left
-       && y < oy + inst->bbox_bottom
-       && y > oy + inst->bbox_top);
+  return (x < inst->$bbox_right()
+       && x > inst->$bbox_left()
+       && y < inst->$bbox_bottom()
+       && y > inst->$bbox_top());
 }

@@ -1,2 +1,2 @@
 SOURCES += $(wildcard Platforms/xlib/*.cpp)
-LDLIBS += -lz
+LDLIBS += -lz -lpthread

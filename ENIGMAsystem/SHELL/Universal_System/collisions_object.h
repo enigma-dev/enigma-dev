@@ -40,14 +40,22 @@ namespace enigma
   struct object_collisions: object_transform
   {
     //Bit Mask
-      var mask_index;
-      var  solid;
+      int  mask_index;
+      bool solid;
     
     //Bounding box
-      var bbox_top;
-      var bbox_bottom;
-      var bbox_left;
-      var bbox_right;
+      #ifdef ENIGMA_PARSER_RUN
+        int bbox_left, bbox_right, bbox_top, bbox_bottom;
+      #else
+        int $bbox_left()   const;
+        int $bbox_right()  const;
+        int $bbox_top()    const;
+        int $bbox_bottom() const;
+        #define bbox_left   $bbox_left()
+        #define bbox_right  $bbox_right()
+        #define bbox_top    $bbox_top()
+        #define bbox_bottom $bbox_bottom()
+      #endif
     
     //Constructors
       object_collisions();

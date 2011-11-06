@@ -114,8 +114,8 @@ int collision_point(double x, double y, int obj, bool prec /*ignored*/, bool not
 double distance_to_object(int object)
 {
   const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-  const double left1  = inst1->x + inst1->bbox_left,  top1    = inst1->y + inst1->bbox_top,
-               right1 = inst1->x + inst1->bbox_right, bottom1 = inst1->y + inst1->bbox_bottom;
+  const double left1  = inst1->$bbox_left(),  top1    = inst1->$bbox_top(),
+               right1 = inst1->$bbox_right(), bottom1 = inst1->$bbox_bottom();
   double distance = std::numeric_limits<double>::infinity();
   double tempdist;
   for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
@@ -123,8 +123,8 @@ double distance_to_object(int object)
     const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
     if (inst1 == inst2) continue;
 
-    const double left2  = inst2->x + inst1->bbox_left,  top2    = inst2->y + inst1->bbox_top,
-                 right2 = inst2->x + inst1->bbox_right, bottom2 = inst2->y + inst1->bbox_bottom;
+    const double left2  = inst2->x + inst1->$bbox_left()  - inst1->x, top2    = inst2->y + inst1->$bbox_top() - inst1->y,
+                 right2 = inst2->x + inst1->$bbox_right() - inst1->x, bottom2 = inst2->y + inst1->$bbox_bottom() - inst1->y;
 
     const double right  = min(right1, right2),   left = max(left1, left2),
                  bottom = min(bottom1, bottom2), top  = max(top1, top2);
@@ -143,8 +143,8 @@ double distance_to_object(int object)
 double distance_to_point(double x, double y)
 {
   enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-  const double left1  = inst1->x + inst1->bbox_left,  top1    = inst1->y + inst1->bbox_top,
-               right1 = inst1->x + inst1->bbox_right, bottom1 = inst1->y + inst1->bbox_bottom;
+  const double left1  = inst1->$bbox_left(),  top1    = inst1->$bbox_top(),
+               right1 = inst1->$bbox_right(), bottom1 = inst1->$bbox_bottom();
   return fabs(hypot(min(left1 - x, right1 -x),
                     min(top1 - y, bottom1 -y)));
 }

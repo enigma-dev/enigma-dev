@@ -1,4 +1,4 @@
-/**  Copyright (C) 2008 Josh Ventura
+/**  Copyright (C) 2011 Josh Ventura
 **  This file is a part of the ENIGMA Development Environment.
 **  It is released under the GNU General Public License, version 3.
 **  See the license of local files for more details.
@@ -6,6 +6,7 @@
 
 #define unsigl  unsigned long
 #define unsigll unsigned long long
+#define llong   long long
 
 
 /** / **
@@ -30,7 +31,7 @@
   namespace enigma { enum var_types { vt_real, vt_tstr }; }
 #endif
 
-
+#undef EVCONST
 #define EVCONST
 
 /** / **

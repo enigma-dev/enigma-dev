@@ -34,6 +34,10 @@
 
 namespace enigma
 {
+  int object_collisions::$bbox_left()   const { return (mask_index >= 0 ? sprite_get_bbox_left  (mask_index) : sprite_get_bbox_left  (sprite_index)) + x; }
+  int object_collisions::$bbox_right()  const { return (mask_index >= 0 ? sprite_get_bbox_right (mask_index) : sprite_get_bbox_right (sprite_index)) + x; }
+  int object_collisions::$bbox_top()    const { return (mask_index >= 0 ? sprite_get_bbox_top   (mask_index) : sprite_get_bbox_top   (sprite_index)) + x; }
+  int object_collisions::$bbox_bottom() const { return (mask_index >= 0 ? sprite_get_bbox_bottom(mask_index) : sprite_get_bbox_bottom(sprite_index)) + x; }
   object_collisions::object_collisions(): object_transform() {}
   object_collisions::object_collisions(unsigned _id,int _objid): object_transform(_id,_objid) {}
   object_collisions::~object_collisions() {}

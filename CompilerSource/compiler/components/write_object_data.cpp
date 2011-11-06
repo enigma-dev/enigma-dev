@@ -423,21 +423,6 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     instance->persistent = enigma::objectdata[instance->obj].persistent;
     instance->depth = enigma::objectdata[instance->obj].depth;*/
     "    \n"
-
-    "    if(instance->sprite_index!=-1)\n"
-    "    {\n"
-    "      instance->sprite_xoffset = sprite_get_xoffset(instance->sprite_index);\n"
-    "      instance->sprite_yoffset = sprite_get_yoffset(instance->sprite_index);\n      \n"
-    "      instance->bbox_left    =   sprite_get_bbox_left(instance->sprite_index)   - instance->sprite_xoffset;\n"
-    "      instance->bbox_right   =  sprite_get_bbox_right(instance->sprite_index)   - instance->sprite_xoffset;\n"
-    "      instance->bbox_top     =   sprite_get_bbox_top (instance->sprite_index)   - instance->sprite_yoffset;\n"
-    "      instance->bbox_bottom  =   sprite_get_bbox_bottom(instance->sprite_index) - instance->sprite_yoffset;\n"
-    "      //instance->sprite_height =  sprite_get_height(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
-    "      //instance->sprite_width  =  sprite_get_width(instance->sprite_index);  //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
-    "      instance->image_number  =  sprite_get_number(instance->sprite_index); //TODO: IMPLEMENT THESE AS AN IMPLICIT ACCESSOR\n"
-
-    "    }\n    \n"
-
     "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
     "    instance->image_single = -1;\n    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
     "instancecount++;\n    instance_count++;\n  }\n}\n";
