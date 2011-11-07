@@ -139,8 +139,8 @@ void clear_ide_editables()
   wto.close();
 }
 
-// modes: 0=run, 1=debug, 2=build, 3=compile
-enum { emode_run, emode_debug, emode_build, emode_compile, emode_rebuild };
+// modes: 0=run, 1=debug, 2=design, 3=compile
+enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 {
   cout << "Initializing dialog boxes" << endl;
@@ -439,13 +439,13 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   idpr("Adding resources...",90);
   string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.buildext;
-  string gameFname = mode == emode_build ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
+  string gameFname = mode == emode_design ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
 
   idpr("Starting compile (This may take a while...)", 30);
 
   string make = "Game ";
 
-  make += "GMODE=Run ";
+  make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
   make += "COLLISION=" + extensions::targetAPI.collisionSys + " ";
@@ -559,12 +559,13 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   fwrite("\0\0\0\0res0",8,1,gameModule);
   fwrite(&resourceblock_start,4,1,gameModule);
 
-  //Close the game module; we're done adding resources
+  // Close the game module; we're done adding resources
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
 
-  if (mode == emode_run or mode == emode_build)
+  // Run the game if requested
+  if (mode == emode_run or mode == emode_debug or mode == emode_design)
   {
     string rprog = extensions::targetOS.runprog, rparam = extensions::targetOS.runparam;
     rprog = string_replace_all(rprog,"$game",gameFname);

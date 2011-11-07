@@ -117,7 +117,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
     unsigned ev_count = 0;
     parsed_object* pob = parsed_objects[es->gmObjects[i].id] = 
       new parsed_object(
-        es->gmObjects[i].name, es->gmObjects[i].id, es->gmObjects[i].spriteId,
+        es->gmObjects[i].name, es->gmObjects[i].id, es->gmObjects[i].spriteId, es->gmObjects[i].maskId,
         es->gmObjects[i].parentId,
         es->gmObjects[i].visible, es->gmObjects[i].solid,
         es->gmObjects[i].depth

@@ -96,8 +96,7 @@ void file_text_close(int fileid) // Closes the file with the given file id.
     if (enigma::files[i].f == NULL)
       enigma::file_highid = i; 
 }
-void file_text_write_string(int fileid,string str) // Writes the string to the file with the given file id.
-{
+void file_text_write_string(int fileid,string str) { // Writes the string to the file with the given file id.
   enigma::files[fileid].sdata = str;
 }
 void file_text_write_real(int fileid,double x) // Write the real value to the file with the given file id.
@@ -112,12 +111,10 @@ void file_text_writeln(int fileid) // Write a newline character to the file.
   fwrite(mf.sdata.c_str(),1,mf.sdata.length(),mf.f);
   fputc('\n',mf.f);
 }
-string file_text_read_string(int fileid) // Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
-{
+string file_text_read_string(int fileid) { // Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
   return enigma::files[fileid].sdata;
 }
-double file_text_read_real(int fileid) // Reads a real value from the file and returns this value.
-{
+double file_text_read_real(int fileid) { // Reads a real value from the file and returns this value.
   return atof(enigma::files[fileid].sdata.c_str());
 }
 void file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
@@ -137,8 +134,7 @@ void file_text_readln(int fileid) // Skips the rest of the line in the file and 
   ret.erase(dp+1);
   enigma::files[fileid].sdata = ret;
 }
-bool file_text_eof(int fileid) // Returns whether we reached the end of the file.
-{
+bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
   return feof(enigma::files[fileid].f);
 }
 
@@ -189,19 +185,15 @@ size_t file_bin_size(int fileid) // Returns the size (in bytes) of the file with
   fseek(enigma::files[fileid].f, sp, SEEK_SET);
   return ret;
 }
-size_t file_bin_position(int fileid) // Returns the current position (in bytes; 0 is the first position) of the file with the given file id.
-{
+size_t file_bin_position(int fileid) { // Returns the current position (in bytes; 0 is the first position) of the file with the given file id.
   return ftell(enigma::files[fileid].f);
 }
-void file_bin_seek(int fileid,size_t pos) // Moves the current position of the file to the indicated position. To append to a file move the position to the size of the file before writing.
-{
+void file_bin_seek(int fileid,size_t pos) { // Moves the current position of the file to the indicated position. To append to a file move the position to the size of the file before writing.
   fseek(enigma::files[fileid].f, pos, SEEK_SET);
 }
-void file_bin_write_byte(int fileid,unsigned char byte) // Writes a byte of data to the file with the given file id.
-{
+void file_bin_write_byte(int fileid,unsigned char byte) { // Writes a byte of data to the file with the given file id.
   fputc(byte, enigma::files[fileid].f);
 }
-int file_bin_read_byte(int fileid) // Reads a byte of data from the file and returns this.
-{
+int file_bin_read_byte(int fileid) { // Reads a byte of data from the file and returns this.
   return fgetc(enigma::files[fileid].f);
 }

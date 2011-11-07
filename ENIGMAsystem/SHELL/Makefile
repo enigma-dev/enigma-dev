@@ -37,10 +37,18 @@ OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
 ###########
 
 CXX := g++
-CXXFLAGS := -Wall -s -O3
+ifeq ($(GMODE), Debug)
+	CXXFLAGS := -Wall -g -DDEBUG_MODE
+else
+	CXXFLAGS := -Wall -s -O3
+endif
 
 CC := gcc
-CFLAGS := -Wall -s -O3
+ifeq ($(GMODE), Debug)
+	CFLAGS := -Wall -g -DDEBUG_MODE
+else
+	CFLAGS := -Wall -s -O3
+endif
 
 LDFLAGS := 
 ifeq ($(PLATFORM), Win32)

@@ -26,8 +26,8 @@
 \********************************************************************************/
 
 /**
-  @file    graphics_object.h
-  @summary Adds a planar tier following the main tier.
+  @file  planar_object.cpp
+  @brief Adds a planar tier following the main tier.
 */
 
 #include <math.h>

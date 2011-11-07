@@ -263,9 +263,11 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           wto << "\n    {\n";
             // Sprite index
               if (used_funcs::object_set_sprite) //We want to initialize
-                wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n";
+                wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n"
+                    << "      make_index = enigma::object_table[" << i->second->id << "].mask;\n";
               else
-                wto << "      sprite_index = " << i->second->sprite_index << ";\n";
+                wto << "      sprite_index = " << i->second->sprite_index << ";\n"
+                    << "      mask_index = " << i->second->mask_index << ";\n";
               wto << "      visible = " << i->second->visible << ";\n      solid = " << i->second->solid << ";\n";
 
             // Depth

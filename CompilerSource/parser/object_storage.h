@@ -85,7 +85,7 @@ struct parsed_object
   varray<parsed_event> events;
   
   string name;
-  int id, sprite_index, parent;
+  int id, sprite_index, mask_index, parent;
   bool visible, solid;
   double depth;
   
@@ -108,7 +108,7 @@ struct parsed_object
   void copy_calls_from(parsed_object&);
   
   parsed_object();
-  parsed_object(string,int,int,int,bool,bool,double);
+  parsed_object(string,int,int,int,int,bool,bool,double);
 };
 extern map<int,parsed_object*> parsed_objects;
 extern map<int,parsed_object*> parsed_rooms;

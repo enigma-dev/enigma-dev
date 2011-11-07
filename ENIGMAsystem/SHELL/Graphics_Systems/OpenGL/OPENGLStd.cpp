@@ -1,51 +1,23 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <../additional/glee/GLee.h>
-#endif*/
-
-////TODO: THIS SHOULD BE MOVED
-/*#ifdef _WIN32
-    //#include <../../../../additional/glew/include/glew.h>
-    #include <../../../../additional/glew/src/glew.c>
-    #define GLEW_STATIC
-#endif*/
+/** Copyright (C) 2008-2011 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <iostream>
 #include <string>
 
-//#include <../../../../additional/glew/src/glew.c>
-//#define GLEW_STATIC
-//#include <../../../../additional/glew/src/glew.c>
-//#define GLEW_STATIC
-//#define GLEW_STATIC
 #include "OpenGLHeaders.h"
 using namespace std;
 #include "OPENGLStd.h"
@@ -70,12 +42,12 @@ namespace enigma
     #endif
 
     #ifdef _WIN32
-        GLenum err = glewInit();
-        if (GLEW_OK != err)
-        {
-            std::cout<<"GLEW ERROR!"<<std::endl;
-        }
-        std::cout<<"GLEW LOADED!"<<std::endl;
+      GLenum err = glewInit();
+      if (GLEW_OK != err)
+      {
+        std::cout<<"GLEW ERROR!"<<std::endl;
+      }
+      std::cout<<"GLEW LOADED!"<<std::endl;
     #endif
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);

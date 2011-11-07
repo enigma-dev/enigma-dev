@@ -1,29 +1,19 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008-2011 Josh Ventura                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2011 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <string>
 #include <stdio.h>
@@ -34,43 +24,61 @@ using std::string;
 #include "../audio_mandatory.h"
 #include "alure/include/AL/alure.h"
 
+#ifdef DEBUG_MODE
+#include "../../libEGMstd.h"
+#include "../../Widget_Systems/widgets_mandatory.h"
+#endif
+
 namespace enigma
 {
+  enum load_state {
+    LOADSTATE_NONE,
+    LOADSTATE_SOURCED,
+    LOADSTATE_INDICATED,
+    LOADSTATE_COMPLETE
+  };
   struct sound
   {
     ALuint src, buf[3]; // The source-id and buffer-id of the sound data
-	alureStream *stream; // optional stream
-	void (*cleanup)(void *userdata); // optional cleanup callback for streams
-	void *userdata; // optional userdata for streams
+    alureStream *stream; // optional stream
+    void (*cleanup)(void *userdata); // optional cleanup callback for streams
+    void *userdata; // optional userdata for streams
 
-    int loaded;   // Degree to which this sound has been loaded successfully
+    load_state loaded;   // Degree to which this sound has been loaded successfully
     bool idle;    // True if this sound is not being used, false if playing or paused.
     bool playing; // True if this sound is playing; not paused or idle.
 
-    sound(): src(0), stream(0), cleanup(0), userdata(0), loaded(0), idle(1), playing(0) {
-	  buf[0] = 0; buf[1] = 0; buf[2] = 0;
-	}
+    sound(): src(0), stream(0), cleanup(0), userdata(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
+      buf[0] = 0; buf[1] = 0; buf[2] = 0;
+    }
   };
   
-  sound *sounds;
-  size_t numSounds;
+  sound **sounds;
   extern size_t sound_idmax;
   
+  #ifdef DEBUG_MODE
+    #define get_sound(snd,id,failure)\
+      if (id < 0 or size_t(id) >= enigma::sound_idmax or !enigma::sounds[id]) {\
+        show_error("Sound " + toString(id) + " does not exist", false);\
+        return failure;\
+      } enigma::sound *const snd = enigma::sounds[id];
+  #else
+    #define get_sound(snd,id,failure)\
+      enigma::sound *const snd = enigma::sounds[id];
+  #endif
+
   static void eos_callback(void *soundID, ALuint src)
   {
-    sound &snd = sounds[(ptrdiff_t)soundID];
-    /*if (snd.looping)
-      snd.idle = !(snd.looping = snd.playing = (alurePlaySource(snd.src, eos_callback, soundID) != AL_FALSE));
-    else {*/
-      snd.playing = false;
-      snd.idle = true;
-    //}
+    get_sound(snd, (ptrdiff_t)soundID, );
+    snd->playing = false;
+    snd->idle = true;
   }
 
   int audiosystem_initialize()
   {
-    numSounds = sound_idmax > 0 ? sound_idmax : 1;
-    sounds = new sound[numSounds];
+    if (sound_idmax == 0)
+      return (sounds = NULL, 0);
+    sounds = new sound*[sound_idmax];
     
     #ifdef _WIN32
     if (!load_al_dll())
@@ -82,14 +90,14 @@ namespace enigma
       return 1;
     }
     
-    for (size_t i = 0; i < numSounds; i++)
+    for (size_t i = 0; i < sound_idmax; i++)
     {
-      alGenSources(1, &sounds[i].src);
+      alGenSources(1, &sounds[i]->src);
       if(alGetError() != AL_NO_ERROR) {
         fprintf(stderr, "Failed to create OpenAL source!\n");
         return 1;
       }
-      sounds[i].loaded = 1;
+      sounds[i]->loaded = LOADSTATE_SOURCED;
     }
     
     return 0;
@@ -97,10 +105,11 @@ namespace enigma
   
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
-    if (sounds[id].loaded != 1)
+    get_sound(snd,id,1);
+    if (snd->loaded != LOADSTATE_SOURCED)
       return 1;
     
-    ALuint& buf = sounds[id].buf[0];
+    ALuint& buf = snd->buf[0];
     buf = alureCreateBufferFromMemory((ALubyte*)buffer, bufsize);
     
     if(!buf) {
@@ -108,71 +117,77 @@ namespace enigma
       return 1;
     }
     
-    alSourcei(sounds[id].src, AL_BUFFER, buf);
-    alSourcei(sounds[id].src, AL_SOURCE_RELATIVE, AL_TRUE);
-    alSourcei(sounds[id].src, AL_REFERENCE_DISTANCE, 1);
-    sounds[id].loaded = 2;
+    alSourcei(snd->src, AL_BUFFER, buf);
+    alSourcei(snd->src, AL_SOURCE_RELATIVE, AL_TRUE);
+    alSourcei(snd->src, AL_REFERENCE_DISTANCE, 1);
+    snd->loaded = LOADSTATE_COMPLETE;
     return 0;
   }
+  
+  static sound* sound_new_with_source() {
+    sound *res = new sound();
+    alGenSources(1, &res->src);
+    if(alGetError() != AL_NO_ERROR) {
+      fprintf(stderr, "Failed to create OpenAL source!\n");
+      return NULL;
+    }
+    res->loaded = LOADSTATE_SOURCED;
+    return res;
+  }
 
-  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*cleanup)(void *userdata), void *userdata) {
-    if (sounds[id].loaded != 1)
+  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*cleanup)(void *userdata), void *userdata)
+  {
+    sound *snd = sounds[id];
+    if (!snd)
+      sound_new_with_source();
+    else if (snd->loaded != LOADSTATE_SOURCED)
       return 1;
 
-    sounds[id].stream = alureCreateStreamFromCallback((ALuint (*)(void*, ALubyte*, ALuint))callback, userdata, AL_FORMAT_STEREO16, 44100, 4096, 3, sounds[id].buf);
-    if (!sounds[id].stream) {
+    snd->stream = alureCreateStreamFromCallback((ALuint (*)(void*, ALubyte*, ALuint))callback, userdata, AL_FORMAT_STEREO16, 44100, 4096, 3, snd->buf);
+    if (!snd->stream) {
       fprintf(stderr, "Could not create stream %d: %s\n", id, alureGetErrorString());
       return 1;
     }
-	sounds[id].cleanup = cleanup;
-	sounds[id].userdata = userdata;
+    snd->cleanup = cleanup;
+    snd->userdata = userdata;
 
-    sounds[id].loaded = 2;
+    snd->loaded = LOADSTATE_COMPLETE;
     return 0;
   }
 
-  int sound_allocate() {
+  int sound_allocate()
+  {
     // Make room for sound
-    const size_t osc = enigma::numSounds;
-    if (osc <= enigma::sound_idmax)
-    {
-  	enigma::sound *nsounds = new enigma::sound[enigma::numSounds = enigma::sound_idmax+1];
-  	for (size_t i = 0; i < osc; i++)
-  	  nsounds[i] = enigma::sounds[i];
-  	for (size_t i = osc; i < enigma::numSounds; i++)
-  	{
-  	  alGenSources(1, &nsounds[i].src);
-  	  if(alGetError() != AL_NO_ERROR) {
-  		fprintf(stderr, "Failed to create OpenAL source!\n");
-  		return 1;
-  	  }
-  	  nsounds[i].loaded = 1;
-  	}
-  	delete[] enigma::sounds;
-  	enigma::sounds = nsounds;
-    }
-
-	return enigma::sound_idmax++;
+    sound **nsounds = new sound*[sound_idmax+1];
+    for (size_t i = 0; i < sound_idmax; i++)
+      nsounds[i] = sounds[i];
+    nsounds[sound_idmax] = sound_new_with_source();
+    delete[] sounds;
+    sounds = nsounds;
+    return sound_idmax++;
   }
   
   void audiosystem_update(void) { alureUpdate(); }
   
   void audiosystem_cleanup()
   {
-    for (size_t i = 0; i < numSounds; i++) 
+    for (size_t i = 0; i < sound_idmax; i++)
+    if (sounds[i])
     {
-      switch (sounds[i].loaded)
+      switch (sounds[i]->loaded)
       {
-        case 2:
-          alDeleteBuffers(sounds[i].stream ? 3 : 1, sounds[i].buf);
-		  if (sounds[i].stream) {
-			alureStopSource(sounds[i].src, true);
-			alureDestroyStream(sounds[i].stream, 0, 0);
-			if (sounds[i].cleanup) sounds[i].cleanup(sounds[i].userdata);
-		  }
-		  // fallthrough
-        case 1:
-          alDeleteSources(1, &sounds[i].src);
+        case LOADSTATE_COMPLETE:
+          alDeleteBuffers(sounds[i]->stream ? 3 : 1, sounds[i]->buf);
+          if (sounds[i]->stream) {
+            alureStopSource(sounds[i]->src, true);
+            alureDestroyStream(sounds[i]->stream, 0, 0);
+            if (sounds[i]->cleanup) sounds[i]->cleanup(sounds[i]->userdata);
+          }
+          // fallthrough
+        case LOADSTATE_SOURCED:
+          alDeleteSources(1, &sounds[i]->src);
+          break;
+        default: ;
       }
     }
     
@@ -180,47 +195,48 @@ namespace enigma
   }
 };
 
-bool sound_play(int sound) // Returns nonzero if an error occurred
+bool sound_play(int sound) // Returns whether sound is playing
 {
-  enigma::sound &snd = enigma::sounds[sound]; //snd.looping = false;
-  alSourcei(snd.src, AL_LOOPING, AL_FALSE); //Just playing
-  return snd.idle = !(snd.playing = !snd.stream ?
-	alurePlaySource(snd.src, enigma::eos_callback, (void*)sound) != AL_FALSE :
-	alurePlaySourceStream(snd.src, snd.stream, 3, -1, enigma::eos_callback, (void*)sound) != AL_FALSE);
+  get_sound(snd,sound,0); //snd.looping = false;
+  alSourcei(snd->src, AL_LOOPING, AL_FALSE); //Just playing
+  return !(snd->idle = !(snd->playing = !snd->stream ?
+    alurePlaySource(snd->src, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
+    alurePlaySourceStream(snd->src, snd->stream, 3, -1, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE));
 }
-bool sound_loop(int sound)
+bool sound_loop(int sound) // Returns whether sound is playing
 {
-  enigma::sound &snd = enigma::sounds[sound];
-  alSourcei(snd.src, AL_LOOPING, AL_TRUE); //Looping now
-  return snd.idle = !(/*snd.looping =*/ snd.playing = (alurePlaySource(snd.src, enigma::eos_callback, (void*)sound) != AL_FALSE));
+  get_sound(snd,sound,0);
+  alSourcei(snd->src, AL_LOOPING, AL_TRUE); // Toggle on looping
+  return snd->idle = !(snd->playing = (alurePlaySource(snd->src, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE));
 }
-bool sound_pause(int sound)
+bool sound_pause(int sound) // Returns whether the sound is still playing
 {
-  enigma::sound &snd = enigma::sounds[sound];
-  return snd.playing = !alurePauseSource(snd.src);
+  get_sound(snd,sound,0);
+  return snd->playing = !alurePauseSource(snd->src);
 }
 void sound_stop(int sound) {
-    enigma::sound &snd = enigma::sounds[sound];
-    alureStopSource(snd.src,AL_FALSE);
+  get_sound(snd,sound,);
+  alureStopSource(snd->src,AL_FALSE);
 }
-bool sound_resume(int sound)
+bool sound_resume(int sound) // Returns whether the sound is playing
 {
-  enigma::sound &snd = enigma::sounds[sound];
-  return snd.playing = alureResumeSource(snd.src);
+  get_sound(snd,sound,false);
+  return snd->playing = alureResumeSource(snd->src);
 }
 
 bool sound_isplaying(int sound) {
-  return enigma::sounds[sound].playing;
+  get_sound(snd,sound,false);
+  return snd->playing;
 }
 bool sound_ispaused(int sound) {
-  return !enigma::sounds[sound].idle and !enigma::sounds[sound].playing;
+  return !enigma::sounds[sound]->idle and !enigma::sounds[sound]->playing;
 }
 
 void sound_pan(int sound, float value)
 {
-  enigma::sound &snd = enigma::sounds[sound];
+  get_sound(snd,sound,);
   const float pan = value*2-1;
-  alSource3f(snd.src,AL_POSITION,pan,sqrt(1-pan*pan),0);
+  alSource3f(snd->src,AL_POSITION,pan,sqrt(1-pan*pan),0);
 }
 
 
