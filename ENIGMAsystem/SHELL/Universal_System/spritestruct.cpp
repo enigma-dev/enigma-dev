@@ -215,22 +215,22 @@ int sprite_get_bbox_top(int sprite)
 int sprite_get_bbox_bottom_relative(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_bottom + spr->yoffset;
+	return spr->bbox_bottom - spr->yoffset;
 }
 int sprite_get_bbox_left_relative(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_left + spr->xoffset;
+	return spr->bbox_left - spr->xoffset;
 }
 int sprite_get_bbox_right_relative(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_right + spr->xoffset;
+	return spr->bbox_right - spr->xoffset;
 }
 int sprite_get_bbox_top_relative(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_top + spr->yoffset;
+	return spr->bbox_top - spr->yoffset;
 }
 
 //TODO: IMPLEMENT
