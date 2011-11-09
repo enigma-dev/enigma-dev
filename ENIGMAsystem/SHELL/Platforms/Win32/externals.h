@@ -25,6 +25,15 @@
 **                                                                              **
 \********************************************************************************/
 
+enum {
+  ty_real = 0,
+  ty_string = 1
+};
+enum {
+  dll_cdecl = 0,
+  dll_stdcall = 1
+};
+
 int external_define(string dll,string func,int calltype,bool returntype,int argcount,
                     bool t01=0,bool t02=0,bool t03=0,bool t04=0,bool t05=0,bool t06=0,bool t07=0,bool t08=0,
                     bool t09=0,bool t10=0,bool t11=0,bool t12=0,bool t13=0,bool t14=0,bool t15=0,bool t16=0);

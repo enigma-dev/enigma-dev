@@ -34,14 +34,9 @@
 
 #include "../platforms_mandatory.h"
 #include "../../Widget_Systems/widgets_mandatory.h"
+#include "externals.h"
 
 using namespace std;
-
-const bool ty_real=0;
-const bool ty_string=1;
-
-const int dll_cdecl=0;
-const int dll_stdcall=1;
 
 struct external
 {
@@ -66,8 +61,8 @@ map<int,external*> externals;
 int external_count=0;
 
 int external_define(string dll,string func,int calltype,bool returntype,int argcount,
-                    bool t01=0,bool t02=0,bool t03=0,bool t04=0,bool t05=0,bool t06=0,bool t07=0,bool t08=0,
-                    bool t09=0,bool t10=0,bool t11=0,bool t12=0,bool t13=0,bool t14=0,bool t15=0,bool t16=0)
+                    bool t01,bool t02,bool t03,bool t04,bool t05,bool t06,bool t07,bool t08,
+                    bool t09,bool t10,bool t11,bool t12,bool t13,bool t14,bool t15,bool t16)
 {
   ffi_status status;
   
@@ -95,7 +90,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   }
   
   ffi_type *restype = ((returntype==ty_string)?(&ffi_type_pointer):(&ffi_type_double));
-  status=ffi_prep_cif(&(a->cif), ((calltype==dll_stdcall)?FFI_STDCALL:FFI_DEFAULT_ABI), 3, restype, a->arg_type);
+  status=ffi_prep_cif(&(a->cif), ((calltype==dll_stdcall)?FFI_STDCALL:FFI_DEFAULT_ABI), ac, restype, a->arg_type);
   
   if (status != FFI_OK)
   {
@@ -103,8 +98,8 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
     return -1;
   }
   
-  HMODULE dllmod=LoadLibrary(dll.c_str());
-  FARPROC funcptr=GetProcAddress(dllmod,"func");
+  HMODULE dllmod = LoadLibrary(dll.c_str());
+  FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
   if (funcptr==NULL) return 0;
   a->functionptr=(void(*)())funcptr;
   
@@ -115,8 +110,8 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
 using namespace enigma;
 union ambiguous { double d; const char* s; };
-variant external_call(int id,variant a1=0,variant a2=0,variant a3=0,variant a4=0,variant a5=0,variant a6=0,variant a7=0,variant a8=0,
-                                variant a9=0,variant a10=0,variant a11=0,variant a12=0,variant a13=0,variant a14=0,variant a15=0,variant a16=0)
+variant external_call(int id,variant a1,variant a2, variant a3, variant a4, variant a5, variant a6, variant a7, variant a8,
+                             variant a9,variant a10,variant a11,variant a12,variant a13,variant a14,variant a15,variant a16)
 {
   map<int,external*>::iterator it;
   if ((it=externals.find(id)) == externals.end())
@@ -126,7 +121,7 @@ variant external_call(int id,variant a1=0,variant a2=0,variant a3=0,variant a4=0
   ambiguous array[a->argc];
   void *arg_values[a->argc];
   
-  variant args[]={a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16};
+  variant args[] = { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16 };
   for (int i=0;i<a->argc;i++)
   {
     if (a->arg_type[i]==&ffi_type_double)
