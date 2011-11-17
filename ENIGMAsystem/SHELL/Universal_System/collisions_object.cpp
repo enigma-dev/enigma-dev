@@ -24,10 +24,10 @@
 
 namespace enigma
 {
-  int object_collisions::$bbox_left()   const { return (mask_index >= 0 ? sprite_get_bbox_left_relative  (mask_index) : (sprite_index >= 0 ? sprite_get_bbox_left_relative  (sprite_index) : 0)) + x; }
-  int object_collisions::$bbox_right()  const { return (mask_index >= 0 ? sprite_get_bbox_right_relative (mask_index) : (sprite_index >= 0 ? sprite_get_bbox_right_relative (sprite_index) : 0)) + x; }
-  int object_collisions::$bbox_top()    const { return (mask_index >= 0 ? sprite_get_bbox_top_relative   (mask_index) : (sprite_index >= 0 ? sprite_get_bbox_top_relative   (sprite_index) : 0)) + y; }
-  int object_collisions::$bbox_bottom() const { return (mask_index >= 0 ? sprite_get_bbox_bottom_relative(mask_index) : (sprite_index >= 0 ? sprite_get_bbox_bottom_relative(sprite_index) : 0)) + y; }
+  int object_collisions::$bbox_left()   const { return (mask_index >= 0 ? sprite_get_bbox_left_relative  (mask_index) : (sprite_index >= 0 ? sprite_get_bbox_left_relative  (sprite_index) : 0)) + round(x); }
+  int object_collisions::$bbox_right()  const { return (mask_index >= 0 ? sprite_get_bbox_right_relative (mask_index) : (sprite_index >= 0 ? sprite_get_bbox_right_relative (sprite_index) : 0)) + round(x); }
+  int object_collisions::$bbox_top()    const { return (mask_index >= 0 ? sprite_get_bbox_top_relative   (mask_index) : (sprite_index >= 0 ? sprite_get_bbox_top_relative   (sprite_index) : 0)) + round(y); }
+  int object_collisions::$bbox_bottom() const { return (mask_index >= 0 ? sprite_get_bbox_bottom_relative(mask_index) : (sprite_index >= 0 ? sprite_get_bbox_bottom_relative(sprite_index) : 0)) + round(y); }
   object_collisions::object_collisions(): object_transform() {}
   object_collisions::object_collisions(unsigned _id,int _objid): object_transform(_id,_objid) {}
   object_collisions::~object_collisions() {}

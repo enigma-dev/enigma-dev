@@ -41,7 +41,7 @@ extern double direction_difference(double dir1,double dir2);
 
 double move_contact_object(double angle, double max_dist, const int object, const bool solid_only)
 {
-    const double DMIN = 0.000001, DMAX = 1000000;
+    const double DMIN = 1, DMAX = 1000000;
     const double contact_distance = DMIN;
     if (max_dist <= 0)
     {
@@ -56,7 +56,7 @@ double move_contact_object(double angle, double max_dist, const int object, cons
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid)) {continue;}
 
-        if (inst2->x + inst2->bbox_right >= inst1->x + inst1->bbox_left && inst2->y + inst2->bbox_bottom >= inst1->y + inst1->bbox_top && inst2->x + inst2->bbox_left <= inst1->x + inst1->bbox_right && inst2->y + inst2->bbox_top <= inst1->y + inst1->bbox_bottom)
+        if (inst2->$bbox_right() >= inst1->$bbox_left() && inst2->$bbox_bottom() >= inst1->$bbox_top() && inst2->$bbox_left() <= inst1->$bbox_right() && inst2->$bbox_top() <= inst1->$bbox_bottom())
         {
             return 0;
         }
@@ -64,62 +64,62 @@ double move_contact_object(double angle, double max_dist, const int object, cons
         switch (quad)
         {
             case 0:
-                if ((inst2->x + inst2->bbox_left > inst1->x + inst1->bbox_right || inst1->y + inst1->bbox_top > inst2->y + inst2->bbox_bottom) &&
-                direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top),angle) >= 0  &&
-                direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom),angle) <= 0)
+                if ((inst2->$bbox_left() > inst1->$bbox_right() || inst1->$bbox_top() > inst2->$bbox_bottom()) &&
+                direction_difference(point_direction(inst1->$bbox_right(), inst1->$bbox_bottom(), inst2->$bbox_left(), inst2->$bbox_top()),angle) >= 0  &&
+                direction_difference(point_direction(inst1->$bbox_left(), inst1->$bbox_top(), inst2->$bbox_right(), inst2->$bbox_bottom()),angle) <= 0)
                 {
-                    if (direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom),angle) > 0)
+                    if (direction_difference(point_direction(inst1->$bbox_right(), inst1->$bbox_top(), inst2->$bbox_left(), inst2->$bbox_bottom()),angle) > 0)
                     {
-                        max_dist = min(max_dist, ((inst1->y + inst1->bbox_top) - (inst2->y + inst2->bbox_bottom) - contact_distance)/sin_angle);
+                        max_dist = min(max_dist, (inst1->$bbox_top() - inst2->$bbox_bottom() - contact_distance)/sin_angle);
                     }
                     else
                     {
-                        max_dist = min(max_dist, ((inst2->x + inst2->bbox_left) - (inst1->x + inst1->bbox_right) - contact_distance)/cos_angle);
+                        max_dist = min(max_dist, (inst2->$bbox_left() - inst1->$bbox_right() - contact_distance)/cos_angle);
                     }
                 }
             break;
             case 1:
-                if ((inst1->x + inst1->bbox_left > inst2->x + inst2->bbox_right || inst1->y + inst1->bbox_top > inst2->y + inst2->bbox_bottom) &&
-                direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top),angle) <= 0  &&
-                direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom),angle) >= 0)
+                if ((inst1->$bbox_left() > inst2->$bbox_right() || inst1->$bbox_top() > inst2->$bbox_bottom()) &&
+                direction_difference(point_direction(inst1->$bbox_left(), inst1->$bbox_bottom(), inst2->$bbox_right(), inst2->$bbox_top()),angle) <= 0  &&
+                direction_difference(point_direction(inst1->$bbox_right(), inst1->$bbox_top(), inst2->$bbox_left(), inst2->$bbox_bottom()),angle) >= 0)
                 {
-                    if (direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom),angle) > 0)
+                    if (direction_difference(point_direction(inst1->$bbox_left(), inst1->$bbox_top(), inst2->$bbox_right(), inst2->$bbox_bottom()),angle) > 0)
                     {
-                        max_dist = min(max_dist, ((inst2->x + inst2->bbox_right) - (inst1->x + inst1->bbox_left) + contact_distance)/cos_angle);
+                        max_dist = min(max_dist, (inst2->$bbox_right() - inst1->$bbox_left() + contact_distance)/cos_angle);
                     }
                     else
                     {
-                        max_dist = min(max_dist, ((inst1->y + inst1->bbox_top) - (inst2->y + inst2->bbox_bottom) - contact_distance)/sin_angle);
+                        max_dist = min(max_dist, (inst1->$bbox_top() - inst2->$bbox_bottom() - contact_distance)/sin_angle);
                     }
                 }
             break;
             case 2:
-                if ((inst1->x + inst1->bbox_left > inst2->x + inst2->bbox_right || inst2->y + inst2->bbox_top > inst1->y + inst1->bbox_bottom) &&
-                direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top),angle) <= 0  &&
-                direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom),angle) >= 0)
+                if ((inst1->$bbox_left() > inst2->$bbox_right() || inst2->$bbox_top() > inst1->$bbox_bottom()) &&
+                direction_difference(point_direction(inst1->$bbox_right(), inst1->$bbox_bottom(), inst2->$bbox_left(), inst2->$bbox_top()),angle) <= 0  &&
+                direction_difference(point_direction(inst1->$bbox_left(), inst1->$bbox_top(), inst2->$bbox_right(), inst2->$bbox_bottom()),angle) >= 0)
                 {
-                    if (direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top),angle) > 0)
+                    if (direction_difference(point_direction(inst1->$bbox_left(), inst1->$bbox_bottom(), inst2->$bbox_right(), inst2->$bbox_top()),angle) > 0)
                     {
-                        max_dist = min(max_dist, ((inst1->y + inst1->bbox_bottom) - (inst2->y + inst2->bbox_top) + contact_distance)/sin_angle);
+                        max_dist = min(max_dist, (inst1->$bbox_bottom() - inst2->$bbox_top() + contact_distance)/sin_angle);
                     }
                     else
                     {
-                        max_dist = min(max_dist, ((inst2->x + inst2->bbox_right) - (inst1->x + inst1->bbox_left) + contact_distance)/cos_angle);
+                        max_dist = min(max_dist, (inst2->$bbox_right() - inst1->$bbox_left() + contact_distance)/cos_angle);
                     }
                 }
             break;
             case 3:
-                if ((inst2->x + inst2->bbox_left > inst1->x + inst1->bbox_right || inst2->y + inst2->bbox_top > inst1->y + inst1->bbox_bottom) &&
-                direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom),angle) <= 0  &&
-                direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top),angle) >= 0)
+                if ((inst2->$bbox_left() > inst1->$bbox_right() || inst2->$bbox_top() > inst1->$bbox_bottom()) &&
+                direction_difference(point_direction(inst1->$bbox_right(), inst1->$bbox_top(), inst2->$bbox_left(), inst2->$bbox_bottom()),angle) <= 0  &&
+                direction_difference(point_direction(inst1->$bbox_left(), inst1->$bbox_bottom(), inst2->$bbox_right(), inst2->$bbox_top()),angle) >= 0)
                 {
-                    if (direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top),angle) > 0)
+                    if (direction_difference(point_direction(inst1->$bbox_right(), inst1->$bbox_bottom(), inst2->$bbox_left(), inst2->$bbox_top()),angle) > 0)
                     {
-                        max_dist = min(max_dist, ((inst2->x + inst2->bbox_left) - (inst1->x + inst1->bbox_right) - contact_distance)/cos_angle);
+                        max_dist = min(max_dist, (inst2->$bbox_left() - inst1->$bbox_right() - contact_distance)/cos_angle);
                     }
                     else
                     {
-                        max_dist = min(max_dist, ((inst1->y + inst1->bbox_bottom) - (inst2->y + inst2->bbox_top) + contact_distance)/sin_angle);
+                        max_dist = min(max_dist, (inst1->$bbox_bottom() - inst2->$bbox_top() + contact_distance)/sin_angle);
                     }
                 }
             break;
@@ -152,7 +152,7 @@ double move_outside_object(double angle, double max_dist, const int object, cons
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid)) {continue;}
 
-        if (!(inst2->x + inst2->bbox_right >= inst1->x + inst1->bbox_left && inst2->y + inst2->bbox_bottom >= inst1->y + inst1->bbox_top && inst2->x + inst2->bbox_left <= inst1->x + inst1->bbox_right && inst2->y + inst2->bbox_top <= inst1->y + inst1->bbox_bottom))
+        if (!(inst2->$bbox_right() >= inst1->$bbox_left() && inst2->$bbox_bottom() >= inst1->$bbox_top() && inst2->$bbox_left() <= inst1->$bbox_right() && inst2->$bbox_top() <= inst1->$bbox_bottom()))
         {
             continue;
         }
@@ -160,43 +160,43 @@ double move_outside_object(double angle, double max_dist, const int object, cons
         switch (quad)
         {
             case 0:
-                if (direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_top),angle) < 0)
+                if (direction_difference(point_direction(inst1->$bbox_right(), inst1->$bbox_top(), inst2->$bbox_right(), inst2->$bbox_top()),angle) < 0)
                 {
-                    dist = max(dist, ((inst1->y + inst1->bbox_bottom) - (inst2->y + inst2->bbox_top) + contact_distance)/sin_angle);
+                    dist = max(dist, ((inst1->$bbox_bottom()) - (inst2->$bbox_top()) + contact_distance)/sin_angle);
                 }
                 else
                 {
-                    dist = max(dist, ((inst2->x + inst2->bbox_right) - (inst1->x + inst1->bbox_left) + contact_distance)/cos_angle);
+                    dist = max(dist, ((inst2->$bbox_right()) - (inst1->$bbox_left()) + contact_distance)/cos_angle);
                 }
             break;
             case 1:
-                if (direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_top, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_top),angle) < 0)
+                if (direction_difference(point_direction(inst1->$bbox_left(), inst1->$bbox_top(), inst2->$bbox_left(), inst2->$bbox_top()),angle) < 0)
                 {
-                    dist = max(dist, ((inst2->x + inst2->bbox_left) - (inst1->x + inst1->bbox_right) - contact_distance)/cos_angle);
+                    dist = max(dist, ((inst2->$bbox_left()) - (inst1->$bbox_right()) - contact_distance)/cos_angle);
                 }
                 else
                 {
-                    dist = max(dist, ((inst1->y + inst1->bbox_bottom) - (inst2->y + inst2->bbox_top) + contact_distance)/sin_angle);
+                    dist = max(dist, ((inst1->$bbox_bottom()) - (inst2->$bbox_top()) + contact_distance)/sin_angle);
                 }
             break;
             case 2:
-                if (direction_difference(point_direction(inst1->x + inst1->bbox_left, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_left, inst2->y + inst2->bbox_bottom),angle) < 0)
+                if (direction_difference(point_direction(inst1->$bbox_left(), inst1->$bbox_bottom(), inst2->$bbox_left(), inst2->$bbox_bottom()),angle) < 0)
                 {
-                    dist = max(dist, ((inst1->y + inst1->bbox_top) - (inst2->y + inst2->bbox_bottom) - contact_distance)/sin_angle);
+                    dist = max(dist, ((inst1->$bbox_top()) - (inst2->$bbox_bottom()) - contact_distance)/sin_angle);
                 }
                 else
                 {
-                    dist = max(dist, ((inst2->x + inst2->bbox_left) - (inst1->x + inst1->bbox_right) - contact_distance)/cos_angle);
+                    dist = max(dist, ((inst2->$bbox_left()) - (inst1->$bbox_right()) - contact_distance)/cos_angle);
                 }
             break;
             case 3:
-                if (direction_difference(point_direction(inst1->x + inst1->bbox_right, inst1->y + inst1->bbox_bottom, inst2->x + inst2->bbox_right, inst2->y + inst2->bbox_bottom),angle) < 0)
+                if (direction_difference(point_direction(inst1->$bbox_right(), inst1->$bbox_bottom(), inst2->$bbox_right(), inst2->$bbox_bottom()),angle) < 0)
                 {
-                    dist = max(dist, ((inst2->x + inst2->bbox_right) - (inst1->x + inst1->bbox_left) + contact_distance)/cos_angle);
+                    dist = max(dist, ((inst2->$bbox_right()) - (inst1->$bbox_left()) + contact_distance)/cos_angle);
                 }
                 else
                 {
-                    dist = max(dist, ((inst1->y + inst1->bbox_top) - (inst2->y + inst2->bbox_bottom) - contact_distance)/sin_angle);
+                    dist = max(dist, ((inst1->$bbox_top()) - (inst2->$bbox_bottom()) - contact_distance)/sin_angle);
                 }
             break;
         }
@@ -218,13 +218,13 @@ int move_bounce_object(const bool adv, const int object, const bool solid_only)
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid)) {continue;}
 
-        if (inst1->x + inst1->bbox_left <= inst2->x + inst2->bbox_right && inst1->y + inst1->bbox_top <= inst2->y + inst2->bbox_bottom && inst1->x + inst1->bbox_right >= inst2->x + inst2->bbox_left && inst1->y + inst1->bbox_bottom >= inst2->y + inst2->bbox_top)
+        if (inst1->$bbox_left() <= inst2->$bbox_right() && inst1->$bbox_top() <= inst2->$bbox_bottom() && inst1->$bbox_right() >= inst2->$bbox_left() && inst1->$bbox_bottom() >= inst2->$bbox_top())
         {
-            if (inst1->x - inst1->hspeed + inst1->bbox_left > inst2->x + inst2->bbox_right || inst1->x - inst1->hspeed + inst1->bbox_right < inst2->x + inst2->bbox_left)
+            if (inst1->$bbox_left() - inst1->hspeed > inst2->$bbox_right() || inst1->$bbox_right() - inst1->hspeed < inst2->$bbox_left())
             {
                 inst1->hspeed *= -1;
             }
-            if (inst1->y - inst1->vspeed + inst1->bbox_top > inst2->x + inst2->bbox_bottom || inst1->y - inst1->vspeed + inst1->bbox_bottom < inst2->x + inst2->bbox_top)
+            if (inst1->$bbox_top() - inst1->vspeed > inst2->$bbox_bottom() || inst1->$bbox_bottom() - inst1->vspeed < inst2->$bbox_top())
             {
                 inst1->vspeed *= -1;
             }
@@ -232,13 +232,13 @@ int move_bounce_object(const bool adv, const int object, const bool solid_only)
             inst1->y += inst1->vspeed;
             return inst2->id;
         }
-        if (inst1->x + inst1->hspeed + inst1->bbox_left <= inst2->x + inst2->bbox_right && inst1->y + inst1->vspeed + inst1->bbox_top <= inst2->y + inst2->bbox_bottom && inst1->x + inst1->hspeed + inst1->bbox_right >= inst2->x + inst2->bbox_left && inst1->y + inst1->vspeed + inst1->bbox_bottom >= inst2->y + inst2->bbox_top)
+        if (inst1->hspeed + inst1->$bbox_left() <= inst2->$bbox_right() && inst1->vspeed + inst1->$bbox_top() <= inst2->$bbox_bottom() && inst1->hspeed + inst1->$bbox_right() >= inst2->$bbox_left() && inst1->vspeed + inst1->$bbox_bottom() >= inst2->$bbox_top())
         {
-            if (inst1->x + inst1->bbox_left > inst2->x + inst2->bbox_right || inst1->x + inst1->bbox_right < inst2->x + inst2->bbox_left)
+            if (inst1->$bbox_left() > inst2->$bbox_right() || inst1->$bbox_right() < inst2->$bbox_left())
             {
                 inst1->hspeed *= -1;
             }
-            if (inst1->y + inst1->bbox_top > inst2->y + inst2->bbox_bottom || inst1->y + inst1->bbox_bottom < inst2->y + inst2->bbox_top)
+            if (inst1->$bbox_top() > inst2->$bbox_bottom() || inst1->$bbox_bottom() < inst2->$bbox_top())
             {
                 inst1->vspeed *= -1;
             }
