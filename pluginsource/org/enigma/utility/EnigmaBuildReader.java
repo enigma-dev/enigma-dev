@@ -45,8 +45,8 @@ public final class EnigmaBuildReader
 		if (ver != 1)
 			throw new GmFormatException(LGM.currentFile,Messages.format(
 					"EnigmaReader.UNKNOWN_VERSION",ver)); //$NON-NLS-1$
-		Room r = LGM.currentFile.rooms.getUnsafe(f.read4());
-		if (r == null) r = LGM.currentFile.rooms.add();
+		Room r = LGM.currentFile.resMap.getList(Room.class).getUnsafe(f.read4());
+		if (r == null) r = LGM.currentFile.resMap.getList(Room.class).add();
 		int mods = f.read4();
 		for (int i = 0; i < mods; i++)
 			{
@@ -56,7 +56,7 @@ public final class EnigmaBuildReader
 				{
 				case 0:
 					inst = r.addInstance();
-					GmObject temp = LGM.currentFile.gmObjects.getUnsafe(f.read4());
+					GmObject temp = LGM.currentFile.resMap.getList(GmObject.class).getUnsafe(f.read4());
 					if (temp != null) inst.properties.put(PInstance.OBJECT,temp.reference);
 					//					inst.setObject(LGM.currentFile.gmObjects.getUnsafe(f.read4()).reference);
 					inst.setPosition(new Point(f.read4(),f.read4()));

@@ -42,6 +42,7 @@ import org.lateralgm.file.GmStreamEncoder;
 import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.Util;
 import org.lateralgm.resources.Background;
+import org.lateralgm.resources.Extensions;
 import org.lateralgm.resources.Font;
 import org.lateralgm.resources.GameInformation;
 import org.lateralgm.resources.GameInformation.PGameInformation;
@@ -96,6 +97,7 @@ public class EFileWriter
 		writers.put(Room.class,new RoomGmDataWriter());
 		writers.put(GameInformation.class,new GameInfoRtfWriter());
 		writers.put(GameSettings.class,new GameSettingsThreeWriter());
+		writers.put(Extensions.class,new ExtensionsEmptyWriter());
 		writers.put(EnigmaSettings.class,new EnigmaSettingsWriter());
 
 		for (Entry<String,Class<? extends Resource<?,?>>> e : Resource.kindsByName3.entrySet())
@@ -589,8 +591,8 @@ public class EFileWriter
 			Room rm = (Room) r;
 			PrintStream ps = new PrintStream(os);
 
-			ps.println("Creation Codes{1}");
-			ps.println("  Creation Code: Code[" + countLines(rm.getCode()) + "]");
+			ps.println("Creation_Codes{1}");
+			ps.println("  Creation_Code: Code[" + countLines(rm.getCode()) + "]");
 			ps.println(rm.getCode());
 
 			ps.println("BackgroundDefs{" + rm.backgroundDefs.size() + "}");
@@ -602,7 +604,7 @@ public class EFileWriter
 				for (PBackgroundDef bool : bools)
 					if (bd.properties.get(bool)) ps.print(bool.name() + " ");
 				ps.println("Fields[3]");
-				String name = getName(bd.properties.get(PBackgroundDef.BACKGROUND));
+				String name = getName(bd.properties.get(PBackgroundDef.BACKGROUND),null);
 				ps.println("    source: " + name);
 				ps.println("    position: " + implode(bd.properties,PBackgroundDef.X,PBackgroundDef.Y));
 				ps.println("    speed: "
@@ -615,7 +617,7 @@ public class EFileWriter
 				ps.print("  View: ");
 				if (v.properties.get(PView.VISIBLE)) ps.print("VISIBLE ");
 				ps.println("Fields[5]");
-				String name = getName(v.properties.get(PView.OBJECT));
+				String name = getName(v.properties.get(PView.OBJECT),null);
 				ps.println("    follow: " + name);
 				ps.println("    view: "
 						+ implode(v.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,PView.VIEW_H));
@@ -628,28 +630,26 @@ public class EFileWriter
 			ps.println("Instances{" + rm.instances.size() + "}");
 			for (Instance in : rm.instances)
 				{
-				ps.print("  Instance (" + in.properties.get(PInstance.ID) + "): ");
+				int id = in.properties.get(PInstance.ID);
+				String src = getName(in.properties.get(PInstance.OBJECT),null);
+				ps.format("  Instance (%s,%d): ",src,id);
 				if (in.isLocked()) ps.print("LOCKED ");
-				ps.println("Properties{2}");
-				ps.println("    Property: Fields[2]");
-				String name = getName(in.properties.get(PInstance.OBJECT));
-				ps.println("      source: " + name);
-				ps.println("      position: " + implode(in.getPosition()));
-				ps.println("    Property: Code[" + countLines(in.getCreationCode()) + "]");
-				ps.println(in.properties.get(PInstance.CREATION_CODE));
+				ps.print("position(" + implode(in.getPosition()) + ") ");
+				ps.println("Code[" + countLines(in.getCreationCode()) + "]");
+				ps.println(in.getCreationCode());
 				}
 
 			ps.println("Tiles{" + rm.tiles.size() + "}");
 			for (Tile t : rm.tiles)
 				{
-				ps.print("  Tile (" + t.properties.get(PTile.ID) + "): ");
+				int id = t.properties.get(PTile.ID);
+				String src = getName(t.properties.get(PTile.BACKGROUND),null);
+				int depth = t.getDepth();
+				ps.format("  Tile (%s,%d,%d): ",src,depth,id);
 				if (t.isLocked()) ps.print("LOCKED ");
-				ps.println("Fields[4]");
-				String name = getName(t.properties.get(PTile.BACKGROUND));
-				ps.println("    source: " + name);
-				ps.println("    depth: " + t.getDepth());
-				ps.println("    room position: " + implode(t.getRoomPosition()));
-				ps.println("    bkg position: " + implode(t.getBackgroundPosition()));
+				ps.println("Fields[3]");
+				ps.println("    room_position: " + implode(t.getRoomPosition()));
+				ps.println("    bkg_position: " + implode(t.getBackgroundPosition()));
 				ps.println("    size: " + implode(t.getSize()));
 				}
 			}
@@ -682,10 +682,10 @@ public class EFileWriter
 			}
 
 		/** obj must be a ResourceReference */
-		private static String getName(Object obj)
+		private static String getName(Object obj, String def)
 			{
 			Resource<?,?> r = Util.deRef((ResourceReference<?>) obj);
-			return r == null ? new String() : r.getName();
+			return r == null ? def : r.getName();
 			}
 		}
 
@@ -820,7 +820,7 @@ public class EFileWriter
 			//handle guid
 			ps.print(PGameSettings.DPLAY_GUID.name() + ": 0x");
 			byte[] dg = (byte[]) gs.get(PGameSettings.DPLAY_GUID);
-			ps.println(String.format("%032x",new BigInteger(1,dg)));
+			ps.format("%032x\n",new BigInteger(1,dg));
 
 			writeProperties(ps,gs.properties);
 
@@ -851,6 +851,17 @@ public class EFileWriter
 			}
 		}
 
+	static class ExtensionsEmptyWriter implements ResourceWriter
+		{
+		@Override
+		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+				throws IOException
+			{
+			String name = (String) child.getUserObject();
+			new PrintStream(os.next(dir,name + EY));
+			}
+		}
+
 	static class EnigmaSettingsWriter implements ResourceWriter
 		{
 		@Override
@@ -867,9 +878,10 @@ public class EFileWriter
 			pw.println("%e-yaml"); //$NON-NLS-1$
 			pw.println("---"); //$NON-NLS-1$
 			pw.println("Data: " + fn); //$NON-NLS-1$
-			EnigmaRunner.es.toYaml(pw,false);
+			EnigmaSettings es = gf.resMap.get(EnigmaSettings.class).getResource();
+			es.toYaml(pw,false);
 
-			writeData(os.next(dir,fn),EnigmaRunner.es);
+			writeData(os.next(dir,fn),es);
 			}
 
 		public static void writeData(OutputStream next, EnigmaSettings es) throws IOException
@@ -889,6 +901,7 @@ public class EFileWriter
 
 	public static int countLines(String s)
 		{
+		if (s == null || s.isEmpty()) return 0;
 		//Java's lovely line-counting method... Note that split() discards eof newlines.
 		Matcher m = Pattern.compile("\r\n|\r|\n").matcher(s);
 		int lines = 1;

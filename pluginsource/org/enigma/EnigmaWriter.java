@@ -262,13 +262,13 @@ public final class EnigmaWriter
 
 	protected void populateSprites()
 		{
-		int size = i.sprites.size();
+		int size = i.resMap.getList(org.lateralgm.resources.Sprite.class).size();
 		o.spriteCount = size;
 		if (size == 0) return;
 
 		o.sprites = new Sprite.ByReference();
 		Sprite[] osl = (Sprite[]) o.sprites.toArray(size);
-		org.lateralgm.resources.Sprite[] isl = i.sprites.toArray(new org.lateralgm.resources.Sprite[0]);
+		org.lateralgm.resources.Sprite[] isl = i.resMap.getList(org.lateralgm.resources.Sprite.class).toArray(new org.lateralgm.resources.Sprite[0]);
 		for (int s = 0; s < size; s++)
 			{
 			Sprite os = osl[s];
@@ -346,13 +346,13 @@ public final class EnigmaWriter
 
 	protected void populateSounds()
 		{
-		int size = i.sounds.size();
+		int size = i.resMap.getList(org.lateralgm.resources.Sound.class).size();
 		o.soundCount = size;
 		if (size == 0) return;
 
 		o.sounds = new Sound.ByReference();
 		Sound[] osl = (Sound[]) o.sounds.toArray(size);
-		org.lateralgm.resources.Sound[] isl = i.sounds.toArray(new org.lateralgm.resources.Sound[0]);
+		org.lateralgm.resources.Sound[] isl = i.resMap.getList(org.lateralgm.resources.Sound.class).toArray(new org.lateralgm.resources.Sound[0]);
 		for (int s = 0; s < size; s++)
 			{
 			Sound os = osl[s];
@@ -385,13 +385,13 @@ public final class EnigmaWriter
 
 	protected void populateBackgrounds()
 		{
-		int size = i.backgrounds.size();
+		int size = i.resMap.getList(org.lateralgm.resources.Background.class).size();
 		o.backgroundCount = size;
 		if (size == 0) return;
 
 		o.backgrounds = new Background.ByReference();
 		Background[] obl = (Background[]) o.backgrounds.toArray(size);
-		org.lateralgm.resources.Background[] ibl = i.backgrounds.toArray(new org.lateralgm.resources.Background[0]);
+		org.lateralgm.resources.Background[] ibl = i.resMap.getList(org.lateralgm.resources.Background.class).toArray(new org.lateralgm.resources.Background[0]);
 		for (int s = 0; s < size; s++)
 			{
 			Background ob = obl[s];
@@ -418,13 +418,13 @@ public final class EnigmaWriter
 
 	protected void populatePaths()
 		{
-		int size = i.paths.size();
+		int size = i.resMap.getList(org.lateralgm.resources.Path.class).size();
 		o.pathCount = size;
 		if (size == 0) return;
 
 		o.paths = new Path.ByReference();
 		Path[] opl = (Path[]) o.paths.toArray(size);
-		org.lateralgm.resources.Path[] ipl = i.paths.toArray(new org.lateralgm.resources.Path[0]);
+		org.lateralgm.resources.Path[] ipl = i.resMap.getList(org.lateralgm.resources.Path.class).toArray(new org.lateralgm.resources.Path[0]);
 		for (int p = 0; p < size; p++)
 			{
 			Path op = opl[p];
@@ -459,13 +459,13 @@ public final class EnigmaWriter
 		{
 		List<LibAction> qs = getQuestionLibActions();
 
-		int size = i.scripts.size() + qs.size();
+		int size = i.resMap.getList(org.lateralgm.resources.Script.class).size() + qs.size();
 		o.scriptCount = size;
 		if (size == 0) return;
 
 		o.scripts = new Script.ByReference();
 		Script[] osl = (Script[]) o.scripts.toArray(size);
-		org.lateralgm.resources.Script[] isl = i.scripts.toArray(new org.lateralgm.resources.Script[0]);
+		org.lateralgm.resources.Script[] isl = i.resMap.getList(org.lateralgm.resources.Script.class).toArray(new org.lateralgm.resources.Script[0]);
 		for (int s = 0; s < isl.length; s++)
 			{
 			Script oo = osl[s];
@@ -487,7 +487,7 @@ public final class EnigmaWriter
 
 	protected void populateFonts()
 		{
-		int size = i.fonts.size() + 1;
+		int size = i.resMap.getList(org.lateralgm.resources.Font.class).size() + 1;
 		o.fontCount = size;
 
 		o.fonts = new Font.ByReference();
@@ -508,7 +508,7 @@ public final class EnigmaWriter
 
 		if (size == 1) return;
 
-		org.lateralgm.resources.Font[] ifl = i.fonts.toArray(new org.lateralgm.resources.Font[0]);
+		org.lateralgm.resources.Font[] ifl = i.resMap.getList(org.lateralgm.resources.Font.class).toArray(new org.lateralgm.resources.Font[0]);
 		for (int f = 1; f < size; f++)
 			{
 			Font of = ofl[f];
@@ -584,13 +584,13 @@ public final class EnigmaWriter
 
 	protected void populateTimelines()
 		{
-		int size = i.timelines.size();
+		int size = i.resMap.getList(org.lateralgm.resources.Timeline.class).size();
 		o.timelineCount = size;
 		if (size == 0) return;
 
 		o.timelines = new Timeline.ByReference();
 		Timeline[] otl = (Timeline[]) o.timelines.toArray(size);
-		org.lateralgm.resources.Timeline[] itl = i.timelines.toArray(new org.lateralgm.resources.Timeline[0]);
+		org.lateralgm.resources.Timeline[] itl = i.resMap.getList(org.lateralgm.resources.Timeline.class).toArray(new org.lateralgm.resources.Timeline[0]);
 		for (int t = 0; t < size; t++)
 			{
 			Timeline ot = otl[t];
@@ -614,13 +614,13 @@ public final class EnigmaWriter
 
 	protected void populateObjects()
 		{
-		int size = i.gmObjects.size();
+		int size = i.resMap.getList(org.lateralgm.resources.GmObject.class).size();
 		o.gmObjectCount = size;
 		if (size == 0) return;
 
 		o.gmObjects = new GmObject.ByReference();
 		GmObject[] ool = (GmObject[]) o.gmObjects.toArray(size);
-		org.lateralgm.resources.GmObject[] iol = i.gmObjects.toArray(new org.lateralgm.resources.GmObject[0]);
+		org.lateralgm.resources.GmObject[] iol = i.resMap.getList(org.lateralgm.resources.GmObject.class).toArray(new org.lateralgm.resources.GmObject[0]);
 		for (int s = 0; s < size; s++)
 			{
 			GmObject oo = ool[s];

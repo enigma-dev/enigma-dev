@@ -39,7 +39,7 @@ public class EEFReader
 
 		protected static int tostring_calls = 0;
 
-		public String toString()
+		public String toFullString()
 			{
 			tostring_calls++;
 			String indent = "";
@@ -76,7 +76,7 @@ public class EEFReader
 				res += indent + "  " + i.trim() + "\n";
 			for (EEFNode child : children)
 				{
-				res += child;
+				res += child.toFullString();
 				res += res.endsWith("\n") ? "" : "\n";
 				}
 
@@ -180,8 +180,8 @@ public class EEFReader
 				final int spos = pos;
 				while (++pos < line.length() && isWordChar(line.charAt(pos)))
 					;
-				final String elementName = line.substring(spos,pos);
-				if (blockName != null && !blockName.matches(elementName + "e?s"))
+				String elementName = line.substring(spos,pos);
+				if (blockName != null && !blockName.matches(elementName + "?i?e?s"))
 					{
 					System.err.println(LINES + " Warning: instance `" + elementName
 							+ "' Does not appear to be a member of `" + blockName + "'");

@@ -76,6 +76,8 @@ import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFile.FormatFlavor;
+import org.lateralgm.file.GmFile.ResourceHolder;
+import org.lateralgm.file.GmFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.jedit.GMLKeywords;
 import org.lateralgm.jedit.GMLKeywords.Construct;
@@ -115,7 +117,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public EnigmaFrame ef = new EnigmaFrame();
 	/** This is global scoped so that it doesn't get GC'd */
 	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
-	public static EnigmaSettings es; //don't like this static, but it has to be for EFileWriter to see it.
 	public EnigmaSettingsFrame esf;
 	public JMenuItem busy, run, debug, design, compile, rebuild;
 	public JMenuItem mImport, showFunctions, showGlobals, showTypes;
@@ -124,7 +125,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public EnigmaRunner()
 		{
-		addReaderAndWriter();
+		addReasourceHook();
 		populateMenu();
 		populateTree();
 		LGM.addReloadListener(this);
@@ -176,7 +177,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						}
 
 					ENIGMA_READY = true;
-					es = new EnigmaSettings();
+					EnigmaSettings es = LGM.currentFile.resMap.get(EnigmaSettings.class).getResource();
 					esf = new EnigmaSettingsFrame(es);
 					LGM.mdi.add(esf);
 					es.commitToDriver(DRIVER);
@@ -283,7 +284,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		return true;
 		}
 
-	void addReaderAndWriter()
+	void addReasourceHook()
 		{
 		EgmIO io = new EgmIO();
 		FileChooser.readers.add(io);
@@ -300,6 +301,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		String name = Messages.getString("EnigmaRunner.RESNODE_NAME"); //$NON-NLS-1$
 		Resource.kindNames.put(EnigmaSettings.class,name);
 		Resource.kindNamesPlural.put(EnigmaSettings.class,name);
+
+		LGM.currentFile.resMap.put(EnigmaSettings.class,new SingletonResourceHolder<EnigmaSettings>(
+				new EnigmaSettings()));
 
 		ResourceFrame.factories.put(EnigmaSettings.class,new ResourceFrameFactory()
 			{
@@ -573,6 +577,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		if (!assertReady()) return;
 
+		EnigmaSettings es = LGM.currentFile.resMap.get(EnigmaSettings.class).getResource();
+
 		if (es.targets.get(TargetHandler.COMPILER) == null
 				|| es.targets.get(TargetHandler.ids[1]) == null)
 			{
@@ -646,8 +652,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		if (!assertReady()) return null;
 
-		String osl[] = new String[LGM.currentFile.scripts.size()];
-		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
+		String osl[] = new String[LGM.currentFile.resMap.getList(Script.class).size()];
+		Script isl[] = LGM.currentFile.resMap.getList(Script.class).toArray(new Script[0]);
 		for (int i = 0; i < osl.length; i++)
 			osl[i] = isl[i].getName();
 		return DRIVER.syntaxCheck(osl.length,new StringArray(osl),code);
@@ -883,7 +889,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (newRoot) populateTree();
 		if (ENIGMA_READY)
 			{
-			es.copyInto(esf.resOriginal);
+			ResourceHolder<EnigmaSettings> rh = LGM.currentFile.resMap.get(EnigmaSettings.class);
+			if (rh == null)
+				LGM.currentFile.resMap.put(EnigmaSettings.class,
+						rh = new SingletonResourceHolder<EnigmaSettings>(new EnigmaSettings()));
+			rh.getResource().copyInto(esf.resOriginal);
 			esf.revertResource(); //updates local es copy as well
 			}
 		}

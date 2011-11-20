@@ -1,6 +1,7 @@
 package org.enigma;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,16 +31,21 @@ public class EefDisplay extends JSplitPane implements TreeSelectionListener
 		super();
 
 		ta = new JTextArea(20,40);
+		ta.setFont(new Font(Font.MONOSPACED,0,12));
 		//		ta.setEditable(false);
 
 		t = new JTree(new EEFTreeNode(ef,null));
-		t.setPreferredSize(new Dimension(150,0));
+		//		t.setVisibleRowCount(0);
+		//		;t.setPreferredSize(new Dimension(150,100));
 		t.setRootVisible(false);
 		t.setShowsRootHandles(true);
 		t.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		t.addTreeSelectionListener(this);
 
-		setLeftComponent(new JScrollPane(t));
+		JScrollPane p = new JScrollPane(t);
+		p.setPreferredSize(new Dimension(170,p.getPreferredSize().height));
+
+		setLeftComponent(p);
 		setRightComponent(new JScrollPane(ta));
 		}
 
@@ -111,6 +117,7 @@ public class EefDisplay extends JSplitPane implements TreeSelectionListener
 			super(parent);
 			obj = n;
 			name = getName();
+			if (name == null || name.isEmpty()) name = "<unnamed>";
 
 			children = new TreeNode[n.children.size()];
 			for (int i = 0; i < children.length; i++)
@@ -153,9 +160,10 @@ public class EefDisplay extends JSplitPane implements TreeSelectionListener
 
 	static String nodeInfo(EEFNode node)
 		{
-		StringBuilder sb = new StringBuilder();
-		for (String s : node.lineAttribs)
-			sb.append(s).append("\n");
+		if (node.lineAttribs.isEmpty()) return new String();
+		StringBuilder sb = new StringBuilder(node.lineAttribs.get(0).replace(' ','·'));
+		for (int i = 1; i < node.lineAttribs.size(); i++)
+			sb.append("¶\n").append(node.lineAttribs.get(i).replace(' ','·'));
 		return sb.toString();
 		}
 
@@ -175,7 +183,7 @@ public class EefDisplay extends JSplitPane implements TreeSelectionListener
 
 	public static void main(String[] args) throws IOException
 		{
-		File fi = new File(System.getProperty("user.home"),"obj_player.obj");
+		File fi = new File(System.getProperty("user.home"),"rm_0.rme");
 		EEFNode ef = EEFReader.parse(new FileInputStream(fi));
 
 		JFrame f = new JFrame("Eef Viewer");

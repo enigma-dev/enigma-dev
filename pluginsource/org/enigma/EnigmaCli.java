@@ -13,11 +13,11 @@ import java.io.FileNotFoundException;
 
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaCallbacks;
+import org.enigma.backend.EnigmaCallbacks.OutputHandler;
 import org.enigma.backend.EnigmaDriver;
+import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
-import org.enigma.backend.EnigmaCallbacks.OutputHandler;
-import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFormatException;
@@ -124,9 +124,9 @@ public class EnigmaCli
 		SyntaxError err = ess.commitToDriver(DRIVER); //returns SyntaxError
 		if (err.absoluteIndex != -1) return err;
 
-		int scrNum = LGM.currentFile.scripts.size();
+		int scrNum = LGM.currentFile.resMap.getList(Script.class).size();
 		String osl[] = new String[scrNum];
-		Script isl[] = LGM.currentFile.scripts.toArray(new Script[0]);
+		Script isl[] = LGM.currentFile.resMap.getList(Script.class).toArray(new Script[0]);
 		for (int i = 0; i < scrNum; i++)
 			osl[i] = isl[i].getName();
 		StringArray scripts = new StringArray(osl);

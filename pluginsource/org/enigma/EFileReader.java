@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -46,12 +48,14 @@ import javax.swing.JLabel;
 import javax.swing.filechooser.FileView;
 
 import org.enigma.backend.EnigmaSettings;
+import org.enigma.backend.EnigmaSettings.PEnigmaSettings;
 import org.enigma.messages.Messages;
 import org.enigma.utility.APNGExperiments;
 import org.enigma.utility.EEFReader;
 import org.enigma.utility.EEFReader.EEFNode;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
+import org.lateralgm.file.GmFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.file.ResourceList;
@@ -69,7 +73,6 @@ import org.lateralgm.resources.GameSettings;
 import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.GmObject;
 import org.lateralgm.resources.GmObject.PGmObject;
-import org.lateralgm.resources.InstantiableResource;
 import org.lateralgm.resources.Path;
 import org.lateralgm.resources.Path.PPath;
 import org.lateralgm.resources.Resource;
@@ -103,7 +106,7 @@ public class EFileReader
 	public static final String EY = ".ey"; //$NON-NLS-1$
 	public static final boolean ADD_EY_ORPHANS = true;
 
-	static List<PostponedRef> postpone = new LinkedList<PostponedRef>();
+	static Queue<PostponedRef> postpone = new LinkedList<PostponedRef>();
 
 	static interface PostponedRef
 		{
@@ -136,7 +139,7 @@ public class EFileReader
 
 	// Module maps
 	/** Used to register readers with their resource kinds. */
-	static Map<Class<? extends Resource<?,?>>,ResourceReader> readers = new HashMap<Class<? extends Resource<?,?>>,ResourceReader>();
+	static Map<Class<? extends Resource<?,?>>,ResourceReader<?>> readers = new HashMap<Class<? extends Resource<?,?>>,ResourceReader<?>>();
 	static
 		{
 		// SPRITE,SOUND,BACKGROUND,PATH,SCRIPT,FONT,TIMELINE,OBJECT,ROOM,GAMEINFO,GAMESETTINGS,EXTENSIONS
@@ -151,6 +154,7 @@ public class EFileReader
 		readers.put(Room.class,new RoomGmDataReader());
 		readers.put(GameInformation.class,new GameInfoRtfReader());
 		readers.put(GameSettings.class,new GameSettingsReader());
+		readers.put(Extensions.class,new ExtensionsEmptyReader());
 		readers.put(EnigmaSettings.class,new EnigmaSettingsReader());
 		}
 
@@ -319,29 +323,35 @@ public class EFileReader
 	 * Interface for registering a method for reading for a kind of resource. An
 	 * inheritor would get mapped to a Kind via the <code>readers</code> map.
 	 */
-	public static interface ResourceReader
+	public static interface ResourceReader<R extends Resource<R,?>>
 		{
-		public Resource<?,?> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
+		public void read(EGMFile f, GmFile gf, InputStream in, String dir, String name, R r)
 				throws IOException;
+
+		public void readUnknown(EGMFile f, GmFile gf, InputStream is, String dir, String name,
+				Resource<?,?> r) throws IOException;
 		}
 
-	public static abstract class DataPropReader<R extends InstantiableResource<R,P>, P extends Enum<P>>
-			implements ResourceReader
+	public static abstract class DataPropReader<R extends Resource<R,P>, P extends Enum<P>> implements
+			ResourceReader<R>
 		{
+		@SuppressWarnings("unchecked")
+		public void readUnknown(EGMFile f, GmFile gf, InputStream is, String dir, String name,
+				Resource<?,?> r) throws IOException
+			{
+			read(f,gf,is,dir,name,(R) r);
+			}
+
 		@Override
-		public Resource<R,P> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
+		public void read(EGMFile f, GmFile gf, InputStream in, String dir, String name, R r)
 				throws IOException
 			{
 			Properties i = new Properties();
 			i.load(in);
 
-			R r = construct();
 			r.setName(name);
 			readProperties(gf,r.properties,i);
 			readDataFile(f,gf,r,i,dir);
-
-			getList(gf).add(r);
-			return r;
 			}
 
 		protected void readProperties(GmFile gf, PropertyMap<P> p, Properties i)
@@ -352,7 +362,7 @@ public class EFileReader
 				if (allowProperty(key))
 					{
 					String kn = key.name();
-					put(gf,p,key,i.get(kn));
+					put(gf,p,key,i.getProperty(kn));
 					i.remove(kn);
 					}
 				}
@@ -362,7 +372,7 @@ public class EFileReader
 		protected void readDataFile(EGMFile f, GmFile gf, R r, Properties i, String dir)
 				throws IOException
 			{
-			String fn = i.get("Data").toString(); //$NON-NLS-1$
+			String fn = i.getProperty("Data"); //$NON-NLS-1$
 			if (!dir.isEmpty()) fn = dir + '/' + fn;
 			f.getEntry(fn);
 			if (f.exists())
@@ -406,10 +416,10 @@ public class EFileReader
 		 * Subclasses should override this method to explicitly convert
 		 * special keys or keys whose default value is null.
 		 */
-		protected void put(GmFile gf, PropertyMap<P> p, P key, Object o)
+		protected void put(GmFile gf, PropertyMap<P> p, P key, String val)
 			{
 			Object def = p.get(key);
-			p.put(key,convert(o.toString(),def == null ? null : def.getClass()));
+			p.put(key,convert(val,def == null ? null : def.getClass()));
 			}
 
 		public static <K extends Enum<K>>void putRef(ResourceList<?> list, PropertyMap<K> p, K key,
@@ -419,11 +429,7 @@ public class EFileReader
 			if (!pr.invoke()) postpone.add(pr);
 			}
 
-		protected abstract R construct();
-
 		protected abstract void readData(GmFile gf, R r, InputStream in);
-
-		protected abstract ResourceList<R> getList(GmFile gf);
 
 		/**
 		 * Returns whether the following property is expected/should be read from the properties file.
@@ -478,6 +484,8 @@ public class EFileReader
 	public static GmFile readEgmFile(File f, ResNode root, boolean zip) throws GmFormatException
 		{
 		GmFile gf = new GmFile();
+		gf.resMap.put(EnigmaSettings.class,new SingletonResourceHolder<EnigmaSettings>(
+				new EnigmaSettings()));
 		gf.uri = f.toURI();
 		try
 			{
@@ -494,8 +502,8 @@ public class EFileReader
 		{
 		gf.format = EFileWriter.FLAVOR_EGM;
 		readNodeChildren(f,gf,root,null,new String());
-		root.add(new ResNode(org.lateralgm.messages.Messages.getString("LGM.EXT"),
-				ResNode.STATUS_SECONDARY,Extensions.class,null));
+		while (!postpone.isEmpty())
+			postpone.remove().invoke();
 		}
 
 	// Workhorse methods
@@ -585,13 +593,15 @@ public class EFileReader
 			throws IOException
 		{
 		System.out.println("_" + dir + '/' + name);
-		ResourceReader reader = readers.get(kind);
+		ResourceReader<?> reader = readers.get(kind);
 		if (reader == null)
 			{
 			System.err.println(Messages.format("EFileReader.NO_READER",kind)); //$NON-NLS-1$
 			return null;
 			}
-		Resource<?,?> r = reader.read(f,gf,is,dir,name);
+
+		Resource<?,?> r = gf.resMap.get(kind).getResource();
+		reader.readUnknown(f,gf,is,dir,name,r);
 		return r == null ? null : r.reference;
 		}
 
@@ -600,12 +610,6 @@ public class EFileReader
 
 	static class SpriteApngReader extends DataPropReader<Sprite,PSprite>
 		{
-		@Override
-		protected Sprite construct()
-			{
-			return new Sprite();
-			}
-
 		protected void readData(GmFile gf, Sprite r, InputStream in)
 			{
 			try
@@ -616,28 +620,10 @@ public class EFileReader
 				{
 				}
 			}
-
-		@Override
-		protected ResourceList<Sprite> getList(GmFile gf)
-			{
-			return gf.sprites;
-			}
 		}
 
 	static class SoundReader extends DataPropReader<Sound,PSound>
 		{
-		@Override
-		protected Sound construct()
-			{
-			return new Sound();
-			}
-
-		@Override
-		protected ResourceList<Sound> getList(GmFile gf)
-			{
-			return gf.sounds;
-			}
-
 		@Override
 		protected void readData(GmFile gf, Sound r, InputStream in)
 			{
@@ -655,18 +641,6 @@ public class EFileReader
 	static class BackgroundReader extends DataPropReader<Background,PBackground>
 		{
 		@Override
-		protected Background construct()
-			{
-			return new Background();
-			}
-
-		@Override
-		protected ResourceList<Background> getList(GmFile gf)
-			{
-			return gf.backgrounds;
-			}
-
-		@Override
 		protected void readData(GmFile gf, Background r, InputStream in)
 			{
 			try
@@ -682,18 +656,6 @@ public class EFileReader
 
 	static class PathTextReader extends DataPropReader<Path,PPath>
 		{
-		@Override
-		protected Path construct()
-			{
-			return new Path();
-			}
-
-		@Override
-		protected ResourceList<Path> getList(GmFile gf)
-			{
-			return gf.paths;
-			}
-
 		@Override
 		protected void readData(GmFile gf, Path r, InputStream in)
 			{
@@ -731,18 +693,6 @@ public class EFileReader
 			}
 
 		@Override
-		protected Script construct()
-			{
-			return new Script();
-			}
-
-		@Override
-		protected ResourceList<Script> getList(GmFile gf)
-			{
-			return gf.scripts;
-			}
-
-		@Override
 		protected void readData(GmFile gf, Script r, InputStream in)
 			{
 			try
@@ -759,18 +709,6 @@ public class EFileReader
 	static class FontRawReader extends DataPropReader<Font,PFont>
 		{
 		@Override
-		protected Font construct()
-			{
-			return new Font();
-			}
-
-		@Override
-		protected ResourceList<Font> getList(GmFile gf)
-			{
-			return gf.fonts;
-			}
-
-		@Override
 		protected void readDataFile(EGMFile f, GmFile gf, Font r, Properties i, String dir)
 				throws IOException
 			{
@@ -786,12 +724,6 @@ public class EFileReader
 
 	static class ObjectEefReader extends DataPropReader<GmObject,PGmObject>
 		{
-		@Override
-		protected GmObject construct()
-			{
-			return new GmObject();
-			}
-
 		protected void readData(GmFile gf, GmObject r, InputStream in)
 			{
 			EEFNode en = EEFReader.parse(in);
@@ -862,26 +794,11 @@ public class EFileReader
 							System.out.println("Name: " + la.name);
 							for (int i = 0; i < actnode.lineAttribs.size(); i++)
 								{
-								switch (la.libArguments[i].kind)
-									{
-									case Argument.ARG_BACKGROUND:
-									case Argument.ARG_FONT:
-									case Argument.ARG_PATH:
-									case Argument.ARG_ROOM:
-									case Argument.ARG_SCRIPT:
-									case Argument.ARG_SOUND:
-									case Argument.ARG_SPRITE:
-									case Argument.ARG_TIMELINE:
-										args[i] = new Argument(la.libArguments[i].kind,
-												actnode.lineAttribs.get(i).trim(),null);
-										putArgumentRef(gf,args[i],actnode.lineAttribs.get(i).trim());
-										break;
-									default:
-										args[i] = new Argument(la.libArguments[i].kind,
-												actnode.lineAttribs.get(i).trim(),null);
-										System.out.println("  Argument(" + actnode.lineAttribs.get(i).trim() + ")");
-										break;
-									}
+								String field = actnode.lineAttribs.get(i).trim();
+								args[i] = new Argument(la.libArguments[i].kind,field,null);
+								Class<? extends Resource<?,?>> kind = Argument.getResourceKind(la.libArguments[i].kind);
+								if (kind != null && Resource.class.isAssignableFrom(kind))
+									putArgumentRef(gf,args[i],field);
 								}
 							}
 						else
@@ -890,7 +807,6 @@ public class EFileReader
 							args[0] = new Argument(la.libArguments[0].kind,implode(actnode.lineAttribs),null);
 							}
 						a.setArguments(args);
-						//arguments, relative, appliesTo, not
 						}
 					}
 			}
@@ -908,7 +824,7 @@ public class EFileReader
 							act.setAppliesTo(GmObject.OBJECT_OTHER);
 							return true;
 							}
-						GmObject temp = gf.gmObjects.get(name);
+						GmObject temp = gf.resMap.getList(GmObject.class).get(name);
 						if (temp != null) act.setAppliesTo(temp.reference);
 						return temp != null;
 						}
@@ -923,7 +839,7 @@ public class EFileReader
 					@Override
 					public boolean invoke()
 						{
-						GmObject temp = gf.gmObjects.get(name);
+						GmObject temp = gf.resMap.getList(GmObject.class).get(name);
 						if (temp != null) e.other = temp.reference;
 						return temp != null;
 						}
@@ -938,7 +854,7 @@ public class EFileReader
 					@Override
 					public boolean invoke()
 						{
-						Resource<?,?> temp = gf.getList(Argument.getResourceKind(arg.kind)).get(name);
+						Resource<?,?> temp = ((ResourceList<?>) gf.resMap.get(Argument.getResourceKind(arg.kind))).get(name);
 						if (temp != null) arg.setRes(temp.reference);
 						return temp != null;
 						}
@@ -947,25 +863,19 @@ public class EFileReader
 			}
 
 		@Override
-		protected ResourceList<GmObject> getList(GmFile gf)
-			{
-			return gf.gmObjects;
-			}
-
-		@Override
-		protected void put(GmFile gf, PropertyMap<PGmObject> p, PGmObject key, Object o)
+		protected void put(GmFile gf, PropertyMap<PGmObject> p, PGmObject key, String val)
 			{
 			if (key == PGmObject.SPRITE || key == PGmObject.MASK)
 				{
-				putRef(gf.sprites,p,key,o.toString());
+				putRef(gf.resMap.getList(Sprite.class),p,key,val.toString());
 				return;
 				}
 			if (key == PGmObject.PARENT)
 				{
-				putRef(gf.gmObjects,p,key,o.toString());
+				putRef(gf.resMap.getList(GmObject.class),p,key,val.toString());
 				return;
 				}
-			super.put(gf,p,key,o);
+			super.put(gf,p,key,val);
 			}
 		}
 
@@ -978,19 +888,13 @@ public class EFileReader
 			}
 
 		@Override
-		protected Room construct()
-			{
-			return new Room();
-			}
-
-		@Override
 		protected void readData(GmFile gf, Room r, InputStream in)
 			{
 			EEFNode en = EEFReader.parse(in);
 			for (EEFNode child : en.children)
 				{
 				String blockName = child.blockName.toLowerCase();
-				if (blockName.equals("creation codes") && !child.children.isEmpty())
+				if (blockName.equals("creation_codes") && !child.children.isEmpty())
 					{
 					r.setCode(implode(child.children.get(0).lineAttribs));
 					continue;
@@ -1007,13 +911,13 @@ public class EFileReader
 						for (PBackgroundDef bool : bools)
 							bdo.properties.put(bool,bdi.namedAttributes.containsKey(bool.name().toLowerCase()));
 
-						Properties p = toProps(bdi.lineAttribs);
-						String source = p.getProperty("source");
+						UsableProperties p = new UsableProperties(bdi.lineAttribs);
+						String source = p.use("source");
 						if (source != null)
-							putRef(gf.backgrounds,bdo.properties,PBackgroundDef.BACKGROUND,source);
-						putPoint(p.getProperty("position"),bdo.properties,PBackgroundDef.X,PBackgroundDef.Y);
-						putPoint(p.getProperty("speed"),bdo.properties,PBackgroundDef.H_SPEED,
-								PBackgroundDef.V_SPEED);
+							putRef(gf.resMap.getList(Background.class),bdo.properties,PBackgroundDef.BACKGROUND,
+									source);
+						putPoint(p.use("position"),bdo.properties,PBackgroundDef.X,PBackgroundDef.Y);
+						putPoint(p.use("speed"),bdo.properties,PBackgroundDef.H_SPEED,PBackgroundDef.V_SPEED);
 						}
 					} //BackgroundDefs
 				if (blockName.equals("views"))
@@ -1025,51 +929,107 @@ public class EFileReader
 
 						vo.properties.put(PView.VISIBLE,vi.namedAttributes.containsKey("visible"));
 
-						Properties p = toProps(vi.lineAttribs);
-						String follow = p.getProperty("follow");
-						if (follow != null) putRef(gf.gmObjects,vo.properties,PView.OBJECT,follow);
-						putRect(p.getProperty("view"),vo.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,
-								PView.VIEW_H);
-						putRect(p.getProperty("port"),vo.properties,PView.PORT_X,PView.PORT_Y,PView.PORT_W,
-								PView.PORT_H);
-						putPoint(p.getProperty("border"),vo.properties,PView.BORDER_H,PView.BORDER_V);
-						putPoint(p.getProperty("speed"),vo.properties,PView.SPEED_H,PView.SPEED_V);
+						UsableProperties p = new UsableProperties(vi.lineAttribs);
+						String follow = p.use("follow");
+						if (follow != null)
+							putRef(gf.resMap.getList(GmObject.class),vo.properties,PView.OBJECT,follow);
+						putRect(p.use("view"),vo.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,PView.VIEW_H);
+						putRect(p.use("port"),vo.properties,PView.PORT_X,PView.PORT_Y,PView.PORT_W,PView.PORT_H);
+						putPoint(p.use("border"),vo.properties,PView.BORDER_H,PView.BORDER_V);
+						putPoint(p.use("speed"),vo.properties,PView.SPEED_H,PView.SPEED_V);
 						}
 					} //Views
+
+				if (blockName.equals("instances"))
+					{
+					int maxId = 100000;
+					for (EEFNode ii : child.children)
+						{
+						if (ii.id.length == 0)
+							{
+							System.err.println("Discarding Instance with insufficient identifying information");
+							continue;
+							}
+						Instance io = r.addInstance();
+
+						putRef(gf.resMap.getList(GmObject.class),io.properties,PInstance.OBJECT,ii.id[0]);
+
+						int id = (ii.id.length > 1) ? parseInt(ii.id[1],-1) : -1;
+						if (id != -1)
+							io.properties.put(PInstance.ID,id);
+						else
+							id = io.properties.get(PInstance.ID);
+						if (id > maxId) maxId = id;
+
+						io.setLocked(ii.namedAttributes.containsKey("locked"));
+						String[] pos = ii.namedAttributes.get("position");
+						if (pos != null && pos.length == 2)
+							{
+							io.properties.put(PInstance.X,parseInt(pos[0],0));
+							io.properties.put(PInstance.Y,parseInt(pos[1],0));
+							}
+
+						io.setCreationCode(implode(ii.lineAttribs));
+						}
+					gf.lastInstanceId = maxId;
+					} //Instances
+				if (blockName.equals("tiles"))
+					{
+					int maxId = 10000000;
+					for (EEFNode ti : child.children)
+						{
+						if (ti.id.length < 2)
+							{
+							System.err.println("Discarding Tile with insufficient identifying information");
+							continue;
+							}
+						Tile to = new Tile(r);
+
+						putRef(gf.resMap.getList(Background.class),to.properties,PTile.BACKGROUND,ti.id[0]);
+						to.setDepth(parseInt(ti.id[1],0));
+
+						int id = (ti.id.length > 2) ? parseInt(ti.id[2],-1) : -1;
+						if (id != -1)
+							to.properties.put(PTile.ID,id);
+						else
+							id = to.properties.get(PTile.ID);
+						if (id > maxId) maxId = id;
+
+						to.setLocked(ti.namedAttributes.containsKey("locked"));
+
+						UsableProperties p = new UsableProperties(ti.lineAttribs);
+						putPoint(p.use("room_position"),to.properties,PTile.ROOM_X,PTile.ROOM_Y);
+						putPoint(p.use("bkg_position"),to.properties,PTile.BG_X,PTile.BG_Y);
+						Point pt = toPoint(p.use("size"));
+						if (pt != null) to.setSize(new Dimension(pt.x,pt.y));
+						}
+					gf.lastTileId = maxId;
+					} //Tiles
 				} //each root node
 			} //readData
 
-		@Override
-		protected ResourceList<Room> getList(GmFile gf)
+		private static int parseInt(String s, int def)
 			{
-			return gf.rooms;
-			}
-
-		static Properties toProps(List<String> lines)
-			{
-			Properties p = new Properties();
 			try
 				{
-				p.load(new StringReader(implode(lines)));
+				return Integer.parseInt(s);
 				}
-			catch (IOException e)
+			catch (NumberFormatException e)
 				{
-				//This should never happen, but assuming it could
-				//Unable to load properties can be treated as empty p
+				return def;
 				}
-			//At this point I'd love to ensure all the keys are lowercase
-			return p;
 			}
 
-		static String NUM = "\\s*([0-9]+)\\s*";
-		static Pattern PT = Pattern.compile("\\(?" + NUM + "," + NUM + "\\)?");
-		static Pattern RECT = Pattern.compile("\\(?" + NUM + "," + NUM + "," + NUM + "," + NUM + "\\)?");
+		private static String NUM = "\\s*([0-9]+)\\s*";
+		private static Pattern PT = Pattern.compile("\\(?" + NUM + "," + NUM + "\\)?");
+		private static Pattern RECT = Pattern.compile("\\(?" + NUM + "," + NUM + "," + NUM + "," + NUM
+				+ "\\)?");
 
-		static Point toPoint(String s)
+		private static Point toPoint(String s)
 			{
 			if (s == null) return null;
 			Matcher m = PT.matcher(s);
-			if (m.matches() && m.groupCount() != 2) return null;
+			if (!m.matches() || m.groupCount() != 2) return null;
 			try
 				{
 				return new Point(Integer.parseInt(m.group(1)),Integer.parseInt(m.group(2)));
@@ -1080,23 +1040,23 @@ public class EFileReader
 				}
 			}
 
-		static <K extends Enum<K>>void putPoint(Point pt, PropertyMap<K> map, K x, K y)
+		private static <K extends Enum<K>>void putPoint(Point pt, PropertyMap<K> map, K x, K y)
 			{
 			if (pt == null) return;
 			map.put(x,pt.x);
 			map.put(y,pt.y);
 			}
 
-		static <K extends Enum<K>>void putPoint(String s, PropertyMap<K> map, K x, K y)
+		private static <K extends Enum<K>>void putPoint(String s, PropertyMap<K> map, K x, K y)
 			{
 			putPoint(toPoint(s),map,x,y);
 			}
 
-		static Rectangle toRect(String s)
+		private static Rectangle toRect(String s)
 			{
 			if (s == null) return null;
-			Matcher m = PT.matcher(s);
-			if (m.matches() && m.groupCount() != 4) return null;
+			Matcher m = RECT.matcher(s);
+			if (!m.matches() || m.groupCount() != 4) return null;
 			try
 				{
 				int c[] = new int[4];
@@ -1110,7 +1070,8 @@ public class EFileReader
 				}
 			}
 
-		static <K extends Enum<K>>void putRect(Rectangle rect, PropertyMap<K> map, K x, K y, K w, K h)
+		private static <K extends Enum<K>>void putRect(Rectangle rect, PropertyMap<K> map, K x, K y,
+				K w, K h)
 			{
 			if (rect == null) return;
 			map.put(x,rect.x);
@@ -1119,7 +1080,7 @@ public class EFileReader
 			map.put(h,rect.height);
 			}
 
-		static <K extends Enum<K>>void putRect(String s, PropertyMap<K> map, K x, K y, K w, K h)
+		private static <K extends Enum<K>>void putRect(String s, PropertyMap<K> map, K x, K y, K w, K h)
 			{
 			putRect(toRect(s),map,x,y,w,h);
 			}
@@ -1127,18 +1088,6 @@ public class EFileReader
 
 	static class RoomGmDataReader extends DataPropReader<Room,PRoom>
 		{
-		@Override
-		protected Room construct()
-			{
-			return new Room();
-			}
-
-		@Override
-		protected ResourceList<Room> getList(GmFile gf)
-			{
-			return gf.rooms;
-			}
-
 		@Override
 		protected void readData(GmFile gf, Room rm, InputStream in2)
 			{
@@ -1150,7 +1099,8 @@ public class EFileReader
 					{
 					BackgroundDef bk = rm.backgroundDefs.get(j);
 					in.readBool(bk.properties,PBackgroundDef.VISIBLE,PBackgroundDef.FOREGROUND);
-					putRef(gf.backgrounds,bk.properties,PBackgroundDef.BACKGROUND,in.readStr());
+					putRef(gf.resMap.getList(Background.class),bk.properties,PBackgroundDef.BACKGROUND,
+							in.readStr());
 					//					Background temp = gf.backgrounds.getUnsafe(in.read4());
 					//					if (temp != null) bk.properties.put(PBackgroundDef.BACKGROUND,temp.reference);
 					in.read4(bk.properties,PBackgroundDef.X,PBackgroundDef.Y);
@@ -1168,7 +1118,7 @@ public class EFileReader
 					in.read4(vw.properties,PView.VIEW_X,PView.VIEW_Y,PView.VIEW_W,PView.VIEW_H,PView.PORT_X,
 							PView.PORT_Y,PView.PORT_W,PView.PORT_H,PView.BORDER_H,PView.BORDER_V,PView.SPEED_H,
 							PView.SPEED_V);
-					putRef(gf.gmObjects,vw.properties,PView.OBJECT,in.readStr());
+					putRef(gf.resMap.getList(GmObject.class),vw.properties,PView.OBJECT,in.readStr());
 					//					GmObject temp = f.gmObjects.getUnsafe(in.read4());
 					//					if (temp != null) vw.properties.put(PView.OBJECT,temp.reference);
 					}
@@ -1177,7 +1127,7 @@ public class EFileReader
 					{
 					Instance inst = rm.addInstance();
 					inst.setPosition(new Point(in.read4(),in.read4()));
-					putRef(gf.gmObjects,inst.properties,PInstance.OBJECT,in.readStr());
+					putRef(gf.resMap.getList(GmObject.class),inst.properties,PInstance.OBJECT,in.readStr());
 					//					GmObject temp = f.gmObjects.getUnsafe(in.read4());
 					//					if (temp != null) inst.properties.put(PInstance.OBJECT,temp.reference);
 					inst.properties.put(PInstance.ID,in.read4());
@@ -1189,7 +1139,7 @@ public class EFileReader
 					{
 					Tile t = new Tile(rm);
 					t.setRoomPosition(new Point(in.read4(),in.read4()));
-					putRef(gf.backgrounds,t.properties,PTile.BACKGROUND,in.readStr());
+					putRef(gf.resMap.getList(Background.class),t.properties,PTile.BACKGROUND,in.readStr());
 					//					Background temp = f.backgrounds.getUnsafe(in.read4());
 					//					ResourceReference<Background> bkg = null;
 					//					if (temp != null) bkg = temp.reference;
@@ -1209,71 +1159,15 @@ public class EFileReader
 			}
 		}
 
-	static class GameInfoRtfReader implements ResourceReader
+	static class GameInfoRtfReader extends DataPropReader<GameInformation,PGameInformation>
 		{
 		@Override
-		public Resource<?,?> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
-				throws IOException
-			{
-			Properties i = new Properties();
-			i.load(in);
-
-			GameInformation r = gf.gameInfo;
-			readProperties(gf,r.properties,i);
-			readDataFile(f,gf,r,i,dir);
-
-			return null;
-			}
-
-		protected static void put(GmFile gf, PropertyMap<PGameInformation> p, PGameInformation key,
-				Object o)
-			{
-			Object def = p.get(key);
-			p.put(key,DataPropReader.convert(o.toString(),def == null ? null : def.getClass()));
-			}
-
-		protected static void readProperties(GmFile gf, PropertyMap<PGameInformation> p, Properties i)
-			{
-			for (Entry<PGameInformation,Object> e : p.entrySet())
-				{
-				PGameInformation key = e.getKey();
-				if (allowProperty(key))
-					{
-					String kn = key.name();
-					put(gf,p,key,i.get(kn));
-					i.remove(kn);
-					}
-				}
-			}
-
-		protected static boolean allowProperty(PGameInformation key)
+		protected boolean allowProperty(PGameInformation key)
 			{
 			return key != PGameInformation.TEXT;
 			}
 
-		private static void readDataFile(EGMFile f, GmFile gf, GameInformation r, Properties i,
-				String dir) throws IOException
-			{
-			String fn = i.get("Data").toString(); //$NON-NLS-1$
-			if (!dir.isEmpty()) fn = dir + '/' + fn;
-			f.getEntry(fn);
-			if (f.exists())
-				{
-				InputStream in = null;
-				try
-					{
-					readData(gf,r,in = f.asInputStream());
-					}
-				finally
-					{
-					if (in != null) in.close();
-					}
-				}
-			else
-				System.err.println("Data file missing: " + fn);
-			}
-
-		private static void readData(GmFile gf, GameInformation r, InputStream in)
+		protected void readData(GmFile gf, GameInformation r, InputStream in)
 			{
 			try
 				{
@@ -1286,46 +1180,10 @@ public class EFileReader
 			}
 		}
 
-	static class GameSettingsReader implements ResourceReader
+	static class GameSettingsReader extends DataPropReader<GameSettings,PGameSettings>
 		{
 		@Override
-		public Resource<?,?> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
-				throws IOException
-			{
-			Properties i = new Properties();
-			i.load(in);
-
-			GameSettings r = gf.gameSettings;
-			//			for (Entry<?,?> e : r.properties.entrySet())
-			//				System.out.println(e.getKey() + ": " + e.getValue());
-			//
-			readProperties(gf,r.properties,i);
-			readDataFiles(f,gf,r,i,dir);
-
-			return null;
-			}
-
-		protected static void put(GmFile gf, PropertyMap<PGameSettings> p, PGameSettings key, Object o)
-			{
-			Object def = p.get(key);
-			p.put(key,DataPropReader.convert(o.toString(),def == null ? null : def.getClass()));
-			}
-
-		protected static void readProperties(GmFile gf, PropertyMap<PGameSettings> p, Properties i)
-			{
-			for (Entry<PGameSettings,Object> e : p.entrySet())
-				{
-				PGameSettings key = e.getKey();
-				if (allowProperty(key))
-					{
-					String kn = key.name();
-					put(gf,p,key,i.get(kn));
-					i.remove(kn);
-					}
-				}
-			}
-
-		protected static boolean allowProperty(PGameSettings prop)
+		protected boolean allowProperty(PGameSettings prop)
 			{
 			//			return false;
 			return prop != PGameSettings.DPLAY_GUID && prop != PGameSettings.GAME_ICON
@@ -1333,7 +1191,8 @@ public class EFileReader
 					&& prop != PGameSettings.LOADING_IMAGE;
 			}
 
-		private static void readDataFiles(EGMFile f, GmFile gf, GameSettings r, Properties i, String dir)
+		@Override
+		protected void readDataFile(EGMFile f, GmFile gf, GameSettings r, Properties i, String dir)
 				throws IOException
 			{
 			String[] entries = { "Icon","Splash","Filler","Progress" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -1342,10 +1201,8 @@ public class EFileReader
 
 			for (int j = 0; j < entries.length; j++)
 				{
-				Object o = i.get(entries[j]);
-				if (o == null) continue;
-				String fn = o.toString();
-				if (fn.isEmpty() || fn.equals("null")) continue;
+				String fn = i.getProperty(entries[j]);
+				if (fn == null || fn.isEmpty() || fn.equals("null")) continue;
 				if (!dir.isEmpty()) fn = dir + '/' + fn;
 				f.getEntry(fn);
 				if (f.exists())
@@ -1367,47 +1224,42 @@ public class EFileReader
 					System.err.println("Game Settings Data file missing: " + fn);
 				}
 			}
+
+		protected void readData(GmFile gf, GameSettings r, InputStream in)
+			{ //Unused since readDataFile is overridden
+			}
 		}
 
-	static class EnigmaSettingsReader implements ResourceReader
+	static class ExtensionsEmptyReader implements ResourceReader<Extensions>
 		{
 		@Override
-		public Resource<?,?> read(EGMFile f, GmFile gf, InputStream in, String dir, String name)
+		public void read(EGMFile f, GmFile gf, InputStream in, String dir, String name, Extensions e)
 				throws IOException
+			{ //Extensions empty
+			}
+
+		@Override
+		public void readUnknown(EGMFile f, GmFile gf, InputStream is, String dir, String name,
+				Resource<?,?> r) throws IOException
+			{ //Extensions empty
+			}
+		}
+
+	static class EnigmaSettingsReader extends DataPropReader<EnigmaSettings,PEnigmaSettings>
+		{
+		@Override
+		public void read(EGMFile f, GmFile gf, InputStream in, String dir, String name,
+				EnigmaSettings es) throws IOException
 			{
 			//			YamlNode node = YamlParser.parse(new Scanner(in));
 			Properties i = new Properties();
 			i.load(in);
 
-			EnigmaSettings es = EnigmaRunner.es;
 			es.fromProperties(i);
 			readDataFile(f,gf,es,i,dir);
-			return null;
 			}
 
-		protected static void readDataFile(EGMFile f, GmFile gf, EnigmaSettings r, Properties i,
-				String dir) throws IOException
-			{
-			String fn = i.getProperty("Data"); //$NON-NLS-1$
-			if (!dir.isEmpty()) fn = dir + '/' + fn;
-			f.getEntry(fn);
-			if (!f.exists())
-				{
-				System.err.println("Enigma Settings Data file missing: " + fn);
-				return;
-				}
-			InputStream in = null;
-			try
-				{
-				readData(f,gf,r,in = f.asInputStream());
-				}
-			finally
-				{
-				if (in != null) in.close();
-				}
-			}
-
-		private static void readData(EGMFile f, GmFile gf, EnigmaSettings r, InputStream in)
+		protected void readData(GmFile gf, EnigmaSettings r, InputStream in)
 			{
 			Set<String> names = new HashSet<String>();
 			Collections.addAll(names,"definitions","globallocals","initialization","cleanup");
@@ -1439,6 +1291,59 @@ public class EFileReader
 					r.initialization = str;
 				else if (id.equals("cleanup")) r.cleanup = str;
 				}
+			}
+		}
+
+	/**
+	 * A Properties implementation that converts all keys to lowercase
+	 * and removes keys after they have been 'used' or gotten.
+	 * This allows you to check for missed/extra/leftover keys.<p>
+	 * Please be aware that, due to this implementation, attempting
+	 * to fetch a key twice will yield null the second time.
+	 */
+	static class UsableProperties extends Properties
+		{
+		private static final long serialVersionUID = 1L;
+		protected boolean caseSensitive = false;
+
+		public UsableProperties(List<String> lines)
+			{
+			super();
+			try
+				{
+				load(new StringReader(implode(lines)));
+				}
+			catch (IOException e)
+				{
+				//This should never happen, but assuming it could
+				//Unable to load properties can be treated as empty
+				}
+			}
+
+		public UsableProperties(Reader reader, boolean caseSensitive) throws IOException
+			{
+			super();
+			this.caseSensitive = caseSensitive;
+			load(reader);
+			}
+
+		@Override
+		public Object put(Object key, Object value)
+			{
+			if (!caseSensitive && key instanceof String) key = ((String) key).toLowerCase();
+			return super.put(key,value);
+			}
+
+		public String use(String key)
+			{
+			Object oval = super.remove(key);
+			if (oval != null && oval instanceof String) return (String) oval;
+			return null;
+			}
+
+		public String getProperty(String key)
+			{
+			return use(key);
 			}
 		}
 
