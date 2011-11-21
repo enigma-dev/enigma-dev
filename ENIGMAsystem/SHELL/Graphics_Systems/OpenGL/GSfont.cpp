@@ -22,6 +22,7 @@
 #include "../../libEGMstd.h"
 #include "GScolors.h"
 #include "GSfont.h"
+#include "binding.h"
 
 using namespace std;
 #include "../../Universal_System/fontstruct.h"
@@ -32,7 +33,6 @@ using namespace std;
 
 namespace enigma {
   static int currentfont = -1;
-  extern unsigned bound_texture;
   extern size_t font_idmax;
 }
 
@@ -258,9 +258,8 @@ void draw_text(int x,int y,variant vstr)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-
-  if (bound_texture != fnt->texture)
-    glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
+  bind_texture(fnt->texture);
+  
   int yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   if (halign == fa_left){
       int xx = x;
@@ -323,9 +322,7 @@ void draw_text_ext(int x,int y,variant vstr, int sep, int w)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-
-  if (bound_texture != fnt->texture)
-    glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
+  bind_texture(fnt->texture);
 
   int yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
 
@@ -408,9 +405,7 @@ void draw_text_transformed(double x,double y,variant vstr,double xscale,double y
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-
-  if (bound_texture != fnt->texture)
-    glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
+  bind_texture(fnt->texture);
 
   rot *= M_PI/180;
 
@@ -516,9 +511,7 @@ void draw_text_ext_transformed(double x,double y,variant vstr,int sep, int w, do
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-
-  if (bound_texture != fnt->texture)
-    glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
+  bind_texture(fnt->texture);
 
   rot *= M_PI/180;
 
@@ -657,9 +650,7 @@ void draw_text_transformed_color(double x,double y,variant vstr,double xscale,do
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-
-  if (bound_texture != fnt->texture)
-    glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
+  bind_texture(fnt->texture);
 
   rot *= M_PI/180;
 
@@ -784,9 +775,7 @@ void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int 
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-
-  if (bound_texture != fnt->texture)
-    glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
+  bind_texture(fnt->texture);
 
   rot *= M_PI/180;
 
@@ -937,9 +926,7 @@ void draw_text_color(int x,int y,variant vstr,int c1,int c2,int c3,int c4,double
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-
-  if (bound_texture != fnt->texture)
-    glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
+  bind_texture(fnt->texture);
 
 
   glPushAttrib(GL_CURRENT_BIT);
@@ -1035,9 +1022,7 @@ void draw_text_ext_color(int x,int y,variant vstr,int sep, int w, int c1,int c2,
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-
-  if (bound_texture != fnt->texture)
-    glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
+  bind_texture(fnt->texture);
 
   glPushAttrib(GL_CURRENT_BIT);
   int yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);

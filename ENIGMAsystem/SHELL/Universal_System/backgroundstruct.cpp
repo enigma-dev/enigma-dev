@@ -37,15 +37,7 @@ namespace enigma {
  * use at load time with data read from the executable. These both expect
  * RAW format, RGB only.
  */
-inline unsigned int nlpo2dc(unsigned int x) //Next largest power of two minus one
-{
-  --x;
-	x |= x>>1;
-	x |= x>>2;
-	x |= x>>4;
-	x |= x>>8;
-	return x | (x>>16);
-}
+#include "nlpo2.h"
 
 namespace enigma
 {

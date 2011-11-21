@@ -29,10 +29,13 @@
 
 
 namespace enigma{
-    extern unsigned bound_texture;
     extern unsigned char currentcolor[4];
 }
-#define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
+#ifdef use_bound_texture_global
+  #define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
+#else
+  #define untexture() glBindTexture(GL_TEXTURE_2D, 0);
+#endif
 
 int pr_curve_detail = 20;
 int pr_curve_mode = GL_LINE_STRIP;

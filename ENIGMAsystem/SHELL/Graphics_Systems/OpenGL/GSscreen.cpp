@@ -59,26 +59,7 @@ namespace enigma
 }
 
 void screen_redraw()
-{
-    if (d3dMode == true)
-    {
-        if (background_showcolor)
-        {
-            int clearcolor = ((int)background_color) & 0x00FFFFFF;
-            glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
-        }
-        
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
-        {
-            for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
-                enigma::instance_event_iterator->inst->myevent_draw();
-        }
-        
-        return;
-    }
-    
+{   
     if (!view_enabled)
     {
         glViewport(0, 0, window_get_width(), window_get_height()); // Possible bug
@@ -90,7 +71,7 @@ void screen_redraw()
         {
             int clearcolor = ((int)background_color) & 0x00FFFFFF;
             glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
         
         draw_back();
@@ -107,7 +88,9 @@ void screen_redraw()
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
                 enigma::instance_event_iterator->inst->myevent_draw();
         }
-    } else {
+    }
+    else
+    {
         for (view_current = 0; view_current < 7; view_current++)
         {
             if (view_visible[(int)view_current])

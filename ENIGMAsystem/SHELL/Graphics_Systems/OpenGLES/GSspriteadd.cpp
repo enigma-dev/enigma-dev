@@ -90,15 +90,7 @@ int sprite_add(string filename,double imgnumb,double precise,double transparent,
  * use at load time with data read from the executable. These both expect
  * RAW format, RGB only.
  */
-inline unsigned int nlpo2dc(unsigned int x) //Next largest power of two minus one
-{
-  --x;
-	x |= x>>1;
-	x |= x>>2;
-	x |= x>>4;
-	x |= x>>8;
-	return x | (x>>16);
-}
+#include "nlpo2.h"
 namespace enigma
 {
   //Allocates and zero-fills the array at game start

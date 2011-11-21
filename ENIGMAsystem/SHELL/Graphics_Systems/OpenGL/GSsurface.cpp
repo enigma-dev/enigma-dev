@@ -21,12 +21,13 @@ using namespace std;
 #include <iostream>
 #include <math.h>
 
+#include "binding.h"
+
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 extern int room_width, room_height;
-namespace enigma{extern unsigned bound_texture;}
 
 #ifdef DEBUG_MODE
 #  include "../../Widget_Systems/widgets_mandatory.h"
@@ -190,11 +191,7 @@ void draw_surface_stretched(int id, double x, double y, double w, double h)
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
@@ -226,11 +223,7 @@ void draw_surface_part(int id,double left,double top,double width,double height,
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
@@ -267,11 +260,7 @@ void draw_surface_tiled(int id,double x,double y)
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -316,11 +305,7 @@ void draw_surface_tiled_area(int id,double x,double y,double x1,double y1,double
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -384,11 +369,7 @@ void draw_surface_ext(int id,double x,double y,double xscale,double yscale,doubl
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -431,11 +412,7 @@ void draw_surface_stretched_ext(int id,double x,double y,double w,double h,int c
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -470,11 +447,7 @@ void draw_surface_part_ext(int id,double left,double top,double width,double hei
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
   glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -512,11 +485,7 @@ void draw_surface_tiled_ext(int id,double x,double y,double xscale,double yscale
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -561,11 +530,7 @@ void draw_surface_tiled_area_ext(int id,double x,double y,double x1,double y1,do
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -629,11 +594,7 @@ void draw_surface_general(int id, double left,double top,double width,double hei
     return;
   }
 
-  if (enigma::bound_texture != enigma::surface_array[id]->tex)
-  {
-    glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-    enigma::bound_texture = enigma::surface_array[id]->tex;
-  }
+  bind_texture(enigma::surface_array[id]->tex);
   
   glPushAttrib(GL_CURRENT_BIT);
     const float tbw = enigma::surface_array[id]->width, tbh = enigma::surface_array[id]->height,

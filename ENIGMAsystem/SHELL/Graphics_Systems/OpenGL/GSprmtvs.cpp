@@ -17,6 +17,7 @@
 
 #include "OpenGLHeaders.h"
 #include "GSprmtvs.h"
+#include "binding.h"
 
 #include <string>
 #include "../../Widget_Systems/widgets_mandatory.h"
@@ -29,10 +30,6 @@ float __primitivexy[PRIMBUFFER][PRIMDEPTH2][2];
 int __currentpcount[PRIMDEPTH2];
 int __currentpdepth;
 #endif
-
-//namespace enigma{extern void untexture();}
-namespace enigma{extern unsigned bound_texture;}
-#define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
 
 GLenum ptypes_by_id[16] = {
   GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES,
@@ -73,8 +70,7 @@ int draw_primitive_begin(int dink)
 
 int draw_primitive_begin_texture(int dink,unsigned tex)
 {
-  if (enigma::bound_texture != tex)
-    glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = tex);
+  bind_texture(tex);
 	GLenum kind = ptypes_by_id[ dink & 15 ];
 	glBegin(kind);
   return 0;

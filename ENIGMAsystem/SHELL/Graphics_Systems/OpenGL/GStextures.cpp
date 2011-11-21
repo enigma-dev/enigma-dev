@@ -21,8 +21,8 @@
 using std::string;
 #include "GStextures.h"
 #include "../graphics_mandatory.h"
+#include "binding.h"
 
-namespace enigma{extern unsigned bound_texture;}
 
 namespace enigma
 {
@@ -43,8 +43,7 @@ namespace enigma
   //Retrieve image data from a texture, in unsigned char, RGBA format.
   unsigned char* graphics_get_texture_rgba(unsigned texture)
   {
-    if (texture != enigma::bound_texture)
-      glBindTexture(GL_TEXTURE_2D, texture);
+    bind_texture(texture);
     
     int w,h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
@@ -52,9 +51,6 @@ namespace enigma
     
     unsigned char* ret = new unsigned char[(w*h) << 2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
-    
-    if (texture != enigma::bound_texture)
-      glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
     
     return ret;
   }

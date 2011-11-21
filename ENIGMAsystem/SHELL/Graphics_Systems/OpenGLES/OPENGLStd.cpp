@@ -75,9 +75,6 @@ namespace enigma
 	  glClearDepth(1.0); 
 #endif 
       
-      
-      glDepthFunc(GL_LEQUAL); //FIXME: Calling this after disabling depth test?
-      
       glEnable(GL_BLEND);
       glEnable(GL_ALPHA_TEST);
       glEnable(GL_TEXTURE_2D);

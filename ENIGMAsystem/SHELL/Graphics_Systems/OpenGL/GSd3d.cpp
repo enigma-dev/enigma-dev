@@ -24,24 +24,14 @@ using namespace std;
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h"
 #include <math.h>
+#include "binding.h"
 
 bool d3dMode = false;
-
-namespace enigma {
-  extern unsigned bound_texture;
-}
-
-#define retexture(texid) if (enigma::bound_texture != unsigned(texid)) { \
-  glBindTexture(GL_TEXTURE_2D,texid); \
-  enigma::bound_texture = texid; \
-}
 
 void d3d_start()
 {
   // Enable depth buffering
-  glDisable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  glDepthRange(.1,640);
+  glEnable(GL_DEPTH_TEST);
 
   // Set up projection matrix
   glMatrixMode(GL_PROJECTION);
@@ -139,7 +129,7 @@ void d3d_set_projection_ortho(int x, int y, int width, int height, int angle)
 
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
-  retexture(texId);
+  bind_texture(texId);
   glBegin(GL_QUADS);
     glTexCoord2d(0,1);
       glVertex3f(x1, y1, z1);
@@ -154,7 +144,7 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
 
 void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
-  retexture(texId);
+  bind_texture(texId);
   glBegin(GL_QUADS);
     glTexCoord2d(0, vrep);
       glVertex3f(x1, y1, z1);

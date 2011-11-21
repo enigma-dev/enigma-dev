@@ -63,15 +63,7 @@ int sprite_add(string filename, int imgnumb, bool precise, bool transparent, boo
  * use at load time with data read from the executable. These both expect
  * RAW format, RGB only.
  */
-inline unsigned int nlpo2dc(unsigned int x) //Next largest power of two minus one
-{
-  --x;
-	x |= x>>1;
-	x |= x>>2;
-	x |= x>>4;
-	x |= x>>8;
-	return x | (x>>16);
-}
+#include "nlpo2.h"
 
 namespace enigma
 {
@@ -86,7 +78,7 @@ namespace enigma
   //Adds an empty sprite to the list
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm)
   {
-    int fullwidth=nlpo2dc(w-1)+1,fullheight=nlpo2dc(h-1)+1;
+    int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
     sprite *as = new sprite(subc);
     spritestructarray[sprid] = as;
     
@@ -130,7 +122,7 @@ namespace enigma
   //Adds a subimage to an existing sprite from the exe
   void sprite_set_subimage(int sprid, int imgindex, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
   {
-    unsigned int fullwidth = nlpo2dc(w-1)+1, fullheight = nlpo2dc(h-1)+1;
+    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
     char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
     unsigned int rowindex,colindex;
     for (rowindex = 0; rowindex < h; rowindex++)

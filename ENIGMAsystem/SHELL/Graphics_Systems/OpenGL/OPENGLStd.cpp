@@ -61,9 +61,6 @@ namespace enigma
 
       glDisable(GL_DEPTH_TEST);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glClearDepth(1.0);
-
-      glDepthFunc(GL_LEQUAL); //FIXME: Calling this after disabling depth test?
 
       glEnable(GL_BLEND);
       glEnable(GL_ALPHA_TEST);

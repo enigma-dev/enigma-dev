@@ -177,7 +177,7 @@ int main(int argc,char** argv)
 	Window root = DefaultRootWindow(disp);
 
 	// Prepare openGL
-	GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, None };
+	GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
 	XVisualInfo *vi = glXChooseVisual(disp,0,att);
 	if(!vi){
 		printf("GLFail\n");
@@ -213,6 +213,7 @@ int main(int argc,char** argv)
 
 	//apply context
 	glXMakeCurrent(disp,win,glxc); //flushes
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
 	/* XEvent e;//wait for server to report our display request
 	do {

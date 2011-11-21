@@ -18,6 +18,7 @@
 #include <math.h>
 #include "OpenGLHeaders.h"
 #include "GSstdraw.h"
+#include "binding.h"
 #include <stdio.h>
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -26,10 +27,8 @@
 
 namespace enigma {
   float circleprecision=24;
-  extern unsigned bound_texture;
   extern unsigned char currentcolor[4];
 }
-#define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
 
 void draw_set_line_pattern(unsigned short pattern, int scale)
 {
