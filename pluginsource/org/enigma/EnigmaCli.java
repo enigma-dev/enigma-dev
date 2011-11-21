@@ -10,6 +10,8 @@ package org.enigma;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URI;
 
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaCallbacks;
@@ -25,6 +27,7 @@ import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.main.FileChooser;
+import org.lateralgm.main.FileChooser.FileReader;
 import org.lateralgm.main.LGM;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
@@ -34,12 +37,16 @@ import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.StringArray;
 
-public class EnigmaCli
+public final class EnigmaCli
 	{
 	public static final String prog = "enigma"; //$NON-NLS-1$
 	public static EnigmaDriver DRIVER;
 
 	public static boolean syntax = false;
+
+	private EnigmaCli()
+		{
+		}
 
 	public static void error(String err)
 		{
@@ -68,7 +75,7 @@ public class EnigmaCli
 			else
 				compile(LGM.currentFile,LGM.root,es);
 			}
-		catch (FileNotFoundException e)
+		catch (IOException e)
 			{
 			error(e.getMessage());
 			}
@@ -78,7 +85,7 @@ public class EnigmaCli
 			}
 		}
 
-	public static void addResourceHook()
+	private static void addResourceHook()
 		{
 		EgmIO io = new EgmIO();
 		FileChooser.readers.add(io);
@@ -94,8 +101,7 @@ public class EnigmaCli
 				new EnigmaSettings()));
 		}
 
-	public static String initailize(String fn, ResNode root) throws FileNotFoundException,
-			GmFormatException
+	public static String initailize(String fn, ResNode root) throws GmFormatException,IOException
 		{
 		File file = new File(fn);
 		if (!file.exists()) throw new FileNotFoundException(fn);
@@ -103,8 +109,12 @@ public class EnigmaCli
 
 		addResourceHook();
 
-		//		r.root = root == null ? new ResNode("Root",(byte) 0,null,null) : root; //$NON-NLS-1$;
-		LGM.listener.fc.open(file.toURI());
+		if (root == null) root = LGM.newRoot();
+
+		URI uri = file.toURI();
+		FileReader reader = FileChooser.findReader(uri);
+		LGM.currentFile = reader.read(uri.toURL().openStream(),uri,LGM.newRoot());
+
 		try
 			{
 			attemptLib();
