@@ -7,7 +7,7 @@
  * See LICENSE for details.
  */
 
-package org.enigma;
+package org.enigma.file;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -47,12 +47,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.filechooser.FileView;
 
+import org.enigma.EnigmaRunner;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaSettings.PEnigmaSettings;
+import org.enigma.file.EEFReader.EEFNode;
 import org.enigma.messages.Messages;
-import org.enigma.utility.APNGExperiments;
-import org.enigma.utility.EEFReader;
-import org.enigma.utility.EEFReader.EEFNode;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFile.SingletonResourceHolder;

@@ -7,7 +7,7 @@
  * See LICENSE for details.
  */
 
-package org.enigma;
+package org.enigma.file;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -34,7 +34,6 @@ import javax.imageio.ImageIO;
 
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.messages.Messages;
-import org.enigma.utility.APNGExperiments;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFile.FormatFlavor;

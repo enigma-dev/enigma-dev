@@ -31,7 +31,7 @@ import org.enigma.SettingsHandler.OptionGroupSetting;
 import org.enigma.SettingsHandler.OptionSetting;
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
-import org.enigma.utility.YamlParser.YamlNode;
+import org.enigma.file.YamlParser.YamlNode;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.util.PropertyMap;

@@ -7,7 +7,7 @@
  * See LICENSE for details.
  */
 
-package org.enigma.utility;
+package org.enigma.file;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;

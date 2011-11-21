@@ -18,10 +18,15 @@ import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
+import org.enigma.file.EgmIO;
+import org.enigma.messages.Messages;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
+import org.lateralgm.file.GmFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
+import org.lateralgm.main.FileChooser;
 import org.lateralgm.main.LGM;
+import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
 import org.lateralgm.resources.library.LibManager;
 
@@ -73,15 +78,21 @@ public class EnigmaCli
 			}
 		}
 
-	//	public static void compile(String fn) throws FileNotFoundException,GmFormatException
-	//		{
-	//		compile(fn,null);
-	//		}
-	//
-	//	public static void compile(File file) throws FileNotFoundException,GmFormatException
-	//		{
-	//		compile(file.getPath(),null);
-	//		}
+	public static void addResourceHook()
+		{
+		EgmIO io = new EgmIO();
+		FileChooser.readers.add(io);
+		FileChooser.writers.add(io);
+
+		Resource.kinds.add(EnigmaSettings.class);
+		Resource.kindsByName3.put("EGS",EnigmaSettings.class);
+		String name = Messages.getString("EnigmaRunner.RESNODE_NAME"); //$NON-NLS-1$
+		Resource.kindNames.put(EnigmaSettings.class,name);
+		Resource.kindNamesPlural.put(EnigmaSettings.class,name);
+
+		LGM.currentFile.resMap.put(EnigmaSettings.class,new SingletonResourceHolder<EnigmaSettings>(
+				new EnigmaSettings()));
+		}
 
 	public static String initailize(String fn, ResNode root) throws FileNotFoundException,
 			GmFormatException
@@ -89,6 +100,9 @@ public class EnigmaCli
 		File file = new File(fn);
 		if (!file.exists()) throw new FileNotFoundException(fn);
 		LibManager.autoLoad();
+
+		addResourceHook();
+
 		//		r.root = root == null ? new ResNode("Root",(byte) 0,null,null) : root; //$NON-NLS-1$;
 		LGM.listener.fc.open(file.toURI());
 		try

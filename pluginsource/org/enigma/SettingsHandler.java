@@ -15,10 +15,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.enigma.file.YamlParser;
+import org.enigma.file.YamlParser.YamlElement;
+import org.enigma.file.YamlParser.YamlNode;
 import org.enigma.messages.Messages;
-import org.enigma.utility.YamlParser;
-import org.enigma.utility.YamlParser.YamlElement;
-import org.enigma.utility.YamlParser.YamlNode;
 
 public final class SettingsHandler
 	{

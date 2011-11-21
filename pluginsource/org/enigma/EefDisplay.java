@@ -17,8 +17,8 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.enigma.utility.EEFReader;
-import org.enigma.utility.EEFReader.EEFNode;
+import org.enigma.file.EEFReader;
+import org.enigma.file.EEFReader.EEFNode;
 
 public class EefDisplay extends JSplitPane implements TreeSelectionListener
 	{

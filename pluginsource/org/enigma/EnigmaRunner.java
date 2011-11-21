@@ -27,9 +27,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -56,8 +53,6 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileView;
 import javax.swing.tree.TreeNode;
 
 import org.enigma.backend.EnigmaCallbacks;
@@ -65,17 +60,17 @@ import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
+import org.enigma.file.EFileReader;
+import org.enigma.file.EgmIO;
+import org.enigma.file.YamlParser;
+import org.enigma.file.YamlParser.YamlNode;
 import org.enigma.messages.Messages;
 import org.enigma.utility.EnigmaBuildReader;
-import org.enigma.utility.YamlParser;
-import org.enigma.utility.YamlParser.YamlNode;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
-import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmFile.FormatFlavor;
 import org.lateralgm.file.GmFile.ResourceHolder;
 import org.lateralgm.file.GmFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
@@ -84,9 +79,6 @@ import org.lateralgm.jedit.GMLKeywords.Construct;
 import org.lateralgm.jedit.GMLKeywords.Function;
 import org.lateralgm.jedit.GMLKeywords.Keyword;
 import org.lateralgm.main.FileChooser;
-import org.lateralgm.main.FileChooser.FileReader;
-import org.lateralgm.main.FileChooser.FileWriter;
-import org.lateralgm.main.FileChooser.GroupFilter;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
 import org.lateralgm.resources.Resource;
@@ -313,61 +305,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					return esf;
 					}
 			});
-		}
-
-	class EgmIO extends FileView implements FileReader,FileWriter,GroupFilter
-		{
-		String ext = ".egm"; //$NON-NLS-1$
-		CustomFileFilter filter = new CustomFileFilter(
-				Messages.getString("EnigmaRunner.FORMAT_READER"),ext); //$NON-NLS-1$
-
-		public FileFilter getGroupFilter()
-			{
-			return filter;
-			}
-
-		public FileFilter[] getFilters()
-			{
-			return new FileFilter[0];
-			}
-
-		//Reader
-		public boolean canRead(URI uri)
-			{
-			return filter.accept(new File(uri));
-			}
-
-		public GmFile read(InputStream in, URI uri, ResNode root) throws GmFormatException
-			{
-			return EFileReader.readEgmFile(new File(uri),root,true);
-			}
-
-		//Writer
-		@Override
-		public String getExtension()
-			{
-			return ext;
-			}
-
-		@Override
-		public String getSelectionName()
-			{
-			return "EGM";
-			}
-
-		@Override
-		public void write(OutputStream out, GmFile gf, ResNode root) throws IOException
-			{
-			EFileWriter.writeEgmZipFile(out,gf,root);
-			}
-
-		@Override
-		public FormatFlavor getFlavor()
-			{
-			return EFileWriter.FLAVOR_EGM;
-			}
-
-		//TODO: FileView
 		}
 
 	public void populateMenu()
@@ -799,10 +736,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						int min = DRIVER.resource_argCountMin();
 						int max = DRIVER.resource_argCountMax();
 						res += "(" + min; //$NON-NLS-1$
-						if (min != max) res += "-" + max; //$NON-NLS-1$
-						res += ")"; //$NON-NLS-1$
-						rl.add(res);
-						}
+				if (min != max) res += "-" + max; //$NON-NLS-1$
+				res += ")"; //$NON-NLS-1$
+				rl.add(res);
+				}
 					break;
 				case 1:
 					if (DRIVER.resource_isGlobal()) rl.add(res);
