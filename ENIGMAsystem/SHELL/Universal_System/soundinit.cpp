@@ -61,8 +61,8 @@ namespace enigma
       char* fdata = new char[size];
       if (!fread(fdata,1,size,exe)) return;
       
-      if (sound_add_from_buffer(id,fdata,size))
-        printf("Failed to load sound%d\n",i);
+      int e = sound_add_from_buffer(id,fdata,size);
+      if (e) printf("Failed to load sound %d; error %d\n",i,e);
       delete fdata;
     }
   }

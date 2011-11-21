@@ -16,7 +16,7 @@
 **/
 
 #include <string>
-#include <string.h>
+#include <cstring>
 using namespace std;
 
 #include "../Graphics_Systems/graphics_mandatory.h"
@@ -65,6 +65,7 @@ int sprite_add(string filename, int imgnumb, bool precise, bool transparent, boo
  */
 inline unsigned int nlpo2dc(unsigned int x) //Next largest power of two minus one
 {
+  --x;
 	x |= x>>1;
 	x |= x>>2;
 	x |= x>>4;
@@ -93,10 +94,14 @@ namespace enigma
     as->subcount = subc;
     as->width  = w;
     as->height = h;
-    as->bbox_bottom  = bbb;
-      as->bbox_left  = bbl;
-      as->bbox_top   = bbt;
-      as->bbox_right = bbr;
+    as->bbox.bottom  = bbb;
+      as->bbox.left  = bbl;
+      as->bbox.top   = bbt;
+      as->bbox.right = bbr;
+    as->bbox_relative.bottom  = bbb - y;
+      as->bbox_relative.left  = bbl - x;
+      as->bbox_relative.top   = bbt - y;
+      as->bbox_relative.right = bbr - x;
     as->xoffset = x;
     as->yoffset = y;
     as->texbordx = (double)w/fullwidth;
@@ -194,44 +199,59 @@ int sprite_get_height(int sprite)
 int sprite_get_bbox_bottom(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_bottom;
+	return spr->bbox.bottom;
 }
 int sprite_get_bbox_left(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_left;
+	return spr->bbox.left;
 }
 int sprite_get_bbox_right(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_right;
+	return spr->bbox.right;
 }
 int sprite_get_bbox_top(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_top;
+	return spr->bbox.top;
 }
 
 int sprite_get_bbox_bottom_relative(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_bottom - spr->yoffset;
+	return spr->bbox_relative.bottom;
 }
 int sprite_get_bbox_left_relative(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_left - spr->xoffset;
+	return spr->bbox_relative.left;
 }
 int sprite_get_bbox_right_relative(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_right - spr->xoffset;
+	return spr->bbox_relative.right;
 }
 int sprite_get_bbox_top_relative(int sprite)
 {
 	get_sprite(spr,sprite,0);
-	return spr->bbox_top - spr->yoffset;
+	return spr->bbox_relative.top;
 }
+
+#ifdef DEBUG_MODE
+  bbox_rect_t dummy_bbox;
+#endif
+const bbox_rect_t &sprite_get_bbox(int sprite)
+{
+	get_sprite(spr,sprite,dummy_bbox);
+	return spr->bbox;
+}
+const bbox_rect_t &sprite_get_bbox_relative(int sprite)
+{
+	get_sprite(spr,sprite,dummy_bbox);
+	return spr->bbox_relative;
+}
+
 
 //TODO: IMPLEMENT
 //sprite_get_bbox_mode

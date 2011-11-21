@@ -91,36 +91,8 @@ namespace enigma
     }
     
     for (size_t i = 0; i < sound_idmax; i++)
-    {
-      alGenSources(1, &sounds[i]->src);
-      if(alGetError() != AL_NO_ERROR) {
-        fprintf(stderr, "Failed to create OpenAL source!\n");
-        return 1;
-      }
-      sounds[i]->loaded = LOADSTATE_SOURCED;
-    }
+      sounds[i] = NULL;
     
-    return 0;
-  }
-  
-  int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
-  {
-    get_sound(snd,id,1);
-    if (snd->loaded != LOADSTATE_SOURCED)
-      return 1;
-    
-    ALuint& buf = snd->buf[0];
-    buf = alureCreateBufferFromMemory((ALubyte*)buffer, bufsize);
-    
-    if(!buf) {
-      fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
-      return 1;
-    }
-    
-    alSourcei(snd->src, AL_BUFFER, buf);
-    alSourcei(snd->src, AL_SOURCE_RELATIVE, AL_TRUE);
-    alSourcei(snd->src, AL_REFERENCE_DISTANCE, 1);
-    snd->loaded = LOADSTATE_COMPLETE;
     return 0;
   }
   
@@ -134,13 +106,38 @@ namespace enigma
     res->loaded = LOADSTATE_SOURCED;
     return res;
   }
+  
+  int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
+  {
+    sound *snd = sounds[id];
+    if (!snd)
+      snd = sounds[id] = sound_new_with_source();
+    if (snd->loaded != LOADSTATE_SOURCED) {
+      fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
+      return 1;
+    }
+    
+    ALuint& buf = snd->buf[0];
+    buf = alureCreateBufferFromMemory((ALubyte*)buffer, bufsize);
+    
+    if(!buf) {
+      fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
+      return 2;
+    }
+    alSourcei(snd->src, AL_BUFFER, buf);
+    alSourcei(snd->src, AL_SOURCE_RELATIVE, AL_TRUE);
+    alSourcei(snd->src, AL_REFERENCE_DISTANCE, 1);
+    snd->loaded = LOADSTATE_COMPLETE;
+    return 0;
+  }
+  
 
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*cleanup)(void *userdata), void *userdata)
   {
     sound *snd = sounds[id];
     if (!snd)
-      sound_new_with_source();
-    else if (snd->loaded != LOADSTATE_SOURCED)
+      snd = sounds[id] = sound_new_with_source();
+    if (snd->loaded != LOADSTATE_SOURCED)
       return 1;
 
     snd->stream = alureCreateStreamFromCallback((ALuint (*)(void*, ALubyte*, ALuint))callback, userdata, AL_FORMAT_STEREO16, 44100, 4096, 3, snd->buf);

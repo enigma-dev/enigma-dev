@@ -92,6 +92,7 @@ int sprite_add(string filename,double imgnumb,double precise,double transparent,
  */
 inline unsigned int nlpo2dc(unsigned int x) //Next largest power of two minus one
 {
+  --x;
 	x |= x>>1;
 	x |= x>>2;
 	x |= x>>4;

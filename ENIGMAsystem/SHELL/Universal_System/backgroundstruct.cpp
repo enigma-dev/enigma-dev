@@ -17,7 +17,7 @@
 **/
 
 #include <string>
-#include <string.h>
+#include <cstring>
 using namespace std;
 
 #include "../Graphics_Systems/graphics_mandatory.h"
@@ -39,6 +39,7 @@ namespace enigma {
  */
 inline unsigned int nlpo2dc(unsigned int x) //Next largest power of two minus one
 {
+  --x;
 	x |= x>>1;
 	x |= x>>2;
 	x |= x>>4;

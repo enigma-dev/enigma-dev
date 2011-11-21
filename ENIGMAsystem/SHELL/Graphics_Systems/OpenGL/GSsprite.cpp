@@ -74,9 +74,6 @@ void draw_sprite(int spr,int subimg,double x,double y)
       enigma::bound_texture = spr2d->texturearray[usi];
   }
   
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-  
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
     
@@ -105,9 +102,6 @@ void draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double 
         enigma::bound_texture=spr2d->texturearray[usi];
     }
     
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-    
     glBegin(GL_QUADS);
     glTexCoord2f(spr2d->texbordx,0);
     glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
@@ -132,7 +126,6 @@ void draw_sprite_part(int spr,int subimg,double left,double top,double width,dou
         enigma::bound_texture=spr2d->texturearray[usi];
     }
     
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
     float tbw=spr2d->width/(float)spr2d->texbordx,tbh=spr2d->height/(float)spr2d->texbordy;
     
     glBegin(GL_TRIANGLE_STRIP);
@@ -159,8 +152,6 @@ void draw_sprite_part_offset(int spr,int subimg,double left,double top,double wi
         enigma::bound_texture=spr2d->texturearray[usi];
     }
     
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
     float tbw=spr2d->width/spr2d->texbordx,tbh=spr2d->height/spr2d->texbordy;
     
     glBegin(GL_TRIANGLE_STRIP);
@@ -185,9 +176,6 @@ void draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double y
       glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[usi]);
       enigma::bound_texture = spr2d->texturearray[usi];
   }
-  
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
   
   glPushAttrib(GL_CURRENT_BIT);
     glBegin(GL_TRIANGLE_STRIP);
@@ -225,8 +213,6 @@ void draw_sprite_part_ext(int spr,int subimg,double left,double top,double width
         enigma::bound_texture=spr2d->texturearray[usi];
     }
     
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
     float tbw=spr2d->width/spr2d->texbordx,tbh=spr2d->height/spr2d->texbordy;
     
     glBegin(GL_TRIANGLE_STRIP);
@@ -255,9 +241,6 @@ void draw_sprite_general(int spr,int subimg,double left,double top,double width,
       glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[usi]);
       enigma::bound_texture=spr2d->texturearray[usi];
     }
-    
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
     
     const float
     tbx = spr2d->texbordx,  tby = spr2d->texbordy,
@@ -302,9 +285,6 @@ void draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,dou
         enigma::bound_texture=spr2d->texturearray[usi];
     }
     
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-    
     glBegin(GL_QUADS);
       glColor4ub(__GETR(blend),__GETG(blend),__GETB(blend),char(alpha*255)); //Implement "blend" parameter
       glTexCoord2f(spr2d->texbordx,0);
@@ -335,9 +315,6 @@ void draw_sprite_tiled(int spr,int subimg,double x,double y)
       glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[usi]);
       enigma::bound_texture = spr2d->texturearray[usi];
   }
-  
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
   
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -376,9 +353,6 @@ void draw_sprite_tiled_ext(int spr,int subimg,double x,double y, double xscale,d
       glBindTexture(GL_TEXTURE_2D,spr2d->texturearray[usi]);
       enigma::bound_texture = spr2d->texturearray[usi];
   }
-  
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
   
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));

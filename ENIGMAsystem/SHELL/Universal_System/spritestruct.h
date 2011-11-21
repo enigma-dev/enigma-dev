@@ -30,6 +30,9 @@
 #ifndef ENIGMA_SPRITESTRUCT
 #define ENIGMA_SPRITESTRUCT
 
+struct bbox_rect_t {
+  int bottom, left, right, top;
+};
 namespace enigma
 {
   struct sprite
@@ -40,7 +43,7 @@ namespace enigma
 
     //void*  *pixeldata;
     double texbordx, texbordy;
-    int bbox_bottom, bbox_left, bbox_right, bbox_top;
+    bbox_rect_t bbox, bbox_relative;
     bool where,smooth;
 
     sprite();
@@ -74,6 +77,9 @@ extern int sprite_get_bbox_bottom_relative (int sprite);
 extern int sprite_get_bbox_left_relative   (int sprite);
 extern int sprite_get_bbox_right_relative  (int sprite);
 extern int sprite_get_bbox_top_relative    (int sprite);
+
+extern const bbox_rect_t &sprite_get_bbox(int sprite);
+extern const bbox_rect_t &sprite_get_bbox_relative(int sprite);
 
 extern int sprite_get_number  (int sprite);
 extern int sprite_get_texture (int sprite, int subimage);

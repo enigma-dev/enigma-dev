@@ -66,9 +66,6 @@ void draw_background(int back, double x, double y)
       enigma::bound_texture = bck2d->texture;
   }
 
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
 
@@ -96,9 +93,6 @@ void draw_background_stretched(int back, double x, double y, double w, double h)
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
 
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
@@ -128,9 +122,6 @@ void draw_background_part(int back,double left,double top,double width,double he
         enigma::bound_texture = bck2d->texture;
     }
 
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
@@ -159,9 +150,6 @@ void draw_background_tiled(int back,double x,double y)
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -199,11 +187,7 @@ void draw_background_tiled_area(int back,double x,double y,double x1,double y1,d
     glBindTexture(GL_TEXTURE_2D,bck2d->texture);
     enigma::bound_texture = bck2d->texture;
   }
-
-
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-
+  
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
@@ -260,9 +244,6 @@ void draw_background_ext(int back,double x,double y,double xscale,double yscale,
       enigma::bound_texture = bck2d->texture;
   }
 
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
@@ -297,9 +278,6 @@ void draw_background_stretched_ext(int back,double x,double y,double w,double h,
       enigma::bound_texture = bck2d->texture;
   }
 
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
@@ -327,10 +305,7 @@ void draw_background_part_ext(int back,double left,double top,double width,doubl
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-
+  
   glPushAttrib(GL_CURRENT_BIT);
   glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
@@ -361,9 +336,6 @@ void draw_background_tiled_ext(int back,double x,double y,double xscale,double y
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -400,10 +372,7 @@ void draw_background_tiled_area_ext(int back,double x,double y,double x1,double 
     glBindTexture(GL_TEXTURE_2D,bck2d->texture);
     enigma::bound_texture = bck2d->texture;
   }
-
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-
+  
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
@@ -459,10 +428,7 @@ void draw_background_general(int back,double left,double top,double width,double
       glBindTexture(GL_TEXTURE_2D,bck2d->texture);
       enigma::bound_texture = bck2d->texture;
   }
-
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-
+  
   glPushAttrib(GL_CURRENT_BIT);
     const float
       tbx = bck2d->texbordx,  tby = bck2d->texbordy,

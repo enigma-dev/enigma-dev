@@ -35,6 +35,7 @@
 
 #include "transform_object.h"
 
+struct bbox_rect_t;
 namespace enigma
 {
   struct object_collisions: object_transform
@@ -51,6 +52,8 @@ namespace enigma
         int $bbox_right()  const;
         int $bbox_top()    const;
         int $bbox_bottom() const;
+        const bbox_rect_t& $bbox_relative() const;
+        const bbox_rect_t& $bbox() const;
         #define bbox_left   $bbox_left()
         #define bbox_right  $bbox_right()
         #define bbox_top    $bbox_top()

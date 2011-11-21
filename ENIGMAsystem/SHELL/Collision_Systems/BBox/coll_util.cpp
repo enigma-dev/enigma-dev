@@ -82,13 +82,13 @@ bool collide_rect_line(double rx1, double ry1, double rx2, double ry2,
 bool collide_rect_rect(double r1x1, double r1y1, double r1x2, double r1y2,
                        double r2x1, double r2y1, double r2x2, double r2y2)
 {
-  return (r1x1 <= r2x2 && r1x2 >= r2x1 && r1y1 <= r2y2 && r1y2 >= r2y1);
+  return (r1x1 < r2x2 && r1x2 > r2x1 && r1y1 < r2y2 && r1y2 > r2y1);
 }
 
 //unused
 bool collide_rect_point(double rx1, double ry1, double rx2, double ry2, double px, double py)
 {
-  return (px <= rx2 && px >= rx1 && py <= ry2 && py >= ry1);
+  return (px < rx2 && px > rx1 && py < ry2 && py > ry1);
 }
 
 
@@ -100,34 +100,39 @@ bool collide_rect_point(double rx1, double ry1, double rx2, double ry2, double p
 
 bool collide_bbox_rect(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2)
 {
-  return collide_rect_rect(ox+inst->$bbox_left()-inst->x,
-                           oy+inst->$bbox_top()-inst->y,
-                           ox+inst->$bbox_right()-inst->x,
-                           oy+inst->$bbox_bottom()-inst->y,
+  const bbox_rect_t &box = inst->$bbox_relative();
+  return collide_rect_rect(box.left + ox,
+                           box.top + oy,
+                           box.right + ox,
+                           box.bottom + oy,
                            x1,y1,x2,y2);
 }
 
 bool collide_bbox_line(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2)
 {
-  return collide_rect_line(ox+inst->$bbox_left()-inst->x,
-                           oy+inst->$bbox_top()-inst->y,
-                           ox+inst->$bbox_right()-inst->x,
-                           oy+inst->$bbox_bottom()-inst->y,
+  const bbox_rect_t &box = inst->$bbox_relative();
+  return collide_rect_line(box.left + ox,
+                           box.top + oy,
+                           box.right + ox,
+                           box.bottom + oy,
                            x1,y1,x2,y2);
 }
 
 bool collide_bbox_bbox(const enigma::object_collisions* inst1, double ox1, double oy1, const enigma::object_collisions* inst2, double ox2, double oy2)
 {
-  return (ox1+inst1->$bbox_left()-inst1->x <= ox2+inst2->$bbox_right()-inst2->x
-       && ox2+inst2->$bbox_left()-inst2->x <= ox1+inst1->$bbox_right()-inst1->x
-       && oy1+inst1->$bbox_top()-inst1->y <= oy2+inst2->$bbox_bottom()-inst2->y
-       && oy2+inst2->$bbox_top()-inst2->y <= oy1+inst1->$bbox_bottom()-inst1->y);
+  const bbox_rect_t &box1 = inst1->$bbox_relative();
+  const bbox_rect_t &box2 = inst2->$bbox_relative();
+  return (box1.left + ox1 < box2.right + ox2
+       && box2.left + ox2 < box1.right + ox1
+       && box1.top + oy1  < box2.bottom + oy2
+       && box2.top + oy2  < box1.bottom + oy1);
 }
 
 bool collide_bbox_point(const enigma::object_collisions* inst, double ox, double oy, double x, double y)
 {
-  return (x <= ox + inst->$bbox_right()-inst->x
-       && x >= ox + inst->$bbox_left()-inst->x
-       && y <= oy + inst->$bbox_bottom()-inst->y
-       && y >= oy + inst->$bbox_top()-inst->y);
+  const bbox_rect_t &box = inst->$bbox_relative();
+  return (x < box.right + ox
+       && x > box.left + ox
+       && y < box.bottom + oy
+       && y > box.top + oy);
 }
