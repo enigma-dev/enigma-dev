@@ -66,6 +66,7 @@ public final class EnigmaCli
 			}
 
 		if (args[0].equals("-s") || args[0].equals("--syntax")) syntax = true;
+		String outname = null;
 
 		try
 			{
@@ -73,7 +74,7 @@ public final class EnigmaCli
 			if (syntax)
 				syntaxChecker(LGM.currentFile,LGM.root);
 			else
-				compile(LGM.currentFile,LGM.root);
+				compile(LGM.currentFile,LGM.root,outname);
 			}
 		catch (IOException e)
 			{
@@ -157,8 +158,8 @@ public final class EnigmaCli
 		return null;
 		}
 
-	public static void compile(GmFile f, ResNode root)
-			throws FileNotFoundException,GmFormatException
+	public static void compile(GmFile f, ResNode root, String outname) throws FileNotFoundException,
+			GmFormatException
 		{
 		ResourceHolder<EnigmaSettings> rh = f.resMap.get(EnigmaSettings.class);
 		EnigmaSettings ess = rh == null ? new EnigmaSettings() : rh.getResource();
@@ -170,15 +171,19 @@ public final class EnigmaCli
 		//XXX: Handle custom modes?
 		int mode = EnigmaRunner.MODE_COMPILE;
 
-		//TODO: Handle custom outname
+		if (outname == null)
+			{
+			outname = new File(f.uri).getAbsolutePath();
+			String ext = ess.targets.get("windowing").ext;
+			if (ext != null) outname = outname.substring(0,outname.lastIndexOf('.')) + ext;
+			}
+
 		//FIXME: Make compliant with spec2
-		File outname = new File(f.uri.toString().substring(0,f.uri.toString().lastIndexOf('.'))
-				+ ess.targets.get("windowing").ext);
 		TargetSelection compiler = ess.targets.get(TargetHandler.COMPILER);
 		if (!compiler.outputexe.equals("$tempfile")) //$NON-NLS-1$
-			outname = new File(compiler.outputexe);
+			outname = new File(compiler.outputexe).getAbsolutePath();
 
-		DRIVER.compileEGMf(es,outname.getAbsolutePath(),mode);
+		DRIVER.compileEGMf(es,outname,mode);
 		}
 
 	private static UnsatisfiedLinkError attemptLib()
