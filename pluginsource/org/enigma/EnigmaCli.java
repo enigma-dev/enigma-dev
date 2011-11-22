@@ -24,6 +24,7 @@ import org.enigma.file.EgmIO;
 import org.enigma.messages.Messages;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
+import org.lateralgm.file.GmFile.ResourceHolder;
 import org.lateralgm.file.GmFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.main.FileChooser;
@@ -69,11 +70,10 @@ public final class EnigmaCli
 		try
 			{
 			initailize(args[0],null);
-			EnigmaSettings es = initSettings();
 			if (syntax)
-				syntaxChecker(LGM.currentFile,LGM.root,es);
+				syntaxChecker(LGM.currentFile,LGM.root);
 			else
-				compile(LGM.currentFile,LGM.root,es);
+				compile(LGM.currentFile,LGM.root);
 			}
 		catch (IOException e)
 			{
@@ -128,23 +128,19 @@ public final class EnigmaCli
 		return DRIVER.libInit(new EnigmaCallbacks(new CliOutputHandler())); //returns String on toolchain failure
 		}
 
-	//TODO: Handle custom settings
-	public static EnigmaSettings initSettings()
+	public static void syntaxChecker(GmFile f, ResNode root)
 		{
-		return new EnigmaSettings();
-		}
-
-	public static void syntaxChecker(GmFile f, ResNode root, EnigmaSettings ess)
-		{
-		SyntaxError se = syntaxCheck(f,root,ess);
+		SyntaxError se = syntaxCheck(f,root);
 		if (se == null || se.absoluteIndex == -1)
 			System.out.println("No syntax errors found.");
 		else
 			error(se.line + ":" + se.position + "::" + se.errorString);
 		}
 
-	public static SyntaxError syntaxCheck(GmFile f, ResNode root, EnigmaSettings ess)
+	public static SyntaxError syntaxCheck(GmFile f, ResNode root)
 		{
+		ResourceHolder<EnigmaSettings> rh = f.resMap.get(EnigmaSettings.class);
+		EnigmaSettings ess = rh == null ? new EnigmaSettings() : rh.getResource();
 		SyntaxError err = ess.commitToDriver(DRIVER); //returns SyntaxError
 		if (err.absoluteIndex != -1) return err;
 
@@ -161,9 +157,11 @@ public final class EnigmaCli
 		return null;
 		}
 
-	public static void compile(GmFile f, ResNode root, EnigmaSettings ess)
+	public static void compile(GmFile f, ResNode root)
 			throws FileNotFoundException,GmFormatException
 		{
+		ResourceHolder<EnigmaSettings> rh = f.resMap.get(EnigmaSettings.class);
+		EnigmaSettings ess = rh == null ? new EnigmaSettings() : rh.getResource();
 		ess.commitToDriver(DRIVER); //returns SyntaxError
 
 		//Generate arguments for compile
