@@ -130,10 +130,6 @@ double move_contact_object(double angle, double max_dist, const int object, cons
     return max_dist;
 }
 
-/*
-move ouside by Polygone
-*/
-
 double move_outside_object(double angle, double max_dist, const int object, const bool solid_only)
 {
     const double DMIN = 0.000001, DMAX = 1000000;
@@ -207,9 +203,6 @@ double move_outside_object(double angle, double max_dist, const int object, cons
     return dist;
 }
 
-
-/* move bounce by Polygone */
-
 int move_bounce_object(const bool adv, const int object, const bool solid_only)
 {
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
@@ -248,7 +241,6 @@ int move_bounce_object(const bool adv, const int object, const bool solid_only)
     return -4;
 }
 
-
 void motion_set(int dir, double newspeed)
 {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
@@ -266,12 +258,14 @@ void motion_add(double newdirection, double newspeed)
 void move_random(const double snapHor, const double snapVer)
 {
     enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-    const int mask = ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->sprite_index;   //CHANGE TO MASK INDEX!!!
+    const int mask_ind = ((enigma::object_collisions*)enigma::instance_event_iterator->inst)->mask_index;
+    const int spr_ind = ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->sprite_index;
+    const int mask = mask_ind >= 0 ? mask_ind : spr_ind;
     const double x1 = sprite_get_xoffset(mask), y1 = sprite_get_yoffset(mask), x2 = room_width - sprite_get_width(mask) + sprite_get_xoffset(mask), y2 = room_height - sprite_get_height(mask) + sprite_get_yoffset(mask);
 
     inst->x = x1 + (snapHor? random(x2 - x1) : floor(random(x2 - x1)/snapHor)*snapHor);
     inst->y = y1 + (snapVer == 0 ? floor(random(y2 - y1)/snapVer)*snapVer : random(y2 - y1));
-} // FIXME: Accomodate mask_index
+}
 
 void move_snap(const double hsnap, const double vsnap)
 {
@@ -282,9 +276,6 @@ void move_snap(const double hsnap, const double vsnap)
         inst->y = round(inst->y/vsnap)*vsnap;
 }
 
-/*
- move_wrap by Polygone
- */
 void move_wrap(const bool hor, const bool vert, const double margin)
 {
     enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
@@ -313,7 +304,6 @@ void move_wrap(const bool hor, const bool vert, const double margin)
         }
     }
 }
-
 
 bool place_snapped(int hsnap, int vsnap) {
     enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);

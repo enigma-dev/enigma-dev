@@ -77,83 +77,83 @@ leftbutton: 6
 	Mode: Special
 	Case: 0
 	Super Check: mouse_check_button(mb_left)
-	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
+	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
 
 rightbutton: 6
 	Name: Right Button
 	Mode: Special
 	Case: 1
 	Super Check: mouse_check_button(mb_right)
-	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
+	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
 
 middlebutton: 6
 	Name: Middle Button
 	Mode: Special
 	Case: 2
 	Super Check: mouse_check_button(mb_middle)
-	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
+	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
 
 nobutton: 6
 	Name: No Button
 	Mode: Special
 	Case: 3
-	Sub Check:   mouse_check_button(mb_none) && !(mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom)
+	Sub Check:   mouse_check_button(mb_none) && !(mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom)
 
 leftpress: 6
 	Name: Left Press
 	Mode: Special
 	Case: 4
 	Super Check: mouse_check_button_pressed(mb_left)
-	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
+	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
 
 rightpress: 6
 	Name: Right Press
 	Mode: Special
 	Case: 5
 	Super Check: mouse_check_button_pressed(mb_right)
-	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
+	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
 
 middlepress: 6
 	Name: Middle Press
 	Mode: Special
 	Case: 6
 	Super Check: mouse_check_button_pressed(mb_middle)
-	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
+	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
 
 leftrelease: 6
 	Name: Left Release
 	Mode: Special
 	Case: 7
 	Super Check: mouse_check_button_released(mb_left)
-	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
+	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
 
 rightrelease: 6
 	Name: Right Release
 	Mode: Special
 	Case: 8
 	Super Check: mouse_check_button_released(mb_right)
-	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
+	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
 
 middlerelease: 6
 	Name: Middle Release
 	Mode: Special
 	Case: 9
 	Super Check: mouse_check_button_released(mb_middle)
-	Sub Check:   mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom
+	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
 
 mouseenter: 6
 	Name: Mouse Enter
 	Mode: Special
 	Case: 10
 	Locals: bool $innowEnter = false;
-	Sub Check: { const bool wasin = $innowEnter; $innowEnter = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if (!$innowEnter or wasin) return 0; }
+	Sub Check: { const bool wasin = $innowEnter; $innowEnter = mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom; if (!$innowEnter or wasin) return 0; }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
 	Locals: bool $innowLeave = false;
-	Sub Check: { const bool wasin = $innowLeave; $innowLeave = mouse_x > x + bbox_left and mouse_x < x + bbox_right and mouse_y > y + bbox_top and mouse_y < y + bbox_bottom; if ($innowLeave or !wasin) return 0; }
+	Sub Check: { const bool wasin = $innowLeave; $innowLeave = mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom; if ($innowLeave or !wasin) return 0; }
 
 mouseunknown: 6
 	Name: Mouse Unknown (old? LGM doesn't even know!)
@@ -256,12 +256,12 @@ outsideroom: 7
 	Name: Outside Room
 	Mode: Special
 	Case: 0
-	Sub Check: (x+bbox_right < 0) || (x+bbox_left > room_width) || (y+bbox_bottom < 0) || (y+bbox_top > room_height)
+	Sub Check: (bbox_right < 0) || (bbox_left > room_width) || (bbox_bottom < 0) || (bbox_top > room_height)
 boundary: 7
 	Name: Intersect Boundary
 	Mode: Special
 	Case: 1
-	Sub Check: (x+bbox_left < 0) or (x+bbox_right > room_width) or (y+bbox_top < 0) or (y+bbox_bottom > room_height)
+	Sub Check: (bbox_left < 0) or (bbox_right > room_width) or (bbox_top < 0) or (bbox_bottom > room_height)
 
 
 # Collisions stuck here for some reason, possibly so that you

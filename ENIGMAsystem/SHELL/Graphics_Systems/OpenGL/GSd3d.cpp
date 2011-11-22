@@ -37,13 +37,13 @@ void d3d_start()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 640);
-  
+
   // Set up modelview matrix
   glMatrixMode(GL_MODELVIEW);
   glClearColor(0,0,0,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
-  
+
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
@@ -57,7 +57,7 @@ void d3d_end()
 
 void d3d_set_hidden(int enable)
 {
-  
+
 }
 
 void d3d_set_lighting(int enable)
@@ -99,7 +99,7 @@ void d3d_set_perspective(int enable)
   }
   else
   {
-    
+
   }
 }
 
@@ -116,6 +116,16 @@ void d3d_primitive_end() {
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
+}
+
+void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
+{
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(angle, -aspect, znear, zfar);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
@@ -154,6 +164,51 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
       glVertex3f(x2, y2, z2);
     glTexCoord2d(hrep, vrep);
       glVertex3f(x2, y1, z2);
+  glEnd();
+}
+
+void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
+{
+  bind_texture(texId);
+  glBegin(GL_TRIANGLE_STRIP);
+    glTexCoord2d(0, vrep);
+      glVertex3f(x1, y1, z1);
+    glTexCoord2d(0,0);
+      glVertex3f(x1, y1, z2);
+    glTexCoord2d(hrep, vrep);
+      glVertex3f(x2, y1, z1);
+    glTexCoord2d(hrep, 0);
+      glVertex3f(x2, y1, z2);
+    glTexCoord2d(hrep*2, vrep);
+      glVertex3f(x2, y2, z1);
+    glTexCoord2d(hrep*2, 0);
+      glVertex3f(x2, y2, z2);
+    glTexCoord2d(hrep*3, vrep);
+      glVertex3f(x1, y2, z1);
+    glTexCoord2d(hrep*3, 0);
+      glVertex3f(x1, y2, z2);
+    glTexCoord2d(hrep*4, vrep);
+      glVertex3f(x1, y1, z1);
+    glTexCoord2d(hrep*4, 0);
+      glVertex3f(x1, y1, z2);
+  glEnd();
+  glBegin(GL_QUADS);
+    glTexCoord2d(0, vrep);
+      glVertex3f(x1, y1, z1);
+    glTexCoord2d(hrep,vrep);
+      glVertex3f(x2, y1, z1);
+    glTexCoord2d(hrep, 0);
+      glVertex3f(x2, y2, z1);
+    glTexCoord2d(0, 0);
+      glVertex3f(x1, y2, z1);
+    glTexCoord2d(0, vrep);
+      glVertex3f(x1, y1, z2);
+    glTexCoord2d(hrep,vrep);
+      glVertex3f(x2, y1, z2);
+    glTexCoord2d(hrep, 0);
+      glVertex3f(x2, y2, z2);
+    glTexCoord2d(0, 0);
+      glVertex3f(x1, y2, z2);
   glEnd();
 }
 

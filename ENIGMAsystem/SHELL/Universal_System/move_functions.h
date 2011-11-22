@@ -28,32 +28,33 @@
 
 double move_contact_object(double angle, double max_dist, const int object, const bool solid_only = false);
 
-inline int move_contact_all(const double direction, const double max_dist) {
+inline double move_contact_all(const double direction, const double max_dist) {
     return move_contact_object(direction, max_dist, all);
 }
 
-inline int move_contact_solid(const double direction, const double max_dist) {
+inline double move_contact_solid(const double direction, const double max_dist) {
     return move_contact_object(direction, max_dist, all, true);
 }
 
-inline int move_contact(const double direction) {
-    return move_contact_object(direction, -1, all);
-}
-
-/*
-move ouside by Polygone
-*/
 double move_outside_object(double angle, double max_dist, const int object, const bool solid_only = false);
 
-inline int move_outside_all(const double direction, const double speed) {
+inline double move_outside_all(const double direction, const double speed) {
     return move_outside_object(direction, speed, all);
 }
 
-inline int move_ouside_solid(const double direction, const double speed) {
+inline double move_ouside_solid(const double direction, const double speed) {
     return move_outside_object(direction, speed, all, true);
 }
 
 int move_bounce_object(const bool adv, const int object, const bool solid_only = false);
+
+inline int move_bounce_all(const bool adv) {
+    return move_bounce_object(adv, all);
+}
+
+inline int move_bounce_solid(const bool adv) {
+    return move_bounce_object(adv, all, true);
+}
 
 void motion_set(int dir, double newspeed);
 void motion_add(double newdirection, double newspeed);

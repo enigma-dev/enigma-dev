@@ -211,6 +211,18 @@ void window_default()
     SetWindowPos(enigma::hWnd, HWND_TOP, screen_width - xm/2, screen_height - ym/2, xm, ym, SWP_SHOWWINDOW);
 }
 
+int display_mouse_get_x()
+{
+    POINT mouse;
+	GetCursorPos(&mouse);
+	return mouse.x;
+}
+int display_mouse_get_y()
+{
+    POINT mouse;
+    GetCursorPos(&mouse);
+	return mouse.y;
+}
 int window_mouse_get_x()
 {
     RECT window;
