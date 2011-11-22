@@ -174,9 +174,9 @@ public final class EnigmaCli
 		if (outname == null)
 			{
 			outname = new File(f.uri).getAbsolutePath();
-			String ext = ess.targets.get(TargetHandler.ids[1]).ext;
-			outname = outname.substring(0,outname.lastIndexOf('.') - 1);
-			if (ext != null) outname = outname + '.' + ext;
+			String ext = ess.targets.get(TargetHandler.COMPILER).ext;
+			outname = outname.substring(0,outname.lastIndexOf('.'));
+			if (ext != null) outname = outname + ext;
 			}
 
 		//FIXME: Make compliant with spec2

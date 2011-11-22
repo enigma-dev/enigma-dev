@@ -516,14 +516,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		EnigmaSettings es = LGM.currentFile.resMap.get(EnigmaSettings.class).getResource();
 
-		if (es.targets.get(TargetHandler.COMPILER) == null
-				|| es.targets.get(TargetHandler.ids[1]) == null)
+		if (es.targets.get(TargetHandler.COMPILER) == null)
 			{
 			JOptionPane.showMessageDialog(null,Messages.getString("EnigmaRunner.UNABLE_SETTINGS_NULL")); //$NON-NLS-1$
 			return;
 			}
 
-		String ext = es.targets.get(TargetHandler.ids[1]).ext;
+		String ext = es.targets.get(TargetHandler.COMPILER).ext;
 
 		//determine `outname` (rebuild has no `outname`)
 		File outname = null;
