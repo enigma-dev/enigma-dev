@@ -17,7 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enigma;
+package org.enigma.frames;
 
 import java.awt.BorderLayout;
 
@@ -31,13 +31,13 @@ import org.enigma.backend.EnigmaCallbacks.OutputHandler;
 import org.enigma.messages.Messages;
 import org.lateralgm.main.LGM;
 
-public class EnigmaFrame extends JFrame implements OutputHandler
+public class ProgressFrame extends JFrame implements OutputHandler
 	{
 	private static final long serialVersionUID = 1L;
 	protected JTextArea ta;
 	protected JProgressBar pb;
 
-	public EnigmaFrame()
+	public ProgressFrame()
 		{
 		super(Messages.getString("EnigmaFrame.TITLE")); //$NON-NLS-1$
 		setLocationRelativeTo(LGM.frame);
@@ -91,12 +91,12 @@ public class EnigmaFrame extends JFrame implements OutputHandler
 		pb.setString(tip);
 		}
 
-	void progress(int pos, String tip)
+	public void progress(int pos, String tip)
 		{
 		progress(pos,tip,tip);
 		}
 
-	void progress(int pos, String tip, String text)
+	public void progress(int pos, String tip, String text)
 		{
 		pb.setValue(pos);
 		pb.setString(tip);

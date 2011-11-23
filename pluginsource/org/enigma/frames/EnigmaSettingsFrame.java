@@ -17,7 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enigma;
+package org.enigma.frames;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -72,6 +72,9 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import org.enigma.EnigmaRunner;
+import org.enigma.SettingsHandler;
+import org.enigma.TargetHandler;
 import org.enigma.SettingsHandler.ExtensionSetting;
 import org.enigma.SettingsHandler.OptionGroupSetting;
 import org.enigma.SettingsHandler.OptionSetting;
@@ -105,7 +108,7 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 
 	private JButton bDef, bGlobLoc;
 	private JButton bInit, bClean;
-	CodeHolder sDef;
+	public CodeHolder sDef;
 	private CodeFrame cfDef, cfGlobLoc, cfInit, cfClean;
 	private CodeHolder sGlobLoc, sInit, sClean;
 	private CustomFileChooser fc;

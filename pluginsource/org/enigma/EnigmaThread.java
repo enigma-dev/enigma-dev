@@ -28,11 +28,12 @@ import java.io.PrintStream;
 
 import javax.swing.SwingUtilities;
 
+import org.enigma.frames.ProgressFrame;
 import org.enigma.utility.EnigmaBuildReader;
 
 public class EnigmaThread extends Thread
 	{
-	private EnigmaFrame ef;
+	private ProgressFrame ef;
 	//gobbler
 	private BufferedReader g_in = null;
 	private PrintStream g_out = null;
@@ -46,7 +47,7 @@ public class EnigmaThread extends Thread
 	private File r_exef = null;
 
 	//gobbler
-	public EnigmaThread(EnigmaFrame ef, InputStream in)
+	public EnigmaThread(ProgressFrame ef, InputStream in)
 		{
 		this.ef = ef;
 		g_in = new BufferedReader(new InputStreamReader(in));
@@ -61,7 +62,7 @@ public class EnigmaThread extends Thread
 		}
 
 	//process
-	public EnigmaThread(EnigmaFrame ef, Process p, byte mode, File exef)
+	public EnigmaThread(ProgressFrame ef, Process p, byte mode, File exef)
 		{
 		this.ef = ef;
 		this.p = p;
@@ -71,7 +72,7 @@ public class EnigmaThread extends Thread
 		}
 
 	//returner
-	public EnigmaThread(EnigmaFrame ef, byte mode, int val, File exef)
+	public EnigmaThread(ProgressFrame ef, byte mode, int val, File exef)
 		{
 		this.ef = ef;
 		r_mode = mode;
@@ -89,8 +90,7 @@ public class EnigmaThread extends Thread
 				if (g_out == null)
 					{
 					System.out.println("> " + line); //$NON-NLS-1$
-					ef.ta.append(line + '\n'); //internally stored as \n according to java
-					ef.ta.setCaretPosition(ef.ta.getDocument().getLength());
+					ef.append(line + '\n'); //internally stored as \n according to java
 					}
 				else
 					g_out.print(line);

@@ -55,6 +55,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.TreeNode;
 
+import org.enigma.backend.Definitions;
 import org.enigma.backend.EnigmaCallbacks;
 import org.enigma.backend.EnigmaDriver;
 import org.enigma.backend.EnigmaDriver.SyntaxError;
@@ -64,6 +65,9 @@ import org.enigma.file.EFileReader;
 import org.enigma.file.EgmIO;
 import org.enigma.file.YamlParser;
 import org.enigma.file.YamlParser.YamlNode;
+import org.enigma.frames.DefinitionsFrame;
+import org.enigma.frames.ProgressFrame;
+import org.enigma.frames.EnigmaSettingsFrame;
 import org.enigma.messages.Messages;
 import org.enigma.utility.EnigmaBuildReader;
 import org.lateralgm.components.ErrorDialog;
@@ -81,6 +85,7 @@ import org.lateralgm.jedit.GMLKeywords.Keyword;
 import org.lateralgm.main.FileChooser;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
+import org.lateralgm.main.Prefs;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
 import org.lateralgm.subframes.ActionFrame;
@@ -97,7 +102,8 @@ import com.sun.jna.StringArray;
 
 public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListener
 	{
-	public static final String ENIGMA = "compileEGMf.exe"; //$NON-NLS-1$
+	public static boolean NEW_DEFINITIONS_READY_YET = false;
+
 	public static boolean ENIGMA_READY = false, ENIGMA_FAIL = false, SHUTDOWN = false;
 	public static final int MODE_RUN = 0, MODE_DEBUG = 1, MODE_DESIGN = 2;
 	public static final int MODE_COMPILE = 3, MODE_REBUILD = 4;
@@ -106,7 +112,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	/** This is static because it belongs to EnigmaStruct's dll, which is statically loaded. */
 	public static EnigmaDriver DRIVER;
 
-	public EnigmaFrame ef = new EnigmaFrame();
+	public ProgressFrame ef = new ProgressFrame();
 	/** This is global scoped so that it doesn't get GC'd */
 	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
 	public EnigmaSettingsFrame esf;
@@ -288,11 +294,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		FileChooser.fileViews.add(io);
 		ResNode.ICON.put(EnigmaSettings.class,LGM.findIcon("restree/gm.png"));
 
-		Resource.kinds.add(EnigmaSettings.class);
-		Resource.kindsByName3.put("EGS",EnigmaSettings.class);
 		String name = Messages.getString("EnigmaRunner.RESNODE_NAME"); //$NON-NLS-1$
-		Resource.kindNames.put(EnigmaSettings.class,name);
-		Resource.kindNamesPlural.put(EnigmaSettings.class,name);
+		addResourceKind(EnigmaSettings.class,"EGS",name,name);
+
+		if (NEW_DEFINITIONS_READY_YET)
+			addResourceKind(Definitions.class,"DEF","Definitions","Definitions");
+		if (!Prefs.prefixes.containsKey(Definitions.class))
+			Prefs.prefixes.put(Definitions.class,"def_");
 
 		LGM.currentFile.resMap.put(EnigmaSettings.class,new SingletonResourceHolder<EnigmaSettings>(
 				new EnigmaSettings()));
@@ -305,6 +313,24 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					return esf;
 					}
 			});
+
+		ResourceFrame.factories.put(Definitions.class,new ResourceFrameFactory()
+			{
+				@Override
+				public ResourceFrame<?,?> makeFrame(Resource<?,?> r, ResNode node)
+					{
+					return new DefinitionsFrame((Definitions) r,node);
+					}
+			});
+		}
+
+	private static void addResourceKind(Class<? extends Resource<?,?>> kind, String name3,
+			String name, String plural)
+		{
+		Resource.kinds.add(kind);
+		Resource.kindsByName3.put(name3,kind);
+		Resource.kindNames.put(kind,name);
+		Resource.kindNamesPlural.put(kind,plural);
 		}
 
 	public void populateMenu()
@@ -366,6 +392,18 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		LGM.frame.getJMenuBar().add(menu,1);
 		}
 
+	public void firstSetup()
+		{
+		LGM.root.add(node); //EnigmaSettings node
+		if (NEW_DEFINITIONS_READY_YET)
+			{
+			LGM.currentFile.resMap.addList(Definitions.class);
+			String name = Resource.kindNamesPlural.get(Definitions.class);
+			LGM.root.addChild(name,ResNode.STATUS_PRIMARY,Definitions.class);
+			}
+		LGM.tree.updateUI();
+		}
+
 	public void populateTree()
 		{
 		if (!LGM.root.isNodeChild(node))
@@ -380,11 +418,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					found = true;
 					}
 				}
-			if (!found)
-				{
-				LGM.root.add(node);
-				LGM.tree.updateUI();
-				}
+			if (!found) firstSetup();
 			}
 		}
 

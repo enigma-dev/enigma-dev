@@ -32,6 +32,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 
+import org.enigma.frames.ProgressFrame;
 import org.enigma.messages.Messages;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.file.GmFormatException;
@@ -68,7 +69,7 @@ public class EnigmaUpdater
 	private File path = null;
 
 	/** Returns -2 on error, -1 on aborted checkout, 0 on no update, 1 on finished update */
-	public static int checkForUpdates(final EnigmaFrame ef)
+	public static int checkForUpdates(final ProgressFrame ef)
 		{
 		EnigmaUpdater svn = new EnigmaUpdater();
 		try

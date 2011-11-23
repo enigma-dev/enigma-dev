@@ -97,7 +97,7 @@ public final class EnigmaCli
 		String name = Messages.getString("EnigmaRunner.RESNODE_NAME"); //$NON-NLS-1$
 		Resource.kindNames.put(EnigmaSettings.class,name);
 		Resource.kindNamesPlural.put(EnigmaSettings.class,name);
-
+		
 		LGM.currentFile.resMap.put(EnigmaSettings.class,new SingletonResourceHolder<EnigmaSettings>(
 				new EnigmaSettings()));
 		}
