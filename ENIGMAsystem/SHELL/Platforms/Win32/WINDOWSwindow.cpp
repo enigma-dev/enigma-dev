@@ -223,6 +223,18 @@ int display_mouse_get_y()
     GetCursorPos(&mouse);
 	return mouse.y;
 }
+void display_mouse_set(int x,int y)
+{
+    SetCursorPos(x,y);
+}
+int display_get_width()
+{
+   GetSystemMetrics(SM_CXSCREEN);
+}
+int display_get_height()
+{
+   GetSystemMetrics(SM_CYSCREEN);
+}
 int window_mouse_get_x()
 {
     RECT window;
@@ -444,8 +456,3 @@ void mouse_clear(const int button)
 {
     enigma::mousestatus[button] = enigma::last_mousestatus[button] = 0;
 }
-
-/*int window_set_cursor(double c)
-{
-    return 0;
-}*/

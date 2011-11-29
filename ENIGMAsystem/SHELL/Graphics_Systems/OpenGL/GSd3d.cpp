@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2011 DatZach, Josh Ventura
+/** Copyright (C) 2008-2011 DatZach, Josh Ventura, Polygone
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -211,6 +211,149 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
       glVertex3f(x1, y2, z2);
   glEnd();
 }
+
+void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
+{
+    steps = max(steps, 3);
+    const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, invstep = 1.0/steps, pr = 2*M_PI/steps;
+    double a1, a2, px1, py1, px2, py2, tp1, tp2;
+    bind_texture(texId);
+    if (closed)
+    {
+        a2 = 0; px2 = rx; py2 = 0; tp2 = 0;
+        for (int i = 0; i < steps; i++)
+        {
+            a1 = a2; a2 += pr; px1 = px2; py1 = py2; px2 = cos(a2)*rx; py2 = sin(a2)*ry; tp1 = tp2; tp2 += invstep;
+            glBegin(GL_QUADS);
+            glTexCoord2d(hrep*tp1, vrep);
+            glVertex3f(cx+px1, cy+py1, z1);
+            glTexCoord2d(hrep*tp1, 0);
+            glVertex3f(cx+px1, cy+py1, z2);
+            glTexCoord2d(hrep*tp2, 0);
+            glVertex3f(cx+px2, cy+py2, z2);
+            glTexCoord2d(hrep*tp2, vrep);
+            glVertex3f(cx+px2, cy+py2, z1);
+            glEnd();
+            glBegin(GL_TRIANGLES);
+            glTexCoord2d(hrep*tp1, vrep);
+            glVertex3f(cx+px1, cy+py1, z1);
+            glTexCoord2d(hrep*tp1, 0);
+            glVertex3f(cx, cy, z1);
+            glTexCoord2d(hrep*tp2, vrep);
+            glVertex3f(cx+px2, cy+py2, z1);
+            glTexCoord2d(hrep*tp1, vrep);
+            glVertex3f(cx+px1, cy+py1, z2);
+            glTexCoord2d(hrep*tp1, 0);
+            glVertex3f(cx, cy, z2);
+            glTexCoord2d(hrep*tp2, vrep);
+            glVertex3f(cx+px2, cy+py2, z2);
+            glEnd();
+        }
+    }
+    else
+    {
+        glBegin(GL_QUADS);
+        a2 = 0; px2 = rx; py2 = 0; tp2 = 0;
+        for (int i = 0; i < steps; i++)
+        {
+            a1 = a2; a2 += pr; px1 = px2; py1 = py2; px2 = cos(a2)*rx; py2 = sin(a2)*ry; tp1 = tp2; tp2 += invstep;
+            glTexCoord2d(hrep*tp1, vrep);
+            glVertex3f(cx+px1, cy+py1, z1);
+            glTexCoord2d(hrep*tp1, 0);
+            glVertex3f(cx+px1, cy+py1, z2);
+            glTexCoord2d(hrep*tp2, 0);
+            glVertex3f(cx+px2, cy+py2, z2);
+            glTexCoord2d(hrep*tp2, vrep);
+            glVertex3f(cx+px2, cy+py2, z1);
+        }
+        glEnd();
+    }
+}
+
+void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
+{
+    steps = max(steps, 3);
+    const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, invstep = 1.0/steps, pr = 2*M_PI/steps;
+    double a1, a2, px1, py1, px2, py2, tp1, tp2;
+    bind_texture(texId);
+    if (closed)
+    {
+        a2 = 0; px2 = rx; py2 = 0; tp2 = 0;
+        for (int i = 0; i < steps; i++)
+        {
+            a1 = a2; a2 += pr; px1 = px2; py1 = py2; px2 = cos(a2)*rx; py2 = sin(a2)*ry; tp1 = tp2; tp2 += invstep;
+            glBegin(GL_TRIANGLES);
+            glTexCoord2d(hrep*tp1, vrep);
+            glVertex3f(cx+px1, cy+py1, z1);
+            glTexCoord2d(hrep*tp1, 0);
+            glVertex3f(cx, cy, z2);
+            glTexCoord2d(hrep*tp2, vrep);
+            glVertex3f(cx+px2, cy+py2, z1);
+            glEnd();
+            glBegin(GL_TRIANGLES);
+            glTexCoord2d(hrep*tp1, vrep);
+            glVertex3f(cx+px1, cy+py1, z1);
+            glTexCoord2d(hrep*tp1, 0);
+            glVertex3f(cx, cy, z1);
+            glTexCoord2d(hrep*tp2, vrep);
+            glVertex3f(cx+px2, cy+py2, z1);
+            glEnd();
+        }
+    }
+    else
+    {
+        glBegin(GL_TRIANGLES);
+        a2 = 0; px2 = rx; py2 = 0; tp2 = 0;
+        for (int i = 0; i < steps; i++)
+        {
+            a1 = a2; a2 += pr; px1 = px2; py1 = py2; px2 = cos(a2)*rx; py2 = sin(a2)*ry; tp1 = tp2; tp2 += invstep;
+            glTexCoord2d(hrep*tp1, vrep);
+            glVertex3f(cx+px1, cy+py1, z1);
+            glTexCoord2d(hrep*tp1, 0);
+            glVertex3f(cx, cy, z2);
+            glTexCoord2d(hrep*tp2, vrep);
+            glVertex3f(cx+px2, cy+py2, z1);
+        }
+        glEnd();
+    }
+}
+
+void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, int steps)
+{
+    steps = max(steps, 3);
+    const int zsteps = ceil(steps/2);
+    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, rz = fabs(z2-z1)/2, pr = 2*M_PI/steps, qr = M_PI/zsteps;
+    double a1, a2, px1, py1, px2, py2, b1, b2, qz1, qz2, qx11, qx12, qy11, qy12, qx21, qx22, qy21, qy22, zr1, zr2;
+    bind_texture(texId);
+    a2 = 0; px2 = rx; py2 = 0;
+    for (int i = 0; i < steps; i++)
+    {
+        a1 = a2; a2 += pr; px1 = px2; py1 = py2; px2 = cos(a2)*rx; py2 = sin(a2)*ry;
+        b2 = 0; qz2 = 0; qx12 = px1; qy12 = py1; qx22 = px2; qy22 = py2; zr1 = sqrt(px1*px1 + py1*py1); zr2 = sqrt(px2*px2 + py2*py2);
+        glBegin(GL_QUADS);
+        for (int ii = 0; ii < zsteps - 2; ii++)
+        {
+            b1 = b2; b2 += qr; qz1 = qz2; qz2 = sin(b2)*rz; qx11 = qx12; qy11 = qy12; qx21 = qx22; qy21 = qy22; qx12 = cos(b2)*zr1; qy12 = sin(b2)*zr1; qx22 = cos(b2)*zr2; qy22 = sin(b2)*zr2;
+            glVertex3f(cx+qx11, cy+qy11, cz+qz1);
+            glVertex3f(cx+qx12, cy+qy12, cz+qz2);
+            glVertex3f(cx+qx22, cy+qy22, cz+qz2);
+            glVertex3f(cx+qx21, cy+qy21, cz+qz1);
+            glVertex3f(cx+qx11, cy+qy11, cz-qz1);
+            glVertex3f(cx+qx12, cy+qy12, cz-qz2);
+            glVertex3f(cx+qx22, cy+qy22, cz-qz2);
+            glVertex3f(cx+qx21, cy+qy21, cz-qz1);
+        } //TODO: Fix quads (ie use code that actually makes sense)
+        glEnd();
+        glBegin(GL_TRIANGLES);
+        glVertex3f(cx+qx12, cy+qy12, cz+qz2);
+        glVertex3f(cx, cy, z2);
+        glVertex3f(cx+qx22, cy+qy22, cz+qz2);
+        glVertex3f(cx+qx12, cy+qy12, cz-qz2);
+        glVertex3f(cx, cy, z1);
+        glVertex3f(cx+qx22, cy+qy22, cz-qz2);
+        glEnd();
+    }
+}//TODO: Also needs texturing
 
 void d3d_transform_set_identity()
 {
