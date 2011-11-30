@@ -229,11 +229,11 @@ void display_mouse_set(int x,int y)
 }
 int display_get_width()
 {
-   GetSystemMetrics(SM_CXSCREEN);
+   return GetSystemMetrics(SM_CXSCREEN);
 }
 int display_get_height()
 {
-   GetSystemMetrics(SM_CYSCREEN);
+   return GetSystemMetrics(SM_CYSCREEN);
 }
 int window_mouse_get_x()
 {
