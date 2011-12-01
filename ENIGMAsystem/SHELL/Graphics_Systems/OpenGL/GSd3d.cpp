@@ -18,13 +18,16 @@
 using namespace std;
 
 #include "OpenGLHeaders.h"
-#include "GSprmtvs.h"
 #include "GSd3d.h"
-#include <string>
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h"
 #include <math.h>
 #include "binding.h"
+
+#define __GETR(x) ((x & 0x0000FF))
+#define __GETG(x) ((x & 0x00FF00)>>8)
+#define __GETB(x) ((x & 0xFF0000)>>16)
+
 
 bool d3dMode = false;
 
@@ -104,14 +107,48 @@ void d3d_set_perspective(int enable)
 }
 
 extern GLenum ptypes_by_id[16];
-void d3d_primitive_begin(int kind) {
-  glBegin(ptypes_by_id[kind]);
+void d3d_primitive_begin(int kind)
+{
+    glBegin(ptypes_by_id[kind]);
 }
-void d3d_vertex(double x, double y, double z) {
-  glVertex3d(x,y,z);
+
+void d3d_vertex(double x, double y, double z)
+{
+    glVertex3d(x,y,z);
 }
-void d3d_primitive_end() {
-  glEnd();
+
+void d3d_vertex_color(double x, double y, double z, int color, double alpha)
+{
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glVertex3d(x,y,z);
+    glPopAttrib();
+}
+
+void d3d_primitive_begin_texture(int kind, int texId)
+{
+    bind_texture(texId);
+    glBegin(ptypes_by_id[kind]);
+}
+
+void d3d_vertex_texture(double x, double y, double z, double tx, double ty)
+{
+    glTexCoord2f(tx,ty);
+    glVertex3d(x,y,z);
+}
+
+void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha)
+{
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glTexCoord2f(tx,ty);
+    glVertex3d(x,y,z);
+    glPopAttrib();
+}
+
+void d3d_primitive_end()
+{
+    glEnd();
 }
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
@@ -293,7 +330,7 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
 {
     steps = max(steps, 3);
     const int zsteps = (ceil(steps/2) - 1)*2;
-    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, rz = fabs(z2-z1)/2, invstep = 1.0/steps, invzstep = 1.0/zsteps, pr = 2*M_PI/steps, qr = M_PI/zsteps/2;
+    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, rz = fabs(z2-z1)/2, invstep = 1.0/steps, pr = 2*M_PI/steps, qr = M_PI/zsteps/2;
     double a, b, px, py, pz, pz2, tp;
     bind_texture(texId);
     pz = 0; pz2 = 0; b = 0;

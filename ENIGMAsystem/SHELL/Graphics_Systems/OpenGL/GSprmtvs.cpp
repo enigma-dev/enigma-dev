@@ -96,11 +96,8 @@ int draw_vertex_color(float x, float y, int col, float alpha)
 }
 int draw_vertex_texture(float x, float y, float tx, float ty)
 {
-  glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(1,1,1,1);
     glTexCoord2f(tx,ty);
     glVertex2f(x,y);
-  glPopAttrib();
 	return 0;
 }
 int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha)
