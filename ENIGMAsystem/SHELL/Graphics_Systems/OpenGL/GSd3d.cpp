@@ -28,7 +28,6 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00)>>8)
 #define __GETB(x) ((x & 0xFF0000)>>16)
 
-
 bool d3dMode = false;
 
 void d3d_start()
@@ -55,13 +54,13 @@ void d3d_end()
 {
   d3dMode = false;
   glDisable(GL_DEPTH_TEST);
-  glOrtho(-1, room_width, -1, room_height, 0, 1);
+  glOrtho(-1, room_width, -1, room_height, 0, 1); //TODO: Turn off perspective, don't ortho
 }
 
 void d3d_set_hidden(int enable)
 {
 
-}
+}//TODO: Hidden
 
 void d3d_set_lighting(int enable)
 {
@@ -103,7 +102,7 @@ void d3d_set_perspective(int enable)
   else
   {
 
-  }
+  }//TODO: Turn off persepective
 }
 
 extern GLenum ptypes_by_id[16];
@@ -123,7 +122,7 @@ void d3d_vertex_color(double x, double y, double z, int color, double alpha)
     glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
     glVertex3d(x,y,z);
     glPopAttrib();
-}
+}//TODO: fix push/pop with open primitive
 
 void d3d_primitive_begin_texture(int kind, int texId)
 {
@@ -330,7 +329,7 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
 {
     steps = max(steps, 3);
     const int zsteps = (ceil(steps/2) - 1)*2;
-    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, rz = fabs(z2-z1)/2, invstep = 1.0/steps, pr = 2*M_PI/steps, qr = M_PI/zsteps/2;
+    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, rz = fabs(z2-z1)/2, invstep = 1.0/steps, pr = 2*M_PI/steps;
     double a, b, px, py, pz, pz2, tp;
     bind_texture(texId);
     pz = 0; pz2 = 0; b = 0;
@@ -383,7 +382,9 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
         a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     glEnd();
-}
+}//TODO: z and x,y coordinates properly (temporary just drew straight up). Texture properly.
+
+//TODO: with all basic drawing add in normals, switch to vertex arrays, push/pop texture binding
 
 void d3d_transform_set_identity()
 {
@@ -444,4 +445,411 @@ void d3d_transform_set_rotation_z(double angle)
 {
   d3d_transform_set_identity();
   glRotated(-angle,0,0,1);
+}
+
+#include <map>
+#include <vector>
+#include "../../Universal_System/fileio.h"
+
+#include "../../Universal_System/terminal_io.h"
+#include <sstream>
+class d3d_model
+{
+    int something, model_call_maxid;
+    vector<vector<double> > model_calls;
+
+    public:
+    d3d_model()
+    {
+        something = 100;
+        model_call_maxid = 0;
+    }
+    ~d3d_model() {}
+
+    void clear()
+    {
+        for (int i = 0; i < model_call_maxid; i++)
+        {
+            model_calls[i].clear();
+        }
+        model_calls.clear();
+        model_call_maxid = 0;
+    }
+
+    void save(string fname)
+    {
+        int file = file_text_open_write(fname);
+        file_text_write_real(file, something);
+        file_text_writeln(file);
+        file_text_write_real(file, model_call_maxid);
+        file_text_writeln(file);
+        for (int i = 0; i < model_call_maxid; i++)
+        {
+            for (int ii = 0; ii < 11; ii++)
+            {
+                file_text_write_real(file, model_calls[i][ii]);
+            }
+            file_text_writeln(file);
+        }
+        file_text_close(file);
+    }
+
+    void load(string fname)
+    {
+        int file = file_text_open_read(fname);
+        something = file_text_read_real(file);
+        file_text_readln(file);
+        model_call_maxid = file_text_read_real(file);
+        file_text_readln(file);
+        for (int i = 0; i < model_call_maxid; i++)
+        {
+            model_calls.push_back(vector<double>());
+            for (int ii = 0; ii < 11; ii++)
+            {
+                model_calls[i].push_back(file_text_read_real(file));
+            }
+            file_text_writeln(file);
+        }
+        file_text_close(file);
+    }
+
+    void draw(double x, double y, double z, int texId)
+    {
+        bind_texture(texId);
+        for (int i = 0; i < model_call_maxid; i++)
+        {
+            switch (int(model_calls[i][0]))
+            {
+                case 0: d3d_primitive_begin(model_calls[i][1]); break;
+                case 1: d3d_primitive_end(); break;
+                case 2: d3d_vertex(model_calls[i][1], model_calls[i][2], model_calls[i][3]); break;
+                case 3: d3d_vertex_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5]); break;
+                case 4: d3d_vertex_texture(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5]); break;
+                case 5: d3d_vertex_texture_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7]); break;
+                case 10: d3d_draw_block(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8]); break;
+                case 11: d3d_draw_cylinder(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8], model_calls[i][9], model_calls[i][10]); break;
+                case 12: d3d_draw_cone(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8], model_calls[i][9], model_calls[i][10]); break;
+                case 13: d3d_draw_ellipsoid(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8], model_calls[i][9]); break;
+                case 14: d3d_draw_wall(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8]); break;
+                case 15: d3d_draw_floor(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8]); break;
+            }
+        }
+    }// TODO: Add translation, push/pop texture binding, efficient model drawing
+
+    void primitive_begin(int kind)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(kind);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void primitive_end()
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(1);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void vertex(double x, double y, double z)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(2);
+        model_calls[model_call_maxid].push_back(x);
+        model_calls[model_call_maxid].push_back(y);
+        model_calls[model_call_maxid].push_back(z);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void vertex_color(double x, double y, double z, int col, double alpha)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(3);
+        model_calls[model_call_maxid].push_back(x);
+        model_calls[model_call_maxid].push_back(y);
+        model_calls[model_call_maxid].push_back(z);
+        model_calls[model_call_maxid].push_back(col);
+        model_calls[model_call_maxid].push_back(alpha);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void vertex_texture(double x, double y, double z, double tx, double ty)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(4);
+        model_calls[model_call_maxid].push_back(x);
+        model_calls[model_call_maxid].push_back(y);
+        model_calls[model_call_maxid].push_back(z);
+        model_calls[model_call_maxid].push_back(tx);
+        model_calls[model_call_maxid].push_back(ty);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void vertex_texture_color(double x, double y, double z, double tx, double ty, int col, double alpha)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(5);
+        model_calls[model_call_maxid].push_back(x);
+        model_calls[model_call_maxid].push_back(y);
+        model_calls[model_call_maxid].push_back(z);
+        model_calls[model_call_maxid].push_back(tx);
+        model_calls[model_call_maxid].push_back(ty);
+        model_calls[model_call_maxid].push_back(col);
+        model_calls[model_call_maxid].push_back(alpha);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(10);
+        model_calls[model_call_maxid].push_back(x1);
+        model_calls[model_call_maxid].push_back(y1);
+        model_calls[model_call_maxid].push_back(z1);
+        model_calls[model_call_maxid].push_back(x2);
+        model_calls[model_call_maxid].push_back(y2);
+        model_calls[model_call_maxid].push_back(z2);
+        model_calls[model_call_maxid].push_back(hrep);
+        model_calls[model_call_maxid].push_back(vrep);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(11);
+        model_calls[model_call_maxid].push_back(x1);
+        model_calls[model_call_maxid].push_back(y1);
+        model_calls[model_call_maxid].push_back(z1);
+        model_calls[model_call_maxid].push_back(x2);
+        model_calls[model_call_maxid].push_back(y2);
+        model_calls[model_call_maxid].push_back(z2);
+        model_calls[model_call_maxid].push_back(hrep);
+        model_calls[model_call_maxid].push_back(vrep);
+        model_calls[model_call_maxid].push_back(closed);
+        model_calls[model_call_maxid].push_back(steps);
+        model_call_maxid++;
+    }
+
+    void draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(12);
+        model_calls[model_call_maxid].push_back(x1);
+        model_calls[model_call_maxid].push_back(y1);
+        model_calls[model_call_maxid].push_back(z1);
+        model_calls[model_call_maxid].push_back(x2);
+        model_calls[model_call_maxid].push_back(y2);
+        model_calls[model_call_maxid].push_back(z2);
+        model_calls[model_call_maxid].push_back(hrep);
+        model_calls[model_call_maxid].push_back(vrep);
+        model_calls[model_call_maxid].push_back(closed);
+        model_calls[model_call_maxid].push_back(steps);
+        model_call_maxid++;
+    }
+
+    void draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(13);
+        model_calls[model_call_maxid].push_back(x1);
+        model_calls[model_call_maxid].push_back(y1);
+        model_calls[model_call_maxid].push_back(z1);
+        model_calls[model_call_maxid].push_back(x2);
+        model_calls[model_call_maxid].push_back(y2);
+        model_calls[model_call_maxid].push_back(z2);
+        model_calls[model_call_maxid].push_back(hrep);
+        model_calls[model_call_maxid].push_back(vrep);
+        model_calls[model_call_maxid].push_back(steps);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(14);
+        model_calls[model_call_maxid].push_back(x1);
+        model_calls[model_call_maxid].push_back(y1);
+        model_calls[model_call_maxid].push_back(z1);
+        model_calls[model_call_maxid].push_back(x2);
+        model_calls[model_call_maxid].push_back(y2);
+        model_calls[model_call_maxid].push_back(z2);
+        model_calls[model_call_maxid].push_back(hrep);
+        model_calls[model_call_maxid].push_back(vrep);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(15);
+        model_calls[model_call_maxid].push_back(x1);
+        model_calls[model_call_maxid].push_back(y1);
+        model_calls[model_call_maxid].push_back(z1);
+        model_calls[model_call_maxid].push_back(x2);
+        model_calls[model_call_maxid].push_back(y2);
+        model_calls[model_call_maxid].push_back(z2);
+        model_calls[model_call_maxid].push_back(hrep);
+        model_calls[model_call_maxid].push_back(vrep);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+};
+
+static map<unsigned int, d3d_model> d3d_models;
+static unsigned int d3d_models_maxid = 0;
+
+unsigned int d3d_model_create()
+{
+    d3d_models.insert(pair<unsigned int, d3d_model>(d3d_models_maxid++, d3d_model()));
+    return d3d_models_maxid-1;
+}
+
+void d3d_model_destroy(const unsigned int id)
+{
+    d3d_models[id].clear();
+    d3d_models.erase(d3d_models.find(id));
+}
+
+void d3d_model_copy(const unsigned int id, const unsigned int source)
+{
+    d3d_models[id] = d3d_models[source];
+}
+
+unsigned int d3d_model_duplicate(const unsigned int source)
+{
+    d3d_models.insert(pair<unsigned int, d3d_model>(d3d_models_maxid++, d3d_model()));
+    d3d_models[d3d_models_maxid-1] = d3d_models[source];
+    return d3d_models_maxid-1;
+}
+
+bool d3d_model_exists(const unsigned int id)
+{
+    return (d3d_models.find(id) != d3d_models.end());
+}
+
+void d3d_model_clear(const unsigned int id)
+{
+    d3d_models[id].clear();
+}
+
+void d3d_model_save(const unsigned int id, string fname)
+{
+    d3d_models[id].save(fname);
+}
+
+void d3d_model_load(const unsigned int id, string fname)
+{
+    d3d_models[id].clear();
+    d3d_models[id].load(fname);
+}
+
+void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId)
+{
+    d3d_models[id].draw(x, y, z, texId);
+}
+
+void d3d_model_primitive_begin(const unsigned int id, int kind)
+{
+    d3d_models[id].primitive_begin(kind);
+}
+
+void d3d_model_primitive_end(const unsigned int id)
+{
+    d3d_models[id].primitive_end();
+}
+
+void d3d_model_vertex(const unsigned int id, double x, double y, double z)
+{
+    d3d_models[id].vertex(x, y, z);
+}
+
+void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha)
+{
+    d3d_models[id].vertex_color(x, y, z, col, alpha);
+}
+
+void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty)
+{
+    d3d_models[id].vertex_texture(x, y, z, tx, ty);
+}
+
+void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha)
+{
+    d3d_models[id].vertex_texture_color(x, y, z, tx, ty, col, alpha);
+}
+
+void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+{
+    d3d_models[id].draw_block(x1, y1, z1, x2, y2, z2, hrep, vrep);
+}
+
+void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
+{
+    d3d_models[id].draw_cylinder(x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+}
+
+void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
+{
+    d3d_models[id].draw_cone(x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+}
+
+void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps)
+{
+    d3d_models[id].draw_ellipsoid(x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
+}
+
+void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+{
+    d3d_models[id].draw_wall(x1, y1, z1, x2, y2, z2, hrep, vrep);
+}
+
+void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+{
+    d3d_models[id].draw_floor(x1, y1, z1, x2, y2, z2, hrep, vrep);
 }

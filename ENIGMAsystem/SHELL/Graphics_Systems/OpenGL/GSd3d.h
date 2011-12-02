@@ -70,3 +70,27 @@ void d3d_transform_set_scaling(double xs,double ys,double zs);
 void d3d_transform_set_rotation_x(double angle);
 void d3d_transform_set_rotation_y(double angle);
 void d3d_transform_set_rotation_z(double angle);
+
+#include <string>
+
+unsigned int d3d_model_create();
+void d3d_model_destroy(const unsigned int id);
+void d3d_model_copy(const unsigned int id, const unsigned int source);
+unsigned int d3d_model_duplicate(const unsigned int source);
+bool d3d_model_exists(const unsigned int id);
+void d3d_model_clear(const unsigned int id);
+void d3d_model_save(const unsigned int id, std::string fname);
+void d3d_model_load(const unsigned int id, std::string fname);
+void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId);
+void d3d_model_primitive_begin(const unsigned int id, int kind);
+void d3d_model_primitive_end(const unsigned int id);
+void d3d_model_vertex(const unsigned int id, double x, double y, double z);
+void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha);
+void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty);
+void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha);
+void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep);
+void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps);
+void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps);
+void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps);
+void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep);
+void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep);
