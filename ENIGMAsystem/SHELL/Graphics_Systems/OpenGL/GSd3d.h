@@ -31,11 +31,10 @@ void d3d_start();
 void d3d_end();
 void d3d_set_perspective(int enable);
 void d3d_set_hidden(int enable);
-
 void d3d_set_lighting(int enable);
 void d3d_set_culling(int enable);
-
 void d3d_set_fog(int enable, int color, int start, int end);
+void d3d_set_shading(bool smooth);
 
 void d3d_primitive_begin(int kind);
 void d3d_vertex(double x, double y, double z);
@@ -61,15 +60,13 @@ void d3d_transform_add_scaling(double xs,double ys,double zs);
 void d3d_transform_add_rotation_x(double angle);
 void d3d_transform_add_rotation_y(double angle);
 void d3d_transform_add_rotation_z(double angle);
-
-void d3d_transform_stack_push();
-void d3d_transform_stack_pop();
-
 void d3d_transform_set_translation(double xt,double yt,double zt);
 void d3d_transform_set_scaling(double xs,double ys,double zs);
 void d3d_transform_set_rotation_x(double angle);
 void d3d_transform_set_rotation_y(double angle);
 void d3d_transform_set_rotation_z(double angle);
+void d3d_transform_stack_push();
+void d3d_transform_stack_pop();
 
 #include <string>
 

@@ -20,6 +20,7 @@
 #include "GSstdraw.h"
 #include "binding.h"
 #include <stdio.h>
+#include "../../Universal_System/roomsystem.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -653,6 +654,21 @@ void draw_healthbar(float x1,float y1,float x2,float y2,float amount,int backcol
 
 int draw_getpixel(int x,int y)
 {
+    if (view_enabled)
+    {
+        x = x - view_xview[view_current];
+        y = view_hview[view_current] - (y - view_yview[view_current]);
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > view_wview[view_current] || y > view_hview[view_current]) return 0;
+    }
+    else
+    {
+        y = room_height - y;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > room_width || y > room_height) return 0;
+    }
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
     glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&ret);
@@ -662,11 +678,9 @@ int draw_getpixel(int x,int y)
     glReadPixels(x,y,1,1,GL_BGR,GL_UNSIGNED_BYTE,&ret);
     return ret>>8;
   #else
-    char r,g,b;
-    glReadPixels(x,y,1,1,GL_RED,GL_UNSIGNED_BYTE,&r);
-    glReadPixels(x,y,1,1,GL_GREEN,GL_UNSIGNED_BYTE,&g);
-    glReadPixels(x,y,1,1,GL_BLUE,GL_UNSIGNED_BYTE,&b);
-    return r|(g<<8)|(b<<16);
+    unsigned char rgb[3];
+    glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&rgb);
+    return rgb[0] | rgb[1] << 8 | rgb[2] << 16;
   #endif
 }
 

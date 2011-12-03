@@ -38,7 +38,7 @@ void d3d_start()
   // Set up projection matrix
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 640);
+  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 6400);
 
   // Set up modelview matrix
   glMatrixMode(GL_MODELVIEW);
@@ -59,8 +59,8 @@ void d3d_end()
 
 void d3d_set_hidden(int enable)
 {
-
-}//TODO: Hidden
+    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
+}
 
 void d3d_set_lighting(int enable)
 {
@@ -97,7 +97,7 @@ void d3d_set_perspective(int enable)
   if (enable)
   {
     glMatrixMode(GL_PROJECTION);
-    gluPerspective(45, view_wview[view_current] / (double)view_hview[view_current], 1, 640);
+    gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 6400);
   }
   else
   {
@@ -105,9 +105,15 @@ void d3d_set_perspective(int enable)
   }//TODO: Turn off persepective
 }
 
+void d3d_set_shading(bool smooth)
+{
+    glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
+}
+
 extern GLenum ptypes_by_id[16];
 void d3d_primitive_begin(int kind)
 {
+    untexture();
     glBegin(ptypes_by_id[kind]);
 }
 
@@ -384,7 +390,7 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
     glEnd();
 }//TODO: z and x,y coordinates properly (temporary just drew straight up). Texture properly.
 
-//TODO: with all basic drawing add in normals, switch to vertex arrays, push/pop texture binding
+//TODO: with all basic drawing add in normals, switch to vertex arrays
 
 void d3d_transform_set_identity()
 {

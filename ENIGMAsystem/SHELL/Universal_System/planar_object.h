@@ -37,6 +37,8 @@
 #include "var4.h"
 #include "reflexive_types.h"
 
+#define ISLOCAL_persistent true
+
 namespace enigma
 {
   struct object_planar: object_basic
@@ -45,27 +47,29 @@ namespace enigma
       double  x, y;
       double  xprevious, yprevious;
       double  xstart, ystart;
-    
+
     //Persistence
+    #ifdef ISLOCAL_persistent
       bool  persistent;
-    
+    #endif
+
     //Motion
       directionv direction;
       speedv     speed;
       hspeedv    hspeed;
       vspeedv    vspeed;
-      
+
     //Accelerators
       double  gravity;
       double  gravity_direction;
       double  friction;
-    
+
     //Constructors
       object_planar();
       object_planar(unsigned, int);
       virtual ~object_planar();
   };
-  
+
   void propagate_locals(object_planar*);
 }
 
