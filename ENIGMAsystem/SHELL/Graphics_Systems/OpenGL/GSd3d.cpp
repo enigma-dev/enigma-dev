@@ -38,7 +38,7 @@ void d3d_start()
   // Set up projection matrix
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 6400);
+  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
 
   // Set up modelview matrix
   glMatrixMode(GL_MODELVIEW);
@@ -53,8 +53,7 @@ void d3d_start()
 void d3d_end()
 {
   d3dMode = false;
-  glDisable(GL_DEPTH_TEST);
-  glOrtho(-1, room_width, -1, room_height, 0, 1); //TODO: Turn off perspective, don't ortho
+  d3d_set_projection_ortho(-1, -1, room_width, room_height, 0); //TODO: Turn off perspective, take views into account
 }
 
 void d3d_set_hidden(int enable)
@@ -72,7 +71,7 @@ void d3d_set_lighting(int enable)
 
 void d3d_set_fog(int enable, int color, int start, int end)
 {
-  if (enable)
+ /* if (enable)
   {
     glEnable(GL_FOG);
     glFogi(GL_FOG_MODE, 1);
@@ -81,8 +80,8 @@ void d3d_set_fog(int enable, int color, int start, int end)
     glFogf(GL_FOG_END, end);
   }
   else
-    glDisable(GL_FOG);
-}
+    glDisable(GL_FOG);*/
+}//TODO: That fog is very wrong
 
 void d3d_set_culling(int enable)
 {
@@ -97,7 +96,7 @@ void d3d_set_perspective(int enable)
   if (enable)
   {
     glMatrixMode(GL_PROJECTION);
-    gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 6400);
+    gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
   }
   else
   {
@@ -175,21 +174,28 @@ void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,do
 
 void d3d_set_projection_ortho(int x, int y, int width, int height, int angle)
 {
-  glOrtho(x,x + width,y,y + height,0,1);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(angle, 1, 0, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glScaled(1, -1, 1);
+  glOrtho(x-1,x + width,y-1,y + height,0,1);
   glRotated(angle,0,0,1);
+  glDisable(GL_DEPTH_TEST);
 }
 
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
   bind_texture(texId);
   glBegin(GL_QUADS);
-    glTexCoord2d(0,1);
-      glVertex3f(x1, y1, z1);
     glTexCoord2d(0,0);
+      glVertex3f(x1, y1, z1);
+    glTexCoord2d(0,vrep);
       glVertex3f(x1, y1, z2);
-    glTexCoord2d(1,0);
+    glTexCoord2d(hrep,vrep);
       glVertex3f(x2, y2, z2);
-    glTexCoord2d(1,1);
+    glTexCoord2d(hrep,0);
       glVertex3f(x2, y2, z1);
   glEnd();
 }
@@ -198,13 +204,13 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
 {
   bind_texture(texId);
   glBegin(GL_QUADS);
-    glTexCoord2d(0, vrep);
+    glTexCoord2d(0, 0);
       glVertex3f(x1, y1, z1);
-    glTexCoord2d(0,0);
+    glTexCoord2d(0, vrep);
       glVertex3f(x1, y2, z1);
-    glTexCoord2d(hrep, 0);
-      glVertex3f(x2, y2, z2);
     glTexCoord2d(hrep, vrep);
+      glVertex3f(x2, y2, z2);
+    glTexCoord2d(hrep, 0);
       glVertex3f(x2, y1, z2);
   glEnd();
 }

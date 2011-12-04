@@ -165,5 +165,6 @@ void screen_redraw()
                 }
             }
         }
+        view_current = 0;
     }
 }
