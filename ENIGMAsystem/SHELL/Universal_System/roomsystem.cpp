@@ -75,7 +75,7 @@ namespace enigma
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
       it->myevent_roomend();
-      #ifdef ISLOCAL_persistent
+      #ifdef ISCONTOLLER_persistent
       if (!((object_planar*)*it)->persistent)
       #endif
       instance_destroy(it->id);

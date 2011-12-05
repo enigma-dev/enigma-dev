@@ -1,29 +1,19 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2011 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 // Simple, untuitive, integer based file I/O
 
@@ -48,13 +38,13 @@ namespace enigma
   {
     FILE *f;      //FILE we opened, or NULL if it has been closed.
     string sdata; //Use varies depending on type.
-    
-    openFile(): f(NULL), sdata() {};
-    openFile(FILE* a,string b): f(a), sdata(b) {};
+    int spos;      //position in sdata string
+
+    openFile(): f(NULL), sdata() {spos = 0;};
+    openFile(FILE* a,string b): f(a), sdata(b) {spos = 0;};
   };
   varray<openFile> files; //Use a dynamic array to store as many files as the user cares to open
   int file_highid = 0; //This isn't what GM does, but it's not a bad idea. GM checks for the smallest unused ID.
-  
 }
 
 
@@ -90,32 +80,49 @@ void file_text_close(int fileid) // Closes the file with the given file id.
 {
   fclose(enigma::files[fileid].f);
   enigma::files[fileid].f = NULL;
-  
+
   //Determine new high id: Lowest possible
   for (int i = enigma::file_highid; i >= 0; i--)
     if (enigma::files[i].f == NULL)
-      enigma::file_highid = i; 
+      enigma::file_highid = i;
 }
 void file_text_write_string(int fileid,string str) { // Writes the string to the file with the given file id.
   enigma::files[fileid].sdata = str;
+
 }
 void file_text_write_real(int fileid,double x) // Write the real value to the file with the given file id.
 {
   char sbuf[12]; sbuf[0] = 0;
-  sprintf(sbuf,"%lf\n",x);
-  enigma::files[fileid].sdata = sbuf;
+  const enigma::openFile &mf = enigma::files[fileid];
+  sprintf(sbuf," %lf",x);
+  const string fstr = sbuf;
+  fwrite(fstr.c_str(),1,fstr.length(),mf.f);
 }
 void file_text_writeln(int fileid) // Write a newline character to the file.
 {
   const enigma::openFile &mf = enigma::files[fileid];
-  fwrite(mf.sdata.c_str(),1,mf.sdata.length(),mf.f);
   fputc('\n',mf.f);
 }
 string file_text_read_string(int fileid) { // Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
-  return enigma::files[fileid].sdata;
+  enigma::openFile &mf = enigma::files[fileid];
+  if (!mf.sdata[mf.spos]) return "";
+  string strr = mf.sdata.substr(mf.spos);
+//  mf.spos = mf.sdata.length();
+  return strr;
 }
+
+inline bool is_whitespace(char x) { return x == ' ' or x == '\t' or x == '\r' or x == '\n'; }
+
 double file_text_read_real(int fileid) { // Reads a real value from the file and returns this value.
-  return atof(enigma::files[fileid].sdata.c_str());
+  enigma::openFile &mf = enigma::files[fileid];
+  double r1;
+  int apos;
+  if (!mf.sdata[mf.spos]) return 0;
+  while (is_whitespace(mf.sdata[mf.spos]))
+    mf.spos++;
+  if  (sscanf(mf.sdata.substr(mf.spos).c_str(),"%lf%n",&r1,&apos),apos)
+    mf.spos += apos;
+  return r1;
 }
 void file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
 {
@@ -133,6 +140,7 @@ void file_text_readln(int fileid) // Skips the rest of the line in the file and 
   for (dp = ret.length()-1; dp != size_t(-1) and (ret[dp] == '\n' or ret[dp] == '\r'); dp--);
   ret.erase(dp+1);
   enigma::files[fileid].sdata = ret;
+  enigma::files[fileid].spos = 0;
 }
 bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
   return feof(enigma::files[fileid].f);
@@ -147,10 +155,10 @@ int file_bin_open(string fname,int mode) // Opens the file with the indicated na
     a = fopen(fname.c_str(),"r+b"); //Open for reading + writing if it exists, failing otherwise
     if (!a) a = fopen(fname.c_str(),"w+b"); //Open for writing + reading, overwriting if it exists or creating otherwise
   } else a = fopen(fname.c_str(),(mode & 1) ? "wb" : "rb");
-  
+
   if (!a)      //Failure
     return -1; //Behavior for fail is -1 return
-  
+
   enigma::files[enigma::file_highid] = enigma::openFile(a,fname); //Store it in the lowest available ID, highid
   return enigma::file_highid++; //Return our index and increment it for next time
 }
@@ -158,7 +166,7 @@ bool file_bin_rewrite(int fileid) // Rewrites the file with the given file id, t
 {
   enigma::openFile &mf = enigma::files[fileid];
   mf.f = freopen (mf.sdata.c_str(), "wb", mf.f);
-  
+
   if (mf.f == NULL) {
     #ifdef DEBUGMODE
       show_error("Failed to reopen binary file. Sure it's a binary file? Drive been removed?",false);
@@ -171,11 +179,11 @@ void file_bin_close(int fileid) // Closes the file with the given file id.
 {
   fclose(enigma::files[fileid].f);
   enigma::files[fileid].f = NULL;
-  
+
   //Determine new high id: Lowest possible
   for (int i = enigma::file_highid; i >= 0; i--)
     if (enigma::files[i].f == NULL)
-      enigma::file_highid = i; 
+      enigma::file_highid = i;
 }
 size_t file_bin_size(int fileid) // Returns the size (in bytes) of the file with the given file id.
 {

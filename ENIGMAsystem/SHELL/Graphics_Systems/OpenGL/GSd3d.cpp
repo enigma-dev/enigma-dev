@@ -215,7 +215,7 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
   glEnd();
 }
 
-void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
+void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed)
 {
   bind_texture(texId);
   glBegin(GL_TRIANGLE_STRIP);
@@ -240,24 +240,27 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
     glTexCoord2d(hrep*4, 0);
       glVertex3f(x1, y1, z2);
   glEnd();
-  glBegin(GL_QUADS);
-    glTexCoord2d(0, vrep);
-      glVertex3f(x1, y1, z1);
-    glTexCoord2d(hrep,vrep);
-      glVertex3f(x2, y1, z1);
-    glTexCoord2d(hrep, 0);
-      glVertex3f(x2, y2, z1);
-    glTexCoord2d(0, 0);
-      glVertex3f(x1, y2, z1);
-    glTexCoord2d(0, vrep);
-      glVertex3f(x1, y1, z2);
-    glTexCoord2d(hrep,vrep);
-      glVertex3f(x2, y1, z2);
-    glTexCoord2d(hrep, 0);
-      glVertex3f(x2, y2, z2);
-    glTexCoord2d(0, 0);
-      glVertex3f(x1, y2, z2);
-  glEnd();
+  if (closed)
+  {
+        glBegin(GL_QUADS);
+        glTexCoord2d(0, vrep);
+          glVertex3f(x1, y1, z1);
+        glTexCoord2d(hrep,vrep);
+          glVertex3f(x2, y1, z1);
+        glTexCoord2d(hrep, 0);
+          glVertex3f(x2, y2, z1);
+        glTexCoord2d(0, 0);
+          glVertex3f(x1, y2, z1);
+        glTexCoord2d(0, vrep);
+          glVertex3f(x1, y1, z2);
+        glTexCoord2d(hrep,vrep);
+          glVertex3f(x2, y1, z2);
+        glTexCoord2d(hrep, 0);
+          glVertex3f(x2, y2, z2);
+        glTexCoord2d(0, 0);
+          glVertex3f(x1, y2, z2);
+        glEnd();
+  }
 }
 
 void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
@@ -271,9 +274,9 @@ void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, do
     for (int i = 0; i <= steps; i++)
     {
         glTexCoord2d(hrep*tp, 0);
-        glVertex3f(px, py, z2);
+          glVertex3f(px, py, z2);
         glTexCoord2d(hrep*tp, vrep);
-        glVertex3f(px, py, z1);
+          glVertex3f(px, py, z1);
         a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     glEnd();
@@ -281,23 +284,23 @@ void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, do
     {
         glBegin(GL_TRIANGLE_FAN);
         glTexCoord2d(0, vrep);
-        glVertex3f(cx, cy, z1);
+          glVertex3f(cx, cy, z1);
         a = 0; px = cx+rx; py = cy; tp = 0;
         for (int i = 0; i <= steps; i++)
         {
             glTexCoord2d(hrep*tp, 0);
-            glVertex3f(px, py, z1);
+              glVertex3f(px, py, z1);
             a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
         }
         glEnd();
         glBegin(GL_TRIANGLE_FAN);
         glTexCoord2d(0, vrep);
-        glVertex3f(cx, cy, z2);
+          glVertex3f(cx, cy, z2);
         a = 0; px = cx+rx; py = cy; tp = 0;
         for (int i = 0; i <= steps; i++)
         {
             glTexCoord2d(hrep*tp, 0);
-            glVertex3f(px, py, z2);
+              glVertex3f(px, py, z2);
             a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
         }
         glEnd();
@@ -312,12 +315,12 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
     bind_texture(texId);
     glBegin(GL_TRIANGLE_FAN);
     glTexCoord2d(0, 0);
-    glVertex3f(cx, cy, z2);
+      glVertex3f(cx, cy, z2);
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
     {
         glTexCoord2d(hrep*tp, vrep);
-        glVertex3f(px, py, z1);
+          glVertex3f(px, py, z1);
         a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     glEnd();
@@ -325,12 +328,12 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
     {
         glBegin(GL_TRIANGLE_FAN);
         glTexCoord2d(0, vrep);
-        glVertex3f(cx, cy, z1);
+          glVertex3f(cx, cy, z1);
         a = 0; px = cx+rx; py = cy; tp = 0;
         for (int i = 0; i <= steps; i++)
         {
             glTexCoord2d(hrep*tp, 0);
-            glVertex3f(px, py, z1);
+              glVertex3f(px, py, z1);
             a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
         }
         glEnd();
@@ -353,9 +356,9 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
         for (int i = 0; i <= steps; i++)
         {
             glTexCoord2d(hrep*tp, 0);
-            glVertex3f(px, py, cz - pz);
+              glVertex3f(px, py, cz - pz);
             glTexCoord2d(hrep*tp, 0);
-            glVertex3f(px, py, cz - pz2);
+              glVertex3f(px, py, cz - pz2);
             a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
         }
         glEnd();
@@ -364,9 +367,9 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
         for (int i = 0; i <= steps; i++)
         {
             glTexCoord2d(hrep*tp, 0);
-            glVertex3f(px, py, cz + pz);
+              glVertex3f(px, py, cz + pz);
             glTexCoord2d(hrep*tp, 0);
-            glVertex3f(px, py, cz + pz2);
+              glVertex3f(px, py, cz + pz2);
             a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
         }
         glEnd();
@@ -374,23 +377,23 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
     }
     glBegin(GL_TRIANGLE_FAN);
     glTexCoord2d(0, 0);
-    glVertex3f(cx, cy, z1);
+      glVertex3f(cx, cy, z1);
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
     {
         glTexCoord2d(hrep*tp, 0);
-        glVertex3f(px, py, cz-pz);
+          glVertex3f(px, py, cz-pz);
         a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     glEnd();
     glBegin(GL_TRIANGLE_FAN);
     glTexCoord2d(0, 0);
-    glVertex3f(cx, cy, z2);
+      glVertex3f(cx, cy, z2);
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
     {
         glTexCoord2d(hrep*tp, 0);
-        glVertex3f(px, py, cz+pz);
+          glVertex3f(px, py, cz+pz);
         a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     glEnd();
@@ -423,12 +426,62 @@ void d3d_transform_add_rotation_z(double angle) {
   glRotatef(-angle,0,0,1);
 }
 
-void d3d_transform_stack_push() {
-  glPushMatrix();
+#include <stack>
+stack<bool> trans_stack;
+int trans_stack_size = 0;
+
+bool d3d_transform_stack_push()
+{
+    if (trans_stack_size == 15) return false;
+    glPushMatrix();
+    trans_stack.push(1);
+    trans_stack_size++;
+    return true;
 }
 
-void d3d_transform_stack_pop() {
-  glPopMatrix();
+bool d3d_transform_stack_pop()
+{
+    if (trans_stack_size == 0) return false;
+    while (trans_stack.top() == 0)
+    {
+        glPopMatrix();
+        trans_stack.pop();
+    }
+    if (trans_stack_size > 0) trans_stack_size--;
+    return true;
+}
+
+void d3d_transform_stack_clear()
+{
+    do
+      glPopMatrix();
+    while (trans_stack_size--);
+    glLoadIdentity();
+}
+
+bool d3d_transform_stack_empty()
+{
+    return (trans_stack_size == 0);
+}
+
+bool d3d_transform_stack_top()
+{
+    if (trans_stack_size == 0) return false;
+    while (trans_stack.top() == 0)
+    {
+        glPopMatrix();
+        trans_stack.pop();
+    }
+    glPushMatrix();
+    return true;
+}
+
+bool d3d_transform_stack_disgard()
+{
+    if (trans_stack_size == 0) return false;
+    trans_stack.push(0);
+    trans_stack_size--;
+    return true;
 }
 
 void d3d_transform_set_translation(double xt,double yt,double zt)
