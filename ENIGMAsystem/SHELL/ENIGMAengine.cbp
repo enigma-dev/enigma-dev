@@ -16,14 +16,14 @@
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
-					<Add library="..\additional\zlib\libzlib.a" />
+					<Add library="../additional/zlib/libzlib.a" />
 					<Add library="gdi32" />
 					<Add library="comdlg32" />
-					<Add library="..\additional\al\lib\Win32\OpenAL32.lib" />
-					<Add library="Platforms\Win32\ffi\libFFI.a" />
+					<Add library="../additional/al/lib/Win32/OpenAL32.lib" />
+					<Add library="Platforms/Win32/ffi/libFFI.a" />
 					<Add library="glu32" />
 					<Add library="comctl32" />
-					<Add directory="\home\git\enigma\ENIGMAsystem\additional\" />
+					<Add directory="/home/git/enigma/ENIGMAsystem/additional/" />
 				</Linker>
 			</Target>
 			<Target title="win-build">
@@ -36,11 +36,11 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="opengl32" />
-					<Add library="..\additional\zlib\libzlib.a" />
+					<Add library="../additional/zlib/libzlib.a" />
 					<Add library="gdi32" />
 					<Add library="comdlg32" />
-					<Add library="..\additional\al\lib\Win32\OpenAL32.lib" />
-					<Add library="Platforms\Win32\ffi\libFFI.a" />
+					<Add library="../additional/al/lib/Win32/OpenAL32.lib" />
+					<Add library="Platforms/Win32/ffi/libFFI.a" />
 					<Add library="glu32" />
 					<Add library="comctl32" />
 				</Linker>
@@ -138,507 +138,508 @@
 			<Add option="-DCODEBLOX" />
 		</Compiler>
 		<Unit filename="API_Switchboard.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\include\aldumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\include\dumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\include\internal\aldumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\include\internal\dumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\include\internal\it.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\aldumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\atexit.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/include/aldumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/include/dumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/include/internal/aldumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/include/internal/dumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/include/internal/it.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/aldumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/atexit.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\duhlen.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/duhlen.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\duhtag.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/duhtag.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\dumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\dumbfile.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/dumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/dumbfile.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\internal\aldumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\internal\dumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\internal\it.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\loadduh.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/internal/aldumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/internal/dumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/internal/it.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/loadduh.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\makeduh.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/makeduh.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\rawsig.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/rawsig.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\readduh.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/readduh.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\register.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/register.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\rendduh.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/rendduh.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\rendsig.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/rendsig.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\core\unload.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/core/unload.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\aldumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\clickrem.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/aldumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/clickrem.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\dumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\internal\aldumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\internal\dumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\internal\it.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\memfile.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/dumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/internal/aldumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/internal/dumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/internal/it.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/memfile.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\resample.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/resample.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\sampbuf.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/sampbuf.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\silence.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/silence.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\helpers\stdfile.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/stdfile.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\aldumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\dumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\internal\aldumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\internal\dumb.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\internal\it.h" />
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\itload.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/aldumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/dumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/internal/aldumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/internal/dumb.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/internal/it.h" />
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itload.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\itload2.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itload2.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\itmisc.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itmisc.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\itorder.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itorder.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\itread.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itread.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\itread2.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itread2.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\itrender.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itrender.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\itunload.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itunload.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\loadmod.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loadmod.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\loadmod2.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loadmod2.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\loads3m.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loads3m.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\loads3m2.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loads3m2.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\loadxm.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loadxm.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\loadxm2.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loadxm2.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\readmod.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/readmod.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\readmod2.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/readmod2.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\reads3m.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/reads3m.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\reads3m2.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/reads3m2.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\readxm.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/readxm.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\readxm2.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/readxm2.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\dumb\src\it\xmeffect.c">
+		<Unit filename="Audio_Systems/Codecs/dumb/src/it/xmeffect.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\ogg\bitwise.c">
+		<Unit filename="Audio_Systems/Codecs/ogg/bitwise.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\ogg\framing.c">
+		<Unit filename="Audio_Systems/Codecs/ogg/framing.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\ogg\include\config_types.h" />
-		<Unit filename="Audio_Systems\Codecs\ogg\include\ogg.h" />
-		<Unit filename="Audio_Systems\Codecs\ogg\include\os_types.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\include\codec.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\include\vorbisenc.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\include\vorbisfile.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\analysis.c">
+		<Unit filename="Audio_Systems/Codecs/ogg/include/config_types.h" />
+		<Unit filename="Audio_Systems/Codecs/ogg/include/ogg.h" />
+		<Unit filename="Audio_Systems/Codecs/ogg/include/os_types.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/include/codec.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/include/vorbisenc.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/include/vorbisfile.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/analysis.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\backends.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\bitrate.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/backends.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/bitrate.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\bitrate.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\block.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/bitrate.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/block.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\books\coupled\res_books_51.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\books\coupled\res_books_stereo.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\books\floor\floor_books.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\books\uncoupled\res_books_uncoupled.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\codebook.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/books/coupled/res_books_51.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/books/coupled/res_books_stereo.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/books/floor/floor_books.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/books/uncoupled/res_books_uncoupled.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/codebook.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\codebook.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\codec_internal.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\envelope.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/codebook.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/codec_internal.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/envelope.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\envelope.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\floor0.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/envelope.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/floor0.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\floor1.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/floor1.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\highlevel.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\info.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/highlevel.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/info.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\lookup.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lookup.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\lookup.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\lookup_data.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\lpc.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lookup.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lookup_data.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lpc.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\lpc.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\lsp.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lpc.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lsp.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\lsp.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\mapping0.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lsp.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/mapping0.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\masking.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\mdct.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/masking.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/mdct.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\mdct.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\misc.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\floor_all.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\psych_11.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\psych_16.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\psych_44.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\psych_8.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\residue_16.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\residue_44.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\residue_44p51.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\residue_44u.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\residue_8.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\setup_11.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\setup_16.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\setup_22.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\setup_32.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\setup_44.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\setup_44p51.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\setup_44u.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\setup_8.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\modes\setup_X.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\os.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\psy.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/mdct.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/misc.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/floor_all.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/psych_11.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/psych_16.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/psych_44.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/psych_8.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_16.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_44.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_44p51.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_44u.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_8.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_11.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_16.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_22.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_32.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_44.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_44p51.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_44u.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_8.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_X.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/os.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/psy.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\psy.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\registry.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/psy.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/registry.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\registry.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\res0.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/registry.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/res0.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\scales.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\sharedbook.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/scales.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/sharedbook.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\smallft.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/smallft.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\smallft.h" />
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\synthesis.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/smallft.h" />
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/synthesis.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\vorbisfile.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/vorbisfile.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\window.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/window.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Audio_Systems\Codecs\vorbis\lib\window.h" />
-		<Unit filename="Audio_Systems\OpenAL\alure\alure.cpp" />
-		<Unit filename="Audio_Systems\OpenAL\alure\buffer.cpp" />
-		<Unit filename="Audio_Systems\OpenAL\alure\config.h" />
-		<Unit filename="Audio_Systems\OpenAL\alure\include\AL\alure.h" />
-		<Unit filename="Audio_Systems\OpenAL\alure\include\alext.h" />
-		<Unit filename="Audio_Systems\OpenAL\alure\istream.cpp" />
-		<Unit filename="Audio_Systems\OpenAL\alure\main.h" />
-		<Unit filename="Audio_Systems\OpenAL\alure\stream.cpp" />
-		<Unit filename="Audio_Systems\OpenAL\alure\streamdec.cpp" />
-		<Unit filename="Audio_Systems\OpenAL\alure\streamplay.cpp" />
-		<Unit filename="Audio_Systems\OpenAL\as_basic.cpp" />
-		<Unit filename="Audio_Systems\OpenAL\as_basic.h" />
-		<Unit filename="Audio_Systems\OpenAL\include.h" />
-		<Unit filename="Audio_Systems\OpenAL\wrap_oal.cpp" />
-		<Unit filename="Audio_Systems\OpenAL\wrap_oal.h" />
-		<Unit filename="Audio_Systems\audio_mandatory.h" />
-		<Unit filename="Collision_Systems\BBox\Info\collision_info.h" />
-		<Unit filename="Collision_Systems\BBox\coll_funcs.cpp" />
-		<Unit filename="Collision_Systems\BBox\coll_funcs.h" />
-		<Unit filename="Collision_Systems\BBox\coll_impl.cpp" />
-		<Unit filename="Collision_Systems\BBox\coll_impl.h" />
-		<Unit filename="Collision_Systems\BBox\coll_util.cpp" />
-		<Unit filename="Collision_Systems\BBox\coll_util.h" />
-		<Unit filename="Collision_Systems\BBox\include.h" />
-		<Unit filename="Collision_Systems\BBox\placeholderlinks.cpp" />
-		<Unit filename="Collision_Systems\collision_mandatory.h" />
-		<Unit filename="Graphics_Systems\OpenGLES\EGMenable.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSblend.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSblend.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GScolors.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GScolors.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSenable.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSenable.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSmiscextra.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSmiscextra.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSprmtvs.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSprmtvs.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSscreen.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSscreen.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSsprite.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSsprite.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSspriteadd.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSspriteadd.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSstdraw.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSstdraw.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSsurface.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GSsurface.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GStextures.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\GStextures.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\OPENGLStd.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\OPENGLStd.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\graphics_object.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGLES\graphics_object.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems\OpenGL\EGMenable.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSbackground.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSbackground.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSblend.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSblend.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GScolors.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GScolors.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GScurves.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GScurves.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSd3d.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSd3d.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSenable.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSenable.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSfont.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSfont.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSmiscextra.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSmiscextra.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSprmtvs.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSprmtvs.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSscreen.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSscreen.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSsprite.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSsprite.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSstdraw.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSstdraw.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GSsurface.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GSsurface.h" />
-		<Unit filename="Graphics_Systems\OpenGL\GStextures.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\GStextures.h" />
-		<Unit filename="Graphics_Systems\OpenGL\OPENGLStd.cpp" />
-		<Unit filename="Graphics_Systems\OpenGL\OPENGLStd.h" />
-		<Unit filename="Graphics_Systems\OpenGL\OpenGLHeaders.h" />
-		<Unit filename="Graphics_Systems\OpenGL\glew.c">
+		<Unit filename="Audio_Systems/Codecs/vorbis/lib/window.h" />
+		<Unit filename="Audio_Systems/OpenAL/alure/alure.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/buffer.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/config.h" />
+		<Unit filename="Audio_Systems/OpenAL/alure/include/AL/alure.h" />
+		<Unit filename="Audio_Systems/OpenAL/alure/include/alext.h" />
+		<Unit filename="Audio_Systems/OpenAL/alure/istream.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/main.h" />
+		<Unit filename="Audio_Systems/OpenAL/alure/stream.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/streamdec.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/alure/streamplay.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/as_basic.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/as_basic.h" />
+		<Unit filename="Audio_Systems/OpenAL/include.h" />
+		<Unit filename="Audio_Systems/OpenAL/wrap_oal.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/wrap_oal.h" />
+		<Unit filename="Audio_Systems/audio_mandatory.h" />
+		<Unit filename="Collision_Systems/BBox/Info/collision_info.h" />
+		<Unit filename="Collision_Systems/BBox/coll_funcs.cpp" />
+		<Unit filename="Collision_Systems/BBox/coll_funcs.h" />
+		<Unit filename="Collision_Systems/BBox/coll_impl.cpp" />
+		<Unit filename="Collision_Systems/BBox/coll_impl.h" />
+		<Unit filename="Collision_Systems/BBox/coll_util.cpp" />
+		<Unit filename="Collision_Systems/BBox/coll_util.h" />
+		<Unit filename="Collision_Systems/BBox/include.h" />
+		<Unit filename="Collision_Systems/BBox/placeholderlinks.cpp" />
+		<Unit filename="Collision_Systems/collision_mandatory.h" />
+		<Unit filename="Graphics_Systems/OpenGL/EGMenable.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSbackground.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSbackground.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSblend.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSblend.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GScolors.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GScolors.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GScurves.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GScurves.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSd3d.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSd3d.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSenable.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSenable.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSfont.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSfont.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSmiscextra.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSmiscextra.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSprmtvs.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSprmtvs.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSscreen.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSscreen.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSsprite.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSsprite.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSstdraw.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSstdraw.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSsurface.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GSsurface.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GStextures.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/GStextures.h" />
+		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.h" />
+		<Unit filename="Graphics_Systems/OpenGL/OpenGLHeaders.h" />
+		<Unit filename="Graphics_Systems/OpenGL/binding.h" />
+		<Unit filename="Graphics_Systems/OpenGL/glew.c">
 			<Option compilerVar="CC" />
 			<Option compiler="gcc" use="1" buildCommand="gcc -c $file -O3 -DGLEW_STATIC -o $object" />
 		</Unit>
-		<Unit filename="Graphics_Systems\OpenGL\glew.h" />
-		<Unit filename="Graphics_Systems\graphics_mandatory.h" />
-		<Unit filename="Modes\buildmode.h" />
-		<Unit filename="Platforms\Win32\WINDOWSStd.h">
+		<Unit filename="Graphics_Systems/OpenGL/glew.h" />
+		<Unit filename="Graphics_Systems/OpenGLES/EGMenable.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSblend.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSblend.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GScolors.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GScolors.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSenable.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSenable.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSmiscextra.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSmiscextra.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSprmtvs.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSprmtvs.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSscreen.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSscreen.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsprite.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsprite.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSspriteadd.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSspriteadd.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSstdraw.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSstdraw.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsurface.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GSsurface.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GStextures.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/GStextures.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/OPENGLStd.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/OPENGLStd.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/graphics_object.cpp">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGLES/graphics_object.h">
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/graphics_mandatory.h" />
+		<Unit filename="Modes/buildmode.h" />
+		<Unit filename="Platforms/Win32/WINDOWSStd.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWScallback.cpp">
+		<Unit filename="Platforms/Win32/WINDOWScallback.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWScallback.h">
+		<Unit filename="Platforms/Win32/WINDOWScallback.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWSfonts.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSfonts.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWSfonts.h">
+		<Unit filename="Platforms/Win32/WINDOWSfonts.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWSmain.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSmain.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWSmain.h">
+		<Unit filename="Platforms/Win32/WINDOWSmain.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWSshow_error.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSshow_error.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWSstd.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSstd.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWSwindow.cpp">
+		<Unit filename="Platforms/Win32/WINDOWSwindow.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\WINDOWSwindow.h">
+		<Unit filename="Platforms/Win32/WINDOWSwindow.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\externals.cpp">
+		<Unit filename="Platforms/Win32/externals.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\externals.h">
+		<Unit filename="Platforms/Win32/externals.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\ffi\ffi.h">
+		<Unit filename="Platforms/Win32/ffi/ffi.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\ffi\ffitarget.h">
+		<Unit filename="Platforms/Win32/ffi/ffitarget.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\file_manip.cpp">
+		<Unit filename="Platforms/Win32/file_manip.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\Win32\file_manip.h">
+		<Unit filename="Platforms/Win32/file_manip.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms\platforms_mandatory.h" />
-		<Unit filename="Platforms\xlib\LINUXjoystick.cpp">
+		<Unit filename="Platforms/platforms_mandatory.h" />
+		<Unit filename="Platforms/xlib/LINUXjoystick.cpp">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 		</Unit>
-		<Unit filename="Platforms\xlib\LINUXjoystick.h">
+		<Unit filename="Platforms/xlib/LINUXjoystick.h">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -649,7 +650,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\XLIBdialog.cpp">
+		<Unit filename="Platforms/xlib/XLIBdialog.cpp">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -660,7 +661,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\XLIBmain.cpp">
+		<Unit filename="Platforms/xlib/XLIBmain.cpp">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -671,7 +672,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\XLIBmain.h">
+		<Unit filename="Platforms/xlib/XLIBmain.h">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -682,7 +683,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\XLIBthreads.cpp">
+		<Unit filename="Platforms/xlib/XLIBthreads.cpp">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -693,7 +694,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\XLIBthreads.h">
+		<Unit filename="Platforms/xlib/XLIBthreads.h">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -704,7 +705,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\XLIBwindow.cpp">
+		<Unit filename="Platforms/xlib/XLIBwindow.cpp">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -715,7 +716,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\XLIBwindow.h">
+		<Unit filename="Platforms/xlib/XLIBwindow.h">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -726,7 +727,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\file_manip.cpp">
+		<Unit filename="Platforms/xlib/file_manip.cpp">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -737,7 +738,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\file_manip.h">
+		<Unit filename="Platforms/xlib/file_manip.h">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -748,7 +749,7 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms\xlib\include.h">
+		<Unit filename="Platforms/xlib/include.h">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
@@ -759,172 +760,170 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Preprocessor_Environment_Editable\GAME_SETTINGS.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_events.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_evparent.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_globals.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_inherited_locals.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_modesenabled.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_object_switch.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_objectaccess.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_objectdeclarations.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_objectfunctionality.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_resourcenames.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_roomarrays.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_roomcreates.h" />
-		<Unit filename="Preprocessor_Environment_Editable\IDE_EDIT_whitespace.h" />
-		<Unit filename="Preprocessor_Environment_Editable\LIBINCLUDE.h" />
+		<Unit filename="Preprocessor_Environment_Editable/GAME_SETTINGS.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_events.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_evparent.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_globals.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h" />
+		<Unit filename="Preprocessor_Environment_Editable/LIBINCLUDE.h" />
 		<Unit filename="SHELLmain.cpp" />
-		<Unit filename="Universal_System\CallbackArrays.cpp" />
-		<Unit filename="Universal_System\CallbackArrays.h" />
-		<Unit filename="Universal_System\ENIGMA_GLOBALS.cpp" />
-		<Unit filename="Universal_System\ENIGMA_GLOBALS.h" />
-		<Unit filename="Universal_System\Extensions\Alarms\alarmcode.cpp" />
-		<Unit filename="Universal_System\Extensions\Alarms\implement.h" />
-		<Unit filename="Universal_System\Extensions\Alarms\include.h" />
-		<Unit filename="Universal_System\Extensions\Paths\implement.h" />
-		<Unit filename="Universal_System\Extensions\Timelines\implement.h" />
-		<Unit filename="Universal_System\Extensions\recast.h" />
-		<Unit filename="Universal_System\GAME_GLOBALS.h" />
-		<Unit filename="Universal_System\IMGloading.cpp" />
-		<Unit filename="Universal_System\IMGloading.h" />
-		<Unit filename="Universal_System\WITHconstruct.cpp" />
-		<Unit filename="Universal_System\WITHconstruct.h" />
-		<Unit filename="Universal_System\WITHconstructClose.h" />
-		<Unit filename="Universal_System\actions.cpp" />
-		<Unit filename="Universal_System\actions.h" />
-		<Unit filename="Universal_System\backgroundinit.cpp" />
-		<Unit filename="Universal_System\backgroundstruct.cpp" />
-		<Unit filename="Universal_System\backgroundstruct.h" />
-		<Unit filename="Universal_System\collisions_object.cpp" />
-		<Unit filename="Universal_System\collisions_object.h" />
-		<Unit filename="Universal_System\compression.h" />
-		<Unit filename="Universal_System\controlled_variant.h" />
-		<Unit filename="Universal_System\darray.cpp" />
-		<Unit filename="Universal_System\darray.h" />
-		<Unit filename="Universal_System\depth_draw.cpp" />
-		<Unit filename="Universal_System\depth_draw.h" />
-		<Unit filename="Universal_System\dynamic_args.cpp" />
-		<Unit filename="Universal_System\dynamic_args.h" />
-		<Unit filename="Universal_System\estring.cpp" />
-		<Unit filename="Universal_System\estring.h" />
-		<Unit filename="Universal_System\event_system.cpp" />
-		<Unit filename="Universal_System\events.cpp" />
-		<Unit filename="Universal_System\events.h" />
-		<Unit filename="Universal_System\fileio.cpp" />
-		<Unit filename="Universal_System\fileio.h" />
-		<Unit filename="Universal_System\fontinit.cpp" />
-		<Unit filename="Universal_System\fontstruct.cpp" />
-		<Unit filename="Universal_System\fontstruct.h" />
-		<Unit filename="Universal_System\globalupdate.cpp" />
-		<Unit filename="Universal_System\globalupdate.h" />
-		<Unit filename="Universal_System\graphics_object.cpp" />
-		<Unit filename="Universal_System\graphics_object.h" />
-		<Unit filename="Universal_System\highscore_functions.cpp" />
-		<Unit filename="Universal_System\imap.h" />
-		<Unit filename="Universal_System\instance.cpp" />
-		<Unit filename="Universal_System\instance.h" />
-		<Unit filename="Universal_System\instance_create.h" />
-		<Unit filename="Universal_System\instance_iterator.h" />
-		<Unit filename="Universal_System\instance_system.cpp" />
-		<Unit filename="Universal_System\instance_system.h" />
-		<Unit filename="Universal_System\instance_system_base.h" />
-		<Unit filename="Universal_System\instance_system_frontend.h" />
-		<Unit filename="Universal_System\key_game_globals.h" />
-		<Unit filename="Universal_System\loading.cpp" />
-		<Unit filename="Universal_System\loading.h" />
-		<Unit filename="Universal_System\lua_table.h" />
-		<Unit filename="Universal_System\mathnc.cpp" />
-		<Unit filename="Universal_System\mathnc.h" />
-		<Unit filename="Universal_System\motion_planning.cpp" />
-		<Unit filename="Universal_System\motion_planning.h" />
-		<Unit filename="Universal_System\motion_planning_struct.cpp" />
-		<Unit filename="Universal_System\motion_planning_struct.h" />
-		<Unit filename="Universal_System\move_functions.cpp" />
-		<Unit filename="Universal_System\move_functions.h" />
-		<Unit filename="Universal_System\mp_movement.cpp" />
-		<Unit filename="Universal_System\mp_movement.h" />
-		<Unit filename="Universal_System\multifunction_variant.cpp" />
-		<Unit filename="Universal_System\multifunction_variant.h" />
-		<Unit filename="Universal_System\object.cpp" />
-		<Unit filename="Universal_System\object.h" />
-		<Unit filename="Universal_System\path_functions.cpp" />
-		<Unit filename="Universal_System\path_functions.h" />
-		<Unit filename="Universal_System\pathinit.cpp" />
-		<Unit filename="Universal_System\pathstruct.cpp" />
-		<Unit filename="Universal_System\pathstruct.h" />
-		<Unit filename="Universal_System\planar_object.cpp" />
-		<Unit filename="Universal_System\planar_object.h" />
-		<Unit filename="Universal_System\pseudo_components.h" />
-		<Unit filename="Universal_System\rectpack.cpp" />
-		<Unit filename="Universal_System\rectpack.h" />
-		<Unit filename="Universal_System\reflexive_types.cpp" />
-		<Unit filename="Universal_System\reflexive_types.h" />
-		<Unit filename="Universal_System\resinit.h" />
-		<Unit filename="Universal_System\resource_data.cpp" />
-		<Unit filename="Universal_System\resource_data.h" />
-		<Unit filename="Universal_System\roomsystem.cpp" />
-		<Unit filename="Universal_System\roomsystem.h" />
-		<Unit filename="Universal_System\simplecollisions.cpp" />
-		<Unit filename="Universal_System\simplecollisions.h" />
-		<Unit filename="Universal_System\soundinit.cpp" />
-		<Unit filename="Universal_System\spriteinit.cpp" />
-		<Unit filename="Universal_System\spritestruct.cpp" />
-		<Unit filename="Universal_System\spritestruct.h" />
-		<Unit filename="Universal_System\switch_stuff.h" />
-		<Unit filename="Universal_System\syntax_quirks.h" />
-		<Unit filename="Universal_System\terminal_io.cpp" />
-		<Unit filename="Universal_System\terminal_io.h" />
-		<Unit filename="Universal_System\transform_object.cpp" />
-		<Unit filename="Universal_System\transform_object.h" />
-		<Unit filename="Universal_System\var4.cpp" />
-		<Unit filename="Universal_System\var4.h" />
-		<Unit filename="Universal_System\var4_lua.cpp" />
-		<Unit filename="Universal_System\var_te.h" />
-		<Unit filename="Universal_System\with.h" />
-		<Unit filename="Universal_System\zlib.cpp" />
-		<Unit filename="Universal_System\zlib.h" />
-		<Unit filename="Widget_Systems\None\Info\widget_info.h">
+		<Unit filename="Universal_System/CallbackArrays.cpp" />
+		<Unit filename="Universal_System/CallbackArrays.h" />
+		<Unit filename="Universal_System/ENIGMA_GLOBALS.cpp" />
+		<Unit filename="Universal_System/ENIGMA_GLOBALS.h" />
+		<Unit filename="Universal_System/Extensions/Alarms/alarmcode.cpp" />
+		<Unit filename="Universal_System/Extensions/Alarms/implement.h" />
+		<Unit filename="Universal_System/Extensions/Alarms/include.h" />
+		<Unit filename="Universal_System/Extensions/Paths/implement.h" />
+		<Unit filename="Universal_System/Extensions/Timelines/implement.h" />
+		<Unit filename="Universal_System/Extensions/recast.h" />
+		<Unit filename="Universal_System/GAME_GLOBALS.h" />
+		<Unit filename="Universal_System/IMGloading.cpp" />
+		<Unit filename="Universal_System/IMGloading.h" />
+		<Unit filename="Universal_System/WITHconstruct.cpp" />
+		<Unit filename="Universal_System/actions.cpp" />
+		<Unit filename="Universal_System/actions.h" />
+		<Unit filename="Universal_System/backgroundinit.cpp" />
+		<Unit filename="Universal_System/backgroundstruct.cpp" />
+		<Unit filename="Universal_System/backgroundstruct.h" />
+		<Unit filename="Universal_System/collisions_object.cpp" />
+		<Unit filename="Universal_System/collisions_object.h" />
+		<Unit filename="Universal_System/controlled_variant.h" />
+		<Unit filename="Universal_System/darray.cpp" />
+		<Unit filename="Universal_System/darray.h" />
+		<Unit filename="Universal_System/depth_draw.cpp" />
+		<Unit filename="Universal_System/depth_draw.h" />
+		<Unit filename="Universal_System/dynamic_args.cpp" />
+		<Unit filename="Universal_System/dynamic_args.h" />
+		<Unit filename="Universal_System/estring.cpp" />
+		<Unit filename="Universal_System/estring.h" />
+		<Unit filename="Universal_System/event_system.cpp" />
+		<Unit filename="Universal_System/events.cpp" />
+		<Unit filename="Universal_System/events.h" />
+		<Unit filename="Universal_System/fileio.cpp" />
+		<Unit filename="Universal_System/fileio.h" />
+		<Unit filename="Universal_System/fontinit.cpp" />
+		<Unit filename="Universal_System/fontstruct.cpp" />
+		<Unit filename="Universal_System/fontstruct.h" />
+		<Unit filename="Universal_System/globalupdate.cpp" />
+		<Unit filename="Universal_System/globalupdate.h" />
+		<Unit filename="Universal_System/graphics_object.cpp" />
+		<Unit filename="Universal_System/graphics_object.h" />
+		<Unit filename="Universal_System/highscore_functions.cpp" />
+		<Unit filename="Universal_System/imap.h" />
+		<Unit filename="Universal_System/instance.cpp" />
+		<Unit filename="Universal_System/instance.h" />
+		<Unit filename="Universal_System/instance_create.h" />
+		<Unit filename="Universal_System/instance_iterator.h" />
+		<Unit filename="Universal_System/instance_system.cpp" />
+		<Unit filename="Universal_System/instance_system.h" />
+		<Unit filename="Universal_System/instance_system_base.h" />
+		<Unit filename="Universal_System/instance_system_frontend.h" />
+		<Unit filename="Universal_System/key_game_globals.h" />
+		<Unit filename="Universal_System/loading.cpp" />
+		<Unit filename="Universal_System/loading.h" />
+		<Unit filename="Universal_System/lua_table.h" />
+		<Unit filename="Universal_System/mathnc.cpp" />
+		<Unit filename="Universal_System/mathnc.h" />
+		<Unit filename="Universal_System/motion_planning.cpp" />
+		<Unit filename="Universal_System/motion_planning.h" />
+		<Unit filename="Universal_System/motion_planning_struct.cpp" />
+		<Unit filename="Universal_System/motion_planning_struct.h" />
+		<Unit filename="Universal_System/move_functions.cpp" />
+		<Unit filename="Universal_System/move_functions.h" />
+		<Unit filename="Universal_System/mp_movement.cpp" />
+		<Unit filename="Universal_System/mp_movement.h" />
+		<Unit filename="Universal_System/multifunction_variant.cpp" />
+		<Unit filename="Universal_System/multifunction_variant.h" />
+		<Unit filename="Universal_System/nlpo2.h" />
+		<Unit filename="Universal_System/object.cpp" />
+		<Unit filename="Universal_System/object.h" />
+		<Unit filename="Universal_System/path_functions.cpp" />
+		<Unit filename="Universal_System/path_functions.h" />
+		<Unit filename="Universal_System/pathinit.cpp" />
+		<Unit filename="Universal_System/pathstruct.cpp" />
+		<Unit filename="Universal_System/pathstruct.h" />
+		<Unit filename="Universal_System/planar_object.cpp" />
+		<Unit filename="Universal_System/planar_object.h" />
+		<Unit filename="Universal_System/pseudo_components.h" />
+		<Unit filename="Universal_System/rectpack.cpp" />
+		<Unit filename="Universal_System/rectpack.h" />
+		<Unit filename="Universal_System/reflexive_types.cpp" />
+		<Unit filename="Universal_System/reflexive_types.h" />
+		<Unit filename="Universal_System/resinit.h" />
+		<Unit filename="Universal_System/resource_data.cpp" />
+		<Unit filename="Universal_System/resource_data.h" />
+		<Unit filename="Universal_System/roomsystem.cpp" />
+		<Unit filename="Universal_System/roomsystem.h" />
+		<Unit filename="Universal_System/simplecollisions.cpp" />
+		<Unit filename="Universal_System/simplecollisions.h" />
+		<Unit filename="Universal_System/soundinit.cpp" />
+		<Unit filename="Universal_System/spriteinit.cpp" />
+		<Unit filename="Universal_System/spritestruct.cpp" />
+		<Unit filename="Universal_System/spritestruct.h" />
+		<Unit filename="Universal_System/switch_stuff.h" />
+		<Unit filename="Universal_System/syntax_quirks.h" />
+		<Unit filename="Universal_System/terminal_io.cpp" />
+		<Unit filename="Universal_System/terminal_io.h" />
+		<Unit filename="Universal_System/transform_object.cpp" />
+		<Unit filename="Universal_System/transform_object.h" />
+		<Unit filename="Universal_System/var4.cpp" />
+		<Unit filename="Universal_System/var4.h" />
+		<Unit filename="Universal_System/var4_lua.cpp" />
+		<Unit filename="Universal_System/var_te.h" />
+		<Unit filename="Universal_System/with.h" />
+		<Unit filename="Universal_System/zlib.cpp" />
+		<Unit filename="Universal_System/zlib.h" />
+		<Unit filename="Widget_Systems/None/Info/widget_info.h">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
 		</Unit>
-		<Unit filename="Widget_Systems\None\include.h">
+		<Unit filename="Widget_Systems/None/include.h">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
 		</Unit>
-		<Unit filename="Widget_Systems\None\nowidget_impl.cpp">
+		<Unit filename="Widget_Systems/None/nowidget_impl.cpp">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
 		</Unit>
-		<Unit filename="Widget_Systems\Win32\dialogs.cpp">
+		<Unit filename="Widget_Systems/Win32/dialogs.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Widget_Systems\Win32\gtklike.h">
+		<Unit filename="Widget_Systems/Win32/gtklike.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Widget_Systems\Win32\include.h">
+		<Unit filename="Widget_Systems/Win32/include.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Widget_Systems\Win32\res.rc">
+		<Unit filename="Widget_Systems/Win32/res.rc">
 			<Option compilerVar="WINDRES" />
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Widget_Systems\Win32\widgets.cpp">
+		<Unit filename="Widget_Systems/Win32/widgets.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Widget_Systems\Win32\widgets.h">
+		<Unit filename="Widget_Systems/Win32/widgets.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Widget_Systems\widgets_mandatory.h" />
+		<Unit filename="Widget_Systems/widgets_mandatory.h" />
 		<Unit filename="initialize.h" />
 		<Unit filename="libEGMstd.cpp" />
 		<Unit filename="libEGMstd.h" />

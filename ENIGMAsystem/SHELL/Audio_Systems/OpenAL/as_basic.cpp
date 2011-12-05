@@ -77,8 +77,9 @@ namespace enigma
   int audiosystem_initialize()
   {
     if (sound_idmax == 0)
-      return (sounds = NULL, 0);
-    sounds = new sound*[sound_idmax];
+      sounds = NULL;
+    else
+      sounds = new sound*[sound_idmax];
     
     #ifdef _WIN32
     if (!load_al_dll())
@@ -98,9 +99,12 @@ namespace enigma
   
   static sound* sound_new_with_source() {
     sound *res = new sound();
+    alGetError();
     alGenSources(1, &res->src);
-    if(alGetError() != AL_NO_ERROR) {
-      fprintf(stderr, "Failed to create OpenAL source!\n");
+    int a = alGetError();
+    if(a != AL_NO_ERROR) {
+      fprintf(stderr, "Failed to create OpenAL source! Error %d: %s\n",a,alureGetErrorString());
+      printf("%d %d %d %d %d\n",AL_INVALID_NAME,AL_INVALID_ENUM,AL_INVALID_VALUE,AL_INVALID_OPERATION,AL_OUT_OF_MEMORY);
       return NULL;
     }
     res->loaded = LOADSTATE_SOURCED;

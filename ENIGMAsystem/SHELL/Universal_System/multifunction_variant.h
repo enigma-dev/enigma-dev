@@ -49,6 +49,7 @@ namespace enigma
     types_extrapolate_alldec(multifunction_variant& operator-=);
     types_extrapolate_alldec(multifunction_variant& operator*=);
     types_extrapolate_alldec(multifunction_variant& operator/=);
+    types_extrapolate_alldec(multifunction_variant& operator%=);
     types_extrapolate_alldec(multifunction_variant& operator<<=);
     types_extrapolate_alldec(multifunction_variant& operator>>=);
     types_extrapolate_alldec(multifunction_variant& operator&=);

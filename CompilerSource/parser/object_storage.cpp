@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008-2011 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -109,8 +109,7 @@ parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), co
 parsed_object::parsed_object() {}
 parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d): name(n), id(i), sprite_index(s), mask_index(m), parent(p), visible(vis), solid(sol), depth(d) {}
 map<int,parsed_object*> parsed_objects;
-map<int,parsed_object*> parsed_rooms;
-
+map<int,parsed_room*> parsed_rooms;
 vector<parsed_extension> parsed_extensions;
 vector<string> requested_extensions;
 
@@ -179,7 +178,7 @@ void add_dot_accessed_local(string name)
     {
       pair<map<string,useinfo>::iterator,bool> ins = uses.insert(pair<string,useinfo>(itt->second.type,useinfo()));
       if (ins.second and uses.size() > 1) {
-        user << "Warning: variable `" << name << "` is accessed via GM1 Integer, but varies in postfix reference path.";
+        user << "Warning: variable `" << name << "` is accessed via GM Integer, but varies in type.";
         user << "Info: Declaration in object " << it->second->name << " conflicts with that in object " << ins.first->second.lastobject << flushl;
       }
       ins.first->second.lastobject = it->second->name;

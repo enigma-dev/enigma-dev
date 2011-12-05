@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2008-2011 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -41,6 +41,8 @@ using namespace std;
 #include "../event_reader/event_parser.h"
 
 #include <math.h> //log2 to calculate passes.
+
+extern string tostring(int);
 
 int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
 {
@@ -173,10 +175,32 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   edbg << "Creating room creation code scope and parsing" << flushl;
   for (int i = 0; i < es->roomCount; i++)
   {
-    parsed_object *ro = parsed_rooms[es->rooms[i].id] = new parsed_object;
-    parsed_event &pev = ro->events[0]; //Make sure each sub event knows its main event's event ID.
-    pev.mainId = 0, pev.id = 0, pev.myObj = ro;
+    parsed_room *pr = parsed_rooms[es->rooms[i].id] = new parsed_room;
+    parsed_event &pev = pr->events[0]; //Make sure each sub event knows its main event's event ID.
+    pev.mainId = 0, pev.id = 0, pev.myObj = pr;
+    
+    int sc = syncheck::syntacheck(es->rooms[i].creationCode);
+    if (sc != -1) {
+      cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
+      return E_ERROR_SYNTAX;
+    }
     parser_main(es->rooms[i].creationCode,&pev);
+    
+    for (int ii = 0; ii < es->rooms[i].instanceCount; ii++)
+    {
+      if (es->rooms[i].instances[ii].creationCode and *(es->rooms[i].instances[ii].creationCode))
+      {
+        int a = syncheck::syntacheck(es->rooms[i].instances[ii].creationCode);
+        if (a != -1) {
+          cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
+          return E_ERROR_SYNTAX;
+        }
+        
+        pr->instance_create_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
+        parsed_event* icce = pr->instance_create_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
+        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + es->rooms[i].instances[ii].creationCode + "}", icce);
+      }
+    }
   }
   
   //Next we link the scripts into the objects.
@@ -219,7 +243,7 @@ int link_globals(parsed_object *global, EnigmaStruct *es,parsed_script *scripts[
 {
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
-  for (po_i i = parsed_rooms.begin(); i != parsed_rooms.end(); i++)
+  for (pr_i i = parsed_rooms.begin(); i != parsed_rooms.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
   for (int i = 0; i < es->scriptCount; i++)
     global->copy_from(scripts[i]->obj,"script `"+scripts[i]->obj.name+"'","the Global Scope");

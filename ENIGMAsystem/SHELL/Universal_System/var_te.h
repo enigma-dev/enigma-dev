@@ -15,10 +15,10 @@
 
 #ifndef __var_te
 #define __var_te
-  #ifdef DEBUGMODE
-    #define div0c(x) if (!x) return show_error("Division by zero.",0), 0;
-    #define terror(x) if (type == x) { show_error("Incompatible types to operator.",0); }
-    #define terror2(dt) if (type == dt or x.type == dt) { show_error("Incompatible types to operator.",0); }
+  #ifdef DEBUG_MODE
+    #define div0c(x) { if (!x) return (show_error("Division by zero.",0), *this); }
+    #define terror(x) { if (type == x) { show_error("Incompatible types to operator.",0); } }
+    #define terror2(dt) { if (type == dt or x.type == dt) { show_error("Incompatible types to operator.",0); } }
     #define terrortrue() show_error("Incompatible right-hand type to operator.",0);
   #else
     #define div0c(x)

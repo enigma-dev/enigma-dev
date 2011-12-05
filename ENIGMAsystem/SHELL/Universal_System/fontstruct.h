@@ -26,6 +26,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _FONTSTRUCT__H
+#define _FONTSTRUCT__H
+
 namespace enigma
 {
   struct fontglyph
@@ -65,3 +68,5 @@ namespace enigma
 }
 
 int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);
+
+#endif

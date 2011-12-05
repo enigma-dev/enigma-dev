@@ -28,6 +28,7 @@
 #include <string>
 using namespace std;
 #include "../widgets_mandatory.h"
+#include "../../Universal_System/instance_system.h"
 #include <cstdlib>
 #include <cstdio>
 
@@ -43,7 +44,12 @@ namespace enigma
 
 void show_error(string err, const bool fatal)
 {
-  printf("ERROR: %s\n",err.c_str());
+  printf("ERROR in some action of some event for object %d: %s\n",
+         (enigma::instance_event_iterator == NULL? global : 
+            enigma::instance_event_iterator->inst == NULL? noone : 
+              enigma::instance_event_iterator->inst->object_index),
+         err.c_str()
+    );
   if (fatal) exit(0);
   ABORT_ON_ALL_ERRORS();
 }

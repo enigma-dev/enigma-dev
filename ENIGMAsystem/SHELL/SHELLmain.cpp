@@ -42,6 +42,9 @@
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
+#include "Universal_System/spritestruct.h"
+#include "Universal_System/fontstruct.h"
+
 #include "GameSettings.h"
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
@@ -50,6 +53,7 @@
 
 #include "Collision_Systems/collision_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include "API_Switchboard.h"

@@ -403,7 +403,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;
-  res = compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount,&EGMglobal);
+  res = compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount,parsed_rooms,&EGMglobal);
 
   edbg << "Writing object data" << flushl;
   res = compile_writeObjectData(es,&EGMglobal);

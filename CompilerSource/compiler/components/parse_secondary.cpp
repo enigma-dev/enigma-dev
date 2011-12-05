@@ -40,7 +40,7 @@ using namespace std;
 #include "../compile_common.h"
 #include "../event_reader/event_parser.h"
 
-int compile_parseSecondary(map<int,parsed_object*> &parsed_objects,parsed_script* scripts[], int scrcount,parsed_object* EGMglobal)
+int compile_parseSecondary(map<int,parsed_object*> &parsed_objects, parsed_script* scripts[], int scrcount, map<int,parsed_room*> &parsed_rooms, parsed_object* EGMglobal)
 {
   // Dump our list of dot-accessed locals
   dot_accessed_locals.clear();
@@ -48,15 +48,30 @@ int compile_parseSecondary(map<int,parsed_object*> &parsed_objects,parsed_script
   // Give all objects and events a second pass
   for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
   {
-    parsed_object *ito = it->second;
-    for (unsigned iit = 0; iit < ito->events.size; iit++)
-      parser_secondary(ito->events[iit].code,ito->events[iit].synt,EGMglobal,it->second,&ito->events[iit]);
+    parsed_object *oto = it->second;
+    for (unsigned iit = 0; iit < oto->events.size; iit++)
+      parser_secondary(oto->events[iit].code,oto->events[iit].synt,EGMglobal,oto,&oto->events[iit]);
   }
   
+  // Give all scripts a second pass
   for (int i = 0; i < scrcount; i++) {
     parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj,&scripts[i]->pev);
     if (scripts[i]->pev_global)
       parser_secondary(scripts[i]->pev_global->code,scripts[i]->pev_global->synt,EGMglobal,&scripts[i]->obj,scripts[i]->pev_global);
+  }
+  
+  // Give all room creation codes a second pass
+  for (pr_i it = parsed_rooms.begin(); it != parsed_rooms.end(); it++)
+  {
+    parsed_object *oto; // The object into which we will dump locals
+    oto = it->second; // Start by dumping into this room
+    if (it->second->events.size)
+      parser_secondary(oto->events[0].code,oto->events[0].synt,EGMglobal,oto,&oto->events[0]);
+    for (map<int,parsed_room::parsed_icreatecode>::iterator ici = it->second->instance_create_codes.begin(); ici != it->second->instance_create_codes.end(); ici++)
+    {
+      oto = parsed_objects[ici->second.object_index];
+      parser_secondary(ici->second.pe->code,ici->second.pe->synt,EGMglobal,oto,ici->second.pe);
+    }
   }
   
   return 0;

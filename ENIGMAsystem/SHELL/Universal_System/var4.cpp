@@ -25,37 +25,47 @@ using namespace std;
 
 #include "var_te.h"
 
-variant::operator int()       { return int  (rval.d); }
-variant::operator bool()      { return lrint(rval.d) > 0; }
-variant::operator char()      { return char (rval.d); }
-variant::operator long()      { return long (rval.d); }
-variant::operator short()     { return short(rval.d); }
-variant::operator unsigned()           { return (unsigned int)       (rval.d); }
-variant::operator unsigned char()      { return (unsigned char)      (rval.d); }
-variant::operator unsigned short()     { return (unsigned short)     (rval.d); }
-variant::operator unsigned long()      { return (unsigned long) (rval.d); }
-variant::operator unsigned long long() { return (unsigned long long) (rval.d); }
-variant::operator long long() { return (long long)(rval.d); }
-variant::operator double()    { return double     (rval.d); }
-variant::operator float()     { return float      (rval.d); }
+#ifdef DEBUG_MODE
+#include "../Widget_Systems/widgets_mandatory.h"
+  #define ccast(tpc) { if (type != tpc) \
+    { if (type==-1) show_error("Accessing uninitialized variable",0); \
+      else show_error(string("Attempting to access ") + (type==0?"real":type==1?"string":"pointer")\
+                      + " variable as " + (tpc==0?"real":tpc==1?"string":"pointer"),0); } }
+#else
+  #define ccast(disregard)
+#endif
 
-variant::operator string() { return sval; }
+variant::operator int()       { ccast(0); return int  (rval.d); }
+variant::operator bool()      { ccast(0); return lrint(rval.d) > 0; }
+variant::operator char()      { ccast(0); return char (rval.d); }
+variant::operator long()      { ccast(0); return long (rval.d); }
+variant::operator short()     { ccast(0); return short(rval.d); }
+variant::operator unsigned()           { ccast(0); return (unsigned int)       (rval.d); }
+variant::operator unsigned char()      { ccast(0); return (unsigned char)      (rval.d); }
+variant::operator unsigned short()     { ccast(0); return (unsigned short)     (rval.d); }
+variant::operator unsigned long()      { ccast(0); return (unsigned long) (rval.d); }
+variant::operator unsigned long long() { ccast(0); return (unsigned long long) (rval.d); }
+variant::operator long long() { ccast(0); return (long long)(rval.d); }
+variant::operator double()    { ccast(0); return double     (rval.d); }
+variant::operator float()     { ccast(0); return float      (rval.d); }
 
-variant::operator int()       const { return int  (rval.d); }
-variant::operator bool()      const { return lrint(rval.d) > 0; }
-variant::operator char()      const { return char (rval.d); }
-variant::operator long()      const { return long (rval.d); }
-variant::operator short()     const { return short(rval.d); }
-variant::operator unsigned()           const { return (unsigned int)       (rval.d); }
-variant::operator unsigned char()      const { return (unsigned char)      (rval.d); }
-variant::operator unsigned short()     const { return (unsigned short)     (rval.d); }
-variant::operator unsigned long()      const { return (unsigned long) (rval.d); }
-variant::operator unsigned long long() const { return (unsigned long long) (rval.d); }
-variant::operator long long() const { return (long long)(rval.d); }
-variant::operator double()    const { return double     (rval.d); }
-variant::operator float()     const { return float      (rval.d); }
+variant::operator string() { ccast(1); return sval; }
 
-variant::operator string() const { return sval; }
+variant::operator int()       const { ccast(0); return int  (rval.d); }
+variant::operator bool()      const { ccast(0); return lrint(rval.d) > 0; }
+variant::operator char()      const { ccast(0); return char (rval.d); }
+variant::operator long()      const { ccast(0); return long (rval.d); }
+variant::operator short()     const { ccast(0); return short(rval.d); }
+variant::operator unsigned()           const { ccast(0); return (unsigned int)       (rval.d); }
+variant::operator unsigned char()      const { ccast(0); return (unsigned char)      (rval.d); }
+variant::operator unsigned short()     const { ccast(0); return (unsigned short)     (rval.d); }
+variant::operator unsigned long()      const { ccast(0); return (unsigned long) (rval.d); }
+variant::operator unsigned long long() const { ccast(0); return (unsigned long long) (rval.d); }
+variant::operator long long() const { ccast(0); return (long long)(rval.d); }
+variant::operator double()    const { ccast(0); return double     (rval.d); }
+variant::operator float()     const { ccast(0); return float      (rval.d); }
+
+variant::operator string() const { ccast(1); return sval; }
 
 #define real enigma::vt_real
 #define tstr enigma::vt_tstr
@@ -64,13 +74,12 @@ types_extrapolate_real_p  (variant::variant,: rval(x), sval( ), type(real) {})
 types_extrapolate_string_p(variant::variant,: rval(0), sval(x), type(tstr) {})
 //variant::variant(var x): rval(x[0].rval), sval(x[0].sval) { }
 variant::variant(const variant& x): rval(x.rval.d), sval(x.sval), type(x.type) { }
-variant::variant(): rval(0), sval( ), type(0) { }
+variant::variant(): rval(0), sval( ), type(-1) { }
 
 types_extrapolate_real_p  (variant& variant::operator=, { rval.d = x; type = real; return *this; })
 types_extrapolate_string_p(variant& variant::operator=, { sval   = x; type = tstr; return *this; })
 variant& variant::operator=(const variant x)            { rval.d = x.rval.d; if ((type = x.type) == tstr) sval = x.sval; return *this; }
 variant& variant::operator=(const var &x)               { return *this = *x; }
-
 types_extrapolate_real_p  (variant& variant::operator+=, { terror(real); rval.d += x; return *this; })
 types_extrapolate_string_p(variant& variant::operator+=, { terror(tstr); sval   += x; return *this; })
 variant& variant::operator+=(const variant x)            { terror(x.type); if (x.type == real) rval.d += x.rval.d; else sval += x.sval; return *this; }
@@ -330,6 +339,17 @@ var::~var() { cleanup(); }
 /*
    This part is about ass-backwards. But we'll go along with it. For science. You monster.
 */
+#ifdef DEBUG_MODE
+  #undef div0c
+  #undef terror
+  #undef terror2
+  #undef terrortrue
+  
+  #define div0c(x)
+  #define terror(x)
+  #define terror2(x)
+  #define terrortrue()
+#endif
 
 types_binary_assign_extrapolate_implement(+, const variant&, terror(real);)
 types_binary_assign_extrapolate_implement(-, const variant&, terror(real);)

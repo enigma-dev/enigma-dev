@@ -64,17 +64,17 @@ unsigned draw_get_valign(){
 #ifdef DEBUG_MODE
   #include "../../Widget_Systems/widgets_mandatory.h"
   #define get_font(fnt,id,r) \
-    if (id < -1 or size_t(id+1) >= (enigma::font_idmax-1) or !fontstructarray[id]) { \
+    if (id < -1 or (size_t(id+1) > enigma::font_idmax) or !fontstructarray[id]) { \
       show_error("Cannot access font with id " + toString(id), false); \
       return r; \
     } const font *const fnt = fontstructarray[id];
   #define get_fontv(fnt,id) \
-    if (id < -1 or size_t(id+1) >= (enigma::font_idmax-1) or !fontstructarray[id]) { \
+    if (id < -1 or (size_t(id+1) > enigma::font_idmax) or !fontstructarray[id]) { \
       show_error("Cannot access font with id " + toString(id), false); \
       return; \
     } const font *const fnt = fontstructarray[id];
   #define get_font_null(fnt,id,r) \
-    if (id < -1 or size_t(id+1) >= (enigma::font_idmax-1)) { \
+    if (id < -1 or (size_t(id+1) > enigma::font_idmax)) { \
       show_error("Cannot access font with id " + toString(id), false); \
       return r; \
     } const font *const fnt = fontstructarray[id];

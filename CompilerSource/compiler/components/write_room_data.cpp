@@ -164,18 +164,22 @@ wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcrea
   wto << license;
   for (int i = 0; i < es->roomCount; i++)
   {
-    wto << "void roomcreate" << es->rooms[i].id << "()\n{\n  ";
-    string cme = es->rooms[i].creationCode;
-    int a = syncheck::syntacheck(cme);
-    if (a != -1) {
-      cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
-      return E_ERROR_SYNTAX;
+    parsed_room *pr = parsed_rooms[es->rooms[i].id];
+    for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
+    {
+      wto << "void instancecreate_" << it->first << "()\n{\n  ";
+      print_to_file(it->second.pe->code, it->second.pe->synt, it->second.pe->strc, it->second.pe->strs, 2, wto);
+      wto << "}\n\n";
     }
-    //parsed_object par;
-    //parsed_event ev(&par);
-    parsed_event& ev = parsed_rooms[es->rooms[i].id]->events[0];
-    parser_secondary(ev.code,ev.synt,EGMglobal,parsed_rooms[es->rooms[i].id],&ev);
-    print_to_file(ev.code,ev.synt,ev.strc,ev.strs,2,wto);
+    
+    wto << "void roomcreate" << es->rooms[i].id << "()\n{\n  ";
+    
+    parsed_event& ev = pr->events[0];
+    print_to_file(ev.code, ev.synt, ev.strc, ev.strs, 2, wto);
+    
+    for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
+      wto << "\n  instancecreate_" << it->first << "();";
+    
     wto << "\n}\n";
   }
 wto.close();
