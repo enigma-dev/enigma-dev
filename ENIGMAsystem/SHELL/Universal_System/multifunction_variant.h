@@ -56,6 +56,8 @@ namespace enigma
     types_extrapolate_alldec(multifunction_variant& operator|=);
     types_extrapolate_alldec(multifunction_variant& operator^=);
     
+    multifunction_variant(); // Assigns default type to real
+    types_extrapolate_alldecc(multifunction_variant); // Other constructors outsource to variant's
     virtual ~multifunction_variant();
     #undef  types_extrapolate_alldec
   };

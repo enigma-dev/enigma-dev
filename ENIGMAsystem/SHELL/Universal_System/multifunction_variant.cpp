@@ -41,11 +41,6 @@
 
 #undef  types_extrapolate_alldec_i
 #undef  types_extrapolate_alldec_ib
-#define types_extrapolate_alldec_is(op, sentiments)\
- types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator op, { rval.d op x;  sentiments; return *this; } )\
- types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator op, { sval op x;    sentiments; return *this; } )\
- multifunction_variant& multifunction_variant::operator op (const variant &x)          { if (type == 1) sval op x.sval; else rval.d op x.rval.d; sentiments; return *this; }\
- multifunction_variant& multifunction_variant::operator op(const var &x)               { if (type == 1) sval op (*x).sval; else rval.d op (*x).rval.d;  sentiments; return *this; } 
 #define types_extrapolate_alldec_i(op, sentiments)\
  types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator op, { rval.d op x;  sentiments; return *this; } )\
  types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator op, { terrortrue(); sentiments; return *this; } )\
@@ -59,22 +54,33 @@
 
 #include <cmath> // fn
 
+#define real enigma::vt_real
+#define tstr enigma::vt_tstr
+
 namespace enigma
 {
-  types_extrapolate_alldec_is(=,  function(); );
-  types_extrapolate_alldec_is(+=, function(); );
+  types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator=, { rval.d = x; type = real; function(); return *this; } )\
+  types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator=, { sval = x;   type = real; function(); return *this; } )\
+  multifunction_variant& multifunction_variant::operator= (const variant &x)          { if ((type = x.type) == 1) sval = x.sval; else rval.d = x.rval.d; function(); return *this; }\
+  multifunction_variant& multifunction_variant::operator= (const var &x)              { if ((type = (*x).type) == 1) sval = (*x).sval; else rval.d = (*x).rval.d; function(); return *this; }
+  
+  types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator+=, { terror(real); rval.d += x;  function(); return *this; } )\
+  types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator+=, { terror(tstr); sval += x;    function(); return *this; } )\
+  multifunction_variant& multifunction_variant::operator+= (const variant &x)          { terror(1); if (type == 1) sval += x.sval; else rval.d += x.rval.d; function(); return *this; }\
+  multifunction_variant& multifunction_variant::operator+= (const var &x)              { if (type == 1) sval += (*x).sval; else rval.d += (*x).rval.d;  function(); return *this; }
+  
   types_extrapolate_alldec_i(-=,  function(); );
   types_extrapolate_alldec_i(*=,  function(); );
-   
-   types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator/=, { div0c(x); rval.d /= x;  function(); return *this; } )\
-   types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator/=, { terrortrue(); function(); return *this; } )\
-   multifunction_variant& multifunction_variant::operator/= (const variant &x)          { div0c(x); rval.d /= x;  function(); return *this; }\
-   multifunction_variant& multifunction_variant::operator/= (const var &x)              { div0c(x); rval.d /= x;  function(); return *this; }
   
-   types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator%=, { div0c(x); rval.d = fmod(rval.d, x);  function(); return *this; } )\
-   types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator%=, { terrortrue(); function(); return *this; } )\
-   multifunction_variant& multifunction_variant::operator%= (const variant &x)          { div0c(x); rval.d = fmod(rval.d, x);  function(); return *this; }\
-   multifunction_variant& multifunction_variant::operator%= (const var &x)              { div0c(x); rval.d = fmod(rval.d, x);  function(); return *this; }
+  types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator/=, { div0c(x); rval.d /= x;  function(); return *this; } )\
+  types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator/=, { terrortrue(); function(); return *this; } )\
+  multifunction_variant& multifunction_variant::operator/= (const variant &x)          { div0c(x); rval.d /= x;  function(); return *this; }\
+  multifunction_variant& multifunction_variant::operator/= (const var &x)              { div0c(x); rval.d /= x;  function(); return *this; }
+
+  types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator%=, { div0c(x); rval.d = fmod(rval.d, x);  function(); return *this; } )\
+  types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator%=, { terrortrue(); function(); return *this; } )\
+  multifunction_variant& multifunction_variant::operator%= (const variant &x)          { div0c(x); rval.d = fmod(rval.d, x);  function(); return *this; }\
+  multifunction_variant& multifunction_variant::operator%= (const var &x)              { div0c(x); rval.d = fmod(rval.d, x);  function(); return *this; }
   
   types_extrapolate_alldec_ib(<<, function(); );
   types_extrapolate_alldec_ib(>>, function(); );
@@ -82,7 +88,15 @@ namespace enigma
   types_extrapolate_alldec_ib(|,  function(); );
   types_extrapolate_alldec_ib(^,  function(); );
   
+  #define EVCONST
   void multifunction_variant::function() {}
+  
+  multifunction_variant::multifunction_variant(): variant(0) {}
+  types_extrapolate_real_p  (multifunction_variant::multifunction_variant,: variant(x) {})
+  types_extrapolate_string_p(multifunction_variant::multifunction_variant,: variant(x) {})
+  multifunction_variant::multifunction_variant(const variant &x): variant(x) {}
+  multifunction_variant::multifunction_variant(const var &x): variant(x) {}
+  
   multifunction_variant::~multifunction_variant() {}
 }
 
