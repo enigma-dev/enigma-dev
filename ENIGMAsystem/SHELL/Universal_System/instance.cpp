@@ -43,16 +43,23 @@ namespace enigma
 void instance_destroy(int id)
 {
   enigma::object_basic* who = enigma::fetch_instance_by_id(id);
-  if (who) {
+  if (who and enigma::cleanups.find(who) == enigma::cleanups.end()) {
     who->myevent_destroy();
     who->unlink();
   }
 }
-
+#include <stdio.h>
 void instance_destroy()
 {
-  enigma::instance_event_iterator->inst->myevent_destroy();
-  enigma::instance_event_iterator->inst->unlink();
+  enigma::object_basic* const a = enigma::instance_event_iterator->inst;
+  if (enigma::cleanups.find(a) == enigma::cleanups.end()) {
+    enigma::instance_event_iterator->inst->myevent_destroy();
+    enigma::instance_event_iterator->inst->unlink();
+    if (enigma::cleanups.find(a) == enigma::cleanups.end())
+    printf("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! %p ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!",a);
+    if (a != (enigma::object_basic*)enigma::instance_event_iterator->inst)
+    printf("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO %p TO POINTING TO %p\n",a,(enigma::object_basic*)enigma::instance_event_iterator->inst);
+  }
 }
 
 bool instance_exists(int obj)

@@ -58,7 +58,7 @@ namespace enigma {
     private: void addme();
   };
   
-  void update_iterators_for_destroy(const iterator&);
+  void update_iterators_for_destroy(const inst_iter*);
   iterator instance_list_first();
   iterator fetch_inst_iter_by_id(int id);
   iterator fetch_inst_iter_by_int(int x);

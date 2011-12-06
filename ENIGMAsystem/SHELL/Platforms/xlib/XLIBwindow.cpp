@@ -360,15 +360,9 @@ void io_handle()
   }
   enigma::update_globals();
 }
-void io_clear()
-{
-  for (int i = 0; i < 255; i++)
-    enigma::keybdstatus[i] = enigma::last_keybdstatus[i] = 0;
-  for (int i = 0; i < 3; i++)
-    enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
-}
 void keyboard_wait()
 {
+  io_clear();
   for (;;)
   {
     io_handle();

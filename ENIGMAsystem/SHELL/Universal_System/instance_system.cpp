@@ -81,15 +81,15 @@ namespace enigma
       if (temp) delete it;
     }
     
-    void update_iterators_for_destroy(const iterator& dd)
+    void update_iterators_for_destroy(const inst_iter* dd)
     {
       for (central_iterator_cache_iterator it = central_iterator_cache.begin();
            it != central_iterator_cache.end(); ++it)
       {
-        if ((*it)->it->next == dd.it)
-          (*it)->it->next = dd.it->next;
-        else if ((*it)->it->prev == dd.it)
-          (*it)->it->prev = dd.it->prev;
+        if ((*it)->it->next == dd)
+          (*it)->it->next = dd->next;
+        else if ((*it)->it->prev == dd)
+          (*it)->it->prev = dd->prev;
       }
     }
   
@@ -110,6 +110,7 @@ namespace enigma
     if (which->prev) which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
     if (prev == which) prev = which->prev;
+    update_iterators_for_destroy(which);
   }
 
   inst_iter *objectid_base::add_inst(object_basic* ninst)
@@ -127,6 +128,7 @@ namespace enigma
     objectid_base *a = objects + oid;
     if (a->prev == which) a->prev = which->prev;
     a->count--;
+    update_iterators_for_destroy(which);
   }
   
   /* **  Variables ** */
@@ -152,7 +154,7 @@ namespace enigma
   iterator_level *il_top = NULL;
 
   // This is basically a garbage collection list for when instances are destroyed
-  vector<inst_iter*> cleanups; // We'll use vector
+  set<object_basic*> cleanups; // We'll use set, to prevent stupidity
 
   // It's a good idea to centralize an event iterator so error reporting can tell where it is.
   static inst_iter dummy_event_iterator(NULL,NULL,NULL); // For create events and such
@@ -269,14 +271,15 @@ namespace enigma
   
   void instance_iter_queue_for_destroy(pinstance_list_iterator whop)
   {
-    enigma::cleanups.push_back(whop->w->second);
+    printf("Queued %p\n",(object_basic*)whop->w->second->inst);
+    enigma::cleanups.insert((object_basic*)whop->w->second->inst);
     enigma::instancecount--;
     instance_count--;
   }
   void dispose_destroyed_instances()
   {
-    for (size_t i = 0; i < cleanups.size(); i++)
-      delete cleanups[i]->inst;
+    for (set<object_basic*>::iterator i = cleanups.begin(); i != cleanups.end(); i++)
+      delete (*i);
     cleanups.clear();
   }
   void unlink_main(instance_list_iterator who)
@@ -285,6 +288,7 @@ namespace enigma
     if (a->prev) a->prev->next = a->next;
     if (a->next) a->next->prev = a->prev;
     instance_list.erase(who);
+    update_iterators_for_destroy(a);
   }
   void unlink_main(pinstance_list_iterator whop)
   {
@@ -292,5 +296,6 @@ namespace enigma
     if (a->prev) a->prev->next = a->next;
     if (a->next) a->next->prev = a->prev;
     instance_list.erase(whop->w);
+    update_iterators_for_destroy(a);
   }
 }

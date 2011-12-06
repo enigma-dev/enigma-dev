@@ -256,6 +256,9 @@ unsigned int string_height_ext(variant vstr, int sep, int w)
 ////////////////////////////////////////////////////
 void draw_text(int x,int y,variant vstr)
 {
+  #ifdef CODEBLOX
+    return;
+  #endif
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
   bind_texture(fnt->texture);

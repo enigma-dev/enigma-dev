@@ -41,12 +41,12 @@
 #endif
 
 #include <map>
-#include <vector>
+#include <set>
 
 namespace enigma {
   typedef std::map<int,inst_iter*>::iterator instance_list_iterator;
   extern std::map<int,inst_iter*> instance_list;
-  extern std::vector<inst_iter*> cleanups;
+  extern std::set<object_basic*> cleanups;
   
   void unlink_main(instance_list_iterator who);
 }

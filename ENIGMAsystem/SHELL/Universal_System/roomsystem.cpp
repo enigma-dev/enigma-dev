@@ -44,6 +44,8 @@
 #include "roomsystem.h"
 #include "depth_draw.h"
 
+#include "CallbackArrays.h"
+
 int room_first  = 0;
 int room_last   = 0;
 int room_speed  = 60;
@@ -141,6 +143,8 @@ namespace enigma
         xm = tx, ym = ty;
     }
     window_set_size(xm,ym);
+    io_clear();
+    
     for (int i=0; i<instancecount; i++) {
       inst *obj = &instances[i];
       instance_create_id(obj->x,obj->y,obj->obj,obj->id);
@@ -271,8 +275,6 @@ int room_previous(int num)
       return -1;
     return enigma::roomorder[rit->order - 1]->id;
 }
-
-#include "CallbackArrays.h"
 
 namespace enigma
 {
