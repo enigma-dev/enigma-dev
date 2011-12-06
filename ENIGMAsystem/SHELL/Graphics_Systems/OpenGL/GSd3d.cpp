@@ -401,29 +401,59 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
 
 //TODO: with all basic drawing add in normals, switch to vertex arrays
 
-void d3d_transform_set_identity()
-{
+void d3d_transform_set_identity() {
   glLoadIdentity();
-  glScalef(1,-1,1);
-  glOrtho(-1,room_width,-1,room_height,0,1);
 }
 
 void d3d_transform_add_translation(double xt,double yt,double zt) {
   glTranslated(xt, yt, zt);
 }
-
 void d3d_transform_add_scaling(double xs,double ys,double zs) {
   glScaled(xs, ys, zs);
 }
 void d3d_transform_add_rotation_x(double angle) {
   glRotated(-angle,1,0,0);
 }
-
 void d3d_transform_add_rotation_y(double angle) {
   glRotated(-angle,0,1,0);
 }
 void d3d_transform_add_rotation_z(double angle) {
   glRotatef(-angle,0,0,1);
+}
+void d3d_transform_add_rotation_axis(double x, double y, double z, double angle)
+{
+  glRotatef(-angle,x,y,z);
+}
+
+void d3d_transform_set_translation(double xt,double yt,double zt)
+{
+  d3d_transform_set_identity();
+  glTranslated(xt, yt, zt);
+}
+void d3d_transform_set_scaling(double xs,double ys,double zs)
+{
+  d3d_transform_set_identity();
+  glScaled(xs, ys, zs);
+}
+void d3d_transform_set_rotation_x(double angle)
+{
+  d3d_transform_set_identity();
+  glRotated(-angle,1,0,0);
+}
+void d3d_transform_set_rotation_y(double angle)
+{
+  d3d_transform_set_identity();
+  glRotated(-angle,0,1,0);
+}
+void d3d_transform_set_rotation_z(double angle)
+{
+  d3d_transform_set_identity();
+  glRotated(-angle,0,0,1);
+}
+void d3d_transform_set_rotation_axis(double x, double y, double z, double angle)
+{
+  d3d_transform_set_identity();
+  glRotatef(-angle,x,y,z);
 }
 
 #include <stack>
@@ -482,34 +512,6 @@ bool d3d_transform_stack_disgard()
     trans_stack.push(0);
     trans_stack_size--;
     return true;
-}
-
-void d3d_transform_set_translation(double xt,double yt,double zt)
-{
-  d3d_transform_set_identity();
-  glTranslated(xt, yt, zt);
-}
-
-void d3d_transform_set_scaling(double xs,double ys,double zs)
-{
-  d3d_transform_set_identity();
-  glScaled(xs, ys, zs);
-}
-void d3d_transform_set_rotation_x(double angle)
-{
-  d3d_transform_set_identity();
-  glRotated(-angle,1,0,0);
-}
-
-void d3d_transform_set_rotation_y(double angle)
-{
-  d3d_transform_set_identity();
-  glRotated(-angle,0,1,0);
-}
-void d3d_transform_set_rotation_z(double angle)
-{
-  d3d_transform_set_identity();
-  glRotated(-angle,0,0,1);
 }
 
 #include <map>
