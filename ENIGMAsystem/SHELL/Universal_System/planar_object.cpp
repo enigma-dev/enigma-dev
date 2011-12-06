@@ -42,33 +42,33 @@ namespace enigma
 {
   object_planar::object_planar()
   {
-    hspeed.reflex1   = &vspeed.rval.d;
-      hspeed.reflex2 = &direction.rval.d;
-      hspeed.reflex3 = &speed.rval.d;
-    vspeed.reflex1    = &hspeed.rval.d;
-      vspeed.reflex2  = &direction.rval.d;
-      vspeed.reflex3  = &speed.rval.d;
-    direction.reflex1   = &speed.rval.d;
-      direction.reflex2 = &hspeed.rval.d;
-      direction.reflex3 = &vspeed.rval.d;
-    speed.reflex1   = &direction.rval.d;
-      speed.reflex2 = &hspeed.rval.d;
-      speed.reflex3 = &vspeed.rval.d;
+    hspeed.vspd  = &vspeed.rval.d;
+      hspeed.dir = &direction.rval.d;
+      hspeed.spd = &speed.rval.d;
+    vspeed.hspd  = &hspeed.rval.d;
+      vspeed.dir = &direction.rval.d;
+      vspeed.spd = &speed.rval.d;
+    direction.spd    = &speed.rval.d;
+      direction.hspd = &hspeed.rval.d;
+      direction.vspd = &vspeed.rval.d;
+    speed.dir    = &direction.rval.d;
+      speed.hspd = &hspeed.rval.d;
+      speed.vspd = &vspeed.rval.d;
   }
   object_planar::object_planar(unsigned _id, int objid): object_basic(_id,objid)
   {
-    hspeed.reflex1   = &vspeed.rval.d;
-      hspeed.reflex2 = &direction.rval.d;
-      hspeed.reflex3 = &speed.rval.d;
-    vspeed.reflex1    = &hspeed.rval.d;
-      vspeed.reflex2  = &direction.rval.d;
-      vspeed.reflex3  = &speed.rval.d;
-    direction.reflex1   = &speed.rval.d;
-      direction.reflex2 = &hspeed.rval.d;
-      direction.reflex3 = &vspeed.rval.d;
-    speed.reflex1   = &direction.rval.d;
-      speed.reflex2 = &hspeed.rval.d;
-      speed.reflex3 = &vspeed.rval.d;
+    hspeed.vspd  = &vspeed.rval.d;
+      hspeed.dir = &direction.rval.d;
+      hspeed.spd = &speed.rval.d;
+    vspeed.hspd  = &hspeed.rval.d;
+      vspeed.dir = &direction.rval.d;
+      vspeed.spd = &speed.rval.d;
+    direction.spd    = &speed.rval.d;
+      direction.hspd = &hspeed.rval.d;
+      direction.vspd = &vspeed.rval.d;
+    speed.dir    = &direction.rval.d;
+      speed.hspd = &hspeed.rval.d;
+      speed.vspd = &vspeed.rval.d;
   }
 
   //This just needs implemented virtually so instance_destroy works.

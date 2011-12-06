@@ -40,6 +40,7 @@ namespace enigma
   object_graphics::object_graphics(unsigned _x, int _y): object_planar(_x,_y) {}
   object_graphics::~object_graphics() {};
   
+  INTERCEPT_DEFAULT_COPY(enigma::depthv);
   void depthv::function() {
     rval.d = floor(rval.d);
     drawing_depths[rval.d].draw_events->unlink(myiter);

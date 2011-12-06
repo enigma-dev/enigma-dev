@@ -59,6 +59,7 @@
 
 namespace enigma
 {
+  multifunction_variant& multifunction_variant::operator=(multifunction_variant& x) { if ((type = x.type) == 1) sval = x.sval; else rval.d = x.rval.d; function(); return *this; }
   types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator=, { rval.d = x; type = real; function(); return *this; } )\
   types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator=, { sval = x;   type = real; function(); return *this; } )\
   multifunction_variant& multifunction_variant::operator= (const variant &x)          { if ((type = x.type) == 1) sval = x.sval; else rval.d = x.rval.d; function(); return *this; }\

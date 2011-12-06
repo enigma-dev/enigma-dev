@@ -44,6 +44,7 @@ namespace enigma
     virtual void function();
     
     //These are assignment operators and require a reference to be passed
+    multifunction_variant& operator=(multifunction_variant&); // Stop shit from happening
     types_extrapolate_alldec(multifunction_variant& operator=);
     types_extrapolate_alldec(multifunction_variant& operator+=);
     types_extrapolate_alldec(multifunction_variant& operator-=);
@@ -63,7 +64,9 @@ namespace enigma
   };
 }
 
-#define INHERIT_OPERATORS()\
-  using multifunction_variant::operator=;
-
+#define INHERIT_OPERATORS(t)\
+  using multifunction_variant::operator=;\
+  t &operator=(t&);
+#define INTERCEPT_DEFAULT_COPY(t)\
+  t &t::operator=(t& x) { *this = (variant&)x; return *this; }
 #endif

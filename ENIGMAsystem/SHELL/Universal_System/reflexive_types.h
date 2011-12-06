@@ -22,26 +22,26 @@
 
 namespace enigma {
   struct directionv: multifunction_variant {
-    INHERIT_OPERATORS();
-    double *reflex1, *reflex2, *reflex3;
+    INHERIT_OPERATORS(directionv);
+    double *spd, *hspd, *vspd;
     void function();
   };
 
   struct speedv: multifunction_variant {
-    INHERIT_OPERATORS();
-    double *reflex1, *reflex2, *reflex3;
+    INHERIT_OPERATORS(speedv);
+    double *dir, *hspd, *vspd;
     void function();
   };
 
   struct hspeedv: multifunction_variant {
-    INHERIT_OPERATORS();
-    double *reflex1, *reflex2, *reflex3;
+    INHERIT_OPERATORS(hspeedv);
+    double *vspd, *dir, *spd;
     void function();
   };
 
   struct vspeedv: multifunction_variant {
-    INHERIT_OPERATORS();
-    double *reflex1, *reflex2, *reflex3;
+    INHERIT_OPERATORS(vspeedv);
+    double *hspd, *dir, *spd;
     void function();
   };
 }

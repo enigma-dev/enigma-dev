@@ -22,26 +22,30 @@
 
 namespace enigma {
   //Make direction work
+  INTERCEPT_DEFAULT_COPY(directionv);
   void directionv::function() {
-    *reflex2 = *reflex1 * cos(rval.d*M_PI/180);
-    *reflex3 = *reflex1 * -sin(rval.d*M_PI/180);
+    *hspd = *spd * cos(rval.d*M_PI/180);
+    *vspd = *spd *-sin(rval.d*M_PI/180);
   }
 
   //Make speed work -- same as above, but rval.d and reflex1 are switched.
+  INTERCEPT_DEFAULT_COPY(speedv);
   void speedv::function() {
-    *reflex2 = rval.d * cos(*reflex1*M_PI/180);
-    *reflex3 = rval.d * -sin(*reflex1*M_PI/180);
+    *hspd = rval.d * cos(*dir*M_PI/180);
+    *vspd = rval.d *-sin(*dir*M_PI/180);
   }
 
   //Make hspeed work
+  INTERCEPT_DEFAULT_COPY(hspeedv);
   void hspeedv::function() {
-    *reflex2 = (int(180+180*(1-atan2(*reflex1,rval.d)/M_PI)))%360;
-    *reflex3 = hypot(rval.d,*reflex1);
+    *dir = (int(180+180*(1-atan2(*vspd,rval.d)/M_PI)))%360;
+    *spd = hypot(rval.d,*vspd);
   }
 
   //Make vspeed work -- Same as above, except the arguments to atan2 are reversed
+  INTERCEPT_DEFAULT_COPY(vspeedv);
   void vspeedv::function() {
-    *reflex2 = (int(180+180*(1-atan2(rval.d,*reflex1)/M_PI)))%360;
-    *reflex3 = hypot(rval.d,*reflex1);
+    *dir = (int(180+180*(1-atan2(rval.d,*hspd)/M_PI)))%360;
+    *spd = hypot(rval.d,*hspd);
   }
 }

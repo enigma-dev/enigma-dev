@@ -120,7 +120,7 @@ namespace enigma
 
 #include "multifunction_variant.h"
 namespace enigma { struct roomv: multifunction_variant {
-  INHERIT_OPERATORS()
+  INHERIT_OPERATORS(roomv);
   void function();
 }; }
 extern enigma::roomv room;
