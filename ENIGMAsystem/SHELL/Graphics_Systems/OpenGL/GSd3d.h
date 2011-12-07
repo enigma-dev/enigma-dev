@@ -34,18 +34,24 @@ void d3d_set_hidden(int enable);
 void d3d_set_lighting(int enable);
 void d3d_set_culling(int enable);
 void d3d_set_fog(int enable, int color, int start, int end);
+void d3d_set_depth(double dep);
 void d3d_set_shading(bool smooth);
 
 void d3d_primitive_begin(int kind);
+void d3d_primitive_begin_texture(int kind, int texId);
+void d3d_primitive_end();
 void d3d_vertex(double x, double y, double z);
 void d3d_vertex_color(double x, double y, double z, int color, double alpha);
-void d3d_primitive_begin_texture(int kind, int texId);
 void d3d_vertex_texture(double x, double y, double z, double tx, double ty);
 void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha);
-void d3d_primitive_end();
+void d3d_vertex_normal(double x, double y, double z, double nx, double ny, double nz);
+void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha);
+void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty);
+void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha);
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup);
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar);
-void d3d_set_projection_ortho(int x, int y, int width, int height, int angle);
+void d3d_set_projection_ortho(double x, double y, double width, double height, double angle);
+void d3d_set_projection_perspective(double x, double y, double width, double height, double angle);
 
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);
 void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);
@@ -74,6 +80,10 @@ bool d3d_transform_stack_empty();
 bool d3d_transform_stack_top();
 bool d3d_transform_stack_disgard();
 
+bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col);
+bool d3d_light_define_point(int id, double x, double y, double z, double range, int col);
+bool d3d_light_enable(int id, bool enable);
+
 #include <string>
 
 unsigned int d3d_model_create();
@@ -91,6 +101,10 @@ void d3d_model_vertex(const unsigned int id, double x, double y, double z);
 void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha);
 void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty);
 void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha);
+void d3d_model_vertex_normal(const unsigned int id, double x, double y, double z, double nx, double ny, double nz);
+void d3d_model_vertex_normal_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, int col, double alpha);
+void d3d_model_vertex_normal_texture(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty);
+void d3d_model_vertex_normal_texture_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha);
 void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep);
 void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps);
 void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps);

@@ -81,7 +81,7 @@ void d3d_set_fog(int enable, int color, int start, int end)
   }
   else
     glDisable(GL_FOG);*/
-}//TODO: That fog is very wrong
+}//TODO: That fog is very wrong and breaks shit
 
 void d3d_set_culling(int enable)
 {
@@ -104,6 +104,11 @@ void d3d_set_perspective(int enable)
   }//TODO: Turn off persepective
 }
 
+void d3d_set_depth(double dep)
+{
+
+}//TODO: Write function
+
 void d3d_set_shading(bool smooth)
 {
     glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
@@ -115,32 +120,33 @@ void d3d_primitive_begin(int kind)
     untexture();
     glBegin(ptypes_by_id[kind]);
 }
-
-void d3d_vertex(double x, double y, double z)
-{
-    glVertex3d(x,y,z);
-}
-
-void d3d_vertex_color(double x, double y, double z, int color, double alpha)
-{
-    glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
-    glVertex3d(x,y,z);
-    glPopAttrib();
-}//TODO: fix push/pop with open primitive
-
 void d3d_primitive_begin_texture(int kind, int texId)
 {
     bind_texture(texId);
     glBegin(ptypes_by_id[kind]);
 }
 
+void d3d_primitive_end()
+{
+    glEnd();
+}
+
+void d3d_vertex(double x, double y, double z)
+{
+    glVertex3d(x,y,z);
+}
+void d3d_vertex_color(double x, double y, double z, int color, double alpha)
+{
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glVertex3d(x,y,z);
+    glPopAttrib();
+}
 void d3d_vertex_texture(double x, double y, double z, double tx, double ty)
 {
     glTexCoord2f(tx,ty);
     glVertex3d(x,y,z);
 }
-
 void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha)
 {
     glPushAttrib(GL_CURRENT_BIT);
@@ -150,9 +156,35 @@ void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty
     glPopAttrib();
 }
 
-void d3d_primitive_end()
+//TODO: fix push/pop with open primitives
+
+void d3d_vertex_normal(double x, double y, double z, double nx, double ny, double nz)
 {
-    glEnd();
+    glNormal3f(nx, ny, nz);
+    glVertex3d(x,y,z);
+}
+void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha)
+{
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glNormal3f(nx, ny, nz);
+    glVertex3d(x,y,z);
+    glPopAttrib();
+}
+void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
+{
+    glTexCoord2f(tx,ty);
+    glNormal3f(nx, ny, nz);
+    glVertex3d(x,y,z);
+}
+void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha)
+{
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glTexCoord2f(tx,ty);
+    glNormal3f(nx, ny, nz);
+    glVertex3d(x,y,z);
+    glPopAttrib();
 }
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
@@ -172,7 +204,7 @@ void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,do
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
 }
 
-void d3d_set_projection_ortho(int x, int y, int width, int height, int angle)
+void d3d_set_projection_ortho(double x, double y, double width, double height, double angle)
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -184,6 +216,11 @@ void d3d_set_projection_ortho(int x, int y, int width, int height, int angle)
   glRotated(angle,0,0,1);
   glDisable(GL_DEPTH_TEST);
 }
+
+void d3d_set_projection_perspective(double x, double y, double width, double height, double angle)
+{
+
+}//TODO: Implement
 
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
@@ -345,9 +382,9 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
     steps = max(steps, 3);
     const int zsteps = (ceil(steps/2) - 1)*2;
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, rz = fabs(z2-z1)/2, invstep = 1.0/steps, pr = 2*M_PI/steps;
-    double a, b, px, py, pz, pz2, tp;
+    double a, px, py, pz, pz2, tp;
     bind_texture(texId);
-    pz = 0; pz2 = 0; b = 0;
+    pz = 0; pz2 = 0;
     for (int ii = 0; ii < (zsteps - 2)/2; ii++)
     {
         pz2 += 2*rz/zsteps;
@@ -403,7 +440,7 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
 
 void d3d_transform_set_identity() {
   glLoadIdentity();
-}
+}//TODO: set identity so it doesn't go over the projection settings
 
 void d3d_transform_add_translation(double xt,double yt,double zt) {
   glTranslated(xt, yt, zt);
@@ -455,6 +492,8 @@ void d3d_transform_set_rotation_axis(double x, double y, double z, double angle)
   d3d_transform_set_identity();
   glRotatef(-angle,x,y,z);
 }
+
+//TODO: transformations should apply in reverse order
 
 #include <stack>
 stack<bool> trans_stack;
@@ -517,9 +556,89 @@ bool d3d_transform_stack_disgard()
 #include <map>
 #include <vector>
 #include "../../Universal_System/fileio.h"
+class d3d_lights
+{
+    map<int,int> light_ind;
 
-#include "../../Universal_System/terminal_io.h"
-#include <sstream>
+    public:
+    d3d_lights() {}
+    ~d3d_lights() {}
+
+    bool light_define_direction(int id, double dx, double dy, double dz, int col)
+    {
+        const int ms = light_ind.size();
+        if (ms >= GL_MAX_LIGHTS)
+            return false;
+        light_ind.insert(pair<int,int>(id, ms));
+        const float dir[3] = {dx, dy, dz}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
+        glLightfv(GL_LIGHT0+ms, GL_SPOT_DIRECTION, dir);
+        glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
+        return true;
+    }
+    bool light_define_point(int id, double x, double y, double z, double range, int col)
+    {
+        const int ms = light_ind.size();
+        if (ms >= GL_MAX_LIGHTS)
+            return false;
+        light_ind.insert(pair<int,int>(id, ms));
+        const float pos[3] = {x, y, z}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
+      	glLightfv(GL_LIGHT1, GL_POSITION, pos);
+        glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
+        return true;
+    } //NOTE: spotlight is only 180 degress, and range cannot be defined
+    bool light_enable(int id)
+    {
+        map<int, int>::iterator it = light_ind.find(id);
+        if (it == light_ind.end())
+        {
+            const int ms = light_ind.size();
+            if (ms >= GL_MAX_LIGHTS)
+                return false;
+            light_ind.insert(pair<int,int>(id, ms));
+            glEnable(GL_LIGHT0+ms);
+        }
+        else
+        {
+            glEnable(GL_LIGHT0+(*it).second);
+        }
+        return true;
+    }
+    bool light_disable(int id)
+    {
+        map<int, int>::iterator it = light_ind.find(id);
+        if (it == light_ind.end())
+        {
+            return false;
+        }
+        else
+        {
+            glDisable(GL_LIGHT0+(*it).second);
+        }
+        return true;
+    }
+} d3d_lighting;
+
+bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col)
+{
+    return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
+}
+
+bool d3d_light_define_point(int id, double x, double y, double z, double range, int col)
+{
+    return d3d_lighting.light_define_point(id, x, y, z, range, col);
+}
+
+bool d3d_light_enable(int id, bool enable)
+{
+    return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
+}
+
+void d3d_light_define_ambient(int col)
+{
+    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
+}  //TODO: Check lighting works, look at replacing/expanding it
+
 class d3d_model
 {
     int something, model_call_maxid;
@@ -587,12 +706,16 @@ class d3d_model
         {
             switch (int(model_calls[i][0]))
             {
-                case 0: d3d_primitive_begin(model_calls[i][1]); break;
-                case 1: d3d_primitive_end(); break;
-                case 2: d3d_vertex(model_calls[i][1], model_calls[i][2], model_calls[i][3]); break;
-                case 3: d3d_vertex_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5]); break;
-                case 4: d3d_vertex_texture(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5]); break;
-                case 5: d3d_vertex_texture_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7]); break;
+                case  0: d3d_primitive_begin(model_calls[i][1]); break;
+                case  1: d3d_primitive_end(); break;
+                case  2: d3d_vertex(model_calls[i][1], model_calls[i][2], model_calls[i][3]); break;
+                case  3: d3d_vertex_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5]); break;
+                case  4: d3d_vertex_texture(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5]); break;
+                case  5: d3d_vertex_texture_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7]); break;
+                case  6: d3d_vertex_normal(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6]); break;
+                case  7: d3d_vertex_normal_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7], model_calls[i][8]); break;
+                case  8: d3d_vertex_normal_texture(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7], model_calls[i][8]); break;
+                case  9: d3d_vertex_normal_texture_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7], model_calls[i][8], model_calls[i][9], model_calls[i][10]); break;
                 case 10: d3d_draw_block(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8]); break;
                 case 11: d3d_draw_cylinder(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8], model_calls[i][9], model_calls[i][10]); break;
                 case 12: d3d_draw_cone(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8], model_calls[i][9], model_calls[i][10]); break;
@@ -702,6 +825,74 @@ class d3d_model
         model_calls[model_call_maxid].push_back(0);
         model_calls[model_call_maxid].push_back(0);
         model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void vertex_normal(double x, double y, double z, double nx, double ny, double nz)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(6);
+        model_calls[model_call_maxid].push_back(x);
+        model_calls[model_call_maxid].push_back(y);
+        model_calls[model_call_maxid].push_back(z);
+        model_calls[model_call_maxid].push_back(nx);
+        model_calls[model_call_maxid].push_back(ny);
+        model_calls[model_call_maxid].push_back(nz);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int col, double alpha)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(7);
+        model_calls[model_call_maxid].push_back(x);
+        model_calls[model_call_maxid].push_back(y);
+        model_calls[model_call_maxid].push_back(z);
+        model_calls[model_call_maxid].push_back(nx);
+        model_calls[model_call_maxid].push_back(ny);
+        model_calls[model_call_maxid].push_back(nz);
+        model_calls[model_call_maxid].push_back(col);
+        model_calls[model_call_maxid].push_back(alpha);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(8);
+        model_calls[model_call_maxid].push_back(x);
+        model_calls[model_call_maxid].push_back(y);
+        model_calls[model_call_maxid].push_back(z);
+        model_calls[model_call_maxid].push_back(nx);
+        model_calls[model_call_maxid].push_back(ny);
+        model_calls[model_call_maxid].push_back(nz);
+        model_calls[model_call_maxid].push_back(tx);
+        model_calls[model_call_maxid].push_back(ty);
+        model_calls[model_call_maxid].push_back(0);
+        model_calls[model_call_maxid].push_back(0);
+        model_call_maxid++;
+    }
+
+    void vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha)
+    {
+        model_calls.push_back(vector<double>());
+        model_calls[model_call_maxid].push_back(9);
+        model_calls[model_call_maxid].push_back(x);
+        model_calls[model_call_maxid].push_back(y);
+        model_calls[model_call_maxid].push_back(z);
+        model_calls[model_call_maxid].push_back(nx);
+        model_calls[model_call_maxid].push_back(ny);
+        model_calls[model_call_maxid].push_back(nz);
+        model_calls[model_call_maxid].push_back(tx);
+        model_calls[model_call_maxid].push_back(ty);
+        model_calls[model_call_maxid].push_back(col);
+        model_calls[model_call_maxid].push_back(alpha);
         model_call_maxid++;
     }
 
@@ -889,6 +1080,26 @@ void d3d_model_vertex_texture(const unsigned int id, double x, double y, double 
 void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha)
 {
     d3d_models[id].vertex_texture_color(x, y, z, tx, ty, col, alpha);
+}
+
+void d3d_model_vertex_normal(const unsigned int id, double x, double y, double z, double nx, double ny, double nz)
+{
+    d3d_models[id].vertex_normal(x, y, z, nx, ny, nz);
+}
+
+void d3d_model_vertex_normal_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, int col, double alpha)
+{
+    d3d_models[id].vertex_normal_color(x, y, z, nx, ny, nz, col, alpha);
+}
+
+void d3d_model_vertex_normal_texture(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
+{
+    d3d_models[id].vertex_normal_texture(x, y, z, nx, ny, nz, tx, ty);
+}
+
+void d3d_model_vertex_normal_texture_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha)
+{
+    d3d_models[id].vertex_normal_texture_color(x, y, z, nx, ny, nz, tx, ty, col, alpha);
 }
 
 void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
