@@ -41,3 +41,4 @@ int  background_get_texture(int backId);
 int background_get_width(int backId);
 int background_get_height(int backId);
 void texture_set_interpolation(int enable);
+void texture_set_repeat(bool repeat);

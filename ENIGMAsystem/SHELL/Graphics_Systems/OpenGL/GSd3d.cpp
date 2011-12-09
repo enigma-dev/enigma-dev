@@ -29,6 +29,7 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000)>>16)
 
 bool d3dMode = false;
+double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 void d3d_start()
 {
@@ -53,7 +54,11 @@ void d3d_start()
 void d3d_end()
 {
   d3dMode = false;
-  d3d_set_projection_ortho(-1, -1, room_width, room_height, 0); //TODO: Turn off perspective, take views into account
+  glDisable(GL_DEPTH_TEST);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(0, 1, 0, 1);
+  glMatrixMode(GL_MODELVIEW);
 }
 
 void d3d_set_hidden(int enable)
@@ -100,8 +105,12 @@ void d3d_set_perspective(int enable)
   }
   else
   {
-
-  }//TODO: Turn off persepective
+    glDisable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(0, 1, 0, 1);
+    glMatrixMode(GL_MODELVIEW);
+  } //Perspective not the same as in GM when turning off perspective and using d3d projection
 }
 
 void d3d_set_depth(double dep)
@@ -192,6 +201,8 @@ void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
+  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
@@ -202,25 +213,38 @@ void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,do
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
+  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 
 void d3d_set_projection_ortho(double x, double y, double width, double height, double angle)
 {
+  glDisable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(angle, 1, 0, 1);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glScaled(1, -1, 1);
+  glScalef(1, -1, 1);
   glOrtho(x-1,x + width,y-1,y + height,0,1);
-  glRotated(angle,0,0,1);
-  glDisable(GL_DEPTH_TEST);
+  glRotatef(angle,0,0,1);
+  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 
 void d3d_set_projection_perspective(double x, double y, double width, double height, double angle)
 {
-
-}//TODO: Implement
+  glDisable(GL_DEPTH_TEST);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+  glMatrixMode(GL_MODELVIEW);
+  glScalef(1, -1, 1);
+  glOrtho(x-1,x + width,y-1,y + height,0,1);
+  glRotatef(angle,0,0,1);
+  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+  glMultMatrixd(transformation_matrix);
+}
 
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
@@ -438,62 +462,130 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
 
 //TODO: with all basic drawing add in normals, switch to vertex arrays
 
-void d3d_transform_set_identity() {
-  glLoadIdentity();
-}//TODO: set identity so it doesn't go over the projection settings
+void d3d_transform_set_identity()
+{
+  transformation_matrix[0] = 1;
+  transformation_matrix[1] = 0;
+  transformation_matrix[2] = 0;
+  transformation_matrix[3] = 0;
+  transformation_matrix[4] = 0;
+  transformation_matrix[5] = 1;
+  transformation_matrix[6] = 0;
+  transformation_matrix[7] = 0;
+  transformation_matrix[8] = 0;
+  transformation_matrix[9] = 0;
+  transformation_matrix[10] = 1;
+  transformation_matrix[11] = 0;
+  transformation_matrix[12] = 0;
+  transformation_matrix[13] = 0;
+  transformation_matrix[14] = 0;
+  transformation_matrix[15] = 1;
+  glLoadMatrixd(projection_matrix);
+}
 
-void d3d_transform_add_translation(double xt,double yt,double zt) {
-  glTranslated(xt, yt, zt);
+void d3d_transform_add_translation(double xt,double yt,double zt)
+{
+  glLoadIdentity();
+  glTranslatef(xt, yt, zt);
+  glMultMatrixd(transformation_matrix);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
-void d3d_transform_add_scaling(double xs,double ys,double zs) {
-  glScaled(xs, ys, zs);
+void d3d_transform_add_scaling(double xs,double ys,double zs)
+{
+  glLoadIdentity();
+  glScalef(xs, ys, zs);
+  glMultMatrixd(transformation_matrix);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
-void d3d_transform_add_rotation_x(double angle) {
-  glRotated(-angle,1,0,0);
+void d3d_transform_add_rotation_x(double angle)
+{
+  glLoadIdentity();
+  glRotatef(-angle,1,0,0);
+  glMultMatrixd(transformation_matrix);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
-void d3d_transform_add_rotation_y(double angle) {
-  glRotated(-angle,0,1,0);
+void d3d_transform_add_rotation_y(double angle)
+{
+  glLoadIdentity();
+  glRotatef(-angle,0,1,0);
+  glMultMatrixd(transformation_matrix);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
-void d3d_transform_add_rotation_z(double angle) {
+void d3d_transform_add_rotation_z(double angle)
+{
+  glLoadIdentity();
   glRotatef(-angle,0,0,1);
+  glMultMatrixd(transformation_matrix);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 void d3d_transform_add_rotation_axis(double x, double y, double z, double angle)
 {
+  glLoadIdentity();
   glRotatef(-angle,x,y,z);
+  glMultMatrixd(transformation_matrix);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 
 void d3d_transform_set_translation(double xt,double yt,double zt)
 {
-  d3d_transform_set_identity();
-  glTranslated(xt, yt, zt);
+  glLoadIdentity();
+  glTranslatef(xt, yt, zt);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 void d3d_transform_set_scaling(double xs,double ys,double zs)
 {
-  d3d_transform_set_identity();
-  glScaled(xs, ys, zs);
+  glLoadIdentity();
+  glScalef(xs, ys, zs);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 void d3d_transform_set_rotation_x(double angle)
 {
-  d3d_transform_set_identity();
-  glRotated(-angle,1,0,0);
+  glLoadIdentity();
+  glRotatef(-angle,1,0,0);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 void d3d_transform_set_rotation_y(double angle)
 {
-  d3d_transform_set_identity();
-  glRotated(-angle,0,1,0);
+  glLoadIdentity();
+  glRotatef(-angle,0,1,0);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 void d3d_transform_set_rotation_z(double angle)
 {
-  d3d_transform_set_identity();
-  glRotated(-angle,0,0,1);
+  glLoadIdentity();
+  glRotatef(-angle,0,0,1);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
 void d3d_transform_set_rotation_axis(double x, double y, double z, double angle)
 {
-  d3d_transform_set_identity();
+  glLoadIdentity();
   glRotatef(-angle,x,y,z);
+  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
+  glLoadMatrixd(projection_matrix);
+  glMultMatrixd(transformation_matrix);
 }
-
-//TODO: transformations should apply in reverse order
 
 #include <stack>
 stack<bool> trans_stack;
@@ -637,7 +729,7 @@ void d3d_light_define_ambient(int col)
 {
     const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
-}  //TODO: Check lighting works, look at replacing/expanding it
+}
 
 class d3d_model
 {
@@ -706,7 +798,7 @@ class d3d_model
         {
             switch (int(model_calls[i][0]))
             {
-                case  0: d3d_primitive_begin(model_calls[i][1]); break;
+                case  0: d3d_primitive_begin_texture(model_calls[i][1],texId); break;
                 case  1: d3d_primitive_end(); break;
                 case  2: d3d_vertex(model_calls[i][1], model_calls[i][2], model_calls[i][3]); break;
                 case  3: d3d_vertex_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5]); break;

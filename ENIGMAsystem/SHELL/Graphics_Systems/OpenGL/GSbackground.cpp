@@ -163,7 +163,7 @@ void draw_background_tiled_area(int back,double x,double y,double x1,double y1,d
 {
   get_background(bck2d,back);
   bind_texture(bck2d->texture);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
@@ -266,7 +266,7 @@ void draw_background_part_ext(int back,double left,double top,double width,doubl
 {
   get_background(bck2d,back);
   bind_texture(bck2d->texture);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
   glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
@@ -323,7 +323,7 @@ void draw_background_tiled_area_ext(int back,double x,double y,double x1,double 
 {
   get_background(bck2d,back);
   bind_texture(bck2d->texture);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
@@ -374,7 +374,7 @@ void draw_background_general(int back,double left,double top,double width,double
 {
   get_background(bck2d,back);
   bind_texture(bck2d->texture);
-  
+
   glPushAttrib(GL_CURRENT_BIT);
     const float
       tbx = bck2d->texbordx,  tby = bck2d->texbordy,
@@ -423,3 +423,21 @@ int background_get_height(int backId) {
   return bck2d->height;
 }
 
+void texture_set_interpolation(int enable)
+{
+
+}//TODO: write function
+
+void texture_set_repeat(bool repeat)
+{
+    if (repeat)
+    {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
+    else
+    {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    }
+}
