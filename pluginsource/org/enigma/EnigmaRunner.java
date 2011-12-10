@@ -123,7 +123,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public EnigmaRunner()
 		{
-		addReasourceHook();
+		addResourceHook();
 		populateMenu();
 		populateTree();
 		LGM.addReloadListener(this);
@@ -282,7 +282,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		return true;
 		}
 
-	void addReasourceHook()
+	void addResourceHook()
 		{
 		EgmIO io = new EgmIO();
 		FileChooser.readers.add(io);
@@ -586,7 +586,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 		setMenuEnabled(false);
 		LGM.commitAll();
-		esf.updateResource();
+		//Don't need to update ESF since commitAll traverses all nodes
+		//esf.updateResource();
 		es.commitToDriver(DRIVER);
 		//System.out.println("Compiling with " + enigma);
 
@@ -599,6 +600,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					ef.progress(10,Messages.getString("EnigmaRunner.POPULATING")); //$NON-NLS-1$
 					EnigmaStruct es = EnigmaWriter.prepareStruct(LGM.currentFile,LGM.root);
 					ef.progress(20,Messages.getString("EnigmaRunner.CALLING")); //$NON-NLS-1$
+					System.out.println("Plugin: Delegating to ENIGMA (out of my hands now)");
 					System.out.println(DRIVER.compileEGMf(es,efi == null ? null : efi.getAbsolutePath(),mode));
 
 					setMenuEnabled(true);
@@ -834,7 +836,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 				public void actionPerformed(ActionEvent e)
 					{
-					SyntaxError se = checkSyntax(code.getText());
+					SyntaxError se = checkSyntax(code.getTextCompat());
 					if (se == null) return;
 					int max = code.getDocumentLength() - 1;
 					if (se.absoluteIndex > max) se.absoluteIndex = max;
@@ -863,8 +865,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			if (rh == null)
 				LGM.currentFile.resMap.put(EnigmaSettings.class,
 						rh = new SingletonResourceHolder<EnigmaSettings>(new EnigmaSettings()));
-			rh.getResource().copyInto(esf.resOriginal);
-			esf.revertResource(); //updates local es copy as well
+			esf.resOriginal = rh.getResource();
+			esf.revertResource(); //updates local res copy as well
 			}
 		}
 

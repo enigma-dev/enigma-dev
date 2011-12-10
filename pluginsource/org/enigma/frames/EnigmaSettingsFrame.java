@@ -605,6 +605,15 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 		return Messages.getString("EnigmaSettingsFrame.DIALOG_KEEPCHANGES_RESOURCE"); //$NON-NLS-1$
 		}
 
+	//FIXME: This shouldn't override. Find out if this affects anything else
+	@Override
+	public void updateResource()
+		{
+		commitChanges();
+		System.out.println("UPDATING " + res);
+		res.copyInto(resOriginal);
+		}
+
 	public void commitChanges()
 		{
 		res.definitions = sDef.getCode();

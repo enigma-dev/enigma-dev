@@ -20,12 +20,19 @@
 package org.enigma.frames;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import org.enigma.backend.EnigmaCallbacks.OutputHandler;
 import org.enigma.messages.Messages;
@@ -34,16 +41,26 @@ import org.lateralgm.main.LGM;
 public class ProgressFrame extends JFrame implements OutputHandler
 	{
 	private static final long serialVersionUID = 1L;
-	protected JTextArea ta;
+	protected JTextPane ta;
 	protected JProgressBar pb;
+	private static final SimpleAttributeSet ORANGE = new SimpleAttributeSet();
+	private static final SimpleAttributeSet RED = new SimpleAttributeSet();
+
+	static
+		{
+		//because Color.ORANGE looks like it was done by Mark Rothko
+		StyleConstants.setForeground(ORANGE,new Color(255,128,0));
+		StyleConstants.setForeground(RED,Color.RED);
+		}
 
 	public ProgressFrame()
 		{
 		super(Messages.getString("EnigmaFrame.TITLE")); //$NON-NLS-1$
 		setLocationRelativeTo(LGM.frame);
 		JPanel p = new JPanel(new BorderLayout());
-		ta = new JTextArea(10,40);
+		ta = new JTextPane();
 		ta.setEditable(false);
+		ta.setPreferredSize(new Dimension(440,150));
 		p.add(new JScrollPane(ta,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),BorderLayout.CENTER);
 		pb = new JProgressBar();
@@ -59,8 +76,40 @@ public class ProgressFrame extends JFrame implements OutputHandler
 
 	public void append(String text)
 		{
-		ta.append(text);
-		ta.setCaretPosition(ta.getDocument().getLength());
+		StyledDocument doc = ta.getStyledDocument();
+		//assuming they actually pass us a full
+		//warning/error string, this will highlight it
+		AttributeSet style = null;
+		String lower = text.toLowerCase();
+		if (lower.startsWith("warning:"))
+			{
+			style = ORANGE;
+			postWarning(text);
+			}
+		if (lower.startsWith("error:"))
+			{
+			style = RED;
+			postError(text);
+			}
+		//do the actual append
+		try
+			{
+			doc.insertString(doc.getLength(),text,style);
+			}
+		catch (BadLocationException e)
+			{ //This can never happen (also, JTextArea does this)
+			}
+		ta.setCaretPosition(doc.getLength());
+		}
+
+	public void postWarning(String text)
+		{
+		//TODO: Register warnings to a new panel
+		}
+
+	public void postError(String text)
+		{
+		//TODO: Register errors to a new panel?
 		}
 
 	public void progress(int pos)
@@ -100,6 +149,6 @@ public class ProgressFrame extends JFrame implements OutputHandler
 		{
 		pb.setValue(pos);
 		pb.setString(tip);
-		ta.append(text + '\n'); //\n is internal representation of newlines, according to java
+		append(text + '\n'); //\n is internal representation of newlines, according to java
 		}
 	}

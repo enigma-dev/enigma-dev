@@ -84,6 +84,9 @@ public final class EnigmaCli
 			{
 			error(e.getMessage());
 			}
+
+		System.out.println("CLI Done.");
+		System.exit(0); //FIXME: Find out why it doesn't terminate normally
 		}
 
 	private static void addResourceHook()
@@ -184,6 +187,7 @@ public final class EnigmaCli
 		if (!compiler.outputexe.equals("$tempfile")) //$NON-NLS-1$
 			outname = new File(compiler.outputexe).getAbsolutePath();
 
+		System.out.println("Plugin: Delegating to ENIGMA (out of my hands now)");
 		DRIVER.compileEGMf(es,outname,mode);
 		}
 
