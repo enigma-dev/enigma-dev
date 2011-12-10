@@ -404,61 +404,61 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
 void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, int steps)
 {
     steps = max(steps, 3);
-    const int zsteps = (ceil(steps/2) - 1)*2;
-    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, rz = fabs(z2-z1)/2, invstep = 1.0/steps, pr = 2*M_PI/steps;
-    double a, px, py, pz, pz2, tp;
+    const int zsteps = ceil(steps/2);
+    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, rz = fabs(z2-z1)/2, invstep = 1.0/steps, invstep2 = 1.0/zsteps, pr = 2*M_PI/steps, qr = M_PI/zsteps;
+    double a, b, px1, py1, px2, py2, pz, pz2, tp, tzp1, tzp2, cosb1, cosb2;
     bind_texture(texId);
-    pz = 0; pz2 = 0;
-    for (int ii = 0; ii < (zsteps - 2)/2; ii++)
+    glBegin(GL_TRIANGLE_FAN);
+    glTexCoord2d(0, 0);
+      glVertex3f(cx, cy, cz - rz);
+    b = qr-M_PI/2;
+    cosb2 = cos(b);
+    pz2 = rz*sin(b);
+    tzp2 = +invstep2;
+    a = 0; px2 = cx+rx*cosb2; py2 = cy; tp = 0;
+    for (int i = 0; i <= steps; i++)
     {
-        pz2 += 2*rz/zsteps;
+        glTexCoord2d(hrep*tp, vrep*tzp2);
+          glVertex3f(px2, py2, cz + pz2);
+        a += pr; px2 = cx+cos(a)*rx*cosb2; py2 = cy+sin(a)*ry*cosb2; tp += invstep;
+    }
+    glEnd();
+    cosb1 = cosb2;
+    pz = pz2;
+    tzp1 = tzp2;
+    for (int ii = 0; ii < zsteps - 2; ii++)
+    {
+        b += qr;
+        cosb2 = cos(b);
+        pz2 = rz*sin(b);
+        tzp2 += invstep2;
         glBegin(GL_TRIANGLE_STRIP);
-        a = 0; px = cx+rx; py = cy; tp = 0;
+        a = 0; px1 = cx+rx*cosb1; py1 = cy; px2 = cx+rx*cosb2; py2 = cy; tp = 0;
         for (int i = 0; i <= steps; i++)
         {
-            glTexCoord2d(hrep*tp, 0);
-              glVertex3f(px, py, cz - pz);
-            glTexCoord2d(hrep*tp, 0);
-              glVertex3f(px, py, cz - pz2);
-            a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+            glTexCoord2d(hrep*tp, vrep*tzp1);
+              glVertex3f(px1, py1, cz + pz);
+            glTexCoord2d(hrep*tp, vrep*tzp2);
+              glVertex3f(px2, py2, cz + pz2);
+            a += pr; px1 = cx+cos(a)*rx*cosb1; py1 = cy+sin(a)*ry*cosb1; px2 = cx+cos(a)*rx*cosb2; py2 = cy+sin(a)*ry*cosb2; tp += invstep;
         }
         glEnd();
-        glBegin(GL_TRIANGLE_STRIP);
-        a = 0; px = cx+rx; py = cy; tp = 0;
-        for (int i = 0; i <= steps; i++)
-        {
-            glTexCoord2d(hrep*tp, 0);
-              glVertex3f(px, py, cz + pz);
-            glTexCoord2d(hrep*tp, 0);
-              glVertex3f(px, py, cz + pz2);
-            a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
-        }
-        glEnd();
+        cosb1 = cosb2;
         pz = pz2;
+        tzp1 = tzp2;
     }
     glBegin(GL_TRIANGLE_FAN);
-    glTexCoord2d(0, 0);
-      glVertex3f(cx, cy, z1);
-    a = 0; px = cx+rx; py = cy; tp = 0;
+    glTexCoord2d(0, vrep);
+      glVertex3f(cx, cy, cz + rz);
+    a = 0; px1 = cx+rx*cosb1; py1 = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
     {
-        glTexCoord2d(hrep*tp, 0);
-          glVertex3f(px, py, cz-pz);
-        a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+        glTexCoord2d(hrep*tp, vrep*tzp1);
+          glVertex3f(px1, py1, cz + pz);
+        a += pr; px1 = cx+cos(a)*rx*cosb1; py1 = cy+sin(a)*ry*cosb1; tp += invstep;
     }
     glEnd();
-    glBegin(GL_TRIANGLE_FAN);
-    glTexCoord2d(0, 0);
-      glVertex3f(cx, cy, z2);
-    a = 0; px = cx+rx; py = cy; tp = 0;
-    for (int i = 0; i <= steps; i++)
-    {
-        glTexCoord2d(hrep*tp, 0);
-          glVertex3f(px, py, cz+pz);
-        a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
-    }
-    glEnd();
-}//TODO: z and x,y coordinates properly (temporary just drew straight up). Texture properly.
+}
 
 //TODO: with all basic drawing add in normals, switch to vertex arrays
 
@@ -593,7 +593,7 @@ int trans_stack_size = 0;
 
 bool d3d_transform_stack_push()
 {
-    if (trans_stack_size == 15) return false;
+    if (trans_stack_size == 31) return false;
     glPushMatrix();
     trans_stack.push(1);
     trans_stack_size++;
@@ -772,23 +772,27 @@ class d3d_model
         file_text_close(file);
     }
 
-    void load(string fname)
+    bool load(string fname)
     {
         int file = file_text_open_read(fname);
+        if (file == -1)
+            return false;
         something = file_text_read_real(file);
         file_text_readln(file);
         model_call_maxid = file_text_read_real(file);
         file_text_readln(file);
-        for (int i = 0; i < model_call_maxid; i++)
+        int i, ii;
+        for (i = 0; i < model_call_maxid; i++)
         {
             model_calls.push_back(vector<double>());
-            for (int ii = 0; ii < 11; ii++)
+            for (ii = 0; ii < 11; ii++)
             {
                 model_calls[i].push_back(file_text_read_real(file));
             }
-            file_text_writeln(file);
+            file_text_readln(file);
         }
         file_text_close(file);
+        return true;
     }
 
     void draw(double x, double y, double z, int texId)
@@ -1133,10 +1137,10 @@ void d3d_model_save(const unsigned int id, string fname)
     d3d_models[id].save(fname);
 }
 
-void d3d_model_load(const unsigned int id, string fname)
+bool d3d_model_load(const unsigned int id, string fname)
 {
     d3d_models[id].clear();
-    d3d_models[id].load(fname);
+    return d3d_models[id].load(fname);
 }
 
 void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId)
