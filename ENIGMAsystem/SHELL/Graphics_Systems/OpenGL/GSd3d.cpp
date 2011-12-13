@@ -61,12 +61,12 @@ void d3d_end()
   glMatrixMode(GL_MODELVIEW);
 }
 
-void d3d_set_hidden(int enable)
+void d3d_set_hidden(bool enable)
 {
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
 }
 
-void d3d_set_lighting(int enable)
+void d3d_set_lighting(bool enable)
 {
   if (enable)
     glEnable(GL_LIGHTING);
@@ -74,21 +74,25 @@ void d3d_set_lighting(int enable)
     glDisable(GL_LIGHTING);
 }
 
-void d3d_set_fog(int enable, int color, int start, int end)
+void d3d_set_fog(bool enable, int color, double start, double end)
 {
- /* if (enable)
+  if (enable)
   {
     glEnable(GL_FOG);
-    glFogi(GL_FOG_MODE, 1);
-    glFogf(GL_FOG_DENSITY, 0.35f);
+    glFogi(GL_FOG_MODE, GL_LINEAR);
     glFogf(GL_FOG_START, start);
     glFogf(GL_FOG_END, end);
+    GLfloat fog_color[3];
+    fog_color[0] = __GETR(color);
+    fog_color[1] = __GETG(color);
+    fog_color[2] = __GETB(color);
+    glFogfv(GL_FOG_COLOR,fog_color);
   }
   else
-    glDisable(GL_FOG);*/
-}//TODO: That fog is very wrong and breaks shit
+    glDisable(GL_FOG);
+}
 
-void d3d_set_culling(int enable)
+void d3d_set_culling(bool enable)
 {
   if (enable)
     glEnable(GL_CULL_FACE);
@@ -96,12 +100,14 @@ void d3d_set_culling(int enable)
     glDisable(GL_CULL_FACE);
 }
 
-void d3d_set_perspective(int enable)
+void d3d_set_perspective(bool enable)
 {
   if (enable)
   {
     glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
     gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+    glMatrixMode(GL_MODELVIEW);
   }
   else
   {
@@ -124,6 +130,10 @@ void d3d_set_shading(bool smooth)
 }
 
 extern GLenum ptypes_by_id[16];
+namespace enigma {
+  extern unsigned char currentcolor[4];
+}
+
 void d3d_primitive_begin(int kind)
 {
     untexture();
@@ -146,10 +156,9 @@ void d3d_vertex(double x, double y, double z)
 }
 void d3d_vertex_color(double x, double y, double z, int color, double alpha)
 {
-    glPushAttrib(GL_CURRENT_BIT);
     glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
     glVertex3d(x,y,z);
-    glPopAttrib();
+    glColor4ubv(enigma::currentcolor);
 }
 void d3d_vertex_texture(double x, double y, double z, double tx, double ty)
 {
@@ -158,14 +167,11 @@ void d3d_vertex_texture(double x, double y, double z, double tx, double ty)
 }
 void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha)
 {
-    glPushAttrib(GL_CURRENT_BIT);
     glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
     glTexCoord2f(tx,ty);
     glVertex3d(x,y,z);
-    glPopAttrib();
+    glColor4ubv(enigma::currentcolor);
 }
-
-//TODO: fix push/pop with open primitives
 
 void d3d_vertex_normal(double x, double y, double z, double nx, double ny, double nz)
 {
@@ -174,11 +180,10 @@ void d3d_vertex_normal(double x, double y, double z, double nx, double ny, doubl
 }
 void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha)
 {
-    glPushAttrib(GL_CURRENT_BIT);
     glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
-    glPopAttrib();
+    glColor4ubv(enigma::currentcolor);
 }
 void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
 {
@@ -188,12 +193,11 @@ void d3d_vertex_normal_texture(double x, double y, double z, double nx, double n
 }
 void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha)
 {
-    glPushAttrib(GL_CURRENT_BIT);
     glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
     glTexCoord2f(tx,ty);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
-    glPopAttrib();
+    glColor4ubv(enigma::currentcolor);
 }
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
@@ -248,121 +252,144 @@ void d3d_set_projection_perspective(double x, double y, double width, double hei
 
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
-  bind_texture(texId);
-  glBegin(GL_QUADS);
-    glTexCoord2d(0,0);
-      glVertex3f(x1, y1, z1);
-    glTexCoord2d(0,vrep);
-      glVertex3f(x1, y1, z2);
-    glTexCoord2d(hrep,vrep);
-      glVertex3f(x2, y2, z2);
-    glTexCoord2d(hrep,0);
-      glVertex3f(x2, y2, z1);
-  glEnd();
+    float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y2, z1}, v3[] = {x2, y2, z2},
+          t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
+    bind_texture(texId);
+    glBegin(GL_TRIANGLE_STRIP);
+    glTexCoord2fv(t0);
+      glVertex3fv(v0);
+    glTexCoord2fv(t1);
+      glVertex3fv(v1);
+    glTexCoord2fv(t2);
+      glVertex3fv(v2);
+    glTexCoord2fv(t3);
+      glVertex3fv(v3);
+    glEnd();
 }
 
 void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
-  bind_texture(texId);
-  glBegin(GL_QUADS);
-    glTexCoord2d(0, 0);
-      glVertex3f(x1, y1, z1);
-    glTexCoord2d(0, vrep);
-      glVertex3f(x1, y2, z1);
-    glTexCoord2d(hrep, vrep);
-      glVertex3f(x2, y2, z2);
-    glTexCoord2d(hrep, 0);
-      glVertex3f(x2, y1, z2);
-  glEnd();
+    float v0[] = {x1, y1, z1}, v1[] = {x1, y2, z1}, v2[] = {x2, y1, z2}, v3[] = {x2, y2, z2},
+          t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
+    bind_texture(texId);
+    glBegin(GL_TRIANGLE_STRIP);
+    glTexCoord2fv(t0);
+      glVertex3fv(v0);
+    glTexCoord2fv(t1);
+      glVertex3fv(v1);
+    glTexCoord2fv(t2);
+      glVertex3fv(v2);
+    glTexCoord2fv(t3);
+      glVertex3fv(v3);
+    glEnd();
 }
 
 void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed)
 {
-  bind_texture(texId);
-  glBegin(GL_TRIANGLE_STRIP);
-    glTexCoord2d(0, vrep);
-      glVertex3f(x1, y1, z1);
-    glTexCoord2d(0,0);
-      glVertex3f(x1, y1, z2);
-    glTexCoord2d(hrep, vrep);
-      glVertex3f(x2, y1, z1);
-    glTexCoord2d(hrep, 0);
-      glVertex3f(x2, y1, z2);
-    glTexCoord2d(hrep*2, vrep);
-      glVertex3f(x2, y2, z1);
-    glTexCoord2d(hrep*2, 0);
-      glVertex3f(x2, y2, z2);
-    glTexCoord2d(hrep*3, vrep);
-      glVertex3f(x1, y2, z1);
-    glTexCoord2d(hrep*3, 0);
-      glVertex3f(x1, y2, z2);
-    glTexCoord2d(hrep*4, vrep);
-      glVertex3f(x1, y1, z1);
-    glTexCoord2d(hrep*4, 0);
-      glVertex3f(x1, y1, z2);
-  glEnd();
-  if (closed)
-  {
-        glBegin(GL_QUADS);
-        glTexCoord2d(0, vrep);
-          glVertex3f(x1, y1, z1);
-        glTexCoord2d(hrep,vrep);
-          glVertex3f(x2, y1, z1);
-        glTexCoord2d(hrep, 0);
-          glVertex3f(x2, y2, z1);
-        glTexCoord2d(0, 0);
-          glVertex3f(x1, y2, z1);
-        glTexCoord2d(0, vrep);
-          glVertex3f(x1, y1, z2);
-        glTexCoord2d(hrep,vrep);
-          glVertex3f(x2, y1, z2);
-        glTexCoord2d(hrep, 0);
-          glVertex3f(x2, y2, z2);
-        glTexCoord2d(0, 0);
-          glVertex3f(x1, y2, z2);
+    float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y1, z1}, v3[] = {x2, y1, z2},
+          v4[] = {x2, y2, z1}, v5[] = {x2, y2, z2}, v6[] = {x1, y2, z1}, v7[] = {x1, y2, z2},
+          t0[] = {0, vrep}, t1[] = {0, 0}, t2[] = {hrep, vrep}, t3[] = {hrep, 0},
+          t4[] = {hrep*2, vrep}, t5[] = {hrep*2, 0}, t6[] = {hrep*3, vrep}, t7[] = {hrep*3, 0},
+          t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0};
+    bind_texture(texId);
+    glBegin(GL_TRIANGLE_STRIP);
+    glTexCoord2fv(t0);
+      glVertex3fv(v0);
+    glTexCoord2fv(t1);
+      glVertex3fv(v1);
+    glTexCoord2fv(t2);
+      glVertex3fv(v2);
+    glTexCoord2fv(t3);
+      glVertex3fv(v3);
+    glTexCoord2fv(t4);
+      glVertex3fv(v4);
+    glTexCoord2fv(t5);
+      glVertex3fv(v5);
+    glTexCoord2fv(t6);
+      glVertex3fv(v6);
+    glTexCoord2fv(t7);
+      glVertex3fv(v7);
+    glTexCoord2fv(t8);
+      glVertex3fv(v0);
+    glTexCoord2fv(t9);
+      glVertex3fv(v1);
+    glEnd();
+    if (closed)
+    {
+        glBegin(GL_TRIANGLE_STRIP);
+        glTexCoord2fv(t0);
+          glVertex3fv(v0);
+        glTexCoord2fv(t1);
+          glVertex3fv(v2);
+        glTexCoord2fv(t2);
+          glVertex3fv(v6);
+        glTexCoord2fv(t3);
+          glVertex3fv(v4);
         glEnd();
-  }
+
+        glBegin(GL_TRIANGLE_STRIP);
+        glTexCoord2fv(t0);
+          glVertex3fv(v1);
+        glTexCoord2fv(t1);
+          glVertex3fv(v3);
+        glTexCoord2fv(t2);
+          glVertex3fv(v7);
+        glTexCoord2fv(t3);
+          glVertex3fv(v5);
+        glEnd();
+    }
 }
 
 void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
 {
-    steps = max(steps, 3);
-    const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, invstep = 1.0/steps, pr = 2*M_PI/steps;
+    float v[100][3];
+    float t[100][3];
+    steps = min(max(steps, 3), 48);
+    const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
     double a, px, py, tp;
+    int k;
     bind_texture(texId);
     glBegin(GL_TRIANGLE_STRIP);
-    a = 0; px = cx+rx; py = cy; tp = 0;
+    a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
     for (int i = 0; i <= steps; i++)
     {
-        glTexCoord2d(hrep*tp, 0);
-          glVertex3f(px, py, z2);
-        glTexCoord2d(hrep*tp, vrep);
-          glVertex3f(px, py, z1);
-        a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+        v[k][0] = px; v[k][1] = py; v[k][2] = z2;
+        t[k][0] = tp; t[k][1] = 0;
+        glTexCoord2fv(t[k]);
+          glVertex3fv(v[k]);
+        k++;
+        v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+        t[k][0] = tp; t[k][1] = vrep;
+        glTexCoord2fv(t[k]);
+          glVertex3fv(v[k]);
+        k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     glEnd();
     if (closed)
     {
         glBegin(GL_TRIANGLE_FAN);
-        glTexCoord2d(0, vrep);
-          glVertex3f(cx, cy, z1);
-        a = 0; px = cx+rx; py = cy; tp = 0;
-        for (int i = 0; i <= steps; i++)
+        v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
+        t[k][0] = 0; t[k][1] = vrep;
+        glTexCoord2fv(t[k]);
+          glVertex3fv(v[k]);
+        k++;
+        for (int i = 0; i <= steps*2; i+=2)
         {
-            glTexCoord2d(hrep*tp, 0);
-              glVertex3f(px, py, z1);
-            a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+            glTexCoord2fv(t[i]);
+              glVertex3fv(v[i+1]);
         }
         glEnd();
+
         glBegin(GL_TRIANGLE_FAN);
-        glTexCoord2d(0, vrep);
-          glVertex3f(cx, cy, z2);
-        a = 0; px = cx+rx; py = cy; tp = 0;
-        for (int i = 0; i <= steps; i++)
+        v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
+        t[k][0] = 0; t[k][1] = vrep;
+        glTexCoord2fv(t[k]);
+          glVertex3fv(v[k]);
+        k++;
+        for (int i = 0; i <= steps*2; i+=2)
         {
-            glTexCoord2d(hrep*tp, 0);
-              glVertex3f(px, py, z2);
-            a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+            glTexCoord2fv(t[i]);
+              glVertex3fv(v[i]);
         }
         glEnd();
     }
@@ -370,32 +397,44 @@ void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, do
 
 void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
 {
-    steps = max(steps, 3);
-    const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, invstep = 1.0/steps, pr = 2*M_PI/steps;
+    float v[51][3];
+    float t[100][3];
+    steps = min(max(steps, 3), 48);
+    const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
     double a, px, py, tp;
+    int k = 0;
     bind_texture(texId);
     glBegin(GL_TRIANGLE_FAN);
-    glTexCoord2d(0, 0);
-      glVertex3f(cx, cy, z2);
+    v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
+    t[k][0] = 0; t[k][1] = 0;
+    glTexCoord2fv(t[k]);
+      glVertex3fv(v[k]);
+    k++;
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
     {
-        glTexCoord2d(hrep*tp, vrep);
-          glVertex3f(px, py, z1);
-        a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+        v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+        t[k][0] = tp; t[k][1] = vrep;
+        glTexCoord2fv(t[k]);
+          glVertex3fv(v[k]);
+        k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     glEnd();
     if (closed)
     {
         glBegin(GL_TRIANGLE_FAN);
-        glTexCoord2d(0, vrep);
-          glVertex3f(cx, cy, z1);
-        a = 0; px = cx+rx; py = cy; tp = 0;
-        for (int i = 0; i <= steps; i++)
+        v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
+        t[k][0] = 0; t[k][1] = vrep;
+        glTexCoord2fv(t[k]);
+          glVertex3fv(v[k]);
+        k++;
+        tp = 0;
+        for (int i = 1; i <= steps+1; i++)
         {
-            glTexCoord2d(hrep*tp, 0);
-              glVertex3f(px, py, z1);
-            a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+            t[k][0] = tp; t[k][1] = 0;
+            glTexCoord2fv(t[k]);
+              glVertex3fv(v[i]);
+            k++; tp += invstep;
         }
         glEnd();
     }
@@ -403,64 +442,78 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
 
 void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, int steps)
 {
-    steps = max(steps, 3);
+    float v[277][3];
+    float t[277][3];
+    steps = min(max(steps, 3), 24);
     const int zsteps = ceil(steps/2);
-    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = fabs(x2-x1)/2, ry = fabs(y2-y1)/2, rz = fabs(z2-z1)/2, invstep = 1.0/steps, invstep2 = 1.0/zsteps, pr = 2*M_PI/steps, qr = M_PI/zsteps;
-    double a, b, px1, py1, px2, py2, pz, pz2, tp, tzp1, tzp2, cosb1, cosb2;
-    bind_texture(texId);
-    glBegin(GL_TRIANGLE_FAN);
-    glTexCoord2d(0, 0);
-      glVertex3f(cx, cy, cz - rz);
-    b = qr-M_PI/2;
-    cosb2 = cos(b);
-    pz2 = rz*sin(b);
-    tzp2 = +invstep2;
-    a = 0; px2 = cx+rx*cosb2; py2 = cy; tp = 0;
+    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, rz = (z2-z1)/2, invstep = (1.0/steps)*hrep, invstep2 = (1.0/zsteps)*vrep, pr = 2*M_PI/steps, qr = M_PI/zsteps;
+    double a, b, px, py, pz, tp, tzp, cosb;
+    double cosx[25], siny[25], txp[25];
+    a = pr; tp = 0;
     for (int i = 0; i <= steps; i++)
     {
-        glTexCoord2d(hrep*tp, vrep*tzp2);
-          glVertex3f(px2, py2, cz + pz2);
-        a += pr; px2 = cx+cos(a)*rx*cosb2; py2 = cy+sin(a)*ry*cosb2; tp += invstep;
+        cosx[i] = cos(a)*rx; siny[i] = sin(a)*ry;
+        txp[i] = tp;
+        a += pr; tp += invstep;
+    }
+    int k = 0, kk;
+    bind_texture(texId);
+    glBegin(GL_TRIANGLE_FAN);
+    v[k][0] = cx; v[k][1] = cy; v[k][2] = cz - rz;
+    t[k][0] = 0; t[k][1] = vrep;
+    glTexCoord2fv(t[k]);
+      glVertex3fv(v[k]);
+    k++;
+    b = qr-M_PI/2;
+    cosb = cos(b);
+    pz = rz*sin(b);
+    tzp = vrep-invstep2;
+    px = cx+rx*cosb; py = cy;
+    for (int i = 0; i <= steps; i++)
+    {
+        v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
+        t[k][0] = txp[i]; t[k][1] = tzp;
+        glTexCoord2fv(t[k]);
+          glVertex3fv(v[k]);
+        k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
     }
     glEnd();
-    cosb1 = cosb2;
-    pz = pz2;
-    tzp1 = tzp2;
     for (int ii = 0; ii < zsteps - 2; ii++)
     {
         b += qr;
-        cosb2 = cos(b);
-        pz2 = rz*sin(b);
-        tzp2 += invstep2;
+        cosb = cos(b);
+        pz = rz*sin(b);
+        tzp -= invstep2;
         glBegin(GL_TRIANGLE_STRIP);
-        a = 0; px1 = cx+rx*cosb1; py1 = cy; px2 = cx+rx*cosb2; py2 = cy; tp = 0;
+        px = cx+rx*cosb; py = cy;
         for (int i = 0; i <= steps; i++)
         {
-            glTexCoord2d(hrep*tp, vrep*tzp1);
-              glVertex3f(px1, py1, cz + pz);
-            glTexCoord2d(hrep*tp, vrep*tzp2);
-              glVertex3f(px2, py2, cz + pz2);
-            a += pr; px1 = cx+cos(a)*rx*cosb1; py1 = cy+sin(a)*ry*cosb1; px2 = cx+cos(a)*rx*cosb2; py2 = cy+sin(a)*ry*cosb2; tp += invstep;
+            kk = k - steps - 1;
+            glTexCoord2fv(t[kk]);
+              glVertex3fv(v[kk]);
+            v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
+            t[k][0] = txp[i]; t[k][1] = tzp;
+            glTexCoord2fv(t[k]);
+              glVertex3fv(v[k]);
+            k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
         }
         glEnd();
-        cosb1 = cosb2;
-        pz = pz2;
-        tzp1 = tzp2;
     }
     glBegin(GL_TRIANGLE_FAN);
-    glTexCoord2d(0, vrep);
-      glVertex3f(cx, cy, cz + rz);
-    a = 0; px1 = cx+rx*cosb1; py1 = cy; tp = 0;
-    for (int i = 0; i <= steps; i++)
+    v[k][0] = cx; v[k][1] = cy; v[k][2] = cz + rz;
+    t[k][0] = 0; t[k][1] = 0;
+    glTexCoord2fv(t[k]);
+      glVertex3fv(v[k]);
+    k++;
+    for (int i = k - steps - 2; i <= k - 2; i++)
     {
-        glTexCoord2d(hrep*tp, vrep*tzp1);
-          glVertex3f(px1, py1, cz + pz);
-        a += pr; px1 = cx+cos(a)*rx*cosb1; py1 = cy+sin(a)*ry*cosb1; tp += invstep;
+        glTexCoord2fv(t[i]);
+          glVertex3fv(v[i]);
     }
     glEnd();
 }
 
-//TODO: with all basic drawing add in normals, switch to vertex arrays
+//TODO: with all basic drawing add in normals
 
 void d3d_transform_set_identity()
 {
@@ -646,7 +699,7 @@ bool d3d_transform_stack_disgard()
 }
 
 #include <map>
-#include <vector>
+#include <list>
 #include "../../Universal_System/fileio.h"
 class d3d_lights
 {
@@ -677,7 +730,7 @@ class d3d_lights
       	glLightfv(GL_LIGHT1, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         return true;
-    } //NOTE: spotlight is only 180 degress, and range cannot be defined
+    } //NOTE: range cannot be defined for spotlights in opengl
     bool light_enable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
@@ -731,27 +784,126 @@ void d3d_light_define_ambient(int col)
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 
+#include <iostream>
 class d3d_model
 {
-    int something, model_call_maxid;
-    vector<vector<double> > model_calls;
+    int something;
 
     public:
-    d3d_model()
-    {
-        something = 100;
-        model_call_maxid = 0;
-    }
+    d3d_model(): something(100) {}
     ~d3d_model() {}
+
+    struct call_structs
+    {
+        int type, kind;
+        float x, y, z, nx, ny, nz, tx, ty;
+        int col;
+        double alpha;
+        void primitive_begin(int kind_)
+        {
+            type = 0;
+            kind = kind_;
+        }
+        void primitive_end()
+        {
+            type = 1;
+        }
+        void vertex(float v[])
+        {
+            type = 2;
+            x = v[0];
+            y = v[1];
+            z = v[2];
+        }
+        void vertex_color(float v[], int col_, double alpha_)
+        {
+            type = 3;
+            x = v[0];
+            y = v[1];
+            z = v[2];
+            col = col_;
+            alpha = alpha_;
+        }
+        void vertex_texture(float v[], float t[])
+        {
+            type = 4;
+            x = v[0];
+            y = v[1];
+            z = v[2];
+            tx = t[0];
+            ty = t[1];
+        }
+        void vertex_texture_color(float v[], float t[], int col_, double alpha_)
+        {
+            type = 5;
+            x = v[0];
+            y = v[1];
+            z = v[2];
+            tx = t[0];
+            ty = t[1];
+            col = col_;
+            alpha = alpha_;
+        }
+        void vertex_normal(float v[], float n[])
+        {
+            type = 6;
+            x = v[0];
+            y = v[1];
+            z = v[2];
+            nx = n[0];
+            ny = n[1];
+            nz = n[2];
+        }
+        void vertex_normal_color(float v[], float n[], int col_, double alpha_)
+        {
+            type = 7;
+            x = v[0];
+            y = v[1];
+            z = v[2];
+            nx = n[0];
+            ny = n[1];
+            nz = n[2];
+            col = col_;
+            alpha = alpha_;
+        }
+        void vertex_normal_texture(float v[], float n[], float t[])
+        {
+            type = 8;
+            x = v[0];
+            y = v[1];
+            z = v[2];
+            nx = n[0];
+            ny = n[1];
+            nz = n[2];
+            tx = t[0];
+            ty = t[1];
+        }
+        void vertex_normal_texture_color(float v[], float n[], float t[], int col_, double alpha_)
+        {
+            type = 9;
+            x = v[0];
+            y = v[1];
+            z = v[2];
+            nx = n[0];
+            ny = n[1];
+            nz = n[2];
+            tx = t[0];
+            ty = t[1];
+            col = col_;
+            alpha = alpha_;
+        }
+    };
+
+    list<call_structs*> model_calls;
 
     void clear()
     {
-        for (int i = 0; i < model_call_maxid; i++)
+        list<call_structs*>::iterator i;
+        for (i = model_calls.begin(); i != model_calls.end(); i++)
         {
-            model_calls[i].clear();
+            delete (*i);
         }
         model_calls.clear();
-        model_call_maxid = 0;
     }
 
     void save(string fname)
@@ -759,13 +911,134 @@ class d3d_model
         int file = file_text_open_write(fname);
         file_text_write_real(file, something);
         file_text_writeln(file);
-        file_text_write_real(file, model_call_maxid);
+        file_text_write_real(file, model_calls.size());
         file_text_writeln(file);
-        for (int i = 0; i < model_call_maxid; i++)
+        list<call_structs*>::iterator i;
+        for (i = model_calls.begin(); i != model_calls.end(); i++)
         {
-            for (int ii = 0; ii < 11; ii++)
+            file_text_write_real(file, (*i)->type);
+            switch ((*i)->type)
             {
-                file_text_write_real(file, model_calls[i][ii]);
+                case  0:
+                    file_text_write_real(file,(*i)->kind);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    break;
+                case  1:
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    break;
+                case  2:
+                    file_text_write_real(file,(*i)->x);
+                    file_text_write_real(file,(*i)->y);
+                    file_text_write_real(file,(*i)->z);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    break;
+                case  3:
+                    file_text_write_real(file,(*i)->x);
+                    file_text_write_real(file,(*i)->y);
+                    file_text_write_real(file,(*i)->z);
+                    file_text_write_real(file,(*i)->col);
+                    file_text_write_real(file,(*i)->alpha);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    break;
+                case  4:
+                    file_text_write_real(file,(*i)->x);
+                    file_text_write_real(file,(*i)->y);
+                    file_text_write_real(file,(*i)->z);
+                    file_text_write_real(file,(*i)->tx);
+                    file_text_write_real(file,(*i)->ty);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    break;
+                case  5:
+                    file_text_write_real(file,(*i)->x);
+                    file_text_write_real(file,(*i)->y);
+                    file_text_write_real(file,(*i)->z);
+                    file_text_write_real(file,(*i)->tx);
+                    file_text_write_real(file,(*i)->ty);
+                    file_text_write_real(file,(*i)->col);
+                    file_text_write_real(file,(*i)->alpha);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    break;
+                case  6:
+                    file_text_write_real(file,(*i)->x);
+                    file_text_write_real(file,(*i)->y);
+                    file_text_write_real(file,(*i)->z);
+                    file_text_write_real(file,(*i)->nx);
+                    file_text_write_real(file,(*i)->ny);
+                    file_text_write_real(file,(*i)->nz);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    break;
+                case  7:
+                    file_text_write_real(file,(*i)->x);
+                    file_text_write_real(file,(*i)->y);
+                    file_text_write_real(file,(*i)->z);
+                    file_text_write_real(file,(*i)->nx);
+                    file_text_write_real(file,(*i)->ny);
+                    file_text_write_real(file,(*i)->nz);
+                    file_text_write_real(file,(*i)->col);
+                    file_text_write_real(file,(*i)->alpha);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    break;
+                case  8:
+                    file_text_write_real(file,(*i)->x);
+                    file_text_write_real(file,(*i)->y);
+                    file_text_write_real(file,(*i)->z);
+                    file_text_write_real(file,(*i)->nx);
+                    file_text_write_real(file,(*i)->ny);
+                    file_text_write_real(file,(*i)->nz);
+                    file_text_write_real(file,(*i)->tx);
+                    file_text_write_real(file,(*i)->ty);
+                    file_text_write_real(file,0);
+                    file_text_write_real(file,0);
+                    break;
+                case  9:
+                    file_text_write_real(file,(*i)->x);
+                    file_text_write_real(file,(*i)->y);
+                    file_text_write_real(file,(*i)->z);
+                    file_text_write_real(file,(*i)->nx);
+                    file_text_write_real(file,(*i)->ny);
+                    file_text_write_real(file,(*i)->nz);
+                    file_text_write_real(file,(*i)->tx);
+                    file_text_write_real(file,(*i)->ty);
+                    file_text_write_real(file,(*i)->col);
+                    file_text_write_real(file,(*i)->alpha);
+                    break;
             }
             file_text_writeln(file);
         }
@@ -779,15 +1052,82 @@ class d3d_model
             return false;
         something = file_text_read_real(file);
         file_text_readln(file);
-        model_call_maxid = file_text_read_real(file);
+        int model_call_num = file_text_read_real(file);
         file_text_readln(file);
-        int i, ii;
-        for (i = 0; i < model_call_maxid; i++)
+        float v[3], n[3], t[2];
+        double col, alpha;
+        for (int i = 0; i < model_call_num; i++)
         {
-            model_calls.push_back(vector<double>());
-            for (ii = 0; ii < 11; ii++)
+            switch (int(file_text_read_real(file)))
             {
-                model_calls[i].push_back(file_text_read_real(file));
+                case  0:
+                    model_primitive_begin(file_text_read_real(file));
+                    break;
+                case  1:
+                    model_primitive_end();
+                    break;
+                case  2:
+                     v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+                     model_vertex(v);
+                    break;
+                case  3:
+                     v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+                     col = file_text_read_real(file); alpha = file_text_read_real(file);
+                     model_vertex_color(v,col,alpha);
+                    break;
+                case  4:
+                     v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+                     t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+                     model_vertex_texture(v,t);
+                    break;
+                case  5:
+                     v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+                     t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+                     col = file_text_read_real(file); alpha = file_text_read_real(file);
+                     model_vertex_texture_color(v,t,col,alpha);
+                    break;
+                case  6:
+                     v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+                     n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
+                     model_vertex_normal(v,n);
+                    break;
+                case  7:
+                     v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+                     n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
+                     col = file_text_read_real(file); alpha = file_text_read_real(file);
+                     model_vertex_normal_color(v,n,col,alpha);
+                    break;
+                case  8:
+                     v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+                     n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
+                     t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+                     model_vertex_normal_texture(v,n,t);
+                    break;
+                case  9:
+                     v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+                     n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
+                     t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+                     col = file_text_read_real(file); alpha = file_text_read_real(file);
+                     model_vertex_normal_texture_color(v,n,t,col,alpha);
+                    break;
+                case  10:
+                    model_block(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file), true);
+                    break;
+                case  11:
+                    model_cylinder(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+                    break;
+                case  12:
+                    model_cone(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+                    break;
+                case  13:
+                    model_ellipsoid(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+                    break;
+                case  14:
+                    model_wall(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+                    break;
+                case  15:
+                    model_floor(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+                    break;
             }
             file_text_readln(file);
         }
@@ -797,301 +1137,349 @@ class d3d_model
 
     void draw(double x, double y, double z, int texId)
     {
+        untexture();
         bind_texture(texId);
-        for (int i = 0; i < model_call_maxid; i++)
+        glPushAttrib(GL_CURRENT_BIT);
+        glTranslatef(x, y, z);
+        list<call_structs*>::iterator i;
+        for (i = model_calls.begin(); i != model_calls.end(); i++)
         {
-            switch (int(model_calls[i][0]))
+            switch ((*i)->type)
             {
-                case  0: d3d_primitive_begin_texture(model_calls[i][1],texId); break;
-                case  1: d3d_primitive_end(); break;
-                case  2: d3d_vertex(model_calls[i][1], model_calls[i][2], model_calls[i][3]); break;
-                case  3: d3d_vertex_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5]); break;
-                case  4: d3d_vertex_texture(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5]); break;
-                case  5: d3d_vertex_texture_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7]); break;
-                case  6: d3d_vertex_normal(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6]); break;
-                case  7: d3d_vertex_normal_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7], model_calls[i][8]); break;
-                case  8: d3d_vertex_normal_texture(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7], model_calls[i][8]); break;
-                case  9: d3d_vertex_normal_texture_color(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], model_calls[i][7], model_calls[i][8], model_calls[i][9], model_calls[i][10]); break;
-                case 10: d3d_draw_block(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8]); break;
-                case 11: d3d_draw_cylinder(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8], model_calls[i][9], model_calls[i][10]); break;
-                case 12: d3d_draw_cone(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8], model_calls[i][9], model_calls[i][10]); break;
-                case 13: d3d_draw_ellipsoid(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8], model_calls[i][9]); break;
-                case 14: d3d_draw_wall(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8]); break;
-                case 15: d3d_draw_floor(model_calls[i][1], model_calls[i][2], model_calls[i][3], model_calls[i][4], model_calls[i][5], model_calls[i][6], texId, model_calls[i][7], model_calls[i][8]); break;
+                case  0:
+                    glBegin(ptypes_by_id[(*i)->kind]);
+                    break;
+                case  1:
+                    glEnd();
+                    break;
+                case  2:
+                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
+                    break;
+                case  3:
+                    glColor4f(__GETR((*i)->col), __GETG((*i)->col), __GETB((*i)->col), (*i)->alpha);
+                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
+                    glColor4ubv(enigma::currentcolor);
+                    break;
+                case  4:
+                    glTexCoord2f((*i)->tx,(*i)->ty);
+                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
+                    break;
+                case  5:
+                    glColor4f(__GETR((*i)->col), __GETG((*i)->col), __GETB((*i)->col), (*i)->alpha);
+                    glTexCoord2f((*i)->tx,(*i)->ty);
+                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
+                    glColor4ubv(enigma::currentcolor);
+                    break;
+                case  6:
+                    glNormal3f((*i)->nx, (*i)->ny, (*i)->nz);
+                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
+                    break;
+                case  7:
+                    glColor4f(__GETR((*i)->col), __GETG((*i)->col), __GETB((*i)->col), (*i)->alpha);
+                    glNormal3f((*i)->nx, (*i)->ny, (*i)->nz);
+                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
+                    glColor4ubv(enigma::currentcolor);
+                    break;
+                case  8:
+                    glTexCoord2f((*i)->tx,(*i)->ty);
+                    glNormal3f((*i)->nx, (*i)->ny, (*i)->nz);
+                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
+                    break;
+                case  9:
+                    glColor4f(__GETR((*i)->col), __GETG((*i)->col), __GETB((*i)->col), (*i)->alpha);
+                    glTexCoord2f((*i)->tx,(*i)->ty);
+                    glNormal3f((*i)->nx, (*i)->ny, (*i)->nz);
+                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
+                    glColor4ubv(enigma::currentcolor);
+                    break;
             }
         }
-    }// TODO: Add translation, push/pop texture binding, efficient model drawing
-
-    void primitive_begin(int kind)
-    {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(kind);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        glTranslatef(-x, -y, -z);
+        glPopAttrib();
     }
 
-    void primitive_end()
+    void model_primitive_begin(int kind)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(1);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->primitive_begin(kind);
+        model_calls.push_back(mc);
     }
 
-    void vertex(double x, double y, double z)
+    void model_primitive_end()
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(2);
-        model_calls[model_call_maxid].push_back(x);
-        model_calls[model_call_maxid].push_back(y);
-        model_calls[model_call_maxid].push_back(z);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->primitive_end();
+        model_calls.push_back(mc);
     }
 
-    void vertex_color(double x, double y, double z, int col, double alpha)
+    void model_vertex(float v[])
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(3);
-        model_calls[model_call_maxid].push_back(x);
-        model_calls[model_call_maxid].push_back(y);
-        model_calls[model_call_maxid].push_back(z);
-        model_calls[model_call_maxid].push_back(col);
-        model_calls[model_call_maxid].push_back(alpha);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->vertex(v);
+        model_calls.push_back(mc);
     }
 
-    void vertex_texture(double x, double y, double z, double tx, double ty)
+    void model_vertex_color(float v[], int col, double alpha)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(4);
-        model_calls[model_call_maxid].push_back(x);
-        model_calls[model_call_maxid].push_back(y);
-        model_calls[model_call_maxid].push_back(z);
-        model_calls[model_call_maxid].push_back(tx);
-        model_calls[model_call_maxid].push_back(ty);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->vertex_color(v, col, alpha);
+        model_calls.push_back(mc);
     }
 
-    void vertex_texture_color(double x, double y, double z, double tx, double ty, int col, double alpha)
+    void model_vertex_texture(float v[], float t[])
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(5);
-        model_calls[model_call_maxid].push_back(x);
-        model_calls[model_call_maxid].push_back(y);
-        model_calls[model_call_maxid].push_back(z);
-        model_calls[model_call_maxid].push_back(tx);
-        model_calls[model_call_maxid].push_back(ty);
-        model_calls[model_call_maxid].push_back(col);
-        model_calls[model_call_maxid].push_back(alpha);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->vertex_texture(v, t);
+        model_calls.push_back(mc);
     }
 
-    void vertex_normal(double x, double y, double z, double nx, double ny, double nz)
+    void model_vertex_texture_color(float v[], float t[], int col, double alpha)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(6);
-        model_calls[model_call_maxid].push_back(x);
-        model_calls[model_call_maxid].push_back(y);
-        model_calls[model_call_maxid].push_back(z);
-        model_calls[model_call_maxid].push_back(nx);
-        model_calls[model_call_maxid].push_back(ny);
-        model_calls[model_call_maxid].push_back(nz);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->vertex_texture_color(v, t, col, alpha);
+        model_calls.push_back(mc);
     }
 
-    void vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int col, double alpha)
+    void model_vertex_normal(float v[], float n[])
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(7);
-        model_calls[model_call_maxid].push_back(x);
-        model_calls[model_call_maxid].push_back(y);
-        model_calls[model_call_maxid].push_back(z);
-        model_calls[model_call_maxid].push_back(nx);
-        model_calls[model_call_maxid].push_back(ny);
-        model_calls[model_call_maxid].push_back(nz);
-        model_calls[model_call_maxid].push_back(col);
-        model_calls[model_call_maxid].push_back(alpha);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->vertex_normal(v, n);
+        model_calls.push_back(mc);
     }
 
-    void vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
+    void model_vertex_normal_color(float v[], float n[], int col, double alpha)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(8);
-        model_calls[model_call_maxid].push_back(x);
-        model_calls[model_call_maxid].push_back(y);
-        model_calls[model_call_maxid].push_back(z);
-        model_calls[model_call_maxid].push_back(nx);
-        model_calls[model_call_maxid].push_back(ny);
-        model_calls[model_call_maxid].push_back(nz);
-        model_calls[model_call_maxid].push_back(tx);
-        model_calls[model_call_maxid].push_back(ty);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->vertex_normal_color(v, n, col, alpha);
+        model_calls.push_back(mc);
     }
 
-    void vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha)
+    void model_vertex_normal_texture(float v[], float n[], float t[])
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(9);
-        model_calls[model_call_maxid].push_back(x);
-        model_calls[model_call_maxid].push_back(y);
-        model_calls[model_call_maxid].push_back(z);
-        model_calls[model_call_maxid].push_back(nx);
-        model_calls[model_call_maxid].push_back(ny);
-        model_calls[model_call_maxid].push_back(nz);
-        model_calls[model_call_maxid].push_back(tx);
-        model_calls[model_call_maxid].push_back(ty);
-        model_calls[model_call_maxid].push_back(col);
-        model_calls[model_call_maxid].push_back(alpha);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->vertex_normal_texture(v, n, t);
+        model_calls.push_back(mc);
     }
 
-    void draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+    void model_vertex_normal_texture_color(float v[], float n[], float t[], int col, double alpha)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(10);
-        model_calls[model_call_maxid].push_back(x1);
-        model_calls[model_call_maxid].push_back(y1);
-        model_calls[model_call_maxid].push_back(z1);
-        model_calls[model_call_maxid].push_back(x2);
-        model_calls[model_call_maxid].push_back(y2);
-        model_calls[model_call_maxid].push_back(z2);
-        model_calls[model_call_maxid].push_back(hrep);
-        model_calls[model_call_maxid].push_back(vrep);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        call_structs *mc = new call_structs;
+        mc->vertex_normal_texture_color(v, n, t, col, alpha);
+        model_calls.push_back(mc);
     }
 
-    void draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
+    void model_block(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(11);
-        model_calls[model_call_maxid].push_back(x1);
-        model_calls[model_call_maxid].push_back(y1);
-        model_calls[model_call_maxid].push_back(z1);
-        model_calls[model_call_maxid].push_back(x2);
-        model_calls[model_call_maxid].push_back(y2);
-        model_calls[model_call_maxid].push_back(z2);
-        model_calls[model_call_maxid].push_back(hrep);
-        model_calls[model_call_maxid].push_back(vrep);
-        model_calls[model_call_maxid].push_back(closed);
-        model_calls[model_call_maxid].push_back(steps);
-        model_call_maxid++;
+        float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y1, z1}, v3[] = {x2, y1, z2},
+              v4[] = {x2, y2, z1}, v5[] = {x2, y2, z2}, v6[] = {x1, y2, z1}, v7[] = {x1, y2, z2},
+              t0[] = {0, vrep}, t1[] = {0, 0}, t2[] = {hrep, vrep}, t3[] = {hrep, 0},
+              t4[] = {hrep*2, vrep}, t5[] = {hrep*2, 0}, t6[] = {hrep*3, vrep}, t7[] = {hrep*3, 0},
+              t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0};
+        model_primitive_begin(GL_TRIANGLE_STRIP);
+        model_vertex_texture(v0,t0);
+        model_vertex_texture(v1,t1);
+        model_vertex_texture(v2,t2);
+        model_vertex_texture(v3,t3);
+        model_vertex_texture(v4,t4);
+        model_vertex_texture(v5,t5);
+        model_vertex_texture(v6,t6);
+        model_vertex_texture(v7,t7);
+        model_vertex_texture(v0,t8);
+        model_vertex_texture(v1,t9);
+        model_primitive_end();
+        if (closed)
+        {
+            model_primitive_begin(GL_TRIANGLE_STRIP);
+            model_vertex_texture(v0,t0);
+            model_vertex_texture(v2,t1);
+            model_vertex_texture(v6,t2);
+            model_vertex_texture(v4,t3);
+            model_primitive_end();
+            model_primitive_begin(GL_TRIANGLE_STRIP);
+            model_vertex_texture(v1,t0);
+            model_vertex_texture(v3,t1);
+            model_vertex_texture(v7,t2);
+            model_vertex_texture(v5,t3);
+            model_primitive_end();
+        }
     }
 
-    void draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
+    void model_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(12);
-        model_calls[model_call_maxid].push_back(x1);
-        model_calls[model_call_maxid].push_back(y1);
-        model_calls[model_call_maxid].push_back(z1);
-        model_calls[model_call_maxid].push_back(x2);
-        model_calls[model_call_maxid].push_back(y2);
-        model_calls[model_call_maxid].push_back(z2);
-        model_calls[model_call_maxid].push_back(hrep);
-        model_calls[model_call_maxid].push_back(vrep);
-        model_calls[model_call_maxid].push_back(closed);
-        model_calls[model_call_maxid].push_back(steps);
-        model_call_maxid++;
+        float v[100][3];
+        float t[100][3];
+        steps = min(max(steps, 3), 48);
+        const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
+        double a, px, py, tp;
+        int k;
+        model_primitive_begin(GL_TRIANGLE_STRIP);
+        a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
+        for (int i = 0; i <= steps; i++)
+        {
+            v[k][0] = px; v[k][1] = py; v[k][2] = z2;
+            t[k][0] = tp; t[k][1] = 0;
+            model_vertex_texture(v[k],t[k]);
+            k++;
+            v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+            t[k][0] = tp; t[k][1] = vrep;
+            model_vertex_texture(v[k],t[k]);
+            k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+        }
+        model_primitive_end();
+        if (closed)
+        {
+            model_primitive_begin(GL_TRIANGLE_FAN);
+            v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
+            t[k][0] = 0; t[k][1] = vrep;
+            model_vertex_texture(v[k],t[k]);
+            k++;
+            for (int i = 0; i <= steps*2; i+=2)
+            {
+                model_vertex_texture(v[i+1],t[i]);
+            }
+            model_primitive_end();
+
+            model_primitive_begin(GL_TRIANGLE_FAN);
+            v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
+            t[k][0] = 0; t[k][1] = vrep;
+            model_vertex_texture(v[k],t[k]);
+            k++;
+            for (int i = 0; i <= steps*2; i+=2)
+            {
+                model_vertex_texture(v[i],t[i]);
+            }
+            model_primitive_end();
+        }
     }
 
-    void draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps)
+    void model_cone(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(13);
-        model_calls[model_call_maxid].push_back(x1);
-        model_calls[model_call_maxid].push_back(y1);
-        model_calls[model_call_maxid].push_back(z1);
-        model_calls[model_call_maxid].push_back(x2);
-        model_calls[model_call_maxid].push_back(y2);
-        model_calls[model_call_maxid].push_back(z2);
-        model_calls[model_call_maxid].push_back(hrep);
-        model_calls[model_call_maxid].push_back(vrep);
-        model_calls[model_call_maxid].push_back(steps);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        float v[51][3];
+        float t[100][3];
+        steps = min(max(steps, 3), 48);
+        const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
+        double a, px, py, tp;
+        int k = 0;
+        model_primitive_begin(GL_TRIANGLE_FAN);
+        v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
+        t[k][0] = 0; t[k][1] = 0;
+        model_vertex_texture(v[k],t[k]);
+        k++;
+        a = 0; px = cx+rx; py = cy; tp = 0;
+        for (int i = 0; i <= steps; i++)
+        {
+            v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+            t[k][0] = tp; t[k][1] = vrep;
+            model_vertex_texture(v[k],t[k]);
+            k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+        }
+        model_primitive_end();
+        if (closed)
+        {
+            model_primitive_begin(GL_TRIANGLE_FAN);
+            v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
+            t[k][0] = 0; t[k][1] = vrep;
+            model_vertex_texture(v[k],t[k]);
+            k++;
+            tp = 0;
+            for (int i = 1; i <= steps+1; i++)
+            {
+                t[k][0] = tp; t[k][1] = 0;
+                model_vertex_texture(v[i],t[k]);
+                k++; tp += invstep;
+            }
+            model_primitive_end();
+        }
     }
 
-    void draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+    void model_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(14);
-        model_calls[model_call_maxid].push_back(x1);
-        model_calls[model_call_maxid].push_back(y1);
-        model_calls[model_call_maxid].push_back(z1);
-        model_calls[model_call_maxid].push_back(x2);
-        model_calls[model_call_maxid].push_back(y2);
-        model_calls[model_call_maxid].push_back(z2);
-        model_calls[model_call_maxid].push_back(hrep);
-        model_calls[model_call_maxid].push_back(vrep);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        float v[277][3];
+        float t[277][3];
+        steps = min(max(steps, 3), 24);
+        const int zsteps = ceil(steps/2);
+        const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, rz = (z2-z1)/2, invstep = (1.0/steps)*hrep, invstep2 = (1.0/zsteps)*vrep, pr = 2*M_PI/steps, qr = M_PI/zsteps;
+        double a, b, px, py, pz, tp, tzp, cosb;
+        double cosx[25], siny[25], txp[25];
+        a = pr; tp = 0;
+        for (int i = 0; i <= steps; i++)
+        {
+            cosx[i] = cos(a)*rx; siny[i] = sin(a)*ry;
+            txp[i] = tp;
+            a += pr; tp += invstep;
+        }
+        int k = 0, kk;
+        model_primitive_begin(GL_TRIANGLE_FAN);
+        v[k][0] = cx; v[k][1] = cy; v[k][2] = cz - rz;
+        t[k][0] = 0; t[k][1] = vrep;
+        model_vertex_texture(v[k],t[k]);
+        k++;
+        b = qr-M_PI/2;
+        cosb = cos(b);
+        pz = rz*sin(b);
+        tzp = vrep-invstep2;
+        px = cx+rx*cosb; py = cy;
+        for (int i = 0; i <= steps; i++)
+        {
+            v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
+            t[k][0] = txp[i]; t[k][1] = tzp;
+            model_vertex_texture(v[k],t[k]);
+            k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
+        }
+        model_primitive_end();
+        for (int ii = 0; ii < zsteps - 2; ii++)
+        {
+            b += qr;
+            cosb = cos(b);
+            pz = rz*sin(b);
+            tzp -= invstep2;
+            model_primitive_begin(GL_TRIANGLE_STRIP);
+            px = cx+rx*cosb; py = cy;
+            for (int i = 0; i <= steps; i++)
+            {
+                kk = k - steps - 1;
+                model_vertex_texture(v[kk],t[kk]);
+                v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
+                t[k][0] = txp[i]; t[k][1] = tzp;
+                model_vertex_texture(v[k],t[k]);
+                k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
+            }
+            model_primitive_end();
+        }
+        model_primitive_begin(GL_TRIANGLE_FAN);
+        v[k][0] = cx; v[k][1] = cy; v[k][2] = cz + rz;
+        t[k][0] = 0; t[k][1] = 0;
+        model_vertex_texture(v[k],t[k]);
+        k++;
+        for (int i = k - steps - 2; i <= k - 2; i++)
+        {
+            model_vertex_texture(v[i],t[i]);
+        }
+        model_primitive_end();
     }
 
-    void draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+    void model_wall(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
     {
-        model_calls.push_back(vector<double>());
-        model_calls[model_call_maxid].push_back(15);
-        model_calls[model_call_maxid].push_back(x1);
-        model_calls[model_call_maxid].push_back(y1);
-        model_calls[model_call_maxid].push_back(z1);
-        model_calls[model_call_maxid].push_back(x2);
-        model_calls[model_call_maxid].push_back(y2);
-        model_calls[model_call_maxid].push_back(z2);
-        model_calls[model_call_maxid].push_back(hrep);
-        model_calls[model_call_maxid].push_back(vrep);
-        model_calls[model_call_maxid].push_back(0);
-        model_calls[model_call_maxid].push_back(0);
-        model_call_maxid++;
+        float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y2, z1}, v3[] = {x2, y2, z2},
+              t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
+        model_primitive_begin(GL_TRIANGLE_STRIP);
+        model_vertex_texture(v0,t0);
+        model_vertex_texture(v1,t1);
+        model_vertex_texture(v2,t2);
+        model_vertex_texture(v3,t3);
+        model_primitive_end();
+    }
+
+    void model_floor(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+    {
+        float v0[] = {x1, y1, z1}, v1[] = {x1, y2, z1}, v2[] = {x2, y1, z2}, v3[] = {x2, y2, z2},
+              t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
+        model_primitive_begin(GL_TRIANGLE_STRIP);
+        model_vertex_texture(v0,t0);
+        model_vertex_texture(v1,t1);
+        model_vertex_texture(v2,t2);
+        model_vertex_texture(v3,t3);
+        model_primitive_end();
     }
 };
 
@@ -1150,80 +1538,88 @@ void d3d_model_draw(const unsigned int id, double x, double y, double z, int tex
 
 void d3d_model_primitive_begin(const unsigned int id, int kind)
 {
-    d3d_models[id].primitive_begin(kind);
+    d3d_models[id].model_primitive_begin(kind);
 }
 
 void d3d_model_primitive_end(const unsigned int id)
 {
-    d3d_models[id].primitive_end();
+    d3d_models[id].model_primitive_end();
 }
 
 void d3d_model_vertex(const unsigned int id, double x, double y, double z)
 {
-    d3d_models[id].vertex(x, y, z);
+    float v[] = {x, y, z};
+    d3d_models[id].model_vertex(v);
 }
 
 void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha)
 {
-    d3d_models[id].vertex_color(x, y, z, col, alpha);
+    float v[] = {x, y, z};
+    d3d_models[id].model_vertex_color(v, col, alpha);
 }
 
 void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty)
 {
-    d3d_models[id].vertex_texture(x, y, z, tx, ty);
+    float v[] = {x, y, z}, t[] = {tx, ty};
+    d3d_models[id].model_vertex_texture(v, t);
 }
 
 void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha)
 {
-    d3d_models[id].vertex_texture_color(x, y, z, tx, ty, col, alpha);
+    float v[] = {x, y, z}, t[] = {tx, ty};
+    d3d_models[id].model_vertex_texture_color(v, t, col, alpha);
 }
 
 void d3d_model_vertex_normal(const unsigned int id, double x, double y, double z, double nx, double ny, double nz)
 {
-    d3d_models[id].vertex_normal(x, y, z, nx, ny, nz);
+    float v[] = {x, y, z}, n[] = {nx, ny, nz};
+    d3d_models[id].model_vertex_normal(v, n);
 }
 
 void d3d_model_vertex_normal_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, int col, double alpha)
 {
-    d3d_models[id].vertex_normal_color(x, y, z, nx, ny, nz, col, alpha);
+    float v[] = {x, y, z}, n[] = {nx, ny, nz};
+    d3d_models[id].model_vertex_normal_color(v, n, col, alpha);
 }
 
 void d3d_model_vertex_normal_texture(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
 {
-    d3d_models[id].vertex_normal_texture(x, y, z, nx, ny, nz, tx, ty);
+    float v[] = {x, y, z}, n[] = {nx, ny, nz}, t[] = {tx, ty};
+    d3d_models[id].model_vertex_normal_texture(v, n, t);
 }
 
 void d3d_model_vertex_normal_texture_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha)
 {
-    d3d_models[id].vertex_normal_texture_color(x, y, z, nx, ny, nz, tx, ty, col, alpha);
+    float v[] = {x, y, z}, n[] = {nx, ny, nz}, t[] = {tx, ty};
+    d3d_models[id].model_vertex_normal_texture_color(v, n, t, col, alpha);
 }
 
-void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed)
 {
-    d3d_models[id].draw_block(x1, y1, z1, x2, y2, z2, hrep, vrep);
+    d3d_models[id].model_block(x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
 }
 
 void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
 {
-    d3d_models[id].draw_cylinder(x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+    d3d_models[id].model_cylinder(x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
 }
 
 void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
 {
-    d3d_models[id].draw_cone(x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+    d3d_models[id].model_cone(x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
 }
 
 void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps)
 {
-    d3d_models[id].draw_ellipsoid(x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
+    d3d_models[id].model_ellipsoid(x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
 }
 
 void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
 {
-    d3d_models[id].draw_wall(x1, y1, z1, x2, y2, z2, hrep, vrep);
+    d3d_models[id].model_wall(x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
 
 void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
 {
-    d3d_models[id].draw_floor(x1, y1, z1, x2, y2, z2, hrep, vrep);
+    d3d_models[id].model_floor(x1, y1, z1, x2, y2, z2, hrep, vrep);
 }

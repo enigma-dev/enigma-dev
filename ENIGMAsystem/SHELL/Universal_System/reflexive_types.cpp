@@ -38,14 +38,20 @@ namespace enigma {
   //Make hspeed work
   INTERCEPT_DEFAULT_COPY(hspeedv);
   void hspeedv::function() {
-    *dir = (int(180+180*(1-atan2(*vspd,rval.d)/M_PI)))%360;
-    *spd = hypot(rval.d,*vspd);
+    if (rval.d or *vspd)
+    {
+        *dir = (int(180+180*(1-atan2(*vspd,rval.d)/M_PI)))%360;
+        *spd = hypot(rval.d,*vspd);
+    }
   }
 
   //Make vspeed work -- Same as above, except the arguments to atan2 are reversed
   INTERCEPT_DEFAULT_COPY(vspeedv);
   void vspeedv::function() {
-    *dir = (int(180+180*(1-atan2(rval.d,*hspd)/M_PI)))%360;
-    *spd = hypot(rval.d,*hspd);
+    if (rval.d or *hspd)
+    {
+        *dir = (int(180+180*(1-atan2(rval.d,*hspd)/M_PI)))%360;
+        *spd = hypot(rval.d,*hspd);
+    }
   }
 }

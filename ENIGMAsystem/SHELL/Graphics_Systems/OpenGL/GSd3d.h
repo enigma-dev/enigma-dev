@@ -31,11 +31,11 @@ extern double transformation_matrix[16];
 
 void d3d_start();
 void d3d_end();
-void d3d_set_perspective(int enable);
-void d3d_set_hidden(int enable);
-void d3d_set_lighting(int enable);
-void d3d_set_culling(int enable);
-void d3d_set_fog(int enable, int color, int start, int end);
+void d3d_set_perspective(bool enable);
+void d3d_set_hidden(bool enable);
+void d3d_set_lighting(bool enable);
+void d3d_set_culling(bool enable);
+void d3d_set_fog(bool enable, int color, double start, double end);
 void d3d_set_depth(double dep);
 void d3d_set_shading(bool smooth);
 
@@ -107,7 +107,7 @@ void d3d_model_vertex_normal(const unsigned int id, double x, double y, double z
 void d3d_model_vertex_normal_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, int col, double alpha);
 void d3d_model_vertex_normal_texture(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty);
 void d3d_model_vertex_normal_texture_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha);
-void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep);
+void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed = true);
 void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps);
 void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps);
 void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps);
