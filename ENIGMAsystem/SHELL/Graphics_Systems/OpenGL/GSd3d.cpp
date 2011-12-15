@@ -90,15 +90,15 @@ void d3d_set_fog(bool enable, int color, double start, double end)
   }
   else
     glDisable(GL_FOG);
-}
+}//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
 
 void d3d_set_culling(bool enable)
 {
-  if (enable)
+/*  if (enable)
     glEnable(GL_CULL_FACE);
   else
-    glDisable(GL_CULL_FACE);
-}
+    glDisable(GL_CULL_FACE);*/
+}//TODO: Culling not working the same as in GM, not advised to enable it's use as it pretty much kills the drawing
 
 void d3d_set_perspective(bool enable)
 {
@@ -111,7 +111,6 @@ void d3d_set_perspective(bool enable)
   }
   else
   {
-    glDisable(GL_DEPTH_TEST);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(0, 1, 0, 1);
@@ -202,6 +201,9 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
@@ -1051,6 +1053,8 @@ class d3d_model
         if (file == -1)
             return false;
         something = file_text_read_real(file);
+        if (something != 100)
+            return false;
         file_text_readln(file);
         int model_call_num = file_text_read_real(file);
         file_text_readln(file);
