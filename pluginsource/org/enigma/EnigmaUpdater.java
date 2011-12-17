@@ -60,7 +60,7 @@ import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 public class EnigmaUpdater
 	{
-	public static final String svn = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev/"; //$NON-NLS-1$
+	public static final String SVN = "https://enigma-dev.svn.sourceforge.net/svnroot/enigma-dev/"; //$NON-NLS-1$
 	public static final boolean SUBFOLDER = false;
 	public static boolean revert;
 
@@ -76,7 +76,9 @@ public class EnigmaUpdater
 			{
 			if (svn.needsCheckout())
 				{
-				String repo = askCheckout();
+				//XXX: For the time being, we've decided to build for Trunk by default until Stable works again
+				//String repo = askCheckout();
+				String repo = SVN + "trunk"; //$NON-NLS-1$
 				if (repo == null) return -1;
 				ef.append(Messages.getString("EnigmaUpdater.DO_UPDATE") + '\n'); //$NON-NLS-1$
 				ef.open();
@@ -180,9 +182,9 @@ public class EnigmaUpdater
 			return null;
 
 		revert = !noRevert.isSelected();
-		if (stable.isSelected()) return svn + "tags/update-stable"; //$NON-NLS-1$
-		if (testing.isSelected()) return svn + "tags/update-test"; //$NON-NLS-1$
-		return svn + "trunk"; //$NON-NLS-1$
+		if (stable.isSelected()) return SVN + "tags/update-stable"; //$NON-NLS-1$
+		if (testing.isSelected()) return SVN + "tags/update-test"; //$NON-NLS-1$
+		return SVN + "trunk"; //$NON-NLS-1$
 		}
 
 	private boolean needsCheckout()
@@ -316,7 +318,7 @@ public class EnigmaUpdater
 	@SuppressWarnings("unused")
 	private static void svnLog() throws SVNException
 		{
-		SVNURL url = SVNURL.parseURIDecoded(svn);
+		SVNURL url = SVNURL.parseURIDecoded(SVN);
 		SVNRepository repository = SVNRepositoryFactory.create(url,null);
 
 		Collection<?> entries = repository.log(null,null,0,-1,true,true);
