@@ -28,6 +28,9 @@ COLLISION := BBox
 # WIDGETS { Widget_Systems/* }
 WIDGETS := None
 
+# Default windres
+WINDRES = windres.exe
+
 SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Universal_System
 
 OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
@@ -109,7 +112,7 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 	echo "// GENERATED RESOURCE FILE FRONTEND" > $(OBJDIR)/resources.rc
 	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
-	windres -o $@ -i $(OBJDIR)/resources.rc -O coff
+	$(WINDRES) -o $@ -i $(OBJDIR)/resources.rc -O coff
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc

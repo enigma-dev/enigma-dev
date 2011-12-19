@@ -204,6 +204,7 @@
 		<Unit filename="externs/references.h" />
 		<Unit filename="filesystem/file_find.cpp" />
 		<Unit filename="gcc_interface/gcc_backend.cpp" />
+		<Unit filename="gcc_interface/gcc_backend.h" />
 		<Unit filename="general/bettersystem.cpp" />
 		<Unit filename="general/bettersystem.h" />
 		<Unit filename="general/darray.cpp" />

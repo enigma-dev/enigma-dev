@@ -66,6 +66,8 @@ inline string tolower(string x) {
 #define user cout << "\n\n\n\n\n"
 #define flushl "\n\n\n\n\n"
 
+extern const char* establish_bearings(const char *compiler);
+
 void parse_ide_settings(const char* eyaml)
 {
   ey_data settree = parse_eyaml_str(eyaml);
@@ -127,6 +129,9 @@ void parse_ide_settings(const char* eyaml)
   
   string cinffile = settree.get("target-compiler");
   cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + cinffile + ".ey";
+  
+  const char *a = establish_bearings(cinffile.c_str());
+  if (a) cout << "Parse fail: " << a << endl;
   
   // Read info about the compiler
   ifstream cinfstream(cinffile.c_str());

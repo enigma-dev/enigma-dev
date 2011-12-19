@@ -451,6 +451,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   make += "COLLISION=" + extensions::targetAPI.collisionSys + " ";
   make += "WIDGETS="  + extensions::targetAPI.widgetSys + " ";
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
+  
+  if (CXX_override.length()) make += "CXX=" + CXX_override + " ";
+  if (CC_override.length()) make += "CC=" + CC_override + " ";
+  if (WINDRES_location.length()) make += "WINDRES=" + WINDRES_location + " ";
+  make += "CFLAGS=" + TOPLEVEL_cflags + " ";
+  make += "CPPFLAGS=" + TOPLEVEL_cppflags + " ";
+  make += "CXXFLAGS=" + TOPLEVEL_cxxflags + " ";
+  make += "LDFLAGS=" + TOPLEVEL_ldflags + " ";
 
   string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
   make += "COMPILEPATH=" + compilepath + " ";

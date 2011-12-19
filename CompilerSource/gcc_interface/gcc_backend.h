@@ -27,4 +27,4 @@
 
 //Sometimes I wonder if licenses waste space. *Whistles*
 
-extern string MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_links;
+extern string MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;

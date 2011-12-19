@@ -61,7 +61,7 @@ bool init_load_successful = false;
 varray<string> include_directories;
 unsigned int include_directory_count;
 
-string MAKE_location, MAKE_paths, MAKE_tcpaths, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_links;
+string MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;
 
 inline int rdir_system(string x, string y)
 {
@@ -129,10 +129,15 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
 }
 
 static char errbuf[1024];
+static string lastbearings;
 
 // Read info about our compiler configuration and run with it
 const char* establish_bearings(const char *compiler)
 {
+  if (compiler == lastbearings)
+    return 0;
+  lastbearings = compiler;
+  
   string GCC_location;
   string compfq = "Compilers/" CURRENT_PLATFORM_NAME "/"; compfq += compiler; compfq += ".ey"; //Filename of compiler.ey
   ifstream compis(compfq.c_str());
@@ -157,7 +162,12 @@ const char* establish_bearings(const char *compiler)
   MAKE_tcpaths = compey.get("tcpath");
   TOPLEVEL_cflags = compey.get("cflags");
   TOPLEVEL_cppflags = compey.get("cppflags");
+  TOPLEVEL_cxxflags = compey.get("cxxflags");
   TOPLEVEL_links = compey.get("links");
+  CXX_override = compey.get("cxx");
+  CC_override = compey.get("cc");
+  WINDRES_location = compey.get("windres");
+  TOPLEVEL_ldflags = compey.get("ldflags");
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.
