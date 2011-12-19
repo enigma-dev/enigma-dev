@@ -38,6 +38,8 @@ int instance_position(double x, double y, int object);
 int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme);
 int collision_line(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme);
 int collision_point(double x, double y, int obj, bool prec, bool notme);
+int collision_circle(double x, double y, double radius, int obj, bool prec, bool notme);
+int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme);
 
 double distance_to_object(int object);
 double distance_to_point(double x, double y);

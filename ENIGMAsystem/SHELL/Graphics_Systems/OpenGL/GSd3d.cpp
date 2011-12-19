@@ -46,9 +46,6 @@ void d3d_start()
   glClearColor(0,0,0,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
 void d3d_end()
@@ -59,6 +56,11 @@ void d3d_end()
   glLoadIdentity();
   gluPerspective(0, 1, 0, 1);
   glMatrixMode(GL_MODELVIEW);
+}
+
+bool d3d_get_mode()
+{
+    return d3dMode;
 }
 
 void d3d_set_hidden(bool enable)

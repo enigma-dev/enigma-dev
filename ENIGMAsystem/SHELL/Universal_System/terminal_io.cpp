@@ -20,11 +20,22 @@
 using namespace std;
 #include "terminal_io.h"
 
+#ifdef DEBUG_MODE
+  #define debug_message(message)\
+    puts(message.c_str());
+#else
+  #define debug_message(message)\
+    (void)0;
+#endif
+
 void cons_show_message(string message) {
   puts(message.c_str());
 }
 void cons_print_overwritable(string message) {
   printf("%s\r",message.c_str());
+}
+void show_debug_message(string message) {
+  debug_message(message);
 }
 char cons_get_byte()
 {

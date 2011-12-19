@@ -20,7 +20,9 @@
 #include <math.h>
 #include "OpenGLHeaders.h"
 #include "GSbackground.h"
+#include "GStextures.h"
 #include "../../Universal_System/backgroundstruct.h"
+#include "../../Universal_System/spritestruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -137,8 +139,8 @@ void draw_background_tiled(int back,double x,double y)
     x=bck2d->width-fmod(x,bck2d->width);
     y=bck2d->height-fmod(y,bck2d->height);
     const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
-    const int hortil= int (ceil(room_width/(bck2d->width*tbx))),
-              vertil= int (ceil(room_height/(bck2d->height*tby)));
+    const int hortil= int (ceil(room_width/(bck2d->width*tbx))) + 1,
+              vertil= int (ceil(room_height/(bck2d->height*tby))) + 1;
 
     glBegin(GL_QUADS);
       for (int i=0; i<hortil; i++)
@@ -425,19 +427,89 @@ int background_get_height(int backId) {
 
 void texture_set_interpolation(int enable)
 {
+    if (enigma::interpolate_textures == enable)
+        return;
 
-}//TODO: write function
+    enigma::interpolate_textures = enable;
+    enigma::background *back;
+    enigma::sprite *spr;
+    for (unsigned int i = 0; i < enigma::background_idmax; i++)
+	{
+        back = enigma::backgroundstructarray[i];
+	    if (!back)
+            continue;
+
+        glBindTexture(GL_TEXTURE_2D, back->texture);
+        if (enable)
+        {
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+        }
+        else
+        {
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        }
+	}
+
+    int ii;
+	for (unsigned int i = 0; i < enigma::sprite_idmax; i++)
+    {
+        spr = enigma::spritestructarray[i];
+	    if (!spr)
+            continue;
+
+        for (ii = 0; ii < spr->subcount; ii++)
+        {
+            glBindTexture(GL_TEXTURE_2D, spr->texturearray[ii]);
+            if (enable)
+            {
+                glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+            }
+            else
+            {
+                glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+            }
+        }
+    }
+}
+
+int texture_get_width(int texId)
+{
+    int w;
+    glBindTexture(GL_TEXTURE_2D, texId);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
+    return w;
+}
+
+int texture_get_height(int texId)
+{
+    int h;
+    glBindTexture(GL_TEXTURE_2D, texId);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
+    return h;
+}
+
+bool texture_get_interpolation()
+{
+    return enigma::interpolate_textures;
+}
+
+void texture_set_blending(bool enable)
+{
+    (enable?glEnable:glDisable)(GL_BLEND);
+}
 
 void texture_set_repeat(bool repeat)
 {
-    if (repeat)
-    {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    }
-    else
-    {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    }
-}
+}//functionality has been removed in ENIGMA, repeat is always used as clamping is useless
+
+void texture_preload(int texid)
+{
+}//functionality has been removed in ENIGMA, all textures are automatically preloaded
+
+void texture_set_priority(int texid, double prio)
+{
+}//functionality has been removed in ENIGMA, all textures are automatically preloaded

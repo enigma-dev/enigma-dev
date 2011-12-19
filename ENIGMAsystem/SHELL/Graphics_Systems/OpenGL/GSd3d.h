@@ -31,6 +31,7 @@ extern double transformation_matrix[16];
 
 void d3d_start();
 void d3d_end();
+bool d3d_get_mode();
 void d3d_set_perspective(bool enable);
 void d3d_set_hidden(bool enable);
 void d3d_set_lighting(bool enable);

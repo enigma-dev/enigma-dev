@@ -253,12 +253,158 @@ int window_mouse_get_y()
 
 	return mouse.y-window.top;
 }
-void window_mouse_set(int x,int y)
+void window_mouse_set(int x, int y)
 {
     RECT window;
     GetWindowRect(enigma::hWnd,&window);
     SetCursorPos(window.left + x,window.top + y);
 }
+
+int window_view_mouse_get_x(int id)
+{
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+    POINT mouse;
+	GetCursorPos(&mouse);
+
+	return mouse.x-window.left+view_xview[id];
+}
+
+int window_view_mouse_get_y(int id)
+{
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+    POINT mouse;
+	GetCursorPos(&mouse);
+
+	return mouse.y-window.top+view_yview[id];
+}
+void window_view_mouse_set(int id, int x, int y)
+{
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+    SetCursorPos(window.left + x + view_xview[id],window.top + y + view_yview[id]);
+}
+
+/*
+int window_views_mouse_get_x()   //NOTE: mousex/y should be set to these so they are relative to the view
+{
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+    POINT mouse;
+	GetCursorPos(&mouse);
+    if (!view_enabled)
+    {
+        return mouse.x-window.left;
+    }
+    else
+    {
+        int mp = -1, vp;
+        for (int v = 6; v >= 0; v--)
+        {
+            if (!view_visible[v])
+                continue;
+            if (view_xview[v] < mp || mp == -1)
+                mp = view_xview[v];
+        }
+        double xpos = mouse.x - window.left;
+        if (xpos < 0)
+        {
+            return mp + xpos;
+        }
+        if (mouse.x > window.right)
+        {
+            mp = room_width;
+            for (int v = 6; v >= 0; v--)
+            {
+                if (!view_visible[v])
+                    continue;
+                vp = view_xview[v] + view_wview[v];
+                if (vp > mp)
+                    mp = vp;
+            }
+            return mp + (mouse.x - window.right);
+        }
+        for (int v = 6; v >= 0; v--)
+        {
+            if (!view_visible[v])
+                continue;
+            vp = xpos + view_xview[v] - mp;
+            if (vp >= 0)
+            {
+                return vp;
+            }
+        }
+        return mouse.x-window.left;
+    }
+}
+
+int window_views_mouse_get_y()
+{
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+    POINT mouse;
+	GetCursorPos(&mouse);
+
+    if (!view_enabled)
+    {
+        return mouse.y-window.top;
+    }
+    else
+    {
+        int mp = -1, vp;
+        for (int v = 6; v >= 0; v--)
+        {
+            if (!view_visible[v])
+                continue;
+            if (view_yview[v] < mp || mp == -1)
+                mp = view_yview[v];
+        }
+        double ypos = mouse.y - window.top;
+        if (ypos < 0)
+        {
+            return mp + ypos;
+        }
+        if (mouse.y > window.bottom)
+        {
+            mp = room_height;
+            for (int v = 6; v >= 0; v--)
+            {
+                if (!view_visible[v])
+                    continue;
+                vp = view_yview[v] + view_hview[v];
+                if (vp > mp)
+                    mp = vp;
+            }
+            return mp + (mouse.y - window.bottom);
+        }
+        for (int v = 6; v >= 0; v--)
+        {
+            if (!view_visible[v])
+                continue;
+            vp = ypos + view_yview[v] - mp;
+            if (vp >= 0)
+            {
+                return vp;
+            }
+        }
+        return mouse.y-window.top;
+    }
+}
+void window_views_mouse_set(int x, int y)
+{
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+
+    if (!view_enabled)
+    {
+        SetCursorPos(window.left + x,window.top + y);
+    }
+    else
+    {
+        SetCursorPos(window.left + x,window.top + y);
+    }
+}*/
 
 namespace enigma {
   long int laststyle;

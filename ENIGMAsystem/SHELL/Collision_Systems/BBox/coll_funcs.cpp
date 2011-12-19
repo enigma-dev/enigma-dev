@@ -110,6 +110,17 @@ int collision_point(double x, double y, int obj, bool prec /*ignored*/, bool not
   return r == NULL ? noone : r->id;
 }
 
+int collision_circle(double x, double y, double radius, int obj, bool prec /*ignored*/, bool notme)
+{
+  const enigma::object_collisions* r = collide_inst_circle(obj,false,notme,x,y,radius); //false is for solid_only, not prec
+  return r == NULL ? noone : r->id;
+}
+
+int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme)
+{
+  const enigma::object_collisions* r = collide_inst_ellipse(obj,false,notme,(x1+x2)/2,(y1+y2)/2,fabs(x2-x1)/2,fabs(y2-y1)/2); //false is for solid_only, not prec
+  return r == NULL ? noone : r->id;
+}
 
 double distance_to_object(int object)
 {

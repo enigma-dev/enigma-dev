@@ -86,6 +86,30 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
       return inst;
   }
   return NULL;
-
 }
 
+enigma::object_collisions* const collide_inst_circle(int object, bool solid_only, bool notme, double x, double y, double r)
+{
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+  {
+    enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+    if (notme && inst->id == enigma::instance_event_iterator->inst->id) continue;
+    if (solid_only && !inst->solid) continue;
+    if (collide_bbox_circle(inst,inst->x,inst->y,x,y,r))
+      return inst;
+  }
+  return NULL;
+}
+
+enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool notme, double x, double y, double rx, double ry)
+{
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+  {
+    enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+    if (notme && inst->id == enigma::instance_event_iterator->inst->id) continue;
+    if (solid_only && !inst->solid) continue;
+    if (collide_bbox_ellipse(inst,inst->x,inst->y,x,y,rx, ry))
+      return inst;
+  }
+  return NULL;
+}

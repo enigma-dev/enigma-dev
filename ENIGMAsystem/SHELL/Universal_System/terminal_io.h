@@ -27,6 +27,7 @@
 
 void cons_show_message(string message);
 void cons_print_overwritable(string message);
+void show_debug_message(string message);
 char cons_get_byte();
 string cons_get_char();
 string cons_get_string();

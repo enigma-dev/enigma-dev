@@ -86,7 +86,8 @@ extern int sprite_get_texture (int sprite, int subimage);
 extern int sprite_get_xoffset (int sprite);
 extern int sprite_get_yoffset (int sprite);
 
-int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset);
+#include <string>
+int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset);
 
 #endif // ENIGMA_SPRITESTRUCT
 

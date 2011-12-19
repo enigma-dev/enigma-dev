@@ -36,11 +36,11 @@ namespace enigma {
 int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
 {
 	int width,height,fullwidth,fullheight;
-	
+
 	char *pxdata = enigma::load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
 	unsigned texture = enigma::graphics_create_texture(fullwidth, fullheight, pxdata);
 	delete[] pxdata;
-	
+
 	//ns.pixeldata=(void**) malloc(sizeof(void*));
 	//ns.pixeldata[0]=bitmapbuffer;
 	enigma::sprite *ns = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
@@ -52,6 +52,7 @@ int sprite_add(string filename, int imgnumb, bool precise, bool transparent, boo
 	ns->yoffset   = (int)y_offset;
 	ns->texbordx  = (double) width/fullwidth;
 	ns->texbordy  = (double) height/fullheight;
+    ns->texturearray = new unsigned int[1];
 	ns->texturearray[0] = texture;
 	return enigma::sprite_idmax++;
 }
@@ -74,14 +75,14 @@ namespace enigma
     for (unsigned i = 0; i < enigma::sprite_idmax; i++)
       spritestructarray[i] = NULL;
   }
-  
+
   //Adds an empty sprite to the list
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm)
   {
     int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
     sprite *as = new sprite(subc);
     spritestructarray[sprid] = as;
-    
+
     as->id = sprid;
     as->subcount = subc;
     as->width  = w;
@@ -98,13 +99,13 @@ namespace enigma
     as->yoffset = y;
     as->texbordx = (double)w/fullwidth;
     as->texbordy = (double)h/fullheight;
-    
+
     as->texturearray = new unsigned int[subc];
     as->colldata = new void*[subc];
-    
+
     if (enigma::sprite_idmax < sprid+1)
       enigma::sprite_idmax = sprid+1;
-    
+
     return sprid;
   }
 
@@ -117,8 +118,8 @@ namespace enigma
     return thenewmask;
   }
   #endif
-  
-  
+
+
   //Adds a subimage to an existing sprite from the exe
   void sprite_set_subimage(int sprid, int imgindex, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
   {
@@ -138,12 +139,12 @@ namespace enigma
       imgpxptr += (fullwidth-colindex) << 2;
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
-    
+
     unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
     delete[] imgpxdata;
-    
+
     enigma::sprite* sprstr = enigma::spritestructarray[sprid];
-    
+
     sprstr->texturearray[imgindex] = texture;
     sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
   }

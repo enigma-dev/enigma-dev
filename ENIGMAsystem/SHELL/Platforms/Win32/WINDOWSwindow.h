@@ -64,20 +64,20 @@ namespace enigma {
   void clampparent();
 }
 
-int  show_message(string str);
-int  window_get_x();
-int  window_get_y();
-int  window_get_width();
-int  window_get_height();
+int show_message(string str);
+int window_get_x();
+int window_get_y();
+int window_get_width();
+int window_get_height();
 void window_set_visible(int visible);
-int  window_get_visible();
+int window_get_visible();
 void window_set_stayontop(int stay);
-int  window_get_stayontop();
+int window_get_stayontop();
 void window_set_caption(char* caption);
 void window_set_caption(string caption);
 string window_get_caption();
 void window_set_color(int color);
-int  window_get_color();
+int window_get_color();
 void window_set_region_scale(int scale, int adaptwindow);
 double window_get_region_scale();
 void window_set_position(int x, int y);
@@ -85,17 +85,25 @@ void window_set_size(unsigned int width, unsigned int height);
 void window_set_rectangle(int x, int y, int width, int height);
 void window_center();
 void window_default();
-int  display_mouse_get_x();
-int  display_mouse_get_y();
-void  display_mouse_set(int x,int y);
+int display_mouse_get_x();
+int display_mouse_get_y();
+void display_mouse_set(int x,int y);
 int display_get_width();
 int display_get_height();
-int  window_mouse_get_x();
-int  window_mouse_get_y();
+int window_mouse_get_x();
+int window_mouse_get_y();
+int window_view_mouse_get_x(int id);
+int window_view_mouse_get_y(int id);
+void window_view_mouse_set(int id, int x, int y);
+/*
+int window_views_mouse_get_x();
+int window_views_mouse_get_y();
+void window_views_mouse_set(int x, int y);
+*/
 void window_mouse_set(int x,int y);
 int window_set_cursor(int curs);
 void window_set_fullscreen(const bool full);
-int  window_get_fullscreen();
+int window_get_fullscreen();
 
 void game_end();
 void action_end_game();

@@ -591,3 +591,8 @@ inline int draw_self()
     draw_sprite_ext(inst->sprite_index, inst->image_index, inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
     return 0;
 }  //actions seemed the best place for this
+
+inline void set_automatic_draw(bool enable)
+{
+    automatic_redraw = enable;
+}

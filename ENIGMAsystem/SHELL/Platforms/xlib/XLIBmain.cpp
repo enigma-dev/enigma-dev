@@ -39,13 +39,13 @@ namespace enigma
   extern char keymap[256];
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  
+
   namespace x11
   {
     Display *disp;
     Window win;
     Atom wm_delwin;
-    
+
     int handleEvents()
     {
       XEvent e;
@@ -71,13 +71,12 @@ namespace enigma
         }
         case KeyRelease: {
             gk=XLookupKeysym(&e.xkey,0);
-            printf("Pressed a key: %d : %d\n", gk, gk & 0xFF);
             if (gk == NoSymbol)
               return 0;
-            
+
             if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
             else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
-            
+
             enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
             enigma::keybdstatus[actualKey]=0;
           return 0;
@@ -136,10 +135,10 @@ namespace enigma
       last_keybdstatus[i]=0;
       keybdstatus[i]=0;
     }
-    
+
     init_joysticks();
   }
-  
+
   void input_push()
   {
     for(int i=0;i<3;i++){
@@ -150,7 +149,7 @@ namespace enigma
     }
     mouse_hscrolls = mouse_vscrolls = 0;
   }
-  
+
   int game_ending();
 }
 
@@ -170,7 +169,7 @@ int main(int argc,char** argv)
 		printf("Display failed\n");
 		return -1;
 	}
-	
+
 
 	// Identify components (close button, root pane)
 	wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
@@ -240,7 +239,7 @@ int main(int argc,char** argv)
 	glXDestroyContext(disp,glxc);
 	XCloseDisplay(disp);
 	return 0;*/
-	
+
 	for(;;)
 	{
 		while(XQLength(disp))
@@ -250,7 +249,7 @@ int main(int argc,char** argv)
 		enigma::ENIGMA_events();
 		enigma::input_push();
 	}
-	
+
 	end:
 	enigma::game_ending();
   glXDestroyContext(disp,glxc);

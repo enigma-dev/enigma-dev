@@ -47,30 +47,30 @@ namespace enigma
   objectid_base::objectid_base(): inst_iter(NULL,NULL,this), count(0) {}
   event_iter::event_iter(string n): inst_iter(NULL,NULL,this), name(n) {}
   event_iter::event_iter(): inst_iter(NULL,NULL,this) {}
-  
-  
+
+
   /*------ New iterator system --------------------------------*\
   \*-----------------------------------------------------------*/
-  
+
     set<iterator*> central_iterator_cache;
     typedef set<iterator*>::iterator central_iterator_cache_iterator;
-    
+
     object_basic* iterator::operator*() { return it->inst; }
     object_basic* iterator::operator->() { return it->inst; }
-    
+
     void iterator::addme() { central_iterator_cache.insert(this); }
-    
+
     iterator::operator bool() { return it; }
     iterator &iterator::operator++()    { it = it->next; return *this; }
     iterator  iterator::operator++(int) { iterator ret(it,temp); it = it->next; return ret; }
     iterator &iterator::operator--()    { it = it->prev; return *this; }
     iterator  iterator::operator--(int) { iterator ret(it,temp); it = it->prev; return ret; }
-    
+
     const iterator &iterator::operator=(iterator& other)       { if (temp) delete it; it = other.it; temp = other.temp; other.temp = false; return other; }
     const iterator &iterator::operator=(const iterator& other) { if (temp) delete it; it = other.it; temp = false; return other; }
     const iterator &iterator::operator=(inst_iter* niter)      { if (temp) delete it; it = niter; temp = false; return *this; }
     const iterator &iterator::operator=(object_basic* object)  { if (temp) delete it; it = new inst_iter(object,NULL,NULL); temp = true; return *this; }
-    
+
     iterator::iterator(inst_iter*_it, bool tmp): it(_it), temp(tmp) { addme(); }
     iterator::iterator(const iterator&other): it(other.it?new inst_iter(*other.it):NULL), temp(true) { addme(); }
     iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = NULL; }
@@ -80,7 +80,7 @@ namespace enigma
       central_iterator_cache.erase(this);
       if (temp) delete it;
     }
-    
+
     void update_iterators_for_destroy(const inst_iter* dd)
     {
       for (central_iterator_cache_iterator it = central_iterator_cache.begin();
@@ -92,11 +92,11 @@ namespace enigma
           (*it)->it->prev = dd->prev;
       }
     }
-  
-  
+
+
   /*------Iterator methods ------------------------------------*\
   \*-----------------------------------------------------------*/
-  
+
   inst_iter *event_iter::add_inst(object_basic* ninst)
   {
     inst_iter *a = new inst_iter(ninst,NULL,prev);
@@ -130,7 +130,7 @@ namespace enigma
     a->count--;
     update_iterators_for_destroy(which);
   }
-  
+
   /* **  Variables ** */
   // This will be instantiated for each event with a unique ID or Sub ID.
   event_iter *events; // It will be allocated towards the beginning.
@@ -199,7 +199,7 @@ namespace enigma
     iliter a = instance_list.find(x);
     return a != instance_list.end() ? a->second->inst : NULL;
   }
-  
+
   iterator fetch_inst_iter_by_int(int x)
   {
     if (x < 0) switch (x) // Keyword-based lookup
@@ -228,7 +228,7 @@ namespace enigma
     iliter a = instance_list.find(x);
     return a != instance_list.end() ? a->second : NULL;
   }
-  
+
   // Implementation for frontend
   // (Wrapper struct to lower compile time)
   typedef struct winstance_list_iterator {
@@ -238,7 +238,7 @@ namespace enigma
   void winstance_list_iterator_delete(pinstance_list_iterator whop) {
     delete whop;
   }
-  
+
   //Link in an instance
   pinstance_list_iterator link_instance(object_basic* who)
   {
@@ -268,10 +268,9 @@ namespace enigma
     objects[oid].count++;
     return objects[oid].add_inst(who);
   }
-  
+
   void instance_iter_queue_for_destroy(pinstance_list_iterator whop)
   {
-    printf("Queued %p\n",(object_basic*)whop->w->second->inst);
     enigma::cleanups.insert((object_basic*)whop->w->second->inst);
     enigma::instancecount--;
     instance_count--;

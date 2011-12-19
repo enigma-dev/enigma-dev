@@ -30,3 +30,8 @@
  * use at load time with data read from the executable. These both expect
  * RAW format, RGB only.
  */
+
+namespace enigma
+{
+    extern bool interpolate_textures;
+}

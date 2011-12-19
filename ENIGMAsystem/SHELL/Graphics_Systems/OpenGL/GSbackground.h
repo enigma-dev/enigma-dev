@@ -37,8 +37,14 @@ void draw_background_tiled_ext(int back,double x,double y,double xscale,double y
 void draw_background_tiled_area_ext(int back,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha);
 void draw_background_general(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4);
 
-int  background_get_texture(int backId);
+int background_get_texture(int backId);
 int background_get_width(int backId);
 int background_get_height(int backId);
+int texture_get_width(int texId);
+int texture_get_height(int texId);
 void texture_set_interpolation(int enable);
+bool texture_get_interpolation();
+void texture_set_blending(bool enable);
 void texture_set_repeat(bool repeat);
+void texture_preload(int texid);
+void texture_set_priority(int texid, double prio);

@@ -87,6 +87,7 @@ global:     transition_kind
 global:     transition_steps
 global:     transition_time*/
 /*global:  working_directory*/
+bool automatic_redraw = true;
 /*********************
 End GM global variables
  *********************/

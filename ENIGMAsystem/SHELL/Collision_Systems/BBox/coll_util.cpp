@@ -136,3 +136,23 @@ bool collide_bbox_point(const enigma::object_collisions* inst, double ox, double
        && y < box.bottom + oy
        && y > box.top + oy);
 }
+
+bool collide_bbox_circle(const enigma::object_collisions* inst, double ox, double oy, double x, double y, double r)
+{
+    const bbox_rect_t &box = inst->$bbox_relative();
+    const double distx = x - min(max(x, ox + box.left), ox + box.right);
+    const double disty = y - min(max(y, oy + box.top), oy + box.bottom);
+
+    return ((distx*distx) + (disty*disty) < (r*r));
+}
+
+bool collide_bbox_ellipse(const enigma::object_collisions* inst, double ox, double oy, double x, double y, double rx, double ry)
+{
+    if (rx == 0 || ry == 0)
+        return false;
+    const bbox_rect_t &box = inst->$bbox_relative();
+    const double distx = (x - min(max(x, ox + box.left), ox + box.right))/rx;
+    const double disty = (y - min(max(y, oy + box.top), oy + box.bottom))/ry;
+
+    return ((distx*distx) + (disty*disty) < 1);
+}
