@@ -647,12 +647,19 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 			if (opt != null) opt.setValue(entry.getValue());
 			}
 
+		changing = true;
 		for (Entry<JComboBox,String> box : targets.entrySet())
 			{
 			TargetSelection targ = es.targets.get(box.getValue());
 			if (targ != null) box.getKey().setSelectedItem(targ);
+			box.getKey().setFont(
+					box.getKey().getFont().deriveFont(
+							box.getValue().equals(TargetHandler.COMPILER) ? Font.BOLD : Font.PLAIN));
 			}
+		changing = false;
+
 		userPicks.clear();
+		userPicks.put(TargetHandler.COMPILER,es.targets.get(TargetHandler.COMPILER));
 
 		for (Entry<ExtensionSetting,Boolean> entry : extensions.entrySet())
 			entry.setValue(es.extensions.contains(entry.getKey().path)); //writes through to map
