@@ -178,20 +178,20 @@ namespace enigma
 
 int sprite_get_width(int sprite)
 {
-	get_sprite(spr,sprite,0);
+	get_sprite(spr,sprite,32);
 	return spr->width;
 }
 
 int sprite_get_height(int sprite)
 {
-	get_sprite(spr,sprite,0);
+	get_sprite(spr,sprite,32);
 	return spr->height;
 }
 
 
 int sprite_get_bbox_bottom(int sprite)
 {
-	get_sprite(spr,sprite,0);
+	get_sprite(spr,sprite,32);
 	return spr->bbox.bottom;
 }
 int sprite_get_bbox_left(int sprite)
@@ -201,7 +201,7 @@ int sprite_get_bbox_left(int sprite)
 }
 int sprite_get_bbox_right(int sprite)
 {
-	get_sprite(spr,sprite,0);
+	get_sprite(spr,sprite,32);
 	return spr->bbox.right;
 }
 int sprite_get_bbox_top(int sprite)
@@ -212,7 +212,7 @@ int sprite_get_bbox_top(int sprite)
 
 int sprite_get_bbox_bottom_relative(int sprite)
 {
-	get_sprite(spr,sprite,0);
+	get_sprite(spr,sprite,32);
 	return spr->bbox_relative.bottom;
 }
 int sprite_get_bbox_left_relative(int sprite)
@@ -222,7 +222,7 @@ int sprite_get_bbox_left_relative(int sprite)
 }
 int sprite_get_bbox_right_relative(int sprite)
 {
-	get_sprite(spr,sprite,0);
+	get_sprite(spr,sprite,32);
 	return spr->bbox_relative.right;
 }
 int sprite_get_bbox_top_relative(int sprite)
@@ -232,7 +232,7 @@ int sprite_get_bbox_top_relative(int sprite)
 }
 
 #ifdef DEBUG_MODE
-  bbox_rect_t dummy_bbox;
+  bbox_rect_t dummy_bbox = {32,0,32,0};
 #endif
 const bbox_rect_t &sprite_get_bbox(int sprite)
 {

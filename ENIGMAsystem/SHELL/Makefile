@@ -51,8 +51,18 @@ else
 endif
 
 LDFLAGS := 
+
+ifeq ($(GMODE), Compile)
+	CXXFLAGS += -fdata-sections -ffunction-sections
+	CFLAGS += -fdata-sections -ffunction-sections
+	LDFLAGS += -gc-sections
+endif
+
 ifeq ($(PLATFORM), Win32)
 	LDFLAGS += -static-libstdc++ -static-libgcc
+	ifeq ($(GMODE), Compile)
+		LDFLAGS += -static-libgcc -Wl,-subsystem,windows
+	endif
 endif
 
 # CPPFLAGS needs these include dirs unconditionally

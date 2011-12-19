@@ -16,6 +16,7 @@
 **/
 
 #include <string>
+#include <cstdio>
 #include "OpenGLHeaders.h"
 #include "GSbackground.h"
 #include "GSscreen.h"
@@ -62,6 +63,7 @@ void screen_redraw()
 {
     if (!view_enabled)
     {
+       // printf("glViewport(0, 0, %d, %d);\n",window_get_width(),window_get_height());
         glViewport(0, 0, window_get_width(), window_get_height()); // Possible bug
         glLoadIdentity();
         glScalef(1, -1, 1);

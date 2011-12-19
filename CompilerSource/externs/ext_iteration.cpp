@@ -100,13 +100,13 @@ dllexport const char* resource_parameters(int i) //Returns a simple string of pa
 { // The returned pointer to the string is INVALIDATED upon the next call to definitionsModified().
   return it->second->sparams[i].c_str();
 }
-dllexport bool resource_isTypeName() //Returns whether the resource can be used as a typename.
+dllexport int resource_isTypeName() //Returns whether the resource can be used as a typename.
 {
-  return it->second->flags & EXTFLAG_TYPENAME;
+  return bool(it->second->flags & EXTFLAG_TYPENAME);
 }
-dllexport bool resource_isGlobal()   //Returns whether the resource is nothing but a global variable.
+dllexport int resource_isGlobal()   //Returns whether the resource is nothing but a global variable.
 {
-  return !it->second->flags and !it->second->is_function();
+  return bool(!it->second->flags and !it->second->is_function());
 }
 
 dllexport const char* next_available_resource() //Returns the name of the next resource on the list, or "" otherwise.

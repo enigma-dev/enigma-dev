@@ -5,12 +5,10 @@
 #include <stdio.h>
 inline unsigned int nlpo2dc(unsigned int x) // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
 {
-  printf("INPUT: %d\n", x);
   --x;
 	x |= x>>1;
 	x |= x>>2;
 	x |= x>>4;
 	x |= x>>8;
-  printf("OUTPUT: %d\n", x | (x>>16));
 	return x | (x>>16);
 }
