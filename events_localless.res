@@ -9,6 +9,16 @@
 #
 
 
+### NOTE this events file can be used instead of the default one to greatly increase speed. But be careful because it removes all the local variable updates, so if you
+### want the speed gain but need to use locals in your code you will need to update them manually yourself. The following local updates have been removed from this file:
+###
+### - xprevious, yprevious setting
+### - image_index setting
+### - drawing an object by default when no draw code is used
+### - movement to previous location on collision with solid instances
+### - any automatic position change from gravity, friction, direction, speed, hspeed or vspeed
+
+
 # These events are executed outside the main event source at special moments
 
 gamestart: 7		# This event is executed from within code at the start of the game
@@ -36,7 +46,6 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
-	Constant: {xprevious = x; yprevious = y; image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index));}
 
 alarm: 2
 	Group: Alarm
@@ -239,12 +248,6 @@ step: 3
 	Mode: Special
 	Case: 0
 
-localsweep: 100000 
-	Name: Locals sweep 
-	Mode: Inline
-	Constant: enigma::propagate_locals(this);
-
-
 # Lump of "Other" events.
 
 pathend: 7
@@ -274,7 +277,6 @@ collision: 4
 	Mode: Stacked
 	Super Check: instance_number(%1)
 	Sub Check: (instance_other = enigma::place_meeting_inst(x,y,%1)) # Parenthesize assignment used as truth
-	prefix: if (solid ||  enigma::glaccess(int(other))->solid) {x = xprevious; y = yprevious;}
 # Check for detriment from collision events above
 
 nomorelives: 7
@@ -306,7 +308,6 @@ draw: 8
 	Iterator-initialize: /* Draw is initialized in the constructor */
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw will destruct with this */
-	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
 	Instead: if (automatic_redraw) screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
 
 

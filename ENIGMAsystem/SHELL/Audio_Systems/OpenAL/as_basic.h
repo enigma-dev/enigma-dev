@@ -35,7 +35,7 @@ bool sound_isplaying(int sound);
 bool sound_ispaused(int sound);
 
 void sound_pan(int sound, float value);
-void sound_volume(int sound, float value);
+//void sound_volume(int sound, float value);
 
 int sound_add(string fname, int kind, bool preload);
 

@@ -47,6 +47,30 @@ inline void action_move_to(const double xx, const double yy) {
 	}
 }
 
+inline void action_linear_step(double x, double y, double stepsize, bool solid_only)
+{
+    if (argument_relative)
+    {
+        mp_linear_step_object(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+x, ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+y, stepsize,all, solid_only);
+    }
+    else
+    {
+        mp_linear_step_object(x, y, stepsize,all, solid_only);
+	}
+}
+
+inline void action_potential_step(double x, double y, double stepsize, bool solid_only)
+{
+    if (argument_relative)
+    {
+        mp_potential_step_object(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+x, ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+y, stepsize,all, solid_only);
+    }
+    else
+    {
+        mp_potential_step_object(x, y, stepsize,all, solid_only);
+	}
+}
+
 inline void action_set_score(double newscore) {
     if (argument_relative) score+= (int)newscore;
     else score = (int)newscore;
