@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include "coll_util.h"
+#include "../../Universal_System/instance.h"
 
 ////////////////////////////////////
 // utility intersection functions - test shape intersection, which is largely API independant
@@ -155,4 +156,13 @@ bool collide_bbox_ellipse(const enigma::object_collisions* inst, double ox, doub
     const double disty = (y - min(max(y, oy + box.top), oy + box.bottom))/ry;
 
     return ((distx*distx) + (disty*disty) < 1);
+}
+
+void destroy_bbox_point(const enigma::object_collisions* inst, double ox, double oy, double x, double y)
+{
+    const bbox_rect_t &box = inst->$bbox_relative();
+    if (x < box.right + ox && x > box.left + ox && y < box.bottom + oy && y > box.top + oy)
+    {
+        instance_destroy(inst->id);
+    }
 }

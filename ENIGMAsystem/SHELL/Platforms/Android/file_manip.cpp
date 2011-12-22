@@ -63,7 +63,7 @@ int directory_create(string dname) {
 
 
 
-string file_find_first(string mask,int attr);   
+string file_find_first(string mask,int attr);
 
 enum {
   fa_readonly  = 1,
@@ -74,20 +74,13 @@ enum {
   fa_archive   = 32
 };
 
-string file_find_next();                 
-void file_find_close();                
-bool file_attributes(string fname,int attr); 
+string file_find_next();
+void file_find_close();
+bool file_attributes(string fname,int attr);
 
-string filename_name(string fname);              
-string filename_path(string fname);              
-string filename_dir(string fname);               
-string filename_drive(string fname);             
-string filename_ext(string fname);               
-string filename_change_ext(string fname,string newext); 
-
-void export_include_file(string fname);                   
-void export_include_file_location(string fname,string location); 
-void discard_include_file(string fname);                  
+void export_include_file(string fname);
+void export_include_file_location(string fname,string location);
+void discard_include_file(string fname);
 
 extern unsigned game_id;
 extern string working_directory;

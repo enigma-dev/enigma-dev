@@ -113,3 +113,13 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
   }
   return NULL;
 }
+
+void destroy_inst_point(int object, bool solid_only, double x, double y)
+{
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+  {
+    enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+    if (solid_only && !inst->solid) continue;
+    destroy_bbox_point(inst,inst->x,inst->y,x,y);
+  }
+}

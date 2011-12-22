@@ -40,6 +40,16 @@ const int noone =  -4;
 const int global = -5;
 const int local =  -7;
 
+/*
+bool object_exists(unsigned objectid);
+int object_get_depth(unsigned id);
+int object_get_mask(unsigned id);
+int object_get_parent(unsigned id);
+bool object_get_persistent(unsigned id);
+bool object_get_solid(unsigned id);
+bool object_get_visible(unsigned id);
+*/
+
 #include "var4.h"
 
 namespace enigma
@@ -55,12 +65,12 @@ namespace enigma
     {
       const unsigned id;
       const int object_index;
-      
+
       virtual void unlink();
       virtual variant myevent_draw();
       virtual variant myevent_roomend();
       virtual variant myevent_destroy();
-      
+
       object_basic();
       object_basic(int uid, int uoid);
       virtual ~object_basic();

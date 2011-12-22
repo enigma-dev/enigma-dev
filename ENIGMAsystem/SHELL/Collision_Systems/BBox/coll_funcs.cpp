@@ -80,6 +80,21 @@ bool position_meeting(double x, double y, int object)
   return collide_inst_point(object,false,true,x,y);
 }
 
+void position_destroy_object(double x, double y, int object, bool solid_only)
+{
+    destroy_inst_point(object,solid_only,x,y);
+}
+
+void position_destroy_solid(double x, double y)
+{
+    destroy_inst_point(all,true,x,y);
+}
+
+void position_destroy(double x, double y)
+{
+    destroy_inst_point(all,false,x,y);
+}
+
 int instance_place(double x, double y, int object)
 {
   enigma::object_collisions* const r = collide_inst_inst(object,false,true,x,y);

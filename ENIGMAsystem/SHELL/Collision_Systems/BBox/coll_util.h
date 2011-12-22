@@ -42,5 +42,6 @@ bool collide_bbox_bbox(const enigma::object_collisions* inst1, double ox1, doubl
 bool collide_bbox_point(const enigma::object_collisions* inst, double ox, double oy, double x, double y);
 bool collide_bbox_circle(const enigma::object_collisions* inst, double ox, double oy, double x, double y, double r);
 bool collide_bbox_ellipse(const enigma::object_collisions* inst, double ox, double oy, double x, double y, double rx, double ry);
+void destroy_bbox_point(const enigma::object_collisions* inst, double ox, double oy, double x, double y);
 
 #endif

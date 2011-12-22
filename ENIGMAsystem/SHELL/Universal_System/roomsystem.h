@@ -37,6 +37,7 @@ int room_goto_previous();
 int room_goto_next();
 int room_next(int num);
 int room_previous(int num);
+bool room_exists(unsigned roomid);
 
 extern int background_color;
 extern int background_showcolor;

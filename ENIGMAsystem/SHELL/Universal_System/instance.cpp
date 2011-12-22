@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
@@ -89,14 +89,15 @@ int instance_number(int obj)
 
 //TODO: replace all these fucking enigma::instance_iterators with enigma::institer_t i or something
 
-int instance_nearest(int x,int y,int obj)
+int instance_nearest(int x,int y,int obj,bool notme)
 {
   double dist_lowest=-1;
   int retid=-4;
   double xl,yl;
-  
+
   for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
   {
+    if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
     xl = ((enigma::object_planar*)*it)->x - x;
     yl = ((enigma::object_planar*)*it)->y - y;
     const double dstclc = hypot(xl,yl);
@@ -106,11 +107,11 @@ int instance_nearest(int x,int y,int obj)
       retid = it->id;
     }
   }
-  
+
   return retid;
 }
 
-int instance_furthest(int x,int y,int obj)
+int instance_furthest(int x,int y,int obj,bool notme)
 {
   double dist_highest = -1;
   int retid = noone;
@@ -119,6 +120,7 @@ int instance_furthest(int x,int y,int obj)
 
   for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
   {
+    if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
     xl=((enigma::object_planar*)*it)->x - x;
     yl=((enigma::object_planar*)*it)->y - y;
     dstclc = hypot(xl,yl);

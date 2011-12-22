@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <stdio.h>
 #include <string>
 #include <cstdlib>
 #include "var4.h"
@@ -58,9 +59,16 @@ int string_pos(string substr,string str) {
 	return res == string::npos ? -1 : (int)res;
 }
 
+string string_format(double val, unsigned tot, unsigned dec)
+{
+    char sbuf[19]; sbuf[0] = 0;
+    sprintf(sbuf," %*.*f",tot,dec,val);
+    const string fstr = sbuf;
+    return fstr.c_str();
+}
+
 string string_copy(string str, int index, int count) {
-	if (index <= 1) return str;
-	return (size_t)index > str.length()? "": str.substr(index-1, count);
+	return (size_t)index > str.length()? "": str.substr(index < 2? 0: index-1, count < 1? 0: count);
 }
 
 string string_char_at(string str,int index) {
@@ -165,4 +173,48 @@ bool string_islettersdigits(string str) {
 		if(!ldgrs[(unsigned char)*c])
 		  return false;
 	return true;
+}
+
+//filename fucntions place here as they are just string based
+
+string filename_name(string fname)
+{
+    size_t fp = fname.find_last_of("/\\");
+    return fname.substr(fp+1);
+}
+
+string filename_path(string fname)
+{
+    size_t fp = fname.find_last_of("/\\");
+    return fname.substr(0,fp+1);
+}
+
+string filename_dir(string fname)
+{
+    size_t fp = fname.find_last_of("/\\");
+    if (fp == -1)
+        return "";
+    return fname.substr(fp);
+}
+
+string filename_drive(string fname)
+{
+    size_t fp = fname.find("/\\");
+    return fname.substr(0, fp);
+}
+
+string filename_ext(string fname)
+{
+    size_t fp = fname.find_last_of(".");
+    if (fp == -1)
+        return "";
+    return fname.substr(fp);
+}
+
+string filename_change_ext(string fname, string newext)
+{
+    size_t fp = fname.find_last_of(".");
+    if (fp == -1)
+        return fname + newext;
+    return fname.replace(fp,fname.length(),newext);
 }

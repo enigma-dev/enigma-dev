@@ -17,9 +17,9 @@
 #define __var_te
   #ifdef DEBUG_MODE
     #define div0c(x) { if (!x) return (show_error("Division by zero.",0), *this); }
-    #define terror(x) { if (type != x) { show_error("Incompatible types to operator.",0); } }
-    #define nterror(x) { if (type == x) { show_error("Incompatible types to operator.",0); } }
-    #define terror2(dt) { if (type != dt or x.type != dt) { show_error("Incompatible types to operator.",0); } }
+    #define terror(x)
+    #define nterror(x)
+    #define terror2(dt)
     #define terrortrue() show_error("Incompatible right-hand type to operator.",0);
   #else
     #define div0c(x)
@@ -38,7 +38,7 @@
 /** / **
  * / This stuff just takes up entirely too much space.
  */
- 
+
 #define types_extrapolate_real_p(prefix,suffix...)\
  prefix (int x)       EVCONST suffix\
  prefix (long x)      EVCONST suffix\
@@ -58,7 +58,7 @@
  prefix (unsigll x,type2 y)   EVCONST suffix\
  prefix (double x,type2 y)    EVCONST suffix\
  prefix (float x,type2 y)     EVCONST suffix
- 
+
 #define types_binary_bitwise_extrapolate_real_p(op,type2,sentiment...)\
  int       operator op(int x,type2 y)       EVCONST { sentiment; return x op int(y); }\
  long      operator op(long x,type2 y)      EVCONST { sentiment; return x op int(y); }\
@@ -68,7 +68,7 @@
  unsigll   operator op(unsigll x,type2 y)   EVCONST { sentiment; return x op (unsigll)(y); }\
  long      operator op(double x,type2 y)    EVCONST { sentiment; return long(x) op long(y); }\
  long      operator op(float x,type2 y)     EVCONST { sentiment; return long(x) op long(y); }
- 
+
 #define types_binary_bitwise_extrapolate_alldecc(func, type2)\
  int       func(int x,type2 y) EVCONST;\
  long      func(long x,type2 y) EVCONST;\
@@ -78,7 +78,7 @@
  unsigll   func(unsigll x,type2 y) EVCONST;\
  long      func(double x,type2 y) EVCONST;\
  long      func(float x,type2 y) EVCONST;
- 
+
 #define types_binary_assign_extrapolate_declare(op,type2)\
  int&       operator op##= (int &x,type2 y) EVCONST;\
  long&      operator op##= (long &x,type2 y) EVCONST;\
@@ -88,7 +88,7 @@
  unsigll&   operator op##= (unsigll &x,type2 y) EVCONST;\
  double&    operator op##= (double &x,type2 y) EVCONST;\
  float&     operator op##= (float &x,type2 y) EVCONST;
- 
+
 #define types_binary_assign_extrapolate_implement(op,type2, sentiment...)\
  int&       operator op##= (int &x,type2 y)        EVCONST { sentiment; return x op##= (int)y; }\
  long&      operator op##= (long &x,type2 y)       EVCONST { sentiment; return x op##= (long)y; }\
@@ -98,7 +98,7 @@
  unsigll&   operator op##= (unsigll &x,type2 y)    EVCONST { sentiment; return x op##= (unsigll)y; }\
  double&    operator op##= (double &x,type2 y)     EVCONST { sentiment; return x op##= (double)y; }\
  float&     operator op##= (float &x,type2 y)      EVCONST { sentiment; return x op##= (float)y; }
- 
+
 #define types_binary_bitwise_assign_extrapolate_implement(op,type2, sentiment...)\
  int&       operator op##= (int &x,type2 y)        EVCONST { sentiment; return x op##= (int)y; }\
  long&      operator op##= (long &x,type2 y)       EVCONST { sentiment; return x op##= (long)y; }\
@@ -112,11 +112,11 @@
 #define types_extrapolate_string_p(prefix,suffix...)\
  prefix (const char *x) EVCONST suffix\
  prefix (string x)      EVCONST suffix
- 
+
 #define types_binary_extrapolate_string_p(prefix,type2,suffix...)\
  prefix (const char *x,type2 y) EVCONST suffix\
  prefix (string x,type2 y)      EVCONST suffix
- 
+
 #define types_extrapolate_mix_p(prefix,suffix...)\
  prefix (variant x) EVCONST suffix\
  prefix (var x)     EVCONST suffix

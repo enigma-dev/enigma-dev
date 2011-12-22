@@ -33,3 +33,4 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 enigma::object_collisions* const collide_inst_point(int object, bool solid_only, bool notme, double x, double y);
 enigma::object_collisions* const collide_inst_circle(int object, bool solid_only, bool notme, double x, double y, double r);
 enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool notme, double x, double y, double rx, double ry);
+void destroy_inst_point(int object, bool solid_only, double x, double y);

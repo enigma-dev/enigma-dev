@@ -144,7 +144,7 @@ namespace enigma
     }
     window_set_size(xm,ym);
     io_clear();
-    
+
     for (int i=0; i<instancecount; i++) {
       inst *obj = &instances[i];
       instance_create_id(obj->x,obj->y,obj->obj,obj->id);
@@ -274,6 +274,11 @@ int room_previous(int num)
     if (!rit or rit->order-1 < 0)
       return -1;
     return enigma::roomorder[rit->order - 1]->id;
+}
+
+bool room_exists(unsigned roomid)
+{
+    return roomid < enigma::room_idmax && enigma::roomdata[roomid];
 }
 
 namespace enigma

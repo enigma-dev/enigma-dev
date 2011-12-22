@@ -705,6 +705,7 @@ bool d3d_transform_stack_disgard()
 #include <map>
 #include <list>
 #include "../../Universal_System/fileio.h"
+
 class d3d_lights
 {
     map<int,int> light_ind;
@@ -788,266 +789,32 @@ void d3d_light_define_ambient(int col)
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 
-#include <iostream>
 class d3d_model
 {
     int something;
+    list<GLuint> primitive_calls;
+    GLuint model;
 
     public:
-    d3d_model(): something(100) {}
+    d3d_model(): something(100) {model = glGenLists(1);}
     ~d3d_model() {}
-
-    struct call_structs
-    {
-        int type, kind;
-        float x, y, z, nx, ny, nz, tx, ty;
-        int col;
-        double alpha;
-        void primitive_begin(int kind_)
-        {
-            type = 0;
-            kind = kind_;
-        }
-        void primitive_end()
-        {
-            type = 1;
-        }
-        void vertex(float v[])
-        {
-            type = 2;
-            x = v[0];
-            y = v[1];
-            z = v[2];
-        }
-        void vertex_color(float v[], int col_, double alpha_)
-        {
-            type = 3;
-            x = v[0];
-            y = v[1];
-            z = v[2];
-            col = col_;
-            alpha = alpha_;
-        }
-        void vertex_texture(float v[], float t[])
-        {
-            type = 4;
-            x = v[0];
-            y = v[1];
-            z = v[2];
-            tx = t[0];
-            ty = t[1];
-        }
-        void vertex_texture_color(float v[], float t[], int col_, double alpha_)
-        {
-            type = 5;
-            x = v[0];
-            y = v[1];
-            z = v[2];
-            tx = t[0];
-            ty = t[1];
-            col = col_;
-            alpha = alpha_;
-        }
-        void vertex_normal(float v[], float n[])
-        {
-            type = 6;
-            x = v[0];
-            y = v[1];
-            z = v[2];
-            nx = n[0];
-            ny = n[1];
-            nz = n[2];
-        }
-        void vertex_normal_color(float v[], float n[], int col_, double alpha_)
-        {
-            type = 7;
-            x = v[0];
-            y = v[1];
-            z = v[2];
-            nx = n[0];
-            ny = n[1];
-            nz = n[2];
-            col = col_;
-            alpha = alpha_;
-        }
-        void vertex_normal_texture(float v[], float n[], float t[])
-        {
-            type = 8;
-            x = v[0];
-            y = v[1];
-            z = v[2];
-            nx = n[0];
-            ny = n[1];
-            nz = n[2];
-            tx = t[0];
-            ty = t[1];
-        }
-        void vertex_normal_texture_color(float v[], float n[], float t[], int col_, double alpha_)
-        {
-            type = 9;
-            x = v[0];
-            y = v[1];
-            z = v[2];
-            nx = n[0];
-            ny = n[1];
-            nz = n[2];
-            tx = t[0];
-            ty = t[1];
-            col = col_;
-            alpha = alpha_;
-        }
-    };
-
-    list<call_structs*> model_calls;
 
     void clear()
     {
-        list<call_structs*>::iterator i;
-        for (i = model_calls.begin(); i != model_calls.end(); i++)
+        while (!primitive_calls.empty())
         {
-            delete (*i);
+            glDeleteLists(primitive_calls.front(), 1);
+            primitive_calls.pop_front();
         }
-        model_calls.clear();
+        primitive_calls.clear();
+        glDeleteLists(model, 1);
+        model = glGenLists(1);
     }
 
     void save(string fname)
     {
-        int file = file_text_open_write(fname);
-        file_text_write_real(file, something);
-        file_text_writeln(file);
-        file_text_write_real(file, model_calls.size());
-        file_text_writeln(file);
-        list<call_structs*>::iterator i;
-        for (i = model_calls.begin(); i != model_calls.end(); i++)
-        {
-            file_text_write_real(file, (*i)->type);
-            switch ((*i)->type)
-            {
-                case  0:
-                    file_text_write_real(file,(*i)->kind);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    break;
-                case  1:
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    break;
-                case  2:
-                    file_text_write_real(file,(*i)->x);
-                    file_text_write_real(file,(*i)->y);
-                    file_text_write_real(file,(*i)->z);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    break;
-                case  3:
-                    file_text_write_real(file,(*i)->x);
-                    file_text_write_real(file,(*i)->y);
-                    file_text_write_real(file,(*i)->z);
-                    file_text_write_real(file,(*i)->col);
-                    file_text_write_real(file,(*i)->alpha);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    break;
-                case  4:
-                    file_text_write_real(file,(*i)->x);
-                    file_text_write_real(file,(*i)->y);
-                    file_text_write_real(file,(*i)->z);
-                    file_text_write_real(file,(*i)->tx);
-                    file_text_write_real(file,(*i)->ty);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    break;
-                case  5:
-                    file_text_write_real(file,(*i)->x);
-                    file_text_write_real(file,(*i)->y);
-                    file_text_write_real(file,(*i)->z);
-                    file_text_write_real(file,(*i)->tx);
-                    file_text_write_real(file,(*i)->ty);
-                    file_text_write_real(file,(*i)->col);
-                    file_text_write_real(file,(*i)->alpha);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    break;
-                case  6:
-                    file_text_write_real(file,(*i)->x);
-                    file_text_write_real(file,(*i)->y);
-                    file_text_write_real(file,(*i)->z);
-                    file_text_write_real(file,(*i)->nx);
-                    file_text_write_real(file,(*i)->ny);
-                    file_text_write_real(file,(*i)->nz);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    break;
-                case  7:
-                    file_text_write_real(file,(*i)->x);
-                    file_text_write_real(file,(*i)->y);
-                    file_text_write_real(file,(*i)->z);
-                    file_text_write_real(file,(*i)->nx);
-                    file_text_write_real(file,(*i)->ny);
-                    file_text_write_real(file,(*i)->nz);
-                    file_text_write_real(file,(*i)->col);
-                    file_text_write_real(file,(*i)->alpha);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    break;
-                case  8:
-                    file_text_write_real(file,(*i)->x);
-                    file_text_write_real(file,(*i)->y);
-                    file_text_write_real(file,(*i)->z);
-                    file_text_write_real(file,(*i)->nx);
-                    file_text_write_real(file,(*i)->ny);
-                    file_text_write_real(file,(*i)->nz);
-                    file_text_write_real(file,(*i)->tx);
-                    file_text_write_real(file,(*i)->ty);
-                    file_text_write_real(file,0);
-                    file_text_write_real(file,0);
-                    break;
-                case  9:
-                    file_text_write_real(file,(*i)->x);
-                    file_text_write_real(file,(*i)->y);
-                    file_text_write_real(file,(*i)->z);
-                    file_text_write_real(file,(*i)->nx);
-                    file_text_write_real(file,(*i)->ny);
-                    file_text_write_real(file,(*i)->nz);
-                    file_text_write_real(file,(*i)->tx);
-                    file_text_write_real(file,(*i)->ty);
-                    file_text_write_real(file,(*i)->col);
-                    file_text_write_real(file,(*i)->alpha);
-                    break;
-            }
-            file_text_writeln(file);
-        }
-        file_text_close(file);
-    }
+      /* */
+    }//removed save for now
 
     bool load(string fname)
     {
@@ -1058,16 +825,18 @@ class d3d_model
         if (something != 100)
             return false;
         file_text_readln(file);
-        int model_call_num = file_text_read_real(file);
+        int calls = file_text_read_real(file);
         file_text_readln(file);
+        int kind;
         float v[3], n[3], t[2];
         double col, alpha;
-        for (int i = 0; i < model_call_num; i++)
+        while (!file_text_eof(file))
         {
             switch (int(file_text_read_real(file)))
             {
                 case  0:
-                    model_primitive_begin(file_text_read_real(file));
+                    kind = file_text_read_real(file);
+                    model_primitive_begin(kind);
                     break;
                 case  1:
                     model_primitive_end();
@@ -1147,131 +916,88 @@ class d3d_model
         bind_texture(texId);
         glPushAttrib(GL_CURRENT_BIT);
         glTranslatef(x, y, z);
-        list<call_structs*>::iterator i;
-        for (i = model_calls.begin(); i != model_calls.end(); i++)
-        {
-            switch ((*i)->type)
-            {
-                case  0:
-                    glBegin(ptypes_by_id[(*i)->kind]);
-                    break;
-                case  1:
-                    glEnd();
-                    break;
-                case  2:
-                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
-                    break;
-                case  3:
-                    glColor4f(__GETR((*i)->col), __GETG((*i)->col), __GETB((*i)->col), (*i)->alpha);
-                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
-                    glColor4ubv(enigma::currentcolor);
-                    break;
-                case  4:
-                    glTexCoord2f((*i)->tx,(*i)->ty);
-                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
-                    break;
-                case  5:
-                    glColor4f(__GETR((*i)->col), __GETG((*i)->col), __GETB((*i)->col), (*i)->alpha);
-                    glTexCoord2f((*i)->tx,(*i)->ty);
-                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
-                    glColor4ubv(enigma::currentcolor);
-                    break;
-                case  6:
-                    glNormal3f((*i)->nx, (*i)->ny, (*i)->nz);
-                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
-                    break;
-                case  7:
-                    glColor4f(__GETR((*i)->col), __GETG((*i)->col), __GETB((*i)->col), (*i)->alpha);
-                    glNormal3f((*i)->nx, (*i)->ny, (*i)->nz);
-                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
-                    glColor4ubv(enigma::currentcolor);
-                    break;
-                case  8:
-                    glTexCoord2f((*i)->tx,(*i)->ty);
-                    glNormal3f((*i)->nx, (*i)->ny, (*i)->nz);
-                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
-                    break;
-                case  9:
-                    glColor4f(__GETR((*i)->col), __GETG((*i)->col), __GETB((*i)->col), (*i)->alpha);
-                    glTexCoord2f((*i)->tx,(*i)->ty);
-                    glNormal3f((*i)->nx, (*i)->ny, (*i)->nz);
-                    glVertex3d((*i)->x,(*i)->y,(*i)->z);
-                    glColor4ubv(enigma::currentcolor);
-                    break;
-            }
-        }
+        glCallList(model);
         glTranslatef(-x, -y, -z);
         glPopAttrib();
     }
 
     void model_primitive_begin(int kind)
     {
-        call_structs *mc = new call_structs;
-        mc->primitive_begin(kind);
-        model_calls.push_back(mc);
+        GLuint index = glGenLists(1);
+        primitive_calls.push_back(index);
+        glNewList(index, GL_COMPILE);
+        glBegin(ptypes_by_id[kind]);
     }
 
     void model_primitive_end()
     {
-        call_structs *mc = new call_structs;
-        mc->primitive_end();
-        model_calls.push_back(mc);
+        glEnd();
+        glEndList();
+        glDeleteLists(model, 1);
+        model = glGenLists(1);
+        glNewList(model, GL_COMPILE);
+        list<GLuint>::iterator i;
+        for (i = primitive_calls.begin(); i != primitive_calls.end(); i++)
+        {
+            glCallList(*i);
+        }
+        glEndList();
     }
 
     void model_vertex(float v[])
     {
-        call_structs *mc = new call_structs;
-        mc->vertex(v);
-        model_calls.push_back(mc);
+        glVertex3fv(v);
     }
 
     void model_vertex_color(float v[], int col, double alpha)
     {
-        call_structs *mc = new call_structs;
-        mc->vertex_color(v, col, alpha);
-        model_calls.push_back(mc);
+        glColor4f(__GETR(col), __GETG(col), __GETB(col), alpha);
+        glVertex3fv(v);
+        glColor4ubv(enigma::currentcolor);
     }
 
     void model_vertex_texture(float v[], float t[])
     {
-        call_structs *mc = new call_structs;
-        mc->vertex_texture(v, t);
-        model_calls.push_back(mc);
+        glTexCoord2fv(t);
+        glVertex3fv(v);
     }
 
     void model_vertex_texture_color(float v[], float t[], int col, double alpha)
     {
-        call_structs *mc = new call_structs;
-        mc->vertex_texture_color(v, t, col, alpha);
-        model_calls.push_back(mc);
+        glColor4f(__GETR(col), __GETG(col), __GETB(col), alpha);
+        glTexCoord2fv(t);
+        glVertex3fv(v);
+        glColor4ubv(enigma::currentcolor);
     }
 
     void model_vertex_normal(float v[], float n[])
     {
-        call_structs *mc = new call_structs;
-        mc->vertex_normal(v, n);
-        model_calls.push_back(mc);
+        glNormal3fv(n);
+        glVertex3fv(v);
     }
 
     void model_vertex_normal_color(float v[], float n[], int col, double alpha)
     {
-        call_structs *mc = new call_structs;
-        mc->vertex_normal_color(v, n, col, alpha);
-        model_calls.push_back(mc);
+        glColor4f(__GETR(col), __GETG(col), __GETB(col), alpha);
+        glNormal3fv(n);
+        glVertex3fv(v);
+        glColor4ubv(enigma::currentcolor);
     }
 
     void model_vertex_normal_texture(float v[], float n[], float t[])
     {
-        call_structs *mc = new call_structs;
-        mc->vertex_normal_texture(v, n, t);
-        model_calls.push_back(mc);
+        glTexCoord2fv(t);
+        glNormal3fv(n);
+        glVertex3fv(v);
     }
 
     void model_vertex_normal_texture_color(float v[], float n[], float t[], int col, double alpha)
     {
-        call_structs *mc = new call_structs;
-        mc->vertex_normal_texture_color(v, n, t, col, alpha);
-        model_calls.push_back(mc);
+        glColor4f(__GETR(col), __GETG(col), __GETB(col), alpha);
+        glTexCoord2fv(t);
+        glNormal3fv(n);
+        glVertex3fv(v);
+        glColor4ubv(enigma::currentcolor);
     }
 
     void model_block(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed)
@@ -1492,6 +1218,7 @@ class d3d_model
 static map<unsigned int, d3d_model> d3d_models;
 static unsigned int d3d_models_maxid = 0;
 
+#include <iostream>
 unsigned int d3d_model_create()
 {
     d3d_models.insert(pair<unsigned int, d3d_model>(d3d_models_maxid++, d3d_model()));

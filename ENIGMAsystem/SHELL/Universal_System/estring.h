@@ -27,7 +27,7 @@ size_t string_length(string str);
 size_t string_length(const char* str);
 int string_pos(string substr,string str);
 
-
+string string_format(double val, unsigned tot, unsigned dec);
 string string_copy(string str,int index,int count);
 string string_char_at(string str,int index);
 string string_delete(string str,int index,int count);

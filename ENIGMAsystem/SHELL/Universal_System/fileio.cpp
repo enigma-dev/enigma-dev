@@ -39,9 +39,10 @@ namespace enigma
     FILE *f;      //FILE we opened, or NULL if it has been closed.
     string sdata; //Use varies depending on type.
     int spos;      //position in sdata string
+    bool eof;
 
-    openFile(): f(NULL), sdata() {spos = 0;};
-    openFile(FILE* a,string b): f(a), sdata(b) {spos = 0;};
+    openFile(): f(NULL), sdata(), spos(0), eof(false) {};
+    openFile(FILE* a,string b): f(a), sdata(b), spos(0), eof(false) {};
   };
   varray<openFile> files; //Use a dynamic array to store as many files as the user cares to open
   int file_highid = 0; //This isn't what GM does, but it's not a bad idea. GM checks for the smallest unused ID.
@@ -87,14 +88,13 @@ void file_text_close(int fileid) // Closes the file with the given file id.
       enigma::file_highid = i;
 }
 void file_text_write_string(int fileid,string str) { // Writes the string to the file with the given file id.
-  enigma::files[fileid].sdata = str;
-
+  fwrite(str.c_str(),1,str.length(),enigma::files[fileid].f);
 }
 void file_text_write_real(int fileid,double x) // Write the real value to the file with the given file id.
 {
-  char sbuf[12]; sbuf[0] = 0;
+  char sbuf[19]; sbuf[0] = 0;
   const enigma::openFile &mf = enigma::files[fileid];
-  sprintf(sbuf," %lf",x);
+  sprintf(sbuf," %.16g",x);
   const string fstr = sbuf;
   fwrite(fstr.c_str(),1,fstr.length(),mf.f);
 }
@@ -107,8 +107,15 @@ string file_text_read_string(int fileid) { // Reads a string from the file with 
   enigma::openFile &mf = enigma::files[fileid];
   if (!mf.sdata[mf.spos]) return "";
   string strr = mf.sdata.substr(mf.spos);
-//  mf.spos = mf.sdata.length();
+  mf.spos = mf.sdata.length();
+  if (feof(mf.f))
+    mf.eof = true;
   return strr;
+}
+bool file_text_eoln(int fileid)
+{
+    enigma::openFile &mf = enigma::files[fileid];
+    return (mf.spos >= mf.sdata.length());
 }
 
 inline bool is_whitespace(char x) { return x == ' ' or x == '\t' or x == '\r' or x == '\n'; }
@@ -120,12 +127,16 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
   if (!mf.sdata[mf.spos]) return 0;
   while (is_whitespace(mf.sdata[mf.spos]))
     mf.spos++;
-  if  (sscanf(mf.sdata.substr(mf.spos).c_str(),"%lf%n",&r1,&apos),apos)
+  if (sscanf(mf.sdata.substr(mf.spos).c_str(),"%lf%n",&r1,&apos),apos)
     mf.spos += apos;
+  if (mf.spos >= mf.sdata.length() && feof(mf.f))
+    mf.eof = true;
   return r1;
 }
 void file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
 {
+  if (feof(enigma::files[fileid].f))
+    enigma::files[fileid].eof = true;
   string ret;
   char buf[BUFSIZ];
     buf[0] = 0;
@@ -143,7 +154,7 @@ void file_text_readln(int fileid) // Skips the rest of the line in the file and 
   enigma::files[fileid].spos = 0;
 }
 bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
-  return feof(enigma::files[fileid].f);
+  return (enigma::files[fileid].eof);
 }
 
 // Binary file manipulation

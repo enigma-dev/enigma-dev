@@ -26,14 +26,14 @@
 \********************************************************************************/
 
 
-int file_exists(std::string fname);           
-int file_delete(std::string fname);           
-int file_rename(std::string oldname,std::string newname); 
-int file_copy(std::string fname,std::string newname);     
-int directory_exists(std::string dname);      
-int directory_create(std::string dname);      
+int file_exists(std::string fname);
+int file_delete(std::string fname);
+int file_rename(std::string oldname,std::string newname);
+int file_copy(std::string fname,std::string newname);
+int directory_exists(std::string dname);
+int directory_create(std::string dname);
 
-std::string file_find_first(std::string mask,int attr);   
+std::string file_find_first(std::string mask,int attr);
 
 enum {
   fa_readonly  = 1,
@@ -44,20 +44,13 @@ enum {
   fa_archive   = 32
 };
 
-std::string file_find_next();                 
-void file_find_close();                
-bool file_attributes(std::string fname,int attr); 
+std::string file_find_next();
+void file_find_close();
+bool file_attributes(std::string fname,int attr);
 
-std::string filename_name(std::string fname);              
-std::string filename_path(std::string fname);              
-std::string filename_dir(std::string fname);               
-std::string filename_drive(std::string fname);             
-std::string filename_ext(std::string fname);               
-std::string filename_change_ext(std::string fname,std::string newext); 
-
-void export_include_file(std::string fname);                   
-void export_include_file_location(std::string fname,std::string location); 
-void discard_include_file(std::string fname);                  
+void export_include_file(std::string fname);
+void export_include_file_location(std::string fname,std::string location);
+void discard_include_file(std::string fname);
 
 extern unsigned game_id;
 extern std::string working_directory;

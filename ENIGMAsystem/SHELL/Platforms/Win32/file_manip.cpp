@@ -126,13 +126,13 @@ static int ff_attribs = 0;
 static HANDLE current_find = INVALID_HANDLE_VALUE;
 static WIN32_FIND_DATA found;
 
-string file_find_first(string name,int attributes) 
+string file_find_first(string name,int attributes)
 {
   if (current_find != INVALID_HANDLE_VALUE)
   { FindClose(current_find); current_find=INVALID_HANDLE_VALUE; }
-  
+
   ff_attribs=attributes;
-  
+
   HANDLE d=FindFirstFile(name.c_str(),&found);
   if (d==INVALID_HANDLE_VALUE) return "";
   while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
@@ -140,7 +140,7 @@ string file_find_first(string name,int attributes)
     if (FindNextFile(d,&found)==0)
     return "";
   }
-  
+
   current_find=d;
   return found.cFileName;
 }
@@ -149,7 +149,7 @@ string file_find_next()
 {
   if (current_find==INVALID_HANDLE_VALUE) return "";
   if (FindNextFile(current_find,&found)==0) return "";
-  
+
   while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes)) {
     if (FindNextFile(current_find,&found)==0)
     return "";
@@ -162,14 +162,13 @@ int file_find_close() {
   return 0;
 }
 
-bool file_attributes(std::string fname,int attr);
-
-std::string filename_name(std::string fname);
-std::string filename_path(std::string fname);
-std::string filename_dir(std::string fname);
-std::string filename_drive(std::string fname);
-std::string filename_ext(std::string fname);
-std::string filename_change_ext(std::string fname,std::string newext);
+bool file_attributes(std::string fname,int attributes)
+{
+    DWORD fa = GetFileAttributes(fname.c_str());
+    if (fa == 0xFFFFFFFF)
+        return false;
+    return fa & attributes;
+}
 
 void export_include_file(std::string fname);
 void export_include_file_location(std::string fname,std::string location);

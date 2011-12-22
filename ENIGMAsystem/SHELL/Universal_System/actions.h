@@ -578,6 +578,19 @@ inline bool action_if_mouse(const int button) {
 	return mouse_check_button(button);
 }
 
+inline void action_kill_position(double x, double y)
+{
+    if (argument_relative)
+    {
+        enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+        position_destroy(inst->x+x, inst->y+y);
+    }
+    else
+    {
+        position_destroy(x, y);
+    }
+}
+
 inline void action_move_random(const double snapHor, const double snapVer) {
     move_random(snapHor, snapVer);
 }
@@ -615,6 +628,22 @@ inline int draw_self()
     draw_sprite_ext(inst->sprite_index, inst->image_index, inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
     return 0;
 }  //actions seemed the best place for this
+
+inline void action_fullscreen(int action)
+{
+    switch (action)
+    {
+        case 0:
+            window_set_fullscreen(!window_get_fullscreen());
+            break;
+        case 1:
+            window_set_fullscreen(false);
+            break;
+        case 2:
+            window_set_fullscreen(true);
+            break;
+    }
+}
 
 inline void set_automatic_draw(bool enable)
 {
