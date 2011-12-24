@@ -113,17 +113,19 @@ void draw_background_part(int back,double left,double top,double width,double he
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
-    const float tbx=bck2d->texbordx,tby=bck2d->texbordy,
-        tbw=bck2d->width/tbx,tbh=bck2d->height/tby;
-    glBegin(GL_QUADS);
-      glTexCoord2f(left/tbw,top/tbh);
-        glVertex2f(x,y);
-      glTexCoord2f((left+width)/tbw,top/tbh);
-        glVertex2f(x+width,y);
-      glTexCoord2f((left+width)/tbw,(top+height)/tbh);
-        glVertex2f(x+width,y+height);
-      glTexCoord2f(left/tbw,(top+height)/tbh);
-        glVertex2f(x,y+height);
+    float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
+          tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
+          tby1 = top/tbh, tby2 = tby1 + height/tbh;
+
+    glBegin(GL_TRIANGLE_STRIP);
+    glTexCoord2f(tbx1,tby1);
+    glVertex2f(x,y);
+    glTexCoord2f(tbx2,tby1);
+    glVertex2f(x+width,y);
+    glTexCoord2f(tbx1,tby2);
+    glVertex2f(x,y+height);
+    glTexCoord2f(tbx2,tby2);
+    glVertex2f(x+width,y+height);
     glEnd();
 
     glPopAttrib();
@@ -131,34 +133,45 @@ void draw_background_part(int back,double left,double top,double width,double he
 
 void draw_background_tiled(int back,double x,double y)
 {
-  get_background(bck2d,back);
-  bind_texture(bck2d->texture);
-
-  glPushAttrib(GL_CURRENT_BIT);
+    get_background(bck2d,back);
+    bind_texture(bck2d->texture);
+    glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
-    x=bck2d->width-fmod(x,bck2d->width);
-    y=bck2d->height-fmod(y,bck2d->height);
-    const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
-    const int hortil= int (ceil(room_width/(bck2d->width*tbx))) + 1,
-              vertil= int (ceil(room_height/(bck2d->height*tby))) + 1;
+
+    x = bck2d->width-fmod(x,bck2d->width);
+    y = bck2d->height-fmod(y,bck2d->height);
+
+    const float
+    tbx = bck2d->texbordx,tby=bck2d->texbordy;
+
+    const int
+    hortil = int (ceil(room_width/(bck2d->width*tbx))) + 1,
+    vertil = int (ceil(room_height/(bck2d->height*tby))) + 1;
 
     glBegin(GL_QUADS);
-      for (int i=0; i<hortil; i++)
-      {
+    float xvert1 = -x, xvert2 = xvert1 + bck2d->width, yvert1, yvert2;
+    for (int i=0; i<hortil; i++)
+    {
+        yvert1 = -y; yvert2 = yvert1 + bck2d->height;
         for (int c=0; c<vertil; c++)
         {
-          glTexCoord2f(0,0);
-            glVertex2f(i*bck2d->width-x,c*bck2d->height-y);
-          glTexCoord2f(tbx,0);
-            glVertex2f((i+1)*bck2d->width-x,c*bck2d->height-y);
-          glTexCoord2f(tbx,tby);
-            glVertex2f((i+1)*bck2d->width-x,(c+1)*bck2d->height-y);
-          glTexCoord2f(0,tby);
-            glVertex2f(i*bck2d->width-x,(c+1)*bck2d->height-y);
+            glTexCoord2f(0,0);
+            glVertex2f(xvert1,yvert1);
+            glTexCoord2f(tbx,0);
+            glVertex2f(xvert2,yvert1);
+            glTexCoord2f(tbx,tby);
+            glVertex2f(xvert2,yvert2);
+            glTexCoord2f(0,tby);
+            glVertex2f(xvert1,yvert2);
+            yvert1 = yvert2;
+            yvert2 += bck2d->height;
         }
-      }
+        xvert1 = xvert2;
+        xvert2 += bck2d->width;
+    }
     glEnd();
-  glPopAttrib();
+
+    glPopAttrib();
 }
 
 void draw_background_tiled_area(int back,double x,double y,double x1,double y1,double x2,double y2)
@@ -214,31 +227,40 @@ void draw_background_tiled_area(int back,double x,double y,double x1,double y1,d
 
 void draw_background_ext(int back,double x,double y,double xscale,double yscale,double rot,int color,double alpha)
 {
-  get_background(bck2d,back);
-  bind_texture(bck2d->texture);
+    get_background(bck2d,back);
+    bind_texture(bck2d->texture);
 
-  glPushAttrib(GL_CURRENT_BIT);
+    glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-    const float tbx=bck2d->texbordx,tby=bck2d->texbordy, w=bck2d->width*xscale, h=bck2d->height*yscale;
     rot *= M_PI/180;
 
-    float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
-          ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+    const float
+    tbx = bck2d->texbordx, tby = bck2d->texbordy,
+    w = bck2d->width*xscale, h = bck2d->height*yscale,
+    wsinrot = w*sin(rot), wcosrot = w*cos(rot);
 
     glBegin(GL_QUADS);
-      glTexCoord2f(0,0);
-        glVertex2f(ulcx,ulcy);
-      glTexCoord2f(tbx,0);
-        glVertex2f(ulcx + w*cos(rot), ulcy - w*sin(rot));
-      glTexCoord2f(tbx,tby);
-        ulcx += h * cos(3*M_PI/2 + rot);
-        ulcy -= h * sin(3*M_PI/2 + rot);
-        glVertex2f(ulcx + w*cos(rot), ulcy - w*sin(rot));
-      glTexCoord2f(0,tby);
-        glVertex2f(ulcx,ulcy);
+
+    float
+    ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+    ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+    glTexCoord2f(0,0);
+    glVertex2f(ulcx,ulcy);
+    glTexCoord2f(tbx,0);
+    glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
+
+    const double mpr = 3*M_PI/2 + rot;
+    ulcx += h * cos(mpr);
+    ulcy -= h * sin(mpr);
+    glTexCoord2f(tbx,tby);
+    glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
+    glTexCoord2f(0,tby);
+    glVertex2f(ulcx,ulcy);
+
     glEnd();
-  glPopAttrib();
+
+    glPopAttrib();
 }
 
 void draw_background_stretched_ext(int back,double x,double y,double w,double h,int color,double alpha)
@@ -266,59 +288,75 @@ void draw_background_stretched_ext(int back,double x,double y,double w,double h,
 
 void draw_background_part_ext(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
 {
-  get_background(bck2d,back);
-  bind_texture(bck2d->texture);
+    get_background(bck2d,back);
+    bind_texture(bck2d->texture);
 
-  glPushAttrib(GL_CURRENT_BIT);
-  glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-  const float
-    tbx = bck2d->texbordx,  tby = bck2d->texbordy,
-    tbw = bck2d->width/tbx, tbh = bck2d->height/tby;
+    float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
+          xvert1 = x, xvert2 = xvert1 + width*xscale,
+          yvert1 = y, yvert2 = yvert1 + height*yscale,
+          tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
+          tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
-  glBegin(GL_QUADS);
-    glTexCoord2f(left/tbw,top/tbh);
-      glVertex2f(x,y);
-    glTexCoord2f((left+width)/tbw,top/tbh);
-      glVertex2f(x+width*xscale,y);
-    glTexCoord2f((left+width)/tbw,(top+height)/tbh);
-      glVertex2f(x+width*xscale,y+height*yscale);
-    glTexCoord2f(left/tbw,(top+height)/tbh);
-      glVertex2f(x,y+height*yscale);
-  glEnd();
+    glBegin(GL_TRIANGLE_STRIP);
+    glTexCoord2f(tbx1,tby1);
+    glVertex2f(xvert1,yvert1);
+    glTexCoord2f(tbx2,tby1);
+    glVertex2f(xvert2,yvert1);
+    glTexCoord2f(tbx1,tby2);
+    glVertex2f(xvert1,yvert2);
+    glTexCoord2f(tbx2,tby2);
+    glVertex2f(xvert2,yvert2);
+    glEnd();
 
-  glPopAttrib();
+    glPopAttrib();
 }
 
 void draw_background_tiled_ext(int back,double x,double y,double xscale,double yscale,int color,double alpha)
 {
-  get_background(bck2d,back);
-  bind_texture(bck2d->texture);
+    get_background(bck2d,back);
+    bind_texture(bck2d->texture);
 
-  glPushAttrib(GL_CURRENT_BIT);
+    glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-    const float tbx=bck2d->texbordx,tby=bck2d->texbordy, w=bck2d->width*xscale, h=bck2d->height*yscale;
-    const int hortil= int (ceil(room_width/(bck2d->width*tbx))),
-        vertil= int (ceil(room_height/(bck2d->height*tby)));
-    x=w-fmod(x,w);
-    y=h-fmod(y,h);
+
+    const float
+    tbx = bck2d->texbordx, tby = bck2d->texbordy,
+    width_scaled = bck2d->width*xscale, height_scaled = bck2d->height*yscale;
+
+    x = width_scaled-fmod(x,width_scaled);
+    y = height_scaled-fmod(y,height_scaled);
+
+    const int
+    hortil = int(ceil(room_width/(width_scaled*tbx))) + 1,
+    vertil = int(ceil(room_height/(height_scaled*tby))) + 1;
+
     glBegin(GL_QUADS);
+    float xvert1 = -x, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
     for (int i=0; i<hortil; i++)
     {
-      for (int c=0; c<vertil; c++)
-      {
-        glTexCoord2f(0,0);
-          glVertex2f(i*w-x,c*h-y);
-        glTexCoord2f(tbx,0);
-          glVertex2f((i+1)*w-x,c*h-y);
-        glTexCoord2f(tbx,tby);
-          glVertex2f((i+1)*w-x,(c+1)*h-y);
-        glTexCoord2f(0,tby);
-          glVertex2f(i*w-x,(c+1)*h-y);
-      }
+        yvert1 = -y; yvert2 = yvert1 + height_scaled;
+        for (int c=0; c<vertil; c++)
+        {
+            glTexCoord2f(0,0);
+            glVertex2f(xvert1,yvert1);
+            glTexCoord2f(tbx,0);
+            glVertex2f(xvert2,yvert1);
+            glTexCoord2f(tbx,tby);
+            glVertex2f(xvert2,yvert2);
+            glTexCoord2f(0,tby);
+            glVertex2f(xvert1,yvert2);
+            yvert1 = yvert2;
+            yvert2 += height_scaled;
+        }
+        xvert1 = xvert2;
+        xvert2 += width_scaled;
     }
     glEnd();
-  glPopAttrib();
+
+    glPopAttrib();
 }
 
 void draw_background_tiled_area_ext(int back,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha)
@@ -384,6 +422,7 @@ void draw_background_general(int back,double left,double top,double width,double
       w = width*xscale, h = height*yscale;
 
     rot *= M_PI/180;
+    const float wcosrot = w*cos(rot), wsinrot = w*sin(rot);
 
     float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
@@ -395,13 +434,13 @@ void draw_background_general(int back,double left,double top,double width,double
 
       glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),char(a2*255));
       glTexCoord2f((left+width)/tbw,top/tbh);
-        glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
+        glVertex2f((ulcx + wcosrot), (ulcy - wsinrot));
 
       ulcx += h * cos(3*M_PI/2 + rot);
       ulcy -= h * sin(3*M_PI/2 + rot);
       glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),char(a3*255));
       glTexCoord2f((left+width)/tbw,(top+height)/tbh);
-        glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
+        glVertex2f((ulcx + wcosrot), (ulcy - wsinrot));
 
       glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),char(a4*255));
       glTexCoord2f(left/tbw,(top+height)/tbh);

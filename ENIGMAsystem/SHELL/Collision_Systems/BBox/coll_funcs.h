@@ -46,3 +46,33 @@ int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool 
 
 double distance_to_object(int object);
 double distance_to_point(double x, double y);
+
+double move_contact_object(double angle, double max_dist, const int object, const bool solid_only = false);
+
+inline double move_contact_all(const double direction, const double max_dist) {
+    return move_contact_object(direction, max_dist, all);
+}
+
+inline double move_contact_solid(const double direction, const double max_dist) {
+    return move_contact_object(direction, max_dist, all, true);
+}
+
+double move_outside_object(double angle, double max_dist, const int object, const bool solid_only = false);
+
+inline double move_outside_all(const double direction, const double speed) {
+    return move_outside_object(direction, speed, all);
+}
+
+inline double move_ouside_solid(const double direction, const double speed) {
+    return move_outside_object(direction, speed, all, true);
+}
+
+int move_bounce_object(const bool adv, const int object, const bool solid_only = false);
+
+inline int move_bounce_all(const bool adv) {
+    return move_bounce_object(adv, all);
+}
+
+inline int move_bounce_solid(const bool adv) {
+    return move_bounce_object(adv, all, true);
+}

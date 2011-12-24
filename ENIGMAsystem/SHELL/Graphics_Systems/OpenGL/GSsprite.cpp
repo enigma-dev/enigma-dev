@@ -67,24 +67,28 @@ bool sprite_exists(int spr) {
 
 void draw_sprite(int spr,int subimg,double x,double y)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-  bind_texture(spr2d->texturearray[usi]);
+    get_spritev(spr2d,spr);
+    const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    bind_texture(spr2d->texturearray[usi]);
 
-  glPushAttrib(GL_CURRENT_BIT);
+    glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
-    const float tbx=spr2d->texbordx,tby=spr2d->texbordy;
+    const float tbx = spr2d->texbordx, tby = spr2d->texbordy,
+                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
+                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height;
+
     glBegin(GL_QUADS);
-      glTexCoord2f(0,0);
-        glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
-      glTexCoord2f(tbx,0);
-        glVertex2f(x+spr2d->width-spr2d->xoffset,y-spr2d->yoffset);
-      glTexCoord2f(tbx,tby);
-        glVertex2f(x+spr2d->width-spr2d->xoffset,y+spr2d->height-spr2d->yoffset);
-      glTexCoord2f(0,tby);
-        glVertex2f(x-spr2d->xoffset,y+spr2d->height-spr2d->yoffset);
+    glTexCoord2f(0,0);
+    glVertex2f(xvert1,yvert1);
+    glTexCoord2f(tbx,0);
+    glVertex2f(xvert2,yvert1);
+    glTexCoord2f(tbx,tby);
+    glVertex2f(xvert2,yvert2);
+    glTexCoord2f(0,tby);
+    glVertex2f(xvert1,yvert2);
     glEnd();
+
 	glPopAttrib();
 }
 
@@ -97,118 +101,142 @@ void draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double 
 	glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
-    const float tbx=spr2d->texbordx,tby=spr2d->texbordy;
+    const float tbx = spr2d->texbordx, tby = spr2d->texbordy,
+                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + w,
+                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + h;
+
     glBegin(GL_QUADS);
     glTexCoord2f(0,0);
-    glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
+    glVertex2f(xvert1,yvert1);
     glTexCoord2f(tbx,0);
-    glVertex2f(x+w-spr2d->xoffset,y-spr2d->yoffset);
+    glVertex2f(xvert2,yvert1);
     glTexCoord2f(tbx,tby);
-    glVertex2f(x+w-spr2d->xoffset,y+h-spr2d->yoffset);
+    glVertex2f(xvert2,yvert2);
     glTexCoord2f(0,tby);
-    glVertex2f(x-spr2d->xoffset,y+h-spr2d->yoffset);
+    glVertex2f(xvert1,yvert2);
     glEnd();
+
 	glPopAttrib();
 }
 
 void draw_sprite_part(int spr,int subimg,double left,double top,double width,double height,double x,double y)
 {
-  get_spritev(spr2d,spr);
-  glPushAttrib(GL_CURRENT_BIT);
+    get_spritev(spr2d,spr);
+    glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
     const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
 
-    float tbw=spr2d->width/(float)spr2d->texbordx,tbh=spr2d->height/(float)spr2d->texbordy;
+    float tbw = spr2d->width/(float)spr2d->texbordx, tbh = spr2d->height/(float)spr2d->texbordy,
+          tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
+          tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
     glBegin(GL_TRIANGLE_STRIP);
-      glTexCoord2f(left/tbw,top/tbh);
-        glVertex2f(x,y);
-      glTexCoord2f((left+width)/tbw,top/tbh);
-        glVertex2f(x+width,y);
-      glTexCoord2f(left/tbw,(top+height)/tbh);
-        glVertex2f(x,y+height);
-      glTexCoord2f((left+width)/tbw,(top+height)/tbh);
-        glVertex2f(x+width,y+height);
+    glTexCoord2f(tbx1,tby1);
+    glVertex2f(x,y);
+    glTexCoord2f(tbx2,tby1);
+    glVertex2f(x+width,y);
+    glTexCoord2f(tbx1,tby2);
+    glVertex2f(x,y+height);
+    glTexCoord2f(tbx2,tby2);
+    glVertex2f(x+width,y+height);
     glEnd();
+
 	glPopAttrib();
 }
 
 void draw_sprite_part_offset(int spr,int subimg,double left,double top,double width,double height,double x,double y)
 {
-  get_spritev(spr2d,spr);
-  glPushAttrib(GL_CURRENT_BIT);
+    get_spritev(spr2d,spr);
+    glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
     const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
 
-    float tbw=spr2d->width/spr2d->texbordx,tbh=spr2d->height/spr2d->texbordy;
+    float tbw = spr2d->width/spr2d->texbordx, tbh = spr2d->height/spr2d->texbordy,
+          xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
+          yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height,
+          tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
+          tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
     glBegin(GL_TRIANGLE_STRIP);
-      glTexCoord2f(left/tbw,top/tbh);
-        glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
-      glTexCoord2f((left+width-1)/tbw,top/tbh);
-        glVertex2f(x+width-1-spr2d->xoffset,y-spr2d->yoffset);
-      glTexCoord2f(left/tbw,(top+height-1)/tbh);
-        glVertex2f(x-spr2d->xoffset,y+height-1-spr2d->yoffset);
-      glTexCoord2f((left+width-1)/tbw,(top+height-1)/tbh);
-        glVertex2f(x+width-1-spr2d->xoffset,y+height-1-spr2d->yoffset);
+    glTexCoord2f(tbx1,tby1);
+    glVertex2f(xvert1,yvert1);
+    glTexCoord2f(tbx2,tby1);
+    glVertex2f(xvert2,yvert1);
+    glTexCoord2f(tbx1,tby2);
+    glVertex2f(xvert1,yvert2);
+    glTexCoord2f(tbx2,tby2);
+    glVertex2f(xvert2,yvert2);
     glEnd();
-    glBindTexture(GL_TEXTURE_2D,0);
+
 	glPopAttrib();
 }
 
 void draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double yscale,double rot,int blend,double alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-  bind_texture(spr2d->texturearray[usi]);
+    get_spritev(spr2d,spr);
+    const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    bind_texture(spr2d->texturearray[usi]);
 
-  glPushAttrib(GL_CURRENT_BIT);
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor4ub(__GETR(blend),__GETG(blend),__GETB(blend),char(alpha*255)); //Implement "blend" parameter
+
+    rot *= M_PI/180;
+
+    const float
+    w = spr2d->width*xscale, h = spr2d->height*yscale,
+    tbx = spr2d->texbordx, tby = spr2d->texbordy,
+    wsinrot = w*sin(rot), wcosrot = w*cos(rot);
+
     glBegin(GL_TRIANGLE_STRIP);
-      const float w = spr2d->width*xscale,   h = spr2d->height*yscale;
-      const float tbx = spr2d->texbordx,   tby = spr2d->texbordy;
-      rot *= M_PI/180;
 
-      float
-      ulcx = x - xscale * spr2d->xoffset * cos(rot) + yscale * spr2d->yoffset * cos(M_PI/2+rot),
-      ulcy = y + xscale * spr2d->xoffset * sin(rot) - yscale * spr2d->yoffset * sin(M_PI/2+rot);
-      glColor4ub(__GETR(blend),__GETG(blend),__GETB(blend),char(alpha*255)); //Implement "blend" parameter
+    float
+    ulcx = x - xscale * spr2d->xoffset * cos(rot) + yscale * spr2d->yoffset * cos(M_PI/2+rot),
+    ulcy = y + xscale * spr2d->xoffset * sin(rot) - yscale * spr2d->yoffset * sin(M_PI/2+rot);
+    glTexCoord2f(0,0);
+    glVertex2f(ulcx,ulcy);
+    glTexCoord2f(tbx,0);
+    glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
 
-      glTexCoord2f(0,0);
-        glVertex2f(ulcx,ulcy);
-      glTexCoord2f(tbx,0);
-        glVertex2f(ulcx + w*cos(rot), ulcy - w*sin(rot));
-      glTexCoord2f(0,tby);
-        ulcx += h * cos(3*M_PI/2 + rot);
-        ulcy -= h * sin(3*M_PI/2 + rot);
-        glVertex2f(ulcx,ulcy);
-      glTexCoord2f(tbx,tby);
-        glVertex2f(ulcx + w*cos(rot), ulcy - w*sin(rot));
+    const double mpr = 3*M_PI/2 + rot;
+    ulcx += h * cos(mpr);
+    ulcy -= h * sin(mpr);
+    glTexCoord2f(0,tby);
+    glVertex2f(ulcx,ulcy);
+    glTexCoord2f(tbx,tby);
+    glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
+
     glEnd();
-  glPopAttrib();
+
+    glPopAttrib();
 }
 
 void draw_sprite_part_ext(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
 {
-  get_spritev(spr2d,spr);
+    get_spritev(spr2d,spr);
 	glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
     const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
 
-    float tbw=spr2d->width/spr2d->texbordx,tbh=spr2d->height/spr2d->texbordy;
+    float tbw = spr2d->width/(float)spr2d->texbordx, tbh = spr2d->height/(float)spr2d->texbordy,
+          xvert1 = x, xvert2 = xvert1 + width*xscale,
+          yvert1 = y, yvert2 = yvert1 + height*yscale,
+          tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
+          tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
     glBegin(GL_TRIANGLE_STRIP);
-      glTexCoord2f(left/tbw,top/tbh);
-        glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
-      glTexCoord2f((left+width-1)/tbw,top/tbh);
-        glVertex2f(x+width-1-spr2d->xoffset,y-spr2d->yoffset);
-      glTexCoord2f(left/tbw,(top+height-1)/tbh);
-        glVertex2f(x-spr2d->xoffset,y+height-1-spr2d->yoffset);
-      glTexCoord2f((left+width-1)/tbw,(top+height-1)/tbh);
-        glVertex2f(x+width-1-spr2d->xoffset,y+height-1-spr2d->yoffset);
+    glTexCoord2f(tbx1,tby1);
+    glVertex2f(xvert1,yvert1);
+    glTexCoord2f(tbx2,tby1);
+    glVertex2f(xvert2,yvert1);
+    glTexCoord2f(tbx1,tby2);
+    glVertex2f(xvert1,yvert2);
+    glTexCoord2f(tbx2,tby2);
+    glVertex2f(xvert2,yvert2);
     glEnd();
+
 	glPopAttrib();
 }
 
@@ -218,8 +246,8 @@ void draw_sprite_part_ext(int spr,int subimg,double left,double top,double width
 
 void draw_sprite_general(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1, double a2, double a3, double a4)
 {
-  get_spritev(spr2d,spr);
-  glPushAttrib(GL_CURRENT_BIT);
+    get_spritev(spr2d,spr);
+    glPushAttrib(GL_CURRENT_BIT);
     const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
 
@@ -229,51 +257,59 @@ void draw_sprite_general(int spr,int subimg,double left,double top,double width,
     w = width*xscale, h = height*yscale;
 
     rot *= M_PI/180;
-
-    float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
-    ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+    const float wcosrot = w*cos(rot), wsinrot = w*sin(rot);
 
     glBegin(GL_QUADS);
-      glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),char(a1*255));
-        glTexCoord2f(left/tbw,top/tbh);
-          glVertex2f(ulcx,ulcy);
 
-      glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),char(a2*255));
-        glTexCoord2f((left+width)/tbw,top/tbh);
-          glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
+    float
+    ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+    ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+    glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),char(a1*255));
+    glTexCoord2f(left/tbw,top/tbh);
+    glVertex2f(ulcx,ulcy);
 
-      ulcx += h * cos(3*M_PI/2 + rot);
-      ulcy -= h * sin(3*M_PI/2 + rot);
-      glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),char(a3*255));
-        glTexCoord2f((left+width)/tbw,(top+height)/tbh);
-          glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
+    glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),char(a2*255));
+    glTexCoord2f((left+width)/tbw,top/tbh);
+    glVertex2f((ulcx + wcosrot), (ulcy - wsinrot));
 
-      glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),char(a4*255));
-        glTexCoord2f(left/tbw,(top+height)/tbh);
-          glVertex2f(ulcx,ulcy);
+    ulcx += h * cos(3*M_PI/2 + rot);
+    ulcy -= h * sin(3*M_PI/2 + rot);
+    glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),char(a3*255));
+    glTexCoord2f((left+width)/tbw,(top+height)/tbh);
+    glVertex2f((ulcx + wcosrot), (ulcy - wsinrot));
+
+    glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),char(a4*255));
+    glTexCoord2f(left/tbw,(top+height)/tbh);
+    glVertex2f(ulcx,ulcy);
+
     glEnd();
-  glPopAttrib();
+
+    glPopAttrib();
 }
 
 void draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,double h, int blend, double alpha)
 {
-  get_spritev(spr2d,spr);
-  glPushAttrib(GL_CURRENT_BIT);
+    get_spritev(spr2d,spr);
+    glPushAttrib(GL_CURRENT_BIT);
     const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
 
+    const float tbx = spr2d->texbordx, tby = spr2d->texbordy,
+                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + w,
+                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + h;
+
     glBegin(GL_QUADS);
-      glColor4ub(__GETR(blend),__GETG(blend),__GETB(blend),char(alpha*255)); //Implement "blend" parameter
-      glTexCoord2f(spr2d->texbordx,0);
-      glVertex2f(x-spr2d->xoffset,y-spr2d->yoffset);
-      glTexCoord2f(0,0);
-      glVertex2f(x+w-spr2d->xoffset,y-spr2d->yoffset);
-      glTexCoord2f(0,spr2d->texbordy);
-      glVertex2f(x+w-spr2d->xoffset,y+h-spr2d->yoffset);
-      glTexCoord2f(spr2d->texbordx,spr2d->texbordy);
-      glVertex2f(x-spr2d->xoffset,y+h-spr2d->yoffset);
+    glTexCoord2f(0,0);
+    glVertex2f(xvert1,yvert1);
+    glTexCoord2f(tbx,0);
+    glVertex2f(xvert2,yvert1);
+    glTexCoord2f(tbx,tby);
+    glVertex2f(xvert2,yvert2);
+    glTexCoord2f(0,tby);
+    glVertex2f(xvert1,yvert2);
     glEnd();
-  glPopAttrib();
+
+	glPopAttrib();
 }
 
 // These two leave a bad taste in my mouth because they depend on views, which should be removable.
@@ -286,70 +322,87 @@ using std::string;
 
 void draw_sprite_tiled(int spr,int subimg,double x,double y)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-  bind_texture(spr2d->texturearray[usi]);
+    get_spritev(spr2d,spr);
+    const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    bind_texture(spr2d->texturearray[usi]);
 
-  glPushAttrib(GL_CURRENT_BIT);
+    glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
     const float
-    tbx  = spr2d->texbordx,  tby  = spr2d->texbordy,
+    tbx  = spr2d->texbordx, tby  = spr2d->texbordy,
     xoff = spr2d->xoffset+x, yoff = spr2d->yoffset+y;
+
     const int
-    hortil = int (ceil(   (view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width)    / (spr2d->width*tbx))),
-    vertil = int (ceil(   (view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height)   / (spr2d->height*tby)));
+    hortil = int(ceil((view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width) / (spr2d->width*tbx))) + 1,
+    vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (spr2d->height*tby))) + 1;
 
     glBegin(GL_QUADS);
+    float xvert1 = -xoff, xvert2 = xvert1 + spr2d->width, yvert1, yvert2;
     for (int i=0; i<hortil; i++)
     {
-      for (int c=0; c<vertil; c++)
-      {
-        glTexCoord2f(0,0);
-          glVertex2f(i*spr2d->width-xoff,c*spr2d->height-yoff);
-        glTexCoord2f(tbx,0);
-          glVertex2f((i+1)*spr2d->width-xoff,c*spr2d->height-yoff);
-        glTexCoord2f(tbx,tby);
-          glVertex2f((i+1)*spr2d->width-xoff,(c+1)*spr2d->height-yoff);
-        glTexCoord2f(0,tby);
-          glVertex2f(i*spr2d->width-xoff,(c+1)*spr2d->height-yoff);
-      }
+        yvert1 = -yoff; yvert2 = yvert1 + spr2d->height;
+        for (int c=0; c<vertil; c++)
+        {
+            glTexCoord2f(0,0);
+            glVertex2f(xvert1,yvert1);
+            glTexCoord2f(tbx,0);
+            glVertex2f(xvert2,yvert1);
+            glTexCoord2f(tbx,tby);
+            glVertex2f(xvert2,yvert2);
+            glTexCoord2f(0,tby);
+            glVertex2f(xvert1,yvert2);
+            yvert1 = yvert2;
+            yvert2 += spr2d->height;
+        }
+        xvert1 = xvert2;
+        xvert2 += spr2d->width;
     }
     glEnd();
+
     glPopAttrib();
 }
 
 void draw_sprite_tiled_ext(int spr,int subimg,double x,double y, double xscale,double yscale,int color,double alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-  bind_texture(spr2d->texturearray[usi]);
+    get_spritev(spr2d,spr);
+    const int usi = subimg != -1 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    bind_texture(spr2d->texturearray[usi]);
 
-  glPushAttrib(GL_CURRENT_BIT);
+    glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
     const float
-    tbx  = spr2d->texbordx,         tby  = spr2d->texbordy,
-    xoff = spr2d->xoffset*xscale+x, yoff = spr2d->yoffset*yscale+y;
+    tbx  = spr2d->texbordx, tby  = spr2d->texbordy,
+    xoff = spr2d->xoffset*xscale+x, yoff = spr2d->yoffset*yscale+y,
+    width_scaled = spr2d->width*xscale, height_scaled = spr2d->height*yscale;
+
     const int
-    hortil= int (ceil(   (view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width)    / (spr2d->width*tbx*xscale))),
-    vertil= int (ceil(   (view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height)   / (spr2d->height*tby*yscale)));
+    hortil = int(ceil((view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width) / (width_scaled*tbx))) + 1,
+    vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (height_scaled*tby))) + 1;
 
     glBegin(GL_QUADS);
+    float xvert1 = -xoff, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
     for (int i=0; i<hortil; i++)
     {
-      for (int c=0; c<vertil; c++)
-      {
-        glTexCoord2f(0,0);
-          glVertex2f(i*spr2d->width*xscale-xoff,c*spr2d->height*yscale-yoff);
-        glTexCoord2f(tbx,0);
-          glVertex2f((i+1)*spr2d->width*xscale-xoff,c*spr2d->height*yscale-yoff);
-        glTexCoord2f(tbx,tby);
-          glVertex2f((i+1)*spr2d->width*xscale-xoff,(c+1)*spr2d->height*yscale-yoff);
-        glTexCoord2f(0,tby);
-          glVertex2f(i*spr2d->width*xscale-xoff,(c+1)*spr2d->height*yscale-yoff);
-      }
+        yvert1 = -yoff; yvert2 = yvert1 + height_scaled;
+        for (int c=0; c<vertil; c++)
+        {
+            glTexCoord2f(0,0);
+            glVertex2f(xvert1,yvert1);
+            glTexCoord2f(tbx,0);
+            glVertex2f(xvert2,yvert1);
+            glTexCoord2f(tbx,tby);
+            glVertex2f(xvert2,yvert2);
+            glTexCoord2f(0,tby);
+            glVertex2f(xvert1,yvert2);
+            yvert1 = yvert2;
+            yvert2 += height_scaled;
+       }
+       xvert1 = xvert2;
+       xvert2 += width_scaled;
     }
     glEnd();
-  glPopAttrib();
+
+    glPopAttrib();
 }

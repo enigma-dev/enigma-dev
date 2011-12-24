@@ -27,10 +27,10 @@
 
 #include "../../Universal_System/collisions_object.h"
 
-enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool notme, double x1, double y1, double x2, double y2);
-enigma::object_collisions* const collide_inst_line(int object, bool solid_only, bool notme, double x1, double y1, double x2, double y2);
 enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, bool notme, double x, double y);
-enigma::object_collisions* const collide_inst_point(int object, bool solid_only, bool notme, double x, double y);
-enigma::object_collisions* const collide_inst_circle(int object, bool solid_only, bool notme, double x, double y, double r);
-enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool notme, double x, double y, double rx, double ry);
-void destroy_inst_point(int object, bool solid_only, double x, double y);
+enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool notme, int x1, int y1, int x2, int y2);
+enigma::object_collisions* const collide_inst_line(int object, bool solid_only, bool notme, int x1, int y1, int x2, int y2);
+enigma::object_collisions* const collide_inst_point(int object, bool solid_only, bool notme, int x1, int y1);
+enigma::object_collisions* const collide_inst_circle(int object, bool solid_only, bool notme, int x1, int y1, double r);
+enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool notme, int x1, int y1, double rx, double ry);
+void destroy_inst_point(int object, bool solid_only, int x1, int y1);

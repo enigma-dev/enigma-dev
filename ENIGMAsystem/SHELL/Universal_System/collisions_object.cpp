@@ -21,18 +21,100 @@
 */
 
 #include "collisions_object.h"
+#include <cmath>
 
 namespace enigma
 {
-  int object_collisions::$bbox_left()   const { return (mask_index >= 0 ? sprite_get_bbox_left_relative  (mask_index) : (sprite_index >= 0 ? sprite_get_bbox_left_relative  (sprite_index) : 0)) + round(x); }
-  int object_collisions::$bbox_right()  const { return (mask_index >= 0 ? sprite_get_bbox_right_relative (mask_index) : (sprite_index >= 0 ? sprite_get_bbox_right_relative (sprite_index) : 0)) + round(x); }
-  int object_collisions::$bbox_top()    const { return (mask_index >= 0 ? sprite_get_bbox_top_relative   (mask_index) : (sprite_index >= 0 ? sprite_get_bbox_top_relative   (sprite_index) : 0)) + round(y); }
-  int object_collisions::$bbox_bottom() const { return (mask_index >= 0 ? sprite_get_bbox_bottom_relative(mask_index) : (sprite_index >= 0 ? sprite_get_bbox_bottom_relative(sprite_index) : 0)) + round(y); }
-  
-  const bbox_rect_t& object_collisions::$bbox_relative() const { return (mask_index >= 0 ? sprite_get_bbox_relative(mask_index) : sprite_get_bbox_relative(sprite_index)); }
-  const bbox_rect_t& object_collisions::$bbox() const { return (mask_index >= 0 ? sprite_get_bbox(mask_index) : sprite_get_bbox(sprite_index)); }
-  
-  object_collisions::object_collisions(): object_transform() {}
-  object_collisions::object_collisions(unsigned _id,int _objid): object_transform(_id,_objid) {}
-  object_collisions::~object_collisions() {}
+    int object_collisions::$bbox_left() const
+    {
+        if (image_angle == 0)
+            return (image_xscale >= 0) ?
+                   ((mask_index >= 0 ? sprite_get_bbox_left_relative(mask_index)*image_xscale : (sprite_index >= 0 ? sprite_get_bbox_left_relative(sprite_index)*image_xscale : 0)) + x + .5) :
+                   ((mask_index >= 0 ? (sprite_get_bbox_right_relative(mask_index) + 1)*image_xscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_right_relative(sprite_index) + 1)*image_xscale - 1: 0)) + x + .5);
+
+        const double arad = image_angle*(M_PI/180.0);
+        const int quad = int(fmod(fmod(image_angle, 360) + 360, 360)/90.0);
+        double w, h;
+        w = ((image_xscale >= 0)^(quad == 1 || quad == 2)) ?
+            (mask_index >= 0 ? sprite_get_bbox_left_relative(mask_index)*image_xscale : (sprite_index >= 0 ? sprite_get_bbox_left_relative(sprite_index)*image_xscale : 0)) :
+            (mask_index >= 0 ? (sprite_get_bbox_right_relative(mask_index) + 1)*image_xscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_right_relative(sprite_index) + 1)*image_xscale - 1: 0));
+        h = ((image_yscale >= 0)^(quad == 2 || quad == 3)) ?
+            (mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0)) :
+            (mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0));
+
+        return cos(arad)*w + sin(arad)*h + x + .5;
+    }
+
+    int object_collisions::$bbox_right() const
+    {
+        if (image_angle == 0)
+            return (image_xscale >= 0) ?
+                   ((mask_index >= 0 ? (sprite_get_bbox_right_relative(mask_index) + 1)*image_xscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_right_relative(sprite_index) + 1)*image_xscale - 1: 0)) + x + .5) :
+                   ((mask_index >= 0 ? sprite_get_bbox_left_relative(mask_index)*image_xscale : (sprite_index >= 0 ? sprite_get_bbox_left_relative(sprite_index)*image_xscale : 0)) + x + .5);
+
+        const double arad = image_angle*(M_PI/180.0);
+        const int quad = int(fmod(fmod(image_angle, 360) + 360, 360)/90.0);
+        double w, h;
+        w = ((image_xscale >= 0)^(quad == 1 || quad == 2)) ?
+            (mask_index >= 0 ? (sprite_get_bbox_right_relative(mask_index) + 1)*image_xscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_right_relative(sprite_index) + 1)*image_xscale - 1: 0)) :
+            (mask_index >= 0 ? sprite_get_bbox_left_relative(mask_index)*image_xscale : (sprite_index >= 0 ? sprite_get_bbox_left_relative(sprite_index)*image_xscale : 0));
+        h = ((image_yscale >= 0)^(quad == 2 || quad == 3)) ?
+            (mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0)) :
+            (mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0));
+
+        return cos(arad)*w + sin(arad)*h + x + .5;
+    }
+
+    int object_collisions::$bbox_top() const
+    {
+        if (image_angle == 0)
+            return (image_xscale >= 0) ?
+                ((mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0)) + y + .5):
+                ((mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0)) + y + .5);
+
+        const double arad = image_angle*(M_PI/180.0);
+        const int quad = int(fmod(fmod(image_angle, 360) + 360, 360)/90.0);
+        double w, h;
+        w = ((image_xscale >= 0)^(quad == 2 || quad == 3)) ?
+            (mask_index >= 0 ? (sprite_get_bbox_right_relative(mask_index) + 1)*image_xscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_right_relative(sprite_index) + 1)*image_xscale - 1: 0)) :
+            (mask_index >= 0 ? sprite_get_bbox_left_relative(mask_index)*image_xscale : (sprite_index >= 0 ? sprite_get_bbox_left_relative(sprite_index)*image_xscale : 0));
+        h = ((image_yscale >= 0)^(quad == 1 || quad == 2)) ?
+            (mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0)) :
+            (mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0));
+
+        return cos(arad)*h -sin(arad)*w + y + .5;
+    }
+
+    int object_collisions::$bbox_bottom() const
+    {
+        if (image_angle == 0)
+            return (image_xscale >= 0) ?
+                ((mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0)) + y + .5) :
+                ((mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0)) + y + .5);
+
+        const double arad = image_angle*(M_PI/180.0);
+        const int quad = int(fmod(fmod(image_angle, 360) + 360, 360)/90.0);
+        double w, h;
+        w = ((image_xscale >= 0)^(quad == 2 || quad == 3)) ?
+            (mask_index >= 0 ? sprite_get_bbox_left_relative(mask_index)*image_xscale : (sprite_index >= 0 ? sprite_get_bbox_left_relative(sprite_index)*image_xscale : 0)) :
+            (mask_index >= 0 ? (sprite_get_bbox_right_relative(mask_index) + 1)*image_xscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_right_relative(sprite_index) + 1)*image_xscale - 1: 0));
+        h = ((image_yscale >= 0)^(quad == 1 || quad == 2)) ?
+            (mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0)) :
+            (mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0));
+
+        return cos(arad)*h - sin(arad)*w + y + .5;
+    }
+
+    const bbox_rect_t& object_collisions::$bbox_relative() const
+    {
+        return (mask_index >= 0 ? sprite_get_bbox_relative(mask_index) : sprite_get_bbox_relative(sprite_index));
+    }
+    const bbox_rect_t& object_collisions::$bbox() const
+    {
+         return (mask_index >= 0 ? sprite_get_bbox(mask_index) : sprite_get_bbox(sprite_index));
+    }
+
+    object_collisions::object_collisions(): object_transform() {}
+    object_collisions::object_collisions(unsigned _id,int _objid): object_transform(_id,_objid) {}
+    object_collisions::~object_collisions() {}
 }
