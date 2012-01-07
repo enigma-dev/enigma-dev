@@ -1,0 +1,12 @@
+hs_err_pid*.log
+searchdirs.txt
+redirfile.txt
+definitions.h
+defines.txt
+blank.txt
+*.class
+*.o
+*.dll
+*.exe
+*.jar
+.svn/
