@@ -1,0 +1,27 @@
+%e-yaml
+---
+Name: GNU GCC G++
+Native: Yes
+Maintainer: Josh / ENIGMA.exe #This is a generated file
+Target-platform: Windows
+Template: 0.94
+
+# Some info about it
+path: ${auxpath}
+tcpath: ${tcpath}
+make: ${make}
+binpath: ${binpath}
+defines:  ${binpath}cpp -dM -x c++ -E $blank
+searchdirs: ${binpath}gcc -E -x c++ -v $blank
+searchdirs-start: "#include <...> search starts here:"
+searchdirs-end: "End of search list."
+resources: $exe
+ldflags: -static-libstdc++ -static-libgcc
+links: -static-libstdc++ -static-libgcc
+
+resource-linker: windres.exe
+
+Build-Extension: .exe
+Run-Output: $tempfile
+Run-Program: $game
+Run-Params: 
