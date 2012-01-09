@@ -28,14 +28,23 @@
 bool sound_play(int sound);
 bool sound_loop(int sound);
 void sound_stop(int sound);
+void sound_volume(int sound, float volume);
+void sound_global_volume(float mastervolume);
+void sound_delete(int sound);
 bool sound_pause(int sound);
+void sound_pause_all();
 bool sound_resume(int sound);
+void sound_resume_all();
+
+float sound_get_length(int sound);
+float sound_get_position(int sound);
+void sound_seek(int sound, float position);
+void sound_seek_all(float position);
 
 bool sound_isplaying(int sound);
 bool sound_ispaused(int sound);
 
 void sound_pan(int sound, float value);
-//void sound_volume(int sound, float value);
 
 int sound_add(string fname, int kind, bool preload);
 

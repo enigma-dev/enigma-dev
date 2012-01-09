@@ -18,6 +18,7 @@
 /*\\\ This file contains prototypes for functions that must be defined by the audio
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
+#include <cstdlib>
 
 namespace enigma
 {
@@ -35,7 +36,7 @@ namespace enigma
 
   // This function creates a stream-based sound.
   // TODO: allow client to specify format and rate
-  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *data, size_t bytes), void (*cleanup)(void *userdata), void *userdata);
+  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata);
 
   // This function allocates a new sound resource but does not put anything in it.
   int sound_allocate();
