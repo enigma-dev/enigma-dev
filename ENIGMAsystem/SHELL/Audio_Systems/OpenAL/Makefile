@@ -1,9 +1,9 @@
-SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
-include $(addsuffix /Makefile, $(addprefix Audio_Systems/OpenAL/, alure ../Codecs))
+SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp) $(wildcard Audio_Systems/OpenAL/alure/*.cpp)
 
 ifeq ($(PLATFORM), xlib)
-	LDLIBS += -lopenal
+	LDLIBS += -lopenal -lvorbisfile -lvorbis -ldumb
 else ifeq ($(PLATFORM), Win32)
+	include $(addsuffix /Makefile, $(addprefix Audio_Systems/OpenAL/, alure ../Codecs))
 	LDLIBS += ../additional/al/lib/Win32/OpenAL32.lib
 	RESOURCES += ../additional/al/rc/oal32.rc
 else ifeq ($(PLATFORM), Cocoa)

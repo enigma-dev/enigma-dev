@@ -16,7 +16,7 @@
 **/
 
 #include <string>
-#include "../../additional/zlib/zlib.h"
+#include <zlib.h>
 #include "../Widget_Systems/widgets_mandatory.h"
 #include "zlib.h"
 
