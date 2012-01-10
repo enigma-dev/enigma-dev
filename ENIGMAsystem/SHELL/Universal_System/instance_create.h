@@ -29,9 +29,10 @@
 int instance_create(int x,int y,int object)
 {
 	int idn = enigma::maxid++;
-
+  enigma::object_basic* ob;
 	switch((int)object)
 	{
+	  #define NEW_OBJ_PREFIX ob =
     #include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
     default:
         #if SHOWERRORS
@@ -39,24 +40,27 @@ int instance_create(int x,int y,int object)
         #endif
       return -1;
   }
+  ob->myevent_create();
   return idn;
 }
 
 namespace enigma
 {
-  void instance_create_id(int x,int y,int object,int idn)
+  object_basic* instance_create_id(int x,int y,int object,int idn)
   { //This is for use by the system only. Please leave be.
     if (enigma::maxid<idn)
       enigma::maxid = idn;
+    enigma::object_basic* ob;
     switch (object)
     {
+	    #define NEW_OBJ_PREFIX ob =
       #include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
-      
       default:
           #if SHOWERRORS
           show_error("Object doesn't exist",0);
           #endif
         ;
     }
+    return ob;
   }
 }

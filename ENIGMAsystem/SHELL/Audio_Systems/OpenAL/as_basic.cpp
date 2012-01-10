@@ -49,7 +49,7 @@ namespace enigma
     bool idle;    // True if this sound is not being used, false if playing or paused.
     bool playing; // True if this sound is playing; not paused or idle.
 
-    sound(): src(0), stream(0), cleanup(0), userdata(0), loaded(LOADSTATE_NONE), idle(1), playing(0), seek(0) {
+    sound(): src(0), stream(0), cleanup(0), userdata(0), seek(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
       buf[0] = 0; buf[1] = 0; buf[2] = 0;
     }
   };
@@ -276,7 +276,7 @@ void sound_pan(int sound, float value)
   alSource3f(snd->src,AL_POSITION,pan,sqrt(1-pan*pan),0);
 }
 float sound_get_length(int sound) { // Not for Streams
-  get_sound(snd,sound,);
+  get_sound(snd,sound,0);
   ALint size, bits, channels, freq;
 
   alGetBufferi(snd->buf[0], AL_SIZE, &size);
@@ -287,7 +287,7 @@ float sound_get_length(int sound) { // Not for Streams
   return size / channels / (bits/8) / (float)freq;
 }
 float sound_get_position(int sound) { // Not for Streams
-  get_sound(snd,sound,);
+  get_sound(snd,sound,-1);
   float offset;
   
   alGetSourcef(snd->src, AL_SEC_OFFSET, &offset);

@@ -312,13 +312,14 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Writing object switch" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out);
     wto << license;
+    wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
       wto << "case " << i->second->id << ":\n";
-      wto << "    new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
+      wto << "    NEW_OBJ_PREFIX new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
       wto << "  break;\n";
     }
-    wto << '\n';
+    wto << "\n\n#undef NEW_OBJ_PREFIX\n";
   wto.close();
 
 

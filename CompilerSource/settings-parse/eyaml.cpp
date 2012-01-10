@@ -157,7 +157,7 @@ ey_data parse_eyaml(istream &file, string filename)
   ey_data res;
   string line, unlowered;
   int linenum = 1, multi = false; // Line number for error reporting, multiline representing not in multi (false), starting multi (-1), or in multi (multiple line count)
-  char mchar = 0; // The character that started a multiline entry
+  //char mchar = 0; // The character that started a multiline entry
   
   getline(file,line);
   if (tolower(line.substr(0,7)) != "%e-yaml")
@@ -265,7 +265,7 @@ ey_data parse_eyaml(istream &file, string filename)
     if (++pos > vsp) // If we have any non-white value after this colon at all...
       if (pos - vsp == 1 and (line[vsp] == '|' or line[vsp] == '>')) // Pipe => Multiline value
         latest->second = latestc->value = new ey_string(unlowered, ""), // Store this value as a string
-        multi = -1, mchar = line[pos]; // Indicate that we are starting a multiline value, and note the character invoking it
+        multi = -1;//, mchar = line[pos]; // Indicate that we are starting a multiline value, and note the character invoking it
       else // Otherwise, just an ordinary scalar
         latest->second = latestc->value = new ey_string(unlowered, line.substr(vsp, pos - vsp)); // Store this value as a string
     else;

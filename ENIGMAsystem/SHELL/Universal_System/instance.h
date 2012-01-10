@@ -32,7 +32,7 @@ namespace enigma {
 int instance_create(int x,int y,int object);
 
 namespace enigma {
-  void instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
+  object_basic *instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
 }
 
 void instance_destroy();

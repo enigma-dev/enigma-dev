@@ -100,7 +100,7 @@ namespace enigma
 
     //Go to the first room
     if (room_count)
-      room_goto_absolute(0);
+      enigma::game_start();
 
     return 0;
   }

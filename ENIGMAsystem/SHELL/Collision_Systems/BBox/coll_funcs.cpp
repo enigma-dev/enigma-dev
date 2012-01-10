@@ -171,8 +171,7 @@ double distance_to_object(int object)
     double tempdist;
     const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     const bbox_rect_t &box = inst1->$bbox_relative();
-    const double x1 = inst1->x, y1 = inst1->y,
-                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
+    const double xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
     int left1, top1, right1, bottom1;
 

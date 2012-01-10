@@ -295,9 +295,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
 
           wto << "      enigma::constructor(this);\n";
-          if (event_used_by_something("create"))
-            wto << "      myevent_create();";
-          wto << "\n    }\n";
+          wto << "    }\n";
 
           // Destructor
           wto <<   "    \n    ~OBJ_" <<  i->second->name << "()\n    {\n";

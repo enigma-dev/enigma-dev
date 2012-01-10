@@ -6,7 +6,9 @@ defines.txt
 blank.txt
 *.class
 *.o
+*.d
+*.depend
 *.dll
 *.exe
 *.jar
-.svn/
+.eobjs/

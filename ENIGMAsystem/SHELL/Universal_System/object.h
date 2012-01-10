@@ -67,6 +67,8 @@ namespace enigma
       const int object_index;
 
       virtual void unlink();
+      virtual variant myevent_create();
+      virtual variant myevent_gamestart();
       virtual variant myevent_draw();
       virtual variant myevent_roomend();
       virtual variant myevent_destroy();

@@ -231,8 +231,7 @@ char getch()
 string getst()
 {
   string res;
-  int c, first;
-  first = c = getchar();
+  int c = getchar();
   while (c != '\n' && c != EOF)
   {
     res += char(c);
@@ -312,9 +311,9 @@ int test_exp_eval()
     char ghere[2048];
     value val;
     cin.getline(ghere,2048);
-    p=ghere; int wret;
+    p=ghere;
     if (p=="x") return 0;
-    if (p=="c" or p=="cls") wret = system("cls");
+    if (p=="c" or p=="cls") { if (system("cls")) cout << "bitchbitchbitchnagnagnag\n"; }
     else
     {
       val=evaluate_expression(p);
@@ -352,7 +351,6 @@ int m_prog_loop_cfp()
   #endif
 
   int a = parse_cfile(cftp);
-  int wret;
 
   #ifdef linux
     timeval te; gettimeofday(&te,NULL);
@@ -393,7 +391,7 @@ int m_prog_loop_cfp()
       cout<<"\r\nVariables:\r\n";
         print_scope_members(&global_scope, 2);
     }
-    if (c == 'c') wret = system("cls || clear");
+    if (c == 'c') { if (system("cls || clear")) for (int i = 0; i < 10; i++) cout << endl << endl << endl << endl << endl; }
     if (c == 'd')
     {
       cout << "Define: ";
@@ -425,7 +423,7 @@ int m_prog_loop_cfp()
       if (!f) cout << "Not found.";
     }
     if (c == 'e') print_err_line_at(a);
-    if (c == 'p') wret = system("PAUSE");
+    if (c == 'p') { if (system("PAUSE")) cout << "bitchbitchbitchnagnagnag\n"; }
     if (c == '>') cout << cfile << endl;
     cout << ">>";
     c = getch();

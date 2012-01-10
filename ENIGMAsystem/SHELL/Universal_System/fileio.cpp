@@ -115,7 +115,7 @@ string file_text_read_string(int fileid) { // Reads a string from the file with 
 bool file_text_eoln(int fileid)
 {
     enigma::openFile &mf = enigma::files[fileid];
-    return (mf.spos >= mf.sdata.length());
+    return (mf.spos >= (int)mf.sdata.length());
 }
 
 inline bool is_whitespace(char x) { return x == ' ' or x == '\t' or x == '\r' or x == '\n'; }
@@ -129,7 +129,7 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
     mf.spos++;
   if (sscanf(mf.sdata.substr(mf.spos).c_str(),"%lf%n",&r1,&apos),apos)
     mf.spos += apos;
-  if (mf.spos >= mf.sdata.length() && feof(mf.f))
+  if (mf.spos >= (int)mf.sdata.length() && feof(mf.f))
     mf.eof = true;
   return r1;
 }

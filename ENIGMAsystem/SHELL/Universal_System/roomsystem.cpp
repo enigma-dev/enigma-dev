@@ -70,7 +70,7 @@ namespace enigma
   roomstruct** roomdata;
   roomstruct** roomorder;
 
-  void roomstruct::gotome()
+  void roomstruct::gotome(bool gamestart)
   {
     //Destroy all objects
     enigma::nodestroy=1;
@@ -145,10 +145,19 @@ namespace enigma
     window_set_size(xm,ym);
     io_clear();
 
-    for (int i=0; i<instancecount; i++) {
+    object_basic* is[instancecount];
+    for (int i = 0; i<instancecount; i++) {
       inst *obj = &instances[i];
-      instance_create_id(obj->x,obj->y,obj->obj,obj->id);
+      is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
     }
+    
+    if (gamestart)
+    for (int i = 0; i<instancecount; i++)
+      is[i]->myevent_gamestart();
+    
+    for (int i = 0; i<instancecount; i++)
+      is[i]->myevent_create();
+    
     createcode();
   }
 
@@ -276,9 +285,9 @@ int room_previous(int num)
     return enigma::roomorder[rit->order - 1]->id;
 }
 
-bool room_exists(unsigned roomid)
+bool room_exists(int roomid)
 {
-    return roomid < enigma::room_idmax && enigma::roomdata[roomid];
+    return roomid >= 0 and roomid < enigma::room_idmax and enigma::roomdata[roomid];
 }
 
 namespace enigma
@@ -299,5 +308,9 @@ namespace enigma
         }
       }
     }
+  }
+  void game_start() {
+    enigma::roomstruct *rit = *enigma::roomorder;
+	  enigma::roomdata[rit->id]->gotome(true);
   }
 }

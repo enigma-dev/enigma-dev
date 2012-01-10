@@ -110,11 +110,12 @@ namespace enigma
     int tilecount;
     tile *tiles;
 
-    void gotome();
+    void gotome(bool=false);
   };
   void room_update();
   extern int room_max, maxid;
   void rooms_load();
+  void game_start();
 }
 
 // room variable

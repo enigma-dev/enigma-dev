@@ -825,7 +825,7 @@ class d3d_model
         if (something != 100)
             return false;
         file_text_readln(file);
-        int calls = file_text_read_real(file);
+        /*int calls = FIXME: POLYFUCK */file_text_read_real(file);
         file_text_readln(file);
         int kind;
         float v[3], n[3], t[2];

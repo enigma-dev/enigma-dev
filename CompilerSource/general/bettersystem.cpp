@@ -329,7 +329,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
         else {
           close(STDOUT_FILENO);
           int filedes = creat(redirout.c_str(),laxpermissions);
-          dup(filedes);
+          if (dup(filedes) == -1) {}
           if (redirerr == redirout)
             dup2(1,2);
         }
@@ -341,10 +341,11 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
               flags &= ~FD_CLOEXEC,
               fcntl(STDERR_FILENO, F_SETFD, flags);
           }
-        else if (redirerr != redirout)
-          close(STDERR_FILENO),
-          dup(creat(redirerr.c_str(),laxpermissions));
-
+        else if (redirerr != redirout) {
+          close(STDERR_FILENO);
+          if (dup(creat(redirerr.c_str(),laxpermissions)) == -1) {}
+        }
+        
         char** usenviron;
         if (Cenviron)
         {
