@@ -1,15 +1,15 @@
 %e-yaml
 ---
-Name: GNU GCC G++
+Name: MinGW 64
 Native: Yes
-Maintainer: RetroX
-Target-platform: Linux
+Maintainer: cheeseboy
+Target-platform: Windows
 
 # Some info about it
 path:
 make: make
-cc: gcc
-cxx: g++
+cc: x86_64-w64-mingw32-gcc
+cxx: x86_64-w64-mingw32-g++
 defines: cpp -dM -x c++ -E $blank
 searchdirs: gcc -E -x c++ -v $blank
 searchdirs-start: "#include <...> search starts here:"
@@ -18,11 +18,12 @@ resources: $exe
 cppflags:
 cxxflags:
 cflags:
-ldflags:
+ldlags:
 links:
+windres: x86_64-w64-mingw32-windres
 
 Build-Extension:
-Run-output: $tempfile
-Run-Program: $game
+Run-output: wine64 $tempfile
+Run-Program: wine64 $game
 Run-Params:
 

@@ -1,8 +1,8 @@
 %e-yaml
 ---
-Name: GNU GCC G++
+Name: GNU GCC G++ 32
 Native: Yes
-Maintainer: RetroX
+Maintainer: cheeseboy
 Target-platform: Linux
 
 # Some info about it
@@ -16,9 +16,9 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
 cppflags:
-cxxflags:
-cflags:
-ldflags:
+cxxflags: -m32
+cflags: -m32
+ldflags: -m32
 links:
 
 Build-Extension:

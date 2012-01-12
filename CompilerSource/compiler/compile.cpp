@@ -456,10 +456,13 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   if (CXX_override.length()) make += "CXX=" + CXX_override + " ";
   if (CC_override.length()) make += "CC=" + CC_override + " ";
   if (WINDRES_location.length()) make += "WINDRES=" + WINDRES_location + " ";
-  make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
-  make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
-  make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + "\" ";
-  make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
+  
+  if (mode != emode_debug) {
+    if (TOPLEVEL_cflags.length()) make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
+    if (TOPLEVEL_cppflags.length()) make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
+    if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + "\" ";
+    if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
+  }
 
   string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
   make += "COMPILEPATH=" + compilepath + " ";
