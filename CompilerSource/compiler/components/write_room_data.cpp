@@ -49,9 +49,49 @@ int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out);
 
   wto << license << "namespace enigma {\n"
-  << "  int room_loadtimecount = " << es->roomCount << ";\n"
-  << "  roomstruct grd_rooms[" << es->roomCount << "] = {\n";
+  << "  int room_loadtimecount = " << es->roomCount << ";\n";
   int room_highid = 0, room_highinstid = 100000,room_hightileid=10000000;
+
+  for (int i = 0; i < es->roomCount; i++)
+  {
+    wto << "  tile tiles_" << es->rooms[i].id << "[] = {\n";
+    for (int ii = 0, modme = 0; ii < es->rooms[i].tileCount; ii++)
+    {
+      wto << "{" <<
+        es->rooms[i].tiles[ii].id << "," <<
+        es->rooms[i].tiles[ii].backgroundId << "," <<
+        es->rooms[i].tiles[ii].bgX << "," <<
+        es->rooms[i].tiles[ii].bgY << "," <<
+        es->rooms[i].tiles[ii].depth << "," <<
+        es->rooms[i].tiles[ii].height << "," <<
+        es->rooms[i].tiles[ii].width << "," <<
+        es->rooms[i].tiles[ii].roomX << "," <<
+        es->rooms[i].tiles[ii].roomY << "},";
+        if (++modme % 16 == 0) wto << "\n        ";
+      if (es->rooms[i].tiles[ii].id > room_hightileid)
+        room_hightileid = es->rooms[i].tiles[ii].id;
+    }
+    wto << "  };\n";
+  }
+
+  for (int i = 0; i < es->roomCount; i++)
+  {
+    wto << "  inst insts_" << es->rooms[i].id << "[] = {\n";
+    for (int ii = 0, modme = 0; ii < es->rooms[i].instanceCount; ii++)
+    {
+      wto << "{" <<
+        es->rooms[i].instances[ii].id << "," <<
+        es->rooms[i].instances[ii].objectId << "," <<
+        es->rooms[i].instances[ii].x << "," <<
+        es->rooms[i].instances[ii].y << "},";
+        if (++modme % 16 == 0) wto << "\n        ";
+      if (es->rooms[i].instances[ii].id > room_highinstid)
+        room_highinstid = es->rooms[i].instances[ii].id;
+    }
+    wto << "  };\n";
+  }
+
+  wto << "  roomstruct grd_rooms[" << es->roomCount << "] = {\n";
   for (int i = 0; i < es->roomCount; i++)
   {
     wto << "    //Room " << es->rooms[i].id << "\n" <<
@@ -106,45 +146,10 @@ int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
         << " },\n";
      }
     wto <<
-    "      },"; //End of Backgrounds
-    wto <<
-    "      " << es->rooms[i].instanceCount << ", "
-    "      (enigma::inst*)(int[]){";
-      int modme = 0;
-      for (int ii = 0; ii < es->rooms[i].instanceCount; ii++) {
-        wto <<
-          es->rooms[i].instances[ii].id << "," <<
-          es->rooms[i].instances[ii].objectId << "," <<
-          es->rooms[i].instances[ii].x << "," <<
-          es->rooms[i].instances[ii].y << ",";
-          if (++modme % 16 == 0) wto << "\n        ";
-        if (es->rooms[i].instances[ii].id > room_highinstid)
-          room_highinstid = es->rooms[i].instances[ii].id;
-      }
-    wto << "  0,0,0,0}\n"; // End of the instances
+    "      }," //End of Backgrounds
 
-    //Tiles
-    wto <<
-    "      ," << es->rooms[i].tileCount << ", "
-    "      (enigma::tile*)(int[]){";
-      modme = 0;
-      for (int ii = 0; ii < es->rooms[i].tileCount; ii++) {
-        wto <<
-          es->rooms[i].tiles[ii].id << "," <<
-          es->rooms[i].tiles[ii].backgroundId << "," <<
-          es->rooms[i].tiles[ii].bgX << "," <<
-          es->rooms[i].tiles[ii].bgY << "," <<
-          es->rooms[i].tiles[ii].depth << "," <<
-          es->rooms[i].tiles[ii].height << "," <<
-          es->rooms[i].tiles[ii].width << "," <<
-          es->rooms[i].tiles[ii].roomX << "," <<
-          es->rooms[i].tiles[ii].roomY << ",";
-          if (++modme % 16 == 0) wto << "\n        ";
-        if (es->rooms[i].tiles[ii].id > room_hightileid)
-          room_hightileid = es->rooms[i].tiles[ii].id;
-
-      }
-    wto << "  0,0,0,0,0,0,0,0,0}\n"; // End of the tiles
+    << "      " << es->rooms[i].instanceCount << ", insts_" << es->rooms[i].id
+    << "      ," << es->rooms[i].tileCount << ", tiles_" << es->rooms[i].id;
 
     // End of this room
     wto << "    },\n";
