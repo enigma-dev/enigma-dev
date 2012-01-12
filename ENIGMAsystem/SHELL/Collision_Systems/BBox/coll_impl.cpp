@@ -232,7 +232,7 @@ enigma::object_collisions* const collide_inst_circle(int object, bool solid_only
 enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool notme, int x1, int y1, double rx, double ry)
 {
     if (rx == 0 || ry == 0)
-        return false;
+        return 0;
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {

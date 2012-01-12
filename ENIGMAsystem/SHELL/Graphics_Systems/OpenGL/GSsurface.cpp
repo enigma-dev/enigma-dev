@@ -16,12 +16,13 @@
 **/
 
 #include "OpenGLHeaders.h"
-using namespace std;
 #include <cstddef>
 #include <iostream>
 #include <math.h>
 
 #include "binding.h"
+
+using namespace std;
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)

@@ -110,9 +110,9 @@ namespace enigma
 
       //Tiles start
       drawing_depths.clear();
-      for (int tilei=0; tilei<enigma::roomdata[room]->tilecount; tilei++) {
-          tile t = enigma::roomdata[room]->tiles[tilei];
-          drawing_depths[t.depth].tiles.push_back(enigma::roomdata[room]->tiles[tilei]);
+      for (int tilei=0; tilei<tilecount; tilei++) {
+          tile t = tiles[tilei];
+          drawing_depths[t.depth].tiles.push_back(tiles[tilei]);
       }
       //Tiles end
 

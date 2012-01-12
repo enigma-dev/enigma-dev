@@ -19,6 +19,7 @@
 #include <string>
 #include <string.h>
 #include <stdio.h>
+#include <vector>
 using namespace std;
 
 #include "../Graphics_Systems/graphics_mandatory.h"
@@ -68,7 +69,7 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   // a square space based on the max height of the font.
 
   unsigned char* glyphdata[gcount]; // Raw font image data
-  enigma::rect_packer::pvrect glyphmetrics[gcount];
+  std::vector<enigma::rect_packer::pvrect> glyphmetrics(gcount);
   int glyphx[gcount], glyphy[gcount];
 
   int gwm = sspr->width, // Glyph width max: sprite width
@@ -127,9 +128,9 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
   for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
   {
-    enigma::rect_packer::rectpnode *nn = enigma::rect_packer::rninsert(rectplane, *i & 0xFF, glyphmetrics);
+    enigma::rect_packer::rectpnode *nn = enigma::rect_packer::rninsert(rectplane, *i & 0xFF, &glyphmetrics.front());
     if (nn)
-      enigma::rect_packer::rncopy(nn, glyphmetrics, *i & 0xFF),
+      enigma::rect_packer::rncopy(nn, &glyphmetrics.front(), *i & 0xFF),
       i++;
     else
     {

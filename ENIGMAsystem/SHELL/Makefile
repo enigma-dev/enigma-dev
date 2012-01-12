@@ -50,7 +50,7 @@ CC := gcc
 ifeq ($(GMODE), Debug)
 	CFLAGS := -Wall -g -DDEBUG_MODE
 else
-	CFLAGS := -Wall -s -O3
+	CFLAGS := -Wall -g
 endif
 
 LDFLAGS := 

@@ -261,9 +261,9 @@ void mp_grid_draw_neighbours(unsigned int id, unsigned int h, unsigned int v, un
 {
     //if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
     enigma::grid *grid = enigma::gridstructarray[id];
-    if (h<0) return;
+    //if (h<0) return; // FIX ME: Always false
     if (h>grid->hcells-1) return;
-    if (v<0) return;
+    //if (v<0) return; // FIX ME: Always false
     if (v>grid->vcells-1) return;
     //glPushAttrib(GL_CURRENT_BIT);
     //glBegin(GL_QUADS);

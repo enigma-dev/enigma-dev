@@ -90,7 +90,7 @@ namespace enigma
 		  unpacked = width*height*4;
 		  
 		  unsigned int size;
-		  if (!fread(&size,4,1,exe)); 
+		  if (!fread(&size,4,1,exe)){}; 
 		  printf("Alloc size: %d", size);
 		  
 		  unsigned char* cpixels=new unsigned char[size+1];

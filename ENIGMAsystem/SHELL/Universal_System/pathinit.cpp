@@ -27,7 +27,7 @@
 
 //#include <string>
 #include <stdio.h>
-using namespace std;
+//using namespace std;
 
 #include "pathstruct.h"
 #include "resinit.h"

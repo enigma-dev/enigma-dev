@@ -15,14 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-using namespace std;
-
 #include "OpenGLHeaders.h"
 #include "GSd3d.h"
 #include "../../Universal_System/var4.h"
 #include "../../Universal_System/roomsystem.h"
 #include <math.h>
 #include "binding.h"
+
+using namespace std;
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00)>>8)
