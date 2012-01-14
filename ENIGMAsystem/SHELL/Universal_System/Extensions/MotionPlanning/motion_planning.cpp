@@ -31,8 +31,8 @@
 using namespace std;
 
 //#include "../Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
-#include "pathstruct.h"
-#include "../libEGMstd.h"
+#include "../../pathstruct.h"
+#include "../../../libEGMstd.h"
 #include "motion_planning_struct.h"
 #include "motion_planning.h"
 
@@ -237,7 +237,7 @@ void mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
     enigma::path_recalculate(pathid);
 }
 
-#include "var4.h"
+#include "../../var4.h"
 //#include "GScolors.h"
 #define __GETR(x) (((x & 0x0000FF)))
 #define __GETG(x) (((x & 0x00FF00)>>8))

@@ -47,30 +47,6 @@ inline void action_move_to(const double xx, const double yy) {
 	}
 }
 
-inline void action_linear_step(double x, double y, double stepsize, bool solid_only)
-{
-    if (argument_relative)
-    {
-        mp_linear_step_object(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+x, ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+y, stepsize,all, solid_only);
-    }
-    else
-    {
-        mp_linear_step_object(x, y, stepsize,all, solid_only);
-	}
-}
-
-inline void action_potential_step(double x, double y, double stepsize, bool solid_only)
-{
-    if (argument_relative)
-    {
-        mp_potential_step_object(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+x, ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+y, stepsize,all, solid_only);
-    }
-    else
-    {
-        mp_potential_step_object(x, y, stepsize,all, solid_only);
-	}
-}
-
 inline void action_set_score(double newscore) {
     if (argument_relative) score+= (int)newscore;
     else score = (int)newscore;
@@ -159,17 +135,6 @@ inline bool action_if(const double x) {
     return x != 0;
 }
 
-inline bool action_if_object(const int object, const double xx, const double yy) {
-    if (argument_relative) {
-        enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-        return place_meeting(inst->x+xx,inst->y+yy,object);
-    }
-    else {
-        return place_meeting(xx,yy,object);
-    }
-    return false;
-}
-
 inline bool action_if_previous_room()
 {
     return room_previous(room) != -1;
@@ -213,22 +178,6 @@ inline void action_reverse_ydir() {
 
 inline bool action_if_aligned(const double snapHor, const double snapVer) {
 	return place_snapped(snapHor, snapVer);
-}
-
-inline bool action_if_empty(const double xx, const double yy, const int objects) {
-    if (argument_relative) {
-        if (objects == 0)
-            return place_free(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+xx,((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+yy);
-        else
-            return place_empty(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+xx,((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+yy);
-    }
-    else {
-        if (objects == 0)
-            return place_free(xx,yy);
-        else
-            return place_empty(xx,yy);
-    }
-    return false;
 }
 
 inline void action_move_start() {
@@ -304,13 +253,6 @@ inline void action_wrap(const int direction) {
     }
 }
 
-inline void action_move_contact(const double direction, const double max_dist, const bool against) {
-    move_contact_object(direction, max_dist, all, !against);
-}
-inline void action_bounce(int precisely, bool against) {
-    move_bounce_object(precisely, all, !against);
-}
-
 inline void action_set_motion(const double dir, const double nspeed) {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
     if (argument_relative) {
@@ -331,11 +273,6 @@ static inline void action_show_info() {show_info();}
 
 #define action_restart_game game_restart
 #define action_message(message) show_message(message)
-
-inline bool action_if_collision(const double x, const double y, const int object) {
-  return !action_if_empty(x,y,object); //Already takes argument_relative into account
-}
-
 
 inline void action_create_object(const int object, const double x, const double y)
 {
@@ -576,19 +513,6 @@ inline bool action_if_score(const double value, const int operation)
 
 inline bool action_if_mouse(const int button) {
 	return mouse_check_button(button);
-}
-
-inline void action_kill_position(double x, double y)
-{
-    if (argument_relative)
-    {
-        enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-        position_destroy(inst->x+x, inst->y+y);
-    }
-    else
-    {
-        position_destroy(x, y);
-    }
 }
 
 inline void action_move_random(const double snapHor, const double snapVer) {

@@ -1,1 +1,1 @@
-SOURCES += Universal_System/Extensions/MotionPlanning/mp.cpp
+SOURCES += $(wildcard Universal_System/Extensions/MotionPlanning/*.cpp)
