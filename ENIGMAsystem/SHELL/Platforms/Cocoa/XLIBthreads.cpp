@@ -28,8 +28,8 @@
 #include <deque>
 #include <stdio.h>
 #include <pthread.h>
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/resource_data.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/resource_data.h"
 #include "XLIBthreads.h"
 
 using namespace std;

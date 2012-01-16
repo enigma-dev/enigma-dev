@@ -37,13 +37,5 @@
 // Extensions selected by user
 #include "Universal_System/Extensions/Alarms/include.h"
 #include "Universal_System/Extensions/Alarms/implement.h"
-#include "Universal_System/Extensions/Timelines/include.h"
-#include "Universal_System/Extensions/Paths/include.h"
-#include "Universal_System/Extensions/Paths/implement.h"
-#include "Universal_System/Extensions/MotionPlanning/include.h"
-#include "Universal_System/Extensions/MotionPlanning/implement.h"
-#include "Universal_System/Extensions/DateTime/include.h"
-#include "Universal_System/Extensions/DateTime/implement.h"
-#include "Universal_System/Extensions/DataStructures/include.h"
-#include "Universal_System/Extensions/DataStructures/implement.h"
+#include "Universal_System/Extensions/GME/include.h"
 

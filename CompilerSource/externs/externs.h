@@ -30,7 +30,7 @@
 
 #include <map>
 #include <string>
-#include "../general/darray.h"
+#include "general/darray.h"
 using namespace std;
 typedef size_t pt;
 

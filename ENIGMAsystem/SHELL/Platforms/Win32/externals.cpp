@@ -30,10 +30,10 @@
 #include <windows.h>
 
 #include "ffi/ffi.h"
-#include "../../Universal_System/var4.h"
+#include "Universal_System/var4.h"
 
-#include "../platforms_mandatory.h"
-#include "../../Widget_Systems/widgets_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "externals.h"
 
 using namespace std;

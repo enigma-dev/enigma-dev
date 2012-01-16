@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include "darray.h"
-#include "../cfile_parse/macro_functions.h"
+#include "cfile_parse/macro_functions.h"
 
 struct macro_push_info {
   pt pos;

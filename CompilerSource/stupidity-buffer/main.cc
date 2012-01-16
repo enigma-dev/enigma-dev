@@ -36,7 +36,7 @@
 using namespace std;
 string msys_path_from_mingw = "msys\\1.0\\bin\\";
 
-#include "../settings-parse/eyaml.h"
+#include "settings-parse/eyaml.h"
 
 string fixdrive(string p)
 {

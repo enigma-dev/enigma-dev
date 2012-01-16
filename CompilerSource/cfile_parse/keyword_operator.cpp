@@ -28,12 +28,12 @@
 #include <map>
 #include <string>
 #include <iostream>
-#include "../general/darray.h"
+#include "general/darray.h"
 
 using namespace std;
 
 #include "value.h"
-#include "../externs/externs.h"
+#include "externs/externs.h"
 #include "expression_evaluator.h"
 
 #include "cfile_parse_constants.h"

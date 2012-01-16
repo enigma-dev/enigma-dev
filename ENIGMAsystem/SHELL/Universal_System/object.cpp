@@ -22,7 +22,7 @@
 #include "reflexive_types.h"
 
 #include "object.h"
-#include "../libEGMstd.h"
+#include "libEGMstd.h"
 
 namespace enigma
 {
@@ -49,7 +49,7 @@ namespace enigma
 extern int object_idmax;
 
 #ifdef DEBUG_MODE
-  #include "../Widget_Systems/widgets_mandatory.h"
+  #include "Widget_Systems/widgets_mandatory.h"
   #define get_object(obj,id) \
     if (id < -1 or size_t(id) > enigma::object_idmax or !enigma::objectdata[id]) { \
       show_error("Cannot access object with id " + toString(id), false); \

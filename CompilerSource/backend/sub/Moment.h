@@ -8,8 +8,8 @@
 
 
 
-#include "../JavaStruct.h"
-#include "../sub/Action.h"
+#include "backend/JavaStruct.h"
+#include "backend/sub/Action.h"
 
 struct Moment
 {

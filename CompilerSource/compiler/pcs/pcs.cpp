@@ -30,7 +30,7 @@
 #include <stdlib.h> //system (Linux)
 #include <cstdio>
 using namespace std;
-#include "../../general/estring.h"
+#include "general/estring.h"
 
 namespace pcs
 {

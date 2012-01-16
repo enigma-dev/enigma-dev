@@ -32,17 +32,17 @@
 
 using namespace std;
 
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
+#include "externs/externs.h"
+#include "syntax/syncheck.h"
+#include "parser/parser.h"
 
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../../parser/object_storage.h"
-#include "../compile_common.h"
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "parser/object_storage.h"
+#include "compiler/compile_common.h"
 
-#include "../../backend/ideprint.h"
+#include "backend/ideprint.h"
 
-#include "../reshandlers/rectpack.h"
+#include "compiler/reshandlers/rectpack.h"
 
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);

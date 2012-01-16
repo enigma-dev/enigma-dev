@@ -26,6 +26,8 @@
  **                                                                              **
  \********************************************************************************/
 
+extern bool argument_relative;
+
 inline bool action_if_variable(const variant& variable, const variant& value, int operation) {
     switch (operation)
     {

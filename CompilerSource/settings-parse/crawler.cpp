@@ -31,8 +31,8 @@
 
 using namespace std;
 
-#include "../filesystem/file_find.h"
-#include "../externs/externs.h"
+#include "filesystem/file_find.h"
+#include "externs/externs.h"
 #include "crawler.h"
 #include "eyaml.h"
 
@@ -55,8 +55,8 @@ namespace settings
   }
 }
 
-#include "../parser/object_storage.h"
-#include "../OS_Switchboard.h"
+#include "parser/object_storage.h"
+#include "OS_Switchboard.h"
 
 extern string toUpper(string);
 namespace extensions

@@ -31,18 +31,18 @@
 #include <string>
 #include <map>
 
-#include "../../backend/ideprint.h"
+#include "backend/ideprint.h"
 
 using namespace std;
 
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
+#include "externs/externs.h"
+#include "syntax/syncheck.h"
+#include "parser/parser.h"
 
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../compile_common.h"
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "compiler/compile_common.h"
 
-#include "../event_reader/event_parser.h"
+#include "compiler/event_reader/event_parser.h"
 
 struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} void f2(int m,int i) { id = i, mid = m; } void inc(int m,int i) { mid=m,id=i,count++; } void operator++(int) { count++; } };
 map<string,foundevent> used_events;

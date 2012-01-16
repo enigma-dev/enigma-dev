@@ -28,7 +28,7 @@
 #include <string>
 using namespace std;
 
-#include "../externs/externs.h"
+#include "externs/externs.h"
 #include "cfile_parse_constants.h"
 #include "cparse_shared.h"
 

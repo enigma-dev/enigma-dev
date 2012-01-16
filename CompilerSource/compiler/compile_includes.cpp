@@ -30,8 +30,8 @@
 #include <stdio.h>
 using namespace std;
 
-#include "../general/estring.h"
-#include "../general/darray.h"
+#include "general/estring.h"
+#include "general/darray.h"
 
 
 /*

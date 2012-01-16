@@ -28,12 +28,12 @@
 #include <map>
 #include <string>
 #include <iostream>
-#include "../general/darray.h"
-#include "../general/implicit_stack.h"
+#include "general/darray.h"
+#include "general/implicit_stack.h"
 
 using namespace std;
 
-#include "../externs/externs.h"
+#include "externs/externs.h"
 #include "expev_macros.h"
 #include "value.h"
 

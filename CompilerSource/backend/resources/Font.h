@@ -8,8 +8,8 @@
 
 
 
-#include "../JavaStruct.h"
-#include "../sub/Glyph.h"
+#include "backend/JavaStruct.h"
+#include "backend/sub/Glyph.h"
 
 struct Font
 {

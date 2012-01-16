@@ -6,7 +6,7 @@
  * See LICENSE for details.
  */
  
-#include "../JavaStruct.h"
+#include "backend/JavaStruct.h"
 
 struct Constant
 {

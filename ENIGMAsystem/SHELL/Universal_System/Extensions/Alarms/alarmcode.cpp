@@ -2,13 +2,14 @@
 // Copyright 2011 Josh Ventura
 // Licensed under the GNU General Public License, Version 3 or later.
 
-#include "../recast.h"
-#include "../../dnd.h"
+#include "Universal_System/Extensions/recast.h"
 #include "implement.h"
 #include "include.h"
 
 declare_recast(enigma::extension_alarm);
 
+extern bool argument_relative;
+ 
 void action_set_alarm(int steps, int alarmno)
 {
   if (argument_relative)

@@ -36,7 +36,7 @@
 
 #include "var4.h"
 #include "multifunction_variant.h"
-#include "../Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "var_te.h"
 
 #undef  types_extrapolate_alldec_i

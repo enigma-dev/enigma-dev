@@ -27,18 +27,18 @@
 
 #include <stdio.h>
 #include <iostream>
-#include "../../backend/ideprint.h"
+#include "backend/ideprint.h"
 
 using namespace std;
 
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
+#include "externs/externs.h"
+#include "syntax/syncheck.h"
+#include "parser/parser.h"
 
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../../parser/object_storage.h"
-#include "../compile_common.h"
-#include "../event_reader/event_parser.h"
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "parser/object_storage.h"
+#include "compiler/compile_common.h"
+#include "compiler/event_reader/event_parser.h"
 
 #include <math.h> //log2 to calculate passes.
 

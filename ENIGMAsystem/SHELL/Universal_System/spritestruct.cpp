@@ -19,11 +19,11 @@
 #include <cstring>
 using namespace std;
 
-#include "../Graphics_Systems/graphics_mandatory.h"
-#include "../Collision_Systems/collision_mandatory.h"
-#include "../Widget_Systems/widgets_mandatory.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Collision_Systems/collision_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "spritestruct.h"
-#include "../libEGMstd.h"
+#include "libEGMstd.h"
 #include "IMGloading.h"
 
 namespace enigma {
@@ -151,7 +151,7 @@ namespace enigma
 }
 
 #ifdef DEBUG_MODE
-  #include "../Widget_Systems/widgets_mandatory.h"
+  #include "Widget_Systems/widgets_mandatory.h"
   #define get_sprite(spr,id,r) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
       show_error("Cannot access sprite with id " + toString(id), false); \

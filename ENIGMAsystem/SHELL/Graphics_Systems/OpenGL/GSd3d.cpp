@@ -17,8 +17,8 @@
 
 #include "OpenGLHeaders.h"
 #include "GSd3d.h"
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h"
 #include <math.h>
 #include "binding.h"
 
@@ -704,7 +704,7 @@ bool d3d_transform_stack_disgard()
 
 #include <map>
 #include <list>
-#include "../../Universal_System/fileio.h"
+#include "Universal_System/fileio.h"
 
 class d3d_lights
 {

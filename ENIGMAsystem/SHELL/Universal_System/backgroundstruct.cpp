@@ -20,8 +20,8 @@
 #include <cstring>
 using namespace std;
 
-#include "../Graphics_Systems/graphics_mandatory.h"
-#include "../libEGMstd.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "libEGMstd.h"
 
 #include "backgroundstruct.h"
 

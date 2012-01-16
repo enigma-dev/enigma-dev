@@ -24,8 +24,8 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include "../../collisions_object.h"
-//#include "../../instance_system.h"
+#include "Universal_System/collisions_object.h"
+//#include "Universal_System/instance_system.h"
 #include <cmath>
 
 void mp_potential_settings(double maxrot, double rotstep, double ahead, double onspot);

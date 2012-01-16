@@ -42,9 +42,9 @@ static inline double max(double x,double y) { return x>y?x:y; }
 
 #include <windows.h>
 //#include <windowsx.h>
-#include "../../../additional/FMOD/inc/fmod.h"
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/Extensions/DataStructures/include.h"
+#include "additional/FMOD/inc/fmod.h" // FIX ME: additional is missing
+#include "Universal_System/var4.h"
+#include "Universal_System/Extensions/DataStructures/include.h"
 #include <string>
 using namespace std;
 //#include "FMOD_main.h"

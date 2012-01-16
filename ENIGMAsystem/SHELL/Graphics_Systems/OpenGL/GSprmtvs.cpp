@@ -20,7 +20,7 @@
 #include "binding.h"
 
 #include <string>
-#include "../../Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #if PRIMBUFFER
 GLenum __primitivetype[PRIMDEPTH2];

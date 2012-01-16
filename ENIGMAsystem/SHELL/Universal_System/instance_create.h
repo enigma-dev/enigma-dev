@@ -33,7 +33,7 @@ int instance_create(int x,int y,int object)
 	switch((int)object)
 	{
 	  #define NEW_OBJ_PREFIX ob =
-    #include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
+    #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
     default:
         #if SHOWERRORS
         show_error("Object doesn't exist",0);
@@ -54,7 +54,7 @@ namespace enigma
     switch (object)
     {
 	    #define NEW_OBJ_PREFIX ob =
-      #include "../Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
+      #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
       default:
           #if SHOWERRORS
           show_error("Object doesn't exist",0);

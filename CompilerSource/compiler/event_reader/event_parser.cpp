@@ -33,8 +33,8 @@
 #include <map>
 using namespace std;
 
-#include "../../general/darray.h"
-#include "../../general/parse_basics.h"
+#include "general/darray.h"
+#include "general/parse_basics.h"
 inline bool is_letterh(char x) { return is_letter(x) or x == '-' or x == ' '; }
 
 #include "event_parser.h"

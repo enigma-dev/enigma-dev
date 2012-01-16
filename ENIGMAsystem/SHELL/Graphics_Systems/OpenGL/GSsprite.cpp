@@ -24,9 +24,9 @@ using std::string;
 #include "GSsprite.h"
 #include "binding.h"
 
-#include "../../Universal_System/spritestruct.h"
-#include "../../Universal_System/instance_system.h"
-#include "../../Universal_System/graphics_object.h"
+#include "Universal_System/spritestruct.h"
+#include "Universal_System/instance_system.h"
+#include "Universal_System/graphics_object.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -34,8 +34,8 @@ using std::string;
 
 
 #ifdef DEBUG_MODE
-  #include "../../libEGMstd.h"
-  #include "../../Widget_Systems/widgets_mandatory.h"
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
   #define get_sprite(spr,id,r) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
       show_error("Cannot access sprite with id " + toString(id), false); \
@@ -317,8 +317,8 @@ void draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,dou
 
 #include <string>
 using std::string;
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h"
 
 void draw_sprite_tiled(int spr,int subimg,double x,double y)
 {

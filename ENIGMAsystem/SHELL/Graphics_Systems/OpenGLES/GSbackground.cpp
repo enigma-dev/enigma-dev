@@ -27,7 +27,7 @@
 
 #include <math.h>
 #include "OpenGLHeaders.h"
-#include "../../Universal_System/backgroundstruct.h"
+#include "Universal_System/backgroundstruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)

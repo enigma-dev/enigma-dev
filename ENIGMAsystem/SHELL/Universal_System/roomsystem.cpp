@@ -34,9 +34,9 @@
 
 #include "ENIGMA_GLOBALS.h" // TODO: Do away with this sloppy infestation permanently!
 
-#include "../Platforms/platforms_mandatory.h"
-#include "../Widget_Systems/widgets_mandatory.h"
-#include "../libEGMstd.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
 #include "instance_system.h"
 #include "instance.h"
 #include "planar_object.h"

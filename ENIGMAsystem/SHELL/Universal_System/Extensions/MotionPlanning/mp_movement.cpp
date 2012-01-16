@@ -24,12 +24,12 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include "../../collisions_object.h"
+#include "Universal_System/collisions_object.h"
 #include <cmath>
-#include "../../instance_system.h"
+#include "Universal_System/instance_system.h"
 #include "mp_movement.h"
-#include "../../pathstruct.h"
-#include "../../path_functions.h"
+#include "Universal_System/pathstruct.h"
+#include "Universal_System/path_functions.h"
 
 // FIXME: NONSTANDARD
 extern bool place_meeting(double x, double y, int object);

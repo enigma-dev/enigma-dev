@@ -32,12 +32,12 @@
 
 using namespace std;
 
-#include "../general/darray.h"
+#include "general/darray.h"
 
 #include "object_storage.h"
-#include "../externs/externs.h"
-#include "../settings-parse/crawler.h"
-#include "../compiler/compile_common.h"
+#include "externs/externs.h"
+#include "settings-parse/crawler.h"
+#include "compiler/compile_common.h"
 
 
 map<string,int> shared_object_locals;
@@ -155,7 +155,7 @@ void parsed_object::copy_calls_from(parsed_object& source)
 }
 
 #include <vector>
-#include "../backend/ideprint.h"
+#include "backend/ideprint.h"
 
 typedef map<string,dectrip> msi;
 struct useinfo { dectrip dec; int c; string lastobject; };

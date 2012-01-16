@@ -17,7 +17,7 @@
 
 #include <string>
 #include <zlib.h>
-#include "../Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "zlib.h"
 
 int zlib_compressed_size=0;

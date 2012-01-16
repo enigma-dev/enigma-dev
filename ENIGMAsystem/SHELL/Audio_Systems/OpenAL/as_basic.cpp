@@ -21,12 +21,12 @@
 #include <math.h>
 using std::string;
 #include "as_basic.h"
-#include "../audio_mandatory.h"
+#include "Audio_Systems/audio_mandatory.h"
 #include "alure/include/AL/alure.h"
 
 #ifdef DEBUG_MODE
-#include "../../libEGMstd.h"
-#include "../../Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #endif
 
 namespace enigma

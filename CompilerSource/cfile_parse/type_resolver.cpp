@@ -34,8 +34,8 @@ using namespace std;
 
 #include "type_resolver.h"
 
-#include "../general/parse_basics.h"
-#include "../externs/externs.h"
+#include "general/parse_basics.h"
+#include "externs/externs.h"
 
 #ifdef cpp
   #define and_not_accessor()

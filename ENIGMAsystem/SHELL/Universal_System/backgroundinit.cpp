@@ -21,10 +21,10 @@
 using namespace std;
 
 #include "backgroundstruct.h"
-#include "../Graphics_Systems/graphics_mandatory.h"
-#include "../Widget_Systems/widgets_mandatory.h"
-#include "../Platforms/platforms_mandatory.h"
-#include "../libEGMstd.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
+#include "libEGMstd.h"
 #include "zlib.h"
 #include "resinit.h"
 

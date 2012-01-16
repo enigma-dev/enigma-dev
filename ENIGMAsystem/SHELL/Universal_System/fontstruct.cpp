@@ -22,8 +22,8 @@
 #include <vector>
 using namespace std;
 
-#include "../Graphics_Systems/graphics_mandatory.h"
-#include "../libEGMstd.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "libEGMstd.h"
 
 #include "spritestruct.h"
 #include "fontstruct.h"

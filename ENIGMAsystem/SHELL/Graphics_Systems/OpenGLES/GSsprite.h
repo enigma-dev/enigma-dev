@@ -28,7 +28,7 @@
  * Sprite structure.
  * All sprites are stored in this
  */
-#include "../../Universal_System/spritestruct.h"
+#include "Universal_System/spritestruct.h"
 
 int draw_sprite(int spr,int subimg,double x,double y);
 int draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h);

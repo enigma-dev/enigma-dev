@@ -29,14 +29,14 @@
 #include <string>
 #include <iostream>
 using namespace std;
-#include "../general/darray.h"
-#include "../general/implicit_stack.h"
-#include "../externs/externs.h"
+#include "general/darray.h"
+#include "general/implicit_stack.h"
+#include "externs/externs.h"
 #include "cfile_parse_constants.h"
 
 #include "cfile_pushing.h"
 #include "macro_functions.h"
-#include "../general/parse_basics.h"
+#include "general/parse_basics.h"
 
 #include "expression_evaluator.h"
 #include "template_handlers.h"

@@ -31,7 +31,7 @@ using namespace std;
 extern int room_width, room_height;
 
 #ifdef DEBUG_MODE
-#  include "../../Widget_Systems/widgets_mandatory.h"
+#  include "Widget_Systems/widgets_mandatory.h"
 #endif
 
 namespace enigma

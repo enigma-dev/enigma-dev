@@ -31,8 +31,8 @@
 using std::string;
 
 #include "WINDOWScallback.h"
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h"
 #include "WINDOWSwindow.h"
 
 namespace enigma //TODO: Find where this belongs

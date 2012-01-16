@@ -29,9 +29,9 @@
 // GM front-end functions - Implementations of standard GM collision functions.
 ////////////////////////////////////
 
-#include "../../Universal_System/collisions_object.h"
-#include "../../Universal_System/instance_system.h" //iter
-#include "../collision_mandatory.h" //iter
+#include "Universal_System/collisions_object.h"
+#include "Universal_System/instance_system.h" //iter
+#include "Collision_Systems/collision_mandatory.h" //iter
 #include "coll_funcs.h"
 #include "coll_impl.h"
 #include <limits>

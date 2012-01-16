@@ -1,4 +1,4 @@
-#include "../../../Audio_Systems/audio_mandatory.h"
+#include "Audio_Systems/audio_mandatory.h"
 #include <gme/gme.h>
 #include <vector>
 #include <cstdio>

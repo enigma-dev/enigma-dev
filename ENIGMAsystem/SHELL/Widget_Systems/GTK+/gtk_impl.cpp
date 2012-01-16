@@ -27,7 +27,7 @@
 
 #include <string>
 #include <gtk/gtk.h>
-#include "../widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 static void *gtk_thread(gpointer)
 {

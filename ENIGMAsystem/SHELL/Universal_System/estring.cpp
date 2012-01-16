@@ -22,8 +22,8 @@
 #include "estring.h"
 
 #ifdef DEBUG_MODE
-#include "../libEGMstd.h"
-#include "../Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #endif
 
 #undef string

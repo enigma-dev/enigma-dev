@@ -20,7 +20,7 @@
 #include <string>
 using std::string;
 #include "GStextures.h"
-#include "../graphics_mandatory.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "binding.h"
 
 namespace enigma

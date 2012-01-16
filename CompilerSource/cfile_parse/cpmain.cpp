@@ -30,11 +30,11 @@
 #include <iostream>
 #include <cstdio>
 #include <sys/time.h>
-#include "../general/darray.h"
+#include "general/darray.h"
 
 using namespace std;
 
-#include "../externs/externs.h"
+#include "externs/externs.h"
 #include "expev_macros.h"
 #include "value.h"
 
@@ -241,7 +241,7 @@ string getst()
 }
 
 #include "cfile_parse.h"
-#include "../general/implicit_stack.h"
+#include "general/implicit_stack.h"
 
 void print_err_line_at(pt a)
 {

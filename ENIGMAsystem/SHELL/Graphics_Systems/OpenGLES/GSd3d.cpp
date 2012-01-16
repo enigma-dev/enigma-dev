@@ -30,8 +30,8 @@ using namespace std;
 #include "OpenGLHeaders.h"
 #include "GSprmtvs.h"
 #include <string>
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h"
 #include <math.h>
 
 /*void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)

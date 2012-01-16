@@ -27,7 +27,7 @@
 
 typedef size_t pt; //Use size_t as our pos type; this will prevent errors with size_t's like std::string::npos
 
-#include "../general/darray.h"
+#include "general/darray.h"
 
 extern map<string,char> edl_tokens;
 int parser_ready_input(string&,string&,unsigned int&,varray<string>&);

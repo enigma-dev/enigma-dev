@@ -30,21 +30,21 @@
 #include <iostream>
 #include <cstdio>
 using namespace std;
-#include "../general/darray.h"
-#include "../externs/externs.h"
+#include "general/darray.h"
+#include "externs/externs.h"
 
-#include "../general/parse_basics.h"
-#include "../general/macro_integration.h"
-#include "../compiler/output_locals.h"
+#include "general/parse_basics.h"
+#include "general/macro_integration.h"
+#include "compiler/output_locals.h"
 
-#include "../settings.h"
+#include "settings.h"
 
 
 typedef size_t pt; //Use size_t as our pos type; helps on 64bit systems.
 map<string,char> edl_tokens; // Logarithmic lookup, with token.
 typedef map<string,char>::iterator tokiter;
 
-#include "../cfile_parse/macro_functions.h"
+#include "cfile_parse/macro_functions.h"
 
 
 int scope_braceid = 0;

@@ -51,16 +51,16 @@
 #include <cstdlib> //stdout, fflush
 #include <cstdio> //stdout, fflush
 using namespace std; //More ease
-#include "../externs/externs.h" //To interface with externally defined types and functions
+#include "externs/externs.h" //To interface with externally defined types and functions
 #include "parser_components.h" //duh
 
-#include "../general/darray.h"
-#include "../general/parse_basics.h"
+#include "general/darray.h"
+#include "general/parse_basics.h"
 #include "object_storage.h"
 
 #include "collect_variables.h"
 
-#include "../settings.h"
+#include "settings.h"
 #include "parser.h"
 
 
@@ -194,7 +194,7 @@ string parser_main(string code, parsed_event* pev)
   return code;
 }
 
-#include "../cfile_parse/type_resolver.h"
+#include "cfile_parse/type_resolver.h"
 
 typedef map<string,dectrip> localscope;
 pt move_to_beginning(string& code, string& synt, pt pos)

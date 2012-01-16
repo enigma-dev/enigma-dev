@@ -28,13 +28,13 @@
 #ifdef CODEBLOX
 #  include <GL/glee.h>
 #else
-#  include <../additional/glee/GLee.h>
+#  include <additional/glee/GLee.h> // no aditional
 #endif*/
 #include <string>
 #include "OpenGLHeaders.h"
 using namespace std;
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/roomsystem.h" // Room dimensions.
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h" // Room dimensions.
 
 namespace enigma
 {

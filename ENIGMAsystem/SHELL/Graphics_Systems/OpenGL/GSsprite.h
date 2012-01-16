@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../../Universal_System/spritestruct.h"
+#include "Universal_System/spritestruct.h"
 
 void draw_sprite(int spr,int subimg,double x,double y);
 void draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h);

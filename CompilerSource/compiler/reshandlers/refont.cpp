@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include <stdio.h>
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "refont.h"
 
 

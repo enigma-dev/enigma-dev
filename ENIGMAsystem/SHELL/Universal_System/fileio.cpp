@@ -24,7 +24,7 @@ using namespace std;
 #include "darray.h" //Simpler vector with logarithmic time
 #include "fileio.h" //Simpler vector with logarithmic time
 
-#include "../Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 // Implement a storage class for file information
 

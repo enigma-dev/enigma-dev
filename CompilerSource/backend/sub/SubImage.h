@@ -8,9 +8,9 @@
 
 
 
-#include "../JavaStruct.h"
-#include "../util/Image.h"
-#include "../util/Polygon.h"
+#include "backend/JavaStruct.h"
+#include "backend/util/Image.h"
+#include "backend/util/Polygon.h"
 
 struct SubImage
 {

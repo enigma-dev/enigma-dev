@@ -33,8 +33,8 @@
 using namespace std;
 
 #include "bettersystem.h"
-#include "../OS_Switchboard.h"
-#include "../general/parse_basics.h"
+#include "OS_Switchboard.h"
+#include "general/parse_basics.h"
 
 
 inline char* scopy(string& str)

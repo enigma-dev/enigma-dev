@@ -35,7 +35,7 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "../general/darray.h"
+#include "general/darray.h"
 
 #include "externs.h"
 

@@ -26,12 +26,12 @@
 \********************************************************************************/
 
 #include <string>
-#include <gl/gl.h>
+#include <GL/gl.h>
 #include <windows.h>
 using namespace std;
 
-#include "../../libEGMstd.h"
-#include "../../Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 namespace enigma
 {

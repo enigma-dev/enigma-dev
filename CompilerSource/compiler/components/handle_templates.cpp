@@ -31,16 +31,16 @@
 #include <string>
 #include <map>
 
-#include "../../backend/ideprint.h"
+#include "backend/ideprint.h"
 
 using namespace std;
 
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
+#include "externs/externs.h"
+#include "syntax/syncheck.h"
+#include "parser/parser.h"
 
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../compile_common.h"
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "compiler/compile_common.h"
 
 int compile_handle_templates(EnigmaStruct* es)
 {

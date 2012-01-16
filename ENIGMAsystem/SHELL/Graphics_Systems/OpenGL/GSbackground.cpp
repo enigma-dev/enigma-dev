@@ -21,8 +21,8 @@
 #include "OpenGLHeaders.h"
 #include "GSbackground.h"
 #include "GStextures.h"
-#include "../../Universal_System/backgroundstruct.h"
-#include "../../Universal_System/spritestruct.h"
+#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/spritestruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -36,8 +36,8 @@ namespace enigma {
 
 #ifdef DEBUG_MODE
   #include <string>
-  #include "../../libEGMstd.h"
-  #include "../../Widget_Systems/widgets_mandatory.h"
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
   #define get_background(bck2d,back)\
     if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
       show_error("Attempting to draw non-existing background " + toString(back), false);\

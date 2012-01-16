@@ -30,15 +30,15 @@
 #include <string>
 #include <iostream>
 #include <cstdio>
-#include "../general/darray.h"
-#include "../general/implicit_stack.h"
+#include "general/darray.h"
+#include "general/implicit_stack.h"
 
 using namespace std;
 
 #include "value.h"
-#include "../externs/externs.h"
+#include "externs/externs.h"
 #include "expression_evaluator.h"
-#include "../general/parse_basics.h"
+#include "general/parse_basics.h"
 #include "cfile_pushing.h"
 
 inline void move_newline()

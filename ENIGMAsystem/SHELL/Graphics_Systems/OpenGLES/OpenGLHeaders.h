@@ -25,7 +25,7 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "../../API_Switchboard.h"
+#include "API_Switchboard.h"
 //#include <graphics_info.h>
 
 #define ENIGMA_WS_IPHONE 1

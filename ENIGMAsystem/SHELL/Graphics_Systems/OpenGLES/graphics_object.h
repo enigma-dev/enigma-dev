@@ -33,9 +33,9 @@
 #ifndef _GRAPHICS_OBJECT_H
 #define _GRAPHICS_OBJECT_H
 
-#include "../../Universal_System/planar_object.h"
-#include "../../Universal_System/mathnc.h"
-#include "../../Universal_System/spritestruct.h"
+#include "Universal_System/planar_object.h"
+#include "Universal_System/mathnc.h"
+#include "Universal_System/spritestruct.h"
 namespace enigma
 {
   struct object_graphics: object_planar

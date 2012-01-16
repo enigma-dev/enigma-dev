@@ -27,12 +27,12 @@
 
 #include <string>
 using namespace std;
-#include "../widgets_mandatory.h"
-#include "../../Universal_System/instance_system.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/instance_system.h"
 #include <cstdlib>
 #include <cstdio>
 
-#include "../../GameSettings.h"
+#include "GameSettings.h"
 
 namespace enigma
 {

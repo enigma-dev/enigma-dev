@@ -27,12 +27,12 @@
 
 
 #include "highscore_functions.h"
-#include "../libEGMstd.h"
+#include "libEGMstd.h"
 #include <algorithm>
 #include <vector>
 #include <string>
 
-#include "../Widget_Systems/widgets_mandatory.h" // show_error
+#include "Widget_Systems/widgets_mandatory.h" // show_error
 
 
 extern double score;

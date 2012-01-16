@@ -121,8 +121,6 @@ extern int amain();
   #include "Universal_System/instance_create.h"
 #endif
 
-#include "Universal_System/pseudo_components.h"
-
 namespace enigma
 {
   int game_ending();

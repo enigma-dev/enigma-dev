@@ -30,9 +30,9 @@
 
 #include "OpenGLHeaders.h"
 
-#include "../../Universal_System/spritestruct.h"
-#include "../../Universal_System/instance_system.h"
-#include "../../Universal_System/graphics_object.h"
+#include "Universal_System/spritestruct.h"
+#include "Universal_System/instance_system.h"
+#include "Universal_System/graphics_object.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -357,8 +357,8 @@ int draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,doub
 
 #include <string>
 using std::string;
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h"
 
 int draw_sprite_tiled(int spr,int subimg,double x,double y)
 {

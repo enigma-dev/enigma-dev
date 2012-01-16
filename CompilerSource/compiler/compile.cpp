@@ -25,10 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "../OS_Switchboard.h" //Tell us where the hell we are
-#include "../backend/EnigmaStruct.h" //LateralGM interface structures
+#include "OS_Switchboard.h" //Tell us where the hell we are
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
 
-#include "../general/darray.h"
+#include "general/darray.h"
 
  #include <cstdio>
 
@@ -49,24 +49,24 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include "../backend/ideprint.h"
+#include "backend/ideprint.h"
 
 using namespace std;
 
-#include "../backend/JavaCallbacks.h"
-#include "../externs/externs.h"
-#include "../syntax/syncheck.h"
-#include "../parser/parser.h"
+#include "backend/JavaCallbacks.h"
+#include "externs/externs.h"
+#include "syntax/syncheck.h"
+#include "parser/parser.h"
 #include "compile_includes.h"
 #include "compile_common.h"
 
-#include "../settings-parse/crawler.h"
-#include "../settings-parse/eyaml.h"
+#include "settings-parse/crawler.h"
+#include "settings-parse/eyaml.h"
 
 #include "components/components.h"
-#include "../gcc_interface/gcc_backend.h"
+#include "gcc_interface/gcc_backend.h"
 
-#include "../general/bettersystem.h"
+#include "general/bettersystem.h"
 #include "event_reader/event_parser.h"
 
 inline void writei(int x, FILE *f) {

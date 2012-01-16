@@ -31,8 +31,8 @@
 
 #include "pathstruct.h"
 #include "resinit.h"
-//#include "../Platforms/platforms_mandatory.h"
-//#include "../libEGMstd.h"
+//#include "Platforms/platforms_mandatory.h"
+//#include "libEGMstd.h"
 
 namespace enigma
 {

@@ -8,8 +8,8 @@
 
 
 
-#include "../sub/PathPoint.h"
-#include "../JavaStruct.h"
+#include "backend/sub/PathPoint.h"
+#include "backend/JavaStruct.h"
 
 struct Path
 {

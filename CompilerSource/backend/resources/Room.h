@@ -8,12 +8,12 @@
 
 
 
-#include "../sub/BackgroundDef.h"
-#include "../sub/Instance.h"
-#include "../sub/Tile.h"
-#include "../sub/View.h"
+#include "backend/sub/BackgroundDef.h"
+#include "backend/sub/Instance.h"
+#include "backend/sub/Tile.h"
+#include "backend/sub/View.h"
 
-#include "../JavaStruct.h"
+#include "backend/JavaStruct.h"
 
 struct Room
 {

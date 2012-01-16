@@ -1,6 +1,6 @@
 #define _GLIBCXX_EXPORT_TEMPLATE 0
 
-#include "../../CompilerSource/cfile_parse/auxilary.h"
+#include "cfile_parse/auxilary.h"
 #include "auxilary.h"
 
 #if false

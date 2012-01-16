@@ -8,8 +8,8 @@
 
 
 
-#include "../JavaStruct.h"
-#include "./Point.h"
+#include "backend/JavaStruct.h"
+#include "Point.h"
 
 struct Polygon
 {

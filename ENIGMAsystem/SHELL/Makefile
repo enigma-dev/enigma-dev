@@ -50,7 +50,7 @@ CC := gcc
 ifeq ($(GMODE), Debug)
 	CFLAGS := -Wall -g -DDEBUG_MODE
 else
-	CFLAGS := -Wall -s -O3
+	CFLAGS := -Wall -s -O3 
 endif
 
 LDFLAGS := 
@@ -70,6 +70,7 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
+override CPPFLAGS += -I.
 
 SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))

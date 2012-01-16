@@ -29,7 +29,7 @@
 #include <vector>
 #include <map>
 
-#include "../settings.h"
+#include "settings.h"
 
 namespace settings
 {

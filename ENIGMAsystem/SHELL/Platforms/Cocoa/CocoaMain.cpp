@@ -22,8 +22,8 @@
 #include "CocoaWindow.h"
 #include "ObjectiveC.h"
 
-#include "../../Universal_System/CallbackArrays.h"
-#include "../../Universal_System/roomsystem.h"
+#include "Universal_System/CallbackArrays.h"
+#include "Universal_System/roomsystem.h"
 
 
 int main(int argc,char** argv)

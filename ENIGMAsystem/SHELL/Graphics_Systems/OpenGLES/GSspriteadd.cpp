@@ -36,9 +36,9 @@ int sprite_add(string filename,double imgnumb,double precise,double transparent,
 #include "OpenGLHeaders.h"
 using namespace std;
 
-#include "../../Universal_System/IMGloading.h"
-#include "../../Universal_System/spritestruct.h"
-#include "../../libEGMstd.h"
+#include "Universal_System/IMGloading.h"
+#include "Universal_System/spritestruct.h"
+#include "libEGMstd.h"
 
 int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)
 {

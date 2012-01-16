@@ -28,7 +28,7 @@
 #include <map>
 #include <string>
 #include <iostream>
-#include "../general/darray.h"
+#include "general/darray.h"
 using namespace std;
 #include "externs.h"
 
@@ -73,7 +73,7 @@ void externs::parameter_unify(rf_stack& x, string& fparams)
   #define tp_just_instd__TRUE
 #endif
 
-#include "../cfile_parse/cparse_shared.h"
+#include "cfile_parse/cparse_shared.h"
 #define other //if (n == "x" and p == &global_scope)
 #define other1(s) //cout << "\n\n\n\n\n\n\n\n\n\n\n" << cfile.substr(pos-10,12) << "\n\n\n\n\n\n\n\n" << s;
 
@@ -183,7 +183,7 @@ void macro_type::assign_func(string n) { if (argc==-1) argc=0; recurse_danger = 
 void macro_type::set_unltd_args(int x) { args_uat = x; }
 void macro_type::addarg(string x) { args[argc++] = x; }
 
-#include "../general/parse_basics.h"
+#include "general/parse_basics.h"
 bool macro_type::check_recurse_danger(string n)
 {
   register bool dgr = 0;
@@ -441,7 +441,7 @@ bool find_in_specializations(externs* inscope,string name, unsigned flags)
 //template parameters and scope names, and filters by type.
 
 extern string cferr;
-  #include "../cfile_parse/cfile_parse_constants.h"
+  #include "cfile_parse/cfile_parse_constants.h"
 void print_err_line_at(pt a = pos);
 bool find_extname(string name,unsigned int flags,bool expect_find)
 {

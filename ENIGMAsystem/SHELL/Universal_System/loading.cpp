@@ -21,14 +21,14 @@
 #include <string>
 
 #include "resinit.h"
-#include "../Platforms/platforms_mandatory.h"
-#include "../Audio_Systems/audio_mandatory.h"
-#include "../Widget_Systems/widgets_mandatory.h"
-#include "../Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Audio_Systems/audio_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "roomsystem.h"
 
 
-#include "../libEGMstd.h"
+#include "libEGMstd.h"
 #include "loading.h"
 
 namespace enigma {

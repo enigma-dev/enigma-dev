@@ -29,11 +29,11 @@
 #include <stdio.h>
 using namespace std;
 
-#include "../general/darray.h"
+#include "general/darray.h"
 #include "cfile_pushing.h"
 
 #include "macro_functions.h"
-#include "../externs/externs.h"
+#include "externs/externs.h"
 
 includings::includings(string n,string p):name(n), path(p) {}
 ifstack::ifnode::ifnode(includings *ia, ifnode *p): i(ia), prev(p) {}

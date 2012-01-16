@@ -27,7 +27,7 @@
 
 #include <string>
 using namespace std;
-#include "../general/darray.h"
+#include "general/darray.h"
 
 varray<string> //In int *foobar [32]
   varnames,       //this is "foobar"

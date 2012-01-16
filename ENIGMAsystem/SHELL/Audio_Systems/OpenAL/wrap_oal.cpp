@@ -21,8 +21,8 @@
 #include <stdio.h>
 #include <windows.h>
 #define AL_NO_PROTOTYPES 1
-#include "../../../additional/al/include/alc.h"
-#include "../../../additional/al/include/al.h"
+#include "additional/al/include/alc.h" // FIX ME: additional is missing
+#include "additional/al/include/al.h"
 #include "wrap_oal.h"
 
 static HMODULE openal_handle = NULL;

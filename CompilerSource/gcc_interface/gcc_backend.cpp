@@ -36,11 +36,11 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "../externs/externs.h"
-    #include "../cfile_parse/cfile_parse.h"
-    #include "../syntax/checkfile.h"
-    #include "../general/parse_basics.h"
-    #include "../general/bettersystem.h"
+#include "externs/externs.h"
+    #include "cfile_parse/cfile_parse.h"
+    #include "syntax/checkfile.h"
+    #include "general/parse_basics.h"
+    #include "general/bettersystem.h"
 
 #include "gcc_backend.h"
 
@@ -71,8 +71,8 @@ inline int rdir_system(string x, string y)
 extern my_string fca(const char*);
 extern my_string GCC_MACRO_STRING;
 
-#include "../OS_Switchboard.h"
-#include "../settings-parse/eyaml.h"
+#include "OS_Switchboard.h"
+#include "settings-parse/eyaml.h"
 
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
@@ -208,6 +208,7 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
+    include_directories[include_directory_count++] = "ENIGMAsystem/SHELL/";
 
     while (is_useless(idirs[++pos]));
 

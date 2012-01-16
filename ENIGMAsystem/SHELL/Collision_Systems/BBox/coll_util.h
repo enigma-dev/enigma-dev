@@ -34,7 +34,7 @@ bool collide_rect_rect(double r1x1, double r1y1, double r1x2, double r1y2,
                        double r2x1, double r2y1, double r2x2, double r2y2);
 bool collide_rect_point(double rx1, double ry1, double rx2, double ry2, double px, double py);
 
-#include "../../Universal_System/collisions_object.h"
+#include "Universal_System/collisions_object.h"
 
 bool collide_bbox_rect(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2);
 bool collide_bbox_line(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2);

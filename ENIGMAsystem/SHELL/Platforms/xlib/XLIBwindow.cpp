@@ -32,9 +32,9 @@
 //#include <GL/gl.h>
 //#include <GL/glu.h>
 
-#include "../../Universal_System/CallbackArrays.h" // For those damn vk_ constants.
-#include "../platforms_mandatory.h" // For type insurance
-#include "../../GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
+#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+#include "Platforms/platforms_mandatory.h" // For type insurance
+#include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBwindow.h"
 #include "XLIBmain.h"
 
@@ -349,7 +349,7 @@ namespace enigma {
   }
 }
 
-#include "../../Universal_System/globalupdate.h"
+#include "Universal_System/globalupdate.h"
 void io_handle()
 {
   enigma::input_push();

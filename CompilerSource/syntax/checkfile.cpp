@@ -30,12 +30,12 @@
 #include <cstdio>
 using namespace std;
 
-#include "../general/darray.h"
+#include "general/darray.h"
 
-#include "../syntax/syncheck.h"
-#include "../parser/parser.h"
+#include "syntax/syncheck.h"
+#include "parser/parser.h"
 
-#include "../general/parse_basics.h"
+#include "general/parse_basics.h"
 
 int file_check(string filename)
 {

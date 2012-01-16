@@ -42,7 +42,7 @@
 using namespace std;
 
 #include "eyaml.h"
-#include "../general/parse_basics.h"
+#include "general/parse_basics.h"
 
 inline string tolower(string x) {
   for (size_t i = 0; i < x.length(); i++)

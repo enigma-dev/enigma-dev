@@ -28,7 +28,7 @@
 
 //Some things that only cause clutter when left in the same file
 
-#include "../general/parse_basics.h"
+#include "general/parse_basics.h"
 
 bool is_tflag(string x)
 {

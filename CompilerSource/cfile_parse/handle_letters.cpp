@@ -29,9 +29,9 @@
 #include <string>
 #include <iostream>
 using namespace std;
-#include "../general/darray.h"
-#include "../general/implicit_stack.h"
-#include "../externs/externs.h"
+#include "general/darray.h"
+#include "general/implicit_stack.h"
+#include "externs/externs.h"
 #include "cfile_parse_constants.h"
 
 #include "cfile_pushing.h"
@@ -60,7 +60,7 @@ int get_line()
   return iline;
 }
 
-#include "../general/parse_basics.h"
+#include "general/parse_basics.h"
 extern int negative_one;
 bool ExtRegister(unsigned int last,unsigned phase,string name,string& fparam,bool,rf_stack refs,externs *type,varray<tpdata> &tparams, int &tpc = negative_one, long long last_value = 0);
 

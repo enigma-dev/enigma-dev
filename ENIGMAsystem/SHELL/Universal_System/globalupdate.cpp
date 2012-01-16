@@ -31,8 +31,8 @@ using namespace std;
 
 #include "roomsystem.h"
 #include "CallbackArrays.h"
-#include "../Platforms/platforms_mandatory.h"
-#include "../Audio_Systems/audio_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Audio_Systems/audio_mandatory.h"
 
 namespace enigma
 {

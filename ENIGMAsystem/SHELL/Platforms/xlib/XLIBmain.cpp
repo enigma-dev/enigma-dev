@@ -23,16 +23,16 @@
 #include <stdio.h>
 #include <string>
 
-#include "../platforms_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
 
 #include "XLIBmain.h"
 #include "XLIBwindow.h"
 #include "LINUXjoystick.h"
 
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/CallbackArrays.h"
-#include "../../Universal_System/roomsystem.h"
-#include "../../Universal_System/loading.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/CallbackArrays.h"
+#include "Universal_System/roomsystem.h"
+#include "Universal_System/loading.h"
 
 namespace enigma
 {
@@ -226,7 +226,7 @@ int main(int argc,char** argv)
 		return -4;
 	}
 	gmw_init(); //init gm window functions, flushes
-	//#include "../../initialize.h"
+	//#include "initialize.h"
 
 	//Call ENIGMA system initializers; sprites, audio, and what have you
 	enigma::initialize_everything();

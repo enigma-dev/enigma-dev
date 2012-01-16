@@ -35,6 +35,7 @@ DEPENDS := $(OBJECTS:.o=.d)
 
 # sort has the nice side effect of removing duplicates. this may or may not be faster.
 OBJDIRS := $(sort $(dir $(OBJECTS)))
+override CPPFLAGS += -I.
 
 ############
 # building #

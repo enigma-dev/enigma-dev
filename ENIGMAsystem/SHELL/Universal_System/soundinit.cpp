@@ -19,9 +19,9 @@
 #include <stdio.h>
 using namespace std;
 
-#include "../Audio_Systems/audio_mandatory.h"
-#include "../Platforms/platforms_mandatory.h"
-#include "../libEGMstd.h"
+#include "Audio_Systems/audio_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
+#include "libEGMstd.h"
 #include "resinit.h"
 #include "zlib.h"
 

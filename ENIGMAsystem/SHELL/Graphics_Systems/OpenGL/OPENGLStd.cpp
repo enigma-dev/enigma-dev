@@ -21,9 +21,9 @@
 #include "OpenGLHeaders.h"
 using namespace std;
 #include "OPENGLStd.h"
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/roomsystem.h" // Room dimensions.
-#include "../graphics_mandatory.h" // Room dimensions.
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h" // Room dimensions.
+#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 namespace enigma
 {
   unsigned bound_texture=0;

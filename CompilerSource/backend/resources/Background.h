@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#include "../JavaStruct.h"
-#include "../util/Image.h"
+#include "backend/JavaStruct.h"
+#include "backend/util/Image.h"
 
 struct Background
 {

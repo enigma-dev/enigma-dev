@@ -8,7 +8,7 @@
 
 
 #include "Event.h"
-#include "../JavaStruct.h"
+#include "backend/JavaStruct.h"
 
 struct MainEvent
 {

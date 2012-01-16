@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include "coll_util.h"
-#include "../../Universal_System/instance.h"
+#include "Universal_System/instance.h"
 
 ////////////////////////////////////
 // utility intersection functions - test shape intersection, which is largely API independant
@@ -97,7 +97,7 @@ bool collide_rect_point(double rx1, double ry1, double rx2, double ry2, double p
 // bbox functions - tests if an instance's bbox placed at a position will collide with something
 ////////////////////////////////////
 
-#include "../../Universal_System/collisions_object.h"
+#include "Universal_System/collisions_object.h"
 
 bool collide_bbox_rect(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2)
 {

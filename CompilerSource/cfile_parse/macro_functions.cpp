@@ -27,8 +27,8 @@
 
 #include <iostream>
 using namespace std;
-#include "../general/parse_basics.h"
-#include "../general/darray.h"
+#include "general/parse_basics.h"
+#include "general/darray.h"
 #include "cparse_shared.h"
 
 string escaped_string(string x)

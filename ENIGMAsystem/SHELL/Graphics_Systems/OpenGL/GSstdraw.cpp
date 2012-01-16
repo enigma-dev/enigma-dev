@@ -20,7 +20,7 @@
 #include "GSstdraw.h"
 #include "binding.h"
 #include <stdio.h>
-#include "../../Universal_System/roomsystem.h"
+#include "Universal_System/roomsystem.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)

@@ -27,7 +27,7 @@
 
 #include "ideprint.h"
 using std::string;
-#include "../general/estring.h"
+#include "general/estring.h"
 #include "JavaCallbacks.h"
 
 ideprint &ideprint::operator<< (string x) {

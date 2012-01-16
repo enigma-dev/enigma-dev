@@ -29,7 +29,7 @@
 #define _CPARSE_SHARED__H
 
 //This file is mostly documentation.
-#include "../externs/externs.h"
+#include "externs/externs.h"
 #include "cfile_parse_constants.h"
 
 /*Skipto and skipto2 tell the parser to ignore everything until it reaches a given symbol.

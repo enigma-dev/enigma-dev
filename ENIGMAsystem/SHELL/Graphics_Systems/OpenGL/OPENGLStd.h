@@ -28,7 +28,7 @@
 #ifdef CODEBLOX
 #  include <GL/glee.h>
 #else
-#  include <../additional/glee/GLee.h>
+#  include <additional/glee/GLee.h>
 #endif*/
 
 //#include "OpenGLHeaders.h"

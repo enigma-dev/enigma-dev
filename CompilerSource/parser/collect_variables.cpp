@@ -33,7 +33,7 @@
 #include <iostream>
 #include <stdio.h>
 using namespace std;
-#include "../compiler/event_reader/event_parser.h"
+#include "compiler/event_reader/event_parser.h"
 
 extern int global_script_argument_count;
 
@@ -49,7 +49,7 @@ struct scope_ignore {
 #define and_safety
 #include "object_storage.h"
 
-#include "../externs/externs.h"
+#include "externs/externs.h"
 
 void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
 {

@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include "expression_evaluator_settings.h"
-#include "../general/parse_basics.h"
+#include "general/parse_basics.h"
 
 #define RTYPE_NONE -1
 #define RTYPE_INT 0

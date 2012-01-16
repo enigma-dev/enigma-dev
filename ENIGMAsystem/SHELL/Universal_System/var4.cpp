@@ -26,7 +26,7 @@ using namespace std;
 #include "var_te.h"
 
 #ifdef DEBUG_MODE
-#include "../Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
   #define ccast(tpc) { if (type != tpc) \
     { if (type==-1) show_error("Accessing uninitialized variable",0); \
       else show_error(string("Attempting to access ") + (type==0?"real":type==1?"string":"pointer")\
@@ -487,7 +487,7 @@ double    var::operator+ () const { return +(double)(**this); }
 
 
 #include <stdio.h>
-#include "../libEGMstd.h"
+#include "libEGMstd.h"
 string toString(const variant &a)
 {
   char buf[32];

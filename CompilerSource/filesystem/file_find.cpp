@@ -28,7 +28,7 @@
 #include <iostream>
 using namespace std;
 
-#include "../OS_Switchboard.h"
+#include "OS_Switchboard.h"
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
   #include <windows.h>
@@ -118,7 +118,7 @@ using namespace std;
     
     const int not_attrib = ~fff_attrib;
     
-    if (r == "." or r == ".." // Don't return ./ and ../
+    if (r == "." or r == ".." // Don't return ./ and 
     or ((r[0] == '.' or r[r.length()-1] == '~') and not_attrib & fa_hidden) // Filter hidden files
     ) return file_find_next(); 
     

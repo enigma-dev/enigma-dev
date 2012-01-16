@@ -33,14 +33,14 @@
 
 using namespace std;
 
-#include "../../externs/externs.h"
-#include "../../syntax/syncheck.h"
-#include "../../parser/parser.h"
+#include "externs/externs.h"
+#include "syntax/syncheck.h"
+#include "parser/parser.h"
 
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../compile_common.h"
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "compiler/compile_common.h"
 
-#include "../event_reader/event_parser.h"
+#include "compiler/event_reader/event_parser.h"
 
 struct foundevent { int mid, id, count; foundevent(); void operator++(int); };
 extern map<string,foundevent> used_events;

@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#include "../JavaStruct.h"
-#include "../sub/SubImage.h"
+#include "backend/JavaStruct.h"
+#include "backend/sub/SubImage.h"
 
 struct Sprite
 {

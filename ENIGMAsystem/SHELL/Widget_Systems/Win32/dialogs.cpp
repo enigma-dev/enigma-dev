@@ -29,8 +29,8 @@
 #include <windows.h>
 #include <stdio.h>
 using namespace std;
-#include "../widgets_mandatory.h"
-#include "../../GameSettings.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "GameSettings.h"
 
 #include "dialogs.h"
 

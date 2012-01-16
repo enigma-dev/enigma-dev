@@ -29,7 +29,7 @@
 #include <string>
 using namespace std;
 
-#include "../parser/object_storage.h"
+#include "parser/object_storage.h"
 #include "compile_organization.h"
 
 namespace used_funcs

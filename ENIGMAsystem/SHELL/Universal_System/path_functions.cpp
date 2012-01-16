@@ -26,8 +26,8 @@
 \********************************************************************************/
 #include "pathstruct.h"
 #include "path_functions.h"
-//#include "../Graphics_Systems/OpenGL/GScurves.h" //This should probably be changed later on, because this is clearly GL only and when d3d is added then this will break
-//#include "../Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
+//#include "Graphics_Systems/OpenGL/GScurves.h" //This should probably be changed later on, because this is clearly GL only and when d3d is added then this will break
+//#include "Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
 //#include "instance_system.h" //for path_start()
 #include <algorithm>
 #include <cmath>

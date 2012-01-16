@@ -2,7 +2,7 @@
 #include <fstream>
 using namespace std;
 
-#include "../settings-parse/eyaml.h"
+#include "settings-parse/eyaml.h"
 
 
 char indent[4096] = { };

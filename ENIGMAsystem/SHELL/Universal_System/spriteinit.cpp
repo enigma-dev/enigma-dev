@@ -20,10 +20,10 @@
 using namespace std;
 
 #include "spritestruct.h"
-#include "../Platforms/platforms_mandatory.h"
-#include "../Graphics_Systems/graphics_mandatory.h"
-#include "../Widget_Systems/widgets_mandatory.h"
-#include "../libEGMstd.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
 #include "zlib.h"
 #include "resinit.h"
 

@@ -9,8 +9,8 @@
 
 
 
-#include "../JavaStruct.h"
-#include "../util/Image.h"
+#include "backend/JavaStruct.h"
+#include "backend/util/Image.h"
 //import org.lateralgm.file.iconio.ICOFile;
 
 struct GameSettings

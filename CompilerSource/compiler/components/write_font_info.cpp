@@ -27,17 +27,17 @@
 
 #include <cstdio>
 #include <fstream>
-#include "../../backend/EnigmaStruct.h" //LateralGM interface structures
-#include "../reshandlers/refont.h"
+#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "compiler/reshandlers/refont.h"
 #include <string>
 using namespace std;
-#include "../compile_common.h"
+#include "compiler/compile_common.h"
 
 
 int compile_writeFontInfo(EnigmaStruct* es)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h",ios_base::out);
-  wto << license << "#include \"../Universal_System/fontstruct.h\"" << endl
+  wto << license << "#include \"Universal_System/fontstruct.h\"" << endl
       << endl;
   
   int maxid = -1, rawfontcount = 0;

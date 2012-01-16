@@ -7,8 +7,8 @@
  */
 
 
-#include "../sub/MainEvent.h"
-#include "../JavaStruct.h"
+#include "backend/sub/MainEvent.h"
+#include "backend/JavaStruct.h"
 
 struct GmObject
 {

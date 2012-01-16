@@ -29,12 +29,12 @@
 #include <windows.h>
 using namespace std;
 
-#include "../../Universal_System/var4.h"
-#include "../../Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h"
 #include <unistd.h> //usleep
-#include "../../Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 
-#include "../../Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "WINDOWSwindow.h"
 
 bool resizeableWindow = false;
@@ -546,7 +546,7 @@ int window_get_curor()
 void game_end() { PostQuitMessage(0); }
 void action_end_game() { game_end(); }
 
-#include "../../Universal_System/globalupdate.h"
+#include "Universal_System/globalupdate.h"
 #include "WINDOWScallback.h"
 
 void io_handle()

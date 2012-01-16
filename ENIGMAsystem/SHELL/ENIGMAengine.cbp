@@ -16,10 +16,10 @@
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
-					<Add library="../additional/zlib/libzlib.a" />
+					<Add library="additional/zlib/libzlib.a" />
 					<Add library="gdi32" />
 					<Add library="comdlg32" />
-					<Add library="../additional/al/lib/Win32/OpenAL32.lib" />
+					<Add library="additional/al/lib/Win32/OpenAL32.lib" />
 					<Add library="Platforms/Win32/ffi/libFFI.a" />
 					<Add library="glu32" />
 					<Add library="comctl32" />
@@ -36,10 +36,10 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="opengl32" />
-					<Add library="../additional/zlib/libzlib.a" />
+					<Add library="additional/zlib/libzlib.a" />
 					<Add library="gdi32" />
 					<Add library="comdlg32" />
-					<Add library="../additional/al/lib/Win32/OpenAL32.lib" />
+					<Add library="additional/al/lib/Win32/OpenAL32.lib" />
 					<Add library="Platforms/Win32/ffi/libFFI.a" />
 					<Add library="glu32" />
 					<Add library="comctl32" />

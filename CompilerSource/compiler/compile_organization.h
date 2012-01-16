@@ -43,7 +43,7 @@ enum cmodes {
   mode_compile
 };
 
-#include "../parser/object_storage.h"
+#include "parser/object_storage.h"
 
 struct parsed_script
 {

@@ -25,8 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "../externs/externs.h"
-#include "../parser/object_storage.h"
+#include "externs/externs.h"
+#include "parser/object_storage.h"
 
 struct onode
 {

@@ -33,10 +33,10 @@
 
 using namespace std;
 
-#include "../filesystem/file_find.h"
-#include "../general/parse_basics.h"
-#include "../OS_Switchboard.h"
-#include "../parser/object_storage.h"
+#include "filesystem/file_find.h"
+#include "general/parse_basics.h"
+#include "OS_Switchboard.h"
+#include "parser/object_storage.h"
 #include "crawler.h"
 #include "eyaml.h"
 
@@ -60,8 +60,8 @@ inline string tolower(string x) {
   return x;
 }
 
-//#include "../backend/ideprint.h"
-//#include "../backend/JavaCallbacks.h"
+//#include "backend/ideprint.h"
+//#include "backend/JavaCallbacks.h"
 
 #define user cout << "\n\n\n\n\n"
 #define flushl "\n\n\n\n\n"

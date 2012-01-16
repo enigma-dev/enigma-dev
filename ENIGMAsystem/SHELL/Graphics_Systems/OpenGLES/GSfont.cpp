@@ -31,7 +31,7 @@
 #include "GScolors.h"
 
 using namespace std;
-#include "../../Universal_System/fontstruct.h"
+#include "Universal_System/fontstruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)

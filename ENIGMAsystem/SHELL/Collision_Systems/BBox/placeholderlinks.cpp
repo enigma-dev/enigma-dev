@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "../collision_mandatory.h"
+#include "Collision_Systems/collision_mandatory.h"
 
 namespace enigma
 {

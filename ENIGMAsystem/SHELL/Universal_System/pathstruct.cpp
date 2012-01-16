@@ -33,8 +33,8 @@
 #include <float.h> //maxiumum values for certain datatypes. Useful for minx = DBL_MAX
 #include <cstdlib> //size_t
 //using namespace std;
-//#include "../Graphics_Systems/graphics_mandatory.h"
-//#include "../libEGMstd.h"
+//#include "Graphics_Systems/graphics_mandatory.h"
+//#include "libEGMstd.h"
 
 #include "pathstruct.h"
 

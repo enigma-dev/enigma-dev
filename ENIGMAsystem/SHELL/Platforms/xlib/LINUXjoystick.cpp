@@ -27,7 +27,7 @@
 using namespace std;
 
 #include "LINUXjoystick.h"  
-#include "../../Universal_System/CallbackArrays.h"  
+#include "Universal_System/CallbackArrays.h"  
 
 
 namespace enigma

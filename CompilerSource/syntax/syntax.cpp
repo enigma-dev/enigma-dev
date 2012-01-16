@@ -32,11 +32,11 @@
 #include <vector>
 #include <iostream>
 
-#include "../settings.h"
-#include "../externs/externs.h"
-#include "../general/parse_basics.h"
-#include "../general/macro_integration.h"
-#include "../parser/object_storage.h"
+#include "settings.h"
+#include "externs/externs.h"
+#include "general/parse_basics.h"
+#include "general/macro_integration.h"
+#include "parser/object_storage.h"
 
 using namespace std;
 

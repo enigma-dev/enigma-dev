@@ -31,7 +31,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "../general/darray.h"
+#include "general/darray.h"
 
 using namespace std;
 
