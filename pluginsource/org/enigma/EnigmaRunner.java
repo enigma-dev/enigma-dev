@@ -582,6 +582,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					Messages.getString("EnigmaRunner.CHOOSER_EXE_DESCRIPTION"))); //$NON-NLS-1$
 			if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			outname = fc.getSelectedFile();
+			if (!outname.getName().endsWith(ext)) outname = new File(outname.getPath() + ext);
 			}
 
 		setMenuEnabled(false);
