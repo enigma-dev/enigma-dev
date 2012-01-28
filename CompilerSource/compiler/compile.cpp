@@ -475,7 +475,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   string mfgfn = gameFname;
   for (size_t i = 0; i < mfgfn.length(); i++)
     if (mfgfn[i] == '\\') mfgfn[i] = '/';
-  make += string("OUTPUTNAME=\"") + mfgfn + "\" ";
+  make += string(" OUTPUTNAME=\"") + mfgfn + "\" ";
   make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
   edbg << "Running make from `" << MAKE_location << "'" << flushl;
