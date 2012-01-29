@@ -961,7 +961,7 @@ public final class EnigmaWriter
 							if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
 								code.append("with (other) "); //$NON-NLS-1$
 							else if (apto.get() != null)
-								code.append("with (").append(apto.get().getName()).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
+								code.append("with (").append(org.lateralgm.resources.GmObject.refAsInt(apto)).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
 							else
 								code.append("/*null with!*/"); //$NON-NLS-1$
 
@@ -971,7 +971,7 @@ public final class EnigmaWriter
 							if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
 								code.append("with (other) {"); //$NON-NLS-1$
 							else if (apto.get() != null)
-								code.append("with (").append(apto.get().getName()).append(") {"); //$NON-NLS-1$ //$NON-NLS-2$
+								code.append("with (").append(org.lateralgm.resources.GmObject.refAsInt(apto)).append(") {"); //$NON-NLS-1$ //$NON-NLS-2$
 							else
 								code.append("/*null with!*/{"); //$NON-NLS-1$
 							}
