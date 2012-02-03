@@ -117,7 +117,7 @@ $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
-	windres -o $@ -i $^ -O rc
+	$(WINDRES) -o $@ -i $^ -O rc
 
 $(OBJDIRS):
 	mkdir -p $@

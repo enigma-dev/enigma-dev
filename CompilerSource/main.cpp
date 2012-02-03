@@ -41,11 +41,12 @@ using namespace std;
 
 #include "externs/externs.h"
 #include "syntax/syncheck.h"
-    #include "parser/parser.h"
-    #include "compiler/compile.h"
-    #include "cfile_parse/cfile_parse.h"
-    #include "cfile_parse/type_resolver.h"
-    #include "syntax/checkfile.h"
+#include "parser/parser.h"
+#include "compiler/compile.h"
+#include "cfile_parse/cfile_parse.h"
+#include "cfile_parse/type_resolver.h"
+#include "syntax/checkfile.h"
+#include "OS_Switchboard.h"
 
 my_string fca(const char* fn);
 
@@ -97,7 +98,7 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   }
   else cout << "IDE Not Found. Continuing without graphical output." << endl;
   
-  const char* a = establish_bearings("gcc");
+  const char* a = establish_bearings("Compilers/" CURRENT_PLATFORM_NAME "/gcc.ey");
   if (a)
     cout << "ERROR: " << a << endl << "See scrollback for more information.\n";
   return a;
