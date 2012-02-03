@@ -139,7 +139,7 @@ const char* establish_bearings(const char *compiler)
   lastbearings = compiler;
   
   string GCC_location;
-  string compfq = "Compilers/" CURRENT_PLATFORM_NAME "/"; compfq += compiler; compfq += ".ey"; //Filename of compiler.ey
+  string compfq = compiler; //Filename of compiler.ey
   ifstream compis(compfq.c_str());
 
   // Bail if error
