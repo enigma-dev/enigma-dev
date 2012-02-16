@@ -13,12 +13,15 @@ OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	TARGET := ../lib$(BASE).so
 	CXXFLAGS += -fPIC
+	MKDIR := mkdir
 else ifeq ($(OS), Darwin)
 	TARGET := ../lib$(BASE).dylib
 	CXXFLAGS += -fPIC
+	MKDIR := mkdir
 else
 	TARGET := ../$(BASE).dll
 	LDFLAGS += -static-libstdc++ -static-libgcc
+	MKDIR := mkdir.exe
 endif
 
 ###########
@@ -58,7 +61,7 @@ $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -MMD -MP -c -o .eobjs/$*.o $<
 
 $(OBJDIRS):
-	mkdir -p $@
+	$(MKDIR) -p $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPENDS)

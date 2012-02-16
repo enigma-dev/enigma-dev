@@ -29,7 +29,7 @@
 #include <string>
 #include <windows.h>
 
-#include "ffi/ffi.h"
+#include <ffi.h>
 #include "Universal_System/var4.h"
 
 #include "Platforms/platforms_mandatory.h"
