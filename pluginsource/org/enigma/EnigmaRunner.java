@@ -66,8 +66,8 @@ import org.enigma.file.EgmIO;
 import org.enigma.file.YamlParser;
 import org.enigma.file.YamlParser.YamlNode;
 import org.enigma.frames.DefinitionsFrame;
-import org.enigma.frames.ProgressFrame;
 import org.enigma.frames.EnigmaSettingsFrame;
+import org.enigma.frames.ProgressFrame;
 import org.enigma.messages.Messages;
 import org.enigma.utility.EnigmaBuildReader;
 import org.lateralgm.components.ErrorDialog;
@@ -85,6 +85,7 @@ import org.lateralgm.jedit.GMLKeywords.Keyword;
 import org.lateralgm.main.FileChooser;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
+import org.lateralgm.main.Listener;
 import org.lateralgm.main.Prefs;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
@@ -288,8 +289,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		FileChooser.readers.add(io);
 		FileChooser.writers.add(io);
 
-		LGM.listener.fc.addOpenFilters(io);
-		LGM.listener.fc.addSaveFilters(io);
+		Listener.getInstance().fc.addOpenFilters(io);
+		Listener.getInstance().fc.addSaveFilters(io);
 
 		FileChooser.fileViews.add(io);
 		ResNode.ICON.put(EnigmaSettings.class,LGM.findIcon("restree/gm.png"));
@@ -839,18 +840,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					{
 					SyntaxError se = checkSyntax(code.getTextCompat());
 					if (se == null) return;
-					int max = code.getDocumentLength() - 1;
-					if (se.absoluteIndex > max) se.absoluteIndex = max;
 					if (se.absoluteIndex != -1) //-1 = no error
 						{
-						code.setCaretPosition(se.absoluteIndex);
-						code.setSelectionStart(se.absoluteIndex);
-						code.setSelectionEnd(se.absoluteIndex + 1);
+						code.markError(se.line - 1,se.position - 1,se.absoluteIndex);
 						errors.setText(se.line + ":" + se.position + "::" + se.errorString); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					else
 						errors.setText(Messages.getString("EnigmaRunner.LABEL_ERRORS_UNSET")); //$NON-NLS-1$
-					code.requestFocus();
+					code.requestFocusInWindow();
 					}
 			});
 		tool.add(syntaxCheck,5);
