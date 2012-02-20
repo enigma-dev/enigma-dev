@@ -143,13 +143,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 				public void run()
 					{
-					//Disable updates by removing plugins/shared/svnkit.jar (e.g. linux packages)
-					int updates = attemptUpdate(); //displays own error
-					if (updates == -1)
-						{
-						ENIGMA_FAIL = true;
-						return;
-						}
 					//Make checks for changes itself
 					if (!make()) //displays own error
 						{
@@ -475,32 +468,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		ImageIcon bg = findIcon(bgloc);
 		LGM.mdi.add(new MDIBackground(bg),JLayeredPane.FRAME_CONTENT_LAYER);
-		}
-
-	/** Attempts to checkout/update. Returns 0/1 on success, -1 on aborted checkout, -2 on failure, -3 on missing SvnKit */
-	public int attemptUpdate()
-		{
-		try
-			{
-			int up = EnigmaUpdater.checkForUpdates(ef);
-			if (EnigmaUpdater.needsRestart)
-				{
-				JOptionPane.showMessageDialog(null,Messages.getString("EnigmaRunner.INFO_UPDATE_RESTART")); //$NON-NLS-1$
-				System.exit(120); //exit code 120 lets our launcher know to restart us.
-				}
-			return up;
-			}
-		/**
-		 * Usually you shouldn't catch an Error, however,
-		 * in this case we catch it to abort the module,
-		 * rather than allowing the failed module to cause
-		 * the entire program/plugin to fail
-		 */
-		catch (NoClassDefFoundError e)
-			{
-			System.err.println(Messages.getString("EnigmaRunner.WARN_UPDATE_MISSING_SVNKIT")); //$NON-NLS-1$
-			return -3;
-			}
 		}
 
 	public class MDIBackground extends JComponent
