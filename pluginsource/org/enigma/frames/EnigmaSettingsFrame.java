@@ -36,14 +36,17 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.ComboBoxModel;
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.GroupLayout.Group;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -59,9 +62,6 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.GroupLayout.Group;
-import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.InternalFrameAdapter;
@@ -74,21 +74,22 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import org.enigma.EnigmaRunner;
 import org.enigma.SettingsHandler;
-import org.enigma.TargetHandler;
 import org.enigma.SettingsHandler.ExtensionSetting;
 import org.enigma.SettingsHandler.OptionGroupSetting;
 import org.enigma.SettingsHandler.OptionSetting;
+import org.enigma.TargetHandler;
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaSettings.PEnigmaSettings;
 import org.enigma.messages.Messages;
 import org.lateralgm.components.CustomFileChooser;
+import org.lateralgm.components.GMLTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
 import org.lateralgm.main.LGM;
 import org.lateralgm.subframes.CodeFrame;
-import org.lateralgm.subframes.ResourceFrame;
 import org.lateralgm.subframes.CodeFrame.CodeHolder;
+import org.lateralgm.subframes.ResourceFrame;
 
 public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSettings> implements
 		ActionListener,FocusListener,PopupMenuListener
@@ -610,7 +611,6 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 	public void updateResource()
 		{
 		commitChanges();
-		System.out.println("UPDATING " + res);
 		res.copyInto(resOriginal);
 		}
 
@@ -901,9 +901,15 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 				{
 				if (!res.definitions.equals(sDef.getCode()))
 					{
+					//Definitions Modified at this point (will change in future)
 					res.definitions = sDef.getCode();
 					res.saveDefinitions();
-					if (EnigmaRunner.ENIGMA_READY) res.commitToDriver(EnigmaRunner.DRIVER);
+					if (EnigmaRunner.ENIGMA_READY)
+						{
+						res.commitToDriver(EnigmaRunner.DRIVER);
+						EnigmaRunner.populateKeywords();
+						GMLTextArea.updateKeywords();
+						}
 					}
 				cfDef = null;
 				}

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
@@ -173,6 +174,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					esf = new EnigmaSettingsFrame(es);
 					LGM.mdi.add(esf);
 					es.commitToDriver(DRIVER);
+					setupBaseKeywords();
 					populateKeywords();
 					}
 			}.start();
@@ -416,21 +418,31 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
+	private static SortedSet<Function> BASE_FUNCTIONS;
+	private static SortedSet<Construct> BASE_CONSTRUCTS;
+	private static final Comparator<Keyword> KEYWORD_COMP = new Comparator<Keyword>()
+		{
+			@Override
+			public int compare(Keyword o1, Keyword o2)
+				{
+				return o1.getName().compareTo(o2.getName());
+				}
+		};
+
+	private static void setupBaseKeywords()
+		{
+		BASE_FUNCTIONS = new TreeSet<Function>(KEYWORD_COMP);
+		for (Function f : GMLKeywords.FUNCTIONS)
+			BASE_FUNCTIONS.add(f);
+		BASE_CONSTRUCTS = new TreeSet<Construct>(KEYWORD_COMP);
+		for (Construct f : GMLKeywords.CONSTRUCTS)
+			BASE_CONSTRUCTS.add(f);
+		}
+
 	public static void populateKeywords()
 		{
-		Comparator<Keyword> nameComp = new Comparator<Keyword>()
-			{
-				@Override
-				public int compare(Keyword o1, Keyword o2)
-					{
-					return o1.getName().compareTo(o2.getName());
-					}
-			};
-
-		Set<Function> fl = new TreeSet<Function>(nameComp);
-		for (Function f : GMLKeywords.FUNCTIONS)
-			fl.add(f);
-		Set<Construct> cl = new TreeSet<Construct>(nameComp);
+		Set<Function> fl = new TreeSet<Function>(BASE_FUNCTIONS);
+		Set<Construct> cl = new TreeSet<Construct>(BASE_CONSTRUCTS);
 		String res = DRIVER.first_available_resource();
 		while (res != null)
 			{
@@ -459,6 +471,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			res = DRIVER.next_available_resource();
 			}
 		GMLKeywords.FUNCTIONS = fl.toArray(new Function[0]);
+
 		for (Construct c : GMLKeywords.CONSTRUCTS)
 			cl.add(c);
 		GMLKeywords.CONSTRUCTS = cl.toArray(new Construct[0]);
