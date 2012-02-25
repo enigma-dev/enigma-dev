@@ -61,7 +61,7 @@ public class EnigmaSettings extends Resource<EnigmaSettings,EnigmaSettings.PEnig
 		if (!load) return;
 
 		loadDefinitions();
-		targets.putAll(TargetHandler.defaults);
+		if (TargetHandler.defaults != null) targets.putAll(TargetHandler.defaults);
 
 		for (OptionGroupSetting ogs : SettingsHandler.optionGroups)
 			for (OptionSetting os : ogs.opts)
