@@ -36,6 +36,28 @@ public class APNGExperiments
 				(byte) ((i & 0x0000FF00) >> 8), (byte) (i & 0x000000FF) };
 	}
 	
+	/** Convenience method to fully read a buffer, since in.read(buf) can fall short. */
+	static void readFully(InputStream in, byte[] buffer) throws IOException
+	{
+		readFully(in,buffer,0,buffer.length);
+	}
+
+	static void readFully(InputStream in, byte[] buffer, int off, int len) throws IOException
+	{
+		int total = 0;
+		while (true)
+		{
+			int n = in.read(buffer,off + total,len - total);
+			if (n <= 0)
+			{
+				if (total == 0) total = n;
+				break;
+			}
+			total += n;
+			if (total == len) break;
+		}
+	}
+	
 	static abstract class PNG_Chunk
 	{
 		int length = 0;
@@ -51,9 +73,9 @@ public class APNGExperiments
 			length = data.length;
 			crc = i2b(tcrc);
 		}
-		
+
 		abstract void repopulate();
-		
+
 		byte[] getBytes() { // Get the bytes of this chunk for writing
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try
@@ -85,11 +107,11 @@ public class APNGExperiments
 			length = (b1 << 24) | (dis.read() << 16) | (dis.read() << 8)
 					| dis.read();
 			chunkType = new byte[4];
-			dis.read(chunkType);
+			readFully(dis,chunkType);
 			data = new byte[length];
-			dis.read(data);
+			readFully(dis,data);
 			crc = new byte[4];
-			dis.read(crc);
+			readFully(dis,crc);
 			return true;
 		}
 	}
