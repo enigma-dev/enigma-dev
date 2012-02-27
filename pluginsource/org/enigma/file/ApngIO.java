@@ -12,7 +12,6 @@ package org.enigma.file;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -187,115 +186,6 @@ public final class ApngIO
 		@Override
 		void repopulate()
 			{
-			updateCRC();
-			}
-		}
-
-	private static class IHDR extends PNG_Chunk
-		{
-		public static final ChunkType type = new ChunkType(new byte[] { 'I','H','D','R' });
-
-		int width, height;
-		byte bitDepth;
-		ColorType colType;
-		Compression compression;
-		Filter filter;
-		Interlace interlace;
-
-		public IHDR(int w, int h, byte bd, ColorType ct, Compression cm, Filter ft, Interlace il)
-			{
-			super(type);
-			width = w;
-			height = h;
-			bitDepth = bd;
-			colType = ct;
-			compression = cm;
-			filter = ft;
-			interlace = il;
-			repopulate();
-			}
-
-		public IHDR(byte[] png)
-			{
-			super(type);
-			data = new byte[13];
-			System.arraycopy(png,16,data,0,data.length);
-			updateCRC();
-			}
-
-		public static enum ColorType
-			{
-			GRAY(0),RGB(2),PALETTE(3),GRAYA(4),RGBA(6);
-
-			private byte value;
-
-			private ColorType(int v)
-				{
-				value = (byte) v;
-				}
-
-			public byte getValue()
-				{
-				return value;
-				}
-			}
-
-		public static enum Compression
-			{
-			DEFLATE(0);
-
-			private byte value;
-
-			private Compression(int v)
-				{
-				value = (byte) v;
-				}
-
-			public byte getValue()
-				{
-				return value;
-				}
-			}
-
-		public static enum Filter
-			{
-			ADAPTIVE(0);
-
-			private byte value;
-
-			private Filter(int v)
-				{
-				value = (byte) v;
-				}
-
-			public byte getValue()
-				{
-				return value;
-				}
-			}
-
-		public static enum Interlace
-			{
-			NONE(0),ADAM7(1);
-
-			private byte value;
-
-			private Interlace(int v)
-				{
-				value = (byte) v;
-				}
-
-			public byte getValue()
-				{
-				return value;
-				}
-			}
-
-		public void repopulate()
-			{
-			data = new byte[] { bite(width,24),bite(width,16),bite(width,8),bite(width,0), //
-					bite(height,24),bite(height,16),bite(height,8),bite(height,0), //
-					bitDepth,colType.getValue(),compression.getValue(),filter.getValue(),interlace.getValue() };
 			updateCRC();
 			}
 		}
@@ -500,8 +390,8 @@ public final class ApngIO
 
 	private static class IEND extends PNG_Chunk
 		{
-		public static final IEND instance = new IEND();
 		public static final ChunkType type = new ChunkType(new byte[] { 'I','E','N','D' });
+		public static final IEND instance = new IEND();
 
 		/**
 		 * IEND is a singleton class and should not be instantiated.
@@ -643,28 +533,5 @@ public final class ApngIO
 			e.printStackTrace();
 			}
 		return ret;
-		}
-
-	//Tests
-	public static void mainTwoWay() throws IOException
-		{
-		File dropbox = new File(System.getProperty("user.home"),"Dropbox");
-		File f = new File(dropbox,"ENIGMA");
-		ArrayList<BufferedImage> list = new ArrayList<BufferedImage>();
-
-		//convert sprite90.png to APNG
-		list.add(ImageIO.read(new File(f,"sprite90.png")));
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		imagesToApng(list,baos);
-
-		//attempt to read resulting APNG byte stream back to BufferedImage
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		ArrayList<BufferedImage> list2 = apngToBufferedImages(bais);
-		System.out.println("HI " + list2.size());
-		}
-
-	public static void main(String[] args) throws Exception
-		{
-		mainTwoWay();
 		}
 	}
