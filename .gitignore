@@ -15,7 +15,6 @@ blank.txt
 *.jar
 .eobjs/
 ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/
-ENIGMAsystem/SHELL/API_Switchboard.h
 plugins/
 LinuxExtra/
 ENIGMAengine
