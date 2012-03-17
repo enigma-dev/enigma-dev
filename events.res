@@ -5,7 +5,7 @@
 #	so long as the IDE supports adding them.
 #
 # That said, DO NOT MODIFY THE CONTENTS OF THIS FILE, UNLESS YOU HAVE READ THE DOCUMENTATION.
-# Modifying this file CAN screw up ENIGMA's behavior.
+# Modifying this file can screw up ENIGMA's behavior.
 #
 
 
