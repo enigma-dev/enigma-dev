@@ -7,10 +7,13 @@
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
 	PLATFORM := xlib
+	MKDIR := mkdir
 else ifeq ($(OS), Darwin)
 	PLATFORM := Cocoa
+	MKDIR := mkdir
 else
 	PLATFORM := Win32
+	MKDIR := mkdir.exe
 endif
 
 # GMODE { Run, Build, Debug, Compile }
@@ -117,10 +120,10 @@ $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
-	windres -o $@ -i $^ -O rc
+	$(WINDRES) -o $@ -i $^ -O rc
 
 $(OBJDIRS):
-	mkdir -p $@
+	$(MKDIR) -p $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPENDS)

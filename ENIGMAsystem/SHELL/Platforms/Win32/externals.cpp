@@ -29,7 +29,7 @@
 #include <string>
 #include <windows.h>
 
-#include "ffi/ffi.h"
+#include <ffi.h>
 #include "Universal_System/var4.h"
 
 #include "Platforms/platforms_mandatory.h"
@@ -44,7 +44,7 @@ struct external
   int argc,restype;
   ffi_type **arg_type;
   void (*functionptr)();
-  
+
   external(int acount,int returntype)
   {
     argc=acount;
@@ -65,10 +65,10 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
                     bool t09,bool t10,bool t11,bool t12,bool t13,bool t14,bool t15,bool t16)
 {
   ffi_status status;
-  
+
   int ac=(argcount>16)?16:((int)argcount);
   external *a = new external(ac,(int)returntype);
-  
+
   switch (ac)
   {
     case 16: a->arg_type[15] = (t16==ty_string?(&ffi_type_pointer):(&ffi_type_double));
@@ -88,21 +88,21 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
     case 2:  a->arg_type[ 1] = (t02==ty_string?(&ffi_type_pointer):(&ffi_type_double));
     case 1:  a->arg_type[ 0] = (t01==ty_string?(&ffi_type_pointer):(&ffi_type_double));
   }
-  
+
   ffi_type *restype = ((returntype==ty_string)?(&ffi_type_pointer):(&ffi_type_double));
   status=ffi_prep_cif(&(a->cif), ((calltype==dll_stdcall)?FFI_STDCALL:FFI_DEFAULT_ABI), ac, restype, a->arg_type);
-  
+
   if (status != FFI_OK)
   {
     show_error("Defining DLL failed.",0);
     return -1;
   }
-  
+
   HMODULE dllmod = LoadLibrary(dll.c_str());
   FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
   if (funcptr==NULL) return 0;
   a->functionptr=(void(*)())funcptr;
-  
+
   int ind=external_count++;
   externals[ind]=a;
   return ind;
@@ -117,10 +117,10 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   if ((it=externals.find(id)) == externals.end())
     return 0;
   external* a=it->second;
-  
+
   ambiguous array[a->argc];
   void *arg_values[a->argc];
-  
+
   variant args[] = { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16 };
   for (int i=0;i<a->argc;i++)
   {
@@ -130,7 +130,7 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
       array[i].s=((string)args[i]).c_str();
     arg_values[i]=&array[i];
   }
-  
+
   ambiguous result;
   ffi_call(&(a->cif), a->functionptr, &result, arg_values);
   if (a->restype==ty_string) return result.s;
