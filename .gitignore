@@ -9,12 +9,7 @@ blank.txt
 *.d
 *.depend
 *.dll
-*.so
-*.dylib
 *.exe
 *.jar
 .eobjs/
 ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/
-plugins/
-LinuxExtra/
-ENIGMAengine
