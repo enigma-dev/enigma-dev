@@ -28,6 +28,7 @@
 bool sound_play(int sound);
 bool sound_loop(int sound);
 void sound_stop(int sound);
+void sound_stop_all();
 void sound_volume(int sound, float volume);
 void sound_global_volume(float mastervolume);
 void sound_delete(int sound);
