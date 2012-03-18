@@ -43,18 +43,18 @@ namespace enigma
   INTERCEPT_DEFAULT_COPY(enigma::depthv);
   void depthv::function() {
     rval.d = floor(rval.d);
-    myev->unlink(myiter);
-    myev = drawing_depths[rval.d].draw_events;
-    inst_iter *mynewiter = myev->add_inst(myiter->inst);
-    delete myiter; myiter = mynewiter;
+    drawing_depths[rval.d].draw_events->unlink(myiter);
+    inst_iter* mynewiter = drawing_depths[rval.d].draw_events->add_inst(myiter->inst);
+     if (instance_event_iterator == myiter)
+       instance_event_iterator = myiter->prev;
+     myiter = mynewiter;
   }
   void depthv::init(double d,object_basic* who) {
-    myev = drawing_depths[rval.d = floor(d)].draw_events;
-    myiter = myev->add_inst(who);
+    myiter = drawing_depths[rval.d = floor(d)].draw_events->add_inst(who);
   }
   void depthv::remove() {
-     myev->unlink(myiter);
-     delete myiter; myiter = NULL;
+     drawing_depths[rval.d].draw_events->unlink(myiter);
+     myiter = NULL;
   }
   depthv::~depthv() {}
   

@@ -398,7 +398,7 @@ public class EFileWriter
 		public void writeData(OutputStream os, Resource<?,?> r) throws IOException
 			{
 			ArrayList<BufferedImage> subs = ((Sprite) r).subImages;
-			ApngIO.imagesToApng(subs,os);
+			APNGExperiments.imagesToApng(subs,os);
 			}
 		}
 
