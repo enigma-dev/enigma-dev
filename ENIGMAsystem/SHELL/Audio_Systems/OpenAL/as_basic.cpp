@@ -22,7 +22,7 @@
 using std::string;
 #include "as_basic.h"
 #include "Audio_Systems/audio_mandatory.h"
-#include "alure/include/AL/alure.h"
+#include <AL/alure.h>
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"

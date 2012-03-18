@@ -54,9 +54,7 @@ public final class TargetHandler
 	public static void load()
 		{
 		targets = new HashMap<String,List<TargetSelection>>();
-		List<TargetSelection> comps = findCompilers();
-		if (comps.isEmpty()) return;
-		targets.put(COMPILER,comps);
+		targets.put(COMPILER,findCompilers());
 		for (int i = 1; i < folders.length; i++)
 			targets.put(ids[i],findTargets(folders[i]));
 
