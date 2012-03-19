@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
@@ -66,8 +67,8 @@ import org.enigma.file.EgmIO;
 import org.enigma.file.YamlParser;
 import org.enigma.file.YamlParser.YamlNode;
 import org.enigma.frames.DefinitionsFrame;
-import org.enigma.frames.ProgressFrame;
 import org.enigma.frames.EnigmaSettingsFrame;
+import org.enigma.frames.ProgressFrame;
 import org.enigma.messages.Messages;
 import org.enigma.utility.EnigmaBuildReader;
 import org.lateralgm.components.ErrorDialog;
@@ -85,6 +86,7 @@ import org.lateralgm.jedit.GMLKeywords.Keyword;
 import org.lateralgm.main.FileChooser;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
+import org.lateralgm.main.Listener;
 import org.lateralgm.main.Prefs;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
@@ -142,13 +144,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			{
 				public void run()
 					{
-					//Disable updates by removing plugins/shared/svnkit.jar (e.g. linux packages)
-					int updates = attemptUpdate(); //displays own error
-					if (updates == -1)
-						{
-						ENIGMA_FAIL = true;
-						return;
-						}
 					//Make checks for changes itself
 					if (!make()) //displays own error
 						{
@@ -179,6 +174,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					esf = new EnigmaSettingsFrame(es);
 					LGM.mdi.add(esf);
 					es.commitToDriver(DRIVER);
+					setupBaseKeywords();
 					populateKeywords();
 					}
 			}.start();
@@ -288,8 +284,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		FileChooser.readers.add(io);
 		FileChooser.writers.add(io);
 
-		LGM.listener.fc.addOpenFilters(io);
-		LGM.listener.fc.addSaveFilters(io);
+		Listener.getInstance().fc.addOpenFilters(io);
+		Listener.getInstance().fc.addSaveFilters(io);
 
 		FileChooser.fileViews.add(io);
 		ResNode.ICON.put(EnigmaSettings.class,LGM.findIcon("restree/gm.png"));
@@ -422,21 +418,31 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 		}
 
+	private static SortedSet<Function> BASE_FUNCTIONS;
+	private static SortedSet<Construct> BASE_CONSTRUCTS;
+	private static final Comparator<Keyword> KEYWORD_COMP = new Comparator<Keyword>()
+		{
+			@Override
+			public int compare(Keyword o1, Keyword o2)
+				{
+				return o1.getName().compareTo(o2.getName());
+				}
+		};
+
+	private static void setupBaseKeywords()
+		{
+		BASE_FUNCTIONS = new TreeSet<Function>(KEYWORD_COMP);
+		for (Function f : GMLKeywords.FUNCTIONS)
+			BASE_FUNCTIONS.add(f);
+		BASE_CONSTRUCTS = new TreeSet<Construct>(KEYWORD_COMP);
+		for (Construct f : GMLKeywords.CONSTRUCTS)
+			BASE_CONSTRUCTS.add(f);
+		}
+
 	public static void populateKeywords()
 		{
-		Comparator<Keyword> nameComp = new Comparator<Keyword>()
-			{
-				@Override
-				public int compare(Keyword o1, Keyword o2)
-					{
-					return o1.getName().compareTo(o2.getName());
-					}
-			};
-
-		Set<Function> fl = new TreeSet<Function>(nameComp);
-		for (Function f : GMLKeywords.FUNCTIONS)
-			fl.add(f);
-		Set<Construct> cl = new TreeSet<Construct>(nameComp);
+		Set<Function> fl = new TreeSet<Function>(BASE_FUNCTIONS);
+		Set<Construct> cl = new TreeSet<Construct>(BASE_CONSTRUCTS);
 		String res = DRIVER.first_available_resource();
 		while (res != null)
 			{
@@ -465,6 +471,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			res = DRIVER.next_available_resource();
 			}
 		GMLKeywords.FUNCTIONS = fl.toArray(new Function[0]);
+
 		for (Construct c : GMLKeywords.CONSTRUCTS)
 			cl.add(c);
 		GMLKeywords.CONSTRUCTS = cl.toArray(new Construct[0]);
@@ -474,32 +481,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		ImageIcon bg = findIcon(bgloc);
 		LGM.mdi.add(new MDIBackground(bg),JLayeredPane.FRAME_CONTENT_LAYER);
-		}
-
-	/** Attempts to checkout/update. Returns 0/1 on success, -1 on aborted checkout, -2 on failure, -3 on missing SvnKit */
-	public int attemptUpdate()
-		{
-		try
-			{
-			int up = EnigmaUpdater.checkForUpdates(ef);
-			if (EnigmaUpdater.needsRestart)
-				{
-				JOptionPane.showMessageDialog(null,Messages.getString("EnigmaRunner.INFO_UPDATE_RESTART")); //$NON-NLS-1$
-				System.exit(120); //exit code 120 lets our launcher know to restart us.
-				}
-			return up;
-			}
-		/**
-		 * Usually you shouldn't catch an Error, however,
-		 * in this case we catch it to abort the module,
-		 * rather than allowing the failed module to cause
-		 * the entire program/plugin to fail
-		 */
-		catch (NoClassDefFoundError e)
-			{
-			System.err.println(Messages.getString("EnigmaRunner.WARN_UPDATE_MISSING_SVNKIT")); //$NON-NLS-1$
-			return -3;
-			}
 		}
 
 	public class MDIBackground extends JComponent
@@ -839,18 +820,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					{
 					SyntaxError se = checkSyntax(code.getTextCompat());
 					if (se == null) return;
-					int max = code.getDocumentLength() - 1;
-					if (se.absoluteIndex > max) se.absoluteIndex = max;
 					if (se.absoluteIndex != -1) //-1 = no error
 						{
-						code.setCaretPosition(se.absoluteIndex);
-						code.setSelectionStart(se.absoluteIndex);
-						code.setSelectionEnd(se.absoluteIndex + 1);
+						code.markError(se.line - 1,se.position - 1,se.absoluteIndex);
 						errors.setText(se.line + ":" + se.position + "::" + se.errorString); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					else
 						errors.setText(Messages.getString("EnigmaRunner.LABEL_ERRORS_UNSET")); //$NON-NLS-1$
-					code.requestFocus();
+					code.requestFocusInWindow();
 					}
 			});
 		tool.add(syntaxCheck,5);
