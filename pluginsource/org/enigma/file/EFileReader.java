@@ -613,7 +613,7 @@ public class EFileReader
 			{
 			try
 				{
-				r.subImages.addAll(APNGExperiments.apngToBufferedImages(in));
+				r.subImages.addAll(ApngIO.apngToBufferedImages(in));
 				}
 			catch (Exception e)
 				{
