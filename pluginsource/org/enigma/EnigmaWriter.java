@@ -37,6 +37,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.DeflaterOutputStream;
 
@@ -73,14 +74,14 @@ import org.enigma.utility.Masker.Mask;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.iconio.ICOFile;
-import org.lateralgm.resources.InstantiableResource;
-import org.lateralgm.resources.Resource;
-import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
 import org.lateralgm.resources.GameSettings.PGameSettings;
 import org.lateralgm.resources.GmObject.PGmObject;
+import org.lateralgm.resources.InstantiableResource;
 import org.lateralgm.resources.Path.PPath;
+import org.lateralgm.resources.Resource;
+import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
@@ -268,7 +269,8 @@ public final class EnigmaWriter
 
 		o.sprites = new Sprite.ByReference();
 		Sprite[] osl = (Sprite[]) o.sprites.toArray(size);
-		org.lateralgm.resources.Sprite[] isl = i.resMap.getList(org.lateralgm.resources.Sprite.class).toArray(new org.lateralgm.resources.Sprite[0]);
+		org.lateralgm.resources.Sprite[] isl = i.resMap.getList(org.lateralgm.resources.Sprite.class).toArray(
+				new org.lateralgm.resources.Sprite[0]);
 		for (int s = 0; s < size; s++)
 			{
 			Sprite os = osl[s];
@@ -352,7 +354,8 @@ public final class EnigmaWriter
 
 		o.sounds = new Sound.ByReference();
 		Sound[] osl = (Sound[]) o.sounds.toArray(size);
-		org.lateralgm.resources.Sound[] isl = i.resMap.getList(org.lateralgm.resources.Sound.class).toArray(new org.lateralgm.resources.Sound[0]);
+		org.lateralgm.resources.Sound[] isl = i.resMap.getList(org.lateralgm.resources.Sound.class).toArray(
+				new org.lateralgm.resources.Sound[0]);
 		for (int s = 0; s < size; s++)
 			{
 			Sound os = osl[s];
@@ -391,7 +394,8 @@ public final class EnigmaWriter
 
 		o.backgrounds = new Background.ByReference();
 		Background[] obl = (Background[]) o.backgrounds.toArray(size);
-		org.lateralgm.resources.Background[] ibl = i.resMap.getList(org.lateralgm.resources.Background.class).toArray(new org.lateralgm.resources.Background[0]);
+		org.lateralgm.resources.Background[] ibl = i.resMap.getList(
+				org.lateralgm.resources.Background.class).toArray(new org.lateralgm.resources.Background[0]);
 		for (int s = 0; s < size; s++)
 			{
 			Background ob = obl[s];
@@ -424,7 +428,8 @@ public final class EnigmaWriter
 
 		o.paths = new Path.ByReference();
 		Path[] opl = (Path[]) o.paths.toArray(size);
-		org.lateralgm.resources.Path[] ipl = i.resMap.getList(org.lateralgm.resources.Path.class).toArray(new org.lateralgm.resources.Path[0]);
+		org.lateralgm.resources.Path[] ipl = i.resMap.getList(org.lateralgm.resources.Path.class).toArray(
+				new org.lateralgm.resources.Path[0]);
 		for (int p = 0; p < size; p++)
 			{
 			Path op = opl[p];
@@ -465,7 +470,8 @@ public final class EnigmaWriter
 
 		o.scripts = new Script.ByReference();
 		Script[] osl = (Script[]) o.scripts.toArray(size);
-		org.lateralgm.resources.Script[] isl = i.resMap.getList(org.lateralgm.resources.Script.class).toArray(new org.lateralgm.resources.Script[0]);
+		org.lateralgm.resources.Script[] isl = i.resMap.getList(org.lateralgm.resources.Script.class).toArray(
+				new org.lateralgm.resources.Script[0]);
 		for (int s = 0; s < isl.length; s++)
 			{
 			Script oo = osl[s];
@@ -508,7 +514,8 @@ public final class EnigmaWriter
 
 		if (size == 1) return;
 
-		org.lateralgm.resources.Font[] ifl = i.resMap.getList(org.lateralgm.resources.Font.class).toArray(new org.lateralgm.resources.Font[0]);
+		org.lateralgm.resources.Font[] ifl = i.resMap.getList(org.lateralgm.resources.Font.class).toArray(
+				new org.lateralgm.resources.Font[0]);
 		for (int f = 1; f < size; f++)
 			{
 			Font of = ofl[f];
@@ -590,7 +597,8 @@ public final class EnigmaWriter
 
 		o.timelines = new Timeline.ByReference();
 		Timeline[] otl = (Timeline[]) o.timelines.toArray(size);
-		org.lateralgm.resources.Timeline[] itl = i.resMap.getList(org.lateralgm.resources.Timeline.class).toArray(new org.lateralgm.resources.Timeline[0]);
+		org.lateralgm.resources.Timeline[] itl = i.resMap.getList(
+				org.lateralgm.resources.Timeline.class).toArray(new org.lateralgm.resources.Timeline[0]);
 		for (int t = 0; t < size; t++)
 			{
 			Timeline ot = otl[t];
@@ -620,7 +628,8 @@ public final class EnigmaWriter
 
 		o.gmObjects = new GmObject.ByReference();
 		GmObject[] ool = (GmObject[]) o.gmObjects.toArray(size);
-		org.lateralgm.resources.GmObject[] iol = i.resMap.getList(org.lateralgm.resources.GmObject.class).toArray(new org.lateralgm.resources.GmObject[0]);
+		org.lateralgm.resources.GmObject[] iol = i.resMap.getList(
+				org.lateralgm.resources.GmObject.class).toArray(new org.lateralgm.resources.GmObject[0]);
 		for (int s = 0; s < size; s++)
 			{
 			GmObject oo = ool[s];
@@ -789,15 +798,20 @@ public final class EnigmaWriter
 					}
 				}
 
-			or.instanceCount = is.instances.size();
+			//Eliminate instances with no parent object.
+			List<org.lateralgm.resources.sub.Instance> ri = new LinkedList<org.lateralgm.resources.sub.Instance>();
+			for (org.lateralgm.resources.sub.Instance ii : is.instances)
+				if (toId(ii.properties.get(PInstance.OBJECT),-1) != -1) ri.add(ii);
+
+			or.instanceCount = ri.size();
 			if (or.instanceCount != 0)
 				{
 				or.instances = new Instance.ByReference();
-				Instance[] oil = (Instance[]) or.instances.toArray(or.instanceCount);
-				for (int i = 0; i < oil.length; i++)
+				Instance[] oil = (Instance[]) or.instances.toArray(ri.size());
+				int i = 0;
+				for (org.lateralgm.resources.sub.Instance ii : ri)
 					{
-					Instance oi = oil[i];
-					org.lateralgm.resources.sub.Instance ii = is.instances.get(i);
+					Instance oi = oil[i++];
 
 					oi.x = ii.properties.get(PInstance.X);
 					oi.y = ii.properties.get(PInstance.Y);
@@ -904,8 +918,8 @@ public final class EnigmaWriter
 				{
 				if (!actionDemise)
 					{
-					JOptionPane.showMessageDialog(null,Messages.format(
-							"EnigmaWriter.UNSUPPORTED_DND",ac.toString())); //$NON-NLS-1$
+					JOptionPane.showMessageDialog(null,
+							Messages.format("EnigmaWriter.UNSUPPORTED_DND",ac.toString())); //$NON-NLS-1$
 					actionDemise = true;
 					}
 				continue;

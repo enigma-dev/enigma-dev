@@ -8,6 +8,7 @@ blank.txt
 *.o
 *.d
 *.depend
+*.so
 *.dll
 *.exe
 *.jar
