@@ -206,6 +206,7 @@ public final class TargetHandler
 		for (Entry<String,TargetSelection> pair : combo.entrySet())
 			{
 			TargetSelection selection = pair.getValue();
+			if (selection == defCompiler) score += 5;
 			if (selection.defaultOn == null) continue;
 			Set<Entry<String,Set<String>>> entrySet = selection.defaultOn.entrySet();
 
