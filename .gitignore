@@ -10,9 +10,12 @@ blank.txt
 *.depend
 *.so
 *.dll
+*.dylib
 *.exe
 *.jar
 *~
+.DS_Store
 .eobjs/
+plugins/
 ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/
 ENIGMAsystem/SHELL/API_Switchboard.h

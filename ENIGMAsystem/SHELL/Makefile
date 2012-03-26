@@ -78,7 +78,7 @@ override CPPFLAGS += -I.
 SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 
-OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES))))
+OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))
 RCFILES := $(addprefix $(OBJDIR)/,$(RESOURCES))
 DEPENDS := $(OBJECTS:.o=.d)
 
@@ -111,6 +111,9 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+
+$(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
