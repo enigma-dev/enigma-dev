@@ -24,7 +24,6 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-
 #include <windows.h>
 #include <time.h>
 #include <string>
@@ -42,15 +41,15 @@ namespace enigma //TODO: Find where this belongs
   HWND hWnd;
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
-  
+
   char** main_argv;
   int main_argc;
-  
+
   int windowcolor; double viewscale; bool windowIsTop;
-  
+
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-  
+
   #ifdef ENIGMA_GS_OPENGL
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
@@ -127,10 +126,10 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         // TODO: Implement minimize button on both windows like GM
         if(resizeableWindow) {
             // TODO: Implement maximize button here like GM
-            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_SIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
+            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX | WS_SIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
                 NULL, NULL, hInstance, NULL);
         } else {
-            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
+            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
                 NULL, NULL, hInstance, NULL);
         }
 

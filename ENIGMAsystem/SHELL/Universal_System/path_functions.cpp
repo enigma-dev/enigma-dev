@@ -26,11 +26,14 @@
 \********************************************************************************/
 #include "pathstruct.h"
 #include "path_functions.h"
-//#include "Graphics_Systems/OpenGL/GScurves.h" //This should probably be changed later on, because this is clearly GL only and when d3d is added then this will break
-//#include "Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
-//#include "instance_system.h" //for path_start()
 #include <algorithm>
 #include <cmath>
+
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+#endif
 
 namespace enigma {
 	extern size_t path_idmax;
@@ -62,6 +65,12 @@ bool path_exists(unsigned pathid)
 
 void path_delete(unsigned pathid)
 {
+    #ifdef DEBUG_MODE
+    if (!path_exists(pathid)){
+        show_error("Attempting to delete invalid path "+toString(pathid), false);
+        return;
+    }
+    #endif
     delete enigma::pathstructarray[pathid];
 }
 
@@ -278,6 +287,12 @@ void path_add_point(unsigned pathid, double x, double y, double speed)
 
 void path_insert_point(unsigned pathid,unsigned n,double x,double y,double speed)
 {
+    #ifdef DEBUG_MODE
+    if (n>enigma::pathstructarray[pathid]->pointarray.size()){
+        show_error("Attempting to insert point in invalid place " + toString(n) + " for path "+toString(pathid), false);
+        return;
+    }
+    #endif
     enigma::path_point point={x,y,speed/100};
     enigma::pathstructarray[pathid]->pointarray.insert(enigma::pathstructarray[pathid]->pointarray.begin() + n,point);
     enigma::path_recalculate(pathid);
@@ -285,9 +300,27 @@ void path_insert_point(unsigned pathid,unsigned n,double x,double y,double speed
 
 void path_change_point(unsigned pathid,unsigned n,double x,double y,double speed)
 {
+    #ifdef DEBUG_MODE
+    if (n>enigma::pathstructarray[pathid]->pointarray.size()){
+        show_error("Attempting to change invalid point " + toString(n) + " for path "+toString(pathid), false);
+        return;
+    }
+    #endif
     enigma::pathstructarray[pathid]->pointarray[n].x = x;
     enigma::pathstructarray[pathid]->pointarray[n].y = y;
     enigma::pathstructarray[pathid]->pointarray[n].speed = speed/100;
+    enigma::path_recalculate(pathid);
+}
+
+void path_delete_point(unsigned pathid,unsigned n)
+{
+    #ifdef DEBUG_MODE
+    if (n>enigma::pathstructarray[pathid]->pointarray.size()){
+        show_error("Attempting to delete invalid point " + toString(n) + " for path "+toString(pathid), false);
+        return;
+    }
+    #endif
+    enigma::pathstructarray[pathid]->pointarray.erase(enigma::pathstructarray[pathid]->pointarray.begin()+n);
     enigma::path_recalculate(pathid);
 }
 

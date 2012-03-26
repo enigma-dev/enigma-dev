@@ -63,10 +63,11 @@ void screen_redraw()
 {
     if (!view_enabled)
     {
-       // printf("glViewport(0, 0, %d, %d);\n",window_get_width(),window_get_height());
         glViewport(0, 0, window_get_width(), window_get_height()); // Possible bug
         glLoadIdentity();
-        glScalef(1, -1, 1);
+        int FBO;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
+        glScalef(1, (FBO==0?-1:1), 1);
         glOrtho(-1, room_width, -1, room_height, 0, 1); // possible bug
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
@@ -75,8 +76,8 @@ void screen_redraw()
         {
             int clearcolor = ((int)background_color) & 0x00FFFFFF;
             glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         draw_back();
 
@@ -88,9 +89,10 @@ void screen_redraw()
                 tile t = dit->second.tiles[i];
                 draw_background_part(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY);
             }
-
+            enigma::inst_iter* push_it = enigma::instance_event_iterator;
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
                 enigma::instance_event_iterator->inst->myevent_draw();
+            enigma::instance_event_iterator = push_it;
         }
     }
     else
@@ -148,8 +150,8 @@ void screen_redraw()
                 {
                     int clearcolor = ((int)background_color) & 0x00FFFFFF;
                     glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 }
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 draw_back();
 
@@ -165,9 +167,11 @@ void screen_redraw()
                         draw_background_part(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY);
                     }
 
+                    enigma::inst_iter* push_it = enigma::instance_event_iterator;
                     //loop instances
                     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
                         enigma::instance_event_iterator->inst->myevent_draw();
+                    enigma::instance_event_iterator = push_it;
                 }
             }
         }

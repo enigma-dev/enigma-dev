@@ -51,6 +51,7 @@ void path_clear_points(unsigned pathid);
 void path_add_point(unsigned pathid,double x,double y,double speed);
 void path_insert_point(unsigned pathid,unsigned n,double x,double y,double speed);
 void path_change_point(unsigned pathid,unsigned n,double x,double y,double speed);
+void path_delete_point(unsigned pathid,unsigned n);
 void path_reverse(unsigned pathid);
 void path_shift(unsigned pathid,double xshift,double yshift);
 void path_flip(unsigned pathid);

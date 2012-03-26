@@ -57,10 +57,10 @@ void draw_set_color_rgb(unsigned char red, unsigned char green, unsigned char bl
 void draw_set_alpha(float alpha);
 void draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
 int draw_get_color();
-int draw_get_red(void);
-int draw_get_green(void);
-int draw_get_blue(void);
-float draw_get_alpha(void);
+int draw_get_red();
+int draw_get_green();
+int draw_get_blue();
+float draw_get_alpha();
 
 
 int make_color_rgb(unsigned char red, unsigned char green, unsigned char blue);

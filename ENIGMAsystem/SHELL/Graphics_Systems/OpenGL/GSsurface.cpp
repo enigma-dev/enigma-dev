@@ -1,4 +1,4 @@
-/** Copyright (C) 2011 Josh Ventura, Dave "biggoron", Harijs Grînbers
+/** Copyright (C) 2011 Josh Ventura, Dave "biggoron", Harijs Grînbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,22 +16,43 @@
 **/
 
 #include "OpenGLHeaders.h"
+using namespace std;
 #include <cstddef>
 #include <iostream>
 #include <math.h>
 
 #include "binding.h"
-
-using namespace std;
+#include <stdio.h> //for file writing (surface_save)
+#include "Universal_System/nlpo2.h"
+#include "Universal_System/spritestruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-extern int room_width, room_height;
+extern int room_width, room_height/*, sprite_idmax*/;
 
 #ifdef DEBUG_MODE
-#  include "Widget_Systems/widgets_mandatory.h"
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_surface(surf,id)\
+    if (id < 0 or id >= enigma::surface_max or !enigma::surface_array[id]) {\
+      show_error("Attempting to use non-existing surface " + toString(id), false);\
+      return;\
+    }\
+    enigma::surface* surf = enigma::surface_array[id];
+  #define get_surfacev(surf,id,r)\
+    if (id < 0 or size_t(id) >= enigma::surface_max or !enigma::surface_array[id]) {\
+      show_error("Attempting to use non-existing surface " + toString(back), false);\
+      return r;\
+    }\
+    enigma::surface* surf = enigma::surface_array[id];
+#else
+  #define get_surface(surf,id)\
+    enigma::surface* surf = enigma::surface_array[id];
+  #define get_surfacev(surf,id,r)\
+    enigma::surface* surf = enigma::surface_array[id];
 #endif
 
 namespace enigma
@@ -46,73 +67,76 @@ namespace enigma
   int surface_max=0;
 }
 
+bool surface_is_supported()
+{
+    return GLEW_EXT_framebuffer_object;
+}
+
 int surface_create(int width, int height)
 {
-  if (GLEW_EXT_framebuffer_object)
-      std::cout<<"Extension supported!!"<<std::endl;
-  else
-      std::cout<<"Extension NOT supported!!"<<std::endl;
-  
-  GLuint tex, fbo;
-  int prevFbo;
-
-  int id,
-    w=(int)width,
-    h=(int)height; //get the integer width and height, and prepare to search for an id
-
-  if (enigma::surface_max==0) {
-    enigma::surface_array=new enigma::surface*[1];
-    enigma::surface_max=1;
-  }
-
-  for (id=0; enigma::surface_array[id]!=NULL; id++)
-  {
-    if (id+1>=enigma::surface_max)
+    if (GLEW_EXT_framebuffer_object)
     {
-      enigma::surface **oldarray=enigma::surface_array;
-      enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
-      
-      for (int i=0; i<enigma::surface_max; i++)
-        enigma::surface_array[i]=oldarray[i];
-      
-      enigma::surface_array[enigma::surface_max]=NULL;
-      enigma::surface_max++;
-      delete[] oldarray;
+      GLuint tex, fbo;
+      int prevFbo;
+
+      int id,
+        w=(int)width,
+        h=(int)height; //get the integer width and height, and prepare to search for an id
+
+      if (enigma::surface_max==0) {
+        enigma::surface_array=new enigma::surface*[1];
+        enigma::surface_max=1;
+      }
+
+      for (id=0; enigma::surface_array[id]!=NULL; id++)
+      {
+        if (id+1>=enigma::surface_max)
+        {
+          enigma::surface **oldarray=enigma::surface_array;
+          enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
+
+          for (int i=0; i<enigma::surface_max; i++)
+            enigma::surface_array[i]=oldarray[i];
+
+          enigma::surface_array[enigma::surface_max]=NULL;
+          enigma::surface_max++;
+          delete[] oldarray;
+        }
+      }
+
+      enigma::surface_array[id] = new enigma::surface;
+      enigma::surface_array[id]->width = w;
+      enigma::surface_array[id]->height = h;
+
+      glGenTextures(1, &tex);
+      glGenFramebuffers(1, &fbo);
+
+      glPushAttrib(GL_TEXTURE_BIT);
+      glBindTexture(GL_TEXTURE_2D, tex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+      glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+      glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex, 0);
+      glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+      glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+        glClearColor(1,1,1,0);
+      glClear(GL_COLOR_BUFFER_BIT);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+      glPopAttrib();
+
+      enigma::surface_array[id]->tex = tex;
+      enigma::surface_array[id]->fbo = fbo;
+
+      return id;
     }
-  }
-
-  enigma::surface_array[id] = new enigma::surface;
-  enigma::surface_array[id]->width = w;
-  enigma::surface_array[id]->height = h;
-
-  glGenTextures(1, &tex);
-  glGenFramebuffers(1, &fbo);
-
-  glPushAttrib(GL_TEXTURE_BIT);
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex, 0);
-  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-  glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-    glClearColor(1,1,1,0);
-  glClear(GL_COLOR_BUFFER_BIT);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-  glPopAttrib();
-
-  enigma::surface_array[id]->tex = tex;
-  enigma::surface_array[id]->fbo = fbo;
-
-  return id;
 }
 
 int surface_set_target(int id)
 {
-  enigma::surface* surf=enigma::surface_array[id]; //copy the surface data from the array
+  get_surfacev(surf,id,-1);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo); //bind it
   glPushMatrix(); //So you can pop it in the reset
   glPushAttrib(GL_VIEWPORT_BIT); //same
@@ -130,38 +154,28 @@ int surface_reset_target(void)
   return 0;
 }
 
-int surface_destroy(int id)
+int surface_free(int id)
 {
-  enigma::surface* surf=enigma::surface_array[id];
-    surf->width = surf->height = surf->tex = surf->fbo = 0;
+  get_surfacev(surf,id,-1);
+  surf->width = surf->height = surf->tex = surf->fbo = 0;
   delete surf;
+  enigma::surface_array[id] = NULL;
   return 0;
+}
+
+bool surface_exists(int id)
+{
+    return !((id<0) or (id>enigma::surface_max) or (enigma::surface_array[id]==NULL));
 }
 
 void draw_surface(int id, double x, double y)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-
+  get_surface(surf,id);
   glPushAttrib(GL_CURRENT_BIT);
-
   glColor4f(1,1,1,1);
-
-  glBindTexture(GL_TEXTURE_2D,enigma::surface_array[id]->tex);
-  int w=enigma::surface_array[id]->width;
-  int h=enigma::surface_array[id]->height;
+  glBindTexture(GL_TEXTURE_2D,surf->tex);
+  int w=surf->width;
+  int h=surf->height;
 
   glBegin(GL_QUADS);
   glTexCoord2f(0, 0);    glVertex2f(x,   y);
@@ -177,23 +191,8 @@ void draw_surface(int id, double x, double y)
 
 void draw_surface_stretched(int id, double x, double y, double w, double h)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-
-  bind_texture(enigma::surface_array[id]->tex);
-  
+  get_surface(surf,id);
+  bind_texture(surf->tex);
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
 
@@ -209,27 +208,13 @@ void draw_surface_stretched(int id, double x, double y, double w, double h)
 
 void draw_surface_part(int id,double left,double top,double width,double height,double x,double y)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
+  get_surface(surf,id);
+  bind_texture(surf->tex);
 
-  bind_texture(enigma::surface_array[id]->tex);
-  
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
-  
-  const float tbw=enigma::surface_array[id]->width,tbh=enigma::surface_array[id]->height;
+
+  const float tbw=surf->width,tbh=surf->height;
   glBegin(GL_QUADS);
     glTexCoord2f(left/tbw,top/tbh);
       glVertex2f(x,y);
@@ -240,35 +225,21 @@ void draw_surface_part(int id,double left,double top,double width,double height,
     glTexCoord2f(left/tbw,(top+height)/tbh);
       glVertex2f(x,y+height);
   glEnd();
-  
+
   glPopAttrib();
 }
 
 void draw_surface_tiled(int id,double x,double y)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
+  get_surface(surf,id);
+  bind_texture(surf->tex);
 
-  bind_texture(enigma::surface_array[id]->tex);
-  
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
-    x=enigma::surface_array[id]->width-fmod(x,enigma::surface_array[id]->width);
-    y=enigma::surface_array[id]->height-fmod(y,enigma::surface_array[id]->height);
-    const int hortil= int (ceil(room_width/(enigma::surface_array[id]->width))),
-              vertil= int (ceil(room_height/(enigma::surface_array[id]->height)));
+    x=surf->width-fmod(x,surf->width);
+    y=surf->height-fmod(y,surf->height);
+    const int hortil= int (ceil(room_width/(surf->width))),
+              vertil= int (ceil(room_height/(surf->height)));
 
     glBegin(GL_QUADS);
       for (int i=0; i<hortil; i++)
@@ -276,13 +247,13 @@ void draw_surface_tiled(int id,double x,double y)
         for (int c=0; c<vertil; c++)
         {
           glTexCoord2f(0,0);
-            glVertex2f(i*enigma::surface_array[id]->width-x,c*enigma::surface_array[id]->height-y);
+            glVertex2f(i*surf->width-x,c*surf->height-y);
           glTexCoord2f(1,0);
-            glVertex2f((i+1)*enigma::surface_array[id]->width-x,c*enigma::surface_array[id]->height-y);
+            glVertex2f((i+1)*surf->width-x,c*surf->height-y);
           glTexCoord2f(1,1);
-            glVertex2f((i+1)*enigma::surface_array[id]->width-x,(c+1)*enigma::surface_array[id]->height-y);
+            glVertex2f((i+1)*surf->width-x,(c+1)*surf->height-y);
           glTexCoord2f(0,1);
-            glVertex2f(i*enigma::surface_array[id]->width-x,(c+1)*enigma::surface_array[id]->height-y);
+            glVertex2f(i*surf->width-x,(c+1)*surf->height-y);
         }
       }
     glEnd();
@@ -291,29 +262,15 @@ void draw_surface_tiled(int id,double x,double y)
 
 void draw_surface_tiled_area(int id,double x,double y,double x1,double y1,double x2,double y2)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
+  get_surface(surf,id);
+  bind_texture(surf->tex);
 
-  bind_texture(enigma::surface_array[id]->tex);
-  
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
     float sw,sh,i,j,jj,left,top,width,height,X,Y;
-    sw = enigma::surface_array[id]->width;
-    sh = enigma::surface_array[id]->height;
+    sw = surf->width;
+    sh = surf->height;
 
     i = x1-(fmod(x1,sw) - fmod(x,sw)) - sw*(fmod(x1,sw)<fmod(x,sw));
     j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
@@ -355,27 +312,13 @@ void draw_surface_tiled_area(int id,double x,double y,double x1,double y1,double
 
 void draw_surface_ext(int id,double x,double y,double xscale,double yscale,double rot,int color,double alpha)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
+  get_surface(surf,id);
+  bind_texture(surf->tex);
 
-  bind_texture(enigma::surface_array[id]->tex);
-  
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-    const float w=enigma::surface_array[id]->width*xscale, h=enigma::surface_array[id]->height*yscale;
+    const float w=surf->width*xscale, h=surf->height*yscale;
     rot *= M_PI/180;
 
     float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
@@ -398,23 +341,9 @@ void draw_surface_ext(int id,double x,double y,double xscale,double yscale,doubl
 
 void draw_surface_stretched_ext(int id,double x,double y,double w,double h,int color,double alpha)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
+  get_surface(surf,id);
+  bind_texture(surf->tex);
 
-  bind_texture(enigma::surface_array[id]->tex);
-  
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
@@ -433,27 +362,13 @@ void draw_surface_stretched_ext(int id,double x,double y,double w,double h,int c
 
 void draw_surface_part_ext(int id,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
+  get_surface(surf,id);
+  bind_texture(surf->tex);
 
-  bind_texture(enigma::surface_array[id]->tex);
-  
   glPushAttrib(GL_CURRENT_BIT);
   glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-  const float tbw = enigma::surface_array[id]->width, tbh = enigma::surface_array[id]->height;
+  const float tbw = surf->width, tbh = surf->height;
 
   glBegin(GL_QUADS);
     glTexCoord2f(left/tbw,top/tbh);
@@ -471,28 +386,14 @@ void draw_surface_part_ext(int id,double left,double top,double width,double hei
 
 void draw_surface_tiled_ext(int id,double x,double y,double xscale,double yscale,int color,double alpha)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
+  get_surface(surf,id);
+  bind_texture(surf->tex);
 
-  bind_texture(enigma::surface_array[id]->tex);
-  
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-    const float w=enigma::surface_array[id]->width*xscale, h=enigma::surface_array[id]->height*yscale;
-    const int hortil= int (ceil(room_width/(enigma::surface_array[id]->width))),
-        vertil= int (ceil(room_height/(enigma::surface_array[id]->height)));
+    const float w=surf->width*xscale, h=surf->height*yscale;
+    const int hortil= int (ceil(room_width/(surf->width))),
+        vertil= int (ceil(room_height/(surf->height)));
     x=w-fmod(x,w);
     y=h-fmod(y,h);
     glBegin(GL_QUADS);
@@ -516,29 +417,15 @@ void draw_surface_tiled_ext(int id,double x,double y,double xscale,double yscale
 
 void draw_surface_tiled_area_ext(int id,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
+  get_surface(surf,id);
+  bind_texture(surf->tex);
 
-  bind_texture(enigma::surface_array[id]->tex);
-  
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
     float sw,sh,i,j,jj,left,top,width,height,X,Y;
-    sw = enigma::surface_array[id]->width*xscale;
-    sh = enigma::surface_array[id]->height*yscale;
+    sw = surf->width*xscale;
+    sh = surf->height*yscale;
 
     i = x1-(fmod(x1,sw) - fmod(x,sw)) - sw*(fmod(x1,sw)<fmod(x,sw));
     j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
@@ -580,25 +467,11 @@ void draw_surface_tiled_area_ext(int id,double x,double y,double x1,double y1,do
 
 void draw_surface_general(int id, double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4)
 {
-  if (id>enigma::surface_max)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
-  if (enigma::surface_array[id]==NULL)
-  {
-    #ifdef DEBUG_MODE
-    show_error("Surface does not exist",0);
-    #endif
-    return;
-  }
+  get_surface(surf,id);
+  bind_texture(surf->tex);
 
-  bind_texture(enigma::surface_array[id]->tex);
-  
   glPushAttrib(GL_CURRENT_BIT);
-    const float tbw = enigma::surface_array[id]->width, tbh = enigma::surface_array[id]->height,
+    const float tbw = surf->width, tbh = surf->height,
       w = width*xscale, h = height*yscale;
 
     rot *= M_PI/180;
@@ -630,15 +503,228 @@ void draw_surface_general(int id, double left,double top,double width,double hei
 
 int surface_get_texture(int id)
 {
-    return (enigma::surface_array[id]->tex);
+    get_surfacev(surf,id,-1);
+    return (surf->tex);
 }
 
 int surface_get_width(int id)
 {
-    return (enigma::surface_array[id]->width);
+    get_surfacev(surf,id,-1);
+    return (surf->width);
 }
 
 int surface_get_height(int id)
 {
-    return (enigma::surface_array[id]->height);
+    get_surfacev(surf,id,-1);
+    return (surf->height);
+}
+
+int surface_getpixel(int id, int x, int y)
+{
+    get_surfacev(surf,id,-1);
+    unsigned char *pixelbuf=new unsigned char[3];
+    int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,pixelbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+    return pixelbuf[0] + (pixelbuf[1] << 8) + (pixelbuf[2] << 16);
+}
+
+int surface_getpixel_alpha(int id, int x, int y)
+{
+    get_surfacev(surf,id,-1);
+    unsigned char *pixelbuf=new unsigned char[1];
+    int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glReadPixels(x,y,1,1,GL_ALPHA,GL_UNSIGNED_BYTE,pixelbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+    return pixelbuf[0];
+}
+
+int surface_get_bound()
+{
+    int prevFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    return prevFbo;
+}
+
+//////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
+//Fuck whoever did this to the spec
+#ifndef GL_BGR
+  #define GL_BGR 0x80E0
+#endif
+
+int surface_save(int id, string filename)
+{
+    get_surfacev(surf,id,-1);
+	FILE *bmp=fopen(filename.c_str(),"wb");
+	if(!bmp) return -1;
+	unsigned int w=surf->width,h=surf->height,sz=w*h;
+	char *surfbuf=new char[sz*3];
+	char *revbuf=new char[sz*3];
+    int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glReadPixels(0,0,w,h,GL_BGR,GL_UNSIGNED_BYTE,surfbuf);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+
+    //This code flips the buffer vertically. It needs to be done or else the picture will be upside down.
+    for (unsigned int i=0; i<h; i++)
+    {
+        for (unsigned int c=0; c<w; c++)
+        {
+            revbuf[(c+(i)*w)*3]=surfbuf[(c+(h-i)*w)*3];
+            revbuf[(c+(i)*w)*3+1]=surfbuf[(c+(h-i)*w)*3+1];
+            revbuf[(c+(i)*w)*3+2]=surfbuf[(c+(h-i)*w)*3+2];
+        }
+    }
+
+	fwrite("BM",2,1,bmp);
+	sz<<=2;
+
+	fwrite(&sz,4,1,bmp);
+	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+	fwrite(&w,4,1,bmp);
+	fwrite(&h,4,1,bmp);
+	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+
+	if(w&3)
+	{
+		size_t pad=w&3;
+		w*=3;
+		sz-=sz>>2;
+		for(unsigned int i=0;i<sz;i+=w)
+		{
+			fwrite(revbuf+i,w,1,bmp);
+			fwrite("\0\0",pad,1,bmp);
+		}
+	} else fwrite(revbuf,w*3,h,bmp);
+	fclose(bmp);
+	delete[] surfbuf;
+	delete[] revbuf;
+	return 1;
+}
+
+int surface_save_part(int id, string filename,unsigned x,unsigned y,unsigned w,unsigned h)
+{
+    get_surfacev(surf,id,-1);
+	FILE *bmp=fopen(filename.c_str(),"wb");
+	if(!bmp) return -1;
+    int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	unsigned sz=w*h;
+	char *surfbuf=new char[sz*3];
+	glReadPixels(x,y,w,h,GL_BGR,GL_UNSIGNED_BYTE,surfbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+
+    char *revbuf=new char[sz*3];
+    //This code flips the buffer vertically. It needs to be done or else the picture will be upside down.
+    for (unsigned int i=0; i<h; i++)
+    {
+        for (unsigned int c=0; c<w; c++)
+        {
+            revbuf[(c+(i)*w)*3]=surfbuf[(c+(h-i)*w)*3];
+            revbuf[(c+(i)*w)*3+1]=surfbuf[(c+(h-i)*w)*3+1];
+            revbuf[(c+(i)*w)*3+2]=surfbuf[(c+(h-i)*w)*3+2];
+        }
+    }
+
+	fwrite("BM",2,1,bmp);
+
+	sz <<= 2;
+	fwrite(&sz,4,1,bmp);
+	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+	fwrite(&w,4,1,bmp);
+	fwrite(&h,4,1,bmp);
+	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+
+	if(w&3)
+	{
+		size_t pad=w&3;
+		w*=3;
+		sz-=sz>>2;
+		for(unsigned i=0;i<sz;i+=w)
+		{
+			fwrite(revbuf+i,w,1,bmp);
+			fwrite("\0\0",pad,1,bmp);
+		}
+	}
+	else fwrite(revbuf,w*3,h,bmp);
+
+	fclose(bmp);
+	delete[] surfbuf;
+    delete[] revbuf;
+	return 1;
+}
+
+int sprite_create_from_surface(int id,int x,int y,int w,int h,bool removeback,bool smooth,int xorig,int yorig)
+{
+    get_surfacev(surf,id,-1);
+    int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+    enigma::spritestructarray_reallocate();
+    int sprid=enigma::sprite_idmax;
+    enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, 1,0);
+
+    unsigned sz=full_width*full_height;
+    unsigned char *surfbuf=new unsigned char[sz*4];
+	int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+ 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+    enigma::sprite_set_subimage(sprid, 0, xorig, yorig, w, h, surfbuf);
+    delete[] surfbuf;
+    return sprid;
+}
+
+void surface_copy_part(int destination,double x,double y,int source,int xs,int ys,int ws,int hs)
+{
+    get_surface(ssurf,source);
+    get_surface(dsurf,destination);
+    unsigned char *surfbuf=new unsigned char[ws*hs*4];
+    int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, ssurf->fbo);
+	glReadPixels(xs,ys,ws,hs,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, dsurf->fbo);
+    glPushMatrix();
+    glPushAttrib(GL_VIEWPORT_BIT);
+    glViewport(0,0,dsurf->width,dsurf->height);
+    glLoadIdentity();
+    glOrtho(-1, dsurf->width, -1, dsurf->height, -1, 1);
+	glRasterPos2d(x, y);
+	glDrawPixels(ws,hs,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+    glPopAttrib();
+    glPopMatrix();
+	glRasterPos2d(0, 0);
+	delete[] surfbuf;
+}
+
+void surface_copy(int destination,double x,double y,int source)
+{
+    get_surface(ssurf,source);
+    get_surface(dsurf,destination);
+    unsigned char *surfbuf=new unsigned char[dsurf->width*dsurf->height*4];
+    int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, ssurf->fbo);
+	glReadPixels(0,0,dsurf->width,dsurf->height,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, dsurf->fbo);
+    glPushMatrix();
+    glPushAttrib(GL_VIEWPORT_BIT);
+    glViewport(0,0,dsurf->width,dsurf->height);
+    glLoadIdentity();
+    glOrtho(-1, dsurf->width, -1, dsurf->height, -1, 1);
+	glRasterPos2d(x, y);
+	glDrawPixels(dsurf->width,dsurf->height,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+    glPopAttrib();
+    glPopMatrix();
+	glRasterPos2d(0, 0);
+	delete[] surfbuf;
 }

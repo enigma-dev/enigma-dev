@@ -52,7 +52,7 @@ int sprite_add(string filename, int imgnumb, bool precise, bool transparent, boo
 	ns->yoffset   = (int)y_offset;
 	ns->texbordx  = (double) width/fullwidth;
 	ns->texbordy  = (double) height/fullheight;
-    ns->texturearray = new unsigned int[1];
+	ns->texturearray = new unsigned int[1];
 	ns->texturearray[0] = texture;
 	return enigma::sprite_idmax++;
 }
@@ -75,6 +75,13 @@ namespace enigma
     for (unsigned i = 0; i < enigma::sprite_idmax; i++)
       spritestructarray[i] = NULL;
   }
+
+    void spritestructarray_reallocate()
+    {
+        enigma::sprite** spriteold = spritestructarray;
+        spritestructarray = new sprite*[enigma::sprite_idmax+2];
+        for (size_t i = 0; i < enigma::sprite_idmax; i++) spritestructarray[i] = spriteold[i]; delete[] spriteold;
+    }
 
   //Adds an empty sprite to the list
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm)
@@ -151,7 +158,7 @@ namespace enigma
 }
 
 #ifdef DEBUG_MODE
-  #include "Widget_Systems/widgets_mandatory.h"
+  #include "../Widget_Systems/widgets_mandatory.h"
   #define get_sprite(spr,id,r) \
     if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
       show_error("Cannot access sprite with id " + toString(id), false); \
