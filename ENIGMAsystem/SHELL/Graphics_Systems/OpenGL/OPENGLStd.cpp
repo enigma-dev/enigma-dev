@@ -33,22 +33,14 @@ namespace enigma
 
   void graphicssystem_initialize()
   {
-    #if GMSURFACE
-      glBindFramebufferEXT   =    (PFNGLBINDFRAMEBUFFEREXTPROC) wglGetProcAddress("glBindFramebufferEXT");
-      glGenFramebuffersEXT   =    (PFNGLGENFRAMEBUFFERSEXTPROC) wglGetProcAddress("glGenFramebuffersEXT");
-      glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) wglGetProcAddress("glFramebufferTexture2DEXT");
-      if (!(glBindFramebufferEXT and glGenFramebuffersEXT and glFramebufferTexture2DEXT))
-        MessageBox(0,"Additional drawing surfaces cannot be created. Extension unsupported by graphics card","Error",MB_OK);
+    GLenum err = glewInit();
+    #ifdef DEBUG_MODE
+    if (GLEW_OK != err)
+    {
+      std::cout<<"GLEW ERROR!"<<std::endl;
+    }
     #endif
 
-    #ifdef _WIN32
-      GLenum err = glewInit();
-      if (GLEW_OK != err)
-      {
-        std::cout<<"GLEW ERROR!"<<std::endl;
-      }
-      std::cout<<"GLEW LOADED!"<<std::endl;
-    #endif
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);
       glClearColor(0,0,0,0);

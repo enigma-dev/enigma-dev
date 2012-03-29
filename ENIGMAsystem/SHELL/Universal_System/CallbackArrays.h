@@ -54,19 +54,19 @@ enum {
 enum {
   vk_anykey = 1,
   vk_nokey  = 0,
-  
+
   vk_left  = 37,
   vk_right = 39,
   vk_up    = 38,
   vk_down  = 40,
-  
+
   vk_tab    = 9,
   vk_enter  = 13,
   vk_shift  = 16,
   vk_control= 17,
   vk_alt    = 18,
   vk_space  = 32,
-  
+
   vk_numpad0 = 96,
   vk_numpad1 = 97,
   vk_numpad2 = 98,
@@ -77,13 +77,13 @@ enum {
   vk_numpad7 = 103,
   vk_numpad8 = 104,
   vk_numpad9 = 105,
-  
+
   vk_multiply = 106,
   vk_add      = 107,
   vk_subtract = 109,
   vk_decimal  = 110,
   vk_divide   = 111,
-  
+
   vk_f1  = 112,
   vk_f2  = 113,
   vk_f3  = 114,
@@ -105,16 +105,16 @@ enum {
   vk_home      = 36,
   vk_insert    = 45,
   vk_delete    = 46,
-  
+
   // These are for check_direct only
   vk_lcontrol = 162,
   vk_rcontrol = 163,
   vk_lalt     = 164,
   vk_ralt     = 165,
-  
+
   // This one's Windows only
   vk_printscreen = 42,
-  
+
   //These are ENIGMA-only
   vk_caps   = 20,
   vk_scroll = 145,
@@ -126,6 +126,7 @@ enum {
 
 extern double mouse_x, mouse_y;
 extern int mouse_button, mouse_lastbutton;
+extern string keyboard_lastchar;
 
 bool mouse_check_button(int button);
 bool mouse_check_button_pressed(int button);

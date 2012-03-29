@@ -39,6 +39,7 @@ namespace enigma
   extern char keymap[256];
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
+  extern string keyboard_lastchar;
 
   namespace x11
   {
@@ -60,14 +61,14 @@ namespace enigma
 
               if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
               else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
-
+              keyboard_lastchar = string(1,actualKey);
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
                 return 0;
               }
               enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
               enigma::keybdstatus[actualKey]=1;
-            return 0;
+              return 0;
         }
         case KeyRelease: {
             gk=XLookupKeysym(&e.xkey,0);

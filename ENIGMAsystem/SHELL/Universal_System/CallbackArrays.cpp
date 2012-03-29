@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <string>
+using std::string;
+
 namespace enigma
 {
 	char mousestatus[3];
@@ -81,6 +84,7 @@ bool mouse_check_button_released(int button)
 
 short mouse_hscrolls = 0;
 short mouse_vscrolls = 0;
+string keyboard_lastchar = "";
 
 bool keyboard_check(int key)
 {

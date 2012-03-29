@@ -31,6 +31,7 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 extern int room_width, room_height/*, sprite_idmax*/;
+#include "GSsurface.h"
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -57,12 +58,6 @@ extern int room_width, room_height/*, sprite_idmax*/;
 
 namespace enigma
 {
-  struct surface
-  {
-  GLuint tex, fbo;
-  int width, height;
-  };
-
   surface **surface_array;
   int surface_max=0;
 }
@@ -134,7 +129,7 @@ int surface_create(int width, int height)
     }
 }
 
-int surface_set_target(int id)
+void surface_set_target(int id)
 {
   get_surfacev(surf,id,-1);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo); //bind it
@@ -143,24 +138,21 @@ int surface_set_target(int id)
   glViewport(0,0,surf->width,surf->height);
   glLoadIdentity();
   glOrtho(-1, surf->width, -1, surf->height, -1, 1);
-  return 0;
 }
 
-int surface_reset_target(void)
+void surface_reset_target(void)
 {
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glPopAttrib();
   glPopMatrix();
-  return 0;
 }
 
-int surface_free(int id)
+void surface_free(int id)
 {
   get_surfacev(surf,id,-1);
   surf->width = surf->height = surf->tex = surf->fbo = 0;
   delete surf;
   enigma::surface_array[id] = NULL;
-  return 0;
 }
 
 bool surface_exists(int id)
@@ -171,9 +163,9 @@ bool surface_exists(int id)
 void draw_surface(int id, double x, double y)
 {
   get_surface(surf,id);
+  bind_texture(surf->tex);
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
-  glBindTexture(GL_TEXTURE_2D,surf->tex);
   int w=surf->width;
   int h=surf->height;
 
@@ -183,8 +175,6 @@ void draw_surface(int id, double x, double y)
   glTexCoord2f(1, 1);    glVertex2f(x+w, y+h);
   glTexCoord2f(0, 1);    glVertex2f(x,   y+h);
   glEnd();
-
-  glBindTexture(GL_TEXTURE_2D, 0);
 
   glPopAttrib();
 }

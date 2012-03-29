@@ -61,12 +61,12 @@ namespace enigma
 
 void screen_redraw()
 {
+    int FBO;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
     if (!view_enabled)
     {
         glViewport(0, 0, window_get_width(), window_get_height()); // Possible bug
         glLoadIdentity();
-        int FBO;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
         glScalef(1, (FBO==0?-1:1), 1);
         glOrtho(-1, room_width, -1, room_height, 0, 1); // possible bug
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
@@ -139,10 +139,10 @@ void screen_redraw()
                     }
                 }
 
-                glViewport((int)view_xport[vc], (int)view_yport[vc], (int)view_wport[vc], (int)view_hport[vc]);
+                glViewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
                 glLoadIdentity();
-                glScalef(1, -1, 1);
-                glOrtho(view_xview[vc] - 1, view_wview[vc] + view_xview[vc], view_yview[vc] - 1, view_hview[vc] + view_yview[vc], 0, 1); // possible bug
+                glScalef(1, (FBO==0?-1:1), 1);
+                glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1); // possible bug
                 glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                 glMultMatrixd(transformation_matrix);
 

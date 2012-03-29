@@ -15,6 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <string>
+#include "OpenGLHeaders.h"
+using namespace std;
+#ifndef SURFSTRUCT_H
+#define SURFSTRUCT_H
+namespace enigma
+{
+  struct surface
+  {
+  GLuint tex, fbo;
+  int width, height;
+  };
+}
+#endif
+
 int surface_create(int width, int height);
 void surface_set_target(int id);
 void surface_reset_target();

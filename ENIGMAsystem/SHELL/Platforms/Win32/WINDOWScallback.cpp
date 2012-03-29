@@ -36,6 +36,7 @@ using std::string;
 
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
+extern string keyboard_lastchar;
 
 namespace enigma
 {
@@ -65,6 +66,7 @@ namespace enigma
         case WM_KEYDOWN:
             last_keybdstatus[wParam]=keybdstatus[wParam];
             keybdstatus[wParam]=1;
+            keyboard_lastchar = string(1,wParam);
             return 0;
 
         case WM_KEYUP:
@@ -75,6 +77,7 @@ namespace enigma
         case WM_SYSKEYDOWN:
             last_keybdstatus[wParam]=keybdstatus[wParam];
             keybdstatus[wParam]=1;
+            keyboard_lastchar = string(1,wParam);
             if (wParam!=18)
             {
               if ((lParam&(1<<29))>0)
