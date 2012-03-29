@@ -39,7 +39,7 @@ namespace enigma
   extern char keymap[256];
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  extern string keyboard_lastchar;
+  string keyboard_lastchar;
 
   namespace x11
   {

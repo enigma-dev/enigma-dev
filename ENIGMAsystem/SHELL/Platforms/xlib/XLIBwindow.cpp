@@ -32,6 +32,8 @@
 //#include <GL/gl.h>
 //#include <GL/glu.h>
 
+using namespace std;
+
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 #include "Platforms/platforms_mandatory.h" // For type insurance
 #include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
@@ -41,7 +43,6 @@
 #include <X11/Xlib.h>
 #define uint unsigned int
 
-using namespace std;
 using namespace enigma::x11;
 
 //////////

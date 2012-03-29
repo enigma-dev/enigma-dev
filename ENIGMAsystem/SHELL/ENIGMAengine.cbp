@@ -136,6 +136,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-DCODEBLOX" />
+			<Add directory="./" />
 		</Compiler>
 		<Unit filename="API_Switchboard.h" />
 		<Unit filename="Audio_Systems/Codecs/dumb/include/aldumb.h" />

@@ -45,7 +45,7 @@ extern int room_width, room_height/*, sprite_idmax*/;
     enigma::surface* surf = enigma::surface_array[id];
   #define get_surfacev(surf,id,r)\
     if (id < 0 or size_t(id) >= enigma::surface_max or !enigma::surface_array[id]) {\
-      show_error("Attempting to use non-existing surface " + toString(back), false);\
+      show_error("Attempting to use non-existing surface " + toString(id), false);\
       return r;\
     }\
     enigma::surface* surf = enigma::surface_array[id];
@@ -127,11 +127,12 @@ int surface_create(int width, int height)
 
       return id;
     }
+    return -1;
 }
 
 void surface_set_target(int id)
 {
-  get_surfacev(surf,id,-1);
+  get_surface(surf,id);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo); //bind it
   glPushMatrix(); //So you can pop it in the reset
   glPushAttrib(GL_VIEWPORT_BIT); //same
@@ -149,7 +150,7 @@ void surface_reset_target(void)
 
 void surface_free(int id)
 {
-  get_surfacev(surf,id,-1);
+  get_surface(surf,id);
   surf->width = surf->height = surf->tex = surf->fbo = 0;
   delete surf;
   enigma::surface_array[id] = NULL;
