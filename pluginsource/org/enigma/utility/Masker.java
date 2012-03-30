@@ -254,16 +254,17 @@ public class Masker
 			out.add(p);
 			Point p2 = new Point(p);
 			final int num = mask[p.y][p.x];
-			int prevDir = 0, huntDir = 0;
+			int prevDir = 0;
 
 			do
 				{
 				//find next clockwise pixel
 				int foundDir = -1;
+				int nextDir = (prevDir / 2 * 2 + 7) % 8;
 				for (int i = 0; i < 8 && foundDir == -1; i++)
 					{
-					Point v = dirs[(huntDir + i) % 8]; //vector unit point
-					if (getNumSafe(p2.y + v.y,p2.x + v.x) == num) foundDir = (huntDir + i) % 8;
+					Point v = dirs[(nextDir + i) % 8]; //vector unit point
+					if (getNumSafe(p2.y + v.y,p2.x + v.x) == num) foundDir = (nextDir + i) % 8;
 					}
 				//handle single-pixel shapes
 				if (foundDir == -1)
@@ -334,14 +335,14 @@ public class Masker
 
 	public static void main(String[] args) throws IOException
 		{
-		BufferedImage i = ImageIO.read(new File("/home/ismavatar/Desktop/test.png"));
+		BufferedImage i = ImageIO.read(new File(System.getProperty("user.home"),"Desktop/test.png"));
 		int w = i.getWidth();
 		int h = i.getHeight();
 		int pixels[] = i.getRGB(0,0,w,h,null,0,w);
-		int img[][] = new int[h][w];
-		for (int y = 0; y < h; y++)
-			for (int x = 0; x < w; x++)
-				img[y][x] = pixels[y * w + x];
+		//		int img[][] = new int[h][w];
+		//		for (int y = 0; y < h; y++)
+		//			for (int x = 0; x < w; x++)
+		//				img[y][x] = pixels[y * w + x];
 
 		JFrame f = new JFrame();
 		Mask m = new Mask(pixels,w,h);
