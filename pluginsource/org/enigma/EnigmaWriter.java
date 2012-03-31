@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.zip.DeflaterOutputStream;
 
 import javax.swing.JOptionPane;
@@ -105,6 +107,8 @@ public final class EnigmaWriter
 	protected EnigmaStruct o;
 	protected ResNode root;
 
+	static Map<BufferedImage,ByteArrayOutputStream> imageCache = new WeakHashMap<BufferedImage,ByteArrayOutputStream>();
+
 	private EnigmaWriter(GmFile in, EnigmaStruct out, ResNode root)
 		{
 		i = in;
@@ -114,10 +118,12 @@ public final class EnigmaWriter
 
 	public static EnigmaStruct prepareStruct(GmFile f, ResNode root)
 		{
-		return new EnigmaWriter(f,new EnigmaStruct(),root).populateStruct();
+		EnigmaWriter ew = new EnigmaWriter(f,new EnigmaStruct(),root);
+		ew.populateStruct();
+		return ew.o;
 		}
 
-	protected EnigmaStruct populateStruct()
+	protected void populateStruct()
 		{
 		o.fileVersion = i.format == null ? -1 : i.format.getVersion();
 		o.filename = i.uri == null ? null : i.uri.toString();
@@ -170,8 +176,6 @@ public final class EnigmaWriter
 
 		o.lastInstanceId = i.lastInstanceId;
 		o.lastTileId = i.lastTileId;
-
-		return o;
 		}
 
 	protected void populateSettings()
@@ -305,6 +309,7 @@ public final class EnigmaWriter
 				populateImage(img,osil[i].image,os.transparent);
 
 				//for now, polygon masking is disabled
+
 				if (true) osil[i].maskShapeCount = 0;
 				if (osil[i].maskShapeCount == 0) continue;
 
@@ -854,6 +859,14 @@ public final class EnigmaWriter
 		o.width = i.getWidth();
 		o.height = i.getHeight();
 
+		ByteArrayOutputStream cache = imageCache.get(i);
+		if (cache != null)
+			{
+			o.dataSize = cache.size();
+			o.data = ByteBuffer.allocateDirect(cache.size()).put(cache.toByteArray());
+			return;
+			}
+
 		int pixels[] = i.getRGB(0,0,o.width,o.height,null,0,o.width);
 		int trans = i.getRGB(0,o.height - 1) & 0x00FFFFFF;
 		try
@@ -876,6 +889,7 @@ public final class EnigmaWriter
 			dos.finish();
 			o.dataSize = baos.size();
 			o.data = ByteBuffer.allocateDirect(baos.size()).put(baos.toByteArray());
+			imageCache.put(i,baos);
 			}
 		catch (IOException e)
 			{
