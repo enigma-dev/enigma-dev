@@ -9,6 +9,7 @@
 package org.enigma.backend.resources;
 
 import org.enigma.backend.sub.SubImage;
+import org.enigma.backend.util.Polygon;
 
 import com.sun.jna.Structure;
 
@@ -33,6 +34,9 @@ public class Sprite extends Structure
 
 	public SubImage.ByReference subImages;
 	public int subImageCount;
+
+	public Polygon.ByReference maskShapes;
+	public int maskShapeCount;
 
 	public static class ByReference extends Sprite implements Structure.ByReference
 		{

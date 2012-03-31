@@ -31,4 +31,7 @@ struct Sprite
   
   SubImage *subImages;
   int subImageCount;
+
+  Polygon *maskShapes;
+  int maskShapeCount;
 };

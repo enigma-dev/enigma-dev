@@ -87,6 +87,7 @@ import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
 import org.lateralgm.resources.Sound.PSound;
+import org.lateralgm.resources.Sprite.MaskShape;
 import org.lateralgm.resources.Sprite.PSprite;
 import org.lateralgm.resources.library.LibAction;
 import org.lateralgm.resources.library.LibManager;
@@ -307,45 +308,47 @@ public final class EnigmaWriter
 				BufferedImage img = is.subImages.get(i);
 				osil[i].image = new Image.ByReference();
 				populateImage(img,osil[i].image,os.transparent);
+				}
 
-				//for now, polygon masking is disabled
+			//Polygon Masking
+			if (is.get(PSprite.SHAPE) != MaskShape.POLYGON)
+				{
+				os.maskShapeCount = 0;
+				continue;
+				}
 
-				if (true) osil[i].maskShapeCount = 0;
-				if (osil[i].maskShapeCount == 0) continue;
+			BufferedImage img = is.subImages.get(0);
+			int w = img.getWidth();
+			int h = img.getHeight();
+			int pixels[] = img.getRGB(0,0,w,h,null,0,w);
+			Mask m = new Mask(pixels,w,h);
 
-				//Individual SubImage Polygon Masking
-				int w = img.getWidth();
-				int h = img.getHeight();
-				int pixels[] = img.getRGB(0,0,w,h,null,0,w);
-				Mask m = new Mask(pixels,w,h);
+			os.maskShapeCount = m.pts.size();
+			if (os.maskShapeCount == 0) continue;
 
-				osil[i].maskShapeCount = m.pts.size();
-				if (osil[i].maskShapeCount == 0) continue;
+			os.maskShapes = new Polygon.ByReference();
+			Polygon[] opl = (Polygon[]) os.maskShapes.toArray(os.maskShapeCount);
 
-				osil[i].maskShapes = new Polygon.ByReference();
-				Polygon[] opl = (Polygon[]) osil[i].maskShapes.toArray(osil[i].maskShapeCount);
+			//populate each polygon
+			for (int j = 0; j < opl.length; j++)
+				{
+				System.out.println("Populating polygon " + j);
+				List<java.awt.Point> ippl = m.getRayOutline(m.pts.get(j));
+				opl[j].pointCount = ippl.size();
+				if (opl[j].pointCount == 0) continue;
 
-				//populate each polygon
-				for (int j = 0; j < opl.length; j++)
+				System.out.println("Test1");
+
+				opl[j].points = new Point.ByReference();
+				Point[] oppl = (Point[]) opl[j].points.toArray(opl[j].pointCount);
+				System.out.println("Test2");
+
+				//populate each point
+				for (int k = 0; k < oppl.length; k++)
 					{
-					System.out.println("Populating polygon " + j);
-					List<java.awt.Point> ippl = m.getRayOutline(m.pts.get(j));
-					opl[j].pointCount = ippl.size();
-					if (opl[j].pointCount == 0) continue;
-
-					System.out.println("Test1");
-
-					opl[j].points = new Point.ByReference();
-					Point[] oppl = (Point[]) opl[j].points.toArray(opl[j].pointCount);
-					System.out.println("Test2");
-
-					//populate each point
-					for (int k = 0; k < oppl.length; k++)
-						{
-						System.out.println(" " + ippl.get(k));
-						oppl[k].x = ippl.get(k).x;
-						oppl[k].y = ippl.get(k).y;
-						}
+					System.out.println(" " + ippl.get(k));
+					oppl[k].x = ippl.get(k).x;
+					oppl[k].y = ippl.get(k).y;
 					}
 				}
 			}

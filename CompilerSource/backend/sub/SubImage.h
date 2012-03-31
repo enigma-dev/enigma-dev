@@ -15,6 +15,4 @@
 struct SubImage
 {
 	Image image;
-	Polygon *maskShapes;
-	int maskShapeCount;
 };
