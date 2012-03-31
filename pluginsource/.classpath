@@ -4,6 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/SvnKit"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/JNA"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/LGM16b4"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/LateralGM"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JoshEdit"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
