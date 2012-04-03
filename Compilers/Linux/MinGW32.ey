@@ -1,7 +1,7 @@
 %e-yaml
 ---
 Name: MinGW 32
-Native: Yes
+Native: No
 Maintainer: cheeseboy
 Target-platform: Windows
 

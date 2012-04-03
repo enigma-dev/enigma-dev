@@ -1,7 +1,7 @@
 %e-yaml
 ---
 Name: GNU GCC G++ 32
-Native: Yes
+Native: No
 Maintainer: cheeseboy
 Target-platform: Linux
 
