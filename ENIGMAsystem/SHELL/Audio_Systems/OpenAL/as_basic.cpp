@@ -22,7 +22,12 @@
 using std::string;
 #include "as_basic.h"
 #include "Audio_Systems/audio_mandatory.h"
+
+#ifdef __APPLE__
+#include "../../../additional/alure/include/AL/alure.h"
+#else
 #include <AL/alure.h>
+#endif
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"

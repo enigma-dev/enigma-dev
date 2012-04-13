@@ -21,5 +21,6 @@ ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/
 ENIGMAsystem/SHELL/API_Switchboard.h
 *.layout
 LinuxExtra/
-
+*.epackage
+ENIGMAsystem/additional/
 unimplementedfunctionnames.txt
