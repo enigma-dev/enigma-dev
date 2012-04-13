@@ -11,9 +11,10 @@
   #define CURRENT_PLATFORM_NAME "Linux"
   #define CURRENT_PLATFORM_ID   OS_LINUX
 #elif defined(__APPLE__) || defined(MACOSX) || defined(__MACH__) || defined(macintosh) || defined(Macintosh)
-  #define CURRENT_PLATFORM_NAME "MacOSX" //ENIGMA_WS_IPHONE" ENIGMA_WS_COCOA
-  #define CURRENT_PLATFORM_ID   OS_MACOSX //OS_IPHONE OS_MACOSX
+  #define CURRENT_PLATFORM_NAME "MacOSX"
+  #define CURRENT_PLATFORM_ID   OS_MACOSX
   #define IPHONE_DEVICE 0
+  //#define WRITE_UNIMPLEMENTED_TXT 1
 #elif defined(unix) || defined(__unix) || defined(__unix__)
   #define CURRENT_PLATFORM_NAME "Linux"
   #define CURRENT_PLATFORM_ID   OS_LINUX

@@ -38,6 +38,11 @@
 #include "general/macro_integration.h"
 #include "parser/object_storage.h"
 
+#include "../OS_Switchboard.h"
+#ifdef WRITE_UNIMPLEMENTED_TXT
+extern std::map <string, char> unimplemented_function_list;
+#endif
+
 using namespace std;
 
 extern string tostring(int);
@@ -572,10 +577,14 @@ namespace syncheck
         case TT_VARNAME:
           if (lex[i+1].type == TT_BEGINPARENTH)
           {
+            #ifndef WRITE_UNIMPLEMENTED_TXT
             syerr = "Unknown function or script `" + lex[i].content + "'";
             if (lex[lex[i+1].match+1].type == TT_DECIMAL)
               syerr += ": use semicolon to separate object ID and variable name.";
             return lex[i].pos;
+            #else
+             unimplemented_function_list[lex[i].content] = 'U';
+            #endif
           }
           break;
         case TT_FUNCTION:
@@ -607,6 +616,7 @@ namespace syncheck
                 ii = lex[ii].match;
             }
             params += contented;
+            #ifndef WRITE_UNIMPLEMENTED_TXT
             if (!lex[i].ext->refstack.is_varargs()) {
               if (exceeded_at)
                 return (syerr = "Too many arguments to function `" + lex[i].content + "': provided " + tostring(params) + ", allowed " + tostring(maxarg) + ".", lex[exceeded_at].pos);
@@ -615,6 +625,13 @@ namespace syncheck
             }
             if (params < minarg)
               return (syerr = "Too few arguments to function `" + lex[i].content + "': provided " + tostring(params) + ", required " + tostring(minarg) + ".", lex[lm].pos);
+            
+            #else
+                 if (!lex[i].ext->refstack.is_varargs() && (exceeded_at || params > maxarg))
+                          unimplemented_function_list[lex[i].content] = 'M'; //M for too many arguments
+                 if (params < minarg)
+                          unimplemented_function_list[lex[i].content] = 'F'; //F for too few arguments
+            #endif
           }
           break;
         default: ;

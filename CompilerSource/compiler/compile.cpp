@@ -69,6 +69,12 @@ using namespace std;
 #include "general/bettersystem.h"
 #include "event_reader/event_parser.h"
 
+#ifdef WRITE_UNIMPLEMENTED_TXT
+#include <fstream>
+#include <iostream>
+std::map <string, char> unimplemented_function_list;
+#endif
+
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
@@ -431,6 +437,22 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   // Now we write any additional templates requested by the window system.
   // compile_handle_templates(es);
+
+#ifdef WRITE_UNIMPLEMENTED_TXT
+    printf("write unimplemented functions %d",0);
+    ofstream outputFile;
+    outputFile.open("unimplementedfunctionnames.txt");
+
+    for ( std::map< string, char, std::less< char > >::const_iterator iter = unimplemented_function_list.begin();
+         iter != unimplemented_function_list.end(); ++iter )
+    {
+        outputFile << iter->first << '\t' << iter->second << '\n';
+    }
+
+    outputFile << endl;
+    outputFile.close();
+#endif
+
 
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
