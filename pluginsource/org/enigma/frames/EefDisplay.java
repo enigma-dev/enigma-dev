@@ -161,9 +161,9 @@ public class EefDisplay extends JSplitPane implements TreeSelectionListener
 	static String nodeInfo(EEFNode node)
 		{
 		if (node.lineAttribs.isEmpty()) return new String();
-		StringBuilder sb = new StringBuilder(node.lineAttribs.get(0).replace(' ','·'));
+		StringBuilder sb = new StringBuilder(node.lineAttribs.get(0).replace(' ','\u00B7'));
 		for (int i = 1; i < node.lineAttribs.size(); i++)
-			sb.append("¶\n").append(node.lineAttribs.get(i).replace(' ','·'));
+			sb.append("¶\n").append(node.lineAttribs.get(i).replace(' ','\u00B6'));
 		return sb.toString();
 		}
 
