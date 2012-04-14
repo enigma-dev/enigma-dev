@@ -1162,7 +1162,9 @@ GLAPI void GLAPIENTRY glViewport (GLint x, GLint y, GLsizei width, GLsizei heigh
 #ifndef GLEW_NO_GLU
 /* this is where we can safely include GLU */
 #  if defined(__APPLE__) && defined(__MACH__)
+#ifndef ENIGMA_PARSER_RUN //without this Enigma will fail (can't find glu.h)
 #    include <OpenGL/glu.h>
+#endif
 #  else
 #    include <GL/glu.h>
 #  endif
