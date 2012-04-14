@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python
 import os, urllib, hashlib, sys,zipfile,shutil
 print "Enigma package manager v1.0.0"
 url="https://raw.github.com/amorri40/Enigma-packages/master/packages.md5"
