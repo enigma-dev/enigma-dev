@@ -668,7 +668,7 @@ public final class EnigmaWriter
 			for (int me = 0; me < oo.mainEventCount; me++)
 				{
 				MainEvent ome = ooil[me];
-				ArrayList<org.lateralgm.resources.sub.Event> iel = io.mainEvents.get(me).events;
+				List<org.lateralgm.resources.sub.Event> iel = io.mainEvents.get(me).events;
 
 				ome.id = me;
 				ome.eventCount = iel.size();
