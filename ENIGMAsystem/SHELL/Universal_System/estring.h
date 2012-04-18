@@ -48,3 +48,10 @@ string string_lettersdigits(string str);
 bool string_isletters(string str);
 bool string_isdigits(string str);
 bool string_islettersdigits(string str);
+
+string filename_name(string fname);
+string filename_path(string fname);
+string filename_dir(string fname);
+string filename_drive(string fname);
+string filename_ext(string fname);
+string filename_change_ext(string fname, string newext);

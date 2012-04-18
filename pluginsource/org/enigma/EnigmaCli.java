@@ -111,12 +111,12 @@ public final class EnigmaCli
 		if (!file.exists()) throw new FileNotFoundException(fn);
 		LibManager.autoLoad();
 
+		FileChooser.addDefaultReadersAndWriters();
 		addResourceHook();
 
 		if (root == null) root = LGM.newRoot();
 
 		URI uri = file.toURI();
-		FileChooser.addDefaultReadersAndWriters();
 		FileReader reader = FileChooser.findReader(uri);
 
 		LGM.currentFile = reader.read(uri.toURL().openStream(),uri,LGM.newRoot());
