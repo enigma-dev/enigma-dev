@@ -22,7 +22,6 @@ import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.file.EgmIO;
 import org.enigma.messages.Messages;
-import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.GmFile;
 import org.lateralgm.file.GmFile.ResourceHolder;
@@ -101,7 +100,7 @@ public final class EnigmaCli
 		String name = Messages.getString("EnigmaRunner.RESNODE_NAME"); //$NON-NLS-1$
 		Resource.kindNames.put(EnigmaSettings.class,name);
 		Resource.kindNamesPlural.put(EnigmaSettings.class,name);
-		
+
 		LGM.currentFile.resMap.put(EnigmaSettings.class,new SingletonResourceHolder<EnigmaSettings>(
 				new EnigmaSettings()));
 		}
@@ -117,9 +116,9 @@ public final class EnigmaCli
 		if (root == null) root = LGM.newRoot();
 
 		URI uri = file.toURI();
-		FileChooser fc = new FileChooser();
-		FileReader reader = fc.findReader(uri);
-		
+		FileChooser.addDefaultReadersAndWriters();
+		FileReader reader = FileChooser.findReader(uri);
+
 		LGM.currentFile = reader.read(uri.toURL().openStream(),uri,LGM.newRoot());
 
 		try
