@@ -45,7 +45,8 @@ int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out);
     wto << license;
-    
+
+    global_script_argument_count=16; //write all 16 arguments
     if (global_script_argument_count) {
       wto << "// Script arguments\n";
       wto << "variant argument0 = 0";
@@ -53,18 +54,18 @@ int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
         wto << ", argument" << i << " = 0";
       wto << ";\n\n";
     }
-    
+
     for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
       wto << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;
     //This part needs written into a global object_parent class instance elsewhere.
     //for (globit i = global->dots.begin(); i != global->globals.end(); i++)
     //  wto << i->second->type << " " << i->second->prefixes << i->second->name << i->second->suffixes << ";" << endl;
     wto << endl;
-    
+
     wto << "namespace enigma" << endl << "{" << endl << "  struct ENIGMA_global_structure: object_locals" << endl << "  {" << endl;
     for (deciter i = dot_accessed_locals.begin(); i != dot_accessed_locals.end(); i++) // Dots are vars that are accessed as something.varname.
       wto << "    " << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;
-    
+
     wto << "    ENIGMA_global_structure(const int _x, const int _y): object_locals(_x,_y) {}" << endl << "  };" << endl << "  object_basic *ENIGMA_global_instance = new ENIGMA_global_structure(global,global);" << endl << "}";
     wto << endl;
   wto.close();

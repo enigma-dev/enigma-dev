@@ -31,7 +31,7 @@ void mp_grid_copy(unsigned id, unsigned srcid);
 unsigned mp_grid_get_cell(unsigned id,int h,int v);
 void mp_grid_draw(unsigned id, unsigned mode = 0, unsigned color_mode = 0);
 void mp_grid_draw_neighbours(unsigned id,int h,int v, int mode = 0);
-void mp_grid_path(unsigned id,unsigned path,double xstart,double ystart,double xgoal,double ygoal,bool allowdiag);
+bool mp_grid_path(unsigned id,unsigned path,double xstart,double ystart,double xgoal,double ygoal,bool allowdiag);
 void mp_grid_clear_all(unsigned id, unsigned cost = 1);
 void mp_grid_clear_cell(unsigned id,int h,int v, unsigned cost = 1);
 void mp_grid_clear_rectangle(unsigned id,double x1,double y1,double x2,double y2, unsigned cost = 1);

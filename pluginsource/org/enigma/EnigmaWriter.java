@@ -23,6 +23,7 @@ import static org.lateralgm.main.Util.deRef;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
@@ -541,7 +542,11 @@ public final class EnigmaWriter
 
 			// Generate a Java font for glyph population
 			int style = (of.italic ? java.awt.Font.ITALIC : 0) | (of.bold ? java.awt.Font.BOLD : 0);
-			int screenRes = Toolkit.getDefaultToolkit().getScreenResolution();
+			int screenRes;
+			if (GraphicsEnvironment.isHeadless())
+				screenRes=72;
+			else
+				screenRes = Toolkit.getDefaultToolkit().getScreenResolution();
 			int fsize = (int) Math.round(of.size * screenRes / 72.0); // Java assumes 72 dps
 			java.awt.Font fnt = new java.awt.Font(of.fontName,style,fsize);
 

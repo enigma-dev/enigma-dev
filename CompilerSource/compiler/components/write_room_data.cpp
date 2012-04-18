@@ -172,19 +172,19 @@ wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcrea
     parsed_room *pr = parsed_rooms[es->rooms[i].id];
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
     {
-      wto << "void instancecreate_" << it->first << "()\n{\n  ";
+      wto << "void room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "()\n{\n  ";
       print_to_file(it->second.pe->code, it->second.pe->synt, it->second.pe->strc, it->second.pe->strs, 2, wto);
       wto << "}\n\n";
     }
-    
+
     wto << "void roomcreate" << es->rooms[i].id << "()\n{\n  ";
-    
+
     parsed_event& ev = pr->events[0];
     print_to_file(ev.code, ev.synt, ev.strc, ev.strs, 2, wto);
-    
+
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
-      wto << "\n  instancecreate_" << it->first << "();";
-    
+      wto << "\n  room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "();";
+
     wto << "\n}\n";
   }
 wto.close();

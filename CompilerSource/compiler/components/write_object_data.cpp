@@ -75,6 +75,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       parsed_script* scr = scr_lookup[es->scripts[i].name];
       const char* comma = "";
       wto << "variant _SCR_" << es->scripts[i].name << "(";
+      scr->globargs=16;//Fixes too many arguments error (scripts can be called dynamically with any number of arguments)
       for (int argn = 0; argn < scr->globargs; argn++) {
         wto << comma << "variant argument" << argn << "=0";
         comma = ", ";

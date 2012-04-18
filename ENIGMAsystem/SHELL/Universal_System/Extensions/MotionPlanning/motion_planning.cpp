@@ -199,16 +199,16 @@ void mp_grid_get_speed_modifier(unsigned id, double value)
     enigma::gridstructarray[id]->speed_modifier = value;
 }
 
-void mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double xgoal,double ygoal,bool allowdiag)
+bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double xgoal,double ygoal,bool allowdiag)
 {
     enigma::grid *gr = enigma::gridstructarray[id];
     int vc = int(enigma::gridstructarray[id]->vcells),
     xs = floor((xstart-gr->left)/int(gr->cellwidth)), ys = floor((ystart-gr->top)/int(gr->cellheight)),
     xg = floor((xgoal-gr->left)/int(gr->cellwidth)), yg = floor((ygoal-gr->top)/int(gr->cellheight));
-    if (xs<0 or xg<0) return;
-    if (xs>int(gr->hcells)-1 or xg>int(gr->hcells)-1) return;
-    if (ys<0 or yg<0) return;
-    if (ys>int(gr->vcells)-1 or yg>int(gr->vcells)-1) return;
+    if (xs<0 or xg<0) return false;
+    if (xs>int(gr->hcells)-1 or xg>int(gr->hcells)-1) return false;
+    if (ys<0 or yg<0) return false;
+    if (ys>int(gr->vcells)-1 or yg>int(gr->vcells)-1) return false;
     //if (xstart==xgoal && ystart==ygoal) return;
 
     bool status = true; //status to check if we can reach the destination
@@ -235,6 +235,7 @@ void mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
         path->pointarray.push_back(point);
     }
     enigma::path_recalculate(pathid);
+    return true;
 }
 
 #include "Universal_System/var4.h"
