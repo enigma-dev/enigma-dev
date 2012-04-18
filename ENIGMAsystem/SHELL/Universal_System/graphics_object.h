@@ -57,8 +57,6 @@ namespace enigma
       bool visible;
     
     //Transformations: these are mostly for higher tiers...
-      int    sprite_xoffset;
-      int    sprite_yoffset;
       double image_xscale;
       double image_yscale;
       double image_angle;
@@ -66,11 +64,16 @@ namespace enigma
     //Accessors
       #ifdef ENIGMA_PARSER_RUN
         int sprite_width, sprite_height;
+        int sprite_xoffset, sprite_yoffset;
       #else
         int $sprite_width() const;
         int $sprite_height() const;
+        int $sprite_xoffset() const;
+        int $sprite_yoffset() const;
         #define sprite_width $sprite_width()
         #define sprite_height $sprite_height()
+        #define sprite_xoffset $sprite_xoffset()
+        #define sprite_yoffset $sprite_yoffset()
       #endif
     
     //Constructors
