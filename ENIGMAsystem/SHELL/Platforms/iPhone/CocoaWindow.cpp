@@ -38,7 +38,7 @@ using namespace std;
 
 
 void io_handle() {
-    cocoa_io_handle();
+    //cocoa_io_handle();
 }
 
 //////////
@@ -287,12 +287,12 @@ namespace enigma
 }
 
 extern void ABORT_ON_ALL_ERRORS();
-void show_error(string err, const bool fatal)
+/*void show_error(string err, const bool fatal)
 {
 	printf("ERROR: %s\n",err.c_str());
 	if (fatal) exit(0);
 	ABORT_ON_ALL_ERRORS();
-}
+}*/
 
 #include <sys/time.h>
 #include <iostream>
@@ -363,3 +363,19 @@ namespace enigma {
  window_set_sizeable(sizeable)
  window_get_sizeable()
  */
+
+namespace enigma {
+    extern char keybdstatus[256];
+    extern char mousestatus[3];
+    extern char last_mousestatus[3];
+    extern char last_keybdstatus[256];
+    extern char keybdstatus[256];
+}
+
+void io_clear()
+{
+   /* for (int i = 0; i < 255; i++)
+        enigma::keybdstatus[i] = enigma::last_keybdstatus[i] = cocoa_keybdstatus[i] = cocoa_last_keybdstatus[i] = 0;*/
+    for (int i = 0; i < 3; i++)
+        enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
+}

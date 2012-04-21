@@ -1,6 +1,6 @@
 #!/usr/bin/python
-import os, urllib, hashlib, sys,zipfile,shutil
-print "Enigma package manager v1.0.0"
+import os, urllib, hashlib, sys,zipfile,shutil, getopt
+print "Enigma package manager"
 url="https://raw.github.com/amorri40/Enigma-packages/master/packages.md5"
 webFile = urllib.urlopen(url)
 updateText=webFile.read().split("\n")
@@ -10,12 +10,24 @@ g_packageToInstall="main"
 g_packageToShow=""
 g_currentPackage="main"
 g_OS=sys.platform
+g_globalInstall=False
+g_showOnly=False
+g_installLocation="./"
 
-if (len(sys.argv) > 2): g_packageToShow=sys.argv[2]; g_packageToInstall="" #user wants to show packages in a category
-elif (len(sys.argv) > 1): g_packageToInstall= sys.argv[1]
+optlist, args = getopt.getopt(sys.argv[1:], 'gh',['show=','global','help'])
+
+if len(args)>0: g_packageToInstall=args[0]
+for o, a in optlist:
+        if o == "--show": #only show the packages 
+            g_packageToInstall=""; g_packageToShow=a; g_showOnly=True
+        if o == "--global" or o == "-g": #install this globally for this user to .ENIGMA
+            g_globalInstall=True; g_installLocation=os.getenv('HOME')+"/.ENIGMA/"
+        if o == "--help" or o == "-h": #show the help
+            print "To see all packages use --show=all \nTo install globally use --global (useful for large sdks) \nTo see all packages in a category use --show=categoryname"
+            sys.exit(0)
 
 if g_packageToInstall.endswith("SDK"): g_packageToInstall+="-"+sys.platform #SDKs are platform specific
-print "Installing "+g_packageToInstall+" please wait..."
+if not g_showOnly: print "Installing "+g_packageToInstall+" please wait..."
 
 def ensure_dir(f):
     d = os.path.dirname(f)
@@ -51,7 +63,7 @@ def downloadPackage(packageToInstall):
         packageURL = packageProperties[3]
         packageDeps = packageProperties[4]
         
-        if g_currentPackage == g_packageToShow: print str(show_iterator)+") "+packageName; show_iterator+=1
+        if g_currentPackage == g_packageToShow or g_packageToShow=='all': print str(show_iterator)+") "+packageName; show_iterator+=1
         
         if packageName != packageToInstall: continue
         
@@ -61,17 +73,18 @@ def downloadPackage(packageToInstall):
             downloadPackage(dependency)
         
         try:
-            ensure_dir("./"+packageLocalPath)
-            localfile=open("./"+packageLocalPath, 'r')
+            ensure_dir(g_installLocation+packageLocalPath)
+            localfile=open(g_installLocation+packageLocalPath, 'r')
             if hashlib.md5(localfile.read()).hexdigest() == packageHash: print "INFO: "+packageName + " already up-to-date (same hash)"; break #exit now that we have what we are looking for
             else: print "INFO: hash did not match (probably needs updated) localhash:"+hashlib.md5(localfile.read()).hexdigest()+ "remotehash:"+packageHash
         except IOError, err: "INFO: File doesn't exist so downloading:"+packageLocalPath
         webFile = urllib.urlopen(packageURL)
-        localfile=open("./"+packageLocalPath, 'w')
+        localfile=open(g_installLocation+packageLocalPath, 'w')
         localfile.write(webFile.read())
         localfile.close()
         webFile.close()
-        if packageLocalPath.endswith(".epackage"): extract_epackage("./"+packageLocalPath)
+        if packageLocalPath.endswith(".epackage"): extract_epackage(g_installLocation+packageLocalPath)
         
 downloadPackage(g_packageToInstall)
-print "Finished updating "+g_packageToInstall
+if g_showOnly: print "Finished showing all packages for category: "+g_packageToShow
+else: print "Finished updating "+g_packageToInstall

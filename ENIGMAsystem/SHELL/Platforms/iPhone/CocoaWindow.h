@@ -148,4 +148,6 @@ namespace enigma {
 	//void writename(char* x);
 }
 
+void io_clear();
+
 #define enigmacatchmouse() //Linux should hopefully do that automatically.
