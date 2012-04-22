@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Copyright (C) 2012 Alasdair Morrison                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -24,6 +25,27 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+
+#ifdef __APPLE__ //getting the msec is platform specific
+#ifndef ENIGMA_PARSER_RUN
+#define current_time (enigma::current_time())
+#else
+double current_time;
+#endif
+#endif
+
+#ifndef ENIGMA_PARSER_RUN //trick the parser (we don't want it knowing about these or enigma will get confused)
+#define current_second (date_get_second(date_current_time()))
+#define current_minute (date_get_minute(date_current_time()))
+#define current_hour (date_get_hour(date_current_datetime()))
+#define current_day (date_get_day(date_current_datetime()))
+#define current_weekday (date_get_weekday(date_current_datetime()))
+#define current_month (date_get_month(date_current_datetime()))
+#define current_year (date_get_year(date_current_datetime()))
+#else
+double current_second,current_minute,current_hour,current_day,current_weekday,current_month,current_year;
+#endif
+
 
 time_t date_current_datetime();
 time_t date_current_date();

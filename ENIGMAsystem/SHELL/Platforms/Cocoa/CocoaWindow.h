@@ -164,6 +164,7 @@ void keyboard_wait();
 namespace enigma {
 	extern char** parameters;
 	//void writename(char* x);
+    long int current_time();
 }
 
 #define enigmacatchmouse() //Linux should hopefully do that automatically.

@@ -76,8 +76,24 @@ int loopy() {
 	return 0;
 }
 
+
+#include <mach/mach_time.h>
+long int timeAtStartup;
+namespace enigma {
+    long int current_time() {
+        const int64_t kOneMillion = 1000 * 1000;
+        static mach_timebase_info_data_t s_timebase_info;
+        
+        if (s_timebase_info.denom == 0) {
+            (void) mach_timebase_info(&s_timebase_info);
+        }
+        return (long int)(((mach_absolute_time() - timeAtStartup) * s_timebase_info.numer) / (kOneMillion * s_timebase_info.denom));
+    }
+}
+
 extern string working_directory;
 int init() {
+    timeAtStartup=mach_absolute_time();
     working_directory=cocoa_get_working_directory();
 enigma::initialize_everything();
 	enigma::initkeymap();
