@@ -45,7 +45,7 @@ map<string,dectrip> dot_accessed_locals;
 int shared_locals_load(vector<string> exts)
 {
   cout << "Finding parent..."; fflush(stdout);
-  
+
   // Find namespace enigma
   externs* pscope = NULL;
   current_scope = &global_scope;
@@ -58,9 +58,9 @@ int shared_locals_load(vector<string> exts)
       pscope = parent->second;
   }
   cout << "found"; fflush(stdout);
-  
+
   shared_object_locals.clear();
-  
+
   //Iterate the tiers of the parent object
   for (externs *cs = pscope; cs; cs = (cs->ancestors.size ? cs->ancestors[0] : NULL) )
   {
@@ -68,7 +68,7 @@ int shared_locals_load(vector<string> exts)
     for (extiter mem = cs->members.begin(); mem != cs->members.end(); mem++)
       shared_object_locals[mem->first] = 0;
   }
-  
+
   extensions::crawl_for_locals();
   extensions::dump_read_locals(shared_object_locals);
   return 0;
@@ -107,7 +107,7 @@ parsed_event::parsed_event():                               id(0), mainId(0), co
 parsed_event::parsed_event(parsed_object *po):              id(0), mainId(0), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_object::parsed_object() {}
-parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d): name(n), id(i), sprite_index(s), mask_index(m), parent(p), visible(vis), solid(sol), depth(d) {}
+parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d,bool pers): name(n), id(i), sprite_index(s), mask_index(m), parent(p), visible(vis), solid(sol), depth(d), persistent(pers) {}
 map<int,parsed_object*> parsed_objects;
 map<int,parsed_room*> parsed_rooms;
 vector<parsed_extension> parsed_extensions;
@@ -116,7 +116,7 @@ vector<string> requested_extensions;
 void parsed_object::copy_from(parsed_object& source, string sourcename, string destname)
 {
   parsed_object& dest = *this;
-  //Copy 
+  //Copy
   for (parsed_object::dotit vit = source.dots.begin(); vit != source.dots.end(); vit++)
     dest.dots[vit->first] = 0;
   for (parsed_object::locit vit = source.locals.begin(); vit != source.locals.end(); vit++)
@@ -162,14 +162,14 @@ struct useinfo { dectrip dec; int c; string lastobject; };
 void add_dot_accessed_local(string name)
 {
   pair<msi::iterator, bool> insd = dot_accessed_locals.insert(msi::value_type(name,dectrip()));
-  if (!insd.second) // If we didn't insert new, 
+  if (!insd.second) // If we didn't insert new,
     return; // all this figuring has been done already
-  
+
   user << "Add dot accessed local " << name << flushl;
-  
+
   map<string,useinfo> uses;
   insd.first->second.type = "var"; // Default, just in case of stupidity.
-  
+
   int maxvotes = 0; // The highest number of votes on a type for this variable
   for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) // For each of our objects
   {
@@ -184,10 +184,10 @@ void add_dot_accessed_local(string name)
       ins.first->second.lastobject = it->second->name;
       ins.first->second.dec = itt->second;
       ins.first->second.c++;
-      
+
       if (ins.first->second.c > maxvotes)
         insd.first->second = ins.first->second.dec, maxvotes = ins.first->second.c;
     }
   }
-  user << insd.first->second.prefix << " " << insd.first->second.type << " " << insd.first->second.suffix << flushl; 
+  user << insd.first->second.prefix << " " << insd.first->second.type << " " << insd.first->second.suffix << flushl;
 }

@@ -270,6 +270,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 wto << "      sprite_index = " << i->second->sprite_index << ";\n"
                     << "      mask_index = " << i->second->mask_index << ";\n";
               wto << "      visible = " << i->second->visible << ";\n      solid = " << i->second->solid << ";\n";
+              wto << "      persistent = " << i->second->persistent << ";\n";
 
             // Depth
               wto << "      depth.init(" << i->second->depth << ", this);\n";

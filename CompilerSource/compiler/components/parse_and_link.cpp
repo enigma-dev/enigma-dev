@@ -110,30 +110,30 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
     cout << endl;
   }
   edbg << "Done." << flushl;
-  
-  
+
+
   edbg << es->gmObjectCount << " Objects:\n";
   for (int i = 0; i < es->gmObjectCount; i++)
   {
     //For every object in Ism's struct, make our own
     unsigned ev_count = 0;
-    parsed_object* pob = parsed_objects[es->gmObjects[i].id] = 
+    parsed_object* pob = parsed_objects[es->gmObjects[i].id] =
       new parsed_object(
         es->gmObjects[i].name, es->gmObjects[i].id, es->gmObjects[i].spriteId, es->gmObjects[i].maskId,
         es->gmObjects[i].parentId,
         es->gmObjects[i].visible, es->gmObjects[i].solid,
-        es->gmObjects[i].depth
+        es->gmObjects[i].depth, es->gmObjects[i].persistent
       );
-    
+
     edbg << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " events: " << flushl;
-    
+
     for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
     if (es->gmObjects[i].mainEvents[ii].eventCount) //For every MainEvent that contains event code
     {
       //For each main event in that object, make a copy
       const int mev_id = es->gmObjects[i].mainEvents[ii].id;
       edbg << "  Event[" << es->gmObjects[i].mainEvents[ii].id << "]: ";
-      
+
       edbg << "  Parsing " << es->gmObjects[i].mainEvents[ii].eventCount << " sub-events:" << flushl;
       for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
       {

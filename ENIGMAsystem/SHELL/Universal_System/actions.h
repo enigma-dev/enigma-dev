@@ -159,15 +159,11 @@ inline void action_move(const char dir[9], int argspeed) {
     if (choices == 0) return;
     choices = int(random(choices)); //choices is now chosen
 
-    //We use rval.d for efficiency, so hspeed/vspeed aren't set twice.
-    const double newdir =
-    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->direction.rval.d = chosendirs[choices];
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->direction = chosendirs[choices];
     if (argument_relative)
         argspeed += ((enigma::object_planar*)enigma::instance_event_iterator->inst)->speed;
-    const double newspd =
-    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->speed.rval.d = chosendirs[choices] == -1 ? 0 : argspeed;
-    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->hspeed.rval.d = newspd * cos(degtorad(newdir));
-    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->vspeed.rval.d = -newspd * sin(degtorad(newdir));
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->speed = chosendirs[choices] == -1 ? 0 : argspeed;
+    
 }
 
 inline void action_reverse_xdir() {

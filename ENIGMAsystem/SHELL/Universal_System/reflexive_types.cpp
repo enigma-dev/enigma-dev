@@ -26,6 +26,8 @@ namespace enigma {
   void directionv::function() {
     *hspd = *spd * cos(rval.d*M_PI/180);
     *vspd = *spd *-sin(rval.d*M_PI/180);
+    if (abs(*hspd - lrint(*hspd)) < 0.0001) *hspd = lrint(*hspd);
+    if (abs(*vspd - lrint(*vspd)) < 0.0001) *vspd = lrint(*vspd);
   }
 
   //Make speed work -- same as above, but rval.d and reflex1 are switched.
@@ -33,6 +35,8 @@ namespace enigma {
   void speedv::function() {
     *hspd = rval.d * cos(*dir*M_PI/180);
     *vspd = rval.d *-sin(*dir*M_PI/180);
+    if (abs(*hspd - lrint(*hspd)) < 0.0001) *hspd = lrint(*hspd);
+    if (abs(*vspd - lrint(*vspd)) < 0.0001) *vspd = lrint(*vspd);
   }
 
   //Make hspeed work
@@ -42,6 +46,7 @@ namespace enigma {
     {
         *dir = (int(180+180*(1-atan2(*vspd,rval.d)/M_PI)))%360;
         *spd = hypot(rval.d,*vspd);
+        if (abs(*spd - lrint(*spd)) < 0.0001) *spd = lrint(*spd);
     }
   }
 
@@ -52,6 +57,7 @@ namespace enigma {
     {
         *dir = (int(180+180*(1-atan2(rval.d,*hspd)/M_PI)))%360;
         *spd = hypot(rval.d,*hspd);
+        if (abs(*spd - lrint(*spd)) < 0.0001) *spd = lrint(*spd);
     }
   }
 }

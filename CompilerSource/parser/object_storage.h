@@ -57,7 +57,7 @@ struct parsed_event
   varray<string> strs;
   int otherObjId;
   parsed_object* myObj; //This will let us add to locals from the code
-  
+
   parsed_event();
   parsed_event(parsed_object*);
   parsed_event(int,int,parsed_object*);
@@ -67,7 +67,7 @@ struct dectrip {
   dectrip();
   dectrip(string t);
   dectrip(string t,string p, string s);
-  
+
   bool defined();
   bool operator!= (const dectrip&);
 };
@@ -76,39 +76,39 @@ struct decquad {
   decquad();
   decquad(string t);
   decquad(string t,string p, string s, string v);
-  
+
   bool defined();
   bool operator!= (const decquad&);
 };
 struct parsed_object
 {
   varray<parsed_event> events;
-  
+
   string name;
   int id, sprite_index, mask_index, parent;
-  bool visible, solid;
+  bool visible, solid,persistent;
   double depth;
-  
+
   map<string,dectrip> locals;   // Any variable KEY used but not declared, or declared as local VALUE.
   map<string,dectrip> globals;  // Any variable KEY declared as global VALUE.
   map<string,decquad> consts;   // Any variable KEY declared as constant VALUE.
   map<string,int> globallocals; // Any shared local variable KEY used.
   map<string,int> funcs;        // Any function KEY called with at most VALUE parameters.
   map<string,int> dots;         // Any attribute KEY accessed via a dot, as in a.KEY
-  
+
   vector<initpair> initializers; // Variables that need initialized in the constructor for this object
-  
+
   typedef map<string,dectrip>::iterator locit;
   typedef map<string,dectrip>::iterator globit;
   typedef map<string,decquad>::iterator constit;
   typedef map<string,int>::iterator funcit;
   typedef map<string,int>::iterator dotit;
-  
+
   void copy_from(parsed_object&, string, string);
   void copy_calls_from(parsed_object&);
-  
+
   parsed_object();
-  parsed_object(string,int,int,int,int,bool,bool,double);
+  parsed_object(string,int,int,int,int,bool,bool,double,bool);
 };
 extern map<int,parsed_object*> parsed_objects;
 struct parsed_room: parsed_object {

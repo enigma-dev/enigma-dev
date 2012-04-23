@@ -36,7 +36,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
-	Constant: {xprevious = x; yprevious = y; image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index));}
+	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index));}
 
 alarm: 2
 	Group: Alarm
