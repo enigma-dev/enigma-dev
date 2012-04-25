@@ -76,3 +76,6 @@ inline int move_bounce_all(const bool adv) {
 inline int move_bounce_solid(const bool adv) {
     return move_bounce_object(adv, all, true);
 }
+
+void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, int inside, bool notme);
+void instance_activate_region(int left, int top, int width, int height, int inside);

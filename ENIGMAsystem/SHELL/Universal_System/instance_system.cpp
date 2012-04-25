@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include <map>
+#include <deque>
 #include <set>
 #include <math.h>
 #include <vector>
@@ -40,6 +41,8 @@
 using namespace std;
 
 int instance_count = 0;
+
+extern  deque<int> instance_id;
 
 namespace enigma
 {
@@ -140,8 +143,11 @@ namespace enigma
 
   // This is the all-inclusive, centralized list of instances.
   map<int,inst_iter*> instance_list;
+  map<int,inst_iter*> instance_deactivated_list;
   typedef map<int,inst_iter*>::iterator iliter;
   typedef pair<int,inst_iter*> inode_pair;
+    
+   
 
   // When you say "global.vname", this is the structure that answers
   extern object_basic *ENIGMA_global_instance; // We also need an iterator for only global.
@@ -243,6 +249,7 @@ namespace enigma
   pinstance_list_iterator link_instance(object_basic* who)
   {
     inst_iter *ins = new inst_iter(who);
+    instance_id.push_back(who->id);
     pair<iliter,bool> it = instance_list.insert(inode_pair(who->id,ins));
     if (!it.second) {
       delete ins;

@@ -30,33 +30,9 @@ GM Global variables
 ******************/
 
 bool argument_relative=false;
-/*global:     background_alpha
-global:     background_blend
-global:     background_foreground
-global:     background_height
-global:     background_hspeed
-global:     background_htiled
-global:     background_index
-global:     background_visible
-global:     background_vspeed
-global:     background_vtiled
-global:     background_width
-global:     background_x
-global:     background_xscale
-global:     background_y
-global:     background_yscale
- */
 string caption_score="Score:", caption_lives="Lives:", caption_health="Health:";
 
 /*
-global:     current_day
-global:     current_hour
-global:     current_minute
-global:     current_month
-global:     current_second
-global:     current_time
-global:     current_weekday
-global:     current_year
 global:     cursor_sprite
 global:     error_last
 global:     error_occurred
@@ -64,30 +40,33 @@ global:     event_action
 global:     event_number
 global:     event_object
 global:     event_type*/
-double      fps;/*
-global:     game_id
-*/
+double      fps;
+unsigned int game_id;
+
 double health=100;
-/*
-global:     instance_id
-global:     keyboard_key
-global:     keyboard_lastchar
-global:     keyboard_lastkey
-global:     keyboard_string
-*/
+deque<int> instance_id;
+
+int keyboard_key=0;
+/*global:     keyboard_lastchar
+global:     keyboard_lastkey */
+string keyboard_string="";
+
 double lives=3;
 double score=0;
-/*
-global:     secure_mode
- */
+bool secure_mode=false;
 bool show_score=0, show_lives=0, show_health=0;
-/*
-global:     temp_directory
-global:     transition_kind
-global:     transition_steps
-global:     transition_time*/
-/*global:  working_directory*/
+
+//string temp_directory="";
+int transition_kind=0;
+int transition_steps=80;
+/*global:     transition_time
+global:  working_directory*/
 bool automatic_redraw = true;
+string program_directory="";
+int os_type;
+int gamemaker_version=0;
+//int transition_steps;
+int cursor_sprite;
 /*********************
 End GM global variables
  *********************/

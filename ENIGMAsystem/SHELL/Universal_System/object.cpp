@@ -34,6 +34,8 @@ namespace enigma
     int newinst_obj, newinst_id;
 
     void object_basic::unlink() {}
+    void object_basic::deactivate() {}
+    void object_basic::activate() {}
     variant object_basic::myevent_create()    { return 0; }
     variant object_basic::myevent_gamestart()    { return 0; }
     variant object_basic::myevent_draw()    { return 0; }

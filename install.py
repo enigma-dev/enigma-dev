@@ -41,7 +41,9 @@ def extract_epackage(epackage):
     
     for f in z.namelist():
         if f.endswith('/'):
-            os.makedirs(f)
+            try:
+               os.makedirs(f)
+            except: print "already exists, overwriting"
         else:
             z.extract(f)
     try: shutil.rmtree("__MACOSX")  #mac zips have a __MACOSX folder which needs to be removed

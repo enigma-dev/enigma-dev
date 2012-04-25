@@ -236,6 +236,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         //This is the actual call to remove the current instance from all linked records before destroying it.
         wto << "\n    void unlink()\n    {\n";
           wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
+          wto << "      deactivate();\n    }\n void deactivate()\n    {\n";
           wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
           for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
             wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
@@ -272,9 +273,18 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               wto << "      visible = " << i->second->visible << ";\n      solid = " << i->second->solid << ";\n";
               wto << "      persistent = " << i->second->persistent << ";\n";
 
-            // Depth
-              wto << "      depth.init(" << i->second->depth << ", this);\n";
 
+              wto << "      activate();";
+            // Coordinates
+              wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
+
+          wto << "      enigma::constructor(this);\n";
+          wto << "    }\n";
+
+
+          wto << " void activate()\n    {\n";
+          // Depth
+              wto << "      depth.init(" << i->second->depth << ", this);\n";
             // Instance system interface
               wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
               for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
@@ -292,12 +302,8 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               }
               for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
                 wto << "      ENOBJ_ITER_myevent_" << it->second.s << " = enigma::event_" << it->second.s << "->add_inst(this);\n";
-
-            // Coordinates
-              wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
-
-          wto << "      enigma::constructor(this);\n";
           wto << "    }\n";
+
 
           // Destructor
           wto <<   "    \n    ~OBJ_" <<  i->second->name << "()\n    {\n";

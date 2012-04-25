@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 Alasdair Morrison                                        ** 
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -34,6 +35,11 @@ int instance_create(int x,int y,int object);
 namespace enigma {
   object_basic *instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
 }
+
+void instance_deactivate_all(bool notme);
+void instance_activate_all();
+void instance_activate_object(int obj);
+void instance_deactivate_object(int obj);
 
 void instance_destroy();
 void instance_destroy(int id);

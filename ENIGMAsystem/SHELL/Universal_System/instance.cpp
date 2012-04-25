@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 Alasdair Morrison                                        ** 
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -38,6 +39,44 @@
 namespace enigma
 {
   int destroycalls = 0, createcalls = 0;
+}
+
+typedef std::pair<int,enigma::inst_iter*> inode_pair;
+void instance_deactivate_all(bool notme) {
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+        if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;  
+        
+        ((enigma::object_basic*)*it)->deactivate();
+        enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+    }
+}
+
+
+void instance_activate_all() {
+    
+    std::map<int,enigma::inst_iter*>::iterator iter;
+    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter) {
+        ((enigma::object_basic*)(iter->second->inst))->activate();
+        enigma::instance_deactivated_list.erase(iter);
+    }
+}
+
+void instance_deactivate_object(int obj) {
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it) {
+        ((enigma::object_basic*)*it)->deactivate();
+        enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+    }
+}
+
+void instance_activate_object(int obj) {
+    std::map<int,enigma::inst_iter*>::iterator iter;
+    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter) {
+        enigma::object_basic* const inst = ((enigma::object_basic*)(iter->second->inst));
+        if (obj==all ||(obj<100000 && inst->object_index==obj)|| (obj>100000 && inst->id == obj)) {
+        inst->activate();
+        enigma::instance_deactivated_list.erase(iter);
+        }
+    }
 }
 
 void instance_destroy(int id)

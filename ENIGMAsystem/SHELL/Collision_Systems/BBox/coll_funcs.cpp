@@ -480,3 +480,66 @@ int move_bounce_object(const bool adv, const int object, const bool solid_only)
     }
     return -4;
 }
+
+typedef std::pair<int,enigma::inst_iter*> inode_pair;
+
+void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, int inside, bool notme) {
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+        if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;  
+        enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
+        
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+            continue;
+        
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x = inst->x, y = inst->y,
+        xscale = inst->image_xscale, yscale = inst->image_yscale,
+        ia = inst->image_angle;
+        
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        
+        if (left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) {
+            if (inside) {
+            inst->deactivate();
+            enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it)); 
+            }
+        } else {
+            if (!inside) {
+                inst->deactivate();
+                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+            }
+        }
+    }
+}
+
+void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int inside) {
+    std::map<int,enigma::inst_iter*>::iterator iter;
+    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter) {
+          
+        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+        
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+            continue;
+        
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x = inst->x, y = inst->y,
+        xscale = inst->image_xscale, yscale = inst->image_yscale,
+        ia = inst->image_angle;
+        
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        
+        if (left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) {
+            if (inside) {
+                inst->activate();
+                enigma::instance_deactivated_list.erase(iter); 
+            }
+        } else {
+            if (!inside) {
+                inst->activate();
+                enigma::instance_deactivated_list.erase(iter);
+            }
+        }
+    }
+}

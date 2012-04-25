@@ -87,6 +87,8 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             continue;
         if (solid_only && !inst2->solid)
             continue;
+        if (inst2->sprite_index == -1 && inst2->mask_index == -1) //no sprite/mask then no collision
+            continue;
 
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
@@ -110,6 +112,8 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
             continue;
         if (solid_only && !inst->solid)
             continue;
+         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
+            continue;
 
         const bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
@@ -132,6 +136,8 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
         if (notme && inst->id == enigma::instance_event_iterator->inst->id)
             continue;
         if (solid_only && !inst->solid)
+            continue;
+        if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
         const bbox_rect_t &box = inst->$bbox_relative();
@@ -189,6 +195,8 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
             continue;
         if (solid_only && !inst->solid)
             continue;
+        if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
+            continue;
 
         const bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
@@ -211,6 +219,8 @@ enigma::object_collisions* const collide_inst_circle(int object, bool solid_only
         if (notme && inst->id == enigma::instance_event_iterator->inst->id)
             continue;
         if (solid_only && !inst->solid)
+            continue;
+        if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
         const bbox_rect_t &box = inst->$bbox_relative();
@@ -241,6 +251,8 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
             continue;
         if (solid_only && !inst->solid)
             continue;
+        if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
+            continue;
 
         const bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
@@ -264,6 +276,8 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
         if (solid_only && !inst->solid)
+            continue;
+        if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
         const bbox_rect_t &box = inst->$bbox_relative();

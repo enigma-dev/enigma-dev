@@ -29,6 +29,7 @@
 #define _INSTANCE_SYSTEM_BASE__H
 
 #include "instance_iterator.h"
+#include <deque>
 
 namespace enigma
 {
@@ -37,6 +38,7 @@ namespace enigma
     object_basic* inst;     // Inst is first member for non-arithmetic dereference
     inst_iter *next, *prev; // Double linked for active removal
     bool dead;              // Whether or not this instance has been destroyed. Should be accessed rarely.
+    //std::deque<inst_iter*>::iterator instance_id_index;
     inst_iter(object_basic* i,inst_iter *n,inst_iter *p);
   };
 
