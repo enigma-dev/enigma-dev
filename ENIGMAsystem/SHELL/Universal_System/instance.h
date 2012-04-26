@@ -52,7 +52,8 @@ int  instance_furthest(int x,int y,int obj,bool notme = false);
 
 //int instance_place(x,y,obj)
 //int instance_copy(performevent)
-//instance_change(obj,perf)
+void instance_change(int obj, bool perf);
+inline void action_change_object(int obj, bool perf);
 
 
 
