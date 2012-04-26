@@ -410,3 +410,5 @@ window_get_stayontop()
 window_set_sizeable(sizeable)
 window_get_sizeable()
 */
+void game_end() { PostQuitMessage(0); }
+void action_end_game() { game_end(); }

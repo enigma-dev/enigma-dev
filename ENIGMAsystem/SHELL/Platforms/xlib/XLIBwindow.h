@@ -162,3 +162,5 @@ string parameter_string(unsigned num);
 int parameter_count();
 
 #define enigmacatchmouse() //Linux should hopefully do that automatically.
+void game_end();
+void action_end_game();
