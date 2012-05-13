@@ -15,7 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <math.h>
+#include <cmath>
+#include <cstdlib>
 #include <string>
 #include "var4.h"
 #include "reflexive_types.h"
