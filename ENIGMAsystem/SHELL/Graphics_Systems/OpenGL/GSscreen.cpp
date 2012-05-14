@@ -61,13 +61,11 @@ namespace enigma
 
 void screen_redraw()
 {
-    int FBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
     if (!view_enabled)
     {
         glViewport(0, 0, window_get_width(), window_get_height()); // Possible bug
         glLoadIdentity();
-        glScalef(1, (FBO==0?-1:1), 1);
+        glScalef(1, -1, 1);
         glOrtho(-1, room_width, -1, room_height, 0, 1); // possible bug
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
@@ -76,8 +74,9 @@ void screen_redraw()
         {
             int clearcolor = ((int)background_color) & 0x00FFFFFF;
             glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT);
         }
+        glClear(GL_DEPTH_BUFFER_BIT);
 
         draw_back();
 
@@ -141,7 +140,7 @@ void screen_redraw()
 
                 glViewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
                 glLoadIdentity();
-                glScalef(1, (FBO==0?-1:1), 1);
+                glScalef(1, -1, 1);
                 glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1); // possible bug
                 glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                 glMultMatrixd(transformation_matrix);
@@ -150,8 +149,9 @@ void screen_redraw()
                 {
                     int clearcolor = ((int)background_color) & 0x00FFFFFF;
                     glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
-                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    glClear(GL_COLOR_BUFFER_BIT);
                 }
+                glClear(GL_DEPTH_BUFFER_BIT);
 
                 draw_back();
 

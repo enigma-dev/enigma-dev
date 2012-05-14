@@ -61,14 +61,14 @@ void instance_change(int obj, bool perf) {
     double image_angle=inst->image_angle;
     enigma::vspeedv vspeed=inst->vspeed;
     enigma::hspeedv hspeed=inst->hspeed;
-    
+
     //the instance id is the same
     int idn=inst->id;
-    
+
     //Destory the instance
     if (perf) inst->myevent_destroy();
     inst->unlink();
-    
+
     //Create the instance
     enigma::object_basic* ob;
 	switch((int)obj)
@@ -77,7 +77,7 @@ void instance_change(int obj, bool perf) {
         #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
         default:
         #if SHOWERRORS
-            show_error("Object doesn't exist",0);   
+            show_error("Object doesn't exist",0);
         #endif
             return;
     }
@@ -86,7 +86,7 @@ void instance_change(int obj, bool perf) {
     enigma::object_graphics* newinst = (enigma::object_graphics*) (*enigma::fetch_inst_iter_by_int(idn));
     if (perf) newinst->myevent_create();
     newinst->x=x; newinst->y=y; newinst->yprevious=yprevious; newinst->xprevious=xprevious;
-    newinst->xstart=xstart; newinst->ystart=ystart; 
+    newinst->xstart=xstart; newinst->ystart=ystart;
     newinst->image_index=image_index; newinst->image_speed=image_speed;
     newinst->visible=visible; newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
     newinst->hspeed=hspeed; newinst->vspeed=vspeed;
@@ -107,8 +107,9 @@ namespace enigma
           #if SHOWERRORS
           show_error("Object doesn't exist",0);
           #endif
-        ;
+          return NULL;
     }
     return ob;
   }
 }
+

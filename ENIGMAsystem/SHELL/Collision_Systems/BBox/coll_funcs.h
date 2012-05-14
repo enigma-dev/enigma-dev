@@ -67,13 +67,15 @@ inline double move_ouside_solid(const double direction, const double speed) {
     return move_outside_object(direction, speed, all, true);
 }
 
-int move_bounce_object(const bool adv, const int object, const bool solid_only = false);
+bool move_bounce_object(int object, bool adv = true, bool solid_only = false);
+bool move_bounce_object_inside(int object, bool adv = true, bool solid_only = false);
+bool move_bounce_object_outside(int object, bool adv = true, bool solid_only = false);
 
-inline int move_bounce_all(const bool adv) {
+inline bool move_bounce_all(bool adv = true) {
     return move_bounce_object(adv, all);
 }
 
-inline int move_bounce_solid(const bool adv) {
+inline bool move_bounce_solid(bool adv = true) {
     return move_bounce_object(adv, all, true);
 }
 
