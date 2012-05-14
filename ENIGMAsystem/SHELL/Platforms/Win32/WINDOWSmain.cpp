@@ -80,7 +80,7 @@ namespace enigma {
     lc = nc;
   }
 }
-
+#include <cstdio>
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
     int wid = (int)room_width, hgt = (int)room_height;

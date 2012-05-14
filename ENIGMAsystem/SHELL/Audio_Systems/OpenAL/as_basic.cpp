@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+// We don't want to load ALURE from a DLL. Would be kind of a waste.
+#define ALURE_STATIC_LIBRARY 1
+
 #include <string>
 #include <stdio.h>
 #include <stddef.h>
@@ -28,6 +31,8 @@ using std::string;
 #else
 #include <AL/alure.h>
 #endif
+
+bool load_al_dll();
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
@@ -82,6 +87,7 @@ namespace enigma
 
   int audiosystem_initialize()
   {
+    printf("Initializing audio system...\n");
     if (sound_idmax == 0)
       sounds = NULL;
     else
@@ -90,13 +96,16 @@ namespace enigma
     #ifdef _WIN32
     if (!load_al_dll())
       return 1;
+	printf("Starting ALURE (Windows thing).\n");
+	init_alure();
     #endif
     
+	printf("Opening ALURE devices.\n");
     if(!alureInitDevice(NULL, NULL)) {
       fprintf(stderr, "Failed to open OpenAL device: %s\n", alureGetErrorString());
       return 1;
     }
-    
+	
     for (size_t i = 0; i < sound_idmax; i++)
       sounds[i] = NULL;
     
