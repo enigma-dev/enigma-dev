@@ -16,7 +16,7 @@
 ### - image_index setting
 ### - drawing an object by default when no draw code is used
 ### - movement to previous location on collision with solid instances
-### - any automatic position change from gravity, friction, direction, speed, hspeed or vspeed
+### - any automatic position change from path_start, gravity, friction, direction, speed, hspeed or vspeed
 
 
 # These events are executed outside the main event source at special moments

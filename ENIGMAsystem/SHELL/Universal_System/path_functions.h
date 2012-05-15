@@ -25,7 +25,11 @@
 **                                                                              **
 \********************************************************************************/
 
-bool path_start(unsigned pathid,double speed,unsigned endaction,bool absolute);
+void path_start(unsigned pathid,double speed,unsigned endaction,bool absolute);
+void path_end();
+void path_set_position(double position, bool relative);
+void path_set_speed(double speed, bool relative);
+bool path_update();
 bool path_exists(unsigned pathid);
 void path_delete(unsigned pathid);
 void path_assign(unsigned pathid,unsigned path);

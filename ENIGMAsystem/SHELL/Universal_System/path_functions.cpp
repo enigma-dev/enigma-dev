@@ -40,23 +40,77 @@ namespace enigma {
 	extern unsigned bound_texture;
 }
 
-////////FIXME: THIS NEEDS TO BE FIXED/FINISHED
-////////FIXME: MOVEME: THIS NEEDS MOVED TO THE PATH EXTENSION
-bool path_start(unsigned pathid,double speed,unsigned endaction,bool absolute)
+#include "collisions_object.h"
+#include "instance_system.h"
+#include "Extensions/Paths/implement.h"
+void path_start(unsigned pathid,double speed,unsigned endaction,bool absolute)
 {
-    //(pseudocode)
-    /*enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
-    enigma::path_inst pathi={inst,pathid,endaction,0,speed,absolute};*/
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    inst_paths->path_index = pathid;
+    inst_paths->path_speed = speed;
+    inst_paths->path_endaction = endaction;
 
-    //Then in update it would be something like
-    /*double speed;
-    path_getspeed(pathi->path_index, speed, pathi->path_position);
-    path_getXY(pathi->path_index,pathi->inst.x,pathi->inst.y,pathi->path_position);
-    pathi->inst.direction = path_get_direction(pathi->path_index,pathi->path_position);
-    pathi->path_position += pathi->path_speed/pathi->path_index.total_length*speed;*/
-    return false;
+    if (absolute)
+    {
+        const double x1 = path_get_x(inst_paths->path_index, inst_paths->path_position), y1 = path_get_y(inst_paths->path_index, inst_paths->path_position);
+        inst->x = x1;
+        inst->y = y1;
+    }
 }
-///////////////////////////////////////
+
+void path_end()
+{
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    inst_paths->path_index = -1;
+}
+
+void path_set_position(double position, bool relative)
+{
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    inst_paths->path_position = position;
+    if (relative)
+    {
+        inst->x = path_get_x(inst_paths->path_index , inst_paths->path_position);
+        inst->x = path_get_y(inst_paths->path_index , inst_paths->path_position);
+    }
+}
+
+void path_set_speed(double speed, bool relative)
+{
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    inst_paths->path_speed = relative ? speed : double(inst->speed + speed);
+}
+
+bool path_update()
+{
+    #ifndef PATH_EXT_SET
+        return false;
+    #endif
+    return false;
+
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+
+    if (inst_paths->path_index == -1 || inst_paths->path_speed == 0)
+        return false;
+
+    return true;
+}
 
 bool path_exists(unsigned pathid)
 {

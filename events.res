@@ -242,7 +242,7 @@ step: 3
 localsweep: 100000 
 	Name: Locals sweep 
 	Mode: Inline
-	Constant: enigma::propagate_locals(this);
+	Constant: if (path_update()) {speed = 0; return 0;} enigma::propagate_locals(this);
 
 
 # Lump of "Other" events.

@@ -575,3 +575,20 @@ inline void set_automatic_draw(bool enable)
 {
     automatic_redraw = enable;
 }
+
+inline void action_path(unsigned pathid,double speed,unsigned endaction,bool absolute)
+{
+    path_start(pathid, speed, endaction, absolute);
+}
+inline void action_path_end()
+{
+    path_end();
+}
+inline void action_path_position(double position, bool relative)
+{
+    path_set_position(position, relative);
+}
+inline void action_path_speed(double speed, bool relative)
+{
+    path_set_speed(speed, relative);
+}

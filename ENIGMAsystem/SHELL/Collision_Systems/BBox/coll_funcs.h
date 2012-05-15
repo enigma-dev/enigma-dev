@@ -38,33 +38,33 @@ void position_destroy_solid(double x, double y);
 void position_destroy(double x, double y);
 int instance_place(double x, double y, int object);
 int instance_position(double x, double y, int object);
-int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme);
-int collision_line(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme);
-int collision_point(double x, double y, int obj, bool prec, bool notme);
-int collision_circle(double x, double y, double radius, int obj, bool prec, bool notme);
-int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme);
+int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
+int collision_line(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
+int collision_point(double x, double y, int obj, bool prec = true, bool notme = true);
+int collision_circle(double x, double y, double radius, int obj, bool prec = true, bool notme = true);
+int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
 
 double distance_to_object(int object);
 double distance_to_point(double x, double y);
 
-double move_contact_object(double angle, double max_dist, const int object, const bool solid_only = false);
+double move_contact_object(int object, double angle, double max_dist = 1000000, bool solid_only = false);
 
-inline double move_contact_all(const double direction, const double max_dist) {
-    return move_contact_object(direction, max_dist, all);
+inline double move_contact_all(const double direction, const double max_dist = 1000000) {
+    return move_contact_object(all, direction, max_dist);
 }
 
-inline double move_contact_solid(const double direction, const double max_dist) {
-    return move_contact_object(direction, max_dist, all, true);
+inline double move_contact_solid(const double direction, const double max_dist = 1000000) {
+    return move_contact_object(all, direction, max_dist, true);
 }
 
-double move_outside_object(double angle, double max_dist, const int object, const bool solid_only = false);
+double move_outside_object(int object, double angle, double max_dist = 1000000, bool solid_only = false);
 
-inline double move_outside_all(const double direction, const double speed) {
-    return move_outside_object(direction, speed, all);
+inline double move_outside_all(const double direction, const double speed = 1000000) {
+    return move_outside_object(all, direction, speed);
 }
 
-inline double move_ouside_solid(const double direction, const double speed) {
-    return move_outside_object(direction, speed, all, true);
+inline double move_ouside_solid(const double direction, const double speed = 1000000) {
+    return move_outside_object(all, direction, speed, true);
 }
 
 bool move_bounce_object(int object, bool adv = true, bool solid_only = false);
@@ -79,5 +79,7 @@ inline bool move_bounce_solid(bool adv = true) {
     return move_bounce_object(adv, all, true);
 }
 
-void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, int inside, bool notme);
-void instance_activate_region(int left, int top, int width, int height, int inside);
+void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, int inside = true, bool notme = true);
+void instance_activate_region(int left, int top, int width, int height, int inside = true);
+void instance_deactivate_circle(int x, int y, int r, int inside = true, bool notme = true);
+void instance_activate_circle(int x, int y, int r, int inside = true);

@@ -215,7 +215,7 @@ double distance_to_point(double x, double y)
                     min(y1 + top1 - y, y1 + bottom1 - y)));
 }
 
-double move_contact_object(double angle, double max_dist, const int object, const bool solid_only)
+double move_contact_object(int object, double angle, double max_dist, bool solid_only)
 {
     const double DMIN = 1, DMAX = 1000000;
     const double contact_distance = DMIN;
@@ -339,7 +339,7 @@ double move_contact_object(double angle, double max_dist, const int object, cons
     return max_dist;
 }
 
-double move_outside_object(double angle, double max_dist, const int object, const bool solid_only)
+double move_outside_object(int object, double angle, double max_dist, bool solid_only)
 {
     const double DMIN = 0.000001, DMAX = 1000000;
     const double contact_distance = DMIN;
@@ -1006,3 +1006,79 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int 
         }
     }
 }
+
+void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
+{
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+    {
+        if (notme && (*it)->id == enigma::instance_event_iterator->inst->id)
+            continue;
+        enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
+
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+            continue;
+
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x1 = inst->x, y1 = inst->y,
+        xscale = inst->image_xscale, yscale = inst->image_yscale,
+        ia = inst->image_angle;
+
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
+
+        if (fabs(hypot(min(x1 + left - x, x1 + right - x), min(y1 + top - y, y1 + bottom - y))) <= r)
+        {
+            if (inside)
+            {
+                inst->deactivate();
+                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+            }
+        }
+        else
+        {
+            if (!inside)
+            {
+                inst->deactivate();
+                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+            }
+        }
+    }
+}
+
+void instance_activate_circle(int x, int y, int r, int inside)
+{
+    std::map<int,enigma::inst_iter*>::iterator iter;
+    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter)
+    {
+        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+            continue;
+
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x1 = inst->x, y1 = inst->y,
+        xscale = inst->image_xscale, yscale = inst->image_yscale,
+        ia = inst->image_angle;
+
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
+
+        if (fabs(hypot(min(x1 + left - x, x1 + right - x), min(y1 + top - y, y1 + bottom - y))) <= r)
+        {
+            if (inside)
+            {
+                inst->activate();
+                enigma::instance_deactivated_list.erase(iter);
+            }
+        }
+        else
+        {
+            if (!inside)
+            {
+                inst->activate();
+                enigma::instance_deactivated_list.erase(iter);
+            }
+        }
+    }
+}
+
