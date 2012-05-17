@@ -72,11 +72,11 @@ bool move_bounce_object_inside(int object, bool adv = true, bool solid_only = fa
 bool move_bounce_object_outside(int object, bool adv = true, bool solid_only = false);
 
 inline bool move_bounce_all(bool adv = true) {
-    return move_bounce_object(adv, all);
+    return move_bounce_object(all, adv);
 }
 
 inline bool move_bounce_solid(bool adv = true) {
-    return move_bounce_object(adv, all, true);
+    return move_bounce_object(all, adv, true);
 }
 
 void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, int inside = true, bool notme = true);

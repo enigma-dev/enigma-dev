@@ -64,11 +64,10 @@ void screen_redraw()
     int FBO;
     if (!view_enabled)
     {
-        glViewport(0, 0, window_get_width(), window_get_height()); // Possible bug
+        glViewport(0, 0, window_get_width(), window_get_height());
         glLoadIdentity();
         if (GLEW_EXT_framebuffer_object)
         {
-            int FBO;
             glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
             glScalef(1, (FBO==0?-1:1), 1);
         }
@@ -76,7 +75,7 @@ void screen_redraw()
         {
             glScalef(1, -1, 1);
         }
-        glOrtho(-1, room_width, -1, room_height, 0, 1); // possible bug
+        glOrtho(0, room_width, 0, room_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
 
@@ -159,7 +158,7 @@ void screen_redraw()
                 {
                     glScalef(1, -1, 1);
                 }
-                glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1); // possible bug
+                glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
                 glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                 glMultMatrixd(transformation_matrix);
 
@@ -194,5 +193,65 @@ void screen_redraw()
             }
         }
         view_current = 0;
+    }
+}
+
+void screen_init()
+{
+    if (!view_enabled)
+    {
+        glMatrixMode(GL_PROJECTION);
+          glClearColor(0,0,0,0);
+          glLoadIdentity();
+          gluPerspective(0, 1, 0, 1);
+        glMatrixMode(GL_MODELVIEW);
+          glViewport(0, 0, window_get_width(), window_get_height());
+          glLoadIdentity();
+          glScalef(1, -1, 1);
+          glOrtho(0, room_width, 0, room_height, 0, 1);
+          glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+          glMultMatrixd(transformation_matrix);
+          glClearColor(0,0,0,0);
+          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+          glDisable(GL_DEPTH_TEST);
+          glEnable(GL_BLEND);
+          glEnable(GL_ALPHA_TEST);
+          glEnable(GL_TEXTURE_2D);
+          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+          glAlphaFunc(GL_ALWAYS,0);
+          glColor4f(0,0,0,1);
+          glBindTexture(GL_TEXTURE_2D,0);
+    }
+    else
+    {
+        for (view_current = 0; view_current < 7; view_current++)
+        {
+            if (view_visible[(int)view_current])
+            {
+                int vc = (int)view_current;
+                glMatrixMode(GL_PROJECTION);
+                  glClearColor(0,0,0,0);
+                  glLoadIdentity();
+                  gluPerspective(0, 1, 0, 1);
+                glMatrixMode(GL_MODELVIEW);
+                  glViewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+                  glLoadIdentity();
+                  glScalef(1, -1, 1);
+                  glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
+                  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+                  glMultMatrixd(transformation_matrix);
+                  glClearColor(0,0,0,0);
+                  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                  glDisable(GL_DEPTH_TEST);
+                  glEnable(GL_BLEND);
+                  glEnable(GL_ALPHA_TEST);
+                  glEnable(GL_TEXTURE_2D);
+                  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                  glAlphaFunc(GL_ALWAYS,0);
+                  glColor4f(0,0,0,1);
+                  glBindTexture(GL_TEXTURE_2D,0);
+                break;
+            }
+        }
     }
 }
