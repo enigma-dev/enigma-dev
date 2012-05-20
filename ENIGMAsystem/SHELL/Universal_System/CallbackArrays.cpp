@@ -131,6 +131,16 @@ bool keyboard_check_released(int key)
 	return enigma::keybdstatus[key & 0xFF]==0 && enigma::last_keybdstatus[key & 0xFF]==1;
 }
 
+bool mouse_wheel_up()
+{
+    return (mouse_vscrolls > 0);
+}
+
+bool mouse_wheel_down()
+{
+    return (mouse_vscrolls < 0);
+}
+
 #ifndef __APPLE__
 void io_clear()
 {

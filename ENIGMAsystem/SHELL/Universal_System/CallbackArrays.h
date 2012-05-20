@@ -138,5 +138,7 @@ extern short mouse_vscrolls;
 bool keyboard_check(int key);
 bool keyboard_check_pressed(int key);
 bool keyboard_check_released(int key);
+bool mouse_wheel_up();
+bool mouse_wheel_down();
 
 void io_clear();
