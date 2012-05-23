@@ -280,6 +280,7 @@ static inline void action_show_info() {show_info();}
 
 #define action_restart_game game_restart
 #define action_message(message) show_message(message)
+#define exit return 0;
 
 inline void action_create_object(const int object, const double x, const double y)
 {

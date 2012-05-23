@@ -56,7 +56,6 @@ int surface_save(int id, string filename);
 int surface_save_part(int id, string filename,unsigned x,unsigned y,unsigned w,unsigned h);
 void surface_copy(int destination,double x,double y,int source);
 void surface_copy_part(int destination,double x,double y,int source,int xs,int ys,int ws,int hs);
-
 int sprite_create_from_surface(int id,int x,int y,int w,int h,bool removeback,bool smooth,int xorig,int yorig);
-
 bool surface_is_supported();
+#define surface_destroy surface_free
