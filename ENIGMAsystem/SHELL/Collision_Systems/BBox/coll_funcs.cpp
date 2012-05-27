@@ -36,6 +36,7 @@
 #include "coll_impl.h"
 #include <limits>
 #include <cmath>
+#include "Universal_System/instance.h"
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {
@@ -43,10 +44,10 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
     {
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
 
-        *leftv   = (xsp ? left : right) + x + .5;
-        *rightv  = (xsp ? right : left) + x + .5;
-        *topv    = (ysp ? top : bottom) + y + .5;
-        *bottomv = (ysp ? bottom : top) + y + .5;
+        *leftv   = (xsp ? left : -right - 2) + x + .5;
+        *rightv  = (xsp ? right : -left) + x + .5;
+        *topv    = (ysp ? top : -bottom - 2) + y + .5;
+        *bottomv = (ysp ? bottom : -top) + y + .5;
     }
     else
     {
@@ -57,10 +58,10 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
                    q12 = (quad == 1 || quad == 2), q23 = (quad == 2 || quad == 3),
                    xs12 = xsp^q12, sx23 = xsp^q23, ys12 = ysp^q12, ys23 = ysp^q23;
 
-        *leftv   = sina*(xs12 ? left : right) + cosa*(ys23 ? top : bottom) + x + .5;
+        *leftv   = sina*(xs12 ? left : -right - 2) + cosa*(ys23 ? top : -bottom - 2) + x + .5;
         *rightv  = sina*(xs12 ? right : left) + cosa*(ys23 ? bottom : top) + x + .5;
-        *topv    = cosa*(ys12 ? top : bottom) - sina*(sx23 ? right : left) + y + .5;
-        *bottomv = cosa*(ys12 ? bottom : top) - sina*(sx23 ? left : right) + y + .5;
+        *topv    = cosa*(ys12 ? top : -bottom - 2) - sina*(sx23 ? right : left) + y + .5;
+        *bottomv = cosa*(ys12 ? bottom : top) - sina*(sx23 ? left : -right - 2) + y + .5;
     }
 }
 
@@ -171,20 +172,25 @@ double distance_to_object(int object)
     double tempdist;
     const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     const bbox_rect_t &box = inst1->$bbox_relative();
-    const double xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
+    const double x1 = inst1->x, y1 = inst1->y,
+                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
     int left1, top1, right1, bottom1;
 
-    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, 0, 0, xscale1, yscale1, ia1);
+    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst1 == inst2) continue;
 
-        const int x2 = inst2->x+.5, y2 = inst2->y+.5;
-        const int left2  = x2 + left1,  top2    = y2 + top1,
-                  right2 = x2 + right1, bottom2 = y2 + bottom1;
+        const bbox_rect_t &box2 = inst2->$bbox_relative();
+        const double x2 = inst2->x, y2 = inst2->y,
+                     xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
+                     ia2 = inst2->image_angle;
+        int left2, top2, right2, bottom2;
+
+        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
 
         const int right  = min(right1, right2),   left = max(left1, left2),
                   bottom = min(bottom1, bottom2), top  = max(top1, top2);
@@ -1082,3 +1088,23 @@ void instance_activate_circle(int x, int y, int r, int inside)
     }
 }
 
+void position_change(double x1, double y1, int obj, bool perf)
+{
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(all); it; ++it)
+    {
+        enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+
+        if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
+            continue;
+
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x = inst->x, y = inst->y,
+                     xscale = inst->image_xscale, yscale = inst->image_yscale,
+                     ia = inst->image_angle;
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+
+        if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom)
+            instance_change(obj, perf);
+    }
+}

@@ -83,3 +83,5 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, in
 void instance_activate_region(int left, int top, int width, int height, int inside = true);
 void instance_deactivate_circle(int x, int y, int r, int inside = true, bool notme = true);
 void instance_activate_circle(int x, int y, int r, int inside = true);
+
+void position_change(double x1, double y1, int obj, bool perf);

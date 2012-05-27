@@ -91,8 +91,27 @@ namespace enigma
       if ((vb4>0 && instance->vspeed.rval.d<0) || (vb4<0 && instance->vspeed.rval.d>0))
         instance->vspeed.rval.d=0;
 
-      instance->hspeed.rval.d += (instance->gravity) * cos(instance->gravity_direction * M_PI/180);
-      instance->vspeed.rval.d += (instance->gravity) *-sin(instance->gravity_direction * M_PI/180);
+      if (instance->gravity_direction == 270)
+      {
+        instance->vspeed.rval.d += (instance->gravity);
+      }
+      else if (instance->gravity_direction == 180)
+      {
+        instance->hspeed.rval.d -= (instance->gravity);
+      }
+      else if (instance->gravity_direction == 90)
+      {
+        instance->vspeed.rval.d -= (instance->gravity);
+      }
+      else if (instance->gravity_direction == 0)
+      {
+        instance->hspeed.rval.d += (instance->gravity);
+      }
+      else
+      {
+        instance->hspeed.rval.d += (instance->gravity) * cos(instance->gravity_direction * M_PI/180);
+        instance->vspeed.rval.d += (instance->gravity) *-sin(instance->gravity_direction * M_PI/180);
+      }
 
       if(instance->speed.rval.d<0)
         instance->direction.rval.d = fmod(instance->direction.rval.d + 180, 360),

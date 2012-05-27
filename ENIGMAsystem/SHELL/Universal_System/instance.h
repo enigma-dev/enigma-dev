@@ -1,7 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
-**  Copyright (C) 2012 Alasdair Morrison                                        ** 
+**  Copyright (C) 2012 Alasdair Morrison                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -52,7 +52,8 @@ int  instance_furthest(int x,int y,int obj,bool notme = false);
 
 //int instance_place(x,y,obj)
 //int instance_copy(performevent)
-void instance_change(int obj, bool perf);
+void instance_change(int obj, bool perf = false);
+void instance_copy(bool perf = true);
 inline void action_change_object(int obj, bool perf);
 
 
