@@ -243,13 +243,16 @@ void sound_stop(int sound) {
   get_sound(snd,sound,);
   alureStopSource(snd->src,AL_FALSE);
   snd->playing = false;
-  if (snd->seek) snd->seek(snd->userdata, 0);
+  if (snd->seek)
+    snd->seek(snd->userdata, 0);
 }
 void sound_stop_all()
 {
   for(size_t i = 0;i < enigma::sound_idmax;i++) {
     alureStopSource(enigma::sounds[i]->src,AL_FALSE);
-    if (enigma::sounds[i]->seek) enigma::sounds[i]->seek(enigma::sounds[i]->userdata,0);
+    enigma::sounds[i]->playing = false;
+    if (enigma::sounds[i]->seek)
+        enigma::sounds[i]->seek(enigma::sounds[i]->userdata,0);
   }
 }
 void sound_delete(int sound) {

@@ -125,15 +125,55 @@ void screen_redraw()
                         //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
                         //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
 
-                        if (vobx < view_xview[vc] + view_hborder[vc])
-                            view_xview[vc] = vobx - view_hborder[vc];
-                        else if (vobx > view_xview[vc] + view_wview[vc] - view_hborder[vc])
-                            view_xview[vc] = vobx + view_hborder[vc] - view_wview[vc];
+                        int vbc_h, vbc_v;
+                        (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = int(view_wview[vc]/2) : vbc_h = view_hborder[vc];
+                        (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = int(view_hview[vc]/2) : vbc_v = view_vborder[vc];
 
-                        if (voby < view_yview[vc] + view_vborder[vc])
-                            view_yview[vc] = voby - view_vborder[vc];
-                        else if (voby > view_yview[vc] + view_hview[vc] - view_vborder[vc])
-                            view_yview[vc] = voby + view_vborder[vc] - view_hview[vc];
+                        if (view_hspeed[vc] == -1)
+                        {
+                            if (vobx < view_xview[vc] + vbc_h)
+                                view_xview[vc] = vobx - vbc_h;
+                            else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
+                                view_xview[vc] = vobx + vbc_h - view_wview[vc];
+                        }
+                        else
+                        {
+                            if (vobx < view_xview[vc] + vbc_h)
+                            {
+                                view_xview[vc] -= view_hspeed[vc];
+                                if (view_xview[vc] < vobx - vbc_h)
+                                    view_xview[vc] = vobx - vbc_h;
+                            }
+                            else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
+                            {
+                                view_xview[vc] += view_hspeed[vc];
+                                if (view_xview[vc] > vobx + vbc_h - view_wview[vc])
+                                    view_xview[vc] = vobx + vbc_h - view_wview[vc];
+                            }
+                        }
+
+                        if (view_vspeed[vc] == -1)
+                        {
+                            if (voby < view_yview[vc] + vbc_v)
+                                view_yview[vc] = voby - vbc_v;
+                            else if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
+                                view_yview[vc] = voby + vbc_v - view_hview[vc];
+                        }
+                        else
+                        {
+                            if (voby < view_yview[vc] + vbc_v)
+                            {
+                                view_yview[vc] -= view_vspeed[vc];
+                                if (view_yview[vc] < voby - vbc_v)
+                                    view_yview[vc] = voby - vbc_v;
+                            }
+                            if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
+                            {
+                                view_yview[vc] += view_vspeed[vc];
+                                if (view_yview[vc] > voby + vbc_v - view_hview[vc])
+                                    view_yview[vc] = voby + vbc_v - view_hview[vc];
+                            }
+                        }
 
                         if (view_xview[vc] < 0)
                             view_xview[vc] = 0;
