@@ -68,7 +68,7 @@ namespace enigma
     int object_collisions::$bbox_top() const
     {
         if (image_angle == 0)
-            return (image_xscale >= 0) ?
+            return (image_yscale >= 0) ?
                 ((mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0)) + y + .5):
                 ((mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0)) + y + .5);
 
@@ -88,7 +88,7 @@ namespace enigma
     int object_collisions::$bbox_bottom() const
     {
         if (image_angle == 0)
-            return (image_xscale >= 0) ?
+            return (image_yscale >= 0) ?
                 ((mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0)) + y + .5) :
                 ((mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0)) + y + .5);
 

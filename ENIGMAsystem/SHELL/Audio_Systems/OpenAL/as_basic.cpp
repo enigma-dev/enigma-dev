@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+// We don't want to load ALURE from a DLL. Would be kind of a waste.
+#define ALURE_STATIC_LIBRARY 1
+
 #include <string>
 #include <stdio.h>
 #include <stddef.h>
@@ -28,6 +31,8 @@ using std::string;
 #else
 #include <AL/alure.h>
 #endif
+
+bool load_al_dll();
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
@@ -58,10 +63,10 @@ namespace enigma
       buf[0] = 0; buf[1] = 0; buf[2] = 0;
     }
   };
-  
+
   sound **sounds;
   extern size_t sound_idmax;
-  
+
   #ifdef DEBUG_MODE
     #define get_sound(snd,id,failure)\
       if (id < 0 or size_t(id) >= enigma::sound_idmax or !enigma::sounds[id]) {\
@@ -82,27 +87,31 @@ namespace enigma
 
   int audiosystem_initialize()
   {
+    printf("Initializing audio system...\n");
     if (sound_idmax == 0)
       sounds = NULL;
     else
       sounds = new sound*[sound_idmax];
-    
+
     #ifdef _WIN32
     if (!load_al_dll())
       return 1;
+	printf("Starting ALURE (Windows thing).\n");
+	init_alure();
     #endif
-    
+
+	printf("Opening ALURE devices.\n");
     if(!alureInitDevice(NULL, NULL)) {
       fprintf(stderr, "Failed to open OpenAL device: %s\n", alureGetErrorString());
       return 1;
     }
-    
+
     for (size_t i = 0; i < sound_idmax; i++)
       sounds[i] = NULL;
-    
+
     return 0;
   }
-  
+
   static sound* sound_new_with_source() {
     sound *res = new sound();
     alGetError();
@@ -117,7 +126,7 @@ namespace enigma
     res->loaded = LOADSTATE_SOURCED;
     return res;
   }
-  
+
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
     sound *snd = sounds[id];
@@ -127,10 +136,10 @@ namespace enigma
       fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
       return 1;
     }
-    
+
     ALuint& buf = snd->buf[0];
     buf = alureCreateBufferFromMemory((ALubyte*)buffer, bufsize);
-    
+
     if(!buf) {
       fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
       return 2;
@@ -141,7 +150,7 @@ namespace enigma
     snd->loaded = LOADSTATE_COMPLETE;
     return 0;
   }
-  
+
 
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata)
   {
@@ -175,9 +184,9 @@ namespace enigma
     sounds = nsounds;
     return sound_idmax++;
   }
-  
+
   void audiosystem_update(void) { alureUpdate(); }
-  
+
   void audiosystem_cleanup()
   {
     for (size_t i = 0; i < sound_idmax; i++)
@@ -199,7 +208,7 @@ namespace enigma
         default: ;
       }
     }
-    
+
     alureShutdownDevice();
   }
 };
@@ -223,7 +232,7 @@ bool sound_pause(int sound) // Returns whether the sound is still playing
   get_sound(snd,sound,0);
   return snd->playing = !alurePauseSource(snd->src);
 }
-void sound_pause_all() 
+void sound_pause_all()
 {
   for(size_t i = 0;i < enigma::sound_idmax;i++) {
     if(enigma::sounds[i] && enigma::sounds[i]->src && enigma::sounds[i]->playing)
@@ -233,13 +242,17 @@ void sound_pause_all()
 void sound_stop(int sound) {
   get_sound(snd,sound,);
   alureStopSource(snd->src,AL_FALSE);
-  if (snd->seek) snd->seek(snd->userdata, 0);
+  snd->playing = false;
+  if (snd->seek)
+    snd->seek(snd->userdata, 0);
 }
-void sound_stop_all() 
+void sound_stop_all()
 {
   for(size_t i = 0;i < enigma::sound_idmax;i++) {
     alureStopSource(enigma::sounds[i]->src,AL_FALSE);
-    if (enigma::sounds[i]->seek) enigma::sounds[i]->seek(enigma::sounds[i]->userdata,0);
+    enigma::sounds[i]->playing = false;
+    if (enigma::sounds[i]->seek)
+        enigma::sounds[i]->seek(enigma::sounds[i]->userdata,0);
   }
 }
 void sound_delete(int sound) {
@@ -259,7 +272,7 @@ bool sound_resume(int sound) // Returns whether the sound is playing
   get_sound(snd,sound,false);
   return snd->playing = alureResumeSource(snd->src);
 }
-void sound_resume_all() 
+void sound_resume_all()
 {
   for(size_t i = 0;i < enigma::sound_idmax;i++) {
     if(enigma::sounds[i] && enigma::sounds[i]->src && !enigma::sounds[i]->playing)
@@ -294,13 +307,13 @@ float sound_get_length(int sound) { // Not for Streams
 float sound_get_position(int sound) { // Not for Streams
   get_sound(snd,sound,-1);
   float offset;
-  
+
   alGetSourcef(snd->src, AL_SEC_OFFSET, &offset);
   return offset;
 }
 void sound_seek(int sound, float position) {
   get_sound(snd,sound,);
-  alSourcef(snd->src, AL_SEC_OFFSET, position); // Non Streams 
+  alSourcef(snd->src, AL_SEC_OFFSET, position); // Non Streams
   if (snd->seek) snd->seek(snd->userdata, position); // Streams
 }
 void sound_seek_all(float position) {
@@ -325,7 +338,7 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
   FILE *afile = fopen(fname.c_str(),"rb");
   if (!afile)
     return -1;
-  
+
   // Buffer sound
   fseek(afile,0,SEEK_END);
   const size_t flen = ftell(afile);
@@ -333,11 +346,11 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
   fseek(afile,0,SEEK_SET);
   if (fread(fdata,1,flen,afile) != flen)
     puts("WARNING: Resource stream cut short while loading sound data");
-  
+
   // Decode sound
   int rid = enigma::sound_allocate();
   if (enigma::sound_add_from_buffer(rid,fdata,flen))
     return (--enigma::sound_idmax, -1);
-  
+
   return rid;
 }

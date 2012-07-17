@@ -27,7 +27,6 @@
 
 #include <map>
 #include <vector>
-//#include "instance_system.h" //for path_inst struct JOSH DO THIS BETTER LATER!
 using std::vector;
 using std::map;
 
@@ -51,14 +50,6 @@ namespace enigma
     path(unsigned pathid, bool smooth, bool closed, int precision, unsigned pointcount);
     ~path();
   };
-
-  /*struct path_inst
-  {
-    enigma::object_graphics inst;
-    unsigned path_index, path_endaction;
-    double path_position, path_speed;
-    bool absolute;
-  };*/
 
   extern path** pathstructarray;
 	void path_add_point(unsigned pathid, double x, double y, double speed);

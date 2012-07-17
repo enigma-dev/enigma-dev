@@ -44,10 +44,10 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
     {
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
 
-        *leftv   = (xsp ? left : right) + x + .5;
-        *rightv  = (xsp ? right : left) + x + .5;
-        *topv    = (ysp ? top : bottom) + y + .5;
-        *bottomv = (ysp ? bottom : top) + y + .5;
+        *leftv   = (xsp ? left : -right - 2) + x + .5;
+        *rightv  = (xsp ? right : -left) + x + .5;
+        *topv    = (ysp ? top : -bottom - 2) + y + .5;
+        *bottomv = (ysp ? bottom : -top) + y + .5;
     }
     else
     {
@@ -58,10 +58,10 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
                    q12 = (quad == 1 || quad == 2), q23 = (quad == 2 || quad == 3),
                    xs12 = xsp^q12, sx23 = xsp^q23, ys12 = ysp^q12, ys23 = ysp^q23;
 
-        *leftv   = sina*(xs12 ? left : right) + cosa*(ys23 ? top : bottom) + x + .5;
+        *leftv   = sina*(xs12 ? left : -right - 2) + cosa*(ys23 ? top : -bottom - 2) + x + .5;
         *rightv  = sina*(xs12 ? right : left) + cosa*(ys23 ? bottom : top) + x + .5;
-        *topv    = cosa*(ys12 ? top : bottom) - sina*(sx23 ? right : left) + y + .5;
-        *bottomv = cosa*(ys12 ? bottom : top) - sina*(sx23 ? left : right) + y + .5;
+        *topv    = cosa*(ys12 ? top : -bottom - 2) - sina*(sx23 ? right : left) + y + .5;
+        *bottomv = cosa*(ys12 ? bottom : top) - sina*(sx23 ? left : -right - 2) + y + .5;
     }
 }
 

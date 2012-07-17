@@ -68,7 +68,12 @@ inline void action_set_caption(const int vscore, const string scoreCaption, cons
     caption_health=healthCaption;
 }
 
-#define action_sound(snd,loop) ((loop?sound_loop:sound_play)(snd))
+inline void action_sound(int snd, bool loop)
+{
+    (loop ? sound_loop:sound_play)(snd);
+}
+
+//#define action_sound(snd,loop) (((loop) ? sound_loop : sound_play)((snd)))
 #define action_if_sound sound_isplaying
 #define action_end_sound sound_stop
 
@@ -159,11 +164,15 @@ inline void action_move(const char dir[9], int argspeed) {
     if (choices == 0) return;
     choices = int(random(choices)); //choices is now chosen
 
-    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->direction = chosendirs[choices];
+    //We use rval.d for efficiency, so hspeed/vspeed aren't set twice.
+    const double newdir =
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->direction.rval.d = chosendirs[choices];
     if (argument_relative)
         argspeed += ((enigma::object_planar*)enigma::instance_event_iterator->inst)->speed;
-    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->speed = chosendirs[choices] == -1 ? 0 : argspeed;
-    
+    const double newspd =
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->speed.rval.d = chosendirs[choices] == -1 ? 0 : argspeed;
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->hspeed.rval.d = newspd * cos(degtorad(newdir));
+    ((enigma::object_planar*)enigma::instance_event_iterator->inst)->vspeed.rval.d = -newspd * sin(degtorad(newdir));
 }
 
 inline void action_reverse_xdir() {
@@ -271,6 +280,8 @@ static inline void action_show_info() {show_info();}
 
 #define action_restart_game game_restart
 #define action_message(message) show_message(message)
+#define exit return 0;
+#define globalvar global var
 
 inline void action_create_object(const int object, const double x, const double y)
 {
@@ -570,4 +581,21 @@ inline void action_fullscreen(int action)
 inline void set_automatic_draw(bool enable)
 {
     automatic_redraw = enable;
+}
+
+inline void action_path(unsigned pathid,double speed,unsigned endaction,bool absolute)
+{
+    path_start(pathid, speed, endaction, absolute);
+}
+inline void action_path_end()
+{
+    path_end();
+}
+inline void action_path_position(double position, bool relative)
+{
+    path_set_position(position, relative);
+}
+inline void action_path_speed(double speed, bool relative)
+{
+    path_set_speed(speed, relative);
 }

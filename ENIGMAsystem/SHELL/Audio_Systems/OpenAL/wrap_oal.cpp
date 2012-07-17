@@ -23,7 +23,7 @@
 #define AL_NO_PROTOTYPES 1
 #include <AL/alc.h>
 #include <AL/al.h>
-#include "wrap_oal.h"
+#include <AL/wrap_oal_dll.h>
 
 static HMODULE openal_handle = NULL;
 
@@ -129,13 +129,14 @@ static bool LoadALFunc(const char *name, T **ptr)
     return *ptr;
 }
 
-#define ERR(x...) printf("!! " x);
+#define ERR(x...) printf("!! " x " !!\n\n");
 bool load_al_dll()
 {
     bool failed = FALSE;
     TCHAR oal_dllloc[MAX_PATH];
     strcpy(oal_dllloc+GetTempPath(MAX_PATH,oal_dllloc),"OpenAL32.dll");
-    
+    printf("Attempting to load OpenAL from %s..\n", oal_dllloc);
+	
     HRSRC oal_dllinf = FindResource(NULL,"oal32",RT_RCDATA);
     if (oal_dllinf == NULL) {
       ERR("BIG BAD ERROR: Can't load dll from resources!");
@@ -285,6 +286,8 @@ bool load_al_dll()
         openal_handle = NULL;
         return false;
     }
+	
+	printf("Load successful!\n");
     return true;
 }
 #endif

@@ -40,23 +40,89 @@ namespace enigma {
 	extern unsigned bound_texture;
 }
 
-////////FIXME: THIS NEEDS TO BE FIXED/FINISHED
-////////FIXME: MOVEME: THIS NEEDS MOVED TO THE PATH EXTENSION
-bool path_start(unsigned pathid,double speed,unsigned endaction,bool absolute)
+#include "collisions_object.h"
+#include "instance_system.h"
+#include "Extensions/Paths/implement.h"
+void path_start(unsigned pathid,double speed,unsigned endaction,bool absolute)
 {
-    //(pseudocode)
-    /*enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
-    enigma::path_inst pathi={inst,pathid,endaction,0,speed,absolute};*/
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
 
-    //Then in update it would be something like
-    /*double speed;
-    path_getspeed(pathi->path_index, speed, pathi->path_position);
-    path_getXY(pathi->path_index,pathi->inst.x,pathi->inst.y,pathi->path_position);
-    pathi->inst.direction = path_get_direction(pathi->path_index,pathi->path_position);
-    pathi->path_position += pathi->path_speed/pathi->path_index.total_length*speed;*/
-    return false;
+    return;  //function can cause crashes atm, until extension variables fixed
+
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    inst_paths->path_index = pathid;
+    inst_paths->path_speed = speed;
+    inst_paths->path_endaction = endaction;
+
+    if (absolute)
+    {
+        const double x1 = path_get_x(inst_paths->path_index, inst_paths->path_position), y1 = path_get_y(inst_paths->path_index, inst_paths->path_position);
+        inst->x = x1;
+        inst->y = y1;
+    }
 }
-///////////////////////////////////////
+
+void path_end()
+{
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    inst_paths->path_index = -1;
+}
+
+void path_set_position(double position, bool relative)
+{
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    inst_paths->path_position = position;
+    if (relative)
+    {
+        inst->x = path_get_x(inst_paths->path_index , inst_paths->path_position);
+        inst->x = path_get_y(inst_paths->path_index , inst_paths->path_position);
+    }
+}
+
+void path_set_speed(double speed, bool relative)
+{
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    inst_paths->path_speed = relative ? speed : double(inst->speed + speed);
+}
+
+bool path_update()
+{
+    #ifndef PATH_EXT_SET
+        return false;
+    #endif
+    return false;  //function can cause crashes atm, until extension variables fixed
+
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+
+    if (inst_paths->path_index == -1 || inst_paths->path_speed == 0)
+        return false;
+
+    return true;
+}
 
 bool path_exists(unsigned pathid)
 {
@@ -183,15 +249,26 @@ double path_get_speed(unsigned pathid, double t)
     return speed*100;
 }
 
-double path_get_direction(unsigned pathid, double t) //this is clearly via ass kind of thing, but something like this is needed at the end anyway
+double path_get_direction(unsigned pathid, double t)
 {
-    double x1,y1,x2,y2;
-    path_getXY(enigma::pathstructarray[pathid], x1, y1, t);
-    path_getXY(enigma::pathstructarray[pathid], x2, y2, fmin(1,fmax(0,t+0.005f)));
-    if (t<1)
-        return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);
+    double x1,y1,x2,y2,p1,p2,precision;
+    precision = 0.0005;
+
+    p1 = t - precision;
+    if (p1 < 0)
+        p1 = 1 - fmod(-p1, 1);
     else
-        return fmod((atan2(y2-y1,x1-x2)*(180/M_PI))+360,360);
+        p1 = fmod(p1, 1);
+
+    p2 = t + precision;
+    if (p2 < 0)
+        p2 = 1 - fmod(-p2, 1);
+    else
+        p2 = fmod(p2, 1);
+
+    path_getXY(enigma::pathstructarray[pathid], x1, y1, p1);
+    path_getXY(enigma::pathstructarray[pathid], x2, y2, p2);
+    return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);
 }
 
 double path_get_center_x(unsigned pathid)

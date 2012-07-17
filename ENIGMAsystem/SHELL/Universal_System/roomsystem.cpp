@@ -36,6 +36,7 @@
 
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "libEGMstd.h"
 #include "instance_system.h"
 #include "instance.h"
@@ -143,19 +144,22 @@ namespace enigma
     window_set_size(xm,ym);
     io_clear();
 
+    screen_init();
+    screen_refresh();
+
     object_basic* is[instancecount];
     for (int i = 0; i<instancecount; i++) {
       inst *obj = &instances[i];
       is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
     }
-    
+
     if (gamestart)
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_gamestart();
-    
+
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_create();
-    
+
     createcode();
   }
 

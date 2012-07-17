@@ -57,7 +57,29 @@ int sprite_add(string filename, int imgnumb, bool precise, bool transparent, boo
 	return enigma::sprite_idmax++;
 }
 
+int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
+{
+	int width,height,fullwidth,fullheight;
 
+	char *pxdata = enigma::load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
+	unsigned texture = enigma::graphics_create_texture(fullwidth, fullheight, pxdata);
+	delete[] pxdata;
+
+	//ns.pixeldata=(void**) malloc(sizeof(void*));
+	//ns.pixeldata[0]=bitmapbuffer;
+	enigma::sprite *ns = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
+	ns->id = enigma::sprite_idmax;
+	ns->subcount  = 1;
+	ns->width     = width;
+	ns->height    = height;
+	ns->xoffset   = (int)x_offset;
+	ns->yoffset   = (int)y_offset;
+	ns->texbordx  = (double) width/fullwidth;
+	ns->texbordy  = (double) height/fullheight;
+	ns->texturearray = new unsigned int[1];
+	ns->texturearray[0] = texture;
+	return enigma::sprite_idmax++;
+}
 
 /* These functions are primarily for use of the engine. Experienced users
  * who are familiar with C++ can make use of these, but they were made to

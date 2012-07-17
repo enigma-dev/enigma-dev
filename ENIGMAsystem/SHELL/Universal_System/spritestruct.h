@@ -90,6 +90,7 @@ extern int sprite_get_yoffset (int sprite);
 
 #include <string>
 int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset);
+int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);  //GM7+ compatible
 
 #endif // ENIGMA_SPRITESTRUCT
 

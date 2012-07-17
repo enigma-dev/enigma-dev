@@ -657,14 +657,14 @@ int draw_getpixel(int x,int y)
     if (view_enabled)
     {
         x = x - view_xview[view_current];
-        y = view_hview[view_current] - (y - view_yview[view_current]);
+        y = view_hview[view_current] - (y - view_yview[view_current]) - 1;
         if (x < 0) x = 0;
         if (y < 0) y = 0;
         if (x > view_wview[view_current] || y > view_hview[view_current]) return 0;
     }
     else
     {
-        y = room_height - y;
+        y = room_height - y - 1;
         if (x < 0) x = 0;
         if (y < 0) y = 0;
         if (x > room_width || y > room_height) return 0;

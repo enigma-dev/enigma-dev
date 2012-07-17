@@ -44,19 +44,20 @@ OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
 
 CXX := g++
 ifeq ($(GMODE), Debug)
-	CXXFLAGS := -Wall -g -DDEBUG_MODE
+	CXXFLAGS += -Wall -g -DDEBUG_MODE
 else
-	CXXFLAGS := -Wall -s -O3
+	CXXFLAGS += -Wall -s -O3
 endif
 
 CC := gcc
 ifeq ($(GMODE), Debug)
-	CFLAGS := -Wall -g -DDEBUG_MODE
+	CFLAGS += -Wall -g -DDEBUG_MODE
 else
-	CFLAGS := -Wall -s -O3 
+	CFLAGS += -Wall -s -O3 
 endif
 
 LDFLAGS := 
+DEPENDENCIES := 
 
 ifeq ($(GMODE), Compile)
 	CXXFLAGS += -fdata-sections -ffunction-sections
@@ -74,6 +75,14 @@ endif
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I.
+
+
+.PHONY: all clean
+
+all: $(OUTPUTNAME)
+
+clean:
+	$(RM) $(OUTPUTNAME) $(OBJECTS) $(RESOURCEBINARY) $(DEPENDS)
 
 SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
@@ -93,14 +102,7 @@ endif
 # building #
 ############
 
-.PHONY: all clean
-
-all: $(OUTPUTNAME)
-
-clean:
-	$(RM) $(OUTPUTNAME) $(OBJECTS) $(RESOURCEBINARY) $(DEPENDS)
-
-$(OUTPUTNAME): $(OBJECTS) $(RCFILES) $(RESOURCEBINARY)
+$(OUTPUTNAME): $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
 
@@ -108,13 +110,13 @@ $(OUTPUTNAME): $(OBJECTS) $(RCFILES) $(RESOURCEBINARY)
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 	echo "// GENERATED RESOURCE FILE FRONTEND" > $(OBJDIR)/resources.rc

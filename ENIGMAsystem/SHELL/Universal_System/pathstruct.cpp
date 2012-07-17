@@ -176,6 +176,10 @@ namespace enigma
     {
       if (!pth) return;
       if (!pth->pointarray.size()) return;
+      if (position < 0)
+        position = 1 - fmod(-position, 1);
+      else
+        position = fmod(position, 1);
       ppi_t ppi = path_point_iterator_at(pth, position);
       double t = position - ppi->first;
       t /= double(pth->pointarray[ppi->second].length) / pth->total_length;
