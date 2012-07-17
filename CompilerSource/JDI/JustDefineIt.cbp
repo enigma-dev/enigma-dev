@@ -40,6 +40,20 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
+			<Target title="Profile">
+				<Option output="bin/Release/JustDefineIt" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Profile" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-pg" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-pg" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wshadow" />
@@ -90,12 +104,18 @@
 		<Unit filename="src/Parser/handlers/handle_class.cpp" />
 		<Unit filename="src/Parser/handlers/handle_declarators.cpp" />
 		<Unit filename="src/Parser/handlers/handle_enum.cpp" />
+		<Unit filename="src/Parser/handlers/handle_function_impl.cpp" />
+		<Unit filename="src/Parser/handlers/handle_function_impl.h" />
+		<Unit filename="src/Parser/handlers/handle_hypothetical.cpp" />
 		<Unit filename="src/Parser/handlers/handle_namespace.cpp" />
 		<Unit filename="src/Parser/handlers/handle_scope.cpp" />
+		<Unit filename="src/Parser/handlers/handle_templates.cpp" />
+		<Unit filename="src/Parser/handlers/handle_union.cpp" />
 		<Unit filename="src/Parser/parse_context.cpp" />
 		<Unit filename="src/Parser/parse_context.h" />
 		<Unit filename="src/Parser/readers/read_expression.cpp" />
 		<Unit filename="src/Parser/readers/read_next_token.cpp" />
+		<Unit filename="src/Parser/readers/read_template_parameters.cpp" />
 		<Unit filename="src/Parser/readers/read_type.cpp" />
 		<Unit filename="src/Storage/definition.cpp" />
 		<Unit filename="src/Storage/definition.h" />
@@ -109,6 +129,8 @@
 		<Unit filename="src/Storage/value_funcs.h" />
 		<Unit filename="src/System/builtins.cpp" />
 		<Unit filename="src/System/builtins.h" />
+		<Unit filename="src/System/lex_buffer.cpp" />
+		<Unit filename="src/System/lex_buffer.h" />
 		<Unit filename="src/System/lex_cpp.cpp" />
 		<Unit filename="src/System/lex_cpp.h" />
 		<Unit filename="src/System/macros.cpp" />

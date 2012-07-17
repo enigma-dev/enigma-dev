@@ -1,46 +1,52 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  compile_includes.h
+  @brief Contains general-purpose functions for use in compile.cpp.
+  
+  This file seems like a pile of shit and will likely be removed soon in favor of
+  just sticking its few methods in the including source.
+  
+  @section License
+    Copyright (C) 2008-2012 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
 
-externs *globals_scope;
-extern externs *enigma_type__var;
-extern externs *enigma_type__variant;
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
+#ifndef _COMPILE_INCLUDES__H
+#define _COMPILE_INCLUDES__H
+
+#include <JDI/src/Storage/definition.h>
+
+extern jdi::definition *enigma_type__var;
+extern jdi::definition *enigma_type__variant;
+extern jdi::definition *enigma_type__varargs;
 
 extern string tostring(int val);
 
-void quickmember_variable(externs* scope, externs* type, string name) {
-  scope->members[name] = new externs(name,type,scope,0,0);
+inline void quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name) {
+  scope->members[name] = new jdi::definition_typed(name,type,scope,0);
 }
-void quickmember_script(externs* scope, string name) {
-  rf_stack rfs;
-  rfs += referencer('(',0,16,true);
-  scope->members[name] = new externs(name,enigma_type__var,scope,0,0,rfs.dissociate());
+inline void quickmember_script(jdi::definition_scope* scope, string name) {
+  jdi::ref_stack rfs;
+  jdi::ref_stack::parameter_ct params;
+  for (int i = 0; i < 16; ++i) {
+    jdi::ref_stack::parameter p;
+    p.def = enigma_type__variant;
+    params.throw_on(p);
+  }
+  scope->members[name] = new jdi::definition_function(name,enigma_type__var,scope,rfs,0,0);
 }
 
-string format_error(string code,string err,int pos)
+inline string format_error(string code,string err,int pos)
 {
   if (pos == -1)
     return err;
@@ -53,3 +59,5 @@ string format_error(string code,string err,int pos)
   }
   return "Line " + tostring(line) + ", position " + tostring(lp) + " (absolute " + tostring(pos) + "): " + err;
 }
+
+#endif

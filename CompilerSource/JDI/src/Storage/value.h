@@ -51,6 +51,13 @@ namespace jdi {
     
     VT type; ///< The type of our value. This little bugger is the reason we can't just be a big union.
     
+    bool operator==(const value& value) const; ///< Test for strict equality, including type.
+    bool operator!=(const value& value) const; ///< Test against strict equality, including type.
+    bool operator>=(const value& value) const; ///< Test a strict greater-than or equal inequality, including type.
+    bool operator<=(const value& value) const; ///< Test a strict less-than or equal inequality, including type.
+    bool operator>(const value& value) const; ///< Test a strict greater-than inequality, including type.
+    bool operator<(const value& value) const; ///< Test a strict less-than inequality, including type.
+    
     value(); ///< Construct a new, invalid value with no type (VT_NONE).
     value(double v); ///< Construct a new value representing a double.
     value(long v); ///< Construct a new value representing an integer.
@@ -58,6 +65,8 @@ namespace jdi {
     value(std::string v); ///< Construct a new value representing a copy of the passed string. This operates in O(N).
     value(const value& v); ///< Copy a value. Handles allocation issues.
     ~value(); ///< Default destructor; handles freeing any strings.
+    
+    std::string toString(); ///< Convert to a string, whatever the value is
     
     operator long() const; ///< Cast to a long int, returning zero if no valid cast exists.
     operator double() const; ///< Cast to a double, returning zero if no valid cast exists.

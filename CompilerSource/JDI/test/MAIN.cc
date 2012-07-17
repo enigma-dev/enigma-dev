@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 Josh Ventura
+/* Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -44,6 +44,8 @@ static void putcap(string cap) {
   cout << "============================================================================" << endl << endl;
 }
 
+void do_cli(context &ct);
+
 int main() {
   add_gnu_declarators();
   builtin.load_standard_builtins();
@@ -59,18 +61,22 @@ int main() {
   builtin.output_macros();
   
   putcap("Metrics");
-  cout << "sizeof(jdip::macro_type):       " << sizeof(jdip::macro_type) << endl
-       << "sizeof(jdip::macro_function):   " << sizeof(jdip::macro_function) << endl
-       << "sizeof(jdip::macro_scalar):     " << sizeof(jdip::macro_scalar) << endl;
+  cout << "sizeof(jdip::macro_type):        " << sizeof(jdip::macro_type) << endl
+       << "sizeof(jdip::macro_function):    " << sizeof(jdip::macro_function) << endl
+       << "sizeof(jdip::macro_scalar):      " << sizeof(jdip::macro_scalar) << endl
+       << "sizeof(jdi::definition):         " << sizeof(jdi::definition) << endl
+       << "sizeof(jdi::ref_stack):          " << sizeof(jdi::ref_stack) << endl
+       << "sizeof(jdi::full_type):          " << sizeof(jdi::full_type) << endl
+       << "sizeof(jdi::template::arg_key):  " << sizeof(jdi::arg_key) << endl;
   
   test_expression_evaluator();
   
   builtin.add_search_directory("/usr/include/c++/4.6");
   builtin.add_search_directory("/usr/include/c++/4.6/x86_64-linux-gnu");
   builtin.add_search_directory("/usr/include/c++/4.6/backward");
-  builtin.add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6.1/include");
+  builtin.add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include");
   builtin.add_search_directory("/usr/local/include");
-  builtin.add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6.1/include-fixed");
+  builtin.add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include-fixed");
   builtin.add_search_directory("/usr/include/x86_64-linux-gnu");
   builtin.add_search_directory("/usr/include");
   
@@ -89,28 +95,138 @@ int main() {
     int res = enigma.parse_C_stream(f, "test.cc");
     end_time(te,tel);
     cout << "Parse finished in " << tel << " microseconds." << endl;
+    
+    //enigma.output_definitions();
     if (res)
-      cout << "ERROR: " << enigma.get_last_error() << endl;
-    enigma.output_definitions();
-    if (res)
-      cout << endl << "====[------------------------------ /FAILURE ------------------------------]====" << endl << endl;
+      cout << endl << "====[------------------------------ FAILURE. ------------------------------]====" << endl << endl;
     else
       cout << endl << "====[++++++++++++++++++++++++++++++ SUCCESS! ++++++++++++++++++++++++++++++]====" << endl << endl;
     
-    cout << "Macro defs: " << endl;
-    enigma.output_macro("__asm");
-    enigma.output_macro("__asm__");
-    enigma.output_macro("__REDIRECT_NTH");
-    enigma.output_macro("__BEGIN_DECLS");
-    enigma.output_macro("__nonnull");
-    enigma.output_macro("__THROW");
-    enigma.output_macro("__MATHDECL");
+    cout << "Macro defs:" << endl;/*
+    enigma.output_macro("_ISbit", cout);
+    enigma.output_macro("__GNUC_PREREQ", cout);
+    enigma.output_macro("__intN_t", cout);*/
+    cout << "None requested." << endl;
+    
+    // do_cli(enigma);
   }
   else
     cout << "Failed to open file for parsing!" << endl;
   
   cleanup_declarators();
   return 0;
+}
+
+#ifdef __linux__d
+#include <ncurses>
+#else
+static char getch() {
+  int c = fgetc(stdin);
+  int ignore = c;
+  while (ignore != '\n')
+    ignore = fgetc(stdin);
+  return c;
+}
+#endif
+
+#include <cstring>
+#include <System/lex_cpp.h>
+#include <General/parse_basics.h>
+
+void do_cli(context &ct) {
+  putcap("Command Line Interface");
+  char c = ' ';
+  macro_map undamageable = ct.get_macros();
+  while (c != 'q' and c != '\n') { switch (c) {
+    case 'd': {
+        cout << "Enter the item to define:" << endl << ">> " << flush;
+        char buf[4096]; cin.getline(buf, 4096);
+        size_t start, e = 0;
+        while (is_useless(buf[e]) or buf[e] == ':') ++e;
+        definition* def = ct.get_global();
+        while (buf[e] and def) {
+          if (!is_letter(buf[e])) { cout << "Unexpected symbol '" << buf[e] << "'" << endl; break; }
+          start = e;
+          while (is_letterd(buf[++e]));
+          if (def->flags & DEF_SCOPE) {
+            string name(buf+start, e-start);
+            definition_scope::defiter it = ((definition_scope*)def)->members.find(name);
+            if (it == ((definition_scope*)def)->members.end()) {
+              cout << "No `" << name << "' found in scope `" << def->name << "'" << endl;
+              def = NULL;
+              break;
+            }
+            def = it->second;
+          }
+          else {
+            cout << "Definition `" << def->name << "' is not a scope" << endl;
+            def = NULL;
+            break;
+          }
+          while (is_useless(buf[e]) or buf[e] == ':') ++e;
+        }
+        if (def and e)
+          cout << def->toString() << endl;
+      } break;
+    
+    case 'e': {
+        bool eval, coerce, render, show;
+        eval = true,
+        coerce = false;
+        render = false;
+        show = false;
+        if (false) { case 'c': eval = false; coerce = true;  render = false; show = false;
+        if (false) { case 'r': eval = false; coerce = false; render = true;  show = false;
+        if (false) { case 's': eval = false; coerce = false; render = false; show = true;
+        } } }
+        cout << "Enter the expression to evaluate:" << endl << ">> " << flush;
+        char buf[4096]; cin.getline(buf, 4096);
+        llreader llr(buf, strlen(buf));
+        AST a;
+        lexer_cpp c_lex(llr, undamageable, "User expression");
+        token_t dummy = c_lex.get_token_in_scope(ct.get_global());
+        if (!a.parse_expression(dummy, &c_lex, ct.get_global(), precedence::all, def_error_handler)) {
+          if (render) {
+            cout << "Filename to render to:" << endl;
+            cin.getline(buf, 4096);
+            a.writeSVG(buf);
+          }
+          if (eval) {
+            value v = a.eval();
+            cout << "Value returned: " << v.toString() << endl;
+          }
+          if (coerce) {
+            full_type t = a.coerce();
+            cout << "Type of expression: " << t.toString() << endl;
+          }
+          if (show) {
+            a.writeSVG("/tmp/anus.svg");
+            if (system("xdg-open /tmp/anus.svg"))
+              cout << "Failed to open." << endl;
+          }
+        } else cout << "Bailing." << endl;
+      } break;
+    
+    case 'h':
+      cout <<
+      "'c' Coerce an expression, printing its type"
+      "'d' Define a symbol, printing it recursively\n"
+      "'e' Evaluate an expression, printing its result\n"
+      "'h' Print this help information\n"
+      "'m' Define a macro, printing a breakdown of its definition\n"
+      "'r' Render an AST representing an expression\n"
+      "'s' Render an AST representing an expression and show it\n"
+      "'q' Quit this interface\n";
+    break;
+      
+    
+    default: cout << "Unrecognized command. Empty command or 'q' to quit." << endl << endl; break;
+    case ' ': cout << "Commands are single-letter; 'h' for help." << endl << "Follow commands with ENTER on non-unix." << endl;
+  } 
+  cout << "> " << flush;
+  c = getch();
+  }
+  cout << endl << "Goodbye" << endl;
 }
 
 void test_expression_evaluator() {

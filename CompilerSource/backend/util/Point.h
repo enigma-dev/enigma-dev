@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _POINT__H
+#define _POINT__H
 
 #include "backend/JavaStruct.h"
 
@@ -15,3 +16,5 @@ struct Point
 	int x;
 	int y;
 };
+
+#endif

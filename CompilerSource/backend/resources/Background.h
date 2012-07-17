@@ -6,6 +6,9 @@
  * See LICENSE for details.
  */
 
+#ifndef _BACKGROUND__H
+#define _BACKGROUND__H
+
 #include "backend/JavaStruct.h"
 #include "backend/util/Image.h"
 
@@ -27,3 +30,5 @@ struct Background
   
   Image backgroundImage;
 };
+
+#endif

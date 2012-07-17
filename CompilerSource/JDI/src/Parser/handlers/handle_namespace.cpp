@@ -23,24 +23,30 @@
 
 int jdip::context_parser::handle_namespace(definition_scope *scope, token_t& token)
 {
+  definition_scope *nscope;
   token = read_next_token( scope);
   if (token.type != TT_IDENTIFIER) {
-    token.report_error(herr, "Expected namespace name here.");
-    return 1;
-  }
-  
-  // Copy the name and ensure it's a member of this scope.
-  string nsname((const char*)token.extra.content.str, token.extra.content.len);
-  pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(nsname,NULL));
-  
-  definition_scope *nscope;
-  if (dins.second) // If a new definition key was created, then allocate a new namespace representation for it.
-    dins.first->second = nscope = new definition_scope(nsname,scope,DEF_NAMESPACE);
-  else {
-    nscope = (definition_scope*)dins.first->second;
-    if (not(dins.first->second->flags & DEF_NAMESPACE)) {
-      token.report_error(herr, "Attempting to redeclare `" + nsname + "' as a namespace");
+    if (token.type == TT_DEFINITION and (token.def->flags & DEF_NAMESPACE))
+      nscope = (definition_scope*)token.def;
+    else {
+      token.report_error(herr, "Expected namespace name here.");
       return 1;
+    }
+  }
+  else
+  {
+    // Copy the name and ensure it's a member of this scope.
+    string nsname(token.content.toString());
+    pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(nsname,NULL));
+    
+    if (dins.second) // If a new definition key was created, then allocate a new namespace representation for it.
+      dins.first->second = nscope = new definition_scope(nsname,scope,DEF_NAMESPACE);
+    else {
+      nscope = (definition_scope*)dins.first->second;
+      if (not(dins.first->second->flags & DEF_NAMESPACE)) {
+        token.report_error(herr, "Attempting to redeclare `" + nsname + "' as a namespace");
+        return 1;
+      }
     }
   }
   
@@ -51,7 +57,7 @@ int jdip::context_parser::handle_namespace(definition_scope *scope, token_t& tok
   }
   if (handle_scope(nscope, token)) return 1;
   if (token.type != TT_RIGHTBRACE) {
-    token.report_error(herr, "Expected closing brace to namespace `" + nsname + "'");
+    token.report_error(herr, "Expected closing brace to namespace `" + nscope->name + "'");
     return 1;
   }
   return 0;

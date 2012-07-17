@@ -6,7 +6,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -91,7 +91,7 @@ string macro_function::mv_chunk::toString(macro_function *mf) {
   comments and strings, as well as, according to the expanded-value specification
   in \c jdip::macro_function::value, handle the # and ## operators.
 **/
-void jdip::macro_function::preparse(string val, error_handler *herr)
+inline void jdip::macro_function::preparse(string val, error_handler *herr)
 {
   unsigned push_from = 0;
   map<string,int> parameters;
@@ -144,7 +144,7 @@ void jdip::macro_function::preparse(string val, error_handler *herr)
         pt ie = i - 2;
         while (ie > 0 and is_useless(val[ie-1])) --ie; // eliminate any leading whitespace
         if (ie > push_from) // If there's anything non-white to push since last time,
-          value.push_back(mv_chunk(val.c_str(), push_from, ie-push_from)); // Then push it
+          value.push_back(mv_chunk(val.c_str(), push_from, ie-push_from+1)); // Then push it
         while (is_useless(val[++i])); // Skip any trailing whitespace
         push_from = i;
         continue;
@@ -174,7 +174,7 @@ void jdip::macro_function::preparse(string val, error_handler *herr)
 
 #include <iostream>
 #include <System/token.h>
-bool macro_function::parse(vector<string> &arg_list, llreader &dest, error_handler *herr, token_t errtok)
+bool macro_function::parse(vector<string> &arg_list, char* &dest, char* &destend, token_t errtok, error_handler *herr) const
 {
   if (arg_list.size() < args.size()) {
     if (arg_list.size() + 1 < args.size())
@@ -242,6 +242,6 @@ bool macro_function::parse(vector<string> &arg_list, llreader &dest, error_handl
       bufat += value[i].metric;
     }
   *bufat = 0;
-  dest.consume(buf, bufat-buf);
+  dest = buf, destend = bufat;
   return true;
 }

@@ -25,6 +25,11 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef COLLECT_VARIABLES__H
+#define COLLECT_VARIABLES__H
 
 #include "object_storage.h"
-void collect_variables(string &code, string &synt, parsed_event* pev = NULL);
+#include "languages/language_adapter.h"
+void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev = NULL);
+
+#endif

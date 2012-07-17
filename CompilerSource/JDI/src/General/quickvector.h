@@ -37,8 +37,9 @@ namespace quick {
     unsigned mysize;
     unsigned reserved;
   public:
-    size_t size() { return mysize; }
+    size_t size() const { return mysize; }
     tp &operator[](unsigned ind) { dbg_assert(ind < mysize); return *data[ind]; }
+    const tp &operator[](unsigned ind) const { dbg_assert(ind < mysize); return *data[ind]; }
     
     void swap(quick::vector<tp,chunksize> &vec)
     {

@@ -8,7 +8,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -63,6 +63,7 @@ namespace jdi {
       RT_FUNCTION ///< This referencer is a set of function parameters.
     };
     
+    struct parameter;
     struct parameter_ct;
     
     class iterator;
@@ -79,7 +80,9 @@ namespace jdi {
         node(node* p, ref_type rt); ///< Allow constructing a new node easily.
         ~node(); ///< Virtual destructor so \c node_func can be complicated.
     };
+    /// Node containing an array boundary.
     struct node_array;
+    /// Node containing function parameters.
     struct node_func;
     
     /// Push a node onto this stack by a given type.
@@ -92,14 +95,27 @@ namespace jdi {
     /// @param parameters  A \c parameter_ct to consume containing details about the parameters of this function.
     void push_func(parameter_ct &parameters);
     /// Append a stack to the top of this stack, consuming it.
-    void append(ref_stack &rf);
-    /// Similar to append, but for reference stacks composed in a nest. Copies the name member as well.
-    void append_nest(ref_stack &rf);
+    void append_c(ref_stack &rf);
+    /// Similar to append_c, but for reference stacks composed in a nest. This method copies the name member as well.
+    void append_nest_c(ref_stack &rf);
+    /// Prepend a stack to the bottom of this stack, copying each element.
+    void prepend(const ref_stack &rf);
+    /// Prepend a stack to the bottom of this stack, consuming the stack.
+    void prepend_c(ref_stack &rf);
+    /// Pop a reference from this stack, or dereference it once.
+    void pop();
     /// Clear the stack, undoing all referencers.
     void clear();
     
+    bool operator==(const ref_stack& other) const; ///< Compare for equality across all three attributes.
+    bool operator!=(const ref_stack& other) const; ///< Compare against equality across all three attributes.
+    bool operator< (const ref_stack& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator> (const ref_stack& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator<= (const ref_stack& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator>= (const ref_stack& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    
     /// Return whether this stack is empty.
-    bool empty();
+    bool empty() const;
     
     /// Constructor wrapper to the copy() method so copying doesn't bite someone in the ass.
     ref_stack(const ref_stack&);
@@ -115,6 +131,25 @@ namespace jdi {
     void copy(const ref_stack &rf);
     /// Swap contents with another ref_stack. This method is completely safe.
     void swap(ref_stack &rf);
+    
+    /// Represent this set of referencers as a string.
+    string toString();
+    /// Represent the left-hand side of this set of referencers as a string (the part before the name).
+    string toStringLHS();
+    /// Represent the right-hand side of this set of referencers as a string (the part after the name).
+    string toStringRHS();
+    
+    /// Get the top node.
+    node &top();
+    /// Get the bottom node.
+    node &bottom();
+    /// Get the top node without allowing modification.
+    const node &top() const;
+    /// Get the bottom node without allowing modification.
+    const node &bottom() const;
+    
+    /// Return the number of nodes contained.
+    size_t size() const;
     
     /// Return iterator from topmost item.
     iterator begin();
@@ -141,10 +176,10 @@ namespace jdi {
     };
     
     string name; ///< The name of the object with the contained referencers.
-    void *implementation; ///< Any data harvested from a function implementation, if we are one.
     private:
-      node *bottom; ///< The bottommost node on the list; used in the prepend method.
-      node *top; ///< The topmost node on the list, for everything else.
+      node *ntop; ///< The topmost node on the list, for everything else.
+      node *nbottom; ///< The bottommost node on the list; used in the prepend method.
+      size_t sz; ///< The number of nodes on the list
   };
 }
 
@@ -152,15 +187,38 @@ namespace jdi {
 //===: Specializations with extended dependencies :========================================================
 //=========================================================================================================
 
+#include <Storage/full_type.h>
 #include <Storage/definition.h>
 #include <General/quickvector.h>
 
 namespace jdi {
+  /// Parameter storage type; contains type info and other important parameter info.
+  struct ref_stack::parameter: full_type {
+    bool variadic; ///< True if this parameter can be passed several values; in C/C++, this is mandated to be the last parameter.
+    bool defaulted; ///< True if this parameter was given a default value. Convenience boolean to remove subtraction as a factor; same as defaulted_value.type != VT_INVALID.
+    value default_value; ///< The default value of this parameter, or an invalid value if none was given.
+    void swap_in(full_type& param); ///< Swap contents with another parameter class.
+    void swap(parameter& param); ///< Swap contents with another parameter class.
+    
+    bool operator==(const parameter& other) const; ///< Compare for equality across all three attributes.
+    bool operator!=(const parameter& other) const; ///< Compare against equality across all three attributes.
+    bool operator< (const parameter& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator> (const parameter& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator<= (const parameter& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator>= (const parameter& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+  };
   /// Parameter storage container type. Guaranteed to have a push_back(full_type) method.
-  struct ref_stack::parameter_ct: public quick::vector<jdi::full_type> {
+  struct ref_stack::parameter_ct: public quick::vector<parameter> {
     /// Throw a full_type onto this list, consuming it.
     /// @param ft  The \c full_type that will be consumed and added to the stack.
-    void throw_on(jdi::full_type& ft);
+    void throw_on(parameter& ft);
+    
+    bool operator==(const parameter_ct& other) const; ///< Compare for equality across all three attributes.
+    bool operator!=(const parameter_ct& other) const; ///< Compare against equality across all three attributes.
+    bool operator< (const parameter_ct& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator> (const parameter_ct& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator<= (const parameter_ct& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator>= (const parameter_ct& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
   };
   /// A special ref_stack node with an array bound size member.
   struct ref_stack::node_array: ref_stack::node {

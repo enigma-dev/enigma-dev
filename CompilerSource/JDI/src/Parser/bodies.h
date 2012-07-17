@@ -7,7 +7,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -28,7 +28,7 @@
  * additional delegation required to accomplish a task, while "readers" are meant
  * to work with simple token patterns. For instance, handle_declarators() would
  * take care of parsing lines such as int a = 10, and might delegate to functions
- * such as read_type(), which would read type info from a string of tokens. While
+ * such as read_fulltype(), which would read type info from a string of tokens. While
  * Readers still do a fair amount of delegation, they are responsible for more of
  * the grunt work involved in parsing a file.
  * 
@@ -69,15 +69,39 @@ namespace jdip {
     This function is a reader. Many inputs are liable to be modified in some form or another.
     See \section Readers for details.
     
-    When the read_type function is invoked, the passed token must be a declarator of some sort.
+    When the read_fulltype function is invoked, the passed token must be a declarator of some sort.
     It is up to the calling method to ensure this.
     
-    When the read_type function terminates, the passed token will have been set to the first
+    When the read_fulltype function terminates, the passed token will have been set to the first
     unhandled token, meaning it will NOT have the types \c TT_DECLARATOR, \c TT_DECFLAG, \c
     TT_LEFTBRACKET, \c TT_LEFTPARENTH, or \c TT_IDENTIFIER. Each of those is handled before
     the termination of this function, either in the function itself or in a call to
     \c read_referencers. If a name is specified along with the type, it will be copied into
     the `referencers` member of the resulting \c full_type.
+    
+    @param  lex    The lexer to be polled for tokens. [in-out]
+    @param  token  The token for which this function was invoked.
+                   The type of this token must be either \c TT_DECLARATOR or \c TT_DECFLAG. [in-out]
+    @param  scope  The scope used to resolve identifiers. [in]
+    @param  herr   The error handler which will be used to report errors. [in]
+    
+    @return Returns the \c full_type read from the stream. Leaves \p token indicating the
+            first unhandled token.
+  **/
+  full_type read_fulltype(lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
+  /**
+    Read a complete type from the given input stream.
+    
+    This function is a reader. Many inputs are liable to be modified in some form or another.
+    See \section Readers for details.
+    
+    When the read_fulltype function is invoked, the passed token must be a declarator of some sort.
+    It is up to the calling method to ensure this.
+    
+    When the read_fulltype function terminates, the passed token will have been set to the first
+    unhandled token, meaning it will NOT have the types \c TT_DECLARATOR or \c TT_DECFLAG. 
+    Each of those is handled before the termination of this function. No referencers are read,
+    no name is read. Only flags and type specifiers.
     
     @param  lex    The lexer to be polled for tokens. [in-out]
     @param  token  The token for which this function was invoked.
@@ -106,11 +130,76 @@ namespace jdip {
                    type, it will be part of the return \c full_type, otherwise it will
                    just be overwritten. [in-out]
     @param  scope  The scope used to resolve identifiers. [in]
+    @param  cp     The context parser to be polled for any additional information. [in]
     @param  herr   The error handler which will be used to report errors. [in]
     @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
              error state, as the error will have already been reported to the given error handler.
   **/
   int read_referencers(ref_stack& refs, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
+  /**
+    Read function parameters into a \c ref_stack from an input stream. This function should be invoked with the first
+    token following the opening parentheses, and will terminate with the first token after the closing parentheses.
+     
+    This function is a reader. Many inputs are liable to be modified in some form or another.
+    See \section Readers for details.
+    
+    This method will read a complete rf_stack from the given input stream. This includes pointer-to asterisks (*),
+    reference ampersands (&), array bounds in square brackets [], and function parameters in parentheses (). Parentheses
+    used for the purpose of putting precedence on a given referencer will be handled, but will not be literally denoted
+    in the returned stack.
+    
+    @param  refs   The ref_stack onto which referencers should be pushed. [out]
+    @param  lex    The lexer to be polled for tokens. [in-out]
+    @param  token  The token for which this function was invoked. If the given token is a
+                   type, it will be part of the return \c full_type, otherwise it will
+                   just be overwritten. [in-out]
+    @param  scope  The scope used to resolve identifiers. [in]
+    @param  cp     The context parser to be polled for any additional information. [in]
+    @param  herr   The error handler which will be used to report errors. [in]
+    @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
+             error state, as the error will have already been reported to the given error handler.
+  **/
+  int read_function_params(ref_stack& refs, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
+  /**
+    Read the latter half of referencers, as handled in read_referencers.
+    
+    @param  refs   The ref_stack onto which referencers should be pushed. [out]
+    @param  lex    The lexer to be polled for tokens. [in-out]
+    @param  token  The token for which this function was invoked. If the given token is a
+                   type, it will be part of the return \c full_type, otherwise it will
+                   just be overwritten. [in-out]
+    @param  scope  The scope used to resolve identifiers. [in]
+    @param  cp     The context parser to be polled for any additional information. [in]
+    @param  herr   The error handler which will be used to report errors. [in]
+    @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
+             error state, as the error will have already been reported to the given error handler.
+  **/
+  int read_referencers_post(ref_stack& refs, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
+  /**
+    Read a list of template parameters from the given input stream.
+    
+    This function is a reader. Many inputs are liable to be modified in some form or another.
+    See \section Readers for details.
+    
+    This method will read from the opening '<' token (which must be the active token passed)
+    to the corresponding '>' token, populating the given arg_key structure.
+    
+    @param  argk   The arg_key into which the parameters will be copied. The
+                   key must be initialized with the parameter count of the given template. [in-out]
+    @param  temp   The template definition for which argument data will be read.
+    @param  lex    The lexer to be polled for tokens. [in-out]
+    @param  token  The token for which this function was invoked. If the given token is a
+                   type, it will be part of the return \c full_type, otherwise it will
+                   just be overwritten. [in-out]
+    @param  scope  The scope used to resolve identifiers. [in]
+    @param  cp     The context parser to be polled for any additional information. [in]
+    @param  herr   The error handler which will be used to report errors. [in]
+    @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
+             error state, as the error will have already been reported to the given error handler.
+  **/
+  int read_template_parameters(arg_key &argk, definition_template *temp, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
+  
+  extern definition* dangling_pointer;
   /**
     @class context_parser
     @brief A field-free utility class extending \c context, implementing the
@@ -145,10 +234,28 @@ namespace jdip {
                      This will be updated to represent the next non-type token
                      in the stream. [in-out]
       @param inherited_flags Any flags which should be given to each declared definition.
+      @param res     A pointer to receive the last definition declared. [out]
       
       @return Zero if no error occurred, a non-zero exit status otherwise.
     **/
-    int handle_declarators(definition_scope *scope, token_t& token, unsigned inherited_flags);
+    int handle_declarators(definition_scope *scope, token_t& token, unsigned inherited_flags, definition* &res = dangling_pointer);
+    /**
+      Parse a list of declarations assuming the given type, copying them into the given scope.
+      
+      This function is a complete handler. All inputs are liable to be modified.
+      See \section Handlers for details.
+      
+      @param  scope  The scope in which declarations will be stored. [in-out]
+      @param  token  The token that was read before this function was invoked.
+                     This will be updated to represent the next non-type token
+                     in the stream. [in-out]
+      @param type    The type we assume was already read. Referencers will be toasted if a comma is encountered. [in-out]
+      @param inherited_flags Any flags which should be given to each declared definition.
+      @param res     A pointer to receive the last definition declared. [out]
+      
+      @return Zero if no error occurred, a non-zero exit status otherwise.
+    **/
+    int handle_declarators(definition_scope *scope, token_t& token, full_type& type, unsigned inherited_flags, definition* &res = dangling_pointer);
     
     /**
       Parse a namespace definition.
@@ -182,9 +289,29 @@ namespace jdip {
                               definition is instantiated for it. These flags are
                               NOT given to memebers of the class.
       
-      @return The enum created/referenced, or NULL if some unrecoverable error occurred
+      @return The enum created/referenced, or NULL if some unrecoverable error occurred.
     **/
     definition_class* handle_class(definition_scope *scope, token_t& token, int inherited_flags);
+    
+    /**
+      Parse a union definition.
+      
+      This function is a complete handler. All inputs are liable to be modified.
+      See \section Handlers for details.
+      
+      @param  scope  The scope in which declarations will be stored. [in-out]
+      @param  token  The token that was read before this function was invoked.
+                     At the start of this call, the type of this token must be
+                     either TT_CLASS or TT_STRUCT. Upon termination, the type
+                     of this token will be TT_DECLARATOR with extra info set to
+                     the new definition unless an error occurs. [in-out]
+      @param inherited_flags  The flags that will be given to the class, if a new
+                              definition is instantiated for it. These flags are
+                              NOT given to memebers of the class.
+      
+      @return The union created/referenced, or NULL if some unrecoverable error occurred.
+    **/
+    jdi::definition_union* handle_union(definition_scope *scope, token_t& token, int inherited_flags);
     
     /**
       Parse an enumeration. Reads the enumeration and its constants into the given scope.
@@ -213,12 +340,41 @@ namespace jdip {
       See \section Handlers for details.
       
       @param  scope  The scope into which declarations will be stored. [in-out]
-      @param  token  The \c token structure into which the next unhandled token will be placed. [out]
+      @param  token  The token structure into which the next unhandled token will be placed. [out]
       @param  inherited_flags  Any flags which must be given to all members of this scope. [in]
       
       @return Zero if no error occurred, a non-zero exit status otherwise.
     **/
     int handle_scope(definition_scope *scope, token_t& token, unsigned inherited_flags = 0);
+    
+    /**
+      Handle parsing a template declaration.
+      
+      This function is a complete handler. All inputs are liable to be modified.
+      See \section Handlers for details.
+      
+      @param  scope  The scope into which declarations will be stored. [in-out]
+      @param  token  The token structure into which the next unhandled token will be placed. [out]
+      @param  inherited_flags  Any flags which must be given to all members of this scope. [in]
+      
+      @return Zero if no error occurred, a non-zero exit status otherwise.
+    **/
+    int handle_template(definition_scope *scope, token_t& token, unsigned inherited_flags = 0);
+    
+    /**
+      Handle accessing dependent types and members. Shoves the definitions into the
+      template for fix later.
+      
+      This function is a complete handler. All inputs are liable to be modified.
+      See \section Handlers for details.
+      
+      @param  scope  The scope from which the member is being accessed. [in-out]
+      @param  token  The token structure into which the next unhandled token will be placed. [out]
+      @param  flags  Flags known about this hypothetical type. [in]
+      
+      @return A representation of the dependent member, or NULL if an error occurred.
+    **/
+    definition* handle_hypothetical(definition_scope *scope, token_t& token, unsigned flags);
     
     /**
       Read an expression from the given input stream, evaluating it for a value.

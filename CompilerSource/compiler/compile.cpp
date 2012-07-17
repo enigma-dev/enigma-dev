@@ -55,7 +55,6 @@
 using namespace std;
 
 #include "backend/JavaCallbacks.h"
-#include "externs/externs.h"
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 #include "compile_includes.h"
@@ -69,6 +68,8 @@ using namespace std;
 
 #include "general/bettersystem.h"
 #include "event_reader/event_parser.h"
+
+#include "languages/lang_CPP.h"
 
 #ifdef WRITE_UNIMPLEMENTED_TXT
 std::map <string, char> unimplemented_function_list;
@@ -92,7 +93,24 @@ string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
-string fc(const char*);
+inline string fc(const char* fn)
+{
+    FILE *pt = fopen(fn,"rb");
+    if (pt==NULL) return "";
+    else {
+      fseek(pt,0,SEEK_END);
+      size_t sz = ftell(pt);
+      fseek(pt,0,SEEK_SET);
+
+      char a[sz+1];
+      sz = fread(a,1,sz,pt);
+      fclose(pt);
+
+      a[sz] = 0;
+      return a;
+    }
+}
+
 string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); i++) res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i]; return res; }
 void clear_ide_editables()
 {
@@ -144,9 +162,17 @@ void clear_ide_editables()
   wto.close();
 }
 
+#include "System/builtins.h"
+
 // modes: 0=run, 1=debug, 2=design, 3=compile
 enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
-dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
+
+
+dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
+  current_language->compile(es, exe_filename, mode);
+}
+
+double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
   cout << "Initializing dialog boxes" << endl;
     ide_dia_clear();
@@ -215,9 +241,8 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
 
   //First, we make a space to put our globals.
-    globals_scope = scope_get_using(&global_scope);
-    extiter gso = globals_scope->members.find("ENIGMA Resources"); if (gso != globals_scope->members.end()) delete gso->second;
-    globals_scope = globals_scope->members["ENIGMA Resources"] = new externs("ENIGMA Resources",globals_scope,NULL,EXTFLAG_NAMESPACE);
+    jdi::definition_scope globals_scope("<ENIGMA Resources>", main_context->get_global(), jdi::DEF_NAMESPACE);
+    main_context->get_global()->use_namespace(&globals_scope);
 
   idpr("Copying resources",1);
 
@@ -226,39 +251,39 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 
   edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
   for (int i = 0; i < es->spriteCount; i++)
-    quickmember_variable(globals_scope,builtin_type__int,es->sprites[i].name);
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
 
   edbg << "Copying sound names [" << es->soundCount << "]" << flushl;
   for (int i = 0; i < es->soundCount; i++)
-    quickmember_variable(globals_scope,builtin_type__int,es->sounds[i].name);
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sounds[i].name);
 
   edbg << "Copying background names [" << es->backgroundCount << "]" << flushl;
   for (int i = 0; i < es->backgroundCount; i++)
-    quickmember_variable(globals_scope,builtin_type__int,es->backgrounds[i].name);
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->backgrounds[i].name);
 
   edbg << "Copying path names [" << es->pathCount << "]" << flushl;
   for (int i = 0; i < es->pathCount; i++)
-    quickmember_variable(globals_scope,builtin_type__int,es->paths[i].name);
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->paths[i].name);
 
   edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
   for (int i = 0; i < es->scriptCount; i++)
-    quickmember_script(globals_scope,es->scripts[i].name);
+    quickmember_script(&globals_scope,es->scripts[i].name);
 
   edbg << "Copying font names [" << es->fontCount << "]" << flushl;
   for (int i = 0; i < es->fontCount; i++)
-    quickmember_variable(globals_scope,builtin_type__int,es->fonts[i].name);
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->fonts[i].name);
 
   edbg << "Copying timeline names [kidding, these are totally not implemented :P] [" << es->timelineCount << "]" << flushl;
   for (int i = 0; i < es->timelineCount; i++)
-    quickmember_variable(globals_scope,builtin_type__int,es->timelines[i].name);
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->timelines[i].name);
 
   edbg << "Copying object names [" << es->gmObjectCount << "]" << flushl;
   for (int i = 0; i < es->gmObjectCount; i++)
-    quickmember_variable(globals_scope,builtin_type__int,es->gmObjects[i].name);
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->gmObjects[i].name);
 
   edbg << "Copying room names [" << es->roomCount << "]" << flushl;
   for (int i = 0; i < es->roomCount; i++)
-    quickmember_variable(globals_scope,builtin_type__int,es->rooms[i].name);
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
 
 
 
@@ -277,7 +302,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
   int res;
   #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
-  res = compile_parseAndLink(es,parsed_scripts);
+  res = current_language->compile_parseAndLink(es,parsed_scripts);
   irrr();
 
 
@@ -435,38 +460,38 @@ wto << "string sound_get_name(int i) {\n switch (i) {\n";
 
   // Defragged events must be written before object data, or object data cannot determine which events were used.
   edbg << "Writing events" << flushl;
-  res = compile_writeDefraggedEvents(es);
+  res = current_language->compile_writeDefraggedEvents(es);
   irrr();
 
   parsed_object EGMglobal;
 
   edbg << "Linking globals" << flushl;
-  res = link_globals(&EGMglobal,es,parsed_scripts);
+  res = current_language->link_globals(&EGMglobal,es,parsed_scripts);
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;
-  res = compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount,parsed_rooms,&EGMglobal);
+  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount,parsed_rooms,&EGMglobal);
 
   edbg << "Writing object data" << flushl;
-  res = compile_writeObjectData(es,&EGMglobal);
+  res = current_language->compile_writeObjectData(es,&EGMglobal);
   irrr();
 
   edbg << "Writing local accessors" << flushl;
-  res = compile_writeObjAccess(parsed_objects, &EGMglobal);
+  res = current_language->compile_writeObjAccess(parsed_objects, &EGMglobal);
   irrr();
 
   edbg << "Writing font data" << flushl;
-  res = compile_writeFontInfo(es);
+  res = current_language->compile_writeFontInfo(es);
   irrr();
 
   edbg << "Writing room data" << flushl;
-  res = compile_writeRoomData(es,&EGMglobal);
+  res = current_language->compile_writeRoomData(es,&EGMglobal);
   irrr();
 
 
 
   // Write the global variables to their own file to be included before any of the objects
-  res = compile_writeGlobals(es,&EGMglobal);
+  res = current_language->compile_writeGlobals(es,&EGMglobal);
   irrr();
 
 
@@ -570,7 +595,7 @@ wto << "string sound_get_name(int i) {\n switch (i) {\n";
     linker sometime in the future.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 
-  #if OS_ANDROID
+  #ifdef OS_ANDROID
     "ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
   #endif
 
@@ -610,19 +635,19 @@ wto << "string sound_get_name(int i) {\n switch (i) {\n";
 
   idpr("Adding Sprites",90);
 
-  res = module_write_sprites(es, gameModule);
+  res = current_language->module_write_sprites(es, gameModule);
   irrr();
 
   edbg << "Finalized sprites." << flushl;
   idpr("Adding Sounds",93);
 
-  module_write_sounds(es,gameModule);
+  current_language->module_write_sounds(es,gameModule);
 
-  module_write_backgrounds(es,gameModule);
+  current_language->module_write_backgrounds(es,gameModule);
 
-  module_write_fonts(es,gameModule);
+  current_language->module_write_fonts(es,gameModule);
 
-  module_write_paths(es,gameModule);
+  current_language->module_write_paths(es,gameModule);
 
   // Tell where the resources start
   fwrite("\0\0\0\0res0",8,1,gameModule);

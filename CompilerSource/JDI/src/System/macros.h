@@ -141,6 +141,7 @@ namespace jdip {
         @param value     The value that will be assigned to this macro function. 
                          The constructor will automatically parse and expand this value according to convention.
         @param variadic  Determines if an additional parameter should be created to store all excess arguments.
+        @param herr      The error handler to receive any errors.
         @note
           If \p arg_list is empty, and \p variadic is false, the behavior is the same as the default constructor. 
     **/
@@ -152,8 +153,14 @@ namespace jdip {
     **/
     void preparse(string definiens, error_handler *herr);
     
-    /** Parse an argument vector into an llreader. **/
-    bool parse(vector<string> &arg_list, llreader &dest, error_handler *herr, token_t errtok);
+    /** Parse an argument vector into a string. 
+        @param arg_list  Contains the arguments to be copied in.
+        @param dest      The char* to direct at the buffer. You are responsible for freeing this buffer. [out]
+        @param destend   The char* to direct at the end of the buffer. [out]
+        @param errtok    Dummy token for error reporting coordination.
+        @param herr      The error handler to receive any errors.
+    **/
+    bool parse(vector<string> &arg_list, char* &dest, char* &destend, token_t errtok, error_handler *herr = def_error_handler) const;
     
     /// Big surprise: The macro_function destructor also does nothing.
     ~macro_function();

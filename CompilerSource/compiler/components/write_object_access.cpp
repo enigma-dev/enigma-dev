@@ -31,7 +31,7 @@
 
 using namespace std;
 
-#include "externs/externs.h"
+
 #include "parser/parser.h"
 
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
@@ -53,7 +53,7 @@ string REFERENCE_POSTFIX(string ref) {
     }
     else if (ref[pos] == ']')
     {
-      if (--lvl = 0);
+      if (--lvl == 0)
         ref.replace(spos,pos-spos+1,"*");
     }
   }
@@ -61,9 +61,10 @@ string REFERENCE_POSTFIX(string ref) {
     ref += " const ";
   return ref;
 }
+#include "languages/lang_CPP.h"
 
 struct usedtype { int uc; dectrip original; usedtype(): uc(0) {} }; // uc is the use count, then after polling, the dummy number.
-int compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global)
+int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global)
 {
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h",ios_base::out);

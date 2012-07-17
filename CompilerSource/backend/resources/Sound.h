@@ -6,6 +6,8 @@
  * See LICENSE for details.
  */
 
+#ifndef _SOUND__H
+#define _SOUND__H
 
 #include "backend/JavaStruct.h"
 
@@ -29,3 +31,5 @@ struct Sound
 	byte *data;
 	int size;
 };
+
+#endif

@@ -41,12 +41,18 @@
 #include <string>
 
 class llreader {
-  int mode; ///< What kind of stream we have open
-  
   public:
     size_t pos; ///< Our position in the stream
     size_t length; ///< The length of the stream
     const char *data; ///< The data in the stream
+  
+  private:
+     int mode; ///< What kind of stream we have open
+  
+  protected:
+     std::string path; ///< The path from which this file was opened
+  
+  public:
     /**
       Open a file as an array.
       Length will reflect the length of the file, and
@@ -62,7 +68,7 @@ class llreader {
       
       @param contents  A string containing contents to be pointed to.
       @warning As this function only encapsulates the string,
-               without copying it, its contents will become
+               without copying it; its contents will become
                invalid once the encapsulated string leaves scope.
     **/
     void encapsulate(std::string &contents);

@@ -4,7 +4,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -26,7 +26,39 @@
 #include <General/debug_macros.h>
 #include <API/compile_settings.h>
 
-static unsigned anon_count = 1111111;
+using namespace jdip;
+
+static inline definition_enum* insnew(definition_scope *const &scope, int inherited_flags, const string& classname, const token_t &token, error_handler* const& herr, context *ct) {
+  definition_enum* nclass = NULL;
+  pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(classname,NULL));
+  if (!dins.second) {
+    if (dins.first->second->flags & DEF_TYPENAME) {
+      token.report_error(herr, "Enum `" + classname + "' instantiated inadvertently during parse by another thread. Freeing.");
+      delete dins.first->second;
+    }
+    else {
+      dins = ct->c_structs.insert(pair<string,definition*>(classname,NULL));
+      if (dins.second)
+        goto my_else;
+      if (dins.first->second->flags & DEF_ENUM)
+        nclass = (definition_enum*)dins.first->second;
+      else {
+        #if FATAL_ERRORS
+          return NULL;
+        #else
+          token.report_error(herr, "Redeclaring `" + classname + "' as different kind of symbol.");
+          delete dins.first->second;
+          goto my_else;
+        #endif
+      }
+    }
+  } else { my_else:
+    dins.first->second = nclass = new definition_enum(classname,scope, DEF_ENUM | DEF_TYPENAME | inherited_flags);
+  }
+  return nclass;
+}
+
+static unsigned anon_count = 1;
 jdi::definition_enum* jdip::context_parser::handle_enum(definition_scope *scope, token_t& token, int inherited_flags)
 {
   dbg_assert(token.type == TT_ENUM);
@@ -39,14 +71,14 @@ jdi::definition_enum* jdip::context_parser::handle_enum(definition_scope *scope,
   bool will_redeclare = false; // True if this enum is from another scope; so true if implementing this enum will allocate it.
   unsigned incomplete = DEF_INCOMPLETE; // DEF_INCOMPLETE if this enum has a body, zero otherwise.
   
-  if (token.type == TT_IDENTIFIER) {
-    classname = string((const char*)token.extra.content.str, token.extra.content.len);
+  if (token.type == TT_IDENTIFIER || token.type == TT_DEFINITION) {
+    classname = token.content.toString();
     token = read_next_token(scope);
   }
   else if (token.type == TT_DECLARATOR) {
-    nenum = (jdi::definition_enum*)token.extra.def;
+    nenum = (jdi::definition_enum*)token.def;
     classname = nenum->name;
-    if (not(nenum->flags & DEF_CLASS)) {
+    if (not(nenum->flags & DEF_ENUM)) {
       if (nenum->parent == scope)
         token.report_error(herr, "Attempt to redeclare `" + classname + "' as enum in this scope");
       nenum = NULL;
@@ -63,25 +95,15 @@ jdi::definition_enum* jdip::context_parser::handle_enum(definition_scope *scope,
     classname = buf;
   }
   
-  #ifdef DEBUG_MODE
-    #define derr(x) token.report_error(herr, x);
-  #else
-    #define derr(x)
-  #endif
-  
-  #define insnew() { \
-    pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(classname,NULL)); \
-    if (!dins.second) { derr("Enum `" + classname + "' instantiated inadvertently during parse by another thread. Freeing."); delete dins.first->second; } \
-    dins.first->second = nenum = new definition_enum(classname,scope, DEF_ENUM | DEF_TYPENAME | inherited_flags); \
-  }
-  
   if (!nenum)
-    insnew();
+    if (not(nenum = insnew(scope,inherited_flags,classname,token,herr,this)))
+      return NULL;
   
   if (token.type == TT_COLON) {
     if (will_redeclare) {
       will_redeclare = false;
-      insnew();
+      if (not(nenum = insnew(scope,inherited_flags,classname,token,herr,this)))
+      return NULL;
     }
     else if (already_complete) {
       token.report_error(herr, "Attempting to define type of previously defined enum `" + classname + "'");
@@ -89,11 +111,11 @@ jdi::definition_enum* jdip::context_parser::handle_enum(definition_scope *scope,
     incomplete = 0;
      
     token = read_next_token(scope);
-    full_type ft = read_type(lex, token, scope, this, herr); // TODO: Check type for errors.
+    full_type ft = read_fulltype(lex, token, scope, this, herr); // TODO: Check type for errors.
     nenum->type = ft.def;
     nenum->modifiers = ft.flags;
   }
-  else nenum->type = builtin_declarators["int"]->def;
+  else nenum->type = builtin_type__int;
   
   if (token.type != TT_LEFTBRACE) {
     return nenum;
@@ -108,39 +130,43 @@ jdi::definition_enum* jdip::context_parser::handle_enum(definition_scope *scope,
     }
     if (token.type != TT_IDENTIFIER)
       { token.report_error(herr, "Expected identifier at this point"); token = read_next_token(scope); continue; }
-    string cname((const char*)token.extra.content.str, token.extra.content.len);
+    string cname(token.content.toString());
     
     token = read_next_token(scope);
     if (token.type == TT_OPERATOR) {
-      if (token.extra.content.len != 1 or token.extra.content.str[0] != '=') {
+      if (token.content.len != 1 or token.content.str[0] != '=') {
         token.report_error(herr, "Expected assignment operator `=' here before secondary operator");
       }
       token = read_next_token(scope);
       AST ast;
-      if (ast.parse_expression(token,lex,herr)) {
+      if (ast.parse_expression(token,lex,scope,precedence::comma+1,herr)) {
         token.report_error(herr, "Expected const expression here");
         continue;
       }
       render_ast(ast, "enum_values");
       value v = ast.eval();
       if (v.type != VT_INTEGER)
+      #ifdef DEBUG_MODE
+        token.report_error(herr, "Expected integer result from expression; " + string(v.type == VT_DOUBLE? "floating point": v.type == VT_STRING? "string": "invalid") + " type given (expression: " + ast.expression + ")"),
+      #else
         token.report_error(herr, "Expected integer result from expression; " + string(v.type == VT_DOUBLE? "floating point": v.type == VT_STRING? "string": "invalid") + " type given"),
+      #endif
         this_value = value(++this_value.val.i);
       else this_value = v;
     }
-    else
-      this_value = value(++this_value.val.i);
     
     pair<definition_scope::defiter, bool> cins = nenum->constants.insert(pair<string,definition*>(cname,NULL));
     if (cins.second) { // If a new definition key was created, then allocate a new enum representation for it.
       pair<definition_scope::defiter, bool> sins = scope->members.insert(pair<string,definition*>(cname,cins.first->second));
       if (sins.second)
-        cins.first->second = sins.first->second = new definition_valued(cname, nenum, nenum->type, nenum->modifiers, this_value);
+        cins.first->second = sins.first->second = new definition_valued(cname, nenum, nenum->type, nenum->modifiers, 0, this_value);
       else
         token.report_error(herr, "Declatation of constant `" + classname + "' in enumeration conflicts with definition in parent scope");
     }
     else
       token.report_error(herr, "Redeclatation of constant `" + classname + "' in enumeration");
+    
+    ++this_value.val.i;
     
     if (token.type == TT_COMMA)
       token = read_next_token(scope);

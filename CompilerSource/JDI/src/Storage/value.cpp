@@ -4,7 +4,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -20,6 +20,8 @@
 **/
 
 #include "value.h"
+#include <cstdio>
+#include <cstring>
 #include <cfloat>
 #include <cmath>
 
@@ -36,6 +38,36 @@ namespace jdi {
   }
   value::value(const value& v): val(v.val), type(v.type) { }
   value::~value() { if (type == VT_STRING) delete[] val.s; }
+  
+  std::string value::toString() {
+    char buf[128];
+    switch (type) {
+      case VT_DOUBLE:  sprintf(buf, "%.32g", val.d); return buf;
+      case VT_INTEGER: sprintf(buf, "%ld", val.i); return buf;
+      case VT_STRING:  return val.s;
+      case VT_NONE:    return "<nothing>";
+      default:         return "<ERROR!>";
+    }
+  }
+  
+  bool value::operator==(const value& other) const { if (type != other.type) return false;
+    switch (type) { case VT_DOUBLE: return fabs(val.d - other.val.d) <= DBL_EPSILON; case VT_INTEGER: return val.i == other.val.i; case VT_STRING: return !strcmp(val.s, other.val.s); case VT_NONE: default: return true; }
+  }
+  bool value::operator!=(const value& other) const { if (type != other.type) return true;
+    switch (type) { case VT_DOUBLE: return fabs(val.d - other.val.d) > DBL_EPSILON; case VT_INTEGER: return val.i != other.val.i; case VT_STRING: return strcmp(val.s, other.val.s); case VT_NONE: default: return false; }
+  }
+  bool value::operator>(const value& other) const { if (type > other.type) return true; if (type < other.type) return false;
+    switch (type) { case VT_DOUBLE: return val.d > other.val.d; case VT_INTEGER: return val.i > other.val.i; case VT_STRING: return strcmp(val.s, other.val.s) > 0; case VT_NONE: default: return false; }
+  }
+  bool value::operator<(const value& other) const { if (type > other.type) return false; if (type < other.type) return true;
+    switch (type) { case VT_DOUBLE: return val.d < other.val.d; case VT_INTEGER: return val.i < other.val.i; case VT_STRING: return strcmp(val.s, other.val.s) < 0; case VT_NONE: default: return false; }
+  }
+  bool value::operator>=(const value& other) const { if (type > other.type) return true; if (type < other.type) return false;
+    switch (type) { case VT_DOUBLE: return val.d >= other.val.d; case VT_INTEGER: return val.i >= other.val.i; case VT_STRING: return strcmp(val.s, other.val.s) >= 0; case VT_NONE: default: return true; }
+  }
+  bool value::operator<=(const value& other) const { if (type > other.type) return false; if (type < other.type) return true;
+    switch (type) { case VT_DOUBLE: return val.d <= other.val.d; case VT_INTEGER: return val.i <= other.val.i; case VT_STRING: return strcmp(val.s, other.val.s) <= 0; case VT_NONE: default: return true; }
+  }
   
   value::operator long()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return (long)val.d; return 0; }
   value::operator double() const { if (type == VT_DOUBLE) return val.d; if (type == VT_INTEGER) return val.i; return 0; }

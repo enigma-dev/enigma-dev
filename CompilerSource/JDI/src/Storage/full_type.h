@@ -4,7 +4,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -34,6 +34,8 @@ namespace jdi {
 #ifndef _FULL_TYPE__H__DETAIL
 #define _FULL_TYPE__H__DETAIL
 
+#include <string>
+
 namespace jdi {
   /**
     @struct jdi::full_type
@@ -46,6 +48,16 @@ namespace jdi {
     int flags; ///< Any flags, such as unsigned, signed, or const, associated with us, as a bitmask.
     
     void swap(full_type& ft); ///< Trade contents with another full_type.
+    void copy(const full_type& ft); ///< Copy a full_type without warning; this is for when copy is inevitable.
+    
+    std::string toString(); ///< Represent as a string.
+    
+    bool operator==(const full_type& other) const; ///< Compare for equality across all three attributes.
+    bool operator!=(const full_type& other) const; ///< Compare against equality across all three attributes.
+    bool operator< (const full_type& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator> (const full_type& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator<= (const full_type& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
+    bool operator>= (const full_type& other) const; ///< Inequality comparison, just in case someone needs to shove these in a map.
     
     full_type(); ///< Default constructor.
     full_type(jdi::definition*); ///< Construct with only a definition.

@@ -6,6 +6,9 @@
  * See LICENSE for details.
  */
 
+#ifndef _LGM_INCLUDE__H
+#define _LGM_INCLUDE__H
+
 #include "backend/JavaStruct.h"
 
 struct Include
@@ -21,3 +24,5 @@ struct Include
   boolean freeMemAfterExport;
   boolean removeAtGameEnd;*/
 };
+
+#endif

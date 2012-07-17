@@ -31,7 +31,6 @@
 
 using namespace std;
 
-#include "externs/externs.h"
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
@@ -40,12 +39,13 @@ using namespace std;
 #include "compiler/compile_common.h"
 
 #include "backend/ideprint.h"
+#include "languages/lang_CPP.h"
 
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule)
+int lang_CPP::module_write_backgrounds(EnigmaStruct *es, FILE *gameModule)
 {
   // Now we're going to add backgrounds
   edbg << es->backgroundCount << " Adding Backgrounds to Game Module: " << flushl;

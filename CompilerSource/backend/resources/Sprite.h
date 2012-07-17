@@ -6,6 +6,9 @@
  * See LICENSE for details.
  */
 
+#ifndef _SPRITE__H
+#define _SPRITE__H
+
 #include "backend/JavaStruct.h"
 #include "backend/sub/SubImage.h"
 
@@ -35,3 +38,5 @@ struct Sprite
   Polygon *maskShapes;
   int maskShapeCount;
 };
+
+#endif

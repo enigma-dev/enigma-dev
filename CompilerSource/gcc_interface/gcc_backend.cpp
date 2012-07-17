@@ -30,21 +30,36 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <vector>
 #include <map>
 
 using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "externs/externs.h"
-    #include "cfile_parse/cfile_parse.h"
-    #include "syntax/checkfile.h"
-    #include "general/parse_basics.h"
-    #include "general/bettersystem.h"
+#include "syntax/checkfile.h"
+#include "general/parse_basics.h"
+#include "general/bettersystem.h"
 
 #include "gcc_backend.h"
 
-string fc(const char* fn);
+inline string fc(const char* fn)
+{
+    FILE *pt = fopen(fn,"rb");
+    if (pt==NULL) return "";
+    else {
+      fseek(pt,0,SEEK_END);
+      size_t sz = ftell(pt);
+      fseek(pt,0,SEEK_SET);
+
+      char a[sz+1];
+      sz = fread(a,1,sz,pt);
+      fclose(pt);
+
+      a[sz] = 0;
+      return a;
+    }
+}
 
 #include <sys/time.h>
 
@@ -58,8 +73,6 @@ string fc(const char* fn);
 
 bool init_found_gcc = false;
 bool init_load_successful = false;
-varray<string> include_directories;
-unsigned int include_directory_count;
 
 string MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;
 
@@ -68,11 +81,12 @@ inline int rdir_system(string x, string y)
   return system((x + " " + y).c_str());
 }
 
-extern my_string fca(const char*);
-extern my_string GCC_MACRO_STRING;
-
 #include "OS_Switchboard.h"
 #include "settings-parse/eyaml.h"
+
+#include "languages/lang_CPP.h"
+#include <System/builtins.h>
+#include <API/context.h>
 
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
@@ -149,7 +163,6 @@ const char* establish_bearings(const char *compiler)
   // Parse our compiler data file
   ey_data compey = parse_eyaml(compis,compiler);
 
-  my_string defs;
   bool got_success = false;
 
   // Now we begin interfacing with the toolchain.
@@ -208,7 +221,7 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
-    include_directories[include_directory_count++] = "ENIGMAsystem/SHELL/";
+    jdi::builtin.add_search_directory("ENIGMAsystem/SHELL/");
 
     while (is_useless(idirs[++pos]));
 
@@ -221,26 +234,23 @@ const char* establish_bearings(const char *compiler)
       if (idirs[pos] == '\r' or idirs[pos] == '\n')
       {
         idirs[pos] = '/';
-        include_directories[include_directory_count++] = idirs.substr(spos,pos-spos+(idirs[pos-1] != '/'));
+        jdi::builtin.add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
         while (is_useless(idirs[++pos]));
         spos = pos--;
       }
     }
 
-    cout << "Toolchain returned " << include_directory_count << " search directories:\n";
-    for (unsigned i = 0; i < include_directory_count; i++)
-      cout << " =>  \"" << include_directories[i] << '"' << endl;
+    cout << "Toolchain returned " << jdi::builtin.search_dir_count() << " search directories:\n";
 
   /* Parse built-in #defines
   ****************************/
-    defs = fc("defines.txt");
-    if (!defs or !*defs) return "Call to toolchain executable returned no data.\n";
+    llreader macro_reader("defines.txt");
+    if (!macro_reader.is_open())
+      return "Call to toolchain executable returned no data.\n";
 
-    pt a = parse_cfile(defs);
-    if (a != pt(-1)) {
-      return "Highly unlikely error. But stupid things can happen when working with files.";
-    }
-    GCC_MACRO_STRING = defs;
+    int res = jdi::builtin.parse_C_stream(macro_reader, "defines.txt");
+    if (res)
+      return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 
   /* Note `make` location
   *****************************/

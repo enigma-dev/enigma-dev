@@ -34,6 +34,7 @@
 #define _JDI_CONTEXT__H
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -61,9 +62,9 @@ namespace jdi
   using std::ostream;
   using std::cout;
   
-  typedef map<string,const jdip::macro_type*> macro_map;
-  typedef macro_map::iterator macro_iter;
-  typedef macro_map::const_iterator macro_iter_c;
+  typedef map<string,const jdip::macro_type*> macro_map; ///< Map type used for storing macros
+  typedef macro_map::iterator macro_iter; ///< Iterator type for macro maps.
+  typedef macro_map::const_iterator macro_iter_c; ///< Const iterator type for macro maps.
   
   /**
     @class context
@@ -87,12 +88,14 @@ namespace jdi
     vector<string> search_directories; ///< A list of #include directories in the order they will be searched.
     definition_scope* global; ///< The global scope represented in this context.
     
+  public:
+    set<definition*> variadics; ///< Set of variadic types.
     
-    public:
-    string error; ///< Any error text from parse calls in this context
-    string err_file; ///< The file in which an error occurred
-    int err_line; ///< The line number on which the error occurred
-    int err_pos; ///< The position at which the error occurred
+    /// This is a map of structures which conflict with other declarations,
+    /// which is allowed by the rules of C.
+    map<string, definition*> c_structs;
+    
+    definition_scope* get_global(); ///< Return the global scope.
     
     size_t search_dir_count(); ///< Return the number of search directories
     string search_dir(size_t index); ///< Return the search directory with the given index, in [0, search_dir_count).
@@ -138,6 +141,7 @@ namespace jdi
     void reset(); ///< Reset back to the built-ins; delete all parsed definitions
     void reset_all(); ///< Reset everything, dumping all built-ins as well as all parsed definitions
     void copy(const context &ct); ///< Copy the contents of another context.
+    void swap(context &ct); ///< Swap contents with another context.
     
     /** Load standard built-in types, such as int. 
         This function is really only for use with the built-in context.
@@ -173,11 +177,6 @@ namespace jdi
                           If this parameter is NULL, the previous error handler will be used, or the default will be used.
     **/
     int parse_stream(lexer *lang_lexer = NULL, error_handler *errhandl = NULL);
-    
-    /** Retrieve the last error message, if any error was thrown during parse.
-        @return The last error message, or an empty string if no error occurred.
-    **/
-    string get_last_error();
     
     /** Default constructor; allocates a global context with built-in definitions.
         Definitions are copied into the new context from the \c builtin context.

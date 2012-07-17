@@ -6,6 +6,9 @@
  * See LICENSE for details.
  */
 
+#ifndef _ENIGMASTRUCT__H
+#define _ENIGMASTRUCT__H
+
 #include "JavaStruct.h"
 #include "resources/GameSettings.h"
 #include "resources/Sprite.h"
@@ -53,7 +56,7 @@ struct EnigmaStruct
 	int constantCount;
 	Include *includes;
 	int includeCount;
-	char *packages[];
+	char **packages;
 	int packageCount;
 
 	int extensionCount;
@@ -68,3 +71,5 @@ struct EnigmaStruct
 #undef String
 #undef boolean
 #undef byte
+
+#endif

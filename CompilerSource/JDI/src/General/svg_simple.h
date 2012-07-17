@@ -66,9 +66,10 @@ class SVG {
         @param y1            The y coordinate of the top-left corner of the rectangle.
         @param x2            The x coordinate of the bottom-right corner of the rectangle.
         @param y2            The y coordinate of the bottom-right corner of the rectangle.
-        @param color         The stroke color, in ARGB format. Defaults to full-alpha white.
+        @param fill          The fill color, in ARGB format. Defaults to full-alpha white.
+        @param stroke        The stroke color, in ARGB format. Defaults to full-alpha white.
         @param stroke_width  The width of the stroke, in pixels. Defaults to 2. **/
-    void draw_rectangle(std::string id, int x1, int y1, int x2, int y2, unsigned color = 0xFF000000, float stroke_width = 2);
+    void draw_rectangle(std::string id, int x1, int y1, int x2, int y2, unsigned fill, unsigned stroke = 0xFF000000, float stroke_width = 2);
     /** Render text to this SVG.
         @param id            The unique id of the text, as a string.
         @param cx            The x coordinate of the center of the text's baseline.

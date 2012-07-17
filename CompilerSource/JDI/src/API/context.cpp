@@ -7,7 +7,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -115,6 +115,11 @@ void context::add_search_directory(string dir)
   search_directories.push_back(dir);
 }
 
+static definition* find_mirror(definition *x, definition_scope* root) {
+  if (x) return ((definition_scope*)find_mirror(x->parent, root))->look_up(x->name);
+  return root;
+}
+
 void context::reset()
 {
   
@@ -133,10 +138,21 @@ void context::copy(const context &ct)
       ++mi->second->refc;
     }
   }
+  for (set<definition*>::iterator it = ct.variadics.begin(); it != ct.variadics.end(); ++it) {
+    if ((*it)->parent)
+      variadics.insert(find_mirror(*it, global));
+    else
+      variadics.insert(*it);
+  }
 }
-
-string context::get_last_error() {
-  return error;
+void context::swap(context &ct) {
+  if (!parse_open and !ct.parse_open) {
+    { register definition_scope* gs = ct.global;
+      ct.global = global; global = gs; }
+    macros.swap(ct.macros);
+    variadics.swap(ct.variadics);
+  }
+  else cout << "ERROR! Cannot swap context while parse is active" << endl;
 }
 
 void context::load_standard_builtins()
@@ -182,117 +198,12 @@ void context::output_macros(ostream &out)
     print_macro(it, out);
 }
 
-static string fulltype_string(full_type& ft);
-
-static string typeflags_string(definition *type, unsigned flags) {
-  string res;
-  for (int i = 1; i <= 0x10000; i <<= 1)
-    if (flags & i) {
-      jdip::tf_flag_map::iterator tfi = builtin_decls_byflag.find(i);
-      if (tfi == builtin_decls_byflag.end()) res += "<ERROR:NOSUCHFLAG:" + toString(i) + "> ";
-      else res += tfi->second->name + " ";
-    }
-  if (type)
-    res += type->name;
-  else res += "<NULL>";
-  return res;
-}
-
-static string type_referencers_string_prefix(ref_stack& rf) {
-  string res;
-  ref_stack::iterator it = rf.begin();
-  while (it)
-  {
-    while (it and (it->type == ref_stack::RT_ARRAYBOUND || it->type == ref_stack::RT_FUNCTION)) ++it;
-    while (it and (it->type == ref_stack::RT_POINTERTO || it->type == ref_stack::RT_REFERENCE))
-      res = (it->type == ref_stack::RT_POINTERTO? '*' : '&') + res, ++it;
-    if (it) res = '(' + res;
-  }
-  return res;
-}
-
-static string arraybound_string(size_t b) {
-  if (b == ref_stack::node_array::nbound)
-    return "[]";
-  char buf[32]; sprintf(buf,"[%lu]",(long unsigned)b);
-  return buf;
-}
-
-static string type_referencers_string_postfix(ref_stack& rf) {
-  string res;
-  ref_stack::iterator it = rf.begin();
-  while (it)
-  {
-    while (it and (it->type == ref_stack::RT_ARRAYBOUND || it->type == ref_stack::RT_FUNCTION)) {
-      if (it->type == ref_stack::RT_ARRAYBOUND) res += arraybound_string(it->arraysize());
-      else {
-        res += '(';
-        ref_stack::node_func* nf = (ref_stack::node_func*)*it;
-        for (size_t i = 0; i < nf->params.size(); i++) {
-          res += fulltype_string(nf->params[i]);
-          if (i + 1 < nf->params.size()) res += ", ";
-        }
-        res += ')';
-      }
-      ++it;
-    }
-    while (it and (it->type == ref_stack::RT_POINTERTO || it->type == ref_stack::RT_REFERENCE)) ++it;
-    if (it) res += ')';
-  }
-  return res;
-}
-
-static string fulltype_string(full_type& ft) {
-  string res = typeflags_string(ft.def, ft.flags);
-  string app = type_referencers_string_prefix(ft.refs) + ft.refs.name + type_referencers_string_postfix(ft.refs);
-  if (app.length()) res += " " + app;
-  return res;
-}
-
-static void utility_printtype(definition_typed* t, ostream &out) {
-  out << typeflags_string(t->type, t->modifiers) << " ";
-  out << type_referencers_string_prefix(t->referencers);
-  out << t->name;
-  out << type_referencers_string_postfix(t->referencers);
-}
-
-static void utility_printrc(definition_scope* scope, ostream &out, string indent) {
-  for (map<string,definition*>::iterator it = scope->members.begin(); it != scope->members.end(); it++)
-  {
-    out << indent;
-    if (it->second->flags & DEF_TYPED)
-    {
-      if (it->second->flags & DEF_TYPENAME)
-        out << "typedef ";
-      utility_printtype((definition_typed*)it->second, out);
-      out << ";" << endl;
-    }
-    else if (it->second->flags & DEF_NAMESPACE)
-    {
-      out << indent << "namespace " << it->second->name << " {" << endl;
-      utility_printrc((definition_scope*)it->second, out, indent + "  ");
-      out << indent << "}" << endl;
-    }
-    else if (it->second->flags & DEF_CLASS)
-    {
-      out << "class " << it->second->name;
-      definition_class *dc = (definition_class*)it->second;
-      if (dc->ancestors.size()) {
-        out << ": ";
-        for (size_t i = 0; i < dc->ancestors.size(); i++)
-          out << (dc->ancestors[i].protection == DEF_PRIVATE? "private "
-                 :dc->ancestors[i].protection == DEF_PROTECTED? "protected "
-                 :"public ") << dc->ancestors[i].def->name
-              << (i+1 < dc->ancestors.size() ? ", " : "");
-      }
-      out << " {" << endl;
-      utility_printrc((definition_scope*)it->second, out, indent + "  ");
-      out << indent << "}" << endl;
-    }
-  }
-}
 void context::output_definitions(ostream &out) {
-  utility_printrc(global, out, "");
+  out << global->toString();
+}
+
+definition_scope* context::get_global() {
+  return global;
 }
 
 context::context(): parse_open(false), lex(NULL), herr(def_error_handler), global(new definition_scope()) {
@@ -315,5 +226,7 @@ void context::dump_macros() {
 context::~context() {
   delete global;
   delete lex;
+  for (map<string,definition*>::iterator it = c_structs.begin(); it != c_structs.end(); ++it)
+    delete it->second;
   dump_macros();
 }

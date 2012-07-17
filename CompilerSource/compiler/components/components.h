@@ -24,24 +24,3 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-
-// Sizable utilities
-int link_globals(parsed_object*, EnigmaStruct*,parsed_script*[]);
-
-// IDE_EDITABLEs added before compile
-int compile_parseAndLink(EnigmaStruct*,parsed_script*[]);
-int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,map<int,parsed_room*>&,parsed_object*);
-int compile_writeGlobals(EnigmaStruct*,parsed_object*);
-int compile_writeObjectData(EnigmaStruct*,parsed_object*);
-int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*);
-int compile_writeFontInfo(EnigmaStruct* es);
-int compile_writeRoomData(EnigmaStruct* es,parsed_object *EGMglobal);
-int compile_writeDefraggedEvents(EnigmaStruct* es);
-int compile_handle_templates(EnigmaStruct* es);
-
-// Resources added to module
-int module_write_sprites(EnigmaStruct *es, FILE *gameModule);
-int module_write_sounds(EnigmaStruct *es, FILE *gameModule);
-int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule);
-int module_write_paths(EnigmaStruct *es, FILE *gameModule);
-int module_write_fonts(EnigmaStruct *es, FILE *gameModule);

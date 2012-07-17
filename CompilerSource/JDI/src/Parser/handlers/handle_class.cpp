@@ -4,7 +4,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -23,7 +23,39 @@
 #include <Parser/bodies.h>
 #include <API/compile_settings.h>
 
-static unsigned anon_count = 1111111;
+
+using namespace jdip;
+#define alloc_class() new definition_class(classname,scope, DEF_CLASS | DEF_TYPENAME | inherited_flags)
+static inline definition_class* insnew(definition_scope *const &scope, int inherited_flags, const string& classname, const token_t &token, error_handler* const& herr, context *ct) {
+  definition_class* nclass = NULL;
+  pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(classname,NULL));
+  if (!dins.second) {
+    if (dins.first->second->flags & DEF_TYPENAME) { // This error is displayed because if the class existed earlier when we were checking, we'd have gotten a different token.
+      token.report_error(herr, "Class `" + classname + "' instantiated inadvertently during parse by another thread. Freeing.");
+      delete dins.first->second;
+    }
+    else {
+      dins = ct->c_structs.insert(pair<string,definition*>(classname,NULL));
+      if (dins.second)
+        goto my_else;
+      if (dins.first->second->flags & DEF_CLASS)
+        nclass = (definition_class*)dins.first->second;
+      else {
+        #if FATAL_ERRORS
+          return NULL;
+        #else
+          delete dins.first->second;
+          goto my_else;
+        #endif
+      }
+    }
+  } else { my_else:
+    dins.first->second = nclass = alloc_class();
+  }
+  return nclass;
+}
+
+static unsigned anon_count = 1;
 jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scope, token_t& token, int inherited_flags)
 {
   unsigned protection = 0;
@@ -50,17 +82,35 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
   // Non-NULL  True               False           Complete class in this scope. MUST be used as a type, not implemented.
   // Non-NULL  True               True            Complete class in another scope; can be redeclared (reallocated and reimplemented) in this scope.
   
+  definition *dulldef = NULL;
   if (token.type == TT_IDENTIFIER) {
-    classname = string((const char*)token.extra.content.str, token.extra.content.len);
+    classname = token.content.toString();
+    token = read_next_token(scope);
+  }
+  else if (token.type == TT_DEFINITION) {
+    classname = token.content.toString();
+    dulldef = token.def;
     token = read_next_token(scope);
   }
   else if (token.type == TT_DECLARATOR) {
-    nclass = (jdi::definition_class*)token.extra.def;
+    nclass = (jdi::definition_class*)token.def;
     classname = nclass->name;
     if (not(nclass->flags & DEF_CLASS)) {
-      if (nclass->parent == scope)
-        token.report_error(herr, "Attempt to redeclare `" + classname + "' as class in this scope");
-      nclass = NULL;
+      if (nclass->parent == scope) {
+        pair<definition_scope::defiter, bool> dins = c_structs.insert(pair<string,definition*>(classname, NULL));
+        if (dins.second)
+          dins.first->second = nclass = alloc_class();
+        else {
+          if (dins.first->second->flags & DEF_CLASS)
+            nclass = (definition_class*)dins.first->second;
+          else {
+            token.report_error(herr, "Attempt to redeclare `" + classname + "' as class in this scope");
+            FATAL_RETURN(NULL);
+          }
+        }
+      }
+      else
+        nclass = NULL;
     }
     else {
       will_redeclare = nclass->parent != scope;
@@ -70,29 +120,61 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
   }
   else {
     char buf[32];
-    sprintf(buf, "<anonymous%08d>", anon_count++);
-    classname = buf;
+    sprintf(buf, "<anonymousClass%08d>", anon_count++);
+    classname = buf; // I love std::string. Even if I'm lazy for it.
   }
   
-  #ifdef DEBUG_MODE
-    #define derr(x) token.report_error(herr, x);
-  #else
-    #define derr(x)
-  #endif
-  
-  #define insnew() { \
-    pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(classname,NULL)); \
-    if (!dins.second) { derr("Class `" + classname + "' instantiated inadvertently during parse by another thread. Freeing."); delete dins.first->second; } \
-    dins.first->second = nclass = new definition_class(classname,scope, DEF_CLASS | DEF_TYPENAME | inherited_flags); \
+  // Handle template access and specialization **before** we go allocating classes.
+  if (token.type == TT_LESSTHAN)
+  {
+    // We'd better have read a definition earlier, and it'd better have been a template.
+    if (not(dulldef and (dulldef->flags & DEF_TEMPLATE))) {
+      token.report_error(herr, "Unexpected '<' token; `" + classname + "' is not a template type");
+      cout << dulldef << ": " << (dulldef? dulldef->name : "no definition by that name") << endl;
+      return NULL;
+    }
+    // Now, we might be specializing the template, or we might just be instantiating it.
+    // If we are in a template<> statement, we have to be specializing. Otherwise, we're not.
+    if (scope->flags & DEF_TEMPSCOPE) {
+      definition_template *temp = (definition_template*)dulldef;
+      definition_tempscope *ts = (definition_tempscope*)scope;
+      arg_key k(temp->params.size());
+      if (read_template_parameters(k, temp, lex, token, scope, this, herr))
+        return NULL;
+      if (token.type != TT_GREATERTHAN) {
+        token.report_errorf(herr, "Expected closing triangle bracket here before %s");
+        FATAL_RETURN(NULL);
+      }
+      definition_template *spec = temp->specialize(k, ts);
+      if (spec->def) {
+        if (not(spec->def->flags & DEF_CLASS)) {
+          token.report_error(herr, "Template `" + temp->name + "' does not name a class");
+          return NULL;
+        }
+        nclass = (definition_class*)spec->def;
+        nclass->parent = ts;
+        already_complete = not(nclass->flags & DEF_INCOMPLETE);
+      }
+      else {
+        spec->def = nclass = new definition_class(temp->name, ts, temp->def->flags);
+        already_complete = false;
+      }
+      ts->use_general("<dependent>", nclass);
+      will_redeclare = false;
+      token = read_next_token(scope);
+    }
   }
   
   if (!nclass)
-    insnew();
+    if (not(nclass = insnew(scope,inherited_flags,classname,token,herr,this)))
+      return NULL;
   
+  // Handle inheritance
   if (token.type == TT_COLON) {
     if (will_redeclare) {
       will_redeclare = false;
-      insnew();
+      if (not(nclass = insnew(scope,inherited_flags,classname,token,herr,this)))
+        return NULL;
     }
     else if (already_complete) {
       token.report_error(herr, "Attempting to add ancestors to previously defined class `" + classname + "'");
@@ -110,24 +192,33 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
       else if (token.type == TT_PROTECTED)
         iprotection = DEF_PRIVATE,
         token = read_next_token(scope);
-      if (token.type != TT_DECLARATOR or not(token.extra.def->flags & DEF_CLASS)) {
+      if (token.type != TT_DECLARATOR and token.type != TT_DEFINITION) {
         string err = "Ancestor class name expected";
-        if (token.type == TT_DECLARATOR) err += "; `" + token.extra.def->name + "' does not name a class";
-        if (token.type == TT_IDENTIFIER) err += "; `" + string((const char*)token.extra.content.str,token.extra.content.len) + "' does not name a type";
+        if (token.type == TT_DECLARATOR) err += "; `" + token.def->name + "' does not name a class";
+        if (token.type == TT_IDENTIFIER) err += "; `" + token.content.toString() + "' does not name a type";
         token.report_error(herr, err);
+        return NULL;
       }
-      nclass->ancestors.push_back(definition_class::ancestor(iprotection, token.extra.def));
-      token = read_next_token(scope);
+      full_type ft = read_type(lex, token, scope, this, herr);
+      if (!ft.def or not(ft.def->flags & DEF_CLASS)) {
+        token.report_errorf(herr, "Expected class name before %s");
+        return NULL;
+      }
+      if (ft.flags or ft.refs.size())
+        token.report_error(herr, "Extra qualifiers to inherited class ignored");
+      nclass->ancestors.push_back(definition_class::ancestor(iprotection, (definition_class*)ft.def));
     }
     while (token.type == TT_COMMA);
   }
   
+  // Handle implementation
   if (token.type == TT_LEFTBRACE)
   {
     incomplete = 0;
     if (will_redeclare) {
       will_redeclare = false;
-      insnew();
+      if (not(nclass = insnew(scope,inherited_flags,classname,token,herr,this)))
+        return NULL;
     }
     else if (already_complete) {
       token.report_error(herr, "Attempting to add members to previously defined class `" + classname + "'");
@@ -139,9 +230,9 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
     }
     token = read_next_token(scope);
   }
-  else
+  else // Sometimes, it isn't okay to not specify a structure body.
     if (!incomplete) { // The only way incomplete is zero in this instance is if it was set in : handler.
-      token.report_error(herr, "Expected class body here after parents named");
+      token.report_errorf(herr, "Expected class body here (before %s) after parents named");
       FATAL_RETURN(NULL);
     }
   

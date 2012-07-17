@@ -39,10 +39,12 @@
   
   #include <assert.h>
   #define dbg_assert(x) assert(x)
+  #define DBG_TERNARY(x,y) x
 
 #else // NOT DEBUG_MODE
 
   #define dbg_assert(x)
+  #define DBG_TERNARY(x,y) y
 
 #endif // DEBUG_MODE ELSE
 #endif // Guard

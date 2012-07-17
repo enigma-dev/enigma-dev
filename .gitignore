@@ -24,3 +24,5 @@ LinuxExtra/
 *.epackage
 ENIGMAsystem/additional/
 unimplementedfunctionnames.txt
+ValgrindOut.xml
+CompilerSource/bin/

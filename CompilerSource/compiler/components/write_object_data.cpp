@@ -31,13 +31,15 @@
 
 using namespace std;
 
-#include "externs/externs.h"
+
 #include "parser/parser.h"
 
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "compiler/compile_common.h"
 #include "compiler/event_reader/event_parser.h"
 #include "general/parse_basics.h"
+
+#include "languages/lang_CPP.h"
 
 inline bool iscomment(const string &n) {
   if (n.length() < 2 or n[0] != '/') return false;
@@ -52,7 +54,7 @@ inline bool iscomment(const string &n) {
 }
 
 struct cspair { string c, s; };
-int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
+int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 {
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
@@ -113,7 +115,7 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 const pt spos = pos;
                 while (is_letterdd(addls[++pos]));
                 string tn = addls.substr(spos,pos-spos);
-                (find_extname(tn,EXTFLAG_TYPENAME) ? type : name) = tn;
+                (find_typename(tn) ? type : name) = tn;
                 pos--; continue;
               }
               if (addls[pos] == '*') { pres += '*'; continue; }
@@ -137,8 +139,8 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                   if (addls[pos] == '[' or addls[pos] == '(') cnt++;
                   else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
                 bool redundant = false;
-                for (size_t ii = 0; ii < i->second->initializers.size(); ii++)
-                  if (i->second->initializers[ii].first == name) { redundant = true; break; }
+                for (size_t j = 0; j < i->second->initializers.size(); j++)
+                  if (i->second->initializers[j].first == name) { redundant = true; break; }
                 if (!redundant)
                   i->second->initializers.push_back(initpair(name,addls.substr(spos,pos-spos)));
                 pos--; continue;

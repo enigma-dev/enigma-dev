@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _SCRIPT__H
+#define _SCRIPT__H
 
 #include "backend/JavaStruct.h"
 
@@ -17,3 +18,5 @@ struct Script
 
 	String code;
 };
+
+#endif

@@ -6,6 +6,9 @@
  * See LICENSE for details.
  */
 
+#ifndef _TRIGGER__H
+#define _TRIGGER__H
+
 #include "backend/JavaStruct.h"
 
 struct Trigger
@@ -15,3 +18,5 @@ struct Trigger
   int checkStep;
   String constant;
 };
+
+#endif

@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _POLYGON__H
+#define _POLYGON__H
 
 #include "backend/JavaStruct.h"
 #include "Point.h"
@@ -16,3 +17,5 @@ struct Polygon
 	Point *points;
 	int pointCount;
 };
+
+#endif

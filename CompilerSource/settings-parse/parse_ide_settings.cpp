@@ -40,8 +40,10 @@ using namespace std;
 #include "crawler.h"
 #include "eyaml.h"
 
+#include "parse_ide_settings.h"
+
 void clear_ide_editables();
-vector<string> explode(string n) {
+static inline vector<string> explode(string n) {
   vector<string> ret;
   size_t pos = 0, epos;
   while (is_useless(n[pos])) pos++;
@@ -109,7 +111,7 @@ void parse_ide_settings(const char* eyaml)
   
   #define eygl(fn,v) \
   {\
-    ifstream ifs((eyname = "ENIGMAsystem/SHELL/" #fn "/" + extensions::targetAPI.v ## Sys + "/Config/" + platn + ".ey").c_str()); \
+    ifs.open((eyname = "ENIGMAsystem/SHELL/" #fn "/" + extensions::targetAPI.v ## Sys + "/Config/" + platn + ".ey").c_str()); \
     if (ifs.is_open()) \
     { \
       ey_data l = parse_eyaml(ifs, eyname.c_str()); \

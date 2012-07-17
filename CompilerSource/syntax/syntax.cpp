@@ -33,7 +33,6 @@
 #include <iostream>
 
 #include "settings.h"
-#include "externs/externs.h"
 #include "general/parse_basics.h"
 #include "general/macro_integration.h"
 #include "parser/object_storage.h"
@@ -42,6 +41,13 @@
 #ifdef WRITE_UNIMPLEMENTED_TXT
 extern std::map <string, char> unimplemented_function_list;
 #endif
+
+#include <API/context.h>
+#include <System/macros.h>
+#include <System/lex_cpp.h>
+#include <Storage/definition.h>
+#include "languages/language_adapter.h"
+#include <compiler/jdi_utility.h>
 
 using namespace std;
 
@@ -142,12 +148,12 @@ namespace syncheck
          operatorlike;   // Operator like is true for OPERATOR, ASSOP, (, [, and statements expecting an expression.
     int macrolevel;
     unsigned match; // The index of the matching parenthesis/bracket/brace in the lex
-    externs* ext;
+    jdi::definition* ext;
     
     token(): type(TT_ERROR) {}
     token(TT t,              string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(0), ext(NULL) {}
     token(TT t, unsigned m,  string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(m), ext(NULL) {}
-    token(TT t, externs *ex, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(0), ext(ex) {}
+    token(TT t, jdi::definition *ex, string ct, pt p,pt l,bool s,bool bnf,bool ol,int ml): type(t), content(ct), pos(p), length(l), separator(s), breakandfollow(bnf), operatorlike(ol), macrolevel(ml), match(0), ext(ex) {}
     operator string() { 
       char buf[12]; sprintf(buf,"%lu",(long unsigned)pos);
       string str = string(TTN[type]) + "{" + buf + ", ";
@@ -231,26 +237,25 @@ namespace syncheck
         const string name = code.substr(spos,pos-spos);
         
         // First, check if it's a macro.
-        maciter mi = macros.find(name);
-        if (mi != macros.end())
+        jdi::macro_iter_c itm = main_context->get_macros().find(name);
+        if (itm != main_context->get_macros().end())
         {
           if (!macro_recurses(name,mymacrostack,mymacroind))
           {
-            string macrostr = mi->second;
-            if (mi->second.argc != -1) //Expect ()
-            {
-              pt cwp = skip_comments(code,pos);
-              if (code[cwp] != '(')
-                goto not_a_macro;
-              if (!macro_function_parse(code.c_str(),code.length(),name,pos,macrostr,mi->second.args,mi->second.argc,mi->second.args_uat,false,true)) {
-                syerr = macrostr;
-                return superPos;
-              }
+            string macrostr;
+            if (itm->second->argc != -1) {
+              vector<string> mpvec;
+              jdip::macro_function* mf = (jdip::macro_function*)itm->second;
+              jdip::lexer_cpp::parse_macro_params(mf, main_context->get_macros(), code.c_str(), pos, code.length(), mpvec, jdip::token_t(), jdi::def_error_handler);
+              char *mss, *mse; mf->parse(mpvec, mss, mse, jdip::token_t());
+              macrostr = string (mss, mse);
             }
+            else
+              macrostr = ((jdip::macro_scalar*)itm->second)->value;
             mymacrostack[mymacroind++].grab(name,code,pos);
             code = macrostr; pos = 0;
+            continue;
           }
-          continue;
         }
         
         not_a_macro:
@@ -270,16 +275,17 @@ namespace syncheck
         
         if (shared_object_locals.find(name) == shared_object_locals.end())
         {
-          if (find_extname(name, 0xFFFFFFFF))
+          jdi::definition *d = main_context->get_global()->look_up(name);
+          if (d)
           {
             // Handle typenames
-            if (ext_retriever_var->flags & EXTFLAG_TYPENAME) {
+            if (d->flags & jdi::DEF_TYPENAME) {
               if (lex[lexlast].type == TT_TYPE_NAME)
                 lex[lexlast].length = superPos - lex[lexlast].pos + name.length();
               else {
                 if (lex[lexlast].breakandfollow)
                   lex.push_back(token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
-                lex.push_back(token(TT_TYPE_NAME, ext_retriever_var, name, superPos, name.length(), false, false, false, mymacroind));
+                lex.push_back(token(TT_TYPE_NAME, d, name, superPos, name.length(), false, false, false, mymacroind));
               }
               continue;
             }
@@ -287,17 +293,17 @@ namespace syncheck
             if (lex[lexlast].breakandfollow)
               lex.push_back(token(TT_IMPLICIT_SEMICOLON, ";", superPos, 0, true, false, false, mymacroind));
             
-            if (ext_retriever_var->flags & EXTFLAG_NAMESPACE) {
-              lex.push_back(token(TT_NAMESPACE, ext_retriever_var, name, superPos, name.length(), false, false, false, mymacroind));
+            if (d->flags & jdi::DEF_NAMESPACE) {
+              lex.push_back(token(TT_NAMESPACE, d, name, superPos, name.length(), false, false, false, mymacroind));
               continue;
             }
             
-            if (ext_retriever_var->is_function()) {
-              lex.push_back(token(TT_FUNCTION, ext_retriever_var, name, superPos, name.length(), false, true, false, mymacroind));
+            if (d->flags & jdi::DEF_FUNCTION) {
+              lex.push_back(token(TT_FUNCTION, d, name, superPos, name.length(), false, true, false, mymacroind));
               continue;
             }
             // Global variables
-            lex.push_back(token(TT_VARNAME, ext_retriever_var, name, superPos, name.length(), false, true, false, mymacroind));
+            lex.push_back(token(TT_VARNAME, d, name, superPos, name.length(), false, true, false, mymacroind));
             continue;
           }
           
@@ -345,13 +351,8 @@ namespace syncheck
             if (code[pos+1] == '=')
               lex.push_back(token(TT_ASSOP, ":", superPos, 2, true, false, false, mymacroind)), pos += 2;
             else if (code[pos+1] == ':') {
-              if (lex[lexlast].type != TT_NAMESPACE)
-              {
-                if (!lex[lexlast].separator)
-                  return (syerr = lex[lexlast].type == TT_VARNAME?"Unexpected namespace accessor: `"+lex[lexlast].content+"' is not a namespace":"Unexpected namespace accessor at this point", superPos);
-                immediate_scope = &global_scope;
-              } else
-                immediate_scope = lex[lexlast].ext;
+              return (syerr = "Cannot handle :: with current parser configuration. Oops.", superPos);
+              
               lex.push_back(token(TT_SCOPEACCESS, "::", superPos, 2, false, false, true, mymacroind)), pos += 2;
             }
             else
@@ -600,8 +601,7 @@ namespace syncheck
           {
             bool contented = false;
             unsigned params = 0, exceeded_at = 0;
-            const unsigned minarg = lex[i].ext->parameter_count_min();
-            const unsigned maxarg = lex[i].ext->parameter_count_max();
+            unsigned minarg, maxarg; definition_parameter_bounds(lex[i].ext, minarg, maxarg);
             const unsigned lm = lex[i+1].match;
             for (unsigned ii = i+2; ii < lm; ii++)
             {
@@ -617,7 +617,7 @@ namespace syncheck
             }
             params += contented;
             #ifndef WRITE_UNIMPLEMENTED_TXT
-            if (!lex[i].ext->refstack.is_varargs()) {
+            if (!referencers_varargs(((jdi::definition_function*)lex[i].ext)->referencers)) {
               if (exceeded_at)
                 return (syerr = "Too many arguments to function `" + lex[i].content + "': provided " + tostring(params) + ", allowed " + tostring(maxarg) + ".", lex[exceeded_at].pos);
               if (params > maxarg)

@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _FONT__H
+#define _FONT__H
 
 #include "backend/JavaStruct.h"
 #include "backend/sub/Glyph.h"
@@ -25,3 +26,5 @@ struct Font
 
 	Glyph *glyphs; //count = rangeMax - rangeMin
 };
+
+#endif

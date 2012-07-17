@@ -50,8 +50,7 @@
 #include <vector> //Store case labels
 #include <cstdlib> //stdout, fflush
 #include <cstdio> //stdout, fflush
-using namespace std; //More ease
-#include "externs/externs.h" //To interface with externally defined types and functions
+using namespace std; //More ease //To interface with externally defined types and functions
 #include "parser_components.h" //duh
 
 #include "general/darray.h"
@@ -63,6 +62,8 @@ using namespace std; //More ease
 #include "settings.h"
 #include "parser.h"
 
+#include "Storage/definition.h"
+#include "System/builtins.h"
 
 //This adds all keywords to a tree structure for quick lookup of their token.
 void parser_init()
@@ -188,13 +189,11 @@ string parser_main(string code, parsed_event* pev)
   //cout << code << endl;
 
   if (pev) { cout << "collecting variables..."; fflush(stdout);
-    collect_variables(code,synt,pev); cout << " done>"; fflush(stdout);
+    collect_variables(current_language, code,synt,pev); cout << " done>"; fflush(stdout);
   }
 
   return code;
 }
-
-#include "cfile_parse/type_resolver.h"
 
 typedef map<string,dectrip> localscope;
 pt move_to_beginning(string& code, string& synt, pt pos)
@@ -245,7 +244,7 @@ pt end_of_brackets(const string& synt, pt pos) // Given a string and the index O
   return pos;
 }
 
-extern externs *enigma_type__var, *enigma_type__variant;
+extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 
 // A little structure to hold detatched cases.
 // Code and synt have their own, identical lengths; they are the expression following the `case` token.
@@ -343,19 +342,11 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       string member = code.substr(epos+1,ep-epos-1);
 
       // Determine the type of the left-hand expression
-      cout << "GET TYPE OF " << exp << endl;
-      onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
-      if (n.type == NULL) n.type = builtin_type__int;
-      externs* ct = n.type;
-      bool tf = (ct->members.find(member) != ct->members.end());
-      while (!tf and ct->flags & EXTFLAG_TYPEDEF and ct->type)
-        ct = ct->type, tf = (ct->members.find(member) != ct->members.end());
-      if (!tf and find_in_all_ancestors_generic(ct,member))
-        ct = ext_retriever_var->parent, tf = true;
-
-      cout << exp << ": " << n.type->name << " :: " << member << " => " << tf << " _ " << level << endl;
-
-      if (!tf) // No member by this name can be accessed
+      cout << "Request for type of " << exp << ": returning int!" << endl;
+      jdi::definition *ct = jdi::builtin_type__int;
+      // FIXME: IF YOU DARE: Actually resolve the expression
+      
+      if (true) // No member by this name can be accessed
       {
         string repstr;
         string repsyn;
@@ -387,14 +378,6 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         synt.replace(ebp, exp.length() + 1 + member.length(), repsyn);
         pos = ebp + repstr.length() - 1;
       }
-      else // There is a member by this name in the type of that expression
-      {
-        if (n.pad > 0 or n.deref) { // The type is a pointer. This dot should be a ->
-          code.replace(epos,1,"->");
-          synt.replace(epos,1,"->");
-          pos = epos + 1;
-        }
-      }
       cout << "New level: " << level << endl << "code from here: " << code.substr(pos) << endl;
       continue;
     }
@@ -402,10 +385,10 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     {
       const pt sp = move_to_beginning(code,synt,pos-1);
       const string exp = code.substr(sp,pos-sp);
-      cout << "GET TYPE2 OF " << exp << endl;
+      /*cout << "GET TYPE2 OF " << exp << endl;
       onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
       if (n.type == enigma_type__var and !n.pad and !n.deref)
-      {
+      {*/
         pt cp = pos;
         code[cp++] = '(';
         for (int cnt = 1; cnt; cp++)
@@ -413,7 +396,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           else if (synt[cp] == ']') cnt--;
         if (synt[--cp] == ']')
           code[cp] = ')';
-      }
+      /*}
       else if (n.pad or n.deref) // Regardless of type, as long as we have some kind of pointer to be dereferenced
       {
         const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
@@ -422,7 +405,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         pos++; // Move after the '['
         code.insert(pos, "int(");
         synt.insert(pos, "ccc(");
-      }
+      }*/
       level++;
     }
     else switch (synt[pos])

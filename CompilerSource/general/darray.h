@@ -59,7 +59,7 @@ struct darray
     return where[ind];
   }
   darray() { where=new atype[1]; allocd=(where!=0); }
-  ~darray() { if (where != 0) delete[] where; }
+  ~darray() { delete[] where; }
 };
 
 //extern void post_access_watch(unsigned,unsigned,unsigned);
@@ -99,7 +99,7 @@ struct varray
     return *(where[ind]);
   }
   varray() { safety_val=new atype; where=new atype*[1]; allocd=(where!=0); if (allocd==0 or safety_val==0) exit(-18); where[0]=0; size=0; }
-  ~varray() { if (where != 0) for (unsigned int i=0; i<size; i++) delete where[i]; }
+  ~varray() { if (where != 0) for (unsigned int i=0; i<size; i++) delete where[i]; delete[] where; delete safety_val; }
 };
 
 template <typename atype>

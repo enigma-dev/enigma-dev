@@ -88,6 +88,24 @@ namespace quick {
           In other words, returns whether any of the nodes in our stack
           are in use. **/
       bool empty() { return !ntop->prev; }
+      
+      /// Standard iterator type
+      class iterator {
+        node *n; ///< The node content of this iterator
+        friend class quick::stack<tp>;
+        iterator(node *np): n(np) {}
+        public:
+          tp &operator*() const  { return n->data; }
+          tp *operator->() const { return &n->data; }
+          iterator &operator--()    { n = n->prev; return *this; }
+          iterator  operator--(int) { return iterator(n->prev);  }
+          iterator &operator++()    { n = n->next; return *this; }
+          iterator  operator++(int) { return iterator(n->next);  }
+          bool operator==(const iterator& it) const { return n == it.n; }
+          bool operator!=(const iterator& it) const { return n != it.n; }
+      };
+      iterator begin() { return iterator(ntop); }
+      iterator end() { return iterator(NULL); }
   };
 }
 

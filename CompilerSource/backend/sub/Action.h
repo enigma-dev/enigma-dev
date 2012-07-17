@@ -6,6 +6,8 @@
  * See LICENSE for details.
  */
 
+#ifndef _ACTION__H
+#define _ACTION__H
 
 #include "backend/JavaStruct.h"
 
@@ -18,3 +20,5 @@ struct Action
   
 	//Argument[] arguments;
 };
+
+#endif

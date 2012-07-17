@@ -31,16 +31,18 @@
 
 using namespace std;
 
-#include "externs/externs.h"
+
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "compiler/compile_common.h"
 
+#include "languages/lang_CPP.h"
+
 int global_script_argument_count = 0;
 
-int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
+int lang_CPP::compile_writeGlobals(EnigmaStruct*, parsed_object* global)
 {
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out);

@@ -6,7 +6,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -48,6 +48,7 @@ namespace parse_bacics {
     whatever['\t'] |= is_::SPACER;
     whatever['\r'] |= is_::NEWLINE;
     whatever['\n'] |= is_::NEWLINE;
+    whatever[0x0C] |= is_::NEWLINE;
   }
 
   is_ is;

@@ -39,16 +39,11 @@ using namespace std;
 
 #include "general/darray.h"
 
-#include "externs/externs.h"
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 #include "compiler/compile.h"
-#include "cfile_parse/cfile_parse.h"
-#include "cfile_parse/type_resolver.h"
 #include "syntax/checkfile.h"
 #include "OS_Switchboard.h"
-
-my_string fca(const char* fn);
 
 int m_prog_loop_cfp();
 
@@ -70,8 +65,7 @@ int m_prog_loop_cfp();
    #define PRINT_TIME() ((double(tn.tv_sec - ts.tv_sec) + double(tn.tv_usec - ts.tv_usec)/1000000.0)*1000)
 #endif
 
-extern void print_err_line_at(pt a);
-#include "cfile_parse/cfile_pushing.h"
+extern void print_err_line_at(size_t a);
 
 extern const char* establish_bearings(const char *compiler);
 
@@ -81,6 +75,9 @@ extern const char* establish_bearings(const char *compiler);
 #  undef dllexport
 #  define dllexport 
 #endif
+
+#include "languages/lang_CPP.h"
+#include <System/builtins.h>
 
 dllexport const char* libInit(EnigmaCallbacks* ecs)
 {
@@ -98,50 +95,33 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   }
   else cout << "IDE Not Found. Continuing without graphical output." << endl;
   
+  cout << "Choosing language... Eenie, meenie, minie, C++" << endl;
+  current_language_name = "CPP";
+  current_language = languages[current_language_name] = new lang_CPP();
+  
+  cout << "Implementing JDI basics" << endl;
+  jdi::add_gnu_declarators();
+  jdi::builtin.load_standard_builtins();
+  jdi::builtin.output_types();
+  cout << endl << endl;
+  
+  cout << "Reading GCC builtins" << endl;
   const char* a = establish_bearings("Compilers/" CURRENT_PLATFORM_NAME "/gcc.ey");
   if (a)
     cout << "ERROR: " << a << endl << "See scrollback for more information.\n";
+  
+  cout << "Creating parse context" << endl;
+  main_context = new jdi::context;
+  
   return a;
 }
 
-struct syntax_error {
-  const char*err_str;
-  int line, position;
-  int absolute_index;
-  void set(int x, int
-  y,int a, string s);
-} ide_passback_error;
-string error_sstring;
-
-
-void syntax_error::set(int x, int y, int a, string s)
-{
-  error_sstring = s;
-  err_str = error_sstring.c_str();
-  line = x, position = y;
-  absolute_index = a;
+dllexport void libFree() {
+  delete main_context;
+  delete current_language;
+  jdi::cleanup_declarators();
 }
 
-const char* heaping_pile_of_dog_shit = "\
-             /\n\
-            |    |\n\
-             \\    \\\n\
-      |       |    |\n\
-       \\     /    /     \\\n\
-    \\   |   |    |      |\n\
-     | /     /\\   \\    /\n\
-    / |     /# \\   |  |\n\
-   |   \\   *    `      \\\n\
-    \\    /   =  # `     |\n\
-     |  | #     ___/   /\n\
-    /   _`---^^^   `. |\n\
-   |  .*     #  =    | \\\n\
-     |  =   #      __/\n\
-    .\\____-------^^  `.\n\
-   /      #         #  \\\n\
-  |   =          =     |\n\
-  \\___    #     #___--^\n\
-      ^^^^^^^^^^^\n\n";
 
 #include "OS_Switchboard.h"
 #include "settings-parse/crawler.h"
@@ -150,100 +130,28 @@ const char* heaping_pile_of_dog_shit = "\
 
 extern void print_definition(string n);
 static bool firstpass = true;
-extern externs *enigma_type__var, *enigma_type__variant;
+
+#include "languages/language_adapter.h"
 
 dllexport syntax_error *definitionsModified(const char* wscode, const char* targetYaml)
 {
-  cout << "Parsing settings..." << flushl;
-    parse_ide_settings(targetYaml);
-  
-  cout << targetYaml << endl;
-  
-  cout << "Creating swap." << flushl;
-  externs oldglobal; map<string,macro_type> oldmacs; // These will essentially garbage collect at the end of this call
-  oldglobal.members.swap(global_scope.members);
-  oldmacs.swap(macros);
-  
-  cout << "Initializing global scope.";
-  cparse_init(); // Set up token info for the C header parser.
-  exp_typeof_init(); // Set up token info for the type coercion module.
-  
-  cout << "Dumping whiteSpace definitions...";
-  FILE *of = wscode ? fopen("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h","wb") : NULL;
-  if (of) fputs(wscode,of), fclose(of);
-  
-  cout << "Opening ENIGMA for parse..." << flushl;
-  my_string EGMmain = fca("ENIGMAsystem/SHELL/SHELLmain.cpp");
-  if (EGMmain == NULL)
-  {
-    /*char d[600];
-    GetCurrentDirectory(600,d);*/
-    cout << "ERROR: Failed to read main engine";
-    ide_passback_error.set(0,0,0,"ENIGMAsystem/SHELL/SHELLmain.cpp: File not found; parse cannot continue");
-    if (!firstpass) oldglobal.members.swap(global_scope.members), oldmacs.swap(macros); // Restore the original... unless there wasn't one.
-    firstpass = false; return &ide_passback_error;
-  }
-  
-  DECLARE_TIME();
-  START_TIME();
-  pt a = parse_cfile(EGMmain);
-  STOP_TIME();
-  
-  if (find_extname("var", EXTFLAG_TYPENAME))
-    enigma_type__var = ext_retriever_var;
-  if (find_extname("variant",EXTFLAG_TYPENAME))
-    enigma_type__variant = ext_retriever_var;
-  
-  if (a != pt(-1)) {
-    cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
-    cout << heaping_pile_of_dog_shit;
-    /*print_definition("__GNUC_PREREQ");*/
-    print_err_line_at(a);
-    ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
-    if (!firstpass) oldglobal.members.swap(global_scope.members), oldmacs.swap(macros);
-    firstpass = false;
-    return &ide_passback_error;
-  }
-  firstpass = false;
-  
-  cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME() << "ms)\n"
-  << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-  //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
-  
-  cout << "Initializing EDL Parser...\n";
-  
-  parser_init();
-  
-  cout << "Grabbing locals...\n";
-  
-  shared_locals_load(requested_extensions);
-  
-  cout << "Determining build target...\n";
-  
-  extensions::determine_target();
-  
-  cout << " Done.\n";
-  
-  return &ide_passback_error;
+  current_language->definitionsModified(wscode, targetYaml);
 };
 
-void quickmember_script(externs* scope, string name);
+void quickmember_script(jdi::definition_scope* scope, string name);
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
   //First, we make a space to put our scripts.
-  globals_scope = scope_get_using(&global_scope);
-  globals_scope = globals_scope->members["ENIGMA Resources"] = new externs("ENIGMA Resources",NULL,globals_scope,EXTFLAG_NAMESPACE);
+  jdi::definition_scope globals_scope("<ENIGMA Resources>", main_context->get_global(), jdi::DEF_NAMESPACE);
+  main_context->get_global()->use_namespace(&globals_scope);
   
   for (int i = 0; i < script_count; i++)
-    quickmember_script(globals_scope,script_names[i]);
+    quickmember_script(&globals_scope,script_names[i]);
   
   ide_passback_error.absolute_index = syncheck::syntacheck(code);
   error_sstring = syncheck::syerr;
   
   ide_passback_error.err_str = error_sstring.c_str();
-  
-  delete globals_scope;
-  scope_get_using(&global_scope)->members.erase("ENIGMA Resources");
   
   if (ide_passback_error.absolute_index != -1)
   {
