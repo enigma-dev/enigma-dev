@@ -141,18 +141,26 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
 void quickmember_script(jdi::definition_scope* scope, string name);
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
-  //First, we make a space to put our scripts.
-  jdi::definition_scope globals_scope("<ENIGMA Resources>", main_context->get_global(), jdi::DEF_NAMESPACE);
-  main_context->get_global()->use_namespace(&globals_scope);
+  cout << "Well, shucks; started." << endl;
   
+  //First, we make a space to put our scripts.
+  jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
+  
+  cout << "Checkpoint." << endl;
   for (int i = 0; i < script_count; i++)
     quickmember_script(&globals_scope,script_names[i]);
   
+  cout << "Starting syntax check." << endl;
   ide_passback_error.absolute_index = syncheck::syntacheck(code);
+  cout << "That's over." << endl;
   error_sstring = syncheck::syerr;
   
+  
+  
+  cout << "Copying error pointer." << endl;
   ide_passback_error.err_str = error_sstring.c_str();
   
+  cout << "Computing position." << endl;
   if (ide_passback_error.absolute_index != -1)
   {
     int line = 1, lp = 1;
@@ -167,5 +175,6 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
   }
   cout << "In checking code\n" << code << "\n\nat position " << ide_passback_error.absolute_index << "\n\n";
   cout << endl << "Line " << ide_passback_error.line << ", position " << ide_passback_error.position << ": " << ide_passback_error.err_str << endl<< endl;
+  cout << "All done." << endl;
   return &ide_passback_error;
 }

@@ -64,6 +64,24 @@ extern char getch();
 extern int cfile_parse_main();
 extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 
+inline string fc(const char* fn)
+{
+    FILE *pt = fopen(fn,"rb");
+    if (pt==NULL) return "";
+    else {
+      fseek(pt,0,SEEK_END);
+      size_t sz = ftell(pt);
+      fseek(pt,0,SEEK_SET);
+
+      char a[sz+1];
+      sz = fread(a,1,sz,pt);
+      fclose(pt);
+
+      a[sz] = 0;
+      return a;
+    }
+}
+
 inline void povers(string n)
 {
   jdi::definition *d = main_context->get_global()->look_up(n);
@@ -77,7 +95,11 @@ syntax_error *definitionsModified(const char*,const char*);
 
 #include "OS_Switchboard.h"
 #include "general/bettersystem.h"
+#include <System/builtins.h>
+#include "compiler/jdi_utility.h"
 
+syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code);
+int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
 int main(int argc, char* argv[])
 {
   puts("Attempting to run");
@@ -88,10 +110,10 @@ int main(int argc, char* argv[])
   current_language->definitionsModified(NULL, ((string) "%e-yaml\n"
     "---\n" 	 
     "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n" 	 
-    "target-graphics: OpenGL\n" 	 
+    /* "target-graphics: OpenGL\n" 	 
     "target-audio: OpenAL\n"
     "target-collision: BBox\n"
-    /* Straight from LGM on Linux
+    /* Straight from LGM on Linux */
     "treat-literals-as: 0\n"
     "sample-lots-of-radios: 0\n"
     "inherit-equivalence-from: 0\n"
@@ -109,16 +131,36 @@ int main(int argc, char* argv[])
     "target-widget: None\n"
     "target-collision: BBox\n"
     "target-networking: None\n"
-    */
+    /* */
     ).c_str());
-  libFree();
   //mainr(argc,argv);
-  /*string in2 = fc("./CompilerSource/cfile_parse/auxilary_gml.h");
-  int retval = syncheck::syntacheck(in2);
-  int l=0,p=0;
-  for (int i=0;i<retval;i++) { if (in2[i]=='\r') { l++; if (in2[i+1]=='\n') i++; p=i+1; } else if (in2[i]=='\n') { l++; p=i+1; } }
-  printf("Line %d, position %d (absolute index %d): %s\r\n",(l)+1,(retval-p)+1,retval,syncheck::syerr.c_str());
+  /*
+  string in2 = fc("./CompilerSource/test_gml.h");
+  cout << "Check file:" << endl << in2 << endl;
+  const char *name = "my_script";
+  syntax_error* a = syntaxCheck(1,&name,in2.c_str());
+  printf("Line %d, position %d (absolute index %d): %s\r\n",a->line,a->position,a->absolute_index,a->err_str);
+  {
+    jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
+    quickmember_variable(&globals_scope, jdi::builtin_type__int, "sprite0");
+  }
+  
+  EnigmaStruct es = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+  };
+  
+  SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
+  Sprite sprite = {"spr_0", 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 32, 32, &subimages, 1, NULL, 0};
+  Sprite sprites[2] = { sprite, sprite };
+  es.spriteCount = 2; es.sprites = sprites;
+  es.filename = "coolio.gmk";
+  es.fileVersion = 800;
+  
+  current_language->compile(&es, "/tmp/coolio.exe", 0);
   */
+  libFree();
+  
   //getchar();
   return 0;
 }

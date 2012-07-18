@@ -32,20 +32,6 @@ extern jdi::definition *enigma_type__varargs;
 
 extern string tostring(int val);
 
-inline void quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name) {
-  scope->members[name] = new jdi::definition_typed(name,type,scope,0);
-}
-inline void quickmember_script(jdi::definition_scope* scope, string name) {
-  jdi::ref_stack rfs;
-  jdi::ref_stack::parameter_ct params;
-  for (int i = 0; i < 16; ++i) {
-    jdi::ref_stack::parameter p;
-    p.def = enigma_type__variant;
-    params.throw_on(p);
-  }
-  scope->members[name] = new jdi::definition_function(name,enigma_type__var,scope,rfs,0,0);
-}
-
 inline string format_error(string code,string err,int pos)
 {
   if (pos == -1)

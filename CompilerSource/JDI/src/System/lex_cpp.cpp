@@ -626,7 +626,6 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
           break;
         }
         
-        cout << "Including " << filename << endl;
         openfile of(filename, line, lpos, *this);
         files.enswap(of);
         pair<set<string>::iterator, bool> fi = visited_files.insert(incfn);
@@ -901,7 +900,6 @@ token_t lexer_cpp::get_token(error_handler *herr)
   
   size_t sz = 0;
   for (quick::stack<openfile>::iterator it = files.begin(); it != files.end(); ++it) ++sz;
-  cout << "Popped back to " << filename << " (size = " << sz << ")" << endl;
   return get_token(herr);
 }
 

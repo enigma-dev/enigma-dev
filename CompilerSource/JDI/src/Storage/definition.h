@@ -313,12 +313,15 @@ namespace jdi {
     struct using_node {
       definition_scope *use; ///< Scope to search
       private: friend class definition_scope;
-        using_node *next; ///< The next node on our list, or NULL
+        using_node *next; ///< The next node on our list, or NULL.
+        using_node *prev; ///< The previous node on our list, or NULL, for removal purposes.
         using_node(definition_scope* scope); ///< Construct with a scope to use
         using_node(definition_scope* scope, using_node* prev); ///< Construct with previous node
     };
     /** Add a namespace to the using list. This can technically be used on any scope. **/
-    void use_namespace(definition_scope* scope);
+    using_node *use_namespace(definition_scope* scope);
+    /** Remove a previously added namespace from our using list. **/
+    void unuse_namespace(using_node *ns);
     /** Add a namespace to the using list. This can technically be used on any scope. **/
     void use_general(string name, definition* def);
     
@@ -519,6 +522,20 @@ namespace jdi {
     definition_hypothetical(string name, definition_scope *parent, unsigned flags, AST* def);
     definition_hypothetical(string name, definition_scope *parent, AST* def);
     ~definition_hypothetical();
+  };
+  
+  
+  //==========================================================================================
+  //===: User Definitions :===================================================================
+  //==========================================================================================
+  
+  // These definitions are not used by JDI, but rather are provided as utility classes for the
+  // end-user. Use them if you want. Or don't.
+  
+  struct using_scope: definition_scope {
+    jdi::definition_scope::using_node* using_me;
+    using_scope(string name, definition_scope* user);
+    ~using_scope();
   };
 }
 

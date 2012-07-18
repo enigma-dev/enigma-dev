@@ -62,3 +62,24 @@ bool lang_CPP::global_exists(string n) {
   definition* d = main_context->get_global()->look_up(n);
   return d;
 }
+
+
+void quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name) {
+  cout << "Address on my side: " << scope << endl;
+  cout << "Char on this side: " << (*(char**)&scope->name) << endl;
+  cout << "Name on my side: `" << scope->name << "'" << endl;
+  cout << "Insert `" << name << "' into `" << flush << scope->name << "'";
+  scope->members[name] = new jdi::definition_typed(name,scope,type,0);
+}
+void quickmember_script(jdi::definition_scope* scope, string name) {
+  jdi::ref_stack rfs;
+  jdi::ref_stack::parameter_ct params;
+  for (int i = 0; i < 16; ++i) {
+    jdi::ref_stack::parameter p;
+    p.def = enigma_type__variant;
+    p.defaulted = true;
+    params.throw_on(p);
+  }
+  rfs.push_func(params);
+  scope->members[name] = new jdi::definition_function(name,enigma_type__var,scope,rfs,0,0);
+}

@@ -108,11 +108,20 @@ namespace jdi {
         return res;
     return NULL;
   }
-  void definition_scope::use_namespace(definition_scope *ns) {
+  definition_scope::using_node *definition_scope::use_namespace(definition_scope *ns) {
+    using_node *res;
     if (using_back)
-      using_back = new using_node(ns, using_back);
+      res = using_back = new using_node(ns, using_back);
     else
-      using_front = using_back = new using_node(ns);
+      res = using_front = using_back = new using_node(ns);
+    return res;
+  }
+  void definition_scope::unuse_namespace(definition_scope::using_node *n) {
+    if (using_back == n) using_back = n->next;
+    if (using_front == n) using_front = n->next;
+    if (n->next) n->next->prev = n->prev;
+    if (n->prev) n->prev->next = n->next;
+    delete n;
   }
   void definition_scope::use_general(string n, definition *def) {
     using_general.insert(pair<string,definition*>(n,def));
@@ -141,8 +150,8 @@ namespace jdi {
     }
     members.clear();
   }
-  definition_scope::using_node::using_node(definition_scope* scope): use(scope), next(NULL) { }
-  definition_scope::using_node::using_node(definition_scope* scope, using_node* prev): use(scope), next(NULL) { prev->next = this; }
+  definition_scope::using_node::using_node(definition_scope* scope): use(scope), next(NULL), prev(NULL) { }
+  definition_scope::using_node::using_node(definition_scope* scope, using_node* nprev): use(scope), next(nprev->next), prev(nprev) { nprev->next = this; }
   
   definition_class::ancestor::ancestor(unsigned protection_level, definition_class* inherit_from): protection(protection_level), def(inherit_from) {}
   definition_class::ancestor::ancestor() {}
@@ -290,6 +299,10 @@ namespace jdi {
   definition_hypothetical::definition_hypothetical(string n, definition_scope *p, unsigned f, AST* d): definition(n,p,f|DEF_HYPOTHETICAL), def(d) {}
   definition_hypothetical::definition_hypothetical(string n, definition_scope *p, AST* d): definition(n,p,DEF_HYPOTHETICAL), def(d) {}
   definition_hypothetical::~definition_hypothetical() { delete def; }
+  
+  
+  using_scope::using_scope(string n, definition_scope* u): definition_scope(n, u, DEF_NAMESPACE), using_me(u->use_namespace(this)) {}
+  using_scope::~using_scope() { parent->unuse_namespace(using_me); }
   
   //========================================================================================================
   //======: Re-map Functions :==============================================================================

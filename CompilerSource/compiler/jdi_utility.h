@@ -27,9 +27,13 @@
 #include <Storage/definition.h>
 int referencers_varargs_at(jdi::ref_stack &refs);
 static inline bool referencers_varargs(jdi::ref_stack &refs) {
-  return referencers_varargs(refs) != -1; // I'm afraid to put ~referencers_varargs because (1) the optimizer should do that and (2) I have no idea what C++ guarantees
+  return referencers_varargs_at(refs) != -1; // I'm afraid to put ~referencers_varargs because (1) the optimizer should do that and (2) I have no idea what C++ guarantees
 }
 /// Read parameter bounds from the current definition into args min and max. For variadics, max = unsigned(-1).
 void definition_parameter_bounds(jdi::definition *d, unsigned &min, unsigned &max);
+/// Create a standard variable member in the given scope.
+void quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name);
+/// Create a script with the given name (and an assumed 16 parameters, all defaulted) to the given scope.
+void quickmember_script(jdi::definition_scope* scope, string name);
 
 #endif

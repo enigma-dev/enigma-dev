@@ -71,6 +71,8 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
+#include "compiler/jdi_utility.h"
+
 #ifdef WRITE_UNIMPLEMENTED_TXT
 std::map <string, char> unimplemented_function_list;
 #endif
@@ -82,7 +84,7 @@ inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-string string_replace_all(string str,string substr,string nstr)
+inline string string_replace_all(string str,string substr,string nstr)
 {
   pt pos=0;
   while ((pos=str.find(substr,pos)) != string::npos)
@@ -95,20 +97,19 @@ string string_replace_all(string str,string substr,string nstr)
 
 inline string fc(const char* fn)
 {
-    FILE *pt = fopen(fn,"rb");
-    if (pt==NULL) return "";
-    else {
-      fseek(pt,0,SEEK_END);
-      size_t sz = ftell(pt);
-      fseek(pt,0,SEEK_SET);
+  FILE *pt = fopen(fn,"rb");
+  if (pt==NULL) return "";
+  
+  fseek(pt,0,SEEK_END);
+  size_t sz = ftell(pt);
+  fseek(pt,0,SEEK_SET);
 
-      char a[sz+1];
-      sz = fread(a,1,sz,pt);
-      fclose(pt);
+  char a[sz+1];
+  sz = fread(a,1,sz,pt);
+  fclose(pt);
 
-      a[sz] = 0;
-      return a;
-    }
+  a[sz] = 0;
+  return a;
 }
 
 string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); i++) res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i]; return res; }
@@ -241,8 +242,7 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
 
   //First, we make a space to put our globals.
-    jdi::definition_scope globals_scope("<ENIGMA Resources>", main_context->get_global(), jdi::DEF_NAMESPACE);
-    main_context->get_global()->use_namespace(&globals_scope);
+  jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
 
   idpr("Copying resources",1);
 
@@ -250,8 +250,14 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "COPYING SOME F*CKING RESOURCES:" << flushl;
 
   edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
-  for (int i = 0; i < es->spriteCount; i++)
+  for (int i = 0; i < es->spriteCount; i++) {
+    cout << "Name on this side: " << globals_scope.name << endl;
+    cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
+    cout << "Pointer on this side: " << (&globals_scope) << endl;
+    cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
+    cout << "Char on this side: " << (*(char**)&globals_scope.name) << endl;
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
+  }
 
   edbg << "Copying sound names [" << es->soundCount << "]" << flushl;
   for (int i = 0; i < es->soundCount; i++)

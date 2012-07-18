@@ -62,6 +62,7 @@ int shared_locals_load(vector<string> exts)
     }
   if (not(parent->flags & jdi::DEF_CLASS)) {
     cerr << "PARSE ERROR! Parent class is not a class?" << endl;
+    cout << parent->toString() << endl;
     return 3;
   }
   jdi::definition_class *pclass = (jdi::definition_class*)parent;
