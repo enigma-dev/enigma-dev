@@ -187,7 +187,7 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
           token = read_next_token(scope);
           
           // Read a new type
-          read_referencers(tp.refs, lex, token, scope, this, herr);
+          read_referencers(tp.refs, tp, lex, token, scope, this, herr);
           
           // Just hop into the error checking above and pass through the definition addition again.
         return handle_declarators(scope, token, tp, inherited_flags, res);

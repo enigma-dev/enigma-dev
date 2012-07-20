@@ -28,6 +28,7 @@
 #include <System/lex_buffer.h>
 #include <Parser/bodies.h>
 #include <API/compile_settings.h>
+#include <cstring>
 #include <cstdio>
 #include <map>
 
@@ -78,7 +79,7 @@ namespace jdi
             lb.reset(); lex = &lb;
             token = get_next_token();
             if (is_cast) {
-              read_referencers(ft.refs, lex, token, search_scope, NULL, herr); // Read all referencers
+              read_referencers(ft.refs, ft, lex, token, search_scope, NULL, herr); // Read all referencers
               track(ft.refs.toString());
               myroot = new AST_Node_Type(ft);
               token_basics(
@@ -102,7 +103,7 @@ namespace jdi
             lex = lb.fallback_lexer;
           }
           else {
-            read_referencers(ft.refs, lex, token, search_scope, NULL, herr); // Read all referencers
+            read_referencers(ft.refs, ft, lex, token, search_scope, NULL, herr); // Read all referencers
             myroot = new AST_Node_Type(ft);
             token_basics(
               myroot->type = AT_TYPE,
@@ -493,27 +494,32 @@ namespace jdi
   //=: Evaluators :============================================================================================================
   //===========================================================================================================================
   
-  value AST::eval() {
+  value AST::eval() const {
     if (!root) return value();
     return root->eval();
   }
   
-  value AST::AST_Node::eval() {
+  value AST::AST_Node::eval() const {
     if (type == AT_DECLITERAL) {
       dec_literal:
-      bool is_float = false;
-      while (is_letter(content[content.length()-1])) {
-        if (content[content.length()-1] == 'f' or content[content.length()-1] == 'd'
-        or  content[content.length()-1] == 'F' or content[content.length()-1] == 'D')
-          is_float = true;
-        content.erase(content.length()-1);
-      }
-      if (!is_float)
-        for (size_t i = 0; i < content.length(); i++)
-          if (content[i] == '.' or  content[i] == 'E' or content[i] == 'e')
+      if (is_letter(content[content.length() - 1])) {
+        bool is_float = false;
+        char *number = (char*)alloca(content.length());
+        memcpy(number, content.c_str(), content.length() * sizeof(char));
+        // This block will fail if the number is all letters--but we know it isn't.
+        for (char *i = number + content.length() - 1; is_letter(*i); --i) {
+          if (*i == 'f' or *i == 'd' or  *i == 'F' or *i == 'D')
             is_float = true;
-      if (is_float)
-        return value(atof(content.c_str()));
+          *i = 0;
+        }
+        if (!is_float)
+          for (size_t i = 0; i < content.length(); i++)
+            if (content[i] == '.' or  content[i] == 'E' or content[i] == 'e')
+              is_float = true;
+        if (is_float)
+          return value(atof(number));
+        return value(atol(number));
+      }
       return value(atol(content.c_str()));
     }
     if (type == AT_OCTLITERAL) {
@@ -528,17 +534,17 @@ namespace jdi
     }
     return value();
   }
-  value AST::AST_Node_Definition::eval() {
+  value AST::AST_Node_Definition::eval() const {
     if (def and (def->flags & DEF_VALUED))
       return ((definition_valued*)def)->value_of;
     return value();
   }
-  value AST::AST_Node_Ternary::eval() {
+  value AST::AST_Node_Ternary::eval() const {
     if (!exp) return value();
     value e = exp->eval();
     return value_boolean(e)? (left?left->eval():value()) : (right?right->eval():value());
   }
-  value AST::AST_Node_Binary::eval() {
+  value AST::AST_Node_Binary::eval() const {
     if (!left or !right) return value();
     symbol_iter si = symbols.find(content);
     if (si == symbols.end()) return value();
@@ -549,16 +555,20 @@ namespace jdi
     //cout << l.val.i << " " << content << " " << r.val.i << " = " << res.val.i << endl;
     return res;
   }
-  value AST::AST_Node_Scope::eval() {
+  value AST::AST_Node_Scope::eval() const {
     full_type res = left->coerce();
     if (!res.def or !(res.def->flags & DEF_SCOPE))
       return value();
     definition* d = ((definition_scope*)res.def)->look_up(right->content);
-    if (!d or not(d->flags & DEF_VALUED))
-      return value();
+    if (!d or not(d->flags & DEF_VALUED)) {
+      #ifdef DEBUG_MODE
+        cout << "Failure: No `" << right->content << "' found in scope `" << res.def->name << "'" << endl;
+      #endif
+      return value(long(0));
+    }
     return ((definition_valued*)d)->value_of;
   }
-  value AST::AST_Node_Unary::eval() {
+  value AST::AST_Node_Unary::eval() const {
     if (!operand) { cout << "No operand to unary (operator" << content << ")!" << endl; return value(); }
     if (prefix) {
       if (!symbols[content].operate_unary_pre) { cout << "No method to unary (operator" << content << ")!" << endl; return value(); }
@@ -574,16 +584,16 @@ namespace jdi
   /*value AST::AST_Node_Group::eval() {
     return root?root->eval():value();
   }*/
-  value AST::AST_Node_Parameters::eval() {
+  value AST::AST_Node_Parameters::eval() const {
     return value(); // We can't evaluate a function call ;_;
   }
-  value AST::AST_Node_Type::eval() {
+  value AST::AST_Node_Type::eval() const {
     return 0L;
   }
-  value AST::AST_Node_sizeof::eval() {
+  value AST::AST_Node_sizeof::eval() const {
     return (long)operand->coerce().def->size_of();
   }
-  value AST::AST_Node_Cast::eval() {
+  value AST::AST_Node_Cast::eval() const {
     if (cast_type.def == builtin_type__int)
       if (cast_type.flags & builtin_flag__long)
         if (cast_type.flags & builtin_flag__unsigned)
@@ -609,7 +619,7 @@ namespace jdi
     cout << "WELL, FUCK." << endl;
     return value();
   }
-  value AST::AST_Node_Array::eval() {
+  value AST::AST_Node_Array::eval() const {
     return elements.size()? elements.front()->eval() : value(0l);
   }
   
@@ -617,11 +627,11 @@ namespace jdi
   //=: Coercers :==============================================================================================================
   //===========================================================================================================================
   
-  full_type AST::coerce() {
+  full_type AST::coerce() const {
     return root? root->coerce() : full_type();
   }
   
-  full_type AST::AST_Node::coerce() {
+  full_type AST::AST_Node::coerce() const {
     full_type res;
     res.def = builtin_type__int;
     res.flags = 0;
@@ -639,12 +649,12 @@ namespace jdi
     return res;
   }
   
-  full_type AST::AST_Node_Binary::coerce() {
+  full_type AST::AST_Node_Binary::coerce() const {
     //TODO: Implement using operator() functions.
     return left->coerce();
   }
   
-  full_type AST::AST_Node_Scope::coerce() {
+  full_type AST::AST_Node_Scope::coerce() const {
     full_type res = left->coerce();
     if (!res.def or !(res.def->flags & DEF_SCOPE))
       return full_type();
@@ -652,11 +662,11 @@ namespace jdi
     return res;
   }
   
-  full_type AST::AST_Node_Cast::coerce() {
+  full_type AST::AST_Node_Cast::coerce() const {
     return cast_type.def; // FIXME: Replace with cast_type (fulltype)
   }
   
-  full_type AST::AST_Node_Definition::coerce() {
+  full_type AST::AST_Node_Definition::coerce() const {
     full_type res;
     if (def->flags & DEF_TYPED) {
       res.def = ((definition_typed*)def)->type;
@@ -668,7 +678,7 @@ namespace jdi
     return res;
   }
   
-  full_type AST::AST_Node_Parameters::coerce() {
+  full_type AST::AST_Node_Parameters::coerce() const {
     #ifdef DEBUG_MODE
       if (func->type != AT_DEFINITION or !((AST_Node_Definition*)func)->def or !(((AST_Node_Definition*)func)->def->flags & DEF_FUNCTION)) {
         cerr << "Left-hand of parameter list not a function";
@@ -677,7 +687,7 @@ namespace jdi
     #endif
     vector<full_type> param_types;
     param_types.reserve(params.size());
-    for (vector<AST_Node*>::iterator it = params.begin(); it != params.end(); ++it)
+    for (vector<AST_Node*>::const_iterator it = params.begin(); it != params.end(); ++it)
       param_types.push_back((*it)->coerce());
     definition_function* df = (definition_function*)((AST_Node_Definition*)func)->def;
     // TODO: Overload resolution
@@ -689,14 +699,14 @@ namespace jdi
     return res;
   }
   
-  full_type AST::AST_Node_sizeof::coerce() {
+  full_type AST::AST_Node_sizeof::coerce() const {
     full_type res;
     res.def = builtin_type__long;
     res.flags = builtin_flag__unsigned;
     return res;
   }
   
-  full_type AST::AST_Node_Ternary::coerce() {
+  full_type AST::AST_Node_Ternary::coerce() const {
     full_type t1 = left->coerce();
     #ifdef DEBUG_MODE
       if (t1 != right->coerce()) cerr << "ERROR: Operands to ternary operator differ in type." << endl;
@@ -704,12 +714,12 @@ namespace jdi
     return t1;
   }
   
-  full_type AST::AST_Node_Type::coerce() {
+  full_type AST::AST_Node_Type::coerce() const {
     full_type ret; ret.copy(dec_type);
     return ret;
   }
   
-  full_type AST::AST_Node_Unary::coerce() {
+  full_type AST::AST_Node_Unary::coerce() const {
     switch (content[0]) {
       case '+':
       case '-':
@@ -725,7 +735,7 @@ namespace jdi
     }
   }
   
-  full_type AST::AST_Node_Array::coerce() {
+  full_type AST::AST_Node_Array::coerce() const {
     if (elements.size()) {
       full_type res = elements[0]->coerce();
       res.refs.push_array(elements.size());

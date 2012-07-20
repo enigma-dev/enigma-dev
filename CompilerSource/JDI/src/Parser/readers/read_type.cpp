@@ -35,7 +35,7 @@ using namespace jdi;
 full_type jdip::read_fulltype(lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr) {
   full_type ft = read_type(lex, token, scope, cp, herr);
   if (ft.def)
-    jdip::read_referencers(ft.refs, lex, token, scope, cp, herr);
+    jdip::read_referencers(ft.refs, ft, lex, token, scope, cp, herr);
   return ft;
 }
 
@@ -76,7 +76,6 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
                 if (read_template_parameters(k, dt, lex, token, scope, cp, herr))
                   return full_type();
                 rdef = dt->instantiate(k);
-                token = lex->get_token_in_scope(scope, herr);
               }
             }
             else {
@@ -86,13 +85,12 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
             }
           }
           else if (token.def->flags & DEF_SCOPE) {
-            definition_scope* as = scope;
-            as = (definition_scope*)token.def;
-            token_t la = lex->get_token_in_scope(as, herr);
+            token_t la = lex->get_token_in_scope(scope, herr);
             if (la.type != TT_SCOPE) {
               token.report_error(herr, "Expected type or qualified-id here; scope `" + token.def->name + "' does not name a type");
               return full_type();
             }
+            definition_scope* as = (definition_scope*)token.def;
             token = lex->get_token_in_scope(as);
             if (token.type != TT_DEFINITION and token.type != TT_DECLARATOR) {
               token.report_errorf(herr, "Expected type or qualified-id before %s");
@@ -125,6 +123,7 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
           token.report_error(herr, "Expected type name here; `" + rdef->name + "' does not name a type");
           return NULL;
         }
+        token = lex->get_token_in_scope(scope, herr);
       }
       else if (token.type == TT_ELLIPSIS) {
         rdef = builtin_type__va_list;
@@ -229,7 +228,7 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
 }
 
 #include <General/debug_macros.h>
-int jdip::read_referencers(ref_stack &refs, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr)
+int jdip::read_referencers(ref_stack &refs, const full_type& ft, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr)
 {
   #ifdef DEBUG_MODE
   static int number_of_times_GDB_dropped_its_ass = 0;
@@ -245,13 +244,13 @@ int jdip::read_referencers(ref_stack &refs, lexer *lex, token_t &token, definiti
       
       case TT_LEFTPARENTH: { // Either a function or a grouping
         token = lex->get_token_in_scope(scope, herr);
-        if (token.type == TT_DECLARATOR || token.type == TT_DECFLAG || token.type == TT_RIGHTPARENTH || token.type == TT_DECLTYPE) {
+        if (ft.def == scope and (token.type != TT_OPERATOR or token.content.len != 1 or *token.content.str != '*')) {
           if (read_function_params(refs, lex, token, scope, cp, herr)) return 1;
           ref_stack appme; int res = read_referencers_post(appme, lex, token, scope, cp, herr);
           refs.append_c(appme); return res;
         }
         ref_stack nestedrefs;
-        read_referencers(nestedrefs, lex, token, scope, cp, herr);
+        read_referencers(nestedrefs, ft, lex, token, scope, cp, herr); // It's safe to recycle ft because we already know we're not a constructor at this point.
         if (token.type != TT_RIGHTPARENTH) {
           token.report_errorf(herr, "Expected right parenthesis before %s to close nested referencers");
           FATAL_RETURN(1);
@@ -304,7 +303,7 @@ int jdip::read_referencers(ref_stack &refs, lexer *lex, token_t &token, definiti
       
       case TT_OPERATORKW: {
           token = lex->get_token_in_scope(scope, herr);
-          if (token.type == TT_OPERATOR) {
+          if (token.type == TT_OPERATOR or token.type == TT_LESSTHAN or token.type == TT_GREATERTHAN) {
             refs.name = "operator" + token.content.toString();
           }
           else if (token.type == TT_LEFTBRACKET) {
@@ -443,7 +442,8 @@ int jdip::read_function_params(ref_stack &refs, lexer *lex, token_t &token, defi
     if (token.type == TT_ENDOFCODE)
       return 1;
     full_type a = read_fulltype(lex,token,scope,cp,herr);
-    ref_stack::parameter param; param.swap_in(a);
+    ref_stack::parameter param; // Instantiate a parameter
+    param.swap_in(a); // Give it our read-in full type (including ref stack, which is costly to copy)
     param.variadic = cp? cp->variadics.find(param.def) != cp->variadics.end() : false;
     params.throw_on(param);
     if (token.type == TT_OPERATOR) {

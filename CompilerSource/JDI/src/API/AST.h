@@ -86,9 +86,9 @@ namespace jdi {
       #endif
       
       /// Evaluates this node recursively, returning a value containing its result.
-      virtual value eval();
+      virtual value eval() const;
       /// Coerces this node recursively for type, returning a full_type representing it.
-      virtual full_type coerce();
+      virtual full_type coerce() const;
       
       AST_Node(); ///< Default constructor.
       AST_Node(string ct); ///< Constructor, with content string.
@@ -107,9 +107,9 @@ namespace jdi {
       bool prefix; ///< True if we are a unary prefix, false otherwise.
       
       /// Evaluates this node recursively, returning a value containing its result.
-      value eval();
+      virtual value eval() const;
       /// Coerces this node recursively for type, returning a full_type representing it.
-      full_type coerce();
+      virtual full_type coerce() const;
       
       AST_Node_Unary(AST_Node* r = NULL); ///< Default constructor. Sets children to NULL.
       AST_Node_Unary(AST_Node* r, string ct, bool pre); ///< Complete constructor, with child node and operator string.
@@ -124,16 +124,16 @@ namespace jdi {
     /// Child of AST_Node_Unary specifically for sizeof
     struct AST_Node_sizeof: AST_Node_Unary {
       bool negate;
-      value eval(); ///< Behaves funny for sizeof; coerces instead, then takes size of result type.
-      full_type coerce(); ///< Behaves funny for sizeof; returns unsigned long every time.
+      virtual value eval() const; ///< Behaves funny for sizeof; coerces instead, then takes size of result type.
+      virtual full_type coerce() const; ///< Behaves funny for sizeof; returns unsigned long every time.
       void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
       AST_Node_sizeof(AST_Node* param, bool negate);
     };
     /// Child of AST_Node_Unary specifically for sizeof
     struct AST_Node_Cast: AST_Node_Unary {
       full_type cast_type; ///< The type this cast represents.
-      value eval(); ///< Performs a cast, as it is able.
-      full_type coerce(); ///< Returns \c cast_type.
+      virtual value eval() const; ///< Performs a cast, as it is able.
+      virtual full_type coerce() const; ///< Returns \c cast_type.
       void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
       virtual int height(); ///< Returns the height which will be used to render this node and all its children.
       virtual int own_height(); ///< Returns the height in pixels of this node as it will render. This does not include its children.
@@ -144,15 +144,15 @@ namespace jdi {
     /// Child of AST_Node for tokens with an attached \c definition.
     struct AST_Node_Definition: AST_Node {
       definition *def; ///< The \c definition of the constant or type this token represents.
-      value eval(); ///< Evaluates this node recursively, returning a value containing its result.
-      full_type coerce(); ///< Returns the type of the given definition, if it has one.
+      virtual value eval() const; ///< Evaluates this node recursively, returning a value containing its result.
+      virtual full_type coerce() const; ///< Returns the type of the given definition, if it has one.
       AST_Node_Definition(definition *def); ///< Construct with a definition
     };
     /// Child of AST_Node for tokens with an attached \c full_type.
     struct AST_Node_Type: AST_Node {
       full_type dec_type; ///< The \c full_type read into this node.
-      value eval(); ///< Returns zero; output should never be queried.
-      full_type coerce(); ///< Returns the type contained, \c dec_type.
+      virtual value eval() const; ///< Returns zero; output should never be queried.
+      virtual full_type coerce() const; ///< Returns the type contained, \c dec_type.
       AST_Node_Type(full_type &ft); ///< Construct consuming a \c full_type.
     };
     /// Child of AST_Node for binary operators.
@@ -161,9 +161,9 @@ namespace jdi {
                *right; ///< The right-hand side of the expression.
       
       /// Evaluates this node recursively, returning a value containing its result.
-      virtual value eval();
+      virtual value eval() const;
       /// Coerces this node recursively for type, returning a full_type representing it.
-      virtual full_type coerce();
+      virtual full_type coerce() const;
       
       AST_Node_Binary(AST_Node* left=NULL, AST_Node* right=NULL); ///< Default constructor. Sets children to NULL.
       AST_Node_Binary(AST_Node* left, AST_Node* right, string op); ///< Default constructor. Sets children to NULL.
@@ -176,8 +176,8 @@ namespace jdi {
     };
     /// Child of AST_Node for the scope resolution operator, ::.
     struct AST_Node_Scope: AST_Node_Binary {
-      virtual value eval(); ///< Evaluates this node recursively, returning a value containing its result.
-      virtual full_type coerce(); ///< Coerces this node recursively for type, returning a full_type representing it.
+      virtual value eval() const; ///< Evaluates this node recursively, returning a value containing its result.
+      virtual full_type coerce() const; ///< Coerces this node recursively for type, returning a full_type representing it.
       AST_Node_Scope(AST_Node* left, AST_Node* right, string op); ///< The one and only know-what-you're-doing constructor.
     };
     /// Child of AST_Node for the ternary operator.
@@ -187,9 +187,9 @@ namespace jdi {
       AST_Node *right; ///< The right-hand (false) result.
       
       /// Evaluates this node recursively, returning a value containing its result.
-      value eval();
+      virtual value eval() const;
       /// Coerces this node recursively for type, returning a full_type representing it.
-      full_type coerce();
+      virtual full_type coerce() const;
       
       AST_Node_Ternary(AST_Node *expression = NULL, AST_Node *exp_true = NULL, AST_Node *exp_false = NULL); ///< Default constructor. Sets children to NULL.
       AST_Node_Ternary(AST_Node *expression, AST_Node *exp_true, AST_Node *exp_false, string ct); ///< Complete constructor, with children and a content string.
@@ -206,9 +206,9 @@ namespace jdi {
       AST_Node *index;
       
       /// Evaluates this node recursively, returning a value containing its result.
-      value eval();
+      virtual value eval() const;
       /// Coerces this node recursively for type, returning a full_type representing it.
-      full_type coerce();
+      virtual full_type coerce() const;
       
       AST_Node_Subscript(); ///< Default constructor. Sets children to NULL.
       ~AST_Node_Subscript(); ///< Default destructor. Frees children recursively.
@@ -225,9 +225,9 @@ namespace jdi {
       vector<AST_Node*> elements; ///< Vector of our array elements.
       
       /// Evaluates this node recursively, returning a value containing its result.
-      value eval();
+      virtual value eval() const;
       /// Coerces this node recursively for type, returning a full_type representing it.
-      full_type coerce();
+      virtual full_type coerce() const;
       
       virtual ~AST_Node_Array();
     };
@@ -237,9 +237,9 @@ namespace jdi {
       vector<AST_Node*> params;
       
       /// Evaluates this node recursively, returning a value containing its result.
-      value eval();
+      virtual value eval() const;
       /// Coerces this node recursively for type, returning a full_type representing it.
-      full_type coerce();
+      virtual full_type coerce() const;
       
       AST_Node_Parameters(); ///< Default constructor. Sets children to NULL.
       ~AST_Node_Parameters(); ///< Default destructor. Frees children recursively.
@@ -348,10 +348,10 @@ namespace jdi {
     int parse_expression(jdip::token_t &token, lexer *lex, definition_scope *scope, int prec, error_handler *uherr);
     
     /// Evaluate the current AST, returning its \c value.
-    value eval();
+    virtual value eval() const;
     
     /// Coerce the current AST for the type of its result.
-    full_type coerce();
+    virtual full_type coerce() const;
     
     /// Clear the AST out, effectively creating a new instance of this class
     void clear();

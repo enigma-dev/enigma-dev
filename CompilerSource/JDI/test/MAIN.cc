@@ -108,7 +108,7 @@ int main() {
     enigma.output_macro("__intN_t", cout);*/
     cout << "None requested." << endl;
     
-    // do_cli(enigma);
+    do_cli(enigma);
   }
   else
     cout << "Failed to open file for parsing!" << endl;
