@@ -104,7 +104,8 @@ dllexport int resource_isTypeName() //Returns whether the resource can be used a
 }
 dllexport int resource_isGlobal() //Returns whether the resource is nothing but a global variable.
 {
-  return !current_resource->flags and !resource_isFunction();
+  return (current_resource->flags & (jdi::DEF_TYPED | jdi::DEF_TYPENAME | jdi::DEF_SCOPE | jdi::DEF_TEMPLATE | jdi::DEF_FUNCTION | jdi::DEF_PRIVATE)) == jdi::DEF_TYPED
+     and !resource_isFunction();
 }
 
 dllexport const char* next_available_resource() //Returns the name of the next resource on the list, or "" otherwise.

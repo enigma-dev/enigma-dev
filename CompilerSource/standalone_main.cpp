@@ -60,7 +60,6 @@ extern  int ext_count;
 #include <Storage/definition.h>
 #include <languages/lang_CPP.h>
 
-extern char getch();
 extern int cfile_parse_main();
 extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 
@@ -98,6 +97,7 @@ syntax_error *definitionsModified(const char*,const char*);
 #include <System/builtins.h>
 #include "compiler/jdi_utility.h"
 
+void do_cli(jdi::context &ct);
 syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code);
 int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
 int main(int argc, char* argv[])
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     /* */
     ).c_str());
   //mainr(argc,argv);
-  /*
+  
   string in2 = fc("./CompilerSource/test_gml.h");
   cout << "Check file:" << endl << in2 << endl;
   const char *name = "my_script";
@@ -150,17 +150,168 @@ int main(int argc, char* argv[])
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
   };
   
-  SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
+  /*SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
   Sprite sprite = {"spr_0", 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 32, 32, &subimages, 1, NULL, 0};
   Sprite sprites[2] = { sprite, sprite };
   es.spriteCount = 2; es.sprites = sprites;
   es.filename = "coolio.gmk";
-  es.fileVersion = 800;
+  es.fileVersion = 800;*/
+  
+  do_cli(*main_context);
   
   current_language->compile(&es, "/tmp/coolio.exe", 0);
-  */
+  
   libFree();
   
   //getchar();
   return 0;
+}
+
+
+#include <cstring>
+#include <System/lex_cpp.h>
+#include <General/parse_basics.h>
+
+#ifdef __linux__d
+#include <ncurses>
+#else
+static char getch() {
+  int c = fgetc(stdin);
+  int ignore = c;
+  while (ignore != '\n')
+    ignore = fgetc(stdin);
+  return c;
+}
+#endif
+
+using namespace jdip;
+void do_cli(context &ct) {
+  char c = ' ';
+  macro_map undamageable = ct.get_macros();
+  while (c != 'q' and c != '\n') { switch (c) {
+    case 'd': {
+        bool justflags; justflags = false;
+        if (false) { case 'f': justflags = true; }
+        cout << "Enter the item to define:" << endl << ">> " << flush;
+        char buf[4096]; cin.getline(buf, 4096);
+        size_t start, e = 0;
+        while (is_useless(buf[e]) or buf[e] == ':') ++e;
+        definition* def = ct.get_global();
+        while (buf[e] and def) {
+          if (!is_letter(buf[e])) { cout << "Unexpected symbol '" << buf[e] << "'" << endl; break; }
+          start = e;
+          while (is_letterd(buf[++e]));
+          if (def->flags & DEF_SCOPE) {
+            string name(buf+start, e-start);
+            definition_scope::defiter it = ((definition_scope*)def)->members.find(name);
+            if (it == ((definition_scope*)def)->members.end()) {
+              cout << "No `" << name << "' found in scope `" << def->name << "'" << endl;
+              def = NULL;
+              break;
+            }
+            def = it->second;
+          }
+          else {
+            cout << "Definition `" << def->name << "' is not a scope" << endl;
+            def = NULL;
+            break;
+          }
+          while (is_useless(buf[e]) or buf[e] == ':') ++e;
+        }
+        if (def and e) {
+          if (justflags) {
+            map<int, string> flagnames;
+            DEF_FLAGS d = DEF_TYPENAME;
+            switch (d) {
+              case DEF_TYPENAME: flagnames[DEF_TYPENAME] = "DEF_TYPENAME";
+              case DEF_NAMESPACE: flagnames[DEF_NAMESPACE] = "DEF_NAMESPACE";
+              case DEF_CLASS: flagnames[DEF_CLASS] = "DEF_CLASS";
+              case DEF_ENUM: flagnames[DEF_ENUM] = "DEF_ENUM";
+              case DEF_UNION: flagnames[DEF_UNION] = "DEF_UNION";
+              case DEF_SCOPE: flagnames[DEF_SCOPE] = "DEF_SCOPE";
+              case DEF_TYPED: flagnames[DEF_TYPED] = "DEF_TYPED";
+              case DEF_FUNCTION: flagnames[DEF_FUNCTION] = "DEF_FUNCTION";
+              case DEF_VALUED: flagnames[DEF_VALUED] = "DEF_VALUED";
+              case DEF_DEFAULTED: flagnames[DEF_DEFAULTED] = "DEF_DEFAULTED";
+              case DEF_EXTERN: flagnames[DEF_EXTERN] = "DEF_EXTERN";
+              case DEF_TEMPLATE: flagnames[DEF_TEMPLATE] = "DEF_TEMPLATE";
+              case DEF_TEMPPARAM: flagnames[DEF_TEMPPARAM] = "DEF_TEMPPARAM";
+              case DEF_HYPOTHETICAL: flagnames[DEF_HYPOTHETICAL] = "DEF_HYPOTHETICAL";
+              case DEF_TEMPSCOPE: flagnames[DEF_TEMPSCOPE] = "DEF_TEMPSCOPE";
+              case DEF_PRIVATE: flagnames[DEF_PRIVATE] = "DEF_PRIVATE";
+              case DEF_PROTECTED: flagnames[DEF_PROTECTED] = "DEF_PROTECTED";
+              case DEF_INCOMPLETE: flagnames[DEF_INCOMPLETE] = "DEF_INCOMPLETE";
+              case DEF_ATOMIC: flagnames[DEF_ATOMIC] = "DEF_ATOMIC";
+              default: ;
+            }
+            bool hadone = false;
+            for (int i = 1; i < (1 << 30); i <<= 1)
+              if (def->flags & i)
+                cout << (hadone? " | " : "  ") << flagnames[i], hadone = true;
+            cout << endl;
+          }
+          else
+            cout << def->toString() << endl;
+        }
+      } break;
+    
+    case 'e': {
+        bool eval, coerce, render, show;
+        eval = true,
+        coerce = false;
+        render = false;
+        show = false;
+        if (false) { case 'c': eval = false; coerce = true;  render = false; show = false;
+        if (false) { case 'r': eval = false; coerce = false; render = true;  show = false;
+        if (false) { case 's': eval = false; coerce = false; render = false; show = true;
+        } } }
+        cout << "Enter the expression to evaluate:" << endl << ">> " << flush;
+        char buf[4096]; cin.getline(buf, 4096);
+        llreader llr(buf, strlen(buf));
+        AST a;
+        lexer_cpp c_lex(llr, undamageable, "User expression");
+        token_t dummy = c_lex.get_token_in_scope(ct.get_global());
+        if (!a.parse_expression(dummy, &c_lex, ct.get_global(), precedence::all, def_error_handler)) {
+          if (render) {
+            cout << "Filename to render to:" << endl;
+            cin.getline(buf, 4096);
+            a.writeSVG(buf);
+          }
+          if (eval) {
+            value v = a.eval();
+            cout << "Value returned: " << v.toString() << endl;
+          }
+          if (coerce) {
+            full_type t = a.coerce();
+            cout << "Type of expression: " << t.toString() << endl;
+          }
+          if (show) {
+            a.writeSVG("/tmp/anus.svg");
+            if (system("xdg-open /tmp/anus.svg"))
+              cout << "Failed to open." << endl;
+          }
+        } else cout << "Bailing." << endl;
+      } break;
+    
+    case 'h':
+      cout <<
+      "'c' Coerce an expression, printing its type"
+      "'d' Define a symbol, printing it recursively\n"
+      "'e' Evaluate an expression, printing its result\n"
+      "'f' Print flags for a given definition\n"
+      "'h' Print this help information\n"
+      "'m' Define a macro, printing a breakdown of its definition\n"
+      "'r' Render an AST representing an expression\n"
+      "'s' Render an AST representing an expression and show it\n"
+      "'q' Quit this interface\n";
+    break;
+      
+    
+    default: cout << "Unrecognized command. Empty command or 'q' to quit." << endl << endl; break;
+    case ' ': cout << "Commands are single-letter; 'h' for help." << endl << "Follow commands with ENTER on non-unix." << endl;
+  } 
+  cout << "> " << flush;
+  c = getch();
+  }
+  cout << endl << "Goodbye" << endl;
 }

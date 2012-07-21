@@ -683,9 +683,9 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
     if (pos >= length)
       break;
     while (is_useless(cfile[pos])) {
-      if (cfile[pos] == '\n') lpos = pos, ++line;
+      if (cfile[pos] == '\n') lpos = pos++, ++line;
       else if (cfile[pos] == '\r' and (cfile[++pos] == '\n' or --pos)) lpos = pos++, ++line;
-      ++pos;
+      else ++pos;
     }
     if (cfile[pos] == '#')
       { ++pos; goto top; }

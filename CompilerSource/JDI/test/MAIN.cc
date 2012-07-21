@@ -32,6 +32,8 @@ using namespace std;
   #define end_time(te,tel) time_t te = clock(); double tel = (((te-ts) * 1000000.0) / CLOCKS_PER_SEC)
 #endif
 
+#include <System/lex_cpp.h>
+
 using namespace jdi;
 using namespace jdip;
 
@@ -71,6 +73,7 @@ int main() {
   
   test_expression_evaluator();
   
+  builtin.add_search_directory("/home/josh/Projects/ENIGMA/ENIGMAsystem/SHELL");
   builtin.add_search_directory("/usr/include/c++/4.6");
   builtin.add_search_directory("/usr/include/c++/4.6/x86_64-linux-gnu");
   builtin.add_search_directory("/usr/include/c++/4.6/backward");
@@ -90,6 +93,7 @@ int main() {
   llreader f("test/test.cc");
   if (f.is_open())
   {
+    /* */
     context enigma;
     start_time(ts);
     int res = enigma.parse_C_stream(f, "test.cc");
@@ -102,13 +106,16 @@ int main() {
     else
       cout << endl << "====[++++++++++++++++++++++++++++++ SUCCESS! ++++++++++++++++++++++++++++++]====" << endl << endl;
     
-    cout << "Macro defs:" << endl;/*
-    enigma.output_macro("_ISbit", cout);
-    enigma.output_macro("__GNUC_PREREQ", cout);
-    enigma.output_macro("__intN_t", cout);*/
-    cout << "None requested." << endl;
-    
-    do_cli(enigma);
+    // do_cli(enigma);
+    /*/
+    macro_map m;
+    lexer_cpp lex(f, m, "test.cc");
+    token_t t = lex.get_token();
+    while (t.type != TT_ENDOFCODE) {
+      t = lex.get_token();
+    }
+    cout << "Done..." << endl;
+    // */
   }
   else
     cout << "Failed to open file for parsing!" << endl;
@@ -139,6 +146,8 @@ void do_cli(context &ct) {
   macro_map undamageable = ct.get_macros();
   while (c != 'q' and c != '\n') { switch (c) {
     case 'd': {
+        bool justflags; justflags = false;
+        if (false) { case 'f': justflags = true; }
         cout << "Enter the item to define:" << endl << ">> " << flush;
         char buf[4096]; cin.getline(buf, 4096);
         size_t start, e = 0;
@@ -165,8 +174,41 @@ void do_cli(context &ct) {
           }
           while (is_useless(buf[e]) or buf[e] == ':') ++e;
         }
-        if (def and e)
-          cout << def->toString() << endl;
+        if (def and e) {
+          if (justflags) {
+            map<int, string> flagnames;
+            DEF_FLAGS d = DEF_TYPENAME;
+            switch (d) {
+              case DEF_TYPENAME: flagnames[DEF_TYPENAME] = "DEF_TYPENAME";
+              case DEF_NAMESPACE: flagnames[DEF_NAMESPACE] = "DEF_NAMESPACE";
+              case DEF_CLASS: flagnames[DEF_CLASS] = "DEF_CLASS";
+              case DEF_ENUM: flagnames[DEF_ENUM] = "DEF_ENUM";
+              case DEF_UNION: flagnames[DEF_UNION] = "DEF_UNION";
+              case DEF_SCOPE: flagnames[DEF_SCOPE] = "DEF_SCOPE";
+              case DEF_TYPED: flagnames[DEF_TYPED] = "DEF_TYPED";
+              case DEF_FUNCTION: flagnames[DEF_FUNCTION] = "DEF_FUNCTION";
+              case DEF_VALUED: flagnames[DEF_VALUED] = "DEF_VALUED";
+              case DEF_DEFAULTED: flagnames[DEF_DEFAULTED] = "DEF_DEFAULTED";
+              case DEF_EXTERN: flagnames[DEF_EXTERN] = "DEF_EXTERN";
+              case DEF_TEMPLATE: flagnames[DEF_TEMPLATE] = "DEF_TEMPLATE";
+              case DEF_TEMPPARAM: flagnames[DEF_TEMPPARAM] = "DEF_TEMPPARAM";
+              case DEF_HYPOTHETICAL: flagnames[DEF_HYPOTHETICAL] = "DEF_HYPOTHETICAL";
+              case DEF_TEMPSCOPE: flagnames[DEF_TEMPSCOPE] = "DEF_TEMPSCOPE";
+              case DEF_PRIVATE: flagnames[DEF_PRIVATE] = "DEF_PRIVATE";
+              case DEF_PROTECTED: flagnames[DEF_PROTECTED] = "DEF_PROTECTED";
+              case DEF_INCOMPLETE: flagnames[DEF_INCOMPLETE] = "DEF_INCOMPLETE";
+              case DEF_ATOMIC: flagnames[DEF_ATOMIC] = "DEF_ATOMIC";
+              default: ;
+            }
+            bool hadone = false;
+            for (int i = 1; i < (1 << 30); i <<= 1)
+              if (def->flags & i)
+                cout << (hadone? " | " : "  ") << flagnames[i], hadone = true;
+            cout << endl;
+          }
+          else
+            cout << def->toString() << endl;
+        }
       } break;
     
     case 'e': {
@@ -212,6 +254,7 @@ void do_cli(context &ct) {
       "'c' Coerce an expression, printing its type"
       "'d' Define a symbol, printing it recursively\n"
       "'e' Evaluate an expression, printing its result\n"
+      "'f' Print flags for a given definition\n"
       "'h' Print this help information\n"
       "'m' Define a macro, printing a breakdown of its definition\n"
       "'r' Render an AST representing an expression\n"

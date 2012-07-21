@@ -146,14 +146,15 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
     if (successful_prior) oldglobal.swap(*main_context);
-    return &ide_passback_error;
+    cout << "Continuing anyway." << endl;
+    // return &ide_passback_error;
+  } else {
+    successful_prior = true;
+    
+    cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME() << "ms)\n"
+    << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+    //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   }
-  successful_prior = true;
-  
-  cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME() << "ms)\n"
-  << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-  //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
-  
   cout << "Initializing EDL Parser...\n";
   
   parser_init();

@@ -65,10 +65,6 @@ bool lang_CPP::global_exists(string n) {
 
 
 void quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name) {
-  cout << "Address on my side: " << scope << endl;
-  cout << "Char on this side: " << (*(char**)&scope->name) << endl;
-  cout << "Name on my side: `" << scope->name << "'" << endl;
-  cout << "Insert `" << name << "' into `" << flush << scope->name << "'";
   scope->members[name] = new jdi::definition_typed(name,scope,type,0);
 }
 void quickmember_script(jdi::definition_scope* scope, string name) {
