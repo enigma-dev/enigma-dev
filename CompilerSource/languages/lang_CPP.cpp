@@ -108,8 +108,12 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   cout << targetYaml << endl;
   
   cout << "Creating swap." << endl;
-  jdi::context oldglobal; // These will essentially garbage collect at the end of this call
-  oldglobal.swap(*main_context);
+  jdi::context *oldglobal = main_context;
+  main_context = new jdi::context();
+  
+  cout << "Dumping whiteSpace definitions...";
+  FILE *of = wscode ? fopen("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h","wb") : NULL;
+  if (of) fputs(wscode,of), fclose(of);
   
   cout << "Opening ENIGMA for parse..." << endl;
   
@@ -145,7 +149,13 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     cout << heaping_pile_of_dog_shit;
     
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
-    if (successful_prior) oldglobal.swap(*main_context);
+    if (successful_prior) {
+      delete main_context;
+      main_context = oldglobal;
+      oldglobal = NULL;
+    }
+    else
+      delete oldglobal;
     cout << "Continuing anyway." << endl;
     // return &ide_passback_error;
   } else {
@@ -154,6 +164,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME() << "ms)\n"
     << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
     //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
+    delete oldglobal;
   }
   cout << "Initializing EDL Parser...\n";
   
