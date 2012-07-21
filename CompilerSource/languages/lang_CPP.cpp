@@ -97,6 +97,8 @@ const char* heaping_pile_of_dog_shit = "\
 #include "settings-parse/parse_ide_settings.h"
 #include "settings-parse/crawler.h"
 
+#include <System/builtins.h>
+
 extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 void parser_init();
 
@@ -166,6 +168,12 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
     delete oldglobal;
   }
+  
+  cout << "Creating dummy primitives for old ENIGMA";
+  for (jdip::tf_iter it = jdip::builtin_declarators.begin(); it != jdip::builtin_declarators.end(); ++it) {
+    main_context->get_global()->members[it->first] = new jdi::definition(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
+  }
+  
   cout << "Initializing EDL Parser...\n";
   
   parser_init();

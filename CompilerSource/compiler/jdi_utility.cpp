@@ -54,6 +54,7 @@ void definition_parameter_bounds(definition *d, unsigned &min, unsigned &max) {
 #include "languages/lang_CPP.h"
 definition* lang_CPP::find_typename(string n) {
   definition* d = main_context->get_global()->look_up(n);
+  if (!d) return NULL;
   if (d->flags & DEF_TYPENAME) return d;
   return NULL;
 }

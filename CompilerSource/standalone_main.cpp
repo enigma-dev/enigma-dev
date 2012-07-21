@@ -150,6 +150,24 @@ int main(int argc, char* argv[])
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
   };
   
+  GmObject obj = {0,0,0,0,0,0,0,0,0,0,0};
+  MainEvent mev = {0,0,0};
+  Event ev = {0,0};
+  ev.code = "//Haha, boobs!";
+  ev.id = 10; // EV_MOUSE_ENTER
+  
+  mev.id = 6; // EV_MOUSE
+  mev.eventCount = 1;
+  mev.events = &ev;
+  
+  obj.mainEventCount = 1;
+  obj.mainEvents = &mev;
+  obj.name = "obj_boobs";
+  obj.spriteId = obj.parentId = obj.maskId = -1;
+  
+  es.gmObjects = &obj;
+  es.gmObjectCount = 1;
+  
   /*SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
   Sprite sprite = {"spr_0", 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 32, 32, &subimages, 1, NULL, 0};
   Sprite sprites[2] = { sprite, sprite };
