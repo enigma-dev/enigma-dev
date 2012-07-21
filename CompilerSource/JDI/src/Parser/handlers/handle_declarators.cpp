@@ -58,8 +58,21 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
   
   // Make sure we actually read a valid type.
   if (!tp.def) {
-    token.report_error(herr, "Declaration does not give a valid type");
-    return 1;
+    if (token.type == TT_TILDE) {
+      token = read_next_token(scope);
+      full_type tp2 = read_fulltype(lex, token, scope, this, herr);
+      if (!tp2.refs.name.empty() or tp2.def != scope or tp2.flags or tp2.refs.size() != 1 or tp2.refs.top().type != ref_stack::RT_FUNCTION) {
+        token.report_error(herr, "Junk destructor; remove tilde?");
+        FATAL_RETURN(1);
+      }
+      tp2.refs.name = "<destruct>";
+      tp2.flags |= tp.flags;
+      tp.swap(tp2);
+    }
+    else {
+      token.report_error(herr, "Declaration does not give a valid type");
+      return 1;
+    }
   }
   
   return handle_declarators(scope, token, tp, inherited_flags, res);
@@ -153,6 +166,7 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
       }
       if (not(ins.first->second->flags & DEF_TYPED)) {
         token.report_error(herr, "Redeclaration of `" + tp.refs.name + "' as a different kind of symbol");
+        cout << ins.first->second->toString() << endl;
         return 3;
       }
       if (ins.first->second->flags & DEF_FUNCTION) { // Handle function overloading

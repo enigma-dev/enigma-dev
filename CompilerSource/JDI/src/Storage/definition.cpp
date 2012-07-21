@@ -50,7 +50,12 @@ namespace jdi {
   definition_typed::~definition_typed() {}
   
   definition_function::definition_function(string n, definition* p, definition* tp, ref_stack &rf, unsigned int typeflags, int flgs): 
-    definition_typed(n, p, tp, rf, typeflags, flgs | DEF_FUNCTION), implementation(NULL) {}
+    definition_typed(n, p, tp, rf, typeflags, flgs | DEF_FUNCTION), implementation(NULL) {
+      static int a = 0; if (++a == 1142)
+      cout << a << endl;
+    arg_key k(referencers);
+    overload(k, this, def_error_handler);
+  }
   
   definition *definition_function::overload(arg_key &key, definition_function* ovrl, error_handler *herr) {
     pair<overload_iter, bool> ins = overloads.insert(pair<arg_key,definition_function*>(key, ovrl));
@@ -74,7 +79,7 @@ namespace jdi {
   
   definition_function::~definition_function() {
     for (overload_iter it = overloads.begin(); it != overloads.end(); ++it)
-      delete it->second;
+      if (it->second != this) delete it->second;
     for (vector<definition_template*>::iterator it = template_overloads.begin(); it != template_overloads.end(); ++it)
       delete *it;
   }
@@ -175,7 +180,7 @@ namespace jdi {
     delete def;
   }
   definition* definition_template::instantiate(arg_key& key) {
-    pair<arg_key&,definition*> insme(key,NULL);
+    pair<arg_key,definition*> insme(key,NULL);
     /*pair<map<arg_key,definition*>::iterator, bool> ins =*/ instantiations.insert(insme);
     return def;//ins.first->second;
   }
@@ -184,7 +189,7 @@ namespace jdi {
     for (arg_key::node* i = key.begin(); i < key.end(); ++i)
       if (i->type == arg_key::AKT_FULLTYPE and (!i->ft().def or (i->ft().def->flags & DEF_TEMPPARAM)))
         i->ft().def = &arg_key::abstract;
-    pair<arg_key&,definition_template*> insme(key,(definition_template*)ts->source);
+    pair<arg_key,definition_template*> insme(key,(definition_template*)ts->source);
     pair<definition_template::speciter, bool> ins = specializations.insert(insme);
     if (ins.second)
       ts->referenced = true;
@@ -539,11 +544,13 @@ namespace jdi {
   string definition_class::toString(unsigned levels, unsigned indent) {
     const string inds(indent, ' ');
     string res = inds + "class " + name;
-    if (!ancestors.empty())
+    if (!ancestors.empty()) {
+      res += ": ";
       for (vector<ancestor>::iterator it = ancestors.begin(); it != ancestors.end(); ++it) {
         res += ((it->protection == DEF_PRIVATE)? "private " : (it->protection == DEF_PROTECTED)? "protected " : "public ");
         res += it->def->name + " ";
       }
+    }
     if (levels and not(flags & DEF_INCOMPLETE))
       res += "\n", res += definition_scope::toString(dl(levels), indent);
     return res;

@@ -303,7 +303,7 @@ int jdip::read_referencers(ref_stack &refs, const full_type& ft, lexer *lex, tok
       
       case TT_OPERATORKW: {
           token = lex->get_token_in_scope(scope, herr);
-          if (token.type == TT_OPERATOR or token.type == TT_LESSTHAN or token.type == TT_GREATERTHAN) {
+          if (token.type == TT_OPERATOR or token.type == TT_LESSTHAN or token.type == TT_GREATERTHAN or token.type == TT_TILDE) {
             refs.name = "operator" + token.content.toString();
           }
           else if (token.type == TT_LEFTBRACKET) {

@@ -41,7 +41,7 @@ namespace enigma
      prefix (const variant &x);\
      prefix (const var &x);
     
-    virtual void function();
+    virtual void function(variant oldvalue);
     
     //These are assignment operators and require a reference to be passed
     multifunction_variant& operator=(multifunction_variant&); // Stop shit from happening

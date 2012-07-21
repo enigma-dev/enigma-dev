@@ -243,32 +243,31 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
             while (token.type != TT_LEFTPARENTH and token.type != TT_LEFTBRACE and token.type != TT_SEMICOLON and token.type != TT_ENDOFCODE)
               lb.push(token), token = read_next_token(scope);
             if (token.type != TT_LEFTPARENTH) {
-              token.report_error(herr, "Expected empty function parmeters before %s");
+              token.report_error(herr, "Expected function parmeters before %s");
               FATAL_RETURN(1); break;
             }
             
             token.type = TT_ENDOFCODE; lb.push(token);
+            token.type = TT_LEFTPARENTH;
             lb.reset(); token_t kick = lb.get_token(herr);
             full_type ft = read_fulltype(&lb, kick, scope, this, herr);
             
-            token = read_next_token(scope);
-            if (token.type != TT_RIGHTPARENTH) {
-              if (token.type == TT_DECLARATOR and token.def == builtin_type__void)
-                token = read_next_token(scope);
-              if (token.type != TT_RIGHTPARENTH) {
-                token.report_errorf(herr, "Expected closing parenthesis to function parameters before %s; cast operators may not have parameters");
-                FATAL_RETURN(1);
+            string opname; {
+              ref_stack my_func_refs;
+              read_referencers_post(my_func_refs, lex, token, scope, this, herr);
+              if (my_func_refs.empty() or my_func_refs.top().type != ref_stack::RT_FUNCTION) {
+                token.report_error(herr, "Expected function parameters for operator overload");
+                return 1;
               }
+              opname = "operator " + ft.toString();
+              ft.refs.append_c(my_func_refs);
             }
             
-            ref_stack::parameter_ct empty;
-            ft.refs.push_func(empty);
-            definition_function *const df = new definition_function("operator " + ft.toString(), scope, ft.def, ft.refs, ft.flags, inherited_flags);
+            definition_function *const df = new definition_function(opname, scope, ft.def, ft.refs, ft.flags, inherited_flags);
             decl = df;
             
             pair<definition_scope::defiter, bool> ins = scope->members.insert(pair<string,definition*>(decl->name, decl));
             if (!ins.second) { arg_key k(df->referencers); decl = ((definition_function*)ins.first->second)->overload(k, df, herr); }
-            token = read_next_token(scope);
             goto handled_declarator_block;
           }
         break;

@@ -182,7 +182,7 @@ namespace enigma
 
 //Implement the "room" global before we continue
 INTERCEPT_DEFAULT_COPY(enigma::roomv);
-void enigma::roomv::function() {
+void enigma::roomv::function(variant) {
   room_goto((int)rval.d);
 } enigma::roomv room;
 

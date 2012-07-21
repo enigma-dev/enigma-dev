@@ -223,7 +223,9 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
     else if (already_complete) {
       token.report_error(herr, "Attempting to add members to previously defined class `" + classname + "'");
     }
-    if (handle_scope(nclass, token, protection)) FATAL_RETURN(NULL);
+    if (handle_scope(nclass, token, protection))
+      FATAL_RETURN(NULL);
+    nclass->flags &= ~DEF_INCOMPLETE;
     if (token.type != TT_RIGHTBRACE) {
       token.report_error(herr, "Expected closing brace to class `" + classname + "'");
       FATAL_RETURN(NULL);

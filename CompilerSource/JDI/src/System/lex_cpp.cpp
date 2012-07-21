@@ -726,8 +726,10 @@ token_t lexer_cpp::get_token(error_handler *herr)
     if (cfile[pos] == '/') {
       if (cfile[++pos] == '*') { skip_multiline_comment(); continue; }
       if (cfile[pos] == '/') { skip_comment(); continue; }
-      if (cfile[pos] == '=')
-        return token_t(token_basics(TT_OPERATOR,filename,line,pos-lpos), cfile+pos-1, 2);
+      if (cfile[pos] == '=') {
+        ++pos;
+        return  token_t(token_basics(TT_OPERATOR,filename,line,pos-lpos), cfile+pos-2, 2);
+      }
       return token_t(token_basics(TT_OPERATOR,filename,line,pos-lpos), cfile+pos-1,1);
     }
     
@@ -827,15 +829,19 @@ token_t lexer_cpp::get_token(error_handler *herr)
         pos += cfile[pos] == cfile[spos] or cfile[pos] == '=' or (cfile[pos] == '>' and cfile[spos] == '-');
         pos += (cfile[pos-1] == '>' and cfile[pos] == '*');
         return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), cfile+spos, pos-spos);
-      case '=': pos += cfile[pos] == cfile[spos]; case '*': case '/': case '^':
+      case '=': pos += cfile[pos] == cfile[spos];
         return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), cfile+spos, pos-spos);
       case '&': case '|':  case '!':
         pos += cfile[pos] == cfile[spos] || cfile[pos] == '=';
         return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), cfile+spos, pos-spos);
-      case '~': case '%':
+      case '~':
         if (cfile[pos] == '=')
           return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), cfile+spos, ++pos-spos);
         return token_t(token_basics(TT_TILDE,filename,line,spos-lpos), cfile+spos, pos-spos);
+      case '%': case '*': case '/': case '^':
+        if (cfile[pos] == '=')
+          return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), cfile+spos, ++pos-spos);
+        return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), cfile+spos, pos-spos);
       case '>': case '<':
         pos += cfile[pos] == cfile[spos]; pos += cfile[pos] == '=';
         return token_t(token_basics((pos-spos==1?cfile[spos]=='<'?TT_LESSTHAN:TT_GREATERTHAN:TT_OPERATOR),filename,line,spos-lpos), cfile+spos, pos-spos);

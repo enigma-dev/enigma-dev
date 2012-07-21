@@ -213,8 +213,11 @@ int lang_CPP::load_shared_locals()
   for (jdi::definition_class *cs = parent_class; cs; cs = (cs->ancestors.empty() ? NULL : cs->ancestors[0].def) )
   {
     cout << " >> Checking ancestor " << cs->name << endl;
-    for (jdi::definition_scope::defiter mem = cs->members.begin(); mem != cs->members.end(); mem++)
+    for (jdi::definition_scope::defiter mem = cs->members.begin(); mem != cs->members.end(); ++mem) {
       shared_object_locals[mem->first] = 0;
+      cout << "  - Found `" << mem->first << "'" << endl;
+    }
+    cout << endl;
   }
 
   load_extension_locals();

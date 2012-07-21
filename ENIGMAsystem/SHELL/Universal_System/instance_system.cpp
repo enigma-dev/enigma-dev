@@ -103,16 +103,17 @@ namespace enigma
   inst_iter *event_iter::add_inst(object_basic* ninst)
   {
     inst_iter *a = new inst_iter(ninst,NULL,prev);
-    if (prev) prev->next = a;
-    else next = a;
-    return prev = a;
+    if (prev) prev->next = a; // If we have a final item, set its next node to this item.
+    else next = a; // Otherwise, set our first item to this item.
+    return prev = a; // Either way, our last item is this item now.
   }
 
   void event_iter::unlink(inst_iter* which)
   {
     if (which->prev) which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
-    if (prev == which) prev = which->prev;
+    if (prev == which) prev = which->prev; // If our last item is this, decrement our last item.
+    if (next == which) next = NULL; // If our first item is this, we have no item.
     update_iterators_for_destroy(which);
   }
 

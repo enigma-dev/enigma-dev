@@ -616,7 +616,7 @@ namespace jdi
       return value((double)operand->eval());
     else if (cast_type.def == builtin_type__bool)
       return value((long)(bool)operand->eval());
-    cout << "WELL, FUCK." << endl;
+    cout << "Attempt to cast to `" << cast_type.def->name << "'" << endl;
     return value();
   }
   value AST::AST_Node_Array::eval() const {
