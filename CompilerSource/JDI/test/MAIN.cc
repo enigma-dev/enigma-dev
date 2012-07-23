@@ -49,18 +49,16 @@ static void putcap(string cap) {
 void do_cli(context &ct);
 
 int main() {
-  add_gnu_declarators();
-  builtin.load_standard_builtins();
-  builtin.output_types();
+  initialize();
   cout << endl << endl;
   
   putcap("Test simple macros");
-  builtin.add_macro("scalar_macro","simple value");
-  builtin.add_macro_func("simple_function","Takes no parameters");
-  builtin.add_macro_func("one_arg_function","x","(1/(1-(x)))",false);
-  builtin.add_macro_func("two_arg_function","a","b","(-(b)/(2*(a)))",false);
-  builtin.add_macro_func("variadic_three_arg_function","a","b","c","printf(a,b,c)",true);
-  builtin.output_macros();
+  builtin->add_macro("scalar_macro","simple value");
+  builtin->add_macro_func("simple_function","Takes no parameters");
+  builtin->add_macro_func("one_arg_function","x","(1/(1-(x)))",false);
+  builtin->add_macro_func("two_arg_function","a","b","(-(b)/(2*(a)))",false);
+  builtin->add_macro_func("variadic_three_arg_function","a","b","c","printf(a,b,c)",true);
+  builtin->output_macros();
   
   putcap("Metrics");
   cout << "sizeof(jdip::macro_type):        " << sizeof(jdip::macro_type) << endl
@@ -73,19 +71,19 @@ int main() {
   
   test_expression_evaluator();
   
-  builtin.add_search_directory("/home/josh/Projects/ENIGMA/ENIGMAsystem/SHELL");
-  builtin.add_search_directory("/usr/include/c++/4.6");
-  builtin.add_search_directory("/usr/include/c++/4.6/x86_64-linux-gnu");
-  builtin.add_search_directory("/usr/include/c++/4.6/backward");
-  builtin.add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include");
-  builtin.add_search_directory("/usr/local/include");
-  builtin.add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include-fixed");
-  builtin.add_search_directory("/usr/include/x86_64-linux-gnu");
-  builtin.add_search_directory("/usr/include");
+  builtin->add_search_directory("/home/josh/Projects/ENIGMA/ENIGMAsystem/SHELL");
+  builtin->add_search_directory("/usr/include/c++/4.6");
+  builtin->add_search_directory("/usr/include/c++/4.6/x86_64-linux-gnu");
+  builtin->add_search_directory("/usr/include/c++/4.6/backward");
+  builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include");
+  builtin->add_search_directory("/usr/local/include");
+  builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include-fixed");
+  builtin->add_search_directory("/usr/include/x86_64-linux-gnu");
+  builtin->add_search_directory("/usr/include");
   
   llreader macro_reader("test/defines.txt");
   if (macro_reader.is_open())
-    builtin.parse_C_stream(macro_reader, "defines.txt");
+    builtin->parse_C_stream(macro_reader, "defines.txt");
   else
     cout << "ERROR: Could not open GCC macro file for parse!" << endl;
   
@@ -120,7 +118,7 @@ int main() {
   else
     cout << "Failed to open file for parsing!" << endl;
   
-  cleanup_declarators();
+  clean_up();
   return 0;
 }
 

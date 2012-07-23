@@ -197,6 +197,8 @@ namespace jdi {
     bool variadic; ///< True if this parameter can be passed several values; in C/C++, this is mandated to be the last parameter.
     bool defaulted; ///< True if this parameter was given a default value. Convenience boolean to remove subtraction as a factor; same as defaulted_value.type != VT_INVALID.
     value default_value; ///< The default value of this parameter, or an invalid value if none was given.
+    
+    parameter(); ///< Default constructor.
     void swap_in(full_type& param); ///< Swap contents with another parameter class.
     void swap(parameter& param); ///< Swap contents with another parameter class.
     

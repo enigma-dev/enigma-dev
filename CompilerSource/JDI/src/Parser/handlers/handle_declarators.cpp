@@ -48,8 +48,10 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
   // This means an identifier if the syntax is correct.
   full_type tp = read_fulltype(lex, token, scope, this, herr);
   if (dtor) {
-    if (tp.refs.name.empty() and tp.def == scope and !tp.flags and tp.refs.size() == 1 and tp.refs.top().type == ref_stack::RT_FUNCTION)
-      tp.refs.name = "<destruct>";
+    if (tp.refs.name.empty() and tp.def == scope and !tp.flags and tp.refs.size() == 1 and tp.refs.top().type == ref_stack::RT_FUNCTION) {
+        tp.refs.name = "~" + scope->name;
+        tp.def = builtin_type__void;
+    }
     else {
       token.report_error(herr, "Junk destructor; remove tilde?");
       FATAL_RETURN(1);
@@ -65,8 +67,9 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
         token.report_error(herr, "Junk destructor; remove tilde?");
         FATAL_RETURN(1);
       }
-      tp2.refs.name = "<destruct>";
+      tp2.refs.name = "~" + scope->name;
       tp2.flags |= tp.flags;
+      tp2.def = builtin_type__void;
       tp.swap(tp2);
     }
     else {

@@ -120,6 +120,11 @@ namespace jdi {
     **/
     virtual string toString(unsigned levels = unsigned(-1), unsigned indent = 0);
     
+    #ifdef CUSTOM_MEMORY_MANAGEMENT
+    void *operator new(size_t sz);
+    void operator delete(void *ptr);
+    #endif
+    
     /** Construct a definition with a name, parent scope, and flags.
         Makes necessary allocations based on the given flags. **/
     definition(string n,definition* p,unsigned int f);

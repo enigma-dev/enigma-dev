@@ -175,9 +175,9 @@ int main(int argc, char* argv[])
   es.filename = "coolio.gmk";
   es.fileVersion = 800;*/
   
-  do_cli(*main_context);
+  //do_cli(*main_context);
   
-  current_language->compile(&es, "/tmp/coolio.exe", 0);
+  //current_language->compile(&es, "/tmp/coolio.exe", 0);
   
   libFree();
   

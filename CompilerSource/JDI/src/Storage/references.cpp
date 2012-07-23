@@ -186,6 +186,8 @@ namespace jdi {
     enswap(ft);
   }
   
+  ref_stack::parameter::parameter(): variadic(false), defaulted(false), default_value() {}
+    
   void ref_stack::parameter::swap(ref_stack::parameter &param) {
     full_type::swap(param);
     

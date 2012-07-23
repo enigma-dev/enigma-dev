@@ -49,5 +49,11 @@
   of most material in this namespace is not official and not guaranteed.
 **/
 
+namespace jdi {
+  /** Initialize JustDefineIt */
+  void initialize();
+  /** Clean up (uninitialize) JustDefineIt */
+  void clean_up();
+}
 
 #endif

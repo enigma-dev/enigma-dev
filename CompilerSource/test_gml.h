@@ -1,1 +1,1 @@
-var a = my_script();
+int b = choose(1,2,3);

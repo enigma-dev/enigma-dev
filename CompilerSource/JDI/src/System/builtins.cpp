@@ -47,7 +47,7 @@ namespace jdip {
 
 using namespace jdip;
 namespace jdi {
-  jdi::context builtin(0);
+  jdi::context *builtin = NULL;
   
   unsigned long builtin_flag__volatile;
   unsigned long builtin_flag__static;
@@ -157,16 +157,16 @@ namespace jdi {
     add_declarator("virtual", UF_FLAG);
     add_declarator("explicit", UF_FLAG);
     
-    builtin.variadics.insert(builtin_type__va_list);
+    builtin->variadics.insert(builtin_type__va_list);
     
     string x(1,'x');
-    builtin.add_macro_func("__attribute__", x, string(), false);
-    builtin.add_macro_func("__typeof__", x, string("int"), false);
-    builtin.add_macro("__extension__", string());
-    builtin.add_macro("false", string(1,'0'));
-    builtin.add_macro("true", string(1,'1'));
+    builtin->add_macro_func("__attribute__", x, string(), false);
+    builtin->add_macro_func("__typeof__", x, string("int"), false);
+    builtin->add_macro("__extension__", string());
+    builtin->add_macro("false", string(1,'0'));
+    builtin->add_macro("true", string(1,'1'));
     
-    builtin.add_macro_func("JUST_DEFINE_IT_RUN", x, string(), false);
+    builtin->add_macro_func("JUST_DEFINE_IT_RUN", x, string(), false);
   }
   
   void cleanup_declarators() {

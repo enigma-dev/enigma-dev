@@ -140,11 +140,15 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     if (!(d->flags & jdi::DEF_TYPENAME))
       cerr << "ERROR! ENIGMA's var is not a type!" << endl;
   } else cerr << "ERROR! No var type found!" << endl;
-  if ((d = main_context->get_global()->look_up("varargs"))) {
-    enigma_type__var = d;
-    if (!(d->flags & jdi::DEF_TYPENAME))
-      cerr << "ERROR! ENIGMA's varargs is not a type!" << endl;
-  } else cerr << "ERROR! No varargs type found!" << endl;
+  if ((d = main_context->get_global()->look_up("enigma"))) {
+    if (d->flags & jdi::DEF_NAMESPACE) {
+      if ((d = ((jdi::definition_scope*)d)->look_up("varargs"))) {
+        enigma_type__varargs = d;
+        if (!(d->flags & jdi::DEF_TYPENAME))
+          cerr << "ERROR! ENIGMA's varargs is not a type!" << endl;
+      } else cerr << "ERROR! No varargs type found!" << endl;
+    } else cerr << "ERROR! Namespace enigma is... not a namespace!" << endl;
+  } else cerr << "ERROR! Namespace enigma not found!" << endl;
   
   if (res) {
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never fucking happy. Have a turd.\n";

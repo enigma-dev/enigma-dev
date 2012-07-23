@@ -51,8 +51,6 @@ namespace jdi {
   
   definition_function::definition_function(string n, definition* p, definition* tp, ref_stack &rf, unsigned int typeflags, int flgs): 
     definition_typed(n, p, tp, rf, typeflags, flgs | DEF_FUNCTION), implementation(NULL) {
-      static int a = 0; if (++a == 1142)
-      cout << a << endl;
     arg_key k(referencers);
     overload(k, this, def_error_handler);
   }
@@ -122,7 +120,7 @@ namespace jdi {
     return res;
   }
   void definition_scope::unuse_namespace(definition_scope::using_node *n) {
-    if (using_back == n) using_back = n->next;
+    if (using_back == n) using_back = n->prev;
     if (using_front == n) using_front = n->next;
     if (n->next) n->next->prev = n->prev;
     if (n->prev) n->prev->next = n->next;
@@ -574,8 +572,8 @@ namespace jdi {
   }
   string definition_function::toString(unsigned levels, unsigned indent) {
     string res = definition_typed::toString(levels, indent);
-    if (overloads.size())
-      res += " (And " + tostr(overloads.size()) + " overloads)";
+    if (overloads.size() > 1)
+      res += " (And " + tostr(overloads.size()-1) + " overloads)";
     return res;
   }
   string definition_scope::toString(unsigned levels, unsigned indent) {
@@ -631,3 +629,30 @@ namespace jdi {
     return string(indent, ' ') + "template<typename " + parent->name + "> " + parent->name + "::" + name;
   }
 }
+
+#ifdef CUSTOM_MEMORY_MANAGEMENT
+struct memblock {
+  char data[sizeof(jdi::definition) << 7];
+  char *atpt;
+  memblock *next;
+  static void *getnew(size_t sz);
+  memblock(): atpt(data), next(NULL) {}
+  ~memblock() { delete next; }
+} first, *atmem = &first;
+
+void *memblock::getnew(size_t sz) {
+  char *np = atmem->atpt + sz;
+  if (np < (char*)&atmem->atpt) {
+    char *res = atmem->atpt;
+    atmem->atpt = np;
+    return res;
+  }
+  atmem = atmem->next = new memblock();
+  return getnew(sz);
+}
+
+void *jdi::definition::operator new(size_t sz) {
+  return atmem->getnew(sz);
+}
+void jdi::definition::operator delete(void*) {}
+#endif

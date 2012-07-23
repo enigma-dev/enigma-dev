@@ -78,6 +78,7 @@ extern const char* establish_bearings(const char *compiler);
 
 #include "languages/lang_CPP.h"
 #include <System/builtins.h>
+#include <API/jdi.h>
 
 dllexport const char* libInit(EnigmaCallbacks* ecs)
 {
@@ -95,15 +96,14 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   }
   else cout << "IDE Not Found. Continuing without graphical output." << endl;
   
+  cout << "Implementing JDI basics" << endl;
+  jdi::initialize();
+  jdi::builtin->output_types();
+  cout << endl << endl;
+  
   cout << "Choosing language... Eenie, meenie, minie, C++" << endl;
   current_language_name = "CPP";
   current_language = languages[current_language_name] = new lang_CPP();
-  
-  cout << "Implementing JDI basics" << endl;
-  jdi::add_gnu_declarators();
-  jdi::builtin.load_standard_builtins();
-  jdi::builtin.output_types();
-  cout << endl << endl;
   
   cout << "Reading GCC builtins" << endl;
   const char* a = establish_bearings("Compilers/" CURRENT_PLATFORM_NAME "/gcc.ey");
@@ -119,7 +119,7 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
 dllexport void libFree() {
   delete main_context;
   delete current_language;
-  jdi::cleanup_declarators();
+  jdi::clean_up();
 }
 
 

@@ -42,7 +42,7 @@ namespace jdi {
     as int and double, macros such as __WIN32__ or __GNUG__, as well as search
     directories such as /usr/include.
   **/
-  extern jdi::context builtin;
+  extern jdi::context *builtin;
   
   /**
     Read a list of declarators from a file, toggling on their usage with the given flags.

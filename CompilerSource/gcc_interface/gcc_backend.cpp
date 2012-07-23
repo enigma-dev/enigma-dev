@@ -221,7 +221,7 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
-    jdi::builtin.add_search_directory("ENIGMAsystem/SHELL/");
+    jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
 
     while (is_useless(idirs[++pos]));
 
@@ -234,13 +234,13 @@ const char* establish_bearings(const char *compiler)
       if (idirs[pos] == '\r' or idirs[pos] == '\n')
       {
         idirs[pos] = '/';
-        jdi::builtin.add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
+        jdi::builtin->add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
         while (is_useless(idirs[++pos]));
         spos = pos--;
       }
     }
 
-    cout << "Toolchain returned " << jdi::builtin.search_dir_count() << " search directories:\n";
+    cout << "Toolchain returned " << jdi::builtin->search_dir_count() << " search directories:\n";
 
   /* Parse built-in #defines
   ****************************/
@@ -248,7 +248,7 @@ const char* establish_bearings(const char *compiler)
     if (!macro_reader.is_open())
       return "Call to toolchain executable returned no data.\n";
 
-    int res = jdi::builtin.parse_C_stream(macro_reader, "defines.txt");
+    int res = jdi::builtin->parse_C_stream(macro_reader, "defines.txt");
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 

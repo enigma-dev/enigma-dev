@@ -207,7 +207,7 @@ definition_scope* context::get_global() {
 }
 
 context::context(): parse_open(false), lex(NULL), herr(def_error_handler), global(new definition_scope()) {
-  copy(builtin);
+  copy(*builtin);
 }
 
 const macro_map& context::get_macros() { return macros; }
