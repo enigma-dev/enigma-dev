@@ -72,7 +72,7 @@ namespace jdi {
     return flags >= other.flags; 
   }
   
-  string full_type::toString() {
+  string full_type::toString() const {
     string res = typeflags_string(def, flags);
     string app = refs.toString();
     if (app.length()) res += " " + app;

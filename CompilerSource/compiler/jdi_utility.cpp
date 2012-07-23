@@ -47,7 +47,7 @@ void definition_parameter_bounds(definition *d, unsigned &min, unsigned &max) {
   const ref_stack::parameter_ct& params = ((ref_stack::node_func*)&refs.top())->params;
   for (size_t i = 0; i < params.size(); ++i)
     if (params[i].variadic or params[i].def == enigma_type__varargs) variadic = true;
-    else if (params[i].defaulted) ++max; else ++min, ++max;
+    else if (params[i].default_value) ++max; else ++min, ++max;
   if (variadic) max = -1;
 }
 
@@ -74,7 +74,7 @@ void quickmember_script(jdi::definition_scope* scope, string name) {
   for (int i = 0; i < 16; ++i) {
     jdi::ref_stack::parameter p;
     p.def = enigma_type__variant;
-    p.defaulted = true;
+    p.default_value = new jdi::AST();
     params.throw_on(p);
   }
   rfs.push_func(params);

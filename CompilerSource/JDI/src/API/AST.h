@@ -94,7 +94,7 @@ namespace jdi {
       AST_Node(string ct); ///< Constructor, with content string.
       virtual ~AST_Node(); ///< Virtual destructor.
       
-      virtual void print(); ///< Prints the contents of this node to stdout, recursively.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
       virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
       virtual int own_width(); ///< Returns the width in pixels of this node as it will render. This does not include its children.
       virtual int own_height(); ///< Returns the height in pixels of this node as it will render. This does not include its children.
@@ -116,17 +116,19 @@ namespace jdi {
       ~AST_Node_Unary(); ///< Default destructor. Frees children recursively.
       bool full(); ///< Returns true if this node is already completely full, meaning it has no room for children.
       
-      void print(); ///< Prints the contents of this node to stdout, recursively.
-      void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
+      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
       virtual int width(); ///< Returns the width which will be used to render this node and all its children.
       virtual int height(); ///< Returns the height which will be used to render this node and all its children.
     };
     /// Child of AST_Node_Unary specifically for sizeof
     struct AST_Node_sizeof: AST_Node_Unary {
       bool negate;
+      
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
       virtual value eval() const; ///< Behaves funny for sizeof; coerces instead, then takes size of result type.
       virtual full_type coerce() const; ///< Behaves funny for sizeof; returns unsigned long every time.
-      void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
+      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
       AST_Node_sizeof(AST_Node* param, bool negate);
     };
     /// Child of AST_Node_Unary specifically for sizeof
@@ -134,7 +136,8 @@ namespace jdi {
       full_type cast_type; ///< The type this cast represents.
       virtual value eval() const; ///< Performs a cast, as it is able.
       virtual full_type coerce() const; ///< Returns \c cast_type.
-      void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
+      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
       virtual int height(); ///< Returns the height which will be used to render this node and all its children.
       virtual int own_height(); ///< Returns the height in pixels of this node as it will render. This does not include its children.
       AST_Node_Cast(AST_Node* param, const full_type &ft);
@@ -146,6 +149,7 @@ namespace jdi {
       definition *def; ///< The \c definition of the constant or type this token represents.
       virtual value eval() const; ///< Evaluates this node recursively, returning a value containing its result.
       virtual full_type coerce() const; ///< Returns the type of the given definition, if it has one.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
       AST_Node_Definition(definition *def); ///< Construct with a definition
     };
     /// Child of AST_Node for tokens with an attached \c full_type.
@@ -153,6 +157,7 @@ namespace jdi {
       full_type dec_type; ///< The \c full_type read into this node.
       virtual value eval() const; ///< Returns zero; output should never be queried.
       virtual full_type coerce() const; ///< Returns the type contained, \c dec_type.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
       AST_Node_Type(full_type &ft); ///< Construct consuming a \c full_type.
     };
     /// Child of AST_Node for binary operators.
@@ -169,15 +174,16 @@ namespace jdi {
       AST_Node_Binary(AST_Node* left, AST_Node* right, string op); ///< Default constructor. Sets children to NULL.
       ~AST_Node_Binary(); ///< Default destructor. Frees children recursively.
       
-      void print(); ///< Prints the contents of this node to stdout, recursively.
-      void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
-      int width(); ///< Returns the width which will be used to render this node and all its children.
-      int height(); ///< Returns the height which will be used to render this node and all its children.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
+      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
+      virtual int width(); ///< Returns the width which will be used to render this node and all its children.
+      virtual int height(); ///< Returns the height which will be used to render this node and all its children.
     };
     /// Child of AST_Node for the scope resolution operator, ::.
     struct AST_Node_Scope: AST_Node_Binary {
       virtual value eval() const; ///< Evaluates this node recursively, returning a value containing its result.
       virtual full_type coerce() const; ///< Coerces this node recursively for type, returning a full_type representing it.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
       AST_Node_Scope(AST_Node* left, AST_Node* right, string op); ///< The one and only know-what-you're-doing constructor.
     };
     /// Child of AST_Node for the ternary operator.
@@ -186,19 +192,17 @@ namespace jdi {
       AST_Node *left; ///< The left-hand (true) result.
       AST_Node *right; ///< The right-hand (false) result.
       
-      /// Evaluates this node recursively, returning a value containing its result.
-      virtual value eval() const;
-      /// Coerces this node recursively for type, returning a full_type representing it.
-      virtual full_type coerce() const;
+      virtual value eval() const; ///< Evaluates this node recursively, returning a value containing its result.
+      virtual full_type coerce() const; ///< Coerces this node recursively for type, returning a full_type representing it.
       
       AST_Node_Ternary(AST_Node *expression = NULL, AST_Node *exp_true = NULL, AST_Node *exp_false = NULL); ///< Default constructor. Sets children to NULL.
       AST_Node_Ternary(AST_Node *expression, AST_Node *exp_true, AST_Node *exp_false, string ct); ///< Complete constructor, with children and a content string.
       ~AST_Node_Ternary(); ///< Default destructor. Frees children recursively.
       
-      void print(); ///< Prints the contents of this node to stdout, recursively.
-      void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
-      int width(); ///< Returns the width which will be used to render this node and all its children.
-      int height(); ///< Returns the height which will be used to render this node and all its children.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
+      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
+      virtual int width(); ///< Returns the width which will be used to render this node and all its children.
+      virtual int height(); ///< Returns the height which will be used to render this node and all its children.
     };
     /// Child of AST_Node for array subscripts.
     struct AST_Node_Subscript: AST_Node {
@@ -216,18 +220,17 @@ namespace jdi {
       void setright(AST_Node* r); ///< Set the right-hand operand (the index expression).
       bool full(); ///< Returns true if this node is already completely full, meaning it has no room for children.
       
-      void print(); ///< Prints the contents of this node to stdout, recursively.
-      void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
-      int width(); ///< Returns the width which will be used to render this node and all its children.
-      int height(); ///< Returns the height which will be used to render this node and all its children.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
+      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
+      virtual int width(); ///< Returns the width which will be used to render this node and all its children.
+      virtual int height(); ///< Returns the height which will be used to render this node and all its children.
     };
     struct AST_Node_Array: AST_Node {
       vector<AST_Node*> elements; ///< Vector of our array elements.
       
-      /// Evaluates this node recursively, returning a value containing its result.
-      virtual value eval() const;
-      /// Coerces this node recursively for type, returning a full_type representing it.
-      virtual full_type coerce() const;
+      virtual value eval() const; ///< Evaluates this node recursively, returning a value containing its result.
+      virtual full_type coerce() const; ///< Coerces this node recursively for type, returning a full_type representing it.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
       
       virtual ~AST_Node_Array();
     };
@@ -247,10 +250,10 @@ namespace jdi {
       void setright(AST_Node* r); ///< Set the right-hand operand (adds a parameter).
       bool full(); ///< Returns true if this node is already completely full, meaning it has no room for children.
       
-      void print(); ///< Prints the contents of this node to stdout, recursively.
-      void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
-      int width(); ///< Returns the width which will be used to render this node and all its children.
-      int height(); ///< Returns the height which will be used to render this node and all its children.
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
+      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
+      virtual int width(); ///< Returns the width which will be used to render this node and all its children.
+      virtual int height(); ///< Returns the height which will be used to render this node and all its children.
     };
     
     AST_Node *root; ///< The first node in our AST--The last operation that will be performed.
@@ -356,8 +359,8 @@ namespace jdi {
     /// Clear the AST out, effectively creating a new instance of this class
     void clear();
     
-    /// Print the AST to stdout.
-    void print();
+    /// Render the AST as a string: This is a relatively costly operation.
+    string toString() const; ///< Renders this node and its children as a string, recursively.
     
     /// Render the AST to an SVG file.
     void writeSVG(const char* filename);

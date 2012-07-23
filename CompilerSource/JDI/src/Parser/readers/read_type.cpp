@@ -458,23 +458,22 @@ int jdip::read_function_params(ref_stack &refs, lexer *lex, token_t &token, defi
       token.report_errorf(herr, "Expected type-id for function parameters before %s");
       FATAL_RETURN(1);
     }
-    else {
-      ref_stack::parameter param; // Instantiate a parameter
-      param.swap_in(a); // Give it our read-in full type (including ref stack, which is costly to copy)
-      param.variadic = cp? cp->variadics.find(param.def) != cp->variadics.end() : false;
-      params.throw_on(param);
-    }
+    ref_stack::parameter param; // Instantiate a parameter
+    param.swap_in(a); // Give it our read-in full type (including ref stack, which is costly to copy)
+    param.variadic = cp? cp->variadics.find(param.def) != cp->variadics.end() : false;
     if (token.type == TT_OPERATOR) {
       if (token.content.len != 1 or *token.content.str != '=') {
         token.report_errorf(herr, "Unexpected operator at this point; expected '=' or ')' before %s");
         FATAL_RETURN(1);
       }
       else {
-        AST dv;
+        param.default_value = new AST;
         token = lex->get_token_in_scope(scope, herr);
-        dv.parse_expression(token, lex, scope, precedence::comma+1, herr);
+        param.default_value->parse_expression(token, lex, scope, precedence::comma+1, herr);
       }
     }
+    params.throw_on(param);
+    
     if (token.type != TT_COMMA) {
       if (token.type == TT_RIGHTPARENTH) break;
       token.report_error(herr,"Expected comma or closing parenthesis to function parameters");

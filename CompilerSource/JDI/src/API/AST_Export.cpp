@@ -23,11 +23,9 @@
 #include <General/svg_simple.h>
 
 namespace jdi {
-  void AST::print() {
-    #ifdef DEBUG_MODE
-      cout << expression << endl;
-    #endif
-    if (root) root->print();
+  string AST::toString() const {
+    if (root) return root->toString();
+    return "";
   }
   
   /// A wrapper to \c SVG which generates IDs based on an internally-stored node count.
@@ -208,9 +206,45 @@ namespace jdi {
   //=: Basic Tree Print :======================================================================================================
   //===========================================================================================================================
   
-  void AST::AST_Node::print() { cout << "(" << content << ")"; }
-  void AST::AST_Node_Unary::print() {}
-  void AST::AST_Node_Binary::print() { cout << "( " << content << " )["; if (left) left->print(); else cout << "(...)"; if (right) right->print(); else cout << "(...)"; cout << "]"; }
-  void AST::AST_Node_Ternary::print() {}
-  void AST::AST_Node_Parameters::print() {}
+  string AST::AST_Node::toString() const {
+    return content;
+  }
+  string AST::AST_Node_Unary::toString() const {
+    return content + operand->toString();
+  }
+  string AST::AST_Node_Binary::toString() const {
+    return "(" + (left? left->toString(): "...") + ") " + content + " (" + (right? right->toString() : "...") + ")";
+  }
+  string AST::AST_Node_Ternary::toString() const {
+    return "(" + (exp?exp->toString():"...") + ")? (" + (left?left->toString():"...") + " : " + (right?right->toString():"...") + ")";
+  }
+  string AST::AST_Node_Parameters::toString() const {
+    string res = "(" + (func?func->toString():"...") + ")(";
+    for (size_t i = 0; i < params.size(); ++i) { res += params[i]->toString(); if (i+1<params.size()) res += ", "; }
+    return res + ")";
+  }
+  string AST::AST_Node_Cast::toString() const {
+    return "(" + cast_type.toString() + ")(" + operand->toString() + ")"; 
+  }
+  string AST::AST_Node_Definition::toString() const {
+    return def? def->name : "...";
+  }
+  string AST::AST_Node_Scope::toString() const {
+    return (left?left->toString() : "...") + "::" + (right?right->content:"???");
+  }
+  string AST::AST_Node_sizeof::toString() const {
+    return "sizeof(" + operand->toString() + ")";
+  }
+  string AST::AST_Node_Subscript::toString() const {
+    return "(" + (left? left->toString() : "...") + ")[" + (index? index->toString() : "...") + "]";
+  }
+  string AST::AST_Node_Type::toString() const {
+    return dec_type.toString();
+  }
+  string AST::AST_Node_Array::toString() const {
+    string res = "{ ";
+    for (size_t i = 0; i < elements.size(); ++i)
+      res += elements[i]->toString() + (i + 1 < elements.size()? ", " : " ");
+    return res + "}";
+  }
 }

@@ -133,11 +133,11 @@ namespace jdi {
     void swap(ref_stack &rf);
     
     /// Represent this set of referencers as a string.
-    string toString();
+    string toString() const;
     /// Represent the left-hand side of this set of referencers as a string (the part before the name).
-    string toStringLHS();
+    string toStringLHS() const;
     /// Represent the right-hand side of this set of referencers as a string (the part after the name).
-    string toStringRHS();
+    string toStringRHS() const;
     
     /// Get the top node.
     node &top();
@@ -152,9 +152,9 @@ namespace jdi {
     size_t size() const;
     
     /// Return iterator from topmost item.
-    iterator begin();
+    iterator begin() const;
     /// Return invalid iterator for comparison.
-    iterator end();
+    iterator end() const;
     
     ref_stack(); ///< Default contructor. Zeroes pointers.
     ~ref_stack(); ///< Default destructor. Frees the stack.
@@ -165,8 +165,8 @@ namespace jdi {
       private:
         node* n; ///< The node to which we are pointing.
         iterator(node*); ///< Utility constructor for use in begin().
-        friend iterator ref_stack::begin(); ///< Let the begin() function use this constructor.
-        friend iterator ref_stack::end(); ///< Let the end() function use this constructor.
+        friend iterator ref_stack::begin() const; ///< Let the begin() function use this constructor.
+        friend iterator ref_stack::end() const; ///< Let the end() function use this constructor.
       public:
         node* operator*(); ///< Get the current node pointer.
         node* operator->(); ///< Treat iterator as current node pointer.
@@ -190,15 +190,16 @@ namespace jdi {
 #include <Storage/full_type.h>
 #include <Storage/definition.h>
 #include <General/quickvector.h>
+#include <API/AST.h>
 
 namespace jdi {
   /// Parameter storage type; contains type info and other important parameter info.
   struct ref_stack::parameter: full_type {
     bool variadic; ///< True if this parameter can be passed several values; in C/C++, this is mandated to be the last parameter.
-    bool defaulted; ///< True if this parameter was given a default value. Convenience boolean to remove subtraction as a factor; same as defaulted_value.type != VT_INVALID.
-    value default_value; ///< The default value of this parameter, or an invalid value if none was given.
+    AST *default_value; ///< An AST if a default value was given. NULL otherwise.
     
     parameter(); ///< Default constructor.
+    ~parameter(); ///< Destructor; frees the default value AST.
     void swap_in(full_type& param); ///< Swap contents with another parameter class.
     void swap(parameter& param); ///< Swap contents with another parameter class.
     

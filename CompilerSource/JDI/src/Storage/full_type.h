@@ -50,7 +50,7 @@ namespace jdi {
     void swap(full_type& ft); ///< Trade contents with another full_type.
     void copy(const full_type& ft); ///< Copy a full_type without warning; this is for when copy is inevitable.
     
-    std::string toString(); ///< Represent as a string.
+    std::string toString() const; ///< Represent as a string.
     
     bool operator==(const full_type& other) const; ///< Compare for equality across all three attributes.
     bool operator!=(const full_type& other) const; ///< Compare against equality across all three attributes.
