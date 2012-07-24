@@ -107,6 +107,7 @@ int main(int argc, char* argv[])
   //e_exec("gcc -E -x c++ -v blank.txt");
   
   libInit(NULL);
+  for (int i = 0; i < 10; ++i)
   current_language->definitionsModified(NULL, ((string) "%e-yaml\n"
     "---\n" 	 
     "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n" 	 
@@ -175,9 +176,9 @@ int main(int argc, char* argv[])
   es.filename = "coolio.gmk";
   es.fileVersion = 800;*/
   
-  //do_cli(*main_context);
+  do_cli(*main_context);
   
-  //current_language->compile(&es, "/tmp/coolio.exe", 0);
+  // current_language->compile(&es, "/tmp/coolio.exe", 0);
   
   libFree();
   
@@ -191,7 +192,7 @@ int main(int argc, char* argv[])
 #include <General/parse_basics.h>
 
 #ifdef __linux__d
-#include <ncurses>
+#include <ncurses.h>
 #else
 static char getch() {
   int c = fgetc(stdin);

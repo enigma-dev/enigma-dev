@@ -92,20 +92,11 @@ llreader::llreader(const llreader& x): pos(x.pos), length(FT_BUFFER), data(NULL)
 }
 llreader::~llreader() { close(); }
 
-static inline void dump_in(const char* name, llreader* dest) {
-  FILE* in = fopen(name,"rb");
-  fseek(in,0,SEEK_END);
-  long int sz = ftell(in);
-  fseek(in,0,SEEK_SET);
-  char* buf = new char[sz+1];
-  fread(buf, 1, sz, in);
-  buf[sz] = 0;
-  dest->data = buf;
-  dest->length = sz;
-  fclose(in);
-}
-
 void llreader::open(const char* filename) {
+  #ifdef DEBUG_MODE
+    if (mode != FT_CLOSED and mode != FT_ALIAS)
+      cerr << "ERROR! Leaked a file in open()." << endl;
+  #endif
 #if defined(IO_FALLBACK)
   #warning Compiling in fallback file mode. May lead to slowness.
   dump_in(filename);
@@ -113,23 +104,31 @@ void llreader::open(const char* filename) {
   #error unimplemented
 #else
   int fd = ::open(filename, O_RDONLY);
-  if (fd == -1)
-    return;
+  if (fd == -1) return;
   struct stat statbuf;
   fstat(fd, &statbuf), length = statbuf.st_size;
   data = (const char*)mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
   mode = FT_MMAP;
+  ::close(fd);
 #endif
   path = fn_path(filename);
 }
 
 void llreader::alias(const char* buffer, size_t len) {
+  #ifdef DEBUG_MODE
+    if (mode != FT_CLOSED and mode != FT_ALIAS)
+      cerr << "ERROR! Leaked a file in alias(buffer, length)." << endl;
+  #endif
   mode = FT_ALIAS;
   pos = 0, length = len;
   data = buffer;
 }
 
 void llreader::alias(const llreader &llread) {
+  #ifdef DEBUG_MODE
+    if (mode != FT_CLOSED and mode != FT_ALIAS)
+      cerr << "ERROR! Leaked a file in alias(llreader)." << endl;
+  #endif
   mode = FT_ALIAS;
   pos = llread.pos, length = llread.length;
   data = llread.data;
@@ -137,12 +136,20 @@ void llreader::alias(const llreader &llread) {
 }
 
 void llreader::consume(char* buffer, size_t len) {
+  #ifdef DEBUG_MODE
+    if (mode != FT_CLOSED and mode != FT_ALIAS)
+      cerr << "ERROR! Leaked a file in consume(buffer, length)" << endl;
+  #endif
   mode = FT_BUFFER;
   pos = 0, length = len;
   data = buffer;
 }
 
 void llreader::consume(llreader& whom) {
+  #ifdef DEBUG_MODE
+    if (mode != FT_CLOSED and mode != FT_ALIAS)
+      cerr << "ERROR! Leaked a file in consume(llreader)" << endl;
+  #endif
   mode = whom.mode;
   pos = whom.pos;
   length = whom.length;

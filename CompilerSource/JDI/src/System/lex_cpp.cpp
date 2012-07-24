@@ -610,13 +610,17 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
         
         string incfn;
         llreader incfile;
-        if (chklocal) incfile.open((incfn = path + fnfind).c_str());
+        if (chklocal)
+          incfile.open((incfn = path + fnfind).c_str());
         for (size_t i = 0; i < builtin->search_dir_count(); ++i) {
-          incfile.open((incfn = builtin->search_dir(i) + fnfind).c_str());
           if (incfile.is_open()) {
-            if (incnext) incnext = incfn != files.top().filename;
+            if (incnext) {
+              incnext = incfn != files.top().filename;
+              incfile.close();
+            }
             else break;
           }
+          incfile.open((incfn = builtin->search_dir(i) + fnfind).c_str());
         }
         if (!incfile.is_open()) {
           herr->error("Could not find " + fnfind.substr(1), filename, line, pos-lpos);
