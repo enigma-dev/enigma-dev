@@ -101,7 +101,23 @@ void llreader::open(const char* filename) {
   #warning Compiling in fallback file mode. May lead to slowness.
   dump_in(filename);
 #elif defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-  #error unimplemented
+  SECURITY_ATTRIBUTES sec;
+  sec.nLength = sizeof(sec), sec.lpSecurityDescriptor = NULL, sec.bInheritHandle = true;
+  HANDLE hFile = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, &sec, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
+  if (hFile == INVALID_HANDLE_VALUE) return;
+  HANDLE mapping = CreateFileMapping(hFile, &sec, PAGE_READONLY, 0, 0, NULL);
+  if (mapping == INVALID_HANDLE_VALUE) {
+    CloseHandle(hFile);
+    return;
+  }
+  data = (const char*)MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
+  if (data) {
+    mode = FT_MMAP;
+    length = GetFileSize(hFile, NULL);
+  }
+  CloseHandle(mapping);
+  CloseHandle(hFile);
+  
 #else
   int fd = ::open(filename, O_RDONLY);
   if (fd == -1) return;
@@ -169,7 +185,7 @@ void llreader::close() {
           fprintf(stderr,"Error: Attempting to free what could never have been allocated...\n");
         #else
           #if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-            #error unimplemented
+            UnmapViewOfFile(data);
           #else
             munmap((void*)data, length);
           #endif

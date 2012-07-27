@@ -158,10 +158,16 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
             token = lex->get_token(herr);
             if (token.type == TT_IDENTIFIER) {
               definition* d = scope->look_up(token.content.toString());
-              if (d->flags & DEF_NAMESPACE)
-                scope->use_namespace((definition_scope*)d);
-              else
-                token.report_error(herr, "Expected namespace name following `namespace' token");
+              if (!d) {
+                token.report_errorf(herr, "Expected id to use before %s");
+                FATAL_RETURN(1);
+              }
+              else {
+                if (d->flags & DEF_NAMESPACE)
+                  scope->use_namespace((definition_scope*)d);
+                else
+                  token.report_error(herr, "Expected namespace name following `namespace' token");
+              }
               token = read_next_token(scope);
             }
             else

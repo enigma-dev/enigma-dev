@@ -173,7 +173,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     delete oldglobal;
   }
   
-  cout << "Creating dummy primitives for old ENIGMA";
+  cout << "Creating dummy primitives for old ENIGMA" << endl;
   for (jdip::tf_iter it = jdip::builtin_declarators.begin(); it != jdip::builtin_declarators.end(); ++it) {
     main_context->get_global()->members[it->first] = new jdi::definition(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
   }

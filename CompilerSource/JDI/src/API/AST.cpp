@@ -28,6 +28,7 @@
 #include <System/lex_buffer.h>
 #include <Parser/bodies.h>
 #include <API/compile_settings.h>
+#include <malloc.h>
 #include <cstring>
 #include <cstdio>
 #include <map>

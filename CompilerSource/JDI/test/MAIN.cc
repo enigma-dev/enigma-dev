@@ -28,6 +28,7 @@ using namespace std;
   #define start_time(ts) timeval ts; usleep(10000); gettimeofday(&ts,NULL)
   #define end_time(te,tel) timeval te; gettimeofday(&te,NULL); long unsigned tel = (te.tv_sec*1000000 + te.tv_usec) - (ts.tv_sec*1000000 + ts.tv_usec)
 #else
+  #include <time.h>
   #define start_time(ts) time_t ts = clock()
   #define end_time(te,tel) time_t te = clock(); double tel = (((te-ts) * 1000000.0) / CLOCKS_PER_SEC)
 #endif

@@ -130,6 +130,7 @@
 		<Unit filename="JDI/src/API/context.h" />
 		<Unit filename="JDI/src/API/error_reporting.cpp" />
 		<Unit filename="JDI/src/API/error_reporting.h" />
+		<Unit filename="JDI/src/API/jdi.cpp" />
 		<Unit filename="JDI/src/API/jdi.h" />
 		<Unit filename="JDI/src/API/lexer_interface.cpp" />
 		<Unit filename="JDI/src/API/lexer_interface.h" />
