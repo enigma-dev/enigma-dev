@@ -42,7 +42,6 @@ namespace jdip {
   typeflag::~typeflag() { }
   
   typeflag* builtin_typeflag__throw;
-  typeflag* builtin_typeflag__restrict;
 }
 
 using namespace jdip;
@@ -60,6 +59,8 @@ namespace jdi {
   unsigned long builtin_flag__signed;
   unsigned long builtin_flag__short;
   unsigned long builtin_flag__long;
+  
+  unsigned long builtin_flag__restrict;
   
   definition *builtin_type__unsigned;
   definition *builtin_type__signed;
@@ -108,9 +109,16 @@ namespace jdi {
         cout << type_name << "=>" << flag << endl;
         builtin_decls_byflag[flag] = insit.first->second;
         insit.first->second->flagbit = flag;
-        if (type_name[0] != '_')
-        {
+        if (type_name[0] != '_') {
           pair<tf_iter, bool> redit = builtin_declarators.insert(pair<string,typeflag*>("__" + type_name,NULL));
+          if (redit.second) redit.first->second = new typeflag(*insit.first->second);
+          if (type_name[type_name.length() - 1] != '_') {
+            redit = builtin_declarators.insert(pair<string,typeflag*>("__" + type_name + "__",NULL));
+            if (redit.second) redit.first->second = new typeflag(*insit.first->second);
+          }
+        }
+        else if (type_name[type_name.length() - 1] != '_') {
+          pair<tf_iter, bool> redit = builtin_declarators.insert(pair<string,typeflag*>(type_name + "__",NULL));
           if (redit.second) redit.first->second = new typeflag(*insit.first->second);
         }
       }
@@ -132,7 +140,7 @@ namespace jdi {
     builtin_flag__Complex  = add_declarator("_Complex",   UF_FLAG).flag;
     
     builtin_typeflag__throw = add_declarator("throw", UF_FLAG).tf_struct;
-    builtin_typeflag__restrict = add_declarator("__restrict", UF_FLAG).tf_struct;
+    builtin_flag__restrict = add_declarator("__restrict", UF_FLAG).flag;
     
     jdi::add_decl_info
     c = add_declarator("unsigned", UF_STANDALONE_FLAG, 4, "int");
@@ -158,15 +166,7 @@ namespace jdi {
     add_declarator("explicit", UF_FLAG);
     
     builtin->variadics.insert(builtin_type__va_list);
-    
-    string x(1,'x');
-    builtin->add_macro_func("__attribute__", x, string(), false);
-    builtin->add_macro_func("__typeof__", x, string("int"), false);
-    builtin->add_macro("__extension__", string());
-    builtin->add_macro("false", string(1,'0'));
-    builtin->add_macro("true", string(1,'1'));
-    
-    builtin->add_macro_func("JUST_DEFINE_IT_RUN", x, string(), false);
+    builtin->add_macro("JUST_DEFINE_IT_RUN", string());
   }
   
   void cleanup_declarators() {

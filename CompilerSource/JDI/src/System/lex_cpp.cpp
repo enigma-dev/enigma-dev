@@ -40,13 +40,13 @@ using namespace jdip;
 #define cfile data //I'm sorry, but I can't spend the whole function calling the file buffer "data."
 
 /// Returns whether s1 begins with s2, followed by whitespace.
-static inline bool strbw(const char* s1, const char (&s2)[3]) { return *s1 == *s2 and s1[1] == s2[1] and (s1[2] == ' ' or s1[2] == '\t' or s1[2] == '\n' or s1[2] == '\r'); }
-static inline bool strbw(const char* s1, const char (&s2)[4]) { return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and (s1[3] == ' ' or s1[3] == '\t' or s1[3] == '\n' or s1[3] == '\r'); }
-static inline bool strbw(const char* s1, const char (&s2)[5]) { return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and s1[3] == s2[3] and (s1[4] == ' ' or s1[4] == '\t' or s1[4] == '\n' or s1[4] == '\r'); }
-static inline bool strbw(const char* s1, const char (&s2)[6]) { return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and s1[3] == s2[3] and s1[4] == s2[4] and (s1[5] == ' ' or s1[5] == '\t' or s1[5] == '\n' or s1[5] == '\r'); }
-static inline bool strbw(const char* s1, const char (&s2)[7]) { return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and s1[3] == s2[3] and s1[4] == s2[4] and s1[5] == s2[5] and (s1[6] == ' ' or s1[6] == '\t' or s1[6] == '\n' or s1[6] == '\r'); }
-static inline bool strbw(const char* s1, const char (&s2)[11]){ return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and s1[3] == s2[3] and s1[4] == s2[4] and s1[5] == s2[5] and s1[6] == s2[6] and s1[7] == s2[7] and s1[8] == s2[8] and s1[9] == s2[9] and (s1[10] == ' ' or s1[10] == '\t' or s1[10] == '\n' or s1[10] == '\r'); }
-static inline bool strbw(char s) { return s == ' ' or s == '\t' or s == '\n' or s == '\r'; }
+static inline bool strbw(const char* s1, const char (&s2)[3]) { return *s1 == *s2 and s1[1] == s2[1] and (!is_letterd(s1[2])); }
+static inline bool strbw(const char* s1, const char (&s2)[4]) { return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and (!is_letterd(s1[3])); }
+static inline bool strbw(const char* s1, const char (&s2)[5]) { return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and s1[3] == s2[3] and (!is_letterd(s1[4])); }
+static inline bool strbw(const char* s1, const char (&s2)[6]) { return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and s1[3] == s2[3] and s1[4] == s2[4] and (!is_letterd(s1[5])); }
+static inline bool strbw(const char* s1, const char (&s2)[7]) { return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and s1[3] == s2[3] and s1[4] == s2[4] and s1[5] == s2[5] and (!is_letterd(s1[6])); }
+static inline bool strbw(const char* s1, const char (&s2)[11]){ return *s1 == *s2 and s1[1] == s2[1] and s1[2] == s2[2] and s1[3] == s2[3] and s1[4] == s2[4] and s1[5] == s2[5] and s1[6] == s2[6] and s1[7] == s2[7] and s1[8] == s2[8] and s1[9] == s2[9] and (!is_letterd(s1[10])); }
+static inline bool strbw(char s) { return !is_letterd(s); }
 
 void lexer_cpp::skip_comment()
 {
@@ -587,15 +587,13 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
       break;
     case_include: {
         bool incnext;
-        if (true)
-            incnext = false;
-        else {
-          case_include_next:
-          incnext = !files.empty();
-        }
+        if (true) incnext = false;
+        else { case_include_next: incnext = true; }
+        
         string fnfind = read_preprocessor_args(herr);
         if (!conditionals.empty() and !conditionals.top().is_true)
           break;
+        
         bool chklocal = false;
         char match = '>';
         if (!incnext and fnfind[0] == '"')
@@ -615,10 +613,9 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
         for (size_t i = 0; i < builtin->search_dir_count(); ++i) {
           if (incfile.is_open()) {
             if (incnext) {
-              incnext = incfn != files.top().filename;
+              incnext = incfn != filename;
               incfile.close();
-            }
-            else break;
+            } else break;
           }
           incfile.open((incfn = builtin->search_dir(i) + fnfind).c_str());
         }
@@ -754,6 +751,7 @@ token_t lexer_cpp::get_token(error_handler *herr)
       
       macro_iter mi = macros.find(fn);
       if (mi != macros.end()) {
+        domacro_mi:
         if (mi->second->argc < 0) {
           bool already_open = false; // Test if we're in this macro already
           quick::stack<openfile>::iterator it = files.begin();
@@ -772,8 +770,17 @@ token_t lexer_cpp::get_token(error_handler *herr)
       }
       
       keyword_map::iterator kwit = keywords.find(fn);
-      if (kwit != keywords.end())
+      if (kwit != keywords.end()) {
+        if (kwit->second == TT_INVALID) {
+          mi = kludge_map.find(fn);
+          #ifdef DEBUG_MODE
+          if (mi == kludge_map.end())
+            cerr << "SYSTEM ERROR! KEYWORD `" << fn << "' IS DEFINED AS INVALID" << endl;
+          #endif
+          goto domacro_mi;
+        }
         return token_t(token_basics(kwit->second,filename,line,spos-lpos));
+      }
       
       tf_iter tfit = builtin_declarators.find(fn);
       if (tfit != builtin_declarators.end()) {
@@ -935,30 +942,58 @@ bool lexer_cpp::pop_file() {
   
   return false;
 }
-  
+
+macro_map lexer_cpp::kludge_map;
+lexer_cpp::keyword_map lexer_cpp::keywords;
 lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): macros(pmacros), filename(fname), line(1), lpos(0), open_macro_count(0), mlex(new lexer_macro(this))
 {
   consume(input); // We are also an llreader. Consume the given one using the inherited method.
-  keywords["asm"] = TT_ASM;
-  keywords["__asm"] = TT_ASM;
-  keywords["__asm__"] = TT_ASM;
-  keywords["class"] = TT_CLASS;
-  keywords["decltype"] = TT_DECLTYPE;
-  keywords["enum"] = TT_ENUM;
-  keywords["extern"] = TT_EXTERN;
-  keywords["namespace"] = TT_NAMESPACE;
-  keywords["operator"] = TT_OPERATORKW;
-  keywords["private"] = TT_PRIVATE;
-  keywords["protected"] = TT_PROTECTED;
-  keywords["public"] = TT_PUBLIC;
-  keywords["sizeof"] = TT_SIZEOF;
-  keywords["__is_empty"] = TT_ISEMPTY;
-  keywords["struct"] = TT_STRUCT;
-  keywords["template"] = TT_TEMPLATE;
-  keywords["typedef"] = TT_TYPEDEF;
-  keywords["typename"] = TT_TYPENAME;
-  keywords["union"] = TT_UNION;
-  keywords["using"] = TT_USING;
+  if (keywords.empty()) {
+    keywords["asm"] = TT_ASM;
+    keywords["__asm"] = TT_ASM;
+    keywords["__asm__"] = TT_ASM;
+    keywords["class"] = TT_CLASS;
+    keywords["decltype"] = TT_DECLTYPE;
+    keywords["enum"] = TT_ENUM;
+    keywords["extern"] = TT_EXTERN;
+    keywords["namespace"] = TT_NAMESPACE;
+    keywords["operator"] = TT_OPERATORKW;
+    keywords["private"] = TT_PRIVATE;
+    keywords["protected"] = TT_PROTECTED;
+    keywords["public"] = TT_PUBLIC;
+    keywords["sizeof"] = TT_SIZEOF;
+    keywords["__is_empty"] = TT_ISEMPTY;
+    keywords["struct"] = TT_STRUCT;
+    keywords["template"] = TT_TEMPLATE;
+    keywords["typedef"] = TT_TYPEDEF;
+    keywords["typename"] = TT_TYPENAME;
+    keywords["union"] = TT_UNION;
+    keywords["using"] = TT_USING;
+    
+    // GNU Extensions
+    keywords["__attribute__"] = TT_INVALID;
+    keywords["__extension__"] = TT_INVALID;
+    keywords["__typeof__"] = TT_INVALID;
+   // keywords["__restrict"] = TT_INVALID;
+    
+    // MinGW Fuckery
+    keywords["__MINGW_IMPORT"] = TT_INVALID;
+    
+    // C++ Extensions
+    keywords["false"] = TT_INVALID;
+    keywords["true"] = TT_INVALID;
+    
+    string x(1,'x');
+    kludge_map.clear();
+    context::global_macros().swap(kludge_map);
+    builtin->add_macro_func("__attribute__", x, string(), false);
+    builtin->add_macro_func("__typeof__", x, string("int"), false);
+    builtin->add_macro("__extension__", string());
+    builtin->add_macro("__MINGW_IMPORT", string());
+    builtin->add_macro("false", string(1,'0'));
+    builtin->add_macro("true", string(1,'1'));
+    context::global_macros().swap(kludge_map);
+  }
 }
 lexer_cpp::~lexer_cpp() {
   delete mlex;
@@ -1153,6 +1188,15 @@ token_t lexer_macro::get_token(error_handler *herr)
           if (cfile[pos] == '\n' or (cfile[pos] == '\r' and (cfile[++pos] == '\n' or pos--)))
             lcpp->lpos = pos++, ++lcpp->line;
         return get_token(herr);
+        
+      case '\"': {
+        --pos; lcpp->skip_string(herr);
+        return token_t(token_basics(TT_STRINGLITERAL,lcpp->filename,lcpp->line,spos-lcpp->lpos), cfile + spos, ++pos-spos);
+      }
+      case '\'': {
+        --pos; lcpp->skip_string(herr);
+        return token_t(token_basics(TT_STRINGLITERAL,lcpp->filename,lcpp->line,spos-lcpp->lpos), cfile + spos, ++pos-spos);
+      }
       
       default:
         return token_t(token_basics(TT_INVALID,lcpp->filename,lcpp->line,pos-lcpp->lpos++));

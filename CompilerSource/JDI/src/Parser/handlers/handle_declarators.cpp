@@ -210,7 +210,9 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
         return handle_declarators(scope, token, tp, inherited_flags, res);
         
       case TT_COLON: {
-          if (tp.def != builtin_type__int) {
+          definition *root = tp.def;
+          while (root->flags & DEF_TYPED and (root = ((definition_typed*)root)->type)); 
+          if (root != builtin_type__int and root != builtin_type__long and root != builtin_type__short) {
             token.report_error(herr,"Attempt to assign bit count in non-integer declaration");
             FATAL_RETURN(1);
           }

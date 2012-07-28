@@ -163,6 +163,9 @@ namespace jdi
     /// Get a reference to the macro map
     const macro_map& get_macros();
     
+    /// Get a non-const reference to the global macro set.
+    static macro_map &global_macros();
+    
     /** Parse an input stream for definitions.
         @param cfile     The stream to be read in.
         @param errhandl  An instance of \c jdi::error_handler which will receive any warnings or errors encountered.

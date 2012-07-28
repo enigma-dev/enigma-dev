@@ -86,6 +86,8 @@ namespace jdi {
   extern unsigned long builtin_flag__short;  ///< Builtin short flag
   extern unsigned long builtin_flag__long;  ///< Builtin long flag
   
+  extern unsigned long builtin_flag__restrict;  ///< Builtin __restrict / __restrict__ flag
+  
   extern definition *builtin_type__unsigned; ///< Builtin unsigned flag
   extern definition *builtin_type__signed;  ///< Builtin signed flag
   extern definition *builtin_type__short;  ///< Builtin short flag
@@ -130,7 +132,6 @@ namespace jdip {
   };
   
   extern typeflag* builtin_typeflag__throw; ///< Builtin __throw typeflag, as stored in the token.
-  extern typeflag* builtin_typeflag__restrict; ///< Builtin __restrict typeflag, as stored in the token.
   
   typedef map<string,typeflag*> tf_map; ///< A map of declarators by name.
   typedef map<unsigned int,typeflag*> tf_flag_map; ///< A map of declarator flags by flag bit, as a power of two.

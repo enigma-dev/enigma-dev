@@ -155,6 +155,10 @@ void context::swap(context &ct) {
   else cout << "ERROR! Cannot swap context while parse is active" << endl;
 }
 
+macro_map &context::global_macros() {
+  return builtin->macros;
+}
+
 void context::load_standard_builtins()
 {
   // Nothing to load

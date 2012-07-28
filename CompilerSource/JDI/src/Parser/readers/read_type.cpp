@@ -352,7 +352,7 @@ int jdip::read_referencers(ref_stack &refs, const full_type& ft, lexer *lex, tok
       
       case TT_DECFLAG: {
           typeflag* a = ((typeflag*)token.def);
-          if (a->flagbit == builtin_flag__const || a->flagbit == builtin_flag__volatile || a == builtin_typeflag__restrict) {
+          if (a->flagbit == builtin_flag__const || a->flagbit == builtin_flag__volatile || a->flagbit == builtin_flag__restrict) {
             // TODO: Give RT_POINTERTO node a bool/volatile flag; to denote that the pointer is const or volatile; set it here.
             token = lex->get_token_in_scope(scope, herr);
             continue;
@@ -418,7 +418,7 @@ int jdip::read_referencers_post(ref_stack &refs, lexer *lex, token_t &token, def
       
       case TT_DECFLAG: {
           typeflag* a = ((typeflag*)token.def);
-          if (a->flagbit == builtin_flag__const || a->flagbit == builtin_flag__volatile) {
+          if (a->flagbit == builtin_flag__const || a->flagbit == builtin_flag__volatile || a->flagbit == builtin_flag__restrict) {
             // TODO: Give RT_POINTERTO node a bool/volatile flag; to denote that the pointer is const or volatile; set it here.
             token = lex->get_token_in_scope(scope, herr);
             continue;

@@ -76,10 +76,13 @@ namespace jdip {
     
     unsigned open_macro_count;
     
-    typedef map<string,TOKEN_TYPE> keyword_map; ///< Map of string to token type; a map-of-keywords type.
+    /// Map of string to token type; a map-of-keywords type.
+    typedef map<string,TOKEN_TYPE> keyword_map;
     /// List of C++ keywords, mapped to the type of their token.
     /// This list is assumed to contain tokens whose contents are unambiguous; one string maps to one token, and vice-versa.
-    keyword_map keywords;
+    static keyword_map keywords;
+    /// This is a map of macros to add bare-minimal support for a number of compiler-specific builtins.
+    static macro_map kludge_map;
     
     /** Sole constructor; consumes an llreader and attaches a new \c lex_macro.
         @param input    The file from which to read definitions. This file will be manipulated by the system.
