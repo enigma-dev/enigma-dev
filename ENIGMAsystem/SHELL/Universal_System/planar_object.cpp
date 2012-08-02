@@ -113,11 +113,12 @@ namespace enigma
         instance->vspeed.rval.d += (instance->gravity) *-sin(instance->gravity_direction * M_PI/180);
       }
 
+      //Remember to keep hspeed and vspeed synced with direction and speed.
       if(instance->speed.rval.d<0)
-        instance->direction.rval.d = fmod(instance->direction.rval.d + 180, 360),
+        instance->direction.rval.d = atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * 180/M_PI,//fmod(instance->direction.rval.d + 180, 360),
         instance->speed.    rval.d = -hypotf(instance->hspeed.rval.d, instance->vspeed.rval.d);
       else
-        instance->direction.rval.d = fmod(instance->direction.rval.d, 360),
+        instance->direction.rval.d = atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * 180/M_PI,//fmod(instance->direction.rval.d, 360),
         instance->speed.    rval.d =  hypotf(instance->hspeed.rval.d, instance->vspeed.rval.d);
       if(instance->direction.rval.d < 0)
         instance->direction.rval.d += 360;
