@@ -113,6 +113,7 @@ namespace enigma
     if (which->prev) which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
     if (prev == which) prev = which->prev;
+    if (next == which) next = which->next;
     update_iterators_for_destroy(which);
   }
 
