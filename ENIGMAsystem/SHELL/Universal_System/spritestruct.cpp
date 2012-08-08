@@ -196,13 +196,32 @@ namespace enigma
       show_error("Cannot access sprite with id " + toString(id), false); \
       return r; \
     } const enigma::sprite *const spr = enigma::spritestructarray[id];
+  #define get_sprite_mutable(spr,id,r) \
+    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
+      show_error("Cannot access sprite with id " + toString(id), false); \
+      return r; \
+    } enigma::sprite *const spr = enigma::spritestructarray[id];
+  #define get_spritev_mutable(spr,id) \
+    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
+      show_error("Cannot access sprite with id " + toString(id), false); \
+      return; \
+    } enigma::sprite *const spr = enigma::spritestructarray[id];
 #else
+  /// Retrieve a sprite by the given index, doing bound/null checking if in debug mode and bailing with result r if an error occurs.
   #define get_sprite(spr,id,r) \
     const enigma::sprite *const spr = enigma::spritestructarray[id];
+  /// Retrieve a sprite by the given index, doing bound/null checking if in debug mode and bailing with no result if an error occurs.
   #define get_spritev(spr,id) \
     const enigma::sprite *const spr = enigma::spritestructarray[id];
+  /// Retrieve a sprite by the given index, doing bounds checking (but not null checking) if in debug mode and bailing with result r if an error occurs.
   #define get_sprite_null(spr,id,r) \
     const enigma::sprite *const spr = enigma::spritestructarray[id];
+  /// Retrieve a sprite (and a lock thereto) by the given index, doing bound/null checking if in debug mode and bailing with result r if an error occurs.
+  #define get_sprite_mutable(spr,id,r) \
+    enigma::sprite *const spr = enigma::spritestructarray[id];
+  /// Retrieve a sprite (and a lock thereto) by the given index, doing bound/null checking if in debug mode and bailing with no result if an error occurs.
+  #define get_spritev_mutable(spr,id) \
+    enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
 int sprite_get_width(int sprite)
