@@ -32,6 +32,9 @@
 //#include <GL/gl.h>
 //#include <GL/glu.h>
 
+void game_end() { exit(0); } //TODO: Fire game end event.
+void action_end_game() { game_end(); }
+
 using namespace std;
 
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.

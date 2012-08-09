@@ -20,6 +20,9 @@
 #include <string>
 using std::string;
 
+void game_end();
+void action_end_game();
+
 void gmw_init();
 
 void Sleep(int ms);

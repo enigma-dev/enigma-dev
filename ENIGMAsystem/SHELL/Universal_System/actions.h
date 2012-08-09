@@ -280,12 +280,6 @@ static inline void action_show_info() {show_info();}
 
 #define action_restart_game game_restart
 #define action_message(message) show_message(message)
-
-void exit_real_exit(int i) {
-    exit(i);
-    return;
-}
-
 #define exit return 0;
 #define globalvar global var
 
