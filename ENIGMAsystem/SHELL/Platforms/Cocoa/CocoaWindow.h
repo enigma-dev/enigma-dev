@@ -161,6 +161,9 @@ void io_handle();
 void io_clear();
 void keyboard_wait();
 
+void window_set_region_scale(double scale, bool adaptwindow);
+bool window_get_region_scale();
+
 namespace enigma {
 	extern char** parameters;
 	//void writename(char* x);

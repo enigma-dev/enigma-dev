@@ -52,8 +52,8 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h");
   wto << license;
-  
-  
+
+
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
   ***********************************************************/
@@ -68,17 +68,17 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
         else
           used_events[event_get_function_name(mid,id)].inc(mid,id);
       }
-  
-  /* Some events are included in all objects, even if the user 
+
+  /* Some events are included in all objects, even if the user
   ** hasn't specified code for them. Account for those here.
   ***********************************************************/
   for (size_t i=0; i<event_sequence.size(); i++)
   {
     const int mid = event_sequence[i].first, id = event_sequence[i].second;
     if (event_has_default_code(mid,id)) // We may not be using this event, but if it's persistent... (constant or defaulted: mandatory)
-    { 
+    {
       used_events[event_get_function_name(mid,id)].f2(mid,id); // ...Reserve it anyway.
-      
+
       for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) // Then shell it out into the other objects.
       {
         bool exists = false;
@@ -90,7 +90,7 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
       }
     }
   }
-  
+
   /* Now we forge a top-level tier for object declaration
   ** that defines default behavior for any obect's unused events.
   *****************************************************************/
@@ -112,35 +112,42 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   wto << "  };" << endl;
   wto << "}" << endl;
   wto.close();
-  
-  
+
+
   /* Now we write the actual event sequence code, as
   ** well as an initializer function for the whole system.
   ***************************************************************/
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.h");
   wto << license;
   wto << "namespace enigma" << endl << "{" << endl;
-  
+
   // Start by defining storage locations for our event lists to iterate.
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
     wto  << "  event_iter *event_" << it->first << "; // Defined in " << it->second.count << " objects" << endl;
-  
+
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
+    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
+//    wto  << "    if (es->gameSettings.interpolate) texture_set_interpolation(1); " << endl;  //FIXME: interpolation needs to be done properly
+    if (es->gameSettings.displayCursor)
+        wto  << "    window_set_cursor(cr_default);" << endl;
+    else
+        wto  << "    window_set_cursor(cr_none);" << endl;
+    wto  << "    window_set_region_scale(" << es->gameSettings.scaling << ", 0);" << endl;
     wto  << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
     int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
     wto  << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
-    
+
     int ind = 0;
     for (evfit it = used_events.begin(); it != used_events.end(); it++)
       wto  << "    event_" << it->first << " = events + " << ind++ << ";  event_" << it->first << "->name = \"" << event_get_human_name(it->second.mid,it->second.id) << "\";" << endl;
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
-  
+
   /* Some Super Checks are more complicated than others, requiring a function. Export those functions here. */
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
     wto << event_get_super_check_function(it->second.mid, it->second.id);
-  
+
   /* Now the event sequence */
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
     for (size_t i=0; i<event_sequence.size(); i++)
@@ -149,7 +156,7 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
       const int mid = event_sequence[i].first, id = event_sequence[i].second;
       evfit it = used_events.find(event_is_instance(mid,id) ? event_stacked_get_root_name(mid) : event_get_function_name(mid,id));
       if (it == used_events.end()) continue;
-      
+
       string seqcode = event_forge_sequence_code(mid,id,it->first);
       if (seqcode != "")
         wto << seqcode,
@@ -157,16 +164,29 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
         wto << "    enigma::update_globals();" << endl,
         wto << "    " << endl;
     }
+    if (es->gameSettings.letEscEndGame)
+        wto << "    if (keyboard_check_pressed(vk_escape)) game_end();" << endl;
+    if (es->gameSettings.letF4SwitchFullscreen)
+        wto << "    if (keyboard_check_pressed(vk_f4)) window_set_fullscreen(!window_get_fullscreen());" << endl;
+    if (es->gameSettings.letF1ShowGameInfo)
+        wto << "    if (keyboard_check_pressed(vk_f1)) show_info();" << endl;
+    if (es->gameSettings.letF9Screenshot)
+        wto << "    if (keyboard_check_pressed(vk_f9)) {}" << endl;   //TODO: Screenshot function
+    if (es->gameSettings.letF5SaveF6Load)  //TODO: uncomment after game save and load fucntions implemented
+    {
+        wto << "    //if (keyboard_check_pressed(vk_f5)) game_save('_save" << es->gameSettings.gameId << ".sav');" << endl;
+        wto << "    //if (keyboard_check_pressed(vk_f6)) game_load('_save" << es->gameSettings.gameId << ".sav');" << endl;
+    }
     wto << "    enigma::dispose_destroyed_instances();" << endl;
     wto << "    enigma::sleep_for_framerate(room_speed);" << endl;
     wto << "    " << endl;
     wto << "    return 0;" << endl;
   wto << "  } // event function" << endl;
-  
+
   // Done, end the namespace
   wto << "} // namespace enigma" << endl;
   wto.close();
-  
+
   return 0;
 }
 

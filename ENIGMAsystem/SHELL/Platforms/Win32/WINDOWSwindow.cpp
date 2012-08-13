@@ -150,7 +150,7 @@ int window_get_color() {
   return enigma::windowcolor;
 }
 
-int window_set_region_scale(double scale, const bool adaptwindow)
+void window_set_region_scale(double scale, bool adaptwindow)
 {
   enigma::viewscale=scale;
   if ((bool)adaptwindow)
@@ -158,8 +158,8 @@ int window_set_region_scale(double scale, const bool adaptwindow)
     RECT window; GetWindowRect(enigma::hWnd,&window);
     SetWindowPos(enigma::hWnd, HWND_TOP, window.right, window.top, (int)(room_width*scale), (int)(room_height*scale), SWP_SHOWWINDOW);
   }
-  return 0;
 }
+
 double window_get_region_scale()
 {
   return enigma::viewscale;

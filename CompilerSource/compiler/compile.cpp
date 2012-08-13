@@ -297,7 +297,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
     wto << "#define PRIMDEPTH2 6\n";
     wto << "#define AUTOLOCALS 0\n";
     wto << "#define MODE3DVARS 0\n";
-    wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"exit(0);":"") << " }\n";
+    wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
+  /*  for (int i = 0; i < es->constantCount; i++)
+        wto << "#define " << es->constants[i].name << " " <<  es->constants[i].value << "\n";*/  //FIXME: Parser needs to recgonise as constants instead of variables
     wto << '\n';
   wto.close();
 
