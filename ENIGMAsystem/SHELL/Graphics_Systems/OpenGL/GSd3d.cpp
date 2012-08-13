@@ -24,9 +24,9 @@
 
 using namespace std;
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
+#define __GETR(x) ((x & 0x0000FF))/255.0
+#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
+#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 bool d3dMode = false;
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
