@@ -68,16 +68,6 @@ inline void action_set_caption(const int vscore, const string scoreCaption, cons
     caption_health=healthCaption;
 }
 
-inline void action_sound(int snd, bool loop)
-{
-    (loop ? sound_loop:sound_play)(snd);
-}
-
-//#define action_sound(snd,loop) (((loop) ? sound_loop : sound_play)((snd)))
-#define action_if_sound sound_isplaying
-#define action_end_sound sound_stop
-
-
 inline void action_color(const int color) {
 	draw_set_color(color);
 }

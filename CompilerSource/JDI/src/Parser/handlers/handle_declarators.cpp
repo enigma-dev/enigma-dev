@@ -85,9 +85,16 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
 {
   // Make sure we do indeed find ourselves at an identifier to declare.
   if (tp.refs.name.empty()) {
-    const bool potentialc = tp.def == scope or (scope->flags & DEF_TEMPSCOPE and tp.def == scope->parent);
+    const bool potentialc = (
+      (tp.def == scope) or
+      (scope->flags & DEF_TEMPSCOPE and tp.def == scope->parent) or
+      ((tp.def->flags & DEF_TEMPLATE) and ((definition_template*)tp.def)->def == scope)
+    );
+    
+    #define invalid_ctor_flags ~(builtin_flag__explicit | builtin_flag__virtual) // Virtual's a bit of a longshot, but we'll take it.
+    
     // Handle constructors; this might need moved to a handle_constructors method.
-    if (potentialc and !tp.flags and tp.refs.size() == 1 and tp.refs.top().type == ref_stack::RT_FUNCTION) {
+    if (potentialc and !(tp.flags & invalid_ctor_flags) and tp.refs.size() == 1 and tp.refs.top().type == ref_stack::RT_FUNCTION) {
       tp.refs.name = "<construct>";
       if (token.type == TT_COLON) {
         // TODO: When you have a place to store constructor data, 
@@ -95,7 +102,7 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
           token = read_next_token(scope);
           if (token.type == TT_SEMICOLON) {
             token.report_error(herr, "Expected constructor body here after initializers.");
-            FATAL_RETURN(1);
+            return FATAL_TERNARY(1,0);
           }
         } while (token.type != TT_LEFTBRACE);
       }
@@ -140,7 +147,16 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
           goto rescope;
         }
       }
-      read_referencers_post(tp.refs, lex, token, scope, this, herr);
+      if (d and (d->flags & DEF_FUNCTION)) {
+        if (scope->flags & DEF_TEMPSCOPE) {
+          scope->use_namespace(d->parent);
+          read_referencers_post(tp.refs, lex, token, scope, this, herr);
+        }
+        else
+          read_referencers_post(tp.refs, lex, token, d->parent, this, herr);
+      }
+      else
+        read_referencers_post(tp.refs, lex, token, scope, this, herr);
       res = d; goto extra_loop;
     }
     else
@@ -149,36 +165,47 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
   
   {
     // Add it to our definitions map, without overwriting the existing member.
-    definition_scope::inspair ins = ((definition_scope*)scope)->members.insert(definition_scope::entry(tp.refs.name,NULL));
-    if (ins.second) { // If we successfully inserted,
+    decpair ins = ((definition_scope*)scope)->declare(tp.refs.name);
+    if (ins.inserted) { // If we successfully inserted,
       insert_anyway:
-      res = ins.first->second = (!tp.refs.empty() && tp.refs.top().type == ref_stack::RT_FUNCTION)?
+      res = ins.def = (!tp.refs.empty() && tp.refs.top().type == ref_stack::RT_FUNCTION)?
         new definition_function(tp.refs.name,scope,tp.def,tp.refs,tp.flags,DEF_TYPED | inherited_flags):
         new definition_typed(tp.refs.name,scope,tp.def,tp.refs,tp.flags,DEF_TYPED | inherited_flags);
     }
     else // Well, uh-oh. We didn't insert anything. This is non-fatal, and will not leak, so no harm done.
     {
-      if (ins.first->second->flags & (DEF_CLASS | DEF_UNION | DEF_ENUM)) {
-        pair<map<string,definition*>::iterator,bool> cins
-          = c_structs.insert(pair<string,definition*>(ins.first->first,ins.first->second));
-        if (!cins.second and cins.first->second != ins.first->second) {
+      if (ins.def->flags & (DEF_CLASS | DEF_UNION | DEF_ENUM)) {
+        decpair cins = declare_c_struct(tp.refs.name, ins.def);
+        if (!cins.inserted and cins.def != ins.def) {
           token.report_error(herr, "Attempt to redeclare `" + tp.refs.name + "' failed due to conflicts");
           FATAL_RETURN(1);
         }
         else goto insert_anyway;
       }
-      if (not(ins.first->second->flags & DEF_TYPED)) {
-        token.report_error(herr, "Redeclaration of `" + tp.refs.name + "' as a different kind of symbol");
-        cout << ins.first->second->toString() << endl;
-        return 3;
+      else if (not(ins.def->flags & DEF_TYPED)) {
+        if (ins.def->flags & DEF_TEMPLATE and !tp.refs.empty() and tp.refs.top().type == ref_stack::RT_FUNCTION) {
+          definition_function* func = new definition_function(tp.refs.name,scope,tp.def,tp.refs,tp.flags,DEF_TYPED | inherited_flags);
+          func->overload((definition_template*)ins.def);
+          res = ins.def = func;
+        }
+        else {
+          token.report_error(herr, "Redeclaration of `" + tp.refs.name + "' as a different kind of symbol");
+          token.report_error(herr, scope->parent? "In scope `" + scope->name + "'" : "At global scope");
+          cout << ins.def->toString() << endl;
+          return 3;
+        }
       }
-      if (ins.first->second->flags & DEF_FUNCTION) { // Handle function overloading
-        definition_function* func = (definition_function*)ins.first->second;
+      else if (ins.def->flags & DEF_FUNCTION) { // Handle function overloading
+        if (tp.refs.empty() or tp.refs.top().type != ref_stack::RT_FUNCTION) {
+          token.report_error(herr, "Cannot declare `" + tp.refs.name + "' over existing function");
+          return 4;
+        }
+        definition_function* func = (definition_function*)ins.def;
         arg_key k(func->referencers);
         res = func->overload(k, new definition_function(tp.refs.name,scope,tp.def,tp.refs,tp.flags,DEF_TYPED | inherited_flags), herr);
       }
       else
-        res = ins.first->second;
+        res = ins.def;
     }
   }
   

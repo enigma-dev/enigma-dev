@@ -201,6 +201,23 @@ namespace jdip {
   **/
   int read_template_parameters(arg_key &argk, definition_template *temp, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
   
+  /**
+    Handle accessing dependent types and members. Shoves the definitions into the
+    template for fix later.
+    
+    This function is a complete handler. All inputs are liable to be modified.
+    See \section Handlers for details.
+    
+    @param  lex    The lexer to poll for tokens. [in-out]
+    @param  scope  The scope from which the member is being accessed. [in-out]
+    @param  token  The first token to handle, and the token structure into which the next unhandled token will be placed. [in-out]
+    @param  flags  Flags known about this hypothetical type. [in]
+    @param  herr   Error handler to which errors will be reported. [in-out]
+    
+    @return A representation of the dependent member, or NULL if an error occurred.
+  **/
+  definition_hypothetical* handle_hypothetical(lexer *lex, definition_scope *scope, token_t& token, unsigned flags, error_handler *herr);
+  
   extern definition* dangling_pointer;
   /**
     @class context_parser
@@ -362,21 +379,6 @@ namespace jdip {
       @return Zero if no error occurred, a non-zero exit status otherwise.
     **/
     int handle_template(definition_scope *scope, token_t& token, unsigned inherited_flags = 0);
-    
-    /**
-      Handle accessing dependent types and members. Shoves the definitions into the
-      template for fix later.
-      
-      This function is a complete handler. All inputs are liable to be modified.
-      See \section Handlers for details.
-      
-      @param  scope  The scope from which the member is being accessed. [in-out]
-      @param  token  The token structure into which the next unhandled token will be placed. [out]
-      @param  flags  Flags known about this hypothetical type. [in]
-      
-      @return A representation of the dependent member, or NULL if an error occurred.
-    **/
-    definition* handle_hypothetical(definition_scope *scope, token_t& token, unsigned flags);
     
     /**
       Read an expression from the given input stream, evaluating it for a value.

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import os, urllib, hashlib, sys,zipfile,shutil, getopt
 print "Enigma package manager"
-url="https://raw.github.com/amorri40/Enigma-packages/master/packages.md5"
+url="https://raw.github.com/enigma-dev/Enigma-packages/master/packages.md5"
 webFile = urllib.urlopen(url)
 updateText=webFile.read().split("\n")
 webFile.close();

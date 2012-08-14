@@ -77,6 +77,9 @@ namespace jdi {
   definition *builtin_type__wchar_t;
   definition *builtin_type__va_list;
   
+  unsigned long builtin_flag__virtual;
+  unsigned long builtin_flag__explicit;
+  
   void read_declarators(const char* filename, USAGE_FLAG usage_flags)
   {
     string tname; // The name of this type, as it appears in code.
@@ -162,8 +165,8 @@ namespace jdi {
     builtin_type__wchar_t = add_declarator("wchar_t",   UF_PRIMITIVE, 2).def;
     builtin_type__va_list = add_declarator("__builtin_va_list",   UF_PRIMITIVE, 8).def;
     
-    add_declarator("virtual", UF_FLAG);
-    add_declarator("explicit", UF_FLAG);
+    builtin_flag__virtual = add_declarator("virtual", UF_FLAG).flag;
+    builtin_flag__explicit = add_declarator("explicit", UF_FLAG).flag;
     
     builtin->variadics.insert(builtin_type__va_list);
     builtin->add_macro("JUST_DEFINE_IT_RUN", string());

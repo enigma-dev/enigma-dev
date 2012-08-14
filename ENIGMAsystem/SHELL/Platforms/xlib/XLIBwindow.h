@@ -114,8 +114,12 @@ enum {
 
 void window_set_cursor(int c);
 
+void game_end();
 void io_handle(), io_clear();
 void keyboard_wait();
+
+void window_set_region_scale(double scale, bool adaptwindow);
+bool window_get_region_scale();
 
 /*
 display_get_width() // Returns the width of the display in pixels.
@@ -136,8 +140,6 @@ window_default()
 window_get_cursor()
 window_set_color(color)
 window_get_color()
-window_set_region_scale(scale,adaptwindow)
-window_get_region_scale()
 window_set_showborder(show)
 window_get_showborder()
 window_set_showicons(show)

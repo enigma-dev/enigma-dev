@@ -299,7 +299,7 @@ namespace enigma
     keymap[0x56] = vk_pagedown;
     keymap[0xFF] = vk_delete;
     keymap[0x63] = vk_insert;
-    
+
     // Set up identity map...
     for (int i = 0; i < 'a'; i++)
       usermap[i] = i;
@@ -329,26 +329,29 @@ namespace enigma {
   void sleep_for_framerate(int rs)
   {
     timeval tv;
-    
+
     for (int i=1; i<hielem+1; i++) {
       last_microsecond[i-1] = last_microsecond[i];
       last_second[i-1] = last_second[i];
     }
-    
+
     //How many microseconds since 1970? herp
     gettimeofday(&tv, NULL);
-    
+
     // I'm feeling hacky, so we'll give the processor a millisecond to take care
     // of these calculations and hop threads. I'd rather be fast than slow.
     int sdur = 1000000/rs - 1000 - (tv.tv_sec - last_second[hielem]) * 1000000 - (tv.tv_usec - last_microsecond[hielem]);
     if (sdur > 0 and sdur < 1000000) usleep(sdur);
-    
+
     // Store this time for diff next time
     gettimeofday(&tv, NULL);
     last_second[hielem] = tv.tv_sec, last_microsecond[hielem] = tv.tv_usec;
     fps = (hielem+1)*1000000 / ((last_second[hielem] - last_second[0]) * 1000000 + (last_microsecond[hielem] - last_microsecond[0]));
   }
 }
+
+void game_end() { }
+void action_end_game() { game_end(); }
 
 #include "Universal_System/globalupdate.h"
 void io_handle()
@@ -373,6 +376,9 @@ void keyboard_wait()
     usleep(10000); // Sleep 1/100 second
   }
 }
+
+void window_set_region_scale(double scale, bool adaptwindow) {}
+bool window_get_region_scale() {return 1;}
 
 string parameter_string(unsigned num) {
   return num < enigma::parameterc ? enigma::parameters[num] : "";

@@ -91,9 +91,13 @@ namespace jdi
   public:
     set<definition*> variadics; ///< Set of variadic types.
     
-    /// This is a map of structures which conflict with other declarations,
-    /// which is allowed by the rules of C.
+    /// This is a map of structures which conflict with other declarations, which is allowed by the rules of C.
     map<string, definition*> c_structs;
+    /** Function to insert into c_structs by the rules of definition_scope::declare.
+        @param name  The name of the definition to declare.
+        @param def   Pointer to the definition being declared, if one is presently available.
+    */
+    decpair declare_c_struct(string name, definition* def = NULL);
     
     definition_scope* get_global(); ///< Return the global scope.
     

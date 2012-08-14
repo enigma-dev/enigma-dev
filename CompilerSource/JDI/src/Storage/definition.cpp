@@ -86,9 +86,6 @@ namespace jdi {
     defiter it = members.find(sname);
     if (it != members.end())
       return it->second;
-    volatile bool pm = false;
-    if (pm)
-      print_map(members);
     if ((it = using_general.find(sname)) != using_general.end())
       return it->second;
     definition *res;
@@ -99,6 +96,36 @@ namespace jdi {
       return NULL;
     return parent->look_up(sname);
   }
+  definition *definition_class::look_up(string sname) {
+    defiter it = members.find(sname);
+    if (it != members.end())
+      return it->second;
+    if ((it = using_general.find(sname)) != using_general.end())
+      return it->second;
+    definition *res;
+    for (using_node* n = using_front; n; n = n->next)
+      if ((res = n->use->find_local(sname)))
+        return res;
+    for (vector<ancestor>::iterator ait = ancestors.begin(); ait != ancestors.end(); ++ait)
+      if ((res = ait->def->find_local(sname)))
+        return res;
+    if (parent == NULL)
+      return NULL;
+    return parent->look_up(sname);
+  }
+  definition *definition_tempscope::look_up(string sname) {
+    defiter it;
+    if (source->name == sname)
+      return source;
+    if ((it = using_general.find(sname)) != using_general.end())
+      return it->second;
+    definition *res;
+    for (using_node* n = using_front; n; n = n->next)
+      if ((res = n->use->find_local(sname)))
+        return res;
+    return parent->look_up(sname);
+  }
+  
   definition *definition_scope::find_local(string sname) {
     defiter it = members.find(sname);
     if (it != members.end())
@@ -132,7 +159,7 @@ namespace jdi {
   void definition_scope::copy(const definition_scope* from) {
     remap_set n;
     for (defiter_c it = from->members.begin(); it != from->members.end(); it++) {
-      pair<defiter,bool> dest = members.insert(pair<string,definition*>(it->first,NULL));
+      inspair dest = members.insert(entry(it->first,NULL));
       if (dest.second) {
         dest.first->second = it->second->duplicate(n);
       }
@@ -262,6 +289,12 @@ namespace jdi {
   arg_key::arg_key(size_t n): values(new node[n]), endv(values+n) {} // Word to the wise: Do not switch the order of this initialization.
   /// Construct from a ref_stack.
   arg_key::arg_key(const ref_stack& rf) {
+    #ifdef DEBUG_MODE
+      if (rf.empty()) {
+        cout << "Critical error." << endl;
+        return;
+      }
+    #endif
     const ref_stack::node &n = rf.top();
     #ifdef DEBUG_MODE
       if (n.type != ref_stack::RT_FUNCTION) {
@@ -299,13 +332,41 @@ namespace jdi {
   
   definition_tempscope::definition_tempscope(string n, definition* p, unsigned f, definition* s): definition_scope(n,p,f|DEF_TEMPSCOPE), source(s), referenced(false) {}
   
-  definition_hypothetical::definition_hypothetical(string n, definition_scope *p, unsigned f, AST* d): definition(n,p,f|DEF_HYPOTHETICAL), def(d) {}
-  definition_hypothetical::definition_hypothetical(string n, definition_scope *p, AST* d): definition(n,p,DEF_HYPOTHETICAL), def(d) {}
+  definition_hypothetical::definition_hypothetical(string n, definition_scope *p, unsigned f, AST* d): definition_class(n,p,f|DEF_HYPOTHETICAL), def(d) {}
+  definition_hypothetical::definition_hypothetical(string n, definition_scope *p, AST* d): definition_class(n,p,DEF_HYPOTHETICAL), def(d) {}
   definition_hypothetical::~definition_hypothetical() { delete def; }
   
   
   using_scope::using_scope(string n, definition_scope* u): definition_scope(n, u, DEF_NAMESPACE), using_me(u->use_namespace(this)) {}
   using_scope::~using_scope() { parent->unuse_namespace(using_me); }
+  
+  //========================================================================================================
+  //======: Declare Functions :=============================================================================
+  //========================================================================================================
+  decpair::decpair(definition* *d, bool insd): def(d), inserted(insd) {}
+  
+  decpair definition_scope::declare(string n, definition* def) {
+    inspair insp = members.insert(entry(n,def));
+    return decpair(&insp.first->second, insp.second);
+  }
+  decpair definition_class::declare(string n, definition* def) {
+    inspair insp = members.insert(entry(n,def));
+    return decpair(&insp.first->second, insp.second);
+  }
+  decpair definition_tempscope::declare(string n, definition* def) {
+    if (source->flags & DEF_TEMPLATE) {
+      definition_template* const temp = (definition_template*)source;
+      temp->name = n;
+      if (!temp->def) {
+        temp->def = def;
+        return decpair(&temp->def, true);
+      }
+      cerr << "Double declaration in a template scope";
+      return decpair(&temp->def, false);
+    }
+    inspair insp = members.insert(entry(n,def));
+    return decpair(&insp.first->second, insp.second);
+  }
   
   //========================================================================================================
   //======: Re-map Functions :==============================================================================
@@ -343,8 +404,11 @@ namespace jdi {
     #endif
   }
   
-  void definition_function::remap(const remap_set& ) {
-    
+  void definition_function::remap(const remap_set& n) {
+    definition_typed::remap(n);
+    for (overload_iter it = overloads.begin(); it != overloads.end(); ++it)
+      if (it->second != this)
+        it->second->remap(n);
   }
   
   void definition_scope::remap(const remap_set &n) {
@@ -355,14 +419,32 @@ namespace jdi {
       else
         it->second = ex->second;
     }
+    for (using_node *un = using_front; un; un = un->next) {
+      remap_set::const_iterator ex = n.find(un->use);
+      if (ex == n.end())
+        un->use = (definition_scope*)ex->second;
+    }
+    for (defiter it = using_general.begin(); it != using_general.end(); ++it) {
+      remap_set::const_iterator ex = n.find(it->second);
+      if (ex != n.end())
+        it->second = ex->second;
+    }
   }
   
-  void definition_template::remap(const remap_set &) {
-    
+  void definition_tempscope::remap(const remap_set &n) {
+    definition_scope::remap(n);
+    if (source) source->remap(n);
   }
   
-  void definition_typed::remap(const remap_set &) {
-    
+  void definition_template::remap(const remap_set &n) {
+    if (def)
+      def->remap(n);
+  }
+  
+  void definition_typed::remap(const remap_set &n) {
+    remap_set::const_iterator ex = n.find(type);
+    if (ex != n.end())
+      type = ex->second;
   }
   
   void definition_union::remap(const remap_set &) {
@@ -478,6 +560,13 @@ namespace jdi {
   
   definition* definition_scope::duplicate(remap_set &n) {
     definition_scope* res = new definition_scope(name, parent, flags);
+    res->copy(this);
+    n[this] = res;
+    return res;
+  }
+  
+  definition* definition_tempscope::duplicate(remap_set &n) {
+    definition_tempscope* res = new definition_tempscope(name, parent, flags, source->duplicate(n));
     res->copy(this);
     n[this] = res;
     return res;

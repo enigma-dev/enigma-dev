@@ -30,29 +30,29 @@ using namespace jdip;
 
 static inline definition_union* insnew(definition_scope *const &scope, int inherited_flags, const string& classname, const token_t &token, error_handler* const& herr, context *ct) {
   definition_union* nclass = NULL;
-  pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(classname,NULL));
-  if (!dins.second) {
-    if (dins.first->second->flags & DEF_TYPENAME) {
+  decpair dins = scope->declare(classname);
+  if (!dins.inserted) {
+    if (dins.def->flags & DEF_TYPENAME) {
       token.report_error(herr, "Union `" + classname + "' instantiated inadvertently during parse by another thread. Freeing.");
-      delete dins.first->second;
+      delete ~dins.def;
     }
     else {
-      dins = ct->c_structs.insert(pair<string,definition*>(classname,NULL));
-      if (dins.second)
+      dins = ct->declare_c_struct(classname);
+      if (dins.inserted)
         goto my_else;
-      if (dins.first->second->flags & DEF_UNION)
-        nclass = (definition_union*)dins.first->second;
+      if (dins.def->flags & DEF_UNION)
+        nclass = (definition_union*)dins.def;
       else {
         #if FATAL_ERRORS
           return NULL;
         #else
-          delete dins.first->second;
+          delete ~dins.def;
           goto my_else;
         #endif
       }
     }
   } else { my_else:
-    dins.first->second = nclass = new definition_union(classname,scope, DEF_UNION | DEF_TYPENAME | inherited_flags);
+    dins.def = nclass = new definition_union(classname,scope, DEF_UNION | DEF_TYPENAME | inherited_flags);
   }
   return nclass;
 }

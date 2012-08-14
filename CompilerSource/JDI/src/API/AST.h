@@ -370,6 +370,8 @@ namespace jdi {
     
     /// Default constructor. Zeroes some stuff.
     AST();
+    /// Construct with a single node
+    AST(definition* def);
     
     /// Default destructor. Deletes the AST.
     ~AST();

@@ -37,6 +37,7 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
   {
     switch (token.type)
     {
+      case TT_TYPENAME:
       case TT_DECFLAG: case TT_DECLTYPE: case TT_DECLARATOR: case_TT_DECLARATOR:
       case TT_CLASS: case TT_STRUCT: case TT_ENUM: case TT_UNION: case TT_TILDE:
           decl = NULL;
@@ -126,6 +127,10 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
             int bc = 1;
             while (bc) {
               token = read_next_token(scope);
+              if (token.type == TT_ENDOFCODE) {
+                token.report_error(herr, "Expected closing brace before end of code.");
+                return 1;
+              }
               bc += token.type == TT_LEFTBRACE;
               bc -= token.type == TT_RIGHTBRACE;
             }
@@ -229,9 +234,25 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
         if (token.def->flags & DEF_TEMPLATE)
           goto case_TT_DECLARATOR;
       }
-      case TT_IDENTIFIER:
-          token.report_error(herr, "Unexpected identifier in this scope; `" + token.content.toString() + "' does not name a type");
-        break;
+      case TT_IDENTIFIER: {
+          string tname(token.content.toString());
+          if (tname == scope->name and (scope->flags & DEF_CLASS)) {
+            token = read_next_token(scope);
+            if (token.type != TT_LEFTPARENTH) {
+              token.report_errorf(herr, "Expected constructor parmeters before %s");
+              break;
+            }
+            
+            full_type ft;
+            ft.def = scope;
+            token = read_next_token(scope);
+            read_function_params(ft.refs, lex, token, scope, this, herr);
+            if (handle_declarators(scope,token,ft,inherited_flags | DEF_TYPENAME,decl))
+              FATAL_RETURN(1);
+            goto handled_declarator_block;
+          }
+          token.report_error(herr, "Unexpected identifier in this scope; `" + tname + "' does not name a type");
+        } break;
       
       case TT_TEMPLATE:
         if (handle_template(scope, token, inherited_flags))
@@ -272,13 +293,13 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
             definition_function *const df = new definition_function(opname, scope, ft.def, ft.refs, ft.flags, inherited_flags);
             decl = df;
             
-            pair<definition_scope::defiter, bool> ins = scope->members.insert(pair<string,definition*>(decl->name, decl));
-            if (!ins.second) { arg_key k(df->referencers); decl = ((definition_function*)ins.first->second)->overload(k, df, herr); }
+            decpair ins = scope->declare(decl->name, decl);
+            if (!ins.inserted) { arg_key k(df->referencers); decl = ((definition_function*)ins.def)->overload(k, df, herr); }
             goto handled_declarator_block;
           }
         break;
       
-      case TT_TYPENAME: case TT_ASM: case TT_SIZEOF: case TT_ISEMPTY:
+      case TT_ASM: case TT_SIZEOF: case TT_ISEMPTY:
       case TT_OPERATOR: case TT_ELLIPSIS: case TT_LESSTHAN: case TT_GREATERTHAN: case TT_COLON:
       case TT_DECLITERAL: case TT_HEXLITERAL: case TT_OCTLITERAL: case TT_STRINGLITERAL: case TT_CHARLITERAL:
       case TTM_CONCAT: case TTM_TOSTRING: case TT_INVALID:

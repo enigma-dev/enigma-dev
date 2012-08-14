@@ -25,6 +25,8 @@
 #ifndef _DEFINITION__H
 #define _DEFINITION__H
 
+#include <General/quickreference.h>
+
 namespace jdi {
   /** Flags given to a definition to describe its type simply and quickly. **/
   enum DEF_FLAGS
@@ -62,6 +64,17 @@ namespace jdi {
   struct definition_atomic;
   struct definition_tempscope;
   struct definition_hypothetical;
+  
+  /// Structure for inserting declarations into a scope.
+  struct decpair {
+    quick::double_pointer<definition> def; ///< The definition that was there previously, or that was inserted if it did not exist.
+    bool inserted; ///< True if the given definition was inserted, false otherwise.
+    /** Construct with data.
+      @param def        A pointer to the pointer to the definition that exists under the previously given key.
+      @param inserted   True if a new entry was created under the given key, false if the key-value was left unchanged.
+    */
+    decpair(definition* *def, bool inserted);
+  };
 }
 
 
@@ -317,8 +330,8 @@ namespace jdi {
     /// Linked list node to contain using scopes
     struct using_node {
       definition_scope *use; ///< Scope to search
+      using_node *next; ///< The next node on our list, or NULL.
       private: friend class definition_scope;
-        using_node *next; ///< The next node on our list, or NULL.
         using_node *prev; ///< The previous node on our list, or NULL, for removal purposes.
         using_node(definition_scope* scope); ///< Construct with a scope to use
         using_node(definition_scope* scope, using_node* prev); ///< Construct with previous node
@@ -343,7 +356,15 @@ namespace jdi {
         @param name  The identifier by which the definition can be referenced. This is NOT qualified!
         @return  If found, a pointer to the definition with the given name is returned. Otherwise, NULL is returned.
     **/
-    definition* look_up(string name);
+    virtual definition* look_up(string name);
+    /** Declare a definition by the given name in this scope. If no definition by that name exists in this scope,
+        the given definition is inserted. Otherwise, the given definition is discarded, and the 
+        @param name  The name of the definition to declare.
+        @param def   A pointer to the definition in memory, or NULL if it will be allocated later.
+        @return Returns a pair containing whether the item was inserted fresh and a mutable pointer to the data inserted.
+                The pointer may be changed to indicate newly allocated data.
+    **/
+    virtual decpair declare(string name, definition* def = NULL);
     /** Look up a \c definition* in the current scope or its using scopes given its identifier.
         @param name  The identifier by which the definition can be referenced. This is NOT qualified!
         @return  If found, a pointer to the definition with the given name is returned. Otherwise, NULL is returned.
@@ -371,7 +392,7 @@ namespace jdi {
     **/
     virtual ~definition_scope();
     
-    private:
+    protected:
       /// First linked list entry
       using_node *using_front;
       /// Final linked list entry
@@ -395,6 +416,9 @@ namespace jdi {
       ancestor(unsigned protection_level, definition_class* inherit_from); ///< Convenience constructor with both members.
       ancestor(); ///< Default constructor for vector.
     };
+    
+    virtual definition* look_up(string name); ///< Look up a definition in this class (including its ancestors).
+    virtual decpair declare(string name, definition* def = NULL); ///< Declare a definition by the given name in this scope.
     vector<ancestor> ancestors; ///< Ancestors of this structure or class
     definition_class(string classname, definition_scope* parent, unsigned flags = DEF_CLASS | DEF_TYPENAME);
   };
@@ -503,13 +527,19 @@ namespace jdi {
   */
   struct definition_tempscope: definition_scope {
     definition *source; ///< The definition for which this subscope was created.
-    bool referenced; ///< Whether this s
+    bool referenced; ///< Whether this->source has been consumed by another object.
     /** Construct with default information.
       @param name   Some unique key name for this scope.
       @param parent The scope above this one.
       @param flags  The additional flag data about this scope.
       @param source The definition with which this scope is affiliated, however loosely. */
     definition_tempscope(string name, definition* parent, unsigned flags, definition *source);
+    
+    virtual definition* duplicate(remap_set &n);
+    virtual void remap(const remap_set &n);
+    
+    virtual definition* look_up(string name); ///< Look up a definition in the parent of this scope (skip this temp scope).
+    virtual decpair declare(string name, definition* def = NULL); ///< Declare a definition by the given name in this scope.
   };
   
   /**
@@ -517,7 +547,7 @@ namespace jdi {
     A class representing a dependent (here called "hypothetical") type--a type which
     depends on an abstract parent or scope.
   */
-  struct definition_hypothetical: definition {
+  struct definition_hypothetical: definition_class {
     AST *def;
     virtual definition* duplicate(remap_set &n);
     virtual void remap(const remap_set &n);
@@ -537,8 +567,16 @@ namespace jdi {
   // These definitions are not used by JDI, but rather are provided as utility classes for the
   // end-user. Use them if you want. Or don't.
   
+  /**
+    A smart scope designed to be used (as in a using directive) by another scope.
+    This class automatically adds itself to the using collection of the given scope
+    on construct, and automatically removes itself on destruct.
+  */
   struct using_scope: definition_scope {
-    jdi::definition_scope::using_node* using_me;
+    jdi::definition_scope::using_node* using_me; ///< The scope that is using us.
+    /// Construct with name and user scope.
+    /// @param name  The name of this scope, in case a trace is ever printed.
+    /// @param user  The scope which will use this scope, as in a using directive.
     using_scope(string name, definition_scope* user);
     ~using_scope();
   };

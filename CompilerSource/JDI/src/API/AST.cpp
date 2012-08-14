@@ -165,7 +165,9 @@ namespace jdi
         token.report_error(herr, "Expected expression here before operator");
         return NULL;
       
-      case TT_SCOPE: break;
+      case TT_SCOPE:
+          cerr << "Unimplemented: '::'";
+        return NULL;
       
       case TT_LEFTPARENTH:
         track(string("("));
@@ -201,7 +203,7 @@ namespace jdi
           array->elements.push_back(n);
           if (token.type != TT_COMMA) {
             token.report_errorf(herr, "Expected comma to separate array elements before %s");
-            FATAL_RETURN(array);
+            FATAL_RETURN(array); break;
           }
           else token = get_next_token();
         }
@@ -227,8 +229,8 @@ namespace jdi
                           track(myroot->content); at = AT_OCTLITERAL; break;
       
       case TT_DECLTYPE:
-        
-        break;
+          cerr << "Unimplemented: `decltype'." << endl;
+        return NULL;
       
       {
           bool not_result;
@@ -798,6 +800,7 @@ namespace jdi
 
   
   AST::AST(): root(NULL), search_scope(NULL), tt_greater_is_op(true) {}
+  AST::AST(definition* d): root(new AST_Node_Definition(d)), search_scope(NULL), tt_greater_is_op(true) {}
     
   AST::~AST() {
     delete root;

@@ -78,7 +78,7 @@ void window_set_caption(string caption);
 string window_get_caption();
 void window_set_color(int color);
 int window_get_color();
-void window_set_region_scale(int scale, int adaptwindow);
+void window_set_region_scale(double scale, bool adaptwindow);
 double window_get_region_scale();
 void window_set_position(int x, int y);
 void window_set_size(unsigned int width, unsigned int height);
