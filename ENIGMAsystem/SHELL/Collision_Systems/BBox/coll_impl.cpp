@@ -73,6 +73,12 @@ static inline double max(double x, double y) { return x>y? x : y; }
 enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, bool notme, double x, double y)
 {
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+
+    //If instance cannot collide with anything, stop.
+    if (inst1->sprite_index == -1 && inst1->mask_index == -1) {
+        return NULL;
+    }
+
     const bbox_rect_t &box = inst1->$bbox_relative();
     const double xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;

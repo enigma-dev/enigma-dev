@@ -325,6 +325,14 @@ void sound_seek_all(float position) {
   }
 }
 
+void action_sound(int snd, bool loop)
+{
+    (loop ? sound_loop:sound_play)(snd);
+}
+
+#define action_if_sound sound_isplaying
+#define action_end_sound sound_stop
+
 const char* sound_get_audio_error() {
   return alureGetErrorString();
 }

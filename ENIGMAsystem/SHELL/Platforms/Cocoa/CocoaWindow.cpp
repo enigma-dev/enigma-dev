@@ -414,6 +414,8 @@ void keyboard_wait() {
     }
 }
 
+void window_set_region_scale(double scale, bool adaptwindow) {}
+bool window_get_region_scale() {return 1;}
 
 void game_end() {
     //audiosystem_cleanup();
