@@ -12,7 +12,7 @@
 #include "backend/JavaStruct.h"
 #include "Point.h"
 
-struct Polygon
+struct Polygon_LOLWINDOWS
 {
 	Point *points;
 	int pointCount;

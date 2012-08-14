@@ -37,7 +37,7 @@ using namespace std;
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "compiler/compile_common.h"
 #include "compiler/event_reader/event_parser.h"
-#include "general/parse_basics.h"
+#include "general/parse_basics_old.h"
 
 #include "languages/lang_CPP.h"
 

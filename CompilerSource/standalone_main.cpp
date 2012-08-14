@@ -103,11 +103,16 @@ int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
 int main(int argc, char* argv[])
 {
   puts("Attempting to run");
-  e_execp("gcc -E -x c++ -v blank.txt","");
+  /*e_execp("gcc -E -x c++ -v blank.txt","");*/
   //e_exec("gcc -E -x c++ -v blank.txt");
   
-  libInit(NULL);
-  for (int i = 0; i < 10; ++i)
+  const char *ic = libInit(NULL);
+  if (ic) {
+    cout << ic << endl;
+    return 0;
+  }
+  
+  for (int i = 0; i < 1; ++i)
   current_language->definitionsModified(NULL, ((string) "%e-yaml\n"
     "---\n" 	 
     "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n" 	 

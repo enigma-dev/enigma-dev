@@ -38,7 +38,7 @@ using namespace std;
 #define flushs flush
 
 #include "syntax/checkfile.h"
-#include "general/parse_basics.h"
+#include "general/parse_basics_old.h"
 #include "general/bettersystem.h"
 
 #include "gcc_backend.h"
@@ -246,7 +246,7 @@ const char* establish_bearings(const char *compiler)
   ****************************/
     llreader macro_reader("defines.txt");
     if (!macro_reader.is_open())
-      return "Call to toolchain executable returned no data.\n";
+      return "Call to `defines' toolchain executable returned no data.\n";
 
     int res = jdi::builtin->parse_C_stream(macro_reader, "defines.txt");
     if (res)

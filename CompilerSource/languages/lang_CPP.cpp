@@ -18,6 +18,8 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <ctime>
+#include <cstdio>
 #include "languages/lang_CPP.h"
 
 string lang_CPP::get_name() { return "C++"; }

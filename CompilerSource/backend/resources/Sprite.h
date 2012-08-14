@@ -11,6 +11,7 @@
 
 #include "backend/JavaStruct.h"
 #include "backend/sub/SubImage.h"
+#include "backend/util/polygon.h"
 
 struct Sprite
 {
@@ -35,7 +36,7 @@ struct Sprite
   SubImage *subImages;
   int subImageCount;
 
-  Polygon *maskShapes;
+  Polygon_LOLWINDOWS *maskShapes;
   int maskShapeCount;
 };
 
