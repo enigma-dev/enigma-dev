@@ -45,7 +45,8 @@ static definition* read_qualified_type(lexer *lex, definition_scope* scope, toke
   for (;;) {
     if (token.def->flags & DEF_TEMPLATE)
     {
-      definition_template* dt = (definition_template*)token.def;
+      res = token.def;
+      definition_template* dt = (definition_template*)res;
       if (dt->def->flags & DEF_CLASS)
       {
         token = lex->get_token_in_scope(scope, herr);
@@ -55,8 +56,8 @@ static definition* read_qualified_type(lexer *lex, definition_scope* scope, toke
           if (read_template_parameters(k, dt, lex, token, scope, cp, herr))
             return FATAL_TERNARY(NULL,res);
           res = dt->instantiate(k);
+          token = lex->get_token_in_scope(scope,herr);
         }
-        token = lex->get_token_in_scope(scope,herr);
       }
       else {
         token.report_error(herr, "Template `" + token.def->name + "' cannot be used as a type");
@@ -67,10 +68,8 @@ static definition* read_qualified_type(lexer *lex, definition_scope* scope, toke
     else if (token.def->flags & DEF_SCOPE)
     {
       token_t la = lex->get_token_in_scope(scope, herr);
-      if (la.type != TT_SCOPE) {
-        token.report_error(herr, "Expected type or qualified-id here; scope `" + token.def->name + "' does not name a type");
-        return FATAL_TERNARY(NULL,res);
-      }
+      if (la.type != TT_SCOPE)
+        break;
       definition_scope* as = (definition_scope*)token.def;
       token = lex->get_token_in_scope(as, herr);
       if (token.type != TT_DEFINITION and token.type != TT_DECLARATOR) {
@@ -78,9 +77,12 @@ static definition* read_qualified_type(lexer *lex, definition_scope* scope, toke
         return FATAL_TERNARY(NULL,res);
       }
       res = token.def;
-      token = lex->get_token_in_scope(scope,herr);
+      continue;
     }
-    else return FATAL_TERNARY(NULL,res);
+    else {
+      token = lex->get_token_in_scope(scope, herr);
+      break;
+    }
     
     if (token.type == TT_SCOPE) {
       #ifdef DEBUG_MODE
@@ -125,12 +127,24 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
       {
         rdef = read_qualified_type(lex, scope, token, cp, herr);
         if (!rdef) {
-          token.report_errorf(herr, "Expected class name here before %s");
+          token.report_errorf(herr, "Expected type name here before %s");
           return NULL;
         }
         if (!(rdef->flags & DEF_TYPENAME)) {
-          token.report_error(herr, "Expected type name here; `" + rdef->name + "' does not name a type");
-          return NULL;
+          if (rdef->flags & DEF_TEMPLATE) {
+            if (((definition_template*)rdef)->def == scope)
+              rdef = scope;
+            else if (scope->flags & DEF_TEMPSCOPE and ((definition_template*)rdef)->def == scope->parent)
+              rdef = scope;
+            else {
+              token.report_error(herr, "Invalid use of template `" + rdef->name + "'");
+              return NULL;
+            }
+          }
+          else {
+            token.report_error(herr, "Expected type name here; `" + rdef->name + "' does not name a type");
+            return NULL;
+          }
         }
       }
       else if (token.type == TT_ELLIPSIS) {
@@ -138,16 +152,9 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
         token = lex->get_token_in_scope(scope, herr);
       }
       else if (token.type == TT_TYPENAME) {
-        if (!cp) {
-          token.report_error(herr, "Cannot use dependent type in this context");
-          FATAL_RETURN(NULL);
-          token = lex->get_token_in_scope(scope, herr);
-        }
-        else {
-          token = lex->get_token_in_scope(scope, herr);
-          if (not(rdef = cp->handle_hypothetical(scope, token, DEF_TYPENAME)))
-            return full_type();
-        }
+        token = lex->get_token_in_scope(scope, herr);
+        if (not(rdef = handle_hypothetical(lex, scope, token, DEF_TYPENAME, herr)))
+          return full_type();
       }
       else {
         if (token.type == TT_IDENTIFIER or token.type == TT_DEFINITION)
@@ -220,13 +227,13 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
         goto typeloop;
       }
     }
-    else if (token.type == TT_DEFINITION and token.def->flags & DEF_SCOPE) {
+    else if (token.type == TT_DEFINITION and token.def->flags & (DEF_SCOPE | DEF_TEMPLATE)) {
      rdef = read_qualified_type(lex, scope, token, cp, herr);
     }
     else if (token.type == TT_TYPENAME) {
       if (!cp) { token.report_error(herr, "Cannot use dependent type in this context"); return full_type(); }
       token = lex->get_token_in_scope(scope);
-      rdef = cp->handle_hypothetical(scope, token, DEF_TYPENAME);
+      rdef = handle_hypothetical(lex, scope, token, DEF_TYPENAME, herr);
     }
     if (rdef == NULL)
     {
@@ -256,11 +263,18 @@ int jdip::read_referencers(ref_stack &refs, const full_type& ft, lexer *lex, tok
       
       case TT_LEFTPARENTH: { // Either a function or a grouping
         token = lex->get_token_in_scope(scope, herr);
-        if (ft.def == scope and (token.type != TT_OPERATOR or token.content.len != 1 or *token.content.str != '*')) {
+        
+        // Check if we're a constructor.
+        if (((ft.def == scope) // If the definition is this scope
+            or ((scope->flags & DEF_TEMPSCOPE) and ft.def == scope->parent) // Or we're in a template and the definition is the parent of this scope
+            or ((ft.def->flags & DEF_TEMPLATE) and ((definition_template*)ft.def)->def == scope) // Or our definition is the template whose scope we are in
+          ) and (token.type != TT_OPERATOR or token.content.len != 1 or *token.content.str != '*'))
+        {
           if (read_function_params(refs, lex, token, scope, cp, herr)) return 1;
           ref_stack appme; int res = read_referencers_post(appme, lex, token, scope, cp, herr);
           refs.append_c(appme); return res;
         }
+        
         ref_stack nestedrefs;
         read_referencers(nestedrefs, ft, lex, token, scope, cp, herr); // It's safe to recycle ft because we already know we're not a constructor at this point.
         if (token.type != TT_RIGHTPARENTH) {
@@ -476,7 +490,7 @@ int jdip::read_function_params(ref_stack &refs, lexer *lex, token_t &token, defi
     
     if (token.type != TT_COMMA) {
       if (token.type == TT_RIGHTPARENTH) break;
-      token.report_error(herr,"Expected comma or closing parenthesis to function parameters");
+      token.report_errorf(herr,"Expected comma or closing parenthesis to function parameters before %s");
       FATAL_RETURN(1);
     }
     token = lex->get_token_in_scope(scope, herr);

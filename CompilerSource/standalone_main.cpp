@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   //e_exec("gcc -E -x c++ -v blank.txt");
   
   libInit(NULL);
-  for (int i = 0; i < 10; ++i)
+  for (int i = 0; i < 1; ++i)
   current_language->definitionsModified(NULL, ((string) "%e-yaml\n"
     "---\n" 	 
     "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n" 	 

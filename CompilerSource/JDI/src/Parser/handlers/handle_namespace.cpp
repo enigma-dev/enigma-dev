@@ -37,13 +37,13 @@ int jdip::context_parser::handle_namespace(definition_scope *scope, token_t& tok
   {
     // Copy the name and ensure it's a member of this scope.
     string nsname(token.content.toString());
-    pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(nsname,NULL));
+    decpair dins = scope->declare(nsname);
     
-    if (dins.second) // If a new definition key was created, then allocate a new namespace representation for it.
-      dins.first->second = nscope = new definition_scope(nsname,scope,DEF_NAMESPACE);
+    if (dins.inserted) // If a new definition key was created, then allocate a new namespace representation for it.
+      dins.def = nscope = new definition_scope(nsname,scope,DEF_NAMESPACE);
     else {
-      nscope = (definition_scope*)dins.first->second;
-      if (not(dins.first->second->flags & DEF_NAMESPACE)) {
+      nscope = (definition_scope*)dins.def;
+      if (not(dins.def->flags & DEF_NAMESPACE)) {
         token.report_error(herr, "Attempting to redeclare `" + nsname + "' as a namespace");
         return 1;
       }

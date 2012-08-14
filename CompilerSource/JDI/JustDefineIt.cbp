@@ -99,6 +99,7 @@
 		<Unit filename="src/General/llreader.h" />
 		<Unit filename="src/General/parse_basics.cpp" />
 		<Unit filename="src/General/parse_basics.h" />
+		<Unit filename="src/General/quickreference.h" />
 		<Unit filename="src/General/quickstack.h" />
 		<Unit filename="src/General/quickvector.h" />
 		<Unit filename="src/General/svg_simple.cpp" />

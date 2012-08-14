@@ -30,30 +30,30 @@ using namespace jdip;
 
 static inline definition_enum* insnew(definition_scope *const &scope, int inherited_flags, const string& classname, const token_t &token, error_handler* const& herr, context *ct) {
   definition_enum* nclass = NULL;
-  pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(classname,NULL));
-  if (!dins.second) {
-    if (dins.first->second->flags & DEF_TYPENAME) {
+  decpair dins = scope->declare(classname);
+  if (!dins.inserted) {
+    if (dins.def->flags & DEF_TYPENAME) {
       token.report_error(herr, "Enum `" + classname + "' instantiated inadvertently during parse by another thread. Freeing.");
-      delete dins.first->second;
+      delete ~dins.def;
     }
     else {
-      dins = ct->c_structs.insert(pair<string,definition*>(classname,NULL));
-      if (dins.second)
+      dins = ct->declare_c_struct(classname);
+      if (dins.inserted)
         goto my_else;
-      if (dins.first->second->flags & DEF_ENUM)
-        nclass = (definition_enum*)dins.first->second;
+      if (dins.def->flags & DEF_ENUM)
+        nclass = (definition_enum*)dins.def;
       else {
         #if FATAL_ERRORS
           return NULL;
         #else
           token.report_error(herr, "Redeclaring `" + classname + "' as different kind of symbol.");
-          delete dins.first->second;
+          delete ~dins.def;
           goto my_else;
         #endif
       }
     }
   } else { my_else:
-    dins.first->second = nclass = new definition_enum(classname,scope, DEF_ENUM | DEF_TYPENAME | inherited_flags);
+    dins.def = nclass = new definition_enum(classname,scope, DEF_ENUM | DEF_TYPENAME | inherited_flags);
   }
   return nclass;
 }
@@ -157,9 +157,9 @@ jdi::definition_enum* jdip::context_parser::handle_enum(definition_scope *scope,
     
     pair<definition_scope::defiter, bool> cins = nenum->constants.insert(pair<string,definition*>(cname,NULL));
     if (cins.second) { // If a new definition key was created, then allocate a new enum representation for it.
-      pair<definition_scope::defiter, bool> sins = scope->members.insert(pair<string,definition*>(cname,cins.first->second));
-      if (sins.second)
-        cins.first->second = sins.first->second = new definition_valued(cname, nenum, nenum->type, nenum->modifiers, 0, this_value);
+      decpair sins = scope->declare(cname,cins.first->second);
+      if (sins.inserted)
+        cins.first->second = sins.def = new definition_valued(cname, nenum, nenum->type, nenum->modifiers, 0, this_value);
       else
         token.report_error(herr, "Declatation of constant `" + classname + "' in enumeration conflicts with definition in parent scope");
     }

@@ -227,6 +227,11 @@ void context::dump_macros() {
     macro_type::free(it->second);
 }
 
+decpair context::declare_c_struct(string n, definition* def) {
+  pair<map<string,definition*>::iterator, bool> insp = c_structs.insert(pair<string,definition*>(n,def));
+  return decpair(&insp.first->second, insp.second);
+}
+
 context::~context() {
   delete global;
   delete lex;

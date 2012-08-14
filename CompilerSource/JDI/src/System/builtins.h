@@ -103,6 +103,9 @@ namespace jdi {
   extern definition *builtin_type__wchar_t; ///< Builtin wchar_t type
   extern definition *builtin_type__va_list; ///< Builtin va_list type
   
+  extern unsigned long builtin_flag__virtual; ///< Builtin virtual flag
+  extern unsigned long builtin_flag__explicit; ///< Builtin explicit flag
+  
   string typeflags_string(definition *type, unsigned flags);
 }
 

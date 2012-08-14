@@ -132,13 +132,18 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   
   jdi::definition *d;
   if ((d = main_context->get_global()->look_up("variant"))) {
-    enigma_type__variant = d;    
-    cerr << "ERROR! ENIGMA's variant is not a type!" << endl;
+    enigma_type__variant = d;   
+    if (!(d->flags & jdi::DEF_TYPENAME))
+      cerr << "ERROR! ENIGMA's variant is not a type!" << endl;
+    else
+      cout << "Successfully loaded builtin variant type" << endl;
   } else cerr << "ERROR! No variant type found!" << endl;
   if ((d = main_context->get_global()->look_up("var"))) {
     enigma_type__var = d;
     if (!(d->flags & jdi::DEF_TYPENAME))
       cerr << "ERROR! ENIGMA's var is not a type!" << endl;
+    else
+      cout << "Successfully loaded builtin var type" << endl;
   } else cerr << "ERROR! No var type found!" << endl;
   if ((d = main_context->get_global()->look_up("enigma"))) {
     if (d->flags & jdi::DEF_NAMESPACE) {
@@ -146,6 +151,8 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
         enigma_type__varargs = d;
         if (!(d->flags & jdi::DEF_TYPENAME))
           cerr << "ERROR! ENIGMA's varargs is not a type!" << endl;
+        else
+          cout << "Successfully loaded builtin varargs type" << endl;
       } else cerr << "ERROR! No varargs type found!" << endl;
     } else cerr << "ERROR! Namespace enigma is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma not found!" << endl;

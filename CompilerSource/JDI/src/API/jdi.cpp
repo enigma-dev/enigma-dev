@@ -22,6 +22,7 @@
 **/
 
 #include "jdi.h"
+#include "System/lex_cpp.h"
 
 namespace jdi {
   void initialize() {
@@ -33,6 +34,7 @@ namespace jdi {
   
   void clean_up() {
     cleanup_declarators();
+    jdip::lexer_cpp::cleanup();
     delete builtin;
     builtin = NULL;
   }

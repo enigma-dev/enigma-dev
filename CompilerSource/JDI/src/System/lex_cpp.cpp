@@ -974,6 +974,7 @@ lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): ma
     keywords["__attribute__"] = TT_INVALID;
     keywords["__extension__"] = TT_INVALID;
     keywords["__typeof__"] = TT_INVALID;
+    keywords["__typeof"] = TT_INVALID;
    // keywords["__restrict"] = TT_INVALID;
     
     // MinGW Fuckery
@@ -988,6 +989,7 @@ lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): ma
     context::global_macros().swap(kludge_map);
     builtin->add_macro_func("__attribute__", x, string(), false);
     builtin->add_macro_func("__typeof__", x, string("int"), false);
+    builtin->add_macro_func("__typeof", x, string("int"), false);
     builtin->add_macro("__extension__", string());
     builtin->add_macro("__MINGW_IMPORT", string());
     builtin->add_macro("false", string(1,'0'));
@@ -997,6 +999,13 @@ lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): ma
 }
 lexer_cpp::~lexer_cpp() {
   delete mlex;
+}
+
+void lexer_cpp::cleanup() {
+  keywords.clear();
+  for (macro_iter it = kludge_map.begin(); it != kludge_map.end(); ++it)
+    macro_type::free(it->second);
+  kludge_map.clear();
 }
 
 openfile::openfile() {}

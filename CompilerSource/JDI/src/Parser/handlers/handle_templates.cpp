@@ -104,7 +104,7 @@ int context_parser::handle_template(definition_scope *scope, token_t& token, uns
     token = read_next_token(scope);
   }
   definition* nd = NULL;
-  token = read_next_token(scope);
+  token = read_next_token(&hijack);
   
   if (token.type == TT_CLASS || token.type == TT_STRUCT) {
     if (handle_declarators(&hijack,token,inherited_flags, nd)) {
@@ -115,55 +115,58 @@ int context_parser::handle_template(definition_scope *scope, token_t& token, uns
       token.report_error(herr, "Cannot declare `" + nd->name + "' as abstract template type");
       IF_FATAL(if (!hijack.referenced) delete temp; return 1);
     }
-  } else if (token.type == TT_DECLARATOR || token.type == TT_DECFLAG || token.type == TT_DECLTYPE) {
+  } else if (token.type == TT_DECLARATOR || token.type == TT_DECFLAG || token.type == TT_DECLTYPE || token.type == TT_DEFINITION || token.type == TT_TYPENAME) {
     if (handle_declarators(&hijack,token,inherited_flags, nd) or !nd) {
       if (!hijack.referenced) delete temp;
       return 1;
     }
-    if (nd->flags & DEF_FUNCTION && token.type == TT_LEFTBRACE) {
+    definition *fdef = nd;
+    while (fdef and fdef->flags & DEF_TEMPLATE) fdef = ((definition_template*)fdef)->def;
+    if (fdef and fdef->flags & DEF_FUNCTION && token.type == TT_LEFTBRACE) {
       ((definition_function*)nd)->implementation = handle_function_implementation(lex, token, scope, herr);
       if (token.type != TT_RIGHTBRACE) {
         token.report_errorf(herr, "Expected closing brace to function body before %s");
         FATAL_RETURN(1);
       }
     }
+  }
+  else if (token.type == TT_TEMPLATE) {
+    if (handle_template(&hijack,token,inherited_flags)) {
+      if (!hijack.referenced) delete temp;
+      return 1;
+    }
   } else {
     token.report_errorf(herr, "Expected class or function declaration following template clause before %s");
     if (!hijack.referenced) delete temp; return ERROR_CODE;
   }
   
-  for (definition_scope::defiter it = hijack.using_general.begin(); it != hijack.using_general.end(); ++it)
-    if (it->second->parent == &hijack) it->second->parent = scope; // TODO: Find a better spot for this; it iterates too much shit
-  
-  if (hijack.members.empty()) {
-    if (hijack.referenced)
-      return 0;
-    delete temp;
-    return 0;
-  }
-  
-  if (hijack.members.size() != 1) {
+  if (hijack.members.size()) {
     char buf[96]; sprintf(buf, "Too many declarations for template; expected one, given %d", (int)hijack.members.size());
     token.report_error(herr, buf);
   }
   
-  definition_scope::defiter a = hijack.members.begin();
-  temp->name = a->second->name;
-  temp->def = a->second;
+  if (!temp->def) {
+    delete temp;
+    return 0;
+  }
+  
   temp->def->parent = scope;
-  hijack.members.erase(a);
+  temp->name = temp->def->name;
   
-  pair<definition_scope::defiter,bool> i = scope->members.insert(pair<string,definition*>(temp->name,temp));
+  if (hijack.referenced)
+    return 0;
   
-  if (!i.second) {
-    definition * const redec = i.first->second;
+  decpair i = scope->declare(temp->name,temp);
+  
+  if (!i.inserted) {
+    definition * const redec = i.def;
     // Specialization
     if (temp->def->flags & DEF_FUNCTION) {
       if (redec->flags & DEF_TEMPLATE) {
         if (token.type == TT_LESSTHAN) {
           
         }
-        token.report_error(herr, "Unimplemented: template function specialization");
+        //token.report_error(herr, "Unimplemented: template function specialization");
         delete temp;
       }
       else if (redec->flags & DEF_FUNCTION)
@@ -173,9 +176,22 @@ int context_parser::handle_template(definition_scope *scope, token_t& token, uns
         delete temp; return ERROR_CODE;
       }
     }
-    else {
-      token.report_error(herr, "Cannot redeclare `" + temp->name + "' as template");
-      delete temp; return ERROR_CODE;
+    else if (redec->flags & DEF_TEMPLATE) {
+      definition_template* retemp = (definition_template*)redec;
+      if (!retemp->def) {
+        retemp->def = temp->def;
+        temp->def = NULL;
+        delete temp;
+      }
+      else if (retemp->def == temp->def) {
+        temp->def->parent = retemp->parent;
+        temp->def = NULL;
+        delete temp;
+      }
+      else {
+        token.report_error(herr, "Cannot redeclare `" + temp->name + "' as template: invalid specialization");
+        delete temp; return ERROR_CODE;
+      }
     }
   }
   return 0;

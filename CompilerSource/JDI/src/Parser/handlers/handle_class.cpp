@@ -28,29 +28,29 @@ using namespace jdip;
 #define alloc_class() new definition_class(classname,scope, DEF_CLASS | DEF_TYPENAME | inherited_flags)
 static inline definition_class* insnew(definition_scope *const &scope, int inherited_flags, const string& classname, const token_t &token, error_handler* const& herr, context *ct) {
   definition_class* nclass = NULL;
-  pair<definition_scope::defiter, bool> dins = scope->members.insert(pair<string,definition*>(classname,NULL));
-  if (!dins.second) {
-    if (dins.first->second->flags & DEF_TYPENAME) { // This error is displayed because if the class existed earlier when we were checking, we'd have gotten a different token.
+  decpair dins = scope->declare(classname);
+  if (!dins.inserted) {
+    if (dins.def->flags & DEF_TYPENAME) { // This error is displayed because if the class existed earlier when we were checking, we'd have gotten a different token.
       token.report_error(herr, "Class `" + classname + "' instantiated inadvertently during parse by another thread. Freeing.");
-      delete dins.first->second;
+      delete ~dins.def;
     }
     else {
-      dins = ct->c_structs.insert(pair<string,definition*>(classname,NULL));
-      if (dins.second)
+      dins = ct->declare_c_struct(classname);
+      if (dins.inserted)
         goto my_else;
-      if (dins.first->second->flags & DEF_CLASS)
-        nclass = (definition_class*)dins.first->second;
+      if (dins.def->flags & DEF_CLASS)
+        nclass = (definition_class*)dins.def;
       else {
         #if FATAL_ERRORS
           return NULL;
         #else
-          delete dins.first->second;
+          delete ~dins.def;
           goto my_else;
         #endif
       }
     }
   } else { my_else:
-    dins.first->second = nclass = alloc_class();
+    dins.def = nclass = alloc_class();
   }
   return nclass;
 }
@@ -159,9 +159,35 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
         spec->def = nclass = new definition_class(temp->name, ts, temp->def->flags);
         already_complete = false;
       }
-      ts->use_general("<dependent>", nclass);
       will_redeclare = false;
       token = read_next_token(scope);
+    }
+  }
+  else if (dulldef)
+  {
+    definition_scope *nts = scope; // Find a non-tempscope scope
+    while (nts and nts->flags & DEF_TEMPSCOPE)
+      nts = nts->parent;
+    if (dulldef->parent == nts)
+    {
+      if (dulldef->flags & DEF_TEMPLATE)
+      {
+        definition_template* temp = (definition_template*)dulldef;
+        if (temp->def->flags & DEF_CLASS) {
+          nclass = (definition_class*)temp->def;
+          nclass->parent = scope;
+          if (nclass->parent->flags & DEF_TEMPSCOPE)
+            ((definition_tempscope*)nclass->parent)->declare(nclass->name, nclass);
+        }
+        else {
+          token.report_error(herr, "Cannot redeclare template `" + dulldef->name + "' as class in this scope");
+          return NULL;
+        }
+      }
+      else {
+        token.report_error(herr, "Cannot redeclare `" + dulldef->name + "' as class in this scope");
+        return NULL;
+      }
     }
   }
   
@@ -201,11 +227,28 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
       }
       full_type ft = read_type(lex, token, scope, this, herr);
       if (!ft.def or not(ft.def->flags & DEF_CLASS)) {
-        token.report_errorf(herr, "Expected class name before %s");
-        return NULL;
+        if (ft.def->flags & DEF_TYPENAME) {
+          definition* def = scope;
+          while (def and ~def->flags & DEF_TEMPSCOPE) def = def->parent;
+          if (!def) {
+            token.report_error(herr, "Invalid use of `typename'");
+            return NULL;
+          }
+          else {
+            definition_hypothetical *h = new definition_hypothetical(ft.def->name, ft.def->parent, ft.def->flags, new AST(ft.def));
+            ((definition_template*)((definition_tempscope*)def)->source)->dependents.push_back(h);
+            ft.def = h;
+          }
+        }
+        else {
+          token.report_errorf(herr, "Expected class name before %s");
+          return NULL;
+        }
       }
-      if (ft.flags or ft.refs.size())
-        token.report_error(herr, "Extra qualifiers to inherited class ignored");
+      else {
+        if (ft.flags or ft.refs.size())
+          token.report_error(herr, "Extra qualifiers to inherited class ignored");
+      }
       nclass->ancestors.push_back(definition_class::ancestor(iprotection, (definition_class*)ft.def));
     }
     while (token.type == TT_COMMA);

@@ -23,7 +23,7 @@
 #include <API/compile_settings.h>
 
 namespace jdip {
-  definition* context_parser::handle_hypothetical(definition_scope *scope, token_t& token, unsigned flags) {
+  definition_hypothetical* handle_hypothetical(lexer *lex, definition_scope *scope, token_t& token, unsigned flags, error_handler *herr) {
     // Verify that we're in a template<> statement.
     definition_scope* temps;
     for (temps = scope; temps and not (temps->flags & (DEF_TEMPLATE | DEF_TEMPSCOPE)); temps = temps->parent);

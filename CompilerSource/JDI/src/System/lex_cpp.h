@@ -84,6 +84,9 @@ namespace jdip {
     /// This is a map of macros to add bare-minimal support for a number of compiler-specific builtins.
     static macro_map kludge_map;
     
+    /// Static cleanup function; safe to call without a matching init.
+    static void cleanup();
+    
     /** Sole constructor; consumes an llreader and attaches a new \c lex_macro.
         @param input    The file from which to read definitions. This file will be manipulated by the system.
         @param pmacros  A \c jdi::macro_map which will receive and be probed for macros.
