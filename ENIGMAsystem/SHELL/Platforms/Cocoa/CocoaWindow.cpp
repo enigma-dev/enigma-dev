@@ -106,6 +106,16 @@ int window_get_y()      { return 0;}//return getWindowDimension(1); }
 int window_get_width()  { return getWindowDimension(2); }
 int window_get_height() { return getWindowDimension(3); }
 
+int window_get_region_width_scaled()
+{
+    return window_get_width();
+}
+
+int window_get_region_height_scaled()
+{
+    return window_get_height();
+}
+
 //Setters
 void window_set_position(int x,int y)
 {
@@ -182,11 +192,6 @@ int window_set_cursor(double c)
 	return 0;*/
 }
 
-
-void window_set_showicons(bool show) {
-
-}
-
 void window_set_color(int color) {}
 
 int window_view_mouse_get_x(int wid) {}
@@ -200,6 +205,34 @@ void window_views_mouse_set(int x, int y) {}
 int window_get_region_width() { return cocoa_window_get_region_width();}
 int window_get_region_height() { return cocoa_window_get_region_height();}
 
+void window_set_stayontop(bool stay) {}
+bool window_get_stayontop() {return false;}
+void window_set_sizeable(bool sizeable) {}
+bool window_get_sizeable() {return false;}
+void window_set_showborder(bool show) {}
+bool window_get_showborder() {return true;}
+void window_set_showicons(bool show) {}
+bool window_get_showicons() {return true;}
+
+void window_default()
+{
+    int xm = int(room_width), ym = int(room_height);
+    if (view_enabled)
+    {
+      int tx = 0, ty = 0;
+      for (int i = 0; i < 8; i++)
+        if (view_visible[i])
+        {
+          if (view_xport[i]+view_wport[i] > tx)
+            tx = (int)(view_xport[i]+view_wport[i]);
+          if (view_yport[i]+view_hport[i] > ty)
+            ty = (int)(view_yport[i]+view_hport[i]);
+        }
+      if (tx and ty)
+        xm = tx, ym = ty;
+    }
+    window_set_size(xm, ym);
+}
 
 void screen_refresh() {
 	cocoa_screen_refresh();
@@ -416,6 +449,7 @@ void keyboard_wait() {
 
 void window_set_region_scale(double scale, bool adaptwindow) {}
 bool window_get_region_scale() {return 1;}
+void window_set_region_size(int w, int h, bool adaptwindow) {}
 
 void game_end() {
     //audiosystem_cleanup();

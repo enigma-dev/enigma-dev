@@ -64,7 +64,7 @@ void screen_redraw()
     int FBO;
     if (!view_enabled)
     {
-        glViewport(0, 0, window_get_width(), window_get_height());
+        glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
         if (GLEW_EXT_framebuffer_object)
         {
@@ -187,7 +187,7 @@ void screen_redraw()
                     }
                 }
 
-                glViewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+                glViewport(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc]);
                 glLoadIdentity();
                 if (GLEW_EXT_framebuffer_object)
                 {
@@ -245,7 +245,7 @@ void screen_init()
           glLoadIdentity();
           gluPerspective(0, 1, 0, 1);
         glMatrixMode(GL_MODELVIEW);
-          glViewport(0, 0, window_get_width(), window_get_height());
+          glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
           glLoadIdentity();
           glScalef(1, -1, 1);
           glOrtho(0, room_width, 0, room_height, 0, 1);

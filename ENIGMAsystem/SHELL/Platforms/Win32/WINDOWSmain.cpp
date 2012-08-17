@@ -45,8 +45,6 @@ namespace enigma //TODO: Find where this belongs
   char** main_argv;
   int main_argc;
 
-  int windowcolor; double viewscale; bool windowIsTop;
-
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
 
@@ -124,14 +122,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         int screen_width = GetSystemMetrics(SM_CXSCREEN);
         int screen_height = GetSystemMetrics(SM_CYSCREEN);
         // TODO: Implement minimize button on both windows like GM
-        if(resizeableWindow) {
-            // TODO: Implement maximize button here like GM
-            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX | WS_SIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
-                NULL, NULL, hInstance, NULL);
-        } else {
-            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
-                NULL, NULL, hInstance, NULL);
-        }
+         enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
         //Create a child window to put into that
         enigma::hWnd = CreateWindow ("TSub", "", WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);

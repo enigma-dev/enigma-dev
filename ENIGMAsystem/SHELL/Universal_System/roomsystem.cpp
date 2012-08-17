@@ -126,24 +126,8 @@ namespace enigma
       view_visible[i] = (bool)views[i].start_vis;
     }
 
-    int xm = int(room_width), ym = int(room_height);
-    if (view_enabled)
-    {
-      int tx = 0, ty = 0;
-      for (int i = 0; i < 8; i++)
-        if (view_visible[i])
-        {
-          if (view_xport[i]+view_wport[i] > tx)
-            tx = (int)(view_xport[i]+view_wport[i]);
-          if (view_yport[i]+view_hport[i] > ty)
-            ty = (int)(view_yport[i]+view_hport[i]);
-        }
-      if (tx and ty)
-        xm = tx, ym = ty;
-    }
-    window_set_size(xm,ym);
+    window_default();
     io_clear();
-
     screen_init();
     screen_refresh();
 

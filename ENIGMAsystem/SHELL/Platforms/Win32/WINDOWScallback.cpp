@@ -41,7 +41,14 @@ extern string keyboard_lastchar;
 namespace enigma
 {
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
+    extern int windowX, windowY, windowWidth, windowHeight;
+    extern double  scaledWidth, scaledHeight;
+    extern char* currentCursor;
+    extern HWND hWnd,hWndParent;
+    extern void setchildsize(bool adapt);
     static short hdeltadelta = 0, vdeltadelta = 0;
+    int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
+    RECT tempWindow;
 
     LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam)
     {
@@ -57,6 +64,30 @@ namespace enigma
             return 0;
 
         case WM_SIZE:
+            return 0;
+
+        case WM_ENTERSIZEMOVE:
+            GetWindowRect(hWnd,&tempWindow);
+            tempLeft = tempWindow.left;
+            tempTop = tempWindow.top;
+            tempRight = tempWindow.right;
+            tempBottom = tempWindow.bottom;
+            return 0;
+
+        case WM_EXITSIZEMOVE:
+            GetWindowRect(hWnd,&tempWindow);
+            tempWidth = windowWidth + (tempWindow.right - tempWindow.left) - (tempRight - tempLeft);
+            tempHeight = windowHeight + (tempWindow.bottom - tempWindow.top) - (tempBottom - tempTop);
+            if (tempWidth < scaledWidth)
+                tempWidth = scaledWidth;
+            if (tempHeight < scaledHeight)
+                tempHeight = scaledHeight;
+
+            windowX += tempWindow.left - tempLeft;
+            windowY += tempWindow.top - tempTop;
+            windowWidth = tempWidth;
+            windowHeight = tempHeight;
+            setchildsize(false);
             return 0;
 
         case WM_SETCURSOR:

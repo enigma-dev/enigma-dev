@@ -112,7 +112,6 @@ int window_get_fullscreen();
 
 int window_set_cursor(double c);
 
-void window_set_showicons(bool show);
 void window_set_color(int color);
 
 int window_view_mouse_get_x(int wid);
@@ -124,6 +123,15 @@ void window_views_mouse_set(int x, int y);
 
 int window_get_region_width();
 int window_get_region_height();
+
+void window_set_stayontop(bool stay);
+bool window_get_stayontop();
+void window_set_sizeable(bool sizeable);
+bool window_get_sizeable();
+void window_set_showborder(bool show);
+bool window_get_showborder();
+void window_set_showicons(bool show);
+bool window_get_showicons();
 
 /*
  display_get_width() // Returns the width of the display in pixels.
@@ -163,6 +171,10 @@ void keyboard_wait();
 
 void window_set_region_scale(double scale, bool adaptwindow);
 bool window_get_region_scale();
+void window_set_region_size(int w, int h, bool adaptwindow);
+void window_default();
+int window_get_region_width_scaled();
+int window_get_region_height_scaled();
 
 namespace enigma {
 	extern char** parameters;

@@ -31,6 +31,15 @@ void Sleep(int ms);
 
 int window_set_visible(bool visible);
 int window_get_visible();
+void window_set_stayontop(bool stay);
+bool window_get_stayontop();
+void window_set_sizeable(bool sizeable);
+bool window_get_sizeable();
+void window_set_showborder(bool show);
+bool window_get_showborder();
+void window_set_showicons(bool show);
+bool window_get_showicons();
+
 
 /////////////
 // CAPTION //
@@ -120,6 +129,12 @@ void keyboard_wait();
 
 void window_set_region_scale(double scale, bool adaptwindow);
 bool window_get_region_scale();
+void window_set_region_size(int w, int h, bool adaptwindow);
+int window_get_region_width();
+int window_get_region_height();
+void window_default();
+int window_get_region_width_scaled();
+int window_get_region_height_scaled();
 
 /*
 display_get_width() // Returns the width of the display in pixels.

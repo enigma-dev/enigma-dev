@@ -128,12 +128,17 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
     wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
-//    wto  << "    if (es->gameSettings.interpolate) texture_set_interpolation(1); " << endl;  //FIXME: interpolation needs to be done properly
+//    wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;  //FIXME: interpolation needs to be done properly
     if (es->gameSettings.displayCursor)
         wto  << "    window_set_cursor(cr_default);" << endl;
     else
         wto  << "    window_set_cursor(cr_none);" << endl;
-    wto  << "    window_set_region_scale(" << es->gameSettings.scaling << ", 0);" << endl;
+    wto  << "    window_set_region_scale(" << es->gameSettings.scaling/100.0 << ", 0);" << endl;
+    wto  << "    window_set_sizeable(" << es->gameSettings.allowWindowResize << ");" << endl;
+    wto  << "    window_set_stayontop(" << es->gameSettings.alwaysOnTop << ");" << endl;
+    wto  << "    window_set_showborder(" << !es->gameSettings.dontDrawBorder << ");" << endl;
+    wto  << "    window_set_showicons(" << !es->gameSettings.dontShowButtons << ");" << endl;
+
     wto  << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
     int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
     wto  << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;

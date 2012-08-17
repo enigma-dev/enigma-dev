@@ -39,7 +39,7 @@ namespace enigma
 
   // This method should take an integer framerate and perform the necessary operations to limit fps to that rate.
   void sleep_for_framerate(int framerate);
-  
+
   // This method is called at load time. It allows for initializing arrays for input.
   void input_initialize();
 }
@@ -50,15 +50,15 @@ namespace enigma
 // This function sets the game window caption, if there is a place reserved for such.
 void window_set_caption(std::string caption);
 
-// This function should resize the window, meaning a lowered resolution if the device displays all windows full screen.
-void window_set_size(unsigned int width, unsigned int height);
+// This is used with roomsystem
+void window_default();
 
 // These two are a surprisingly integral part of the system
 int window_mouse_get_x();
 int window_mouse_get_y();
 
 // These two are used by screen_redraw for view calculations and such.
-int window_get_width();
-int window_get_height();
+int window_get_region_width_scaled();
+int window_get_region_height_scaled();
 
 #endif
