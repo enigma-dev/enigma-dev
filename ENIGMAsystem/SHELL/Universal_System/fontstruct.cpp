@@ -74,12 +74,13 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
 
   int gwm = sspr->width, // Glyph width max: sprite width
       ghm = sspr->height, // Glyph height max: sprite height
-      gtw = int((double)sspr->width / sspr->texbordy);
+      gtw;
 
   font->height = ghm;
 
   for (int i = 0; i < gcount; i++)
   {
+    gtw =  int((double)sspr->width / sspr->texbordyarray[i]);
     unsigned char* data = enigma::graphics_get_texture_rgba(sspr->texturearray[i]);
     glyphdata[i] = data;
 
@@ -160,6 +161,6 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   font->twid = w;
   font->thgt = h;
   font->yoffset = 0;
-  
+
   return idfont;
 }

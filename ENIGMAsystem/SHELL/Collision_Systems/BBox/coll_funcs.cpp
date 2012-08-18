@@ -31,6 +31,7 @@
 
 #include "Universal_System/collisions_object.h"
 #include "Universal_System/instance_system.h" //iter
+#include "Universal_System/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
 #include "coll_funcs.h"
 #include "coll_impl.h"
@@ -71,6 +72,7 @@ static inline int max(int x, int y) { return x>y? x : y; }
 static inline double max(double x, double y) { return x>y? x : y; }
 static inline double direction_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
 static inline double point_direction(double x1,double y1,double x2,double y2) {return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);}
+extern double random(double x);
 
 bool place_free(double x,double y)
 {
@@ -1107,4 +1109,22 @@ void position_change(double x1, double y1, int obj, bool perf)
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom)
             instance_change(obj, perf);
     }
+}
+
+void move_random(const double snapHor, const double snapVer)
+{
+    enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+    const int mask_ind = ((enigma::object_collisions*)enigma::instance_event_iterator->inst)->mask_index;
+    const int spr_ind = ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->sprite_index;
+    const int mask = mask_ind >= 0 ? mask_ind : spr_ind;
+    const double x1 = sprite_get_xoffset(mask), y1 = sprite_get_yoffset(mask), x2 = room_width - sprite_get_width(mask) + sprite_get_xoffset(mask), y2 = room_height - sprite_get_height(mask) + sprite_get_yoffset(mask);
+
+    int cutoff = 300;
+    do
+    {
+        inst->x = x1 + (snapHor ? floor(random(x2 - x1)/snapHor)*snapHor : random(x2 - x1));
+        inst->y = y1 + (snapVer ? floor(random(y2 - y1)/snapVer)*snapVer : random(y2 - y1));
+        cutoff--;
+    }
+    while (collide_inst_inst(all,true,true,inst->x,inst->y) && cutoff);
 }

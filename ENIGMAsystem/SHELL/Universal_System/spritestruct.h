@@ -39,10 +39,10 @@ namespace enigma
   {
     int width,height,subcount,xoffset,yoffset,id;
     unsigned int *texturearray; //Each subimage has a texture
+    double *texbordxarray, *texbordyarray;
     void **colldata; // Each subimage has collision data
 
     //void*  *pixeldata;
-    double texbordx, texbordy;
     bbox_rect_t bbox, bbox_relative;
     bool where,smooth;
 
@@ -68,6 +68,8 @@ namespace enigma
 
 extern int sprite_get_width  (int sprite);
 extern int sprite_get_height (int sprite);
+extern double sprite_get_texture_width_factor(int sprite, int subimg);
+extern double sprite_get_texture_height_factor(int sprite, int subimg);
 
 extern int sprite_get_bbox_bottom (int sprite);
 extern int sprite_get_bbox_left   (int sprite);

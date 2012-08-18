@@ -464,6 +464,16 @@ int background_get_height(int backId) {
   return bck2d->height;
 }
 
+double background_get_texture_width_factor(int backId) {
+  get_backgroundnv(bck2d,backId,-1);
+  return bck2d->texbordx;
+}
+
+double background_get_texture_height_factor(int backId) {
+  get_backgroundnv(bck2d,backId,-1);
+  return bck2d->texbordy;
+}
+
 void texture_set_interpolation(int enable)
 {
     if (enigma::interpolate_textures == enable)
@@ -513,22 +523,6 @@ void texture_set_interpolation(int enable)
             }
         }
     }
-}
-
-int texture_get_width(int texId)
-{
-    int w;
-    glBindTexture(GL_TEXTURE_2D, texId);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-    return w;
-}
-
-int texture_get_height(int texId)
-{
-    int h;
-    glBindTexture(GL_TEXTURE_2D, texId);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
-    return h;
 }
 
 bool texture_get_interpolation()

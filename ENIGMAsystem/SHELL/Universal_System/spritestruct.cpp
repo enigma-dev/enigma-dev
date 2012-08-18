@@ -29,8 +29,8 @@ using namespace std;
 namespace enigma {
   sprite** spritestructarray;
 	extern size_t sprite_idmax;
-	sprite::sprite(): texturearray(NULL) {}
-  sprite::sprite(unsigned int x): texturearray(new unsigned int[x]) {}
+	sprite::sprite(): texturearray(NULL), texbordxarray(NULL), texbordyarray(NULL) {}
+  sprite::sprite(unsigned int x): texturearray(new unsigned int[x]), texbordxarray(new double[x]), texbordyarray(new double[x]) {}
 }
 
 int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
@@ -50,10 +50,12 @@ int sprite_add(string filename, int imgnumb, bool precise, bool transparent, boo
 	ns->height    = height;
 	ns->xoffset   = (int)x_offset;
 	ns->yoffset   = (int)y_offset;
-	ns->texbordx  = (double) width/fullwidth;
-	ns->texbordy  = (double) height/fullheight;
 	ns->texturearray = new unsigned int[1];
 	ns->texturearray[0] = texture;
+	ns->texbordxarray = new double[1];
+	ns->texbordxarray[0] = (double) width/fullwidth;
+	ns->texbordyarray = new double[1];
+	ns->texbordyarray[0] = (double) height/fullheight;
 	return enigma::sprite_idmax++;
 }
 
@@ -74,10 +76,12 @@ int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int 
 	ns->height    = height;
 	ns->xoffset   = (int)x_offset;
 	ns->yoffset   = (int)y_offset;
-	ns->texbordx  = (double) width/fullwidth;
-	ns->texbordy  = (double) height/fullheight;
 	ns->texturearray = new unsigned int[1];
 	ns->texturearray[0] = texture;
+	ns->texbordxarray = new double[1];
+	ns->texbordxarray[0] = (double) width/fullwidth;
+	ns->texbordyarray = new double[1];
+	ns->texbordyarray[0] = (double) height/fullheight;
 	return enigma::sprite_idmax++;
 }
 
@@ -126,10 +130,10 @@ namespace enigma
       as->bbox_relative.right = bbr - x;
     as->xoffset = x;
     as->yoffset = y;
-    as->texbordx = (double)w/fullwidth;
-    as->texbordy = (double)h/fullheight;
 
     as->texturearray = new unsigned int[subc];
+    as->texbordxarray = new double[subc];
+    as->texbordyarray = new double[subc];
     as->colldata = new void*[subc];
 
     if (enigma::sprite_idmax < sprid+1)
@@ -175,6 +179,8 @@ namespace enigma
     enigma::sprite* sprstr = enigma::spritestructarray[sprid];
 
     sprstr->texturearray[imgindex] = texture;
+    sprstr->texbordxarray[imgindex] = (double) w/fullwidth;
+    sprstr->texbordyarray[imgindex] = (double) h/fullheight;
     sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
   }
 }
@@ -236,6 +242,17 @@ int sprite_get_height(int sprite)
 	return spr->height;
 }
 
+double sprite_get_texture_width_factor(int sprite, int subimg)
+{
+	get_sprite(spr,sprite,32);
+	return spr->texbordxarray[subimg];
+}
+
+double sprite_get_texture_height_factor(int sprite, int subimg)
+{
+	get_sprite(spr,sprite,32);
+	return spr->texbordyarray[subimg];
+}
 
 int sprite_get_bbox_bottom(int sprite)
 {

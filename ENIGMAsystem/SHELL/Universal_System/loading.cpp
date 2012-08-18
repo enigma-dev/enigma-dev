@@ -33,6 +33,7 @@
 
 namespace enigma {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
+  extern int game_settings_initialize();
 }
 extern int random_set_seed(int ss);
 extern int mtrandom_seed(int ss);
@@ -102,6 +103,7 @@ namespace enigma
     if (room_count)
       enigma::game_start();
 
+    enigma::game_settings_initialize();
     return 0;
   }
 }

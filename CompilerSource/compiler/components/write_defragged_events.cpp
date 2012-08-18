@@ -125,8 +125,24 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
     wto  << "  event_iter *event_" << it->first << "; // Defined in " << it->second.count << " objects" << endl;
 
+    /*constants not picked up by instances (note constants can be set as numbers, strings, true/false, hexidecimal)
+    for (int i = 0; i < es->constantCount; i++)
+        wto  << "    const int " << es->constants[i].name << " = " <<  es->constants[i].value << ";\n";*/
+
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
+    wto  << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
+    int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
+    wto  << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
+
+    int ind = 0;
+    for (evfit it = used_events.begin(); it != used_events.end(); it++)
+      wto  << "    event_" << it->first << " = events + " << ind++ << ";  event_" << it->first << "->name = \"" << event_get_human_name(it->second.mid,it->second.id) << "\";" << endl;
+    wto << "    return 0;" << endl;
+  wto << "  }" << endl;
+
+    // Game setting initaliser
+  wto << "  int game_settings_initialize()" << endl << "  {" << endl;
     wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
 //    wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;  //FIXME: interpolation needs to be done properly
     if (es->gameSettings.displayCursor)
@@ -138,14 +154,6 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
     wto  << "    window_set_stayontop(" << es->gameSettings.alwaysOnTop << ");" << endl;
     wto  << "    window_set_showborder(" << !es->gameSettings.dontDrawBorder << ");" << endl;
     wto  << "    window_set_showicons(" << !es->gameSettings.dontShowButtons << ");" << endl;
-
-    wto  << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
-    int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
-    wto  << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
-
-    int ind = 0;
-    for (evfit it = used_events.begin(); it != used_events.end(); it++)
-      wto  << "    event_" << it->first << " = events + " << ind++ << ";  event_" << it->first << "->name = \"" << event_get_human_name(it->second.mid,it->second.id) << "\";" << endl;
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
 
