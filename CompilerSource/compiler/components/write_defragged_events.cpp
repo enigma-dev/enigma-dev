@@ -144,7 +144,7 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
     // Game setting initaliser
   wto << "  int game_settings_initialize()" << endl << "  {" << endl;
     wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
-//    wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;  //FIXME: interpolation needs to be done properly
+    wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;
     if (es->gameSettings.displayCursor)
         wto  << "    window_set_cursor(cr_default);" << endl;
     else

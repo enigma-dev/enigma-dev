@@ -33,6 +33,7 @@ namespace enigma
 
   /// Generate a texture from image data. Preserves input pixbuf.
   unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata);
+  void (graphics_delete_texture(int texture));
 
   /// Retrieve image data from a texture, in unsigned char, RGBA format.
   /// This data will be allocated afresh; the pointer and data are yours to manipulate

@@ -81,34 +81,13 @@ namespace enigma
 
     void centerchild()
     {
-        int parWidth, parHeight;
-        if (isFullScreen)
-        {
-            parWidth = GetSystemMetrics(SM_CXSCREEN);
-            parHeight = GetSystemMetrics(SM_CYSCREEN);
-        }
-        else
-        {
-            parWidth = windowWidth;
-            parHeight = windowHeight;
-        }
-
+        int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
         SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
     }
 
     void setchildsize(bool adapt)
     {
-        int parWidth, parHeight;
-        if (isFullScreen)
-        {
-            parWidth = GetSystemMetrics(SM_CXSCREEN);
-            parHeight = GetSystemMetrics(SM_CYSCREEN);
-        }
-        else
-        {
-            parWidth = windowWidth;
-            parHeight = windowHeight;
-        }
+        int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
 
         if (viewScale > 0)  //Fixed Scale
         {
@@ -154,7 +133,7 @@ namespace enigma
             clampparent();
         }
 
-        centerchild();
+        SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);  //center child
     }
 }
 
@@ -274,26 +253,21 @@ void window_default()
 
 void window_set_fullscreen(const bool full)
 {
-    if (full)
+    if (enigma::isFullScreen == full)
+        return;
+
+    if (enigma::isFullScreen = full)
     {
-        if (!enigma::isFullScreen)
-        {
-            enigma::isFullScreen = 1;
-            SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
-            ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
-            enigma::setchildsize(false);
-        }
+        SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
+        ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
+        enigma::setchildsize(false);
     }
     else
     {
-        if (enigma::isFullScreen)
-        {
-            enigma::isFullScreen = 0;
-            enigma::setparentstyle();
-            ShowWindow(enigma::hWndParent,SW_RESTORE);
-            enigma::setchildsize(false);
-        }
+        enigma::setparentstyle();
+        ShowWindow(enigma::hWndParent,SW_RESTORE);
     }
+    enigma::setchildsize(false);
 }
 
 int window_get_fullscreen()
@@ -303,22 +277,11 @@ int window_get_fullscreen()
 
 void window_set_sizeable(bool sizeable)
 {
-    if (sizeable)
-    {
-        if (!enigma::isSizeable)
-        {
-            enigma::isSizeable = true;
-            enigma::setparentstyle();
-        }
-    }
-    else
-    {
-        if (enigma::isSizeable)
-        {
-            enigma::isSizeable = false;
-            enigma::setparentstyle();
-        }
-    }
+    if (enigma::isSizeable == sizeable)
+        return;
+
+    enigma::isSizeable = sizeable;
+    enigma::setparentstyle();
 }
 
 bool window_get_sizeable()
@@ -328,22 +291,11 @@ bool window_get_sizeable()
 
 void window_set_showborder(bool show)
 {
-    if (show)
-    {
-        if (!enigma::showBorder)
-        {
-            enigma::showBorder = true;
-            enigma::setparentstyle();
-        }
-    }
-    else
-    {
-        if (enigma::showBorder)
-        {
-            enigma::showBorder = false;
-            enigma::setparentstyle();
-        }
-    }
+    if (enigma::showBorder == show)
+        return;
+
+    enigma::showBorder = show;
+    enigma::setparentstyle();
 }
 
 bool window_get_showborder()
@@ -353,22 +305,11 @@ bool window_get_showborder()
 
 void window_set_showicons(bool show)
 {
-    if (show)
-    {
-        if (!enigma::showIcons)
-        {
-            enigma::showIcons = true;
-            enigma::setparentstyle();
-        }
-    }
-    else
-    {
-        if (enigma::showIcons)
-        {
-            enigma::showIcons = false;
-            enigma::setparentstyle();
-        }
-    }
+    if (enigma::showIcons == show)
+        return;
+
+    enigma::showIcons = show;
+    enigma::setparentstyle();
 }
 
 bool window_get_showicons()
@@ -378,22 +319,11 @@ bool window_get_showicons()
 
 void window_set_visible(bool visible)
 {
-    if (visible)
-    {
-        if (!enigma::isVisible)
-        {
-            enigma::isVisible = true;
-            enigma::setparentstyle();
-        }
-    }
-    else
-    {
-        if (enigma::isVisible)
-        {
-            enigma::isVisible = false;
-            enigma::setparentstyle();
-        }
-    }
+    if (enigma::isVisible == visible)
+        return;
+
+    enigma::isVisible = visible;
+    enigma::setparentstyle();
 }
 
 int window_get_visible()
@@ -403,23 +333,18 @@ int window_get_visible()
 
 void window_set_stayontop(bool stay)
 {
-   if (stay)
-   {
-        if (!enigma::windowIsTop)
-        {
-            enigma::windowIsTop = true;
-            SetWindowPos(enigma::hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
-        }
-   }
-   else
-   {
-        if (!enigma::windowIsTop)
-        {
-            enigma::windowIsTop = false;
-            SetWindowPos(enigma::hWnd,HWND_BOTTOM,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE);
-            SetWindowPos(enigma::hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
-        }
-   }
+    if (enigma::windowIsTop == stay)
+        return;
+
+    if (enigma::windowIsTop = stay)
+    {
+        SetWindowPos(enigma::hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
+    }
+    else
+    {
+        SetWindowPos(enigma::hWnd,HWND_BOTTOM,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE);
+        SetWindowPos(enigma::hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
+    }
 }
 
 bool window_get_stayontop()

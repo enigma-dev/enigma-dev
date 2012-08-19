@@ -213,6 +213,11 @@ namespace enigma
   }
 };
 
+bool sound_exists(int sound)
+{
+    return unsigned(sound) < enigma::sound_idmax && bool(enigma::sounds[sound]);
+}
+
 bool sound_play(int sound) // Returns whether sound is playing
 {
   get_sound(snd,sound,0); //snd.looping = false;
@@ -259,6 +264,8 @@ void sound_delete(int sound) {
   get_sound(snd,sound,);
   alureDestroyStream(snd->stream, 0, 0);
   alDeleteSources(1,&snd->src);
+  delete enigma::sounds[sound];
+  enigma::sounds[sound] = NULL;
 }
 void sound_volume(int sound, float volume) {
     get_sound(snd,sound,);
@@ -361,4 +368,13 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
     return (--enigma::sound_idmax, -1);
 
   return rid;
+}
+
+bool sound_replace(int sound, string fname, int kind, bool preload)
+{
+  get_sound(snd,sound,);
+  alureDestroyStream(snd->stream, 0, 0);
+  alDeleteSources(1,&snd->src);
+  enigma::sounds[sound] = enigma::sound_new_with_source();
+  return true;
 }

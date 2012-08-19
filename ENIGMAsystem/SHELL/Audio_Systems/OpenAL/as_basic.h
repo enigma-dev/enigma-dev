@@ -25,6 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
+bool sound_exists(int sound);
 bool sound_play(int sound);
 bool sound_loop(int sound);
 void sound_stop(int sound);
@@ -50,5 +51,6 @@ void action_sound(int snd, bool loop);
 void sound_pan(int sound, float value);
 
 int sound_add(string fname, int kind, bool preload);
+bool sound_replace(int sound, string fname, int kind, bool preload);
 
 const char* sound_get_audio_error();

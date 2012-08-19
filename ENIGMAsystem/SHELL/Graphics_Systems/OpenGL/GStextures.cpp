@@ -47,6 +47,12 @@ namespace enigma
     return texture;
   }
 
+  void (graphics_delete_texture(int texture))
+  {
+    GLuint tex = texture;
+    glDeleteTextures(1, &tex);
+  }
+
   //Retrieve image data from a texture, in unsigned char, RGBA format.
   unsigned char* graphics_get_texture_rgba(unsigned texture)
   {

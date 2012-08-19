@@ -22,8 +22,8 @@ using namespace std;
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "libEGMstd.h"
-
 #include "backgroundstruct.h"
+#include "IMGloading.h"
 
 
 namespace enigma {
@@ -41,22 +41,22 @@ namespace enigma {
 
 namespace enigma
 {
-  background::background(): 
+  background::background():
     tileset(false) {}
-  background::background(const bool ts): 
+  background::background(bool ts):
     tileset(ts) {}
-  background::background(int w,int h,unsigned tex,bool trans,bool smth,bool prel): 
+  background::background(int w,int h,unsigned tex,bool trans,bool smth,bool prel):
     width(w), height(h), texture(tex), transparent(trans), smooth(smth), preload(prel), tileset(false) {}
-  background::background(const bool ts,int w,int h,unsigned tex,bool trans,bool smth,bool prel): 
+  background::background(bool ts,int w,int h,unsigned tex,bool trans,bool smth,bool prel):
     width(w), height(h), texture(tex), transparent(trans), smooth(smth), preload(prel), tileset(ts) {}
-  
-  background_tileset::background_tileset(): 
+
+  background_tileset::background_tileset():
     background(true) {}
   background_tileset::background_tileset(int tw, int th, int ho, int vo, int hs, int vs):
     background(true), tileWidth(tw), tileHeight(th), hOffset(ho), vOffset(vo), hSep(hs), vSep(vs) {}
   background_tileset::background_tileset(int w,int h,unsigned tex,bool trans,bool smth,bool prel,int tw, int th, int ho, int vo, int hs, int vs):
     background(true, w, h, tex, trans, smth, prel), tileWidth(tw), tileHeight(th), hOffset(ho), vOffset(vo), hSep(hs), vSep(vs) {}
-  
+
   //Adds a subimage to an existing sprite from the exe
   void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep)
   {
@@ -76,17 +76,36 @@ namespace enigma
       imgpxptr += (fullwidth-colindex) << 2;
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
-    
+
     unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
     delete[] imgpxdata;
-    
-   backgroundstructarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);  
+
+   backgroundstructarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
 	  enigma::background *bak = backgroundstructarray[bkgid];
 	  bak->texbordx  = (double) w/fullwidth;
 	  bak->texbordy  = (double) h/fullheight;
-	  
+
   }
-	
+
+  void background_add_to_index(enigma::background *bak, string filename, bool transparent, bool smoothEdges, bool preload)
+  {
+    int w,h,fullwidth,fullheight;
+
+    char *pxdata = enigma::load_bitmap(filename,&w,&h,&fullwidth,&fullheight);
+    unsigned texture = enigma::graphics_create_texture(fullwidth, fullheight, pxdata);
+    delete[] pxdata;
+
+    bak->width = w;
+    bak->height = h;
+    bak->texture = texture;
+    bak->transparent = transparent;
+    bak->smooth = smoothEdges;
+    bak->preload = preload;
+    bak->tileset = false;
+    bak->texbordx = (double) w/fullwidth;
+	bak->texbordy = (double) h/fullheight;
+  }
+
 	//Allocates and zero-fills the array at game start
 	void backgrounds_init()
 	{
@@ -94,4 +113,36 @@ namespace enigma
 		for (unsigned i = 0; i < enigma::background_idmax; i++)
 			backgroundstructarray[i] = NULL;
 	}
+}
+
+int background_add(string filename, bool transparent, bool smooth, bool preload)
+{
+	enigma::background *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
+    enigma::background_add_to_index(bck, filename, transparent, smooth, preload);
+	return enigma::background_idmax++;
+}
+
+bool background_replace(int back, string filename, bool transparent, bool smooth, bool preload, bool free_texture)
+{
+    enigma::background *bck = enigma::backgroundstructarray[back];
+    if (free_texture)
+        enigma::graphics_delete_texture(bck->texture);
+
+    enigma::background_add_to_index(bck, filename, transparent, smooth, preload);
+	return true;
+}
+
+void background_delete(int back, bool free_texture)
+{
+    enigma::background *bck = enigma::backgroundstructarray[back];
+    if (free_texture)
+        enigma::graphics_delete_texture(bck->texture);
+
+    delete enigma::backgroundstructarray[back];
+    enigma::backgroundstructarray[back] = NULL;
+}
+
+bool background_exists(int back)
+{
+    return unsigned(back) < enigma::background_idmax && bool(enigma::backgroundstructarray[back]);
 }

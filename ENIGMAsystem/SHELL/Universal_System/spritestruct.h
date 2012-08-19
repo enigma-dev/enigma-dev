@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include <stdlib.h>
+#include <string>
 
 #ifndef ENIGMA_SPRITESTRUCT
 #define ENIGMA_SPRITESTRUCT
@@ -57,8 +58,8 @@ namespace enigma
 
 namespace enigma
 {
-  //Adds an empty sprite to the list
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm);
+  void sprite_add_to_index(enigma::sprite *ns, std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);
 
   //Adds a subimage to an existing sprite from the exe
   void sprite_set_subimage(int sprid, int imgindex, int x, int y, unsigned int w,unsigned int h,unsigned char*chunk);
@@ -90,9 +91,13 @@ extern int sprite_get_texture (int sprite, int subimage);
 extern int sprite_get_xoffset (int sprite);
 extern int sprite_get_yoffset (int sprite);
 
-#include <string>
 int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset);
 int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);  //GM7+ compatible
+bool sprite_replace(int ind, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture = true);
+bool sprite_replace(int ind, std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture = true);   //GM7+ compatible
+void sprite_delete(int ind, bool free_texture = true);
+int sprite_duplicate(int ind);
+void sprite_assign(int ind, int copy_sprite, bool free_texture = true);
 
 #endif // ENIGMA_SPRITESTRUCT
 

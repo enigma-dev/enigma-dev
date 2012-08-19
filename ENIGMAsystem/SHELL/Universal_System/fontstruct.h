@@ -65,8 +65,19 @@ namespace enigma
 
   extern int rawfontcount, rawfontmaxid;
   int font_new(unsigned char gs, unsigned char gc); // Creates a new font, allocating 'gc' glyphs
+  int font_pack(enigma::font *font, int spr, unsigned char gcount, bool prop, int sep);
 }
 
+int font_add(string name, int size, bool bold, bool italic, unsigned char first, unsigned char last);
+bool font_replace(int ind, string name, int size, bool bold, bool italic, unsigned char first, unsigned char last);
 int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);
+bool font_replace_sprite(int ind, int spr, unsigned char first, bool prop, int sep);
+bool font_get_bold(int fnt);
+bool font_get_italic(int fnt);
+unsigned char font_get_first(int fnt);
+unsigned char font_get_last(int fnt);
+string font_get_fontname(int fnt);
+void font_delete(int fnt);
+bool font_exists(int fnt);
 
 #endif

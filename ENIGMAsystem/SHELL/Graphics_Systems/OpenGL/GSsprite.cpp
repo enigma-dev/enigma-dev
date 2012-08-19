@@ -60,7 +60,6 @@ using std::string;
     const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
-
 bool sprite_exists(int spr) {
     return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
 }
