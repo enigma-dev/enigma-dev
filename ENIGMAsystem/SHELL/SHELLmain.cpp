@@ -42,6 +42,7 @@
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
+#include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/fontstruct.h"
 

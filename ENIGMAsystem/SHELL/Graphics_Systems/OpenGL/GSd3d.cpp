@@ -35,6 +35,8 @@ void d3d_start()
 {
   // Enable depth buffering
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_NOTEQUAL, 0);
 
   // Set up projection matrix
   glMatrixMode(GL_PROJECTION);
@@ -52,6 +54,7 @@ void d3d_end()
 {
   d3dMode = false;
   glDisable(GL_DEPTH_TEST);
+  glDisable(GL_ALPHA_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(0, 1, 0, 1);

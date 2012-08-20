@@ -59,7 +59,8 @@ namespace enigma
 namespace enigma
 {
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm);
-  void sprite_add_to_index(enigma::sprite *ns, std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);
+  void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);
+  void sprite_add_copy(sprite *spr, sprite *spr_copy);
 
   //Adds a subimage to an existing sprite from the exe
   void sprite_set_subimage(int sprid, int imgindex, int x, int y, unsigned int w,unsigned int h,unsigned char*chunk);
@@ -98,6 +99,9 @@ bool sprite_replace(int ind, std::string filename, int imgnumb, bool transparent
 void sprite_delete(int ind, bool free_texture = true);
 int sprite_duplicate(int ind);
 void sprite_assign(int ind, int copy_sprite, bool free_texture = true);
+void sprite_merge(int ind, int copy_sprite);
+void sprite_set_offset(int ind, int xoff, int yoff);
+void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture=true);
 
 #endif // ENIGMA_SPRITESTRUCT
 

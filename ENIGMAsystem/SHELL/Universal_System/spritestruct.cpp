@@ -51,27 +51,28 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool tr
 {
     enigma::sprite *spr = enigma::spritestructarray[ind];
     if (free_texture)
-    {
         for (int ii = 0; ii < spr->subcount; ii++)
-        {
             enigma::graphics_delete_texture(spr->texturearray[ii]);
-        }
-    }
+
     delete[] spr->texturearray, spr->texbordxarray, spr->texbordyarray;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
     return true;
+}
+
+void sprite_set_offset(int ind, int xoff, int yoff)
+{
+    enigma::sprite *spr = enigma::spritestructarray[ind];
+    spr->xoffset = xoff;
+    spr->yoffset = yoff;
 }
 
 bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture)
 {
     enigma::sprite *spr = enigma::spritestructarray[ind];
     if (free_texture)
-    {
         for (int ii = 0; ii < spr->subcount; ii++)
-        {
             enigma::graphics_delete_texture(spr->texturearray[ii]);
-        }
-    }
+
     delete[] spr->texturearray, spr->texbordxarray, spr->texbordyarray;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
     return true;
@@ -81,61 +82,76 @@ void sprite_delete(int ind, bool free_texture)
 {
     enigma::sprite *spr = enigma::spritestructarray[ind];
     if (free_texture)
-    {
         for (int ii = 0; ii < spr->subcount; ii++)
-        {
             enigma::graphics_delete_texture(spr->texturearray[ii]);
-        }
-    }
+
     delete enigma::spritestructarray[ind];
     enigma::spritestructarray[ind] = NULL;
 }
 
-//TODO: These are temporary going to redo with copying the textures instead of sharing them
-int sprite_duplicate(int ind)
+int sprite_duplicate(int copy_sprite)
 {
-    enigma::sprite *spr = enigma::spritestructarray[ind], *ns = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
-    ns->id = enigma::sprite_idmax;
-    ns->subcount  = spr->subcount;
-    ns->width     = spr->width;
-    ns->height    = spr->height;
-    ns->xoffset   = spr->xoffset;
-    ns->yoffset   = spr->yoffset;
-    ns->texturearray = new unsigned int[spr->subcount];
-    memcpy(&ns->texturearray, &spr->texturearray, sizeof(spr->texturearray));
-    ns->texbordxarray = new double[spr->subcount];
-    memcpy(&ns->texbordxarray, &spr->texbordxarray, sizeof(spr->texbordxarray));
-    ns->texbordyarray = new double[spr->subcount];
-    memcpy(&ns->texbordyarray, &spr->texbordyarray, sizeof(spr->texbordyarray));
+    enigma::sprite *spr_copy = enigma::spritestructarray[copy_sprite], *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
+    spr->id = enigma::sprite_idmax;
+    enigma::sprite_add_copy(spr, spr_copy);
 	return enigma::sprite_idmax++;
 }
-
-//sprite_merge
 
 void sprite_assign(int ind, int copy_sprite, bool free_texture)
 {
     enigma::sprite *spr = enigma::spritestructarray[ind], *spr_copy = enigma::spritestructarray[copy_sprite];
     if (free_texture)
-    {
         for (int ii = 0; ii < spr->subcount; ii++)
-        {
             enigma::graphics_delete_texture(spr->texturearray[ii]);
-        }
-    }
-    spr->subcount  = spr_copy->subcount;
-    spr->width     = spr_copy->width;
-    spr->height    = spr_copy->height;
-    spr->xoffset   = spr_copy->xoffset;
-    spr->yoffset   = spr_copy->yoffset;
+
     delete[] spr->texturearray;
-    spr->texturearray = new unsigned int[spr->subcount];
-    memcpy(&spr->texturearray, &spr_copy->texturearray, sizeof(spr_copy->texturearray));
     delete[] spr->texbordxarray;
-    spr->texbordxarray = new double[spr->subcount];
-    memcpy(&spr->texbordxarray, &spr_copy->texbordxarray, sizeof(spr_copy->texbordxarray));
     delete[] spr->texbordyarray;
-    spr->texbordyarray = new double[spr->subcount];
-    memcpy(&spr->texbordyarray, &spr_copy->texbordyarray, sizeof(spr_copy->texbordyarray));
+    enigma::sprite_add_copy(spr, spr_copy);
+}
+
+void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture)
+{
+    enigma::sprite *spr = enigma::spritestructarray[ind], *spr_copy = enigma::spritestructarray[copy_sprite];
+    unsigned int *t_texturearray = new unsigned int[spr->subcount];
+    for (int i = 0; i < spr->subcount; i++)
+    {
+        t_texturearray[i] = enigma::graphics_create_texture_alpha_from_texture(spr->texturearray[i], spr_copy->texturearray[0]);
+        if (free_texture)
+            enigma::graphics_delete_texture(spr->texturearray[i]);
+    }
+    delete[] spr->texturearray;
+    spr->texturearray = t_texturearray;
+}
+
+void sprite_merge(int ind, int copy_sprite)
+{
+    enigma::sprite *spr = enigma::spritestructarray[ind], *spr_copy = enigma::spritestructarray[copy_sprite];
+
+    int t_subcount = spr->subcount + spr_copy->subcount, i = 0, j = 0;
+    unsigned int *t_texturearray = new unsigned int[t_subcount];
+    double *t_texbordxarray = new double[t_subcount], *t_texbordyarray = new double[t_subcount];
+    while (i < spr->subcount)
+    {
+        t_texturearray[i] = spr->texturearray[i];
+        t_texbordxarray[i] = spr->texbordxarray[i];
+        t_texbordyarray[i++] = spr->texbordyarray[i];
+    }
+    while (j < spr_copy->subcount)
+    {
+        t_texturearray[i] = enigma::graphics_duplicate_texture(spr_copy->texturearray[j]);
+        t_texbordxarray[i] = spr_copy->texbordxarray[j];
+        t_texbordyarray[i++] = spr_copy->texbordyarray[j++];
+    }
+    spr->subcount = t_subcount;
+    spr->width    = (spr->width > spr_copy->width)?spr->width:spr_copy->width;
+    spr->height   = (spr->height > spr_copy->height)?spr->height:spr_copy->height;
+    delete[] spr->texturearray;
+    delete[] spr->texbordxarray;
+    delete[] spr->texbordyarray;
+    spr->texturearray = t_texturearray;
+    spr->texbordxarray = t_texbordxarray;
+    spr->texbordyarray = t_texbordyarray;
 }
 
 /* These functions are primarily for use of the engine. Experienced users
@@ -150,16 +166,16 @@ namespace enigma
   //Allocates and zero-fills the array at game start
   void sprites_init()
   {
-    spritestructarray = new sprite*[enigma::sprite_idmax+1];
-    for (unsigned i = 0; i < enigma::sprite_idmax; i++)
+    spritestructarray = new sprite*[sprite_idmax+1];
+    for (unsigned i = 0; i < sprite_idmax; i++)
       spritestructarray[i] = NULL;
   }
 
     void spritestructarray_reallocate()
     {
-        enigma::sprite** spriteold = spritestructarray;
-        spritestructarray = new sprite*[enigma::sprite_idmax+2];
-        for (size_t i = 0; i < enigma::sprite_idmax; i++) spritestructarray[i] = spriteold[i]; delete[] spriteold;
+        sprite** spriteold = spritestructarray;
+        spritestructarray = new sprite*[sprite_idmax+2];
+        for (size_t i = 0; i < sprite_idmax; i++) spritestructarray[i] = spriteold[i]; delete[] spriteold;
     }
 
     //Adds an empty sprite to the list
@@ -189,23 +205,23 @@ namespace enigma
         as->texbordyarray = new double[subc];
         as->colldata = new void*[subc];
 
-        if (enigma::sprite_idmax < sprid+1)
-          enigma::sprite_idmax = sprid+1;
+        if (sprite_idmax < sprid+1)
+          sprite_idmax = sprid+1;
 
         return sprid;
     }
 
-    void sprite_add_to_index(enigma::sprite *ns, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
+    void sprite_add_to_index(sprite *ns, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
     {
         int width,height,fullwidth,fullheight;
 
-        char *pxdata = enigma::load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
-        unsigned texture = enigma::graphics_create_texture(fullwidth, fullheight, pxdata);
+        char *pxdata = load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
+        unsigned texture = graphics_create_texture(fullwidth, fullheight, pxdata);
         delete[] pxdata;
 
         //ns.pixeldata=(void**) malloc(sizeof(void*));
         //ns.pixeldata[0]=bitmapbuffer;
-        ns->id = enigma::sprite_idmax;
+        ns->id = sprite_idmax;
         ns->subcount  = 1;
         ns->width     = width;
         ns->height    = height;
@@ -217,6 +233,24 @@ namespace enigma
         ns->texbordxarray[0] = (double) width/fullwidth;
         ns->texbordyarray = new double[1];
         ns->texbordyarray[0] = (double) height/fullheight;
+    }
+
+    void sprite_add_copy(sprite *spr, sprite *spr_copy)
+    {
+        spr->subcount  = spr_copy->subcount;
+        spr->width     = spr_copy->width;
+        spr->height    = spr_copy->height;
+        spr->xoffset   = spr_copy->xoffset;
+        spr->yoffset   = spr_copy->yoffset;
+        spr->texturearray = new unsigned int[spr_copy->subcount];
+        spr->texbordxarray = new double[spr_copy->subcount];
+        spr->texbordyarray = new double[spr_copy->subcount];
+        for (int i = 0; i < spr->subcount; i++)
+        {
+            spr->texturearray[i] = graphics_duplicate_texture(spr_copy->texturearray[i]);
+            spr->texbordxarray[i] = spr_copy->texbordxarray[i];
+            spr->texbordyarray[i] = spr_copy->texbordyarray[i];
+        }
     }
 
   #if COLLIGMA
@@ -253,7 +287,7 @@ namespace enigma
     unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
     delete[] imgpxdata;
 
-    enigma::sprite* sprstr = enigma::spritestructarray[sprid];
+    sprite* sprstr = spritestructarray[sprid];
 
     sprstr->texturearray[imgindex] = texture;
     sprstr->texbordxarray[imgindex] = (double) w/fullwidth;

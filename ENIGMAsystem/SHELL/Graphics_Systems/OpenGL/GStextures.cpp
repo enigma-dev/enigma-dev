@@ -23,6 +23,15 @@ using std::string;
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "binding.h"
 
+inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
+	x =  (x & -x) - 1;
+	x -= ((x >> 1) & 0x55555555);
+	x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
+	x =  ((x >> 4) + x) & 0x0f0f0f0f;
+	x += x >> 8;
+	return (x + (x >> 16)) & 63;
+}
+
 namespace enigma
 {
   bool interpolate_textures = false; //NOTE: set value here when game settings are used
@@ -47,10 +56,49 @@ namespace enigma
     return texture;
   }
 
-  void (graphics_delete_texture(int texture))
+  unsigned graphics_duplicate_texture(int tex)
   {
-    GLuint tex = texture;
-    glDeleteTextures(1, &tex);
+    GLuint texture = tex;
+    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+    glColor4f(1,1,1,1);
+    glDisable(GL_BLEND);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    int w, h;
+    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
+    char* bitmap = new char[(h<<(lgpp2(w)+2))|2];
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    unsigned dup_tex = graphics_create_texture(w, h, bitmap);
+    delete[] bitmap;
+    glPopAttrib();
+    return dup_tex;
+  }
+
+  unsigned graphics_create_texture_alpha_from_texture(int tex, int copy_tex)
+  {
+    GLuint texture = tex, copy_texture = copy_tex;
+    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+    glColor4f(1,1,1,1);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    int w, h;
+    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBindTexture(GL_TEXTURE_2D, copy_texture);
+    char* bitmap = new char[(h<<(lgpp2(w)+2))|2];
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    unsigned dup_tex = graphics_create_texture(w, h, bitmap);
+    delete[] bitmap;
+    glPopAttrib();
+    return dup_tex;
+  }
+
+  void graphics_delete_texture(int tex)
+  {
+    GLuint texture = tex;
+    glDeleteTextures(1, &texture);
   }
 
   //Retrieve image data from a texture, in unsigned char, RGBA format.

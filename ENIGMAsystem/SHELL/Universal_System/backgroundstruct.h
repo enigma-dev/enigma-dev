@@ -63,11 +63,15 @@ namespace enigma
 
   extern background** backgroundstructarray;
   void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep);
-  void background_add_to_index(enigma::background *nb, std::string filename, bool transparent, bool smoothEdges, bool preload);
+  void background_add_to_index(background *nb, std::string filename, bool transparent, bool smoothEdges, bool preload);
+  void background_add_copy(background *bak, background *bck_copy);
   void backgrounds_init();
 }
 
 int background_add(std::string filename, bool transparent = false, bool smooth = false, bool preload = false);
 bool background_replace(int back, std::string filename, bool transparent = false, bool smooth = false, bool preload = false, bool free_texture = true);
 void background_delete(int back, bool free_texture = true);
+int background_duplicate(int back);
+void background_assign(int back, int copy_background, bool free_texture = true);
 bool background_exists(int back);
+void background_set_alpha_from_background(int back, int copy_background, bool free_texture = true);

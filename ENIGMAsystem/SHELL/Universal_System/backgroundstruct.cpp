@@ -81,36 +81,49 @@ namespace enigma
     delete[] imgpxdata;
 
    backgroundstructarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
-	  enigma::background *bak = backgroundstructarray[bkgid];
+	  background *bak = backgroundstructarray[bkgid];
 	  bak->texbordx  = (double) w/fullwidth;
 	  bak->texbordy  = (double) h/fullheight;
 
   }
 
-  void background_add_to_index(enigma::background *bak, string filename, bool transparent, bool smoothEdges, bool preload)
+  void background_add_to_index(background *bak, string filename, bool transparent, bool smoothEdges, bool preload)
   {
     int w,h,fullwidth,fullheight;
 
-    char *pxdata = enigma::load_bitmap(filename,&w,&h,&fullwidth,&fullheight);
-    unsigned texture = enigma::graphics_create_texture(fullwidth, fullheight, pxdata);
+    char *pxdata = load_bitmap(filename,&w,&h,&fullwidth,&fullheight);
+    unsigned texture = graphics_create_texture(fullwidth, fullheight, pxdata);
     delete[] pxdata;
 
     bak->width = w;
     bak->height = h;
-    bak->texture = texture;
     bak->transparent = transparent;
     bak->smooth = smoothEdges;
     bak->preload = preload;
     bak->tileset = false;
     bak->texbordx = (double) w/fullwidth;
 	bak->texbordy = (double) h/fullheight;
+    bak->texture = texture;
+  }
+
+  void background_add_copy(background *bak, background *bck_copy)
+  {
+    bak->width = bck_copy->width;
+    bak->height = bck_copy->height;
+    bak->transparent = bck_copy->transparent;
+    bak->smooth = bck_copy->smooth;
+    bak->preload = bck_copy->preload;
+    bak->tileset = bck_copy->tileset;
+    bak->texbordx = bck_copy->texbordx;
+	bak->texbordy = bck_copy->texbordy;
+    bak->texture = graphics_duplicate_texture(bck_copy->texture);
   }
 
 	//Allocates and zero-fills the array at game start
 	void backgrounds_init()
 	{
-		backgroundstructarray = new background*[enigma::background_idmax+1];
-		for (unsigned i = 0; i < enigma::background_idmax; i++)
+		backgroundstructarray = new background*[background_idmax+1];
+		for (unsigned i = 0; i < background_idmax; i++)
 			backgroundstructarray[i] = NULL;
 	}
 }
@@ -142,7 +155,32 @@ void background_delete(int back, bool free_texture)
     enigma::backgroundstructarray[back] = NULL;
 }
 
+int background_duplicate(int back)
+{
+    enigma::background *bck_copy = enigma::backgroundstructarray[back], *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
+    enigma::background_add_copy(bck, bck_copy);
+	return enigma::background_idmax++;
+}
+
+void background_assign(int back, int copy_background, bool free_texture)
+{
+    enigma::background *bck = enigma::backgroundstructarray[back], *bck_copy = enigma::backgroundstructarray[copy_background];
+    if (free_texture)
+        enigma::graphics_delete_texture(bck->texture);
+
+    enigma::background_add_copy(bck, bck_copy);
+}
+
 bool background_exists(int back)
 {
     return unsigned(back) < enigma::background_idmax && bool(enigma::backgroundstructarray[back]);
+}
+
+void background_set_alpha_from_background(int back, int copy_background, bool free_texture)
+{
+    enigma::background *bck = enigma::backgroundstructarray[back], *bck_copy = enigma::backgroundstructarray[copy_background];
+    int nex_tex = enigma::graphics_create_texture_alpha_from_texture(bck->texture, bck_copy->texture);
+    if (free_texture)
+        enigma::graphics_delete_texture(bck->texture);
+    bck->texture = nex_tex;
 }
