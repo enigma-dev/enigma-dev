@@ -11,7 +11,7 @@
 
 #include "backend/JavaStruct.h"
 #include "backend/sub/SubImage.h"
-#include "backend/util/polygon.h"
+#include "backend/util/Polygon.h"
 
 struct Sprite
 {

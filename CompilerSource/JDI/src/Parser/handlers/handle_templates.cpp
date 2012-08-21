@@ -185,8 +185,9 @@ int context_parser::handle_template(definition_scope *scope, token_t& token, uns
       }
       else if (retemp->def == temp->def) {
         temp->def->parent = retemp->parent;
-        temp->def = NULL;
-        delete temp;
+        retemp->def = NULL;
+        i.def = temp;
+        delete retemp;
       }
       else {
         token.report_error(herr, "Cannot redeclare `" + temp->name + "' as template: invalid specialization");

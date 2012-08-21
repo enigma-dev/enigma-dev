@@ -132,9 +132,11 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
         }
         if (!(rdef->flags & DEF_TYPENAME)) {
           if (rdef->flags & DEF_TEMPLATE) {
-            if (((definition_template*)rdef)->def == scope)
+            // FIXME: This block is kind of a hack. In order to facilitate template constructors/destructors,
+            //        this section of code will return a non-typename definition. This has led to undefined behavior.
+            if (((definition_template*)rdef)->def == scope and token.type == TT_LEFTPARENTH)
               rdef = scope;
-            else if (scope->flags & DEF_TEMPSCOPE and ((definition_template*)rdef)->def == scope->parent)
+            else if (scope->flags & DEF_TEMPSCOPE and ((definition_template*)rdef)->def == scope->parent and token.type == TT_LEFTPARENTH)
               rdef = scope;
             else {
               token.report_error(herr, "Invalid use of template `" + rdef->name + "'");

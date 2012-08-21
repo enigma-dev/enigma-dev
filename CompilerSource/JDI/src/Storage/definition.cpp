@@ -361,7 +361,13 @@ namespace jdi {
         temp->def = def;
         return decpair(&temp->def, true);
       }
-      cerr << "Double declaration in a template scope";
+      if (def) {
+        cerr << "Double declaration in a template scope" << endl;
+        cerr << "First definition:" << endl;
+        cerr << temp->def->toString(-1,2);
+        cerr << endl << "New definition:" << endl;
+        cerr << def->toString(-1,2) << endl;
+      }
       return decpair(&temp->def, false);
     }
     inspair insp = members.insert(entry(n,def));
@@ -704,7 +710,9 @@ namespace jdi {
   string definition_typed::toString(unsigned, unsigned indent) {
     string res(indent, ' ');
     if (flags & DEF_TYPENAME) res += "typedef ";
-    res += typeflags_string(type, modifiers) + " " + referencers.toStringLHS() + name + referencers.toStringRHS() + ";";
+    res += type? typeflags_string(type, modifiers) : "<NULL>";
+    res += " ";
+    res += referencers.toStringLHS() + name + referencers.toStringRHS() + ";";
     return res;
   }
   string definition_union::toString(unsigned levels, unsigned indent) {

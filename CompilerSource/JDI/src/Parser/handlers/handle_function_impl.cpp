@@ -34,6 +34,10 @@ static void* code_ignorer(lexer *lex, token_t &token, definition_scope *, error_
       if (token.type == TT_LEFTBRACE) ++bc;
       else if (token.type == TT_RIGHTBRACE and !--bc) return NULL;
       token = lex->get_token(herr);
+      if (token.type == TT_ENDOFCODE) {
+        token.report_errorf(herr, "Expected closing brace to code before %s");
+        return NULL;
+      }
     }
   }
   else if (token.type == TT_ASM) {

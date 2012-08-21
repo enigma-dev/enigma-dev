@@ -42,20 +42,24 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
       case TT_CLASS: case TT_STRUCT: case TT_ENUM: case TT_UNION: case TT_TILDE:
           decl = NULL;
           handle_declarator_block:
-          if (handle_declarators(scope, token, inherited_flags, decl))
-            return 1;
+          if (handle_declarators(scope, token, inherited_flags, decl)) {
+            FATAL_RETURN(1);
+            while (token.type != TT_ENDOFCODE and token.type != TT_SEMICOLON and token.type != TT_LEFTBRACE and token.type != TT_RIGHTBRACE)
+              token = read_next_token(scope);
+          }
           handled_declarator_block:
           if (token.type != TT_SEMICOLON) {
             if (token.type == TT_LEFTBRACE || token.type == TT_ASM) {
               if (!(decl and decl->flags & DEF_FUNCTION)) {
                 token.report_error(herr, "Unexpected opening brace here; declaration is not a function");
-                return 1;
-              } else {
+                FATAL_RETURN(1);
+                handle_function_implementation(lex,token,scope,herr);
+              }
+              else
                 ((definition_function*)decl)->implementation = handle_function_implementation(lex,token,scope,herr);
-                if (token.type != TT_RIGHTBRACE && token.type != TT_SEMICOLON) {
-                  token.report_error(herr, "Expected closing symbol to function");
-                  continue;
-                }
+              if (token.type != TT_RIGHTBRACE && token.type != TT_SEMICOLON) {
+                token.report_error(herr, "Expected closing symbol to function");
+                continue;
               }
             }
             else {
@@ -63,6 +67,7 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
               #if FATAL_ERRORS
                 return 1;
               #else
+                semicolon_bail:
                 while (token.type != TT_SEMICOLON && token.type != TT_LEFTBRACE && token.type != TT_RIGHTBRACE && token.type != TT_ENDOFCODE)
                   token = read_next_token(scope);
                 if (token.type == TT_LEFTBRACE) {
@@ -255,8 +260,10 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
         } break;
       
       case TT_TEMPLATE:
-        if (handle_template(scope, token, inherited_flags))
-          return 1;
+        if (handle_template(scope, token, inherited_flags)) {
+          FATAL_RETURN(1);
+          goto semicolon_bail;
+        }
         break;
       
       case TT_OPERATORKW:

@@ -72,7 +72,7 @@ int main() {
   
   test_expression_evaluator();
   
-  #ifdef __WIN32__
+  #if 1
     builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++");
     builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++/mingw32");
     builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++/backward");
@@ -80,19 +80,30 @@ int main() {
     builtin->add_search_directory("c:\\mingw\\include");
     builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include-fixed");
     
-    llreader macro_reader("test/defines_mingw.txt");
+    llreader macro_reader("test/defines_custom.txt");
   #else
-    builtin->add_search_directory("/home/josh/Projects/ENIGMA/ENIGMAsystem/SHELL");
-    builtin->add_search_directory("/usr/include/c++/4.6");
-    builtin->add_search_directory("/usr/include/c++/4.6/x86_64-linux-gnu");
-    builtin->add_search_directory("/usr/include/c++/4.6/backward");
-    builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include");
-    builtin->add_search_directory("/usr/local/include");
-    builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include-fixed");
-    builtin->add_search_directory("/usr/include/x86_64-linux-gnu");
-    builtin->add_search_directory("/usr/include");
-    
-    llreader macro_reader("test/defines_linux.txt");
+    #ifdef __WIN32__
+      builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++");
+      builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++/mingw32");
+      builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++/backward");
+      builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include");
+      builtin->add_search_directory("c:\\mingw\\include");
+      builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include-fixed");
+      
+      llreader macro_reader("test/defines_mingw.txt");
+    #else
+      builtin->add_search_directory("/home/josh/Projects/ENIGMA/ENIGMAsystem/SHELL");
+      builtin->add_search_directory("/usr/include/c++/4.6");
+      builtin->add_search_directory("/usr/include/c++/4.6/x86_64-linux-gnu");
+      builtin->add_search_directory("/usr/include/c++/4.6/backward");
+      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include");
+      builtin->add_search_directory("/usr/local/include");
+      builtin->add_search_directory("/usr/lib/gcc/x86_64-linux-gnu/4.6/include-fixed");
+      builtin->add_search_directory("/usr/include/x86_64-linux-gnu");
+      builtin->add_search_directory("/usr/include");
+      
+      llreader macro_reader("test/defines_linux.txt");
+    #endif
   #endif
   
   if (macro_reader.is_open())
@@ -117,7 +128,7 @@ int main() {
     else
       cout << endl << "====[++++++++++++++++++++++++++++++ SUCCESS! ++++++++++++++++++++++++++++++]====" << endl << endl;
     
-    // do_cli(enigma);
+    do_cli(enigma);
     /*/
     macro_map m;
     lexer_cpp lex(f, m, "test.cc");
