@@ -80,7 +80,7 @@ void d3d_set_lighting(bool enable)
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)
-{
+{/*
   if (enable)
   {
     glEnable(GL_FOG);
@@ -93,7 +93,7 @@ void d3d_set_fog(bool enable, int color, double start, double end)
     fog_color[2] = __GETB(color);
     glFogfv(GL_FOG_COLOR,fog_color);
   }
-  else
+  else*/
     glDisable(GL_FOG);
 }//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
 
@@ -794,6 +794,7 @@ void d3d_light_define_ambient(int col)
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 
+#include "Universal_System/estring.h"
 class d3d_model
 {
     int something;
@@ -818,11 +819,14 @@ class d3d_model
 
     void save(string fname)
     {
-      /* */
-    }//removed save for now
+        if (fname.find_first_of("\\/") == -1)
+            fname = get_working_directory() + fname;
+    }//format needs to be decided on
 
-    bool load(string fname)
+    bool load(string fname)  //TODO: this needs to be rewritten properly not using the file_text functions
     {
+        if (fname.find_first_of("\\/") == -1)
+            fname = get_working_directory() + fname;
         int file = file_text_open_read(fname);
         if (file == -1)
             return false;
@@ -830,7 +834,7 @@ class d3d_model
         if (something != 100)
             return false;
         file_text_readln(file);
-        /*int calls = FIXME: POLYFUCK */file_text_read_real(file);
+        file_text_read_real(file);  //don't see the use in this value, it doesn't equal the number of calls left exactly
         file_text_readln(file);
         int kind;
         float v[3], n[3], t[2];

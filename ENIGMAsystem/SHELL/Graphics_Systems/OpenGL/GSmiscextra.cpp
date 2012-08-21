@@ -30,8 +30,12 @@ using namespace std;
 extern int window_get_width();
 extern int window_get_height();
 
+#include "Universal_System/estring.h"
+
 int screen_save(string filename) //Assumes native integers are little endian
 {
+    if (filename.find_first_of("\\/") == -1)
+        filename = get_working_directory() + filename;
 	unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
 	FILE *bmp = fopen(filename.c_str(),"wb");
 	if(!bmp) return -1;
@@ -66,6 +70,8 @@ int screen_save(string filename) //Assumes native integers are little endian
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
+    if (filename.find_first_of("\\/") == -1)
+        filename = get_working_directory() + filename;
 	unsigned sz = w * h;
 	FILE *bmp=fopen(filename.c_str(), "wb");
 	if (!bmp) return -1;

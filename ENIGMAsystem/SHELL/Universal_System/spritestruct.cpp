@@ -25,6 +25,7 @@ using namespace std;
 #include "spritestruct.h"
 #include "libEGMstd.h"
 #include "IMGloading.h"
+#include "estring.h"
 
 namespace enigma {
   sprite** spritestructarray;
@@ -35,6 +36,8 @@ namespace enigma {
 
 int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
 {
+    if (filename.find_first_of("\\/") == -1)
+        filename = get_working_directory() + filename;
 	enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
 	return enigma::sprite_idmax++;
@@ -42,6 +45,8 @@ int sprite_add(string filename, int imgnumb, bool precise, bool transparent, boo
 
 int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
 {
+    if (filename.find_first_of("\\/") == -1)
+        filename = get_working_directory() + filename;
 	enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
 	return enigma::sprite_idmax++;
@@ -49,6 +54,22 @@ int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int 
 
 bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture)
 {
+    if (filename.find_first_of("\\/") == -1)
+        filename = get_working_directory() + filename;
+    enigma::sprite *spr = enigma::spritestructarray[ind];
+    if (free_texture)
+        for (int ii = 0; ii < spr->subcount; ii++)
+            enigma::graphics_delete_texture(spr->texturearray[ii]);
+
+    delete[] spr->texturearray, spr->texbordxarray, spr->texbordyarray;
+    enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
+    return true;
+}
+
+bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture)
+{
+    if (filename.find_first_of("\\/") == -1)
+        filename = get_working_directory() + filename;
     enigma::sprite *spr = enigma::spritestructarray[ind];
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
@@ -64,18 +85,6 @@ void sprite_set_offset(int ind, int xoff, int yoff)
     enigma::sprite *spr = enigma::spritestructarray[ind];
     spr->xoffset = xoff;
     spr->yoffset = yoff;
-}
-
-bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture)
-{
-    enigma::sprite *spr = enigma::spritestructarray[ind];
-    if (free_texture)
-        for (int ii = 0; ii < spr->subcount; ii++)
-            enigma::graphics_delete_texture(spr->texturearray[ii]);
-
-    delete[] spr->texturearray, spr->texbordxarray, spr->texbordyarray;
-    enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
-    return true;
 }
 
 void sprite_delete(int ind, bool free_texture)

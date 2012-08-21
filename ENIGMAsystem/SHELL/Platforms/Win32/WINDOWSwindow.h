@@ -107,3 +107,7 @@ int window_get_fullscreen();
 
 void game_end();
 void action_end_game();
+
+string clipboard_get_text();
+void clipboard_set_text(string text);
+bool clipboard_has_text();

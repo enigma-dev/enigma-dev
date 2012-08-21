@@ -39,6 +39,7 @@ using namespace std;
 #include "compiler/compile_common.h"
 
 int global_script_argument_count = 0;
+extern string string_replace_all(string str,string substr,string nstr);
 
 int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
 {
@@ -52,8 +53,21 @@ int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
       wto << "variant argument0 = 0";
       for (int i = 1; i < global_script_argument_count; i++)
         wto << ", argument" << i << " = 0";
-      wto << ";\n\n";
+      wto << ";\n";
     }
+
+    string s;
+    if (!es->filename)
+        s = "";
+    else
+    {
+        s = es->filename;
+        s = s.substr(0, s.find_last_of("/"));
+        s = s.substr(s.find("file:/",0) + 6);
+        s = string_replace_all(s, "/", "\\\\");
+        s = string_replace_all(s, "%20", " ");
+    }
+    wto << "string working_directory = \"" << s << "\";" << endl;
 
     for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
       wto << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;

@@ -721,3 +721,50 @@ void mouse_clear(const int button)
 {
     enigma::mousestatus[button] = enigma::last_mousestatus[button] = 0;
 }
+
+string clipboard_get_text()
+{
+  if (!OpenClipboard(enigma::hWndParent)) return "";
+  unsigned int format=EnumClipboardFormats(0);
+  string res = "";
+  while (format) {
+    if (format == CF_TEXT)
+    {
+      HGLOBAL clip_data = GetClipboardData(format);
+      char* clip_text = (char*)GlobalLock(clip_data);
+      if (clip_text)
+      {
+        unsigned long clip_size = GlobalSize(clip_data) - 1;
+        if (clip_size)
+          res = string(clip_text,clip_size);
+        GlobalUnlock(clip_data); //Give Windows back its clipdata
+      }
+    }
+    format=EnumClipboardFormats(format);  //Next
+  }
+  CloseClipboard();
+  return res;
+}
+
+void clipboard_set_text(string text)
+{
+	HGLOBAL hGlobal, hgBuffer;
+	if (!OpenClipboard(enigma::hWndParent)) return;
+	EmptyClipboard();
+	hGlobal = GlobalAlloc(GMEM_DDESHARE, text.length() + 1);
+	hgBuffer = GlobalLock(hGlobal);
+    strcpy((char*)hgBuffer, text.c_str());
+    GlobalUnlock(hGlobal);
+	SetClipboardData(CF_TEXT, (HANDLE)hGlobal);
+	CloseClipboard();
+}
+
+bool clipboard_has_text()
+{
+    if (!OpenClipboard(enigma::hWndParent))
+        return false;
+
+    bool value = GetClipboardData(CF_TEXT);
+    CloseClipboard();
+    return value;
+}

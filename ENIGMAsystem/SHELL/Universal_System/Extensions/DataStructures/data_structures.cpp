@@ -51,31 +51,35 @@ class grid
     grid(const unsigned int w, const unsigned int h) {ygrid = h; xgrid = w; grid_array = new t[h*w];}
     ~grid() {}
 
+    void destroy()
+    {
+        delete[] grid_array;
+    }
     void clear(const t val)
     {
         for (unsigned i = 0; i < ygrid; i++)
-        {
             for (unsigned ii = 0; ii < xgrid; ii++)
-            {
                 grid_array[i * xgrid + ii] = val;
-            }
-        }
     }
-    void resize(const grid& grid_id, const unsigned int grid_w, const unsigned int grid_h, const unsigned int w, const unsigned int h)
+    void resize(unsigned w, unsigned h)
     {
-        grid<variant> temp(0, 0);
-        temp = grid_id;
-        xgrid = w;
-        ygrid = h;
-        grid_array = new t[h*w];
-        const unsigned int wm = minv(grid_w, w), hm = minv(grid_h, h);
+        grid<variant> temp(w, h);
+        const unsigned int wm = minv(xgrid, w), hm = minv(ygrid, h);
         for (unsigned i = 0; i < hm; i++)
-        {
             for (unsigned ii = 0; ii < wm; ii++)
-            {
-                grid_array[i * xgrid + ii] = temp.grid_array[i * grid_w + ii];
-            }
-        }
+                temp.grid_array[i * w + ii] = grid_array[i * xgrid + ii];
+        delete[] grid_array;
+        (*this) = temp;
+    }
+    void copy(const grid& copy_id)
+    {
+        delete[] grid_array;
+        grid_array = new t[copy_id.ygrid*copy_id.xgrid];
+        xgrid = copy_id.xgrid;
+        ygrid = copy_id.ygrid;
+        for (unsigned i = 0; i < ygrid; i++)
+            for (unsigned ii = 0; ii < xgrid; ii++)
+                grid_array[i * xgrid + ii] = grid_array[i * copy_id.xgrid + ii];
     }
     unsigned int width()
     {
@@ -88,23 +92,17 @@ class grid
     void insert(const unsigned int x, const unsigned int y, const t val)
     {
         if (x < xgrid && y < ygrid)
-        {
             grid_array[y * xgrid + x] = val;
-        }
     }
     void add(const unsigned int x, const unsigned int y, const t val)
     {
         if (x < xgrid && y < ygrid)
-        {
             grid_array[y * xgrid + x] += val;
-        }
     }
     void multiply(const unsigned int x, const unsigned int y, const double val)
     {
         if (x < xgrid && y < ygrid)
-        {
             grid_array[y * xgrid + x] *= val;
-        }
     }
     void insert_region(const unsigned int x1, const unsigned int y1, unsigned int x2, const unsigned int y2, const t val)
     {
@@ -113,12 +111,8 @@ class grid
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
-               {
                    grid_array[i * xgrid + ii] = val;
-               }
-           }
        }
     }
     void add_region(const unsigned int x1, const unsigned int y1, unsigned int x2, const unsigned int y2, const t val)
@@ -128,12 +122,8 @@ class grid
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
-               {
                    grid_array[i * xgrid + ii] += val;
-               }
-           }
        }
     }
     void multiply_region(const unsigned int x1, const unsigned int y1, unsigned int x2, const unsigned int y2, const double val)
@@ -143,12 +133,8 @@ class grid
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
-               {
                    grid_array[i * xgrid + ii] *= val;
-               }
-           }
        }
     }
     void insert_disk(const double x, const double y, const double r, const t val)
@@ -159,15 +145,9 @@ class grid
         {
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                    {
                         grid_array[i * xgrid + ii] = val;
-                    }
-                }
-            }
         }
     }
     void add_disk(const double x, const double y, const double r, const t val)
@@ -178,15 +158,9 @@ class grid
         {
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                    {
                         grid_array[i * xgrid + ii] += val;
-                    }
-                }
-            }
         }
     }
     void multiply_disk(const double x, const double y, const double r, const double val)
@@ -197,15 +171,9 @@ class grid
         {
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                    {
                         grid_array[i * xgrid + ii] *= val;
-                    }
-                }
-            }
         }
     }
     void insert_grid_region(const grid& source_id, const unsigned int sx1, const unsigned int sy1, const unsigned int sx2, const unsigned int sy2, const unsigned int x, const unsigned int y)
@@ -217,12 +185,8 @@ class grid
             {
                 const int upx = minv(tx2 - tx1 + 1, minv(xgrid - x, xd)), upy = minv(ty2 - ty1 + 1, minv(ygrid - y, yd));
                 for (int i = 0; i < upy; i++)
-                {
                     for (int ii = 0; ii < upx; ii++)
-                    {
                         grid_array[(x + i)*xgrid + (y + ii)] = source_id.grid_array[(tx1 + i)*source_id.xgrid + (ty1 + ii)];
-                    }
-                }
             }
         }
     }
@@ -235,12 +199,8 @@ class grid
             {
                 const int upx = minv(tx2 - tx1 + 1, minv(xgrid - x, xd)), upy = minv(ty2 - ty1 + 1, minv(ygrid - y, yd));
                 for (int i = 0; i < upy; i++)
-                {
                     for (int ii = 0; ii < upx; ii++)
-                    {
                         grid_array[(x + i)*xgrid + (y + ii)] += source_id.grid_array[(tx1 + i)*source_id.xgrid + (ty1 + ii)];
-                    }
-                }
             }
         }
     }
@@ -253,12 +213,8 @@ class grid
             {
                 const int upx = minv(tx2 - tx1 + 1, minv(xgrid - x, xd)), upy = minv(ty2 - ty1 + 1, minv(ygrid - y, yd));
                 for (int i = 0; i < upy; i++)
-                {
                     for (int ii = 0; ii < upx; ii++)
-                    {
                         grid_array[(x + i)*xgrid + (y + ii)] *= source_id.grid_array[(tx1 + i)*source_id.xgrid + (ty1 + ii)];
-                    }
-                }
             }
         }
     }
@@ -275,12 +231,8 @@ class grid
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            variant sum = 0;
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
-               {
                    sum += grid_array[i * xgrid + ii];
-               }
-           }
            return sum;
        }
        return variant(0);
@@ -288,21 +240,18 @@ class grid
     t find_region_max(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
     {
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
+       double val_check;
        if (xd > 0 && yd > 0)
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            double max_check = DBL_MIN;
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
                {
-                   const double val_check = grid_array[i * xgrid + ii];
+                   val_check = grid_array[i * xgrid + ii];
                    if (val_check > max_check)
-                   {
                        max_check = val_check;
-                   }
                }
-           }
            return ((max_check == DBL_MIN) ? variant(0) : variant(max_check));
        }
        return variant(0);
@@ -310,21 +259,18 @@ class grid
     t find_region_min(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
     {
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
+       double val_check;
        if (xd > 0 && yd > 0)
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            double min_check = DBL_MAX;
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
                {
-                   const double val_check = grid_array[i * xgrid + ii];
+                   val_check = grid_array[i * xgrid + ii];
                    if (val_check < min_check)
-                   {
                        min_check = val_check;
-                   }
                }
-           }
            return ((min_check == DBL_MAX) ? variant(0) : variant(min_check));
        }
        return variant(0);
@@ -337,12 +283,8 @@ class grid
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            double sum = 0;
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
-               {
                    sum += grid_array[i * xgrid + ii];
-               }
-           }
            const double region_size = (py2 - py1)*(px2 - px1);
            return ((region_size == 0) ? variant(0) : variant(sum/region_size));
        }
@@ -357,15 +299,9 @@ class grid
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             variant sum = 0;
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                    {
                         sum += grid_array[i * xgrid + ii];
-                    }
-                }
-            }
             return sum;
         }
         return variant(0);
@@ -379,19 +315,13 @@ class grid
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             double max_check = DBL_MIN;
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
                     {
                         const double val_check = grid_array[i * xgrid + ii];
                         if (val_check > max_check)
-                        {
                             max_check = val_check;
-                        }
                     }
-                }
-            }
             return ((max_check == DBL_MIN) ? variant(0) : variant(max_check));
         }
         return variant(0);
@@ -405,19 +335,13 @@ class grid
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             double min_check = DBL_MAX;
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
                     {
                         const double val_check = grid_array[i * xgrid + ii];
                         if (val_check < min_check)
-                        {
                             min_check = val_check;
-                        }
                     }
-                }
-            }
             return ((min_check == DBL_MAX) ? variant(0) : variant(min_check));
         }
         return variant(0);
@@ -431,16 +355,12 @@ class grid
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             double sum = 0, region_size = 0;
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
                     {
                         sum += grid_array[i * xgrid + ii];
                         region_size++;
                     }
-                }
-            }
            return ((region_size == 0) ? variant(0) : variant(sum/region_size));
         }
         return variant(0);
@@ -452,15 +372,9 @@ class grid
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
-               {
                    if (grid_array[i * xgrid + ii] == val)
-                   {
                        return true;
-                   }
-               }
-           }
        }
        return false;
     }
@@ -471,15 +385,9 @@ class grid
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
-               {
                    if (grid_array[i * xgrid + ii] == val)
-                   {
                        return ii;
-                   }
-               }
-           }
        }
        return 0;
     }
@@ -490,15 +398,9 @@ class grid
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            for (int i = py1; i < py2; i++)
-           {
                for (int ii = px1; ii < px2; ii++)
-               {
                    if (grid_array[i * xgrid + ii] == val)
-                   {
                        return i;
-                   }
-               }
-           }
        }
        return 0;
     }
@@ -510,18 +412,10 @@ class grid
         {
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                    {
                         if (grid_array[i * xgrid + ii] == val)
-                        {
                             return true;
-                        }
-                    }
-                }
-            }
         }
         return false;
     }
@@ -533,18 +427,10 @@ class grid
         {
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                    {
                         if (grid_array[i * xgrid + ii] == val)
-                        {
                             return i;
-                        }
-                    }
-                }
-            }
         }
         return 0;
     }
@@ -556,18 +442,10 @@ class grid
         {
             const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
             for (int i = py1; i < py2; i++)
-            {
                 for (int ii = px1; ii < px2; ii++)
-                {
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                    {
                         if (grid_array[i * xgrid + ii] == val)
-                        {
                             return ii;
-                        }
-                    }
-                }
-            }
         }
         return 0;
     }
@@ -592,6 +470,7 @@ unsigned int ds_grid_create(const unsigned int w, const unsigned int h)
 void ds_grid_destroy(const unsigned int id)
 {
     //Destroys the grid
+    ds_grids[id].destroy();
     ds_grids.erase(ds_grids.find(id));
 }
 
@@ -604,12 +483,12 @@ void ds_grid_clear(const unsigned int id, const variant val)
 void ds_grid_copy(const unsigned int id, const unsigned int source)
 {
     //Copies the source grid onto the grid
-    ds_grids[id] = ds_grids[source];
+    ds_grids[id].copy(ds_grids[source]);
 }
 
 void ds_grid_resize(const unsigned int id, const unsigned int w, const unsigned int h)
 {
-    ds_grids[id].resize(ds_grids[id], ds_grids[id].width(), ds_grids[id].height(), w, h);
+    ds_grids[id].resize(w, h);
 }
 
 
@@ -802,8 +681,8 @@ bool ds_grid_exists(const unsigned int id)
 unsigned int ds_grid_duplicate(const unsigned int source)
 {
     //creates and returns a new grid containing a copy of the source grid
-    ds_grids.insert(pair<unsigned int, grid<variant> >(ds_grids_maxid++, grid<variant>(ds_grids[source].width(), ds_grids[source].height())));
-    ds_grids[ds_grids_maxid-1] = ds_grids[source];
+    ds_grids.insert(pair<unsigned int, grid<variant> >(ds_grids_maxid++, grid<variant>(0, 0)));
+    ds_grids[ds_grids_maxid-1].copy(ds_grids[source]);
     return ds_grids_maxid-1;
 }
 
