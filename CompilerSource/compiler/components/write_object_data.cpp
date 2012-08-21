@@ -411,13 +411,20 @@ int compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
     wto << "namespace enigma\n{\n"
     "  callable_script callable_scripts[] = {\n";
+    int scr_count = 0;
     for (int i = 0; i < es->scriptCount; i++)
     {
-      if (es->scripts[i].id < i) cout << "ERROR! Why the HELL does this script have a lower ID than the last one sent?" << endl;
-      else if (es->scripts[i].id > i) wto << "    { NULL, -1 },\n";
-      else wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " },\n";
+      while (es->scripts[i].id > scr_count)
+      {
+          wto << "    { NULL, -1 },\n";
+          scr_count++;
+      }
+      scr_count++;
+      wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " },\n";
     }
     wto << "  };\n  \n";
+
+    wto << "  int script_idmax = " << scr_count << ";\n \n";
 
     cout << "DBGMSG 8" << endl;
     wto << "  void constructor(object_basic* instance_b)\n  {\n"
