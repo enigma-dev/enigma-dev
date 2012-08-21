@@ -33,6 +33,7 @@ using std::string;
 #include "WINDOWScallback.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/estring.h"
 #include "WINDOWSwindow.h"
 #include "WINDOWSmain.h"
 
@@ -182,6 +183,65 @@ string parameter_string(int x)
 int parameter_count()
 {
   return enigma::main_argc;
+}
+
+unsigned long long disk_size(std::string drive)
+{
+	DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
+	
+	if (drive.length() == 1)
+		drive += ":\\";
+	
+	if (!GetDiskFreeSpace((drive == "") ? NULL : drive.c_str(), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
+		return 0;
+	
+	return (unsigned long long)(totalClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector;
+}
+
+unsigned long long disk_free(std::string drive)
+{
+	DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
+	
+	if (drive.length() == 1)
+		drive += ":\\";
+	
+	if (!GetDiskFreeSpace((drive == "") ? NULL : drive.c_str(), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
+		return 0;
+	
+	return ((unsigned long long)(totalClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector) -
+				((unsigned long long)(freeClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector);
+}
+
+void set_program_priority(int value)
+{
+	// Need to add PROCESS_SET_INFORMATION permission to thread's access rights, not sure how
+	
+	DWORD priorityValue = NORMAL_PRIORITY_CLASS;
+	if (value == -1 || value == -2)
+		priorityValue = BELOW_NORMAL_PRIORITY_CLASS;
+	else if (value == -3)
+		priorityValue = IDLE_PRIORITY_CLASS;
+	else if (value == 1)
+		priorityValue = ABOVE_NORMAL_PRIORITY_CLASS;
+	else if (value == 2)
+		priorityValue = HIGH_PRIORITY_CLASS;
+	else if (value == 3)
+		priorityValue = REALTIME_PRIORITY_CLASS;
+	
+	SetPriorityClass(GetCurrentThread(), priorityValue);
+}
+
+void execute_shell(std::string fname, std::string args)
+{
+	ShellExecute(enigma::hWndParent, NULL, fname.c_str(), args.c_str(), get_working_directory().c_str(), SW_SHOW);
+}
+
+std::string environment_get_variable(std::string name)
+{
+	std::string value(1024, '\x00');
+	GetEnvironmentVariable((LPCTSTR)name.c_str(), (LPTSTR)value.data(), 1024);
+	
+	return value;
 }
 
 void registry_write_string(std::string name, std::string str)
