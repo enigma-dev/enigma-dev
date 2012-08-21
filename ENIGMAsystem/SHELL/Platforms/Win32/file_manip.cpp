@@ -26,10 +26,74 @@
 \********************************************************************************/
 
 #include <string>
+#include <sstream>
 #include <windows.h>
 #include "Universal_System/estring.h"
 
 using namespace std;
+
+static std::string iniFilename = "";
+
+void ini_open(std::string fname)
+{
+	if (fname.find_first_of("\\/") == -1)
+		iniFilename = get_working_directory() + fname;
+	else
+		iniFilename = fname;
+}
+
+void ini_close()
+{
+	iniFilename = "";
+}
+
+std::string ini_read_string(std::string section, std::string key, std::string defaultValue)
+{
+	string value(1024, ' ');
+	GetPrivateProfileString(section.c_str(), key.c_str(), defaultValue.c_str(), (LPSTR)value.data(), 1024, iniFilename.c_str());
+	
+	return value;
+}
+
+int ini_read_real(std::string section, std::string key, int defaultValue)
+{
+	return GetPrivateProfileInt(section.c_str(), key.c_str(), defaultValue, iniFilename.c_str());
+}
+
+void ini_write_string(std::string section, std::string key, std::string value)
+{
+	WritePrivateProfileString(section.c_str(), key.c_str(), value.c_str(), iniFilename.c_str());
+}
+
+void ini_write_real(std::string section, std::string key, int value)
+{
+	std::stringstream ss;
+	ss << value;
+	
+	WritePrivateProfileString(section.c_str(), key.c_str(), ss.str().c_str(), iniFilename.c_str());
+}
+
+bool ini_key_exists(std::string section, std::string key)
+{
+	string value(1024, ' ');
+	return GetPrivateProfileString(section.c_str(), key.c_str(), "", (LPSTR)value.data(), 1024, iniFilename.c_str()) != 0;
+}
+
+bool ini_section_exists(std::string section)
+{
+	string value(1024, ' ');
+	return GetPrivateProfileSection(section.c_str(), (LPTSTR)value.data(), 1024, iniFilename.c_str()) != 0;
+}
+
+void ini_key_delete(std::string section, std::string key)
+{
+	
+}
+
+void ini_section_delete(std::string section)
+{
+	
+}
 
 /* OS Specific; should be moved */
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="win-debug" />
+	<File name="Audio_Systems\OpenAL\as_basic.cpp" open="1" top="0" tabpos="7">
+		<Cursor position="1096" topLine="0" />
+	</File>
+	<File name="Platforms\Win32\WINDOWSStd.h" open="1" top="0" tabpos="6">
+		<Cursor position="2452" topLine="0" />
+	</File>
+	<File name="Platforms\Win32\WINDOWSstd.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="3911" topLine="57" />
+	</File>
+	<File name="Platforms\Win32\file_manip.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="2249" topLine="0" />
+	</File>
+	<File name="Preprocessor_Environment_Editable\IDE_EDIT_roomcreates.h" open="0" top="0" tabpos="0">
+		<Cursor position="2361" topLine="0" />
+	</File>
+	<File name="libEGMstd.h" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="20" />
+	</File>
+</CodeBlocks_layout_file>

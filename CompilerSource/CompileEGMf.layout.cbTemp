@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="WinRelease" />
+	<File name="backend\ideprint.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="2239" topLine="0" />
+	</File>
+	<File name="cfile_parse\cfile_parse.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="2280" topLine="0" />
+	</File>
+	<File name="compiler\compile.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="1846" topLine="0" />
+	</File>
+</CodeBlocks_layout_file>
