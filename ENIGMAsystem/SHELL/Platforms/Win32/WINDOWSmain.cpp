@@ -40,6 +40,8 @@ using std::string;
 extern unsigned int game_id;
 static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
 
+unsigned long long window_handle;
+
 namespace enigma //TODO: Find where this belongs
 {
   HINSTANCE hInstance;
@@ -133,6 +135,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         //Create a child window to put into that
         enigma::hWnd = CreateWindow ("TSub", "", WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
 
+	window_handle = (unsigned long long)enigma::hWnd;
 
     enigma::EnableDrawing (&hRC);
     enigma::initialize_everything();

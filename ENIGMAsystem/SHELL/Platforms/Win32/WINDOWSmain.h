@@ -19,6 +19,8 @@
 **  *|
 \****/
 
+extern unsigned long long window_handle;
+
 string parameter_string(int x);
 int parameter_count();
 
