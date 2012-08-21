@@ -21,11 +21,12 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
 namespace enigma
 {
   void input_push();
+  void input_initialize();
 }

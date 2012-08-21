@@ -29,6 +29,7 @@
 using std::string;
 #include <windows.h>
 #include "WINDOWSwindow.h"
+#include "WINDOWScallback.h"
 
 #ifndef WM_MOUSEHWHEEL
   #define WM_MOUSEHWHEEL 0x020E
@@ -64,6 +65,23 @@ namespace enigma
             return 0;
 
         case WM_SIZE:
+            return 0;
+
+        case WM_SETFOCUS:
+            input_initialize();
+            return 0;
+
+        case WM_KILLFOCUS:
+            for (int i = 0; i < 255; i++)
+            {
+                last_keybdstatus[i] = keybdstatus[i];
+                keybdstatus[i] = 0;
+            }
+            for(int i=0; i < 3; i++)
+            {
+                last_mousestatus[i] = mousestatus[i];
+                mousestatus[i] = 0;
+            }
             return 0;
 
         case WM_ENTERSIZEMOVE:
