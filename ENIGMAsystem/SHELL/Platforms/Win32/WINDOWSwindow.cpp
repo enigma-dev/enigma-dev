@@ -42,6 +42,8 @@ using namespace std;
 
 #include <stdio.h>
 
+static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0, displayInitialBitdepth = 0, displayInitialFrequency = 0;
+
 namespace enigma
 {
     extern HWND hWnd,hWndParent;
@@ -416,6 +418,195 @@ int display_get_height()
 {
    return GetSystemMetrics(SM_CYSCREEN);
 }
+
+int display_get_colordepth()
+{
+	return GetDeviceCaps(GetDC(enigma::hWnd), BITSPIXEL);
+}
+
+int display_get_frequency()
+{
+	return GetDeviceCaps(GetDC(enigma::hWnd), VREFRESH);
+}
+
+void display_reset()
+{
+	DEVMODE devMode;
+	
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return;
+	
+	if (displayInitialBitdepth != 0)
+	{
+		devMode.dmFields |= DM_BITSPERPEL;
+		devMode.dmBitsPerPel = displayInitialBitdepth;
+	}
+	
+	if (displayInitialFrequency != 0)
+	{
+		devMode.dmFields |= DM_DISPLAYFREQUENCY;
+		devMode.dmDisplayFrequency = displayInitialFrequency;
+	}
+	
+	if (displayInitialResolutionWidth != 0)
+	{
+		devMode.dmFields |= DM_PELSWIDTH;
+		devMode.dmPelsWidth = displayInitialResolutionWidth;
+	}
+	
+	if (displayInitialResolutionHeight != 0)
+	{
+		devMode.dmFields |= DM_PELSHEIGHT;
+		devMode.dmPelsHeight = displayInitialResolutionHeight;
+	}
+	
+	ChangeDisplaySettings(&devMode, 0);
+}
+
+void display_set_colordepth(int depth)
+{
+	DEVMODE devMode;
+	
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return;
+	
+	if (displayInitialBitdepth == 0)
+		displayInitialBitdepth = devMode.dmBitsPerPel;
+	
+	devMode.dmFields = DM_BITSPERPEL;
+	devMode.dmBitsPerPel = depth;
+	
+	ChangeDisplaySettings(&devMode, 0);
+}
+
+void display_set_size(int w, int h)
+{
+	DEVMODE devMode;
+	
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return;
+	
+	if (displayInitialResolutionWidth == 0)
+		displayInitialResolutionWidth = devMode.dmPelsWidth;
+	
+	if (displayInitialResolutionHeight == 0)
+		displayInitialResolutionHeight = devMode.dmPelsHeight;
+	
+	devMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+	devMode.dmPelsWidth = w;
+	devMode.dmPelsHeight = h;
+	
+	ChangeDisplaySettings(&devMode, 0);
+}
+
+void display_set_frequency(int freq)
+{
+	DEVMODE devMode;
+	
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return;
+	
+	if (displayInitialFrequency == 0)
+		displayInitialFrequency = devMode.dmBitsPerPel;
+	
+	devMode.dmFields = DM_DISPLAYFREQUENCY;
+	devMode.dmDisplayFrequency = freq;
+	
+	ChangeDisplaySettings(&devMode, 0);
+}
+
+bool display_set_all(int w, int h, int freq, int bitdepth)
+{
+	DEVMODE devMode;
+
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return false;
+	
+	if (w != -1)
+	{
+		if (displayInitialResolutionWidth == 0)
+			displayInitialResolutionWidth = devMode.dmPelsWidth;
+		
+		devMode.dmFields |= DM_PELSWIDTH;
+		devMode.dmPelsWidth = w;
+	}
+	
+	if (h != -1)
+	{
+		if (displayInitialResolutionHeight == 0)
+			displayInitialResolutionHeight = devMode.dmPelsHeight;
+		
+		devMode.dmFields |= DM_PELSHEIGHT;
+		devMode.dmPelsHeight = h;
+	}
+	
+	if (freq != -1)
+	{
+		if (displayInitialFrequency == 0)
+			displayInitialFrequency = devMode.dmDisplayFrequency;
+		
+		devMode.dmFields |= DM_DISPLAYFREQUENCY;
+		devMode.dmDisplayFrequency = freq;
+	}
+	
+	if (bitdepth != -1)
+	{
+		if (displayInitialBitdepth == 0)
+			displayInitialBitdepth = devMode.dmBitsPerPel;
+		
+		devMode.dmFields |= DM_BITSPERPEL;
+		devMode.dmBitsPerPel = bitdepth;
+	}
+	
+	return ChangeDisplaySettings(&devMode, 0) == DISP_CHANGE_SUCCESSFUL;
+}
+
+bool display_test_all(int w, int h, int freq, int bitdepth)
+{
+	DEVMODE devMode;
+
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return false;
+	
+	if (w != -1)
+	{
+		if (displayInitialResolutionWidth == 0)
+			displayInitialResolutionWidth = devMode.dmPelsWidth;
+		
+		devMode.dmFields |= DM_PELSWIDTH;
+		devMode.dmPelsWidth = w;
+	}
+	
+	if (h != -1)
+	{
+		if (displayInitialResolutionHeight == 0)
+			displayInitialResolutionHeight = devMode.dmPelsHeight;
+		
+		devMode.dmFields |= DM_PELSHEIGHT;
+		devMode.dmPelsHeight = h;
+	}
+	
+	if (freq != -1)
+	{
+		if (displayInitialFrequency == 0)
+			displayInitialFrequency = devMode.dmDisplayFrequency;
+		
+		devMode.dmFields |= DM_DISPLAYFREQUENCY;
+		devMode.dmDisplayFrequency = freq;
+	}
+	
+	if (bitdepth != -1)
+	{
+		if (displayInitialBitdepth == 0)
+			displayInitialBitdepth = devMode.dmBitsPerPel;
+		
+		devMode.dmFields |= DM_BITSPERPEL;
+		devMode.dmBitsPerPel = bitdepth;
+	}
+	
+	return ChangeDisplaySettings(&devMode, CDS_TEST) == DISP_CHANGE_SUCCESSFUL;
+}
+
 int window_mouse_get_x()
 {
     RECT window;

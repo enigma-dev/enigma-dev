@@ -95,6 +95,15 @@ int display_mouse_get_y();
 void display_mouse_set(int x,int y);
 int display_get_width();
 int display_get_height();
+int display_get_colordepth();
+int display_get_frequency();
+void display_reset();
+void display_set_colordepth(int depth);
+void display_set_size(int w, int h);
+void display_set_frequency(int freq);
+bool display_set_all(int w, int h, int freq, int bitdepth);
+bool display_test_all(int w, int h, int freq, int bitdepth);
+
 int window_mouse_get_x();
 int window_mouse_get_y();
 int window_view_mouse_get_x(int id);
