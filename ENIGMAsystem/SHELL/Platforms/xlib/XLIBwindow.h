@@ -72,17 +72,13 @@ void display_mouse_set(double x,double y);
 int window_get_x();
 int window_get_y();
 
-#ifndef PLATFORMS_MANDATORY__H
 int window_get_width();
 int window_get_height();
-#endif
 
 //Setters
 void window_set_position(int x,int y);
 void window_set_rectangle(int x,int y,int w,int h);
-#ifndef PLATFORMS_MANDATORY__H
 void window_set_size(unsigned int w,unsigned int h);
-#endif
 
 //Center
 void window_center();

@@ -36,7 +36,7 @@ static std::string iniFilename = "";
 
 void ini_open(std::string fname)
 {
-	if (fname.find_first_of("\\/") == -1)
+	if (fname.find_first_of("\\/") == string::npos)
 		iniFilename = get_working_directory() + fname;
 	else
 		iniFilename = fname;
@@ -51,7 +51,7 @@ std::string ini_read_string(std::string section, std::string key, std::string de
 {
 	string value(1024, '\x00');
 	GetPrivateProfileString(section.c_str(), key.c_str(), defaultValue.c_str(), (LPSTR)value.data(), 1024, iniFilename.c_str());
-	
+
 	return value;
 }
 
@@ -69,7 +69,7 @@ void ini_write_real(std::string section, std::string key, int value)
 {
 	std::stringstream ss;
 	ss << value;
-	
+
 	WritePrivateProfileString(section.c_str(), key.c_str(), ss.str().c_str(), iniFilename.c_str());
 }
 
@@ -87,18 +87,18 @@ bool ini_section_exists(std::string section)
 
 void ini_key_delete(std::string section, std::string key)
 {
-	
+
 }
 
 void ini_section_delete(std::string section)
 {
-	
+
 }
 
 /* OS Specific; should be moved */
 
 int file_exists(std::string fname) {
-    if (fname.find_first_of("\\/") == -1)
+    if (fname.find_first_of("\\/") == string::npos)
         fname = get_working_directory() + fname;
     DWORD attributes = GetFileAttributes(fname.c_str());
     if(attributes == 0xFFFFFFFF) {
@@ -109,7 +109,7 @@ int file_exists(std::string fname) {
 }
 
 int file_delete(std::string fname) {
-    if (fname.find_first_of("\\/") == -1)
+    if (fname.find_first_of("\\/") == string::npos)
         fname = get_working_directory() + fname;
     DWORD result = DeleteFileA(fname.c_str());
 
@@ -130,9 +130,9 @@ int file_delete(std::string fname) {
 }
 
 int file_rename(std::string oldname, std::string newname) {
-    if (oldname.find_first_of("\\/") == -1)
+    if (oldname.find_first_of("\\/") == string::npos)
         oldname = get_working_directory() + oldname;
-    if (newname.find_first_of("\\/") == -1)
+    if (newname.find_first_of("\\/") == string::npos)
         newname = get_working_directory() + newname;
     DWORD result = MoveFileA(oldname.c_str(), newname.c_str());
 
@@ -147,7 +147,7 @@ int file_rename(std::string oldname, std::string newname) {
 }
 
 int file_copy(std::string fname, std::string newname) {
-    if (fname.find_first_of("\\/") == -1)
+    if (fname.find_first_of("\\/") == string::npos)
         fname = get_working_directory() + fname;
     DWORD result = CopyFileA(fname.c_str(), newname.c_str(), false);
 

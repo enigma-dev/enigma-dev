@@ -819,13 +819,13 @@ class d3d_model
 
     void save(string fname)
     {
-        if (fname.find_first_of("\\/") == -1)
+        if (fname.find_first_of("\\/") == string::npos)
             fname = get_working_directory() + fname;
     }//format needs to be decided on
 
     bool load(string fname)  //TODO: this needs to be rewritten properly not using the file_text functions
     {
-        if (fname.find_first_of("\\/") == -1)
+        if (fname.find_first_of("\\/") == string::npos)
             fname = get_working_directory() + fname;
         int file = file_text_open_read(fname);
         if (file == -1)

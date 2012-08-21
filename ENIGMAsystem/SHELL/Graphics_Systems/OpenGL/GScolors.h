@@ -66,7 +66,7 @@ float draw_get_alpha();
 int make_color_rgb(unsigned char red, unsigned char green, unsigned char blue);
 inline int make_color(unsigned char r, unsigned char g, unsigned char b)
 {
-    make_color_rgb(r,g,b);
+    return make_color_rgb(r,g,b);
 }
 
 int color_get_red(int color);

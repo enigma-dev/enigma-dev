@@ -88,7 +88,7 @@ inline void parse_filter_string(GtkFileChooser *dialog, const string &filter)
 
 string get_open_filename(string filter, string fname)
 {
-  if (fname.find_first_of("\\/") == -1)
+  if (fname.find_first_of("\\/") == string::npos)
     fname = get_working_directory() + fname;
 
   string ret;
@@ -117,7 +117,7 @@ string get_open_filename(string filter, string fname)
 
 string get_save_filename(string filter, string fname)
 {
-  if (fname.find_first_of("\\/") == -1)
+  if (fname.find_first_of("\\/") == string::npos)
     fname = get_working_directory() + fname;
 
   string ret;

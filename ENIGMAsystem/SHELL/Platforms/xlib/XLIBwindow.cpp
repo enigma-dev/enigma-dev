@@ -35,6 +35,7 @@
 using namespace std;
 
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+#include "Universal_System/roomsystem.h"
 #include "Platforms/platforms_mandatory.h" // For type insurance
 #include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBwindow.h"
@@ -138,7 +139,7 @@ bool window_get_showicons() {return true;}
 
 void window_default()
 {
-    int xm = int(room_width), ym = int(room_height);
+    unsigned int xm = room_width, ym = room_height;
     if (view_enabled)
     {
       int tx = 0, ty = 0;

@@ -352,7 +352,7 @@ extern void show_message(string);
 int sound_add(string fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
 {
   // Open sound
-  if (fname.find_first_of("\\/") == -1)
+  if (fname.find_first_of("\\/") == string::npos)
     fname = get_working_directory() + fname;
   FILE *afile = fopen(fname.c_str(),"rb");
   if (!afile)

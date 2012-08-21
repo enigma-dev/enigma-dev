@@ -36,7 +36,7 @@ namespace enigma {
 
 int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
 {
-    if (filename.find_first_of("\\/") == -1)
+    if (filename.find_first_of("\\/") == string::npos)
         filename = get_working_directory() + filename;
 	enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
@@ -45,7 +45,7 @@ int sprite_add(string filename, int imgnumb, bool precise, bool transparent, boo
 
 int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
 {
-    if (filename.find_first_of("\\/") == -1)
+    if (filename.find_first_of("\\/") == string::npos)
         filename = get_working_directory() + filename;
 	enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
@@ -54,28 +54,32 @@ int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int 
 
 bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture)
 {
-    if (filename.find_first_of("\\/") == -1)
+    if (filename.find_first_of("\\/") == string::npos)
         filename = get_working_directory() + filename;
     enigma::sprite *spr = enigma::spritestructarray[ind];
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
             enigma::graphics_delete_texture(spr->texturearray[ii]);
 
-    delete[] spr->texturearray, spr->texbordxarray, spr->texbordyarray;
+    delete[] spr->texturearray;
+    delete[] spr->texbordxarray;
+    delete[] spr->texbordyarray;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
     return true;
 }
 
 bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture)
 {
-    if (filename.find_first_of("\\/") == -1)
+    if (filename.find_first_of("\\/") == string::npos)
         filename = get_working_directory() + filename;
     enigma::sprite *spr = enigma::spritestructarray[ind];
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
             enigma::graphics_delete_texture(spr->texturearray[ii]);
 
-    delete[] spr->texturearray, spr->texbordxarray, spr->texbordyarray;
+    delete[] spr->texturearray;
+    delete[] spr->texbordxarray;
+    delete[] spr->texbordyarray;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
     return true;
 }
@@ -137,20 +141,22 @@ void sprite_merge(int ind, int copy_sprite)
 {
     enigma::sprite *spr = enigma::spritestructarray[ind], *spr_copy = enigma::spritestructarray[copy_sprite];
 
-    int t_subcount = spr->subcount + spr_copy->subcount, i = 0, j = 0;
+    int i = 0, j = 0, t_subcount = spr->subcount + spr_copy->subcount;
     unsigned int *t_texturearray = new unsigned int[t_subcount];
     double *t_texbordxarray = new double[t_subcount], *t_texbordyarray = new double[t_subcount];
     while (i < spr->subcount)
     {
         t_texturearray[i] = spr->texturearray[i];
         t_texbordxarray[i] = spr->texbordxarray[i];
-        t_texbordyarray[i++] = spr->texbordyarray[i];
+        t_texbordyarray[i] = spr->texbordyarray[i];
+        i++;
     }
     while (j < spr_copy->subcount)
     {
         t_texturearray[i] = enigma::graphics_duplicate_texture(spr_copy->texturearray[j]);
         t_texbordxarray[i] = spr_copy->texbordxarray[j];
-        t_texbordyarray[i++] = spr_copy->texbordyarray[j++];
+        t_texbordyarray[i] = spr_copy->texbordyarray[j];
+        i++; j++;
     }
     spr->subcount = t_subcount;
     spr->width    = (spr->width > spr_copy->width)?spr->width:spr_copy->width;
@@ -190,7 +196,6 @@ namespace enigma
     //Adds an empty sprite to the list
     int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm)
     {
-        int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
         sprite *as = new sprite(subc);
         spritestructarray[sprid] = as;
 
