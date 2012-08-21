@@ -90,6 +90,5 @@ int jdi::context::parse_stream(lexer *lang_lexer, error_handler *errhandl)
   }
   
   parse_open = false; // Now a parse can be called in this context again
-  
   return res;
 }

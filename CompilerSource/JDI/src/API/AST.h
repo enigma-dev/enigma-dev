@@ -351,10 +351,10 @@ namespace jdi {
     int parse_expression(jdip::token_t &token, lexer *lex, definition_scope *scope, int prec, error_handler *uherr);
     
     /// Evaluate the current AST, returning its \c value.
-    virtual value eval() const;
+    value eval() const;
     
     /// Coerce the current AST for the type of its result.
-    virtual full_type coerce() const;
+    full_type coerce() const;
     
     /// Clear the AST out, effectively creating a new instance of this class
     void clear();

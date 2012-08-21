@@ -39,7 +39,7 @@
 namespace jdi {
   ref_stack::ref_stack(): ntop(NULL), nbottom(NULL), sz(0) {}
   ref_stack::ref_stack(ref_stack& rf): ntop(NULL), nbottom(NULL), sz(0) { swap(rf); }
-  ref_stack::ref_stack(const ref_stack& rf) { /* cout << "IMPLICITLY DUPLICATED REF STACK (CTOR)" << endl; */ copy(rf); }
+  ref_stack::ref_stack(const ref_stack& rf) { /* cerr << "IMPLICITLY DUPLICATED REF STACK (CTOR)" << endl; */ copy(rf); }
   ref_stack::~ref_stack() { clear(); }
   
   ref_stack &ref_stack::operator= (const ref_stack& rf) { clear(); cout << "IMPLICITLY DUPLICATED REF STACK (ASSN)" << endl; copy(rf); return *this; }

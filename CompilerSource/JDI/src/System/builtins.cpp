@@ -109,7 +109,6 @@ namespace jdi {
       if (usage_flags & UF_FLAG)
       {
         flag = 1 << builtin_decls_byflag.size();
-        cout << type_name << "=>" << flag << endl;
         builtin_decls_byflag[flag] = insit.first->second;
         insit.first->second->flagbit = flag;
         if (type_name[0] != '_') {

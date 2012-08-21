@@ -130,7 +130,7 @@ jdi::definition_class* jdip::context_parser::handle_class(definition_scope *scop
     // We'd better have read a definition earlier, and it'd better have been a template.
     if (not(dulldef and (dulldef->flags & DEF_TEMPLATE))) {
       token.report_error(herr, "Unexpected '<' token; `" + classname + "' is not a template type");
-      cout << dulldef << ": " << (dulldef? dulldef->name : "no definition by that name") << endl;
+      //cerr << dulldef << ": " << (dulldef? dulldef->name : "no definition by that name") << endl;
       return NULL;
     }
     // Now, we might be specializing the template, or we might just be instantiating it.

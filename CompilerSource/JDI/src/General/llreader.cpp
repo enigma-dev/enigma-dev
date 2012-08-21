@@ -37,6 +37,7 @@
 #endif
 
 #include "llreader.h"
+#include <iostream>
 
 /// Enumeration of open states for an \c llreader.
 enum {
@@ -80,9 +81,8 @@ llreader::llreader(): pos(0), length(0), data(NULL), mode(FT_CLOSED), path(dot) 
 llreader::llreader(const char* filename): pos(0), length(0), data(NULL), mode(FT_CLOSED), path(fn_path(filename)) { open(filename); }
 llreader::llreader(std::string contents, bool cp): pos(0), length(0), data(NULL), mode(FT_CLOSED), path(dot) { cp? copy(contents) : encapsulate(contents); }
 
-#include <iostream>
 llreader::llreader(const llreader& x): pos(x.pos), length(FT_BUFFER), data(NULL), mode(FT_BUFFER), path(x.path) {
-  cout << "COPY CALLED ON LLREADER" << endl;
+  cerr << "WARNING: COPY CALLED ON LLREADER" << endl;
   if (x.mode == FT_CLOSED) mode = FT_CLOSED;
   else {
     char *buf = new char[x.length+1];

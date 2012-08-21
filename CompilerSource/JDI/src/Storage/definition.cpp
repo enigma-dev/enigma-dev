@@ -29,13 +29,6 @@
 #include <Parser/handlers/handle_function_impl.h>
 using namespace std;
 
-template<typename a, typename b> void print_map(const map<a,b>& c) {
-  cout << "{" << endl;
-  for (typename map<a,b>::const_iterator i = c.begin(); i != c.end(); ++i)
-    cout << "  " << i->first<< endl; 
-  cout << "}" << endl;
-}
-
 namespace jdi {
   definition::definition(string n,definition* p,unsigned int f): flags(f), name(n), parent((definition_scope*)p) {}
   definition::definition(): flags(0), name(), parent(NULL) {}
@@ -291,14 +284,14 @@ namespace jdi {
   arg_key::arg_key(const ref_stack& rf) {
     #ifdef DEBUG_MODE
       if (rf.empty()) {
-        cout << "Critical error." << endl;
+        cerr << "Critical error." << endl;
         return;
       }
     #endif
     const ref_stack::node &n = rf.top();
     #ifdef DEBUG_MODE
       if (n.type != ref_stack::RT_FUNCTION) {
-        cout << "Critical error." << endl;
+        cerr << "Critical error." << endl;
         return;
       }
     #endif
@@ -459,7 +452,7 @@ namespace jdi {
   
   void definition_atomic::remap(const remap_set &) {}
   
-  void definition_hypothetical::remap(const remap_set &) { cout << "ERROR: Remap called on hypothetical type" << endl; }
+  void definition_hypothetical::remap(const remap_set &) { cerr << "ERROR: Remap called on hypothetical type" << endl; }
   
   //========================================================================================================
   //======: Sizeof functions :==============================================================================
@@ -517,7 +510,7 @@ namespace jdi {
   }
   
   size_t definition_hypothetical::size_of() {
-    cout << "ERROR: sizeof() performed on dependent (hypothetical) type" << endl;
+    cerr << "ERROR: sizeof() performed on dependent (hypothetical) type" << endl;
     return 0;
   }
   

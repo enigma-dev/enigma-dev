@@ -555,7 +555,6 @@ namespace jdi
     if (!s.operate) return value();
     value l = left->eval(), r = right->eval();
     value res = s.operate(l, r);
-    //cout << l.val.i << " " << content << " " << r.val.i << " = " << res.val.i << endl;
     return res;
   }
   value AST::AST_Node_Scope::eval() const {
@@ -565,21 +564,21 @@ namespace jdi
     definition* d = ((definition_scope*)res.def)->look_up(right->content);
     if (!d or not(d->flags & DEF_VALUED)) {
       #ifdef DEBUG_MODE
-        cout << "Failure: No `" << right->content << "' found in scope `" << res.def->name << "'" << endl;
+        cerr << "Failure: No `" << right->content << "' found in scope `" << res.def->name << "'" << endl;
       #endif
       return value(long(0));
     }
     return ((definition_valued*)d)->value_of;
   }
   value AST::AST_Node_Unary::eval() const {
-    if (!operand) { cout << "No operand to unary (operator" << content << ")!" << endl; return value(); }
+    if (!operand) { cerr << "No operand to unary (operator" << content << ")!" << endl; return value(); }
     if (prefix) {
-      if (!symbols[content].operate_unary_pre) { cout << "No method to unary (operator" << content << ")!" << endl; return value(); }
+      if (!symbols[content].operate_unary_pre) { cerr << "No method to unary (operator" << content << ")!" << endl; return value(); }
       value b4 = operand->eval(), after = symbols[content].operate_unary_pre(b4);
       return after;
     }
     else {
-      if (!symbols[content].operate_unary_post) { cout << "No method to unary (operator" << content << ")!" << endl; return value(); }
+      if (!symbols[content].operate_unary_post) { cerr << "No method to unary (operator" << content << ")!" << endl; return value(); }
       value b4 = operand->eval(), after = symbols[content].operate_unary_post(b4);
       return after;
     }
@@ -619,7 +618,7 @@ namespace jdi
       return value((double)operand->eval());
     else if (cast_type.def == builtin_type__bool)
       return value((long)(bool)operand->eval());
-    cout << "Attempt to cast to `" << cast_type.def->name << "'" << endl;
+    cerr << "Attempt to cast to `" << cast_type.def->name << "'" << endl;
     return value();
   }
   value AST::AST_Node_Array::eval() const {

@@ -191,7 +191,7 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
         else {
           token.report_error(herr, "Redeclaration of `" + tp.refs.name + "' as a different kind of symbol");
           token.report_error(herr, scope->parent? "In scope `" + scope->name + "'" : "At global scope");
-          cout << ins.def->toString() << endl;
+          //cerr << ins.def->toString() << endl;
           return 3;
         }
       }

@@ -621,9 +621,9 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
         }
         if (!incfile.is_open()) {
           herr->error("Could not find " + fnfind.substr(1), filename, line, pos-lpos);
-          if (chklocal) cout << "  Checked " << path << endl;
+          if (chklocal) cerr << "  Checked " << path << endl;
           for (size_t i = 0; !incfile.is_open() and i < builtin->search_dir_count(); ++i)
-            cout << "  Checked " << builtin->search_dir(i) << endl;
+            cerr << "  Checked " << builtin->search_dir(i) << endl;
           break;
         }
         
@@ -908,7 +908,7 @@ token_t lexer_cpp::get_token(error_handler *herr)
     }
   }
   
-  cout << "UNREACHABLE BLOCK REACHED" << endl;
+  cerr << "UNREACHABLE BLOCK REACHED" << endl;
   return token_t(TT_INVALID,filename,line,pos-lpos++);
   
   POP_FILE: // This block was created instead of a helper function to piss Rusky off.

@@ -61,7 +61,7 @@ static definition* read_qualified_type(lexer *lex, definition_scope* scope, toke
       }
       else {
         token.report_error(herr, "Template `" + token.def->name + "' cannot be used as a type");
-        cout << token.def->toString();
+        //cerr << token.def->toString();
         return FATAL_TERNARY(NULL,res);
       }
     }
@@ -132,12 +132,10 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
         }
         if (!(rdef->flags & DEF_TYPENAME)) {
           if (rdef->flags & DEF_TEMPLATE) {
-            // FIXME: This block is kind of a hack. In order to facilitate template constructors/destructors,
-            //        this section of code will return a non-typename definition. This has led to undefined behavior.
-            if (((definition_template*)rdef)->def == scope and token.type == TT_LEFTPARENTH)
+            if (((definition_template*)rdef)->def == scope)
               rdef = scope;
-            else if (scope->flags & DEF_TEMPSCOPE and ((definition_template*)rdef)->def == scope->parent and token.type == TT_LEFTPARENTH)
-              rdef = scope;
+            else if (scope->flags & DEF_TEMPSCOPE and ((definition_template*)rdef)->def == scope->parent)
+              rdef = scope->parent;
             else {
               token.report_error(herr, "Invalid use of template `" + rdef->name + "'");
               return NULL;

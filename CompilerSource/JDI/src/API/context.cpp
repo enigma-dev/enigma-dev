@@ -152,7 +152,7 @@ void context::swap(context &ct) {
     macros.swap(ct.macros);
     variadics.swap(ct.variadics);
   }
-  else cout << "ERROR! Cannot swap context while parse is active" << endl;
+  else cerr << "ERROR! Cannot swap context while parse is active" << endl;
 }
 
 macro_map &context::global_macros() {
@@ -174,7 +174,7 @@ void context::load_gnu_builtins()
 void context::output_types(ostream &out) {
   out << "Unimplemented";
 }
-static inline void print_macro(macro_iter it, ostream &out = cout)
+static inline void print_macro(macro_iter it, ostream &out)
 {
   if (it->second->argc >= 0)
   {

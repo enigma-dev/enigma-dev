@@ -15,6 +15,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <unistd.h>
 using namespace std;
 #include <API/jdi.h>
 #include <API/AST.h>
@@ -59,7 +60,7 @@ int main() {
   builtin->add_macro_func("one_arg_function","x","(1/(1-(x)))",false);
   builtin->add_macro_func("two_arg_function","a","b","(-(b)/(2*(a)))",false);
   builtin->add_macro_func("variadic_three_arg_function","a","b","c","printf(a,b,c)",true);
-  builtin->output_macros();
+  //builtin->output_macros();
   
   putcap("Metrics");
   cout << "sizeof(jdip::macro_type):        " << sizeof(jdip::macro_type) << endl
@@ -72,7 +73,7 @@ int main() {
   
   test_expression_evaluator();
   
-  #if 1
+  #if 0
     builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++");
     builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++/mingw32");
     builtin->add_search_directory("c:\\mingw/lib/gcc/mingw32/4.6.1/include/c++/backward");
@@ -273,7 +274,7 @@ void do_cli(context &ct) {
     
     case 'h':
       cout <<
-      "'c' Coerce an expression, printing its type"
+      "'c' Coerce an expression, printing its type\n"
       "'d' Define a symbol, printing it recursively\n"
       "'e' Evaluate an expression, printing its result\n"
       "'f' Print flags for a given definition\n"
