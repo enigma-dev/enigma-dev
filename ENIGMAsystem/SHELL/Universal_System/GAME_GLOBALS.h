@@ -41,7 +41,6 @@ global:     event_number
 global:     event_object
 global:     event_type*/
 double      fps;
-unsigned int game_id;
 
 double health=100;
 deque<int> instance_id;
