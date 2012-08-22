@@ -45,9 +45,7 @@ extern int background_showcolor;
 extern var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
 background_vtiled, background_hspeed, background_vspeed,background_alpha;
 
-extern int room_first;
 extern int room_height;
-extern int room_last;
 extern int room_persistent;
 extern int room_speed;
 extern int room_width;

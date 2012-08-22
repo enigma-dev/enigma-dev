@@ -66,6 +66,8 @@ int os_type;
 int gamemaker_version=0;
 //int transition_steps;
 int cursor_sprite;
+extern int room_first, room_last;
+
 /*********************
 End GM global variables
  *********************/

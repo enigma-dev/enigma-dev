@@ -47,13 +47,11 @@
 
 #include "CallbackArrays.h"
 
-int room_first  = 0;
-int room_last   = 0;
 int room_speed  = 60;
 int room_width  = 640;
 int room_height = 480;
 int room_persistent = 0;
-var room_caption = "ENIGMA Engine";
+var room_caption = "";
 
 int background_color = 16777215;
 int background_showcolor=1;
