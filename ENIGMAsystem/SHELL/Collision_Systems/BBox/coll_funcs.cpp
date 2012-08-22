@@ -170,9 +170,11 @@ int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool 
 
 double distance_to_object(int object)
 {
+    const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -1;
     double distance = std::numeric_limits<double>::infinity();
     double tempdist;
-    const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     const bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
@@ -185,6 +187,8 @@ double distance_to_object(int object)
     {
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst1 == inst2) continue;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+            continue;
 
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
@@ -211,6 +215,8 @@ double distance_to_object(int object)
 double distance_to_point(double x, double y)
 {
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -1;
     const bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
@@ -225,6 +231,9 @@ double distance_to_point(double x, double y)
 
 double move_contact_object(int object, double angle, double max_dist, bool solid_only)
 {
+    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -4;
     const double DMIN = 1, DMAX = 1000000;
     const double contact_distance = DMIN;
     double sin_angle, cos_angle;
@@ -251,7 +260,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         sin_angle = sin(radang), cos_angle = cos(radang);
     }
     const int quad = int(angle/90.0);
-    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+
     const bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
@@ -263,6 +272,8 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+            continue;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
             continue;
         const bbox_rect_t &box2 = inst2->$bbox_relative();
@@ -349,6 +360,9 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
 
 double move_outside_object(int object, double angle, double max_dist, bool solid_only)
 {
+    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -4;
     const double DMIN = 0.000001, DMAX = 1000000;
     const double contact_distance = DMIN;
     if (max_dist <= 0)
@@ -360,7 +374,6 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
     double radang = angle*(M_PI/180.0);
     const double sin_angle = sin(radang), cos_angle = cos(radang);
     const int quad = int(angle/90.0);
-    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     const bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
@@ -373,6 +386,8 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
     {
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
+            continue;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
             continue;
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
@@ -438,6 +453,8 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
 bool move_bounce_object(int object, bool adv, bool solid_only)
 {
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -4;
     if (place_meeting(inst1->x, inst1->y, object))
     {
         inst1->x -= inst1->hspeed;
@@ -462,6 +479,8 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
     {
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
+            continue;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
             continue;
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
@@ -858,6 +877,8 @@ void move_random(const double snapHor, const double snapVer)
     enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
     const int mask_ind = ((enigma::object_collisions*)enigma::instance_event_iterator->inst)->mask_index;
     const int spr_ind = ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->sprite_index;
+    if (spr_ind == -1 && (mask_ind == -1))
+        return;
     const int mask = mask_ind >= 0 ? mask_ind : spr_ind;
     const double x1 = sprite_get_xoffset(mask), y1 = sprite_get_yoffset(mask), x2 = room_width - sprite_get_width(mask) + sprite_get_xoffset(mask), y2 = room_height - sprite_get_height(mask) + sprite_get_yoffset(mask);
 

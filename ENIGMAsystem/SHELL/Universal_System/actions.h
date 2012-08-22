@@ -477,6 +477,16 @@ inline void action_draw_variable(variant variable, const double x, const double 
         draw_text(x, y, string(variable));
 }
 
+inline bool action_replace_sprite(int ind, std::string filename, int imgnumb)
+{
+    return sprite_replace(ind, filename, imgnumb, true, false, 0, 0, true);
+}
+
+inline bool action_replace_background(int ind, std::string filename)
+{
+    return background_replace(ind, filename, true, false, true, true);
+}
+
 inline bool action_if_health(const double value, const int operation)
 {
 	switch (operation)
