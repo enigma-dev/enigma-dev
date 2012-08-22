@@ -376,7 +376,7 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
 
 bool sound_replace(int sound, string fname, int kind, bool preload)
 {
-  get_sound(snd,sound,);
+  get_sound(snd,sound,false);
   alureDestroyStream(snd->stream, 0, 0);
   alDeleteSources(1,&snd->src);
   enigma::sounds[sound] = enigma::sound_new_with_source();

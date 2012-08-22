@@ -53,6 +53,10 @@ inline double move_contact_all(const double direction, const double max_dist = 1
     return move_contact_object(all, direction, max_dist);
 }
 
+inline double move_contact(const double direction) {
+    return move_contact_object(all, direction, -1);
+}
+
 inline double move_contact_solid(const double direction, const double max_dist = 1000000) {
     return move_contact_object(all, direction, max_dist, true);
 }
