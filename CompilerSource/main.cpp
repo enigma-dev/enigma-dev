@@ -136,6 +136,7 @@ static bool firstpass = true;
 dllexport syntax_error *definitionsModified(const char* wscode, const char* targetYaml)
 {
   current_language->definitionsModified(wscode, targetYaml);
+  return &ide_passback_error;
 };
 
 void quickmember_script(jdi::definition_scope* scope, string name);
