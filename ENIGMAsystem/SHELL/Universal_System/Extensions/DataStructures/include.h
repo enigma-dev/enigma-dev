@@ -62,6 +62,8 @@ bool ds_grid_value_disk_y(const unsigned int id, const double x, const double y,
 void ds_grid_shuffle(const unsigned int id);
 bool ds_grid_exists(const unsigned int id);
 unsigned int ds_grid_duplicate(const unsigned int source);
+std::string ds_grid_write(const unsigned int id);
+void ds_grid_read(const unsigned int id, std::string value);
 
 unsigned int ds_map_create();
 void ds_map_destroy(const unsigned int id);
@@ -81,6 +83,8 @@ variant ds_map_find_first(const unsigned int id);
 variant ds_map_find_last(const unsigned int id);
 bool ds_map_exists(const unsigned int id);
 unsigned int ds_map_duplicate(const unsigned int source);
+std::string ds_map_write(const unsigned int source);
+void ds_map_read(const unsigned int id, std::string value);
 
 unsigned int ds_list_create();
 void ds_list_destroy(const unsigned int id);
@@ -99,6 +103,8 @@ void ds_list_sort(const unsigned int id, const bool ascend);
 void ds_list_shuffle(const unsigned int id);
 bool ds_list_exists(const unsigned int id);
 unsigned int ds_list_duplicate(const unsigned int source);
+std::string ds_list_write(const unsigned int id);
+void ds_list_read(const unsigned int id, std::string value);
 
 unsigned int ds_priority_create();
 void ds_priority_destroy(const unsigned int id);
@@ -117,6 +123,8 @@ variant ds_priority_delete_max(const unsigned int id);
 variant ds_priority_find_max(const unsigned int id);
 bool ds_priority_exists(const unsigned int id);
 unsigned int ds_priority_duplicate(const unsigned int source);
+std::string ds_priority_write(const unsigned int id);
+void ds_priority_read(const unsigned int id, std::string value);
 
 unsigned int ds_queue_create();
 void ds_queue_destroy(const unsigned int id);
@@ -130,6 +138,8 @@ variant ds_queue_head(const unsigned int id);
 variant ds_queue_tail(const unsigned int id);
 bool ds_queue_exists(const unsigned int id);
 unsigned int ds_queue_duplicate(const unsigned int source);
+std::string ds_queue_write(const unsigned int id);
+void ds_queue_read(const unsigned int id, std::string value);
 
 unsigned int ds_stack_create();
 void ds_stack_destroy(const unsigned int id);
@@ -142,3 +152,5 @@ variant ds_stack_pop(const unsigned int id);
 variant ds_stack_top(const unsigned int id);
 bool ds_stack_exists(const unsigned int id);
 unsigned int ds_stack_duplicate(const unsigned int source);
+std::string ds_stack_write(const unsigned int id);
+void ds_stack_read(const unsigned int id, std::string value);
