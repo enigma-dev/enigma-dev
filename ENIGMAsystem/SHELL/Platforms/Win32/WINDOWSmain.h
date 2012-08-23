@@ -19,8 +19,6 @@
 **  *|
 \****/
 
-extern unsigned long long window_handle;
-
 string parameter_string(int x);
 int parameter_count();
 
@@ -43,3 +41,4 @@ std::string registry_read_string_ext(std::string key, std::string name);
 int registry_read_real_ext(std::string key, std::string name);
 bool registry_exists_ext(std::string key, std::string name);
 void registry_set_root(int root);
+unsigned long long window_handle();

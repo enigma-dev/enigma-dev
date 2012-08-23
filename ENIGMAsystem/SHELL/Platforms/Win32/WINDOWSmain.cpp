@@ -40,8 +40,6 @@ using std::string;
 extern unsigned int game_id;
 static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
 
-unsigned long long window_handle;
-
 namespace enigma //TODO: Find where this belongs
 {
   HINSTANCE hInstance;
@@ -134,8 +132,6 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
         //Create a child window to put into that
         enigma::hWnd = CreateWindow ("TSub", NULL, WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
-
-	window_handle = (unsigned long long)enigma::hWnd;
 
     enigma::EnableDrawing (&hRC);
     enigma::initialize_everything();
@@ -372,4 +368,9 @@ void registry_set_root(int root)
 	const HKEY keyLookup[4] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_CLASSES_ROOT, HKEY_USERS };
 	if (root >= 0 && root < 4)
 		registryCurrentRoot = keyLookup[root];
+}
+
+unsigned long long window_handle()
+{
+    return (unsigned long long)enigma::hWnd;
 }

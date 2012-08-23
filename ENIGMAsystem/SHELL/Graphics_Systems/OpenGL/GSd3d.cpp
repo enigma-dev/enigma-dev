@@ -37,6 +37,8 @@ void d3d_start()
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_COLOR_MATERIAL);
 
   // Set up projection matrix
   glMatrixMode(GL_PROJECTION);
@@ -55,6 +57,8 @@ void d3d_end()
   d3dMode = false;
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_ALPHA_TEST);
+  glDisable(GL_NORMALIZE);
+  glDisable(GL_COLOR_MATERIAL);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(0, 1, 0, 1);
@@ -725,7 +729,7 @@ class d3d_lights
         if (ms >= GL_MAX_LIGHTS)
             return false;
         light_ind.insert(pair<int,int>(id, ms));
-        const float dir[3] = {dx, dy, dz}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
+        const float dir[3] = {dx, dy, dz}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
         glLightfv(GL_LIGHT0+ms, GL_SPOT_DIRECTION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         return true;
@@ -736,7 +740,7 @@ class d3d_lights
         if (ms >= GL_MAX_LIGHTS)
             return false;
         light_ind.insert(pair<int,int>(id, ms));
-        const float pos[3] = {x, y, z}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
+        const float pos[3] = {x, y, z}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
       	glLightfv(GL_LIGHT1, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         return true;
@@ -790,7 +794,7 @@ bool d3d_light_enable(int id, bool enable)
 
 void d3d_light_define_ambient(int col)
 {
-    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
+    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 
