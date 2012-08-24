@@ -105,10 +105,8 @@ void llreader::open(const char* filename) {
   SECURITY_ATTRIBUTES sec;
   sec.nLength = sizeof(sec), sec.lpSecurityDescriptor = NULL, sec.bInheritHandle = true;
   HANDLE hFile = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, &sec, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
-  if (hFile == INVALID_HANDLE_VALUE) {
-    cerr << "Complete failure. File " << filename << "; Error " << GetLastError() << endl;
+  if (hFile == INVALID_HANDLE_VALUE)
     return;
-  }
   HANDLE mapping = CreateFileMapping(hFile, &sec, PAGE_READONLY, 0, 0, NULL);
   if (mapping == INVALID_HANDLE_VALUE) {
     CloseHandle(hFile);
