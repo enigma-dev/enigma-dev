@@ -39,17 +39,35 @@ int referencers_varargs_at(ref_stack &refs) {
   return -1;
 }
 
+/*
+ Iterate over function overloads and change minimum argument count and maximum argument count based on the number
+ of arguments in the overload.
+ */
+void iterate_overloads(definition_function* d, unsigned &min, unsigned &max) {
+    bool variadic = false;
+    int local_min=0,local_max=0;
+    
+    const ref_stack &refs = ((definition_function*)d)->referencers;
+    const ref_stack::parameter_ct& params = ((ref_stack::node_func*)&refs.top())->params;
+    for (size_t i = 0; i < params.size(); ++i)
+        if (params[i].variadic or params[i].def == enigma_type__varargs) variadic = true;
+        else if (params[i].default_value) ++local_max; else ++local_min, ++local_max;
+    if (variadic) max = -1;
+    if (min > local_min) min = local_min;
+    if (max < local_max) max = local_max;
+}
+
 void definition_parameter_bounds(definition *d, unsigned &min, unsigned &max) {
   min = max = 0;
-  bool variadic = false;
+  
   if (!(d->flags & DEF_FUNCTION)) { cout << "Attempt to use " << d->toString() << " as function" << endl; return; }
-  const ref_stack &refs = ((definition_function*)d)->referencers;
-  const ref_stack::parameter_ct& params = ((ref_stack::node_func*)&refs.top())->params;
-  for (size_t i = 0; i < params.size(); ++i)
-    if (params[i].variadic or params[i].def == enigma_type__varargs) variadic = true;
-    else if (params[i].default_value) ++max; else ++min, ++max;
-  if (variadic) max = -1;
+    
+  map<arg_key, definition_function*>::iterator iter=((definition_function*)d)->overloads.begin();
+  for (; iter!=((definition_function*)d)->overloads.end(); iter++) {
+        iterate_overloads(iter->second,min,max);
+  }
 }
+
 
 #include "languages/lang_CPP.h"
 definition* lang_CPP::find_typename(string n) {
