@@ -27,6 +27,51 @@ using namespace std;
 #include "IMGloading.h"
 #include "estring.h"
 
+#ifdef DEBUG_MODE
+  #include "../Widget_Systems/widgets_mandatory.h"
+  #define get_sprite(spr,id,r) \
+    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
+      show_error("Cannot access sprite with id " + toString(id), false); \
+      return r; \
+    } const enigma::sprite *const spr = enigma::spritestructarray[id];
+  #define get_spritev(spr,id) \
+    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
+      show_error("Cannot access sprite with id " + toString(id), false); \
+      return; \
+    } const enigma::sprite *const spr = enigma::spritestructarray[id];
+  #define get_sprite_null(spr,id,r) \
+    if (id < -1 or size_t(id) > enigma::sprite_idmax) { \
+      show_error("Cannot access sprite with id " + toString(id), false); \
+      return r; \
+    } const enigma::sprite *const spr = enigma::spritestructarray[id];
+  #define get_sprite_mutable(spr,id,r) \
+    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
+      show_error("Cannot access sprite with id " + toString(id), false); \
+      return r; \
+    } enigma::sprite *const spr = enigma::spritestructarray[id];
+  #define get_spritev_mutable(spr,id) \
+    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
+      show_error("Cannot access sprite with id " + toString(id), false); \
+      return; \
+    } enigma::sprite *const spr = enigma::spritestructarray[id];
+#else
+  /// Retrieve a sprite by the given index, doing bound/null checking if in debug mode and bailing with result r if an error occurs.
+  #define get_sprite(spr,id,r) \
+    const enigma::sprite *const spr = enigma::spritestructarray[id];
+  /// Retrieve a sprite by the given index, doing bound/null checking if in debug mode and bailing with no result if an error occurs.
+  #define get_spritev(spr,id) \
+    const enigma::sprite *const spr = enigma::spritestructarray[id];
+  /// Retrieve a sprite by the given index, doing bounds checking (but not null checking) if in debug mode and bailing with result r if an error occurs.
+  #define get_sprite_null(spr,id,r) \
+    const enigma::sprite *const spr = enigma::spritestructarray[id];
+  /// Retrieve a sprite (and a lock thereto) by the given index, doing bound/null checking if in debug mode and bailing with result r if an error occurs.
+  #define get_sprite_mutable(spr,id,r) \
+    enigma::sprite *const spr = enigma::spritestructarray[id];
+  /// Retrieve a sprite (and a lock thereto) by the given index, doing bound/null checking if in debug mode and bailing with no result if an error occurs.
+  #define get_spritev_mutable(spr,id) \
+    enigma::sprite *const spr = enigma::spritestructarray[id];
+#endif
+
 namespace enigma {
   sprite** spritestructarray;
 	extern size_t sprite_idmax;
@@ -56,7 +101,7 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool tr
 {
     if (filename.find_first_of("\\/") == string::npos)
         filename = get_working_directory() + filename;
-    enigma::sprite *spr = enigma::spritestructarray[ind];
+    get_sprite_mutable(spr,ind,false);
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
             enigma::graphics_delete_texture(spr->texturearray[ii]);
@@ -72,7 +117,7 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, boo
 {
     if (filename.find_first_of("\\/") == string::npos)
         filename = get_working_directory() + filename;
-    enigma::sprite *spr = enigma::spritestructarray[ind];
+    get_sprite_mutable(spr,ind,false);
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
             enigma::graphics_delete_texture(spr->texturearray[ii]);
@@ -86,14 +131,14 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, boo
 
 void sprite_set_offset(int ind, int xoff, int yoff)
 {
-    enigma::sprite *spr = enigma::spritestructarray[ind];
+    get_spritev_mutable(spr,ind);
     spr->xoffset = xoff;
     spr->yoffset = yoff;
 }
 
 void sprite_delete(int ind, bool free_texture)
 {
-    enigma::sprite *spr = enigma::spritestructarray[ind];
+    get_spritev_mutable(spr,ind);
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
             enigma::graphics_delete_texture(spr->texturearray[ii]);
@@ -104,7 +149,8 @@ void sprite_delete(int ind, bool free_texture)
 
 int sprite_duplicate(int copy_sprite)
 {
-    enigma::sprite *spr_copy = enigma::spritestructarray[copy_sprite], *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
+    get_sprite_mutable(spr_copy,copy_sprite,-1);
+    enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
     spr->id = enigma::sprite_idmax;
     enigma::sprite_add_copy(spr, spr_copy);
 	return enigma::sprite_idmax++;
@@ -112,7 +158,8 @@ int sprite_duplicate(int copy_sprite)
 
 void sprite_assign(int ind, int copy_sprite, bool free_texture)
 {
-    enigma::sprite *spr = enigma::spritestructarray[ind], *spr_copy = enigma::spritestructarray[copy_sprite];
+    get_spritev_mutable(spr,ind);
+    get_spritev_mutable(spr_copy,copy_sprite);
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
             enigma::graphics_delete_texture(spr->texturearray[ii]);
@@ -125,7 +172,8 @@ void sprite_assign(int ind, int copy_sprite, bool free_texture)
 
 void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture)
 {
-    enigma::sprite *spr = enigma::spritestructarray[ind], *spr_copy = enigma::spritestructarray[copy_sprite];
+    get_spritev_mutable(spr,ind);
+    get_spritev_mutable(spr_copy,copy_sprite);
     unsigned int *t_texturearray = new unsigned int[spr->subcount];
     for (int i = 0; i < spr->subcount; i++)
     {
@@ -139,8 +187,8 @@ void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture)
 
 void sprite_merge(int ind, int copy_sprite)
 {
-    enigma::sprite *spr = enigma::spritestructarray[ind], *spr_copy = enigma::spritestructarray[copy_sprite];
-
+    get_spritev_mutable(spr,ind);
+    get_spritev_mutable(spr_copy,copy_sprite);
     int i = 0, j = 0, t_subcount = spr->subcount + spr_copy->subcount;
     unsigned int *t_texturearray = new unsigned int[t_subcount];
     double *t_texbordxarray = new double[t_subcount], *t_texbordyarray = new double[t_subcount];
@@ -167,6 +215,19 @@ void sprite_merge(int ind, int copy_sprite)
     spr->texturearray = t_texturearray;
     spr->texbordxarray = t_texbordxarray;
     spr->texbordyarray = t_texbordyarray;
+}
+
+void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
+{
+    get_spritev_mutable(spr,ind);
+    spr->bbox.left = left;
+    spr->bbox.top = top;
+    spr->bbox.right = right;
+    spr->bbox.bottom = bottom;
+    spr->bbox_relative.left = left - spr->xoffset;
+    spr->bbox_relative.top = top - spr->yoffset;
+    spr->bbox_relative.right = right - spr->xoffset;
+    spr->bbox_relative.bottom = bottom - spr->yoffset;
 }
 
 /* These functions are primarily for use of the engine. Experienced users
@@ -309,51 +370,6 @@ namespace enigma
     sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
   }
 }
-
-#ifdef DEBUG_MODE
-  #include "../Widget_Systems/widgets_mandatory.h"
-  #define get_sprite(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_mutable(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev_mutable(spr,id) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return; \
-    } enigma::sprite *const spr = enigma::spritestructarray[id];
-#else
-  /// Retrieve a sprite by the given index, doing bound/null checking if in debug mode and bailing with result r if an error occurs.
-  #define get_sprite(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  /// Retrieve a sprite by the given index, doing bound/null checking if in debug mode and bailing with no result if an error occurs.
-  #define get_spritev(spr,id) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  /// Retrieve a sprite by the given index, doing bounds checking (but not null checking) if in debug mode and bailing with result r if an error occurs.
-  #define get_sprite_null(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  /// Retrieve a sprite (and a lock thereto) by the given index, doing bound/null checking if in debug mode and bailing with result r if an error occurs.
-  #define get_sprite_mutable(spr,id,r) \
-    enigma::sprite *const spr = enigma::spritestructarray[id];
-  /// Retrieve a sprite (and a lock thereto) by the given index, doing bound/null checking if in debug mode and bailing with no result if an error occurs.
-  #define get_spritev_mutable(spr,id) \
-    enigma::sprite *const spr = enigma::spritestructarray[id];
-#endif
 
 int sprite_get_width(int sprite)
 {

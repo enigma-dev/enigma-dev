@@ -25,6 +25,28 @@ using namespace std;
 #include "backgroundstruct.h"
 #include "IMGloading.h"
 
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_background(bck2d,back)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return;\
+    }\
+    enigma::background bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return r;\
+    }\
+    enigma::background bck2d = enigma::backgroundstructarray[back];
+#else
+  #define get_background(bck2d,back)\
+    enigma::background *bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    enigma::background *bck2d = enigma::backgroundstructarray[back];
+#endif
 
 namespace enigma {
 	background** backgroundstructarray;
@@ -140,9 +162,9 @@ int background_add(string filename, bool transparent, bool smooth, bool preload)
 
 bool background_replace(int back, string filename, bool transparent, bool smooth, bool preload, bool free_texture)
 {
+    get_backgroundnv(bck,back,false);
     if (filename.find_first_of("\\/") == string::npos)
         filename = get_working_directory() + filename;
-    enigma::background *bck = enigma::backgroundstructarray[back];
     if (free_texture)
         enigma::graphics_delete_texture(bck->texture);
 
@@ -152,7 +174,7 @@ bool background_replace(int back, string filename, bool transparent, bool smooth
 
 void background_delete(int back, bool free_texture)
 {
-    enigma::background *bck = enigma::backgroundstructarray[back];
+    get_background(bck,back);
     if (free_texture)
         enigma::graphics_delete_texture(bck->texture);
 
@@ -162,14 +184,16 @@ void background_delete(int back, bool free_texture)
 
 int background_duplicate(int back)
 {
-    enigma::background *bck_copy = enigma::backgroundstructarray[back], *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
+    get_backgroundnv(bck_copy,back,-1);
+    enigma::background *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
     enigma::background_add_copy(bck, bck_copy);
 	return enigma::background_idmax++;
 }
 
 void background_assign(int back, int copy_background, bool free_texture)
 {
-    enigma::background *bck = enigma::backgroundstructarray[back], *bck_copy = enigma::backgroundstructarray[copy_background];
+    get_background(bck,back);
+    get_background(bck_copy,copy_background);
     if (free_texture)
         enigma::graphics_delete_texture(bck->texture);
 
@@ -183,7 +207,8 @@ bool background_exists(int back)
 
 void background_set_alpha_from_background(int back, int copy_background, bool free_texture)
 {
-    enigma::background *bck = enigma::backgroundstructarray[back], *bck_copy = enigma::backgroundstructarray[copy_background];
+    get_background(bck,back);
+    get_background(bck_copy,copy_background);
     int nex_tex = enigma::graphics_create_texture_alpha_from_texture(bck->texture, bck_copy->texture);
     if (free_texture)
         enigma::graphics_delete_texture(bck->texture);
