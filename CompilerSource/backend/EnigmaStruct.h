@@ -56,7 +56,11 @@ struct EnigmaStruct
 	int constantCount;
 	Include *includes;
 	int includeCount;
+#ifdef WIN32
+    char *packages[];
+#else
 	char **packages;
+#endif
 	int packageCount;
 
 	int extensionCount;
