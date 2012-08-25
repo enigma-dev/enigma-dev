@@ -31,6 +31,8 @@
 #include <string>
 #include <map>
 
+#define polygone_is_a_fucking_moron 1
+
 #include "backend/ideprint.h"
 
 using namespace std;
@@ -130,7 +132,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
     wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
 //    wto  << "    if (es->gameSettings.interpolate) texture_set_interpolation(1); " << endl;  //FIXME: interpolation needs to be done properly
-    if (es->gameSettings.displayCursor)
+    if (es->gameSettings.displayCursor or polygone_is_a_fucking_moron)
         wto  << "    window_set_cursor(cr_default);" << endl;
     else
         wto  << "    window_set_cursor(cr_none);" << endl;
