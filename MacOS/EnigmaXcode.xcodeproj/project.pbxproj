@@ -2252,20 +2252,20 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = EnigmaXcode_Prefix.pch;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../ENIGMAsystem/SHELL",
+					"$(SRCROOT)/../ENIGMAsystem/additional/zlib",
+				);
 				INFOPLIST_FILE = "EnigmaXcode-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win32/EFX-Util_MT\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win32/EFX-Util_MTDLL\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win32\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win64/EFX-Util_MT\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win64/EFX-Util_MTDLL\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win64\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/glee\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/zlib\"",
-					"\"$(SRCROOT)/../ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/obj/local/armeabi\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/additional/al/lib/Win32/EFX-Util_MT\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/additional/al/lib/Win32/EFX-Util_MTDLL\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/additional/al/lib/Win32\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/additional/glee\"",
 					"\"$(SRCROOT)/../ENIGMAsystem/additional/zlib\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/obj/local/armeabi\"",
 				);
 				PRODUCT_NAME = EnigmaXcode;
 				SYMROOT = build;
@@ -2280,20 +2280,20 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = EnigmaXcode_Prefix.pch;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../ENIGMAsystem/SHELL",
+					"$(SRCROOT)/../ENIGMAsystem/additional/zlib",
+				);
 				INFOPLIST_FILE = "EnigmaXcode-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win32/EFX-Util_MT\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win32/EFX-Util_MTDLL\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win32\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win64/EFX-Util_MT\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win64/EFX-Util_MTDLL\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/al/lib/Win64\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/glee\"",
-					"\"$(SRCROOT)/../../Documents/workspace/enigma-dev/trunk/ENIGMAsystem/additional/zlib\"",
-					"\"$(SRCROOT)/../ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/obj/local/armeabi\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/additional/al/lib/Win32/EFX-Util_MT\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/additional/al/lib/Win32/EFX-Util_MTDLL\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/additional/al/lib/Win32\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/additional/glee\"",
 					"\"$(SRCROOT)/../ENIGMAsystem/additional/zlib\"",
+					"\"$(SRCROOT)/../ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/obj/local/armeabi\"",
 				);
 				PRODUCT_NAME = EnigmaXcode;
 			};

@@ -57,11 +57,18 @@
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
      NSLog(@"applicationShouldTerminate");
     [enigmaview terminateEnigma];
+    return NO;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     NSLog(@"applicationWillTerminate");
     [enigmaview terminateEnigma];
+}
+
+- (BOOL)windowShouldClose:(NSNotification *)notification {
+    NSLog(@"Closing Enigma\n");
+    [enigmaview terminateEnigma];
+    return NO;
 }
 
 @end
