@@ -272,6 +272,8 @@ static inline void action_show_info() {show_info();}
 #define action_message(message) show_message(message)
 #define exit return 0;
 #define globalvar global var
+#define action_if_sound sound_isplaying
+#define action_end_sound sound_stop
 
 inline void action_create_object(const int object, const double x, const double y)
 {
