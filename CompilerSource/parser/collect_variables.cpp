@@ -33,6 +33,8 @@
 #include <iostream>
 #include <stdio.h>
 using namespace std;
+
+#include "config.h"
 #include "compiler/event_reader/event_parser.h"
 
 extern int global_script_argument_count;
@@ -46,12 +48,11 @@ struct scope_ignore {
   scope_ignore(int x): is_with(x) {}
 };
 
-#define and_safety
 #include "object_storage.h"
+#include "collect_variables.h"
+#include "languages/language_adapter.h"
 
-#include "externs/externs.h"
-
-void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
+void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev)
 {
   int igpos = 0;
   darray<scope_ignore*> igstack;
@@ -270,7 +271,7 @@ void collect_variables(string &code, string &synt, parsed_event* pev = NULL)
         }
         
         //Second, check that it's not a global
-        if (find_extname(nname,0xFFFFFFFF)) {
+        if (lang->global_exists(nname)) {
           cout << "Ignoring `" << nname << "' because it's a global.\n";
           continue;
         }

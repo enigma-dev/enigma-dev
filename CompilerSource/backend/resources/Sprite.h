@@ -6,8 +6,12 @@
  * See LICENSE for details.
  */
 
+#ifndef _SPRITE__H
+#define _SPRITE__H
+
 #include "backend/JavaStruct.h"
 #include "backend/sub/SubImage.h"
+#include "backend/util/Polygon.h"
 
 struct Sprite
 {
@@ -32,6 +36,8 @@ struct Sprite
   SubImage *subImages;
   int subImageCount;
 
-  Polygon *maskShapes;
+  Polygon_LOLWINDOWS *maskShapes;
   int maskShapeCount;
 };
+
+#endif

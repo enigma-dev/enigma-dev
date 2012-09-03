@@ -41,9 +41,10 @@ namespace enigma
   object_graphics::~object_graphics() {};
   
   INTERCEPT_DEFAULT_COPY(enigma::depthv);
-  void depthv::function() {
+  void depthv::function(variant oldval) {
     rval.d = floor(rval.d);
-    drawing_depths[rval.d].draw_events->unlink(myiter);
+    if (oldval.rval.d == rval.d) return;
+    drawing_depths[oldval.rval.d].draw_events->unlink(myiter);
     inst_iter* mynewiter = drawing_depths[rval.d].draw_events->add_inst(myiter->inst);
      if (instance_event_iterator == myiter)
        instance_event_iterator = myiter->prev;

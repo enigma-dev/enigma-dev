@@ -25,7 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-
+#ifndef _SYNCHECK__H
+#define _SYNCHECK__H
 
 namespace syncheck
 {
@@ -35,3 +36,5 @@ namespace syncheck
 }
 
 int file_check(string filename);
+
+#endif

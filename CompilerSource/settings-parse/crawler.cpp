@@ -32,7 +32,7 @@
 using namespace std;
 
 #include "filesystem/file_find.h"
-#include "externs/externs.h"
+
 #include "crawler.h"
 #include "eyaml.h"
 
@@ -57,6 +57,7 @@ namespace settings
 
 #include "parser/object_storage.h"
 #include "OS_Switchboard.h"
+#include "languages/language_adapter.h"
 
 extern string toUpper(string);
 namespace extensions
@@ -108,29 +109,30 @@ namespace extensions
       parsed_extensions.push_back(pe);
     }
   }
+  
   void crawl_for_locals()
   {
     locals.clear();
     
-    current_scope = &global_scope, immediate_scope = NULL;
-    if (!find_extname("enigma", 0xFFFFFFFF))
+    jdi::definition *denigma = main_context->get_global()->look_up("enigma");
+    if (!denigma or not(denigma->flags & jdi::DEF_SCOPE))
       return (cout << "ERROR! ENIGMA NAMESPACE NOT FOUND. THIS SHOULD NEVER HAPPEN." << endl, void());
-    externs* namespace_enigma = ext_retriever_var;
+    jdi::definition_scope *namespace_enigma = (jdi::definition_scope*)denigma;
     
     for (unsigned i = 0; i < parsed_extensions.size(); i++)
     {
       if (parsed_extensions[i].implements == "")
         continue;
       
-      immediate_scope = namespace_enigma;
-      bool found = find_extname(parsed_extensions[i].implements,0xFFFFFFFF, false);
+      jdi::definition* implements = namespace_enigma->look_up(parsed_extensions[i].implements);
       
-      if (!found)
+      if (!implements or not(implements->flags & jdi::DEF_SCOPE))
         cout << "ERROR! Extension implements " << parsed_extensions[i].implements << " without defining it!" << endl;
       else
       {
-        for (extiter it = ext_retriever_var->members.begin(); it != ext_retriever_var->members.end(); it++)
-          locals[it->second->name] = it->second->type ? it->second->type->name : "var";
+        jdi::definition_scope *const iscope = (jdi::definition_scope*)implements;
+        for (jdi::definition_scope::defiter it = iscope->members.begin(); it != iscope->members.end(); ++it)
+          locals[it->second->name] = (it->second->flags & jdi::DEF_TYPED) ? ((jdi::definition_typed*)it->second)->type->name : "var";
       }
     }
   }
@@ -167,6 +169,8 @@ namespace extensions
         sdk.represents  = dat.get("represents");
       } else cout << "Failed!\n";
     }
+    file_find_close();
+    
     if (targetAPI.windowSys != "")
       targetSDK = all_platforms[toUpper(targetAPI.windowSys)];
     else

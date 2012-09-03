@@ -97,11 +97,11 @@ extern int amain();
 #include "Universal_System/actions.h"
 
 
-#ifndef ENIGMA_PARSER_RUN
+#ifndef JUST_DEFINE_IT_RUN
   #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
-  #endif
+#endif
 #include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
-  #ifndef ENIGMA_PARSER_RUN
+  #ifndef JUST_DEFINE_IT_RUN
   #include "Universal_System/syntax_quirks.h"
 
   #include "Universal_System/with.h"

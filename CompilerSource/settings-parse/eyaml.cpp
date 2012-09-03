@@ -42,7 +42,7 @@
 using namespace std;
 
 #include "eyaml.h"
-#include "general/parse_basics.h"
+#include "general/parse_basics_old.h"
 
 inline string tolower(string x) {
   for (size_t i = 0; i < x.length(); i++)
@@ -101,7 +101,11 @@ ey_string::operator string&() { return value; }
 char ey_string::toByte()      { return atoi(value.c_str()); }
 double ey_string::toDouble()  { return atof(value.c_str()); }
 int ey_string::toInt()        { cout << "TOINT: " << value << endl; return atoi(value.c_str()); }
-long long ey_string::toLong() { return atoll(value.c_str()); }
+long ey_string::toLong()      { return atol(value.c_str()); }
+#ifdef USE_LONG_LONG
+  long long ey_string::toVeryLong() { return atoll(value.c_str()); }
+#endif
+
 string ey_string::toString()
 {
   if (value[0] != '"')
@@ -138,6 +142,8 @@ string ey_string::toString()
         
       accepted_escape:
         ret.erase(i+1,1);
+      
+      default: continue;
     }
     else if (ret[i] == '"') {
       ret.erase(i); break;
@@ -268,7 +274,7 @@ ey_data parse_eyaml(istream &file, string filename)
         multi = -1;//, mchar = line[pos]; // Indicate that we are starting a multiline value, and note the character invoking it
       else // Otherwise, just an ordinary scalar
         latest->second = latestc->value = new ey_string(unlowered, line.substr(vsp, pos - vsp)); // Store this value as a string
-    else;
+    else {}
   }
   if (latest != cur->s->values.end() and latest->second == NULL)
     latest->second = latestc->value =  new ey_string(unlowered,"");

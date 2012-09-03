@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _INSTANCE__H
+#define _INSTANCE__H
 
 #include "backend/JavaStruct.h"
 
@@ -19,3 +20,5 @@ struct Instance
 	String creationCode;
 	boolean locked;
 };
+
+#endif

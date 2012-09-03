@@ -25,8 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _OBJECT_STORAGE_H
-#define _OBJECT_STORAGE_H
+#ifndef _OBJECT_STORAGE__H
+#define _OBJECT_STORAGE__H
 
 #include <map>
 #include <string>
@@ -86,7 +86,7 @@ struct parsed_object
 
   string name;
   int id, sprite_index, mask_index, parent;
-  bool visible, solid,persistent;
+  bool visible, solid, persistent;
   double depth;
 
   map<string,dectrip> locals;   // Any variable KEY used but not declared, or declared as local VALUE.
@@ -110,7 +110,18 @@ struct parsed_object
   parsed_object();
   parsed_object(string,int,int,int,int,bool,bool,double,bool);
 };
+
 extern map<int,parsed_object*> parsed_objects;
+
+struct parsed_script
+{
+  parsed_object obj; //Script will pretend to be an object, having locals and globals inherited by all who call it.
+  parsed_event pev, *pev_global; // The former is this scripts code, as an "event". The latter is a global scope version; see documentation
+  int globargs; // The maximum number of arguments with which this was invoked from all contexts.
+  parsed_script(): obj(), pev(&obj), pev_global(NULL), globargs(0) {}; //automatically link our even to our object.
+};
+
+
 struct parsed_room: parsed_object {
   struct parsed_icreatecode { parsed_event* pe; int object_index; };
   map<int,parsed_icreatecode> instance_create_codes;

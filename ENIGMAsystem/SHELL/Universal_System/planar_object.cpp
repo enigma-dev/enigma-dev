@@ -121,6 +121,8 @@ namespace enigma
         instance->speed.    rval.d =  hypotf(instance->hspeed.rval.d, instance->vspeed.rval.d);
       if(instance->direction.rval.d < 0)
         instance->direction.rval.d += 360;
+
+      instance->vspeed.function(instance->vspeed);
     }
 
     instance->x += instance->hspeed.rval.d;

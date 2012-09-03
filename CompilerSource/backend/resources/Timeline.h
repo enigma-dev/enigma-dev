@@ -6,10 +6,10 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _TIMELINE__H
+#define _TIMELINE__H
 
 #include "backend/sub/Moment.h"
-
 #include "backend/JavaStruct.h"
 
 struct Timeline
@@ -20,3 +20,5 @@ struct Timeline
 	Moment *moments;
 	int momentCount;
 };
+
+#endif

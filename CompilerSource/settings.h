@@ -58,7 +58,7 @@ namespace setting
   extern bool use_gml_equals;   // Defines what language operator= is inherited from.   0 = GML,               1 = C++
   extern bool use_incrementals; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
   extern bool literal_autocast; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
-};
+}
 
 #endif
 

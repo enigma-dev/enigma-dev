@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _COMPILE__ORGANIZATION__H
+#define _COMPILE__ORGANIZATION__H
+
 //Error codes
 enum {
   E_ERROR_NO_ERROR_LOL,
@@ -43,12 +46,4 @@ enum cmodes {
   mode_compile
 };
 
-#include "parser/object_storage.h"
-
-struct parsed_script
-{
-  parsed_object obj; //Script will pretend to be an object, having locals and globals inherited by all who call it.
-  parsed_event pev, *pev_global; // The former is this scripts code, as an "event". The latter is a global scope version; see documentation
-  int globargs; // The maximum number of arguments with which this was invoked from all contexts.
-  parsed_script(): obj(), pev(&obj), pev_global(NULL), globargs(0) {}; //automatically link our even to our object.
-};
+#endif

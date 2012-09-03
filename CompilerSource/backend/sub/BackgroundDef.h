@@ -6,6 +6,8 @@
  * See LICENSE for details.
  */
 
+#ifndef _BACKGROUNDDEF__H
+#define _BACKGROUNDDEF__H
 
 #include "backend/JavaStruct.h"
 
@@ -23,3 +25,5 @@ struct BackgroundDef
   
 	int backgroundId;
 };
+
+#endif

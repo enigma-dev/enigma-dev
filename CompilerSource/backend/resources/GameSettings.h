@@ -6,15 +6,15 @@
  * See LICENSE for details.
  */
 
-
-
+#ifndef _GAMESETTINGS__H
+#define _GAMESETTINGS__H
 
 #include "backend/JavaStruct.h"
 #include "backend/util/Image.h"
 //import org.lateralgm.file.iconio.ICOFile;
 
 struct GameSettings
-	{
+{
 	int gameId; // randomized in GmFile constructor
 	boolean startFullscreen;
 	boolean interpolate;
@@ -71,4 +71,6 @@ struct GameSettings
 	String description;
 
 	String gameIcon; //filename
-	};
+};
+
+#endif

@@ -24,25 +24,25 @@ namespace enigma {
   struct directionv: multifunction_variant {
     INHERIT_OPERATORS(directionv);
     double *spd, *hspd, *vspd;
-    void function();
+    void function(variant oldval);
   };
 
   struct speedv: multifunction_variant {
     INHERIT_OPERATORS(speedv);
     double *dir, *hspd, *vspd;
-    void function();
+    void function(variant oldval);
   };
 
   struct hspeedv: multifunction_variant {
     INHERIT_OPERATORS(hspeedv);
     double *vspd, *dir, *spd;
-    void function();
+    void function(variant oldval);
   };
 
   struct vspeedv: multifunction_variant {
     INHERIT_OPERATORS(vspeedv);
     double *hspd, *dir, *spd;
-    void function();
+    void function(variant oldval);
   };
 }
 

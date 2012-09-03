@@ -45,7 +45,11 @@ struct ey_string: ey_base { // If it doesn't contain more named members, it's a 
   operator string&(); // Implicitly behave as a string
   int toInt(); double toDouble(); // Offer methods to convert to reals
   string toString(); // Offer a method to parse the string
-  long long toLong(); char toByte(); // And oddly-sized reals
+  long toLong(); // Offer a method to convert to large reals
+  #ifdef USE_LONG_LONG
+    long long toVeryLong(); // And very large reals
+  #endif
+  char toByte(); // And very small reals
   ey_string(string, string);
   ey_string(string); ey_string();
 };

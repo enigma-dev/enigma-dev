@@ -31,7 +31,7 @@
 
 using namespace std;
 
-#include "externs/externs.h"
+
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
@@ -44,7 +44,9 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
+#include "languages/lang_CPP.h"
+
+int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out);
 

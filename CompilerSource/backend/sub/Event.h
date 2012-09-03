@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _EVENTS__H
+#define _EVENTS__H
 
 #include "backend/JavaStruct.h"
 
@@ -15,3 +16,5 @@ struct Event
 	int id;
 	String code;
 };
+
+#endif

@@ -42,18 +42,20 @@ ideprint &ideprint::operator<< (int x) {
 ideprint &ideprint::operator<< (long x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (long long x) {
-  f(tostring(x).c_str()); return *this;
-}
 ideprint &ideprint::operator<< (unsigned x) {
   f(tostring(x).c_str()); return *this;
 }
 ideprint &ideprint::operator<< (unsigned long x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (unsigned long long x) {
-  f(tostring(x).c_str()); return *this;
-}
+#ifdef USE_LONG_LONG
+  ideprint &ideprint::operator<< (long long x) {
+    f(tostring(x).c_str()); return *this;
+  }
+  ideprint &ideprint::operator<< (unsigned long long x) {
+    f(tostring(x).c_str()); return *this;
+  }
+#endif
 ideprint &ideprint::operator<< (void *x) {
   f(tostringv(x).c_str()); return *this;
 }

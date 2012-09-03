@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _PATH__H
+#define _PATH__H
 
 #include "backend/sub/PathPoint.h"
 #include "backend/JavaStruct.h"
@@ -27,3 +28,5 @@ struct Path
 	PathPoint *points;
 	int pointCount;
 };
+
+#endif

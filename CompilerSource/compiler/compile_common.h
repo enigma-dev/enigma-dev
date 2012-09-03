@@ -25,8 +25,12 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _COMPILE_COMMON__H
+#define _COMPILE_COMMON__H
+
 #include <map>
 #include "compile_organization.h"
+#include "parser/object_storage.h"
 
 namespace used_funcs
 {
@@ -36,7 +40,6 @@ namespace used_funcs
 extern std::map<string,parsed_script*> scr_lookup;
 
 extern const char* license;
-extern string format_error(string code,string err,int pos);
 
 
 inline string tdefault(string t) {
@@ -49,3 +52,5 @@ inline void* lgmRoomBGColor(int c) {
 inline string system_get_uppermost_tier() {
   return "object_collisions";
 }
+
+#endif

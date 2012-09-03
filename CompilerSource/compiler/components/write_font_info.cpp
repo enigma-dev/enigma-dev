@@ -34,7 +34,8 @@ using namespace std;
 #include "compiler/compile_common.h"
 
 
-int compile_writeFontInfo(EnigmaStruct* es)
+#include "languages/lang_CPP.h"
+int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h",ios_base::out);
   wto << license << "#include \"Universal_System/fontstruct.h\"" << endl

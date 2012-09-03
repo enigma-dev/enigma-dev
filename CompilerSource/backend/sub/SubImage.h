@@ -6,13 +6,15 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _SUBIMAGE__H
+#define _SUBIMAGE__H
 
 #include "backend/JavaStruct.h"
 #include "backend/util/Image.h"
 #include "backend/util/Polygon.h"
 
-struct SubImage
-{
+struct SubImage {
 	Image image;
 };
+
+#endif

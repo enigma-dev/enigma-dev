@@ -6,6 +6,8 @@
  * See LICENSE for details.
  */
 
+#ifndef _VIEW__H
+#define _VIEW__H
 
 #include "backend/JavaStruct.h"
 
@@ -26,3 +28,5 @@ struct View
   int speedV;
 	int objectId;
 };
+
+#endif
