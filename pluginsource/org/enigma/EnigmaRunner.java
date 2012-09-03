@@ -66,7 +66,6 @@ import org.enigma.file.EFileReader;
 import org.enigma.file.EgmIO;
 import org.enigma.file.YamlParser;
 import org.enigma.file.YamlParser.YamlNode;
-import org.enigma.frames.DefinitionsFrame;
 import org.enigma.frames.EnigmaSettingsFrame;
 import org.enigma.frames.ProgressFrame;
 import org.enigma.messages.Messages;
@@ -86,8 +85,8 @@ import org.lateralgm.jedit.GMLKeywords.Keyword;
 import org.lateralgm.main.FileChooser;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
+import org.lateralgm.main.LGM.SingletonPluginResource;
 import org.lateralgm.main.Listener;
-import org.lateralgm.main.Prefs;
 import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.Script;
 import org.lateralgm.subframes.ActionFrame;
@@ -281,52 +280,60 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	void addResourceHook()
 		{
 		EgmIO io = new EgmIO();
+		FileChooser.fileViews.add(io);
 		FileChooser.readers.add(io);
 		FileChooser.writers.add(io);
 
 		Listener.getInstance().fc.addOpenFilters(io);
 		Listener.getInstance().fc.addSaveFilters(io);
 
-		FileChooser.fileViews.add(io);
-		ResNode.ICON.put(EnigmaSettings.class,LGM.findIcon("restree/gm.png"));
-
-		String name = Messages.getString("EnigmaRunner.RESNODE_NAME"); //$NON-NLS-1$
-		addResourceKind(EnigmaSettings.class,"EGS",name,name);
-
-		if (NEW_DEFINITIONS_READY_YET)
-			addResourceKind(Definitions.class,"DEF","Definitions","Definitions");
-		if (!Prefs.prefixes.containsKey(Definitions.class))
-			Prefs.prefixes.put(Definitions.class,"def_");
-
-		LGM.currentFile.resMap.put(EnigmaSettings.class,new SingletonResourceHolder<EnigmaSettings>(
-				new EnigmaSettings()));
-
-		ResourceFrame.factories.put(EnigmaSettings.class,new ResourceFrameFactory()
-			{
-				@Override
-				public ResourceFrame<?,?> makeFrame(Resource<?,?> r, ResNode node)
-					{
-					return esf;
-					}
-			});
-
-		ResourceFrame.factories.put(Definitions.class,new ResourceFrameFactory()
-			{
-				@Override
-				public ResourceFrame<?,?> makeFrame(Resource<?,?> r, ResNode node)
-					{
-					return new DefinitionsFrame((Definitions) r,node);
-					}
-			});
+		LGM.addPluginResource(new EnigmaSettingsPluginResource());
 		}
 
-	private static void addResourceKind(Class<? extends Resource<?,?>> kind, String name3,
-			String name, String plural)
+	private class EnigmaSettingsPluginResource extends SingletonPluginResource<EnigmaSettings>
 		{
-		Resource.kinds.add(kind);
-		Resource.kindsByName3.put(name3,kind);
-		Resource.kindNames.put(kind,name);
-		Resource.kindNamesPlural.put(kind,plural);
+		@Override
+		public Class<? extends Resource<?,?>> getKind()
+			{
+			return EnigmaSettings.class;
+			}
+
+		@Override
+		public ImageIcon getIcon()
+			{
+			return LGM.findIcon("restree/gm.png");
+			}
+
+		@Override
+		public String getName3()
+			{
+			return "EGS";
+			}
+
+		@Override
+		public String getName()
+			{
+			return Messages.getString("EnigmaRunner.RESNODE_NAME");
+			}
+
+		@Override
+		public ResourceFrameFactory getResourceFrameFactory()
+			{
+			return new ResourceFrameFactory()
+				{
+					@Override
+					public ResourceFrame<?,?> makeFrame(Resource<?,?> r, ResNode node)
+						{
+						return esf;
+						}
+				};
+			}
+
+		@Override
+		public EnigmaSettings getInstance()
+			{
+			return new EnigmaSettings();
+			}
 		}
 
 	public void populateMenu()
