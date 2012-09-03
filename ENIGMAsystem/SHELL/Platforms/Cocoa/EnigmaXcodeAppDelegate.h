@@ -28,7 +28,7 @@
 #import <Cocoa/Cocoa.h>
 #import "EnigmaView.h"
 
-@interface EnigmaXcodeAppDelegate : NSObject <NSApplicationDelegate> {
+@interface EnigmaXcodeAppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate> {
     NSWindow *window;
 	BOOL visible;
     EnigmaView *enigmaview;
@@ -46,6 +46,7 @@
 
 - (void)changeVisible;
 
+- (BOOL)windowShouldClose:(NSNotification *)notification;
 
 
 @end
