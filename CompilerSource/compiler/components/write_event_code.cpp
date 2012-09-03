@@ -33,7 +33,6 @@
 
 using namespace std;
 
-#include "externs/externs.h"
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
@@ -41,6 +40,7 @@ using namespace std;
 #include "compiler/compile_common.h"
 
 #include "compiler/event_reader/event_parser.h"
+#include "languages/lang_CPP.h"
 
 struct foundevent { int mid, id, count; foundevent(); void operator++(int); };
 extern map<string,foundevent> used_events;

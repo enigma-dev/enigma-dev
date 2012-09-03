@@ -121,7 +121,7 @@ namespace enigma
 #include "multifunction_variant.h"
 namespace enigma { struct roomv: multifunction_variant {
   INHERIT_OPERATORS(roomv);
-  void function();
+  void function(variant oldval);
 }; }
 extern enigma::roomv room;
 #endif

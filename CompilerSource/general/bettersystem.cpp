@@ -34,7 +34,7 @@ using namespace std;
 
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
-#include "general/parse_basics.h"
+#include "general/parse_basics_old.h"
 
 
 inline char* scopy(string& str)
@@ -147,7 +147,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           inheritibility.bInheritHandle = TRUE;
 
       // Output redirection
-      HANDLE handleout = NULL, handleerr = NULL;
+      HANDLE handleout = INVALID_HANDLE_VALUE, handleerr = INVALID_HANDLE_VALUE;
       if (redirout != "" or redirerr != "")
       {
         if (redirout != "")
@@ -157,12 +157,12 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
         else
           handleerr = CreateFile(redirerr.c_str(), FILE_WRITE_DATA, FILE_SHARE_READ|FILE_SHARE_WRITE, &inheritibility, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-        if (handleout or handleerr)
+        if (handleout != INVALID_HANDLE_VALUE or handleerr != INVALID_HANDLE_VALUE)
         {
           StartupInfo.dwFlags = STARTF_USESTDHANDLES;
           StartupInfo.hStdInput  = GetStdHandle((DWORD)-10);
-          StartupInfo.hStdOutput = handleout? handleout : GetStdHandle((DWORD)-11);
-          StartupInfo.hStdError  = handleerr? handleerr : GetStdHandle((DWORD)-12);
+          StartupInfo.hStdOutput = handleout != INVALID_HANDLE_VALUE? handleout : GetStdHandle((DWORD)-11);
+          StartupInfo.hStdError  = handleerr != INVALID_HANDLE_VALUE? handleerr : GetStdHandle((DWORD)-12);
 
           if (!StartupInfo.hStdInput or StartupInfo.hStdInput == INVALID_HANDLE_VALUE)
           {
@@ -204,8 +204,12 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
         GetExitCodeProcess(ProcessInformation.hProcess, &result);
         CloseHandle(ProcessInformation.hProcess);
         CloseHandle(ProcessInformation.hThread);
+        CloseHandle(handleout);
+        if (handleerr != handleout) CloseHandle(handleerr);
       }
       else {
+        CloseHandle(handleout);
+        if (handleerr != handleout) CloseHandle(handleerr);
         printf("ENIGMA: Failed to create process `%s': error %d.\nCommand line: `%s`", ename.c_str(), (int)GetLastError(), parameters.c_str());
         return -1;
       }

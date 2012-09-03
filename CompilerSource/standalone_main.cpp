@@ -1,29 +1,19 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2012 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <time.h>
 #include <string>
@@ -38,16 +28,13 @@ using namespace std;
 
 #include "general/darray.h"
 
-#include "externs/externs.h"
-#include "syntax/syncheck.h"
-    #include "parser/parser.h"
-    #include "parser/object_storage.h"
-    #include "compiler/compile.h"
-    #include "cfile_parse/cfile_parse.h"
-    #include "syntax/checkfile.h"
 
-string fc(const char* fn);
-my_string fca(const char* fn);
+#include "syntax/syncheck.h"
+  #include "parser/parser.h"
+  #include "parser/object_storage.h"
+  #include "compiler/compile.h"
+  #include "syntax/checkfile.h"
+
 
 int m_prog_loop_cfp();
 
@@ -61,210 +48,294 @@ int m_prog_loop_cfp();
  #include <cstdio>
 #endif
 
-extern void print_err_line_at(pt a);
-#include "cfile_parse/cfile_pushing.h"
-
 extern const char* establish_bearings(const char* compiler);
 extern void print_definition(string);
 
 
 extern  int ext_count;
-extern  map<externs*, int> bigmap;
 
-#include "cfile_parse/type_resolver.h"
 #include "settings-parse/crawler.h"
 #include "filesystem/file_find.h"
 
-extern char getch();
+#include <Storage/definition.h>
+#include <languages/lang_CPP.h>
+
 extern int cfile_parse_main();
-extern externs *enigma_type__var, *enigma_type__variant;
+extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
+
+inline string fc(const char* fn)
+{
+    FILE *pt = fopen(fn,"rb");
+    if (pt==NULL) return "";
+    else {
+      fseek(pt,0,SEEK_END);
+      size_t sz = ftell(pt);
+      fseek(pt,0,SEEK_SET);
+
+      char a[sz+1];
+      sz = fread(a,1,sz,pt);
+      fclose(pt);
+
+      a[sz] = 0;
+      return a;
+    }
+}
 
 inline void povers(string n)
 {
-  if (find_extname(n,0xFFFFFFFF))
-  {
-    cout << ext_retriever_var->name;
-    for (unsigned i = 0; i < ext_retriever_var->sparams.size; i++)
-      cout << "   " << ext_retriever_var->sparams[i] << endl;
-  }
-}
-int mainr(int argc, char *argv[])
-{
-  cout << "Grabbing locals" << endl;
-    extensions::crawl_for_locals();
-    string localstring = extensions::compile_local_string();
-    cout << localstring << endl;
-  cout << "Ass." << endl;
-  
-  //m_prog_loop_cfp();
-  
-  my_string EGMmain = fca("./CompilerSource/cfile_parse/auxilary.h");
-  if (EGMmain == NULL) {
-    cout << "ERROR: Failed to read main engine file\n";
-    getchar(); return 1;
-  } else cout << "Opened Engine file.\n";
-  
-  /*ofstream wto("freezway.txt",ios_base::out);
-    wto << "This is what ENIGMA read for SHELL: \n";
-    wto << EGMmain;
-  wto.close();*/
-  
-  //EGMmain += "\n\n#include <map>\n\nstd::map<float,float> testmap;\n\n";
-  //EGMmain = fc("./CompilerSource/cfile_parse/auxilary.h");
-  
-  //my_string EGMmain_e = EGMmain;
-  
-  clock_t cs = clock();
-  timeval ts, tn; gettimeofday(&ts,NULL);
-  pt a = parse_cfile(EGMmain);
-  gettimeofday(&tn,NULL);
-  clock_t ce = clock();
-  
-  if (a != pt(-1))
-  {
-    cout << "ERROR in parsing engine file: this is the worst thing that could have happened within the first few seconds of compile.\n";
-    print_err_line_at(a);
-    
-    print_definition("__PTRDIFF_TYPE__");
-    return 1;
-  }
-  
-  //print_scope_members(&global_scope);
-  
-  cout << "Successfully parsed ENIGMA's engine (" << (((ce - cs) * 1000)/CLOCKS_PER_SEC) << "ms)\n";
-  cout << "Name lookups: " << endl;
-  povers("draw_sprite");
-  povers("show_message");
-  povers("max");
-  povers("sin");
-  povers("fork");
-  povers("toString");
-  povers("draw_triangle");
-  povers("draw_text");
-  povers("draw_primitive_begin");
-  povers("room_goto");
-  povers("printf");
-  povers("draw_background_tiled_area_ext");
-  povers("draw_roundrect_color");
-  
-  return 0;
-  //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
-  
-  if (find_extname("var", EXTFLAG_TYPENAME))
-    enigma_type__var = ext_retriever_var;
-  if (find_extname("variant",EXTFLAG_TYPENAME))
-    enigma_type__variant = ext_retriever_var;
-  
-  cout << "Initializing GML parser..." << endl;
-  parser_init();
-  cout << "Loading locals..." << endl;
-  shared_locals_load(requested_extensions);
-  cout << "Getting data..." << endl;
-  string pf = fc("./CompilerSource/cfile_parse/auxilary_gml.h");
-  
-  cout << "Checking syntax" << endl;
-  a = syncheck::syntacheck(pf);
-  if (a != pt(-1))
-  {
-    int line = 1, lp = 1;
-    for (unsigned i=0; i<a; i++,lp++) {
-      if (pf[i] =='\r')
-        line++, lp = 0, i += pf[i+1] == '\n';
-      else if (pf[i] == '\n') line++, lp = 0;
-    }
-    cout << "Line " << line << ", position " << lp << " (absolute " << a << "): " << syncheck::syerr <<  endl;
-    return 0;
-  }
-  
-  cout << "Syntax check completed with no error.\n";
-  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-  
-  parsed_object par;
-  parsed_event ev(&par);
-  string b = parser_main(pf,&ev);
-  unsigned sc = 0;
-  varray<string> empty;
-  
-  cout << "\nParsed to:\n" << b;
-  parsed_object tglob; tglob.locals["gstr"] = dectrip("string");
-  parser_secondary(ev.code,ev.synt, &tglob, NULL, &ev);
-  ofstream fpsd("parse_output.txt",ios_base::out);
-  print_to_file(ev.code,ev.synt,sc,empty,0,fpsd); fpsd.close();
-  system("gedit parse_output.txt || notepad parse_output.txt");
-  cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
-  
-  cout << "Locals declared:\n";
-  for (deciter i = par.locals.begin(); i != par.locals.end(); i++)
-  {
-    cout << "  " << (i->second.type != ""? i->second.type : "var") << " " << i->second.prefix << " " << i->first << " " << i->second.suffix << "\n";
-  }
-  
-  cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nOne more thing: Resolving types\n";
-  cout << externs_name(exp_typeof("room_speed")) << endl;
-  cout << externs_name(exp_typeof("var")) << endl;
-  cout << externs_name(exp_typeof("*var")) << endl;
-  cout << externs_name(exp_typeof("room")) << endl;
-  cout << externs_name(exp_typeof("room + room")) << endl;
-  cout << externs_name(exp_typeof("room + 1")) << endl;
-  cout << externs_name(exp_typeof("room - 1")) << endl;
-  cout << externs_name(exp_typeof("var[5]")) << endl;
-  cout << externs_name(exp_typeof("testmap")) << endl;
-  cout << externs_name(exp_typeof("testmap[5]")) << endl;
-  cout << (find_extname("testmap",0xFFFFFFFF) ? externs_name(ext_retriever_var) : "wut") << endl;
-  
-  cout << "And just for the record, parsing the C stuff took " << (double(tn.tv_sec - ts.tv_sec) + double(tn.tv_usec - ts.tv_usec)/1000000.0) << " seconds" << endl;
-  cout << "\n\n\n\n\n\n\n\n\nPress Enter to continue" << endl;
-  
-  getch();
-  
-  cout << "% Testing free % \n";
-  cout << "Freeing global scope... "; global_scope.clear_all(); cout << "Done.\n";
-  cout << "Clearing parser lists... "; cfp_clear_lists(); cout << "Done.\n";
-  /*
-  cout << "Free completed successfully (" << global_scope.members.size() << "): " << ext_count << " remaining\n";
-  cout << "(Or, if you want a second opinion, there are apparently " << bigmap.size() << " remaining)\n";
-  for (map<externs*,int>::iterator i = bigmap.begin(); i != bigmap.end(); i++)
-    cout << i->first->name << " ("<<(i->second)<<"), "; cout << "end\n";*/
-  
-  
-  return 0;
+  jdi::definition *d = main_context->get_global()->look_up(n);
+  if (d) cout << d->toString();
+  else cout << n << ": Not found" << endl;
 }
 
-
-struct syntax_error {
-  const char*err_str;
-  int line, position;
-  int absolute_index;
-  void set(int x, int
-  y,int a, string s);
-};
 const char* libInit(struct EnigmaCallbacks* ecs);
+void        libFree();
 syntax_error *definitionsModified(const char*,const char*);
 
 #include "OS_Switchboard.h"
 #include "general/bettersystem.h"
+#include <System/builtins.h>
+#include "compiler/jdi_utility.h"
 
+void do_cli(jdi::context &ct);
+syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code);
+int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
 int main(int argc, char* argv[])
 {
   puts("Attempting to run");
-  e_execp("gcc -E -x c++ -v blank.txt","");
+  /*e_execp("gcc -E -x c++ -v blank.txt","");*/
   //e_exec("gcc -E -x c++ -v blank.txt");
   
-  libInit(NULL);
-  definitionsModified(NULL, ((string) "%e-yaml\n"
-	       "---\n" 	 
-	       "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n" 	 
-	       "target-graphics: OpenGL\n" 	 
-	       "target-audio: OpenAL\n"
-	       "target-collision: BBox\n"
-	       ).c_str());
-  //mainr(argc,argv);
-  string in2 = fc("./CompilerSource/cfile_parse/auxilary_gml.h");
-  int retval = syncheck::syntacheck(in2);
-  int l=0,p=0;
-  for (int i=0;i<retval;i++) { if (in2[i]=='\r') { l++; if (in2[i+1]=='\n') i++; p=i+1; } else if (in2[i]=='\n') { l++; p=i+1; } }
-  printf("Line %d, position %d (absolute index %d): %s\r\n",(l)+1,(retval-p)+1,retval,syncheck::syerr.c_str());
+  const char *ic = libInit(NULL);
+  if (ic) {
+    cout << ic << endl;
+    return 0;
+  }
   
-  getchar();
+  for (int i = 0; i < 1; ++i)
+  current_language->definitionsModified(NULL, ((string) "%e-yaml\n"
+    "---\n" 	 
+    "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n" 	 
+    /* "target-graphics: OpenGL\n" 	 
+    "target-audio: OpenAL\n"
+    "target-collision: BBox\n"
+    /* Straight from LGM on Linux */
+    "treat-literals-as: 0\n"
+    "sample-lots-of-radios: 0\n"
+    "inherit-equivalence-from: 0\n"
+    "sample-checkbox: on\n"
+    "sample-edit: DEADBEEF\n"
+    "sample-combobox: 0\n"
+    "inherit-strings-from: 0\n"
+    "inherit-escapes-from: 0\n"
+    "inherit-increment-from: 0\n"
+    " \n"
+    "target-audio: OpenAL\n"
+    "target-windowing: xlib\n"
+    "target-compiler: gcc\n"
+    "target-graphics: OpenGL\n"
+    "target-widget: None\n"
+    "target-collision: BBox\n"
+    "target-networking: None\n"
+    /* */
+    ).c_str());
+  //mainr(argc,argv);
+  
+  string in2 = fc("./CompilerSource/test_gml.h");
+  cout << "Check file:" << endl << in2 << endl;
+  const char *name = "my_script";
+  syntax_error* a = syntaxCheck(1,&name,in2.c_str());
+  printf("Line %d, position %d (absolute index %d): %s\r\n",a->line,a->position,a->absolute_index,a->err_str);
+  {
+    jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
+    quickmember_variable(&globals_scope, jdi::builtin_type__int, "sprite0");
+  }
+  
+  EnigmaStruct es = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+  };
+  
+  GmObject obj = {0,0,0,0,0,0,0,0,0,0,0};
+  MainEvent mev = {0,0,0};
+  Event ev = {0,0};
+  ev.code = "//Haha, boobs!";
+  ev.id = 10; // EV_MOUSE_ENTER
+  
+  mev.id = 6; // EV_MOUSE
+  mev.eventCount = 1;
+  mev.events = &ev;
+  
+  obj.mainEventCount = 1;
+  obj.mainEvents = &mev;
+  obj.name = "obj_boobs";
+  obj.spriteId = obj.parentId = obj.maskId = -1;
+  
+  es.gmObjects = &obj;
+  es.gmObjectCount = 1;
+  
+  /*SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
+  Sprite sprite = {"spr_0", 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 32, 32, &subimages, 1, NULL, 0};
+  Sprite sprites[2] = { sprite, sprite };
+  es.spriteCount = 2; es.sprites = sprites;
+  es.filename = "coolio.gmk";
+  es.fileVersion = 800;*/
+  
+  do_cli(*main_context);
+  
+  // current_language->compile(&es, "/tmp/coolio.exe", 0);
+  
+  libFree();
+  
+  //getchar();
   return 0;
+}
+
+
+#include <cstring>
+#include <System/lex_cpp.h>
+#include <General/parse_basics.h>
+
+#ifdef __linux__d
+#include <ncurses.h>
+#else
+static char getch() {
+  int c = fgetc(stdin);
+  int ignore = c;
+  while (ignore != '\n')
+    ignore = fgetc(stdin);
+  return c;
+}
+#endif
+
+using namespace jdip;
+void do_cli(context &ct) {
+  char c = ' ';
+  macro_map undamageable = ct.get_macros();
+  while (c != 'q' and c != '\n') { switch (c) {
+    case 'd': {
+        bool justflags; justflags = false;
+        if (false) { case 'f': justflags = true; }
+        cout << "Enter the item to define:" << endl << ">> " << flush;
+        char buf[4096]; cin.getline(buf, 4096);
+        size_t start, e = 0;
+        while (is_useless(buf[e]) or buf[e] == ':') ++e;
+        definition* def = ct.get_global();
+        while (buf[e] and def) {
+          if (!is_letter(buf[e])) { cout << "Unexpected symbol '" << buf[e] << "'" << endl; break; }
+          start = e;
+          while (is_letterd(buf[++e]));
+          if (def->flags & DEF_SCOPE) {
+            string name(buf+start, e-start);
+            definition_scope::defiter it = ((definition_scope*)def)->members.find(name);
+            if (it == ((definition_scope*)def)->members.end()) {
+              cout << "No `" << name << "' found in scope `" << def->name << "'" << endl;
+              def = NULL;
+              break;
+            }
+            def = it->second;
+          }
+          else {
+            cout << "Definition `" << def->name << "' is not a scope" << endl;
+            def = NULL;
+            break;
+          }
+          while (is_useless(buf[e]) or buf[e] == ':') ++e;
+        }
+        if (def and e) {
+          if (justflags) {
+            map<int, string> flagnames;
+            DEF_FLAGS d = DEF_TYPENAME;
+            switch (d) {
+              case DEF_TYPENAME: flagnames[DEF_TYPENAME] = "DEF_TYPENAME";
+              case DEF_NAMESPACE: flagnames[DEF_NAMESPACE] = "DEF_NAMESPACE";
+              case DEF_CLASS: flagnames[DEF_CLASS] = "DEF_CLASS";
+              case DEF_ENUM: flagnames[DEF_ENUM] = "DEF_ENUM";
+              case DEF_UNION: flagnames[DEF_UNION] = "DEF_UNION";
+              case DEF_SCOPE: flagnames[DEF_SCOPE] = "DEF_SCOPE";
+              case DEF_TYPED: flagnames[DEF_TYPED] = "DEF_TYPED";
+              case DEF_FUNCTION: flagnames[DEF_FUNCTION] = "DEF_FUNCTION";
+              case DEF_VALUED: flagnames[DEF_VALUED] = "DEF_VALUED";
+              case DEF_DEFAULTED: flagnames[DEF_DEFAULTED] = "DEF_DEFAULTED";
+              case DEF_EXTERN: flagnames[DEF_EXTERN] = "DEF_EXTERN";
+              case DEF_TEMPLATE: flagnames[DEF_TEMPLATE] = "DEF_TEMPLATE";
+              case DEF_TEMPPARAM: flagnames[DEF_TEMPPARAM] = "DEF_TEMPPARAM";
+              case DEF_HYPOTHETICAL: flagnames[DEF_HYPOTHETICAL] = "DEF_HYPOTHETICAL";
+              case DEF_TEMPSCOPE: flagnames[DEF_TEMPSCOPE] = "DEF_TEMPSCOPE";
+              case DEF_PRIVATE: flagnames[DEF_PRIVATE] = "DEF_PRIVATE";
+              case DEF_PROTECTED: flagnames[DEF_PROTECTED] = "DEF_PROTECTED";
+              case DEF_INCOMPLETE: flagnames[DEF_INCOMPLETE] = "DEF_INCOMPLETE";
+              case DEF_ATOMIC: flagnames[DEF_ATOMIC] = "DEF_ATOMIC";
+              default: ;
+            }
+            bool hadone = false;
+            for (int i = 1; i < (1 << 30); i <<= 1)
+              if (def->flags & i)
+                cout << (hadone? " | " : "  ") << flagnames[i], hadone = true;
+            cout << endl;
+          }
+          else
+            cout << def->toString() << endl;
+        }
+      } break;
+    
+    case 'e': {
+        bool eval, coerce, render, show;
+        eval = true,
+        coerce = false;
+        render = false;
+        show = false;
+        if (false) { case 'c': eval = false; coerce = true;  render = false; show = false;
+        if (false) { case 'r': eval = false; coerce = false; render = true;  show = false;
+        if (false) { case 's': eval = false; coerce = false; render = false; show = true;
+        } } }
+        cout << "Enter the expression to evaluate:" << endl << ">> " << flush;
+        char buf[4096]; cin.getline(buf, 4096);
+        llreader llr(buf, strlen(buf));
+        AST a;
+        lexer_cpp c_lex(llr, undamageable, "User expression");
+        token_t dummy = c_lex.get_token_in_scope(ct.get_global());
+        if (!a.parse_expression(dummy, &c_lex, ct.get_global(), precedence::all, def_error_handler)) {
+          if (render) {
+            cout << "Filename to render to:" << endl;
+            cin.getline(buf, 4096);
+            a.writeSVG(buf);
+          }
+          if (eval) {
+            value v = a.eval();
+            cout << "Value returned: " << v.toString() << endl;
+          }
+          if (coerce) {
+            full_type t = a.coerce();
+            cout << "Type of expression: " << t.toString() << endl;
+          }
+          if (show) {
+            a.writeSVG("/tmp/anus.svg");
+            if (system("xdg-open /tmp/anus.svg"))
+              cout << "Failed to open." << endl;
+          }
+        } else cout << "Bailing." << endl;
+      } break;
+    
+    case 'h':
+      cout <<
+      "'c' Coerce an expression, printing its type"
+      "'d' Define a symbol, printing it recursively\n"
+      "'e' Evaluate an expression, printing its result\n"
+      "'f' Print flags for a given definition\n"
+      "'h' Print this help information\n"
+      "'m' Define a macro, printing a breakdown of its definition\n"
+      "'r' Render an AST representing an expression\n"
+      "'s' Render an AST representing an expression and show it\n"
+      "'q' Quit this interface\n";
+    break;
+      
+    
+    default: cout << "Unrecognized command. Empty command or 'q' to quit." << endl << endl; break;
+    case ' ': cout << "Commands are single-letter; 'h' for help." << endl << "Follow commands with ENTER on non-unix." << endl;
+  } 
+  cout << "> " << flush;
+  c = getch();
+  }
+  cout << endl << "Goodbye" << endl;
 }

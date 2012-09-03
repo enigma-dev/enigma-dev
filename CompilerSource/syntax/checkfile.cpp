@@ -35,7 +35,7 @@ using namespace std;
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
-#include "general/parse_basics.h"
+#include "general/parse_basics_old.h"
 
 int file_check(string filename)
 {

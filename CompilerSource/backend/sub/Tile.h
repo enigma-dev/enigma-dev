@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _TILE__H
+#define _TILE__H
 
 #include "backend/JavaStruct.h"
 
@@ -23,3 +24,5 @@ struct Tile
   int id;
   boolean locked;
 };
+
+#endif

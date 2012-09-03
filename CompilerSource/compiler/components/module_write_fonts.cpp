@@ -32,7 +32,7 @@
 
 using namespace std;
 
-#include "externs/externs.h"
+
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
@@ -43,6 +43,7 @@ using namespace std;
 #include "backend/ideprint.h"
 
 #include "compiler/reshandlers/rectpack.h"
+#include "languages/lang_CPP.h"
 
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
@@ -52,7 +53,7 @@ inline void writef(float x, FILE *f) {
 }
 
 using namespace rect_packer;
-int module_write_fonts(EnigmaStruct *es, FILE *gameModule)
+int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
 {
   // Now we're going to add backgrounds
   edbg << es->fontCount << " Adding Fonts to Game Module: " << flushl;

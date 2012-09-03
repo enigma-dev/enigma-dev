@@ -38,7 +38,7 @@ namespace enigma
   struct depthv: multifunction_variant {
     INHERIT_OPERATORS(depthv);
     struct inst_iter *myiter;
-    void function();
+    void function(variant oldval);
     void init(double depth, object_basic* who);
     void remove();
     ~depthv();
@@ -62,7 +62,7 @@ namespace enigma
       double image_angle;
     
     //Accessors
-      #ifdef ENIGMA_PARSER_RUN
+      #ifdef JUST_DEFINE_IT_RUN
         int sprite_width, sprite_height;
         int sprite_xoffset, sprite_yoffset;
       #else

@@ -10,8 +10,10 @@
 package org.enigma.file;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -460,6 +462,7 @@ public final class ApngIO
 			fullFile.write(fctl.getBytes()); // Write it into the file
 
 			// Now make our frame data. IDs will be 3, 5, 7, 9...
+			buf= baos.toByteArray();
 			bais = new ByteArrayInputStream(buf);
 			bais.skip(8);
 			transferIDATs(bais,fullFile,indx,true);
@@ -472,6 +475,7 @@ public final class ApngIO
 		PNG_Chunk genChunk = new Generic_Chunk();
 		ByteArrayOutputStream png = new ByteArrayOutputStream();
 		ArrayList<BufferedImage> ret = new ArrayList<BufferedImage>();
+		byte[] imageHeader=null;
 		try
 			{
 			png.write(PNG_SIGNATURE);
@@ -484,6 +488,7 @@ public final class ApngIO
 
 			while (genChunk.read(is))
 				{
+
 				if (genChunk.isType(acTL.type))
 					{
 					//Look at all the fucks I give
@@ -498,6 +503,7 @@ public final class ApngIO
 
 						png.reset();
 						png.write(pngBase);
+						png.write(imageHeader);
 						hasData = false;
 						}
 					}
@@ -519,6 +525,11 @@ public final class ApngIO
 					ret.add(ImageIO.read(bais));
 					break;
 					}
+				else if (genChunk.isType(IHDR_Dummy.type)) {
+					//save the image header as it is used for all subimages
+					imageHeader=genChunk.getBytes();
+					png.write(imageHeader);
+				}
 				else
 					{
 					png.write(genChunk.getBytes());

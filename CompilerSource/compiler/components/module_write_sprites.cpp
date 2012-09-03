@@ -31,7 +31,7 @@
 
 using namespace std;
 
-#include "externs/externs.h"
+
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
@@ -45,7 +45,8 @@ inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-int module_write_sprites(EnigmaStruct *es, FILE *gameModule)
+#include "languages/lang_CPP.h"
+int lang_CPP::module_write_sprites(EnigmaStruct *es, FILE *gameModule)
 {
   // Now we're going to add sprites
   edbg << es->spriteCount << " Adding Sprites to Game Module: " << flushl;

@@ -45,7 +45,7 @@ namespace enigma
       bool solid;
     
     //Bounding box
-      #ifdef ENIGMA_PARSER_RUN
+      #ifdef JUST_DEFINE_IT_RUN
         int bbox_left, bbox_right, bbox_top, bbox_bottom;
       #else
         int $bbox_left()   const;

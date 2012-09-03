@@ -29,7 +29,7 @@
 #define _INSTANCE_SYSTEM_BASE__H
 
 #include "instance_iterator.h"
-#include <deque>
+//#include <deque>
 
 namespace enigma
 {

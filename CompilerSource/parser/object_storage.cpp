@@ -34,38 +34,49 @@ using namespace std;
 
 #include "general/darray.h"
 
+#include <Storage/definition.h>
 #include "object_storage.h"
-#include "externs/externs.h"
 #include "settings-parse/crawler.h"
 #include "compiler/compile_common.h"
 
 
 map<string,int> shared_object_locals;
 map<string,dectrip> dot_accessed_locals;
+
+#include "languages/lang_CPP.h"
 int shared_locals_load(vector<string> exts)
 {
   cout << "Finding parent..."; fflush(stdout);
 
   // Find namespace enigma
-  externs* pscope = NULL;
-  current_scope = &global_scope;
-  extiter ns_enigma = current_scope->members.find("enigma");
-
-  // Find the parent object
-  if (ns_enigma != current_scope->members.end()) {
-    extiter parent = ns_enigma->second->members.find(system_get_uppermost_tier());
-    if (parent != ns_enigma->second->members.end())
-      pscope = parent->second;
+  jdi::definition* pscope = main_context->get_global()->look_up("enigma");
+  if (!pscope or !(pscope->flags & jdi::DEF_SCOPE)) {
+    cerr << "ERROR! Can't find namespace enigma!" << endl;
+    return 1;
   }
-  cout << "found"; fflush(stdout);
+  jdi::definition_scope* ns_enigma = (jdi::definition_scope*)pscope;
+  jdi::definition* parent = ns_enigma->look_up(system_get_uppermost_tier());
+    if (!parent) {
+      cerr << "ERROR! Failed to find parent scope `" << system_get_uppermost_tier() << endl;
+      return 2;
+    }
+  if (not(parent->flags & jdi::DEF_CLASS)) {
+    cerr << "PARSE ERROR! Parent class is not a class?" << endl;
+    cout << parent->parent->name << "::" << parent->name << ":  " << parent->toString() << endl;
+    return 3;
+  }
+  jdi::definition_class *pclass = (jdi::definition_class*)parent;
+  
+  // Find the parent object
+  cout << "Found parent scope" << endl;
 
   shared_object_locals.clear();
 
   //Iterate the tiers of the parent object
-  for (externs *cs = pscope; cs; cs = (cs->ancestors.size ? cs->ancestors[0] : NULL) )
+  for (jdi::definition_class *cs = pclass; cs; cs = (cs->ancestors.size() ? cs->ancestors[0].def : NULL) )
   {
     cout << " >> Checking ancestor " << cs->name << endl;
-    for (extiter mem = cs->members.begin(); mem != cs->members.end(); mem++)
+    for (jdi::definition_scope::defiter mem = cs->members.begin(); mem != cs->members.end(); ++mem)
       shared_object_locals[mem->first] = 0;
   }
 
@@ -79,7 +90,6 @@ int shared_locals_clear()
   shared_object_locals.clear();
   return !shared_object_locals.empty();
 }
-
 
 dectrip::dectrip(): type(), prefix(), suffix() {}
 dectrip::dectrip(string t): type(t), prefix(), suffix() {}
@@ -107,7 +117,7 @@ parsed_event::parsed_event():                               id(0), mainId(0), co
 parsed_event::parsed_event(parsed_object *po):              id(0), mainId(0), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_object::parsed_object() {}
-parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d,bool pers): name(n), id(i), sprite_index(s), mask_index(m), parent(p), visible(vis), solid(sol), depth(d), persistent(pers) {}
+parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d,bool pers): name(n), id(i), sprite_index(s), mask_index(m), parent(p), visible(vis), solid(sol), persistent(pers), depth(d) {}
 map<int,parsed_object*> parsed_objects;
 map<int,parsed_room*> parsed_rooms;
 vector<parsed_extension> parsed_extensions;

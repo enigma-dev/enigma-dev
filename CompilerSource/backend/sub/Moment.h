@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _MOMENT__H
+#define _MOMENT__H
 
 #include "backend/JavaStruct.h"
 #include "backend/sub/Action.h"
@@ -16,3 +17,5 @@ struct Moment
 	int stepNo;
 	String code;
 };
+
+#endif

@@ -31,7 +31,7 @@
 
 using namespace std;
 
-#include "externs/externs.h"
+
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
@@ -42,9 +42,13 @@ using namespace std;
 
 #include <math.h> //log2 to calculate passes.
 
+#include <languages/lang_CPP.h>
+
+#include "compiler/compile_includes.h"
+
 extern string tostring(int);
 
-int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
+int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
 {
   //First we just parse the scripts to add semicolons and collect variable names
   for (int i = 0; i < es->scriptCount; i++)
@@ -239,7 +243,7 @@ int compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
 }
 
 
-int link_globals(parsed_object *global, EnigmaStruct *es,parsed_script *scripts[])
+int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es,parsed_script *scripts[])
 {
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");

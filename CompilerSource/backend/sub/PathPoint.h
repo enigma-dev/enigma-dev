@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _PATHPOINT__H
+#define _PATHPOINT__H
 
 #include "backend/JavaStruct.h"
 
@@ -16,3 +17,5 @@ struct PathPoint
 	int y;
 	int speed;
 };
+
+#endif

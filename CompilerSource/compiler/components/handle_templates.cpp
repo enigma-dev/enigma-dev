@@ -35,14 +35,15 @@
 
 using namespace std;
 
-#include "externs/externs.h"
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "compiler/compile_common.h"
 
-int compile_handle_templates(EnigmaStruct* es)
+#include "languages/lang_CPP.h"
+
+int lang_CPP::compile_handle_templates(EnigmaStruct* es)
 {
   map<string,string> values;
   GameSettings *gs = (GameSettings *)es;//es->gameSettings;

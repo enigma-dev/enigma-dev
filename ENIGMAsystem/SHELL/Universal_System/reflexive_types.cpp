@@ -24,21 +24,21 @@
 namespace enigma {
   //Make direction work
   INTERCEPT_DEFAULT_COPY(directionv);
-  void directionv::function() {
+  void directionv::function(variant) {
     *hspd = *spd * cos(rval.d*M_PI/180);
     *vspd = *spd *-sin(rval.d*M_PI/180);
   }
 
   //Make speed work -- same as above, but rval.d and reflex1 are switched.
   INTERCEPT_DEFAULT_COPY(speedv);
-  void speedv::function() {
+  void speedv::function(variant) {
     *hspd = rval.d * cos(*dir*M_PI/180);
     *vspd = rval.d *-sin(*dir*M_PI/180);
   }
 
   //Make hspeed work
   INTERCEPT_DEFAULT_COPY(hspeedv);
-  void hspeedv::function() {
+  void hspeedv::function(variant) {
     if (rval.d or *vspd)
     {
         *dir = (int(180+180*(1-atan2(*vspd,rval.d)/M_PI)))%360;
@@ -48,7 +48,7 @@ namespace enigma {
 
   //Make vspeed work -- Same as above, except the arguments to atan2 are reversed
   INTERCEPT_DEFAULT_COPY(vspeedv);
-  void vspeedv::function() {
+  void vspeedv::function(variant) {
     if (rval.d or *hspd)
     {
         *dir = (int(180+180*(1-atan2(rval.d,*hspd)/M_PI)))%360;

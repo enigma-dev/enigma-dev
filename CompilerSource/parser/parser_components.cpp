@@ -31,11 +31,13 @@
 #include <cstdio>
 using namespace std;
 #include "general/darray.h"
-#include "externs/externs.h"
 
-#include "general/parse_basics.h"
+#include "general/parse_basics_old.h"
 #include "general/macro_integration.h"
 #include "compiler/output_locals.h"
+#include "languages/language_adapter.h"
+
+#include <compiler/jdi_utility.h>
 
 #include "settings.h"
 
@@ -44,34 +46,40 @@ typedef size_t pt; //Use size_t as our pos type; helps on 64bit systems.
 map<string,char> edl_tokens; // Logarithmic lookup, with token.
 typedef map<string,char>::iterator tokiter;
 
-#include "cfile_parse/macro_functions.h"
-
-
 int scope_braceid = 0;
 extern string tostring(int);
+
+#include <Storage/definition.h>
+static jdi::definition_scope *current_scope;
+
 int dropscope()
 {
-  if (current_scope != &global_scope)
+  if (current_scope != main_context->get_global())
   current_scope = current_scope->parent;
   return 0;
 }
 int quickscope()
 {
-  current_scope = current_scope->members["{}"+tostring(scope_braceid++)] = new externs("{}",NULL,current_scope,EXTFLAG_NAMESPACE);
+  jdi::definition_scope* ns = new jdi::definition_scope("{}",current_scope,jdi::DEF_NAMESPACE);
+  current_scope->members["{}"+tostring(scope_braceid++)] = ns;
+  current_scope = ns;
   return 0;
 }
 int initscope(string name)
 {
   scope_braceid = 0;
-  current_scope = global_scope.members[name] = new externs(name,NULL,&global_scope,EXTFLAG_NAMESPACE);
+  main_context->get_global()->members[name] = current_scope = new jdi::definition_scope(name,main_context->get_global(),jdi::DEF_NAMESPACE);
   return 0;
 }
 int quicktype(unsigned flags, string name)
 {
-  current_scope->members[name] = new externs(name,NULL,current_scope,flags | EXTFLAG_TYPENAME);
+  current_scope->members[name] = new jdi::definition(name,current_scope,flags | jdi::DEF_TYPENAME);
   return 0;
 }
 
+#include <API/context.h>
+#include <System/macros.h>
+#include <System/lex_cpp.h>
 
 ///Remove whitespace, unfold macros,
 ///And lex code into synt.
@@ -119,30 +127,21 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         continue;
       }
       
-      maciter itm = macros.find(name);
-      if (itm != macros.end())
+      jdi::macro_iter_c itm = main_context->get_macros().find(name);
+      if (itm != main_context->get_macros().end())
       {
         if (!macro_recurses(name,mymacrostack,mymacroind))
         {
-          string macrostr = itm->second;
-
-          if (itm->second.argc != -1) //Expect ()
-          {
-            pt cwp = pos;
-            while (is_useless(code[cwp]) or (code[cwp]=='/' and (code[cwp+1]=='/' or code[cwp+1]=='*'))) {
-              if (code[cwp++] == '*') {
-                if (code[cwp] == '/') while (cwp < code.length() and  code[cwp] != '\r' and code[cwp]   != '\n') pos++;
-                else {      cwp += 2; while (cwp < code.length() and (code[cwp] != '*'  or  code[cwp+1] != '/')) pos++; }
-              }
-            }
-            if (code[cwp] != '(')
-              goto out_of_here;
-            if (!macro_function_parse(code.c_str(),code.length(),name,pos,macrostr,itm->second.args,itm->second.argc,itm->second.args_uat,false,true)) {
-              cout << "UNEXPECTED ERROR: " << macrostr;
-              cout << "\nThis error should have been reported during a previous syntax check\n"; 
-              continue;
-            }
+          string macrostr;
+          if (itm->second->argc != -1) {
+            vector<string> mpvec;
+            jdip::macro_function* mf = (jdip::macro_function*)itm->second;
+            jdip::lexer_cpp::parse_macro_params(mf, main_context->get_macros(), code.c_str(), pos, code.length(), mpvec, jdip::token_t(), jdi::def_error_handler);
+            char *mss, *mse; mf->parse(mpvec, mss, mse, jdip::token_t());
+            macrostr = string (mss, mse);
           }
+          else
+            macrostr = ((jdip::macro_scalar*)itm->second)->value;
           mymacrostack[mymacroind++].grab(name,code,pos);
           code = macrostr; pos = 0;
           codo.append(macrostr.length(),' ');
@@ -154,15 +153,16 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       out_of_here:
       char c = 'n';
       
+      jdi::definition* d;
       tokiter itt = edl_tokens.find(name);
       if (itt != edl_tokens.end()) {
         c = itt->second;
       }
-      else if (find_extname(name,0xFFFFFFFF))
+      else if ((d = main_context->get_global()->look_up(name)))
       {
-        if (ext_retriever_var->flags & EXTFLAG_TYPENAME)
+        if (d->flags & jdi::DEF_TYPENAME)
           c = 't';
-        else if (ext_retriever_var->is_function() and ext_retriever_var->refstack.is_varargs())
+        else if (d->flags & jdi::DEF_FUNCTION and referencers_varargs(((jdi::definition_function*)d)->referencers))
           c = 'V';
       }
       else if (name == "then")
@@ -187,7 +187,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       //Accurately reflect newly defined types and structures
       //These will be added as types now, but their innards will be ignored until ENIGMA "link"
       if (c == 'n' and last_token == 'C') { //"class <name>"
-        quicktype(EXTFLAG_STRUCT,name); //Add the string we used to determine if this token is 'n' as a struct
+        quicktype(jdi::DEF_CLASS, name); //Add the string we used to determine if this token is 'n' as a struct
       }
       
       last_token = c;
@@ -397,9 +397,9 @@ int parser_reinterpret(string &code,string &synt)
     {
       const pt spos = pos;
       while ((synt[pos] = 'n', synt[++pos] == 'V'));
-      find_extname(code.substr(spos,pos-spos),0xFFFFFFFF);
+      jdi::definition_function *d = (jdi::definition_function*)main_context->get_global()->look_up(code.substr(spos,pos-spos));
       const pt epos = pos;
-      int en = ext_retriever_var->refstack.varargs_at();
+      int en = referencers_varargs_at(d->referencers);
       if (en == -1) continue;
       cout << "AND EN = " << en  << endl;
       ++pos; for (unsigned lvl = 1; en and lvl; pos++)
@@ -888,15 +888,15 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
   cout << " <" << ((synt && code.length()) == (synt && synt->length()) ? "equivalent" : "UNEQUAL") << "> [" << (pos > code.length()) << "]";
   cout << "ass: " << spos << ", " << epos << ": " << code.length() << endl;
   string ptname = code.substr(spos,epos-spos+1); // Isolate the potential template's name
-  bool fnd = find_extname(ptname,0xFFFFFFFF);
-  if (!fnd) return 0;
+  jdi::definition* a = main_context->get_global()->look_up(ptname);
+  if (!a) return 0;
   
-  externs *a = ext_retriever_var;
-  if (a->flags & EXTFLAG_TEMPLATE)
+  if (a->flags & jdi::DEF_TEMPLATE)
   {
-    int tmc = a->tempargs.size - 1;
+    jdi::definition_template *tmp = (jdi::definition_template*)a;
+    int tmc = tmp->params.size() - 1;
     for (int i = tmc; i >= 0; i--)
-      if (a->tempargs[i]->flags & EXTFLAG_DEFAULTED) tmc = i;
+      if (tmp->params[i]->flags & jdi::DEF_DEFAULTED) tmc = i;
     a2i = tmc - a2i;
     string iseg;
     for (int i = 0; i < a2i;)

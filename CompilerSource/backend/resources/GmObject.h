@@ -6,6 +6,8 @@
  * See LICENSE for details.
  */
 
+#ifndef _GMOBJECT__H
+#define _GMOBJECT__H
 
 #include "backend/sub/MainEvent.h"
 #include "backend/JavaStruct.h"
@@ -26,3 +28,5 @@ struct GmObject
   MainEvent *mainEvents;
   int mainEventCount;
 };
+
+#endif

@@ -6,6 +6,8 @@
  * See LICENSE for details.
  */
 
+#ifndef _MAINEVENT__H
+#define _MAINEVENT__H
 
 #include "Event.h"
 #include "backend/JavaStruct.h"
@@ -17,3 +19,5 @@ struct MainEvent
 	
 	int eventCount;
 };
+
+#endif

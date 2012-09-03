@@ -6,6 +6,8 @@
  * See LICENSE for details.
  */
 
+#ifndef _ROOM__H
+#define _ROOM__H
 
 
 #include "backend/sub/BackgroundDef.h"
@@ -64,3 +66,5 @@ struct Room
 	Tile *tiles;
 	int tileCount;
 };
+
+#endif

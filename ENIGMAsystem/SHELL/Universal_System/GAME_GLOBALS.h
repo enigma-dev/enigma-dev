@@ -43,7 +43,12 @@ global:     event_type*/
 double      fps;
 
 double health=100;
+#ifndef JUST_DEFINE_IT_RUN
+#include <deque>
 deque<int> instance_id;
+#else
+int *instance_id;
+#endif
 
 int keyboard_key=0;
 /*global:     keyboard_lastchar

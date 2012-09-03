@@ -32,7 +32,7 @@ namespace enigma {
   {
     int argc;
     void *argv;
-    #ifndef ENIGMA_PARSER_RUN
+    #ifndef JUST_DEFINE_IT_RUN
     void sort();
     void reverse();
     variant get(int) const;

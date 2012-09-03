@@ -32,7 +32,7 @@
 
 using namespace std;
 
-#include "externs/externs.h"
+
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
@@ -42,11 +42,13 @@ using namespace std;
 
 #include "backend/ideprint.h"
 
+#include "languages/lang_CPP.h"
+
 inline void writei(int x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-int module_write_paths(EnigmaStruct *es, FILE *gameModule)
+int lang_CPP::module_write_paths(EnigmaStruct *es, FILE *gameModule)
 {
   // Now we're going to add paths
   edbg << es->pathCount << " Adding Paths to Game Module: " << flushl;

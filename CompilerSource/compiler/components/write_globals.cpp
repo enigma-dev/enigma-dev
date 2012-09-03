@@ -31,17 +31,18 @@
 
 using namespace std;
 
-#include "externs/externs.h"
 #include "syntax/syncheck.h"
+#include "general/estring.h"
 #include "parser/parser.h"
 
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "compiler/compile_common.h"
 
-int global_script_argument_count = 0;
-extern string string_replace_all(string str,string substr,string nstr);
+#include "languages/lang_CPP.h"
 
-int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
+int global_script_argument_count = 0;
+
+int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
 {
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out);
@@ -53,7 +54,7 @@ int compile_writeGlobals(EnigmaStruct* es,parsed_object* global)
       wto << "variant argument0 = 0";
       for (int i = 1; i < global_script_argument_count; i++)
         wto << ", argument" << i << " = 0";
-      wto << ";\n";
+      wto << ";\n\n";
     }
 
     string s;

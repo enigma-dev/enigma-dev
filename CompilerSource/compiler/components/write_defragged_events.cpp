@@ -31,11 +31,13 @@
 #include <string>
 #include <map>
 
+#define polygone_is_a_fucking_moron 1
+
 #include "backend/ideprint.h"
 
 using namespace std;
 
-#include "externs/externs.h"
+
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
@@ -43,12 +45,13 @@ using namespace std;
 #include "compiler/compile_common.h"
 
 #include "compiler/event_reader/event_parser.h"
+#include "languages/lang_CPP.h"
 
 struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} void f2(int m,int i) { id = i, mid = m; } void inc(int m,int i) { mid=m,id=i,count++; } void operator++(int) { count++; } };
 map<string,foundevent> used_events;
 typedef map<string,foundevent>::iterator evfit;
 
-int compile_writeDefraggedEvents(EnigmaStruct* es)
+int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h");
   wto << license;
@@ -82,8 +85,8 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
       for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) // Then shell it out into the other objects.
       {
         bool exists = false;
-        for (unsigned i = 0; i < it->second->events.size; i++)
-          if (it->second->events[i].mainId == mid and it->second->events[i].id == id)
+        for (unsigned j = 0; j < it->second->events.size; j++)
+          if (it->second->events[j].mainId == mid and it->second->events[j].id == id)
             { exists = true; break; }
         if (!exists)
           it->second->events[it->second->events.size] = parsed_event(mid, id, it->second);
@@ -131,6 +134,13 @@ int compile_writeDefraggedEvents(EnigmaStruct* es)
 
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
+    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
+//    wto  << "    if (es->gameSettings.interpolate) texture_set_interpolation(1); " << endl;  //FIXME: interpolation needs to be done properly
+    if (es->gameSettings.displayCursor or polygone_is_a_fucking_moron)
+        wto  << "    window_set_cursor(cr_default);" << endl;
+    else
+        wto  << "    window_set_cursor(cr_none);" << endl;
+    wto  << "    window_set_region_scale(" << es->gameSettings.scaling << ", 0);" << endl;
     wto  << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
     int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
     wto  << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
