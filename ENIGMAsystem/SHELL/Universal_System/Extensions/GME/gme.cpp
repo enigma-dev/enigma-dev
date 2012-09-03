@@ -1,4 +1,5 @@
 #include "Audio_Systems/audio_mandatory.h"
+#include "Universal_System/estring.h"
 #include <gme/gme.h>
 #include <vector>
 #include <cstdio>
