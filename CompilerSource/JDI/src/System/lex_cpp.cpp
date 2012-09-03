@@ -421,8 +421,17 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
         while (is_useless(argstr[++i]));
         if (argstr[i] != ')') for (;;) {
           if (!is_letter(argstr[i])) {
-            herr->error("Expected parameter name for macro declaration", filename, line, pos-lpos);
-            break;
+            if (argstr[i] == '.' and argstr[i+1] == '.' and argstr[i+2] == '.') {
+              variadic = true, i += 3;
+              while (is_useless(argstr[i])) ++i;
+              if (argstr[i] != ')')
+                herr->error("Expected end of parameters after variadic", filename, line, pos-lpos);
+              break;
+            }
+            else {
+              herr->error("Expected parameter name for macro declaration", filename, line, pos-lpos);
+              break;
+            }
           }
           const size_t si = i;
           while (is_letterd(argstr[++i]));
@@ -969,6 +978,8 @@ lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): ma
     keywords["typename"] = TT_TYPENAME;
     keywords["union"] = TT_UNION;
     keywords["using"] = TT_USING;
+    keywords["new"] = TT_NEW;
+    keywords["delete"] = TT_DELETE;
     
     // GNU Extensions
     keywords["__attribute__"] = TT_INVALID;

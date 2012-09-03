@@ -123,13 +123,33 @@ namespace jdi {
     };
     /// Child of AST_Node_Unary specifically for sizeof
     struct AST_Node_sizeof: AST_Node_Unary {
-      bool negate;
+      bool negate; ///< If this is true, then rather than sizeof, we represent its negation, is_empty.
       
       virtual string toString() const; ///< Renders this node and its children as a string, recursively.
       virtual value eval() const; ///< Behaves funny for sizeof; coerces instead, then takes size of result type.
       virtual full_type coerce() const; ///< Behaves funny for sizeof; returns unsigned long every time.
       virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
       AST_Node_sizeof(AST_Node* param, bool negate);
+    };
+    struct AST_Node_new: AST_Node {
+      full_type type; ///< The type to be allocated.
+      AST_Node *position; ///< A posisition AST node, for placement new.
+      AST_Node *bound; ///< An array bound AST node, for new[].
+      
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
+      virtual value eval() const; ///< Behaves funny for sizeof; coerces instead, then takes size of result type.
+      virtual full_type coerce() const; ///< Behaves funny for sizeof; returns unsigned long every time.
+      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
+      AST_Node_new();
+    };
+    struct AST_Node_delete: AST_Node_Unary {
+      bool array; ///< True if we are delete[] rather than regular delete.
+      
+      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
+      virtual value eval() const; ///< Behaves funny for sizeof; coerces instead, then takes size of result type.
+      virtual full_type coerce() const; ///< Behaves funny for sizeof; returns unsigned long every time.
+      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
+      AST_Node_delete(AST_Node* param, bool array);
     };
     /// Child of AST_Node_Unary specifically for sizeof
     struct AST_Node_Cast: AST_Node_Unary {

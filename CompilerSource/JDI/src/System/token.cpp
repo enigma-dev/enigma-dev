@@ -104,9 +104,13 @@ static struct token_info_c {
       case TT_DECLITERAL: name[TT_DECLITERAL] = "decimal literal";
       case TT_HEXLITERAL: name[TT_HEXLITERAL] = "hexadecimal literal";
       case TT_OCTLITERAL: name[TT_OCTLITERAL] = "octal literal";
+      case TT_NEW: name[TT_NEW] = "`new' keyword";
+      case TT_DELETE: name[TT_DELETE] = "`delete' keyword";
       case TTM_CONCAT:   name[TTM_CONCAT] = "`##' token";
       case TTM_TOSTRING: name[TTM_TOSTRING] = "`#' token";
       case TT_ENDOFCODE: name[TT_ENDOFCODE] = "end of code";
+      #define handle_user_token(tname, desc) case tname: name[tname] = desc;
+      #include <User/token_cases.h>
     }
   }
 } token_info;

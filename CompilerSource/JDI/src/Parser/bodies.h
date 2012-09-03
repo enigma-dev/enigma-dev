@@ -218,6 +218,27 @@ namespace jdip {
   **/
   definition_hypothetical* handle_hypothetical(lexer *lex, definition_scope *scope, token_t& token, unsigned flags, error_handler *herr);
   
+  /**
+    Read a string from code containing the name of an operator function, eg, `operator*', `operator[]', `operator.', `operator new[]'.
+    @param  lex   The lexer to poll for tokens.
+    @param token  The token which sparked this function call. Should be TT_OPERATORKW.
+    @param scope  The scope from which class names will be read for class casts.
+    @param herr   An error handler to receive any error reports.
+    @return The string containing the legible name of the operator function.
+  */
+  string read_operatorkw_name(lexer* lex, token_t &token, definition_scope *scope, error_handler *herr);
+  
+  /**
+    Read a definition from a string of scope qualifiers.
+    @param lex    The lexer to poll for tokens.
+    @param scope  The scope from which class names will be read for class casts.
+    @param token  The token which sparked this function call. Should be TT_OPERATORKW.
+    @param cp     The context parser to be polled for any additional information.
+    @param herr   An error handler to receive any error reports.
+    @return The string containing the legible name of the operator function.
+  */
+  definition* read_qualified_definition(lexer *lex, definition_scope* scope, token_t &token, context_parser *cp, error_handler *herr);
+  
   extern definition* dangling_pointer;
   /**
     @class context_parser

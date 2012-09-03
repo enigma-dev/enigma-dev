@@ -216,6 +216,60 @@ namespace jdi
       }
       break;
       
+      case TT_NEW: {
+        token = get_next_token();
+        AST_Node_new* ann = new AST_Node_new();
+        if (token.type == TT_LEFTPARENTH) {
+          track(string("("));
+          ann->position = parse_expression(token, 0);
+          if (ann->position == NULL) return NULL;
+          if (token.type != TT_RIGHTPARENTH) {
+            token.report_errorf(herr, "Expected closing parenthesis for placement new here before %s");
+            delete ann; return NULL;
+          }
+          track(string(")"));
+          token = get_next_token();
+        }
+        ann->type = read_type(lex, token, search_scope, NULL, herr);
+        
+        bool stillgoing = true;
+        while (token.type == TT_OPERATOR) {
+          if (token.content.len != 1 or *token.content.str != '*') {
+            stillgoing = false;
+            break;
+          }
+          else
+            ann->type.refs.push(ref_stack::RT_POINTERTO);
+        }
+        
+        if (stillgoing and token.type == TT_LEFTBRACKET) {
+          track(string("["));
+          token = get_next_token();
+          ann->bound = parse_expression(token, 0);
+          if (ann->bound == NULL) return NULL;
+          if (token.type != TT_RIGHTBRACKET) {
+            token.report_errorf(herr, "Expected closing parenthesis for placement new here before %s");
+            delete ann; return NULL;
+          }
+          track(string("]"));
+          token = get_next_token();
+        }
+        
+        myroot = ann;
+      } break;
+      
+      case TT_DELETE: {
+        token = get_next_token();
+        bool is_array = token.type == TT_LEFTBRACKET;
+        if (is_array) {
+          if ((token = get_next_token()).type != TT_RIGHTBRACKET) {
+            token.report_errorf(herr, "Brackets to operator delete[] should be empty; expected right bracket before %s");
+            return NULL;
+          }
+        }
+        myroot = new AST_Node_delete(parse_expression(token, precedence::unary_pre), is_array);
+      } break;
+      
       case TT_COMMA:
       case TT_SEMICOLON:
         token.report_error(herr, "Expected expression");
@@ -265,6 +319,7 @@ namespace jdi
         // Overflow; same error.
       case TT_TEMPLATE: case TT_NAMESPACE: case TT_ENDOFCODE: case TT_TYPEDEF: case TT_ASM:
       case TT_USING: case TT_PUBLIC: case TT_PRIVATE: case TT_PROTECTED: 
+      #include <User/token_cases.h>
         token.report_errorf(herr, "Expected expression before %s");
         return NULL;
       
@@ -451,6 +506,8 @@ namespace jdi
       case TT_USING: case TT_PUBLIC: case TT_PRIVATE: case TT_PROTECTED:
       
       case TT_ASM: case TT_OPERATORKW: case TT_SIZEOF: case TT_ISEMPTY: case TT_DECLTYPE:
+      case TT_NEW: case TT_DELETE:
+      #include <User/token_cases.h>
       return left_node;
       
       case TTM_CONCAT: case TTM_TOSTRING: case TT_INVALID: default: return left_node;
@@ -628,6 +685,12 @@ namespace jdi
   value AST::AST_Node_Array::eval() const {
     return elements.size()? elements.front()->eval() : value(0l);
   }
+  value AST::AST_Node_new::eval() const {
+    return position? position->eval() : value(0l);
+  }
+  value AST::AST_Node_delete::eval() const {
+    return value();
+  }
   
   //===========================================================================================================================
   //=: Coercers :==============================================================================================================
@@ -752,12 +815,22 @@ namespace jdi
     return res;
   }
   
+  full_type AST::AST_Node_new::coerce() const {
+    full_type res = type;
+    if (bound) res.refs.push_array(0);
+    return res;
+  }
+  
+  full_type AST::AST_Node_delete::coerce() const {
+    return builtin_type__void;
+  }
+  
   //===========================================================================================================================
   //=: Constructors :==========================================================================================================
   //===========================================================================================================================
   
   static string str_sizeof("sizeof",6);
-  static string str_cast("cast",6);
+  static string str_cast("cast",4);
   
   AST::AST_Node::AST_Node(): parent(NULL) {}
   AST::AST_Node::AST_Node(string ct): parent(NULL), content(ct) {}
@@ -775,6 +848,8 @@ namespace jdi
   AST::AST_Node_Ternary::AST_Node_Ternary(AST_Node *expression, AST_Node *exp_true, AST_Node *exp_false): exp(expression), left(exp_true), right(exp_false) { type = AT_TERNARYOP; }
   AST::AST_Node_Ternary::AST_Node_Ternary(AST_Node *expression, AST_Node *exp_true, AST_Node *exp_false, string ct): AST_Node(ct), exp(expression), left(exp_true), right(exp_false) { type = AT_TERNARYOP; }
   AST::AST_Node_Parameters::AST_Node_Parameters(): func(NULL) {}
+  AST::AST_Node_new::AST_Node_new(): type(), position(NULL), bound(NULL) {}
+  AST::AST_Node_delete::AST_Node_delete(AST_Node* param, bool arr): AST_Node_Unary(param), array(arr) {}
   
   
   //===========================================================================================================================

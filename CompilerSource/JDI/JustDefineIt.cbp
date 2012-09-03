@@ -120,6 +120,8 @@
 		<Unit filename="src/Parser/parse_context.h" />
 		<Unit filename="src/Parser/readers/read_expression.cpp" />
 		<Unit filename="src/Parser/readers/read_next_token.cpp" />
+		<Unit filename="src/Parser/readers/read_operatorkw_name.cpp" />
+		<Unit filename="src/Parser/readers/read_qualified_definition.cpp" />
 		<Unit filename="src/Parser/readers/read_template_parameters.cpp" />
 		<Unit filename="src/Parser/readers/read_type.cpp" />
 		<Unit filename="src/Storage/definition.cpp" />

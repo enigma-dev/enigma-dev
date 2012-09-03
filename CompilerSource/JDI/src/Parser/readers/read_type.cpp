@@ -39,69 +39,6 @@ full_type jdip::read_fulltype(lexer *lex, token_t &token, definition_scope *scop
   return ft;
 }
 
-static definition* read_qualified_type(lexer *lex, definition_scope* scope, token_t &token, context_parser *cp, error_handler *herr)
-{
-  definition *res = NULL;
-  for (;;) {
-    if (token.def->flags & DEF_TEMPLATE)
-    {
-      res = token.def;
-      definition_template* dt = (definition_template*)res;
-      if (dt->def->flags & DEF_CLASS)
-      {
-        token = lex->get_token_in_scope(scope, herr);
-        if (token.type == TT_LESSTHAN)
-        {
-          arg_key k(dt->params.size());
-          if (read_template_parameters(k, dt, lex, token, scope, cp, herr))
-            return FATAL_TERNARY(NULL,res);
-          res = dt->instantiate(k);
-          token = lex->get_token_in_scope(scope,herr);
-        }
-      }
-      else {
-        token.report_error(herr, "Template `" + token.def->name + "' cannot be used as a type");
-        //cerr << token.def->toString();
-        return FATAL_TERNARY(NULL,res);
-      }
-    }
-    else if (token.def->flags & DEF_SCOPE)
-    {
-      token_t la = lex->get_token_in_scope(scope, herr);
-      if (la.type != TT_SCOPE)
-        break;
-      definition_scope* as = (definition_scope*)token.def;
-      token = lex->get_token_in_scope(as, herr);
-      if (token.type != TT_DEFINITION and token.type != TT_DECLARATOR) {
-        token.report_errorf(herr, "Expected type or qualified-id before %s");
-        return FATAL_TERNARY(NULL,res);
-      }
-      res = token.def;
-      continue;
-    }
-    else {
-      token = lex->get_token_in_scope(scope, herr);
-      break;
-    }
-    
-    if (token.type == TT_SCOPE) {
-      #ifdef DEBUG_MODE
-        if (!res) { token.report_error(herr, "Accessing NULL scope..."); return NULL; }
-        if (!(res->flags & DEF_SCOPE)) { token.report_error(herr, "Accessing non-scope object " + res->name + "..."); return NULL; }
-      #endif
-      token = lex->get_token_in_scope((definition_scope*)res, herr);
-      if (token.type != TT_DEFINITION and token.type != TT_DECLARATOR) {
-        token.report_errorf(herr, "Expected qualified-id following `::' before %s");
-        return NULL;
-      }
-      else
-        res = token.def;
-    }
-    else break;
-  }
-  return res;
-}
-
 full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr)
 {
   definition* inferred_type = NULL; // This is the type we will use if absolutely no other type is given
@@ -125,7 +62,7 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
       }
       else if (token.type == TT_DEFINITION)
       {
-        rdef = read_qualified_type(lex, scope, token, cp, herr);
+        rdef = read_qualified_definition(lex, scope, token, cp, herr);
         if (!rdef) {
           token.report_errorf(herr, "Expected type name here before %s");
           return NULL;
@@ -228,10 +165,10 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
       }
     }
     else if (token.type == TT_DEFINITION and token.def->flags & (DEF_SCOPE | DEF_TEMPLATE)) {
-     rdef = read_qualified_type(lex, scope, token, cp, herr);
+     rdef = read_qualified_definition(lex, scope, token, cp, herr);
     }
     else if (token.type == TT_TYPENAME) {
-      if (!cp) { token.report_error(herr, "Cannot use dependent type in this context"); return full_type(); }
+      //if (!cp) { token.report_error(herr, "Cannot use dependent type in this context"); return full_type(); }
       token = lex->get_token_in_scope(scope);
       rdef = handle_hypothetical(lex, scope, token, DEF_TYPENAME, herr);
     }
@@ -328,31 +265,7 @@ int jdip::read_referencers(ref_stack &refs, const full_type& ft, lexer *lex, tok
       }
       
       case TT_OPERATORKW: {
-          token = lex->get_token_in_scope(scope, herr);
-          if (token.type == TT_OPERATOR or token.type == TT_LESSTHAN or token.type == TT_GREATERTHAN or token.type == TT_TILDE) {
-            refs.name = "operator" + token.content.toString();
-          }
-          else if (token.type == TT_LEFTBRACKET) {
-            refs.name = "operator[]";
-            token = lex->get_token_in_scope(scope, herr);
-            if (token.type != TT_RIGHTBRACKET) {
-              token.report_error(herr, "Expected closing bracket for `operator[]' definition");
-              FATAL_RETURN(1);
-            }
-          }
-          else if (token.type == TT_LEFTPARENTH) {
-            refs.name = "operator()";
-            token = lex->get_token_in_scope(scope, herr);
-            if (token.type != TT_RIGHTPARENTH) {
-              token.report_error(herr, "Expected closing parenthesis for `operator()' definition");
-              FATAL_RETURN(1);
-            }
-          }
-          else {
-            token.report_errorf(herr, "Unexpected %s following `operator' keyword; does not form a valid operator");
-            FATAL_RETURN(1);
-          }
-          token = lex->get_token_in_scope(scope, herr);
+          refs.name = read_operatorkw_name(lex, token, scope, herr);
           ref_stack appme; int res = read_referencers_post(appme, lex, token, scope, cp, herr);
           refs.append_c(appme); return res;
       } break;
@@ -381,8 +294,9 @@ int jdip::read_referencers(ref_stack &refs, const full_type& ft, lexer *lex, tok
       case TT_NAMESPACE: case TT_TEMPLATE: case TT_TYPENAME: case TT_TYPEDEF: case TT_USING: case TT_PUBLIC:
       case TT_PRIVATE: case TT_PROTECTED: case TT_COLON: case TT_RIGHTPARENTH: case TT_RIGHTBRACKET: case TT_SCOPE:
       case TT_LEFTBRACE: case TT_RIGHTBRACE: case TT_LESSTHAN: case TT_GREATERTHAN: case TT_TILDE: case TT_ASM: case TT_SIZEOF: case TT_ISEMPTY: case TT_DECLTYPE:
-      case TT_COMMA: case TT_SEMICOLON: case TT_STRINGLITERAL: case TT_CHARLITERAL: case TT_DECLITERAL: case TT_HEXLITERAL:
-      case TT_OCTLITERAL: case TT_ENDOFCODE: case TTM_CONCAT: case TTM_TOSTRING: case TT_INVALID: default: default_:
+      case TT_COMMA: case TT_SEMICOLON: case TT_STRINGLITERAL: case TT_CHARLITERAL: case TT_DECLITERAL: case TT_HEXLITERAL: case TT_OCTLITERAL:
+      case TT_NEW: case TT_DELETE: case TT_ENDOFCODE: case TTM_CONCAT: case TTM_TOSTRING: case TT_INVALID: default: default_:
+      #include <User/token_cases.h>
         return 0;
     }
     token = lex->get_token_in_scope(scope, herr);
@@ -450,8 +364,9 @@ int jdip::read_referencers_post(ref_stack &refs, lexer *lex, token_t &token, def
       case TT_NAMESPACE: case TT_TEMPLATE: case TT_TYPENAME: case TT_TYPEDEF: case TT_USING: case TT_PUBLIC: case TT_DEFINITION: 
       case TT_PRIVATE: case TT_PROTECTED: case TT_COLON: case TT_RIGHTPARENTH: case TT_RIGHTBRACKET: case TT_SCOPE: case TT_OPERATORKW:
       case TT_LEFTBRACE: case TT_RIGHTBRACE: case TT_GREATERTHAN: case TT_TILDE: case TT_ASM: case TT_SIZEOF: case TT_ISEMPTY: case TT_DECLTYPE:
-      case TT_COMMA: case TT_SEMICOLON: case TT_STRINGLITERAL: case TT_CHARLITERAL: case TT_DECLITERAL: case TT_HEXLITERAL:
-      case TT_OCTLITERAL: case TT_ENDOFCODE: case TTM_CONCAT: case TTM_TOSTRING: case TT_INVALID: default: default_:
+      case TT_COMMA: case TT_SEMICOLON: case TT_STRINGLITERAL: case TT_CHARLITERAL: case TT_DECLITERAL: case TT_HEXLITERAL: case TT_OCTLITERAL:
+      case TT_NEW: case TT_DELETE: case TT_ENDOFCODE: case TTM_CONCAT: case TTM_TOSTRING: case TT_INVALID: default: default_:
+      #include <User/token_cases.h>
         return 0;
     }
     token = lex->get_token_in_scope(scope, herr);

@@ -96,6 +96,13 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
               break;
             }
           }
+          else if (token.type == TT_TEMPLATE) {
+            token = read_next_token(scope);
+            if (token.type != TT_CLASS and token.type != TT_STRUCT and token.type != TT_DECLARATOR and token.type != TT_DEFINITION) {
+              token.report_errorf(herr, "Expected template specialization following `extern template' directive; %s unhandled");
+              FATAL_RETURN(1);
+            }
+          }
         goto handle_declarator_block;
       
       case TT_COMMA:
@@ -184,31 +191,7 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
               token.report_error(herr, "Expected namespace name following `namespace' token");
           }
           else {
-            definition_scope* siq = scope;
-            definition *usedef = NULL;
-            if (token.type == TT_SCOPE) {
-              siq = global;
-              token = read_next_token(siq);
-            }
-            while (token.type != TT_ENDOFCODE) {
-              if (token.type != TT_DEFINITION and token.type != TT_DECLARATOR) {
-                token.report_errorf(herr, "Expected qualified-id before %s");
-                FATAL_RETURN(1); break;
-              }
-              usedef = token.def;
-              token = read_next_token(scope);
-              if (token.type == TT_SCOPE) {
-                if (!(usedef->flags & DEF_SCOPE)) {
-                  token.report_error(herr, "Cannot access `" + usedef->name + "' as a scope");
-                  FATAL_RETURN(1);
-                }
-                else {
-                  siq = (definition_scope*)usedef;
-                  token = read_next_token(siq);
-                }
-              }
-              else break;
-            }
+            definition *usedef = read_qualified_definition(lex, scope, token, this, herr);
             if (usedef)
               scope->use_general(usedef->name, usedef);
             else {
@@ -309,7 +292,8 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
       case TT_ASM: case TT_SIZEOF: case TT_ISEMPTY:
       case TT_OPERATOR: case TT_ELLIPSIS: case TT_LESSTHAN: case TT_GREATERTHAN: case TT_COLON:
       case TT_DECLITERAL: case TT_HEXLITERAL: case TT_OCTLITERAL: case TT_STRINGLITERAL: case TT_CHARLITERAL:
-      case TTM_CONCAT: case TTM_TOSTRING: case TT_INVALID:
+      case TT_NEW: case TT_DELETE: case TTM_CONCAT: case TTM_TOSTRING: case TT_INVALID:
+      #include <User/token_cases.h>
       default:
         token.report_errorf(herr, "Unexpected %s in this scope");
         break;

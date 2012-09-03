@@ -263,7 +263,9 @@ int jdip::context_parser::handle_declarators(definition_scope *scope, token_t& t
       case TT_DECLARATOR: case TT_DECFLAG: case TT_CLASS: case TT_STRUCT: case TT_ENUM: case TT_UNION: case TT_NAMESPACE: case TT_EXTERN: case TT_IDENTIFIER:
       case TT_DEFINITION: case TT_TEMPLATE: case TT_TYPENAME: case TT_TYPEDEF: case TT_USING: case TT_PUBLIC: case TT_PRIVATE: case TT_PROTECTED:
       case TT_SCOPE: case TT_LEFTPARENTH: case TT_RIGHTPARENTH: case TT_LEFTBRACKET: case TT_RIGHTBRACKET: case TT_LEFTBRACE: case TT_RIGHTBRACE:
-      case TT_ASM: case TT_TILDE: case TTM_CONCAT: case TTM_TOSTRING: case TT_ENDOFCODE: case TT_SIZEOF: case TT_ISEMPTY: case TT_OPERATORKW: case TT_DECLTYPE: case TT_INVALID: default:
+      case TT_ASM: case TT_TILDE: case TTM_CONCAT: case TTM_TOSTRING: case TT_ENDOFCODE: case TT_SIZEOF: case TT_ISEMPTY: case TT_OPERATORKW:
+      case TT_NEW: case TT_DELETE: case TT_DECLTYPE: case TT_INVALID: default:
+      #include <User/token_cases.h>
         return 0;
     }
   }

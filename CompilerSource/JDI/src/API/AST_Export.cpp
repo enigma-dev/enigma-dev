@@ -150,6 +150,32 @@ namespace jdi {
     svg->draw_circle(nid,x,y,r,0xFFFFFFFF,svg->cur == this ? 0xFF00C000 : 0xFF000000,2);
     svg->draw_text(nid,x,y+4,"()");
   }
+  void AST::AST_Node_new::toSVG(int x, int y, SVGrenderInfo *svg)
+  {
+    const int nid = svg->nodes_written++;
+    int xx = x, yy = y+own_height()/2+16+(bound?bound->own_width()/2:0);
+    
+    content = (position?"new() ":"new ") + type.toString();
+    if (bound) content += "[]";
+    int r = own_width()/2;
+    svg->draw_line(nid,'m',x,y,xx,yy);
+    svg->draw_rectangle(nid,x-r,y-12,x+r,y+12,0xFFFFFFFF,svg->cur == this ? 0xFF00C000 : 0xFF000000,2);
+    svg->draw_text(nid,x,y+4,content);
+    if (bound)
+      bound->toSVG(xx,yy,svg);
+  }
+  void AST::AST_Node_delete::toSVG(int x, int y, SVGrenderInfo *svg) {
+    const int nid = svg->nodes_written++;
+    int xx = x, yy = y+own_height()/2+16+(operand?operand->own_height()/2:0);
+    
+    content = array?"delete[]":"delete";
+    int r = own_width()/2;
+    svg->draw_line(nid,'m',x,y,xx,yy);
+    svg->draw_rectangle(nid,x-r,y-12,x+r,y+12,0xFFFFFFFF,svg->cur == this ? 0xFF00C000 : 0xFF000000,2);
+    svg->draw_text(nid,x,y+4,content);
+    if (operand)
+      operand->toSVG(xx,yy,svg);
+  }
   
   
   //===========================================================================================================================
@@ -246,5 +272,14 @@ namespace jdi {
     for (size_t i = 0; i < elements.size(); ++i)
       res += elements[i]->toString() + (i + 1 < elements.size()? ", " : " ");
     return res + "}";
+  }
+  string AST::AST_Node_new::toString() const {
+    string res = (position)? "new(" + position->toString() + ") " : "new ";
+    res += type.toString();
+    if (bound) res += "[" + bound->toString() + "]";
+    return res;
+  }
+  string AST::AST_Node_delete::toString() const {
+    return (array?"delete ":"delete[] ") + operand->toString();
   }
 }
