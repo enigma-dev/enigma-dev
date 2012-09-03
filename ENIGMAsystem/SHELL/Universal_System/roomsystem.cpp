@@ -47,13 +47,11 @@
 
 #include "CallbackArrays.h"
 
-int room_first  = 0;
-int room_last   = 0;
 int room_speed  = 60;
 int room_width  = 640;
 int room_height = 480;
 int room_persistent = 0;
-var room_caption = "ENIGMA Engine";
+var room_caption = "";
 
 int background_color = 16777215;
 int background_showcolor=1;
@@ -126,24 +124,8 @@ namespace enigma
       view_visible[i] = (bool)views[i].start_vis;
     }
 
-    int xm = int(room_width), ym = int(room_height);
-    if (view_enabled)
-    {
-      int tx = 0, ty = 0;
-      for (int i = 0; i < 8; i++)
-        if (view_visible[i])
-        {
-          if (view_xport[i]+view_wport[i] > tx)
-            tx = (int)(view_xport[i]+view_wport[i]);
-          if (view_yport[i]+view_hport[i] > ty)
-            ty = (int)(view_yport[i]+view_hport[i]);
-        }
-      if (tx and ty)
-        xm = tx, ym = ty;
-    }
-    window_set_size(xm,ym);
+    window_default();
     io_clear();
-
     screen_init();
     screen_refresh();
 

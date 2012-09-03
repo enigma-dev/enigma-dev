@@ -35,6 +35,7 @@
 using namespace std;
 
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+#include "Universal_System/roomsystem.h"
 #include "Platforms/platforms_mandatory.h" // For type insurance
 #include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBwindow.h"
@@ -126,6 +127,35 @@ int display_mouse_get_x() { return getMouse(0); }
 int display_mouse_get_y() { return getMouse(1); }
 int window_mouse_get_x()  { return getMouse(2); }
 int window_mouse_get_y()  { return getMouse(3); }
+
+void window_set_stayontop(bool stay) {}
+bool window_get_stayontop() {return false;}
+void window_set_sizeable(bool sizeable) {}
+bool window_get_sizeable() {return false;}
+void window_set_showborder(bool show) {}
+bool window_get_showborder() {return true;}
+void window_set_showicons(bool show) {}
+bool window_get_showicons() {return true;}
+
+void window_default()
+{
+    unsigned int xm = room_width, ym = room_height;
+    if (view_enabled)
+    {
+      int tx = 0, ty = 0;
+      for (int i = 0; i < 8; i++)
+        if (view_visible[i])
+        {
+          if (view_xport[i]+view_wport[i] > tx)
+            tx = (int)(view_xport[i]+view_wport[i]);
+          if (view_yport[i]+view_hport[i] > ty)
+            ty = (int)(view_yport[i]+view_hport[i]);
+        }
+      if (tx and ty)
+        xm = tx, ym = ty;
+    }
+    window_set_size(xm, ym);
+}
 
 void window_mouse_set(double x,double y) {
 	XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
@@ -350,7 +380,10 @@ namespace enigma {
   }
 }
 
-void game_end() { }
+void game_end()
+{
+    exit(0);
+}
 void action_end_game() { game_end(); }
 
 #include "Universal_System/globalupdate.h"
@@ -379,6 +412,27 @@ void keyboard_wait()
 
 void window_set_region_scale(double scale, bool adaptwindow) {}
 bool window_get_region_scale() {return 1;}
+void window_set_region_size(int w, int h, bool adaptwindow) {}
+
+int window_get_region_width()
+{
+    return window_get_width();
+}
+
+int window_get_region_height()
+{
+    return window_get_height();
+}
+
+int window_get_region_width_scaled()
+{
+    return window_get_width();
+}
+
+int window_get_region_height_scaled()
+{
+    return window_get_height();
+}
 
 string parameter_string(unsigned num) {
   return num < enigma::parameterc ? enigma::parameters[num] : "";

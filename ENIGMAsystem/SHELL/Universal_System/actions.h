@@ -272,6 +272,8 @@ static inline void action_show_info() {show_info();}
 #define action_message(message) show_message(message)
 #define exit return 0;
 #define globalvar global var
+#define action_if_sound sound_isplaying
+#define action_end_sound sound_stop
 
 inline void action_create_object(const int object, const double x, const double y)
 {
@@ -475,6 +477,16 @@ inline void action_draw_variable(variant variable, const double x, const double 
     }
     else
         draw_text(x, y, string(variable));
+}
+
+inline bool action_replace_sprite(int ind, std::string filename, int imgnumb)
+{
+    return sprite_replace(ind, filename, imgnumb, true, false, 0, 0, true);
+}
+
+inline bool action_replace_background(int ind, std::string filename)
+{
+    return background_replace(ind, filename, true, false, true, true);
 }
 
 inline bool action_if_health(const double value, const int operation)

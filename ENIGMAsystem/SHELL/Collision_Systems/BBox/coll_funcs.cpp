@@ -31,6 +31,7 @@
 
 #include "Universal_System/collisions_object.h"
 #include "Universal_System/instance_system.h" //iter
+#include "Universal_System/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
 #include "coll_funcs.h"
 #include "coll_impl.h"
@@ -71,6 +72,7 @@ static inline int max(int x, int y) { return x>y? x : y; }
 static inline double max(double x, double y) { return x>y? x : y; }
 static inline double direction_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
 static inline double point_direction(double x1,double y1,double x2,double y2) {return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);}
+extern double random(double x);
 
 bool place_free(double x,double y)
 {
@@ -168,9 +170,11 @@ int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool 
 
 double distance_to_object(int object)
 {
+    const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -1;
     double distance = std::numeric_limits<double>::infinity();
     double tempdist;
-    const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     const bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
@@ -183,6 +187,8 @@ double distance_to_object(int object)
     {
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst1 == inst2) continue;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+            continue;
 
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
@@ -209,6 +215,8 @@ double distance_to_object(int object)
 double distance_to_point(double x, double y)
 {
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -1;
     const bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
@@ -223,6 +231,9 @@ double distance_to_point(double x, double y)
 
 double move_contact_object(int object, double angle, double max_dist, bool solid_only)
 {
+    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -4;
     const double DMIN = 1, DMAX = 1000000;
     const double contact_distance = DMIN;
     double sin_angle, cos_angle;
@@ -249,7 +260,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         sin_angle = sin(radang), cos_angle = cos(radang);
     }
     const int quad = int(angle/90.0);
-    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+
     const bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
@@ -261,6 +272,8 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+            continue;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
             continue;
         const bbox_rect_t &box2 = inst2->$bbox_relative();
@@ -347,6 +360,9 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
 
 double move_outside_object(int object, double angle, double max_dist, bool solid_only)
 {
+    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -4;
     const double DMIN = 0.000001, DMAX = 1000000;
     const double contact_distance = DMIN;
     if (max_dist <= 0)
@@ -358,7 +374,6 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
     double radang = angle*(M_PI/180.0);
     const double sin_angle = sin(radang), cos_angle = cos(radang);
     const int quad = int(angle/90.0);
-    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     const bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
@@ -371,6 +386,8 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
     {
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
+            continue;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
             continue;
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
@@ -433,262 +450,19 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
     return dist;
 }
 
-bool move_bounce_object_inside(int object, bool adv, bool solid_only)
+bool move_bounce_object(int object, bool adv, bool solid_only)
 {
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-    const double angle = inst1->direction, radang = angle*(M_PI/180.0), DBL_EPSILON = 0.00001;
-    double sin_angle = sin(radang), cos_angle = cos(radang), pc_corner, pc_dist, max_dist = 1000000;
-    int side_type = 0;
-    const int quad = int(2*radang/M_PI);
-    const bbox_rect_t &box = inst1->$bbox_relative();
-    const double x1 = inst1->x - inst1->hspeed, y1 = inst1->y - inst1->vspeed,
-                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                 ia1 = inst1->image_angle;
-    int left1, top1, right1, bottom1;
-
-    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
-
-    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -4;
+    if (place_meeting(inst1->x, inst1->y, object))
     {
-        const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
-        if (inst2->id == inst1->id || (solid_only && !inst2->solid))
-            continue;
-        const bbox_rect_t &box2 = inst2->$bbox_relative();
-        const double x2 = inst2->x, y2 = inst2->y,
-                     xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia1 = inst2->image_angle;
-        int left2, top2, right2, bottom2;
-
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
-
-        if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
-        {
-            return false;
-        }
-
-        switch (quad)
-        {
-            case 0:
-                if ((left2 > right1 || top1 > bottom2) &&
-                direction_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
-                direction_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
-                {
-                    pc_corner = direction_difference(point_direction(right1, top1, left2, bottom2),angle);
-                    if (fabs(pc_corner) < DBL_EPSILON)
-                    {
-                        pc_dist = (left2 - right1)/cos_angle;
-                        if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 4;
-                        }
-                    }
-                    else if (pc_corner > 0)
-                    {
-                        pc_dist = (top1 - bottom2)/sin_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
-                        {
-                            if (side_type == 2)
-                                side_type = 3;
-                            else if (side_type != 3)
-                                side_type = 1;
-                        }
-                        else if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 1;
-                        }
-                    }
-                    else
-                    {
-                        pc_dist = (left2 - right1)/cos_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
-                        {
-                            if (side_type == 1)
-                                side_type = 3;
-                            else if (side_type != 3)
-                                side_type = 2;
-                        }
-                        else if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 2;
-                        }
-                    }
-                }
-            break;
-            case 1:
-                if ((left1 > right2 || top1 > bottom2) &&
-                direction_difference(point_direction(left1, bottom1, right2, top2),angle) <= 0  &&
-                direction_difference(point_direction(right1, top1, left2, bottom2),angle) >= 0)
-                {
-                    pc_corner = direction_difference(point_direction(left1, top1, right2, bottom2),angle);
-
-                    if (fabs(pc_corner) < DBL_EPSILON)
-                    {
-                        pc_dist = (left2 - right1)/cos_angle;
-                        if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 4;
-                        }
-                    }
-                    else if (pc_corner > 0)
-                    {
-                        pc_dist = (right2 - left1)/cos_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
-                        {
-                            if (side_type == 1)
-                                side_type = 3;
-                            else if (side_type != 3)
-                                side_type = 2;
-                        }
-                        else if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 2;
-                        }
-                    }
-                    else
-                    {
-                        pc_dist = (top1 - bottom2)/sin_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
-                        {
-                            if (side_type == 2)
-                                side_type = 3;
-                            else if (side_type != 3)
-                                side_type = 1;
-                        }
-                        else if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 1;
-                        }
-                    }
-                }
-            break;
-            case 2:
-                if ((left1 > right2 || top2 > bottom1) &&
-                direction_difference(point_direction(right1, bottom1, left2, top2),angle) <= 0  &&
-                direction_difference(point_direction(left1, top1, right2, bottom2),angle) >= 0)
-                {
-                    pc_corner = direction_difference(point_direction(left1, bottom1, right2, top2),angle);
-                    if (fabs(pc_corner) < DBL_EPSILON)
-                    {
-                        pc_dist = (right2 - left1)/cos_angle;
-                        if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 4;
-                        }
-                    }
-                    else if (pc_corner > 0)
-                    {
-                        pc_dist = (bottom1 - top2)/sin_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
-                        {
-                            if (side_type == 2)
-                                side_type = 3;
-                            else if (side_type != 3)
-                                side_type = 1;
-                        }
-                        else if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 1;
-                        }
-                    }
-                    else
-                    {
-                        pc_dist = (right2 - left1)/cos_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
-                        {
-                            if (side_type == 1)
-                                side_type = 3;
-                            else if (side_type != 3)
-                                side_type = 2;
-                        }
-                        else if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 2;
-                        }
-                    }
-                }
-            break;
-            case 3:
-                if ((left2 > right1 || top2 > bottom1) &&
-                direction_difference(point_direction(right1, top1, left2, bottom2),angle) <= 0  &&
-                direction_difference(point_direction(left1, bottom1, right2, top2),angle) >= 0)
-                {
-                    pc_corner = direction_difference(point_direction(right1, bottom1, left2, top2),angle);
-                    if (fabs(pc_corner) < DBL_EPSILON)
-                    {
-                        pc_dist = (bottom1 - top2)/sin_angle;
-                        if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 4;
-                        }
-                    }
-                    else if (pc_corner > 0)
-                    {
-                        pc_dist = (left2 - right1)/cos_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
-                        {
-                            if (side_type == 1)
-                                side_type = 3;
-                            else if (side_type != 3)
-                                side_type = 2;
-                        }
-                        else if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 2;
-                        }
-                    }
-                    else
-                    {
-                        pc_dist = (bottom1 - top2)/sin_angle;
-                        if (fabs(pc_dist - max_dist) < DBL_EPSILON)
-                        {
-                            if (side_type == 2)
-                                side_type = 3;
-                            else if (side_type != 3)
-                                side_type = 1;
-                        }
-                        else if (pc_dist < max_dist)
-                        {
-                            max_dist = pc_dist;
-                            side_type = 1;
-                        }
-                    }
-                }
-            break;
-        }
+        inst1->x -= inst1->hspeed;
+        inst1->y -= inst1->vspeed;
     }
+    else if (!place_meeting(inst1->x+inst1->hspeed, inst1->y+inst1->vspeed, object))
+        return false;
 
-    switch (side_type)
-    {
-        case 0:  //no side hit
-            return false;
-        case 1:  //horizontal side hit
-            inst1->vspeed *= -1;
-        break;
-        case 2:  //vertical side hit
-            inst1->hspeed *= -1;
-        break;
-        case 3: case 4:  //corner or both horizontal and vertical side hit
-            inst1->hspeed *= -1;
-            inst1->vspeed *= -1;
-        break;
-    }
-    return true;
-}
-
-bool move_bounce_object_outside(int object, bool adv, bool solid_only)
-{
-    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     const double angle = inst1->direction, radang = angle*(M_PI/180.0), DBL_EPSILON = 0.00001;
     double sin_angle = sin(radang), cos_angle = cos(radang), pc_corner, pc_dist, max_dist = 1000000;
     int side_type = 0;
@@ -706,6 +480,8 @@ bool move_bounce_object_outside(int object, bool adv, bool solid_only)
         const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
             continue;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+            continue;
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
@@ -715,9 +491,7 @@ bool move_bounce_object_outside(int object, bool adv, bool solid_only)
         get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
 
         if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
-        {
             return false;
-        }
 
         switch (quad)
         {
@@ -927,27 +701,16 @@ bool move_bounce_object_outside(int object, bool adv, bool solid_only)
             return false;
         case 1:  //horizontal side hit
             inst1->vspeed *= -1;
-            inst1->y += inst1->vspeed;
         break;
         case 2:  //vertical side hit
             inst1->hspeed *= -1;
-            inst1->x += inst1->hspeed;
         break;
         case 3: case 4:  //corner or both horizontal and vertical side hit
             inst1->hspeed *= -1;
             inst1->vspeed *= -1;
-            inst1->x += inst1->hspeed;
-            inst1->y += inst1->vspeed;
         break;
     }
     return true;
-}
-
-bool move_bounce_object(int object, bool adv, bool solid_only)
-{
-    if (move_bounce_object_inside(object, adv, solid_only))
-        return true;
-    return (move_bounce_object_outside(object, adv, solid_only));
 }
 
 typedef std::pair<int,enigma::inst_iter*> inode_pair;
@@ -1107,4 +870,24 @@ void position_change(double x1, double y1, int obj, bool perf)
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom)
             instance_change(obj, perf);
     }
+}
+
+void move_random(const double snapHor, const double snapVer)
+{
+    enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+    const int mask_ind = ((enigma::object_collisions*)enigma::instance_event_iterator->inst)->mask_index;
+    const int spr_ind = ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->sprite_index;
+    if (spr_ind == -1 && (mask_ind == -1))
+        return;
+    const int mask = mask_ind >= 0 ? mask_ind : spr_ind;
+    const double x1 = sprite_get_xoffset(mask), y1 = sprite_get_yoffset(mask), x2 = room_width - sprite_get_width(mask) + sprite_get_xoffset(mask), y2 = room_height - sprite_get_height(mask) + sprite_get_yoffset(mask);
+
+    int cutoff = 300;
+    do
+    {
+        inst->x = x1 + (snapHor ? floor(random(x2 - x1)/snapHor)*snapHor : random(x2 - x1));
+        inst->y = y1 + (snapVer ? floor(random(y2 - y1)/snapVer)*snapVer : random(y2 - y1));
+        cutoff--;
+    }
+    while (collide_inst_inst(all,true,true,inst->x,inst->y) && cutoff);
 }

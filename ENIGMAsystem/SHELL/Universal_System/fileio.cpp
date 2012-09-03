@@ -52,8 +52,11 @@ namespace enigma
 // Function family file_text*
 // Uses enigma::files[] for storage, treats sdata as last read string.
 
+#include "estring.h"
 int file_text_open_read(string fname) // Opens the file with the indicated name for reading. The function returns the id of the file that must be used in the other functions. You can open multiple files at the same time (32 max). Don't forget to close them once you are finished with them.
 {
+  if (fname.find_first_of("\\/") == string::npos)
+    fname = get_working_directory() + fname;
   FILE *a = fopen(fname.c_str(),"rt"); //Read as text file
   if (!a)      //Failure
     return -1; //Behavior for fail is -1 return
@@ -63,6 +66,8 @@ int file_text_open_read(string fname) // Opens the file with the indicated name 
 }
 int file_text_open_write(string fname) // Opens the indicated file for writing, creating it if it does not exist. The function returns the id of the file that must be used in the other functions.
 {
+  if (fname.find_first_of("\\/") == string::npos)
+    fname = get_working_directory() + fname;
   FILE *a = fopen(fname.c_str(),"wt"); //Write as text file
   if (!a)      //Failure
     return -1; //Behavior for fail is -1 return
@@ -71,6 +76,8 @@ int file_text_open_write(string fname) // Opens the indicated file for writing, 
 }
 int file_text_open_append(string fname) // Opens the indicated file for appending data at the end, creating it if it does not exist. The function returns the id of the file that must be used in the other functions.
 {
+  if (fname.find_first_of("\\/") == string::npos)
+    fname = get_working_directory() + fname;
   FILE *a = fopen(fname.c_str(),"at"); //Append as text file
   if (!a)      //Failure
     return -1; //Behavior for fail is -1 return
@@ -161,6 +168,8 @@ bool file_text_eof(int fileid) { // Returns whether we reached the end of the fi
 
 int file_bin_open(string fname,int mode) // Opens the file with the indicated name. The mode indicates what can be done with the file: 0 = reading, 1 = writing, 2 = both reading and writing). When the file does not exist it is created. The function returns the id of the file that must be used in the other functions.
 {
+  if (fname.find_first_of("\\/") == string::npos)
+    fname = get_working_directory() + fname;
   FILE *a;
   if (mode & 2) {
     a = fopen(fname.c_str(),"r+b"); //Open for reading + writing if it exists, failing otherwise

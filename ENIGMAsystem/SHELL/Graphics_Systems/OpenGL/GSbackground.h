@@ -40,8 +40,8 @@ void draw_background_general(int back,double left,double top,double width,double
 int background_get_texture(int backId);
 int background_get_width(int backId);
 int background_get_height(int backId);
-int texture_get_width(int texId);
-int texture_get_height(int texId);
+double background_get_texture_width_factor(int backId);
+double background_get_texture_height_factor(int backId);
 void texture_set_interpolation(int enable);
 bool texture_get_interpolation();
 void texture_set_blending(bool enable);

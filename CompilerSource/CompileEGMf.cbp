@@ -22,6 +22,7 @@
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-DBUILD_DLL" />
+					<Add directory="C:\Users\Owner\Documents\GitHub\enigma-dev\CompilerSource\" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />

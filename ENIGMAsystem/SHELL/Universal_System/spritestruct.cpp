@@ -25,159 +25,7 @@ using namespace std;
 #include "spritestruct.h"
 #include "libEGMstd.h"
 #include "IMGloading.h"
-
-namespace enigma {
-  sprite** spritestructarray;
-	extern size_t sprite_idmax;
-	sprite::sprite(): texturearray(NULL) {}
-  sprite::sprite(unsigned int x): texturearray(new unsigned int[x]) {}
-}
-
-int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
-{
-	int width,height,fullwidth,fullheight;
-
-	char *pxdata = enigma::load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
-	unsigned texture = enigma::graphics_create_texture(fullwidth, fullheight, pxdata);
-	delete[] pxdata;
-
-	//ns.pixeldata=(void**) malloc(sizeof(void*));
-	//ns.pixeldata[0]=bitmapbuffer;
-	enigma::sprite *ns = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
-	ns->id = enigma::sprite_idmax;
-	ns->subcount  = 1;
-	ns->width     = width;
-	ns->height    = height;
-	ns->xoffset   = (int)x_offset;
-	ns->yoffset   = (int)y_offset;
-	ns->texbordx  = (double) width/fullwidth;
-	ns->texbordy  = (double) height/fullheight;
-	ns->texturearray = new unsigned int[1];
-	ns->texturearray[0] = texture;
-	return enigma::sprite_idmax++;
-}
-
-int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
-{
-	int width,height,fullwidth,fullheight;
-
-	char *pxdata = enigma::load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
-	unsigned texture = enigma::graphics_create_texture(fullwidth, fullheight, pxdata);
-	delete[] pxdata;
-
-	//ns.pixeldata=(void**) malloc(sizeof(void*));
-	//ns.pixeldata[0]=bitmapbuffer;
-	enigma::sprite *ns = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
-	ns->id = enigma::sprite_idmax;
-	ns->subcount  = 1;
-	ns->width     = width;
-	ns->height    = height;
-	ns->xoffset   = (int)x_offset;
-	ns->yoffset   = (int)y_offset;
-	ns->texbordx  = (double) width/fullwidth;
-	ns->texbordy  = (double) height/fullheight;
-	ns->texturearray = new unsigned int[1];
-	ns->texturearray[0] = texture;
-	return enigma::sprite_idmax++;
-}
-
-/* These functions are primarily for use of the engine. Experienced users
- * who are familiar with C++ can make use of these, but they were made to
- * use at load time with data read from the executable. These both expect
- * RAW format, RGB only.
- */
-#include "nlpo2.h"
-
-namespace enigma
-{
-  //Allocates and zero-fills the array at game start
-  void sprites_init()
-  {
-    spritestructarray = new sprite*[enigma::sprite_idmax+1];
-    for (unsigned i = 0; i < enigma::sprite_idmax; i++)
-      spritestructarray[i] = NULL;
-  }
-
-    void spritestructarray_reallocate()
-    {
-        enigma::sprite** spriteold = spritestructarray;
-        spritestructarray = new sprite*[enigma::sprite_idmax+2];
-        for (size_t i = 0; i < enigma::sprite_idmax; i++) spritestructarray[i] = spriteold[i]; delete[] spriteold;
-    }
-
-  //Adds an empty sprite to the list
-  int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm)
-  {
-    int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
-    sprite *as = new sprite(subc);
-    spritestructarray[sprid] = as;
-
-    as->id = sprid;
-    as->subcount = subc;
-    as->width  = w;
-    as->height = h;
-    as->bbox.bottom  = bbb;
-      as->bbox.left  = bbl;
-      as->bbox.top   = bbt;
-      as->bbox.right = bbr;
-    as->bbox_relative.bottom  = bbb - y;
-      as->bbox_relative.left  = bbl - x;
-      as->bbox_relative.top   = bbt - y;
-      as->bbox_relative.right = bbr - x;
-    as->xoffset = x;
-    as->yoffset = y;
-    as->texbordx = (double)w/fullwidth;
-    as->texbordy = (double)h/fullheight;
-
-    as->texturearray = new unsigned int[subc];
-    as->colldata = new void*[subc];
-
-    if (enigma::sprite_idmax < sprid+1)
-      enigma::sprite_idmax = sprid+1;
-
-    return sprid;
-  }
-
-  #if COLLIGMA
-  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h)
-  {
-    collCustom* thenewmask = new collCustom(w,h,x,y,x,y);
-    for(int xp=0;xp<w*h;xp++)
-      collbitSet(*thenewmask,xp % w,xp/w,pixdata[xp*4+3]>0); //the width times the number of rows, the current column*4, then 3
-    return thenewmask;
-  }
-  #endif
-
-
-  //Adds a subimage to an existing sprite from the exe
-  void sprite_set_subimage(int sprid, int imgindex, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
-  {
-    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
-    char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
-    unsigned int rowindex,colindex;
-    for (rowindex = 0; rowindex < h; rowindex++)
-    {
-      for(colindex = 0; colindex < w; colindex++)
-      {
-        *imgpxptr++ = *chunk++;
-        *imgpxptr++ = *chunk++;
-        *imgpxptr++ = *chunk++;
-        *imgpxptr++ = *chunk++;
-      }
-      memset(imgpxptr, 0, (fullwidth-colindex) << 2);
-      imgpxptr += (fullwidth-colindex) << 2;
-    }
-    memset(imgpxptr,0,(fullheight-h) * fullwidth);
-
-    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
-    delete[] imgpxdata;
-
-    enigma::sprite* sprstr = enigma::spritestructarray[sprid];
-
-    sprstr->texturearray[imgindex] = texture;
-    sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
-  }
-}
+#include "estring.h"
 
 #ifdef DEBUG_MODE
   #include "../Widget_Systems/widgets_mandatory.h"
@@ -224,6 +72,305 @@ namespace enigma
     enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
+namespace enigma {
+  sprite** spritestructarray;
+	extern size_t sprite_idmax;
+	sprite::sprite(): texturearray(NULL), texbordxarray(NULL), texbordyarray(NULL) {}
+  sprite::sprite(unsigned int x): texturearray(new unsigned int[x]), texbordxarray(new double[x]), texbordyarray(new double[x]) {}
+}
+
+int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
+{
+    if (filename.find_first_of("\\/") == string::npos)
+        filename = get_working_directory() + filename;
+	enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
+    enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
+	return enigma::sprite_idmax++;
+}
+
+int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
+{
+    if (filename.find_first_of("\\/") == string::npos)
+        filename = get_working_directory() + filename;
+	enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
+    enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
+	return enigma::sprite_idmax++;
+}
+
+bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture)
+{
+    if (filename.find_first_of("\\/") == string::npos)
+        filename = get_working_directory() + filename;
+    get_sprite_mutable(spr,ind,false);
+    if (free_texture)
+        for (int ii = 0; ii < spr->subcount; ii++)
+            enigma::graphics_delete_texture(spr->texturearray[ii]);
+
+    delete[] spr->texturearray;
+    delete[] spr->texbordxarray;
+    delete[] spr->texbordyarray;
+    enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
+    return true;
+}
+
+bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture)
+{
+    if (filename.find_first_of("\\/") == string::npos)
+        filename = get_working_directory() + filename;
+    get_sprite_mutable(spr,ind,false);
+    if (free_texture)
+        for (int ii = 0; ii < spr->subcount; ii++)
+            enigma::graphics_delete_texture(spr->texturearray[ii]);
+
+    delete[] spr->texturearray;
+    delete[] spr->texbordxarray;
+    delete[] spr->texbordyarray;
+    enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
+    return true;
+}
+
+void sprite_set_offset(int ind, int xoff, int yoff)
+{
+    get_spritev_mutable(spr,ind);
+    spr->xoffset = xoff;
+    spr->yoffset = yoff;
+}
+
+void sprite_delete(int ind, bool free_texture)
+{
+    get_spritev_mutable(spr,ind);
+    if (free_texture)
+        for (int ii = 0; ii < spr->subcount; ii++)
+            enigma::graphics_delete_texture(spr->texturearray[ii]);
+
+    delete enigma::spritestructarray[ind];
+    enigma::spritestructarray[ind] = NULL;
+}
+
+int sprite_duplicate(int copy_sprite)
+{
+    get_sprite_mutable(spr_copy,copy_sprite,-1);
+    enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
+    spr->id = enigma::sprite_idmax;
+    enigma::sprite_add_copy(spr, spr_copy);
+	return enigma::sprite_idmax++;
+}
+
+void sprite_assign(int ind, int copy_sprite, bool free_texture)
+{
+    get_spritev_mutable(spr,ind);
+    get_spritev_mutable(spr_copy,copy_sprite);
+    if (free_texture)
+        for (int ii = 0; ii < spr->subcount; ii++)
+            enigma::graphics_delete_texture(spr->texturearray[ii]);
+
+    delete[] spr->texturearray;
+    delete[] spr->texbordxarray;
+    delete[] spr->texbordyarray;
+    enigma::sprite_add_copy(spr, spr_copy);
+}
+
+void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture)
+{
+    get_spritev_mutable(spr,ind);
+    get_spritev_mutable(spr_copy,copy_sprite);
+    unsigned int *t_texturearray = new unsigned int[spr->subcount];
+    for (int i = 0; i < spr->subcount; i++)
+    {
+        t_texturearray[i] = enigma::graphics_create_texture_alpha_from_texture(spr->texturearray[i], spr_copy->texturearray[0]);
+        if (free_texture)
+            enigma::graphics_delete_texture(spr->texturearray[i]);
+    }
+    delete[] spr->texturearray;
+    spr->texturearray = t_texturearray;
+}
+
+void sprite_merge(int ind, int copy_sprite)
+{
+    get_spritev_mutable(spr,ind);
+    get_spritev_mutable(spr_copy,copy_sprite);
+    int i = 0, j = 0, t_subcount = spr->subcount + spr_copy->subcount;
+    unsigned int *t_texturearray = new unsigned int[t_subcount];
+    double *t_texbordxarray = new double[t_subcount], *t_texbordyarray = new double[t_subcount];
+    while (i < spr->subcount)
+    {
+        t_texturearray[i] = spr->texturearray[i];
+        t_texbordxarray[i] = spr->texbordxarray[i];
+        t_texbordyarray[i] = spr->texbordyarray[i];
+        i++;
+    }
+    while (j < spr_copy->subcount)
+    {
+        t_texturearray[i] = enigma::graphics_duplicate_texture(spr_copy->texturearray[j]);
+        t_texbordxarray[i] = spr_copy->texbordxarray[j];
+        t_texbordyarray[i] = spr_copy->texbordyarray[j];
+        i++; j++;
+    }
+    spr->subcount = t_subcount;
+    spr->width    = (spr->width > spr_copy->width)?spr->width:spr_copy->width;
+    spr->height   = (spr->height > spr_copy->height)?spr->height:spr_copy->height;
+    delete[] spr->texturearray;
+    delete[] spr->texbordxarray;
+    delete[] spr->texbordyarray;
+    spr->texturearray = t_texturearray;
+    spr->texbordxarray = t_texbordxarray;
+    spr->texbordyarray = t_texbordyarray;
+}
+
+void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
+{
+    get_spritev_mutable(spr,ind);
+    spr->bbox.left = left;
+    spr->bbox.top = top;
+    spr->bbox.right = right;
+    spr->bbox.bottom = bottom;
+    spr->bbox_relative.left = left - spr->xoffset;
+    spr->bbox_relative.top = top - spr->yoffset;
+    spr->bbox_relative.right = right - spr->xoffset;
+    spr->bbox_relative.bottom = bottom - spr->yoffset;
+}
+
+/* These functions are primarily for use of the engine. Experienced users
+ * who are familiar with C++ can make use of these, but they were made to
+ * use at load time with data read from the executable. These both expect
+ * RAW format, RGB only.
+ */
+#include "nlpo2.h"
+
+namespace enigma
+{
+  //Allocates and zero-fills the array at game start
+  void sprites_init()
+  {
+    spritestructarray = new sprite*[sprite_idmax+1];
+    for (unsigned i = 0; i < sprite_idmax; i++)
+      spritestructarray[i] = NULL;
+  }
+
+    void spritestructarray_reallocate()
+    {
+        sprite** spriteold = spritestructarray;
+        spritestructarray = new sprite*[sprite_idmax+2];
+        for (size_t i = 0; i < sprite_idmax; i++) spritestructarray[i] = spriteold[i]; delete[] spriteold;
+    }
+
+    //Adds an empty sprite to the list
+    int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm)
+    {
+        sprite *as = new sprite(subc);
+        spritestructarray[sprid] = as;
+
+        as->id = sprid;
+        as->subcount = subc;
+        as->width  = w;
+        as->height = h;
+        as->bbox.bottom  = bbb;
+          as->bbox.left  = bbl;
+          as->bbox.top   = bbt;
+          as->bbox.right = bbr;
+        as->bbox_relative.bottom  = bbb - y;
+          as->bbox_relative.left  = bbl - x;
+          as->bbox_relative.top   = bbt - y;
+          as->bbox_relative.right = bbr - x;
+        as->xoffset = x;
+        as->yoffset = y;
+
+        as->texturearray = new unsigned int[subc];
+        as->texbordxarray = new double[subc];
+        as->texbordyarray = new double[subc];
+        as->colldata = new void*[subc];
+
+        if (sprite_idmax < sprid+1)
+          sprite_idmax = sprid+1;
+
+        return sprid;
+    }
+
+    void sprite_add_to_index(sprite *ns, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
+    {
+        int width,height,fullwidth,fullheight;
+
+        char *pxdata = load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
+        unsigned texture = graphics_create_texture(fullwidth, fullheight, pxdata);
+        delete[] pxdata;
+
+        //ns.pixeldata=(void**) malloc(sizeof(void*));
+        //ns.pixeldata[0]=bitmapbuffer;
+        ns->id = sprite_idmax;
+        ns->subcount  = 1;
+        ns->width     = width;
+        ns->height    = height;
+        ns->xoffset   = (int)x_offset;
+        ns->yoffset   = (int)y_offset;
+        ns->texturearray = new unsigned int[1];
+        ns->texturearray[0] = texture;
+        ns->texbordxarray = new double[1];
+        ns->texbordxarray[0] = (double) width/fullwidth;
+        ns->texbordyarray = new double[1];
+        ns->texbordyarray[0] = (double) height/fullheight;
+    }
+
+    void sprite_add_copy(sprite *spr, sprite *spr_copy)
+    {
+        spr->subcount  = spr_copy->subcount;
+        spr->width     = spr_copy->width;
+        spr->height    = spr_copy->height;
+        spr->xoffset   = spr_copy->xoffset;
+        spr->yoffset   = spr_copy->yoffset;
+        spr->texturearray = new unsigned int[spr_copy->subcount];
+        spr->texbordxarray = new double[spr_copy->subcount];
+        spr->texbordyarray = new double[spr_copy->subcount];
+        for (int i = 0; i < spr->subcount; i++)
+        {
+            spr->texturearray[i] = graphics_duplicate_texture(spr_copy->texturearray[i]);
+            spr->texbordxarray[i] = spr_copy->texbordxarray[i];
+            spr->texbordyarray[i] = spr_copy->texbordyarray[i];
+        }
+    }
+
+  #if COLLIGMA
+  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h)
+  {
+    collCustom* thenewmask = new collCustom(w,h,x,y,x,y);
+    for(int xp=0;xp<w*h;xp++)
+      collbitSet(*thenewmask,xp % w,xp/w,pixdata[xp*4+3]>0); //the width times the number of rows, the current column*4, then 3
+    return thenewmask;
+  }
+  #endif
+
+
+  //Adds a subimage to an existing sprite from the exe
+  void sprite_set_subimage(int sprid, int imgindex, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
+  {
+    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
+    char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
+    unsigned int rowindex,colindex;
+    for (rowindex = 0; rowindex < h; rowindex++)
+    {
+      for(colindex = 0; colindex < w; colindex++)
+      {
+        *imgpxptr++ = *chunk++;
+        *imgpxptr++ = *chunk++;
+        *imgpxptr++ = *chunk++;
+        *imgpxptr++ = *chunk++;
+      }
+      memset(imgpxptr, 0, (fullwidth-colindex) << 2);
+      imgpxptr += (fullwidth-colindex) << 2;
+    }
+    memset(imgpxptr,0,(fullheight-h) * fullwidth);
+
+    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
+    delete[] imgpxdata;
+
+    sprite* sprstr = spritestructarray[sprid];
+
+    sprstr->texturearray[imgindex] = texture;
+    sprstr->texbordxarray[imgindex] = (double) w/fullwidth;
+    sprstr->texbordyarray[imgindex] = (double) h/fullheight;
+    sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
+  }
+}
+
 int sprite_get_width(int sprite)
 {
 	get_sprite(spr,sprite,32);
@@ -236,6 +383,17 @@ int sprite_get_height(int sprite)
 	return spr->height;
 }
 
+double sprite_get_texture_width_factor(int sprite, int subimg)
+{
+	get_sprite(spr,sprite,32);
+	return spr->texbordxarray[subimg];
+}
+
+double sprite_get_texture_height_factor(int sprite, int subimg)
+{
+	get_sprite(spr,sprite,32);
+	return spr->texbordyarray[subimg];
+}
 
 int sprite_get_bbox_bottom(int sprite)
 {

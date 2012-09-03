@@ -31,10 +31,13 @@
 
 #include <ffi.h>
 #include "Universal_System/var4.h"
+#include "Universal_System/estring.h"
 
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "externals.h"
+
+#include <cstdio>
 
 using namespace std;
 
@@ -57,6 +60,7 @@ struct external
   }
 };
 
+std::map<std::string, HMODULE> dllHandles;
 map<int,external*> externals;
 int external_count=0;
 
@@ -69,6 +73,9 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   int ac=(argcount>16)?16:((int)argcount);
   external *a = new external(ac,(int)returntype);
   
+  if (dll.find_first_of("\\/") == string::npos)
+		dll = get_working_directory() + dll;
+
   switch (ac)
   {
     case 16: a->arg_type[15] = (t16==ty_string?(&ffi_type_pointer):(&ffi_type_double));
@@ -97,14 +104,35 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
     show_error("Defining DLL failed.",0);
     return -1;
   }
+
+  HMODULE dllmod;
+  std::map<std::string, HMODULE>::iterator dllIt;
+  if ((dllIt=dllHandles.find(dll)) == dllHandles.end())
+  	dllmod = LoadLibrary(dll.c_str());
+  else
+  {
+  	printf("LOADING PREEXISTING HANDLE");
+    dllmod = dllHandles[dll];
+  }
+
+  if (dllmod == NULL)
+  {
+  	show_error(std::string("Cannot load library \"") + dll + std::string("\"!"), 0);
+  	return -1;
+  }
   
-  HMODULE dllmod = LoadLibrary(dll.c_str());
   FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
-  if (funcptr==NULL) return 0;
+  if (funcptr==NULL)
+  {
+  	show_error(std::string("No such function \"") + func + std::string("\"."), 0);
+  	return -1;
+  }
+
   a->functionptr=(void(*)())funcptr;
   
   int ind=external_count++;
   externals[ind]=a;
+  
   return ind;
 }
 
@@ -115,7 +143,10 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
 {
   map<int,external*>::iterator it;
   if ((it=externals.find(id)) == externals.end())
-    return 0;
+  {
+  	show_error("Unknown external function called", 0);
+  	return 0;
+  }
   external* a=it->second;
   
   ambiguous array[a->argc];
@@ -135,4 +166,11 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   ffi_call(&(a->cif), a->functionptr, &result, arg_values);
   if (a->restype==ty_string) return result.s;
   return result.d;
+}
+
+void external_free(std::string dll)
+{
+  std::map<std::string, HMODULE>::iterator dllIt;
+  if ((dllIt=dllHandles.find(dll)) != dllHandles.end())
+    FreeLibrary(dllHandles[dll]);
 }

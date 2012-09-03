@@ -274,7 +274,8 @@ collision: 4
 	Mode: Stacked
 	Super Check: instance_number(%1)
 	Sub Check: (instance_other = enigma::place_meeting_inst(x,y,%1)) # Parenthesize assignment used as truth
-	prefix: if (solid ||  enigma::glaccess(int(other))->solid) {x = xprevious; y = yprevious;}
+	prefix: for (enigma::iterator it = enigma::fetch_inst_iter_by_int(%1); it; ++it) {instance_other = *it; if (enigma::place_meeting_inst(x,y,instance_other->id)) {if(enigma::glaccess(int(other))->solid) x = xprevious, y = yprevious;
+	suffix: }}
 # Check for detriment from collision events above
 
 nomorelives: 7

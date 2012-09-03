@@ -41,7 +41,6 @@ global:     event_number
 global:     event_object
 global:     event_type*/
 double      fps;
-unsigned int game_id;
 
 double health=100;
 #ifndef JUST_DEFINE_IT_RUN
@@ -72,6 +71,8 @@ int os_type;
 int gamemaker_version=0;
 //int transition_steps;
 int cursor_sprite;
+extern int room_first, room_last;
+
 /*********************
 End GM global variables
  *********************/

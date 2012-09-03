@@ -464,6 +464,16 @@ int background_get_height(int backId) {
   return bck2d->height;
 }
 
+double background_get_texture_width_factor(int backId) {
+  get_backgroundnv(bck2d,backId,-1);
+  return bck2d->texbordx;
+}
+
+double background_get_texture_height_factor(int backId) {
+  get_backgroundnv(bck2d,backId,-1);
+  return bck2d->texbordy;
+}
+
 void texture_set_interpolation(int enable)
 {
     if (enigma::interpolate_textures == enable)
@@ -472,27 +482,19 @@ void texture_set_interpolation(int enable)
     enigma::interpolate_textures = enable;
     enigma::background *back;
     enigma::sprite *spr;
-    for (unsigned int i = 0; i < enigma::background_idmax; i++)
+    int i, ii;
+    for (i = 0; i < enigma::background_idmax; i++)
 	{
         back = enigma::backgroundstructarray[i];
 	    if (!back)
             continue;
 
         glBindTexture(GL_TEXTURE_2D, back->texture);
-        if (enable)
-        {
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-        }
-        else
-        {
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-        }
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
 	}
 
-    int ii;
-	for (unsigned int i = 0; i < enigma::sprite_idmax; i++)
+	for (i = 0; i < enigma::sprite_idmax; i++)
     {
         spr = enigma::spritestructarray[i];
 	    if (!spr)
@@ -501,34 +503,10 @@ void texture_set_interpolation(int enable)
         for (ii = 0; ii < spr->subcount; ii++)
         {
             glBindTexture(GL_TEXTURE_2D, spr->texturearray[ii]);
-            if (enable)
-            {
-                glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-            }
-            else
-            {
-                glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-            }
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
         }
     }
-}
-
-int texture_get_width(int texId)
-{
-    int w;
-    glBindTexture(GL_TEXTURE_2D, texId);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-    return w;
-}
-
-int texture_get_height(int texId)
-{
-    int h;
-    glBindTexture(GL_TEXTURE_2D, texId);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
-    return h;
 }
 
 bool texture_get_interpolation()

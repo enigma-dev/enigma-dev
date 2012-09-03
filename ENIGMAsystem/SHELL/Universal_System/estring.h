@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "var4.h"
+
 bool is_string(variant val);
 bool is_real(variant val);
 
@@ -55,3 +57,4 @@ string filename_dir(string fname);
 string filename_drive(string fname);
 string filename_ext(string fname);
 string filename_change_ext(string fname, string newext);
+string get_working_directory();

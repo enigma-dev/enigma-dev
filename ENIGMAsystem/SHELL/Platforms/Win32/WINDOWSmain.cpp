@@ -27,12 +27,18 @@
 #include <windows.h>
 #include <time.h>
 #include <string>
+#include <sstream>
 using std::string;
 
 #include "WINDOWScallback.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/estring.h"
 #include "WINDOWSwindow.h"
+#include "WINDOWSmain.h"
+
+extern unsigned int game_id;
+static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
 
 namespace enigma //TODO: Find where this belongs
 {
@@ -44,8 +50,6 @@ namespace enigma //TODO: Find where this belongs
 
   char** main_argv;
   int main_argc;
-
-  int windowcolor; double viewscale; bool windowIsTop;
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
@@ -124,18 +128,10 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         int screen_width = GetSystemMetrics(SM_CXSCREEN);
         int screen_height = GetSystemMetrics(SM_CYSCREEN);
         // TODO: Implement minimize button on both windows like GM
-        if(resizeableWindow) {
-            // TODO: Implement maximize button here like GM
-            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX | WS_SIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
-                NULL, NULL, hInstance, NULL);
-        } else {
-            enigma::hWndParent = CreateWindow ("TMain", "ENIGMA Shell", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
-                NULL, NULL, hInstance, NULL);
-        }
+         enigma::hWndParent = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
         //Create a child window to put into that
-        enigma::hWnd = CreateWindow ("TSub", "", WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
-
+        enigma::hWnd = CreateWindow ("TSub", NULL, WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
 
     enigma::EnableDrawing (&hRC);
     enigma::initialize_everything();
@@ -178,10 +174,203 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 string parameter_string(int x)
 {
   if (x < enigma::main_argc)
-  return enigma::main_argv[x];
+  	return enigma::main_argv[x];
+
   return "";
 }
-int parameter_count() {
+
+int parameter_count()
+{
   return enigma::main_argc;
 }
 
+unsigned long long disk_size(std::string drive)
+{
+	DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
+
+	if (drive.length() == 1)
+		drive += ":\\";
+
+	if (!GetDiskFreeSpace((drive == "") ? NULL : drive.c_str(), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
+		return 0;
+
+	return (unsigned long long)(totalClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector;
+}
+
+unsigned long long disk_free(std::string drive)
+{
+	DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
+
+	if (drive.length() == 1)
+		drive += ":\\";
+
+	if (!GetDiskFreeSpace((drive == "") ? NULL : drive.c_str(), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
+		return 0;
+
+	return ((unsigned long long)(totalClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector) -
+				((unsigned long long)(freeClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector);
+}
+
+void set_program_priority(int value)
+{
+	// Need to add PROCESS_SET_INFORMATION permission to thread's access rights, not sure how
+
+	DWORD priorityValue = NORMAL_PRIORITY_CLASS;
+	if (value == -1 || value == -2)
+		priorityValue = BELOW_NORMAL_PRIORITY_CLASS;
+	else if (value == -3)
+		priorityValue = IDLE_PRIORITY_CLASS;
+	else if (value == 1)
+		priorityValue = ABOVE_NORMAL_PRIORITY_CLASS;
+	else if (value == 2)
+		priorityValue = HIGH_PRIORITY_CLASS;
+	else if (value == 3)
+		priorityValue = REALTIME_PRIORITY_CLASS;
+
+	SetPriorityClass(GetCurrentThread(), priorityValue);
+}
+
+void execute_shell(std::string fname, std::string args)
+{
+	ShellExecute(enigma::hWndParent, NULL, fname.c_str(), args.c_str(), get_working_directory().c_str(), SW_SHOW);
+}
+
+std::string environment_get_variable(std::string name)
+{
+	std::string value(1024, '\x00');
+	GetEnvironmentVariable((LPCTSTR)name.c_str(), (LPTSTR)value.data(), 1024);
+
+	return value;
+}
+
+void registry_write_string(std::string name, std::string str)
+{
+	std::stringstream ss;
+	ss << "Software\\EnigmaGM\\" << game_id;
+
+	// Write to registry
+	registry_write_string_ext(ss.str(), name, str);
+}
+
+void registry_write_real(std::string name, int x)
+{
+	std::stringstream ss;
+	ss << "Software\\EnigmaGM\\" << game_id;
+
+	// Write to registry
+	registry_write_real_ext(ss.str(), name, x);
+}
+
+std::string registry_read_string(std::string name)
+{
+	std::stringstream ss;
+	ss << "Software\\EnigmaGM\\" << game_id;
+
+	// Read from registry
+	return registry_read_string_ext(ss.str(), name);
+}
+
+int registry_read_real(std::string name)
+{
+	std::stringstream ss;
+	ss << "Software\\EnigmaGM\\" << game_id;
+
+	// Read from registry
+	return registry_read_real_ext(ss.str(), name);
+}
+
+bool registry_exists(std::string name)
+{
+	std::stringstream ss;
+	ss << "Software\\EnigmaGM\\" << game_id;
+
+	return registry_exists_ext(ss.str(), name);
+}
+
+void registry_write_string_ext(std::string key, std::string name, std::string str)
+{
+	HKEY hKey;
+
+	// Open registry key
+	if (RegCreateKeyEx(registryCurrentRoot, key.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL) != ERROR_SUCCESS)
+		return;
+
+	// Write file and close key
+	RegSetValueEx(hKey, name.c_str(), 0, REG_SZ, (LPBYTE)str.c_str(), str.length() + 1);
+	RegCloseKey(hKey);
+}
+
+void registry_write_real_ext(std::string key, std::string name, int x)
+{
+	HKEY hKey;
+
+	// Open registry key
+	if (RegCreateKeyEx(registryCurrentRoot, key.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL) != ERROR_SUCCESS)
+		return;
+
+	// Write value and close key
+	RegSetValueEx(hKey, name.c_str(), 0, REG_DWORD, (LPBYTE)&x, sizeof(int));
+	RegCloseKey(hKey);
+}
+
+std::string registry_read_string_ext(std::string key, std::string name)
+{
+	std::string value(1024, '\x00');
+	DWORD type = REG_SZ, len = 1024;
+	HKEY hKey;
+
+	// Open registry key
+	if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
+		return "";
+
+	// Read value and close key
+	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)value.data(), &len);
+	RegCloseKey(hKey);
+
+	return value;
+}
+
+int registry_read_real_ext(std::string key, std::string name)
+{
+	DWORD type = REG_DWORD, len = sizeof(int);
+	HKEY hKey;
+	int value;
+
+	// Open registry key
+	if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
+		return 0;
+
+	// Read value and close key
+	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)&value, &len);
+	RegCloseKey(hKey);
+
+	return value;
+}
+
+bool registry_exists_ext(std::string key, std::string name)
+{
+	HKEY hKey;
+	bool value;
+
+	// Open registry key
+	if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
+		return false;
+
+	// Read value and close key
+	value = RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, NULL, NULL, NULL) != ERROR_FILE_NOT_FOUND;
+	RegCloseKey(hKey);
+
+	return value;
+}
+
+void registry_set_root(int root)
+{
+	const HKEY keyLookup[4] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_CLASSES_ROOT, HKEY_USERS };
+	if (root >= 0 && root < 4)
+		registryCurrentRoot = keyLookup[root];
+}
+
+unsigned long long window_handle()
+{
+    return (unsigned long long)enigma::hWnd;
+}

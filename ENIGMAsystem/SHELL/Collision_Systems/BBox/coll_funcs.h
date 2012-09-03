@@ -53,6 +53,10 @@ inline double move_contact_all(const double direction, const double max_dist = 1
     return move_contact_object(all, direction, max_dist);
 }
 
+inline double move_contact(const double direction) {
+    return move_contact_object(all, direction, -1);
+}
+
 inline double move_contact_solid(const double direction, const double max_dist = 1000000) {
     return move_contact_object(all, direction, max_dist, true);
 }
@@ -63,13 +67,11 @@ inline double move_outside_all(const double direction, const double speed = 1000
     return move_outside_object(all, direction, speed);
 }
 
-inline double move_ouside_solid(const double direction, const double speed = 1000000) {
+inline double move_outside_solid(const double direction, const double speed = 1000000) {
     return move_outside_object(all, direction, speed, true);
 }
 
 bool move_bounce_object(int object, bool adv = true, bool solid_only = false);
-bool move_bounce_object_inside(int object, bool adv = true, bool solid_only = false);
-bool move_bounce_object_outside(int object, bool adv = true, bool solid_only = false);
 
 inline bool move_bounce_all(bool adv = true) {
     return move_bounce_object(all, adv);
@@ -85,3 +87,4 @@ void instance_deactivate_circle(int x, int y, int r, int inside = true, bool not
 void instance_activate_circle(int x, int y, int r, int inside = true);
 
 void position_change(double x1, double y1, int obj, bool perf);
+void move_random(const double snapHor, const double snapVer);

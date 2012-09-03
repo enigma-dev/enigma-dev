@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include <stdlib.h>
+#include <string>
 
 #ifndef ENIGMA_SPRITESTRUCT
 #define ENIGMA_SPRITESTRUCT
@@ -39,10 +40,10 @@ namespace enigma
   {
     int width,height,subcount,xoffset,yoffset,id;
     unsigned int *texturearray; //Each subimage has a texture
+    double *texbordxarray, *texbordyarray;
     void **colldata; // Each subimage has collision data
 
     //void*  *pixeldata;
-    double texbordx, texbordy;
     bbox_rect_t bbox, bbox_relative;
     bool where,smooth;
 
@@ -57,8 +58,9 @@ namespace enigma
 
 namespace enigma
 {
-  //Adds an empty sprite to the list
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm);
+  void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);
+  void sprite_add_copy(sprite *spr, sprite *spr_copy);
 
   //Adds a subimage to an existing sprite from the exe
   void sprite_set_subimage(int sprid, int imgindex, int x, int y, unsigned int w,unsigned int h,unsigned char*chunk);
@@ -68,6 +70,8 @@ namespace enigma
 
 extern int sprite_get_width  (int sprite);
 extern int sprite_get_height (int sprite);
+extern double sprite_get_texture_width_factor(int sprite, int subimg);
+extern double sprite_get_texture_height_factor(int sprite, int subimg);
 
 extern int sprite_get_bbox_bottom (int sprite);
 extern int sprite_get_bbox_left   (int sprite);
@@ -88,9 +92,17 @@ extern int sprite_get_texture (int sprite, int subimage);
 extern int sprite_get_xoffset (int sprite);
 extern int sprite_get_yoffset (int sprite);
 
-#include <string>
 int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset);
 int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);  //GM7+ compatible
+bool sprite_replace(int ind, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture = true);
+bool sprite_replace(int ind, std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture = true);   //GM7+ compatible
+void sprite_delete(int ind, bool free_texture = true);
+int sprite_duplicate(int ind);
+void sprite_assign(int ind, int copy_sprite, bool free_texture = true);
+void sprite_merge(int ind, int copy_sprite);
+void sprite_set_offset(int ind, int xoff, int yoff);
+void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture=true);
+void sprite_set_bbox(int sprite, int left, int top, int right, int bottom);
 
 #endif // ENIGMA_SPRITESTRUCT
 

@@ -15,7 +15,7 @@ void handle_error( const char* str )
 {
         if (str)
         {
-                printf( "\n GME Error: %s\n", str ); 
+                printf( "\n GME Error: %s\n", str );
                 exit( EXIT_FAILURE );
         }
 }
@@ -49,6 +49,8 @@ void seek(gme_callback *userdata, float position) {
 }
 
 int sound_add_from_gme(string filename, int track) {
+    if (filename.find_first_of("\\/") == string::npos)
+        filename = get_working_directory() + filename;
 	Music_Emu *emu;
 	handle_error( gme_open_file(filename.c_str(), &emu, 44100) );
 	if (!emu)

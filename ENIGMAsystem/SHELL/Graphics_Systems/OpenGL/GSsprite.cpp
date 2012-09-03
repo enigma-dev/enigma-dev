@@ -60,7 +60,6 @@ using std::string;
     const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
-
 bool sprite_exists(int spr) {
     return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
 }
@@ -74,7 +73,7 @@ void draw_sprite(int spr,int subimg,double x,double y)
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
-    const float tbx = spr2d->texbordx, tby = spr2d->texbordy,
+    const float tbx = spr2d->texbordxarray[subimg], tby = spr2d->texbordyarray[subimg],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
                 yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height;
 
@@ -99,9 +98,10 @@ void draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double 
     bind_texture(spr2d->texturearray[usi]);
 
 	glPushAttrib(GL_CURRENT_BIT);
+
     glColor4f(1,1,1,1);
 
-    const float tbx = spr2d->texbordx, tby = spr2d->texbordy,
+    const float tbx = spr2d->texbordxarray[subimg], tby = spr2d->texbordyarray[subimg],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + w,
                 yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + h;
 
@@ -127,7 +127,7 @@ void draw_sprite_part(int spr,int subimg,double left,double top,double width,dou
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
 
-    float tbw = spr2d->width/(float)spr2d->texbordx, tbh = spr2d->height/(float)spr2d->texbordy,
+    float tbw = spr2d->width/(float)spr2d->texbordxarray[subimg], tbh = spr2d->height/(float)spr2d->texbordyarray[subimg],
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
           tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
@@ -153,7 +153,7 @@ void draw_sprite_part_offset(int spr,int subimg,double left,double top,double wi
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
 
-    float tbw = spr2d->width/spr2d->texbordx, tbh = spr2d->height/spr2d->texbordy,
+    float tbw = spr2d->width/spr2d->texbordxarray[subimg], tbh = spr2d->height/spr2d->texbordyarray[subimg],
           xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
           yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height,
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -186,7 +186,7 @@ void draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double y
 
     const float
     w = spr2d->width*xscale, h = spr2d->height*yscale,
-    tbx = spr2d->texbordx, tby = spr2d->texbordy,
+    tbx = spr2d->texbordxarray[subimg], tby = spr2d->texbordyarray[subimg],
     wsinrot = w*sin(rot), wcosrot = w*cos(rot);
 
     glBegin(GL_TRIANGLE_STRIP);
@@ -220,7 +220,7 @@ void draw_sprite_part_ext(int spr,int subimg,double left,double top,double width
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
 
-    float tbw = spr2d->width/(float)spr2d->texbordx, tbh = spr2d->height/(float)spr2d->texbordy,
+    float tbw = spr2d->width/(float)spr2d->texbordxarray[subimg], tbh = spr2d->height/(float)spr2d->texbordyarray[subimg],
           xvert1 = x, xvert2 = xvert1 + width*xscale,
           yvert1 = y, yvert2 = yvert1 + height*yscale,
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -252,7 +252,7 @@ void draw_sprite_general(int spr,int subimg,double left,double top,double width,
     bind_texture(spr2d->texturearray[usi]);
 
     const float
-    tbx = spr2d->texbordx,  tby = spr2d->texbordy,
+    tbx = spr2d->texbordxarray[subimg],  tby = spr2d->texbordyarray[subimg],
     tbw = spr2d->width/tbx, tbh = spr2d->height/tby,
     w = width*xscale, h = height*yscale;
 
@@ -294,7 +294,7 @@ void draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,dou
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
 
-    const float tbx = spr2d->texbordx, tby = spr2d->texbordy,
+    const float tbx = spr2d->texbordxarray[subimg], tby = spr2d->texbordyarray[subimg],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + w,
                 yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + h;
 
@@ -330,7 +330,7 @@ void draw_sprite_tiled(int spr,int subimg,double x,double y)
     glColor4f(1,1,1,1);
 
     const float
-    tbx  = spr2d->texbordx, tby  = spr2d->texbordy,
+    tbx  = spr2d->texbordxarray[subimg], tby  = spr2d->texbordyarray[subimg],
     xoff = spr2d->xoffset+x, yoff = spr2d->yoffset+y;
 
     const int
@@ -373,7 +373,7 @@ void draw_sprite_tiled_ext(int spr,int subimg,double x,double y, double xscale,d
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
     const float
-    tbx  = spr2d->texbordx, tby  = spr2d->texbordy,
+    tbx  = spr2d->texbordxarray[subimg], tby  = spr2d->texbordyarray[subimg],
     xoff = spr2d->xoffset*xscale+x, yoff = spr2d->yoffset*yscale+y,
     width_scaled = spr2d->width*xscale, height_scaled = spr2d->height*yscale;
 

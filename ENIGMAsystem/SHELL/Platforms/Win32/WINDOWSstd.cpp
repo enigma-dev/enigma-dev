@@ -33,7 +33,6 @@ using namespace std;
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
-
 namespace enigma
 {
     extern HWND hWnd;
@@ -90,3 +89,4 @@ int sleep(int millis)
   Sleep(millis);
   return 0;
 }
+

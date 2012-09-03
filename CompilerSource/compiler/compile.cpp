@@ -329,8 +329,6 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     wto << "#define AUTOLOCALS 0\n";
     wto << "#define MODE3DVARS 0\n";
     wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
-  /*  for (int i = 0; i < es->constantCount; i++)
-        wto << "#define " << es->constants[i].name << " " <<  es->constants[i].value << "\n";*/  //FIXME: Parser needs to recgonise as constants instead of variables
     wto << '\n';
   wto.close();
 

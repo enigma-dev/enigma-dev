@@ -26,24 +26,26 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <string>
+
 namespace enigma
 {
   struct background
   {
     int width, height;
     unsigned texture;
-    
+
     bool transparent;
     bool smooth;
     bool preload;
 	  double texbordx, texbordy;
-    
-    const bool tileset;
-    
+
+    bool tileset;
+
     background();
-    background(const bool);
+    background(bool);
     background(int w,int h,unsigned tex,bool trans,bool smth,bool prel);
-    background(const bool,int w,int h,unsigned tex,bool trans,bool smth,bool prel);
+    background(bool,int w,int h,unsigned tex,bool trans,bool smth,bool prel);
   };
   struct background_tileset: background
   {
@@ -53,19 +55,23 @@ namespace enigma
     int vOffset;
     int hSep;
     int vSep;
-    
+
     background_tileset();
     background_tileset(int tw, int th, int ho, int vo, int hs, int vs);
     background_tileset(int w,int h,unsigned tex,bool trans,bool smth,bool prel,int tw, int th, int ho, int vo, int hs, int vs);
   };
-  
+
   extern background** backgroundstructarray;
-	void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep);
-
+  void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep);
+  void background_add_to_index(background *nb, std::string filename, bool transparent, bool smoothEdges, bool preload);
+  void background_add_copy(background *bak, background *bck_copy);
+  void backgrounds_init();
 }
 
-namespace enigma
-{
-	//Allocates and zero-fills the array at game start
-	void backgrounds_init();
-}
+int background_add(std::string filename, bool transparent = false, bool smooth = false, bool preload = false);
+bool background_replace(int back, std::string filename, bool transparent = false, bool smooth = false, bool preload = false, bool free_texture = true);
+void background_delete(int back, bool free_texture = true);
+int background_duplicate(int back);
+void background_assign(int back, int copy_background, bool free_texture = true);
+bool background_exists(int back);
+void background_set_alpha_from_background(int back, int copy_background, bool free_texture = true);

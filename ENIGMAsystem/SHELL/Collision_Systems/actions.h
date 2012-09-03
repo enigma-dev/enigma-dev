@@ -58,11 +58,11 @@ inline bool action_if_empty(const double xx, const double yy, const int objects)
 }
 
 inline void action_move_contact(const double direction, const double max_dist, const bool against) {
-    move_contact_object(direction, max_dist, all, !against);
+    move_contact_object(all, direction, max_dist, !against);
 }
 
 inline void action_bounce(int precisely, bool against) {
-    move_bounce_object(precisely, all, !against);
+    move_bounce_object(all, precisely, !against);
 }
 
 inline void action_kill_position(double x, double y)

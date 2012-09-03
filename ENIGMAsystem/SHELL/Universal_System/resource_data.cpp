@@ -33,6 +33,7 @@ using namespace std;
 static map<string,int> resources;
 namespace enigma
 {
+  extern int script_idmax;
   void map_resource_ids(nameid_pair* n)
   {
     for (nameid_pair* i = n; i->id != -1; i++)
@@ -71,4 +72,9 @@ variant script_execute(int scr, variant arg0, variant arg1, variant arg2, varian
     case 16: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)   (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15);
   }
   return 0;
+}
+
+bool script_exists(int script)
+{
+    return (unsigned(script) < enigma::script_idmax) and bool(enigma::callable_scripts[script].base);
 }

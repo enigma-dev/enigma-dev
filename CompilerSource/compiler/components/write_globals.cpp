@@ -31,8 +31,8 @@
 
 using namespace std;
 
-
 #include "syntax/syncheck.h"
+#include "general/estring.h"
 #include "parser/parser.h"
 
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
@@ -42,7 +42,7 @@ using namespace std;
 
 int global_script_argument_count = 0;
 
-int lang_CPP::compile_writeGlobals(EnigmaStruct*, parsed_object* global)
+int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
 {
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out);
@@ -56,6 +56,20 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct*, parsed_object* global)
         wto << ", argument" << i << " = 0";
       wto << ";\n\n";
     }
+
+    string s;
+    if (!es->filename)
+        s = "";
+    else
+    {
+        s = es->filename;
+        s = s.substr(0, s.find_last_of("/"));
+        s = s.substr(s.find("file:/",0) + 6);
+        s = string_replace_all(s, "/", "\\\\");
+        s = string_replace_all(s, "%20", " ");
+    }
+    wto << "string working_directory = \"" << s << "\";" << endl;
+    wto << "unsigned int game_id = " << es->gameSettings.gameId << ";" << endl;
 
     for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
       wto << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;

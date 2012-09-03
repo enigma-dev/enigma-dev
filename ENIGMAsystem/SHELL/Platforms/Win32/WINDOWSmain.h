@@ -21,3 +21,24 @@
 
 string parameter_string(int x);
 int parameter_count();
+
+unsigned long long disk_size(std::string drive);
+unsigned long long disk_free(std::string drive);
+
+void set_program_priority(int value);
+void execute_shell(std::string fname, std::string args);
+
+std::string environment_get_variable(std::string name);
+
+void registry_write_string(std::string name, std::string str);
+void registry_write_real(std::string name, int x);
+std::string registry_read_string(std::string name);
+int registry_read_real(std::string name);
+bool registry_exists(std::string name);
+void registry_write_string_ext(std::string key, std::string name, std::string str);
+void registry_write_real_ext(std::string key, std::string name, int x);
+std::string registry_read_string_ext(std::string key, std::string name);
+int registry_read_real_ext(std::string key, std::string name);
+bool registry_exists_ext(std::string key, std::string name);
+void registry_set_root(int root);
+unsigned long long window_handle();

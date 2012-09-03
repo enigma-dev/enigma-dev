@@ -39,6 +39,8 @@ bool load_al_dll();
 #include "Widget_Systems/widgets_mandatory.h"
 #endif
 
+#include "Universal_System/estring.h"
+
 namespace enigma
 {
   enum load_state {
@@ -213,6 +215,11 @@ namespace enigma
   }
 };
 
+bool sound_exists(int sound)
+{
+    return unsigned(sound) < enigma::sound_idmax && bool(enigma::sounds[sound]);
+}
+
 bool sound_play(int sound) // Returns whether sound is playing
 {
   get_sound(snd,sound,0); //snd.looping = false;
@@ -259,6 +266,8 @@ void sound_delete(int sound) {
   get_sound(snd,sound,);
   alureDestroyStream(snd->stream, 0, 0);
   alDeleteSources(1,&snd->src);
+  delete enigma::sounds[sound];
+  enigma::sounds[sound] = NULL;
 }
 void sound_volume(int sound, float volume) {
     get_sound(snd,sound,);
@@ -330,9 +339,6 @@ void action_sound(int snd, bool loop)
     (loop ? sound_loop:sound_play)(snd);
 }
 
-#define action_if_sound sound_isplaying
-#define action_end_sound sound_stop
-
 const char* sound_get_audio_error() {
   return alureGetErrorString();
 }
@@ -343,6 +349,8 @@ extern void show_message(string);
 int sound_add(string fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
 {
   // Open sound
+  if (fname.find_first_of("\\/") == string::npos)
+    fname = get_working_directory() + fname;
   FILE *afile = fopen(fname.c_str(),"rb");
   if (!afile)
     return -1;
@@ -361,4 +369,13 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
     return (--enigma::sound_idmax, -1);
 
   return rid;
+}
+
+bool sound_replace(int sound, string fname, int kind, bool preload)
+{
+  get_sound(snd,sound,false);
+  alureDestroyStream(snd->stream, 0, 0);
+  alDeleteSources(1,&snd->src);
+  enigma::sounds[sound] = enigma::sound_new_with_source();
+  return true;
 }

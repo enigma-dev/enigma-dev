@@ -25,9 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-extern bool resizeableWindow;
-extern char* currentCursor;
-
 enum {
   cr_default    = 0,
   cr_none       = -1,
@@ -60,19 +57,11 @@ void mouse_wait();
 void keyboard_clear(const int key);
 void mouse_clear(const int button);
 
-namespace enigma {
-  void clampparent();
-}
-
 int show_message(string str);
 int window_get_x();
 int window_get_y();
 int window_get_width();
 int window_get_height();
-void window_set_visible(int visible);
-int window_get_visible();
-void window_set_stayontop(int stay);
-int window_get_stayontop();
 void window_set_caption(char* caption);
 void window_set_caption(string caption);
 string window_get_caption();
@@ -85,21 +74,41 @@ void window_set_size(unsigned int width, unsigned int height);
 void window_set_rectangle(int x, int y, int width, int height);
 void window_center();
 void window_default();
+void window_set_region_size(int w, int h, bool adaptwindow);
+int window_get_region_width();
+int window_get_region_height();
+int window_get_region_width_scaled();
+int window_get_region_height_scaled();
+void window_set_visible(bool visible);
+int window_get_visible();
+void window_set_stayontop(bool stay);
+bool window_get_stayontop();
+void window_set_sizeable(bool sizeable);
+bool window_get_sizeable();
+void window_set_showborder(bool show);
+bool window_get_showborder();
+void window_set_showicons(bool show);
+bool window_get_showicons();
+
 int display_mouse_get_x();
 int display_mouse_get_y();
 void display_mouse_set(int x,int y);
 int display_get_width();
 int display_get_height();
+int display_get_colordepth();
+int display_get_frequency();
+void display_reset();
+void display_set_colordepth(int depth);
+void display_set_size(int w, int h);
+void display_set_frequency(int freq);
+bool display_set_all(int w, int h, int freq, int bitdepth);
+bool display_test_all(int w, int h, int freq, int bitdepth);
+
 int window_mouse_get_x();
 int window_mouse_get_y();
 int window_view_mouse_get_x(int id);
 int window_view_mouse_get_y(int id);
 void window_view_mouse_set(int id, int x, int y);
-/*
-int window_views_mouse_get_x();
-int window_views_mouse_get_y();
-void window_views_mouse_set(int x, int y);
-*/
 void window_mouse_set(int x,int y);
 int window_set_cursor(int curs);
 void window_set_fullscreen(const bool full);
@@ -107,3 +116,7 @@ int window_get_fullscreen();
 
 void game_end();
 void action_end_game();
+
+string clipboard_get_text();
+void clipboard_set_text(string text);
+bool clipboard_has_text();

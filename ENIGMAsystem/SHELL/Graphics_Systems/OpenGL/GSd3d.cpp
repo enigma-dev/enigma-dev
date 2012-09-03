@@ -35,6 +35,10 @@ void d3d_start()
 {
   // Enable depth buffering
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_NOTEQUAL, 0);
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_COLOR_MATERIAL);
 
   // Set up projection matrix
   glMatrixMode(GL_PROJECTION);
@@ -52,6 +56,9 @@ void d3d_end()
 {
   d3dMode = false;
   glDisable(GL_DEPTH_TEST);
+  glDisable(GL_ALPHA_TEST);
+  glDisable(GL_NORMALIZE);
+  glDisable(GL_COLOR_MATERIAL);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(0, 1, 0, 1);
@@ -77,7 +84,7 @@ void d3d_set_lighting(bool enable)
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)
-{
+{/*
   if (enable)
   {
     glEnable(GL_FOG);
@@ -90,7 +97,7 @@ void d3d_set_fog(bool enable, int color, double start, double end)
     fog_color[2] = __GETB(color);
     glFogfv(GL_FOG_COLOR,fog_color);
   }
-  else
+  else*/
     glDisable(GL_FOG);
 }//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
 
@@ -722,7 +729,7 @@ class d3d_lights
         if (ms >= GL_MAX_LIGHTS)
             return false;
         light_ind.insert(pair<int,int>(id, ms));
-        const float dir[3] = {dx, dy, dz}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
+        const float dir[3] = {dx, dy, dz}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
         glLightfv(GL_LIGHT0+ms, GL_SPOT_DIRECTION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         return true;
@@ -733,7 +740,7 @@ class d3d_lights
         if (ms >= GL_MAX_LIGHTS)
             return false;
         light_ind.insert(pair<int,int>(id, ms));
-        const float pos[3] = {x, y, z}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
+        const float pos[3] = {x, y, z}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
       	glLightfv(GL_LIGHT1, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         return true;
@@ -787,10 +794,11 @@ bool d3d_light_enable(int id, bool enable)
 
 void d3d_light_define_ambient(int col)
 {
-    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 0};
+    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 
+#include "Universal_System/estring.h"
 class d3d_model
 {
     int something;
@@ -815,11 +823,14 @@ class d3d_model
 
     void save(string fname)
     {
-      /* */
-    }//removed save for now
+        if (fname.find_first_of("\\/") == string::npos)
+            fname = get_working_directory() + fname;
+    }//format needs to be decided on
 
-    bool load(string fname)
+    bool load(string fname)  //TODO: this needs to be rewritten properly not using the file_text functions
     {
+        if (fname.find_first_of("\\/") == string::npos)
+            fname = get_working_directory() + fname;
         int file = file_text_open_read(fname);
         if (file == -1)
             return false;
@@ -827,7 +838,7 @@ class d3d_model
         if (something != 100)
             return false;
         file_text_readln(file);
-        /*int calls = FIXME: POLYFUCK */file_text_read_real(file);
+        file_text_read_real(file);  //don't see the use in this value, it doesn't equal the number of calls left exactly
         file_text_readln(file);
         int kind;
         float v[3], n[3], t[2];
