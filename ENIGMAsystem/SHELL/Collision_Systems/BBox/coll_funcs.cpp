@@ -225,8 +225,8 @@ double distance_to_point(double x, double y)
 
     get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
 
-    return fabs(hypot(min(x1 + left1 - x, x1 + right1 - x),
-                    min(y1 + top1 - y, y1 + bottom1 - y)));
+    return fabs(hypot(min(left1 - x, right1 - x),
+                    min(top1 - y, bottom1 - y)));
 }
 
 double move_contact_object(int object, double angle, double max_dist, bool solid_only)

@@ -62,6 +62,7 @@ namespace enigma
     glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
     glColor4f(1,1,1,1);
     glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
     glBindTexture(GL_TEXTURE_2D, texture);
     int w, h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
@@ -79,13 +80,14 @@ namespace enigma
     GLuint texture = tex, copy_texture = copy_tex;
     glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
     glColor4f(1,1,1,1);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_BLEND);
     glBindTexture(GL_TEXTURE_2D, texture);
     int w, h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_SRC_COLOR);
     glBindTexture(GL_TEXTURE_2D, copy_texture);
     char* bitmap = new char[(h<<(lgpp2(w)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);

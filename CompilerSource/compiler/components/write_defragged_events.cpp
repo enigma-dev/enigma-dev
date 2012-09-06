@@ -128,7 +128,6 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
-    wto  << "    window_set_region_scale(" << es->gameSettings.scaling << ", 0);" << endl;
     wto  << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
     int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
     wto  << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
