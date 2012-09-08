@@ -22,7 +22,7 @@ int draw_set_blend_mode(int mode){
 	switch (mode)
 	{
     case bm_add:
-        glBlendFunc(GL_SRC_ALPHA,GL_DST_ALPHA);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
       return 0;
     case bm_max:
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_COLOR);

@@ -59,8 +59,9 @@ namespace enigma
   unsigned graphics_duplicate_texture(int tex)
   {
     GLuint texture = tex;
-    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
     glColor4f(1,1,1,1);
+    glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -78,21 +79,28 @@ namespace enigma
   unsigned graphics_create_texture_alpha_from_texture(int tex, int copy_tex)
   {
     GLuint texture = tex, copy_texture = copy_tex;
-    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
     glColor4f(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_BLEND);
+
+    int w, h, size;
     glBindTexture(GL_TEXTURE_2D, texture);
-    int w, h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_SRC_COLOR);
-    glBindTexture(GL_TEXTURE_2D, copy_texture);
-    char* bitmap = new char[(h<<(lgpp2(w)+2))|2];
+    size = (h<<(lgpp2(w)+2))|2;
+    char* bitmap = new char[size];
+    char* bitmap2 = new char[size];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    glBindTexture(GL_TEXTURE_2D, copy_texture);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap2);
+
+    for (int i = 0; i < size; i++)
+        bitmap[i] = bitmap2[i];  //TODO: correct code here to set alpha values from bitmap2 to bitmap
+
     unsigned dup_tex = graphics_create_texture(w, h, bitmap);
     delete[] bitmap;
+    delete[] bitmap2;
     glPopAttrib();
     return dup_tex;
   }
