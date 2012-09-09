@@ -76,7 +76,7 @@ namespace enigma
     return dup_tex;
   }
 
-  unsigned graphics_create_texture_alpha_from_texture(int tex, int copy_tex)
+  void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
     GLuint texture = tex, copy_texture = copy_tex;
     glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
@@ -98,11 +98,23 @@ namespace enigma
     for (int i = 3; i < size; i += 4)
         bitmap[i] = (bitmap2[i-1] + bitmap2[i-2] + bitmap2[i-3])/3;
 
-    unsigned dup_tex = graphics_create_texture(w, h, bitmap);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    if (interpolate_textures)
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    }
+    else
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     delete[] bitmap;
     delete[] bitmap2;
     glPopAttrib();
-    return dup_tex;
   }
 
   void graphics_delete_texture(int tex)

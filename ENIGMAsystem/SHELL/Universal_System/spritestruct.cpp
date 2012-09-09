@@ -174,15 +174,8 @@ void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture)
 {
     get_spritev_mutable(spr,ind);
     get_spritev_mutable(spr_copy,copy_sprite);
-    unsigned int *t_texturearray = new unsigned int[spr->subcount];
     for (int i = 0; i < spr->subcount; i++)
-    {
-        t_texturearray[i] = enigma::graphics_create_texture_alpha_from_texture(spr->texturearray[i], spr_copy->texturearray[0]);
-        if (free_texture)
-            enigma::graphics_delete_texture(spr->texturearray[i]);
-    }
-    delete[] spr->texturearray;
-    spr->texturearray = t_texturearray;
+        enigma::graphics_replace_texture_alpha_from_texture(spr->texturearray[i], spr_copy->texturearray[0]);
 }
 
 void sprite_merge(int ind, int copy_sprite)

@@ -26,21 +26,19 @@ using namespace std;
 #include "IMGloading.h"
 
 #ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_background(bck2d,back)\
     if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
       show_error("Attempting to draw non-existing background " + toString(back), false);\
       return;\
     }\
-    enigma::background bck2d = enigma::backgroundstructarray[back];
+    enigma::background *bck2d = enigma::backgroundstructarray[back];
   #define get_backgroundnv(bck2d,back,r)\
     if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
       show_error("Attempting to draw non-existing background " + toString(back), false);\
       return r;\
     }\
-    enigma::background bck2d = enigma::backgroundstructarray[back];
+    enigma::background *bck2d = enigma::backgroundstructarray[back];
 #else
   #define get_background(bck2d,back)\
     enigma::background *bck2d = enigma::backgroundstructarray[back];
@@ -209,8 +207,5 @@ void background_set_alpha_from_background(int back, int copy_background, bool fr
 {
     get_background(bck,back);
     get_background(bck_copy,copy_background);
-    int nex_tex = enigma::graphics_create_texture_alpha_from_texture(bck->texture, bck_copy->texture);
-    if (free_texture)
-        enigma::graphics_delete_texture(bck->texture);
-    bck->texture = nex_tex;
+    enigma::graphics_replace_texture_alpha_from_texture(bck->texture, bck_copy->texture);
 }
