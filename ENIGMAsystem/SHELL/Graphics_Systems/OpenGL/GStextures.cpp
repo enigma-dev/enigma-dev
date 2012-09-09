@@ -95,8 +95,8 @@ namespace enigma
     glBindTexture(GL_TEXTURE_2D, copy_texture);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap2);
 
-    for (int i = 0; i < size; i++)
-        bitmap[i] = bitmap2[i];  //TODO: correct code here to set alpha values from bitmap2 to bitmap
+    for (int i = 3; i < size; i += 4)
+        bitmap[i] = (bitmap2[i-1] + bitmap2[i-2] + bitmap2[i-3])/3;
 
     unsigned dup_tex = graphics_create_texture(w, h, bitmap);
     delete[] bitmap;
