@@ -234,6 +234,16 @@ void do_cli(context &ct) {
         }
       } break;
     
+    case 'm': {
+        cout << "Enter the macro to define:" << endl << ">> " << flush;
+        char buf[4096]; cin.getline(buf, 4096);
+        macro_iter_c mi = ct.get_macros().find(buf);
+        if (mi != ct.get_macros().end())
+          cout << mi->second->toString();
+        else
+          cout << "Not found." << endl;
+      } break;
+    
     case 'e': {
         bool eval, coerce, render, show;
         eval = true,

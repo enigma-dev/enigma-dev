@@ -103,6 +103,8 @@ void lexer_cpp::skip_string(error_handler *herr)
       break;
     }
   }
+  if (cfile[pos] != endc)
+    herr->error("Unterminated string literal", filename, line, pos-lpos);
 }
 
 static inline void skip_string(const char* cfile, size_t &pos, size_t length)

@@ -44,6 +44,8 @@ namespace jdi {
   **/
   class AST
   {
+  protected:
+    
     /** Enum declaring basic node types for this AST. These include the three types of
         operators and the four types of data.
     **/

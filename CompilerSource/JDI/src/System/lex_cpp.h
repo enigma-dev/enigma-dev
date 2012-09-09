@@ -66,7 +66,7 @@ namespace jdip {
            seamlessly, returning only relevant tokens.
   **/
   struct lexer_cpp: lexer, llreader {
-    token_t get_token(error_handler *herr = def_error_handler);
+    virtual token_t get_token(error_handler *herr = def_error_handler);
     quick::stack<openfile> files; ///< The files we have open, in the order we included them.
     macro_map &macros; ///< Reference to the \c jdi::macro_map which will be used to store and retrieve macros.
     
@@ -109,7 +109,7 @@ namespace jdip {
     inline void skip_comment();
     /// Utility function to skip a multi-line comment; invoke with pos indicating the starting slash.
     inline void skip_multiline_comment();
-    /// Utility function to skip a string; invoke with pos indicating the quotation mark, terminates indicating match.
+    /// Utility function to skip a string; invoke with pos indicating the quotation mark. Terminates indicating match.
     inline void skip_string(error_handler *herr);
     /// Skip anything that cannot be interpreted as code in any way.
     inline void skip_whitespace();
@@ -153,7 +153,7 @@ namespace jdip {
     bool pop_file();
     
     set<string> visited_files; ///< For record and reporting purposes only.
-  private:
+  protected:
     /// Storage mechanism for conditionals, such as #if, #ifdef, and #1ifndef
     struct condition {
       bool is_true; ///< True if code in this layer is to be parsed; ie, the condition given is true.
