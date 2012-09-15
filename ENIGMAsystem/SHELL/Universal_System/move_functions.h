@@ -32,3 +32,4 @@ void move_snap(const double hsnap, const double vsnap);
 void move_wrap(const bool hor, const bool vert, const double margin);
 void move_towards_point (const double point_x, const double point_y, const double newspeed);
 bool place_snapped(int hsnap, int vsnap);
+void move_random(const double snapHor, const double snapVer);
