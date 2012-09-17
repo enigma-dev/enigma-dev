@@ -29,11 +29,14 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 bool d3dMode = false;
+bool d3dHidden = true;
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 void d3d_start()
 {
   // Enable depth buffering
+  d3dMode = true;
+  d3dHidden = true;
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
@@ -73,14 +76,12 @@ bool d3d_get_mode()
 void d3d_set_hidden(bool enable)
 {
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
+    d3dHidden = enable;
 }
 
 void d3d_set_lighting(bool enable)
 {
-  if (enable)
-    glEnable(GL_LIGHTING);
-  else
-    glDisable(GL_LIGHTING);
+    (enable?glEnable:glDisable)(GL_LIGHTING);
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)
@@ -97,16 +98,13 @@ void d3d_set_fog(bool enable, int color, double start, double end)
     fog_color[2] = __GETB(color);
     glFogfv(GL_FOG_COLOR,fog_color);
   }
-  else*/
-    glDisable(GL_FOG);
+  else
+    glDisable(GL_FOG);*/
 }//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
 
 void d3d_set_culling(bool enable)
 {
-/*  if (enable)
-    glEnable(GL_CULL_FACE);
-  else
-    glDisable(GL_CULL_FACE);*/
+//  (enable?glEnable:glDisable)(GL_CULL_FACE);
 }//TODO: Culling not working the same as in GM, not advised to enable it's use as it pretty much kills the drawing
 
 void d3d_set_perspective(bool enable)
@@ -210,7 +208,7 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
-  glEnable(GL_DEPTH_TEST);
+  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
@@ -223,7 +221,7 @@ void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double
 
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
 {
-  glEnable(GL_DEPTH_TEST);
+  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(angle, -aspect, znear, zfar);
