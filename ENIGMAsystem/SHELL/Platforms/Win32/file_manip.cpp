@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -29,6 +29,8 @@
 #include <sstream>
 #include <windows.h>
 #include "Universal_System/estring.h"
+#include <time.h>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -259,3 +261,30 @@ int parameter_count();
 string parameter_string(int n);
 
 string environment_get_variable(std::string name);
+
+long long file_size(std::string fname)
+{
+    struct stat sb;
+    if (stat(fname.c_str(), &sb) == -1) {
+        return -1;
+    }
+    return (long long) sb.st_size;
+}
+
+time_t file_access_time(std::string fname)
+{
+    struct stat sb;
+    if (stat(fname.c_str(), &sb) == -1) {
+        return -1;
+    }
+    return sb.st_atime;
+}
+
+time_t file_modified_time(std::string fname)
+{
+    struct stat sb;
+    if (stat(fname.c_str(), &sb) == -1) {
+        return -1;
+    }
+    return sb.st_mtime;
+}
