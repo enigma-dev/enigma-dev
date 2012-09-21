@@ -87,4 +87,3 @@ void instance_deactivate_circle(int x, int y, int r, int inside = true, bool not
 void instance_activate_circle(int x, int y, int r, int inside = true);
 
 void position_change(double x1, double y1, int obj, bool perf);
-void move_random(const double snapHor, const double snapVer);

@@ -43,25 +43,27 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
     if (angle == 0)
     {
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
+        const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
 
-        *leftv   = (xsp ? left : -right - 2) + x + .5;
-        *rightv  = (xsp ? right : -left) + x + .5;
-        *topv    = (ysp ? top : -bottom - 2) + y + .5;
-        *bottomv = (ysp ? bottom : -top) + y + .5;
+        *leftv   = (xsp ? lsc : rsc) + x + .5;
+        *rightv  = (xsp ? rsc : lsc) + x + .5;
+        *topv    = (ysp ? tsc : bsc) + y + .5;
+        *bottomv = (ysp ? bsc : tsc) + y + .5;
     }
     else
     {
         const double arad = angle*(M_PI/180.0);
         const double sina = sin(arad), cosa = cos(arad);
+        const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
         const int quad = int(fmod(fmod(angle, 360) + 360, 360)/90.0);
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0),
                    q12 = (quad == 1 || quad == 2), q23 = (quad == 2 || quad == 3),
                    xs12 = xsp^q12, sx23 = xsp^q23, ys12 = ysp^q12, ys23 = ysp^q23;
 
-        *leftv   = sina*(xs12 ? left : -right - 2) + cosa*(ys23 ? top : -bottom - 2) + x + .5;
-        *rightv  = sina*(xs12 ? right : left) + cosa*(ys23 ? bottom : top) + x + .5;
-        *topv    = cosa*(ys12 ? top : -bottom - 2) - sina*(sx23 ? right : left) + y + .5;
-        *bottomv = cosa*(ys12 ? bottom : top) - sina*(sx23 ? left : -right - 2) + y + .5;
+        *leftv   = cosa*(xs12 ? lsc : rsc) + sina*(ys23 ? tsc : bsc) + x + .5;
+        *rightv  = cosa*(xs12 ? rsc : lsc) + sina*(ys23 ? bsc : tsc) + x + .5;
+        *topv    = cosa*(ys12 ? tsc : bsc) - sina*(sx23 ? rsc : lsc) + y + .5;
+        *bottomv = cosa*(ys12 ? bsc : tsc) - sina*(sx23 ? lsc : rsc) + y + .5;
     }
 }
 

@@ -39,7 +39,7 @@ namespace enigma
   object_graphics::object_graphics() {}
   object_graphics::object_graphics(unsigned _x, int _y): object_planar(_x,_y) {}
   object_graphics::~object_graphics() {};
-  
+
   INTERCEPT_DEFAULT_COPY(enigma::depthv);
   void depthv::function(variant oldval) {
     rval.d = floor(rval.d);
@@ -58,10 +58,10 @@ namespace enigma
      myiter = NULL;
   }
   depthv::~depthv() {}
-  
-  
+
   int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : sprite_get_width(sprite_index); }
   int object_graphics::$sprite_height() const { return sprite_index == -1? 0 : sprite_get_height(sprite_index); }
   int object_graphics::$sprite_xoffset() const { return sprite_index == -1? 0 : sprite_get_xoffset(sprite_index); }
   int object_graphics::$sprite_yoffset() const { return sprite_index == -1? 0 : sprite_get_yoffset(sprite_index); }
+  int object_graphics::$image_number() const { return sprite_index == -1? 0 : sprite_get_number(sprite_index); }
 }
