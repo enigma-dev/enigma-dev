@@ -36,7 +36,13 @@ namespace jdi {
       s[i] = v[i];
     val.s = s;
   }
-  value::value(const value& v): val(v.val), type(v.type) { }
+  value::value(const value& v): val(v.val), type(v.type) {
+    if (type == VT_STRING) {
+      size_t l = strlen(val.s) + 1;
+      val.s = new char[l];
+      memcpy((void*)val.s, v.val.s, l);
+    }
+  }
   value::~value() { if (type == VT_STRING) delete[] val.s; }
   
   std::string value::toString() {
