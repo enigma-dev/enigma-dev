@@ -596,6 +596,24 @@ namespace jdi
         goto dec_literal; // A single octal digit is no different from a decimal digit
       return value(strtol(content.c_str(),NULL,16));
     }
+    if (type == AT_CHRLITERAL) {
+      if (content[0] == '\'') {
+        if (content[1] == '\\')
+        switch (content[2]) {
+          case 'n': return value(long('\n'));
+          case 'r': return value(long('\r'));
+          case 't': return value(long('\t'));
+          case '\'': return value(long('\''));
+          case '\"': return value(long('\"'));
+          case '\\': return value(long('\\'));
+          default: return 0L;
+        }
+        return value(long(content[1]));
+      }
+      else {
+        return value(content.substr(1, content.length() - 2));
+      }
+    }
     return value();
   }
   value AST::AST_Node_Definition::eval() const {
