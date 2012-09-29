@@ -45,16 +45,16 @@ using namespace std;
 
 inline string fc(const char* fn)
 {
-    FILE *pt = fopen(fn,"rb");
-    if (pt==NULL) return "";
+    FILE *f = fopen(fn,"rb");
+    if (f==NULL) return "";
     else {
-      fseek(pt,0,SEEK_END);
-      size_t sz = ftell(pt);
-      fseek(pt,0,SEEK_SET);
+      fseek(f,0,SEEK_END);
+      size_t sz = ftell(f);
+      fseek(f,0,SEEK_SET);
 
       char a[sz+1];
-      sz = fread(a,1,sz,pt);
-      fclose(pt);
+      sz = fread(a,1,sz,f);
+      fclose(f);
 
       a[sz] = 0;
       return a;
@@ -102,10 +102,10 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
 
     if (line[pos] == '"' and ++spos)
       while (line[++pos] != '"' and pos<line.length())
-        if (line[pos] == '\\') pos++; else;
+        if (line[pos] == '\\') pos++; else {}
     else if (line[pos] == '\'' and ++spos)
       while (line[++pos] != '\'' and pos<line.length())
-        if (line[pos] == '\\') pos++; else;
+        if (line[pos] == '\\') pos++; else {}
     else while (!is_useless(line[++pos]) and pos<line.length());
 
   exename = line.substr(spos,pos-spos);

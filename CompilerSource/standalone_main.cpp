@@ -112,6 +112,8 @@ int main(int argc, char* argv[])
     return 0;
   }
   
+  
+  extern void parse_edl(string);
   for (int i = 0; i < 1; ++i)
   current_language->definitionsModified(NULL, ((string) "%e-yaml\n"
     "---\n" 	 
@@ -151,6 +153,14 @@ int main(int argc, char* argv[])
     quickmember_variable(&globals_scope, jdi::builtin_type__int, "sprite0");
   }
   
+  cout << endl << endl << endl << endl << endl <<
+  "=====================================================\nTest drive new EDL parser\n====================================================="
+  << endl << endl;
+  
+  parse_edl(in2);
+  
+  
+  /*
   EnigmaStruct es = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
