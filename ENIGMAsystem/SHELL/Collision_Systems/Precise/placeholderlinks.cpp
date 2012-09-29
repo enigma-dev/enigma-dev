@@ -26,15 +26,17 @@
 \********************************************************************************/
 
 #include "Collision_Systems/collision_mandatory.h"
+#include "Universal_System/nlpo2.h"
 
 #include <iostream>
 
 namespace enigma
 {
-  void *collisionsystem_sprite_data_create(char* imgpxdata, int x, int y, int w, int h,
-                                           int fullwidth, int fullheight) // It is called for every subimage of every sprite loaded.
+  void *collisionsystem_sprite_data_create(char* imgpxdata, int x, int y, int w, int h) // It is called for every subimage of every sprite loaded.
   {
     char* colldata = new char[w*h]; //TODO: Handle memory leak.
+
+    const unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
 
     for (unsigned int rowindex = 0; rowindex < h; rowindex++)
     {

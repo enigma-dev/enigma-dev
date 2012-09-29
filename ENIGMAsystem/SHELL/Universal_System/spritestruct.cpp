@@ -359,7 +359,7 @@ namespace enigma
     sprstr->texturearray[imgindex] = texture;
     sprstr->texbordxarray[imgindex] = (double) w/fullwidth;
     sprstr->texbordyarray[imgindex] = (double) h/fullheight;
-    sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h, fullwidth, fullheight);
+    sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
     
     delete[] imgpxdata;
   }

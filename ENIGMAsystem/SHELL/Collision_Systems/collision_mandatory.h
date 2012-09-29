@@ -28,10 +28,9 @@
 namespace enigma
 {
   // This function will be passed sprite data, including pixel data (uncompressed RGBA bytes),
-  // Offsets (origin point) x and y, dimensions w and h, and the full width and height
-  // of the pixel data. This function is intended to generate a collision object, such as a bitmask
-  // or polygon mesh, and return a void* pointer to it.
-  void *collisionsystem_sprite_data_create(char*,int,int,int,int, int, int); // It is called for every subimage of every sprite loaded.
+  // Offsets (origin point) x and y, and dimensions w and h. This function is intended to generate
+  // a collision object, such as a bitmask or polygon mesh, and return a void* pointer to it.
+  void *collisionsystem_sprite_data_create(char*,int,int,int,int); // It is called for every subimage of every sprite loaded.
   
   #ifdef _COLLISIONS_OBJECT_H
     // This function will be invoked each collision event to obtain a pointer to any
