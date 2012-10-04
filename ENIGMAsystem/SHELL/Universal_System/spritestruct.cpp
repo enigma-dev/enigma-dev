@@ -353,7 +353,6 @@ namespace enigma
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
 
     unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
-    delete[] imgpxdata;
 
     sprite* sprstr = spritestructarray[sprid];
 
@@ -361,6 +360,8 @@ namespace enigma
     sprstr->texbordxarray[imgindex] = (double) w/fullwidth;
     sprstr->texbordyarray[imgindex] = (double) h/fullheight;
     sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
+    
+    delete[] imgpxdata;
   }
 }
 

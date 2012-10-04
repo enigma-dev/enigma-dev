@@ -101,9 +101,9 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia1 = inst2->image_angle;
+                     ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
+        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
 
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1)
             return inst2;
