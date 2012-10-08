@@ -99,6 +99,8 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   cout << "Implementing JDI basics" << endl;
   jdi::initialize();
   jdi::builtin->output_types();
+  jdi::builtin->add_macro("true","1"); // Temporary, or permanent, fix for true/false in ENIGMA
+  jdi::builtin->add_macro("false","0"); // Added because polygone is a bitch
   cout << endl << endl;
   
   cout << "Choosing language... Eenie, meenie, minie, C++" << endl;
