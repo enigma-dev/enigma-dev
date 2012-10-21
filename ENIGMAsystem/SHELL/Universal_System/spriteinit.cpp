@@ -32,7 +32,7 @@ namespace enigma
   void exe_loadsprs(FILE *exe)
   {
     int nullhere;
-    unsigned sprid, width, height, bbt, bbb, bbl, bbr;
+    unsigned sprid, width, height, bbt, bbb, bbl, bbr, shape;
     int xorig, yorig;
     
     if (!fread(&nullhere,4,1,exe)) return;
@@ -59,6 +59,19 @@ namespace enigma
       if (!fread(&bbb, 4,1,exe)) return;
       if (!fread(&bbl, 4,1,exe)) return;
       if (!fread(&bbr, 4,1,exe)) return;
+      if (!fread(&shape, 4,1,exe)) return;
+
+      collision_type coll_type;
+      switch (shape)
+      {
+        case ct_precise: coll_type = ct_precise; break;
+        case ct_bbox: coll_type = ct_bbox; break;
+        case ct_ellipse: coll_type = ct_ellipse; break;
+        case ct_diamond: coll_type = ct_diamond; break;
+        case ct_polygon: coll_type = ct_bbox; break; //FIXME: Change to ct_polygon once polygons are supported.
+        case ct_circle: coll_type = ct_circle; break;
+        default: coll_type = ct_bbox; break;
+      };
       
       int subimages;
       if (!fread(&subimages,4,1,exe)) return; //co//ut << "Subimages: " << subimages << endl;
@@ -89,7 +102,18 @@ namespace enigma
         }
         delete[] cpixels;
         //co//ut << "Adding subimage...\n";
-        sprite_set_subimage(sprid, ii, xorig, yorig, width, height, pixels);
+        unsigned char* collision_data = 0;
+        switch (coll_type)
+        {
+          case ct_precise: collision_data = pixels; break;
+          case ct_circle:
+          case ct_ellipse:
+          case ct_diamond:
+          case ct_bbox: collision_data = 0; break;
+          case ct_polygon: collision_data = 0; break; //FIXME: Support vertex data.
+          default: collision_data = 0; break;
+        };
+        sprite_set_subimage(sprid, ii, xorig, yorig, width, height, pixels, pixels, coll_type);
         //co//ut << "...done\n";
         
         delete[] pixels;

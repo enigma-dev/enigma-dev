@@ -28,9 +28,13 @@
 #include "Collision_Systems/collision_mandatory.h"
 
 namespace enigma
-{
-  void *collisionsystem_sprite_data_create(char*,int,int,int,int) // It is called for every subimage of every sprite loaded.
+{ 
+  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
   {
     return 0;
+  }
+
+  void free_collision_mask(void* mask)
+  {
   }
 };

@@ -105,22 +105,22 @@ namespace enigma {
 
 bool position_free(double x,double y)
 {
-  return collide_inst_point(all,true,true,x+.5,y+.5) == NULL;
+  return collide_inst_point(all,true,true,true,x+.5,y+.5) == NULL;
 }
 
 bool position_empty(double x, double y)
 {
-  return collide_inst_point(all,false,true,x+.5,y+.5) == NULL;
+  return collide_inst_point(all,false,true,true,x+.5,y+.5) == NULL;
 }
 
 bool position_meeting(double x, double y, int object)
 {
-  return collide_inst_point(object,false,true,x+.5,y+.5);
+  return collide_inst_point(object,false,true,true,x+.5,y+.5);
 }
 
 int instance_position(double x, double y, int object)
 {
-  const enigma::object_collisions* r = collide_inst_point(object,false,true,x+.5,y+.5);
+  const enigma::object_collisions* r = collide_inst_point(object,false,true,true,x+.5,y+.5);
   return r == NULL ? noone : r->id;
 }
 
