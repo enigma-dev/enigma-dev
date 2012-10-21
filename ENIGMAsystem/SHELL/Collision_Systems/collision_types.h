@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,14 +25,20 @@
 **                                                                              **
 \********************************************************************************/
 
-namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
-  {
-    return 0;
-  }
+#ifndef ENIGMA_COLLISIONTYPE
+#define ENIGMA_COLLISIONTYPE
 
-  void free_collision_mask(void* mask)
-  {
-  }
-};
+namespace enigma
+{
+  enum collision_type { //The order fits with the MaskShape enum in org.lateralgm.resources.Sprite.
+    ct_precise, //Data is the image, collision shape is the precise image inside the bounding box.
+    ct_bbox, //Data should be ignored, collision shape is the bounding box.
+    ct_ellipse, //Data should be ignored, collision shape is an ellipse fitting the bounding box.
+    ct_diamond, //Data should be ignored, collision shape is a diamond fitting the bounding box.
+    ct_polygon,
+    ct_circle //Data should be ignored, collision shape is a circle fitting inside the middle of the bounding box.
+  };
+}
+
+#endif // ENIGMA_COLLISIONTYPE
+

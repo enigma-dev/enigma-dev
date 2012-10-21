@@ -701,6 +701,7 @@ public class EFileWriter
 			{
 			Room rm = (Room) r;
 			GmStreamEncoder out = new GmStreamEncoder(os);
+			out.writeStr(rm.getCode());
 			out.write4(rm.backgroundDefs.size());
 			for (BackgroundDef back : rm.backgroundDefs)
 				{
@@ -746,6 +747,12 @@ public class EFileWriter
 				out.writeBool(tile.isLocked());
 				}
 			out.flush();
+			}
+
+		@Override
+		public boolean allowProperty(Enum<?> prop)
+			{
+			return prop != PRoom.CREATION_CODE;
 			}
 
 		private static void writeName(GmStreamEncoder out, ResourceReference<?> rr) throws IOException

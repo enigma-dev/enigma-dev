@@ -32,21 +32,36 @@
 
 namespace enigma
 {
-  void *collisionsystem_sprite_data_create(char* imgpxdata, int x, int y, int w, int h) // It is called for every subimage of every sprite loaded.
+  //A non-NULL pointer is a sprite mask, a NULL pointer means bbox should be used.
+  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
   {
-    char* colldata = new char[w*h]; //TODO: Handle memory leak.
-
-    const unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
-
-    for (unsigned int rowindex = 0; rowindex < h; rowindex++)
+    switch (ct)
     {
-      for(unsigned int colindex = 0; colindex < w; colindex++)
-      {
-        colldata[rowindex*w + colindex] = (imgpxdata[4*(rowindex*fullwidth + colindex) + 3] != 0) ? 1 : 0; // If alpha != 0 then 1 else 0.
-      }
-    }
+      case ct_precise:
+        {
+          const unsigned int w = spr->width, h = spr->height;
+          unsigned char* colldata = new unsigned char[w*h];
+
+          for (unsigned int rowindex = 0; rowindex < h; rowindex++)
+          {
+            for(unsigned int colindex = 0; colindex < w; colindex++)
+            {
+              colldata[rowindex*w + colindex] = (input_data[4*(rowindex*w + colindex) + 3] != 0) ? 1 : 0; // If alpha != 0 then 1 else 0.
+            }
+          }
     
-    return colldata;
+          return colldata;
+        }
+      default: return 0;
+      //TODO: Generate masks for circle, ellipse and diamond, and treat them otherwise like precise.
+    };
+  }
+
+  void free_collision_mask(void* mask)
+  {
+    if (mask != 0) {
+      delete[] (unsigned char*)mask;
+    }
   }
 };
 

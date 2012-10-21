@@ -76,7 +76,7 @@ bool precise_collision_single(int intersection_left, int intersection_right, int
                                 double x1, double y1,
                                 double xscale1, double yscale1,
                                 double ia1,
-                                char* pixels1,
+                                unsigned char* pixels1,
                                 int w1, int h1,
                                 int xoffset1, int yoffset1)
 {
@@ -118,7 +118,7 @@ bool precise_collision_pair(int intersection_left, int intersection_right, int i
                                 double x1, double y1, double x2, double y2,
                                 double xscale1, double yscale1, double xscale2, double yscale2,
                                 double ia1, double ia2,
-                                char* pixels1, char* pixels2,
+                                unsigned char* pixels1, unsigned char* pixels2,
                                 int w1, int h1, int w2, int h2,
                                 int xoffset1, int yoffset1, int xoffset2, int yoffset2)
 {
@@ -205,16 +205,6 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1) {
 
-            //TODO: Handle bbox vs. bbox and bbox vs. precise.
-
-            //Precise vs. precise.
-
-            //Intersection.
-            const int ins_left = max(left1, left2);
-            const int ins_right = min(right1, right2);
-            const int ins_top = max(top1, top2);
-            const int ins_bottom = min(bottom1, bottom2);
-
             //Check per pixel.
             const int collsprite_index1 = inst1->mask_index != -1 ? inst1->mask_index : inst1->sprite_index;
             const int collsprite_index2 = inst2->mask_index != -1 ? inst2->mask_index : inst2->sprite_index;
@@ -225,31 +215,74 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             const int usi1 = ((int) inst1->image_index) % sprite1->subcount;
             const int usi2 = ((int) inst2->image_index) % sprite2->subcount;
 
-            char* pixels1 = (char*) (sprite1->colldata[usi1]);
-            char* pixels2 = (char*) (sprite2->colldata[usi2]);
+            unsigned char* pixels1 = (unsigned char*) (sprite1->colldata[usi1]);
+            unsigned char* pixels2 = (unsigned char*) (sprite2->colldata[usi2]);
 
-            const int w1 = sprite1->width;
-            const int h1 = sprite1->height;
-            const int w2 = sprite2->width;
-            const int h2 = sprite2->height;
-
-            const double xoffset1 = sprite1->xoffset;
-            const double yoffset1 = sprite1->yoffset;
-            const double xoffset2 = sprite2->xoffset;
-            const double yoffset2 = sprite2->yoffset;
-
-            const bool coll_result = precise_collision_pair(
-                ins_left, ins_right, ins_top, ins_bottom,
-                x, y, x2, y2,
-                xscale1, yscale1, xscale2, yscale2,
-                ia1, ia2,
-                pixels1, pixels2,
-                w1, h1, w2, h2,
-                xoffset1, yoffset1, xoffset2, yoffset2
-            );
-
-            if (coll_result) {
+            if (pixels1 == 0 && pixels2 == 0) { //bbox vs. bbox.
                 return inst2;
+            }
+            else {
+                //Intersection.
+                const int ins_left = max(left1, left2);
+                const int ins_right = min(right1, right2);
+                const int ins_top = max(top1, top2);
+                const int ins_bottom = min(bottom1, bottom2);
+
+                const int w1 = sprite1->width;
+                const int h1 = sprite1->height;
+                const int w2 = sprite2->width;
+                const int h2 = sprite2->height;
+
+                const double xoffset1 = sprite1->xoffset;
+                const double yoffset1 = sprite1->yoffset;
+                const double xoffset2 = sprite2->xoffset;
+                const double yoffset2 = sprite2->yoffset;
+
+                if (pixels1 != 0 && pixels2 == 0) { //precise vs. bbox.
+                    const bool coll_result = precise_collision_single(
+                        ins_left, ins_right, ins_top, ins_bottom,
+                        x, y,
+                        xscale1, yscale1,
+                        ia1,
+                        pixels1,
+                        w1, h1,
+                        xoffset1, yoffset1
+                      );
+
+                    if (coll_result) {
+                        return inst2;
+                    }
+                }
+                else if (pixels1 == 0 && pixels2 != 0) { //bbox vs. precise.
+                    const bool coll_result = precise_collision_single(
+                        ins_left, ins_right, ins_top, ins_bottom,
+                        x2, y2,
+                        xscale2, yscale2,
+                        ia2,
+                        pixels2,
+                        w2, h2,
+                        xoffset2, yoffset2
+                    );
+
+                    if (coll_result) {
+                        return inst2;
+                    }
+                }
+                else { //precise vs. precise
+                    const bool coll_result = precise_collision_pair(
+                        ins_left, ins_right, ins_top, ins_bottom,
+                        x, y, x2, y2,
+                        xscale1, yscale1, xscale2, yscale2,
+                        ia1, ia2,
+                        pixels1, pixels2,
+                        w1, h1, w2, h2,
+                        xoffset1, yoffset1, xoffset2, yoffset2
+                    );
+
+                    if (coll_result) {
+                        return inst2;
+                    }
+                }
             }
         }
             
@@ -283,54 +316,57 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
         if (left <= x2 && x1 <= right && top <= y2 && y1 <= bottom) {
 
-            //Bbox.
-
+            //Only do precise if prec is true AND the sprite is precise.
             if (!prec) {
                 return inst;
             }
-            
-            //Precise.
 
-            //Intersection.
-            const int ins_left = max(left, x1);
-            const int ins_right = min(right, x2);
-            const int ins_top = max(top, y1);
-            const int ins_bottom = min(bottom, y2);
-
-            //Check per pixel.
             const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
 
             enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
 
             const int usi = ((int) inst->image_index) % sprite->subcount;
 
-            char* pixels = (char*) (sprite->colldata[usi]);
+            unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
-            const int w = sprite->width;
-            const int h = sprite->height;
-
-            const double xoffset = sprite->xoffset;
-            const double yoffset = sprite->yoffset;
-
-            const bool coll_result = precise_collision_single(
-                ins_left, ins_right, ins_top, ins_bottom,
-                x, y,
-                xscale, yscale,
-                ia,
-                pixels,
-                w, h,
-                xoffset, yoffset
-            );
-
-            if (coll_result) {
+            if (pixels == 0) { //bbox.
                 return inst;
+            }
+            else { //precise.
+                //Intersection.
+                const int ins_left = max(left, x1);
+                const int ins_right = min(right, x2);
+                const int ins_top = max(top, y1);
+                const int ins_bottom = min(bottom, y2);
+
+                //Check per pixel.
+
+                const int w = sprite->width;
+                const int h = sprite->height;
+
+                const double xoffset = sprite->xoffset;
+                const double yoffset = sprite->yoffset;
+
+                const bool coll_result = precise_collision_single(
+                    ins_left, ins_right, ins_top, ins_bottom,
+                    x, y,
+                    xscale, yscale,
+                    ia,
+                    pixels,
+                    w, h,
+                    xoffset, yoffset
+                );
+
+                if (coll_result) {
+                    return inst;
+                }
             }
         }
     }
     return NULL;
 }
 
-enigma::object_collisions* const collide_inst_point(int object, bool solid_only, bool notme, int x1, int y1)
+enigma::object_collisions* const collide_inst_point(int object, bool solid_only, bool prec, bool notme, int x1, int y1)
 {
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
@@ -350,44 +386,51 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) {
-            
-            //TODO: Handle bbox.
-            
-            //Precise.
 
-            //Intersection.
-            const int ins_left = max(left, x1);
-            const int ins_right = min(right, x1);
-            const int ins_top = max(top, y1);
-            const int ins_bottom = min(bottom, y1);
+            //Only do precise if prec is true AND the sprite is precise.
+            if (!prec) {
+                return inst;
+            }
 
-            //Check per pixel.
             const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
 
             enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
 
             const int usi = ((int) inst->image_index) % sprite->subcount;
 
-            char* pixels = (char*) (sprite->colldata[usi]);
+            unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
-            const int w = sprite->width;
-            const int h = sprite->height;
-
-            const double xoffset = sprite->xoffset;
-            const double yoffset = sprite->yoffset;
-
-            const bool coll_result = precise_collision_single(
-                ins_left, ins_right, ins_top, ins_bottom,
-                x, y,
-                xscale, yscale,
-                ia,
-                pixels,
-                w, h,
-                xoffset, yoffset
-            );
-
-            if (coll_result) {
+            if (pixels == 0) { //bbox.
                 return inst;
+            }
+            else { //precise.
+                //Intersection.
+                const int ins_left = max(left, x1);
+                const int ins_right = min(right, x1);
+                const int ins_top = max(top, y1);
+                const int ins_bottom = min(bottom, y1);
+
+                //Check per pixel.
+
+                const int w = sprite->width;
+                const int h = sprite->height;
+
+                const double xoffset = sprite->xoffset;
+                const double yoffset = sprite->yoffset;
+
+                const bool coll_result = precise_collision_single(
+                    ins_left, ins_right, ins_top, ins_bottom,
+                    x, y,
+                    xscale, yscale,
+                    ia,
+                    pixels,
+                    w, h,
+                    xoffset, yoffset
+                );
+
+                if (coll_result) {
+                    return inst;
+                }
             }
         }
     }

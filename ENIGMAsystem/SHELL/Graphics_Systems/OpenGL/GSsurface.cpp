@@ -25,6 +25,7 @@ using namespace std;
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
+#include "Collision_Systems/collision_types.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -673,7 +674,7 @@ int sprite_create_from_surface(int id,int x,int y,int w,int h,bool removeback,bo
  	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
 	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
-    enigma::sprite_set_subimage(sprid, 0, xorig, yorig, w, h, surfbuf);
+    enigma::sprite_set_subimage(sprid, 0, xorig, yorig, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise. 
     delete[] surfbuf;
     return sprid;
 }

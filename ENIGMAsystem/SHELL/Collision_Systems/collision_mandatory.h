@@ -25,12 +25,24 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "Universal_System/spritestruct.h"
+#include "Collision_Systems/collision_types.h"
+
 namespace enigma
 {
-  // This function will be passed sprite data, including pixel data (uncompressed RGBA bytes),
-  // Offsets (origin point) x and y, and dimensions w and h. This function is intended to generate
-  // a collision object, such as a bitmask or polygon mesh, and return a void* pointer to it.
-  void *collisionsystem_sprite_data_create(char*,int,int,int,int); // It is called for every subimage of every sprite loaded.
+
+  // This function fetches a collision mask from the collision system for a single subimage.
+  // Examples of possible collision masks include bitmasks and polygon meshes.
+  // It is called for every subimage of every sprite loaded.
+  // The spr argument is the sprite containing the subimage,
+  // the input_data argument contains the collision data for the subimage,
+  // and the collision_type argument indicates the format of the collision data
+  // and how it should be used.
+  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct);
+
+  // This function frees a collision mask fetched using "get_collision_mask".
+  // It is used to clean up on game termination.
+  void free_collision_mask(void* mask);
   
   #ifdef _COLLISIONS_OBJECT_H
     // This function will be invoked each collision event to obtain a pointer to any
@@ -39,3 +51,4 @@ namespace enigma
     object_basic *place_meeting_inst(double x, double y, int object);
   #endif
 }
+

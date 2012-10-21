@@ -1093,6 +1093,7 @@ public class EFileReader
 			try
 				{
 				GmStreamDecoder in = new GmStreamDecoder(in2);
+				rm.setCode(in.readStr());
 				int nobackgrounds = in.read4();
 				for (int j = 0; j < nobackgrounds; j++)
 					{
@@ -1155,6 +1156,12 @@ public class EFileReader
 				{
 				e.printStackTrace();
 				}
+			}
+
+		@Override
+		protected boolean allowProperty(PRoom key)
+			{
+			return key != PRoom.CREATION_CODE;
 			}
 		}
 
