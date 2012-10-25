@@ -157,7 +157,6 @@ namespace enigma
           return colldata;
         }
       default: return 0;
-      // TODO: Generate masks for circle, ellipse and diamond, and treat them otherwise like precise.
     };
   }
 
