@@ -130,3 +130,9 @@ int collision_rectangle(double x1, double y1, double x2, double y2, int obj, boo
   return r == NULL ? noone : r->id;
 }
 
+int collision_point(double x, double y, int obj, bool prec, bool notme)
+{
+  const enigma::object_collisions* r = collide_inst_point(obj,false, prec,notme,x+.5,y+.5);
+  return r == NULL ? noone : r->id;
+}
+
