@@ -71,7 +71,7 @@ static inline double min(double x, double y) { return x<y? x : y; }
 static inline int max(int x, int y) { return x>y? x : y; }
 static inline double max(double x, double y) { return x>y? x : y; }
 
-bool precise_collision_single(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
+static bool precise_collision_single(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
                                 double x1, double y1,
                                 double xscale1, double yscale1,
                                 double ia1,
@@ -79,7 +79,7 @@ bool precise_collision_single(int intersection_left, int intersection_right, int
                                 int w1, int h1,
                                 int xoffset1, int yoffset1)
 {
-    
+
     if (xscale1 != 0.0 && yscale1 != 0.0) {
 
         const double pi_half = M_PI/2.0;
@@ -96,7 +96,7 @@ bool precise_collision_single(int intersection_left, int intersection_right, int
         {
             for(unsigned int colindex = intersection_left; colindex <= intersection_right; colindex++)
             {
-                        
+
                 //Test for single image.
                 const int bx1 = (colindex - x1);
                 const int by1 = (rowindex - y1);
@@ -113,7 +113,7 @@ bool precise_collision_single(int intersection_left, int intersection_right, int
     return false;
 }
 
-bool precise_collision_pair(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
+static bool precise_collision_pair(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
                                 double x1, double y1, double x2, double y2,
                                 double xscale1, double yscale1, double xscale2, double yscale2,
                                 double ia1, double ia2,
@@ -121,7 +121,7 @@ bool precise_collision_pair(int intersection_left, int intersection_right, int i
                                 int w1, int h1, int w2, int h2,
                                 int xoffset1, int yoffset1, int xoffset2, int yoffset2)
 {
-    
+
     if (xscale1 != 0.0 && yscale1 != 0.0 && xscale2 != 0.0 && yscale2 != 0.0) {
 
         const double pi_half = M_PI/2.0;
@@ -144,14 +144,14 @@ bool precise_collision_pair(int intersection_left, int intersection_right, int i
         {
             for(unsigned int colindex = intersection_left; colindex <= intersection_right; colindex++)
             {
-                        
+
                 //Test for first image.
                 const int bx1 = (colindex - x1);
                 const int by1 = (rowindex - y1);
                 const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
                 const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
                 const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
-    
+
                 //Test for second image.
                 const int bx2 = (colindex - x2);
                 const int by2 = (rowindex - y2);
@@ -161,6 +161,78 @@ bool precise_collision_pair(int intersection_left, int intersection_right, int i
 
                 //Final test.
                 if (p1 && p2) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// Assumes lx1 != lx2 || ly1 != ly2.
+static bool precise_collision_line(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
+                                double x1, double y1,
+                                double xscale1, double yscale1,
+                                double ia1,
+                                unsigned char* pixels1,
+                                int w1, int h1,
+                                int xoffset1, int yoffset1,
+                                int lx1, int ly1, int lx2, int ly2)
+{
+    if (xscale1 != 0.0 && yscale1 != 0.0) {
+
+        const double pi_half = M_PI/2.0;
+        const double arad = M_PI/180.0;
+
+        const double arad1 = ia1*M_PI/180.0;
+
+        const double cosa1 = cos(-arad1);
+        const double sina1 = sin(-arad1);
+        const double cosa90_1 = cos(-arad1 + pi_half);
+        const double sina90_1 = sin(-arad1 + pi_half);
+
+        if (lx1 != lx2 && abs(lx1-lx2) >= abs(ly1-ly2)) { // The slope is defined and in [-1;1].
+            const int minX = max(min(lx1, lx2), intersection_left),
+                       maxX = min(max(lx1, lx2), intersection_right);
+
+            const double denom = lx2 - lx1;
+            for (int gx = minX; gx <= maxX; gx++)
+            {
+                int gy = (int)round((gx - lx1)*(ly2-ly1)/denom + ly1);
+                if (gy < intersection_top || gy > intersection_bottom) {
+                    continue;
+                }
+                // Test for single image.
+                const int bx1 = (gx - x1);
+                const int by1 = (gy - y1);
+                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
+                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
+                const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
+
+                if (p1) {
+                    return true;
+                }
+            }
+        }
+        else { // ly1 != ly2.
+            const int minY = max(min(ly1, ly2), intersection_top),
+                       maxY = min(max(ly1, ly2), intersection_bottom);
+
+            const double denom = ly2 - ly1;
+            for (int gy = minY; gy <= maxY; gy++)
+            {
+                int gx = (int)round((gy - ly1)*(lx2-lx1)/denom + lx1);
+                if (gx < intersection_left || gx > intersection_right) {
+                    continue;
+                }
+                // Test for single image.
+                const int bx1 = (gx - x1);
+                const int by1 = (gy - y1);
+                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
+                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
+                const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
+
+                if (p1) {
                     return true;
                 }
             }
@@ -358,6 +430,115 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
                 if (coll_result) {
                     return inst;
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+enigma::object_collisions* const collide_inst_line(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2)
+{
+    // Ensure x1 != x2 || y1 != y2.
+    if (x1 == x2 && y1 == y2) {
+        return collide_inst_point(object, solid_only, prec, notme, x1, y1);
+    }
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+    {
+        enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+        if (notme && inst->id == enigma::instance_event_iterator->inst->id)
+            continue;
+        if (solid_only && !inst->solid)
+            continue;
+        if (inst->sprite_index == -1 && inst->mask_index == -1) // No sprite/mask then no collision.
+            continue;
+
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x = inst->x, y = inst->y,
+                     xscale = inst->image_xscale, yscale = inst->image_yscale,
+                     ia = inst->image_angle;
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+
+        double minX = max(min(x1,x2),left);
+        double maxX = min(max(x1,x2),right);
+        if (minX > maxX)
+            continue;
+
+        // Find corresponding min and max Y for min and max X we found before.
+        double minY = y1;
+        double maxY = y2;
+        double dx = x2 - x1;
+
+        // Do slope check of non vertical lines (dx != 0).
+        if ((float)dx)
+        {
+            double a = (y2 - y1) / dx;
+            double b = y1 - a * x1;
+            minY = a * minX + b;
+            maxY = a * maxX + b;
+        }
+
+        if (minY > maxY) // Swap.
+        {
+            double tmp = maxY;
+            maxY = minY;
+            minY = tmp;
+        }
+
+        // Find the intersection of the segment's and rectangle's y-projections.
+        if (maxY > bottom)
+            maxY = bottom;
+        if (minY < top)
+            minY = top;
+
+        if (minY <= maxY) { // If Y-projections do not intersect then no collision.
+            // At this point, the line segment intersects the bounding box.
+            if (!prec) {
+                return inst;
+            }
+            else {
+                const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
+
+                enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
+
+                const int usi = ((int) inst->image_index) % sprite->subcount;
+
+                unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
+
+                if (pixels == NULL) { // Bounding box.
+                    return inst;
+                }
+                else { // Precise.
+                    // Intersection.
+                    int ins_left = max(left, min(x1, x2));
+                    int ins_right = min(right, max(x1, x2));
+                    int ins_top = max(top, min(y1, y2));
+                    int ins_bottom = min(bottom, max(y1, y2));
+
+                    // Check per pixel.
+
+                    const int w = sprite->width;
+                    const int h = sprite->height;
+
+                    const double xoffset = sprite->xoffset;
+                    const double yoffset = sprite->yoffset;
+
+                    // x1 != x2 || y1 != y2 is true here.
+                    const bool coll_result = precise_collision_line(
+                        ins_left, ins_right, ins_top, ins_bottom,
+                        x, y,
+                        xscale, yscale,
+                        ia,
+                        pixels,
+                        w, h,
+                        xoffset, yoffset,
+                        x1, y1, x2, y2
+                    );
+
+                    if (coll_result) {
+                        return inst;
+                    }
                 }
             }
         }
