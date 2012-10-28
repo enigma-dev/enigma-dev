@@ -92,9 +92,9 @@ static bool precise_collision_single(int intersection_left, int intersection_rig
         const double cosa90_1 = cos(-arad1 + pi_half);
         const double sina90_1 = sin(-arad1 + pi_half);
 
-        for (unsigned int rowindex = intersection_top; rowindex <= intersection_bottom; rowindex++)
+        for (int rowindex = intersection_top; rowindex <= intersection_bottom; rowindex++)
         {
-            for(unsigned int colindex = intersection_left; colindex <= intersection_right; colindex++)
+            for(int colindex = intersection_left; colindex <= intersection_right; colindex++)
             {
 
                 //Test for single image.
@@ -140,9 +140,9 @@ static bool precise_collision_pair(int intersection_left, int intersection_right
         const double cosa90_2 = cos(-arad2 + pi_half);
         const double sina90_2 = sin(-arad2 + pi_half);
 
-        for (unsigned int rowindex = intersection_top; rowindex <= intersection_bottom; rowindex++)
+        for (int rowindex = intersection_top; rowindex <= intersection_bottom; rowindex++)
         {
-            for(unsigned int colindex = intersection_left; colindex <= intersection_right; colindex++)
+            for(int colindex = intersection_left; colindex <= intersection_right; colindex++)
             {
 
                 //Test for first image.
@@ -228,6 +228,55 @@ static bool precise_collision_line(int intersection_left, int intersection_right
                 // Test for single image.
                 const int bx1 = (gx - x1);
                 const int by1 = (gy - y1);
+                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
+                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
+                const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
+
+                if (p1) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// rx > 0, ry > 0.
+static bool precise_collision_ellipse(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
+                                double x1, double y1,
+                                double xscale1, double yscale1,
+                                double ia1,
+                                unsigned char* pixels1,
+                                int w1, int h1,
+                                int xoffset1, int yoffset1,
+                                int ex, int ey, int rx, int ry)
+{
+
+    if (xscale1 != 0.0 && yscale1 != 0.0) {
+
+        const double pi_half = M_PI/2.0;
+        const double arad = M_PI/180.0;
+
+        const double arad1 = ia1*M_PI/180.0;
+
+        const double cosa1 = cos(-arad1);
+        const double sina1 = sin(-arad1);
+        const double cosa90_1 = cos(-arad1 + pi_half);
+        const double sina90_1 = sin(-arad1 + pi_half);
+
+        const double rx_2 = rx*rx, ry_2 = ry*ry;
+
+        for (int rowindex = intersection_top; rowindex <= intersection_bottom; rowindex++)
+        {
+            for(int colindex = intersection_left; colindex <= intersection_right; colindex++)
+            {
+                const double px = colindex - ex;
+                const double py = rowindex - ey;
+                if (px*px/rx_2 + py*py/ry_2 > 1.0) continue;
+
+                // Test for single image.
+                const int bx1 = (colindex - x1);
+                const int by1 = (rowindex - y1);
                 const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
                 const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
                 const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
@@ -606,6 +655,105 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
                     pixels,
                     w, h,
                     xoffset, yoffset
+                );
+
+                if (coll_result) {
+                    return inst;
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+enigma::object_collisions* const collide_inst_circle(int object, bool solid_only, bool prec, bool notme, int x1, int y1, double r)
+{
+    return collide_inst_ellipse(object, solid_only, prec, notme, x1, y1, r, r);
+}
+
+static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, double ly2)
+{
+    // Formula: x^2/a^2 + y^2/b^2 = 1   <=>   y = +/- sqrt(b^2*(1 - x^2/a^2))
+
+    const double inner = ry*ry*(1 - x*x/(rx*rx));
+    if (inner < 0) {
+        return false;
+    }
+    else {
+        const double y1 = -sqrt(inner), y2 = sqrt(inner);
+        return y1 <= ly2 && ly1 <= y2;
+    }
+}
+
+enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool prec, bool notme, int x1, int y1, double rx, double ry)
+{
+    if (rx == 0 || ry == 0)
+        return 0;
+
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+    {
+        enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+        if (notme && inst->id == enigma::instance_event_iterator->inst->id)
+            continue;
+        if (solid_only && !inst->solid)
+            continue;
+        if (inst->sprite_index == -1 && inst->mask_index == -1) // No sprite/mask then no collision.
+            continue;
+
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x = inst->x, y = inst->y,
+                     xscale = inst->image_xscale, yscale = inst->image_yscale,
+                     ia = inst->image_angle;
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+
+        const bool intersects = line_ellipse_intersects(rx, ry, left-x1, top-y1, bottom-y1) ||
+                                 line_ellipse_intersects(rx, ry, right-x1, top-y1, bottom-y1) ||
+                                 line_ellipse_intersects(ry, rx, top-y1, left-x1, right-x1) ||
+                                 line_ellipse_intersects(ry, rx, bottom-y1, left-x1, right-x1) ||
+                                 (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom); // Ellipse inside bbox.
+
+        if (intersects) {
+
+            if (!prec) {
+                return inst;
+            }
+
+            const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
+
+            enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
+
+            const int usi = ((int) inst->image_index) % sprite->subcount;
+
+            unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
+
+            if (pixels == 0) { // Bounding Box.
+                return inst;
+            }
+            else { // Precise.
+                // Intersection.
+                const int ins_left = max(left, (int)(x1-rx));
+                const int ins_right = min(right, (int)(x1+rx));
+                const int ins_top = max(top, (int)(y1-ry));
+                const int ins_bottom = min(bottom, (int)(y1+ry));
+
+                // Check per pixel.
+
+                const int w = sprite->width;
+                const int h = sprite->height;
+
+                const double xoffset = sprite->xoffset;
+                const double yoffset = sprite->yoffset;
+
+                const bool coll_result = precise_collision_ellipse(
+                    ins_left, ins_right, ins_top, ins_bottom,
+                    x, y,
+                    xscale, yscale,
+                    ia,
+                    pixels,
+                    w, h,
+                    xoffset, yoffset,
+                    x1, y1, rx, ry
                 );
 
                 if (coll_result) {

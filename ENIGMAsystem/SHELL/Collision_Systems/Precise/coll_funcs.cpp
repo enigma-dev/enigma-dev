@@ -142,3 +142,15 @@ int collision_point(double x, double y, int obj, bool prec, bool notme)
   return r == NULL ? noone : r->id;
 }
 
+int collision_circle(double x, double y, double radius, int obj, bool prec, bool notme)
+{
+  const enigma::object_collisions* r = collide_inst_circle(obj,false,prec,notme,x+.5,y+.5,radius);
+  return r == NULL ? noone : r->id;
+}
+
+int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme)
+{
+  const enigma::object_collisions* r = collide_inst_ellipse(obj,false,prec,notme,((x1+x2)/2)+.5,((y1+y2)/2)+.5,fabs(x2-x1)/2,fabs(y2-y1)/2);
+  return r == NULL ? noone : r->id;
+}
+
