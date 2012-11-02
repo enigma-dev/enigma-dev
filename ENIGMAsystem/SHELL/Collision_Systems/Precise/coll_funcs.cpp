@@ -154,3 +154,102 @@ int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool 
   return r == NULL ? noone : r->id;
 }
 
+double distance_to_object(int object)
+{
+    const enigma::object_collisions* inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -1;
+    double distance = std::numeric_limits<double>::infinity();
+    double tempdist;
+    const bbox_rect_t &box = inst1->$bbox_relative();
+    const double x1 = inst1->x, y1 = inst1->y,
+                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
+                 ia1 = inst1->image_angle;
+    int left1, top1, right1, bottom1;
+
+    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+    {
+        const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
+        if (inst1 == inst2) continue;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+            continue;
+
+        const bbox_rect_t &box2 = inst2->$bbox_relative();
+        const double x2 = inst2->x, y2 = inst2->y,
+                     xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
+                     ia2 = inst2->image_angle;
+        int left2, top2, right2, bottom2;
+
+        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
+
+        const int right  = min(right1, right2),   left = max(left1, left2),
+                  bottom = min(bottom1, bottom2), top  = max(top1, top2);
+
+        tempdist = hypot((left > right ? left - right : 0),
+                         (top > bottom ? top - bottom : 0));
+
+        if (tempdist < distance)
+        {
+            distance = tempdist;
+        }
+    }
+    return (distance == std::numeric_limits<double>::infinity() ? -1 : distance);
+}
+
+double distance_to_point(double x, double y)
+{
+    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return -1;
+    const bbox_rect_t &box = inst1->$bbox_relative();
+    const double x1 = inst1->x, y1 = inst1->y,
+                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
+                 ia1 = inst1->image_angle;
+    int left1, top1, right1, bottom1;
+
+    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+
+    return fabs(hypot(min(left1 - x, right1 - x),
+                    min(top1 - y, bottom1 - y)));
+}
+
+double move_contact_object(int object, double angle, double max_dist, bool solid_only)
+{
+    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1)) {
+        return -4;
+    }
+
+    double x = inst1->x, y = inst1->y;
+
+    if (collide_inst_inst(all, solid_only, true, x, y) != NULL) {
+        return 0;
+    }
+
+    const double DMIN = 1, DMAX = 1000; // Arbitrary max for non-positive values, 1000 fits with other implementations.
+    const double contact_distance = DMIN;
+    if (max_dist <= 0) { // Use the arbitrary max for non-positive values.
+        max_dist = DMAX;
+    }
+    const double radang = (fmod(fmod(angle, 360) + 360, 360))*(M_PI/180.0);
+
+    double current_dist;
+    for (current_dist = DMIN; current_dist <= max_dist; current_dist++)
+    {
+        const double next_x = x + current_dist*cos(radang);
+        const double next_y = y - current_dist*sin(radang);
+        if (collide_inst_inst(all, solid_only, true, next_x, next_y) != NULL) {
+            current_dist--;
+            break;
+        }
+        else {
+            inst1->x = next_x;
+            inst1->y = next_y;
+        }
+    }
+
+    return current_dist;
+}
+
