@@ -253,3 +253,38 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
     return current_dist;
 }
 
+double move_outside_object(int object, double angle, double max_dist, bool solid_only)
+{
+    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1)) {
+        return -4;
+    }
+
+    double x = inst1->x, y = inst1->y;
+
+    if (collide_inst_inst(all, solid_only, true, x, y) == NULL) {
+        return 0;
+    }
+
+    const double DMIN = 1, DMAX = 1000; // Arbitrary max for non-positive values, 1000 fits with other implementations.
+    const double contact_distance = DMIN;
+    if (max_dist <= 0) { // Use the arbitrary max for non-positive values.
+        max_dist = DMAX;
+    }
+    const double radang = (fmod(fmod(angle, 360) + 360, 360))*(M_PI/180.0);
+
+    double current_dist;
+    for (current_dist = DMIN; current_dist <= max_dist; current_dist++)
+    {
+        const double next_x = x + current_dist*cos(radang);
+        const double next_y = y - current_dist*sin(radang);
+        inst1->x = next_x;
+        inst1->y = next_y;
+        if (collide_inst_inst(all, solid_only, true, next_x, next_y) == NULL) {
+            break;
+        }
+    }
+
+    return current_dist;
+}
+
