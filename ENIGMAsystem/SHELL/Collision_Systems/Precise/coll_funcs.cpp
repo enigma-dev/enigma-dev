@@ -224,7 +224,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
 
     double x = inst1->x, y = inst1->y;
 
-    if (collide_inst_inst(all, solid_only, true, x, y) != NULL) {
+    if (collide_inst_inst(object, solid_only, true, x, y) != NULL) {
         return 0;
     }
 
@@ -240,7 +240,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
     {
         const double next_x = x + current_dist*cos(radang);
         const double next_y = y - current_dist*sin(radang);
-        if (collide_inst_inst(all, solid_only, true, next_x, next_y) != NULL) {
+        if (collide_inst_inst(object, solid_only, true, next_x, next_y) != NULL) {
             current_dist--;
             break;
         }
@@ -262,7 +262,7 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
 
     double x = inst1->x, y = inst1->y;
 
-    if (collide_inst_inst(all, solid_only, true, x, y) == NULL) {
+    if (collide_inst_inst(object, solid_only, true, x, y) == NULL) {
         return 0;
     }
 
@@ -280,7 +280,7 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
         const double next_y = y - current_dist*sin(radang);
         inst1->x = next_x;
         inst1->y = next_y;
-        if (collide_inst_inst(all, solid_only, true, next_x, next_y) == NULL) {
+        if (collide_inst_inst(object, solid_only, true, next_x, next_y) == NULL) {
             break;
         }
     }
