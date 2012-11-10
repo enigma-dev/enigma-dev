@@ -133,6 +133,11 @@ void position_destroy(double x, double y)
     destroy_inst_point(all,false,x+.5,y+.5);
 }
 
+void position_change(double x, double y, int obj, bool perf)
+{
+    change_inst_point(obj, perf, x+.5, y+.5);
+}
+
 int instance_position(double x, double y, int object)
 {
   const enigma::object_collisions* r = collide_inst_point(object,false,true,true,x+.5,y+.5);

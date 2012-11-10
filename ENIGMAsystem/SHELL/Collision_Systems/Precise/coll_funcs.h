@@ -34,6 +34,7 @@ bool position_meeting(double x, double y, int object);
 void position_destroy_object(double x, double y, int object, bool solid_only = false);
 void position_destroy_solid(double x, double y);
 void position_destroy(double x, double y);
+void position_change(double x1, double y1, int obj, bool perf);
 int instance_place(double x, double y, int object);
 int instance_position(double x, double y, int object);
 int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
@@ -84,4 +85,3 @@ void instance_activate_region(int left, int top, int width, int height, int insi
 void instance_deactivate_circle(int x, int y, int r, int inside = true, bool notme = true);
 void instance_activate_circle(int x, int y, int r, int inside = true);
 
-void position_change(double x1, double y1, int obj, bool perf);
