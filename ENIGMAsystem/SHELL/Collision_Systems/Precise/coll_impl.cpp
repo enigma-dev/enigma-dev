@@ -765,3 +765,66 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
     return NULL;
 }
 
+void destroy_inst_point(int object, bool solid_only, int x1, int y1)
+{
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+    {
+        enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
+        if (solid_only && !inst->solid)
+            continue;
+        if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
+            continue;
+
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x = inst->x, y = inst->y,
+                     xscale = inst->image_xscale, yscale = inst->image_yscale,
+                     ia = inst->image_angle;
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+
+        if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) {
+
+            const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
+
+            enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
+
+            const int usi = ((int) inst->image_index) % sprite->subcount;
+
+            unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
+
+            if (pixels == 0) { //bbox.
+                instance_destroy(inst->id);
+            }
+            else { //precise.
+                //Intersection.
+                const int ins_left = max(left, x1);
+                const int ins_right = min(right, x1);
+                const int ins_top = max(top, y1);
+                const int ins_bottom = min(bottom, y1);
+
+                //Check per pixel.
+
+                const int w = sprite->width;
+                const int h = sprite->height;
+
+                const double xoffset = sprite->xoffset;
+                const double yoffset = sprite->yoffset;
+
+                const bool coll_result = precise_collision_single(
+                    ins_left, ins_right, ins_top, ins_bottom,
+                    x, y,
+                    xscale, yscale,
+                    ia,
+                    pixels,
+                    w, h,
+                    xoffset, yoffset
+                );
+
+                if (coll_result) {
+                    instance_destroy(inst->id);
+                }
+            }
+        }
+    }
+}
+
