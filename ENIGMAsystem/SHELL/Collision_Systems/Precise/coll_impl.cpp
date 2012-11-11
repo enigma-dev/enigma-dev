@@ -882,7 +882,7 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
                 );
 
                 if (coll_result) {
-                    instance_change(obj, perf);
+                    enigma::instance_change_inst(obj, perf, inst);
                 }
             }
         }

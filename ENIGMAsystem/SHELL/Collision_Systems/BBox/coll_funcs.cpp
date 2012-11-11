@@ -895,6 +895,6 @@ void position_change(double x1, double y1, int obj, bool perf)
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom)
-            instance_change(obj, perf);
+            enigma::instance_change_inst(obj, perf, inst);
     }
 }
