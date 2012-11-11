@@ -461,3 +461,104 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int 
     }
 }
 
+static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, double ly2)
+{
+    // Formula: x^2/a^2 + y^2/b^2 = 1   <=>   y = +/- sqrt(b^2*(1 - x^2/a^2))
+
+    const double inner = ry*ry*(1 - x*x/(rx*rx));
+    if (inner < 0) {
+        return false;
+    }
+    else {
+        const double y1 = -sqrt(inner), y2 = sqrt(inner);
+        return y1 <= ly2 && ly1 <= y2;
+    }
+}
+
+void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
+{
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+    {
+        if (notme && (*it)->id == enigma::instance_event_iterator->inst->id)
+            continue;
+        enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
+
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+            continue;
+
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x1 = inst->x, y1 = inst->y,
+        xscale = inst->image_xscale, yscale = inst->image_yscale,
+        ia = inst->image_angle;
+
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
+
+        const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, top-y, left-x, right-x) ||
+                                 line_ellipse_intersects(r, r, bottom-y, left-x, right-x) ||
+                                 (x >= left && x <= right && y >= top && y <= bottom); // Circle inside bbox.
+
+        if (intersects)
+        {
+            if (inside)
+            {
+                inst->deactivate();
+                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+            }
+        }
+        else
+        {
+            if (!inside)
+            {
+                inst->deactivate();
+                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+            }
+        }
+    }
+}
+
+void instance_activate_circle(int x, int y, int r, int inside)
+{
+    std::map<int,enigma::inst_iter*>::iterator iter;
+    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter)
+    {
+        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+            continue;
+
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x1 = inst->x, y1 = inst->y,
+        xscale = inst->image_xscale, yscale = inst->image_yscale,
+        ia = inst->image_angle;
+
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
+
+        const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, top-y, left-x, right-x) ||
+                                 line_ellipse_intersects(r, r, bottom-y, left-x, right-x) ||
+                                 (x >= left && x <= right && y >= top && y <= bottom); // Circle inside bbox.
+
+        if (intersects)
+        {
+            if (inside)
+            {
+                inst->activate();
+                enigma::instance_deactivated_list.erase(iter);
+            }
+        }
+        else
+        {
+            if (!inside)
+            {
+                inst->activate();
+                enigma::instance_deactivated_list.erase(iter);
+            }
+        }
+    }
+}
+
