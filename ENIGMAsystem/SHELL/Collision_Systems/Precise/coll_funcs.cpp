@@ -308,6 +308,96 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
     return current_dist;
 }
 
+bool move_bounce_object(int object, bool adv, bool solid_only)
+{
+    enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
+        return false;
+
+    if (collide_inst_inst(object, solid_only, true, inst1->x, inst1->y) == NULL) {
+        return false;
+    }
+
+    const double x_start = inst1->x, y_start = inst1->y;
+
+    // Return the instance to its previous position.
+    inst1->x = inst1->xprevious;
+    inst1->y = inst1->yprevious;
+
+    const double x = inst1->x, y = inst1->y;
+
+    if (adv) {
+        const double angle_radial = 10.0; // The angle increment for the radials.
+        const int radial_max = max(int(180/angle_radial), 1); // The maximum number of radials in one direction.
+
+        const double effective_direction = inst1->speed >= 0 ? inst1->direction : fmod(inst1->direction+180.0, 360.0);
+        const double flipped_direction = fmod(effective_direction + 180.0, 360.0);
+        const double speed = abs(inst1->speed);
+
+        // Find the normal direction of the collision by doing radial collisions based on the speed and flipped direction.
+
+        int d1, d2;
+        for (d1 = 0; d1 < radial_max; d1++) // Positive direction.
+        {
+            const double rad = (flipped_direction + d1*angle_radial)*M_PI/180.0;
+            const double x1 = x + speed*cos(rad);
+            const double y1 = y - speed*sin(rad);
+            if (collide_inst_inst(object, solid_only, true, x1, y1) != NULL) {
+                break;
+            }
+        }
+        for (d2 = 0; d2 > -radial_max; d2--) // Negative direction.
+        {
+            const double rad = (flipped_direction + d2*angle_radial)*M_PI/180.0;
+            const double x1 = x + speed*cos(rad);
+            const double y1 = y - speed*sin(rad);
+            if (collide_inst_inst(object, solid_only, true, x1, y1) != NULL) {
+                break;
+            }
+        }
+
+        const int d = (d1 + d2)/2;
+        const double normal_direction = fmod(flipped_direction + d*angle_radial + 360.0, 360.0);
+
+        // Flip and then mirror the effective direction unit vector along the direction of the normal.
+
+        const double normal_rad = normal_direction * M_PI / 180.0;
+        const double normal_x = cos(normal_rad), normal_y = -sin(normal_rad);
+
+        const double flipped_rad = flipped_direction * M_PI / 180.0;
+        const double flipped_x = cos(flipped_rad), flipped_y = -sin(flipped_rad);
+
+        const double dot_product = normal_x*flipped_x + normal_y*flipped_y;
+        const double flipped_on_normal_x = dot_product*normal_x, flipped_on_normal_y = dot_product*normal_y;
+
+        const double crossed_x = flipped_x - flipped_on_normal_x, crossed_y = flipped_y - flipped_on_normal_y;
+        
+        const double mirror_x = flipped_x - 2*crossed_x, mirror_y = flipped_y - 2*crossed_y;
+
+        // Set final direction from flipped, mirrored direction unit vector.
+
+        const double mirror_direction = fmod(atan2(-mirror_y, mirror_x) * 180.0 / M_PI + 360.0, 360.0);
+        inst1->direction = speed >= 0 ? mirror_direction : fmod(mirror_direction + 180.0, 360.0);
+        return true;
+    }
+    else {
+        const double direction = inst1->direction;
+        const bool free_horizontal = collide_inst_inst(object, solid_only, true, x, y_start) == NULL;
+        const bool free_vertical = collide_inst_inst(object, solid_only, true, x_start, y) == NULL;
+        if (free_horizontal && !free_vertical) {
+            inst1->direction = direction <= 180.0 ? fmod(180.0 - direction, 360.0) : fmod((360.0 - direction) + 180.0, 360.0);
+        }
+        else if (!free_horizontal && free_vertical) {
+            inst1->direction = fmod(360.0 - direction, 360.0);
+        }
+        else {
+            inst1->direction = fmod(direction + 180.0, 360.0);
+        }
+
+        return true;
+    }
+}
+
 typedef std::pair<int,enigma::inst_iter*> inode_pair;
 
 void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, int inside, bool notme) {
