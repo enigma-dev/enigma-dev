@@ -777,6 +777,20 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int 
     }
 }
 
+static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, double ly2)
+{
+    // Formula: x^2/a^2 + y^2/b^2 = 1   <=>   y = +/- sqrt(b^2*(1 - x^2/a^2))
+
+    const double inner = ry*ry*(1 - x*x/(rx*rx));
+    if (inner < 0) {
+        return false;
+    }
+    else {
+        const double y1 = -sqrt(inner), y2 = sqrt(inner);
+        return y1 <= ly2 && ly1 <= y2;
+    }
+}
+
 void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
 {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
@@ -796,7 +810,13 @@ void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
         int left, top, right, bottom;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
 
-        if (fabs(hypot(min(x1 + left - x, x1 + right - x), min(y1 + top - y, y1 + bottom - y))) <= r)
+        const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, top-y, left-x, right-x) ||
+                                 line_ellipse_intersects(r, r, bottom-y, left-x, right-x) ||
+                                 (x >= left && x <= right && y >= top && y <= bottom); // Circle inside bbox.
+
+        if (intersects)
         {
             if (inside)
             {
@@ -833,7 +853,13 @@ void instance_activate_circle(int x, int y, int r, int inside)
         int left, top, right, bottom;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
 
-        if (fabs(hypot(min(x1 + left - x, x1 + right - x), min(y1 + top - y, y1 + bottom - y))) <= r)
+        const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, top-y, left-x, right-x) ||
+                                 line_ellipse_intersects(r, r, bottom-y, left-x, right-x) ||
+                                 (x >= left && x <= right && y >= top && y <= bottom); // Circle inside bbox.
+
+        if (intersects)
         {
             if (inside)
             {
