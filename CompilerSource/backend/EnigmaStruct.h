@@ -63,8 +63,8 @@ struct EnigmaStruct
 #endif
 	int packageCount;
 
-	int extensionCount;
 	Extension *extensions;
+	int extensionCount;
 
 	//GameInformation gameInfo;
 	GameSettings gameSettings;

@@ -1,4 +1,4 @@
-/** Copyright (C) 2011 Josh Ventura
+/** Copyright (C) 2011-2012 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -61,8 +61,8 @@ namespace enigma
   
   void init_joysticks()
   {
+    joystick_load(0);
     joystick_load(1);
-    joystick_load(2);
   }
   
   static void handle_joystick(e_joystick *my_joystick)
@@ -82,7 +82,7 @@ namespace enigma
         else
         {
           //printf("Axis %d rotated in %d\n", a.number, a.value);
-          float at = my_joystick->axis[a.number] = double(abs(a.value) > 5 ? a.value : 0) / 32767;
+          float at = my_joystick->axis[a.number] = (abs(a.value) > 5 ? double(a.value) / 32767. : 0.);
           //printf("Wrap: %d, %d\n",my_joystick->wrapaxis_negative[a.number],my_joystick->wrapaxis_positive[a.number]);
           if (a.value <= 0 and my_joystick->wrapaxis_negative[a.number])
             enigma::keybdstatus[(int)my_joystick->wrapaxis_negative[a.number]] = at < -my_joystick->threashold;
@@ -112,9 +112,10 @@ namespace enigma
 
 bool joystick_load(int id)
 {
-  string devn = "/dev/input/js";
-  char dnum[16]; sprintf(dnum,"%d",id - 1);
-  devn += dnum;
+  if (enigma::joysticks.size() < id)
+    enigma::joysticks.resize(id+1, 0);
+  char sps[32]; sprintf(sps,"/dev/input/js%d",id);
+  string devn(sps);
   int device = open(devn.c_str(), O_RDONLY|O_NONBLOCK);
   if (device == -1)
     return false;
@@ -133,7 +134,8 @@ bool joystick_load(int id)
     enigma::joysticks.push_back(NULL);
   
   enigma::e_joystick* jsn = new enigma::e_joystick(device, devn, ac, bc);
-  enigma::joysticks.push_back(jsn);
+  delete enigma::joysticks[id];
+  enigma::joysticks[id] = jsn;
   enigma::handle_joystick(jsn);
   return true;
 }

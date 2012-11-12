@@ -715,6 +715,8 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
 #include <cstdio>
 token_t lexer_cpp::get_token(error_handler *herr)
 {
+  get_token_top:
+  
   #ifdef DEBUG_MODE
     static int number_of_times_GDB_has_dropped_its_ass = 0;
     ++number_of_times_GDB_has_dropped_its_ass;
@@ -893,7 +895,8 @@ token_t lexer_cpp::get_token(error_handler *herr)
       case ')': return token_t(token_basics(TT_RIGHTPARENTH,filename,line,spos-lpos));
       
       case '#':
-        return handle_preprocessor(herr), get_token(herr);
+        handle_preprocessor(herr);
+        goto get_token_top; // Unoptimized tail call leads to death and destruction
       
       case '\\':
         if (cfile[pos] != '\n' and cfile[pos] != '\r')
