@@ -377,7 +377,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
         // Set final direction from flipped, mirrored direction unit vector.
 
         const double mirror_direction = fmod(atan2(-mirror_y, mirror_x) * 180.0 / M_PI + 360.0, 360.0);
-        inst1->direction = speed >= 0 ? mirror_direction : fmod(mirror_direction + 180.0, 360.0);
+        inst1->direction = inst1->speed >= 0 ? mirror_direction : fmod(mirror_direction + 180.0, 360.0);
         return true;
     }
     else {
