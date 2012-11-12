@@ -314,6 +314,10 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
     if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
         return false;
 
+    if (collide_inst_inst(object, solid_only, true, inst1->x + inst1->hspeed, inst1->y + inst1->vspeed) == NULL) {
+        return false;
+    }
+
     if (collide_inst_inst(object, solid_only, true, inst1->x, inst1->y) != NULL) {
         // Return the instance to its previous position.
         inst1->x = inst1->xprevious;
