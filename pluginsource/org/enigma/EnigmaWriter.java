@@ -141,40 +141,49 @@ public final class EnigmaWriter
 		populateObjects();
 		populateRooms();
 
+		/** Used to store counts until they are ready to be committed to backend */
+		int count;
+
+		//triggers not implemented
 		o.triggerCount = 0;
 
-		o.constantCount = i.constants.size();
-		if (o.constantCount != 0)
+		count = i.constants.size();
+		if (count != 0)
 			{
 			o.constants = new Constant.ByReference();
-			Constant[] ocl = (Constant[]) o.constants.toArray(o.constantCount);
-			for (int c = 0; c < o.constantCount; c++)
+			Constant[] ocl = (Constant[]) o.constants.toArray(count);
+			for (int c = 0; c < count; c++)
 				{
 				ocl[c].name = i.constants.get(c).name;
 				ocl[c].value = i.constants.get(c).value;
 				}
 			}
+		o.constantCount = count;
 
-		o.includeCount = i.includes.size();
-		if (o.includeCount != 0)
+		count = i.includes.size();
+		if (count != 0)
 			{
 			o.includes = new Include.ByReference();
-			Include[] oil = (Include[]) o.includes.toArray(o.includeCount);
-			for (int inc = 0; inc < o.includeCount; inc++)
+			Include[] oil = (Include[]) o.includes.toArray(count);
+			for (int inc = 0; inc < count; inc++)
 				{
 				oil[inc].filepath = i.includes.get(inc).filepath;
 				}
 			}
+		o.includeCount = count;
 
+		//packages not implemented
 		o.packageCount = 0;
 		// o.packageCount = packages.length;
 		// o.packages = new StringArray(packages);
 
-		o.extensionCount = 1;
+		//extensions implemented separately. This is hard-coded legacy.
+		count = 1;
 		o.extensions = new Extension.ByReference();
-		Extension[] oix = (Extension[]) o.extensions.toArray(o.extensionCount);
+		Extension[] oix = (Extension[]) o.extensions.toArray(count);
 		oix[0].name = "Alarms";
 		oix[0].path = "Universal_System/Extensions";
+		o.extensionCount = count;
 
 		o.lastInstanceId = i.lastInstanceId;
 		o.lastTileId = i.lastTileId;
