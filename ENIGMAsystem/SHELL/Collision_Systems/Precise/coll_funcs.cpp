@@ -314,17 +314,15 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
     if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
         return false;
 
-    if (collide_inst_inst(object, solid_only, true, inst1->x, inst1->y) == NULL) {
-        return false;
+    if (collide_inst_inst(object, solid_only, true, inst1->x, inst1->y) != NULL) {
+        // Return the instance to its previous position.
+        inst1->x = inst1->xprevious;
+        inst1->y = inst1->yprevious;
     }
 
     const double x_start = inst1->x, y_start = inst1->y;
 
-    // Return the instance to its previous position.
-    inst1->x = inst1->xprevious;
-    inst1->y = inst1->yprevious;
-
-    const double x = inst1->x, y = inst1->y;
+    const double x = inst1->x + inst1->hspeed, y = inst1->y + inst1->vspeed;
 
     if (adv) {
         const double angle_radial = 10.0; // The angle increment for the radials.
@@ -332,7 +330,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
 
         const double effective_direction = inst1->speed >= 0 ? inst1->direction : fmod(inst1->direction+180.0, 360.0);
         const double flipped_direction = fmod(effective_direction + 180.0, 360.0);
-        const double speed = abs(inst1->speed);
+        const double speed = abs(inst1->speed + 1);//max(1, abs(inst1->speed));
 
         // Find the normal direction of the collision by doing radial collisions based on the speed and flipped direction.
 
@@ -356,7 +354,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
             }
         }
 
-        const int d = (d1 + d2)/2;
+        const int d = int(round((d1 + d2)/2.0));
         const double normal_direction = fmod(flipped_direction + d*angle_radial + 360.0, 360.0);
 
         // Flip and then mirror the effective direction unit vector along the direction of the normal.
@@ -381,18 +379,20 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
         return true;
     }
     else {
-        const double direction = inst1->direction;
+        const double direction = inst1->speed >= 0 ? inst1->direction : fmod(inst1->direction+180.0, 360.0);
         const bool free_horizontal = collide_inst_inst(object, solid_only, true, x, y_start) == NULL;
         const bool free_vertical = collide_inst_inst(object, solid_only, true, x_start, y) == NULL;
-        if (free_horizontal && !free_vertical) {
-            inst1->direction = direction <= 180.0 ? fmod(180.0 - direction, 360.0) : fmod((360.0 - direction) + 180.0, 360.0);
+        double new_direction;
+        if (!free_horizontal && free_vertical) {
+            new_direction = direction <= 180.0 ? fmod(180.0 - direction, 360.0) : fmod((360.0 - direction) + 180.0, 360.0);
         }
-        else if (!free_horizontal && free_vertical) {
-            inst1->direction = fmod(360.0 - direction, 360.0);
+        else if (free_horizontal && !free_vertical) {
+            new_direction = fmod(360.0 - direction, 360.0);
         }
         else {
-            inst1->direction = fmod(direction + 180.0, 360.0);
+            new_direction = fmod(direction + 180.0, 360.0);
         }
+        inst1->direction = inst1->speed >= 0 ? new_direction : fmod(new_direction + 180.0, 360.0);
 
         return true;
     }
