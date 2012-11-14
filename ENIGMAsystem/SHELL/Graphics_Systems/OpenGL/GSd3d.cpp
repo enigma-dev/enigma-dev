@@ -221,6 +221,7 @@ void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
+  enigma::d3d_light_update_positions();
 }
 
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
@@ -234,6 +235,7 @@ void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,do
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
+  enigma::d3d_light_update_positions();
 }
 
 void d3d_set_projection_ortho(double x, double y, double width, double height, double angle)
@@ -249,6 +251,7 @@ void d3d_set_projection_ortho(double x, double y, double width, double height, d
   glRotatef(angle,0,0,1);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
+  enigma::d3d_light_update_positions();
 }
 
 void d3d_set_projection_perspective(double x, double y, double width, double height, double angle)
@@ -263,6 +266,7 @@ void d3d_set_projection_perspective(double x, double y, double width, double hei
   glRotatef(angle,0,0,1);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
+  enigma::d3d_light_update_positions();
 }
 
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
@@ -729,11 +733,12 @@ bool d3d_transform_stack_disgard()
 #include <list>
 #include "Universal_System/fileio.h"
 
-struct posi {
+struct posi { // Homogenous point.
     double x;
     double y;
     double z;
-    posi(double x1, double y1, double z1) : x(x1), y(y1), z(z1){}
+    double w;
+    posi(double x1, double y1, double z1, double w1) : x(x1), y(y1), z(z1), w(w1){}
 };
 
 class d3d_lights
@@ -753,8 +758,9 @@ class d3d_lights
         if (ms >= MAX_LIGHTS)
             return false;
         light_ind.insert(pair<int,int>(id, ms));
-        const float dir[3] = {dx, dy, dz}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
-        glLightfv(GL_LIGHT0+ms, GL_SPOT_DIRECTION, dir);
+        ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        const float dir[4] = {-dx, -dy, -dz, 0.0f}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
+        glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         return true;
     }
@@ -769,7 +775,7 @@ class d3d_lights
         if (ms >= MAX_LIGHTS)
             return false;
         light_ind.insert(pair<int,int>(id, ms));
-        ind_pos.insert(pair<int,posi>(ms, posi(x, y, z)));
+        ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
             specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
@@ -791,7 +797,7 @@ class d3d_lights
         map<int, posi>::iterator end = ind_pos.end();
         for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
             const posi pos1 = (*it).second;
-            const float pos[4] = {pos1.x, pos1.y, pos1.z, 1};
+            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
             glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
         }
     }

@@ -61,8 +61,6 @@ namespace enigma
 
 void screen_redraw()
 {
-    d3d_light_update_positions();
-
     int FBO;
     if (!view_enabled)
     {
