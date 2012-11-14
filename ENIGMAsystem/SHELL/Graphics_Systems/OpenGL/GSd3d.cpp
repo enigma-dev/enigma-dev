@@ -34,6 +34,10 @@ double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation
 
 void d3d_start()
 {
+  // Set global ambient lighting to nothing.
+  float global_ambient[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+
   // Enable depth buffering
   d3dMode = true;
   d3dHidden = true;
@@ -263,9 +267,18 @@ void d3d_set_projection_perspective(double x, double y, double width, double hei
 
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
+    if ((x1 == x2 && y1 == y2) || z1 == z2) {
+        return;
+    }
     float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y2, z1}, v3[] = {x2, y2, z2},
           t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
     bind_texture(texId);
+
+    const float xd = x2-x1, yd = y2-y1, zd = z2-z1;
+    const float usize = fabs(zd), vsize = hypotf(xd, yd);
+    const float uz = zd/usize, vx = xd/vsize, vy = yd/vsize;
+    glNormal3f(uz*vy, -uz*vx, 0);
+
     glBegin(GL_TRIANGLE_STRIP);
     glTexCoord2fv(t0);
       glVertex3fv(v0);
@@ -283,6 +296,9 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
     float v0[] = {x1, y1, z1}, v1[] = {x1, y2, z1}, v2[] = {x2, y1, z2}, v3[] = {x2, y2, z2},
           t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
     bind_texture(texId);
+
+    glNormal3f(0, 0, 1); // TODO: Floor may be slanted, so calculate the normal properly.
+
     glBegin(GL_TRIANGLE_STRIP);
     glTexCoord2fv(t0);
       glVertex3fv(v0);
@@ -713,9 +729,17 @@ bool d3d_transform_stack_disgard()
 #include <list>
 #include "Universal_System/fileio.h"
 
+struct posi {
+    double x;
+    double y;
+    double z;
+    posi(double x1, double y1, double z1) : x(x1), y(y1), z(z1){}
+};
+
 class d3d_lights
 {
     map<int,int> light_ind;
+    map<int,posi> ind_pos; // Internal index to position.
 
     public:
     d3d_lights() {}
@@ -724,7 +748,9 @@ class d3d_lights
     bool light_define_direction(int id, double dx, double dy, double dz, int col)
     {
         const int ms = light_ind.size();
-        if (ms >= GL_MAX_LIGHTS)
+        int MAX_LIGHTS;
+        glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+        if (ms >= MAX_LIGHTS)
             return false;
         light_ind.insert(pair<int,int>(id, ms));
         const float dir[3] = {dx, dy, dz}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
@@ -734,22 +760,50 @@ class d3d_lights
     }
     bool light_define_point(int id, double x, double y, double z, double range, int col)
     {
+        if (range <= 0.0) {
+            return false;
+        }
         const int ms = light_ind.size();
-        if (ms >= GL_MAX_LIGHTS)
+        int MAX_LIGHTS;
+        glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+        if (ms >= MAX_LIGHTS)
             return false;
         light_ind.insert(pair<int,int>(id, ms));
-        const float pos[3] = {x, y, z}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
-      	glLightfv(GL_LIGHT1, GL_POSITION, pos);
+        ind_pos.insert(pair<int,posi>(ms, posi(x, y, z)));
+        const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
+            specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
+        glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
+        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+        glLightfv(GL_LIGHT0+ms, GL_AMBIENT, ambient);
+
+        // Limit the range of the light through attenuation.
+        glLightf(GL_LIGHT0+ms, GL_CONSTANT_ATTENUATION, 1.0);
+        glLightf(GL_LIGHT0+ms, GL_LINEAR_ATTENUATION, 0.0);
+        // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
+        const double attenuation_calibration = 48.0;
+        glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
+
         return true;
     } //NOTE: range cannot be defined for spotlights in opengl
+    void light_update_positions()
+    {
+        map<int, posi>::iterator end = ind_pos.end();
+        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
+            const posi pos1 = (*it).second;
+            const float pos[4] = {pos1.x, pos1.y, pos1.z, 1};
+            glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
+        }
+    }
     bool light_enable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
         if (it == light_ind.end())
         {
             const int ms = light_ind.size();
-            if (ms >= GL_MAX_LIGHTS)
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
                 return false;
             light_ind.insert(pair<int,int>(id, ms));
             glEnable(GL_LIGHT0+ms);
@@ -794,6 +848,13 @@ void d3d_light_define_ambient(int col)
 {
     const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
+}
+
+namespace enigma {
+    void d3d_light_update_positions()
+    {
+        d3d_lighting.light_update_positions();
+    }
 }
 
 #include "Universal_System/estring.h"
