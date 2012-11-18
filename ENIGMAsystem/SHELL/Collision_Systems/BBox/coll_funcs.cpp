@@ -38,7 +38,6 @@
 #include <limits>
 #include <cmath>
 #include "Universal_System/instance.h"
-#include <list>
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {
@@ -381,18 +380,12 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
 
     const double x_start = inst1->x, y_start = inst1->y;
 
-    std::list<enigma::object_collisions*> collision_objects;
-    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
-    {
-        collision_objects.push_back((enigma::object_collisions*)*it);
-    }
+    bool had_collision = true;
 
-    int collision_objects_prev = collision_objects.size() + 1;
-
-    while (collision_objects_prev != collision_objects.size()) // If the number of objects to check for hasn't changed, we are done.
+    while (had_collision) // If there was no collision in the last iteration, we have moved outside the object.
     {
-        collision_objects_prev = collision_objects.size();
-        for (std::list<enigma::object_collisions*>::iterator it = collision_objects.begin(); it != collision_objects.end(); ++it)
+        had_collision = false;
+        for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
         {
             const bbox_rect_t &box = inst1->$bbox_relative();
             const double x1 = inst1->x, y1 = inst1->y;
@@ -400,7 +393,7 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
 
             get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
 
-            const enigma::object_collisions* inst2 = *it;
+            const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
             if (inst2->id == inst1->id || (solid_only && !inst2->solid))
                 continue;
             if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
@@ -416,10 +409,10 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
             if (!(right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1))
                 continue;
 
-            // After this step inst2 has been handled, and should therefore not be included amongst the objects to check for,
-            // so delete it from the collection.
-            // Note that list supports removing objects without invalidating iterators.
-            it = collision_objects.erase(it);
+            had_collision = true;
+
+            // Move at least one step every time there is a collision.
+            const double min_dist = dist + 1;
 
             switch (quad)
             {
@@ -464,7 +457,7 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
                     }
                 break;
             }
-            dist = min(dist, max_dist);
+            dist = max(min(dist, max_dist), min_dist);
             inst1->x = x_start + cos_angle*dist;
             inst1->y = y_start - sin_angle*dist;
 
