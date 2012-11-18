@@ -356,16 +356,9 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         }
     }
 
-    double current_dist = DMIN;
-    {
-        double next_x = x + mid_dist*cos_angle;
-        double next_y = y - mid_dist*sin_angle;
-        if (collide_inst_inst(object, solid_only, true, next_x, next_y) == NULL) {
-            inst1->x = next_x;
-            inst1->y = next_y;
-            current_dist = mid_dist;
-        }
-    }
+    double current_dist = mid_dist;
+    inst1->x = x + mid_dist*cos_angle;
+    inst1->y = y - mid_dist*sin_angle;
 
     // Subtraction end.
 
