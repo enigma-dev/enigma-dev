@@ -38,6 +38,7 @@
 #include <limits>
 #include <cmath>
 #include "Universal_System/instance.h"
+#include <list>
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {
@@ -280,10 +281,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia1 = inst2->image_angle;
+                     ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
 
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
+        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
 
         if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
         {
@@ -371,83 +372,114 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
         max_dist = DMAX;
     }
     double dist = 0;
-    angle = ((angle %(variant) 360) + 360) %(variant) 360;
+    angle = fmod(angle, 360.0);
     double radang = angle*(M_PI/180.0);
     const double sin_angle = sin(radang), cos_angle = cos(radang);
     const int quad = int(angle/90.0);
-    const bbox_rect_t &box = inst1->$bbox_relative();
-    const double x1 = inst1->x, y1 = inst1->y,
-                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                 ia1 = inst1->image_angle;
-    int left1, top1, right1, bottom1;
+    const double    xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
+                     ia1 = inst1->image_angle;
 
-    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+    const double x_start = inst1->x, y_start = inst1->y;
 
+    std::list<enigma::object_collisions*> collision_objects;
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
-        const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
-        if (inst2->id == inst1->id || (solid_only && !inst2->solid))
-            continue;
-        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
-            continue;
-        const bbox_rect_t &box2 = inst2->$bbox_relative();
-        const double x2 = inst2->x, y2 = inst2->y,
-                     xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia1 = inst2->image_angle;
-        int left2, top2, right2, bottom2;
+        collision_objects.push_back((enigma::object_collisions*)*it);
+    }
 
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
+    int collision_objects_prev = collision_objects.size() + 1;
 
-        if (!(right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1))
-            continue;
-
-        switch (quad)
+    while (collision_objects_prev != collision_objects.size()) // If the number of objects to check for hasn't changed, we are done.
+    {
+        collision_objects_prev = collision_objects.size();
+        for (std::list<enigma::object_collisions*>::iterator it = collision_objects.begin(); it != collision_objects.end(); ++it)
         {
-            case 0:
-                if (direction_difference(point_direction(right1, top1, right2, top2),angle) < 0)
+            const bbox_rect_t &box = inst1->$bbox_relative();
+            const double x1 = inst1->x, y1 = inst1->y;
+            int left1, top1, right1, bottom1;
+
+            get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+
+            const enigma::object_collisions* inst2 = *it;
+            if (inst2->id == inst1->id || (solid_only && !inst2->solid))
+                continue;
+            if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+                continue;
+            const bbox_rect_t &box2 = inst2->$bbox_relative();
+            const double x2 = inst2->x, y2 = inst2->y,
+                         xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
+                         ia2 = inst2->image_angle;
+            int left2, top2, right2, bottom2;
+
+            get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
+
+            if (!(right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1))
+                continue;
+
+            // After this step inst2 has been handled, and should therefore not be included amongst the objects to check for,
+            // so delete it from the collection.
+            // Note that list supports removing objects without invalidating iterators.
+            it = collision_objects.erase(it);
+
+            switch (quad)
+            {
+                case 0:
+                    if (direction_difference(point_direction(left1, bottom1, right2, top2),angle) < 0)
+                    {
+                        dist += ((bottom1) - (top2))/sin_angle;
+                    }
+                    else
+                    {
+                        dist += ((right2) - (left1))/cos_angle;
+                    }
+                break;
+                case 1:
+                    if (direction_difference(point_direction(right1, bottom1, left2, top2),angle) < 0)
+                    {
+                        dist += ((left2) - (right1))/cos_angle;
+                    }
+                    else
+                    {
+                        dist += ((bottom1) - (top2))/sin_angle;
+                    }
+                break;
+                case 2:
+                if (direction_difference(point_direction(right1, top1, left2, bottom2),angle) < 0)
                 {
-                    dist = max(dist, ((bottom1) - (top2) + contact_distance)/sin_angle);
+                    dist += ((top1) - (bottom2))/sin_angle;
                 }
                 else
                 {
-                    dist = max(dist, ((right2) - (left1) + contact_distance)/cos_angle);
+                    dist += ((left2) - (right1))/cos_angle;
                 }
-            break;
-            case 1:
-                if (direction_difference(point_direction(left1, top1, left2, top2),angle) < 0)
-                {
-                    dist = max(dist, ((left2) - (right1) - contact_distance)/cos_angle);
+                break;
+                case 3:
+                    if (direction_difference(point_direction(left1, top1, right2, bottom2),angle) < 0)
+                    {
+                        dist += ((right2) - (left1))/cos_angle;
+                    }
+                    else
+                    {
+                        dist += ((top1) - (bottom2))/sin_angle;
+                    }
+                break;
+            }
+            dist = min(dist, max_dist);
+            inst1->x = x_start + cos_angle*dist;
+            inst1->y = y_start - sin_angle*dist;
+
+            for (int i = 0; i < 1; i++) // Move a single step on if the moving was not precise.
+            {
+                if (collide_inst_inst(inst2->id, solid_only, true, inst1->x, inst1->y) == NULL) {
+                    break;
                 }
-                else
-                {
-                    dist = max(dist, ((bottom1) - (top2) + contact_distance)/sin_angle);
-                }
-            break;
-            case 2:
-                if (direction_difference(point_direction(left1, bottom1, left2, bottom2),angle) < 0)
-                {
-                    dist = max(dist, ((top1) - (bottom2) - contact_distance)/sin_angle);
-                }
-                else
-                {
-                    dist = max(dist, ((left2) - (right1) - contact_distance)/cos_angle);
-                }
-            break;
-            case 3:
-                if (direction_difference(point_direction(right1, bottom1, right2, bottom2),angle) < 0)
-                {
-                    dist = max(dist, ((right2) - (left1) + contact_distance)/cos_angle);
-                }
-                else
-                {
-                    dist = max(dist, ((top1) - (bottom2) - contact_distance)/sin_angle);
-                }
-            break;
+                dist += 1;
+                inst1->x = x_start + cos_angle*dist;
+                inst1->y = y_start - sin_angle*dist;
+            }
         }
     }
-    dist = min(dist, max_dist);
-    inst1->x += cos_angle*dist;
-    inst1->y -= sin_angle*dist;
+
     return dist;
 }
 
@@ -456,13 +488,16 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
         return -4;
-    if (place_meeting(inst1->x, inst1->y, object))
-    {
-        inst1->x -= inst1->hspeed;
-        inst1->y -= inst1->vspeed;
-    }
-    else if (!place_meeting(inst1->x+inst1->hspeed, inst1->y+inst1->vspeed, object))
+
+    if (collide_inst_inst(object, solid_only, true, inst1->x + inst1->hspeed, inst1->y + inst1->vspeed) == NULL) {
         return false;
+    }
+
+    if (collide_inst_inst(object, solid_only, true, inst1->x, inst1->y) != NULL) {
+        // Return the instance to its previous position.
+        inst1->x = inst1->xprevious;
+        inst1->y = inst1->yprevious;
+    }
 
     const double angle = inst1->direction, radang = angle*(M_PI/180.0), DBL_EPSILON = 0.00001;
     double sin_angle = sin(radang), cos_angle = cos(radang), pc_corner, pc_dist, max_dist = 1000000;
@@ -486,10 +521,10 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia1 = inst2->image_angle;
+                     ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
 
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
+        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
 
         if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
             return false;
