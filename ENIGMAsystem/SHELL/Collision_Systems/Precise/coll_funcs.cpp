@@ -242,7 +242,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         return -4;
     }
 
-    double x = inst1->x, y = inst1->y;
+    const double x = inst1->x, y = inst1->y;
 
     if (collide_inst_inst(object, solid_only, true, x, y) != NULL) {
         return 0;
@@ -250,16 +250,129 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
 
     const double DMIN = 1, DMAX = 1000; // Arbitrary max for non-positive values, 1000 fits with other implementations.
     const double contact_distance = DMIN;
+    double mid_dist = max_dist; // mid_dist is used for the subtraction part.
     if (max_dist <= 0) { // Use the arbitrary max for non-positive values.
         max_dist = DMAX;
     }
+    mid_dist = max_dist;
     const double radang = (fmod(fmod(angle, 360) + 360, 360))*(M_PI/180.0);
+    const double sin_angle = sin(radang), cos_angle = cos(radang);
 
-    double current_dist;
-    for (current_dist = DMIN; current_dist <= max_dist; current_dist++)
+    // Subtraction.
+
+    const int quad = int(angle/90.0);
+
+    const bbox_rect_t &box = inst1->$bbox_relative();
+    const double x1 = inst1->x, y1 = inst1->y,
+                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
+                 ia1 = inst1->image_angle;
+    int left1, top1, right1, bottom1;
+
+    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
-        const double next_x = x + current_dist*cos(radang);
-        const double next_y = y - current_dist*sin(radang);
+        const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
+        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+            continue;
+        if (inst2->id == inst1->id || (solid_only && !inst2->solid))
+            continue;
+        const bbox_rect_t &box2 = inst2->$bbox_relative();
+        const double x2 = inst2->x, y2 = inst2->y,
+                     xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
+                     ia2 = inst2->image_angle;
+        int left2, top2, right2, bottom2;
+
+        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
+
+        if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
+        {
+            mid_dist = DMIN;
+            break;
+        }
+
+        switch (quad)
+        {
+            case 0:
+                if ((left2 > right1 || top1 > bottom2) &&
+                direction_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
+                direction_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
+                {
+                    if (direction_difference(point_direction(right1, top1, left2, bottom2),angle) > 0)
+                    {
+                        mid_dist = min(mid_dist, (top1 - bottom2 - contact_distance)/sin_angle);
+                    }
+                    else
+                    {
+                        mid_dist = min(mid_dist, (left2 - right1 - contact_distance)/cos_angle);
+                    }
+                }
+            break;
+            case 1:
+                if ((left1 > right2 || top1 > bottom2) &&
+                direction_difference(point_direction(left1, bottom1, right2, top2),angle) <= 0  &&
+                direction_difference(point_direction(right1, top1, left2, bottom2),angle) >= 0)
+                {
+                    if (direction_difference(point_direction(left1, top1, right2, bottom2),angle) > 0)
+                    {
+                        mid_dist = min(mid_dist, (right2 - left1 + contact_distance)/cos_angle);
+                    }
+                    else
+                    {
+                        mid_dist = min(mid_dist, (top1 - bottom2 - contact_distance)/sin_angle);
+                    }
+                }
+            break;
+            case 2:
+                if ((left1 > right2 || top2 > bottom1) &&
+                direction_difference(point_direction(right1, bottom1, left2, top2),angle) <= 0  &&
+                direction_difference(point_direction(left1, top1, right2, bottom2),angle) >= 0)
+                {
+                    if (direction_difference(point_direction(left1, bottom1, right2, top2),angle) > 0)
+                    {
+                        mid_dist = min(mid_dist, (bottom1 - top2 + contact_distance)/sin_angle);
+                    }
+                    else
+                    {
+                        mid_dist = min(mid_dist, (right2 - left1 + contact_distance)/cos_angle);
+                    }
+                }
+            break;
+            case 3:
+                if ((left2 > right1 || top2 > bottom1) &&
+                direction_difference(point_direction(right1, top1, left2, bottom2),angle) <= 0  &&
+                direction_difference(point_direction(left1, bottom1, right2, top2),angle) >= 0)
+                {
+                    if (direction_difference(point_direction(right1, bottom1, left2, top2),angle) > 0)
+                    {
+                        mid_dist = min(mid_dist, (left2 - right1 - contact_distance)/cos_angle);
+                    }
+                    else
+                    {
+                        mid_dist = min(mid_dist, (bottom1 - top2 + contact_distance)/sin_angle);
+                    }
+                }
+            break;
+        }
+    }
+
+    double current_dist = DMIN;
+    {
+        double next_x = x + mid_dist*cos_angle;
+        double next_y = y - mid_dist*sin_angle;
+        if (collide_inst_inst(object, solid_only, true, next_x, next_y) == NULL) {
+            inst1->x = next_x;
+            inst1->y = next_y;
+            current_dist = mid_dist;
+        }
+    }
+
+    // Subtraction end.
+
+    for (; current_dist <= max_dist; current_dist++)
+    {
+        const double next_x = x + current_dist*cos_angle;
+        const double next_y = y - current_dist*sin_angle;
         if (collide_inst_inst(object, solid_only, true, next_x, next_y) != NULL) {
             current_dist--;
             break;
