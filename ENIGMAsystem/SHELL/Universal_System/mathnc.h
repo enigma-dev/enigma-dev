@@ -75,7 +75,7 @@ static inline double mtrandom(double x, double y) {
 
 // C Random
 static inline int random32() { return rand(); }
-static inline long random64() { return ::random(); }
+static inline long random64() { return ::rand(); }
 
 // Overloading
 double abs(const variant& x);
