@@ -25,4 +25,5 @@
 namespace enigma {
   depth_layer::depth_layer(): draw_events(new event_iter("Draw")) {}
   map<double,depth_layer> drawing_depths;
+  map<int,pair<double,double> > id_to_currentnextdepth;
 }

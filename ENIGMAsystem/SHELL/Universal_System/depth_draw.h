@@ -47,5 +47,6 @@ namespace enigma {
     depth_layer();
   };
   extern map<double,depth_layer> drawing_depths;
+  extern map<int,pair<double,double> > id_to_currentnextdepth;
   typedef map<double,depth_layer>::reverse_iterator diter;
 }

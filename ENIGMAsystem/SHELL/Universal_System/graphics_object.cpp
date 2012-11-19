@@ -44,11 +44,15 @@ namespace enigma
   void depthv::function(variant oldval) {
     rval.d = floor(rval.d);
     if (oldval.rval.d == rval.d) return;
-    drawing_depths[oldval.rval.d].draw_events->unlink(myiter);
-    inst_iter* mynewiter = drawing_depths[rval.d].draw_events->add_inst(myiter->inst);
-     if (instance_event_iterator == myiter)
-       instance_event_iterator = myiter->prev;
-     myiter = mynewiter;
+
+    map<int,pair<double,double> >::iterator it;
+    it = id_to_currentnextdepth.find(myiter->inst->id);
+    if (it == id_to_currentnextdepth.end()) { // Insert a request to change in depth.
+      id_to_currentnextdepth.insert(pair<int,pair<double,double> >(myiter->inst->id, pair<double,double>(oldval.rval.d,rval.d)));
+    }
+    else { // Update the request to change in depth.
+      (*it).second.second = rval.d;
+    }
   }
   void depthv::init(double d,object_basic* who) {
     myiter = drawing_depths[rval.d = floor(d)].draw_events->add_inst(who);
