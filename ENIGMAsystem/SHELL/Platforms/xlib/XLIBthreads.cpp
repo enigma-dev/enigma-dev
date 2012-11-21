@@ -50,7 +50,8 @@ static void* thread_script_func(void* data) {
 int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7)
 {
   ethread* newthread = new ethread();
-  scrtdata *sd = new scrtdata(scr,(variant[]){arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7}, newthread);
+  variant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
+  scrtdata *sd = new scrtdata(scr, args, newthread);
   if (pthread_create(&newthread->me, NULL, thread_script_func, sd)) {
     delete sd; delete newthread;
     return -1;

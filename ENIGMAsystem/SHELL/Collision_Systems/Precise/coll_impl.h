@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>                          **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,14 +25,14 @@
 **                                                                              **
 \********************************************************************************/
 
-namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
-  {
-    return 0;
-  }
+#include "Universal_System/collisions_object.h"
 
-  void free_collision_mask(void* mask)
-  {
-  }
-};
+enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, bool notme, double x, double y);
+enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2);
+enigma::object_collisions* const collide_inst_line(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2);
+enigma::object_collisions* const collide_inst_point(int object, bool solid_only, bool prec, bool notme, int x1, int y1);
+enigma::object_collisions* const collide_inst_circle(int object, bool solid_only, bool prec, bool notme, int x1, int y1, double r);
+enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool prec, bool notme, int x1, int y1, double rx, double ry);
+void destroy_inst_point(int object, bool solid_only, int x1, int y1);
+void change_inst_point(int obj, bool perf, int x1, int y1);
+

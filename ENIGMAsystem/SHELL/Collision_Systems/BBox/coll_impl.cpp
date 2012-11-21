@@ -101,9 +101,9 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia1 = inst2->image_angle;
+                     ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
+        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
 
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1)
             return inst2;
@@ -221,30 +221,21 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
 
 enigma::object_collisions* const collide_inst_circle(int object, bool solid_only, bool notme, int x1, int y1, double r)
 {
-    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
-    {
-        enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
-        if (notme && inst->id == enigma::instance_event_iterator->inst->id)
-            continue;
-        if (solid_only && !inst->solid)
-            continue;
-        if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
-            continue;
+    return collide_inst_ellipse(object, solid_only, notme, x1, y1, r, r);
+}
 
-        const bbox_rect_t &box = inst->$bbox_relative();
-        const double x = inst->x, y = inst->y,
-                     xscale = inst->image_xscale, yscale = inst->image_yscale,
-                     ia = inst->image_angle;
-        int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, double ly2)
+{
+    // Formula: x^2/a^2 + y^2/b^2 = 1   <=>   y = +/- sqrt(b^2*(1 - x^2/a^2))
 
-        const double distx = x1 - min(max(int(x+.5), left), right),
-                     disty = y1 - min(max(int(y+.5), top), bottom);
-
-        if ((distx*distx) + (disty*disty) <= (r*r))
-            return inst;
+    const double inner = ry*ry*(1 - x*x/(rx*rx));
+    if (inner < 0) {
+        return false;
     }
-    return NULL;
+    else {
+        const double y1 = -sqrt(inner), y2 = sqrt(inner);
+        return y1 <= ly2 && ly1 <= y2;
+    }
 }
 
 enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool notme, int x1, int y1, double rx, double ry)
@@ -269,11 +260,15 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
         int left, top, right, bottom;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
-        const double distx = (x1 - min(max(int(x+.5), left), right))/rx,
-                     disty = (y1 - min(max(int(y+.5), top), bottom))/ry;
+        const bool intersects = line_ellipse_intersects(rx, ry, left-x1, top-y1, bottom-y1) ||
+                                 line_ellipse_intersects(rx, ry, right-x1, top-y1, bottom-y1) ||
+                                 line_ellipse_intersects(ry, rx, top-y1, left-x1, right-x1) ||
+                                 line_ellipse_intersects(ry, rx, bottom-y1, left-x1, right-x1) ||
+                                 (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom); // Ellipse inside bbox.
 
-        if ((distx*distx) + (disty*disty) <= 1)
+        if (intersects) {
             return inst;
+        }
     }
     return NULL;
 }

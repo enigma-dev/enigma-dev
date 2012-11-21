@@ -333,7 +333,7 @@ namespace enigma
 
 
   //Adds a subimage to an existing sprite from the exe
-  void sprite_set_subimage(int sprid, int imgindex, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
+  void sprite_set_subimage(int sprid, int imgindex, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk, unsigned char*collision_data, collision_type ct)
   {
     unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
     char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
@@ -353,14 +353,15 @@ namespace enigma
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
 
     unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
-    delete[] imgpxdata;
 
     sprite* sprstr = spritestructarray[sprid];
 
     sprstr->texturearray[imgindex] = texture;
     sprstr->texbordxarray[imgindex] = (double) w/fullwidth;
     sprstr->texbordyarray[imgindex] = (double) h/fullheight;
-    sprstr->colldata[imgindex] = collisionsystem_sprite_data_create(imgpxdata,x,y,w,h);
+    sprstr->colldata[imgindex] = get_collision_mask(sprstr,collision_data,ct);
+    
+    delete[] imgpxdata;
   }
 }
 

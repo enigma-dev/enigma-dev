@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <string>
 
+#include "Collision_Systems/collision_types.h"
+
 #ifndef ENIGMA_SPRITESTRUCT
 #define ENIGMA_SPRITESTRUCT
 
@@ -63,7 +65,7 @@ namespace enigma
   void sprite_add_copy(sprite *spr, sprite *spr_copy);
 
   //Adds a subimage to an existing sprite from the exe
-  void sprite_set_subimage(int sprid, int imgindex, int x, int y, unsigned int w,unsigned int h,unsigned char*chunk);
+  void sprite_set_subimage(int sprid, int imgindex, int x, int y, unsigned int w,unsigned int h,unsigned char*chunk, unsigned char*collision_data, collision_type ct);
 
   void spritestructarray_reallocate();
 }

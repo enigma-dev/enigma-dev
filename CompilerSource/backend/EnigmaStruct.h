@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>, Josh Ventura
- * 
+ *
  * This file is part of Enigma Plugin.
  * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
  * See LICENSE for details.
@@ -56,15 +56,13 @@ struct EnigmaStruct
 	int constantCount;
 	Include *includes;
 	int includeCount;
-#ifdef WIN32
-    char *packages[];
-#else
+
 	char **packages;
-#endif
+
 	int packageCount;
 
-	int extensionCount;
 	Extension *extensions;
+	int extensionCount;
 
 	//GameInformation gameInfo;
 	GameSettings gameSettings;

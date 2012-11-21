@@ -87,6 +87,10 @@ bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col
 bool d3d_light_define_point(int id, double x, double y, double z, double range, int col);
 bool d3d_light_enable(int id, bool enable);
 
+namespace enigma {
+    void d3d_light_update_positions();
+}
+
 #include <string>
 
 unsigned int d3d_model_create();

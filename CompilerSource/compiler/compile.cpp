@@ -201,16 +201,23 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   // CLean up from any previous executions.
   edbg << "Cleaning up from previous executions" << flushl;
     parsed_objects.clear(); //Make sure we don't dump in any old object code...
+    edbg << " - Cleared parsed objects" << flushl;
     parsed_rooms.clear();   //Or that we dump any room code, for that matter...
+    edbg << " - Cleared room entries" << flushl;
     shared_locals_clear();  //Forget inherited locals, we'll reparse them
+    edbg << " - Cleared shared locals list" << flushl;
     event_info_clear();     //Forget event definitions, we'll re-get them
-
+    edbg << " - Cleared event info" << flushl;
+   
   // Re-establish ourself
     // Read the global locals: locals that will be included with each instance
     {
       vector<string> extnp;
-      for (int i = 0; i < es->extensionCount; i++)
+      for (int i = 0; i < es->extensionCount; i++) {
+        cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
         extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
+      }
+      edbg << "Loading shared locals from extensions list" << flushl;
       if (shared_locals_load(extnp) != 0) {
         user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
         idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
