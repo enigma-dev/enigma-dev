@@ -43,8 +43,8 @@ void instance_activate_all();
 void instance_activate_object(int obj);
 void instance_deactivate_object(int obj);
 
+void instance_destroy(int id, bool dest_ev = true);
 void instance_destroy();
-void instance_destroy(int id);
 bool instance_exists (int obj);
 int  instance_find   (int obj,int n);
 int  instance_number (int obj);
