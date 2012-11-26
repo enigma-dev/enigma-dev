@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 
-int instance_create(int x,int y,int object)
+enigma::instance_t instance_create(int x,int y,int object)
 {
 	int idn = enigma::maxid++;
   enigma::object_basic* ob;

@@ -33,6 +33,8 @@
 
 namespace enigma
 {
+  typedef int instance_t;
+
   struct inst_iter
   {
     object_basic* inst;     // Inst is first member for non-arithmetic dereference
