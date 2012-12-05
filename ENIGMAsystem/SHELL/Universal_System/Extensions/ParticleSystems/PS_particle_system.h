@@ -25,52 +25,15 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "PS_particle_type.h"
+#ifndef ENIGMA_PS_PARTICLESYSTEM
+#define ENIGMA_PS_PARTICLESYSTEM
+
+#include <set>
 
 namespace enigma
 {
-  particle_type_manager pt_manager;
+  void draw_particlesystems(std::set<int>& particlesystem_ids);
 }
 
-int part_type_create()
-{ 
-  enigma::particle_type* pt = new enigma::particle_type();
-  pt->particle_count = 0;
-  pt->alive = true;
-  pt->life_min = 100;
-  pt->life_max = 100;
-  pt->speed_min = 0.0, pt->speed_max = 0.0;
-  pt->speed_incr = 0.0, pt->speed_wiggle = 0.0;
-  pt->dir_min = 0.0, pt->dir_max = 0.0;
-  pt->dir_incr = 0.0, pt->dir_wiggle = 0.0;
-
-  enigma::pt_manager.max_id++;
-  enigma::pt_manager.id_to_particletype.insert(std::pair<int,enigma::particle_type*>(enigma::pt_manager.max_id, pt));
-
-  return enigma::pt_manager.max_id;
-}
-void part_type_destroy(int id);
-void part_type_exists(int id);
-void part_type_clear(int id);
-// Motion.
-void part_type_speed(int id, double speed_min, double speed_max, double speed_incr, double speed_wiggle)
-{
-  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
-  if (it != enigma::pt_manager.id_to_particletype.end()) {
-    (*it).second->speed_min = speed_min;
-    (*it).second->speed_max = speed_max;
-    (*it).second->speed_incr = speed_incr;
-    (*it).second->speed_wiggle = speed_wiggle;
-  }
-}
-void part_type_direction(int id, double dir_min, double dir_max, double dir_incr, double dir_wiggle)
-{
-  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
-  if (it != enigma::pt_manager.id_to_particletype.end()) {
-    (*it).second->dir_min = dir_min;
-    (*it).second->dir_max = dir_max;
-    (*it).second->dir_incr = dir_incr;
-    (*it).second->dir_wiggle = dir_wiggle;
-  }
-}
+#endif // ENIGMA_PS_PARTICLESYSTEM
 

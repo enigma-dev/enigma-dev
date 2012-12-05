@@ -25,11 +25,18 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "PS_particle_system.h"
 #include "PS_particle.h"
 #include "PS_particle_type.h"
+#include "PS_particle_instance.h"
+#include "PS_particle_emitter.h"
+#include "Universal_System/depth_draw.h"
 #include <GL/gl.h> //TODO: Consider this.
 #include <cmath>
 #include <cstdlib>
+#include <list>
+
+using enigma::pt_manager;
 
 namespace enigma
 {
@@ -38,6 +45,7 @@ namespace enigma
     // Particles.
     bool oldtonew;
     double x_offset, y_offset;
+    double depth; // Integer stored as double.
     std::list<particle_instance> pi_list;
     bool auto_update, auto_draw;
     void initialize();
@@ -58,6 +66,7 @@ namespace enigma
   {
     oldtonew = true;
     auto_update = true, auto_draw = true;
+    depth = 0.0;
     pi_list = std::list<particle_instance>();
     id_to_emitter = std::map<int,particle_emitter*>();
     emitter_max_id = 0;
@@ -66,13 +75,12 @@ namespace enigma
   {
     // Emitters.
     {
-      particle_type_manager* pt_manager = get_particle_type_manager();
       std::map<int,particle_emitter*>::iterator end = id_to_emitter.end();
       for (std::map<int,particle_emitter*>::iterator it = id_to_emitter.begin(); it != end; it++)
       {
         particle_emitter* p_e = (*it).second;
-        std::map<int,particle_type*>::iterator pt_it = pt_manager->id_to_particletype.find(p_e->particle_type_id);
-        if (pt_it != pt_manager->id_to_particletype.end()) {
+        std::map<int,particle_type*>::iterator pt_it = pt_manager.id_to_particletype.find(p_e->particle_type_id);
+        if (pt_it != pt_manager.id_to_particletype.end()) {
           particle_type* p_t = (*pt_it).second;
           const int number = p_e->get_step_number();
           for (int i = 1; i <= number; i++)
@@ -173,6 +181,18 @@ namespace enigma
   };
 
   particle_system_manager ps_manager;
+
+  void draw_particlesystems(std::set<int>& particlesystem_ids)
+  {
+    std::set<int>::iterator end = particlesystem_ids.end();
+    for (std::set<int>::iterator it = particlesystem_ids.begin(); it != end; it++)
+    {
+      std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(*it);
+      if (ps_it != ps_manager.id_to_particlesystem.end()) {
+        (*ps_it).second->draw_particlesystem();
+      }
+    }
+  }
 }
 
 using enigma::particle_system;
@@ -180,7 +200,6 @@ using enigma::particle_type;
 using enigma::ps_manager;
 using enigma::ps_manager;
 using enigma::particle_type_manager;
-using enigma::get_particle_type_manager;
 
 // General functions.
 
@@ -192,6 +211,9 @@ int part_system_create()
   ps_manager.max_id++;
   ps_manager.id_to_particlesystem.insert(std::pair<int,particle_system*>(ps_manager.max_id, p_s));
 
+  // Drawing is automatic, so register in depth.
+  enigma::drawing_depths[p_s->depth].particlesystem_ids.insert(ps_manager.max_id);
+
   return ps_manager.max_id;
 }
 void part_system_destroy(int id);
@@ -202,7 +224,7 @@ void part_system_draw_order(int id, bool oldtonew);
 // Update and draw.
 
 void part_system_automatic_update(int id, bool automatic);
-void part_system_automatic_draw(int id, bool automatic);
+void part_system_automatic_draw(int id, bool automatic); // TODO: Remember to register/unregister with depth_draw.
 void part_system_update(int id)
 {
   std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
@@ -224,9 +246,8 @@ void part_particles_create(int id, double x, double y, int particle_type_id, int
 {
   std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
   if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_type_manager* pt_manager = get_particle_type_manager();
-    std::map<int,particle_type*>::iterator pt_it = pt_manager->id_to_particletype.find(id);
-    if (pt_it != pt_manager->id_to_particletype.end()) {
+    std::map<int,particle_type*>::iterator pt_it = pt_manager.id_to_particletype.find(id);
+    if (pt_it != pt_manager.id_to_particletype.end()) {
       (*ps_it).second->create_particles(x, y, (*pt_it).second, number);
     }
   }

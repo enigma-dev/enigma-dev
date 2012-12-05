@@ -51,8 +51,8 @@ namespace enigma
     int max_id;
     std::map<int,particle_type*> id_to_particletype;
   };
-
-  particle_type_manager* get_particle_type_manager();
+  
+  extern particle_type_manager pt_manager;
 }
 
 #endif // ENIGMA_PS_PARTICLETYPE

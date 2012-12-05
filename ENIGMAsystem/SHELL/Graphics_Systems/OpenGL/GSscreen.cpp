@@ -36,6 +36,7 @@ using namespace std;
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/Extensions/ParticleSystems/PS_particle_system.h"
 
 using namespace enigma;
 
@@ -111,9 +112,12 @@ void screen_redraw()
                 draw_background_part(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY);
             }
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
+            //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
                 enigma::instance_event_iterator->inst->myevent_draw();
             enigma::instance_event_iterator = push_it;
+            //particles
+            draw_particlesystems(dit->second.particlesystem_ids);
         }
     }
     else
@@ -255,6 +259,8 @@ void screen_redraw()
                     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
                         enigma::instance_event_iterator->inst->myevent_draw();
                     enigma::instance_event_iterator = push_it;
+                    //particles
+                    draw_particlesystems(dit->second.particlesystem_ids);
                 }
             }
         }
