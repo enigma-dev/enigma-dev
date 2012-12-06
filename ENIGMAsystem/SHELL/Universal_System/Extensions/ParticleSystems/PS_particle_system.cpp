@@ -182,6 +182,15 @@ namespace enigma
 
   particle_system_manager ps_manager;
 
+  void update_particlesystems()
+  {
+    std::map<int,particle_system*>::iterator end = ps_manager.id_to_particlesystem.end();
+    for (std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.begin(); it != end; it++)
+    {
+      (*it).second->update_particlesystem();
+    }
+  }
+
   void draw_particlesystems(std::set<int>& particlesystem_ids)
   {
     std::set<int>::iterator end = particlesystem_ids.end();

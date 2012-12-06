@@ -298,6 +298,13 @@ endstep: 3
 	Case: 2
 
 
+particlesystemsupdate: 100000
+	Name: Particle Systems Update
+	Mode: None
+	Default: ;
+	Instead: enigma::update_particlesystems(); # We never want to iterate draw; we let screen_redraw() handle it.
+
+
 # Fun fact: Draw comes after End Step.
 draw: 8
 	Name: Draw
