@@ -187,7 +187,9 @@ namespace enigma
     std::map<int,particle_system*>::iterator end = ps_manager.id_to_particlesystem.end();
     for (std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.begin(); it != end; it++)
     {
-      (*it).second->update_particlesystem();
+      if ((*it).second->auto_update) {
+        (*it).second->update_particlesystem();
+      }
     }
   }
 

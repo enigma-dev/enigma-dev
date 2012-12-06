@@ -25,9 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-//#ifndef ENIGMA_PS_PARTICLESYSTEM
-//#define ENIGMA_PS_PARTICLESYSTEM
-
 #include <set>
 
 namespace enigma
@@ -35,6 +32,4 @@ namespace enigma
   void update_particlesystems();
   void draw_particlesystems(std::set<int>& particlesystem_ids);
 }
-
-//#endif // ENIGMA_PS_PARTICLESYSTEM
 
