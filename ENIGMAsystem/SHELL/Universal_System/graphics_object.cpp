@@ -45,8 +45,7 @@ namespace enigma
     rval.d = floor(rval.d);
     if (oldval.rval.d == rval.d) return;
 
-    map<int,pair<double,double> >::iterator it;
-    it = id_to_currentnextdepth.find(myiter->inst->id);
+    map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
     if (it == id_to_currentnextdepth.end()) { // Insert a request to change in depth.
       id_to_currentnextdepth.insert(pair<int,pair<double,double> >(myiter->inst->id, pair<double,double>(oldval.rval.d,rval.d)));
     }
@@ -58,8 +57,14 @@ namespace enigma
     myiter = drawing_depths[rval.d = floor(d)].draw_events->add_inst(who);
   }
   void depthv::remove() {
-     drawing_depths[rval.d].draw_events->unlink(myiter);
-     myiter = NULL;
+    map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
+    if (it == id_to_currentnextdepth.end()) { // Local value is valid, use it.
+      drawing_depths[rval.d].draw_events->unlink(myiter);
+    }
+    else { // Local value is invalid, use the one in the map.
+      drawing_depths[(*it).second.first].draw_events->unlink(myiter);
+    }
+    myiter = NULL;
   }
   depthv::~depthv() {}
 
