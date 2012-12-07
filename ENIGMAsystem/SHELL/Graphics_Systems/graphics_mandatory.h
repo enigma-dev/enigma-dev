@@ -19,6 +19,8 @@
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
 
+#include <string>
+
 namespace enigma
 {
   /// Called at game load to allow the system to set up.

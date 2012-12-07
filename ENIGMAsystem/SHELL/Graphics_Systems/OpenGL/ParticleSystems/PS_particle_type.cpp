@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include "PS_particle_type.h"
+#include "PS_particle_sprites.h"
 
 namespace enigma
 {
@@ -37,6 +38,11 @@ int part_type_create()
   enigma::particle_type* pt = new enigma::particle_type();
   pt->particle_count = 0;
   pt->alive = true;
+  pt->is_particle_sprite = true;
+  std::map<pt_shape,enigma::particle_sprite*>::iterator it_shape = enigma::shape_to_sprite.find(pt_shape_sphere); // TODO: Make the default shape "pixel".
+  if (it_shape != enigma::shape_to_sprite.end()) {
+     pt->part_sprite = (*it_shape).second;
+  }
   pt->life_min = 100;
   pt->life_max = 100;
   pt->speed_min = 0.0, pt->speed_max = 0.0;
@@ -52,6 +58,28 @@ int part_type_create()
 void part_type_destroy(int id);
 void part_type_exists(int id);
 void part_type_clear(int id);
+// Shape.
+void part_type_shape(int id, pt_shape particle_shape)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    std::map<pt_shape,enigma::particle_sprite*>::iterator it_shape = enigma::shape_to_sprite.find(particle_shape);
+    if (it_shape != enigma::shape_to_sprite.end()) {
+       (*it).second->part_sprite = (*it_shape).second;
+    }
+  }
+}
+// Life and death.
+void part_type_life(int id, int life_min, int life_max)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    life_min = std::max(life_min, 1);
+    life_max = std::max(life_max, 1);
+    (*it).second->life_min = std::min(life_min, life_max);
+    (*it).second->life_max = std::max(life_min, life_max);
+  }
+}
 // Motion.
 void part_type_speed(int id, double speed_min, double speed_max, double speed_incr, double speed_wiggle)
 {

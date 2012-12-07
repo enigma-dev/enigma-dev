@@ -69,6 +69,10 @@ int part_type_create();
 void part_type_destroy(int id);
 void part_type_exists(int id);
 void part_type_clear(int id);
+// Shape.
+void part_type_shape(int id, pt_shape particle_shape);
+// Life and death.
+void part_type_life(int id, int life_min, int life_max);
 // Motion.
 void part_type_speed(int id, double speed_min, double speed_max, double speed_incr, double speed_wiggle);
 void part_type_direction(int id, double dir_min, double dir_max, double dir_incr, double dir_wiggle);

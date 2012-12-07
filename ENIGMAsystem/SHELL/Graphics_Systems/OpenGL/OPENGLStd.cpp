@@ -24,6 +24,7 @@ using namespace std;
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
+#include "Graphics_Systems/OpenGL/ParticleSystems/PS_particle_sprites.h"
 namespace enigma
 {
   unsigned bound_texture=0;
@@ -34,6 +35,8 @@ namespace enigma
   void graphicssystem_initialize()
   {
     GLenum err = glewInit();
+    initialize_particle_sprites();
+    
     #ifdef DEBUG_MODE
     if (GLEW_OK != err)
     {

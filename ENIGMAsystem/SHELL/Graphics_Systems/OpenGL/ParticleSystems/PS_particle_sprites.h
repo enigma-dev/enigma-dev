@@ -25,42 +25,22 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLETYPE
-#define ENIGMA_PS_PARTICLETYPE
+#ifndef ENIGMA_PS_PARTICLESPRITES
+#define ENIGMA_PS_PARTICLESPRITES
 
-#include <map>
 #include "PS_particle_enums.h"
-#include "PS_particle_sprites.h"
+#include <map>
 
 namespace enigma
 {
-  struct particle_type
+  struct particle_sprite
   {
-    // If the particle count becomes 0, and the type is not alive,
-    // the type should be removed, since it is no longer used.
-    int particle_count; // The number of particles of this particle type.
-    bool alive; // Whether the type is still alive.
-
-    // Shape.
-    bool is_particle_sprite; // Whether an internal particle sprite is used or not.
-    enigma::particle_sprite* part_sprite;
-    // Life and death.
-    int life_min, life_max; // life_min <= life_max.
-    // Motion.
-    double speed_min, speed_max;
-    double speed_incr, speed_wiggle;
-    double dir_min, dir_max;
-    double dir_incr, dir_wiggle;
+    int texture;
+    int width, height;
   };
-
-  struct particle_type_manager
-  {
-    int max_id;
-    std::map<int,particle_type*> id_to_particletype;
-  };
-  
-  extern particle_type_manager pt_manager;
+  void initialize_particle_sprites();
+  extern std::map<pt_shape,particle_sprite*> shape_to_sprite;
 }
 
-#endif // ENIGMA_PS_PARTICLETYPE
+#endif // ENIGMA_PS_PARTICLESPRITES
 

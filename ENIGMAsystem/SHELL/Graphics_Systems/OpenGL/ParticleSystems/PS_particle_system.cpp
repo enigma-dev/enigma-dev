@@ -31,6 +31,8 @@
 #include "PS_particle_instance.h"
 #include "PS_particle_emitter.h"
 #include "Universal_System/depth_draw.h"
+#include "Graphics_Systems/OpenGL/GSstdraw.h"
+#include "Graphics_Systems/OpenGL/binding.h"
 #include <GL/gl.h> //TODO: Consider this.
 #include <cmath>
 #include <cstdlib>
@@ -121,12 +123,38 @@ namespace enigma
   }
   void particle_system::draw_particlesystem()
   {
-    //TODO: Handle different particle shapes.
-    glBindTexture(GL_TEXTURE_2D, 0);
+    // TODO: Handle different particle shapes.
+    // TODO: Draw the particle system either from oldest to youngest or reverse.
+
     const std::list<particle_instance>::iterator end = pi_list.end();
     for (std::list<particle_instance>::iterator it = pi_list.begin(); it != end; it++)
     {
-      glRectf(it->x-1,it->y-1,it->x+1,it->y+1);
+      particle_type* pt = it->pt;
+      // TODO: Use default shape if particle type not alive.
+      if (pt->is_particle_sprite) {
+        particle_sprite* ps = pt->part_sprite;
+        bind_texture(ps->texture);
+
+        glPushAttrib(GL_CURRENT_BIT); // Push 1.
+
+        glColor4f(1,1,1,1); // TODO: Color may change.
+        const float tbx = 1, tby = 1,
+          xvert1 = it->x - ps->width/2, xvert2 = it->x + ps->width/2,
+          yvert1 = it->y - ps->height/2, yvert2 = it->y + ps->height/2;
+
+        glBegin(GL_QUADS);
+        glTexCoord2f(0,0);
+        glVertex2f(xvert1,yvert1);
+        glTexCoord2f(tbx,0);
+        glVertex2f(xvert2,yvert1);
+        glTexCoord2f(tbx,tby);
+        glVertex2f(xvert2,yvert2);
+        glTexCoord2f(0,tby);
+        glVertex2f(xvert1,yvert2);
+        glEnd();
+
+	glPopAttrib(); // Pop 1.
+      }
     }
   }
   void particle_system::create_particles(double x, double y, particle_type* pt, int number)

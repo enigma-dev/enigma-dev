@@ -25,42 +25,51 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLETYPE
-#define ENIGMA_PS_PARTICLETYPE
-
-#include <map>
-#include "PS_particle_enums.h"
 #include "PS_particle_sprites.h"
+#include "PS_particle_enums.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include <map>
+#include <cmath>
 
 namespace enigma
 {
-  struct particle_type
+  std::map<pt_shape,particle_sprite*> shape_to_sprite;
+  void generate_sphere()
   {
-    // If the particle count becomes 0, and the type is not alive,
-    // the type should be removed, since it is no longer used.
-    int particle_count; // The number of particles of this particle type.
-    bool alive; // Whether the type is still alive.
+    //TODO: Implement correctly.
+    int fullwidth = 64, fullheight = 64; // Assumed to be equal to n^2 for some n.
+    char *imgpxdata = new char[4*fullwidth*fullheight+1];
 
-    // Shape.
-    bool is_particle_sprite; // Whether an internal particle sprite is used or not.
-    enigma::particle_sprite* part_sprite;
-    // Life and death.
-    int life_min, life_max; // life_min <= life_max.
-    // Motion.
-    double speed_min, speed_max;
-    double speed_incr, speed_wiggle;
-    double dir_min, dir_max;
-    double dir_incr, dir_wiggle;
-  };
+    int center_x = fullwidth/2, center_y = fullheight/2;
 
-  struct particle_type_manager
+    for (int x = 0; x < fullwidth; x++)
+    {
+      for (int y = 0; y < fullheight; y++)
+      {
+        double x_d = (x+0.5-center_x);
+        double y_d = (y+0.5-center_y);
+        double dist_from_middle = sqrt(x_d*x_d + y_d*y_d);
+        int grayvalue = 255;
+        int alpha = dist_from_middle > 32 ? 0 : int(255*(32 - dist_from_middle)/32);
+        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+3] = alpha;
+      }
+    }
+    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
+    delete[] imgpxdata;
+
+    particle_sprite* p_sprite = new particle_sprite();
+    p_sprite->texture = texture;
+    p_sprite->width = fullwidth;
+    p_sprite->height = fullheight;
+
+    shape_to_sprite.insert(std::pair<pt_shape,particle_sprite*>(pt_shape_sphere,p_sprite));
+  }
+  void initialize_particle_sprites()
   {
-    int max_id;
-    std::map<int,particle_type*> id_to_particletype;
-  };
-  
-  extern particle_type_manager pt_manager;
+    generate_sphere();
+  }
 }
-
-#endif // ENIGMA_PS_PARTICLETYPE
-
+ 

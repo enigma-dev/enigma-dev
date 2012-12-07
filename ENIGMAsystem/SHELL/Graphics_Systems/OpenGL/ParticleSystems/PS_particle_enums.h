@@ -28,6 +28,9 @@
 #ifndef ENIGMA_PS_PARTICLEENUMS
 #define ENIGMA_PS_PARTICLEENUMS
 
+enum pt_shape {
+  pt_shape_sphere
+};
 enum ps_shape {
   ps_shape_rectangle//,
   //ps_shape_ellipse,
