@@ -91,7 +91,6 @@ extern int amain();
 #include "Universal_System/path_functions.h"
 //#include "Universal_System/motion_planning.h"
 //#include "Universal_System/mp_movement.h"
-#include "Universal_System/Extensions/ParticleSystems/PS_particle_system.h"
 
 #include "Universal_System/move_functions.h"
 
