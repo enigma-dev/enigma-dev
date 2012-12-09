@@ -29,6 +29,11 @@
 #define ENIGMA_PS_PARTICLEENUMS
 
 enum pt_shape {
+  pt_shape_pixel,
+  pt_shape_disk,
+  pt_shape_square,
+  pt_shape_line,
+  pt_shape_star,
   pt_shape_sphere
 };
 enum ps_shape {

@@ -39,7 +39,7 @@ int part_type_create()
   pt->particle_count = 0;
   pt->alive = true;
   pt->is_particle_sprite = true;
-  std::map<pt_shape,enigma::particle_sprite*>::iterator it_shape = enigma::shape_to_sprite.find(pt_shape_sphere); // TODO: Make the default shape "pixel".
+  std::map<pt_shape,enigma::particle_sprite*>::iterator it_shape = enigma::shape_to_sprite.find(pt_shape_pixel);
   if (it_shape != enigma::shape_to_sprite.end()) {
      pt->part_sprite = (*it_shape).second;
   }
