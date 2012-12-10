@@ -241,14 +241,13 @@ namespace enigma
           }
           if (inside) break;
         }
-        int alpha;
+        int alpha = 0;
         if (inside) { // Fill completely the inner area.
           alpha = alpha_max;
         }
         else { // Fade out the edges.
 
           // Find minimum distance along line.
-          double edge_dist = 0.0;
           for (int i = 0; i < 5; i++)
           {
             int i_1 = i, i_2 = (i+1) % 5;
@@ -299,6 +298,68 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_star);
     delete[] imgpxdata;
   }
+  void generate_circle()
+  {
+    const int fullwidth = 64, fullheight = 64;
+    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+
+    const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
+    const int rad = 26;
+    const double ring_size = 2.5;
+    const int alpha_max = 220;
+    const int grayvalue = 255;
+    for (int x = 0; x < fullwidth; x++)
+    {
+      for (int y = 0; y < fullheight; y++)
+      {
+        double x_d = (x+0.5-center_x);
+        double y_d = (y+0.5-center_y);
+        double dfm = sqrt(x_d*x_d + y_d*y_d); // Distance from middle.
+        double diff = fabs(dfm - rad);
+        int alpha = std::max(0, int(alpha_max*(ring_size - diff)/ring_size));
+        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+3] = alpha;
+      }
+    }
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_circle);
+    delete[] imgpxdata;
+  }
+  void generate_ring()
+  {
+    const int fullwidth = 64, fullheight = 64;
+    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+
+    const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
+    const int out_r = 26;
+    const int in_r = 6;
+    const double ring_size = 2.5;
+    const int alpha_max = 220;
+    const int grayvalue = 255;
+    for (int x = 0; x < fullwidth; x++)
+    {
+      for (int y = 0; y < fullheight; y++)
+      {
+        double x_d = (x+0.5-center_x);
+        double y_d = (y+0.5-center_y);
+        double dfm = sqrt(x_d*x_d + y_d*y_d); // Distance from middle.
+        int alpha = 0;
+        if (dfm >= out_r) {
+          alpha = std::max(0, int(alpha_max*(ring_size - (dfm-out_r))/ring_size));
+        }
+        else if (dfm >= in_r) {
+          alpha = int(alpha_max*pow(dfm-in_r, 2)/pow(out_r - in_r, 2));
+        }
+        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+3] = alpha;
+      }
+    }
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_ring);
+    delete[] imgpxdata;
+  }
   void generate_sphere()
   {
     const int fullwidth = 64, fullheight = 64;
@@ -324,6 +385,68 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_sphere);
     delete[] imgpxdata;
   }
+  long random_seed = 0;
+  const long M = 2393*12413;
+  long get_next_random()
+  {
+    random_seed = (random_seed*random_seed + 1) % M;
+    return random_seed;
+  }
+  void generate_flare()
+  {
+    const int fullwidth = 64, fullheight = 64;
+    char *imgpxdata = new char[4*fullwidth*fullheight+1];
+
+    const int center_x = fullwidth/2-1, center_y = fullheight/2-1;
+
+    const int line_count = 200;
+    const double line_length_min = 26.0;
+    const double line_length_max = 26.5;
+    double line_lengths[line_count];
+    random_seed = 127;
+    for (int i = 0; i < line_count; i++)
+    {
+      line_lengths[i] = line_length_min + (1.0*get_next_random()/M)*(line_length_max-line_length_min);
+    }
+    for (int i = 0; i < 30; i++) {
+      int index = get_next_random() % line_count;
+      line_lengths[(index-1) % line_count] = 27.0;
+      line_lengths[index] = 28.5;
+      line_lengths[(index+1) % line_count] = 27.0;
+    }
+
+    int alpha_max = 255;
+    int alpha_min = 0;
+    const int grayvalue = 255;
+    const double dist_max = 29.0;
+
+    for (int x = 0; x < fullwidth; x++)
+    {
+      for (int y = 0; y < fullheight; y++)
+      {
+        double x_d = (x+0.5-center_x);
+        double y_d = (y+0.5-center_y);
+        double angle = fmod(atan2(y_d, x_d) + 360.0, 360.0);
+        int line_index = int(line_count*angle/(2.0*M_PI)) % line_count;
+        double dfm = sqrt(x_d*x_d + y_d*y_d) / (line_lengths[line_index]/line_length_min); // Distance from middle.
+        int alpha;
+        if (dfm >= dist_max) {
+          alpha = 0;
+        }
+        else {
+          double part = pow(std::min(1.0, 1.1 - dfm/dist_max), 3);
+          alpha = int(alpha_min + part*(alpha_max-alpha_min));
+          if (alpha > 255) alpha = 255;
+        }
+        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+3] = alpha;
+      }
+    }
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_flare);
+    delete[] imgpxdata;
+  }
   void initialize_particle_sprites()
   {
     generate_pixel();
@@ -331,7 +454,10 @@ namespace enigma
     generate_square();
     generate_line();
     generate_star();
+    generate_circle();
+    generate_ring();
     generate_sphere();
+    generate_flare();
   }
 }
  

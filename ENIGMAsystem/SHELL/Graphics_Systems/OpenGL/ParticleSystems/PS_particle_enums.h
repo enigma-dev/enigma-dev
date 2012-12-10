@@ -34,7 +34,10 @@ enum pt_shape {
   pt_shape_square,
   pt_shape_line,
   pt_shape_star,
-  pt_shape_sphere
+  pt_shape_circle,
+  pt_shape_ring,
+  pt_shape_sphere,
+  pt_shape_flare
 };
 enum ps_shape {
   ps_shape_rectangle//,
