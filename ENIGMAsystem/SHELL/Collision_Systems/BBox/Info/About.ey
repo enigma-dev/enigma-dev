@@ -8,5 +8,5 @@ Description: Collisions register using simple sprite bounding box (rectangle) ch
 Author: IsmAvatar
 
 Represents:
-	Build-platforms: All
+	Build-platforms: None
 

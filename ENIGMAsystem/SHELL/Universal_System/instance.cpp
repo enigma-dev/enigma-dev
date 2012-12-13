@@ -1,7 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
-**  Copyright (C) 2012 Alasdair Morrison                                        ** 
+**  Copyright (C) 2012 Alasdair Morrison                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -44,8 +44,8 @@ namespace enigma
 typedef std::pair<int,enigma::inst_iter*> inode_pair;
 void instance_deactivate_all(bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
-        if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;  
-        
+        if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
+
         ((enigma::object_basic*)*it)->deactivate();
         enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
     }
@@ -53,7 +53,7 @@ void instance_deactivate_all(bool notme) {
 
 
 void instance_activate_all() {
-    
+
     std::map<int,enigma::inst_iter*>::iterator iter;
     for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter) {
         ((enigma::object_basic*)(iter->second->inst))->activate();
@@ -79,12 +79,14 @@ void instance_activate_object(int obj) {
     }
 }
 
-void instance_destroy(int id)
+void instance_destroy(int id, bool dest_ev)
 {
   enigma::object_basic* who = enigma::fetch_instance_by_id(id);
   if (who and enigma::cleanups.find(who) == enigma::cleanups.end()) {
-    who->myevent_destroy();
-    who->unlink();
+    if (dest_ev)
+        who->myevent_destroy();
+    if (enigma::cleanups.find(who) == enigma::cleanups.end())
+        who->unlink();
   }
 }
 #include <stdio.h>
@@ -93,7 +95,8 @@ void instance_destroy()
   enigma::object_basic* const a = enigma::instance_event_iterator->inst;
   if (enigma::cleanups.find(a) == enigma::cleanups.end()) {
     enigma::instance_event_iterator->inst->myevent_destroy();
-    enigma::instance_event_iterator->inst->unlink();
+    if (enigma::cleanups.find(a) == enigma::cleanups.end())
+        enigma::instance_event_iterator->inst->unlink();
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
     printf("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! %p ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!",a);
     if (a != (enigma::object_basic*)enigma::instance_event_iterator->inst)

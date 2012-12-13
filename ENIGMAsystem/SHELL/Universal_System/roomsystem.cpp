@@ -32,8 +32,6 @@
 #include "var4.h"
 #include "reflexive_types.h"
 
-#include "ENIGMA_GLOBALS.h" // TODO: Do away with this sloppy infestation permanently!
-
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -72,14 +70,12 @@ namespace enigma
   void roomstruct::gotome(bool gamestart)
   {
     //Destroy all objects
-    enigma::nodestroy=1;
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
       it->myevent_roomend();
       if (!((object_planar*)*it)->persistent)
-      instance_destroy(it->id);
+      instance_destroy(it->id, false);
     }
-    enigma::nodestroy = 0;
 
     // Set the index to self
     room.rval.d = id;

@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,16 +25,32 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "Collision_Systems/collision_mandatory.h"
+#ifndef ENIGMA_PS_PARTICLEENUMS
+#define ENIGMA_PS_PARTICLEENUMS
 
-namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
-  {
-    return 0;
-  }
-
-  void free_collision_mask(void* mask)
-  {
-  }
+enum pt_shape {
+  pt_shape_pixel,
+  pt_shape_disk,
+  pt_shape_square,
+  pt_shape_line,
+  pt_shape_star,
+  pt_shape_circle,
+  pt_shape_ring,
+  pt_shape_sphere,
+  pt_shape_flare
 };
+enum ps_shape {
+  ps_shape_rectangle//,
+  //ps_shape_ellipse,
+  //ps_shape_diamond,
+  //ps_shape_line
+};
+
+enum ps_distr {
+  ps_distr_linear//,
+  //ps_distr_gaussian,
+  //ps_distr_invgaussian
+};
+
+#endif // ENIGMA_PS_PARTICLEENUMS
+

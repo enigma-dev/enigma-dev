@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,16 +25,32 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "Collision_Systems/collision_mandatory.h"
+#ifndef ENIGMA_PS_PARTICLEEMITTER
+#define ENIGMA_PS_PARTICLEEMITTER
+
+#include "PS_particle_enums.h"
 
 namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
+{
+  struct particle_emitter
   {
-    return 0;
-  }
+    double xmin, ymin, xmax, ymax;
+    ps_shape shape;
+    ps_distr distribution;
+    int particle_type_id; // -1 for no id.
+    int number;
 
-  void free_collision_mask(void* mask)
-  {
-  }
-};
+    void initialize();
+    void clear_particle_emitter();
+    void set_region(double xmin, double ymin, double xmax, double ymax, ps_shape shape, ps_distr distribution);
+    void set_burst(int particle_type_id, int number);
+    void set_stream(int particle_type_id, int number);
+    void get_point(int& x, int& y);
+    int get_step_number();
+  };
+
+  particle_emitter* create_particle_emitter();
+}
+
+#endif // ENIGMA_PS_PARTICLEEMITTER
+

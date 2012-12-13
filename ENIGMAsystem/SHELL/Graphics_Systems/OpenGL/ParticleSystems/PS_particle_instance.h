@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,16 +25,22 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "Collision_Systems/collision_mandatory.h"
+#ifndef ENIGMA_PS_PARTICLEINSTANCE
+#define ENIGMA_PS_PARTICLEINSTANCE
+
+#include "PS_particle_type.h"
 
 namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
+{
+  struct particle_instance
   {
-    return 0;
-  }
+    particle_type* pt;
 
-  void free_collision_mask(void* mask)
-  {
-  }
-};
+    int life_current;
+    double x, y;
+    double vx, vy;
+  };
+}
+
+#endif // ENIGMA_PS_PARTICLEINSTANCE
+

@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,16 +25,66 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "Collision_Systems/collision_mandatory.h"
+#include "PS_particle_emitter.h"
+#include "PS_particle_enums.h"
+#include <cstdlib>
+#include <algorithm>
 
 namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
+{
+  void particle_emitter::initialize()
   {
-    return 0;
+    xmin = 0, xmax = 0, ymin = 0, ymax = 0;
+    shape = ps_shape_rectangle;
+    distribution = ps_distr_linear;
+    particle_type_id = -1;
+    number = 0;
   }
+  particle_emitter* create_particle_emitter()
+  {
+    particle_emitter* pe = new particle_emitter();
+    pe->initialize();
+    return pe;
+  }
+  void particle_emitter::clear_particle_emitter()
+  {
+    initialize();
+  }
+  void particle_emitter::set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape, ps_distr distribution)
+  {
+    this->xmin = xmin;
+    this->xmax = xmax;
+    this->ymin = ymin;
+    this->ymax = ymax;
 
-  void free_collision_mask(void* mask)
-  {
+    this->shape = shape;
+    this->distribution = distribution;
   }
-};
+  void particle_emitter::set_stream(int particle_type_id, int number)
+  {
+    this->particle_type_id = particle_type_id;
+    this->number = number;
+  }
+  void particle_emitter::get_point(int& x, int&y)
+  {
+    // TODO: Missing shapes and distributions.
+
+    switch (shape) {
+    case ps_shape_rectangle: {
+      x = std::min(xmin, xmax) + rand() % abs(xmin-xmax) + 1;
+      y = std::min(ymin, ymax) + rand() % abs(ymin-ymax) + 1;
+      break;
+    }
+    }
+  }
+  int particle_emitter::get_step_number()
+  {
+    if (number >= 0) {
+      return number;
+    }
+    else {
+      return rand() % (-number) < 1 ? 1 : 0; // Create particle with probability -1/number.
+    }
+  }
+}
+
