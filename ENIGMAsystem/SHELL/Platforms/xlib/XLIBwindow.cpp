@@ -40,6 +40,7 @@ using namespace std;
 #include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBwindow.h"
 #include "XLIBmain.h"
+#undef sleep
 
 #include <X11/Xlib.h>
 #define uint unsigned int
@@ -67,9 +68,9 @@ void gmw_init()
 	}
 }
 
-void sleep(int ms)
+void Sleep(int ms)
 {
-	if(ms>1000) sleep(ms/1000);
+	if(ms>=1000) sleep(ms/1000);
 	if(ms>0)	usleep(ms%1000*1000);
 }
 
