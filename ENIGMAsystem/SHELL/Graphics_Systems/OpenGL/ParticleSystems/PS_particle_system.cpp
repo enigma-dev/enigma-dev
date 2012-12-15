@@ -32,11 +32,16 @@
 #include "PS_particle_emitter.h"
 #include "Universal_System/depth_draw.h"
 #include "Graphics_Systems/OpenGL/GSstdraw.h"
+#include "Graphics_Systems/OpenGL/GScolors.h"
 #include "Graphics_Systems/OpenGL/binding.h"
 #include <GL/gl.h> //TODO: Consider this.
 #include <cmath>
 #include <cstdlib>
 #include <list>
+
+#define __GETR(x) ((x & 0x0000FF))
+#define __GETG(x) ((x & 0x00FF00) >> 8)
+#define __GETB(x) ((x & 0xFF0000) >> 16)
 
 using enigma::pt_manager;
 
@@ -137,7 +142,8 @@ namespace enigma
 
         glPushAttrib(GL_CURRENT_BIT); // Push 1.
 
-        glColor4f(1,1,1,1); // TODO: Color may change.
+        int color = it->color; // TODO: Alpha can be set.
+        glColor4ub(__GETR(color),__GETG(color),__GETB(color),255);
         const float tbx = 1, tby = 1,
           xvert1 = it->x - ps->width/2, xvert2 = it->x + ps->width/2,
           yvert1 = it->y - ps->height/2, yvert2 = it->y + ps->height/2;
@@ -166,6 +172,7 @@ namespace enigma
     {
       particle_instance pi;
       pi.pt = pt;
+      pi.color = pt->color1;
       pi.life_current = pt->life_min == pt->life_max ? pt->life_min : pt->life_min + rand() % (	pt->life_max - pt->life_min);
       pi.x = x;
       pi.y = y;

@@ -27,6 +27,7 @@
 
 #include "PS_particle_type.h"
 #include "PS_particle_sprites.h"
+#include "Graphics_Systems/OpenGL/GScolors.h"
 
 namespace enigma
 {
@@ -39,10 +40,12 @@ int part_type_create()
   pt->particle_count = 0;
   pt->alive = true;
   pt->is_particle_sprite = true;
-  std::map<pt_shape,enigma::particle_sprite*>::iterator it_shape = enigma::shape_to_sprite.find(pt_shape_pixel);
-  if (it_shape != enigma::shape_to_sprite.end()) {
-     pt->part_sprite = (*it_shape).second;
+  enigma::particle_sprite* sprite = enigma::get_particle_sprite(pt_shape_pixel);
+  if (sprite != 0) {
+    pt->part_sprite = sprite;
   }
+  pt->c_mode = enigma::one_color;
+  pt->color1 = c_white;
   pt->life_min = 100;
   pt->life_max = 100;
   pt->speed_min = 0.0, pt->speed_max = 0.0;
@@ -63,10 +66,19 @@ void part_type_shape(int id, pt_shape particle_shape)
 {
   std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
   if (it != enigma::pt_manager.id_to_particletype.end()) {
-    std::map<pt_shape,enigma::particle_sprite*>::iterator it_shape = enigma::shape_to_sprite.find(particle_shape);
-    if (it_shape != enigma::shape_to_sprite.end()) {
-       (*it).second->part_sprite = (*it_shape).second;
+    enigma::particle_sprite* sprite = enigma::get_particle_sprite(particle_shape);
+    if (sprite != 0) {
+       (*it).second->part_sprite = sprite;
     }
+  }
+}
+// Color and blending.
+void part_type_color1(int id, int color1)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->c_mode = enigma::one_color;
+    (*it).second->color1 = color1;
   }
 }
 // Life and death.

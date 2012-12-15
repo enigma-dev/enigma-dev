@@ -71,6 +71,8 @@ void part_type_exists(int id);
 void part_type_clear(int id);
 // Shape.
 void part_type_shape(int id, pt_shape particle_shape);
+// Color and blending.
+void part_type_color1(int id, int color);
 // Life and death.
 void part_type_life(int id, int life_min, int life_max);
 // Motion.

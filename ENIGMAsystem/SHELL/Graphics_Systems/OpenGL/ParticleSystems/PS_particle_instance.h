@@ -36,6 +36,7 @@ namespace enigma
   {
     particle_type* pt;
 
+    int color;
     int life_current;
     double x, y;
     double vx, vy;

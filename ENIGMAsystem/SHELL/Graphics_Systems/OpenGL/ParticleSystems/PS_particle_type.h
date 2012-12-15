@@ -34,6 +34,9 @@
 
 namespace enigma
 {
+  enum color_mode {
+    one_color, two_color, three_color
+  };
   struct particle_type
   {
     // If the particle count becomes 0, and the type is not alive,
@@ -44,6 +47,9 @@ namespace enigma
     // Shape.
     bool is_particle_sprite; // Whether an internal particle sprite is used or not.
     enigma::particle_sprite* part_sprite;
+    // Color and blending.
+    color_mode c_mode;
+    int color1;
     // Life and death.
     int life_min, life_max; // life_min <= life_max.
     // Motion.

@@ -37,7 +37,12 @@ enum pt_shape {
   pt_shape_circle,
   pt_shape_ring,
   pt_shape_sphere,
-  pt_shape_flare
+  pt_shape_flare,
+  pt_shape_spark,
+  pt_shape_explosion,
+  pt_shape_cloud,
+  pt_shape_smoke,
+  pt_shape_snow
 };
 enum ps_shape {
   ps_shape_rectangle//,
