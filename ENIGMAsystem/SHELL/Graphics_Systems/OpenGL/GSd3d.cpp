@@ -750,32 +750,69 @@ class d3d_lights
     d3d_lights() {}
     ~d3d_lights() {}
 
+    void light_update_positions()
+    {
+        map<int, posi>::iterator end = ind_pos.end();
+        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
+            const posi pos1 = (*it).second;
+            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
+            glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
+        }
+    }
+
     bool light_define_direction(int id, double dx, double dy, double dz, int col)
     {
-        const int ms = light_ind.size();
-        int MAX_LIGHTS;
-        glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-        if (ms >= MAX_LIGHTS)
-            return false;
-        light_ind.insert(pair<int,int>(id, ms));
-        ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+            multimap<int,posi>::iterator it = ind_pos.find(ms);
+            ind_pos.erase(it);
+            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+
+            light_ind.insert(pair<int,int>(id, ms));
+            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        }
+
         const float dir[4] = {-dx, -dy, -dz, 0.0f}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
+        light_update_positions();
         return true;
     }
+
     bool light_define_point(int id, double x, double y, double z, double range, int col)
     {
         if (range <= 0.0) {
             return false;
         }
-        const int ms = light_ind.size();
-        int MAX_LIGHTS;
-        glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-        if (ms >= MAX_LIGHTS)
-            return false;
-        light_ind.insert(pair<int,int>(id, ms));
-        ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+            multimap<int,posi>::iterator it = ind_pos.find(ms);
+            ind_pos.erase(it);
+            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+
+            light_ind.insert(pair<int,int>(id, ms));
+            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        }
         const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
             specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
@@ -789,18 +826,10 @@ class d3d_lights
         // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
         const double attenuation_calibration = 48.0;
         glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
-
+//        light_update_positions();
         return true;
-    } //NOTE: range cannot be defined for spotlights in opengl
-    void light_update_positions()
-    {
-        map<int, posi>::iterator end = ind_pos.end();
-        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
-            const posi pos1 = (*it).second;
-            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
-            glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
-        }
     }
+
     bool light_enable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
@@ -820,6 +849,7 @@ class d3d_lights
         }
         return true;
     }
+
     bool light_disable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
