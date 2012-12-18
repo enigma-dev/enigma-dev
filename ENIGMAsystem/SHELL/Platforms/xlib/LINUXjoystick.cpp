@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <iostream>
 #include <cmath>
 using namespace std;
 
@@ -112,7 +113,7 @@ namespace enigma
 
 bool joystick_load(int id)
 {
-  if (enigma::joysticks.size() < id)
+  if (enigma::joysticks.size() <= id)
     enigma::joysticks.resize(id+1, 0);
   char sps[32]; sprintf(sps,"/dev/input/js%d",id);
   string devn(sps);
@@ -129,9 +130,6 @@ bool joystick_load(int id)
   if (ioctl(device, JSIOCGNAME(256), name) > 0)
     devn = name;
   printf("Joystick name: %s\n",name);
-  
-  while ((signed)enigma::joysticks.size() < id)
-    enigma::joysticks.push_back(NULL);
   
   enigma::e_joystick* jsn = new enigma::e_joystick(device, devn, ac, bc);
   delete enigma::joysticks[id];

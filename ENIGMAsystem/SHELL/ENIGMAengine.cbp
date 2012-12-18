@@ -189,6 +189,19 @@
 		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.h" />
 		<Unit filename="Graphics_Systems/OpenGL/OpenGLHeaders.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_emitter.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_emitter.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_enums.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_instance.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_sprites.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_sprites.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_type.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_type.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/actions.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/implement.h" />
 		<Unit filename="Graphics_Systems/OpenGL/binding.h" />
 		<Unit filename="Graphics_Systems/OpenGL/glew.c">
 			<Option compilerVar="CC" />
@@ -528,6 +541,7 @@
 		<Unit filename="Universal_System/GAME_GLOBALS.h" />
 		<Unit filename="Universal_System/IMGloading.cpp" />
 		<Unit filename="Universal_System/IMGloading.h" />
+		<Unit filename="Universal_System/Makefile" />
 		<Unit filename="Universal_System/actions.h" />
 		<Unit filename="Universal_System/backgroundinit.cpp" />
 		<Unit filename="Universal_System/backgroundstruct.cpp" />
@@ -555,6 +569,7 @@
 		<Unit filename="Universal_System/graphics_object.cpp" />
 		<Unit filename="Universal_System/graphics_object.h" />
 		<Unit filename="Universal_System/highscore_functions.cpp" />
+		<Unit filename="Universal_System/highscore_functions.h" />
 		<Unit filename="Universal_System/imap.h" />
 		<Unit filename="Universal_System/instance.cpp" />
 		<Unit filename="Universal_System/instance.h" />
