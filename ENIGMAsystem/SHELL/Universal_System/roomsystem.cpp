@@ -131,12 +131,11 @@ namespace enigma
       is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
     }
 
+    for (int i = 0; i<instancecount; i++)
+      is[i]->myevent_create();
     if (gamestart)
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_gamestart();
-
-    for (int i = 0; i<instancecount; i++)
-      is[i]->myevent_create();
 
     createcode();
   }
@@ -212,11 +211,11 @@ int room_count() {
   return enigma::room_loadtimecount;
 }
 
-int room_goto_first()
+int room_goto_first(bool restart_game)
 {
     enigma::roomstruct *rit = enigma::roomorder[0];
     errcheck_o(0,"Game must have at least one room to do anything");
-    rit->gotome();
+    rit->gotome(restart_game);
     return 0;
 }
 
