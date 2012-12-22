@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
@@ -37,18 +37,18 @@ namespace enigma
 {
     extern HWND hWnd;
     extern HDC window_hDC;
-    
+
     void windowsystem_write_exename(char* exenamehere)
     {
       GetModuleFileName(NULL, exenamehere, 1024);
     }
-    
+
     #ifndef NOT_ENIGMA_GS_OPENGL // FIXME: This shit needs moved, as you can plainly see.
     void EnableDrawing (HGLRC *hRC)
     {
         PIXELFORMATDESCRIPTOR pfd;
         int iFormat;
-        
+
         enigma::window_hDC = GetDC (hWnd);
         ZeroMemory (&pfd, sizeof (pfd));
         pfd.nSize = sizeof (pfd);
@@ -59,14 +59,14 @@ namespace enigma
         pfd.cDepthBits = 16;
         pfd.iLayerType = PFD_MAIN_PLANE;
         iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
-        
+
         if (iFormat==0) { show_error("Total failure. Abort.",1); }
-        
+
         SetPixelFormat (enigma::window_hDC, iFormat, &pfd);
         *hRC = wglCreateContext( enigma::window_hDC );
         wglMakeCurrent( enigma::window_hDC, *hRC );
     }
-    
+
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
     {
         wglMakeCurrent (NULL, NULL);
@@ -90,3 +90,11 @@ int sleep(int millis)
   return 0;
 }
 
+void enable_vsync(bool enable)
+{
+    typedef BOOL (APIENTRY *fp)( int );
+    fp f = 0;
+    const char *extensions = (char*)glGetString(GL_EXTENSIONS);
+    if (strstr(extensions, "WGL_EXT_swap_control") and (f = (fp)wglGetProcAddress( "wglSwapIntervalEXT" )))
+        f(enable);
+}
