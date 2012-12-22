@@ -38,6 +38,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <list>
+#include <vector>
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -47,6 +48,13 @@ using enigma::pt_manager;
 
 namespace enigma
 {
+  struct generation_info
+  {
+    double x;
+    double y;
+    int number;
+    particle_type* pt;
+  };
   struct particle_system
   {
     // Particles.
@@ -80,6 +88,109 @@ namespace enigma
   }
   void particle_system::update_particlesystem()
   {
+    std::vector<generation_info> particles_to_generate;
+    // Handle life and death.
+    {
+      for (std::list<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
+      {
+        // Decrease life.
+        it->life_current--;
+        if (it->life_current <= 0) { // Death.
+          particle_type* pt = it->pt;
+
+          // Generated upon end of life.
+          if (pt->alive && pt->death_on) {
+            std::map<int,particle_type*>::iterator death_pt_it = pt_manager.id_to_particletype.find(pt->death_particle_id);
+            if (death_pt_it != pt_manager.id_to_particletype.end()) {
+              generation_info gen_info;
+              gen_info.x = it->x;
+              gen_info.y = it->y;
+              gen_info.number = pt->death_number;
+              gen_info.pt = (*death_pt_it).second;
+              particles_to_generate.push_back(gen_info);
+            }
+          }
+
+          // Death handling.
+          pt->particle_count--;
+          if (pt->particle_count <= 0 && !pt->alive) {
+            // Particle type is no longer used, delete it.
+            delete pt;
+          }
+          it = pi_list.erase(it);
+        }
+      }
+    }
+    // Color and blending.
+    {
+      std::list<particle_instance>::iterator end = pi_list.end();
+      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+      {
+        particle_type* pt = it->pt;
+        // Color.
+        switch(pt->c_mode) {
+        case one_color : {break;}
+        case two_color : {
+          if (pt->alive) {
+            const int r1 = color_get_red(pt->color1),
+                g1 = color_get_green(pt->color1),
+                b1 = color_get_blue(pt->color1);
+            const int r2 = color_get_red(pt->color2),
+                g2 = color_get_green(pt->color2),
+                b2 = color_get_blue(pt->color2);
+            const double part = 1.0*it->life_current/it->life_start;
+            it->color = make_color_rgb(int(part*r1 + (1-part)*r2),int(part*g1 + (1-part)*g2),int(part*b1 + (1-part)*b2));
+          }
+          break;
+        }
+        case three_color : {
+          // TODO: Implement three color handling.
+          break;
+        }
+        }
+        // Alpha.
+        switch(pt->a_mode) {
+        case one_alpha : {break;}
+        case two_alpha : {
+          if (pt->alive) {
+            const int alpha1 = int(255*pt->alpha1);
+            const int alpha2 = int(255*pt->alpha2);
+            const double part = 1.0*it->life_current/it->life_start;
+            it->alpha = int(part*alpha1 + (1-part)*alpha2);
+          }
+          break;
+        }
+        case three_color : {
+          // TODO: Implement three color handling.
+          break;
+        }
+        }
+      }
+    }
+    // Move particles.
+    {
+      std::list<particle_instance>::iterator end = pi_list.end();
+      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+      {
+        particle_type* pt = it->pt;
+        if (pt->alive) {
+          double grav_amount = pt->grav_amount, grav_dir = pt->grav_dir;
+          it->vx += grav_amount*cos(grav_dir*M_PI/180.0);
+          it->vy += -grav_amount*sin(grav_dir*M_PI/180.0);
+        }
+        it->x += it->vx;
+        it->y += it->vy;
+      }
+    }
+    // Generate particles.
+    for (std::vector<generation_info>::iterator it = particles_to_generate.begin(); it != particles_to_generate.end(); it++)
+    {
+      double x = (*it).x, y = (*it).y;
+      int number = (*it).number;
+      particle_type* pt = (*it).pt;
+      number = number >= 0 ? number : (rand() % (-number) < 1 ? 1 : 0); // Create particle with probability -1/number.
+      create_particles(x, y, pt, number);
+    }
     // Emitters.
     {
       std::map<int,particle_emitter*>::iterator end = id_to_emitter.end();
@@ -99,32 +210,6 @@ namespace enigma
         }
       }
     }
-    // Handle life and death.
-    for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=pi_list.end(); it++)
-    {
-      // Decrease life.
-      //TODO: When dying due to end of life (not due to destroyers), particles may be spawned.
-      it->life_current--;
-      if (it->life_current <= 0) {
-        particle_type* pt = it->pt;
-        pt->particle_count--;
-        if (pt->particle_count <= 0 && !pt->alive) {
-          // Particle type is no longer used, delete it.
-          delete pt;
-        }
-        it = pi_list.erase(it);
-      }
-    }
-    // Move particles.
-    {
-      std::list<particle_instance>::iterator end = pi_list.end();
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
-      {
-        it->x += it->vx;
-        it->y += it->vy;
-        // TODO: Implement direction and speed change.
-      }
-    }
   }
   void particle_system::draw_particlesystem()
   {
@@ -136,27 +221,45 @@ namespace enigma
     {
       particle_type* pt = it->pt;
       // TODO: Use default shape if particle type not alive.
+      if (it->size <= 0) continue;
+
       if (pt->is_particle_sprite) {
         particle_sprite* ps = pt->part_sprite;
         bind_texture(ps->texture);
 
         glPushAttrib(GL_CURRENT_BIT); // Push 1.
 
-        int color = it->color; // TODO: Alpha can be set.
-        glColor4ub(__GETR(color),__GETG(color),__GETB(color),255);
-        const float tbx = 1, tby = 1,
-          xvert1 = it->x - ps->width/2, xvert2 = it->x + ps->width/2,
-          yvert1 = it->y - ps->height/2, yvert2 = it->y + ps->height/2;
+        int color = it->color;
+        glColor4ub(__GETR(color),__GETG(color),__GETB(color),it->alpha);
 
-        glBegin(GL_QUADS);
+        const double rot = 0*M_PI/180; // TODO: Implement rotation.
+
+        const double x = it->x, y = it->y;
+        const double xscale = pt->xscale*it->size, yscale = pt->yscale*it->size;
+
+        const float
+        w = ps->width*xscale, h = ps->height*yscale,
+        tbx = 1, tby = 1,
+        wsinrot = w*sin(rot), wcosrot = w*cos(rot);
+
+        glBegin(GL_TRIANGLE_STRIP);
+
+        float
+        ulcx = x - xscale * (ps->width/2.0) * cos(rot) + yscale * (ps->height/2.0) * cos(M_PI/2+rot),
+        ulcy = y + xscale * (ps->width/2.0) * sin(rot) - yscale * (ps->height/2.0) * sin(M_PI/2+rot);
         glTexCoord2f(0,0);
-        glVertex2f(xvert1,yvert1);
+        glVertex2f(ulcx,ulcy);
         glTexCoord2f(tbx,0);
-        glVertex2f(xvert2,yvert1);
-        glTexCoord2f(tbx,tby);
-        glVertex2f(xvert2,yvert2);
+        glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
+
+        const double mpr = 3*M_PI/2 + rot;
+        ulcx += h * cos(mpr);
+        ulcy -= h * sin(mpr);
         glTexCoord2f(0,tby);
-        glVertex2f(xvert1,yvert2);
+        glVertex2f(ulcx,ulcy);
+        glTexCoord2f(tbx,tby);
+        glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
+
         glEnd();
 
 	glPopAttrib(); // Pop 1.
@@ -172,12 +275,21 @@ namespace enigma
     {
       particle_instance pi;
       pi.pt = pt;
+      // Shape.
+      pi.size = pt->size_min + (pt->size_max-pt->size_min)*1.0*rand()/(RAND_MAX-1);
+      // Color and blending.
       pi.color = pt->color1;
+      pi.alpha = pt->alpha1;
+      // Life and death.
       pi.life_current = pt->life_min == pt->life_max ? pt->life_min : pt->life_min + rand() % (	pt->life_max - pt->life_min);
+      pi.life_start = pi.life_current;
+      // Motion.
       pi.x = x;
       pi.y = y;
-      pi.vx = pt->speed_min*cos(pt->dir_min*M_PI/180.0); // TODO: Implement randomness.
-      pi.vy = -pt->speed_min*sin(pt->dir_min*M_PI/180.0); // TODO: Implement randomness.
+      const double dir = pt->dir_min + (pt->dir_max-pt->dir_min)*1.0*rand()/(RAND_MAX-1);
+      const double speed = pt->speed_min + (pt->speed_max-pt->speed_min)*1.0*rand()/(RAND_MAX-1);
+      pi.vx = speed*cos(dir*M_PI/180.0);
+      pi.vy = -speed*sin(dir*M_PI/180.0);
       pi_list.push_back(pi);
     }
   }

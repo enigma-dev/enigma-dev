@@ -71,8 +71,8 @@ namespace enigma
 
     switch (shape) {
     case ps_shape_rectangle: {
-      x = std::min(xmin, xmax) + rand() % abs(xmin-xmax) + 1;
-      y = std::min(ymin, ymax) + rand() % abs(ymin-ymax) + 1;
+      x = std::min(xmin, xmax) + rand() % (abs(xmin-xmax) + 1);
+      y = std::min(ymin, ymax) + rand() % (abs(ymin-ymax) + 1);
       break;
     }
     }
