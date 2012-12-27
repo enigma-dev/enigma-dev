@@ -90,7 +90,7 @@ int sleep(int millis)
   return 0;
 }
 
-void enable_vsync(bool enable)
+void set_synchronization(bool enable)
 {
     typedef BOOL (APIENTRY *fp)( int );
     fp f = 0;

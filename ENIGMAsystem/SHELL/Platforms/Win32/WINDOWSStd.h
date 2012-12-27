@@ -30,7 +30,7 @@ void windowsystem_write_exename(char* exenamehere);
 void screen_refresh();
 
 int sleep(int millis);
-void enable_vsync(bool enable);
+void set_synchronization(bool enable);
 void enigma_catchmouse_backend(bool x);
 
 #define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)

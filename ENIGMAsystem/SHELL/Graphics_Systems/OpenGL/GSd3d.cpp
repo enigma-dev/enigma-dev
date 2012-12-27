@@ -29,7 +29,8 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 bool d3dMode = false;
-bool d3dHidden = true;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 void d3d_start()
@@ -40,7 +41,8 @@ void d3d_start()
 
   // Enable depth buffering
   d3dMode = true;
-  d3dHidden = true;
+  d3dHidden = false;
+  d3dZWriteEnable = true;
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
@@ -79,8 +81,13 @@ bool d3d_get_mode()
 
 void d3d_set_hidden(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
     d3dHidden = enable;
+}   // TODO: Write function
+
+void d3d_set_zwriteenable(bool enable)
+{
+    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
+    d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)
@@ -212,7 +219,7 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
-  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
@@ -226,7 +233,7 @@ void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double
 
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
 {
-  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(angle, -aspect, znear, zfar);
@@ -875,15 +882,15 @@ bool d3d_light_define_point(int id, double x, double y, double z, double range, 
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-bool d3d_light_enable(int id, bool enable)
-{
-    return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
-}
-
 void d3d_light_define_ambient(int col)
 {
     const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
+}
+
+bool d3d_light_enable(int id, bool enable)
+{
+    return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
 }
 
 namespace enigma {
