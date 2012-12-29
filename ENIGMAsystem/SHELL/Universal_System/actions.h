@@ -263,7 +263,7 @@ inline void action_set_motion(const double dir, const double nspeed) {
 }
 
 inline void game_restart() { //RELOCATE ME
-    room_goto_first();
+    room_goto_first(true);
 }
 static void show_info() {}  //TEMPORARY FILLER, RELOCATE ME
 static inline void action_show_info() {show_info();}

@@ -54,10 +54,10 @@ void instance_deactivate_all(bool notme) {
 
 void instance_activate_all() {
 
-    std::map<int,enigma::inst_iter*>::iterator iter;
-    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter) {
+    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    while (iter != enigma::instance_deactivated_list.end()) {
         ((enigma::object_basic*)(iter->second->inst))->activate();
-        enigma::instance_deactivated_list.erase(iter);
+        enigma::instance_deactivated_list.erase(iter++);
     }
 }
 
@@ -69,12 +69,15 @@ void instance_deactivate_object(int obj) {
 }
 
 void instance_activate_object(int obj) {
-    std::map<int,enigma::inst_iter*>::iterator iter;
-    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter) {
+    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    while (iter != enigma::instance_deactivated_list.end()) {
         enigma::object_basic* const inst = ((enigma::object_basic*)(iter->second->inst));
         if (obj==all ||(obj<100000 && inst->object_index==obj)|| (obj>100000 && inst->id == obj)) {
-        inst->activate();
-        enigma::instance_deactivated_list.erase(iter);
+            inst->activate();
+            enigma::instance_deactivated_list.erase(iter++);
+        }
+        else {
+            iter++;
         }
     }
 }
