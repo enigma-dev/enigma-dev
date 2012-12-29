@@ -65,14 +65,14 @@ namespace enigma
     this->particle_type_id = particle_type_id;
     this->number = number;
   }
-  void particle_emitter::get_point(int& x, int&y)
+  void particle_emitter::get_point(int& x, int& y)
   {
     // TODO: Missing shapes and distributions.
 
     switch (shape) {
     case ps_shape_rectangle: {
-      x = std::min(xmin, xmax) + rand() % abs(xmin-xmax) + 1;
-      y = std::min(ymin, ymax) + rand() % abs(ymin-ymax) + 1;
+      x = std::min(xmin, xmax) + rand() % (abs(xmin-xmax) + 1);
+      y = std::min(ymin, ymax) + rand() % (abs(ymin-ymax) + 1);
       break;
     }
     }

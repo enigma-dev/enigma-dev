@@ -21,7 +21,7 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
@@ -30,6 +30,7 @@ void windowsystem_write_exename(char* exenamehere);
 void screen_refresh();
 
 int sleep(int millis);
+void set_synchronization(bool enable);
 void enigma_catchmouse_backend(bool x);
 
 #define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)

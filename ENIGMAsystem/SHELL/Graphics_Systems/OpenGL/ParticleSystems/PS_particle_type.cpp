@@ -29,6 +29,13 @@
 #include "PS_particle_sprites.h"
 #include "Graphics_Systems/OpenGL/GScolors.h"
 
+inline int bounds(int value, int low, int high)
+{
+  if (value < low) return low;
+  if (value > high) return high;
+  return value;
+}
+
 namespace enigma
 {
   particle_type_manager pt_manager;
@@ -44,14 +51,30 @@ int part_type_create()
   if (sprite != 0) {
     pt->part_sprite = sprite;
   }
+  pt->size_min = 1.0, pt->size_max = 1.0;
+  pt->size_incr = 0.0, pt->size_wiggle = 0.0;
+  pt->xscale = 1.0, pt->yscale = 1.0;
+  pt->ang_min = 0.0, pt->ang_max = 0.0;
+  pt->ang_incr = 0.0, pt->ang_wiggle = 0.0;
+  pt->ang_relative = false;
   pt->c_mode = enigma::one_color;
   pt->color1 = c_white;
+  pt->color2 = c_white;
+  pt->color3 = c_white;
+  pt->a_mode = enigma::one_alpha;
+  pt->alpha1 = 255;
+  pt->alpha2 = 255;
+  pt->alpha3 = 255;
+  pt->blend_additive = false;
   pt->life_min = 100;
   pt->life_max = 100;
+  pt->death_on = false, pt->death_particle_id = 0, pt->death_number = 0;
+  pt->step_on = false, pt->step_particle_id = 0, pt->step_number = 0;
   pt->speed_min = 0.0, pt->speed_max = 0.0;
   pt->speed_incr = 0.0, pt->speed_wiggle = 0.0;
   pt->dir_min = 0.0, pt->dir_max = 0.0;
   pt->dir_incr = 0.0, pt->dir_wiggle = 0.0;
+  pt->grav_amount = 0.0, pt->grav_dir = 0.0;
 
   enigma::pt_manager.max_id++;
   enigma::pt_manager.id_to_particletype.insert(std::pair<int,enigma::particle_type*>(enigma::pt_manager.max_id, pt));
@@ -72,6 +95,37 @@ void part_type_shape(int id, pt_shape particle_shape)
     }
   }
 }
+void part_type_size(int id, double size_min, double size_max, double size_incr, double size_wiggle)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->size_min = size_min;
+    (*it).second->size_max = std::max(size_min, size_max);
+    (*it).second->size_incr = size_incr;
+    (*it).second->size_wiggle = size_wiggle;
+  }
+}
+void part_type_scale(int id, double xscale, double yscale)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->xscale = xscale;
+    (*it).second->yscale = yscale;
+  }
+}
+void part_type_orientation(int id, double ang_min, double ang_max, double ang_incr, double ang_wiggle, bool ang_relative)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    ang_min = std::max(ang_min, 0.0);
+    ang_max = std::max(ang_min, ang_max);
+    (*it).second->ang_min = ang_min;
+    (*it).second->ang_max = ang_max;
+    (*it).second->ang_incr = ang_incr;
+    (*it).second->ang_wiggle = ang_wiggle;
+    (*it).second->ang_relative = ang_relative;
+  }
+}
 // Color and blending.
 void part_type_color1(int id, int color1)
 {
@@ -79,6 +133,59 @@ void part_type_color1(int id, int color1)
   if (it != enigma::pt_manager.id_to_particletype.end()) {
     (*it).second->c_mode = enigma::one_color;
     (*it).second->color1 = color1;
+  }
+}
+void part_type_color2(int id, int color1, int color2)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->c_mode = enigma::two_color;
+    (*it).second->color1 = color1;
+    (*it).second->color2 = color2;
+  }
+}
+void part_type_color3(int id, int color1, int color2, int color3)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->c_mode = enigma::three_color;
+    (*it).second->color1 = color1;
+    (*it).second->color2 = color2;
+    (*it).second->color3 = color3;
+  }
+}
+void part_type_alpha1(int id, double alpha1)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->a_mode = enigma::one_alpha;
+    (*it).second->alpha1 = bounds(int(255*alpha1), 0, 255);
+  }
+}
+void part_type_alpha2(int id, double alpha1, double alpha2)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->a_mode = enigma::two_alpha;
+    (*it).second->alpha1 = bounds(int(255*alpha1), 0, 255);
+    (*it).second->alpha2 = bounds(int(255*alpha2), 0, 255);
+  }
+}
+void part_type_alpha3(int id, double alpha1, double alpha2, double alpha3)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->a_mode = enigma::three_alpha;
+    (*it).second->alpha1 = bounds(int(255*alpha1), 0, 255);
+    (*it).second->alpha2 = bounds(int(255*alpha2), 0, 255);
+    (*it).second->alpha3 = bounds(int(255*alpha3), 0, 255);
+  }
+}
+void part_type_blend(int id, bool additive)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->blend_additive = additive;
   }
 }
 // Life and death.
@@ -92,11 +199,31 @@ void part_type_life(int id, int life_min, int life_max)
     (*it).second->life_max = std::max(life_min, life_max);
   }
 }
+void part_type_step(int id, int step_number, int step_type)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->step_on = true;
+    (*it).second->step_number = step_number;
+    (*it).second->step_particle_id = step_type;
+  }
+}
+void part_type_death(int id, int death_number, int death_type)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->death_on = true;
+    (*it).second->death_number = death_number;
+    (*it).second->death_particle_id = death_type;
+  }
+}
 // Motion.
 void part_type_speed(int id, double speed_min, double speed_max, double speed_incr, double speed_wiggle)
 {
   std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
   if (it != enigma::pt_manager.id_to_particletype.end()) {
+    speed_min = std::max(speed_min, 0.0);
+    speed_max = std::max(speed_min, speed_max);
     (*it).second->speed_min = speed_min;
     (*it).second->speed_max = speed_max;
     (*it).second->speed_incr = speed_incr;
@@ -107,10 +234,20 @@ void part_type_direction(int id, double dir_min, double dir_max, double dir_incr
 {
   std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
   if (it != enigma::pt_manager.id_to_particletype.end()) {
+    dir_min = std::max(dir_min, 0.0);
+    dir_max = std::max(dir_min, dir_max);
     (*it).second->dir_min = dir_min;
     (*it).second->dir_max = dir_max;
     (*it).second->dir_incr = dir_incr;
     (*it).second->dir_wiggle = dir_wiggle;
+  }
+}
+void part_type_gravity(int id, double grav_amount, double grav_dir)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->grav_amount = grav_amount;
+    (*it).second->grav_dir = grav_dir;
   }
 }
 

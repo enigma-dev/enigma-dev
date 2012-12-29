@@ -32,7 +32,7 @@ int room_goto(int roomind);
 int room_restart();
 string room_get_name(int index);
 int room_goto_absolute(int index);
-int room_goto_first();
+int room_goto_first(bool restart_game=false);
 int room_goto_previous();
 int room_goto_next();
 int room_next(int num);
