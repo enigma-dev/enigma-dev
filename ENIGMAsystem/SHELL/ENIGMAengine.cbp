@@ -346,10 +346,6 @@
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
-		<Unit filename="Platforms/Win32/WINDOWSshow_error.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
 		<Unit filename="Platforms/Win32/WINDOWSstd.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
@@ -535,6 +531,12 @@
 		<Unit filename="Universal_System/Extensions/Alarms/alarmcode.cpp" />
 		<Unit filename="Universal_System/Extensions/Alarms/implement.h" />
 		<Unit filename="Universal_System/Extensions/Alarms/include.h" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning.cpp" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning.h" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning_struct.cpp" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning_struct.h" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/mp_movement.cpp" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/mp_movement.h" />
 		<Unit filename="Universal_System/Extensions/Paths/implement.h" />
 		<Unit filename="Universal_System/Extensions/Timelines/implement.h" />
 		<Unit filename="Universal_System/Extensions/recast.h" />

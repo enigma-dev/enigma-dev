@@ -381,12 +381,6 @@ namespace enigma {
   }
 }
 
-void game_end()
-{
-    exit(0);
-}
-void action_end_game() { game_end(); }
-
 #include "Universal_System/globalupdate.h"
 void io_handle()
 {
