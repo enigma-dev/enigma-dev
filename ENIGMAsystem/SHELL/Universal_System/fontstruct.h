@@ -44,7 +44,7 @@ namespace enigma
     int fontsize; bool bold, italic;
 
     // Metrics and such
-    unsigned char glyphstart, glyphcount;
+    unsigned int glyphstart, glyphcount;
     fontglyph *glyphs;
     unsigned int height, yoffset;
 
@@ -58,7 +58,7 @@ namespace enigma
 
     string fontname;
     int fontsize; bool bold, italic;
-    unsigned char glyphstart, glyphcount;
+    unsigned int glyphstart, glyphcount;
   };
   extern rawfont rawfontdata[];
   extern font **fontstructarray;
