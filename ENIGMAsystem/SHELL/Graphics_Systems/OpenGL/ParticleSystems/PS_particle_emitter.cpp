@@ -65,7 +65,7 @@ namespace enigma
     this->particle_type_id = particle_type_id;
     this->number = number;
   }
-  void particle_emitter::get_point(int& x, int&y)
+  void particle_emitter::get_point(int& x, int& y)
   {
     // TODO: Missing shapes and distributions.
 

@@ -53,15 +53,24 @@ namespace enigma
     double size_min, size_max;
     double size_incr, size_wiggle;
     double xscale, yscale;
+    double ang_min, ang_max;
+    double ang_incr, ang_wiggle;
+    bool ang_relative;
     // Color and blending.
     color_mode c_mode;
     int color1;
     int color2;
+    int color3;
     alpha_mode a_mode;
-    int alpha1;
-    int alpha2;
+    double alpha1;
+    double alpha2;
+    double alpha3;
+    bool blend_additive;
     // Life and death.
     int life_min, life_max; // 1 <= life_min <= life_max.
+    bool step_on;
+    int step_particle_id;
+    int step_number;
     bool death_on;
     int death_particle_id;
     int death_number;
@@ -78,7 +87,7 @@ namespace enigma
     int max_id;
     std::map<int,particle_type*> id_to_particletype;
   };
-  
+
   extern particle_type_manager pt_manager;
 }
 

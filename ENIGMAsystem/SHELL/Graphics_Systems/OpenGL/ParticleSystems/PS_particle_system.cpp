@@ -44,6 +44,13 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+inline int bounds(int value, int low, int high)
+{
+  if (value < low) return low;
+  if (value > high) return high;
+  return value;
+}
+
 using enigma::pt_manager;
 
 namespace enigma
@@ -57,6 +64,10 @@ namespace enigma
   };
   struct particle_system
   {
+    // Wiggling.
+    double wiggle;
+    int wiggle_frequency; // Number of steps for a full cycle. Domain: [1;[.
+    double get_wiggle_result(double wiggle_offset);
     // Particles.
     bool oldtonew;
     double x_offset, y_offset;
@@ -77,8 +88,17 @@ namespace enigma
     // TODO: Write emitters, attractors, destroyers, deflectors and changers,
     // and create a map of each in the particle_system.
   };
+  double particle_system::get_wiggle_result(double wiggle_offset)
+  {
+    double result_wiggle = wiggle + wiggle_offset;
+    result_wiggle = result_wiggle > 1.0 ? result_wiggle - 1.0 : result_wiggle;
+    if (result_wiggle < 0.5) return -1.0 + 4*result_wiggle;
+    else return 3.0 - 4.0*result_wiggle;
+  }
   void particle_system::initialize()
   {
+    wiggle = 0;
+    wiggle_frequency = 25;
     oldtonew = true;
     auto_update = true, auto_draw = true;
     depth = 0.0;
@@ -88,6 +108,12 @@ namespace enigma
   }
   void particle_system::update_particlesystem()
   {
+    // Increase wiggle.
+    wiggle += 1.0/wiggle_frequency;
+    if (wiggle > 1.0) {
+      wiggle -= 1.0;
+    }
+
     std::vector<generation_info> particles_to_generate;
     // Handle life and death.
     {
@@ -121,6 +147,18 @@ namespace enigma
         }
       }
     }
+    // Shape.
+    {
+      std::list<particle_instance>::iterator end = pi_list.end();
+      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+      {
+        particle_type* pt = it->pt;
+        double angle = it->angle;
+        if (pt->alive) {
+          angle += pt->ang_incr;
+        }
+      }
+    }
     // Color and blending.
     {
       std::list<particle_instance>::iterator end = pi_list.end();
@@ -144,7 +182,27 @@ namespace enigma
           break;
         }
         case three_color : {
-          // TODO: Implement three color handling.
+          if (pt->alive) {
+            double part = 1.0*it->life_current/it->life_start;
+            int first_color, second_color;
+            if (part <= 0.5) {
+              part = 2.0*part;
+              first_color = pt->color1;
+              second_color = pt->color2;
+            }
+            else {
+              part = 2.0*(part - 0.5);
+              first_color = pt->color2;
+              second_color = pt->color3;
+            }
+            const int r1 = color_get_red(first_color),
+                g1 = color_get_green(first_color),
+                b1 = color_get_blue(first_color);
+            const int r2 = color_get_red(second_color),
+                g2 = color_get_green(second_color),
+                b2 = color_get_blue(second_color);
+            it->color = make_color_rgb(int(part*r1 + (1-part)*r2),int(part*g1 + (1-part)*g2),int(part*b1 + (1-part)*b2));
+          }
           break;
         }
         }
@@ -153,17 +211,54 @@ namespace enigma
         case one_alpha : {break;}
         case two_alpha : {
           if (pt->alive) {
-            const int alpha1 = int(255*pt->alpha1);
-            const int alpha2 = int(255*pt->alpha2);
+            const int alpha1 = pt->alpha1;
+            const int alpha2 = pt->alpha2;
             const double part = 1.0*it->life_current/it->life_start;
-            it->alpha = int(part*alpha1 + (1-part)*alpha2);
+            it->alpha = bounds(int(part*alpha1 + (1-part)*alpha2), 0, 255);
           }
           break;
         }
         case three_color : {
-          // TODO: Implement three color handling.
+          if (pt->alive) {
+            const int alpha1 = pt->alpha1;
+            const int alpha2 = pt->alpha2;
+            const int alpha3 = pt->alpha2;
+            double part = 1.0*it->life_current/it->life_start;
+            int first_alpha, second_alpha;
+            if (part <= 0.5) {
+              part = 2.0*part;
+              first_alpha = alpha1;
+              second_alpha = alpha2;
+            }
+            else {
+              part = 2.0*(part - 0.5);
+              first_alpha = alpha2;
+              second_alpha = alpha3;
+            }
+            it->alpha = bounds(int(part*first_alpha + (1-part)*second_alpha), 0, 255);
+          }
           break;
         }
+        }
+      }
+    }
+    // Step.
+    {
+      for (std::list<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
+      {
+        particle_type* pt = it->pt;
+
+        // Generated each step.
+        if (pt->alive && pt->step_on) {
+          std::map<int,particle_type*>::iterator step_pt_it = pt_manager.id_to_particletype.find(pt->step_particle_id);
+          if (step_pt_it != pt_manager.id_to_particletype.end()) {
+            generation_info gen_info;
+            gen_info.x = it->x;
+            gen_info.y = it->y;
+            gen_info.number = pt->step_number;
+            gen_info.pt = (*step_pt_it).second;
+            particles_to_generate.push_back(gen_info);
+          }
         }
       }
     }
@@ -174,12 +269,26 @@ namespace enigma
       {
         particle_type* pt = it->pt;
         if (pt->alive) {
-          double grav_amount = pt->grav_amount, grav_dir = pt->grav_dir;
-          it->vx += grav_amount*cos(grav_dir*M_PI/180.0);
-          it->vy += -grav_amount*sin(grav_dir*M_PI/180.0);
+          it->speed += pt->speed_incr;
+          it->direction += pt->dir_incr;
+          if (it->speed < 0) {
+            it->speed = -it->speed;
+            it->direction += 180.0;
+          }
+          const double speed = it->speed, direction = it->direction;
+          const double grav_amount = pt->grav_amount, grav_dir = pt->grav_dir;
+          const double vx = speed*cos(direction*M_PI/180.0) + grav_amount*cos(grav_dir*M_PI/180.0);
+          const double vy = -(speed*sin(direction*M_PI/180.0) + grav_amount*sin(grav_dir*M_PI/180.0));
+          it->speed = sqrt(vx*vx + vy*vy);
+          it->direction = vx == 0 && vy == 0 ? direction : -atan2(vy,vx)*180.0/M_PI;
         }
-        it->x += it->vx;
-        it->y += it->vy;
+        double speed = it->speed, direction = it->direction;
+        if (pt->alive) {
+          speed += pt->speed_wiggle*get_wiggle_result(it->speed_wiggle_offset);
+          direction += pt->dir_wiggle*get_wiggle_result(it->dir_wiggle_offset);
+        }
+        it->x += speed*cos(direction*M_PI/180.0);
+        it->y += -speed*sin(direction*M_PI/180.0);
       }
     }
     // Generate particles.
@@ -213,26 +322,38 @@ namespace enigma
   }
   void particle_system::draw_particlesystem()
   {
-    // TODO: Handle different particle shapes.
     // TODO: Draw the particle system either from oldest to youngest or reverse.
 
     const std::list<particle_instance>::iterator end = pi_list.end();
     for (std::list<particle_instance>::iterator it = pi_list.begin(); it != end; it++)
     {
       particle_type* pt = it->pt;
+
       // TODO: Use default shape if particle type not alive.
       if (it->size <= 0) continue;
 
-      if (pt->is_particle_sprite) {
+      if (pt->alive) {
+        // TODO: Use custom sprite if assigned.
         particle_sprite* ps = pt->part_sprite;
         bind_texture(ps->texture);
 
-        glPushAttrib(GL_CURRENT_BIT); // Push 1.
+        glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Push 1.
+
+        if (pt->blend_additive) {
+          glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+        }
+        else {
+          glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+        }
 
         int color = it->color;
         glColor4ub(__GETR(color),__GETG(color),__GETB(color),it->alpha);
 
-        const double rot = 0*M_PI/180; // TODO: Implement rotation.
+        double rot_degrees = it->angle + wiggle*get_wiggle_result(it->ang_wiggle_offset);
+        if (pt->ang_relative) {
+          rot_degrees += it->direction;
+        }
+        const double rot = rot_degrees*M_PI/180.0;
 
         const double x = it->x, y = it->y;
         const double xscale = pt->xscale*it->size, yscale = pt->yscale*it->size;
@@ -264,6 +385,8 @@ namespace enigma
 
 	glPopAttrib(); // Pop 1.
       }
+      else { // TODO: Draw particle in a limited way if particle type not alive.
+      }
     }
   }
   void particle_system::create_particles(double x, double y, particle_type* pt, int number)
@@ -277,6 +400,8 @@ namespace enigma
       pi.pt = pt;
       // Shape.
       pi.size = pt->size_min + (pt->size_max-pt->size_min)*1.0*rand()/(RAND_MAX-1);
+      pi.angle = pt->ang_min + (pt->ang_max-pt->ang_min)*1.0*rand()/(RAND_MAX-1);
+      pi.ang_wiggle_offset = 1.0*rand()/(RAND_MAX-1);
       // Color and blending.
       pi.color = pt->color1;
       pi.alpha = pt->alpha1;
@@ -286,10 +411,10 @@ namespace enigma
       // Motion.
       pi.x = x;
       pi.y = y;
-      const double dir = pt->dir_min + (pt->dir_max-pt->dir_min)*1.0*rand()/(RAND_MAX-1);
-      const double speed = pt->speed_min + (pt->speed_max-pt->speed_min)*1.0*rand()/(RAND_MAX-1);
-      pi.vx = speed*cos(dir*M_PI/180.0);
-      pi.vy = -speed*sin(dir*M_PI/180.0);
+      pi.speed = pt->speed_min + (pt->speed_max-pt->speed_min)*1.0*rand()/(RAND_MAX-1);
+      pi.direction = pt->dir_min + (pt->dir_max-pt->dir_min)*1.0*rand()/(RAND_MAX-1);
+      pi.speed_wiggle_offset = 1.0*rand()/(RAND_MAX-1);
+      pi.dir_wiggle_offset = 1.0*rand()/(RAND_MAX-1);
       pi_list.push_back(pi);
     }
   }
