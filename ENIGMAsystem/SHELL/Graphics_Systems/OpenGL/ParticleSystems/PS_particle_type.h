@@ -34,6 +34,12 @@
 
 namespace enigma
 {
+  enum color_mode {
+    one_color, two_color, three_color
+  };
+  enum alpha_mode {
+    one_alpha, two_alpha, three_alpha
+  };
   struct particle_type
   {
     // If the particle count becomes 0, and the type is not alive,
@@ -44,13 +50,36 @@ namespace enigma
     // Shape.
     bool is_particle_sprite; // Whether an internal particle sprite is used or not.
     enigma::particle_sprite* part_sprite;
+    double size_min, size_max;
+    double size_incr, size_wiggle;
+    double xscale, yscale;
+    double ang_min, ang_max;
+    double ang_incr, ang_wiggle;
+    bool ang_relative;
+    // Color and blending.
+    color_mode c_mode;
+    int color1;
+    int color2;
+    int color3;
+    alpha_mode a_mode;
+    double alpha1;
+    double alpha2;
+    double alpha3;
+    bool blend_additive;
     // Life and death.
-    int life_min, life_max; // life_min <= life_max.
+    int life_min, life_max; // 1 <= life_min <= life_max.
+    bool step_on;
+    int step_particle_id;
+    int step_number;
+    bool death_on;
+    int death_particle_id;
+    int death_number;
     // Motion.
     double speed_min, speed_max;
     double speed_incr, speed_wiggle;
     double dir_min, dir_max;
     double dir_incr, dir_wiggle;
+    double grav_amount, grav_dir;
   };
 
   struct particle_type_manager
@@ -58,7 +87,7 @@ namespace enigma
     int max_id;
     std::map<int,particle_type*> id_to_particletype;
   };
-  
+
   extern particle_type_manager pt_manager;
 }
 

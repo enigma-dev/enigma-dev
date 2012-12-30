@@ -36,9 +36,16 @@ namespace enigma
   {
     particle_type* pt;
 
-    int life_current;
+    double size;
+    double angle;
+    double ang_wiggle_offset; // [-1;1].
+    int color;
+    int alpha;
+    int life_current, life_start;
     double x, y;
-    double vx, vy;
+    double speed, direction;
+    double speed_wiggle_offset; // [-1;1].
+    double dir_wiggle_offset; // [-1;1].
   };
 }
 

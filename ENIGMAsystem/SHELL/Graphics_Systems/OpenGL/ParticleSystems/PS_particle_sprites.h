@@ -38,8 +38,7 @@ namespace enigma
     int texture;
     int width, height;
   };
-  void initialize_particle_sprites();
-  extern std::map<pt_shape,particle_sprite*> shape_to_sprite;
+  particle_sprite* get_particle_sprite(pt_shape particle_shape);
 }
 
 #endif // ENIGMA_PS_PARTICLESPRITES

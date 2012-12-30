@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <iostream>
 #include <cmath>
 using namespace std;
 
@@ -50,11 +51,15 @@ namespace enigma
     e_joystick(int d, string n, int ac, int bc): device(d), name(n), axiscount(ac), buttoncount(bc),
       axis(new float[ac]), button(new bool[bc]), threashold(.25),
       wrapaxis_positive(new char[ac]), wrapaxis_negative(new char[ac]), wrapbutton(new char[bc])
-      {
+    {
         for (int i = 0; i < 8; i++)
           axis[i] = wrapaxis_positive[i] = wrapaxis_negative[i] = wrapbutton[i] = button[i] = 0;
         for (int i = 8; i < 16; i++)
           wrapbutton[i] = button[i] = 0;
+    }
+    
+    ~e_joystick() {
+      close(device);
     }
   };
   static vector<e_joystick*> joysticks;
@@ -112,8 +117,11 @@ namespace enigma
 
 bool joystick_load(int id)
 {
-  if (enigma::joysticks.size() < id)
+  if (enigma::joysticks.size() <= id)
     enigma::joysticks.resize(id+1, 0);
+  else
+     delete enigma::joysticks[id];
+  
   char sps[32]; sprintf(sps,"/dev/input/js%d",id);
   string devn(sps);
   int device = open(devn.c_str(), O_RDONLY|O_NONBLOCK);
@@ -130,11 +138,7 @@ bool joystick_load(int id)
     devn = name;
   printf("Joystick name: %s\n",name);
   
-  while ((signed)enigma::joysticks.size() < id)
-    enigma::joysticks.push_back(NULL);
-  
-  enigma::e_joystick* jsn = new enigma::e_joystick(device, devn, ac, bc);
-  delete enigma::joysticks[id];
+  enigma::e_joystick* const jsn = new enigma::e_joystick(device, devn, ac, bc);
   enigma::joysticks[id] = jsn;
   enigma::handle_joystick(jsn);
   return true;

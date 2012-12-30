@@ -542,13 +542,15 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, in
 }
 
 void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int inside) {
-    std::map<int,enigma::inst_iter*>::iterator iter;
-    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter) {
+    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    while (iter != enigma::instance_deactivated_list.end()) {
 
         enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
 
-        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) { //no sprite/mask then no collision
+            ++iter;
             continue;
+        }
 
         const bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
@@ -558,16 +560,22 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int 
         int left, top, right, bottom;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
+        bool removed = false;
         if (left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) {
             if (inside) {
                 inst->activate();
-                enigma::instance_deactivated_list.erase(iter);
+                enigma::instance_deactivated_list.erase(iter++);
+                removed = true;
             }
         } else {
             if (!inside) {
                 inst->activate();
-                enigma::instance_deactivated_list.erase(iter);
+                enigma::instance_deactivated_list.erase(iter++);
+                removed = true;
             }
+        }
+        if (!removed) {
+            ++iter;
         }
     }
 }
@@ -632,13 +640,14 @@ void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
 
 void instance_activate_circle(int x, int y, int r, int inside)
 {
-    std::map<int,enigma::inst_iter*>::iterator iter;
-    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter)
-    {
+    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    while (iter != enigma::instance_deactivated_list.end()) {
         enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
 
-        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) { //no sprite/mask then no collision
+            ++iter;
             continue;
+        }
 
         const bbox_rect_t &box = inst->$bbox_relative();
         const double x1 = inst->x, y1 = inst->y,
@@ -654,12 +663,14 @@ void instance_activate_circle(int x, int y, int r, int inside)
                                  line_ellipse_intersects(r, r, bottom-y, left-x, right-x) ||
                                  (x >= left && x <= right && y >= top && y <= bottom); // Circle inside bbox.
 
+        bool removed = false;
         if (intersects)
         {
             if (inside)
             {
                 inst->activate();
-                enigma::instance_deactivated_list.erase(iter);
+                enigma::instance_deactivated_list.erase(iter++);
+                removed = true;
             }
         }
         else
@@ -667,8 +678,12 @@ void instance_activate_circle(int x, int y, int r, int inside)
             if (!inside)
             {
                 inst->activate();
-                enigma::instance_deactivated_list.erase(iter);
+                enigma::instance_deactivated_list.erase(iter++);
+                removed = true;
             }
+        }
+        if (!removed) {
+            ++iter;
         }
     }
 }
