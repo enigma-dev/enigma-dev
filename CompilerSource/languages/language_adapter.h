@@ -21,6 +21,8 @@
 #ifndef _LANGUAGE_ADAPTER__H
 #define _LANGUAGE_ADAPTER__H
 
+struct language_adapter;
+
 #include <string>
 using namespace std;
 #include "parser/object_storage.h"
@@ -30,18 +32,22 @@ using namespace std;
 struct language_adapter {
   virtual string get_name() = 0;
   
+  // Common Settings/Information
+  vector<string> requested_extensions;
+  vector<parsed_extension> parsed_extensions;
+  
   // Sizable utilities
-  virtual int link_globals(parsed_object*, EnigmaStruct*, parsed_script*[]) = 0;
+  virtual int link_globals(parsed_object*, EnigmaStruct*, compile_context &ctex) = 0;
 
   // IDE_EDITABLEs added before compile
-  virtual int compile_parseAndLink(EnigmaStruct*,parsed_script*[]) = 0;
+  virtual int compile_parseAndLink(EnigmaStruct*, compile_context &ctex) = 0;
   virtual int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,map<int,parsed_room*>&,parsed_object*) = 0;
   virtual int compile_writeGlobals(EnigmaStruct*,parsed_object*) = 0;
-  virtual int compile_writeObjectData(EnigmaStruct*,parsed_object*) = 0;
-  virtual int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*) = 0;
+  virtual int compile_writeObjectData(EnigmaStruct*, parsed_object*, compile_context&) = 0;
+  virtual int compile_writeObjAccess(map<int,parsed_object*>&) = 0;
   virtual int compile_writeFontInfo(EnigmaStruct* es) = 0;
-  virtual int compile_writeRoomData(EnigmaStruct* es,parsed_object *EGMglobal) = 0;
-  virtual int compile_writeDefraggedEvents(EnigmaStruct* es) = 0;
+  virtual int compile_writeRoomData(EnigmaStruct* es, compile_context &ctex) = 0;
+  virtual int compile_writeDefraggedEvents(EnigmaStruct* es, compile_context &ctex) = 0;
   virtual int compile_handle_templates(EnigmaStruct* es) = 0;
 
   // Resources added to module

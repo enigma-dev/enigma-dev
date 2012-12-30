@@ -193,7 +193,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   
   cout << "Grabbing locals...\n";
   
-  shared_locals_load(requested_extensions);
+  shared_locals_load(this);
   
   cout << "Determining build target...\n";
   

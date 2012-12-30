@@ -66,7 +66,17 @@ namespace dll_ext_iteration {
 }
 using namespace dll_ext_iteration;
 
+dllexport const char* first_available_resource();
 dllexport const char* next_available_resource();
+dllexport bool resource_isFunction();
+dllexport int resource_argCountMin();
+dllexport int resource_argCountMax();
+dllexport int resource_overloadCount();
+dllexport const char* resource_parameters(int i);
+dllexport int resource_isTypeName();
+dllexport int resource_isGlobal();
+dllexport bool resources_atEnd();
+
 dllexport const char* first_available_resource() //Returns the name of the first resource on the list, or "" otherwise.
 {
   searching_in = main_context->get_global();
@@ -95,7 +105,9 @@ dllexport int resource_overloadCount() //Returns the number of times the functio
 }
 dllexport const char* resource_parameters(int i) //Returns a simple string of parameters and defaults that would serve as the prototype of this function
 { // The returned pointer to the string is INVALIDATED upon the next call to definitionsModified().
-  static string res; res = ((jdi::definition_function*)current_resource)->toString();
+  static string res;
+  jdi::definition_function *df = (jdi::definition_function*)current_resource;
+  res = df->overloads[i]->toString();
   return res.c_str();
 }
 dllexport int resource_isTypeName() //Returns whether the resource can be used as a typename.

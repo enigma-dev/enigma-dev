@@ -46,9 +46,7 @@ using namespace std;
 
 #include "compiler/compile_includes.h"
 
-extern string tostring(int);
-
-int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
+int lang_CPP::compile_parseAndLink(EnigmaStruct *es, compile_context &ctex)
 {
   //First we just parse the scripts to add semicolons and collect variable names
   for (int i = 0; i < es->scriptCount; i++)
@@ -59,16 +57,16 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
       return E_ERROR_SYNTAX;
     }
     // Keep a parsed record of this script
-    scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
-    parser_main(es->scripts[i].code,&scripts[i]->pev);
-    edbg << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
+    scr_lookup[es->scripts[i].name] = ctex.parsed_scripts[i] = new parsed_script;
+    parser_main(es->scripts[i].code, &ctex.parsed_scripts[i]->pev);
+    edbg << "Parsed `" << es->scripts[i].name << "': " << ctex.parsed_scripts[i]->obj.locals.size() << " locals, " << ctex.parsed_scripts[i]->obj.globals.size() << " globals" << flushl;
     
     // If the script accesses variables from outside its scope implicitly
-    if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size()) {
-      parsed_object temporary_object = *scripts[i]->pev.myObj;
-      scripts[i]->pev_global = new parsed_event(&temporary_object);
-      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n/* */}",scripts[i]->pev_global);
-      scripts[i]->pev_global->myObj = NULL;
+    if (ctex.parsed_scripts[i]->obj.locals.size() or ctex.parsed_scripts[i]->obj.globallocals.size()) {
+      parsed_object temporary_object = *ctex.parsed_scripts[i]->pev.myObj;
+      ctex.parsed_scripts[i]->pev_global = new parsed_event(&temporary_object);
+      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n/* */}",ctex.parsed_scripts[i]->pev_global);
+      ctex.parsed_scripts[i]->pev_global->myObj = NULL;
     }
     fflush(stdout);
   }
@@ -84,7 +82,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   {
     for (int _im = 0; _im < es->scriptCount; _im++) //For each script
     {
-      parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
+      parsed_script* curscript = ctex.parsed_scripts[_im]; //At this point, what we have is this:     for each script as curscript
       for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
       {
         map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
@@ -99,7 +97,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   for (int _im = 0; _im < es->scriptCount; _im++) //For each script
   {
     string curscrname = es->scripts[_im].name;
-    parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
+    parsed_script* curscript = ctex.parsed_scripts[_im]; //At this point, what we have is this:     for each script as curscript
     edbg << "Linking `" << curscrname << "':\n";
     for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
     {
@@ -121,7 +119,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   {
     //For every object in Ism's struct, make our own
     unsigned ev_count = 0;
-    parsed_object* pob = parsed_objects[es->gmObjects[i].id] =
+    parsed_object* pob = ctex.parsed_objects[es->gmObjects[i].id] =
       new parsed_object(
         es->gmObjects[i].name, es->gmObjects[i].id, es->gmObjects[i].spriteId, es->gmObjects[i].maskId,
         es->gmObjects[i].parentId,
@@ -179,7 +177,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   edbg << "Creating room creation code scope and parsing" << flushl;
   for (int i = 0; i < es->roomCount; i++)
   {
-    parsed_room *pr = parsed_rooms[es->rooms[i].id] = new parsed_room;
+    parsed_room *pr = ctex.parsed_rooms[es->rooms[i].id] = new parsed_room;
     parsed_event &pev = pr->events[0]; //Make sure each sub event knows its main event's event ID.
     pev.mainId = 0, pev.id = 0, pev.myObj = pr;
     
@@ -201,7 +199,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
         }
         
         pr->instance_create_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
-        parsed_event* icce = pr->instance_create_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
+        parsed_event* icce = pr->instance_create_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1, -1, ctex.parsed_objects[es->rooms[i].instances[ii].objectId]);
         parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + es->rooms[i].instances[ii].creationCode + "}", icce);
       }
     }
@@ -209,7 +207,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   
   //Next we link the scripts into the objects.
   edbg << "\"Linking\" scripts into the objects..." << flushl;
-  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+  for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
   {
     parsed_object* t = i->second;
     for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
@@ -229,7 +227,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
   
   // Sort through object calls finding max script arg counts
   edbg << "Tabulating maximum argument passes to each script" << flushl;
-  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+  for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
     for (parsed_object::funcit it = i->second->funcs.begin(); it != i->second->funcs.end(); it++) //For each function called by this object
   {
     map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
@@ -243,13 +241,13 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[])
 }
 
 
-int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es,parsed_script *scripts[])
+int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es, compile_context &ctex)
 {
-  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+  for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
-  for (pr_i i = parsed_rooms.begin(); i != parsed_rooms.end(); i++)
+  for (pr_i i = ctex.parsed_rooms.begin(); i != ctex.parsed_rooms.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
   for (int i = 0; i < es->scriptCount; i++)
-    global->copy_from(scripts[i]->obj,"script `"+scripts[i]->obj.name+"'","the Global Scope");
+    global->copy_from(ctex.parsed_scripts[i]->obj, "script `" + ctex.parsed_scripts[i]->obj.name + "'", "the Global Scope");
   return 0;
 }

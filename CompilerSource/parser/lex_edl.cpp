@@ -347,25 +347,28 @@ void lexer_edl::handle_preprocessor(error_handler *herr)
           herr->warning(token_basics("#warning " + wmsg,filename,line,pos-lpos));
       } break;
   }
+  
+  // skip shit here
+  while (code[pos] != '}' or code[pos-1] != '}') {
+    if (code[pos] == '\n') ++line;
+    ++pos;
+  }
+  ++pos;
+  
   if (conditionals.empty() or conditionals.top().is_true)
     return;
   
   // skip_to_macro:
   while (pos < length) {
-    while (pos < length and code[pos] != '\n' and code[pos] != '\r') {
-      skip_noncode(continue);
+    if (code[pos] == '{' and code[++pos] == '{')
+    {
       ++pos;
+      goto top;
     }
-    if (pos >= length)
-      break;
-    while (is_useless(code[pos])) {
-      if (code[pos] == '\n') lpos = pos++, ++line;
-      else if (code[pos] == '\r' and (code[++pos] == '\n' or --pos)) lpos = pos++, ++line;
-      else ++pos;
-    }
-    if (code[pos] == '#')
-      { ++pos; goto top; }
+    if (code[pos++] == '\n')
+      ++line;
   }
+  
   herr->error("Expected closing preprocessors before end of code",filename,line,pos-lpos);
   return;
   
@@ -373,7 +376,17 @@ void lexer_edl::handle_preprocessor(error_handler *herr)
     while (is_letterd(code[pos])) ++pos;
     string ppname(code + pspos, pos - pspos);
     herr->error(token_basics("Invalid preprocessor directive `" + ppname + "'",filename,line,pos-lpos));
-    while (pos < length and code[pos] != '\n' and code[pos] != '\r') ++pos;
+    while (pos < length and (code[pos] != '}' or code[pos-1] != '}')) ++pos;
+    ++pos;
+}
+
+
+string lexer_edl::read_preprocessor_args(error_handler *herr)
+{
+  size_t spos = pos; const size_t lenm1 = length - 1;
+  while (++pos < lenm1 and (code[pos] != '}' or code[pos+1] != '}'));
+  if (pos >= lenm1) herr->error("Unterminated preprocessor directive",filename,line,pos-lpos);
+  return string(code, spos, pos-spos);
 }
 
 #include <cstdio>
@@ -517,18 +530,15 @@ token_t lexer_edl::get_token(error_handler *herr)
         return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), code+spos, pos-spos);
       case '=': pos += code[pos] == code[spos];
         return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), code+spos, pos-spos);
-      case '&': case '|':  case '!':
-        pos += code[pos] == code[spos] || code[pos] == '=';
-        return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), code+spos, pos-spos);
-      case '~':
+      case '!': case '~':
         if (code[pos] == '=')
           return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), code+spos, ++pos-spos);
         return token_t(token_basics(TT_TILDE,filename,line,spos-lpos), code+spos, pos-spos);
-      case '%': case '*': case '/': case '^':
+      case '%': case '/':
         if (code[pos] == '=')
           return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), code+spos, ++pos-spos);
         return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), code+spos, pos-spos);
-      case '>': case '<':
+      case '>': case '<': case '*': case '^': case '&': case '|':
         pos += code[pos] == code[spos]; pos += code[pos] == '=';
         return token_t(token_basics((pos-spos==1?code[spos]=='<'?TT_LESSTHAN:TT_GREATERTHAN:TT_OPERATOR),filename,line,spos-lpos), code+spos, pos-spos);
       case ':':
@@ -551,13 +561,11 @@ token_t lexer_edl::get_token(error_handler *herr)
       
       case '(': return token_t(token_basics(TT_LEFTPARENTH,filename,line,spos-lpos));
       case '[': return token_t(token_basics(TT_LEFTBRACKET,filename,line,spos-lpos));
-      case '{': return token_t(token_basics(TT_LEFTBRACE,  filename,line,spos-lpos));
+      case '{': if (code[pos] == '{') return (++pos, handle_preprocessor(herr), get_token(herr));
+                return token_t(token_basics(TT_LEFTBRACE,  filename,line,spos-lpos));
       case '}': return token_t(token_basics(TT_RIGHTBRACE,  filename,line,spos-lpos));
       case ']': return token_t(token_basics(TT_RIGHTBRACKET,filename,line,spos-lpos));
       case ')': return token_t(token_basics(TT_RIGHTPARENTH,filename,line,spos-lpos));
-      
-      case '#':
-        return handle_preprocessor(herr), get_token(herr);
       
       case '\\':
         if (code[pos] != '\n' and code[pos] != '\r')
@@ -599,9 +607,12 @@ lexer_edl::lexer_edl(llreader &input, macro_map &pmacros, const char *fname): le
 {
   pair<map<string, TOKEN_TYPE>::iterator, bool> ins = keywords.insert(pair<string, TOKEN_TYPE>("with", TT_WITH));
   if (ins.second) {
-    //keywords["with"] = TT_WITH; We just handled this
+    /* *****************************
+    ** Add EDL Keywords not in C++
+    ** ****************************/
     keywords["if"] = TT_IF;
     keywords["else"] = TT_ELSE;
+    keywords["repeat"] = TT_REPEAT;
     keywords["do"] = TT_BREAK;
     keywords["while"] = TT_WHILE;
     keywords["until"] = TT_UNTIL;
@@ -612,9 +623,17 @@ lexer_edl::lexer_edl(llreader &input, macro_map &pmacros, const char *fname): le
     keywords["break"] = TT_BREAK;
     keywords["continue"] = TT_CONTINUE;
     keywords["return"] = TT_RETURN;
-    keywords["with"] = TT_WITH;
     keywords["try"] = TT_TRY;
     keywords["catch"] = TT_CATCH;
+    
+    /* *******************************
+    ** Remove C++ keywords not in EDL
+    ** ******************************/
+    // Note: This list is incomplete.
+    keywords.erase("extern");
+    keywords.erase("asm");
+    keywords.erase("operator");
+    keywords.erase("typename");
   }
 }
 lexer_edl::~lexer_edl() {

@@ -106,11 +106,11 @@ namespace jdip {
     void handle_preprocessor(error_handler *herr);
     
     /// Utility function to skip a single-line comment; invoke with pos indicating one of the slashes.
-    inline void skip_comment();
+    void skip_comment();
     /// Utility function to skip a multi-line comment; invoke with pos indicating the starting slash.
-    inline void skip_multiline_comment();
+    void skip_multiline_comment();
     /// Utility function to skip a string; invoke with pos indicating the quotation mark. Terminates indicating match.
-    inline void skip_string(error_handler *herr);
+    void skip_string(error_handler *herr);
     /// Skip anything that cannot be interpreted as code in any way.
     inline void skip_whitespace();
     /// Function used by the preprocessor to read in macro parameters in compliance with ISO.

@@ -38,17 +38,17 @@ struct lang_CPP: language_adapter {
   string get_name();
   
   // Sizable utilities
-  int link_globals(parsed_object*, EnigmaStruct*,parsed_script*[]);
+  int link_globals(parsed_object*, EnigmaStruct*, compile_context &ctex);
 
   // IDE_EDITABLEs added before compile
-  int compile_parseAndLink(EnigmaStruct*,parsed_script*[]);
+  int compile_parseAndLink(EnigmaStruct*, compile_context &ctex);
   int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,map<int,parsed_room*>&,parsed_object*);
   int compile_writeGlobals(EnigmaStruct*,parsed_object*);
-  int compile_writeObjectData(EnigmaStruct*,parsed_object*);
-  int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*);
+  int compile_writeObjectData(EnigmaStruct*, parsed_object*, compile_context&);
+  int compile_writeObjAccess(map<int,parsed_object*>&);
   int compile_writeFontInfo(EnigmaStruct* es);
-  int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal);
-  int compile_writeDefraggedEvents(EnigmaStruct* es);
+  int compile_writeRoomData(EnigmaStruct* es, compile_context &ctex);
+  int compile_writeDefraggedEvents(EnigmaStruct* es, compile_context &ctex);
   int compile_handle_templates(EnigmaStruct* es);
 
   // Resources added to module

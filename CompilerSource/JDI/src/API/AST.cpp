@@ -46,6 +46,8 @@ using namespace jdip;
 #define track(ct)
 #endif
 
+#include "AST_operator.h"
+
 namespace jdi
 {
   AST::AST_Node* AST::parse_expression(token_t &token, int prec_min) {
@@ -459,6 +461,7 @@ namespace jdi
       
       case TT_LEFTPARENTH:
           if (left_node->type == AT_DEFINITION or left_node->type == AT_TYPE) {
+            track(string("("));
             token = get_next_token();
             bool gtio = tt_greater_is_op; tt_greater_is_op = true;
             AST_Node *params = parse_expression(token, precedence::all);
@@ -471,7 +474,9 @@ namespace jdi
               token.report_errorf(herr, "Expected closing parenthesis here before %s");
               FATAL_RETURN(left_node);
             }
-            left_node = new AST_Node_Binary(left_node,params,"(");
+            left_node = new AST_Node_Binary(left_node,params,"");
+            token = get_next_token(); // Skip that closing paren
+            track(string(")"));
             break;
           }
         return left_node;
@@ -535,23 +540,18 @@ namespace jdi
   int AST::parse_expression(lexer *ulex, token_t &token, int precedence, error_handler *uherr) {
     lex = ulex, herr = uherr;
     token = get_next_token();
-    if ((root = parse_expression(token, precedence)))
-      return 0;
-    return 1;
+    return !((root = parse_expression(token, precedence)));
   }
   
   int AST::parse_expression(token_t &token, lexer *ulex, int precedence, error_handler *uherr) {
     lex = ulex, herr = uherr;
-    if ((root = parse_expression(token, precedence)))
-      return 0;
-    return 1;
+    return !(root = parse_expression(token, precedence));
   }
   
   int AST::parse_expression(token_t &token, lexer *ulex, definition_scope *scope, int precedence, error_handler *uherr) {
     search_scope = scope;
     lex = ulex, herr = uherr;
-    root = parse_expression(token, precedence);
-    return 0;
+    return !(root = parse_expression(token, precedence));
   }
   
   //===========================================================================================================================
@@ -881,6 +881,38 @@ namespace jdi
   AST::AST_Node_Parameters::~AST_Node_Parameters() { for (size_t i = 0; i < params.size(); i++) delete params[i]; }
   AST::AST_Node_Array::~AST_Node_Array() { for (vector<AST_Node*>::iterator it = elements.begin(); it != elements.end(); ++it) delete *it; }
   
+  
+  //===========================================================================================================================
+  //=: ASTOperator Class :=====================================================================================================
+  //===========================================================================================================================
+  
+  void AST::AST_Node::operate(ASTOperator *aop, void *param) { aop->operate(this, param); }
+  void AST::AST_Node_Definition::operate(ASTOperator *aop, void *param) { aop->operate_Definition(this, param); }
+  void AST::AST_Node_Scope::operate(ASTOperator *aop, void *param) { aop->operate_Scope(this, param); }
+  void AST::AST_Node_Type::operate(ASTOperator *aop, void *param) { aop->operate_Type(this, param); }
+  void AST::AST_Node_Unary::operate(ASTOperator *aop, void *param) { aop->operate_Unary(this, param); }
+  void AST::AST_Node_sizeof::operate(ASTOperator *aop, void *param) { aop->operate_sizeof(this, param); }
+  void AST::AST_Node_Cast::operate(ASTOperator *aop, void *param) { aop->operate_Cast(this, param); }
+  void AST::AST_Node_Binary::operate(ASTOperator *aop, void *param) { aop->operate_Binary(this, param); }
+  void AST::AST_Node_Ternary::operate(ASTOperator *aop, void *param) { aop->operate_Ternary(this, param); }
+  void AST::AST_Node_Parameters::operate(ASTOperator *aop, void *param) { aop->operate_Parameters(this, param); }
+  void AST::AST_Node_Array::operate(ASTOperator *aop, void *param) { aop->operate_Array(this, param); }
+  void AST::AST_Node_new::operate(ASTOperator *aop, void *param) { aop->operate_new(this, param); }
+  void AST::AST_Node_delete::operate(ASTOperator *aop, void *param) { aop->operate_delete(this, param); }
+  
+  void AST::AST_Node::operate(ConstASTOperator *aop, void *param) const { aop->operate(this, param); }
+  void AST::AST_Node_Definition::operate(ConstASTOperator *aop, void *param) const { aop->operate_Definition(this, param); }
+  void AST::AST_Node_Scope::operate(ConstASTOperator *aop, void *param) const { aop->operate_Scope(this, param); }
+  void AST::AST_Node_Type::operate(ConstASTOperator *aop, void *param) const { aop->operate_Type(this, param); }
+  void AST::AST_Node_Unary::operate(ConstASTOperator *aop, void *param) const { aop->operate_Unary(this, param); }
+  void AST::AST_Node_sizeof::operate(ConstASTOperator *aop, void *param) const { aop->operate_sizeof(this, param); }
+  void AST::AST_Node_Cast::operate(ConstASTOperator *aop, void *param) const { aop->operate_Cast(this, param); }
+  void AST::AST_Node_Binary::operate(ConstASTOperator *aop, void *param) const { aop->operate_Binary(this, param); }
+  void AST::AST_Node_Ternary::operate(ConstASTOperator *aop, void *param) const { aop->operate_Ternary(this, param); }
+  void AST::AST_Node_Parameters::operate(ConstASTOperator *aop, void *param) const { aop->operate_Parameters(this, param); }
+  void AST::AST_Node_Array::operate(ConstASTOperator *aop, void *param) const { aop->operate_Array(this, param); }
+  void AST::AST_Node_new::operate(ConstASTOperator *aop, void *param) const { aop->operate_new(this, param); }
+  void AST::AST_Node_delete::operate(ConstASTOperator *aop, void *param) const { aop->operate_delete(this, param); }
   
   //===========================================================================================================================
   //=: Everything else :=======================================================================================================

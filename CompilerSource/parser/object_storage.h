@@ -38,10 +38,6 @@ using namespace std;
 //Locals that are inherited by all instances of all objects from the core system.
 extern map<string,int> shared_object_locals;
 extern map<string,struct dectrip> dot_accessed_locals;
-extern int shared_locals_load(vector<string> exts);
-extern int shared_locals_clear();
-
-void add_dot_accessed_local(string name);
 
 //Represent an initializer (name(value) in constructor)
 typedef pair<string,string> initpair;
@@ -111,8 +107,6 @@ struct parsed_object
   parsed_object(string,int,int,int,int,bool,bool,double,bool);
 };
 
-extern map<int,parsed_object*> parsed_objects;
-
 struct parsed_script
 {
   parsed_object obj; //Script will pretend to be an object, having locals and globals inherited by all who call it.
@@ -126,7 +120,7 @@ struct parsed_room: parsed_object {
   struct parsed_icreatecode { parsed_event* pe; int object_index; };
   map<int,parsed_icreatecode> instance_create_codes;
 };
-extern map<int,parsed_room*> parsed_rooms;
+
 typedef map<int,parsed_object*> :: iterator po_i;
 typedef map<int,parsed_event*>  :: iterator pe_i;
 typedef map<int,parsed_room*>   :: iterator pr_i;
@@ -139,7 +133,17 @@ struct parsed_extension {
   string implements;
 };
 
-extern vector<parsed_extension> parsed_extensions;
-extern vector<string> requested_extensions;
+struct compile_context {
+  map<int,parsed_object*> parsed_objects;
+  map<int,parsed_room*> parsed_rooms;
+  parsed_script **parsed_scripts;
+  inline compile_context(): parsed_scripts(NULL) {}
+};
+
+
+#include "languages/language_adapter.h"
+void add_dot_accessed_local(string name, compile_context ctex);
+extern int shared_locals_load(language_adapter *lang);
+extern int shared_locals_clear();
 
 #endif

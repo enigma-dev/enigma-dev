@@ -38,34 +38,12 @@ using namespace std;
 #include "compiler/compile_common.h"
 #include "compiler/event_reader/event_parser.h"
 #include "parser/object_storage.h"
-
-string REFERENCE_POSTFIX(string ref) {
-  unsigned pos, spos = 0;
-  bool makeItConst = false;
-  int lvl = 0;
-  for (pos = 0; pos < ref.length(); pos++)
-  {
-    if (ref[pos] == '[')
-    {
-      if (!lvl) spos = pos;
-      makeItConst = true;
-      lvl++;
-    }
-    else if (ref[pos] == ']')
-    {
-      if (--lvl == 0)
-        ref.replace(spos,pos-spos+1,"*");
-    }
-  }
-  if (makeItConst)
-    ref += " const ";
-  return ref;
-}
 #include "languages/lang_CPP.h"
 
 struct usedtype { int uc; dectrip original; usedtype(): uc(0) {} }; // uc is the use count, then after polling, the dummy number.
-int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global)
+int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects)
 {
+  // TODO: RECODE
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h",ios_base::out);
     wto << license;
@@ -94,7 +72,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
     for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++)
     {
       const string& pmember = dait->first;
-      wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
+      wto << "  " << dait->second.type << " " << dait->second.prefix << " &varaccess_" << pmember << "(int x)" << endl;
       wto << "  {" << endl;
       
       wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;

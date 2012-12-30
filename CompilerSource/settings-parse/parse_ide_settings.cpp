@@ -42,7 +42,6 @@ using namespace std;
 
 #include "parse_ide_settings.h"
 
-void clear_ide_editables();
 static inline vector<string> explode(string n) {
   vector<string> ret;
   size_t pos = 0, epos;
@@ -65,10 +64,11 @@ inline string tolower(string x) {
 //#include "backend/ideprint.h"
 //#include "backend/JavaCallbacks.h"
 
+#include <compiler/compile.h>
+#include "gcc_interface/gcc_backend.h"
+
 #define user cout << "\n\n\n\n\n"
 #define flushl "\n\n\n\n\n"
-
-extern const char* establish_bearings(const char *compiler);
 
 void parse_ide_settings(const char* eyaml)
 {
@@ -153,9 +153,9 @@ void parse_ide_settings(const char* eyaml)
   setting::literal_autocast = settree.get("treat-literals-as").toInt();
   
   cout << "Setting up IDE editables... " << endl;
-  requested_extensions.clear();
-  requested_extensions = explode((string)settree.get("extensions"));
-  extensions::parse_extensions(requested_extensions);
-  clear_ide_editables();
+  current_language->requested_extensions.clear();
+  current_language->requested_extensions = explode((string)settree.get("extensions"));
+  extensions::parse_extensions(current_language);
+  clear_ide_editables(current_language);
 }
 

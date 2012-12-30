@@ -282,11 +282,11 @@ int event_parse_resourcefile()
         if (v[0] == '{')
         {
           braces = 1;
-          int iq = 0;
+          int iq2 = 0;
           for (size_t i=1; i<v.length(); i++)
-            if (!iq) { braces += (v[i] == '{') - (v[i] == '}');
-              iq = (v[i] == '"') + ((v[i] == '\'') << 1);
-            } else { iq = (iq == 1 and v[i] != '"') + ((iq == 2 and v[i] != '\'') << 1);
+            if (!iq2) { braces += (v[i] == '{') - (v[i] == '}');
+              iq2 = (v[i] == '"') + ((v[i] == '\'') << 1);
+            } else { iq2 = (iq2 == 1 and v[i] != '"') + ((iq2 == 2 and v[i] != '\'') << 1);
               i += (v[i] == '\\');
             }
         }
@@ -338,26 +338,27 @@ int event_parse_resourcefile()
   return 0;
 }
 
-extern string tostring(int);
-string format_lookup(int id, p_type t)
+#include <general/estring.h>
+static string format_lookup(int id, p_type t)
 {
   switch (t)
   {
     case p2t_sprite:     return "spr_" + tostring(id);
     case p2t_sound:      return "snd_" + tostring(id);
-    case p2t_background: return "bk_" + tostring(id);
+    case p2t_background: return "bk_"  + tostring(id);
     case p2t_path:       return "pth_" + tostring(id);
     case p2t_script:     return "scr_" + tostring(id);
     case p2t_font:       return "fnt_" + tostring(id);
-    case p2t_timeline:   return "tl_" + tostring(id);
+    case p2t_timeline:   return "tl_"  + tostring(id);
     case p2t_object:     return "obj_" + tostring(id);
-    case p2t_room:       return "rm_" + tostring(id);
-    case p2t_key:        return "key" + tostring(id);
+    case p2t_room:       return "rm_"  + tostring(id);
+    case p2t_key:        return "key"  + tostring(id);
     case p2t_error:      return "...";
+    default:             return "..!";
   }
   return tostring(id);
 }
-string format_lookup_econstant(int id, p_type t)
+static string format_lookup_econstant(int id, p_type t)
 {
   switch (t)
   {
@@ -372,8 +373,8 @@ string format_lookup_econstant(int id, p_type t)
     case p2t_room:       return tostring(id);
     case p2t_key:        return tostring(id);
     case p2t_error:      return tostring(id);
+    default:             return tostring(id);
   }
-  return tostring(id);
 }
 
 inline string autoparam(string x,string y)
@@ -440,7 +441,7 @@ string event_get_human_name_min(int mid, int id)
 }
 
 // Used by the rest of these functions
-event_info *event_access(int mid, int id)
+static inline event_info *event_access(int mid, int id)
 {
   main_event_info &mei = main_event_infos[mid];
   return (mei.is_group) ? mei.specs[id] : mei.specs[0];
@@ -492,7 +493,7 @@ string event_get_suffix_code(int mid, int id) {
 
 
 // The rest of these functions use this
-string evres_code_substitute(string code, int sid, p_type t)
+static inline string evres_code_substitute(string code, int sid, p_type t)
 {
   for (size_t i = code.find("%1"); i != string::npos; i = code.find("%1"))
     code.replace(i, 2, format_lookup_econstant(sid, t));
@@ -552,9 +553,15 @@ void event_info_clear()
   event_sequence.clear();
 }
 
-bool event_is_instance(int mid, int id) { // Returns if the event with the given ID pair is an instance of a stacked event
+/// Returns if the event with the given ID pair is an instance of a stacked event
+bool event_is_instance(int mid, int id)
+{
   main_event_info &mei = main_event_infos[mid];
-  return !mei.is_group and mei.specs[0]->mode == et_stacked;
+  if (!mei.is_group) return false;
+  map<int, event_info*>::iterator a = mei.specs.find(id);
+  if (a == mei.specs.end()) a = mei.specs.find(0);
+  if (a == mei.specs.end()) return false;
+  return a->second->mode == et_stacked;
 }
 
 string event_forge_sequence_code(int mid, int id, string preferred_name)

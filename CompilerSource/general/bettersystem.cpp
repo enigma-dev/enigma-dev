@@ -239,7 +239,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
     extern char **environ;
 #endif
 
-    void path_coerce(string &ename)
+    static void path_coerce(string &ename)
     {
       char* a = getenv("PATH");
       size_t len = strlen(a) + 1;

@@ -69,9 +69,11 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
   for (int i = 0; i < font_count; i++)
   {
     cout << "Iterating included fonts..." << endl;
+    
     // Simple allocations and initializations
     const int gc = es->fonts[i].rangeMax - es->fonts[i].rangeMin + 1;
-    pvrect boxes[gc]; list<unsigned int> box_order;
+    pvrect *boxes = new pvrect[gc];
+    list<unsigned int> box_order;
     cout << "Allocated some font stuff" << endl;
 
     /*cout << "Font name `" << es->fonts[i].name << "` uses " << es->fonts[i].fontName << endl;
@@ -120,10 +122,11 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
 
     cout << "Finished packing font stuff." << endl;
 
-    unsigned char bigtex[w*h];
+    unsigned char *bigtex = new unsigned char[w*h];
     for (int ii = 0; ii < w*h; ii++)
       bigtex[ii] = 0;
-    struct { float x,y,x2,y2; } glyphtexc[gc];
+    struct glyphtexcs { float x,y,x2,y2; };
+    glyphtexcs *glyphtexc = new glyphtexcs[gc];
 
     cout << "Allocated a big texture. Moving font into it..." << endl;
     for (int ii = 0; ii < gc; ii++)
@@ -153,7 +156,7 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     writei(w,gameModule), writei(h,gameModule);
     fwrite(bigtex,1,w*h,gameModule);
     fwrite("done",1,4,gameModule);
-
+    
     for (int ii = 0; ii < gc; ii++)
       writef(es->fonts[i].glyphs[ii].advance, gameModule),
       writef(es->fonts[i].glyphs[ii].baseline,gameModule),
@@ -166,6 +169,11 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
       writef(glyphtexc[ii].y2, gameModule);
 
     fwrite("endf",1,4,gameModule);
+    
+    delete boxes;
+    delete bigtex;
+    delete glyphtexc;
+    
     cout << "Wrote all data for font " << i << endl;
   }
 

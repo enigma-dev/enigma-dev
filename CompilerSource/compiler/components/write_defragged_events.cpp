@@ -49,7 +49,7 @@ struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} v
 map<string,foundevent> used_events;
 typedef map<string,foundevent>::iterator evfit;
 
-int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
+int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es, compile_context &ctex)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h");
   wto << license;
@@ -80,7 +80,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     {
       used_events[event_get_function_name(mid,id)].f2(mid,id); // ...Reserve it anyway.
 
-      for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) // Then shell it out into the other objects.
+      for (po_i it = ctex.parsed_objects.begin(); it != ctex.parsed_objects.end(); it++) // Then shell it out into the other objects.
       {
         bool exists = false;
         for (unsigned j = 0; j < it->second->events.size; j++)
@@ -129,7 +129,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
     wto  << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
-    int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
+    int obj_high_id = ctex.parsed_objects.rbegin() != ctex.parsed_objects.rend() ? ctex.parsed_objects.rbegin()->first : 0;
     wto  << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
 
     int ind = 0;

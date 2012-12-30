@@ -30,6 +30,7 @@
 #include <map>
 
 #include "settings.h"
+#include <languages/language_adapter.h>
 
 namespace settings
 {
@@ -45,7 +46,8 @@ namespace extensions
 {
   string compile_local_string();
   void dump_read_locals(map<string,int>&);
-  void parse_extensions(vector<string> exts);
-  void crawl_for_locals();
+  /// Parses the requested_extensions of the language adapter into its parsed_extensions.
+  void parse_extensions(language_adapter *lang);
+  void crawl_for_locals(language_adapter *lang);
   void determine_target();
 }

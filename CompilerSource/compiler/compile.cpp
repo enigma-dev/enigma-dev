@@ -54,6 +54,8 @@
 
 using namespace std;
 
+#include "compile.h"
+
 #include "backend/JavaCallbacks.h"
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
@@ -84,7 +86,9 @@ inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-inline string string_replace_all(string str,string substr,string nstr)
+#include <general/estring.h>
+
+string string_replace_all(string str,string substr,string nstr)
 {
   pt pos=0;
   while ((pos=str.find(substr,pos)) != string::npos)
@@ -95,25 +99,31 @@ inline string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
+string toUpper(string x) {
+  string res = x;
+  for (size_t i = 0; i < res.length(); i++)
+    res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i];
+  return res;
+}
+
 inline string fc(const char* fn)
 {
-  FILE *pt = fopen(fn,"rb");
-  if (pt==NULL) return "";
+  FILE *ptf = fopen(fn,"rb");
+  if (!ptf) return "";
   
-  fseek(pt,0,SEEK_END);
-  size_t sz = ftell(pt);
-  fseek(pt,0,SEEK_SET);
+  fseek(ptf,0,SEEK_END);
+  size_t sz = ftell(ptf);
+  fseek(ptf,0,SEEK_SET);
 
-  char a[sz+1];
-  sz = fread(a,1,sz,pt);
-  fclose(pt);
+  char *a = (char*)alloca(sz+1);
+  sz = fread(a,1,sz,ptf);
+  fclose(ptf);
 
   a[sz] = 0;
   return a;
 }
 
-string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); i++) res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i]; return res; }
-void clear_ide_editables()
+void clear_ide_editables(language_adapter *lang)
 {
   ofstream wto;
   string f2comp = fc("ENIGMAsystem/SHELL/API_Switchboard.h");
@@ -127,13 +137,13 @@ void clear_ide_editables()
 
     const string incg = "#include \"", impl = "/implement.h\"\n";
     f2write += "\n// Extensions selected by user\n";
-    for (unsigned i = 0; i < parsed_extensions.size(); i++)
+    for (unsigned i = 0; i < lang->parsed_extensions.size(); i++)
     {
-      ifstream ifabout((parsed_extensions[i].pathname + "/About.ey").c_str());
-      ey_data about = parse_eyaml(ifabout,parsed_extensions[i].path + parsed_extensions[i].name + "/About.ey");
-      f2write += incg + parsed_extensions[i].pathname + inc;
-      if (parsed_extensions[i].implements != "")
-        f2write += incg + parsed_extensions[i].pathname + impl;
+      ifstream ifabout((lang->parsed_extensions[i].pathname + "/About.ey").c_str());
+      ey_data about = parse_eyaml(ifabout, lang->parsed_extensions[i].path + lang->parsed_extensions[i].name + "/About.ey");
+      f2write += incg + lang->parsed_extensions[i].pathname + inc;
+      if (lang->parsed_extensions[i].implements != "")
+        f2write += incg + lang->parsed_extensions[i].pathname + impl;
     }
 
   if (f2comp != f2write)
@@ -168,9 +178,9 @@ void clear_ide_editables()
 // modes: 0=run, 1=debug, 2=design, 3=compile
 enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
-
+dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
-  current_language->compile(es, exe_filename, mode);
+  return current_language->compile(es, exe_filename, mode);
 }
 
 double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
@@ -198,12 +208,10 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   edbg << "Building for mode (" << mode << ")" << flushl;
 
-  // CLean up from any previous executions.
+  // Clean up from any previous executions.
   edbg << "Cleaning up from previous executions" << flushl;
-    parsed_objects.clear(); //Make sure we don't dump in any old object code...
-    edbg << " - Cleared parsed objects" << flushl;
-    parsed_rooms.clear();   //Or that we dump any room code, for that matter...
-    edbg << " - Cleared room entries" << flushl;
+  compile_context ctex;
+    edbg << " - Cleared parsed objects and room entries" << flushl;
     shared_locals_clear();  //Forget inherited locals, we'll reparse them
     edbg << " - Cleared shared locals list" << flushl;
     event_info_clear();     //Forget event definitions, we'll re-get them
@@ -212,13 +220,16 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   // Re-establish ourself
     // Read the global locals: locals that will be included with each instance
     {
-      vector<string> extnp;
+      // FIXME: Extensions already read?
+      
+      /*vector<string> extnp;
       for (int i = 0; i < es->extensionCount; i++) {
         cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
         extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
-      }
+      }*/
+      
       edbg << "Loading shared locals from extensions list" << flushl;
-      if (shared_locals_load(extnp) != 0) {
+      if (shared_locals_load(this) != 0) {
         user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
         idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
       }
@@ -307,15 +318,15 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
 
   edbg << es->scriptCount << " Scripts:" << flushl;
-  parsed_script *parsed_scripts[es->scriptCount];
+  ctex.parsed_scripts = new parsed_script*[es->scriptCount];
 
   scr_lookup.clear();
-  used_funcs::zero();
+  used_funcs.clear();
 
   int res;
   #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
-  res = current_language->compile_parseAndLink(es,parsed_scripts);
+  res = current_language->compile_parseAndLink(es,ctex);
   irrr();
 
 
@@ -356,7 +367,7 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out);
     wto << license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
-    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+    for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
     {
       wto << "case " << i->second->id << ":\n";
       wto << "    NEW_OBJ_PREFIX new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
@@ -378,7 +389,7 @@ stringstream ss;
 
     max = 0;
     wto << "enum //object names\n{\n";
-    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++) {
+    for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++) {
       if (i->first >= max) max = i->first + 1;
       wto << "  " << i->second->name << " = " << i->first << ",\n";
       ss << "    case " << i->first << ": return \"" << i->second->name << "\"; break;\n";
@@ -473,24 +484,24 @@ wto << "string sound_get_name(int i) {\n switch (i) {\n";
 
   // Defragged events must be written before object data, or object data cannot determine which events were used.
   edbg << "Writing events" << flushl;
-  res = current_language->compile_writeDefraggedEvents(es);
+  res = current_language->compile_writeDefraggedEvents(es, ctex);
   irrr();
 
   parsed_object EGMglobal;
 
   edbg << "Linking globals" << flushl;
-  res = current_language->link_globals(&EGMglobal,es,parsed_scripts);
+  res = current_language->link_globals(&EGMglobal,es,ctex);
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;
-  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount,parsed_rooms,&EGMglobal);
+  res = current_language->compile_parseSecondary(ctex.parsed_objects,ctex.parsed_scripts,es->scriptCount,ctex.parsed_rooms,&EGMglobal);
 
   edbg << "Writing object data" << flushl;
-  res = current_language->compile_writeObjectData(es,&EGMglobal);
+  res = current_language->compile_writeObjectData(es, &EGMglobal, ctex);
   irrr();
 
   edbg << "Writing local accessors" << flushl;
-  res = current_language->compile_writeObjAccess(parsed_objects, &EGMglobal);
+  res = current_language->compile_writeObjAccess(ctex.parsed_objects);
   irrr();
 
   edbg << "Writing font data" << flushl;
@@ -498,7 +509,7 @@ wto << "string sound_get_name(int i) {\n switch (i) {\n";
   irrr();
 
   edbg << "Writing room data" << flushl;
-  res = current_language->compile_writeRoomData(es,&EGMglobal);
+  res = current_language->compile_writeRoomData(es, ctex);
   irrr();
 
 
@@ -690,4 +701,4 @@ wto << "string sound_get_name(int i) {\n switch (i) {\n";
 
   idpr("Done.", 100);
   return 0;
-};
+}

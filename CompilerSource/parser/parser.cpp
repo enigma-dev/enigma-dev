@@ -28,6 +28,8 @@
 //Welcome to the ENIGMA EDL-to-C++ parser; just add semicolons.
 //No, it's not really that simple.
 
+#if 0
+
 /*/\*\
   As a fun fact, this parser was the first one I ever wrote, and was originally
   coded in GML. When it was complete, it parsed itself to C++.
@@ -710,3 +712,5 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   delete sstack[0];
   return -1;
 }
+
+#endif

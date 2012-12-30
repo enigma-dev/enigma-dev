@@ -48,9 +48,7 @@ int m_prog_loop_cfp();
  #include <cstdio>
 #endif
 
-extern const char* establish_bearings(const char* compiler);
-extern void print_definition(string);
-
+#include "gcc_interface/gcc_backend.h"
 
 extern  int ext_count;
 
@@ -65,16 +63,16 @@ extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__v
 
 inline string fc(const char* fn)
 {
-    FILE *pt = fopen(fn,"rb");
-    if (pt==NULL) return "";
+    FILE *ptf = fopen(fn,"rb");
+    if (!ptf) return "";
     else {
-      fseek(pt,0,SEEK_END);
-      size_t sz = ftell(pt);
-      fseek(pt,0,SEEK_SET);
+      fseek(ptf,0,SEEK_END);
+      size_t sz = ftell(ptf);
+      fseek(ptf,0,SEEK_SET);
 
-      char a[sz+1];
-      sz = fread(a,1,sz,pt);
-      fclose(pt);
+      char *a = (char*)alloca(sz+1);
+      sz = fread(a,1,sz,ptf);
+      fclose(ptf);
 
       a[sz] = 0;
       return a;
@@ -96,11 +94,12 @@ syntax_error *definitionsModified(const char*,const char*);
 #include "general/bettersystem.h"
 #include <System/builtins.h>
 #include "compiler/jdi_utility.h"
+#include "parser/parse_edl.h"
 
 void do_cli(jdi::context &ct);
 syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code);
 int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
   puts("Attempting to run");
   /*e_execp("gcc -E -x c++ -v blank.txt","");*/
@@ -112,8 +111,6 @@ int main(int argc, char* argv[])
     return 0;
   }
   
-  
-  extern void parse_edl(string);
   for (int i = 0; i < 1; ++i)
   current_language->definitionsModified(NULL, ((string) "%e-yaml\n"
     "---\n" 	 
@@ -121,7 +118,7 @@ int main(int argc, char* argv[])
     /* "target-graphics: OpenGL\n" 	 
     "target-audio: OpenAL\n"
     "target-collision: BBox\n"
-    /* Straight from LGM on Linux */
+    / * Straight from LGM on Linux */
     "treat-literals-as: 0\n"
     "sample-lots-of-radios: 0\n"
     "inherit-equivalence-from: 0\n"
@@ -157,7 +154,8 @@ int main(int argc, char* argv[])
   "=====================================================\nTest drive new EDL parser\n====================================================="
   << endl << endl;
   
-  parse_edl(in2);
+  EDL_AST east;
+  east.parse_edl(in2);
   
   
   /*
@@ -184,7 +182,7 @@ int main(int argc, char* argv[])
   es.gmObjects = &obj;
   es.gmObjectCount = 1;
   
-  /*SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
+  / *SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
   Sprite sprite = {"spr_0", 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 32, 32, &subimages, 1, NULL, 0};
   Sprite sprites[2] = { sprite, sprite };
   es.spriteCount = 2; es.sprites = sprites;

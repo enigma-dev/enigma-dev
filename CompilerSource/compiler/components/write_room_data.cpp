@@ -46,7 +46,7 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
-int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
+int lang_CPP::compile_writeRoomData(EnigmaStruct* es, compile_context &ctex)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out);
 
@@ -174,7 +174,7 @@ wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcrea
   wto << license;
   for (int i = 0; i < es->roomCount; i++)
   {
-    parsed_room *pr = parsed_rooms[es->rooms[i].id];
+    parsed_room *pr = ctex.parsed_rooms[es->rooms[i].id];
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
     {
       wto << "void room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "()\n{\n  ";

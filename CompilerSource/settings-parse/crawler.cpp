@@ -58,16 +58,16 @@ namespace settings
 #include "parser/object_storage.h"
 #include "OS_Switchboard.h"
 #include "languages/language_adapter.h"
+#include <general/estring.h>
 
-extern string toUpper(string);
 namespace extensions
 {
   map<string, string> locals;
-  string unmangled_type_pre(string str) { 
+  static inline string unmangled_type_pre(string str) { 
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? str : str.substr(0,pm);
   }
-  string unmangled_type_suf(string str) {
+  static inline string unmangled_type_suf(string str) {
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? "" : str.substr(pm);
   }
@@ -83,34 +83,31 @@ namespace extensions
     for (map<string,string>::iterator it = locals.begin(); it != locals.end(); it++)
       lmap[it->first]++;
   }
-  void parse_extensions(vector<string> exts)
+  void parse_extensions(language_adapter *lang)
   {
-    if (exts.empty())
-      return;  //IsmAvatar: Remove this if() return.
-    parsed_extensions.clear();
-    
-    for (unsigned i = 0; i < exts.size(); i++)
+    lang->parsed_extensions.clear();
+    for (unsigned i = 0; i < lang->requested_extensions.size(); i++)
     {
       parsed_extension pe;
-      pe.pathname = exts[i];
-      size_t pos = exts[i].find_last_of("/\\");
-      pe.name = pos == string::npos ? exts[i] : exts[i].substr(pos + 1);
-      pe.path = pos == string::npos ? ""      : exts[i].substr(0, pos + 1);
+      pe.pathname = lang->requested_extensions[i];
+      size_t pos = lang->requested_extensions[i].find_last_of("/\\");
+      pe.name = pos == string::npos ? lang->requested_extensions[i] : lang->requested_extensions[i].substr(pos + 1);
+      pe.path = pos == string::npos ? "" : lang->requested_extensions[i].substr(0, pos + 1);
       for (pos = 0; pos < pe.path.length(); pos++)
         if (pe.path[pos] == '\\')
           pe.path[i] = '/';
       
-      ifstream iey(("ENIGMAsystem/SHELL/" + exts[i]+"/About.ey").c_str());
+      ifstream iey(("ENIGMAsystem/SHELL/" + lang->requested_extensions[i]+"/About.ey").c_str());
       if (!iey.is_open())
-        cout << "ERROR! Failed to open extension descriptor for " << exts[i] << endl;
-      ey_data about = parse_eyaml(iey,exts[i]);
+        cout << "ERROR! Failed to open extension descriptor for " << lang->requested_extensions[i] << endl;
+      ey_data about = parse_eyaml(iey,lang->requested_extensions[i]);
       pe.implements = about.get("implement");
       
-      parsed_extensions.push_back(pe);
+      lang->parsed_extensions.push_back(pe);
     }
   }
   
-  void crawl_for_locals()
+  void crawl_for_locals(language_adapter *lang)
   {
     locals.clear();
     
@@ -119,15 +116,15 @@ namespace extensions
       return (cout << "ERROR! ENIGMA NAMESPACE NOT FOUND. THIS SHOULD NEVER HAPPEN." << endl, void());
     jdi::definition_scope *namespace_enigma = (jdi::definition_scope*)denigma;
     
-    for (unsigned i = 0; i < parsed_extensions.size(); i++)
+    for (unsigned i = 0; i < lang->parsed_extensions.size(); i++)
     {
-      if (parsed_extensions[i].implements == "")
+      if (lang->parsed_extensions[i].implements == "")
         continue;
       
-      jdi::definition* implements = namespace_enigma->look_up(parsed_extensions[i].implements);
+      jdi::definition* implements = namespace_enigma->look_up(lang->parsed_extensions[i].implements);
       
       if (!implements or not(implements->flags & jdi::DEF_SCOPE))
-        cout << "ERROR! Extension implements " << parsed_extensions[i].implements << " without defining it!" << endl;
+        cout << "ERROR! Extension implements " << lang->parsed_extensions[i].implements << " without defining it!" << endl;
       else
       {
         jdi::definition_scope *const iscope = (jdi::definition_scope*)implements;

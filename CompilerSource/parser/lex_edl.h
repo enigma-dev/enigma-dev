@@ -48,6 +48,8 @@ struct lexer_edl: jdip::lexer_cpp {
   
   /// Utility function to skip a GML string; invoke with pos indicating the quotation mark: terminates indicating match.
   void skip_gml_string(jdi::error_handler *herr);
+  /// Function used by the preprocessor to navigate to terminating double braces.
+  string read_preprocessor_args(jdi::error_handler *herr);
   
   lexer_edl(llreader &input, jdi::macro_map &pmacros, const char *fname);
   ~lexer_edl();

@@ -111,6 +111,7 @@ extern string event_get_suffix_code(int mid, int id);
 extern bool   event_execution_uses_default(int mid, int id);
 bool event_is_instance(int mid, int id);
 string event_stacked_get_root_name(int mid);
+string event_get_human_name_min(int mid, int id);
 
 string event_forge_sequence_code(int mid,int id, string preferred_name);
 

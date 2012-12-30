@@ -7,7 +7,7 @@
 		<Option pch_mode="2" />
 		<Option default_target="StandAlone" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Test/;" />
+		<Option virtualFolders="Test/;syntax/;" />
 		<Build>
 			<Target title="WinRelease">
 				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
@@ -17,7 +17,6 @@
 				<Option compiler="gcc" />
 				<Option parameters="-jar lgm16b4.jar" />
 				<Option host_application="java" />
-				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-O2" />
@@ -37,7 +36,6 @@
 				<Option compiler="gcc" />
 				<Option parameters="-jar lgm16b4.jar" />
 				<Option host_application="java" />
-				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -52,7 +50,6 @@
 				<Option compiler="gcc" />
 				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
 				<Option host_application="xterm" />
-				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-O2" />
@@ -71,7 +68,6 @@
 				<Option compiler="gcc" />
 				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
 				<Option host_application="xterm" />
-				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -191,6 +187,8 @@
 		<Unit filename="JDI/src/System/token.cpp" />
 		<Unit filename="JDI/src/System/token.h" />
 		<Unit filename="JDI/src/System/type_usage_flags.h" />
+		<Unit filename="JDI/src/User/token_cases.h" />
+		<Unit filename="JDI/src/User/token_types.h" />
 		<Unit filename="JDI/test/debug_lexer.h" />
 		<Unit filename="OS_Switchboard.h" />
 		<Unit filename="backend/EnigmaStruct.h" />
@@ -219,7 +217,6 @@
 		<Unit filename="backend/sub/Action.h" />
 		<Unit filename="backend/sub/BackgroundDef.h" />
 		<Unit filename="backend/sub/Event.h" />
-		<Unit filename="backend/sub/Image.h" />
 		<Unit filename="backend/sub/Instance.h" />
 		<Unit filename="backend/sub/MainEvent.h" />
 		<Unit filename="backend/sub/Moment.h" />
@@ -265,8 +262,6 @@
 		<Unit filename="compiler/reshandlers/rectpack.cpp" />
 		<Unit filename="compiler/reshandlers/rectpack.h" />
 		<Unit filename="config.h" />
-		<Unit filename="externs/externs.h" />
-		<Unit filename="externs/references.h" />
 		<Unit filename="filesystem/file_find.cpp" />
 		<Unit filename="frontend.cpp" />
 		<Unit filename="frontend.h" />
@@ -301,7 +296,9 @@
 		<Unit filename="parser/parser.cpp" />
 		<Unit filename="parser/parser.h" />
 		<Unit filename="parser/parser_components.cpp" />
-		<Unit filename="parser/parser_components.h" />
+		<Unit filename="parser/parser_components.h">
+			<Option virtualFolder="syntax/" />
+		</Unit>
 		<Unit filename="settings-parse/crawler.cpp" />
 		<Unit filename="settings-parse/crawler.h" />
 		<Unit filename="settings-parse/eyaml.cpp" />

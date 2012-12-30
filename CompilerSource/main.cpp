@@ -67,8 +67,7 @@ int m_prog_loop_cfp();
 
 extern void print_err_line_at(size_t a);
 
-extern const char* establish_bearings(const char *compiler);
-
+#include "gcc_interface/gcc_backend.h"
 #include "backend/JavaCallbacks.h"
 
 #ifdef NOT_A_DLL
@@ -79,6 +78,11 @@ extern const char* establish_bearings(const char *compiler);
 #include "languages/lang_CPP.h"
 #include <System/builtins.h>
 #include <API/jdi.h>
+
+dllexport const char* libInit(EnigmaCallbacks* ecs);
+dllexport void libFree();
+dllexport syntax_error *definitionsModified(const char* wscode, const char* targetYaml);
+dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code);
 
 dllexport const char* libInit(EnigmaCallbacks* ecs)
 {
@@ -131,7 +135,6 @@ dllexport void libFree() {
 #include "parser/object_storage.h"
 
 extern void print_definition(string n);
-static bool firstpass = true;
 
 #include "languages/language_adapter.h"
 
@@ -139,7 +142,7 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
 {
   current_language->definitionsModified(wscode, targetYaml);
   return &ide_passback_error;
-};
+}
 
 void quickmember_script(jdi::definition_scope* scope, string name);
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)

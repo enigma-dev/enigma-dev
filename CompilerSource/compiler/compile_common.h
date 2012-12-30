@@ -29,14 +29,11 @@
 #define _COMPILE_COMMON__H
 
 #include <map>
+#include <set>
 #include "compile_organization.h"
 #include "parser/object_storage.h"
 
-namespace used_funcs
-{
-  extern bool object_set_sprite;
-  void zero();
-}
+extern set<string> used_funcs;
 extern std::map<string,parsed_script*> scr_lookup;
 
 extern const char* license;

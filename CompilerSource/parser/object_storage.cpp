@@ -44,7 +44,7 @@ map<string,int> shared_object_locals;
 map<string,dectrip> dot_accessed_locals;
 
 #include "languages/lang_CPP.h"
-int shared_locals_load(vector<string> exts)
+int shared_locals_load(language_adapter *lang)
 {
   cout << "Finding parent..."; fflush(stdout);
 
@@ -80,7 +80,7 @@ int shared_locals_load(vector<string> exts)
       shared_object_locals[mem->first] = 0;
   }
 
-  extensions::crawl_for_locals();
+  extensions::crawl_for_locals(lang);
   extensions::dump_read_locals(shared_object_locals);
   return 0;
 }
@@ -118,10 +118,6 @@ parsed_event::parsed_event(parsed_object *po):              id(0), mainId(0), co
 parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_object::parsed_object() {}
 parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d,bool pers): name(n), id(i), sprite_index(s), mask_index(m), parent(p), visible(vis), solid(sol), persistent(pers), depth(d) {}
-map<int,parsed_object*> parsed_objects;
-map<int,parsed_room*> parsed_rooms;
-vector<parsed_extension> parsed_extensions;
-vector<string> requested_extensions;
 
 void parsed_object::copy_from(parsed_object& source, string sourcename, string destname)
 {
@@ -169,7 +165,7 @@ void parsed_object::copy_calls_from(parsed_object& source)
 
 typedef map<string,dectrip> msi;
 struct useinfo { dectrip dec; int c; string lastobject; };
-void add_dot_accessed_local(string name)
+void add_dot_accessed_local(string name, compile_context ctex)
 {
   pair<msi::iterator, bool> insd = dot_accessed_locals.insert(msi::value_type(name,dectrip()));
   if (!insd.second) // If we didn't insert new,
@@ -181,7 +177,7 @@ void add_dot_accessed_local(string name)
   insd.first->second.type = "var"; // Default, just in case of stupidity.
 
   int maxvotes = 0; // The highest number of votes on a type for this variable
-  for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) // For each of our objects
+  for (po_i it = ctex.parsed_objects.begin(); it != ctex.parsed_objects.end(); it++) // For each of our objects
   {
     msi::iterator itt = it->second->locals.find(name); // Find a variable by this name
     if (itt != it->second->locals.end() and itt->second.type != "") // If found, and indeed declared locally

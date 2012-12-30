@@ -52,7 +52,7 @@ inline string fc(const char* fn)
       size_t sz = ftell(f);
       fseek(f,0,SEEK_SET);
 
-      char a[sz+1];
+      char *a = (char*)alloca(sz+1);
       sz = fread(a,1,sz,f);
       fclose(f);
 

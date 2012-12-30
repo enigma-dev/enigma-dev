@@ -30,6 +30,7 @@
 using namespace std;
 
 typedef size_t pt;
+#include "estring.h"
 
 string tostring(int val)
 {

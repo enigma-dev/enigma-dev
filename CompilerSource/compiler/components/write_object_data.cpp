@@ -54,7 +54,7 @@ inline bool iscomment(const string &n) {
 }
 
 struct cspair { string c, s; };
-int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
+int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, compile_context &ctex)
 {
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
@@ -95,7 +95,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
         wto << "    object_locals() {}\n";
         wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {}\n  };\n";
-      for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+      for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
       {
         wto << "  \n  struct OBJ_" << i->second->name << ": object_locals\n  {";
 
@@ -220,7 +220,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
         // This tracks components of the instance system.
         wto << "      enigma::pinstance_list_iterator ENOBJ_ITER_me;\n";
-        for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) // For this object and each parent thereof
+        for (po_i her = i; her != ctex.parsed_objects.end(); her = ctex.parsed_objects.find(her->second->parent)) // For this object and each parent thereof
           wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
 
         // This tracks components of the event system.
@@ -240,7 +240,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
           wto << "      deactivate();\n    }\n void deactivate()\n    {\n";
           wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
-          for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+          for (po_i her = i; her != ctex.parsed_objects.end(); her = ctex.parsed_objects.find(her->second->parent))
             wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
           for (unsigned ii = 0; ii < i->second->events.size; ii++)
             if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
@@ -266,7 +266,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             wto << ", " << i->second->initializers[ii].first << "(" << i->second->initializers[ii].second << ")";
           wto << "\n    {\n";
             // Sprite index
-              if (used_funcs::object_set_sprite) //We want to initialize
+              if (used_funcs.find("object_set_sprite") != used_funcs.end()) //We want to initialize
                 wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n"
                     << "      make_index = enigma::object_table[" << i->second->id << "].mask;\n";
               else
@@ -289,7 +289,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               wto << "      depth.init(" << i->second->depth << ", this);\n";
             // Instance system interface
               wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
-              for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+              for (po_i her = i; her != ctex.parsed_objects.end(); her = ctex.parsed_objects.find(her->second->parent))
                 wto << "      ENOBJ_ITER_myobj" << her->second->id << " = enigma::link_obj_instance(this, " << her->second->id << ");\n";
 
             // Event system interface
@@ -310,7 +310,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           // Destructor
           wto <<   "    \n    ~OBJ_" <<  i->second->name << "()\n    {\n";
             wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
-            for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+            for (po_i her = i; her != ctex.parsed_objects.end(); her = ctex.parsed_objects.find(her->second->parent))
               wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
             for (unsigned ii = 0; ii < i->second->events.size; ii++)
               if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
@@ -359,7 +359,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
     cout << "DBGMSG 3" << endl;
     // Export everything else
-    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+    for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
     {
     cout << "DBGMSG 4" << endl;
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
