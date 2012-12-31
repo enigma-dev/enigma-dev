@@ -24,6 +24,7 @@
 **/
 
 #include "parse_edl.h"
+#include <general/estring.h>
 
 namespace settings {
   bool pedantic_edl = true;
@@ -41,6 +42,21 @@ map<string, declaration> global_grabbag;
 struct definition_object: definition_scope {
   map<egm_event, EDL_AST::AST_Node_Block> events; ///< The code for all events in this object
   vector<definition_object*> parents; ///< List of parents of this object
+};
+
+struct stacked_statement {
+  EDL_AST::loopstack &loops;
+  EDL_AST::AST_Node_Statement *stmt;
+  error_handler *const herr;
+  token_t token;
+  inline stacked_statement(EDL_AST::loopstack &ls, EDL_AST::statement_kind sk, EDL_AST::AST_Node_Statement *sp, token_t tk, error_handler *eh): loops(ls), stmt(sp), herr(eh), token(tk) {
+    loops.push_back(EDL_AST::statement_ref(sk, stmt));
+  }
+  inline ~stacked_statement() {
+    if (loops.back().statement != stmt) {
+      token.report_error(herr, "Logic error! Back statement is not correct!");
+    } loops.pop_back();
+  }
 };
 
 // ---------------------------------------------------------------------
@@ -83,6 +99,12 @@ EDL_AST::AST_Node_Statement_trycatch::~AST_Node_Statement_trycatch() { delete co
 EDL_AST::AST_Node_Statement_switch::AST_Node_Statement_switch(AST_Node *swv, AST_Node_Statement *swb): expression(swv), code(swb) {}
 EDL_AST::AST_Node_Statement_switch::~AST_Node_Statement_switch() {}
 
+EDL_AST::AST_Node_Statement_break::AST_Node_Statement_break(AST_Node_Statement *loop, int dep): depth(dep), target(loop) {}
+EDL_AST::AST_Node_Statement_break::~AST_Node_Statement_break() {}
+
+EDL_AST::AST_Node_Statement_continue::AST_Node_Statement_continue(AST_Node_Statement *loop, int dep): AST_Node_Statement_break(loop, dep) {}
+EDL_AST::AST_Node_Statement_continue::~AST_Node_Statement_continue() {}
+
 // ---------------------------------------------------------------------
 // ToString implementations --------------------------------------------
 // ---------------------------------------------------------------------
@@ -104,7 +126,7 @@ string EDL_AST::AST_Node_Block::toString(int indent) const {
   }
   else {
     if (statements.empty())
-      return "{}";
+      return string(indent, ' ') + "{}";
     return string(indent, ' ') + statements[0]->toString(indent + 2);
   }
 }
@@ -154,8 +176,8 @@ string EDL_AST::AST_Node_Statement_do::toString(int indent) const {
   return res;
 }
 string EDL_AST::AST_Node_Statement_for::toString(int indent) const {
-  return "for (" + (operand_pre? operand_pre->toString() : " ") + "; " + (condition? condition->toString() : " ")
-    + (operand_post? operand_post->toString() : " ")  + ")" + (code? "\n"+code->toString(indent + 2) : ";");
+  return string(indent, ' ') + "for (" + (operand_pre? operand_pre->toString() + " " : " ; ") + (condition? condition->toString() + "; " : " ; ")
+    + (operand_post? operand_post->toString() + ")" : ")") + (code? "\n"+code->toString(indent + 2) : ";");
 }
 string EDL_AST::AST_Node_Statement_with::toString(int indent) const {
   return string(indent, ' ') + "with (" + (instances? instances->toString() : "noone") + ")\n" + code->toString(indent + 2);
@@ -171,6 +193,12 @@ string EDL_AST::AST_Node_Statement_switch::toString(int indent) const {
 }
 string EDL_AST::AST_Node_Statement_return::toString(int indent) const {
   return string(indent, ' ') + "return" + (value? " " + value->toString() + ";" : ";");
+}
+string EDL_AST::AST_Node_Statement_break::toString(int indent) const {
+  return string(indent, ' ') + "break" + (depth > 1? " " + ::tostring(depth) + ";" : ";");
+}
+string EDL_AST::AST_Node_Statement_continue::toString(int indent) const {
+  return string(indent, ' ') + "continue" + (depth > 1? " " + ::tostring(depth) + ";" : ";");
 }
 
 
@@ -225,6 +253,10 @@ int EDL_AST::AST_Node_Statement_if::height() { return 0; }
 void EDL_AST::AST_Node_Statement_return::toSVG(int, int, SVGrenderInfo*) {}
 int EDL_AST::AST_Node_Statement_return::width()  { return 0; }
 int EDL_AST::AST_Node_Statement_return::height() { return 0; }
+
+void EDL_AST::AST_Node_Statement_break::toSVG(int, int, SVGrenderInfo*) {}
+int EDL_AST::AST_Node_Statement_break::width()  { return 0; }
+int EDL_AST::AST_Node_Statement_break::height() { return 0; }
 
 /* ****************************** ************************************************************** *\
 ** Actual parser code starts here ************************************************************** **
@@ -386,7 +418,7 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
       
       case TT_RIGHTPARENTH: token.report_errorf(herr, "Unexpected closing parenthesis here: none open"); return NULL;
       case TT_RIGHTBRACKET: token.report_errorf(herr, "Unexpected closing bracket here: none open"); return NULL;
-      case TT_COLON: token.report_error(herr, "Unexpected colon bracket here: No label given"); return NULL;
+      case TT_COLON: token.report_error(herr, "Unexpected colon here: No label given"); return NULL;
       case TT_LESSTHAN: case TT_GREATERTHAN: case TT_COMMA: token.report_errorf(herr, "Unexpected %s here: No label given"); return NULL;
       
       case TT_SEMICOLON:
@@ -417,15 +449,17 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
           if (!cv) return NULL;
           res = new AST_Node_Statement_case(sw, cv);
         }
-        if (token.type != TT_COLON and settings::pedantic_edl)
+        if (token.type == TT_COLON)
+          token = get_next_token();
+        else if (settings::pedantic_edl)
           if (pedantic_warn(token, herr, token.type == TT_SEMICOLON?
             "A colon should follow case labels rather than a semicolon" : "A colon should follow `case' and `default' labels"))
             { delete res; return NULL; }
         return res;
       }
       
-      case TT_BREAK:    // Overflow
-      case TT_CONTINUE: // Overflow
+      case TT_BREAK:    return handle_break(token, false);
+      case TT_CONTINUE: return handle_break(token, true);
       case TT_RETURN:   return handle_return(token);
       
       case TT_IF:     return handle_if(token);
@@ -520,57 +554,63 @@ EDL_AST::AST_Node_Statement_for*      EDL_AST::handle_for     (token_t &token) {
   if (token.type == TT_LEFTBRACE and settings::pedantic_edl)
     if (pedantic_warn(token, herr, "Blocks not actually allowed in `for' parameters"))
       return NULL;
-  AST_Node_Statement *spre = handle_statement(token);
-  if (!spre) return NULL;
+  
+  AST_Node_Statement_for *res = new AST_Node_Statement_for();
+  stacked_statement ss(loops, SK_LOOP, res, token, herr);
+  res->operand_pre = handle_statement(token);
+  if (!res->operand_pre) { delete res; return NULL; }
   
   // Handle the B in for(A; B; C) { D }
-  AST_Node *cond = parse_expression(token, precedence::all);
-  if (!cond) { delete spre; return NULL; }
+  res->condition = parse_expression(token, precedence::all);
+  if (!res->condition) { delete res; return NULL; }
   if (token.type == TT_SEMICOLON) token = get_next_token();
   else if (settings::pedantic_edl)
     if (pedantic_warn(token, herr, "Semicolon expected after `for' condition"))
-      { delete spre; delete cond; return NULL; }
+      { delete res; return NULL; }
   
   // Handle the C in for(A; B; C) { D }
-  AST_Node_Statement *spost = handle_statement(token);
-  if (!spost) { delete spre; delete cond; return NULL; }
+  res->operand_post = handle_statement(token);
+  if (!res->operand_post) { delete res; return NULL; }
   
   if (expect_rightp) {
     if (token.type != TT_RIGHTPARENTH) {
       token.report_errorf(herr, "Expected closing parenthesis to `for' parameters before %s");
-      delete spre; delete cond; delete spost; return NULL;
+      delete res; return NULL;
     }
     token = get_next_token();
   }
   
-  AST_Node_Statement *loop = handle_statement(token);
-  if (!loop) { delete spre; delete cond; delete spost; return NULL; }
+  res->code = handle_statement(token);
+  if (!res->code) { delete res; return NULL; }
   
-  return new AST_Node_Statement_for(spre, cond, spost, loop);
+  return res;
 }
 EDL_AST::AST_Node_Statement_do*       EDL_AST::handle_do      (token_t &token) {
   token = get_next_token();
-  AST_Node_Statement *code = handle_statement(token);
-  if (!code) return NULL;
+  AST_Node_Statement_do *res = new AST_Node_Statement_do();
+  stacked_statement ss(loops, SK_LOOP, res, token, herr);
   
-  bool negate;
-  if (token.type == TT_UNTIL) negate = true;
-  else if (token.type == TT_WHILE) negate = false;
+  res->code = handle_statement(token);
+  if (!res->code) { delete res; return NULL; }
+  
+  if (token.type == TT_UNTIL) res->negate = true;
+  else if (token.type == TT_WHILE) res->negate = false;
   else {
     token.report_error(herr, "Expected `until' or `while' clause to complete `do' statement");
-    delete code; return NULL;
+    delete res; return NULL;
   }
   
   token = get_next_token();
-  AST_Node* cond = parse_expression(token, precedence::all);
-  if (!cond) { delete code; return NULL; }
+  res->condition = parse_expression(token, precedence::all);
+  if (!res->condition) { delete res; return NULL; }
   
   if (token.type == TT_SEMICOLON) token = get_next_token();
   else if (settings::pedantic_edl) if (pedantic_warn(token, herr, "ISO C++ requires a semicolon after a do-while statement; EDL follows"))
-    { delete code; delete cond; return NULL; }
+    { delete res; return NULL; }
   
-  return new AST_Node_Statement_do(code, cond, negate);
+  return res;
 }
+
 EDL_AST::AST_Node_Statement_while*    EDL_AST::handle_while   (token_t &token) {
   bool negate;
   if (token.type == TT_WHILE) negate = false;
@@ -581,20 +621,27 @@ EDL_AST::AST_Node_Statement_while*    EDL_AST::handle_while   (token_t &token) {
   AST_Node* cond = parse_expression(token, precedence::all);
   if (!cond) { return NULL; }
   
+  AST_Node_Statement_while *res = new AST_Node_Statement_while(cond, NULL, negate);
+  stacked_statement ss(loops, SK_LOOP, res, token, herr);
   AST_Node_Statement *code = handle_statement(token);
-  if (!code) { delete cond; return NULL; }
+  if (!code) { delete res; return NULL; }
   
-  return new AST_Node_Statement_while(cond, code, negate);
+  res->code = code;
+  return res;
 }
+
 EDL_AST::AST_Node_Statement_with*     EDL_AST::handle_with    (token_t &token) {
   token = get_next_token();
   AST_Node* whom = parse_expression(token, precedence::all);
   if (!whom) { return NULL; }
   
+  AST_Node_Statement_with *res = new AST_Node_Statement_with(whom);
+  stacked_statement ss(loops, SK_LOOP, res, token, herr);
   AST_Node_Statement *code = handle_statement(token);
-  if (!code) { delete whom; return NULL; }
+  if (!code) { delete res; return NULL; }
   
-  return new AST_Node_Statement_with(whom, code);
+  res->code = code;
+  return res;
 } 
 EDL_AST::AST_Node_Statement_trycatch* EDL_AST::handle_trycatch(token_t &token) {
   token = get_next_token();
@@ -631,9 +678,55 @@ EDL_AST::AST_Node_Statement_switch*   EDL_AST::handle_switch  (token_t &token) {
     return NULL;
   }
   
+  AST_Node_Statement_switch *res = new AST_Node_Statement_switch(swval);
+  stacked_statement ss(loops, SK_SWITCH, res, token, herr);
   AST_Node_Statement *swblock = handle_statement(token);
-  if (!swblock) { delete swval; return NULL; }
-  return new AST_Node_Statement_switch(swval, swblock);
+  
+  if (!swblock) { delete res; return NULL; }
+  res->code = swblock;
+  
+  return res;
+}
+EDL_AST::AST_Node_Statement *EDL_AST::handle_break(token_t &token) {
+  return handle_break(token, token.type == TT_CONTINUE);
+}
+EDL_AST::AST_Node_Statement *EDL_AST::handle_break(token_t &token, bool h_continue) {
+  token_t bt = token;
+  string bc = h_continue? "continue" : "break";
+  token = get_next_token();
+  int break_depth = 1;
+  if (token.type == TT_DECLITERAL or token.type == TT_HEXLITERAL or token.type == TT_OCTLITERAL) {
+    AST_Node *a = parse_expression(token, precedence::all);
+    if (!a) return NULL;
+    
+    break_depth = a->eval();
+    delete a;
+    
+    if (break_depth < 1) {
+      bt.report_errorf(herr, "Invalid loop depth given for %s; should be a constant expression with a positive result");
+      return NULL;
+    }
+    if (break_depth == 1)
+      bt.report_warning(herr, "Specified loop depth of 1: This depth is the default");
+  }
+  // Regardless of whether it was specified, break_depth should be at least 1 from here.
+  int vd = break_depth;
+  AST_Node_Statement *target = NULL;
+  int mask = h_continue? SK_CONTINUABLE : SK_BREAKABLE;
+  for (loopstack::reverse_iterator it = loops.rbegin(); it != loops.rend(); ++it)
+    if (it->kind & mask) if (!--vd) { target = it->statement; break; }
+  if (vd or !target) {
+    if (break_depth == 1 or (break_depth - vd <= 0)) bt.report_errorf(herr, "Unexpected %s at this point; no loops to " + bc);
+    else bt.report_errorf(herr, "Insufficient nested loops to " + bc + ": Requested " + tostring(break_depth) + ", " + tostring(break_depth - vd) + " available");
+    return NULL;
+  }
+  
+  if (token.type == TT_SEMICOLON)
+    token = get_next_token();
+  else if (settings::pedantic_edl and pedantic_warn(token, herr, "Expected semicolon following control statement"))
+    return NULL;
+  
+  return h_continue? new AST_Node_Statement_continue(target, break_depth) : new AST_Node_Statement_break(target, break_depth);
 }
 
 bool EDL_AST::parse_edl(string code) {

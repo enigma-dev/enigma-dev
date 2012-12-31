@@ -276,7 +276,29 @@ struct EDL_AST: AST {
     AST_Node_Statement* statement; ///< The statement node in memory
     int line; ///< The line on which the statement appears in the code
     int pos; ///< The position in the line at which the statement appears
+    inline statement_ref(statement_kind k, AST_Node_Statement* s): kind(k), statement(s) {}
   };
+  
+  /// AST Node specifically representing a case label.
+  struct AST_Node_Statement_break: AST_Node_Statement {
+    int depth; ///< How many levels are being break'd from
+    AST_Node_Statement* target; ///< The statement being break'd
+    
+    virtual string toString(int indent) const; ///< Renders this node as a string.
+    void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node as an SVG, using the toString() method.
+    int width(); ///< Returns the width which will be used to render this node and all its children.
+    int height(); ///< Returns the height which will be used to render this node and all its children.
+    
+    AST_Node_Statement_break(AST_Node_Statement *loop, int depth);
+    virtual ~AST_Node_Statement_break();
+  };
+  
+  struct AST_Node_Statement_continue: AST_Node_Statement_break {
+    string toString(int indent) const; ///< Renders this node as a string.
+    AST_Node_Statement_continue(AST_Node_Statement *loop, int depth);
+    ~AST_Node_Statement_continue();
+  };
+  
   /// Stack of statement_refs
   typedef vector<statement_ref> loopstack;
   /// The stack of statement_refs indicating what loops we are inside
@@ -340,6 +362,8 @@ struct EDL_AST: AST {
   AST_Node_Statement_while*    handle_while    (token_t &token);
   AST_Node_Statement_with*     handle_with     (token_t &token);
   AST_Node_Statement_trycatch* handle_trycatch (token_t &token);
+  AST_Node_Statement*          handle_break    (token_t &token);
+  AST_Node_Statement*          handle_break    (token_t &token, bool h_continue);
   
   bool parse_edl(string code);
 };

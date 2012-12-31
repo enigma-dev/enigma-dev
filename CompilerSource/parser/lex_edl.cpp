@@ -610,21 +610,21 @@ lexer_edl::lexer_edl(llreader &input, macro_map &pmacros, const char *fname): le
     /* *****************************
     ** Add EDL Keywords not in C++
     ** ****************************/
-    keywords["if"] = TT_IF;
-    keywords["else"] = TT_ELSE;
-    keywords["repeat"] = TT_REPEAT;
-    keywords["do"] = TT_BREAK;
-    keywords["while"] = TT_WHILE;
-    keywords["until"] = TT_UNTIL;
-    keywords["for"] = TT_FOR;
-    keywords["switch"] = TT_SWITCH;
-    keywords["case"] = TT_CASE;
-    keywords["default"] = TT_DEFAULT;
-    keywords["break"] = TT_BREAK;
+    keywords["if"]       = TT_IF;
+    keywords["else"]     = TT_ELSE;
+    keywords["repeat"]   = TT_REPEAT;
+    keywords["do"]       = TT_DO;
+    keywords["while"]    = TT_WHILE;
+    keywords["until"]    = TT_UNTIL;
+    keywords["for"]      = TT_FOR;
+    keywords["switch"]   = TT_SWITCH;
+    keywords["case"]     = TT_CASE;
+    keywords["default"]  = TT_DEFAULT;
+    keywords["break"]    = TT_BREAK;
     keywords["continue"] = TT_CONTINUE;
-    keywords["return"] = TT_RETURN;
-    keywords["try"] = TT_TRY;
-    keywords["catch"] = TT_CATCH;
+    keywords["return"]   = TT_RETURN;
+    keywords["try"]      = TT_TRY;
+    keywords["catch"]    = TT_CATCH;
     
     /* *******************************
     ** Remove C++ keywords not in EDL

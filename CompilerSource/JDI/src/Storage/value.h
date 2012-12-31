@@ -68,6 +68,7 @@ namespace jdi {
     
     std::string toString(); ///< Convert to a string, whatever the value is
     
+    operator int() const; ///< Cast to an int, returning zero if no valid cast exists.
     operator long() const; ///< Cast to a long int, returning zero if no valid cast exists.
     operator double() const; ///< Cast to a double, returning zero if no valid cast exists.
     operator bool() const; ///< Cast to a boolean, returning false if no valid cast exists, true if this is a non-empty string.

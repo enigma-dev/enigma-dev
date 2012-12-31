@@ -1,3 +1,4 @@
+arr[gh] = 10;
 int a, b = 1 + 1 + 4/2 - 3, c;
 d = a + 10 - random(300) / 3 + x;
 e = 1 + 1 f = 20 g = 35
@@ -13,3 +14,20 @@ else y=z
 f=g
 
 with all inst.x = my_whatever
+
+switch fruit {
+  case apple: a = b; break;
+  case orange c = d
+  case grape; d = f;
+  case watermellon: damn_thats_a_big_fruit = 1 break 1
+}
+
+for (int i = 0; i < 10; ++i)
+  for (int j = 0; j < 10; ++j) {
+    k = 10
+    while true
+      break 3;
+  }
+
+do
+continue while false

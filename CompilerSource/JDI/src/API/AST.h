@@ -265,6 +265,7 @@ namespace jdi {
       virtual full_type coerce() const;
       
       AST_Node_Subscript(); ///< Default constructor. Sets children to NULL.
+      AST_Node_Subscript(AST_Node *l, AST_Node *ind); ///< Default constructor. Sets children to NULL.
       ~AST_Node_Subscript(); ///< Default destructor. Frees children recursively.
       void setleft(AST_Node* l); ///< Set the left-hand operand (the container).
       void setright(AST_Node* r); ///< Set the right-hand operand (the index expression).
