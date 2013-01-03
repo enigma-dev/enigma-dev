@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012 forthevin                                                **
+**  Copyright (C) 2012-2013 forthevin                                           **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -27,7 +27,9 @@
 
 #include "PS_particle_type.h"
 #include "PS_particle_sprites.h"
+#include "PS_particle_enums.h"
 #include "Graphics_Systems/OpenGL/GScolors.h"
+#include "Graphics_Systems/OpenGL/GSsprite.h"
 
 inline int bounds(int value, int low, int high)
 {
@@ -47,10 +49,12 @@ int part_type_create()
   pt->particle_count = 0;
   pt->alive = true;
   pt->is_particle_sprite = true;
-  enigma::particle_sprite* sprite = enigma::get_particle_sprite(pt_shape_pixel);
+  enigma::particle_sprite* sprite = enigma::get_particle_sprite(enigma::pt_sh_pixel);
   if (sprite != 0) {
     pt->part_sprite = sprite;
   }
+  pt->sprite_id = -1;
+  pt->sprite_animated = false, pt->sprite_stretched = false, pt->sprite_random = false;
   pt->size_min = 1.0, pt->size_max = 1.0;
   pt->size_incr = 0.0, pt->size_wiggle = 0.0;
   pt->xscale = 1.0, pt->yscale = 1.0;
@@ -85,14 +89,29 @@ void part_type_destroy(int id);
 void part_type_exists(int id);
 void part_type_clear(int id);
 // Shape.
-void part_type_shape(int id, pt_shape particle_shape)
+void part_type_shape(int id, int particle_shape)
 {
   std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
   if (it != enigma::pt_manager.id_to_particletype.end()) {
-    enigma::particle_sprite* sprite = enigma::get_particle_sprite(particle_shape);
+
+    enigma::pt_shape part_shape = enigma::get_pt_shape(particle_shape);
+
+    enigma::particle_sprite* sprite = enigma::get_particle_sprite(part_shape);
     if (sprite != 0) {
+       (*it).second->is_particle_sprite = true;
        (*it).second->part_sprite = sprite;
     }
+  }
+}
+void part_type_sprite(int id, int sprite, bool animat, bool stretch, bool random)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end() && sprite_exists(sprite)) {
+       (*it).second->is_particle_sprite = false;
+       (*it).second->sprite_id = sprite;
+       (*it).second->sprite_animated = animat;
+       (*it).second->sprite_stretched = stretch;
+       (*it).second->sprite_random = random;
   }
 }
 void part_type_size(int id, double size_min, double size_max, double size_incr, double size_wiggle)

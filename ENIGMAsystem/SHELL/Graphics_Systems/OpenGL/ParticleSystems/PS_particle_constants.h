@@ -25,66 +25,36 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "PS_particle_emitter.h"
-#include "PS_particle_enums.h"
-#include <cstdlib>
-#include <algorithm>
+#ifndef ENIGMA_PS_PARTICLECONSTANTS
+#define ENIGMA_PS_PARTICLECONSTANTS
 
-namespace enigma
+enum
 {
-  void particle_emitter::initialize()
-  {
-    xmin = 0, xmax = 0, ymin = 0, ymax = 0;
-    shape = ps_sh_rectangle;
-    distribution = ps_di_linear;
-    particle_type_id = -1;
-    number = 0;
-  }
-  particle_emitter* create_particle_emitter()
-  {
-    particle_emitter* pe = new particle_emitter();
-    pe->initialize();
-    return pe;
-  }
-  void particle_emitter::clear_particle_emitter()
-  {
-    initialize();
-  }
-  void particle_emitter::set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape, ps_distr distribution)
-  {
-    this->xmin = xmin;
-    this->xmax = xmax;
-    this->ymin = ymin;
-    this->ymax = ymax;
+  pt_shape_pixel = 0,
+  pt_shape_disk,
+  pt_shape_square,
+  pt_shape_line,
+  pt_shape_star,
+  pt_shape_circle,
+  pt_shape_ring,
+  pt_shape_sphere,
+  pt_shape_flare,
+  pt_shape_spark,
+  pt_shape_explosion,
+  pt_shape_cloud,
+  pt_shape_smoke,
+  pt_shape_snow
+};
 
-    this->shape = shape;
-    this->distribution = distribution;
-  }
-  void particle_emitter::set_stream(int particle_type_id, int number)
-  {
-    this->particle_type_id = particle_type_id;
-    this->number = number;
-  }
-  void particle_emitter::get_point(int& x, int& y)
-  {
-    // TODO: Missing shapes and distributions.
+enum
+{
+  ps_shape_rectangle = 0
+};
 
-    switch (shape) {
-    case ps_shape_rectangle: {
-      x = std::min(xmin, xmax) + rand() % (abs(xmin-xmax) + 1);
-      y = std::min(ymin, ymax) + rand() % (abs(ymin-ymax) + 1);
-      break;
-    }
-    }
-  }
-  int particle_emitter::get_step_number()
-  {
-    if (number >= 0) {
-      return number;
-    }
-    else {
-      return rand() % (-number) < 1 ? 1 : 0; // Create particle with probability -1/number.
-    }
-  }
-}
+enum
+{
+  ps_distr_linear = 0
+};
+
+#endif // ENIGMA_PS_PARTICLECONSTANTS
 

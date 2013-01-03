@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012 forthevin                                                **
+**  Copyright (C) 2012-2013 forthevin                                           **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -28,9 +28,7 @@
 #ifndef ENIGMA_PS_PARTICLESYSTEM
 #define ENIGMA_PS_PARTICLESYSTEM
 
-#include <list>
-#include "PS_particle_instance.h"
-#include "PS_particle_emitter.h"
+#include "PS_particle_constants.h"
 
 // Particle systems.
 
@@ -40,6 +38,7 @@ void part_system_destroy(int id);
 void part_system_exists(int id);
 void part_system_clear(int id);
 void part_system_draw_order(int id, bool oldtonew);
+void part_system_depth(int id, double depth);
 // Update and draw.
 void part_system_automatic_update(int id, bool automatic);
 void part_system_automatic_draw(int id, bool automatic);
@@ -58,7 +57,7 @@ void part_emitter_destroy(int ps_id, int em_id);
 void part_emitter_destroy_all(int ps_id);
 void part_emitter_exists(int ps_id, int em_id);
 void part_emitter_clear(int ps_id, int em_id);
-void part_emitter_region(int ps_id, int em_id, double xmin, double xmax, double ymin, double ymax, ps_shape shape, ps_distr distribution);
+void part_emitter_region(int ps_id, int em_id, double xmin, double xmax, double ymin, double ymax, int shape, int distribution);
 void part_emitter_burst(int ps_id, int em_id, int particle_type_id, int number);
 void part_emitter_stream(int ps_id, int em_id, int particle_type_id, int number);
 
@@ -70,7 +69,8 @@ void part_type_destroy(int id);
 void part_type_exists(int id);
 void part_type_clear(int id);
 // Shape.
-void part_type_shape(int id, pt_shape particle_shape);
+void part_type_shape(int id, int particle_shape);
+void part_type_sprite(int id, int sprite, bool animat, bool stretch, bool random);
 void part_type_size(int id, double size_min, double size_max, double size_incr, double size_wiggle);
 void part_type_scale(int id, double xscale, double yscale);
 void part_type_orientation(int id, double ang_min, double ang_max, double ang_incr, double ang_wiggle, bool ang_relative);

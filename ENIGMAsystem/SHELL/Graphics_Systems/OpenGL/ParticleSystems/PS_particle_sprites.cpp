@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012 forthevin                                                **
+**  Copyright (C) 2012-2013 forthevin                                           **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -133,7 +133,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_pixel);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_pixel);
     delete[] imgpxdata;
   }
   void generate_disk()
@@ -162,7 +162,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_disk);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_disk);
     delete[] imgpxdata;
   }
   void generate_square()
@@ -191,7 +191,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_square);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_square);
     delete[] imgpxdata;
   }
   void generate_line()
@@ -223,7 +223,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_line);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_line);
     delete[] imgpxdata;
   }
   void generate_star()
@@ -320,7 +320,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_star);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_star);
     delete[] imgpxdata;
   }
   void generate_circle()
@@ -348,7 +348,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_circle);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_circle);
     delete[] imgpxdata;
   }
   void generate_ring()
@@ -382,7 +382,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_ring);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_ring);
     delete[] imgpxdata;
   }
   void generate_sphere()
@@ -407,7 +407,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_sphere);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_sphere);
     delete[] imgpxdata;
   }
   void generate_flare()
@@ -462,7 +462,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_flare);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_flare);
     delete[] imgpxdata;
   }
   void generate_spark()
@@ -550,7 +550,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_spark);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_spark);
     delete[] imgpxdata;
   }
   void generate_explosion()
@@ -626,7 +626,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_explosion);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_explosion);
     delete[] imgpxdata;
   }
   void generate_cloud()
@@ -702,7 +702,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_cloud);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_cloud);
     delete[] imgpxdata;
   }
   void generate_smoke()
@@ -777,7 +777,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_smoke);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_smoke);
     delete[] imgpxdata;
   }
   void generate_snow()
@@ -883,7 +883,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_shape_snow);
+    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_snow);
     delete[] imgpxdata;
   }
   particle_sprite* get_particle_sprite(pt_shape particle_shape)
@@ -897,20 +897,20 @@ namespace enigma
     // The particle shape may not have been generated yet.
     // If so, generate it and try again.
     switch(particle_shape) {
-    case pt_shape_pixel: {generate_pixel(); break;}
-    case pt_shape_disk: {generate_disk(); break;}
-    case pt_shape_square: {generate_square(); break;}
-    case pt_shape_line: {generate_line(); break;}
-    case pt_shape_star: {generate_star(); break;}
-    case pt_shape_circle: {generate_circle(); break;}
-    case pt_shape_ring: {generate_ring(); break;}
-    case pt_shape_sphere: {generate_sphere(); break;}
-    case pt_shape_flare: {generate_flare(); break;}
-    case pt_shape_spark: {generate_spark(); break;}
-    case pt_shape_explosion: {generate_explosion(); break;}
-    case pt_shape_cloud: {generate_cloud(); break;}
-    case pt_shape_smoke: {generate_smoke(); break;}
-    case pt_shape_snow: {generate_snow(); break;}
+    case pt_sh_pixel: {generate_pixel(); break;}
+    case pt_sh_disk: {generate_disk(); break;}
+    case pt_sh_square: {generate_square(); break;}
+    case pt_sh_line: {generate_line(); break;}
+    case pt_sh_star: {generate_star(); break;}
+    case pt_sh_circle: {generate_circle(); break;}
+    case pt_sh_ring: {generate_ring(); break;}
+    case pt_sh_sphere: {generate_sphere(); break;}
+    case pt_sh_flare: {generate_flare(); break;}
+    case pt_sh_spark: {generate_spark(); break;}
+    case pt_sh_explosion: {generate_explosion(); break;}
+    case pt_sh_cloud: {generate_cloud(); break;}
+    case pt_sh_smoke: {generate_smoke(); break;}
+    case pt_sh_snow: {generate_snow(); break;}
     }
 
     std::map<pt_shape,enigma::particle_sprite*>::iterator it_shape = enigma::shape_to_sprite.find(particle_shape);
