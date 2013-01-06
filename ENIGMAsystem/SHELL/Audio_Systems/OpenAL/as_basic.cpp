@@ -29,6 +29,8 @@ using std::string;
 #ifdef __APPLE__
 #include "../../../additional/alure/include/AL/alure.h"
 #else
+#include <AL/al.h>
+#include <AL/alc.h>
 #include <AL/alure.h>
 #endif
 
@@ -99,7 +101,6 @@ namespace enigma
     if (!load_al_dll())
       return 1;
 	printf("Starting ALURE (Windows thing).\n");
-	init_alure();
     #endif
 
 	printf("Opening ALURE devices.\n");
