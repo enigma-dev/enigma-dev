@@ -1,18 +1,24 @@
-/** Copyright (C) 2008-2012 Josh Ventura
-***
-*** This file is a part of the ENIGMA Development Environment.
-***
-*** ENIGMA is free software: you can redistribute it and/or modify it under the
-*** terms of the GNU General Public License as published by the Free Software
-*** Foundation, version 3 of the license or any later version.
-***
-*** This application and its source code is distributed AS-IS, WITHOUT ANY
-*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-*** details.
-***
-*** You should have received a copy of the GNU General Public License along
-*** with this code. If not, see <http://www.gnu.org/licenses/>
+/**
+  @file  standalone_main.cpp
+  @brief Implements a testing environment for all basic ENIGMA features.
+  
+  This file's main() method can be run without a development environment
+  attached if invoked from the main ENIGMA directory.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
 #include <time.h>
@@ -154,8 +160,16 @@ int main(int, char*[])
   "=====================================================\nTest drive new EDL parser\n====================================================="
   << endl << endl;
   
-  EDL_AST east;
-  east.parse_edl(in2);
+  definition_scope cs("[obj]", main_context->get_global(), 0), ls, gs;
+  
+  EDL_AST east(&cs, &ls, &gs);
+  if (east.parse_edl(in2))
+    cout << "Parse failed. :(" << endl << endl;
+  else {
+    cout << "Parse succeeded :)" << endl << endl;
+    cout << east.toString();
+    cout << endl << endl << endl << endl;
+  }
   
   
   /*

@@ -416,6 +416,9 @@ namespace jdi {
     /// Clear the AST out, effectively creating a new instance of this class
     void clear();
     
+    /// Check if this AST is empty.
+    bool empty();
+    
     /// Render the AST as a string: This is a relatively costly operation.
     string toString() const; ///< Renders this node and its children as a string, recursively.
     void operate(ASTOperator *aop, void *p); ///< Perform some externally defined recursive operation on this AST.

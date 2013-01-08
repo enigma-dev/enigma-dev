@@ -1,29 +1,23 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008-2011 Josh Ventura                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  parse_and_link.cpp
+  @brief Declares the all-important part of the compiler that iterates through
+         everything, parsing it.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <stdio.h>
 #include <iostream>
@@ -43,31 +37,34 @@ using namespace std;
 #include <math.h> //log2 to calculate passes.
 
 #include <languages/lang_CPP.h>
+#include <General/parse_basics.h>
 
 #include "compiler/compile_includes.h"
 
-int lang_CPP::compile_parseAndLink(EnigmaStruct *es, compile_context &ctex)
+inline string safe_name(string name) {
+  bool good_name = true;
+  if (!is_letter(name[0]))
+    good_name = false;
+  else for (size_t i = 1; i < name.length(); ++i)
+    if (!is_letterd(name[i])) { good_name = false; break; }
+  if (good_name) return name;
+  name = "ENC_" + name;
+  for (size_t i = 4; i < name.length(); ++i)
+    if (!is_letterd(name[i]))
+      name.replace(i,1,"_C" + tostring(int(name[i])) + "_");
+  return name;
+}
+
+int compile_parseAndLink(compile_context &ctex)
 {
   //First we just parse the scripts to add semicolons and collect variable names
-  for (int i = 0; i < es->scriptCount; i++)
+  for (int i = 0; i < ctex.es->scriptCount; i++)
   {
-    int a = syncheck::syntacheck(es->scripts[i].code);
-    if (a != -1) {
-      user << "Syntax error in script `" << es->scripts[i].name << "'\n" << syncheck::syerr << flushl;
-      return E_ERROR_SYNTAX;
-    }
-    // Keep a parsed record of this script
-    scr_lookup[es->scripts[i].name] = ctex.parsed_scripts[i] = new parsed_script;
-    parser_main(es->scripts[i].code, &ctex.parsed_scripts[i]->pev);
-    edbg << "Parsed `" << es->scripts[i].name << "': " << ctex.parsed_scripts[i]->obj.locals.size() << " locals, " << ctex.parsed_scripts[i]->obj.globals.size() << " globals" << flushl;
-    
-    // If the script accesses variables from outside its scope implicitly
-    if (ctex.parsed_scripts[i]->obj.locals.size() or ctex.parsed_scripts[i]->obj.globallocals.size()) {
-      parsed_object temporary_object = *ctex.parsed_scripts[i]->pev.myObj;
-      ctex.parsed_scripts[i]->pev_global = new parsed_event(&temporary_object);
-      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n/* */}",ctex.parsed_scripts[i]->pev_global);
-      ctex.parsed_scripts[i]->pev_global->myObj = NULL;
-    }
+    // Keep a record of this script
+    parsed_script *cur_scr = ctex.parsed_scripts[ctex.es->scripts[i].name] = new parsed_script(ctex.es->scripts + i, ctex.global);
+    if (!cur_scr->parse())
+      return 1;
+    edbg << "Parsed `" << ctex.es->scripts[i].name << "': " << cur_scr->locals.members.size() << " locals" << flushl;
     fflush(stdout);
   }
   
@@ -75,98 +72,58 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es, compile_context &ctex)
   
   //Next we traverse the scripts for dependencies.
   unsigned nec_iters = 0;
-  if (es->scriptCount > 0)
-    nec_iters = lrint(ceilf(log2(es->scriptCount)));
-  edbg << "`Linking' " << es->scriptCount << " scripts in " << nec_iters << " passes...\n";
-  for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
+  if (ctex.es->scriptCount > 0)
+    nec_iters = lrint(ceilf(log2(ctex.es->scriptCount)));
+  edbg << "`Linking' " << ctex.es->scriptCount << " scripts in " << nec_iters << " passes...\n";
+  for (unsigned necit = 0; necit < nec_iters; necit++) //We will iterate the list of scripts just enough times to copy everything
   {
-    for (int _im = 0; _im < es->scriptCount; _im++) //For each script
+    for (ps_i it = ctex.parsed_scripts.begin(); it != ctex.parsed_scripts.end(); ++it) //For each script
     {
-      parsed_script* curscript = ctex.parsed_scripts[_im]; //At this point, what we have is this:     for each script as curscript
-      for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
-      {
-        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-        if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
-          curscript->obj.copy_calls_from(subscr->second->obj);
-      }
+      parsed_script* curscript = it->second; //At this point, what we have is this:     for each script as curscript
+      for (script_it subscr = curscript->sh.scripts.begin(); subscr != curscript->sh.scripts.end(); ++subscr) //For each function called by each script
+        curscript->sh.copy_scripts_from(subscr->second.script->sh);
     }
   }
   
   edbg << "Completing script \"Link\"" << flushl;
   
-  for (int _im = 0; _im < es->scriptCount; _im++) //For each script
+  for (ps_i psit = ctex.parsed_scripts.begin(); psit != ctex.parsed_scripts.end(); ++psit) //For each script
   {
-    string curscrname = es->scripts[_im].name;
-    parsed_script* curscript = ctex.parsed_scripts[_im]; //At this point, what we have is this:     for each script as curscript
+    string curscrname = psit->first;
+    parsed_script* curscript = psit->second; //At this point, what we have is this:     for each script as curscript
     edbg << "Linking `" << curscrname << "':\n";
-    for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
-    {
-      cout << string(it->first) << "::";
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
-      {
-        cout << "is_script::";
-        curscript->obj.copy_from(subscr->second->obj,  "script `"+it->first+"'",  "script `"+curscrname + "'");
-      }
-    }
+    for (script_it scrit = curscript->sh.scripts.begin(); scrit != curscript->sh.scripts.end(); ++scrit) //For each script called by each script
+      curscript->sh.copy_from(scrit->second.script->sh,  "script `" + scrit->first + "'",  "script `" + curscrname + "'");
     cout << endl;
   }
   edbg << "Done." << flushl;
 
 
-  edbg << es->gmObjectCount << " Objects:\n";
-  for (int i = 0; i < es->gmObjectCount; i++)
+  edbg << ctex.es->gmObjectCount << " Objects:\n";
+  for (int i = 0; i < ctex.es->gmObjectCount; i++)
   {
     //For every object in Ism's struct, make our own
-    unsigned ev_count = 0;
-    parsed_object* pob = ctex.parsed_objects[es->gmObjects[i].id] =
-      new parsed_object(
-        es->gmObjects[i].name, es->gmObjects[i].id, es->gmObjects[i].spriteId, es->gmObjects[i].maskId,
-        es->gmObjects[i].parentId,
-        es->gmObjects[i].visible, es->gmObjects[i].solid,
-        es->gmObjects[i].depth, es->gmObjects[i].persistent
-      );
+    parsed_object* p_obj = ctex.parsed_objects[ctex.es->gmObjects[i].id] =
+      new parsed_object(safe_name(ctex.es->gmObjects[i].name), &ctex.es->gmObjects[i]);
 
-    edbg << " " << es->gmObjects[i].name << ": " << es->gmObjects[i].mainEventCount << " events: " << flushl;
+    edbg << " " << ctex.es->gmObjects[i].name << ": " << ctex.es->gmObjects[i].mainEventCount << " events: " << flushl;
 
-    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
-    if (es->gmObjects[i].mainEvents[ii].eventCount) //For every MainEvent that contains event code
+    for (int ii = 0; ii < ctex.es->gmObjects[i].mainEventCount; ii++)
+    if (ctex.es->gmObjects[i].mainEvents[ii].eventCount) //For every MainEvent that contains event code
     {
       //For each main event in that object, make a copy
-      const int mev_id = es->gmObjects[i].mainEvents[ii].id;
-      edbg << "  Event[" << es->gmObjects[i].mainEvents[ii].id << "]: ";
-
-      edbg << "  Parsing " << es->gmObjects[i].mainEvents[ii].eventCount << " sub-events:" << flushl;
-      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
+      const int mev_id = ctex.es->gmObjects[i].mainEvents[ii].id;
+      edbg << "  Parsing " << ctex.es->gmObjects[i].mainEvents[ii].eventCount << " sub-events:" << flushl;
+      for (int iii = 0; iii < ctex.es->gmObjects[i].mainEvents[ii].eventCount; iii++)
       {
         //For each individual event (like begin_step) in the main event (Step), parse the code
-        const int sev_id = es->gmObjects[i].mainEvents[ii].events[iii].id;
-        parsed_event &pev = pob->events[ev_count++]; //Make sure each sub event knows its main event's event ID.
-        pev.mainId = mev_id, pev.id = sev_id;
+        const int ev_id = ctex.es->gmObjects[i].mainEvents[ii].events[iii].id;
+        parsed_event *p_ev = new parsed_event(mev_id, ev_id, p_obj, ctex.global, ctex.es->gmObjects[i].mainEvents[ii].events[iii].code);
+        p_obj->events.push_back(p_ev); // Make sure each sub event knows its main event's event ID.
         
-        //Copy the code into a string, and its attributes elsewhere
-        string code = es->gmObjects[i].mainEvents[ii].events[iii].code;
-        
-        //Syntax check the code
-        
-        // Print debug info
-          edbg << "Check `" << es->gmObjects[i].name << "::" << event_get_function_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << "...";
-        
-        // Check the code
-        int sc = syncheck::syntacheck(code);
-        if (sc != -1)
-        {
-          // Error. Report it.
-          user << "Syntax error in object `" << es->gmObjects[i].name << "', " << event_get_human_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << " event:"
-               << es->gmObjects[i].mainEvents[ii].events[iii].id << ":\n" << format_error(code,syncheck::syerr,sc) << flushl;
-          return E_ERROR_SYNTAX;
-        }
-        
-        edbg << " Done. Parse...";
-        
-        //Add this to our objects map
-        pev.myObj = pob; //Link to its calling object.
-        parser_main(code,&pev); //Format it to C++
+        // Parse the code
+        int pres = p_ev->parse();
+        if (pres) return 1;
         
         edbg << " Done." << flushl;
       }
@@ -175,79 +132,44 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es, compile_context &ctex)
   
   //Now we parse the rooms
   edbg << "Creating room creation code scope and parsing" << flushl;
-  for (int i = 0; i < es->roomCount; i++)
+  for (int i = 0; i < ctex.es->roomCount; i++)
   {
-    parsed_room *pr = ctex.parsed_rooms[es->rooms[i].id] = new parsed_room;
-    parsed_event &pev = pr->events[0]; //Make sure each sub event knows its main event's event ID.
-    pev.mainId = 0, pev.id = 0, pev.myObj = pr;
-    
-    int sc = syncheck::syntacheck(es->rooms[i].creationCode);
-    if (sc != -1) {
-      cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
-      return E_ERROR_SYNTAX;
+    parsed_room *p_room = ctex.parsed_rooms[ctex.es->rooms[i].id] = new parsed_room(ctex.es->rooms + i);
+    if (ctex.es->rooms[i].creationCode and *ctex.es->rooms[i].creationCode) {
+      p_room->creation_code = new parsed_code(NULL, ctex.global);
+      int pres = p_room->creation_code->parse(ctex.es->rooms[i].creationCode);
+      if (!pres) return E_ERROR_SYNTAX;
     }
-    parser_main(es->rooms[i].creationCode,&pev);
     
-    for (int ii = 0; ii < es->rooms[i].instanceCount; ii++)
+    for (int ii = 0; ii < ctex.es->rooms[i].instanceCount; ii++)
     {
-      if (es->rooms[i].instances[ii].creationCode and *(es->rooms[i].instances[ii].creationCode))
+      const char *const ccode = ctex.es->rooms[i].instances[ii].creationCode;
+      if (ccode and *ccode)
       {
-        int a = syncheck::syntacheck(es->rooms[i].instances[ii].creationCode);
-        if (a != -1) {
-          cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
-          return E_ERROR_SYNTAX;
-        }
-        
-        pr->instance_create_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
-        parsed_event* icce = pr->instance_create_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1, -1, ctex.parsed_objects[es->rooms[i].instances[ii].objectId]);
-        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + es->rooms[i].instances[ii].creationCode + "}", icce);
+        parsed_room::parsed_icreatecode *picc = p_room->instance_create_codes[ctex.es->rooms[i].instances[ii].id]
+          = new parsed_room::parsed_icreatecode(ctex.parsed_objects[ctex.es->rooms[i].instances[ii].objectId], ctex.global);
+        int pres = picc->parse(ccode);
+        if (pres) return E_ERROR_SYNTAX;
       }
     }
   }
   
   //Next we link the scripts into the objects.
   edbg << "\"Linking\" scripts into the objects..." << flushl;
-  for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
+  for (po_i it = ctex.parsed_objects.begin(); it != ctex.parsed_objects.end(); ++it)
   {
-    parsed_object* t = i->second;
-    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
-    {
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //If we've got ourselves a script
-        t->copy_calls_from(subscr->second->obj);
-    }
-    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
-    {
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //If we've got ourselves a script
-        t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
-    }
+    parsed_object* p_obj = it->second;
+    for (script_it subscr = p_obj->sh.scripts.begin(); subscr != p_obj->sh.scripts.end(); ++subscr) //For each script called by each script
+      p_obj->sh.copy_from(subscr->second.script->sh,  "script `" + subscr->first + "'",  "object `" + string(it->second->properties->name) + "'");
   }
   edbg << "\"Link\" complete." << flushl;
   
-  // Sort through object calls finding max script arg counts
-  edbg << "Tabulating maximum argument passes to each script" << flushl;
-  for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
-    for (parsed_object::funcit it = i->second->funcs.begin(); it != i->second->funcs.end(); it++) //For each function called by this object
-  {
-    map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-    if (subscr != scr_lookup.end() and subscr->second->globargs < it->second)
-      subscr->second->globargs = it->second,
-      edbg << "  Object `" << i->second->name << "' calls " << it->first << " with " << it->second << " parameters." << flushl;
-  }
+  // Sort through object calls finding max script arg countsae
+  edbg << "Tabulating maximum numbers of arguments passed to each script" << flushl;
+  for (po_i it = ctex.parsed_objects.begin(); it != ctex.parsed_objects.end(); ++it)
+    for (script_it subscr = it->second->sh.scripts.begin(); subscr != it->second->sh.scripts.end(); ++subscr) //For each script called by this object
+      if (subscr->second.script->global_args < subscr->second.arg_max)
+        subscr->second.script->global_args = subscr->second.arg_max;
   edbg << "Finished" << flushl;
-  
-  return 0;
-}
-
-
-int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es, compile_context &ctex)
-{
-  for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
-    global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
-  for (pr_i i = ctex.parsed_rooms.begin(); i != ctex.parsed_rooms.end(); i++)
-    global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
-  for (int i = 0; i < es->scriptCount; i++)
-    global->copy_from(ctex.parsed_scripts[i]->obj, "script `" + ctex.parsed_scripts[i]->obj.name + "'", "the Global Scope");
   return 0;
 }

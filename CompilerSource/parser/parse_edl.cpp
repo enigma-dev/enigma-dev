@@ -1,30 +1,31 @@
 /**
- * @file parse_edl.cpp
- * @brief Source implementing the C++ \c lexer class extensions.
- * 
- * This file's function will be referenced, directly or otherwise, by every
- * other function in the parser. The efficiency of its implementation is of
- * crucial importance. If this file runs slow, so do the others.
- * 
- * @section License
- * 
- * Copyright (C) 2012-2013 Josh Ventura
- * This file is part of JustDefineIt.
- * 
- * JustDefineIt is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, version 3 of the License, or (at your option) any later version.
- * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
+  @file  parse_edl.cpp
+  @brief Source implementing the EDL parser; or at least its first pass.
+  
+  During the first pass of the parser, code is lexed and placed in a syntax tree.
+  Checking is done insofar as it concerns general syntax, including cast types,
+  declaration types, and function calls. Access type checking and overload
+  verification are beyond the scope of this pass.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
 #include "parse_edl.h"
 #include <general/estring.h>
+#include "languages/language_adapter.h"
 
 namespace settings {
   bool pedantic_edl = true;
@@ -471,7 +472,6 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
       case TT_SWITCH: return handle_switch(token);
       case TT_WITH:   return handle_with(token);
       case TT_TRY:    return handle_trycatch(token);
-        break;
       
       case TT_TEMPLATE: // Scrapped since ENIGMA's dynamic enough as it is
       case TT_CLASS: // Scrapped from the spec for simplicity
@@ -501,8 +501,9 @@ EDL_AST::AST_Node_Block* EDL_AST::handle_block(token_t &token) {
 }
 
 EDL_AST::AST_Node_Statement_repeat* EDL_AST::handle_repeat(token_t &token) {
-  AST_Node_Statement_repeat* res = new AST_Node_Statement_repeat();
   token = get_next_token();
+  AST_Node_Statement_repeat* res = new AST_Node_Statement_repeat();
+  stacked_statement ss(loops, SK_LOOP, res, token, herr);
   if (not(res->condition = parse_expression(token, precedence::all)))
     { delete res; return NULL; }
   res->code = handle_statement(token);
@@ -569,6 +570,10 @@ EDL_AST::AST_Node_Statement_for*      EDL_AST::handle_for     (token_t &token) {
       { delete res; return NULL; }
   
   // Handle the C in for(A; B; C) { D }
+  if (token.type == TT_LEFTBRACE and settings::pedantic_edl)
+    if (pedantic_warn(token, herr, "Blocks not actually allowed in `for' parameters"))
+      return NULL;
+  
   res->operand_post = handle_statement(token);
   if (!res->operand_post) { delete res; return NULL; }
   
@@ -605,7 +610,7 @@ EDL_AST::AST_Node_Statement_do*       EDL_AST::handle_do      (token_t &token) {
   if (!res->condition) { delete res; return NULL; }
   
   if (token.type == TT_SEMICOLON) token = get_next_token();
-  else if (settings::pedantic_edl) if (pedantic_warn(token, herr, "ISO C++ requires a semicolon after a do-while statement; EDL follows"))
+  else if (settings::pedantic_edl) if (pedantic_warn(token, herr, "ISO C++ requires a semicolon after a do-while statement; EDL follows suit"))
     { delete res; return NULL; }
   
   return res;
@@ -735,18 +740,17 @@ bool EDL_AST::parse_edl(string code) {
   lex = new lexer_edl(codereader, (macro_map&)main_context->get_macros(), "Code");
   herr = def_error_handler;
   token_t token = lex->get_token(herr);
-  /*while (token.type != TT_ENDOFCODE) {
-    token.report_errorf(herr, "read %s");
-    token = lex.get_token(herr);
-  }*/
-  search_scope = new definition_scope("[code]", main_context->get_global(), DEF_FUNCTION);
-  AST_Node_Block* wheee = handle_block(token);
+  root = handle_block(token);
   if (token.type == TT_ENDOFCODE) {
     if (token.type == TT_RIGHTBRACE)
       token.report_error(herr, "Unexpected closing brace at this point: none open");
-    cout << "Parse finished without error" << endl;
+    return false;
   }
-  else { cout << "One or more errors occurred during parse" << endl; }
-  cout << (wheee? wheee->toString(0) : "ERROR! SHIT BE NULL") << endl << endl;
-  return true;
+  return root != NULL;
+}
+
+EDL_AST::EDL_AST(definition_scope *myscope, definition_scope *objscope, definition_scope *globscope):
+  AST(), object_scope(objscope), global_scope(globscope) { search_scope = myscope; }
+EDL_AST::~EDL_AST() {
+  // FIXME: Delete anything here?
 }

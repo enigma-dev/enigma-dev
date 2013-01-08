@@ -1,9 +1,10 @@
 /**
-  @file  parser_components.h
-  @brief May or may not contain anything. If not, DELETE ME.
+  @file  rebuild_cpp.cpp
+  @brief Source implementing the C++ plugin's method for writing arbitrary extension
+         resources to a compiled game module.
   
   @section License
-    Copyright (C) 2008-2013 Josh Ventura
+    Copyright (C) 2013 Josh Ventura
     This file is a part of the ENIGMA Development Environment.
 
     ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -18,19 +19,10 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#include "general/darray.h"
+#include <cstdio>
+#include <languages/lang_CPP.h>
 
-extern map<string,char> edl_tokens;
-int parser_ready_input(string&,string&,unsigned int&,varray<string>&);
-int  parser_fix_templates(string &code,pt pos,pt spos,string *synt);
-void parser_add_semicolons(string &code,string &synt);
-void print_the_fucker(string code,string synt);
-int parser_reinterpret(string&,string&);
-
-int dropscope();
-int quickscope();
-int initscope(string name);
-int quicktype(unsigned flags, string name);
-*/
-
+int lang_CPP::resource_writer_cpp::module_write_extensions(compile_context &ctex) {
+  // TODO: WRITEME
+  return 0;
+}

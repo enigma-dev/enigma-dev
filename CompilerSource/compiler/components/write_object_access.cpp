@@ -1,29 +1,23 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  write_object_access.cpp
+  @brief Implements the part of the C++ plugin that creates methods for accessing
+         variables from other objects.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <stdio.h>
 #include <iostream>
@@ -39,14 +33,13 @@ using namespace std;
 #include "compiler/event_reader/event_parser.h"
 #include "parser/object_storage.h"
 #include "languages/lang_CPP.h"
+#include <general/estring.h>
 
-struct usedtype { int uc; dectrip original; usedtype(): uc(0) {} }; // uc is the use count, then after polling, the dummy number.
-int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects)
+int lang_CPP::compile_writeObjAccess(compile_context &ctex)
 {
-  // TODO: RECODE
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h",ios_base::out);
-    wto << license;
+    wto << gen_license;
     wto << "// Depending on how many times your game accesses variables via OBJECT.varname, this file may be empty." << endl << endl;
     wto << "namespace enigma" << endl << "{" << endl;
     
@@ -55,44 +48,66 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects)
     "  object_locals *glaccess(int x)" << endl <<
     "  {" << endl << "    object_locals* ri = (object_locals*)fetch_instance_by_int(x);" << endl << "    return ri ? ri : &ldummy;" << endl << "  }" << endl << endl;
     
-    map<string,usedtype> usedtypes;
-    for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
-      usedtype &ut = usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix];
-      if (!ut.uc) ut.original = dait->second;
-      ut.uc++;
-    }
-    int dummynumber = 0;
-    for (map<string,usedtype>::iterator i = usedtypes.begin(); i != usedtypes.end(); i++)
-    {
-      int uc = i->second.uc;
-      i->second.uc = dummynumber++;
-      wto << "  " << i->second.original.type << " " << i->second.original.prefix << "dummy_" << i->second.uc << i->second.original.suffix << "; // Referenced by " << uc << " accessors" << endl;
+    /* *************************************************************** *\
+    ** First we write a collection of dummy variables to the file.     **
+    ** If the requested variable doesn't exist, the dummy is returned. **
+    \* *************************************************************** */
+    typedef map<full_type, int> utm; // Map of full_types used as dummies to a corresponding unique index from zero to the number of unique types
+    utm usedtypes; // The key is a full type specifier, the value is a unique index for naming and referencing
+    for (dal_it dait = ctex.dot_accessed_locals.begin(); dait != ctex.dot_accessed_locals.end(); ++dait)
+      usedtypes.insert(utm::value_type(dait->second, usedtypes.size())); // Insert the type into the map, and give it a unique index
+    
+    for (utm::iterator i = usedtypes.begin(); i != usedtypes.end(); i++) {
+      full_type ft(i->first); ft.refs.name = "dummy_" + ::tostring(i->second); // Copy the type into a new full_type object, with our dummy name
+      wto << "  " << ft.toString(); // Converts full_type to C++-formatted declaration and writes it straight to the file
     }
     
-    for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++)
+    /* **************************************************************** *\
+    ** Now that we have dummy variables to fall back on, we can write   **
+    ** the dot-access functions for each arbitrarily accessed variable. **
+    \* **************************************************************** */
+    for (dal_it dait = ctex.dot_accessed_locals.begin(); dait != ctex.dot_accessed_locals.end(); dait++)
     {
-      const string& pmember = dait->first;
-      wto << "  " << dait->second.type << " " << dait->second.prefix << " &varaccess_" << pmember << "(int x)" << endl;
-      wto << "  {" << endl;
+      const string pmember = dait->first;
+      wto << "  " << typeflags_string(dait->second.def, dait->second.flags) << " "
+                  << dait->second.refs.toStringLHS()
+                  << (dait->second.refs.size()? " (&varaccess_":" &varaccess_")
+                  << pmember
+                  << (dait->second.refs.size()? "(int x))":"(int x)") << endl
+          << "  {" << endl
+          << "    object_basic *inst = fetch_instance_by_int(x);" << endl
+          << "    if (inst) switch (inst->object_index)" << endl
+          << "    {" << endl;
       
-      wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
-      wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
+      const full_type &correct_type = dait->second;
       
-      for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
+      // Iterate all objects in search of this local
+      for (po_i it = ctex.parsed_objects.begin(); it != ctex.parsed_objects.end(); it++)
       {
-        map<string,dectrip>::iterator x = it->second->locals.find(pmember);
-        if (x != it->second->locals.end())
+        // We'll probe this directly since we have no interest in a full search; only this scope
+        definition_scope::defiter x = it->second->self.members.find(pmember);
+        if (x != it->second->self.members.end())
         {
-          string tot = x->second.type != "" ? x->second.type : "var";
-          if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
-            wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)inst)->" << pmember << ";" << endl;
+          if (not(x->second->flags & DEF_TYPED))
+            ctex.herr->warning("Variable `" + pmember + "' is declared as non-variable in object `" + it->second->properties->name + "': omitted from access list");
+          else {
+            definition_typed *dt = (definition_typed*)x->second;
+            if (!dt->type)
+              ctex.herr->error("LOGIC ERROR! Variable `" + pmember + "' has still not given a type! Compile is liable to fail, but will not be aborted.");
+            // string tot = dt->type? typeflags_string(dt->type, dt->modifiers) : "var";
+            full_type ntype(dt->type, dt->referencers, dt->modifiers);
+            if (ntype.synonymous_with(correct_type))
+              wto << "      case " << it->second->properties->id << ": return ((" << it->second->class_name << "*)inst)->" << pmember << "; // " << it->second->properties->name << endl;
+            else
+              ctex.herr->warning("Since variable `" + pmember + "' is declared with a different type in object `" + it->second->properties->name + "', it will be omitted from access list");
+          }
         }
       }
       
-      wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
-      wto << "    }" << endl;
-      wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc << ";" << endl;
-      wto << "  }" << endl;
+      wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl
+          << "    }" << endl
+          << "    return dummy_" << usedtypes[correct_type] << ";" << endl
+          << "  }" << endl;
     }
     wto << "} // namespace enigma" << endl;
   wto.close();

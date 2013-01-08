@@ -1,29 +1,22 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  event_parser.cpp
+  @brief Implements functions for reading events.res. This file is on its way out.
+  
+  @section License
+    Copyright (C) 2010-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 
 #include <stdio.h>
@@ -76,7 +69,8 @@ event_info::event_info(string n,int i): name(n), gmid(i), humanname(), par2type(
 
 main_event_info::main_event_info(): name(), is_group(false), specs() { }
 
-varray<main_event_info> main_event_infos;
+typedef map<int, main_event_info> mei_map;
+mei_map main_event_infos;
 typedef pair<int, int> evpair;
 vector<evpair> event_sequence;
 
@@ -324,15 +318,15 @@ int event_parse_resourcefile()
   if (last and evid != -1)
     event_add(evid,last);
 
-  for (size_t i=0; i<main_event_infos.size; i++)
+  for (mei_map::iterator i = main_event_infos.begin(); i != main_event_infos.end(); ++i)
   {
-    for (main_event_info::iter ii = main_event_infos[i].specs.begin(); ii != main_event_infos[i].specs.end(); ii++)
+    for (main_event_info::iter ii = i->second.specs.begin(); ii != i->second.specs.end(); ii++)
       if (ii->second->humanname == "")
         ii->second->humanname = ii->second->name;
 
-    main_event_info::iter ii = main_event_infos[i].specs.begin();
-    if (main_event_infos[i].name == "" and ii != main_event_infos[i].specs.end())
-      main_event_infos[i].name = main_event_infos[i].specs[0]->humanname;
+    main_event_info::iter ii = i->second.specs.begin();
+    if (i->second.name == "" and ii != i->second.specs.end())
+      i->second.name = i->second.specs[0]->humanname;
   }
 
   return 0;
@@ -548,8 +542,8 @@ bool event_execution_uses_default(int mid, int id) {
 // main events, which can just be overwritten.
 void event_info_clear()
 {
-  for (unsigned i=0; i<main_event_infos.size; i++)
-    main_event_infos[i].specs.clear();
+  for (mei_map::iterator i = main_event_infos.begin(); i != main_event_infos.end(); ++i)
+    i->second.specs.clear();
   event_sequence.clear();
 }
 

@@ -1,29 +1,26 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  gcc_backend.cpp
+  @brief Implements the method in the C++ plugin that interfaces with the GCC.
+  
+  This file provides methods to probe the GCC for preprocessor directives, include
+  directories, and other bullet points needed to properly read definitions from the
+  engine source.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <time.h>
 #include <string>
@@ -73,8 +70,6 @@ inline string fc(const char* fn)
 
 bool init_found_gcc = false;
 bool init_load_successful = false;
-
-string MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;
 
 inline int rdir_system(string x, string y)
 {
@@ -142,15 +137,12 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
   return redir;
 }
 
-static char errbuf[1024];
-static string lastbearings;
-
 // Read info about our compiler configuration and run with it
-const char* establish_bearings(const char *compiler)
+const char* lang_CPP::establish_bearings(const char *compiler)
 {
-  if (compiler == lastbearings)
+  if (compiler == last_configuration)
     return 0;
-  lastbearings = compiler;
+  last_configuration = compiler;
   
   string GCC_location;
   string compfq = compiler; //Filename of compiler.ey
@@ -158,7 +150,7 @@ const char* establish_bearings(const char *compiler)
 
   // Bail if error
   if (!compis.is_open())
-    return (sprintf(errbuf,"Could not open compiler descriptor `%s`.", compfq.c_str()), errbuf);
+    return (build_error = "Could not open compiler descriptor `" + compfq + "'").c_str();
 
   // Parse our compiler data file
   ey_data compey = parse_eyaml(compis,compiler);
@@ -186,7 +178,7 @@ const char* establish_bearings(const char *compiler)
   ** These will help us through parsing available libraries.
   ***********************************************************/
   if ((cmd = compey.get("defines")) == "")
-    return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compfq.c_str()), errbuf);
+    return (build_error = "Compiler descriptor file `" + compfq + "' does not specify 'defines' executable.\n").c_str();
   redir = toolchain_parseout(cmd, toolchainexec,parameters,"defines.txt");
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? e_execsp(toolchainexec, parameters, "> defines.txt",MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
@@ -197,7 +189,7 @@ const char* establish_bearings(const char *compiler)
   ** These are where we'll look for headers to parse.
   ****************************************************/
   if ((cmd = compey.get("searchdirs")) == "")
-    return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compfq.c_str()), errbuf);
+    return (build_error = "Compiler descriptor file `" + compfq + "' does not specify 'searchdirs' executable.").c_str();
   redir = toolchain_parseout(cmd, toolchainexec,parameters,"searchdirs.txt");
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? e_execsp(toolchainexec, parameters, "&> searchdirs.txt", MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));

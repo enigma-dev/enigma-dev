@@ -985,7 +985,9 @@ namespace jdi
     #endif
     root = NULL;
   }
-
+  bool AST::empty() {
+    return !root;
+  }
   
   AST::AST(): root(NULL), search_scope(NULL), tt_greater_is_op(true) {}
   AST::AST(definition* d): root(new AST_Node_Definition(d)), search_scope(NULL), tt_greater_is_op(true) {}

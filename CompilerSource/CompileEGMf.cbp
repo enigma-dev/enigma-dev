@@ -7,7 +7,7 @@
 		<Option pch_mode="2" />
 		<Option default_target="StandAlone" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Test/;syntax/;" />
+		<Option virtualFolders="Test/;" />
 		<Build>
 			<Target title="WinRelease">
 				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
@@ -122,6 +122,8 @@
 		<Unit filename="JDI/src/API/AST.cpp" />
 		<Unit filename="JDI/src/API/AST.h" />
 		<Unit filename="JDI/src/API/AST_Export.cpp" />
+		<Unit filename="JDI/src/API/AST_operator.cpp" />
+		<Unit filename="JDI/src/API/AST_operator.h" />
 		<Unit filename="JDI/src/API/compile_settings.h" />
 		<Unit filename="JDI/src/API/context.cpp" />
 		<Unit filename="JDI/src/API/context.h" />
@@ -235,11 +237,6 @@
 		<Unit filename="compiler/compile_organization.h" />
 		<Unit filename="compiler/components/components.h" />
 		<Unit filename="compiler/components/handle_templates.cpp" />
-		<Unit filename="compiler/components/module_write_backgrounds.cpp" />
-		<Unit filename="compiler/components/module_write_fonts.cpp" />
-		<Unit filename="compiler/components/module_write_paths.cpp" />
-		<Unit filename="compiler/components/module_write_sounds.cpp" />
-		<Unit filename="compiler/components/module_write_sprites.cpp" />
 		<Unit filename="compiler/components/parse_and_link.cpp" />
 		<Unit filename="compiler/components/parse_secondary.cpp" />
 		<Unit filename="compiler/components/write_defragged_events.cpp" />
@@ -279,6 +276,18 @@
 		<Unit filename="general/string.cpp" />
 		<Unit filename="general/textfile.cpp" />
 		<Unit filename="general/textfile.h" />
+		<Unit filename="languages/cpp/clear_cpp_editables.cpp" />
+		<Unit filename="languages/cpp/compile_cpp.cpp" />
+		<Unit filename="languages/cpp/module_finalize.cpp" />
+		<Unit filename="languages/cpp/module_write_backgrounds.cpp" />
+		<Unit filename="languages/cpp/module_write_extensions.cpp" />
+		<Unit filename="languages/cpp/module_write_fonts.cpp" />
+		<Unit filename="languages/cpp/module_write_paths.cpp" />
+		<Unit filename="languages/cpp/module_write_sounds.cpp" />
+		<Unit filename="languages/cpp/module_write_sprites.cpp" />
+		<Unit filename="languages/cpp/rebuild_cpp.cpp" />
+		<Unit filename="languages/cpp/run_cpp_game.cpp" />
+		<Unit filename="languages/cpp/write_resource_names.cpp" />
 		<Unit filename="languages/lang_CPP.cpp" />
 		<Unit filename="languages/lang_CPP.h" />
 		<Unit filename="languages/language_adapter.cpp" />
@@ -296,9 +305,7 @@
 		<Unit filename="parser/parser.cpp" />
 		<Unit filename="parser/parser.h" />
 		<Unit filename="parser/parser_components.cpp" />
-		<Unit filename="parser/parser_components.h">
-			<Option virtualFolder="syntax/" />
-		</Unit>
+		<Unit filename="parser/parser_components.h" />
 		<Unit filename="settings-parse/crawler.cpp" />
 		<Unit filename="settings-parse/crawler.h" />
 		<Unit filename="settings-parse/eyaml.cpp" />

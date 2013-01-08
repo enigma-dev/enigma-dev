@@ -1,6 +1,6 @@
 /**
-  @file  parser_components.h
-  @brief May or may not contain anything. If not, DELETE ME.
+  @file  run_cpp_game.cpp
+  @brief Implements a method to run a recently-built game.
   
   @section License
     Copyright (C) 2008-2013 Josh Ventura
@@ -18,19 +18,18 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#include "general/darray.h"
+#include <languages/lang_CPP.h>
+#include <settings-parse/crawler.h>
+#include <general/bettersystem.h>
+#include <backend/ideprint.h>
+#include <general/estring.h>
 
-extern map<string,char> edl_tokens;
-int parser_ready_input(string&,string&,unsigned int&,varray<string>&);
-int  parser_fix_templates(string &code,pt pos,pt spos,string *synt);
-void parser_add_semicolons(string &code,string &synt);
-void print_the_fucker(string code,string synt);
-int parser_reinterpret(string&,string&);
-
-int dropscope();
-int quickscope();
-int initscope(string name);
-int quicktype(unsigned flags, string name);
-*/
-
+void lang_CPP::run_game(compile_context&, resource_writer *reswg) {
+  resource_writer_cpp *resw = (resource_writer_cpp*)reswg;
+  string rprog = extensions::targetOS.runprog, rparam = extensions::targetOS.runparam;
+  rprog = string_replace_all(rprog,"$game",resw->gameFname);
+  rparam = string_replace_all(rparam,"$game",resw->gameFname);
+  user << "Running \"" << rprog << "\" " << rparam << flushl;
+  int gameres = e_execs(rprog, rparam);
+  user << "Game returned " << gameres << "\n";
+}

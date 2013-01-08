@@ -1,26 +1,26 @@
 /**
- * @file lex_edl.cpp
- * @brief Source implementing the C++ \c lexer class extensions.
- * 
- * This file's function will be referenced, directly or otherwise, by every
- * other function in the parser. The efficiency of its implementation is of
- * crucial importance. If this file runs slow, so do the others.
- * 
- * @section License
- * 
- * Copyright (C) 2011-2012 Josh Ventura
- * This file is part of JustDefineIt.
- * 
- * JustDefineIt is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, version 3 of the License, or (at your option) any later version.
- * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
+  @file lex_edl.cpp
+  @brief Source implementing the C++ \c lexer class extensions.
+ 
+  This file's function will be referenced, directly or otherwise, by every
+  other function in the parser. The efficiency of its implementation is of
+  crucial importance. If this file runs slow, so do the others.
+ 
+  @section License
+  
+    Copyright (C) 2011-2012 Josh Ventura
+    This file is part of JustDefineIt.
+    
+    JustDefineIt is free software: you can redistribute it and/or modify it under
+    the terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the License, or (at your option) any later version.
+    
+    JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+    PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License along with
+    JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
 #include "lex_edl.h"
@@ -28,6 +28,7 @@
 #include <General/parse_basics.h>
 #include <General/debug_macros.h>
 #include <Parser/parse_context.h>
+#include <Storage/value_funcs.h>
 #include <System/builtins.h>
 #include <API/context.h>
 #include <API/AST.h>
@@ -538,9 +539,12 @@ token_t lexer_edl::get_token(error_handler *herr)
         if (code[pos] == '=')
           return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), code+spos, ++pos-spos);
         return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), code+spos, pos-spos);
-      case '>': case '<': case '*': case '^': case '&': case '|':
+      case '<': 
+        if (code[pos] == '>') ++pos; else pos += code[pos] == code[spos], pos += code[pos] == '=';
+        return token_t(token_basics(((pos-spos==1)?TT_LESSTHAN:TT_OPERATOR),filename,line,spos-lpos), code+spos, pos-spos);
+      case '>': case '*': case '^': case '&': case '|':
         pos += code[pos] == code[spos]; pos += code[pos] == '=';
-        return token_t(token_basics((pos-spos==1?code[spos]=='<'?TT_LESSTHAN:TT_GREATERTHAN:TT_OPERATOR),filename,line,spos-lpos), code+spos, pos-spos);
+        return token_t(token_basics(((pos-spos==1 && code[spos]=='>')?TT_GREATERTHAN:TT_OPERATOR),filename,line,spos-lpos), code+spos, pos-spos);
       case ':':
         pos += code[pos] == code[spos];
         return token_t(token_basics(pos - spos == 1 ? TT_COLON : TT_SCOPE,filename,line,spos-lpos), code+spos, pos-spos);
@@ -625,6 +629,12 @@ lexer_edl::lexer_edl(llreader &input, macro_map &pmacros, const char *fname): le
     keywords["return"]   = TT_RETURN;
     keywords["try"]      = TT_TRY;
     keywords["catch"]    = TT_CATCH;
+    
+    /* *****************************
+    ** Add EDL Operators not in C++
+    ** ****************************/
+    symbols["<>"]  = symbol(ST_BINARY,precedence::equivalence,values_notequal);
+    symbols["^^"]  = symbol(ST_BINARY,precedence::logical_or,values_boolxor);
     
     /* *******************************
     ** Remove C++ keywords not in EDL

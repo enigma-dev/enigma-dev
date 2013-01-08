@@ -1,29 +1,23 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  parse_ide_settings.cpp
+  @brief Parses a collection of settings defined in the IDE, submitted to this
+         library in e-yaml.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <iostream>
 #include <fstream>
@@ -132,7 +126,7 @@ void parse_ide_settings(const char* eyaml)
   string cinffile = settree.get("target-compiler");
   cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + cinffile + ".ey";
   
-  const char *a = establish_bearings(cinffile.c_str());
+  const char *a = current_language->establish_bearings(cinffile.c_str());
   if (a) cout << "Parse fail: " << a << endl;
   
   // Read info about the compiler
@@ -156,6 +150,6 @@ void parse_ide_settings(const char* eyaml)
   current_language->requested_extensions.clear();
   current_language->requested_extensions = explode((string)settree.get("extensions"));
   extensions::parse_extensions(current_language);
-  clear_ide_editables(current_language);
+  current_language->clear_ide_editables();
 }
 

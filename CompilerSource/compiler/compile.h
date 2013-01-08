@@ -1,3 +1,2 @@
-
-#include <languages/language_adapter.h>
-void clear_ide_editables(language_adapter *lang);
+// This file is a joke. TODO: Move it somewhere.
+int compile(EnigmaStruct *es, const char* exe_filename, int mode);

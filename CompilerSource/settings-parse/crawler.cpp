@@ -1,29 +1,28 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  crawler.cpp
+  @brief Implements functions for extension descriptor file iteration.
+  
+  This file lays out the framework for reading extensions from the host language.
+  The host language provides the dir(s) to crawl for extensions, and also the method
+  to finish parsing and loading the extensions once they have been read in.
+  
+  Members of this file simply load the skeletons into memory.
+  
+  @section License
+    Copyright (C) 2008-2012 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <iostream>
 #include <string>
@@ -62,7 +61,6 @@ namespace settings
 
 namespace extensions
 {
-  map<string, string> locals;
   static inline string unmangled_type_pre(string str) { 
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? str : str.substr(0,pm);
@@ -70,18 +68,6 @@ namespace extensions
   static inline string unmangled_type_suf(string str) {
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? "" : str.substr(pm);
-  }
-  string compile_local_string()
-  {
-    string res;
-    for (map<string, string>::iterator it = locals.begin(); it != locals.end(); it++)
-      res += unmangled_type_pre(it->second) + " " + it->first + unmangled_type_suf(it->second) + ";\n";
-    return res;
-  }
-  void dump_read_locals(map<string,int> &lmap)
-  {
-    for (map<string,string>::iterator it = locals.begin(); it != locals.end(); it++)
-      lmap[it->first]++;
   }
   void parse_extensions(language_adapter *lang)
   {
@@ -104,33 +90,6 @@ namespace extensions
       pe.implements = about.get("implement");
       
       lang->parsed_extensions.push_back(pe);
-    }
-  }
-  
-  void crawl_for_locals(language_adapter *lang)
-  {
-    locals.clear();
-    
-    jdi::definition *denigma = main_context->get_global()->look_up("enigma");
-    if (!denigma or not(denigma->flags & jdi::DEF_SCOPE))
-      return (cout << "ERROR! ENIGMA NAMESPACE NOT FOUND. THIS SHOULD NEVER HAPPEN." << endl, void());
-    jdi::definition_scope *namespace_enigma = (jdi::definition_scope*)denigma;
-    
-    for (unsigned i = 0; i < lang->parsed_extensions.size(); i++)
-    {
-      if (lang->parsed_extensions[i].implements == "")
-        continue;
-      
-      jdi::definition* implements = namespace_enigma->look_up(lang->parsed_extensions[i].implements);
-      
-      if (!implements or not(implements->flags & jdi::DEF_SCOPE))
-        cout << "ERROR! Extension implements " << lang->parsed_extensions[i].implements << " without defining it!" << endl;
-      else
-      {
-        jdi::definition_scope *const iscope = (jdi::definition_scope*)implements;
-        for (jdi::definition_scope::defiter it = iscope->members.begin(); it != iscope->members.end(); ++it)
-          locals[it->second->name] = (it->second->flags & jdi::DEF_TYPED) ? ((jdi::definition_typed*)it->second)->type->name : "var";
-      }
     }
   }
   

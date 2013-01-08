@@ -1,29 +1,22 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2011 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  compile.cpp
+  @brief Implements the basic structure behind the compilation sequence.
+  
+  @section License
+    Copyright (C) 2011-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
@@ -87,6 +80,7 @@ inline void writef(float x, FILE *f) {
 }
 
 #include <general/estring.h>
+#include <parser/parser_components.h>
 
 string string_replace_all(string str,string substr,string nstr)
 {
@@ -106,134 +100,48 @@ string toUpper(string x) {
   return res;
 }
 
-inline string fc(const char* fn)
-{
-  FILE *ptf = fopen(fn,"rb");
-  if (!ptf) return "";
-  
-  fseek(ptf,0,SEEK_END);
-  size_t sz = ftell(ptf);
-  fseek(ptf,0,SEEK_SET);
-
-  char *a = (char*)alloca(sz+1);
-  sz = fread(a,1,sz,ptf);
-  fclose(ptf);
-
-  a[sz] = 0;
-  return a;
-}
-
-void clear_ide_editables(language_adapter *lang)
-{
-  ofstream wto;
-  string f2comp = fc("ENIGMAsystem/SHELL/API_Switchboard.h");
-  string f2write = license;
-    string inc = "/include.h\"\n";
-    f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
-               "#include \"Graphics_Systems/" + (extensions::targetAPI.graphicsSys)   + "/include.h\"\n"
-               "#include \"Audio_Systems/" + (extensions::targetAPI.audioSys)         + "/include.h\"\n"
-               "#include \"Collision_Systems/" + (extensions::targetAPI.collisionSys) + "/include.h\"\n"
-               "#include \"Widget_Systems/" + (extensions::targetAPI.widgetSys)       + inc;
-
-    const string incg = "#include \"", impl = "/implement.h\"\n";
-    f2write += "\n// Extensions selected by user\n";
-    for (unsigned i = 0; i < lang->parsed_extensions.size(); i++)
-    {
-      ifstream ifabout((lang->parsed_extensions[i].pathname + "/About.ey").c_str());
-      ey_data about = parse_eyaml(ifabout, lang->parsed_extensions[i].path + lang->parsed_extensions[i].name + "/About.ey");
-      f2write += incg + lang->parsed_extensions[i].pathname + inc;
-      if (lang->parsed_extensions[i].implements != "")
-        f2write += incg + lang->parsed_extensions[i].pathname + impl;
-    }
-
-  if (f2comp != f2write)
-  {
-    wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
-      wto << f2write << endl;
-    wto.close();
-  }
-
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/LIBINCLUDE.h");
-    wto << license;
-    wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
-    wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n#define FONTPOLYS 1\n"
-           "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n#define COLLIGMA  0\n";
-    wto << "/***************\nEnd optional libs\n ***************/\n";
-  wto.close();
-
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
-    wto << license;
-    wto << "#define ASSUMEZERO 0\n";
-    wto << "#define PRIMBUFFER 0\n";
-    wto << "#define PRIMDEPTH2 6\n";
-    wto << "#define AUTOLOCALS 0\n";
-    wto << "#define MODE3DVARS 0\n";
-    wto << "void ABORT_ON_ALL_ERRORS() { }\n";
-    wto << '\n';
-  wto.close();
-}
-
 #include "System/builtins.h"
 
 // modes: 0=run, 1=debug, 2=design, 3=compile
-enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(es, exe_filename, mode);
+  return ::compile(es, exe_filename, mode);
 }
 
-double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
+int compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
   cout << "Initializing dialog boxes" << endl;
     ide_dia_clear();
     ide_dia_open();
   cout << "Initialized." << endl;
 
-  if (mode == emode_rebuild)
-  {
-    edbg << "Cleaning..." << flushl;
-
-	string make = "clean-game ";
-	make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier + " ";
-	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
-
-	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
-    e_execs(MAKE_location,make);
-
-    edbg << "Done.\n" << flushl;
-	idpr("Done.", 100);
-	return 0;
+  if (mode == emode_rebuild) {
+    idpr("Rebuilding.", 0);
+    return current_language->rebuild();
+    idpr("Done.", 100);
   }
 
   edbg << "Building for mode (" << mode << ")" << flushl;
-
-  // Clean up from any previous executions.
-  edbg << "Cleaning up from previous executions" << flushl;
-  compile_context ctex;
-    edbg << " - Cleared parsed objects and room entries" << flushl;
-    shared_locals_clear();  //Forget inherited locals, we'll reparse them
-    edbg << " - Cleared shared locals list" << flushl;
-    event_info_clear();     //Forget event definitions, we'll re-get them
-    edbg << " - Cleared event info" << flushl;
+  compile_context ctex; // This baby holds everything about our compile process
    
   // Re-establish ourself
-    // Read the global locals: locals that will be included with each instance
-    {
-      // FIXME: Extensions already read?
-      
-      /*vector<string> extnp;
-      for (int i = 0; i < es->extensionCount; i++) {
-        cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
-        extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
-      }*/
-      
-      edbg << "Loading shared locals from extensions list" << flushl;
-      if (shared_locals_load(this) != 0) {
-        user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
-        idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
-      }
+  // Read the global locals: locals that will be included with each instance
+  {
+    // FIXME: Extensions already read?
+    
+    /*vector<string> extnp;
+    for (int i = 0; i < es->extensionCount; i++) {
+      cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
+      extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
+    }*/
+    
+    edbg << "Loading shared locals from extensions list" << flushl;
+    if (current_language->load_shared_locals() != 0) {
+      user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
+      idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
     }
+  }
 
   //Read the types of events
   event_parse_resourcefile();
@@ -250,11 +158,9 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     edbg << "Incorrect version. File is too " << ((es->fileVersion > 800)?"new":"old") << " for this compiler. Continuing anyway, because this number is always wrong.";
 
 
-
-
-  /**** Segment One: This segment of the compile process is responsible for
-  * @ * translating the code into C++. Basically, anything essential to the
-  *//// compilation of said code is dealt with during this segment.
+  /* *\\\  Segment One: This segment of the compile process is responsible for
+  *  *||| translating the code into C++. Basically, anything essential to the
+  \* *///  compilation of said code is dealt with during this segment.
 
   ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.
 
@@ -311,28 +217,18 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
 
 
-  /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
+  // Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
 
   idpr("Checking Syntax and performing Preliminary Parsing",2);
-
   edbg << "SYNTAX CHECKING AND PRIMARY PARSING:" << flushl;
-
   edbg << es->scriptCount << " Scripts:" << flushl;
-  ctex.parsed_scripts = new parsed_script*[es->scriptCount];
-
-  scr_lookup.clear();
-  used_funcs.clear();
 
   int res;
   #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
-
-  res = current_language->compile_parseAndLink(es,ctex);
+  res = compile_parseAndLink(ctex);
   irrr();
-
-
-  //Export resources to each file.
-
-  ofstream wto;
+  
+  ofstream wto; // NEWPARSER: FIXME: Remove this! The compiler abstraction's job is not to write to files.
   idpr("Outputting Resources in Various Places...",10);
 
   // FIRST FILE
@@ -340,18 +236,14 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   edbg << "Writing modes and settings" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
-    wto << license;
+    wto << lang_CPP::gen_license;
     wto << "#define ASSUMEZERO 0\n";
-    wto << "#define PRIMBUFFER 0\n";
-    wto << "#define PRIMDEPTH2 6\n";
-    wto << "#define AUTOLOCALS 0\n";
-    wto << "#define MODE3DVARS 0\n";
     wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
     wto << '\n';
   wto.close();
 
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h",ios_base::out);
-    wto << license;
+    wto << lang_CPP::gen_license;
     wto << "#define BUILDMODE " << 0 << "\n";
     wto << "#define DEBUGMODE " << 0 << "\n";
     wto << '\n';
@@ -365,12 +257,12 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   //Object switch: A listing of all object IDs and the code to allocate them.
   edbg << "Writing object switch" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out);
-    wto << license;
+    wto << lang_CPP::gen_license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
     for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++)
     {
-      wto << "case " << i->second->id << ":\n";
-      wto << "    NEW_OBJ_PREFIX new enigma::OBJ_" << i->second->name <<"(x,y,idn);\n";
+      wto << "case " << i->second->properties->id << ":\n";
+      wto << "    NEW_OBJ_PREFIX new enigma::" << i->second->class_name <<"(x,y,idn);\n";
       wto << "  break;\n";
     }
     wto << "\n\n#undef NEW_OBJ_PREFIX\n";
@@ -379,143 +271,38 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   //NEXT FILE ----------------------------------------
   //Resource names: Defines integer constants for all resources.
-  int max;
   edbg << "Writing resource names and maxima" << flushl;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out);
-    wto << license;
-
-
-stringstream ss;
-
-    max = 0;
-    wto << "enum //object names\n{\n";
-    for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++) {
-      if (i->first >= max) max = i->first + 1;
-      wto << "  " << i->second->name << " = " << i->first << ",\n";
-      ss << "    case " << i->first << ": return \"" << i->second->name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t object_idmax = " << max << "; }\n\n";
-
-    wto << "string object_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "enum //sprite names\n{\n";
-    for (int i = 0; i < es->spriteCount; i++) {
-      if (es->sprites[i].id >= max) max = es->sprites[i].id + 1;
-      wto << "  " << es->sprites[i].name << " = " << es->sprites[i].id << ",\n";
-      ss << "    case " << es->sprites[i].id << ": return \"" << es->sprites[i].name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t sprite_idmax = " << max << "; }\n\n";
-
-     wto << "string sprite_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "enum //background names\n{\n";
-    for (int i = 0; i < es->backgroundCount; i++) {
-      if (es->backgrounds[i].id >= max) max = es->backgrounds[i].id + 1;
-      wto << "  " << es->backgrounds[i].name << " = " << es->backgrounds[i].id << ",\n";
-      ss << "    case " << es->backgrounds[i].id << ": return \"" << es->backgrounds[i].name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t background_idmax = " << max << "; }\n\n";
-
-     wto << "string background_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "enum //font names\n{\n";
-    for (int i = 0; i < es->fontCount; i++) {
-      if (es->fonts[i].id >= max) max = es->fonts[i].id + 1;
-      wto << "  " << es->fonts[i].name << " = " << es->fonts[i].id << ",\n";
-      ss << "    case " << es->fonts[i].id << ": return \"" << es->fonts[i].name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t font_idmax = " << max << "; }\n\n";
-
-     wto << "string font_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
-     ss.str( "" );
-
-    max = 0;
-	wto << "enum //timeline names\n{\n";
-	for (int i = 0; i < es->timelineCount; i++) {
-	    if (es->timelines[i].id >= max) max = es->timelines[i].id + 1;
-        wto << "  " << es->timelines[i].name << " = " << es->timelines[i].id << ",\n";
-        ss << "    case " << es->timelines[i].id << ": return \"" << es->timelines[i].name << "\"; break;\n";
-	} wto << "};\nnamespace enigma { size_t timeline_idmax = " << max << "; }\n\n";
-
-wto << "string timeline_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
-     ss.str( "" );
-
-    max = 0;
-	wto << "enum //path names\n{\n";
-	for (int i = 0; i < es->pathCount; i++) {
-	    if (es->paths[i].id >= max) max = es->paths[i].id + 1;
-        wto << "  " << es->paths[i].name << " = " << es->paths[i].id << ",\n";
-        ss << "    case " << es->paths[i].id << ": return \"" << es->paths[i].name << "\"; break;\n";
-	} wto << "};\nnamespace enigma { size_t path_idmax = " << max << "; }\n\n";
-
-wto << "string path_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "enum //sound names\n{\n";
-    for (int i = 0; i < es->soundCount; i++) {
-      if (es->sounds[i].id >= max) max = es->sounds[i].id + 1;
-      wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n";
-      ss << "    case " << es->sounds[i].id << ": return \"" << es->sounds[i].name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t sound_idmax = " <<max << "; }\n\n";
-
-wto << "string sound_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
-     ss.str( "" );
-
-    max = 0;
-    wto << "enum //room names\n{\n";
-    for (int i = 0; i < es->roomCount; i++) {
-      if (es->rooms[i].id >= max) max = es->rooms[i].id + 1;
-      wto << "  " << es->rooms[i].name << " = " << es->rooms[i].id << ",\n";
-    }
-    wto << "};\nnamespace enigma { size_t room_idmax = " <<max << "; }\n\n";
-  wto.close();
-
+  current_language->compile_write_resource_names(ctex);
+  
   idpr("Performing Secondary Parsing and Writing Globals",25);
 
   // Defragged events must be written before object data, or object data cannot determine which events were used.
   edbg << "Writing events" << flushl;
-  res = current_language->compile_writeDefraggedEvents(es, ctex);
+  res = current_language->compile_writeDefraggedEvents(ctex);
   irrr();
 
-  parsed_object EGMglobal;
-
-  edbg << "Linking globals" << flushl;
-  res = current_language->link_globals(&EGMglobal,es,ctex);
-  irrr();
-
-  edbg << "Running Secondary Parse Passes" << flushl;
-  res = current_language->compile_parseSecondary(ctex.parsed_objects,ctex.parsed_scripts,es->scriptCount,ctex.parsed_rooms,&EGMglobal);
-
+  /*edbg << "Linking globals and running Secondary Parse Passes" << flushl;
+  res = compile_parseSecondary(ctex);
+  irrr();*/
+  
   edbg << "Writing object data" << flushl;
-  res = current_language->compile_writeObjectData(es, &EGMglobal, ctex);
+  res = current_language->compile_writeObjectData(ctex);
   irrr();
 
   edbg << "Writing local accessors" << flushl;
-  res = current_language->compile_writeObjAccess(ctex.parsed_objects);
+  res = current_language->compile_writeObjAccess(ctex);
   irrr();
 
   edbg << "Writing font data" << flushl;
-  res = current_language->compile_writeFontInfo(es);
+  res = current_language->compile_writeFontInfo(ctex);
   irrr();
 
   edbg << "Writing room data" << flushl;
-  res = current_language->compile_writeRoomData(es, ctex);
+  res = current_language->compile_writeRoomData(ctex);
   irrr();
-
-
-
+  
   // Write the global variables to their own file to be included before any of the objects
-  res = current_language->compile_writeGlobals(es,&EGMglobal);
+  res = current_language->compile_writeGlobals(ctex);
   irrr();
 
 
@@ -539,165 +326,46 @@ wto << "string sound_get_name(int i) {\n switch (i) {\n";
 
 
 
-  /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment two: Now that the game has been exported as C++ and raw
     resources, our task is to compile the game itself via GNU Make.
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-
-  idpr("Adding resources...",90);
-  string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.buildext;
-  string gameFname = mode == emode_design ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
-
-  idpr("Starting compile (This may take a while...)", 30);
-
-  string make = "Game ";
-
-  make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
-  make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
-  make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
-  make += "COLLISION=" + extensions::targetAPI.collisionSys + " ";
-  make += "WIDGETS="  + extensions::targetAPI.widgetSys + " ";
-  make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
-
-  if (CXX_override.length()) make += "CXX=" + CXX_override + " ";
-  if (CC_override.length()) make += "CC=" + CC_override + " ";
-  if (WINDRES_location.length()) make += "WINDRES=" + WINDRES_location + " ";
-
-  if (mode != emode_debug) {
-    if (TOPLEVEL_cflags.length()) make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
-    if (TOPLEVEL_cppflags.length()) make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
-    if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + "\" ";
-    if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
-  }
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+   
+  language_adapter::resource_writer *resw = current_language->compile(ctex, exe_filename);
+  if (resw)
+    ;
   else {
-    if (TOPLEVEL_cflags.length()) make += "CFLAGS=\"" + TOPLEVEL_cflags + " -g -DDEBUG_MODE\" ";
-    if (TOPLEVEL_cppflags.length()) make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
-    if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + " -g -DDEBUG_MODE\" ";
-    if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
+    idpr(("Compile failed at " + current_language_name + " level.").c_str(),-1);
+    return 12;
   }
 
-  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
-  make += "COMPILEPATH=" + compilepath + " ";
-
-  string extstr = "EXTENSIONS=\"";
-  for (unsigned i = 0; i < parsed_extensions.size(); i++)
-  	extstr += " " + parsed_extensions[i].pathname;
-  make += extstr + "\"";
-
-  string mfgfn = gameFname;
-  for (size_t i = 0; i < mfgfn.length(); i++)
-    if (mfgfn[i] == '\\') mfgfn[i] = '/';
-  make += string(" OUTPUTNAME=\"") + mfgfn + "\" ";
-  make += "eTCpath=\"" + MAKE_tcpaths + "\"";
-
-  edbg << "Running make from `" << MAKE_location << "'" << flushl;
-  edbg << "Full command line: " << MAKE_location << " " << make << flushl;
-
-//  #if CURRENT_PLATFORM_ID == OS_MACOSX
-  //int makeres = better_system("cd ","/MacOS/");
-//  int makeres = better_system(MAKE_location,"MacOS");
-
-  // Pick a file and flush it
-  const char* redirfile = "redirfile.txt";
-  fclose(fopen(redirfile,"wb"));
-
-  // Redirect it
-  ide_output_redirect_file(redirfile);
-  int makeres = e_execs(MAKE_location,make,"&>",redirfile);
-
-  // Stop redirecting GCC output
-  ide_output_redirect_reset();
-
-  if (makeres) {
-    idpr("Compile failed at C++ level.",-1);
-    return E_ERROR_BUILD;
-  }
-  user << "+++++Make completed successfully.++++++++++++++++++++++++++++++++++++\n";
-
-
-
-
-
-  /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment three: Add resources into the game executable. They are
     literally tacked on to the end of the file for now. They should
     have an option in the config file to pass them to some resource
     linker sometime in the future.
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-
-  #ifdef OS_ANDROID
-    "ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
-  #endif
-
-  FILE *gameModule;
-  int resourceblock_start = 0;
-  cout << "`" << extensions::targetOS.resfile << "` == '$exe': " << (extensions::targetOS.resfile == "$exe"?"true":"FALSE") << endl;
-  if (extensions::targetOS.resfile == "$exe")
-  {
-    gameModule = fopen(gameFname.c_str(),"ab");
-    if (!gameModule) {
-      user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
-      idpr("Failed to add resources.",-1); return 12;
-    }
-
-    fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
-    resourceblock_start = ftell(gameModule);
-
-    if (resourceblock_start < 128) {
-      user << "Compiled game is clearly not a working module; cannot continue" << flushl;
-      idpr("Failed to add resources.",-1); return 13;
-    }
-  }
-  else
-  {
-    string resname = extensions::targetOS.resfile;
-    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
-      resname.replace(p,4,gameFname);
-    gameModule = fopen(resname.c_str(),"wb");
-    if (!gameModule) {
-      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
-      idpr("Failed to write resources.",-1); return 12;
-    }
-  }
-
-  // Start by setting off our location with a DWord of NULLs
-  fwrite("\0\0\0",1,4,gameModule);
-
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  
   idpr("Adding Sprites",90);
-
-  res = current_language->module_write_sprites(es, gameModule);
-  irrr();
-
-  edbg << "Finalized sprites." << flushl;
-  idpr("Adding Sounds",93);
-
-  current_language->module_write_sounds(es,gameModule);
-
-  current_language->module_write_backgrounds(es,gameModule);
-
-  current_language->module_write_fonts(es,gameModule);
-
-  current_language->module_write_paths(es,gameModule);
-
-  // Tell where the resources start
-  fwrite("\0\0\0\0res0",8,1,gameModule);
-  fwrite(&resourceblock_start,4,1,gameModule);
+  res = resw->module_write_sprites(ctex);
+  irrr(); idpr("Adding Sounds",92);
+  res = resw->module_write_sounds(ctex);
+  irrr(); idpr("Adding Backgrounds",94);
+  res = resw->module_write_backgrounds(ctex);
+  irrr(); idpr("Adding fonts",96);
+  res = resw->module_write_fonts(ctex);
+  irrr(); idpr("Adding paths",97);
+  res = resw->module_write_paths(ctex);
+  irrr(); idpr("Adding any extension resources",98);
+  res = resw->module_write_extensions(ctex);
 
   // Close the game module; we're done adding resources
   idpr("Closing game module and running if requested.",99);
-  edbg << "Closing game module and running if requested." << flushl;
-  fclose(gameModule);
+  res = resw->module_finalize(ctex);
 
   // Run the game if requested
   if (mode == emode_run or mode == emode_debug or mode == emode_design)
-  {
-    string rprog = extensions::targetOS.runprog, rparam = extensions::targetOS.runparam;
-    rprog = string_replace_all(rprog,"$game",gameFname);
-    rparam = string_replace_all(rparam,"$game",gameFname);
-    user << "Running \"" << rprog << "\" " << rparam << flushl;
-    int gameres = e_execs(rprog, rparam);
-    user << "Game returned " << gameres << "\n";
-  }
+    current_language->run_game(ctex, resw);
 
   idpr("Done.", 100);
   return 0;

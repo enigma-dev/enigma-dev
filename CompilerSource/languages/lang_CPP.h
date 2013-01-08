@@ -23,11 +23,9 @@
 #include "language_adapter.h"
 #include <Storage/definition.h>
 #include <API/context.h>
+#include <ostream>
 
 struct lang_CPP: language_adapter {
-  /// A map of all global local variables.
-  map<string,dectrip> locals;
-  
   /// The context of all parsed definitions.
   jdi::context definitions;
   
@@ -41,31 +39,60 @@ struct lang_CPP: language_adapter {
   int link_globals(parsed_object*, EnigmaStruct*, compile_context &ctex);
 
   // IDE_EDITABLEs added before compile
-  int compile_parseAndLink(EnigmaStruct*, compile_context &ctex);
-  int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,map<int,parsed_room*>&,parsed_object*);
-  int compile_writeGlobals(EnigmaStruct*,parsed_object*);
-  int compile_writeObjectData(EnigmaStruct*, parsed_object*, compile_context&);
-  int compile_writeObjAccess(map<int,parsed_object*>&);
-  int compile_writeFontInfo(EnigmaStruct* es);
-  int compile_writeRoomData(EnigmaStruct* es, compile_context &ctex);
-  int compile_writeDefraggedEvents(EnigmaStruct* es, compile_context &ctex);
-  int compile_handle_templates(EnigmaStruct* es);
-
-  // Resources added to module
-  int module_write_sprites(EnigmaStruct *es, FILE *gameModule);
-  int module_write_sounds(EnigmaStruct *es, FILE *gameModule);
-  int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule);
-  int module_write_paths(EnigmaStruct *es, FILE *gameModule);
-  int module_write_fonts(EnigmaStruct *es, FILE *gameModule);
+  int compile_writeGlobals(compile_context &ctex);
+  int compile_write_resource_names(compile_context &ctex);
+  int compile_writeObjectData(compile_context &ctex);
+  int compile_writeObjAccess(compile_context &ctex);
+  int compile_writeFontInfo(compile_context &ctex);
+  int compile_writeRoomData(compile_context &ctex);
+  int compile_writeDefraggedEvents(compile_context &ctex);
+  int compile_handle_templates(compile_context &ctex);
+  
+  struct resource_writer_cpp: resource_writer {
+    FILE *gameModule; ///< The executable built by the C++ compiler
+    string gameFname; ///< The filename of the game module; used to run it
+    size_t resourceblock_start; ///< The starting position of the resources we are writing to this game.
+    int module_write_sprites    (compile_context &ctex); ///< Method to write all sprites to the compiled module
+    int module_write_sounds     (compile_context &ctex); ///< Method to write all sounds to the compiled module
+    int module_write_backgrounds(compile_context &ctex); ///< Method to write all backgrounds to the compiled module
+    int module_write_paths      (compile_context &ctex); ///< Method to write all paths to the compiled module
+    int module_write_fonts      (compile_context &ctex); ///< Method to write all fonts to the compiled module
+    int module_write_extensions (compile_context &ctex); ///< Method to write any and all extension resources to the compiled module
+    int module_finalize         (compile_context &ctex); ///< Finalize the module
+    resource_writer_cpp(FILE *gmod, string gfname); ///< Construct with a game module
+  };
   
   int  load_shared_locals();
-  void load_extension_locals();
+  int load_extension_locals();
+  void clear_ide_editables();
+  typedef map<string, definition*> sol_map; ///< Shared Object Locals Map. lol sol
+  sol_map shared_object_locals;
   
-  virtual syntax_error* definitionsModified(const char*, const char*);
-  virtual double compile(EnigmaStruct *es, const char* exe_filename, int mode);
+  const char* establish_bearings(const char *compiler);
+  syntax_error* definitionsModified(const char*, const char*);
+  resource_writer *compile(compile_context &ctex, const char* filename);
+  void run_game(compile_context &ctex, resource_writer *resw);
+  int rebuild();
   
   bool global_exists(string name);
   jdi::definition* find_typename(string name);
+  
+  string format_expression(AST *ast); ///< Format an AST into a C++ expression string
+  void print_to_stream(compile_context &ctex, parsed_code& code, int indent, ostream &os); ///< Print formatted C++ code to a stream
+  
+  // Oher attributes and properties
+  static const char *gen_license; ///< The license placed at the top of generated files
+  string MAKE_paths;
+  string MAKE_tcpaths;
+  string MAKE_location;
+  string TOPLEVEL_cflags;
+  string TOPLEVEL_cppflags;
+  string TOPLEVEL_cxxflags;
+  string TOPLEVEL_links;
+  string CXX_override;
+  string CC_override;
+  string WINDRES_location;
+  string TOPLEVEL_ldflags;
   
   virtual ~lang_CPP();
 };
