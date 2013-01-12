@@ -66,7 +66,7 @@ void part_emitter_stream(int ps_id, int em_id, int particle_type_id, int number)
 // General.
 int part_type_create();
 void part_type_destroy(int id);
-void part_type_exists(int id);
+bool part_type_exists(int id);
 void part_type_clear(int id);
 // Shape.
 void part_type_shape(int id, int particle_shape);

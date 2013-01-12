@@ -46,6 +46,7 @@ namespace enigma
     // the type should be removed, since it is no longer used.
     int particle_count; // The number of particles of this particle type.
     bool alive; // Whether the type is still alive.
+    int id; // Id of the particle type.
 
     // Shape.
     bool is_particle_sprite; // Whether an internal particle sprite is used or not.

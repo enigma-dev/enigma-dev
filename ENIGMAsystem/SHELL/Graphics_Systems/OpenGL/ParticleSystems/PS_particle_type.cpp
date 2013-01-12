@@ -43,11 +43,8 @@ namespace enigma
   particle_type_manager pt_manager;
 }
 
-int part_type_create()
-{ 
-  enigma::particle_type* pt = new enigma::particle_type();
-  pt->particle_count = 0;
-  pt->alive = true;
+void initialize_particle_type(enigma::particle_type* pt)
+{
   pt->is_particle_sprite = true;
   enigma::particle_sprite* sprite = enigma::get_particle_sprite(enigma::pt_sh_pixel);
   if (sprite != 0) {
@@ -81,15 +78,48 @@ int part_type_create()
   pt->dir_min = 0.0, pt->dir_max = 0.0;
   pt->dir_incr = 0.0, pt->dir_wiggle = 0.0;
   pt->grav_amount = 0.0, pt->grav_dir = 0.0;
+}
+int part_type_create()
+{ 
+  enigma::particle_type* pt = new enigma::particle_type();
+  pt->particle_count = 0;
+  pt->alive = true;
+
+  initialize_particle_type(pt);
 
   enigma::pt_manager.max_id++;
+  pt->id = enigma::pt_manager.max_id;
   enigma::pt_manager.id_to_particletype.insert(std::pair<int,enigma::particle_type*>(enigma::pt_manager.max_id, pt));
 
   return enigma::pt_manager.max_id;
 }
-void part_type_destroy(int id);
-void part_type_exists(int id);
-void part_type_clear(int id);
+void part_type_destroy(int id)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    enigma::particle_type* pt = (*it).second;
+    pt->alive = false;
+    if (pt->particle_count <= 0) {
+      delete (*it).second;
+      enigma::pt_manager.id_to_particletype.erase(id);
+    }
+  }
+}
+bool part_type_exists(int id)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    return true;
+  }
+  return false;
+}
+void part_type_clear(int id)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    initialize_particle_type((*it).second);
+  }
+}
 // Shape.
 void part_type_shape(int id, int particle_shape)
 {
