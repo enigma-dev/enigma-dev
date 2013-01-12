@@ -65,6 +65,8 @@ int part_type_create()
   pt->color1 = c_white;
   pt->color2 = c_white;
   pt->color3 = c_white;
+  pt->rmin = 255, pt->rmax = 255, pt->gmin = 255, pt->gmax = 255, pt->bmin = 255, pt->bmax = 255;
+  pt->hmin = 255, pt->hmax = 255, pt->smin = 255, pt->smax = 255, pt->vmin = 255, pt->vmax = 255;
   pt->a_mode = enigma::one_alpha;
   pt->alpha1 = 255;
   pt->alpha2 = 255;
@@ -171,6 +173,62 @@ void part_type_color3(int id, int color1, int color2, int color3)
     (*it).second->color1 = color1;
     (*it).second->color2 = color2;
     (*it).second->color3 = color3;
+  }
+}
+void part_type_color_mix(int id, int color1, int color2)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->c_mode = enigma::mix_color;
+    unsigned char r1 = color_get_red(color1), g1 = color_get_green(color1), b1 = color_get_blue(color1);
+    unsigned char r2 = color_get_red(color2), g2 = color_get_green(color2), b2 = color_get_blue(color2);
+    unsigned char rmin = std::min(r1, r2), rmax = std::max(r1, r2);
+    unsigned char gmin = std::min(g1, g2), gmax = std::max(g1, g2);
+    unsigned char bmin = std::min(b1, b2), bmax = std::max(b1, b2);
+    enigma::particle_type* pt = (*it).second;
+    pt->rmin = rmin, pt->rmax = rmax;
+    pt->gmin = gmin, pt->gmax = gmax;
+    pt->bmin = bmin, pt->bmax = bmax;
+  }
+}
+void part_type_color_rgb(int id, int rmin, int rmax, int gmin, int gmax, int bmin, int bmax)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->c_mode = enigma::rgb_color;
+    rmin = bounds(rmin, 0, 255);
+    rmax = bounds(rmax, 0, 255);
+    rmax = std::max(rmin, rmax);
+    gmin = bounds(gmin, 0, 255);
+    gmax = bounds(gmax, 0, 255);
+    gmax = std::max(gmin, gmax);
+    bmin = bounds(bmin, 0, 255);
+    bmax = bounds(bmax, 0, 255);
+    bmax = std::max(bmin, bmax);
+    enigma::particle_type* pt = (*it).second;
+    pt->rmin = rmin, pt->rmax = rmax;
+    pt->gmin = gmin, pt->gmax = gmax;
+    pt->bmin = bmin, pt->bmax = bmax;
+  }
+}
+void part_type_color_hsv(int id, int hmin, int hmax, int smin, int smax, int vmin, int vmax)
+{
+  std::map<int,enigma::particle_type*>::iterator it = enigma::pt_manager.id_to_particletype.find(id);
+  if (it != enigma::pt_manager.id_to_particletype.end()) {
+    (*it).second->c_mode = enigma::hsv_color;
+    hmin = bounds(hmin, 0, 255);
+    hmax = bounds(hmax, 0, 255);
+    hmax = std::max(hmin, hmax);
+    vmin = bounds(vmin, 0, 255);
+    vmax = bounds(vmax, 0, 255);
+    vmax = std::max(vmin, vmax);
+    smin = bounds(smin, 0, 255);
+    smax = bounds(smax, 0, 255);
+    smax = std::max(smin, smax);
+    enigma::particle_type* pt = (*it).second;
+    pt->hmin = hmin, pt->hmax = hmax;
+    pt->vmin = vmin, pt->vmax = vmax;
+    pt->smin = smin, pt->smax = smax;
   }
 }
 void part_type_alpha1(int id, double alpha1)

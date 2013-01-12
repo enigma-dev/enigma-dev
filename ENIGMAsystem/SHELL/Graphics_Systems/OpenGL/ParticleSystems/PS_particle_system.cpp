@@ -212,6 +212,9 @@ namespace enigma
           }
           break;
         }
+        case mix_color : {break;}
+        case rgb_color : {break;}
+        case hsv_color : {break;}
         }
         // Alpha.
         switch(pt->a_mode) {
@@ -468,6 +471,33 @@ namespace enigma
       pi.ang_wiggle_offset = 1.0*rand()/(RAND_MAX-1);
       // Color and blending.
       pi.color = pt->color1;
+      switch(pt->c_mode) {
+      case one_color : {break;}
+      case two_color : {break;}
+      case three_color : {break;}
+      case mix_color : {
+        double random_fact = 1.0*rand()/(RAND_MAX-1);
+        unsigned char r = bounds(pt->rmin + (pt->rmax - pt->rmin)*random_fact, 0, 255);
+        unsigned char g = bounds(pt->gmin + (pt->gmax - pt->gmin)*random_fact, 0, 255);
+        unsigned char b = bounds(pt->bmin + (pt->bmax - pt->bmin)*random_fact, 0, 255);
+        pi.color = make_color_rgb(r, g, b);
+        break;
+      }
+      case rgb_color : {
+        unsigned char r = bounds(pt->rmin + (pt->rmax - pt->rmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
+        unsigned char g = bounds(pt->gmin + (pt->gmax - pt->gmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
+        unsigned char b = bounds(pt->bmin + (pt->bmax - pt->bmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
+        pi.color = make_color_rgb(r, g, b);
+        break;
+      }
+      case hsv_color : {
+        unsigned char h = bounds(pt->hmin + (pt->hmax - pt->hmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
+        unsigned char s = bounds(pt->smin + (pt->smax - pt->smin)*1.0*rand()/(RAND_MAX-1), 0, 255);
+        unsigned char v = bounds(pt->vmin + (pt->vmax - pt->vmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
+        pi.color = make_color_hsv(h, s, v);
+        break;
+      }
+      }
       pi.alpha = pt->alpha1;
       // Life and death.
       pi.life_current = pt->life_min == pt->life_max ? pt->life_min : pt->life_min + rand() % (	pt->life_max - pt->life_min);

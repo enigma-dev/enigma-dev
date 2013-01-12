@@ -35,7 +35,7 @@
 namespace enigma
 {
   enum color_mode {
-    one_color, two_color, three_color
+    one_color, two_color, three_color, mix_color, rgb_color, hsv_color
   };
   enum alpha_mode {
     one_alpha, two_alpha, three_alpha
@@ -63,6 +63,8 @@ namespace enigma
     int color1;
     int color2;
     int color3;
+    unsigned char rmin, rmax, gmin, gmax, bmin, bmax;
+    unsigned char hmin, hmax, smin, smax, vmin, vmax;
     alpha_mode a_mode;
     double alpha1;
     double alpha2;

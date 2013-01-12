@@ -78,6 +78,9 @@ void part_type_orientation(int id, double ang_min, double ang_max, double ang_in
 void part_type_color1(int id, int color1);
 void part_type_color2(int id, int color1, int color2);
 void part_type_color3(int id, int color1, int color2, int color3);
+void part_type_color_mix(int id, int color1, int color2);
+void part_type_color_rgb(int id, int rmin, int rmax, int gmin, int gmax, int bmin, int bmax);
+void part_type_color_hsv(int id, int hmin, int hmax, int smin, int smax, int vmin, int vmax);
 void part_type_alpha1(int id, double alpha1);
 void part_type_alpha2(int id, double alpha1, double alpha2);
 void part_type_alpha3(int id, double alpha1, double alpha2, double alpha3);
