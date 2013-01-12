@@ -81,8 +81,6 @@ namespace enigma {
 
 int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
 {
-    if (filename.find_first_of("\\/") == string::npos)
-        filename = get_working_directory() + filename;
 	enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
 	return enigma::sprite_idmax++;
@@ -90,8 +88,6 @@ int sprite_add(string filename, int imgnumb, bool precise, bool transparent, boo
 
 int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
 {
-    if (filename.find_first_of("\\/") == string::npos)
-        filename = get_working_directory() + filename;
 	enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite;
     enigma::sprite_add_to_index(spr, filename, imgnumb, transparent, smooth, x_offset, y_offset);
 	return enigma::sprite_idmax++;
@@ -99,8 +95,6 @@ int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int 
 
 bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture)
 {
-    if (filename.find_first_of("\\/") == string::npos)
-        filename = get_working_directory() + filename;
     get_sprite_mutable(spr,ind,false);
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
@@ -115,8 +109,6 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool tr
 
 bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture)
 {
-    if (filename.find_first_of("\\/") == string::npos)
-        filename = get_working_directory() + filename;
     get_sprite_mutable(spr,ind,false);
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
