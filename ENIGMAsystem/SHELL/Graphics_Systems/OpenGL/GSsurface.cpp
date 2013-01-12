@@ -552,8 +552,6 @@ int surface_get_bound()
 
 int surface_save(int id, string filename)
 {
-    if (filename.find_first_of("\\/") == string::npos)
-        filename = get_working_directory() + filename;
     get_surfacev(surf,id,-1);
 	FILE *bmp=fopen(filename.c_str(),"wb");
 	if(!bmp) return -1;
@@ -606,8 +604,6 @@ int surface_save(int id, string filename)
 
 int surface_save_part(int id, string filename,unsigned x,unsigned y,unsigned w,unsigned h)
 {
-    if (filename.find_first_of("\\/") == string::npos)
-        filename = get_working_directory() + filename;
     get_surfacev(surf,id,-1);
 	FILE *bmp=fopen(filename.c_str(),"wb");
 	if(!bmp) return -1;

@@ -151,8 +151,6 @@ namespace enigma
 #include "estring.h"
 int background_add(string filename, bool transparent, bool smooth, bool preload)
 {
-    if (filename.find_first_of("\\/") == string::npos)
-        filename = get_working_directory() + filename;
 	enigma::background *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
     enigma::background_add_to_index(bck, filename, transparent, smooth, preload);
 	return enigma::background_idmax++;
@@ -161,8 +159,6 @@ int background_add(string filename, bool transparent, bool smooth, bool preload)
 bool background_replace(int back, string filename, bool transparent, bool smooth, bool preload, bool free_texture)
 {
     get_backgroundnv(bck,back,false);
-    if (filename.find_first_of("\\/") == string::npos)
-        filename = get_working_directory() + filename;
     if (free_texture)
         enigma::graphics_delete_texture(bck->texture);
 
