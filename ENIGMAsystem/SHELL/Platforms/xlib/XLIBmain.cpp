@@ -34,12 +34,13 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/loading.h"
 
+extern string keyboard_lastchar;
+
 namespace enigma
 {
   extern char keymap[256];
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  string keyboard_lastchar;
 
   namespace x11
   {
@@ -61,7 +62,13 @@ namespace enigma
 
               if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
               else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
-              keyboard_lastchar = string(1,actualKey);
+              { // Set keyboard_lastchar. Seems to work without 
+                  char str[1];
+                  int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
+                  if (len > 0) {
+                      keyboard_lastchar = string(1,str[0]);
+                  }
+              }
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
                 return 0;
