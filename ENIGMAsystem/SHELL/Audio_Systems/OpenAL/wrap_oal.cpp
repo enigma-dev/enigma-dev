@@ -23,7 +23,7 @@
 #define AL_NO_PROTOTYPES 1
 #include <AL/alc.h>
 #include <AL/al.h>
-#include <AL/wrap_oal_dll.h>
+#include "wrap_oal_dll.h"
 
 static HMODULE openal_handle = NULL;
 
