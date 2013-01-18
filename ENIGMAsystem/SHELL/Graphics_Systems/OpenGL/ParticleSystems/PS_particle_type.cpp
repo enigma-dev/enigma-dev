@@ -212,13 +212,10 @@ void part_type_color_mix(int id, int color1, int color2)
     (*it).second->c_mode = enigma::mix_color;
     unsigned char r1 = color_get_red(color1), g1 = color_get_green(color1), b1 = color_get_blue(color1);
     unsigned char r2 = color_get_red(color2), g2 = color_get_green(color2), b2 = color_get_blue(color2);
-    unsigned char rmin = std::min(r1, r2), rmax = std::max(r1, r2);
-    unsigned char gmin = std::min(g1, g2), gmax = std::max(g1, g2);
-    unsigned char bmin = std::min(b1, b2), bmax = std::max(b1, b2);
     enigma::particle_type* pt = (*it).second;
-    pt->rmin = rmin, pt->rmax = rmax;
-    pt->gmin = gmin, pt->gmax = gmax;
-    pt->bmin = bmin, pt->bmax = bmax;
+    pt->rmin = r1, pt->rmax = r2;
+    pt->gmin = g1, pt->gmax = g2;
+    pt->bmin = b1, pt->bmax = b2;
   }
 }
 void part_type_color_rgb(int id, int rmin, int rmax, int gmin, int gmax, int bmin, int bmax)
