@@ -1,29 +1,27 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  parse_secondary.cpp
+  @brief Declares a method to take care of the second pass of the parse phase.
+  
+  The second pass of the parse is more informed; it is conducted over the ASTs after
+  harvesting all declarations from them and storing them in the appropriate objects.
+  
+  During this phase, type checking and access checking is done.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <stdio.h>
 #include <iostream>
@@ -40,17 +38,15 @@ using namespace std;
 #include "compiler/event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
-int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, parsed_script* scripts[], int scrcount, map<int,parsed_room*> &parsed_rooms, parsed_object* EGMglobal)
+/*
+int compile_parseSecondary(compile_context &ctex)
 {
-  // Dump our list of dot-accessed locals
-  dot_accessed_locals.clear();
-  
   // Give all objects and events a second pass
-  for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
+  for (po_i it = ctex.parsed_objects.begin(); it != ctex.parsed_objects.end(); it++)
   {
     parsed_object *oto = it->second;
-    for (unsigned iit = 0; iit < oto->events.size; iit++)
-      parser_secondary(oto->events[iit].code,oto->events[iit].synt,EGMglobal,oto,&oto->events[iit]);
+    for (unsigned iit = 0; iit < oto->events.size(); iit++)
+      oto->events[iit]->code.ast.parse_secondary();
   }
   
   // Give all scripts a second pass
@@ -73,7 +69,6 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
       parser_secondary(ici->second.pe->code,ici->second.pe->synt,EGMglobal,oto,ici->second.pe);
     }
   }
-  
   return 0;
 }
-
+*/

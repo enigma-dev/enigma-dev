@@ -96,7 +96,6 @@ void draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double 
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
     bind_texture(spr2d->texturearray[usi]);
-
 	glPushAttrib(GL_CURRENT_BIT);
 
     glColor4f(1,1,1,1);

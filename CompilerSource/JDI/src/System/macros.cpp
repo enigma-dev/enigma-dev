@@ -142,7 +142,7 @@ inline void jdip::macro_function::preparse(string val, error_handler *herr)
       if (val[++i] == '#') {
         if (i <= 1) continue;
         pt ie = i - 2;
-        while (ie > 0 and is_useless(val[ie-1])) --ie; // eliminate any leading whitespace
+        while (ie > 0 and is_useless(val[ie])) --ie; // eliminate any leading whitespace
         if (ie > push_from) // If there's anything non-white to push since last time,
           value.push_back(mv_chunk(val.c_str(), push_from, ie-push_from+1)); // Then push it
         while (is_useless(val[++i])); // Skip any trailing whitespace
@@ -153,7 +153,7 @@ inline void jdip::macro_function::preparse(string val, error_handler *herr)
         value.push_back(mv_chunk(val.c_str(), push_from, i-push_from)); // Push it onto our value
       while (is_useless_macros(val[++i]));
       push_from = i; // Store current position just in case something stupid happens
-      if (!is_letter(val[i])) { herr->error("Expected parameter name following '#' token; `" + val + "'[" + toString(i) + "] is not a valid identifier character"); continue; }
+      if (!is_letter(val[i])) { herr->error("Expected parameter name following '#' token; `" + val + "'[" + ::toString(i) + "] is not a valid identifier character"); continue; }
       const size_t asi = i;
       while (is_letterd(val[++i]));
       map<string,int>::iterator pi = parameters.find(val.substr(asi,i-asi));
@@ -172,13 +172,30 @@ inline void jdip::macro_function::preparse(string val, error_handler *herr)
     value.push_back(mv_chunk(val.c_str(), push_from, val.length() - push_from));
 }
 
+string macro_type::toString() const {
+  if (argc >= 0)
+  {
+    macro_function *mf = (macro_function*)this;
+    string res = "#define " + name + "(";
+    for (size_t i = 0; i < mf->args.size(); i++)
+      res += mf->args[i] + (i+1 < mf->args.size() ? ", " : ((size_t)argc > mf->args.size()? "...": ""));
+    res += ") \\\n";
+    for (size_t i = 0; i < mf->value.size(); i++)
+      res += "  " + mf->value[i].toString(mf) + (i+1 < mf->value.size()? "\\\n" : "");
+    return res;
+  }
+  else {
+    return "#define " + name + "\n  " + ((macro_scalar*)this)->value;
+  }
+}
+
 #include <iostream>
 #include <System/token.h>
 bool macro_function::parse(vector<string> &arg_list, char* &dest, char* &destend, token_t errtok, error_handler *herr) const
 {
   if (arg_list.size() < args.size()) {
     if (arg_list.size() + 1 < args.size())
-      return errtok.report_error(herr, "Too few arguments to macro function `" + name + "': provided " + toString(arg_list.size()) + ", requested " + toString(args.size())), false;
+      return errtok.report_error(herr, "Too few arguments to macro function `" + name + "': provided " + ::toString(arg_list.size()) + ", requested " + ::toString(args.size())), false;
     arg_list.push_back("");
   }
   else if ((arg_list.size() > args.size() and args.size() == (unsigned)argc))

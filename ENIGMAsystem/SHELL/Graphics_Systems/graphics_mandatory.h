@@ -19,6 +19,8 @@
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
 
+#include <string>
+
 namespace enigma
 {
   /// Called at game load to allow the system to set up.
@@ -34,7 +36,7 @@ namespace enigma
   /// Generate a texture from image data. Preserves input pixbuf.
   unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata);
   unsigned graphics_duplicate_texture(int tex);
-  unsigned graphics_create_texture_alpha_from_texture(int tex, int copy_tex);
+  void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex);
   void graphics_delete_texture(int tex);
 
   /// Retrieve image data from a texture, in unsigned char, RGBA format.

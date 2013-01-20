@@ -59,6 +59,8 @@
 					<Add library="z" />
 					<Add library="openal" />
 					<Add library="GLU" />
+					<Add library="alure" />
+					<Add library="dumb" />
 				</Linker>
 			</Target>
 			<Target title="lin-profile">
@@ -139,270 +141,6 @@
 			<Add directory="./" />
 		</Compiler>
 		<Unit filename="API_Switchboard.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/include/aldumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/include/dumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/include/internal/aldumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/include/internal/dumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/include/internal/it.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/aldumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/atexit.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/duhlen.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/duhtag.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/dumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/dumbfile.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/internal/aldumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/internal/dumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/internal/it.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/loadduh.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/makeduh.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/rawsig.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/readduh.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/register.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/rendduh.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/rendsig.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/core/unload.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/aldumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/clickrem.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/dumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/internal/aldumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/internal/dumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/internal/it.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/memfile.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/resample.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/sampbuf.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/silence.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/helpers/stdfile.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/aldumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/dumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/internal/aldumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/internal/dumb.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/internal/it.h" />
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itload.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itload2.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itmisc.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itorder.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itread.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itread2.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itrender.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/itunload.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loadmod.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loadmod2.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loads3m.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loads3m2.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loadxm.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/loadxm2.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/readmod.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/readmod2.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/reads3m.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/reads3m2.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/readxm.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/readxm2.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/dumb/src/it/xmeffect.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/ogg/bitwise.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/ogg/framing.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/ogg/include/config_types.h" />
-		<Unit filename="Audio_Systems/Codecs/ogg/include/ogg.h" />
-		<Unit filename="Audio_Systems/Codecs/ogg/include/os_types.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/include/codec.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/include/vorbisenc.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/include/vorbisfile.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/analysis.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/backends.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/bitrate.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/bitrate.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/block.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/books/coupled/res_books_51.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/books/coupled/res_books_stereo.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/books/floor/floor_books.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/books/uncoupled/res_books_uncoupled.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/codebook.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/codebook.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/codec_internal.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/envelope.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/envelope.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/floor0.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/floor1.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/highlevel.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/info.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lookup.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lookup.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lookup_data.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lpc.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lpc.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lsp.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/lsp.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/mapping0.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/masking.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/mdct.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/mdct.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/misc.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/floor_all.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/psych_11.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/psych_16.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/psych_44.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/psych_8.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_16.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_44.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_44p51.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_44u.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/residue_8.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_11.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_16.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_22.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_32.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_44.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_44p51.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_44u.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_8.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/modes/setup_X.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/os.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/psy.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/psy.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/registry.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/registry.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/res0.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/scales.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/sharedbook.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/smallft.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/smallft.h" />
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/synthesis.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/vorbisfile.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/window.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="Audio_Systems/Codecs/vorbis/lib/window.h" />
-		<Unit filename="Audio_Systems/OpenAL/alure/alure.cpp" />
-		<Unit filename="Audio_Systems/OpenAL/alure/buffer.cpp" />
-		<Unit filename="Audio_Systems/OpenAL/alure/config.h" />
-		<Unit filename="Audio_Systems/OpenAL/alure/include/AL/alure.h" />
-		<Unit filename="Audio_Systems/OpenAL/alure/include/alext.h" />
-		<Unit filename="Audio_Systems/OpenAL/alure/istream.cpp" />
-		<Unit filename="Audio_Systems/OpenAL/alure/main.h" />
-		<Unit filename="Audio_Systems/OpenAL/alure/stream.cpp" />
-		<Unit filename="Audio_Systems/OpenAL/alure/streamdec.cpp" />
-		<Unit filename="Audio_Systems/OpenAL/alure/streamplay.cpp" />
 		<Unit filename="Audio_Systems/OpenAL/as_basic.cpp" />
 		<Unit filename="Audio_Systems/OpenAL/as_basic.h" />
 		<Unit filename="Audio_Systems/OpenAL/include.h" />
@@ -451,6 +189,19 @@
 		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.h" />
 		<Unit filename="Graphics_Systems/OpenGL/OpenGLHeaders.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_emitter.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_emitter.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_enums.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_instance.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_sprites.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_sprites.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_type.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_type.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/actions.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/implement.h" />
 		<Unit filename="Graphics_Systems/OpenGL/binding.h" />
 		<Unit filename="Graphics_Systems/OpenGL/glew.c">
 			<Option compilerVar="CC" />
@@ -592,10 +343,6 @@
 			<Option target="win-build" />
 		</Unit>
 		<Unit filename="Platforms/Win32/WINDOWSmain.h">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
-		<Unit filename="Platforms/Win32/WINDOWSshow_error.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
@@ -784,14 +531,19 @@
 		<Unit filename="Universal_System/Extensions/Alarms/alarmcode.cpp" />
 		<Unit filename="Universal_System/Extensions/Alarms/implement.h" />
 		<Unit filename="Universal_System/Extensions/Alarms/include.h" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning.cpp" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning.h" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning_struct.cpp" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning_struct.h" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/mp_movement.cpp" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/mp_movement.h" />
 		<Unit filename="Universal_System/Extensions/Paths/implement.h" />
 		<Unit filename="Universal_System/Extensions/Timelines/implement.h" />
 		<Unit filename="Universal_System/Extensions/recast.h" />
 		<Unit filename="Universal_System/GAME_GLOBALS.h" />
 		<Unit filename="Universal_System/IMGloading.cpp" />
 		<Unit filename="Universal_System/IMGloading.h" />
-		<Unit filename="Universal_System/WITHconstruct.cpp" />
-		<Unit filename="Universal_System/actions.cpp" />
+		<Unit filename="Universal_System/Makefile" />
 		<Unit filename="Universal_System/actions.h" />
 		<Unit filename="Universal_System/backgroundinit.cpp" />
 		<Unit filename="Universal_System/backgroundstruct.cpp" />
@@ -807,7 +559,6 @@
 		<Unit filename="Universal_System/dynamic_args.h" />
 		<Unit filename="Universal_System/estring.cpp" />
 		<Unit filename="Universal_System/estring.h" />
-		<Unit filename="Universal_System/event_system.cpp" />
 		<Unit filename="Universal_System/events.cpp" />
 		<Unit filename="Universal_System/events.h" />
 		<Unit filename="Universal_System/fileio.cpp" />
@@ -820,6 +571,7 @@
 		<Unit filename="Universal_System/graphics_object.cpp" />
 		<Unit filename="Universal_System/graphics_object.h" />
 		<Unit filename="Universal_System/highscore_functions.cpp" />
+		<Unit filename="Universal_System/highscore_functions.h" />
 		<Unit filename="Universal_System/imap.h" />
 		<Unit filename="Universal_System/instance.cpp" />
 		<Unit filename="Universal_System/instance.h" />
@@ -835,13 +587,10 @@
 		<Unit filename="Universal_System/lua_table.h" />
 		<Unit filename="Universal_System/mathnc.cpp" />
 		<Unit filename="Universal_System/mathnc.h" />
-		<Unit filename="Universal_System/motion_planning.cpp" />
 		<Unit filename="Universal_System/motion_planning.h" />
-		<Unit filename="Universal_System/motion_planning_struct.cpp" />
 		<Unit filename="Universal_System/motion_planning_struct.h" />
 		<Unit filename="Universal_System/move_functions.cpp" />
 		<Unit filename="Universal_System/move_functions.h" />
-		<Unit filename="Universal_System/mp_movement.cpp" />
 		<Unit filename="Universal_System/mp_movement.h" />
 		<Unit filename="Universal_System/multifunction_variant.cpp" />
 		<Unit filename="Universal_System/multifunction_variant.h" />

@@ -1,29 +1,22 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  event_parser.cpp
+  @brief Implements functions for reading events.res. This file is on its way out.
+  
+  @section License
+    Copyright (C) 2010-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 
 #include <stdio.h>
@@ -76,7 +69,8 @@ event_info::event_info(string n,int i): name(n), gmid(i), humanname(), par2type(
 
 main_event_info::main_event_info(): name(), is_group(false), specs() { }
 
-varray<main_event_info> main_event_infos;
+typedef map<int, main_event_info> mei_map;
+mei_map main_event_infos;
 typedef pair<int, int> evpair;
 vector<evpair> event_sequence;
 
@@ -282,11 +276,11 @@ int event_parse_resourcefile()
         if (v[0] == '{')
         {
           braces = 1;
-          int iq = 0;
+          int iq2 = 0;
           for (size_t i=1; i<v.length(); i++)
-            if (!iq) { braces += (v[i] == '{') - (v[i] == '}');
-              iq = (v[i] == '"') + ((v[i] == '\'') << 1);
-            } else { iq = (iq == 1 and v[i] != '"') + ((iq == 2 and v[i] != '\'') << 1);
+            if (!iq2) { braces += (v[i] == '{') - (v[i] == '}');
+              iq2 = (v[i] == '"') + ((v[i] == '\'') << 1);
+            } else { iq2 = (iq2 == 1 and v[i] != '"') + ((iq2 == 2 and v[i] != '\'') << 1);
               i += (v[i] == '\\');
             }
         }
@@ -324,40 +318,41 @@ int event_parse_resourcefile()
   if (last and evid != -1)
     event_add(evid,last);
 
-  for (size_t i=0; i<main_event_infos.size; i++)
+  for (mei_map::iterator i = main_event_infos.begin(); i != main_event_infos.end(); ++i)
   {
-    for (main_event_info::iter ii = main_event_infos[i].specs.begin(); ii != main_event_infos[i].specs.end(); ii++)
+    for (main_event_info::iter ii = i->second.specs.begin(); ii != i->second.specs.end(); ii++)
       if (ii->second->humanname == "")
         ii->second->humanname = ii->second->name;
 
-    main_event_info::iter ii = main_event_infos[i].specs.begin();
-    if (main_event_infos[i].name == "" and ii != main_event_infos[i].specs.end())
-      main_event_infos[i].name = main_event_infos[i].specs[0]->humanname;
+    main_event_info::iter ii = i->second.specs.begin();
+    if (i->second.name == "" and ii != i->second.specs.end())
+      i->second.name = i->second.specs[0]->humanname;
   }
 
   return 0;
 }
 
-extern string tostring(int);
-string format_lookup(int id, p_type t)
+#include <general/estring.h>
+static string format_lookup(int id, p_type t)
 {
   switch (t)
   {
     case p2t_sprite:     return "spr_" + tostring(id);
     case p2t_sound:      return "snd_" + tostring(id);
-    case p2t_background: return "bk_" + tostring(id);
+    case p2t_background: return "bk_"  + tostring(id);
     case p2t_path:       return "pth_" + tostring(id);
     case p2t_script:     return "scr_" + tostring(id);
     case p2t_font:       return "fnt_" + tostring(id);
-    case p2t_timeline:   return "tl_" + tostring(id);
+    case p2t_timeline:   return "tl_"  + tostring(id);
     case p2t_object:     return "obj_" + tostring(id);
-    case p2t_room:       return "rm_" + tostring(id);
-    case p2t_key:        return "key" + tostring(id);
+    case p2t_room:       return "rm_"  + tostring(id);
+    case p2t_key:        return "key"  + tostring(id);
     case p2t_error:      return "...";
+    default:             return "..!";
   }
   return tostring(id);
 }
-string format_lookup_econstant(int id, p_type t)
+static string format_lookup_econstant(int id, p_type t)
 {
   switch (t)
   {
@@ -372,8 +367,8 @@ string format_lookup_econstant(int id, p_type t)
     case p2t_room:       return tostring(id);
     case p2t_key:        return tostring(id);
     case p2t_error:      return tostring(id);
+    default:             return tostring(id);
   }
-  return tostring(id);
 }
 
 inline string autoparam(string x,string y)
@@ -440,7 +435,7 @@ string event_get_human_name_min(int mid, int id)
 }
 
 // Used by the rest of these functions
-event_info *event_access(int mid, int id)
+static inline event_info *event_access(int mid, int id)
 {
   main_event_info &mei = main_event_infos[mid];
   return (mei.is_group) ? mei.specs[id] : mei.specs[0];
@@ -492,7 +487,7 @@ string event_get_suffix_code(int mid, int id) {
 
 
 // The rest of these functions use this
-string evres_code_substitute(string code, int sid, p_type t)
+static inline string evres_code_substitute(string code, int sid, p_type t)
 {
   for (size_t i = code.find("%1"); i != string::npos; i = code.find("%1"))
     code.replace(i, 2, format_lookup_econstant(sid, t));
@@ -547,14 +542,20 @@ bool event_execution_uses_default(int mid, int id) {
 // main events, which can just be overwritten.
 void event_info_clear()
 {
-  for (unsigned i=0; i<main_event_infos.size; i++)
-    main_event_infos[i].specs.clear();
+  for (mei_map::iterator i = main_event_infos.begin(); i != main_event_infos.end(); ++i)
+    i->second.specs.clear();
   event_sequence.clear();
 }
 
-bool event_is_instance(int mid, int id) { // Returns if the event with the given ID pair is an instance of a stacked event
+/// Returns if the event with the given ID pair is an instance of a stacked event
+bool event_is_instance(int mid, int id)
+{
   main_event_info &mei = main_event_infos[mid];
-  return !mei.is_group and mei.specs[0]->mode == et_stacked;
+  if (!mei.is_group) return false;
+  map<int, event_info*>::iterator a = mei.specs.find(id);
+  if (a == mei.specs.end()) a = mei.specs.find(0);
+  if (a == mei.specs.end()) return false;
+  return a->second->mode == et_stacked;
 }
 
 string event_forge_sequence_code(int mid, int id, string preferred_name)

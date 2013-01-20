@@ -1,35 +1,27 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008-2011 Josh Ventura                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2012 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <stdlib.h>
 #include <cmath>
 #include "var4.h"
 #include "dynamic_args.h"
 
+// Note: This hack is justifiable in that it was put here to prevent
+// around contributors' bad habits, not because of developers' bad habits.
 #define INCLUDED_FROM_SHELLMAIN Not really.
 #include "mathnc.h"
 
@@ -83,7 +75,6 @@ double arctan2(double y,double x) { return atan2(y,x);  }
 double sind(double x)              { return sin(x * M_PI / 180.0); }
 double cosd(double x)              { return cos(x * M_PI / 180.0); }
 double tand(double x)              { return tan(x * M_PI / 180.0); }
-//double tand2(double y,double x);
 double asind(double x)             { return asin(x)    * 180.0 / M_PI; }
 double acosd(double x)             { return acos(x)    * 180.0 / M_PI; }
 double atand(double x)             { return atan(x)    * 180.0 / M_PI; }
@@ -211,9 +202,10 @@ namespace enigma {
 
    Any feedback is very welcome.
    http://www.math.keio.ac.jp/matumoto/emt.html
-   email: matumoto@math.keio.ac.jp*/
+   email: matumoto@math.keio.ac.jp
+*/
 
-unsigned int random32()
+unsigned int mtrandom32()
 {
 	unsigned int y;
 	static const unsigned int mag01[2]={0,0x9908b0df};
@@ -243,7 +235,7 @@ unsigned int random32()
 }
 
 double mtrandom(){
-	return ((random32()>>5)*67108864.+(random32()>>6))/9007199254740992.;
+	return ((mtrandom32()>>5)*67108864.+(mtrandom32()>>6))/9007199254740992.;
 }
 
 int mtrandom_seed(int x){
@@ -253,20 +245,24 @@ int mtrandom_seed(int x){
 	enigma::mt[624] = 624;
 	return 0;
 }
+// END MERSENNE
 
-int random_integer(int x) {return x>0?random32()*(x/0xFFFFFFFF):0;}
-//END MERSENNE
-
-double random(double n) //Do not fix. Based off of Delphi prng
+// ENIGMA Random Functions
+double random(double n) // Do not fix:  Based off of Delphi PRNG.
 {
-	double rval=frac(
-		0.031379939289763571*(enigma::Random_Seed%32)
-		+0.00000000023283064365387*(enigma::Random_Seed/32+1)
-		+0.004158057505264878*(enigma::Random_Seed/32))*n;
-	enigma::Random_Seed=random32();
-	return rval;
+  double rval = frac(
+    3.1379939289763571e-2  * (enigma::Random_Seed % 32)
+    + 2.3283064365387e-10  * (enigma::Random_Seed / 32 + 1)
+    + 4.158057505264878e-3 * (enigma::Random_Seed / 32)
+  )*n;
+  enigma::Random_Seed = mtrandom32();
+  return rval;
 }
 
-int random_set_seed(int seed){return enigma::Random_Seed=seed;}
-int random_get_seed(){return enigma::Random_Seed;}
-int randomize(){return enigma::Random_Seed=random32();}
+int mtrandom_integer(int x) {
+  return x > 0? mtrandom32() * (x/0xFFFFFFFF) : 0;
+}
+
+int random_set_seed(int seed) { return enigma::Random_Seed = seed; }
+int random_get_seed() { return enigma::Random_Seed; }
+int randomize() { return enigma::Random_Seed = mtrandom32(); }

@@ -99,11 +99,8 @@ void file_text_write_string(int fileid,string str) { // Writes the string to the
 }
 void file_text_write_real(int fileid,double x) // Write the real value to the file with the given file id.
 {
-  char sbuf[19]; sbuf[0] = 0;
   const enigma::openFile &mf = enigma::files[fileid];
-  sprintf(sbuf," %.16g",x);
-  const string fstr = sbuf;
-  fwrite(fstr.c_str(),1,fstr.length(),mf.f);
+  fprintf(mf.f, " %.16g", x);
 }
 void file_text_writeln(int fileid) // Write a newline character to the file.
 {

@@ -141,6 +141,7 @@ public final class EnigmaWriter
 		populateObjects();
 		populateRooms();
 
+		//triggers not implemented
 		o.triggerCount = 0;
 
 		o.constantCount = i.constants.size();
@@ -166,10 +167,12 @@ public final class EnigmaWriter
 				}
 			}
 
+		//packages not implemented
 		o.packageCount = 0;
 		// o.packageCount = packages.length;
 		// o.packages = new StringArray(packages);
 
+		//extensions implemented separately. This is hard-coded legacy.
 		o.extensionCount = 1;
 		o.extensions = new Extension.ByReference();
 		Extension[] oix = (Extension[]) o.extensions.toArray(o.extensionCount);

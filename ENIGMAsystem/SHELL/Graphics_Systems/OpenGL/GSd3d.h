@@ -34,6 +34,7 @@ void d3d_end();
 bool d3d_get_mode();
 void d3d_set_perspective(bool enable);
 void d3d_set_hidden(bool enable);
+void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
 void d3d_set_culling(bool enable);
 void d3d_set_fog(bool enable, int color, double start, double end);
@@ -85,7 +86,12 @@ bool d3d_transform_stack_disgard();
 
 bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col);
 bool d3d_light_define_point(int id, double x, double y, double z, double range, int col);
+void d3d_light_define_ambient(int col);
 bool d3d_light_enable(int id, bool enable);
+
+namespace enigma {
+    void d3d_light_update_positions();
+}
 
 #include <string>
 

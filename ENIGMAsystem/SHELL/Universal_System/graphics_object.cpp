@@ -39,29 +39,38 @@ namespace enigma
   object_graphics::object_graphics() {}
   object_graphics::object_graphics(unsigned _x, int _y): object_planar(_x,_y) {}
   object_graphics::~object_graphics() {};
-  
+
   INTERCEPT_DEFAULT_COPY(enigma::depthv);
   void depthv::function(variant oldval) {
     rval.d = floor(rval.d);
     if (oldval.rval.d == rval.d) return;
-    drawing_depths[oldval.rval.d].draw_events->unlink(myiter);
-    inst_iter* mynewiter = drawing_depths[rval.d].draw_events->add_inst(myiter->inst);
-     if (instance_event_iterator == myiter)
-       instance_event_iterator = myiter->prev;
-     myiter = mynewiter;
+
+    map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
+    if (it == id_to_currentnextdepth.end()) { // Insert a request to change in depth.
+      id_to_currentnextdepth.insert(pair<int,pair<double,double> >(myiter->inst->id, pair<double,double>(oldval.rval.d,rval.d)));
+    }
+    else { // Update the request to change in depth.
+      (*it).second.second = rval.d;
+    }
   }
   void depthv::init(double d,object_basic* who) {
     myiter = drawing_depths[rval.d = floor(d)].draw_events->add_inst(who);
   }
   void depthv::remove() {
-     drawing_depths[rval.d].draw_events->unlink(myiter);
-     myiter = NULL;
+    map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
+    if (it == id_to_currentnextdepth.end()) { // Local value is valid, use it.
+      drawing_depths[rval.d].draw_events->unlink(myiter);
+    }
+    else { // Local value is invalid, use the one in the map.
+      drawing_depths[(*it).second.first].draw_events->unlink(myiter);
+    }
+    myiter = NULL;
   }
   depthv::~depthv() {}
-  
-  
+
   int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : sprite_get_width(sprite_index); }
   int object_graphics::$sprite_height() const { return sprite_index == -1? 0 : sprite_get_height(sprite_index); }
   int object_graphics::$sprite_xoffset() const { return sprite_index == -1? 0 : sprite_get_xoffset(sprite_index); }
   int object_graphics::$sprite_yoffset() const { return sprite_index == -1? 0 : sprite_get_yoffset(sprite_index); }
+  int object_graphics::$image_number() const { return sprite_index == -1? 0 : sprite_get_number(sprite_index); }
 }

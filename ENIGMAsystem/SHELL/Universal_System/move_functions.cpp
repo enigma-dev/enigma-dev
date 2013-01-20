@@ -95,3 +95,24 @@ void move_towards_point (const double point_x, const double point_y, const doubl
     inst->direction = fmod((atan2(inst->y-point_y,point_x-inst->x)*(180/M_PI))+360,360);
     inst->speed = (newspeed);
 }
+
+extern double random(double x);
+void move_random(const double snapHor, const double snapVer)
+{
+    enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
+    const int mask_ind = ((enigma::object_collisions*)enigma::instance_event_iterator->inst)->mask_index;
+    const int spr_ind = ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->sprite_index;
+    double x1, y1, x2, y2;
+    if (spr_ind == -1 && (mask_ind == -1))
+    {
+        x1 = 0; y1 = 0; x2 = room_width; y2 = room_height;
+    }
+    else
+    {
+        const int mask = (mask_ind >= 0) ? mask_ind : spr_ind;
+        x1 = sprite_get_xoffset(mask); y1 = sprite_get_yoffset(mask); x2 = room_width - sprite_get_width(mask) + sprite_get_xoffset(mask); y2 = room_height - sprite_get_height(mask) + sprite_get_yoffset(mask);
+    }
+
+    inst->x = x1 + (snapHor ? floor(random(x2 - x1)/snapHor)*snapHor : random(x2 - x1));
+    inst->y = y1 + (snapVer ? floor(random(y2 - y1)/snapVer)*snapVer : random(y2 - y1));
+}

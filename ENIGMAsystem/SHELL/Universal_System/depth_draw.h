@@ -30,6 +30,7 @@
 /// structure layers of depth, for both tiles and instances.
 
 #include <map>
+#include <set>
 #include "instance_system.h"
 #include <vector>
 #include "roomsystem.h"
@@ -42,10 +43,12 @@ using namespace std;
 
 namespace enigma {
   struct depth_layer {
-     vector<tile> tiles;
+    vector<tile> tiles;
+    set<int> particlesystem_ids;
     event_iter* draw_events;
     depth_layer();
   };
   extern map<double,depth_layer> drawing_depths;
+  extern map<int,pair<double,double> > id_to_currentnextdepth;
   typedef map<double,depth_layer>::reverse_iterator diter;
 }

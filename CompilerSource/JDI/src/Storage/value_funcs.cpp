@@ -24,11 +24,11 @@
 #include <cfloat>
 #include <cmath>
 
-static inline char* strdupcat(const char* s1, const char* s2) {
+static inline jdi::value strdupcat(const char* s1, const char* s2) {
   int l1 = strlen(s1), l2 = strlen(s2)+1;
   char* res = new char[l1+l2];
   memcpy(res,s1,l1), memcpy(res+l1,s2,l2);
-  return res;
+  return jdi::value(res);
 }
 static inline long fcomp(double x, double y) { return fabs(x - y) < DBL_EPSILON; }
 static inline long fcomp(double x, long y) { return fabs(x - y) < DBL_EPSILON; }

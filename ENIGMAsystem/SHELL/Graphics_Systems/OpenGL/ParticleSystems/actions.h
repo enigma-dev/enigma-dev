@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,61 +25,5 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
 
-using namespace std;
 
-#include "syntax/syncheck.h"
-#include "parser/parser.h"
-
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
-#include "parser/object_storage.h"
-#include "compiler/compile_common.h"
-
-#include "backend/ideprint.h"
-#include "languages/lang_CPP.h"
-
-inline void writei(int x, FILE *f) {
-  fwrite(&x,4,1,f);
-}
-
-int lang_CPP::module_write_sounds(EnigmaStruct *es, FILE *gameModule)
-{
-  // Now we're going to add sounds
-  edbg << es->soundCount << " Sounds:" << flushl;
-  for (int i = 0; i < es->soundCount; i++) {
-    edbg << " " << es->sounds[i].name << flushl;
-    fflush(stdout);
-  }
-  
-  //Magic number
-  fwrite("SND ",4,1,gameModule);
-  
-  //Indicate how many
-  int sound_count = es->soundCount;
-  fwrite(&sound_count,4,1,gameModule);
-  
-  int sound_maxid = 0;
-  for (int i = 0; i < sound_count; i++)
-    if (es->sounds[i].id > sound_maxid)
-      sound_maxid = es->sounds[i].id;
-  fwrite(&sound_maxid,4,1,gameModule);
-  
-  for (int i = 0; i < sound_count; i++)
-  {
-    unsigned sndsz = es->sounds[i].size;
-    if (!sndsz) {
-      user << "Sound `" << es->sounds[i].name << "' has no size. It will be omitted from the game." << flushl;
-      continue;
-    }
-    
-    writei(es->sounds[i].id, gameModule); // id
-    writei(sndsz, gameModule); // Size
-    fwrite(es->sounds[i].data, 1, sndsz, gameModule); // Sound data
-  }
- 
-  edbg << "Done writing sounds." << flushl;
-  return 0;
-}

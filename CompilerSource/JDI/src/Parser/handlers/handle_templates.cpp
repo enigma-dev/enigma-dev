@@ -39,8 +39,8 @@ int context_parser::handle_template(definition_scope *scope, token_t& token, uns
     token.report_error(herr, "Expected opening triangle bracket following `template' token");
     return ERROR_CODE;
   }
-  definition_template *temp = new definition_template("", scope, inherited_flags);
-  definition_tempscope hijack("template<>", scope, 0, temp);
+  definition_tempscope hijack("template<>", scope, 0, new definition_template("", scope, inherited_flags));
+  #define temp ((definition_template*)hijack.source)
   token = read_next_token(&hijack);
   for (;;) {
     string pname; // The name given to this parameter
@@ -146,7 +146,8 @@ int context_parser::handle_template(definition_scope *scope, token_t& token, uns
   }
   
   if (!temp->def) {
-    delete temp;
+    if (!hijack.referenced)
+      delete temp;
     return 0;
   }
   
@@ -193,6 +194,10 @@ int context_parser::handle_template(definition_scope *scope, token_t& token, uns
         token.report_error(herr, "Cannot redeclare `" + temp->name + "' as template: invalid specialization");
         delete temp; return ERROR_CODE;
       }
+    }
+    else {
+      delete temp;
+      return ERROR_CODE;
     }
   }
   return 0;

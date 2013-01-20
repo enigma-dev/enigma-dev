@@ -32,6 +32,8 @@
 using namespace std;
 #include "general/estring.h"
 
+#include "pcs.h"
+
 namespace pcs
 {
   string cargs="",largs="";

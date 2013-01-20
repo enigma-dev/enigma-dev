@@ -36,6 +36,7 @@ using namespace std;
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.h"
 
 using namespace enigma;
 
@@ -89,6 +90,21 @@ void screen_redraw()
 
         draw_back();
 
+        // Apply and clear stored depth changes.
+        for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
+        {
+            enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
+            if (inst_depth != NULL) {
+                drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
+                inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
+                if (instance_event_iterator == inst_depth->depth.myiter) {
+                    instance_event_iterator = inst_depth->depth.myiter->prev;
+                }
+                inst_depth->depth.myiter = mynewiter;
+            }
+        }
+        id_to_currentnextdepth.clear();
+
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
             //loop tiles
@@ -98,9 +114,12 @@ void screen_redraw()
                 draw_background_part(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY);
             }
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
+            //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
                 enigma::instance_event_iterator->inst->myevent_draw();
             enigma::instance_event_iterator = push_it;
+            //particles
+            draw_particlesystems(dit->second.particlesystem_ids);
         }
     }
     else
@@ -212,6 +231,21 @@ void screen_redraw()
 
                 draw_back();
 
+                // Apply and clear stored depth changes.
+                for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
+                {
+                    enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
+                    if (inst_depth != NULL) {
+                        drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
+                        inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
+                        if (instance_event_iterator == inst_depth->depth.myiter) {
+                            instance_event_iterator = inst_depth->depth.myiter->prev;
+                        }
+                        inst_depth->depth.myiter = mynewiter;
+                    }
+                }
+                id_to_currentnextdepth.clear();
+
                 for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
                 {
                     //loop tiles
@@ -229,6 +263,8 @@ void screen_redraw()
                     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
                         enigma::instance_event_iterator->inst->myevent_draw();
                     enigma::instance_event_iterator = push_it;
+                    //particles
+                    draw_particlesystems(dit->second.particlesystem_ids);
                 }
             }
         }

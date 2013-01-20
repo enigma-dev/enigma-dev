@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -37,6 +37,9 @@ bool ini_section_exists(std::string section);
 void ini_key_delete(std::string section, std::string key);
 void ini_section_delete(std::string section);
 
+long long file_size(std::string fname);
+time_t file_access_time(std::string fname);
+time_t file_modified_time(std::string fname);
 /* OS Specific; should be moved */
 
 int file_exists(std::string fname);

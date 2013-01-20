@@ -154,6 +154,7 @@ namespace enigma
   int game_ending();
 }
 
+static bool game_isending = false;
 int main(int argc,char** argv)
 {
   // Copy our parameters
@@ -241,7 +242,7 @@ int main(int argc,char** argv)
 	XCloseDisplay(disp);
 	return 0;*/
 
-	for(;;)
+	while (!game_isending)
 	{
 		while(XQLength(disp))
 			if(handleEvents() > 0)
@@ -256,5 +257,12 @@ int main(int argc,char** argv)
   glXDestroyContext(disp,glxc);
   XCloseDisplay(disp);
 	return 0;
+}
+
+void game_end() {
+  game_isending = true;
+}
+void action_end_game() {
+  game_end();
 }
 

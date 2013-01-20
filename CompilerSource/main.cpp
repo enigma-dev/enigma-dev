@@ -1,29 +1,22 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  main.cpp
+  @brief Implements the main DLL API calls.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <time.h>
 #include <string>
@@ -67,8 +60,7 @@ int m_prog_loop_cfp();
 
 extern void print_err_line_at(size_t a);
 
-extern const char* establish_bearings(const char *compiler);
-
+#include "gcc_interface/gcc_backend.h"
 #include "backend/JavaCallbacks.h"
 
 #ifdef NOT_A_DLL
@@ -79,6 +71,11 @@ extern const char* establish_bearings(const char *compiler);
 #include "languages/lang_CPP.h"
 #include <System/builtins.h>
 #include <API/jdi.h>
+
+dllexport const char* libInit(EnigmaCallbacks* ecs);
+dllexport void libFree();
+dllexport syntax_error *definitionsModified(const char* wscode, const char* targetYaml);
+dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code);
 
 dllexport const char* libInit(EnigmaCallbacks* ecs)
 {
@@ -99,6 +96,8 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   cout << "Implementing JDI basics" << endl;
   jdi::initialize();
   jdi::builtin->output_types();
+  jdi::builtin->add_macro("true","1"); // Temporary, or permanent, fix for true/false in ENIGMA
+  jdi::builtin->add_macro("false","0"); // Added because polygone is a bitch
   cout << endl << endl;
   
   cout << "Choosing language... Eenie, meenie, minie, C++" << endl;
@@ -106,7 +105,7 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   current_language = languages[current_language_name] = new lang_CPP();
   
   cout << "Reading GCC builtins" << endl;
-  const char* a = establish_bearings("Compilers/" CURRENT_PLATFORM_NAME "/gcc.ey");
+  const char* a = current_language->establish_bearings("Compilers/" CURRENT_PLATFORM_NAME "/gcc.ey");
   if (a)
     cout << "ERROR: " << a << endl << "See scrollback for more information.\n";
   
@@ -129,7 +128,6 @@ dllexport void libFree() {
 #include "parser/object_storage.h"
 
 extern void print_definition(string n);
-static bool firstpass = true;
 
 #include "languages/language_adapter.h"
 
@@ -137,7 +135,7 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
 {
   current_language->definitionsModified(wscode, targetYaml);
   return &ide_passback_error;
-};
+}
 
 void quickmember_script(jdi::definition_scope* scope, string name);
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
@@ -152,30 +150,9 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
     quickmember_script(&globals_scope,script_names[i]);
   
   cout << "Starting syntax check." << endl;
-  ide_passback_error.absolute_index = syncheck::syntacheck(code);
-  cout << "That's over." << endl;
-  error_sstring = syncheck::syerr;
-  
-  
-  
-  cout << "Copying error pointer." << endl;
-  ide_passback_error.err_str = error_sstring.c_str();
-  
-  cout << "Computing position." << endl;
-  if (ide_passback_error.absolute_index != -1)
-  {
-    int line = 1, lp = 1;
-    for (int i=0; i<ide_passback_error.absolute_index; i++,lp++) {
-      if (code[i] =='\r')
-        line++, lp = 0, i += code[i+1] == '\n';
-      else if (code[i] == '\n') line++, lp = 0;
-    }
-    
-    ide_passback_error.line = line;
-    ide_passback_error.position = lp;
-  }
-  cout << "In checking code\n" << code << "\n\nat position " << ide_passback_error.absolute_index << "\n\n";
-  cout << endl << "Line " << ide_passback_error.line << ", position " << ide_passback_error.position << ": " << ide_passback_error.err_str << endl<< endl;
-  cout << "All done." << endl;
+  definition_scope fakecode, fakelocal, fakeglobal;
+  EDL_AST ast(&fakecode, &fakelocal, &fakeglobal);
+  bool serr = ast.parse_edl(code);
+  // NEWPARSER: TODO: FIXME: Give a list of errors, somehow
   return &ide_passback_error;
 }

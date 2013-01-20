@@ -165,5 +165,5 @@ void token_t::report_warning(error_handler *herr, std::string error) const
     p = pos
   );
   
-  herr->error(error, fn, l, p);
+  herr->warning(error, fn, l, p);
 }

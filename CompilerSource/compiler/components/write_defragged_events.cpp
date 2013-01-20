@@ -1,29 +1,23 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/**
+  @file  write_defragged_events.cpp
+  @brief Implements the method in the C++ plugin that writes an optimized event loop
+         to the engine.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <stdio.h>
 #include <iostream>
@@ -49,30 +43,31 @@ struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} v
 map<string,foundevent> used_events;
 typedef map<string,foundevent>::iterator evfit;
 
-int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
+int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h");
-  wto << license;
+  wto << gen_license;
 
 
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
   ***********************************************************/
   used_events.clear();
-  for (int i = 0; i < es->gmObjectCount; i++)
-    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
-      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
+  for (int i = 0; i < ctex.es->gmObjectCount; i++)
+    for (int ii = 0; ii < ctex.es->gmObjects[i].mainEventCount; ii++)
+      for (int iii = 0; iii < ctex.es->gmObjects[i].mainEvents[ii].eventCount; iii++)
       {
-        const int mid = es->gmObjects[i].mainEvents[ii].id, id = es->gmObjects[i].mainEvents[ii].events[iii].id;
+        const int mid = ctex.es->gmObjects[i].mainEvents[ii].id, id = ctex.es->gmObjects[i].mainEvents[ii].events[iii].id;
         if (event_is_instance(mid,id))
           used_events[event_stacked_get_root_name(mid)].inc(mid,id);
         else
           used_events[event_get_function_name(mid,id)].inc(mid,id);
       }
 
-  /* Some events are included in all objects, even if the user
-  ** hasn't specified code for them. Account for those here.
-  ***********************************************************/
+  /* ********************************************************* *\
+  ** Some events are included in all objects, even if the user **
+  ** hasn't specified code for them. Account for those here.   **
+  \* ********************************************************* */
   for (size_t i=0; i<event_sequence.size(); i++)
   {
     const int mid = event_sequence[i].first, id = event_sequence[i].second;
@@ -80,14 +75,14 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     {
       used_events[event_get_function_name(mid,id)].f2(mid,id); // ...Reserve it anyway.
 
-      for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) // Then shell it out into the other objects.
+      for (po_i it = ctex.parsed_objects.begin(); it != ctex.parsed_objects.end(); it++) // Then shell it out into the other objects.
       {
         bool exists = false;
-        for (unsigned j = 0; j < it->second->events.size; j++)
-          if (it->second->events[j].mainId == mid and it->second->events[j].id == id)
+        for (unsigned j = 0; j < it->second->events.size(); j++)
+          if (it->second->events[j]->main_id == mid and it->second->events[j]->id == id)
             { exists = true; break; }
         if (!exists)
-          it->second->events[it->second->events.size] = parsed_event(mid, id, it->second);
+          it->second->events.push_back(new parsed_event(mid, id, it->second, ctex.global, ""));
       }
     }
   }
@@ -119,7 +114,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   ** well as an initializer function for the whole system.
   ***************************************************************/
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.h");
-  wto << license;
+  wto << gen_license;
   wto << "namespace enigma" << endl << "{" << endl;
 
   // Start by defining storage locations for our event lists to iterate.
@@ -128,9 +123,8 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 
   // Here's the initializer
   wto << "  int event_system_initialize()" << endl << "  {" << endl;
-    wto  << "    window_set_region_scale(" << es->gameSettings.scaling << ", 0);" << endl;
     wto  << "    events = new event_iter[" << used_events.size() << "]; // Allocated here; not really meant to change." << endl;
-    int obj_high_id = parsed_objects.rbegin() != parsed_objects.rend() ? parsed_objects.rbegin()->first : 0;
+    int obj_high_id = ctex.parsed_objects.rbegin() != ctex.parsed_objects.rend() ? ctex.parsed_objects.rbegin()->first : 0;
     wto  << "    objects = new objectid_base[" << (obj_high_id+1) << "]; // Allocated here; not really meant to change." << endl;
 
     int ind = 0;
@@ -141,17 +135,17 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 
     // Game setting initaliser
   wto << "  int game_settings_initialize()" << endl << "  {" << endl;
-/*    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
-    wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;
-    if (es->gameSettings.displayCursor)
+/*    wto  << "    window_set_fullscreen(" << ctex.es->gameSettings.startFullscreen << ");" << endl;
+    wto  << "    texture_set_interpolation(" << ctex.es->gameSettings.interpolate << "); " << endl;
+    if (ctex.es->gameSettings.displayCursor)
         wto  << "    window_set_cursor(cr_default);" << endl;
     else
         wto  << "    window_set_cursor(cr_none);" << endl;
-    wto  << "    window_set_region_scale(" << es->gameSettings.scaling/100.0 << ", 0);" << endl;
-    wto  << "    window_set_sizeable(" << es->gameSettings.allowWindowResize << ");" << endl;
-    wto  << "    window_set_stayontop(" << es->gameSettings.alwaysOnTop << ");" << endl;
-    wto  << "    window_set_showborder(" << !es->gameSettings.dontDrawBorder << ");" << endl;
-    wto  << "    window_set_showicons(" << !es->gameSettings.dontShowButtons << ");" << endl;*/  //TODO: LGM needs settings sorted before reenabling
+    wto  << "    window_set_region_scale(" << ctex.es->gameSettings.scaling/100.0 << ", 0);" << endl;
+    wto  << "    window_set_sizeable(" << ctex.es->gameSettings.allowWindowResize << ");" << endl;
+    wto  << "    window_set_stayontop(" << ctex.es->gameSettings.alwaysOnTop << ");" << endl;
+    wto  << "    window_set_showborder(" << !ctex.es->gameSettings.dontDrawBorder << ");" << endl;
+    wto  << "    window_set_showicons(" << !ctex.es->gameSettings.dontShowButtons << ");" << endl;*/  //TODO: LGM needs settings sorted before reenabling
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
 
@@ -175,18 +169,18 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
         wto << "    enigma::update_globals();" << endl,
         wto << "    " << endl;
     }
-    if (es->gameSettings.letEscEndGame)
+    if (ctex.es->gameSettings.letEscEndGame)
         wto << "    if (keyboard_check_pressed(vk_escape)) game_end();" << endl;
-    if (es->gameSettings.letF4SwitchFullscreen)
+    if (ctex.es->gameSettings.letF4SwitchFullscreen)
         wto << "    if (keyboard_check_pressed(vk_f4)) window_set_fullscreen(!window_get_fullscreen());" << endl;
-    if (es->gameSettings.letF1ShowGameInfo)
+    if (ctex.es->gameSettings.letF1ShowGameInfo)
         wto << "    if (keyboard_check_pressed(vk_f1)) show_info();" << endl;
-    if (es->gameSettings.letF9Screenshot)
+    if (ctex.es->gameSettings.letF9Screenshot)
         wto << "    if (keyboard_check_pressed(vk_f9)) {}" << endl;   //TODO: Screenshot function
-    if (es->gameSettings.letF5SaveF6Load)  //TODO: uncomment after game save and load fucntions implemented
+    if (ctex.es->gameSettings.letF5SaveF6Load)  //TODO: uncomment after game save and load fucntions implemented
     {
-        wto << "    //if (keyboard_check_pressed(vk_f5)) game_save('_save" << es->gameSettings.gameId << ".sav');" << endl;
-        wto << "    //if (keyboard_check_pressed(vk_f6)) game_load('_save" << es->gameSettings.gameId << ".sav');" << endl;
+        wto << "    //if (keyboard_check_pressed(vk_f5)) game_save('_save" << ctex.es->gameSettings.gameId << ".sav');" << endl;
+        wto << "    //if (keyboard_check_pressed(vk_f6)) game_load('_save" << ctex.es->gameSettings.gameId << ".sav');" << endl;
     }
     wto << "    enigma::dispose_destroyed_instances();" << endl;
     wto << "    enigma::sleep_for_framerate(room_speed);" << endl;

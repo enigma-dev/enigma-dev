@@ -1,18 +1,24 @@
-/** Copyright (C) 2008-2012 Josh Ventura
-***
-*** This file is a part of the ENIGMA Development Environment.
-***
-*** ENIGMA is free software: you can redistribute it and/or modify it under the
-*** terms of the GNU General Public License as published by the Free Software
-*** Foundation, version 3 of the license or any later version.
-***
-*** This application and its source code is distributed AS-IS, WITHOUT ANY
-*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-*** details.
-***
-*** You should have received a copy of the GNU General Public License along
-*** with this code. If not, see <http://www.gnu.org/licenses/>
+/**
+  @file  standalone_main.cpp
+  @brief Implements a testing environment for all basic ENIGMA features.
+  
+  This file's main() method can be run without a development environment
+  attached if invoked from the main ENIGMA directory.
+  
+  @section License
+    Copyright (C) 2008-2013 Josh Ventura
+    This file is a part of the ENIGMA Development Environment.
+
+    ENIGMA is free software: you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation, version 3 of the license or any later version.
+
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE. See the GNU General Public License for more details.
+
+    You should have recieved a copy of the GNU General Public License along
+    with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
 #include <time.h>
@@ -48,9 +54,7 @@ int m_prog_loop_cfp();
  #include <cstdio>
 #endif
 
-extern const char* establish_bearings(const char* compiler);
-extern void print_definition(string);
-
+#include "gcc_interface/gcc_backend.h"
 
 extern  int ext_count;
 
@@ -65,16 +69,16 @@ extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__v
 
 inline string fc(const char* fn)
 {
-    FILE *pt = fopen(fn,"rb");
-    if (pt==NULL) return "";
+    FILE *ptf = fopen(fn,"rb");
+    if (!ptf) return "";
     else {
-      fseek(pt,0,SEEK_END);
-      size_t sz = ftell(pt);
-      fseek(pt,0,SEEK_SET);
+      fseek(ptf,0,SEEK_END);
+      size_t sz = ftell(ptf);
+      fseek(ptf,0,SEEK_SET);
 
-      char a[sz+1];
-      sz = fread(a,1,sz,pt);
-      fclose(pt);
+      char *a = (char*)alloca(sz+1);
+      sz = fread(a,1,sz,ptf);
+      fclose(ptf);
 
       a[sz] = 0;
       return a;
@@ -96,11 +100,12 @@ syntax_error *definitionsModified(const char*,const char*);
 #include "general/bettersystem.h"
 #include <System/builtins.h>
 #include "compiler/jdi_utility.h"
+#include "parser/parse_edl.h"
 
 void do_cli(jdi::context &ct);
 syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code);
 int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
   puts("Attempting to run");
   /*e_execp("gcc -E -x c++ -v blank.txt","");*/
@@ -119,7 +124,7 @@ int main(int argc, char* argv[])
     /* "target-graphics: OpenGL\n" 	 
     "target-audio: OpenAL\n"
     "target-collision: BBox\n"
-    /* Straight from LGM on Linux */
+    / * Straight from LGM on Linux */
     "treat-literals-as: 0\n"
     "sample-lots-of-radios: 0\n"
     "inherit-equivalence-from: 0\n"
@@ -151,6 +156,23 @@ int main(int argc, char* argv[])
     quickmember_variable(&globals_scope, jdi::builtin_type__int, "sprite0");
   }
   
+  cout << endl << endl << endl << endl << endl <<
+  "=====================================================\nTest drive new EDL parser\n====================================================="
+  << endl << endl;
+  
+  definition_scope cs("[obj]", main_context->get_global(), 0), ls, gs;
+  
+  EDL_AST east(&cs, &ls, &gs);
+  if (east.parse_edl(in2))
+    cout << "Parse failed. :(" << endl << endl;
+  else {
+    cout << "Parse succeeded :)" << endl << endl;
+    cout << east.toString();
+    cout << endl << endl << endl << endl;
+  }
+  
+  
+  /*
   EnigmaStruct es = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -174,7 +196,7 @@ int main(int argc, char* argv[])
   es.gmObjects = &obj;
   es.gmObjectCount = 1;
   
-  /*SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
+  / *SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
   Sprite sprite = {"spr_0", 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 32, 32, &subimages, 1, NULL, 0};
   Sprite sprites[2] = { sprite, sprite };
   es.spriteCount = 2; es.sprites = sprites;

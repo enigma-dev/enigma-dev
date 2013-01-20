@@ -67,8 +67,11 @@ namespace jdip {
     /// A copy of the name of this macro; std::string will take care of the aliasing.
     string name;
     
-    // Release a macro
+    /// Release a macro
     static void free(const macro_type* whom);
+    
+    /// Convert this macro to a string
+    string toString() const;
     
     protected:
       /**

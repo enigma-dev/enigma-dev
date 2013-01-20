@@ -59,9 +59,11 @@ namespace enigma
   unsigned graphics_duplicate_texture(int tex)
   {
     GLuint texture = tex;
-    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
     glColor4f(1,1,1,1);
+    glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
     glBindTexture(GL_TEXTURE_2D, texture);
     int w, h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
@@ -74,25 +76,45 @@ namespace enigma
     return dup_tex;
   }
 
-  unsigned graphics_create_texture_alpha_from_texture(int tex, int copy_tex)
+  void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
     GLuint texture = tex, copy_texture = copy_tex;
-    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
     glColor4f(1,1,1,1);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_BLEND);
+
+    int w, h, size;
     glBindTexture(GL_TEXTURE_2D, texture);
-    int w, h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D, copy_texture);
-    char* bitmap = new char[(h<<(lgpp2(w)+2))|2];
+    size = (h<<(lgpp2(w)+2))|2;
+    char* bitmap = new char[size];
+    char* bitmap2 = new char[size];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
-    unsigned dup_tex = graphics_create_texture(w, h, bitmap);
+    glBindTexture(GL_TEXTURE_2D, copy_texture);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap2);
+
+    for (int i = 3; i < size; i += 4)
+        bitmap[i] = (bitmap2[i-1] + bitmap2[i-2] + bitmap2[i-3])/3;
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    if (interpolate_textures)
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    }
+    else
+    {
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     delete[] bitmap;
+    delete[] bitmap2;
     glPopAttrib();
-    return dup_tex;
   }
 
   void graphics_delete_texture(int tex)

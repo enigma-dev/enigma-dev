@@ -176,19 +176,7 @@ void context::output_types(ostream &out) {
 }
 static inline void print_macro(macro_iter it, ostream &out)
 {
-  if (it->second->argc >= 0)
-  {
-    macro_function *mf = (macro_function*)it->second;
-    out << "#define " << it->first << "(";
-    for (size_t i = 0; i < mf->args.size(); i++)
-      out << mf->args[i] << (i+1 < mf->args.size() ? ", " : ((size_t)it->second->argc > mf->args.size()? "...": ""));
-    out << ") \\" << endl;
-    for (size_t i = 0; i < mf->value.size(); i++)
-      out << "  " << mf->value[i].toString(mf) << (i+1 < mf->value.size()? "\\" : "") << endl;
-  }
-  else {
-    out << "#define " << it->first << endl << "  " << ((macro_scalar*)it->second)->value << endl;
-  }
+  out << it->second->toString();
 }
 void context::output_macro(string macroname, ostream &out)
 {

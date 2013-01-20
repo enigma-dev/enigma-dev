@@ -1,7 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 IsmAvatar <IsmAvatar@gmail.com>                          **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>                          **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -26,67 +25,14 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
+#include "Universal_System/collisions_object.h"
 
-using namespace std;
+enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, bool notme, double x, double y);
+enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2);
+enigma::object_collisions* const collide_inst_line(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2);
+enigma::object_collisions* const collide_inst_point(int object, bool solid_only, bool prec, bool notme, int x1, int y1);
+enigma::object_collisions* const collide_inst_circle(int object, bool solid_only, bool prec, bool notme, int x1, int y1, double r);
+enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool prec, bool notme, int x1, int y1, double rx, double ry);
+void destroy_inst_point(int object, bool solid_only, int x1, int y1);
+void change_inst_point(int obj, bool perf, int x1, int y1);
 
-
-#include "syntax/syncheck.h"
-#include "parser/parser.h"
-
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
-#include "parser/object_storage.h"
-#include "compiler/compile_common.h"
-
-#include "backend/ideprint.h"
-
-#include "languages/lang_CPP.h"
-
-inline void writei(int x, FILE *f) {
-  fwrite(&x,4,1,f);
-}
-
-int lang_CPP::module_write_paths(EnigmaStruct *es, FILE *gameModule)
-{
-  // Now we're going to add paths
-  edbg << es->pathCount << " Adding Paths to Game Module: " << flushl;
-
-  //Magic Number
-  fwrite("PTH ",4,1,gameModule);
-
-  //Indicate how many
-  int path_count = es->pathCount;
-  fwrite(&path_count,4,1,gameModule);
-
-  int path_maxid = 0;
-  for (int i = 0; i < path_count; i++)
-    if (es->paths[i].id > path_maxid)
-      path_maxid = es->paths[i].id;
-  fwrite(&path_maxid,4,1,gameModule);
-
-  for (int i = 0; i < path_count; i++)
-  {
-    writei(es->paths[i].id,gameModule); //id
-
-    writei(es->paths[i].smooth,gameModule);
-    writei(es->paths[i].closed,gameModule);
-    writei(es->paths[i].precision,gameModule);
-    // possibly snapX/Y?
-
-    // Track how many path points we're copying
-    int pointCount = es->paths[i].pointCount;
-    writei(pointCount,gameModule);
-
-    for (int ii = 0; ii < pointCount; ii++)
-    {
-      writei(es->paths[i].points[ii].x,gameModule);
-      writei(es->paths[i].points[ii].y,gameModule);
-      writei(es->paths[i].points[ii].speed,gameModule);
-    }
-  }
-
-  edbg << "Done writing paths." << flushl;
-  return 0;
-}

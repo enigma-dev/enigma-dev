@@ -44,25 +44,27 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
     if (angle == 0)
     {
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
+        const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
 
-        *leftv   = (xsp ? left : -right - 2) + x + .5;
-        *rightv  = (xsp ? right : -left) + x + .5;
-        *topv    = (ysp ? top : -bottom - 2) + y + .5;
-        *bottomv = (ysp ? bottom : -top) + y + .5;
+        *leftv   = (xsp ? lsc : rsc) + x + .5;
+        *rightv  = (xsp ? rsc : lsc) + x + .5;
+        *topv    = (ysp ? tsc : bsc) + y + .5;
+        *bottomv = (ysp ? bsc : tsc) + y + .5;
     }
     else
     {
         const double arad = angle*(M_PI/180.0);
         const double sina = sin(arad), cosa = cos(arad);
+        const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
         const int quad = int(fmod(fmod(angle, 360) + 360, 360)/90.0);
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0),
                    q12 = (quad == 1 || quad == 2), q23 = (quad == 2 || quad == 3),
                    xs12 = xsp^q12, sx23 = xsp^q23, ys12 = ysp^q12, ys23 = ysp^q23;
 
-        *leftv   = sina*(xs12 ? left : -right - 2) + cosa*(ys23 ? top : -bottom - 2) + x + .5;
-        *rightv  = sina*(xs12 ? right : left) + cosa*(ys23 ? bottom : top) + x + .5;
-        *topv    = cosa*(ys12 ? top : -bottom - 2) - sina*(sx23 ? right : left) + y + .5;
-        *bottomv = cosa*(ys12 ? bottom : top) - sina*(sx23 ? left : -right - 2) + y + .5;
+        *leftv   = cosa*(xs12 ? lsc : rsc) + sina*(ys23 ? tsc : bsc) + x + .5;
+        *rightv  = cosa*(xs12 ? rsc : lsc) + sina*(ys23 ? bsc : tsc) + x + .5;
+        *topv    = cosa*(ys12 ? tsc : bsc) - sina*(sx23 ? rsc : lsc) + y + .5;
+        *bottomv = cosa*(ys12 ? bsc : tsc) - sina*(sx23 ? lsc : rsc) + y + .5;
     }
 }
 
@@ -72,7 +74,6 @@ static inline int max(int x, int y) { return x>y? x : y; }
 static inline double max(double x, double y) { return x>y? x : y; }
 static inline double direction_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
 static inline double point_direction(double x1,double y1,double x2,double y2) {return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);}
-extern double random(double x);
 
 bool place_free(double x,double y)
 {
@@ -225,8 +226,8 @@ double distance_to_point(double x, double y)
 
     get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
 
-    return fabs(hypot(min(x1 + left1 - x, x1 + right1 - x),
-                    min(y1 + top1 - y, y1 + bottom1 - y)));
+    return fabs(hypot(min(left1 - x, right1 - x),
+                    min(top1 - y, bottom1 - y)));
 }
 
 double move_contact_object(int object, double angle, double max_dist, bool solid_only)
@@ -279,10 +280,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia1 = inst2->image_angle;
+                     ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
 
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
+        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
 
         if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
         {
@@ -370,83 +371,108 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
         max_dist = DMAX;
     }
     double dist = 0;
-    angle = ((angle %(variant) 360) + 360) %(variant) 360;
+    angle = fmod(angle, 360.0);
     double radang = angle*(M_PI/180.0);
     const double sin_angle = sin(radang), cos_angle = cos(radang);
     const int quad = int(angle/90.0);
-    const bbox_rect_t &box = inst1->$bbox_relative();
-    const double x1 = inst1->x, y1 = inst1->y,
-                 xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
-                 ia1 = inst1->image_angle;
-    int left1, top1, right1, bottom1;
+    const double    xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
+                     ia1 = inst1->image_angle;
 
-    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+    const double x_start = inst1->x, y_start = inst1->y;
 
-    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
+    bool had_collision = true;
+
+    while (had_collision) // If there was no collision in the last iteration, we have moved outside the object.
     {
-        const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
-        if (inst2->id == inst1->id || (solid_only && !inst2->solid))
-            continue;
-        if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
-            continue;
-        const bbox_rect_t &box2 = inst2->$bbox_relative();
-        const double x2 = inst2->x, y2 = inst2->y,
-                     xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia1 = inst2->image_angle;
-        int left2, top2, right2, bottom2;
-
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
-
-        if (!(right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1))
-            continue;
-
-        switch (quad)
+        had_collision = false;
+        for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
         {
-            case 0:
-                if (direction_difference(point_direction(right1, top1, right2, top2),angle) < 0)
+            const bbox_rect_t &box = inst1->$bbox_relative();
+            const double x1 = inst1->x, y1 = inst1->y;
+            int left1, top1, right1, bottom1;
+
+            get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
+
+            const enigma::object_collisions* inst2 = (enigma::object_collisions*)*it;
+            if (inst2->id == inst1->id || (solid_only && !inst2->solid))
+                continue;
+            if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
+                continue;
+            const bbox_rect_t &box2 = inst2->$bbox_relative();
+            const double x2 = inst2->x, y2 = inst2->y,
+                         xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
+                         ia2 = inst2->image_angle;
+            int left2, top2, right2, bottom2;
+
+            get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
+
+            if (!(right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1))
+                continue;
+
+            had_collision = true;
+
+            // Move at least one step every time there is a collision.
+            const double min_dist = dist + 1;
+
+            switch (quad)
+            {
+                case 0:
+                    if (direction_difference(point_direction(left1, bottom1, right2, top2),angle) < 0)
+                    {
+                        dist += ((bottom1) - (top2))/sin_angle;
+                    }
+                    else
+                    {
+                        dist += ((right2) - (left1))/cos_angle;
+                    }
+                break;
+                case 1:
+                    if (direction_difference(point_direction(right1, bottom1, left2, top2),angle) < 0)
+                    {
+                        dist += ((left2) - (right1))/cos_angle;
+                    }
+                    else
+                    {
+                        dist += ((bottom1) - (top2))/sin_angle;
+                    }
+                break;
+                case 2:
+                if (direction_difference(point_direction(right1, top1, left2, bottom2),angle) < 0)
                 {
-                    dist = max(dist, ((bottom1) - (top2) + contact_distance)/sin_angle);
+                    dist += ((top1) - (bottom2))/sin_angle;
                 }
                 else
                 {
-                    dist = max(dist, ((right2) - (left1) + contact_distance)/cos_angle);
+                    dist += ((left2) - (right1))/cos_angle;
                 }
-            break;
-            case 1:
-                if (direction_difference(point_direction(left1, top1, left2, top2),angle) < 0)
-                {
-                    dist = max(dist, ((left2) - (right1) - contact_distance)/cos_angle);
+                break;
+                case 3:
+                    if (direction_difference(point_direction(left1, top1, right2, bottom2),angle) < 0)
+                    {
+                        dist += ((right2) - (left1))/cos_angle;
+                    }
+                    else
+                    {
+                        dist += ((top1) - (bottom2))/sin_angle;
+                    }
+                break;
+            }
+            dist = max(min(dist, max_dist), min_dist);
+            inst1->x = x_start + cos_angle*dist;
+            inst1->y = y_start - sin_angle*dist;
+
+            for (int i = 0; i < 1; i++) // Move a single step on if the moving was not precise.
+            {
+                if (collide_inst_inst(inst2->id, solid_only, true, inst1->x, inst1->y) == NULL) {
+                    break;
                 }
-                else
-                {
-                    dist = max(dist, ((bottom1) - (top2) + contact_distance)/sin_angle);
-                }
-            break;
-            case 2:
-                if (direction_difference(point_direction(left1, bottom1, left2, bottom2),angle) < 0)
-                {
-                    dist = max(dist, ((top1) - (bottom2) - contact_distance)/sin_angle);
-                }
-                else
-                {
-                    dist = max(dist, ((left2) - (right1) - contact_distance)/cos_angle);
-                }
-            break;
-            case 3:
-                if (direction_difference(point_direction(right1, bottom1, right2, bottom2),angle) < 0)
-                {
-                    dist = max(dist, ((right2) - (left1) + contact_distance)/cos_angle);
-                }
-                else
-                {
-                    dist = max(dist, ((top1) - (bottom2) - contact_distance)/sin_angle);
-                }
-            break;
+                dist += 1;
+                inst1->x = x_start + cos_angle*dist;
+                inst1->y = y_start - sin_angle*dist;
+            }
         }
     }
-    dist = min(dist, max_dist);
-    inst1->x += cos_angle*dist;
-    inst1->y -= sin_angle*dist;
+
     return dist;
 }
 
@@ -455,13 +481,17 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
         return -4;
-    if (place_meeting(inst1->x, inst1->y, object))
-    {
-        inst1->x -= inst1->hspeed;
-        inst1->y -= inst1->vspeed;
-    }
-    else if (!place_meeting(inst1->x+inst1->hspeed, inst1->y+inst1->vspeed, object))
+
+    if (collide_inst_inst(object, solid_only, true, inst1->x, inst1->y) == NULL &&
+        collide_inst_inst(object, solid_only, true, inst1->x + inst1->hspeed, inst1->y + inst1->vspeed) == NULL) {
         return false;
+    }
+
+    if (collide_inst_inst(object, solid_only, true, inst1->x, inst1->y) != NULL) {
+        // Return the instance to its previous position.
+        inst1->x = inst1->xprevious;
+        inst1->y = inst1->yprevious;
+    }
 
     const double angle = inst1->direction, radang = angle*(M_PI/180.0), DBL_EPSILON = 0.00001;
     double sin_angle = sin(radang), cos_angle = cos(radang), pc_corner, pc_dist, max_dist = 1000000;
@@ -485,10 +515,10 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
         const bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
-                     ia1 = inst2->image_angle;
+                     ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
 
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia1);
+        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
 
         if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
             return false;
@@ -746,13 +776,15 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, in
 }
 
 void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int inside) {
-    std::map<int,enigma::inst_iter*>::iterator iter;
-    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter) {
+    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    while (iter != enigma::instance_deactivated_list.end()) {
 
         enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
 
-        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) { //no sprite/mask then no collision
+            ++iter;
             continue;
+        }
 
         const bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
@@ -762,17 +794,37 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int 
         int left, top, right, bottom;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
+        bool removed = false;
         if (left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) {
             if (inside) {
                 inst->activate();
-                enigma::instance_deactivated_list.erase(iter);
+                enigma::instance_deactivated_list.erase(iter++);
+                removed = true;
             }
         } else {
             if (!inside) {
                 inst->activate();
-                enigma::instance_deactivated_list.erase(iter);
+                enigma::instance_deactivated_list.erase(iter++);
+                removed = true;
             }
         }
+        if (!removed) {
+            ++iter;
+        }
+    }
+}
+
+static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, double ly2)
+{
+    // Formula: x^2/a^2 + y^2/b^2 = 1   <=>   y = +/- sqrt(b^2*(1 - x^2/a^2))
+
+    const double inner = ry*ry*(1 - x*x/(rx*rx));
+    if (inner < 0) {
+        return false;
+    }
+    else {
+        const double y1 = -sqrt(inner), y2 = sqrt(inner);
+        return y1 <= ly2 && ly1 <= y2;
     }
 }
 
@@ -795,7 +847,13 @@ void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
         int left, top, right, bottom;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
 
-        if (fabs(hypot(min(x1 + left - x, x1 + right - x), min(y1 + top - y, y1 + bottom - y))) <= r)
+        const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, top-y, left-x, right-x) ||
+                                 line_ellipse_intersects(r, r, bottom-y, left-x, right-x) ||
+                                 (x >= left && x <= right && y >= top && y <= bottom); // Circle inside bbox.
+
+        if (intersects)
         {
             if (inside)
             {
@@ -814,15 +872,17 @@ void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
     }
 }
 
+
 void instance_activate_circle(int x, int y, int r, int inside)
 {
-    std::map<int,enigma::inst_iter*>::iterator iter;
-    for (iter = enigma::instance_deactivated_list.begin(); iter != enigma::instance_deactivated_list.end(); ++iter)
-    {
+    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    while (iter != enigma::instance_deactivated_list.end()) {
         enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
 
-        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) { //no sprite/mask then no collision
+            ++iter;
             continue;
+        }
 
         const bbox_rect_t &box = inst->$bbox_relative();
         const double x1 = inst->x, y1 = inst->y,
@@ -832,12 +892,20 @@ void instance_activate_circle(int x, int y, int r, int inside)
         int left, top, right, bottom;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
 
-        if (fabs(hypot(min(x1 + left - x, x1 + right - x), min(y1 + top - y, y1 + bottom - y))) <= r)
+        const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, right-x, top-y, bottom-y) ||
+                                 line_ellipse_intersects(r, r, top-y, left-x, right-x) ||
+                                 line_ellipse_intersects(r, r, bottom-y, left-x, right-x) ||
+                                 (x >= left && x <= right && y >= top && y <= bottom); // Circle inside bbox.
+
+        bool removed = false;
+        if (intersects)
         {
             if (inside)
             {
                 inst->activate();
-                enigma::instance_deactivated_list.erase(iter);
+                enigma::instance_deactivated_list.erase(iter++);
+                removed = true;
             }
         }
         else
@@ -845,8 +913,12 @@ void instance_activate_circle(int x, int y, int r, int inside)
             if (!inside)
             {
                 inst->activate();
-                enigma::instance_deactivated_list.erase(iter);
+                enigma::instance_deactivated_list.erase(iter++);
+                removed = true;
             }
+        }
+        if (!removed) {
+            ++iter;
         }
     }
 }
@@ -868,26 +940,6 @@ void position_change(double x1, double y1, int obj, bool perf)
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom)
-            instance_change(obj, perf);
+            enigma::instance_change_inst(obj, perf, inst);
     }
-}
-
-void move_random(const double snapHor, const double snapVer)
-{
-    enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-    const int mask_ind = ((enigma::object_collisions*)enigma::instance_event_iterator->inst)->mask_index;
-    const int spr_ind = ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->sprite_index;
-    if (spr_ind == -1 && (mask_ind == -1))
-        return;
-    const int mask = mask_ind >= 0 ? mask_ind : spr_ind;
-    const double x1 = sprite_get_xoffset(mask), y1 = sprite_get_yoffset(mask), x2 = room_width - sprite_get_width(mask) + sprite_get_xoffset(mask), y2 = room_height - sprite_get_height(mask) + sprite_get_yoffset(mask);
-
-    int cutoff = 300;
-    do
-    {
-        inst->x = x1 + (snapHor ? floor(random(x2 - x1)/snapHor)*snapHor : random(x2 - x1));
-        inst->y = y1 + (snapVer ? floor(random(y2 - y1)/snapVer)*snapVer : random(y2 - y1));
-        cutoff--;
-    }
-    while (collide_inst_inst(all,true,true,inst->x,inst->y) && cutoff);
 }

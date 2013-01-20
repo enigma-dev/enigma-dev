@@ -1,4 +1,4 @@
-/** Copyright (C) 2011 Josh Ventura
+/** Copyright (C) 2011-2012 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <iostream>
 #include <cmath>
 using namespace std;
 
@@ -50,19 +51,23 @@ namespace enigma
     e_joystick(int d, string n, int ac, int bc): device(d), name(n), axiscount(ac), buttoncount(bc),
       axis(new float[ac]), button(new bool[bc]), threashold(.25),
       wrapaxis_positive(new char[ac]), wrapaxis_negative(new char[ac]), wrapbutton(new char[bc])
-      {
+    {
         for (int i = 0; i < 8; i++)
           axis[i] = wrapaxis_positive[i] = wrapaxis_negative[i] = wrapbutton[i] = button[i] = 0;
         for (int i = 8; i < 16; i++)
           wrapbutton[i] = button[i] = 0;
+    }
+    
+    ~e_joystick() {
+      close(device);
     }
   };
   static vector<e_joystick*> joysticks;
   
   void init_joysticks()
   {
+    joystick_load(0);
     joystick_load(1);
-    joystick_load(2);
   }
   
   static void handle_joystick(e_joystick *my_joystick)
@@ -82,7 +87,7 @@ namespace enigma
         else
         {
           //printf("Axis %d rotated in %d\n", a.number, a.value);
-          float at = my_joystick->axis[a.number] = double(abs(a.value) > 5 ? a.value : 0) / 32767;
+          float at = my_joystick->axis[a.number] = (abs(a.value) > 5 ? double(a.value) / 32767. : 0.);
           //printf("Wrap: %d, %d\n",my_joystick->wrapaxis_negative[a.number],my_joystick->wrapaxis_positive[a.number]);
           if (a.value <= 0 and my_joystick->wrapaxis_negative[a.number])
             enigma::keybdstatus[(int)my_joystick->wrapaxis_negative[a.number]] = at < -my_joystick->threashold;
@@ -112,9 +117,13 @@ namespace enigma
 
 bool joystick_load(int id)
 {
-  string devn = "/dev/input/js";
-  char dnum[16]; sprintf(dnum,"%d",id - 1);
-  devn += dnum;
+  if (enigma::joysticks.size() <= id)
+    enigma::joysticks.resize(id+1, 0);
+  else
+     delete enigma::joysticks[id];
+  
+  char sps[32]; sprintf(sps,"/dev/input/js%d",id);
+  string devn(sps);
   int device = open(devn.c_str(), O_RDONLY|O_NONBLOCK);
   if (device == -1)
     return false;
@@ -129,11 +138,8 @@ bool joystick_load(int id)
     devn = name;
   printf("Joystick name: %s\n",name);
   
-  while ((signed)enigma::joysticks.size() < id)
-    enigma::joysticks.push_back(NULL);
-  
-  enigma::e_joystick* jsn = new enigma::e_joystick(device, devn, ac, bc);
-  enigma::joysticks.push_back(jsn);
+  enigma::e_joystick* const jsn = new enigma::e_joystick(device, devn, ac, bc);
+  enigma::joysticks[id] = jsn;
   enigma::handle_joystick(jsn);
   return true;
 }

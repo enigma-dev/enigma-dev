@@ -32,8 +32,6 @@
 #include "var4.h"
 #include "reflexive_types.h"
 
-#include "ENIGMA_GLOBALS.h" // TODO: Do away with this sloppy infestation permanently!
-
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -72,14 +70,12 @@ namespace enigma
   void roomstruct::gotome(bool gamestart)
   {
     //Destroy all objects
-    enigma::nodestroy=1;
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
       it->myevent_roomend();
       if (!((object_planar*)*it)->persistent)
-      instance_destroy(it->id);
+      instance_destroy(it->id, false);
     }
-    enigma::nodestroy = 0;
 
     // Set the index to self
     room.rval.d = id;
@@ -135,12 +131,11 @@ namespace enigma
       is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
     }
 
+    for (int i = 0; i<instancecount; i++)
+      is[i]->myevent_create();
     if (gamestart)
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_gamestart();
-
-    for (int i = 0; i<instancecount; i++)
-      is[i]->myevent_create();
 
     createcode();
   }
@@ -216,11 +211,11 @@ int room_count() {
   return enigma::room_loadtimecount;
 }
 
-int room_goto_first()
+int room_goto_first(bool restart_game)
 {
     enigma::roomstruct *rit = enigma::roomorder[0];
     errcheck_o(0,"Game must have at least one room to do anything");
-    rit->gotome();
+    rit->gotome(restart_game);
     return 0;
 }
 

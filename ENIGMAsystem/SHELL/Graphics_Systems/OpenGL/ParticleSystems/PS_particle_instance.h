@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2012 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,67 +25,29 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
+#ifndef ENIGMA_PS_PARTICLEINSTANCE
+#define ENIGMA_PS_PARTICLEINSTANCE
 
-using namespace std;
+#include "PS_particle_type.h"
 
-#include "syntax/syncheck.h"
-#include "parser/parser.h"
-
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
-#include "parser/object_storage.h"
-#include "compiler/compile_common.h"
-
-#include "backend/ideprint.h"
-#include "languages/lang_CPP.h"
-
-inline void writei(int x, FILE *f) {
-  fwrite(&x,4,1,f);
-}
-
-int lang_CPP::module_write_backgrounds(EnigmaStruct *es, FILE *gameModule)
+namespace enigma
 {
-  // Now we're going to add backgrounds
-  edbg << es->backgroundCount << " Adding Backgrounds to Game Module: " << flushl;
-
-  //Magic Number
-  fwrite("BKG ",4,1,gameModule);
-
-  //Indicate how many
-  int back_count = es->backgroundCount;
-  fwrite(&back_count,4,1,gameModule);
-
-  int back_maxid = 0;
-  for (int i = 0; i < back_count; i++)
-    if (es->backgrounds[i].id > back_maxid)
-      back_maxid = es->backgrounds[i].id;
-  fwrite(&back_maxid,4,1,gameModule);
-
-  for (int i = 0; i < back_count; i++)
+  struct particle_instance
   {
-      writei(es->backgrounds[i].id,gameModule); //id
-    writei(es->backgrounds[i].backgroundImage.width, gameModule); // width
-    writei(es->backgrounds[i].backgroundImage.height, gameModule); // height
+    particle_type* pt;
 
-
-    writei(es->backgrounds[i].transparent,gameModule);
-    writei(es->backgrounds[i].smoothEdges,gameModule);
-    writei(es->backgrounds[i].preload,gameModule);
-    writei(es->backgrounds[i].useAsTileset,gameModule);
-    writei(es->backgrounds[i].tileWidth,gameModule);
-    writei(es->backgrounds[i].tileHeight,gameModule);
-    writei(es->backgrounds[i].hOffset,gameModule);
-    writei(es->backgrounds[i].vOffset,gameModule);
-    writei(es->backgrounds[i].hSep,gameModule);
-    writei(es->backgrounds[i].vSep,gameModule);
-
-    const int sz = es->backgrounds[i].backgroundImage.dataSize;
-    writei(sz, gameModule); // size
-    fwrite(es->backgrounds[i].backgroundImage.data, 1, sz, gameModule); // data
-  }
-
-  edbg << "Done writing backgrounds." << flushl;
-  return 0;
+    double size;
+    double angle;
+    double ang_wiggle_offset; // [-1;1].
+    int color;
+    int alpha;
+    int life_current, life_start;
+    double x, y;
+    double speed, direction;
+    double speed_wiggle_offset; // [-1;1].
+    double dir_wiggle_offset; // [-1;1].
+  };
 }
+
+#endif // ENIGMA_PS_PARTICLEINSTANCE
+

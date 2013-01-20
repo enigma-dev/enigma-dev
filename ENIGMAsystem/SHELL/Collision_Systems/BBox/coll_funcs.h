@@ -26,6 +26,7 @@
 \********************************************************************************/
 
 #include "coll_util.h"
+#include "Universal_System/instance_system_base.h"
 
 bool place_free(double x,double y);
 bool place_empty(double x,double y);
@@ -36,13 +37,13 @@ bool position_meeting(double x, double y, int object);
 void position_destroy_object(double x, double y, int object, bool solid_only = false);
 void position_destroy_solid(double x, double y);
 void position_destroy(double x, double y);
-int instance_place(double x, double y, int object);
-int instance_position(double x, double y, int object);
-int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
-int collision_line(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
-int collision_point(double x, double y, int obj, bool prec = true, bool notme = true);
-int collision_circle(double x, double y, double radius, int obj, bool prec = true, bool notme = true);
-int collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
+enigma::instance_t instance_place(double x, double y, int object);
+enigma::instance_t instance_position(double x, double y, int object);
+enigma::instance_t collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_line(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_point(double x, double y, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_circle(double x, double y, double radius, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
 
 double distance_to_object(int object);
 double distance_to_point(double x, double y);
@@ -87,4 +88,3 @@ void instance_deactivate_circle(int x, int y, int r, int inside = true, bool not
 void instance_activate_circle(int x, int y, int r, int inside = true);
 
 void position_change(double x1, double y1, int obj, bool perf);
-void move_random(const double snapHor, const double snapVer);

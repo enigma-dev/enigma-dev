@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 
-int instance_create(int x,int y,int object)
+enigma::instance_t instance_create(int x,int y,int object)
 {
 	int idn = enigma::maxid++;
   enigma::object_basic* ob;
@@ -48,48 +48,51 @@ int instance_create(int x,int y,int object)
 inline void action_change_object(int obj, bool perf) {instance_change(obj,perf);}
 void instance_change(int obj, bool perf) {
     enigma::object_graphics* inst = (enigma::object_graphics*) enigma::instance_event_iterator->inst;
-    if (inst->object_index == obj) return; //prevents infinite loop
+    enigma::instance_change_inst(obj, perf, inst);
+}
+namespace enigma {
+    void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst) {
+        if (inst->object_index == obj) return; //prevents infinite loop
 
-    double  x=inst->x, y=inst->y;
-    double  xprevious=inst->xprevious, yprevious=inst->yprevious;
-    double  xstart=inst->xstart, ystart=inst->ystart;
-    double image_index=inst->image_index;
-    double image_speed=inst->image_speed;
-    bool visible=inst->visible;
-    double image_xscale=inst->image_xscale;
-    double image_yscale=inst->image_yscale;
-    double image_angle=inst->image_angle;
-    enigma::vspeedv vspeed=inst->vspeed;
-    enigma::hspeedv hspeed=inst->hspeed;
+        double  x=inst->x, y=inst->y;
+        double  xprevious=inst->xprevious, yprevious=inst->yprevious;
+        double  xstart=inst->xstart, ystart=inst->ystart;
+        double image_index=inst->image_index;
+        double image_speed=inst->image_speed;
+        bool visible=inst->visible;
+        double image_xscale=inst->image_xscale;
+        double image_yscale=inst->image_yscale;
+        double image_angle=inst->image_angle;
+        enigma::vspeedv vspeed=inst->vspeed;
+        enigma::hspeedv hspeed=inst->hspeed;
 
-    //the instance id is the same
-    int idn=inst->id;
+        //the instance id is the same
+        int idn=inst->id;
 
-    //Destory the instance
-    if (perf) inst->myevent_destroy();
-    inst->unlink();
+        //Destory the instance
+        if (perf) inst->myevent_destroy();
+        inst->unlink();
 
-    //Create the instance
-    enigma::object_basic* ob;
-	switch((int)obj)
-	{
-    #define NEW_OBJ_PREFIX ob =
-        #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
-        default:
-        #if SHOWERRORS
-            show_error("Object doesn't exist",0);
-        #endif
-            return;
+        //Create the instance
+        enigma::object_basic* ob;
+        switch((int)obj)
+        {
+        #define NEW_OBJ_PREFIX ob =
+            #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
+            default:
+            #if SHOWERRORS
+                show_error("Object doesn't exist",0);
+            #endif
+                return;
+        }
+        enigma::object_graphics* newinst = (enigma::object_graphics*) (*enigma::fetch_inst_iter_by_int(idn));
+        if (perf) newinst->myevent_create();
+        newinst->x=x; newinst->y=y; newinst->yprevious=yprevious; newinst->xprevious=xprevious;
+        newinst->xstart=xstart; newinst->ystart=ystart;
+        newinst->image_index=image_index; newinst->image_speed=image_speed;
+        newinst->visible=visible; newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
+        newinst->hspeed=hspeed; newinst->vspeed=vspeed;
     }
-    enigma::instancecount--;
-    instance_count--; //instance count is increased in construvtors so decrease
-    enigma::object_graphics* newinst = (enigma::object_graphics*) (*enigma::fetch_inst_iter_by_int(idn));
-    if (perf) newinst->myevent_create();
-    newinst->x=x; newinst->y=y; newinst->yprevious=yprevious; newinst->xprevious=xprevious;
-    newinst->xstart=xstart; newinst->ystart=ystart;
-    newinst->image_index=image_index; newinst->image_speed=image_speed;
-    newinst->visible=visible; newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
-    newinst->hspeed=hspeed; newinst->vspeed=vspeed;
 }
 
 void instance_copy(bool perf) {

@@ -88,9 +88,8 @@ namespace jdip {
     TT_DELETE,        ///< The `delete' keyword.
     
     TT_ENDOFCODE,     ///< This token signifies that the code has reached its end.
-    TT_INVALID        ///< Invalid token; read failed.
-    
     #include <User/token_types.h>
+    TT_INVALID        ///< Invalid token; read failed.
   };
   
   #ifdef DEBUG_MODE

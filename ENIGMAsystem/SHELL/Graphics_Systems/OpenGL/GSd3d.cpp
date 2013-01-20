@@ -29,11 +29,20 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 bool d3dMode = false;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 void d3d_start()
 {
+  // Set global ambient lighting to nothing.
+  float global_ambient[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+
   // Enable depth buffering
+  d3dMode = true;
+  d3dHidden = false;
+  d3dZWriteEnable = true;
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
@@ -72,15 +81,18 @@ bool d3d_get_mode()
 
 void d3d_set_hidden(bool enable)
 {
+    d3dHidden = enable;
+}   // TODO: Write function
+
+void d3d_set_zwriteenable(bool enable)
+{
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
+    d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)
 {
-  if (enable)
-    glEnable(GL_LIGHTING);
-  else
-    glDisable(GL_LIGHTING);
+    (enable?glEnable:glDisable)(GL_LIGHTING);
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)
@@ -97,16 +109,13 @@ void d3d_set_fog(bool enable, int color, double start, double end)
     fog_color[2] = __GETB(color);
     glFogfv(GL_FOG_COLOR,fog_color);
   }
-  else*/
-    glDisable(GL_FOG);
+  else
+    glDisable(GL_FOG);*/
 }//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
 
 void d3d_set_culling(bool enable)
 {
-/*  if (enable)
-    glEnable(GL_CULL_FACE);
-  else
-    glDisable(GL_CULL_FACE);*/
+//  (enable?glEnable:glDisable)(GL_CULL_FACE);
 }//TODO: Culling not working the same as in GM, not advised to enable it's use as it pretty much kills the drawing
 
 void d3d_set_perspective(bool enable)
@@ -210,7 +219,7 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
-  glEnable(GL_DEPTH_TEST);
+  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
@@ -219,11 +228,12 @@ void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
+  enigma::d3d_light_update_positions();
 }
 
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
 {
-  glEnable(GL_DEPTH_TEST);
+  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(angle, -aspect, znear, zfar);
@@ -232,6 +242,7 @@ void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,do
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
+  enigma::d3d_light_update_positions();
 }
 
 void d3d_set_projection_ortho(double x, double y, double width, double height, double angle)
@@ -247,6 +258,7 @@ void d3d_set_projection_ortho(double x, double y, double width, double height, d
   glRotatef(angle,0,0,1);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
+  enigma::d3d_light_update_positions();
 }
 
 void d3d_set_projection_perspective(double x, double y, double width, double height, double angle)
@@ -261,13 +273,23 @@ void d3d_set_projection_perspective(double x, double y, double width, double hei
   glRotatef(angle,0,0,1);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
+  enigma::d3d_light_update_positions();
 }
 
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
+    if ((x1 == x2 && y1 == y2) || z1 == z2) {
+        return;
+    }
     float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y2, z1}, v3[] = {x2, y2, z2},
           t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
     bind_texture(texId);
+
+    const float xd = x2-x1, yd = y2-y1, zd = z2-z1;
+    const float usize = fabs(zd), vsize = hypotf(xd, yd);
+    const float uz = zd/usize, vx = xd/vsize, vy = yd/vsize;
+    glNormal3f(uz*vy, -uz*vx, 0);
+
     glBegin(GL_TRIANGLE_STRIP);
     glTexCoord2fv(t0);
       glVertex3fv(v0);
@@ -285,6 +307,9 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
     float v0[] = {x1, y1, z1}, v1[] = {x1, y2, z1}, v2[] = {x2, y1, z2}, v3[] = {x2, y2, z2},
           t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
     bind_texture(texId);
+
+    glNormal3f(0, 0, 1); // TODO: Floor may be slanted, so calculate the normal properly.
+
     glBegin(GL_TRIANGLE_STRIP);
     glTexCoord2fv(t0);
       glVertex3fv(v0);
@@ -715,43 +740,112 @@ bool d3d_transform_stack_disgard()
 #include <list>
 #include "Universal_System/fileio.h"
 
+struct posi { // Homogenous point.
+    double x;
+    double y;
+    double z;
+    double w;
+    posi(double x1, double y1, double z1, double w1) : x(x1), y(y1), z(z1), w(w1){}
+};
+
 class d3d_lights
 {
     map<int,int> light_ind;
+    map<int,posi> ind_pos; // Internal index to position.
 
     public:
     d3d_lights() {}
     ~d3d_lights() {}
 
+    void light_update_positions()
+    {
+        map<int, posi>::iterator end = ind_pos.end();
+        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
+            const posi pos1 = (*it).second;
+            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
+            glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
+        }
+    }
+
     bool light_define_direction(int id, double dx, double dy, double dz, int col)
     {
-        const int ms = light_ind.size();
-        if (ms >= GL_MAX_LIGHTS)
-            return false;
-        light_ind.insert(pair<int,int>(id, ms));
-        const float dir[3] = {dx, dy, dz}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
-        glLightfv(GL_LIGHT0+ms, GL_SPOT_DIRECTION, dir);
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+            multimap<int,posi>::iterator it = ind_pos.find(ms);
+            ind_pos.erase(it);
+            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+
+            light_ind.insert(pair<int,int>(id, ms));
+            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        }
+
+        const float dir[4] = {-dx, -dy, -dz, 0.0f}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
+        glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
+        light_update_positions();
         return true;
     }
+
     bool light_define_point(int id, double x, double y, double z, double range, int col)
     {
-        const int ms = light_ind.size();
-        if (ms >= GL_MAX_LIGHTS)
+        if (range <= 0.0) {
             return false;
-        light_ind.insert(pair<int,int>(id, ms));
-        const float pos[3] = {x, y, z}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
-      	glLightfv(GL_LIGHT1, GL_POSITION, pos);
+        }
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+            multimap<int,posi>::iterator it = ind_pos.find(ms);
+            ind_pos.erase(it);
+            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+
+            light_ind.insert(pair<int,int>(id, ms));
+            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        }
+        const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
+            specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
+        glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
+        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+        glLightfv(GL_LIGHT0+ms, GL_AMBIENT, ambient);
+
+        // Limit the range of the light through attenuation.
+        glLightf(GL_LIGHT0+ms, GL_CONSTANT_ATTENUATION, 1.0);
+        glLightf(GL_LIGHT0+ms, GL_LINEAR_ATTENUATION, 0.0);
+        // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
+        const double attenuation_calibration = 48.0;
+        glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
+//        light_update_positions();
         return true;
-    } //NOTE: range cannot be defined for spotlights in opengl
+    }
+
     bool light_enable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
         if (it == light_ind.end())
         {
             const int ms = light_ind.size();
-            if (ms >= GL_MAX_LIGHTS)
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
                 return false;
             light_ind.insert(pair<int,int>(id, ms));
             glEnable(GL_LIGHT0+ms);
@@ -762,6 +856,7 @@ class d3d_lights
         }
         return true;
     }
+
     bool light_disable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
@@ -787,15 +882,22 @@ bool d3d_light_define_point(int id, double x, double y, double z, double range, 
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
+void d3d_light_define_ambient(int col)
+{
+    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
+}
+
 bool d3d_light_enable(int id, bool enable)
 {
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
 }
 
-void d3d_light_define_ambient(int col)
-{
-    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
+namespace enigma {
+    void d3d_light_update_positions()
+    {
+        d3d_lighting.light_update_positions();
+    }
 }
 
 #include "Universal_System/estring.h"
