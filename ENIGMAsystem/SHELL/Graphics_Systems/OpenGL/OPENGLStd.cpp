@@ -34,6 +34,7 @@ namespace enigma
   void graphicssystem_initialize()
   {
     GLenum err = glewInit();
+    
     #ifdef DEBUG_MODE
     if (GLEW_OK != err)
     {

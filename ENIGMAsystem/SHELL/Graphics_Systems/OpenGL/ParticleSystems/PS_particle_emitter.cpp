@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012 forthevin                                                **
+**  Copyright (C) 2012-2013 forthevin                                           **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -35,8 +35,8 @@ namespace enigma
   void particle_emitter::initialize()
   {
     xmin = 0, xmax = 0, ymin = 0, ymax = 0;
-    shape = ps_shape_rectangle;
-    distribution = ps_distr_linear;
+    shape = ps_sh_rectangle;
+    distribution = ps_di_linear;
     particle_type_id = -1;
     number = 0;
   }
@@ -65,14 +65,14 @@ namespace enigma
     this->particle_type_id = particle_type_id;
     this->number = number;
   }
-  void particle_emitter::get_point(int& x, int&y)
+  void particle_emitter::get_point(int& x, int& y)
   {
     // TODO: Missing shapes and distributions.
 
     switch (shape) {
     case ps_shape_rectangle: {
-      x = std::min(xmin, xmax) + rand() % abs(xmin-xmax) + 1;
-      y = std::min(ymin, ymax) + rand() % abs(ymin-ymax) + 1;
+      x = std::min(xmin, xmax) + rand() % (abs(xmin-xmax) + 1);
+      y = std::min(ymin, ymax) + rand() % (abs(ymin-ymax) + 1);
       break;
     }
     }

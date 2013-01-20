@@ -27,12 +27,13 @@
 \********************************************************************************/
 
 #include "Universal_System/graphics_object.h"
+#include "Universal_System/instance_system_base.h"
 
 namespace enigma {
   extern int destroycalls, createcalls;
 }
 
-int instance_create(int x,int y,int object);
+enigma::instance_t instance_create(int x,int y,int object);
 
 namespace enigma {
   object_basic *instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
@@ -46,10 +47,10 @@ void instance_deactivate_object(int obj);
 void instance_destroy(int id, bool dest_ev = true);
 void instance_destroy();
 bool instance_exists (int obj);
-int  instance_find   (int obj,int n);
-int  instance_number (int obj);
-int  instance_nearest (int x,int y,int obj,bool notme = false);
-int  instance_furthest(int x,int y,int obj,bool notme = false);
+enigma::instance_t instance_find   (int obj,int n);
+int instance_number (int obj);
+enigma::instance_t instance_nearest (int x,int y,int obj,bool notme = false);
+enigma::instance_t instance_furthest(int x,int y,int obj,bool notme = false);
 
 
 //int instance_place(x,y,obj)

@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012 forthevin                                                **
+**  Copyright (C) 2012-2013 forthevin                                           **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -36,9 +36,18 @@ namespace enigma
   {
     particle_type* pt;
 
-    int life_current;
+    int sprite_subimageindex_initial;
+    double size;
+    double size_wiggle_offset; // [-1;1].
+    double angle;
+    double ang_wiggle_offset; // [-1;1].
+    int color;
+    int alpha;
+    int life_current, life_start;
     double x, y;
-    double vx, vy;
+    double speed, direction;
+    double speed_wiggle_offset; // [-1;1].
+    double dir_wiggle_offset; // [-1;1].
   };
 }
 

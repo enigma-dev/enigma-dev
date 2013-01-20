@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "Collision_Systems/collision_mandatory.h"
+
 namespace enigma
 { 
   void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.

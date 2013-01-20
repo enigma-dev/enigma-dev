@@ -112,10 +112,13 @@ namespace enigma
             SetCursor(LoadCursor(NULL, currentCursor));
             return 0;
 
+        case WM_CHAR:
+            keyboard_lastchar = string(1,wParam);
+            return 0;
+
         case WM_KEYDOWN:
             last_keybdstatus[wParam]=keybdstatus[wParam];
             keybdstatus[wParam]=1;
-            keyboard_lastchar = string(1,wParam);
             return 0;
 
         case WM_KEYUP:
@@ -126,7 +129,6 @@ namespace enigma
         case WM_SYSKEYDOWN:
             last_keybdstatus[wParam]=keybdstatus[wParam];
             keybdstatus[wParam]=1;
-            keyboard_lastchar = string(1,wParam);
             if (wParam!=18)
             {
               if ((lParam&(1<<29))>0)

@@ -29,7 +29,8 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 bool d3dMode = false;
-bool d3dHidden = true;
+bool d3dHidden = false;
+bool d3dZWriteEnable = true;
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 void d3d_start()
@@ -40,7 +41,8 @@ void d3d_start()
 
   // Enable depth buffering
   d3dMode = true;
-  d3dHidden = true;
+  d3dHidden = false;
+  d3dZWriteEnable = true;
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
@@ -79,8 +81,13 @@ bool d3d_get_mode()
 
 void d3d_set_hidden(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
     d3dHidden = enable;
+}   // TODO: Write function
+
+void d3d_set_zwriteenable(bool enable)
+{
+    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
+    d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)
@@ -212,7 +219,7 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
-  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
@@ -226,7 +233,7 @@ void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double
 
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
 {
-  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(angle, -aspect, znear, zfar);
@@ -750,32 +757,69 @@ class d3d_lights
     d3d_lights() {}
     ~d3d_lights() {}
 
+    void light_update_positions()
+    {
+        map<int, posi>::iterator end = ind_pos.end();
+        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
+            const posi pos1 = (*it).second;
+            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
+            glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
+        }
+    }
+
     bool light_define_direction(int id, double dx, double dy, double dz, int col)
     {
-        const int ms = light_ind.size();
-        int MAX_LIGHTS;
-        glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-        if (ms >= MAX_LIGHTS)
-            return false;
-        light_ind.insert(pair<int,int>(id, ms));
-        ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+            multimap<int,posi>::iterator it = ind_pos.find(ms);
+            ind_pos.erase(it);
+            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+
+            light_ind.insert(pair<int,int>(id, ms));
+            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        }
+
         const float dir[4] = {-dx, -dy, -dz, 0.0f}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
+        light_update_positions();
         return true;
     }
+
     bool light_define_point(int id, double x, double y, double z, double range, int col)
     {
         if (range <= 0.0) {
             return false;
         }
-        const int ms = light_ind.size();
-        int MAX_LIGHTS;
-        glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-        if (ms >= MAX_LIGHTS)
-            return false;
-        light_ind.insert(pair<int,int>(id, ms));
-        ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+            multimap<int,posi>::iterator it = ind_pos.find(ms);
+            ind_pos.erase(it);
+            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+
+            light_ind.insert(pair<int,int>(id, ms));
+            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        }
         const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
             specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
@@ -789,18 +833,10 @@ class d3d_lights
         // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
         const double attenuation_calibration = 48.0;
         glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
-
+//        light_update_positions();
         return true;
-    } //NOTE: range cannot be defined for spotlights in opengl
-    void light_update_positions()
-    {
-        map<int, posi>::iterator end = ind_pos.end();
-        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
-            const posi pos1 = (*it).second;
-            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
-            glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
-        }
     }
+
     bool light_enable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
@@ -820,6 +856,7 @@ class d3d_lights
         }
         return true;
     }
+
     bool light_disable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
@@ -845,15 +882,15 @@ bool d3d_light_define_point(int id, double x, double y, double z, double range, 
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-bool d3d_light_enable(int id, bool enable)
-{
-    return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
-}
-
 void d3d_light_define_ambient(int col)
 {
     const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
+}
+
+bool d3d_light_enable(int id, bool enable)
+{
+    return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
 }
 
 namespace enigma {
@@ -888,14 +925,10 @@ class d3d_model
 
     void save(string fname)
     {
-        if (fname.find_first_of("\\/") == string::npos)
-            fname = get_working_directory() + fname;
     }//format needs to be decided on
 
     bool load(string fname)  //TODO: this needs to be rewritten properly not using the file_text functions
     {
-        if (fname.find_first_of("\\/") == string::npos)
-            fname = get_working_directory() + fname;
         int file = file_text_open_read(fname);
         if (file == -1)
             return false;

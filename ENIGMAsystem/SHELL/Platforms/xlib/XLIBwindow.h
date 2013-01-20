@@ -120,6 +120,7 @@ enum {
 void window_set_cursor(int c);
 
 void game_end();
+void action_end_game();
 void io_handle(), io_clear();
 void keyboard_wait();
 

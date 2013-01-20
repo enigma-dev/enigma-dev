@@ -25,76 +25,36 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLETYPE
-#define ENIGMA_PS_PARTICLETYPE
+#ifndef ENIGMA_PS_PARTICLECONSTANTS
+#define ENIGMA_PS_PARTICLECONSTANTS
 
-#include <map>
-#include "PS_particle_enums.h"
-#include "PS_particle_sprites.h"
-
-namespace enigma
+enum
 {
-  enum color_mode {
-    one_color, two_color, three_color, mix_color, rgb_color, hsv_color
-  };
-  enum alpha_mode {
-    one_alpha, two_alpha, three_alpha
-  };
-  struct particle_type
-  {
-    // If the particle count becomes 0, and the type is not alive,
-    // the type should be removed, since it is no longer used.
-    int particle_count; // The number of particles of this particle type.
-    bool alive; // Whether the type is still alive.
-    int id; // Id of the particle type.
+  pt_shape_pixel = 0,
+  pt_shape_disk,
+  pt_shape_square,
+  pt_shape_line,
+  pt_shape_star,
+  pt_shape_circle,
+  pt_shape_ring,
+  pt_shape_sphere,
+  pt_shape_flare,
+  pt_shape_spark,
+  pt_shape_explosion,
+  pt_shape_cloud,
+  pt_shape_smoke,
+  pt_shape_snow
+};
 
-    // Shape.
-    bool is_particle_sprite; // Whether an internal particle sprite is used or not.
-    enigma::particle_sprite* part_sprite;
-    int sprite_id;
-    bool sprite_animated, sprite_stretched, sprite_random;
-    double size_min, size_max;
-    double size_incr, size_wiggle;
-    double xscale, yscale;
-    double ang_min, ang_max;
-    double ang_incr, ang_wiggle;
-    bool ang_relative;
-    // Color and blending.
-    color_mode c_mode;
-    int color1;
-    int color2;
-    int color3;
-    unsigned char rmin, rmax, gmin, gmax, bmin, bmax;
-    unsigned char hmin, hmax, smin, smax, vmin, vmax;
-    alpha_mode a_mode;
-    double alpha1;
-    double alpha2;
-    double alpha3;
-    bool blend_additive;
-    // Life and death.
-    int life_min, life_max; // 1 <= life_min <= life_max.
-    bool step_on;
-    int step_particle_id;
-    int step_number;
-    bool death_on;
-    int death_particle_id;
-    int death_number;
-    // Motion.
-    double speed_min, speed_max;
-    double speed_incr, speed_wiggle;
-    double dir_min, dir_max;
-    double dir_incr, dir_wiggle;
-    double grav_amount, grav_dir;
-  };
+enum
+{
+  ps_shape_rectangle = 0
+};
 
-  struct particle_type_manager
-  {
-    int max_id;
-    std::map<int,particle_type*> id_to_particletype;
-  };
+enum
+{
+  ps_distr_linear = 0
+};
 
-  extern particle_type_manager pt_manager;
-}
-
-#endif // ENIGMA_PS_PARTICLETYPE
+#endif // ENIGMA_PS_PARTICLECONSTANTS
 
