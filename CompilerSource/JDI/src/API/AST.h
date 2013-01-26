@@ -110,8 +110,6 @@ namespace jdi {
       virtual int own_height(); ///< Returns the height in pixels of this node as it will render. This does not include its children.
       virtual int width(); ///< Returns the width which will be used to render this node and all its children.
       virtual int height(); ///< Returns the height which will be used to render this node and all its children.
-      friend struct jdi::ASTOperator;
-      friend struct jdi::ConstASTOperator;
     };
     /// Child of AST_Node for unary operators.
     struct AST_Node_Unary: AST_Node {
