@@ -302,6 +302,8 @@
 		<Unit filename="parser/object_storage.h" />
 		<Unit filename="parser/parse_edl.cpp" />
 		<Unit filename="parser/parse_edl.h" />
+		<Unit filename="parser/parse_edl_operator.cpp" />
+		<Unit filename="parser/parse_edl_operator.h" />
 		<Unit filename="parser/parser.cpp" />
 		<Unit filename="parser/parser.h" />
 		<Unit filename="parser/parser_components.cpp" />

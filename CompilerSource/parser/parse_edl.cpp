@@ -1,12 +1,12 @@
 /**
   @file  parse_edl.cpp
   @brief Source implementing the EDL parser; or at least its first pass.
-  
+
   During the first pass of the parser, code is lexed and placed in a syntax tree.
   Checking is done insofar as it concerns general syntax, including cast types,
   declaration types, and function calls. Access type checking and overload
   verification are beyond the scope of this pass.
-  
+
   @section License
     Copyright (C) 2008-2013 Josh Ventura
     This file is a part of the ENIGMA Development Environment.
@@ -15,7 +15,7 @@
     terms of the GNU General Public License as published by the Free Software
     Foundation, version 3 of the license or any later version.
 
-    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY;
     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
     PURPOSE. See the GNU General Public License for more details.
 
@@ -26,6 +26,7 @@
 #include "parse_edl.h"
 #include <general/estring.h>
 #include "languages/language_adapter.h"
+#include "parser/parse_edl_operator.h"
 
 namespace settings {
   bool pedantic_edl = true;
@@ -39,7 +40,7 @@ bool pedantic_warn(token_t &token, error_handler *herr, string w) {
 
 map<string, declaration> global_grabbag;
 
-/// Definition representing an ENIGMA object; 
+/// Definition representing an ENIGMA object;
 struct definition_object: definition_scope {
   map<egm_event, EDL_AST::AST_Node_Block> events; ///< The code for all events in this object
   vector<definition_object*> parents; ///< List of parents of this object
@@ -105,6 +106,50 @@ EDL_AST::AST_Node_Statement_break::~AST_Node_Statement_break() {}
 
 EDL_AST::AST_Node_Statement_continue::AST_Node_Statement_continue(AST_Node_Statement *loop, int dep): AST_Node_Statement_break(loop, dep) {}
 EDL_AST::AST_Node_Statement_continue::~AST_Node_Statement_continue() {}
+
+//===========================================================================================================================
+//=: ASTOperator Class :=====================================================================================================
+//===========================================================================================================================
+
+void EDL_AST::AST_Node_Statement::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement(this, param); }
+void EDL_AST::AST_Node_Statement_Standard::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_Standard(this, param); }
+void EDL_AST::AST_Node_Block::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Block(this, param); }
+void EDL_AST::AST_Node_Declaration::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Declaration(this, param); }
+void EDL_AST::AST_Node_Structdef::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Structdef(this, param); }
+void EDL_AST::AST_Node_Enumdef::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Enumdef(this, param); }
+void EDL_AST::AST_Node_Statement_if::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_if(this, param); }
+void EDL_AST::AST_Node_Statement_for::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_for(this, param); }
+void EDL_AST::AST_Node_Statement_repeat::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_repeat(this, param); }
+void EDL_AST::AST_Node_Statement_while::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_while(this, param); }
+void EDL_AST::AST_Node_Statement_with::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_with(this, param); }
+void EDL_AST::AST_Node_Statement_switch::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_switch(this, param); }
+void EDL_AST::AST_Node_Statement_trycatch::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_trycatch(this, param); }
+void EDL_AST::AST_Node_Statement_do::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_do(this, param); }
+void EDL_AST::AST_Node_Statement_return::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_return(this, param); }
+void EDL_AST::AST_Node_Statement_default::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_default(this, param); }
+void EDL_AST::AST_Node_Statement_case::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_case(this, param); }
+void EDL_AST::AST_Node_Statement_break::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_break(this, param); }
+void EDL_AST::AST_Node_Statement_continue::operate(ASTOperator *aop, void *param) { dynamic_cast<EDL_ASTOperator*>(aop)->operate_Statement_continue(this, param); }
+
+void EDL_AST::AST_Node_Statement::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement(this, param); }
+void EDL_AST::AST_Node_Statement_Standard::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_Standard(this, param); }
+void EDL_AST::AST_Node_Block::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Block(this, param); }
+void EDL_AST::AST_Node_Declaration::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Declaration(this, param); }
+void EDL_AST::AST_Node_Structdef::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Structdef(this, param); }
+void EDL_AST::AST_Node_Enumdef::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Enumdef(this, param); }
+void EDL_AST::AST_Node_Statement_if::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_if(this, param); }
+void EDL_AST::AST_Node_Statement_for::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_for(this, param); }
+void EDL_AST::AST_Node_Statement_repeat::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_repeat(this, param); }
+void EDL_AST::AST_Node_Statement_while::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_while(this, param); }
+void EDL_AST::AST_Node_Statement_with::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_with(this, param); }
+void EDL_AST::AST_Node_Statement_switch::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_switch(this, param); }
+void EDL_AST::AST_Node_Statement_trycatch::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_trycatch(this, param); }
+void EDL_AST::AST_Node_Statement_do::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_do(this, param); }
+void EDL_AST::AST_Node_Statement_return::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_return(this, param); }
+void EDL_AST::AST_Node_Statement_default::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_default(this, param); }
+void EDL_AST::AST_Node_Statement_case::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_case(this, param); }
+void EDL_AST::AST_Node_Statement_break::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_break(this, param); }
+void EDL_AST::AST_Node_Statement_continue::operate(ConstASTOperator *aop, void *param) const { dynamic_cast<EDL_ConstASTOperator*>(aop)->operate_Statement_continue(this, param); }
 
 // ---------------------------------------------------------------------
 // ToString implementations --------------------------------------------
@@ -310,7 +355,7 @@ EDL_AST::AST_Node_Declaration *EDL_AST::handle_declaration(token_t &token)
     definition_typed *decdef = new definition_typed(nt.refs.name, dscope, nt.def, nt.flags);
     dscope->declare(decdef->name, decdef);
     res->declarations.push_back(decdef);
-    
+
     // Read initialization
     if (token.type == TT_OPERATOR and token.content.len == 1 and *token.content.str == '=') {
       AST *ast = new AST();
@@ -327,7 +372,7 @@ EDL_AST::AST_Node_Declaration *EDL_AST::handle_declaration(token_t &token)
         }
       }
     }
-    
+
     if (token.type == TT_COMMA)
       token = get_next_token();
     else break;
@@ -345,10 +390,10 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
       case TT_UNION:
       case TT_STRUCT:
         return handle_struct(token);
-      
+
       case TT_ENUM:
         return handle_enum(token);
-      
+
       case TT_GLOBAL:
       case TT_LOCAL:
       case TT_TYPEDEF:
@@ -356,7 +401,7 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
       case TT_DECLTYPE:
       case TT_DECLARATOR:
         return handle_declaration(token);
-      
+
       case TT_NAMESPACE:
         token.report_error(herr, "Keyword `namespace' out of nowhere; did you mean `using namespace'? (Namespace declarations not valid in a function)");
         return NULL;
@@ -364,7 +409,7 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
         token.report_error(herr, "FIXME: Unimplemented! This feature is coming soon.");
         return NULL;
         break;
-      
+
       // Assigning an identifier or calling a function
       case TT_IDENTIFIER:
       case TT_DEFINITION:
@@ -393,39 +438,39 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
           else if (settings::pedantic_edl) pedantic_warn(token, herr, "Semicolon should follow statement at this point");
         return res;
       };
-      
+
       case TT_LEFTBRACE: {
         token = get_next_token();
         AST_Node_Block *res = handle_block(token);
         if (!res) return NULL;
-        if (token.type != TT_RIGHTBRACE) { 
+        if (token.type != TT_RIGHTBRACE) {
           token.report_errorf(herr, "Expected closing brace before %s");
           delete res; return NULL;
         }
         token = get_next_token();
         return res;
       }
-      
+
       case TT_ELLIPSIS:
         token.report_error(herr, "Elipsis not valid here; did you forget to fill something in?");
         return NULL;
-      
+
       case TT_THEN: token.report_errorf(herr, "Unexpected `then' keyword here: `then' should only follow `if'");
         return NULL;
       case TT_ELSE: token.report_errorf(herr, "Unexpected `else' clause here: no corresponding `if' block");
         return NULL;
       case TT_CATCH: token.report_errorf(herr, "Unexpected `catch' clause here: no corresponding `try' block");
         return NULL;
-      
+
       case TT_RIGHTPARENTH: token.report_errorf(herr, "Unexpected closing parenthesis here: none open"); return NULL;
       case TT_RIGHTBRACKET: token.report_errorf(herr, "Unexpected closing bracket here: none open"); return NULL;
       case TT_COLON: token.report_error(herr, "Unexpected colon here: No label given"); return NULL;
       case TT_LESSTHAN: case TT_GREATERTHAN: case TT_COMMA: token.report_errorf(herr, "Unexpected %s here: No label given"); return NULL;
-      
+
       case TT_SEMICOLON:
         token = get_next_token();
         return new AST_Node_Block();
-      
+
       case TT_CASE: {
         bool c_or_d;
         c_or_d = false;
@@ -433,14 +478,14 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
       case TT_DEFAULT:
           c_or_d = true;
         }
-        
+
         statement_ref *const sref = loops_get_kind(SK_SWITCH);
         if (!sref) {
           token.report_errorf(herr, "%s can only appear in `switch' statements");
           return NULL;
         }
         AST_Node_Statement_switch *const sw = (AST_Node_Statement_switch*)sref->statement;
-        
+
         AST_Node_Statement *res;
         token = get_next_token();
         if (c_or_d)
@@ -458,11 +503,11 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
             { delete res; return NULL; }
         return res;
       }
-      
+
       case TT_BREAK:    return handle_break(token, false);
       case TT_CONTINUE: return handle_break(token, true);
       case TT_RETURN:   return handle_return(token);
-      
+
       case TT_IF:     return handle_if(token);
       case TT_REPEAT: return handle_repeat(token);
       case TT_DO:     return handle_do(token);
@@ -472,17 +517,17 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
       case TT_SWITCH: return handle_switch(token);
       case TT_WITH:   return handle_with(token);
       case TT_TRY:    return handle_trycatch(token);
-      
+
       case TT_TEMPLATE: // Scrapped since ENIGMA's dynamic enough as it is
       case TT_CLASS: // Scrapped from the spec for simplicity
       case TT_PUBLIC: case TT_PRIVATE: case TT_PROTECTED: // Scrapped along with classes
       case TT_EXTERN: case TT_ASM: case TT_OPERATORKW: case TT_TYPENAME: case TTM_CONCAT: case TTM_TOSTRING:
         token.report_errorf(herr, "Lexer has honored C++ %s: this should not happen.");
         return NULL;
-      
+
       case TT_INVALID: default:
         token.report_error(herr, "Invalid token read at this point; lex failed");
-      
+
       case TT_ENDOFCODE: case TT_RIGHTBRACE:
         return NULL;
      }
@@ -550,17 +595,17 @@ EDL_AST::AST_Node_Statement_for*      EDL_AST::handle_for     (token_t &token) {
         return NULL;
     expect_rightp = false;
   }
-  
+
   // Handle the A in for(A; B; C) { D }
   if (token.type == TT_LEFTBRACE and settings::pedantic_edl)
     if (pedantic_warn(token, herr, "Blocks not actually allowed in `for' parameters"))
       return NULL;
-  
+
   AST_Node_Statement_for *res = new AST_Node_Statement_for();
   stacked_statement ss(loops, SK_LOOP, res, token, herr);
   res->operand_pre = handle_statement(token);
   if (!res->operand_pre) { delete res; return NULL; }
-  
+
   // Handle the B in for(A; B; C) { D }
   res->condition = parse_expression(token, precedence::all);
   if (!res->condition) { delete res; return NULL; }
@@ -568,15 +613,15 @@ EDL_AST::AST_Node_Statement_for*      EDL_AST::handle_for     (token_t &token) {
   else if (settings::pedantic_edl)
     if (pedantic_warn(token, herr, "Semicolon expected after `for' condition"))
       { delete res; return NULL; }
-  
+
   // Handle the C in for(A; B; C) { D }
   if (token.type == TT_LEFTBRACE and settings::pedantic_edl)
     if (pedantic_warn(token, herr, "Blocks not actually allowed in `for' parameters"))
       return NULL;
-  
+
   res->operand_post = handle_statement(token);
   if (!res->operand_post) { delete res; return NULL; }
-  
+
   if (expect_rightp) {
     if (token.type != TT_RIGHTPARENTH) {
       token.report_errorf(herr, "Expected closing parenthesis to `for' parameters before %s");
@@ -584,35 +629,35 @@ EDL_AST::AST_Node_Statement_for*      EDL_AST::handle_for     (token_t &token) {
     }
     token = get_next_token();
   }
-  
+
   res->code = handle_statement(token);
   if (!res->code) { delete res; return NULL; }
-  
+
   return res;
 }
 EDL_AST::AST_Node_Statement_do*       EDL_AST::handle_do      (token_t &token) {
   token = get_next_token();
   AST_Node_Statement_do *res = new AST_Node_Statement_do();
   stacked_statement ss(loops, SK_LOOP, res, token, herr);
-  
+
   res->code = handle_statement(token);
   if (!res->code) { delete res; return NULL; }
-  
+
   if (token.type == TT_UNTIL) res->negate = true;
   else if (token.type == TT_WHILE) res->negate = false;
   else {
     token.report_error(herr, "Expected `until' or `while' clause to complete `do' statement");
     delete res; return NULL;
   }
-  
+
   token = get_next_token();
   res->condition = parse_expression(token, precedence::all);
   if (!res->condition) { delete res; return NULL; }
-  
+
   if (token.type == TT_SEMICOLON) token = get_next_token();
   else if (settings::pedantic_edl) if (pedantic_warn(token, herr, "ISO C++ requires a semicolon after a do-while statement; EDL follows suit"))
     { delete res; return NULL; }
-  
+
   return res;
 }
 
@@ -621,16 +666,16 @@ EDL_AST::AST_Node_Statement_while*    EDL_AST::handle_while   (token_t &token) {
   if (token.type == TT_WHILE) negate = false;
   else if (token.type == TT_UNTIL) negate = true;
   else token.report_error(herr, "Parse error: `until' or `while' clause expected here");
-  
+
   token = get_next_token();
   AST_Node* cond = parse_expression(token, precedence::all);
   if (!cond) { return NULL; }
-  
+
   AST_Node_Statement_while *res = new AST_Node_Statement_while(cond, NULL, negate);
   stacked_statement ss(loops, SK_LOOP, res, token, herr);
   AST_Node_Statement *code = handle_statement(token);
   if (!code) { delete res; return NULL; }
-  
+
   res->code = code;
   return res;
 }
@@ -639,35 +684,35 @@ EDL_AST::AST_Node_Statement_with*     EDL_AST::handle_with    (token_t &token) {
   token = get_next_token();
   AST_Node* whom = parse_expression(token, precedence::all);
   if (!whom) { return NULL; }
-  
+
   AST_Node_Statement_with *res = new AST_Node_Statement_with(whom);
   stacked_statement ss(loops, SK_LOOP, res, token, herr);
   AST_Node_Statement *code = handle_statement(token);
   if (!code) { delete res; return NULL; }
-  
+
   res->code = code;
   return res;
-} 
+}
 EDL_AST::AST_Node_Statement_trycatch* EDL_AST::handle_trycatch(token_t &token) {
   token = get_next_token();
   AST_Node_Statement *tcode = handle_statement(token);
   if (!tcode) return NULL;
-  
+
   if (token.type != TT_CATCH) {
     token.report_errorf(herr, "Expected `catch' clause to complete `try' statement here before %s");
     delete tcode; return NULL;
   }
-  
+
   AST_Node_Statement_trycatch* res = new AST_Node_Statement_trycatch(tcode);
-  
+
   do {
     token = get_next_token();
     full_type ctype = read_fulltype(lex, token, search_scope, (context_parser*)main_context, herr);
     if (!ctype.def) { delete res; return NULL; }
-    
+
     AST_Node_Statement *ccode = handle_statement(token);
     if (!ccode) { delete res; return NULL; }
-    
+
     res->catches.push_back(AST_Node_Statement_trycatch::catch_clause(ctype, ccode));
   }
   while (token.type == TT_CATCH);
@@ -677,19 +722,19 @@ EDL_AST::AST_Node_Statement_switch*   EDL_AST::handle_switch  (token_t &token) {
   token = get_next_token();
   AST_Node *swval = parse_expression(token, precedence::all);
   if (!swval) return NULL;
-  
+
   if (token.type != TT_LEFTBRACE) {
     token.report_error(herr, "Expected block for `switch' statement");
     return NULL;
   }
-  
+
   AST_Node_Statement_switch *res = new AST_Node_Statement_switch(swval);
   stacked_statement ss(loops, SK_SWITCH, res, token, herr);
   AST_Node_Statement *swblock = handle_statement(token);
-  
+
   if (!swblock) { delete res; return NULL; }
   res->code = swblock;
-  
+
   return res;
 }
 EDL_AST::AST_Node_Statement *EDL_AST::handle_break(token_t &token) {
@@ -703,10 +748,10 @@ EDL_AST::AST_Node_Statement *EDL_AST::handle_break(token_t &token, bool h_contin
   if (token.type == TT_DECLITERAL or token.type == TT_HEXLITERAL or token.type == TT_OCTLITERAL) {
     AST_Node *a = parse_expression(token, precedence::all);
     if (!a) return NULL;
-    
+
     break_depth = a->eval();
     delete a;
-    
+
     if (break_depth < 1) {
       bt.report_errorf(herr, "Invalid loop depth given for %s; should be a constant expression with a positive result");
       return NULL;
@@ -725,12 +770,12 @@ EDL_AST::AST_Node_Statement *EDL_AST::handle_break(token_t &token, bool h_contin
     else bt.report_errorf(herr, "Insufficient nested loops to " + bc + ": Requested " + tostring(break_depth) + ", " + tostring(break_depth - vd) + " available");
     return NULL;
   }
-  
+
   if (token.type == TT_SEMICOLON)
     token = get_next_token();
   else if (settings::pedantic_edl and pedantic_warn(token, herr, "Expected semicolon following control statement"))
     return NULL;
-  
+
   return h_continue? new AST_Node_Statement_continue(target, break_depth) : new AST_Node_Statement_break(target, break_depth);
 }
 
