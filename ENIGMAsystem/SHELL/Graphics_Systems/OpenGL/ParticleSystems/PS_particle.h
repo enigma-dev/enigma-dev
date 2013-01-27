@@ -35,10 +35,11 @@
 // General.
 int part_system_create();
 void part_system_destroy(int id);
-void part_system_exists(int id);
+bool part_system_exists(int id);
 void part_system_clear(int id);
 void part_system_draw_order(int id, bool oldtonew);
 void part_system_depth(int id, double depth);
+void part_system_position(int id, double x, double y);
 // Update and draw.
 void part_system_automatic_update(int id, bool automatic);
 void part_system_automatic_draw(int id, bool automatic);
@@ -55,7 +56,7 @@ int part_particles_count(int id);
 int part_emitter_create(int id);
 void part_emitter_destroy(int ps_id, int em_id);
 void part_emitter_destroy_all(int ps_id);
-void part_emitter_exists(int ps_id, int em_id);
+bool part_emitter_exists(int ps_id, int em_id);
 void part_emitter_clear(int ps_id, int em_id);
 void part_emitter_region(int ps_id, int em_id, double xmin, double xmax, double ymin, double ymax, int shape, int distribution);
 void part_emitter_burst(int ps_id, int em_id, int particle_type_id, int number);

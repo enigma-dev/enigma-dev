@@ -29,7 +29,9 @@
 
 namespace enigma
 {
+   // Updates all particle systems that are automatically updated.
   void update_particlesystems();
+  // Draws all given particle systems that are automatically drawn.
   void draw_particlesystems(std::set<int>& particlesystem_ids);
 }
 
