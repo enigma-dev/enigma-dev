@@ -48,12 +48,17 @@ enum
 
 enum
 {
-  ps_shape_rectangle = 0
+  ps_shape_rectangle = 0,
+  ps_shape_ellipse,
+  ps_shape_diamond,
+  ps_shape_line
 };
 
 enum
 {
-  ps_distr_linear = 0
+  ps_distr_linear = 0,
+  ps_distr_gaussian,
+  ps_distr_invgaussian
 };
 
 #endif // ENIGMA_PS_PARTICLECONSTANTS

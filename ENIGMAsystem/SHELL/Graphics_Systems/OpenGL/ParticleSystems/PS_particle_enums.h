@@ -70,28 +70,33 @@ namespace enigma
   }
 
   enum ps_shape {
-    ps_sh_rectangle = 0//,
-    //ps_sh_ellipse,
-    //ps_sh_diamond,
-    //ps_sh_line
+    ps_sh_rectangle = 0,
+    ps_sh_ellipse,
+    ps_sh_diamond,
+    ps_sh_line
   };
   inline ps_shape get_ps_shape(int shape)
   {
     switch (shape) {
     case ps_shape_rectangle : return enigma::ps_sh_rectangle;
+    case ps_shape_ellipse : return enigma::ps_sh_ellipse;
+    case ps_shape_diamond : return enigma::ps_sh_diamond;
+    case ps_shape_line : return enigma::ps_sh_line;
     default : return enigma::ps_sh_rectangle;
     }
   }
 
   enum ps_distr {
-    ps_di_linear = 0//,
-    //ps_di_gaussian,
-    //ps_di_invgaussian
+    ps_di_linear = 0,
+    ps_di_gaussian,
+    ps_di_invgaussian
   };
   inline ps_distr get_ps_distr(int distribution)
   {
     switch (distribution) {
     case ps_distr_linear : return enigma::ps_di_linear;
+    case ps_distr_gaussian : return enigma::ps_di_gaussian;
+    case ps_distr_invgaussian : return enigma::ps_di_invgaussian;
     default : return enigma::ps_di_linear;
     }
   }
