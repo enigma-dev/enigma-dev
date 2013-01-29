@@ -31,6 +31,7 @@
 #include "PS_particle_instance.h"
 #include "PS_particle_emitter.h"
 #include "PS_particle_attractor.h"
+#include "PS_particle_destroyer.h"
 #include "Universal_System/depth_draw.h"
 #include "Graphics_Systems/OpenGL/GSstdraw.h"
 #include "Graphics_Systems/OpenGL/GScolors.h"
@@ -95,6 +96,10 @@ namespace enigma
     std::map<int,particle_attractor*> id_to_attractor;
     int attractor_max_id;
     int create_attractor();
+    // Destroyers.
+    std::map<int,particle_destroyer*> id_to_destroyer;
+    int destroyer_max_id;
+    int create_destroyer();
 
     // TODO: Write emitters, attractors, destroyers, deflectors and changers,
     // and create a map of each in the particle_system.
@@ -379,6 +384,31 @@ namespace enigma
           else {
             it->x += force_effective_strength*cos(direction_radians);
             it->y += -force_effective_strength*sin(direction_radians);
+          }
+        }
+      }
+    }
+    // Destroyers.
+    {
+      std::map<int,particle_destroyer*>::iterator end = id_to_destroyer.end();
+      for (std::map<int,particle_destroyer*>::iterator ds_it = id_to_destroyer.begin(); ds_it != end; ds_it++)
+      {
+        particle_destroyer* p_ds = (*ds_it).second;
+        std::list<particle_instance>::iterator end = pi_list.end();
+        for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        {
+          if (p_ds->is_inside(it->x, it->y)) {
+            particle_type* pt = it->pt;
+
+            // Death handling.
+            pt->particle_count--;
+            if (pt->particle_count <= 0 && !pt->alive) {
+              // Particle type is no longer used, delete it.
+              int id = pt->id;
+              delete pt;
+              enigma::pt_manager.id_to_particletype.erase(id);
+            }
+            it = pi_list.erase(it);
           }
         }
       }
@@ -677,6 +707,16 @@ namespace enigma
 
     return attractor_max_id;
   }
+  int particle_system::create_destroyer()
+  {
+    particle_destroyer* p_ds = new particle_destroyer();
+    p_ds->initialize();
+
+    destroyer_max_id++;
+    id_to_destroyer.insert(std::pair<int,particle_destroyer*>(destroyer_max_id, p_ds));
+
+    return destroyer_max_id;
+  }
 }
 
 namespace enigma
@@ -722,6 +762,7 @@ using enigma::ps_manager;
 using enigma::particle_type_manager;
 using enigma::particle_emitter;
 using enigma::particle_attractor;
+using enigma::particle_destroyer;
 
 // General functions.
 
@@ -763,6 +804,7 @@ void part_system_clear(int id)
   // TODO: Remove all the particles, emitters, deflectors, etc.
   part_emitter_destroy_all(id);
   part_attractor_destroy_all(id);
+  part_destroyer_destroy_all(id);
   part_particles_clear(id);
 }
 void part_system_draw_order(int id, bool oldtonew)
@@ -985,6 +1027,7 @@ void part_emitter_stream(int ps_id, int em_id, int particle_type_id, int number)
     (*ps_it).second->set_emitter_stream(em_id, particle_type_id, number);
   }
 }
+
 // Attractor.
 
 int part_attractor_create(int id)
@@ -1061,6 +1104,75 @@ void part_attractor_force(int ps_id, int at_id, double force, double dist, int k
     std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
     if (at_it != p_s->id_to_attractor.end()) {
       (*at_it).second->set_force(force, dist, enigma::get_ps_force(kind), additive);
+    }
+  }
+}
+
+// Destroyer.
+
+int part_destroyer_create(int id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    return (*ps_it).second->create_destroyer();
+  }
+  return -1;
+}
+void part_destroyer_destroy(int ps_id, int ds_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
+    if (ds_it != p_s->id_to_destroyer.end()) {
+      delete (*ds_it).second;
+      p_s->id_to_destroyer.erase(ds_it);
+    }
+  }
+}
+void part_destroyer_destroy_all(int ps_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    for (std::map<int,particle_destroyer*>::iterator it = p_s->id_to_destroyer.begin(); it != p_s->id_to_destroyer.end(); it++)
+    {
+      delete (*it).second;
+    }
+    p_s->id_to_destroyer.clear();
+  }
+}
+bool part_destroyer_exists(int ps_id, int ds_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
+    if (ds_it != p_s->id_to_destroyer.end()) {
+      return true;
+    }
+  }
+  return false;
+}
+void part_destroyer_clear(int ps_id, int ds_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
+    if (ds_it != p_s->id_to_destroyer.end()) {
+      (*ds_it).second->initialize();
+    }
+  }
+}
+void part_destroyer_region(int ps_id, int ds_id, double xmin, double xmax, double ymin, double ymax, int shape)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
+    if (ds_it != p_s->id_to_destroyer.end()) {
+      (*ds_it).second->set_region(xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape));
     }
   }
 }

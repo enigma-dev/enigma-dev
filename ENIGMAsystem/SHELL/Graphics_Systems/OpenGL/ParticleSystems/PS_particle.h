@@ -72,6 +72,15 @@ void part_attractor_clear(int ps_id, int at_id);
 void part_attractor_position(int ps_id, int at_id, double x, double y);
 void part_attractor_force(int ps_id, int at_id, double force, double dist, int kind, bool additive);
 
+// Destroyers.
+
+int part_destroyer_create(int id);
+void part_destroyer_destroy(int ps_id, int ds_id);
+void part_destroyer_destroy_all(int ps_id);
+bool part_destroyer_exists(int ps_id, int ds_id);
+void part_destroyer_clear(int ps_id, int ds_id);
+void part_destroyer_region(int ps_id, int ds_id, double xmin, double xmax, double ymin, double ymax, int shape);
+
 // Particle types.
 
 // General.
