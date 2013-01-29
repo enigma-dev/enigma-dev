@@ -30,6 +30,7 @@
 #include "PS_particle_type.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_emitter.h"
+#include "PS_particle_attractor.h"
 #include "Universal_System/depth_draw.h"
 #include "Graphics_Systems/OpenGL/GSstdraw.h"
 #include "Graphics_Systems/OpenGL/GScolors.h"
@@ -90,6 +91,10 @@ namespace enigma
     int create_emitter();
     void set_emitter_region(int em_id, double xmin, double xmax, double ymin, double ymax, ps_shape shape, ps_distr distribution);
     void set_emitter_stream(int em_id, int particle_type_id, int number);
+    // Attractors.
+    std::map<int,particle_attractor*> id_to_attractor;
+    int attractor_max_id;
+    int create_attractor();
 
     // TODO: Write emitters, attractors, destroyers, deflectors and changers,
     // and create a map of each in the particle_system.
@@ -111,6 +116,8 @@ namespace enigma
     pi_list = std::list<particle_instance>();
     id_to_emitter = std::map<int,particle_emitter*>();
     emitter_max_id = 0;
+    id_to_attractor = std::map<int,particle_attractor*>();
+    attractor_max_id = 0;
   }
   void particle_system::update_particlesystem()
   {
@@ -330,6 +337,48 @@ namespace enigma
             int x, y;
             p_e->get_point(x, y);
             create_particles(x, y, p_t, 1);
+          }
+        }
+      }
+    }
+    // Attractors.
+    {
+      std::map<int,particle_attractor*>::iterator end = id_to_attractor.end();
+      for (std::map<int,particle_attractor*>::iterator at_it = id_to_attractor.begin(); at_it != end; at_it++)
+      {
+        particle_attractor* p_a = (*at_it).second;
+        std::list<particle_instance>::iterator end = pi_list.end();
+        for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        {
+          // If the particle is not inside the attractor range of influence,
+          // or is at the attractor's exact position,
+          // skip to next attractor. 
+          const double dx = it->x - p_a->x;
+          const double dy = it->y - p_a->y;
+          const double relative_distance = sqrt(dx*dx + dy*dy)/std::max(1.0, p_a->dist_effect);
+          if (relative_distance > 1.0 || (dx == 0 && dy == 0)) {
+            continue;
+          }
+          const double direction_radians = atan2(-(p_a->y - it->y), p_a->x - it->x);
+          // Determine force.
+          double force_effective_strength;
+          switch (p_a->force_kind)  {
+          case ps_fo_constant : force_effective_strength = p_a->force_strength; break;
+          case ps_fo_linear : force_effective_strength = (1.0 - relative_distance)*p_a->force_strength; break;
+          case ps_fo_quadratic : force_effective_strength = (1.0 - relative_distance)*(1.0 - relative_distance)*p_a->force_strength; break;
+          default : force_effective_strength = p_a->force_strength; break;
+          }
+          // Apply force.
+          if (p_a->additive) {
+            const double vx = it->speed*cos(it->direction*M_PI/180.0) + force_effective_strength*cos(direction_radians);
+            const double vy = -it->speed*sin(it->direction*M_PI/180.0) - force_effective_strength*sin(direction_radians);
+            it->speed = sqrt(vx*vx + vy*vy);
+            const double direction = it->direction;
+            it->direction = vx == 0.0 && vy == 0.0 ? direction : -atan2(vy,vx)*180.0/M_PI;
+          }
+          else {
+            it->x += force_effective_strength*cos(direction_radians);
+            it->y += -force_effective_strength*sin(direction_radians);
           }
         }
       }
@@ -618,6 +667,16 @@ namespace enigma
       (*pe_it).second->set_stream(particle_type_id, number);
     }
   }
+  int particle_system::create_attractor()
+  {
+    particle_attractor* p_a = new particle_attractor();
+    p_a->initialize();
+
+    attractor_max_id++;
+    id_to_attractor.insert(std::pair<int,particle_attractor*>(attractor_max_id, p_a));
+
+    return attractor_max_id;
+  }
 }
 
 namespace enigma
@@ -662,6 +721,7 @@ using enigma::ps_manager;
 using enigma::ps_manager;
 using enigma::particle_type_manager;
 using enigma::particle_emitter;
+using enigma::particle_attractor;
 
 // General functions.
 
@@ -702,6 +762,7 @@ void part_system_clear(int id)
 {
   // TODO: Remove all the particles, emitters, deflectors, etc.
   part_emitter_destroy_all(id);
+  part_attractor_destroy_all(id);
   part_particles_clear(id);
 }
 void part_system_draw_order(int id, bool oldtonew)
@@ -922,6 +983,85 @@ void part_emitter_stream(int ps_id, int em_id, int particle_type_id, int number)
   std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
   if (ps_it != ps_manager.id_to_particlesystem.end()) {
     (*ps_it).second->set_emitter_stream(em_id, particle_type_id, number);
+  }
+}
+// Attractor.
+
+int part_attractor_create(int id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    return (*ps_it).second->create_attractor();
+  }
+  return -1;
+}
+void part_attractor_destroy(int ps_id, int at_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
+    if (at_it != p_s->id_to_attractor.end()) {
+      delete (*at_it).second;
+      p_s->id_to_attractor.erase(at_it);
+    }
+  }
+}
+void part_attractor_destroy_all(int ps_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    for (std::map<int,particle_attractor*>::iterator it = p_s->id_to_attractor.begin(); it != p_s->id_to_attractor.end(); it++)
+    {
+      delete (*it).second;
+    }
+    p_s->id_to_attractor.clear();
+  }
+}
+bool part_attractor_exists(int ps_id, int at_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
+    if (at_it != p_s->id_to_attractor.end()) {
+      return true;
+    }
+  }
+  return false;
+}
+void part_attractor_clear(int ps_id, int at_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
+    if (at_it != p_s->id_to_attractor.end()) {
+      (*at_it).second->initialize();
+    }
+  }
+}
+void part_attractor_position(int ps_id, int at_id, double x, double y)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
+    if (at_it != p_s->id_to_attractor.end()) {
+      (*at_it).second->set_position(x, y);
+    }
+  }
+}
+void part_attractor_force(int ps_id, int at_id, double force, double dist, int kind, bool additive)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
+    if (at_it != p_s->id_to_attractor.end()) {
+      (*at_it).second->set_force(force, dist, enigma::get_ps_force(kind), additive);
+    }
   }
 }
 

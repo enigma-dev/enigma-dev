@@ -61,5 +61,12 @@ enum
   ps_distr_invgaussian
 };
 
+enum
+{
+  ps_force_constant = 0,
+  ps_force_linear,
+  ps_force_quadratic
+};
+
 #endif // ENIGMA_PS_PARTICLECONSTANTS
 

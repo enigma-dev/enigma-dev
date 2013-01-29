@@ -62,6 +62,16 @@ void part_emitter_region(int ps_id, int em_id, double xmin, double xmax, double 
 void part_emitter_burst(int ps_id, int em_id, int particle_type_id, int number);
 void part_emitter_stream(int ps_id, int em_id, int particle_type_id, int number);
 
+// Attractors.
+
+int part_attractor_create(int id);
+void part_attractor_destroy(int ps_id, int at_id);
+void part_attractor_destroy_all(int ps_id);
+bool part_attractor_exists(int ps_id, int at_id);
+void part_attractor_clear(int ps_id, int at_id);
+void part_attractor_position(int ps_id, int at_id, double x, double y);
+void part_attractor_force(int ps_id, int at_id, double force, double dist, int kind, bool additive);
+
 // Particle types.
 
 // General.

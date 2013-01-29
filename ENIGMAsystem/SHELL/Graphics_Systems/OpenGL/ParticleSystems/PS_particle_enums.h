@@ -100,6 +100,21 @@ namespace enigma
     default : return enigma::ps_di_linear;
     }
   }
+
+  enum ps_force {
+    ps_fo_constant = 0,
+    ps_fo_linear,
+    ps_fo_quadratic
+  };
+  inline ps_force get_ps_force(int force_kind)
+  {
+    switch (force_kind) {
+    case ps_force_constant : return enigma::ps_fo_constant;
+    case ps_force_linear : return enigma::ps_fo_linear;
+    case ps_force_quadratic : return enigma::ps_fo_quadratic;
+    default : return enigma::ps_fo_constant;
+    }
+  }
 }
 
 #endif // ENIGMA_PS_PARTICLEENUMS
