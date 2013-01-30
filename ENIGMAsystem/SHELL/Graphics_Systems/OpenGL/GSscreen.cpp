@@ -139,14 +139,14 @@ void screen_redraw()
                     {
                         object_planar* vobr = (object_planar*)instanceexists;
 
-                        int vobx = (int)(vobr->x), voby = (int)(vobr->y);
+                        double vobx = vobr->x, voby = vobr->y;
 
                         //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
                         //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
 
-                        int vbc_h, vbc_v;
-                        (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = int(view_wview[vc]/2) : vbc_h = view_hborder[vc];
-                        (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = int(view_hview[vc]/2) : vbc_v = view_vborder[vc];
+                        double vbc_h, vbc_v;
+                        (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
+                        (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
 
                         if (view_hspeed[vc] == -1)
                         {
