@@ -128,6 +128,17 @@ namespace enigma
     default : return enigma::ps_de_horizontal;
     }
   }
+
+  enum ps_change {
+    ps_ch_all = 0
+  };
+  inline ps_change get_ps_change(int change_kind)
+  {
+    switch (change_kind) {
+    case ps_change_all : return enigma::ps_ch_all;
+    default : return enigma::ps_ch_all;
+    }
+  }
 }
 
 #endif // ENIGMA_PS_PARTICLEENUMS

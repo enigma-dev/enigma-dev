@@ -33,6 +33,7 @@
 #include "PS_particle_attractor.h"
 #include "PS_particle_destroyer.h"
 #include "PS_particle_deflector.h"
+#include "PS_particle_changer.h"
 #include "Universal_System/depth_draw.h"
 #include "Graphics_Systems/OpenGL/GSstdraw.h"
 #include "Graphics_Systems/OpenGL/GScolors.h"
@@ -105,9 +106,10 @@ namespace enigma
     std::map<int,particle_deflector*> id_to_deflector;
     int deflector_max_id;
     int create_deflector();
-
-    // TODO: Write emitters, attractors, destroyers, deflectors and changers,
-    // and create a map of each in the particle_system.
+    // Changers.
+    std::map<int,particle_changer*> id_to_changer;
+    int changer_max_id;
+    int create_changer();
   };
   double particle_system::get_wiggle_result(double wiggle_offset)
   {
@@ -132,6 +134,8 @@ namespace enigma
     destroyer_max_id = 0;
     id_to_deflector = std::map<int,particle_deflector*>();
     deflector_max_id = 0;
+    id_to_changer = std::map<int,particle_changer*>();
+    changer_max_id = 0;
   }
   void particle_system::update_particlesystem()
   {
@@ -324,6 +328,51 @@ namespace enigma
         }
         it->x += speed*cos(direction*M_PI/180.0);
         it->y += -speed*sin(direction*M_PI/180.0);
+      }
+    }
+    // Changers.
+    {
+      std::map<int,particle_changer*>::iterator end = id_to_changer.end();
+      for (std::map<int,particle_changer*>::iterator ch_it = id_to_changer.begin(); ch_it != end; ch_it++)
+      {
+        particle_changer* p_ch = (*ch_it).second;
+        particle_type* pt1;
+        particle_type* pt2;
+        std::map<int,enigma::particle_type*>::iterator pt_it1 = enigma::pt_manager.id_to_particletype.find(p_ch->parttypeid1);
+        if (pt_it1 == enigma::pt_manager.id_to_particletype.end()) {
+          continue;
+        }
+        std::map<int,enigma::particle_type*>::iterator pt_it2 = enigma::pt_manager.id_to_particletype.find(p_ch->parttypeid2);
+        if (pt_it2 == enigma::pt_manager.id_to_particletype.end()) {
+          continue;
+        }
+        pt1 = (*pt_it1).second;
+        pt2 = (*pt_it2).second;
+
+        std::list<particle_instance>::iterator end = pi_list.end();
+        for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        {
+          if (p_ch->is_inside(it->x, it->y) && it->pt->id == pt1->id) {
+            // Store position of old particle.
+            const double x = it->x, y = it->y;
+            // Destroy the old particle.
+            pt1->particle_count--;
+            if (pt1->particle_count <= 0 && !pt1->alive) {
+              // Particle type is no longer used, delete it.
+              int id = pt1->id;
+              delete pt1;
+              enigma::pt_manager.id_to_particletype.erase(id);
+            }
+            it = pi_list.erase(it);
+            // Create a new particle at its position.
+            generation_info gen_info;
+            gen_info.x = x;
+            gen_info.y = y;
+            gen_info.number = 1;
+            gen_info.pt = pt2;
+            particles_to_generate.push_back(gen_info);
+          }
+        }
       }
     }
     // Generate particles.
@@ -774,6 +823,16 @@ namespace enigma
 
     return deflector_max_id;
   }
+  int particle_system::create_changer()
+  {
+    particle_changer* p_c = new particle_changer();
+    p_c->initialize();
+
+    changer_max_id++;
+    id_to_changer.insert(std::pair<int,particle_changer*>(changer_max_id, p_c));
+
+    return changer_max_id;
+  }
 }
 
 namespace enigma
@@ -821,6 +880,7 @@ using enigma::particle_emitter;
 using enigma::particle_attractor;
 using enigma::particle_destroyer;
 using enigma::particle_deflector;
+using enigma::particle_changer;
 
 // General functions.
 
@@ -859,10 +919,11 @@ bool part_system_exists(int id)
 }
 void part_system_clear(int id)
 {
-  // TODO: Remove all the particles, emitters, deflectors, etc.
   part_emitter_destroy_all(id);
   part_attractor_destroy_all(id);
   part_destroyer_destroy_all(id);
+  part_deflector_destroy_all(id);
+  part_changer_destroy_all(id);
   part_particles_clear(id);
 }
 void part_system_draw_order(int id, bool oldtonew)
@@ -1322,6 +1383,97 @@ void part_deflector_friction(int ps_id, int df_id, double friction)
     std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
     if (df_it != p_s->id_to_deflector.end()) {
       (*df_it).second->set_friction(friction);
+    }
+  }
+}
+
+// Changer.
+
+int part_changer_create(int id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    return (*ps_it).second->create_changer();
+  }
+  return -1;
+}
+void part_changer_destroy(int ps_id, int ch_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+    if (ch_it != p_s->id_to_changer.end()) {
+      delete (*ch_it).second;
+      p_s->id_to_changer.erase(ch_it);
+    }
+  }
+}
+void part_changer_destroy_all(int ps_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    for (std::map<int,particle_changer*>::iterator it = p_s->id_to_changer.begin(); it != p_s->id_to_changer.end(); it++)
+    {
+      delete (*it).second;
+    }
+    p_s->id_to_changer.clear();
+  }
+}
+bool part_changer_exists(int ps_id, int ch_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+    if (ch_it != p_s->id_to_changer.end()) {
+      return true;
+    }
+  }
+  return false;
+}
+void part_changer_clear(int ps_id, int ch_id)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+    if (ch_it != p_s->id_to_changer.end()) {
+      (*ch_it).second->initialize();
+    }
+  }
+}
+void part_changer_region(int ps_id, int ch_id, double xmin, double xmax, double ymin, double ymax, int shape)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+    if (ch_it != p_s->id_to_changer.end()) {
+      (*ch_it).second->set_region(xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape));
+    }
+  }
+}
+void part_changer_types(int ps_id, int ch_id, int parttype1, int parttype2)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+    if (ch_it != p_s->id_to_changer.end()) {
+      (*ch_it).second->set_types(parttype1, parttype2);
+    }
+  }
+}
+void part_changer_kind(int ps_id, int ch_id, int kind)
+{
+  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+    if (ch_it != p_s->id_to_changer.end()) {
+      (*ch_it).second->set_change_kind(enigma::get_ps_change(kind));
     }
   }
 }

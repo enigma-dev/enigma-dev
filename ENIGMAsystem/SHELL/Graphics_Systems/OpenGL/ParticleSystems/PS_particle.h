@@ -92,6 +92,17 @@ void part_deflector_region(int ps_id, int df_id, double xmin, double xmax, doubl
 void part_deflector_kind(int ps_id, int df_id, int kind);
 void part_deflector_friction(int ps_id, int df_id, double friction);
 
+// Changers.
+
+int part_changer_create(int id);
+void part_changer_destroy(int ps_id, int ch_id);
+void part_changer_destroy_all(int ps_id);
+bool part_changer_exists(int ps_id, int ch_id);
+void part_changer_clear(int ps_id, int ch_id);
+void part_changer_region(int ps_id, int ch_id, double xmin, double xmax, double ymin, double ymax, int shape);
+void part_changer_types(int ps_id, int ch_id, int parttype1, int parttype2);
+void part_changer_kind(int ps_id, int ch_id, int kind);
+
 // Particle types.
 
 // General.

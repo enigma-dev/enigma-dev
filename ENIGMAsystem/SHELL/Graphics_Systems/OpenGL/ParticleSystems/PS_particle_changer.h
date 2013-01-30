@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012-2013 forthevin                                           **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,63 +25,31 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLECONSTANTS
-#define ENIGMA_PS_PARTICLECONSTANTS
+#ifndef ENIGMA_PS_PARTICLECHANGER
+#define ENIGMA_PS_PARTICLECHANGER
 
-enum
+#include "PS_particle_enums.h"
+
+namespace enigma
 {
-  pt_shape_pixel = 0,
-  pt_shape_disk,
-  pt_shape_square,
-  pt_shape_line,
-  pt_shape_star,
-  pt_shape_circle,
-  pt_shape_ring,
-  pt_shape_sphere,
-  pt_shape_flare,
-  pt_shape_spark,
-  pt_shape_explosion,
-  pt_shape_cloud,
-  pt_shape_smoke,
-  pt_shape_snow
-};
+  struct particle_changer
+  {
+    double xmin, xmax, ymin, ymax;
+    ps_shape shape;
+    int parttypeid1;
+    int parttypeid2;
+    ps_change change_kind;
 
-enum
-{
-  ps_shape_rectangle = 0,
-  ps_shape_ellipse,
-  ps_shape_diamond,
-  ps_shape_line
-};
+    void initialize();
+    void clear_particle_changer();
+    void set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape);
+    void set_types(int parttypeid1, int parttypeid2);
+    void set_change_kind(ps_change change_kind);
+    bool is_inside(double x, double y);
+  };
 
-enum
-{
-  ps_distr_linear = 0,
-  ps_distr_gaussian,
-  ps_distr_invgaussian
-};
+  particle_changer* create_particle_changer();
+}
 
-enum
-{
-  ps_force_constant = 0,
-  ps_force_linear,
-  ps_force_quadratic
-};
-
-enum
-{
-  ps_deflect_horizontal = 0,
-  ps_deflect_vertical
-};
-
-enum
-{
-  ps_change_all = 0
-  // NOTE: ps_change_motion and ps_change_shape are intentionally not
-  // implemented. The reasoning for this decision is that their
-  // interface is loosely defined, and an existing implementation
-  // seems contrary to the loosely defined interface.
-};
-
-#endif // ENIGMA_PS_PARTICLECONSTANTS
+#endif // ENIGMA_PS_PARTICLECHANGER
 
