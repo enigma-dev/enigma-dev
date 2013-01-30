@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012-2013 forthevin                                           **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,54 +25,49 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLECONSTANTS
-#define ENIGMA_PS_PARTICLECONSTANTS
+#include "PS_particle_deflector.h"
+#include "PS_particle_enums.h"
+#include <cstdlib>
+#include <algorithm>
+#include <cmath>
 
-enum
+namespace enigma
 {
-  pt_shape_pixel = 0,
-  pt_shape_disk,
-  pt_shape_square,
-  pt_shape_line,
-  pt_shape_star,
-  pt_shape_circle,
-  pt_shape_ring,
-  pt_shape_sphere,
-  pt_shape_flare,
-  pt_shape_spark,
-  pt_shape_explosion,
-  pt_shape_cloud,
-  pt_shape_smoke,
-  pt_shape_snow
-};
-
-enum
-{
-  ps_shape_rectangle = 0,
-  ps_shape_ellipse,
-  ps_shape_diamond,
-  ps_shape_line
-};
-
-enum
-{
-  ps_distr_linear = 0,
-  ps_distr_gaussian,
-  ps_distr_invgaussian
-};
-
-enum
-{
-  ps_force_constant = 0,
-  ps_force_linear,
-  ps_force_quadratic
-};
-
-enum
-{
-  ps_deflect_horizontal = 0,
-  ps_deflect_vertical,
-};
-
-#endif // ENIGMA_PS_PARTICLECONSTANTS
+  void particle_deflector::initialize()
+  {
+    xmin = 0.0, xmax = 0.0;
+    ymin = 0.0, ymax = 0.0;
+    deflection_kind = ps_de_horizontal;
+    friction = 0.0;
+  }
+  particle_deflector* create_particle_deflector()
+  {
+    particle_deflector* pdf = new particle_deflector();
+    pdf->initialize();
+    return pdf;
+  }
+  void particle_deflector::clear_particle_deflector()
+  {
+    initialize();
+  }
+  bool particle_deflector::is_inside(double x, double y)
+  {
+    return xmin != xmax && ymin != ymax && x >= xmin && x <= xmax && y >= ymin && y <= ymax;
+  }
+  void particle_deflector::set_region(double xmin, double xmax, double ymin, double ymax)
+  {
+    this->xmin = std::min(xmin, xmax);
+    this->xmax = xmax;
+    this->ymin = std::min(ymin, ymax);
+    this->ymax = ymax;
+  }
+  void particle_deflector::set_kind(ps_deflect deflection_kind)
+  {
+    this->deflection_kind = deflection_kind;
+  }
+  void particle_deflector::set_friction(double friction)
+  {
+    this->friction = friction;
+  }
+}
 

@@ -115,6 +115,19 @@ namespace enigma
     default : return enigma::ps_fo_constant;
     }
   }
+
+  enum ps_deflect {
+    ps_de_horizontal = 0,
+    ps_de_vertical
+  };
+  inline ps_deflect get_ps_deflect(int deflection_kind)
+  {
+    switch (deflection_kind) {
+    case ps_deflect_horizontal : return enigma::ps_de_horizontal;
+    case ps_deflect_vertical : return enigma::ps_de_vertical;
+    default : return enigma::ps_de_horizontal;
+    }
+  }
 }
 
 #endif // ENIGMA_PS_PARTICLEENUMS

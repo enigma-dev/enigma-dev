@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012-2013 forthevin                                           **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,54 +25,29 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLECONSTANTS
-#define ENIGMA_PS_PARTICLECONSTANTS
+#ifndef ENIGMA_PS_PARTICLEDEFLECTOR
+#define ENIGMA_PS_PARTICLEDEFLECTOR
 
-enum
+#include "PS_particle_enums.h"
+
+namespace enigma
 {
-  pt_shape_pixel = 0,
-  pt_shape_disk,
-  pt_shape_square,
-  pt_shape_line,
-  pt_shape_star,
-  pt_shape_circle,
-  pt_shape_ring,
-  pt_shape_sphere,
-  pt_shape_flare,
-  pt_shape_spark,
-  pt_shape_explosion,
-  pt_shape_cloud,
-  pt_shape_smoke,
-  pt_shape_snow
-};
+  struct particle_deflector
+  {
+    double xmin, xmax, ymin, ymax;
+    ps_deflect deflection_kind;
+    double friction; // NOTE: Can be negative.
 
-enum
-{
-  ps_shape_rectangle = 0,
-  ps_shape_ellipse,
-  ps_shape_diamond,
-  ps_shape_line
-};
+    void initialize();
+    void clear_particle_deflector();
+    bool is_inside(double x, double y);
+    void set_region(double xmin, double xmax, double ymin, double ymax);
+    void set_kind(ps_deflect deflection_kind);
+    void set_friction(double friction);
+  };
 
-enum
-{
-  ps_distr_linear = 0,
-  ps_distr_gaussian,
-  ps_distr_invgaussian
-};
+  particle_deflector* create_particle_deflector();
+}
 
-enum
-{
-  ps_force_constant = 0,
-  ps_force_linear,
-  ps_force_quadratic
-};
-
-enum
-{
-  ps_deflect_horizontal = 0,
-  ps_deflect_vertical,
-};
-
-#endif // ENIGMA_PS_PARTICLECONSTANTS
+#endif // ENIGMA_PS_PARTICLEDEFLECTOR
 

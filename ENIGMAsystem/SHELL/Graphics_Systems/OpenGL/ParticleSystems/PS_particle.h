@@ -81,6 +81,17 @@ bool part_destroyer_exists(int ps_id, int ds_id);
 void part_destroyer_clear(int ps_id, int ds_id);
 void part_destroyer_region(int ps_id, int ds_id, double xmin, double xmax, double ymin, double ymax, int shape);
 
+// Deflectors.
+
+int part_deflector_create(int id);
+void part_deflector_destroy(int ps_id, int df_id);
+void part_deflector_destroy_all(int ps_id);
+bool part_deflector_exists(int ps_id, int df_id);
+void part_deflector_clear(int ps_id, int df_id);
+void part_deflector_region(int ps_id, int df_id, double xmin, double xmax, double ymin, double ymax);
+void part_deflector_kind(int ps_id, int df_id, int kind);
+void part_deflector_friction(int ps_id, int df_id, double friction);
+
 // Particle types.
 
 // General.
