@@ -25,10 +25,11 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLESYSTEM
-#define ENIGMA_PS_PARTICLESYSTEM
+#ifndef ENIGMA_PS_PARTICLE
+#define ENIGMA_PS_PARTICLE
 
 #include "PS_particle_constants.h"
+#include "PS_effects_constants.h"
 
 // Particle systems.
 
@@ -136,5 +137,11 @@ void part_type_speed(int id, double speed_min, double speed_max, double speed_in
 void part_type_direction(int id, double dir_min, double dir_max, double dir_incr, double dir_wiggle);
 void part_type_gravity(int id, double grav_amount, double grav_dir);
 
-#endif // ENIGMA_PS_PARTICLESYSTEM
+// Effects.
+
+void effect_create_below(int kind, double x, double y, int size, int color);
+void effect_create_above(int kind, double x, double y, int size, int color);
+void effect_clear();
+
+#endif // ENIGMA_PS_PARTICLE
 

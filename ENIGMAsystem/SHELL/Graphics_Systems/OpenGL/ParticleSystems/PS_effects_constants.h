@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012-2013 forthevin                                           **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,66 +25,33 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLESYSTEM
-#define ENIGMA_PS_PARTICLESYSTEM
+#ifndef ENIGMA_PS_EFFECTSCONSTANTS
+#define ENIGMA_PS_EFFECTSCONSTANTS
 
-#include "PS_particle_emitter.h"
-#include "PS_particle_attractor.h"
-#include "PS_particle_destroyer.h"
-#include "PS_particle_deflector.h"
-#include "PS_particle_changer.h"
-#include "PS_particle_instance.h"
-#include "PS_particle_enums.h"
-#include "Graphics_Systems/OpenGL/GScolors.h"
-#include <list>
-#include <map>
-
-namespace enigma
+/*
+enum
 {
-  struct particle_system
-  {
-    // Wiggling.
-    double wiggle;
-    int wiggle_frequency; // Number of steps for a full cycle. Domain: [1;[.
-    double get_wiggle_result(double wiggle_offset);
-    // Subimage index.
-    int subimage_index;
-    // Particles.
-    int id;
-    bool oldtonew;
-    double x_offset, y_offset;
-    double depth; // Integer stored as double.
-    std::list<particle_instance> pi_list;
-    bool auto_update, auto_draw;
-    void initialize();
-    void update_particlesystem();
-    void draw_particle(particle_instance* it);
-    void draw_particlesystem();
-    void create_particles(double x, double y, particle_type* pt, int number, bool use_color=false, int given_color=c_white);
-    // Emitters.
-    std::map<int,particle_emitter*> id_to_emitter;
-    int emitter_max_id;
-    int create_emitter();
-    void set_emitter_region(int em_id, double xmin, double xmax, double ymin, double ymax, ps_shape shape, ps_distr distribution);
-    void set_emitter_stream(int em_id, int particle_type_id, int number);
-    // Attractors.
-    std::map<int,particle_attractor*> id_to_attractor;
-    int attractor_max_id;
-    int create_attractor();
-    // Destroyers.
-    std::map<int,particle_destroyer*> id_to_destroyer;
-    int destroyer_max_id;
-    int create_destroyer();
-    // Deflectors.
-    std::map<int,particle_deflector*> id_to_deflector;
-    int deflector_max_id;
-    int create_deflector();
-    // Changers.
-    std::map<int,particle_changer*> id_to_changer;
-    int changer_max_id;
-    int create_changer();
-  };
-}
+  ef_explosion = 0,
+  ef_ring,
+  ef_ellipse,
+  ef_firework,
+  ef_smoke,
+  ef_smokeup,
+  ef_star,
+  ef_spark,
+  ef_flare,
+  ef_cloud,
+  ef_rain,
+  ef_snow
+};
 
-#endif // ENIGMA_PS_PARTICLESYSTEM
+enum
+{
+  ef_size_small = 0,
+  ef_size_medium,
+  ef_size_large,
+};
+*/
+
+#endif // ENIGMA_PS_EFFECTSCONSTANTS
 

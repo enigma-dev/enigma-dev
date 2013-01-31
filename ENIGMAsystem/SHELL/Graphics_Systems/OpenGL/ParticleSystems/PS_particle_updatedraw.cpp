@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012-2013 forthevin                                           **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,78 +25,35 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLETYPE
-#define ENIGMA_PS_PARTICLETYPE
-
-#include <map>
-#include "PS_particle_enums.h"
-#include "PS_particle_sprites.h"
+#include "PS_particle_system_manager.h"
+#include "PS_particle_system.h"
+#include "PS_particle_updatedraw.h"
 
 namespace enigma
 {
-  enum color_mode {
-    one_color, two_color, three_color, mix_color, rgb_color, hsv_color
-  };
-  enum alpha_mode {
-    one_alpha, two_alpha, three_alpha
-  };
-  struct particle_type
+  void update_particlesystems()
   {
-    // If the particle count becomes 0, and the type is not alive,
-    // the memory of the particle type should be freed, since it is no longer used.
-    int particle_count; // The number of particles of this particle type.
-    bool alive; // Whether the type is still alive.
-    int id; // Id of the particle type.
+    std::map<int,particle_system*>::iterator end = ps_manager.id_to_particlesystem.end();
+    for (std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.begin(); it != end; it++)
+    {
+      if ((*it).second->auto_update) {
+        (*it).second->update_particlesystem();
+      }
+    }
+  }
 
-    // Shape.
-    bool is_particle_sprite; // Whether an internal particle sprite is used or not.
-    enigma::particle_sprite* part_sprite;
-    int sprite_id;
-    bool sprite_animated, sprite_stretched, sprite_random;
-    double size_min, size_max;
-    double size_incr, size_wiggle;
-    double xscale, yscale;
-    double ang_min, ang_max;
-    double ang_incr, ang_wiggle;
-    bool ang_relative;
-    // Color and blending.
-    color_mode c_mode;
-    int color1;
-    int color2;
-    int color3;
-    unsigned char rmin, rmax, gmin, gmax, bmin, bmax;
-    unsigned char hmin, hmax, smin, smax, vmin, vmax;
-    alpha_mode a_mode;
-    double alpha1;
-    double alpha2;
-    double alpha3;
-    bool blend_additive;
-    // Life and death.
-    int life_min, life_max; // 1 <= life_min <= life_max.
-    bool step_on;
-    int step_particle_id;
-    int step_number;
-    bool death_on;
-    int death_particle_id;
-    int death_number;
-    // Motion.
-    double speed_min, speed_max;
-    double speed_incr, speed_wiggle;
-    double dir_min, dir_max;
-    double dir_incr, dir_wiggle;
-    double grav_amount, grav_dir;
-  };
-
-  struct particle_type_manager
+  void draw_particlesystems(std::set<int>& particlesystem_ids)
   {
-    int max_id;
-    std::map<int,particle_type*> id_to_particletype;
-  };
-
-  extern particle_type_manager pt_manager;
-
-  void initialize_particle_type(enigma::particle_type* pt);
+    std::set<int>::iterator end = particlesystem_ids.end();
+    for (std::set<int>::iterator it = particlesystem_ids.begin(); it != end; it++)
+    {
+      std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(*it);
+      if (ps_it != ps_manager.id_to_particlesystem.end()) {
+        if ((*ps_it).second->auto_draw) {
+          (*ps_it).second->draw_particlesystem();
+        }
+      }
+    }
+  }
 }
-
-#endif // ENIGMA_PS_PARTICLETYPE
 

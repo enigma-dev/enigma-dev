@@ -31,53 +31,53 @@
 #include "Graphics_Systems/OpenGL/GScolors.h"
 #include "Graphics_Systems/OpenGL/GSsprite.h"
 
+namespace enigma
+{
+  particle_type_manager pt_manager;
+
+  void initialize_particle_type(enigma::particle_type* pt)
+  {
+    pt->is_particle_sprite = true;
+    enigma::particle_sprite* sprite = enigma::get_particle_sprite(enigma::pt_sh_pixel);
+    if (sprite != 0) {
+      pt->part_sprite = sprite;
+    }
+    pt->sprite_id = -1;
+    pt->sprite_animated = false, pt->sprite_stretched = false, pt->sprite_random = false;
+    pt->size_min = 1.0, pt->size_max = 1.0;
+    pt->size_incr = 0.0, pt->size_wiggle = 0.0;
+    pt->xscale = 1.0, pt->yscale = 1.0;
+    pt->ang_min = 0.0, pt->ang_max = 0.0;
+    pt->ang_incr = 0.0, pt->ang_wiggle = 0.0;
+    pt->ang_relative = false;
+    pt->c_mode = enigma::one_color;
+    pt->color1 = c_white;
+    pt->color2 = c_white;
+    pt->color3 = c_white;
+    pt->rmin = 255, pt->rmax = 255, pt->gmin = 255, pt->gmax = 255, pt->bmin = 255, pt->bmax = 255;
+    pt->hmin = 255, pt->hmax = 255, pt->smin = 255, pt->smax = 255, pt->vmin = 255, pt->vmax = 255;
+    pt->a_mode = enigma::one_alpha;
+    pt->alpha1 = 255;
+    pt->alpha2 = 255;
+    pt->alpha3 = 255;
+    pt->blend_additive = false;
+    pt->life_min = 100;
+    pt->life_max = 100;
+    pt->death_on = false, pt->death_particle_id = 0, pt->death_number = 0;
+    pt->step_on = false, pt->step_particle_id = 0, pt->step_number = 0;
+    pt->speed_min = 0.0, pt->speed_max = 0.0;
+    pt->speed_incr = 0.0, pt->speed_wiggle = 0.0;
+    pt->dir_min = 0.0, pt->dir_max = 0.0;
+    pt->dir_incr = 0.0, pt->dir_wiggle = 0.0;
+    pt->grav_amount = 0.0, pt->grav_dir = 0.0;
+  }
+}
+
 inline int bounds(int value, int low, int high)
 {
   if (value < low) return low;
   if (value > high) return high;
   return value;
-}
-
-namespace enigma
-{
-  particle_type_manager pt_manager;
-}
-
-void initialize_particle_type(enigma::particle_type* pt)
-{
-  pt->is_particle_sprite = true;
-  enigma::particle_sprite* sprite = enigma::get_particle_sprite(enigma::pt_sh_pixel);
-  if (sprite != 0) {
-    pt->part_sprite = sprite;
-  }
-  pt->sprite_id = -1;
-  pt->sprite_animated = false, pt->sprite_stretched = false, pt->sprite_random = false;
-  pt->size_min = 1.0, pt->size_max = 1.0;
-  pt->size_incr = 0.0, pt->size_wiggle = 0.0;
-  pt->xscale = 1.0, pt->yscale = 1.0;
-  pt->ang_min = 0.0, pt->ang_max = 0.0;
-  pt->ang_incr = 0.0, pt->ang_wiggle = 0.0;
-  pt->ang_relative = false;
-  pt->c_mode = enigma::one_color;
-  pt->color1 = c_white;
-  pt->color2 = c_white;
-  pt->color3 = c_white;
-  pt->rmin = 255, pt->rmax = 255, pt->gmin = 255, pt->gmax = 255, pt->bmin = 255, pt->bmax = 255;
-  pt->hmin = 255, pt->hmax = 255, pt->smin = 255, pt->smax = 255, pt->vmin = 255, pt->vmax = 255;
-  pt->a_mode = enigma::one_alpha;
-  pt->alpha1 = 255;
-  pt->alpha2 = 255;
-  pt->alpha3 = 255;
-  pt->blend_additive = false;
-  pt->life_min = 100;
-  pt->life_max = 100;
-  pt->death_on = false, pt->death_particle_id = 0, pt->death_number = 0;
-  pt->step_on = false, pt->step_particle_id = 0, pt->step_number = 0;
-  pt->speed_min = 0.0, pt->speed_max = 0.0;
-  pt->speed_incr = 0.0, pt->speed_wiggle = 0.0;
-  pt->dir_min = 0.0, pt->dir_max = 0.0;
-  pt->dir_incr = 0.0, pt->dir_wiggle = 0.0;
-  pt->grav_amount = 0.0, pt->grav_dir = 0.0;
 }
 int part_type_create()
 { 

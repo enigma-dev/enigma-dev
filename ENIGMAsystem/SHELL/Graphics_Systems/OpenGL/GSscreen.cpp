@@ -36,7 +36,7 @@ using namespace std;
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.h"
+#include "Graphics_Systems/OpenGL/ParticleSystems/PS_particle_updatedraw.h"
 
 using namespace enigma;
 

@@ -9,5 +9,5 @@
 #endif
 
 #include "ParticleSystems/PS_particle.h"
-#include "ParticleSystems/PS_particle_system.h"
+#include "ParticleSystems/PS_particle_updatedraw.h"
 
