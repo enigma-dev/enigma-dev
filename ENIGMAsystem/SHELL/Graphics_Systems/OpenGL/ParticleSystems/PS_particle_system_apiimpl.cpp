@@ -34,7 +34,6 @@
 
 using enigma::particle_system;
 using enigma::particle_type;
-using enigma::ps_manager;
 using enigma::pt_manager;
 using enigma::particle_type_manager;
 
@@ -42,6 +41,7 @@ using enigma::particle_type_manager;
 
 int part_system_create()
 {
+  using enigma::ps_manager;
   particle_system* p_s = new particle_system();
   p_s->initialize();
 
@@ -58,23 +58,19 @@ void part_system_destroy(int id)
 {
   part_system_clear(id);
   // Remember to destroy the system.
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*it).second;
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
     delete p_s;
-    ps_manager.id_to_particlesystem.erase(it);
+    enigma::ps_manager.id_to_particlesystem.erase(id);
   }
 }
 bool part_system_exists(int id)
 {
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    return true;
-  }
-  return false;
+  return enigma::get_particlesystem(id) != NULL;
 }
 void part_system_clear(int id)
 {
+  if (enigma::get_particlesystem(id) == NULL) return;
   part_emitter_destroy_all(id);
   part_attractor_destroy_all(id);
   part_destroyer_destroy_all(id);
@@ -84,16 +80,15 @@ void part_system_clear(int id)
 }
 void part_system_draw_order(int id, bool oldtonew)
 {
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    (*it).second->oldtonew = oldtonew;
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->oldtonew = oldtonew;
   }
 }
 void part_system_depth(int id, double depth)
 {
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*it).second;
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
     const double new_depth = round(depth);
     if (p_s->auto_draw) {
       // If the particle system has automatic drawing enabled, it is in the depth system,
@@ -111,10 +106,10 @@ void part_system_depth(int id, double depth)
 }
 void part_system_position(int id, double x, double y)
 {
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    (*it).second->x_offset = x;
-    (*it).second->y_offset = y;
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->x_offset = x;
+    p_s->y_offset = y;
   }
 }
 
@@ -122,16 +117,15 @@ void part_system_position(int id, double x, double y)
 
 void part_system_automatic_update(int id, bool automatic)
 {
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    (*it).second->auto_update = automatic;
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->auto_update = automatic;
   }
 }
 void part_system_automatic_draw(int id, bool automatic)
 {
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*it).second;
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
     bool auto_draw_before = p_s->auto_draw;
     p_s->auto_draw = automatic;
     if (automatic && !auto_draw_before) { // Add to drawing depths.
@@ -144,16 +138,16 @@ void part_system_automatic_draw(int id, bool automatic)
 }
 void part_system_update(int id)
 {
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    (*it).second->update_particlesystem();
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->update_particlesystem();
   }
 }
 void part_system_drawit(int id)
 {
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    (*it).second->draw_particlesystem();
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->draw_particlesystem();
   }
 }
 

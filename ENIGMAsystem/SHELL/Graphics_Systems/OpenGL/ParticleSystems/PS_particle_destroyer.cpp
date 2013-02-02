@@ -97,23 +97,20 @@ namespace enigma
 
 using enigma::particle_system;
 using enigma::particle_type;
-using enigma::ps_manager;
 using enigma::particle_destroyer;
-using enigma::pt_manager;
 
 int part_destroyer_create(int id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    return (*ps_it).second->create_destroyer();
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    return p_s->create_destroyer();
   }
   return -1;
 }
 void part_destroyer_destroy(int ps_id, int ds_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
     if (ds_it != p_s->id_to_destroyer.end()) {
       delete (*ds_it).second;
@@ -123,9 +120,8 @@ void part_destroyer_destroy(int ps_id, int ds_id)
 }
 void part_destroyer_destroy_all(int ps_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     for (std::map<int,particle_destroyer*>::iterator it = p_s->id_to_destroyer.begin(); it != p_s->id_to_destroyer.end(); it++)
     {
       delete (*it).second;
@@ -135,9 +131,8 @@ void part_destroyer_destroy_all(int ps_id)
 }
 bool part_destroyer_exists(int ps_id, int ds_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
     if (ds_it != p_s->id_to_destroyer.end()) {
       return true;
@@ -147,9 +142,8 @@ bool part_destroyer_exists(int ps_id, int ds_id)
 }
 void part_destroyer_clear(int ps_id, int ds_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
     if (ds_it != p_s->id_to_destroyer.end()) {
       (*ds_it).second->initialize();
@@ -158,9 +152,8 @@ void part_destroyer_clear(int ps_id, int ds_id)
 }
 void part_destroyer_region(int ps_id, int ds_id, double xmin, double xmax, double ymin, double ymax, int shape)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
     if (ds_it != p_s->id_to_destroyer.end()) {
       (*ds_it).second->set_region(xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape));

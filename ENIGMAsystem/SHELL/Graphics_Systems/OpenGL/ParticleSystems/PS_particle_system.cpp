@@ -85,6 +85,7 @@ namespace enigma
     deflector_max_id = 0;
     id_to_changer = std::map<int,particle_changer*>();
     changer_max_id = 0;
+    hidden = false;
   }
   void particle_system::update_particlesystem()
   {
@@ -512,6 +513,8 @@ namespace enigma
 
           particle_sprite* ps = pt->part_sprite;
           bind_texture(ps->texture);
+          glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+          glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
           glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Push 1.
 

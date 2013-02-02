@@ -28,7 +28,6 @@
 #ifndef ENIGMA_PS_EFFECTSENUMS
 #define ENIGMA_PS_EFFECTSENUMS
 
-/*
 #include "PS_effects_constants.h"
 
 namespace enigma
@@ -46,13 +45,31 @@ namespace enigma
     ef_effects_cloud,
     ef_effects_rain,
     ef_effects_snow
+  };
+  inline ef_effect get_ef(int effect)
+  {
+    switch (effect) {
+    case ef_explosion : return enigma::ef_effects_explosion;
+    case ef_ring : return enigma::ef_effects_ring;
+    case ef_ellipse : return enigma::ef_effects_ellipse;
+    case ef_firework : return enigma::ef_effects_firework;
+    case ef_smoke : return enigma::ef_effects_smoke;
+    case ef_smokeup : return enigma::ef_effects_smokeup;
+    case ef_star : return enigma::ef_effects_star;
+    case ef_spark : return enigma::ef_effects_spark;
+    case ef_flare : return enigma::ef_effects_flare;
+    case ef_cloud : return enigma::ef_effects_cloud;
+    case ef_rain : return enigma::ef_effects_rain;
+    case ef_snow : return enigma::ef_effects_snow;
+    default : return enigma::ef_effects_explosion;
+    }
   }
 
   enum ef_size {
     ef_si_small = 0,
     ef_si_medium,
-    ef_si_large,
-  }
+    ef_si_large
+  };
   inline ef_size get_ef_size(int size_kind)
   {
     switch (size_kind) {
@@ -63,7 +80,6 @@ namespace enigma
     }
   }
 }
-*/
 
 #endif // ENIGMA_PS_EFFECTSENUMS
 

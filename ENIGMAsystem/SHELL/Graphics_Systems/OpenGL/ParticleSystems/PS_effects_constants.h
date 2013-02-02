@@ -28,7 +28,6 @@
 #ifndef ENIGMA_PS_EFFECTSCONSTANTS
 #define ENIGMA_PS_EFFECTSCONSTANTS
 
-/*
 enum
 {
   ef_explosion = 0,
@@ -51,7 +50,6 @@ enum
   ef_size_medium,
   ef_size_large,
 };
-*/
 
 #endif // ENIGMA_PS_EFFECTSCONSTANTS
 

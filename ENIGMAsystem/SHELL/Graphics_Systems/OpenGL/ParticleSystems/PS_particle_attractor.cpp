@@ -69,23 +69,20 @@ namespace enigma
 
 using enigma::particle_system;
 using enigma::particle_type;
-using enigma::ps_manager;
 using enigma::particle_attractor;
-using enigma::pt_manager;
 
 int part_attractor_create(int id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    return (*ps_it).second->create_attractor();
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    return p_s->create_attractor();
   }
   return -1;
 }
 void part_attractor_destroy(int ps_id, int at_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
     if (at_it != p_s->id_to_attractor.end()) {
       delete (*at_it).second;
@@ -95,9 +92,8 @@ void part_attractor_destroy(int ps_id, int at_id)
 }
 void part_attractor_destroy_all(int ps_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     for (std::map<int,particle_attractor*>::iterator it = p_s->id_to_attractor.begin(); it != p_s->id_to_attractor.end(); it++)
     {
       delete (*it).second;
@@ -107,9 +103,8 @@ void part_attractor_destroy_all(int ps_id)
 }
 bool part_attractor_exists(int ps_id, int at_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
     if (at_it != p_s->id_to_attractor.end()) {
       return true;
@@ -119,9 +114,8 @@ bool part_attractor_exists(int ps_id, int at_id)
 }
 void part_attractor_clear(int ps_id, int at_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
     if (at_it != p_s->id_to_attractor.end()) {
       (*at_it).second->initialize();
@@ -130,9 +124,8 @@ void part_attractor_clear(int ps_id, int at_id)
 }
 void part_attractor_position(int ps_id, int at_id, double x, double y)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
     if (at_it != p_s->id_to_attractor.end()) {
       (*at_it).second->set_position(x, y);
@@ -141,9 +134,8 @@ void part_attractor_position(int ps_id, int at_id, double x, double y)
 }
 void part_attractor_force(int ps_id, int at_id, double force, double dist, int kind, bool additive)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_attractor*>::iterator at_it = p_s->id_to_attractor.find(at_id);
     if (at_it != p_s->id_to_attractor.end()) {
       (*at_it).second->set_force(force, dist, enigma::get_ps_force(kind), additive);

@@ -83,6 +83,8 @@ namespace enigma
     std::map<int,particle_changer*> id_to_changer;
     int changer_max_id;
     int create_changer();
+    // Protection.
+    bool hidden;
   };
 }
 

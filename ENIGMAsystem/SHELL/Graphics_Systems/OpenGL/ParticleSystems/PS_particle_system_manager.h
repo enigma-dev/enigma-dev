@@ -40,6 +40,7 @@ namespace enigma
   };
 
   extern particle_system_manager ps_manager;
+  particle_system* get_particlesystem(int id); // Null if not found.
 }
 
 #endif // ENIGMA_PS_PARTICLESYSTEMMANAGER

@@ -33,7 +33,6 @@
 
 using enigma::particle_system;
 using enigma::particle_type;
-using enigma::ps_manager;
 using enigma::pt_manager;
 using enigma::particle_type_manager;
 
@@ -41,29 +40,28 @@ using enigma::particle_type_manager;
 
 void part_particles_create(int id, double x, double y, int particle_type_id, int number)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    std::map<int,particle_type*>::iterator pt_it = pt_manager.id_to_particletype.find(id);
-    if (pt_it != pt_manager.id_to_particletype.end()) {
-      (*ps_it).second->create_particles(x, y, (*pt_it).second, number);
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    particle_type* p_t = enigma::get_particletype(particle_type_id);
+    if (p_t != NULL) {
+      p_s->create_particles(x, y, p_t, number);
     }
   }
 }
 void part_particles_create_color(int id, double x, double y, int particle_type_id, int color, int number)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    std::map<int,particle_type*>::iterator pt_it = pt_manager.id_to_particletype.find(id);
-    if (pt_it != pt_manager.id_to_particletype.end()) {
-      (*ps_it).second->create_particles(x, y, (*pt_it).second, number, true, color);
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    particle_type* p_t = enigma::get_particletype(particle_type_id);
+    if (p_t != NULL) {
+      p_s->create_particles(x, y, p_t, number, true, color);
     }
   }
 }
 void part_particles_clear(int id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
     for (std::list<enigma::particle_instance>::iterator it = p_s->pi_list.begin(); it != p_s->pi_list.end(); it++)
     {
       particle_type* pt = it->pt;
@@ -82,9 +80,8 @@ void part_particles_clear(int id)
 }
 void part_particles_position(int id, double x, double y)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
     p_s->x_offset = x;
     p_s->y_offset = y;
   }

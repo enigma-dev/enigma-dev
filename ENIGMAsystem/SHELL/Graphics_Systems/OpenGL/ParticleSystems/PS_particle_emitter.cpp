@@ -205,23 +205,20 @@ namespace enigma
 
 using enigma::particle_system;
 using enigma::particle_type;
-using enigma::ps_manager;
 using enigma::particle_emitter;
-using enigma::pt_manager;
 
 int part_emitter_create(int id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    return (*ps_it).second->create_emitter();
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    return p_s->create_emitter();
   }
   return -1;
 }
 void part_emitter_destroy(int ps_id, int em_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_emitter*>::iterator em_it = p_s->id_to_emitter.find(em_id);
     if (em_it != p_s->id_to_emitter.end()) {
       delete (*em_it).second;
@@ -231,9 +228,8 @@ void part_emitter_destroy(int ps_id, int em_id)
 }
 void part_emitter_destroy_all(int ps_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     for (std::map<int,particle_emitter*>::iterator it = p_s->id_to_emitter.begin(); it != p_s->id_to_emitter.end(); it++)
     {
       delete (*it).second;
@@ -243,9 +239,8 @@ void part_emitter_destroy_all(int ps_id)
 }
 bool part_emitter_exists(int ps_id, int em_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_emitter*>::iterator em_it = p_s->id_to_emitter.find(em_id);
     if (em_it != p_s->id_to_emitter.end()) {
       return true;
@@ -255,9 +250,8 @@ bool part_emitter_exists(int ps_id, int em_id)
 }
 void part_emitter_clear(int ps_id, int em_id)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_emitter*>::iterator em_it = p_s->id_to_emitter.find(em_id);
     if (em_it != p_s->id_to_emitter.end()) {
       (*em_it).second->initialize();
@@ -266,22 +260,20 @@ void part_emitter_clear(int ps_id, int em_id)
 }
 void part_emitter_region(int ps_id, int em_id, double xmin, double xmax, double ymin, double ymax, int shape, int distribution)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    (*ps_it).second->set_emitter_region(em_id, xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape), enigma::get_ps_distr(distribution));
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
+    p_s->set_emitter_region(em_id, xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape), enigma::get_ps_distr(distribution));
   }
 }
 void part_emitter_burst(int ps_id, int em_id, int particle_type_id, int number)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL) {
     std::map<int,particle_emitter*>::iterator em_it = p_s->id_to_emitter.find(em_id);
     if (em_it != p_s->id_to_emitter.end()) {
       particle_emitter* p_e = (*em_it).second;
-      std::map<int,particle_type*>::iterator pt_it = pt_manager.id_to_particletype.find(particle_type_id);
-      if (pt_it != pt_manager.id_to_particletype.end()) {
-        particle_type* p_t = (*pt_it).second;
+      particle_type* p_t = enigma::get_particletype(particle_type_id);
+      if (p_t != NULL) {
         for (int i = 1; i <= number; i++)
         {
           int x, y;
@@ -294,9 +286,9 @@ void part_emitter_burst(int ps_id, int em_id, int particle_type_id, int number)
 }
 void part_emitter_stream(int ps_id, int em_id, int particle_type_id, int number)
 {
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    (*ps_it).second->set_emitter_stream(em_id, particle_type_id, number);
+  particle_system* p_s = enigma::get_particlesystem(ps_id);
+  if (p_s != NULL && enigma::get_particletype(particle_type_id) != NULL) {
+    p_s->set_emitter_stream(em_id, particle_type_id, number);
   }
 }
 

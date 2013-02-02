@@ -85,6 +85,8 @@ namespace enigma
     double dir_min, dir_max;
     double dir_incr, dir_wiggle;
     double grav_amount, grav_dir;
+    // Protection.
+    bool hidden;
   };
 
   struct particle_type_manager
@@ -94,6 +96,7 @@ namespace enigma
   };
 
   extern particle_type_manager pt_manager;
+  particle_type* get_particletype(int id); // Null if not found.
 
   void initialize_particle_type(enigma::particle_type* pt);
 }
