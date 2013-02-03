@@ -499,7 +499,6 @@ namespace enigma
           const double x = it->x, y = it->y;
           const double xscale = pt->xscale*size, yscale = pt->yscale*size;
 
-          glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Push 1.
           if (pt->blend_additive) {
             glBlendFunc(GL_SRC_ALPHA,GL_ONE);
           }
@@ -507,16 +506,11 @@ namespace enigma
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
           }
           draw_sprite_ext(sprite_id, subimg, x, y, xscale, yscale, rot_degrees, color, alpha/255.0);
-          glPopAttrib(); // Pop 1.
         }
         else { // Draw particle sprite.
 
           particle_sprite* ps = pt->part_sprite;
           bind_texture(ps->texture);
-          glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-          glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
-          glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Push 1.
 
           if (pt->blend_additive) {
             glBlendFunc(GL_SRC_ALPHA,GL_ONE);
@@ -556,8 +550,6 @@ namespace enigma
           glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
 
           glEnd();
-
-          glPopAttrib(); // Pop 1.
         }
       }
       else { // Draw particle in a limited way if particle type not alive.
@@ -569,8 +561,7 @@ namespace enigma
         if (ps == NULL) return; // NOTE: Skip to next particle.
         bind_texture(ps->texture);
 
-        glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Push 1.
-
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);
 
         const double rot = rot_degrees*M_PI/180.0;
@@ -602,16 +593,16 @@ namespace enigma
         glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
 
         glEnd();
-
-        glPopAttrib(); // Pop 1.
       }
     }
   }
   void particle_system::draw_particlesystem()
   {
-    glPushMatrix(); // Push 1.
+    glPushMatrix(); // Matrix push 1.
 
     glTranslated(x_offset, y_offset, 0.0);
+
+    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Attrib push 1.
 
     // Draw the particle system either from oldest to youngest or reverse.
     if (oldtonew) {
@@ -629,7 +620,9 @@ namespace enigma
       }
     }
 
-    glPopMatrix(); // Pop 1.
+    glPopAttrib(); // Attrib pop 1.
+
+    glPopMatrix(); // Matrix pop 1.
   }
   void particle_system::create_particles(double x, double y, particle_type* pt, int number, bool use_color, int given_color)
   {

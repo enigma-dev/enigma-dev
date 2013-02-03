@@ -78,12 +78,11 @@ void part_particles_clear(int id)
     p_s->pi_list.clear();
   }
 }
-void part_particles_position(int id, double x, double y)
+int part_particles_count(int id)
 {
   particle_system* p_s = enigma::get_particlesystem(id);
   if (p_s != NULL) {
-    p_s->x_offset = x;
-    p_s->y_offset = y;
+    return p_s->pi_list.size();
   }
 }
 
