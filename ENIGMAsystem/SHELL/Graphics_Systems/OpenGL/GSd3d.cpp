@@ -33,6 +33,14 @@ bool d3dHidden = false;
 bool d3dZWriteEnable = true;
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
+GLenum renderstates[22] = {   
+  GL_FILL, GL_LINE, GL_POINT, GL_FRONT, GL_BACK,
+  GL_FRONT_AND_BACK, GL_CW, GL_CCW,
+  GL_NICEST, GL_FASTEST, GL_DONT_CARE, GL_EXP, GL_EXP2, 
+  GL_LINEAR, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL,
+  GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS 
+}; 
+
 void d3d_start()
 {
   // Set global ambient lighting to nothing.
@@ -96,27 +104,90 @@ void d3d_set_lighting(bool enable)
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)
-{/*
-  if (enable)
-  {
-    glEnable(GL_FOG);
-    glFogi(GL_FOG_MODE, GL_LINEAR);
-    glFogf(GL_FOG_START, start);
-    glFogf(GL_FOG_END, end);
-    GLfloat fog_color[3];
-    fog_color[0] = __GETR(color);
-    fog_color[1] = __GETG(color);
-    fog_color[2] = __GETB(color);
-    glFogfv(GL_FOG_COLOR,fog_color);
-  }
-  else
-    glDisable(GL_FOG);*/
+{
+  d3d_set_fog_enabled(enable);
+  d3d_set_fog_color(color);
+  d3d_set_fog_start(start);
+  d3d_set_fog_end(end); 
+  d3d_set_fog_hint(rs_nicest);
+  d3d_set_fog_mode(rs_linear);
 }//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
+
+void d3d_set_fog_enabled(bool enable) 
+{
+  (enable?glEnable:glDisable)(GL_FOG);
+}
+
+void d3d_set_fog_mode(int mode)
+{
+  glFogi(GL_FOG_MODE, renderstates[mode]); 
+}
+
+void d3d_set_fog_hint(int mode) {
+  glHint(GL_FOG_HINT, mode); 
+}
+
+void d3d_set_fog_color(int color)
+{
+   GLfloat fog_color[3];
+   fog_color[0] = __GETR(color);
+   fog_color[1] = __GETG(color);
+   fog_color[2] = __GETB(color);
+   glFogfv(GL_FOG_COLOR, fog_color);
+}
+
+void d3d_set_fog_start(double start)
+{
+  glFogf(GL_FOG_START, start);
+}
+
+void d3d_set_fog_end(double end)
+{
+  glFogf(GL_FOG_END, end);
+}
+
+void d3d_set_fog_density(double density)
+{
+  glFogf(GL_FOG_DENSITY, density);  
+}
 
 void d3d_set_culling(bool enable)
 {
-//  (enable?glEnable:glDisable)(GL_CULL_FACE);
-}//TODO: Culling not working the same as in GM, not advised to enable it's use as it pretty much kills the drawing
+  if (!enable) glDisable(GL_CULL_FACE); else glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
+}
+
+void d3d_set_culling_mode(int mode) {
+  glCullFace(renderstates[mode]);
+}
+
+void d3d_set_culling_orientation(int mode) {
+  glFrontFace(renderstates[mode]);
+}
+
+void d3d_set_render_mode(int face, int fill) 
+{
+  glPolygonMode(renderstates[face], renderstates[fill]);
+} 
+void d3d_set_line_width(float value) {
+  glLineWidth(value);
+}
+
+void d3d_set_point_size(float value) {
+  glPointSize(value);
+}
+
+void d3d_depth_clear() {
+  d3d_depth_clear_value(1.0f);
+}
+
+void d3d_depth_clear_value(float value) {
+  glClearDepthf(value);
+}
+
+void d3d_depth_operator(int mode) {
+  glDepthFunc(renderstates[mode]);
+}
 
 void d3d_set_perspective(bool enable)
 {
