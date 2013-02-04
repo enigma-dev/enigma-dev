@@ -94,13 +94,21 @@ double radtodeg(double x)         { return x*(180.0/M_PI);}
 double lengthdir_x(double len,double dir) { return len *  cosd(dir); }
 double lengthdir_y(double len,double dir) { return len * -sind(dir); }
 
-double lerp(double x, double y, double a) { return x + ((y-x)*a); }
-
 double direction_difference(double dir1,double dir2) {
 	return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;
 }
 double point_direction(double x1,double y1,double x2,double y2) { return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }
 double point_distance(double x1,double y1,double x2,double y2)  { return hypot(x2-x1,y2-y1); }
+double point_distance_3d(double x1,double y1,double z1,double x2,
+double y2,double z2)  { return sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
+double dot_product(double x1,double y1,double x2,double y2) { return (x1 * x2 + y1 * y2); }
+double dot_product_3d(double x1,double y1,double z1,double x2,double y2, double z2) { return (x1 * x2 + y1 * y2 + z1 * z2); }
+double lerp(double x, double y, double a) { return x + ((y-x)*a); }
+double clamp(double x, double y, double a) {
+    if (x < y) { return y; }
+    if (x > a) { return a; }
+    return x;
+}
 
 double min(double x, double y) { return x < y ? x : y; }
 double max(double x, double y) { return x > y ? x : y; }

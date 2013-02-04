@@ -24,6 +24,30 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+enum {
+  rs_fill,
+  rs_line,
+  rs_point,
+  rs_front,
+  rs_back,
+  rs_front_back,
+  rs_clockwise,
+  rs_counterclockwise,
+  rs_nicest,
+  rs_fastest,
+  rs_dontcare,
+  rs_exp,
+  rs_exp2, 
+  rs_linear,
+  rs_never, 	// Always False
+  rs_less, 	// source Z < depth Z
+  rs_equal,	// source Z = depth Z
+  rs_lequal, 	// source Z <= depth Z
+  rs_greater,	// source Z > depth Z
+  rs_notequal, 	// source Z != depth Z
+  rs_gequal, 	// source Z >= depth Z
+  rs_always     // Always True
+};
 
 extern bool d3dMode;
 extern double projection_matrix[16];
@@ -36,8 +60,25 @@ void d3d_set_perspective(bool enable);
 void d3d_set_hidden(bool enable);
 void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
+
+
 void d3d_set_culling(bool enable);
+void d3d_set_culling_mode(int mode);
+void d3d_set_culling_orientation(int mode);
+void d3d_set_render_mode(int face, int fill);
+void d3d_set_line_width(float value);
+void d3d_set_point_size(float value);
+void d3d_depth_operator(int mode);
+void d3d_depth_clear();
+void d3d_depth_clear_value(float value);
 void d3d_set_fog(bool enable, int color, double start, double end);
+void d3d_set_fog_enabled(bool enable);
+void d3d_set_fog_hint(int mode);
+void d3d_set_fog_mode(int mode);
+void d3d_set_fog_color(int color);
+void d3d_set_fog_start(double start);
+void d3d_set_fog_end(double end);
+void d3d_set_fog_density(double density);
 void d3d_set_depth(double dep);
 void d3d_set_shading(bool smooth);
 
