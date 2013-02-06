@@ -37,6 +37,7 @@
 #include "PS_particle_enums.h"
 #include "Graphics_Systems/OpenGL/GScolors.h"
 #include <list>
+#include <vector>
 #include <map>
 
 namespace enigma
@@ -54,7 +55,7 @@ namespace enigma
     bool oldtonew;
     double x_offset, y_offset;
     double depth; // Integer stored as double.
-    std::list<particle_instance> pi_list;
+    std::vector<particle_instance> pi_list;
     bool auto_update, auto_draw;
     void initialize();
     void update_particlesystem();

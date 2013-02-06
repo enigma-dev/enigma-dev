@@ -62,7 +62,7 @@ void part_particles_clear(int id)
 {
   particle_system* p_s = enigma::get_particlesystem(id);
   if (p_s != NULL) {
-    for (std::list<enigma::particle_instance>::iterator it = p_s->pi_list.begin(); it != p_s->pi_list.end(); it++)
+    for (std::vector<enigma::particle_instance>::iterator it = p_s->pi_list.begin(); it != p_s->pi_list.end(); it++)
     {
       particle_type* pt = it->pt;
 

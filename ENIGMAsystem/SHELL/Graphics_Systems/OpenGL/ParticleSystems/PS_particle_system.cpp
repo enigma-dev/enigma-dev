@@ -37,6 +37,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <vector>
+#include <algorithm>
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -74,7 +75,7 @@ namespace enigma
     oldtonew = true;
     auto_update = true, auto_draw = true;
     depth = 0.0;
-    pi_list = std::list<particle_instance>();
+    pi_list = std::vector<particle_instance>();
     id_to_emitter = std::map<int,particle_emitter*>();
     emitter_max_id = 0;
     id_to_attractor = std::map<int,particle_attractor*>();
@@ -86,6 +87,10 @@ namespace enigma
     id_to_changer = std::map<int,particle_changer*>();
     changer_max_id = 0;
     hidden = false;
+  }
+  bool is_dead_from_old_age(particle_instance& pi)
+  {
+    return pi.life_current <= 0;
   }
   void particle_system::update_particlesystem()
   {
@@ -100,7 +105,7 @@ namespace enigma
     std::vector<generation_info> particles_to_generate;
     // Handle life and death.
     {
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
       {
         // Decrease life.
         it->life_current--;
@@ -121,6 +126,7 @@ namespace enigma
           }
 
           // Death handling.
+          // Only the clean-up is made here.
           pt->particle_count--;
           if (pt->particle_count <= 0 && !pt->alive) {
             // Particle type is no longer used, delete it.
@@ -128,14 +134,14 @@ namespace enigma
             delete pt;
             enigma::pt_manager.id_to_particletype.erase(id);
           }
-          it = pi_list.erase(it);
         }
       }
+      pi_list.erase(std::remove_if(pi_list.begin(), pi_list.end(), is_dead_from_old_age), pi_list.end());
     }
     // Shape.
     {
-      std::list<particle_instance>::iterator end = pi_list.end();
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+      std::vector<particle_instance>::iterator end = pi_list.end();
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
       {
         particle_type* pt = it->pt;
         if (pt->alive) {
@@ -146,8 +152,8 @@ namespace enigma
     }
     // Color and blending.
     {
-      std::list<particle_instance>::iterator end = pi_list.end();
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+      std::vector<particle_instance>::iterator end = pi_list.end();
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
       {
         particle_type* pt = it->pt;
         // Color.
@@ -232,7 +238,7 @@ namespace enigma
     }
     // Step.
     {
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
       {
         particle_type* pt = it->pt;
 
@@ -252,8 +258,8 @@ namespace enigma
     }
     // Move particles.
     {
-      std::list<particle_instance>::iterator end = pi_list.end();
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+      std::vector<particle_instance>::iterator end = pi_list.end();
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
       {
         particle_type* pt = it->pt;
         if (pt->alive) {
@@ -299,13 +305,14 @@ namespace enigma
         pt1 = (*pt_it1).second;
         pt2 = (*pt_it2).second;
 
-        std::list<particle_instance>::iterator end = pi_list.end();
-        for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        std::vector<particle_instance>::iterator end = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
         {
-          if (p_ch->is_inside(it->x, it->y) && it->pt->id == pt1->id) {
+          if (p_ch->is_inside(it->x, it->y) && it->pt->id == pt1->id && it->life_current > 0) { // Skip particles with life_current <= 0.
             // Store position of old particle.
             const double x = it->x, y = it->y;
             // Destroy the old particle.
+            // Only the clean-up is made here. The actual removal is handle after the loops by remove_if and erase.
             pt1->particle_count--;
             if (pt1->particle_count <= 0 && !pt1->alive) {
               // Particle type is no longer used, delete it.
@@ -313,7 +320,8 @@ namespace enigma
               delete pt1;
               enigma::pt_manager.id_to_particletype.erase(id);
             }
-            it = pi_list.erase(it);
+            // Internally when handling changers, setting life_current to 0 indicates that the particle has been removed.
+            it->life_current = 0;
             // Create a new particle at its position.
             generation_info gen_info;
             gen_info.x = x;
@@ -324,6 +332,8 @@ namespace enigma
           }
         }
       }
+      // Erase all particles with life_current <= 0.
+      pi_list.erase(std::remove_if(pi_list.begin(), pi_list.end(), is_dead_from_old_age), pi_list.end());
     }
     // Generate particles.
     for (std::vector<generation_info>::iterator it = particles_to_generate.begin(); it != particles_to_generate.end(); it++)
@@ -360,8 +370,8 @@ namespace enigma
       for (std::map<int,particle_attractor*>::iterator at_it = id_to_attractor.begin(); at_it != end; at_it++)
       {
         particle_attractor* p_a = (*at_it).second;
-        std::list<particle_instance>::iterator end = pi_list.end();
-        for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        std::vector<particle_instance>::iterator end = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
         {
           // If the particle is not inside the attractor range of influence,
           // or is at the attractor's exact position,
@@ -402,13 +412,14 @@ namespace enigma
       for (std::map<int,particle_destroyer*>::iterator ds_it = id_to_destroyer.begin(); ds_it != end; ds_it++)
       {
         particle_destroyer* p_ds = (*ds_it).second;
-        std::list<particle_instance>::iterator end = pi_list.end();
-        for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        std::vector<particle_instance>::iterator end = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
         {
-          if (p_ds->is_inside(it->x, it->y)) {
+          if (p_ds->is_inside(it->x, it->y) && it->life_current > 0) { // Skip particles with life_current <= 0.
             particle_type* pt = it->pt;
 
             // Death handling.
+            // Only the clean-up is made here. The actual removal is handle after the loops by remove_if and erase.
             pt->particle_count--;
             if (pt->particle_count <= 0 && !pt->alive) {
               // Particle type is no longer used, delete it.
@@ -416,10 +427,13 @@ namespace enigma
               delete pt;
               enigma::pt_manager.id_to_particletype.erase(id);
             }
-            it = pi_list.erase(it);
+            // Internally when handling destroyers, setting life_current to 0 indicates that the particle has been removed.
+            it->life_current = 0;
           }
         }
       }
+      // Erase all particles with life_current <= 0.
+      pi_list.erase(std::remove_if(pi_list.begin(), pi_list.end(), is_dead_from_old_age), pi_list.end());
     }
     // Deflectors.
     {
@@ -427,12 +441,10 @@ namespace enigma
       for (std::map<int,particle_deflector*>::iterator df_it = id_to_deflector.begin(); df_it != end; df_it++)
       {
         particle_deflector* p_df = (*df_it).second;
-        std::list<particle_instance>::iterator end = pi_list.end();
-        for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        std::vector<particle_instance>::iterator end = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
         {
           if (p_df->is_inside(it->x, it->y)) {
-            particle_type* pt = it->pt;
-
             // Direction changing.
             it->direction = fmod(it->direction + 360.0, 360.0);
             switch (p_df->deflection_kind) {
@@ -606,15 +618,15 @@ namespace enigma
 
     // Draw the particle system either from oldest to youngest or reverse.
     if (oldtonew) {
-      const std::list<particle_instance>::iterator end = pi_list.end();
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it != end; it++)
+      const std::vector<particle_instance>::iterator end = pi_list.end();
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != end; it++)
       {
         draw_particle(&(*it));
       }
     }
     else {
-      const std::list<particle_instance>::reverse_iterator rend = pi_list.rend();
-      for (std::list<particle_instance>::reverse_iterator it = pi_list.rbegin(); it != rend; it++)
+      const std::vector<particle_instance>::reverse_iterator rend = pi_list.rend();
+      for (std::vector<particle_instance>::reverse_iterator it = pi_list.rbegin(); it != rend; it++)
       {
         draw_particle(&(*it));
       }
