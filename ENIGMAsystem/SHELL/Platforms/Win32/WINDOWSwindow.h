@@ -58,8 +58,6 @@ void keyboard_clear(const int key);
 void mouse_clear(const int button);
 
 int show_message(string str);
-//int show_message_ext(string msg, string but1, string but2, string but3)
-bool show_question(string str);
 int window_get_x();
 int window_get_y();
 int window_get_width();
