@@ -1,34 +1,25 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2013 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <windows.h>
 #include <windowsx.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <fstream>
 #include <string>
 #include <map>
@@ -239,7 +230,7 @@ void get_new_drive_letter()
   
   ComboBox_AddString(cbb,"\\ (Whatever drive ENIGMA is installed on)");
   DWORD drives = GetLogicalDrives();
-  char drivename[4] = { 'A', ':', '\\', 0 };
+  char drivename[4] = "A:\\";
   for (int i = 0; i < 26; i++)
     if (drives & (1 << i))
       drivename[0] = 'A' + i, ComboBox_AddString(cbb,drivename);
@@ -463,7 +454,14 @@ int main()
     if (!a)
     {
       printf("Calling `%s -jar l*.jar`\n\n",jpath);
-      better_system(jpath,"-jar l*.jar");
+      clock_t x = clock();
+      int res = better_system(jpath,"-jar l*.jar");
+      if (res and (clock() - x)/CLOCKS_PER_SEC <= 3) {
+        printf("Failing that, calling `%s -jar lgm16b4.jar`\n\n",jpath);
+        res = better_system(jpath,"-jar lgm16b4.jar");
+        if (res and (clock() - x)/CLOCKS_PER_SEC <= 5)
+          printf("I am become error. Please make sure Java is actually installed and that LGM exists.\r\n\r\n");
+      }
     }
     else {
       puts(java_not_found);
