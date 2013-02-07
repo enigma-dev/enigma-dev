@@ -28,7 +28,6 @@
 #include "PS_particle.h"
 #include "PS_particle_system.h"
 #include "PS_particle_type.h"
-#include "Universal_System/depth_draw.h"
 #include "Graphics_Systems/OpenGL/GSstdraw.h"
 #include "Graphics_Systems/OpenGL/GSsprite.h"
 #include "Graphics_Systems/OpenGL/binding.h"

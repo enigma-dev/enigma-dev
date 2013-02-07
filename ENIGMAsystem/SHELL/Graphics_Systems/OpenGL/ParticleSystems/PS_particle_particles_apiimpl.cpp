@@ -29,7 +29,7 @@
 #include "PS_particle_system.h"
 #include "PS_particle_type.h"
 #include "PS_particle_system_manager.h"
-#include "Universal_System/depth_draw.h"
+#include <cstddef>
 
 using enigma::particle_system;
 using enigma::particle_type;
@@ -84,5 +84,6 @@ int part_particles_count(int id)
   if (p_s != NULL) {
     return p_s->pi_list.size();
   }
+  return 0;
 }
 

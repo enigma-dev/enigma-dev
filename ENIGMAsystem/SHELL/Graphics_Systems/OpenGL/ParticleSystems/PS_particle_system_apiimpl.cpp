@@ -29,8 +29,10 @@
 #include "PS_particle_system.h"
 #include "PS_particle_type.h"
 #include "PS_particle_system_manager.h"
-#include "Universal_System/depth_draw.h"
+#include "PS_particle_depths.h"
+#include "PS_particle_updatedraw.h"
 #include <cmath>
+#include <cstddef>
 
 using enigma::particle_system;
 using enigma::particle_type;
@@ -41,6 +43,8 @@ using enigma::particle_type_manager;
 
 int part_system_create()
 {
+  enigma::initialize_particle_systems_drawing();
+
   using enigma::ps_manager;
   particle_system* p_s = new particle_system();
   p_s->initialize();
@@ -50,7 +54,7 @@ int part_system_create()
   p_s->id = ps_manager.max_id;
 
   // Drawing is automatic, so register in depth.
-  enigma::drawing_depths[p_s->depth].particlesystem_ids.insert(ps_manager.max_id);
+  enigma::negated_particle_depths[-p_s->depth].particlesystem_ids.insert(ps_manager.max_id);
 
   return ps_manager.max_id;
 }
@@ -94,8 +98,8 @@ void part_system_depth(int id, double depth)
       // If the particle system has automatic drawing enabled, it is in the depth system,
       // and it should be moved.
       const double current_depth = p_s->depth;
-      enigma::drawing_depths[current_depth].particlesystem_ids.erase(p_s->id);
-      enigma::drawing_depths[new_depth].particlesystem_ids.insert(p_s->id);
+      enigma::negated_particle_depths[-current_depth].particlesystem_ids.erase(p_s->id);
+      enigma::negated_particle_depths[-new_depth].particlesystem_ids.insert(p_s->id);
     }
     else {
       // If the particle system does not have automatic drawing enabled, it is not in the depth system,
@@ -129,10 +133,10 @@ void part_system_automatic_draw(int id, bool automatic)
     bool auto_draw_before = p_s->auto_draw;
     p_s->auto_draw = automatic;
     if (automatic && !auto_draw_before) { // Add to drawing depths.
-      enigma::drawing_depths[p_s->depth].particlesystem_ids.insert(p_s->id);
+      enigma::negated_particle_depths[-p_s->depth].particlesystem_ids.insert(p_s->id);
     }
     else if (!automatic && auto_draw_before) { // Remove from drawing depths.
-      enigma::drawing_depths[p_s->depth].particlesystem_ids.erase(p_s->id);
+      enigma::negated_particle_depths[-p_s->depth].particlesystem_ids.erase(p_s->id);
     }
   }
 }

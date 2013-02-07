@@ -47,6 +47,12 @@ namespace enigma
   #if COLLIGMA // FIXME: This doesn't belong here.
   collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h);
   #endif
+
+  struct particles_implementation
+  {
+    void (*draw_particlesystems)(double high, double low);
+  };
+  void set_particles_implementation(particles_implementation* particles_impl);
 }
 
 // These functions are available to the user to be called on a whim.

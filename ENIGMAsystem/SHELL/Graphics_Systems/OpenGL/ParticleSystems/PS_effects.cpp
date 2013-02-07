@@ -30,6 +30,7 @@
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
 #include "PS_particle_type.h"
+#include "PS_particle_updatedraw.h"
 #include <cstddef>
 #include <cstdlib>
 #include <map>
@@ -695,10 +696,12 @@ namespace enigma
 
 void effect_create_below(int kind, double x, double y, int size, int color)
 {
+  enigma::initialize_particle_systems_drawing();
   enigma::create_effect_in_particlesystem(enigma::ps_below_id, enigma::below_depth, kind, x, y, size, color);
 }
 void effect_create_above(int kind, double x, double y, int size, int color)
 {
+  enigma::initialize_particle_systems_drawing();
   enigma::create_effect_in_particlesystem(enigma::ps_above_id, enigma::above_depth, kind, x, y, size, color);
 }
 void effect_clear()

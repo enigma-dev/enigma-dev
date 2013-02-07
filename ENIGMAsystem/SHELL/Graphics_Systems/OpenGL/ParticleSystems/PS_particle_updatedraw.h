@@ -35,7 +35,9 @@ namespace enigma
   // Updates all particle systems that are automatically updated.
   void update_particlesystems();
   // Draws all given particle systems that are automatically drawn.
-  void draw_particlesystems(std::set<int>& particlesystem_ids);
+  void draw_particlesystems(double high, double low);
+  // Should be called whenever effects or particle systems are created.
+  void initialize_particle_systems_drawing();
 }
 
 #endif // ENIGMA_PS_PARTICLEUPDATEDRAW
