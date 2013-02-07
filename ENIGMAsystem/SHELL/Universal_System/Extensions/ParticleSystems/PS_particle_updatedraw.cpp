@@ -25,20 +25,62 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLEUPDATEDRAW
-#define ENIGMA_PS_PARTICLEUPDATEDRAW
-
-#include <set>
+#include "PS_particle_system_manager.h"
+#include "PS_particle_system.h"
+#include "PS_particle_updatedraw.h"
+#include "PS_particle_depths.h"
+#include "PS_particle.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 namespace enigma
 {
-  // Updates all particle systems that are automatically updated.
-  void update_particlesystems();
-  // Draws all given particle systems that are automatically drawn.
-  void draw_particlesystems(double high, double low);
-  // Should be called whenever effects or particle systems are created.
-  void initialize_particle_systems_drawing();
-}
+  void internal_update_particlesystems()
+  {
+    std::map<int,particle_system*>::iterator end = ps_manager.id_to_particlesystem.end();
+    for (std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.begin(); it != end; it++)
+    {
+      if ((*it).second->auto_update) {
+        (*it).second->update_particlesystem();
+      }
+    }
+  }
 
-#endif // ENIGMA_PS_PARTICLEUPDATEDRAW
+  void internal_draw_particlesystems(double high, double low)
+  {
+    high = std::max(high, low); // Ensure consistency of arguments.
+    const std::map<double,particle_depth_layer>::iterator ne_end = negated_particle_depths.upper_bound(-low);
+    const std::map<double,particle_depth_layer>::iterator ne_upper_it = negated_particle_depths.find(-low);
+    for (std::map<double,particle_depth_layer>::iterator ne_it = negated_particle_depths.lower_bound(-high); ne_it != ne_end && ne_it != ne_upper_it; ne_it++)
+    {
+      std::set<int>::iterator ps_ids_end = (*ne_it).second.particlesystem_ids.end();
+      for (std::set<int>::iterator  ps_ids_it = (*ne_it).second.particlesystem_ids.begin();  ps_ids_it != ps_ids_end;  ps_ids_it++)
+      {
+        std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(*ps_ids_it);
+        if (ps_it != ps_manager.id_to_particlesystem.end()) {
+          if ((*ps_it).second->auto_draw) {
+            (*ps_it).second->draw_particlesystem();
+          }
+        }
+      }
+    }
+  }
+
+  void internal_clear_effects()
+  {
+    effect_clear();
+  }
+
+  particles_implementation part_impl;
+  bool initialized;
+  void initialize_particle_systems_drawing()
+  {
+    if (!initialized) {
+      initialized = true;
+      part_impl.update_particlesystems = &internal_update_particlesystems;
+      part_impl.draw_particlesystems = &internal_draw_particlesystems;
+      part_impl.clear_effects = &internal_clear_effects;
+      set_particles_implementation(&part_impl);
+    }
+  }
+}
 

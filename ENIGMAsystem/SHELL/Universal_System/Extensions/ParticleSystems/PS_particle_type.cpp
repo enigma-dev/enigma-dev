@@ -29,7 +29,7 @@
 #include "PS_particle_sprites.h"
 #include "PS_particle_enums.h"
 #include "Graphics_Systems/OpenGL/GScolors.h"
-#include "Graphics_Systems/OpenGL/GSsprite.h"
+#include <cstddef>
 
 namespace enigma
 {
@@ -147,7 +147,7 @@ void part_type_shape(int id, int particle_shape)
 void part_type_sprite(int id, int sprite, bool animat, bool stretch, bool random)
 {
   particle_type* p_t = enigma::get_particletype(id);
-  if (p_t != NULL && sprite_exists(sprite)) {
+  if (p_t != NULL) {
     p_t->is_particle_sprite = false;
     p_t->sprite_id = sprite;
     p_t->sprite_animated = animat;

@@ -706,6 +706,38 @@ void effect_create_above(int kind, double x, double y, int size, int color)
 }
 void effect_clear()
 {
-  // TODO: Implement.
+  using enigma::ps_manager;
+  using enigma::particle_system;
+  using enigma::pt_manager;
+  using enigma::particle_type;
+  using enigma::ef_pt;
+  {
+    std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(enigma::ps_below_id);
+    if (ps_it != ps_manager.id_to_particlesystem.end()) {
+      ps_it->second->hidden = false;
+    }
+  }
+  {
+    std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(enigma::ps_above_id);
+    if (ps_it != ps_manager.id_to_particlesystem.end()) {
+      ps_it->second->hidden = false;
+    }
+  }
+  part_system_destroy(enigma::ps_below_id);
+  part_system_destroy(enigma::ps_above_id);
+  enigma::ps_below_id = -1;
+  enigma::ps_above_id = -1;
+  {
+    const std::map<ef_pt,int>::iterator id_end = enigma::effectparticletype_to_particletypeid.end();
+    for (std::map<ef_pt,int>::iterator id_it = enigma::effectparticletype_to_particletypeid.begin(); id_it != id_end; id_it++)
+    {
+      std::map<int,particle_type*>::iterator pt_it = pt_manager.id_to_particletype.find(id_it->second);
+      if (pt_it != pt_manager.id_to_particletype.end()) {
+        pt_it->second->hidden = false;
+      }
+      part_type_destroy(id_it->second);
+    }
+    enigma::effectparticletype_to_particletypeid.clear();
+  }
 }
 

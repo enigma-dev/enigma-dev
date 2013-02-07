@@ -8,6 +8,3 @@
 #include "GSsurface.h"
 #endif
 
-#include "ParticleSystems/PS_particle.h"
-#include "ParticleSystems/PS_particle_updatedraw.h"
-

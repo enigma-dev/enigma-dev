@@ -25,8 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "PS_particle_attractor.h"
-#include "PS_particle_enums.h"
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
 #include <cstdlib>

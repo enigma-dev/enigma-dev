@@ -19,7 +19,9 @@
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
 
+#include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
 #include <string>
+#include <vector>
 
 namespace enigma
 {
@@ -50,9 +52,18 @@ namespace enigma
 
   struct particles_implementation
   {
+    // Updates all particle systems that are automatically updated.
+    void (*update_particlesystems)();
+    // Draws all given particle systems in the depth range [-high, -low[ that are automatically drawn.
     void (*draw_particlesystems)(double high, double low);
+    void (*clear_effects)();
   };
   void set_particles_implementation(particles_implementation* particles_impl);
+  // Updates all particle systems that are automatically updated.
+  void update_particlesystems();
+  void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
+      double x_offset, double y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape));
+  void graphics_clean_up_roomend();
 }
 
 // These functions are available to the user to be called on a whim.

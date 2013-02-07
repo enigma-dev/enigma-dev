@@ -36,7 +36,6 @@ using namespace std;
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/OpenGL/ParticleSystems/PS_particle_updatedraw.h"
 #include <limits>
 
 using namespace enigma;
@@ -64,6 +63,18 @@ namespace enigma
     {
         particles_impl = part_impl;
     };
+    void update_particlesystems()
+    {
+        if (particles_impl != NULL) {
+            (particles_impl->update_particlesystems)();
+        }
+    }
+    void graphics_clean_up_roomend()
+    {
+        if (particles_impl != NULL) {
+            (particles_impl->clear_effects)();
+        }
+    }
 }
 
 void screen_redraw()
