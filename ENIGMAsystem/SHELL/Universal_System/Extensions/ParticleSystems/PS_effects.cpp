@@ -31,9 +31,11 @@
 #include "PS_particle_system_manager.h"
 #include "PS_particle_type.h"
 #include "PS_particle_updatedraw.h"
+#include "Universal_System/roomsystem.h"
 #include <cstddef>
 #include <cstdlib>
 #include <map>
+#include <cmath>
 
 namespace enigma
 {
@@ -363,6 +365,41 @@ namespace enigma
       part_type_alpha3(pt_id, 0.0, 0.4, 0.0);
       return p_t;
     }
+    case ef_pt_rain: {
+      // NOTE: Be careful when changing this and be careful of the dependencies between this
+      // and the rain creation part.
+      part_type_shape(pt_id, pt_shape_line);
+      part_type_size(pt_id, 0.14, 0.18, 0, 0);
+      part_type_direction(pt_id, 260,260,0,0);
+      part_type_orientation(pt_id, 0, 0, 0, 0, true);
+      const double sp = 7.0;
+      part_type_speed(pt_id, sp, sp, 0, 0);
+      part_type_scale(pt_id, 2.0, 1.0);
+      part_type_alpha1(pt_id,0.5);
+      // Calculate life based on room dimensions.
+      const double v = 10*M_PI/180.0;
+      const double h = std::max(1.0, 1.0*room_height);
+      const double life = h/(sp*cos(v)) + 100;
+      part_type_life(pt_id, life, life);
+      return p_t;
+    }
+    case ef_pt_snow: {
+      // NOTE: Be careful when changing this and be careful of the dependencies between this
+      // and the snow creation part.
+      part_type_shape(pt_id, pt_shape_snow);
+      part_type_size(pt_id, 0.1, 0.25, 0, 0);
+      part_type_direction(pt_id, 250,290,0,30);
+      part_type_orientation(pt_id, 0, 360, 0, 0, false);
+      const double sp = 3.0;
+      part_type_speed(pt_id, sp, sp, 0, 0);
+      part_type_alpha1(pt_id, 0.5);
+      // Calculate life based on room dimensions.
+      const double v = 20*M_PI/180.0;
+      const double h = std::max(1.0, 1.0*room_height);
+      const double life = 2*h/(sp*cos(v)) + 100;
+      part_type_life(pt_id, life, life);
+      return p_t;
+    }
     }
     return NULL;
   }
@@ -674,6 +711,86 @@ namespace enigma
       if (p_t != NULL) {
         p_t->hidden = false;
         part_particles_create_color(ps_id, x, y, p_t->id, color, 1);
+        p_t->hidden = true;
+      }
+      break;
+    }
+    case ef_effects_rain: {
+      int num = 0;
+      switch (effect_size) {
+      case ef_si_small: {
+        num = 2;
+        break;
+      }
+      case ef_si_medium: {
+        num = 5;
+        break;
+      }
+      case ef_si_large: {
+        num = 9;
+        break;
+      }
+      default: {
+        break;
+      }
+      }
+      p_t = get_particletype(ef_pt_rain, effect_size);
+      // NOTE: Be careful when changing this and be careful of the dependencies between this
+      // and the rain type part.
+      if (p_t != NULL) {
+        p_t->hidden = false;
+        const double v = 10*M_PI/180.0;
+        const double w = std::max(1.0, 1.0*room_width);
+        const double h = std::max(1.0, 1.0*room_height);
+        const double s = h*tan(v);
+        const double x_dist = w + s;
+        for (int i = 0; i < num; i++)
+        {
+          const double l = 20.0 + 10.0*rand()/(RAND_MAX-1);
+          const double x_offset = l*sin(v);
+          const double y_offset = -l*cos(v);
+          part_particles_create_color(ps_id, x_offset + x_dist*rand()/(RAND_MAX-1), y_offset, p_t->id, color, 1);
+        }
+        p_t->hidden = true;
+      }
+      break;
+    }
+    case ef_effects_snow: {
+      int num = 0;
+      switch (effect_size) {
+      case ef_si_small: {
+        num = 1;
+        break;
+      }
+      case ef_si_medium: {
+        num = 3;
+        break;
+      }
+      case ef_si_large: {
+        num = 7;
+        break;
+      }
+      default: {
+        break;
+      }
+      }
+      p_t = get_particletype(ef_pt_snow, effect_size);
+      // NOTE: Be careful when changing this and be careful of the dependencies between this
+      // and the snow type part.
+      if (p_t != NULL) {
+        p_t->hidden = false;
+        const double v = 20*M_PI/180.0;
+        const double w = std::max(1.0, 1.0*room_width);
+        const double h = std::max(1.0, 1.0*room_height);
+        const double s = h*tan(v);
+        const double x_dist = w + 2*s;
+        for (int i = 0; i < num; i++)
+        {
+          const double l = 20.0 + 10.0*rand()/(RAND_MAX-1);
+          const double x_offset = -s - l*sin(v);
+          const double y_offset = -l*cos(v);
+          part_particles_create_color(ps_id, x_offset + x_dist*rand()/(RAND_MAX-1), y_offset, p_t->id, color, 1);
+        }
         p_t->hidden = true;
       }
       break;
