@@ -53,7 +53,7 @@ namespace enigma //TODO: Find where this belongs
   int main_argc;
   bool next_frame = true;
   #define TIMER_ID 1337
-  int timer_millis = 25;
+  int timer_millis = 33;
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
@@ -70,21 +70,14 @@ namespace enigma {
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
 extern double fps;
+extern int room_speed;
+bool high_res = true;
+int frames = 0;
 namespace enigma {
-  clock_t lc;
+  clock_t lc, nc;
+  LARGE_INTEGER lq, nq, timer_freq;
   void sleep_for_framerate(int rs)
   {
-    clock_t nc = clock();
-    double sdur = 1000/rs - (nc - lc)*1000 / CLOCKS_PER_SEC;
-    if (sdur > 0)
-    {
-        fps = int(CLOCKS_PER_SEC / (nc - lc + sdur));
-    }
-    else
-    {
-        fps = int(CLOCKS_PER_SEC / (nc - lc));
-    }
-    lc = nc;
     enigma::timer_millis = 1000/rs;
   }
 }
@@ -141,6 +134,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     enigma::initialize_everything();
 
     //Main loop
+        SetTimer(enigma::hWnd, TIMER_ID, std::max(1, enigma::timer_millis - 2), NULL);
+        if(!QueryPerformanceCounter(&enigma::lq)) high_res = false;
         char bQuit=0;
         while (!bQuit)
         {
@@ -154,6 +149,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                 else if (msg.message == WM_TIMER)
                 {
                     enigma::next_frame = true;
+                    SetTimer(enigma::hWnd, TIMER_ID, std::max(1, enigma::timer_millis - 2), NULL);
                 }
                 else
                 {
@@ -163,12 +159,35 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
             }
             else
             {
-                if(!enigma::next_frame) continue;
-                enigma::ENIGMA_events();
-                enigma::input_push();
-                
-                SetTimer(enigma::hWnd, TIMER_ID, std::max(1, enigma::timer_millis - 2), NULL);
-                enigma::next_frame = false;
+                if(enigma::next_frame)
+                {
+                    enigma::next_frame = false;
+                    enigma::ENIGMA_events();
+                    enigma::input_push();
+                    frames++;
+                    
+                    if(!high_res)
+                    {
+                        enigma::nc = clock();
+                        if(enigma::nc - enigma::lc > 200)
+                        {
+                            fps = int((double)frames / ((enigma::nc - enigma::lc) * 1000));
+                            enigma::lc = enigma::nc;
+                            frames = 0;
+                        }
+                    }
+                    else
+                    {
+                        QueryPerformanceCounter(&enigma::nq);
+                        QueryPerformanceFrequency(&enigma::timer_freq);
+                        if((enigma::nq.QuadPart-enigma::lq.QuadPart) / (enigma::timer_freq.QuadPart/1000) > 200)
+                        {
+                            fps = int(((double)frames / ((enigma::nq.QuadPart-enigma::lq.QuadPart) / (enigma::timer_freq.QuadPart/1000))) * 1000);
+                            enigma::lq = enigma::nq;
+                            frames = 0;
+                        }
+                    }
+                }
                 WaitMessage();
             }
         }
