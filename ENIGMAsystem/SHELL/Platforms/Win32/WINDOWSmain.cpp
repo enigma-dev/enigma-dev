@@ -28,6 +28,7 @@
 #include <time.h>
 #include <string>
 #include <sstream>
+#include <algorithm>
 using std::string;
 
 #include "WINDOWScallback.h"
@@ -50,6 +51,9 @@ namespace enigma //TODO: Find where this belongs
 
   char** main_argv;
   int main_argc;
+  bool next_frame = true;
+  #define TIMER_ID 1337
+  int timer_millis = 25;
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
@@ -74,7 +78,6 @@ namespace enigma {
     double sdur = 1000/rs - (nc - lc)*1000 / CLOCKS_PER_SEC;
     if (sdur > 0)
     {
-        Sleep(sdur);
         fps = int(CLOCKS_PER_SEC / (nc - lc + sdur));
     }
     else
@@ -82,6 +85,7 @@ namespace enigma {
         fps = int(CLOCKS_PER_SEC / (nc - lc));
     }
     lc = nc;
+    enigma::timer_millis = 1000/rs;
   }
 }
 #include <cstdio>
@@ -147,6 +151,10 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                     bQuit=1;
                     break;
                 }
+                else if (msg.message == WM_TIMER)
+                {
+                    enigma::next_frame = true;
+                }
                 else
                 {
                     TranslateMessage (&msg);
@@ -155,8 +163,13 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
             }
             else
             {
+                if(!enigma::next_frame) continue;
                 enigma::ENIGMA_events();
                 enigma::input_push();
+                
+                SetTimer(enigma::hWnd, TIMER_ID, std::max(1, enigma::timer_millis - 2), NULL);
+                enigma::next_frame = false;
+                WaitMessage();
             }
         }
 
