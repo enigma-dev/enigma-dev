@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2011 Josh Ventura
+/** Copyright (C) 2008-2011 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -41,6 +41,13 @@ bool load_al_dll();
 
 #include "Universal_System/estring.h"
 
+#include <AL/al.h>
+ALfloat listenerPos[]={0.0f,0.0f,0.0f};
+ALfloat listenerVel[]={0.0f,0.0f,0.0f};
+ALfloat listenerOri[]={0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
+int channel_num = 128;
+ALuint channel_sources[128];
+int falloff_model = 0;
 namespace enigma
 {
   enum load_state {
@@ -51,22 +58,37 @@ namespace enigma
   };
   struct sound
   {
-    ALuint src, buf[3]; // The source-id and buffer-id of the sound data
+    ALuint buf[3]; // The buffer-idof the sound data
     alureStream *stream; // optional stream
     void (*cleanup)(void *userdata); // optional cleanup callback for streams
     void *userdata; // optional userdata for streams
-    void (*seek)(void *userdata, float position); // optional seeking shits
+    void (*seek)(void *userdata, float position); // optional seeking
+    int type = 0; //0 for sound, 1 for music, -1 for error
+    int kind = 0; //
 
     load_state loaded;   // Degree to which this sound has been loaded successfully
     bool idle;    // True if this sound is not being used, false if playing or paused.
     bool playing; // True if this sound is playing; not paused or idle.
 
-    sound(): src(0), stream(0), cleanup(0), userdata(0), seek(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
+    sound(): stream(0), cleanup(0), userdata(0), seek(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
       buf[0] = 0; buf[1] = 0; buf[2] = 0;
     }
   };
 
+  struct soundEmitter
+  {
+    ALfloat emitPos[3];
+    ALfloat emitVel[3];
+    ALfloat pitch;
+    soundEmitter()
+    {
+      ALfloat emitPos[3]={0.0f,0.0f,0.0f};
+      ALfloat emitVel[3]={0.0f,0.0f,0.0f};
+    }
+  };
+
   sound **sounds;
+  soundEmitter **soundEmitters;
   extern size_t sound_idmax;
 
   #ifdef DEBUG_MODE
@@ -78,6 +100,17 @@ namespace enigma
   #else
     #define get_sound(snd,id,failure)\
       enigma::sound *const snd = enigma::sounds[id];
+  #endif
+
+  #ifdef DEBUG_MODE
+    #define get_emitter(emit,id,failure)\
+      if (id < 0 or !enigma::soundEmitters[id]) {\
+        show_error("Emitter " + toString(id) + " does not exist", false);\
+        return failure;\
+      } enigma::soundEmitter *const emit = enigma::soundEmitters[id];
+  #else
+    #define get_emitter(emit,id,failure)\
+      enigma::soundEmitter *const emit = enigma::soundEmitters[id];
   #endif
 
   static void eos_callback(void *soundID, ALuint src)
@@ -108,6 +141,9 @@ namespace enigma
       return 1;
     }
 
+    alGenSources(channel_num, channel_sources);
+    fprintf(stderr, "Generating default %d audio listening channels.\n",channel_num);
+
     for (size_t i = 0; i < sound_idmax; i++)
       sounds[i] = NULL;
 
@@ -117,7 +153,6 @@ namespace enigma
   static sound* sound_new_with_source() {
     sound *res = new sound();
     alGetError();
-    alGenSources(1, &res->src);
     int a = alGetError();
     if(a != AL_NO_ERROR) {
       fprintf(stderr, "Failed to create OpenAL source! Error %d: %s\n",a,alGetString(a));
@@ -146,9 +181,7 @@ namespace enigma
       fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
       return 2;
     }
-    alSourcei(snd->src, AL_BUFFER, buf);
-    alSourcei(snd->src, AL_SOURCE_RELATIVE, AL_TRUE);
-    alSourcei(snd->src, AL_REFERENCE_DISTANCE, 1);
+
     snd->loaded = LOADSTATE_COMPLETE;
     return 0;
   }
@@ -199,13 +232,13 @@ namespace enigma
         case LOADSTATE_COMPLETE:
           alDeleteBuffers(sounds[i]->stream ? 3 : 1, sounds[i]->buf);
           if (sounds[i]->stream) {
-            alureStopSource(sounds[i]->src, true);
+            alureStopSource(channel_sources[0], true);
             alureDestroyStream(sounds[i]->stream, 0, 0);
             if (sounds[i]->cleanup) sounds[i]->cleanup(sounds[i]->userdata);
           }
           // fallthrough
         case LOADSTATE_SOURCED:
-          alDeleteSources(1, &sounds[i]->src);
+          alDeleteSources(1, channel_sources);
           break;
         default: ;
       }
@@ -215,6 +248,8 @@ namespace enigma
   }
 };
 
+// ***** OLD SOUND SYSTEM *****
+
 bool sound_exists(int sound)
 {
     return unsigned(sound) < enigma::sound_idmax && bool(enigma::sounds[sound]);
@@ -222,33 +257,79 @@ bool sound_exists(int sound)
 
 bool sound_play(int sound) // Returns whether sound is playing
 {
-  get_sound(snd,sound,0); //snd.looping = false;
-  alSourcei(snd->src, AL_LOOPING, AL_FALSE); //Just playing
-  return !(snd->idle = !(snd->playing = !snd->stream ?
-    alurePlaySource(snd->src, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
-    alurePlaySourceStream(snd->src, snd->stream, 3, -1, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE));
+  int src = -1;
+  for(size_t i = 0; i < channel_num; i++) 
+  {
+    ALint state;
+    alGetSourcei(channel_sources[i], AL_SOURCE_STATE, &state);
+    if (state != AL_PLAYING)
+    { 
+      src = i;
+    }
+  }
+  if (src == -1) 
+  {
+    // test for channels playing a lower priority
+  }
+  if (src != -1) 
+  {
+    get_sound(snd,sound,0); //snd.looping = false;
+    alSourcei(channel_sources[src], AL_BUFFER, snd->buf[0]);
+    alSourcei(channel_sources[src], AL_SOURCE_RELATIVE, AL_TRUE);
+    alSourcei(channel_sources[src], AL_REFERENCE_DISTANCE, 1);
+    alSourcei(channel_sources[src], AL_LOOPING, AL_FALSE); //Just playing
+    return !(snd->idle = !(snd->playing = !snd->stream ?
+      alurePlaySource(channel_sources[src], enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
+      alurePlaySourceStream(channel_sources[src], snd->stream, 3, -1, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE));
+  } 
+  else 
+  {
+    return -1;
+  }
 }
 bool sound_loop(int sound) // Returns whether sound is playing
 {
-  get_sound(snd,sound,0);
-  alSourcei(snd->src, AL_LOOPING, AL_TRUE); // Toggle on looping
-  return snd->idle = !(snd->playing = (alurePlaySource(snd->src, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE));
+  int src = -1;
+  for(size_t i = 0; i < channel_num; i++) 
+  {
+    ALint state;
+    alGetSourcei(channel_sources[i], AL_SOURCE_STATE, &state);
+    if (state != AL_PLAYING)
+    { 
+      src = i;
+    }
+  }
+  if (src == -1) 
+  {
+    // test for channels playing a lower priority
+  }
+  if (src != -1) 
+  {
+    get_sound(snd,sound,0);
+    alSourcei(channel_sources[src], AL_LOOPING, AL_TRUE); // Toggle on looping
+    return snd->idle = !(snd->playing = (alurePlaySource(channel_sources[src], enigma::eos_callback, 
+      (void*)(ptrdiff_t)sound) != AL_FALSE));
+  }
+  else 
+  {
+    return -1;
+  }
 }
 bool sound_pause(int sound) // Returns whether the sound is still playing
 {
   get_sound(snd,sound,0);
-  return snd->playing = !alurePauseSource(snd->src);
+  return snd->playing = !alurePauseSource(channel_sources[0]);
 }
 void sound_pause_all()
 {
   for(size_t i = 0;i < enigma::sound_idmax;i++) {
-    if(enigma::sounds[i] && enigma::sounds[i]->src && enigma::sounds[i]->playing)
-      enigma::sounds[i]->playing = !alurePauseSource(enigma::sounds[i]->src);
+    if(enigma::sounds[i] && channel_sources[0] && enigma::sounds[i]->playing)
+      enigma::sounds[i]->playing = !alurePauseSource(channel_sources[0]);
   }
 }
 void sound_stop(int sound) {
   get_sound(snd,sound,);
-  alureStopSource(snd->src,AL_FALSE);
+  alureStopSource(channel_sources[0], AL_FALSE);
   snd->playing = false;
   if (snd->seek)
     snd->seek(snd->userdata, 0);
@@ -256,7 +337,7 @@ void sound_stop(int sound) {
 void sound_stop_all()
 {
   for(size_t i = 0;i < enigma::sound_idmax;i++) {
-    alureStopSource(enigma::sounds[i]->src,AL_FALSE);
+    alureStopSource(channel_sources[0],AL_FALSE);
     enigma::sounds[i]->playing = false;
     if (enigma::sounds[i]->seek)
         enigma::sounds[i]->seek(enigma::sounds[i]->userdata,0);
@@ -265,13 +346,13 @@ void sound_stop_all()
 void sound_delete(int sound) {
   get_sound(snd,sound,);
   alureDestroyStream(snd->stream, 0, 0);
-  alDeleteSources(1,&snd->src);
+  alDeleteSources(channel_num, channel_sources);
   delete enigma::sounds[sound];
   enigma::sounds[sound] = NULL;
 }
 void sound_volume(int sound, float volume) {
     get_sound(snd,sound,);
-    alSourcef(snd->src, AL_GAIN, volume);
+    alSourcef(channel_sources[0], AL_GAIN, volume);
 }
 void sound_global_volume(float mastervolume) {
     alListenerf(AL_GAIN, mastervolume);
@@ -279,13 +360,13 @@ void sound_global_volume(float mastervolume) {
 bool sound_resume(int sound) // Returns whether the sound is playing
 {
   get_sound(snd,sound,false);
-  return snd->playing = alureResumeSource(snd->src);
+  return snd->playing = alureResumeSource(channel_sources[0]);
 }
 void sound_resume_all()
 {
   for(size_t i = 0;i < enigma::sound_idmax;i++) {
-    if(enigma::sounds[i] && enigma::sounds[i]->src && !enigma::sounds[i]->playing)
-      enigma::sounds[i]->playing = alureResumeSource(enigma::sounds[i]->src);
+    if(enigma::sounds[i] && channel_sources[0] && !enigma::sounds[i]->playing)
+      enigma::sounds[i]->playing = alureResumeSource(channel_sources[0]);
   }
 }
 bool sound_isplaying(int sound) {
@@ -300,7 +381,7 @@ void sound_pan(int sound, float value)
 {
   get_sound(snd,sound,);
   const float pan = value*2-1;
-  alSource3f(snd->src,AL_POSITION,pan,sqrt(1-pan*pan),0);
+  alSource3f(channel_sources[0],AL_POSITION,pan,sqrt(1-pan*pan),0);
 }
 float sound_get_length(int sound) { // Not for Streams
   get_sound(snd,sound,0);
@@ -317,18 +398,18 @@ float sound_get_position(int sound) { // Not for Streams
   get_sound(snd,sound,-1);
   float offset;
 
-  alGetSourcef(snd->src, AL_SEC_OFFSET, &offset);
+  alGetSourcef(channel_sources[0], AL_SEC_OFFSET, &offset);
   return offset;
 }
 void sound_seek(int sound, float position) {
   get_sound(snd,sound,);
-  alSourcef(snd->src, AL_SEC_OFFSET, position); // Non Streams
+  alSourcef(channel_sources[0], AL_SEC_OFFSET, position); // Non Streams
   if (snd->seek) snd->seek(snd->userdata, position); // Streams
 }
 void sound_seek_all(float position) {
   for(size_t i = 0;i < enigma::sound_idmax;i++) {
-    if(enigma::sounds[i] && enigma::sounds[i]->src) {
-      alSourcef(enigma::sounds[i]->src, AL_SEC_OFFSET, position); // Non Streams
+    if(enigma::sounds[i] && channel_sources[0]) {
+      alSourcef(channel_sources[0], AL_SEC_OFFSET, position); // Non Streams
       if (enigma::sounds[i]->seek) enigma::sounds[i]->seek(enigma::sounds[i]->userdata, position); // Streams
     }
   }
@@ -373,7 +454,339 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
 {
   get_sound(snd,sound,false);
   alureDestroyStream(snd->stream, 0, 0);
-  alDeleteSources(1,&snd->src);
+  alDeleteSources(channel_num,channel_sources);
   enigma::sounds[sound] = enigma::sound_new_with_source();
   return true;
+}
+
+// ***** NEW SOUND SYSTEM *****
+ 
+bool audio_exists(int sound)
+{
+  return unsigned(sound) < enigma::sound_idmax && bool(enigma::sounds[sound]);
+}
+bool audio_is_playing(int sound) {
+  get_sound(snd,sound,false);
+  return snd->playing;
+}
+
+void audio_play_music(int sound, bool loop) 
+{
+    // channel 0 is reserved for music, but sounds can play there if they want
+    // but if music starts they get overridin, and you can only play 1 background
+    // music at a time
+    get_sound(snd,sound,0);
+    alSourcei(channel_sources[0], AL_BUFFER, snd->buf[0]);
+    alSourcei(channel_sources[0], AL_SOURCE_RELATIVE, AL_TRUE);
+    alSourcei(channel_sources[0], AL_REFERENCE_DISTANCE, 1);
+    alSourcei(channel_sources[0], AL_LOOPING, loop?AL_TRUE:AL_FALSE);
+    !(snd->idle = !(snd->playing = !snd->stream ?
+      alurePlaySource(channel_sources[0], enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
+      alurePlaySourceStream(channel_sources[0], snd->stream, 3, -1, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE));
+}
+
+int audio_play_sound(int sound, int priority, bool loop) 
+{
+  int src = -1;
+  for(size_t i = 0; i < channel_num; i++) 
+  {
+    ALint state;
+    alGetSourcei(channel_sources[i], AL_SOURCE_STATE, &state);
+    if (state != AL_PLAYING)
+    { 
+      src = i;
+    }
+  }
+  if (src == -1) 
+  {
+    // test for channels playing a lower priority sound, and take their spot if they are
+  }
+  if (src != -1) 
+  {
+    get_sound(snd,sound,0);
+    alSourcei(channel_sources[src], AL_BUFFER, snd->buf[0]);
+    alSourcei(channel_sources[src], AL_SOURCE_RELATIVE, AL_TRUE);
+    alSourcei(channel_sources[src], AL_REFERENCE_DISTANCE, 1);
+    alSourcei(channel_sources[src], AL_LOOPING, loop?AL_TRUE:AL_FALSE);
+    !(snd->idle = !(snd->playing = !snd->stream ?
+      alurePlaySource(channel_sources[src], enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
+      alurePlaySourceStream(channel_sources[src], snd->stream, 3, -1, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE));
+    return src;
+  } 
+  else 
+  {
+    return -1;
+  }
+}
+
+int audio_play_sound_at(int sound, double x, double y, double z, int falloff_ref, double falloff_max, double falloff_factor, bool loop, double priority) 
+{
+  int src = -1;
+  for(size_t i = 0; i < channel_num; i++) 
+  {
+    ALint state;
+    alGetSourcei(channel_sources[i], AL_SOURCE_STATE, &state);
+    if (state != AL_PLAYING)
+    { 
+      src = i;
+    }
+  }
+  if (src == -1) 
+  {
+    // test for channels playing a lower priority
+  }
+  if (src != -1) 
+  {
+    get_sound(snd,sound,0);
+    alSourcei(channel_sources[0], AL_LOOPING, loop?AL_TRUE:AL_FALSE);
+    ALfloat soundPos[]={0.0f,0.0f,0.0f};
+    alSourcefv(channel_sources[0], AL_POSITION, soundPos);
+    !(snd->idle = !(snd->playing = !snd->stream ?
+      alurePlaySource(channel_sources[0], enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
+      alurePlaySourceStream(channel_sources[0], snd->stream, 3, -1, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE));
+    return src;
+  } 
+  else 
+  {
+    return -1;
+  }
+}
+
+void audio_pause_sound(int index)
+{
+  alurePauseSource(channel_sources[index]);
+}
+
+void audio_resume_sound(int index)
+{
+  alureResumeSource(channel_sources[index]);
+}
+
+void audio_stop_sound(int index)
+{
+  alureStopSource(channel_sources[index], AL_TRUE);
+}
+
+void audio_stop_all()
+{
+  for(size_t i = 0; i < enigma::sound_idmax;i++) {
+    if (enigma::sounds[i]->type == 0) {
+      alureStopSource(channel_sources[0],AL_FALSE);
+      enigma::sounds[i]->playing = false;
+      if (enigma::sounds[i]->seek)
+          enigma::sounds[i]->seek(enigma::sounds[i]->userdata,0);
+    }
+  }
+}
+
+void audio_stop_music()
+{
+  for(size_t i = 0;i < enigma::sound_idmax;i++) {
+    if (enigma::sounds[i]->type == 1) {
+      alureStopSource(channel_sources[0],AL_FALSE);
+      enigma::sounds[i]->playing = false;
+      if (enigma::sounds[i]->seek)
+          enigma::sounds[i]->seek(enigma::sounds[i]->userdata,0);
+    }
+  }
+}
+
+void audio_pause_all()
+{
+  for(size_t i = 0;i < enigma::sound_idmax;i++) {
+    if (enigma::sounds[i]->type == 0) {
+      if(enigma::sounds[i] && channel_sources[0] && enigma::sounds[i]->playing)
+        enigma::sounds[i]->playing = !alurePauseSource(channel_sources[0]);
+    }
+  }
+}
+
+void audio_pause_music()
+{
+  for(size_t i = 0;i < enigma::sound_idmax;i++) {
+    if (enigma::sounds[i]->type == 1) {
+      if(enigma::sounds[i] && channel_sources[0] && enigma::sounds[i]->playing)
+        enigma::sounds[i]->playing = !alurePauseSource(channel_sources[0]);
+    }
+  }
+}
+
+void audio_resume_all()
+{
+  for(size_t i = 0;i < enigma::sound_idmax;i++) {
+    if (enigma::sounds[i]->type == 0) {
+      if(enigma::sounds[i] && channel_sources[0] && !enigma::sounds[i]->playing)
+        enigma::sounds[i]->playing = alureResumeSource(channel_sources[0]);
+    }
+  }
+}
+
+void audio_resume_music()
+{
+  for(size_t i = 0;i < enigma::sound_idmax;i++) {
+    if (enigma::sounds[i]->type == 1) {
+      if(enigma::sounds[i] && channel_sources[0] && !enigma::sounds[i]->playing)
+        enigma::sounds[i]->playing = alureResumeSource(channel_sources[0]);
+    }
+  }
+}
+
+int audio_get_type(int index) 
+{
+  if (!audio_exists(index)) {return -1;}
+  get_sound(snd, index, 0);
+  return snd->type;
+}
+
+void audio_listener_orientation(double lookat_x, double lookat_y, double lookat_z, double up_x, double up_y, double up_z)
+{
+  listenerOri[0] = up_x;
+  listenerOri[1] = up_y;
+  listenerOri[2] = up_z;
+  listenerOri[3] = lookat_x;
+  listenerOri[4] = lookat_y;
+  listenerOri[5] = lookat_z;
+  alListenerfv(AL_ORIENTATION, listenerOri);
+}
+
+void audio_listener_position(double x, double y, double z)
+{
+  listenerPos[0] = x;
+  listenerPos[1] = y;
+  listenerPos[2] = z;
+  alListenerfv(AL_POSITION, listenerPos);
+}
+
+void audio_listener_velocity(double vx, double vy, double vz)
+{
+  listenerVel[0] = vx;
+  listenerVel[1] = vy;
+  listenerVel[2] = vz;
+  alListenerfv(AL_VELOCITY, listenerVel);
+}
+
+double audio_sound_length(int index) 
+{
+  get_sound(snd,index,0);
+  ALint size, bits, channels, freq;
+
+  alGetBufferi(snd->buf[0], AL_SIZE, &size);
+  alGetBufferi(snd->buf[0], AL_BITS, &bits);
+  alGetBufferi(snd->buf[0], AL_CHANNELS, &channels);
+  alGetBufferi(snd->buf[0], AL_FREQUENCY, &freq);
+
+  return size / channels / (bits/8) / (float)freq;
+}
+
+void audio_master_gain(float volume, double time) 
+{
+  alListenerf(AL_GAIN, volume);
+}
+
+void audio_music_gain(int index, float volume, double time) 
+{
+  alSourcef(channel_sources[index], AL_GAIN, volume);
+}
+
+void audio_sound_gain(int index, float volume, double time)
+{	
+  alSourcef(channel_sources[index], AL_GAIN, volume);
+}
+
+void audio_channel_num(int num) {
+  channel_num = num;
+}
+
+int audio_system()
+{
+  // return audio_old_system or audio_new_system
+}
+
+int audio_add(string fname, int type)
+{
+  // Open sound
+  FILE *afile = fopen(fname.c_str(),"rb");
+  if (!afile)
+    return -1;
+
+  // Buffer sound
+  fseek(afile,0,SEEK_END);
+  const size_t flen = ftell(afile);
+  char fdata[flen];
+  fseek(afile,0,SEEK_SET);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading sound data");
+
+  // Decode sound
+  int rid = enigma::sound_allocate();
+  if (enigma::sound_add_from_buffer(rid,fdata,flen))
+    return (--enigma::sound_idmax, -1);
+
+  return rid;
+}
+
+void audio_delete(int sound)
+{
+  get_sound(snd,sound,);
+  alureDestroyStream(snd->stream, 0, 0);
+  alDeleteSources(channel_num, channel_sources);
+  delete enigma::sounds[sound];
+  enigma::sounds[sound] = NULL;
+}
+
+void audio_falloff_set_model(int model)
+{
+
+}
+
+int audio_emitter_create()
+{
+
+}
+
+bool audio_emitter_exists(int index)
+{
+
+}
+
+void audio_emitter_falloff(int emitter, double falloff_ref, double falloff_max, double falloff_factor)
+{
+
+}
+
+void audio_emitter_free(int emitter)
+{
+
+}
+
+void audio_emitter_gain(int emitter, double gain)
+{
+
+}
+
+void audio_emitter_pitch(int emitter, double pitch)
+{
+  get_emitter(emit,emitter,);
+  emit->pitch = pitch;
+}
+
+void audio_emitter_position(int emitter, double x, double y, double z)
+{
+  get_emitter(emit,emitter,);
+  emit->emitPos[0] = x;
+  emit->emitPos[1] = y;
+  emit->emitPos[2] = z;
+}
+
+void audio_emitter_velocity(int emitter, double vx, double vy, double vz)
+{
+  get_emitter(emit,emitter,);
+  emit->emitVel[0] = vx;
+  emit->emitVel[1] = vy;
+  emit->emitVel[2] = vz;
+}
+
+void audio_play_sound_on(int emitter, int sound, bool loop, double priority)
+{
+
 }
