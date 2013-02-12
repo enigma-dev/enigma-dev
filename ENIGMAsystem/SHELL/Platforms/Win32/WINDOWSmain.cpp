@@ -1,29 +1,20 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008-2011 Josh Ventura                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have received a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2013 Josh Ventura, Matt Shaffer
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 #include <windows.h>
 #include <time.h>
 #include <string>
@@ -51,8 +42,6 @@ namespace enigma //TODO: Find where this belongs
 
   char** main_argv;
   int main_argc;
-  bool next_frame = true;
-  #define TIMER_ID 1337
   int timer_millis = 33;
 
   void EnableDrawing (HGLRC *hRC);
@@ -75,10 +64,11 @@ bool high_res = true;
 int frames = 0;
 namespace enigma {
   clock_t lc, nc;
+  clock_t lc_fps, nc_fps;
   LARGE_INTEGER lq, nq, timer_freq;
   void sleep_for_framerate(int rs)
   {
-    enigma::timer_millis = 1000/rs;
+    enigma::timer_millis = rs == 0 ? 0 : 1000/rs;
   }
 }
 #include <cstdio>
@@ -134,7 +124,6 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     enigma::initialize_everything();
 
     //Main loop
-        SetTimer(enigma::hWnd, TIMER_ID, std::max(1, enigma::timer_millis - 2), NULL);
         if(!QueryPerformanceCounter(&enigma::lq)) high_res = false;
         char bQuit=0;
         while (!bQuit)
@@ -146,11 +135,6 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                     bQuit=1;
                     break;
                 }
-                else if (msg.message == WM_TIMER)
-                {
-                    enigma::next_frame = true;
-                    SetTimer(enigma::hWnd, TIMER_ID, std::max(1, enigma::timer_millis - 2), NULL);
-                }
                 else
                 {
                     TranslateMessage (&msg);
@@ -159,36 +143,41 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
             }
             else
             {
-                if(enigma::next_frame)
+                // FPS Lock
+                if(!high_res)
                 {
-                    enigma::next_frame = false;
-                    enigma::ENIGMA_events();
-                    enigma::input_push();
-                    frames++;
-                    
-                    if(!high_res)
+                    enigma::nc = clock();
+                    while(((enigma::nc-enigma::lc)/(CLOCKS_PER_SEC/1000)) < enigma::timer_millis)
                     {
+                        Sleep(1);
                         enigma::nc = clock();
-                        if(enigma::nc - enigma::lc > 200)
-                        {
-                            fps = int((double)frames / ((enigma::nc - enigma::lc) * 1000));
-                            enigma::lc = enigma::nc;
-                            frames = 0;
-                        }
                     }
-                    else
-                    {
-                        QueryPerformanceCounter(&enigma::nq);
-                        QueryPerformanceFrequency(&enigma::timer_freq);
-                        if((enigma::nq.QuadPart-enigma::lq.QuadPart) / (enigma::timer_freq.QuadPart/1000) > 200)
-                        {
-                            fps = int(((double)frames / ((enigma::nq.QuadPart-enigma::lq.QuadPart) / (enigma::timer_freq.QuadPart/1000))) * 1000);
-                            enigma::lq = enigma::nq;
-                            frames = 0;
-                        }
-                    }
+                    enigma::lc = enigma::nc;
                 }
-                WaitMessage();
+                else
+                {
+                    QueryPerformanceCounter(&enigma::nq);
+                    QueryPerformanceFrequency(&enigma::timer_freq);
+                    while((enigma::nq.QuadPart-enigma::lq.QuadPart)/(enigma::timer_freq.QuadPart/1000) < enigma::timer_millis)
+                    {
+                        Sleep(1);
+                        QueryPerformanceCounter(&enigma::nq);
+                    }
+                    enigma::lq = enigma::nq;
+                }
+                
+                // FPS calculation
+                enigma::nc_fps = clock();
+                if((enigma::nc_fps-enigma::lc_fps)/(CLOCKS_PER_SEC/1000) >= 200)
+                {
+                    fps = int(((double)frames/((enigma::nc_fps-enigma::lc_fps)/(CLOCKS_PER_SEC/1000)))*1000);
+                    enigma::lc_fps = enigma::nc_fps;
+                    frames = 0;
+                }
+                
+                enigma::ENIGMA_events();
+                enigma::input_push();
+                frames++;
             }
         }
 
