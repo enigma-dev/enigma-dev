@@ -84,7 +84,7 @@ void audio_pause_music();
 void audio_resume_music();
 void audio_stop_music(); 
 
-int audio_play_sound(int index, int priority, bool loop);
+int audio_play_sound(int index, double priority, bool loop);
 int audio_play_sound_at(int sound, double x, double y, double z, int falloff_ref, double falloff_max, double falloff_factor, bool loop, double priority);
 void audio_pause_sound(int index);
 void audio_resume_sound(int index);
@@ -92,6 +92,11 @@ void audio_stop_sound(int index);
 void audio_pause_all();
 void audio_resume_all();
 void audio_stop_all();
+
+void audio_music_seek(double offset);
+void audio_sound_seek(int index, double offset);
+double audio_music_offset();
+double audio_sound_offset(int index);
 
 void audio_listener_orientation(double lookat_x, double lookat_y, double lookat_z, double up_x, double up_y, double up_z);
 void audio_listener_position(double x, double y, double z);
