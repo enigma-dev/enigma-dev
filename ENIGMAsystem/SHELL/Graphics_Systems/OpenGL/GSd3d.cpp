@@ -33,13 +33,13 @@ bool d3dHidden = false;
 bool d3dZWriteEnable = true;
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
-GLenum renderstates[22] = {   
+GLenum renderstates[22] = {
   GL_FILL, GL_LINE, GL_POINT, GL_FRONT, GL_BACK,
   GL_FRONT_AND_BACK, GL_CW, GL_CCW,
-  GL_NICEST, GL_FASTEST, GL_DONT_CARE, GL_EXP, GL_EXP2, 
+  GL_NICEST, GL_FASTEST, GL_DONT_CARE, GL_EXP, GL_EXP2,
   GL_LINEAR, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL,
-  GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS 
-}; 
+  GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS
+};
 
 void d3d_start()
 {
@@ -108,23 +108,23 @@ void d3d_set_fog(bool enable, int color, double start, double end)
   d3d_set_fog_enabled(enable);
   d3d_set_fog_color(color);
   d3d_set_fog_start(start);
-  d3d_set_fog_end(end); 
+  d3d_set_fog_end(end);
   d3d_set_fog_hint(rs_nicest);
   d3d_set_fog_mode(rs_linear);
 }//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
 
-void d3d_set_fog_enabled(bool enable) 
+void d3d_set_fog_enabled(bool enable)
 {
   (enable?glEnable:glDisable)(GL_FOG);
 }
 
 void d3d_set_fog_mode(int mode)
 {
-  glFogi(GL_FOG_MODE, renderstates[mode]); 
+  glFogi(GL_FOG_MODE, renderstates[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
-  glHint(GL_FOG_HINT, mode); 
+  glHint(GL_FOG_HINT, mode);
 }
 
 void d3d_set_fog_color(int color)
@@ -148,7 +148,7 @@ void d3d_set_fog_end(double end)
 
 void d3d_set_fog_density(double density)
 {
-  glFogf(GL_FOG_DENSITY, density);  
+  glFogf(GL_FOG_DENSITY, density);
 }
 
 void d3d_set_culling(bool enable)
@@ -165,10 +165,10 @@ void d3d_set_culling_orientation(int mode) {
   glFrontFace(renderstates[mode]);
 }
 
-void d3d_set_render_mode(int face, int fill) 
+void d3d_set_render_mode(int face, int fill)
 {
   glPolygonMode(renderstates[face], renderstates[fill]);
-} 
+}
 void d3d_set_line_width(float value) {
   glLineWidth(value);
 }
@@ -996,7 +996,7 @@ class d3d_model
 
     void save(string fname)
     {
-    }//format needs to be decided on
+    }//TODO: format needs to be decided on
 
     bool load(string fname)  //TODO: this needs to be rewritten properly not using the file_text functions
     {

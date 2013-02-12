@@ -352,7 +352,7 @@ namespace enigma
     sprstr->texbordxarray[imgindex] = (double) w/fullwidth;
     sprstr->texbordyarray[imgindex] = (double) h/fullheight;
     sprstr->colldata[imgindex] = get_collision_mask(sprstr,collision_data,ct);
-    
+
     delete[] imgpxdata;
   }
 }
@@ -436,15 +436,6 @@ const bbox_rect_t &sprite_get_bbox_relative(int sprite)
 	get_sprite(spr,sprite,dummy_bbox);
 	return spr->bbox_relative;
 }
-
-
-//TODO: IMPLEMENT
-//sprite_get_bbox_mode
-//sprite_get_name
-//sprite_get_precise
-//sprite_get_preload
-//sprite_get_smooth
-//sprite_get_transparent
 
 int sprite_get_number(int sprite)
 {
