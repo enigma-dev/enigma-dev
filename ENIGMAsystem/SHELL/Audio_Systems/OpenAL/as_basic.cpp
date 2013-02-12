@@ -43,7 +43,6 @@ bool load_al_dll();
 
 #include <vector>
 using std::vector;
-#include <AL/al.h>
 #include <time.h>
 clock_t starttime;
 clock_t elapsedtime;
