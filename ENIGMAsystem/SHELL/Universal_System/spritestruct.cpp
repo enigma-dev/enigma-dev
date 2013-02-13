@@ -313,17 +313,6 @@ namespace enigma
         }
     }
 
-  #if COLLIGMA
-  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h)
-  {
-    collCustom* thenewmask = new collCustom(w,h,x,y,x,y);
-    for(int xp=0;xp<w*h;xp++)
-      collbitSet(*thenewmask,xp % w,xp/w,pixdata[xp*4+3]>0); //the width times the number of rows, the current column*4, then 3
-    return thenewmask;
-  }
-  #endif
-
-
   //Adds a subimage to an existing sprite from the exe
   void sprite_set_subimage(int sprid, int imgindex, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk, unsigned char*collision_data, collision_type ct)
   {
