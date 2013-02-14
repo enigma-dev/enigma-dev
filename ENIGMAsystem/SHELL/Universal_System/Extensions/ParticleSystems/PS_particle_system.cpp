@@ -25,26 +25,15 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "PS_particle_system.h"
 #include "PS_particle.h"
+#include "PS_particle_system.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "PS_particle_type.h"
-#include "PS_particle_instance.h"
-#include "PS_particle_emitter.h"
-#include "Universal_System/depth_draw.h"
-#include "Graphics_Systems/OpenGL/GSstdraw.h"
-#include "Graphics_Systems/OpenGL/GScolors.h"
-#include "Graphics_Systems/OpenGL/GSsprite.h"
-#include "Graphics_Systems/OpenGL/binding.h"
 #include "Universal_System/spritestruct.h"
-#include <GL/gl.h>
 #include <cmath>
 #include <cstdlib>
-#include <list>
 #include <vector>
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include <algorithm>
 
 inline int bounds(int value, int low, int high)
 {
@@ -64,35 +53,6 @@ namespace enigma
     int number;
     particle_type* pt;
   };
-  struct particle_system
-  {
-    // Wiggling.
-    double wiggle;
-    int wiggle_frequency; // Number of steps for a full cycle. Domain: [1;[.
-    double get_wiggle_result(double wiggle_offset);
-    // Subimage index.
-    int subimage_index;
-    // Particles.
-    int id;
-    bool oldtonew;
-    double x_offset, y_offset;
-    double depth; // Integer stored as double.
-    std::list<particle_instance> pi_list;
-    bool auto_update, auto_draw;
-    void initialize();
-    void update_particlesystem();
-    void draw_particlesystem();
-    void create_particles(double x, double y, particle_type* pt, int number);
-    // Emitters.
-    std::map<int,particle_emitter*> id_to_emitter;
-    int emitter_max_id;
-    int create_emitter();
-    void set_emitter_region(int em_id, double xmin, double xmax, double ymin, double ymax, ps_shape shape, ps_distr distribution);
-    void set_emitter_stream(int em_id, int particle_type_id, int number);
-
-    // TODO: Write emitters, attractors, destroyers, deflectors and changers,
-    // and create a map of each in the particle_system.
-  };
   double particle_system::get_wiggle_result(double wiggle_offset)
   {
     double result_wiggle = wiggle + wiggle_offset;
@@ -107,9 +67,22 @@ namespace enigma
     oldtonew = true;
     auto_update = true, auto_draw = true;
     depth = 0.0;
-    pi_list = std::list<particle_instance>();
+    pi_list = std::vector<particle_instance>();
     id_to_emitter = std::map<int,particle_emitter*>();
     emitter_max_id = 0;
+    id_to_attractor = std::map<int,particle_attractor*>();
+    attractor_max_id = 0;
+    id_to_destroyer = std::map<int,particle_destroyer*>();
+    destroyer_max_id = 0;
+    id_to_deflector = std::map<int,particle_deflector*>();
+    deflector_max_id = 0;
+    id_to_changer = std::map<int,particle_changer*>();
+    changer_max_id = 0;
+    hidden = false;
+  }
+  bool is_dead_from_old_age(particle_instance& pi)
+  {
+    return pi.life_current <= 0;
   }
   void particle_system::update_particlesystem()
   {
@@ -124,7 +97,7 @@ namespace enigma
     std::vector<generation_info> particles_to_generate;
     // Handle life and death.
     {
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
       {
         // Decrease life.
         it->life_current--;
@@ -145,6 +118,7 @@ namespace enigma
           }
 
           // Death handling.
+          // Only the clean-up is made here.
           pt->particle_count--;
           if (pt->particle_count <= 0 && !pt->alive) {
             // Particle type is no longer used, delete it.
@@ -152,14 +126,14 @@ namespace enigma
             delete pt;
             enigma::pt_manager.id_to_particletype.erase(id);
           }
-          it = pi_list.erase(it);
         }
       }
+      pi_list.erase(std::remove_if(pi_list.begin(), pi_list.end(), is_dead_from_old_age), pi_list.end());
     }
     // Shape.
     {
-      std::list<particle_instance>::iterator end = pi_list.end();
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+      std::vector<particle_instance>::iterator end = pi_list.end();
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
       {
         particle_type* pt = it->pt;
         if (pt->alive) {
@@ -170,8 +144,8 @@ namespace enigma
     }
     // Color and blending.
     {
-      std::list<particle_instance>::iterator end = pi_list.end();
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+      std::vector<particle_instance>::iterator end = pi_list.end();
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
       {
         particle_type* pt = it->pt;
         // Color.
@@ -256,7 +230,7 @@ namespace enigma
     }
     // Step.
     {
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != pi_list.end(); it++)
       {
         particle_type* pt = it->pt;
 
@@ -276,8 +250,8 @@ namespace enigma
     }
     // Move particles.
     {
-      std::list<particle_instance>::iterator end = pi_list.end();
-      for (std::list<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+      std::vector<particle_instance>::iterator end = pi_list.end();
+      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
       {
         particle_type* pt = it->pt;
         if (pt->alive) {
@@ -303,6 +277,55 @@ namespace enigma
         it->x += speed*cos(direction*M_PI/180.0);
         it->y += -speed*sin(direction*M_PI/180.0);
       }
+    }
+    // Changers.
+    {
+      std::map<int,particle_changer*>::iterator end = id_to_changer.end();
+      for (std::map<int,particle_changer*>::iterator ch_it = id_to_changer.begin(); ch_it != end; ch_it++)
+      {
+        particle_changer* p_ch = (*ch_it).second;
+        particle_type* pt1;
+        particle_type* pt2;
+        std::map<int,enigma::particle_type*>::iterator pt_it1 = enigma::pt_manager.id_to_particletype.find(p_ch->parttypeid1);
+        if (pt_it1 == enigma::pt_manager.id_to_particletype.end()) {
+          continue;
+        }
+        std::map<int,enigma::particle_type*>::iterator pt_it2 = enigma::pt_manager.id_to_particletype.find(p_ch->parttypeid2);
+        if (pt_it2 == enigma::pt_manager.id_to_particletype.end()) {
+          continue;
+        }
+        pt1 = (*pt_it1).second;
+        pt2 = (*pt_it2).second;
+
+        std::vector<particle_instance>::iterator end = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        {
+          if (p_ch->is_inside(it->x, it->y) && it->pt->id == pt1->id && it->life_current > 0) { // Skip particles with life_current <= 0.
+            // Store position of old particle.
+            const double x = it->x, y = it->y;
+            // Destroy the old particle.
+            // Only the clean-up is made here. The actual removal is handle after the loops by remove_if and erase.
+            pt1->particle_count--;
+            if (pt1->particle_count <= 0 && !pt1->alive) {
+              // Particle type is no longer used, delete it.
+              int id = pt1->id;
+              delete pt1;
+              enigma::pt_manager.id_to_particletype.erase(id);
+            }
+            // Internally when handling changers, setting life_current to 0 indicates that the particle has been removed.
+            it->life_current = 0;
+            // Create a new particle at its position.
+            generation_info gen_info;
+            gen_info.x = x;
+            gen_info.y = y;
+            gen_info.number = 1;
+            gen_info.pt = pt2;
+            particles_to_generate.push_back(gen_info);
+          }
+        }
+      }
+      // Erase all particles with life_current <= 0.
+      pi_list.erase(std::remove_if(pi_list.begin(), pi_list.end(), is_dead_from_old_age), pi_list.end());
     }
     // Generate particles.
     for (std::vector<generation_info>::iterator it = particles_to_generate.begin(); it != particles_to_generate.end(); it++)
@@ -333,157 +356,119 @@ namespace enigma
         }
       }
     }
-  }
-  void particle_system::draw_particlesystem()
-  {
-    // TODO: Draw the particle system either from oldest to youngest or reverse.
-
-    const std::list<particle_instance>::iterator end = pi_list.end();
-    for (std::list<particle_instance>::iterator it = pi_list.begin(); it != end; it++)
+    // Attractors.
     {
-      int color = it->color;
-      int alpha = it->alpha;
-      if (it->pt->alive) {  
-        particle_type* pt = it->pt;
-
-        double size;
-        double rot_degrees;
-        size = std::max(0.0, it->size + pt->size_wiggle*get_wiggle_result(it->size_wiggle_offset));
-        rot_degrees = it->angle + pt->ang_wiggle*get_wiggle_result(it->ang_wiggle_offset);
-        if (pt->ang_relative) {
-          rot_degrees += it->direction;
-        }
-
-        if (size <= 0) continue;
-
-        if (!pt->is_particle_sprite) { // Draw sprite.
-          int sprite_id = pt->sprite_id;
-          int subimg;
-          if (!pt->sprite_animated) {
-            subimg = it->sprite_subimageindex_initial;
+      std::map<int,particle_attractor*>::iterator end = id_to_attractor.end();
+      for (std::map<int,particle_attractor*>::iterator at_it = id_to_attractor.begin(); at_it != end; at_it++)
+      {
+        particle_attractor* p_a = (*at_it).second;
+        std::vector<particle_instance>::iterator end = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        {
+          // If the particle is not inside the attractor range of influence,
+          // or is at the attractor's exact position,
+          // skip to next attractor. 
+          const double dx = it->x - p_a->x;
+          const double dy = it->y - p_a->y;
+          const double relative_distance = sqrt(dx*dx + dy*dy)/std::max(1.0, p_a->dist_effect);
+          if (relative_distance > 1.0 || (dx == 0 && dy == 0)) {
+            continue;
+          }
+          const double direction_radians = atan2(-(p_a->y - it->y), p_a->x - it->x);
+          // Determine force.
+          double force_effective_strength;
+          switch (p_a->force_kind)  {
+          case ps_fo_constant : force_effective_strength = p_a->force_strength; break;
+          case ps_fo_linear : force_effective_strength = (1.0 - relative_distance)*p_a->force_strength; break;
+          case ps_fo_quadratic : force_effective_strength = (1.0 - relative_distance)*(1.0 - relative_distance)*p_a->force_strength; break;
+          default : force_effective_strength = p_a->force_strength; break;
+          }
+          // Apply force.
+          if (p_a->additive) {
+            const double vx = it->speed*cos(it->direction*M_PI/180.0) + force_effective_strength*cos(direction_radians);
+            const double vy = -it->speed*sin(it->direction*M_PI/180.0) - force_effective_strength*sin(direction_radians);
+            it->speed = sqrt(vx*vx + vy*vy);
+            const double direction = it->direction;
+            it->direction = vx == 0.0 && vy == 0.0 ? direction : -atan2(vy,vx)*180.0/M_PI;
           }
           else {
-            const enigma::sprite *const spr = enigma::spritestructarray[pt->sprite_id];
-            const int subimage_count = spr->subcount;
-            if (pt->sprite_stretched) {
-              subimg = int(subimage_count*(1.0 - 1.0*it->life_current/it->life_start));
-              subimg = subimg >= subimage_count ? subimage_count - 1 : subimg;
-              subimg = subimg % subimage_count;
-            }
-            else {
-              subimg = (subimage_index + it->sprite_subimageindex_initial) % subimage_count;
-            }
+            it->x += force_effective_strength*cos(direction_radians);
+            it->y += -force_effective_strength*sin(direction_radians);
           }
-          const double x = it->x, y = it->y;
-          const double xscale = pt->xscale*size, yscale = pt->yscale*size;
-
-          glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Push 1.
-          if (pt->blend_additive) {
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-          }
-          else {
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-          }
-          draw_sprite_ext(sprite_id, subimg, x, y, xscale, yscale, rot_degrees, color, alpha/255.0);
-          glPopAttrib(); // Pop 1.
-        }
-        else { // Draw particle sprite.
-
-          particle_sprite* ps = pt->part_sprite;
-          bind_texture(ps->texture);
-
-          glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Push 1.
-
-          if (pt->blend_additive) {
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-          }
-          else {
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-          }
-
-          glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);
-
-          const double rot = rot_degrees*M_PI/180.0;
-
-          const double x = it->x, y = it->y;
-          const double xscale = pt->xscale*size, yscale = pt->yscale*size;
-
-          const float
-          w = ps->width*xscale, h = ps->height*yscale,
-          tbx = 1, tby = 1,
-          wsinrot = w*sin(rot), wcosrot = w*cos(rot);
-
-          glBegin(GL_TRIANGLE_STRIP);
-
-          float
-          ulcx = x - xscale * (ps->width/2.0) * cos(rot) + yscale * (ps->height/2.0) * cos(M_PI/2+rot),
-          ulcy = y + xscale * (ps->width/2.0) * sin(rot) - yscale * (ps->height/2.0) * sin(M_PI/2+rot);
-          glTexCoord2f(0,0);
-          glVertex2f(ulcx,ulcy);
-          glTexCoord2f(tbx,0);
-          glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-
-          const double mpr = 3*M_PI/2 + rot;
-          ulcx += h * cos(mpr);
-          ulcy -= h * sin(mpr);
-          glTexCoord2f(0,tby);
-          glVertex2f(ulcx,ulcy);
-          glTexCoord2f(tbx,tby);
-          glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-
-          glEnd();
-
-          glPopAttrib(); // Pop 1.
         }
       }
-      else { // Draw particle in a limited way if particle type not alive.
-        double size = it->size;
-        double rot_degrees = it->angle;
-        if (size <= 0) continue;
+    }
+    // Destroyers.
+    {
+      std::map<int,particle_destroyer*>::iterator end = id_to_destroyer.end();
+      for (std::map<int,particle_destroyer*>::iterator ds_it = id_to_destroyer.begin(); ds_it != end; ds_it++)
+      {
+        particle_destroyer* p_ds = (*ds_it).second;
+        std::vector<particle_instance>::iterator end = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        {
+          if (p_ds->is_inside(it->x, it->y) && it->life_current > 0) { // Skip particles with life_current <= 0.
+            particle_type* pt = it->pt;
 
-        particle_sprite* ps = enigma::get_particle_sprite(enigma::pt_sh_pixel);
-        if (ps == NULL) continue;
-        bind_texture(ps->texture);
-
-        glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Push 1.
-
-        glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);
-
-        const double rot = rot_degrees*M_PI/180.0;
-
-        const double x = round(it->x), y = round(it->y);
-        const double xscale = size, yscale = size;
-
-        const float
-        w = ps->width*xscale, h = ps->height*yscale,
-        tbx = 1, tby = 1,
-        wsinrot = w*sin(rot), wcosrot = w*cos(rot);
-
-        glBegin(GL_TRIANGLE_STRIP);
-
-        float
-        ulcx = x - xscale * (ps->width/2.0) * cos(rot) + yscale * (ps->height/2.0) * cos(M_PI/2+rot),
-        ulcy = y + xscale * (ps->width/2.0) * sin(rot) - yscale * (ps->height/2.0) * sin(M_PI/2+rot);
-        glTexCoord2f(0,0);
-        glVertex2f(ulcx,ulcy);
-        glTexCoord2f(tbx,0);
-        glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-
-        const double mpr = 3*M_PI/2 + rot;
-        ulcx += h * cos(mpr);
-        ulcy -= h * sin(mpr);
-        glTexCoord2f(0,tby);
-        glVertex2f(ulcx,ulcy);
-        glTexCoord2f(tbx,tby);
-        glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-
-        glEnd();
-
-        glPopAttrib(); // Pop 1.
+            // Death handling.
+            // Only the clean-up is made here. The actual removal is handle after the loops by remove_if and erase.
+            pt->particle_count--;
+            if (pt->particle_count <= 0 && !pt->alive) {
+              // Particle type is no longer used, delete it.
+              int id = pt->id;
+              delete pt;
+              enigma::pt_manager.id_to_particletype.erase(id);
+            }
+            // Internally when handling destroyers, setting life_current to 0 indicates that the particle has been removed.
+            it->life_current = 0;
+          }
+        }
+      }
+      // Erase all particles with life_current <= 0.
+      pi_list.erase(std::remove_if(pi_list.begin(), pi_list.end(), is_dead_from_old_age), pi_list.end());
+    }
+    // Deflectors.
+    {
+      std::map<int,particle_deflector*>::iterator end = id_to_deflector.end();
+      for (std::map<int,particle_deflector*>::iterator df_it = id_to_deflector.begin(); df_it != end; df_it++)
+      {
+        particle_deflector* p_df = (*df_it).second;
+        std::vector<particle_instance>::iterator end = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        {
+          if (p_df->is_inside(it->x, it->y)) {
+            // Direction changing.
+            it->direction = fmod(it->direction + 360.0, 360.0);
+            switch (p_df->deflection_kind) {
+            case ps_de_horizontal : {
+              it->direction = it->direction <= 180.0 ? 180.0 - it->direction : 540.0 - it->direction;
+              break;
+            }
+            case ps_de_vertical : {
+              it->direction = 360.0 - it->direction;
+              break;
+            }
+            default : {
+              break;
+            }
+            }
+            // Friction handling.
+            const double new_speed = std::max(0.0, it->speed - p_df->friction);
+            const double friction_effect = it->speed - new_speed;
+            it->speed = new_speed;
+            // Move one step.
+            it->x += friction_effect*cos(it->direction*M_PI/180.0);
+            it->y += -friction_effect*sin(it->direction*M_PI/180.0);
+          }
+        }
       }
     }
   }
-  void particle_system::create_particles(double x, double y, particle_type* pt, int number)
+  void particle_system::draw_particlesystem()
+  {
+    draw_particles(pi_list, oldtonew, wiggle, subimage_index, x_offset, y_offset, &get_particle_sprite);
+  }
+  void particle_system::create_particles(double x, double y, particle_type* pt, int number, bool use_color, int given_color)
   {
     if (number > 0) {
       pt->particle_count += number;
@@ -515,10 +500,20 @@ namespace enigma
       // Color and blending.
       pi.color = pt->color1;
       switch(pt->c_mode) {
-      case one_color : {break;}
+      case one_color : {
+        if (use_color) {
+          pi.color = given_color;
+          break;
+        }
+        break;
+      }
       case two_color : {break;}
       case three_color : {break;}
       case mix_color : {
+        if (use_color) {
+          pi.color = given_color;
+          break;
+        }
         double random_fact = 1.0*rand()/(RAND_MAX-1);
         unsigned char r = bounds(pt->rmin + (pt->rmax - pt->rmin)*random_fact, 0, 255);
         unsigned char g = bounds(pt->gmin + (pt->gmax - pt->gmin)*random_fact, 0, 255);
@@ -527,6 +522,10 @@ namespace enigma
         break;
       }
       case rgb_color : {
+        if (use_color) {
+          pi.color = given_color;
+          break;
+        }
         unsigned char r = bounds(pt->rmin + (pt->rmax - pt->rmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
         unsigned char g = bounds(pt->gmin + (pt->gmax - pt->gmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
         unsigned char b = bounds(pt->bmin + (pt->bmax - pt->bmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
@@ -534,6 +533,10 @@ namespace enigma
         break;
       }
       case hsv_color : {
+        if (use_color) {
+          pi.color = given_color;
+          break;
+        }
         unsigned char h = bounds(pt->hmin + (pt->hmax - pt->hmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
         unsigned char s = bounds(pt->smin + (pt->smax - pt->smin)*1.0*rand()/(RAND_MAX-1), 0, 255);
         unsigned char v = bounds(pt->vmin + (pt->vmax - pt->vmin)*1.0*rand()/(RAND_MAX-1), 0, 255);
@@ -579,172 +582,45 @@ namespace enigma
       (*pe_it).second->set_stream(particle_type_id, number);
     }
   }
-}
-
-namespace enigma
-{
-  struct particle_system_manager
+  int particle_system::create_attractor()
   {
-    int max_id;
-    std::map<int,particle_system*> id_to_particlesystem;
-  };
+    particle_attractor* p_a = new particle_attractor();
+    p_a->initialize();
 
-  particle_system_manager ps_manager;
+    attractor_max_id++;
+    id_to_attractor.insert(std::pair<int,particle_attractor*>(attractor_max_id, p_a));
 
-  void update_particlesystems()
+    return attractor_max_id;
+  }
+  int particle_system::create_destroyer()
   {
-    std::map<int,particle_system*>::iterator end = ps_manager.id_to_particlesystem.end();
-    for (std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.begin(); it != end; it++)
-    {
-      if ((*it).second->auto_update) {
-        (*it).second->update_particlesystem();
-      }
-    }
-  }
+    particle_destroyer* p_ds = new particle_destroyer();
+    p_ds->initialize();
 
-  void draw_particlesystems(std::set<int>& particlesystem_ids)
+    destroyer_max_id++;
+    id_to_destroyer.insert(std::pair<int,particle_destroyer*>(destroyer_max_id, p_ds));
+
+    return destroyer_max_id;
+  }
+  int particle_system::create_deflector()
   {
-    std::set<int>::iterator end = particlesystem_ids.end();
-    for (std::set<int>::iterator it = particlesystem_ids.begin(); it != end; it++)
-    {
-      std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(*it);
-      if (ps_it != ps_manager.id_to_particlesystem.end()) {
-        (*ps_it).second->draw_particlesystem();
-      }
-    }
+    particle_deflector* p_df = new particle_deflector();
+    p_df->initialize();
+
+    deflector_max_id++;
+    id_to_deflector.insert(std::pair<int,particle_deflector*>(deflector_max_id, p_df));
+
+    return deflector_max_id;
   }
-}
+  int particle_system::create_changer()
+  {
+    particle_changer* p_c = new particle_changer();
+    p_c->initialize();
 
-using enigma::particle_system;
-using enigma::particle_type;
-using enigma::ps_manager;
-using enigma::ps_manager;
-using enigma::particle_type_manager;
-using enigma::particle_emitter;
+    changer_max_id++;
+    id_to_changer.insert(std::pair<int,particle_changer*>(changer_max_id, p_c));
 
-// General functions.
-
-int part_system_create()
-{
-  particle_system* p_s = new particle_system();
-  p_s->initialize();
-
-  ps_manager.max_id++;
-  ps_manager.id_to_particlesystem.insert(std::pair<int,particle_system*>(ps_manager.max_id, p_s));
-  p_s->id = ps_manager.max_id;
-
-  // Drawing is automatic, so register in depth.
-  enigma::drawing_depths[p_s->depth].particlesystem_ids.insert(ps_manager.max_id);
-
-  return ps_manager.max_id;
-}
-void part_system_destroy(int id);
-void part_system_exists(int id);
-void part_system_clear(int id);
-void part_system_draw_order(int id, bool oldtonew);
-void part_system_depth(int id, double depth)
-{
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*it).second;
-    const double new_depth = round(depth);
-    if (p_s->auto_draw) {
-      // If the particle system has automatic drawing enabled, it is in the depth system,
-      // and it should be moved.
-      const double current_depth = p_s->depth;
-      enigma::drawing_depths[current_depth].particlesystem_ids.erase(p_s->id);
-      enigma::drawing_depths[new_depth].particlesystem_ids.insert(p_s->id);
-    }
-    else {
-      // If the particle system does not have automatic drawing enabled, it is not in the depth system,
-      // and the value should just be updated.
-      p_s->depth = new_depth;
-    }
-  }
-}
-
-// Update and draw.
-
-void part_system_automatic_update(int id, bool automatic);
-void part_system_automatic_draw(int id, bool automatic); // TODO: Remember to register/unregister with depth_draw.
-void part_system_update(int id)
-{
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    (*it).second->update_particlesystem();
-  }
-}
-void part_system_drawit(int id)
-{
-  std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.find(id);
-  if (it != ps_manager.id_to_particlesystem.end()) {
-    (*it).second->draw_particlesystem();
-  }
-}
-
-// Particles.
-
-void part_particles_create(int id, double x, double y, int particle_type_id, int number)
-{
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    std::map<int,particle_type*>::iterator pt_it = pt_manager.id_to_particletype.find(id);
-    if (pt_it != pt_manager.id_to_particletype.end()) {
-      (*ps_it).second->create_particles(x, y, (*pt_it).second, number);
-    }
-  }
-}
-void part_particles_create_color(int id, double x, double y, int particle_type_id, int color, int number);
-void part_particles_clear(int id);
-int part_particles_count(int id);
-
-// Emitters.
-
-int part_emitter_create(int id)
-{
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    return (*ps_it).second->create_emitter();
-  }
-  return -1;
-}
-void part_emitter_destroy(int ps_id, int em_id);
-void part_emitter_destroy_all(int ps_id);
-void part_emitter_exists(int ps_id, int em_id);
-void part_emitter_clear(int ps_id, int em_id);
-void part_emitter_region(int ps_id, int em_id, double xmin, double xmax, double ymin, double ymax, int shape, int distribution)
-{
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    (*ps_it).second->set_emitter_region(em_id, xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape), enigma::get_ps_distr(distribution));
-  }
-}
-void part_emitter_burst(int ps_id, int em_id, int particle_type_id, int number)
-{
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    particle_system* p_s = (*ps_it).second;
-    std::map<int,particle_emitter*>::iterator em_it = p_s->id_to_emitter.find(em_id);
-    if (em_it != p_s->id_to_emitter.end()) {
-      particle_emitter* p_e = (*em_it).second;
-      std::map<int,particle_type*>::iterator pt_it = pt_manager.id_to_particletype.find(particle_type_id);
-      if (pt_it != pt_manager.id_to_particletype.end()) {
-        particle_type* p_t = (*pt_it).second;
-        for (int i = 1; i <= number; i++)
-        {
-          int x, y;
-          p_e->get_point(x, y);
-          p_s->create_particles(x, y, p_t, 1);
-        }
-      }
-    }
-  }
-}
-void part_emitter_stream(int ps_id, int em_id, int particle_type_id, int number)
-{
-  std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
-  if (ps_it != ps_manager.id_to_particlesystem.end()) {
-    (*ps_it).second->set_emitter_stream(em_id, particle_type_id, number);
+    return changer_max_id;
   }
 }
 

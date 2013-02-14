@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012-2013 forthevin                                           **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,76 +25,32 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLETYPE
-#define ENIGMA_PS_PARTICLETYPE
+#ifndef ENIGMA_PS_ACTIONS
+#define ENIGMA_PS_ACTIONS
 
-#include <map>
-#include "PS_particle_enums.h"
-#include "PS_particle_sprites.h"
+extern bool argument_relative;
 
-namespace enigma
-{
-  enum color_mode {
-    one_color, two_color, three_color, mix_color, rgb_color, hsv_color
-  };
-  enum alpha_mode {
-    one_alpha, two_alpha, three_alpha
-  };
-  struct particle_type
-  {
-    // If the particle count becomes 0, and the type is not alive,
-    // the type should be removed, since it is no longer used.
-    int particle_count; // The number of particles of this particle type.
-    bool alive; // Whether the type is still alive.
-    int id; // Id of the particle type.
+void action_effect(int effect_type, double x, double y, int size, int color, int where);
 
-    // Shape.
-    bool is_particle_sprite; // Whether an internal particle sprite is used or not.
-    enigma::particle_sprite* part_sprite;
-    int sprite_id;
-    bool sprite_animated, sprite_stretched, sprite_random;
-    double size_min, size_max;
-    double size_incr, size_wiggle;
-    double xscale, yscale;
-    double ang_min, ang_max;
-    double ang_incr, ang_wiggle;
-    bool ang_relative;
-    // Color and blending.
-    color_mode c_mode;
-    int color1;
-    int color2;
-    int color3;
-    unsigned char rmin, rmax, gmin, gmax, bmin, bmax;
-    unsigned char hmin, hmax, smin, smax, vmin, vmax;
-    alpha_mode a_mode;
-    double alpha1;
-    double alpha2;
-    double alpha3;
-    bool blend_additive;
-    // Life and death.
-    int life_min, life_max; // 1 <= life_min <= life_max.
-    bool step_on;
-    int step_particle_id;
-    int step_number;
-    bool death_on;
-    int death_particle_id;
-    int death_number;
-    // Motion.
-    double speed_min, speed_max;
-    double speed_incr, speed_wiggle;
-    double dir_min, dir_max;
-    double dir_incr, dir_wiggle;
-    double grav_amount, grav_dir;
-  };
+void action_partsyst_create(double depth);
+void action_partsyst_destroy();
+void action_partsyst_clear();
 
-  struct particle_type_manager
-  {
-    int max_id;
-    std::map<int,particle_type*> id_to_particletype;
-  };
+// The particle "type" is in [0..15].
 
-  extern particle_type_manager pt_manager;
-}
+void action_parttype_create(int type, int shape, int sprite, double min_size, double max_size, double size_increment);
+// color_shape: 0=mixed, 1=changing.
+void action_parttype_color(int type, int color_shape, int color1, int color2, double alpha1, double alpha2);
+void action_parttype_life(int type, int min_life, int max_life);
+void action_parttype_speed(int type, double min_speed, double max_speed, double min_dir, double max_dir, double friction);
+void action_parttype_gravity(int type, double amount, double direction);
+void action_parttype_secondary(int primary_type, int step_type, int step_count, int death_type, int death_count);
 
-#endif // ENIGMA_PS_PARTICLETYPE
+// "emitter" is in [0..7].
+void action_partemit_create(int emitter, int shape, double x_left, double x_right, double y_top, double y_bottom);
+void action_partemit_destroy(int emitter);
+void action_partemit_burst(int emitter, int particle_type, int amount);
+void action_partemit_stream(int emitter, int particle_type, int amount);
+
+#endif // ENIGMA_PS_ACTIONS
 

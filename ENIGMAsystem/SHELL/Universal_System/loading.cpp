@@ -21,6 +21,7 @@
 #include <string>
 
 #include "resinit.h"
+#include "spritestruct.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"

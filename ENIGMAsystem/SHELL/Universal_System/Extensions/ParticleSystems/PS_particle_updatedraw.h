@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012-2013 forthevin                                           **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,36 +25,16 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLECONSTANTS
-#define ENIGMA_PS_PARTICLECONSTANTS
+#ifndef ENIGMA_PS_PARTICLEUPDATEDRAW
+#define ENIGMA_PS_PARTICLEUPDATEDRAW
 
-enum
+#include <set>
+
+namespace enigma
 {
-  pt_shape_pixel = 0,
-  pt_shape_disk,
-  pt_shape_square,
-  pt_shape_line,
-  pt_shape_star,
-  pt_shape_circle,
-  pt_shape_ring,
-  pt_shape_sphere,
-  pt_shape_flare,
-  pt_shape_spark,
-  pt_shape_explosion,
-  pt_shape_cloud,
-  pt_shape_smoke,
-  pt_shape_snow
-};
+  // Should be called whenever effects or particle systems are created.
+  void initialize_particle_systems_drawing();
+}
 
-enum
-{
-  ps_shape_rectangle = 0
-};
-
-enum
-{
-  ps_distr_linear = 0
-};
-
-#endif // ENIGMA_PS_PARTICLECONSTANTS
+#endif // ENIGMA_PS_PARTICLEUPDATEDRAW
 

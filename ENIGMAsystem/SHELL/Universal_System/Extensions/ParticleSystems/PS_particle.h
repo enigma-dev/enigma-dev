@@ -25,20 +25,22 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_PS_PARTICLESYSTEM
-#define ENIGMA_PS_PARTICLESYSTEM
+#ifndef ENIGMA_PS_PARTICLE
+#define ENIGMA_PS_PARTICLE
 
 #include "PS_particle_constants.h"
+#include "PS_effects_constants.h"
 
 // Particle systems.
 
 // General.
 int part_system_create();
 void part_system_destroy(int id);
-void part_system_exists(int id);
+bool part_system_exists(int id);
 void part_system_clear(int id);
 void part_system_draw_order(int id, bool oldtonew);
 void part_system_depth(int id, double depth);
+void part_system_position(int id, double x, double y);
 // Update and draw.
 void part_system_automatic_update(int id, bool automatic);
 void part_system_automatic_draw(int id, bool automatic);
@@ -55,11 +57,52 @@ int part_particles_count(int id);
 int part_emitter_create(int id);
 void part_emitter_destroy(int ps_id, int em_id);
 void part_emitter_destroy_all(int ps_id);
-void part_emitter_exists(int ps_id, int em_id);
+bool part_emitter_exists(int ps_id, int em_id);
 void part_emitter_clear(int ps_id, int em_id);
 void part_emitter_region(int ps_id, int em_id, double xmin, double xmax, double ymin, double ymax, int shape, int distribution);
 void part_emitter_burst(int ps_id, int em_id, int particle_type_id, int number);
 void part_emitter_stream(int ps_id, int em_id, int particle_type_id, int number);
+
+// Attractors.
+
+int part_attractor_create(int id);
+void part_attractor_destroy(int ps_id, int at_id);
+void part_attractor_destroy_all(int ps_id);
+bool part_attractor_exists(int ps_id, int at_id);
+void part_attractor_clear(int ps_id, int at_id);
+void part_attractor_position(int ps_id, int at_id, double x, double y);
+void part_attractor_force(int ps_id, int at_id, double force, double dist, int kind, bool additive);
+
+// Destroyers.
+
+int part_destroyer_create(int id);
+void part_destroyer_destroy(int ps_id, int ds_id);
+void part_destroyer_destroy_all(int ps_id);
+bool part_destroyer_exists(int ps_id, int ds_id);
+void part_destroyer_clear(int ps_id, int ds_id);
+void part_destroyer_region(int ps_id, int ds_id, double xmin, double xmax, double ymin, double ymax, int shape);
+
+// Deflectors.
+
+int part_deflector_create(int id);
+void part_deflector_destroy(int ps_id, int df_id);
+void part_deflector_destroy_all(int ps_id);
+bool part_deflector_exists(int ps_id, int df_id);
+void part_deflector_clear(int ps_id, int df_id);
+void part_deflector_region(int ps_id, int df_id, double xmin, double xmax, double ymin, double ymax);
+void part_deflector_kind(int ps_id, int df_id, int kind);
+void part_deflector_friction(int ps_id, int df_id, double friction);
+
+// Changers.
+
+int part_changer_create(int id);
+void part_changer_destroy(int ps_id, int ch_id);
+void part_changer_destroy_all(int ps_id);
+bool part_changer_exists(int ps_id, int ch_id);
+void part_changer_clear(int ps_id, int ch_id);
+void part_changer_region(int ps_id, int ch_id, double xmin, double xmax, double ymin, double ymax, int shape);
+void part_changer_types(int ps_id, int ch_id, int parttype1, int parttype2);
+void part_changer_kind(int ps_id, int ch_id, int kind);
 
 // Particle types.
 
@@ -94,5 +137,11 @@ void part_type_speed(int id, double speed_min, double speed_max, double speed_in
 void part_type_direction(int id, double dir_min, double dir_max, double dir_incr, double dir_wiggle);
 void part_type_gravity(int id, double grav_amount, double grav_dir);
 
-#endif // ENIGMA_PS_PARTICLESYSTEM
+// Effects.
+
+void effect_create_below(int kind, double x, double y, int size, int color);
+void effect_create_above(int kind, double x, double y, int size, int color);
+void effect_clear();
+
+#endif // ENIGMA_PS_PARTICLE
 

@@ -313,17 +313,6 @@ namespace enigma
         }
     }
 
-  #if COLLIGMA
-  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h)
-  {
-    collCustom* thenewmask = new collCustom(w,h,x,y,x,y);
-    for(int xp=0;xp<w*h;xp++)
-      collbitSet(*thenewmask,xp % w,xp/w,pixdata[xp*4+3]>0); //the width times the number of rows, the current column*4, then 3
-    return thenewmask;
-  }
-  #endif
-
-
   //Adds a subimage to an existing sprite from the exe
   void sprite_set_subimage(int sprid, int imgindex, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk, unsigned char*collision_data, collision_type ct)
   {
@@ -352,7 +341,7 @@ namespace enigma
     sprstr->texbordxarray[imgindex] = (double) w/fullwidth;
     sprstr->texbordyarray[imgindex] = (double) h/fullheight;
     sprstr->colldata[imgindex] = get_collision_mask(sprstr,collision_data,ct);
-    
+
     delete[] imgpxdata;
   }
 }
@@ -436,15 +425,6 @@ const bbox_rect_t &sprite_get_bbox_relative(int sprite)
 	get_sprite(spr,sprite,dummy_bbox);
 	return spr->bbox_relative;
 }
-
-
-//TODO: IMPLEMENT
-//sprite_get_bbox_mode
-//sprite_get_name
-//sprite_get_precise
-//sprite_get_preload
-//sprite_get_smooth
-//sprite_get_transparent
 
 int sprite_get_number(int sprite)
 {

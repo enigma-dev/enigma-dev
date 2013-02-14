@@ -15,20 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef _SURFSTRUCT__H
+#define _SURFSTRUCT__H
+
 #include <string>
 #include "OpenGLHeaders.h"
-using namespace std;
-#ifndef SURFSTRUCT_H
-#define SURFSTRUCT_H
+using std::string;
+
 namespace enigma
 {
   struct surface
   {
-  GLuint tex, fbo;
-  int width, height;
+    GLuint tex, fbo;
+    int width, height;
   };
 }
-#endif
 
 int surface_create(int width, int height);
 void surface_set_target(int id);
@@ -59,3 +60,5 @@ void surface_copy_part(int destination,double x,double y,int source,int xs,int y
 int sprite_create_from_surface(int id,int x,int y,int w,int h,bool removeback,bool smooth,int xorig,int yorig);
 bool surface_is_supported();
 #define surface_destroy surface_free
+
+#endif

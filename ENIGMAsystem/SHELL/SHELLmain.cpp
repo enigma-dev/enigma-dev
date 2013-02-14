@@ -79,11 +79,6 @@ extern int amain();
 
 #include "Universal_System/globalupdate.h"
 
-#include "Universal_System/simplecollisions.h"
-#if COLLIGMA
-    #include "Universal_System/collisions.h"
-#endif
-
 #include "Universal_System/instance_system_frontend.h"
 
 #include "Universal_System/resource_data.h"

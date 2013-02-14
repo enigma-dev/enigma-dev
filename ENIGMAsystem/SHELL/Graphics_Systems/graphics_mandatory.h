@@ -19,19 +19,14 @@
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
 
+#include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
 #include <string>
+#include <vector>
 
 namespace enigma
 {
   /// Called at game load to allow the system to set up.
   void graphicssystem_initialize(); /// This function can be implemented as an empty call if it is not needed.
-
-  /// Called at game start if no resource data can be loaded. //FIXME: This doesn't belong here.
-  void sprite_safety_override(); /// This function should ensure a reasonable number of sprite indexes won't segfault.
-
-  /// Called at game start.
-  //FIXME: This doesn't belong here.
-  void sprites_init(); /// This should allocate room for sprites and perform any other necessary actions.
 
   /// Generate a texture from image data. Preserves input pixbuf.
   unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata);
@@ -44,9 +39,20 @@ namespace enigma
   /// and must be freed once you are done.
   unsigned char* graphics_get_texture_rgba(unsigned texture);
 
-  #if COLLIGMA // FIXME: This doesn't belong here.
-  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h);
-  #endif
+  struct particles_implementation
+  {
+    // Updates all particle systems that are automatically updated.
+    void (*update_particlesystems)();
+    // Draws all given particle systems in the depth range [-high, -low[ that are automatically drawn.
+    void (*draw_particlesystems)(double high, double low);
+    void (*clear_effects)();
+  };
+  void set_particles_implementation(particles_implementation* particles_impl);
+  // Updates all particle systems that are automatically updated.
+  void update_particlesystems();
+  void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
+      double x_offset, double y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape));
+  void graphics_clean_up_roomend();
 }
 
 // These functions are available to the user to be called on a whim.

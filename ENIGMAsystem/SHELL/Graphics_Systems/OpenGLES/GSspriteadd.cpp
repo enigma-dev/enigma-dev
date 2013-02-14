@@ -101,10 +101,6 @@ namespace enigma
       spritestructarray[i] = NULL;
   }
   
-  void sprite_safety_override() {
-    sprites_allocate_initial(sprite_idmax);
-  }
-  
   //Adds an empty sprite to the list
  /* int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm)
   {
@@ -127,17 +123,6 @@ namespace enigma
     return sprid;
   }*/
 
-  #if COLLIGMA
-  collCustom* generate_bitmask(unsigned char* pixdata,int x,int y,int w,int h)
-  {
-    collCustom* thenewmask = new collCustom(w,h,x,y,x,y);
-    for(int xp=0;xp<w*h;xp++)
-      collbitSet(*thenewmask,xp % w,xp/w,pixdata[xp*4+3]>0); //the width times the number of rows, the current column*4, then 3
-    return thenewmask;
-  }
-  #endif
-
-
   //Adds a subimage to an existing sprite from the exe
   void sprite_add_subimage(int sprid, int x,int y, unsigned int w,unsigned int h,unsigned char*chunk)
   {
@@ -159,10 +144,6 @@ namespace enigma
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
     
-    #if COLLIGMA
-    collCustom* themask=generate_bitmask(imgpxdata,x,y,w,h);
-    #endif
-    
     glGenTextures(1,&texture);
     glBindTexture(GL_TEXTURE_2D,texture);
 	  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); // OPENGLES added
@@ -182,9 +163,6 @@ namespace enigma
     enigma::sprite* sprstr = enigma::spritestructarray[sprid];
     
     sprstr->texturearray[sprstr->subcount] = texture;
-    #if COLLIGMA
-    sprstr->bitmask[as->subcount] = themask;
-    #endif
     sprstr->subcount++;
     //std::c out << "Added subimage " << sprstr->subcount << " to sprite " << sprid << std::endl;
   }

@@ -77,6 +77,8 @@ namespace enigma
       instance_destroy(it->id, false);
     }
 
+    graphics_clean_up_roomend();
+
     // Set the index to self
     room.rval.d = id;
 

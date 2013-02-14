@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012 forthevin                                                **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,5 +25,29 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef ENIGMA_PS_PARTICLEATTRACTOR
+#define ENIGMA_PS_PARTICLEATTRACTOR
 
+#include "PS_particle_enums.h"
+
+namespace enigma
+{
+  struct particle_attractor
+  {
+    double x, y;
+    double force_strength; // Negative values indicates pushing.
+    double dist_effect; // Effect radius, always non-negative.
+    ps_force force_kind;
+    bool additive;
+
+    void initialize();
+    void clear_particle_attractor();
+    void set_position(double x, double y);
+    void set_force(double force_strength, double dist_effect, ps_force force_kind, bool additive);
+  };
+
+  particle_attractor* create_particle_attractor();
+}
+
+#endif // ENIGMA_PS_PARTICLEATTRACTOR
 

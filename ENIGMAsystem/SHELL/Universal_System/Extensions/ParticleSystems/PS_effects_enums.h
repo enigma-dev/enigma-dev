@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2012 forthevin                                                **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,11 +25,61 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <set>
+#ifndef ENIGMA_PS_EFFECTSENUMS
+#define ENIGMA_PS_EFFECTSENUMS
+
+#include "PS_effects_constants.h"
 
 namespace enigma
 {
-  void update_particlesystems();
-  void draw_particlesystems(std::set<int>& particlesystem_ids);
+  enum ef_effect {
+    ef_effects_explosion = 0,
+    ef_effects_ring,
+    ef_effects_ellipse,
+    ef_effects_firework,
+    ef_effects_smoke,
+    ef_effects_smokeup,
+    ef_effects_star,
+    ef_effects_spark,
+    ef_effects_flare,
+    ef_effects_cloud,
+    ef_effects_rain,
+    ef_effects_snow
+  };
+  inline ef_effect get_ef(int effect)
+  {
+    switch (effect) {
+    case ef_explosion : return enigma::ef_effects_explosion;
+    case ef_ring : return enigma::ef_effects_ring;
+    case ef_ellipse : return enigma::ef_effects_ellipse;
+    case ef_firework : return enigma::ef_effects_firework;
+    case ef_smoke : return enigma::ef_effects_smoke;
+    case ef_smokeup : return enigma::ef_effects_smokeup;
+    case ef_star : return enigma::ef_effects_star;
+    case ef_spark : return enigma::ef_effects_spark;
+    case ef_flare : return enigma::ef_effects_flare;
+    case ef_cloud : return enigma::ef_effects_cloud;
+    case ef_rain : return enigma::ef_effects_rain;
+    case ef_snow : return enigma::ef_effects_snow;
+    default : return enigma::ef_effects_explosion;
+    }
+  }
+
+  enum ef_size {
+    ef_si_small = 0,
+    ef_si_medium,
+    ef_si_large
+  };
+  inline ef_size get_ef_size(int size_kind)
+  {
+    switch (size_kind) {
+    case ef_size_small : return enigma::ef_si_small;
+    case ef_size_medium : return enigma::ef_si_medium;
+    case ef_size_large : return enigma::ef_si_large;
+    default : return enigma::ef_si_medium;
+    }
+  }
 }
+
+#endif // ENIGMA_PS_EFFECTSENUMS
 

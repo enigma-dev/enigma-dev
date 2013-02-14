@@ -36,7 +36,7 @@ using namespace std;
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.h"
+#include <limits>
 
 using namespace enigma;
 
@@ -58,6 +58,23 @@ static inline void draw_back()
 namespace enigma
 {
     extern std::map<int,roomstruct*> roomdata;
+    particles_implementation* particles_impl;
+    void set_particles_implementation(particles_implementation* part_impl)
+    {
+        particles_impl = part_impl;
+    };
+    void update_particlesystems()
+    {
+        if (particles_impl != NULL) {
+            (particles_impl->update_particlesystems)();
+        }
+    }
+    void graphics_clean_up_roomend()
+    {
+        if (particles_impl != NULL) {
+            (particles_impl->clear_effects)();
+        }
+    }
 }
 
 void screen_redraw()
@@ -105,6 +122,11 @@ void screen_redraw()
         }
         id_to_currentnextdepth.clear();
 
+        if (enigma::particles_impl != NULL) {
+            const double high = numeric_limits<double>::max();
+            const double low = drawing_depths.rbegin() != drawing_depths.rend() ? drawing_depths.rbegin()->first : -numeric_limits<double>::max();
+            (enigma::particles_impl->draw_particlesystems)(high, low);
+        }
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
             //loop tiles
@@ -119,7 +141,13 @@ void screen_redraw()
                 enigma::instance_event_iterator->inst->myevent_draw();
             enigma::instance_event_iterator = push_it;
             //particles
-            draw_particlesystems(dit->second.particlesystem_ids);
+            if (enigma::particles_impl != NULL) {
+                const double high = dit->first;
+                dit++;
+                const double low = dit != drawing_depths.rend() ? dit->first : -numeric_limits<double>::max();
+                dit--;
+                (enigma::particles_impl->draw_particlesystems)(high, low);
+            }
         }
     }
     else
@@ -139,14 +167,14 @@ void screen_redraw()
                     {
                         object_planar* vobr = (object_planar*)instanceexists;
 
-                        int vobx = (int)(vobr->x), voby = (int)(vobr->y);
+                        double vobx = vobr->x, voby = vobr->y;
 
                         //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
                         //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
 
-                        int vbc_h, vbc_v;
-                        (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = int(view_wview[vc]/2) : vbc_h = view_hborder[vc];
-                        (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = int(view_hview[vc]/2) : vbc_v = view_vborder[vc];
+                        double vbc_h, vbc_v;
+                        (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
+                        (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
 
                         if (view_hspeed[vc] == -1)
                         {
@@ -246,6 +274,11 @@ void screen_redraw()
                 }
                 id_to_currentnextdepth.clear();
 
+                if (enigma::particles_impl != NULL) {
+                    const double high = numeric_limits<double>::max();
+                    const double low = drawing_depths.rbegin() != drawing_depths.rend() ? drawing_depths.rbegin()->first : -numeric_limits<double>::max();
+                    (enigma::particles_impl->draw_particlesystems)(high, low);
+                }
                 for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
                 {
                     //loop tiles
@@ -264,7 +297,13 @@ void screen_redraw()
                         enigma::instance_event_iterator->inst->myevent_draw();
                     enigma::instance_event_iterator = push_it;
                     //particles
-                    draw_particlesystems(dit->second.particlesystem_ids);
+                    if (enigma::particles_impl != NULL) {
+                        const double high = dit->first;
+                        dit++;
+                        const double low = dit != drawing_depths.rend() ? dit->first : -numeric_limits<double>::max();
+                        dit--;
+                        (enigma::particles_impl->draw_particlesystems)(high, low);
+                    }
                 }
             }
         }
