@@ -168,6 +168,7 @@ int show_message(string str);
 namespace enigma {
   extern string*  parameters;
   extern unsigned parameterc;
+  extern int current_room_speed;
   //void writename(char* x);
   void initkeymap();
 }

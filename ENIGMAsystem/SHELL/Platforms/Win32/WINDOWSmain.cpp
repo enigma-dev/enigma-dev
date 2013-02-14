@@ -28,6 +28,7 @@
 #include <time.h>
 #include <string>
 #include <sstream>
+#include <algorithm>
 using std::string;
 
 #include "WINDOWScallback.h"
@@ -67,21 +68,10 @@ namespace enigma {
 
 extern double fps;
 namespace enigma {
-  clock_t lc;
+  int current_room_speed;
   void sleep_for_framerate(int rs)
   {
-    clock_t nc = clock();
-    double sdur = 1000/rs - (nc - lc)*1000 / CLOCKS_PER_SEC;
-    if (sdur > 0)
-    {
-        Sleep(sdur);
-        fps = int(CLOCKS_PER_SEC / (nc - lc + sdur));
-    }
-    else
-    {
-        fps = int(CLOCKS_PER_SEC / (nc - lc));
-    }
-    lc = nc;
+    current_room_speed = rs;
   }
 }
 #include <cstdio>
@@ -137,28 +127,66 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     enigma::initialize_everything();
 
     //Main loop
-        char bQuit=0;
-        while (!bQuit)
-        {
-            if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
-            {
-                if (msg.message == WM_QUIT)
-                {
-                    bQuit=1;
-                    break;
-                }
-                else
-                {
-                    TranslateMessage (&msg);
-                    DispatchMessage (&msg);
-                }
-            }
-            else
-            {
-                enigma::ENIGMA_events();
-                enigma::input_push();
-            }
-        }
+    ULARGE_INTEGER time_offset;
+    ULARGE_INTEGER time_current;
+    ULARGE_INTEGER time_previous;
+    FILETIME time_values;
+    GetSystemTimeAsFileTime(&time_values);
+    time_offset.LowPart = time_values.dwLowDateTime;
+    time_offset.HighPart = time_values.dwHighDateTime;
+    time_previous.QuadPart = time_offset.QuadPart;
+    int frames_count = 0;
+
+      char bQuit=0;
+      while (!bQuit)
+      {
+          using enigma::current_room_speed;
+          GetSystemTimeAsFileTime(&time_values);
+          time_current.LowPart = time_values.dwLowDateTime;
+          time_current.HighPart = time_values.dwHighDateTime;
+          {
+              long passed_100ns = time_current.QuadPart - time_offset.QuadPart;
+              if (passed_100ns >= 10000000) { // Handle resetting.
+                  fps = frames_count;
+                  frames_count = 0;
+                  time_offset.QuadPart += (passed_100ns/10000000)*10000000;
+              }
+          }
+
+          if (current_room_speed > 0) {
+              long spent_100ns = time_current.QuadPart - time_offset.QuadPart;
+              long remaining_100ns = 10000000 - spent_100ns;
+              long needed_100ns = long((1.0 - 1.0*frames_count/current_room_speed)*1e7);
+              long current_quantum_100ns = time_current.QuadPart - time_previous.QuadPart;
+              long mandated_quantum_100ns = long(0.95*1e7/current_room_speed);
+              if (remaining_100ns > needed_100ns || current_quantum_100ns < mandated_quantum_100ns) {
+                  Sleep(1);
+                  continue;
+              }
+          }
+          if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
+          {
+              if (msg.message == WM_QUIT)
+              {
+                  bQuit=1;
+                  break;
+              }
+              else
+              {
+                  TranslateMessage (&msg);
+                  DispatchMessage (&msg);
+              }
+          }
+          else
+          {
+
+              time_previous.QuadPart = time_current.QuadPart;
+              enigma::ENIGMA_events();
+              enigma::input_push();
+
+              frames_count++;
+          }
+      }
 
 
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
