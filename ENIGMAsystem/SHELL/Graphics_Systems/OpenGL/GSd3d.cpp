@@ -154,6 +154,7 @@ void d3d_set_fog_density(double density)
 void d3d_set_culling(bool enable)
 {
   (enable?glEnable:glDisable)(GL_CULL_FACE);
+  glFrontFace(GL_CW);
 }
 
 void d3d_set_culling_mode(int mode) {
@@ -345,30 +346,61 @@ void d3d_set_projection_perspective(double x, double y, double width, double hei
   glMultMatrixd(transformation_matrix);
   enigma::d3d_light_update_positions();
 }
-
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
     if ((x1 == x2 && y1 == y2) || z1 == z2) {
         return;
     }
-    float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y2, z1}, v3[] = {x2, y2, z2},
-          t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
+    float v0[] = {x1, y1, z1}, v1[] = {x2, y2, z1}, v2[] = {x1, y1, z2}, v3[] = {x2, y2, z2},
+          t0[] = {0, 0}, t1[] = {hrep, 0}, t2[] = {0, vrep}, t3[] = {hrep, vrep};
     bind_texture(texId);
 
-    const float xd = x2-x1, yd = y2-y1, zd = z2-z1;
-    const float usize = fabs(zd), vsize = hypotf(xd, yd);
-    const float uz = zd/usize, vx = xd/vsize, vy = yd/vsize;
-    glNormal3f(uz*vy, -uz*vx, 0);
+    float xd = x2-x1, yd = y2-y1, zd = z2-z1;
+    float normal[3] = {xd*zd, zd*yd, 0};
+    float mag = hypot(normal[0], normal[1]); 
+    normal[0] /= mag; 
+    normal[1] /= mag;
+    if (x2 < x1) {
+    normal[0]=-normal[0]; }
+     if (y2 < y1) {
+    normal[1]=-normal[1]; }
 
     glBegin(GL_TRIANGLE_STRIP);
-    glTexCoord2fv(t0);
+    glNormal3fv(normal);
+    if (x2>x1 || y2>y1) {
+      glTexCoord2fv(t0);
       glVertex3fv(v0);
-    glTexCoord2fv(t1);
-      glVertex3fv(v1);
-    glTexCoord2fv(t2);
-      glVertex3fv(v2);
-    glTexCoord2fv(t3);
+    } else {
+      glTexCoord2fv(t3);
       glVertex3fv(v3);
+    }
+
+    glNormal3fv(normal);
+    if (x2<x1 || y2<y1) {
+      glTexCoord2fv(t2);
+      glVertex3fv(v2);
+    } else {
+      glTexCoord2fv(t1);
+      glVertex3fv(v1);
+    }
+
+    glNormal3fv(normal);
+    if (x2<x1 || y2<y1) {
+      glTexCoord2fv(t1);
+      glVertex3fv(v1);
+    } else {
+      glTexCoord2fv(t2);
+      glVertex3fv(v2);
+    }
+
+    glNormal3fv(normal);
+    if (x2>x1 || y2>y1) {
+      glTexCoord2fv(t3);
+      glVertex3fv(v3);
+    } else {
+      glTexCoord2fv(t0);
+      glVertex3fv(v0);
+    }
     glEnd();
 }
 
@@ -378,17 +410,33 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
           t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
     bind_texture(texId);
 
-    glNormal3f(0, 0, 1); // TODO: Floor may be slanted, so calculate the normal properly.
+    //float xd = x2-x1, yd = y2-y1, zd = z2-z1;
+    float normal[] = {0, 0, 1};
+    //float mag = hypot(normal[0], normal[1]); 
+    //normal[0] /= mag; 
+    //normal[1] /= mag;
 
     glBegin(GL_TRIANGLE_STRIP);
-    glTexCoord2fv(t0);
+    if (x2>x1 || y2>y1) {
+      glTexCoord2fv(t0);
       glVertex3fv(v0);
-    glTexCoord2fv(t1);
-      glVertex3fv(v1);
-    glTexCoord2fv(t2);
+      glTexCoord2fv(t2);
       glVertex3fv(v2);
-    glTexCoord2fv(t3);
+      glTexCoord2fv(t1);
+      glVertex3fv(v1);
+      glTexCoord2fv(t3);
       glVertex3fv(v3);
+    } else {
+      normal[2] = -normal[2];
+      glTexCoord2fv(t3);
+      glVertex3fv(v3);
+      glTexCoord2fv(t2);
+      glVertex3fv(v2);
+      glTexCoord2fv(t1);
+      glVertex3fv(v1);
+      glTexCoord2fv(t0);
+      glVertex3fv(v0);
+    }
     glEnd();
 }
 
@@ -401,26 +449,33 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
           t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0};
     bind_texture(texId);
     glBegin(GL_TRIANGLE_STRIP);
+
+
     glTexCoord2fv(t0);
       glVertex3fv(v0);
     glTexCoord2fv(t1);
       glVertex3fv(v1);
+
     glTexCoord2fv(t2);
-      glVertex3fv(v2);
+      glVertex3fv(v6);
     glTexCoord2fv(t3);
-      glVertex3fv(v3);
+      glVertex3fv(v7);
+
     glTexCoord2fv(t4);
       glVertex3fv(v4);
     glTexCoord2fv(t5);
       glVertex3fv(v5);
-    glTexCoord2fv(t6);
-      glVertex3fv(v6);
-    glTexCoord2fv(t7);
-      glVertex3fv(v7);
+
     glTexCoord2fv(t8);
-      glVertex3fv(v0);
+      glVertex3fv(v2);
     glTexCoord2fv(t9);
+      glVertex3fv(v3);
+
+    glTexCoord2fv(t6);
+      glVertex3fv(v0);
+    glTexCoord2fv(t7);
       glVertex3fv(v1);
+
     glEnd();
     if (closed)
     {
@@ -436,13 +491,13 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
         glEnd();
 
         glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2fv(t0);
-          glVertex3fv(v1);
         glTexCoord2fv(t1);
-          glVertex3fv(v3);
-        glTexCoord2fv(t2);
-          glVertex3fv(v7);
+          glVertex3fv(v1);
         glTexCoord2fv(t3);
+          glVertex3fv(v3);
+        glTexCoord2fv(t0);
+          glVertex3fv(v7);
+        glTexCoord2fv(t2);
           glVertex3fv(v5);
         glEnd();
     }
@@ -1373,14 +1428,39 @@ class d3d_model
 
     void model_wall(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
     {
-        float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y2, z1}, v3[] = {x2, y2, z2},
-              t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
-        model_primitive_begin(GL_TRIANGLE_STRIP);
-        model_vertex_texture(v0,t0);
-        model_vertex_texture(v1,t1);
-        model_vertex_texture(v2,t2);
-        model_vertex_texture(v3,t3);
-        model_primitive_end();
+    if ((x1 == x2 && y1 == y2) || z1 == z2) {
+        return;
+    }
+    float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y2, z1}, v3[] = {x2, y2, z2},
+          t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
+    model_primitive_begin(GL_TRIANGLE_STRIP);
+        
+    const float xd = x1-x2, yd = y2-y1, zd = z2-z1;
+    const float usize = fabs(zd), vsize = hypotf(xd, yd);
+    const float uz = zd/usize, vx = xd/vsize, vy = yd/vsize;
+    glNormal3f(uz*vy, uz*vx, 0);
+
+    if (x2>x1 || y2>y1) {
+      model_vertex_texture(v0,t0);
+    } else {
+      model_vertex_texture(v3,t3);
+    }
+    if (x1>x2 || y1>y2) {
+      model_vertex_texture(v1,t1);
+    } else {
+      model_vertex_texture(v2,t2);
+    }
+    if (x1>x2 || y1>y2) {
+      model_vertex_texture(v2,t2);
+    } else {
+      model_vertex_texture(v1,t1);
+    }
+    if (x2>x1 || y2>y1) {
+      model_vertex_texture(v3,t3);
+    } else {
+      model_vertex_texture(v0,t0);
+    }
+    model_primitive_end();
     }
 
     void model_floor(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
