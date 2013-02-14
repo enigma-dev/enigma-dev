@@ -151,6 +151,11 @@ void d3d_set_fog_density(double density)
   glFogf(GL_FOG_DENSITY, density);
 }
 
+void d3d_set_texturing(bool enable)
+{
+  (enable?glEnable:glDisable)(GL_TEXTURE_2D);
+}
+
 void d3d_set_culling(bool enable)
 {
   (enable?glEnable:glDisable)(GL_CULL_FACE);
@@ -450,29 +455,38 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
     bind_texture(texId);
     glBegin(GL_TRIANGLE_STRIP);
 
-
+    glNormal3f(-0.5, -0.5, -0.5);
     glTexCoord2fv(t0);
       glVertex3fv(v0);
+    glNormal3f(-0.5, -0.5, 0.5);
     glTexCoord2fv(t1);
       glVertex3fv(v1);
 
+    glNormal3f(-0.5, 0.5, -0.5);
     glTexCoord2fv(t2);
       glVertex3fv(v6);
+    glNormal3f(-0.5, 0.5, 0.5);
     glTexCoord2fv(t3);
       glVertex3fv(v7);
 
+    glNormal3f(0.5, 0.5, -0.5);
     glTexCoord2fv(t4);
       glVertex3fv(v4);
+    glNormal3f(0.5, 0.5, 0.5);
     glTexCoord2fv(t5);
       glVertex3fv(v5);
 
+    glNormal3f(0.5, -0.5, -0.5);
     glTexCoord2fv(t8);
       glVertex3fv(v2);
+    glNormal3f(0.5, -0.5, 0.5);
     glTexCoord2fv(t9);
       glVertex3fv(v3);
 
+    glNormal3f(-0.5, -0.5, -0.5);
     glTexCoord2fv(t6);
       glVertex3fv(v0);
+    glNormal3f(-0.5, -0.5, 0.5);
     glTexCoord2fv(t7);
       glVertex3fv(v1);
 
@@ -480,23 +494,31 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
     if (closed)
     {
         glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2fv(t0);
-          glVertex3fv(v0);
-        glTexCoord2fv(t1);
-          glVertex3fv(v2);
+	glNormal3f(0.5, 0.5, -0.5);
         glTexCoord2fv(t2);
-          glVertex3fv(v6);
-        glTexCoord2fv(t3);
           glVertex3fv(v4);
+	glNormal3f(0.5, -0.5, -0.5);	
+        glTexCoord2fv(t3);
+          glVertex3fv(v2);
+	glNormal3f(-0.5, 0.5, -0.5);
+        glTexCoord2fv(t0);
+          glVertex3fv(v6);
+	glNormal3f(-0.5, -0.5, -0.5);
+        glTexCoord2fv(t1);
+          glVertex3fv(v0);
         glEnd();
 
         glBegin(GL_TRIANGLE_STRIP);
+	glNormal3f(-0.5, -0.5, 0.5);
         glTexCoord2fv(t1);
           glVertex3fv(v1);
+	glNormal3f(0.5, -0.5, 0.5);
         glTexCoord2fv(t3);
           glVertex3fv(v3);
+	glNormal3f(-0.5, 0.5, 0.5);
         glTexCoord2fv(t0);
           glVertex3fv(v7);
+	glNormal3f(0.5, 0.5, 0.5);
         glTexCoord2fv(t2);
           glVertex3fv(v5);
         glEnd();
@@ -674,6 +696,37 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
           glVertex3fv(v[i]);
     }
     glEnd();
+}
+
+void d3d_draw_icosahedron() {
+
+
+}
+
+void d3d_draw_torus(double x1, double y1, double z1, int texId, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
+        int numc = csteps, numt = tsteps;
+	bind_texture(texId);
+        for (int i = 0; i < numc; i++) {
+            glBegin(GL_QUAD_STRIP);
+	    
+            for (int j = 0; j <= numt; j++) {
+                for (int k = 1; k >= 0; k--) {
+
+                    double s = (i + k) % numc + 0.5;
+                    double t = j % numt;
+
+                    double x = (radius + tradius * cos(s * TWOPI / numc)) * cos(t * TWOPI / numt);
+                    double y = (radius + tradius * cos(s * TWOPI / numc)) * sin(t * TWOPI / numt);
+                    double z = tradius * sin(s * TWOPI / numc);
+		    double u = (i + k) / (float)numc;
+		    double v = t / (float)numt;
+
+		    glTexCoord2f(v, u);
+                    glVertex3f(x1 + x, y1 + y, z1 + z);
+                }
+            }
+	    glEnd();
+        }
 }
 
 //TODO: with all basic drawing add in normals
@@ -1426,6 +1479,37 @@ class d3d_model
         model_primitive_end();
     }
 
+    void model_icosahedron() 
+    {
+
+    }
+
+    void model_torus(double x1, double y1, double z1, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14) 
+    {
+        int numc = csteps, numt = tsteps;
+
+        for (int i = 0; i < numc; i++) {
+            model_primitive_begin(GL_QUAD_STRIP);
+            for (int j = 0; j <= numt; j++) {
+                for (int k = 1; k >= 0; k--) {
+
+                    double s = (i + k) % numc + 0.5;
+                    double t = j % numt;
+
+                    double x = (radius + tradius * cos(s * TWOPI / numc)) * cos(t * TWOPI / numt);
+                    double y = (radius + tradius * cos(s * TWOPI / numc)) * sin(t * TWOPI / numt);
+                    double z = tradius * sin(s * TWOPI / numc);
+		    double u = (i + k) / (float)numc;
+		    double v = t / (float)numt;
+
+		    float ver[] = {x1 + x, y1 + y, z1 + z}, uv[] = {u, v};
+		    model_vertex_texture(ver, uv);
+                }
+            }
+	    model_primitive_end();
+        }
+    }
+
     void model_wall(double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
     {
     if ((x1 == x2 && y1 == y2) || z1 == z2) {
@@ -1606,6 +1690,16 @@ void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, doub
 void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps)
 {
     d3d_models[id].model_ellipsoid(x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
+}
+
+void d3d_model_icosahedron(const unsigned int id)
+{
+    d3d_models[id].model_icosahedron();
+}
+
+void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
+{
+    d3d_models[id].model_torus(x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius, TWOPI);
 }
 
 void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
