@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>, Josh Ventura        **
+ **  Copyright (C) 2013 Robert B. Colton                                         **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -24,6 +25,9 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+
 enum {
   tx_none,
   tx_nearest,
@@ -63,3 +67,6 @@ void texture_set_priority(int texid, double prio);
 void texture_set_border(int texid, int r, int g, int b, double a);
 void texture_mipmapping_filter(int texid, int enable);
 void texture_mipmapping_generate(int texid, int levels);
+bool  texture_anisotropy_supported();
+float texture_anisotropy_maxlevel();
+void  texture_anisotropy_filter(int texid, float levels);

@@ -58,6 +58,7 @@ namespace enigma {
 #endif
 
 #include "binding.h"
+#include <string.h> // needed for querying ARB extensions
 
 void draw_background(int back, double x, double y)
 {
@@ -622,4 +623,23 @@ void texture_mipmapping_generate(int texid, int levels)
   {
     glGenerateMipmap(GL_TEXTURE_2D);
   }
+}
+
+bool  texture_anisotropy_supported()
+{
+  return strstr((char*)glGetString(GL_EXTENSIONS), 
+           "GL_EXT_texture_filter_anisotropic");
+}
+
+float texture_anisotropy_maxlevel()
+{
+  float maximumAnisotropy;
+  glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maximumAnisotropy);
+  return maximumAnisotropy;
+}
+
+void  texture_anisotropy_filter(int texid, float levels)
+{
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
