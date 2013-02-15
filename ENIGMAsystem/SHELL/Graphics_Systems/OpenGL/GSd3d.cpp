@@ -452,6 +452,7 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
           t0[] = {0, vrep}, t1[] = {0, 0}, t2[] = {hrep, vrep}, t3[] = {hrep, 0},
           t4[] = {hrep*2, vrep}, t5[] = {hrep*2, 0}, t6[] = {hrep*3, vrep}, t7[] = {hrep*3, 0},
           t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0};
+
     bind_texture(texId);
     glBegin(GL_TRIANGLE_STRIP);
 
@@ -999,12 +1000,11 @@ class d3d_lights
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
         const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
-            specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
+            specular[4] = {255, 0, 0, 1}, ambient[4] = {0, 0, 0, 0};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
-        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+        //glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
         glLightfv(GL_LIGHT0+ms, GL_AMBIENT, ambient);
-
         // Limit the range of the light through attenuation.
         glLightf(GL_LIGHT0+ms, GL_CONSTANT_ATTENUATION, 1.0);
         glLightf(GL_LIGHT0+ms, GL_LINEAR_ATTENUATION, 0.0);
@@ -1058,6 +1058,23 @@ bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col
 bool d3d_light_define_point(int id, double x, double y, double z, double range, int col)
 {
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
+}
+
+void d3d_light_define_specularity(int id, int r, int g, int b, double a) 
+{
+  float specular[4] = {r, g, b, a};
+  glLightfv(GL_LIGHT0+id, GL_SPECULAR, specular);
+}
+
+void d3d_light_specularity(int facemode, int r, int g, int b, double a)
+{
+  float specular[4] = {r, g, b, a};
+  glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+}
+
+void d3d_light_shininess(int facemode, int shine) 
+{
+  glMateriali(GL_FRONT, GL_SHININESS, shine);
 }
 
 void d3d_light_define_ambient(int col)
