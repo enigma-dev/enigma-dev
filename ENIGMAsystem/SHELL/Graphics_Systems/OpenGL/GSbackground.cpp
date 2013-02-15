@@ -521,12 +521,55 @@ void texture_set_blending(bool enable)
 
 void texture_set_repeat(bool repeat)
 {
-}//functionality has been removed in ENIGMA, repeat is always used as clamping is useless
+  enigma::background *back;
+  for (int i = 0; i < enigma::background_idmax; i++)
+  {
+    back = enigma::backgroundstructarray[i];
+    if (!back) { continue; }
+
+    glBindTexture(GL_TEXTURE_2D, back->texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
+  }
+}
+
+void texture_set_repeat(int texid, bool repeat)
+{
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
+}
+
+void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw)
+{
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeatu?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeatv?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeatw?GL_REPEAT:GL_CLAMP);
+}
 
 void texture_preload(int texid)
 {
+  
 }//functionality has been removed in ENIGMA, all textures are automatically preloaded
 
 void texture_set_priority(int texid, double prio)
 {
-}//functionality has been removed in ENIGMA, all textures are automatically preloaded
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
+}
+
+void texture_set_border(int texid, int r, int g, int b, double a) 
+{
+  GLint color[4] = {r, g, b, a * 255};
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+}
+
+void texture_bind_texture(int texid, int texid2) 
+{
+
+}
+

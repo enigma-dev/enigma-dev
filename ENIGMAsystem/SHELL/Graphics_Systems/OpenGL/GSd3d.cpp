@@ -1000,10 +1000,10 @@ class d3d_lights
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
         const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
-            specular[4] = {255, 0, 0, 1}, ambient[4] = {0, 0, 0, 0};
+            specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
-        //glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
         glLightfv(GL_LIGHT0+ms, GL_AMBIENT, ambient);
         // Limit the range of the light through attenuation.
         glLightf(GL_LIGHT0+ms, GL_CONSTANT_ATTENUATION, 1.0);
@@ -1069,12 +1069,12 @@ void d3d_light_define_specularity(int id, int r, int g, int b, double a)
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
   float specular[4] = {r, g, b, a};
-  glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+  glMaterialfv(renderstates[facemode], GL_SPECULAR, specular);
 }
 
 void d3d_light_shininess(int facemode, int shine) 
 {
-  glMateriali(GL_FRONT, GL_SHININESS, shine);
+  glMateriali(renderstates[facemode], GL_SHININESS, shine);
 }
 
 void d3d_light_define_ambient(int col)
