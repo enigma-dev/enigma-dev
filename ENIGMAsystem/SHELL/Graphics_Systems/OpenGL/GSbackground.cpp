@@ -519,19 +519,48 @@ void texture_set_blending(bool enable)
     (enable?glEnable:glDisable)(GL_BLEND);
 }
 
+double texture_get_width(int texid)
+{
+  // returns floating point scale to the bg or some shit
+}
+
+double texture_get_height(int texid)
+{
+  // so does this one
+}
+
+int texture_get_pixwidth(int texid)
+{
+  // returns the actual number of pixels in the texture across the xaxis
+  GLint width = 0;
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+  return width;
+}
+
+int texture_get_pixheight(int texid)
+{
+  // returns the actual number of pixels in the tex across the yaxis
+  GLint height = 0;
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &height);
+  return height;
+}
+
 void texture_set_repeat(bool repeat)
 {
+/*
   enigma::background *back;
   for (int i = 0; i < enigma::background_idmax; i++)
   {
     back = enigma::backgroundstructarray[i];
     if (!back) { continue; }
-
-    glBindTexture(GL_TEXTURE_2D, back->texture);
+*/
+    //glBindTexture(GL_TEXTURE_2D, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
-  }
+  //}
 }
 
 void texture_set_repeat(int texid, bool repeat)
