@@ -24,6 +24,12 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
+enum {
+  tx_none,
+  tx_nearest,
+  tx_bilinear,
+  tx_trilinear
+};
 
 void draw_background(int back, double x, double y);
 void draw_background_stretched(int back, double x, double y, double w, double h);
@@ -55,5 +61,5 @@ void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw);
 void texture_preload(int texid);
 void texture_set_priority(int texid, double prio);
 void texture_set_border(int texid, int r, int g, int b, double a);
-void texture_mipmapping_enable(int texid, bool enable);
+void texture_mipmapping_filter(int texid, int enable);
 void texture_mipmapping_generate(int texid, int levels);
