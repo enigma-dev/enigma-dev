@@ -451,75 +451,77 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
           v4[] = {x2, y2, z1}, v5[] = {x2, y2, z2}, v6[] = {x1, y2, z1}, v7[] = {x1, y2, z2},
           t0[] = {0, vrep}, t1[] = {0, 0}, t2[] = {hrep, vrep}, t3[] = {hrep, 0},
           t4[] = {hrep*2, vrep}, t5[] = {hrep*2, 0}, t6[] = {hrep*3, vrep}, t7[] = {hrep*3, 0},
-          t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0};
+          t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0},
+	  n0[] = {-0.5, -0.5, -0.5}, n1[] = {-0.5, -0.5, 0.5}, n2[] = {-0.5, 0.5, -0.5}, n3[] = {-0.5, 0.5, 0.5},
+          n4[] = {0.5, 0.5, -0.5}, n5[] = {0.5, 0.5, 0.5}, n6[] = {0.5, -0.5, -0.5}, n7[] = {0.5, -0.5, 0.5};
 
     bind_texture(texId);
     glBegin(GL_TRIANGLE_STRIP);
 
-    glNormal3f(-0.5, -0.5, -0.5);
+    glNormal3fv(n0);
     glTexCoord2fv(t0);
       glVertex3fv(v0);
-    glNormal3f(-0.5, -0.5, 0.5);
+    glNormal3fv(n1);
     glTexCoord2fv(t1);
       glVertex3fv(v1);
 
-    glNormal3f(-0.5, 0.5, -0.5);
+    glNormal3fv(n2);
     glTexCoord2fv(t2);
       glVertex3fv(v6);
-    glNormal3f(-0.5, 0.5, 0.5);
+    glNormal3fv(n3);
     glTexCoord2fv(t3);
       glVertex3fv(v7);
 
-    glNormal3f(0.5, 0.5, -0.5);
+    glNormal3fv(n4);
     glTexCoord2fv(t4);
       glVertex3fv(v4);
-    glNormal3f(0.5, 0.5, 0.5);
+    glNormal3fv(n5);
     glTexCoord2fv(t5);
       glVertex3fv(v5);
 
-    glNormal3f(0.5, -0.5, -0.5);
-    glTexCoord2fv(t8);
+    glNormal3fv(n6);
+    glTexCoord2fv(t6);
       glVertex3fv(v2);
-    glNormal3f(0.5, -0.5, 0.5);
-    glTexCoord2fv(t9);
+    glNormal3fv(n7);
+    glTexCoord2fv(t7);
       glVertex3fv(v3);
 
-    glNormal3f(-0.5, -0.5, -0.5);
-    glTexCoord2fv(t6);
+    glNormal3fv(n0);
+    glTexCoord2fv(t8);
       glVertex3fv(v0);
-    glNormal3f(-0.5, -0.5, 0.5);
-    glTexCoord2fv(t7);
+    glNormal3fv(n1);
+    glTexCoord2fv(t9);
       glVertex3fv(v1);
 
     glEnd();
     if (closed)
     {
         glBegin(GL_TRIANGLE_STRIP);
-	glNormal3f(0.5, 0.5, -0.5);
+	glNormal3fv(n4);
         glTexCoord2fv(t2);
           glVertex3fv(v4);
-	glNormal3f(0.5, -0.5, -0.5);	
+	glNormal3fv(n6);	
         glTexCoord2fv(t3);
           glVertex3fv(v2);
-	glNormal3f(-0.5, 0.5, -0.5);
+	glNormal3fv(n2);
         glTexCoord2fv(t0);
           glVertex3fv(v6);
-	glNormal3f(-0.5, -0.5, -0.5);
+	glNormal3fv(n0);
         glTexCoord2fv(t1);
           glVertex3fv(v0);
         glEnd();
 
         glBegin(GL_TRIANGLE_STRIP);
-	glNormal3f(-0.5, -0.5, 0.5);
+	glNormal3fv(n1);
         glTexCoord2fv(t1);
           glVertex3fv(v1);
-	glNormal3f(0.5, -0.5, 0.5);
+	glNormal3fv(n7);
         glTexCoord2fv(t3);
           glVertex3fv(v3);
-	glNormal3f(-0.5, 0.5, 0.5);
+	glNormal3fv(n3);
         glTexCoord2fv(t0);
           glVertex3fv(v7);
-	glNormal3f(0.5, 0.5, 0.5);
+	glNormal3fv(n5);
         glTexCoord2fv(t2);
           glVertex3fv(v5);
         glEnd();
@@ -1015,6 +1017,13 @@ class d3d_lights
         return true;
     }
 
+    void light_define_specularity(int id, int r, int g, int b, double a) 
+    {
+	map<int, int>::iterator it = light_ind.find(id);
+	float specular[4] = {r, g, b, a};
+	glLightfv(GL_LIGHT0+(*it).second, GL_SPECULAR, specular);
+    }
+
     bool light_enable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
@@ -1062,8 +1071,7 @@ bool d3d_light_define_point(int id, double x, double y, double z, double range, 
 
 void d3d_light_define_specularity(int id, int r, int g, int b, double a) 
 {
-  float specular[4] = {r, g, b, a};
-  glLightfv(GL_LIGHT0+id, GL_SPECULAR, specular);
+    d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
@@ -1312,32 +1320,35 @@ class d3d_model
               v4[] = {x2, y2, z1}, v5[] = {x2, y2, z2}, v6[] = {x1, y2, z1}, v7[] = {x1, y2, z2},
               t0[] = {0, vrep}, t1[] = {0, 0}, t2[] = {hrep, vrep}, t3[] = {hrep, 0},
               t4[] = {hrep*2, vrep}, t5[] = {hrep*2, 0}, t6[] = {hrep*3, vrep}, t7[] = {hrep*3, 0},
-              t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0};
+              t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0},
+	      n0[] = {-0.5, -0.5, -0.5}, n1[] = {-0.5, -0.5, 0.5}, n2[] = {-0.5, 0.5, -0.5}, n3[] = {-0.5, 0.5, 0.5},
+              n4[] = {0.5, 0.5, -0.5}, n5[] = {0.5, 0.5, 0.5}, n6[] = {0.5, -0.5, -0.5}, n7[] = {0.5, -0.5, 0.5};
+
         model_primitive_begin(GL_TRIANGLE_STRIP);
-        model_vertex_texture(v0,t0);
-        model_vertex_texture(v1,t1);
-        model_vertex_texture(v2,t2);
-        model_vertex_texture(v3,t3);
-        model_vertex_texture(v4,t4);
-        model_vertex_texture(v5,t5);
-        model_vertex_texture(v6,t6);
-        model_vertex_texture(v7,t7);
-        model_vertex_texture(v0,t8);
-        model_vertex_texture(v1,t9);
+        model_vertex_normal_texture(v0,n0,t0);
+        model_vertex_normal_texture(v1,n1,t1);
+        model_vertex_normal_texture(v6,n2,t2);
+        model_vertex_normal_texture(v7,n3,t3);
+        model_vertex_normal_texture(v4,n4,t4);
+        model_vertex_normal_texture(v5,n5,t5);
+        model_vertex_normal_texture(v2,n6,t8);
+        model_vertex_normal_texture(v3,n7,t9);
+        model_vertex_normal_texture(v0,n0,t6);
+        model_vertex_normal_texture(v1,n1,t7);
         model_primitive_end();
         if (closed)
         {
             model_primitive_begin(GL_TRIANGLE_STRIP);
-            model_vertex_texture(v0,t0);
-            model_vertex_texture(v2,t1);
-            model_vertex_texture(v6,t2);
-            model_vertex_texture(v4,t3);
+            model_vertex_normal_texture(v0,n4,t0);
+            model_vertex_normal_texture(v2,n6,t1);
+            model_vertex_normal_texture(v6,n2,t2);
+            model_vertex_normal_texture(v4,n0,t3);
             model_primitive_end();
             model_primitive_begin(GL_TRIANGLE_STRIP);
-            model_vertex_texture(v1,t0);
-            model_vertex_texture(v3,t1);
-            model_vertex_texture(v7,t2);
-            model_vertex_texture(v5,t3);
+            model_vertex_normal_texture(v1,n1,t0);
+            model_vertex_normal_texture(v3,n7,t1);
+            model_vertex_normal_texture(v7,n3,t2);
+            model_vertex_normal_texture(v5,n5,t3);
             model_primitive_end();
         }
     }
