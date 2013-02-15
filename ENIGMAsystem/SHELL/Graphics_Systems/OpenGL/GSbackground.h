@@ -55,4 +55,5 @@ void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw);
 void texture_preload(int texid);
 void texture_set_priority(int texid, double prio);
 void texture_set_border(int texid, int r, int g, int b, double a);
-void texture_bind_texture(int texid, int texid2);
+void texture_mipmapping_enable(int texid, bool enable);
+void texture_mipmapping_generate(int texid, int levels);

@@ -597,8 +597,18 @@ void texture_set_border(int texid, int r, int g, int b, double a)
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 }
 
-void texture_bind_texture(int texid, int texid2) 
+void texture_mipmapping_enable(int texid, bool enable) 
 {
-
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, enable?GL_LINEAR_MIPMAP_LINEAR:GL_NEAREST);
 }
 
+void texture_mipmapping_generate(int texid, int levels)
+{
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  for (int i = 0; i < levels; i++) 
+  {
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+}
