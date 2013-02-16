@@ -28,6 +28,7 @@
 #include <time.h>
 #include <string>
 #include <sstream>
+#include <algorithm>
 using std::string;
 
 #include "WINDOWScallback.h"
@@ -67,21 +68,96 @@ namespace enigma {
 
 extern double fps;
 namespace enigma {
-  clock_t lc;
+  int current_room_speed;
+  bool use_pc;
+  // Filetime.
+  ULARGE_INTEGER time_offset_ft;
+  ULARGE_INTEGER time_current_ft;
+  ULARGE_INTEGER time_previous_ft;
+  // High-resolution performance counter.
+  LARGE_INTEGER time_offset_pc;
+  LARGE_INTEGER time_current_pc;
+  LARGE_INTEGER time_previous_pc;
+  LARGE_INTEGER frequency_pc;
+  // Timing functions.
+  long clamp(long value, long min, long max)
+  {
+    if (value < min) {
+      return min;
+    }
+    if (value > max) {
+      return max;
+    }
+    return value;
+  }
   void sleep_for_framerate(int rs)
   {
-    clock_t nc = clock();
-    double sdur = 1000/rs - (nc - lc)*1000 / CLOCKS_PER_SEC;
-    if (sdur > 0)
-    {
-        Sleep(sdur);
-        fps = int(CLOCKS_PER_SEC / (nc - lc + sdur));
+    current_room_speed = rs;
+  }
+  void initialize_timing()
+  {
+    use_pc = QueryPerformanceFrequency(&frequency_pc);
+    if (use_pc) {
+      QueryPerformanceCounter(&time_offset_pc);
+      time_previous_pc.QuadPart = time_offset_pc.QuadPart;
     }
-    else
-    {
-        fps = int(CLOCKS_PER_SEC / (nc - lc));
+    else {
+      FILETIME time_values;
+      GetSystemTimeAsFileTime(&time_values);
+      time_offset_ft.LowPart = time_values.dwLowDateTime;
+      time_offset_ft.HighPart = time_values.dwHighDateTime;
+      time_previous_ft.QuadPart = time_offset_ft.QuadPart;
     }
-    lc = nc;
+  }
+  void update_current_time()
+  {
+    if (use_pc) {
+      QueryPerformanceCounter(&time_current_pc);
+    }
+    else {
+      FILETIME time_values;
+      GetSystemTimeAsFileTime(&time_values);
+      time_current_ft.LowPart = time_values.dwLowDateTime;
+      time_current_ft.HighPart = time_values.dwHighDateTime;
+    }
+  }
+  void set_previous_to_current()
+  {
+    if (use_pc) {
+      time_previous_pc.QuadPart = time_current_pc.QuadPart;
+    }
+    else {
+      time_previous_ft.QuadPart = time_current_ft.QuadPart;
+    }
+  }
+  long get_current_offset_difference_mcs()
+  {
+    if (use_pc) {
+      return clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart)*1000000/frequency_pc.QuadPart, 0, 1000000);
+    }
+    else {  
+      return clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart)/10, 0, 1000000);
+    }
+  }
+  long get_current_previous_difference_mcs()
+  {
+    if (use_pc) {
+      return clamp((time_current_pc.QuadPart - time_previous_pc.QuadPart)*1000000/frequency_pc.QuadPart, 0, 1000000);
+    }
+    else {
+      return clamp((time_current_ft.QuadPart - time_previous_ft.QuadPart)/10, 0, 1000000);
+    }
+  }
+  void offset_modulus_one_second()
+  {
+    if (use_pc) {
+      long passed_mcs = get_current_offset_difference_mcs();
+      time_offset_pc.QuadPart += (passed_mcs/1000000)*frequency_pc.QuadPart;
+    }
+    else {
+      long passed_mcs = get_current_offset_difference_mcs();
+      time_offset_ft.QuadPart += (passed_mcs/1000000)*10000000;
+    }
   }
 }
 #include <cstdio>
@@ -137,28 +213,64 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     enigma::initialize_everything();
 
     //Main loop
-        char bQuit=0;
-        while (!bQuit)
-        {
-            if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
-            {
-                if (msg.message == WM_QUIT)
-                {
-                    bQuit=1;
-                    break;
-                }
-                else
-                {
-                    TranslateMessage (&msg);
-                    DispatchMessage (&msg);
-                }
-            }
-            else
-            {
-                enigma::ENIGMA_events();
-                enigma::input_push();
-            }
-        }
+
+    // Initialize timing.
+    enigma::initialize_timing();
+    int frames_count = 0;
+
+      char bQuit=0;
+      while (!bQuit)
+      {
+          using enigma::current_room_speed;
+          // Update current time.
+          enigma::update_current_time();
+          {
+              // Find diff between current and offset.
+              long passed_mcs = enigma::get_current_offset_difference_mcs();
+              if (passed_mcs >= 1000000) { // Handle resetting.
+                  // If more than one second has passed, update fps variable, reset frames count,
+                  // and advance offset by difference in seconds, rounded down.
+                  fps = frames_count;
+                  frames_count = 0;
+                  enigma::offset_modulus_one_second();
+              }
+          }
+
+          if (current_room_speed > 0) {
+              long spent_mcs = enigma::get_current_offset_difference_mcs();
+              long remaining_mcs = 1000000 - spent_mcs;
+              long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+              long current_quantum_mcs = enigma::get_current_previous_difference_mcs();
+              long mandated_quantum_mcs = long(0.95*1e6/current_room_speed);
+              if (remaining_mcs > needed_mcs || current_quantum_mcs < mandated_quantum_mcs) {
+                  Sleep(1);
+                  continue;
+              }
+          }
+          if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
+          {
+              if (msg.message == WM_QUIT)
+              {
+                  bQuit=1;
+                  break;
+              }
+              else
+              {
+                  TranslateMessage (&msg);
+                  DispatchMessage (&msg);
+              }
+          }
+          else
+          {
+              // Update previous time.
+              enigma::set_previous_to_current();
+
+              enigma::ENIGMA_events();
+              enigma::input_push();
+
+              frames_count++;
+          }
+      }
 
 
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);

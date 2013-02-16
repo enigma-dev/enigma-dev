@@ -34,6 +34,8 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/loading.h"
 
+#include <time.h>
+
 extern string keyboard_lastchar;
 
 namespace enigma
@@ -161,6 +163,18 @@ namespace enigma
   int game_ending();
 }
 
+extern double fps;
+long clamp(long value, long min, long max)
+{
+  if (value < min) {
+    return min;
+  }
+  if (value > max) {
+    return max;
+  }
+  return value;
+}
+
 static bool game_isending = false;
 int main(int argc,char** argv)
 {
@@ -249,14 +263,53 @@ int main(int argc,char** argv)
 	XCloseDisplay(disp);
 	return 0;*/
 
+	struct timespec time_offset;
+	struct timespec time_current;
+	struct timespec time_previous;
+	clock_gettime(CLOCK_MONOTONIC, &time_offset);
+	time_previous.tv_sec = time_offset.tv_sec;
+	time_previous.tv_nsec = time_offset.tv_nsec;
+	int frames_count = 0;
+
 	while (!game_isending)
 	{
+		using enigma::current_room_speed;
+		clock_gettime(CLOCK_MONOTONIC, &time_current);
+		{
+			long passed_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_offset.tv_sec*1000000 + time_offset.tv_nsec/1000);
+      passed_mcs = clamp(passed_mcs, 0, 1000000);
+			if (passed_mcs >= 1000000) { // Handle resetting.
+				fps = frames_count;
+				frames_count = 0;
+				time_offset.tv_sec += passed_mcs/1000000;
+			}
+		}
+
+		if (current_room_speed > 0) {
+			long spent_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_offset.tv_sec*1000000 + time_offset.tv_nsec/1000);
+      spent_mcs = clamp(spent_mcs, 0, 1000000);
+			long remaining_mcs = 1000000 - spent_mcs;
+			long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+			long current_quantum_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_previous.tv_sec*1000000 + time_previous.tv_nsec/1000);
+			long mandated_quantum_mcs = long(0.95*1e6/current_room_speed);
+			if (remaining_mcs > needed_mcs || current_quantum_mcs < mandated_quantum_mcs) {
+				usleep(1);
+				continue;
+			}
+		}
+
 		while(XQLength(disp))
 			if(handleEvents() > 0)
 				goto end;
-    enigma::handle_joysticks();
+
+		time_previous.tv_sec = time_current.tv_sec;
+		time_previous.tv_nsec = time_current.tv_nsec;
+
+		enigma::handle_joysticks();
 		enigma::ENIGMA_events();
 		enigma::input_push();
+
+		frames_count++;
 	}
 
 	end:
