@@ -119,7 +119,7 @@ void draw_rectangle(float x1,float y1,float x2,float y2,bool outline)
       glVertex2f(x2,y1);
     glEnd();
   }
-  else glRectf(x1,y1,x2,y2);
+  else glRectf(x1-1,y1-1,x2,y2);
 }
 
 void draw_rectangle_angle(float x1,float y1,float x2,float y2,float angle,bool outline)
