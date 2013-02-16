@@ -70,3 +70,5 @@ void texture_mipmapping_generate(int texid, int levels);
 bool  texture_anisotropy_supported();
 float texture_anisotropy_maxlevel();
 void  texture_anisotropy_filter(int texid, float levels);
+bool texture_multitexture_supported();
+void texture_multitexture_enable(bool enable);

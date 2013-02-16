@@ -654,3 +654,15 @@ void  texture_anisotropy_filter(int texid, float levels)
   glBindTexture(GL_TEXTURE_2D, texid);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
+
+bool  texture_multitexture_supported()
+{
+  return strstr((char*)glGetString(GL_EXTENSIONS), 
+           "GL_ARB_multitexture");
+}
+
+void texture_multitexture_enable(bool enable)
+{
+
+}
+
