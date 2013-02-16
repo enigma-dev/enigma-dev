@@ -1,19 +1,30 @@
-/** Copyright (C) 2010-2011 Harijs Grînbergs, Josh Ventura, Alasdair Morrison
-***
-*** This file is a part of the ENIGMA Development Environment.
-***
-*** ENIGMA is free software: you can redistribute it and/or modify it under the
-*** terms of the GNU General Public License as published by the Free Software
-*** Foundation, version 3 of the license or any later version.
-***
-*** This application and its source code is distributed AS-IS, WITHOUT ANY
-*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-*** details.
-***
-*** You should have received a copy of the GNU General Public License along
-*** with this code. If not, see <http://www.gnu.org/licenses/>
-**/
+/********************************************************************************\
+ **                                                                              **
+ **  Copyright (C) 2010-2011 Alasdair Morrison <tgmg@g-java.com>, Josh Ventura   **
+ **  Copyright (C) 2013 Robert B. Colton                                         **
+ **                                                                              **
+ **  This file is a part of the ENIGMA Development Environment.                  **
+ **                                                                              **
+ **                                                                              **
+ **  ENIGMA is free software: you can redistribute it and/or modify it under the **
+ **  terms of the GNU General Public License as published by the Free Software   **
+ **  Foundation, version 3 of the license or any later version.                  **
+ **                                                                              **
+ **  This application and its source code is distributed AS-IS, WITHOUT ANY      **
+ **  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
+ **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
+ **  details.                                                                    **
+ **                                                                              **
+ **  You should have recieved a copy of the GNU General Public License along     **
+ **  with this code. If not, see <http://www.gnu.org/licenses/>                  **
+ **                                                                              **
+ **  ENIGMA is an environment designed to create games and other programs with a **
+ **  high-level, fully compilable language. Developers of ENIGMA or anything     **
+ **  associated with ENIGMA are in no way responsible for its users or           **
+ **  applications created by its users, or damages caused by the environment     **
+ **  or programs made in the environment.                                        **
+ **                                                                              **
+ \********************************************************************************/
 
 #include <cstddef>
 
@@ -58,6 +69,7 @@ namespace enigma {
 #endif
 
 #include "binding.h"
+#include <string.h> // needed for querying ARB extensions
 
 void draw_background(int back, double x, double y)
 {
@@ -519,14 +531,138 @@ void texture_set_blending(bool enable)
     (enable?glEnable:glDisable)(GL_BLEND);
 }
 
+double texture_get_width(int texid)
+{
+  // returns floating point scale to the bg or some shit
+}
+
+double texture_get_height(int texid)
+{
+  // so does this one
+}
+
+int texture_get_pixwidth(int texid)
+{
+  // returns the actual number of pixels in the texture across the xaxis
+  GLint width = 0;
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+  return width;
+}
+
+int texture_get_pixheight(int texid)
+{
+  // returns the actual number of pixels in the tex across the yaxis
+  GLint height = 0;
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &height);
+  return height;
+}
+
 void texture_set_repeat(bool repeat)
 {
-}//functionality has been removed in ENIGMA, repeat is always used as clamping is useless
+/*
+  enigma::background *back;
+  for (int i = 0; i < enigma::background_idmax; i++)
+  {
+    back = enigma::backgroundstructarray[i];
+    if (!back) { continue; }
+*/
+    //glBindTexture(GL_TEXTURE_2D, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
+  //}
+}
+
+void texture_set_repeat(int texid, bool repeat)
+{
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
+}
+
+void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw)
+{
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeatu?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeatv?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeatw?GL_REPEAT:GL_CLAMP);
+}
 
 void texture_preload(int texid)
 {
+  
 }//functionality has been removed in ENIGMA, all textures are automatically preloaded
 
 void texture_set_priority(int texid, double prio)
 {
-}//functionality has been removed in ENIGMA, all textures are automatically preloaded
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
+}
+
+void texture_set_border(int texid, int r, int g, int b, double a) 
+{
+  GLint color[4] = {r, g, b, a * 255};
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+}
+
+void texture_mipmapping_filter(int texid, int filter) 
+{
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  if (filter == tx_trilinear) {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  } else if (filter == tx_bilinear) {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  } else if (filter == tx_nearest) {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  } 
+}
+
+void texture_mipmapping_generate(int texid, int levels)
+{
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  for (int i = 0; i < levels; i++) 
+  {
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+}
+
+bool  texture_anisotropy_supported()
+{
+  return strstr((char*)glGetString(GL_EXTENSIONS), 
+           "GL_EXT_texture_filter_anisotropic");
+}
+
+float texture_anisotropy_maxlevel()
+{
+  float maximumAnisotropy;
+  glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maximumAnisotropy);
+  return maximumAnisotropy;
+}
+
+void  texture_anisotropy_filter(int texid, float levels)
+{
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
+}
+
+bool  texture_multitexture_supported()
+{
+  return strstr((char*)glGetString(GL_EXTENSIONS), 
+           "GL_ARB_multitexture");
+}
+
+void texture_multitexture_enable(bool enable)
+{
+
+}
+

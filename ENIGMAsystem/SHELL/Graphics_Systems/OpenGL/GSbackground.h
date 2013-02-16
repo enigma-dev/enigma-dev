@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>, Josh Ventura        **
+ **  Copyright (C) 2013 Robert B. Colton                                         **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -24,6 +25,15 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+
+enum {
+  tx_none,
+  tx_nearest,
+  tx_bilinear,
+  tx_trilinear
+};
 
 void draw_background(int back, double x, double y);
 void draw_background_stretched(int back, double x, double y, double w, double h);
@@ -44,7 +54,21 @@ double background_get_texture_width_factor(int backId);
 double background_get_texture_height_factor(int backId);
 void texture_set_interpolation(int enable);
 bool texture_get_interpolation();
+double texture_get_width(int texid);
+double texture_get_height(int texid);
+int texture_get_pixwidth(int texid);
+int texture_get_pixheight(int texid);
 void texture_set_blending(bool enable);
 void texture_set_repeat(bool repeat);
+void texture_set_repeat(int texid, bool repeat);
+void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw);
 void texture_preload(int texid);
 void texture_set_priority(int texid, double prio);
+void texture_set_border(int texid, int r, int g, int b, double a);
+void texture_mipmapping_filter(int texid, int enable);
+void texture_mipmapping_generate(int texid, int levels);
+bool  texture_anisotropy_supported();
+float texture_anisotropy_maxlevel();
+void  texture_anisotropy_filter(int texid, float levels);
+bool texture_multitexture_supported();
+void texture_multitexture_enable(bool enable);
