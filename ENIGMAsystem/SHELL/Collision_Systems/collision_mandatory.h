@@ -27,6 +27,7 @@
 
 #include "Universal_System/spritestruct.h"
 #include "Collision_Systems/collision_types.h"
+#include "Collision_Systems/box2d.h"
 
 namespace enigma
 {
