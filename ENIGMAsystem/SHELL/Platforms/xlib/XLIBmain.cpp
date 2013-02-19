@@ -263,6 +263,7 @@ int main(int argc,char** argv)
 	XCloseDisplay(disp);
 	return 0;*/
 
+  long speed_error_mcs = 0;
 	struct timespec time_offset;
 	struct timespec time_current;
 	struct timespec time_previous;
@@ -291,9 +292,12 @@ int main(int argc,char** argv)
 			long remaining_mcs = 1000000 - spent_mcs;
 			long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
 			long current_quantum_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_previous.tv_sec*1000000 + time_previous.tv_nsec/1000);
-			long mandated_quantum_mcs = long(0.95*1e6/current_room_speed);
-			if (remaining_mcs > needed_mcs || current_quantum_mcs < mandated_quantum_mcs) {
+			long desired_quantum_mcs = long(1e6/current_room_speed);
+      long diff = desired_quantum_mcs - current_quantum_mcs;
+      speed_error_mcs += diff > 0 ? diff : 0;
+			if (remaining_mcs > needed_mcs || speed_error_mcs > 1000) {
 				usleep(1);
+        speed_error_mcs = 0;
 				continue;
 			}
 		}

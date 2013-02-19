@@ -215,6 +215,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     //Main loop
 
     // Initialize timing.
+    long speed_error_mcs = 0;
     enigma::initialize_timing();
     int frames_count = 0;
 
@@ -241,9 +242,12 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
               long remaining_mcs = 1000000 - spent_mcs;
               long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
               long current_quantum_mcs = enigma::get_current_previous_difference_mcs();
-              long mandated_quantum_mcs = long(0.95*1e6/current_room_speed);
-              if (remaining_mcs > needed_mcs || current_quantum_mcs < mandated_quantum_mcs) {
+              long desired_quantum_mcs = long(1e6/current_room_speed);
+              long diff = desired_quantum_mcs - current_quantum_mcs;
+              speed_error_mcs += diff > 0 ? diff : 0;
+              if (remaining_mcs > needed_mcs || speed_error_mcs > 1000) {
                   Sleep(1);
+                  speed_error_mcs = 0;
                   continue;
               }
           }
@@ -271,7 +275,6 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
               frames_count++;
           }
       }
-
 
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
     DestroyWindow (enigma::hWnd);
