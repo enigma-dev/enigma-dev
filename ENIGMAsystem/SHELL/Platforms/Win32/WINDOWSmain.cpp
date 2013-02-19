@@ -161,6 +161,7 @@ namespace enigma {
   }
 }
 #include <cstdio>
+#include <mmsystem.h>
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
     int wid = (int)room_width, hgt = (int)room_height;
@@ -215,6 +216,13 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     //Main loop
 
     // Initialize timing.
+    
+    UINT minimum_resolution = 1;
+    TIMECAPS timer_resolution_info;
+    if (timeGetDevCaps(&timer_resolution_info, sizeof(timer_resolution_info)) == MMSYSERR_NOERROR) {
+      minimum_resolution = timer_resolution_info.wPeriodMin;
+    }
+    timeBeginPeriod(minimum_resolution);
     long speed_error_mcs = 0;
     enigma::initialize_timing();
     int frames_count = 0;
@@ -245,8 +253,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
               long desired_quantum_mcs = long(1e6/current_room_speed);
               long diff = desired_quantum_mcs - current_quantum_mcs;
               speed_error_mcs += diff > 0 ? diff : 0;
-              if (remaining_mcs > needed_mcs || speed_error_mcs > 1000) {
-                  Sleep(1);
+              if (remaining_mcs > needed_mcs || speed_error_mcs > minimum_resolution*1000) {
+                  Sleep(minimum_resolution);
                   speed_error_mcs = 0;
                   continue;
               }
@@ -276,6 +284,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
       }
 
+    timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
     DestroyWindow (enigma::hWnd);
 
