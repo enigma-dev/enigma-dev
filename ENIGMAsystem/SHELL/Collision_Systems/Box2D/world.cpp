@@ -30,11 +30,10 @@
 #include "Collision_Systems/collision_mandatory.h" //iter
 #include "Universal_System/instance.h"
 
-//#include <Box2D.h>
+#include <Box2D/Box2D.h>
 
 #include <string>
 #include <stdio.h>
-#include "world.h"
 
 /* This is just place holder shit to get the fuckin linker shut the fuckin hell up */
 enigma::instance_t collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme)
@@ -68,8 +67,9 @@ bool place_meeting(double x, double y, int object)
 
 void physics_world_create()
 {
-//b2Vec2 gravity(0.0f, -10.0f);
-//b2AABB worldAABB;
-//bool doSleep = true;
-//b2World world(worldAABB, gravity, doSleep);
+	// Define the gravity vector.
+	b2Vec2 gravity(0.0f, -10.0f);
+
+	// Construct a world object, which will hold and simulate the rigid bodies.
+	b2World world(gravity);
 }
