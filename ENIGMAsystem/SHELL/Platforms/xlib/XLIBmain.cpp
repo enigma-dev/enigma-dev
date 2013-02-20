@@ -20,6 +20,7 @@
 
 #include <X11/Xlib.h>
 #include <GL/glx.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <string>
 
