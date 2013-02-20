@@ -30,6 +30,7 @@
 #include "Collision_Systems/collision_mandatory.h" //iter
 #include "Universal_System/instance.h"
 
+#include "world.h"
 #include <Box2D/Box2D.h>
 
 #include <string>
