@@ -31,8 +31,6 @@ bool place_free(double x,double y);
 bool place_meeting(double x, double y, int object);
 // End of linking shit to stfu 
 
-void physics_test();
-
 /* Worlds */
 int physics_world_create();
 void physics_world_gravity();

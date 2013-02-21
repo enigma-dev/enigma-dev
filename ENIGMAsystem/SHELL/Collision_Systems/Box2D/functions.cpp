@@ -104,40 +104,6 @@ bool place_meeting(double x, double y, int object)
 
 /* This is where the actual physics_* functions start at */
 
-void physics_test()
-{
-
-  int world = physics_world_create();
-
-  int groundfixture = physics_fixture_create();
-  physics_fixture_set_position(groundfixture, 0.0f, -10.0f);
-  physics_fixture_set_box_shape(groundfixture, 50.0f, 10.0f);
-  physics_fixture_set_density(groundfixture, 0);
-
-  int dynamicfixture = physics_fixture_create();
-  physics_fixture_set_position(dynamicfixture, 0.0f, 4.0f);
-  //physics_fixture_set_box_shape(dynamicfixture, 1.0f, 1.0f);
-  physics_fixture_set_circle_shape(dynamicfixture, 10.0f);
-  physics_fixture_set_density(dynamicfixture, 1.0f);
-  physics_fixture_set_friction(dynamicfixture, 0.3f);
-
-  // This is our little game loop.
-  for (int i = 0; i < 60; ++i)
-  {
-    physics_world_update(world);
-
-    printf("%4.2f %4.2f %4.2f\n", 
-      physics_fixture_get_x(dynamicfixture), 
-      physics_fixture_get_y(dynamicfixture), 
-      physics_fixture_get_angle(dynamicfixture));
-  }
-
-  // When the world destructor is called, all bodies and joints are freed. This can
-  // create orphaned pointers, so be careful about your world management.
-
-  return;
-}
-
 int physics_world_create() 
 {
   int i = worlds.size();
