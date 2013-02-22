@@ -38,7 +38,7 @@ using std::string;
 #include "WINDOWSwindow.h"
 #include "WINDOWSmain.h"
 
-#include "Platforms/os_types.h"
+#include "Platforms/platforms_mandatory.h"
 
 const int os_type = os_windows;
 
