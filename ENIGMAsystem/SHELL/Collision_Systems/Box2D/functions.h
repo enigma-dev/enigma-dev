@@ -33,33 +33,39 @@ bool place_meeting(double x, double y, int object);
 
 /* Worlds */
 int physics_world_create();
-void physics_world_gravity();
-void physics_world_update(int index);
-
+void physics_world_delete(int index);
+void physics_world_gravity(int index, float gx, float gy);
+void physics_world_update(int index); // extra function to control your world update, should be auto done inside our game loop
 void physics_world_update_iterations();
 void physics_world_update_speed();
-void physics_world_draw_debug();
-void physics_draw_debug();
-void physics_pause_enable();
+void physics_world_draw_debug(); // draws all the fixtures and their rotations in the room for u, wants constants, fuck that
 
 /* Fixtures */
-int physics_fixture_create();
-void physics_fixture_bind();
-void physics_fixture_set_collision_group();
-void physics_fixture_delete();
+int  physics_fixture_create(int world);
+void physics_fixture_create(); // overloaded cause the default studio function uses the current rooms binded world
+void physics_fixture_bind(); // binds a fixture to an object, im not writing this fuck YYG
+void physics_fixture_set_collision_group(int id, int group);
+void physics_fixture_delete(int id);
 
 void physics_fixture_set_box_shape(int id, float halfwidth, float halfheight);
 void physics_fixture_set_circle_shape(int id, float radius);
 void physics_fixture_set_polygon_shape();
 void physics_fixture_add_point();
 
+void physics_fixture_set_transform(int id, float x, float y, float angle);
 void physics_fixture_set_position(int id, float x, float y);
+void physics_fixture_set_angle(int id, float angle);
 void physics_fixture_set_density(int id, float density);
 void physics_fixture_set_friction(int id, float friction);
-void physics_fixture_set_linear_damping();
-void physics_fixture_set_angular_damping();
-void physics_fixture_set_restitution();
-void physics_fixture_set_sensor();
+void physics_fixture_set_linear_damping(int id, float damping);
+void physics_fixture_set_angular_damping(int id, float damping);
+void physics_fixture_set_restitution(int id, float restitution);
+void physics_fixture_set_sensor(int id, bool state);
+void physics_fixture_set_static(int id);
+void physics_fixture_set_kinematic(int id);
+void physics_fixture_set_dynamic(int id);
+void physics_fixture_set_awake(int id, bool state);
+void physics_fixture_set_mass(int id, float mass, float local_center_x, float local_center_y, float inertia);
 
 float physics_fixture_get_angle(int id);
 float physics_fixture_get_x(int id);
@@ -83,9 +89,9 @@ void physics_joint_delete();
 void physics_joint_enable_motor();
 void physics_joint_get_value();
 void physics_joint_set_value();
-void physics_fixture_set_kinematic();
-void physics_fixture_set_awake();
 
 /* Miscellaneous */
 void physics_test_overlap();
-void physics_mass_properties();
+void physics_mass_properties(); // same as physics_fixture_set_mass except it doesnt need an id, uses the currently bound fixture
+void physics_draw_debug(); // draws the currently bound fixture's shape with draw color, fuck that 
+void physics_pause_enable(bool pause);

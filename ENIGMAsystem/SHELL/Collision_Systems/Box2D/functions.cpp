@@ -38,6 +38,7 @@ using std::vector;
 
 #include <Box2D/Box2D.h>
 #include "functions.h"
+bool systemPaused = false;
 
 struct worldInstance { 
   b2World* world;
@@ -45,8 +46,8 @@ struct worldInstance {
   // second (60Hz) and 10 iterations. This provides a high quality simulation
   // in most game scenarios.
   float32 timeStep = 1.0f / 30.0f;
-  int32 velocityIterations = 6;
-  int32 positionIterations = 2;
+  int32 velocityIterations = 8;
+  int32 positionIterations = 3;
   worldInstance() 
   {
     // Define the gravity vector.
@@ -59,7 +60,9 @@ struct worldInstance {
 }; 
 void worldInstance::world_update() 
 {
-  world->Step(timeStep, velocityIterations, positionIterations);
+  if (!systemPaused) {
+    world->Step(timeStep, velocityIterations, positionIterations);
+  }
 }
 vector<worldInstance> worlds(0);
 
@@ -117,16 +120,36 @@ void physics_world_update(int index)
   worlds[index].world_update();
 }
 
-int physics_fixture_create() 
+void physics_fixture_create()
+{
+
+}
+
+int physics_fixture_create(int world) 
 {
   int i = fixtures.size();
   fixtures.resize(i + 1);
   fixtureInstance fixture = fixtureInstance();
   b2BodyDef bodyDef;
   bodyDef.type = b2_dynamicBody;
-  fixture.body = worlds[0].world->CreateBody(&bodyDef);
+  fixture.body = worlds[world].world->CreateBody(&bodyDef);
   fixtures[i] = fixture;
   return i;
+}
+
+void physics_fixture_bind()
+{
+  // binds a fixture to an object, im not writing this fuck YYG
+}
+
+void physics_fixture_set_collision_group(int id, int group)
+{
+  //fixtures[id].fixture->filter.groupIndex = group;
+}
+
+void physics_fixture_delete(int id)
+{
+
 }
 
 void physics_fixture_set_box_shape(int id, float halfwidth, float halfheight)
@@ -149,28 +172,77 @@ void physics_fixture_set_circle_shape(int id, float radius)
   fixtures[id].fixture = fixtures[id].body->CreateFixture(&fixtureDef);
 }
 
+void physics_fixture_set_transform(int id, float x, float y, float angle)
+{
+  fixtures[id].body->SetTransform(b2Vec2(x, y), angle);
+}
+
 void physics_fixture_set_position(int id, float x, float y)
 {
   fixtures[id].body->SetTransform(b2Vec2(x, y), fixtures[id].body->GetAngle());
 }
 
+void physics_fixture_set_angle(int id, float angle)
+{
+  fixtures[id].body->SetTransform(fixtures[id].body->GetPosition(), angle);
+}
+
 void physics_fixture_set_density(int id, float density) 
 {
-  if (density == 0) {
-    fixtures[id].body->SetType(b2_staticBody);
-  } else {
+  // technically studio makes it so 0 density, means infinite density and just makes it
+  // a static object, but im just gonna go ahead and comment that out cause its fuckin stupid
+  //if (density == 0) {
+    //fixtures[id].body->SetType(b2_staticBody);
+  //} else {
     fixtures[id].fixture->SetDensity(density);
-  }
+  //}
+  fixtures[id].body->ResetMassData();
 }
 
 void physics_fixture_set_friction(int id, float friction) 
 {
   fixtures[id].fixture->SetFriction(friction);
+  fixtures[id].body->ResetMassData();
 }
 
-void physics_fixture_set_type(int id, b2BodyType type) 
+void physics_fixture_set_linear_damping(int id, float damping)
 {
-  fixtures[id].body->SetType(type);
+  fixtures[id].body->SetLinearDamping(damping);
+}
+
+void physics_fixture_set_angular_damping(int id, float damping)
+{
+  fixtures[id].body->SetAngularDamping(damping);
+}
+
+void physics_fixture_set_restitution(int id, float restitution)
+{
+  fixtures[id].fixture->SetRestitution(restitution);
+}
+
+void physics_fixture_set_sensor(int id, bool state)
+{
+  fixtures[id].fixture->SetSensor(state);
+}
+
+void physics_fixture_set_awake(int id, bool state)
+{
+  fixtures[id].body->SetAwake(state);
+}
+
+void physics_fixture_set_static(int id)
+{
+  fixtures[id].body->SetType(b2_staticBody);
+}
+
+void physics_fixture_set_kinematic(int id)
+{
+  fixtures[id].body->SetType(b2_kinematicBody);
+}
+
+void physics_fixture_set_dynamic(int id)
+{
+  fixtures[id].body->SetType(b2_dynamicBody);
 }
 
 float physics_fixture_get_angle(int id) 
@@ -186,4 +258,9 @@ float physics_fixture_get_x(int id)
 float physics_fixture_get_y(int id) 
 {
   return fixtures[id].body->GetPosition().y;
+}
+
+void physics_pause_enable(bool pause)
+{
+  systemPaused = pause;
 }
