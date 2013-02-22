@@ -107,7 +107,14 @@ int physics_world_create()
 
 void physics_world_update(int index) 
 {
-  worlds[index].world_update();
+  if (unsigned(index) >= worlds.size() || index < 0)
+  {
+    return;
+  }
+  else
+  {
+    worlds[index].world_update();
+  }
 }
 
 void physics_fixture_create()
@@ -117,14 +124,21 @@ void physics_fixture_create()
 
 int physics_fixture_create(int world) 
 {
-  int i = fixtures.size();
-  fixtures.resize(i + 1);
-  fixtureInstance fixture = fixtureInstance();
-  b2BodyDef bodyDef;
-  bodyDef.type = b2_dynamicBody;
-  fixture.body = worlds[world].world->CreateBody(&bodyDef);
-  fixtures[i] = fixture;
-  return i;
+  if (unsigned(world) >= worlds.size() || world < 0)
+  {
+    return -1;
+  }
+  else
+  {
+    int i = fixtures.size();
+    fixtures.resize(i + 1);
+    fixtureInstance fixture = fixtureInstance();
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody;
+    fixture.body = worlds[world].world->CreateBody(&bodyDef);
+    fixtures[i] = fixture;
+    return i;
+  }
 }
 
 void physics_fixture_bind()
@@ -144,110 +158,236 @@ void physics_fixture_delete(int id)
 
 void physics_fixture_set_box_shape(int id, float halfwidth, float halfheight)
 {
-  b2PolygonShape shape;
-  shape.SetAsBox(halfwidth, halfheight);
-  fixtures[id].shape = &shape;
-  b2FixtureDef fixtureDef;
-  fixtureDef.shape = &shape;
-  fixtures[id].fixture = fixtures[id].body->CreateFixture(&fixtureDef);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    b2PolygonShape shape;
+    shape.SetAsBox(halfwidth, halfheight);
+    fixtures[id].shape = &shape;
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &shape;
+    fixtures[id].fixture = fixtures[id].body->CreateFixture(&fixtureDef);
+  }
 }
 
 void physics_fixture_set_circle_shape(int id, float radius) 
 {
-  b2CircleShape shape;
-  shape.m_radius = radius;
-  fixtures[id].shape = &shape;
-  b2FixtureDef fixtureDef;
-  fixtureDef.shape = &shape;
-  fixtures[id].fixture = fixtures[id].body->CreateFixture(&fixtureDef);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    b2CircleShape shape;
+    shape.m_radius = radius;
+    fixtures[id].shape = &shape;
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &shape;
+    fixtures[id].fixture = fixtures[id].body->CreateFixture(&fixtureDef);
+  }
 }
 
 void physics_fixture_set_transform(int id, float x, float y, float angle)
 {
-  fixtures[id].body->SetTransform(b2Vec2(x, y), angle);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->SetTransform(b2Vec2(x, y), angle);
+  }
 }
 
 void physics_fixture_set_position(int id, float x, float y)
 {
-  fixtures[id].body->SetTransform(b2Vec2(x, y), fixtures[id].body->GetAngle());
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->SetTransform(b2Vec2(x, y), fixtures[id].body->GetAngle());
+  }
 }
 
 void physics_fixture_set_angle(int id, float angle)
 {
-  fixtures[id].body->SetTransform(fixtures[id].body->GetPosition(), angle);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->SetTransform(fixtures[id].body->GetPosition(), angle);
+  }
 }
 
 void physics_fixture_set_density(int id, float density) 
 {
-  // technically studio makes it so 0 density, means infinite density and just makes it
-  // a static object, but im just gonna go ahead and comment that out cause its fuckin stupid
-  //if (density == 0) {
-    //fixtures[id].body->SetType(b2_staticBody);
-  //} else {
-    fixtures[id].fixture->SetDensity(density);
-  //}
-  fixtures[id].body->ResetMassData();
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else 
+  {
+    // technically studio makes it so 0 density, means infinite density and just makes it
+    // a static object, but im just gonna go ahead and comment that out cause its fuckin stupid
+    //if (density == 0) {
+      //fixtures[id].body->SetType(b2_staticBody);
+    //} else {
+      fixtures[id].fixture->SetDensity(density);
+      fixtures[id].body->ResetMassData();
+    //}
+  }
 }
 
 void physics_fixture_set_friction(int id, float friction) 
 {
-  fixtures[id].fixture->SetFriction(friction);
-  fixtures[id].body->ResetMassData();
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else 
+  {
+    fixtures[id].fixture->SetFriction(friction);
+    fixtures[id].body->ResetMassData();
+  }
 }
 
 void physics_fixture_set_linear_damping(int id, float damping)
 {
-  fixtures[id].body->SetLinearDamping(damping);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else 
+  {
+    fixtures[id].body->SetLinearDamping(damping);
+  }
 }
 
 void physics_fixture_set_angular_damping(int id, float damping)
 {
-  fixtures[id].body->SetAngularDamping(damping);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else 
+  {
+    fixtures[id].body->SetAngularDamping(damping);
+  }
 }
 
 void physics_fixture_set_restitution(int id, float restitution)
 {
-  fixtures[id].fixture->SetRestitution(restitution);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else 
+  {
+    fixtures[id].fixture->SetRestitution(restitution);
+  }
 }
 
 void physics_fixture_set_sensor(int id, bool state)
 {
-  fixtures[id].fixture->SetSensor(state);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else 
+  {
+    fixtures[id].fixture->SetSensor(state);
+  }
 }
 
 void physics_fixture_set_awake(int id, bool state)
 {
-  fixtures[id].body->SetAwake(state);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->SetAwake(state);
+  }
 }
 
 void physics_fixture_set_static(int id)
 {
-  fixtures[id].body->SetType(b2_staticBody);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->SetType(b2_staticBody);
+  }
 }
 
 void physics_fixture_set_kinematic(int id)
 {
-  fixtures[id].body->SetType(b2_kinematicBody);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->SetType(b2_kinematicBody);
+  }
 }
 
 void physics_fixture_set_dynamic(int id)
 {
-  fixtures[id].body->SetType(b2_dynamicBody);
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->SetType(b2_dynamicBody);
+  }
 }
 
 float physics_fixture_get_angle(int id) 
 {
-  return fixtures[id].body->GetAngle();
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return 0;
+  }
+  else
+  {
+    return fixtures[id].body->GetAngle();
+  }
 }
 
 float physics_fixture_get_x(int id) 
 {
-  return fixtures[id].body->GetPosition().x;
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return 0;
+  }
+  else
+  {
+    return fixtures[id].body->GetPosition().x;
+  } 
 }
 
 float physics_fixture_get_y(int id) 
 {
-  return fixtures[id].body->GetPosition().y;
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return 0;
+  }
+  else
+  {
+    return fixtures[id].body->GetPosition().y;
+  }
 }
 
 void physics_pause_enable(bool pause)
