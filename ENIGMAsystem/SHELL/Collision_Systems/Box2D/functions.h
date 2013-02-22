@@ -24,7 +24,7 @@ bool place_meeting(double x, double y, int object);
 /* Worlds */
 int physics_world_create();
 void physics_world_delete(int index);
-void physics_world_gravity(int index, float gx, float gy);
+void physics_world_gravity(int index, double gx, double gy);
 void physics_world_update(int index); // extra function to control your world update, should be auto done inside our game loop
 void physics_world_update_iterations();
 void physics_world_update_speed();
@@ -37,29 +37,29 @@ void physics_fixture_bind(); // binds a fixture to an object, im not writing thi
 void physics_fixture_set_collision_group(int id, int group);
 void physics_fixture_delete(int id);
 
-void physics_fixture_set_box_shape(int id, float halfwidth, float halfheight);
-void physics_fixture_set_circle_shape(int id, float radius);
+void physics_fixture_set_box_shape(int id, double halfwidth, double halfheight);
+void physics_fixture_set_circle_shape(int id, double radius);
 void physics_fixture_set_polygon_shape();
 void physics_fixture_add_point();
 
-void physics_fixture_set_transform(int id, float x, float y, float angle);
-void physics_fixture_set_position(int id, float x, float y);
-void physics_fixture_set_angle(int id, float angle);
-void physics_fixture_set_density(int id, float density);
-void physics_fixture_set_friction(int id, float friction);
-void physics_fixture_set_linear_damping(int id, float damping);
-void physics_fixture_set_angular_damping(int id, float damping);
-void physics_fixture_set_restitution(int id, float restitution);
+void physics_fixture_set_transform(int id, double x, double y, double angle);
+void physics_fixture_set_position(int id, double x, double y);
+void physics_fixture_set_angle(int id, double angle);
+void physics_fixture_set_density(int id, double density);
+void physics_fixture_set_friction(int id, double friction);
+void physics_fixture_set_linear_damping(int id, double damping);
+void physics_fixture_set_angular_damping(int id, double damping);
+void physics_fixture_set_restitution(int id, double restitution);
 void physics_fixture_set_sensor(int id, bool state);
 void physics_fixture_set_static(int id);
 void physics_fixture_set_kinematic(int id);
 void physics_fixture_set_dynamic(int id);
 void physics_fixture_set_awake(int id, bool state);
-void physics_fixture_set_mass(int id, float mass, float local_center_x, float local_center_y, float inertia);
+void physics_fixture_set_mass(int id, double mass, double local_center_x, double local_center_y, double inertia);
 
-float physics_fixture_get_angle(int id);
-float physics_fixture_get_x(int id);
-float physics_fixture_get_y(int id);
+double physics_fixture_get_angle(int id);
+double physics_fixture_get_x(int id);
+double physics_fixture_get_y(int id);
 
 /* Forces */
 void physics_apply_force();
@@ -82,6 +82,6 @@ void physics_joint_set_value();
 
 /* Miscellaneous */
 void physics_test_overlap();
-void physics_mass_properties(); // same as physics_fixture_set_mass except it doesnt need an id, uses the currently bound fixture
-void physics_draw_debug(); // draws the currently bound fixture's shape with draw color, fuck that 
+void physics_mass_properties(double mass, double local_center_x, double local_center_y, double inertia); 
+void physics_draw_debug(); 
 void physics_pause_enable(bool pause);

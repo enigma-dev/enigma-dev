@@ -156,7 +156,7 @@ void physics_fixture_delete(int id)
 
 }
 
-void physics_fixture_set_box_shape(int id, float halfwidth, float halfheight)
+void physics_fixture_set_box_shape(int id, double halfwidth, double halfheight)
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -173,7 +173,7 @@ void physics_fixture_set_box_shape(int id, float halfwidth, float halfheight)
   }
 }
 
-void physics_fixture_set_circle_shape(int id, float radius) 
+void physics_fixture_set_circle_shape(int id, double radius) 
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -190,7 +190,7 @@ void physics_fixture_set_circle_shape(int id, float radius)
   }
 }
 
-void physics_fixture_set_transform(int id, float x, float y, float angle)
+void physics_fixture_set_transform(int id, double x, double y, double angle)
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -202,7 +202,7 @@ void physics_fixture_set_transform(int id, float x, float y, float angle)
   }
 }
 
-void physics_fixture_set_position(int id, float x, float y)
+void physics_fixture_set_position(int id, double x, double y)
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -214,7 +214,7 @@ void physics_fixture_set_position(int id, float x, float y)
   }
 }
 
-void physics_fixture_set_angle(int id, float angle)
+void physics_fixture_set_angle(int id, double angle)
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -226,7 +226,7 @@ void physics_fixture_set_angle(int id, float angle)
   }
 }
 
-void physics_fixture_set_density(int id, float density) 
+void physics_fixture_set_density(int id, double density) 
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -245,7 +245,7 @@ void physics_fixture_set_density(int id, float density)
   }
 }
 
-void physics_fixture_set_friction(int id, float friction) 
+void physics_fixture_set_friction(int id, double friction) 
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -258,7 +258,7 @@ void physics_fixture_set_friction(int id, float friction)
   }
 }
 
-void physics_fixture_set_linear_damping(int id, float damping)
+void physics_fixture_set_linear_damping(int id, double damping)
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -270,7 +270,7 @@ void physics_fixture_set_linear_damping(int id, float damping)
   }
 }
 
-void physics_fixture_set_angular_damping(int id, float damping)
+void physics_fixture_set_angular_damping(int id, double damping)
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -282,7 +282,7 @@ void physics_fixture_set_angular_damping(int id, float damping)
   }
 }
 
-void physics_fixture_set_restitution(int id, float restitution)
+void physics_fixture_set_restitution(int id, double restitution)
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -354,7 +354,7 @@ void physics_fixture_set_dynamic(int id)
   }
 }
 
-float physics_fixture_get_angle(int id) 
+double physics_fixture_get_angle(int id) 
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -366,7 +366,7 @@ float physics_fixture_get_angle(int id)
   }
 }
 
-float physics_fixture_get_x(int id) 
+double physics_fixture_get_x(int id) 
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -378,7 +378,7 @@ float physics_fixture_get_x(int id)
   } 
 }
 
-float physics_fixture_get_y(int id) 
+double physics_fixture_get_y(int id) 
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
   {
@@ -393,4 +393,15 @@ float physics_fixture_get_y(int id)
 void physics_pause_enable(bool pause)
 {
   systemPaused = pause;
+}
+
+void physics_mass_properties(double mass, double local_center_x, double local_center_y, double inertia)
+{
+  // same as physics_fixture_set_mass except it doesnt need an id, uses the currently bound fixture
+  // of whatever is calling the function, im not writing it cause its stupid
+}
+
+void physics_draw_debug()
+{
+  // draws the currently bound fixture's shape with draw color, fuck that let the end programmer have control
 }
