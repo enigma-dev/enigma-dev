@@ -38,6 +38,10 @@ using std::string;
 #include "WINDOWSwindow.h"
 #include "WINDOWSmain.h"
 
+#include "Platforms/os_types.h"
+
+const int os_type = os_windows;
+
 extern unsigned int game_id;
 static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
 

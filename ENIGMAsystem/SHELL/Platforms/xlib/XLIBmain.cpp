@@ -37,6 +37,8 @@
 
 #include <time.h>
 
+const int os_type = os_linux;
+
 extern string keyboard_lastchar;
 
 namespace enigma

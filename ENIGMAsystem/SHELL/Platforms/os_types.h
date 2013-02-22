@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,54 +25,22 @@
 **                                                                              **
 \********************************************************************************/
 
-/*************************************************************
-GM Global variables
-******************/
+#ifndef OS_TYPES__H
+#define OS_TYPES__H
 
-bool argument_relative=false;
-string caption_score="Score:", caption_lives="Lives:", caption_health="Health:";
+enum
+{
+  os_unknown = -1,
+  os_windows = 0,
+  os_win32 = 0,
+  os_macosx = 1,
+  os_psp = 2,
+  os_ios = 3,
+  os_android = 4,
+  os_symbian = 5,
+  os_linux = 6,
+  os_winphone = 7,
+};
 
-/*
-global:     cursor_sprite
-global:     error_last
-global:     error_occurred
-global:     event_action
-global:     event_number
-global:     event_object
-global:     event_type*/
-double      fps;
-
-double health=100;
-// TODO: MOVEME: Who put this here?
-#ifndef JUST_DEFINE_IT_RUN
-#include <deque>
-std::deque<int> instance_id;
-#else
-int *instance_id;
 #endif
 
-int keyboard_key=0;
-/*global:     keyboard_lastchar
-global:     keyboard_lastkey */
-string keyboard_string="";
-
-double lives=3;
-double score=0;
-bool secure_mode=false;
-bool show_score=0, show_lives=0, show_health=0;
-
-//string temp_directory="";
-int transition_kind=0;
-int transition_steps=80;
-/*global:     transition_time
-global:  working_directory*/
-bool automatic_redraw = true;
-string program_directory="";
-int gamemaker_version=0;
-//int transition_steps;
-int cursor_sprite;
-extern int room_first, room_last;
-
-/*********************
-End GM global variables
- *********************/
