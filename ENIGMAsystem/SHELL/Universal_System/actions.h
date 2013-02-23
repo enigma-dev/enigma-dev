@@ -212,7 +212,7 @@ inline void action_draw_text(const string text, const double x, const double y) 
 
 inline void action_sleep(const double milliseconds, const int redraw) {
     if (redraw) {screen_redraw();}
-    sleep(milliseconds/1000);
+    sleep(milliseconds);
 }
 
 inline void action_current_room(const int transition) {
