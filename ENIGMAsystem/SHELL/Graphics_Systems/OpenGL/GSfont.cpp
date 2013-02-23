@@ -87,6 +87,18 @@ unsigned draw_get_valign(){
     const font *const fnt = fontstructarray[id];
 #endif
 
+namespace enigma
+{
+  inline int get_space_width(const font *const fnt)
+  {
+    fontglyph &g = fnt->glyphs[(unsigned char)(' ' - fnt->glyphstart) % fnt->glyphcount];
+    // Use the width of the space glyph when available,
+    // else use the backup.
+    // FIXME: Find out why the width is not available on Linux.
+    return g.xs > 1 ? g.xs : fnt->height/3;
+  }
+}
+
 ///////////////////////////////////////////////////
 unsigned int string_width_line(variant vstr, int line)
 {
@@ -107,7 +119,7 @@ unsigned int string_width_line(variant vstr, int line)
       cl += 1;
       len = 0;
     } else if (str[i] == ' ')
-      len += fnt->height/3; // FIXME: what's GM do about this?
+      len += get_space_width(fnt);
     else {
       len += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount].xs;
     }
@@ -128,7 +140,7 @@ unsigned int string_width_ext_line(variant vstr, int w, int line)
     else if (str[i] == '\n')
       if (cl == line) return width; else width = 0, cl +=1;
     else if (str[i] == ' '){
-      width += fnt->height/3, tw = 0;
+      width += get_space_width(fnt), tw = 0;
       for (unsigned c = i+1; c < str.length(); c++)
       {
         if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
@@ -156,7 +168,7 @@ unsigned int string_width_ext_line_count(variant vstr, int w)
     else if (str[i] == '\n')
       width = 0, cl +=1;
     else if (str[i] == ' '){
-      width += fnt->height/3, tw = 0;
+      width += get_space_width(fnt), tw = 0;
       for (unsigned c = i+1; c < str.length(); c++)
       {
         if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
@@ -181,7 +193,7 @@ unsigned int string_width(variant vstr)
     if (str[i] == '\r' or str[i] == '\n')
       tlen = 0;
     else if (str[i] == ' ')
-      tlen += fnt->height/3; // FIXME: what's GM do about this?
+      tlen += get_space_width(fnt);
     else {
       tlen += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount].xs;
       if (tlen > mlen) mlen = tlen;
@@ -213,7 +225,7 @@ unsigned int string_width_ext(variant vstr, int sep, int w) //here sep doesn't d
         if (width >= unsigned(w) && w!=-1)
             (width>maxwidth ? maxwidth=width, width = 0 : width = 0);
         else
-            width += fnt->height/3; // FIXME: what's GM do about this?
+            width += get_space_width(fnt);
     } else {
         fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
         width += g.xs;
@@ -233,7 +245,7 @@ unsigned int string_height_ext(variant vstr, int sep, int w)
     if (str[i] == '\r' or str[i] == '\n')
       width = 0, height +=  (sep+2 ? fnt->height : sep);
     else if (str[i] == ' '){
-      width += fnt->height/3;
+      width += get_space_width(fnt);
       tw = 0;
       for (unsigned c = i+1; c < str.length(); c++)
       {
@@ -274,7 +286,7 @@ void draw_text(int x,int y,variant vstr)
         else if (str[i] == '\n')
           xx = x, yy += fnt->height;
         else if (str[i] == ' ')
-          xx += fnt->height/3; // FIXME: what's GM do about this?
+          xx += get_space_width(fnt);
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
@@ -302,7 +314,7 @@ void draw_text(int x,int y,variant vstr)
           line +=1, yy += fnt->height;
           xx = halign == fa_center ? x-int(string_width_line(str,line)/2) : x-int(string_width_line(str,line));
         } else if (str[i] == ' ')
-          xx += fnt->height/3; // FIXME: what's GM do about this?
+          xx += get_space_width(fnt);
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
@@ -339,7 +351,7 @@ void draw_text_ext(int x,int y,variant vstr, int sep, int w)
         else if (str[i] == '\n')
           xx = x, yy += (sep+2 ? fnt->height : sep);
         else if (str[i] == ' '){
-          xx += fnt->height/3, width = xx-x;
+          xx += get_space_width(fnt), width = xx-x;
           tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
           {
@@ -375,7 +387,7 @@ void draw_text_ext(int x,int y,variant vstr, int sep, int w)
         else if (str[i] == '\n')
           line += 1, xx = halign == fa_center ? x-int(string_width_ext_line(str,w,line)/2) : x-int(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), width = 0;
         else if (str[i] == ' '){
-          xx += fnt->height/3, width += fnt->height/3, tw = 0;
+          xx += get_space_width(fnt), width += get_space_width(fnt), tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
           {
             if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
@@ -414,7 +426,7 @@ void draw_text_transformed(double x,double y,variant vstr,double xscale,double y
 
   const float sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
-    cvy = cv*yscale, sw = fnt->height/3 * cvx, sh = fnt->height/3 * svx,
+    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
   float xx, yy, tmpx, tmpy, tmpsize;
@@ -520,7 +532,7 @@ void draw_text_ext_transformed(double x,double y,variant vstr,int sep, int w, do
 
   const float sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
-    cvy = cv*yscale, sw = fnt->height/3 * cvx, sh = fnt->height/3 * svx,
+    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
   float xx, yy, tmpx, tmpy, wi, tmpsize;
@@ -545,7 +557,7 @@ void draw_text_ext_transformed(double x,double y,variant vstr,int sep, int w, do
           xx += sw,
           yy -= sh;
 
-          width += fnt->height/3;
+          width += get_space_width(fnt);
           tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
           {
@@ -606,7 +618,7 @@ void draw_text_ext_transformed(double x,double y,variant vstr,int sep, int w, do
           xx += sw,
           yy -= sh;
 
-          width += fnt->height/3;
+          width += get_space_width(fnt);
           tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
           {
@@ -659,7 +671,7 @@ void draw_text_transformed_color(double x,double y,variant vstr,double xscale,do
 
   const float sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
-    cvy = cv*yscale, sw = fnt->height/3 * cvx, sh = fnt->height/3 * svx,
+    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
   float xx, yy, tmpx, tmpy, tmpsize;
@@ -684,7 +696,7 @@ void draw_text_transformed_color(double x,double y,variant vstr,double xscale,do
           lines += 1, width = 0, xx = tmpx + lines * shi, yy = tmpy + lines * chi, tmpsize = string_width_line(str,lines);
         else if (str[i] == ' ')
           xx += sw, yy -= sh,
-          width += fnt->height/3;
+          width += get_space_width(fnt);
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
@@ -738,7 +750,7 @@ void draw_text_transformed_color(double x,double y,variant vstr,double xscale,do
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
         } else if (str[i] == ' ')
           xx += sw, yy -= sh,
-          width += fnt->height/3;
+          width += get_space_width(fnt);
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
@@ -784,7 +796,7 @@ void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int 
 
   const float sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
-    cvy = cv*yscale, sw = fnt->height/3 * cvx, sh = fnt->height/3 * svx,
+    cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
   float xx, yy, tmpx, tmpy, tmpsize;
@@ -809,7 +821,7 @@ void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int 
           lines += 1, width = 0, xx = tmpx + lines * shi, yy = tmpy + lines * chi, tmpsize = string_width_ext_line(str,w,lines);
         else if (str[i] == ' '){
           xx += sw, yy -= sh,
-          width += fnt->height/3;
+          width += get_space_width(fnt);
           tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
           {
@@ -873,7 +885,7 @@ void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int 
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
         } else if (str[i] == ' '){
           xx += sw, yy -= sh,
-          width += fnt->height/3;
+          width += get_space_width(fnt);
           tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
           {
@@ -950,7 +962,7 @@ void draw_text_color(int x,int y,variant vstr,int c1,int c2,int c3,int c4,double
           line += 1;
           sw = string_width_line(str, line);
         } else if (str[i] == ' ')
-          xx += fnt->height/3; // FIXME: what's GM do about this?
+          xx += get_space_width(fnt);
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
@@ -988,7 +1000,7 @@ void draw_text_color(int x,int y,variant vstr,int c1,int c2,int c3,int c4,double
           yy += fnt->height, line += 1, sw = string_width_line(str, line),
           xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else if (str[i] == ' ')
-          xx += fnt->height/3; // FIXME: what's GM do about this?
+          xx += get_space_width(fnt);
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
@@ -1040,7 +1052,7 @@ void draw_text_ext_color(int x,int y,variant vstr,int sep, int w, int c1,int c2,
         else if (str[i] == '\n')
           xx = x, yy += (sep+2 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
         else if (str[i] == ' '){
-          xx += fnt->height/3;
+          xx += get_space_width(fnt);
           width = xx-x;
           tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
@@ -1084,7 +1096,7 @@ void draw_text_ext_color(int x,int y,variant vstr,int sep, int w, int c1,int c2,
         else if (str[i] == '\n')
           yy += (sep+2 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         else if (str[i] == ' '){
-          xx += fnt->height/3, width = xx-tmpx, tw = 0;
+          xx += get_space_width(fnt), width = xx-tmpx, tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
           {
             if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
