@@ -30,14 +30,31 @@ using std::vector;
 #include "functions.h"
 bool systemPaused = false;
 
+static inline double r2d(double r) { return r * 180 / M_PI; }
+
+// NOTES: 
+// 1) provide function overloads for interfacing with how studio is all fucked up so we don't have to limit ours
+// 2) box2d uses an inversed y-axis, thus why physics_fixture_get_angle() returns -radianstodegrees(angle)
+// 3) static objects when hit appear to me to move about one pixel at times, I can't tell if this is just my eyes playin tricks
+// 4) worlds must be manually updated untill someone writes an update loop for this system which updates the current
+//    rooms binded world, I suggest also leaving the option to continue allowing you to manually update your world
+// 5) box2d's manual also states you should blend previous timesteps for updating the world with the current timestep
+//    in order to make the simulation run smoother
+// 6) box2d manual is available here... http://www.box2d.org/manual.html
+// 7) I made joints bind fixtures, where as studio's joints bind instances together, that's stupid, fuck that
+// 8) box2d's classes allow you to set a b2Shape for instance to a b2CircleShape or b2PolygonShape
+//    that is why I wrote the classes to use an abstracted pointer reference such as b2Shape and b2Joint
+
 struct worldInstance { 
   b2World* world;
   // Prepare for simulation. Typically we use a time step of 1/60 of a
   // second (60Hz) and 10 iterations. This provides a high quality simulation
   // in most game scenarios.
-  float32 timeStep = 1.0f / 30.0f;
+  float32 timeStep = 1.0f / 60.0f;
   int32 velocityIterations = 8;
   int32 positionIterations = 3;
+  int32 pixelstometers = 32;
+  bool paused = false;
   worldInstance() 
   {
     // Define the gravity vector.
@@ -50,8 +67,9 @@ struct worldInstance {
 }; 
 void worldInstance::world_update() 
 {
-  if (!systemPaused) {
+  if (!systemPaused && !paused) {
     world->Step(timeStep, velocityIterations, positionIterations);
+    world->ClearForces();
   }
 }
 vector<worldInstance> worlds(0);
@@ -66,6 +84,15 @@ struct fixtureInstance {
   }
 }; 
 vector<fixtureInstance> fixtures(0);
+
+struct jointInstance { 
+  int world;
+  b2Joint* joint;
+  jointInstance() 
+  {
+  }
+}; 
+vector<jointInstance> joints(0);
 
 /* This is just place holder shit to get the fuckin linker shut the fuckin hell up */
 enigma::instance_t collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme)
@@ -97,6 +124,13 @@ bool place_meeting(double x, double y, int object)
 
 /* This is where the actual physics_* functions start at */
 
+void physics_world_create(int pixeltometerscale)
+{
+  // studio's fucked up world creation just auto binds it to the current room
+  // thats fuckin retarded thus why i overloaded the function and provided an extra
+  // function for setting the pixel to metre scale, because i refuse to write system their way
+}
+
 int physics_world_create() 
 {
   int i = worlds.size();
@@ -105,8 +139,50 @@ int physics_world_create()
   return i;
 }
 
+void physics_world_delete(int index)
+{
+  // I, robert colton, know nothing of memory management, help me by writing this bitch of a function
+}
+
+void physics_world_pause_enable(int index, bool paused)
+{
+  if (unsigned(index) >= worlds.size() || index < 0)
+  {
+    return;
+  }
+  else
+  {
+    worlds[index].paused = paused;
+  }
+}
+
+void physics_world_scale(int index, int pixelstometers)
+{
+  if (unsigned(index) >= worlds.size() || index < 0)
+  {
+    return;
+  }
+  else
+  {
+    worlds[index].pixelstometers = pixelstometers;
+  }
+}
+
+void physics_world_gravity(int index, double gx, double gy)
+{
+  if (unsigned(index) >= worlds.size() || index < 0)
+  {
+    return;
+  }
+  else
+  {
+    worlds[index].world->SetGravity(b2Vec2(gx, gy));
+  }
+}
+
 void physics_world_update(int index) 
 {
+  // extra function to control your world update, should be auto done inside our game loop
   if (unsigned(index) >= worlds.size() || index < 0)
   {
     return;
@@ -117,9 +193,54 @@ void physics_world_update(int index)
   }
 }
 
-void physics_fixture_create()
+void physics_world_update_settings(int index, double timeStep, int velocityIterations, int positionIterations)
 {
+  // extra function to control your world update settings
+  if (unsigned(index) >= worlds.size() || index < 0)
+  {
+    return;
+  }
+  else
+  {
+    worlds[index].timeStep = timeStep;
+    worlds[index].velocityIterations = velocityIterations;
+    worlds[index].positionIterations = positionIterations;
+  }
+}
 
+void physics_world_update_iterations(int iterationsperstep)
+{
+  // provide overloads if we do adopt this system so that you can still
+  // change indexed worlds
+}
+
+void physics_world_update_iterations(int index, int iterationsperstep)
+{
+  // this sets the number of iterations the physics system takes each step
+  // not needed for the current implementation
+}
+
+void physics_world_update_speed(int updatesperstep)
+{
+  // provide overloads if we do adopt this system so that you can still
+  // change indexed worlds
+}
+
+void physics_world_update_speed(int index, int updatesperstep)
+{
+  // this sets the number of updates the physics system takes each step
+  // not needed for the current implementation
+}
+
+void physics_world_draw_debug()
+{
+  // draws all the fixtures and their rotations in the room for u, wants constants, fuck that
+  // end programmer can do it themselves
+}
+
+int physics_fixture_create()
+{
+  // overloaded cause the default studio function uses the current rooms binded world
 }
 
 int physics_fixture_create(int world) 
@@ -137,6 +258,7 @@ int physics_fixture_create(int world)
     bodyDef.type = b2_dynamicBody;
     fixture.body = worlds[world].world->CreateBody(&bodyDef);
     fixtures[i] = fixture;
+    fixtures[i].world = world;
     return i;
   }
 }
@@ -148,12 +270,23 @@ void physics_fixture_bind()
 
 void physics_fixture_set_collision_group(int id, int group)
 {
-  //fixtures[id].fixture->filter.groupIndex = group;
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    // sets the collision group used to make parts of things not collide, like a ragdoll for 
+    // instance should not collide with itself
+    b2Filter newfilter;
+    newfilter.groupIndex = group;
+    fixtures[id].fixture->SetFilterData(newfilter);
+  }
 }
 
 void physics_fixture_delete(int id)
 {
-
+  // I, robert, know nothing of memory management, write this shit for me
 }
 
 void physics_fixture_set_box_shape(int id, double halfwidth, double halfheight)
@@ -318,6 +451,35 @@ void physics_fixture_set_awake(int id, bool state)
   }
 }
 
+void physics_fixture_set_sleep(int id, bool allowsleep)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->SetSleepingAllowed(allowsleep);
+  }
+}
+
+void physics_fixture_mass_properties(int id, double mass, double local_center_x, double local_center_y, double inertia)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+     b2MassData lMassData; 
+     fixtures[id].body->GetMassData(&lMassData);
+     lMassData.mass = mass;
+     lMassData.center.Set(local_center_x, local_center_y);
+     lMassData.I = inertia;
+     fixtures[id].body->SetMassData(&lMassData);
+  }
+}
+
 void physics_fixture_set_static(int id)
 {
   if (unsigned(id) >= fixtures.size() || id < 0)
@@ -327,6 +489,7 @@ void physics_fixture_set_static(int id)
   else
   {
     fixtures[id].body->SetType(b2_staticBody);
+    fixtures[id].body->ResetMassData();
   }
 }
 
@@ -362,7 +525,7 @@ double physics_fixture_get_angle(int id)
   }
   else
   {
-    return fixtures[id].body->GetAngle();
+    return -r2d(fixtures[id].body->GetAngle());
   }
 }
 
@@ -390,6 +553,193 @@ double physics_fixture_get_y(int id)
   }
 }
 
+double physics_fixture_get_mass(int id)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return 0;
+  }
+  else
+  {
+     b2MassData lMassData; 
+     fixtures[id].body->GetMassData(&lMassData);
+     return lMassData.mass;
+  }
+}
+
+double physics_fixture_get_center_x(int id)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return 0;
+  }
+  else
+  {
+     b2MassData lMassData; 
+     fixtures[id].body->GetMassData(&lMassData);
+     return lMassData.center.x;
+  }
+}
+
+double physics_fixture_get_center_y(int id)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return 0;
+  }
+  else
+  {
+     b2MassData lMassData; 
+     fixtures[id].body->GetMassData(&lMassData);
+     return lMassData.center.y;
+  }
+}
+
+double physics_fixture_get_inertia(int id)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return 0;
+  }
+  else
+  {
+     b2MassData lMassData; 
+     fixtures[id].body->GetMassData(&lMassData);
+     return lMassData.I;
+  }
+}
+
+void physics_apply_force(int world, double xpos, double ypos, double xforce, double yforce)
+{
+  if (unsigned(world) >= worlds.size() || world < 0)
+  {
+    return;
+  }
+  else
+  {
+    for (int i = 0; i < fixtures.size(); i++)
+    {
+      if (fixtures[i].world == world) 
+      {
+        fixtures[i].body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos));
+      }
+    }
+  }
+}
+
+void physics_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse)
+{
+  if (unsigned(world) >= worlds.size() || world < 0)
+  {
+    return;
+  }
+  else
+  {
+    for (int i = 0; i < fixtures.size(); i++)
+    {
+      if (fixtures[i].world == world) 
+      {
+        fixtures[i].body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos));
+      }
+    }
+  }
+}
+
+void physics_apply_local_force(int id, double xlocal, double ylocal, double xforce, double yforce)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xlocal, ylocal));
+  }
+}
+
+void physics_apply_local_impulse(int id, double xlocal, double ylocal, double ximpulse, double yimpulse)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xlocal, ylocal));
+  }
+}
+
+void physics_apply_local_torque(int id, double torque)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].body->ApplyTorque(torque);
+  }
+}
+
+int physics_joint_create(int world) 
+{
+    int i = joints.size();
+    joints.resize(i + 1);
+    jointInstance joint = jointInstance();
+    joint.world = world;
+    joints[i] = joint;
+    return i;
+}
+
+void physics_joint_distance_create(int id, int fixture1, int fixture2) 
+{
+  if (unsigned(id) >= joints.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    b2JointDef jointDef;
+    jointDef.bodyA = fixtures[fixture1].body;
+    jointDef.bodyB = fixtures[fixture2].body;
+    //jointDef.target.Set(350, 320);
+    //jointDef.maxForce = 3000.0 * body.m_mass;
+    //jointDef.timeStep = m_timeStep;
+    joints[id].joint = worlds[joints[id].world].world->CreateJoint(&jointDef);
+  }
+}
+
+void physics_joint_mouse_create(int id, int fixture) 
+{
+  if (unsigned(id) >= joints.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    b2MouseJointDef jointDef;
+    //jointDef.body1 = m_world.m_groundBody;
+    //jointDef.body2 = body;
+    //jointDef.target.Set(350, 320);
+    //jointDef.maxForce = 3000.0 * body.m_mass;
+    //jointDef.timeStep = m_timeStep;
+    joints[id].joint = worlds[joints[id].world].world->CreateJoint(&jointDef);
+  }
+}
+
+void physics_joint_set_target(int id, double x, double y)
+{
+  if (unsigned(id) >= joints.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    //joints[id].joint->SetTarget(b2Vec2(x, y));
+  }
+}
+
+
 void physics_pause_enable(bool pause)
 {
   systemPaused = pause;
@@ -397,7 +747,7 @@ void physics_pause_enable(bool pause)
 
 void physics_mass_properties(double mass, double local_center_x, double local_center_y, double inertia)
 {
-  // same as physics_fixture_set_mass except it doesnt need an id, uses the currently bound fixture
+  // same as physics_fixture_mass_properties except it doesnt need an id, uses the currently bound fixture
   // of whatever is calling the function, im not writing it cause its stupid
 }
 
