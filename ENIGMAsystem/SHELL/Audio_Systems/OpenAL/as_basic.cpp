@@ -166,7 +166,7 @@ namespace enigma
   };
   struct sound
   {
-    ALuint buf[3]; // The buffer-idof the sound data
+    ALuint buf[3]; // The buffer-id of the sound data
     alureStream *stream; // optional stream
     void (*cleanup)(void *userdata); // optional cleanup callback for streams
     void *userdata; // optional userdata for streams
