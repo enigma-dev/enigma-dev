@@ -60,7 +60,7 @@ int string_pos(string substr,string str) {
 string string_format(double val, unsigned tot, unsigned dec)
 {
     char sbuf[19]; sbuf[0] = 0;
-    sprintf(sbuf," %*.*f",tot,dec,val);
+    sprintf(sbuf,"%0*.*f",tot,dec,val);
     const string fstr = sbuf;
     return fstr.c_str();
 }
