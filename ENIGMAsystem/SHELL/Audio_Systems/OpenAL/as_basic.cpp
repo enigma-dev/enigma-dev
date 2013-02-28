@@ -355,7 +355,7 @@ bool sound_exists(int sound)
 bool sound_play(int sound) // Returns whether sound is playing
 {
   int src = get_free_channel(1);
-  if (src != -1)
+  if (src != -1 && sound_exists(sound))
   {
     get_sound(snd,sound,0); //snd.looping = false;
     alSourcei(sound_sources[src].source, AL_BUFFER, snd->buf[0]);
@@ -375,7 +375,7 @@ bool sound_play(int sound) // Returns whether sound is playing
 bool sound_loop(int sound) // Returns whether sound is playing
 {
   int src = get_free_channel(1);
-  if (src != -1)
+  if (src != -1 && sound_exists(sound))
   {
     get_sound(snd,sound,0); //snd.looping = false;
     alSourcei(sound_sources[src].source, AL_BUFFER, snd->buf[0]);
@@ -421,6 +421,9 @@ void sound_stop_all()
 }
 void sound_delete(int sound) {
   sound_stop(sound);
+  if (!sound_exists(sound)) {
+    return;
+  }
   get_sound(snd,sound,);
   alureDestroyStream(snd->stream, 0, 0);
   for(size_t i = 1; i < sound_sources.size(); i++) {
@@ -458,10 +461,16 @@ void sound_resume_all()
   }
 }
 bool sound_isplaying(int sound) {
+  if (!sound_exists(sound)) {
+    return false;
+  }
   get_sound(snd,sound,false);
   return snd->playing;
 }
 bool sound_ispaused(int sound) {
+  if (!sound_exists(sound)) {
+    return false;
+  }
   return !enigma::sounds[sound]->idle and !enigma::sounds[sound]->playing;
 }
 
@@ -475,6 +484,9 @@ void sound_pan(int sound, float value)
   }
 }
 float sound_get_length(int sound) { // Not for Streams
+  if (!sound_exists(sound)) {
+    return 0.0;
+  }
   get_sound(snd,sound,0);
   ALint size, bits, channels, freq;
 
@@ -486,6 +498,9 @@ float sound_get_length(int sound) { // Not for Streams
   return size / channels / (bits/8) / (float)freq;
 }
 float sound_get_position(int sound) { // Not for Streams
+  if (!sound_exists(sound)) {
+    return 0.0;
+  }
   get_sound(snd,sound,-1);
   float offset;
 
@@ -493,6 +508,9 @@ float sound_get_position(int sound) { // Not for Streams
   return offset;
 }
 void sound_seek(int sound, float position) {
+  if (!sound_exists(sound)) {
+    return;
+  }
   get_sound(snd,sound,);
   if (snd->seek) snd->seek(snd->userdata, position); // Streams
   for(size_t i = 1; i < sound_sources.size(); i++) {
