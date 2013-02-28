@@ -40,7 +40,7 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 bool d3dMode = false;
-bool d3dHidden = false;
+bool d3dHidden = true;
 bool d3dZWriteEnable = true;
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
@@ -60,7 +60,7 @@ void d3d_start()
 
   // Enable depth buffering
   d3dMode = true;
-  d3dHidden = false;
+  d3dHidden = true;
   d3dZWriteEnable = true;
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
@@ -100,8 +100,9 @@ bool d3d_get_mode()
 
 void d3d_set_hidden(bool enable)
 {
+    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
     d3dHidden = enable;
-}   // TODO: Write function
+}
 
 void d3d_set_zwriteenable(bool enable)
 {
@@ -306,6 +307,7 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
+  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -320,6 +322,7 @@ void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double
 
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
 {
+  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -427,7 +430,7 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
     bind_texture(texId);
 
     //float xd = x2-x1, yd = y2-y1, zd = z2-z1;
-    float normal[] = {0, 0, 1};
+    float normal[] = {0, 0, 1}; // TODO: Use the normal.
     //float mag = hypot(normal[0], normal[1]); 
     //normal[0] /= mag; 
     //normal[1] /= mag;
