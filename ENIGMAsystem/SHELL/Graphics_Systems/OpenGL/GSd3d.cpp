@@ -436,13 +436,13 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
     //normal[1] /= mag;
 
     glBegin(GL_TRIANGLE_STRIP);
-    if (x2>x1 || y2>y1) {
+    if ((x2>x1) != (y2>y1)) {
       glTexCoord2fv(t0);
       glVertex3fv(v0);
-      glTexCoord2fv(t2);
-      glVertex3fv(v2);
       glTexCoord2fv(t1);
       glVertex3fv(v1);
+      glTexCoord2fv(t2);
+      glVertex3fv(v2);
       glTexCoord2fv(t3);
       glVertex3fv(v3);
     } else {
