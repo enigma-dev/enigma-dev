@@ -39,7 +39,7 @@ enum {
   rs_fastest,
   rs_dontcare,
   rs_exp,
-  rs_exp2, 
+  rs_exp2,
   rs_linear,
   rs_never, 	// Always False
   rs_less, 	// source Z < depth Z
@@ -131,7 +131,7 @@ bool d3d_transform_stack_disgard();
 
 bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col);
 bool d3d_light_define_point(int id, double x, double y, double z, double range, int col);
-void d3d_light_define_specularity(int id, int r, int g, int b, double a);
+bool d3d_light_define_specularity(int id, int r, int g, int b, double a);
 void d3d_light_specularity(int facemode, int r, int g, int b, double a);
 void d3d_light_shininess(int facemode, int shine);
 void d3d_light_define_ambient(int col);

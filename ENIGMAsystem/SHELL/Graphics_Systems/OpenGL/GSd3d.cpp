@@ -376,8 +376,8 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
 
     float xd = x2-x1, yd = y2-y1, zd = z2-z1;
     float normal[3] = {xd*zd, zd*yd, 0};
-    float mag = hypot(normal[0], normal[1]); 
-    normal[0] /= mag; 
+    float mag = hypot(normal[0], normal[1]);
+    normal[0] /= mag;
     normal[1] /= mag;
     if (x2 < x1) {
     normal[0]=-normal[0]; }
@@ -431,8 +431,8 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
 
     //float xd = x2-x1, yd = y2-y1, zd = z2-z1;
     float normal[] = {0, 0, 1}; // TODO: Use the normal.
-    //float mag = hypot(normal[0], normal[1]); 
-    //normal[0] /= mag; 
+    //float mag = hypot(normal[0], normal[1]);
+    //normal[0] /= mag;
     //normal[1] /= mag;
 
     glBegin(GL_TRIANGLE_STRIP);
@@ -514,7 +514,7 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
 	glNormal3fv(n4);
         glTexCoord2fv(t2);
           glVertex3fv(v4);
-	glNormal3fv(n6);	
+	glNormal3fv(n6);
         glTexCoord2fv(t3);
           glVertex3fv(v2);
 	glNormal3fv(n2);
@@ -725,7 +725,7 @@ void d3d_draw_torus(double x1, double y1, double z1, int texId, int hrep, int vr
 	bind_texture(texId);
         for (int i = 0; i < numc; i++) {
             glBegin(GL_QUAD_STRIP);
-	    
+
             for (int j = 0; j <= numt; j++) {
                 for (int k = 1; k >= 0; k--) {
 
@@ -969,7 +969,8 @@ class d3d_lights
         {
             ms = (*light_ind.find(id)).second;
             multimap<int,posi>::iterator it = ind_pos.find(ms);
-            ind_pos.erase(it);
+            if (it != ind_pos.end())
+                ind_pos.erase(it);
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
         else
@@ -1001,7 +1002,8 @@ class d3d_lights
         {
             ms = (*light_ind.find(id)).second;
             multimap<int,posi>::iterator it = ind_pos.find(ms);
-            ind_pos.erase(it);
+            if (it != ind_pos.end())
+                ind_pos.erase(it);
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
         else
@@ -1027,15 +1029,27 @@ class d3d_lights
         // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
         const double attenuation_calibration = 48.0;
         glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
-//        light_update_positions();
         return true;
     }
 
-    void light_define_specularity(int id, int r, int g, int b, double a) 
+    bool light_define_specularity(int id, int r, int g, int b, double a)
     {
-	map<int, int>::iterator it = light_ind.find(id);
-	float specular[4] = {r, g, b, a};
-	glLightfv(GL_LIGHT0+(*it).second, GL_SPECULAR, specular);
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+        }
+        float specular[4] = {r, g, b, a};
+        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+        return true;
     }
 
     bool light_enable(int id)
@@ -1083,7 +1097,7 @@ bool d3d_light_define_point(int id, double x, double y, double z, double range, 
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-void d3d_light_define_specularity(int id, int r, int g, int b, double a) 
+bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
     d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
@@ -1094,7 +1108,7 @@ void d3d_light_specularity(int facemode, int r, int g, int b, double a)
   glMaterialfv(renderstates[facemode], GL_SPECULAR, specular);
 }
 
-void d3d_light_shininess(int facemode, int shine) 
+void d3d_light_shininess(int facemode, int shine)
 {
   glMateriali(renderstates[facemode], GL_SHININESS, shine);
 }
@@ -1521,12 +1535,12 @@ class d3d_model
         model_primitive_end();
     }
 
-    void model_icosahedron() 
+    void model_icosahedron()
     {
 
     }
 
-    void model_torus(double x1, double y1, double z1, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14) 
+    void model_torus(double x1, double y1, double z1, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14)
     {
         int numc = csteps, numt = tsteps;
 
@@ -1560,7 +1574,7 @@ class d3d_model
     float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y2, z1}, v3[] = {x2, y2, z2},
           t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
     model_primitive_begin(GL_TRIANGLE_STRIP);
-        
+
     const float xd = x1-x2, yd = y2-y1, zd = z2-z1;
     const float usize = fabs(zd), vsize = hypotf(xd, yd);
     const float uz = zd/usize, vx = xd/vsize, vy = yd/vsize;
