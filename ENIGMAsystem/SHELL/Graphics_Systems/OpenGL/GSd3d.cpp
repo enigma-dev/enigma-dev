@@ -597,52 +597,55 @@ void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, do
     }
 }
 
-void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
+void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed, int steps)
 {
-    float v[51][3];
-    float t[100][3];
     steps = min(max(steps, 3), 48);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
+    float v[(steps + 1)*3 + 1][3];
+    float t[(steps + 1)*3 + 1][2];
     double a, px, py, tp;
     int k = 0;
     bind_texture(texId);
-    glBegin(GL_TRIANGLE_FAN);
-    v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
-    t[k][0] = 0; t[k][1] = 0;
-    glTexCoord2fv(t[k]);
-      glVertex3fv(v[k]);
-    k++;
+    glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
     {
-        v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+        v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
         t[k][0] = tp; t[k][1] = vrep;
         glTexCoord2fv(t[k]);
-          glVertex3fv(v[k]);
+        glVertex3fv(v[k]);
+        k += steps + 1;
+        v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+        t[k][0] = tp; t[k][1] = 0;
+        glTexCoord2fv(t[k]);
+        glVertex3fv(v[k]);
+        k -= steps + 1;
         k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
+    k += steps + 1;
     glEnd();
     if (closed)
     {
         glBegin(GL_TRIANGLE_FAN);
         v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
-        t[k][0] = 0; t[k][1] = vrep;
+        t[k][0] = 0; t[k][1] = 0;
         glTexCoord2fv(t[k]);
-          glVertex3fv(v[k]);
+        glVertex3fv(v[k]);
         k++;
         tp = 0;
-        for (int i = 1; i <= steps+1; i++)
+        for (int i = 0; i <= steps; i++)
         {
-            t[k][0] = tp; t[k][1] = 0;
+            v[k][0] = v[i + steps + 1][0]; v[k][1] = v[i + steps + 1][1]; v[k][2] = v[i + steps + 1][2];
+            t[k][0] = 0; t[k][1] = 0;
             glTexCoord2fv(t[k]);
-              glVertex3fv(v[i]);
+            glVertex3fv(v[k]);
             k++; tp += invstep;
         }
         glEnd();
     }
 }
 
-void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, int steps)
+void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, int steps)
 {
     steps = min(max(steps, 3), 24);
     const int zsteps = ceil(steps/2.0);
@@ -1078,7 +1081,7 @@ bool d3d_light_define_point(int id, double x, double y, double z, double range, 
 
 bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
-    d3d_lighting.light_define_specularity(id, r, g, b, a);
+    return d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
