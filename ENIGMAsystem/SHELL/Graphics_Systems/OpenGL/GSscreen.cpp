@@ -263,12 +263,6 @@ void screen_redraw()
                     glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
                     glClear(GL_COLOR_BUFFER_BIT);
                 }
-                else
-                {
-                    // Views by default clears the screen with black.
-                    glClearColor(0.0, 0.0, 0.0, 1.0);
-                    glClear(GL_COLOR_BUFFER_BIT);
-                }
                 glClear(GL_DEPTH_BUFFER_BIT);
 
                 draw_back();
