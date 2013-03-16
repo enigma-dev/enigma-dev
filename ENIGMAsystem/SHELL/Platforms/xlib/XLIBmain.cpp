@@ -266,13 +266,12 @@ int main(int argc,char** argv)
 	XCloseDisplay(disp);
 	return 0;*/
 
-  long speed_error_mcs = 0;
 	struct timespec time_offset;
+	struct timespec time_offset_slowing;
 	struct timespec time_current;
-	struct timespec time_previous;
 	clock_gettime(CLOCK_MONOTONIC, &time_offset);
-	time_previous.tv_sec = time_offset.tv_sec;
-	time_previous.tv_nsec = time_offset.tv_nsec;
+	time_offset_slowing.tv_sec = time_offset.tv_sec;
+	time_offset_slowing.tv_nsec = time_offset.tv_nsec;
 	int frames_count = 0;
 
 	while (!game_isending)
@@ -281,26 +280,36 @@ int main(int argc,char** argv)
 		clock_gettime(CLOCK_MONOTONIC, &time_current);
 		{
 			long passed_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_offset.tv_sec*1000000 + time_offset.tv_nsec/1000);
-      passed_mcs = clamp(passed_mcs, 0, 1000000);
+			passed_mcs = clamp(passed_mcs, 0, 1000000);
 			if (passed_mcs >= 1000000) { // Handle resetting.
 				fps = frames_count;
 				frames_count = 0;
 				time_offset.tv_sec += passed_mcs/1000000;
+				time_offset_slowing.tv_sec = time_offset.tv_sec;
+				time_offset_slowing.tv_nsec = time_offset.tv_nsec;
 			}
 		}
 
 		if (current_room_speed > 0) {
-			long spent_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_offset.tv_sec*1000000 + time_offset.tv_nsec/1000);
-      spent_mcs = clamp(spent_mcs, 0, 1000000);
+			long spent_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_offset_slowing.tv_sec*1000000 + time_offset_slowing.tv_nsec/1000);
+			spent_mcs = clamp(spent_mcs, 0, 1000000);
 			long remaining_mcs = 1000000 - spent_mcs;
 			long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
-			long current_quantum_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_previous.tv_sec*1000000 + time_previous.tv_nsec/1000);
-			long desired_quantum_mcs = long(1e6/current_room_speed);
-      long diff = desired_quantum_mcs - current_quantum_mcs;
-      speed_error_mcs += diff > 0 ? diff : 0;
-			if (remaining_mcs > needed_mcs || speed_error_mcs > 1000) {
+			const int catchup_limit_ms = 50;
+			if (needed_mcs > remaining_mcs + catchup_limit_ms*1000) {
+				// If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
+				// In order to avoid running too fast, we advance the offset, such that we are only at most catchup_limit ms behind.
+				// Thus, if the load is consistently making the game slow, the game is still allowed to run as fast as possible
+				// without any sleep.
+				// And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
+				time_offset_slowing.tv_nsec += 1000*(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
+				spent_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_offset_slowing.tv_sec*1000000 + time_offset_slowing.tv_nsec/1000);
+				spent_mcs = clamp(spent_mcs, 0, 1000000);
+				remaining_mcs = 1000000 - spent_mcs;
+				needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+			}
+			if (remaining_mcs > needed_mcs) {
 				usleep(1);
-        speed_error_mcs = 0;
 				continue;
 			}
 		}
@@ -308,9 +317,6 @@ int main(int argc,char** argv)
 		while(XQLength(disp))
 			if(handleEvents() > 0)
 				goto end;
-
-		time_previous.tv_sec = time_current.tv_sec;
-		time_previous.tv_nsec = time_current.tv_nsec;
 
 		enigma::handle_joysticks();
 		enigma::ENIGMA_events();
