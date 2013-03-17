@@ -53,14 +53,14 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 unsigned get_texture(int texid) 
 {
-	//if (texid < 0 || texid >= GmTextures.size()) 
-	//{
-	//	return -1;
-	//}
-	//else 
-	//{
+	if (texid < 0 || texid >= GmTextures.size()) 
+	{
+		return -1;
+	}
+	else 
+	{
 		return GmTextures[texid]->gltex;
-	//}
+	}
 }
 
 namespace enigma
