@@ -20,8 +20,8 @@
 #include "OpenGLHeaders.h"
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
-#include "GScolors.h"
-#include "GSfont.h"
+#include "GLcolors.h"
+#include "GLfont.h"
 #include "binding.h"
 
 using namespace std;

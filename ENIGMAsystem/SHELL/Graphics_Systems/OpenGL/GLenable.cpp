@@ -16,7 +16,7 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "GSenable.h"
+#include "GLenable.h"
 
 void gs_enable_alpha(bool enable) {
   (enable?glEnable:glDisable)(GL_ALPHA_TEST);

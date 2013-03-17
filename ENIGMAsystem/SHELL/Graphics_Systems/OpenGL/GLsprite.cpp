@@ -21,7 +21,7 @@
 using std::string;
 
 #include "OpenGLHeaders.h"
-#include "GSsprite.h"
+#include "GLsprite.h"
 #include "binding.h"
 
 #include "Universal_System/spritestruct.h"

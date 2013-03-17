@@ -27,7 +27,7 @@
  \********************************************************************************/
 
 #include "OpenGLHeaders.h"
-#include "GSd3d.h"
+#include "GLd3d.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>

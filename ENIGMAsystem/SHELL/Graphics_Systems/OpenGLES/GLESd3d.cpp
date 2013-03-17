@@ -25,13 +25,67 @@
 **                                                                              **
 \********************************************************************************/
 
-/* These functions are primarily for use of the engine. Experienced users
- * who are familiar with C++ can make use of these, but they were made to
- * use at load time with data read from the executable. These both expect
- * RAW format, RGB only.
- */
+using namespace std;
 
-namespace enigma
+#include "OpenGLHeaders.h"
+#include "GLESprmtvs.h"
+#include <string>
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h"
+#include <math.h>
+
+/*void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
-    extern bool interpolate_textures;
+   GLdouble xmin, xmax, ymin, ymax;
+
+   ymax = zNear * tan(fovy * M_PI / 360.0);
+   ymin = -ymax;
+   xmin = ymin * aspect;
+   xmax = ymax * aspect;
+
+
+   glFrustum(xmin, xmax, ymin, ymax, zNear, zFar);
+}//I need to include GL/glu.h*/
+//I need it for gluLookAt()
+
+
+int d3d_start()
+{
+    glEnable(GL_DEPTH_TEST);
+  //  gluPerspective(110, view_wview[view_current]/view_hview[view_current], 5, 6);
+
+    return 0;
+}
+
+int d3d_end()
+{
+    glDisable(GL_DEPTH_TEST);
+  //  glOrtho(0,room_width,0,room_height,0,1);
+
+    return 0;
+}
+
+int d3d_primitive_begin(int kind)
+{
+   // glBegin(kind);
+    return 0;
+}
+
+int d3d_vertex(double x, double y, double z)
+{
+   // glVertex3d(x,y,z);
+    return 0;
+}
+
+int d3d_primitive_end()
+{
+  //  glEnd();
+    return 0;
+}
+
+int d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,
+                       double yto,double zto,double xup,double yup,double zup)
+{
+   // gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
+    return 0;
 }
