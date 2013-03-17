@@ -32,7 +32,7 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 extern int room_width, room_height/*, sprite_idmax*/;
-#include "GSsurface.h"
+#include "GLsurface.h"
 
 #ifdef DEBUG_MODE
   #include <string>

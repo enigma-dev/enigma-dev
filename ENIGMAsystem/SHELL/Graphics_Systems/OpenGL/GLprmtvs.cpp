@@ -16,7 +16,7 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "GSprmtvs.h"
+#include "GLprmtvs.h"
 #include "binding.h"
 
 #include <string>

@@ -25,16 +25,36 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
-#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
-#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
-enum {
-  tx_none,
-  tx_nearest,
-  tx_bilinear,
-  tx_trilinear
-};
+#include "GLtextures.h"
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_background(bck2d,back)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return;\
+    }\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return r;\
+    }\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#else
+  #define get_background(bck2d,back)\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#endif
 
+int background_get_texture(int backId);
+int background_get_width(int backId);
+int background_get_height(int backId);
+double background_get_texture_width_factor(int backId);
+double background_get_texture_height_factor(int backId);
 void draw_background(int back, double x, double y);
 void draw_background_stretched(int back, double x, double y, double w, double h);
 void draw_background_part(int back,double left,double top,double width,double height,double x,double y);
@@ -46,29 +66,3 @@ void draw_background_part_ext(int back,double left,double top,double width,doubl
 void draw_background_tiled_ext(int back,double x,double y,double xscale,double yscale,int color,double alpha);
 void draw_background_tiled_area_ext(int back,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha);
 void draw_background_general(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4);
-
-int background_get_texture(int backId);
-int background_get_width(int backId);
-int background_get_height(int backId);
-double background_get_texture_width_factor(int backId);
-double background_get_texture_height_factor(int backId);
-void texture_set_interpolation(int enable);
-bool texture_get_interpolation();
-double texture_get_width(int texid);
-double texture_get_height(int texid);
-int texture_get_pixwidth(int texid);
-int texture_get_pixheight(int texid);
-void texture_set_blending(bool enable);
-void texture_set_repeat(bool repeat);
-void texture_set_repeat(int texid, bool repeat);
-void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw);
-void texture_preload(int texid);
-void texture_set_priority(int texid, double prio);
-void texture_set_border(int texid, int r, int g, int b, double a);
-void texture_mipmapping_filter(int texid, int enable);
-void texture_mipmapping_generate(int texid, int levels);
-bool  texture_anisotropy_supported();
-float texture_anisotropy_maxlevel();
-void  texture_anisotropy_filter(int texid, float levels);
-bool texture_multitexture_supported();
-void texture_multitexture_enable(bool enable);

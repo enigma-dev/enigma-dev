@@ -18,9 +18,9 @@
 #include <string>
 #include <cstdio>
 #include "OpenGLHeaders.h"
-#include "GSbackground.h"
-#include "GSscreen.h"
-#include "GSd3d.h"
+#include "GLbackground.h"
+#include "GLscreen.h"
+#include "GLd3d.h"
 
 using namespace std;
 

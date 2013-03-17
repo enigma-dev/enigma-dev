@@ -20,7 +20,7 @@
 #include <stdio.h>
 using namespace std;
 
-#include "GSmiscextra.h"
+#include "GLmiscextra.h"
 
 //Fuck whoever did this to the spec
 #ifndef GL_BGR

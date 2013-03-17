@@ -27,7 +27,8 @@
  \********************************************************************************/
 
 #include "OpenGLHeaders.h"
-#include "GSd3d.h"
+#include "GLd3d.h"
+#include "GLtextures.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -246,7 +247,7 @@ void d3d_primitive_begin(int kind)
 }
 void d3d_primitive_begin_texture(int kind, int texId)
 {
-    bind_texture(texId);
+    bind_texture(get_texture(texId));
     glBegin(ptypes_by_id[kind]);
 }
 
@@ -372,7 +373,7 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
     }
     float v0[] = {x1, y1, z1}, v1[] = {x2, y2, z1}, v2[] = {x1, y1, z2}, v3[] = {x2, y2, z2},
           t0[] = {0, 0}, t1[] = {hrep, 0}, t2[] = {0, vrep}, t3[] = {hrep, vrep};
-    bind_texture(texId);
+  bind_texture(get_texture(texId));
 
     float xd = x2-x1, yd = y2-y1, zd = z2-z1;
     float normal[3] = {xd*zd, zd*yd, 0};
@@ -427,7 +428,7 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
 {
     float v0[] = {x1, y1, z1}, v1[] = {x1, y2, z1}, v2[] = {x2, y1, z2}, v3[] = {x2, y2, z2},
           t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
-    bind_texture(texId);
+  bind_texture(get_texture(texId));
 
     //float xd = x2-x1, yd = y2-y1, zd = z2-z1;
     float normal[] = {0, 0, 1}; // TODO: Use the normal.
@@ -469,7 +470,7 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
 	  n0[] = {-0.5, -0.5, -0.5}, n1[] = {-0.5, -0.5, 0.5}, n2[] = {-0.5, 0.5, -0.5}, n3[] = {-0.5, 0.5, 0.5},
           n4[] = {0.5, 0.5, -0.5}, n5[] = {0.5, 0.5, 0.5}, n6[] = {0.5, -0.5, -0.5}, n7[] = {0.5, -0.5, 0.5};
 
-    bind_texture(texId);
+  bind_texture(get_texture(texId));
     glBegin(GL_TRIANGLE_STRIP);
 
     glNormal3fv(n0);
@@ -550,7 +551,7 @@ void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, do
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
     double a, px, py, tp;
     int k;
-    bind_texture(texId);
+  bind_texture(get_texture(texId));
     glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
     for (int i = 0; i <= steps; i++)
@@ -605,7 +606,7 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
     float t[(steps + 1)*3 + 1][2];
     double a, px, py, tp;
     int k = 0;
-    bind_texture(texId);
+    bind_texture(get_texture(texId));
     glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
@@ -662,7 +663,7 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
         a += pr; tp += invstep;
     }
     int k = 0, kk;
-    bind_texture(texId);
+    bind_texture(get_texture(texId));
     b = M_PI/2;
     cosb = cos(b);
     pz = rz*sin(b);
@@ -704,7 +705,7 @@ void d3d_draw_icosahedron() {
 
 void d3d_draw_torus(double x1, double y1, double z1, int texId, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
         int numc = csteps, numt = tsteps;
-	bind_texture(texId);
+	bind_texture(get_texture(texId));
         for (int i = 0; i < numc; i++) {
             glBegin(GL_QUAD_STRIP);
 
@@ -1237,7 +1238,7 @@ class d3d_model
     void draw(double x, double y, double z, int texId)
     {
         untexture();
-        bind_texture(texId);
+        bind_texture(get_texture(texId));
         glPushAttrib(GL_CURRENT_BIT);
         glTranslatef(x, y, z);
         glCallList(model);

@@ -65,16 +65,16 @@ namespace enigma
     tileset(false) {}
   background::background(bool ts):
     tileset(ts) {}
-  background::background(int w,int h,unsigned tex,bool trans,bool smth,bool prel):
+  background::background(int w,int h,int tex,bool trans,bool smth,bool prel):
     width(w), height(h), texture(tex), transparent(trans), smooth(smth), preload(prel), tileset(false) {}
-  background::background(bool ts,int w,int h,unsigned tex,bool trans,bool smth,bool prel):
+  background::background(bool ts,int w,int h,int tex,bool trans,bool smth,bool prel):
     width(w), height(h), texture(tex), transparent(trans), smooth(smth), preload(prel), tileset(ts) {}
 
   background_tileset::background_tileset():
     background(true) {}
   background_tileset::background_tileset(int tw, int th, int ho, int vo, int hs, int vs):
     background(true), tileWidth(tw), tileHeight(th), hOffset(ho), vOffset(vo), hSep(hs), vSep(vs) {}
-  background_tileset::background_tileset(int w,int h,unsigned tex,bool trans,bool smth,bool prel,int tw, int th, int ho, int vo, int hs, int vs):
+  background_tileset::background_tileset(int w,int h,int tex,bool trans,bool smth,bool prel,int tw, int th, int ho, int vo, int hs, int vs):
     background(true, w, h, tex, trans, smth, prel), tileWidth(tw), tileHeight(th), hOffset(ho), vOffset(vo), hSep(hs), vSep(vs) {}
 
   //Adds a subimage to an existing sprite from the exe
@@ -97,7 +97,7 @@ namespace enigma
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
 
-    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
+    int texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
     delete[] imgpxdata;
 
    backgroundstructarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);

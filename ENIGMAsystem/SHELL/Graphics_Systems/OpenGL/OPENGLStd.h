@@ -41,11 +41,11 @@ namespace enigma
   extern bool pbo_isgo;
 }
 
-#include "GScolors.h"
-#include "GSprmtvs.h"
-#include "GSd3d.h"
-#include "GSstdraw.h"
-#include "GSblend.h"
-#include "GSsurface.h"
-#include "GSmiscextra.h"
+#include "GLcolors.h"
+#include "GLprmtvs.h"
+#include "GLd3d.h"
+#include "GLstdraw.h"
+#include "GLblend.h"
+#include "GLsurface.h"
+#include "GLmiscextra.h"
 

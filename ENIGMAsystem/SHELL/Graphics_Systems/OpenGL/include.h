@@ -1,10 +1,10 @@
 #include "OPENGLStd.h"
-#include "GSsprite.h"
-#include "GSbackground.h"
+#include "GLsprite.h"
+#include "GLbackground.h"
 
-#include "GSfont.h"
-#include "GScurves.h"
+#include "GLfont.h"
+#include "GLcurves.h"
 #ifdef TARGET_OS_MAC
-#include "GSsurface.h"
+#include "GLsurface.h"
 #endif
 

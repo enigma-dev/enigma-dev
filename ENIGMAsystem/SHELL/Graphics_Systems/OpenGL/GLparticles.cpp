@@ -25,10 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "GSstdraw.h"
-#include "GSsprite.h"
+#include "GLstdraw.h"
+#include "GLsprite.h"
 #include "binding.h"
-#include "GScolors.h"
+#include "GLcolors.h"
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_sprites.h"
 #include <vector>

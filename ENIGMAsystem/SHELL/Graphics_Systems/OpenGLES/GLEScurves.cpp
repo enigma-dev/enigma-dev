@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include "OpenGLHeaders.h"
-#include "GScolors.h"
+#include "GLEScolors.h"
 #include <stack>
 #include <vector>
 #include <math.h>

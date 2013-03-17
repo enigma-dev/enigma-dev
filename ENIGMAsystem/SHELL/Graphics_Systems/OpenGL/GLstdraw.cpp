@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "OpenGLHeaders.h"
-#include "GSstdraw.h"
+#include "GLstdraw.h"
 #include "binding.h"
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"

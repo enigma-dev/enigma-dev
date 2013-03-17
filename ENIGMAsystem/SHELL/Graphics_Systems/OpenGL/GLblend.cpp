@@ -16,7 +16,7 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "GSblend.h"
+#include "GLblend.h"
 
 int draw_set_blend_mode(int mode){
 	switch (mode)

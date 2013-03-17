@@ -28,7 +28,7 @@
 #include <math.h>
 #include <string>
 #include "OpenGLHeaders.h"
-#include "GScolors.h"
+#include "GLEScolors.h"
 
 using namespace std;
 #include "Universal_System/fontstruct.h"

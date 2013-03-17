@@ -30,8 +30,7 @@
 
 #include <math.h>
 #include "OpenGLHeaders.h"
-#include "GSbackground.h"
-#include "GStextures.h"
+#include "GLbackground.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 
@@ -44,38 +43,14 @@ namespace enigma {
   extern size_t background_idmax;
 }
 
-
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return r;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#else
-  #define get_background(bck2d,back)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#endif
-
 #include "binding.h"
 #include <string.h> // needed for querying ARB extensions
 
 void draw_background(int back, double x, double y)
 {
   get_background(bck2d,back);
-  bind_texture(bck2d->texture);
-
+    bind_texture(GmTextures[bck2d->texture]->gltex);
+// see backgroundstruct and spritestruct are storing the gluint to the texture, and when 
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
 
@@ -97,7 +72,7 @@ void draw_background(int back, double x, double y)
 void draw_background_stretched(int back, double x, double y, double w, double h)
 {
   get_background(bck2d,back);
-  bind_texture(bck2d->texture);
+    bind_texture(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
@@ -120,7 +95,7 @@ void draw_background_stretched(int back, double x, double y, double w, double h)
 void draw_background_part(int back,double left,double top,double width,double height,double x,double y)
 {
     get_background(bck2d,back);
-    bind_texture(bck2d->texture);
+      bind_texture(GmTextures[bck2d->texture]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -146,7 +121,7 @@ void draw_background_part(int back,double left,double top,double width,double he
 void draw_background_tiled(int back,double x,double y)
 {
     get_background(bck2d,back);
-    bind_texture(bck2d->texture);
+      bind_texture(GmTextures[bck2d->texture]->gltex);
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
@@ -189,7 +164,7 @@ void draw_background_tiled(int back,double x,double y)
 void draw_background_tiled_area(int back,double x,double y,double x1,double y1,double x2,double y2)
 {
   get_background(bck2d,back);
-  bind_texture(bck2d->texture);
+    bind_texture(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -240,7 +215,7 @@ void draw_background_tiled_area(int back,double x,double y,double x1,double y1,d
 void draw_background_ext(int back,double x,double y,double xscale,double yscale,double rot,int color,double alpha)
 {
     get_background(bck2d,back);
-    bind_texture(bck2d->texture);
+      bind_texture(GmTextures[bck2d->texture]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -278,7 +253,7 @@ void draw_background_ext(int back,double x,double y,double xscale,double yscale,
 void draw_background_stretched_ext(int back,double x,double y,double w,double h,int color,double alpha)
 {
   get_background(bck2d,back);
-  bind_texture(bck2d->texture);
+    bind_texture(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -301,7 +276,7 @@ void draw_background_stretched_ext(int back,double x,double y,double w,double h,
 void draw_background_part_ext(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
 {
     get_background(bck2d,back);
-    bind_texture(bck2d->texture);
+      bind_texture(GmTextures[bck2d->texture]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -329,7 +304,7 @@ void draw_background_part_ext(int back,double left,double top,double width,doubl
 void draw_background_tiled_ext(int back,double x,double y,double xscale,double yscale,int color,double alpha)
 {
     get_background(bck2d,back);
-    bind_texture(bck2d->texture);
+      bind_texture(GmTextures[bck2d->texture]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -374,7 +349,7 @@ void draw_background_tiled_ext(int back,double x,double y,double xscale,double y
 void draw_background_tiled_area_ext(int back,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha)
 {
   get_background(bck2d,back);
-  bind_texture(bck2d->texture);
+    bind_texture(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -425,7 +400,7 @@ void draw_background_tiled_area_ext(int back,double x,double y,double x1,double 
 void draw_background_general(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4)
 {
   get_background(bck2d,back);
-  bind_texture(bck2d->texture);
+  bind_texture(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
     const float
@@ -485,184 +460,3 @@ double background_get_texture_height_factor(int backId) {
   get_backgroundnv(bck2d,backId,-1);
   return bck2d->texbordy;
 }
-
-void texture_set_interpolation(int enable)
-{
-    if (enigma::interpolate_textures == enable)
-        return;
-
-    enigma::interpolate_textures = enable;
-    enigma::background *back;
-    enigma::sprite *spr;
-    int i, ii;
-    for (i = 0; i < enigma::background_idmax; i++)
-	{
-        back = enigma::backgroundstructarray[i];
-	    if (!back)
-            continue;
-
-        glBindTexture(GL_TEXTURE_2D, back->texture);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
-	}
-
-	for (i = 0; i < enigma::sprite_idmax; i++)
-    {
-        spr = enigma::spritestructarray[i];
-	    if (!spr)
-            continue;
-
-        for (ii = 0; ii < spr->subcount; ii++)
-        {
-            glBindTexture(GL_TEXTURE_2D, spr->texturearray[ii]);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
-        }
-    }
-}
-
-bool texture_get_interpolation()
-{
-    return enigma::interpolate_textures;
-}
-
-void texture_set_blending(bool enable)
-{
-    (enable?glEnable:glDisable)(GL_BLEND);
-}
-
-double texture_get_width(int texid)
-{
-  // returns floating point scale to the bg or some shit
-}
-
-double texture_get_height(int texid)
-{
-  // so does this one
-}
-
-int texture_get_pixwidth(int texid)
-{
-  // returns the actual number of pixels in the texture across the xaxis
-  GLint width = 0;
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-  return width;
-}
-
-int texture_get_pixheight(int texid)
-{
-  // returns the actual number of pixels in the tex across the yaxis
-  GLint height = 0;
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &height);
-  return height;
-}
-
-void texture_set_repeat(bool repeat)
-{
-/*
-  enigma::background *back;
-  for (int i = 0; i < enigma::background_idmax; i++)
-  {
-    back = enigma::backgroundstructarray[i];
-    if (!back) { continue; }
-*/
-    //glBindTexture(GL_TEXTURE_2D, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
-  //}
-}
-
-void texture_set_repeat(int texid, bool repeat)
-{
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
-}
-
-void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw)
-{
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeatu?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeatv?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeatw?GL_REPEAT:GL_CLAMP);
-}
-
-void texture_preload(int texid)
-{
-  
-}//functionality has been removed in ENIGMA, all textures are automatically preloaded
-
-void texture_set_priority(int texid, double prio)
-{
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
-}
-
-void texture_set_border(int texid, int r, int g, int b, double a) 
-{
-  GLint color[4] = {r, g, b, a * 255};
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-}
-
-void texture_mipmapping_filter(int texid, int filter) 
-{
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  if (filter == tx_trilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  } else if (filter == tx_bilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  } else if (filter == tx_nearest) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  } 
-}
-
-void texture_mipmapping_generate(int texid, int levels)
-{
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  for (int i = 0; i < levels; i++) 
-  {
-    glGenerateMipmap(GL_TEXTURE_2D);
-  }
-}
-
-bool  texture_anisotropy_supported()
-{
-  return strstr((char*)glGetString(GL_EXTENSIONS), 
-           "GL_EXT_texture_filter_anisotropic");
-}
-
-float texture_anisotropy_maxlevel()
-{
-  float maximumAnisotropy;
-  glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maximumAnisotropy);
-  return maximumAnisotropy;
-}
-
-void  texture_anisotropy_filter(int texid, float levels)
-{
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
-}
-
-bool  texture_multitexture_supported()
-{
-  return strstr((char*)glGetString(GL_EXTENSIONS), 
-           "GL_ARB_multitexture");
-}
-
-void texture_multitexture_enable(bool enable)
-{
-
-}
-

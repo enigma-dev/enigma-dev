@@ -25,67 +25,62 @@
 **                                                                              **
 \********************************************************************************/
 
-using namespace std;
+/* These functions are primarily for use of the engine. Experienced users
+ * who are familiar with C++ can make use of these, but they were made to
+ * use at load time with data read from the executable. These both expect
+ * RAW format, RGB only.
+ */
 
-#include "OpenGLHeaders.h"
-#include "GSprmtvs.h"
-#include <string>
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
-#include <math.h>
+#ifndef _GLTEXTURES__H
+#define _GLTEXTURES__H
 
-/*void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
+namespace enigma
 {
-   GLdouble xmin, xmax, ymin, ymax;
-
-   ymax = zNear * tan(fovy * M_PI / 360.0);
-   ymin = -ymax;
-   xmin = ymin * aspect;
-   xmax = ymax * aspect;
-
-
-   glFrustum(xmin, xmax, ymin, ymax, zNear, zFar);
-}//I need to include GL/glu.h*/
-//I need it for gluLookAt()
-
-
-int d3d_start()
-{
-    glEnable(GL_DEPTH_TEST);
-  //  gluPerspective(110, view_wview[view_current]/view_hview[view_current], 5, 6);
-
-    return 0;
+    extern bool interpolate_textures;
 }
 
-int d3d_end()
-{
-    glDisable(GL_DEPTH_TEST);
-  //  glOrtho(0,room_width,0,room_height,0,1);
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
-    return 0;
-}
+#include <vector>
+using std::vector;
 
-int d3d_primitive_begin(int kind)
-{
-   // glBegin(kind);
-    return 0;
-}
+struct GmTexture {
+	unsigned gltex;
+	GmTexture(unsigned gtex);
+	~GmTexture();
+};
+extern vector<GmTexture*> GmTextures;
 
-int d3d_vertex(double x, double y, double z)
-{
-   // glVertex3d(x,y,z);
-    return 0;
-}
+enum {
+  tx_none,
+  tx_nearest,
+  tx_bilinear,
+  tx_trilinear
+};
 
-int d3d_primitive_end()
-{
-  //  glEnd();
-    return 0;
-}
+unsigned get_texture(int texid); // fail safe macro
 
-int d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,
-                       double yto,double zto,double xup,double yup,double zup)
-{
-   // gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
-    return 0;
-}
+void texture_set_interpolation(int enable);
+bool texture_get_interpolation();
+double texture_get_width(int texid);
+double texture_get_height(int texid);
+int texture_get_pixwidth(int texid);
+int texture_get_pixheight(int texid);
+void texture_set_blending(bool enable);
+void texture_set_repeat(bool repeat);
+void texture_set_repeat(int texid, bool repeat);
+void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw);
+void texture_preload(int texid);
+void texture_set_priority(int texid, double prio);
+void texture_set_border(int texid, int r, int g, int b, double a);
+void texture_mipmapping_filter(int texid, int enable);
+void texture_mipmapping_generate(int texid, int levels);
+bool  texture_anisotropy_supported();
+float texture_anisotropy_maxlevel();
+void  texture_anisotropy_filter(int texid, float levels);
+bool texture_multitexture_supported();
+void texture_multitexture_enable(bool enable);
+
+#endif
+

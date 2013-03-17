@@ -41,7 +41,7 @@ namespace enigma
   struct sprite
   {
     int width,height,subcount,xoffset,yoffset,id;
-    unsigned int *texturearray; //Each subimage has a texture
+    int *texturearray; //Each subimage has a texture
     double *texbordxarray, *texbordyarray;
     void **colldata; // Each subimage has collision data
 
@@ -50,7 +50,7 @@ namespace enigma
     bool where,smooth;
 
     sprite();
-    sprite(unsigned int);
+    sprite(int);
   };
   extern sprite** spritestructarray; // INVARIANT: Should only be modified inside spritestruct.cpp.
   extern size_t sprite_idmax;

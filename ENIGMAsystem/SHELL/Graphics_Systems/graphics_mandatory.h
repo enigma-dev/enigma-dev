@@ -29,8 +29,8 @@ namespace enigma
   void graphicssystem_initialize(); /// This function can be implemented as an empty call if it is not needed.
 
   /// Generate a texture from image data. Preserves input pixbuf.
-  unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata);
-  unsigned graphics_duplicate_texture(int tex);
+  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata);
+  int graphics_duplicate_texture(int tex);
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex);
   void graphics_delete_texture(int tex);
 

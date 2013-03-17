@@ -1,32 +1,22 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**  Copyright (C) 2011 Alasdair Morrison                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2011 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include "OpenGLHeaders.h"
+#include "GLcolors.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -42,10 +32,9 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
-void draw_unbind_all()
- 	 {
-         glBindTexture(GL_TEXTURE_2D, 0);
-     }
+void draw_unbind_all() {
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 void draw_clear_alpha(int col,float alpha)
 {
@@ -62,10 +51,9 @@ void draw_clear(int col)
 int merge_color(int c1,int c2,double amount)
 {
 	amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);
-    return
-    (unsigned char)(fabs(__GETR(c1)+(__GETR(c2)-__GETR(c1))*amount))
-    | (unsigned char)(fabs(__GETG(c1)+(__GETG(c2)-__GETG(c1))*amount))<<8
-    | (unsigned char)(fabs(__GETB(c1)+(__GETB(c2)-__GETB(c1))*amount))<<16;
+  return (unsigned char)(fabs(__GETR(c1)+(__GETR(c2)-__GETR(c1))*amount))
+  |      (unsigned char)(fabs(__GETG(c1)+(__GETG(c2)-__GETG(c1))*amount))<<8
+  |      (unsigned char)(fabs(__GETB(c1)+(__GETB(c2)-__GETB(c1))*amount))<<16;
 }
 
 void draw_set_color(int color)
@@ -73,21 +61,19 @@ void draw_set_color(int color)
 	enigma::currentcolor[0] = __GETR(color);
 	enigma::currentcolor[1] = __GETG(color);
 	enigma::currentcolor[2] = __GETB(color);
-	glColor4ub(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
+	glColor4ubv(enigma::currentcolor);
 }
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
-	glColor4ub(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
-
+	glColor4ubv(enigma::currentcolor);
 }
 void draw_set_alpha(float alpha)
 {
 	enigma::currentcolor[3] = bind_alpha(alpha);
-	glColor4ub(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
-
+	glColor4ubv(enigma::currentcolor);
 }
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
@@ -95,7 +81,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
 	enigma::currentcolor[3] = bind_alpha(alpha);
-	glColor4ub(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2],enigma::currentcolor[3]);
+	glColor4ubv(enigma::currentcolor);
 }
 
 int draw_get_color() {
