@@ -76,7 +76,7 @@ namespace enigma {
   sprite** spritestructarray;
 	extern size_t sprite_idmax;
 	sprite::sprite(): texturearray(NULL), texbordxarray(NULL), texbordyarray(NULL) {}
-  sprite::sprite(unsigned int x): texturearray(new unsigned int[x]), texbordxarray(new double[x]), texbordyarray(new double[x]) {}
+  sprite::sprite(int x): texturearray(new int[x]), texbordxarray(new double[x]), texbordyarray(new double[x]) {}
 }
 
 int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
@@ -175,7 +175,7 @@ void sprite_merge(int ind, int copy_sprite)
     get_spritev_mutable(spr,ind);
     get_spritev_mutable(spr_copy,copy_sprite);
     int i = 0, j = 0, t_subcount = spr->subcount + spr_copy->subcount;
-    unsigned int *t_texturearray = new unsigned int[t_subcount];
+    int *t_texturearray = new int[t_subcount];
     double *t_texbordxarray = new double[t_subcount], *t_texbordyarray = new double[t_subcount];
     while (i < spr->subcount)
     {
@@ -260,7 +260,7 @@ namespace enigma
         as->xoffset = x;
         as->yoffset = y;
 
-        as->texturearray = new unsigned int[subc];
+        as->texturearray = new int[subc];
         as->texbordxarray = new double[subc];
         as->texbordyarray = new double[subc];
         as->colldata = new void*[subc];
@@ -287,7 +287,7 @@ namespace enigma
         ns->height    = height;
         ns->xoffset   = (int)x_offset;
         ns->yoffset   = (int)y_offset;
-        ns->texturearray = new unsigned int[1];
+        ns->texturearray = new int[1];
         ns->texturearray[0] = texture;
         ns->texbordxarray = new double[1];
         ns->texbordxarray[0] = (double) width/fullwidth;
@@ -302,7 +302,7 @@ namespace enigma
         spr->height    = spr_copy->height;
         spr->xoffset   = spr_copy->xoffset;
         spr->yoffset   = spr_copy->yoffset;
-        spr->texturearray = new unsigned int[spr_copy->subcount];
+        spr->texturearray = new int[spr_copy->subcount];
         spr->texbordxarray = new double[spr_copy->subcount];
         spr->texbordyarray = new double[spr_copy->subcount];
         for (int i = 0; i < spr->subcount; i++)

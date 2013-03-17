@@ -26,6 +26,7 @@
  **                                                                              **
  \********************************************************************************/
 
+#include "GLtextures.h"
 #ifdef DEBUG_MODE
   #include <string>
   #include "libEGMstd.h"

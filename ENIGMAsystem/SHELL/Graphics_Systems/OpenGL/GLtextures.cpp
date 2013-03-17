@@ -25,17 +25,22 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "binding.h"
 
+vector<GmTexture*> GmTextures(0);
+
 extern int room_width, room_height;
 namespace enigma {
   extern size_t background_idmax;
 }
 
-#include <vector>
-using std::vector;
+GmTexture::GmTexture(unsigned gtex)
+{
+	gltex = gtex;
+}
 
-struct texture {
-};
-vector<texture> textures(0);
+GmTexture::~GmTexture()
+{
+	glDeleteTextures(1, &gltex);
+}
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
@@ -46,11 +51,23 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	return (x + (x >> 16)) & 63;
 }
 
+unsigned get_texture(int texid) 
+{
+	//if (texid < 0 || texid >= GmTextures.size()) 
+	//{
+	//	return -1;
+	//}
+	//else 
+	//{
+		return GmTextures[texid]->gltex;
+	//}
+}
+
 namespace enigma
 {
   bool interpolate_textures = false; //NOTE: set value here when game settings are used
 
-  unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
+  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
   {
     GLuint texture;
     glGenTextures(1, &texture);
@@ -67,12 +84,14 @@ namespace enigma
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     }
     glBindTexture(GL_TEXTURE_2D, 0);
-    return texture;
+
+    GmTextures.push_back(new GmTexture(texture));
+    return GmTextures.size()-1;
   }
 
-  unsigned graphics_duplicate_texture(int tex)
+  int graphics_duplicate_texture(int tex)
   {
-    GLuint texture = tex;
+    GLuint texture = GmTextures[tex]->gltex;
     glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
     glColor4f(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -87,12 +106,15 @@ namespace enigma
     unsigned dup_tex = graphics_create_texture(w, h, bitmap);
     delete[] bitmap;
     glPopAttrib();
-    return dup_tex;
+
+    GmTextures.push_back(new GmTexture(dup_tex));
+    return GmTextures.size()-1;
   }
 
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
-    GLuint texture = tex, copy_texture = copy_tex;
+    GLuint texture = GmTextures[tex]->gltex;
+    GLuint copy_texture = GmTextures[copy_tex]->gltex;
     glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
     glColor4f(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -131,13 +153,12 @@ namespace enigma
     glPopAttrib();
   }
 
+// V when this is called its passing the Gluint, but the Gluint is also stored by my GmTexture struct
   void graphics_delete_texture(int tex)
   {
-    GLuint texture = tex;
-    glDeleteTextures(1, &texture);
+    delete GmTextures[tex];
   }
 
-  //Retrieve image data from a texture, in unsigned char, RGBA format.
   unsigned char* graphics_get_texture_rgba(unsigned texture)
   {
     bind_texture(texture);
@@ -155,42 +176,17 @@ namespace enigma
 
 void texture_set_interpolation(int enable)
 {
-    if (enigma::interpolate_textures == enable)
-        return;
-
-    enigma::interpolate_textures = enable;
-    enigma::background *back;
-    enigma::sprite *spr;
-    int i, ii;
-    for (i = 0; i < enigma::background_idmax; i++)
-	{
-        back = enigma::backgroundstructarray[i];
-	    if (!back)
-            continue;
-
-        glBindTexture(GL_TEXTURE_2D, back->texture);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
-	}
-
-	for (i = 0; i < enigma::sprite_idmax; i++)
-    {
-        spr = enigma::spritestructarray[i];
-	    if (!spr)
-            continue;
-
-        for (ii = 0; ii < spr->subcount; ii++)
-        {
-            glBindTexture(GL_TEXTURE_2D, spr->texturearray[ii]);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
-        }
-    }
+  for (int i = 0; i < GmTextures.size(); i++)
+  {
+    glBindTexture(GL_TEXTURE_2D, GmTextures[i]->gltex);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
+  }
 }
 
 bool texture_get_interpolation()
 {
-    //return enigma::interpolate_textures;
+    return enigma::interpolate_textures;
 }
 
 void texture_set_blending(bool enable)
@@ -228,23 +224,18 @@ int texture_get_pixheight(int texid)
 
 void texture_set_repeat(bool repeat)
 {
-/*
-  enigma::background *back;
-  for (int i = 0; i < enigma::background_idmax; i++)
+  for (int i = 0; i < GmTextures.size(); i++)
   {
-    back = enigma::backgroundstructarray[i];
-    if (!back) { continue; }
-*/
-    //glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, GmTextures[i]->gltex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
-  //}
+  }
 }
 
 void texture_set_repeat(int texid, bool repeat)
 {
-  glBindTexture(GL_TEXTURE_2D, texid);
+  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
@@ -252,7 +243,7 @@ void texture_set_repeat(int texid, bool repeat)
 
 void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw)
 {
-  glBindTexture(GL_TEXTURE_2D, texid);
+  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeatu?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeatv?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeatw?GL_REPEAT:GL_CLAMP);
@@ -265,20 +256,20 @@ void texture_preload(int texid)
 
 void texture_set_priority(int texid, double prio)
 {
-  glBindTexture(GL_TEXTURE_2D, texid);
+  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
 }
 
 void texture_set_border(int texid, int r, int g, int b, double a) 
 {
   GLint color[4] = {r, g, b, a * 255};
-  glBindTexture(GL_TEXTURE_2D, texid);
+  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 }
 
 void texture_mipmapping_filter(int texid, int filter) 
 {
-  glBindTexture(GL_TEXTURE_2D, texid);
+  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   if (filter == tx_trilinear) {
@@ -295,7 +286,7 @@ void texture_mipmapping_filter(int texid, int filter)
 
 void texture_mipmapping_generate(int texid, int levels)
 {
-  glBindTexture(GL_TEXTURE_2D, texid);
+  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   for (int i = 0; i < levels; i++) 
   {
@@ -318,7 +309,7 @@ float texture_anisotropy_maxlevel()
 
 void  texture_anisotropy_filter(int texid, float levels)
 {
-  glBindTexture(GL_TEXTURE_2D, texid);
+  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
 

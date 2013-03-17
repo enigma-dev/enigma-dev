@@ -33,19 +33,19 @@ namespace enigma
   struct background
   {
     int width, height;
-    unsigned texture;
+    int texture;
 
     bool transparent;
     bool smooth;
     bool preload;
-	  double texbordx, texbordy;
+    double texbordx, texbordy;
 
     bool tileset;
 
     background();
     background(bool);
-    background(int w,int h,unsigned tex,bool trans,bool smth,bool prel);
-    background(bool,int w,int h,unsigned tex,bool trans,bool smth,bool prel);
+    background(int w,int h,int tex,bool trans,bool smth,bool prel);
+    background(bool,int w,int h,int tex,bool trans,bool smth,bool prel);
   };
   struct background_tileset: background
   {
@@ -58,7 +58,7 @@ namespace enigma
 
     background_tileset();
     background_tileset(int tw, int th, int ho, int vo, int hs, int vs);
-    background_tileset(int w,int h,unsigned tex,bool trans,bool smth,bool prel,int tw, int th, int ho, int vo, int hs, int vs);
+    background_tileset(int w,int h,int tex,bool trans,bool smth,bool prel,int tw, int th, int ho, int vo, int hs, int vs);
   };
 
   extern background** backgroundstructarray;

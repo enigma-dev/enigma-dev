@@ -31,6 +31,9 @@
  * RAW format, RGB only.
  */
 
+#ifndef _GLTEXTURES__H
+#define _GLTEXTURES__H
+
 namespace enigma
 {
     extern bool interpolate_textures;
@@ -39,12 +42,24 @@ namespace enigma
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
+#include <vector>
+using std::vector;
+
+struct GmTexture {
+	unsigned gltex;
+	GmTexture(unsigned gtex);
+	~GmTexture();
+};
+extern vector<GmTexture*> GmTextures;
+
 enum {
   tx_none,
   tx_nearest,
   tx_bilinear,
   tx_trilinear
 };
+
+unsigned get_texture(int texid); // fail safe macro
 
 void texture_set_interpolation(int enable);
 bool texture_get_interpolation();
@@ -66,3 +81,6 @@ float texture_anisotropy_maxlevel();
 void  texture_anisotropy_filter(int texid, float levels);
 bool texture_multitexture_supported();
 void texture_multitexture_enable(bool enable);
+
+#endif
+
