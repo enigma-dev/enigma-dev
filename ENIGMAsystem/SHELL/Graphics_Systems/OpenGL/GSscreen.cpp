@@ -127,6 +127,7 @@ void screen_redraw()
             const double low = drawing_depths.rbegin() != drawing_depths.rend() ? drawing_depths.rbegin()->first : -numeric_limits<double>::max();
             (enigma::particles_impl->draw_particlesystems)(high, low);
         }
+        bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
             //loop tiles
@@ -137,9 +138,15 @@ void screen_redraw()
             }
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
-            for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
+            for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
                 enigma::instance_event_iterator->inst->myevent_draw();
+                if (enigma::room_switching_id != -1) {
+                    stop_loop = true;
+                    break;
+                }
+            }
             enigma::instance_event_iterator = push_it;
+            if (stop_loop) break;
             //particles
             if (enigma::particles_impl != NULL) {
                 const double high = dit->first;
@@ -152,6 +159,7 @@ void screen_redraw()
     }
     else
     {
+        bool stop_loop = false;
         for (view_current = 0; view_current < 7; view_current++)
         {
             if (view_visible[(int)view_current])
@@ -293,9 +301,15 @@ void screen_redraw()
 
                     enigma::inst_iter* push_it = enigma::instance_event_iterator;
                     //loop instances
-                    for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
+                    for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
                         enigma::instance_event_iterator->inst->myevent_draw();
+                        if (enigma::room_switching_id != -1) {
+                            stop_loop = true;
+                            break;
+                        }
+                    }
                     enigma::instance_event_iterator = push_it;
+                    if (stop_loop) break;
                     //particles
                     if (enigma::particles_impl != NULL) {
                         const double high = dit->first;
@@ -305,6 +319,7 @@ void screen_redraw()
                         (enigma::particles_impl->draw_particlesystems)(high, low);
                     }
                 }
+                if (stop_loop) break;
             }
         }
         view_current = 0;
