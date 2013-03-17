@@ -1,0 +1,52 @@
+/********************************************************************************\
+**                                                                              **
+**  Copyright (C) 2008 Josh Ventura                                             **
+**                                                                              **
+**  This file is a part of the ENIGMA Development Environment.                  **
+**                                                                              **
+**                                                                              **
+**  ENIGMA is free software: you can redistribute it and/or modify it under the **
+**  terms of the GNU General Public License as published by the Free Software   **
+**  Foundation, version 3 of the license or any later version.                  **
+**                                                                              **
+**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
+**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
+**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
+**  details.                                                                    **
+**                                                                              **
+**  You should have recieved a copy of the GNU General Public License along     **
+**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
+**                                                                              **
+**  ENIGMA is an environment designed to create games and other programs with a **
+**  high-level, fully compilable language. Developers of ENIGMA or anything     **
+**  associated with ENIGMA are in no way responsible for its users or           **
+**  applications created by its users, or damages caused by the environment     **
+**  or programs made in the environment.                                        **
+**                                                                              **
+\********************************************************************************/
+
+const int pr_pointlist      =1;     //GL_POINTS
+const int pr_linelist       =2;     //GL_LINES
+const int pr_linestrip      =3;     //GL_LINE_STRIP
+const int pr_trianglelist   =4;     //GL_TRIANGLES
+const int pr_trianglestrip  =5;     //GL_TRIANGLE_STRIP
+const int pr_trianglefan    =6;     //GL_TRIANGLE_FAN
+
+const int pr_lineloop       =7;     //GL_LINE_LOOP
+const int pr_quadlist       =8;     //GL_QUADS
+const int pr_quadstrip      =9;     //GL_QUAD_STRIP
+const int pr_polygon       =10;     //GL_POLYGON
+
+const int pr_aa_nicest      =4354;  //GL_NICEST
+const int pr_aa_fastest     =4353;  //GL_FASTEST
+const int pr_aa_dontcare    =4352;  //GL_DONT_CARE
+
+void draw_set_primitive_aa(bool enable, int quality);
+int draw_primitive_begin(int kind);
+int draw_primitive_begin_texture(int dink,unsigned tex);
+int draw_vertex(double x, double y);
+int draw_vertex_color(float x, float y, int color, float alpha);
+int draw_vertex_texture(float x, float y, float tx, float ty);
+int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha);
+
+int draw_primitive_end();
