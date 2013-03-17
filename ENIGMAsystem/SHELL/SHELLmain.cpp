@@ -91,6 +91,8 @@ extern int amain();
 
 #include "Universal_System/actions.h"
 
+#include "Universal_System/lives.h"
+
 
 #ifndef JUST_DEFINE_IT_RUN
   #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"

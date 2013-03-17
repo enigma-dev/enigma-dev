@@ -45,6 +45,8 @@
 
 #include "CallbackArrays.h"
 
+#include "lives.h"
+
 int room_speed  = 60;
 int room_width  = 640;
 int room_height = 480;
@@ -89,6 +91,8 @@ namespace enigma
 
     background_color = backcolor;
     background_showcolor = drawbackcolor;
+  
+    reset_lives();
 
     //Backgrounds start
     for (int i=0;i<8;i++)

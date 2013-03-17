@@ -54,6 +54,8 @@ inline void action_set_score(double newscore) {
     else score = (int)newscore;
 }
 
+#include "lives.h"
+
 inline void action_set_life(double newlives) {
     if (argument_relative) lives+= (int)newlives;
     else lives = newlives;

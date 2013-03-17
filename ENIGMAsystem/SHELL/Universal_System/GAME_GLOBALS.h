@@ -56,7 +56,6 @@ int keyboard_key=0;
 global:     keyboard_lastkey */
 string keyboard_string="";
 
-double lives=3;
 double score=0;
 bool secure_mode=false;
 bool show_score=0, show_lives=0, show_health=0;
