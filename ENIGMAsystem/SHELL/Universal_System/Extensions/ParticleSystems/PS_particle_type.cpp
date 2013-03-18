@@ -28,7 +28,7 @@
 #include "PS_particle_type.h"
 #include "PS_particle_sprites.h"
 #include "PS_particle_enums.h"
-#include "Graphics_Systems/OpenGL/GScolors.h"
+#include "Graphics_Systems/OpenGL/GLcolors.h"
 #include <cstddef>
 
 namespace enigma

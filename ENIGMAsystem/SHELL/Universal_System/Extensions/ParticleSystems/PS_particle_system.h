@@ -35,7 +35,7 @@
 #include "PS_particle_changer.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_enums.h"
-#include "Graphics_Systems/OpenGL/GScolors.h"
+#include "Graphics_Systems/OpenGL/GLcolors.h"
 #include <list>
 #include <vector>
 #include <map>
