@@ -8,6 +8,6 @@ Author: Robert B. Colton
 
 Depends:
 	Windowing: xlib, Win32, Cocoa
+
 Represents:
 	Build-platforms: Linux, MacOSX
-

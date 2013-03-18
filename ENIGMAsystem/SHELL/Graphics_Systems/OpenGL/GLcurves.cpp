@@ -1,4 +1,4 @@
-/** Copyright (C) 2010-2011 Harijs Grînbergs
+/** Copyright (C) 2010-2013 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
