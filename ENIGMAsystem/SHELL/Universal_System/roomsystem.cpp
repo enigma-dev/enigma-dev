@@ -92,7 +92,9 @@ namespace enigma
     background_color = backcolor;
     background_showcolor = drawbackcolor;
   
-    reset_lives();
+    if (gamestart) {
+      reset_lives();
+    }
 
     //Backgrounds start
     for (int i=0;i<8;i++)
