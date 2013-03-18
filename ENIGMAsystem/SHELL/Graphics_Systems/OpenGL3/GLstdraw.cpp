@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2011 Josh Ventura, Serprex
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Serpex
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
