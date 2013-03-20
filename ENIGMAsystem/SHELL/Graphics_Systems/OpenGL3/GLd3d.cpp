@@ -440,7 +440,6 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
   GLubyte indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, // sides
                        0, 2, 6, 4, 1, 7, 3, 5}; // top and bottom
 
-
   bind_texture(get_texture(texId));
  // glClientActiveTexture(GL_TEXTURE0);
 
@@ -448,11 +447,10 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
 
-  // draw sides
-  glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 10, GL_UNSIGNED_BYTE, indices);
   if (closed) {
-    // draw top and bottom
-    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 8, GL_UNSIGNED_BYTE, indices+10);
+    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 18, GL_UNSIGNED_BYTE, indices);
+  } else {
+    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 10, GL_UNSIGNED_BYTE, indices);
   }
 }
 
