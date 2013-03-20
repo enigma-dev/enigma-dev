@@ -8,5 +8,5 @@ else ifeq ($(PLATFORM), Cocoa)
 	LDLIBS += -framework OpenGL
 endif
 
-#$(OBJDIR)/Graphics_Systems/OpenGL3/glew.o: Graphics_Systems/OpenGL/glew.c
+#$(OBJDIR)/Graphics_Systems/OpenGL3/glew.o: Graphics_Systems/OpenGL3/glew.c
 #	gcc -c $^ -O3 -DGLEW_STATIC -o $@

@@ -17,6 +17,7 @@
 
 #include "OpenGLHeaders.h"
 #include "GLd3d.h"
+#include "GLvertexbuffer.h"
 #include "GLtextures.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
@@ -354,179 +355,103 @@ void d3d_set_projection_perspective(double x, double y, double width, double hei
 }
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
-    if ((x1 == x2 && y1 == y2) || z1 == z2) {
-        return;
-    }
-    float v0[] = {x1, y1, z1}, v1[] = {x2, y2, z1}, v2[] = {x1, y1, z2}, v3[] = {x2, y2, z2},
-          t0[] = {0, 0}, t1[] = {hrep, 0}, t2[] = {0, vrep}, t3[] = {hrep, vrep};
-  bind_texture(get_texture(texId));
+  if ((x1 == x2 && y1 == y2) || z1 == z2) {
+    return;
+  }
 
-    float xd = x2-x1, yd = y2-y1, zd = z2-z1;
-    float normal[3] = {xd*zd, zd*yd, 0};
-    float mag = hypot(normal[0], normal[1]); 
-    normal[0] /= mag; 
-    normal[1] /= mag;
-    if (x2 < x1) {
+  float xd = x2-x1, yd = y2-y1, zd = z2-z1;
+  float normal[3] = {xd*zd, zd*yd, 0};
+  float mag = hypot(normal[0], normal[1]); 
+  normal[0] /= mag; 
+  normal[1] /= mag;
+  if (x2 < x1) {
     normal[0]=-normal[0]; }
-     if (y2 < y1) {
+  if (y2 < y1) {
     normal[1]=-normal[1]; }
 
-    glBegin(GL_TRIANGLE_STRIP);
-    glNormal3fv(normal);
-    if (x2>x1 || y2>y1) {
-      glTexCoord2fv(t0);
-      glVertex3fv(v0);
-    } else {
-      glTexCoord2fv(t3);
-      glVertex3fv(v3);
-    }
+  GLfloat verts[] = {x1, y1, z1, x2, y2, z1, x1, y1, z2, x2, y2, z2},
+          texts[] = {0, 0, hrep, 0, 0, vrep, hrep, vrep},
+          norms[] = {normal[0], normal[1], normal[2], normal[0], normal[1], normal[2], 
+                     normal[0], normal[1], normal[2], normal[0], normal[1], normal[2]};
 
-    glNormal3fv(normal);
-    if (x2<x1 || y2<y1) {
-      glTexCoord2fv(t2);
-      glVertex3fv(v2);
-    } else {
-      glTexCoord2fv(t1);
-      glVertex3fv(v1);
-    }
+  GLubyte indices[] = {0, 1, 2, 3}; 
 
-    glNormal3fv(normal);
-    if (x2<x1 || y2<y1) {
-      glTexCoord2fv(t1);
-      glVertex3fv(v1);
-    } else {
-      glTexCoord2fv(t2);
-      glVertex3fv(v2);
-    }
+  if (x2>x1 || y2>y1) {
+    indices[0] = 0;
+  } else {
+    indices[0] = 3;
+  }
 
-    glNormal3fv(normal);
-    if (x2>x1 || y2>y1) {
-      glTexCoord2fv(t3);
-      glVertex3fv(v3);
-    } else {
-      glTexCoord2fv(t0);
-      glVertex3fv(v0);
-    }
-    glEnd();
+  if (x2<x1 || y2<y1) {
+    indices[1] = 2;
+  } else {
+    indices[1] = 1;
+  }
+
+  if (x2<x1 || y2<y1) {
+    indices[2] = 1;
+  } else {
+    indices[2] = 2;
+  }
+
+  if (x2>x1 || y2>y1) {
+    indices[3] = 3;
+  } else {
+    indices[3] = 0;
+  }
+
+  bind_texture(get_texture(texId));
+
+  glVertexPointer(3, GL_FLOAT, 0, verts);
+  glNormalPointer(GL_FLOAT, 0, norms);
+  glTexCoordPointer(2, GL_FLOAT, 0, texts);
+
+  glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, indices);
 }
 
 void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
 {
-    float v0[] = {x1, y1, z1}, v1[] = {x1, y2, z1}, v2[] = {x2, y1, z2}, v3[] = {x2, y2, z2},
-          t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
+  GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
+          texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
+          norms[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1};
+  GLubyte ceil_indices[] = {0, 1, 2, 3}; 
+  GLubyte floor_indices[] = {0, 2, 3, 1}; 
+
   bind_texture(get_texture(texId));
 
-    //float xd = x2-x1, yd = y2-y1, zd = z2-z1;
-    float normal[] = {0, 0, 1};
-    //float mag = hypot(normal[0], normal[1]); 
-    //normal[0] /= mag; 
-    //normal[1] /= mag;
+  glVertexPointer(3, GL_FLOAT, 0, verts);
+  glNormalPointer(GL_FLOAT, 0, norms);
+  glTexCoordPointer(2, GL_FLOAT, 0, texts);
 
-    glBegin(GL_TRIANGLE_STRIP);
-    if (x2>x1 || y2>y1) {
-      glTexCoord2fv(t0);
-      glVertex3fv(v0);
-      glTexCoord2fv(t2);
-      glVertex3fv(v2);
-      glTexCoord2fv(t1);
-      glVertex3fv(v1);
-      glTexCoord2fv(t3);
-      glVertex3fv(v3);
-    } else {
-      normal[2] = -normal[2];
-      glTexCoord2fv(t3);
-      glVertex3fv(v3);
-      glTexCoord2fv(t2);
-      glVertex3fv(v2);
-      glTexCoord2fv(t1);
-      glVertex3fv(v1);
-      glTexCoord2fv(t0);
-      glVertex3fv(v0);
-    }
-    glEnd();
+  if (x2>x1 || y2>y1) {
+    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, ceil_indices);
+  } else {
+    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, floor_indices);
+  }
 }
 
 void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed)
 {
-    float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y1, z1}, v3[] = {x2, y1, z2},
-          v4[] = {x2, y2, z1}, v5[] = {x2, y2, z2}, v6[] = {x1, y2, z1}, v7[] = {x1, y2, z2},
-          t0[] = {0, vrep}, t1[] = {0, 0}, t2[] = {hrep, vrep}, t3[] = {hrep, 0},
-          t4[] = {hrep*2, vrep}, t5[] = {hrep*2, 0}, t6[] = {hrep*3, vrep}, t7[] = {hrep*3, 0},
-          t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0},
-	  n0[] = {-0.5, -0.5, -0.5}, n1[] = {-0.5, -0.5, 0.5}, n2[] = {-0.5, 0.5, -0.5}, n3[] = {-0.5, 0.5, 0.5},
-          n4[] = {0.5, 0.5, -0.5}, n5[] = {0.5, 0.5, 0.5}, n6[] = {0.5, -0.5, -0.5}, n7[] = {0.5, -0.5, 0.5};
+  GLfloat verts[] = {x1, y1, z1, x1, y1, z2, x1, y2, z1, x1, y2, z2, x2, y2, z1, x2, y2, z2, x2, y1, z1, x2, y1, z2},
+          texts[] = {0, vrep, hrep, vrep, 0, 0, hrep, 0,
+		     0, vrep, hrep, vrep, 0, 0, hrep, 0},
+	  norms[] = {-0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 
+                     0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5};
+  GLubyte indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, // sides
+                       0, 2, 6, 4, 1, 7, 3, 5}; // top and bottom
 
   bind_texture(get_texture(texId));
-    glBegin(GL_TRIANGLE_STRIP);
+ // glClientActiveTexture(GL_TEXTURE0);
 
-    glNormal3fv(n0);
-    glTexCoord2fv(t0);
-      glVertex3fv(v0);
-    glNormal3fv(n1);
-    glTexCoord2fv(t1);
-      glVertex3fv(v1);
+  glVertexPointer(3, GL_FLOAT, 0, verts);
+  glNormalPointer(GL_FLOAT, 0, norms);
+  glTexCoordPointer(2, GL_FLOAT, 0, texts);
 
-    glNormal3fv(n2);
-    glTexCoord2fv(t2);
-      glVertex3fv(v6);
-    glNormal3fv(n3);
-    glTexCoord2fv(t3);
-      glVertex3fv(v7);
-
-    glNormal3fv(n4);
-    glTexCoord2fv(t4);
-      glVertex3fv(v4);
-    glNormal3fv(n5);
-    glTexCoord2fv(t5);
-      glVertex3fv(v5);
-
-    glNormal3fv(n6);
-    glTexCoord2fv(t6);
-      glVertex3fv(v2);
-    glNormal3fv(n7);
-    glTexCoord2fv(t7);
-      glVertex3fv(v3);
-
-    glNormal3fv(n0);
-    glTexCoord2fv(t8);
-      glVertex3fv(v0);
-    glNormal3fv(n1);
-    glTexCoord2fv(t9);
-      glVertex3fv(v1);
-
-    glEnd();
-    if (closed)
-    {
-        glBegin(GL_TRIANGLE_STRIP);
-	glNormal3fv(n4);
-        glTexCoord2fv(t2);
-          glVertex3fv(v4);
-	glNormal3fv(n6);	
-        glTexCoord2fv(t3);
-          glVertex3fv(v2);
-	glNormal3fv(n2);
-        glTexCoord2fv(t0);
-          glVertex3fv(v6);
-	glNormal3fv(n0);
-        glTexCoord2fv(t1);
-          glVertex3fv(v0);
-        glEnd();
-
-        glBegin(GL_TRIANGLE_STRIP);
-	glNormal3fv(n1);
-        glTexCoord2fv(t1);
-          glVertex3fv(v1);
-	glNormal3fv(n7);
-        glTexCoord2fv(t3);
-          glVertex3fv(v3);
-	glNormal3fv(n3);
-        glTexCoord2fv(t0);
-          glVertex3fv(v7);
-	glNormal3fv(n5);
-        glTexCoord2fv(t2);
-          glVertex3fv(v5);
-        glEnd();
-    }
+  if (closed) {
+    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 18, GL_UNSIGNED_BYTE, indices);
+  } else {
+    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 10, GL_UNSIGNED_BYTE, indices);
+  }
 }
 
 void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
@@ -1085,6 +1010,35 @@ namespace enigma {
         d3d_lighting.light_update_positions();
     }
 }
+
+#include <vector>
+using std::vector;
+
+struct glPrimitive
+{
+  int type;
+
+  glPrimitive();
+  ~glPrimitive();
+
+  void Draw()
+  {
+    //TODO:
+  }
+};
+
+class glMesh
+{
+  vector<glPrimitive*> glPrimitives;
+  glMesh();
+  ~glMesh();
+  void Draw()
+  {
+    //TODO: Loop all primitives and draw them
+  }
+};
+
+vector<glMesh*> glMeshes;
 
 #include "Universal_System/estring.h"
 class d3d_model
