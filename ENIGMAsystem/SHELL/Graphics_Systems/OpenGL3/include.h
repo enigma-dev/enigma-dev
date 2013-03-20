@@ -1,6 +1,7 @@
 #include "OPENGLStd.h"
 #include "GLsprite.h"
 #include "GLbackground.h"
+#include "GLvertexbuffer.h"
 
 #include "GLfont.h"
 #include "GLcurves.h"

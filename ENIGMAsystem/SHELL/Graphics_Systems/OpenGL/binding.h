@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+// OpenGL does not memorize the bound texture and significant slowdowns occur by constantly rebinding a texture
+// glBind calls clog up the pipeline avoid them at all costs, texture paging is good
+#define use_bound_texture_global
 #ifdef use_bound_texture_global
   namespace enigma { extern unsigned bound_texture; }
   #define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);

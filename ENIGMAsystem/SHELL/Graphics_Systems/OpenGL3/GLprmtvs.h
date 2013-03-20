@@ -15,21 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-const int pr_pointlist      =1;     //GL_POINTS
-const int pr_linelist       =2;     //GL_LINES
-const int pr_linestrip      =3;     //GL_LINE_STRIP
-const int pr_trianglelist   =4;     //GL_TRIANGLES
-const int pr_trianglestrip  =5;     //GL_TRIANGLE_STRIP
-const int pr_trianglefan    =6;     //GL_TRIANGLE_FAN
+const int pr_pointlist      = 1;     //GL_POINTS
+const int pr_linelist       = 2;     //GL_LINES
+const int pr_linestrip      = 3;     //GL_LINE_STRIP
+const int pr_trianglelist   = 4;     //GL_TRIANGLES
+const int pr_trianglestrip  = 5;     //GL_TRIANGLE_STRIP
+const int pr_trianglefan    = 6;     //GL_TRIANGLE_FAN
 
-const int pr_lineloop       =7;     //GL_LINE_LOOP
-const int pr_quadlist       =8;     //GL_QUADS
-const int pr_quadstrip      =9;     //GL_QUAD_STRIP
-const int pr_polygon       =10;     //GL_POLYGON
+const int pr_lineloop       = 7;     //GL_LINE_LOOP
+const int pr_quadlist       = 8;     //GL_QUADS
+const int pr_quadstrip      = 9;     //GL_QUAD_STRIP
+const int pr_polygon        = 10;    //GL_POLYGON
 
-const int pr_aa_nicest      =4354;  //GL_NICEST
-const int pr_aa_fastest     =4353;  //GL_FASTEST
-const int pr_aa_dontcare    =4352;  //GL_DONT_CARE
+const int pr_aa_nicest      = 4354;  //GL_NICEST
+const int pr_aa_fastest     = 4353;  //GL_FASTEST
+const int pr_aa_dontcare    = 4352;  //GL_DONT_CARE
 
 void draw_set_primitive_aa(bool enable, int quality);
 int draw_primitive_begin(int kind);
