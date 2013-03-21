@@ -254,7 +254,7 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   idpr("Copying resources",1);
 
   //Next, add the resource names to that list
-  edbg << "COPYING SOME F*CKING RESOURCES:" << flushl;
+  edbg << "Copying resources:" << flushl;
 
   edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
   for (int i = 0; i < es->spriteCount; i++) {
