@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Box2D Physics
+Identifier: Box2D
+Represents: None
+Description: Collision registering using the free and open source Box2D physics engine.
+Author: Robert
+
+Represents:
+	Build-platforms: None
+

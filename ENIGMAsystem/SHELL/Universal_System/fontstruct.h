@@ -49,7 +49,7 @@ namespace enigma
     unsigned int height, yoffset;
 
     // Texture layer
-    unsigned int texture;
+    int texture;
     int twid, thgt;
   };
   struct rawfont {

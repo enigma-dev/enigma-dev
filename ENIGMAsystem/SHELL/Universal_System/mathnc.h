@@ -127,13 +127,18 @@ double frac(double x);
 double degtorad(double x);
 double radtodeg(double x);
 
-double lerp(double x, double y, double a);
-
 double lengthdir_x(double len,double dir);
 double lengthdir_y(double len,double dir);
 double direction_difference(double dir1,double dir2);
 double point_direction(double x1,double y1,double x2,double y2);
 double point_distance(double x1, double y1, double x2, double y2);
+double point_distance_3d(double x1, double y1, double z1, double x2,
+double y2, double z2);
+double dot_product(double x1, double y1, double x2, double y2);
+double dot_product_3d(double x1, double y1, double z1, double x2,
+double y2, double z2);
+double lerp(double x, double y, double a);
+double clamp(double x, double y, double a);
 
 double max(const enigma::varargs &t);
 double min(const enigma::varargs &t);

@@ -169,6 +169,8 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
         wto << "    enigma::update_globals();" << endl,
         wto << "    " << endl;
     }
+    wto << "    after_events:" << endl;
+    wto << "    enigma::update_globals();" << endl;
     if (ctex.es->gameSettings.letEscEndGame)
         wto << "    if (keyboard_check_pressed(vk_escape)) game_end();" << endl;
     if (ctex.es->gameSettings.letF4SwitchFullscreen)
@@ -182,7 +184,9 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
         wto << "    //if (keyboard_check_pressed(vk_f5)) game_save('_save" << ctex.es->gameSettings.gameId << ".sav');" << endl;
         wto << "    //if (keyboard_check_pressed(vk_f6)) game_load('_save" << ctex.es->gameSettings.gameId << ".sav');" << endl;
     }
+    // Handle room switching/game restart.
     wto << "    enigma::dispose_destroyed_instances();" << endl;
+    wto << "    enigma::rooms_switch();" << endl;
     wto << "    enigma::sleep_for_framerate(room_speed);" << endl;
     wto << "    " << endl;
     wto << "    return 0;" << endl;

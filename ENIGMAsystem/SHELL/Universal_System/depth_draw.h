@@ -44,7 +44,6 @@ using namespace std;
 namespace enigma {
   struct depth_layer {
     vector<tile> tiles;
-    set<int> particlesystem_ids;
     event_iter* draw_events;
     depth_layer();
   };

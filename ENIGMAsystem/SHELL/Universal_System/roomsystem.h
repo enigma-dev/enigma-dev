@@ -112,6 +112,8 @@ namespace enigma
   };
   void room_update();
   extern int room_max, maxid;
+  extern int room_switching_id; // -1 indicates no room set.
+  void rooms_switch();
   void rooms_load();
   void game_start();
 }

@@ -72,9 +72,6 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   
   int ac=(argcount>16)?16:((int)argcount);
   external *a = new external(ac,(int)returntype);
-  
-  if (dll.find_first_of("\\/") == string::npos)
-		dll = get_working_directory() + dll;
 
   switch (ac)
   {

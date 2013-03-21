@@ -16,6 +16,7 @@
 **/
 
 #include <string>
+#include <cstring>
 using namespace std;
 #include "IMGloading.h"
 
@@ -34,7 +35,7 @@ namespace enigma
   {
     FILE *imgfile;
     int bmpstart,bmpwidth,bmpheight;
-    if(!(imgfile=fopen(filename.c_str(),"r"))) return 0;
+    if(!(imgfile=fopen(filename.c_str(),"rb"))) return 0;
     fseek(imgfile,0,SEEK_END);
     fseek(imgfile,10,SEEK_SET);
     if (fread(&bmpstart,1,4,imgfile) != 4)
@@ -51,36 +52,22 @@ namespace enigma
       return 0;
     
     int
-      wfdc = nlpo2dc(bmpwidth), widfull = wfdc+1, wflgp2 = lgpp2(widfull)+2,
-      hgtfull = nlpo2dc(bmpheight),
-      ih,iw,tmp=hgtfull++<<wflgp2;
-    char* bitmap=new char[(hgtfull<<wflgp2)|2];
+      widfull = nlpo2dc(bmpwidth) + 1,
+      hgtfull = nlpo2dc(bmpheight) + 1,
+      ih,iw;
+    const int bitmap_size = widfull*hgtfull*4;
+    char* bitmap=new char[bitmap_size](); // Initialize to zero.
     long int pad=bmpwidth & 3; //This is that set of nulls that follows each line
       fseek(imgfile,bmpstart,SEEK_SET);
     
-    for (ih = 0; ih < hgtfull-bmpheight; ih++) {
-      for (iw = 0; iw < widfull; iw++) {
-        bitmap[tmp]=0;
-        bitmap[tmp+1]=0;
-        bitmap[tmp+2]=0;
-        bitmap[tmp+3]=0;
-        tmp+=4;
-      }
-    }
-    for(ih=0; ih < bmpheight; ih++)
+    for(ih = bmpheight - 1; ih >= 0; ih--)
     {
+      int tmp = ih*widfull*4;
       for (iw=0; iw < bmpwidth; iw++){
         bitmap[tmp+3] = 255;
         bitmap[tmp+2] = fgetc(imgfile);
         bitmap[tmp+1] = fgetc(imgfile);
         bitmap[tmp]   = fgetc(imgfile);
-        tmp+=4;
-      }
-      for (iw=0; iw < widfull-bmpwidth; iw++){
-        bitmap[tmp]   = 0;
-        bitmap[tmp+1] = 0;
-        bitmap[tmp+2] = 0;
-        bitmap[tmp+3] = 0;
         tmp+=4;
       }
       fseek(imgfile,pad,SEEK_CUR);

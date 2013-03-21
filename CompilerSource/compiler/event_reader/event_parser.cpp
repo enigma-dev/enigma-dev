@@ -571,11 +571,15 @@ string event_forge_sequence_code(int mid, int id, string preferred_name)
     {
       if (event_has_super_check(mid,id) and !event_is_instance(mid,id))
         return base_indent + "if (" + event_get_super_check_condition(mid,id) + ")\n" +
-               base_indent + "  for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)\n" +
-               base_indent + "    ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
+               base_indent + "  for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n" +
+               base_indent + "    ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n" +
+               base_indent + "    if (enigma::room_switching_id != -1) goto after_events;\n" +
+               base_indent + "  }\n";
       else
-         return base_indent + "for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next)\n"
-              + base_indent + "  ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
+         return base_indent + "for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n"
+              + base_indent + "  ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n"
+              + base_indent + "  if (enigma::room_switching_id != -1) goto after_events;\n"
+              + base_indent + "}\n";
     }
   return "";
 }

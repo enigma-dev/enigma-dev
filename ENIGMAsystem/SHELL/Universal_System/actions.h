@@ -54,6 +54,8 @@ inline void action_set_score(double newscore) {
     else score = (int)newscore;
 }
 
+#include "lives.h"
+
 inline void action_set_life(double newlives) {
     if (argument_relative) lives+= (int)newlives;
     else lives = newlives;
@@ -212,7 +214,7 @@ inline void action_draw_text(const string text, const double x, const double y) 
 
 inline void action_sleep(const double milliseconds, const int redraw) {
     if (redraw) {screen_redraw();}
-    sleep(milliseconds/1000);
+    sleep(milliseconds);
 }
 
 inline void action_current_room(const int transition) {

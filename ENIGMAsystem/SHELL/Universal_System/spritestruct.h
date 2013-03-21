@@ -41,7 +41,7 @@ namespace enigma
   struct sprite
   {
     int width,height,subcount,xoffset,yoffset,id;
-    unsigned int *texturearray; //Each subimage has a texture
+    int *texturearray; //Each subimage has a texture
     double *texbordxarray, *texbordyarray;
     void **colldata; // Each subimage has collision data
 
@@ -50,9 +50,9 @@ namespace enigma
     bool where,smooth;
 
     sprite();
-    sprite(unsigned int);
+    sprite(int);
   };
-  extern sprite** spritestructarray;
+  extern sprite** spritestructarray; // INVARIANT: Should only be modified inside spritestruct.cpp.
   extern size_t sprite_idmax;
 }
 
@@ -60,8 +60,11 @@ namespace enigma
 
 namespace enigma
 {
+  /// Called at game start.
+  void sprites_init(); /// This should allocate room for sprites and perform any other necessary actions.
+
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm);
-  void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);
+  void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, int x_offset, int y_offset);
   void sprite_add_copy(sprite *spr, sprite *spr_copy);
 
   //Adds a subimage to an existing sprite from the exe

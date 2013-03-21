@@ -141,8 +141,24 @@ namespace enigma
 
 int show_message(string str)
 {
-    MessageBox(enigma::hWnd,str.c_str(),"Message",MB_OK);
+    MessageBox(enigma::hWnd,str.c_str(), window_get_caption().c_str(), MB_OK);
     return 0;
+}
+
+// TODO There's no easy way to do this. Creating a custom form is the only
+// solution I could find.
+int show_message_ext(string msg, string but1, string but2, string but3)
+{
+    return 1;
+}
+
+bool show_question(string str)
+{
+    if(MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_YESNO) == IDYES)
+    {
+        return true;
+    }
+    return false;
 }
 
 int window_get_x()

@@ -45,6 +45,8 @@
 
 #include "CallbackArrays.h"
 
+#include "lives.h"
+
 int room_speed  = 60;
 int room_width  = 640;
 int room_height = 480;
@@ -77,6 +79,8 @@ namespace enigma
       instance_destroy(it->id, false);
     }
 
+    graphics_clean_up_roomend();
+
     // Set the index to self
     room.rval.d = id;
 
@@ -87,6 +91,10 @@ namespace enigma
 
     background_color = backcolor;
     background_showcolor = drawbackcolor;
+  
+    if (gamestart) {
+      reset_lives();
+    }
 
     //Backgrounds start
     for (int i=0;i<8;i++)
@@ -131,6 +139,8 @@ namespace enigma
       is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
     }
 
+    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_create();
     if (gamestart)
@@ -143,6 +153,8 @@ namespace enigma
   extern int room_loadtimecount;
   extern roomstruct grd_rooms[];
   extern int room_idmax;
+  int room_switching_id = -1;
+  int room_switching_restartgame = false;
   void rooms_load()
   {
     roomdata = new roomstruct*[room_idmax];
@@ -159,8 +171,9 @@ namespace enigma
 
 //Implement the "room" global before we continue
 INTERCEPT_DEFAULT_COPY(enigma::roomv);
-void enigma::roomv::function(variant) {
+void enigma::roomv::function(variant oldval) {
   room_goto((int)rval.d);
+  rval.d = oldval.rval.d;
 } enigma::roomv room;
 
 #if SHOWERRORS
@@ -178,7 +191,8 @@ void enigma::roomv::function(variant) {
 int room_goto(int indx)
 {
 	errcheck(indx,"Attempting to go to nonexisting room");
-	enigma::roomdata[indx]->gotome();
+	enigma::room_switching_id = indx;
+	enigma::room_switching_restartgame = false;
 	return 0;
 }
 
@@ -186,7 +200,8 @@ int room_restart()
 {
 	int indx=(int)room.rval.d;
 	errcheck(indx,"Is this some kind of joke?");
-	enigma::roomdata[indx]->gotome();
+	enigma::room_switching_id = indx;
+	enigma::room_switching_restartgame = false;
 	return 0;
 }
 
@@ -202,7 +217,8 @@ int room_goto_absolute(int index)
 	enigma::roomstruct *rit = enigma::roomorder[index];
 	int indx = rit->id;
 
-	enigma::roomdata[indx]->gotome();
+	enigma::room_switching_id = indx;
+	enigma::room_switching_restartgame = false;
 	return 0;
 }
 
@@ -213,9 +229,10 @@ int room_count() {
 
 int room_goto_first(bool restart_game)
 {
-    enigma::roomstruct *rit = enigma::roomorder[0];
     errcheck_o(0,"Game must have at least one room to do anything");
-    rit->gotome(restart_game);
+    enigma::roomstruct *rit = enigma::roomorder[0];
+    enigma::room_switching_id = rit->id;
+    enigma::room_switching_restartgame = restart_game;
     return 0;
 }
 
@@ -228,7 +245,8 @@ int room_goto_next()
     rit = enigma::roomorder[rit->order + 1];
     errcheck(rit->order+1,"Going to next room after last");
 
-    rit->gotome();
+    enigma::room_switching_id = rit->id;
+    enigma::room_switching_restartgame = false;
     return 0;
 }
 
@@ -240,7 +258,8 @@ int room_goto_previous()
     rit = enigma::roomorder[rit->order - 1];
     errcheck(rit->order-1,"Going to next room after last");
 
-    rit->gotome();
+    enigma::room_switching_id = rit->id;
+    enigma::room_switching_restartgame = false;
     return 0;
 }
 
@@ -288,8 +307,18 @@ namespace enigma
       }
     }
   }
+  void rooms_switch()
+  {
+    if (room_exists(room_switching_id)) {
+      int local_room_switching_id = room_switching_id;
+      bool local_room_switching_restartgame = room_switching_restartgame;
+      room_switching_id = -1;
+      room_switching_restartgame = false;
+    	enigma::roomdata[local_room_switching_id]->gotome(local_room_switching_restartgame);
+    }
+  }
   void game_start() {
     enigma::roomstruct *rit = *enigma::roomorder;
-	  enigma::roomdata[rit->id]->gotome(true);
+    enigma::roomdata[rit->id]->gotome(true);
   }
 }

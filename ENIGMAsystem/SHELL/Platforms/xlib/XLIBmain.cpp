@@ -20,6 +20,7 @@
 
 #include <X11/Xlib.h>
 #include <GL/glx.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <string>
 
@@ -34,12 +35,17 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/loading.h"
 
+#include <time.h>
+
+const int os_type = os_linux;
+
+extern string keyboard_lastchar;
+
 namespace enigma
 {
   extern char keymap[256];
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  string keyboard_lastchar;
 
   namespace x11
   {
@@ -61,7 +67,13 @@ namespace enigma
 
               if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
               else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
-              keyboard_lastchar = string(1,actualKey);
+              { // Set keyboard_lastchar. Seems to work without 
+                  char str[1];
+                  int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
+                  if (len > 0) {
+                      keyboard_lastchar = string(1,str[0]);
+                  }
+              }
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
                 return 0;
@@ -154,6 +166,18 @@ namespace enigma
   int game_ending();
 }
 
+extern double fps;
+long clamp(long value, long min, long max)
+{
+  if (value < min) {
+    return min;
+  }
+  if (value > max) {
+    return max;
+  }
+  return value;
+}
+
 static bool game_isending = false;
 int main(int argc,char** argv)
 {
@@ -242,14 +266,63 @@ int main(int argc,char** argv)
 	XCloseDisplay(disp);
 	return 0;*/
 
+	struct timespec time_offset;
+	struct timespec time_offset_slowing;
+	struct timespec time_current;
+	clock_gettime(CLOCK_MONOTONIC, &time_offset);
+	time_offset_slowing.tv_sec = time_offset.tv_sec;
+	time_offset_slowing.tv_nsec = time_offset.tv_nsec;
+	int frames_count = 0;
+
 	while (!game_isending)
 	{
+		using enigma::current_room_speed;
+		clock_gettime(CLOCK_MONOTONIC, &time_current);
+		{
+			long passed_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_offset.tv_sec*1000000 + time_offset.tv_nsec/1000);
+			passed_mcs = clamp(passed_mcs, 0, 1000000);
+			if (passed_mcs >= 1000000) { // Handle resetting.
+				fps = frames_count;
+				frames_count = 0;
+				time_offset.tv_sec += passed_mcs/1000000;
+				time_offset_slowing.tv_sec = time_offset.tv_sec;
+				time_offset_slowing.tv_nsec = time_offset.tv_nsec;
+			}
+		}
+
+		if (current_room_speed > 0) {
+			long spent_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_offset_slowing.tv_sec*1000000 + time_offset_slowing.tv_nsec/1000);
+			spent_mcs = clamp(spent_mcs, 0, 1000000);
+			long remaining_mcs = 1000000 - spent_mcs;
+			long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+			const int catchup_limit_ms = 50;
+			if (needed_mcs > remaining_mcs + catchup_limit_ms*1000) {
+				// If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
+				// In order to avoid running too fast, we advance the offset, such that we are only at most catchup_limit ms behind.
+				// Thus, if the load is consistently making the game slow, the game is still allowed to run as fast as possible
+				// without any sleep.
+				// And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
+				time_offset_slowing.tv_nsec += 1000*(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
+				spent_mcs = (time_current.tv_sec*1000000 + time_current.tv_nsec/1000) - (time_offset_slowing.tv_sec*1000000 + time_offset_slowing.tv_nsec/1000);
+				spent_mcs = clamp(spent_mcs, 0, 1000000);
+				remaining_mcs = 1000000 - spent_mcs;
+				needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+			}
+			if (remaining_mcs > needed_mcs) {
+				usleep(1);
+				continue;
+			}
+		}
+
 		while(XQLength(disp))
 			if(handleEvents() > 0)
 				goto end;
-    enigma::handle_joysticks();
+
+		enigma::handle_joysticks();
 		enigma::ENIGMA_events();
 		enigma::input_push();
+
+		frames_count++;
 	}
 
 	end:
