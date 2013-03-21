@@ -57,26 +57,7 @@ void lang_CPP::load_extension_locals()
 }
 
 
-const char* heaping_pile_of_dog_shit = "\
-             /\n\
-            |    |\n\
-             \\    \\\n\
-      |       |    |\n\
-       \\     /    /     \\\n\
-    \\   |   |    |      |\n\
-     | /     /\\   \\    /\n\
-    / |     /# \\   |  |\n\
-   |   \\   *    `      \\\n\
-    \\    /   =  # `     |\n\
-     |  | #     ___/   /\n\
-    /   _`---^^^   `. |\n\
-   |  .*     #  =    | \\\n\
-     |  =   #      __/\n\
-    .\\____-------^^  `.\n\
-   /      #         #  \\\n\
-  |   =          =     |\n\
-  \\___    #     #___--^\n\
-      ^^^^^^^^^^^\n\n";
+const char* heaping_pile_of_dog_shit = "ERROR: Unknown";
 
 #ifdef _WIN32
  #include <windows.h>
