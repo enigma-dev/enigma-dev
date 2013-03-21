@@ -32,6 +32,10 @@
 // under this directory, /Platforms/. They are not required to do anything at all
 // if the platform in question lacks support for them entirely.
 
+#include "os_types.h"
+
+extern const int os_type;
+
 namespace enigma
 {
   // This method should write the name of the running module to exenamehere.

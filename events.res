@@ -282,7 +282,7 @@ nomorelives: 7
 	Name: No More Lives
 	Mode: Special
 	Case: 6
-	Sub Check: lives <= 0
+  Super Check: enigma::update_lives_status_and_return_zeroless()
 nomorehealth: 7
 	Name: No More Health
 	Mode: Special

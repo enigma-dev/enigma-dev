@@ -93,8 +93,8 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
 void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);
 void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed = true);
 void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texid, int hrep, int vrep, bool closed, int steps);
-void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texid, int hrep, int vrep, bool closed, int steps);
-void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texid, int hrep, int vrep, int steps);
+void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, bool closed, int steps);
+void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, int steps);
 void d3d_draw_icosahedron();
 void d3d_draw_torus(double x1, double y1, double z1, int texId, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
 

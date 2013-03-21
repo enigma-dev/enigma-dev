@@ -28,7 +28,7 @@ enum {
   rs_fastest,
   rs_dontcare,
   rs_exp,
-  rs_exp2, 
+  rs_exp2,
   rs_linear,
   rs_never, 	// Always False
   rs_less, 	// source Z < depth Z
@@ -93,8 +93,8 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
 void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);
 void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed = true);
 void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texid, int hrep, int vrep, bool closed, int steps);
-void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texid, int hrep, int vrep, bool closed, int steps);
-void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texid, int hrep, int vrep, int steps);
+void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, bool closed, int steps);
+void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, int steps);
 void d3d_draw_icosahedron();
 void d3d_draw_torus(double x1, double y1, double z1, int texId, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
 
@@ -120,7 +120,7 @@ bool d3d_transform_stack_disgard();
 
 bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col);
 bool d3d_light_define_point(int id, double x, double y, double z, double range, int col);
-void d3d_light_define_specularity(int id, int r, int g, int b, double a);
+bool d3d_light_define_specularity(int id, int r, int g, int b, double a);
 void d3d_light_specularity(int facemode, int r, int g, int b, double a);
 void d3d_light_shininess(int facemode, int shine);
 void d3d_light_define_ambient(int col);

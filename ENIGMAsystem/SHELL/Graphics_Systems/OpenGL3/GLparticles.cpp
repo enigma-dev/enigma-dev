@@ -18,6 +18,7 @@
 #include "GLstdraw.h"
 #include "GLsprite.h"
 #include "binding.h"
+#include "GLtextures.h"
 #include "GLcolors.h"
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_sprites.h"
@@ -94,7 +95,7 @@ namespace enigma
             else { // Draw particle sprite.
 
                 particle_sprite* ps = pt->part_sprite;
-                bind_texture(ps->texture);
+                bind_texture(GmTextures[ps->texture]->gltex);
 
                 if (pt->blend_additive) {
                    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
@@ -143,7 +144,7 @@ namespace enigma
 
             particle_sprite* ps = enigma::draw_get_particle_sprite(enigma::pt_sh_pixel);
             if (ps == NULL) return; // NOTE: Skip to next particle.
-            bind_texture(ps->texture);
+            bind_texture(GmTextures[ps->texture]->gltex);
 
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
             glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);

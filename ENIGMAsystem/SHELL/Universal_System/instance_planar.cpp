@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -21,9 +21,56 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
-bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2);
-int collision_bbox_rect_first(int object,double x1,double y1,double x2,double y2);
+#include "planar_object.h"
+#include "instance_system.h"
+#include "instance.h"
+
+int instance_nearest(int x,int y,int obj,bool notme)
+{
+  double dist_lowest=-1;
+  int retid=-4;
+  double xl,yl;
+
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
+  {
+    if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
+    xl = ((enigma::object_planar*)*it)->x - x;
+    yl = ((enigma::object_planar*)*it)->y - y;
+    const double dstclc = hypot(xl,yl);
+    if (dstclc < dist_lowest or dist_lowest == -1)
+    {
+      dist_lowest = dstclc;
+      retid = it->id;
+    }
+  }
+
+  return retid;
+}
+
+int instance_furthest(int x,int y,int obj,bool notme)
+{
+  double dist_highest = -1;
+  int retid = noone;
+  double xl,yl;
+  double dstclc;
+
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
+  {
+    if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
+    xl=((enigma::object_planar*)*it)->x - x;
+    yl=((enigma::object_planar*)*it)->y - y;
+    dstclc = hypot(xl,yl);
+    if (dstclc > dist_highest)
+    {
+      dist_highest = dstclc;
+      retid = it->id;
+    }
+  }
+
+  return retid;
+}
+

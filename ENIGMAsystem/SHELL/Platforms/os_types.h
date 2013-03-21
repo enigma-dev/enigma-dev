@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2013 forthevin                                                **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -21,48 +21,26 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
-#include <math.h>
-#include <string>
+#ifndef OS_TYPES__H
+#define OS_TYPES__H
 
-#include "var4.h"
-#include "reflexive_types.h"
-
-#include "ENIGMA_GLOBALS.h" // TODO: Do away with this sloppy infestation permanently!
-
-#include "collisions_object.h"
-#include "instance_system.h"
-#include "simplecollisions.h"
-
-bool collision_bbox_rect(int object,double x1,double y1,double x2,double y2)
+enum
 {
-  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
-  {
-    const enigma::object_collisions* inst = (enigma::object_collisions*)*it;
-    const int ox = (int)inst->x,         oy = (int)inst->y,
-              bl = inst->bbox_left, br = inst->bbox_right,
-              bt = inst->bbox_top,  bb = inst->bbox_bottom;
-    if (x1<ox+br && x2>ox+bl && y1<oy+bb && y2>oy+bt)
-      return 1;
-  }
-  return 0;
-}
+  os_unknown = -1,
+  os_windows = 0,
+  os_win32 = 0,
+  os_macosx = 1,
+  os_psp = 2,
+  os_ios = 3,
+  os_android = 4,
+  os_symbian = 5,
+  os_linux = 6,
+  os_winphone = 7,
+};
 
-int collision_bbox_rect_first(int object,double x1,double y1,double x2,double y2)
-{
-  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
-  {
-    const enigma::object_collisions* inst = (enigma::object_collisions*)*it;
-    const int ox = (int)inst->x,         oy = (int)inst->y,
-              bl = inst->bbox_left, br = inst->bbox_right,
-              bt = inst->bbox_top,  bb = inst->bbox_bottom;
-    if (x1<ox+br && x2>ox+bl && y1<oy+bb && y2>oy+bt)
-      return inst->id;
-  }
-  return noone;
-}
+#endif
 

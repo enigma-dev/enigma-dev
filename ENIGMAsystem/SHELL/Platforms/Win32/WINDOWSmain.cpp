@@ -28,6 +28,7 @@
 #include <time.h>
 #include <string>
 #include <sstream>
+#include <algorithm>
 using std::string;
 
 #include "WINDOWScallback.h"
@@ -36,6 +37,10 @@ using std::string;
 #include "Universal_System/estring.h"
 #include "WINDOWSwindow.h"
 #include "WINDOWSmain.h"
+
+#include "Platforms/platforms_mandatory.h"
+
+const int os_type = os_windows;
 
 extern unsigned int game_id;
 static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
@@ -67,24 +72,102 @@ namespace enigma {
 
 extern double fps;
 namespace enigma {
-  clock_t lc;
+  int current_room_speed;
+  bool use_pc;
+  // Filetime.
+  ULARGE_INTEGER time_offset_ft;
+  ULARGE_INTEGER time_offset_slowing_ft;
+  ULARGE_INTEGER time_current_ft;
+  // High-resolution performance counter.
+  LARGE_INTEGER time_offset_pc;
+  LARGE_INTEGER time_offset_slowing_pc;
+  LARGE_INTEGER time_current_pc;
+  LARGE_INTEGER frequency_pc;
+  // Timing functions.
+  long clamp(long value, long min, long max)
+  {
+    if (value < min) {
+      return min;
+    }
+    if (value > max) {
+      return max;
+    }
+    return value;
+  }
   void sleep_for_framerate(int rs)
   {
-    clock_t nc = clock();
-    double sdur = 1000/rs - (nc - lc)*1000 / CLOCKS_PER_SEC;
-    if (sdur > 0)
-    {
-        Sleep(sdur);
-        fps = int(CLOCKS_PER_SEC / (nc - lc + sdur));
+    current_room_speed = rs;
+  }
+  void initialize_timing()
+  {
+    use_pc = QueryPerformanceFrequency(&frequency_pc);
+    if (use_pc) {
+      QueryPerformanceCounter(&time_offset_pc);
+      time_offset_slowing_pc.QuadPart = time_offset_pc.QuadPart;
     }
-    else
-    {
-        fps = int(CLOCKS_PER_SEC / (nc - lc));
+    else {
+      FILETIME time_values;
+      GetSystemTimeAsFileTime(&time_values);
+      time_offset_ft.LowPart = time_values.dwLowDateTime;
+      time_offset_ft.HighPart = time_values.dwHighDateTime;
+      time_offset_slowing_ft.QuadPart = time_offset_ft.QuadPart;
     }
-    lc = nc;
+  }
+  void update_current_time()
+  {
+    if (use_pc) {
+      QueryPerformanceCounter(&time_current_pc);
+    }
+    else {
+      FILETIME time_values;
+      GetSystemTimeAsFileTime(&time_values);
+      time_current_ft.LowPart = time_values.dwLowDateTime;
+      time_current_ft.HighPart = time_values.dwHighDateTime;
+    }
+  }
+  long get_current_offset_difference_mcs()
+  {
+    if (use_pc) {
+      return clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart)*1000000/frequency_pc.QuadPart, 0, 1000000);
+    }
+    else {  
+      return clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart)/10, 0, 1000000);
+    }
+  }
+  long get_current_offset_slowing_difference_mcs()
+  {
+    if (use_pc) {
+      return clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart)*1000000/frequency_pc.QuadPart, 0, 1000000);
+    }
+    else {  
+      return clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart)/10, 0, 1000000);
+    }
+  }
+  void increase_offset_slowing(long increase_mcs)
+  {
+    if (use_pc) {
+      time_offset_slowing_pc.QuadPart += frequency_pc.QuadPart*increase_mcs/1000000;
+    }
+    else {
+      time_offset_slowing_ft.QuadPart += 10*increase_mcs;
+    }
+  }
+  void offset_modulus_one_second()
+  {
+    if (use_pc) {
+      long passed_mcs = get_current_offset_difference_mcs();
+      time_offset_pc.QuadPart += (passed_mcs/1000000)*frequency_pc.QuadPart;
+      time_offset_slowing_pc.QuadPart = time_offset_pc.QuadPart;
+    }
+    else {
+      long passed_mcs = get_current_offset_difference_mcs();
+      time_offset_ft.QuadPart += (passed_mcs/1000000)*10000000;
+      time_offset_slowing_ft.QuadPart = time_offset_ft.QuadPart;
+    }
   }
 }
 #include <cstdio>
+#include <mmsystem.h>
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
     int wid = (int)room_width, hgt = (int)room_height;
@@ -137,30 +220,81 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     enigma::initialize_everything();
 
     //Main loop
-        char bQuit=0;
-        while (!bQuit)
-        {
-            if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
-            {
-                if (msg.message == WM_QUIT)
-                {
-                    bQuit=1;
-                    break;
-                }
-                else
-                {
-                    TranslateMessage (&msg);
-                    DispatchMessage (&msg);
-                }
-            }
-            else
-            {
-                enigma::ENIGMA_events();
-                enigma::input_push();
-            }
-        }
 
+    // Initialize timing.
+    
+    UINT minimum_resolution = 1;
+    TIMECAPS timer_resolution_info;
+    if (timeGetDevCaps(&timer_resolution_info, sizeof(timer_resolution_info)) == MMSYSERR_NOERROR) {
+      minimum_resolution = timer_resolution_info.wPeriodMin;
+    }
+    timeBeginPeriod(minimum_resolution);
+    long speed_error_mcs = 0;
+    enigma::initialize_timing();
+    int frames_count = 0;
 
+      char bQuit=0;
+      while (!bQuit)
+      {
+          using enigma::current_room_speed;
+          // Update current time.
+          enigma::update_current_time();
+          {
+              // Find diff between current and offset.
+              long passed_mcs = enigma::get_current_offset_difference_mcs();
+              if (passed_mcs >= 1000000) { // Handle resetting.
+                  // If more than one second has passed, update fps variable, reset frames count,
+                  // and advance offset by difference in seconds, rounded down.
+                  fps = frames_count;
+                  frames_count = 0;
+                  enigma::offset_modulus_one_second();
+              }
+          }
+
+          if (current_room_speed > 0) {
+              long spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+              long remaining_mcs = 1000000 - spent_mcs;
+              long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+              const int catchup_limit_ms = 50;
+              if (needed_mcs > remaining_mcs + catchup_limit_ms*1000) {
+                // If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
+                // In order to avoid running too fast, we advance the offset, such that we are only at most catchup_limit ms behind.
+                // Thus, if the load is consistently making the game slow, the game is still allowed to run as fast as possible
+                // without any sleep.
+                // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
+                enigma::increase_offset_slowing(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
+                long spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+                long remaining_mcs = 1000000 - spent_mcs;
+                long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+              }
+              if (remaining_mcs > needed_mcs) {
+                  Sleep(1);
+                  continue;
+              }
+          }
+          if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
+          {
+              if (msg.message == WM_QUIT)
+              {
+                  bQuit=1;
+                  break;
+              }
+              else
+              {
+                  TranslateMessage (&msg);
+                  DispatchMessage (&msg);
+              }
+          }
+          else
+          {
+              enigma::ENIGMA_events();
+              enigma::input_push();
+
+              frames_count++;
+          }
+      }
+
+    timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
     DestroyWindow (enigma::hWnd);
 

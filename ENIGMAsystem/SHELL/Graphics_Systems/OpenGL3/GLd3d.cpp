@@ -509,61 +509,64 @@ void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, do
     }
 }
 
-void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
+void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed, int steps)
 {
-    float v[51][3];
-    float t[100][3];
     steps = min(max(steps, 3), 48);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
+    float v[(steps + 1)*3 + 1][3];
+    float t[(steps + 1)*3 + 1][2];
     double a, px, py, tp;
     int k = 0;
-  bind_texture(get_texture(texId));
-    glBegin(GL_TRIANGLE_FAN);
-    v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
-    t[k][0] = 0; t[k][1] = 0;
-    glTexCoord2fv(t[k]);
-      glVertex3fv(v[k]);
-    k++;
+    bind_texture(get_texture(texId));
+    glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
     {
-        v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+        v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
         t[k][0] = tp; t[k][1] = vrep;
         glTexCoord2fv(t[k]);
-          glVertex3fv(v[k]);
+        glVertex3fv(v[k]);
+        k += steps + 1;
+        v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+        t[k][0] = tp; t[k][1] = 0;
+        glTexCoord2fv(t[k]);
+        glVertex3fv(v[k]);
+        k -= steps + 1;
         k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
+    k += steps + 1;
     glEnd();
     if (closed)
     {
         glBegin(GL_TRIANGLE_FAN);
         v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
-        t[k][0] = 0; t[k][1] = vrep;
+        t[k][0] = 0; t[k][1] = 0;
         glTexCoord2fv(t[k]);
-          glVertex3fv(v[k]);
+        glVertex3fv(v[k]);
         k++;
         tp = 0;
-        for (int i = 1; i <= steps+1; i++)
+        for (int i = 0; i <= steps; i++)
         {
-            t[k][0] = tp; t[k][1] = 0;
+            v[k][0] = v[i + steps + 1][0]; v[k][1] = v[i + steps + 1][1]; v[k][2] = v[i + steps + 1][2];
+            t[k][0] = 0; t[k][1] = 0;
             glTexCoord2fv(t[k]);
-              glVertex3fv(v[i]);
+            glVertex3fv(v[k]);
             k++; tp += invstep;
         }
         glEnd();
     }
 }
 
-void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, int steps)
+void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, int steps)
 {
-    float v[277][3];
-    float t[277][3];
     steps = min(max(steps, 3), 24);
-    const int zsteps = ceil(steps/2);
+    const int zsteps = ceil(steps/2.0);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, rz = (z2-z1)/2, invstep = (1.0/steps)*hrep, invstep2 = (1.0/zsteps)*vrep, pr = 2*M_PI/steps, qr = M_PI/zsteps;
+    float v[(steps+2)*(zsteps+2)][3];
+    float t[(steps+2)*(zsteps+2)][2];
     double a, b, px, py, pz, tp, tzp, cosb;
-    double cosx[25], siny[25], txp[25];
-    a = pr; tp = 0;
+    double cosx[steps+1], siny[steps+1], txp[steps+1];
+    a = M_PI; tp = 0;
     for (int i = 0; i <= steps; i++)
     {
         cosx[i] = cos(a)*rx; siny[i] = sin(a)*ry;
@@ -571,60 +574,39 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
         a += pr; tp += invstep;
     }
     int k = 0, kk;
-  bind_texture(get_texture(texId));
-    glBegin(GL_TRIANGLE_FAN);
-    v[k][0] = cx; v[k][1] = cy; v[k][2] = cz - rz;
-    t[k][0] = 0; t[k][1] = vrep;
-    glTexCoord2fv(t[k]);
-      glVertex3fv(v[k]);
-    k++;
-    b = qr-M_PI/2;
+    bind_texture(get_texture(texId));
+    b = M_PI/2;
     cosb = cos(b);
     pz = rz*sin(b);
-    tzp = vrep-invstep2;
-    px = cx+rx*cosb; py = cy;
+    tzp = 0.0;
     for (int i = 0; i <= steps; i++)
     {
+        px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
         v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
         t[k][0] = txp[i]; t[k][1] = tzp;
-        glTexCoord2fv(t[k]);
-          glVertex3fv(v[k]);
-        k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
+        k++;
     }
-    glEnd();
-    for (int ii = 0; ii < zsteps - 2; ii++)
+    for (int ii = 0; ii < zsteps; ii++)
     {
         b += qr;
         cosb = cos(b);
         pz = rz*sin(b);
-        tzp -= invstep2;
+        tzp += invstep2;
         glBegin(GL_TRIANGLE_STRIP);
-        px = cx+rx*cosb; py = cy;
         for (int i = 0; i <= steps; i++)
         {
+            px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
             kk = k - steps - 1;
             glTexCoord2fv(t[kk]);
-              glVertex3fv(v[kk]);
+            glVertex3fv(v[kk]);
             v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
             t[k][0] = txp[i]; t[k][1] = tzp;
             glTexCoord2fv(t[k]);
-              glVertex3fv(v[k]);
-            k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
+            glVertex3fv(v[k]);
+            k++;
         }
         glEnd();
     }
-    glBegin(GL_TRIANGLE_FAN);
-    v[k][0] = cx; v[k][1] = cy; v[k][2] = cz + rz;
-    t[k][0] = 0; t[k][1] = 0;
-    glTexCoord2fv(t[k]);
-      glVertex3fv(v[k]);
-    k++;
-    for (int i = k - steps - 2; i <= k - 2; i++)
-    {
-        glTexCoord2fv(t[i]);
-          glVertex3fv(v[i]);
-    }
-    glEnd();
 }
 
 void d3d_draw_icosahedron() {

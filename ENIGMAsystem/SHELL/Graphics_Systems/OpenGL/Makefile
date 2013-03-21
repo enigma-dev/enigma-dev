@@ -1,4 +1,4 @@
-SOURCES += $(wildcard Graphics_Systems/OpenGL/*.cpp) Graphics_Systems/OpenGL/glew.c $(wildcard Graphics_Systems/OpenGL/ParticleSystems/*.cpp)
+SOURCES += $(wildcard Graphics_Systems/OpenGL/*.cpp) Graphics_Systems/OpenGL/glew.c
 
 ifeq ($(PLATFORM), Win32)
 	LDLIBS += -lopengl32 -lglu32

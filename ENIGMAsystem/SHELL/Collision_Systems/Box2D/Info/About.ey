@@ -3,10 +3,10 @@
 
 Name: Box2D Physics
 Identifier: Box2D
-Represents: All
+Represents: None
 Description: Collision registering using the free and open source Box2D physics engine.
 Author: Robert
 
 Represents:
-	Build-platforms: All
+	Build-platforms: None
 
