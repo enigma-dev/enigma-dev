@@ -103,7 +103,7 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   jdi::builtin->add_macro("false","0"); // Added because polygone is a bitch
   cout << endl << endl;
   
-  cout << "Choosing language... Eenie, meenie, minie, C++" << endl;
+  cout << "Choosing language: C++" << endl;
   current_language_name = "CPP";
   current_language = languages[current_language_name] = new lang_CPP();
   
@@ -144,7 +144,7 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
 void quickmember_script(jdi::definition_scope* scope, string name);
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
-  cout << "Well, shucks; started." << endl;
+  cout << "******** Compiling Initialized ********" << endl;
   
   //First, we make a space to put our scripts.
   jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
@@ -155,7 +155,7 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
   
   cout << "Starting syntax check." << endl;
   ide_passback_error.absolute_index = syncheck::syntacheck(code);
-  cout << "That's over." << endl;
+  cout << "Syntax checking complete." << endl;
   error_sstring = syncheck::syerr;
   
   
@@ -178,6 +178,6 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
   }
   cout << "In checking code\n" << code << "\n\nat position " << ide_passback_error.absolute_index << "\n\n";
   cout << endl << "Line " << ide_passback_error.line << ", position " << ide_passback_error.position << ": " << ide_passback_error.err_str << endl<< endl;
-  cout << "All done." << endl;
+  cout << "******** Compiling Finished ********" << endl;
   return &ide_passback_error;
 }
