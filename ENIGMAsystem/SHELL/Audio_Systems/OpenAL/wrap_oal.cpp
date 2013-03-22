@@ -1,5 +1,4 @@
-/** Copyright (C) 2011 Kitty Cat <http://kcat.strangesoft.net/> 
-*** Copyright (C) 2011 Josh Ventura
+/** Copyright (C) 2008-2013 Josh Ventura, Kitty Cat <http://kcat.stangesoft.net/>
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***

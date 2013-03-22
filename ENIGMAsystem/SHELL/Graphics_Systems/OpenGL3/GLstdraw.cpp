@@ -42,7 +42,7 @@ void draw_set_line_pattern(unsigned short pattern, int scale)
 
 void draw_point(float x,float y)
 {
-  untexture();
+  texture_reset();
   glBegin(GL_POINTS);
     glVertex2f(x,y);
   glEnd();
@@ -50,7 +50,7 @@ void draw_point(float x,float y)
 
 void draw_point_color(float x,float y,int col)
 {
-  untexture();
+  texture_reset();
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(col),__GETG(col),__GETB(col),enigma::currentcolor[3]);
     glBegin(GL_POINTS);
@@ -61,7 +61,7 @@ void draw_point_color(float x,float y,int col)
 
 void draw_line(float x1,float y1,float x2,float y2)
 {
-  untexture();
+  texture_reset();
   glBegin(GL_LINES);
     glVertex2f(x1,y1);
     glVertex2f(x2,y2);
@@ -70,7 +70,7 @@ void draw_line(float x1,float y1,float x2,float y2)
 
 void draw_line_width(float x1,float y1,float x2,float y2,float width)
 {
-  untexture();
+  texture_reset();
   glPushAttrib(GL_LINE_BIT);
     glLineWidth(width);
     glBegin(GL_LINES);
@@ -82,7 +82,7 @@ void draw_line_width(float x1,float y1,float x2,float y2,float width)
 
 void draw_line_color(float x1,float y1,float x2,float y2,int c1,int c2)
 {
-  untexture();
+  texture_reset();
   glBegin(GL_LINES);
     glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
       glVertex2f(x1,y1);
@@ -94,7 +94,7 @@ void draw_line_color(float x1,float y1,float x2,float y2,int c1,int c2)
 
 void draw_line_width_color(float x1,float y1,float x2,float y2,float width,int c1,int c2)
 {
-  untexture();
+  texture_reset();
   glPushAttrib(GL_LINE_BIT);
     glLineWidth(width);
     glBegin(GL_LINES);
@@ -111,7 +111,7 @@ void draw_rectangle(float x1,float y1,float x2,float y2,bool outline)
 {
   x1 -= 1;
   y1 -= 1;
-  untexture();
+  texture_reset();
   if(outline)
   {
     glBegin(GL_LINE_LOOP);
@@ -126,7 +126,7 @@ void draw_rectangle(float x1,float y1,float x2,float y2,bool outline)
 
 void draw_rectangle_angle(float x1,float y1,float x2,float y2,float angle,bool outline)
 {
-  untexture();
+  texture_reset();
   angle *= M_PI/180;
 
   float
@@ -156,7 +156,7 @@ void draw_rectangle_angle(float x1,float y1,float x2,float y2,float angle,bool o
 
 void draw_rectangle_color(float x1,float y1,float x2,float y2,int c1,int c2,int c3,int c4,bool outline)
 {
-    untexture();
+    texture_reset();
     glBegin(outline?GL_LINE_LOOP:GL_QUADS);
       glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
         glVertex2f(x1,y1);
@@ -179,7 +179,7 @@ float draw_get_circle_precision() {
 
 void draw_circle(float x,float y,float r,bool outline)
 {
-    untexture();
+    texture_reset();
     double pr=2*M_PI/enigma::circleprecision;
     if(outline)
     {
@@ -205,7 +205,7 @@ void draw_circle(float x,float y,float r,bool outline)
 
 void draw_circle_color(float x,float y,float r,int c1, int c2,bool outline)
 {
-  untexture();
+  texture_reset();
     if(outline)
       glBegin(GL_LINE_STRIP);
     else
@@ -227,7 +227,7 @@ void draw_circle_color(float x,float y,float r,int c1, int c2,bool outline)
 
 void draw_circle_perfect(float x,float y,float r,bool outline)
 {
-    untexture();
+    texture_reset();
     const float r2 = r*r, r12 = r*M_SQRT1_2;
     glBegin(outline?GL_POINTS:GL_LINES);
     for(float xc=0, yc=r; xc <= r12; xc++)
@@ -247,7 +247,7 @@ void draw_circle_perfect(float x,float y,float r,bool outline)
 
 void draw_circle_color_perfect(float x,float y,float r, int c1, int c2, bool outline)
 {
-    untexture();
+    texture_reset();
     float r2=r*r;
     if(outline)
     {
@@ -288,7 +288,7 @@ void draw_circle_color_perfect(float x,float y,float r, int c1, int c2, bool out
 
 void draw_ellipse(float x1,float y1,float x2,float y2,bool outline)
 {
-  untexture();
+  texture_reset();
   float
       x=(x1+x2)/2,y=(y1+y2)/2,
       hr=fabs(x2-x),vr=fabs(y2-y),
@@ -324,7 +324,7 @@ void draw_ellipse(float x1,float y1,float x2,float y2,bool outline)
 
 void draw_ellipse_color(float x1,float y1,float x2,float y2,int c1, int c2,bool outline)
 {
-  untexture();
+  texture_reset();
     float
         x=(x1+x2)/2,y=(y1+y2)/2,
         hr=fabs(x2-x),vr=fabs(y2-y),
@@ -351,7 +351,7 @@ void draw_ellipse_color(float x1,float y1,float x2,float y2,int c1, int c2,bool 
 
 void draw_ellipse_perfect(float x1,float y1,float x2,float y2,bool outline)
 {
-  untexture();
+  texture_reset();
   float
     x=(x1+x2)/2,y=(y1+y2)/2,
     hr=fabs(x2-x),vr=fabs(y2-y);
@@ -369,7 +369,7 @@ void draw_ellipse_perfect(float x1,float y1,float x2,float y2,bool outline)
 
 void draw_triangle(float x1,float y1,float x2,float y2,float x3,float y3,bool outline)
 {
-  untexture();
+  texture_reset();
   glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
     glVertex2f(x1,y1);
     glVertex2f(x2,y2);
@@ -379,7 +379,7 @@ void draw_triangle(float x1,float y1,float x2,float y2,float x3,float y3,bool ou
 
 void draw_triangle_color(float x1,float y1,float x2,float y2,float x3,float y3,int col1,int col2,int col3,bool outline)
 {
-  untexture();
+  texture_reset();
   glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
     glColor4ub(__GETR(col1),__GETG(col1),__GETB(col1),enigma::currentcolor[3]);
       glVertex2f(x1,y1);
@@ -393,7 +393,7 @@ void draw_triangle_color(float x1,float y1,float x2,float y2,float x3,float y3,i
 
 void draw_roundrect(float x1,float y1,float x2,float y2,float r, bool outline)
 {
-  untexture();
+  texture_reset();
   if(x1>x2) {
     float t=x2;
     x2=x1;
@@ -454,7 +454,7 @@ void draw_roundrect(float x1,float y1,float x2,float y2,float r, bool outline)
 
 void draw_roundrect_color(float x1, float y1, float x2, float y2, float r, int col1, int col2, bool outline)
 {
-  untexture();
+  texture_reset();
   if(x1>x2) {
     float t=x2;
     x2=x1;
@@ -531,7 +531,7 @@ void draw_roundrect_color(float x1, float y1, float x2, float y2, float r, int c
 
 void draw_arrow(float x1,float y1,float x2,float y2, float arrow_size, float line_size, bool outline)
 {
-  untexture();
+  texture_reset();
   double dir = atan2(y2-y1,x2-x1);
   float tc = cos(dir), ts = sin(dir),
   xs = x2-tc*arrow_size, ys = y2-ts*arrow_size,
@@ -554,7 +554,7 @@ void draw_arrow(float x1,float y1,float x2,float y2, float arrow_size, float lin
 
 void draw_button(float x1,float y1,float x2,float y2,float border_width,bool up)
 {
-  untexture();
+  texture_reset();
   if(x1>x2) {
     float t=x2;
     x2=x1;
@@ -612,7 +612,7 @@ void draw_healthbar(float x1,float y1,float x2,float y2,float amount,int backcol
   }
   amount = amount>=100 ? 1 : (amount<=0 ? 0 : amount/100);
 
-  untexture();
+  texture_reset();
   if(showborder)
   {
     glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
