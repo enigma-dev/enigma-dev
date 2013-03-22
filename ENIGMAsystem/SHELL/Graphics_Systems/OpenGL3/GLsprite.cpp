@@ -69,7 +69,7 @@ void draw_sprite(int spr,int subimg,double x,double y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -96,7 +96,7 @@ void draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double 
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 	glPushAttrib(GL_CURRENT_BIT);
 
     glColor4f(1,1,1,1);
@@ -125,7 +125,7 @@ void draw_sprite_part(int spr,int subimg,double left,double top,double width,dou
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     float tbw = spr2d->width/(float)spr2d->texbordxarray[usi], tbh = spr2d->height/(float)spr2d->texbordyarray[usi],
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -151,7 +151,7 @@ void draw_sprite_part_offset(int spr,int subimg,double left,double top,double wi
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     float tbw = spr2d->width/spr2d->texbordxarray[usi], tbh = spr2d->height/spr2d->texbordyarray[usi],
           xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
@@ -177,7 +177,7 @@ void draw_sprite_ext(int spr,int subimg,double x,double y,double xscale,double y
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(blend),__GETG(blend),__GETB(blend),char(alpha*255)); //Implement "blend" parameter
@@ -218,7 +218,7 @@ void draw_sprite_part_ext(int spr,int subimg,double left,double top,double width
 	glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     float tbw = spr2d->width/(float)spr2d->texbordxarray[usi], tbh = spr2d->height/(float)spr2d->texbordyarray[usi],
           xvert1 = x, xvert2 = xvert1 + width*xscale,
@@ -249,7 +249,7 @@ void draw_sprite_general(int spr,int subimg,double left,double top,double width,
     get_spritev(spr2d,spr);
     glPushAttrib(GL_CURRENT_BIT);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     const float
     tbx = spr2d->texbordxarray[usi],  tby = spr2d->texbordyarray[usi],
@@ -292,7 +292,7 @@ void draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,dou
     get_spritev(spr2d,spr);
     glPushAttrib(GL_CURRENT_BIT);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + w,
@@ -324,7 +324,7 @@ void draw_sprite_tiled(int spr,int subimg,double x,double y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -367,7 +367,7 @@ void draw_sprite_tiled_ext(int spr,int subimg,double x,double y, double xscale,d
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    bind_texture(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_bind(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));

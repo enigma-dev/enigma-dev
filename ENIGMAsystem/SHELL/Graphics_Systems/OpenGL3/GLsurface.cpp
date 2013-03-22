@@ -165,7 +165,7 @@ bool surface_exists(int id)
 void draw_surface(int id, double x, double y)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
   int w=surf->width;
@@ -184,7 +184,7 @@ void draw_surface(int id, double x, double y)
 void draw_surface_stretched(int id, double x, double y, double w, double h)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
 
@@ -201,7 +201,7 @@ void draw_surface_stretched(int id, double x, double y, double w, double h)
 void draw_surface_part(int id,double left,double top,double width,double height,double x,double y)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
@@ -224,7 +224,7 @@ void draw_surface_part(int id,double left,double top,double width,double height,
 void draw_surface_tiled(int id,double x,double y)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -255,7 +255,7 @@ void draw_surface_tiled(int id,double x,double y)
 void draw_surface_tiled_area(int id,double x,double y,double x1,double y1,double x2,double y2)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -305,7 +305,7 @@ void draw_surface_tiled_area(int id,double x,double y,double x1,double y1,double
 void draw_surface_ext(int id,double x,double y,double xscale,double yscale,double rot,int color,double alpha)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -334,7 +334,7 @@ void draw_surface_ext(int id,double x,double y,double xscale,double yscale,doubl
 void draw_surface_stretched_ext(int id,double x,double y,double w,double h,int color,double alpha)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -355,7 +355,7 @@ void draw_surface_stretched_ext(int id,double x,double y,double w,double h,int c
 void draw_surface_part_ext(int id,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
   glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -379,7 +379,7 @@ void draw_surface_part_ext(int id,double left,double top,double width,double hei
 void draw_surface_tiled_ext(int id,double x,double y,double xscale,double yscale,int color,double alpha)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -410,7 +410,7 @@ void draw_surface_tiled_ext(int id,double x,double y,double xscale,double yscale
 void draw_surface_tiled_area_ext(int id,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -460,7 +460,7 @@ void draw_surface_tiled_area_ext(int id,double x,double y,double x1,double y1,do
 void draw_surface_general(int id, double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4)
 {
   get_surface(surf,id);
-  bind_texture(surf->tex);
+  texture_bind(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     const float tbw = surf->width, tbh = surf->height,

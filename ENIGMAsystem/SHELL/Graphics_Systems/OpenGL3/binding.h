@@ -21,9 +21,9 @@
 #ifdef use_bound_texture_global
   namespace enigma { extern unsigned bound_texture; }
   #define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
-  #define bind_texture(texid) if (enigma::bound_texture != unsigned(texid)) \
+  #define texture_bind(texid) if (enigma::bound_texture != unsigned(texid)) \
     glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = texid)
 #else
   #define untexture() glBindTexture(GL_TEXTURE_2D, 0)
-  #define bind_texture(texid) glBindTexture(GL_TEXTURE_2D, texid)
+  #define texture_bind(texid) glBindTexture(GL_TEXTURE_2D, texid)
 #endif

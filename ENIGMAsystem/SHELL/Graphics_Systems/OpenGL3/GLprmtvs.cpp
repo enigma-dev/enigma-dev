@@ -70,7 +70,7 @@ int draw_primitive_begin(int dink)
 
 int draw_primitive_begin_texture(int dink,unsigned tex)
 {
-  bind_texture(tex);
+  texture_bind(tex);
 	GLenum kind = ptypes_by_id[ dink & 15 ];
 	glBegin(kind);
   return 0;

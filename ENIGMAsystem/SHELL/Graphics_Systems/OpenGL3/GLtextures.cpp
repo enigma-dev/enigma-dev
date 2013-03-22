@@ -161,7 +161,7 @@ namespace enigma
 
   unsigned char* graphics_get_texture_rgba(unsigned texture)
   {
-    bind_texture(texture);
+    texture_bind(texture);
 
     int w,h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
