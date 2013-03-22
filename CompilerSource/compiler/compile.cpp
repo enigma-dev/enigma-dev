@@ -254,7 +254,11 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   idpr("Copying resources",1);
 
   //Next, add the resource names to that list
+<<<<<<< HEAD
   edbg << "\nCOPYING THE FOLLOWING RESOURCES:" << flushl;
+=======
+  edbg << "Copying resources:" << flushl;
+>>>>>>> upstream/master
 
   edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
   for (int i = 0; i < es->spriteCount; i++) {
@@ -601,7 +605,7 @@ wto << "string sound_get_name(int i) {\n switch (i) {\n";
     idpr("Compile failed at C++ level.",-1);
     return E_ERROR_BUILD;
   }
-  user << "******** Make Complete Successfully ******** \n";
+  user << "******** Make Completed Successfully ******** \n";
 
 
 
