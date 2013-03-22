@@ -52,7 +52,6 @@ void d3d_set_hidden(bool enable);
 void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
 
-void d3d_set_texturing(bool enable);
 void d3d_set_culling(bool enable);
 void d3d_set_culling_mode(int mode);
 void d3d_set_culling_orientation(int mode);

@@ -3,6 +3,7 @@
 #include "GLbackground.h"
 #include "GLvertexbuffer.h"
 #include "GLshader.h"
+#include "GLmaterial.h"
 
 #include "GLfont.h"
 #include "GLcurves.h"
