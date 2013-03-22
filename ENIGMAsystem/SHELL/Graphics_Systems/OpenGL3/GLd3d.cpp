@@ -153,11 +153,6 @@ void d3d_set_fog_density(double density)
   glFogf(GL_FOG_DENSITY, density);  
 }
 
-void d3d_set_texturing(bool enable)
-{
-  (enable?glEnable:glDisable)(GL_TEXTURE_2D);
-}
-
 void d3d_set_culling(bool enable)
 {
   (enable?glEnable:glDisable)(GL_CULL_FACE);
