@@ -51,6 +51,7 @@ enum {
 
 unsigned get_texture(int texid); // fail safe macro
 
+void texture_set_enabled(bool enable);
 void texture_set_interpolation(int enable);
 bool texture_get_interpolation();
 double texture_get_width(int texid);

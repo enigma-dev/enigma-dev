@@ -174,6 +174,11 @@ namespace enigma
   }
 }
 
+void texture_set_enabled(bool enable)
+{
+  (enable?glEnable:glDisable)(GL_TEXTURE_2D);
+}
+
 void texture_set_interpolation(int enable)
 {
   for (int i = 0; i < GmTextures.size(); i++)

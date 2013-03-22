@@ -161,7 +161,7 @@ namespace enigma
 
   unsigned char* graphics_get_texture_rgba(unsigned texture)
   {
-    bind_texture(texture);
+    texture_use(texture);
 
     int w,h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
@@ -172,6 +172,11 @@ namespace enigma
 
     return ret;
   }
+}
+
+void texture_set_enabled(bool enable)
+{
+  (enable?glEnable:glDisable)(GL_TEXTURE_2D);
 }
 
 void texture_set_interpolation(int enable)

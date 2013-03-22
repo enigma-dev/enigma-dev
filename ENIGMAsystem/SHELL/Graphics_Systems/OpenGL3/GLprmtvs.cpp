@@ -62,7 +62,7 @@ void draw_set_primitive_aa(bool enable, int quality)
 
 int draw_primitive_begin(int dink)
 {
-	untexture();
+	texture_reset();
 	GLenum kind = ptypes_by_id[ dink & 15 ];
   glBegin(kind);
   return 0;
@@ -70,7 +70,7 @@ int draw_primitive_begin(int dink)
 
 int draw_primitive_begin_texture(int dink,unsigned tex)
 {
-  bind_texture(tex);
+  texture_use(tex);
 	GLenum kind = ptypes_by_id[ dink & 15 ];
 	glBegin(kind);
   return 0;

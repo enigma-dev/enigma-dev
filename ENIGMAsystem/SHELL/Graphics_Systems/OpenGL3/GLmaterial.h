@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,16 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Collision_Systems/collision_mandatory.h"
+#ifndef _GLMATERIAL__H
+#define _GLMATERIAL__H
 
-namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
-  {
-    return 0;
-  }
+int material_create();
+void material_add_texture(int id, int tid);
+void material_set_texture(int id, int mtid, int tid);
+void material_set_shader(int id, int sid);
+int material_get_shader(int id);
+void material_use(int id);
+void material_reset();
+void material_free(int id);
 
-  void free_collision_mask(void* mask)
-  {
-  }
-};
+#endif
