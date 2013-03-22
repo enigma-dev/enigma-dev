@@ -35,25 +35,23 @@ namespace enigma
   {
     int nullhere;
 	  unsigned bkgid, width, height,transparent,smoothEdges,preload,useAsTileset,tileWidth,tileHeight,hOffset,vOffset,hSep,vSep;
-    
+
     if (!fread(&nullhere,4,1,exe) or nullhere != *(int*)"BKG ")
       return;
-    
+
     // Determine how many backgrounds we have
     int bkgcount;
     if (!fread(&bkgcount,4,1,exe))
       return;
-    
-	  
+
+
 	  // Fetch the highest ID we will be using
 	  int bkg_highid;
 	  if (!fread(&bkg_highid,4,1,exe))
 	    return;
-	  
-	  printf("highestid: %d", bkg_highid);
-	  
+
 	  backgrounds_init();
-	  
+
 	  for (int i = 0; i < bkgcount; i++)
 	  {
 		  int unpacked;
@@ -62,7 +60,7 @@ namespace enigma
 		  printf("width: %d", width);
 		  if (!fread(&height,4,1,exe)) return;
 		  printf("height: %d", height);
-		  
+
 		  if (!fread(&transparent,4,1,exe)) return;
 		  printf("transparent: %d", transparent);
 		  if (!fread(&smoothEdges,4,1,exe)) return;
@@ -83,19 +81,19 @@ namespace enigma
 		  printf("hSep: %d", hSep);
 		  if (!fread(&vSep,4,1,exe)) return;
 		  printf("vSep: %d", vSep);
-		  
-		 
+
+
 		  //need to add: transparent, smooth, preload, tileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep
-		  
+
 		  unpacked = width*height*4;
-		  
+
 		  unsigned int size;
-		  if (!fread(&size,4,1,exe)){}; 
+		  if (!fread(&size,4,1,exe)){};
 		  printf("Alloc size: %d", size);
-		  
+
 		  unsigned char* cpixels=new unsigned char[size+1];
 		  if (!cpixels)
-		  {  
+		  {
 			  show_error("Failed to load background: Cannot allocate enough memory "+toString(unpacked),0);
 			  break;
 		  }
@@ -111,10 +109,10 @@ namespace enigma
 			  continue;
 		  }
 		  delete[] cpixels;
-		 
+
 		  printf("Adding background: %d", i);
 		  background_new(bkgid, width, height, pixels, false, false, true, false, 32, 32, 0, 0, 1,1);
-		  
+
 		  delete[] pixels;
 	  }
   }

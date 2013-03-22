@@ -559,12 +559,32 @@ inline void action_create_object_motion(int object, double x, double y, double s
     }
 }
 
-inline int draw_self()
+int draw_self()
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     draw_sprite_ext(inst->sprite_index, inst->image_index, inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
     return 0;
 }  //actions seemed the best place for this
+
+inline int action_draw_self()
+{
+    return draw_self();
+}
+
+inline void action_sprite_transform(int xscale, int yscale, double angle, int mirror)
+{
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    inst->image_xscale = (mirror==1 || mirror==3)?-xscale:xscale;
+    inst->image_yscale = (mirror==2 || mirror==3)?-yscale:yscale;
+    inst->image_angle = angle;
+}
+
+inline void action_sprite_color(int color, int alpha)
+{
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    inst->image_blend = color;
+    inst->image_alpha = alpha;
+}
 
 inline void action_fullscreen(int action)
 {
