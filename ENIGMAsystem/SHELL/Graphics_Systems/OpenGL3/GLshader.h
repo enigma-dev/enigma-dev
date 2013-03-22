@@ -15,22 +15,31 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _GLVERTEXBUFFER__H
-#define _GLVERTEXBUFFER__H
+#ifndef _GLSHADER__H
+#define _GLSHADER__H
 
-#include <vector>
-using std::vector;
-
-struct Shader {
-
+enum {
+  sh_vertex = 0,
+  sh_tesscontrol = 1,
+  sh_tessevaluation = 2,
+  sh_geometry = 3,
+  sh_fragment = 4
 };
 
-extern vector<Shader*> shaders;
+int shader_create(int type);
+int shader_load(int id, const char* fname);
+bool shader_compile(int id);
+const char* shader_compile_output(int id);
+void shader_free(int id);
 
-int shader_glsl_create(int type); // creates a shader and returns the index
-void shader_glsl_load(const char* fname); // loads the shader code from an external file
-void shader_glsl_compile(int id); // compiles the shader code so that it can then be used for rendering
-void shader_glsl_begin(int id); // uses the shader on all further draw calls
-void shader_glsl_end(int id); // stops the shader on all further draw calls
+int shader_program_create();
+bool shader_program_link(int id);
+bool shader_program_validate(int id);
+void shader_program_attach(int id, int sid);
+void shader_program_detach(int id, int sid);
+void shader_program_bind_frag_data(int id, const char* name);
+void shader_program_use(int id);
+void shader_program_reset();
+void shader_program_free(int id);
 
 #endif
