@@ -27,6 +27,30 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+#include "GLtextures.h"
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_background(bck2d,back)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return;\
+    }\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return r;\
+    }\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#else
+  #define get_background(bck2d,back)\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#endif
+
 extern int room_width, room_height;
 namespace enigma {
   extern size_t background_idmax;
@@ -39,7 +63,7 @@ void draw_background(int back, double x, double y)
 {
   get_background(bck2d,back);
     bind_texture(GmTextures[bck2d->texture]->gltex);
-// see backgroundstruct and spritestruct are storing the gluint to the texture, and when 
+// see backgroundstruct and spritestruct are storing the gluint to the texture, and when
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
 

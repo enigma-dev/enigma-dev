@@ -15,30 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLtextures.h"
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return r;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#else
-  #define get_background(bck2d,back)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#endif
-
 int background_get_texture(int backId);
 int background_get_width(int backId);
 int background_get_height(int backId);
