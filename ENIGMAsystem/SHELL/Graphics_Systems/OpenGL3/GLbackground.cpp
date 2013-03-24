@@ -20,8 +20,32 @@
 #include <math.h>
 #include "OpenGLHeaders.h"
 #include "GLbackground.h"
+#include "GLtextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
+
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_background(bck2d,back)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return;\
+    }\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return r;\
+    }\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#else
+  #define get_background(bck2d,back)\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#endif
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
