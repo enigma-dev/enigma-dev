@@ -15,29 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLtextures.h"
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return r;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#else
-  #define get_background(bck2d,back)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#endif
+#ifndef _GLBACKGROUND__H
+#define _GLBACKGROUND__H
+
+
 
 int background_get_texture(int backId);
 int background_get_width(int backId);
@@ -55,3 +36,5 @@ void draw_background_part_ext(int back,double left,double top,double width,doubl
 void draw_background_tiled_ext(int back,double x,double y,double xscale,double yscale,int color,double alpha);
 void draw_background_tiled_area_ext(int back,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha);
 void draw_background_general(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4);
+
+#endif

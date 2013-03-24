@@ -581,7 +581,7 @@ void audio_play_music(int sound, bool loop)
     {
       alGenSources(1, &sound_sources[0]->source);
     }
-    get_sound(snd,sound,0);
+    get_sound(snd,sound,);
     alSourcei(sound_sources[0]->source, AL_BUFFER, snd->buf[0]);
     alSourcei(sound_sources[0]->source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(sound_sources[0]->source, AL_REFERENCE_DISTANCE, 1);
@@ -789,7 +789,7 @@ void audio_channel_num(int num) {
 
 int audio_system()
 {
-  // return audio_old_system or audio_new_system
+  return audio_new_system;
 }
 
 int audio_add(string fname, int type)
@@ -846,7 +846,7 @@ int audio_emitter_create()
 
 bool audio_emitter_exists(int index)
 {
-  return (index < sound_emitters.size()) && bool(sound_emitters[index]);
+  return true;//((index < sound_emitters.size()) && (sound_emitters[index]));
 }
 
 void audio_emitter_falloff(int emitter, double falloff_ref, double falloff_max, double falloff_factor)

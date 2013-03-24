@@ -24,6 +24,7 @@ using std::vector;
 
 struct Material {
   unsigned int shader;
+  unsigned int textcount = 0;
 
   Material() 
   {
@@ -77,6 +78,6 @@ void material_reset()
 
 void material_free(int id)
 {
-
+  delete materials[id];
 }
 
