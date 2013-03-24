@@ -66,6 +66,7 @@ string string_format(double val, unsigned tot, unsigned dec)
 }
 
 string string_copy(string str, int index, int count) {
+	index = index < 0 ? 0 : index;
 	return (size_t)index > str.length()? "": str.substr(index < 2? 0: index-1, count < 1? 0: count);
 }
 
