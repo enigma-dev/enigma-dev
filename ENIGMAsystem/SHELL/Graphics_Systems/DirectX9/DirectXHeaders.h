@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2010-2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,29 +14,3 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
-
-//#include "OpenGLHeaders.h"
-
-namespace enigma
-{
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
-}
-
-#include "GLcolors.h"
-#include "GLprmtvs.h"
-#include "GLd3d.h"
-#include "GLdraw.h"
-#include "GLblend.h"
-#include "GLsurface.h"
-#include "GLmiscextra.h"
-
