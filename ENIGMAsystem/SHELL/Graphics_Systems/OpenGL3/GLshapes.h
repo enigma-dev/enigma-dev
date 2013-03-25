@@ -19,4 +19,5 @@
 #define __GLSHAPESH_
 #include "OpenGLHeaders.h"
 GLfloat* block_vertices(double x1, double y1, double z1, double x2, double y2, double z2);
+GLfloat* block_indices(double x1, double y1, double z1, double x2, double y2, double z2);
 #endif
