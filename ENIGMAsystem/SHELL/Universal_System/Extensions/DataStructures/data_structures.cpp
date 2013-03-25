@@ -376,21 +376,21 @@ class grid
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
-                   if (grid_array[i * xgrid + ii] == val)
+                   if (double(grid_array[i * xgrid + ii]) == double(val))
                        return true;
        }
        return false;
     }
     int value_region_x(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const variant val)
-    {
+    { int ab;
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
        if (xd > 0 && yd > 0)
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
-                   if (grid_array[i * xgrid + ii] == val)
-                       return ii;
+                   if (double(grid_array[i * xgrid + ii]) == double(val))
+                      return ii;
        }
        return 0;
     }
@@ -402,7 +402,7 @@ class grid
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
-                   if (grid_array[i * xgrid + ii] == val)
+                   if (double(grid_array[i * xgrid + ii]) == double(val))
                        return i;
        }
        return 0;
@@ -417,7 +417,7 @@ class grid
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                        if (grid_array[i * xgrid + ii] == val)
+                        if (double(grid_array[i * xgrid + ii]) == double(val))
                             return true;
         }
         return false;
@@ -432,7 +432,7 @@ class grid
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                        if (grid_array[i * xgrid + ii] == val)
+                        if (double(grid_array[i * xgrid + ii]) == double(val))
                             return i;
         }
         return 0;
@@ -447,7 +447,7 @@ class grid
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                        if (grid_array[i * xgrid + ii] == val)
+                        if (double(grid_array[i * xgrid + ii]) == double(val))
                             return ii;
         }
         return 0;
@@ -695,15 +695,15 @@ std::string ds_grid_write(const unsigned int id)
 	ss.flags(std::ios::hex | std::ios::uppercase | std::ios::internal);
 	ss.width(4);
 	ss.fill('0');
-	
+
 	grid<variant> dsGrid = ds_grids[id];
-	
+
 	// Write size
 	ss << std::hex << dsGrid.width();
 	ss.width(4); ss << std::hex << dsGrid.height();
-	
+
 	//ds_grids[id].find(x, y)
-	
+
 	for(int y = 0; y < dsGrid.height(); ++y)
 	{
 		for(int x = 0; x < dsGrid.width(); ++x)
@@ -711,15 +711,15 @@ std::string ds_grid_write(const unsigned int id)
 			// Write coords
 			ss.width(4); ss << (unsigned int)x;
 			ss.width(4); ss << (unsigned int)y;
-			
+
 			variant vari = dsGrid.find(x, y);
-			
+
 			// Write type
 			ss.width(2);
 			ss << (unsigned int)((vari.type == enigma::vt_real) ? 0x00 : 0x01);
 			ss.width(16);
 			ss << *(unsigned long long*)&vari.rval.d;
-			
+
 			// Write data
 			if (vari.type == enigma::vt_real)
 			{
@@ -735,7 +735,7 @@ std::string ds_grid_write(const unsigned int id)
 			}
 		}
 	}
-	
+
 	return ss.str();
 }
 
@@ -758,7 +758,7 @@ void ds_grid_read(const unsigned int id, std::string value)
 		for(int x = 0; x < width; ++x)
 		{
 			int xx, yy, type;
-			
+
 			// Read x/y
 			ss << std::hex << value.substr(i, 4);
 			ss >> xx;
@@ -768,7 +768,7 @@ void ds_grid_read(const unsigned int id, std::string value)
 			ss >> yy;
 			ss.clear();
 			i += 4;
-			
+
 			// Read type
 			ss << std::hex << value.substr(i, 2);
 			ss >> type;
@@ -779,13 +779,13 @@ void ds_grid_read(const unsigned int id, std::string value)
 			{
 				variant vari;
 				vari.type = enigma::vt_real;
-				
+
 				double d;
 				ss << std::hex << value.substr(i, 16);
 				ss >> *(unsigned long long*)&d;
 				ss.clear();
 				i += 16;
-				
+
 				vari.rval = d;
 				ds_grids[id].add(xx, yy, vari);
 			}
@@ -794,7 +794,7 @@ void ds_grid_read(const unsigned int id, std::string value)
 				variant vari;
 				vari.type = enigma::vt_tstr;
 				int len;
-				
+
 				// Read length
 				ss << std::hex << value.substr(i, 4);
 				ss >> len;
@@ -803,7 +803,7 @@ void ds_grid_read(const unsigned int id, std::string value)
 
 				vari.sval = value.substr(i, len);
 				i += len;
-				
+
 				ds_grids[id].add(xx, yy, vari);
 			}
 		}
@@ -966,19 +966,19 @@ std::string ds_map_write(const unsigned int id)
 	ss.flags(std::ios::hex | std::ios::uppercase | std::ios::internal);
 	ss.width(4);
 	ss.fill('0');
-	
+
 	std::multimap<variant, variant> dsMap = ds_maps[id];
-	
+
 	// Write size
 	ss << std::hex << dsMap.size();
-	
+
 	std::multimap<variant, variant>::iterator it = dsMap.begin();
 	while (it != dsMap.end())
 	{
 		// Write type
 		ss.width(2);
 		ss << (unsigned int)(((*it).first.type == enigma::vt_real) ? 0x00 : 0x01);
-		
+
 		// Write data
 		if ((*it).first.type == enigma::vt_real)
 		{
@@ -992,11 +992,11 @@ std::string ds_map_write(const unsigned int id)
 			for(size_t j = 0; j < (*it).first.sval.length(); ++j)
 				ss << (*it).first.sval[j];
 		}
-		
+
 		// Write type
 		ss.width(2);
 		ss << (unsigned int)(((*it).second.type == enigma::vt_real) ? 0x00 : 0x01);
-		
+
 		// Write data
 		if ((*it).second.type == enigma::vt_real)
 		{
@@ -1010,10 +1010,10 @@ std::string ds_map_write(const unsigned int id)
 			for(size_t j = 0; j < (*it).second.sval.length(); ++j)
 				ss << (*it).second.sval[j];
 		}
-		
+
 		++it;
 	}
-	
+
 	return ss.str();
 }
 
@@ -1022,23 +1022,23 @@ void ds_map_read(const unsigned int id, std::string value)
 	std::stringstream ss;
 	int i = 4;
 	int count;
-	
+
 	// Read count
 	ss << std::hex << value.substr(0, 4);
 	ss >> count;
 	ss.clear();
-	
+
 	for(int j = 0; j < count; ++j)
 	{
 		variant variKey, variValue;
 		int type;
-		
+
 		// Read type
 		ss << std::hex << value.substr(i, 2);
 		ss >> type;
 		ss.clear();
 		i += 2;
-		
+
 		if (type == 0)
 		{
 			double d;
@@ -1046,14 +1046,14 @@ void ds_map_read(const unsigned int id, std::string value)
 			ss >> *(unsigned long long*)&d;
 			ss.clear();
 			i += 16;
-			
+
 			variKey.type = enigma::vt_real;
 			variKey.rval = d;
 		}
 		else
 		{
 			int len;
-			
+
 			// Read length
 			ss << std::hex << value.substr(i, 4);
 			ss >> len;
@@ -1064,13 +1064,13 @@ void ds_map_read(const unsigned int id, std::string value)
 			variKey.sval = value.substr(i, len);
 			i += len;
 		}
-		
+
 		// Read type
 		ss << std::hex << value.substr(i, 2);
 		ss >> type;
 		ss.clear();
 		i += 2;
-		
+
 		if (type == 0)
 		{
 			double d;
@@ -1078,14 +1078,14 @@ void ds_map_read(const unsigned int id, std::string value)
 			ss >> *(unsigned long long*)&d;
 			ss.clear();
 			i += 16;
-			
+
 			variValue.type = enigma::vt_real;
 			variValue.rval = d;
 		}
 		else
 		{
 			int len;
-			
+
 			// Read length
 			ss << std::hex << value.substr(i, 4);
 			ss >> len;
@@ -1096,7 +1096,7 @@ void ds_map_read(const unsigned int id, std::string value)
 			variValue.sval = value.substr(i, len);
 			i += len;
 		}
-		
+
 		// Push value
 		ds_maps[id].insert(std::pair<variant, variant>(variKey, variValue));
 	}
@@ -1246,9 +1246,9 @@ std::string ds_list_write(const unsigned int id)
 	ss.flags(std::ios::hex | std::ios::uppercase | std::ios::internal);
 	ss.width(4);
 	ss.fill('0');
-	
+
 	std::vector<variant> dsList = ds_lists[id];
-	
+
 	// Write count
 	ss << dsList.size();
 	for(size_t i = 0; i < dsList.size(); ++i)
@@ -1256,7 +1256,7 @@ std::string ds_list_write(const unsigned int id)
 		// Write type
 		ss.width(2);
 		ss << (unsigned int)((dsList[i].type == enigma::vt_real) ? 0x00 : 0x01);
-		
+
 		// Write data
 		if (dsList[i].type == enigma::vt_real)
 		{
@@ -1271,7 +1271,7 @@ std::string ds_list_write(const unsigned int id)
 				ss << dsList[i].sval[j];
 		}
 	}
-	
+
 	return ss.str();
 }
 
@@ -1285,11 +1285,11 @@ void ds_list_read(const unsigned int id, std::string value)
 	ss << std::hex << value.substr(0, 4);
 	ss >> count;
 	ss.clear();
-	
+
 	for(int j = 0; j < count; ++j)
 	{
 		int type;
-		
+
 		// Read type
 		ss << std::hex << value.substr(i, 2);
 		ss >> type;
@@ -1300,13 +1300,13 @@ void ds_list_read(const unsigned int id, std::string value)
 		{
 			variant vari;
 			vari.type = enigma::vt_real;
-			
+
 			double d;
 			ss << std::hex << value.substr(i, 16);
 			ss >> *(unsigned long long*)&d;
 			ss.clear();
 			i += 16;
-			
+
 			vari.rval = d;
 			ds_lists[id].push_back(vari);
 		}
@@ -1315,7 +1315,7 @@ void ds_list_read(const unsigned int id, std::string value)
 			variant vari;
 			vari.type = enigma::vt_tstr;
 			int len;
-			
+
 			// Read length
 			ss << std::hex << value.substr(i, 4);
 			ss >> len;
@@ -1324,7 +1324,7 @@ void ds_list_read(const unsigned int id, std::string value)
 
 			vari.sval = value.substr(i, len);
 			i += len;
-			
+
 			ds_lists[id].push_back(vari);
 		}
 	}
@@ -1492,12 +1492,12 @@ std::string ds_priority_write(const unsigned int id)
 	ss.flags(std::ios::hex | std::ios::uppercase | std::ios::internal);
 	ss.width(4);
 	ss.fill('0');
-	
+
 	std::multimap<variant, variant> dsPriority = ds_prioritys[id];
-	
+
 	// Write size
 	ss << std::hex << dsPriority.size();
-	
+
 	std::multimap<variant, variant>::iterator it = dsPriority.begin();
 	while (it != dsPriority.end())
 	{
@@ -1506,7 +1506,7 @@ std::string ds_priority_write(const unsigned int id)
 		ss << (unsigned int)(((*it).first.type == enigma::vt_real) ? 0x00 : 0x01);
 		ss.width(16);
 		ss << *(unsigned long long*)&(*it).second.rval.d;
-		
+
 		// Write data
 		if ((*it).first.type == enigma::vt_real)
 		{
@@ -1520,10 +1520,10 @@ std::string ds_priority_write(const unsigned int id)
 			for(size_t j = 0; j < (*it).first.sval.length(); ++j)
 				ss << (*it).first.sval[j];
 		}
-		
+
 		++it;
 	}
-	
+
 	return ss.str();
 }
 
@@ -1532,31 +1532,31 @@ void ds_priority_read(const unsigned int id, std::string value)
 	std::stringstream ss;
 	int i = 4;
 	int count;
-	
+
 	// Read count
 	ss << std::hex << value.substr(0, 4);
 	ss >> count;
 	ss.clear();
-	
+
 	for(int j = 0; j < count; ++j)
 	{
 		variant vari, prio;
 		int type;
-		
+
 		prio.type = enigma::vt_real;
-		
+
 		// Read type
 		ss << std::hex << value.substr(i, 2);
 		ss >> type;
 		ss.clear();
 		i += 2;
-		
+
 		// Read priority
 		ss << std::hex << value.substr(i, 16);
 		ss >> *(unsigned long long*)&prio.rval.d;
 		ss.clear();
 		i += 16;
-		
+
 		if (type == 0)
 		{
 			double d;
@@ -1564,14 +1564,14 @@ void ds_priority_read(const unsigned int id, std::string value)
 			ss >> *(unsigned long long*)&d;
 			ss.clear();
 			i += 16;
-			
+
 			vari.type = enigma::vt_real;
 			vari.rval = d;
 		}
 		else
 		{
 			int len;
-			
+
 			// Read length
 			ss << std::hex << value.substr(i, 4);
 			ss >> len;
@@ -1582,7 +1582,7 @@ void ds_priority_read(const unsigned int id, std::string value)
 			vari.sval = value.substr(i, len);
 			i += len;
 		}
-		
+
 		// Push value
 		ds_prioritys[id].insert(std::pair<variant, variant>(vari, prio));
 	}
@@ -1680,18 +1680,18 @@ std::string ds_queue_write(const unsigned int id)
 	ss.flags(std::ios::hex | std::ios::uppercase | std::ios::internal);
 	ss.width(4);
 	ss.fill('0');
-	
+
 	std::deque<variant> dsQueue = ds_queues[id];
-	
+
 	// Write size
 	ss << std::hex << dsQueue.size();
-	
+
 	for(size_t i = 0; i < dsQueue.size(); ++i)
 	{
 		// Write type
 		ss.width(2);
 		ss << (unsigned int)((dsQueue[i].type == enigma::vt_real) ? 0x00 : 0x01);
-		
+
 		// Write data
 		if (dsQueue[i].type == enigma::vt_real)
 		{
@@ -1706,7 +1706,7 @@ std::string ds_queue_write(const unsigned int id)
 				ss << dsQueue[i].sval[j];
 		}
 	}
-	
+
 	return ss.str();
 }
 
@@ -1715,23 +1715,23 @@ void ds_queue_read(const unsigned int id, std::string value)
 	std::stringstream ss;
 	int i = 4;
 	int count;
-	
+
 	// Read count
 	ss << std::hex << value.substr(0, 4);
 	ss >> count;
 	ss.clear();
-	
+
 	for(int j = 0; j < count; ++j)
 	{
 		variant vari;
 		int type;
-		
+
 		// Read type
 		ss << std::hex << value.substr(i, 2);
 		ss >> type;
 		ss.clear();
 		i += 2;
-		
+
 		if (type == 0)
 		{
 			double d;
@@ -1739,14 +1739,14 @@ void ds_queue_read(const unsigned int id, std::string value)
 			ss >> *(unsigned long long*)&d;
 			ss.clear();
 			i += 16;
-			
+
 			vari.type = enigma::vt_real;
 			vari.rval = d;
 		}
 		else
 		{
 			int len;
-			
+
 			// Read length
 			ss << std::hex << value.substr(i, 4);
 			ss >> len;
@@ -1757,7 +1757,7 @@ void ds_queue_read(const unsigned int id, std::string value)
 			vari.sval = value.substr(i, len);
 			i += len;
 		}
-		
+
 		// Push value
 		ds_queues[id].push_back(vari);
 	}
@@ -1848,18 +1848,18 @@ std::string ds_stack_write(const unsigned int id)
 	ss.flags(std::ios::hex | std::ios::uppercase | std::ios::internal);
 	ss.width(4);
 	ss.fill('0');
-	
+
 	std::deque<variant> dsStack = ds_stacks[id];
-	
+
 	// Write size
 	ss << std::hex << dsStack.size();
-	
+
 	for(size_t i = 0; i < dsStack.size(); ++i)
 	{
 		// Write type
 		ss.width(2);
 		ss << (unsigned int)((dsStack[i].type == enigma::vt_real) ? 0x00 : 0x01);
-		
+
 		// Write data
 		if (dsStack[i].type == enigma::vt_real)
 		{
@@ -1874,7 +1874,7 @@ std::string ds_stack_write(const unsigned int id)
 				ss << dsStack[i].sval[j];
 		}
 	}
-	
+
 	return ss.str();
 }
 
@@ -1883,23 +1883,23 @@ void ds_stack_read(const unsigned int id, std::string value)
 	std::stringstream ss;
 	int i = 4;
 	int count;
-	
+
 	// Read count
 	ss << std::hex << value.substr(0, 4);
 	ss >> count;
 	ss.clear();
-	
+
 	for(int j = 0; j < count; ++j)
 	{
 		variant vari;
 		int type;
-		
+
 		// Read type
 		ss << std::hex << value.substr(i, 2);
 		ss >> type;
 		ss.clear();
 		i += 2;
-		
+
 		if (type == 0)
 		{
 			double d;
@@ -1907,14 +1907,14 @@ void ds_stack_read(const unsigned int id, std::string value)
 			ss >> *(unsigned long long*)&d;
 			ss.clear();
 			i += 16;
-			
+
 			vari.type = enigma::vt_real;
 			vari.rval = d;
 		}
 		else
 		{
 			int len;
-			
+
 			// Read length
 			ss << std::hex << value.substr(i, 4);
 			ss >> len;
@@ -1925,7 +1925,7 @@ void ds_stack_read(const unsigned int id, std::string value)
 			vari.sval = value.substr(i, len);
 			i += len;
 		}
-		
+
 		// Push value
 		ds_stacks[id].push_back(vari);
 	}
