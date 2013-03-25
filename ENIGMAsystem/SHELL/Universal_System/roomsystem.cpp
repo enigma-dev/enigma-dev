@@ -39,6 +39,7 @@
 #include "instance_system.h"
 #include "instance.h"
 #include "planar_object.h"
+#include "backgroundstruct.h"
 
 #include "roomsystem.h"
 #include "depth_draw.h"
@@ -57,7 +58,7 @@ int background_color = 16777215;
 int background_showcolor=1;
 
 var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed,background_alpha;
+background_vtiled, background_hspeed, background_vspeed,background_alpha,background_width,background_height,background_xscale,background_yscale;
 
 int view_current = 0;
 int view_enabled = 0;
@@ -91,7 +92,7 @@ namespace enigma
 
     background_color = backcolor;
     background_showcolor = drawbackcolor;
-  
+
     if (gamestart) {
       reset_lives();
     }
@@ -105,7 +106,18 @@ namespace enigma
       background_x[i] = backs[i].area_x; background_y[i] = backs[i].area_y;
       background_hspeed[i] = backs[i].horSpeed; background_vspeed[i] = backs[i].verSpeed;
       background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
-      //background_stretch? = backs[i].stretch;
+      if (background_exists(background_index[i]))
+      {
+        background_width[i] = background_get_width(background_index[i]); background_height[i] = background_get_height(background_index[i]);
+        background_xscale[i] = (backs[i].stretch) ? room_width/background_width[i] : 1;
+        background_yscale[i] = (backs[i].stretch) ? room_height/background_height[i] : 1;
+      }
+      else
+      {
+        background_width[i] = 0; background_height[i] = 0;
+        background_xscale[i] = 1;
+        background_yscale[i] = 1;
+      }
     }
     //Backgrounds end
 

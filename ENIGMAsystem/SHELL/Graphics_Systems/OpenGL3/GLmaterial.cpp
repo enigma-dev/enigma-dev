@@ -24,13 +24,13 @@ using std::vector;
 
 struct Material {
   unsigned int shader;
-  unsigned int textcount = 0;
+  unsigned int textcount;
 
-  Material() 
+  Material()
   {
-
+    textcount = 0;
   }
- 
+
   ~Material()
   {
 
