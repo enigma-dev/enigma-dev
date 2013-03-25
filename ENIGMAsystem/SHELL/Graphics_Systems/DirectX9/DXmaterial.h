@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,28 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
+#ifndef _DXMATERIAL__H
+#define _DXMATERIAL__H
 
-//#include "OpenGLHeaders.h"
+int material_create();
+void material_add_texture(int id, int tid);
+void material_set_texture(int id, int mtid, int tid);
+void material_set_shader(int id, int sid);
+int material_get_shader(int id);
+void material_use(int id);
+void material_reset();
+void material_free(int id);
 
-namespace enigma
-{
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
-}
-
-#include "GLcolors.h"
-#include "GLprmtvs.h"
-#include "GLd3d.h"
-#include "GLdraw.h"
-#include "GLblend.h"
-#include "GLsurface.h"
-#include "GLmiscextra.h"
-
+#endif

@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,28 +15,28 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
+#include <iostream>
+#include <string>
 
-//#include "OpenGLHeaders.h"
-
+#include "DirectXHeaders.h"
+using namespace std;
+#include "DIRECTXStd.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h" // Room dimensions.
+#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 namespace enigma
 {
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
+  unsigned bound_texture=0;
+  unsigned char currentcolor[4] = {0,0,0,255};
+
+  void graphicssystem_initialize()
+  {
+
+  }
 }
 
-#include "GLcolors.h"
-#include "GLprmtvs.h"
-#include "GLd3d.h"
-#include "GLdraw.h"
-#include "GLblend.h"
-#include "GLsurface.h"
-#include "GLmiscextra.h"
+// Stolen entirely from the documentation and thrown into a switch() structure.
+string draw_get_graphics_error()
+{
 
+}
