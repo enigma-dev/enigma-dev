@@ -20,6 +20,7 @@
 #include "GLvertexbuffer.h"
 #include "GLtextures.h"
 #include "GLmesh.h"
+#include "GLshapes.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -425,8 +426,8 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
 
 void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed)
 {
-  GLfloat verts[] = {x1, y1, z1, x1, y1, z2, x1, y2, z1, x1, y2, z2, x2, y2, z1, x2, y2, z2, x2, y1, z1, x2, y1, z2},
-          texts[] = {0, vrep, hrep, vrep, 0, 0, hrep, 0,
+  GLfloat* verts = block_vertices(x1,y1,z1,x2,y2,z2);
+  GLfloat texts[] = {0, vrep, hrep, vrep, 0, 0, hrep, 0,
 		     0, vrep, hrep, vrep, 0, 0, hrep, 0},
 	  norms[] = {-0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 
                      0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5};
