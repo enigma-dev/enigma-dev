@@ -26,6 +26,8 @@ bool d3d_model_exists(const unsigned int id);
 void d3d_model_clear(const unsigned int id);
 void d3d_model_save(const unsigned int id, std::string fname);
 bool d3d_model_load(const unsigned int id, std::string fname);
+void d3d_model_draw(const unsigned int id);
+void d3d_model_draw(const unsigned int id, double x, double y, double z);
 void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId);
 void d3d_model_primitive_begin(const unsigned int id, int kind);
 void d3d_model_primitive_end(const unsigned int id);
