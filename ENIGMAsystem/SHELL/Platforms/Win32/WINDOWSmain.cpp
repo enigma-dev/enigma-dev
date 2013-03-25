@@ -84,7 +84,7 @@ namespace enigma {
   LARGE_INTEGER time_current_pc;
   LARGE_INTEGER frequency_pc;
   // Timing functions.
-  long clamp(long value, long min, long max)
+  long clamp(LONGLONG value, long min, long max)
   {
     if (value < min) {
       return min;
@@ -92,7 +92,7 @@ namespace enigma {
     if (value > max) {
       return max;
     }
-    return value;
+    return long(value);
   }
   void sleep_for_framerate(int rs)
   {
