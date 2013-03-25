@@ -15,28 +15,24 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
+#include "DirectXHeaders.h"
+#include <string>
+#include <stdio.h>
+using namespace std;
 
-//#include "OpenGLHeaders.h"
+#include "DXmiscextra.h"
 
-namespace enigma
+extern int window_get_width();
+extern int window_get_height();
+
+#include "Universal_System/estring.h"
+
+int screen_save(string filename) //Assumes native integers are little endian
 {
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
+
 }
 
-#include "GLcolors.h"
-#include "GLprmtvs.h"
-#include "GLd3d.h"
-#include "GLdraw.h"
-#include "GLblend.h"
-#include "GLsurface.h"
-#include "GLmiscextra.h"
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
+{
 
+}

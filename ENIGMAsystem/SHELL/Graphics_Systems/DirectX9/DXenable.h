@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,28 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
-
-//#include "OpenGLHeaders.h"
-
-namespace enigma
-{
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
-}
-
-#include "GLcolors.h"
-#include "GLprmtvs.h"
-#include "GLd3d.h"
-#include "GLdraw.h"
-#include "GLblend.h"
-#include "GLsurface.h"
-#include "GLmiscextra.h"
-
+void gs_enable_alpha(bool enable);
+void gs_enable_blending(bool enable);
+void gs_enable_depthbuffer(bool enable);
+void gs_enable_dither(bool enable);
+void gs_enable_smooth_lines(bool enable);
+void gs_enable_stipple(bool enable);
+void gs_enable_logical_op(bool enable);
+void gs_enable_smooth_points(bool enable);
+void gs_enable_smooth_polygons(bool enable);
+void gs_enable_stencil(bool enable);
+void gs_enable_texture(bool enable);

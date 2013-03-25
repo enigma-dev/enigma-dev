@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GLstdraw.h"
+#include "GLdraw.h"
 #include "GLsprite.h"
 #include "binding.h"
 #include "GLtextures.h"
