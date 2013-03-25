@@ -149,7 +149,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           }
         }
 
-        wto << "\n    //Locals to instances of this object\n    ";
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
         {
           bool writeit = true; //Whether this "local" should be declared such
@@ -203,13 +202,29 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               nemap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
             wto << "    variant myevent_" << evname << "();\n    ";
           }
+
+        /* Event Perform Code */
+        wto << "\n//Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
+
+        for (unsigned ii = 0; ii < i->second->events.size; ii++)
+          if  (i->second->events[ii].code != "")
+          {
+            //Look up the event name
+            string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
+            wto << "        if (type == " << i->second->events[ii].mainId << " && numb == " << i->second->events[ii].id << ")\n";
+            wto << "          return myevent_" << evname << "();\n";
+          }
+
+        wto << "\n        return 0;\n      }\n";
+
+        wto << "\n    //Locals to instances of this object\n    ";
+
         if (nemap.size())
         {
           wto << "\n    \n    // Grouped event bases\n    ";
           for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
             wto << "  void myevent_" << it->second.s << "()\n      {\n" << it->second.c << "      }\n    ";
         }
-
 
         /**** Now we write the callable unlinker. Its job is to disconnect the instance for destroy.
         * @ * This is an important component that tracks multiple pieces of the instance. These pieces

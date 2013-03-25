@@ -108,6 +108,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
               else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
             }
   wto << "    //virtual void unlink() {} // This is already declared at the super level." << endl;
+  wto << "    virtual variant myevents_perf(int type, int numb) {}" << endl;
   wto << "    event_parent() {}" << endl;
   wto << "    event_parent(unsigned _x, int _y): " << system_get_uppermost_tier() << "(_x,_y) {}" << endl;
   wto << "  };" << endl;
@@ -154,6 +155,8 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
 
+  wto << "  variant ev_perf(int type, int numb)\n  {\n    return ((enigma::event_parent*)(instance_event_iterator->inst))->myevents_perf(type, numb);\n  }\n";
+
   /* Some Super Checks are more complicated than others, requiring a function. Export those functions here. */
   for (evfit it = used_events.begin(); it != used_events.end(); it++)
     wto << event_get_super_check_function(it->second.mid, it->second.id);
@@ -166,6 +169,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
       const int mid = event_sequence[i].first, id = event_sequence[i].second;
       evfit it = used_events.find(event_is_instance(mid,id) ? event_stacked_get_root_name(mid) : event_get_function_name(mid,id));
       if (it == used_events.end()) continue;
+      if (mid == 7 && (id >= 10 && id <= 25)) continue;   //User events, don't want to be run in the event sequence. TODO: Remove hard-coded values.
 
       string seqcode = event_forge_sequence_code(mid,id,it->first);
       if (seqcode != "")
