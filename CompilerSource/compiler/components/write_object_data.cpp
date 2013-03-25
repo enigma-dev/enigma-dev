@@ -66,9 +66,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     // Write the script names
     wto << "// Script identifiers\n";
     for (int i = 0; i < es->scriptCount; i++)
-      wto << "const int " << es->scripts[i].name << " = " << es->scripts[i].id << ";\n";
-    wto << "\n";
-    for (int i = 0; i < es->scriptCount; i++)
       wto << "#define " << es->scripts[i].name << "(arguments...) _SCR_" << es->scripts[i].name << "(arguments)\n";
     wto << "\n\n";
 
@@ -440,8 +437,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " },\n";
     }
     wto << "  };\n  \n";
-
-    wto << "  int script_idmax = " << scr_count << ";\n \n";
 
     cout << "DBGMSG 8" << endl;
     wto << "  void constructor(object_basic* instance_b)\n  {\n"

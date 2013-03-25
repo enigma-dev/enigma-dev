@@ -130,7 +130,7 @@ namespace enigma {
     if (use_pc) {
       return clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart)*1000000/frequency_pc.QuadPart, 0, 1000000);
     }
-    else {  
+    else {
       return clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart)/10, 0, 1000000);
     }
   }
@@ -139,7 +139,7 @@ namespace enigma {
     if (use_pc) {
       return clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart)*1000000/frequency_pc.QuadPart, 0, 1000000);
     }
-    else {  
+    else {
       return clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart)/10, 0, 1000000);
     }
   }
@@ -222,7 +222,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     //Main loop
 
     // Initialize timing.
-    
+
     UINT minimum_resolution = 1;
     TIMECAPS timer_resolution_info;
     if (timeGetDevCaps(&timer_resolution_info, sizeof(timer_resolution_info)) == MMSYSERR_NOERROR) {
@@ -367,6 +367,28 @@ void set_program_priority(int value)
 void execute_shell(std::string fname, std::string args)
 {
 	ShellExecute(enigma::hWndParent, NULL, fname.c_str(), args.c_str(), get_working_directory().c_str(), SW_SHOW);
+}
+
+void execute_program(std::string fname, std::string args, bool wait)
+{
+    SHELLEXECUTEINFO lpExecInfo;
+      lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
+      lpExecInfo.lpFile = fname.c_str();
+      lpExecInfo.fMask=SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
+      lpExecInfo.hwnd = enigma::hWndParent;
+      lpExecInfo.lpVerb = "open";
+      lpExecInfo.lpParameters = args.c_str();
+      lpExecInfo.lpDirectory = get_working_directory().c_str();
+      lpExecInfo.nShow = SW_SHOW;
+      lpExecInfo.hInstApp = (HINSTANCE) SE_ERR_DDEFAIL ;   //WINSHELLAPI BOOL WINAPI result;
+      ShellExecuteEx(&lpExecInfo);
+
+      //wait until a file is finished printing
+      if (wait && lpExecInfo.hProcess != NULL)
+      {
+        ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
+        ::CloseHandle(lpExecInfo.hProcess);
+      }
 }
 
 std::string environment_get_variable(std::string name)

@@ -40,15 +40,7 @@ const int noone =  -4;
 const int global = -5;
 const int local =  -7;
 
-/*
-bool object_exists(unsigned objectid);
-int object_get_depth(unsigned id);
-int object_get_mask(unsigned id);
-int object_get_parent(unsigned id);
-bool object_get_persistent(unsigned id);
-bool object_get_solid(unsigned id);
-bool object_get_visible(unsigned id);
-*/
+double object_get_depth(int ind);
 
 #include "var4.h"
 
