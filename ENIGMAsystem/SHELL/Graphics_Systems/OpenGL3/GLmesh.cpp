@@ -356,12 +356,22 @@ bool d3d_model_load(const unsigned int id, string fname)
   return true;
 }
 
-void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId)
+void d3d_model_draw(const unsigned int id) // overload for no additional texture or transformation call's
 {
-    texture_use(get_texture(texId));
+    meshes[id]->Draw();
+}
+
+void d3d_model_draw(const unsigned int id, double x, double y, double z) // overload for no additional texture call's
+{
     glTranslatef(x, y, z);
     meshes[id]->Draw();
     glTranslatef(-x, -y, -z);
+}
+
+void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId)
+{
+    texture_use(get_texture(texId));
+    d3d_model_draw(id, x, y, z);
 }
 
 void d3d_model_primitive_begin(const unsigned int id, int kind)
