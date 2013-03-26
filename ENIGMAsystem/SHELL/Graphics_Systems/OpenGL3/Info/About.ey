@@ -10,4 +10,4 @@ Depends:
 	Windowing: xlib, Win32, Cocoa
 
 Represents:
-	Build-platforms: Windows, Linux, MacOSX
+	Build-platforms: None
