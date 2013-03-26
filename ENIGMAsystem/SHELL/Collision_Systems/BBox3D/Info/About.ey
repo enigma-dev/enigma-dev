@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Bounding Box 3D
+Identifier: BBox3D
+Represents: None
+Description: API for 3D bounding box collision checking.
+Author: Robert B. Colton
+
+Represents:
+	Build-platforms: None
+

@@ -2,4 +2,4 @@
 // or API-dependent behavior. This file can define any number of macros
 // describing various compatibility and feature points.
 
-#define ENIGMA_CS_BOX2D 1
+#define ENIGMA_CS_NEWTON 1
