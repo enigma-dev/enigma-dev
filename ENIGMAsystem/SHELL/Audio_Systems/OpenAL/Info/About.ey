@@ -9,6 +9,5 @@ Author: Josh Ventura
 Depends:
 	Build-platforms: Windows, Linux, MacOSX
 Represents:
-	Build-platforms: Linux
-	Graphics: OpenGL
+	Build-platforms: Windows, Linux
 

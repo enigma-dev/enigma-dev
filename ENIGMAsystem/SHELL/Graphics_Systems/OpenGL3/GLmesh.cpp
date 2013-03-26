@@ -47,15 +47,19 @@ namespace enigma {
 
 struct Primitive
 {
-  unsigned int vertcount = 0;
-  unsigned int vertstart = 0;
-  unsigned int indexcount = 0;
-  unsigned int indexstart = 0;
+  unsigned int vertcount;
+  unsigned int vertstart;
+  unsigned int indexcount;
+  unsigned int indexstart;
   int type;
 
   Primitive(int pt)
   {
     type = pt;
+    vertcount = 0;
+    vertstart = 0;
+    indexcount = 0;
+    indexstart = 0;
   }
 
   ~Primitive()
@@ -78,15 +82,17 @@ class Mesh
 
   GLuint verticesVBO;
   GLuint texturesVBO;
-  GLuint maxindice = 0;
-  
-  bool vbogenerated = false;
+  GLuint maxindice;
+
+  bool vbogenerated;
   int vbotype;
 
   Mesh(int vbt)
   {
     currentPrimitive = 0;
     vbotype = vbt;
+    maxindice = 0;
+    vbogenerated = false;
   }
 
   ~Mesh()
@@ -163,12 +169,12 @@ class Mesh
       glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
       // Load The Data
       glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], GL_STATIC_DRAW );
-    } 
+    }
     glBindBufferARB( GL_ARRAY_BUFFER, verticesVBO );
     glVertexPointer( 3, GL_FLOAT, 0, (char *) NULL );       // Set The Vertex Pointer To The Vertex Buffer
     glBindBufferARB( GL_ARRAY_BUFFER, texturesVBO );
     glTexCoordPointer( 2, GL_FLOAT, 0, (char *) NULL );     // Set The TexCoord Pointer To The TexCoord Buffer
-     
+
     //glNormalPointer(GL_FLOAT, 0, &normals[0]);
 
     for (int i = 0; i < primitives.size(); i++)
