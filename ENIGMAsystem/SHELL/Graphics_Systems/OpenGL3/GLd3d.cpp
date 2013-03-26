@@ -500,7 +500,7 @@ void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, do
     }
 }
 
-void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, bool closed, int steps)
+void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed, int steps)
 {
     steps = min(max(steps, 3), 48);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
@@ -508,7 +508,7 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
     float t[(steps + 1)*3 + 1][2];
     double a, px, py, tp;
     int k = 0;
-    texture_use(get_texture(texid));
+    texture_use(get_texture(texId));
     glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)

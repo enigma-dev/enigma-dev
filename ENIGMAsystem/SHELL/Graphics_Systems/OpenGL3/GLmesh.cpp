@@ -52,8 +52,8 @@ struct Primitive
   vector<GLfloat> normals;
   vector<GLfloat> colors;
   vector<GLuint> indices;
-  GLuint maxindice = 0;
 
+  GLuint maxindice;
   GLuint verticesVBO;
   GLuint texturesVBO;
 
@@ -64,6 +64,7 @@ struct Primitive
   {
     type = pt;
     vbotype = vbt;
+    maxindice = 0;
   }
 
   ~Primitive()
@@ -112,7 +113,7 @@ struct Primitive
   {
 
   }
- 
+
   void End()
   {
     // Generate And Bind The Vertex Buffer
@@ -120,7 +121,7 @@ struct Primitive
     glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );         // Bind The Buffer
     // Load The Data
     glBufferData( GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW );
- 
+
     // Generate And Bind The Texture Coordinate Buffer
     glGenBuffers( 1, &texturesVBO );                 // Get A Valid Name
     glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
@@ -149,11 +150,11 @@ class Mesh
 {
   public:
   vector<Primitive*> primitives;
-  unsigned int currentPrimitive = 0;
+  unsigned int currentPrimitive ;
 
   Mesh()
   {
-
+    currentPrimitive = 0;
   }
 
   ~Mesh()
@@ -163,7 +164,7 @@ class Mesh
 
   void Clear()
   {
-    for (int i = 0; i < primitives.size(); i++) 
+    for (int i = 0; i < primitives.size(); i++)
     {
       primitives[i]->Clear();
       delete primitives[i];
@@ -184,7 +185,7 @@ class Mesh
     primitives[currentPrimitive]->VertexVector(x,y,z);
   }
 
-  void VertexIndex(int vi) 
+  void VertexIndex(int vi)
   {
     primitives[currentPrimitive]->VertexIndex(vi);
   }
@@ -203,7 +204,7 @@ class Mesh
   {
     primitives[currentPrimitive]->ColorVector();
   }
- 
+
   void End()
   {
     primitives[currentPrimitive]->End();
@@ -211,7 +212,7 @@ class Mesh
 
   void Draw()
   {
-    for (int i = 0; i < primitives.size(); i++) 
+    for (int i = 0; i < primitives.size(); i++)
     {
       primitives[i]->Draw();
     }
@@ -474,5 +475,5 @@ void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, doub
 
 void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
 {
- 
+
 }

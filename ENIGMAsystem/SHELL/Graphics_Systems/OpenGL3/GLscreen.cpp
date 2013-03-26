@@ -47,11 +47,11 @@ static inline void draw_back()
     {
         if (background_visible[back_current] == 1)
         {
-            // if (background_stretched) draw_background_stretched(back, x, y, w, h);
-            draw_background_tiled(background_index[back_current], background_x[back_current], background_y[back_current]);
+            if (background_htiled[back_current] || background_vtiled[back_current])
+                draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0xFFFFFF, 1);
+            else
+                draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, 0xFFFFFF, 1);
         }
-        // background_foreground, background_index, background_x, background_y, background_htiled,
-        // background_vtiled, background_hspeed, background_vspeed;
     }
 }
 

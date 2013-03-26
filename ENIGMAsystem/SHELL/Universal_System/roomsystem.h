@@ -25,9 +25,11 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "var4.h"
 #ifndef room_system_h
 #define room_system_h
+
+#include "var4.h"
+
 int room_goto(int roomind);
 int room_restart();
 string room_get_name(int index);
@@ -43,7 +45,7 @@ extern int background_color;
 extern int background_showcolor;
 
 extern var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed,background_alpha;
+background_vtiled, background_hspeed, background_vspeed,background_alpha,background_width,background_height,background_xscale,background_yscale;
 
 extern int room_height;
 extern int room_persistent;

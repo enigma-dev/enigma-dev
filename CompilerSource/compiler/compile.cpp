@@ -99,7 +99,7 @@ inline string fc(const char* fn)
 {
   FILE *pt = fopen(fn,"rb");
   if (pt==NULL) return "";
-  
+
   fseek(pt,0,SEEK_END);
   size_t sz = ftell(pt);
   fseek(pt,0,SEEK_SET);
@@ -208,7 +208,7 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     edbg << " - Cleared shared locals list" << flushl;
     event_info_clear();     //Forget event definitions, we'll re-get them
     edbg << " - Cleared event info" << flushl;
-   
+
   // Re-establish ourself
     // Read the global locals: locals that will be included with each instance
     {
@@ -255,7 +255,7 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   //Next, add the resource names to that list
   edbg << "Copying resources:" << flushl;
-  
+
   edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
   for (int i = 0; i < es->spriteCount; i++) {
     cout << "Name on this side: " << globals_scope.name << endl;
@@ -457,6 +457,18 @@ wto << "string path_get_name(int i) {\n switch (i) {\n";
     } wto << "};\nnamespace enigma { size_t sound_idmax = " <<max << "; }\n\n";
 
 wto << "string sound_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
+     ss.str( "" );
+
+    max = 0;
+    wto << "enum //script names\n{\n";
+    for (int i = 0; i < es->scriptCount; i++) {
+      if (es->scripts[i].id >= max) max = es->scripts[i].id + 1;
+      wto << "  " << es->scripts[i].name << " = " << es->scripts[i].id << ",\n";
+      ss << "    case " << es->scripts[i].id << ": return \"" << es->scripts[i].name << "\"; break;\n";
+    } wto << "};\nnamespace enigma { size_t script_idmax = " <<max << "; }\n\n";
+
+wto << "string script_get_name(int i) {\n switch (i) {\n";
      wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
      ss.str( "" );
 

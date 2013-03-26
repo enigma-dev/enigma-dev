@@ -67,3 +67,6 @@ void screen_refresh(); // Without invoking any events, refresh the contents of t
 void screen_redraw(); // Invoke all the draw events, but do not refresh the screen.
 
 void screen_init();
+
+int background_get_width(int backId);
+int background_get_height(int backId);

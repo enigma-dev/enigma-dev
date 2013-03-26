@@ -27,6 +27,7 @@ unsigned long long disk_free(std::string drive);
 
 void set_program_priority(int value);
 void execute_shell(std::string fname, std::string args);
+void execute_program(std::string fname, std::string args, bool wait);
 
 std::string environment_get_variable(std::string name);
 
