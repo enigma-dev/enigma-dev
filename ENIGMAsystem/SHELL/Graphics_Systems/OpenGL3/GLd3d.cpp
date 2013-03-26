@@ -351,7 +351,7 @@ void d3d_set_projection_perspective(double x, double y, double width, double hei
   enigma::d3d_light_update_positions();
 }
 
-void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
+void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep)
 {
   if ((x1 == x2 && y1 == y2) || z1 == z2) {
     return;
@@ -405,7 +405,7 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
   glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, indices);
 }
 
-void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep)
+void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep)
 {
   GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
           texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
@@ -424,7 +424,7 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
   }
 }
 
-void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed)
+void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed)
 {
   GLfloat* verts = block_vertices(x1,y1,z1,x2,y2,z2);
   GLfloat texts[] = {0, vrep, hrep, vrep, 0, 0, hrep, 0,
@@ -445,7 +445,7 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
   }
 }
 
-void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
+void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed, int steps)
 {
     float v[100][3];
     float t[100][3];
@@ -500,7 +500,7 @@ void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, do
     }
 }
 
-void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed, int steps)
+void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed, int steps)
 {
     steps = min(max(steps, 3), 48);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
@@ -604,7 +604,7 @@ void d3d_draw_icosahedron(int texId) {
     texture_use(get_texture(texId));
 }
 
-void d3d_draw_torus(double x1, double y1, double z1, int texId, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
+void d3d_draw_torus(double x1, double y1, double z1, int texId, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
         int numc = csteps, numt = tsteps;
         for (int i = 0; i < numc; i++) {
             glBegin(GL_QUAD_STRIP);

@@ -50,6 +50,7 @@ namespace enigma
   namespace x11
   {
     Display *disp;
+    Screen *screen;
     Window win;
     Atom wm_delwin;
 
@@ -224,9 +225,9 @@ int main(int argc,char** argv)
 	XMapRaised(disp,win); //request visible
 
 	//prepare window for display (center, caption, etc)
-	Screen *s = DefaultScreenOfDisplay(disp);
+	screen = DefaultScreenOfDisplay(disp);
 	//printf("Screen: %d %d %d %d\n",s->width/2,s->height/2,winw,winh);
-	XMoveWindow(disp,win,(s->width-winw)/2,(s->height-winh)/2);
+	XMoveWindow(disp,win,(screen->width-winw)/2,(screen->height-winh)/2);
 
 	//geom();
 	//give us a GL context
@@ -338,4 +339,7 @@ void game_end() {
 void action_end_game() {
   game_end();
 }
+
+int display_get_width() { return XWidthOfScreen(screen); }
+int display_get_height() { return XHeightOfScreen(screen); }
 
