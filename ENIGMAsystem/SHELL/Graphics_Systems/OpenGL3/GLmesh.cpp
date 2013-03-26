@@ -47,33 +47,56 @@ namespace enigma {
 
 struct Primitive
 {
-  vector<GLfloat> vertices;
-  vector<GLfloat> textures;
-  vector<GLfloat> normals;
-  vector<GLfloat> colors;
-  vector<GLuint> indices;
-
-  GLuint maxindice;
-  GLuint verticesVBO;
-  GLuint texturesVBO;
-
+  unsigned int vertcount = 0;
+  unsigned int vertstart = 0;
+  unsigned int indexcount = 0;
+  unsigned int indexstart = 0;
   int type;
-  int vbotype;
 
-  Primitive(int pt, int vbt)
+  Primitive(int pt)
   {
     type = pt;
-    vbotype = vbt;
-    maxindice = 0;
   }
 
   ~Primitive()
   {
 
   }
+};
+
+class Mesh
+{
+  public:
+  vector<Primitive*> primitives;
+  unsigned int currentPrimitive;
+
+  vector<GLfloat> vertices;
+  vector<GLfloat> textures;
+  vector<GLfloat> normals;
+  vector<GLfloat> colors;
+  vector<GLuint> indices;
+
+  GLuint verticesVBO;
+  GLuint texturesVBO;
+  GLuint maxindice = 0;
+  
+  bool vbogenerated = false;
+  int vbotype;
+
+  Mesh(int vbt)
+  {
+    currentPrimitive = 0;
+    vbotype = vbt;
+  }
+
+  ~Mesh()
+  {
+
+  }
 
   void Clear()
   {
+    primitives.clear();
     vertices.clear();
     textures.clear();
     normals.clear();
@@ -81,22 +104,28 @@ struct Primitive
     indices.clear();
   }
 
-  void Begin()
+  void Begin(int pt)
   {
-
+    vbogenerated = false;
+    unsigned int id = primitives.size();
+    currentPrimitive = id;
+    Primitive* newPrim = new Primitive(pt);
+    newPrim->vertstart = vertices.size()/3;
+    newPrim->indexstart = indices.size();
+    primitives.push_back(newPrim);
   }
 
   void VertexVector(float x, float y, float z)
   {
-    vertices.push_back(x);
-    vertices.push_back(y);
-    vertices.push_back(z);
+    vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
+    primitives[currentPrimitive]->vertcount += 1;
   }
 
-  void VertexIndex(GLuint vi)
+  void VertexIndex(int vi)
   {
     if (vi > maxindice) { maxindice = vi; }
     indices.push_back(vi);
+    primitives[currentPrimitive]->indexcount += 1;
   }
 
   void NormalVector(float nx, float ny, float nz)
@@ -116,105 +145,40 @@ struct Primitive
 
   void End()
   {
-    // Generate And Bind The Vertex Buffer
-    glGenBuffers( 1, &verticesVBO );                  // Get A Valid Name
-    glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );         // Bind The Buffer
-    // Load The Data
-    glBufferData( GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW );
 
-    // Generate And Bind The Texture Coordinate Buffer
-    glGenBuffers( 1, &texturesVBO );                 // Get A Valid Name
-    glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
-    // Load The Data
-    glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], GL_STATIC_DRAW );
   }
 
   void Draw()
   {
+    if (!vbogenerated) {
+      vbogenerated = true;
+      // Generate And Bind The Vertex Buffer
+      glGenBuffers( 1, &verticesVBO );                  // Get A Valid Name
+      glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );         // Bind The Buffer
+      // Load The Data
+      glBufferData( GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW );
+
+      // Generate And Bind The Texture Coordinate Buffer
+      glGenBuffers( 1, &texturesVBO );                 // Get A Valid Name
+      glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
+      // Load The Data
+      glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], GL_STATIC_DRAW );
+    } 
     glBindBufferARB( GL_ARRAY_BUFFER, verticesVBO );
     glVertexPointer( 3, GL_FLOAT, 0, (char *) NULL );       // Set The Vertex Pointer To The Vertex Buffer
     glBindBufferARB( GL_ARRAY_BUFFER, texturesVBO );
     glTexCoordPointer( 2, GL_FLOAT, 0, (char *) NULL );     // Set The TexCoord Pointer To The TexCoord Buffer
-
+     
     //glNormalPointer(GL_FLOAT, 0, &normals[0]);
 
-    if (indices.size() > 0) {
-      //glDrawRangeElements(ptypes_by_id[type], 0, maxindice + 1, indices.size(), GL_UNSIGNED_INT, &indices[0]);
-    } else {
-      glDrawArrays(ptypes_by_id[type], 0, vertices.size()/3);
-    }
-  }
-};
-
-class Mesh
-{
-  public:
-  vector<Primitive*> primitives;
-  unsigned int currentPrimitive ;
-
-  Mesh()
-  {
-    currentPrimitive = 0;
-  }
-
-  ~Mesh()
-  {
-
-  }
-
-  void Clear()
-  {
     for (int i = 0; i < primitives.size(); i++)
     {
-      primitives[i]->Clear();
-      delete primitives[i];
-      primitives.clear();
-    }
-  }
 
-  void Begin(int pt, int vbt)
-  {
-    unsigned int id = primitives.size();
-    currentPrimitive = id;
-    Primitive* newPrim = new Primitive(pt, vbt);
-    primitives.push_back(newPrim);
-  }
-
-  void VertexVector(float x, float y, float z)
-  {
-    primitives[currentPrimitive]->VertexVector(x,y,z);
-  }
-
-  void VertexIndex(int vi)
-  {
-    primitives[currentPrimitive]->VertexIndex(vi);
-  }
-
-  void NormalVector(float nx, float ny, float nz)
-  {
-    primitives[currentPrimitive]->NormalVector(nx,ny,nz);
-  }
-
-  void TextureVector(float tx, float ty)
-  {
-    primitives[currentPrimitive]->TextureVector(tx,ty);
-  }
-
-  void ColorVector()
-  {
-    primitives[currentPrimitive]->ColorVector();
-  }
-
-  void End()
-  {
-    primitives[currentPrimitive]->End();
-  }
-
-  void Draw()
-  {
-    for (int i = 0; i < primitives.size(); i++)
-    {
-      primitives[i]->Draw();
+      if (indices.size() > 0) {
+        glDrawRangeElements(ptypes_by_id[primitives[i]->type], primitives[i]->indexstart, maxindice + 1, primitives[i]->indexcount, GL_UNSIGNED_INT, &indices[0]);
+      } else {
+        glDrawArrays(ptypes_by_id[primitives[i]->type], primitives[i]->vertstart, primitives[i]->vertcount);
+      }
     }
   }
 };
@@ -224,7 +188,7 @@ vector<Mesh*> meshes;
 unsigned int d3d_model_create()
 {
   unsigned int id = meshes.size();
-  meshes.push_back(new Mesh());
+  meshes.push_back(new Mesh(0));
   return id;
 }
 
@@ -377,7 +341,7 @@ void d3d_model_draw(const unsigned int id, double x, double y, double z, int tex
 
 void d3d_model_primitive_begin(const unsigned int id, int kind)
 {
-    meshes[id]->Begin(kind, 0);
+    meshes[id]->Begin(kind);
 }
 
 void d3d_model_primitive_end(const unsigned int id)
@@ -387,55 +351,55 @@ void d3d_model_primitive_end(const unsigned int id)
 
 void d3d_model_index(const unsigned int id, int in)
 {
-
+  meshes[id]->VertexIndex(in);
 }
 
 void d3d_model_vertex(const unsigned int id, double x, double y, double z)
 {
-   meshes[id]->VertexVector(x, y, z);
+  meshes[id]->VertexVector(x, y, z);
 }
 
 void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha)
 {
-   meshes[id]->VertexVector(x, y, z);
+  meshes[id]->VertexVector(x, y, z);
 }
 
 void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty)
 {
-   meshes[id]->VertexVector(x, y, z);
-   meshes[id]->TextureVector(tx, ty);
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->TextureVector(tx, ty);
 }
 
 void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha)
 {
-   meshes[id]->VertexVector(x, y, z);
-   meshes[id]->TextureVector(tx, ty);
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->TextureVector(tx, ty);
 }
 
 void d3d_model_vertex_normal(const unsigned int id, double x, double y, double z, double nx, double ny, double nz)
 {
-   meshes[id]->VertexVector(x, y, z);
-   meshes[id]->NormalVector(nx, ny, nz);
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
 }
 
 void d3d_model_vertex_normal_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, int col, double alpha)
 {
-   meshes[id]->VertexVector(x, y, z);
-   meshes[id]->NormalVector(nx, ny, nz);
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
 }
 
 void d3d_model_vertex_normal_texture(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
 {
-   meshes[id]->VertexVector(x, y, z);
-   meshes[id]->NormalVector(nx, ny, nz);
-   meshes[id]->TextureVector(tx, ty);
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+  meshes[id]->TextureVector(tx, ty);
 }
 
 void d3d_model_vertex_normal_texture_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha)
 {
-   meshes[id]->VertexVector(x, y, z);
-   meshes[id]->NormalVector(nx, ny, nz);
-   meshes[id]->TextureVector(tx, ty);
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+  meshes[id]->TextureVector(tx, ty);
 }
 
 void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed)
