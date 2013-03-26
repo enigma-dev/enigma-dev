@@ -10,5 +10,5 @@ Depends:
 	Build-platforms: Windows, Linux, MacOSX
 Represents:
 	Build-platforms: Linux
-	Graphics: OpenGL3
+	Graphics: OpenGL
 
