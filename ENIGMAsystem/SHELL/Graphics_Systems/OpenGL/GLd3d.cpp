@@ -358,8 +358,8 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
 
   float xd = x2-x1, yd = y2-y1, zd = z2-z1;
   float normal[3] = {xd*zd, zd*yd, 0};
-  float mag = hypot(normal[0], normal[1]); 
-  normal[0] /= mag; 
+  float mag = hypot(normal[0], normal[1]);
+  normal[0] /= mag;
   normal[1] /= mag;
   if (x2 < x1) {
     normal[0]=-normal[0]; }
@@ -368,10 +368,10 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
 
   GLfloat verts[] = {x1, y1, z1, x2, y2, z1, x1, y1, z2, x2, y2, z2},
           texts[] = {0, 0, hrep, 0, 0, vrep, hrep, vrep},
-          norms[] = {normal[0], normal[1], normal[2], normal[0], normal[1], normal[2], 
+          norms[] = {normal[0], normal[1], normal[2], normal[0], normal[1], normal[2],
                      normal[0], normal[1], normal[2], normal[0], normal[1], normal[2]};
 
-  GLubyte indices[] = {0, 1, 2, 3}; 
+  GLubyte indices[] = {0, 1, 2, 3};
 
   if (x2>x1 || y2>y1) {
     indices[0] = 0;
@@ -411,8 +411,8 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
   GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
           texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
           norms[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1};
-  GLubyte ceil_indices[] = {0, 1, 2, 3}; 
-  GLubyte floor_indices[] = {0, 2, 3, 1}; 
+  GLubyte ceil_indices[] = {0, 2, 1, 3};
+  GLubyte floor_indices[] = {3, 1, 2, 0};
 
   bind_texture(get_texture(texId));
 
@@ -432,7 +432,7 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
   GLfloat verts[] = {x1, y1, z1, x1, y1, z2, x1, y2, z1, x1, y2, z2, x2, y2, z1, x2, y2, z2, x2, y1, z1, x2, y1, z2},
           texts[] = {0, vrep, hrep, vrep, 0, 0, hrep, 0,
 		     0, vrep, hrep, vrep, 0, 0, hrep, 0},
-	  norms[] = {-0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 
+	  norms[] = {-0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5,
                      0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5};
   GLubyte indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, // sides
                        0, 2, 6, 4, 1, 7, 3, 5}; // top and bottom
