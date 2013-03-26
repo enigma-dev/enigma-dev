@@ -37,13 +37,13 @@ bool d3dHidden = false;
 bool d3dZWriteEnable = true;
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
-GLenum renderstates[22] = {   
+GLenum renderstates[22] = {
   GL_FILL, GL_LINE, GL_POINT, GL_FRONT, GL_BACK,
   GL_FRONT_AND_BACK, GL_CW, GL_CCW,
-  GL_NICEST, GL_FASTEST, GL_DONT_CARE, GL_EXP, GL_EXP2, 
+  GL_NICEST, GL_FASTEST, GL_DONT_CARE, GL_EXP, GL_EXP2,
   GL_LINEAR, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL,
-  GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS 
-}; 
+  GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS
+};
 
 void d3d_start()
 {
@@ -112,23 +112,23 @@ void d3d_set_fog(bool enable, int color, double start, double end)
   d3d_set_fog_enabled(enable);
   d3d_set_fog_color(color);
   d3d_set_fog_start(start);
-  d3d_set_fog_end(end); 
+  d3d_set_fog_end(end);
   d3d_set_fog_hint(rs_nicest);
   d3d_set_fog_mode(rs_linear);
 }//NOTE: fog can use vertex checks with less good graphic cards which screws up large textures (however this doesn't happen in directx)
 
-void d3d_set_fog_enabled(bool enable) 
+void d3d_set_fog_enabled(bool enable)
 {
   (enable?glEnable:glDisable)(GL_FOG);
 }
 
 void d3d_set_fog_mode(int mode)
 {
-  glFogi(GL_FOG_MODE, renderstates[mode]); 
+  glFogi(GL_FOG_MODE, renderstates[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
-  glHint(GL_FOG_HINT, mode); 
+  glHint(GL_FOG_HINT, mode);
 }
 
 void d3d_set_fog_color(int color)
@@ -152,7 +152,7 @@ void d3d_set_fog_end(double end)
 
 void d3d_set_fog_density(double density)
 {
-  glFogf(GL_FOG_DENSITY, density);  
+  glFogf(GL_FOG_DENSITY, density);
 }
 
 void d3d_set_culling(bool enable)
@@ -169,10 +169,10 @@ void d3d_set_culling_orientation(int mode) {
   glFrontFace(renderstates[mode]);
 }
 
-void d3d_set_render_mode(int face, int fill) 
+void d3d_set_render_mode(int face, int fill)
 {
   glPolygonMode(renderstates[face], renderstates[fill]);
-} 
+}
 void d3d_set_line_width(float value) {
   glLineWidth(value);
 }
@@ -359,8 +359,8 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
 
   float xd = x2-x1, yd = y2-y1, zd = z2-z1;
   float normal[3] = {xd*zd, zd*yd, 0};
-  float mag = hypot(normal[0], normal[1]); 
-  normal[0] /= mag; 
+  float mag = hypot(normal[0], normal[1]);
+  normal[0] /= mag;
   normal[1] /= mag;
   if (x2 < x1) {
     normal[0]=-normal[0]; }
@@ -369,10 +369,10 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
 
   GLfloat verts[] = {x1, y1, z1, x2, y2, z1, x1, y1, z2, x2, y2, z2},
           texts[] = {0, 0, hrep, 0, 0, vrep, hrep, vrep},
-          norms[] = {normal[0], normal[1], normal[2], normal[0], normal[1], normal[2], 
+          norms[] = {normal[0], normal[1], normal[2], normal[0], normal[1], normal[2],
                      normal[0], normal[1], normal[2], normal[0], normal[1], normal[2]};
 
-  GLubyte indices[] = {0, 1, 2, 3}; 
+  GLubyte indices[] = {0, 1, 2, 3};
 
   if (x2>x1 || y2>y1) {
     indices[0] = 0;
@@ -410,8 +410,8 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
   GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
           texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
           norms[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1};
-  GLubyte ceil_indices[] = {0, 1, 2, 3}; 
-  GLubyte floor_indices[] = {0, 2, 3, 1}; 
+  GLubyte ceil_indices[] = {0, 2, 1, 3};
+  GLubyte floor_indices[] = {3, 1, 2, 0};
 
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
@@ -429,7 +429,7 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
   GLfloat* verts = block_vertices(x1,y1,z1,x2,y2,z2);
   GLfloat texts[] = {0, vrep, hrep, vrep, 0, 0, hrep, 0,
 		     0, vrep, hrep, vrep, 0, 0, hrep, 0},
-	  norms[] = {-0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 
+	  norms[] = {-0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5,
                      0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5};
   GLubyte indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, // sides
                        0, 2, 6, 4, 1, 7, 3, 5}; // top and bottom
@@ -915,7 +915,7 @@ class d3d_lights
         return true;
     }
 
-    void light_define_specularity(int id, int r, int g, int b, double a) 
+    void light_define_specularity(int id, int r, int g, int b, double a)
     {
 	map<int, int>::iterator it = light_ind.find(id);
 	float specular[4] = {r, g, b, a};
@@ -967,7 +967,7 @@ bool d3d_light_define_point(int id, double x, double y, double z, double range, 
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-void d3d_light_define_specularity(int id, int r, int g, int b, double a) 
+void d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
     d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
@@ -978,7 +978,7 @@ void d3d_light_specularity(int facemode, int r, int g, int b, double a)
   glMaterialfv(renderstates[facemode], GL_SPECULAR, specular);
 }
 
-void d3d_light_shininess(int facemode, int shine) 
+void d3d_light_shininess(int facemode, int shine)
 {
   glMateriali(renderstates[facemode], GL_SHININESS, shine);
 }
