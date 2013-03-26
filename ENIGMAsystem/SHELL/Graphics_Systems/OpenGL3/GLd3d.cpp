@@ -413,6 +413,7 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
   GLubyte ceil_indices[] = {0, 1, 2, 3}; 
   GLubyte floor_indices[] = {0, 2, 3, 1}; 
 
+glBindBuffer( GL_ARRAY_BUFFER, 0 );
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
@@ -853,7 +854,8 @@ class d3d_lights
         {
             ms = (*light_ind.find(id)).second;
             multimap<int,posi>::iterator it = ind_pos.find(ms);
-            ind_pos.erase(it);
+            if (it != ind_pos.end())
+                ind_pos.erase(it); 
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
         else
@@ -885,7 +887,8 @@ class d3d_lights
         {
             ms = (*light_ind.find(id)).second;
             multimap<int,posi>::iterator it = ind_pos.find(ms);
-            ind_pos.erase(it);
+ 	    if (it != ind_pos.end())
+                ind_pos.erase(it); 
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
         else
@@ -911,15 +914,27 @@ class d3d_lights
         // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
         const double attenuation_calibration = 48.0;
         glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
-//        light_update_positions();
         return true;
     }
 
-    void light_define_specularity(int id, int r, int g, int b, double a) 
+    bool light_define_specularity(int id, int r, int g, int b, double a) 
     {
-	map<int, int>::iterator it = light_ind.find(id);
-	float specular[4] = {r, g, b, a};
-	glLightfv(GL_LIGHT0+(*it).second, GL_SPECULAR, specular);
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+        }
+        float specular[4] = {r, g, b, a};
+        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+        return true;
     }
 
     bool light_enable(int id)
@@ -967,9 +982,9 @@ bool d3d_light_define_point(int id, double x, double y, double z, double range, 
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-void d3d_light_define_specularity(int id, int r, int g, int b, double a) 
+bool d3d_light_define_specularity(int id, int r, int g, int b, double a) 
 {
-    d3d_lighting.light_define_specularity(id, r, g, b, a);
+    return d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
