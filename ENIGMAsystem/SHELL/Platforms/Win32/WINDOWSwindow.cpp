@@ -163,7 +163,7 @@ bool show_question(string str)
 
 bool action_if_question(string str)
 {
-    return show_question(string str);
+    return show_question(str);
 }
 
 int window_get_x()
