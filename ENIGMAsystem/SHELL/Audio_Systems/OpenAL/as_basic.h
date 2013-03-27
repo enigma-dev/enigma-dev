@@ -114,4 +114,4 @@ void audio_emitter_pitch(int emitter, double pitch);
 void audio_emitter_position(int emitter, double x, double y, double z);
 void audio_emitter_velocity(int emitter, double vx, double vy, double vz);
 void audio_play_sound_on(int emitter, int sound, bool loop, double priority);
-
+void sound_pitch(int sound, float value);

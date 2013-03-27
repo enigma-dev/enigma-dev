@@ -899,3 +899,13 @@ void audio_play_sound_on(int emitter, int sound, bool loop, double priority)
   alSourcefv(sound_sources[src]->source, AL_VELOCITY, emit->emitVel);
   alSourcei(sound_sources[src]->source, AL_PITCH, emit->pitch);
 }
+
+void sound_pitch(int sound, float value)
+{
+  for(size_t i = 1; i < sound_sources.size(); i++) {
+    if (sound_sources[i]->soundIndex == sound) {
+      const float pitch = value;
+      alSourcef(sound_sources[i]->source,AL_PITCH,pitch);
+    }
+  }
+}
