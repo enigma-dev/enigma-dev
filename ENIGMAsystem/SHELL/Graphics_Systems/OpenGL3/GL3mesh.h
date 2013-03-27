@@ -16,9 +16,10 @@
 **/
 
 #include <string>
+#include "GL3vertexbuffer.h"
 
 // ***** MODELS BEGIN *****
-unsigned int d3d_model_create();
+unsigned int d3d_model_create(int vbot = vbo_static);
 void d3d_model_destroy(const unsigned int id);
 void d3d_model_copy(const unsigned int id, const unsigned int source);
 unsigned int d3d_model_duplicate(const unsigned int source);
@@ -31,7 +32,13 @@ void d3d_model_draw(const unsigned int id, double x, double y, double z);
 void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId);
 void d3d_model_primitive_begin(const unsigned int id, int kind);
 void d3d_model_primitive_end(const unsigned int id);
+void d3d_model_open(const unsigned int id, int start);
+void d3d_model_close(const unsigned int id);
 void d3d_model_vertex(const unsigned int id, double x, double y, double z);
+void d3d_model_normal(const unsigned int id, double nx, double ny, double nz);
+void d3d_model_texture(const unsigned int id, double tx, double ty);
+void d3d_model_color(const unsigned int id, int col, double alpha);
+void d3d_model_index(const unsigned int id, int in);
 void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha);
 void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty);
 void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha);

@@ -4,7 +4,7 @@
 Name: Bullet Physics
 Identifier: Bullet
 Represents: None
-Description: API for adding realistic 3D physics aspects to your game using the Bullet physics engine, which has support
+Description: WARNING! Not yet intended for development use. API for adding realistic 3D physics aspects to your game using the Bullet physics engine, which has support
 for real time destruction capabilities.
 Author: Robert B. Colton
 
