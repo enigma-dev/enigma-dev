@@ -347,7 +347,7 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
   GLubyte ceil_indices[] = {0, 2, 1, 3};
   GLubyte floor_indices[] = {3, 1, 2, 0};
 
-glBindBuffer( GL_ARRAY_BUFFER, 0 );
+  glBindBuffer( GL_ARRAY_BUFFER, 0 );
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
