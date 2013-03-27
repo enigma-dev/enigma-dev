@@ -46,6 +46,7 @@ int room_set_background(int indx, int bind, bool vis, bool fore, bool back, doub
 int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
 int room_set_background_color(int indx, int col, bool show);
 int room_set_caption(int indx, string str);
+int room_set_persistent(int indx, bool pers);
 int room_set_view_enabled(int indx, int val);
 
 extern int background_color;
@@ -96,7 +97,7 @@ namespace enigma
     int tileHor, tileVert;
     int stretch;
     double alpha;
-    double color;
+    int color;
   };
   struct roomstruct
   {
@@ -108,11 +109,11 @@ namespace enigma
     int backcolor;
     bool drawbackcolor;
     void(*createcode)();
-    int width, height, spd;
+    int width, height, spd, persistent;
     int views_enabled;
-    viewstruct views[8];
+    viewstruct views[10];
 
-    backstruct backs[8];
+    backstruct backs[10];
 
     int instancecount;
     inst *instances;
