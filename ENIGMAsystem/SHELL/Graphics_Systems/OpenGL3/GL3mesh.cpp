@@ -87,10 +87,10 @@ class Mesh
   bool vbogenerated;
   int vbotype;
 
-  Mesh(int vbt)
+  Mesh(int vbot = vbo_static)
   {
     currentPrimitive = 0;
-    vbotype = vbt;
+    vbotype = vbot;
     maxindice = 0;
     vbogenerated = false;
   }
@@ -100,14 +100,20 @@ class Mesh
 
   }
 
-  void Clear()
+  void ClearData() 
   {
-    primitives.clear();
     vertices.clear();
     textures.clear();
     normals.clear();
     colors.clear();
     indices.clear();
+  }
+
+  void Clear()
+  {
+    primitives.clear();
+    ClearData();
+    // TODO: Rebuffer
   }
 
   void Begin(int pt)
@@ -144,7 +150,7 @@ class Mesh
     textures.push_back(tx); textures.push_back(ty);
   }
 
-  void ColorVector()
+  void ColorVector(double c, double a)
   {
 
   }
@@ -154,21 +160,29 @@ class Mesh
 
   }
 
+  void BufferData()
+  {
+    // Generate And Bind The Vertex Buffer
+    glGenBuffers( 1, &verticesVBO );                  // Get A Valid Name
+    glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );         // Bind The Buffer
+    // Send the data to the GPU
+    glBufferData( GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW );
+
+    // Generate And Bind The Texture Coordinate Buffer
+    glGenBuffers( 1, &texturesVBO );                 // Get A Valid Name
+    glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
+    // Send the data to the GPU
+    glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], GL_STATIC_DRAW );
+
+    // Clean up the data from RAM it is now safe on VRAM
+    ClearData();
+  }
+
   void Draw()
   {
     if (!vbogenerated) {
       vbogenerated = true;
-      // Generate And Bind The Vertex Buffer
-      glGenBuffers( 1, &verticesVBO );                  // Get A Valid Name
-      glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );         // Bind The Buffer
-      // Load The Data
-      glBufferData( GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW );
-
-      // Generate And Bind The Texture Coordinate Buffer
-      glGenBuffers( 1, &texturesVBO );                 // Get A Valid Name
-      glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
-      // Load The Data
-      glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], GL_STATIC_DRAW );
+      BufferData();
     }
     glBindBufferARB( GL_ARRAY_BUFFER, verticesVBO );
     glVertexPointer( 3, GL_FLOAT, 0, (char *) NULL );       // Set The Vertex Pointer To The Vertex Buffer
@@ -191,10 +205,10 @@ class Mesh
 
 vector<Mesh*> meshes;
 
-unsigned int d3d_model_create()
+unsigned int d3d_model_create(int vbot)
 {
   unsigned int id = meshes.size();
-  meshes.push_back(new Mesh(0));
+  meshes.push_back(new Mesh(vbot));
   return id;
 }
 
@@ -355,14 +369,39 @@ void d3d_model_primitive_end(const unsigned int id)
     meshes[id]->End();
 }
 
-void d3d_model_index(const unsigned int id, int in)
+void d3d_model_open(const unsigned int id, int start)
 {
-  meshes[id]->VertexIndex(in);
+
+}
+
+void d3d_model_close(const unsigned int id)
+{
+
 }
 
 void d3d_model_vertex(const unsigned int id, double x, double y, double z)
 {
   meshes[id]->VertexVector(x, y, z);
+}
+
+void d3d_model_normal(const unsigned int id, double nx, double ny, double nz)
+{
+  meshes[id]->NormalVector(nx, ny, nz);
+}
+
+void d3d_model_texture(const unsigned int id, double tx, double ty)
+{
+  meshes[id]->TextureVector(tx, ty);
+}
+
+void d3d_model_color(const unsigned int id, int col, double alpha)
+{
+
+}
+
+void d3d_model_index(const unsigned int id, int in)
+{
+  meshes[id]->VertexIndex(in);
 }
 
 void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha)
