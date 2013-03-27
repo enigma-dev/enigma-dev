@@ -47,6 +47,11 @@ namespace enigma
   void free_collision_mask(void* mask)
   {
   }
+
+  void perform_automatic_collision_handling_before_collision_event()
+  {
+    // Do nothing.
+  }
 };
 
 bool place_free(double x,double y)

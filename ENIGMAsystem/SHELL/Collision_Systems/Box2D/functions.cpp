@@ -110,6 +110,13 @@ namespace enigma
   void free_collision_mask(void* mask)
   {
   }
+
+  void perform_automatic_collision_handling_before_collision_event()
+  {
+    for (std::vector<worldInstance>::iterator it = worlds.begin(); it != worlds.end(); it++) {
+      it->world_update();
+    }
+  }
 };
 
 bool place_free(double x,double y)
