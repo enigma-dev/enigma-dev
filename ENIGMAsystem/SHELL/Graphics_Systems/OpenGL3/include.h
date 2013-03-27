@@ -1,15 +1,15 @@
-#include "OPENGLStd.h"
-#include "GLsprite.h"
-#include "GLbackground.h"
-#include "GLvertexbuffer.h"
-#include "GLshader.h"
-#include "GLtextures.h"
-#include "GLmaterial.h"
-#include "GLmesh.h"
+#include "OPENGL3Std.h"
+#include "GL3sprite.h"
+#include "GL3background.h"
+#include "GL3vertexbuffer.h"
+#include "GL3shader.h"
+#include "GL3textures.h"
+#include "GL3material.h"
+#include "GL3mesh.h"
 
-#include "GLfont.h"
-#include "GLcurves.h"
+#include "GL3font.h"
+#include "GL3curves.h"
 #ifdef TARGET_OS_MAC
-#include "GLsurface.h"
+#include "GL3surface.h"
 #endif
 

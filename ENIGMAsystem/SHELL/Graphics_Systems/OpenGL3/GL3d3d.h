@@ -15,6 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <string>
+
+namespace enigma {
+    void d3d_light_update_positions();
+}
+
+// ***** RENDER STATE MODE CONSTANTS *****
 enum {
   rs_fill,
   rs_line,
@@ -28,7 +35,7 @@ enum {
   rs_fastest,
   rs_dontcare,
   rs_exp,
-  rs_exp2,
+  rs_exp2, 
   rs_linear,
   rs_never, 	// Always False
   rs_less, 	// source Z < depth Z
@@ -83,9 +90,10 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
 void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, bool closed, int steps);
 void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, bool closed, int steps);
 void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, int steps);
-void d3d_draw_icosahedron();
+void d3d_draw_icosahedron(int texid);
 void d3d_draw_torus(double x1, double y1, double z1, int texId, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
 
+// ***** TRANSFORMATIONS BEGIN *****
 void d3d_transform_set_identity();
 void d3d_transform_add_translation(double xt,double yt,double zt);
 void d3d_transform_add_scaling(double xs,double ys,double zs);
@@ -105,7 +113,9 @@ void d3d_transform_stack_clear();
 bool d3d_transform_stack_empty();
 bool d3d_transform_stack_top();
 bool d3d_transform_stack_disgard();
+// ***** TRANSFORMATIONS END *****
 
+// ***** LIGHTS BEGIN *****
 bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col);
 bool d3d_light_define_point(int id, double x, double y, double z, double range, int col);
 bool d3d_light_define_specularity(int id, int r, int g, int b, double a);
@@ -113,37 +123,4 @@ void d3d_light_specularity(int facemode, int r, int g, int b, double a);
 void d3d_light_shininess(int facemode, int shine);
 void d3d_light_define_ambient(int col);
 bool d3d_light_enable(int id, bool enable);
-
-namespace enigma {
-    void d3d_light_update_positions();
-}
-
-#include <string>
-
-unsigned int d3d_model_create();
-void d3d_model_destroy(const unsigned int id);
-void d3d_model_copy(const unsigned int id, const unsigned int source);
-unsigned int d3d_model_duplicate(const unsigned int source);
-bool d3d_model_exists(const unsigned int id);
-void d3d_model_clear(const unsigned int id);
-void d3d_model_save(const unsigned int id, std::string fname);
-bool d3d_model_load(const unsigned int id, std::string fname);
-void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId);
-void d3d_model_primitive_begin(const unsigned int id, int kind);
-void d3d_model_primitive_end(const unsigned int id);
-void d3d_model_vertex(const unsigned int id, double x, double y, double z);
-void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha);
-void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty);
-void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha);
-void d3d_model_vertex_normal(const unsigned int id, double x, double y, double z, double nx, double ny, double nz);
-void d3d_model_vertex_normal_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, int col, double alpha);
-void d3d_model_vertex_normal_texture(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty);
-void d3d_model_vertex_normal_texture_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha);
-void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep);
-void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep);
-void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed = true);
-void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed, int steps);
-void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed, int steps);
-void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, int steps);
-void d3d_model_icosahedron(const unsigned int id);
-void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
+// ***** LIGHTS END *****
