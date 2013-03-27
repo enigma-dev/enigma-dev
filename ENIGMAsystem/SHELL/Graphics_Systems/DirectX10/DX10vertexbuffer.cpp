@@ -15,19 +15,48 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//#include "DirectXHeaders.h"
+#include "DirectX10Headers.h"
+#include "DX10vertexbuffer.h"
+#include <math.h>
 
-namespace enigma
+// first one is the "Global Vertex Buffer"
+vector<VertexBuffer*> vertexbuffers(0);
+int current_vertex_buffer = 0;
+
+int vertex_buffer_create(int type)
 {
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
+  int id = vertexbuffers.size();
+  VertexBuffer* vertbuf = new VertexBuffer();
+  vertexbuffers.push_back(vertbuf);
+  return id;
 }
 
-#include "DX10colors.h"
-#include "DX10primitives.h"
-#include "DX10d3d.h"
-#include "DX10draw.h"
-#include "DX10blend.h"
-#include "DX10surface.h"
-#include "DX10miscextra.h"
+void vertex_buffer_free(int id)
+{
+  delete vertexbuffers[id];
+}
 
+void vertex_buffer_set(int id)
+{
+  current_vertex_buffer = id;
+}
+
+int vertex_buffer_get()
+{
+  return current_vertex_buffer;
+}
+
+void vertex_buffer_reset()
+{
+  current_vertex_buffer = 0;
+}
+
+void vertex_buffer_draw(int id)
+{
+  vertexbuffers[id]->Draw();
+}
+
+bool vertex_buffer_supported()
+{
+
+}

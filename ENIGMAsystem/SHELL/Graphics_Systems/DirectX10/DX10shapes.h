@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,19 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//#include "DirectXHeaders.h"
-
-namespace enigma
-{
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-}
-
-#include "DX10colors.h"
-#include "DX10primitives.h"
-#include "DX10d3d.h"
-#include "DX10draw.h"
-#include "DX10blend.h"
-#include "DX10surface.h"
-#include "DX10miscextra.h"
-
+#ifndef __DXSHAPESH_
+#define __DXSHAPESH_
+#include "DirectX10Headers.h"
+float* block_vertices(double x1, double y1, double z1, double x2, double y2, double z2);
+float* block_indices(double x1, double y1, double z1, double x2, double y2, double z2);
+#endif

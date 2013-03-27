@@ -15,19 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//#include "DirectXHeaders.h"
+#include "DirectX10Headers.h"
+#include "DX10blend.h"
 
-namespace enigma
-{
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
+int draw_set_blend_mode(int mode){
+
 }
 
-#include "DX10colors.h"
-#include "DX10primitives.h"
-#include "DX10d3d.h"
-#include "DX10draw.h"
-#include "DX10blend.h"
-#include "DX10surface.h"
-#include "DX10miscextra.h"
+int draw_set_blend_mode_ext(double src,double dest){
 
+}

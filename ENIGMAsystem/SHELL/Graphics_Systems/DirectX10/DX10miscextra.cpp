@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,19 +15,24 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//#include "DirectXHeaders.h"
+#include "DirectX10Headers.h"
+#include <string>
+#include <stdio.h>
+using namespace std;
 
-namespace enigma
-{
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-}
-
-#include "DX10colors.h"
-#include "DX10primitives.h"
-#include "DX10d3d.h"
-#include "DX10draw.h"
-#include "DX10blend.h"
-#include "DX10surface.h"
 #include "DX10miscextra.h"
 
+extern int window_get_width();
+extern int window_get_height();
+
+#include "Universal_System/estring.h"
+
+int screen_save(string filename) //Assumes native integers are little endian
+{
+
+}
+
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
+{
+
+}

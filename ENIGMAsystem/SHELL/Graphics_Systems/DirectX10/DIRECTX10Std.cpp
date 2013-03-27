@@ -15,19 +15,28 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//#include "DirectXHeaders.h"
+#include <iostream>
+#include <string>
 
+#include "DirectX10Headers.h"
+using namespace std;
+#include "DIRECTX10Std.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h" // Room dimensions.
+#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 namespace enigma
 {
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
+  unsigned bound_texture=0;
+  unsigned char currentcolor[4] = {0,0,0,255};
+
+  void graphicssystem_initialize()
+  {
+
+  }
 }
 
-#include "DX10colors.h"
-#include "DX10primitives.h"
-#include "DX10d3d.h"
-#include "DX10draw.h"
-#include "DX10blend.h"
-#include "DX10surface.h"
-#include "DX10miscextra.h"
+// Stolen entirely from the documentation and thrown into a switch() structure.
+string draw_get_graphics_error()
+{
 
+}

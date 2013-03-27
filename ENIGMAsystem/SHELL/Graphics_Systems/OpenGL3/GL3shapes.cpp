@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,19 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//#include "DirectXHeaders.h"
+#include "GL3shapes.h"
 
-namespace enigma
+GLfloat* block_vertices(double x1, double y1, double z1, double x2, double y2, double z2)
 {
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
+ //{ x2, y2, z1, x2, y2, z2, x2, y1, z1, x2, y1, z2}
+  static GLfloat verts[24] = {x2, y1, z1, x2, y1, z2};
+  verts[0]=x1;verts[1]=y1;verts[2]=z1; verts[3]=x1;verts[4]=y1;verts[5]=z2; verts[6]=x1;verts[7]=y2;verts[8]=z1;
+  verts[9]=x1;verts[10]=y2;verts[11]=z2; verts[12]=x2;verts[13]=y2;verts[14]=z1; verts[15]=x2;verts[16]=y2;verts[17]=z2;
+  verts[18]=x2;verts[19]=y1;verts[20]=z1; verts[21]=x2;verts[22]=y1;verts[23]=z2; 
+  return verts;
 }
-
-#include "DX10colors.h"
-#include "DX10primitives.h"
-#include "DX10d3d.h"
-#include "DX10draw.h"
-#include "DX10blend.h"
-#include "DX10surface.h"
-#include "DX10miscextra.h"
-
