@@ -58,7 +58,7 @@ int background_color = 16777215;
 int background_showcolor=1;
 
 var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed,background_alpha,background_width,background_height,background_xscale,background_yscale;
+background_vtiled, background_hspeed, background_vspeed,background_alpha,background_coloring,background_width,background_height,background_xscale,background_yscale;
 
 int view_current = 0;
 int view_enabled = 0;
@@ -106,6 +106,8 @@ namespace enigma
       background_x[i] = backs[i].area_x; background_y[i] = backs[i].area_y;
       background_hspeed[i] = backs[i].horSpeed; background_vspeed[i] = backs[i].verSpeed;
       background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
+      background_alpha[i] = 1;
+      background_coloring[i] = 0xFFFFFF;  //TODO: Add these to back backstruct, can't right now since it's set statically
       if (background_exists(background_index[i]))
       {
         background_width[i] = background_get_width(background_index[i]); background_height[i] = background_get_height(background_index[i]);
@@ -217,19 +219,19 @@ int room_restart()
 	return 0;
 }
 
-string room_get_name(int index)
+string room_get_name(int indx)
 {
 	errcheck(indx,"Room index out of range");
-	return enigma::roomdata[index]->name;
+	return enigma::roomdata[indx]->name;
 }
 
-int room_goto_absolute(int index)
+int room_goto_absolute(int indx)
 {
-	errcheck_o(index,"Room index out of range");
-	enigma::roomstruct *rit = enigma::roomorder[index];
-	int indx = rit->id;
+	errcheck_o(indx,"Room index out of range");
+	enigma::roomstruct *rit = enigma::roomorder[indx];
+	int index = rit->id;
 
-	enigma::room_switching_id = indx;
+	enigma::room_switching_id = index;
 	enigma::room_switching_restartgame = false;
 	return 0;
 }
@@ -298,6 +300,74 @@ int room_previous(int num)
 bool room_exists(int roomid)
 {
     return roomid >= 0 and roomid < enigma::room_idmax and enigma::roomdata[roomid];
+}
+
+int room_set_width(int indx, int wid)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->width = wid;
+}
+
+int room_set_height(int indx, int hei)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->height = hei;
+}
+
+int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha, int color)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::backstruct bk = enigma::roomdata[indx]->backs[bind];
+    bk.visible = vis;
+    bk.foreground = fore;
+    bk.background = back;
+    bk.area_x = x;
+    bk.area_y = y;
+    bk.tileHor = htiled;
+    bk.tileVert = vtiled;
+    bk.horSpeed = hspeed;
+    bk.verSpeed = vspeed;
+//    bk.alpha = alpha;
+//    bk.color = color;  //TODO: Add these to back backstruct, can't right now since it's set statically
+}
+
+int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::viewstruct vw = enigma::roomdata[indx]->views[vind];
+    vw.start_vis = vis;
+    vw.area_x = xview;
+    vw.area_y = yview;
+    vw.area_w = wview;
+    vw.area_h = hview;
+    vw.port_x = xport;
+    vw.port_y = yport;
+    vw.port_w = wport;
+    vw.port_h = hport;
+    vw.hborder = hborder;
+    vw.vborder = vborder;
+    vw.hspd = hspeed;
+    vw.vspd = vspeed;
+    vw.object2follow = obj;
+}
+
+int room_set_background_color(int indx, int col, bool show)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->backcolor = col;
+    enigma::roomdata[indx]->drawbackcolor = show;
+}
+
+int room_set_caption(int indx, string str)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->cap = str;
+}
+
+int room_set_view_enabled(int indx, int val)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->views_enabled = val;
 }
 
 namespace enigma

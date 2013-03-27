@@ -40,12 +40,19 @@ int room_goto_next();
 int room_next(int num);
 int room_previous(int num);
 bool room_exists(unsigned roomid);
+int room_set_width(int indx, int wid);
+int room_set_height(int indx, int hei);
+int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha = 1, int color = 0xFFFFFF);
+int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
+int room_set_background_color(int indx, int col, bool show);
+int room_set_caption(int indx, string str);
+int room_set_view_enabled(int indx, int val);
 
 extern int background_color;
 extern int background_showcolor;
 
 extern var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed,background_alpha,background_width,background_height,background_xscale,background_yscale;
+background_vtiled, background_hspeed, background_vspeed,background_alpha,background_coloring,background_width,background_height,background_xscale,background_yscale;
 
 extern int room_height;
 extern int room_persistent;
@@ -88,6 +95,8 @@ namespace enigma
     int area_x, area_y, horSpeed, verSpeed;
     int tileHor, tileVert;
     int stretch;
+    double alpha;
+    double color;
   };
   struct roomstruct
   {
