@@ -15,10 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
-#include "GLprmtvs.h"
+#include "OpenGL3Headers.h"
+#include "GL3primitives.h"
+#include "GL3textures.h"
 #include "binding.h"
-#include "GLtextures.h"
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
@@ -71,7 +71,7 @@ void draw_set_primitive_aa(bool enable, int quality)
 
 int draw_primitive_begin(int dink)
 {
-	untexture();
+	texture_reset();
 	GLenum kind = ptypes_by_id[ dink & 15 ];
   glBegin(kind);
   return 0;
@@ -79,7 +79,7 @@ int draw_primitive_begin(int dink)
 
 int draw_primitive_begin_texture(int dink,unsigned tex)
 {
-  bind_texture(tex);
+  texture_use(tex);
 	GLenum kind = ptypes_by_id[ dink & 15 ];
 	glBegin(kind);
   return 0;
@@ -103,12 +103,14 @@ int draw_vertex_color(float x, float y, int col, float alpha)
   glPopAttrib();
 	return 0;
 }
+
 int draw_vertex_texture(float x, float y, float tx, float ty)
 {
     glTexCoord2f(tx,ty);
     glVertex2f(x,y);
 	return 0;
 }
+
 int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha)
 {
   glPushAttrib(GL_CURRENT_BIT);
@@ -122,6 +124,7 @@ int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, flo
   glPopAttrib();
 	return 0;
 }
+
 int draw_primitive_end()
 {
 	glEnd();
@@ -130,12 +133,13 @@ int draw_primitive_end()
 
 void d3d_primitive_begin(int kind)
 {
-    untexture();
+    texture_reset();
     glBegin(ptypes_by_id[kind]);
 }
+
 void d3d_primitive_begin_texture(int kind, int texId)
 {
-    bind_texture(get_texture(texId));
+    texture_use(get_texture(texId));
     glBegin(ptypes_by_id[kind]);
 }
 
@@ -148,6 +152,7 @@ void d3d_vertex(double x, double y, double z)
 {
     glVertex3d(x,y,z);
 }
+
 void d3d_vertex_color(double x, double y, double z, int color, double alpha)
 {
     glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
@@ -172,6 +177,7 @@ void d3d_vertex_normal(double x, double y, double z, double nx, double ny, doubl
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
 }
+
 void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha)
 {
     glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
@@ -179,12 +185,14 @@ void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny,
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
 }
+
 void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
 {
     glTexCoord2f(tx,ty);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
 }
+
 void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha)
 {
     glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
