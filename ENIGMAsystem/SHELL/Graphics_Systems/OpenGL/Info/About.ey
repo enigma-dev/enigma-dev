@@ -3,7 +3,7 @@
 
 Name: OpenGL
 Identifier: OpenGL
-Description: Render using OpenGL, offering high portability but requiring specific graphics card features to run.
+Description: Render using OpenGL, offering high portability but requiring specific graphics card features to run. May not work on never graphics hardware.
 Author: Josh Ventura, serprex
 
 Depends:

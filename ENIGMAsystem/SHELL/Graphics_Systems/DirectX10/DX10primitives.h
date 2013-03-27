@@ -38,5 +38,16 @@ int draw_vertex(double x, double y);
 int draw_vertex_color(float x, float y, int color, float alpha);
 int draw_vertex_texture(float x, float y, float tx, float ty);
 int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha);
-
 int draw_primitive_end();
+
+void d3d_primitive_begin(int kind);
+void d3d_primitive_begin_texture(int kind, int texId);
+void d3d_primitive_end();
+void d3d_vertex(double x, double y, double z);
+void d3d_vertex_color(double x, double y, double z, int color, double alpha);
+void d3d_vertex_texture(double x, double y, double z, double tx, double ty);
+void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha);
+void d3d_vertex_normal(double x, double y, double z, double nx, double ny, double nz);
+void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha);
+void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty);
+void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha);
