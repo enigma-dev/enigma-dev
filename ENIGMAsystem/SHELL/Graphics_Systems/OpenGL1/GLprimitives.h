@@ -31,7 +31,6 @@ const int pr_aa_nicest      =4354;  //GL_NICEST
 const int pr_aa_fastest     =4353;  //GL_FASTEST
 const int pr_aa_dontcare    =4352;  //GL_DONT_CARE
 
-void draw_set_primitive_aa(bool enable, int quality);
 int draw_primitive_begin(int kind);
 int draw_primitive_begin_texture(int dink,unsigned tex);
 int draw_vertex(double x, double y);

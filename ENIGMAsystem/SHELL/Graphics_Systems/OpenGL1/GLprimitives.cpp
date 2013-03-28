@@ -16,7 +16,7 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "GLprmtvs.h"
+#include "GLprimitives.h"
 #include "binding.h"
 #include "GLtextures.h"
 
@@ -47,26 +47,6 @@ GLenum ptypes_by_id[16] = {
 
 namespace enigma {
   extern unsigned char currentcolor[4];
-}
-
-void draw_set_primitive_aa(bool enable, int quality)
-{
-    if (enable==1) {
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_POINT_SMOOTH);
-        glEnable(GL_POLYGON_SMOOTH);
-        glHint(GL_LINE_SMOOTH_HINT, quality);
-        glHint(GL_POINT_SMOOTH_HINT, quality);
-        glHint(GL_POLYGON_SMOOTH_HINT, quality);
-        glPointSize(1.1);
-        glLineWidth(1.1);
-    } else {
-        glDisable(GL_LINE_SMOOTH);
-        glDisable(GL_POINT_SMOOTH);
-        glDisable(GL_POINT_SMOOTH);
-        glPointSize(1);
-        glLineWidth(1);
-    }
 }
 
 int draw_primitive_begin(int dink)

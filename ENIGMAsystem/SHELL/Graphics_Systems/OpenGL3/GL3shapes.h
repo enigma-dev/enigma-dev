@@ -15,6 +15,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+// ***** Information BEGIN ***** 
+/*
+   Everything must use Vertex Buffer Object's in the new graphics system's, the old one also needs to use similiar
+   shape functions for obtaining data for Vertex Array pointer's. Nothing can use immediate mode anymore.
+   These are the basic shappes...
+   
+   Plane : Walls/Floors/Sprites
+   Cube
+   Uvsphere
+   Icosahedron
+   Cone
+   Cylinder
+   Torus
+*/
+// ***** Information END ***** 
+
 #ifndef __GLSHAPESH_
 #define __GLSHAPESH_
 #include "OpenGL3Headers.h"

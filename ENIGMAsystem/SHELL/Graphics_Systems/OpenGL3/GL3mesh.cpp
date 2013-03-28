@@ -68,6 +68,7 @@ struct Primitive
   }
 };
 
+/* Mesh clearing has a memory leak */
 class Mesh
 {
   public:
@@ -80,11 +81,14 @@ class Mesh
   vector<GLfloat> colors;
   vector<GLuint> indices;
 
+  /* NOTE: only use 1 VBO per model, this could be 
+     rewritten to make attributes offset in the single vbo */
   GLuint verticesVBO;
   GLuint texturesVBO;
   GLuint maxindice;
-
+  GLuint rebufferOffset;
   bool vbogenerated;
+  bool vbobuffered;
   int vbotype;
 
   Mesh(int vbot = vbo_static)
@@ -93,6 +97,7 @@ class Mesh
     vbotype = vbot;
     maxindice = 0;
     vbogenerated = false;
+    vbobuffered = false;
   }
 
   ~Mesh()
@@ -113,12 +118,12 @@ class Mesh
   {
     primitives.clear();
     ClearData();
-    // TODO: Rebuffer
+    vbobuffered = false;
   }
 
   void Begin(int pt)
   {
-    vbogenerated = false;
+    vbobuffered = false;
     unsigned int id = primitives.size();
     currentPrimitive = id;
     Primitive* newPrim = new Primitive(pt);
@@ -127,7 +132,7 @@ class Mesh
     primitives.push_back(newPrim);
   }
 
-  void VertexVector(float x, float y, float z)
+  void VertexVector(double x, double y, double z)
   {
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
     primitives[currentPrimitive]->vertcount += 1;
@@ -140,66 +145,109 @@ class Mesh
     primitives[currentPrimitive]->indexcount += 1;
   }
 
-  void NormalVector(float nx, float ny, float nz)
+  void NormalVector(double nx, double ny, double nz)
   {
     normals.push_back(nx); normals.push_back(ny); normals.push_back(nz);
   }
 
-  void TextureVector(float tx, float ty)
+  void TextureVector(double tx, double ty)
   {
     textures.push_back(tx); textures.push_back(ty);
   }
 
-  void ColorVector(double c, double a)
+/* For reference...
+    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glVertex3d(x,y,z);
+    glColor4ubv(enigma::currentcolor);
+*/
+  void ColorVector(int col, double alpha)
   {
-
+    // TODO: Write function
   }
 
   void End()
   {
+ 
+  }
 
+  void BufferGenerate()
+  {
+    glGenBuffers( 1, &verticesVBO );
+    glGenBuffers( 1, &texturesVBO );
   }
 
   void BufferData()
   {
-    // Generate And Bind The Vertex Buffer
-    glGenBuffers( 1, &verticesVBO );                  // Get A Valid Name
-    glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );         // Bind The Buffer
+    // Bind The Vertex Buffer
+    glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );
     // Send the data to the GPU
-    glBufferData( GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], vbotypes[vbotype] );
 
-    // Generate And Bind The Texture Coordinate Buffer
-    glGenBuffers( 1, &texturesVBO );                 // Get A Valid Name
-    glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
+    // Bind The Texture Coordinate Buffer
+    glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
     // Send the data to the GPU
-    glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], GL_STATIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], vbotypes[vbotype] );
+
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
     // Clean up the data from RAM it is now safe on VRAM
     ClearData();
+  }
+
+  void BufferSubData(GLint offset)
+  {
+    if (!vbobuffered) { return; }
+    glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );         // Bind The Buffer
+    // Send the data to the GPU
+    glBufferSubData( GL_ARRAY_BUFFER, offset * 3 * sizeof(GLfloat), vertices.size(), &vertices[0] );
+
+    glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
+    // Send the data to the GPU
+    glBufferSubData( GL_ARRAY_BUFFER, offset * 2 * sizeof(GLfloat), textures.size(), &textures[0] );
+
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
+    // Clean up the data from RAM it is now safe on VRAM
+    ClearData();
+  }
+
+  void Open(int offset) 
+  {
+    rebufferOffset = offset;
+  }
+
+  void Close()
+  {
+    BufferSubData(rebufferOffset); 
   }
 
   void Draw()
   {
     if (!vbogenerated) {
       vbogenerated = true;
+      BufferGenerate();
+    }
+    if (!vbobuffered) {
+      vbobuffered = true;
       BufferData();
     }
-    glBindBufferARB( GL_ARRAY_BUFFER, verticesVBO );
+    glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );
     glVertexPointer( 3, GL_FLOAT, 0, (char *) NULL );       // Set The Vertex Pointer To The Vertex Buffer
-    glBindBufferARB( GL_ARRAY_BUFFER, texturesVBO );
+    glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
     glTexCoordPointer( 2, GL_FLOAT, 0, (char *) NULL );     // Set The TexCoord Pointer To The TexCoord Buffer
 
     //glNormalPointer(GL_FLOAT, 0, &normals[0]);
 
     for (int i = 0; i < primitives.size(); i++)
     {
-
       if (indices.size() > 0) {
         glDrawRangeElements(ptypes_by_id[primitives[i]->type], primitives[i]->indexstart, maxindice + 1, primitives[i]->indexcount, GL_UNSIGNED_INT, &indices[0]);
       } else {
         glDrawArrays(ptypes_by_id[primitives[i]->type], primitives[i]->vertstart, primitives[i]->vertcount);
       }
     }
+
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
   }
 };
 
@@ -220,17 +268,22 @@ void d3d_model_destroy(const unsigned int id)
 
 void d3d_model_copy(const unsigned int id, const unsigned int source)
 {
-  meshes[id] = meshes[source];
+  //TODO: Write copy meshes code
+}
+
+void d3d_model_merge(const unsigned int id, const unsigned int source)
+{
+  //TODO: Write merge meshes code
 }
 
 unsigned int d3d_model_duplicate(const unsigned int source)
 {
-  //TODO: Write duplicate code meshes
+  //TODO: Write duplicate meshes code
 }
 
 bool d3d_model_exists(const unsigned int id)
 {
-  return (id > 0 && id < meshes.size());
+  return (id >= 0 && id < meshes.size());
 }
 
 void d3d_model_clear(const unsigned int id)
@@ -361,22 +414,22 @@ void d3d_model_draw(const unsigned int id, double x, double y, double z, int tex
 
 void d3d_model_primitive_begin(const unsigned int id, int kind)
 {
-    meshes[id]->Begin(kind);
+  meshes[id]->Begin(kind);
 }
 
 void d3d_model_primitive_end(const unsigned int id)
 {
-    meshes[id]->End();
+  meshes[id]->End();
 }
 
-void d3d_model_open(const unsigned int id, int start)
+void d3d_model_open(const unsigned int id, int offset)
 {
-
+  meshes[id]->Open(offset);
 }
 
 void d3d_model_close(const unsigned int id)
 {
-
+  meshes[id]->Close();
 }
 
 void d3d_model_vertex(const unsigned int id, double x, double y, double z)
@@ -396,7 +449,7 @@ void d3d_model_texture(const unsigned int id, double tx, double ty)
 
 void d3d_model_color(const unsigned int id, int col, double alpha)
 {
-
+  meshes[id]->ColorVector(col, alpha);
 }
 
 void d3d_model_index(const unsigned int id, int in)

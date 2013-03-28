@@ -15,28 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
+// For querying the graphic's output for debugging purposes, eg. triangles rendered, VRAM usage, and VBO's, etc.
 
-//#include "OpenGLHeaders.h"
+#ifndef __GLPROFILERH_
+#define __GLPROFILERH_
+#include "OpenGLHeaders.h"
 
-namespace enigma
-{
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
-}
-
-#include "GLcolors.h"
-#include "GLprimitives.h"
-#include "GLd3d.h"
-#include "GLstdraw.h"
-#include "GLblend.h"
-#include "GLsurface.h"
-#include "GLmiscextra.h"
-
+#endif
