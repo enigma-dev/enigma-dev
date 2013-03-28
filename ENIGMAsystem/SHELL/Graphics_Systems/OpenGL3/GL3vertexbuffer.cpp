@@ -19,3 +19,6 @@
 #include "GL3vertexbuffer.h"
 #include <math.h>
 
+GLenum vbotypes[3] = {   
+  GL_STATIC_DRAW, GL_DYNAMIC_DRAW, GL_STREAM_DRAW
+}; 

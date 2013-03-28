@@ -21,6 +21,8 @@
 #include <vector>
 using std::vector;
 
+extern GLenum vbotypes[];
+
 enum {
   vbo_static,
   vbo_dynamic,
