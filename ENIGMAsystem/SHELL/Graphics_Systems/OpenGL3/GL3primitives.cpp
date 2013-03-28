@@ -18,6 +18,7 @@
 #include "OpenGL3Headers.h"
 #include "GL3primitives.h"
 #include "GL3textures.h"
+#include "GL3mesh.h"
 #include "binding.h"
 
 #include <string>
@@ -49,155 +50,155 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
-void draw_set_primitive_aa(bool enable, int quality)
-{
-    if (enable==1) {
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_POINT_SMOOTH);
-        glEnable(GL_POLYGON_SMOOTH);
-        glHint(GL_LINE_SMOOTH_HINT, quality);
-        glHint(GL_POINT_SMOOTH_HINT, quality);
-        glHint(GL_POLYGON_SMOOTH_HINT, quality);
-        glPointSize(1.1);
-        glLineWidth(1.1);
-    } else {
-        glDisable(GL_LINE_SMOOTH);
-        glDisable(GL_POINT_SMOOTH);
-        glDisable(GL_POINT_SMOOTH);
-        glPointSize(1);
-        glLineWidth(1);
-    }
-}
+int prim_draw_model = -1;
+int prim_draw_texture = -1;
+int prim_d3d_model = -1;
+int prim_d3d_texture = -1;
 
-int draw_primitive_begin(int dink)
+int draw_primitive_begin(int kind)
 {
-	texture_reset();
-	GLenum kind = ptypes_by_id[ dink & 15 ];
-  glBegin(kind);
+  prim_draw_texture = -1;
+  if (prim_draw_model == -1) {
+    prim_draw_model = d3d_model_create();
+  }
+  d3d_model_primitive_begin(prim_draw_model, kind);
   return 0;
 }
 
-int draw_primitive_begin_texture(int dink,unsigned tex)
+int draw_primitive_begin_texture(int kind,unsigned tex)
 {
-  texture_use(tex);
-	GLenum kind = ptypes_by_id[ dink & 15 ];
-	glBegin(kind);
+  if (prim_draw_model == -1) {
+    prim_draw_model = d3d_model_create();
+  }
+  prim_draw_texture = tex;
+  d3d_model_primitive_begin(prim_draw_model, kind);
   return 0;
 }
 
 int draw_vertex(double x, double y)
 {
-	glVertex2f(x,y);
-	return 0;
+  d3d_model_vertex(prim_draw_model, x, y, 0);
+  return 0;
 }
 
 int draw_vertex_color(float x, float y, int col, float alpha)
 {
-  glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(
-      (col&0xFF)/255.0,
-      ((col&0xFF00)>>8)/255.0,
-      ((col&0xFF0000)>>16)/255.0,
-      alpha);
-    glVertex2f(x,y);
-  glPopAttrib();
-	return 0;
+  d3d_model_vertex_color(prim_draw_model, x, y, 0, col, alpha);
+  return 0;
 }
 
 int draw_vertex_texture(float x, float y, float tx, float ty)
 {
-    glTexCoord2f(tx,ty);
-    glVertex2f(x,y);
-	return 0;
+  d3d_model_vertex_texture(prim_draw_model, x, y, 0, tx, ty);
+  return 0;
 }
 
 int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha)
 {
-  glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(
-      (col&0xFF)/255.0,
-      ((col&0xFF00)>>8)/255.0,
-      ((col&0xFF0000)>>16)/255.0,
-      alpha);
-    glTexCoord2f(tx,ty);
-    glVertex2f(x,y);
-  glPopAttrib();
-	return 0;
+  d3d_model_vertex_texture_color(prim_draw_model, x, y, 0, tx, ty, col, alpha);
+  return 0;
 }
 
 int draw_primitive_end()
 {
-	glEnd();
-	return 0;
+  if (prim_draw_texture != -1) {
+    texture_use(prim_draw_texture);
+  } else {
+    texture_reset();
+  }
+  prim_draw_texture = -1;
+  d3d_model_draw(prim_draw_model);
+  d3d_model_clear(prim_draw_model);
+  return 0;
 }
 
 void d3d_primitive_begin(int kind)
 {
-    texture_reset();
-    glBegin(ptypes_by_id[kind]);
+  prim_draw_texture == -1;
+  if (prim_d3d_model = -1) {
+    prim_d3d_model = d3d_model_create();
+  }
+  d3d_model_primitive_begin(prim_d3d_model, kind);
+  return;
 }
 
 void d3d_primitive_begin_texture(int kind, int texId)
 {
-    texture_use(get_texture(texId));
-    glBegin(ptypes_by_id[kind]);
+  if (prim_d3d_model == -1) {
+    prim_d3d_model = d3d_model_create();
+  }
+  prim_d3d_texture = texId;
+  d3d_model_primitive_begin(prim_d3d_model, kind);
 }
 
 void d3d_primitive_end()
 {
-    glEnd();
+  if (prim_d3d_texture != -1) {
+    texture_use(prim_d3d_texture);
+  } else {
+    texture_reset();
+  }
+  prim_d3d_texture = -1;
+  d3d_model_draw(prim_d3d_model);
+  d3d_model_clear(prim_d3d_model);
 }
 
 void d3d_vertex(double x, double y, double z)
 {
-    glVertex3d(x,y,z);
+  d3d_model_vertex(prim_d3d_model, x, y, z);
+}
+
+void d3d_normal(double nx, double ny, double nz)
+{
+  d3d_model_normal(prim_d3d_model, nx, ny, nz);
+}
+
+void d3d_texture(double tx, double ty)
+{
+  d3d_model_texture(prim_d3d_model, tx, ty);
+}
+
+void d3d_color(int col, double alpha)
+{
+  d3d_model_color(prim_d3d_model, col, alpha);
+}
+
+void d3d_index(int in)
+{
+  d3d_model_index(prim_d3d_model, in);
 }
 
 void d3d_vertex_color(double x, double y, double z, int color, double alpha)
 {
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
-    glVertex3d(x,y,z);
-    glColor4ubv(enigma::currentcolor);
+  d3d_model_vertex_color(prim_d3d_model, x, y, z, color, alpha);
 }
+
 void d3d_vertex_texture(double x, double y, double z, double tx, double ty)
 {
-    glTexCoord2f(tx,ty);
-    glVertex3d(x,y,z);
+  d3d_model_vertex_texture(prim_d3d_model, x, y, z, tx, ty);
 }
+
 void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha)
 {
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
-    glTexCoord2f(tx,ty);
-    glVertex3d(x,y,z);
-    glColor4ubv(enigma::currentcolor);
+  d3d_model_vertex_texture_color(prim_d3d_model, x, y, z, tx, ty, color, alpha);
 }
 
 void d3d_vertex_normal(double x, double y, double z, double nx, double ny, double nz)
 {
-    glNormal3f(nx, ny, nz);
-    glVertex3d(x,y,z);
+  d3d_model_vertex_normal(prim_d3d_model, x, y, z, nx, ny, nz);
 }
 
 void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha)
 {
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
-    glNormal3f(nx, ny, nz);
-    glVertex3d(x,y,z);
-    glColor4ubv(enigma::currentcolor);
+  d3d_model_vertex_normal_color(prim_d3d_model, x, y, z, nx, ny, nz, color, alpha);
 }
 
 void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
 {
-    glTexCoord2f(tx,ty);
-    glNormal3f(nx, ny, nz);
-    glVertex3d(x,y,z);
+  d3d_model_vertex_normal_texture(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty);
 }
 
 void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha)
 {
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
-    glTexCoord2f(tx,ty);
-    glNormal3f(nx, ny, nz);
-    glVertex3d(x,y,z);
-    glColor4ubv(enigma::currentcolor);
+  d3d_model_vertex_normal_texture_color(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty, color, alpha);
 }
