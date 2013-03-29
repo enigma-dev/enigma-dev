@@ -17,4 +17,5 @@
 
 
 int screen_save(string filename);
+int action_snapshot(string filename);
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);

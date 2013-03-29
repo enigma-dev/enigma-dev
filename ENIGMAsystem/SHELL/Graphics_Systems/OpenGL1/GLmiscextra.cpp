@@ -66,6 +66,11 @@ int screen_save(string filename) //Assumes native integers are little endian
 	return 0;
 }
 
+int action_snapshot(string filename)
+{
+    return screen_save(filename);
+}
+
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
 	unsigned sz = w * h;

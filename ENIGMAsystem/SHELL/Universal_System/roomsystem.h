@@ -48,6 +48,8 @@ int room_set_background_color(int indx, int col, bool show);
 int room_set_caption(int indx, string str);
 int room_set_persistent(int indx, bool pers);
 int room_set_view_enabled(int indx, int val);
+int room_tile_add(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth);
+int room_tile_clear(int indx);
 
 extern int background_color;
 extern int background_showcolor;
@@ -112,9 +114,7 @@ namespace enigma
     int width, height, spd, persistent;
     int views_enabled;
     viewstruct views[10];
-
     backstruct backs[10];
-
     int instancecount;
     inst *instances;
     int tilecount;
