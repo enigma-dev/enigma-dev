@@ -40,8 +40,6 @@ const int noone =  -4;
 const int global = -5;
 const int local =  -7;
 
-double object_get_depth(int ind);
-
 #include "var4.h"
 
 namespace enigma

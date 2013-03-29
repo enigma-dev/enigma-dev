@@ -109,6 +109,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
 
     << es->rooms[i].width << ", " << es->rooms[i].height << ", " // Width and Height
     << es->rooms[i].speed << ",  "  // Speed
+    << es->rooms[i].persistent << ",  "  // Persistent
 
     << (es->rooms[i].enableViews ? "true" : "false") << ", {\n"; // Views Enabled
 
@@ -126,7 +127,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
       << es->rooms[i].views[ii].objectId << ",   " // Object2Follow
 
       << es->rooms[i].views[ii].borderH << ", " << es->rooms[i].views[ii].borderV << ",   " //Hborder and Vborder
-      << es->rooms[i].views[ii].speedH<< ", " << es->rooms[i].views[ii].speedV //Hborder and Vborder
+      << es->rooms[i].views[ii].speedH<< ", " << es->rooms[i].views[ii].speedV //Hspeed and Vspeed
 
       << " },\n";
     }
@@ -144,7 +145,9 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
         << es->rooms[i].backgroundDefs[ii].vSpeed << ",   " // VSpeed
         << (es->rooms[i].backgroundDefs[ii].tileHoriz ? "true" : "false") << ",   " // tileHor
         << (es->rooms[i].backgroundDefs[ii].tileVert ? "true" : "false") << ",   " // tileVert
-        << (es->rooms[i].backgroundDefs[ii].stretch ? "true" : "false") // Stretch
+        << (es->rooms[i].backgroundDefs[ii].stretch ? "true" : "false") << ",   " // Stretch
+        << ("1") << ",   " // Alpha
+        << ("0xFFFFFF") // Color
         << " },\n";
      }
     wto <<

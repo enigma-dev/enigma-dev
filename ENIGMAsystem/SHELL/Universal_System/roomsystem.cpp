@@ -89,6 +89,7 @@ namespace enigma
     room_width   = width;
     room_height  = height;
     room_speed   = spd;
+    room_persistent = persistent;
 
     background_color = backcolor;
     background_showcolor = drawbackcolor;
@@ -106,8 +107,8 @@ namespace enigma
       background_x[i] = backs[i].area_x; background_y[i] = backs[i].area_y;
       background_hspeed[i] = backs[i].horSpeed; background_vspeed[i] = backs[i].verSpeed;
       background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
-      background_alpha[i] = 1;
-      background_coloring[i] = 0xFFFFFF;  //TODO: Add these to back backstruct, can't right now since it's set statically
+      background_alpha[i] = backs[i].alpha;
+      background_coloring[i] = backs[i].color;
       if (background_exists(background_index[i]))
       {
         background_width[i] = background_get_width(background_index[i]); background_height[i] = background_get_height(background_index[i]);
@@ -327,8 +328,8 @@ int room_set_background(int indx, int bind, bool vis, bool fore, bool back, doub
     bk.tileVert = vtiled;
     bk.horSpeed = hspeed;
     bk.verSpeed = vspeed;
-//    bk.alpha = alpha;
-//    bk.color = color;  //TODO: Add these to back backstruct, can't right now since it's set statically
+    bk.alpha = alpha;
+    bk.color = color;
 }
 
 int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj)
@@ -362,6 +363,12 @@ int room_set_caption(int indx, string str)
 {
     errcheck(indx,"Nonexistent room");
     enigma::roomdata[indx]->cap = str;
+}
+
+int room_set_persistent(int indx, bool pers)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->persistent = pers;
 }
 
 int room_set_view_enabled(int indx, int val)
