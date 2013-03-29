@@ -19,8 +19,11 @@
 #define _GLMATERIAL__H
 
 int material_create();
+void material_load();
+void material_save();
 void material_add_texture(int id, int tid);
 void material_set_texture(int id, int mtid, int tid);
+void material_remove_texture(int id, int mtid);
 void material_set_shader(int id, int sid);
 int material_get_shader(int id);
 void material_use(int id);
