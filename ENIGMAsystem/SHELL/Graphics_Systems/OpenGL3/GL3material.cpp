@@ -17,6 +17,7 @@
 
 #include "OpenGL3Headers.h"
 #include "GL3material.h"
+#include "binding.h"
 #include <math.h>
 
 #include <vector>
@@ -24,11 +25,11 @@ using std::vector;
 
 struct Material {
   unsigned int shader;
-  unsigned int textcount;
+  vector<unsigned int> textures;
 
   Material()
   {
-    textcount = 0;
+
   }
 
   ~Material()
@@ -37,7 +38,7 @@ struct Material {
   }
 };
 
-vector<Material*> materials(0);
+vector<Material*> materials;
 
 int material_create(int type)
 {
@@ -48,12 +49,12 @@ int material_create(int type)
 
 void material_add_texture(int id, int tid)
 {
-
+  materials[id]->textures.push_back(tid);
 }
 
 void material_set_texture(int id, int mtid, int tid)
 {
-
+  materials[id]->textures[mtid] = tid;
 }
 
 void material_set_shader(int id, int sid)
@@ -66,9 +67,12 @@ int material_get_shader(int id)
   return materials[id]->shader;
 }
 
+/* Could use global bound material for optimization, just like texture's */
 void material_use(int id)
 {
-
+  Material* mat = materials[id];
+  glActiveTextureARB(GL_TEXTURE0);
+  texture_use(mat->textures[0]);
 }
 
 void material_reset()
