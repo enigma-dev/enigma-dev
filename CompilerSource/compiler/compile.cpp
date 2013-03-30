@@ -146,7 +146,7 @@ void clear_ide_editables()
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/LIBINCLUDE.h");
     wto << license;
     wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
-    wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n#define FONTPOLYS 1\n"
+    wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n"
            "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n";
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();

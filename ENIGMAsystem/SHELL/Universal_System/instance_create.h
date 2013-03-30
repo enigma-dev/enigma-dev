@@ -75,6 +75,7 @@ namespace enigma {
 
         //Create the instance
         enigma::object_basic* ob;
+        ob = NULL;
         switch((int)obj)
         {
         #define NEW_OBJ_PREFIX ob =
@@ -102,6 +103,7 @@ void instance_copy(bool perf) {
     int idn = enigma::maxid++;
 
     enigma::object_basic* ob;
+    ob = NULL;
 	switch((int)inst->object_index)
 	{
     #define NEW_OBJ_PREFIX ob =

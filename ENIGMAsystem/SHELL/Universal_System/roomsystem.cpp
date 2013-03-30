@@ -54,7 +54,7 @@ int room_height = 480;
 int room_persistent = 0;
 var room_caption = "";
 
-int background_color = 16777215;
+int background_color = 0xFFFFFF;
 int background_showcolor=1;
 
 var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
@@ -450,6 +450,12 @@ int room_instance_clear(int indx)
     rm->instances = newinst;
     rm->instancecount = 0;
     return 1;
+}
+
+int room_add()
+{
+    int indx = enigma::room_idmax++;
+    return indx;
 }
 
 namespace enigma
