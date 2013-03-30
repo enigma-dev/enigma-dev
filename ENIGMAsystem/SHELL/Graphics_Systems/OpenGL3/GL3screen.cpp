@@ -329,7 +329,7 @@ void screen_redraw()
 #include "binding.h"
 void screen_init()
 {
-    untexture()
+    texture_reset();
     if (!view_enabled)
     {
         glMatrixMode(GL_PROJECTION);
