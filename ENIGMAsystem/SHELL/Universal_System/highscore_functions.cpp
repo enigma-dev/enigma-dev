@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include "CallbackArrays.h"
 
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 
@@ -95,6 +96,7 @@ void highscore_show(int numb) {
          screen_refresh();
          io_handle();
      }
+     io_clear();
 }
 
 void action_highscore_show(int background,int border,double newColor,double otherColor,std::string font,int a,int b,int c,int d,int e,int f) {

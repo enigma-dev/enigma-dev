@@ -134,7 +134,7 @@ void screen_redraw()
             for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
                 tile t = dit->second.tiles[i];
-                draw_background_part(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY);
+                draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
             }
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
@@ -296,7 +296,7 @@ void screen_redraw()
                         if (t.roomX + t.width < view_xview[vc] || t.roomY + t.height < view_yview[vc] || t.roomX > view_xview[vc] + view_wview[vc] || t.roomY > view_yview[vc] + view_hview[vc])
                             continue;
 
-                        draw_background_part(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY);
+                        draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
                     }
 
                     enigma::inst_iter* push_it = enigma::instance_event_iterator;
@@ -326,8 +326,10 @@ void screen_redraw()
     }
 }
 
+#include "binding.h"
 void screen_init()
 {
+    untexture()
     if (!view_enabled)
     {
         glMatrixMode(GL_PROJECTION);

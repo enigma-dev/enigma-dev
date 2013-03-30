@@ -68,7 +68,11 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
         es->rooms[i].tiles[ii].height << "," <<
         es->rooms[i].tiles[ii].width << "," <<
         es->rooms[i].tiles[ii].roomX << "," <<
-        es->rooms[i].tiles[ii].roomY << "},";
+        es->rooms[i].tiles[ii].roomY << "," <<
+        /*es->rooms[i].tiles[ii].xscale*/1 << "," <<
+        /*es->rooms[i].tiles[ii].yscale*/1 << "," <<
+        /*es->rooms[i].tiles[ii].alpha*/"1.0" << "," <<
+        /*es->rooms[i].tiles[ii].color*/0xFFFFFF << "},";
         if (++modme % 16 == 0) wto << "\n        ";
       if (es->rooms[i].tiles[ii].id > room_hightileid)
         room_hightileid = es->rooms[i].tiles[ii].id;
@@ -146,9 +150,8 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
         << (es->rooms[i].backgroundDefs[ii].tileHoriz ? "true" : "false") << ",   " // tileHor
         << (es->rooms[i].backgroundDefs[ii].tileVert ? "true" : "false") << ",   " // tileVert
         << (es->rooms[i].backgroundDefs[ii].stretch ? "true" : "false") << ",   " // Stretch
-        << ("1") << ",   " // Alpha
-        << ("0xFFFFFF") // Color
-        << " },\n";
+        << /*es->rooms[i].backgroundDefs[ii].alpha*/1 << ",   " // Alpha
+        << /*es->rooms[i].backgroundDefs[ii].color*/0xFFFFFF << " },\n";  // Color
      }
     wto <<
     "      }," //End of Backgrounds
@@ -164,7 +167,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
   }
 
   wto << "  };\n  \n"; // End of all rooms
-  wto << "  int room_max = " <<  room_highid << " + 1;\n  int maxid = " << room_highinstid << " + 1;\n";
+  wto << "  int room_max = " <<  room_highid << " + 1;\n  int maxid = " << room_highinstid << " + 1;\n  int maxtileid = " << room_hightileid << " + 1;\n";
 
   wto << "} // Namespace enigma\n";
 
