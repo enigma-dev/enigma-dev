@@ -37,14 +37,15 @@ void physics_world_draw_debug();
 /* Fixtures */
 int  physics_fixture_create(int world);
 int  physics_fixture_create(); 
+void physics_fixture_bind(int id); 
 void physics_fixture_bind(); 
 void physics_fixture_set_collision_group(int id, int group);
 void physics_fixture_delete(int id);
 
 void physics_fixture_set_box_shape(int id, double halfwidth, double halfheight);
 void physics_fixture_set_circle_shape(int id, double radius);
-void physics_fixture_set_polygon_shape();
-void physics_fixture_add_point();
+void physics_fixture_set_polygon_shape(int id);
+void physics_fixture_add_point(int id, double x, double y);
 
 void physics_fixture_set_transform(int id, double x, double y, double angle);
 void physics_fixture_set_position(int id, double x, double y);

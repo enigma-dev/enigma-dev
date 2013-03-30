@@ -58,11 +58,6 @@ namespace enigma //TODO: Find where this belongs
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-
-  #ifdef ENIGMA_GS_OPENGL
-  void EnableDrawing (HGLRC *hRC);
-  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-  #endif
 }
 
 namespace enigma {
