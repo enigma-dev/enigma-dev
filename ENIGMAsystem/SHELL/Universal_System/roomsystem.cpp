@@ -58,7 +58,7 @@ int background_color = 16777215;
 int background_showcolor=1;
 
 var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed,background_alpha,background_width,background_height,background_xscale,background_yscale;
+background_vtiled, background_hspeed, background_vspeed,background_alpha,background_coloring,background_width,background_height,background_xscale,background_yscale;
 
 int view_current = 0;
 int view_enabled = 0;
@@ -89,6 +89,7 @@ namespace enigma
     room_width   = width;
     room_height  = height;
     room_speed   = spd;
+    room_persistent = persistent;
 
     background_color = backcolor;
     background_showcolor = drawbackcolor;
@@ -106,6 +107,8 @@ namespace enigma
       background_x[i] = backs[i].area_x; background_y[i] = backs[i].area_y;
       background_hspeed[i] = backs[i].horSpeed; background_vspeed[i] = backs[i].verSpeed;
       background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
+      background_alpha[i] = backs[i].alpha;
+      background_coloring[i] = backs[i].color;
       if (background_exists(background_index[i]))
       {
         background_width[i] = background_get_width(background_index[i]); background_height[i] = background_get_height(background_index[i]);
@@ -205,7 +208,7 @@ int room_goto(int indx)
 	errcheck(indx,"Attempting to go to nonexisting room");
 	enigma::room_switching_id = indx;
 	enigma::room_switching_restartgame = false;
-	return 0;
+	return 1;
 }
 
 int room_restart()
@@ -214,24 +217,24 @@ int room_restart()
 	errcheck(indx,"Is this some kind of joke?");
 	enigma::room_switching_id = indx;
 	enigma::room_switching_restartgame = false;
-	return 0;
+	return 1;
 }
 
-string room_get_name(int index)
+string room_get_name(int indx)
 {
 	errcheck(indx,"Room index out of range");
-	return enigma::roomdata[index]->name;
+	return enigma::roomdata[indx]->name;
 }
 
-int room_goto_absolute(int index)
+int room_goto_absolute(int indx)
 {
-	errcheck_o(index,"Room index out of range");
-	enigma::roomstruct *rit = enigma::roomorder[index];
-	int indx = rit->id;
+	errcheck_o(indx,"Room index out of range");
+	enigma::roomstruct *rit = enigma::roomorder[indx];
+	int index = rit->id;
 
-	enigma::room_switching_id = indx;
+	enigma::room_switching_id = index;
 	enigma::room_switching_restartgame = false;
-	return 0;
+	return 1;
 }
 
 #undef room_count
@@ -245,10 +248,9 @@ int room_goto_first(bool restart_game)
     enigma::roomstruct *rit = enigma::roomorder[0];
     enigma::room_switching_id = rit->id;
     enigma::room_switching_restartgame = restart_game;
-    return 0;
+    return 1;
 }
 
-#include <stdio.h>
 int room_goto_next()
 {
     enigma::roomstruct *rit = enigma::roomdata[(int)room.rval.d];
@@ -259,7 +261,7 @@ int room_goto_next()
 
     enigma::room_switching_id = rit->id;
     enigma::room_switching_restartgame = false;
-    return 0;
+    return 1;
 }
 
 int room_goto_previous()
@@ -272,7 +274,7 @@ int room_goto_previous()
 
     enigma::room_switching_id = rit->id;
     enigma::room_switching_restartgame = false;
-    return 0;
+    return 1;
 }
 
 
@@ -298,6 +300,156 @@ int room_previous(int num)
 bool room_exists(int roomid)
 {
     return roomid >= 0 and roomid < enigma::room_idmax and enigma::roomdata[roomid];
+}
+
+int room_set_width(int indx, int wid)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->width = wid;
+    return 1;
+}
+
+int room_set_height(int indx, int hei)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->height = hei;
+    return 1;
+}
+
+int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha, int color)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::backstruct bk = enigma::roomdata[indx]->backs[bind];
+    bk.visible = vis;
+    bk.foreground = fore;
+    bk.background = back;
+    bk.area_x = x;
+    bk.area_y = y;
+    bk.tileHor = htiled;
+    bk.tileVert = vtiled;
+    bk.horSpeed = hspeed;
+    bk.verSpeed = vspeed;
+    bk.alpha = alpha;
+    bk.color = color;
+    return 1;
+}
+
+int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::viewstruct vw = enigma::roomdata[indx]->views[vind];
+    vw.start_vis = vis;
+    vw.area_x = xview;
+    vw.area_y = yview;
+    vw.area_w = wview;
+    vw.area_h = hview;
+    vw.port_x = xport;
+    vw.port_y = yport;
+    vw.port_w = wport;
+    vw.port_h = hport;
+    vw.hborder = hborder;
+    vw.vborder = vborder;
+    vw.hspd = hspeed;
+    vw.vspd = vspeed;
+    vw.object2follow = obj;
+    return 1;
+}
+
+int room_set_background_color(int indx, int col, bool show)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->backcolor = col;
+    enigma::roomdata[indx]->drawbackcolor = show;
+    return 1;
+}
+
+int room_set_caption(int indx, string str)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->cap = str;
+    return 1;
+}
+
+int room_set_persistent(int indx, bool pers)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->persistent = pers;
+    return 1;
+}
+
+int room_set_view_enabled(int indx, int val)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomdata[indx]->views_enabled = val;
+    return 1;
+}
+
+int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomstruct *rm = enigma::roomdata[indx];
+    const int tcount = rm->tilecount++;
+    enigma::tile *ti = rm->tiles;
+    enigma::tile *newtiles = new enigma::tile[tcount + 1];
+    for (int tilei = 0; tilei < tcount; tilei++)
+        newtiles[tilei] = ti[tilei];
+
+    newtiles[tcount].id = enigma::maxtileid++;
+    newtiles[tcount].bckid = bck;
+    newtiles[tcount].bgx = left;
+    newtiles[tcount].bgy = top;
+    newtiles[tcount].depth = depth;
+    newtiles[tcount].height = height;
+    newtiles[tcount].width = width;
+    newtiles[tcount].roomX = x;
+    newtiles[tcount].roomY = y;
+    newtiles[tcount].xscale = xscale;
+    newtiles[tcount].yscale = yscale;
+    newtiles[tcount].alpha = alpha;
+    newtiles[tcount].color = color;
+    rm->tiles = newtiles;
+    return 1;
+}
+
+int room_tile_clear(int indx)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomstruct *rm = enigma::roomdata[indx];
+    enigma::tile *ti = rm->tiles;
+    enigma::tile *newtiles = new enigma::tile[1];
+    rm->tiles = newtiles;
+    rm->tilecount = 0;
+    return 1;
+}
+
+int room_instance_add(int indx, int x, int y, int obj)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomstruct *rm = enigma::roomdata[indx];
+    const int icount = rm->instancecount++;
+    enigma::inst *in = rm->instances;
+    enigma::inst *newinst = new enigma::inst[icount + 1];
+    for (int insti = 0; insti < icount; insti++)
+        newinst[insti] = in[insti];
+
+    newinst[icount].id = enigma::maxid++;
+    newinst[icount].x = x;
+    newinst[icount].y = y;
+    newinst[icount].obj = obj;
+
+    rm->instances = newinst;
+    return 1;
+}
+
+int room_instance_clear(int indx)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomstruct *rm = enigma::roomdata[indx];
+    enigma::inst *in = rm->instances;
+    enigma::inst *newinst = new enigma::inst[1];
+    rm->instances = newinst;
+    rm->instancecount = 0;
+    return 1;
 }
 
 namespace enigma
