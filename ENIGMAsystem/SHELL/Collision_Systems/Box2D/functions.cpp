@@ -378,8 +378,10 @@ void physics_fixture_set_polygon_shape(int id)
   }
   else
   {
-    b2PolygonShape* shape;
-    fixtures[id].polygonshape = shape;
+    b2PolygonShape shape;
+
+    shape.Set(&fixtures[id].vertices[0], fixtures[id].vertices.size());
+    fixtures[id].shape = &shape;
     fixtures[id].FinishShape();
   }
 }
@@ -393,7 +395,6 @@ void physics_fixture_add_point(int id, double x, double y)
   else
   {
     fixtures[id].vertices.push_back(b2Vec2(x, y));
-    fixtures[id].polygonshape->Set(&fixtures[id].vertices[0], fixtures[id].vertices.size());
   }
 }
 
