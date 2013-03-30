@@ -26,7 +26,6 @@
 \********************************************************************************/
 
 #include <string>
-#include <GL/gl.h>
 #include <windows.h>
 using namespace std;
 
