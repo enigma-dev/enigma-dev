@@ -55,6 +55,7 @@ struct worldInstance {
   int32 positionIterations = 3;
   int32 pixelstometers = 32;
   bool paused = false;
+
   worldInstance() 
   {
     // Define the gravity vector.
@@ -63,8 +64,10 @@ struct worldInstance {
     // Construct a world object, which will hold and simulate the rigid bodies.
     world = new b2World(gravity);
   }
+
   void world_update();
 }; 
+
 void worldInstance::world_update() 
 {
   if (!systemPaused && !paused) {
@@ -72,18 +75,36 @@ void worldInstance::world_update()
     world->ClearForces();
   }
 }
-vector<worldInstance> worlds(0);
+
+vector<worldInstance> worlds(1);
 
 struct fixtureInstance { 
   int world;
   b2Body* body;
   b2Fixture* fixture;
   b2Shape* shape;
+  b2PolygonShape* polygonshape;
+  vector<b2Vec2> vertices;
+
   fixtureInstance() 
   {
+
   }
+
+  ~fixtureInstance()
+  {
+
+  }
+
+  void FinishShape()
+  {
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = shape;
+    fixture = body->CreateFixture(&fixtureDef);
+  }
+
 }; 
-vector<fixtureInstance> fixtures(0);
+vector<fixtureInstance> fixtures;
 
 struct jointInstance { 
   int world;
@@ -92,7 +113,7 @@ struct jointInstance {
   {
   }
 }; 
-vector<jointInstance> joints(0);
+vector<jointInstance> joints;
 
 /* This is just place holder shit to get the fuckin linker shut the fuckin hell up */
 enigma::instance_t collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme)
@@ -119,9 +140,15 @@ namespace enigma
   }
 };
 
-bool place_free(double x,double y)
+bool place_free(double x, double y)
 {
-  return true;
+  for (int i = 0; i < fixtures.size(); i++)
+  {
+    if (fixtures[i].body->GetFixtureList()->TestPoint(b2Vec2(x, y))){
+      return true;
+    }
+  }
+  return false;
 }
 
 bool place_meeting(double x, double y, int object)
@@ -148,7 +175,7 @@ int physics_world_create()
 
 void physics_world_delete(int index)
 {
-  // I, robert colton, know nothing of memory management, help me by writing this bitch of a function
+ 
 }
 
 void physics_world_pause_enable(int index, bool paused)
@@ -245,11 +272,6 @@ void physics_world_draw_debug()
   // end programmer can do it themselves
 }
 
-int physics_fixture_create()
-{
-  // overloaded cause the default studio function uses the current rooms binded world
-}
-
 int physics_fixture_create(int world) 
 {
   if (unsigned(world) >= worlds.size() || world < 0)
@@ -270,9 +292,27 @@ int physics_fixture_create(int world)
   }
 }
 
+int physics_fixture_create()
+{
+  physics_fixture_create(0);
+}
+
+void physics_fixture_bind(int id)
+{
+  // binds a fixture to nothing, just closes and fills the definition
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+
+  }
+}
+
 void physics_fixture_bind()
 {
-  // binds a fixture to an object, im not writing this fuck YYG
+  // binds a fixture to an object
 }
 
 void physics_fixture_set_collision_group(int id, int group)
@@ -293,7 +333,7 @@ void physics_fixture_set_collision_group(int id, int group)
 
 void physics_fixture_delete(int id)
 {
-  // I, robert, know nothing of memory management, write this shit for me
+
 }
 
 void physics_fixture_set_box_shape(int id, double halfwidth, double halfheight)
@@ -307,9 +347,7 @@ void physics_fixture_set_box_shape(int id, double halfwidth, double halfheight)
     b2PolygonShape shape;
     shape.SetAsBox(halfwidth, halfheight);
     fixtures[id].shape = &shape;
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &shape;
-    fixtures[id].fixture = fixtures[id].body->CreateFixture(&fixtureDef);
+    fixtures[id].FinishShape();
   }
 }
 
@@ -324,9 +362,34 @@ void physics_fixture_set_circle_shape(int id, double radius)
     b2CircleShape shape;
     shape.m_radius = radius;
     fixtures[id].shape = &shape;
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &shape;
-    fixtures[id].fixture = fixtures[id].body->CreateFixture(&fixtureDef);
+    fixtures[id].FinishShape();
+  }
+}
+
+void physics_fixture_set_polygon_shape(int id)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    b2PolygonShape* shape;
+    fixtures[id].polygonshape = shape;
+    fixtures[id].FinishShape();
+  }
+}
+
+void physics_fixture_add_point(int id, double x, double y)
+{
+  if (unsigned(id) >= fixtures.size() || id < 0)
+  {
+    return;
+  }
+  else
+  {
+    fixtures[id].vertices.push_back(b2Vec2(x, y));
+    fixtures[id].polygonshape->Set(&fixtures[id].vertices[0], fixtures[id].vertices.size());
   }
 }
 
