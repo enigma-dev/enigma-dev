@@ -161,11 +161,6 @@ bool show_question(string str)
     return false;
 }
 
-bool action_if_question(string str)
-{
-    return show_question(str);
-}
-
 int window_get_x()
 {
     return enigma::windowX;

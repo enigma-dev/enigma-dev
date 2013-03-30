@@ -24,7 +24,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <stdio.h>
+
 #include <map>
 #include <math.h>
 #include <string>
@@ -126,7 +126,6 @@ namespace enigma
 
       //Tiles start
       drawing_depths.clear();
-      printf("\n tilePP: %i %i %i %i %i %i %i", tilecount, tiles[0].id, tiles[0].bckid, tiles[0].bgx, tiles[0].bgy, tiles[0].width, tiles[0].height);
       for (int tilei=0; tilei<tilecount; tilei++) {
           tile t = tiles[tilei];
           drawing_depths[t.depth].tiles.push_back(tiles[tilei]);
@@ -385,7 +384,7 @@ int room_set_view_enabled(int indx, int val)
     return 1;
 }
 
-int room_tile_add(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth)
+int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color)
 {
     errcheck(indx,"Nonexistent room");
     enigma::roomstruct *rm = enigma::roomdata[indx];
@@ -393,11 +392,9 @@ int room_tile_add(int indx, int bck, int left, int top, int width, int height, i
     enigma::tile *ti = rm->tiles;
     enigma::tile *newtiles = new enigma::tile[tcount + 1];
     for (int tilei = 0; tilei < tcount; tilei++)
-    {printf("pllk: %i oo", tcount);
         newtiles[tilei] = ti[tilei];
-    }
 
-    newtiles[tcount].id = 10000200 + tcount;
+    newtiles[tcount].id = enigma::maxtileid++;
     newtiles[tcount].bckid = bck;
     newtiles[tcount].bgx = left;
     newtiles[tcount].bgy = top;
@@ -406,7 +403,10 @@ int room_tile_add(int indx, int bck, int left, int top, int width, int height, i
     newtiles[tcount].width = width;
     newtiles[tcount].roomX = x;
     newtiles[tcount].roomY = y;
-    printf("\n t: %i %i %i", tcount, newtiles[tcount].id, newtiles[tcount].bckid);
+    newtiles[tcount].xscale = xscale;
+    newtiles[tcount].yscale = yscale;
+    newtiles[tcount].alpha = alpha;
+    newtiles[tcount].color = color;
     rm->tiles = newtiles;
     return 1;
 }
@@ -419,6 +419,36 @@ int room_tile_clear(int indx)
     enigma::tile *newtiles = new enigma::tile[1];
     rm->tiles = newtiles;
     rm->tilecount = 0;
+    return 1;
+}
+
+int room_instance_add(int indx, int x, int y, int obj)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomstruct *rm = enigma::roomdata[indx];
+    const int icount = rm->instancecount++;
+    enigma::inst *in = rm->instances;
+    enigma::inst *newinst = new enigma::inst[icount + 1];
+    for (int insti = 0; insti < icount; insti++)
+        newinst[insti] = in[insti];
+
+    newinst[icount].id = enigma::maxid++;
+    newinst[icount].x = x;
+    newinst[icount].y = y;
+    newinst[icount].obj = obj;
+
+    rm->instances = newinst;
+    return 1;
+}
+
+int room_instance_clear(int indx)
+{
+    errcheck(indx,"Nonexistent room");
+    enigma::roomstruct *rm = enigma::roomdata[indx];
+    enigma::inst *in = rm->instances;
+    enigma::inst *newinst = new enigma::inst[1];
+    rm->instances = newinst;
+    rm->instancecount = 0;
     return 1;
 }
 

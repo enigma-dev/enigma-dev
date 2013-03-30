@@ -48,8 +48,15 @@ int room_set_background_color(int indx, int col, bool show);
 int room_set_caption(int indx, string str);
 int room_set_persistent(int indx, bool pers);
 int room_set_view_enabled(int indx, int val);
-int room_tile_add(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth);
+int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color = 0xFFFFFF);
+inline int room_tile_add(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth)
+{
+    room_tile_add_ext(indx, bck, left, top, width, height, x, y, depth, 1, 1, 1, 0xFFFFFF);
+}
 int room_tile_clear(int indx);
+int room_instance_add(int indx, int x, int y, int obj);
+int room_instance_clear(int indx);
+
 
 extern int background_color;
 extern int background_showcolor;
@@ -81,7 +88,9 @@ namespace enigma
     int id,obj,x,y;
   };
     struct tile {
-        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
+        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY,xscale,yscale;
+        double alpha;
+        int color;
     };
   struct viewstruct
   {
@@ -123,7 +132,7 @@ namespace enigma
     void gotome(bool=false);
   };
   void room_update();
-  extern int room_max, maxid;
+  extern int room_max, maxid, maxtileid;
   extern int room_switching_id; // -1 indicates no room set.
   void rooms_switch();
   void rooms_load();

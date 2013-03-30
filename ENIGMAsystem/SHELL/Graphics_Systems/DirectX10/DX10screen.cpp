@@ -82,7 +82,9 @@ void screen_redraw()
 
 }
 
+#include "binding.h"
 void screen_init()
 {
+    untexture()
 
 }

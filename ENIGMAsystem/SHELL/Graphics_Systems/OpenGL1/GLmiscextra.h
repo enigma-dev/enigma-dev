@@ -17,5 +17,8 @@
 
 
 int screen_save(string filename);
-int action_snapshot(string filename);
+inline int action_snapshot(string filename)
+{
+    return screen_save(filename);
+}
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
