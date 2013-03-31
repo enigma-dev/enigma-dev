@@ -47,6 +47,7 @@
 #include "CallbackArrays.h"
 
 #include "lives.h"
+#include <string.h>
 
 int room_speed  = 60;
 int room_width  = 640;
@@ -65,6 +66,7 @@ int view_enabled = 0;
 rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
     view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
 
+#include <stdio.h>
 namespace enigma
 {
   roomstruct** roomdata;
@@ -79,18 +81,15 @@ namespace enigma
       if (!((object_planar*)*it)->persistent)
       instance_destroy(it->id, false);
     }
-
     graphics_clean_up_roomend();
 
     // Set the index to self
     room.rval.d = id;
-
     room_caption = cap;
     room_width   = width;
     room_height  = height;
     room_speed   = spd;
     room_persistent = persistent;
-
     background_color = backcolor;
     background_showcolor = drawbackcolor;
 
@@ -131,7 +130,6 @@ namespace enigma
           drawing_depths[t.depth].tiles.push_back(tiles[tilei]);
       }
       //Tiles end
-
     view_enabled = views_enabled;
 
     for (int i=0;i<8;i++)
@@ -155,14 +153,14 @@ namespace enigma
     }
 
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
-
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_create();
     if (gamestart)
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_gamestart();
 
-    createcode();
+    if (createcode)
+        createcode();
   }
 
   extern int room_loadtimecount;
@@ -384,6 +382,12 @@ int room_set_view_enabled(int indx, int val)
     return 1;
 }
 
+namespace enigma
+{
+    bool tile_alter = false;
+    bool instance_alter = false;
+}
+
 int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color)
 {
     errcheck(indx,"Nonexistent room");
@@ -407,7 +411,10 @@ int room_tile_add_ext(int indx, int bck, int left, int top, int width, int heigh
     newtiles[tcount].yscale = yscale;
     newtiles[tcount].alpha = alpha;
     newtiles[tcount].color = color;
+
+    if (enigma::tile_alter) delete[] rm->tiles;
     rm->tiles = newtiles;
+    enigma::tile_alter = true;
     return 1;
 }
 
@@ -417,8 +424,11 @@ int room_tile_clear(int indx)
     enigma::roomstruct *rm = enigma::roomdata[indx];
     enigma::tile *ti = rm->tiles;
     enigma::tile *newtiles = new enigma::tile[1];
-    rm->tiles = newtiles;
     rm->tilecount = 0;
+
+    if (enigma::tile_alter) delete[] rm->tiles;
+    rm->tiles = newtiles;
+    enigma::tile_alter = true;
     return 1;
 }
 
@@ -437,7 +447,9 @@ int room_instance_add(int indx, int x, int y, int obj)
     newinst[icount].y = y;
     newinst[icount].obj = obj;
 
+    if (enigma::instance_alter) delete[] rm->instances;
     rm->instances = newinst;
+    enigma::instance_alter = true;
     return 1;
 }
 
@@ -447,15 +459,172 @@ int room_instance_clear(int indx)
     enigma::roomstruct *rm = enigma::roomdata[indx];
     enigma::inst *in = rm->instances;
     enigma::inst *newinst = new enigma::inst[1];
-    rm->instances = newinst;
     rm->instancecount = 0;
+
+    if (enigma::instance_alter) delete[] rm->instances;
+    rm->instances = newinst;
+    enigma::instance_alter = true;
     return 1;
 }
 
 int room_add()
 {
-    int indx = enigma::room_idmax++;
-    return indx;
+    int newrm = enigma::room_idmax++;
+    enigma::roomstruct** newroomdata;
+
+    newroomdata = new enigma::roomstruct*[newrm + 1];
+    for (int i = 0; i < newrm; i++)
+        newroomdata[i] = enigma::roomdata[i];
+
+    enigma::roomstruct *rm = newroomdata[newrm] = new enigma::roomstruct;
+
+    rm->id = newrm;
+    rm->order = -1;
+    rm->name = "New Room";
+    rm->cap = "";
+    rm->backcolor = 0xFFFFFF;
+    rm->drawbackcolor = true;
+    rm->width = 640;
+    rm->height = 480;
+    rm->spd = 60;
+    rm->persistent = false;
+    rm->views_enabled = false;
+    rm->createcode = NULL;
+
+    enigma::inst *newinst = new enigma::inst[1];
+    rm->instances = newinst;
+    rm->instancecount = 0;
+
+    enigma::tile *newtiles = new enigma::tile[1];
+    rm->tiles = newtiles;
+    rm->tilecount = 0;
+
+    enigma::viewstruct vw;
+    for (int i = 0; i < 8; i++)
+    {
+        vw = rm->views[i];
+        vw.start_vis = false;
+        vw.area_x = 0;
+        vw.area_y = 0;
+        vw.area_w = 640;
+        vw.area_h = 480;
+        vw.port_x = 0;
+        vw.port_y = 0;
+        vw.port_w = 640;
+        vw.port_h = 480;
+        vw.hborder = 32;
+        vw.vborder = 32;
+        vw.hspd = -1;
+        vw.vspd = -1;
+        vw.object2follow = -4;
+    }
+
+    enigma::backstruct bk;
+    for (int i = 0; i < 8; i++)
+    {
+        bk = rm->backs[i];
+        bk.visible = 0;
+        bk.foreground = 0;
+        bk.background = 0;
+        bk.area_x = 0;
+        bk.area_y = 0;
+        bk.tileHor = true;
+        bk.tileVert = true;
+        bk.horSpeed = 0;
+        bk.verSpeed = 0;
+        bk.alpha = 1;
+        bk.color = 0xFFFFFF;
+    }
+
+    delete[] enigma::roomdata;
+    enigma::roomdata = newroomdata;
+    return newrm;
+}
+
+int room_duplicate(int indx, bool ass, int assroom)
+{
+    errcheck(indx,"Nonexistent room");
+    if (ass)
+    {
+        errcheck(assroom,"Nonexistent room");
+    }
+    int newrm = (ass)?enigma::room_idmax++ : enigma::room_idmax - 1;
+
+    enigma::roomstruct** newroomdata;
+    newroomdata = new enigma::roomstruct*[newrm + 1];
+    for (int i = 0; i < newrm; i++)
+        newroomdata[i] = enigma::roomdata[i];
+
+    enigma::roomstruct *rm = (ass)?newroomdata[indx] : newroomdata[newrm] = new enigma::roomstruct;
+    enigma::roomstruct *copyrm = (ass)?enigma::roomdata[assroom]:enigma::roomdata[indx];
+
+    rm->id = copyrm->id;
+    rm->order = (ass)?copyrm->order:-1;
+    rm->name = "New Room";
+    rm->cap = copyrm->cap;
+    rm->backcolor = copyrm->backcolor;
+    rm->drawbackcolor = copyrm->drawbackcolor;
+    rm->width = copyrm->width;
+    rm->height = copyrm->height;
+    rm->spd = copyrm->spd;
+    rm->persistent = copyrm->persistent;
+    rm->views_enabled = copyrm->views_enabled;
+    rm->createcode = copyrm->createcode;
+
+    enigma::inst *newinst = new enigma::inst[copyrm->instancecount];
+    rm->instances = newinst;
+    rm->instancecount = copyrm->instancecount;
+    for (int i = 0; i < rm->instancecount; i++)
+        rm->instances[i] = copyrm->instances[i];
+
+    enigma::tile *newtiles = new enigma::tile[copyrm->tilecount];
+    rm->tiles = newtiles;
+    rm->tilecount = copyrm->tilecount;
+    for (int i = 0; i < rm->tilecount; i++)
+        rm->tiles[i] = copyrm->tiles[i];
+
+    enigma::viewstruct vw, vc;
+    for (int i = 0; i < 8; i++)
+    {
+        vw = rm->views[i];
+        vc = copyrm->views[i];
+        vw.start_vis = vc.start_vis;
+        vw.area_x = vw.area_x;
+        vw.area_y = vc.area_y;
+        vw.area_w = vc.area_w;
+        vw.area_h = vc.area_h;
+        vw.port_x = vc.port_x;
+        vw.port_y = vc.port_y;
+        vw.port_w = vc.port_w;
+        vw.port_h = vc.port_h;
+        vw.hborder = vc.hborder;
+        vw.vborder = vc.vborder;
+        vw.hspd = vc.hspd;
+        vw.vspd = vc.vspd;
+        vw.object2follow = vc.object2follow;
+    }
+
+    enigma::backstruct bk, bc;
+    for (int i = 0; i < 8; i++)
+    {
+        bk = rm->backs[i];
+        bc = copyrm->backs[i];
+        bk.visible = bc.visible;
+        bk.foreground = bc.foreground;
+        bk.background = bc.background;
+        bk.area_x = bc.area_x;
+        bk.area_y = bc.area_y;
+        bk.tileHor = bc.tileHor;
+        bk.tileVert = bc.tileVert;
+        bk.horSpeed = bc.horSpeed;
+        bk.verSpeed = bc.verSpeed;
+        bk.alpha = bc.alpha;
+        bk.color = bc.color;
+    }
+
+    delete[] enigma::roomdata;
+    enigma::roomdata = newroomdata;
+    return ((ass)?indx:newrm);
 }
 
 namespace enigma

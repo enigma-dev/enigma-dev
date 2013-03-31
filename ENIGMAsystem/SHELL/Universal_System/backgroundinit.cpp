@@ -110,7 +110,7 @@ namespace enigma
 		  }
 		  delete[] cpixels;
 
-		  printf("Adding background: %d", i);
+		  printf("Adding background: %d\n\n", i);
 		  background_new(bkgid, width, height, pixels, false, false, true, false, 32, 32, 0, 0, 1,1);
 
 		  delete[] pixels;

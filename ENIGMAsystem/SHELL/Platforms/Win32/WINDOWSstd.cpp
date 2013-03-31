@@ -96,4 +96,4 @@ void set_synchronization(bool enable)
     const char *extensions = (char*)glGetString(GL_EXTENSIONS);
     if (strstr(extensions, "WGL_EXT_swap_control") and (f = (fp)wglGetProcAddress( "wglSwapIntervalEXT" )))
         f(enable);*/
-}
+}  //TODO: Needs to be rewritten

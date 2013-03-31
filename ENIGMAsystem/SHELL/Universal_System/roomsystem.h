@@ -56,7 +56,12 @@ inline int room_tile_add(int indx, int bck, int left, int top, int width, int he
 int room_tile_clear(int indx);
 int room_instance_add(int indx, int x, int y, int obj);
 int room_instance_clear(int indx);
-
+int room_add();
+int room_duplicate(int indx, bool ass = false, int assroom = -1);
+inline int room_assign(int indx, int roomindx)
+{
+    return room_duplicate(indx, true, roomindx);
+}
 
 extern int background_color;
 extern int background_showcolor;

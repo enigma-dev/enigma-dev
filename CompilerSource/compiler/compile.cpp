@@ -697,7 +697,7 @@ wto << "string script_get_name(int i) {\n switch (i) {\n";
     rparam = string_replace_all(rparam,"$game",gameFname);
     user << "Running \"" << rprog << "\" " << rparam << flushl;
     int gameres = e_execs(rprog, rparam);
-    user << "Game returned " << gameres << "\n";
+    user << "\n\nGame returned " << gameres << "\n";
   }
 
   idpr("Done.", 100);
