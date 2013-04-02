@@ -63,6 +63,8 @@ inline int room_assign(int indx, int roomindx)
     return room_duplicate(indx, true, roomindx);
 }
 
+int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
+
 extern int background_color;
 extern int background_showcolor;
 

@@ -56,7 +56,6 @@ else
 	CFLAGS += -Wall -s -O3 
 endif
 
-LDFLAGS := 
 DEPENDENCIES := 
 
 ifeq ($(GMODE), Compile)

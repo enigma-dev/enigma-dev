@@ -47,4 +47,4 @@ namespace enigma
     object_basic::~object_basic() {}
 }
 
-//TODO: Object data needs to be loading in loading.cpp
+

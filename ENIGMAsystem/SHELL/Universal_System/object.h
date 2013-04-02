@@ -69,6 +69,15 @@ namespace enigma
       object_basic(int uid, int uoid);
       virtual ~object_basic();
     };
+
+ /*   struct objectstruct
+    {
+        bool sprite, solid, visible;
+        double depth;
+        bool persistent
+        double mask;
+        double parent;
+    }*/
 }
 
 namespace enigma

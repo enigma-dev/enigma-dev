@@ -627,6 +627,25 @@ int room_duplicate(int indx, bool ass, int assroom)
     return ((ass)?indx:newrm);
 }
 
+int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj)
+{
+    view_visible[vind] = vis;
+    view_xview[vind] = xview;
+    view_yport[vind] = yview;
+    view_wport[vind] = wview;
+    view_hview[vind] = hview;
+    view_xport[vind] = xport;
+    view_yport[vind] = yport;
+    view_wport[vind] = wport;
+    view_hport[vind] = hport;
+    view_hborder[vind] = hborder;
+    view_vborder[vind] = vborder;
+    view_hspeed[vind] = hspeed;
+    view_vspeed[vind] = vspeed;
+    view_object[vind] = obj;
+    return 1;
+}
+
 namespace enigma
 {
   void room_update()
