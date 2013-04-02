@@ -1,0 +1,11 @@
+%e-yaml
+---
+
+Name: OGRE Windowing
+Identifier: OGREws
+Represents: Linux, Windows, Mac, Android
+Description: Window an OGRE graphics device on any platform.
+Author: Robert B. Colton
+
+Depends:
+	Build-Platforms: Linux, Windows, Mac, Android
