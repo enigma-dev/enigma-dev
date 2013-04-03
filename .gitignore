@@ -29,5 +29,6 @@ CompilerSource/bin/
 CompilerSource/JDI/dox/
 CompilerSource/JDI/test/defines_linux.txt
 CompilerSource/JDI/test/defines_mingw.txt
+Compilers/Windows/gcc.ey
 ENIGMAsystem/SHELL/ENIGMAengine
 *.cbTemp

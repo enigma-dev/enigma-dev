@@ -70,14 +70,14 @@ namespace enigma
       virtual ~object_basic();
     };
 
- /*   struct objectstruct
+    struct objectstruct
     {
         bool sprite, solid, visible;
         double depth;
-        bool persistent
+        bool persistent;
         double mask;
         double parent;
-    }*/
+    };
 }
 
 namespace enigma
