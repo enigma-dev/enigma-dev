@@ -48,10 +48,11 @@ namespace enigma
     object_basic::~object_basic() {}
 
     extern objectstruct objs[];
+    extern int obj_idmax;
 
     void objectdata_load()
     {
-        objectdata = new objectstruct*[objectcount];
+        objectdata = new objectstruct*[obj_idmax];
         for (int i = 0; i < objectcount; i++)
             objectdata[objs[i].id] = &objs[i];
     }

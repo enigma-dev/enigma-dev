@@ -172,8 +172,6 @@ namespace enigma
   {
     roomdata = new roomstruct*[room_idmax];
     roomorder = new roomstruct*[room_loadtimecount];
-    for (int i = 0; i < room_idmax; i++)
-      roomdata[i] = 0;
     for (int i = 0; i < room_loadtimecount; i++) {
       roomdata[grd_rooms[i].id] = &grd_rooms[i];
       roomorder[i] = &grd_rooms[i];

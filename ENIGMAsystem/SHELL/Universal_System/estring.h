@@ -57,4 +57,3 @@ string filename_dir(string fname);
 string filename_drive(string fname);
 string filename_ext(string fname);
 string filename_change_ext(string fname, string newext);
-string get_working_directory();
