@@ -27,6 +27,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "roomsystem.h"
+#include "object.h"
 
 
 #include "libEGMstd.h"
@@ -96,6 +97,9 @@ namespace enigma
       fclose(exe);
     }
     while (false);
+
+    //Load object struct
+    enigma::objectdata_load();
 
     //Load rooms
     enigma::rooms_load();

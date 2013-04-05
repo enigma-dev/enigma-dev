@@ -234,12 +234,6 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     return E_ERROR_PLUGIN_FUCKED_UP;
   }
 
-  edbg << "File version: " << es->fileVersion << flushl << flushl;
-  if (es->fileVersion != 800)
-    edbg << "Incorrect version. File is too " << ((es->fileVersion > 800)?"new":"old") << " for this compiler. Continuing anyway, because this number is always wrong.";
-
-
-
 
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the

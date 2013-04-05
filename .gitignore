@@ -13,6 +13,7 @@ blank.txt
 *.dylib
 *.exe
 *.jar
+*.log
 *~
 .DS_Store
 .eobjs/

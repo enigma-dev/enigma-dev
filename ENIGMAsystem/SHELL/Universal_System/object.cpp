@@ -27,6 +27,7 @@
 namespace enigma
 {
     extern int maxid;
+    objectstruct** objectdata;
     int instancecount = 0;
     int id_current =0;
 
@@ -45,6 +46,108 @@ namespace enigma
     object_basic::object_basic(): id(0), object_index(-4) {}
     object_basic::object_basic(int uid, int uoid): id(uid), object_index(uoid) {}
     object_basic::~object_basic() {}
+
+    extern objectstruct objs[];
+
+    void objectdata_load()
+    {
+        objectdata = new objectstruct*[objectcount];
+        for (int i = 0; i < objectcount; i++)
+            objectdata[objs[i].id] = &objs[i];
+    }
 }
 
+#if SHOWERRORS
+  #define errcheck(objid,err) \
+	if (objid < 0 or objid >= enigma::objectcount or !enigma::objectdata[objid]) \
+		return (show_error(err,0), 0)
+  #define errcheck(objid,err) \
+	if (objid < 0 or objid >= enigma::objectcount or !enigma::objectdata[objid]) \
+		show_error(err,0)
+#else
+  #define errcheck(objid,err)
+  #define errcheck_v(objid,err)
+#endif
 
+bool object_exists(int objid)
+{
+    return ((objid >= 0) && (objid < enigma::objectcount) && bool(enigma::objectdata[objid]));
+}
+
+void object_set_depth(int objid, int val)
+{
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->depth = val;
+}
+
+void object_set_mask(int objid, int val)
+{
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->mask = val;
+}
+
+void object_set_persistent(int objid, bool val)
+{
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->persistent = val;
+}
+
+void object_set_solid(int objid, bool val)
+{
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->solid = val;
+}
+
+void object_set_sprite(int objid, int val)
+{
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->sprite = val;
+}
+
+void object_set_visible(int objid, bool val)
+{
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->visible = val;
+}
+
+int object_get_depth(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->depth;
+}
+
+int object_get_mask(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->mask;
+}
+
+int object_get_parent(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->parent;
+}
+
+bool object_get_persistent(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->persistent;
+}
+
+bool object_get_solid(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->solid;
+}
+
+int object_get_sprite(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->sprite;
+}
+
+bool object_get_visible(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->visible;
+}
