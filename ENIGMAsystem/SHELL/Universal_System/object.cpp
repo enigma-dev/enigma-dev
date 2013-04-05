@@ -151,3 +151,15 @@ bool object_get_visible(int objid)
 	errcheck(objid,"Object doesn't exist");
 	return enigma::objectdata[objid]->visible;
 }
+
+bool object_is_ancestor(int objid, int acid)
+{
+	errcheck(objid,"Object doesn't exist");
+	errcheck(acid,"Anchestor id doesn't exist");
+	do
+    {
+        objid = enigma::objectdata[objid]->parent;
+    }
+	while (!(objid == -100 || objid == acid));
+	return (objid == acid);
+}

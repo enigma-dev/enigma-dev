@@ -73,7 +73,8 @@ namespace enigma
 
     struct objectstruct
     {
-        bool sprite, solid, visible;
+        int sprite;
+        bool solid, visible;
         double depth;
         bool persistent;
         double mask;
@@ -98,5 +99,6 @@ bool object_get_persistent(int objid);
 bool object_get_solid(int objid);
 int object_get_sprite(int objid);
 bool object_get_visible(int objid);
+bool object_is_ancestor(int objid, int acid);
 
 #endif //_object_h
