@@ -158,7 +158,7 @@ void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture)
     get_spritev_mutable(spr,ind);
     get_spritev_mutable(spr_copy,copy_sprite);
     for (int i = 0; i < spr->subcount; i++)
-        enigma::graphics_replace_texture_alpha_from_texture(spr->texturearray[i], spr_copy->texturearray[0]);
+        enigma::graphics_replace_texture_alpha_from_texture(spr->texturearray[i], spr_copy->texturearray[i % spr_copy->subcount]);
 }
 
 void sprite_merge(int ind, int copy_sprite)
