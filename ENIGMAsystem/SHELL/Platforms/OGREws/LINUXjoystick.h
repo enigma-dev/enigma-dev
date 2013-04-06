@@ -25,15 +25,28 @@
 **                                                                              **
 \********************************************************************************/
 
+namespace enigma {
+  void init_joysticks();
+  void handle_joysticks();
+}
 
-void windowsystem_write_exename(char* exenamehere);
-void screen_refresh();
+bool joystick_exists(int id);
+string joystick_name(int id);
+int joystick_axes(int id);
+int joystick_buttons(int id);
+bool joystick_has_pov(int id);
+int joystick_direction(int id); // Numpad key style. WTF.
+#define joystick_check_button(id, numb) joystick_button(id, numb)
+#define joystick_xpos(id) joystick_axis(id,1)
+#define joystick_ypos(id) joystick_axis(id,2)
+#define joystick_zpos(id) joystick_axis(id,3)
+#define joystick_rpos(id) joystick_axis(id,4)
+#define joystick_upos(id) joystick_axis(id,5)
+#define joystick_vpos(id) joystick_axis(id,6)
+double joystick_pov(int id);
 
-int sleep(int millis);
-void set_synchronization(bool enable);
-void enigma_catchmouse_backend(bool x);
-
-#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
-#include "WINDOWSwindow.h"
-
-#include "externals.h"
+double joystick_axis(int id, int axis);
+bool joystick_button(int id, int button);
+void joystick_map_button(int id, int butnum, char key);
+void joystick_map_axis(int id, int axisnum, char keyneg, char keypos);
+bool joystick_load(int id);

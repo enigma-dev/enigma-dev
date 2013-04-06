@@ -146,7 +146,7 @@ void clear_ide_editables()
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/LIBINCLUDE.h");
     wto << license;
     wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
-    wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n#define FONTPOLYS 1\n"
+    wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n"
            "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n";
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
@@ -233,12 +233,6 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     idpr("Java ENIGMA plugin dropped its ass.",-1);
     return E_ERROR_PLUGIN_FUCKED_UP;
   }
-
-  edbg << "File version: " << es->fileVersion << flushl << flushl;
-  if (es->fileVersion != 800)
-    edbg << "Incorrect version. File is too " << ((es->fileVersion > 800)?"new":"old") << " for this compiler. Continuing anyway, because this number is always wrong.";
-
-
 
 
   /**** Segment One: This segment of the compile process is responsible for
@@ -697,7 +691,7 @@ wto << "string script_get_name(int i) {\n switch (i) {\n";
     rparam = string_replace_all(rparam,"$game",gameFname);
     user << "Running \"" << rprog << "\" " << rparam << flushl;
     int gameres = e_execs(rprog, rparam);
-    user << "Game returned " << gameres << "\n";
+    user << "\n\nGame returned " << gameres << "\n";
   }
 
   idpr("Done.", 100);

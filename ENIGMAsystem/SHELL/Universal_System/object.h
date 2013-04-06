@@ -47,6 +47,7 @@ namespace enigma
     extern int maxid;
     extern int instancecount;
     extern int id_current;
+    extern int objectcount;
 
     extern double newinst_x, newinst_y;
     extern int newinst_obj, newinst_id;
@@ -69,11 +70,35 @@ namespace enigma
       object_basic(int uid, int uoid);
       virtual ~object_basic();
     };
-}
 
-namespace enigma
-{
+    struct objectstruct
+    {
+        int sprite;
+        bool solid, visible;
+        double depth;
+        bool persistent;
+        double mask;
+        double parent;
+        int id;
+    };
+    void objectdata_load();
     void constructor(object_basic* instance);
 }
+
+bool object_exists(int objid);
+void object_set_depth(int objid, int val);
+void object_set_mask(int objid, int val);
+void object_set_persistent(int objid, bool val);
+void object_set_solid(int objid, bool val);
+void object_set_sprite(int objid, int val);
+void object_set_visible(int objid, bool val);
+int object_get_depth(int objid);
+int object_get_mask(int objid);
+int object_get_parent(int objid);
+bool object_get_persistent(int objid);
+bool object_get_solid(int objid);
+int object_get_sprite(int objid);
+bool object_get_visible(int objid);
+bool object_is_ancestor(int objid, int acid);
 
 #endif //_object_h

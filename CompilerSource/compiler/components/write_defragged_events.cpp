@@ -102,7 +102,6 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
             {
               const bool e_is_inst = event_is_instance(it->second.mid, it->second.id);
               wto << (e_is_inst ? "    virtual void    myevent_" : "    virtual variant myevent_") << it->first << "()";
-              edbg << "Checking for default code in ev[" << it->second.mid << ", " << it->second.id << ".\n";
               if (event_has_default_code(it->second.mid,it->second.id))
                 wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << (e_is_inst ? "    }" : "    return 0;\n    }") << endl;
               else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;

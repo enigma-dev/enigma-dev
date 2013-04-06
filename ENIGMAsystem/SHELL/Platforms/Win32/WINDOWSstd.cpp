@@ -91,9 +91,9 @@ int sleep(int millis)
 
 void set_synchronization(bool enable)
 {
-    typedef BOOL (APIENTRY *fp)( int );
+ /*   typedef BOOL (APIENTRY *fp)( int );
     fp f = 0;
     const char *extensions = (char*)glGetString(GL_EXTENSIONS);
     if (strstr(extensions, "WGL_EXT_swap_control") and (f = (fp)wglGetProcAddress( "wglSwapIntervalEXT" )))
-        f(enable);
-}
+        f(enable);*/
+}  //TODO: Needs to be rewritten

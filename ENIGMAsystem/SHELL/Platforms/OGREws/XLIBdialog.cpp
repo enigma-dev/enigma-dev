@@ -25,15 +25,14 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <string>
+#include <stdio.h>
+using namespace std;
+#include "XLIBwindow.h"
 
-void windowsystem_write_exename(char* exenamehere);
-void screen_refresh();
-
-int sleep(int millis);
-void set_synchronization(bool enable);
-void enigma_catchmouse_backend(bool x);
-
-#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
-#include "WINDOWSwindow.h"
-
-#include "externals.h"
+// FIXME: MOVEME
+int show_message(string message)
+{
+  printf("show_message: %s\n",message.c_str());
+  return 0;
+}

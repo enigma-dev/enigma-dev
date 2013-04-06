@@ -354,8 +354,7 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
         return -4;
-    const double DMIN = 0.000001, DMAX = 1000000;
-    const double contact_distance = DMIN;
+    const double DMAX = 1000000;
     if (max_dist <= 0)
     {
         max_dist = DMAX;

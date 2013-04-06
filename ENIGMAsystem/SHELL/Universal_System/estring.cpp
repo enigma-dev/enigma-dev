@@ -217,12 +217,3 @@ string filename_change_ext(string fname, string newext)
         return fname + newext;
     return fname.replace(fp,fname.length(),newext);
 }
-
-extern string working_directory;
-string get_working_directory()
-{
-    if (working_directory == "")
-        return "";
-
-    return working_directory + "\\";
-}

@@ -51,12 +51,19 @@ int room_set_view_enabled(int indx, int val);
 int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color = 0xFFFFFF);
 inline int room_tile_add(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth)
 {
-    room_tile_add_ext(indx, bck, left, top, width, height, x, y, depth, 1, 1, 1, 0xFFFFFF);
+    return room_tile_add_ext(indx, bck, left, top, width, height, x, y, depth, 1, 1, 1, 0xFFFFFF);
 }
 int room_tile_clear(int indx);
 int room_instance_add(int indx, int x, int y, int obj);
 int room_instance_clear(int indx);
+int room_add();
+int room_duplicate(int indx, bool ass = false, int assroom = -1);
+inline int room_assign(int indx, int roomindx)
+{
+    return room_duplicate(indx, true, roomindx);
+}
 
+int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
 
 extern int background_color;
 extern int background_showcolor;
@@ -132,7 +139,7 @@ namespace enigma
     void gotome(bool=false);
   };
   void room_update();
-  extern int room_max, maxid, maxtileid;
+  extern int maxid, maxtileid;
   extern int room_switching_id; // -1 indicates no room set.
   void rooms_switch();
   void rooms_load();

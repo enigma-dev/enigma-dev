@@ -21,6 +21,7 @@
 
 string parameter_string(int x);
 int parameter_count();
+bool set_working_directory();
 
 unsigned long long disk_size(std::string drive);
 unsigned long long disk_free(std::string drive);

@@ -6,12 +6,12 @@ LINKS := -lcomctl32 -lgdi32
 CXXFLAGS := -I..
 
 obj/Debug:
-	mkdir -p obj/Debug
+	mkdir.exe -p obj/Debug
 obj/Release:
-	mkdir -p obj/Release
+	mkdir.exe -p obj/Release
 
 obj/Release/eyaml.o: obj/Release ../settings-parse/eyaml.cpp
-	mingw32-g++.exe $(CXXFLAGS) -c ../settings-parse/eyaml.cpp -o obj/Release/eyaml.o
+	g++.exe $(CXXFLAGS) -c ../settings-parse/eyaml.cpp -o obj/Release/eyaml.o
 
 Release: obj/Release obj/Release/eyaml.o
 	windres.exe -i stupid-candy.rc -J rc -o obj\Release\stupid-candy.res -O coff 
@@ -25,3 +25,4 @@ Debug: obj/Debug obj/Release/eyaml.o
 clean:
 	rm obj/Debug/*
 	rm obj/Release/*
+

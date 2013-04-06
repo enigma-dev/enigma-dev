@@ -167,7 +167,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
   }
 
   wto << "  };\n  \n"; // End of all rooms
-  wto << "  int room_max = " <<  room_highid << " + 1;\n  int maxid = " << room_highinstid << " + 1;\n  int maxtileid = " << room_hightileid << " + 1;\n";
+  wto << "  int maxid = " << room_highinstid << " + 1;\n  int maxtileid = " << room_hightileid << " + 1;\n";
 
   wto << "} // Namespace enigma\n";
 

@@ -26,14 +26,39 @@
 \********************************************************************************/
 
 
-void windowsystem_write_exename(char* exenamehere);
-void screen_refresh();
+int file_exists(std::string fname);
+int file_delete(std::string fname);
+int file_rename(std::string oldname,std::string newname);
+int file_copy(std::string fname,std::string newname);
+int directory_exists(std::string dname);
+int directory_create(std::string dname);
 
-int sleep(int millis);
-void set_synchronization(bool enable);
-void enigma_catchmouse_backend(bool x);
+std::string file_find_first(std::string mask,int attr);
 
-#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
-#include "WINDOWSwindow.h"
+enum {
+  fa_readonly  = 1,
+  fa_hidden    = 2,
+  fa_sysfile   = 4,
+  fa_volumeid  = 8,
+  fa_directory = 16,
+  fa_archive   = 32
+};
 
-#include "externals.h"
+std::string file_find_next();
+void file_find_close();
+bool file_attributes(std::string fname,int attr);
+
+void export_include_file(std::string fname);
+void export_include_file_location(std::string fname,std::string location);
+void discard_include_file(std::string fname);
+
+extern unsigned game_id;
+extern std::string working_directory;
+extern std::string program_directory;
+extern std::string temp_directory;
+
+
+int parameter_count();
+std::string parameter_string(int n);
+
+std::string environment_get_variable(std::string name);

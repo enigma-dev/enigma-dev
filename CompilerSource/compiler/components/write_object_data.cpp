@@ -61,7 +61,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
     wto << license;
-    wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
+    wto << "#include \"../Universal_System/collisions_object.h\"\n";
+    wto << "#include \"../Universal_System/object.h\"\n\n";
 
     // Write the script names
     wto << "// Script identifiers\n";
@@ -83,6 +84,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     }
     wto << "\n";
     wto << "namespace enigma\n{\n";
+    wto << "  extern objectstruct** objectdata;\n";
       wto << "  struct object_locals: event_parent";
         for (unsigned i = 0; i < parsed_extensions.size(); i++)
           if (parsed_extensions[i].implements != "")
@@ -279,13 +281,13 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           wto << "\n    {\n";
             // Sprite index
               if (used_funcs::object_set_sprite) //We want to initialize
-                wto << "      sprite_index = enigma::object_table[" << i->second->id << "].sprite;\n"
-                    << "      make_index = enigma::object_table[" << i->second->id << "].mask;\n";
+                wto << "      sprite_index = enigma::object_table[" << i->second->id << "].->sprite;\n"
+                    << "      make_index = enigma::object_table[" << i->second->id << "]->mask;\n";
               else
-                wto << "      sprite_index = " << i->second->sprite_index << ";\n"
-                    << "      mask_index = " << i->second->mask_index << ";\n";
-              wto << "      visible = " << i->second->visible << ";\n      solid = " << i->second->solid << ";\n";
-              wto << "      persistent = " << i->second->persistent << ";\n";
+                wto << "      sprite_index = enigma::objectdata[" << i->second->id << "]->sprite;\n"
+                    << "      mask_index = enigma::objectdata[" << i->second->id << "]->mask;\n";
+              wto << "      visible = enigma::objectdata[" << i->second->id << "]->visible;\n      solid = enigma::objectdata[" << i->second->id << "]->solid;\n";
+              wto << "      persistent = enigma::objectdata[" << i->second->id << "]->persistent;\n";
 
 
               wto << "      activate();";
@@ -298,7 +300,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
           wto << " void activate()\n    {\n";
           // Depth
-              wto << "      depth.init(" << i->second->depth << ", this);\n";
+
+              wto << "      depth.init(enigma::objectdata[" << i->second->id << "]->depth, this);\n";
+
             // Instance system interface
               wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
               for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
@@ -338,6 +342,16 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
         wto << "  };\n";
       }
+      wto << "\n  objectstruct objs[] = {\n  ";
+      int objcunt = 0, obmx = 0;
+      for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++, objcunt++)
+      {
+        wto << "{" << i->second->sprite_index << "," << i->second->solid << "," << i->second->visible << "," << i->second->depth << "," << i->second->persistent << "," << i->second->mask_index << "," << i->second->parent << "," << i->second->id << "}, ";
+        if (i->second->id >= obmx) obmx = i->second->id;
+      }
+      wto << "  };\n";
+      wto << "  int objectcount = " << objcunt << ";\n";
+      wto << "  int obj_idmax = " << obmx+1 << ";\n";
     wto << "}\n";
   wto.close();
 
@@ -443,12 +457,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"
     "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
     "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
-    /*instance->sprite_index = enigma::objectdata[instance->obj].sprite_index;
-    instance->mask_index = enigma::objectdata[instance->obj].mask_index;
-    instance->visible = enigma::objectdata[instance->obj].visible;
-    instance->solid = enigma::objectdata[instance->obj].solid;
-    instance->persistent = enigma::objectdata[instance->obj].persistent;
-    instance->depth = enigma::objectdata[instance->obj].depth;*/
     "    \n"
     "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
     "    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
