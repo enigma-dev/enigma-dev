@@ -1166,7 +1166,7 @@ class d3d_model
         glVertex3fv(v);
         glColor4ubv(enigma::currentcolor);
     }
-
+    //TODO: Model basic shapes need to be changed to the basic new oens
     void model_block(double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed)
     {
         float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y1, z1}, v3[] = {x2, y1, z2},
@@ -1444,7 +1444,6 @@ class d3d_model
 static map<unsigned int, d3d_model> d3d_models;
 static unsigned int d3d_models_maxid = 0;
 
-#include <iostream>
 unsigned int d3d_model_create()
 {
     d3d_models.insert(pair<unsigned int, d3d_model>(d3d_models_maxid++, d3d_model()));
@@ -1455,18 +1454,6 @@ void d3d_model_destroy(const unsigned int id)
 {
     d3d_models[id].clear();
     d3d_models.erase(d3d_models.find(id));
-}
-
-void d3d_model_copy(const unsigned int id, const unsigned int source)
-{
-    d3d_models[id] = d3d_models[source];
-}
-
-unsigned int d3d_model_duplicate(const unsigned int source)
-{
-    d3d_models.insert(pair<unsigned int, d3d_model>(d3d_models_maxid++, d3d_model()));
-    d3d_models[d3d_models_maxid-1] = d3d_models[source];
-    return d3d_models_maxid-1;
 }
 
 bool d3d_model_exists(const unsigned int id)

@@ -122,8 +122,6 @@ namespace enigma {
 
 unsigned int d3d_model_create();
 void d3d_model_destroy(const unsigned int id);
-void d3d_model_copy(const unsigned int id, const unsigned int source);
-unsigned int d3d_model_duplicate(const unsigned int source);
 bool d3d_model_exists(const unsigned int id);
 void d3d_model_clear(const unsigned int id);
 void d3d_model_save(const unsigned int id, std::string fname);

@@ -53,8 +53,8 @@ namespace enigma
   void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
       double x_offset, double y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape));
   void graphics_clean_up_roomend();
+  void load_tiles();
 }
-
 // These functions are available to the user to be called on a whim.
 
 // Called at random. Maybe.

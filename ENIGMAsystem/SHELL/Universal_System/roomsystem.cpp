@@ -66,7 +66,6 @@ int view_enabled = 0;
 rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
     view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
 
-#include <stdio.h>
 namespace enigma
 {
   roomstruct** roomdata;
@@ -123,12 +122,15 @@ namespace enigma
     }
     //Backgrounds end
 
-      //Tiles start
-      drawing_depths.clear();
-      for (int tilei=0; tilei<tilecount; tilei++) {
-          tile t = tiles[tilei];
-          drawing_depths[t.depth].tiles.push_back(tiles[tilei]);
-      }
+    //Load tiles
+    drawing_depths.clear();
+    for (int i = 0; i < tilecount; i++)
+    {
+        tile t = tiles[i];
+        drawing_depths[t.depth].tiles.push_back(t);
+    }
+    load_tiles();
+
       //Tiles end
     view_enabled = views_enabled;
 
