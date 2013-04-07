@@ -75,16 +75,19 @@ namespace enigma
         glPushAttrib(GL_CURRENT_BIT);
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
-            sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
-            int index = int(glGenLists(1));
-            drawing_depths[dit->second.tiles[0].depth].tilelist = index;
-            glNewList(index, GL_COMPILE);
-            for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
+            if (dit->second.tiles.size())
             {
-                tile t = dit->second.tiles[i];
-                draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
+                int index = int(glGenLists(1));
+                drawing_depths[dit->second.tiles[0].depth].tilelist = index;
+                glNewList(index, GL_COMPILE);
+                for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
+                {
+                    tile t = dit->second.tiles[i];
+                    draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                }
+                glEndList();
             }
-            glEndList();
         }
         glPopAttrib();
     }

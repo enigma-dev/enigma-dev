@@ -127,7 +127,8 @@ void screen_redraw()
                 tile t = dit->second.tiles[i];
                 draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
             }*/
-            glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
+            if (dit->second.tiles.size())
+                glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
 
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
