@@ -123,6 +123,7 @@ namespace enigma
     //Backgrounds end
 
     //Load tiles
+    delete_tiles();
     drawing_depths.clear();
     for (int i = 0; i < tilecount; i++)
     {

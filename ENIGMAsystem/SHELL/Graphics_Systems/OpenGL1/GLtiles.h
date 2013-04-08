@@ -23,5 +23,6 @@ namespace enigma
         bool operator() (const tile a, const tile b) {return (a.bckid < b.bckid);}
     }   bkinxcomp;
     void draw_tile();
+    void delete_tiles();
     void load_tiles();
 }

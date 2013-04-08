@@ -91,4 +91,15 @@ namespace enigma
         }
         glPopAttrib();
     }
+
+    void delete_tiles()
+    {
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+        {
+            if (dit->second.tiles.size())
+            {
+                glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
+            }
+        }
+    }
 }
