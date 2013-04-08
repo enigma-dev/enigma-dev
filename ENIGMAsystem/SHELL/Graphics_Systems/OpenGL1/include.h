@@ -2,6 +2,7 @@
 #include "GLsprite.h"
 #include "GLbackground.h"
 #include "GLtextures.h"
+#include "GLtiles.h"
 
 #include "GLfont.h"
 #include "GLcurves.h"

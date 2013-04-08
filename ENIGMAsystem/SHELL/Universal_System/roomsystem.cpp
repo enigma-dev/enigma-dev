@@ -122,6 +122,8 @@ namespace enigma
     }
     //Backgrounds end
 
+    screen_init();
+
     //Load tiles
     delete_tiles();
     drawing_depths.clear();
@@ -146,7 +148,6 @@ namespace enigma
 
     window_default();
     io_clear();
-    screen_init();
     screen_refresh();
 
     object_basic* is[instancecount];
