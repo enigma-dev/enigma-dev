@@ -51,25 +51,89 @@ enum {
 
 unsigned get_texture(int texid); // fail safe macro
 
+/** description
+@param enable
+**/
 void texture_set_enabled(bool enable);
+/** description
+@param enable
+**/
 void texture_set_interpolation(int enable);
+/** description
+**/
 bool texture_get_interpolation();
+/** description
+@param texid
+**/
 int texture_get_pixwidth(int texid);
+/** description
+@param texid
+**/
 int texture_get_pixheight(int texid);
+/** description
+@param enable
+**/
 void texture_set_blending(bool enable);
+/** description
+@param repeat
+**/
 void texture_set_repeat(bool repeat);
+/** description
+@param texid
+@param repeat
+**/
 void texture_set_repeat(int texid, bool repeat);
+/** description
+@param texid
+@param repeatu
+@param repeatv
+@param repeatw
+**/
 void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw);
+/** description
+@param texid
+**/
 void texture_preload(int texid);
+/** description
+@param texid
+@param prio
+**/
 void texture_set_priority(int texid, double prio);
+/** description
+@param texid
+@param r
+@param g 
+@param b
+@param a
+**/
 void texture_set_border(int texid, int r, int g, int b, double a);
+/** description
+@param texid
+@param enable
+**/
 void texture_mipmapping_filter(int texid, int enable);
+/** description
+@param texid
+@param levels
+**/
 void texture_mipmapping_generate(int texid, int levels);
+/** description
+**/
 bool  texture_anisotropy_supported();
+/** description
+**/
 float texture_anisotropy_maxlevel();
+/** description
+@param texid
+@param levels
+**/
 void  texture_anisotropy_filter(int texid, float levels);
+/** description
+**/
 bool texture_multitexture_supported();
+/** description
+@param enable
+**/
 void texture_multitexture_enable(bool enable);
 
 #endif
-
