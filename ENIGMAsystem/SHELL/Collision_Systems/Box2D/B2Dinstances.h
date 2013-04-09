@@ -15,6 +15,5 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "B2Dfunctions.h"
-#include "B2Djoints.h"
-#include "B2Dinstances.h"
+// Linker shit right meow...
+#include "Universal_System/instance_system_base.h"

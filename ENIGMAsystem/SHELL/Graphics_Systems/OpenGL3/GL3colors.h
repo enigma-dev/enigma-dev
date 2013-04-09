@@ -37,19 +37,64 @@ enum {
   c_yellow  = 0x00FFFF
 };
 
+/** Clears everything drawn to the given color.
+@param color
+**/
 void draw_clear(int color);
+/** Clears everything drawn to the given color with the given alpha.
+@param color the color to clear with
+@param alpha the alpha to clear with
+**/
 void draw_clear_alpha(int color, float alpha);
 
+/** Merges two colors into a single color value.
+@param col1 the first color
+@param col2 the second color
+@param amount fractional amount of the second color
+@return This function returns two colors merged into a single value.
+**/
 int merge_color(int col1, int col2, double amount);
 
+/** Sets the color used for drawing.
+@param col the color to draw with
+**/
 void draw_set_color(int col);
+/** Sets the color used for drawing.
+@param red the red component of the color
+@param green the green component of the color
+@param blue the blue component of the color
+**/
 void draw_set_color_rgb(unsigned char red, unsigned char green, unsigned char blue);
+/** Sets the alpha used for drawing.
+@param alpha the alpha value to draw with
+**/
 void draw_set_alpha(float alpha);
+/** Sets the color and alpha value to draw with.
+@param red the red component of the color
+@param green the green component of the color
+@param blue the blue component of the color
+@param alpha the alpha component of the color
+**/
 void draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
+/** Gets the current color used for drawing.
+@return This function returns the current draw color.
+**/
 int draw_get_color();
+/** Gets the red component of the current color used for drawing.
+@return This function returns the red component of the current draw color.
+**/
 int draw_get_red();
+/** Gets the green component of the current color used for drawing.
+@return This function returns the green component of the current draw color.
+**/
 int draw_get_green();
+/** Gets the blue component of the current color used for drawing.
+@return This function returns the blue component of the current draw color.
+**/
 int draw_get_blue();
+/** Gets the current alpha used for drawing.
+@return This function returns the current drawing alpha.
+**/
 float draw_get_alpha();
 
 
