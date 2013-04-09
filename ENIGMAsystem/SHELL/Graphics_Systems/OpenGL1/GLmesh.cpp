@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,6 +15,5 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "B2Dfunctions.h"
-#include "B2Djoints.h"
-#include "B2Dinstances.h"
+#include "GLmesh.h"
+
