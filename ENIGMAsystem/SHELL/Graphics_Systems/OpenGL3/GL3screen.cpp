@@ -17,10 +17,11 @@
 
 #include <string>
 #include <cstdio>
-#include "OpenGL3Headers.h"
-#include "GL3background.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLbackground.h"
 #include "GL3screen.h"
 #include "GL3d3d.h"
+#include "../General/GLbinding.h"
 
 using namespace std;
 
@@ -326,7 +327,6 @@ void screen_redraw()
     }
 }
 
-#include "binding.h"
 void screen_init()
 {
     texture_reset();

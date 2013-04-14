@@ -33,7 +33,7 @@
 
 #ifndef __GLSHAPESH_
 #define __GLSHAPESH_
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 GLfloat* block_vertices(double x1, double y1, double z1, double x2, double y2, double z2);
 GLfloat* block_indices(double x1, double y1, double z1, double x2, double y2, double z2);
 #endif

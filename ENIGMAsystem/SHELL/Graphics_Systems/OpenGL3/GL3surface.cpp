@@ -15,13 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 using namespace std;
 #include <cstddef>
 #include <iostream>
 #include <math.h>
 
-#include "binding.h"
+#include "../General/GLbinding.h"
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
@@ -32,7 +32,7 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 extern int room_width, room_height/*, sprite_idmax*/;
-#include "GL3surface.h"
+#include "../General/GLsurface.h"
 
 #ifdef DEBUG_MODE
   #include <string>

@@ -16,9 +16,9 @@
 **/
 
 #include <math.h>
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include "GL3draw.h"
-#include "binding.h"
+#include "../General/GLbinding.h"
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"
 

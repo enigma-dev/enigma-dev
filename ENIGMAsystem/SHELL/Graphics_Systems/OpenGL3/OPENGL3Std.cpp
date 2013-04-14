@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 using namespace std;
 #include "OPENGL3Std.h"
 #include "Universal_System/var4.h"
