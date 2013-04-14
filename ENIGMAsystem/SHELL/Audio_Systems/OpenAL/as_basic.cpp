@@ -24,6 +24,7 @@
 #include <math.h>
 using std::string;
 #include "as_basic.h"
+#include "as_advanced.h"
 #include "Audio_Systems/audio_mandatory.h"
 
 #ifdef __APPLE__
