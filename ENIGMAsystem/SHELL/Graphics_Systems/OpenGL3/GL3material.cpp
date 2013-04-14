@@ -15,9 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include "GL3material.h"
-#include "binding.h"
+#include "../General/GLbinding.h"
 #include <math.h>
 
 #include <vector>

@@ -16,14 +16,14 @@
 **/
 
 #include <stdio.h>
-#include "OpenGLHeaders.h"
+#include "../General/OpenGLHeaders.h"
 #include <string.h>
 //using std::string;
-#include "GLtextures.h"
+#include "../General/GLtextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "binding.h"
+#include "../General/GLbinding.h"
 
 vector<GmTexture*> GmTextures(0);
 
@@ -148,7 +148,7 @@ namespace enigma
 
   unsigned char* graphics_get_texture_rgba(unsigned texture)
   {
-    bind_texture(texture);
+    texture_use(texture);
 
     int w,h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);

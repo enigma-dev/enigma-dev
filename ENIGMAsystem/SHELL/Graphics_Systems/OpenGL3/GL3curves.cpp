@@ -19,9 +19,9 @@
 #include <vector>
 #include <math.h>
 
-#include "OpenGL3Headers.h"
-#include "GL3colors.h"
-#include "GL3curves.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLcolors.h"
+#include "../General/GLcurves.h"
 
 #define __GETR(x) (((x & 0x0000FF))/255.0)
 #define __GETG(x) (((x & 0x00FF00)>>8)/255.0)

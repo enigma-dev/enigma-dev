@@ -17,13 +17,13 @@
 
 #include <math.h>
 #include <string>
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
-#include "GL3colors.h"
-#include "GL3font.h"
-#include "GL3textures.h"
-#include "binding.h"
+#include "../General/GLcolors.h"
+#include "../General/GLfont.h"
+#include "../General/GLtextures.h"
+#include "../General/GLbinding.h"
 
 using namespace std;
 #include "Universal_System/fontstruct.h"

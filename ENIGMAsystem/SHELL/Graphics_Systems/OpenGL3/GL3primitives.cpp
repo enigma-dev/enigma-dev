@@ -15,11 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include "GL3primitives.h"
-#include "GL3textures.h"
+#include "../General/GLtextures.h"
 #include "GL3mesh.h"
-#include "binding.h"
+#include "../General/GLbinding.h"
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"

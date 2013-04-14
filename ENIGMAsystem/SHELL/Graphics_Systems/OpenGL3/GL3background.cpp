@@ -18,9 +18,9 @@
 #include <cstddef>
 
 #include <math.h>
-#include "OpenGL3Headers.h"
-#include "GL3background.h"
-#include "GL3textures.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLbackground.h"
+#include "../General/GLtextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 
@@ -56,7 +56,7 @@ namespace enigma {
   extern size_t background_idmax;
 }
 
-#include "binding.h"
+#include "../General/GLbinding.h"
 #include <string.h> // needed for querying ARB extensions
 
 void draw_background(int back, double x, double y)

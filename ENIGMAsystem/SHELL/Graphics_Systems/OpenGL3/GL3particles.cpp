@@ -16,10 +16,10 @@
 **/
 
 #include "GL3draw.h"
-#include "GL3sprite.h"
-#include "binding.h"
-#include "GL3textures.h"
-#include "GL3colors.h"
+#include "../General/GLsprite.h"
+#include "../General/GLbinding.h"
+#include "../General/GLtextures.h"
+#include "../General/GLcolors.h"
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_sprites.h"
 #include <vector>

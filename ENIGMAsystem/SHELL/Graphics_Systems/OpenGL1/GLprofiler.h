@@ -19,6 +19,6 @@
 
 #ifndef __GLPROFILERH_
 #define __GLPROFILERH_
-#include "OpenGLHeaders.h"
+#include "../General/OpenGLHeaders.h"
 
 #endif

@@ -20,10 +20,10 @@
 #include <string>
 using std::string;
 
-#include "OpenGL3Headers.h"
-#include "GL3sprite.h"
-#include "GL3textures.h"
-#include "binding.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLsprite.h"
+#include "../General/GLtextures.h"
+#include "../General/GLbinding.h"
 
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/instance_system.h"

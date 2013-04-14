@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
-#include "GL3colors.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLcolors.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))
