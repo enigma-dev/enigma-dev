@@ -15,16 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include "GL3d3d.h"
 #include "GL3vertexbuffer.h"
-#include "GL3textures.h"
+#include "../General/GLtextures.h"
 #include "GL3mesh.h"
 #include "GL3shapes.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
-#include "binding.h"
+#include "../General/GLbinding.h"
 
 using namespace std;
 

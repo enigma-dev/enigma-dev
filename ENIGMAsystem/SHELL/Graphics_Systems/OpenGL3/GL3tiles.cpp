@@ -35,15 +35,15 @@
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 // Tile system
-#include "GL3tiles.h"
-#include "GL3tilestruct.h"
+#include "../General/GLtiles.h"
+#include "../General/GLtilestruct.h"
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
-#include "GL3background.h"
+#include "../General/GLbackground.h"
 #include "Universal_System/backgroundstruct.h"
-#include "GL3textures.h"
-#include "binding.h"
-#include "OpenGL3Headers.h"
+#include "../General/GLtextures.h"
+#include "../General/GLbinding.h"
+#include "../General/OpenGLHeaders.h"
 namespace enigma
 {
     void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)

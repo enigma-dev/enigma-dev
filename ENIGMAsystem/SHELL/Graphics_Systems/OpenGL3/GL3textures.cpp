@@ -16,14 +16,14 @@
 **/
 
 #include <stdio.h>
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include <string.h>
 //using std::string;
-#include "GL3textures.h"
+#include "../General/GLtextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "binding.h"
+#include "../General/GLbinding.h"
 
 vector<GmTexture*> GmTextures(0);
 

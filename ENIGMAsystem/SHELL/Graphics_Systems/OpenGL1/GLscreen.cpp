@@ -17,10 +17,11 @@
 
 #include <string>
 #include <cstdio>
-#include "OpenGLHeaders.h"
-#include "GLbackground.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLbackground.h"
 #include "GLscreen.h"
 #include "GLd3d.h"
+#include "../General/GLbinding.h"
 
 using namespace std;
 
@@ -299,10 +300,9 @@ void screen_redraw()
     }
 }
 
-#include "binding.h"
 void screen_init()
 {
-    untexture()
+    texture_reset()
     if (!view_enabled)
     {
         glMatrixMode(GL_PROJECTION);

@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
-#include "GLblend.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLblend.h"
 
 int draw_set_blend_mode(int mode){
 	switch (mode)

@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include <string>
 #include <stdio.h>
 using namespace std;

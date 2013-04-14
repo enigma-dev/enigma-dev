@@ -1,12 +1,12 @@
 #include "OPENGLStd.h"
-#include "GLsprite.h"
-#include "GLbackground.h"
-#include "GLtextures.h"
-#include "GLtiles.h"
+#include "../General/GLsprite.h"
+#include "../General/GLbackground.h"
+#include "../General/GLtextures.h"
+#include "../General/GLtiles.h"
 
-#include "GLfont.h"
-#include "GLcurves.h"
+#include "../General/GLfont.h"
+#include "../General/GLcurves.h"
 #ifdef TARGET_OS_MAC
-#include "GLsurface.h"
+#include "../General/GLsurface.h"
 #endif
 
