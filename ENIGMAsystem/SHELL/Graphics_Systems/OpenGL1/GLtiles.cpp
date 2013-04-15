@@ -15,6 +15,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+// Tile system
+#include "Universal_System/depth_draw.h"
+#include <algorithm>
+#include "../General/GLbackground.h"
+#include "Universal_System/backgroundstruct.h"
+#include "../General/GLtextures.h"
+#include "../General/GLtiles.h"
+#include "../General/GLtilestruct.h"
+#include "../General/GLbinding.h"
+#include "../General/OpenGLHeaders.h"
+
 #ifdef DEBUG_MODE
   #include <string>
   #include "libEGMstd.h"
@@ -34,16 +45,6 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-// Tile system
-#include "Universal_System/depth_draw.h"
-#include <algorithm>
-#include "../General/GLbackground.h"
-#include "Universal_System/backgroundstruct.h"
-#include "../General/GLtextures.h"
-#include "../General/GLtiles.h"
-#include "../General/GLtilestruct.h"
-#include "../General/GLbinding.h"
-#include "../General/OpenGLHeaders.h"
 namespace enigma
 {
     void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
