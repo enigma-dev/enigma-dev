@@ -21,3 +21,5 @@
 #include <math.h>
 using std::string;
 #include "as_advanced.h"
+
+// Move all the audio_* functions here to break that large as file down
