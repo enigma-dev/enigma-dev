@@ -30,6 +30,7 @@
 
 namespace enigma
 {
+  extern size_t background_idmax;
   struct background
   {
     int width, height;

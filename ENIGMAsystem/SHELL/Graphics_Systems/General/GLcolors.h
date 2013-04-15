@@ -97,21 +97,64 @@ int draw_get_blue();
 **/
 float draw_get_alpha();
 
-
+/** description
+@param red
+@param green
+@param blue
+@return
+**/
 int make_color_rgb(unsigned char red, unsigned char green, unsigned char blue);
+/** description
+@param r
+@param g
+@param b
+@return
+**/
 inline int make_color(unsigned char r, unsigned char g, unsigned char b)
 {
     return make_color_rgb(r,g,b);
 }
 
+/** description
+@param color
+@return 
+**/
 int color_get_red(int color);
+/** description
+@param color
+@return 
+**/
 int color_get_green(int color);
+/** description
+@param color
+@return 
+**/
 int color_get_blue(int color);
 
+/** description
+@param color
+@return 
+**/
 int color_get_hue(int color);
+/** description
+@param color
+@return 
+**/
 int color_get_value(int color);
+/** description
+@param color
+@return 
+**/
 int color_get_saturation(int color);
 
+/** description
+@param hue
+@param saturation
+@param value
+@return 
+**/
 int make_color_hsv(int hue,int saturation,int value);
 
+/** description
+**/
 void draw_unbind_all();
