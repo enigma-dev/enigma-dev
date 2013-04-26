@@ -274,7 +274,6 @@
 		<Unit filename="general/macro_integration.h" />
 		<Unit filename="general/parse_basics_old.h" />
 		<Unit filename="general/string.cpp" />
-		<Unit filename="general/textfile.cpp" />
 		<Unit filename="general/textfile.h" />
 		<Unit filename="languages/cpp/clear_cpp_editables.cpp" />
 		<Unit filename="languages/cpp/compile_cpp.cpp" />

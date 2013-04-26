@@ -21,8 +21,9 @@
 #include <cstdio>
 #include <languages/lang_CPP.h>
 
-int lang_CPP::resource_writer_cpp::module_finalize(compile_context &ctex) {
+int lang_CPP::resource_writer_cpp::module_finalize(compile_context &) {
   fwrite("\0\0\0\0res0", 8, 1, gameModule);
   fwrite(&resourceblock_start, 4, 1, gameModule);
   fclose(gameModule);
+  return 0;
 }

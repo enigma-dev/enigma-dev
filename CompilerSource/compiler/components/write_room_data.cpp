@@ -159,7 +159,7 @@ int lang_CPP::compile_writeRoomData(compile_context &ctex)
 
   wto << "} // Namespace enigma\n";
 
-  if (es->roomCount == 0)
+  if (ctex.es->roomCount == 0)
   {
     wto << "int room_first = 0;\n";
     wto << "int room_last = 0;\n";

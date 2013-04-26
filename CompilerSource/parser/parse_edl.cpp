@@ -665,7 +665,7 @@ EDL_AST::AST_Node_Statement_while*    EDL_AST::handle_while   (token_t &token) {
   bool negate;
   if (token.type == TT_WHILE) negate = false;
   else if (token.type == TT_UNTIL) negate = true;
-  else token.report_error(herr, "Parse error: `until' or `while' clause expected here");
+  else negate = false, token.report_error(herr, "Parse error: `until' or `while' clause expected here. This is a bug; please report it and the code that caused it.");
 
   token = get_next_token();
   AST_Node* cond = parse_expression(token, precedence::all);
