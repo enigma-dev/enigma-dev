@@ -267,6 +267,12 @@ boundary: 7
 # Collisions stuck here for some reason, possibly so that you
 # can deduct lives/health right before the "No more Lives" event
 
+beforecollisionautomaticcollisionhandling: 100000
+	Name: Before collision automatic collision handling
+	Mode: None
+	Default: ;
+	Instead: enigma::perform_automatic_collision_handling_before_collision_event();
+
 collision: 4
 	Group: Collision
 	Name: %1

@@ -22,6 +22,9 @@
 #ifndef _ESTRING__H
 #define _ESTRING__H
 
+#include <string>
+using std::string;
+
 string tostring(int val);
 string tostringd(double val);
 string tostringv(void* val);

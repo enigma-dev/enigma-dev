@@ -54,8 +54,10 @@ int lang_CPP::compile_writeObjectData(compile_context &ctex)
   //Object declarations: object classes/names and locals.
   ofstream wto;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
+  
     wto << gen_license;
     wto << "#include \"../Universal_System/collisions_object.h\"\n\n";
+    wto << "#include \"../Universal_System/object.h\"\n\n";
 
     // Write the script names
     wto << "// Script identifiers\n";
@@ -79,6 +81,7 @@ int lang_CPP::compile_writeObjectData(compile_context &ctex)
     }
     wto << "\n";
     wto << "namespace enigma\n{\n";
+    wto << "  extern objectstruct** objectdata;\n";
       wto << "  struct object_locals: event_parent";
         for (unsigned i = 0; i < parsed_extensions.size(); i++)
           if (parsed_extensions[i].implements != "")
@@ -138,13 +141,29 @@ int lang_CPP::compile_writeObjectData(compile_context &ctex)
               nemap[i->second->events[ii]->main_id].s = event_stacked_get_root_name(i->second->events[ii]->main_id);
             wto << "    variant myevent_" << evname << "();\n    ";
           }
+
+        /* Event Perform Code */
+        wto << "\n//Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
+
+        for (unsigned ii = 0; ii < i->second->events.size(); ii++)
+          if  (!i->second->events[ii]->code.ast.empty())
+          {
+            //Look up the event name
+            string evname = event_get_function_name(i->second->events[ii]->main_id, i->second->events[ii]->id);
+            wto << "        if (type == " << i->second->events[ii]->main_id << " && numb == " << i->second->events[ii]->id << ")\n";
+            wto << "          return myevent_" << evname << "();\n";
+          }
+
+        wto << "\n        return 0;\n      }\n";
+
+        wto << "\n    //Locals to instances of this object\n    ";
+
         if (nemap.size())
         {
           wto << "\n    \n    // Grouped event bases\n    ";
           for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
             wto << "  void myevent_" << it->second.s << "()\n      {\n" << it->second.c << "      }\n    ";
         }
-
 
         // Now we write the callable unlinker. Its job is to disconnect the instance for destroy.
         // This is an important component that tracks multiple pieces of the instance. These pieces
@@ -201,14 +220,11 @@ int lang_CPP::compile_writeObjectData(compile_context &ctex)
             wto << ", " << ci->first << "(" << format_expression(ci->second.initial_value) << ")";
           wto << "\n    {\n";
             // Sprite index
-              if (ctex.sh.funcs.find("object_set_sprite") != ctex.sh.funcs.end()) //We want to initialize
-                wto << "      sprite_index = enigma::object_table[" << i->second->properties->id << "].sprite;\n"
-                    << "      make_index = enigma::object_table[" << i->second->properties->id << "].mask;\n";
-              else
-                wto << "      sprite_index = " << i->second->properties->spriteId << ";\n"
-                    << "      mask_index = " << i->second->properties->maskId << ";\n";
-              wto << "      visible = " << i->second->properties->visible << ";\n      solid = " << i->second->properties->solid << ";\n";
-              wto << "      persistent = " << i->second->properties->persistent << ";\n";
+              wto << "      sprite_index = enigma::objectdata[" << i->second->properties->id << "]->sprite;\n"
+                     "      mask_index = enigma::objectdata[" << i->second->properties->id << "]->mask;\n";
+              wto << "      visible = enigma::objectdata[" << i->second->properties->id << "]->visible;\n"
+                     "      solid = enigma::objectdata[" << i->second->properties->id << "]->solid;\n";
+              wto << "      persistent = enigma::objectdata[" << i->second->properties->id << "]->persistent;\n";
 
 
               wto << "      activate();";
@@ -220,8 +236,9 @@ int lang_CPP::compile_writeObjectData(compile_context &ctex)
 
 
           wto << " void activate()\n    {\n";
-          // Depth
-              wto << "      depth.init(" << i->second->properties->depth << ", this);\n";
+            // Depth
+              wto << "      depth.init(enigma::objectdata[" << i->second->properties->id << "]->depth, this);\n";
+              
             // Instance system interface
               wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
               for (po_i her = i; her != ctex.parsed_objects.end(); her = ctex.parsed_objects.find(her->second->properties->parentId))
@@ -261,6 +278,24 @@ int lang_CPP::compile_writeObjectData(compile_context &ctex)
 
         wto << "  };\n";
       }
+      wto << "\n  objectstruct objs[] = {\n  ";
+      int objcunt = 0, obmx = 0;
+      for (po_i i = ctex.parsed_objects.begin(); i != ctex.parsed_objects.end(); i++, objcunt++)
+      {
+        wto << "{ " << i->second->properties->sprite_index
+            << ", " << i->second->properties->solid
+            << ", " << i->second->properties->visible
+            << ", " << i->second->properties->depth
+            << ", " << i->second->properties->persistent
+            << ", " << i->second->properties->mask_index
+            << ", " << i->second->properties->parentId
+            << ", " << i->second->properties->id << " }, ";
+        if (i->second->properties->id >= obmx)
+          obmx = i->second->properties->id;
+      }
+      wto << "  };\n";
+      wto << "  int objectcount = " << objcunt << ";\n";
+      wto << "  int obj_idmax = " << obmx+1 << ";\n";
     wto << "}\n";
   wto.close();
 
@@ -363,22 +398,23 @@ int lang_CPP::compile_writeObjectData(compile_context &ctex)
     }
     wto << "  };\n  \n";
 
-    wto << "  int script_idmax = " << scr_count << ";\n \n";
-
     cout << "DBGMSG 8" << endl;
     wto << "  void constructor(object_basic* instance_b)\n  {\n"
     "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"
     "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
     "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
+<<<<<<< HEAD
     / *instance->sprite_index = enigma::objectdata[instance->obj].sprite_index;
     instance->mask_index = enigma::objectdata[instance->obj].mask_index;
     instance->visible = enigma::objectdata[instance->obj].visible;
     instance->solid = enigma::objectdata[instance->obj].solid;
     instance->persistent = enigma::objectdata[instance->obj].persistent;
     instance->depth = enigma::objectdata[instance->obj].depth;* /
+=======
+>>>>>>> 3cc19457cf033fbb98e202aa9030f9edd5801aee
     "    \n"
     "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
-    "    instance->image_single = -1;\n    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
+    "    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
     "instancecount++;\n    instance_count++;\n  }\n}\n";
   wto.close();
 */

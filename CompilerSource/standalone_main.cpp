@@ -181,7 +181,7 @@ int main(int, char*[])
   GmObject obj = {0,0,0,0,0,0,0,0,0,0,0};
   MainEvent mev = {0,0,0};
   Event ev = {0,0};
-  ev.code = "//Haha, boobs!";
+  ev.code = "//NOTICE: test code!!!";
   ev.id = 10; // EV_MOUSE_ENTER
   
   mev.id = 6; // EV_MOUSE

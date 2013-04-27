@@ -177,3 +177,6 @@ string parameter_string(unsigned num);
 int parameter_count();
 
 #define enigmacatchmouse() //Linux should hopefully do that automatically.
+
+int display_get_width();
+int display_get_height();

@@ -1,0 +1,54 @@
+Same as Unity3D, they offer the source code for download here http://unity3d.com/unity/download/archive
+They are written in CG
+
+Normal Shader Family
+
+    Vertex-Lit
+    Diffuse
+    Specular
+    Bumped Diffuse
+    Bumped Specular
+    Parallax Diffuse
+    Parallax Bumped Specular
+    Decal
+    Diffuse Detail 
+
+Transparent Shader Family
+
+    Transparent Vertex-Lit
+    Transparent Diffuse
+    Transparent Specular
+    Transparent Bumped Diffuse
+    Transparent Bumped Specular
+    Transparent Parallax Diffuse
+    Transparent Parallax Specular 
+
+Transparent Cutout Shader Family
+
+    Transparent Cutout Vertex-Lit
+    Transparent Cutout Diffuse
+    Transparent Cutout Specular
+    Transparent Cutout Bumped Diffuse
+    Transparent Cutout Bumped Specular 
+
+Self-Illuminated Shader Family
+
+    Self-Illuminated Vertex-Lit
+    Self-Illuminated Diffuse
+    Self-Illuminated Specular
+    Self-Illuminated Normal mapped Diffuse
+    Self-Illuminated Normal mapped Specular
+    Self-Illuminated Parallax Diffuse
+    Self-Illuminated Parallax Specular 
+
+Reflective Shader Family
+
+    Reflective Vertex-Lit
+    Reflective Diffuse
+    Reflective Specular
+    Reflective Bumped Diffuse
+    Reflective Bumped Specular
+    Reflective Parallax Diffuse
+    Reflective Parallax Specular
+    Reflective Normal Mapped Unlit
+    Reflective Normal mapped Vertex-lit 

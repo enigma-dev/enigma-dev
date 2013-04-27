@@ -82,24 +82,6 @@ inline void writef(float x, FILE *f) {
 #include <general/estring.h>
 #include <parser/parser_components.h>
 
-string string_replace_all(string str,string substr,string nstr)
-{
-  pt pos=0;
-  while ((pos=str.find(substr,pos)) != string::npos)
-  {
-    str.replace(pos,substr.length(),nstr);
-    pos+=nstr.length();
-  }
-  return str;
-}
-
-string toUpper(string x) {
-  string res = x;
-  for (size_t i = 0; i < res.length(); i++)
-    res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i];
-  return res;
-}
-
 #include "System/builtins.h"
 
 // modes: 0=run, 1=debug, 2=design, 3=compile
@@ -123,8 +105,9 @@ int compile(EnigmaStruct *es, const char* exe_filename, int mode)
   }
 
   edbg << "Building for mode (" << mode << ")" << flushl;
+  
   compile_context ctex; // This baby holds everything about our compile process
-   
+  
   // Re-establish ourself
   // Read the global locals: locals that will be included with each instance
   {
@@ -157,21 +140,19 @@ int compile(EnigmaStruct *es, const char* exe_filename, int mode)
   if (es->fileVersion != 800)
     edbg << "Incorrect version. File is too " << ((es->fileVersion > 800)?"new":"old") << " for this compiler. Continuing anyway, because this number is always wrong.";
 
-
   /* *\\\  Segment One: This segment of the compile process is responsible for
   *  *||| translating the code into C++. Basically, anything essential to the
   \* *///  compilation of said code is dealt with during this segment.
 
-  ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.
+  // The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.
 
-
-  //First, we make a space to put our globals.
+  // First, we make a space to put our globals.
   jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
 
   idpr("Copying resources",1);
 
-  //Next, add the resource names to that list
-  edbg << "COPYING SOME F*CKING RESOURCES:" << flushl;
+  // Next, add the resource names to that list
+  edbg << "Copying resources:" << flushl;
 
   edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
   for (int i = 0; i < es->spriteCount; i++) {
@@ -272,6 +253,7 @@ int compile(EnigmaStruct *es, const char* exe_filename, int mode)
   //NEXT FILE ----------------------------------------
   //Resource names: Defines integer constants for all resources.
   edbg << "Writing resource names and maxima" << flushl;
+  
   current_language->compile_write_resource_names(ctex);
   
   idpr("Performing Secondary Parsing and Writing Globals",25);

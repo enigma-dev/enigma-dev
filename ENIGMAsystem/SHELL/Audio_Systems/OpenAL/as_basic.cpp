@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura Robert B. Colton 
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton 
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -24,6 +24,7 @@
 #include <math.h>
 using std::string;
 #include "as_basic.h"
+#include "as_advanced.h"
 #include "Audio_Systems/audio_mandatory.h"
 
 #ifdef __APPLE__
@@ -58,7 +59,6 @@ struct sound_instance {
   ALuint source; 
   int soundIndex; 
   double priority; 
-  bool playing;
   int type;
   sound_instance(ALint alsource, int sound_id): source(alsource), soundIndex(sound_id) {}
   sound_instance() {}
@@ -397,27 +397,27 @@ bool sound_pause(int sound) // Returns whether the sound is still playing
 {
   for(size_t i = 1; i < sound_sources.size(); i++) {
     if (sound_sources[i]->soundIndex == sound) {
-      return sound_sources[i]->playing = !alurePauseSource(sound_sources[i]->source);
+      return alurePauseSource(sound_sources[i]->source);
     }
   }
 }
 void sound_pause_all()
 {
   for(size_t i = 1; i < sound_sources.size(); i++) {
-    sound_sources[i]->playing = !alurePauseSource(sound_sources[i]->source);
+    alurePauseSource(sound_sources[i]->source);
   }
 }
 void sound_stop(int sound) {
   for(size_t i = 1; i < sound_sources.size(); i++) {
     if (sound_sources[i]->soundIndex == sound) {
-      sound_sources[i]->playing = !alureStopSource(sound_sources[i]->source, AL_FALSE);
+      alureStopSource(sound_sources[i]->source, AL_FALSE);
     }
   }
 }
 void sound_stop_all()
 {
   for(size_t i = 1; i < sound_sources.size(); i++) {
-    sound_sources[i]->playing = !alureStopSource(sound_sources[i]->source, AL_FALSE);
+    alureStopSource(sound_sources[i]->source, AL_FALSE);
   }
 }
 void sound_delete(int sound) {
@@ -448,19 +448,30 @@ bool sound_resume(int sound) // Returns whether the sound is playing
 {
   for(size_t i = 1; i < sound_sources.size(); i++) {
     if (sound_sources[i]->soundIndex == sound) {
-      return sound_sources[i]->playing = alureResumeSource(sound_sources[i]->source);
+      return alureResumeSource(sound_sources[i]->source);
     }
   }
 }
 void sound_resume_all()
 {
   for(size_t i = 1; i < sound_sources.size(); i++) {
-    sound_sources[i]->playing = alureResumeSource(sound_sources[i]->source);
+    alureResumeSource(sound_sources[i]->source);
   }
 }
 bool sound_isplaying(int sound) {
-  get_sound(snd,sound,false);
-  return snd->playing;
+  // test for channels playing the sound
+  for(size_t i = 1; i < sound_sources.size(); i++) 
+  {
+    if (sound_sources[i]->soundIndex == sound) {
+      ALint state;
+      alGetSourcei(sound_sources[i]->source, AL_SOURCE_STATE, &state);
+      if (state == AL_PLAYING)
+      { 
+        return true;
+      }
+    }
+  }  
+  return false;
 }
 bool sound_ispaused(int sound) {
   return !enigma::sounds[sound]->idle and !enigma::sounds[sound]->playing;
@@ -570,8 +581,19 @@ bool audio_exists(int sound)
   return unsigned(sound) < enigma::sound_idmax && bool(enigma::sounds[sound]);
 }
 bool audio_is_playing(int sound) {
-  get_sound(snd,sound,false);
-  return snd->playing;
+  // test for channels playing the sound
+  for(size_t i = 0; i < sound_sources.size(); i++) 
+  {
+    if (sound_sources[i]->soundIndex == sound) {
+      ALint state;
+      alGetSourcei(sound_sources[i]->source, AL_SOURCE_STATE, &state);
+      if (state == AL_PLAYING)
+      { 
+        return true;
+      }
+    }
+  }  
+  return false;
 }
 
 void audio_play_music(int sound, bool loop) 
@@ -581,7 +603,7 @@ void audio_play_music(int sound, bool loop)
     {
       alGenSources(1, &sound_sources[0]->source);
     }
-    get_sound(snd,sound,0);
+    get_sound(snd,sound,);
     alSourcei(sound_sources[0]->source, AL_BUFFER, snd->buf[0]);
     alSourcei(sound_sources[0]->source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(sound_sources[0]->source, AL_REFERENCE_DISTANCE, 1);
@@ -655,45 +677,42 @@ void audio_resume_sound(int index)
 void audio_stop_sound(int index)
 {
   alureStopSource(sound_sources[index]->source, AL_TRUE);
-  sound_sources[index]->playing = false;
 }
 
 void audio_stop_all()
 {
   for(size_t i = 1; i < sound_sources.size(); i++) {
       alureStopSource(sound_sources[i]->source, AL_FALSE);
-      sound_sources[i]->playing = false;
   }
 }
 
 void audio_stop_music()
 {
   alureStopSource(sound_sources[0]->source, AL_FALSE);
-  sound_sources[0]->playing = false;
 }
 
 void audio_pause_all()
 {
   for(size_t i = 1; i < sound_sources.size(); i++) {
-      sound_sources[i]->playing = !alurePauseSource(sound_sources[i]->source);
+      alurePauseSource(sound_sources[i]->source);
   }
 }
 
 void audio_pause_music()
 {
-  sound_sources[0]->playing = !alurePauseSource(sound_sources[0]->source);
+  alurePauseSource(sound_sources[0]->source);
 }
 
 void audio_resume_all()
 {
   for(size_t i = 1; i < sound_sources.size(); i++) {
-      sound_sources[i]->playing = alureResumeSource(sound_sources[i]->source);
+      alureResumeSource(sound_sources[i]->source);
   }
 }
 
 void audio_resume_music()
 {
-  sound_sources[0]->playing = alureResumeSource(sound_sources[0]->source);
+  alureResumeSource(sound_sources[0]->source);
 }
 
 void audio_music_seek(double offset) 
@@ -789,7 +808,7 @@ void audio_channel_num(int num) {
 
 int audio_system()
 {
-  // return audio_old_system or audio_new_system
+  return audio_new_system;
 }
 
 int audio_add(string fname, int type)
@@ -846,7 +865,7 @@ int audio_emitter_create()
 
 bool audio_emitter_exists(int index)
 {
-  return (index < sound_emitters.size()) && bool(sound_emitters[index]);
+  return true;//((index < sound_emitters.size()) && (sound_emitters[index]));
 }
 
 void audio_emitter_falloff(int emitter, double falloff_ref, double falloff_max, double falloff_factor)

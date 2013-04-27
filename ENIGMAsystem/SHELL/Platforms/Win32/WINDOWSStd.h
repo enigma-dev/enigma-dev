@@ -36,8 +36,4 @@ void enigma_catchmouse_backend(bool x);
 #define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
 #include "WINDOWSwindow.h"
 
-#if FONTPOLYS
-#include "WINDOWSfonts.h"
-#endif
-
 #include "externals.h"

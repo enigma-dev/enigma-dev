@@ -62,7 +62,11 @@ int lang_CPP::compile_writeRoomData(compile_context &ctex)
         ctex.es->rooms[i].tiles[ii].height << "," <<
         ctex.es->rooms[i].tiles[ii].width << "," <<
         ctex.es->rooms[i].tiles[ii].roomX << "," <<
-        ctex.es->rooms[i].tiles[ii].roomY << "},";
+        ctex.es->rooms[i].tiles[ii].roomY << "," <<
+        /*ctex.es->rooms[i].tiles[ii].xscale*/1 << "," <<
+        /*ctex.es->rooms[i].tiles[ii].yscale*/1 << "," <<
+        /*ctex.es->rooms[i].tiles[ii].alpha*/"1.0" << "," <<
+        /*ctex.es->rooms[i].tiles[ii].color*/0xFFFFFF << "},";
         if (++modme % 16 == 0) wto << "\n        ";
       if (ctex.es->rooms[i].tiles[ii].id > room_hightileid)
         room_hightileid = ctex.es->rooms[i].tiles[ii].id;
@@ -103,6 +107,7 @@ int lang_CPP::compile_writeRoomData(compile_context &ctex)
 
     << ctex.es->rooms[i].width << ", " << ctex.es->rooms[i].height << ", " // Width and Height
     << ctex.es->rooms[i].speed << ",  "  // Speed
+    << ctex.es->rooms[i].persistent << ",  "  // Persistent
 
     << (ctex.es->rooms[i].enableViews ? "true" : "false") << ", {\n"; // Views Enabled
 
@@ -120,7 +125,7 @@ int lang_CPP::compile_writeRoomData(compile_context &ctex)
       << ctex.es->rooms[i].views[ii].objectId << ",   " // Object2Follow
 
       << ctex.es->rooms[i].views[ii].borderH << ", " << ctex.es->rooms[i].views[ii].borderV << ",   " //Hborder and Vborder
-      << ctex.es->rooms[i].views[ii].speedH<< ", " << ctex.es->rooms[i].views[ii].speedV //Hborder and Vborder
+      << ctex.es->rooms[i].views[ii].speedH << ", " << ctex.es->rooms[i].views[ii].speedV //Hspeed and Vspeed
 
       << " },\n";
     }
@@ -138,8 +143,10 @@ int lang_CPP::compile_writeRoomData(compile_context &ctex)
         << ctex.es->rooms[i].backgroundDefs[ii].vSpeed << ",   " // VSpeed
         << (ctex.es->rooms[i].backgroundDefs[ii].tileHoriz ? "true" : "false") << ",   " // tileHor
         << (ctex.es->rooms[i].backgroundDefs[ii].tileVert ? "true" : "false") << ",   " // tileVert
-        << (ctex.es->rooms[i].backgroundDefs[ii].stretch ? "true" : "false") // Stretch
-        << " },\n";
+        << (ctex.es->rooms[i].backgroundDefs[ii].stretch ? "true" : "false") << ",   " // Stretch
+        // TODO: Background alpha and color?
+        << /*ctex.es->rooms[i].backgroundDefs[ii].alpha*/1 << ",   " // Alpha
+        << /*ctex.es->rooms[i].backgroundDefs[ii].color*/0xFFFFFF << " },\n";  // Color
      }
     wto <<
     "      }," //End of Backgrounds
@@ -155,7 +162,7 @@ int lang_CPP::compile_writeRoomData(compile_context &ctex)
   }
 
   wto << "  };\n  \n"; // End of all rooms
-  wto << "  int room_max = " <<  room_highid << " + 1;\n  int maxid = " << room_highinstid << " + 1;\n";
+  wto << "  int maxid = " << room_highinstid << " + 1;\n  int maxtileid = " << room_hightileid << " + 1;\n";
 
   wto << "} // Namespace enigma\n";
 

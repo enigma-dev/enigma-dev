@@ -17,13 +17,13 @@ struct GmObject
   String name;
   int id;
   
-  int spriteId;
+  int sprite_index;
   boolean solid;
   boolean visible;
   int depth;
   boolean persistent;
   int parentId;
-  int maskId;
+  int mask_index;
 
   MainEvent *mainEvents;
   int mainEventCount;

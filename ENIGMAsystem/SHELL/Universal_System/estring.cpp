@@ -66,6 +66,7 @@ string string_format(double val, unsigned tot, unsigned dec)
 }
 
 string string_copy(string str, int index, int count) {
+	index = index < 0 ? 0 : index;
 	return (size_t)index > str.length()? "": str.substr(index < 2? 0: index-1, count < 1? 0: count);
 }
 
@@ -215,13 +216,4 @@ string filename_change_ext(string fname, string newext)
     if (fp == string::npos)
         return fname + newext;
     return fname.replace(fp,fname.length(),newext);
-}
-
-extern string working_directory;
-string get_working_directory()
-{
-    if (working_directory == "")
-        return "";
-
-    return working_directory + "\\";
 }

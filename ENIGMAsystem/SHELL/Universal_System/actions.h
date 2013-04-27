@@ -272,10 +272,10 @@ static inline void action_show_info() {show_info();}
 
 #define action_restart_game game_restart
 #define action_message(message) show_message(message)
-#define exit return 0;
-#define globalvar global var
 #define action_if_sound sound_isplaying
 #define action_end_sound sound_stop
+#define exit return 0;
+#define globalvar global var
 
 inline void action_create_object(const int object, const double x, const double y)
 {
@@ -559,12 +559,32 @@ inline void action_create_object_motion(int object, double x, double y, double s
     }
 }
 
-inline int draw_self()
+int draw_self()
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     draw_sprite_ext(inst->sprite_index, inst->image_index, inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
     return 0;
 }  //actions seemed the best place for this
+
+inline int action_draw_self()
+{
+    return draw_self();
+}
+
+inline void action_sprite_transform(int xscale, int yscale, double angle, int mirror)
+{
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    inst->image_xscale = (mirror==1 || mirror==3)?-xscale:xscale;
+    inst->image_yscale = (mirror==2 || mirror==3)?-yscale:yscale;
+    inst->image_angle = angle;
+}
+
+inline void action_sprite_color(int color, int alpha)
+{
+    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    inst->image_blend = color;
+    inst->image_alpha = alpha;
+}
 
 inline void action_fullscreen(int action)
 {
@@ -602,4 +622,128 @@ inline void action_path_position(double position, bool relative)
 inline void action_path_speed(double speed, bool relative)
 {
     path_set_speed(speed, relative);
+}
+
+
+/* Temp location fpr event perform stuff */ //TODO: Move
+
+enum
+{
+    ev_create       = 0,
+    ev_destroy      = 1,
+    ev_alarm        = 2,
+    ev_step         = 3,
+    ev_collision    = 4,
+    ev_keyboard     = 5,
+    ev_mouse        = 6,
+    ev_other        = 7,
+    ev_draw         = 8,
+    ev_keypress     = 9,
+    ev_keyrelease   = 10,
+    ev_trigger      = 11
+};
+
+enum
+{
+    ev_left_button              = 0,
+    ev_right_button             = 1,
+    ev_middle_button            = 2,
+    ev_no_button                = 3,
+    ev_left_press               = 4,
+    ev_right_press              = 5,
+    ev_middle_press             = 6,
+    ev_left_release             = 7,
+    ev_right_release            = 8,
+    ev_middle_release           = 9,
+    ev_mouse_enter              = 10,
+    ev_mouse_leave              = 11,
+    ev_joystick1_left           = 16,
+    ev_joystick1_right          = 17,
+    ev_joystick1_up             = 18,
+    ev_joystick1_down           = 19,
+    ev_joystick1_button1        = 21,
+    ev_joystick1_button2        = 22,
+    ev_joystick1_button3        = 23,
+    ev_joystick1_button4        = 24,
+    ev_joystick1_button5        = 25,
+    ev_joystick1_button6        = 26,
+    ev_joystick1_button7        = 27,
+    ev_joystick1_button8        = 28,
+    ev_joystick2_left           = 31,
+    ev_joystick2_right          = 32,
+    ev_joystick2_up             = 33,
+    ev_joystick2_down           = 34,
+    ev_joystick2_button1        = 36,
+    ev_joystick2_button2        = 37,
+    ev_joystick2_button3        = 38,
+    ev_joystick2_button4        = 39,
+    ev_joystick2_button5        = 40,
+    ev_joystick2_button6        = 41,
+    ev_joystick2_button7        = 42,
+    ev_joystick2_button8        = 43,
+    ev_global_left_button       = 50,
+    ev_global_right_button      = 51,
+    ev_global_middle_button     = 52,
+    ev_global_left_press        = 53,
+    ev_global_right_press       = 54,
+    ev_global_middle_press      = 55,
+    ev_global_left_release      = 56,
+    ev_global_right_release     = 57,
+    ev_global_middle_release    = 58,
+    ev_mouse_wheel_up           = 60,
+    ev_mouse_wheel_down         = 61
+};
+
+enum
+{
+    ev_outside          = 0,
+    ev_boundary         = 1,
+    ev_game_start       = 2,
+    ev_game_end         = 3,
+    ev_room_start       = 4,
+    ev_room_end         = 5,
+    ev_no_more_lives    = 6,
+    ev_animation_end    = 7,
+    ev_end_of_path      = 8,
+    ev_no_more_health   = 9,
+    ev_user0            = 10,
+    ev_user1            = 11,
+    ev_user2            = 12,
+    ev_user3            = 13,
+    ev_user4            = 14,
+    ev_user5            = 15,
+    ev_user6            = 16,
+    ev_user7            = 17,
+    ev_user8            = 18,
+    ev_user9            = 19,
+    ev_user10           = 20,
+    ev_user11           = 21,
+    ev_user12           = 22,
+    ev_user13           = 23,
+    ev_user14           = 24,
+    ev_user15           = 25,
+    ev_close_button     = 30
+};
+
+enum
+{
+    ev_step_normal  = 0,
+    ev_step_begin   = 1,
+    ev_step_end     = 2
+};
+
+namespace enigma
+{
+    int initialize_everything();
+    variant ev_perf(int type, int numb);
+}
+
+variant event_perform(int type, int numb)
+{
+    return enigma::ev_perf(type, numb);
+}
+
+variant event_user(int numb)
+{
+    return event_perform(ev_other, numb + ev_user0);
 }

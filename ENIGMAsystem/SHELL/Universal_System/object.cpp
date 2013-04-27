@@ -27,6 +27,7 @@
 namespace enigma
 {
     extern int maxid;
+    objectstruct** objectdata;
     int instancecount = 0;
     int id_current =0;
 
@@ -45,60 +46,121 @@ namespace enigma
     object_basic::object_basic(): id(0), object_index(-4) {}
     object_basic::object_basic(int uid, int uoid): id(uid), object_index(uoid) {}
     object_basic::~object_basic() {}
+
+    extern objectstruct objs[];
+    extern int obj_idmax;
+
+    void objectdata_load()
+    {
+        objectdata = new objectstruct*[obj_idmax];
+        for (int i = 0; i < objectcount; i++)
+            objectdata[objs[i].id] = &objs[i];
+    }
 }
 
-/*
-extern int object_idmax;
-
-#ifdef DEBUG_MODE
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_object(obj,id) \
-    if (id < -1 or size_t(id) > enigma::object_idmax or !enigma::objectdata[id]) { \
-      show_error("Cannot access object with id " + toString(id), false); \
-      return 0; \
-    } const enigma::object *const obj = enigma::objectdata[id];
+#if SHOWERRORS
+  #define errcheck(objid,err) \
+	if (objid < 0 or objid >= enigma::objectcount or !enigma::objectdata[objid]) \
+		return (show_error(err,0), 0)
+  #define errcheck(objid,err) \
+	if (objid < 0 or objid >= enigma::objectcount or !enigma::objectdata[objid]) \
+		show_error(err,0)
 #else
-  #define get_object(obj,id) \
-    const enigma::object *const obj = enigma::objectdata[id];
+  #define errcheck(objid,err)
+  #define errcheck_v(objid,err)
 #endif
 
-bool object_exists(unsigned objectid)
+bool object_exists(int objid)
 {
-    return objectid < enigma::object_idmax && enigma::objectdata[objectid];
+    return ((objid >= 0) && (objid < enigma::objectcount) && bool(enigma::objectdata[objid]));
 }
 
-int object_get_depth(unsigned id)
+void object_set_depth(int objid, int val)
 {
-    get_object(obj,id);
-    return obj.depth;
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->depth = val;
 }
 
-int object_get_mask(unsigned id)
+void object_set_mask(int objid, int val)
 {
-    get_object(obj,id);
-    return obj.maskId;
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->mask = val;
 }
 
-int object_get_parent(unsigned id)
+void object_set_persistent(int objid, bool val)
 {
-    get_object(obj,id);
-    return obj.parentId;
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->persistent = val;
 }
 
-bool object_get_persistent(unsigned id)
+void object_set_solid(int objid, bool val)
 {
-    get_object(obj,id);
-    return obj.persistent;
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->solid = val;
 }
 
-bool object_get_solid(unsigned id)
+void object_set_sprite(int objid, int val)
 {
-    get_object(obj,id);
-    return obj.solid;
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->sprite = val;
 }
 
-bool object_get_visible(unsigned id)
+void object_set_visible(int objid, bool val)
 {
-    get_object(obj,id);
-    return obj.visible;
-}*/
+	errcheck_v(objid,"Object doesn't exist");
+	enigma::objectdata[objid]->visible = val;
+}
+
+int object_get_depth(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->depth;
+}
+
+int object_get_mask(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->mask;
+}
+
+int object_get_parent(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->parent;
+}
+
+bool object_get_persistent(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->persistent;
+}
+
+bool object_get_solid(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->solid;
+}
+
+int object_get_sprite(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->sprite;
+}
+
+bool object_get_visible(int objid)
+{
+	errcheck(objid,"Object doesn't exist");
+	return enigma::objectdata[objid]->visible;
+}
+
+bool object_is_ancestor(int objid, int acid)
+{
+	errcheck(objid,"Object doesn't exist");
+	errcheck(acid,"Anchestor id doesn't exist");
+	do
+    {
+        objid = enigma::objectdata[objid]->parent;
+    }
+	while (!(objid == -100 || objid == acid));
+	return (objid == acid);
+}

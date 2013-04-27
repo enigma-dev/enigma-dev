@@ -58,11 +58,6 @@ namespace enigma //TODO: Find where this belongs
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-
-  #ifdef ENIGMA_GS_OPENGL
-  void EnableDrawing (HGLRC *hRC);
-  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-  #endif
 }
 
 namespace enigma {
@@ -84,7 +79,7 @@ namespace enigma {
   LARGE_INTEGER time_current_pc;
   LARGE_INTEGER frequency_pc;
   // Timing functions.
-  long clamp(long value, long min, long max)
+  long clamp(LONGLONG value, long min, long max)
   {
     if (value < min) {
       return min;
@@ -92,7 +87,7 @@ namespace enigma {
     if (value > max) {
       return max;
     }
-    return value;
+    return long(value);
   }
   void sleep_for_framerate(int rs)
   {
@@ -130,7 +125,7 @@ namespace enigma {
     if (use_pc) {
       return clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart)*1000000/frequency_pc.QuadPart, 0, 1000000);
     }
-    else {  
+    else {
       return clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart)/10, 0, 1000000);
     }
   }
@@ -139,7 +134,7 @@ namespace enigma {
     if (use_pc) {
       return clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart)*1000000/frequency_pc.QuadPart, 0, 1000000);
     }
-    else {  
+    else {
       return clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart)/10, 0, 1000000);
     }
   }
@@ -222,7 +217,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     //Main loop
 
     // Initialize timing.
-    
+
     UINT minimum_resolution = 1;
     TIMECAPS timer_resolution_info;
     if (timeGetDevCaps(&timer_resolution_info, sizeof(timer_resolution_info)) == MMSYSERR_NOERROR) {
@@ -234,6 +229,9 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     int frames_count = 0;
 
       char bQuit=0;
+      long spent_mcs;
+      long remaining_mcs;
+      long needed_mcs;
       while (!bQuit)
       {
           using enigma::current_room_speed;
@@ -252,9 +250,9 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
 
           if (current_room_speed > 0) {
-              long spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
-              long remaining_mcs = 1000000 - spent_mcs;
-              long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+              spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+              remaining_mcs = 1000000 - spent_mcs;
+              needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
               const int catchup_limit_ms = 50;
               if (needed_mcs > remaining_mcs + catchup_limit_ms*1000) {
                 // If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
@@ -263,9 +261,9 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                 // without any sleep.
                 // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
                 enigma::increase_offset_slowing(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
-                long spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
-                long remaining_mcs = 1000000 - spent_mcs;
-                long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+                spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+                remaining_mcs = 1000000 - spent_mcs;
+                needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
               }
               if (remaining_mcs > needed_mcs) {
                   Sleep(1);
@@ -318,6 +316,13 @@ int parameter_count()
   return enigma::main_argc;
 }
 
+extern string working_directory;
+bool set_working_directory()
+{
+    SetCurrentDirectory(working_directory.c_str());
+    return 1;
+}
+
 unsigned long long disk_size(std::string drive)
 {
 	DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
@@ -366,7 +371,33 @@ void set_program_priority(int value)
 
 void execute_shell(std::string fname, std::string args)
 {
-	ShellExecute(enigma::hWndParent, NULL, fname.c_str(), args.c_str(), get_working_directory().c_str(), SW_SHOW);
+    TCHAR cDir[MAX_PATH];
+    GetCurrentDirectory(MAX_PATH, cDir);
+	ShellExecute(enigma::hWndParent, NULL, fname.c_str(), args.c_str(), cDir, SW_SHOW);
+}
+
+void execute_program(std::string fname, std::string args, bool wait)
+{
+    SHELLEXECUTEINFO lpExecInfo;
+      lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
+      lpExecInfo.lpFile = fname.c_str();
+      lpExecInfo.fMask=SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
+      lpExecInfo.hwnd = enigma::hWndParent;
+      lpExecInfo.lpVerb = "open";
+      lpExecInfo.lpParameters = args.c_str();
+      TCHAR cDir[MAX_PATH];
+      GetCurrentDirectory(MAX_PATH, cDir);
+      lpExecInfo.lpDirectory = cDir;
+      lpExecInfo.nShow = SW_SHOW;
+      lpExecInfo.hInstApp = (HINSTANCE) SE_ERR_DDEFAIL ;   //WINSHELLAPI BOOL WINAPI result;
+      ShellExecuteEx(&lpExecInfo);
+
+      //wait until a file is finished printing
+      if (wait && lpExecInfo.hProcess != NULL)
+      {
+        ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
+        ::CloseHandle(lpExecInfo.hProcess);
+      }
 }
 
 std::string environment_get_variable(std::string name)

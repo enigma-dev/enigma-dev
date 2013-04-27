@@ -25,9 +25,11 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "var4.h"
 #ifndef room_system_h
 #define room_system_h
+
+#include "var4.h"
+
 int room_goto(int roomind);
 int room_restart();
 string room_get_name(int index);
@@ -38,12 +40,36 @@ int room_goto_next();
 int room_next(int num);
 int room_previous(int num);
 bool room_exists(unsigned roomid);
+int room_set_width(int indx, int wid);
+int room_set_height(int indx, int hei);
+int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha = 1, int color = 0xFFFFFF);
+int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
+int room_set_background_color(int indx, int col, bool show);
+int room_set_caption(int indx, string str);
+int room_set_persistent(int indx, bool pers);
+int room_set_view_enabled(int indx, int val);
+int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color = 0xFFFFFF);
+inline int room_tile_add(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth)
+{
+    return room_tile_add_ext(indx, bck, left, top, width, height, x, y, depth, 1, 1, 1, 0xFFFFFF);
+}
+int room_tile_clear(int indx);
+int room_instance_add(int indx, int x, int y, int obj);
+int room_instance_clear(int indx);
+int room_add();
+int room_duplicate(int indx, bool ass = false, int assroom = -1);
+inline int room_assign(int indx, int roomindx)
+{
+    return room_duplicate(indx, true, roomindx);
+}
+
+int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
 
 extern int background_color;
 extern int background_showcolor;
 
 extern var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed,background_alpha;
+background_vtiled, background_hspeed, background_vspeed,background_alpha,background_coloring,background_width,background_height,background_xscale,background_yscale;
 
 extern int room_height;
 extern int room_persistent;
@@ -69,7 +95,9 @@ namespace enigma
     int id,obj,x,y;
   };
     struct tile {
-        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
+        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY,xscale,yscale;
+        double alpha;
+        int color;
     };
   struct viewstruct
   {
@@ -86,6 +114,8 @@ namespace enigma
     int area_x, area_y, horSpeed, verSpeed;
     int tileHor, tileVert;
     int stretch;
+    double alpha;
+    int color;
   };
   struct roomstruct
   {
@@ -97,12 +127,10 @@ namespace enigma
     int backcolor;
     bool drawbackcolor;
     void(*createcode)();
-    int width, height, spd;
+    int width, height, spd, persistent;
     int views_enabled;
-    viewstruct views[8];
-
-    backstruct backs[8];
-
+    viewstruct views[10];
+    backstruct backs[10];
     int instancecount;
     inst *instances;
     int tilecount;
@@ -111,7 +139,7 @@ namespace enigma
     void gotome(bool=false);
   };
   void room_update();
-  extern int room_max, maxid;
+  extern int maxid, maxtileid;
   extern int room_switching_id; // -1 indicates no room set.
   void rooms_switch();
   void rooms_load();

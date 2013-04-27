@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: OpenGL 1.0
+Identifier: OpenGL1
+Description: Render using OpenGL 1.0, offering high portability but requiring specific graphics card features to run. May not work on never graphics hardware.
+Author: Josh Ventura, serprex
+
+Depends:
+	Windowing: xlib, Win32, Cocoa
+
+Represents:
+	Build-platforms: Windows, Linux, MacOSX

@@ -32,7 +32,6 @@ namespace enigma
     //Other attributes that logically don't belong here
         double image_alpha;
         int    image_blend;
-        int    image_single;
     //Constructors
       object_transform();
       object_transform(unsigned x, int y);
