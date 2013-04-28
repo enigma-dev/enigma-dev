@@ -27,7 +27,10 @@ namespace enigma
     void function(variant oldval);
   };
 }
-extern enigma::livesv lives;
+namespace enigma_user
+{
+  extern enigma::livesv lives;
+}
 namespace enigma
 {
   void reset_lives();
