@@ -40,7 +40,7 @@ enum {
   noone =  -4,
   global = -5,
   local =  -7
-}
+};
 
 #include "var4.h"
 
