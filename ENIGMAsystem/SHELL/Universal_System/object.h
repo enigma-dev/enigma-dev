@@ -33,12 +33,14 @@
 #ifndef _object_h
 #define _object_h
 
-const int self =   -1;
-const int other =  -2;
-const int all =    -3;
-const int noone =  -4;
-const int global = -5;
-const int local =  -7;
+enum {
+  self =   -1,
+  other =  -2,
+  all =    -3,
+  noone =  -4,
+  global = -5,
+  local =  -7
+}
 
 #include "var4.h"
 
