@@ -1,8 +1,8 @@
 %e-yaml
 ---
 
-Name: Game-Music-Emulator
-ID: GME
+Name: GME
+ID: Game Music Emulator
 Author: Rusky
 Description: Loads emulator sounds and music using libgme.
 Default: false
