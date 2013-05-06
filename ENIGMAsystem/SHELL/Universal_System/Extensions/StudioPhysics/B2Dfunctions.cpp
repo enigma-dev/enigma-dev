@@ -19,6 +19,16 @@
 #include <stdio.h>
 //using namespace std;
 
+/*
+#include "Universal_System/Extensions/recast.h"
+#include "implement.h"
+declare_recast(enigma::extension_studiophysics);
+
+namespace enigma {
+  extension_studiophysics::extension_studiophysics() { 
+  }
+}
+*/
 #include <Box2D/Box2D.h>
 #include "B2Dfunctions.h"
 bool systemPaused = false;
@@ -48,27 +58,11 @@ void worldInstance::world_update()
   }
 }
 
-bool place_free(double x, double y)
-{
-  for (int i = 0; i < fixtures.size(); i++)
-  {
-    if (fixtures[i].body->GetFixtureList()->TestPoint(b2Vec2(x, y))){
-      return true;
-    }
-  }
-  return false;
-}
-
-bool place_meeting(double x, double y, int object)
-{
-  return false;
-}
-
 void physics_world_create(int pixeltometerscale)
 {
   /** studio's fucked up world creation just auto binds it to the current room
       thats fuckin retarded thus why i overloaded the function and provided an extra
-      function for setting the pixel to metre scale, because i refuse to write system their way
+      function for setting the pixel to metre scale
   **/
 }
 

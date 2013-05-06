@@ -14,19 +14,20 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-// Linker shit right meow...
-#include "Universal_System/instance_system_base.h"
 
-bool place_free(double x,double y);
-bool place_meeting(double x, double y, int object);
-// End of linking shit to stfu 
+#include "B2Dfunctions.h"
 
-/* Scenes */
+#include <vector>
+using std::vector;
 
-/* Fixtures */
+namespace enigma {
+  struct extension_studiophysics
+  {
+    void studiophysics_update() {
+      for (std::vector<worldInstance>::iterator it = worlds.begin(); it != worlds.end(); it++) {
+        it->world_update();
+      }
+    }
+  };
+}
 
-/* Forces */
-
-/* Joints */
-
-/* Miscellaneous */

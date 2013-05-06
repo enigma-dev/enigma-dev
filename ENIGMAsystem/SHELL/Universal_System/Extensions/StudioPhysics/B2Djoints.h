@@ -19,18 +19,24 @@
 #define _JOINTS__H
 
 #include <Box2D/Box2D.h>
+#include "B2Dfunctions.h"
 
 struct jointInstance {
-  int world;
+  int worldid;
   b2Joint* joint;
   jointInstance()
   {
+  }
+
+  ~jointInstance()
+  {
+    //worlds[worldid].world->DestroyJoint(joint);
   }
 }; 
 extern vector<jointInstance> joints;
 
 // constants for getting and setting joint data using physics_joint_get_value and physics_joint_set_value, use switch case
-// see http://enigma-dev.org/docs/Wiki/Physics_Constant, for information on what they are
+// see http://enigma-dev.org/docs/Wiki/, for information on what they are
 enum {
   phy_joint_anchor_1_x,
   phy_joint_anchor_1_y,
@@ -53,17 +59,17 @@ enum {
   phy_joint_frequency
 };
 
-/** description...
-@param world
-@return the return....
+/** Creates a new physics joint in the given world.
+@param world Index of the world.
+@return Returns the index of the newly created joint.
 **/
 int physics_joint_create(int world);
 /** description...
-@param id
+@param id Index of the joint.
 @param fixture1
 @param fixture2
 **/
-void physics_joint_distance_create(int id, int fixture1, int fixture2);
+void physics_joint_distance_create(int id, int fixture1, int fixture2,  bool collide_connected = true);
 /** description...
 @param id
 **/
