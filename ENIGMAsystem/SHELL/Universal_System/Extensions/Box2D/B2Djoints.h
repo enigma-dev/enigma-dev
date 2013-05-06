@@ -19,18 +19,24 @@
 #define _JOINTS__H
 
 #include <Box2D/Box2D.h>
+#include "B2Dfunctions.h"
 
 struct jointInstance {
-  int world;
+  int worldid;
   b2Joint* joint;
   jointInstance()
   {
   }
+
+  ~jointInstance()
+  {
+    //worlds[worldid].world->DestroyJoint(joint);
+  }
 }; 
 extern vector<jointInstance> joints;
 
-// constants for getting and setting joint data using physics_joint_get_value and physics_joint_set_value, use switch case
-// see http://enigma-dev.org/docs/Wiki/Physics_Constant, for information on what they are
+// constants for getting and setting joint data using b2d_joint_get_value and b2d_joint_set_value, use switch case
+// see http://enigma-dev.org/docs/Wiki/, for information on what they are
 enum {
   phy_joint_anchor_1_x,
   phy_joint_anchor_1_y,
@@ -53,61 +59,61 @@ enum {
   phy_joint_frequency
 };
 
-/** description...
-@param world
-@return the return....
+/** Creates a new physics joint in the given world.
+@param world Index of the world.
+@return Returns the index of the newly created joint.
 **/
-int physics_joint_create(int world);
+int b2d_joint_create(int world);
 /** description...
-@param id
+@param id Index of the joint.
 @param fixture1
 @param fixture2
 **/
-void physics_joint_distance_create(int id, int fixture1, int fixture2);
+void b2d_joint_distance_create(int id, int fixture1, int fixture2,  bool collide_connected = true);
 /** description...
 @param id
 **/
-void physics_joint_revolute_create(int id);
+void b2d_joint_revolute_create(int id);
 /** description...
 @param id
 **/
-void physics_joint_prismatic_create(int id);
+void b2d_joint_prismatic_create(int id);
 /** description...
 @param id
 **/
-void physics_joint_pulley_create(int id);
+void b2d_joint_pulley_create(int id);
 /** description...
 @param id
 **/
-void physics_joint_gear_create(int id);
+void b2d_joint_gear_create(int id);
 /** description...
 @param id
 @param fixture
 **/
-void physics_joint_mouse_create(int id, int fixture);
+void b2d_joint_mouse_create(int id, int fixture);
 /** description...
 @param id
 **/
-void physics_joint_delete(int id);
+void b2d_joint_delete(int id);
 
 /** description...
 @param id
 @param x
 @param y
 **/
-void physics_joint_set_target(int id, double x, double y);
+void b2d_joint_set_target(int id, double x, double y);
 
 /** description...
 @param id
 **/
-void physics_joint_enable_motor(int id);
+void b2d_joint_enable_motor(int id);
 /** description...
 @param id
 **/
-void physics_joint_get_value(int id);
+void b2d_joint_get_value(int id);
 /** description...
 @param id
 **/
-void physics_joint_set_value(int id);
+void b2d_joint_set_value(int id);
 
 #endif

@@ -14,4 +14,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "functions.h"
+
+#include "SB2Dfunctions.h"
+#include "SB2Djoints.h"
+#include "SB2Dinstances.h"

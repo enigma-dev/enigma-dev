@@ -27,28 +27,3 @@
 
 #include <vector>
 using std::vector;
-
-/* This is just place holder shit to get the fuckin linker shut the fuckin hell up */
-enigma::instance_t collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme)
-{
-
-}
-
-namespace enigma
-{
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
-  {
-    return 0;
-  }
-
-  void free_collision_mask(void* mask)
-  {
-  }
-
-  void perform_automatic_collision_handling_before_collision_event()
-  {
-    for (std::vector<worldInstance>::iterator it = worlds.begin(); it != worlds.end(); it++) {
-      it->world_update();
-    }
-  }
-};
