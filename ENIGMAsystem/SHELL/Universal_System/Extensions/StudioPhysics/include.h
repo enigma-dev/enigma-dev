@@ -15,6 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "B2Dfunctions.h"
-#include "B2Djoints.h"
-#include "B2Dinstances.h"
+#include "SB2Dfunctions.h"
+#include "SB2Djoints.h"
+#include "SB2Dinstances.h"

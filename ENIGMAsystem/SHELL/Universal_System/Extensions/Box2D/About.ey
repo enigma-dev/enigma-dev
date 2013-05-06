@@ -1,0 +1,14 @@
+%E-YAML
+---
+
+Name: Box2DPhysics
+ID: Box2D Physics
+Description: Physics simulation using the Box2D physics engine.
+Default: false
+Build-date: 5/05/2013
+Icon: b2dlogo.png
+
+Depends: None
+Dependencies: None
+Implement: extension_box2dphysics
+

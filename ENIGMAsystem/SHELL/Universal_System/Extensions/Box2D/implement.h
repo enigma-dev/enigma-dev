@@ -15,15 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "SB2Dfunctions.h"
+#include "B2Dfunctions.h"
 
 #include <vector>
 using std::vector;
 
 namespace enigma {
-  struct extension_studiophysics
+  struct extension_box2dphysics
   {
-    void studiophysics_update() {
+    void box2dphysics_update() {
       for (std::vector<worldInstance>::iterator it = worlds.begin(); it != worlds.end(); it++) {
         it->world_update();
       }

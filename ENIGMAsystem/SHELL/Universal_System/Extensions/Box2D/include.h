@@ -15,19 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "SB2Dfunctions.h"
-
-#include <vector>
-using std::vector;
-
-namespace enigma {
-  struct extension_studiophysics
-  {
-    void studiophysics_update() {
-      for (std::vector<worldInstance>::iterator it = worlds.begin(); it != worlds.end(); it++) {
-        it->world_update();
-      }
-    }
-  };
-}
-
+#include "B2Dfunctions.h"
+#include "B2Djoints.h"
+#include "B2Dinstances.h"
