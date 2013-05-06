@@ -14,19 +14,6 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
 // Linker shit right meow...
 #include "Universal_System/instance_system_base.h"
-
-bool place_free(double x,double y);
-bool place_meeting(double x, double y, int object);
-// End of linking shit to stfu 
-
-/* Scenes */
-
-/* Fixtures */
-
-/* Forces */
-
-/* Joints */
-
-/* Miscellaneous */
