@@ -6,7 +6,7 @@ ID: Studio Physics
 Description: Physics compatibility with GameMaker: Studio
 Default: false
 Build-date: 5/05/2013
-Icon: gmslogo.png
+Icon: spicon.png
 
 Depends: None
 Dependencies: None
