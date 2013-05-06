@@ -47,7 +47,7 @@ static inline double r2d(double r) { return r * 180 / M_PI; }
 // 8) box2d's classes allow you to set a b2Shape for instance to a b2CircleShape or b2PolygonShape
 //    that is why I wrote the classes to use an abstracted pointer reference such as b2Shape and b2Joint
 
-vector<worldInstance> worlds(1);
+vector<worldInstance> worlds(0);
 vector<fixtureInstance> fixtures;
 
 void worldInstance::world_update() 
