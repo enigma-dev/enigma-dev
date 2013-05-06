@@ -24,7 +24,7 @@ using std::vector;
 
 vector<jointInstance> joints(0);
 
-int physics_joint_create(int world)
+int b2d_joint_create(int world)
 {
     int i = joints.size();
     jointInstance joint = jointInstance();
@@ -33,7 +33,7 @@ int physics_joint_create(int world)
     return i;
 }
 
-void physics_joint_distance_create(int id, int fixture1, int fixture2, bool collide_connected)
+void b2d_joint_distance_create(int id, int fixture1, int fixture2, bool collide_connected)
 {
   if (unsigned(id) >= joints.size() || id < 0)
   {
@@ -51,7 +51,7 @@ void physics_joint_distance_create(int id, int fixture1, int fixture2, bool coll
   }
 }
 
-void physics_joint_mouse_create(int id, int fixture)
+void b2d_joint_mouse_create(int id, int fixture)
 {
   if (unsigned(id) >= joints.size() || id < 0)
   {
@@ -65,7 +65,7 @@ void physics_joint_mouse_create(int id, int fixture)
   }
 }
 
-void physics_joint_set_target(int id, double x, double y)
+void b2d_joint_set_target(int id, double x, double y)
 {
   if (unsigned(id) >= joints.size() || id < 0)
   {
