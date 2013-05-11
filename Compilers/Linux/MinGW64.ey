@@ -16,9 +16,9 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
 cppflags:
-cxxflags:
+cxxflags: -I../Additional/Windows/include
 cflags:
-ldlags:
+ldflags: -L../Additional/Windows/lib -static-libgcc -static-libstdc++
 links:
 windres: x86_64-w64-mingw32-windres
 
