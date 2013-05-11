@@ -1,6 +1,25 @@
+/** Copyright (C) 2008-2013 Cheeseboy, Robert B. Colton 
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 #include <SFML/Audio.hpp>
 #include <vector>
-#include "as_basic.h"
+#include "SFML_basic.h"
+
+#include <cstdlib>
 
 struct PlayableSound 
 { 
@@ -10,6 +29,35 @@ struct PlayableSound
 };
 
 std::vector<PlayableSound> sounds;
+
+namespace enigma
+{
+  int audiosystem_initialize() { 
+    //TODO: Initialize audio system
+    return 0; 
+  }
+
+  void audiosystem_update() {
+    //TODO: Perform audio fall off and emitter updating
+  }
+
+  int sound_add_from_buffer(int id, void* buffer, size_t size) { 
+    int i = (int)sounds.size();
+    sf::SoundBuffer *buf = new sf::SoundBuffer();
+    sf::Sound *snd;
+
+    buf->loadFromMemory(buffer, size);
+		
+    snd = new sf::Sound();
+    snd->setBuffer(*buf);
+    sounds.push_back(PlayableSound(snd, buf));
+    return i;
+  }
+
+  void audiosystem_cleanup() {
+    //TODO: Cleanup and delete/free sounds/existing buffers from memory
+  }
+}
 
 int sound_add(std::string fname, int kind, bool preload)
 {
