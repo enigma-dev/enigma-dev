@@ -19,6 +19,8 @@
 #include <vector>
 #include "SFML_basic.h"
 
+#include <cstdlib>
+
 struct PlayableSound 
 { 
 	sf::Sound *sound; 
@@ -27,6 +29,35 @@ struct PlayableSound
 };
 
 std::vector<PlayableSound> sounds;
+
+namespace enigma
+{
+  int audiosystem_initialize() { 
+    //TODO: Initialize audio system
+    return 0; 
+  }
+
+  void audiosystem_update() {
+    //TODO: Perform audio fall off and emitter updating
+  }
+
+  int sound_add_from_buffer(int id, void* buffer, size_t size) { 
+    int i = (int)sounds.size();
+    sf::SoundBuffer *buf = new sf::SoundBuffer();
+    sf::Sound *snd;
+
+    buf->loadFromMemory(buffer, size);
+		
+    snd = new sf::Sound();
+    snd->setBuffer(*buf);
+    sounds.push_back(PlayableSound(snd, buf));
+    return i;
+  }
+
+  void audiosystem_cleanup() {
+    //TODO: Cleanup and delete/free sounds/existing buffers from memory
+  }
+}
 
 int sound_add(std::string fname, int kind, bool preload)
 {
