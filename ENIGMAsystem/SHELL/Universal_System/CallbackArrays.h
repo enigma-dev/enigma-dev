@@ -43,6 +43,9 @@ namespace enigma
   extern char keybdstatus[256];
 }
 
+namespace enigma_user
+{
+
 enum {
   mb_any    = -1,
   mb_none   =  0,
@@ -132,8 +135,13 @@ bool mouse_check_button(int button);
 bool mouse_check_button_pressed(int button);
 bool mouse_check_button_released(int button);
 
+}
+
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
+
+namespace enigma_user
+{
 
 bool keyboard_check(int key);
 bool keyboard_check_pressed(int key);
@@ -141,4 +149,7 @@ bool keyboard_check_released(int key);
 bool mouse_wheel_up();
 bool mouse_wheel_down();
 
+}
+
 void io_clear();
+

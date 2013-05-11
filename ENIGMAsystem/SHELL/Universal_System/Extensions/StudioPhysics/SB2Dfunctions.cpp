@@ -58,6 +58,9 @@ void worldInstance::world_update()
   }
 }
 
+namespace enigma_user
+{
+
 void physics_world_create(int pixeltometerscale)
 {
   /** studio's fucked up world creation just auto binds it to the current room
@@ -666,3 +669,6 @@ void physics_draw_debug()
 {
   // draws the currently bound fixture's shape with draw color, fuck that let the end programmer have control
 }
+
+}
+

@@ -63,11 +63,20 @@ public:
 
 
 //#ifdef __APPLE__
+
+namespace enigma_user
+{
+
 void highscore_show(int numb);
 
 void action_highscore_show(int background,int border,double newColor,double otherColor,std::string font,int a,int b,int c,int d,int e,int f);
 
+}
+
 //#endif
+
+namespace enigma_user
+{
 
 void highscore_set_background(int back) ;
 
@@ -84,11 +93,12 @@ void highscore_add(std::string str, int numb) ;
 void highscore_add_current() ;
 int highscore_value(int place);
 std::string highscore_name(int place) ;
-void draw_highscore(int x1, int y1, int x2, int y2) ;namespace enigma {
+void draw_highscore(int x1, int y1, int x2, int y2) ;
 
-    void highscore_init();
 }
 
-
+namespace enigma {
+    void highscore_init();
+}
 
 #endif

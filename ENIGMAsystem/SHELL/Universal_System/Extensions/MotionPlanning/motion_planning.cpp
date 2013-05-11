@@ -43,6 +43,9 @@ namespace enigma {
 	extern unsigned bound_texture;
 }
 
+namespace enigma_user
+{
+
 unsigned mp_grid_create(int left,int top,int hcells,int vcells,int cellwidth,int cellheight, double speed_modifier)
 {
     enigma::gridstructarray_reallocate();
@@ -238,11 +241,14 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
     return true;
 }
 
+}
+
 #include "Universal_System/var4.h"
 //#include "GScolors.h"
 #define __GETR(x) (((x & 0x0000FF)))
 #define __GETG(x) (((x & 0x00FF00)>>8))
 #define __GETB(x) (((x & 0xFF0000)>>16))
+
 void draw_text(int x,int y,variant str);
 int merge_color(int c1,int c2,double amount);
 int draw_primitive_begin(int kind);
@@ -257,6 +263,9 @@ void draw_set_valign(int align);
 int draw_get_valign();
 void draw_set_font(int fnt);
 int draw_get_font();*/
+
+namespace enigma_user
+{
 
 void mp_grid_draw_neighbours(unsigned int id, unsigned int h, unsigned int v, unsigned int mode)
 {
@@ -358,3 +367,6 @@ void mp_grid_draw(unsigned int id, unsigned int mode, unsigned int color_mode)
     }
     draw_set_color(tc);
 }
+
+}
+

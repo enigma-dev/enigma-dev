@@ -35,8 +35,9 @@
 
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 
-
+namespace enigma_user {
 extern double score;
+}
 
 namespace enigma {
 
@@ -73,7 +74,7 @@ static bool cmp_highscore( const playerScore& a, const playerScore& b ) {
         highscore_caption="Top Ten Players";
         highscore_nobody="<nobody>";
         highscore_escape="press <Escape> to close";
-        highscore_clear();
+        enigma_user::highscore_clear();
 
     }
 
@@ -81,9 +82,13 @@ static bool cmp_highscore( const playerScore& a, const playerScore& b ) {
 
 extern int room_width;
 extern int room_height;
-void screen_refresh();
 
+void screen_refresh();
 void io_handle();
+
+namespace enigma_user
+{
+
 bool keyboard_check(int i);
 void screen_redraw();
 void keyboard_wait();
@@ -163,11 +168,13 @@ std::string highscore_name(int place) {
     return enigma::highscore_list[place].player_name;
 }
 
+}
+
 #include "var4.h"
 void draw_text(int x,int y,variant str);
 int string_width(variant str);
 
-
+namespace enigma_user {
 void draw_highscore(int x1, int y1, int x2, int y2) {
 
     for (size_t i=0; i<enigma::highscore_list.size(); i++) {
@@ -175,8 +182,5 @@ void draw_highscore(int x1, int y1, int x2, int y2) {
         draw_text(x2-string_width(toString((var)enigma::highscore_list[i].player_score)), (i*((y2-y1)/10))+y1+10 , toString((var)enigma::highscore_list[i].player_score));
     }
 }
-
-
-
-
+}
 

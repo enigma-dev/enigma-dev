@@ -37,6 +37,7 @@ extern vector<jointInstance> joints;
 
 // constants for getting and setting joint data using physics_joint_get_value and physics_joint_set_value, use switch case
 // see http://enigma-dev.org/docs/Wiki/, for information on what they are
+namespace enigma_user {
 enum {
   phy_joint_anchor_1_x,
   phy_joint_anchor_1_y,
@@ -58,6 +59,10 @@ enum {
   phy_joint_damping_ratio,
   phy_joint_frequency
 };
+}
+
+namespace enigma_user
+{
 
 /** Creates a new physics joint in the given world.
 @param world Index of the world.
@@ -115,5 +120,7 @@ void physics_joint_get_value(int id);
 @param id
 **/
 void physics_joint_set_value(int id);
+
+}
 
 #endif

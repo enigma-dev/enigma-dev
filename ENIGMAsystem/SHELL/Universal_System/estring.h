@@ -17,6 +17,9 @@
 
 #include "var4.h"
 
+namespace enigma_user
+{
+
 bool is_string(variant val);
 bool is_real(variant val);
 
@@ -57,3 +60,6 @@ string filename_dir(string fname);
 string filename_drive(string fname);
 string filename_ext(string fname);
 string filename_change_ext(string fname, string newext);
+
+}
+

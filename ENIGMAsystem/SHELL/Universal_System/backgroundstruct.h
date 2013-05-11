@@ -69,6 +69,9 @@ namespace enigma
   void backgrounds_init();
 }
 
+namespace enigma_user
+{
+
 int background_add(std::string filename, bool transparent = false, bool smooth = false, bool preload = false);
 bool background_replace(int back, std::string filename, bool transparent = false, bool smooth = false, bool preload = false, bool free_texture = true);
 void background_delete(int back, bool free_texture = true);
@@ -76,3 +79,6 @@ int background_duplicate(int back);
 void background_assign(int back, int copy_background, bool free_texture = true);
 bool background_exists(int back);
 void background_set_alpha_from_background(int back, int copy_background, bool free_texture = true);
+
+}
+

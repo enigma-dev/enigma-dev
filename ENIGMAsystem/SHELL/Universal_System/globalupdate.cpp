@@ -38,10 +38,10 @@ namespace enigma
 {
   double mouse_xprevious, mouse_yprevious;
   void update_globals() {
-    mouse_xprevious = mouse_x;
-    mouse_yprevious = mouse_y;
-    mouse_x = window_mouse_get_x();
-    mouse_y = window_mouse_get_y();
+    mouse_xprevious = enigma_user::mouse_x;
+    mouse_yprevious = enigma_user::mouse_y;
+    enigma_user::mouse_x = window_mouse_get_x();
+    enigma_user::mouse_y = window_mouse_get_y();
     enigma::room_update();
     audiosystem_update();
   }

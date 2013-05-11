@@ -24,6 +24,9 @@ using std::vector;
 
 vector<jointInstance> joints(0);
 
+namespace enigma_user
+{
+
 int b2d_joint_create(int world)
 {
     int i = joints.size();
@@ -80,3 +83,6 @@ void b2d_joint_set_target(int id, double x, double y)
     mouseJoint->SetTarget(b2Vec2(x, y));
   }
 }
+
+}
+

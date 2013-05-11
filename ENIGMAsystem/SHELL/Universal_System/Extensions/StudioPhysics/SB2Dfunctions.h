@@ -92,6 +92,9 @@ bool place_free(double x,double y);
 **/
 bool place_meeting(double x, double y, int object);
 
+namespace enigma_user
+{
+
 /************** Worlds **************/
 
 /** Creates a physics world
@@ -390,5 +393,7 @@ void physics_draw_debug();
 @param pause
 **/
 void physics_pause_enable(bool pause);
+
+}
 
 #endif

@@ -277,6 +277,7 @@ namespace enigma
   char usermap[256];
   void initkeymap()
   {
+    using namespace enigma_user;
     // Pretend this part doesn't exist
     keymap[0x51] = vk_left;
     keymap[0x53] = vk_right;

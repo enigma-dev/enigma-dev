@@ -50,8 +50,10 @@
 #include <string.h>
 
 int room_speed  = 60;
+
 int room_width  = 640;
 int room_height = 480;
+
 int room_persistent = 0;
 var room_caption = "";
 
@@ -107,7 +109,7 @@ namespace enigma
       background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
       background_alpha[i] = backs[i].alpha;
       background_coloring[i] = backs[i].color;
-      if (background_exists(background_index[i]))
+      if (enigma_user::background_exists(background_index[i]))
       {
         background_width[i] = background_get_width(background_index[i]); background_height[i] = background_get_height(background_index[i]);
         background_xscale[i] = (backs[i].stretch) ? room_width/background_width[i] : 1;
@@ -658,6 +660,8 @@ namespace enigma
       for (int i=0;i<8;i++)
       if (view_visible[i])
       {
+        using enigma_user::mouse_x;
+        using enigma_user::mouse_y;
         if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i]
         &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
           mouse_x=view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];

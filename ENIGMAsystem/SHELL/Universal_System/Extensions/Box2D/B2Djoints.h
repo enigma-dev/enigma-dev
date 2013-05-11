@@ -37,6 +37,9 @@ extern vector<jointInstance> joints;
 
 // constants for getting and setting joint data using b2d_joint_get_value and b2d_joint_set_value, use switch case
 // see http://enigma-dev.org/docs/Wiki/, for information on what they are
+namespace enigma_user
+{
+
 enum {
   phy_joint_anchor_1_x,
   phy_joint_anchor_1_y,
@@ -115,5 +118,6 @@ void b2d_joint_get_value(int id);
 @param id
 **/
 void b2d_joint_set_value(int id);
+}
 
 #endif

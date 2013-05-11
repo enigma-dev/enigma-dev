@@ -78,6 +78,9 @@ struct fixtureInstance {
 }; 
 extern vector<fixtureInstance> fixtures;
 
+namespace enigma_user
+{
+
 /** Check if there are no solid objects at a given position.
 @param x coordinate representing the location
 @param y 
@@ -390,5 +393,7 @@ void b2d_draw_debug();
 @param pause
 **/
 void b2d_pause_enable(bool pause);
+
+}
 
 #endif

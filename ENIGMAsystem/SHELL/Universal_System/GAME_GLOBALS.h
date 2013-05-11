@@ -56,7 +56,10 @@ int keyboard_key=0;
 global:     keyboard_lastkey */
 string keyboard_string="";
 
-double score=0;
+namespace enigma_user {
+  double score=0;
+}
+
 bool secure_mode=false;
 bool show_score=0, show_lives=0, show_health=0;
 

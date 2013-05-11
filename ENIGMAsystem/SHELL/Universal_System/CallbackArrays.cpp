@@ -28,6 +28,9 @@ namespace enigma
 
 #include "CallbackArrays.h"
 
+namespace enigma_user
+{
+
 double mouse_x, mouse_y;
 int mouse_button, mouse_lastbutton;
 
@@ -81,10 +84,15 @@ bool mouse_check_button_released(int button)
 	}
 }
 
+}
 
 short mouse_hscrolls = 0;
 short mouse_vscrolls = 0;
+
 string keyboard_lastchar = "";
+
+namespace enigma_user
+{
 
 bool keyboard_check(int key)
 {
@@ -141,6 +149,8 @@ bool mouse_wheel_down()
     return (mouse_vscrolls < 0);
 }
 
+}
+
 #ifndef __APPLE__
 void io_clear()
 {
@@ -150,3 +160,4 @@ void io_clear()
     enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
 }
 #endif
+
