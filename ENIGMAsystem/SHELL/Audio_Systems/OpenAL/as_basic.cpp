@@ -64,6 +64,7 @@ struct sound_instance {
   sound_instance() {}
   void sound_update();
 }; 
+
 void sound_instance::sound_update() 
 {
   // NOTE: Use starttime, elapsedtime, and lasttime
@@ -72,29 +73,29 @@ void sound_instance::sound_update()
   // calculate falloff
   switch (falloff_model)
   {
-    case audio_falloff_exponent_distance:
+    case enigma_user::audio_falloff_exponent_distance:
       // gain = (listener_distance / reference_distance) ^ (-falloff_factor)
       break;
-    case audio_falloff_exponent_distance_clamped:
+    case enigma_user::audio_falloff_exponent_distance_clamped:
       // distance = clamp(listener_distance, reference_distance, maximum_distance)
       // gain = (distance / reference_distance) ^ (-falloff_factor)
       break;
-    case audio_falloff_inverse_distance:
+    case enigma_user::audio_falloff_inverse_distance:
       // gain = reference_distance / (reference_distance + falloff_factor * (listener_distance – reference_distance))
       break;
-    case audio_falloff_inverse_distance_clamped:
+    case enigma_user::audio_falloff_inverse_distance_clamped:
       // distance = clamp(listener_distance, reference_distance, maximum_distance)
       // gain = reference_distance / (reference_distance + falloff_factor * (distance – reference_distance))
       break;
-    case audio_falloff_linear_distance:
+    case enigma_user::audio_falloff_linear_distance:
       // distance = min(distance, maximum_distance)
       // gain = (1 – falloff_factor * (distance – reference_distance) / (maximum_distance – reference_distance))
       break; 
-    case audio_falloff_linear_distance_clamped:
+    case enigma_user::audio_falloff_linear_distance_clamped:
       // distance = clamp(listener_distance, reference_distance, maximum_distance)
       // gain = (1 – falloff_factor * (distance – reference_distance) / (maximum_distance – reference_distance))
       break;
-    case audio_falloff_none:
+    case enigma_user::audio_falloff_none:
       // gain = 1
       break;
     default: 
@@ -348,6 +349,9 @@ namespace enigma
 
 // ***** OLD SOUND SYSTEM *****
 
+namespace enigma_user
+{
+
 bool sound_exists(int sound)
 {
     return unsigned(sound) < enigma::sound_idmax && bool(enigma::sounds[sound]);
@@ -534,9 +538,15 @@ const char* sound_get_audio_error() {
   return alureGetErrorString();
 }
 
+}
+
 #include <string>
 using namespace std;
 extern void show_message(string);
+
+namespace enigma_user
+{
+
 int sound_add(string fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
 {
   // Open sound
@@ -574,7 +584,12 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
   return true;
 }
 
+}
+
 // ***** NEW SOUND SYSTEM *****
+
+namespace enigma_user
+{
  
 bool audio_exists(int sound)
 {
@@ -918,3 +933,6 @@ void audio_play_sound_on(int emitter, int sound, bool loop, double priority)
   alSourcefv(sound_sources[src]->source, AL_VELOCITY, emit->emitVel);
   alSourcei(sound_sources[src]->source, AL_PITCH, emit->pitch);
 }
+
+}
+

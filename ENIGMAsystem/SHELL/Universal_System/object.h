@@ -87,6 +87,7 @@ namespace enigma
     void constructor(object_basic* instance);
 }
 
+namespace enigma_user {
 bool object_exists(int objid);
 void object_set_depth(int objid, int val);
 void object_set_mask(int objid, int val);
@@ -102,5 +103,6 @@ bool object_get_solid(int objid);
 int object_get_sprite(int objid);
 bool object_get_visible(int objid);
 bool object_is_ancestor(int objid, int acid);
+}
 
 #endif //_object_h

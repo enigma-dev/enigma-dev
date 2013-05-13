@@ -43,6 +43,9 @@ namespace enigma
   }
 }
 
+namespace enigma_user
+{
+
 int resource_get_id(string name)
 {
   return -1;
@@ -78,3 +81,6 @@ bool script_exists(int script)
 {
     return (unsigned(script) < enigma::script_idmax) and bool(enigma::callable_scripts[script].base);
 }
+
+}
+

@@ -25,6 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
+namespace enigma_user {
 void path_start(unsigned pathid,double speed,unsigned endaction,bool absolute);
 void path_end();
 void path_set_position(double position, bool relative);
@@ -66,4 +67,7 @@ double path_get_x(unsigned pathid, double t);
 double path_get_y(unsigned pathid, double t);
 double path_get_speed(unsigned pathid, double t);
 double path_get_direction(unsigned pathid, double t);
+}
+
 void draw_path(unsigned path,double x,double y,bool absolute);
+

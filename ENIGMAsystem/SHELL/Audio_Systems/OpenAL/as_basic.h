@@ -17,6 +17,9 @@
 
 // ***** Old Sound System *****
 
+namespace enigma_user
+{
+
 /** des
 @param sound The index of the sound asset.
 @return
@@ -141,3 +144,6 @@ inline bool action_replace_sound(int sound, string fname)
 @return
 **/
 const char* sound_get_audio_error();
+
+}
+

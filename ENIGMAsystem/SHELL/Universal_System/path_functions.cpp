@@ -43,6 +43,10 @@ namespace enigma {
 #include "collisions_object.h"
 #include "instance_system.h"
 #include "Extensions/Paths/implement.h"
+
+namespace enigma_user
+{
+
 void path_start(unsigned pathid,double speed,unsigned endaction,bool absolute)
 {
     #ifndef PATH_EXT_SET
@@ -405,6 +409,8 @@ void path_reverse(unsigned pathid)
 {
     reverse(enigma::pathstructarray[pathid]->pointarray.begin(),enigma::pathstructarray[pathid]->pointarray.end());
     enigma::path_recalculate(pathid);
+}
+
 }
 
 //Declare drawing functions here, so it works no matter if GL, GLES or D3D is used

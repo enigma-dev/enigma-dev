@@ -17,6 +17,9 @@
 
 // ***** New Sound System *****
 
+namespace enigma_user
+{
+
 enum { 
   audio_falloff_exponent_distance,
   audio_falloff_exponent_distance_clamped,
@@ -241,4 +244,6 @@ void audio_emitter_velocity(int emitter, double vx, double vy, double vz);
 @param priority
 **/
 void audio_play_sound_on(int emitter, int sound, bool loop, double priority);
+
+}
 

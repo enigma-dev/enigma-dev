@@ -122,6 +122,9 @@ namespace enigma
 
 int id=0;
 
+namespace enigma_user
+{
+
 bool sound_play(int sound) // Returns nonzero if an error occurred
 {
 	
@@ -136,5 +139,7 @@ bool sound_play(int sound) // Returns nonzero if an error occurred
 int sound_add(string fname, int kind, bool preload) //last two arguments do nothing
 {
 return enigma::jni_load_sound(fname.c_str());
+}
+
 }
 
