@@ -29,6 +29,9 @@
 #include "instance_system.h"
 #include "instance.h"
 
+namespace enigma_user
+{
+
 int instance_nearest(int x,int y,int obj,bool notme)
 {
   double dist_lowest=-1;
@@ -72,5 +75,7 @@ int instance_furthest(int x,int y,int obj,bool notme)
   }
 
   return retid;
+}
+
 }
 

@@ -36,12 +36,18 @@
 #include "instance_system.h"
 #include "instance.h"
 
+#include <stdio.h>
+
 namespace enigma
 {
   int destroycalls = 0, createcalls = 0;
 }
 
 typedef std::pair<int,enigma::inst_iter*> inode_pair;
+
+namespace enigma_user
+{
+
 void instance_deactivate_all(bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
@@ -50,7 +56,6 @@ void instance_deactivate_all(bool notme) {
         enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
     }
 }
-
 
 void instance_activate_all() {
 
@@ -82,6 +87,8 @@ void instance_activate_object(int obj) {
     }
 }
 
+}
+
 void instance_destroy(int id, bool dest_ev)
 {
   enigma::object_basic* who = enigma::fetch_instance_by_id(id);
@@ -92,7 +99,10 @@ void instance_destroy(int id, bool dest_ev)
         who->unlink();
   }
 }
-#include <stdio.h>
+
+namespace enigma_user
+{
+
 void instance_destroy()
 {
   enigma::object_basic* const a = enigma::instance_event_iterator->inst;
@@ -127,5 +137,7 @@ int instance_find(int obj, int num)
 int instance_number(int obj)
 {
   return enigma::objects[obj].count;
+}
+
 }
 

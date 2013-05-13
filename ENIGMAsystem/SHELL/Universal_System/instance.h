@@ -33,24 +33,31 @@ namespace enigma {
   extern int destroycalls, createcalls;
 }
 
+namespace enigma_user {
 enigma::instance_t instance_create(int x,int y,int object);
+}
 
 namespace enigma {
   object_basic *instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
 }
 
+namespace enigma_user {
 void instance_deactivate_all(bool notme);
 void instance_activate_all();
 void instance_activate_object(int obj);
 void instance_deactivate_object(int obj);
+}
 
 void instance_destroy(int id, bool dest_ev = true);
+
+namespace enigma_user {
 void instance_destroy();
 bool instance_exists (int obj);
 enigma::instance_t instance_find   (int obj,int n);
 int instance_number (int obj);
 enigma::instance_t instance_nearest (int x,int y,int obj,bool notme = false);
 enigma::instance_t instance_furthest(int x,int y,int obj,bool notme = false);
+}
 
 
 //int instance_place(x,y,obj)
@@ -58,11 +65,10 @@ enigma::instance_t instance_furthest(int x,int y,int obj,bool notme = false);
 namespace enigma {
   void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst);
 }
+
 void instance_change(int obj, bool perf = false);
+namespace enigma_user {
 void instance_copy(bool perf = true);
 inline void action_change_object(int obj, bool perf);
-
-
-
-
+}
 

@@ -106,5 +106,7 @@ namespace enigma
 }
 
 // Other
-extern int instance_count;
+namespace enigma_user {
+  extern int instance_count;
+}
 #endif

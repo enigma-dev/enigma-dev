@@ -30,7 +30,10 @@ GM Global variables
 ******************/
 
 bool argument_relative=false;
+
+namespace enigma_user {
 string caption_score="Score:", caption_lives="Lives:", caption_health="Health:";
+}
 
 /*
 global:     cursor_sprite
@@ -42,7 +45,10 @@ global:     event_object
 global:     event_type*/
 double      fps;
 
+namespace enigma_user {
 double health=100;
+}
+
 // TODO: MOVEME: Who put this here?
 #ifndef JUST_DEFINE_IT_RUN
 #include <deque>
@@ -51,29 +57,37 @@ std::deque<int> instance_id;
 int *instance_id;
 #endif
 
+namespace enigma_user {
 int keyboard_key=0;
+}
 /*global:     keyboard_lastchar
 global:     keyboard_lastkey */
-string keyboard_string="";
-
 namespace enigma_user {
+  string keyboard_string="";
+
   double score=0;
+
+  bool secure_mode=false;
+  bool show_score=0, show_lives=0, show_health=0;
 }
 
-bool secure_mode=false;
-bool show_score=0, show_lives=0, show_health=0;
-
 //string temp_directory="";
+namespace enigma_user {
 int transition_kind=0;
 int transition_steps=80;
+}
 /*global:     transition_time
 global:  working_directory*/
+namespace enigma_user {
 bool automatic_redraw = true;
 string program_directory="";
 int gamemaker_version=0;
+}
 //int transition_steps;
+namespace enigma_user {
 int cursor_sprite;
 extern int room_first, room_last;
+}
 
 /*********************
 End GM global variables

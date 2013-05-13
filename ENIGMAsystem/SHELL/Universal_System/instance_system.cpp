@@ -40,7 +40,9 @@
 
 using namespace std;
 
-int instance_count = 0;
+namespace enigma_user {
+  int instance_count = 0;
+}
 
 extern  deque<int> instance_id;
 
@@ -281,7 +283,7 @@ namespace enigma
   {
     enigma::cleanups.insert((object_basic*)whop->w->second->inst);
     enigma::instancecount--;
-    instance_count--;
+    enigma_user::instance_count--;
   }
   void dispose_destroyed_instances()
   {
