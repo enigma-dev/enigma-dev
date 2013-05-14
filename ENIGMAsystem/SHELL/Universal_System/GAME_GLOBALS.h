@@ -43,7 +43,9 @@ global:     event_action
 global:     event_number
 global:     event_object
 global:     event_type*/
+namespace enigma_user {
 double      fps;
+}
 
 namespace enigma_user {
 double health=100;

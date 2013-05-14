@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+namespace enigma_user
+{
+
 enum {
   cr_default    = 0,
   cr_none       = -1,
@@ -66,8 +69,15 @@ inline bool action_if_question(string str)
 }
 int window_get_x();
 int window_get_y();
+
+}
+
 int window_get_width();
 int window_get_height();
+
+namespace enigma_user
+{
+
 void window_set_caption(char* caption);
 void window_set_caption(string caption);
 string window_get_caption();
@@ -81,10 +91,17 @@ void window_set_rectangle(int x, int y, int width, int height);
 void window_center();
 void window_default();
 void window_set_region_size(int w, int h, bool adaptwindow);
+
+}
+
 int window_get_region_width();
 int window_get_region_height();
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
+
+namespace enigma_user
+{
+
 void window_set_visible(bool visible);
 int window_get_visible();
 void window_set_stayontop(bool stay);
@@ -126,3 +143,6 @@ void action_end_game();
 string clipboard_get_text();
 void clipboard_set_text(string text);
 bool clipboard_has_text();
+
+}
+

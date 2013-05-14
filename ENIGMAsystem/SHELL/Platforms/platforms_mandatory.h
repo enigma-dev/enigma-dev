@@ -34,7 +34,9 @@
 
 #include "os_types.h"
 
-extern const int os_type;
+namespace enigma_user {
+  extern const int os_type;
+}
 
 namespace enigma
 {
@@ -48,6 +50,9 @@ namespace enigma
   void input_initialize();
 }
 
+namespace enigma_user
+{
+
 // These functions are standard GML that are an integral part of the system.
 // Each instance must implement these, even if they are unable to do anything on the target platform.
 
@@ -60,6 +65,8 @@ void window_default();
 // These two are a surprisingly integral part of the system
 int window_mouse_get_x();
 int window_mouse_get_y();
+
+}
 
 // These two are used by screen_redraw for view calculations and such.
 int window_get_region_width_scaled();

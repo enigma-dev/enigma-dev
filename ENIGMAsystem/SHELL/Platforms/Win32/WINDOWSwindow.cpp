@@ -139,6 +139,9 @@ namespace enigma
     }
 }
 
+namespace enigma_user
+{
+
 int show_message(string str)
 {
     MessageBox(enigma::hWnd,str.c_str(), window_get_caption().c_str(), MB_OK);
@@ -171,6 +174,8 @@ int window_get_y()
     return enigma::windowY;
 }
 
+}
+
 int window_get_width()
 {
     return enigma::windowWidth;
@@ -180,6 +185,9 @@ int window_get_height()
 {
     return enigma::windowHeight;
 }
+
+namespace enigma_user
+{
 
 void window_set_caption(char* caption)
 {
@@ -400,6 +408,8 @@ int window_get_region_height()
     return enigma::regionHeight;
 }
 
+}
+
 int window_get_region_width_scaled()
 {
     return enigma::scaledWidth;
@@ -409,6 +419,9 @@ int window_get_region_height_scaled()
 {
     return enigma::scaledHeight;
 }
+
+namespace enigma_user
+{
 
 int display_mouse_get_x()
 {
@@ -675,6 +688,8 @@ void window_view_mouse_set(int id, int x, int y)
     SetCursorPos(window.left + x + view_xview[id],window.top + y + view_yview[id]);
 }
 
+}
+
 /*
 int window_views_mouse_get_x()   //NOTE: mousex/y should be set to these so they are relative to the view
 {
@@ -794,6 +809,9 @@ void window_views_mouse_set(int x, int y)
         SetCursorPos(window.left + x,window.top + y);
     }
 }*/
+
+namespace enigma_user
+{
 
 int window_set_cursor(int curs)
 {
@@ -975,3 +993,6 @@ bool clipboard_has_text()
     CloseClipboard();
     return value;
 }
+
+}
+

@@ -149,7 +149,6 @@ bool keyboard_check_released(int key);
 bool mouse_wheel_up();
 bool mouse_wheel_down();
 
-}
-
 void io_clear();
+}
 

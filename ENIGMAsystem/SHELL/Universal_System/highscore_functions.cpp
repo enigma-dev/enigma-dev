@@ -84,10 +84,11 @@ extern int room_width;
 extern int room_height;
 
 void screen_refresh();
-void io_handle();
 
 namespace enigma_user
 {
+
+void io_handle();
 
 bool keyboard_check(int i);
 void screen_redraw();

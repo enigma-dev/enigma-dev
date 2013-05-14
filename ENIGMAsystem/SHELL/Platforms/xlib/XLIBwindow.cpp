@@ -76,6 +76,9 @@ void Sleep(int ms)
 
 int visx = -1, visy = -1;
 
+namespace enigma_user
+{
+
 int window_set_visible(bool visible)
 {
 	if(visible)
@@ -108,6 +111,8 @@ string window_get_caption()
 	return r;
 }
 
+}
+
 inline int getMouse(int i)
 {
 	Window r1,r2;
@@ -123,6 +128,9 @@ inline int getMouse(int i)
     default: return -1;
 	}
 }
+
+namespace enigma_user
+{
 
 int display_mouse_get_x() { return getMouse(0); }
 int display_mouse_get_y() { return getMouse(1); }
@@ -165,6 +173,8 @@ void display_mouse_set(double x,double y) {
 	XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
 }
 
+}
+
 ////////////
 // WINDOW //
 ////////////
@@ -184,10 +194,15 @@ static int getWindowDimension(int i)
 }
 
 //Getters
+namespace enigma_user {
 int window_get_x()      { return getWindowDimension(0); }
 int window_get_y()      { return getWindowDimension(1); }
+}
 int window_get_width()  { return getWindowDimension(2); }
 int window_get_height() { return getWindowDimension(3); }
+
+namespace enigma_user
+{
 
 //Setters
 void window_set_position(int x,int y)
@@ -214,14 +229,20 @@ void window_center()
 	XMoveWindow(disp,win,s->width/2-w/2,s->height/2-h/2);
 }
 
+}
+
 ////////////////
 // FULLSCREEN //
 ////////////////
+
 enum {
   _NET_WM_STATE_REMOVE,
   _NET_WM_STATE_ADD,
   _NET_WM_STATE_TOGGLE
 };
+
+namespace enigma_user
+{
 
 void window_set_fullscreen(bool full)
 {
@@ -258,12 +279,20 @@ bool window_get_fullscreen()
 	return 0;
 }
 
+}
+
                  //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
 short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
+
+namespace enigma_user
+{
+
 void window_set_cursor(int c)
 {
 	XUndefineCursor(disp,win);
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
+}
+
 }
 
 // FIXME: MOVEME: I can't decide where the hell to put this.
@@ -366,6 +395,10 @@ namespace enigma {
 }
 
 #include "Universal_System/globalupdate.h"
+
+namespace enigma_user
+{
+
 void io_handle()
 {
   enigma::input_push();
@@ -376,6 +409,7 @@ void io_handle()
   }
   enigma::update_globals();
 }
+
 void keyboard_wait()
 {
   io_clear();
@@ -403,6 +437,8 @@ int window_get_region_height()
     return window_get_height();
 }
 
+}
+
 int window_get_region_width_scaled()
 {
     return window_get_width();
@@ -413,11 +449,16 @@ int window_get_region_height_scaled()
     return window_get_height();
 }
 
+namespace enigma_user
+{
+
 string parameter_string(unsigned num) {
   return num < enigma::parameterc ? enigma::parameters[num] : "";
 }
 int parameter_count() {
   return enigma::parameterc;
+}
+
 }
 /*
 display_get_width() // Returns the width of the display in pixels.

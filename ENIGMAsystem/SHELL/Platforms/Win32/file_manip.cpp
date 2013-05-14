@@ -36,6 +36,9 @@ using namespace std;
 
 static std::string iniFilename = "";
 
+namespace enigma_user
+{
+
 void ini_open(std::string fname)
 {
 	iniFilename = fname;
@@ -185,10 +188,14 @@ enum {
   fa_archive   = FILE_ATTRIBUTE_ARCHIVE
 };
 
+}
 
 static int ff_attribs = 0;
 static HANDLE current_find = INVALID_HANDLE_VALUE;
 static WIN32_FIND_DATA found;
+
+namespace enigma_user
+{
 
 string file_find_first(string name,int attributes)
 {
@@ -275,3 +282,6 @@ time_t file_modified_time(std::string fname)
     }
     return sb.st_mtime;
 }
+
+}
+

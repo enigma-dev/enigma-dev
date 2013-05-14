@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+namespace enigma_user
+{
+
 enum {
   ty_real = 0,
   ty_string = 1
@@ -42,4 +45,6 @@ variant external_call(int id,variant a1=0,variant a2=0,variant a3=0,variant a4=0
                              variant a9=0,variant a10=0,variant a11=0,variant a12=0,variant a13=0,variant a14=0,variant a15=0,variant a16=0);
 
 void external_free(std::string dll);
+
+}
 

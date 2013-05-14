@@ -23,12 +23,16 @@ using std::string;
 void gmw_init();
 
 void Sleep(int ms);
-#define sleep(x) Sleep(x)
+
+namespace enigma_user {
+inline void sleep(int ms) {Sleep(ms);};
+}
 
 /////////////
 // VISIBLE //
 /////////////
 
+namespace enigma_user {
 int window_set_visible(bool visible);
 int window_get_visible();
 void window_set_stayontop(bool stay);
@@ -39,20 +43,25 @@ void window_set_showborder(bool show);
 bool window_get_showborder();
 void window_set_showicons(bool show);
 bool window_get_showicons();
+}
 
 
 /////////////
 // CAPTION //
 /////////////
+
+namespace enigma_user {
 #ifndef PLATFORMS_MANDATORY__H
 void window_set_caption(string caption);
 #endif
 string window_get_caption();
+}
 
 ///////////
 // MOUSE //
 ///////////
 
+namespace enigma_user {
 #ifndef PLATFORMS_MANDATORY__H
 int window_mouse_get_x();
 int window_mouse_get_y();
@@ -62,18 +71,25 @@ int display_mouse_get_y();
 
 void window_mouse_set(double x,double y);
 void display_mouse_set(double x,double y);
+}
 
 ////////////
 // WINDOW //
 ////////////
 //int getWindowDimension(int i);
 
+
 //Getters
+namespace enigma_user {
 int window_get_x();
 int window_get_y();
+}
 
 int window_get_width();
 int window_get_height();
+
+namespace enigma_user
+{
 
 //Setters
 void window_set_position(int x,int y);
@@ -83,15 +99,24 @@ void window_set_size(unsigned int w,unsigned int h);
 //Center
 void window_center();
 
+}
+
 ////////////////
 // FULLSCREEN //
 ////////////////
+
+namespace enigma_user {
 void window_set_fullscreen(bool full);
 bool window_get_fullscreen();
+}
 
 ////////////
 // CURSOR //
 ////////////
+
+namespace enigma_user
+{
+
 enum {
   cr_default = 0,
   cr_none    = -1,
@@ -130,6 +155,9 @@ void window_set_region_size(int w, int h, bool adaptwindow);
 int window_get_region_width();
 int window_get_region_height();
 void window_default();
+
+}
+
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
@@ -161,9 +189,9 @@ window_get_stayontop()
 window_set_sizeable(sizeable)
 window_get_sizeable()*/
 
-
+namespace enigma_user {
 int show_message(string str);
-
+}
 
 namespace enigma {
   extern string*  parameters;
@@ -173,10 +201,15 @@ namespace enigma {
   void initkeymap();
 }
 
+namespace enigma_user {
 string parameter_string(unsigned num);
 int parameter_count();
+}
 
 #define enigmacatchmouse() //Linux should hopefully do that automatically.
 
+namespace enigma_user {
 int display_get_width();
 int display_get_height();
+}
+

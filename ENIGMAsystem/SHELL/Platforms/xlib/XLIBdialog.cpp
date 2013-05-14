@@ -30,9 +30,15 @@
 using namespace std;
 #include "XLIBwindow.h"
 
+namespace enigma_user
+{
+
 // FIXME: MOVEME
 int show_message(string message)
 {
   printf("show_message: %s\n",message.c_str());
   return 0;
 }
+
+}
+

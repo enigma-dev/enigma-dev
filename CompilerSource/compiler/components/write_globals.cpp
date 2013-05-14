@@ -68,8 +68,8 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
         s = string_replace_all(s, "/", "\\\\");
         s = string_replace_all(s, "%20", " ");
     }
-    wto << "string working_directory = \"" << s << "\";" << endl;
-    wto << "unsigned int game_id = " << es->gameSettings.gameId << ";" << endl;
+    wto << "namespace enigma_user {string working_directory = \"" << s << "\";}" << endl;
+    wto << "namespace enigma_user {unsigned int game_id = " << es->gameSettings.gameId << ";}" << endl;
 
     for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
       wto << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;

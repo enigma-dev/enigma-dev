@@ -148,8 +148,8 @@ namespace enigma
       view_visible[i] = (bool)views[i].start_vis;
     }
 
-    window_default();
-    io_clear();
+    enigma_user::window_default();
+    enigma_user::io_clear();
     screen_refresh();
 
     object_basic* is[instancecount];
@@ -654,7 +654,7 @@ namespace enigma
 {
   void room_update()
   {
-    window_set_caption(room_caption);
+    enigma_user::window_set_caption(room_caption);
     if (view_enabled)
     {
       for (int i=0;i<8;i++)

@@ -37,9 +37,11 @@
 
 #include <time.h>
 
-const int os_type = os_linux;
+namespace enigma_user {
+  const int os_type = os_linux;
 
-extern string keyboard_lastchar;
+  extern string keyboard_lastchar;
+}
 
 namespace enigma
 {
@@ -72,7 +74,7 @@ namespace enigma
                   char str[1];
                   int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
                   if (len > 0) {
-                      keyboard_lastchar = string(1,str[0]);
+                      enigma_user::keyboard_lastchar = string(1,str[0]);
                   }
               }
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
@@ -167,7 +169,9 @@ namespace enigma
   int game_ending();
 }
 
-extern double fps;
+namespace enigma_user {
+  extern double fps;
+}
 long clamp(long value, long min, long max)
 {
   if (value < min) {
@@ -283,7 +287,7 @@ int main(int argc,char** argv)
 			long passed_mcs = (time_current.tv_sec - time_offset.tv_sec)*1000000 + (time_current.tv_nsec/1000 - + time_offset.tv_nsec/1000);
 			passed_mcs = clamp(passed_mcs, 0, 1000000);
 			if (passed_mcs >= 1000000) { // Handle resetting.
-				fps = frames_count;
+				enigma_user::fps = frames_count;
 				frames_count = 0;
 				time_offset.tv_sec += passed_mcs/1000000;
 				time_offset_slowing.tv_sec = time_offset.tv_sec;
@@ -333,11 +337,13 @@ int main(int argc,char** argv)
 	return 0;
 }
 
+namespace enigma_user {
 void game_end() {
   game_isending = true;
 }
 void action_end_game() {
   game_end();
+}
 }
 
 int display_get_width() { return XWidthOfScreen(screen); }
