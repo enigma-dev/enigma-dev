@@ -36,7 +36,9 @@ using namespace std;
 #include "motion_planning_struct.h"
 #include "motion_planning.h"
 
+namespace enigma_user {
 int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme);
+}
 
 namespace enigma {
 	extern size_t grid_idmax;

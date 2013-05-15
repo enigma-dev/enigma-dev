@@ -32,9 +32,11 @@ bool systemPaused = false;
 static inline double r2d(double r) { return r * 180 / M_PI; }
 
 /* This is just place holder shit to get the fuckin linker shut the fuckin hell up */
+namespace enigma_user {
 enigma::instance_t collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec, bool notme)
 {
 
+}
 }
 
 namespace enigma
@@ -54,6 +56,9 @@ namespace enigma
   }
 };
 
+namespace enigma_user
+{
+
 bool place_free(double x,double y)
 {
   return true;
@@ -63,3 +68,6 @@ bool place_meeting(double x, double y, int object)
 {
   return false;
 }
+
+}
+

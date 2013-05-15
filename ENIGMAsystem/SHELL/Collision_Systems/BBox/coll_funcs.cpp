@@ -65,6 +65,9 @@ static inline double max(double x, double y) { return x>y? x : y; }
 static inline double direction_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
 static inline double point_direction(double x1,double y1,double x2,double y2) {return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);}
 
+namespace enigma_user
+{
+
 bool place_free(double x,double y)
 {
   return collide_inst_inst(all,true,true,x,y) == NULL;
@@ -86,12 +89,16 @@ int instance_place(double x, double y, int object)
   return r == NULL ? noone : r->id;
 }
 
+}
+
 namespace enigma {
   object_basic *place_meeting_inst(double x, double y, int object)
   {
     return collide_inst_inst(object,false,true,x,y);
   }
 }
+
+namespace enigma_user {
 
 bool position_free(double x,double y)
 {
@@ -732,7 +739,12 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
     return true;
 }
 
+}
+
 typedef std::pair<int,enigma::inst_iter*> inode_pair;
+
+namespace enigma_user
+{
 
 void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, int inside, bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
@@ -803,6 +815,8 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int 
     }
 }
 
+}
+
 static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, double ly2)
 {
     // Formula: x^2/a^2 + y^2/b^2 = 1   <=>   y = +/- sqrt(b^2*(1 - x^2/a^2))
@@ -816,6 +830,9 @@ static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, 
         return y1 <= ly2 && ly1 <= y2;
     }
 }
+
+namespace enigma_user
+{
 
 void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
 {
@@ -932,3 +949,6 @@ void position_change(double x1, double y1, int obj, bool perf)
             enigma::instance_change_inst(obj, perf, inst);
     }
 }
+
+}
+

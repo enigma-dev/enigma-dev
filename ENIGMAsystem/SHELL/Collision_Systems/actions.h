@@ -19,6 +19,9 @@
 
 extern bool argument_relative;
 
+namespace enigma_user
+{
+
 inline bool action_if_object(const int object, const double xx, const double yy) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
@@ -70,3 +73,6 @@ inline void action_kill_position(double x, double y)
 inline bool action_if_collision(const double x, const double y, const int object) {
   return !action_if_empty(x,y,object); //Already takes argument_relative into account
 }
+
+}
+
