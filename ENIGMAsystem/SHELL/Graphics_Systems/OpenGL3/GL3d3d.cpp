@@ -471,7 +471,7 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
         glVertex3fv(v[k]);
         k++;
         tp = 0;
-        for (int i = 0; i <= steps; i++)
+        for (int i = steps; i >= 0; i--)
         {
             v[k][0] = v[i + steps + 1][0]; v[k][1] = v[i + steps + 1][1]; v[k][2] = v[i + steps + 1][2];
             t[k][0] = 0; t[k][1] = 0;

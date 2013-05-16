@@ -476,7 +476,7 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
         glVertex3fv(v[k]);
         k++;
         tp = 0;
-        for (int i = 0; i <= steps; i++)
+        for (int i = steps; i >= 0; i--)
         {
             v[k][0] = v[i + steps + 1][0]; v[k][1] = v[i + steps + 1][1]; v[k][2] = v[i + steps + 1][2];
             t[k][0] = 0; t[k][1] = 0;
@@ -1284,8 +1284,8 @@ class d3d_model
             model_vertex_texture(v[k],t[k]);
             k++;
             tp = 0;
-            for (int i = 1; i <= steps+1; i++)
-            {
+        for (int i = steps + 1; i >= 0; i--)
+        {
                 t[k][0] = tp; t[k][1] = 0;
                 model_vertex_texture(v[i],t[k]);
                 k++; tp += invstep;

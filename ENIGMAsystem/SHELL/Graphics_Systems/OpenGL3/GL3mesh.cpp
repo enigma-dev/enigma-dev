@@ -606,8 +606,8 @@ void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, doub
     d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
     k++;
     tp = 0;
-    for (int i = 1; i <= steps+1; i++)
-    {
+        for (int i = steps + 1; i >= 0; i--)
+        {
       d3d_model_vertex_texture(id, cx, cy, z1, tp, 0);
       k++; tp += invstep;
     }
