@@ -46,11 +46,7 @@ void instance_deactivate_all(bool notme);
 void instance_activate_all();
 void instance_activate_object(int obj);
 void instance_deactivate_object(int obj);
-}
-
 void instance_destroy(int id, bool dest_ev = true);
-
-namespace enigma_user {
 void instance_destroy();
 bool instance_exists (int obj);
 enigma::instance_t instance_find   (int obj,int n);
@@ -66,8 +62,8 @@ namespace enigma {
   void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst);
 }
 
-void instance_change(int obj, bool perf = false);
 namespace enigma_user {
+void instance_change(int obj, bool perf = false);
 void instance_copy(bool perf = true);
 inline void action_change_object(int obj, bool perf);
 }

@@ -281,6 +281,6 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom)
-            instance_destroy(inst->id);
+            enigma_user::instance_destroy(inst->id);
     }
 }

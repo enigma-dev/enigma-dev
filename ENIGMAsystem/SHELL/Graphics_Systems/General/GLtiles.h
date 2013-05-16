@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+namespace enigma_user
+{
+
 int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, int alpha = 1, int color = 0xFFFFFF);
 bool tile_delete(int id);
 bool tile_exists(int id);
@@ -46,3 +49,6 @@ int tile_layer_find(int layer_depth, int x, int y);
 bool tile_layer_hide(int layer_depth);
 bool tile_layer_show(int layer_depth);
 bool tile_layer_shift(int layer_depth, int x, int y);
+
+}
+

@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+namespace enigma_user
+{
+
 const unsigned fa_left = 0;
 const unsigned fa_center = 1;
 const unsigned fa_right = 2;
@@ -53,3 +56,6 @@ unsigned int string_height_ext(variant str, int sep, int w);
 unsigned int string_width_line(variant str, int line);
 unsigned int string_width_ext_line(variant str, int w, int line);
 unsigned int string_width_ext_line_count(variant str, int w);
+
+}
+

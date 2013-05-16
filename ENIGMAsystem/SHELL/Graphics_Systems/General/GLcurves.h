@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+namespace enigma_user
+{
+
 /** description
 **/
 void draw_bezier_quadratic(float x1,float y1,float x2,float y2,float x3,float y3);
@@ -251,3 +254,6 @@ void draw_bezier_quadratic_spline_end();
 @return
 **/
 int draw_spline_optimized_end();
+
+}
+

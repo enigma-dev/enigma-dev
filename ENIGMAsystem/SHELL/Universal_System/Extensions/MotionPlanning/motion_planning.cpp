@@ -251,6 +251,9 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
 #define __GETG(x) (((x & 0x00FF00)>>8))
 #define __GETB(x) (((x & 0xFF0000)>>16))
 
+namespace enigma_user
+{
+
 void draw_text(int x,int y,variant str);
 int merge_color(int c1,int c2,double amount);
 int draw_primitive_begin(int kind);
@@ -265,9 +268,6 @@ void draw_set_valign(int align);
 int draw_get_valign();
 void draw_set_font(int fnt);
 int draw_get_font();*/
-
-namespace enigma_user
-{
 
 void mp_grid_draw_neighbours(unsigned int id, unsigned int h, unsigned int v, unsigned int mode)
 {

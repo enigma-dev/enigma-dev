@@ -18,6 +18,7 @@
 #ifndef _GLMATERIAL__H
 #define _GLMATERIAL__H
 
+namespace enigma_user {
 int material_create();
 void material_load();
 void material_save();
@@ -29,5 +30,6 @@ int material_get_shader(int id);
 void material_use(int id);
 void material_reset();
 void material_free(int id);
+}
 
 #endif

@@ -40,6 +40,9 @@ struct Material {
 
 vector<Material*> materials;
 
+namespace enigma_user
+{
+
 int material_create(int type)
 {
   unsigned int id = materials.size();
@@ -83,5 +86,7 @@ void material_reset()
 void material_free(int id)
 {
   delete materials[id];
+}
+
 }
 

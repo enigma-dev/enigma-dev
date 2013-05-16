@@ -50,6 +50,9 @@ typedef std::vector< splinePoint > spline;
 static std::stack< spline, std::vector<spline*> > startedSplines;
 static std::stack< int > startedSplinesMode;
 
+namespace enigma_user
+{
+
 void draw_set_curve_width(int width)
 {
     pr_curve_width=width;
@@ -487,3 +490,6 @@ int draw_spline_optimized_end()
     pr_curve_detail = (int)tmp_detail;
     return tot_det;
 }
+
+}
+

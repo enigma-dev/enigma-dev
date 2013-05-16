@@ -49,6 +49,9 @@
 #include "lives.h"
 #include <string.h>
 
+namespace enigma_user
+{
+
 int room_speed  = 60;
 
 int room_width  = 640;
@@ -68,6 +71,8 @@ int view_enabled = 0;
 rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
     view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
 
+}
+
 namespace enigma
 {
   roomstruct** roomdata;
@@ -75,6 +80,8 @@ namespace enigma
 
   void roomstruct::gotome(bool gamestart)
   {
+    using namespace enigma_user;
+
     //Destroy all objects
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
@@ -189,9 +196,12 @@ namespace enigma
 //Implement the "room" global before we continue
 INTERCEPT_DEFAULT_COPY(enigma::roomv);
 void enigma::roomv::function(variant oldval) {
-  room_goto((int)rval.d);
+  enigma_user::room_goto((int)rval.d);
   rval.d = oldval.rval.d;
-} enigma::roomv room;
+};
+namespace enigma_user {
+  enigma::roomv room;
+}
 
 #if SHOWERRORS
   #define errcheck(indx,err) \
@@ -204,6 +214,9 @@ void enigma::roomv::function(variant oldval) {
   #define errcheck(indx,err)
   #define errcheck_o(indx,err)
 #endif
+
+namespace enigma_user
+{
 
 int room_goto(int indx)
 {
@@ -386,11 +399,16 @@ int room_set_view_enabled(int indx, int val)
     return 1;
 }
 
+}
+
 namespace enigma
 {
     bool tile_alter = false;
     bool instance_alter = false;
 }
+
+namespace enigma_user
+{
 
 int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color)
 {
@@ -650,18 +668,19 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
     return 1;
 }
 
+}
+
 namespace enigma
 {
   void room_update()
   {
-    enigma_user::window_set_caption(room_caption);
+    using namespace enigma_user;
+    window_set_caption(room_caption);
     if (view_enabled)
     {
       for (int i=0;i<8;i++)
       if (view_visible[i])
       {
-        using enigma_user::mouse_x;
-        using enigma_user::mouse_y;
         if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i]
         &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
           mouse_x=view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
@@ -673,7 +692,7 @@ namespace enigma
   }
   void rooms_switch()
   {
-    if (room_exists(room_switching_id)) {
+    if (enigma_user::room_exists(room_switching_id)) {
       int local_room_switching_id = room_switching_id;
       bool local_room_switching_restartgame = room_switching_restartgame;
       room_switching_id = -1;

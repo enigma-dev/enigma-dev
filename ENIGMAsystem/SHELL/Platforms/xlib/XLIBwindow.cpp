@@ -193,16 +193,14 @@ static int getWindowDimension(int i)
 	return i?(i==1?pwa.y+wa.y:-1):pwa.x+wa.x;
 }
 
-//Getters
-namespace enigma_user {
-int window_get_x()      { return getWindowDimension(0); }
-int window_get_y()      { return getWindowDimension(1); }
-}
-int window_get_width()  { return getWindowDimension(2); }
-int window_get_height() { return getWindowDimension(3); }
-
 namespace enigma_user
 {
+
+//Getters
+int window_get_x()      { return getWindowDimension(0); }
+int window_get_y()      { return getWindowDimension(1); }
+int window_get_width()  { return getWindowDimension(2); }
+int window_get_height() { return getWindowDimension(3); }
 
 //Setters
 void window_set_position(int x,int y)
@@ -293,11 +291,11 @@ void window_set_cursor(int c)
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
 }
 
-}
-
 // FIXME: MOVEME: I can't decide where the hell to put this.
 void screen_refresh() {
 	glXSwapBuffers(disp,win);
+}
+
 }
 
 namespace enigma
@@ -373,7 +371,10 @@ namespace enigma
 
 #include <sys/time.h>
 
-extern double fps;
+namespace enigma_user {
+  extern double fps;
+}
+
 namespace enigma {
   string* parameters;
   unsigned int parameterc;
@@ -437,8 +438,6 @@ int window_get_region_height()
     return window_get_height();
 }
 
-}
-
 int window_get_region_width_scaled()
 {
     return window_get_width();
@@ -448,9 +447,6 @@ int window_get_region_height_scaled()
 {
     return window_get_height();
 }
-
-namespace enigma_user
-{
 
 string parameter_string(unsigned num) {
   return num < enigma::parameterc ? enigma::parameters[num] : "";

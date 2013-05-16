@@ -31,7 +31,9 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;
+}
 #include "../General/GLsurface.h"
 
 #ifdef DEBUG_MODE
@@ -62,6 +64,9 @@ namespace enigma
   surface **surface_array;
   int surface_max=0;
 }
+
+namespace enigma_user
+{
 
 bool surface_is_supported()
 {
@@ -542,6 +547,8 @@ int surface_get_bound()
     return prevFbo;
 }
 
+}
+
 //////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
 //Fuck whoever did this to the spec
 #ifndef GL_BGR
@@ -549,6 +556,9 @@ int surface_get_bound()
 #endif
 
 #include "Universal_System/estring.h"
+
+namespace enigma_user
+{
 
 int surface_save(int id, string filename)
 {
@@ -722,3 +732,6 @@ void surface_copy(int destination,double x,double y,int source)
 	glRasterPos2d(0, 0);
 	delete[] surfbuf;
 }
+
+}
+

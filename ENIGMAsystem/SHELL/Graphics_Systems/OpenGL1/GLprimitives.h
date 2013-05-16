@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+namespace enigma_user
+{
+
 const int pr_pointlist      =1;     //GL_POINTS
 const int pr_linelist       =2;     //GL_LINES
 const int pr_linestrip      =3;     //GL_LINE_STRIP
@@ -50,3 +53,6 @@ void d3d_vertex_normal(double x, double y, double z, double nx, double ny, doubl
 void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha);
 void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty);
 void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha);
+
+}
+

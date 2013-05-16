@@ -87,8 +87,6 @@ void instance_activate_object(int obj) {
     }
 }
 
-}
-
 void instance_destroy(int id, bool dest_ev)
 {
   enigma::object_basic* who = enigma::fetch_instance_by_id(id);
@@ -99,9 +97,6 @@ void instance_destroy(int id, bool dest_ev)
         who->unlink();
   }
 }
-
-namespace enigma_user
-{
 
 void instance_destroy()
 {

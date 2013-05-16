@@ -153,6 +153,6 @@ void destroy_bbox_point(const enigma::object_collisions* inst, double ox, double
     const bbox_rect_t &box = inst->$bbox_relative();
     if (x < box.right + ox && x > box.left + ox && y < box.bottom + oy && y > box.top + oy)
     {
-        instance_destroy(inst->id);
+        enigma_user::instance_destroy(inst->id);
     }
 }

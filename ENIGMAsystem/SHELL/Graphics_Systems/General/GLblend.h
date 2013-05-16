@@ -26,6 +26,9 @@ int draw_set_blend_mode_ext(ARG src,ARG2 dest)
 
 \******************************************************************************/
 
+namespace enigma_user
+{
+
 enum {
   bm_normal   = 0,
   bm_add      = 1,
@@ -57,3 +60,6 @@ int draw_set_blend_mode(int mode);
 @return
 **/
 int draw_set_blend_mode_ext(double src,double dest);
+
+}
+

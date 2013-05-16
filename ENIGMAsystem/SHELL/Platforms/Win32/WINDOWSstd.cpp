@@ -75,13 +75,18 @@ namespace enigma
     #endif
 }
 
+namespace enigma_user {
 void screen_refresh() {
     SwapBuffers(enigma::window_hDC);
+}
 }
 
 void enigma_catchmouse_backend(bool x) {
   if (x) SetCapture(enigma::hWnd); else ReleaseCapture();
 }
+
+namespace enigma_user
+{
 
 int sleep(int millis)
 {
@@ -97,3 +102,6 @@ void set_synchronization(bool enable)
     if (strstr(extensions, "WGL_EXT_swap_control") and (f = (fp)wglGetProcAddress( "wglSwapIntervalEXT" )))
         f(enable);*/
 }  //TODO: Needs to be rewritten
+
+}
+

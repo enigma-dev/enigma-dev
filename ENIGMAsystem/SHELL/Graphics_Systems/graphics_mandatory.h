@@ -58,6 +58,9 @@ namespace enigma
 }
 // These functions are available to the user to be called on a whim.
 
+namespace enigma_user
+{
+
 // Called at random. Maybe.
 std::string draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
 
@@ -71,3 +74,6 @@ void screen_init();
 
 int background_get_width(int backId);
 int background_get_height(int backId);
+
+}
+

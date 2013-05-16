@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+namespace enigma_user
+{
+
 enum {
   c_aqua    = 0xFFFF00,
   c_black   = 0x000000,
@@ -158,3 +161,6 @@ int make_color_hsv(int hue,int saturation,int value);
 /** description
 **/
 void draw_unbind_all();
+
+}
+

@@ -411,8 +411,6 @@ void path_reverse(unsigned pathid)
     enigma::path_recalculate(pathid);
 }
 
-}
-
 //Declare drawing functions here, so it works no matter if GL, GLES or D3D is used
 void draw_spline_begin(int mode);
 int draw_spline_vertex(float x, float y);
@@ -468,3 +466,6 @@ void draw_path(unsigned pathid,double x,double y,bool absolute)
         draw_primitive_end();
     }
 }
+
+}
+

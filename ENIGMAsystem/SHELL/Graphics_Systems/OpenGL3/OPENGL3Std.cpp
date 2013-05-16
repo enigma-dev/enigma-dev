@@ -48,6 +48,8 @@ namespace enigma
     glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
 
+      using enigma_user::room_width;
+      using enigma_user::room_height;
       glViewport(0,0,(int)room_width,(int)room_height);
       glOrtho(-1,(int)room_width,-1,(int)room_height,0,1);
       glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -71,6 +73,7 @@ namespace enigma
   }
 }
 
+namespace enigma_user {
 // Stolen entirely from the documentation and thrown into a switch() structure.
 string draw_get_graphics_error()
 {
@@ -88,3 +91,5 @@ string draw_get_graphics_error()
   }
   return "Unspecified error.";
 }
+}
+

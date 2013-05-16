@@ -51,13 +51,18 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-extern int room_width, room_height;
+namespace enigma_user {
+  extern int room_width, room_height;
+}
 namespace enigma {
   extern size_t background_idmax;
 }
 
 #include "../General/GLbinding.h"
 #include <string.h> // needed for querying ARB extensions
+
+namespace enigma_user
+{
 
 void draw_background(int back, double x, double y)
 {
@@ -473,3 +478,6 @@ double background_get_texture_height_factor(int backId) {
   get_backgroundnv(bck2d,backId,-1);
   return bck2d->texbordy;
 }
+
+}
+

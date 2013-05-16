@@ -18,6 +18,9 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GLblend.h"
 
+namespace enigma_user
+{
+
 int draw_set_blend_mode(int mode){
 	switch (mode)
 	{
@@ -45,3 +48,6 @@ int draw_set_blend_mode_ext(double src,double dest){
 	glBlendFunc(blendequivs[((int)src-1)%10],blendequivs[((int)dest-1)%10]);
 	return 0;
 }
+
+}
+

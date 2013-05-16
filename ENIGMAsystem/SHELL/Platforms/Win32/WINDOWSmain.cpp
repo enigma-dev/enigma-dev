@@ -174,7 +174,7 @@ namespace enigma {
 #include <mmsystem.h>
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
-    int wid = (int)room_width, hgt = (int)room_height;
+    int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     enigma::hInstance = hInstance;
     //enigma::main_argc = argc;
     //enigma::main_argv = argv;

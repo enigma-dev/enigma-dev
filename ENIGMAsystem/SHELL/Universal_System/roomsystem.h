@@ -30,6 +30,9 @@
 
 #include "var4.h"
 
+namespace enigma_user
+{
+
 int room_goto(int roomind);
 int room_restart();
 string room_get_name(int index);
@@ -84,9 +87,15 @@ int room_count();
 
 extern int view_current;
 extern int view_enabled;
+
+}
+
 typedef var rvt;
+
+namespace enigma_user {
 extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible,
            view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
+}
 
 
 namespace enigma
@@ -153,5 +162,7 @@ namespace enigma { struct roomv: multifunction_variant {
   INHERIT_OPERATORS(roomv);
   void function(variant oldval);
 }; }
-extern enigma::roomv room;
+namespace enigma_user {
+  extern enigma::roomv room;
+}
 #endif

@@ -17,6 +17,9 @@
 
 #include "Universal_System/spritestruct.h"
 
+namespace enigma_user
+{
+
 void draw_sprite(int spr,int subimg,double x,double y);
 void draw_sprite_stretched(int spr,int subimg,double x,double y,double w,double h);
 //enigma::4args int draw_sprite_tiled(ARG sprite,ARG2 subimg,ARG3 x,ARG4 y)
@@ -32,3 +35,6 @@ void draw_sprite_tiled(int spr,int subimg,double x,double y);
 void draw_sprite_tiled_ext(int spr,int subimg,double x,double y,double xscale,double yscale,int color,double alpha);
 
 bool sprite_exists(int sprite);
+
+}
+

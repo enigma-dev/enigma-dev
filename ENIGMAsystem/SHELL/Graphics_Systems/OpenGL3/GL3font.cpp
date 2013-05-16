@@ -45,8 +45,11 @@ const int fa_top = 0;
 const int fa_middle = 1;
 const int fa_bottom = 2;*/
 
-unsigned halign = fa_left; //default alignment
-unsigned valign = fa_top; //default alignment
+unsigned halign = enigma_user::fa_left; //default alignment
+unsigned valign = enigma_user::fa_top; //default alignment
+
+namespace enigma_user
+{
 
 void draw_set_halign(unsigned align){
     halign = align;
@@ -60,6 +63,8 @@ unsigned draw_get_halign(){
 }
 unsigned draw_get_valign(){
     return valign;
+}
+
 }
 
 #ifdef DEBUG_MODE
@@ -89,6 +94,10 @@ unsigned draw_get_valign(){
 #endif
 
 ///////////////////////////////////////////////////
+
+namespace enigma_user
+{
+
 unsigned int string_width_line(variant vstr, int line)
 {
   string str = toString(vstr);
@@ -254,7 +263,13 @@ unsigned int string_height_ext(variant vstr, int sep, int w)
   return height;
 }
 
+}
+
 ////////////////////////////////////////////////////
+
+namespace enigma_user
+{
+
 void draw_text(int x,int y,variant vstr)
 {
   #ifdef CODEBLOX
@@ -1145,5 +1160,7 @@ void draw_set_font(int fnt) {
 
 int draw_get_font() {
   return enigma::currentfont;
+}
+
 }
 

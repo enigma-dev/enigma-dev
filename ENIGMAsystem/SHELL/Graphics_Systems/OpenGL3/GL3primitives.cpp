@@ -55,6 +55,9 @@ int prim_draw_texture = -1;
 int prim_d3d_model = -1;
 int prim_d3d_texture = -1;
 
+namespace enigma_user
+{
+
 int draw_primitive_begin(int kind)
 {
   prim_draw_texture = -1;
@@ -202,3 +205,6 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
 {
   d3d_model_vertex_normal_texture_color(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty, color, alpha);
 }
+
+}
+

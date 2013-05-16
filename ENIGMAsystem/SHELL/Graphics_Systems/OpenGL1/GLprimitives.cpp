@@ -49,6 +49,9 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
+namespace enigma_user
+{
+
 int draw_primitive_begin(int dink)
 {
 	texture_reset();
@@ -173,3 +176,6 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
 }
+
+}
+

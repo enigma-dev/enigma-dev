@@ -80,13 +80,13 @@ static bool cmp_highscore( const playerScore& a, const playerScore& b ) {
 
 }
 
+namespace enigma_user
+{
+
 extern int room_width;
 extern int room_height;
 
 void screen_refresh();
-
-namespace enigma_user
-{
 
 void io_handle();
 
@@ -172,10 +172,13 @@ std::string highscore_name(int place) {
 }
 
 #include "var4.h"
+
+namespace enigma_user
+{
+
 void draw_text(int x,int y,variant str);
 int string_width(variant str);
 
-namespace enigma_user {
 void draw_highscore(int x1, int y1, int x2, int y2) {
 
     for (size_t i=0; i<enigma::highscore_list.size(); i++) {
@@ -183,5 +186,6 @@ void draw_highscore(int x1, int y1, int x2, int y2) {
         draw_text(x2-string_width(toString((var)enigma::highscore_list[i].player_score)), (i*((y2-y1)/10))+y1+10 , toString((var)enigma::highscore_list[i].player_score));
     }
 }
+
 }
 

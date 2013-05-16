@@ -18,6 +18,9 @@
 #include "../General/OpenGLHeaders.h"
 #include "GL3enable.h"
 
+namespace enigma_user
+{
+
 void gs_enable_alpha(bool enable) {
   (enable?glEnable:glDisable)(GL_ALPHA_TEST);
 }//If enabled, do alpha testing. See glAlphaFunc.
@@ -67,3 +70,6 @@ void gs_enable_stencil(bool enable) {
 void gs_enable_texture(bool enable) {
   (enable?glEnable:glDisable)(GL_TEXTURE_2D);
 }//If enabled, textures
+
+}
+

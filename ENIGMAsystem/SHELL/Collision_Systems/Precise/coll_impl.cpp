@@ -783,7 +783,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
             unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
             if (pixels == 0) { //bbox.
-                instance_destroy(inst->id);
+                enigma_user::instance_destroy(inst->id);
             }
             else { //precise.
                 //Intersection.
@@ -811,7 +811,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
                 );
 
                 if (coll_result) {
-                    instance_destroy(inst->id);
+                    enigma_user::instance_destroy(inst->id);
                 }
             }
         }
@@ -844,7 +844,7 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
             unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
             if (pixels == 0) { //bbox.
-                instance_change(obj, perf);
+                enigma::instance_change_inst(obj, perf, inst);
             }
             else { //precise.
                 //Intersection.

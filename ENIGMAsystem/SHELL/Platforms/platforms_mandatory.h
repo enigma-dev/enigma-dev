@@ -66,10 +66,10 @@ void window_default();
 int window_mouse_get_x();
 int window_mouse_get_y();
 
-}
-
 // These two are used by screen_redraw for view calculations and such.
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
+
+}
 
 #endif

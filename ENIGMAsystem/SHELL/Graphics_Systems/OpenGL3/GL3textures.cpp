@@ -27,7 +27,9 @@
 
 vector<GmTexture*> GmTextures(0);
 
-extern int room_width, room_height;
+namespace enigma_user {
+  extern int room_width, room_height;
+}
 namespace enigma {
   extern size_t background_idmax;
 }
@@ -173,6 +175,9 @@ namespace enigma
     return ret;
   }
 }
+
+namespace enigma_user
+{
 
 void texture_set_enabled(bool enable)
 {
@@ -326,6 +331,8 @@ bool  texture_multitexture_supported()
 
 void texture_multitexture_enable(bool enable)
 {
+
+}
 
 }
 

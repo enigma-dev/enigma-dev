@@ -64,7 +64,7 @@ namespace enigma
 
             if (!pt->is_particle_sprite) { // Draw sprite.
                 int sprite_id = pt->sprite_id;
-                if (!sprite_exists(sprite_id)) return; // NOTE: Skip to next particle.
+                if (!enigma_user::sprite_exists(sprite_id)) return; // NOTE: Skip to next particle.
                 int subimg;
                 if (!pt->sprite_animated) {
                     subimg = it->sprite_subimageindex_initial;
@@ -90,7 +90,7 @@ namespace enigma
                 else {
                     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
                 }
-                draw_sprite_ext(sprite_id, subimg, x, y, xscale, yscale, rot_degrees, color, alpha/255.0);
+                enigma_user::draw_sprite_ext(sprite_id, subimg, x, y, xscale, yscale, rot_degrees, color, alpha/255.0);
             }
             else { // Draw particle sprite.
 

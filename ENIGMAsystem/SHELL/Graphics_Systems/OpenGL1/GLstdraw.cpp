@@ -31,6 +31,9 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
+namespace enigma_user
+{
+
 void draw_set_line_pattern(unsigned short pattern, int scale)
 {
   if (pattern == -1)
@@ -649,10 +652,15 @@ void draw_healthbar(float x1,float y1,float x2,float y2,float amount,int backcol
   glColor4ubv(enigma::currentcolor);
 }
 
+}
+
 //#include <endian.h>
 //TODO: Though serprex, the author of the function below, never included endian.h,
 //   // Doing so is necessary for the function to work at its peak.
 //   // When ENIGMA generates configuration files, one should be included here.
+
+namespace enigma_user
+{
 
 int draw_getpixel(int x,int y)
 {
@@ -669,7 +677,7 @@ int draw_getpixel(int x,int y)
         y = room_height - y - 1;
         if (x < 0) x = 0;
         if (y < 0) y = 0;
-        if (x > room_width || y > room_height) return 0;
+        if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
     }
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
@@ -705,5 +713,7 @@ int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned i
       }
     glEnd();
     return c;
+}
+
 }
 

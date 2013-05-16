@@ -47,11 +47,11 @@ enigma::instance_t instance_create(int x,int y,int object)
 
 inline void action_change_object(int obj, bool perf) {instance_change(obj,perf);}
 
-}
-
 void instance_change(int obj, bool perf) {
     enigma::object_graphics* inst = (enigma::object_graphics*) enigma::instance_event_iterator->inst;
     enigma::instance_change_inst(obj, perf, inst);
+}
+
 }
 
 namespace enigma {

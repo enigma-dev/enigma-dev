@@ -43,6 +43,18 @@ using namespace enigma;
 
 static inline void draw_back()
 {
+    using enigma_user::background_x;
+    using enigma_user::background_y;
+    using enigma_user::background_visible;
+    using enigma_user::background_alpha;
+    using enigma_user::background_xscale;
+    using enigma_user::background_yscale;
+    using enigma_user::background_htiled;
+    using enigma_user::background_vtiled;
+    using enigma_user::background_index;
+    using enigma_user::background_coloring;
+    using enigma_user::draw_background_tiled_ext;
+    using enigma_user::draw_background_ext;
     //Draw backgrounds
     for (int back_current=0; back_current<7; back_current++)
     {
@@ -77,6 +89,9 @@ namespace enigma
         }
     }
 }
+
+namespace enigma_user
+{
 
 void screen_redraw()
 {
@@ -387,3 +402,6 @@ void screen_init()
         }
     }
 }
+
+}
+

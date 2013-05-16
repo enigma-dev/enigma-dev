@@ -85,7 +85,7 @@ namespace enigma
                 for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
                 {
                     tile t = dit->second.tiles[i];
-                    draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    enigma_user::draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
                 }
                 glEndList();
             }
@@ -114,13 +114,16 @@ namespace enigma
                 for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
                 {
                     tile t = dit->second.tiles[i];
-                    draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    enigma_user::draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
                 }
                 glEndList();
             }
         glPopAttrib();
     }
 }
+
+namespace enigma_user
+{
 
 int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, int alpha, int color)
 {
@@ -543,3 +546,6 @@ bool tile_layer_shift(int layer_depth, int x, int y)
         }
     return false;
 }
+
+}
+

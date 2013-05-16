@@ -92,7 +92,7 @@ class Mesh
   bool vbobuffered;
   int vbotype;
 
-  Mesh(int vbot = vbo_static)
+  Mesh(int vbot = enigma_user::vbo_static)
   {
     currentPrimitive = 0;
     vbotype = vbot;
@@ -253,6 +253,9 @@ class Mesh
 };
 
 vector<Mesh*> meshes;
+
+namespace enigma_user
+{
 
 unsigned int d3d_model_create(int vbot)
 {
@@ -781,3 +784,6 @@ void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, dou
   d3d_model_vertex_normal_texture(id, x2, y2, z2, hrep, vrep, normal[0], normal[1], normal[2]);
   d3d_model_primitive_end(id);
 }
+
+}
+

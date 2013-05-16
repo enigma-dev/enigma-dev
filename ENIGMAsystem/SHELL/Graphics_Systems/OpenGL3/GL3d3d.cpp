@@ -45,6 +45,9 @@ GLenum renderstates[22] = {
   GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS
 };
 
+namespace enigma_user
+{
+
 void d3d_start()
 {
   // Set global ambient lighting to nothing.
@@ -221,10 +224,15 @@ void d3d_set_shading(bool smooth)
     glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
 }
 
+}
+
 extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
 }
+
+namespace enigma_user
+{
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
@@ -690,9 +698,14 @@ void d3d_transform_set_rotation_axis(double x, double y, double z, double angle)
   glMultMatrixd(transformation_matrix);
 }
 
+}
+
 #include <stack>
 stack<bool> trans_stack;
 int trans_stack_size = 0;
+
+namespace enigma_user
+{
 
 bool d3d_transform_stack_push()
 {
@@ -747,6 +760,9 @@ bool d3d_transform_stack_disgard()
     trans_stack_size--;
     return true;
 }
+
+}
+
 // ***** TRANSFORMATIONS END *****
 
 // ***** LIGHTS BEGIN *****
@@ -906,6 +922,9 @@ class d3d_lights
     }
 } d3d_lighting;
 
+namespace enigma_user
+{
+
 bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col)
 {
     return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
@@ -941,6 +960,8 @@ void d3d_light_define_ambient(int col)
 bool d3d_light_enable(int id, bool enable)
 {
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
+}
+
 }
 
 namespace enigma {

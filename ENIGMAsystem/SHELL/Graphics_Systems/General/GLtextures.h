@@ -42,14 +42,20 @@ struct GmTexture {
 };
 extern vector<GmTexture*> GmTextures;
 
+
+namespace enigma_user {
 enum {
   tx_none,
   tx_nearest,
   tx_bilinear,
   tx_trilinear
 };
+}
 
 unsigned get_texture(int texid); // fail safe macro
+
+namespace enigma_user
+{
 
 /** description
 @param enable
@@ -135,5 +141,7 @@ bool texture_multitexture_supported();
 @param enable
 **/
 void texture_multitexture_enable(bool enable);
+
+}
 
 #endif

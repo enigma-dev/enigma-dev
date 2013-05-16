@@ -223,8 +223,8 @@ int main(int argc,char** argv)
 	unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
 
 	//default window size
-	int winw = room_width;
-	int winh = room_height;
+	int winw = enigma_user::room_width;
+	int winh = enigma_user::room_height;
 	win = XCreateWindow(disp,root,0,0,winw,winh,0,vi->depth,InputOutput,vi->visual,valmask,&swa);
 	XMapRaised(disp,win); //request visible
 
@@ -337,15 +337,18 @@ int main(int argc,char** argv)
 	return 0;
 }
 
-namespace enigma_user {
+namespace enigma_user
+{
+
 void game_end() {
   game_isending = true;
 }
 void action_end_game() {
   game_end();
 }
-}
 
 int display_get_width() { return XWidthOfScreen(screen); }
 int display_get_height() { return XHeightOfScreen(screen); }
+
+}
 

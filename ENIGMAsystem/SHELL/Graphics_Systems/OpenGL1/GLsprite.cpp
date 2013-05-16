@@ -61,6 +61,9 @@ using std::string;
     const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
+namespace enigma_user
+{
+
 bool sprite_exists(int spr) {
     return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
 }
@@ -312,6 +315,8 @@ void draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,dou
 	glPopAttrib();
 }
 
+}
+
 // These two leave a bad taste in my mouth because they depend on views, which should be removable.
 // However, for now, they stay.
 
@@ -319,6 +324,9 @@ void draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,dou
 using std::string;
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
+
+namespace enigma_user
+{
 
 void draw_sprite_tiled(int spr,int subimg,double x,double y)
 {
@@ -406,3 +414,6 @@ void draw_sprite_tiled_ext(int spr,int subimg,double x,double y, double xscale,d
 
     glPopAttrib();
 }
+
+}
+

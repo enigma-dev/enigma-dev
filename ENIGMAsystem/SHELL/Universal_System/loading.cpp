@@ -107,7 +107,7 @@ namespace enigma
     enigma::rooms_load();
 
     //Go to the first room
-    if (room_count)
+    if (enigma_user::room_count)
       enigma::game_start();
 
     enigma::game_settings_initialize();

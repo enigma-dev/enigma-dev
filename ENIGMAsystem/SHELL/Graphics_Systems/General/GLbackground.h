@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+namespace enigma_user
+{
+
 /** description
 @param backId The index of the background asset.
 @return
@@ -160,3 +163,6 @@ void draw_background_tiled_area_ext(int back,double x,double y,double x1,double 
 @param a4
 **/
 void draw_background_general(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4);
+
+}
+

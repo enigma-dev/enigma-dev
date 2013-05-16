@@ -78,18 +78,14 @@ void display_mouse_set(double x,double y);
 ////////////
 //int getWindowDimension(int i);
 
-
-//Getters
-namespace enigma_user {
-int window_get_x();
-int window_get_y();
-}
-
-int window_get_width();
-int window_get_height();
-
 namespace enigma_user
 {
+
+//Getters
+int window_get_x();
+int window_get_y();
+int window_get_width();
+int window_get_height();
 
 //Setters
 void window_set_position(int x,int y);
@@ -156,10 +152,10 @@ int window_get_region_width();
 int window_get_region_height();
 void window_default();
 
-}
-
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
+
+}
 
 /*
 display_get_width() // Returns the width of the display in pixels.

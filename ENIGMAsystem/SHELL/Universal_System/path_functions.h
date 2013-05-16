@@ -67,7 +67,6 @@ double path_get_x(unsigned pathid, double t);
 double path_get_y(unsigned pathid, double t);
 double path_get_speed(unsigned pathid, double t);
 double path_get_direction(unsigned pathid, double t);
-}
-
 void draw_path(unsigned path,double x,double y,bool absolute);
+}
 

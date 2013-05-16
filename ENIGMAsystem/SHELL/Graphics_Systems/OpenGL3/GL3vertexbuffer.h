@@ -23,10 +23,12 @@ using std::vector;
 
 extern GLenum vbotypes[];
 
+namespace enigma_user {
 enum {
   vbo_static,
   vbo_dynamic,
   vbo_stream
 };
+}
 
 #endif

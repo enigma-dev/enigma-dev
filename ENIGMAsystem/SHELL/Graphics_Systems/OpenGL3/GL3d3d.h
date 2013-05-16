@@ -22,6 +22,7 @@ namespace enigma {
 }
 
 // ***** RENDER STATE MODE CONSTANTS *****
+namespace enigma_user {
 enum {
   rs_fill,
   rs_line,
@@ -46,10 +47,14 @@ enum {
   rs_gequal, 	// source Z >= depth Z
   rs_always     // Always True
 };
+}
 
 extern bool d3dMode;
 extern double projection_matrix[16];
 extern double transformation_matrix[16];
+
+namespace enigma_user
+{
 
 /** Starts 3D mode.
 **/
@@ -143,3 +148,6 @@ void d3d_light_shininess(int facemode, int shine);
 void d3d_light_define_ambient(int col);
 bool d3d_light_enable(int id, bool enable);
 // ***** LIGHTS END *****
+
+}
+

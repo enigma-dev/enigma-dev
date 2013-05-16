@@ -174,8 +174,6 @@ int window_get_y()
     return enigma::windowY;
 }
 
-}
-
 int window_get_width()
 {
     return enigma::windowWidth;
@@ -185,9 +183,6 @@ int window_get_height()
 {
     return enigma::windowHeight;
 }
-
-namespace enigma_user
-{
 
 void window_set_caption(char* caption)
 {
@@ -408,8 +403,6 @@ int window_get_region_height()
     return enigma::regionHeight;
 }
 
-}
-
 int window_get_region_width_scaled()
 {
     return enigma::scaledWidth;
@@ -419,9 +412,6 @@ int window_get_region_height_scaled()
 {
     return enigma::scaledHeight;
 }
-
-namespace enigma_user
-{
 
 int display_mouse_get_x()
 {
