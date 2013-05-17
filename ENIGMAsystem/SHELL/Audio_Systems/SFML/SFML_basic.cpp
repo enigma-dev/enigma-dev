@@ -15,7 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifdef _WIN32 #define SFML_STATIC 
+#ifdef _WIN32 
+#define SFML_STATIC 
 
 #include <SFML/Audio.hpp>
 #include <vector>
