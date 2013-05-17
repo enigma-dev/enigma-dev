@@ -17,6 +17,7 @@
 
 #ifdef _WIN32 
 #define SFML_STATIC 
+#endif
 
 #include <SFML/Audio.hpp>
 #include <vector>
