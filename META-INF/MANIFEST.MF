@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+LGM-Plugin: com.alasdairmorrison.LGMUtility.LGMUtilityMain
+Class-Path: ../lgm16b4.jar enigma.jar
+Main-Class: com.alasdairmorrison.LGMUtility.LGMUtilityMain
+
