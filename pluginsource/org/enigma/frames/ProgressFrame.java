@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, 2009 IsmAvatar <IsmAvatar@gmail.com>
+ * Copyright (C) 2013, Robert B. Colton
  * 
  * This file is part of Enigma Plugin.
  * 
@@ -22,9 +23,16 @@ package org.enigma.frames;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -53,6 +61,41 @@ public class ProgressFrame extends JFrame implements OutputHandler
 		StyleConstants.setForeground(RED,Color.RED);
 		}
 
+	public AbstractAction aCopy = new AbstractAction("COPY")
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** @see AbstractAction#actionPerformed(ActionEvent) */
+	//r@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			ta.copy();
+		}
+	};
+	
+	public AbstractAction aSelAll = new AbstractAction("SELALL")
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** @see AbstractAction#actionPerformed(ActionEvent) */
+	//r@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			ta.selectAll();
+		}
+	};
+	
+	private static JMenuItem makeContextButton(Action a)
+	{
+	  String key = "EnigmaPlugin." + a.getValue(Action.NAME);
+	  JMenuItem b = new JMenuItem();
+	  b.setIcon(LGM.getIconForKey(key));
+	  b.setText(Messages.getString(key));
+	  b.setRequestFocusEnabled(false);
+	  b.addActionListener(a);
+		return b;
+	}
+	
 	public ProgressFrame()
 		{
 		super(Messages.getString("EnigmaFrame.TITLE")); //$NON-NLS-1$
@@ -68,6 +111,34 @@ public class ProgressFrame extends JFrame implements OutputHandler
 		pb.setString(Messages.getString("EnigmaFrame.STARTING")); //$NON-NLS-1$
 		p.add(pb,BorderLayout.SOUTH);
 
+	    // build popup menu
+	    final JPopupMenu popup = new JPopupMenu();
+	    
+
+		popup.add(makeContextButton(aCopy));
+		popup.addSeparator();
+		popup.add(makeContextButton(aSelAll));
+			
+	    ta.setComponentPopupMenu(popup);
+	    ta.addMouseListener(new MouseAdapter() {
+
+	    	@Override
+	    	public void mousePressed(MouseEvent e) {
+	        showPopup(e);
+	    	}
+
+	    	@Override
+	    	public void mouseReleased(MouseEvent e) {
+	        showPopup(e);
+	    	}
+
+	    	private void showPopup(MouseEvent e) {
+	    		if (e.isPopupTrigger()) {
+	    			popup.show(e.getComponent(), e.getX(), e.getY());
+	    		}
+	    	}
+		});
+		
 		setContentPane(p);
 		pack();
 		setLocationRelativeTo(null);
