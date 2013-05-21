@@ -8,6 +8,9 @@
 
 package org.enigma.backend;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Library;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
@@ -19,6 +22,12 @@ public interface EnigmaDriver extends Library
 		public String errorString;
 		public int line, position;
 		public int absoluteIndex;
+
+		@Override
+		protected List<String> getFieldOrder()
+			{
+			return Arrays.asList("errorString","line","position","absoluteIndex");
+			}
 		}
 
 	public String libInit(EnigmaCallbacks ef);

@@ -8,6 +8,9 @@
 
 package org.enigma.backend.sub;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class Action extends Structure
@@ -18,4 +21,10 @@ public class Action extends Structure
 	int appliesToObjectId;
 
 	//	Argument[] arguments;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("relative","not","appliesToObjectId");
+		}
 	}

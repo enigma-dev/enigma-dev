@@ -8,6 +8,9 @@
 
 package org.enigma.backend.sub;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class Instance extends Structure
@@ -18,6 +21,12 @@ public class Instance extends Structure
 	public int id;
 	public String creationCode;
 	public boolean locked;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("x","y","objectId","id","creationCode","locked");
+		}
 
 	public static class ByReference extends Instance implements Structure.ByReference
 		{

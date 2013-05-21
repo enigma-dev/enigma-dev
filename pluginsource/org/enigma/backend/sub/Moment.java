@@ -8,12 +8,21 @@
 
 package org.enigma.backend.sub;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class Moment extends Structure
 	{
 	public int stepNo;
 	public String code;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("stepNo","code");
+		}
 
 	public static class ByReference extends Moment implements Structure.ByReference
 		{

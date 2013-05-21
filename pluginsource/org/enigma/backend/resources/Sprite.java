@@ -8,6 +8,9 @@
 
 package org.enigma.backend.resources;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.enigma.backend.sub.SubImage;
 import org.enigma.backend.util.Polygon;
 
@@ -37,6 +40,14 @@ public class Sprite extends Structure
 
 	public Polygon.ByReference maskShapes;
 	public int maskShapeCount;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","id","transparent","shape","alphaTolerance","separateMask",
+				"smoothEdges","preload","originX","originY","bbMode","bbLeft","bbRight","bbTop","bbBottom",
+				"subImages","subImageCount","maskShapes","maskShapeCount");
+		}
 
 	public static class ByReference extends Sprite implements Structure.ByReference
 		{

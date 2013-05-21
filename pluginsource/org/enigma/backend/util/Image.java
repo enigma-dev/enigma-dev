@@ -9,6 +9,8 @@
 package org.enigma.backend.util;
 
 import java.nio.Buffer;
+import java.util.Arrays;
+import java.util.List;
 
 import com.sun.jna.Structure;
 
@@ -18,6 +20,12 @@ public class Image extends Structure
 	public int height;
 	public Buffer data; //zlib compressed RGBA
 	public int dataSize;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("width","height","data","dataSize");
+		}
 
 	public static class ByReference extends Image implements Structure.ByReference
 		{

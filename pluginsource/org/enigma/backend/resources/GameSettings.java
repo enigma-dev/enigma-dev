@@ -8,6 +8,9 @@
 
 package org.enigma.backend.resources;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class GameSettings extends Structure
@@ -68,4 +71,19 @@ public class GameSettings extends Structure
 	public String description;
 
 	public String gameIcon;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("gameId","startFullscreen","interpolate","dontDrawBorder","displayCursor",
+				"scaling","allowWindowResize","alwaysOnTop","colorOutsideRoom","setResolution",
+				"colorDepth","resolution","frequency","dontShowButtons","useSynchronization",
+				"disableScreensavers","letF4SwitchFullscreen","letF1ShowGameInfo","letEscEndGame",
+				"letF5SaveF6Load","letF9Screenshot","treatCloseAsEscape","gamePriority",
+				"freezeOnLoseFocus","loadBarMode","showCustomLoadImage","imagePartiallyTransparent",
+				"loadImageAlpha","scaleProgressBar","displayErrors","writeToLog","abortOnError",
+				"treatUninitializedAs0","author","version","lastChanged","information","includeFolder",
+				"overwriteExisting","removeAtGameEnd","versionMajor","versionMinor","versionRelease",
+				"versionBuild","company","product","copyright","description","gameIcon");
+		}
 	}

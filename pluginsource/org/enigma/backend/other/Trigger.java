@@ -8,6 +8,9 @@
 
 package org.enigma.backend.other;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class Trigger extends Structure
@@ -16,6 +19,12 @@ public class Trigger extends Structure
 	String condition;
 	int checkStep;
 	String constant;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","condition","checkStep","constant");
+		}
 
 	public static class ByReference extends Trigger implements Structure.ByReference
 		{

@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
@@ -42,6 +44,12 @@ public class EnigmaCallbacks extends Structure
 	public Callback ccf = new CloseFile(); //void (*ccf) (void)
 	public Callback cex = new Execute(); //int (*cex) (String, String[], boolean)
 	public Callback ccd = new CompressData(); //Image* (*ccd) (byte[], int)
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("coo","coa","cock","cop","cot","cof","ccf","cex","ccd");
+		}
 
 	public static interface OutputHandler
 		{

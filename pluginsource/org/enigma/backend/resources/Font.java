@@ -8,6 +8,9 @@
 
 package org.enigma.backend.resources;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.enigma.backend.sub.Glyph;
 
 import com.sun.jna.Structure;
@@ -25,6 +28,12 @@ public class Font extends Structure
 	public int rangeMax;
 
 	public Glyph.ByReference glyphs; //count = rangeMax - rangeMin
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","id","fontName","size","bold","italic","rangeMin","rangeMax","glyphs");
+		}
 
 	public static class ByReference extends Font implements Structure.ByReference
 		{

@@ -8,6 +8,9 @@
 
 package org.enigma.backend.resources;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.enigma.backend.sub.BackgroundDef;
 import org.enigma.backend.sub.Instance;
 import org.enigma.backend.sub.Tile;
@@ -61,6 +64,17 @@ public class Room extends Structure
 	public int instanceCount;
 	public Tile.ByReference tiles;
 	public int tileCount;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","id","caption","width","height","snapX","snapY","isometric",
+				"speed","persistent","backgroundColor","drawBackgroundColor","creationCode",
+				"rememberWindowSize","editorWidth","editorHeight","showGrid","showObjects","showTiles",
+				"showBackgrounds","showViews","deleteUnderlyingObjects","deleteUnderlyingTiles",
+				"currentTab","scrollBarX","scrollBarY","enableViews","backgroundDefs","backgroundDefCount",
+				"views","viewCount","instances","instanceCount","tiles","tileCount");
+		}
 
 	public static class ByReference extends Room implements Structure.ByReference
 		{
