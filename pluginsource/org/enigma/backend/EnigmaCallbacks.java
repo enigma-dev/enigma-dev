@@ -261,9 +261,10 @@ public class EnigmaCallbacks extends Structure
 					}
 				else
 					{
-					OutputStream os = new FileOutputStream(redir);
+					OutputStream os = null;
+					if (mod == '2' || mod == '&') os = new FileOutputStream(redir);
 					new Pump(in,mod == '2' ? null : os).start();
-					new Pump(er,mod == '2' || mod == '&' ? os : null).start();
+					new Pump(er,os).start();
 					}
 
 				if (wait) return pr.waitFor();
