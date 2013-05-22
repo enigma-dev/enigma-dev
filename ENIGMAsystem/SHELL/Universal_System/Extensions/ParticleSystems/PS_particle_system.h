@@ -35,10 +35,12 @@
 #include "PS_particle_changer.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_enums.h"
-#include "Graphics_Systems/OpenGL/GLcolors.h"
+#include "Graphics_Systems/General/GLcolors.h"
 #include <list>
 #include <vector>
 #include <map>
+
+using namespace enigma_user;
 
 namespace enigma
 {

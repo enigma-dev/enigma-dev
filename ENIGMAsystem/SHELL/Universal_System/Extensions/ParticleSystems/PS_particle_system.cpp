@@ -42,6 +42,13 @@ inline int bounds(int value, int low, int high)
   return value;
 }
 
+#include "PS_particle_instance.h"
+#include "PS_particle_sprites.h"
+namespace enigma {
+  void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
+        double x_offset, double y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape));
+}
+
 using enigma::pt_manager;
 
 namespace enigma

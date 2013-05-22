@@ -1,4 +1,5 @@
 #include "OPENGLStd.h"
+#include "Info/graphics_info.h"
 #include "../General/GLsprite.h"
 #include "../General/GLbackground.h"
 #include "../General/GLtextures.h"

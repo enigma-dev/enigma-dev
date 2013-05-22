@@ -28,7 +28,7 @@
 #include "PS_particle_type.h"
 #include "PS_particle_sprites.h"
 #include "PS_particle_enums.h"
-#include "Graphics_Systems/OpenGL/GLcolors.h"
+#include "Graphics_Systems/General/GLcolors.h"
 #include <cstddef>
 
 namespace enigma
@@ -62,9 +62,9 @@ namespace enigma
     pt->ang_incr = 0.0, pt->ang_wiggle = 0.0;
     pt->ang_relative = false;
     pt->c_mode = enigma::one_color;
-    pt->color1 = c_white;
-    pt->color2 = c_white;
-    pt->color3 = c_white;
+    pt->color1 = enigma_user::c_white;
+    pt->color2 = enigma_user::c_white;
+    pt->color3 = enigma_user::c_white;
     pt->rmin = 255, pt->rmax = 255, pt->gmin = 255, pt->gmax = 255, pt->bmin = 255, pt->bmax = 255;
     pt->hmin = 255, pt->hmax = 255, pt->smin = 255, pt->smax = 255, pt->vmin = 255, pt->vmax = 255;
     pt->a_mode = enigma::one_alpha;
@@ -86,6 +86,8 @@ namespace enigma
 }
 
 using enigma::particle_type;
+
+using namespace enigma_user;
 
 inline int bounds(int value, int low, int high)
 {
