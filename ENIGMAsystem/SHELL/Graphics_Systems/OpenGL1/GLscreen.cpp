@@ -95,11 +95,20 @@ namespace enigma_user
 
 void screen_redraw()
 {
+    int FBO;
     if (!view_enabled)
     {
         glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
-        glScalef(1, -1, 1);
+        if (GLEW_EXT_framebuffer_object)
+        {
+            glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
+            glScalef(1, (FBO==0?-1:1), 1);
+        }
+        else
+        {
+            glScalef(1, -1, 1);
+        }
         glOrtho(0, room_width, 0, room_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
@@ -248,7 +257,15 @@ void screen_redraw()
 
                 glViewport(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc]);
                 glLoadIdentity();
-                glScalef(1, -1, 1);
+                if (GLEW_EXT_framebuffer_object)
+                {
+                    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
+                    glScalef(1, (FBO==0?-1:1), 1);
+                }
+                else
+                {
+                    glScalef(1, -1, 1);
+                }
                 glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
                 glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                 glMultMatrixd(transformation_matrix);

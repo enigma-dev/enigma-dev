@@ -131,19 +131,6 @@ namespace enigma
     }
     //Backgrounds end
 
-    screen_init();
-
-    //Load tiles
-    delete_tiles();
-    drawing_depths.clear();
-    for (int i = 0; i < tilecount; i++)
-    {
-        tile t = tiles[i];
-        drawing_depths[t.depth].tiles.push_back(t);
-    }
-    load_tiles();
-
-      //Tiles end
     view_enabled = views_enabled;
 
     for (int i=0;i<8;i++)
@@ -157,7 +144,19 @@ namespace enigma
 
     enigma_user::window_default();
     enigma_user::io_clear();
+    screen_init();
     screen_refresh();
+
+    //Load tiles
+    delete_tiles();
+    drawing_depths.clear();
+    for (int i = 0; i < tilecount; i++)
+    {
+        tile t = tiles[i];
+        drawing_depths[t.depth].tiles.push_back(t);
+    }
+    load_tiles();
+    //Tiles end
 
     object_basic* is[instancecount];
     for (int i = 0; i<instancecount; i++) {
