@@ -57,6 +57,16 @@ namespace enigma {
     GLuint vao;
     GLuint shader_program;
     void initialize_particle_bridge() {
+
+      int major_version;
+      glGetIntegerv(GL_MAJOR_VERSION, &major_version);
+      if (major_version < 3) {
+        int minor_version;
+        glGetIntegerv(GL_MINOR_VERSION, &minor_version);
+        std::cerr << "Error: OpenGL 3.0 or more must be supported, but a smaller version number was found: " << major_version << "." << minor_version << std::endl;
+        exit(-1);
+      }
+
       glGenVertexArrays(1, &vao); // Allocate vertex array 1.
       glBindVertexArray(vao);
 
