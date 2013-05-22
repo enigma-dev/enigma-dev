@@ -15,8 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
+#include "../General/OpenGLHeaders.h"
 #include "GLenable.h"
+
+namespace enigma_user
+{
 
 void gs_enable_alpha(bool enable) {
   (enable?glEnable:glDisable)(GL_ALPHA_TEST);
@@ -67,3 +70,6 @@ void gs_enable_stencil(bool enable) {
 void gs_enable_texture(bool enable) {
   (enable?glEnable:glDisable)(GL_TEXTURE_2D);
 }//If enabled, textures
+
+}
+

@@ -37,8 +37,10 @@ namespace enigma {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern int game_settings_initialize();
 }
-extern int random_set_seed(int ss);
-extern int mtrandom_seed(int ss);
+namespace enigma_user {
+  extern int random_set_seed(int ss);
+  extern int mtrandom_seed(int ss);
+}
 
 //This is like main(), only cross-api
 namespace enigma
@@ -46,8 +48,8 @@ namespace enigma
   int initialize_everything()
   {
     time_t ss = time(0);
-    random_set_seed(ss);
-    mtrandom_seed(ss);
+    enigma_user::random_set_seed(ss);
+    enigma_user::mtrandom_seed(ss);
 
     graphicssystem_initialize();
     audiosystem_initialize();
@@ -105,7 +107,7 @@ namespace enigma
     enigma::rooms_load();
 
     //Go to the first room
-    if (room_count)
+    if (enigma_user::room_count)
       enigma::game_start();
 
     enigma::game_settings_initialize();

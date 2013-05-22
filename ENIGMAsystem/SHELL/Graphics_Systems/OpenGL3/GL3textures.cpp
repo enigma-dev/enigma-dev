@@ -16,18 +16,20 @@
 **/
 
 #include <stdio.h>
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include <string.h>
 //using std::string;
-#include "GL3textures.h"
+#include "../General/GLtextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "binding.h"
+#include "../General/GLbinding.h"
 
 vector<GmTexture*> GmTextures(0);
 
-extern int room_width, room_height;
+namespace enigma_user {
+  extern int room_width, room_height;
+}
 namespace enigma {
   extern size_t background_idmax;
 }
@@ -173,6 +175,9 @@ namespace enigma
     return ret;
   }
 }
+
+namespace enigma_user
+{
 
 void texture_set_enabled(bool enable)
 {
@@ -326,6 +331,8 @@ bool  texture_multitexture_supported()
 
 void texture_multitexture_enable(bool enable)
 {
+
+}
 
 }
 

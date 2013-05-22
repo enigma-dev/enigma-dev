@@ -25,6 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
+namespace enigma_user {
 
 enigma::instance_t instance_create(int x,int y,int object)
 {
@@ -44,12 +45,15 @@ enigma::instance_t instance_create(int x,int y,int object)
   return idn;
 }
 
-
 inline void action_change_object(int obj, bool perf) {instance_change(obj,perf);}
+
 void instance_change(int obj, bool perf) {
     enigma::object_graphics* inst = (enigma::object_graphics*) enigma::instance_event_iterator->inst;
     enigma::instance_change_inst(obj, perf, inst);
 }
+
+}
+
 namespace enigma {
     void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst) {
         if (inst->object_index == obj) return; //prevents infinite loop
@@ -96,6 +100,7 @@ namespace enigma {
     }
 }
 
+namespace enigma_user {
 void instance_copy(bool perf) {
     enigma::object_graphics* inst = (enigma::object_graphics*) enigma::instance_event_iterator->inst;
 
@@ -121,6 +126,7 @@ void instance_copy(bool perf) {
     newinst->image_index=inst->image_index; newinst->image_speed=inst->image_speed;
     newinst->visible=inst->visible; newinst->image_xscale=inst->image_xscale; newinst->image_yscale=inst->image_yscale; newinst->image_angle=inst->image_angle;
     newinst->hspeed=inst->hspeed; newinst->vspeed=inst->vspeed;
+}
 }
 
 namespace enigma

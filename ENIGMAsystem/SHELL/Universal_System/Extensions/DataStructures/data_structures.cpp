@@ -463,6 +463,9 @@ class grid
 static map<unsigned int, grid<variant> > ds_grids;
 static unsigned int ds_grids_maxid = 0;
 
+namespace enigma_user
+{
+
 unsigned int ds_grid_create(const unsigned int w, const unsigned int h)
 {
     //Creates a new grid. The function returns an integer as an id that must be used in all other functions to access the particular grid.
@@ -810,10 +813,15 @@ void ds_grid_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_maps */
 
 static map<unsigned int, multimap<variant, variant> > ds_maps;
 static unsigned int ds_maps_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_map_create()
 {
@@ -1102,10 +1110,15 @@ void ds_map_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_lists */
 
 static map<unsigned int, vector<variant> > ds_lists;
 static unsigned int ds_lists_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_list_create()
 {
@@ -1330,10 +1343,15 @@ void ds_list_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_prioritys */
 
 static map<unsigned int, multimap<variant, variant> > ds_prioritys;
 static unsigned int ds_prioritys_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_priority_create()
 {
@@ -1588,10 +1606,15 @@ void ds_priority_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_queues */
 
 static map<unsigned int, deque<variant> > ds_queues;
 static unsigned int ds_queues_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_queue_create()
 {
@@ -1763,10 +1786,15 @@ void ds_queue_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_stacks */
 
 static map<unsigned int, deque<variant> > ds_stacks;
 static unsigned int ds_stacks_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_stack_create()
 {
@@ -1929,5 +1957,7 @@ void ds_stack_read(const unsigned int id, std::string value)
 		// Push value
 		ds_stacks[id].push_back(vari);
 	}
+}
+
 }
 

@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+namespace enigma_user
+{
 
 void ini_open(std::string fname);
 void ini_close();
@@ -80,3 +82,6 @@ int parameter_count();
 std::string parameter_string(int n);
 
 std::string environment_get_variable(std::string name);
+
+}
+

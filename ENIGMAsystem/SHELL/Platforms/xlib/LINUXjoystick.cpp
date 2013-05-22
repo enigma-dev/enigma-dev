@@ -66,8 +66,8 @@ namespace enigma
   
   void init_joysticks()
   {
-    joystick_load(0);
-    joystick_load(1);
+    enigma_user::joystick_load(0);
+    enigma_user::joystick_load(1);
   }
   
   static void handle_joystick(e_joystick *my_joystick)
@@ -114,6 +114,8 @@ namespace enigma
   }
 }
 
+namespace enigma_user
+{
 
 bool joystick_load(int id)
 {
@@ -206,3 +208,6 @@ int joystick_direction(int id)
 double joystick_pov(int id) {
   return 0;
 }
+
+}
+

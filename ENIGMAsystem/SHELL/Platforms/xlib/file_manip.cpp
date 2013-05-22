@@ -26,6 +26,9 @@ using namespace std;
 
 /* UNIX-ready port of file manipulation */
 
+namespace enigma_user
+{
+
 int file_exists(string fname)
 {
   struct stat st;
@@ -50,6 +53,8 @@ int directory_exists(string dname)
 }
 int directory_create(string dname) {
   return mkdir(dname.c_str(),S_IRUSR|S_IWUSR|S_IXUSR);
+}
+
 }
 
 

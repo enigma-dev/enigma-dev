@@ -28,6 +28,12 @@
 
 extern bool argument_relative;
 
+#include "instance_system_base.h"
+#include "lives.h"
+
+namespace enigma_user
+{
+
 inline bool action_if_variable(const variant& variable, const variant& value, int operation) {
     switch (operation)
     {
@@ -53,8 +59,6 @@ inline void action_set_score(double newscore) {
     if (argument_relative) score+= (int)newscore;
     else score = (int)newscore;
 }
-
-#include "lives.h"
 
 inline void action_set_life(double newlives) {
     if (argument_relative) lives+= (int)newlives;
@@ -540,8 +544,6 @@ inline void action_highscore_clear() {
     highscore_clear();
 }
 
-#include "instance_system_base.h"
-
 inline void action_create_object_motion(int object, double x, double y, double speed, double direction)
 {
     if (argument_relative)
@@ -624,6 +626,7 @@ inline void action_path_speed(double speed, bool relative)
     path_set_speed(speed, relative);
 }
 
+}
 
 /* Temp location fpr event perform stuff */ //TODO: Move
 

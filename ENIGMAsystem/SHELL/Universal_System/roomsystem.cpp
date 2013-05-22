@@ -49,9 +49,14 @@
 #include "lives.h"
 #include <string.h>
 
+namespace enigma_user
+{
+
 int room_speed  = 60;
+
 int room_width  = 640;
 int room_height = 480;
+
 int room_persistent = 0;
 var room_caption = "";
 
@@ -66,7 +71,8 @@ int view_enabled = 0;
 rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
     view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
 
-#include <stdio.h>
+}
+
 namespace enigma
 {
   roomstruct** roomdata;
@@ -74,6 +80,8 @@ namespace enigma
 
   void roomstruct::gotome(bool gamestart)
   {
+    using namespace enigma_user;
+
     //Destroy all objects
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
@@ -108,7 +116,7 @@ namespace enigma
       background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
       background_alpha[i] = backs[i].alpha;
       background_coloring[i] = backs[i].color;
-      if (background_exists(background_index[i]))
+      if (enigma_user::background_exists(background_index[i]))
       {
         background_width[i] = background_get_width(background_index[i]); background_height[i] = background_get_height(background_index[i]);
         background_xscale[i] = (backs[i].stretch) ? room_width/background_width[i] : 1;
@@ -123,13 +131,6 @@ namespace enigma
     }
     //Backgrounds end
 
-      //Tiles start
-      drawing_depths.clear();
-      for (int tilei=0; tilei<tilecount; tilei++) {
-          tile t = tiles[tilei];
-          drawing_depths[t.depth].tiles.push_back(tiles[tilei]);
-      }
-      //Tiles end
     view_enabled = views_enabled;
 
     for (int i=0;i<8;i++)
@@ -141,10 +142,21 @@ namespace enigma
       view_visible[i] = (bool)views[i].start_vis;
     }
 
-    window_default();
-    io_clear();
+    enigma_user::window_default();
+    enigma_user::io_clear();
     screen_init();
     screen_refresh();
+
+    //Load tiles
+    delete_tiles();
+    drawing_depths.clear();
+    for (int i = 0; i < tilecount; i++)
+    {
+        tile t = tiles[i];
+        drawing_depths[t.depth].tiles.push_back(t);
+    }
+    load_tiles();
+    //Tiles end
 
     object_basic* is[instancecount];
     for (int i = 0; i<instancecount; i++) {
@@ -183,9 +195,12 @@ namespace enigma
 //Implement the "room" global before we continue
 INTERCEPT_DEFAULT_COPY(enigma::roomv);
 void enigma::roomv::function(variant oldval) {
-  room_goto((int)rval.d);
+  enigma_user::room_goto((int)rval.d);
   rval.d = oldval.rval.d;
-} enigma::roomv room;
+};
+namespace enigma_user {
+  enigma::roomv room;
+}
 
 #if SHOWERRORS
   #define errcheck(indx,err) \
@@ -198,6 +213,9 @@ void enigma::roomv::function(variant oldval) {
   #define errcheck(indx,err)
   #define errcheck_o(indx,err)
 #endif
+
+namespace enigma_user
+{
 
 int room_goto(int indx)
 {
@@ -380,11 +398,16 @@ int room_set_view_enabled(int indx, int val)
     return 1;
 }
 
+}
+
 namespace enigma
 {
     bool tile_alter = false;
     bool instance_alter = false;
 }
+
+namespace enigma_user
+{
 
 int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color)
 {
@@ -644,10 +667,13 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
     return 1;
 }
 
+}
+
 namespace enigma
 {
   void room_update()
   {
+    using namespace enigma_user;
     window_set_caption(room_caption);
     if (view_enabled)
     {
@@ -665,7 +691,7 @@ namespace enigma
   }
   void rooms_switch()
   {
-    if (room_exists(room_switching_id)) {
+    if (enigma_user::room_exists(room_switching_id)) {
       int local_room_switching_id = room_switching_id;
       bool local_room_switching_restartgame = room_switching_restartgame;
       room_switching_id = -1;

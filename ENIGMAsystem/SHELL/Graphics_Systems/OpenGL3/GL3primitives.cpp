@@ -15,11 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include "GL3primitives.h"
-#include "GL3textures.h"
+#include "../General/GLtextures.h"
 #include "GL3mesh.h"
-#include "binding.h"
+#include "../General/GLbinding.h"
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
@@ -54,6 +54,9 @@ int prim_draw_model = -1;
 int prim_draw_texture = -1;
 int prim_d3d_model = -1;
 int prim_d3d_texture = -1;
+
+namespace enigma_user
+{
 
 int draw_primitive_begin(int kind)
 {
@@ -202,3 +205,6 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
 {
   d3d_model_vertex_normal_texture_color(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty, color, alpha);
 }
+
+}
+

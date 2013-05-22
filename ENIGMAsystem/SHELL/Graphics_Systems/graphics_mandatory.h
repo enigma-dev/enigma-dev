@@ -53,9 +53,13 @@ namespace enigma
   void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
       double x_offset, double y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape));
   void graphics_clean_up_roomend();
+  void delete_tiles();
+  void load_tiles();
 }
-
 // These functions are available to the user to be called on a whim.
+
+namespace enigma_user
+{
 
 // Called at random. Maybe.
 std::string draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
@@ -70,3 +74,6 @@ void screen_init();
 
 int background_get_width(int backId);
 int background_get_height(int backId);
+
+}
+

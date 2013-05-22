@@ -25,6 +25,9 @@
  **                                                                              **
  \********************************************************************************/
 
+namespace enigma_user
+{
+
 bool sound_play(int sound);
 bool sound_loop(int sound);
 void sound_stop(int sound);
@@ -40,3 +43,6 @@ void sound_volume(int sound, float value);
 int sound_add(string fname, int kind, bool preload);
 
 const char* sound_get_audio_error();
+
+}
+

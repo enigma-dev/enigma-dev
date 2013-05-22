@@ -18,6 +18,9 @@
 #include "coll_util.h"
 #include "Universal_System/instance_system_base.h"
 
+namespace enigma_user
+{
+
 bool place_free(double x,double y);
 bool place_empty(double x,double y);
 bool place_meeting(double x, double y, int object);
@@ -78,3 +81,6 @@ void instance_deactivate_circle(int x, int y, int r, int inside = true, bool not
 void instance_activate_circle(int x, int y, int r, int inside = true);
 
 void position_change(double x1, double y1, int obj, bool perf);
+
+}
+

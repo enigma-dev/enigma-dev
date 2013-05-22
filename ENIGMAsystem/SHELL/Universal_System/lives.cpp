@@ -21,6 +21,7 @@
 INTERCEPT_DEFAULT_COPY(enigma::livesv);
 namespace enigma
 {
+  using enigma_user::lives;
   bool has_been_zeroless = false;
 
   void reset_lives()
@@ -42,5 +43,10 @@ void enigma::livesv::function(variant oldval) {
   if (rval.d <= 0.0 && oldval.rval.d >= 1.0) {
     has_been_zeroless = true;
   }
-} enigma::livesv lives;
+}
+
+namespace enigma_user
+{
+  enigma::livesv lives;
+}
 

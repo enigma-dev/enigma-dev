@@ -9,6 +9,8 @@
 package org.enigma.backend.sub;
 
 import java.nio.Buffer;
+import java.util.Arrays;
+import java.util.List;
 
 import com.sun.jna.Structure;
 
@@ -20,6 +22,12 @@ public class Glyph extends Structure
 	public int width;
 	public int height;
 	public Buffer raster; //size = width * height
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("origin","baseline","advance","width","height","raster");
+		}
 
 	public static class ByReference extends Glyph implements Structure.ByReference
 		{

@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
+#include "../General/OpenGLHeaders.h"
 #include <string>
 #include <stdio.h>
 using namespace std;
@@ -27,10 +27,15 @@ using namespace std;
   #define GL_BGR 0x80E0
 #endif
 
+namespace enigma_user {
 extern int window_get_width();
 extern int window_get_height();
+}
 
 #include "Universal_System/estring.h"
+
+namespace enigma_user
+{
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
@@ -100,3 +105,6 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 	delete[] scrbuf;
 	return 0;
 }
+
+}
+

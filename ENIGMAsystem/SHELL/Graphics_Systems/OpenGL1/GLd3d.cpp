@@ -15,13 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
+#include "../General/OpenGLHeaders.h"
 #include "GLd3d.h"
-#include "GLtextures.h"
+#include "../General/GLtextures.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
-#include "binding.h"
+#include "../General/GLbinding.h"
 
 using namespace std;
 
@@ -41,6 +41,9 @@ GLenum renderstates[22] = {
   GL_LINEAR, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL,
   GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS
 };
+
+namespace enigma_user
+{
 
 void d3d_start()
 {
@@ -219,10 +222,15 @@ void d3d_set_shading(bool smooth)
     glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
 }
 
+}
+
 extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
 }
+
+namespace enigma_user
+{
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
@@ -331,7 +339,7 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
     indices[3] = 0;
   }
 
-  bind_texture(get_texture(texId));
+  texture_use(get_texture(texId));
 
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
@@ -348,7 +356,7 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
   GLubyte ceil_indices[] = {0, 2, 1, 3};
   GLubyte floor_indices[] = {3, 1, 2, 0};
 
-  bind_texture(get_texture(texId));
+  texture_use(get_texture(texId));
 
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
@@ -371,7 +379,7 @@ void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, doubl
   GLubyte indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, // sides
                        0, 2, 6, 4, 1, 7, 3, 5}; // top and bottom
 
-  bind_texture(get_texture(texId));
+  texture_use(get_texture(texId));
  // glClientActiveTexture(GL_TEXTURE0);
 
   glVertexPointer(3, GL_FLOAT, 0, verts);
@@ -393,7 +401,7 @@ void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, do
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
     double a, px, py, tp;
     int k;
-  bind_texture(get_texture(texId));
+  texture_use(get_texture(texId));
     glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
     for (int i = 0; i <= steps; i++)
@@ -448,7 +456,7 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
     float t[(steps + 1)*3 + 1][2];
     double a, px, py, tp;
     int k = 0;
-    bind_texture(get_texture(texId));
+    texture_use(get_texture(texId));
     glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
@@ -476,7 +484,7 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
         glVertex3fv(v[k]);
         k++;
         tp = 0;
-        for (int i = 0; i <= steps; i++)
+        for (int i = steps; i >= 0; i--)
         {
             v[k][0] = v[i + steps + 1][0]; v[k][1] = v[i + steps + 1][1]; v[k][2] = v[i + steps + 1][2];
             t[k][0] = 0; t[k][1] = 0;
@@ -505,7 +513,7 @@ void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, d
         a += pr; tp += invstep;
     }
     int k = 0, kk;
-    bind_texture(get_texture(texId));
+    texture_use(get_texture(texId));
     b = M_PI/2;
     cosb = cos(b);
     pz = rz*sin(b);
@@ -547,7 +555,7 @@ void d3d_draw_icosahedron() {
 
 void d3d_draw_torus(double x1, double y1, double z1, int texId, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
         int numc = csteps, numt = tsteps;
-	bind_texture(get_texture(texId));
+	texture_use(get_texture(texId));
         for (int i = 0; i < numc; i++) {
             glBegin(GL_QUAD_STRIP);
 
@@ -698,9 +706,14 @@ void d3d_transform_set_rotation_axis(double x, double y, double z, double angle)
   glMultMatrixd(transformation_matrix);
 }
 
+}
+
 #include <stack>
 stack<bool> trans_stack;
 int trans_stack_size = 0;
+
+namespace enigma_user
+{
 
 bool d3d_transform_stack_push()
 {
@@ -754,6 +767,8 @@ bool d3d_transform_stack_disgard()
     trans_stack.push(0);
     trans_stack_size--;
     return true;
+}
+
 }
 
 #include <map>
@@ -912,6 +927,9 @@ class d3d_lights
     }
 } d3d_lighting;
 
+namespace enigma_user
+{
+
 bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col)
 {
     return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
@@ -947,6 +965,8 @@ void d3d_light_define_ambient(int col)
 bool d3d_light_enable(int id, bool enable)
 {
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
+}
+
 }
 
 namespace enigma {
@@ -1079,12 +1099,17 @@ class d3d_model
 
     void draw(double x, double y, double z, int texId)
     {
-        untexture();
-        bind_texture(get_texture(texId));
+        texture_reset();
+        texture_use(get_texture(texId));
         glPushAttrib(GL_CURRENT_BIT);
+        glLoadIdentity();
+        glLoadMatrixd(projection_matrix);
         glTranslatef(x, y, z);
+        glMultMatrixd(transformation_matrix);
         glCallList(model);
-        glTranslatef(-x, -y, -z);
+        glLoadIdentity();
+        glLoadMatrixd(projection_matrix);
+        glMultMatrixd(transformation_matrix);
         glPopAttrib();
     }
 
@@ -1166,7 +1191,7 @@ class d3d_model
         glVertex3fv(v);
         glColor4ubv(enigma::currentcolor);
     }
-
+    //TODO: Model basic shapes need to be changed to the basic new oens
     void model_block(double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed)
     {
         float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y1, z1}, v3[] = {x2, y1, z2},
@@ -1284,8 +1309,8 @@ class d3d_model
             model_vertex_texture(v[k],t[k]);
             k++;
             tp = 0;
-            for (int i = 1; i <= steps+1; i++)
-            {
+        for (int i = steps + 1; i >= 0; i--)
+        {
                 t[k][0] = tp; t[k][1] = 0;
                 model_vertex_texture(v[i],t[k]);
                 k++; tp += invstep;
@@ -1444,7 +1469,9 @@ class d3d_model
 static map<unsigned int, d3d_model> d3d_models;
 static unsigned int d3d_models_maxid = 0;
 
-#include <iostream>
+namespace enigma_user
+{
+
 unsigned int d3d_model_create()
 {
     d3d_models.insert(pair<unsigned int, d3d_model>(d3d_models_maxid++, d3d_model()));
@@ -1455,18 +1482,6 @@ void d3d_model_destroy(const unsigned int id)
 {
     d3d_models[id].clear();
     d3d_models.erase(d3d_models.find(id));
-}
-
-void d3d_model_copy(const unsigned int id, const unsigned int source)
-{
-    d3d_models[id] = d3d_models[source];
-}
-
-unsigned int d3d_model_duplicate(const unsigned int source)
-{
-    d3d_models.insert(pair<unsigned int, d3d_model>(d3d_models_maxid++, d3d_model()));
-    d3d_models[d3d_models_maxid-1] = d3d_models[source];
-    return d3d_models_maxid-1;
 }
 
 bool d3d_model_exists(const unsigned int id)
@@ -1592,3 +1607,6 @@ void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, dou
 {
     d3d_models[id].model_floor(x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
+
+}
+

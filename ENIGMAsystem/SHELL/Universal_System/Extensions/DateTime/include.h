@@ -30,7 +30,10 @@
 #ifndef ENIGMA_PARSER_RUN
 #define current_time (enigma::current_time())
 #else
-double current_time;
+namespace enigma_user
+{
+  double current_time;
+}
 #endif
 #endif
 
@@ -43,10 +46,14 @@ double current_time;
 #define current_month (date_get_month(date_current_datetime()))
 #define current_year (date_get_year(date_current_datetime()))
 #else
+namespace enigma_user
+{
 double current_second,current_minute,current_hour,current_day,current_weekday,current_month,current_year;
+}
 #endif
 
-
+namespace enigma_user
+{
 time_t date_current_datetime();
 time_t date_current_date();
 time_t date_current_time();
@@ -102,3 +109,5 @@ string date_datetime_string(time_t date);
 string date_date_string(time_t date);
 string date_time_string(time_t date);
 string date_datetime_stringf(time_t date,string format);
+}
+

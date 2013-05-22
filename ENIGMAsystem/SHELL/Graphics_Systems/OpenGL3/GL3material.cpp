@@ -15,9 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include "GL3material.h"
-#include "binding.h"
+#include "../General/GLbinding.h"
 #include <math.h>
 
 #include <vector>
@@ -39,6 +39,9 @@ struct Material {
 };
 
 vector<Material*> materials;
+
+namespace enigma_user
+{
 
 int material_create(int type)
 {
@@ -83,5 +86,7 @@ void material_reset()
 void material_free(int id)
 {
   delete materials[id];
+}
+
 }
 

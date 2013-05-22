@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+namespace enigma_user
+{
+
 void draw_set_line_pattern(unsigned short pattern, int scale);
 void draw_point(float x, float y);
 void draw_point_color(float x, float y,int color);
@@ -45,3 +48,6 @@ void draw_button(float x1, float y1, float x2, float y2, float border_width, boo
 int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned iter);
 int draw_getpixel(int,int);
 #define draw_get_pixel draw_getpixel
+
+}
+

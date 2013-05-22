@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+namespace enigma_user
+{
 
 int file_exists(std::string fname);
 int file_delete(std::string fname);
@@ -62,3 +64,6 @@ int parameter_count();
 std::string parameter_string(int n);
 
 std::string environment_get_variable(std::string name);
+
+}
+

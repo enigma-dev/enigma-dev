@@ -70,6 +70,9 @@ namespace enigma
   #define errcheck_v(objid,err)
 #endif
 
+namespace enigma_user
+{
+
 bool object_exists(int objid)
 {
     return ((objid >= 0) && (objid < enigma::objectcount) && bool(enigma::objectdata[objid]));
@@ -164,3 +167,6 @@ bool object_is_ancestor(int objid, int acid)
 	while (!(objid == -100 || objid == acid));
 	return (objid == acid);
 }
+
+}
+

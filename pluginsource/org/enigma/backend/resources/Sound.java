@@ -9,6 +9,8 @@
 package org.enigma.backend.resources;
 
 import java.nio.Buffer;
+import java.util.Arrays;
+import java.util.List;
 
 import com.sun.jna.Structure;
 
@@ -31,6 +33,13 @@ public class Sound extends Structure
 
 	public Buffer data;
 	public int size;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","id","kind","fileType","fileName","chorus","echo","flanger",
+				"gargle","reverb","volume","pan","preload","data","size");
+		}
 
 	public static class ByReference extends Sound implements Structure.ByReference
 		{

@@ -16,10 +16,10 @@
 **/
 
 #include "GLstdraw.h"
-#include "GLsprite.h"
-#include "binding.h"
-#include "GLtextures.h"
-#include "GLcolors.h"
+#include "../General/GLsprite.h"
+#include "../General/GLbinding.h"
+#include "../General/GLtextures.h"
+#include "../General/GLcolors.h"
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_sprites.h"
 #include <vector>
@@ -64,7 +64,7 @@ namespace enigma
 
             if (!pt->is_particle_sprite) { // Draw sprite.
                 int sprite_id = pt->sprite_id;
-                if (!sprite_exists(sprite_id)) return; // NOTE: Skip to next particle.
+                if (!enigma_user::sprite_exists(sprite_id)) return; // NOTE: Skip to next particle.
                 int subimg;
                 if (!pt->sprite_animated) {
                     subimg = it->sprite_subimageindex_initial;
@@ -90,12 +90,12 @@ namespace enigma
                 else {
                     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
                 }
-                draw_sprite_ext(sprite_id, subimg, x, y, xscale, yscale, rot_degrees, color, alpha/255.0);
+                enigma_user::draw_sprite_ext(sprite_id, subimg, x, y, xscale, yscale, rot_degrees, color, alpha/255.0);
             }
             else { // Draw particle sprite.
 
                 particle_sprite* ps = pt->part_sprite;
-                bind_texture(GmTextures[ps->texture]->gltex);
+                texture_use(GmTextures[ps->texture]->gltex);
 
                 if (pt->blend_additive) {
                    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
@@ -144,7 +144,7 @@ namespace enigma
 
             particle_sprite* ps = enigma::draw_get_particle_sprite(enigma::pt_sh_pixel);
             if (ps == NULL) return; // NOTE: Skip to next particle.
-            bind_texture(GmTextures[ps->texture]->gltex);
+            texture_use(GmTextures[ps->texture]->gltex);
 
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
             glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);

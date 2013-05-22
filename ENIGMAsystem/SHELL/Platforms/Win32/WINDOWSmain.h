@@ -19,6 +19,9 @@
 **  *|
 \****/
 
+namespace enigma_user
+{
+
 string parameter_string(int x);
 int parameter_count();
 bool set_working_directory();
@@ -44,3 +47,6 @@ int registry_read_real_ext(std::string key, std::string name);
 bool registry_exists_ext(std::string key, std::string name);
 void registry_set_root(int root);
 unsigned long long window_handle();
+
+}
+

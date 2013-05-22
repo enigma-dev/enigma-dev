@@ -34,7 +34,9 @@
 
 #include "os_types.h"
 
-extern const int os_type;
+namespace enigma_user {
+  extern const int os_type;
+}
 
 namespace enigma
 {
@@ -47,6 +49,9 @@ namespace enigma
   // This method is called at load time. It allows for initializing arrays for input.
   void input_initialize();
 }
+
+namespace enigma_user
+{
 
 // These functions are standard GML that are an integral part of the system.
 // Each instance must implement these, even if they are unable to do anything on the target platform.
@@ -64,5 +69,7 @@ int window_mouse_get_y();
 // These two are used by screen_redraw for view calculations and such.
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
+
+}
 
 #endif

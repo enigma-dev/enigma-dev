@@ -159,6 +159,9 @@ namespace enigma
   }
 }
 
+namespace enigma_user
+{
+
 bool font_get_bold(int fnt)
 {
     return enigma::fontstructarray[fnt]->bold;
@@ -242,3 +245,6 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   if (!enigma::font_pack(font, spr, gcount, prop, sep)) return -1;
   return idfont;
 }
+
+}
+

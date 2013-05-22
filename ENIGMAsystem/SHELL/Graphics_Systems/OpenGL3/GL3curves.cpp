@@ -19,9 +19,9 @@
 #include <vector>
 #include <math.h>
 
-#include "OpenGL3Headers.h"
-#include "GL3colors.h"
-#include "GL3curves.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLcolors.h"
+#include "../General/GLcurves.h"
 
 #define __GETR(x) (((x & 0x0000FF))/255.0)
 #define __GETG(x) (((x & 0x00FF00)>>8)/255.0)
@@ -49,6 +49,9 @@ struct splinePoint {
 typedef std::vector< splinePoint > spline;
 static std::stack< spline, std::vector<spline*> > startedSplines;
 static std::stack< int > startedSplinesMode;
+
+namespace enigma_user
+{
 
 void draw_set_curve_width(int width)
 {
@@ -487,3 +490,6 @@ int draw_spline_optimized_end()
     pr_curve_detail = (int)tmp_detail;
     return tot_det;
 }
+
+}
+

@@ -8,12 +8,21 @@
 
 package org.enigma.backend.other;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class Constant extends Structure
 	{
 	public String name;
 	public String value;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","value");
+		}
 
 	public static class ByReference extends Constant implements Structure.ByReference
 		{

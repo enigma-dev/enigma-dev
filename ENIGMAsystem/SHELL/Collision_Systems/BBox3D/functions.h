@@ -17,8 +17,14 @@
 // Linker shit right meow...
 #include "Universal_System/instance_system_base.h"
 
+namespace enigma_user
+{
+
 bool place_free(double x,double y);
 bool place_meeting(double x, double y, int object);
+
+}
+
 // End of linking shit to stfu 
 
 /* Scenes */

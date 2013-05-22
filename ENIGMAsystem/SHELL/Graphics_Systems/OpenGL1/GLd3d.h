@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+namespace enigma_user
+{
+
 enum {
   rs_fill,
   rs_line,
@@ -40,16 +43,40 @@ enum {
   rs_always     // Always True
 };
 
+}
+
 extern bool d3dMode;
 extern double projection_matrix[16];
 extern double transformation_matrix[16];
 
+namespace enigma_user
+{
+
+/** Starts 3D mode.
+**/
 void d3d_start();
+/** Ends 3d mode.
+**/
 void d3d_end();
+/** Gets whether 3D mode is enabled.
+@return This function returns true if 3D mode is enabled, and false if it is not.
+**/
 bool d3d_get_mode();
+/** Sets the use of a perspective projection.
+@param enable whether or not to enable perspective
+**/
 void d3d_set_perspective(bool enable);
+/** Sets whether hidden surface removal is enabled.
+@param enable whether or not to enable hidden surface removal
+**/
 void d3d_set_hidden(bool enable);
+/** Sets whether depth buffer writing is enabled.
+@param enable whether or not to enable depth writing
+**/
 void d3d_set_zwriteenable(bool enable);
+/** Sets whether lighting is enabled.
+@param enable whether or not to enable lighting
+**/
 void d3d_set_lighting(bool enable);
 
 void d3d_set_culling(bool enable);
@@ -114,16 +141,19 @@ void d3d_light_shininess(int facemode, int shine);
 void d3d_light_define_ambient(int col);
 bool d3d_light_enable(int id, bool enable);
 
+}
+
 namespace enigma {
     void d3d_light_update_positions();
 }
 
 #include <string>
 
+namespace enigma_user
+{
+
 unsigned int d3d_model_create();
 void d3d_model_destroy(const unsigned int id);
-void d3d_model_copy(const unsigned int id, const unsigned int source);
-unsigned int d3d_model_duplicate(const unsigned int source);
 bool d3d_model_exists(const unsigned int id);
 void d3d_model_clear(const unsigned int id);
 void d3d_model_save(const unsigned int id, std::string fname);
@@ -147,3 +177,6 @@ void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, doub
 void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, int steps);
 void d3d_model_icosahedron(const unsigned int id);
 void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
+
+}
+

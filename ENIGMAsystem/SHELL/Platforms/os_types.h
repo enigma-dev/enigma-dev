@@ -28,19 +28,21 @@
 #ifndef OS_TYPES__H
 #define OS_TYPES__H
 
-enum
-{
-  os_unknown = -1,
-  os_windows = 0,
-  os_win32 = 0,
-  os_macosx = 1,
-  os_psp = 2,
-  os_ios = 3,
-  os_android = 4,
-  os_symbian = 5,
-  os_linux = 6,
-  os_winphone = 7,
-};
+namespace enigma_user {
+  enum
+  {
+    os_unknown = -1,
+    os_windows = 0,
+    os_win32 = 0,
+    os_macosx = 1,
+    os_psp = 2,
+    os_ios = 3,
+    os_android = 4,
+    os_symbian = 5,
+    os_linux = 6,
+    os_winphone = 7,
+  };
+}
 
 #endif
 

@@ -8,6 +8,9 @@
 
 package org.enigma.backend.resources;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class GameInformation extends Structure
@@ -24,4 +27,11 @@ public class GameInformation extends Structure
 	boolean stayOnTop;
 	boolean pauseGame;
 	String gameInfoStr;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("backgroundColor","mimicGameWindow","formCaption","left","top","width",
+				"height","showBorder","allowResize","stayOnTop","pauseGame","gameInfoStr");
+		}
 	}

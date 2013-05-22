@@ -40,9 +40,15 @@ using std::string;
 
 #include "Platforms/platforms_mandatory.h"
 
+namespace enigma_user
+{
+
 const int os_type = os_windows;
 
 extern unsigned int game_id;
+
+}
+
 static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
 
 namespace enigma //TODO: Find where this belongs
@@ -65,7 +71,10 @@ namespace enigma {
   int ENIGMA_events();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
-extern double fps;
+namespace enigma_user {
+  extern double fps;
+}
+
 namespace enigma {
   int current_room_speed;
   bool use_pc;
@@ -165,7 +174,7 @@ namespace enigma {
 #include <mmsystem.h>
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
-    int wid = (int)room_width, hgt = (int)room_height;
+    int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     enigma::hInstance = hInstance;
     //enigma::main_argc = argc;
     //enigma::main_argv = argv;
@@ -243,7 +252,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
               if (passed_mcs >= 1000000) { // Handle resetting.
                   // If more than one second has passed, update fps variable, reset frames count,
                   // and advance offset by difference in seconds, rounded down.
-                  fps = frames_count;
+                  enigma_user::fps = frames_count;
                   frames_count = 0;
                   enigma::offset_modulus_one_second();
               }
@@ -302,6 +311,9 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
     return 0;
 }
+
+namespace enigma_user
+{
 
 string parameter_string(int x)
 {
@@ -539,3 +551,6 @@ unsigned long long window_handle()
 {
     return (unsigned long long)enigma::hWnd;
 }
+
+}
+

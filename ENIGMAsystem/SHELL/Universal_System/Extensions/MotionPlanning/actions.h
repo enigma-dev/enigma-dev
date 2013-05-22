@@ -30,6 +30,9 @@
 
 extern bool argument_relative;
 
+namespace enigma_user
+{
+
 inline void action_linear_step(double x, double y, double stepsize, bool solid_only)
 {
     if (argument_relative)
@@ -53,3 +56,6 @@ inline void action_potential_step(double x, double y, double stepsize, bool soli
         mp_potential_step_object(x, y, stepsize,all, solid_only);
 	}
 }
+
+}
+

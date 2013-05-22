@@ -371,108 +371,108 @@ double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 stringstream ss;
 
     max = 0;
-    wto << "enum //object names\n{\n";
+    wto << "namespace enigma_user {\nenum //object names\n{\n";
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++) {
       if (i->first >= max) max = i->first + 1;
       wto << "  " << i->second->name << " = " << i->first << ",\n";
       ss << "    case " << i->first << ": return \"" << i->second->name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t object_idmax = " << max << "; }\n\n";
+    } wto << "};\n}\nnamespace enigma { size_t object_idmax = " << max << "; }\n\n";
 
-    wto << "string object_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
+    wto << "namespace enigma_user {\nstring object_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
     max = 0;
-    wto << "enum //sprite names\n{\n";
+    wto << "namespace enigma_user {\nenum //sprite names\n{\n";
     for (int i = 0; i < es->spriteCount; i++) {
       if (es->sprites[i].id >= max) max = es->sprites[i].id + 1;
       wto << "  " << es->sprites[i].name << " = " << es->sprites[i].id << ",\n";
       ss << "    case " << es->sprites[i].id << ": return \"" << es->sprites[i].name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t sprite_idmax = " << max << "; }\n\n";
+    } wto << "};}\nnamespace enigma { size_t sprite_idmax = " << max << "; }\n\n";
 
-     wto << "string sprite_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
+     wto << "namespace enigma_user {\nstring sprite_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
     max = 0;
-    wto << "enum //background names\n{\n";
+    wto << "namespace enigma_user {\nenum //background names\n{\n";
     for (int i = 0; i < es->backgroundCount; i++) {
       if (es->backgrounds[i].id >= max) max = es->backgrounds[i].id + 1;
       wto << "  " << es->backgrounds[i].name << " = " << es->backgrounds[i].id << ",\n";
       ss << "    case " << es->backgrounds[i].id << ": return \"" << es->backgrounds[i].name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t background_idmax = " << max << "; }\n\n";
+    } wto << "};}\nnamespace enigma { size_t background_idmax = " << max << "; }\n\n";
 
-     wto << "string background_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
+     wto << "namespace enigma_user {\nstring background_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
     max = 0;
-    wto << "enum //font names\n{\n";
+    wto << "namespace enigma_user {\nenum //font names\n{\n";
     for (int i = 0; i < es->fontCount; i++) {
       if (es->fonts[i].id >= max) max = es->fonts[i].id + 1;
       wto << "  " << es->fonts[i].name << " = " << es->fonts[i].id << ",\n";
       ss << "    case " << es->fonts[i].id << ": return \"" << es->fonts[i].name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t font_idmax = " << max << "; }\n\n";
+    } wto << "};}\nnamespace enigma { size_t font_idmax = " << max << "; }\n\n";
 
-     wto << "string font_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
+     wto << "namespace enigma_user {\nstring font_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
     max = 0;
-	wto << "enum //timeline names\n{\n";
+	wto << "namespace enigma_user {\nenum //timeline names\n{\n";
 	for (int i = 0; i < es->timelineCount; i++) {
 	    if (es->timelines[i].id >= max) max = es->timelines[i].id + 1;
         wto << "  " << es->timelines[i].name << " = " << es->timelines[i].id << ",\n";
         ss << "    case " << es->timelines[i].id << ": return \"" << es->timelines[i].name << "\"; break;\n";
-	} wto << "};\nnamespace enigma { size_t timeline_idmax = " << max << "; }\n\n";
+	} wto << "};}\nnamespace enigma { size_t timeline_idmax = " << max << "; }\n\n";
 
-wto << "string timeline_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
+wto << "namespace enigma_user {\nstring timeline_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
     max = 0;
-	wto << "enum //path names\n{\n";
+	wto << "namespace enigma_user {\nenum //path names\n{\n";
 	for (int i = 0; i < es->pathCount; i++) {
 	    if (es->paths[i].id >= max) max = es->paths[i].id + 1;
         wto << "  " << es->paths[i].name << " = " << es->paths[i].id << ",\n";
         ss << "    case " << es->paths[i].id << ": return \"" << es->paths[i].name << "\"; break;\n";
-	} wto << "};\nnamespace enigma { size_t path_idmax = " << max << "; }\n\n";
+	} wto << "};}\nnamespace enigma { size_t path_idmax = " << max << "; }\n\n";
 
-wto << "string path_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
+wto << "namespace enigma_user {\nstring path_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
     max = 0;
-    wto << "enum //sound names\n{\n";
+    wto << "namespace enigma_user {\nenum //sound names\n{\n";
     for (int i = 0; i < es->soundCount; i++) {
       if (es->sounds[i].id >= max) max = es->sounds[i].id + 1;
       wto << "  " << es->sounds[i].name << " = " << es->sounds[i].id << ",\n";
       ss << "    case " << es->sounds[i].id << ": return \"" << es->sounds[i].name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t sound_idmax = " <<max << "; }\n\n";
+    } wto << "};}\nnamespace enigma { size_t sound_idmax = " <<max << "; }\n\n";
 
-wto << "string sound_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
+wto << "namespace enigma_user {\nstring sound_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
     max = 0;
-    wto << "enum //script names\n{\n";
+    wto << "namespace enigma_user {\nenum //script names\n{\n";
     for (int i = 0; i < es->scriptCount; i++) {
       if (es->scripts[i].id >= max) max = es->scripts[i].id + 1;
       wto << "  " << es->scripts[i].name << " = " << es->scripts[i].id << ",\n";
       ss << "    case " << es->scripts[i].id << ": return \"" << es->scripts[i].name << "\"; break;\n";
-    } wto << "};\nnamespace enigma { size_t script_idmax = " <<max << "; }\n\n";
+    } wto << "};}\nnamespace enigma { size_t script_idmax = " <<max << "; }\n\n";
 
-wto << "string script_get_name(int i) {\n switch (i) {\n";
-     wto << ss.str() << " default: return \"<undefined>\";}};\n\n";
+wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
     max = 0;
-    wto << "enum //room names\n{\n";
+    wto << "namespace enigma_user {\nenum //room names\n{\n";
     for (int i = 0; i < es->roomCount; i++) {
       if (es->rooms[i].id >= max) max = es->rooms[i].id + 1;
       wto << "  " << es->rooms[i].name << " = " << es->rooms[i].id << ",\n";
     }
-    wto << "};\nnamespace enigma { size_t room_idmax = " <<max << "; }\n\n";
+    wto << "};}\nnamespace enigma { size_t room_idmax = " <<max << "; }\n\n";
   wto.close();
 
   idpr("Performing Secondary Parsing and Writing Globals",25);

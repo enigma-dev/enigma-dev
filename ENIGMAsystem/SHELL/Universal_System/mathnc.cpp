@@ -25,132 +25,100 @@
 #define INCLUDED_FROM_SHELLMAIN Not really.
 #include "mathnc.h"
 
-double bessel_j0(double x);
-double bessel_j1(double x);
-double bessel_jn(int x, double y);
-double bessel_y0(double x);
-double bessel_y1(double x);
-double bessel_yn(int x, double y);
-
-double bessel_j0(double x) { return j0(x); }
-double bessel_j1(double x) { return j1(x); }
-double bessel_jn(int x, double y) { return jn(x,y); }
-double bessel_y0(double x) { return y0(x); }
-double bessel_y1(double x) { return y1(x); }
-double bessel_yn(int x, double y) { return yn(x,y); }
-
 //overloading
-double abs(const variant& x)   { return fabs(double(x)); }
-double ceil(const variant& x)  { return ceil((double)x); }
-double floor(const variant& x) { return floor((double)x); }
-double exp(const variant& x)   { return exp((double)x); }
-double sqrt(const variant& x)  { return sqrt((double)x); }
-double log10(const variant& x) { return log10((double)x); }
-double sin(const variant& x)   { return sin((double)x); }
-double cos(const variant& x)   { return cos((double)x); }
-double tan(const variant& x)   { return tan((double)x); }
 
-double abs(const var& x)     { return fabs(double(x)); }
-double ceil(const var& x)    { return ceil((double)x); }
-double floor(const var& x)   { return floor((double)x); }
-double exp(const var& x)     { return exp((double)x); }
-double sqrt(const var& x)    { return sqrt((double)x); }
-double log10(const var& x)   { return log10((double)x); }
-double sin(const var& x)     { return sin((double)x); }
-double cos(const var& x)     { return cos((double)x); }
-double tan(const var& x)     { return tan((double)x); }
-
-
-double round(double x)            { return lrint(x); }
-double sqr(double x)              { return x*x;      }
-double power(double x,double p)   { return pow(x,p); }
-double ln(double x)               { return log(x);   }
-double logn(double n,double x)    { return log(x)/log(n); }
-double log2(double x)             { return log(x)/M_LN2; }//This may already exist
-double arcsin(double x)           { return asin(x);     }
-double arccos(double x)           { return acos(x);     }
-double arctan(double x)           { return atan(x);     }
-double arctan2(double y,double x) { return atan2(y,x);  }
-
-double sind(double x)              { return sin(x * M_PI / 180.0); }
-double cosd(double x)              { return cos(x * M_PI / 180.0); }
-double tand(double x)              { return tan(x * M_PI / 180.0); }
-double asind(double x)             { return asin(x)    * 180.0 / M_PI; }
-double acosd(double x)             { return acos(x)    * 180.0 / M_PI; }
-double atand(double x)             { return atan(x)    * 180.0 / M_PI; }
-double atand2(double y,double x)   { return atan2(y,x) * 180.0 / M_PI; }
-double arcsind(double x)           { return asin(x)    * 180.0 / M_PI; }
-double arccosd(double x)           { return acos(x)    * 180.0 / M_PI; }
-double arctand(double x)           { return atan(x)    * 180.0 / M_PI; }
-double arctand2(double y,double x) { return atan2(y,x) * 180.0 / M_PI; }
-
-int sign(double x)                { return (x>0)-(x<0); }
-int cmp(double x,double y)        { return (x>y)-(x<y); }
-double frac(double x)             { return x-(int)x;    }
-
-double degtorad(double x)         { return x*(M_PI/180.0);}
-double radtodeg(double x)         { return x*(180.0/M_PI);}
-
-double lengthdir_x(double len,double dir) { return len *  cosd(dir); }
-double lengthdir_y(double len,double dir) { return len * -sind(dir); }
-
-double direction_difference(double dir1,double dir2) {
-	return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;
-}
-double point_direction(double x1,double y1,double x2,double y2) { return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }
-double point_distance(double x1,double y1,double x2,double y2)  { return hypot(x2-x1,y2-y1); }
-double point_distance_3d(double x1,double y1,double z1,double x2,
-double y2,double z2)  { return sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
-double dot_product(double x1,double y1,double x2,double y2) { return (x1 * x2 + y1 * y2); }
-double dot_product_3d(double x1,double y1,double z1,double x2,double y2, double z2) { return (x1 * x2 + y1 * y2 + z1 * z2); }
-double lerp(double x, double y, double a) { return x + ((y-x)*a); }
-double clamp(double x, double y, double a) {
-    if (x < y) { return y; }
-    if (x > a) { return a; }
-    return x;
-}
-
-double min(double x, double y) { return x < y ? x : y; }
-double max(double x, double y) { return x > y ? x : y; }
-
-double max(const enigma::varargs &t)
+namespace enigma_user
 {
-  register double ret = t.get(0), tst;
-  for (int i = 1; i < t.argc; i++)
-    if ((tst = t.get(i)) > ret)
-      ret = tst;
-  return ret;
+  // Overloading
+  // TODO: Once the user space switch to namespace enigma_user has been made,
+  // remove these functions.
+  double abs(const variant& x)   { return ::fabs(double(x)); }
+  double abs(const var& x)     { return ::fabs(double(x)); }
+
+  // Functions
+
+  double sqr(double x)              { return x*x;      }
+  double logn(double n,double x)    { return ::log(x)/::log(n); }
+
+  double sind(double x)              { return ::sin(x * M_PI / 180.0); }
+  double cosd(double x)              { return ::cos(x * M_PI / 180.0); }
+  double tand(double x)              { return ::tan(x * M_PI / 180.0); }
+  double asind(double x)             { return ::asin(x)    * 180.0 / M_PI; }
+  double acosd(double x)             { return ::acos(x)    * 180.0 / M_PI; }
+  double atand(double x)             { return ::atan(x)    * 180.0 / M_PI; }
+  double atand2(double y,double x)   { return ::atan2(y,x) * 180.0 / M_PI; }
+  double arcsind(double x)           { return ::asin(x)    * 180.0 / M_PI; }
+  double arccosd(double x)           { return ::acos(x)    * 180.0 / M_PI; }
+  double arctand(double x)           { return ::atan(x)    * 180.0 / M_PI; }
+  double arctand2(double y,double x) { return ::atan2(y,x) * 180.0 / M_PI; }
+
+  int sign(double x)                { return (x>0)-(x<0); }
+  int cmp(double x,double y)        { return (x>y)-(x<y); }
+  double frac(double x)             { return x-(int)x;    }
+
+  double degtorad(double x)         { return x*(M_PI/180.0);}
+  double radtodeg(double x)         { return x*(180.0/M_PI);}
+
+  double lengthdir_x(double len,double dir) { return len *  cosd(dir); }
+  double lengthdir_y(double len,double dir) { return len * -sind(dir); }
+
+  double direction_difference(double dir1,double dir2) {
+	  return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;
+  }
+  double point_direction(double x1,double y1,double x2,double y2) { return ::fmod((::atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }
+  double point_distance(double x1,double y1,double x2,double y2)  { return ::hypot(x2-x1,y2-y1); }
+  double point_distance_3d(double x1,double y1,double z1,double x2,
+  double y2,double z2)  { return ::sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
+  double dot_product(double x1,double y1,double x2,double y2) { return (x1 * x2 + y1 * y2); }
+  double dot_product_3d(double x1,double y1,double z1,double x2,double y2, double z2) { return (x1 * x2 + y1 * y2 + z1 * z2); }
+  double lerp(double x, double y, double a) { return x + ((y-x)*a); }
+  double clamp(double x, double y, double a) {
+      if (x < y) { return y; }
+      if (x > a) { return a; }
+      return x;
+  }
+
+  double min(double x, double y) { return x < y ? x : y; }
+  double max(double x, double y) { return x > y ? x : y; }
+
+  double max(const enigma::varargs &t)
+  {
+    register double ret = t.get(0), tst;
+    for (int i = 1; i < t.argc; i++)
+      if ((tst = t.get(i)) > ret)
+        ret = tst;
+    return ret;
+  }
+
+  double min(const enigma::varargs &t)
+  {
+    register double ret = t.get(0), tst;
+    for (int i = 1; i < t.argc; i++)
+      if ((tst = t.get(i)) < ret)
+        ret = tst;
+    return ret;
+  }
+
+  double median(enigma::varargs t)
+  {
+    t.sort();
+    if (t.argc & 1)
+      return t.get(t.argc/2);
+    return (t.get(t.argc/2) + t.get(t.argc/2-1)) / 2.;
+  }
+
+  double mean(const enigma::varargs &t)
+  {
+    register double ret = 0;
+    for (int i = 0; i < t.argc; i++)
+        ret += t.get(i);
+    return ret/t.argc;
+  }
+
+  variant choose(const enigma::varargs& args) {
+     return args.get(rand() % args.argc);
+  };
 }
-
-double min(const enigma::varargs &t)
-{
-  register double ret = t.get(0), tst;
-  for (int i = 1; i < t.argc; i++)
-    if ((tst = t.get(i)) < ret)
-      ret = tst;
-  return ret;
-}
-
-double median(enigma::varargs t)
-{
-  t.sort();
-  if (t.argc & 1)
-    return t.get(t.argc/2);
-  return (t.get(t.argc/2) + t.get(t.argc/2-1)) / 2.;
-}
-
-double mean(const enigma::varargs &t)
-{
-  register double ret = 0;
-  for (int i = 0; i < t.argc; i++)
-      ret += t.get(i);
-  return ret/t.argc;
-}
-
-
-variant choose(const enigma::varargs& args) {
-   return args.get(rand() % args.argc);
-};
 
 // For added randomness
 // ...................................................
@@ -213,64 +181,71 @@ namespace enigma {
    email: matumoto@math.keio.ac.jp
 */
 
-unsigned int mtrandom32()
+namespace enigma_user
 {
-	unsigned int y;
-	static const unsigned int mag01[2]={0,0x9908b0df};
-	if (enigma::mt[624] >= 624)
-	{ /* generate N words at one time */
-		int kk;
-		for(kk=0;kk<227;kk++)
-		{
-			y = (enigma::mt[kk]&UPPER_MASK)|(enigma::mt[kk+1]&LOWER_MASK);
-			enigma::mt[kk] = enigma::mt[kk+397] ^ (y >> 1) ^ mag01[y&1];
-		}
-		for(;kk<623;kk++)
-		{
-			y = (enigma::mt[kk]&UPPER_MASK)|(enigma::mt[kk+1]&LOWER_MASK);
-			enigma::mt[kk] = enigma::mt[kk-227] ^ (y >> 1) ^ mag01[y&1];
-		}
 
-		y = (enigma::mt[623]&UPPER_MASK) | (enigma::mt[0]&LOWER_MASK);
-		enigma::mt[623] = enigma::mt[396] ^ (y >> 1) ^ mag01[y & 1];
-		enigma::mt[624] = 0;
-	}
-	y = enigma::mt[enigma::mt[624]++];
-	y ^= y >> 11;
-	y ^= (y << 7) & 0x9d2c5680UL;
-	y ^= (y << 15) & 0xefc60000UL;
-	return y^(y >> 18);
+  unsigned int mtrandom32()
+  {
+	  unsigned int y;
+	  static const unsigned int mag01[2]={0,0x9908b0df};
+	  if (enigma::mt[624] >= 624)
+	  { /* generate N words at one time */
+		  int kk;
+		  for(kk=0;kk<227;kk++)
+		  {
+			  y = (enigma::mt[kk]&UPPER_MASK)|(enigma::mt[kk+1]&LOWER_MASK);
+			  enigma::mt[kk] = enigma::mt[kk+397] ^ (y >> 1) ^ mag01[y&1];
+		  }
+		  for(;kk<623;kk++)
+		  {
+			  y = (enigma::mt[kk]&UPPER_MASK)|(enigma::mt[kk+1]&LOWER_MASK);
+			  enigma::mt[kk] = enigma::mt[kk-227] ^ (y >> 1) ^ mag01[y&1];
+		  }
+
+		  y = (enigma::mt[623]&UPPER_MASK) | (enigma::mt[0]&LOWER_MASK);
+		  enigma::mt[623] = enigma::mt[396] ^ (y >> 1) ^ mag01[y & 1];
+		  enigma::mt[624] = 0;
+	  }
+	  y = enigma::mt[enigma::mt[624]++];
+	  y ^= y >> 11;
+	  y ^= (y << 7) & 0x9d2c5680UL;
+	  y ^= (y << 15) & 0xefc60000UL;
+	  return y^(y >> 18);
+  }
+
+  double mtrandom(){
+	  return ((mtrandom32()>>5)*67108864.+(mtrandom32()>>6))/9007199254740992.;
+  }
+
+  int mtrandom_seed(int x){
+	  enigma::mt[0]=x&0xffffffff;
+	  for(int mti=1;mti<624;mti++)
+		  enigma::mt[mti]=1812433253*(enigma::mt[mti-1]^(enigma::mt[mti-1]>>30))+mti;
+	  enigma::mt[624] = 624;
+	  return 0;
+  }
+
+  // END MERSENNE
+
+  // ENIGMA Random Functions
+
+  double random(double n) // Do not fix:  Based off of Delphi PRNG.
+  {
+    double rval = frac(
+      3.1379939289763571e-2  * (enigma::Random_Seed % 32)
+      + 2.3283064365387e-10  * (enigma::Random_Seed / 32 + 1)
+      + 4.158057505264878e-3 * (enigma::Random_Seed / 32)
+    )*n;
+    enigma::Random_Seed = mtrandom32();
+    return rval;
+  }
+
+  int mtrandom_integer(int x) {
+    return x > 0? mtrandom32() * (x/0xFFFFFFFF) : 0;
+  }
+
+  int random_set_seed(int seed) { return enigma::Random_Seed = seed; }
+  int random_get_seed() { return enigma::Random_Seed; }
+  int randomize() { return enigma::Random_Seed = mtrandom32(); }
 }
 
-double mtrandom(){
-	return ((mtrandom32()>>5)*67108864.+(mtrandom32()>>6))/9007199254740992.;
-}
-
-int mtrandom_seed(int x){
-	enigma::mt[0]=x&0xffffffff;
-	for(int mti=1;mti<624;mti++)
-		enigma::mt[mti]=1812433253*(enigma::mt[mti-1]^(enigma::mt[mti-1]>>30))+mti;
-	enigma::mt[624] = 624;
-	return 0;
-}
-// END MERSENNE
-
-// ENIGMA Random Functions
-double random(double n) // Do not fix:  Based off of Delphi PRNG.
-{
-  double rval = frac(
-    3.1379939289763571e-2  * (enigma::Random_Seed % 32)
-    + 2.3283064365387e-10  * (enigma::Random_Seed / 32 + 1)
-    + 4.158057505264878e-3 * (enigma::Random_Seed / 32)
-  )*n;
-  enigma::Random_Seed = mtrandom32();
-  return rval;
-}
-
-int mtrandom_integer(int x) {
-  return x > 0? mtrandom32() * (x/0xFFFFFFFF) : 0;
-}
-
-int random_set_seed(int seed) { return enigma::Random_Seed = seed; }
-int random_get_seed() { return enigma::Random_Seed; }
-int randomize() { return enigma::Random_Seed = mtrandom32(); }

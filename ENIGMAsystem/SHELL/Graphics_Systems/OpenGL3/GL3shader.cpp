@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include "GL3shader.h"
 #include <math.h>
 
@@ -64,11 +64,16 @@ struct ShaderProgram{
 vector<Shader*> shaders(0);
 vector<ShaderProgram*> shaderprograms(0);
 
+namespace enigma_user
+{
+
 int shader_create(int type)
 {
   unsigned int id = shaders.size();
   shaders.push_back(new Shader(type));
   return id;
+}
+
 }
 
 unsigned long getFileLength(ifstream& file)
@@ -82,6 +87,9 @@ unsigned long getFileLength(ifstream& file)
     
     return len;
 }
+
+namespace enigma_user
+{
 
 int shader_load(int id, const char* fname)
 {
@@ -210,5 +218,7 @@ void shader_program_reset()
 void shader_program_free(int id)
 {
   delete shaderprograms[id];
+}
+
 }
 

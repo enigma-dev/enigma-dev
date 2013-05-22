@@ -64,6 +64,9 @@ std::map<std::string, HMODULE> dllHandles;
 map<int,external*> externals;
 int external_count=0;
 
+namespace enigma_user
+{
+
 int external_define(string dll,string func,int calltype,bool returntype,int argcount,
                     bool t01,bool t02,bool t03,bool t04,bool t05,bool t06,bool t07,bool t08,
                     bool t09,bool t10,bool t11,bool t12,bool t13,bool t14,bool t15,bool t16)
@@ -133,8 +136,14 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   return ind;
 }
 
+}
+
 using namespace enigma;
 union ambiguous { double d; const char* s; };
+
+namespace enigma_user
+{
+
 variant external_call(int id,variant a1,variant a2, variant a3, variant a4, variant a5, variant a6, variant a7, variant a8,
                              variant a9,variant a10,variant a11,variant a12,variant a13,variant a14,variant a15,variant a16)
 {
@@ -171,3 +180,6 @@ void external_free(std::string dll)
   if ((dllIt=dllHandles.find(dll)) != dllHandles.end())
     FreeLibrary(dllHandles[dll]);
 }
+
+}
+

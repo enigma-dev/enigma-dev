@@ -32,8 +32,11 @@
 #include "Universal_System/path_functions.h"
 
 // FIXME: NONSTANDARD
+
+namespace enigma_user {
 extern bool place_meeting(double x, double y, int object);
 extern bool place_free(double x, double y);
+}
 
 static inline double min(double x, double y) { return x<y?x:y; }
 static inline double max(double x, double y) { return x>y?x:y; }
@@ -43,6 +46,9 @@ namespace mp_potential
     double maxrot = 30, rotstep = 10, ahead = 3;
     bool onspot = true;
 }
+
+namespace enigma_user
+{
 
 void mp_potential_settings(double maxrot, double rotstep, double ahead, double onspot)
 {
@@ -291,3 +297,6 @@ bool mp_linear_path_object(int path, const double x, const double y, const doubl
     }
     return false;
 }
+
+}
+

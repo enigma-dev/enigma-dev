@@ -37,6 +37,9 @@ static const char ldgrs[256] = {
   1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0
 };
 
+namespace enigma_user
+{
+
 bool is_string(variant val) { return val.type;  }
 bool is_real(variant val)   { return !val.type; }
 string chr(char val) { return string(1,val); }
@@ -217,3 +220,6 @@ string filename_change_ext(string fname, string newext)
         return fname + newext;
     return fname.replace(fp,fname.length(),newext);
 }
+
+}
+

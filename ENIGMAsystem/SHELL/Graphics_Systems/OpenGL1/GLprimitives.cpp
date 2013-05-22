@@ -15,10 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
+#include "../General/OpenGLHeaders.h"
 #include "GLprimitives.h"
-#include "binding.h"
-#include "GLtextures.h"
+#include "../General/GLbinding.h"
+#include "../General/GLtextures.h"
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
@@ -49,9 +49,12 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
+namespace enigma_user
+{
+
 int draw_primitive_begin(int dink)
 {
-	untexture();
+	texture_reset();
 	GLenum kind = ptypes_by_id[ dink & 15 ];
   glBegin(kind);
   return 0;
@@ -59,7 +62,7 @@ int draw_primitive_begin(int dink)
 
 int draw_primitive_begin_texture(int dink,unsigned tex)
 {
-  bind_texture(tex);
+  texture_use(tex);
 	GLenum kind = ptypes_by_id[ dink & 15 ];
 	glBegin(kind);
   return 0;
@@ -110,12 +113,12 @@ int draw_primitive_end()
 
 void d3d_primitive_begin(int kind)
 {
-    untexture();
+    texture_reset();
     glBegin(ptypes_by_id[kind]);
 }
 void d3d_primitive_begin_texture(int kind, int texId)
 {
-    bind_texture(get_texture(texId));
+    texture_use(get_texture(texId));
     glBegin(ptypes_by_id[kind]);
 }
 
@@ -173,3 +176,6 @@ void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, do
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
 }
+
+}
+

@@ -49,6 +49,7 @@ void seek(gme_callback *userdata, float position) {
 	handle_error( gme_seek(userdata->emu,position*1000) );
 }
 
+namespace enigma_user {
 int sound_add_from_gme(string filename, int track) {
 	Music_Emu *emu;
 	handle_error( gme_open_file(filename.c_str(), &emu, 44100) );
@@ -64,3 +65,5 @@ int sound_add_from_gme(string filename, int track) {
 
 	return enigma::sound_add_from_stream(sid,(size_t (*)(void*, void*, size_t))callback,(void (*)(void*,float))seek,(void (*)(void*))cleanup,(void*)userdata)?-1:sid;
 }
+}
+

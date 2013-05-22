@@ -68,6 +68,7 @@ namespace enigma
   int font_pack(enigma::font *font, int spr, unsigned char gcount, bool prop, int sep);
 }
 
+namespace enigma_user {
 int font_add(string name, int size, bool bold, bool italic, unsigned char first, unsigned char last);
 bool font_replace(int ind, string name, int size, bool bold, bool italic, unsigned char first, unsigned char last);
 int  font_add_sprite(int spr, unsigned char first, bool prop, int sep);
@@ -79,5 +80,6 @@ unsigned char font_get_last(int fnt);
 string font_get_fontname(int fnt);
 void font_delete(int fnt);
 bool font_exists(int fnt);
+}
 
 #endif

@@ -30,6 +30,9 @@ namespace enigma {
   void handle_joysticks();
 }
 
+namespace enigma_user
+{
+
 bool joystick_exists(int id);
 string joystick_name(int id);
 int joystick_axes(int id);
@@ -50,3 +53,6 @@ bool joystick_button(int id, int button);
 void joystick_map_button(int id, int butnum, char key);
 void joystick_map_axis(int id, int axisnum, char keyneg, char keypos);
 bool joystick_load(int id);
+
+}
+

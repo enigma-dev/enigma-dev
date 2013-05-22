@@ -19,6 +19,7 @@
 #include "GL3vertexbuffer.h"
 
 // ***** MODELS BEGIN *****
+namespace enigma_user {
 unsigned int d3d_model_create(int vbot = vbo_static);
 void d3d_model_destroy(const unsigned int id);
 void d3d_model_copy(const unsigned int id, const unsigned int source);
@@ -55,4 +56,5 @@ void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, doub
 void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps);
 void d3d_model_icosahedron(const unsigned int id);
 void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
+}
 // ***** MODELS END *****

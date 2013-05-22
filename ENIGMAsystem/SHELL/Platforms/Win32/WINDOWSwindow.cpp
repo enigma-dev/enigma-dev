@@ -139,6 +139,9 @@ namespace enigma
     }
 }
 
+namespace enigma_user
+{
+
 int show_message(string str)
 {
     MessageBox(enigma::hWnd,str.c_str(), window_get_caption().c_str(), MB_OK);
@@ -675,6 +678,8 @@ void window_view_mouse_set(int id, int x, int y)
     SetCursorPos(window.left + x + view_xview[id],window.top + y + view_yview[id]);
 }
 
+}
+
 /*
 int window_views_mouse_get_x()   //NOTE: mousex/y should be set to these so they are relative to the view
 {
@@ -794,6 +799,9 @@ void window_views_mouse_set(int x, int y)
         SetCursorPos(window.left + x,window.top + y);
     }
 }*/
+
+namespace enigma_user
+{
 
 int window_set_cursor(int curs)
 {
@@ -975,3 +983,6 @@ bool clipboard_has_text()
     CloseClipboard();
     return value;
 }
+
+}
+

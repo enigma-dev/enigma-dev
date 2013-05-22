@@ -43,6 +43,10 @@ namespace enigma {
 #include "collisions_object.h"
 #include "instance_system.h"
 #include "Extensions/Paths/implement.h"
+
+namespace enigma_user
+{
+
 void path_start(unsigned pathid,double speed,unsigned endaction,bool absolute)
 {
     #ifndef PATH_EXT_SET
@@ -462,3 +466,6 @@ void draw_path(unsigned pathid,double x,double y,bool absolute)
         draw_primitive_end();
     }
 }
+
+}
+

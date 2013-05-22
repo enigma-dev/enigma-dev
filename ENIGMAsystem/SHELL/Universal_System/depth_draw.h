@@ -45,6 +45,7 @@ namespace enigma {
   struct depth_layer {
     vector<tile> tiles;
     event_iter* draw_events;
+    int tilelist;
     depth_layer();
   };
   extern map<double,depth_layer> drawing_depths;

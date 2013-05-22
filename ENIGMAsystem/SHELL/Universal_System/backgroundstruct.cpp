@@ -149,6 +149,10 @@ namespace enigma
 }
 
 #include "estring.h"
+
+namespace enigma_user
+{
+
 int background_add(string filename, bool transparent, bool smooth, bool preload)
 {
 	enigma::background *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
@@ -205,3 +209,6 @@ void background_set_alpha_from_background(int back, int copy_background, bool fr
     get_background(bck_copy,copy_background);
     enigma::graphics_replace_texture_alpha_from_texture(bck->texture, bck_copy->texture);
 }
+
+}
+

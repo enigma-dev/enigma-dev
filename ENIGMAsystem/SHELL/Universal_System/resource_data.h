@@ -38,6 +38,9 @@ namespace enigma {
   extern nameid_pair resource_nameids[];
 };
 
+namespace enigma_user
+{
+
 int resource_get_id(string name);
 variant script_execute(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0, variant arg8 = 0, variant arg9 = 0, variant arg10 = 0, variant arg11 = 0, variant arg12 = 0, variant arg13 = 0, variant arg14 = 14, variant arg15 = 0);
 bool script_exists(int script);
@@ -50,3 +53,6 @@ string timeline_get_name(int i);
 string path_get_name(int i);
 string sound_get_name(int i);
 string script_get_name(int i);
+
+}
+

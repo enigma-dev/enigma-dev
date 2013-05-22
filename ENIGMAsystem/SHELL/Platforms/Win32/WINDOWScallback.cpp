@@ -37,10 +37,13 @@ using std::string;
 
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
+namespace enigma_user {
 extern string keyboard_lastchar;
+}
 
 namespace enigma
 {
+    using enigma_user::keyboard_lastchar;
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
     extern int windowX, windowY, windowWidth, windowHeight;
     extern double  scaledWidth, scaledHeight;

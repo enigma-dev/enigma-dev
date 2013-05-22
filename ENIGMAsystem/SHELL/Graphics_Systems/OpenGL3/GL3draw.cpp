@@ -16,9 +16,9 @@
 **/
 
 #include <math.h>
-#include "OpenGL3Headers.h"
+#include "../General/OpenGLHeaders.h"
 #include "GL3draw.h"
-#include "binding.h"
+#include "../General/GLbinding.h"
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"
 
@@ -30,6 +30,9 @@ namespace enigma {
   float circleprecision=24;
   extern unsigned char currentcolor[4];
 }
+
+namespace enigma_user
+{
 
 void draw_set_line_pattern(unsigned short pattern, int scale)
 {
@@ -649,10 +652,15 @@ void draw_healthbar(float x1,float y1,float x2,float y2,float amount,int backcol
   glColor4ubv(enigma::currentcolor);
 }
 
+}
+
 //#include <endian.h>
 //TODO: Though serprex, the author of the function below, never included endian.h,
 //   // Doing so is necessary for the function to work at its peak.
 //   // When ENIGMA generates configuration files, one should be included here.
+
+namespace enigma_user
+{
 
 int draw_getpixel(int x,int y)
 {
@@ -705,5 +713,7 @@ int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned i
       }
     glEnd();
     return c;
+}
+
 }
 

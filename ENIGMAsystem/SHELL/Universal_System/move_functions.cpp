@@ -32,6 +32,9 @@
 #include "roomsystem.h"
 #include "move_functions.h"
 
+namespace enigma_user
+{
+
 void motion_set(int dir, double newspeed)
 {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
@@ -97,6 +100,7 @@ void move_towards_point (const double point_x, const double point_y, const doubl
 }
 
 extern double random(double x);
+
 void move_random(const double snapHor, const double snapVer)
 {
     enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
@@ -112,7 +116,10 @@ void move_random(const double snapHor, const double snapVer)
         const int mask = (mask_ind >= 0) ? mask_ind : spr_ind;
         x1 = sprite_get_xoffset(mask); y1 = sprite_get_yoffset(mask); x2 = room_width - sprite_get_width(mask) + sprite_get_xoffset(mask); y2 = room_height - sprite_get_height(mask) + sprite_get_yoffset(mask);
     }
-
+    using enigma_user::random;
     inst->x = x1 + (snapHor ? floor(random(x2 - x1)/snapHor)*snapHor : random(x2 - x1));
     inst->y = y1 + (snapVer ? floor(random(y2 - y1)/snapVer)*snapVer : random(y2 - y1));
 }
+
+}
+

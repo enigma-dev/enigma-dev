@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+namespace enigma_user
+{
+
 void gs_enable_alpha(bool enable);
 void gs_enable_blending(bool enable);
 void gs_enable_depthbuffer(bool enable);
@@ -26,3 +29,6 @@ void gs_enable_smooth_points(bool enable);
 void gs_enable_smooth_polygons(bool enable);
 void gs_enable_stencil(bool enable);
 void gs_enable_texture(bool enable);
+
+}
+

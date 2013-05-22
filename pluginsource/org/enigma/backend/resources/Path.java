@@ -8,6 +8,9 @@
 
 package org.enigma.backend.resources;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.enigma.backend.sub.PathPoint;
 
 import com.sun.jna.Structure;
@@ -26,6 +29,13 @@ public class Path extends Structure
 
 	public PathPoint.ByReference points;
 	public int pointCount;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","id","smooth","closed","precision","snapX","snapY","points",
+				"pointCount");
+		}
 
 	public static class ByReference extends Path implements Structure.ByReference
 		{

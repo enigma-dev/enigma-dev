@@ -36,12 +36,17 @@ using namespace std;
 #include "motion_planning_struct.h"
 #include "motion_planning.h"
 
+namespace enigma_user {
 int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme);
+}
 
 namespace enigma {
 	extern size_t grid_idmax;
 	extern unsigned bound_texture;
 }
+
+namespace enigma_user
+{
 
 unsigned mp_grid_create(int left,int top,int hcells,int vcells,int cellwidth,int cellheight, double speed_modifier)
 {
@@ -238,11 +243,17 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
     return true;
 }
 
+}
+
 #include "Universal_System/var4.h"
 //#include "GScolors.h"
 #define __GETR(x) (((x & 0x0000FF)))
 #define __GETG(x) (((x & 0x00FF00)>>8))
 #define __GETB(x) (((x & 0xFF0000)>>16))
+
+namespace enigma_user
+{
+
 void draw_text(int x,int y,variant str);
 int merge_color(int c1,int c2,double amount);
 int draw_primitive_begin(int kind);
@@ -358,3 +369,6 @@ void mp_grid_draw(unsigned int id, unsigned int mode, unsigned int color_mode)
     }
     draw_set_color(tc);
 }
+
+}
+

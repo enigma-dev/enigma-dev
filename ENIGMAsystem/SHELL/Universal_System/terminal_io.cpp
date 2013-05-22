@@ -28,6 +28,9 @@ using namespace std;
     (void)0;
 #endif
 
+namespace enigma_user
+{
+
 void cons_show_message(string message) {
   puts(message.c_str());
 }
@@ -64,3 +67,6 @@ string cons_get_string()
   }
   return res;
 }
+
+}
+

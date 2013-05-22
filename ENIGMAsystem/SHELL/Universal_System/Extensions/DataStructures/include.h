@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+namespace enigma_user
+{
+
 unsigned int ds_grid_create(const unsigned int w, const unsigned int h);
 void ds_grid_destroy(const unsigned int id);
 void ds_grid_clear(const unsigned int id, const variant val);
@@ -154,3 +157,6 @@ bool ds_stack_exists(const unsigned int id);
 unsigned int ds_stack_duplicate(const unsigned int source);
 std::string ds_stack_write(const unsigned int id);
 void ds_stack_read(const unsigned int id, std::string value);
+
+}
+

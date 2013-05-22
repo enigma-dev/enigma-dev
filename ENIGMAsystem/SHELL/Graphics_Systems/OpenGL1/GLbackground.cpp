@@ -18,8 +18,8 @@
 #include <cstddef>
 
 #include <math.h>
-#include "OpenGLHeaders.h"
-#include "GLbackground.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLbackground.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 
@@ -27,7 +27,7 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-#include "GLtextures.h"
+#include "../General/GLtextures.h"
 #ifdef DEBUG_MODE
   #include <string>
   #include "libEGMstd.h"
@@ -51,18 +51,23 @@
     const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #endif
 
-extern int room_width, room_height;
+namespace enigma_user {
+  extern int room_width, room_height;
+}
 namespace enigma {
   extern size_t background_idmax;
 }
 
-#include "binding.h"
+#include "../General/GLbinding.h"
 #include <string.h> // needed for querying ARB extensions
+
+namespace enigma_user
+{
 
 void draw_background(int back, double x, double y)
 {
   get_background(bck2d,back);
-    bind_texture(GmTextures[bck2d->texture]->gltex);
+    texture_use(GmTextures[bck2d->texture]->gltex);
 // see backgroundstruct and spritestruct are storing the gluint to the texture, and when
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
@@ -85,7 +90,7 @@ void draw_background(int back, double x, double y)
 void draw_background_stretched(int back, double x, double y, double w, double h)
 {
   get_background(bck2d,back);
-    bind_texture(GmTextures[bck2d->texture]->gltex);
+    texture_use(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
@@ -108,7 +113,7 @@ void draw_background_stretched(int back, double x, double y, double w, double h)
 void draw_background_part(int back,double left,double top,double width,double height,double x,double y)
 {
     get_background(bck2d,back);
-      bind_texture(GmTextures[bck2d->texture]->gltex);
+      texture_use(GmTextures[bck2d->texture]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -134,7 +139,7 @@ void draw_background_part(int back,double left,double top,double width,double he
 void draw_background_tiled(int back,double x,double y)
 {
     get_background(bck2d,back);
-      bind_texture(GmTextures[bck2d->texture]->gltex);
+      texture_use(GmTextures[bck2d->texture]->gltex);
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
@@ -177,7 +182,7 @@ void draw_background_tiled(int back,double x,double y)
 void draw_background_tiled_area(int back,double x,double y,double x1,double y1,double x2,double y2)
 {
   get_background(bck2d,back);
-    bind_texture(GmTextures[bck2d->texture]->gltex);
+    texture_use(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -228,7 +233,7 @@ void draw_background_tiled_area(int back,double x,double y,double x1,double y1,d
 void draw_background_ext(int back,double x,double y,double xscale,double yscale,double rot,int color,double alpha)
 {
     get_background(bck2d,back);
-      bind_texture(GmTextures[bck2d->texture]->gltex);
+      texture_use(GmTextures[bck2d->texture]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -266,7 +271,7 @@ void draw_background_ext(int back,double x,double y,double xscale,double yscale,
 void draw_background_stretched_ext(int back,double x,double y,double w,double h,int color,double alpha)
 {
   get_background(bck2d,back);
-    bind_texture(GmTextures[bck2d->texture]->gltex);
+    texture_use(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -289,7 +294,7 @@ void draw_background_stretched_ext(int back,double x,double y,double w,double h,
 void draw_background_part_ext(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
 {
     get_background(bck2d,back);
-      bind_texture(GmTextures[bck2d->texture]->gltex);
+      texture_use(GmTextures[bck2d->texture]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -317,7 +322,7 @@ void draw_background_part_ext(int back,double left,double top,double width,doubl
 void draw_background_tiled_ext(int back,double x,double y,double xscale,double yscale,int color,double alpha)
 {
     get_background(bck2d,back);
-      bind_texture(GmTextures[bck2d->texture]->gltex);
+      texture_use(GmTextures[bck2d->texture]->gltex);
 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -362,7 +367,7 @@ void draw_background_tiled_ext(int back,double x,double y,double xscale,double y
 void draw_background_tiled_area_ext(int back,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha)
 {
   get_background(bck2d,back);
-    bind_texture(GmTextures[bck2d->texture]->gltex);
+    texture_use(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -413,7 +418,7 @@ void draw_background_tiled_area_ext(int back,double x,double y,double x1,double 
 void draw_background_general(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4)
 {
   get_background(bck2d,back);
-  bind_texture(GmTextures[bck2d->texture]->gltex);
+  texture_use(GmTextures[bck2d->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
     const float
@@ -473,3 +478,6 @@ double background_get_texture_height_factor(int backId) {
   get_backgroundnv(bck2d,backId,-1);
   return bck2d->texbordy;
 }
+
+}
+

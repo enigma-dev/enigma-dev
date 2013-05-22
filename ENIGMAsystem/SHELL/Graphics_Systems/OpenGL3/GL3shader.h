@@ -18,6 +18,9 @@
 #ifndef _GLSHADER__H
 #define _GLSHADER__H
 
+namespace enigma_user
+{
+
 enum {
   sh_vertex = 0,
   sh_tesscontrol = 1,
@@ -41,5 +44,7 @@ void shader_program_bind_frag_data(int id, const char* name);
 void shader_program_use(int id);
 void shader_program_reset();
 void shader_program_free(int id);
+
+}
 
 #endif

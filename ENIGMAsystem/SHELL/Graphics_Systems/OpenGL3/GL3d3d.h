@@ -22,6 +22,7 @@ namespace enigma {
 }
 
 // ***** RENDER STATE MODE CONSTANTS *****
+namespace enigma_user {
 enum {
   rs_fill,
   rs_line,
@@ -46,17 +47,40 @@ enum {
   rs_gequal, 	// source Z >= depth Z
   rs_always     // Always True
 };
+}
 
 extern bool d3dMode;
 extern double projection_matrix[16];
 extern double transformation_matrix[16];
 
+namespace enigma_user
+{
+
+/** Starts 3D mode.
+**/
 void d3d_start();
+/** Ends 3d mode.
+**/
 void d3d_end();
+/** Gets whether 3D mode is enabled.
+@return This function returns true if 3D mode is enabled, and false if it is not.
+**/
 bool d3d_get_mode();
+/** Sets the use of a perspective projection.
+@param enable whether or not to enable perspective
+**/
 void d3d_set_perspective(bool enable);
+/** Sets whether hidden surface removal is enabled.
+@param enable whether or not to enable hidden surface removal
+**/
 void d3d_set_hidden(bool enable);
+/** Sets whether depth buffer writing is enabled.
+@param enable whether or not to enable depth writing
+**/
 void d3d_set_zwriteenable(bool enable);
+/** Sets whether lighting is enabled.
+@param enable whether or not to enable lighting
+**/
 void d3d_set_lighting(bool enable);
 
 void d3d_set_culling(bool enable);
@@ -124,3 +148,6 @@ void d3d_light_shininess(int facemode, int shine);
 void d3d_light_define_ambient(int col);
 bool d3d_light_enable(int id, bool enable);
 // ***** LIGHTS END *****
+
+}
+

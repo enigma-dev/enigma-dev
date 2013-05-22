@@ -17,10 +17,11 @@
 
 #include <string>
 #include <cstdio>
-#include "OpenGLHeaders.h"
-#include "GLbackground.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLbackground.h"
 #include "GLscreen.h"
 #include "GLd3d.h"
+#include "../General/GLbinding.h"
 
 using namespace std;
 
@@ -42,6 +43,18 @@ using namespace enigma;
 
 static inline void draw_back()
 {
+    using enigma_user::background_x;
+    using enigma_user::background_y;
+    using enigma_user::background_visible;
+    using enigma_user::background_alpha;
+    using enigma_user::background_xscale;
+    using enigma_user::background_yscale;
+    using enigma_user::background_htiled;
+    using enigma_user::background_vtiled;
+    using enigma_user::background_index;
+    using enigma_user::background_coloring;
+    using enigma_user::draw_background_tiled_ext;
+    using enigma_user::draw_background_ext;
     //Draw backgrounds
     for (int back_current=0; back_current<7; back_current++)
     {
@@ -76,6 +89,9 @@ namespace enigma
         }
     }
 }
+
+namespace enigma_user
+{
 
 void screen_redraw()
 {
@@ -130,12 +146,9 @@ void screen_redraw()
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
-            //loop tiles
-            for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
-            {
-                tile t = dit->second.tiles[i];
-                draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-            }
+            if (dit->second.tiles.size())
+                glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
+
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -289,15 +302,8 @@ void screen_redraw()
                 }
                 for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
                 {
-                    //loop tiles
-                    for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
-                    {
-                        tile t = dit->second.tiles[i];
-                        if (t.roomX + t.width < view_xview[vc] || t.roomY + t.height < view_yview[vc] || t.roomX > view_xview[vc] + view_wview[vc] || t.roomY > view_yview[vc] + view_hview[vc])
-                            continue;
-
-                        draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-                    }
+                    if (dit->second.tiles.size())
+                        glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
 
                     enigma::inst_iter* push_it = enigma::instance_event_iterator;
                     //loop instances
@@ -326,10 +332,9 @@ void screen_redraw()
     }
 }
 
-#include "binding.h"
 void screen_init()
 {
-    untexture()
+    texture_reset()
     if (!view_enabled)
     {
         glMatrixMode(GL_PROJECTION);
@@ -387,3 +392,6 @@ void screen_init()
         }
     }
 }
+
+}
+

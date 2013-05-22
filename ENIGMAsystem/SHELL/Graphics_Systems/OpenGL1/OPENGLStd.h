@@ -32,11 +32,11 @@ namespace enigma
   extern bool pbo_isgo;
 }
 
-#include "GLcolors.h"
+#include "../General/GLcolors.h"
 #include "GLprimitives.h"
 #include "GLd3d.h"
 #include "GLstdraw.h"
-#include "GLblend.h"
-#include "GLsurface.h"
+#include "../General/GLblend.h"
+#include "../General/GLsurface.h"
 #include "GLmiscextra.h"
 

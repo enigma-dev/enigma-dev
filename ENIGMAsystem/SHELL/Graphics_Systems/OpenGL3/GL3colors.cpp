@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGL3Headers.h"
-#include "GL3colors.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GLcolors.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -31,6 +31,9 @@
 namespace enigma {
   extern unsigned char currentcolor[4];
 }
+
+namespace enigma_user
+{
 
 void draw_unbind_all() {
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -124,9 +127,14 @@ int color_get_saturation(int color)
 	return cmpmax  ?  255 - int(255 * (r<g ? (r<b?r:b) : (g<b?g:b)) / double(cmpmax))  :  0;
 }
 
+}
+
 static inline int min(int x,int y) { return x<y ? x:y; }
 static inline int max(int x,int y) { return x>y ? x:y; }
 static inline int bclamp(int x)    { return x > 255 ? 255 : x < 0 ? 0 : x; }
+
+namespace enigma_user
+{
 
 int make_color_hsv(int hue,int saturation,int value)
 {
@@ -147,3 +155,6 @@ int make_color_hsv(int hue,int saturation,int value)
 
   return (redr>0 ? redr : 0) | (greenr>0 ? (greenr<<8) : 0) | (bluer>0 ? (bluer<<16) : 0);
 }
+
+}
+
