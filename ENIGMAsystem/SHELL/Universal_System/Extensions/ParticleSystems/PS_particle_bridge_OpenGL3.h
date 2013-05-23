@@ -317,7 +317,10 @@ namespace enigma {
         texcoords.push_back(t3y);
         texcoords.push_back(t4x);
         texcoords.push_back(t4y);
-        const unsigned int i4 = i*4;
+        unsigned int i4 = i*4;
+        if (!oldtonew) {
+          i4 = (pi_list_size - 1 - i)*4;
+        }
         indices.push_back(i4 + 0);
         indices.push_back(i4 + 1);
         indices.push_back(i4 + 2);
@@ -335,8 +338,12 @@ namespace enigma {
         bool curr_blend_add = false;
         int switch_offset = 0;
         int switch_count = 0;
-        for (int i = 0; i < pi_list.size(); i++) {
-          particle_instance& pi = pi_list[i];
+        for (unsigned int loop_i = 0; loop_i  < pi_list.size(); loop_i ++) {
+          unsigned int i = loop_i;
+          if (!oldtonew) {
+            i = pi_list_size - 1 - loop_i;
+          }
+
           curr_texture_index = texture_indices[i];
           curr_blend_add = blend_adds[i];
 
@@ -345,7 +352,11 @@ namespace enigma {
           }
           else {
             if (prev_blend_add != curr_blend_add || prev_texture_index != curr_texture_index) {
-              switch_offset_instcount.push_back(std::pair<int,int>(switch_offset, switch_count));
+              int new_offset = switch_offset;
+              if (!oldtonew) {
+                new_offset = pi_list_size - switch_offset - 1;
+              }
+              switch_offset_instcount.push_back(std::pair<int,int>(new_offset, switch_count));
               switch_offset = i;
               switch_count = 0;
             }
@@ -354,7 +365,11 @@ namespace enigma {
           prev_texture_index = curr_texture_index;
           prev_blend_add = curr_blend_add;
         }
-        switch_offset_instcount.push_back(std::pair<int,int>(switch_offset, switch_count));
+        int new_offset = switch_offset;
+        if (!oldtonew) {
+          new_offset = pi_list_size - switch_offset - 1;
+        }
+        switch_offset_instcount.push_back(std::pair<int,int>(new_offset, switch_count));
       }
 
       const unsigned int points_bsize = sizeof(GLfloat)*points.size();
@@ -407,8 +422,12 @@ namespace enigma {
         int switch_offset = switch_offset_instcount[i].first;
         int switch_count = switch_offset_instcount[i].second;
 
-        texture_use(GmTextures[texture_indices[switch_offset]]->gltex);
-        if (blend_adds[switch_offset]) {
+        int actual_index = switch_offset;
+        if (!oldtonew) {
+          actual_index = pi_list_size - switch_offset - 1;
+        }
+        texture_use(GmTextures[texture_indices[actual_index]]->gltex);
+        if (blend_adds[actual_index]) {
           glBlendFunc(GL_SRC_ALPHA,GL_ONE);
         }
         else {
