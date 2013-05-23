@@ -1,4 +1,4 @@
-/** Copyright (C) 2009-2011 Josh Ventura
+/** Copyright (C) 2009-2013 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,9 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
-#include <stdlib.h>
 #include <sys/stat.h>
 
 #include <string>
@@ -63,6 +63,12 @@ int directory_create(string dname) {
 #include <sys/stat.h>
 #include <dirent.h>
 
+static DIR* fff_dir_open = NULL;
+static string fff_mask, fff_path;
+static int fff_attrib;
+
+#define u_root 0
+
 namespace enigma_user
 {
   string file_find_next()
@@ -91,9 +97,6 @@ namespace enigma_user
     or (sb.st_uid == u_root and not_attrib & fa_sysfile) // Filter system files
     or (not_attrib & fa_readonly and access(fqfn.c_str(),W_OK)) // Filter read-only files
     ) return file_find_next();
-    
-    if (~sb.st_mode & S_IFDIR and fff_attrib & fa_nofiles)
-      return file_find_next();
     
     return r;
   }
