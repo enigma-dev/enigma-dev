@@ -8,12 +8,21 @@
 
 package org.enigma.backend.util;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class Point extends Structure
 	{
 	public int x;
 	public int y;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("x","y");
+		}
 
 	public static class ByReference extends Point implements Structure.ByReference
 		{

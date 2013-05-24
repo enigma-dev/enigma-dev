@@ -8,6 +8,9 @@
 
 package org.enigma.backend.resources;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class Script extends Structure
@@ -16,6 +19,12 @@ public class Script extends Structure
 	public int id;
 
 	public String code;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","id","code");
+		}
 
 	public static class ByReference extends Script implements Structure.ByReference
 		{

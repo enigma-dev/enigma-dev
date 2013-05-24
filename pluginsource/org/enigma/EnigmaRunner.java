@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008-2011 IsmAvatar <IsmAvatar@gmail.com>
+ * Copyright (C) 2013, Robert B. Colton
  * 
  * This file is part of Enigma Plugin.
  * 
@@ -118,6 +119,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	private EnigmaCallbacks ec = new EnigmaCallbacks(ef);
 	public EnigmaSettingsFrame esf;
 	public JMenuItem busy, run, debug, design, compile, rebuild;
+	public JButton runb, debugb, compileb;
 	public JMenuItem mImport, showFunctions, showGlobals, showTypes;
 	public ResNode node = new ResNode(Messages.getString("EnigmaRunner.RESNODE_NAME"), //$NON-NLS-1$
 			ResNode.STATUS_SECONDARY,EnigmaSettings.class);
@@ -346,18 +348,38 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		menu.add(busy);
 		run = new JMenuItem(Messages.getString("EnigmaRunner.MENU_RUN")); //$NON-NLS-1$
 		run.addActionListener(this);
+		run.setIcon(LGM.getIconForKey("EnigmaPlugin.EXECUTE"));
 		menu.add(run);
+		runb = new JButton(); //$NON-NLS-1$
+		runb.addActionListener(this);
+		runb.setToolTipText(Messages.getString("EnigmaRunner.MENU_RUN"));
+		runb.setIcon(LGM.getIconForKey("EnigmaPlugin.EXECUTE"));
+		LGM.tool.add(new JToolBar.Separator(), 4);
+		LGM.tool.add(runb, 5);
 		debug = new JMenuItem(Messages.getString("EnigmaRunner.MENU_DEBUG")); //$NON-NLS-1$
 		debug.addActionListener(this);
+		debug.setIcon(LGM.getIconForKey("EnigmaPlugin.DEBUG"));
 		menu.add(debug);
+		debugb = new JButton(); //$NON-NLS-1$
+		debugb.addActionListener(this);
+		debugb.setToolTipText(Messages.getString("EnigmaRunner.MENU_DEBUG"));
+		debugb.setIcon(LGM.getIconForKey("EnigmaPlugin.DEBUG"));
+		LGM.tool.add(debugb, 6);
 		design = new JMenuItem(Messages.getString("EnigmaRunner.MENU_DESIGN")); //$NON-NLS-1$
 		design.addActionListener(this);
 		menu.add(design);
 		compile = new JMenuItem(Messages.getString("EnigmaRunner.MENU_COMPILE")); //$NON-NLS-1$
 		compile.addActionListener(this);
+		compile.setIcon(LGM.getIconForKey("EnigmaPlugin.COMPILE"));
 		menu.add(compile);
+		compileb = new JButton(); //$NON-NLS-1$
+		compileb.addActionListener(this);
+		compileb.setToolTipText(Messages.getString("EnigmaRunner.MENU_COMPILE"));
+		compileb.setIcon(LGM.getIconForKey("EnigmaPlugin.COMPILE"));
+		LGM.tool.add(compileb, 7);
 		rebuild = new JMenuItem(Messages.getString("EnigmaRunner.MENU_REBUILD_ALL")); //$NON-NLS-1$
 		rebuild.addActionListener(this);
+		rebuild.setIcon(LGM.getIconForKey("EnigmaPlugin.REBUILD_ALL"));
 		menu.add(rebuild);
 
 		menu.addSeparator();
@@ -559,19 +581,22 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			if (outname != null) outname.deleteOnExit();
 			}
 		catch (IOException e)
-			{
+		{
 			e.printStackTrace();
 			return;
-			}
+		}
 		if (mode == MODE_COMPILE)
-			{
+		{
 			JFileChooser fc = new JFileChooser();
 			fc.setFileFilter(new CustomFileFilter(ext,
 					Messages.getString("EnigmaRunner.CHOOSER_EXE_DESCRIPTION"))); //$NON-NLS-1$
 			if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			outname = fc.getSelectedFile();
-			if (!outname.getName().endsWith(ext)) outname = new File(outname.getPath() + ext);
-			}
+			if (ext != null && !outname.getName().endsWith(ext))
+				outname = new File(outname.getPath() + ext);
+			else
+				outname = new File(outname.getPath());
+		}
 
 		setMenuEnabled(false);
 		LGM.commitAll();
@@ -623,12 +648,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public void actionPerformed(ActionEvent e)
 		{
 		if (!assertReady()) return;
-
 		Object s = e.getSource();
-		if (s == run) compile(MODE_RUN);
-		if (s == debug) compile(MODE_DEBUG);
+		if (s == run || s == runb) compile(MODE_RUN);
+		if (s == debug || s == debugb) compile(MODE_DEBUG);
 		if (s == design) compile(MODE_DESIGN);
-		if (s == compile) compile(MODE_COMPILE);
+		if (s == compile || s == compileb) compile(MODE_COMPILE);
 		if (s == rebuild) compile(MODE_REBUILD);
 
 		if (s == mImport) EFileReader.importEgmFolder();

@@ -8,6 +8,9 @@
 
 package org.enigma.backend;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.enigma.backend.other.Constant;
 import org.enigma.backend.other.Extension;
 import org.enigma.backend.other.Include;
@@ -57,15 +60,24 @@ public class EnigmaStruct extends Structure
 	public int constantCount;
 	public Include.ByReference includes;
 	public int includeCount;
-	public Pointer packages; //StringArray
+	public Pointer packages; // StringArray
 	public int packageCount;
 
 	public Extension.ByReference extensions;
 	public int extensionCount;
 
-	//public GameInformation gameInfo;
+	// public GameInformation gameInfo;
 	public GameSettings gameSettings;
 	public int lastInstanceId = 100000;
 	public int lastTileId = 10000000;
 
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("fileVersion","filename","sprites","spriteCount","sounds","soundCount",
+				"backgrounds","backgroundCount","paths","pathCount","scripts","scriptCount","fonts",
+				"fontCount","timelines","timelineCount","gmObjects","gmObjectCount","rooms","roomCount",
+				"triggers","triggerCount","constants","constantCount","includes","includeCount","packages",
+				"packageCount","extensions","extensionCount","gameSettings","lastInstanceId","lastTileId");
+		}
 	}

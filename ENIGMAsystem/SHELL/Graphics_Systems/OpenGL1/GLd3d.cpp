@@ -1102,9 +1102,14 @@ class d3d_model
         texture_reset();
         texture_use(get_texture(texId));
         glPushAttrib(GL_CURRENT_BIT);
+        glLoadIdentity();
+        glLoadMatrixd(projection_matrix);
+        glMultMatrixd(transformation_matrix);
         glTranslatef(x, y, z);
         glCallList(model);
-        glTranslatef(-x, -y, -z);
+        glLoadIdentity();
+        glLoadMatrixd(projection_matrix);
+        glMultMatrixd(transformation_matrix);
         glPopAttrib();
     }
 

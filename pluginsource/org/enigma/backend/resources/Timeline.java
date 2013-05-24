@@ -8,6 +8,9 @@
 
 package org.enigma.backend.resources;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.enigma.backend.sub.Moment;
 
 import com.sun.jna.Structure;
@@ -19,6 +22,12 @@ public class Timeline extends Structure
 
 	public Moment.ByReference moments;
 	public int momentCount;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","id","moments","momentCount");
+		}
 
 	public static class ByReference extends Timeline implements Structure.ByReference
 		{

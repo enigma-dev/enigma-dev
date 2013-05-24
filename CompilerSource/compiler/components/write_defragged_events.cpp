@@ -195,7 +195,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     // Handle room switching/game restart.
     wto << "    enigma::dispose_destroyed_instances();" << endl;
     wto << "    enigma::rooms_switch();" << endl;
-    wto << "    enigma::sleep_for_framerate(room_speed);" << endl;
+    wto << "    #define USER_IQ (180 - room_speed)\n    if (USER_IQ >= 10)\n      enigma::sleep_for_framerate(room_speed);" << endl;
     wto << "    " << endl;
     wto << "    return 0;" << endl;
   wto << "  } // event function" << endl;

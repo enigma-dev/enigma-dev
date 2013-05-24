@@ -145,7 +145,10 @@ namespace enigma_user
     return low + random_integer(high - low);
   }
 
-  inline double irandom(int x) { return random_integer(x); }
+  // These functions are for compatability with GM8, wherein they were implemented to circumvent
+  // GML's lack of function overload capability. Since irandom is a nice shorthand, it supports
+  // random_integer's overload. Since irandom_range is a stupid idea, it uses only GM's behavior.
+  #define irandom random_integer
   inline double irandom_range(int low, int high) { return random_integer(low, high); }
 
   // Mersenne random

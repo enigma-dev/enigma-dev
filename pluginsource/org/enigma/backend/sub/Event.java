@@ -8,12 +8,21 @@
 
 package org.enigma.backend.sub;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class Event extends Structure
 	{
 	public int id;
 	public String code;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("id","code");
+		}
 
 	public static class ByReference extends Event implements Structure.ByReference
 		{

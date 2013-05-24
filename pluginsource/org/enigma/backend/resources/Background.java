@@ -8,6 +8,9 @@
 
 package org.enigma.backend.resources;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.enigma.backend.util.Image;
 
 import com.sun.jna.Structure;
@@ -29,6 +32,13 @@ public class Background extends Structure
 	public int vSep;
 
 	public Image backgroundImage;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("name","id","transparent","smoothEdges","preload","useAsTileset",
+				"tileWidth","tileHeight","hOffset","vOffset","hSep","vSep","backgroundImage");
+		}
 
 	public static class ByReference extends Background implements Structure.ByReference
 		{

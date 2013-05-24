@@ -51,7 +51,6 @@ namespace enigma
     {
         get_background(bck2d,back);
         texture_use(GmTextures[bck2d->texture]->gltex);
-
         glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
         float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
@@ -78,6 +77,7 @@ namespace enigma
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
             if (dit->second.tiles.size())
             {
+                texture_reset();
                 sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
                 int index = int(glGenLists(1));
                 drawing_depths[dit->second.tiles[0].depth].tilelist = index;
@@ -85,7 +85,7 @@ namespace enigma
                 for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
                 {
                     tile t = dit->second.tiles[i];
-                    enigma_user::draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
                 }
                 glEndList();
             }
@@ -102,11 +102,14 @@ namespace enigma
     void rebuild_tile_layer(int layer_depth)
     {
         glPushAttrib(GL_CURRENT_BIT);
+        texture_reset();
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
             if (dit->second.tiles.size())
             {
                 if (dit->second.tiles[0].depth != layer_depth)
                     continue;
+
+                texture_reset();
                 glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
                 int index = int(glGenLists(1));
                 drawing_depths[dit->second.tiles[0].depth].tilelist = index;
@@ -114,7 +117,7 @@ namespace enigma
                 for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
                 {
                     tile t = dit->second.tiles[i];
-                    enigma_user::draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
                 }
                 glEndList();
             }

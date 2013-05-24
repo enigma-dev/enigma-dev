@@ -8,6 +8,9 @@
 
 package org.enigma.backend.sub;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class BackgroundDef extends Structure
@@ -23,6 +26,13 @@ public class BackgroundDef extends Structure
 	public boolean stretch;
 
 	public int backgroundId;
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("visible","foreground","x","y","tileHoriz","tileVert","hSpeed","vSpeed",
+				"stretch","backgroundId");
+		}
 
 	public static class ByReference extends BackgroundDef implements Structure.ByReference
 		{

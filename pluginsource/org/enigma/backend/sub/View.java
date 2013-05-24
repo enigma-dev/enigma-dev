@@ -8,6 +8,9 @@
 
 package org.enigma.backend.sub;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class View extends Structure
@@ -26,6 +29,13 @@ public class View extends Structure
 	public int speedH;
 	public int speedV;
 	public int objectId; //following object
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("visible","viewX","viewY","viewW","viewH","portX","portY","portW","portH",
+				"borderH","borderV","speedH","speedV","objectId");
+		}
 
 	public static class ByReference extends View implements Structure.ByReference
 		{

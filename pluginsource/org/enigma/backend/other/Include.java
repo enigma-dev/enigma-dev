@@ -8,20 +8,30 @@
 
 package org.enigma.backend.other;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class Include extends Structure
 	{
-//	String filename = "";
+	//	String filename = "";
 	public String filepath;
-/*	boolean isOriginal;
-	int size = 0;
-	byte[] data = null;
-	int export = 2;
-	String exportFolder = "";
-	boolean overwriteExisting = false;
-	boolean freeMemAfterExport = true;
-	boolean removeAtGameEnd = true;*/
+
+	/*	boolean isOriginal;
+		int size = 0;
+		byte[] data = null;
+		int export = 2;
+		String exportFolder = "";
+		boolean overwriteExisting = false;
+		boolean freeMemAfterExport = true;
+		boolean removeAtGameEnd = true;*/
+
+	@Override
+	protected List<String> getFieldOrder()
+		{
+		return Arrays.asList("filepath");
+		}
 
 	public static class ByReference extends Include implements Structure.ByReference
 		{
