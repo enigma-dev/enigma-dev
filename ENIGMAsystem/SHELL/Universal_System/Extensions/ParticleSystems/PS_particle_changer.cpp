@@ -109,84 +109,86 @@ using enigma::particle_system;
 using enigma::particle_type;
 using enigma::particle_changer;
 
-int part_changer_create(int id)
-{
-  particle_system* p_s = enigma::get_particlesystem(id);
-  if (p_s != NULL) {
-    return p_s->create_changer();
+namespace enigma_user {
+  int part_changer_create(int id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(id);
+    if (p_s != NULL) {
+      return p_s->create_changer();
+    }
+    return -1;
   }
-  return -1;
-}
-void part_changer_destroy(int ps_id, int ch_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
-    if (ch_it != p_s->id_to_changer.end()) {
-      delete (*ch_it).second;
-      p_s->id_to_changer.erase(ch_it);
+  void part_changer_destroy(int ps_id, int ch_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+      if (ch_it != p_s->id_to_changer.end()) {
+        delete (*ch_it).second;
+        p_s->id_to_changer.erase(ch_it);
+      }
     }
   }
-}
-void part_changer_destroy_all(int ps_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    for (std::map<int,particle_changer*>::iterator it = p_s->id_to_changer.begin(); it != p_s->id_to_changer.end(); it++)
-    {
-      delete (*it).second;
-    }
-    p_s->id_to_changer.clear();
-  }
-}
-bool part_changer_exists(int ps_id, int ch_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
-    if (ch_it != p_s->id_to_changer.end()) {
-      return true;
+  void part_changer_destroy_all(int ps_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      for (std::map<int,particle_changer*>::iterator it = p_s->id_to_changer.begin(); it != p_s->id_to_changer.end(); it++)
+      {
+        delete (*it).second;
+      }
+      p_s->id_to_changer.clear();
     }
   }
-  return false;
-}
-void part_changer_clear(int ps_id, int ch_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
-    if (ch_it != p_s->id_to_changer.end()) {
-      (*ch_it).second->initialize();
+  bool part_changer_exists(int ps_id, int ch_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+      if (ch_it != p_s->id_to_changer.end()) {
+        return true;
+      }
+    }
+    return false;
+  }
+  void part_changer_clear(int ps_id, int ch_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+      if (ch_it != p_s->id_to_changer.end()) {
+        (*ch_it).second->initialize();
+      }
     }
   }
-}
-void part_changer_region(int ps_id, int ch_id, double xmin, double xmax, double ymin, double ymax, int shape)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
-    if (ch_it != p_s->id_to_changer.end()) {
-      (*ch_it).second->set_region(xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape));
+  void part_changer_region(int ps_id, int ch_id, double xmin, double xmax, double ymin, double ymax, int shape)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+      if (ch_it != p_s->id_to_changer.end()) {
+        (*ch_it).second->set_region(xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape));
+      }
     }
   }
-}
-void part_changer_types(int ps_id, int ch_id, int parttype1, int parttype2)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL && enigma::get_particletype(parttype1) != NULL && enigma::get_particletype(parttype2) != NULL) {
-    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
-    if (ch_it != p_s->id_to_changer.end()) {
-      (*ch_it).second->set_types(parttype1, parttype2);
+  void part_changer_types(int ps_id, int ch_id, int parttype1, int parttype2)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL && enigma::get_particletype(parttype1) != NULL && enigma::get_particletype(parttype2) != NULL) {
+      std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+      if (ch_it != p_s->id_to_changer.end()) {
+        (*ch_it).second->set_types(parttype1, parttype2);
+      }
     }
   }
-}
-void part_changer_kind(int ps_id, int ch_id, int kind)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
-    if (ch_it != p_s->id_to_changer.end()) {
-      (*ch_it).second->set_change_kind(enigma::get_ps_change(kind));
+  void part_changer_kind(int ps_id, int ch_id, int kind)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_changer*>::iterator ch_it = p_s->id_to_changer.find(ch_id);
+      if (ch_it != p_s->id_to_changer.end()) {
+        (*ch_it).second->set_change_kind(enigma::get_ps_change(kind));
+      }
     }
   }
 }

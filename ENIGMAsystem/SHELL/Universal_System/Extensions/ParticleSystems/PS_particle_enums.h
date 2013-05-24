@@ -50,6 +50,7 @@ namespace enigma
   };
   inline pt_shape get_pt_shape(int particle_shape)
   {
+    using namespace enigma_user;
     switch (particle_shape) {
     case pt_shape_pixel : return enigma::pt_sh_pixel;
     case pt_shape_disk : return enigma::pt_sh_disk;
@@ -77,6 +78,7 @@ namespace enigma
   };
   inline ps_shape get_ps_shape(int shape)
   {
+    using namespace enigma_user;
     switch (shape) {
     case ps_shape_rectangle : return enigma::ps_sh_rectangle;
     case ps_shape_ellipse : return enigma::ps_sh_ellipse;
@@ -93,6 +95,7 @@ namespace enigma
   };
   inline ps_distr get_ps_distr(int distribution)
   {
+    using namespace enigma_user;
     switch (distribution) {
     case ps_distr_linear : return enigma::ps_di_linear;
     case ps_distr_gaussian : return enigma::ps_di_gaussian;
@@ -108,6 +111,7 @@ namespace enigma
   };
   inline ps_force get_ps_force(int force_kind)
   {
+    using namespace enigma_user;
     switch (force_kind) {
     case ps_force_constant : return enigma::ps_fo_constant;
     case ps_force_linear : return enigma::ps_fo_linear;
@@ -122,6 +126,7 @@ namespace enigma
   };
   inline ps_deflect get_ps_deflect(int deflection_kind)
   {
+    using namespace enigma_user;
     switch (deflection_kind) {
     case ps_deflect_horizontal : return enigma::ps_de_horizontal;
     case ps_deflect_vertical : return enigma::ps_de_vertical;
@@ -134,6 +139,7 @@ namespace enigma
   };
   inline ps_change get_ps_change(int change_kind)
   {
+    using namespace enigma_user;
     switch (change_kind) {
     case ps_change_all : return enigma::ps_ch_all;
     default : return enigma::ps_ch_all;
