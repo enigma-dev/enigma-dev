@@ -674,7 +674,7 @@ namespace enigma
   void room_update()
   {
     using namespace enigma_user;
-    window_set_caption(room_caption);
+ //   window_set_caption(room_caption);   // This little baby needs changing
     if (view_enabled)
     {
       for (int i=0;i<8;i++)

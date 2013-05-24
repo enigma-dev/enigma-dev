@@ -1104,8 +1104,8 @@ class d3d_model
         glPushAttrib(GL_CURRENT_BIT);
         glLoadIdentity();
         glLoadMatrixd(projection_matrix);
-        glTranslatef(x, y, z);
         glMultMatrixd(transformation_matrix);
+        glTranslatef(x, y, z);
         glCallList(model);
         glLoadIdentity();
         glLoadMatrixd(projection_matrix);

@@ -50,7 +50,6 @@ namespace enigma
     void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
     {
         get_background(bck2d,back);
-//        glBindTexture(GL_TEXTURE_2D, GmTextures[bck2d->texture]->gltex);
         texture_use(GmTextures[bck2d->texture]->gltex);
         glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
