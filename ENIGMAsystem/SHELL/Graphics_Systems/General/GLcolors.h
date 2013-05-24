@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_GLCOLORS_H
+#define ENIGMA_GLCOLORS_H
+
 namespace enigma_user
 {
 
@@ -163,4 +166,6 @@ int make_color_hsv(int hue,int saturation,int value);
 void draw_unbind_all();
 
 }
+
+#endif // ENIGMA_GLCOLORS_H
 

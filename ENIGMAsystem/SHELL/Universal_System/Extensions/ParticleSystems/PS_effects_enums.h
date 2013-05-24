@@ -48,6 +48,7 @@ namespace enigma
   };
   inline ef_effect get_ef(int effect)
   {
+    using namespace enigma_user;
     switch (effect) {
     case ef_explosion : return enigma::ef_effects_explosion;
     case ef_ring : return enigma::ef_effects_ring;
@@ -72,6 +73,7 @@ namespace enigma
   };
   inline ef_size get_ef_size(int size_kind)
   {
+    using namespace enigma_user;
     switch (size_kind) {
     case ef_size_small : return enigma::ef_si_small;
     case ef_size_medium : return enigma::ef_si_medium;

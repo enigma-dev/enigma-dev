@@ -1,4 +1,5 @@
 #include "OPENGL3Std.h"
+#include "Info/graphics_info.h"
 #include "../General/GLsprite.h"
 #include "../General/GLbackground.h"
 #include "GL3vertexbuffer.h"

@@ -70,6 +70,10 @@ namespace enigma
     effect_clear();
   }
 
+  namespace particle_bridge {
+    void initialize_particle_bridge();
+  }
+
   particles_implementation part_impl;
   bool initialized;
   void initialize_particle_systems_drawing()
@@ -80,6 +84,7 @@ namespace enigma
       part_impl.draw_particlesystems = &internal_draw_particlesystems;
       part_impl.clear_effects = &internal_clear_effects;
       set_particles_implementation(&part_impl);
+      particle_bridge::initialize_particle_bridge();
     }
   }
 }
