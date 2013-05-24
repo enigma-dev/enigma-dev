@@ -149,6 +149,7 @@ void screen_redraw()
             if (dit->second.tiles.size())
                 glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
 
+            texture_reset();
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -305,6 +306,7 @@ void screen_redraw()
                     if (dit->second.tiles.size())
                         glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
 
+                    texture_reset();
                     enigma::inst_iter* push_it = enigma::instance_event_iterator;
                     //loop instances
                     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
