@@ -98,64 +98,66 @@ using enigma::particle_system;
 using enigma::particle_type;
 using enigma::particle_destroyer;
 
-int part_destroyer_create(int id)
-{
-  particle_system* p_s = enigma::get_particlesystem(id);
-  if (p_s != NULL) {
-    return p_s->create_destroyer();
+namespace enigma_user {
+  int part_destroyer_create(int id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(id);
+    if (p_s != NULL) {
+      return p_s->create_destroyer();
+    }
+    return -1;
   }
-  return -1;
-}
-void part_destroyer_destroy(int ps_id, int ds_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
-    if (ds_it != p_s->id_to_destroyer.end()) {
-      delete (*ds_it).second;
-      p_s->id_to_destroyer.erase(ds_it);
+  void part_destroyer_destroy(int ps_id, int ds_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
+      if (ds_it != p_s->id_to_destroyer.end()) {
+        delete (*ds_it).second;
+        p_s->id_to_destroyer.erase(ds_it);
+      }
     }
   }
-}
-void part_destroyer_destroy_all(int ps_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    for (std::map<int,particle_destroyer*>::iterator it = p_s->id_to_destroyer.begin(); it != p_s->id_to_destroyer.end(); it++)
-    {
-      delete (*it).second;
-    }
-    p_s->id_to_destroyer.clear();
-  }
-}
-bool part_destroyer_exists(int ps_id, int ds_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
-    if (ds_it != p_s->id_to_destroyer.end()) {
-      return true;
+  void part_destroyer_destroy_all(int ps_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      for (std::map<int,particle_destroyer*>::iterator it = p_s->id_to_destroyer.begin(); it != p_s->id_to_destroyer.end(); it++)
+      {
+        delete (*it).second;
+      }
+      p_s->id_to_destroyer.clear();
     }
   }
-  return false;
-}
-void part_destroyer_clear(int ps_id, int ds_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
-    if (ds_it != p_s->id_to_destroyer.end()) {
-      (*ds_it).second->initialize();
+  bool part_destroyer_exists(int ps_id, int ds_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
+      if (ds_it != p_s->id_to_destroyer.end()) {
+        return true;
+      }
+    }
+    return false;
+  }
+  void part_destroyer_clear(int ps_id, int ds_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
+      if (ds_it != p_s->id_to_destroyer.end()) {
+        (*ds_it).second->initialize();
+      }
     }
   }
-}
-void part_destroyer_region(int ps_id, int ds_id, double xmin, double xmax, double ymin, double ymax, int shape)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
-    if (ds_it != p_s->id_to_destroyer.end()) {
-      (*ds_it).second->set_region(xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape));
+  void part_destroyer_region(int ps_id, int ds_id, double xmin, double xmax, double ymin, double ymax, int shape)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_destroyer*>::iterator ds_it = p_s->id_to_destroyer.find(ds_id);
+      if (ds_it != p_s->id_to_destroyer.end()) {
+        (*ds_it).second->set_region(xmin, xmax, ymin, ymax, enigma::get_ps_shape(shape));
+      }
     }
   }
 }

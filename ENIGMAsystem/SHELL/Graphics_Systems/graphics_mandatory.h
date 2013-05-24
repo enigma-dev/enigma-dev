@@ -50,8 +50,6 @@ namespace enigma
   void set_particles_implementation(particles_implementation* particles_impl);
   // Updates all particle systems that are automatically updated.
   void update_particlesystems();
-  void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
-      double x_offset, double y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape));
   void graphics_clean_up_roomend();
   void delete_tiles();
   void load_tiles();
