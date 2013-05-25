@@ -63,11 +63,6 @@ namespace enigma
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glAlphaFunc(GL_ALWAYS,0);
 
-      // enable vertex array's for fast vertex processing
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      glEnableClientState(GL_NORMAL_ARRAY);
-
       glColor4f(0,0,0,1);
       glBindTexture(GL_TEXTURE_2D,0);
   }
