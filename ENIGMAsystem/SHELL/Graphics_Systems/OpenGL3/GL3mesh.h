@@ -17,6 +17,7 @@
 
 #include <string>
 #include "GL3vertexbuffer.h"
+#include "../General/OpenGLHeaders.h"
 
 // ***** MODELS BEGIN *****
 namespace enigma_user {
@@ -40,7 +41,7 @@ void d3d_model_vertex(const unsigned int id, double x, double y, double z);
 void d3d_model_normal(const unsigned int id, double nx, double ny, double nz);
 void d3d_model_texture(const unsigned int id, double tx, double ty);
 void d3d_model_color(const unsigned int id, int col, double alpha);
-void d3d_model_index(const unsigned int id, int in);
+void d3d_model_index(const unsigned int id, GLuint in);
 void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha);
 void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty);
 void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha);

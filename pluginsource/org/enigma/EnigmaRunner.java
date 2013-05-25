@@ -552,6 +552,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		design.setEnabled(en);
 		compile.setEnabled(en);
 		rebuild.setEnabled(en);
+		runb.setEnabled(en);
+		debugb.setEnabled(en);
+		compileb.setEnabled(en);
 		}
 
 	public void compile(final int mode)

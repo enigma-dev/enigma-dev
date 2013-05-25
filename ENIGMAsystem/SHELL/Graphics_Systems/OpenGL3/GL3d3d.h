@@ -16,7 +16,7 @@
 **/
 
 #ifndef ENIGMA_GL3D3D_H
-#define ENIGMA_GL3D3D_H
+#define ENIGMA_GL3D3D_H 
 
 #include <string>
 
@@ -154,5 +154,4 @@ bool d3d_light_enable(int id, bool enable);
 
 }
 
-#endif // ENIGMA_GL3D3D_H
-
+#endif // ENIGMA_GL3D3D_H 
