@@ -29,9 +29,12 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
-bool d3dMode = false;
-bool d3dHidden = true;
-bool d3dZWriteEnable = true;
+namespace enigma {
+    bool d3dMode = false;
+    bool d3dHidden = false;
+    bool d3dZWriteEnable = true;
+}
+
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 GLenum renderstates[22] = {
@@ -52,9 +55,9 @@ void d3d_start()
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
   // Enable depth buffering
-  d3dMode = true;
-  d3dHidden = true;
-  d3dZWriteEnable = true;
+  enigma::d3dMode = true;
+  enigma::d3dHidden = true;
+  enigma::d3dZWriteEnable = true;
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
@@ -75,7 +78,8 @@ void d3d_start()
 
 void d3d_end()
 {
-  d3dMode = false;
+  enigma::d3dMode = false;
+  enigma::d3dHidden = false;
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_ALPHA_TEST);
   glDisable(GL_NORMALIZE);
@@ -88,19 +92,19 @@ void d3d_end()
 
 bool d3d_get_mode()
 {
-    return d3dMode;
+    return enigma::d3dMode;
 }
 
 void d3d_set_hidden(bool enable)
 {
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    d3dHidden = enable;
+    enigma::d3dHidden = enable;
 }
 
 void d3d_set_zwriteenable(bool enable)
 {
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    d3dZWriteEnable = enable;
+    enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)
@@ -234,8 +238,7 @@ namespace enigma_user
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
-  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
-  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
+  (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
@@ -249,8 +252,7 @@ void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double
 
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
 {
-  (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
-  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
+  (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(angle, -aspect, znear, zfar);

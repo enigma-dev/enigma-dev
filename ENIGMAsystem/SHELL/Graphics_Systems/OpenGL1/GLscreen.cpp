@@ -90,6 +90,10 @@ namespace enigma
     }
 }
 
+namespace enigma {
+    extern bool d3dHidden;
+}
+
 namespace enigma_user
 {
 
@@ -119,7 +123,9 @@ void screen_redraw()
             glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
             glClear(GL_COLOR_BUFFER_BIT);
         }
-        glClear(GL_DEPTH_BUFFER_BIT);
+
+        if (enigma::d3dHidden)
+            glClear(GL_DEPTH_BUFFER_BIT);
 
         draw_back();
 
@@ -277,7 +283,9 @@ void screen_redraw()
                     glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
                     glClear(GL_COLOR_BUFFER_BIT);
                 }
-                glClear(GL_DEPTH_BUFFER_BIT);
+
+                if (enigma::d3dHidden)
+                    glClear(GL_DEPTH_BUFFER_BIT);
 
                 draw_back();
 
