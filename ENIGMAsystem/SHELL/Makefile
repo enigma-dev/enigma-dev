@@ -20,7 +20,7 @@ endif
 GMODE := Run
 
 # GRAPHICS { Graphics_Systems/* }
-GRAPHICS := OpenGL1
+GRAPHICS ?= OpenGL1
 
 # AUDIO { Audio_Systems/* }
 AUDIO := OpenAL
