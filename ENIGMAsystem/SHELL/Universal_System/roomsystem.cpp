@@ -59,6 +59,7 @@ int room_height = 480;
 
 int room_persistent = 0;
 var room_caption = "";
+var current_caption = "";
 
 int background_color = 0xFFFFFF;
 int background_showcolor=1;
@@ -671,23 +672,26 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
 
 namespace enigma
 {
-  void room_update()
+  double mouse_xprevious, mouse_yprevious;
+  void update_mouse_variables()
   {
     using namespace enigma_user;
- //   window_set_caption(room_caption);   // This little baby needs changing
+    mouse_xprevious = mouse_x;
+    mouse_yprevious = mouse_y;
+    mouse_x = window_mouse_get_x();
+    mouse_y = window_mouse_get_y();
+
     if (view_enabled)
-    {
-      for (int i=0;i<8;i++)
-      if (view_visible[i])
-      {
-        if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i]
-        &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
-          mouse_x=view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
-          mouse_y=view_yview[i]+((mouse_y-view_yport[i])/(double)view_hport[i])*view_hview[i];
-          break;
+      for (int i=0; i<8; i++)
+        if (view_visible[i])
+        {
+          if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i])
+          {
+            mouse_x = view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
+            mouse_y = view_yview[i]+((mouse_y-view_yport[i])/(double)view_hport[i])*view_hview[i];
+            break;
+          }
         }
-      }
-    }
   }
   void rooms_switch()
   {

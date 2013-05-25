@@ -184,21 +184,22 @@ int window_get_height()
     return enigma::windowHeight;
 }
 
-void window_set_caption(char* caption)
-{
-  SetWindowText(enigma::hWnd,caption);
-}
-
 void window_set_caption(string caption)
 {
-  SetWindowText(enigma::hWndParent,(char*) caption.c_str());
+/*  if (caption == "")
+      if (score != 0)
+        caption = "Score: " + string(score);  //GM does this but it's rather fucktarded */
+
+    if (caption != current_caption)
+    {
+        SetWindowText(enigma::hWndParent,(char*) caption.c_str());
+        current_caption = caption;
+    }
 }
 
 string window_get_caption()
 {
-  char text_buffer[513];
-  GetWindowText(enigma::hWnd, text_buffer, 512);
-  return text_buffer;
+  return current_caption;
 }
 
 void window_set_color(int color)
@@ -899,7 +900,7 @@ void io_handle()
     TranslateMessage (&msg);
     DispatchMessage (&msg);
   }
-  enigma::update_globals();
+  enigma::update_mouse_variables();
 }
 
 void keyboard_wait()

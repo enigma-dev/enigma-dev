@@ -80,6 +80,7 @@ extern int room_speed;
 extern int room_width;
 
 extern var room_caption;
+extern var current_caption;
 
 int room_count();
 #define room_count room_count()
@@ -147,7 +148,7 @@ namespace enigma
 
     void gotome(bool=false);
   };
-  void room_update();
+  void update_mouse_variables();
   extern int maxid, maxtileid;
   extern int room_switching_id; // -1 indicates no room set.
   void rooms_switch();

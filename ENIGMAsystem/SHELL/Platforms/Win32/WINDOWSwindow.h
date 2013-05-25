@@ -73,7 +73,6 @@ int window_get_y();
 int window_get_width();
 int window_get_height();
 
-void window_set_caption(char* caption);
 void window_set_caption(string caption);
 string window_get_caption();
 void window_set_color(int color);

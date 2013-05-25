@@ -56,9 +56,6 @@ namespace enigma_user
 // These functions are standard GML that are an integral part of the system.
 // Each instance must implement these, even if they are unable to do anything on the target platform.
 
-// This function sets the game window caption, if there is a place reserved for such.
-void window_set_caption(std::string caption);
-
 // This is used with roomsystem
 void window_default();
 

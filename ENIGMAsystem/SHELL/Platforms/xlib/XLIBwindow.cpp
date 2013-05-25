@@ -408,7 +408,6 @@ void io_handle()
     if(handleEvents() > 0)
       exit(0);
   }
-  enigma::update_globals();
 }
 
 void keyboard_wait()

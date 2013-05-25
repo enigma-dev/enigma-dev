@@ -178,7 +178,6 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
         wto << "    " << endl;
     }
     wto << "    after_events:" << endl;
-    wto << "    enigma::update_globals();" << endl;
     if (es->gameSettings.letEscEndGame)
         wto << "    if (keyboard_check_pressed(vk_escape)) game_end();" << endl;
     if (es->gameSettings.letF4SwitchFullscreen)
