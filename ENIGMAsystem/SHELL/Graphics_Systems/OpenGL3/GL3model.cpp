@@ -20,7 +20,7 @@
 #include "GL3primitives.h"
 #include "GL3vertexbuffer.h"
 #include "../General/GLtextures.h"
-#include "GL3mesh.h"
+#include "GL3model.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -260,17 +260,18 @@ class Mesh
 
     // enable vertex array's for fast vertex processing
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-
     glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );
     glVertexPointer( 3, GL_FLOAT, 0, (char *) NULL );       // Set The Vertex Pointer To The Vertex Buffer
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
     glTexCoordPointer( 2, GL_FLOAT, 0, (char *) NULL );     // Set The TexCoord Pointer To The TexCoord Buffer
+
+    glEnableClientState(GL_NORMAL_ARRAY);
     glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
     glNormalPointer( GL_FLOAT, 0, (char *) NULL );     // Set The Normal Pointer To The Normal Buffer
+
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );
-    glNormalPointer( GL_FLOAT, 0, (char *) NULL );     // Set The Normal Pointer To The Normal Buffer
 
     for (int i = 0; i < primitives.size(); i++)
     {

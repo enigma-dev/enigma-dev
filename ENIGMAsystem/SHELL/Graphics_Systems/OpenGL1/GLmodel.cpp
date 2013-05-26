@@ -23,7 +23,7 @@
 #include <math.h>
 #include "../General/GLbinding.h"
 
-#include "GLmesh.h"
+#include "GLmodel.h"
 
 #include "Universal_System/estring.h"
 

@@ -4,7 +4,7 @@
 #include "../General/GLbackground.h"
 #include "../General/GLtextures.h"
 #include "../General/GLtiles.h"
-#include "GLmesh.h"
+#include "GLmodel.h"
 
 #include "../General/GLfont.h"
 #include "../General/GLcurves.h"

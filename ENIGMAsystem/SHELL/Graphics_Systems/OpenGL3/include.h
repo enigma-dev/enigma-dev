@@ -6,7 +6,7 @@
 #include "GL3shader.h"
 #include "../General/GLtextures.h"
 #include "GL3material.h"
-#include "GL3mesh.h"
+#include "GL3model.h"
 
 #include "../General/GLfont.h"
 #include "../General/GLcurves.h"
