@@ -9,4 +9,4 @@ Author: Robert B. Colton
 Depends:
 
 Represents:
-	Build-platforms: None
+	Build-platforms: All

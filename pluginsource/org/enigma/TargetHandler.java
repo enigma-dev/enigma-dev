@@ -34,9 +34,9 @@ public final class TargetHandler
 		}
 
 	public static final String COMPILER = "compiler"; //$NON-NLS-1$
-	public static final String[] ids = { COMPILER,"windowing","graphics","audio","collision","widget" };
+	public static final String[] ids = { COMPILER,"windowing","graphics","audio","collision","widget","networking" };
 	private static final String[] folders = { null,"Platforms","Graphics_Systems","Audio_Systems",
-			"Collision_Systems","Widget_Systems" };
+			"Collision_Systems","Widget_Systems", "Networking_Systems" };
 	private static final String COMP_TARG = "target", OS_KEY = "build-platforms"; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final Pattern NORMALIZER = Pattern.compile("[\\[\\]\\-\\s_]"); //$NON-NLS-1$
 	private static final Pattern SPLITTER = Pattern.compile("\\s*,\\s*"); //$NON-NLS-1$
