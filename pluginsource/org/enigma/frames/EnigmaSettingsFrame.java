@@ -97,7 +97,7 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon CODE_ICON = LGM.getIconForKey("Resource.SCRIPT"); //$NON-NLS-1$
 	private static final String[] labels = { "Compiler: ","Platform: ","Graphics: ","Audio: ", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			"Collision: ","Widgets: " }; //$NON-NLS-1$ //$NON-NLS-2$
+			"Collision: ","Widgets: ","Networking: " }; //$NON-NLS-1$ //$NON-NLS-2$
 
 	protected JToolBar toolbar;
 	protected JButton saveFile, loadFile;

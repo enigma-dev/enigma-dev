@@ -20,7 +20,7 @@
 #include "GL3primitives.h"
 #include "GL3vertexbuffer.h"
 #include "../General/GLtextures.h"
-#include "GL3mesh.h"
+#include "GL3model.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -260,17 +260,18 @@ class Mesh
 
     // enable vertex array's for fast vertex processing
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-
     glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );
     glVertexPointer( 3, GL_FLOAT, 0, (char *) NULL );       // Set The Vertex Pointer To The Vertex Buffer
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
     glTexCoordPointer( 2, GL_FLOAT, 0, (char *) NULL );     // Set The TexCoord Pointer To The TexCoord Buffer
+
+    glEnableClientState(GL_NORMAL_ARRAY);
     glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
     glNormalPointer( GL_FLOAT, 0, (char *) NULL );     // Set The Normal Pointer To The Normal Buffer
+
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );
-    glNormalPointer( GL_FLOAT, 0, (char *) NULL );     // Set The Normal Pointer To The Normal Buffer
 
     for (int i = 0; i < primitives.size(); i++)
     {
@@ -594,7 +595,7 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
         const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
         double a, px, py, tp;
         int k;
-        d3d_model_primitive_begin(id, pr_trianglestrip);
+        //d3d_model_primitive_begin(id, pr_trianglestrip);
         a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
         for (int i = 0; i <= steps; i++)
         {
@@ -607,10 +608,10 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
             d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
             k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
         }
-        d3d_model_primitive_end(id);
+        //d3d_model_primitive_end(id);
         if (closed)
         {
-            d3d_model_primitive_begin(id, pr_trianglefan);
+            //d3d_model_primitive_begin(id, pr_trianglefan);
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
             t[k][0] = 0; t[k][1] = vrep;
             d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
@@ -619,9 +620,9 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
             {
                 d3d_model_vertex_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], t[i][0], t[i][1]);
             }
-            d3d_model_primitive_end(id);
+            //d3d_model_primitive_end(id);
 
-            d3d_model_primitive_begin(id, pr_trianglefan);
+            //d3d_model_primitive_begin(id, pr_trianglefan);
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
             t[k][0] = 0; t[k][1] = vrep;
             d3d_model_vertex_texture(id, cx, cy, z2, 0, vrep);
@@ -630,7 +631,7 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
             {
                 d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
             }
-            d3d_model_primitive_end(id);
+            //d3d_model_primitive_end(id);
         }
 }
 
