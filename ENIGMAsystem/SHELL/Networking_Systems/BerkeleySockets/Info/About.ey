@@ -1,10 +1,10 @@
 %e-yaml
 ---
 
-Name: Berkley Sockets
-Identifier: BerkleySockets
+Name: Berkeley Sockets
+Identifier: BerkeleySockets
 Description: WARNING! Not intended for development yet. Utilization of the Berkley Sockets library for networking.
-Author: Robert B. Colton
+Author: IsmAvatar and Robert B. Colton
 
 Depends:
 

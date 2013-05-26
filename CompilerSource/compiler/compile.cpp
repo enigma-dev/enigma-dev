@@ -123,6 +123,7 @@ void clear_ide_editables()
                "#include \"Graphics_Systems/" + (extensions::targetAPI.graphicsSys)   + "/include.h\"\n"
                "#include \"Audio_Systems/" + (extensions::targetAPI.audioSys)         + "/include.h\"\n"
                "#include \"Collision_Systems/" + (extensions::targetAPI.collisionSys) + "/include.h\"\n"
+               "#include \"Networking_Systems/" + (extensions::targetAPI.networkingSys) + "/include.h\"\n"
                "#include \"Widget_Systems/" + (extensions::targetAPI.widgetSys)       + inc;
 
     const string incg = "#include \"", impl = "/implement.h\"\n";

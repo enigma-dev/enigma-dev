@@ -5,7 +5,7 @@ OUTPUT_FILE = ../plugins/enigma.jar
 .SUFFIXES: .java .class
 
 .java.class:
-        $(JC) $(JFLAGS) $*.java
+	$(JC) $(JFLAGS) $*.java
 
 JAVA_FILES = $(shell find org -name "*.java")
 JAR_INC_FILES = $(shell find org -type f \( -not -wholename '*/.git/*' \) -a \( -not -name "*.java" \) | sed 's/\$$/\\\$$/g')
@@ -15,8 +15,9 @@ default: classes jar
 classes: $(JAVA_FILES:.java=.class)
 
 clean:
-        find org/enigma -name "*.class" -exec rm {} \;
-        rm -f $(OUTPUT_FILE)
+	find org/enigma -name "*.class" -exec rm {} \;
+	rm -f $(OUTPUT_FILE)
 
 jar:
-        @jar cfm $(OUTPUT_FILE) META-INF/MANIFEST.MF COPYING LICENSE $(JAR_INC_FILES)
+	@jar cfm $(OUTPUT_FILE) META-INF/MANIFEST.MF COPYING LICENSE $(JAR_INC_FILES)
+
