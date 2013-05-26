@@ -595,7 +595,7 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
         const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
         double a, px, py, tp;
         int k;
-        d3d_model_primitive_begin(id, pr_trianglestrip);
+        //d3d_model_primitive_begin(id, pr_trianglestrip);
         a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
         for (int i = 0; i <= steps; i++)
         {
@@ -608,10 +608,10 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
             d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
             k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
         }
-        d3d_model_primitive_end(id);
+        //d3d_model_primitive_end(id);
         if (closed)
         {
-            d3d_model_primitive_begin(id, pr_trianglefan);
+            //d3d_model_primitive_begin(id, pr_trianglefan);
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
             t[k][0] = 0; t[k][1] = vrep;
             d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
@@ -620,9 +620,9 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
             {
                 d3d_model_vertex_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], t[i][0], t[i][1]);
             }
-            d3d_model_primitive_end(id);
+            //d3d_model_primitive_end(id);
 
-            d3d_model_primitive_begin(id, pr_trianglefan);
+            //d3d_model_primitive_begin(id, pr_trianglefan);
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
             t[k][0] = 0; t[k][1] = vrep;
             d3d_model_vertex_texture(id, cx, cy, z2, 0, vrep);
@@ -631,7 +631,7 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
             {
                 d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
             }
-            d3d_model_primitive_end(id);
+            //d3d_model_primitive_end(id);
         }
 }
 
