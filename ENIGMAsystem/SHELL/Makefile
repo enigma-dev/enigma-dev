@@ -31,10 +31,13 @@ COLLISION := BBox
 # WIDGETS { Widget_Systems/* }
 WIDGETS := None
 
+# NETWORKING { Networking_Systems/* }
+NETWORKING := None
+
 # Default windres
 WINDRES = windres.exe
 
-SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Universal_System
+SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Networking_Systems/$(NETWORKING) Universal_System
 
 OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
 
