@@ -3,10 +3,10 @@
 
 Name: Berkeley Sockets
 Identifier: BerkeleySockets
-Description: WARNING! Not intended for development yet. Utilization of the Berkley Sockets library for networking.
+Description: Utilization of the Berkley Sockets library for networking with HTTP, FTP, TCP-IP and UDP.
 Author: IsmAvatar and Robert B. Colton
 
 Depends: None
 
 Represents:
-	Build-platforms: All
+	Build-platforms: None

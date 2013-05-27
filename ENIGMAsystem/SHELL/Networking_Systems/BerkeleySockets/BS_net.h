@@ -22,6 +22,9 @@
   THE SOFTWARE.
 */
 
+#ifndef ___BSNET_H_
+#define ___BSNET_H_
+
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,23 +38,22 @@
 #else
  #include <sys/types.h>
  #include <sys/socket.h>
- #include <netdb.h>
  #include <fcntl.h>
 
  #define SOCKET_ERROR -1
  #define closesocket(s) close(s)
 #endif
 
-#define bool char
+#define net_send(s, msg, len) send(s, msg, len, 0)
 
 bool net_init();
 bool net_cleanup();
-int net_connect(char*,char*,bool,bool);
-int net_connect_tcp(char*,char*,bool);
-int net_connect_udp(char*,bool);
-int net_accept(int);
+int net_connect(char*, char*, bool, bool);
+int net_connect_tcp(char*, char*, bool);
+int net_connect_udp(char*, bool);
+int net_accept(int); 
 char *net_receive(int);
-#define net_send(s,msg,len) send(s,msg,len,0)
 int net_get_port(int);
-int net_blocking(int,bool);
+int net_blocking(int, bool);
 
+#endif

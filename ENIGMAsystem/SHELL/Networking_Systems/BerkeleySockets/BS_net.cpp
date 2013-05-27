@@ -24,6 +24,10 @@
 
 #include "BS_net.h"
 
+#ifndef _WIN32
+ #include <netdb.h>
+#endif
+
 bool winsock_started = 0;
 
 bool net_init() {
