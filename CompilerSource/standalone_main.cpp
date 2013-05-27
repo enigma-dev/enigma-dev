@@ -105,18 +105,18 @@ int main(int argc, char* argv[])
   puts("Attempting to run");
   /*e_execp("gcc -E -x c++ -v blank.txt","");*/
   //e_exec("gcc -E -x c++ -v blank.txt");
-  
+
   const char *ic = libInit(NULL);
   if (ic) {
     cout << ic << endl;
     return 0;
   }
-  
+
   for (int i = 0; i < 1; ++i)
   current_language->definitionsModified(NULL, ((string) "%e-yaml\n"
-    "---\n" 	 
-    "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n" 	 
-    /* "target-graphics: OpenGL\n" 	 
+    "---\n"
+    "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n"
+    /* "target-graphics: OpenGL\n"
     "target-audio: OpenAL\n"
     "target-collision: BBox\n"
     /* Straight from LGM on Linux */
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     /* */
     ).c_str());
   //mainr(argc,argv);
-  
+
   string in2 = fc("./CompilerSource/test_gml.h");
   cout << "Check file:" << endl << in2 << endl;
   const char *name = "my_script";
@@ -150,43 +150,43 @@ int main(int argc, char* argv[])
     jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
     quickmember_variable(&globals_scope, jdi::builtin_type__int, "sprite0");
   }
-  
+
   EnigmaStruct es = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
   };
-  
+
   GmObject obj = {0,0,0,0,0,0,0,0,0,0,0};
   MainEvent mev = {0,0,0};
   Event ev = {0,0};
   ev.code = "//NOTICE: test code!!!";
   ev.id = 10; // EV_MOUSE_ENTER
-  
+
   mev.id = 6; // EV_MOUSE
   mev.eventCount = 1;
   mev.events = &ev;
-  
+
   obj.mainEventCount = 1;
   obj.mainEvents = &mev;
   obj.name = "obj_boobs";
   obj.spriteId = obj.parentId = obj.maskId = -1;
-  
+
   es.gmObjects = &obj;
   es.gmObjectCount = 1;
-  
+
   /*SubImage subimages = { 32, 32, new char[32*32*4], 32*32*4 };
   Sprite sprite = {"spr_0", 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 32, 32, &subimages, 1, NULL, 0};
   Sprite sprites[2] = { sprite, sprite };
   es.spriteCount = 2; es.sprites = sprites;
   es.filename = "coolio.gmk";
   es.fileVersion = 800;*/
-  
+
   do_cli(*main_context);
-  
+
   // current_language->compile(&es, "/tmp/coolio.exe", 0);
-  
+
   libFree();
-  
+
   //getchar();
   return 0;
 }
@@ -278,7 +278,7 @@ void do_cli(context &ct) {
             cout << def->toString() << endl;
         }
       } break;
-    
+
     case 'e': {
         bool eval, coerce, render, show;
         eval = true,
@@ -316,7 +316,7 @@ void do_cli(context &ct) {
           }
         } else cout << "Bailing." << endl;
       } break;
-    
+
     case 'h':
       cout <<
       "'c' Coerce an expression, printing its type"
@@ -329,11 +329,11 @@ void do_cli(context &ct) {
       "'s' Render an AST representing an expression and show it\n"
       "'q' Quit this interface\n";
     break;
-      
-    
+
+
     default: cout << "Unrecognized command. Empty command or 'q' to quit." << endl << endl; break;
     case ' ': cout << "Commands are single-letter; 'h' for help." << endl << "Follow commands with ENTER on non-unix." << endl;
-  } 
+  }
   cout << "> " << flush;
   c = getch();
   }
