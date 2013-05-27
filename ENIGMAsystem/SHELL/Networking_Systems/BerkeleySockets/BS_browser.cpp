@@ -22,23 +22,10 @@
   THE SOFTWARE.
 */
 
-// Implementation of some major aspects of protocols for http and ftp.
-// This allows easy communication with FTP and HTTP servers.
-// An example is also provided in the main() method at the bottom.
-
+#include "BS_browser.h"
 #include "BS_net.h"
 #include <stdarg.h>
 #include <stdlib.h>
-
-/*
-The following resources may be handy in writing your http client/server:
-Http made really easy
-http://www.jmarshall.com/easy/http/#structure
-W3C HTTP/1.1 (especially helpful with understanding headers)
-http://www.w3.org/Protocols/rfc2616/rfc2616.html
-RFC 2616 (very difficult to read)
-http://www.ietf.org/rfc/rfc2616.txt
-*/
 
 void die(char *e, int n, ...) {
  printf("%s error (%d)\n",e,errno);
@@ -95,9 +82,7 @@ char *ftpexpect(int in, char *exp) {
  return packet;
 }
 
-//Opens a connection with an FTP server using given hostname, username, and password.
-//Returns an identifier for the FTP connection.
-int ftp_open(char *host, char *user, char *pass) {
+int net_ftp_open(char *host, char *user, char *pass) {
  int in = net_connect_tcp(host,"ftp",0);
  if (in < 0) die("Connect",0);
  ftpexpect(in,"220 ");
@@ -111,9 +96,7 @@ int ftp_open(char *host, char *user, char *pass) {
  return in;
 }
 
-//Uploads data to an ftp server to be stored as file.
-//Indicate the ftp connection, the remote filename to store the data in, and the data (and size)
-void ftp_send(int in, char *file, char *msg, int msglen) {
+void net_ftp_send(int in, char *file, char *msg, int msglen) {
  ftpsend(in,"PASV\r\n");
  char *ip = ftpexpect(in,"227 ");
 
@@ -137,16 +120,13 @@ void ftp_send(int in, char *file, char *msg, int msglen) {
  ftpexpect(in,"226 ");
 }
 
-//Properly terminates the connection with this ftp socket.
-void ftp_close(int in) {
+void net_ftp_close(int in) {
  ftpsend(in,"QUIT\r\n");
  ftpexpect(in,"221 ");
  closesocket(in);
 }
 
-//Queries a http host and location, returns the contents
-//This method handles the packets and headers for you
-char *http(char *host, char *loc) {
+char *net_http(char *host, char *loc) {
  char *packet;
 
  int s = net_connect_tcp(host,"http",0);

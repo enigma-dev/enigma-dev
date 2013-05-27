@@ -53,14 +53,6 @@ bool net_cleanup() {
  return !(winsock_started = 0);
 }
 
-//initializes a socket
-//serve specifies if this is a server socket (1) or a client socket (0)
-//udp specifies whether to use udp (1) or tcp (0)
-//if this is not a server, addr and port specify who to connect to.
-//IPv4 and v6 are both supported.
-//Returns an identifier for the socket, or negative on error.
-//For clients, the identifier indicates the server,
-//and may be used to receive messages from them.
 int net_connect(char *addr, char *port, bool serve, bool udp) {
  net_init();
 
@@ -110,21 +102,14 @@ int net_connect(char *addr, char *port, bool serve, bool udp) {
  return s;
 }
 
-//Initializes a tcp socket, which can either be a server or client.
-//See net_connect for arguments and returns
 int net_connect_tcp(char *addr, char *port, bool serve) {
  return net_connect(addr,port,serve,0);
 }
 
-//Initializes a tcp socket, which can either be a server or client.
-//See net_connect for arguments and returns
 int net_connect_udp(char *localport, bool serve) {
  return net_connect(NULL,localport,serve,1);
 }
 
-//A server must accept or reject (ignore) incoming socket connections.
-//The argument is this server socket's ID.
-//Returns the incoming socket's ID, or -1 if an error occurred.
 int net_accept(int s) {
  return accept(s, NULL, NULL);
 }
@@ -132,15 +117,6 @@ int net_accept(int s) {
 #define BUFSIZE 512
 char buf[BUFSIZE];
 
-//Receives data on a socket's stream.
-//The argument is the socket to receive data from.
-//Returns the data, or NULL on error.
-
-//This function requires improvement due to the sensitive nature of its buffer termination.
-//As it functions now, it will fill the full buffer (BUFSIZE) as best it can.
-//Iff it reads short of BUFSIZE, it will append a null character.
-//Otherwise, if it reads the full buffer, no null character can be appended.
-//There is no guarantee that the buffer will not already contain null characters.
 char *net_receive(int s) {
  int r;
  if ((r = recv(s,buf,BUFSIZE,0)) == SOCKET_ERROR) return NULL;
@@ -149,11 +125,6 @@ char *net_receive(int s) {
  return buf;
 }
 
-//A largely debugging/server method for echo-bouncing messages
-//That is, receives a message from the specified socket, and sends it back to the same socket.
-//Prints the message that was bounced, if available.
-//Returns bounce status. 0 on successful bounce. 1 on empty receive, 2 on empty send.
-//Returns -1 on receive error. -2 on send error.
 int net_bounce(int s) {
  struct sockaddr_storage whom;
  u_int len = sizeof(whom);
@@ -167,13 +138,10 @@ int net_bounce(int s) {
  return 0;
 }
 
-//Sends a message to specified socket. (We use a #define in the .h file instead)
-//See documentation for Berkeley sockets send() method.
-/*int net_send(int s, char *msg, int len) {
- return send(s,msg,len,0);
-}*/
+int net_send(int s, char* msg, int len) {
+  send(s, msg, len, 0); 
+}
 
-//Returns the port of a given socket.
 int net_get_port(int s) {
  struct sockaddr_in sa;
  u_int sas = sizeof(sa);
@@ -184,13 +152,6 @@ int net_get_port(int s) {
  return ntohs(sa.sin_port);
 }
 
-//Sets whether given socket is in blocking mode
-//Blocking sockets will block on certain commands (read, accept) if nothing is available yet.
-//When a command blocks, it pauses program execution until something is available.
-//Non-blocking sockets will immediately return a not-ready value on those commands.
-//By default, sockets are initialized as blocking.
-//Returns 0 on success, any other value on error.
-//Windows users, see the return value of ioctlsocket.
 int net_blocking(int s, bool block) {
 #ifdef _WIN32
  u_long iMode = (block == 0) ? 1 : 0;
