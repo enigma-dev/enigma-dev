@@ -9,4 +9,4 @@ Author: IsmAvatar and Robert B. Colton
 Depends: None
 
 Represents:
-	Build-platforms: None
+	Build-platforms: All
