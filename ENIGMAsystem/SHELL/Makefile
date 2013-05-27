@@ -32,7 +32,7 @@ COLLISION := BBox
 WIDGETS := None
 
 # NETWORKING { Networking_Systems/* }
-NETWORKING := BerkeleySockets
+NETWORKING := None
 
 # Default windres
 WINDRES = windres.exe

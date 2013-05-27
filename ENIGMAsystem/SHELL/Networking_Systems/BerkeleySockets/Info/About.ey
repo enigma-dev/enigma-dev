@@ -6,7 +6,7 @@ Identifier: BerkeleySockets
 Description: WARNING! Not intended for development yet. Utilization of the Berkley Sockets library for networking.
 Author: IsmAvatar and Robert B. Colton
 
-Depends:
+Depends: None
 
 Represents:
 	Build-platforms: None

@@ -123,7 +123,7 @@ void clear_ide_editables()
                "#include \"Graphics_Systems/" + (extensions::targetAPI.graphicsSys)   + "/include.h\"\n"
                "#include \"Audio_Systems/" + (extensions::targetAPI.audioSys)         + "/include.h\"\n"
                "#include \"Collision_Systems/" + (extensions::targetAPI.collisionSys) + "/include.h\"\n"
-               "#include \"Networking_Systems/" + (extensions::targetAPI.networkingSys) + "/include.h\"\n"
+               "#include \"Networking_Systems/" + (extensions::targetAPI.networkSys) + "/include.h\"\n"
                "#include \"Widget_Systems/" + (extensions::targetAPI.widgetSys)       + inc;
 
     const string incg = "#include \"", impl = "/implement.h\"\n";
@@ -553,6 +553,7 @@ wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
   make += "COLLISION=" + extensions::targetAPI.collisionSys + " ";
   make += "WIDGETS="  + extensions::targetAPI.widgetSys + " ";
+  make += "NETWORKING="  + extensions::targetAPI.networkSys + " ";
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
 
   if (CXX_override.length()) make += "CXX=" + CXX_override + " ";
