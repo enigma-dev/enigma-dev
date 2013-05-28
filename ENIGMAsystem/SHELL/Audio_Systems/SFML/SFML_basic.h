@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Cheeseboy, Robert B. Colton 
+/** Copyright (C) 2008-2013 Robert B. Colton and Cheeseboy
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,13 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// Memory Shit //
+/// Memory, file, and asset functions
 bool sound_exists(int sound);
 int sound_add(std::string fname, int kind, bool preload);
 void sound_delete(int sound);
 bool sound_replace(int sound, std::string fname, int kind, bool preload);
 
-// Baics //
+/// Basic audio functions
 bool sound_play(int sound);
 #define sound_resume sound_play
 bool sound_loop(int sound);
@@ -31,21 +31,21 @@ bool sound_pause(int sound);
 void sound_pause_all();
 void sound_resume_all();
 
-// Gets //
+/// Basic get functions
 bool sound_isplaying(int sound);
 bool sound_ispaused(int sound);
 float sound_get_position(int sound);
 float sound_get_length(int sound);
-int sound_get_samplerate(int sound);
-int sound_get_channels(int sound);
+unsigned int sound_get_samplerate(int sound);
+unsigned int sound_get_channels(int sound);
 
-// Sets //
+/// Basic set functions
 void sound_global_volume(float volume);
 void sound_set_volume(int sound, float volume);
 void sound_seek(int sound, float position);
 void sound_seek_all(float position);
 void sound_set_pitch(int sound, float pitch);
-void sound_3d_set_sound_position(int sound,int x,int y,int z);
+void sound_3d_set_sound_position(int sound, float x, float y, float z);
 void sound_3d_set_sound_distance(int sound, float mindist, float maxdist);
 int sound_get_x(int sound);
 int sound_get_y(int sound);
