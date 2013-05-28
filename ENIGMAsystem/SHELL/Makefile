@@ -17,22 +17,22 @@ else
 endif
 
 # GMODE { Run, Build, Debug, Compile }
-GMODE := Run
+GMODE ?= Run
 
 # GRAPHICS { Graphics_Systems/* }
 GRAPHICS ?= OpenGL1
 
 # AUDIO { Audio_Systems/* }
-AUDIO := OpenAL
+AUDIO ?= OpenAL
 
 # COLLISION { Collision_Systems/* }
-COLLISION := BBox
+COLLISION ?= BBox
 
 # WIDGETS { Widget_Systems/* }
-WIDGETS := None
+WIDGETS ?= None
 
 # NETWORKING { Networking_Systems/* }
-NETWORKING := None
+NETWORKING ?= None
 
 # Default windres
 WINDRES = windres.exe
