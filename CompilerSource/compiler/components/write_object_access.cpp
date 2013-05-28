@@ -111,7 +111,8 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
         }
         else
         {
-            wto << "      case " << it->second->name << ": if (((((OBJ_" << it->second->name << "*)inst)->vmap).find(\"" << pmember << "\")) == (((OBJ_" << it->second->name << "*)inst)->vmap).end()) (((OBJ_" << it->second->name << "*)inst)->vmap).insert(std::pair<string, var>(\"" << pmember << "\", 0));  return ((((OBJ_" << it->second->name << "*)inst)->vmap).find(\"" << pmember << "\"))->second;"  << endl;
+          if (dait->second.type == "var")
+            wto << "      case " << it->second->name << ": if ((((OBJ_" << it->second->name << "*)inst)->vmap) == NULL) (((OBJ_" << it->second->name << "*)inst)->vmap) = new std::map<string, var>(); if (((((OBJ_" << it->second->name << "*)inst)->vmap)->find(\"" << pmember << "\")) == (((OBJ_" << it->second->name << "*)inst)->vmap)->end()) (((OBJ_" << it->second->name << "*)inst)->vmap)->insert(std::pair<string, var>(\"" << pmember << "\", 0));  return ((((OBJ_" << it->second->name << "*)inst)->vmap)->find(\"" << pmember << "\"))->second;"  << endl;
         }
       }
 
