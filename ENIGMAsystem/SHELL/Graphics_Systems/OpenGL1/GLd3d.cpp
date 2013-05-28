@@ -97,12 +97,14 @@ bool d3d_get_mode()
 
 void d3d_set_hidden(bool enable)
 {
+    if (!enigma::d3dMode) return;
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
     enigma::d3dHidden = enable;
 }
 
 void d3d_set_zwriteenable(bool enable)
 {
+    if (!enigma::d3dMode) return;
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
     enigma::d3dZWriteEnable = enable;
 }
@@ -162,8 +164,9 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(bool enable)
 {
-  (enable?glEnable:glDisable)(GL_CULL_FACE);
-  glFrontFace(GL_CW);
+    if (!enigma::d3dMode) return;
+    (enable?glEnable:glDisable)(GL_CULL_FACE);
+    glFrontFace(GL_CW);
 }
 
 void d3d_set_culling_mode(int mode) {
@@ -200,21 +203,22 @@ void d3d_depth_operator(int mode) {
 
 void d3d_set_perspective(bool enable)
 {
-  if (enable)
-  {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-    glMatrixMode(GL_MODELVIEW);
-  }
-  else
-  {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(0, 1, 0, 1);
-    glMatrixMode(GL_MODELVIEW);
-  } //Perspective not the same as in GM when turning off perspective and using d3d projection
-}
+    if (!enigma::d3dMode) return;
+    if (enable)
+    {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(0, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+        glMatrixMode(GL_MODELVIEW);
+    }
+    else
+    {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(0, 1, 0, 1);
+        glMatrixMode(GL_MODELVIEW);
+    }
+}  //Note GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
 
 void d3d_set_depth(double dep)
 {

@@ -70,6 +70,7 @@ static inline void draw_back()
 
 namespace enigma
 {
+    extern bool d3dHidden;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
@@ -90,9 +91,6 @@ namespace enigma
     }
 }
 
-namespace enigma {
-    extern bool d3dHidden;
-}
 
 namespace enigma_user
 {
