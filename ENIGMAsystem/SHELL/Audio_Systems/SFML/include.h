@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 cheeseboy <greg@hell.gov>, Robert B. Colton
+/** Copyright (C) 2013 cheeseboy and Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
