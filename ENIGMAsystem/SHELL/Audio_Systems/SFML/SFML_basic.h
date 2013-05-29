@@ -22,6 +22,7 @@ void sound_delete(int sound);
 bool sound_replace(int sound, std::string fname, int kind, bool preload);
 
 /// Basic audio functions
+void action_sound(int snd, bool loop);
 bool sound_play(int sound);
 #define sound_resume sound_play
 bool sound_loop(int sound);
