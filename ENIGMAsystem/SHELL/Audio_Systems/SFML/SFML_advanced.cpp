@@ -14,6 +14,3 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-#include "SFML_basic.h"
-#include "SFML_advanced.h"

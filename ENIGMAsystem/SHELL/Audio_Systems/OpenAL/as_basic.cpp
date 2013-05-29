@@ -310,13 +310,13 @@ namespace enigma
   void audiosystem_update(void)
   {
     alureUpdate();
-/*
+
     elapsedtime = clock() - lasttime;
     lasttime = elapsedtime;
     // update all the sounds so they can calculate fall off and gain
     for(size_t i = 1; i < sound_sources.size(); i++) {
       sound_sources[i]->sound_update();
-    }*/
+    }
   }
 
   void audiosystem_cleanup()

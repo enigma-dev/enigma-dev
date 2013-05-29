@@ -51,6 +51,7 @@ void seek(gme_callback *userdata, float position) {
 
 namespace enigma_user {
 int sound_add_from_gme(string filename, int track) {
+
 	Music_Emu *emu;
 	handle_error( gme_open_file(filename.c_str(), &emu, 44100) );
 	if (!emu)
