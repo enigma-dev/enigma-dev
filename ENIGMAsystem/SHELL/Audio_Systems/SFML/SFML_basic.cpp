@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton and Cheeseboy
+/** Copyright (C) 2013 Robert B. Colton and Cheeseboy
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -27,6 +27,13 @@
 #include <cstdlib>
 #include <cstdio>
 
+struct normalizer { 
+  unsigned char lowbyte, highbyte; 
+  void normalize() { 
+    if (highbyte > 255) highbyte = 1, lowbyte = 1; 
+  } 
+};
+
 class CustomSoundStream: public sf::SoundStream {
   void *userdata;
   void *buffer;
@@ -41,20 +48,28 @@ class CustomSoundStream: public sf::SoundStream {
   CustomSoundStream(size_t (*callback)(void *userdata, void *buffer, size_t size),
     void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void* userdata):
       userdata(userdata), buffer(new char[BUFSIZ]), buffer_size(BUFSIZ),
-      ongetdata(callback), onseek(seek), oncleanup(cleanup) {}
+      ongetdata(callback), onseek(seek), oncleanup(cleanup) { initialize(2, 44100); }
+
+  ~CustomSoundStream() {
+    oncleanup(userdata);
+  }
  
+  private:
+
+  void clipBuffer() {
+    for (size_t i = 0; i < BUFSIZ / sizeof(normalizer); ++i) 
+      ((normalizer*)buffer)[i].normalize();
+  }
+
   bool onGetData(Chunk& data) {
-    data.samples = (short int*)buffer;
-    data.sampleCount = ongetdata(userdata, buffer, buffer_size);
+    data.samples = (short*) buffer;
+    data.sampleCount = ongetdata(userdata, buffer, buffer_size)/sizeof(short);
+    //clipBuffer();
     return true;
   }
  
   void onSeek(sf::Time timeOffset) {
     onseek(userdata, timeOffset.asSeconds());
-  }
- 
-  ~CustomSoundStream() {
-    oncleanup(userdata);
   }
 };
 
@@ -332,12 +347,11 @@ namespace enigma
 
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata)
   {
-      int i = (int)sounds.size();
       CustomSoundStream *snd;
 
       snd = new CustomSoundStream(callback, seek, cleanup, userdata);
-      sounds[id] = new PlayableSoundStream(snd);
-      return i;
+      sounds[id] = new PlayableSoundStream(snd);	
+      return 0;
   }
 
 }
@@ -396,6 +410,11 @@ bool sound_play(int sound)
 {
 	sounds[sound]->play();
 	return sounds[sound]->getStatus() == sf::Sound::Playing;
+}
+
+void action_sound(int snd, bool loop)
+{
+	(loop ? sound_loop:sound_play)(snd);
 }
 
 bool sound_loop(int sound)

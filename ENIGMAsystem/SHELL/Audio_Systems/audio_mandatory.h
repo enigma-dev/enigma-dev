@@ -34,7 +34,13 @@ namespace enigma
   // This function is called for each sound in the game's module.
   int sound_add_from_buffer(int id, void* buffer, size_t size); // It should add the sound under the given ID.
 
-  // This function creates a stream-based sound.
+  /** This function creates a stream-based sound. 
+  @param id
+  @param callback
+  @param seek
+  @param userdata
+  @return 0, for success 1, for failure
+  **/
   // TODO: allow client to specify format and rate
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata);
 
