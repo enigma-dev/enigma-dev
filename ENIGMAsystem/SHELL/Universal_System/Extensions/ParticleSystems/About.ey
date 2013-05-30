@@ -4,7 +4,7 @@
 Name: ParticleSystems
 ID: Particle Systems
 Description: Adds particle systems functions.
-Default: false
+Default: true
 Icon: ps.png
 
 Depends: None
