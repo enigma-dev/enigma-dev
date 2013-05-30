@@ -77,6 +77,17 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
     "  object_locals *glaccess(int x)" << endl <<
     "  {" << endl << "    object_locals* ri = (object_locals*)fetch_instance_by_int(x);" << endl << "    return ri ? ri : &ldummy;" << endl << "  }" << endl << endl;
 
+    wto <<
+    "  var &map_var(std::map<string, var> **vmap, string str)" << endl <<
+    "  {" << endl <<
+    "      if (*vmap == NULL)" << endl <<
+    "        *vmap = new std::map<string, var>();" << endl <<
+    "      if ((*vmap)->find(str) == (*vmap)->end())" << endl <<
+    "        (*vmap)->insert(std::pair<string, var>(str, 0));" << endl <<
+    "      return ((*vmap)->find(str))->second;" << endl <<
+    "  }" << endl << endl;
+
+
     map<string,usedtype> usedtypes;
     for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
       usedtype &ut = usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix];
@@ -112,7 +123,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
         else
         {
           if (dait->second.type == "var")
-            wto << "      case " << it->second->name << ": if ((((OBJ_" << it->second->name << "*)inst)->vmap) == NULL) (((OBJ_" << it->second->name << "*)inst)->vmap) = new std::map<string, var>(); if (((((OBJ_" << it->second->name << "*)inst)->vmap)->find(\"" << pmember << "\")) == (((OBJ_" << it->second->name << "*)inst)->vmap)->end()) (((OBJ_" << it->second->name << "*)inst)->vmap)->insert(std::pair<string, var>(\"" << pmember << "\", 0));  return ((((OBJ_" << it->second->name << "*)inst)->vmap)->find(\"" << pmember << "\"))->second;"  << endl;
+            wto << "      case " << it->second->name << ": return map_var(&((OBJ_" << it->second->name << "*)inst)->vmap, \"" << pmember << "\");"  << endl;
         }
       }
 

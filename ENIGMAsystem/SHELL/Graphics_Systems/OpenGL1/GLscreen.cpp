@@ -346,6 +346,7 @@ void screen_redraw()
         }
         view_current = 0;
     }
+    screen_refresh();
 }
 
 void screen_init()
