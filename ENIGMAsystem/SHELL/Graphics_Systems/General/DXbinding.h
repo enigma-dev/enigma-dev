@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Serpex
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -20,10 +20,10 @@
 #define use_bound_texture_global
 #ifdef use_bound_texture_global
   namespace enigma { extern unsigned bound_texture; }
-  #define texture_reset() //if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
-  #define texture_use(texid) //if (enigma::bound_texture != unsigned(texid)) \
-    //glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = texid)
+  #define texture_reset() if(enigma::bound_texture) 
+  #define texture_use(texid) if (enigma::bound_texture != unsigned(texid)) \
+    
 #else
-  #define texture_reset() //glBindTexture(GL_TEXTURE_2D, 0)
-  #define texture_use(texid)// glBindTexture(GL_TEXTURE_2D, texid)
+  #define texture_reset() 
+  #define texture_use(texid)
 #endif

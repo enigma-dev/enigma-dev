@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -17,10 +17,11 @@
 
 #include <string>
 #include <cstdio>
-#include "DirectX10Headers.h"
-#include "DX10background.h"
+#include "../General/DirectXHeaders.h"
+#include "../General/DXbackground.h"
 #include "DX10screen.h"
 #include "DX10d3d.h"
+#include "../General/DXbinding.h"
 
 using namespace std;
 
@@ -42,6 +43,18 @@ using namespace enigma;
 
 static inline void draw_back()
 {
+    using enigma_user::background_x;
+    using enigma_user::background_y;
+    using enigma_user::background_visible;
+    using enigma_user::background_alpha;
+    using enigma_user::background_xscale;
+    using enigma_user::background_yscale;
+    using enigma_user::background_htiled;
+    using enigma_user::background_vtiled;
+    using enigma_user::background_index;
+    using enigma_user::background_coloring;
+    using enigma_user::draw_background_tiled_ext;
+    using enigma_user::draw_background_ext;
     //Draw backgrounds
     for (int back_current=0; back_current<7; back_current++)
     {
@@ -77,14 +90,18 @@ namespace enigma
     }
 }
 
+namespace enigma_user
+{
+
 void screen_redraw()
 {
-
+ 
 }
 
-#include "binding.h"
 void screen_init()
 {
-    untexture()
 
 }
+
+}
+

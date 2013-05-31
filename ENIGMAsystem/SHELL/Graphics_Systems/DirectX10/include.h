@@ -1,15 +1,13 @@
 #include "DIRECTX10Std.h"
-#include "DX10sprite.h"
-#include "DX10background.h"
+#include "Info/graphics_info.h" 
+#include "../General/DXsprite.h"
+#include "../General/DXbackground.h"
 #include "DX10vertexbuffer.h"
 #include "DX10shader.h"
-#include "DX10textures.h"
+#include "../General/DXtextures.h"
 #include "DX10material.h"
-#include "DX10mesh.h"
+#include "DX10model.h"
 
-#include "DX10font.h"
-#include "DX10curves.h"
-//#ifdef TARGET_OS_MAC
-//#include "DXsurface.h"
-//#endif
-
+#include "../General/DXfont.h"
+#include "../General/DXcurves.h"
+#include "../General/DXsurface.h"
