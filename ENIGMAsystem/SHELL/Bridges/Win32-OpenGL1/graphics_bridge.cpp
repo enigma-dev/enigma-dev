@@ -29,13 +29,11 @@
 #include <windows.h>
 using namespace std;
 
-/*
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "WINDOWSwindow.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
-*/
+#include "Platforms/Win32/WINDOWSmain.h"
+#include "Platforms/Win32/WINDOWSwindow.h"
+
 namespace enigma
 {
     void EnableDrawing (HGLRC *hRC)
