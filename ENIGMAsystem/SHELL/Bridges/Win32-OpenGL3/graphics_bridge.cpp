@@ -31,42 +31,53 @@ using namespace std;
 
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "WINDOWSwindow.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Platforms/Win32/WINDOWSmain.h"
+#include "Platforms/Win32/WINDOWSwindow.h"
 
 namespace enigma
 {
-    extern HWND hWnd;
-    extern HDC window_hDC;
-
-    void windowsystem_write_exename(char* exenamehere)
+    void EnableDrawing (HGLRC *hRC)
     {
-      GetModuleFileName(NULL, exenamehere, 1024);
+        PIXELFORMATDESCRIPTOR pfd;
+        int iFormat;
+
+        enigma::window_hDC = GetDC (hWnd);
+        ZeroMemory (&pfd, sizeof (pfd));
+        pfd.nSize = sizeof (pfd);
+        pfd.nVersion = 1;
+        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+        pfd.iPixelType = PFD_TYPE_RGBA;
+        pfd.cColorBits = 24;
+        pfd.cDepthBits = 16;
+        pfd.iLayerType = PFD_MAIN_PLANE;
+        iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
+
+        if (iFormat==0) { show_error("Total failure. Abort.",1); }
+
+        SetPixelFormat (enigma::window_hDC, iFormat, &pfd);
+        *hRC = wglCreateContext( enigma::window_hDC );
+        wglMakeCurrent( enigma::window_hDC, *hRC );
     }
-}
 
-namespace enigma_user {
-extern var room_caption;
-void screen_refresh() {
-    window_set_caption(room_caption);
-    enigma::update_mouse_variables();
-    SwapBuffers(enigma::window_hDC);
-}
-}
-
-void enigma_catchmouse_backend(bool x) {
-  if (x) SetCapture(enigma::hWnd); else ReleaseCapture();
+    void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
+    {
+        wglMakeCurrent (NULL, NULL);
+        wglDeleteContext (hRC);
+        ReleaseDC (hWnd, hDC);
+    }
 }
 
 namespace enigma_user
 {
 
-int sleep(int millis)
+void set_synchronization(bool enable) //TODO: Needs to be rewritten
 {
-  Sleep(millis);
-  return 0;
-}
+ /*   typedef BOOL (APIENTRY *fp)( int );
+    fp f = 0;
+    const char *extensions = (char*)glGetString(GL_EXTENSIONS);
+    if (strstr(extensions, "WGL_EXT_swap_control") and (f = (fp)wglGetProcAddress( "wglSwapIntervalEXT" )))
+        f(enable);*/
+}  
 
 }
 

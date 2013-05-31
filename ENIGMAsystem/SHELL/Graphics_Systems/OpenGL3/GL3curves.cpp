@@ -22,20 +22,15 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GLcolors.h"
 #include "../General/GLcurves.h"
+#include "../General/GLbinding.h"
 
 #define __GETR(x) (((x & 0x0000FF))/255.0)
 #define __GETG(x) (((x & 0x00FF00)>>8)/255.0)
 #define __GETB(x) (((x & 0xFF0000)>>16)/255.0)
 
-
 namespace enigma{
     extern unsigned char currentcolor[4];
 }
-#ifdef use_bound_texture_global
-  #define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
-#else
-  #define untexture() glBindTexture(GL_TEXTURE_2D, 0);
-#endif
 
 int pr_curve_detail = 20;
 int pr_curve_mode = GL_LINE_STRIP;
@@ -70,7 +65,7 @@ void draw_set_curve_detail(int detail)
 
 void draw_bezier_quadratic(float x1, float y1, float x2, float y2, float x3, float y3)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -92,7 +87,7 @@ void draw_bezier_quadratic(float x1, float y1, float x2, float y2, float x3, flo
 
 void draw_bezier_quadratic_color(float x1, float y1, float x2, float y2, float x3, float y3, int c1, int c2, float al1, float al2)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -120,7 +115,7 @@ void draw_bezier_quadratic_color(float x1, float y1, float x2, float y2, float x
 
 void draw_bezier_cubic(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -142,7 +137,7 @@ void draw_bezier_cubic(float x1, float y1, float x2, float y2, float x3, float y
 
 void draw_bezier_cubic_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float al1, float al2)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -237,7 +232,7 @@ void draw_spline_part_color(float x1, float y1, float x2, float y2, float x3, fl
 
 void draw_spline2c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -248,7 +243,7 @@ void draw_spline2c(float x1, float y1, float x2, float y2, float x3, float y3, f
 
 void draw_spline2c_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -260,7 +255,7 @@ void draw_spline2c_color(float x1, float y1, float x2, float y2, float x3, float
 
 void draw_spline3(float x1, float y1, float x2, float y2, float x3, float y3)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -273,7 +268,7 @@ void draw_spline3(float x1, float y1, float x2, float y2, float x3, float y3)
 
 void draw_spline3_color(float x1, float y1, float x2, float y2, float x3, float y3, int c1, int c2, float a1, float a2)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -293,7 +288,7 @@ void draw_spline3_color(float x1, float y1, float x2, float y2, float x3, float 
 
 void draw_spline3c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -306,7 +301,7 @@ void draw_spline3c(float x1, float y1, float x2, float y2, float x3, float y3, f
 
 void draw_spline3c_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5, int c1, int c2, float a1, float a2)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -325,7 +320,7 @@ void draw_spline3c_color(float x1, float y1, float x2, float y2, float x3, float
 
 void draw_spline4(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -338,7 +333,7 @@ void draw_spline4(float x1, float y1, float x2, float y2, float x3, float y3, fl
 
 void draw_spline4_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -358,7 +353,7 @@ void draw_spline4_color(float x1, float y1, float x2, float y2, float x3, float 
 
 void draw_spline4c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5, float x6, float y6)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -371,7 +366,7 @@ void draw_spline4c(float x1, float y1, float x2, float y2, float x3, float y3, f
 
 void draw_spline4c_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5, float x6, float y6, int c1, int c2, float a1, float a2)
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -413,7 +408,7 @@ int draw_spline_vertex_color(float x, float y, int col, float alpha)
 
 void draw_spline_end()
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
       glLineWidth(pr_curve_width);
       glBegin(startedSplinesMode.top());
@@ -448,7 +443,7 @@ void draw_bezier_quadratic_spline_part(float x1, float y1, float x2, float y2, f
 //first and last point is used as control points, so they will not be drawn
 void draw_bezier_quadratic_spline_end()
 {
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
       glLineWidth(pr_curve_width);
       glBegin(startedSplinesMode.top());
@@ -468,7 +463,7 @@ int draw_spline_optimized_end()
 {
     double tmp_detail = (double)pr_curve_detail;
     int tot_det = 0;
-    untexture();
+    texture_reset();
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(startedSplinesMode.top());

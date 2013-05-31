@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,17 +19,20 @@
 #define _SURFSTRUCT__H
 
 #include <string>
-#include "DirectX10Headers.h"
+#include "DirectXHeaders.h"
 using std::string;
 
 namespace enigma
 {
   struct surface
   {
-    unsigned int tex, fbo;
+
     int width, height;
   };
 }
+
+namespace enigma_user
+{
 
 int surface_create(int width, int height);
 void surface_set_target(int id);
@@ -60,5 +63,7 @@ void surface_copy_part(int destination,double x,double y,int source,int xs,int y
 int sprite_create_from_surface(int id,int x,int y,int w,int h,bool removeback,bool smooth,int xorig,int yorig);
 bool surface_is_supported();
 #define surface_destroy surface_free
+
+}
 
 #endif

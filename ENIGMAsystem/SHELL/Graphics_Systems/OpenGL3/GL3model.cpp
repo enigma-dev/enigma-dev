@@ -589,14 +589,14 @@ void d3d_model_block(const unsigned int id, double x1, double y1, double z1, dou
 
 void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
 {
-       float v[100][3];
+        float v[100][3];
         float t[100][3];
-        steps = min(max(steps, 3), 48);
+        steps = min(max(steps, 3), 48); // i think 48 should be circle_presicion
         const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
         double a, px, py, tp;
         int k;
-        //d3d_model_primitive_begin(id, pr_trianglestrip);
         a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
+
         for (int i = 0; i <= steps; i++)
         {
             v[k][0] = px; v[k][1] = py; v[k][2] = z2;
@@ -607,31 +607,44 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
             t[k][0] = tp; t[k][1] = vrep;
             d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
             k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+            v[k][0] = px; v[k][1] = py; v[k][2] = z2;
+            t[k][0] = tp; t[k][1] = 0;
+            d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
+/*
+            v[k][0] = px; v[k][1] = py; v[k][2] = z2;
+            t[k][0] = tp; t[k][1] = 0;
+            d3d_model_vertex_texture(id, px, py, z2, tp, 0);
+            k++;
+            v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+            t[k][0] = tp; t[k][1] = vrep;
+            d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
+            k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
+            d3d_model_vertex_texture(id, v[k-4][0], v[k-4][1], v[k-4][3], t[k-4][0], t[k-4][1]);*/
         }
-        //d3d_model_primitive_end(id);
+
         if (closed)
         {
-            //d3d_model_primitive_begin(id, pr_trianglefan);
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
             t[k][0] = 0; t[k][1] = vrep;
-            d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
             k++;
-            for (int i = 0; i <= steps*2; i+=2)
+            for (int i = 0; i < steps*2; i+=2)
             {
+                d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
+                d3d_model_vertex_texture(id, v[i+3][0], v[i+3][1], v[i+3][2], t[i+2][0], t[i+2][1]);
                 d3d_model_vertex_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], t[i][0], t[i][1]);
+		d3d_model_normal(id, 0, 0, -1); d3d_model_normal(id, 0, 0, -1); d3d_model_normal(id, 0, 0, -1);
             }
-            //d3d_model_primitive_end(id);
 
-            //d3d_model_primitive_begin(id, pr_trianglefan);
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
             t[k][0] = 0; t[k][1] = vrep;
-            d3d_model_vertex_texture(id, cx, cy, z2, 0, vrep);
             k++;
-            for (int i = 0; i <= steps*2; i+=2)
+            for (int i = 0; i < steps*2; i+=2)
             {
+                d3d_model_vertex_texture(id, cx, cy, z2, 0, vrep);
                 d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
+                d3d_model_vertex_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], t[i+2][0], t[i+2][1]);
+		d3d_model_normal(id, 0, 0, 1); d3d_model_normal(id, 0, 0, 1); d3d_model_normal(id, 0, 0, 1);
             }
-            //d3d_model_primitive_end(id);
         }
 }
 
@@ -644,7 +657,7 @@ void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, doub
   const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
   double a, px, py, tp;
   int k = 0;
-  d3d_model_primitive_begin(id, pr_trianglefan);
+  //d3d_model_primitive_begin(id, pr_trianglefan);
   d3d_model_vertex_texture(id, cx, cy, z2, 0, 0);
   k++;
   a = 0; px = cx+rx; py = cy; tp = 0;
@@ -653,10 +666,10 @@ void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, doub
     d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
     k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
   }
-  d3d_model_primitive_end(id);
+  //d3d_model_primitive_end(id);
   if (closed)
   {
-    d3d_model_primitive_begin(id, pr_trianglefan);
+    //d3d_model_primitive_begin(id, pr_trianglefan);
     d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
     k++;
     tp = 0;
@@ -665,7 +678,7 @@ void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, doub
       d3d_model_vertex_texture(id, cx, cy, z1, tp, 0);
       k++; tp += invstep;
     }
-    d3d_model_primitive_end(id);
+    //d3d_model_primitive_end(id);
   }
 }
 
@@ -687,7 +700,7 @@ void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1,
             a += pr; tp += invstep;
         }
         int k = 0, kk;
-        d3d_model_primitive_begin(id, pr_trianglefan);
+        //d3d_model_primitive_begin(id, pr_trianglefan);
         v[k][0] = cx; v[k][1] = cy; v[k][2] = cz - rz;
         t[k][0] = 0; t[k][1] = vrep;
         d3d_model_vertex_texture(id, cx, cy, cz - rz, 0, vrep);
@@ -704,14 +717,14 @@ void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1,
             d3d_model_vertex_texture(id, px, py, cz + pz, txp[i], tzp);
             k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
         }
-        d3d_model_primitive_end(id);
+        //d3d_model_primitive_end(id);
         for (int ii = 0; ii < zsteps - 2; ii++)
         {
             b += qr;
             cosb = cos(b);
             pz = rz*sin(b);
             tzp -= invstep2;
-            d3d_model_primitive_begin(id, pr_trianglestrip);
+            //d3d_model_primitive_begin(id, pr_trianglestrip);
             px = cx+rx*cosb; py = cy;
             for (int i = 0; i <= steps; i++)
             {
@@ -722,9 +735,9 @@ void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1,
                 d3d_model_vertex_texture(id, px, py, cz + pz, txp[i], tzp);
                 k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
             }
-            d3d_model_primitive_end(id);
+            //d3d_model_primitive_end(id);
         }
-        d3d_model_primitive_begin(id, pr_trianglefan);
+        //d3d_model_primitive_begin(id, pr_trianglefan);
         v[k][0] = cx; v[k][1] = cy; v[k][2] = cz + rz;
         t[k][0] = 0; t[k][1] = 0;
         d3d_model_vertex_texture(id, cx, cy, cz + rz, 0, 0);
@@ -733,7 +746,7 @@ void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1,
         {
             d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
         }
-        d3d_model_primitive_end(id);
+        //d3d_model_primitive_end(id);
 
 }
 
@@ -747,7 +760,7 @@ void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, int
   int numc = csteps, numt = tsteps;
 
   for (int i = 0; i < numc; i++) {
-    d3d_model_primitive_begin(id, pr_quadstrip);
+    //d3d_model_primitive_begin(id, pr_quadstrip);
     for (int j = 0; j <= numt; j++) {
       for (int k = 1; k >= 0; k--) {
 
@@ -763,7 +776,7 @@ void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, int
 	d3d_model_vertex_texture(id, x1 + x, y1 + y, z1 + z, u, v);
       }
     }
-    d3d_model_primitive_end(id);
+    //d3d_model_primitive_end(id);
   }
 }
 
@@ -783,7 +796,7 @@ void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, doub
   if (y2 < y1) {
     normal[1]=-normal[1]; }
 
-  d3d_model_primitive_begin(id, pr_trianglestrip);
+  //d3d_model_primitive_begin(id, pr_trianglestrip);
   d3d_model_vertex_normal_texture(id, x1, y1, z1, 0, 0, normal[0], normal[1], normal[2]);
   d3d_model_vertex_normal_texture(id, x2, y2, z1, hrep, 0, normal[0], normal[1], normal[2]);
   d3d_model_vertex_normal_texture(id, x1, y1, z2, 0, vrep, normal[0], normal[1], normal[2]);
@@ -813,14 +826,14 @@ void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, doub
     d3d_model_index(id, 0);
   }
 
-  d3d_model_primitive_end(id);
+  //d3d_model_primitive_end(id);
 }
 
 void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
 {
   GLfloat normal[] = {0, 0, 1};
 
-  d3d_model_primitive_begin(id, pr_trianglestrip);
+  //d3d_model_primitive_begin(id, pr_trianglestrip);
 
   if (x2>x1 || y2>y1) {
     d3d_model_index(id, 0); d3d_model_index(id, 2); d3d_model_index(id, 1); d3d_model_index(id, 3);
@@ -833,7 +846,7 @@ void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, dou
   d3d_model_vertex_normal_texture(id, x2, y1, z2, 0, vrep, normal[0], normal[1], normal[2]);
   d3d_model_vertex_normal_texture(id, x1, y2, z1, hrep, 0, normal[0], normal[1], normal[2]);
   d3d_model_vertex_normal_texture(id, x2, y2, z2, hrep, vrep, normal[0], normal[1], normal[2]);
-  d3d_model_primitive_end(id);
+  //d3d_model_primitive_end(id);
 }
 
 }

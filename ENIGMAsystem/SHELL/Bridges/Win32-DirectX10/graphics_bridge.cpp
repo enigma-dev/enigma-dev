@@ -1,4 +1,4 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **                                                                              **
@@ -21,6 +21,39 @@
 **  high-level, fully compilable language. Developers of ENIGMA or anything     **
 **  associated with ENIGMA are in no way responsible for its users or           **
 **  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **                      
+**  or programs made in the environment.                                        **
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
+
+#include <string>
+#include <windows.h>
+using namespace std;
+
+#include "libEGMstd.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Platforms/Win32/WINDOWSmain.h"
+#include "Platforms/Win32/WINDOWSwindow.h"
+
+namespace enigma
+{
+    void EnableDrawing (HGLRC *hRC)
+    {
+
+    }
+
+    void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
+    {
+
+    }
+}
+
+namespace enigma_user
+{
+
+void set_synchronization(bool enable) //TODO: Needs to be rewritten
+{
+
+}  
+
+}
+

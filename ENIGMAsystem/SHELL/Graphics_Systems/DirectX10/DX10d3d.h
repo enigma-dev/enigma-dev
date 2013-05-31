@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_DX10D3D_H
+#define ENIGMA_DX10D3D_H 
+
 #include <string>
 
 namespace enigma {
@@ -22,6 +25,7 @@ namespace enigma {
 }
 
 // ***** RENDER STATE MODE CONSTANTS *****
+namespace enigma_user {
 enum {
   rs_fill,
   rs_line,
@@ -46,17 +50,40 @@ enum {
   rs_gequal, 	// source Z >= depth Z
   rs_always     // Always True
 };
+}
 
 extern bool d3dMode;
 extern double projection_matrix[16];
 extern double transformation_matrix[16];
 
+namespace enigma_user
+{
+
+/** Starts 3D mode.
+**/
 void d3d_start();
+/** Ends 3d mode.
+**/
 void d3d_end();
+/** Gets whether 3D mode is enabled.
+@return This function returns true if 3D mode is enabled, and false if it is not.
+**/
 bool d3d_get_mode();
+/** Sets the use of a perspective projection.
+@param enable whether or not to enable perspective
+**/
 void d3d_set_perspective(bool enable);
+/** Sets whether hidden surface removal is enabled.
+@param enable whether or not to enable hidden surface removal
+**/
 void d3d_set_hidden(bool enable);
+/** Sets whether depth buffer writing is enabled.
+@param enable whether or not to enable depth writing
+**/
 void d3d_set_zwriteenable(bool enable);
+/** Sets whether lighting is enabled.
+@param enable whether or not to enable lighting
+**/
 void d3d_set_lighting(bool enable);
 
 void d3d_set_culling(bool enable);
@@ -84,14 +111,14 @@ void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,do
 void d3d_set_projection_ortho(double x, double y, double width, double height, double angle);
 void d3d_set_projection_perspective(double x, double y, double width, double height, double angle);
 
-void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);
-void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep);
-void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, int hrep, int vrep, bool closed = true);
-void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texid, int hrep, int vrep, bool closed, int steps);
+void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep);
+void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep);
+void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed = true);
+void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, bool closed, int steps);
 void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, bool closed, int steps);
 void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texid, double hrep, double vrep, int steps);
 void d3d_draw_icosahedron(int texid);
-void d3d_draw_torus(double x1, double y1, double z1, int texId, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
+void d3d_draw_torus(double x1, double y1, double z1, int texId, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
 
 // ***** TRANSFORMATIONS BEGIN *****
 void d3d_transform_set_identity();
@@ -118,9 +145,13 @@ bool d3d_transform_stack_disgard();
 // ***** LIGHTS BEGIN *****
 bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col);
 bool d3d_light_define_point(int id, double x, double y, double z, double range, int col);
-void d3d_light_define_specularity(int id, int r, int g, int b, double a);
+bool d3d_light_define_specularity(int id, int r, int g, int b, double a);
 void d3d_light_specularity(int facemode, int r, int g, int b, double a);
 void d3d_light_shininess(int facemode, int shine);
 void d3d_light_define_ambient(int col);
 bool d3d_light_enable(int id, bool enable);
 // ***** LIGHTS END *****
+
+}
+
+#endif // ENIGMA_DX10D3D_H 

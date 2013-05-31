@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -31,24 +31,26 @@ int enable_texture(double enable)
 
 \******************************************************************************/
 
+namespace enigma_user
+{
 
 int enable_alpha(double enable)
 {
 
 }
-//If enabled, do alpha testing.
+//If enabled, do alpha testing. See glAlphaFunc. 
 
 int enable_blending(double enable)
 {
  
 }
-//If enabled, blend the incoming RGBA color values with the values in the color buffers.
+//If enabled, blend the incoming RGBA color values with the values in the color buffers. See glBlendFunc. 
 
 int enable_depthbuffer(double enable)
 {
 
 }
-//If enabled, do depth comparisons and update the depth buffer.
+//If enabled, do depth comparisons and update the depth buffer. See glDepthFunc and glDepthRange. 
 
 int enable_dither(double enable)
 {
@@ -60,40 +62,43 @@ int enable_smooth_lines(double enable)
 {
 
 }
-//If enabled, draw lines with correct filtering. If disabled, draw aliased lines. 
+//If enabled, draw lines with correct filtering. If disabled, draw aliased lines. See glLineWidth. 
 
 int enable_stipple(double enable)
 {
 
 }
-//If enabled, use the current polygon stipple pattern when rendering polygons. 
+//If enabled, use the current polygon stipple pattern when rendering polygons. See glPolygonStipple. 
 
 int enable_logical_op(double enable)
 {
 
 }
-//If enabled, apply the currently selected logical operation to the incoming and color-buffer indexes. 
+//If enabled, apply the currently selected logical operation to the incoming and color-buffer indexes. See glLogicOp. 
 
 int enable_smooth_points(double enable)
 {
 
 }
-//If enabled, draw points with proper filtering. If disabled, draw aliased points.
+//If enabled, draw points with proper filtering. If disabled, draw aliased points. See glPointSize. 
+
 int enable_smooth_polygons(double enable)
 {
 
 }
-//If enabled, draw polygons with proper filtering. If disabled, draw aliased polygons.
+//If enabled, draw polygons with proper filtering. If disabled, draw aliased polygons. See glPolygonMode. 
 
 
 int enable_stencil(double enable)
 {
- 
+
 }
-//If enabled, do stencil testing and update the stencil buffer. 
+//If enabled, do stencil testing and update the stencil buffer. See glStencilFunc and glStencilOp. 
 
 int enable_texture(double enable)
 {
+
+}
 
 }
 

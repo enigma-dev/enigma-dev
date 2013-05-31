@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,19 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//#include "DirectXHeaders.h"
-
+#include "Universal_System/roomsystem.h"
 namespace enigma
 {
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
+    struct bkinxop
+    {
+        bool operator() (const tile a, const tile b) {return (a.bckid < b.bckid);}
+    }   bkinxcomp;
+    void draw_tile();
+    void delete_tiles();
+    void load_tiles();
+    void rebuild_tile_layer(int layer_depth);
 }
-
-#include "DX10colors.h"
-#include "DX10primitives.h"
-#include "DX10d3d.h"
-#include "DX10draw.h"
-#include "DX10blend.h"
-#include "DX10surface.h"
-#include "DX10miscextra.h"
-

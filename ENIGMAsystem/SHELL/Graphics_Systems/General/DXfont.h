@@ -1,4 +1,4 @@
-/** Copyright (C) 2011-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,6 +14,9 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
+namespace enigma_user
+{
 
 const unsigned fa_left = 0;
 const unsigned fa_center = 1;
@@ -53,3 +56,6 @@ unsigned int string_height_ext(variant str, int sep, int w);
 unsigned int string_width_line(variant str, int line);
 unsigned int string_width_ext_line(variant str, int w, int line);
 unsigned int string_width_ext_line_count(variant str, int w);
+
+}
+

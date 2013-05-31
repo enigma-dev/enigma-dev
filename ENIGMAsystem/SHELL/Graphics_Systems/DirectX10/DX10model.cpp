@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,15 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DirectX10Headers.h"
 #include "DX10d3d.h"
+#include "DX10shapes.h"
+#include "DX10primitives.h"
 #include "DX10vertexbuffer.h"
-#include "DX10textures.h"
-#include "DX10mesh.h"
+#include "../General/DXtextures.h"
+#include "DX10model.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
-#include "binding.h"
+#include "../General/DXbinding.h"
 
 using namespace std;
 
@@ -46,90 +47,38 @@ namespace enigma {
 
 struct Primitive
 {
-  vector<float> vertices;
-  vector<float> textures;
-  vector<float> normals;
-  vector<float> colors;
-  vector<unsigned int> indices;
-  unsigned int maxindice = 0;
-
-  unsigned int verticesVBO;
-  unsigned int texturesVBO;
-
+  unsigned int vertcount;
+  unsigned int vertstart;
+  unsigned int indexcount;
+  unsigned int indexstart;
   int type;
-  int vbotype;
 
-  Primitive(int pt, int vbt)
+  Primitive(int pt)
   {
     type = pt;
-    vbotype = vbt;
+    vertcount = 0;
+    vertstart = 0;
+    indexcount = 0;
+    indexstart = 0;
   }
 
   ~Primitive()
   {
 
   }
-
-  void Clear()
-  {
-    vertices.clear();
-    textures.clear();
-    normals.clear();
-    colors.clear();
-    indices.clear();
-  }
-
-  void Begin()
-  {
-
-  }
-
-  void VertexVector(float x, float y, float z)
-  {
-    vertices.push_back(x);
-    vertices.push_back(y);
-    vertices.push_back(z);
-  }
-
-  void VertexIndex(int vi)
-  {
-    if (vi > maxindice) { maxindice = vi; }
-    indices.push_back(vi);
-  }
-
-  void NormalVector(float nx, float ny, float nz)
-  {
-    normals.push_back(nx); normals.push_back(ny); normals.push_back(nz);
-  }
-
-  void TextureVector(float tx, float ty)
-  {
-    textures.push_back(tx); textures.push_back(ty);
-  }
-
-  void ColorVector()
-  {
-
-  }
- 
-  void End()
-  {
-
-  }
-
-  void Draw()
-  {
-
-  }
 };
 
+/* Mesh clearing has a memory leak */
 class Mesh
 {
   public:
-  vector<Primitive*> primitives;
-  unsigned int currentPrimitive = 0;
 
-  Mesh()
+  unsigned int Begin(int pt)
+  {
+
+  }
+
+  Mesh(int vbot = enigma_user::vbo_static)
   {
 
   }
@@ -139,69 +88,86 @@ class Mesh
 
   }
 
+  void ClearData() 
+  {
+
+  }
+
   void Clear()
   {
-    for (int i = 0; i < primitives.size(); i++) 
-    {
-      primitives[i]->Clear();
-      delete primitives[i];
-      primitives.clear();
-    }
+
   }
 
-  void Begin(int pt, int vbt)
+  void VertexVector(double x, double y, double z)
   {
-    unsigned int id = primitives.size();
-    currentPrimitive = id;
-    Primitive* newPrim = new Primitive(pt, vbt);
-    primitives.push_back(newPrim);
+
   }
 
-  void VertexVector(float x, float y, float z)
+  void VertexIndex(GLuint vi)
   {
-    primitives[currentPrimitive]->VertexVector(x,y,z);
+
   }
 
-  void VertexIndex(int vi) 
+  void NormalVector(double nx, double ny, double nz)
   {
-    primitives[currentPrimitive]->VertexIndex(vi);
+
   }
 
-  void NormalVector(float nx, float ny, float nz)
+  void TextureVector(double tx, double ty)
   {
-    primitives[currentPrimitive]->NormalVector(nx,ny,nz);
+
   }
 
-  void TextureVector(float tx, float ty)
+  void ColorVector(int col, double alpha)
   {
-    primitives[currentPrimitive]->TextureVector(tx,ty);
+  
   }
 
-  void ColorVector()
-  {
-    primitives[currentPrimitive]->ColorVector();
-  }
- 
   void End()
   {
-    primitives[currentPrimitive]->End();
+ 
+  }
+
+  void BufferGenerate()
+  {
+
+  }
+
+  void BufferData()
+  {
+
+  }
+
+  void BufferSubData(GLint offset)
+  {
+
+  }
+
+  void Open(int offset) 
+  {
+
+  }
+
+  void Close()
+  {
+
   }
 
   void Draw()
   {
-    for (int i = 0; i < primitives.size(); i++) 
-    {
-      primitives[i]->Draw();
-    }
+
   }
 };
 
 vector<Mesh*> meshes;
 
-unsigned int d3d_model_create()
+namespace enigma_user
+{
+
+unsigned int d3d_model_create(int vbot)
 {
   unsigned int id = meshes.size();
-  meshes.push_back(new Mesh());
+  meshes.push_back(new Mesh(vbot));
   return id;
 }
 
@@ -213,17 +179,22 @@ void d3d_model_destroy(const unsigned int id)
 
 void d3d_model_copy(const unsigned int id, const unsigned int source)
 {
-  meshes[id] = meshes[source];
+  //TODO: Write copy meshes code
+}
+
+void d3d_model_merge(const unsigned int id, const unsigned int source)
+{
+  //TODO: Write merge meshes code
 }
 
 unsigned int d3d_model_duplicate(const unsigned int source)
 {
-  //TODO: Write duplicate code meshes
+  //TODO: Write duplicate meshes code
 }
 
 bool d3d_model_exists(const unsigned int id)
 {
-  return (id > 0 && id < meshes.size());
+  return (id >= 0 && id < meshes.size());
 }
 
 void d3d_model_clear(const unsigned int id)
@@ -344,74 +315,115 @@ void d3d_model_draw(const unsigned int id, double x, double y, double z) // over
 
 }
 
+void d3d_model_draw(const unsigned int id, int texId)
+{
+    texture_use(get_texture(texId));
+    meshes[id]->Draw();
+}
+
 void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId)
 {
-
+    texture_use(get_texture(texId));
+    d3d_model_draw(id, x, y, z);
 }
 
 void d3d_model_primitive_begin(const unsigned int id, int kind)
 {
-
+  meshes[id]->Begin(kind);
 }
 
 void d3d_model_primitive_end(const unsigned int id)
 {
-
+  meshes[id]->End();
 }
 
-void d3d_model_index(const unsigned int id, int in)
+void d3d_model_open(const unsigned int id, int offset)
 {
+  meshes[id]->Open(offset);
+}
 
+void d3d_model_close(const unsigned int id)
+{
+  meshes[id]->Close();
 }
 
 void d3d_model_vertex(const unsigned int id, double x, double y, double z)
 {
+  meshes[id]->VertexVector(x, y, z);
+}
 
+void d3d_model_normal(const unsigned int id, double nx, double ny, double nz)
+{
+  meshes[id]->NormalVector(nx, ny, nz);
+}
+
+void d3d_model_texture(const unsigned int id, double tx, double ty)
+{
+  meshes[id]->TextureVector(tx, ty);
+}
+
+void d3d_model_color(const unsigned int id, int col, double alpha)
+{
+  meshes[id]->ColorVector(col, alpha);
+}
+
+void d3d_model_index(const unsigned int id, GLuint in)
+{
+  meshes[id]->VertexIndex(in);
 }
 
 void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha)
 {
-
+  meshes[id]->VertexVector(x, y, z);
 }
 
 void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty)
 {
-
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->TextureVector(tx, ty);
 }
 
 void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha)
 {
-
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->TextureVector(tx, ty);
 }
 
 void d3d_model_vertex_normal(const unsigned int id, double x, double y, double z, double nx, double ny, double nz)
 {
-
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
 }
 
 void d3d_model_vertex_normal_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, int col, double alpha)
 {
-
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
 }
 
 void d3d_model_vertex_normal_texture(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
 {
-
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+  meshes[id]->TextureVector(tx, ty);
 }
 
 void d3d_model_vertex_normal_texture_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha)
 {
-
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+  meshes[id]->TextureVector(tx, ty);
 }
+
 
 void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed)
 {
-
+ 
 }
 
 void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
 {
-
+  
 }
 
 void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
@@ -436,10 +448,13 @@ void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, int
 
 void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
 {
-
+ 
 }
 
 void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
 {
  
 }
+
+}
+

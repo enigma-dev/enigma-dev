@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,9 +16,9 @@
 **/
 
 #include <math.h>
-#include "DirectX10Headers.h"
+#include "../General/DirectXHeaders.h"
 #include "DX10draw.h"
-#include "binding.h"
+#include "../General/DXbinding.h"
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"
 
@@ -30,6 +30,9 @@ namespace enigma {
   float circleprecision=24;
   extern unsigned char currentcolor[4];
 }
+
+namespace enigma_user
+{
 
 void draw_set_line_pattern(unsigned short pattern, int scale)
 {
@@ -82,10 +85,10 @@ void draw_rectangle_color(float x1,float y1,float x2,float y2,int c1,int c2,int 
 }
 
 void draw_set_circle_precision(float pr) {
-
+    enigma::circleprecision = pr<3 ? 3 : pr;
 }
 float draw_get_circle_precision() {
-
+    return enigma::circleprecision;
 }
 
 void draw_circle(float x,float y,float r,bool outline)
@@ -159,10 +162,15 @@ void draw_healthbar(float x1,float y1,float x2,float y2,float amount,int backcol
 
 }
 
+}
+
 //#include <endian.h>
 //TODO: Though serprex, the author of the function below, never included endian.h,
 //   // Doing so is necessary for the function to work at its peak.
 //   // When ENIGMA generates configuration files, one should be included here.
+
+namespace enigma_user
+{
 
 int draw_getpixel(int x,int y)
 {
@@ -171,6 +179,8 @@ int draw_getpixel(int x,int y)
 
 int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned iter)
 {
+
+}
 
 }
 
