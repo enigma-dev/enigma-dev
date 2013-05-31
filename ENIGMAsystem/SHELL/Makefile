@@ -88,6 +88,7 @@ clean:
 
 SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
+include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))
 RCFILES := $(addprefix $(OBJDIR)/,$(RESOURCES))

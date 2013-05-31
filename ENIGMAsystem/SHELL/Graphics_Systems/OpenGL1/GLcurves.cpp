@@ -1,4 +1,4 @@
-/** Copyright (C) 2010-2013 Harijs Grinbergs
+/** Copyright (C) 2010-2013 Harijs Grinbergs, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -22,6 +22,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GLcolors.h"
 #include "../General/GLcurves.h"
+#include "../General/GLbinding.h"
 
 #define __GETR(x) (((x & 0x0000FF))/255.0)
 #define __GETG(x) (((x & 0x00FF00)>>8)/255.0)
@@ -31,11 +32,6 @@
 namespace enigma{
     extern unsigned char currentcolor[4];
 }
-#ifdef use_bound_texture_global
-  #define texture_reset() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
-#else
-  #define texture_reset() glBindTexture(GL_TEXTURE_2D, 0);
-#endif
 
 int pr_curve_detail = 20;
 int pr_curve_mode = GL_LINE_STRIP;

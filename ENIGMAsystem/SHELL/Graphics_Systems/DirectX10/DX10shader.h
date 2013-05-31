@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,8 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DXSHADER__H
-#define _DXSHADER__H
+#ifndef _DX10SHADER__H
+#define _DX10SHADER__H
+
+namespace enigma_user
+{
 
 enum {
   sh_vertex = 0,
@@ -41,5 +44,7 @@ void shader_program_bind_frag_data(int id, const char* name);
 void shader_program_use(int id);
 void shader_program_reset();
 void shader_program_free(int id);
+
+}
 
 #endif

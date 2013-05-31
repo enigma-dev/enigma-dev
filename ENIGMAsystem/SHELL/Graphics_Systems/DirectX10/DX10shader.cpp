@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DirectX10Headers.h"
+#include "../General/DirectXHeaders.h"
 #include "DX10shader.h"
 #include <math.h>
 
@@ -28,11 +28,6 @@ using std::vector;
 #include <iostream>
 #include <fstream>
 using namespace std;
-
-enum shadertypes
-{
-	
-};
 
 struct Shader{
   const char* log;
@@ -64,15 +59,32 @@ struct ShaderProgram{
 vector<Shader*> shaders(0);
 vector<ShaderProgram*> shaderprograms(0);
 
+namespace enigma_user
+{
+
 int shader_create(int type)
 {
+  unsigned int id = shaders.size();
+  shaders.push_back(new Shader(type));
+  return id;
+}
 
 }
 
 unsigned long getFileLength(ifstream& file)
 {
-
+    if(!file.good()) return 0;
+    
+    unsigned long pos=file.tellg();
+    file.seekg(0,ios::end);
+    unsigned long len = file.tellg();
+    file.seekg(ios::beg);
+    
+    return len;
 }
+
+namespace enigma_user
+{
 
 int shader_load(int id, const char* fname)
 {
@@ -86,17 +98,19 @@ bool shader_compile(int id)
 
 const char* shader_compile_output(int id)
 {
-
+  return shaders[id]->log;
 }
 
 void shader_free(int id)
 {
-
+  delete shaders[id];
 }
 
 int shader_program_create()
 {
-
+  unsigned int id = shaderprograms.size();
+  shaderprograms.push_back(new ShaderProgram());
+  return id;
 }
 
 bool shader_program_link(int id)
@@ -131,6 +145,8 @@ void shader_program_reset()
 
 void shader_program_free(int id)
 {
+  delete shaderprograms[id];
+}
 
 }
 

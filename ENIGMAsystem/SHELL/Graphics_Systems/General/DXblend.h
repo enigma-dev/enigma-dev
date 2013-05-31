@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -26,6 +26,9 @@ int draw_set_blend_mode_ext(ARG src,ARG2 dest)
 
 \******************************************************************************/
 
+namespace enigma_user
+{
+
 enum {
   bm_normal   = 0,
   bm_add      = 1,
@@ -46,5 +49,17 @@ enum {
   bm_src_alpha_sat    = 11   // GL_SRC_ALPHA_SATURATE     //only for src
 };
 
+/** description
+@param mode
+@return 
+**/
 int draw_set_blend_mode(int mode);
+/** description
+@param src
+@param dest
+@return
+**/
 int draw_set_blend_mode_ext(double src,double dest);
+
+}
+

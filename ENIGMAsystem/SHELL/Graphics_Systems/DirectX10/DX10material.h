@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,16 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DXMATERIAL__H
-#define _DXMATERIAL__H
+#ifndef _DX10MATERIAL__H
+#define _DX10MATERIAL__H
 
+namespace enigma_user {
 int material_create();
+void material_load();
+void material_save();
 void material_add_texture(int id, int tid);
 void material_set_texture(int id, int mtid, int tid);
+void material_remove_texture(int id, int mtid);
 void material_set_shader(int id, int sid);
 int material_get_shader(int id);
 void material_use(int id);
 void material_reset();
 void material_free(int id);
+}
 
 #endif

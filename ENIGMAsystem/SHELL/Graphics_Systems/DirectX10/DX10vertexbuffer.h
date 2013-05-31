@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -21,41 +21,12 @@
 #include <vector>
 using std::vector;
 
+namespace enigma_user {
 enum {
-  vb_static,
-  vb_dynamic,
-  vb_stream
+  vbo_static,
+  vbo_dynamic,
+  vbo_stream
 };
-
-struct VertexBuffer {
-  float vertexdata[];
-  float colordata[];
-  float texturedata[];
-
-  VertexBuffer()
-  {
-  }
-  ~VertexBuffer()
-  {
-    //delete vertexdata;
-    //delete colordata;
-    //delete texturedata;
-  }
-  void Draw()
-  {
-
-  }
-};
-
-extern vector<VertexBuffer*> vertexbuffers;
-extern int current_vertex_buffer;
-
-int vertex_buffer_create(int type); // creates a vertex buffer and returns the id
-void vertex_buffer_free(int id); // frees the vertex buffer object and all its vertex/index data
-void vertex_buffer_set(int id); // redirects all draw calls to use the given buffer
-int vertex_buffer_get(); // gets the currently set vertex buffer
-void vertex_buffer_reset(); // redirects draw calls to the global vertex buffer
-void vertex_buffer_draw(int id); // manually tells the buffer to upload its vertex/index data and draw immediately
-bool vertex_buffer_supported(); // gets whether the present hardware supports vertex buffer objects
+}
 
 #endif

@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,13 +15,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DirectX10Headers.h"
-#include "DX10blend.h"
+#include "../General/DirectXHeaders.h"
+#include "../General/DXblend.h"
+
+namespace enigma_user
+{
 
 int draw_set_blend_mode(int mode){
 
 }
 
 int draw_set_blend_mode_ext(double src,double dest){
+
+}
 
 }

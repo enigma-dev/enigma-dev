@@ -1,6 +1,6 @@
 /****\
 **  *|
-**  Copyright (C) 2011 Josh Ventura
+**  Copyright (C) 2011 Josh Ventura and Robert B. Colton
 **
 **  This file is a part of the ENIGMA Development Environment.
 **
@@ -18,6 +18,16 @@
 **  with this code. If not, see <http://www.gnu.org/licenses/>
 **  *|
 \****/
+
+#include <windows.h>
+
+namespace enigma //TODO: Find where this belongs
+{
+  extern HINSTANCE hInstance;
+  extern HWND hWndParent;
+  extern HWND hWnd;
+  extern HDC window_hDC;
+}
 
 namespace enigma_user
 {
