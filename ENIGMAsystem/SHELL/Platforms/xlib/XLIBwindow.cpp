@@ -294,6 +294,8 @@ void window_set_cursor(int c)
 // FIXME: MOVEME: I can't decide where the hell to put this.
 void screen_refresh() {
 	glXSwapBuffers(disp,win);
+    enigma::update_mouse_variables();
+    window_set_caption(room_caption);
 }
 
 }
