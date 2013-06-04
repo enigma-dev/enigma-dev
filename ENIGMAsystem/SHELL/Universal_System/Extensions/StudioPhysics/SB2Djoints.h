@@ -32,7 +32,7 @@ struct jointInstance {
   {
     //worlds[worldid].world->DestroyJoint(joint);
   }
-}; 
+};
 extern vector<jointInstance> joints;
 
 // constants for getting and setting joint data using physics_joint_get_value and physics_joint_set_value, use switch case
@@ -74,7 +74,7 @@ int physics_joint_create(int world);
 @param fixture1
 @param fixture2
 **/
-void physics_joint_distance_create(int id, int fixture1, int fixture2,  bool collide_connected = true);
+void physics_joint_distance_create(int id, int fixture1, int fixture2, bool collide_connected = true);
 /** description...
 @param id
 **/
