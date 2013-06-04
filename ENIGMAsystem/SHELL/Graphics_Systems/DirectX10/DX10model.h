@@ -17,7 +17,7 @@
 
 #include <string>
 #include "DX10vertexbuffer.h"
-#include "../General/OpenGLHeaders.h"
+#include "../General/DirectXHeaders.h"
 
 namespace enigma_user {
   unsigned int d3d_model_create(int vbot = vbo_static);

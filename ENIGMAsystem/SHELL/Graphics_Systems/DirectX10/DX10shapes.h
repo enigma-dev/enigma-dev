@@ -33,7 +33,7 @@
 
 #ifndef __DX10SHAPESH_
 #define __DX10SHAPESH_
-#include "../General/OpenGLHeaders.h"
+#include "../General/DirectXHeaders.h"
 GLfloat* block_vertices(double x1, double y1, double z1, double x2, double y2, double z2);
 GLfloat* block_indices(double x1, double y1, double z1, double x2, double y2, double z2);
 #endif

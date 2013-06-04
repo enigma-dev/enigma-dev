@@ -110,58 +110,58 @@ int net_connect_udp(char *localport, bool serve) {
  return net_connect(NULL,localport,serve,1);
 }
 
-int net_accept(int s) {
- return accept(s, NULL, NULL);
+int net_accept(int sock) {
+ return accept(sock, NULL, NULL);
 }
 
 #define BUFSIZE 512
 char buf[BUFSIZE];
 
-char *net_receive(int s) {
+char *net_receive(int sock) {
  int r;
- if ((r = recv(s,buf,BUFSIZE,0)) == SOCKET_ERROR) return NULL;
+ if ((r = recv(sock,buf,BUFSIZE,0)) == SOCKET_ERROR) return NULL;
  if (r == BUFSIZE) return buf;
  buf[r] = '\0';
  return buf;
 }
 
-int net_bounce(int s) {
+int net_bounce(int sock) {
  struct sockaddr_storage whom;
  u_int len = sizeof(whom);
- int n = recvfrom(s,buf,BUFSIZE,0,(struct sockaddr *)&whom,&len);
+ int n = recvfrom(sock,buf,BUFSIZE,0,(struct sockaddr *)&whom,&len);
  if (n == 0) return 1;
  if (n == SOCKET_ERROR) return -1;
  printf("Bouncing: %s\n",buf);
- n = sendto(s,buf,n,0,(struct sockaddr *)&whom,sizeof(whom));
+ n = sendto(sock,buf,n,0,(struct sockaddr *)&whom,sizeof(whom));
  if (n == 0) return 2;
  if (n == SOCKET_ERROR) return -2;
  return 0;
 }
 
-int net_send(int s, char* msg, int len) {
-  send(s, msg, len, 0); 
+int net_send(int sock, char* msg, int len) {
+  send(sock, msg, len, 0); 
 }
 
-int net_get_port(int s) {
+int net_get_port(int sock) {
  struct sockaddr_in sa;
  u_int sas = sizeof(sa);
- if (getsockname(s, (struct sockaddr*) &sa, &sas) == SOCKET_ERROR) {
-  closesocket(s);
+ if (getsockname(sock, (struct sockaddr*) &sa, &sas) == SOCKET_ERROR) {
+  closesocket(sock);
   return -1;
  }
  return ntohs(sa.sin_port);
 }
 
-int net_blocking(int s, bool block) {
+int net_blocking(int sock, bool block) {
 #ifdef _WIN32
  u_long iMode = (block == 0) ? 1 : 0;
- return ioctlsocket(s,FIONBIO,&iMode);
+ return ioctlsocket(sock,FIONBIO,&iMode);
 #else
  int flags, r;
- if ((flags = fcntl(s, F_GETFL, 0)) < 0) return -1;
+ if ((flags = fcntl(sock, F_GETFL, 0)) < 0) return -1;
  if (block == 0) flags |= O_NONBLOCK;
  else flags &= ~O_NONBLOCK;
- if (fcntl(s, F_SETFL, flags) < 0) return -2;
+ if (fcntl(sock, F_SETFL, flags) < 0) return -2;
  return 0;
 #endif
 }
