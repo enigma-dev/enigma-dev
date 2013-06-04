@@ -58,13 +58,13 @@ int net_connect(char *addr, char *port, bool serve, bool udp);
 //Initializes a tcp socket, which can either be a server or client.
 //See net_connect for arguments and returns
 int net_connect_tcp(char *addr, char *port, bool serve);
-//Initializes a tcp socket, which can either be a server or client.
+//Initializes a udp socket, which can either be a server or client.
 //See net_connect for arguments and returns
 int net_connect_udp(char *localport, bool serve);
 //A server must accept or reject (ignore) incoming socket connections.
 //The argument is this server socket's ID.
 //Returns the incoming socket's ID, or -1 if an error occurred.
-int net_accept(int s); 
+int net_accept(int sock); 
 
 //Receives data on a socket's stream.
 //The argument is the socket to receive data from.
@@ -75,18 +75,18 @@ int net_accept(int s);
 //Iff it reads short of BUFSIZE, it will append a null character.
 //Otherwise, if it reads the full buffer, no null character can be appended.
 //There is no guarantee that the buffer will not already contain null characters.
-char *net_receive(int s);
+char *net_receive(int sock);
 //A largely debugging/server method for echo-bouncing messages
 //That is, receives a message from the specified socket, and sends it back to the same socket.
 //Prints the message that was bounced, if available.
 //Returns bounce status. 0 on successful bounce. 1 on empty receive, 2 on empty send.
 //Returns -1 on receive error. -2 on send error.
-int net_bounce(int s);
+int net_bounce(int sock);
 //Sends a message to specified socket. (We use a #define in the .h file instead)
 //See documentation for Berkeley sockets send() method.
-int net_send(int s, char* msg, int len);
+int net_send(int sock, char* msg, int len);
 //Returns the port of a given socket.
-int net_get_port(int s);
+int net_get_port(int sock);
 //Sets whether given socket is in blocking mode
 //Blocking sockets will block on certain commands (read, accept) if nothing is available yet.
 //When a command blocks, it pauses program execution until something is available.
@@ -94,6 +94,19 @@ int net_get_port(int s);
 //By default, sockets are initialized as blocking.
 //Returns 0 on success, any other value on error.
 //Windows users, see the return value of ioctlsocket.
-int net_blocking(int s, bool block);
+int net_blocking(int sock, bool block);
+
+// These functions are for compatibility with GameMaker: Studio
+void network_connect();
+void network_conenct_raw();
+void network_create_server();
+void network_create_socket();
+void network_resolve();
+void network_send_broadcase();
+void network_send_packet();
+void network_send_raw();
+void network_send_udp();
+void network_set_timeout();
+void network_destroy();
 
 #endif
