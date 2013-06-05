@@ -46,7 +46,7 @@ inline int bounds(int value, int low, int high)
 #include "PS_particle_sprites.h"
 namespace enigma {
   void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
-        double x_offset, double y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape));
+        double x_offset, double y_offset);
 }
 
 using enigma::pt_manager;
@@ -473,7 +473,7 @@ namespace enigma
   }
   void particle_system::draw_particlesystem()
   {
-    draw_particles(pi_list, oldtonew, wiggle, subimage_index, x_offset, y_offset, &get_particle_sprite);
+    draw_particles(pi_list, oldtonew, wiggle, subimage_index, x_offset, y_offset);
   }
   void particle_system::create_particles(double x, double y, particle_type* pt, int number, bool use_color, int given_color)
   {

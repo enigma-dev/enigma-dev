@@ -15,13 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_PS_PARTICLE_BRIDGE_OPENGL1_H
-#define ENIGMA_PS_PARTICLE_BRIDGE_OPENGL1_H
+#ifndef ENIGMA_PS_PARTICLE_BRIDGE_FALLBACK_H
+#define ENIGMA_PS_PARTICLE_BRIDGE_FALLBACK_H
 
-#include "Graphics_Systems/General/GLsprite.h"
-#include "Graphics_Systems/General/GLbinding.h"
-#include "Graphics_Systems/General/GLtextures.h"
-#include "Graphics_Systems/General/GLcolors.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_sprites.h"
 #include <vector>
@@ -32,9 +28,6 @@
 namespace enigma {
   namespace particle_bridge {
     void initialize_particle_bridge() {}; // Do nothing, nothing to initialize.
-    inline int __GETR(int x) {return x & 0x0000FF;}
-    inline int __GETG(int x) {return (x & 0x00FF00) >> 8;}
-    inline int __GETB(int x) {return (x & 0xFF0000) >> 16;}
     double wiggle;
     int subimage_index;
     double x_offset;
@@ -85,57 +78,34 @@ namespace enigma {
           const double x = it->x, y = it->y;
           const double xscale = pt->xscale*size, yscale = pt->yscale*size;
 
-          if (pt->blend_additive) {
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+          // NOTE: Do not comment this in until blending mode is reset to what it was before particle drawing.
+          /*if (pt->blend_additive) {
+            draw_set_blend_mode(enigma_user::bm_add);
           }
           else {
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-          }
-          enigma_user::draw_sprite_ext(sprite_id, subimg, x, y, xscale, yscale, rot_degrees, color, alpha/255.0);
+            draw_set_blend_mode(enigma_user::bm_normal);
+          }*/
+
+          enigma_user::draw_sprite_ext(sprite_id, subimg, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, alpha/255.0);
         }
         else { // Draw particle sprite.
 
           particle_sprite* ps = pt->part_sprite;
-          texture_use(GmTextures[ps->texture]->gltex);
-
-          if (pt->blend_additive) {
-             glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-          }
-          else {
-              glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-          }
-
-          glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);
-
-          const double rot = rot_degrees*M_PI/180.0;
 
           const double x = it->x, y = it->y;
           const double xscale = pt->xscale*size, yscale = pt->yscale*size;
 
-          const float
-          w = ps->width*xscale, h = ps->height*yscale,
-          tbx = 1, tby = 1,
-          wsinrot = w*sin(rot), wcosrot = w*cos(rot);
+          int sprite_id = get_particle_actual_sprite(ps->shape);
 
-          glBegin(GL_TRIANGLE_STRIP);
+          // NOTE: Do not comment this in until blending mode is reset to what it was before particle drawing.
+          /*if (pt->blend_additive) {
+            draw_set_blend_mode(enigma_user::bm_add);
+          }
+          else {
+            draw_set_blend_mode(enigma_user::bm_normal);
+          }*/
 
-          float
-          ulcx = x - xscale * (ps->width/2.0) * cos(rot) + yscale * (ps->height/2.0) * cos(M_PI/2+rot),
-          ulcy = y + xscale * (ps->width/2.0) * sin(rot) - yscale * (ps->height/2.0) * sin(M_PI/2+rot);
-          glTexCoord2f(0,0);
-          glVertex2f(ulcx,ulcy);
-          glTexCoord2f(tbx,0);
-          glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-
-          const double mpr = 3*M_PI/2 + rot;
-          ulcx += h * cos(mpr);
-          ulcy -= h * sin(mpr);
-          glTexCoord2f(0,tby);
-          glVertex2f(ulcx,ulcy);
-          glTexCoord2f(tbx,tby);
-          glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-
-          glEnd();
+          enigma_user::draw_sprite_ext(sprite_id, 0, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, alpha/255.0);
         }
       }
       else { // Draw particle in a limited way if particle type not alive.
@@ -145,40 +115,16 @@ namespace enigma {
 
         particle_sprite* ps = get_particle_sprite(pt_sh_pixel);
         if (ps == NULL) return; // NOTE: Skip to next particle.
-        texture_use(GmTextures[ps->texture]->gltex);
 
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-        glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);
-
-        const double rot = rot_degrees*M_PI/180.0;
+        // NOTE: Do not comment this in until blending mode is reset to what it was before particle drawing.
+        //draw_set_blend_mode(enigma_user::bm_normal);
 
         const double x = round(it->x), y = round(it->y);
         const double xscale = size, yscale = size;
 
-        const float
-        w = ps->width*xscale, h = ps->height*yscale,
-        tbx = 1, tby = 1,
-        wsinrot = w*sin(rot), wcosrot = w*cos(rot);
+        int sprite_id = get_particle_actual_sprite(ps->shape);
 
-        glBegin(GL_TRIANGLE_STRIP);
-
-        float
-        ulcx = x - xscale * (ps->width/2.0) * cos(rot) + yscale * (ps->height/2.0) * cos(M_PI/2+rot),
-        ulcy = y + xscale * (ps->width/2.0) * sin(rot) - yscale * (ps->height/2.0) * sin(M_PI/2+rot);
-        glTexCoord2f(0,0);
-        glVertex2f(ulcx,ulcy);
-        glTexCoord2f(tbx,0);
-        glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-
-        const double mpr = 3*M_PI/2 + rot;
-        ulcx += h * cos(mpr);
-        ulcy -= h * sin(mpr);
-        glTexCoord2f(0,tby);
-        glVertex2f(ulcx,ulcy);
-        glTexCoord2f(tbx,tby);
-        glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-
-        glEnd();
+        enigma_user::draw_sprite_ext(sprite_id, 0, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, alpha/255.0);
       }
     }
   }
@@ -190,12 +136,6 @@ namespace enigma {
     subimage_index = a_subimage_index;
     x_offset = a_x_offset;
     y_offset = a_y_offset;
-
-    glPushMatrix(); // Matrix push 1.
-
-    glTranslated(x_offset, y_offset, 0.0);
-
-    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Attrib push 1.
 
     // Draw the particle system either from oldest to youngest or reverse.
     if (oldtonew) {
@@ -213,11 +153,9 @@ namespace enigma {
       }
     }
 
-    glPopAttrib(); // Attrib pop 1.
-
-    glPopMatrix(); // Matrix pop 1.
+    // TODO: Implement blending mode such that it is set to what it was before particle drawing.
   }
 }
 
-#endif // ENIGMA_PS_PARTICLE_BRIDGE_OPENGL1_H
+#endif // ENIGMA_PS_PARTICLE_BRIDGE_FALLBACK_H
 

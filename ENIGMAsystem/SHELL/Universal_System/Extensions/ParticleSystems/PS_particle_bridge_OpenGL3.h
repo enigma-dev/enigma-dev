@@ -127,7 +127,6 @@ namespace enigma {
     int subimage_index;
     double x_offset;
     double y_offset;
-    particle_sprite* (*draw_get_particle_sprite)(pt_shape particle_shape);
     double get_wiggle_result(double wiggle_offset, double wiggle)
     {
       double result_wiggle = wiggle + wiggle_offset;
@@ -137,13 +136,12 @@ namespace enigma {
     }
   }
   void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double a_wiggle, int a_subimage_index,
-    double a_x_offset, double a_y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape)) {
+    double a_x_offset, double a_y_offset) {
     using namespace enigma::particle_bridge;
     wiggle = a_wiggle;
     subimage_index = a_subimage_index;
     x_offset = a_x_offset;
     y_offset = a_y_offset;
-    draw_get_particle_sprite = get_particle_sprite;
 
     glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Attrib push 1.
 
@@ -226,7 +224,7 @@ namespace enigma {
           else {
             particle_sprite* ps;
             if (!pt->is_particle_sprite) {
-              ps = draw_get_particle_sprite(pt_sh_pixel);
+              ps = get_particle_sprite(pt_sh_pixel);
             }
             else {
               ps = pt->part_sprite;
@@ -244,7 +242,7 @@ namespace enigma {
           double size = pi.size;
           if (size <= 0) size = 0;
 
-          particle_sprite* ps = draw_get_particle_sprite(pt_sh_pixel);
+          particle_sprite* ps = get_particle_sprite(pt_sh_pixel);
           texture_indices.push_back(ps->texture);
           blend_adds.push_back(false);
 
