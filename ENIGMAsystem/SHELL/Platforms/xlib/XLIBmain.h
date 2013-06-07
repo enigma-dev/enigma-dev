@@ -25,6 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <X11/Xlib.h>
 
 namespace enigma {
   void input_push();
@@ -37,3 +38,8 @@ namespace enigma {
     int handleEvents();
   }
 }
+
+namespace enigma_user {
+  void set_synchronization(bool enable);
+}
+
