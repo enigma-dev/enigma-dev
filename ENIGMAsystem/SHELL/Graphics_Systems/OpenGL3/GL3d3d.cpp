@@ -21,6 +21,7 @@
 #include "../General/GLtextures.h"
 #include "GL3model.h"
 #include "GL3shapes.h"
+#include "GL3screen.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -156,6 +157,29 @@ void d3d_set_fog_end(double end)
 void d3d_set_fog_density(double density)
 {
   glFogf(GL_FOG_DENSITY, density);
+}
+
+void d3d_multisampling_set_enabled(bool enable) {
+ (enable?glEnable:glDisable)(GL_MULTISAMPLE);
+}
+
+void d3d_multisampling_set_level(int level) {
+  glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, tex );
+  glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, level, GL_RGBA8, 800, 600, false );
+}
+
+int d3d_multisampling_get_maxlevel() {
+  int samples;
+  //We need to find out what the maximum supported samples is
+  glGetIntegerv(GL_MAX_SAMPLES_EXT, &samples);
+  return samples;
+}
+
+#include <string.h>
+
+bool d3d_multisampling_supported() {
+  return strstr((char*)glGetString(GL_EXTENSIONS), 
+           "GL_EXT_framebuffer_multisample");
 }
 
 void d3d_set_culling(bool enable)

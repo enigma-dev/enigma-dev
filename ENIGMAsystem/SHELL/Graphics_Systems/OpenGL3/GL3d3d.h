@@ -86,6 +86,10 @@ void d3d_set_zwriteenable(bool enable);
 **/
 void d3d_set_lighting(bool enable);
 
+void d3d_multisampling_set_enabled(bool enable);
+void d3d_multisampling_set_level(int level);
+int d3d_multisampling_get_maxlevel();
+bool d3d_multisampling_supported();
 void d3d_set_culling(bool enable);
 void d3d_set_culling_mode(int mode);
 void d3d_set_culling_orientation(int mode);

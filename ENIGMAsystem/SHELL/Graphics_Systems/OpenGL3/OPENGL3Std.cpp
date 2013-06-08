@@ -60,6 +60,7 @@ namespace enigma
       glEnable(GL_BLEND);
       glEnable(GL_ALPHA_TEST);
       glEnable(GL_TEXTURE_2D);
+      glEnable(GL_TEXTURE_2D_MULTISAMPLE);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glAlphaFunc(GL_ALWAYS,0);
 

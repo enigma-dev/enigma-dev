@@ -93,9 +93,13 @@ namespace enigma
 namespace enigma_user
 {
 
+bool fbogen = false;
+GLuint tex, texd, fbo;
+
 void screen_redraw()
 {
     int FBO;
+
     if (!view_enabled)
     {
         glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
@@ -112,6 +116,28 @@ void screen_redraw()
         glOrtho(0, room_width, 0, room_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
+
+if (!fbogen) {
+  
+  glGenTextures( 1, &tex );
+  glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, tex );
+  glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, 1, GL_RGBA8, 800, 600, false );
+
+  //glGenTextures( 1, &texd );
+  //glBindTexture( GL_TEXTURE_2D, tex );
+  //glTexImage2D( GL_TEXTURE_2D, GL_RGBA8, 800, 600, false );
+
+  glGenFramebuffers( 1, &fbo );
+  glBindFramebuffer( GL_FRAMEBUFFER, fbo );
+  glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, tex, 0 );
+  //glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_COMPONENT24, GL_TEXTURE_2D, texd, 0 );
+
+  //GLenum status = glCheckFramebufferStatus( target );
+fbogen = true;
+}
+glBindFramebuffer( GL_FRAMEBUFFER, fbo );
+glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
         if (background_showcolor)
         {
@@ -340,6 +366,18 @@ void screen_redraw()
         }
         view_current = 0;
     }
+        // blit contents into textures
+        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo);
+        glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, FBO);
+        glBlitFramebufferEXT(0, 0, 800, 600,
+                             0, 0, 800, 600,
+                             GL_COLOR_BUFFER_BIT |
+                             GL_DEPTH_BUFFER_BIT,
+                             GL_NEAREST);
+ 
+        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
+        glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+glDisable(GL_MULTISAMPLE);
 }
 
 void screen_init()
