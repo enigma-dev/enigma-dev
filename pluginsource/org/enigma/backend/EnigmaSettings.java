@@ -180,7 +180,6 @@ public class EnigmaSettings extends Resource<EnigmaSettings,EnigmaSettings.PEnig
 			if (entry.getValue() == null) continue;
 			out.append("target-").append(entry.getKey()).append(": ").append(entry.getValue().id).println(); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-		out.println("target-networking: None"); //$NON-NLS-1$
 
 		if (extensions.size() > 0)
 			{
