@@ -359,8 +359,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		compileb.setIcon(LGM.getIconForKey("EnigmaPlugin.COMPILE"));
 		LGM.tool.add(compileb, 7);
 		
-		JMenu menu = new JMenu(Messages.getString("EnigmaRunner.MENU_ENIGMA")); //$NON-NLS-1$
-		menu.setFont(LGM.lnfFont.deriveFont(Font.BOLD));
+		JMenu menu = new JMenu(Messages.getString("EnigmaRunner.MENU_BUILD")); //$NON-NLS-1$
+		menu.setFont(LGM.lnfFont.deriveFont(Font.BOLD, 14));
 		busy = addItem(Messages.getString("EnigmaRunner.MENU_BUSY"));
 		busy.setEnabled(false);
 		busy.setVisible(false);
