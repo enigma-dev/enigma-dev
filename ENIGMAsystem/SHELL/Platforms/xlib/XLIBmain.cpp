@@ -45,7 +45,7 @@ namespace enigma_user {
 
 namespace enigma
 {
-  extern char keymap[256];
+  extern char keymap[512];
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
 
@@ -65,11 +65,12 @@ namespace enigma
       {
         case KeyPress: {
               gk=XLookupKeysym(&e.xkey,0);
+printf("out %08x %c\n",gk,gk&0xff);
               if (gk==NoSymbol)
                 return 0;
 
-              if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
-              else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
+              if (!(gk & 0xFF00)) actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
+              else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0x1FF]];
               { // Set keyboard_lastchar. Seems to work without 
                   char str[1];
                   int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
@@ -90,8 +91,8 @@ namespace enigma
             if (gk == NoSymbol)
               return 0;
 
-            if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
-            else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
+            if (!(gk & 0xFF00)) actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
+            else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0x1FF]];
 
             enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
             enigma::keybdstatus[actualKey]=0;
