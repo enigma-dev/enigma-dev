@@ -302,72 +302,75 @@ void screen_refresh() {
 
 namespace enigma
 {
-  char keymap[256];
+  char keymap[512];
   char usermap[256];
   void initkeymap()
   {
     using namespace enigma_user;
     // Pretend this part doesn't exist
-    keymap[0x51] = vk_left;
-    keymap[0x53] = vk_right;
-    keymap[0x52] = vk_up;
-    keymap[0x54] = vk_down;
-    keymap[0xE3] = vk_control;
-    keymap[0xE4] = vk_control;
-    keymap[0xE9] = vk_alt;
-    keymap[0xEA] = vk_alt;
-    keymap[0xE1] = vk_shift;
-    keymap[0xE2] = vk_shift;
-    keymap[0x0D] = vk_enter;
-    keymap[0x85] = vk_lsuper;
-    keymap[0x86] = vk_rsuper;
-    keymap[0x17] = vk_tab;
-    keymap[0x42] = vk_caps;
-    keymap[0x4E] = vk_scroll;
-    keymap[0x7F] = vk_pause;
-    keymap[0x9E] = vk_numpad0;
-    keymap[0x9C] = vk_numpad1;
-    keymap[0x99] = vk_numpad2;
-    keymap[0x9B] = vk_numpad3;
-    keymap[0x96] = vk_numpad4;
-    keymap[0x9D] = vk_numpad5;
-    keymap[0x98] = vk_numpad6;
-    keymap[0x95] = vk_numpad7;
-    keymap[0x97] = vk_numpad8;
-    keymap[0x9A] = vk_numpad9;
-    keymap[0xAF] = vk_divide;
-    keymap[0xAA] = vk_multiply;
-    keymap[0xAD] = vk_subtract;
-    keymap[0xAB] = vk_add;
-    keymap[0x9F] = vk_decimal;
-    keymap[0xBE] = vk_f1;
-    keymap[0xBF] = vk_f2;
-    keymap[0xC0] = vk_f3;
-    keymap[0xC1] = vk_f4;
-    keymap[0xC2] = vk_f5;
-    keymap[0xC3] = vk_f6;
-    keymap[0xC4] = vk_f7;
-    keymap[0xC5] = vk_f8;
-    keymap[0xC6] = vk_f9;
-    keymap[0xC7] = vk_f10;
-    keymap[0xC8] = vk_f11;
-    keymap[0xC9] = vk_f12;
-    keymap[0x08] = vk_backspace;
-    keymap[0x1B] = vk_escape;
-    keymap[0x50] = vk_home;
-    keymap[0x57] = vk_end;
-    keymap[0x55] = vk_pageup;
-    keymap[0x56] = vk_pagedown;
-    keymap[0xFF] = vk_delete;
-    keymap[0x63] = vk_insert;
+    keymap[0x151] = vk_left;
+    keymap[0x153] = vk_right;
+    keymap[0x152] = vk_up;
+    keymap[0x154] = vk_down;
+    keymap[0x1E3] = vk_control;
+    keymap[0x1E4] = vk_control;
+    keymap[0x1E9] = vk_alt;
+    keymap[0x1EA] = vk_alt;
+    keymap[0x1E1] = vk_shift;
+    keymap[0x1E2] = vk_shift;
+    keymap[0x10D] = vk_enter;
+    keymap[0x185] = vk_lsuper;
+    keymap[0x186] = vk_rsuper;
+    keymap[0x117] = vk_tab;
+    keymap[0x142] = vk_caps;
+    keymap[0x14E] = vk_scroll;
+    keymap[0x17F] = vk_pause;
+    keymap[0x19E] = vk_numpad0;
+    keymap[0x19C] = vk_numpad1;
+    keymap[0x199] = vk_numpad2;
+    keymap[0x19B] = vk_numpad3;
+    keymap[0x196] = vk_numpad4;
+    keymap[0x19D] = vk_numpad5;
+    keymap[0x198] = vk_numpad6;
+    keymap[0x195] = vk_numpad7;
+    keymap[0x197] = vk_numpad8;
+    keymap[0x19A] = vk_numpad9;
+    keymap[0x1AF] = vk_divide;
+    keymap[0x1AA] = vk_multiply;
+    keymap[0x1AD] = vk_subtract;
+    keymap[0x1AB] = vk_add;
+    keymap[0x19F] = vk_decimal;
+    keymap[0x1BE] = vk_f1;
+    keymap[0x1BF] = vk_f2;
+    keymap[0x1C0] = vk_f3;
+    keymap[0x1C1] = vk_f4;
+    keymap[0x1C2] = vk_f5;
+    keymap[0x1C3] = vk_f6;
+    keymap[0x1C4] = vk_f7;
+    keymap[0x1C5] = vk_f8;
+    keymap[0x1C6] = vk_f9;
+    keymap[0x1C7] = vk_f10;
+    keymap[0x1C8] = vk_f11;
+    keymap[0x1C9] = vk_f12;
+    keymap[0x108] = vk_backspace;
+    keymap[0x11B] = vk_escape;
+    keymap[0x150] = vk_home;
+    keymap[0x157] = vk_end;
+    keymap[0x155] = vk_pageup;
+    keymap[0x156] = vk_pagedown;
+    keymap[0x1FF] = vk_delete;
+    keymap[0x163] = vk_insert;
 
     // Set up identity map...
-    for (int i = 0; i < 'a'; i++)
+    for (int i = 0; i < 255; i++)
       usermap[i] = i;
+
+    for (int i = 0; i < 255; i++)
+      keymap[i] = i;
     for (int i = 'a'; i <= 'z'; i++) // 'a' to 'z' wrap to 'A' to 'Z'
-      usermap[i] = i + 'A' - 'a';
+      keymap[i] = i + 'A' - 'a';
     for (int i = 'z'+1; i < 255; i++)
-      usermap[i] = i;
+      keymap[i] = i;
    }
 }
 
