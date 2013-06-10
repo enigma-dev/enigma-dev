@@ -65,7 +65,6 @@ namespace enigma
       {
         case KeyPress: {
               gk=XLookupKeysym(&e.xkey,0);
-printf("out %08x %c\n",gk,gk&0xff);
               if (gk==NoSymbol)
                 return 0;
 
