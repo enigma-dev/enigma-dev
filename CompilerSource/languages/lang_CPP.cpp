@@ -145,13 +145,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     cout << heaping_pile_of_dog_shit;
     
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
-    if (successful_prior) {
-      delete main_context;
-      main_context = oldglobal;
-      oldglobal = NULL;
-    }
-    else
-      delete oldglobal;
+    delete oldglobal;
     cout << "Continuing anyway." << endl;
     // return &ide_passback_error;
   } else {
