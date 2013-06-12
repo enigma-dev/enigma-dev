@@ -93,7 +93,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   cout << targetYaml << endl;
   
   cout << "Creating swap." << endl;
-  jdi::context *oldglobal = main_context;
+  delete main_context;
   main_context = new jdi::context();
   
   cout << "Dumping whiteSpace definitions...";
@@ -110,8 +110,6 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     res = main_context->parse_C_stream(f, "SHELLmain.cpp");
     STOP_TIME();
   }
-  
-  static int successful_prior = false;
   
   jdi::definition *d;
   if ((d = main_context->get_global()->look_up("variant"))) {
@@ -145,16 +143,12 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     cout << heaping_pile_of_dog_shit;
     
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
-    delete oldglobal;
     cout << "Continuing anyway." << endl;
     // return &ide_passback_error;
-  } else {
-    successful_prior = true;
-    
+  } else {    
     cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME() << "ms)\n"
     << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
     //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
-    delete oldglobal;
   }
   
   cout << "Creating dummy primitives for old ENIGMA" << endl;
