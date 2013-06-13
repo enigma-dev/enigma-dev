@@ -1,4 +1,4 @@
-/** Copyright (C) 2010-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,9 +19,10 @@
 #include <vector>
 #include <math.h>
 
-#include "DirectX10Headers.h"
-#include "DX10colors.h"
-#include "DX10curves.h"
+#include "../General/DirectXHeaders.h"
+#include "../General/DXcolors.h"
+#include "../General/DXcurves.h"
+#include "../General/DXbinding.h"
 
 #define __GETR(x) (((x & 0x0000FF))/255.0)
 #define __GETG(x) (((x & 0x00FF00)>>8)/255.0)
@@ -31,14 +32,8 @@
 namespace enigma{
     extern unsigned char currentcolor[4];
 }
-#ifdef use_bound_texture_global
-  #define untexture() //if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
-#else
-  #define untexture() //glBindTexture(GL_TEXTURE_2D, 0);
-#endif
 
 int pr_curve_detail = 20;
-int pr_curve_mode = 0;//GL_LINE_STRIP
 int pr_spline_points = 0;
 int pr_curve_width = 1;
 
@@ -50,6 +45,9 @@ typedef std::vector< splinePoint > spline;
 static std::stack< spline, std::vector<spline*> > startedSplines;
 static std::stack< int > startedSplinesMode;
 
+namespace enigma_user
+{
+
 void draw_set_curve_width(int width)
 {
     pr_curve_width=width;
@@ -57,7 +55,7 @@ void draw_set_curve_width(int width)
 
 void draw_set_curve_mode(int mode)
 {
-    pr_curve_mode = mode;
+
 }
 
 void draw_set_curve_detail(int detail)
@@ -118,38 +116,12 @@ float draw_bezier_cubic_y(float x1, float y1, float x2, float y2, float x3, floa
 //in the middle
 void draw_spline_part(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
 {
-    float x, y, t = 0, det = 1/(float)pr_curve_detail;
-    for (int i=0; i<=pr_curve_detail; i++){
 
-        float t2 = t * t, t3 = t2 * t;
-        x = 0.5 * ( ( 2.0 * x2 ) + ( -x1 + x3 ) * t + ( 2.0 * x1 - 5.0 * x2 + 4 * x3 - x4 ) * t2 +
-        ( -x1 + 3.0 * x2 - 3.0 * x3 + x4 ) * t3 );
-        y = 0.5 * ( ( 2.0 * y2 ) + ( -y1 + y3 ) * t + ( 2.0 * y1 - 5.0 * y2 + 4 * y3 - y4 ) * t2 +
-        ( -y1 + 3.0 * y2 - 3.0 * y3 + y4 ) * t3 );
-        //glVertex2f(x, y);
-        t += det;
-    }
 }
 
 void draw_spline_part_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2)
 {
-    int col;
-    float x, y, al, t = 0, det = 1/(float)pr_curve_detail;
-    for (int i=0; i<=pr_curve_detail; i++){
 
-        al = a1 + (a2-a1)*t;
-
-        col = merge_color(c1, c2, t);
-
-        float t2 = t * t, t3 = t2 * t;
-        x = 0.5 * ( ( 2.0 * x2 ) + ( -x1 + x3 ) * t + ( 2.0 * x1 - 5.0 * x2 + 4 * x3 - x4 ) * t2 +
-        ( -x1 + 3.0 * x2 - 3.0 * x3 + x4 ) * t3 );
-        y = 0.5 * ( ( 2.0 * y2 ) + ( -y1 + y3 ) * t + ( 2.0 * y1 - 5.0 * y2 + 4 * y3 - y4 ) * t2 +
-        ( -y1 + 3.0 * y2 - 3.0 * y3 + y4 ) * t3 );
-        //glColor4f(__GETR(col),__GETG(col),__GETB(col),al);
-        //glVertex2f(x, y);
-        t += det;
-    }
 }
 
 void draw_spline2c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
@@ -205,7 +177,8 @@ void draw_spline4c_color(float x1, float y1, float x2, float y2, float x3, float
 
 void draw_spline_begin(int mode)
 {
-
+    startedSplinesMode.push(mode);
+    startedSplines.push(new spline);
 }
 
 int draw_spline_vertex(float x, float y)
@@ -243,3 +216,6 @@ int draw_spline_optimized_end()
 {
 
 }
+
+}
+

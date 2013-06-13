@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,8 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DirectX10Headers.h"
+#include "../General/DirectXHeaders.h"
 #include "DX10material.h"
+#include "../General/DXbinding.h"
 #include <math.h>
 
 #include <vector>
@@ -24,20 +25,23 @@ using std::vector;
 
 struct Material {
   unsigned int shader;
-  unsigned int textcount = 0;
+  vector<unsigned int> textures;
 
-  Material() 
+  Material()
   {
 
   }
- 
+
   ~Material()
   {
 
   }
 };
 
-vector<Material*> materials(0);
+vector<Material*> materials;
+
+namespace enigma_user
+{
 
 int material_create(int type)
 {
@@ -48,12 +52,12 @@ int material_create(int type)
 
 void material_add_texture(int id, int tid)
 {
-
+  materials[id]->textures.push_back(tid);
 }
 
 void material_set_texture(int id, int mtid, int tid)
 {
-
+  materials[id]->textures[mtid] = tid;
 }
 
 void material_set_shader(int id, int sid)
@@ -66,6 +70,7 @@ int material_get_shader(int id)
   return materials[id]->shader;
 }
 
+/* Could use global bound material for optimization, just like texture's */
 void material_use(int id)
 {
 
@@ -79,5 +84,7 @@ void material_reset()
 void material_free(int id)
 {
   delete materials[id];
+}
+
 }
 

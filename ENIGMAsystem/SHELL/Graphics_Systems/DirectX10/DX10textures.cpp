@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,18 +16,20 @@
 **/
 
 #include <stdio.h>
-#include "DirectX10Headers.h"
+#include "../General/DirectXHeaders.h"
 #include <string.h>
 //using std::string;
-#include "DX10textures.h"
+#include "../General/DXtextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "binding.h"
+#include "../General/DXbinding.h"
 
 vector<GmTexture*> GmTextures(0);
 
-extern int room_width, room_height;
+namespace enigma_user {
+  extern int room_width, room_height;
+}
 namespace enigma {
   extern size_t background_idmax;
 }
@@ -53,14 +55,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 unsigned get_texture(int texid) 
 {
-	if (texid < 0 || texid >= GmTextures.size()) 
-	{
-		return -1;
-	}
-	else 
-	{
-		return GmTextures[texid]->gltex;
-	}
+
 }
 
 namespace enigma
@@ -94,6 +89,9 @@ namespace enigma
   }
 }
 
+namespace enigma_user
+{
+
 void texture_set_enabled(bool enable)
 {
 
@@ -106,7 +104,7 @@ void texture_set_interpolation(int enable)
 
 bool texture_get_interpolation()
 {
-
+    return enigma::interpolate_textures;
 }
 
 void texture_set_blending(bool enable)
@@ -116,12 +114,12 @@ void texture_set_blending(bool enable)
 
 double texture_get_width(int texid)
 {
-  // returns floating point scale to the bg or some shit
+
 }
 
 double texture_get_height(int texid)
 {
-  // so does this one
+
 }
 
 int texture_get_pixwidth(int texid)
@@ -196,6 +194,8 @@ bool  texture_multitexture_supported()
 
 void texture_multitexture_enable(bool enable)
 {
+
+}
 
 }
 

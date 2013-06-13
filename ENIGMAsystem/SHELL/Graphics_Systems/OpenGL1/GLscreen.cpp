@@ -70,6 +70,7 @@ static inline void draw_back()
 
 namespace enigma
 {
+    extern bool d3dHidden;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
@@ -90,9 +91,6 @@ namespace enigma
     }
 }
 
-namespace enigma {
-    extern bool d3dHidden;
-}
 
 namespace enigma_user
 {
@@ -117,15 +115,19 @@ void screen_redraw()
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
 
+        int clear_bits = 0;
         if (background_showcolor)
         {
             int clearcolor = ((int)background_color) & 0x00FFFFFF;
             glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
+            clear_bits |= GL_COLOR_BUFFER_BIT;
         }
 
         if (enigma::d3dHidden)
-            glClear(GL_DEPTH_BUFFER_BIT);
+            clear_bits |= GL_DEPTH_BUFFER_BIT;
+
+        if (clear_bits)
+            glClear(clear_bits);
 
         draw_back();
 
@@ -277,15 +279,19 @@ void screen_redraw()
                 glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                 glMultMatrixd(transformation_matrix);
 
+                int clear_bits = 0;
                 if (background_showcolor)
                 {
                     int clearcolor = ((int)background_color) & 0x00FFFFFF;
                     glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
-                    glClear(GL_COLOR_BUFFER_BIT);
+                    clear_bits |= GL_COLOR_BUFFER_BIT;
                 }
 
                 if (enigma::d3dHidden)
-                    glClear(GL_DEPTH_BUFFER_BIT);
+                    clear_bits |= GL_DEPTH_BUFFER_BIT;
+
+                if (clear_bits)
+                    glClear(clear_bits);
 
                 draw_back();
 
@@ -340,6 +346,7 @@ void screen_redraw()
         }
         view_current = 0;
     }
+    screen_refresh();
 }
 
 void screen_init()

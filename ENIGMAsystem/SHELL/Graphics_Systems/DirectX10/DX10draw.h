@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,6 +14,9 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
+namespace enigma_user
+{
 
 void draw_set_line_pattern(unsigned short pattern, int scale);
 void draw_point(float x, float y);
@@ -45,3 +48,6 @@ void draw_button(float x1, float y1, float x2, float y2, float border_width, boo
 int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned iter);
 int draw_getpixel(int,int);
 #define draw_get_pixel draw_getpixel
+
+}
+

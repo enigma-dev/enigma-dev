@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DirectX10Headers.h"
-#include "DX10colors.h"
+#include "../General/DirectXHeaders.h"
+#include "../General/DXcolors.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -31,6 +31,9 @@
 namespace enigma {
   extern unsigned char currentcolor[4];
 }
+
+namespace enigma_user
+{
 
 void draw_unbind_all() {
 
@@ -55,26 +58,19 @@ int merge_color(int c1,int c2,double amount)
 
 void draw_set_color(int color)
 {
-	enigma::currentcolor[0] = __GETR(color);
-	enigma::currentcolor[1] = __GETG(color);
-	enigma::currentcolor[2] = __GETB(color);
+
 }
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
-	enigma::currentcolor[0] = red;
-	enigma::currentcolor[1] = green;
-	enigma::currentcolor[2] = blue;
+
 }
 void draw_set_alpha(float alpha)
 {
-	enigma::currentcolor[3] = bind_alpha(alpha);
+
 }
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
-	enigma::currentcolor[0] = red;
-	enigma::currentcolor[1] = green;
-	enigma::currentcolor[2] = blue;
-	enigma::currentcolor[3] = bind_alpha(alpha);
+
 }
 
 int draw_get_color() {
@@ -117,9 +113,14 @@ int color_get_saturation(int color)
 	return cmpmax  ?  255 - int(255 * (r<g ? (r<b?r:b) : (g<b?g:b)) / double(cmpmax))  :  0;
 }
 
+}
+
 static inline int min(int x,int y) { return x<y ? x:y; }
 static inline int max(int x,int y) { return x>y ? x:y; }
 static inline int bclamp(int x)    { return x > 255 ? 255 : x < 0 ? 0 : x; }
+
+namespace enigma_user
+{
 
 int make_color_hsv(int hue,int saturation,int value)
 {
@@ -140,3 +141,6 @@ int make_color_hsv(int hue,int saturation,int value)
 
   return (redr>0 ? redr : 0) | (greenr>0 ? (greenr<<8) : 0) | (bluer>0 ? (bluer<<16) : 0);
 }
+
+}
+

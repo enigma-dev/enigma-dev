@@ -27,6 +27,7 @@
 
 #include <string>
 #define flushl '\n'
+// The MinGW team is the most thoughtless, incompetent bunch of inconsistent morons who ever lived
 
 struct ideprint {
   void (*f)(const char*);
@@ -37,7 +38,7 @@ struct ideprint {
   ideprint &operator<< (long x);
   ideprint &operator<< (unsigned x);
   ideprint &operator<< (unsigned long x);
-  #ifdef USE_LONG_LONG
+  #if __cplusplus >= 201100
     ideprint &operator<< (long long x);
     ideprint &operator<< (unsigned long long x);
   #endif

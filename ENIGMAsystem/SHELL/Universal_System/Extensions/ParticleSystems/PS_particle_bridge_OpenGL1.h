@@ -39,7 +39,6 @@ namespace enigma {
     int subimage_index;
     double x_offset;
     double y_offset;
-    particle_sprite* (*draw_get_particle_sprite)(pt_shape particle_shape);
     double get_wiggle_result(double wiggle_offset, double wiggle)
     {
       double result_wiggle = wiggle + wiggle_offset;
@@ -144,7 +143,7 @@ namespace enigma {
         double rot_degrees = it->angle;
         if (size <= 0) return; // NOTE: Skip to next particle.
 
-        particle_sprite* ps = draw_get_particle_sprite(pt_sh_pixel);
+        particle_sprite* ps = get_particle_sprite(pt_sh_pixel);
         if (ps == NULL) return; // NOTE: Skip to next particle.
         texture_use(GmTextures[ps->texture]->gltex);
 
@@ -184,14 +183,13 @@ namespace enigma {
     }
   }
   void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double a_wiggle, int a_subimage_index,
-      double a_x_offset, double a_y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape))
+      double a_x_offset, double a_y_offset)
   {
     using namespace enigma::particle_bridge;
     wiggle = a_wiggle;
     subimage_index = a_subimage_index;
     x_offset = a_x_offset;
     y_offset = a_y_offset;
-    draw_get_particle_sprite = get_particle_sprite;
 
     glPushMatrix(); // Matrix push 1.
 

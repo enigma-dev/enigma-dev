@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,17 +15,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DirectX10Headers.h"
+#include "../General/DirectXHeaders.h"
 #include <string>
 #include <stdio.h>
 using namespace std;
 
 #include "DX10miscextra.h"
 
+//Fuck whoever did this to the spec
+#ifndef DX_BGR
+  #define DX_BGR 0x80E0
+#endif
+
+namespace enigma_user {
 extern int window_get_width();
 extern int window_get_height();
+}
 
 #include "Universal_System/estring.h"
+
+namespace enigma_user
+{
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
@@ -36,3 +46,6 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 {
 
 }
+
+}
+

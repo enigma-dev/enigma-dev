@@ -23,6 +23,8 @@ using namespace std;
 #include "Collision_Systems/collision_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "spritestruct.h"
+#include "graphics_object.h"
+#include "Universal_System/instance_system.h"
 #include "libEGMstd.h"
 #include "IMGloading.h"
 #include "estring.h"
@@ -449,7 +451,8 @@ int sprite_get_number(int sprite)
 int sprite_get_texture(int sprite,int subimage)
 {
 	get_sprite(spr,sprite,0);
-	return spr->texturearray[subimage % spr->subcount];
+    const int usi = subimage >= 0 ? (subimage % spr->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr->subcount;
+	return spr->texturearray[usi];
 }
 
 int sprite_get_xoffset(int sprite)

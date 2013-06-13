@@ -321,7 +321,7 @@ draw: 8
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw will destruct with this */
 	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
-	Instead: if (automatic_redraw) screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
+	Instead: if (automatic_redraw) screen_redraw(); # We never want to iterate draw; we let screen_redraw() handle it.
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
@@ -408,6 +408,10 @@ userfourteen: 7
 	Name: User defined 14
 	Mode: Special
 	Case: 24
+userfifteen: 7
+	Name: User defined 15
+	Mode: Special
+	Case: 25
 
 #other mouse events
 joystickoneleft: 6

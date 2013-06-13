@@ -71,12 +71,23 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
     wto << license;
     wto << "// Depending on how many times your game accesses variables via OBJECT.varname, this file may be empty." << endl << endl;
     wto << "namespace enigma" << endl << "{" << endl;
-    
+
     wto <<
     "  object_locals ldummy;" << endl <<
     "  object_locals *glaccess(int x)" << endl <<
     "  {" << endl << "    object_locals* ri = (object_locals*)fetch_instance_by_int(x);" << endl << "    return ri ? ri : &ldummy;" << endl << "  }" << endl << endl;
-    
+
+    wto <<
+    "  var &map_var(std::map<string, var> **vmap, string str)" << endl <<
+    "  {" << endl <<
+    "      if (*vmap == NULL)" << endl <<
+    "        *vmap = new std::map<string, var>();" << endl <<
+    "      if ((*vmap)->find(str) == (*vmap)->end())" << endl <<
+    "        (*vmap)->insert(std::pair<string, var>(str, 0));" << endl <<
+    "      return ((*vmap)->find(str))->second;" << endl <<
+    "  }" << endl << endl;
+
+
     map<string,usedtype> usedtypes;
     for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
       usedtype &ut = usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix];
@@ -90,16 +101,16 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
       i->second.uc = dummynumber++;
       wto << "  " << i->second.original.type << " " << i->second.original.prefix << "dummy_" << i->second.uc << i->second.original.suffix << "; // Referenced by " << uc << " accessors" << endl;
     }
-    
+
     for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++)
     {
       const string& pmember = dait->first;
       wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
       wto << "  {" << endl;
-      
+
       wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
       wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
-      
+
       for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
       {
         map<string,dectrip>::iterator x = it->second->locals.find(pmember);
@@ -109,8 +120,13 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
           if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
             wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)inst)->" << pmember << ";" << endl;
         }
+        else
+        {
+          if (dait->second.type == "var")
+            wto << "      case " << it->second->name << ": return map_var(&((OBJ_" << it->second->name << "*)inst)->vmap, \"" << pmember << "\");"  << endl;
+        }
       }
-      
+
       wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
       wto << "    }" << endl;
       wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc << ";" << endl;

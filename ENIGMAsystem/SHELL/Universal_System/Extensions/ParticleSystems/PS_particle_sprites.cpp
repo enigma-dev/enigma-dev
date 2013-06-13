@@ -28,6 +28,8 @@
 #include "PS_particle_sprites.h"
 #include "PS_particle_enums.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/spritestruct.h"
+#include "Collision_Systems/collision_mandatory.h"
 #include <map>
 #include <cmath>
 #include <cstdlib>
@@ -35,6 +37,7 @@
 namespace enigma
 {
   std::map<pt_shape,particle_sprite*> shape_to_sprite;
+  std::map<pt_shape,int> shape_to_actual_sprite;
 
   int bounds(int value, int low, int high)
   {
@@ -107,6 +110,7 @@ namespace enigma
     p_sprite->texture = texture;
     p_sprite->width = fullwidth;
     p_sprite->height = fullheight;
+    p_sprite->shape = pt_sh;
 
     shape_to_sprite.insert(std::pair<pt_shape,particle_sprite*>(pt_sh,p_sprite));
   }
@@ -918,6 +922,31 @@ namespace enigma
       return (*it_shape).second;
     }
     return 0;
+  }
+  int get_particle_actual_sprite(pt_shape particle_shape)
+  {
+    {
+      std::map<pt_shape,int>::iterator it_shape = enigma::shape_to_actual_sprite.find(particle_shape);
+      if (it_shape != enigma::shape_to_actual_sprite.end()) {
+        return (*it_shape).second;
+      }
+    }
+    particle_sprite* ps = get_particle_sprite(particle_shape);
+    if (ps == 0) {
+      return -1;
+    }
+    enigma::spritestructarray_reallocate();
+    int sprid = enigma::sprite_idmax;
+    sprite_new_empty(sprid, 1, ps->width, ps->height, ps->width/2.0, ps->height/2.0, 0, ps->height, 0, ps->width, true, false);
+
+    sprite* sprstr = spritestructarray[sprid];
+    sprstr->texturearray[0] = ps->texture;
+    sprstr->texbordxarray[0] = 1.0; // Assumes multiple of 2.
+    sprstr->texbordyarray[0] = 1.0; // Assumes multiple of 2.
+    sprstr->colldata[0] = get_collision_mask(sprstr,0,ct_bbox);
+
+    shape_to_actual_sprite.insert(std::pair<pt_shape,int>(particle_shape,sprid));
+    return sprid;
   }
 }
 

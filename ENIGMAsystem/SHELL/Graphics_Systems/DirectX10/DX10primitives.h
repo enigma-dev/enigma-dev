@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,6 +14,9 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
+namespace enigma_user
+{
 
 const int pr_pointlist      = 1;     //GL_POINTS
 const int pr_linelist       = 2;     //GL_LINES
@@ -31,19 +34,21 @@ const int pr_aa_nicest      = 4354;  //GL_NICEST
 const int pr_aa_fastest     = 4353;  //GL_FASTEST
 const int pr_aa_dontcare    = 4352;  //GL_DONT_CARE
 
-void draw_set_primitive_aa(bool enable, int quality);
 int draw_primitive_begin(int kind);
-int draw_primitive_begin_texture(int dink,unsigned tex);
+int draw_primitive_begin_texture(int kind,unsigned tex);
 int draw_vertex(double x, double y);
 int draw_vertex_color(float x, float y, int color, float alpha);
 int draw_vertex_texture(float x, float y, float tx, float ty);
 int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha);
 int draw_primitive_end();
-
 void d3d_primitive_begin(int kind);
 void d3d_primitive_begin_texture(int kind, int texId);
 void d3d_primitive_end();
 void d3d_vertex(double x, double y, double z);
+void d3d_normal(double nx, double ny, double nz);
+void d3d_texture(double tx, double ty);
+void d3d_color(int col, double alpha);
+void d3d_index(int in);
 void d3d_vertex_color(double x, double y, double z, int color, double alpha);
 void d3d_vertex_texture(double x, double y, double z, double tx, double ty);
 void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha);
@@ -51,3 +56,6 @@ void d3d_vertex_normal(double x, double y, double z, double nx, double ny, doubl
 void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha);
 void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty);
 void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha);
+
+}
+

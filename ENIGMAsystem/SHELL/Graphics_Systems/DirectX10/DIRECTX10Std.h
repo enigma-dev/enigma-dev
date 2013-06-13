@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,19 +15,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//#include "DirectXHeaders.h"
-
 namespace enigma
 {
   extern unsigned bound_texture;
   extern unsigned char currentcolor[4];
+  extern bool pbo_isgo;
 }
 
-#include "DX10colors.h"
+#include "../General/DXcolors.h"
 #include "DX10primitives.h"
 #include "DX10d3d.h"
 #include "DX10draw.h"
-#include "DX10blend.h"
-#include "DX10surface.h"
+#include "../General/DXblend.h"
+#include "../General/DXsurface.h"
 #include "DX10miscextra.h"
 

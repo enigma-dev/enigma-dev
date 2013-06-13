@@ -17,24 +17,27 @@ else
 endif
 
 # GMODE { Run, Build, Debug, Compile }
-GMODE := Run
+GMODE ?= Run
 
 # GRAPHICS { Graphics_Systems/* }
-GRAPHICS := OpenGL1
+GRAPHICS ?= OpenGL1
 
 # AUDIO { Audio_Systems/* }
-AUDIO := OpenAL
+AUDIO ?= OpenAL
 
 # COLLISION { Collision_Systems/* }
-COLLISION := BBox
+COLLISION ?= BBox
 
 # WIDGETS { Widget_Systems/* }
-WIDGETS := None
+WIDGETS ?= None
+
+# NETWORKING { Networking_Systems/* }
+NETWORKING ?= None
 
 # Default windres
 WINDRES = windres.exe
 
-SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Universal_System
+SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Networking_Systems/$(NETWORKING) Universal_System
 
 OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
 
@@ -85,6 +88,7 @@ clean:
 
 SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
+include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))
 RCFILES := $(addprefix $(OBJDIR)/,$(RESOURCES))
