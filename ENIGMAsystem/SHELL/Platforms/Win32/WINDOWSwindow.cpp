@@ -89,6 +89,9 @@ namespace enigma
 
     void setchildsize(bool adapt)
     {
+        if (!regionWidth)
+            return;
+
         int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
 
         if (viewScale > 0)  //Fixed Scale

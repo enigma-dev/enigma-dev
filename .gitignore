@@ -33,3 +33,4 @@ CompilerSource/JDI/test/defines_mingw.txt
 Compilers/Windows/gcc.ey
 ENIGMAsystem/SHELL/ENIGMAengine
 *.cbTemp
+ENIGMAsystem/SHELL/.objs
