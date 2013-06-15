@@ -123,6 +123,12 @@ void b2d_world_update(int index)
   b2dworld->world_update();
 }
 
+void b2d_world_dump(int index)
+{
+  get_world(b2dworld, index);
+  b2dworld->world->Dump();
+}
+
 void b2d_world_update_settings(int index, double timeStep, int velocityIterations, int positionIterations)
 {
   get_world(b2dworld, index);
@@ -281,6 +287,13 @@ void b2d_body_delete(int id)
   get_body(b2dbody, id);
   delete b2dbody;
 }
+
+void b2d_body_dump(int id)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->Dump();
+}
+
 
 void b2d_body_set_collision_group(int id, int group)
 {

@@ -121,6 +121,10 @@ void b2d_world_gravity(int index, double gx, double gy);
 void b2d_world_update(int index); 
 /** description...
 @param index
+**/
+void b2d_world_dump(int index);
+/** description...
+@param index
 @param timeStep
 @param velocityIterations
 @param positionIterations
@@ -175,6 +179,10 @@ void b2d_body_bind();
 @param id
 **/
 void b2d_body_delete(int id);
+/** description...
+@param id
+**/
+void b2d_body_dump(int id);
 
 /** description...
 @param id

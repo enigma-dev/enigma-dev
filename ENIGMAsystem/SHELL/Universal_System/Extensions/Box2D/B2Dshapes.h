@@ -71,6 +71,10 @@ int b2d_shape_create();
 void b2d_shape_delete(int id);
 /** description...
 @param id
+**/
+int b2d_shape_duplicate(int id);
+/** description...
+@param id
 @param halfwidth
 @param halfheight
 **/
@@ -88,6 +92,25 @@ void b2d_shape_circle(int id, double radius);
 void b2d_shape_add_point(int id, double x, double y);
 /** description...
 @param id
+@param pn
+**/
+void b2d_shape_remove_point(int id, int pn);
+/** description...
+@param id
+@param startn
+@param endn
+**/
+void b2d_shape_remove_points(int id, int startn, int endn);
+/** description...
+@param id
+**/
+void b2d_shape_clear_points(int id);
+/** description...
+@param id
+**/
+int b2d_shape_count_points(int id);
+/** description...
+@param id
 @param x
 @param y
 **/
@@ -95,11 +118,19 @@ void b2d_shape_test_point(int id, double sx, double sy, double sa, double px, do
 /** description...
 @param id
 **/
-void b2d_shape_edge(int id);
+void b2d_shape_polygon(int id);
 /** description...
 @param id
 **/
-void b2d_shape_polygon(int id);
+void b2d_shape_edge(int id, bool adjstart, bool adjend);
+/** description...
+@param id
+**/
+void b2d_shape_chain(int id);
+/** description...
+@param id
+**/
+void b2d_shape_loop(int id, bool adjstart, bool adjend);
 
 /** description...
 @param bodyid

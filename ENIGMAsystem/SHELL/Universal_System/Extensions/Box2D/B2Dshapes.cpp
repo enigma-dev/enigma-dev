@@ -75,6 +75,17 @@ void b2d_shape_delete(int id)
   delete b2dshape;
 }
 
+int b2d_shape_duplicate(int id)
+{
+  get_shape(b2dshape, id);
+  int i = b2dshapes.size();
+  B2DShape* nb2dshape = new B2DShape();
+  nb2dshape->shape = b2dshape->shape->Clone(new b2BlockAllocator());
+  copy(b2dshape->vertices.begin(),b2dshape->vertices.end(),nb2dshape->vertices.begin());
+  b2dshapes.push_back(nb2dshape);
+  return i;
+}
+
 void b2d_shape_box(int id, double halfwidth, double halfheight)
 {
   get_shape(b2dshape, id);
@@ -97,6 +108,30 @@ void b2d_shape_add_point(int id, double x, double y)
   b2dshape->vertices.push_back(b2Vec2(x, y));
 }
 
+void b2d_shape_remove_point(int id, int pn)
+{
+  get_shape(b2dshape, id);
+  b2dshape->vertices.erase(b2dshape->vertices.begin() + pn);
+}
+
+void b2d_shape_remove_points(int id, int startn, int endn)
+{
+  get_shape(b2dshape, id);
+  b2dshape->vertices.erase(b2dshape->vertices.begin() + startn, b2dshape->vertices.begin() + endn);
+}
+
+void b2d_shape_clear_points(int id)
+{
+  get_shape(b2dshape, id);
+  b2dshape->vertices.clear();
+}
+
+int b2d_shape_count_points(int id)
+{
+  get_shape(b2dshape, id);
+  return b2dshape->vertices.size();
+}
+
 void b2d_shape_test_point(int id, double sx, double sy, double sa, double px, double py)
 {
   get_shape(b2dshape, id);
@@ -112,12 +147,47 @@ void b2d_shape_polygon(int id)
   b2dshape->shape = shape;
 }
 
-void b2d_shape_edge(int id)
+void b2d_shape_edge(int id, bool adjstart, bool adjend)
 {
   get_shape(b2dshape, id);
   b2EdgeShape* shape = new b2EdgeShape();
 
-  //shape->Set(&b2dshape->vertices[0],  &b2dshape->vertices[b2dshape->vertices.size()]);
+  int vid = 0;
+  if (adjstart) {
+    shape->m_hasVertex0 = true;
+    shape->m_vertex0 = b2dshape->vertices[vid];
+    vid += 1;
+  }
+  shape->Set(b2dshape->vertices[vid],  b2dshape->vertices[vid + 1]);
+  vid += 2;
+  if (adjend) {
+    shape->m_hasVertex3 = true;
+    shape->m_vertex3 = b2dshape->vertices[vid];
+  }
+  b2dshape->shape = shape;
+}
+
+void b2d_shape_chain(int id)
+{
+  get_shape(b2dshape, id);
+  b2ChainShape* shape = new b2ChainShape();
+
+  shape->CreateChain(&b2dshape->vertices[0],  b2dshape->vertices.size());
+  b2dshape->shape = shape;
+}
+
+void b2d_shape_loop(int id, bool adjstart, bool adjend)
+{
+  get_shape(b2dshape, id);
+  b2ChainShape* shape = new b2ChainShape();
+
+  if (adjstart) {
+    shape->SetPrevVertex(b2dshape->vertices[0]);
+  }
+  shape->CreateLoop(&b2dshape->vertices[adjstart],  b2dshape->vertices.size() - adjstart - adjend);
+  if (adjend) {
+    shape->SetNextVertex(b2dshape->vertices[b2dshape->vertices.size() - 1]);
+  }
   b2dshape->shape = shape;
 }
 
