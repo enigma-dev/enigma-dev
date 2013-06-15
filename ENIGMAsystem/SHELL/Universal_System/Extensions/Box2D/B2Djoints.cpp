@@ -19,67 +19,67 @@
 using std::vector;
 
 #include <Box2D/Box2D.h>
-#include "B2Dfunctions.h"
 #include "B2Djoints.h"
+#include "B2Dfunctions.h"
 
-vector<jointInstance> joints(0);
+vector<B2DJoint*> b2djoints(0);
 
 namespace enigma_user
 {
 
 int b2d_joint_create(int world)
 {
-    int i = joints.size();
-    jointInstance joint = jointInstance();
-    joint.worldid = world;
-    joints.push_back(joint);
+    int i = b2djoints.size();
+    B2DJoint* b2djoint = new B2DJoint();
+    b2djoint->worldid = world;
+    b2djoints.push_back(b2djoint);
     return i;
 }
 
-void b2d_joint_distance_create(int id, int fixture1, int fixture2, bool collide_connected)
+void b2d_joint_distance_create(int id, int body1, int body2, bool collide_connected)
 {
-  if (unsigned(id) >= joints.size() || id < 0)
+  if (unsigned(id) >= b2djoints.size() || id < 0)
   {
     return;
   }
   else
   {
     b2DistanceJointDef jointDef;
-    jointDef.bodyA = fixtures[fixture1].body;
-    jointDef.bodyB = fixtures[fixture2].body;
+    jointDef.bodyA = b2dbodies[body1]->body;
+    jointDef.bodyB = b2dbodies[body2]->body;
     jointDef.collideConnected = collide_connected;
     jointDef.frequencyHz = 4.0f;
     jointDef.dampingRatio = 0.5f;
-    joints[id].joint = worlds[joints[id].worldid].world->CreateJoint(&jointDef);
+    b2djoints[id]->joint = b2dworlds[b2djoints[id]->worldid]->world->CreateJoint(&jointDef);
   }
 }
 
-void b2d_joint_mouse_create(int id, int fixture)
+void b2d_joint_mouse_create(int id, int bodyid)
 {
-  if (unsigned(id) >= joints.size() || id < 0)
+  if (unsigned(id) >= b2djoints.size() || id < 0)
   {
     return;
   }
   else
   {
     b2MouseJointDef jointDef;
-    jointDef.bodyA = fixtures[fixture].body;
-    joints[id].joint = worlds[joints[id].worldid].world->CreateJoint(&jointDef);
+    jointDef.bodyA = b2dbodies[bodyid]->body;
+    b2djoints[id]->joint = b2dworlds[b2djoints[id]->worldid]->world->CreateJoint(&jointDef);
   }
 }
 
 void b2d_joint_set_target(int id, double x, double y)
 {
-  if (unsigned(id) >= joints.size() || id < 0)
+  if (unsigned(id) >= b2djoints.size() || id < 0)
   {
     return;
   }
   else
   {
-    if (joints[id].joint->GetType() != e_mouseJoint) {
+    if (b2djoints[id]->joint->GetType() != e_mouseJoint) {
       return;
     }
-    b2MouseJoint* mouseJoint = (b2MouseJoint*)joints[id].joint;
+    b2MouseJoint* mouseJoint = (b2MouseJoint*)b2djoints[id]->joint;
     mouseJoint->SetTarget(b2Vec2(x, y));
   }
 }

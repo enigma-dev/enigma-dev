@@ -36,15 +36,13 @@ bool systemPaused = false;
 static inline double r2d(double r) { return r * 180 / M_PI; }
 
 // NOTES:
-// 1) provide function overloads for interfacing with how studio is all fucked up so we don't have to limit ours
-// 2) box2d uses an inversed y-axis, thus why physics_fixture_get_angle() returns -radianstodegrees(angle)
-// 3) static objects when hit appear to me to move about one pixel at times, I can't tell if this is just my eyes playin tricks
-// 4) leave the option to continue allowing you to manually update your world
-// 5) box2d's manual also states you should blend previous timesteps for updating the world with the current timestep
+// 1) box2d uses an inversed y-axis, thus why physics_fixture_get_angle() returns -radianstodegrees(angle)
+// 2) static objects when hit appear to me to move about one pixel at times, this is caused by bodies/fixtures not being created in the world
+// 3) leave the option to continue allowing you to manually update your world
+// 4) box2d's manual also states you should blend previous timesteps for updating the world with the current timestep
 //    in order to make the simulation run smoother
-// 6) box2d manual is available here... http://www.box2d.org/manual.html
-// 7) I made joints bind fixtures, where as studio's joints bind instances together, that's stupid, fuck that
-// 8) box2d's classes allow you to set a b2Shape for instance to a b2CircleShape or b2PolygonShape
+// 5) box2d manual is available here... http://www.box2d.org/manual.html
+// 6) box2d's classes allow you to set a b2Shape for instance to a b2CircleShape or b2PolygonShape
 //    that is why I wrote the classes to use an abstracted pointer reference such as b2Shape and b2Joint
 
 vector<worldInstance> worlds(1);
@@ -341,13 +339,13 @@ void physics_fixture_set_density(int id, double density)
   else
   {
     // technically studio makes it so 0 density, means infinite density and just makes it
-    // a static object, but im just gonna go ahead and comment that out cause its fuckin stupid
-    //if (density == 0) {
-      //fixtures[id].body->SetType(b2_staticBody);
-    //} else {
+    // a static object
+    if (density == 0) {
+      fixtures[id].body->SetType(b2_staticBody);
+    } else {
       fixtures[id].fixture->SetDensity(density);
       fixtures[id].body->ResetMassData();
-    //}
+    }
   }
 }
 
