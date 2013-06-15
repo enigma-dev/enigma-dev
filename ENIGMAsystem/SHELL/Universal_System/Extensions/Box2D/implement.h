@@ -24,8 +24,8 @@ namespace enigma {
   struct extension_box2dphysics
   {
     void box2dphysics_update() {
-      for (std::vector<worldInstance>::iterator it = worlds.begin(); it != worlds.end(); it++) {
-        it->world_update();
+      for (std::vector<B2DWorld*>::iterator it = b2dworlds.begin(); it != b2dworlds.end(); it++) {
+        (*it)->world_update();
       }
     }
   };

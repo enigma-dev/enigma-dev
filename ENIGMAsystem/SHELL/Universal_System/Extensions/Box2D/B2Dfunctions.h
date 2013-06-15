@@ -22,7 +22,9 @@
 using std::vector;
 
 #include <Box2D/Box2D.h>
-struct worldInstance {
+#include "B2Dshapes.h"
+
+struct B2DWorld {
   b2World* world;
   // Prepare for simulation. Typically we use a time step of 1/60 of a
   // second (60Hz) and 10 iterations. This provides a high quality simulation
@@ -33,7 +35,7 @@ struct worldInstance {
   int32 pixelstometers;
   bool paused;
 
-  worldInstance()
+  B2DWorld()
   {
     // Define the gravity vector.
     b2Vec2 gravity(0.0f, 10.0f);
@@ -48,35 +50,25 @@ struct worldInstance {
 
   void world_update();
 }; 
-extern vector<worldInstance> worlds;
+extern vector<B2DWorld*> b2dworlds;
 
-struct fixtureInstance {
+struct B2DBody {
   int world;
+  vector<int> fixtures;
   b2Body* body;
-  b2Fixture* fixture;
-  b2Shape* shape;
-  b2PolygonShape* polygonshape;
-  vector<b2Vec2> vertices;
 
-  fixtureInstance() 
+  B2DBody() 
   {
 
   }
 
-  ~fixtureInstance()
+  ~B2DBody()
   {
 
-  }
-
-  void FinishShape()
-  {
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = shape;
-    fixture = body->CreateFixture(&fixtureDef);
   }
 
 }; 
-extern vector<fixtureInstance> fixtures;
+extern vector<B2DBody*> b2dbodies;
 
 namespace enigma_user
 {
@@ -129,6 +121,10 @@ void b2d_world_gravity(int index, double gx, double gy);
 void b2d_world_update(int index); 
 /** description...
 @param index
+**/
+void b2d_world_dump(int index);
+/** description...
+@param index
 @param timeStep
 @param velocityIterations
 @param positionIterations
@@ -148,17 +144,30 @@ void b2d_world_update_speed(int index, int updatesperstep);
 **/
 void b2d_world_draw_debug();
 
-/************** Fixtures **************/
+void b2d_world_clear_forces(int index);
+void b2d_world_set_sleeping(int index, bool sleeping);
+void b2d_world_set_warmstarting(int index, bool warmstarting);
+void b2d_world_set_continuous(int index, bool continuous);
+void b2d_world_set_substepping(int index, bool substepping);
+void b2d_world_set_clearforces(int index, bool autoclear);
+bool b2d_world_get_sleeping(int index);
+bool b2d_world_get_warmstarting(int index);
+bool b2d_world_get_continuous(int index);
+bool b2d_world_get_substepping(int index);
+int b2d_world_get_proxy_count(int index);
+int b2d_world_get_body_count(int index);
+int b2d_world_get_joint_count(int index);
+int b2d_world_get_contect_count(int index);
+bool b2d_world_get_locked(int index);
+bool b2d_world_get_clearforces(int index);
+
+/************** Bodies **************/
 
 /** description...
 @param world
 @return This function returns the index of the newly created fixture.
 **/
-int  b2d_body_create(int world);
-/** description...
-@return the return....
-**/
-int  b2d_body_create(); 
+int  b2d_body_create(int world = 0);
 /** description...
 @param id
 **/
@@ -168,35 +177,12 @@ void b2d_body_bind(int id);
 void b2d_body_bind(); 
 /** description...
 @param id
-@param group
-**/
-void b2d_body_set_collision_group(int id, int group);
-/** description...
-@param id
 **/
 void b2d_body_delete(int id);
-
-/** description...
-@param id
-@param halfwidth
-@param halfheight
-**/
-void b2d_body_set_box_shape(int id, double halfwidth, double halfheight);
-/** description...
-@param id
-@param radius
-**/
-void b2d_body_set_circle_shape(int id, double radius);
 /** description...
 @param id
 **/
-void b2d_body_set_polygon_shape(int id);
-/** description...
-@param id
-@param x
-@param y
-**/
-void b2d_body_add_point(int id, double x, double y);
+void b2d_body_dump(int id);
 
 /** description...
 @param id
@@ -218,6 +204,11 @@ void b2d_body_set_position(int id, double x, double y);
 void b2d_body_set_angle(int id, double angle);
 /** description...
 @param id
+@param fixed
+**/
+void b2d_body_set_angle_fixed(int id, bool fixed);
+/** description...
+@param id
 @param density
 **/
 void b2d_body_set_density(int id, double density);
@@ -228,16 +219,6 @@ void b2d_body_set_density(int id, double density);
 void b2d_body_set_friction(int id, double friction);
 /** description...
 @param id
-@param damping
-**/
-void b2d_body_set_linear_damping(int id, double damping);
-/** description...
-@param id
-@param damping
-**/
-void b2d_body_set_angular_damping(int id, double damping);
-/** description...
-@param id
 @param restitution
 **/
 void b2d_body_set_restitution(int id, double restitution);
@@ -246,6 +227,16 @@ void b2d_body_set_restitution(int id, double restitution);
 @param state
 **/
 void b2d_body_set_sensor(int id, bool state);
+/** description...
+@param id
+@param damping
+**/
+void b2d_body_set_linear_damping(int id, double damping);
+/** description...
+@param id
+@param damping
+**/
+void b2d_body_set_angular_damping(int id, double damping);
 /** description...
 @param id
 **/
@@ -265,9 +256,19 @@ void b2d_body_set_dynamic(int id);
 void b2d_body_set_awake(int id, bool state);
 /** description...
 @param id
+@param bullet
+**/
+void b2d_body_set_bullet(int id, bool bullet);
+/** description...
+@param id
 @param allowsleep
 **/
 void b2d_body_set_sleep(int id, bool allowsleep);
+/** description...
+@param id
+@param group
+**/
+void b2d_body_set_collision_group(int id, int group);
 /** description...
 @param id
 @param mass
@@ -275,7 +276,11 @@ void b2d_body_set_sleep(int id, bool allowsleep);
 @param local_center_y
 @param inertia
 **/
-void b2d_body_mass_properties(int id, double mass, double local_center_x, double local_center_y, double inertia);
+void b2d_body_set_massdata(int id, double mass, double local_center_x, double local_center_y, double inertia);
+/** description...
+@param id
+**/
+void b2d_body_reset_massdata(int id);
 
 /** description...
 @param id
@@ -312,8 +317,44 @@ double b2d_body_get_center_y(int id);
 @return the return....
 **/
 double b2d_body_get_inertia(int id);
+/** description...
+@param id
+@return the return...
+**/
+double b2d_body_get_angular_velocity(int id);
+/** description...
+@param id
+@return the return...
+**/
+bool b2d_body_get_awake(int id);
+/** description...
+@param id
+@return the return...
+**/
+bool b2d_body_get_sleeping(int id);
+/** description...
+@param id
+@return the return...
+**/
+bool b2d_body_get_angle_fixed(int id);
+/** description...
+@param id
+@return the return...
+**/
+bool b2d_body_get_bullet(int id);
+/** description...
+@param id
+@param fid
+@return the return...
+**/
+int b2d_body_get_fixture(int id, int fid);
 
 /************** Forces **************/
+void b2d_body_apply_force(int id, double xpos, double ypos, double xforce, double yforce);
+void b2d_body_apply_force_center(int id, double xforce, double yforce);
+void b2d_body_apply_torque(int id, double torque);
+void b2d_body_apply_impulse_linear(int id, double xpos, double ypos, double ximpulse, double yimpulse);
+void b2d_body_apply_impulse_angular(int id, double impulse);
 
 /** description...
 @param world
@@ -322,13 +363,13 @@ double b2d_body_get_inertia(int id);
 @param xforce
 @param yforce
 **/
-void b2d_apply_force(int world, double xpos, double ypos, double xforce, double yforce);
+void b2d_world_apply_force(int world, double xpos, double ypos, double xforce, double yforce);
 /** description...
 @param world
 @param xpos
 @param ypos
 **/
-void b2d_apply_force_radial(int world, double xpos, double ypos);
+void b2d_world_apply_force_radial(int world, double xpos, double ypos);
 /** description...
 @param world
 @param xpos
@@ -336,56 +377,15 @@ void b2d_apply_force_radial(int world, double xpos, double ypos);
 @param ximpulse
 @param yimpulse
 **/
-void b2d_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse);
+void b2d_world_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse);
 /** description...
 @param world
 @param xpos
 @param ypos
 **/
-void b2d_apply_impulse_radial(int world, double xpos, double ypos);
-/** description...
-@param id
-@param xlocal
-@param ylocal
-**/
-void b2d_apply_local_force(int id, double xlocal, double ylocal, double xforce, double yforce);
-/** description...
-@param world
-@param xpos
-@param ypos
-**/
-void b2d_apply_local_force_radial(int world, double xpos, double ypos);
-/** description...
-@param id
-@param xlocal
-@param ylocal
-@param ximpulse
-@param yimpulse
-**/
-void b2d_apply_local_impulse(int id, double xlocal, double ylocal, double ximpulse, double yimpulse);
-/** description...
-@param world
-@param xpos
-@param ypos
-**/
-void b2d_apply_local_impulse_radial(int world, double xpos, double ypos);
-/** description...
-@param id
-@param torque
-**/
-void b2d_apply_local_torque(int id, double torque);
+void b2d_world_apply_impulse_radial(int world, double xpos, double ypos);
 
 /************** Miscellaneous **************/
-/** description...
-**/
-void b2d_test_overlap();
-/** description...
-@param mass
-@param local_center_x
-@param local_center_y
-@param interia
-**/
-void b2d_mass_properties(double mass, double local_center_x, double local_center_y, double inertia);
 /** description...
 **/ 
 void b2d_draw_debug(); 

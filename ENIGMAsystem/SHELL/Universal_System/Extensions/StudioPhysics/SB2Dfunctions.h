@@ -48,7 +48,7 @@ struct worldInstance {
 
   void world_update();
 }; 
-extern vector<worldInstance> worlds;
+extern vector<worldInstance*> worlds;
 
 struct fixtureInstance {
   int world;
@@ -76,7 +76,7 @@ struct fixtureInstance {
   }
 
 }; 
-extern vector<fixtureInstance> fixtures;
+extern vector<fixtureInstance*> fixtures;
 
 /** Check if there are no solid objects at a given position.
 @param x coordinate representing the location
