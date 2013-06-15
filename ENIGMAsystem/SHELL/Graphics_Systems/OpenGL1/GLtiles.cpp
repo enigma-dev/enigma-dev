@@ -49,8 +49,10 @@ namespace enigma
 {
     void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
     {
+        if (!enigma_user::background_exists(back)) return;
         get_background(bck2d,back);
         texture_use(GmTextures[bck2d->texture]->gltex);
+
         glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
         float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
