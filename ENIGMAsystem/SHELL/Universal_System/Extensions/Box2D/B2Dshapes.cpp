@@ -20,6 +20,47 @@
 vector<B2DShape*> b2dshapes;
 vector<B2DFixture*> b2dfixtures;
 
+#include <cmath>
+#include <cstdlib>
+#include <string>
+using std::string;
+
+#ifdef DEBUG_MODE
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_shaper(s,id,r) \
+    if (unsigned(id) >= b2dshapes.size() || id < 0) { \
+      show_error("Cannot access Box2D physics shape with id " + toString(id), false); \
+      return r; \
+    } B2DShape* s = b2dshapes[id];
+  #define get_shape(s,id) \
+    if (unsigned(id) >= b2dshapes.size() || id < 0) { \
+      show_error("Cannot access Box2D physics shape with id " + toString(id), false); \
+      return; \
+    } B2DShape* s = b2dshapes[id];
+  #define get_fixturer(f,id,r) \
+    if (unsigned(id) >= b2dfixtures.size() || id < 0) { \
+      show_error("Cannot access Box2D physics fixture with id " + toString(id), false); \
+      return r; \
+    } B2DFixture* f = b2dfixtures[id];
+  #define get_fixture(f,id) \
+    if (unsigned(id) >= b2dfixtures.size() || id < 0) { \
+      show_error("Cannot access Box2D physics fixture with id " + toString(id), false); \
+      return; \
+    } B2DFixture* f = b2dfixtures[id];
+#else
+  #define get_shaper(s,id,r) \
+    B2DShape* s = b2dshapes[id];
+  #define get_shape(s,id) \
+    B2DShape* s = b2dshapes[id];
+  #define get_fixturer(f,id,r) \
+    B2DFixture* f = b2dfixtures[id];
+  #define get_fixture(f,id) \
+    B2DFixture* f = b2dfixtures[id];
+#endif
+
+namespace enigma_user {
+
 int b2d_shape_create()
 {
   int i = b2dshapes.size();
@@ -30,96 +71,54 @@ int b2d_shape_create()
 
 void b2d_shape_delete(int id)
 {
-  if (unsigned(id) >= b2dshapes.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    delete b2dshapes[id];
-  }
+  get_shape(b2dshape, id);
+  delete b2dshape;
 }
 
 void b2d_shape_box(int id, double halfwidth, double halfheight)
 {
-  if (unsigned(id) >= b2dshapes.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2PolygonShape* shape = new b2PolygonShape();
-    shape->SetAsBox(halfwidth, halfheight);
-    b2dshapes[id]->shape = shape;
-  }
+  get_shape(b2dshape, id);
+  b2PolygonShape* shape = new b2PolygonShape();
+  shape->SetAsBox(halfwidth, halfheight);
+  b2dshape->shape = shape;
 }
 
 void b2d_shape_circle(int id, double radius)
 {
-  if (unsigned(id) >= b2dshapes.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2CircleShape* shape = new b2CircleShape();
-    shape->m_radius = radius;
-    b2dshapes[id]->shape = shape;
-  }
+  get_shape(b2dshape, id);
+  b2CircleShape* shape = new b2CircleShape();
+  shape->m_radius = radius;
+  b2dshape->shape = shape;
 }
 
 void b2d_shape_add_point(int id, double x, double y)
 {
-  if (unsigned(id) >= b2dshapes.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2dshapes[id]->vertices.push_back(b2Vec2(x, y));
-  }
+  get_shape(b2dshape, id);
+  b2dshape->vertices.push_back(b2Vec2(x, y));
 }
 
 void b2d_shape_test_point(int id, double sx, double sy, double sa, double px, double py)
 {
-  if (unsigned(id) >= b2dshapes.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2dshapes[id]->shape->TestPoint(b2Transform(b2Vec2(sx, sy), b2Rot(sa)), b2Vec2(px, py));
-  }
+  get_shape(b2dshape, id);
+  b2dshape->shape->TestPoint(b2Transform(b2Vec2(sx, sy), b2Rot(sa)), b2Vec2(px, py));
 }
 
 void b2d_shape_polygon(int id)
 {
-  if (unsigned(id) >= b2dshapes.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2PolygonShape* shape = new b2PolygonShape();
+  get_shape(b2dshape, id);
+  b2PolygonShape* shape = new b2PolygonShape();
 
-    shape->Set(&b2dshapes[id]->vertices[0],  b2dshapes[id]->vertices.size());
-    b2dshapes[id]->shape = shape;
-  }
+  shape->Set(&b2dshape->vertices[0],  b2dshape->vertices.size());
+  b2dshape->shape = shape;
 }
 
 void b2d_shape_edge(int id)
 {
-  if (unsigned(id) >= b2dshapes.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2EdgeShape* shape = new b2EdgeShape();
+  get_shape(b2dshape, id);
+  b2EdgeShape* shape = new b2EdgeShape();
 
-    //shape->Set(&b2dshapes[id]->vertices[0],  &b2dshapes[id]->vertices[b2dshapes[id]->vertices.size()]);
-    b2dshapes[id]->shape = shape;
-  }
+  //shape->Set(&b2dshape->vertices[0],  &b2dshape->vertices[b2dshape->vertices.size()]);
+  b2dshape->shape = shape;
 }
 
 int b2d_fixture_create(int bodyid, int shapeid)
@@ -146,100 +145,54 @@ int b2d_fixture_create(int bodyid, int shapeid)
 
 void b2d_fixture_delete(int id)
 {
-  if (unsigned(id) >= b2dfixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    delete b2dfixtures[id];
-  }
+  get_fixture(b2dfixture, id);
+  delete b2dfixture;
 }
 
 void b2d_fixture_set_collision_group(int id, int group)
 {
-  if (unsigned(id) >= b2dfixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    // sets the collision group used to make parts of things not collide, like a ragdoll for
-    // instance should not collide with itself
-    b2Filter newfilter;
-    newfilter.groupIndex = group;
-    b2dfixtures[id]->fixture->SetFilterData(newfilter);
-  }
+  get_fixture(b2dfixture, id);
+  // sets the collision group used to make parts of things not collide, like a ragdoll for
+  // instance should not collide with itself
+  b2Filter newfilter;
+  newfilter.groupIndex = group;
+  b2dfixture->fixture->SetFilterData(newfilter);
 }
 
 int b2d_fixture_get_shape(int id)
 {
-  if (unsigned(id) >= b2dfixtures.size() || id < 0)
-  {
-    return -1;
-  }
-  else
-  {
-    return b2dfixtures[id]->shapeid;
-  }
+  get_fixturer(b2dfixture, id, -1);
+  return b2dfixture->shapeid;
 }
 
 int b2d_fixture_get_body(int id)
 {
-  if (unsigned(id) >= b2dfixtures.size() || id < 0)
-  {
-    return -1;
-  }
-  else
-  {
-    return b2dfixtures[id]->bodyid;
-  }
+  get_fixturer(b2dfixture, id, -1);
+  return b2dfixture->bodyid;
 }
 
 void b2d_fixture_set_density(int id, double density)
 {
-  if (unsigned(id) >= b2dfixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2dfixtures[id]->fixture->SetDensity(density);
-  }
+  get_fixture(b2dfixture, id);
+  b2dfixture->fixture->SetDensity(density);
 }
 
 void b2d_fixture_set_friction(int id, double friction)
 {
-  if (unsigned(id) >= b2dfixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2dfixtures[id]->fixture->SetFriction(friction);
-  }
+  get_fixture(b2dfixture, id);
+  b2dfixture->fixture->SetFriction(friction);
 }
 
 void b2d_fixture_set_restitution(int id, double restitution)
 {
-  if (unsigned(id) >= b2dfixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2dfixtures[id]->fixture->SetRestitution(restitution);
-  }
+  get_fixture(b2dfixture, id);
+  b2dfixture->fixture->SetRestitution(restitution);
 }
 
 void b2d_fixture_set_sensor(int id, bool state)
 {
-  if (unsigned(id) >= b2dfixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2dfixtures[id]->fixture->SetSensor(state);
-  }
+  get_fixture(b2dfixture, id);
+  b2dfixture->fixture->SetSensor(state);
+}
+
 }

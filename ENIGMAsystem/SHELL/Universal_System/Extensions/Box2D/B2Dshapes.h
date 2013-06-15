@@ -59,6 +59,8 @@ struct B2DFixture {
 }; 
 extern vector<B2DFixture*> b2dfixtures;
 
+namespace enigma_user {
+
 /** description...
 @return returns...
 **/
@@ -142,5 +144,7 @@ int b2d_fixture_get_shape(int id);
 @param id
 **/
 int b2d_fixture_get_body(int id);
+
+}
 
 #endif
