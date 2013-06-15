@@ -13,16 +13,19 @@
 				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-I ../Additional/Windows/include" />
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
-					<Add library="additional/zlib/libzlib.a" />
 					<Add library="gdi32" />
 					<Add library="comdlg32" />
-					<Add library="additional/al/lib/Win32/OpenAL32.lib" />
-					<Add library="Platforms/Win32/ffi/libFFI.a" />
+					<Add library="..\Additional\Windows\lib\libz.a" />
+					<Add library="..\Additional\Windows\lib\OpenAL32.lib" />
+					<Add library="..\Additional\Windows\lib\libalure32.a" />
+					<Add library="..\Additional\Windows\lib\libffi.a" />
 					<Add library="glu32" />
 					<Add library="comctl32" />
+					<Add library="winmm" />
 					<Add directory="/home/git/enigma/ENIGMAsystem/additional/" />
 				</Linker>
 			</Target>
@@ -32,15 +35,16 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O3" />
+					<Add option="-I ../Additional/Windows/include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
 					<Add library="opengl32" />
-					<Add library="additional/zlib/libzlib.a" />
+					<Add library="additional\zlib\libzlib.a" />
 					<Add library="gdi32" />
 					<Add library="comdlg32" />
-					<Add library="additional/al/lib/Win32/OpenAL32.lib" />
-					<Add library="Platforms/Win32/ffi/libFFI.a" />
+					<Add library="additional\al\lib\Win32\OpenAL32.lib" />
+					<Add library="Platforms\Win32\ffi\libFFI.a" />
 					<Add library="glu32" />
 					<Add library="comctl32" />
 				</Linker>
@@ -137,14 +141,45 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-I." />
 			<Add option="-DCODEBLOX" />
 			<Add directory="./" />
 		</Compiler>
 		<Unit filename="API_Switchboard.h" />
-		<Unit filename="Audio_Systems/OpenAL/as_basic.cpp" />
+		<Unit filename="Audio_Systems/None/Info/audio_info.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Audio_Systems/None/fillin.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Audio_Systems/None/include.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/as_basic.cpp">
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+			<Option target="wii-build" />
+		</Unit>
 		<Unit filename="Audio_Systems/OpenAL/as_basic.h" />
 		<Unit filename="Audio_Systems/OpenAL/include.h" />
-		<Unit filename="Audio_Systems/OpenAL/wrap_oal.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/wrap_oal.cpp">
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+			<Option target="iphone-debug" />
+			<Option target="iphone-build" />
+			<Option target="wii-build" />
+		</Unit>
 		<Unit filename="Audio_Systems/OpenAL/wrap_oal.h" />
 		<Unit filename="Audio_Systems/audio_mandatory.h" />
 		<Unit filename="Collision_Systems/BBox/Info/collision_info.h" />
@@ -157,57 +192,41 @@
 		<Unit filename="Collision_Systems/BBox/include.h" />
 		<Unit filename="Collision_Systems/BBox/placeholderlinks.cpp" />
 		<Unit filename="Collision_Systems/collision_mandatory.h" />
-		<Unit filename="Graphics_Systems/OpenGL/EGMenable.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSbackground.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSbackground.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSblend.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSblend.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GScolors.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GScolors.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GScurves.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GScurves.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSd3d.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSd3d.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSenable.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSenable.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSfont.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSfont.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSmiscextra.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSmiscextra.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSprmtvs.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSprmtvs.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSscreen.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSscreen.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSsprite.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSsprite.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSstdraw.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSstdraw.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GSsurface.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GSsurface.h" />
-		<Unit filename="Graphics_Systems/OpenGL/GStextures.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/GStextures.h" />
-		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.h" />
-		<Unit filename="Graphics_Systems/OpenGL/OpenGLHeaders.h" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle.h" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_emitter.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_emitter.h" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_enums.h" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_instance.h" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_sprites.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_sprites.h" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.h" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_type.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_type.h" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/actions.h" />
-		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/implement.h" />
-		<Unit filename="Graphics_Systems/OpenGL/binding.h" />
-		<Unit filename="Graphics_Systems/OpenGL/glew.c">
+		<Unit filename="Graphics_Systems/OpenGL1/EGMenable.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLbackground.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLblend.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLcolors.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLcurves.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLd3d.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLd3d.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLenable.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLenable.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLfont.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLmesh.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLmesh.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLmiscextra.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLmiscextra.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLprimitives.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLprimitives.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLprofiler.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLprofiler.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLscreen.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLscreen.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLshapes.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLshapes.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLsprite.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLstdraw.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLstdraw.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLsurface.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLtextures.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLtiles.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/Info/graphics_info.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/OPENGLStd.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/OPENGLStd.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/glew.c">
 			<Option compilerVar="CC" />
-			<Option compiler="gcc" use="1" buildCommand="gcc -c $file -O3 -DGLEW_STATIC -o $object" />
 		</Unit>
-		<Unit filename="Graphics_Systems/OpenGL/glew.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/include.h" />
 		<Unit filename="Graphics_Systems/OpenGLES/EGMenable.h">
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
@@ -316,6 +335,34 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL/EGMenable.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSbackground.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSblend.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GScolors.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GScurves.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSd3d.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSenable.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSfont.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSmiscextra.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSprmtvs.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSscreen.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSsprite.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSstdraw.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GSsurface.h" />
+		<Unit filename="Graphics_Systems/OpenGL/GStextures.h" />
+		<Unit filename="Graphics_Systems/OpenGL/OPENGLStd.h" />
+		<Unit filename="Graphics_Systems/OpenGL/OpenGLHeaders.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_emitter.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_enums.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_instance.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_sprites.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_system.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/PS_particle_type.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/actions.h" />
+		<Unit filename="Graphics_Systems/OpenGL/ParticleSystems/implement.h" />
+		<Unit filename="Graphics_Systems/OpenGL/binding.h" />
+		<Unit filename="Graphics_Systems/OpenGL/glew.h" />
 		<Unit filename="Graphics_Systems/graphics_mandatory.h" />
 		<Unit filename="Modes/buildmode.h" />
 		<Unit filename="Platforms/Win32/WINDOWSStd.h">
@@ -327,10 +374,6 @@
 			<Option target="win-build" />
 		</Unit>
 		<Unit filename="Platforms/Win32/WINDOWScallback.h">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-		</Unit>
-		<Unit filename="Platforms/Win32/WINDOWSfonts.cpp">
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
@@ -531,14 +574,60 @@
 		<Unit filename="Universal_System/Extensions/Alarms/alarmcode.cpp" />
 		<Unit filename="Universal_System/Extensions/Alarms/implement.h" />
 		<Unit filename="Universal_System/Extensions/Alarms/include.h" />
+		<Unit filename="Universal_System/Extensions/Box2D/B2Dfunctions.h" />
+		<Unit filename="Universal_System/Extensions/Box2D/B2Dinstances.h" />
+		<Unit filename="Universal_System/Extensions/Box2D/B2Djoints.h" />
+		<Unit filename="Universal_System/Extensions/Box2D/implement.h" />
+		<Unit filename="Universal_System/Extensions/Box2D/include.h" />
+		<Unit filename="Universal_System/Extensions/DataStructures/data_structures.cpp" />
+		<Unit filename="Universal_System/Extensions/DataStructures/implement.h" />
+		<Unit filename="Universal_System/Extensions/DataStructures/include.h" />
+		<Unit filename="Universal_System/Extensions/DateTime/date_time.cpp" />
+		<Unit filename="Universal_System/Extensions/DateTime/implement.h" />
+		<Unit filename="Universal_System/Extensions/DateTime/include.h" />
+		<Unit filename="Universal_System/Extensions/GME/include.h" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/actions.h" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/implement.h" />
+		<Unit filename="Universal_System/Extensions/MotionPlanning/include.h" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning.cpp" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning.h" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning_struct.cpp" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning_struct.h" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/mp_movement.cpp" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/mp_movement.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_actions.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_effects_constants.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_effects_enums.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_attractor.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL3.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_changer.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_constants.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_deflector.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_depths.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_destroyer.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_emitter.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_enums.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_instance.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_sprites.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system_manager.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_type.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_updatedraw.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/implement.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/include.h" />
 		<Unit filename="Universal_System/Extensions/Paths/implement.h" />
+		<Unit filename="Universal_System/Extensions/Paths/include.h" />
+		<Unit filename="Universal_System/Extensions/Paths/paths.cpp" />
+		<Unit filename="Universal_System/Extensions/StudioPhysics/SB2Dfunctions.h" />
+		<Unit filename="Universal_System/Extensions/StudioPhysics/SB2Dinstances.h" />
+		<Unit filename="Universal_System/Extensions/StudioPhysics/SB2Djoints.h" />
+		<Unit filename="Universal_System/Extensions/StudioPhysics/implement.h" />
+		<Unit filename="Universal_System/Extensions/StudioPhysics/include.h" />
 		<Unit filename="Universal_System/Extensions/Timelines/implement.h" />
+		<Unit filename="Universal_System/Extensions/Timelines/include.h" />
+		<Unit filename="Universal_System/Extensions/Timelines/timelines.cpp" />
 		<Unit filename="Universal_System/Extensions/recast.h" />
 		<Unit filename="Universal_System/GAME_GLOBALS.h" />
 		<Unit filename="Universal_System/IMGloading.cpp" />
@@ -559,7 +648,6 @@
 		<Unit filename="Universal_System/dynamic_args.h" />
 		<Unit filename="Universal_System/estring.cpp" />
 		<Unit filename="Universal_System/estring.h" />
-		<Unit filename="Universal_System/events.cpp" />
 		<Unit filename="Universal_System/events.h" />
 		<Unit filename="Universal_System/fileio.cpp" />
 		<Unit filename="Universal_System/fileio.h" />
@@ -575,13 +663,23 @@
 		<Unit filename="Universal_System/imap.h" />
 		<Unit filename="Universal_System/instance.cpp" />
 		<Unit filename="Universal_System/instance.h" />
+		<Unit filename="Universal_System/instance/GLOBAL_GAME_SETTINGS.h" />
+		<Unit filename="Universal_System/instance/IDE_edit_instancode.h" />
+		<Unit filename="Universal_System/instance/INSTANCE_COMMON_VARIABLES.h" />
+		<Unit filename="Universal_System/instance/INSTANCE_PARENT.h" />
+		<Unit filename="Universal_System/instance/cleanup.h" />
+		<Unit filename="Universal_System/instance/events.h" />
+		<Unit filename="Universal_System/instance/instances.h" />
 		<Unit filename="Universal_System/instance_create.h" />
 		<Unit filename="Universal_System/instance_iterator.h" />
+		<Unit filename="Universal_System/instance_planar.cpp" />
 		<Unit filename="Universal_System/instance_system.cpp" />
 		<Unit filename="Universal_System/instance_system.h" />
 		<Unit filename="Universal_System/instance_system_base.h" />
 		<Unit filename="Universal_System/instance_system_frontend.h" />
 		<Unit filename="Universal_System/key_game_globals.h" />
+		<Unit filename="Universal_System/lives.cpp" />
+		<Unit filename="Universal_System/lives.h" />
 		<Unit filename="Universal_System/loading.cpp" />
 		<Unit filename="Universal_System/loading.h" />
 		<Unit filename="Universal_System/lua_table.h" />
@@ -614,7 +712,6 @@
 		<Unit filename="Universal_System/resource_data.h" />
 		<Unit filename="Universal_System/roomsystem.cpp" />
 		<Unit filename="Universal_System/roomsystem.h" />
-		<Unit filename="Universal_System/simplecollisions.cpp" />
 		<Unit filename="Universal_System/simplecollisions.h" />
 		<Unit filename="Universal_System/soundinit.cpp" />
 		<Unit filename="Universal_System/spriteinit.cpp" />

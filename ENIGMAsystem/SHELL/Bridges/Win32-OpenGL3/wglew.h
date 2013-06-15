@@ -52,6 +52,8 @@
 ** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 */
 
+#define GLEW_STATIC
+
 #ifndef __wglew_h__
 #define __wglew_h__
 #define __WGLEW_H__
@@ -61,6 +63,8 @@
 #endif
 
 #define __wglext_h_
+
+#include "../../Graphics_Systems/General/glew.h"
 
 #if !defined(WINAPI)
 #  ifndef WIN32_LEAN_AND_MEAN

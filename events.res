@@ -408,6 +408,10 @@ userfourteen: 7
 	Name: User defined 14
 	Mode: Special
 	Case: 24
+userfifteen: 7
+	Name: User defined 15
+	Mode: Special
+	Case: 25
 
 #other mouse events
 joystickoneleft: 6

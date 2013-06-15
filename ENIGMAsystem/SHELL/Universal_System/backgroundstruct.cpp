@@ -200,7 +200,7 @@ void background_assign(int back, int copy_background, bool free_texture)
 
 bool background_exists(int back)
 {
-    return unsigned(back) < enigma::background_idmax && bool(enigma::backgroundstructarray[back]);
+    return unsigned(back) < enigma::background_idmax && bool(enigma::backgroundstructarray) && bool(enigma::backgroundstructarray[back]);
 }
 
 void background_set_alpha_from_background(int back, int copy_background, bool free_texture)
