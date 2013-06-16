@@ -277,7 +277,7 @@ namespace enigma
 
         char *pxdata = load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
         // If sprite transparent, set the alpha to zero for pixels that should be transparent
-	if (transparent)
+	if (pxdata && transparent)
 	{
 		unsigned int t_pixel_r = pxdata[(height-1)*width*4]; 
 		unsigned int t_pixel_g = pxdata[(height-1)*width*4+1]; 
