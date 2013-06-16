@@ -276,7 +276,7 @@ namespace enigma
         int width,height,fullwidth,fullheight;
 
         char *pxdata = load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
-        // If sprite transparent, set the alpha to zero for pixels that should be transparent
+        // If sprite transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
 	if (pxdata && transparent)
 	{
 		unsigned int t_pixel_r = pxdata[(height-1)*width*4]; 
@@ -291,22 +291,22 @@ namespace enigma
 				{
 					pxdata[tmp+3] = 0;
 				}
-			tmp+=4;
+				tmp+=4;
 			}
 		}
 	}
-	
-	unsigned texture = graphics_create_texture(fullwidth, fullheight, pxdata);
+        
+        int cellwidth =width/imgnumb;
 
         ns->id = sprite_idmax;
-        ns->subcount  = 1;
-        ns->width     = width;
+        ns->subcount  = imgnumb;
+        ns->width     = cellwidth;
         ns->height    = height;
         // FIXME: Calculate and assign correct bbox values.
         int bbb = height;
         int bbl = 0;
         int bbt = 0;
-        int bbr = width;
+        int bbr = cellwidth;
         ns->bbox.bottom  = bbb;
           ns->bbox.left  = bbl;
           ns->bbox.top   = bbt;
@@ -317,15 +317,37 @@ namespace enigma
           ns->bbox_relative.right = bbr - x_offset;
         ns->xoffset   = (int)x_offset;
         ns->yoffset   = (int)y_offset;
-        ns->texturearray = new int[1];
-        ns->texturearray[0] = texture;
-        ns->texbordxarray = new double[1];
-        ns->texbordxarray[0] = (double) width/fullwidth;
-        ns->texbordyarray = new double[1];
-        ns->texbordyarray[0] = (double) height/fullheight;
-        ns->colldata = new void*[1];
-        collision_type coll_type = precise ? ct_precise : ct_bbox;
-        ns->colldata[0] = get_collision_mask(ns,(unsigned char*)pxdata,coll_type);
+        ns->texturearray = new int[imgnumb];
+        ns->texbordxarray = new double[imgnumb];
+        ns->texbordyarray = new double[imgnumb];
+        ns->colldata = new void*[imgnumb];
+        unsigned char* pixels=new unsigned char[cellwidth*height*4]();
+        for (int ii=0;ii<imgnumb;ii++) 
+        {
+                int ih,iw;
+                int xcelloffset=ii*cellwidth*4;
+                for(ih = height - 1; ih >= 0; ih--)
+                {
+                        int tmp = ih*fullwidth*4+xcelloffset;
+                        int tmpcell = ih*cellwidth*4;
+                        for (iw=0; iw < cellwidth; iw++)
+                        {
+                                pixels[tmpcell+3] = pxdata[tmp+3];
+                                pixels[tmpcell+2] = pxdata[tmp+2];
+                                pixels[tmpcell+1] = pxdata[tmp+1];
+                                pixels[tmpcell] = pxdata[tmp];
+                                tmp+=4;
+                                tmpcell+=4;
+                        }
+                }
+                unsigned texture = graphics_create_texture(cellwidth, fullheight, pixels);
+                ns->texturearray[ii] = texture;
+                ns->texbordxarray[ii] = (double) 1.0;//width/fullwidth;
+                ns->texbordyarray[ii] = (double) height/fullheight;
+                collision_type coll_type = precise ? ct_precise : ct_bbox;
+                ns->colldata[ii] = get_collision_mask(ns,(unsigned char*)pixels,coll_type);
+        }
+        delete[] pixels;
         delete[] pxdata;
     }
 
