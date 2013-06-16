@@ -24,13 +24,15 @@ using std::vector;
 #include <Box2D/Box2D.h>
 
 struct B2DShape {
+  int type;
   int worldid;
   b2Shape* shape;
-  b2PolygonShape* polyshape;
+  bool shapeBuilt;
   vector<b2Vec2> vertices;
 
   B2DShape()
   {
+    shapeBuilt = false;
   }
 
   ~B2DShape()
@@ -60,6 +62,17 @@ struct B2DFixture {
 extern vector<B2DFixture*> b2dfixtures;
 
 namespace enigma_user {
+
+enum {
+  b2d_none,
+  b2d_unknown,
+  b2d_box,
+  b2d_circle,
+  b2d_edge,
+  b2d_chain,
+  b2d_loop,
+  b2d_polygon
+};
 
 /** description...
 @return returns...
@@ -111,10 +124,51 @@ void b2d_shape_clear_points(int id);
 int b2d_shape_count_points(int id);
 /** description...
 @param id
+@param sx
+@param sy
+@param sa
+@param px
+@param py
+**/
+void b2d_shape_test_point(int id, double sx, double sy, double sa, double px, double py);
+/** description...
+@param id
+@param pn
 @param x
 @param y
 **/
-void b2d_shape_test_point(int id, double sx, double sy, double sa, double px, double py);
+void b2d_shape_set_point(int id, int pn, double x, double y);
+/** description...
+@param id
+@param pn
+@return returns...
+**/
+double b2d_shape_get_point_x(int id, int pn);
+/** description...
+@param id
+@param pn
+@return returns...
+**/
+double b2d_shape_get_point_y(int id, int pn);
+/** description...
+@param id
+@param en
+@param pn
+@return returns...
+**/
+double b2d_shape_get_edge_point_x(int id, int en, int pn);
+/** description...
+@param id
+@param en
+@param pn
+@return returns...
+**/
+double b2d_shape_get_edge_point_y(int id, int en, int pn);
+/** description...
+@param id
+@return returns...
+**/
+int b2d_shape_get_type(int id);
 /** description...
 @param id
 **/

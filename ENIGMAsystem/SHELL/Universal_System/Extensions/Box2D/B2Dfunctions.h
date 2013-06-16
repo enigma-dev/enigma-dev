@@ -102,79 +102,157 @@ int b2d_world_create();
 **/
 void b2d_world_delete(int index);
 /** Sets the paused state of the physics world
-@param index
+@param index The index of the world.
 @param paused
 **/
 void b2d_world_pause_enable(int index, bool paused);
 /** Scales the physics world
-@param index
+@param index The index of the world.
 @param pixelstometers
 **/
 void b2d_world_scale(int index, int pixelstometers);
 /** description...
-@param for each parameter
+@param index The index of the world.
+@param gx
+@param gy
 **/
 void b2d_world_gravity(int index, double gx, double gy);
 /** description...
-@param index
+@param index The index of the world.
 **/
 void b2d_world_update(int index); 
 /** description...
-@param index
+@param index The index of the world.
 **/
 void b2d_world_dump(int index);
 /** description...
-@param index
+@param index The index of the world.
 @param timeStep
 @param velocityIterations
 @param positionIterations
 **/
 void b2d_world_update_settings(int index, double timeStep, int velocityIterations, int positionIterations);
 /** description...
-@param index
+@param index The index of the world.
 @param iterationsperstep
 **/
 void b2d_world_update_iterations(int index, int iterationsperstep);
 /** description...
-@param index
+@param index The index of the world.
 @param updatesperstep
 **/
 void b2d_world_update_speed(int index, int updatesperstep);
 /** description...
+@param index The index of the world.
 **/
-void b2d_world_draw_debug();
-
 void b2d_world_clear_forces(int index);
-void b2d_world_set_sleeping(int index, bool sleeping);
+/** description...
+@param index The index of the world.
+@param sleeping
+**/
+void b2d_world_set_sleep(int index, bool sleeping);
+/** description...
+@param index The index of the world.
+@param warmstarting
+**/
 void b2d_world_set_warmstarting(int index, bool warmstarting);
+/** description...
+@param index The index of the world.
+@param continuous
+**/
 void b2d_world_set_continuous(int index, bool continuous);
+/** description...
+@param index The index of the world.
+@param substepping
+**/
 void b2d_world_set_substepping(int index, bool substepping);
+/** description...
+@param index The index of the world.
+@param autoclear
+**/
 void b2d_world_set_clearforces(int index, bool autoclear);
-bool b2d_world_get_sleeping(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
+bool b2d_world_get_sleep(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
 bool b2d_world_get_warmstarting(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
 bool b2d_world_get_continuous(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
 bool b2d_world_get_substepping(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
 int b2d_world_get_proxy_count(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
 int b2d_world_get_body_count(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
 int b2d_world_get_joint_count(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
 int b2d_world_get_contect_count(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
 bool b2d_world_get_locked(int index);
+/** description...
+@param index The index of the world.
+@return returns...
+**/
 bool b2d_world_get_clearforces(int index);
 
 /************** Bodies **************/
 
-/** description...
-@param world
+/** This function creates a new physics body in the given world.
+@param world The world to create the body in.
 @return This function returns the index of the newly created fixture.
 **/
 int  b2d_body_create(int world = 0);
-/** description...
-@param id
+/** This function creates a new physics body with a fixture from the given shape, it is just a convenience function.
+@param world The world to create the body in.
+@param shape The shape to create the bodies fixture with.
+@return This function returns the index of the newly created fixture.
 **/
-void b2d_body_bind(int id); 
-/** description...
+int  b2d_body_create_shape(int world, int shape);
+/** This function creates a new physics body with a fixture that has a box shape, it is just a convenience function.
+@param world The world to create the body in.
+@param halfwidth Half of the width of the bodies fixture box shape.
+@param halfheight Half of the height of the bodies fixture box shape.
+@return This function returns the index of the newly created fixture.
 **/
-void b2d_body_bind(); 
+int  b2d_body_create_box(int world, double halfwidth, double halfheight);
+/** This function creates a new physics body with a fixture that has a circle shape, it is just a convenience function.
+@param world The world to create the body in.
+@param radius The radius of the bodies fixture shape.
+@return This function returns the index of the newly created fixture.
+**/
+int  b2d_body_create_circle(int world, double radius);
+/** This function binds a physics body to an object instance allowing object inherited locals to be used.
+@param id The index of the body to bind to the instance.
+@param obj The index of the object instance.
+**/
+void b2d_body_bind(int id, int obj); 
 /** description...
 @param id
 **/
@@ -331,7 +409,7 @@ bool b2d_body_get_awake(int id);
 @param id
 @return the return...
 **/
-bool b2d_body_get_sleeping(int id);
+bool b2d_body_get_sleep(int id);
 /** description...
 @param id
 @return the return...
