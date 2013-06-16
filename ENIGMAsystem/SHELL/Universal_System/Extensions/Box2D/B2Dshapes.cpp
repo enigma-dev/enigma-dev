@@ -48,6 +48,10 @@ using std::string;
       show_error("Cannot access Box2D physics fixture with id " + toString(id), false); \
       return; \
     } B2DFixture* f = b2dfixtures[id];
+  #define check_cast(obj, shapeid, failv) { \
+    if ((obj)->shape != shapeid) { \
+      show_error("Invalid cast of Box2D shape.", false); return failv; \
+    } }
 #else
   #define get_shaper(s,id,r) \
     B2DShape* s = b2dshapes[id];
@@ -57,6 +61,7 @@ using std::string;
     B2DFixture* f = b2dfixtures[id];
   #define get_fixture(f,id) \
     B2DFixture* f = b2dfixtures[id];
+  #define check_cast(obj, shapeid, failv)
 #endif
 
 namespace enigma_user {
@@ -77,10 +82,13 @@ void b2d_shape_delete(int id)
 
 int b2d_shape_duplicate(int id)
 {
-  get_shape(b2dshape, id);
+  get_shaper(b2dshape, id, -1);
   int i = b2dshapes.size();
   B2DShape* nb2dshape = new B2DShape();
   nb2dshape->shape = b2dshape->shape->Clone(new b2BlockAllocator());
+  nb2dshape->type = b2dshape->type;
+  nb2dshape->shapeBuilt = true;
+  nb2dshape->worldid = b2dshape->worldid;
   copy(b2dshape->vertices.begin(),b2dshape->vertices.end(),nb2dshape->vertices.begin());
   b2dshapes.push_back(nb2dshape);
   return i;
@@ -89,16 +97,40 @@ int b2d_shape_duplicate(int id)
 void b2d_shape_box(int id, double halfwidth, double halfheight)
 {
   get_shape(b2dshape, id);
-  b2PolygonShape* shape = new b2PolygonShape();
+  b2PolygonShape* shape;
+  if (b2dshape->shapeBuilt) {
+    if (b2dshape->shape->GetType() != b2Shape::e_polygon) {
+      delete b2dshape->shape;
+      shape = new b2PolygonShape();
+    } else {
+      shape = (b2PolygonShape*)b2dshape->shape;
+    }
+  } else {
+    b2dshape->shapeBuilt = true;
+    shape = new b2PolygonShape();
+  }
   shape->SetAsBox(halfwidth, halfheight);
+  b2dshape->type = b2d_box;
   b2dshape->shape = shape;
 }
 
 void b2d_shape_circle(int id, double radius)
 {
   get_shape(b2dshape, id);
-  b2CircleShape* shape = new b2CircleShape();
+  b2CircleShape* shape;
+  if (b2dshape->shapeBuilt) {
+    if (b2dshape->shape->GetType() != b2Shape::e_circle) {
+      delete b2dshape->shape;
+      shape = new b2CircleShape();
+    } else {
+      shape = (b2CircleShape*)b2dshape->shape;
+    }
+  } else {
+    b2dshape->shapeBuilt = true;
+    shape = new b2CircleShape();
+  }
   shape->m_radius = radius;
+  b2dshape->type = b2d_circle;
   b2dshape->shape = shape;
 }
 
@@ -128,7 +160,7 @@ void b2d_shape_clear_points(int id)
 
 int b2d_shape_count_points(int id)
 {
-  get_shape(b2dshape, id);
+  get_shaper(b2dshape, id, -1);
   return b2dshape->vertices.size();
 }
 
@@ -138,20 +170,111 @@ void b2d_shape_test_point(int id, double sx, double sy, double sa, double px, do
   b2dshape->shape->TestPoint(b2Transform(b2Vec2(sx, sy), b2Rot(sa)), b2Vec2(px, py));
 }
 
+void b2d_shape_set_point(int id, int pn, double x, double y)
+{
+  get_shape(b2dshape, id);
+  b2dshape->vertices[pn].Set(x, y);
+}
+
+double b2d_shape_get_point_x(int id, int pn)
+{
+  get_shaper(b2dshape, id, -1);
+  return b2dshape->vertices[pn].x;
+}
+
+double b2d_shape_get_point_y(int id, int pn)
+{
+  get_shaper(b2dshape, id, -1);
+  return b2dshape->vertices[pn].y;
+}
+
+double b2d_shape_get_edge_point_x(int id, int en, int pn)
+{
+  get_shaper(b2dshape, id, -1);
+  b2EdgeShape edge;
+  //check_cast(b2dshape, b2ChainShape*, -1);
+  b2ChainShape* shape = (b2ChainShape*)b2dshape->shape;
+  shape->GetChildEdge(&edge, en);
+  switch (pn) {
+    case 0:
+      return edge.m_vertex0.x;
+      break;
+    case 1:
+      return edge.m_vertex1.x;
+      break;
+    case 2:
+      return edge.m_vertex2.x;
+      break;
+    case 3:
+      return edge.m_vertex3.x;
+      break;
+  }
+}
+
+double b2d_shape_get_edge_point_y(int id, int en, int pn)
+{
+  get_shaper(b2dshape, id, -1);
+  b2EdgeShape edge;
+  //check_cast(b2dshape, b2ChainShape*, -1);
+  b2ChainShape* shape = (b2ChainShape*)b2dshape->shape;
+  shape->GetChildEdge(&edge, en);
+  switch (pn) {
+    case 0:
+      return edge.m_vertex0.y;
+      break;
+    case 1:
+      return edge.m_vertex1.y;
+      break;
+    case 2:
+      return edge.m_vertex2.y;
+      break;
+    case 3:
+      return edge.m_vertex3.y;
+      break;
+  }
+}
+
+int b2d_shape_get_type(int id)
+{
+  get_shaper(b2dshape, id, -1);
+  return b2dshape->type;
+}
+
 void b2d_shape_polygon(int id)
 {
   get_shape(b2dshape, id);
-  b2PolygonShape* shape = new b2PolygonShape();
-
+  b2PolygonShape* shape;
+  if (b2dshape->shapeBuilt) {
+    if (b2dshape->shape->GetType() != b2Shape::e_polygon) {
+      delete b2dshape->shape;
+      shape = new b2PolygonShape();
+    } else {
+      shape = (b2PolygonShape*)b2dshape->shape;
+    }
+  } else {
+    b2dshape->shapeBuilt = true;
+    shape = new b2PolygonShape();
+  }
   shape->Set(&b2dshape->vertices[0],  b2dshape->vertices.size());
+  b2dshape->type = b2d_polygon;
   b2dshape->shape = shape;
 }
 
 void b2d_shape_edge(int id, bool adjstart, bool adjend)
 {
   get_shape(b2dshape, id);
-  b2EdgeShape* shape = new b2EdgeShape();
-
+  b2EdgeShape* shape;
+  if (b2dshape->shapeBuilt) {
+    if (b2dshape->shape->GetType() != b2Shape::e_edge) {
+      delete b2dshape->shape;
+      shape = new b2EdgeShape();
+    } else {
+      shape = (b2EdgeShape*)b2dshape->shape;
+    }
+  } else {
+    b2dshape->shapeBuilt = true;
+    shape = new b2EdgeShape();
+  }
   int vid = 0;
   if (adjstart) {
     shape->m_hasVertex0 = true;
@@ -164,23 +287,45 @@ void b2d_shape_edge(int id, bool adjstart, bool adjend)
     shape->m_hasVertex3 = true;
     shape->m_vertex3 = b2dshape->vertices[vid];
   }
+  b2dshape->type = b2d_edge;
   b2dshape->shape = shape;
 }
 
 void b2d_shape_chain(int id)
 {
   get_shape(b2dshape, id);
-  b2ChainShape* shape = new b2ChainShape();
-
+  b2ChainShape* shape;
+  if (b2dshape->shapeBuilt) {
+    if (b2dshape->shape->GetType() != b2Shape::e_chain) {
+      delete b2dshape->shape;
+      shape = new b2ChainShape();
+    } else {
+      shape = (b2ChainShape*)b2dshape->shape;
+    }
+  } else {
+    b2dshape->shapeBuilt = true;
+    shape = new b2ChainShape();
+  }
   shape->CreateChain(&b2dshape->vertices[0],  b2dshape->vertices.size());
+  b2dshape->type = b2d_chain;
   b2dshape->shape = shape;
 }
 
 void b2d_shape_loop(int id, bool adjstart, bool adjend)
 {
   get_shape(b2dshape, id);
-  b2ChainShape* shape = new b2ChainShape();
-
+  b2ChainShape* shape;
+  if (b2dshape->shapeBuilt) {
+    if (b2dshape->shape->GetType() != b2Shape::e_chain) {
+      delete b2dshape->shape;
+      shape = new b2ChainShape();
+    } else {
+      shape = (b2ChainShape*)b2dshape->shape;
+    }
+  } else {
+    b2dshape->shapeBuilt = true;
+    shape = new b2ChainShape();
+  }
   if (adjstart) {
     shape->SetPrevVertex(b2dshape->vertices[0]);
   }
@@ -188,6 +333,7 @@ void b2d_shape_loop(int id, bool adjstart, bool adjend)
   if (adjend) {
     shape->SetNextVertex(b2dshape->vertices[b2dshape->vertices.size() - 1]);
   }
+  b2dshape->type = b2d_loop;
   b2dshape->shape = shape;
 }
 

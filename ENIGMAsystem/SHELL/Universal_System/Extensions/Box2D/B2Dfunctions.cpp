@@ -173,7 +173,7 @@ void b2d_world_clear_forces(int index)
   b2dworld->world->ClearForces();
 }
 
-void b2d_world_set_sleeping(int index, bool sleeping)
+void b2d_world_set_sleep(int index, bool sleeping)
 {
   get_world(b2dworld, index);
   b2dworld->world->SetAllowSleeping(sleeping);
@@ -203,7 +203,7 @@ void b2d_world_set_clearforces(int index, bool autoclear)
   b2dworld->world->SetAutoClearForces(autoclear);
 }
 
-bool b2d_world_get_sleeping(int index)
+bool b2d_world_get_sleep(int index)
 {
   get_worldr(b2dworld, index, false);
   return b2dworld->world->GetAllowSleeping();
@@ -276,9 +276,33 @@ int b2d_body_create(int world)
   return i;
 }
 
-void b2d_body_bind(int id)
+int  b2d_body_create_shape(int world, int shape)
 {
-  // binds a body to an object
+  int i = b2d_body_create(world);
+  int f = b2d_fixture_create(i, shape);
+  return i;
+}
+
+int  b2d_body_create_box(int world, double halfwidth, double halfheight)
+{
+  int i = b2d_body_create(world);
+  int s = b2d_shape_create();
+  b2d_shape_box(s, halfwidth, halfheight);
+  int f = b2d_fixture_create(i, s);
+  return i;
+}
+
+int  b2d_body_create_circle(int world, double radius)
+{
+  int i = b2d_body_create(world);
+  int s = b2d_shape_create();
+  b2d_shape_circle(s, radius);
+  int f = b2d_fixture_create(i, s);
+  return i;
+}
+
+void b2d_body_bind(int id, int obj)
+{
   get_body(b2dbody, id);
 }
 
@@ -493,7 +517,7 @@ bool b2d_body_get_active(int id)
   return b2dbody->body->IsActive();
 }
 
-bool b2d_body_get_sleeping(int id)
+bool b2d_body_get_sleep(int id)
 {
   get_bodyr(b2dbody, id, false);
   return b2dbody->body->IsSleepingAllowed();
