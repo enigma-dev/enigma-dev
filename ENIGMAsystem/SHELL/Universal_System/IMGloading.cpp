@@ -17,6 +17,8 @@
 
 #include <string>
 #include <cstring>
+#include "lodepng.h"
+#include <stdlib.h>
 using namespace std;
 #include "IMGloading.h"
 
@@ -31,12 +33,58 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 }
 namespace enigma
 {
+  char* load_png(string filename,int* width,int* height, int* fullwidth, int* fullheight)
+  {
+    unsigned error;
+    unsigned char* image;
+    unsigned bmpwidth, bmpheight;
+
+    error = lodepng_decode32_file(&image, &bmpwidth, &bmpheight, filename.c_str());
+    if(error)
+    {
+      printf("error %u: %s\n", error, lodepng_error_text(error));
+      return NULL;
+    }
+
+    int
+      widfull = nlpo2dc(bmpwidth) + 1,
+      hgtfull = nlpo2dc(bmpheight) + 1,
+      ih,iw;
+    const int bitmap_size = widfull*hgtfull*4;
+    char* bitmap=new char[bitmap_size](); // Initialize to zero.
+    
+    for(ih = bmpheight - 1; ih >= 0; ih--)
+    {
+      int tmp = ih*widfull*4;
+      for (iw=0; iw < bmpwidth; iw++){
+                bitmap[tmp+3] = image[4*bmpwidth*ih+iw*4+3];
+                bitmap[tmp+2] = image[4*bmpwidth*ih+iw*4+2];
+                bitmap[tmp+1] = image[4*bmpwidth*ih+iw*4+1];
+                bitmap[tmp]   = image[4*bmpwidth*ih+iw*4];
+        tmp+=4;
+      }
+    }
+
+    free(image);
+    *width  = bmpwidth;
+    *height = bmpheight;
+    *fullwidth  = widfull;
+    *fullheight = hgtfull;
+    return bitmap;
+  }
+
   char* load_bitmap(string filename,int* width,int* height, int* fullwidth, int* fullheight)
   {
     FILE *imgfile;
     int bmpstart,bmpwidth,bmpheight;
     if(!(imgfile=fopen(filename.c_str(),"rb"))) return 0;
     fseek(imgfile,0,SEEK_END);
+    fseek(imgfile,0,SEEK_SET);
+    if (fgetc(imgfile)!=0x42 && fgetc(imgfile)!=0x4D) // Not a BMP
+    {
+      fclose(imgfile);
+      return load_png(filename,width,height,fullwidth,fullheight);
+    }
     fseek(imgfile,10,SEEK_SET);
     if (fread(&bmpstart,1,4,imgfile) != 4)
       return NULL;
