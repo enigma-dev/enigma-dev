@@ -48,8 +48,13 @@ namespace enigma
     
     fseek(imgfile,28,SEEK_SET); // Color depth
     
-    if(fgetc(imgfile) != 24) // Only take 24-bit bitmaps for now
+    // Only take 24 or 32-bit bitmaps for now
+    int bitdepth=fgetc(imgfile);
+    if(bitdepth != 24 && bitdepth != 32)
       return 0;
+
+    fseek(imgfile,69,SEEK_SET); // Alpha in last byte
+    int bgramask=fgetc(imgfile);
     
     int
       widfull = nlpo2dc(bmpwidth) + 1,
@@ -64,10 +69,30 @@ namespace enigma
     {
       int tmp = ih*widfull*4;
       for (iw=0; iw < bmpwidth; iw++){
-        bitmap[tmp+3] = 255;
-        bitmap[tmp+2] = fgetc(imgfile);
-        bitmap[tmp+1] = fgetc(imgfile);
-        bitmap[tmp]   = fgetc(imgfile);
+        if(bitdepth == 24)
+        {
+                bitmap[tmp+3] = 255;
+                bitmap[tmp+2] = fgetc(imgfile);
+                bitmap[tmp+1] = fgetc(imgfile);
+                bitmap[tmp]   = fgetc(imgfile);
+        }
+        if(bitdepth == 32)
+        {
+                if (bgramask) //BGRA
+                {
+                        bitmap[tmp+2] = fgetc(imgfile);
+                        bitmap[tmp+1] = fgetc(imgfile);
+                        bitmap[tmp] = fgetc(imgfile);
+                        bitmap[tmp+3]   = fgetc(imgfile);
+                }
+                else //ABGR
+                {
+                        bitmap[tmp+3] = fgetc(imgfile);
+                        bitmap[tmp+2] = fgetc(imgfile);
+                        bitmap[tmp+1] = fgetc(imgfile);
+                        bitmap[tmp]   = fgetc(imgfile);
+                }
+        }
         tmp+=4;
       }
       fseek(imgfile,pad,SEEK_CUR);
