@@ -328,7 +328,7 @@ namespace enigma
                 int xcelloffset=ii*cellwidth*4;
                 for(ih = height - 1; ih >= 0; ih--)
                 {
-                        int tmp = ih*width*4+xcelloffset;
+                        int tmp = ih*fullwidth*4+xcelloffset;
                         int tmpcell = ih*cellwidth*4;
                         for (iw=0; iw < cellwidth; iw++)
                         {
