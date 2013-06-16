@@ -275,27 +275,27 @@ namespace enigma
     {
         int width,height,fullwidth,fullheight;
 
-        unsigned char *pxdata = (unsigned char *)load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
-        // If sprite transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
-        if (pxdata && transparent)
-        {
-                unsigned int t_pixel_r = pxdata[(height-1)*width*4]; 
-                unsigned int t_pixel_g = pxdata[(height-1)*width*4+1]; 
-                unsigned int t_pixel_b = pxdata[(height-1)*width*4+2];
-                int ih,iw;
-                for(ih = height - 1; ih >= 0; ih--)
-                {
-                        int tmp = ih*width*4;
-                        for (iw=0; iw < width; iw++)
-                        {
-                                if (pxdata[tmp]==t_pixel_r && pxdata[tmp+1]==t_pixel_g && pxdata[tmp+2] == t_pixel_b)
-                                {
-                                        pxdata[tmp+3] = 0;
-                                }
-                                tmp+=4;
-                        }
-                }
-        }
+	unsigned char *pxdata = load_bitmap(filename,&width,&height,&fullwidth,&fullheight);
+	// If sprite transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
+	if (pxdata && transparent)
+	{
+		unsigned int t_pixel_r = pxdata[(height-1)*width*4]; 
+		unsigned int t_pixel_g = pxdata[(height-1)*width*4+1]; 
+		unsigned int t_pixel_b = pxdata[(height-1)*width*4+2];
+		int ih,iw;
+		for(ih = height - 1; ih >= 0; ih--)
+		{
+			int tmp = ih*width*4;
+			for (iw=0; iw < width; iw++)
+			{
+				if (pxdata[tmp]==t_pixel_r && pxdata[tmp+1]==t_pixel_g && pxdata[tmp+2] == t_pixel_b)
+				{
+					pxdata[tmp+3] = 0;
+				}
+				tmp+=4;
+			}
+		}
+	}
         
         int cellwidth =width/imgnumb;
 
