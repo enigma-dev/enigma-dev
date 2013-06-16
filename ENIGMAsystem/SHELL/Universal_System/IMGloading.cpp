@@ -40,7 +40,11 @@ namespace enigma
     unsigned bmpwidth, bmpheight;
 
     error = lodepng_decode32_file(&image, &bmpwidth, &bmpheight, filename.c_str());
-    if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
+    if(error)
+    {
+      printf("error %u: %s\n", error, lodepng_error_text(error));
+      return NULL;
+    }
 
     int
       widfull = nlpo2dc(bmpwidth) + 1,
