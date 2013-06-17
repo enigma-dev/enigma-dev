@@ -55,10 +55,12 @@ namespace enigma
   }
   void particle_changer::set_region(double p_xmin, double p_xmax, double p_ymin, double p_ymax, ps_shape p_shape)
   {
+    // NOTE: The assignment to the region's coordinates means that if p_xmin >= p_xmax, the region is empty.
+    // This has been tested and verified to be consistent with GM.
     xmin = std::min(p_xmin, p_xmax);
-    xmax = std::max(p_xmin, p_xmax);
+    xmax = p_xmax;
     ymin = std::min(p_ymin, p_ymax);
-    ymax = std::max(p_ymin, p_ymax);
+    ymax = p_ymax;
     shape = p_shape;
   }
   void particle_changer::set_types(int pt_id1, int pt_id2)
@@ -73,6 +75,8 @@ namespace enigma
   inline double sqr(double x) {return x*x;}
   bool particle_changer::is_inside(double x, double y)
   {
+    // Regions with coordinates along the same axis which are the same are empty.
+    // This has been tested and verified to be consistent with GM.
     if (xmin >= xmax || ymin >= ymax || x < xmin || x > xmax || y < ymin || y > ymax) {
       return false;
     }

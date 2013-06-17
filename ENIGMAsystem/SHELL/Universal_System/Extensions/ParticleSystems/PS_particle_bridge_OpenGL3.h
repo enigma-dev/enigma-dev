@@ -179,10 +179,10 @@ namespace enigma {
             particle_type* pt = pi.pt;
             x = pi.x;
             y = pi.y;
-            double size = std::max(0.0, pi.size + pt->size_wiggle*get_wiggle_result(pi.size_wiggle_offset, wiggle));
+            double size = std::max(0.0, pi.size + pt->size_wiggle*particle_system::get_wiggle_result(pi.size_wiggle_offset, wiggle));
             xscale = pt->xscale*size;
             yscale = pt->yscale*size;
-            double rot_degrees = pi.angle + pt->ang_wiggle*get_wiggle_result(pi.ang_wiggle_offset, wiggle);
+            double rot_degrees = pi.angle + pt->ang_wiggle*particle_system::get_wiggle_result(pi.ang_wiggle_offset, wiggle);
             if (pt->ang_relative) {
               rot_degrees += pi.direction;
             }

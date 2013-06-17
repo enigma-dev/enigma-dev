@@ -53,15 +53,19 @@ namespace enigma
   }
   void particle_destroyer::set_region(double p_xmin, double p_xmax, double p_ymin, double p_ymax, ps_shape p_shape)
   {
-    this->xmin = std::min(p_xmin, p_xmax);
-    this->xmax = std::max(p_xmin, p_xmax);
-    this->ymin = std::min(p_ymin, p_ymax);
-    this->ymax = std::max(p_ymin, p_ymax);
+    // NOTE: The assignment to the region's coordinates means that if p_xmin >= p_xmax, the region is empty.
+    // This has been tested and verified to be consistent with GM.
+    xmin = std::min(p_xmin, p_xmax);
+    xmax = p_xmax;
+    ymin = std::min(p_ymin, p_ymax);
+    ymax = p_ymax;
     this->shape = p_shape;
   }
   inline double sqr(double x) {return x*x;}
   bool particle_destroyer::is_inside(double x, double y)
   {
+    // Regions with coordinates along the same axis which are the same are empty.
+    // This has been tested and verified to be consistent with GM.
     if (xmin >= xmax || ymin >= ymax || x < xmin || x > xmax || y < ymin || y > ymax) {
       return false;
     }

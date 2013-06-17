@@ -56,10 +56,13 @@ namespace enigma
   }
   void particle_emitter::set_region(double p_xmin, double p_xmax, double p_ymin, double p_ymax, ps_shape p_shape, ps_distr p_distribution)
   {
-    xmin = std::min(p_xmin, p_xmax);
-    xmax = std::max(p_xmin, p_xmax);
-    ymin = std::min(p_ymin, p_ymax);
-    ymax = std::max(p_ymin, p_ymax);
+    // "min" and "max" is somewhat weird in these cases. For instance, by having p_xmin > p_xmax and p_ymin < p_ymax,
+    // the line region gives a line with a positive slope instead of the usual negative slope.
+    // This is consistent with GM.
+    xmin = p_xmin;
+    xmax = p_xmax;
+    ymin = p_ymin;
+    ymax = p_ymax;
 
     shape = p_shape;
     distribution = p_distribution;

@@ -53,15 +53,19 @@ namespace enigma
     initialize();
   }
   bool particle_deflector::is_inside(double x, double y)
-  { //XXX: Is the xmin < xmax && ymin < ymax check really necessary? Does it matter if the deflector has no size, as long as a particle is right on it?
+  {
+    // Regions with coordinates along the same axis which are the same are empty.
+    // This has been tested and verified to be consistent with GM.
     return xmin < xmax && ymin < ymax && x >= xmin && x <= xmax && y >= ymin && y <= ymax;
   }
   void particle_deflector::set_region(double p_xmin, double p_xmax, double p_ymin, double p_ymax)
   {
+    // NOTE: The assignment to the region's coordinates means that if p_xmin >= p_xmax, the region is empty.
+    // This has been tested and verified to be consistent with GM.
     xmin = std::min(p_xmin, p_xmax);
-    xmax = std::max(p_xmin, p_xmax);
+    xmax = p_xmax;
     ymin = std::min(p_ymin, p_ymax);
-    ymax = std::max(p_ymin, p_ymax);
+    ymax = p_ymax;
   }
   void particle_deflector::set_kind(ps_deflect p_deflection_kind)
   {
