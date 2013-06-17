@@ -28,6 +28,7 @@
 #include "PS_particle_destroyer.h"
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
+#include "PS_particle.h"
 #include <cstdlib>
 #include <algorithm>
 #include <cmath>
@@ -50,15 +51,13 @@ namespace enigma
   {
     initialize();
   }
-  void particle_destroyer::set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape)
+  void particle_destroyer::set_region(double p_xmin, double p_xmax, double p_ymin, double p_ymax, ps_shape p_shape)
   {
-    xmin = std::min(xmin, xmax);
-    ymin = std::min(ymin, ymax);
-    this->xmin = xmin;
-    this->xmax = std::max(xmin, xmax);
-    this->ymin = ymin;
-    this->ymax = std::max(ymin, ymax);
-    this->shape = shape;
+    this->xmin = std::min(p_xmin, p_xmax);
+    this->xmax = std::max(p_xmin, p_xmax);
+    this->ymin = std::min(p_ymin, p_ymax);
+    this->ymax = std::max(p_ymin, p_ymax);
+    this->shape = p_shape;
   }
   inline double sqr(double x) {return x*x;}
   bool particle_destroyer::is_inside(double x, double y)

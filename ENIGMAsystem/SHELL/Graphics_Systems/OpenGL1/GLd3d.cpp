@@ -32,9 +32,9 @@ using namespace std;
 #include <floatcomp.h>
 
 namespace enigma {
-    bool d3dMode = false;
-    bool d3dHidden = false;
-    bool d3dZWriteEnable = true;
+  bool d3dMode = false;
+  bool d3dHidden = false;
+  bool d3dZWriteEnable = true;
 }
 
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
@@ -166,9 +166,9 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(bool enable)
 {
-    if (!enigma::d3dMode) return;
-    (enable?glEnable:glDisable)(GL_CULL_FACE);
-    glFrontFace(GL_CW);
+  if (!enigma::d3dMode) return;
+  (enable?glEnable:glDisable)(GL_CULL_FACE);
+  glFrontFace(GL_CW);
 }
 
 void d3d_set_culling_mode(int mode) {
@@ -205,22 +205,25 @@ void d3d_depth_operator(int mode) {
 
 void d3d_set_perspective(bool enable)
 {
-    if (!enigma::d3dMode) return;
-    if (enable)
-    {
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluPerspective(0, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-        glMatrixMode(GL_MODELVIEW);
-    }
-    else
-    {
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluPerspective(0, 1, 0, 1);
-        glMatrixMode(GL_MODELVIEW);
-    }
-}  //Note GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
+  if (!enigma::d3dMode) return;
+  if (enable)
+  {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+    glMatrixMode(GL_MODELVIEW);
+  }
+  else
+  {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(0, 1, 0, 1);
+    glMatrixMode(GL_MODELVIEW);
+  }
+  // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
+  // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
+  // See also OpenGL3/GL3d3d.cpp.
+}
 
 void d3d_set_depth(double dep)
 {

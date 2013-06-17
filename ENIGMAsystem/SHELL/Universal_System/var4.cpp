@@ -35,6 +35,12 @@ using namespace std;
   #define ccast(disregard)
 #endif
 
+#ifdef CODEBLOX
+#  define codebloxt(x, y) (x)
+#else
+#  define codebloxt(x, y) (y)
+#endif
+
 template<typename t> inline bool vareq(double x, t y) { return fabs(x - y) < 1e-12; }
 template<>           inline bool vareq(double x, double y) { return fabs(x - y) < 1e-12; }
 template<>           inline bool vareq(double x, float y)  { return fabsf(float(x) - y) < 1e-8; }
@@ -42,8 +48,8 @@ template<typename t> inline bool varneq(double x, t y) { return fabs(x - y) > 1e
 template<>           inline bool varneq(double x, double y) { return fabs(x - y) >= 1e-12; }
 template<>           inline bool varneq(double x, float y)  { return fabsf(float(x) - y) >= 1e-8; }
 template<typename t> inline bool varzero(t x)      { return !x; }
-template<>           inline bool varzero(float x)  { return !x; }
-template<>           inline bool varzero(double x) { return !x; }
+template<>           inline bool varzero(float x)  { return codebloxt(x >= 0 && x <= 0, !x); }
+template<>           inline bool varzero(double x) { return codebloxt(x >= 0 && x <= 0, !x); }
 
 #if DEBUG_MODE
 #  define div0c(x) { if (varzero(x)) return (show_error("Division by zero.",0), *this); }

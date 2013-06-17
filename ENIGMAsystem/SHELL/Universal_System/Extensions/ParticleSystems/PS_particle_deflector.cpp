@@ -28,6 +28,7 @@
 #include "PS_particle_deflector.h"
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
+#include "PS_particle.h"
 #include <cstdlib>
 #include <algorithm>
 #include <cmath>
@@ -52,23 +53,23 @@ namespace enigma
     initialize();
   }
   bool particle_deflector::is_inside(double x, double y)
-  {
-    return xmin != xmax && ymin != ymax && x >= xmin && x <= xmax && y >= ymin && y <= ymax;
+  { //XXX: Is the xmin < xmax && ymin < ymax check really necessary? Does it matter if the deflector has no size, as long as a particle is right on it?
+    return xmin < xmax && ymin < ymax && x >= xmin && x <= xmax && y >= ymin && y <= ymax;
   }
-  void particle_deflector::set_region(double xmin, double xmax, double ymin, double ymax)
+  void particle_deflector::set_region(double p_xmin, double p_xmax, double p_ymin, double p_ymax)
   {
-    this->xmin = std::min(xmin, xmax);
-    this->xmax = xmax;
-    this->ymin = std::min(ymin, ymax);
-    this->ymax = ymax;
+    xmin = std::min(p_xmin, p_xmax);
+    xmax = std::max(p_xmin, p_xmax);
+    ymin = std::min(p_ymin, p_ymax);
+    ymax = std::max(p_ymin, p_ymax);
   }
-  void particle_deflector::set_kind(ps_deflect deflection_kind)
+  void particle_deflector::set_kind(ps_deflect p_deflection_kind)
   {
-    this->deflection_kind = deflection_kind;
+    deflection_kind = p_deflection_kind;
   }
-  void particle_deflector::set_friction(double friction)
+  void particle_deflector::set_friction(double p_friction)
   {
-    this->friction = friction;
+    friction = p_friction;
   }
 }
 

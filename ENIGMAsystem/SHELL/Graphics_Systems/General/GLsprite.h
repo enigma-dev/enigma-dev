@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef _GL_SPRITE__H
+#define _GL_SPRITE__H
+
 #include "Universal_System/spritestruct.h"
 
 namespace enigma_user
@@ -38,3 +41,4 @@ bool sprite_exists(int sprite);
 
 }
 
+#endif

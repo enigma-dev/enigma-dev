@@ -91,7 +91,6 @@ namespace enigma
     }
 }
 
-
 namespace enigma_user
 {
 
@@ -351,7 +350,7 @@ void screen_redraw()
 
 void screen_init()
 {
-    texture_reset()
+    texture_reset();
     if (!view_enabled)
     {
         glMatrixMode(GL_PROJECTION);

@@ -34,7 +34,7 @@
 
 namespace enigma
 {
-  void internal_update_particlesystems()
+  static void internal_update_particlesystems()
   {
     std::map<int,particle_system*>::iterator end = ps_manager.id_to_particlesystem.end();
     for (std::map<int,particle_system*>::iterator it = ps_manager.id_to_particlesystem.begin(); it != end; it++)
@@ -45,7 +45,7 @@ namespace enigma
     }
   }
 
-  void internal_draw_particlesystems(double high, double low)
+  static void internal_draw_particlesystems(double high, double low)
   {
     high = std::max(high, low); // Ensure consistency of arguments.
     const std::map<double,particle_depth_layer>::iterator ne_end = negated_particle_depths.upper_bound(-low);
@@ -65,13 +65,8 @@ namespace enigma
     }
   }
 
-  void internal_clear_effects()
-  {
+  static inline void internal_clear_effects() {
     effect_clear();
-  }
-
-  namespace particle_bridge {
-    void initialize_particle_bridge();
   }
 
   particles_implementation part_impl;

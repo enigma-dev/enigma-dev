@@ -52,7 +52,6 @@ enum {
 };
 }
 
-extern bool d3dMode;
 extern double projection_matrix[16];
 extern double transformation_matrix[16];
 

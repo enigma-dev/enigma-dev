@@ -44,12 +44,21 @@ using namespace enigma_user;
 
 namespace enigma
 {
+  namespace particle_bridge {
+    // Initialization
+    void initialize_particle_bridge();
+    // Drawing
+    void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
+        double x_offset, double y_offset);
+  }
+  
   struct particle_system
   {
     // Wiggling.
     double wiggle;
     int wiggle_frequency; // Number of steps for a full cycle. Domain: [1;[.
     double get_wiggle_result(double wiggle_offset);
+    static double get_wiggle_result(double wiggle_offset, double wiggle_amount);
     // Subimage index.
     int subimage_index;
     // Particles.
@@ -61,7 +70,6 @@ namespace enigma
     bool auto_update, auto_draw;
     void initialize();
     void update_particlesystem();
-    void draw_particle(particle_instance* it);
     void draw_particlesystem();
     void create_particles(double x, double y, particle_type* pt, int number, bool use_color=false, int given_color=c_white);
     // Emitters.

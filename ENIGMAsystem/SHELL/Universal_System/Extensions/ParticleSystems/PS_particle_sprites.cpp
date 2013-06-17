@@ -30,22 +30,35 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/spritestruct.h"
 #include "Collision_Systems/collision_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
 #include <map>
 #include <cmath>
 #include <cstdlib>
+
+#include <floatcomp.h>
+
+#ifdef CODEBLOX
+#  define codebloxt(x, y) (x)
+#else
+#  define codebloxt(x, y) (y)
+#endif
 
 namespace enigma
 {
   std::map<pt_shape,particle_sprite*> shape_to_sprite;
   std::map<pt_shape,int> shape_to_actual_sprite;
 
-  int bounds(int value, int low, int high)
+  // Reduce compiler warnings on floats by checking them here; a value of -1 is used to indicate uninitialized indices.
+  inline bool negativeone(double x) { return codebloxt((x <= -1 && x >= -1), x == -1); }
+  inline bool notnegativeone(double x) { return codebloxt(x < -1 || x > -1,  x != -1); }
+  
+  static inline int bounds(int value, int low, int high)
   {
     if (value < low) return low;
     if (value > high) return high;
     return value;
   }
-  double fbounds(double value, double low, double high)
+  static inline double fbounds(double value, double low, double high)
   {
     if (value < low) return low;
     if (value > high) return high;
@@ -54,7 +67,7 @@ namespace enigma
   static inline double direction_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),2*M_PI) + 3*M_PI), 2*M_PI) - M_PI;}
   long random_seed = 0;
   const long M = 2393*12413;
-  long get_next_random() // NOTE: Remember to set seed before using.
+  static long get_next_random() // NOTE: Remember to set seed before using.
   {
     random_seed = (random_seed*random_seed + 1) % M;
     return random_seed;
@@ -102,7 +115,7 @@ namespace enigma
   };
 
   // Assumes fullwidth == fullheight == 2^n for some n>0.
-  void create_particle_sprite(int fullwidth, int fullheight, char* imgpxdata, pt_shape pt_sh)
+  static void create_particle_sprite(int fullwidth, int fullheight, char* imgpxdata, pt_shape pt_sh)
   {
     unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
 
@@ -115,7 +128,7 @@ namespace enigma
     shape_to_sprite.insert(std::pair<pt_shape,particle_sprite*>(pt_sh,p_sprite));
   }
 
-  void generate_pixel()
+  static void generate_pixel()
   {
     const int fullwidth = 8, fullheight = 8;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -140,7 +153,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_pixel);
     delete[] imgpxdata;
   }
-  void generate_disk()
+  static void generate_disk()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -169,7 +182,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_disk);
     delete[] imgpxdata;
   }
-  void generate_square()
+  static void generate_square()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -198,7 +211,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_square);
     delete[] imgpxdata;
   }
-  void generate_line()
+  static void generate_line()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -230,7 +243,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_line);
     delete[] imgpxdata;
   }
-  void generate_star()
+  static void generate_star()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -247,7 +260,7 @@ namespace enigma
       );
     }
     const double border_size = 2.0;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     const int alpha_max = 190;
     for (int x = 0; x < fullwidth; x++)
     {
@@ -318,7 +331,7 @@ namespace enigma
             }
           }
         }
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)]   = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
@@ -327,7 +340,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_star);
     delete[] imgpxdata;
   }
-  void generate_circle()
+  static void generate_circle()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -336,7 +349,7 @@ namespace enigma
     const int rad = 26;
     const double ring_size = 2.5;
     const int alpha_max = 220;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     for (int x = 0; x < fullwidth; x++)
     {
       for (int y = 0; y < fullheight; y++)
@@ -355,7 +368,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_circle);
     delete[] imgpxdata;
   }
-  void generate_ring()
+  static void generate_ring()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -365,7 +378,7 @@ namespace enigma
     const int in_r = 6;
     const double ring_size = 2.5;
     const int alpha_max = 220;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     for (int x = 0; x < fullwidth; x++)
     {
       for (int y = 0; y < fullheight; y++)
@@ -389,7 +402,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_ring);
     delete[] imgpxdata;
   }
-  void generate_sphere()
+  static void generate_sphere()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -414,7 +427,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_sphere);
     delete[] imgpxdata;
   }
-  void generate_flare()
+  static void generate_flare()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -439,7 +452,7 @@ namespace enigma
 
     int alpha_max = 255;
     int alpha_min = 0;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     const double dist_max = 29.0;
 
     for (int x = 0; x < fullwidth; x++)
@@ -469,7 +482,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_flare);
     delete[] imgpxdata;
   }
-  void generate_spark()
+  static void generate_spark()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -495,7 +508,7 @@ namespace enigma
 
     int alpha_max = 255;
     int alpha_min = 20;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     const double line_half_width = 1.5;
 
     for (int x = 0; x < fullwidth; x++)
@@ -511,13 +524,13 @@ namespace enigma
         int line_index_high = line_index;
         while (true)
         {
-          if (line_lengths[line_index_low] == -1) {
+          if (negativeone(line_lengths[line_index_low])) {
             line_index_low = (line_index_low-1) % line_count;
           }
-          if (line_lengths[line_index_high] == -1) {
+          if (negativeone(line_lengths[line_index_high])) {
             line_index_high = (line_index_high+1) % line_count;
           }
-          if (line_lengths[line_index_low] != -1 && line_lengths[line_index_high] != -1) {
+          if (notnegativeone(line_lengths[line_index_low]) && notnegativeone(line_lengths[line_index_high])) {
             break;
           }
         }
@@ -535,13 +548,13 @@ namespace enigma
           double dfm_mod1 = dfm*line_length_max/line_lengths[line_index_low];
           double part1 = pow(fbounds(1.1 - dfm_mod1/line_length_max, 0.0, 1.0), 2);
           double s1 = line_strengths[line_index_low]*part1*(alpha_max-alpha_min);
-          s1 = s1 == 0 ? 0 : s1 + alpha_min;
+          s1 = fzero(s1) ? 0 : s1 + alpha_min;
           int alpha1 = int(distance_part1*s1);
 
           double dfm_mod2 = dfm*line_length_max/line_lengths[line_index_high];
           double part2 = pow(fbounds(1.1 - dfm_mod2/line_length_max, 0.0, 1.0), 2);
           double s2 = line_strengths[line_index_high]*part2*(alpha_max-alpha_min);
-          s2 = s2 == 0 ? 0 : s2 + alpha_min;
+          s2 = fzero(s2) ? 0 : s2 + alpha_min;
           int alpha2 = int(distance_part2*s2);
 
           alpha = std::max(alpha1, alpha2);
@@ -557,7 +570,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_spark);
     delete[] imgpxdata;
   }
-  void generate_explosion()
+  static void generate_explosion()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -633,7 +646,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_explosion);
     delete[] imgpxdata;
   }
-  void generate_cloud()
+  static void generate_cloud()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -709,7 +722,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_cloud);
     delete[] imgpxdata;
   }
-  void generate_smoke()
+  static void generate_smoke()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -784,7 +797,7 @@ namespace enigma
     create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_smoke);
     delete[] imgpxdata;
   }
-  void generate_snow()
+  static void generate_snow()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -915,6 +928,11 @@ namespace enigma
     case pt_sh_cloud: {generate_cloud(); break;}
     case pt_sh_smoke: {generate_smoke(); break;}
     case pt_sh_snow: {generate_snow(); break;}
+    default:
+      #if DEBUG_MODE
+        show_error("No such particle type", false);
+      #endif
+      ;
     }
 
     std::map<pt_shape,enigma::particle_sprite*>::iterator it_shape = enigma::shape_to_sprite.find(particle_shape);

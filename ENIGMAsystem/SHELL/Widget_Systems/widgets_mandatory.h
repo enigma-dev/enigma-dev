@@ -28,6 +28,8 @@
 #ifndef _WIDGETS_MANDATORY__H
 #define _WIDGETS_MANDATORY__H
 
+#include <string>
+
 namespace enigma
 {
   // This function is called at the beginning of the game to allow the widget system to load.

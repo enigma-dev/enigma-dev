@@ -71,9 +71,9 @@ namespace enigma_user {
         pt->particle_count--;
         if (pt->particle_count <= 0 && !pt->alive) {
           // Particle type is no longer used, delete it.
-          int id = pt->id;
+          int pid = pt->id;
           delete pt;
-          enigma::pt_manager.id_to_particletype.erase(id);
+          enigma::pt_manager.id_to_particletype.erase(pid);
         }
       }
       p_s->pi_list.clear();

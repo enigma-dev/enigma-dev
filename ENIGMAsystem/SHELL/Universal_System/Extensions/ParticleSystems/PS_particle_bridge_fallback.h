@@ -25,6 +25,9 @@
 #include <algorithm>
 #include <GL/gl.h>
 
+#include "PS_particle_system.h"
+#include "PS_particle.h"
+
 namespace enigma {
   namespace particle_bridge {
     void initialize_particle_bridge() {}; // Do nothing, nothing to initialize.
@@ -39,7 +42,7 @@ namespace enigma {
       if (result_wiggle < 0.5) return -1.0 + 4*result_wiggle;
       else return 3.0 - 4.0*result_wiggle;
     }
-    void draw_particle(particle_instance* it)
+    static void draw_particle(particle_instance* it)
     {
       int color = it->color;
       int alpha = it->alpha;

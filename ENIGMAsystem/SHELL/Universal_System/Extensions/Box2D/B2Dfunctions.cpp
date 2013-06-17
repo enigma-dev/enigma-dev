@@ -19,44 +19,61 @@
 #include <stdio.h>
 //using namespace std;
 
-/*
-#include "Universal_System/Extensions/recast.h"
-#include "implement.h"
-declare_recast(enigma::extension_studiophysics);
-
-namespace enigma {
-  extension_studiophysics::extension_studiophysics() { 
-  }
-}
-*/
 #include <Box2D/Box2D.h>
 #include "B2Dfunctions.h"
 bool systemPaused = false;
 
 static inline double r2d(double r) { return r * 180 / M_PI; }
 
-// NOTES:
-// 1) provide function overloads for interfacing with how studio is all fucked up so we don't have to limit ours
-// 2) box2d uses an inversed y-axis, thus why b2d_body_get_angle() returns -radianstodegrees(angle)
-// 3) static objects when hit appear to me to move about one pixel at times, I can't tell if this is just my eyes playin tricks
-// 4) leave the option to continue allowing you to manually update your world
-// 5) box2d's manual also states you should blend previous timesteps for updating the world with the current timestep
-//    in order to make the simulation run smoother
-// 6) box2d manual is available here... http://www.box2d.org/manual.html
-// 7) I made joints bind fixtures, where as studio's joints bind instances together, that's stupid, fuck that
-// 8) box2d's classes allow you to set a b2Shape for instance to a b2CircleShape or b2PolygonShape
-//    that is why I wrote the classes to use an abstracted pointer reference such as b2Shape and b2Joint
+vector<B2DWorld*> b2dworlds(0);
+vector<B2DBody*> b2dbodies;
 
-vector<worldInstance> worlds(0);
-vector<fixtureInstance> fixtures;
-
-void worldInstance::world_update() 
+void B2DWorld::world_update() 
 {
   if (!systemPaused && !paused) {
     world->Step(timeStep, velocityIterations, positionIterations);
     world->ClearForces();
   }
 }
+
+#include <cmath>
+#include <cstdlib>
+#include <string>
+using std::string;
+
+#ifdef DEBUG_MODE
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_worldr(w,id,r) \
+    if (unsigned(id) >= b2dworlds.size() || id < 0) { \
+      show_error("Cannot access Box2D physics world with id " + toString(id), false); \
+      return r; \
+    } B2DWorld* w = b2dworlds[id];
+  #define get_world(w,id) \
+    if (unsigned(id) >= b2dworlds.size() || id < 0) { \
+      show_error("Cannot access Box2D physics world with id " + toString(id), false); \
+      return; \
+    } B2DWorld* w = b2dworlds[id];
+  #define get_bodyr(b,id,r) \
+    if (unsigned(id) >= b2dbodies.size() || id < 0) { \
+      show_error("Cannot access Box2D physics body with id " + toString(id), false); \
+      return r; \
+    } B2DBody* b = b2dbodies[id];
+  #define get_body(b,id) \
+    if (unsigned(id) >= b2dbodies.size() || id < 0) { \
+      show_error("Cannot access Box2D physics body with id " + toString(id), false); \
+      return; \
+    } B2DBody* b = b2dbodies[id];
+#else
+  #define get_worldr(w,id,r) \
+    B2DWorld* w = b2dworlds[id];
+  #define get_world(w,id) \
+    B2DWorld* w = b2dworlds[id];
+  #define get_bodyr(b,id,r) \
+    B2DBody* b = b2dbodies[id];
+  #define get_body(b,id) \
+    B2DBody* b = b2dbodies[id];
+#endif
 
 namespace enigma_user
 {
@@ -71,78 +88,53 @@ void b2d_world_create(int pixeltometerscale)
 
 int b2d_world_create()
 {
-  int i = worlds.size();
-  worlds.push_back(worldInstance());
+  int i = b2dworlds.size();
+  b2dworlds.push_back(new B2DWorld());
   return i;
 }
 
 void b2d_world_delete(int index)
 {
- 
+  get_world(b2dworld, index);
+  delete b2dworld;
 }
 
 void b2d_world_pause_enable(int index, bool paused)
 {
-  if (unsigned(index) >= worlds.size() || index < 0)
-  {
-    return;
-  }
-  else
-  {
-    worlds[index].paused = paused;
-  }
+  get_world(b2dworld, index);
+  b2dworld->paused = paused;
 }
 
 void b2d_world_scale(int index, int pixelstometers)
 {
-  if (unsigned(index) >= worlds.size() || index < 0)
-  {
-    return;
-  }
-  else
-  {
-    worlds[index].pixelstometers = pixelstometers;
-  }
+  get_world(b2dworld, index);
+  b2dworld->pixelstometers = pixelstometers;
 }
 
 void b2d_world_gravity(int index, double gx, double gy)
 {
-  if (unsigned(index) >= worlds.size() || index < 0)
-  {
-    return;
-  }
-  else
-  {
-    worlds[index].world->SetGravity(b2Vec2(gx, gy));
-  }
+  get_world(b2dworld, index);
+  b2dworld->world->SetGravity(b2Vec2(gx, gy));
 }
 
 void b2d_world_update(int index)
 {
-  // extra function to control your world update, should be auto done inside our game loop
-  if (unsigned(index) >= worlds.size() || index < 0)
-  {
-    return;
-  }
-  else
-  {
-    worlds[index].world_update();
-  }
+  get_world(b2dworld, index);
+  b2dworld->world_update();
+}
+
+void b2d_world_dump(int index)
+{
+  get_world(b2dworld, index);
+  b2dworld->world->Dump();
 }
 
 void b2d_world_update_settings(int index, double timeStep, int velocityIterations, int positionIterations)
 {
-  // extra function to control your world update settings
-  if (unsigned(index) >= worlds.size() || index < 0)
-  {
-    return;
-  }
-  else
-  {
-    worlds[index].timeStep = timeStep;
-    worlds[index].velocityIterations = velocityIterations;
-    worlds[index].positionIterations = positionIterations;
-  }
+  get_world(b2dworld, index);
+  b2dworld->timeStep = timeStep;
+  b2dworld->velocityIterations = velocityIterations;
+  b2dworld->positionIterations = positionIterations;
 }
 
 void b2d_world_update_iterations(int iterationsperstep)
@@ -175,499 +167,438 @@ void b2d_world_draw_debug()
   // end programmer can do it themselves
 }
 
+void b2d_world_clear_forces(int index)
+{
+  get_world(b2dworld, index);
+  b2dworld->world->ClearForces();
+}
+
+void b2d_world_set_sleep(int index, bool sleeping)
+{
+  get_world(b2dworld, index);
+  b2dworld->world->SetAllowSleeping(sleeping);
+}
+
+void b2d_world_set_warmstarting(int index, bool warmstarting)
+{
+  get_world(b2dworld, index);
+  b2dworld->world->SetWarmStarting(warmstarting);
+}
+
+void b2d_world_set_continuous(int index, bool continuous)
+{
+  get_world(b2dworld, index);
+  b2dworld->world->SetContinuousPhysics(continuous);
+}
+
+void b2d_world_set_substepping(int index, bool substepping)
+{
+  get_world(b2dworld, index);
+  b2dworld->world->SetSubStepping(substepping);
+}
+
+void b2d_world_set_clearforces(int index, bool autoclear)
+{
+  get_world(b2dworld, index);
+  b2dworld->world->SetAutoClearForces(autoclear);
+}
+
+bool b2d_world_get_sleep(int index)
+{
+  get_worldr(b2dworld, index, false);
+  return b2dworld->world->GetAllowSleeping();
+}
+
+bool b2d_world_get_warmstarting(int index)
+{
+  get_worldr(b2dworld, index, false);
+  return b2dworld->world->GetWarmStarting();
+}
+
+bool b2d_world_get_continuous(int index)
+{
+  get_worldr(b2dworld, index, false);
+  return b2dworld->world->GetContinuousPhysics();
+}
+
+bool b2d_world_get_substepping(int index)
+{
+  get_worldr(b2dworld, index, false);
+  return b2dworld->world->GetSubStepping();
+}
+
+int b2d_world_get_proxy_count(int index)
+{
+  get_worldr(b2dworld, index, -1);
+  return b2dworld->world->GetProxyCount();
+}
+
+int b2d_world_get_body_count(int index)
+{
+  get_worldr(b2dworld, index, -1);
+  return b2dworld->world->GetBodyCount();
+}
+
+int b2d_world_get_joint_count(int index)
+{
+  get_worldr(b2dworld, index, -1);
+  return b2dworld->world->GetJointCount();
+}
+
+int b2d_world_get_contect_count(int index)
+{
+  get_worldr(b2dworld, index, -1);
+  return b2dworld->world->GetContactCount();
+}
+
+bool b2d_world_get_locked(int index)
+{
+  get_worldr(b2dworld, index, false);
+  return b2dworld->world->IsLocked();
+}
+
+bool b2d_world_get_clearforces(int index)
+{
+  get_worldr(b2dworld, index, false);
+  return b2dworld->world->GetAutoClearForces();
+}
+
 int b2d_body_create(int world)
 {
-  if (unsigned(world) >= worlds.size() || world < 0)
-  {
-    return -1;
-  }
-  else
-  {
-    int i = fixtures.size();
-    fixtureInstance fixture = fixtureInstance();
-    b2BodyDef bodyDef;
-    bodyDef.type = b2_dynamicBody;
-    fixture.body = worlds[world].world->CreateBody(&bodyDef);
-    fixtures.push_back(fixture);
-    fixtures[i].world = world;
-    return i;
-  }
+  get_worldr(b2dworld, world, -1);
+  int i = b2dbodies.size();
+  B2DBody* b2dbody = new B2DBody();
+  b2BodyDef bodyDef;
+  bodyDef.type = b2_dynamicBody;
+  b2dbody->body = b2dworld->world->CreateBody(&bodyDef);
+  b2dbodies.push_back(b2dbody);
+  b2dbodies[i]->world = world;
+  return i;
 }
 
-int b2d_body_create()
+int  b2d_body_create_shape(int world, int shape)
 {
-  b2d_body_create(0);
+  int i = b2d_body_create(world);
+  int f = b2d_fixture_create(i, shape);
+  return i;
 }
 
-void b2d_body_bind(int id)
+int  b2d_body_create_box(int world, double halfwidth, double halfheight)
 {
-  // binds a fixture to nothing, just closes and fills the definition
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-
-  }
+  int i = b2d_body_create(world);
+  int s = b2d_shape_create();
+  b2d_shape_box(s, halfwidth, halfheight);
+  int f = b2d_fixture_create(i, s);
+  return i;
 }
 
-void b2d_body_bind()
+int  b2d_body_create_circle(int world, double radius)
 {
-  // binds a fixture to an object
+  int i = b2d_body_create(world);
+  int s = b2d_shape_create();
+  b2d_shape_circle(s, radius);
+  int f = b2d_fixture_create(i, s);
+  return i;
 }
 
-void b2d_body_set_collision_group(int id, int group)
+void b2d_body_bind(int id, int obj)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    // sets the collision group used to make parts of things not collide, like a ragdoll for
-    // instance should not collide with itself
-    b2Filter newfilter;
-    newfilter.groupIndex = group;
-    fixtures[id].fixture->SetFilterData(newfilter);
-  }
+  get_body(b2dbody, id);
 }
 
 void b2d_body_delete(int id)
 {
-
+  get_body(b2dbody, id);
+  delete b2dbody;
 }
 
-void b2d_body_set_box_shape(int id, double halfwidth, double halfheight)
+void b2d_body_dump(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2PolygonShape shape;
-    shape.SetAsBox(halfwidth, halfheight);
-    fixtures[id].shape = &shape;
-    fixtures[id].FinishShape();
-  }
+  get_body(b2dbody, id);
+  b2dbody->body->Dump();
 }
 
-void b2d_body_set_circle_shape(int id, double radius)
-{
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2CircleShape shape;
-    shape.m_radius = radius;
-    fixtures[id].shape = &shape;
-    fixtures[id].FinishShape();
-  }
-}
 
-void b2d_body_set_polygon_shape(int id)
+void b2d_body_set_collision_group(int id, int group)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2PolygonShape shape;
-
-    shape.Set(&fixtures[id].vertices[0], fixtures[id].vertices.size());
-    fixtures[id].shape = &shape;
-    fixtures[id].FinishShape();
-  }
-}
-
-void b2d_body_add_point(int id, double x, double y)
-{
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].vertices.push_back(b2Vec2(x, y));
+  get_body(b2dbody, id);
+  // sets the collision group used to make parts of things not collide, like a ragdoll for
+  // instance should not collide with itself
+  b2Filter newfilter;
+  newfilter.groupIndex = group;
+  for (int i = 0; i < b2dbody->fixtures.size(); i++) {
+    b2dfixtures[b2dbody->fixtures[i]]->fixture->SetFilterData(newfilter);
   }
 }
 
 void b2d_body_set_transform(int id, double x, double y, double angle)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetTransform(b2Vec2(x, y), angle);
-  }
+  get_body(b2dbody, id);
+  b2dbody->body->SetTransform(b2Vec2(x, y), angle);
 }
 
 void b2d_body_set_position(int id, double x, double y)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetTransform(b2Vec2(x, y), fixtures[id].body->GetAngle());
-  }
+  get_body(b2dbody, id);
+  b2dbody->body->SetTransform(b2Vec2(x, y), b2dbodies[id]->body->GetAngle());
 }
 
 void b2d_body_set_angle(int id, double angle)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetTransform(fixtures[id].body->GetPosition(), angle);
-  }
+  get_body(b2dbody, id);
+  b2dbody->body->SetTransform(b2dbodies[id]->body->GetPosition(), angle);
+}
+
+void b2d_body_set_angle_fixed(int id, bool fixed)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->SetFixedRotation(fixed);
 }
 
 void b2d_body_set_density(int id, double density)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
+  get_body(b2dbody, id);
+  for (int i = 0; i < b2dbody->fixtures.size(); i++) {
+    b2dfixtures[b2dbody->fixtures[i]]->fixture->SetDensity(density);
   }
-  else
-  {
-    // technically studio makes it so 0 density, means infinite density and just makes it
-    // a static object, but im just gonna go ahead and comment that out cause its fuckin stupid
-    //if (density == 0) {
-      //fixtures[id].body->SetType(b2_staticBody);
-    //} else {
-      fixtures[id].fixture->SetDensity(density);
-      fixtures[id].body->ResetMassData();
-    //}
-  }
+  b2dbody->body->ResetMassData();
 }
 
 void b2d_body_set_friction(int id, double friction)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
+  get_body(b2dbody, id);
+  for (int i = 0; i < b2dbody->fixtures.size(); i++) {
+    b2dfixtures[b2dbody->fixtures[i]]->fixture->SetFriction(friction);
   }
-  else
-  {
-    fixtures[id].fixture->SetFriction(friction);
-    fixtures[id].body->ResetMassData();
-  }
-}
-
-void b2d_body_set_linear_damping(int id, double damping)
-{
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetLinearDamping(damping);
-  }
-}
-
-void b2d_body_set_angular_damping(int id, double damping)
-{
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetAngularDamping(damping);
-  }
+  b2dbody->body->ResetMassData();
 }
 
 void b2d_body_set_restitution(int id, double restitution)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].fixture->SetRestitution(restitution);
+  get_body(b2dbody, id);
+  for (int i = 0; i < b2dbody->fixtures.size(); i++) {
+    b2dfixtures[b2dbody->fixtures[i]]->fixture->SetRestitution(restitution);
   }
 }
 
 void b2d_body_set_sensor(int id, bool state)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
+  get_body(b2dbody, id);
+  for (int i = 0; i < b2dbody->fixtures.size(); i++) {
+    b2dfixtures[b2dbody->fixtures[i]]->fixture->SetSensor(state);
   }
-  else
-  {
-    fixtures[id].fixture->SetSensor(state);
-  }
+}
+
+void b2d_body_set_linear_damping(int id, double damping)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->SetLinearDamping(damping);
+}
+
+void b2d_body_set_angular_damping(int id, double damping)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->SetAngularDamping(damping);
 }
 
 void b2d_body_set_awake(int id, bool state)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetAwake(state);
-  }
+  get_body(b2dbody, id);
+  b2dbody->body->SetAwake(state);
+}
+
+void b2d_body_set_bullet(int id, bool bullet)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->SetBullet(bullet);
 }
 
 void b2d_body_set_sleep(int id, bool allowsleep)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetSleepingAllowed(allowsleep);
-  }
+  get_body(b2dbody, id);
+  b2dbody->body->SetSleepingAllowed(allowsleep);
 }
 
-void b2d_body_mass_properties(int id, double mass, double local_center_x, double local_center_y, double inertia)
+void b2d_body_set_massdata(int id, double mass, double local_center_x, double local_center_y, double inertia)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-     b2MassData lMassData;
-     fixtures[id].body->GetMassData(&lMassData);
-     lMassData.mass = mass;
-     lMassData.center.Set(local_center_x, local_center_y);
-     lMassData.I = inertia;
-     fixtures[id].body->SetMassData(&lMassData);
-  }
+  get_body(b2dbody, id);
+  b2MassData lMassData;
+  b2dbody->body->GetMassData(&lMassData);
+  lMassData.mass = mass;
+  lMassData.center.Set(local_center_x, local_center_y);
+  lMassData.I = inertia;
+  b2dbody->body->SetMassData(&lMassData);
+}
+
+void b2d_body_reset_massdata(int id)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->ResetMassData();
 }
 
 void b2d_body_set_static(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetType(b2_staticBody);
-    fixtures[id].body->ResetMassData();
-  }
+  get_body(b2dbody, id);
+  b2dbody->body->SetType(b2_staticBody);
+  b2dbody->body->ResetMassData();
 }
 
 void b2d_body_set_kinematic(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetType(b2_kinematicBody);
-  }
+  get_body(b2dbody, id);
+  b2dbody->body->SetType(b2_kinematicBody);
 }
 
 void b2d_body_set_dynamic(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->SetType(b2_dynamicBody);
-  }
+  get_body(b2dbody, id);
+  b2dbody->body->SetType(b2_dynamicBody);
 }
 
 double b2d_body_get_angle(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return 0;
-  }
-  else
-  {
-    return -r2d(fixtures[id].body->GetAngle());
-  }
+  get_bodyr(b2dbody, id, -1);
+  return -r2d(b2dbody->body->GetAngle());
 }
 
 double b2d_body_get_x(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return 0;
-  }
-  else
-  {
-    return fixtures[id].body->GetPosition().x;
-  }
+  get_bodyr(b2dbody, id, -1);
+  return b2dbody->body->GetPosition().x;
 }
 
 double b2d_body_get_y(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return 0;
-  }
-  else
-  {
-    return fixtures[id].body->GetPosition().y;
-  }
+  get_bodyr(b2dbody, id, -1);
+  return b2dbody->body->GetPosition().y;
 }
 
 double b2d_body_get_mass(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return 0;
-  }
-  else
-  {
-     b2MassData lMassData;
-     fixtures[id].body->GetMassData(&lMassData);
-     return lMassData.mass;
-  }
+  get_bodyr(b2dbody, id, -1);
+  b2MassData lMassData;
+  b2dbody->body->GetMassData(&lMassData);
+  return lMassData.mass;
 }
 
 double b2d_body_get_center_x(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return 0;
-  }
-  else
-  {
-     b2MassData lMassData;
-     fixtures[id].body->GetMassData(&lMassData);
-     return lMassData.center.x;
-  }
+  get_bodyr(b2dbody, id, -1);
+  b2MassData lMassData;
+  b2dbody->body->GetMassData(&lMassData);
+  return lMassData.center.x;
 }
 
 double b2d_body_get_center_y(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return 0;
-  }
-  else
-  {
-     b2MassData lMassData;
-     fixtures[id].body->GetMassData(&lMassData);
-     return lMassData.center.y;
-  }
+  get_bodyr(b2dbody, id, -1);
+  b2MassData lMassData;
+  b2dbody->body->GetMassData(&lMassData);
+  return lMassData.center.y;
 }
 
 double b2d_body_get_inertia(int id)
 {
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return 0;
-  }
-  else
-  {
-     b2MassData lMassData;
-     fixtures[id].body->GetMassData(&lMassData);
-     return lMassData.I;
-  }
+  get_bodyr(b2dbody, id, -1);
+  b2MassData lMassData;
+  b2dbody->body->GetMassData(&lMassData);
+  return lMassData.I;
 }
 
-void b2d_apply_force(int world, double xpos, double ypos, double xforce, double yforce)
+double b2d_body_get_angular_velocity(int id)
 {
-  if (unsigned(world) >= worlds.size() || world < 0)
+  get_bodyr(b2dbody, id, -1);
+  return b2dbody->body->GetAngularVelocity();
+}
+
+bool b2d_body_get_active(int id)
+{
+  get_bodyr(b2dbody, id, false);
+  return b2dbody->body->IsActive();
+}
+
+bool b2d_body_get_sleep(int id)
+{
+  get_bodyr(b2dbody, id, false);
+  return b2dbody->body->IsSleepingAllowed();
+}
+
+bool b2d_body_get_angle_fixed(int id)
+{
+  get_bodyr(b2dbody, id, false);
+  return b2dbody->body->IsFixedRotation();
+}
+
+bool b2d_body_get_bullet(int id)
+{
+  get_bodyr(b2dbody, id, false);
+  return b2dbody->body->IsBullet();
+}
+
+int b2d_body_get_fixture(int id, int fid)
+{
+  get_bodyr(b2dbody, id, -1);
+  return b2dbody->fixtures[fid];
+}
+
+/************** Forces **************/
+void b2d_body_apply_force(int id, double xpos, double ypos, double xforce, double yforce)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos));
+}
+
+void b2d_body_apply_force_center(int id, double xforce, double yforce)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->ApplyForceToCenter(b2Vec2(xforce, yforce));
+}
+
+void b2d_body_apply_torque(int id, double torque)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->ApplyTorque(torque);
+}
+
+void b2d_body_apply_impulse_linear(int id, double xpos, double ypos, double ximpulse, double yimpulse)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos));
+}
+
+void b2d_body_apply_impulse_angular(int id, double impulse)
+{
+  get_body(b2dbody, id);
+  b2dbody->body->ApplyAngularImpulse(impulse);
+}
+
+void b2d_world_apply_force(int world, double xpos, double ypos, double xforce, double yforce)
+{
+  get_world(b2dworld, world);
+  for (int i = 0; i < b2dbodies.size(); i++)
   {
-    return;
-  }
-  else
-  {
-    for (int i = 0; i < fixtures.size(); i++)
+    if (b2dbodies[i]->world == world)
     {
-      if (fixtures[i].world == world)
-      {
-        fixtures[i].body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos));
-      }
+      b2dbodies[i]->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos));
     }
   }
 }
 
-void b2d_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse)
+void b2d_world_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse)
 {
-  if (unsigned(world) >= worlds.size() || world < 0)
+  get_body(b2dworld, world);
+  for (int i = 0; i < b2dbodies.size(); i++)
   {
-    return;
-  }
-  else
-  {
-    for (int i = 0; i < fixtures.size(); i++)
+    if (b2dbodies[i]->world == world)
     {
-      if (fixtures[i].world == world)
-      {
-        fixtures[i].body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos));
-      }
+      b2dbodies[i]->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos));
     }
-  }
-}
-
-void b2d_apply_local_force(int id, double xlocal, double ylocal, double xforce, double yforce)
-{
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xlocal, ylocal));
-  }
-}
-
-void b2d_apply_local_impulse(int id, double xlocal, double ylocal, double ximpulse, double yimpulse)
-{
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xlocal, ylocal));
-  }
-}
-
-void b2d_apply_local_torque(int id, double torque)
-{
-  if (unsigned(id) >= fixtures.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    fixtures[id].body->ApplyTorque(torque);
   }
 }
 
 void b2d_pause_enable(bool pause)
 {
   systemPaused = pause;
-}
-
-void b2d_mass_properties(double mass, double local_center_x, double local_center_y, double inertia)
-{
-  // same as b2d_body_mass_properties except it doesnt need an id, uses the currently bound fixture
-  // of whatever is calling the function, im not writing it cause its stupid
-}
-
-void b2d_draw_debug()
-{
-  // draws the currently bound fixture's shape with draw color, fuck that let the end programmer have control
 }
 
 }

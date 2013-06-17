@@ -28,6 +28,7 @@
 #include "PS_particle_changer.h"
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
+#include "PS_particle.h"
 #include <algorithm>
 #include <cmath>
 
@@ -52,24 +53,22 @@ namespace enigma
   {
     initialize();
   }
-  void particle_changer::set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape)
+  void particle_changer::set_region(double p_xmin, double p_xmax, double p_ymin, double p_ymax, ps_shape p_shape)
   {
-    xmin = std::min(xmin, xmax);
-    ymin = std::min(ymin, ymax);
-    this->xmin = xmin;
-    this->xmax = std::max(xmin, xmax);
-    this->ymin = ymin;
-    this->ymax = std::max(ymin, ymax);
-    this->shape = shape;
+    xmin = std::min(p_xmin, p_xmax);
+    xmax = std::max(p_xmin, p_xmax);
+    ymin = std::min(p_ymin, p_ymax);
+    ymax = std::max(p_ymin, p_ymax);
+    shape = p_shape;
   }
-  void particle_changer::set_types(int parttypeid1, int parttypeid2)
+  void particle_changer::set_types(int pt_id1, int pt_id2)
   {
-    this->parttypeid1 = parttypeid1;
-    this->parttypeid2 = parttypeid2;
+    parttypeid1 = pt_id1;
+    parttypeid2 = pt_id2;
   }
-  void particle_changer::set_change_kind(ps_change change_kind)
+  void particle_changer::set_change_kind(ps_change ps_change_kind)
   {
-    this->change_kind = change_kind;
+    change_kind = ps_change_kind;
   }
   inline double sqr(double x) {return x*x;}
   bool particle_changer::is_inside(double x, double y)
