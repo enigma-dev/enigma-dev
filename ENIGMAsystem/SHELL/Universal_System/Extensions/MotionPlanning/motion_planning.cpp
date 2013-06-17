@@ -31,7 +31,7 @@
 using namespace std;
 
 //#include "Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
-#include "Universal_System/pathstruct.h"
+#include "../Paths/pathstruct.h"
 #include "libEGMstd.h"
 #include "motion_planning_struct.h"
 #include "motion_planning.h"

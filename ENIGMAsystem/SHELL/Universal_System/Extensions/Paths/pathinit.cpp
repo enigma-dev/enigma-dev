@@ -30,7 +30,7 @@
 //using namespace std;
 
 #include "pathstruct.h"
-#include "resinit.h"
+#include "Universal_System/resinit.h"
 //#include "Platforms/platforms_mandatory.h"
 //#include "libEGMstd.h"
 
