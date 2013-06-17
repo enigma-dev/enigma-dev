@@ -31,7 +31,7 @@
 namespace enigma_user
 {
 
-void mp_potential_settings(double maxrot, double rotstep, double ahead, double onspot);
+void mp_potential_settings(double maxrot, double rotstep, double ahead, bool onspot);
 bool mp_potential_step_object(const double x, const double y, const double stepsize, const int object, const bool solid_only = false);
 
 inline bool mp_potential_step(const double x, const double y, const double stepsize, const bool checkall) {

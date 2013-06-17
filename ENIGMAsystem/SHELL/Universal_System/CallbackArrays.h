@@ -25,15 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-/*
-bool mouse_check_button(double button)
-bool mouse_check_button_pressed(double button)
-bool mouse_check_button_released(double button)
-bool keyboard_check(double key)
-bool keyboard_check_pressed(double key)
-bool keyboard_check_released(double key)
-*/
-
+#ifndef _CALLBACK_ARRAYS__H
+#define _CALLBACK_ARRAYS__H
 
 namespace enigma
 {
@@ -152,3 +145,4 @@ bool mouse_wheel_down();
 void io_clear();
 }
 
+#endif

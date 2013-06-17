@@ -57,6 +57,31 @@
 #define real enigma::vt_real
 #define tstr enigma::vt_tstr
 
+#include <cmath>
+
+#ifdef CODEBLOX
+#  define codebloxt(x, y) (x)
+#else
+#  define codebloxt(x, y) (y)
+#endif
+
+template<typename t> inline bool vareq(double x, t y) { return fabs(x - y) < 1e-12; }
+template<>           inline bool vareq(double x, double y) { return fabs(x - y) < 1e-12; }
+template<>           inline bool vareq(double x, float y)  { return fabsf(float(x) - y) < 1e-8; }
+template<typename t> inline bool varneq(double x, t y) { return fabs(x - y) > 1e-12; }
+template<>           inline bool varneq(double x, double y) { return fabs(x - y) >= 1e-12; }
+template<>           inline bool varneq(double x, float y)  { return fabsf(float(x) - y) >= 1e-8; }
+template<typename t> inline bool varzero(t x)      { return !x; }
+template<>           inline bool varzero(float x)  { return codebloxt(x >= 0 && x <= 0, !x); }
+template<>           inline bool varzero(double x) { return codebloxt(x >= 0 && x <= 0, !x); }
+
+#if DEBUG_MODE
+#  define div0c(x) { if (varzero(x)) return (show_error("Division by zero.",0), *this); }
+#else
+#  define div0c(x)
+#endif
+
+
 namespace enigma
 {
   multifunction_variant& multifunction_variant::operator=(multifunction_variant& x) { variant oldvalue = *this; if ((type = x.type) == 1) sval = x.sval; else rval.d = x.rval.d; function(oldvalue); return *this; }
@@ -70,8 +95,8 @@ namespace enigma
   multifunction_variant& multifunction_variant::operator+= (const variant &x)          { variant oldvalue = *this; terror(1); if (type == 1) sval += x.sval; else rval.d += x.rval.d; function(oldvalue); return *this; }\
   multifunction_variant& multifunction_variant::operator+= (const var &x)              { variant oldvalue = *this; if (type == 1) sval += (*x).sval; else rval.d += (*x).rval.d;  function(oldvalue); return *this; }
   
-  types_extrapolate_alldec_i(-=, variant oldvalue = *this, function(oldvalue); );
-  types_extrapolate_alldec_i(*=, variant oldvalue = *this, function(oldvalue); );
+  types_extrapolate_alldec_i(-=, variant oldvalue = *this, function(oldvalue); )
+  types_extrapolate_alldec_i(*=, variant oldvalue = *this, function(oldvalue); )
   
   types_extrapolate_real_p  (multifunction_variant& multifunction_variant::operator/=, { variant oldvalue = *this; div0c(x); rval.d /= x;  function(oldvalue); return *this; } )\
   types_extrapolate_string_p(multifunction_variant& multifunction_variant::operator/=, { variant oldvalue = *this; terrortrue(); function(oldvalue); return *this; } )\
@@ -83,11 +108,11 @@ namespace enigma
   multifunction_variant& multifunction_variant::operator%= (const variant &x)          { variant oldvalue = *this; div0c(x); rval.d = fmod(rval.d, x);  function(oldvalue); return *this; }\
   multifunction_variant& multifunction_variant::operator%= (const var &x)              { variant oldvalue = *this; div0c(x); rval.d = fmod(rval.d, x);  function(oldvalue); return *this; }
   
-  types_extrapolate_alldec_ib(<<, variant oldvalue = *this, function(oldvalue); );
-  types_extrapolate_alldec_ib(>>, variant oldvalue = *this, function(oldvalue); );
-  types_extrapolate_alldec_ib(&,  variant oldvalue = *this, function(oldvalue); );
-  types_extrapolate_alldec_ib(|,  variant oldvalue = *this, function(oldvalue); );
-  types_extrapolate_alldec_ib(^,  variant oldvalue = *this, function(oldvalue); );
+  types_extrapolate_alldec_ib(<<, variant oldvalue = *this, function(oldvalue); )
+  types_extrapolate_alldec_ib(>>, variant oldvalue = *this, function(oldvalue); )
+  types_extrapolate_alldec_ib(&,  variant oldvalue = *this, function(oldvalue); )
+  types_extrapolate_alldec_ib(|,  variant oldvalue = *this, function(oldvalue); )
+  types_extrapolate_alldec_ib(^,  variant oldvalue = *this, function(oldvalue); )
   
   #define EVCONST
   void multifunction_variant::function(variant) {}

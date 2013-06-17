@@ -77,7 +77,7 @@ void instance_activate_object(int obj) {
     std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
         enigma::object_basic* const inst = ((enigma::object_basic*)(iter->second->inst));
-        if (obj==all ||(obj<100000 && inst->object_index==obj)|| (obj>100000 && inst->id == obj)) {
+        if (obj == all || (obj < 100000? inst->object_index == obj : inst->id == unsigned(obj))) {
             inst->activate();
             enigma::instance_deactivated_list.erase(iter++);
         }
@@ -106,9 +106,9 @@ void instance_destroy()
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
         enigma::instance_event_iterator->inst->unlink();
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
-    printf("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! %p ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!",a);
+    printf("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! %p ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!", (void*)a);
     if (a != (enigma::object_basic*)enigma::instance_event_iterator->inst)
-    printf("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO %p TO POINTING TO %p\n",a,(enigma::object_basic*)enigma::instance_event_iterator->inst);
+    printf("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO %p TO POINTING TO %p\n", (void*)a, (void*)(enigma::object_basic*)enigma::instance_event_iterator->inst);
   }
 }
 

@@ -28,6 +28,8 @@
 #include "PS_particle_emitter.h"
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
+#include "PS_particle.h"
+#include <Widget_Systems/widgets_mandatory.h> // show_error
 #include <cstdlib>
 #include <algorithm>
 #include <cmath>
@@ -52,26 +54,29 @@ namespace enigma
   {
     initialize();
   }
-  void particle_emitter::set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape, ps_distr distribution)
+  void particle_emitter::set_region(double p_xmin, double p_xmax, double p_ymin, double p_ymax, ps_shape p_shape, ps_distr p_distribution)
   {
-    this->xmin = xmin;
-    this->xmax = xmax;
-    this->ymin = ymin;
-    this->ymax = ymax;
+    // "min" and "max" is somewhat weird in these cases. For instance, by having p_xmin > p_xmax and p_ymin < p_ymax,
+    // the line region gives a line with a positive slope instead of the usual negative slope.
+    // This is consistent with GM.
+    xmin = p_xmin;
+    xmax = p_xmax;
+    ymin = p_ymin;
+    ymax = p_ymax;
 
-    this->shape = shape;
-    this->distribution = distribution;
+    shape = p_shape;
+    distribution = p_distribution;
   }
-  void particle_emitter::set_stream(int particle_type_id, int number)
+  void particle_emitter::set_stream(int pt_id, int p_number)
   {
-    this->particle_type_id = particle_type_id;
-    this->number = number;
+    particle_type_id = pt_id;
+    number = p_number;
   }
   // Returns value in range [0, 1] with the given distribution approximated.
   // Note that since the normal distribution does not fit inside [0, 1],
   // and cannot be scaled correctly to [0, 1] due to being ]-inf, inf[,
   // the values returned are not really normal-distributed.
-  double get_random_value(ps_distr distribution)
+  static double get_random_value(ps_distr distribution)
   {
     switch (distribution) {
     case ps_di_linear: {
@@ -189,6 +194,11 @@ namespace enigma
       y = origin_y + rand1*v1y;
       return;
     }
+    default:
+      #if DEBUG_MODE
+      show_error("Internal error: invalid particle shape", false)
+      #endif
+      ;
     }
   }
   int particle_emitter::get_step_number()

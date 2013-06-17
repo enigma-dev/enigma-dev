@@ -44,11 +44,8 @@ global:     event_number
 global:     event_object
 global:     event_type*/
 namespace enigma_user {
-double      fps;
-}
-
-namespace enigma_user {
-double health=100;
+  double fps;
+  double health=100;
 }
 
 // TODO: MOVEME: Who put this here?

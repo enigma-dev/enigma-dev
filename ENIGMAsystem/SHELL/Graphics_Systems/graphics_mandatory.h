@@ -58,20 +58,19 @@ namespace enigma
 
 namespace enigma_user
 {
+  // Called at random. Maybe.
+  std::string draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
 
-// Called at random. Maybe.
-std::string draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
+  // Called each step, or by the user randomly.
+  void screen_refresh(); // Without invoking any events, refresh the contents of the screen.
 
-// Called each step, or by the user randomly.
-void screen_refresh(); // Without invoking any events, refresh the contents of the screen.
+  // Called each step, or by the user randomly.
+  void screen_redraw(); // Invoke all the draw events, but do not refresh the screen.
 
-// Called each step, or by the user randomly.
-void screen_redraw(); // Invoke all the draw events, but do not refresh the screen.
+  void screen_init();
 
-void screen_init();
-
-int background_get_width(int backId);
-int background_get_height(int backId);
-
+  // Called by the room system to retrieve dimensions for background_width/height[room background index].
+  int background_get_width(int backId);
+  int background_get_height(int backId);
 }
 

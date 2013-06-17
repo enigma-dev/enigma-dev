@@ -100,7 +100,7 @@ namespace enigma
 		  delete[] cpixels;*/
 
 		  int ymin=100, ymax=-100;
-		  for (int gi = 0; gi < enigma::fontstructarray[i]->glyphcount; gi++)
+		  for (unsigned gi = 0; gi < enigma::fontstructarray[i]->glyphcount; gi++)
 		  {
 		    if (!fread(&advance,4,1,exe)) return;
         if (!fread(&baseline,4,1,exe)) return;

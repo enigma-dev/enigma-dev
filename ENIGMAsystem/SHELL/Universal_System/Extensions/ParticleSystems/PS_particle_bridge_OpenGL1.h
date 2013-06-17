@@ -29,9 +29,12 @@
 #include <algorithm>
 #include <GL/gl.h>
 
+#include "PS_particle_system.h"
+#include "PS_particle.h"
+
 namespace enigma {
   namespace particle_bridge {
-    void initialize_particle_bridge() {}; // Do nothing, nothing to initialize.
+    void initialize_particle_bridge() {} // Do nothing, nothing to initialize.
     inline int __GETR(int x) {return x & 0x0000FF;}
     inline int __GETG(int x) {return (x & 0x00FF00) >> 8;}
     inline int __GETB(int x) {return (x & 0xFF0000) >> 16;}
@@ -39,14 +42,8 @@ namespace enigma {
     int subimage_index;
     double x_offset;
     double y_offset;
-    double get_wiggle_result(double wiggle_offset, double wiggle)
-    {
-      double result_wiggle = wiggle + wiggle_offset;
-      result_wiggle = result_wiggle > 1.0 ? result_wiggle - 1.0 : result_wiggle;
-      if (result_wiggle < 0.5) return -1.0 + 4*result_wiggle;
-      else return 3.0 - 4.0*result_wiggle;
-    }
-    void draw_particle(particle_instance* it)
+    
+    static void draw_particle(particle_instance* it)
     {
       int color = it->color;
       int alpha = it->alpha;
@@ -55,8 +52,8 @@ namespace enigma {
 
         double size;
         double rot_degrees;
-        size = std::max(0.0, it->size + pt->size_wiggle*get_wiggle_result(it->size_wiggle_offset, wiggle));
-        rot_degrees = it->angle + pt->ang_wiggle*get_wiggle_result(it->ang_wiggle_offset, wiggle);
+        size = std::max(0.0, it->size + pt->size_wiggle * particle_system::get_wiggle_result(it->size_wiggle_offset, wiggle));
+        rot_degrees = it->angle + pt->ang_wiggle * particle_system::get_wiggle_result(it->ang_wiggle_offset, wiggle);
         if (pt->ang_relative) {
           rot_degrees += it->direction;
         }
@@ -181,41 +178,42 @@ namespace enigma {
         glEnd();
       }
     }
-  }
-  void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double a_wiggle, int a_subimage_index,
-      double a_x_offset, double a_y_offset)
-  {
-    using namespace enigma::particle_bridge;
-    wiggle = a_wiggle;
-    subimage_index = a_subimage_index;
-    x_offset = a_x_offset;
-    y_offset = a_y_offset;
+    
+    void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double a_wiggle, int a_subimage_index,
+        double a_x_offset, double a_y_offset)
+    {
+      using namespace enigma::particle_bridge;
+      wiggle = a_wiggle;
+      subimage_index = a_subimage_index;
+      x_offset = a_x_offset;
+      y_offset = a_y_offset;
 
-    glPushMatrix(); // Matrix push 1.
+      glPushMatrix(); // Matrix push 1.
 
-    glTranslated(x_offset, y_offset, 0.0);
+      glTranslated(x_offset, y_offset, 0.0);
 
-    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Attrib push 1.
+      glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT); // Attrib push 1.
 
-    // Draw the particle system either from oldest to youngest or reverse.
-    if (oldtonew) {
-      const std::vector<particle_instance>::iterator end = pi_list.end();
-      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != end; it++)
-      {
-        draw_particle(&(*it));
+      // Draw the particle system either from oldest to youngest or reverse.
+      if (oldtonew) {
+        const std::vector<particle_instance>::iterator end = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != end; it++)
+        {
+          draw_particle(&(*it));
+        }
       }
-    }
-    else {
-      const std::vector<particle_instance>::reverse_iterator rend = pi_list.rend();
-      for (std::vector<particle_instance>::reverse_iterator it = pi_list.rbegin(); it != rend; it++)
-      {
-        draw_particle(&(*it));
+      else {
+        const std::vector<particle_instance>::reverse_iterator rend = pi_list.rend();
+        for (std::vector<particle_instance>::reverse_iterator it = pi_list.rbegin(); it != rend; it++)
+        {
+          draw_particle(&(*it));
+        }
       }
+
+      glPopAttrib(); // Attrib pop 1.
+
+      glPopMatrix(); // Matrix pop 1.
     }
-
-    glPopAttrib(); // Attrib pop 1.
-
-    glPopMatrix(); // Matrix pop 1.
   }
 }
 

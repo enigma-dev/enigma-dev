@@ -22,6 +22,7 @@
 #include "Universal_System/roomsystem.h"
 #include <math.h>
 #include "../General/GLbinding.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
 
 #include "GLmodel.h"
 
@@ -33,9 +34,11 @@
 
 using namespace std;
 
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+#define GETR(x) ((x & 0x0000FF))/255.0
+#define GETG(x) ((x & 0x00FF00)>>8)/255.0
+#define GETB(x) ((x & 0xFF0000)>>16)/255.0
+
+#include <floatcomp.h>
 
 class d3d_model
 {
@@ -136,10 +139,10 @@ class d3d_model
                     model_block(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file), true);
                     break;
                 case  11:
-                    model_cylinder(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+                    model_cylinder(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),ftrueGM(file_text_read_real(file)),file_text_read_real(file));
                     break;
                 case  12:
-                    model_cone(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+                    model_cone(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),ftrueGM(file_text_read_real(file)),file_text_read_real(file));
                     break;
                 case  13:
                     model_ellipsoid(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
@@ -150,6 +153,11 @@ class d3d_model
                 case  15:
                     model_floor(file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
                     break;
+                default:
+                  #if DEBUG_MODE
+                  show_error("Error loading model: invalid solid type", false);
+                  #endif
+                  break;
             }
             file_text_readln(file);
         }
@@ -203,7 +211,7 @@ class d3d_model
 
     void model_vertex_color(float v[], int col, double alpha)
     {
-        glColor4f(__GETR(col), __GETG(col), __GETB(col), alpha);
+        glColor4f(GETR(col), GETG(col), GETB(col), alpha);
         glVertex3fv(v);
         glColor4ubv(enigma::currentcolor);
     }
@@ -216,7 +224,7 @@ class d3d_model
 
     void model_vertex_texture_color(float v[], float t[], int col, double alpha)
     {
-        glColor4f(__GETR(col), __GETG(col), __GETB(col), alpha);
+        glColor4f(GETR(col), GETG(col), GETB(col), alpha);
         glTexCoord2fv(t);
         glVertex3fv(v);
         glColor4ubv(enigma::currentcolor);
@@ -230,7 +238,7 @@ class d3d_model
 
     void model_vertex_normal_color(float v[], float n[], int col, double alpha)
     {
-        glColor4f(__GETR(col), __GETG(col), __GETB(col), alpha);
+        glColor4f(GETR(col), GETG(col), GETB(col), alpha);
         glNormal3fv(n);
         glVertex3fv(v);
         glColor4ubv(enigma::currentcolor);
@@ -245,7 +253,7 @@ class d3d_model
 
     void model_vertex_normal_texture_color(float v[], float n[], float t[], int col, double alpha)
     {
-        glColor4f(__GETR(col), __GETG(col), __GETB(col), alpha);
+        glColor4f(GETR(col), GETG(col), GETB(col), alpha);
         glTexCoord2fv(t);
         glNormal3fv(n);
         glVertex3fv(v);
@@ -478,7 +486,7 @@ class d3d_model
 
     void model_wall(double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep)
     {
-    if ((x1 == x2 && y1 == y2) || z1 == z2) {
+    if ((fequal(x1, x2) && fequal(y1, y2)) || fequal(z1, z2)) {
         return;
     }
     float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y2, z1}, v3[] = {x2, y2, z2},

@@ -102,7 +102,7 @@ namespace enigma_user {
   }
 }
 
-particle_type* get_action_particle_type(int action_type_id)
+static particle_type* get_action_particle_type(int action_type_id)
 {
   std::map<int,int>::iterator at_it = actiontypeid_to_particleid.find(action_type_id);
   if (at_it != actiontypeid_to_particleid.end()) {
@@ -209,7 +209,7 @@ namespace enigma_user {
     }
   }
 
-  int get_action_particle_emitter_id(int ps_id, int emitter)
+  static int get_action_particle_emitter_id(int ps_id, int emitter)
   {
     int emitter_id = -1;
     std::map<int,int>::iterator at_it = actionemitterid_to_particleemitterid.find(emitter);
@@ -230,6 +230,7 @@ namespace enigma_user {
     }
     return emitter_id;
   }
+  
   void action_partemit_create(int emitter, int shape, double x_left, double x_right, double y_top, double y_bottom)
   {
     if (ps_manager.id_to_particlesystem.find(action_ps_id) == ps_manager.id_to_particlesystem.end()) {

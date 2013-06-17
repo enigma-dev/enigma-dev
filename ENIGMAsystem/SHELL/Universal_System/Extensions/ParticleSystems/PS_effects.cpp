@@ -32,6 +32,7 @@
 #include "PS_particle_type.h"
 #include "PS_particle_updatedraw.h"
 #include "Universal_System/roomsystem.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
 #include <cstddef>
 #include <cstdlib>
 #include <map>
@@ -60,7 +61,7 @@ namespace enigma
   };
   std::map<ef_pt,int> effectparticletype_to_particletypeid;
 
-  particle_system* get_effect_particlesystem(int& ps_id, double depth)
+  static particle_system* get_effect_particlesystem(int& ps_id, double depth)
   {
     {
       std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(ps_id);
@@ -76,7 +77,7 @@ namespace enigma
     return NULL;
   }
   using enigma::ef_pt;
-  particle_type* get_particletype(ef_pt effectparticletype, ef_size effect_size)
+  static particle_type* get_particletype(ef_pt effectparticletype, ef_size effect_size)
   {
     {
       std::map<ef_pt,int>::iterator id_it = effectparticletype_to_particletypeid.find(effectparticletype);
@@ -400,10 +401,10 @@ namespace enigma
       part_type_life(pt_id, life, life);
       return p_t;
     }
+    default: return NULL;
     }
-    return NULL;
   }
-  void create_effect(int ps_id, ef_effect effect_kind, ef_size effect_size, double x, double y, int color)
+  static void create_effect(int ps_id, ef_effect effect_kind, ef_size effect_size, double x, double y, int color)
   {
     particle_type* p_t = NULL;
     switch (effect_kind) {
@@ -795,10 +796,15 @@ namespace enigma
       }
       break;
     }
+      default:
+        #if DEBUG_MODE
+          show_error("Internal error: invalid particle effect type.", false)
+        #endif
+        ;
     }
   }
 
-  void create_effect_in_particlesystem(int& ps_id, double depth, int kind, double x, double y, int size, int color)
+  static void create_effect_in_particlesystem(int& ps_id, double depth, int kind, double x, double y, int size, int color)
   {
     const enigma::ef_effect effect_kind = enigma::get_ef(kind);
     const enigma::ef_size effect_size = enigma::get_ef_size(size);

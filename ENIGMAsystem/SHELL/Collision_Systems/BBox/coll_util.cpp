@@ -30,6 +30,8 @@
 //rect functions - test if a rectangle and another shape intersect
 ////////////////////////////////////
 
+#include <floatcomp.h>
+
 bool collide_rect_line(double rx1, double ry1, double rx2, double ry2,
                        double px1, double py1, double px2, double py2)
 {
@@ -45,7 +47,7 @@ bool collide_rect_line(double rx1, double ry1, double rx2, double ry2,
   double dx = px2 - px1;
 
   //do slope check of non vertical lines (dx != 0)
-  if ((float)dx)
+  if (fnzero(dx))
   {
     double a = (py2 - py1) / dx;
     double b = py1 - a * px1;
@@ -139,7 +141,7 @@ bool collide_bbox_circle(const enigma::object_collisions* inst, double ox, doubl
 
 bool collide_bbox_ellipse(const enigma::object_collisions* inst, double ox, double oy, double x, double y, double rx, double ry)
 {
-    if (rx == 0 || ry == 0)
+    if (fzero(rx) || fzero(ry))
         return false;
     const bbox_rect_t &box = inst->$bbox_relative();
     const double distx = (x - min(max(x, ox + box.left), ox + box.right))/rx;

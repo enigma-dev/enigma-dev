@@ -17,7 +17,8 @@
 
 #include <X11/Xlib.h>
 #include "glxew.h"
-#include "Platforms/xlib/XLIBmain.h"
+#include <Platforms/xlib/XLIBmain.h>
+#include <Graphics_Systems/graphics_mandatory.h>
 
 #include <iostream>
 #include <cstring>
@@ -26,12 +27,11 @@
 
 namespace enigma {
   namespace swaphandling {
-    bool has_checked_extensions = false;
-    bool ext_swapcontrol_supported;
-    bool mesa_swapcontrol_supported;
+    static bool has_checked_extensions = false;
+    static bool ext_swapcontrol_supported;
+    static bool mesa_swapcontrol_supported;
 
-    void investigate_swapcontrol_support() {
-
+    static void investigate_swapcontrol_support() {
       if (has_checked_extensions) return; // Already calculated, no need to calculate it more.
 
       // TODO: The second argument to glXQueryExtensionsString is screen number,
@@ -47,15 +47,18 @@ namespace enigma {
     }
   }
 
-  bool is_ext_swapcontrol_supported() {
+  static bool is_ext_swapcontrol_supported() {
     swaphandling::investigate_swapcontrol_support();
     return swaphandling::ext_swapcontrol_supported;
   }
-  bool is_mesa_swapcontrol_supported() {
+  static bool is_mesa_swapcontrol_supported() {
     swaphandling::investigate_swapcontrol_support();
     return swaphandling::mesa_swapcontrol_supported;
   }
 }
+
+#include <Platforms/xlib/XLIBwindow.h> // window_set_caption
+#include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
   void set_synchronization(bool enable) {
@@ -87,6 +90,12 @@ namespace enigma_user {
       // be zero or less, so therefore it is not used here.
       // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
     }
+  }
+  
+  void screen_refresh() {
+    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
+    enigma::update_mouse_variables();
+    window_set_caption(room_caption);
   }
 }
 

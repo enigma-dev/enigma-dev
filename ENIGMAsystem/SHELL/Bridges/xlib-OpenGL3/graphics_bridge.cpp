@@ -57,6 +57,9 @@ namespace enigma {
   }
 }
 
+#include <Platforms/xlib/XLIBwindow.h> // window_set_caption
+#include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
+
 namespace enigma_user {
   void set_synchronization(bool enable) {
 
@@ -87,6 +90,12 @@ namespace enigma_user {
       // be zero or less, so therefore it is not used here.
       // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
     }
+  }
+  
+  void screen_refresh() {
+    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
+    enigma::update_mouse_variables();
+    window_set_caption(room_caption);
   }
 }
 

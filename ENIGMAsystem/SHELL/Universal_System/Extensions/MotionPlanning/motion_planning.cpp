@@ -227,16 +227,16 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
     multimap<unsigned,enigma::node*>::reverse_iterator it;
     for (it=nodelist.rbegin(); it != nodelist.rend(); it++)
     {
-            point=(enigma::path_point){gr->left+((*it).second->x+0.5)*gr->cellwidth,gr->top+((*it).second->y+0.5)*gr->cellheight,gr->speed_modifier/double((*it).second->cost)};
+            point = enigma::path_point({gr->left+((*it).second->x+0.5)*gr->cellwidth,gr->top+((*it).second->y+0.5)*gr->cellheight,gr->speed_modifier/double((*it).second->cost)});
             path->pointarray.push_back(point);
     }
 
     //push the very last point if we can reach the destination
     if (status == true){
-        point=(enigma::path_point){xgoal,ygoal,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost)};
+        point = enigma::path_point({xgoal,ygoal,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost)});
         path->pointarray.push_back(point);
     }else if (path->pointarray.size()==1){
-        point=(enigma::path_point){path->pointarray.back().x,path->pointarray.back().y,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost)};
+        point = enigma::path_point({path->pointarray.back().x,path->pointarray.back().y,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost)});
         path->pointarray.push_back(point);
     }
     enigma::path_recalculate(pathid);

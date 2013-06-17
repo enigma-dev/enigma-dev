@@ -31,7 +31,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 }
 namespace enigma
 {
-  char* load_bitmap(string filename,int* width,int* height, int* fullwidth, int* fullheight)
+  char* load_bitmap(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight)
   {
     FILE *imgfile;
     int bmpstart,bmpwidth,bmpheight;
@@ -71,7 +71,7 @@ namespace enigma
       for (iw=0; iw < bmpwidth; iw++){
         if(bitdepth == 24)
         {
-                bitmap[tmp+3] = 255;
+                bitmap[tmp+3] = (char)0xFF;
                 bitmap[tmp+2] = fgetc(imgfile);
                 bitmap[tmp+1] = fgetc(imgfile);
                 bitmap[tmp]   = fgetc(imgfile);

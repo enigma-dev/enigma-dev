@@ -41,13 +41,13 @@ namespace enigma_user {
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_surface(surf,id)\
-    if (id < 0 or id >= enigma::surface_max or !enigma::surface_array[id]) {\
+    if (size_t(id) >= enigma::surface_max or !enigma::surface_array[id]) {\
       show_error("Attempting to use non-existing surface " + toString(id), false);\
       return;\
     }\
     enigma::surface* surf = enigma::surface_array[id];
   #define get_surfacev(surf,id,r)\
-    if (id < 0 or size_t(id) >= enigma::surface_max or !enigma::surface_array[id]) {\
+    if (size_t(id) >= enigma::surface_max or !enigma::surface_array[id]) {\
       show_error("Attempting to use non-existing surface " + toString(id), false);\
       return r;\
     }\
@@ -62,7 +62,7 @@ namespace enigma_user {
 namespace enigma
 {
   surface **surface_array;
-  int surface_max=0;
+  size_t surface_max=0;
 }
 
 namespace enigma_user
@@ -80,7 +80,7 @@ int surface_create(int width, int height)
       GLuint tex, fbo;
       int prevFbo;
 
-      int id,
+      size_t id,
         w=(int)width,
         h=(int)height; //get the integer width and height, and prepare to search for an id
 
@@ -91,12 +91,12 @@ int surface_create(int width, int height)
 
       for (id=0; enigma::surface_array[id]!=NULL; id++)
       {
-        if (id+1>=enigma::surface_max)
+        if (id+1 >= enigma::surface_max)
         {
           enigma::surface **oldarray=enigma::surface_array;
           enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
 
-          for (int i=0; i<enigma::surface_max; i++)
+          for (size_t i=0; i<enigma::surface_max; i++)
             enigma::surface_array[i]=oldarray[i];
 
           enigma::surface_array[enigma::surface_max]=NULL;
@@ -164,7 +164,7 @@ void surface_free(int id)
 
 bool surface_exists(int id)
 {
-    return !((id<0) or (id>enigma::surface_max) or (enigma::surface_array[id]==NULL));
+    return size_t(id) < enigma::surface_max && enigma::surface_array[id] != NULL;
 }
 
 void draw_surface(int id, double x, double y)

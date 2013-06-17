@@ -23,7 +23,7 @@
 namespace enigma
 {
   struct livesv: multifunction_variant {
-    INHERIT_OPERATORS(livesv);
+    INHERIT_OPERATORS(livesv)
     void function(variant oldval);
   };
 }

@@ -35,6 +35,28 @@ using namespace std;
   #define ccast(disregard)
 #endif
 
+#ifdef CODEBLOX
+#  define codebloxt(x, y) (x)
+#else
+#  define codebloxt(x, y) (y)
+#endif
+
+template<typename t> inline bool vareq(double x, t y) { return fabs(x - y) < 1e-12; }
+template<>           inline bool vareq(double x, double y) { return fabs(x - y) < 1e-12; }
+template<>           inline bool vareq(double x, float y)  { return fabsf(float(x) - y) < 1e-8; }
+template<typename t> inline bool varneq(double x, t y) { return fabs(x - y) > 1e-12; }
+template<>           inline bool varneq(double x, double y) { return fabs(x - y) >= 1e-12; }
+template<>           inline bool varneq(double x, float y)  { return fabsf(float(x) - y) >= 1e-8; }
+template<typename t> inline bool varzero(t x)      { return !x; }
+template<>           inline bool varzero(float x)  { return codebloxt(x >= 0 && x <= 0, !x); }
+template<>           inline bool varzero(double x) { return codebloxt(x >= 0 && x <= 0, !x); }
+
+#if DEBUG_MODE
+#  define div0c(x) { if (varzero(x)) return (show_error("Division by zero.",0), *this); }
+#else
+#  define div0c(x)
+#endif
+
 variant::operator int()       { ccast(0); return int  (rval.d); }
 variant::operator bool()      { ccast(0); return lrint(rval.d) > 0; }
 variant::operator char()      { ccast(0); return char (rval.d); }
@@ -96,14 +118,14 @@ types_extrapolate_string_p(variant& variant::operator*=, { terrortrue(); return 
 variant& variant::operator*=(const variant x)            { terror2(real); rval.d *= x.rval.d; return *this; }
 variant& variant::operator*=(const var &x)               { return *this *= *x; }
 
-types_extrapolate_real_p  (variant& variant::operator/=, { terror(real); div0c(x); rval.d /= x; return *this; })
+types_extrapolate_real_p  (variant& variant::operator/=, { terror(real); rval.d /= x; return *this; })
 types_extrapolate_string_p(variant& variant::operator/=, { terrortrue(); return *this; })
-variant& variant::operator/=(const variant x)            { terror2(real); div0c(x.rval.d); rval.d /= x.rval.d; return *this; }
+variant& variant::operator/=(const variant x)            { terror2(real); rval.d /= x.rval.d; return *this; }
 variant& variant::operator/=(const var &x)               { return *this /= *x; }
 
-types_extrapolate_real_p  (variant& variant::operator%=, { terror(real); div0c(x); rval.d = fmod(rval.d, x); return *this; })
+types_extrapolate_real_p  (variant& variant::operator%=, { terror(real); rval.d = fmod(rval.d, x); return *this; })
 types_extrapolate_string_p(variant& variant::operator%=, { terrortrue(); return *this; })
-variant& variant::operator%=(const variant x)            { terror2(real); div0c(x.rval.d); rval.d = fmod(rval.d, x.rval.d); return *this; }
+variant& variant::operator%=(const variant x)            { terror2(real); rval.d = fmod(rval.d, x.rval.d); return *this; }
 variant& variant::operator%=(const var &x)               { div0c((*x).rval.d) rval.d = fmod(rval.d, (*x).rval.d); return *this; }
 
 
@@ -151,12 +173,12 @@ types_extrapolate_string_p(double  variant::operator*, { terrortrue(); return rv
 double variant::operator*(const variant x)  EVCONST    { terror2(real); return rval.d * x.rval.d; }
 double variant::operator*(const var &x)     EVCONST    { return *this * *x; }
 
-types_extrapolate_real_p  (double  variant::operator/, { terror(real); div0c(x); return rval.d / x; })
+types_extrapolate_real_p  (double  variant::operator/, { terror(real); return rval.d / x; })
 types_extrapolate_string_p(double  variant::operator/, { terrortrue(); return rval.d; })
 double variant::operator/(const variant x)  EVCONST    { terror2(real); return rval.d / x.rval.d; }
 double variant::operator/(const var &x)     EVCONST    { return *this / *x; }
 
-types_extrapolate_real_p  (double  variant::operator%, { terror(real); div0c(x); return fmod(rval.d, x); })
+types_extrapolate_real_p  (double  variant::operator%, { terror(real); return fmod(rval.d, x); })
 types_extrapolate_string_p(double  variant::operator%, { terrortrue(); return rval.d; })
 double variant::operator%(const variant x)  EVCONST    { terror2(real); div0c(x.rval.d); return fmod(rval.d, x.rval.d); }
 double variant::operator%(const var &x)     EVCONST    { div0c((*x).rval.d); return fmod(this->rval.d, (*x).rval.d); }
@@ -190,15 +212,15 @@ long variant::operator^(const var &x)    EVCONST    { return *this ^ *x; }
 
 // STANDARD:  In all cases, string > real
 
-types_extrapolate_real_p  (bool variant::operator==, { return type == real and rval.d == x; })
-types_extrapolate_string_p(bool variant::operator==, { return type == tstr and sval   == x; })
-bool variant::operator==(const variant &x)   EVCONST { return type == x.type and ((x.type == real) ? rval.d == x.rval.d : sval == x.sval); }
+types_extrapolate_real_p  (bool variant::operator==, { return type == real and vareq(rval.d, x); })
+types_extrapolate_string_p(bool variant::operator==, { return type == tstr and sval == x; })
+bool variant::operator==(const variant &x)   EVCONST { return type == x.type and ((x.type == real) ? vareq(rval.d, x.rval.d) : sval == x.sval); }
 //bool variant::operator==(const variant x)            { return type == x.type and ((x.type == real) ? rval.d == x.rval.d : sval == x.sval); }
 bool variant::operator==(const var &x)       EVCONST { return *this == *x; }
 
-types_extrapolate_real_p  (bool variant::operator!=, { return type != real or rval.d != x; })
-types_extrapolate_string_p(bool variant::operator!=, { return type != tstr or sval   != x; })
-bool variant::operator!=(const variant &x)   EVCONST { return type != x.type or ((x.type == real) ? rval.d != x.rval.d : sval != x.sval); }
+types_extrapolate_real_p  (bool variant::operator!=, { return type != real or varneq(rval.d, x); })
+types_extrapolate_string_p(bool variant::operator!=, { return type != tstr or sval != x; })
+bool variant::operator!=(const variant &x)   EVCONST { return type != x.type or ((x.type == real) ? varneq(rval.d, x.rval.d) : sval != x.sval); }
 //bool variant::operator!=(const variant x)            { return type != x.type or ((x.type == real) ? rval.d != x.rval.d : sval != x.sval); }
 bool variant::operator!=(const var &x)       EVCONST { return *this != *x; }
 

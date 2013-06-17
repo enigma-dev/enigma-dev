@@ -28,6 +28,7 @@
 #include "PS_particle_type.h"
 #include "PS_particle_sprites.h"
 #include "PS_particle_enums.h"
+#include "PS_particle.h"
 #include "Graphics_Systems/General/GLcolors.h"
 #include <cstddef>
 

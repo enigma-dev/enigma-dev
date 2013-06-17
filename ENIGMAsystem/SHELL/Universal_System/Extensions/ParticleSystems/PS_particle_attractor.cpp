@@ -27,6 +27,7 @@
 
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
+#include "PS_particle.h"
 #include <cstdlib>
 #include <algorithm>
 #include <cmath>
@@ -51,17 +52,17 @@ namespace enigma
   {
     initialize();
   }
-  void particle_attractor::set_position(double x, double y)
+  void particle_attractor::set_position(double p_x, double p_y)
   {
-    this->x = x;
-    this->y = y;
+    x = p_x;
+    y = p_y;
   }
-  void particle_attractor::set_force(double force_strength, double dist_effect, ps_force force_kind, bool additive)
+  void particle_attractor::set_force(double p_force_strength, double p_dist_effect, ps_force p_force_kind, bool p_additive)
   {
-    this->force_strength = force_strength;
-    this->dist_effect = std::max(0.0, dist_effect);
-    this->force_kind = force_kind;
-    this->additive = additive;
+    force_strength = p_force_strength;
+    dist_effect = std::max(0., p_dist_effect);
+    force_kind = p_force_kind;
+    additive = p_additive;
   }
 }
 

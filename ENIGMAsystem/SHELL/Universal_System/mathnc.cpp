@@ -117,7 +117,7 @@ namespace enigma_user
 
   variant choose(const enigma::varargs& args) {
      return args.get(rand() % args.argc);
-  };
+  }
 }
 
 // For added randomness

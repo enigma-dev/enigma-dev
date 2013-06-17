@@ -28,6 +28,8 @@
 #include <string>
 using std::string;
 
+#include "include.h"
+
 namespace enigma_user
 {
 time_t date_current_datetime()

@@ -200,24 +200,27 @@ bool font_exists(int fnt)
 
 int font_add(string name, int size, bool bold, bool italic, unsigned char first, unsigned char last)
 {
-    enigma::font *fnt = enigma::fontstructarray[enigma::font_new(first, last-first)];
-    fnt->name = name;
-    fnt->fontsize = size;
-    fnt->bold = bold;
-    fnt->italic = italic;
-    fnt->glyphstart = first;
-    fnt->glyphcount = last-first;
+  int res = enigma::font_new(first, last-first);
+  enigma::font *fnt = enigma::fontstructarray[res];
+  fnt->name = name;
+  fnt->fontsize = size;
+  fnt->bold = bold;
+  fnt->italic = italic;
+  fnt->glyphstart = first;
+  fnt->glyphcount = last-first;
+  return res;
 }
 
 bool font_replace(int ind, string name, int size, bool bold, bool italic, unsigned char first, unsigned char last)
 {
-    enigma::font *fnt = enigma::fontstructarray[ind];
-    fnt->name = name;
-    fnt->fontsize = size;
-    fnt->bold = bold;
-    fnt->italic = italic;
-    fnt->glyphstart = first;
-    fnt->glyphcount = last-first;
+  enigma::font *fnt = enigma::fontstructarray[ind];
+  fnt->name = name;
+  fnt->fontsize = size;
+  fnt->bold = bold;
+  fnt->italic = italic;
+  fnt->glyphstart = first;
+  fnt->glyphcount = last-first;
+  return true;
 }
 
 bool font_replace_sprite(int ind, int spr, unsigned char first, bool prop, int sep)

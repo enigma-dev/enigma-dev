@@ -54,7 +54,7 @@ namespace enigma
     graphicssystem_initialize();
     audiosystem_initialize();
 
-    #if BUILDMODE
+    #if defined(BUILDMODE) && BUILDMODE
       buildmode::buildinit();
     #endif
 

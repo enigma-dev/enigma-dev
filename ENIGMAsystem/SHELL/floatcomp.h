@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura
+/** Copyright (C) 2013 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,21 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Collision_Systems/collision_mandatory.h"
-
-namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
-  {
-    return 0;
-  }
-
-  void free_collision_mask(void* mask)
-  {
-  }
-
-  void perform_automatic_collision_handling_before_collision_event()
-  {
-    // Do nothing.
-  }
-}
+#ifndef _FLOATCMP__H
+#define _FLOATCMP__H
+#include <cmath>
+static inline bool fzero(double x)   { return fabs(x) < 1e-8; }
+static inline bool fnzero(double x)  { return fabs(x) >= 1e-8; }
+static inline bool ftrueGM(double x) { return x >= .5; }
+static inline bool fequal(double x, double y) { return fabs(x - y) < 1e-8; }
+#endif
