@@ -126,6 +126,7 @@ namespace enigma_user
 
     enigma::object_basic* ob;
     ob = NULL;
+    double x = inst->x, y = inst->y;
     switch((int)inst->object_index)
     {
     #define NEW_OBJ_PREFIX ob =
@@ -134,6 +135,7 @@ namespace enigma_user
         #if defined(SHOW_ERRORS) && SHOW_ERRORS
             show_error("Object doesn't exist",0);
         #endif
+            (void)x; (void)y;
             return;
     }
     (void)ob;
