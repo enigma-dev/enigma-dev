@@ -47,7 +47,7 @@
 
 namespace enigma
 {
-    void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
+    static void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
     {
         get_background(bck2d,back);
         texture_use(GmTextures[bck2d->texture]->gltex);
@@ -250,7 +250,7 @@ double tile_get_visible(int id)
         if (dit->second.tiles.size())
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
                 if (dit->second.tiles[i].id == id)
-                    return (dit->second.tiles[i].alpha == 0);
+                    return (dit->second.tiles[i].alpha > 0);
     return 0;
 }
 
@@ -507,7 +507,7 @@ bool tile_layer_hide(int layer_depth)
                 continue;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
-                enigma::tile t = dit->second.tiles[i];
+                enigma::tile &t = dit->second.tiles[i];
                 t.alpha = 0;
             }
             return true;
@@ -524,7 +524,7 @@ bool tile_layer_show(int layer_depth)
                 continue;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
-                enigma::tile t = dit->second.tiles[i];
+                enigma::tile &t = dit->second.tiles[i];
                 t.alpha = 1;
             }
             return true;
@@ -541,7 +541,7 @@ bool tile_layer_shift(int layer_depth, int x, int y)
                 continue;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
-                enigma::tile t = dit->second.tiles[i];
+                enigma::tile &t = dit->second.tiles[i];
                 t.roomX += x;
                 t.roomY += y;
             }

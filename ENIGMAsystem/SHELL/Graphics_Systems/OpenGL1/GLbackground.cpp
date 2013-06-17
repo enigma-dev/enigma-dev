@@ -21,6 +21,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GLbackground.h"
 #include "Universal_System/backgroundstruct.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/spritestruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))

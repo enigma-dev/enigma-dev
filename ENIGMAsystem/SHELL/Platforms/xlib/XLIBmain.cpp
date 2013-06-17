@@ -104,6 +104,7 @@ namespace enigma
               case 5: mouse_vscrolls--; break;
               case 6: mouse_hscrolls++; break;
               case 7: mouse_hscrolls--; break;
+              default: ;
             }
           return 0;
         }
@@ -114,6 +115,7 @@ namespace enigma
               case 5: mouse_vscrolls--; break;
               case 6: mouse_hscrolls++; break;
               case 7: mouse_hscrolls--; break;
+              default: ;
             }
           return 0;
         }
@@ -172,14 +174,11 @@ namespace enigma
 namespace enigma_user {
   extern double fps;
 }
-long clamp(long value, long min, long max)
+
+static inline long clamp(long value, long min, long max)
 {
-  if (value < min) {
-    return min;
-  }
-  if (value > max) {
-    return max;
-  }
+  if (value < min) return min;
+  if (value > max) return max;
   return value;
 }
 

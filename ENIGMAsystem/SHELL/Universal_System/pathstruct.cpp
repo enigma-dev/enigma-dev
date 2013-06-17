@@ -37,6 +37,7 @@
 //#include "libEGMstd.h"
 
 #include "pathstruct.h"
+#include <floatcomp.h>
 
 
 namespace enigma {
@@ -91,7 +92,7 @@ namespace enigma
         t += 0.05;
       }
       return length;
-    };
+    }
 
     path::path(unsigned pathid, bool smth, bool close, int prec, unsigned pointcount):
         id(pathid), precision(prec), smooth(smth), closed(close), pointarray(), total_length(0)
@@ -197,19 +198,25 @@ namespace enigma
       x2=pth->pointarray[sid].x, y2=pth->pointarray[sid].y;
 
         //std::cout<<pth->pointarray.size()<<std::endl;
-      if (pth->pointarray.size()==1){x=x1; y=y1; return;}
-      else if (pth->pointarray.size()==2 && x1==x2 && y1==y2){x=x1; y=y1; return;}
+      if (pth->pointarray.size() == 1) {
+        x = x1, y = y1;
+        return;
+      }
+      else if (pth->pointarray.size() == 2 && fequal(x1, x2) && fequal(y1, y2)) {
+        x = x1, y = y1;
+        return;
+      }
 
-      if (pth->smooth && (pth->pointarray.size()>2 || pth->closed)){
-          if (size_t(sid)+1 == pc)
-              x3=end.x, y3=end.y;
-          else
-              x3=pth->pointarray[sid+1].x, y3=pth->pointarray[sid+1].y;
-          x = 0.5 * (((x1 - 2 * x2 + x3) * t + 2 * x2 - 2 * x1) * t + x1 + x2);
-          y = 0.5 * (((y1 - 2 * y2 + y3) * t + 2 * y2 - 2 * y1) * t + y1 + y2);
-      }else{
-          x = x1+(x2-x1)*t;
-          y = y1+(y2-y1)*t;
+      if (pth->smooth && (pth->pointarray.size()>2 || pth->closed)) {
+        if (size_t(sid)+1 == pc)
+            x3=end.x, y3=end.y;
+        else
+            x3=pth->pointarray[sid+1].x, y3=pth->pointarray[sid+1].y;
+        x = 0.5 * (((x1 - 2 * x2 + x3) * t + 2 * x2 - 2 * x1) * t + x1 + x2);
+        y = 0.5 * (((y1 - 2 * y2 + y3) * t + 2 * y2 - 2 * y1) * t + y1 + y2);
+      } else {
+        x = x1 + (x2-x1) * t;
+        y = y1 + (y2-y1) * t;
       }
     }
 

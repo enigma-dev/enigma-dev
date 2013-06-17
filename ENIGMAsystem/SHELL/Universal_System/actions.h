@@ -81,7 +81,7 @@ inline void action_color(const int color) {
 inline bool action_if_number(const int object, const double number, const int operation) {
 	switch (operation)
 	{
-	    case 0: return (instance_number(object) == number); break;
+	    case 0: return (instance_number(object) == lrint(number)); break;
 	    case 1:	return (instance_number(object) < number); break;
 	    case 2: return (instance_number(object) > number); break;
 	    default: return false; //invalid operation
@@ -123,8 +123,8 @@ inline void action_set_friction(const double newfriction) {
 }
 
 inline bool action_if_dice(double sides) {
-    if (sides == 0) {return false;}
-    return (random(1) < (double)1/sides);
+    if (sides < 1) {return false;}
+    return (random(sides) < 1);
 }
 
 inline void action_move_point(const double x, const double y, const double speed) {
@@ -135,7 +135,7 @@ inline void action_move_point(const double x, const double y, const double speed
 }
 
 inline bool action_if(const double x) {
-    return x != 0;
+    return x >= 0.5;
 }
 
 inline bool action_if_previous_room()
@@ -203,7 +203,7 @@ inline void action_draw_rectangle(const double x1, const double y1, const double
 inline void action_sprite_set(const double spritep, const  double subimage, const double speed) {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
     inst->sprite_index=spritep;
-	if (subimage !=-1) inst->image_index=subimage;
+	if ((int)subimage !=-1) inst->image_index=subimage;
 	inst->image_speed=speed;
 }
 
@@ -250,9 +250,9 @@ inline void action_font(const int font, const int align) {
 inline void action_wrap(const int direction) {
     switch (direction)
     {
-        case 0: move_wrap(1,0,0); break;
-        case 1: move_wrap(0,1,0); break;
-        case 2: move_wrap(1,1,0); break;
+         case 0: move_wrap(1,0,0); break;
+         case 1: move_wrap(0,1,0); break;
+default: case 2: move_wrap(1,1,0); break;
     }
 }
 
@@ -495,11 +495,12 @@ inline bool action_replace_background(int ind, std::string filename)
     return background_replace(ind, filename, true, false, true, true);
 }
 
+#define _V_EPSILON 1e-8
 inline bool action_if_health(const double value, const int operation)
 {
 	switch (operation)
 	{
-	    case 0: return (health == value); break;
+	    case 0: return (fabs(health - value) < _V_EPSILON); break;
 	    case 1:	return (health < value); break;
 	    case 2: return (health > value); break;
 	    default: return false; //invalid operation
@@ -510,7 +511,7 @@ inline bool action_if_life(const double value, const int operation)
 {
 	switch (operation)
 	{
-	    case 0: return (lives == value); break;
+	    case 0: return (fabs(lives - value) < _V_EPSILON); break;
 	    case 1:	return (lives < value); break;
 	    case 2: return (lives > value); break;
 	    default: return false; //invalid operation
@@ -521,7 +522,7 @@ inline bool action_if_score(const double value, const int operation)
 {
 	switch (operation)
 	{
-	    case 0: return (score == value); break;
+	    case 0: return (fabs(score - value) < _V_EPSILON); break;
 	    case 1:	return (score < value); break;
 	    case 2: return (score > value); break;
 	    default: return false; //invalid operation
@@ -561,7 +562,7 @@ inline void action_create_object_motion(int object, double x, double y, double s
     }
 }
 
-int draw_self()
+inline int draw_self()
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     draw_sprite_ext(inst->sprite_index, inst->image_index, inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
@@ -592,7 +593,7 @@ inline void action_fullscreen(int action)
 {
     switch (action)
     {
-        case 0:
+        case 0: default:
             window_set_fullscreen(!window_get_fullscreen());
             break;
         case 1:
@@ -741,12 +742,10 @@ namespace enigma
     variant ev_perf(int type, int numb);
 }
 
-variant event_perform(int type, int numb)
-{
+inline variant event_perform(int type, int numb) {
     return enigma::ev_perf(type, numb);
 }
 
-variant event_user(int numb)
-{
+inline variant event_user(int numb) {
     return event_perform(ev_other, numb + ev_user0);
 }

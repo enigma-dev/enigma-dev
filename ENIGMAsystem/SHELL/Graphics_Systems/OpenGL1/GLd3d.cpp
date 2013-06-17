@@ -29,6 +29,8 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
+#include <floatcomp.h>
+
 namespace enigma {
     bool d3dMode = false;
     bool d3dHidden = false;
@@ -293,9 +295,10 @@ void d3d_set_projection_perspective(double x, double y, double width, double hei
   glMultMatrixd(transformation_matrix);
   enigma::d3d_light_update_positions();
 }
+
 void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep)
 {
-  if ((x1 == x2 && y1 == y2) || z1 == z2) {
+  if ((fequal(x1, x2) || fequal(y1, y2)) || fequal(z1, z2)) {
     return;
   }
 

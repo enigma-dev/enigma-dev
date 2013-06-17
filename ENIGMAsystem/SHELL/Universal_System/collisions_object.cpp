@@ -23,11 +23,13 @@
 #include "collisions_object.h"
 #include <cmath>
 
+#include <floatcomp.h>
+
 namespace enigma
 {
     int object_collisions::$bbox_left() const
     {
-        if (image_angle == 0)
+        if (fzero(image_angle))
             return (image_xscale >= 0) ?
                    ((mask_index >= 0 ? sprite_get_bbox_left_relative(mask_index)*image_xscale : (sprite_index >= 0 ? sprite_get_bbox_left_relative(sprite_index)*image_xscale : 0)) + x + .5) :
                    ((mask_index >= 0 ? (sprite_get_bbox_right_relative(mask_index) + 1)*image_xscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_right_relative(sprite_index) + 1)*image_xscale - 1: 0)) + x + .5);
@@ -47,7 +49,7 @@ namespace enigma
 
     int object_collisions::$bbox_right() const
     {
-        if (image_angle == 0)
+        if (fzero(image_angle))
             return (image_xscale >= 0) ?
                    ((mask_index >= 0 ? (sprite_get_bbox_right_relative(mask_index) + 1)*image_xscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_right_relative(sprite_index) + 1)*image_xscale - 1: 0)) + x + .5) :
                    ((mask_index >= 0 ? sprite_get_bbox_left_relative(mask_index)*image_xscale : (sprite_index >= 0 ? sprite_get_bbox_left_relative(sprite_index)*image_xscale : 0)) + x + .5);
@@ -67,7 +69,7 @@ namespace enigma
 
     int object_collisions::$bbox_top() const
     {
-        if (image_angle == 0)
+        if (fzero(image_angle))
             return (image_yscale >= 0) ?
                 ((mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0)) + y + .5):
                 ((mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0)) + y + .5);
@@ -87,7 +89,7 @@ namespace enigma
 
     int object_collisions::$bbox_bottom() const
     {
-        if (image_angle == 0)
+        if (fzero(image_angle))
             return (image_yscale >= 0) ?
                 ((mask_index >= 0 ? (sprite_get_bbox_bottom_relative(mask_index) + 1)*image_yscale - 1 : (sprite_index >= 0 ? (sprite_get_bbox_bottom_relative(sprite_index) + 1)*image_yscale - 1: 0)) + y + .5) :
                 ((mask_index >= 0 ? sprite_get_bbox_top_relative(mask_index)*image_yscale : (sprite_index >= 0 ? sprite_get_bbox_top_relative(sprite_index)*image_yscale : 0)) + y + .5);

@@ -27,10 +27,11 @@
 #include "coll_util.h"
 #include "coll_impl.h"
 #include <cmath>
+#include <floatcomp.h>
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {
-    if (angle == 0)
+    if (fzero(angle))
     {
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
         const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
@@ -156,7 +157,7 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
         double dx = x2 - x1;
 
         //do slope check of non vertical lines (dx != 0)
-        if ((float)dx)
+        if (fnzero(dx))
         {
             double a = (y2 - y1) / dx;
             double b = y1 - a * x1;
@@ -230,7 +231,7 @@ static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, 
 
 enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool notme, int x1, int y1, double rx, double ry)
 {
-    if (rx == 0 || ry == 0)
+    if (fzero(rx) || fzero(ry))
         return 0;
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)

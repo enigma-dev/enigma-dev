@@ -64,7 +64,7 @@ namespace enigma
     {
       int tmp = ih*widfull*4;
       for (iw=0; iw < bmpwidth; iw++){
-        bitmap[tmp+3] = 255;
+        bitmap[tmp+3] = (char)0xFF;
         bitmap[tmp+2] = fgetc(imgfile);
         bitmap[tmp+1] = fgetc(imgfile);
         bitmap[tmp]   = fgetc(imgfile);

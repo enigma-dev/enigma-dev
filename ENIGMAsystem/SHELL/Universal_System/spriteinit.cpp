@@ -101,7 +101,7 @@ namespace enigma
           continue;
         }
         delete[] cpixels;
-        //co//ut << "Adding subimage...\n";
+        
         unsigned char* collision_data = 0;
         switch (coll_type)
         {
@@ -113,8 +113,9 @@ namespace enigma
           case ct_polygon: collision_data = 0; break; //FIXME: Support vertex data.
           default: collision_data = 0; break;
         };
+        
+        // FIXME: collision_data is never passed to a mask generator!
         sprite_set_subimage(sprid, ii, xorig, yorig, width, height, pixels, pixels, coll_type);
-        //co//ut << "...done\n";
         
         delete[] pixels;
         if (!fread(&nullhere,4,1,exe)) return;

@@ -202,7 +202,7 @@ struct var
   
   var();
   var(const var&);
-  types_extrapolate_alldec(var);
+  types_extrapolate_alldec(var)
   
   types_extrapolate_alldec(variant& operator=)
   var& operator= (const var&);

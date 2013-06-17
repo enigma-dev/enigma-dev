@@ -35,6 +35,8 @@
   #include "Widget_Systems/widgets_mandatory.h"
 #endif
 
+#include "floatcomp.h"
+
 namespace enigma {
 	extern size_t path_idmax;
 	extern unsigned bound_texture;
@@ -118,11 +120,10 @@ bool path_update()
         return false;
     #endif
     return false;  //function can cause crashes atm, until extension variables fixed
-
-    enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
+    
     enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
 
-    if (inst_paths->path_index == -1 || inst_paths->path_speed == 0)
+    if (inst_paths->path_index == -1 || fzero(inst_paths->path_speed))
         return false;
 
     return true;

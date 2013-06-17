@@ -33,17 +33,18 @@
 #include <math.h>
 #include "depth_draw.h"
 #include "graphics_object.h"
+#include <floatcomp.h>
 
 namespace enigma
 {
   object_graphics::object_graphics() {}
   object_graphics::object_graphics(unsigned _x, int _y): object_planar(_x,_y) {}
-  object_graphics::~object_graphics() {};
+  object_graphics::~object_graphics() {}
 
-  INTERCEPT_DEFAULT_COPY(enigma::depthv);
+  INTERCEPT_DEFAULT_COPY(enigma::depthv)
   void depthv::function(variant oldval) {
     rval.d = floor(rval.d);
-    if (oldval.rval.d == rval.d) return;
+    if (fequal(oldval.rval.d, rval.d)) return;
 
     map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
     if (it == id_to_currentnextdepth.end()) { // Insert a request to change in depth.

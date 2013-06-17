@@ -43,8 +43,8 @@ namespace enigma
 
 namespace enigma
 {
-    grid::grid(unsigned int id,int left,int top,unsigned int hcells,unsigned int vcells,unsigned int cellwidth,unsigned int cellheight,unsigned threshold,double speed_modifier):
-        id(id), left(left), top(top), hcells(hcells), vcells(vcells), cellwidth(cellwidth), cellheight(cellheight), threshold(threshold), speed_modifier(speed_modifier), nodearray()
+    grid::grid(unsigned int idp,int leftp,int topp,unsigned int hcellsp,unsigned int vcellsp,unsigned int cellwidthp,unsigned int cellheightp,unsigned thresholdp,double speed_modifierp):
+        id(idp), left(leftp), top(topp), hcells(hcellsp), vcells(vcellsp), cellwidth(cellwidthp), cellheight(cellheightp), threshold(thresholdp), speed_modifier(speed_modifierp), nodearray()
     {
         gridstructarray[id] = this;
         gridstructarray[id]->nodearray.reserve(hcells*vcells);
@@ -93,25 +93,25 @@ namespace enigma
     }
 
     //Helper functions
-    unsigned find_heuristic(const node* n0, const node* n1, bool allow_diag) //Distance from n0 to n1
+    static inline unsigned find_heuristic(const node* n0, const node* n1, bool allow_diag) //Distance from n0 to n1
     {
         if (!allow_diag){
             //std::cout << "Straight " << " H = " << fabs((int)n0->x-(int)n1->x) + fabs((int)n0->y-(int)n1->y) << std::endl;
             return fabs((int)n0->x-(int)n1->x) + fabs((int)n0->y-(int)n1->y);
-        }else{
+        } else {
             //std::cout << "Diagn " << " H = " << fmax(fabs((int)n0->x-(int)n1->x) , fabs((int)n0->y-(int)n1->y)) << std::endl;
             return fmax(fabs((int)n0->x-(int)n1->x) , fabs((int)n0->y-(int)n1->y));
         }
     }
 
-    int find_priority(multimap<unsigned,node*> &m, node* value){
+    static inline int find_priority(multimap<unsigned,node*> &m, node* value){
         multimap<unsigned,node*>::iterator it;
         for (it = m.begin(); it != m.end(); it++)
             if (it->second == value) return (int)it->first;
         return -1;
     }
 
-    bool check_corners(unsigned id, node* n0, node* n1) //There must be a better way to do this
+    static inline bool check_corners(unsigned id, node* n0, node* n1) //There must be a better way to do this
     {
         //std::cout << "Searching..." << std::endl;
         for (vector<enigma::node*>::iterator it0 = n0->neighbor_nodes.begin(); it0!=n0->neighbor_nodes.end(); ++it0)
@@ -159,15 +159,17 @@ namespace enigma
                 std::cout << (*tit).first << " => " << (*tit).second << std::endl;*/
 
             //this is basically ds_priority_delete_min
-            multimap<unsigned,node*>::iterator it = OPEN.begin(), it_check;
-            it_check = it++;
-            while (it != OPEN.end())
             {
-                if ((*it).first < (*it_check).first) {it_check = it;}
-                it++;
+              multimap<unsigned,node*>::iterator it = OPEN.begin(), it_check;
+              it_check = it++;
+              while (it != OPEN.end())
+              {
+                  if ((*it).first < (*it_check).first) {it_check = it;}
+                  it++;
+              }
+              current = (*it_check).second;
+              OPEN.erase(it_check);
             }
-            current = (*it_check).second;
-            OPEN.erase(it_check);
             //std::cout << OPEN.size() << std::endl;
             //std::cout << "End" << std::endl;
             //multimap<unsigned,node*>::iterator tit;

@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef _WIDGETS_MANDATORY__H
+#define _WIDGETS_MANDATORY__H
+
 namespace enigma
 {
   // This function is called at the beginning of the game to allow the widget system to load.
@@ -35,3 +38,4 @@ namespace enigma
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
 void show_error(std::string msg, const bool fatal); 
 
+#endif

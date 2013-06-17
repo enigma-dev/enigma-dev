@@ -37,7 +37,7 @@ bool load_al_dll();
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
 #include "Universal_System/estring.h"
@@ -49,12 +49,12 @@ clock_t starttime;
 clock_t elapsedtime;
 clock_t lasttime;
 
-ALfloat listenerPos[]={0.0f,0.0f,0.0f};
-ALfloat listenerVel[]={0.0f,0.0f,0.0f};
-ALfloat listenerOri[]={0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
+ALfloat listenerPos[] = {0.0f,0.0f,0.0f};
+ALfloat listenerVel[] = {0.0f,0.0f,0.0f};
+ALfloat listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 int falloff_model = 0;
 
-int channel_num = 128;
+size_t channel_num = 128;
 struct sound_instance {
   ALuint source;
   int soundIndex;
@@ -113,17 +113,11 @@ struct soundEmitter
   ALfloat falloff[3];
   ALfloat pitch;
   ALfloat volume;
-  soundEmitter()
-  {
-    ALfloat emitPos[3]={0.0f,0.0f,0.0f};
-    ALfloat emitVel[3]={0.0f,0.0f,0.0f};
-    ALfloat falloff[3]={0.0f,0.0f,1.0f};
-    volume = 1.0f;
-  }
+  soundEmitter(): emitPos {0.0f,0.0f,0.0f}, emitVel {0.0f,0.0f,0.0f}, falloff{0.0f,0.0f,1.0f}, volume(1.0f) {}
 };
 vector<soundEmitter*> sound_emitters(0);
 
-int get_free_channel(double priority)
+static int get_free_channel(double priority)
 {
   // test for channels not playing anything
   for(size_t i = 1; i < sound_sources.size(); i++)
@@ -156,6 +150,8 @@ int get_free_channel(double priority)
       return i;
     }
   }
+  
+  return -1;
 }
 
 namespace enigma
@@ -335,17 +331,20 @@ namespace enigma
           }
           // fallthrough
         case LOADSTATE_SOURCED:
-          for(size_t i = 1; i < sound_sources.size(); i++) {
-            alDeleteSources(1, &sound_sources[i]->source);
+          for(size_t j = 1; j < sound_sources.size(); j++) {
+            alDeleteSources(1, &sound_sources[j]->source);
           }
           break;
+        
+        case LOADSTATE_INDICATED:
+        case LOADSTATE_NONE:
         default: ;
       }
     }
 
     alureShutdownDevice();
   }
-};
+}
 
 // ***** OLD SOUND SYSTEM *****
 
@@ -397,13 +396,14 @@ bool sound_loop(int sound) // Returns whether sound is playing
     return -1;
   }
 }
-bool sound_pause(int sound) // Returns whether the sound is still playing
+bool sound_pause(int sound) // Returns whether the sound was successfully paused
 {
   for(size_t i = 1; i < sound_sources.size(); i++) {
     if (sound_sources[i]->soundIndex == sound) {
       return alurePauseSource(sound_sources[i]->source);
     }
   }
+  return false;
 }
 void sound_pause_all()
 {
@@ -455,6 +455,7 @@ bool sound_resume(int sound) // Returns whether the sound is playing
       return alureResumeSource(sound_sources[i]->source);
     }
   }
+  return false;
 }
 void sound_resume_all()
 {
@@ -502,10 +503,11 @@ float sound_get_length(int sound) { // Not for Streams
   return size / channels / (bits/8) / (float)freq;
 }
 float sound_get_position(int sound) { // Not for Streams
-  get_sound(snd,sound,-1);
-  float offset;
-
-  //alGetSourcef(channel_sources[0], AL_SEC_OFFSET, &offset);
+  float offset = -1;
+  for(size_t i = 1; i < sound_sources.size(); i++) {
+    if (sound_sources[i]->soundIndex == sound)
+      alGetSourcef(sound_sources[i]->source, AL_SEC_OFFSET, &offset);
+  }
   return offset;
 }
 void sound_seek(int sound, float position) {
@@ -557,16 +559,18 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
   // Buffer sound
   fseek(afile,0,SEEK_END);
   const size_t flen = ftell(afile);
-  char fdata[flen];
+  char *fdata = new char[flen];
   fseek(afile,0,SEEK_SET);
   if (fread(fdata,1,flen,afile) != flen)
     puts("WARNING: Resource stream cut short while loading sound data");
 
   // Decode sound
   int rid = enigma::sound_allocate();
-  if (enigma::sound_add_from_buffer(rid,fdata,flen))
+  bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
+  delete fdata;
+  
+  if (fail)
     return (--enigma::sound_idmax, -1);
-
   return rid;
 }
 
@@ -836,16 +840,18 @@ int audio_add(string fname, int type)
   // Buffer sound
   fseek(afile,0,SEEK_END);
   const size_t flen = ftell(afile);
-  char fdata[flen];
+  char *fdata = new char[flen];
   fseek(afile,0,SEEK_SET);
   if (fread(fdata,1,flen,afile) != flen)
     puts("WARNING: Resource stream cut short while loading sound data");
 
   // Decode sound
   int rid = enigma::sound_allocate();
-  if (enigma::sound_add_from_buffer(rid,fdata,flen))
+  bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
+  delete fdata;
+  
+  if (fail)
     return (--enigma::sound_idmax, -1);
-
   return rid;
 }
 

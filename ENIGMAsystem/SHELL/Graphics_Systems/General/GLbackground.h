@@ -27,16 +27,6 @@ int background_get_texture(int backId);
 @param backId The index of the background asset.
 @return
 **/
-int background_get_width(int backId);
-/** description
-@param backId The index of the background asset.
-@return
-**/
-int background_get_height(int backId);
-/** description
-@param backId The index of the background asset.
-@return
-**/
 double background_get_texture_width_factor(int backId);
 /** description
 @param backId The index of the background asset.

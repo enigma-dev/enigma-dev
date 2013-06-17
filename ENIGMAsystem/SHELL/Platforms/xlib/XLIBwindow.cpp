@@ -34,9 +34,10 @@
 
 using namespace std;
 
-#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants, and io_clear().
 #include "Universal_System/roomsystem.h"
 #include "Platforms/platforms_mandatory.h" // For type insurance
+#include "XLIBwindow.h" // Type insurance for non-mandatory functions
 #include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBwindow.h"
 #include "XLIBmain.h"
@@ -282,28 +283,10 @@ bool window_get_fullscreen()
                  //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
 short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
 
-namespace enigma_user
-{
-
-void window_set_cursor(int c)
-{
-	XUndefineCursor(disp,win);
-	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
-}
-
-// FIXME: MOVEME: I can't decide where the hell to put this.
-void screen_refresh() {
-	glXSwapBuffers(disp,win);
-    enigma::update_mouse_variables();
-    window_set_caption(room_caption);
-}
-
-}
-
 namespace enigma
 {
-  char keymap[512];
-  char usermap[256];
+  unsigned char keymap[512];
+  unsigned char usermap[256];
   void initkeymap()
   {
     using namespace enigma_user;
@@ -393,7 +376,6 @@ namespace enigma {
     x[irx] = 0;
   }
   #define hielem 9
-  static int last_second[hielem+1] = {0},last_microsecond[hielem+1] = {0};
   void sleep_for_framerate(int rs)
   {
     current_room_speed = rs;
@@ -413,6 +395,12 @@ void io_handle()
     if(handleEvents() > 0)
       exit(0);
   }
+}
+
+void window_set_cursor(int c)
+{
+	XUndefineCursor(disp,win);
+	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
 }
 
 void keyboard_wait()

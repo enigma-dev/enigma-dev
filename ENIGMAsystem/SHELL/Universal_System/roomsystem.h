@@ -42,7 +42,7 @@ int room_goto_previous();
 int room_goto_next();
 int room_next(int num);
 int room_previous(int num);
-bool room_exists(unsigned roomid);
+bool room_exists(int roomid);
 int room_set_width(int indx, int wid);
 int room_set_height(int indx, int hei);
 int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha = 1, int color = 0xFFFFFF);
@@ -160,7 +160,7 @@ namespace enigma
 
 #include "multifunction_variant.h"
 namespace enigma { struct roomv: multifunction_variant {
-  INHERIT_OPERATORS(roomv);
+  INHERIT_OPERATORS(roomv)
   void function(variant oldval);
 }; }
 namespace enigma_user {

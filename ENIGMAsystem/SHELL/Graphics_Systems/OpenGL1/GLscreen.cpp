@@ -76,7 +76,7 @@ namespace enigma
     void set_particles_implementation(particles_implementation* part_impl)
     {
         particles_impl = part_impl;
-    };
+    }
     void update_particlesystems()
     {
         if (particles_impl != NULL) {

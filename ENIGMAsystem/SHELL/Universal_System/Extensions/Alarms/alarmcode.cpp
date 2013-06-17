@@ -6,7 +6,7 @@
 #include "implement.h"
 #include "include.h"
 
-declare_recast(enigma::extension_alarm);
+declare_recast(enigma::extension_alarm)
 
 extern bool argument_relative;
 

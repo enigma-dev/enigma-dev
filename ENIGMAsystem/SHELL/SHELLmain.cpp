@@ -84,7 +84,7 @@ extern int amain();
 
 #include "Universal_System/lives.h"
 
-namespace enigma_user {};
+namespace enigma_user {}
 
 using namespace enigma_user;
 
@@ -106,7 +106,7 @@ using namespace enigma_user;
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h"
 
-  #if BUILDMODE
+  #if defined(BUILDMODE) && BUILDMODE
     #include "Modes/buildmode.h"
   #endif
 

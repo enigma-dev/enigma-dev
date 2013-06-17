@@ -58,7 +58,7 @@ namespace enigma
     }
 }
 
-#if SHOWERRORS
+#if defined(SHOW_ERRORS) && SHOW_ERRORS
   #define errcheck(objid,err) \
 	if (objid < 0 or objid >= enigma::objectcount or !enigma::objectdata[objid]) \
 		return (show_error(err,0), 0)
