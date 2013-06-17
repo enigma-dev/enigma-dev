@@ -74,9 +74,6 @@ extern int amain();
 
 #include "Universal_System/resource_data.h"
 #include "Universal_System/highscore_functions.h"
-//#include "Universal_System/path_functions.h"
-//#include "Universal_System/motion_planning.h"
-//#include "Universal_System/mp_movement.h"
 
 static void show_info() {} //TEMPORARY FILLER, RELOCATE ME
 
