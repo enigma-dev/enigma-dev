@@ -40,9 +40,9 @@ namespace enigma {
 	extern unsigned bound_texture;
 }
 
-#include "collisions_object.h"
-#include "instance_system.h"
-#include "Extensions/Paths/implement.h"
+#include "Universal_System/collisions_object.h"
+#include "Universal_System/instance_system.h"
+#include "implement.h"
 
 namespace enigma_user
 {

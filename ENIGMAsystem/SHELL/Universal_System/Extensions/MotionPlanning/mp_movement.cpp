@@ -28,8 +28,8 @@
 #include <cmath>
 #include "Universal_System/instance_system.h"
 #include "mp_movement.h"
-#include "Universal_System/pathstruct.h"
-#include "Universal_System/path_functions.h"
+#include "../Paths/pathstruct.h"
+#include "../Paths/path_functions.h"
 
 // FIXME: NONSTANDARD
 
