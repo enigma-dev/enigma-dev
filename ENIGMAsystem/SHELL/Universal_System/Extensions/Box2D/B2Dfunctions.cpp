@@ -19,6 +19,8 @@
 #include <stdio.h>
 //using namespace std;
 
+#include "Universal_System/callbacks_events.h"
+
 #include <Box2D/Box2D.h>
 #include "B2Dfunctions.h"
 bool systemPaused = false;
@@ -75,11 +77,33 @@ using std::string;
     B2DBody* b = b2dbodies[id];
 #endif
 
+namespace enigma {
+  bool has_been_initialized = false;
+
+  void update_worlds_automatically() {
+    vector<B2DWorld*>::iterator it_end = b2dworlds.end();
+    for (vector<B2DWorld*>::iterator it = b2dworlds.begin(); it != it_end; it++) {
+      (*it)->world_update();
+    }
+  }
+
+  // Should be called whenever a world is created.
+  void init_box2d_system() {
+    if (!has_been_initialized) {
+      has_been_initialized = true;
+
+      // Register callback.
+      register_callback_before_collision_event(update_worlds_automatically);
+    }
+  }
+}
+
 namespace enigma_user
 {
 
 void b2d_world_create(int pixeltometerscale)
 {
+  enigma::init_box2d_system();
   /** studio's fucked up world creation just auto binds it to the current room
       thats fuckin retarded thus why i overloaded the function and provided an extra
       function for setting the pixel to metre scale
@@ -88,6 +112,7 @@ void b2d_world_create(int pixeltometerscale)
 
 int b2d_world_create()
 {
+  enigma::init_box2d_system();
   int i = b2dworlds.size();
   b2dworlds.push_back(new B2DWorld());
   return i;

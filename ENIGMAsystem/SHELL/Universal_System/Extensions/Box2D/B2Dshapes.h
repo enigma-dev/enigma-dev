@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _JOINTS__H
-#define _JOINTS__H
+#ifndef _ENIGMA_B2D_SHAPES__H
+#define _ENIGMA_B2D_SHAPES__H
 
 #include <vector>
 using std::vector;
@@ -232,4 +232,5 @@ int b2d_fixture_get_body(int id);
 
 }
 
-#endif
+#endif // _ENIGMA_B2D_SHAPES__H
+

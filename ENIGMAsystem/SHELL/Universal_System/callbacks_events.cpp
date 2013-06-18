@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura
+/** Copyright (C) 2013 forthevin
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,16 +15,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Collision_Systems/collision_mandatory.h"
+#include <list>
 
 namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
-  {
-    return 0;
+{
+  using std::list;
+
+  typedef void (*callback_t )();
+
+  list<callback_t> before_collision_callbacks;
+
+  void perform_callbacks_before_collision_event() {
+    list<callback_t>::iterator it_end = before_collision_callbacks.end();
+    for (list<callback_t>::iterator it = before_collision_callbacks.begin(); it != it_end; it++) {
+      (*it)();
+    }
   }
 
-  void free_collision_mask(void* mask)
-  {
+  void register_callback_before_collision_event(callback_t callback) {
+    before_collision_callbacks.push_back(callback);
   }
 }
+

@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _FUNCTIONS__H
-#define _FUNCTIONS__H
+#ifndef _ENIGMA_B2D_FUNCTIONS__H
+#define _ENIGMA_B2D_FUNCTIONS__H
 
 #include <vector>
 using std::vector;
@@ -474,4 +474,5 @@ void b2d_pause_enable(bool pause);
 
 }
 
-#endif
+#endif // _ENIGMA_B2D_FUNCTIONS__H
+

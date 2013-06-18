@@ -271,7 +271,7 @@ beforecollisionautomaticcollisionhandling: 100000
 	Name: Before collision automatic collision handling
 	Mode: None
 	Default: ;
-	Instead: enigma::perform_automatic_collision_handling_before_collision_event();
+	Instead: enigma::perform_callbacks_before_collision_event();
 
 collision: 4
 	Group: Collision

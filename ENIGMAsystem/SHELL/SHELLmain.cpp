@@ -37,6 +37,8 @@
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/fontstruct.h"
 
+#include "Universal_System/callbacks_events.h"
+
 #include "GameSettings.h"
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
