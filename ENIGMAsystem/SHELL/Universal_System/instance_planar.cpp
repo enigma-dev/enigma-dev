@@ -44,7 +44,7 @@ int instance_nearest(int x,int y,int obj,bool notme)
     if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
     xl = ((enigma::object_planar*)*it)->x - x;
     yl = ((enigma::object_planar*)*it)->y - y;
-    const double dstclc = xl * x1 + yl * y1;
+    const double dstclc = xl * xl + yl * yl;
     if (dstclc < dist_lowest) {
       dist_lowest = dstclc;
       retid = it->id;
@@ -66,7 +66,7 @@ int instance_furthest(int x,int y,int obj,bool notme)
     if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
     xl=((enigma::object_planar*)*it)->x - x;
     yl=((enigma::object_planar*)*it)->y - y;
-    dstclc = xl * x1 + yl * y1;
+    dstclc = xl * xl + yl * yl;
     if (dstclc > dist_highest)
     {
       dist_highest = dstclc;

@@ -77,18 +77,6 @@ namespace enigma
     {
         particles_impl = part_impl;
     };
-    void update_particlesystems()
-    {
-        if (particles_impl != NULL) {
-            (particles_impl->update_particlesystems)();
-        }
-    }
-    void graphics_clean_up_roomend()
-    {
-        if (particles_impl != NULL) {
-            (particles_impl->clear_effects)();
-        }
-    }
     extern void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha);
 }
 

@@ -308,7 +308,7 @@ particlesystemsupdate: 100000
 	Name: Particle Systems Update
 	Mode: None
 	Default: ;
-	Instead: enigma::update_particlesystems();
+	Instead: enigma::perform_callbacks_particle_updating();
 
 
 # Fun fact: Draw comes after End Step.

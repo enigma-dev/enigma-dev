@@ -41,16 +41,10 @@ namespace enigma
 
   struct particles_implementation
   {
-    // Updates all particle systems that are automatically updated.
-    void (*update_particlesystems)();
     // Draws all given particle systems in the depth range [-high, -low[ that are automatically drawn.
     void (*draw_particlesystems)(double high, double low);
-    void (*clear_effects)();
   };
   void set_particles_implementation(particles_implementation* particles_impl);
-  // Updates all particle systems that are automatically updated.
-  void update_particlesystems();
-  void graphics_clean_up_roomend();
   void delete_tiles();
   void load_tiles();
 }

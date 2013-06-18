@@ -18,17 +18,18 @@
 #ifndef _ENIGMA_CALLBACKS_EVENTS__H
 #define _ENIGMA_CALLBACKS_EVENTS__H
 
-namespace enigma
-{
-  // This function is called once per iteration of the event loop, just before the collision
-  // event and the objects with collision events (if any) are stepped through.
-  // It performs all callbacks registered for execution before the collision event begins.
+namespace enigma {
+  // Before collision event.
   void perform_callbacks_before_collision_event();
-
-  // Register a callback to be called before collisions are handled.
-  // This can be useful for things like physics engine extensions, which
-  // need to update the different worlds each step.
   void register_callback_before_collision_event(void (*callback)());
+
+  // Particle updating.
+  void perform_callbacks_particle_updating();
+  void register_callback_particle_updating(void (*callback)());
+
+  // Clean up room-end.
+  void perform_callbacks_clean_up_roomend();
+  void register_callback_clean_up_roomend(void (*callback)());
 }
 
 #endif // _ENIGMA_CALLBACKS_EVENTS__H
