@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "bullet_worlds.h"
+#include "B3Dworlds.h"
 
 #include <vector>
 using std::vector;

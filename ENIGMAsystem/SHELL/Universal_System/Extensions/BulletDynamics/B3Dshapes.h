@@ -15,6 +15,26 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifdef DEBUG_MODE
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_shaper(w,id,r) \
+    if (unsigned(id) >= bulletShapes.size() || id < 0) { \
+      show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
+      return r; \
+    } BulletShape* w = bulletShapes[id];
+  #define get_shape(w,id) \
+    if (unsigned(id) >= bulletShapes.size() || id < 0) { \
+      show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
+      return; \
+    } BulletShape* w = bulletShapes[id];
+#else
+  #define get_shaper(w,id,r) \
+    BulletShape* w = bulletShapes[id];
+  #define get_shape(w,id) \
+    BulletShape* w = bulletShapes[id];
+#endif
+
 #ifndef _BULLETSHAPES__H
 #define _BULLETSHAPES__H
 
@@ -42,12 +62,12 @@ extern vector<BulletShape*> bulletShapes;
 
 namespace enigma_user {
 
-int bullet_shape_create_plane();
-int bullet_shape_create_sphere(double radius);
-int bullet_shape_create_plane_static(double nx, double ny, double nz, btScalar constant);
-int bullet_shape_create_sphere_static();
-void bullet_shape_calculate_local_inertia(int id, double mass, double ix, double iy, double iz);
-void bullet_shape_delete(int id);
+int b3d_shape_create_plane();
+int b3d_shape_create_sphere(double radius);
+int b3d_shape_create_plane_static(double nx, double ny, double nz, btScalar constant);
+int b3d_shape_create_sphere_static();
+void b3d_shape_calculate_local_inertia(int id, double mass, double ix, double iy, double iz);
+void b3d_shape_delete(int id);
 
 }
 #endif

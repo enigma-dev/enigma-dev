@@ -1,3 +1,3 @@
 INCLUDES += `pkg-config --cflags bullet`
 SOURCES += $(wildcard Universal_System/Extensions/BulletDynamics/*.cpp) 
-LDLIBS += -lBulletDynamics -lBulletCollision -lLinearMath
+LDLIBS += -lBulletDynamics -lBulletSoftBody -lBulletCollision -lLinearMath
