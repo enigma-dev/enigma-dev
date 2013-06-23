@@ -20,12 +20,32 @@
 
 namespace enigma_user {
 
-int b3d_shape_create_plane();
+int b3d_shape_create();
+void b3d_shape_delete(int id);
+
+// These functions create the shape and build it all in one call, only for basic shapes
+int b3d_shape_create_box(double halfwidth, double halflength, double halfheight);
+int b3d_shape_create_cylinder(double halfwidth, double halflength, double halfheight);
+int b3d_shape_create_capsule(double radius, double height);
+int b3d_shape_create_cone(double radius, double height);
 int b3d_shape_create_sphere(double radius);
 int b3d_shape_create_plane_static(double nx, double ny, double nz, double constant);
-int b3d_shape_create_sphere_static();
+
+// These functions build the already created shape or else rebuild it into a new shape, if it was already built
+void b3d_shape_box(int id, double halfwidth, double halflength, double halfheight);
+void b3d_shape_cylinder(int id, double halfwidth, double halflength, double halfheight);
+void b3d_shape_capsule(int id, double radius, double height);
+void b3d_shape_cone(int id, double radius, double height);
+void b3d_shape_sphere(int id, double radius);
+void b3d_shape_plane_static(int id, double nx, double ny, double nz, double constant);
+
 void b3d_shape_calculate_local_inertia(int id, double mass, double ix, double iy, double iz);
-void b3d_shape_delete(int id);
+double b3d_shape_get_scale_x(int id);
+double b3d_shape_get_scale_y(int id);
+double b3d_shape_get_scale_z(int id);
+double b3d_shape_get_margin(int id);
+void b3d_shape_set_margin(int id, double margin);
+void b3d_shape_set_scale(int id, double sx, double sy, double sz);
 
 }
 #endif

@@ -57,29 +57,50 @@ void b3d_world_delete(int id)
   bulletWorlds.erase(bulletWorlds.begin() + id);
 }
 
+int b3d_world_get_type(int id) 
+{
+  get_world(bulletworld, id);
+  return bulletworld->type;
+}
+
 void b3d_world_set_gravity(int id, double gx, double gy, double gz)
 {
   get_world(bulletworld, id);
   bulletworld->dynamicsWorld->setGravity(btVector3(gx,gy,gz));
 }
 
-void b3d_world_add_body(int id, int body) 
+void b3d_world_add_bodyr(int id, int rigidbody)
 {
   get_world(bulletworld, id);
-  get_body(bulletbody, body);
-  bulletworld->dynamicsWorld->addRigidBody(bulletbody->rigidBody);
+  get_body(bulletbodyr, rigidbody);
+  bulletworld->dynamicsWorld->addRigidBody(bulletbodyr->rigidBody);
+}
+
+void b3d_world_add_bodys(int id, int softbody)
+{
+  get_worldc(bulletworld, id, btSoftRigidDynamicsWorld*);
+  get_softbody(bulletbodys, softbody);
+  bulletworld->addSoftBody(bulletbodys->softBody);
+}
+
+void b3d_world_remove_bodyr(int id, int rigidbody)
+{
+  get_world(bulletworld, id);
+  get_body(bulletbodyr, rigidbody);
+  bulletworld->dynamicsWorld->removeRigidBody(bulletbodyr->rigidBody);
+}
+
+void b3d_world_remove_bodys(int id, int softbody)
+{
+  get_worldc(bulletworld, id, btSoftRigidDynamicsWorld*);
+  get_softbody(bulletbodys, softbody);
+  bulletworld->removeSoftBody(bulletbodys->softBody);
 }
 
 void b3d_world_update(int id, double timestep, double iterations) 
 {
   get_world(bulletworld, id);
   bulletworld->update(timestep, iterations);
-}
-
-void b3d_world_remove_body(int id, int body)
-{
-  get_world(bulletworld, id);
-  bulletworld->dynamicsWorld->removeRigidBody(bulletBodies[body]->rigidBody);
 }
 
 }

@@ -23,22 +23,10 @@ vector<BulletShape*> bulletShapes;
 
 namespace enigma_user {
 
-int b3d_shape_create_sphere(double radius)
+int b3d_shape_create()
 {
   int i = bulletShapes.size();
   BulletShape* bulletshape = new BulletShape();
-  btCollisionShape* btshape = new btSphereShape(radius);
-  bulletshape->colShape = btshape;
-  bulletShapes.push_back(bulletshape);
-  return i;
-}
-
-int b3d_shape_create_plane_static(double nx, double ny, double nz, double constant)
-{
-  int i = bulletShapes.size();
-  BulletShape* bulletshape = new BulletShape();
-  btCollisionShape* btshape = new btStaticPlaneShape(btVector3(nx,ny,nz),constant);
-  bulletshape->colShape = btshape;
   bulletShapes.push_back(bulletshape);
   return i;
 }
@@ -49,12 +37,139 @@ void b3d_shape_delete(int id)
   bulletShapes.erase(bulletShapes.begin() + id);
 }
 
+int b3d_shape_create_box(double halfwidth, double halflength, double halfheight)
+{
+  int i = b3d_shape_create();
+  b3d_shape_box(i, halfwidth, halflength, halfheight);
+  return i;
+}
+
+int b3d_shape_create_cylinder(double halfwidth, double halflength, double halfheight)
+{
+  int i = b3d_shape_create();
+  b3d_shape_cylinder(i, halfwidth, halflength, halfheight);
+  return i;
+}
+
+int b3d_shape_create_capsule(double radius, double height)
+{
+  int i = b3d_shape_create();
+  b3d_shape_capsule(i, radius, height);
+  return i;
+}
+
+int b3d_shape_create_cone(double radius, double height)
+{
+  int i = b3d_shape_create();
+  b3d_shape_cone(i, radius, height);
+  return i;
+}
+
+int b3d_shape_create_sphere(double radius)
+{
+  int i = b3d_shape_create();
+  b3d_shape_sphere(i, radius);
+  return i;
+}
+
+int b3d_shape_create_plane_static(double nx, double ny, double nz, double constant)
+{
+  int i = b3d_shape_create();
+  b3d_shape_plane_static(i, nx, ny, nz, constant);
+  return i;
+}
+
+void b3d_shape_box(int id, double halfwidth, double halflength, double halfheight)
+{
+  get_shape(bulletshape, id);
+  btCollisionShape* btshape = new btBoxShape(btVector3(halfwidth, halflength, halfheight));
+  bulletshape->beginShape();
+  bulletshape->colShape = btshape;
+}
+
+void b3d_shape_cylinder(int id, double halfwidth, double halflength, double halfheight)
+{
+  get_shape(bulletshape, id);
+  btCollisionShape* btshape = new btCylinderShape(btVector3(halfwidth, halflength, halfheight));
+  bulletshape->beginShape();
+  bulletshape->colShape = btshape;
+}
+
+void b3d_shape_capsule(int id, double radius, double height)
+{
+  get_shape(bulletshape, id);
+  btCollisionShape* btshape = new btCapsuleShape(radius, height);
+  bulletshape->beginShape();
+  bulletshape->colShape = btshape;
+}
+
+void b3d_shape_cone(int id, double radius, double height)
+{
+  get_shape(bulletshape, id);
+  btCollisionShape* btshape = new btConeShape(radius, height);
+  bulletshape->beginShape();
+  bulletshape->colShape = btshape;
+}
+
+void b3d_shape_sphere(int id, double radius)
+{
+  get_shape(bulletshape, id);
+  btCollisionShape* btshape = new btSphereShape(radius);
+  bulletshape->beginShape();
+  bulletshape->colShape = btshape;
+}
+
+void b3d_shape_plane_static(int id, double nx, double ny, double nz, double constant)
+{
+  get_shape(bulletshape, id);
+  btCollisionShape* btshape = new btStaticPlaneShape(btVector3(nx,ny,nz),constant);
+  bulletshape->beginShape();
+  bulletshape->colShape = btshape;
+}
+
 void b3d_shape_calculate_local_inertia(int id, double mass, double ix, double iy, double iz)
 {
   get_shape(bulletshape, id);
   btVector3 inertia(ix,iy,iz);
   bulletshape->colShape->calculateLocalInertia(mass, inertia);
 }
+
+void b3d_shape_set_scale(int id, double sx, double sy, double sz)
+{
+  get_shape(bulletshape, id);
+  bulletshape->colShape->setLocalScaling(btVector3(sx, sy, sz));
+}
+
+double b3d_shape_get_scale_x(int id)
+{
+  get_shape(bulletshape, id);
+  return bulletshape->colShape->getLocalScaling().getX();
+}
+
+double b3d_shape_get_scale_y(int id)
+{
+  get_shape(bulletshape, id);
+  return bulletshape->colShape->getLocalScaling().getY();
+}
+
+double b3d_shape_get_scale_z(int id)
+{
+  get_shape(bulletshape, id);
+  return bulletshape->colShape->getLocalScaling().getZ();
+}
+
+void b3d_shape_set_margin(int id, double margin)
+{
+  get_shape(bulletshape, id);
+  return bulletshape->colShape->setMargin(margin);
+}
+
+double b3d_shape_get_margin(int id)
+{
+  get_shape(bulletshape, id);
+  return bulletshape->colShape->getMargin();
+}
+
 
 }
 

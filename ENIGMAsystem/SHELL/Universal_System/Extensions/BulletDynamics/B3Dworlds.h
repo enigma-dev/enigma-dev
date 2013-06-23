@@ -24,11 +24,12 @@ int b3d_world_create_softrigid();
 int b3d_world_create_discrete();
 int b3d_world_create_simple();
 void b3d_world_delete(int id);
+int b3d_world_get_type(int id);
 void b3d_world_set_gravity(int id, double gx, double gy, double gz);
-void b3d_world_add_body(int id, int body);
-void b3d_world_add_softbody(int id, int softbody);
-void b3d_world_remove_body(int id, int body);
-void b3d_world_remove_softbody(int id, int softbody);
+void b3d_world_add_bodyr(int id, int rigidbody);
+void b3d_world_add_bodys(int id, int softbody);
+void b3d_world_remove_bodyr(int id, int rigidbody);
+void b3d_world_remove_bodys(int id, int softbody);
 void b3d_world_update(int id, double timestep, double iterations); 
 
 }

@@ -45,16 +45,26 @@ using std::vector;
 
 struct BulletShape {
   int worldid;
+  bool shapebuilt;
   btCollisionShape* colShape;
 
   BulletShape()
   {
-
+    shapebuilt = false;
   }
 
   ~BulletShape() 
   {
     delete colShape;
+  }
+
+  void beginShape() 
+  {
+    if (shapebuilt) {
+      delete colShape;
+    } else {  
+      shapebuilt = true;
+    }
   }
 
 }; 
