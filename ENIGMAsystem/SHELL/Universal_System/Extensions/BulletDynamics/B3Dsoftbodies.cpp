@@ -16,6 +16,8 @@
 **/
 
 #include "B3Dsoftbodies.h"
+#include "BulletSoftBody.h"
+#include "BulletShape.h"
 #include <iostream>
 
 vector<BulletSoftBody*> bulletSoftBodies;

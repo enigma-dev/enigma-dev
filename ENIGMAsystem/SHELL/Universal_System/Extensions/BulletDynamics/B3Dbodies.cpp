@@ -16,6 +16,7 @@
 **/
 
 #include "B3Dbodies.h"
+#include "BulletRigidBody.h"
 #include <iostream>
 
 vector<BulletBody*> bulletBodies;

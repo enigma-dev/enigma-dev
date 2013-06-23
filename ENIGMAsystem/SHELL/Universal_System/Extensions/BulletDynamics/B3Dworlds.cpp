@@ -16,8 +16,8 @@
 **/
 
 #include "B3Dworlds.h"
-#include "B3Dbodies.h"
-#include "B3Dsoftbodies.h"
+#include "BulletRigidBody.h"
+#include "BulletSoftBody.h"
 #include <iostream>
 
 vector<BulletWorld*> bulletWorlds;

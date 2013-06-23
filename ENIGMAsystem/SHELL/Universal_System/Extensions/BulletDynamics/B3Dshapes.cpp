@@ -16,6 +16,7 @@
 **/
 
 #include "B3Dshapes.h"
+#include "BulletShape.h"
 #include <iostream>
  
 vector<BulletShape*> bulletShapes;
@@ -32,7 +33,7 @@ int b3d_shape_create_sphere(double radius)
   return i;
 }
 
-int b3d_shape_create_plane_static(double nx, double ny, double nz, btScalar constant)
+int b3d_shape_create_plane_static(double nx, double ny, double nz, double constant)
 {
   int i = bulletShapes.size();
   BulletShape* bulletshape = new BulletShape();
