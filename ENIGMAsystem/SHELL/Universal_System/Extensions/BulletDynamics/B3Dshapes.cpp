@@ -79,6 +79,13 @@ int b3d_shape_create_plane_static(double nx, double ny, double nz, double consta
   return i;
 }
 
+int b3d_shape_create_empty()
+{
+  int i = b3d_shape_create();
+  b3d_shape_empty(i);
+  return i;
+}
+
 void b3d_shape_box(int id, double halfwidth, double halflength, double halfheight)
 {
   get_shape(bulletshape, id);
@@ -127,6 +134,14 @@ void b3d_shape_plane_static(int id, double nx, double ny, double nz, double cons
   bulletshape->colShape = btshape;
 }
 
+void b3d_shape_empty(int id)
+{
+  get_shape(bulletshape, id);
+  btCollisionShape* btshape = new btEmptyShape();
+  bulletshape->beginShape();
+  bulletshape->colShape = btshape;
+}
+
 void b3d_shape_calculate_local_inertia(int id, double mass, double ix, double iy, double iz)
 {
   get_shape(bulletshape, id);
@@ -142,19 +157,19 @@ void b3d_shape_set_scale(int id, double sx, double sy, double sz)
 
 double b3d_shape_get_scale_x(int id)
 {
-  get_shape(bulletshape, id);
+  get_shaper(bulletshape, id, -1);
   return bulletshape->colShape->getLocalScaling().getX();
 }
 
 double b3d_shape_get_scale_y(int id)
 {
-  get_shape(bulletshape, id);
+  get_shaper(bulletshape, id, -1);
   return bulletshape->colShape->getLocalScaling().getY();
 }
 
 double b3d_shape_get_scale_z(int id)
 {
-  get_shape(bulletshape, id);
+  get_shaper(bulletshape, id, -1);
   return bulletshape->colShape->getLocalScaling().getZ();
 }
 
@@ -166,7 +181,7 @@ void b3d_shape_set_margin(int id, double margin)
 
 double b3d_shape_get_margin(int id)
 {
-  get_shape(bulletshape, id);
+  get_shaper(bulletshape, id, -1);
   return bulletshape->colShape->getMargin();
 }
 

@@ -16,23 +16,35 @@
 **/
 
 #ifdef DEBUG_MODE
+
+/*
+#ifndef stringinclude
+#define stringinclude
+#include <string>
+using std::string;
+#endif
+
   #include "libEGMstd.h"
+*/
+#define toString(s) \
+  s
+
   #include "Widget_Systems/widgets_mandatory.h"
-  #define get_shaper(w,id,r) \
+  #define get_shaper(s,id,r) \
     if (unsigned(id) >= bulletShapes.size() || id < 0) { \
       show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
       return r; \
-    } BulletShape* w = bulletShapes[id];
-  #define get_shape(w,id) \
+    } BulletShape* s = bulletShapes[id];
+  #define get_shape(s,id) \
     if (unsigned(id) >= bulletShapes.size() || id < 0) { \
       show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
       return; \
-    } BulletShape* w = bulletShapes[id];
+    } BulletShape* s = bulletShapes[id];
 #else
-  #define get_shaper(w,id,r) \
-    BulletShape* w = bulletShapes[id];
-  #define get_shape(w,id) \
-    BulletShape* w = bulletShapes[id];
+  #define get_shaper(s,id,r) \
+    BulletShape* s = bulletShapes[id];
+  #define get_shape(s,id) \
+    BulletShape* s = bulletShapes[id];
 #endif
 
 #ifndef _BULLETSHAPE__H
@@ -44,9 +56,11 @@ using std::vector;
 #include <btBulletDynamicsCommon.h>
 
 struct BulletShape {
+  int type;
   int worldid;
   bool shapebuilt;
   btCollisionShape* colShape;
+  vector<btVector3> vertices;
 
   BulletShape()
   {

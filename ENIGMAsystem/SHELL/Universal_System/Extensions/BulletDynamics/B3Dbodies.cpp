@@ -23,11 +23,11 @@ vector<BulletBody*> bulletBodies;
 
 namespace enigma_user {
 
-int b3d_bodyr_create(int sid, double mass, double ix, double iy, double iz)
+int b3d_bodyr_create(int sid, double mass, double ix, double iy, double iz, double friction, double restitution)
 {
   int i = bulletBodies.size();
-  get_shape(bulletshape, sid);
-  bulletBodies.push_back(new BulletBody(sid, mass, ix, iy, iz));
+  get_shaper(bulletshape, sid, -1);
+  bulletBodies.push_back(new BulletBody(sid, mass, ix, iy, iz, friction, restitution));
   return i;
 }
 
@@ -58,7 +58,7 @@ double b3d_bodyr_get_z(int id)
 double b3d_bodyr_get_rot_x(int id)
 {
   get_bodyr(bulletbody, id, -1);
-  return bulletbody->getYaw();
+  return bulletbody->getRoll();
 }
 
 double b3d_bodyr_get_rot_y(int id)
@@ -70,7 +70,13 @@ double b3d_bodyr_get_rot_y(int id)
 double b3d_bodyr_get_rot_z(int id)
 {
   get_bodyr(bulletbody, id, -1);
-  return bulletbody->getRoll();
+  return bulletbody->getYaw();
+}
+
+double b3d_bodyr_get_rot_ang(int id)
+{
+  get_bodyr(bulletbody, id, -1);
+  return bulletbody->getAngle();
 }
 
 double b3d_bodyr_get_quat_x(int id)

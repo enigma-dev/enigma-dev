@@ -27,7 +27,7 @@ namespace enigma_user {
 int b3d_bodys_create(int sid, double mass, double ix, double iy, double iz)
 {
   int i = bulletSoftBodies.size();
-  get_shape(bulletshape, sid);
+  get_shaper(bulletshape, sid, -1);
   bulletSoftBodies.push_back(new BulletSoftBody(sid, 5, 5, 5, 5, 5 ));
   return i;
 }

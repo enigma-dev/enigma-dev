@@ -16,7 +16,19 @@
 **/
 
 #ifdef DEBUG_MODE
+
+/*
+#ifndef stringinclude
+#define stringinclude
+#include <string>
+using std::string;
+#endif
+
   #include "libEGMstd.h"
+*/
+#define toString(s) \
+  s
+
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_bodyr(w,id,r) \
     if (unsigned(id) >= bulletBodies.size() || id < 0) { \
@@ -51,11 +63,13 @@ struct BulletBody {
   int shapeid;
   btRigidBody* rigidBody;
 
-  BulletBody(int sid, double mass, double ix, double iy, double iz)
+  BulletBody(int sid, double mass, double ix, double iy, double iz, double friction, double restitution)
   {
     btDefaultMotionState* motionstate = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0)));
     shapeid = sid;
     btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass,motionstate,bulletShapes[shapeid]->colShape,btVector3(ix,iy,iz));
+    rigidBodyCI.m_restitution = restitution;
+    rigidBodyCI.m_friction = friction;
     rigidBody = new btRigidBody(rigidBodyCI);
   }
 
@@ -115,7 +129,7 @@ struct BulletBody {
 //rigidBody->setCenterOfMassTransform(trans);
   }
 
-  double getYaw()
+  double getRoll()
   {
     return rigidBody->getOrientation().getAxis().getX();
   }
@@ -125,9 +139,14 @@ struct BulletBody {
     return rigidBody->getOrientation().getAxis().getY();
   }
 
-  double getRoll()
+  double getYaw()
   {
     return rigidBody->getOrientation().getAxis().getZ();
+  }
+
+  double getAngle()
+  {
+    return rigidBody->getOrientation().getAngle();
   }
 
   double getQuatX()

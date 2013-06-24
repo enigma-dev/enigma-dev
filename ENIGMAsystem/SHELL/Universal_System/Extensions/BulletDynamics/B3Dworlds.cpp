@@ -59,7 +59,7 @@ void b3d_world_delete(int id)
 
 int b3d_world_get_type(int id) 
 {
-  get_world(bulletworld, id);
+  get_worldr(bulletworld, id, -1);
   return bulletworld->type;
 }
 

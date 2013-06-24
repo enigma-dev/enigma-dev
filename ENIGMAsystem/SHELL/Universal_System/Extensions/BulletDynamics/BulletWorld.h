@@ -16,7 +16,19 @@
 **/
 
 #ifdef DEBUG_MODE
+
+/*
+#ifndef stringinclude
+#define stringinclude
+#include <string>
+using std::string;
+#endif
+
   #include "libEGMstd.h"
+*/
+#define toString(s) \
+  s
+
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_worldr(w,id,r) \
     if (unsigned(id) >= bulletWorlds.size() || id < 0) { \

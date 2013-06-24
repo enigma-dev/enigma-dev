@@ -20,7 +20,7 @@
 
 namespace enigma_user {
 
-int b3d_bodyr_create(int sid, double mass = 0, double ix = 0, double iy = 0, double iz = 0);
+int b3d_bodyr_create(int sid, double mass = 0, double ix = 0, double iy = 0, double iz = 0, double friction = 0, double restitution = 0);
 void b3d_bodyr_delete(int id);
 double b3d_bodyr_get_x(int id);
 double b3d_bodyr_get_y(int id);
@@ -28,6 +28,7 @@ double b3d_bodyr_get_z(int id);
 double b3d_bodyr_get_rot_x(int id);
 double b3d_bodyr_get_rot_y(int id);
 double b3d_bodyr_get_rot_z(int id);
+double b3d_bodyr_get_rot_ang(int id);
 double b3d_bodyr_get_quat_x(int id);
 double b3d_bodyr_get_quat_y(int id);
 double b3d_bodyr_get_quat_z(int id);
