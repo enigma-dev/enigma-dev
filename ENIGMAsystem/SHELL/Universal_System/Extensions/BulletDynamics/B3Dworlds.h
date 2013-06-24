@@ -14,25 +14,23 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-// Linker shit right meow...
-#include "Universal_System/instance_system_base.h"
 
-namespace enigma_user
-{
+#ifndef _B3DWORLDS__H
+#define _B3DWORLDS__H
 
-bool place_free(double x,double y);
-bool place_meeting(double x, double y, int object);
+namespace enigma_user {
+
+int b3d_world_create_softrigid();
+int b3d_world_create_discrete();
+int b3d_world_create_simple();
+void b3d_world_delete(int id);
+int b3d_world_get_type(int id);
+void b3d_world_set_gravity(int id, double gx, double gy, double gz);
+void b3d_world_add_bodyr(int id, int rigidbody);
+void b3d_world_add_bodys(int id, int softbody);
+void b3d_world_remove_bodyr(int id, int rigidbody);
+void b3d_world_remove_bodys(int id, int softbody);
+void b3d_world_update(int id, double timestep, double iterations); 
 
 }
-
-// End of linking shit to stfu 
-
-/* Scenes */
-
-/* Fixtures */
-
-/* Forces */
-
-/* Joints */
-
-/* Miscellaneous */
+#endif

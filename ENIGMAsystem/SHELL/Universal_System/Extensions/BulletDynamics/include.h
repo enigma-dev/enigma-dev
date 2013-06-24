@@ -14,4 +14,8 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "functions.h"
+
+#include "B3Dworlds.h"
+#include "B3Dbodies.h"
+#include "B3Dshapes.h"
+#include "B3Dsoftbodies.h"
