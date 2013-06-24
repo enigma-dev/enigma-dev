@@ -31,6 +31,7 @@
 #include "PS_particle_depths.h"
 #include "PS_particle.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/callbacks_events.h"
 
 namespace enigma
 {
@@ -75,10 +76,10 @@ namespace enigma
   {
     if (!initialized) {
       initialized = true;
-      part_impl.update_particlesystems = &internal_update_particlesystems;
       part_impl.draw_particlesystems = &internal_draw_particlesystems;
-      part_impl.clear_effects = &internal_clear_effects;
       set_particles_implementation(&part_impl);
+      register_callback_particle_updating(internal_update_particlesystems);
+      register_callback_clean_up_roomend(internal_clear_effects);
       particle_bridge::initialize_particle_bridge();
     }
   }

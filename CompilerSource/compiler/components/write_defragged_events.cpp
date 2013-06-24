@@ -140,7 +140,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 
     // Game setting initaliser
   wto << "  int game_settings_initialize()" << endl << "  {" << endl;
-/*    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
+    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
     wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;
     if (es->gameSettings.displayCursor)
         wto  << "    window_set_cursor(cr_default);" << endl;
@@ -150,7 +150,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     wto  << "    window_set_sizeable(" << es->gameSettings.allowWindowResize << ");" << endl;
     wto  << "    window_set_stayontop(" << es->gameSettings.alwaysOnTop << ");" << endl;
     wto  << "    window_set_showborder(" << !es->gameSettings.dontDrawBorder << ");" << endl;
-    wto  << "    window_set_showicons(" << !es->gameSettings.dontShowButtons << ");" << endl;*/  //TODO: LGM needs settings sorted before reenabling
+    wto  << "    window_set_showicons(" << !es->gameSettings.dontShowButtons << ");" << endl;
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
 

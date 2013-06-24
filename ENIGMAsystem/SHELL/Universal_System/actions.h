@@ -268,13 +268,9 @@ inline void action_set_motion(const double dir, const double nspeed) {
     }
 }
 
-inline void game_restart() { //RELOCATE ME
-    room_goto_first(true);
-}
 static void show_info() {}  //TEMPORARY FILLER, RELOCATE ME
 static inline void action_show_info() {show_info();}
 
-#define action_restart_game game_restart
 #define action_message(message) show_message(message)
 #define action_if_sound sound_isplaying
 #define action_end_sound sound_stop

@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _JOINTS__H
-#define _JOINTS__H
+#ifndef _ENIGMA_B2D_JOINTS__H
+#define _ENIGMA_B2D_JOINTS__H
 
 #include <Box2D/Box2D.h>
 
@@ -122,4 +122,5 @@ void b2d_joint_set_value(int id);
 
 }
 
-#endif
+#endif // _ENIGMA_B2D_JOINTS__H
+

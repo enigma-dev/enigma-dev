@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura
+/** Copyright (C) 2013 forthevin
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,16 +15,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Collision_Systems/collision_mandatory.h"
+#ifndef _ENIGMA_CALLBACKS_EVENTS__H
+#define _ENIGMA_CALLBACKS_EVENTS__H
 
-namespace enigma
-{ 
-  void *get_collision_mask(sprite* spr, unsigned char* input_data, collision_type ct) // It is called for every subimage of every sprite loaded.
-  {
-    return 0;
-  }
+namespace enigma {
+  // Before collision event.
+  void perform_callbacks_before_collision_event();
+  void register_callback_before_collision_event(void (*callback)());
 
-  void free_collision_mask(void* mask)
-  {
-  }
+  // Particle updating.
+  void perform_callbacks_particle_updating();
+  void register_callback_particle_updating(void (*callback)());
+
+  // Clean up room-end.
+  void perform_callbacks_clean_up_roomend();
+  void register_callback_clean_up_roomend(void (*callback)());
 }
+
+#endif // _ENIGMA_CALLBACKS_EVENTS__H
+

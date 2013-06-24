@@ -271,7 +271,7 @@ beforecollisionautomaticcollisionhandling: 100000
 	Name: Before collision automatic collision handling
 	Mode: None
 	Default: ;
-	Instead: enigma::perform_automatic_collision_handling_before_collision_event();
+	Instead: enigma::perform_callbacks_before_collision_event();
 
 collision: 4
 	Group: Collision
@@ -308,7 +308,7 @@ particlesystemsupdate: 100000
 	Name: Particle Systems Update
 	Mode: None
 	Default: ;
-	Instead: enigma::update_particlesystems();
+	Instead: enigma::perform_callbacks_particle_updating();
 
 
 # Fun fact: Draw comes after End Step.

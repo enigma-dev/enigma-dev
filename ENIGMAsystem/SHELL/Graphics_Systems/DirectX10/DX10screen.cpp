@@ -76,18 +76,6 @@ namespace enigma
     {
         particles_impl = part_impl;
     };
-    void update_particlesystems()
-    {
-        if (particles_impl != NULL) {
-            (particles_impl->update_particlesystems)();
-        }
-    }
-    void graphics_clean_up_roomend()
-    {
-        if (particles_impl != NULL) {
-            (particles_impl->clear_effects)();
-        }
-    }
 }
 
 namespace enigma_user

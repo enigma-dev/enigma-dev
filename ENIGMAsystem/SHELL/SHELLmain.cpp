@@ -37,6 +37,8 @@
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/fontstruct.h"
 
+#include "Universal_System/callbacks_events.h"
+
 #include "GameSettings.h"
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
@@ -75,10 +77,8 @@ extern int amain();
 #include "Universal_System/resource_data.h"
 #include "Universal_System/highscore_functions.h"
 
-static void show_info() {} //TEMPORARY FILLER, RELOCATE ME
-
 #include "Universal_System/move_functions.h"
-
+#include "Universal_System/actions.h"
 #include "Universal_System/lives.h"
 
 namespace enigma_user {}

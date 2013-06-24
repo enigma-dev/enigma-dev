@@ -29,6 +29,9 @@ namespace enigma {
   }
 }
 */
+
+#include "Universal_System/callbacks_events.h"
+
 #include <Box2D/Box2D.h>
 #include "SB2Dfunctions.h"
 bool systemPaused = false;
@@ -90,17 +93,40 @@ void worldInstance::world_update()
     fixtureInstance* f = fixtures[id];
 #endif
 
+namespace enigma {
+  bool has_been_initialized = false;
+
+  void update_worlds_automatically() {
+    vector<worldInstance*>::iterator it_end = worlds.end();
+    for (vector<worldInstance*>::iterator it = worlds.begin(); it != it_end; it++) {
+      (*it)->world_update();
+    }
+  }
+
+  // Should be called whenever a world is created.
+  void init_studio_physics() {
+    if (!has_been_initialized) {
+      has_been_initialized = true;
+
+      // Register callback.
+      register_callback_before_collision_event(update_worlds_automatically);
+    }
+  }
+}
+
 namespace enigma_user
 {
 
 void physics_world_create(int pixeltometerscale)
 {
+  enigma::init_studio_physics();
   /** stupido's fucked up world creation just auto binds it to the current room
   **/
 }
 
 int physics_world_create()
 {
+  enigma::init_studio_physics();
   int i = worlds.size();
   worlds.push_back(new worldInstance());
   return i;

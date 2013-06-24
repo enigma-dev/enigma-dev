@@ -120,14 +120,11 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
           if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
             wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)inst)->" << pmember << ";" << endl;
         }
-        else
-        {
-          if (dait->second.type == "var")
-            wto << "      case " << it->second->name << ": return map_var(&((OBJ_" << it->second->name << "*)inst)->vmap, \"" << pmember << "\");"  << endl;
-        }
       }
 
       wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
+      if (dait->second.type == "var")
+        wto << "      default: return map_var(&(((enigma::object_locals*)instance_event_iterator->inst)->vmap), \"" << pmember << "\");"  << endl;
       wto << "    }" << endl;
       wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc << ";" << endl;
       wto << "  }" << endl;

@@ -165,5 +165,13 @@ namespace enigma { struct roomv: multifunction_variant {
 }; }
 namespace enigma_user {
   extern enigma::roomv room;
+
+  inline void game_restart() {
+      room_goto_first(true);
+  }
 }
+
+#define action_restart_game game_restart
+
 #endif
+

@@ -35,6 +35,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/callbacks_events.h"
 #include "libEGMstd.h"
 #include "instance_system.h"
 #include "instance.h"
@@ -90,7 +91,7 @@ namespace enigma
       if (!((object_planar*)*it)->persistent)
       instance_destroy(it->id, false);
     }
-    graphics_clean_up_roomend();
+    perform_callbacks_clean_up_roomend();
 
     // Set the index to self
     room.rval.d = id;
