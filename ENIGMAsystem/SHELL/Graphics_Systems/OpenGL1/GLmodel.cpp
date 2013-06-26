@@ -68,6 +68,7 @@ class d3d_model
 
     bool load(string fname)  //TODO: this needs to be rewritten properly not using the file_text functions
     {
+        using namespace enigma_user;
         int file = file_text_open_read(fname);
         if (file == -1)
             return false;

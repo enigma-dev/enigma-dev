@@ -81,6 +81,9 @@ namespace enigma {
   sprite::sprite(int x): texturearray(new int[x]), texbordxarray(new double[x]), texbordyarray(new double[x]) {}
 }
 
+namespace enigma_user
+{
+
 int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
 {
     enigma::spritestructarray_reallocate();
@@ -206,6 +209,8 @@ void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
     spr->bbox_relative.top = top - spr->yoffset;
     spr->bbox_relative.right = right - spr->xoffset;
     spr->bbox_relative.bottom = bottom - spr->yoffset;
+}
+
 }
 
 /* These functions are primarily for use of the engine. Experienced users
@@ -403,6 +408,9 @@ namespace enigma
   }
 }
 
+namespace enigma_user
+{
+
 int sprite_get_width(int sprite)
 {
   get_sprite(spr,sprite,32);
@@ -448,6 +456,8 @@ int sprite_get_bbox_top(int sprite)
   return spr->bbox.top;
 }
 
+}
+
 int sprite_get_bbox_bottom_relative(int sprite)
 {
   get_sprite(spr,sprite,32);
@@ -483,6 +493,9 @@ const bbox_rect_t &sprite_get_bbox_relative(int sprite)
   return spr->bbox_relative;
 }
 
+namespace enigma_user
+{
+
 int sprite_get_number(int sprite)
 {
   if (sprite == -1) return 0;
@@ -508,3 +521,6 @@ int sprite_get_yoffset(int sprite)
   get_sprite(spr,sprite,0);
   return spr->yoffset;
 }
+
+}
+

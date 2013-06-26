@@ -45,11 +45,11 @@ namespace enigma
 void show_error(string err, const bool fatal)
 {
   printf("ERROR in some action of some event for object %d, instance id %d: %s\n",
-         (enigma::instance_event_iterator == NULL? global :
-            enigma::instance_event_iterator->inst == NULL? noone :
+         (enigma::instance_event_iterator == NULL? enigma_user::global :
+            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
               enigma::instance_event_iterator->inst->object_index),
-         (enigma::instance_event_iterator == NULL? global :
-            enigma::instance_event_iterator->inst == NULL? noone :
+         (enigma::instance_event_iterator == NULL? enigma_user::global :
+            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
               enigma::instance_event_iterator->inst->id),
          err.c_str()
     );

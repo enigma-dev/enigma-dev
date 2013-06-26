@@ -33,14 +33,16 @@
 #ifndef _object_h
 #define _object_h
 
-enum {
-  self =   -1,
-  other =  -2,
-  all =    -3,
-  noone =  -4,
-  global = -5,
-  local =  -7
-};
+namespace enigma_user {
+  enum {
+    self =   -1,
+    other =  -2,
+    all =    -3,
+    noone =  -4,
+    global = -5,
+    local =  -7
+  };
+}
 
 #include "var4.h"
 

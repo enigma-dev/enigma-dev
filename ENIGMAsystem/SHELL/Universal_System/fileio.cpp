@@ -53,6 +53,10 @@ namespace enigma
 // Uses enigma::files[] for storage, treats sdata as last read string.
 
 #include "estring.h"
+
+namespace enigma_user
+{
+
 int file_text_open_read(string fname) // Opens the file with the indicated name for reading. The function returns the id of the file that must be used in the other functions. You can open multiple files at the same time (32 max). Don't forget to close them once you are finished with them.
 {
   FILE *a = fopen(fname.c_str(),"rt"); //Read as text file
@@ -155,7 +159,12 @@ bool file_text_eof(int fileid) { // Returns whether we reached the end of the fi
   return (enigma::files[fileid].eof);
 }
 
+}
+
 // Binary file manipulation
+
+namespace enigma_user
+{
 
 int file_bin_open(string fname,int mode) // Opens the file with the indicated name. The mode indicates what can be done with the file: 0 = reading, 1 = writing, 2 = both reading and writing). When the file does not exist it is created. The function returns the id of the file that must be used in the other functions.
 {
@@ -214,3 +223,6 @@ void file_bin_write_byte(int fileid,unsigned char byte) { // Writes a byte of da
 int file_bin_read_byte(int fileid) { // Reads a byte of data from the file and returns this.
   return fgetc(enigma::files[fileid].f);
 }
+
+}
+

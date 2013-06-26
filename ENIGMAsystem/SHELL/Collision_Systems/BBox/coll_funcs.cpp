@@ -933,7 +933,7 @@ void instance_activate_circle(int x, int y, int r, int inside)
 
 void position_change(double x1, double y1, int obj, bool perf)
 {
-    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(all); it; ++it)
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(enigma_user::all); it; ++it)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
 

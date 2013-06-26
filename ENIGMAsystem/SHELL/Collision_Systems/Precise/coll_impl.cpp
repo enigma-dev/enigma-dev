@@ -820,7 +820,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
 
 void change_inst_point(int obj, bool perf, int x1, int y1)
 {
-    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(all); it; ++it)
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(enigma_user::all); it; ++it)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision

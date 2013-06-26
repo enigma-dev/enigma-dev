@@ -341,6 +341,7 @@ void d3d_model_save(const unsigned int id, string fname)
 bool d3d_model_load(const unsigned int id, string fname)
 {
   //TODO: this needs to be rewritten properly not using the file_text functions
+  using namespace enigma_user;
   int file = file_text_open_read(fname);
   if (file == -1) {
     return false;

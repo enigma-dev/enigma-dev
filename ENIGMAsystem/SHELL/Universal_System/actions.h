@@ -623,8 +623,6 @@ inline void action_path_speed(double speed, bool relative)
     path_set_speed(speed, relative);
 }
 
-}
-
 /* Temp location fpr event perform stuff */ //TODO: Move
 
 enum
@@ -732,6 +730,8 @@ enum
     ev_step_end     = 2
 };
 
+}
+
 namespace enigma
 {
     int initialize_everything();
@@ -743,5 +743,5 @@ inline variant event_perform(int type, int numb) {
 }
 
 inline variant event_user(int numb) {
-    return event_perform(ev_other, numb + ev_user0);
+    return event_perform(enigma_user::ev_other, numb + enigma_user::ev_user0);
 }
