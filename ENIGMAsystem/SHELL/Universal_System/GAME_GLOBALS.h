@@ -29,6 +29,9 @@
 GM Global variables
 ******************/
 
+#ifndef __GAME_GLOBALS_H
+#define __GAME_GLOBALS_H
+
 bool argument_relative=false;
 
 namespace enigma_user {
@@ -91,3 +94,5 @@ extern int room_first, room_last;
 /*********************
 End GM global variables
  *********************/
+
+#endif
