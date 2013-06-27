@@ -15,9 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
 // This file contains functions that are used by virtually all components of ENIGMA.
 // They are also, directly or otherwise, available to the user.
+
+#ifndef __libegmstd_h
+#define __libegmstd_h
 
 using std::string;
 
@@ -44,3 +46,4 @@ string toString(size_t n, char c);
 string toString(const struct var&);
 string toString(const struct variant&);
 
+#endif
