@@ -47,8 +47,8 @@ using std::string;
     BulletBody* w = bulletBodies[id];
 #endif
 
-#ifndef _ENIGMA_BULLETRIGIDBODY__H
-#define _ENIGMA_BULLETRIGIDBODY__H
+#ifndef _BULLETRIGIDBODY__H
+#define _BULLETRIGIDBODY__H
 
 #include <vector>
 using std::vector;

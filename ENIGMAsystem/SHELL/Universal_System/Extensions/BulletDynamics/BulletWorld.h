@@ -54,8 +54,8 @@ using std::string;
     c w = (c) bulletWorlds[id]->dynamicsWorld;
 #endif
 
-#ifndef _ENIGMA_BULLETWORLD__H
-#define _ENIGMA_BULLETWORLD__H
+#ifndef _BULLETWORLD__H
+#define _BULLETWORLD__H
 
 #include <vector>
 using std::vector;

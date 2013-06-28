@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _ENIGMA_B2D_SHAPES__H
-#define _ENIGMA_B2D_SHAPES__H
+#ifndef _B2D_SHAPES__H
+#define _B2D_SHAPES__H
 
 #include <vector>
 using std::vector;
