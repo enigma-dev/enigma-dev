@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _B3DBODIES__H
-#define _B3DBODIES__H
+#ifndef _ENIGMA_B3DBODIES__H
+#define _ENIGMA_B3DBODIES__H
 
 namespace enigma_user {
 

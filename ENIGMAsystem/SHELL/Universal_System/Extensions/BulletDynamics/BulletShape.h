@@ -47,8 +47,8 @@ using std::string;
     BulletShape* s = bulletShapes[id];
 #endif
 
-#ifndef _BULLETSHAPE__H
-#define _BULLETSHAPE__H
+#ifndef _ENIGMA_BULLETSHAPE__H
+#define _ENIGMA_BULLETSHAPE__H
 
 #include <vector>
 using std::vector;
