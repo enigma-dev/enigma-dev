@@ -193,6 +193,12 @@ void physics_fixture_set_circle_shape(int id, double radius);
 void physics_fixture_set_polygon_shape(int id);
 /** description...
 @param id
+@param adjstart
+@param adjend
+**/
+void physics_fixture_set_edge_shape(int id, bool adjstart = true, bool adjend = true); 
+/** description...
+@param id
 @param x
 @param y
 **/

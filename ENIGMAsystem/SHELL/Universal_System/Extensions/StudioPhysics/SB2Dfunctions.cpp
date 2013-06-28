@@ -270,6 +270,27 @@ void physics_fixture_set_polygon_shape(int id)
   sb2dfixture->FinishShape();
 }
 
+void physics_fixture_set_edge_shape(int id, bool adjstart, bool adjend) 
+{
+  get_fixture(sb2dfixture, id);
+  b2EdgeShape shape;
+
+  int vid = 0;
+  if (adjstart) {
+    shape.m_hasVertex0 = true;
+    shape.m_vertex0 = sb2dfixture->vertices[vid];
+    vid += 1;
+  }
+  shape.Set(sb2dfixture->vertices[vid],  sb2dfixture->vertices[vid + 1]);
+  vid += 2;
+  if (adjend) {
+    shape.m_hasVertex3 = true;
+    shape.m_vertex3 = sb2dfixture->vertices[vid];
+  }
+  sb2dfixture->shape = &shape;
+  sb2dfixture->FinishShape();
+}
+
 void physics_fixture_add_point(int id, double x, double y)
 {
   get_fixture(sb2dfixture, id);
