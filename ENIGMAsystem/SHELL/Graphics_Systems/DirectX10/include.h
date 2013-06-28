@@ -11,3 +11,4 @@
 #include "../General/DXfont.h"
 #include "../General/DXcurves.h"
 #include "../General/DXsurface.h"
+#include "../General/actions.h"
