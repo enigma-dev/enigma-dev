@@ -75,6 +75,7 @@ import org.enigma.messages.Messages;
 import org.enigma.utility.EnigmaBuildReader;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
+import org.lateralgm.components.GmMenu;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
@@ -359,8 +360,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		compileb.setIcon(LGM.getIconForKey("EnigmaPlugin.COMPILE"));
 		LGM.tool.add(compileb, 7);
 		
-		JMenu menu = new JMenu(Messages.getString("EnigmaRunner.MENU_BUILD")); //$NON-NLS-1$
-		menu.setFont(LGM.lnfFont.deriveFont(Font.BOLD, 14));
+		JMenu menu = new GmMenu(Messages.getString("EnigmaRunner.MENU_BUILD")); //$NON-NLS-1$
+		if (LGM.themename.equals("Quantum")) {
+		  menu.setFont(LGM.lnfFont);
+		}
 		menu.setMnemonic('B');
 		busy = addItem(Messages.getString("EnigmaRunner.MENU_BUSY"));
 		busy.setEnabled(false);
@@ -411,7 +414,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		menu.add(mi);
 
 		JMenu sub = new JMenu(Messages.getString("EnigmaRunner.MENU_KEYWORDS")); //$NON-NLS-1$
-		sub.setFont(LGM.lnfFont.deriveFont(Font.BOLD));
+		if (LGM.themename.equals("Quantum")) {
+		  sub.setFont(LGM.lnfFont);
+		}
 		menu.add(sub);
 
 		showFunctions = addItem(KEY_MODES[FUNCTIONS]);
@@ -429,7 +434,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	private JMenuItem addItem(String string) {
 		JMenuItem ret = new JMenuItem(string);
-		ret.setFont(LGM.lnfFont.deriveFont(Font.BOLD));
+		if (LGM.themename.equals("Quantum")) {
+		  ret.setFont(LGM.lnfFont);
+		}
 		return ret;
 	}
 
@@ -700,7 +707,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			final JList list = new JList(keywordLists[mode]);
 			//			keywordLists[mode].setEditable(false);
 			//			keywordLists[mode].setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-			list.setFont(new Font(Font.MONOSPACED,Font.PLAIN,12));
 			final JTextField filter = new JTextField();
 			filter.getDocument().addDocumentListener(new DocumentListener()
 				{
