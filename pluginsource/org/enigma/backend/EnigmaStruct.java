@@ -31,7 +31,7 @@ import com.sun.jna.Structure;
 
 public class EnigmaStruct extends Structure
 	{
-	/** One of 530, 600, 701, or 800 */
+	/** One of 530, 600, 701, 800, or 820 */
 	public int fileVersion = 600;
 	public String filename = null;
 

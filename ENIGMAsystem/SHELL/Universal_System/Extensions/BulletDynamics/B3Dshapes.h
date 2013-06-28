@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _B3DSHAPES__H
-#define _B3DSHAPES__H
+#ifndef _B3D_SHAPES__H
+#define _B3D_SHAPES__H
 
 namespace enigma_user {
 
