@@ -20,8 +20,8 @@
 #include <math.h>
 
 #include "../General/DirectXHeaders.h"
-#include "../General/DXcolors.h"
-#include "../General/DXcurves.h"
+#include "../General/GScolors.h"
+#include "../General/GScurves.h"
 #include "../General/DXbinding.h"
 
 #define __GETR(x) (((x & 0x0000FF))/255.0)

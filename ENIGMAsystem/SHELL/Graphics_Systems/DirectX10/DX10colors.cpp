@@ -16,7 +16,7 @@
 **/
 
 #include "../General/DirectXHeaders.h"
-#include "../General/DXcolors.h"
+#include "../General/GScolors.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))

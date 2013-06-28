@@ -19,8 +19,8 @@
 
 #include <math.h>
 #include "../General/DirectXHeaders.h"
-#include "../General/DXbackground.h"
-#include "../General/DXtextures.h"
+#include "../General/GSbackground.h"
+#include "../General/GStextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 

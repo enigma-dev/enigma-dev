@@ -19,8 +19,8 @@
 
 #include <math.h>
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLbackground.h"
-#include "../General/GLtextures.h"
+#include "../General/GSbackground.h"
+#include "../General/GStextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 

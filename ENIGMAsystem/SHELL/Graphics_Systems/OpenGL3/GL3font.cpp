@@ -20,9 +20,9 @@
 #include "../General/OpenGLHeaders.h"
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
-#include "../General/GLcolors.h"
-#include "../General/GLfont.h"
-#include "../General/GLtextures.h"
+#include "../General/GScolors.h"
+#include "../General/GSfont.h"
+#include "../General/GStextures.h"
 #include "../General/GLbinding.h"
 
 using namespace std;

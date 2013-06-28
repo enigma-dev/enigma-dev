@@ -21,8 +21,8 @@
 using std::string;
 
 #include "../General/DirectXHeaders.h"
-#include "../General/DXsprite.h"
-#include "../General/DXtextures.h"
+#include "../General/GSsprite.h"
+#include "../General/GStextures.h"
 #include "../General/DXbinding.h"
 
 #include "Universal_System/spritestruct.h"
