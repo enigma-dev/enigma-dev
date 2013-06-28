@@ -20,9 +20,9 @@
 #include "../General/DirectXHeaders.h"
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
-#include "../General/DXcolors.h"
-#include "../General/DXfont.h"
-#include "../General/DXtextures.h"
+#include "../General/GScolors.h"
+#include "../General/GSfont.h"
+#include "../General/GStextures.h"
 #include "../General/DXbinding.h"
 
 using namespace std;

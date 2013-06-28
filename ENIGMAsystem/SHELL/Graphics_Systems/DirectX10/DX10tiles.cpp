@@ -37,12 +37,12 @@
 // Tile system
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
-#include "../General/DXbackground.h"
+#include "../General/GSbackground.h"
 #include "Universal_System/backgroundstruct.h"
-#include "../General/DXtextures.h"
+#include "../General/GStextures.h"
 #include "../General/DXbinding.h"
 #include "../General/DirectXHeaders.h"
-#include "../General/DXtiles.h"
+#include "../General/GStiles.h"
 #include "../General/DXtilestruct.h"
 namespace enigma
 {

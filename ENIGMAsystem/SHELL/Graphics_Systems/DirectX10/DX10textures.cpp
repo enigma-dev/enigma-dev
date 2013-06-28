@@ -19,7 +19,7 @@
 #include "../General/DirectXHeaders.h"
 #include <string.h>
 //using std::string;
-#include "../General/DXtextures.h"
+#include "../General/GStextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"

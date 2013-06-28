@@ -18,7 +18,7 @@
 #include <string>
 #include <cstdio>
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLbackground.h"
+#include "../General/GSbackground.h"
 #include "GL3screen.h"
 #include "GL3d3d.h"
 #include "../General/GLbinding.h"

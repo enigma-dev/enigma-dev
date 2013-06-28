@@ -18,10 +18,10 @@
 // Tile system
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
-#include "../General/GLbackground.h"
+#include "../General/GSbackground.h"
 #include "Universal_System/backgroundstruct.h"
-#include "../General/GLtextures.h"
-#include "../General/GLtiles.h"
+#include "../General/GStextures.h"
+#include "../General/GStiles.h"
 #include "../General/GLtilestruct.h"
 #include "../General/GLbinding.h"
 #include "../General/OpenGLHeaders.h"

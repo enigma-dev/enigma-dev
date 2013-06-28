@@ -22,11 +22,11 @@ namespace enigma
   extern bool pbo_isgo;
 }
 
-#include "../General/DXcolors.h"
+#include "../General/GScolors.h"
 #include "DX10primitives.h"
 #include "DX10d3d.h"
 #include "DX10draw.h"
-#include "../General/DXblend.h"
-#include "../General/DXsurface.h"
+#include "../General/GSblend.h"
+#include "../General/GSsurface.h"
 #include "DX10miscextra.h"
 
