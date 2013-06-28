@@ -18,7 +18,7 @@
 #include "../General/DirectXHeaders.h"
 #include "DX10d3d.h"
 #include "DX10vertexbuffer.h"
-#include "../General/DXtextures.h"
+#include "../General/GStextures.h"
 #include "DX10model.h"
 #include "DX10shapes.h"
 #include "Universal_System/var4.h"

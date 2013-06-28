@@ -19,7 +19,7 @@
 #include "GL3shapes.h"
 #include "GL3primitives.h"
 #include "GL3vertexbuffer.h"
-#include "../General/GLtextures.h"
+#include "../General/GStextures.h"
 #include "GL3model.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"

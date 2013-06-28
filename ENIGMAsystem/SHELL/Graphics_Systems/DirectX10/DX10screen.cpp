@@ -18,7 +18,7 @@
 #include <string>
 #include <cstdio>
 #include "../General/DirectXHeaders.h"
-#include "../General/DXbackground.h"
+#include "../General/GSbackground.h"
 #include "DX10screen.h"
 #include "DX10d3d.h"
 #include "../General/DXbinding.h"

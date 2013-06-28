@@ -7,7 +7,7 @@ Description: WARNING! This graphics system is still under development and not as
 Author: Robert B. Colton
 
 Depends:
-	Windowing: Win32
+	Windowing: xlib
 
 Represents:
 	Build-platforms: None

@@ -18,10 +18,10 @@
 #ifndef ENIGMA_PS_PARTICLE_BRIDGE_OPENGL1_H
 #define ENIGMA_PS_PARTICLE_BRIDGE_OPENGL1_H
 
-#include "Graphics_Systems/General/GLsprite.h"
+#include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GLbinding.h"
-#include "Graphics_Systems/General/GLtextures.h"
-#include "Graphics_Systems/General/GLcolors.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_sprites.h"
 #include <vector>

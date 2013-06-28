@@ -20,8 +20,8 @@
 #include <math.h>
 
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLcolors.h"
-#include "../General/GLcurves.h"
+#include "../General/GScolors.h"
+#include "../General/GScurves.h"
 #include "../General/GLbinding.h"
 
 #define __GETR(x) (((x & 0x0000FF))/255.0)

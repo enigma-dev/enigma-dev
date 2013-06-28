@@ -17,7 +17,7 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "GLd3d.h"
-#include "../General/GLtextures.h"
+#include "../General/GStextures.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
