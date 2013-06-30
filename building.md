@@ -29,10 +29,10 @@ For Windows
 For Linux
 ---------------------
 Execute the following on a terminal...
-
+```
 cd $enigma-dev
 make
-
+```
 You can also use `make clean` to clean make files.
 
 Code::Blocks Project 
