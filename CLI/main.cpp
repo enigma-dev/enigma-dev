@@ -128,6 +128,7 @@ void clearconsole() {
 int main()
 {
     void *result = LoadPluginLib();
+    cout << result;
     definitionsModified("", ((const char*) "%e-yaml\n"
     "---\n"
     "treat-literals-as: 0\n"

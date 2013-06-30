@@ -31,9 +31,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
-			<Add directory="../" />
-			<Add directory="../CompilerSource" />
-			<Add directory="backend" />
+			<Add option="-I." />
+			<Add option="-I../" />
+			<Add option="-I../CompilerSource" />
+			<Add option="-Ibackend" />
 		</Compiler>
 		<Linker>
 			<Add option="-ldl" />
