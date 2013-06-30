@@ -44,17 +44,17 @@ static void ede_dia_add(const char* text)
 //Clears the frame log
 static void ede_dia_clear()
 {
-    //enigmaFrame->OutputClearAll();
+
 }
 //Sets the progress bar (0-100)
 static void ede_dia_progress(int progress)
 {
-    //enigmaFrame->SetProgress(progress);
+    cout << progress << endl;
 }
 //Applies a given text to the progress bar
 static void ede_dia_progress_text(const char* caption)
 {
-    //enigmaFrame->SetProgressText(caption);
+    cout << "caption" << endl;
 }
 //Sets the file from which data is redirected to frame log
 static void ede_output_redirect_file(const char* filepath)
@@ -72,7 +72,7 @@ static void ede_output_redirect_reset()
 //static Image* ede_ide_compress_data(char *, int) { }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-void* LoadPluginLib(ENIGMA_IDEFrame* frame)
+void* LoadPluginLib()
 {
 
 }

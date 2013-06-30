@@ -1,0 +1,22 @@
+For Macintosh
+-------------------
+
+For Windows
+-------------------
+
+For Linux
+-------------------
+Execute the following on a terminal...
+
+cd $enigma-dev/CLI
+make
+
+You can also use `make clean` to clean make files.
+
+Linking
+-------------------
+You will also need to right click and drag while holding alt and release selecting link here to link the following files into enigma-dev/CLI on Linux
+
+libCompileEGMf.so
+ENIGMAsystem
+Compilers

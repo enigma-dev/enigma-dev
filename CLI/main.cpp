@@ -103,22 +103,27 @@ void textcolorfg(int attr, int fg) {
     printf("%s", command);
 }
 
-void printfc(char* msg, int attr, int fg) {
-    textcolorfg(attr, fg);
-    printf(msg);
-}
-
-void printfc(char* msg, int attr, int bg, int fg) {
-    textcolor(attr, fg, bg);
-    printf(msg);
-}
-
 void printfln(char* msg) {
     cout << msg << endl;
 }
 
 void println() {
     cout << endl;
+}
+
+void printfc(char* msg, int attr, int fg) {
+    textcolorfg(attr, fg);
+    printf(msg);
+}
+
+void printfcln(char* msg, int attr, int fg) {
+    printfc(msg, attr, fg);
+    println();
+}
+
+void printfc(char* msg, int attr, int bg, int fg) {
+    textcolor(attr, fg, bg);
+    printf(msg);
 }
 
 void clearconsole() {
@@ -128,7 +133,11 @@ void clearconsole() {
 int main()
 {
     void *result = LoadPluginLib();
-    cout << result;
+    if (result == NULL)
+    {
+      printfc("ERROR!", DIM, RED);
+      printfcln(" Failed to load the plugin. Perhaps you have not compiled ENIGMA yet?", DIM, WHITE);
+    }
     definitionsModified("", ((const char*) "%e-yaml\n"
     "---\n"
     "treat-literals-as: 0\n"
