@@ -24,94 +24,111 @@
 **/
 
 #include "link.h"
+#include "printcolors.h"
 
 int dummy_compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 {
     // show error
+    print_error("dummy_compileEGMf");
     return -1;
 }
 
 const char* dummy_next_available_resource()
 {
     // show error
+    print_error("dummy_next_available_resource");
     return NULL;
 }
 
 const char* dummy_first_available_resource()
 {
     // show error
+    print_error("dummy_first_available_resource");
     return NULL;
 }
 
 bool dummy_resource_isFunction()
 {
     // show error
+    print_error("dummy_resource_isFunction");
     return false;
 }
 
 int dummy_resource_argCountMin()
 {
     // show error
+    print_error("dummy_resource_argCountMin");
     return 0;
 }
 
 int dummy_resource_argCountMax()
 {
     // show error
+    print_error("dummy_resource_argCountMax");
     return 0;
 }
 
 int dummy_resource_overloadCount()
 {
     // show error
+    print_error("dummy_resource_overloadCount");
     return 0;
 }
 
 const char* dummy_resource_parameters(int i)
 {
     // show error
+    print_error("dummy_resource_parameters");
     return "()";
 }
 
 int dummy_resource_isTypeName()
 {
     // show error
+    print_error("dummy_resource_isTypeName");
     return false;
 }
 
 int dummy_resource_isGlobal()
 {
     // show error
+    print_error("dummy_resource_isGlobal");
     return false;
 }
 
 bool dummy_resources_atEnd()
 {
     // show error
+    print_error("dummy_resources_atEnd");
     return true;
 }
 
 const char* dummy_libInit(EnigmaCallbacks* ecs)
 {
     // show error
+    print_error("dummy_libInit");
     return "";
 }
 
 void dummy_libFree()
 {
     // show error
+    print_error("dummy_libFree");
+    return;
 }
 
 syntax_error dummy_syerr;
 syntax_error *dummy_definitionsModified(const char* wscode, const char* targetYaml)
 {
     // show error
+    print_error("dummy_definitionsModified");
     return &dummy_syerr;
 }
 
 syntax_error *dummy_syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
     // show error
+    print_error("dummy_syntaxCheck");
     return &dummy_syerr;
 }
 

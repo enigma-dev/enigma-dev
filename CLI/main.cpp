@@ -27,25 +27,9 @@
 #include <stdio.h>
 
 #include "library.h"
+#include "printcolors.h"
 
 using namespace std;
-
-#define RESET           0
-#define BRIGHT          1
-#define DIM             2
-#define UNDERLINE       3
-#define BLINK           4
-#define REVERSE         7
-#define HIDDEN          8
-
-#define BLACK           0
-#define RED             1
-#define GREEN           2
-#define YELLOW          3
-#define BLUE            4
-#define MAGENTA         5
-#define CYAN            6
-#define WHITE           7
 
 #define TITLETEXT \
 "ENIGMA Development Environment\n\
@@ -79,63 +63,12 @@ license          retrieves the license information"\
 \nYou should have received a copy of the GNU General Public License along\
 \nwith this program. If not, see <http://www.gnu.org/licenses/>"
 
-void textcolor(int attr, int fg, int bg) {
-    char command[13];
-
-    /* Command is the control command to the terminal */
-    sprintf(command, "%c[%d;%d;%dm", 0x1B, attr, fg + 30, bg + 40);
-    printf("%s", command);
-}
-
-void textcolorbg(int attr, int bg) {
-    char command[13];
-
-    /* Command is the control command to the terminal */
-    sprintf(command, "%c[%d;%dm", 0x1B, attr, bg + 40);
-    printf("%s", command);
-}
-
-void textcolorfg(int attr, int fg) {
-    char command[13];
-
-    /* Command is the control command to the terminal */
-    sprintf(command, "%c[%d;%dm", 0x1B, attr, fg + 30);
-    printf("%s", command);
-}
-
-void printfln(char* msg) {
-    cout << msg << endl;
-}
-
-void println() {
-    cout << endl;
-}
-
-void printfc(char* msg, int attr, int fg) {
-    textcolorfg(attr, fg);
-    printf(msg);
-}
-
-void printfcln(char* msg, int attr, int fg) {
-    printfc(msg, attr, fg);
-    println();
-}
-
-void printfc(char* msg, int attr, int bg, int fg) {
-    textcolor(attr, fg, bg);
-    printf(msg);
-}
-
-void clearconsole() {
-    printf("\e[1;1H\e[2J");
-}
-
 unsigned long RGBA2DWORD(int iR, int iG, int iB, int iA)
 {
   return (((((iR << 8) + iG) << 8) + iB) << 8) + iA;
 }
 
-void Compile()
+void Compile(char* location, int mode)
 {
     EnigmaStruct* es = new EnigmaStruct();
     es->gameSettings.alwaysOnTop = true;
@@ -174,7 +107,7 @@ void Compile()
   //  es->sprites = spr;
   //  es->timelines = tln;
    // es->backgrounds = bgd;
-    compileEGMf(es, "/tmp/testes.tmp", emode_run);
+    compileEGMf(es, location, mode);
 }
 
 int main()
@@ -182,8 +115,7 @@ int main()
     void *result = LoadPluginLib();
     if (result == NULL)
     {
-      printfc("ERROR!", DIM, RED);
-      printfcln(" Failed to load the plugin. Perhaps you have not compiled ENIGMA yet?", DIM, WHITE);
+        print_error("Failed to load the plugin. Perhaps you have not compiled ENIGMA yet?");
     }
     definitionsModified("", ((const char*) "%e-yaml\n"
     "---\n"
@@ -222,8 +154,7 @@ int main()
         string input;
         cin >> input;
 
-        if (input == "help")
-        {
+        if (input == "help") {
             printfln(HELPTEXT);
         } else if (input == "license") {
             printfln(LICENSETEXT);
@@ -232,11 +163,63 @@ int main()
         } else if (input == "exit") {
             close = true;
         } else if (input == "build") {
-            Compile();
+            printfln("Where would you like to output the executable to?");
+            string loc;
+            cin >> loc;
+            printfln("Please enter your build mode: run/debug/design/compile/rebuild");
+            string mode;
+            cin >> mode;
+            int bmode = -1;
+            if (mode == "run") {
+              bmode = emode_run;
+            } else if (mode == "debug") {
+              bmode = emode_debug;
+            } else if (mode == "design") {
+              bmode = emode_design;
+            } else if (mode == "compile") {
+              bmode = emode_compile;
+            } else if (mode == "rebuild") {
+              bmode = emode_rebuild;
+            } else {
+              printfln("Unknown build mode");
+            }
+            if (bmode >= 0) {
+              Compile((char*)loc.c_str(), bmode);
+            }
         } else if (input == "settings") {
 
         } else if (input == "list") {
+            printfln("What would you like to list? functions/globals/typenames/all/other");
+            cin >> input;
+            char* currentResource = (char*)first_available_resource();
+            bool other = false;
+            printfln("***** START *****");
+            while (!resources_atEnd())
+            {
+                other = true;
+                if (resource_isFunction() && (input == "functions" || input == "all")) {
+                    printfc(currentResource, DIM, CYAN);
+                    other = false;
+                }
+                if (resource_isGlobal() && (input == "globals" || input == "all")) {
+                    printfc(currentResource, DIM, YELLOW);
+                    other = false;
+                }
+                if (resource_isTypeName() && (input == "typenames" || input == "all")) {
+                    printfc(currentResource, DIM, RED);
+                    other = false;
+                }
+                if ((input == "all" || input == "other") && other) {
+                    textcolorfg(RESET, WHITE);
+                    printf(currentResource);
+                }
+                printf(" ");
+                currentResource = (char*)next_available_resource();
+            }
 
+            textcolorfg(RESET, WHITE);
+            println();
+            printfln("***** END *****");
         } else if (input == "definitions") {
 
         } else if (input == "syntax") {

@@ -1,5 +1,10 @@
 The following are instructions for building the Command Line Interface on different platforms.
 
+Dependencies
+-------------------
+1) The CLI requires the zlib package on Ubuntu for EGM files, say the following on a terminal...
+`sudo apt-get install libzip-dev`
+
 For Macintosh
 -------------------
 

@@ -37,7 +37,7 @@
 			<Add option="-Ibackend" />
 		</Compiler>
 		<Linker>
-			<Add option="-ldl" />
+			<Add option="-ldl -lzip" />
 		</Linker>
 		<Unit filename="backend/library.cpp" />
 		<Unit filename="backend/library.h" />
@@ -46,6 +46,8 @@
 		<Unit filename="backend/syntax_error.cpp" />
 		<Unit filename="backend/syntax_error.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="printcolors.cpp" />
+		<Unit filename="printcolors.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

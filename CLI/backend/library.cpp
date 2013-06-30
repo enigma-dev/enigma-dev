@@ -33,11 +33,14 @@ using namespace std;
 //Opens the EnigmaFrame
 static void ede_dia_open()
 {
+    // this is pointless too, the output window is already open
     //enigmaFrame->outputAUINotebook->Show();
 }
 //Appends a given text to the frame log
 static void ede_dia_add(const char* text)
 {
+    // no need for this when running enigma from a command line
+    // it already outputs this
     //enigmaFrame->OutputText(text);
     //cout << text << endl;
 }
@@ -49,12 +52,20 @@ static void ede_dia_clear()
 //Sets the progress bar (0-100)
 static void ede_dia_progress(int progress)
 {
-    cout << progress << endl;
+    cout << "[";
+    for (int i = 0; i < progress/5; i++) {
+      cout << "=";
+    }
+    for (int i = 0; i < 20-(progress/5); i++) {
+      cout << " ";
+    }
+    cout << "] ";
+    cout << progress << "%" << endl;
 }
 //Applies a given text to the progress bar
 static void ede_dia_progress_text(const char* caption)
 {
-    cout << "caption" << endl;
+    cout << caption << endl;
 }
 //Sets the file from which data is redirected to frame log
 static void ede_output_redirect_file(const char* filepath)

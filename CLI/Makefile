@@ -2,7 +2,7 @@ CXXFLAGS := -I. -I../ -Ibackend -I../CompilerSource
 
 SOURCES := $(wildcard *.cpp) $(wildcard backend/*.cpp)
 
-LDLIBS := -ldl
+LDLIBS := -ldl -lzip
 
 OBJECTS := $(patsubst %.cpp,%.o,$(SOURCES))
 
