@@ -1,4 +1,4 @@
-The following are instructions for building the Command Line Interface on different platforms.
+The following are instructions for building the Command Line Interface on different platforms. You may also build the CLI from the Code::Blocks project so long as you have the required dependencies.
 
 Dependencies
 -------------------
