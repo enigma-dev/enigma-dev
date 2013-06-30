@@ -1,22 +1,32 @@
-/** Copyright (C) 2013 Robert B. Colton
-***
-*** This file is a part of the ENIGMA Development Environment.
-***
-*** ENIGMA is free software: you can redistribute it and/or modify it under the
-*** terms of the GNU General Public License as published by the Free Software
-*** Foundation, version 3 of the license or any later version.
-***
-*** This application and its source code is distributed AS-IS, WITHOUT ANY
-*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-*** details.
-***
-*** You should have received a copy of the GNU General Public License along
-*** with this code. If not, see <http://www.gnu.org/licenses/>
+/**
+* @file main.cpp
+* @brief Source file of main entry point for the program.
+*
+* Write a description about the file here...
+*
+* @section License
+*
+* Copyright (C) 2013 Robert B. Colton
+*
+* This file is a part of the ENIGMA Development Environment.
+*
+* ENIGMA is free software: you can redistribute it and/or modify it under the
+* terms of the GNU General Public License as published by the Free Software
+* Foundation, version 3 of the license or any later version.
+*
+* This application and its source code is distributed AS-IS, WITHOUT ANY
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+* details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
 #include <iostream>
 #include <stdio.h>
+
+#include "library.h"
 
 using namespace std;
 
@@ -117,7 +127,28 @@ void clearconsole() {
 
 int main()
 {
-    clearconsole();
+    void *result = LoadPluginLib();
+    definitionsModified("", ((const char*) "%e-yaml\n"
+    "---\n"
+    "treat-literals-as: 0\n"
+    "sample-lots-of-radios: 0\n"
+    "inherit-equivalence-from: 0\n"
+    "sample-checkbox: on\n"
+    "sample-edit: DEADBEEF\n"
+    "sample-combobox: 0\n"
+    "inherit-strings-from: 0\n"
+    "inherit-escapes-from: 0\n"
+    "inherit-increment-from: 0\n"
+    " \n"
+    "target-audio: OpenAL\n"
+    "target-windowing: xlib\n"
+    "target-compiler: gcc\n"
+    "target-graphics: OpenGL1\n"
+    "target-widget: None\n"
+    "target-collision: BBox\n"
+    "target-networking: None\n"
+    ));
+    //clearconsole();
     printfln(TITLETEXT);
 
     printf("Type ");

@@ -31,7 +31,19 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add directory="../" />
+			<Add directory="../CompilerSource" />
+			<Add directory="backend" />
 		</Compiler>
+		<Linker>
+			<Add option="-ldl" />
+		</Linker>
+		<Unit filename="backend/library.cpp" />
+		<Unit filename="backend/library.h" />
+		<Unit filename="backend/link.cpp" />
+		<Unit filename="backend/link.h" />
+		<Unit filename="backend/syntax_error.cpp" />
+		<Unit filename="backend/syntax_error.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
