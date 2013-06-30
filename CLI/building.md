@@ -2,11 +2,8 @@ The following are instructions for building the Command Line Interface on differ
 
 Dependencies
 -------------------
-* The CLI requires the zlib package on Ubuntu for EGM files, say the following on a terminal...
+- The CLI requires the zlib package on Ubuntu for EGM files, say the following on a terminal...
 `sudo apt-get install libzip-dev`
-* test
-#test
-#test
 
 For Macintosh
 -------------------

@@ -4,16 +4,16 @@ The following are instructions for building the engine on various platforms. The
 
 Dependencies
 -----------------------
-* Java Runtime Environment (JRE) Version 5 or higher, if you intend to use the LateralGM IDE
-On linux say the following on a terminal to determine your JDK version...
-`java -version`
-If you do not have Java installed, say the following on a terminal...
-`sudo apt-get install java`
-also...
-`sudo apt-get install openjdk-`
-and hit tab several times and it will list the available JDK packages you can install.
-* ENIGMA also requires a few packages on Linux, say the following on a terminal to obtain them...
-`sudo apt-get install g++ zlib1g-dev libglu1-mesa-dev libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev`
+- Java Runtime Environment (JRE) Version 5 or higher, if you intend to use the LateralGM IDE
+- On linux say the following on a terminal to determine your JDK version...
+- `java -version`
+- If you do not have Java installed, say the following on a terminal...
+- `sudo apt-get install java`
+- also...
+- `sudo apt-get install openjdk-`
+- and hit tab several times and it will list the available JDK packages you can install.
+- ENIGMA also requires a few packages on Linux, say the following on a terminal to obtain them...
+- `sudo apt-get install g++ zlib1g-dev libglu1-mesa-dev libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev`
 
 Python Installation
 -----------------------
