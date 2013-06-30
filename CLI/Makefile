@@ -7,7 +7,7 @@ LDLIBS := -ldl
 OBJECTS := $(patsubst %.cpp,%.o,$(SOURCES))
 
 all: ${OBJECTS}
-	${CXX} ${OBJECTS} ${LDLIBS} -o enigmacli
+	${CXX} ${OBJECTS} ${LDLIBS} -o ../enigmacli
 clean:
 	find . -name "*.o" -exec rm {} \;
 

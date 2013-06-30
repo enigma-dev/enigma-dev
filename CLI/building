@@ -1,3 +1,5 @@
+The following are instructions for building the Command Line Interface on different platforms.
+
 For Macintosh
 -------------------
 
@@ -13,10 +15,11 @@ make
 
 You can also use `make clean` to clean make files.
 
-Linking
+Running
 -------------------
-You will also need to right click and drag while holding alt and release selecting link here to link the following files into enigma-dev/CLI on Linux
+To run the CLI, simply back out from the directory...
+`cd ..`
+And then execute the exe...
+`./enigmacli`
 
-libCompileEGMf.so
-ENIGMAsystem
-Compilers
+It is important to note you must cd to enigma-dev folder and run the CLI from there.

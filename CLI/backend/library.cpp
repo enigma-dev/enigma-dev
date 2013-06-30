@@ -86,7 +86,7 @@ void* LoadPluginLib()
     string extension = ".so";
     #endif
 
-    void *handle = dlopen(("libcompileEGMf" + extension).c_str(), RTLD_NOW | RTLD_GLOBAL);
+    void *handle = dlopen(("./libcompileEGMf" + extension).c_str(), RTLD_NOW | RTLD_GLOBAL);
 
     if (handle == NULL)
     {

@@ -130,6 +130,53 @@ void clearconsole() {
     printf("\e[1;1H\e[2J");
 }
 
+unsigned long RGBA2DWORD(int iR, int iG, int iB, int iA)
+{
+  return (((((iR << 8) + iG) << 8) + iB) << 8) + iA;
+}
+
+void Compile()
+{
+    EnigmaStruct* es = new EnigmaStruct();
+    es->gameSettings.alwaysOnTop = true;
+    es->gameSettings.gameId = 03434534;
+    es->filename = "examplegamefilename";
+    Room rms[1];
+    rms[0] = Room();
+    rms[0].drawBackgroundColor = true;
+    rms[0].width = 500;
+    rms[0].height=500;
+    rms[0].creationCode = "";
+    rms[0].name = "exampleroom";
+    rms[0].id = 0543;
+    rms[0].speed = 30;
+    rms[0].caption = "Example Game Room Caption";
+    rms[0].instanceCount = 0;
+    rms[0].backgroundColor = RGBA2DWORD(0, 149, 255, 255);
+    GmObject obj[10];
+
+    obj[0] = GmObject();
+    //obj[0].name="pissmonkey";
+    obj[0].id = 0;
+  //  Sprite spr[0];
+  //  Font fnt[0];
+  //  Timeline tln[0];
+  //  Script scr[0];
+  //  Path pth[0];
+  //  Background bgd[0];
+
+    es->rooms = rms;
+    es->roomCount = 1;
+    //es->gmObjects = obj;
+    //es->gmObjectCount = 1;
+  //  es->scripts = scr;
+  //  es->fonts = fnt;
+  //  es->sprites = spr;
+  //  es->timelines = tln;
+   // es->backgrounds = bgd;
+    compileEGMf(es, "/tmp/testes.tmp", emode_run);
+}
+
 int main()
 {
     void *result = LoadPluginLib();
@@ -184,7 +231,7 @@ int main()
         } else if (input == "exit") {
             close = true;
         } else if (input == "build") {
-
+            Compile();
         } else if (input == "settings") {
 
         } else if (input == "list") {
