@@ -3,7 +3,7 @@ The following are instructions for building the Command Line Interface on differ
 Dependencies
 -------------------
 - The CLI requires the zlib package on Ubuntu for EGM files, say the following on a terminal...
-`sudo apt-get install libzip-dev`
+ `sudo apt-get install libzip-dev`
 
 For Macintosh
 -------------------
@@ -22,9 +22,9 @@ You can also use `make clean` to clean make files.
 
 Running
 -------------------
-To run the CLI, simply back out from the directory...
-`cd ..`
-And then execute the exe...
-`./enigmacli`
+ To run the CLI, simply back out from the directory...
+ `cd ..`
+ And then execute the exe...
+ `./enigmacli`
 
 It is important to note you must cd to enigma-dev folder and run the CLI from there.
