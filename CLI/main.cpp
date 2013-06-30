@@ -204,6 +204,7 @@ int main()
     "target-widget: None\n"
     "target-collision: BBox\n"
     "target-networking: None\n"
+    "extensions:Universal_System/Extensions/Paths\n"
     ));
     //clearconsole();
     printfln(TITLETEXT);

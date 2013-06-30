@@ -39,7 +39,7 @@ static void ede_dia_open()
 static void ede_dia_add(const char* text)
 {
     //enigmaFrame->OutputText(text);
-    cout << text;
+    //cout << text << endl;
 }
 //Clears the frame log
 static void ede_dia_clear()
