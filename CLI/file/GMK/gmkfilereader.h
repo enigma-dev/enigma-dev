@@ -26,27 +26,33 @@
 #ifndef GMKFILEREADER_H_INCLUDED
 #define GMKFILEREADER_H_INCLUDED
 
+#include <iostream>
+#include <fstream>
+using namespace std;
+
 #include "backend/EnigmaStruct.h"
 
 EnigmaStruct* loadGMK(char* path);
 
-struct GMKFile {
-EnigmaStruct* es;
-char* path;
+struct GMKFile
+{
+    EnigmaStruct* es;
+    char* path;
+    ifstream file;
 
-EnigmaStruct* load(char* path);
-void readSprites();
-void readSounds();
-void readBackgrounds();
-void readPaths();
-void readScripts();
-void readFonts();
-void readTimelines();
-void readObjects();
-void readRooms();
-void readGameSettings();
-void readGameInfo();
-void readGameExtensions();
+    EnigmaStruct* load(char* path);
+    void readSprites();
+    void readSounds();
+    void readBackgrounds();
+    void readPaths();
+    void readScripts();
+    void readFonts();
+    void readTimelines();
+    void readObjects();
+    void readRooms();
+    void readGameSettings();
+    void readGameInfo();
+    void readGameExtensions();
 
 };
 

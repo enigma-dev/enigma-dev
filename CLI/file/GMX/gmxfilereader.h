@@ -30,23 +30,24 @@
 
 EnigmaStruct* loadGMX(char* path);
 
-struct GMXFile {
-EnigmaStruct* es;
-char* path;
+struct GMXFile
+{
+    EnigmaStruct* es;
+    char* path;
 
-EnigmaStruct* load(char* path);
-void readSprites();
-void readSounds();
-void readBackgrounds();
-void readPaths();
-void readScripts();
-void readFonts();
-void readTimelines();
-void readObjects();
-void readRooms();
-void readGameSettings();
-void readGameInfo();
-void readGameExtensions();
+    EnigmaStruct* load(char* path);
+    void readSprites();
+    void readSounds();
+    void readBackgrounds();
+    void readPaths();
+    void readScripts();
+    void readFonts();
+    void readTimelines();
+    void readObjects();
+    void readRooms();
+    void readGameSettings();
+    void readGameInfo();
+    void readGameExtensions();
 
 };
 

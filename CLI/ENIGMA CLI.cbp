@@ -34,6 +34,11 @@
 			<Add option="-I." />
 			<Add option="-I../" />
 			<Add option="-I../CompilerSource" />
+			<Add option="-I./file" />
+			<Add option="-I./file/EGM" />
+			<Add option="-I./file/GMK" />
+			<Add option="-I./file/GMX" />
+			<Add option="-I./file/GMZ" />
 			<Add option="-Ibackend" />
 		</Compiler>
 		<Linker>
@@ -45,8 +50,14 @@
 		<Unit filename="backend/link.h" />
 		<Unit filename="backend/syntax_error.cpp" />
 		<Unit filename="backend/syntax_error.h" />
-		<Unit filename="file/EGM/efilereader.cpp" />
-		<Unit filename="file/EGM/efilereader.h" />
+		<Unit filename="file/EGM/egmfilereader.cpp" />
+		<Unit filename="file/EGM/egmfilereader.h" />
+		<Unit filename="file/GMK/gmkfilereader.cpp" />
+		<Unit filename="file/GMK/gmkfilereader.h" />
+		<Unit filename="file/GMX/gmxfilereader.cpp" />
+		<Unit filename="file/GMX/gmxfilereader.h" />
+		<Unit filename="file/GMZ/gmzfilereader.cpp" />
+		<Unit filename="file/GMZ/gmzfilereader.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="printcolors.cpp" />
 		<Unit filename="printcolors.h" />

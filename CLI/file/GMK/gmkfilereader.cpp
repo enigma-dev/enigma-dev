@@ -36,6 +36,24 @@ EnigmaStruct* GMKFile::load(char* path)
 {
     es = new EnigmaStruct();
     es->filename = "examplegamefilename";
+    file.open(path, ios::in|ios::binary);
+    if (!file.is_open())
+    {
+        print_error("File does not exist");
+        return 0;
+    }
+
+    int identifier;
+    file.read((char*)&identifier, 4);
+    if (identifier != 1234321)
+    {
+        print_error("Fuck you");
+    }
+    //throw new GmFormatException(f,Messages.format("GmFileReader.ERROR_INVALID",uri, //$NON-NLS-1$
+    //identifier));
+    int ver;
+    file.read((char*)&ver, 4);
+    cout << ver;
 
     readSprites();
     readSounds();
@@ -50,6 +68,7 @@ EnigmaStruct* GMKFile::load(char* path)
     readGameSettings();
     readGameInfo();
     readGameExtensions();
+    file.close();
 
     return es;
 }
