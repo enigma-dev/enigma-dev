@@ -44,6 +44,8 @@
  #define closesocket(s) close(s)
 #endif
 
+#include "Universal_System/var4.h"
+
 bool net_init();
 bool net_cleanup();
 //initializes a socket
@@ -54,13 +56,13 @@ bool net_cleanup();
 //Returns an identifier for the socket, or negative on error.
 //For clients, the identifier indicates the server,
 //and may be used to receive messages from them.
-int net_connect(char *addr, char *port, bool serve, bool udp);
+int net_connect(string addr, string port, bool server, bool udp);
 //Initializes a tcp socket, which can either be a server or client.
 //See net_connect for arguments and returns
-int net_connect_tcp(char *addr, char *port, bool serve);
+int net_connect_tcp(string addr, string port, bool server);
 //Initializes a udp socket, which can either be a server or client.
 //See net_connect for arguments and returns
-int net_connect_udp(char *localport, bool serve);
+int net_connect_udp(string localport, bool server);
 //A server must accept or reject (ignore) incoming socket connections.
 //The argument is this server socket's ID.
 //Returns the incoming socket's ID, or -1 if an error occurred.
@@ -75,7 +77,7 @@ int net_accept(int sock);
 //Iff it reads short of BUFSIZE, it will append a null character.
 //Otherwise, if it reads the full buffer, no null character can be appended.
 //There is no guarantee that the buffer will not already contain null characters.
-char *net_receive(int sock);
+string net_receive(int sock);
 //A largely debugging/server method for echo-bouncing messages
 //That is, receives a message from the specified socket, and sends it back to the same socket.
 //Prints the message that was bounced, if available.
@@ -84,7 +86,7 @@ char *net_receive(int sock);
 int net_bounce(int sock);
 //Sends a message to specified socket. (We use a #define in the .h file instead)
 //See documentation for Berkeley sockets send() method.
-int net_send(int sock, char* msg, int len);
+int net_send(int sock, string msg, int len);
 //Returns the port of a given socket.
 int net_get_port(int sock);
 //Sets whether given socket is in blocking mode
