@@ -45,6 +45,8 @@
 		<Unit filename="backend/link.h" />
 		<Unit filename="backend/syntax_error.cpp" />
 		<Unit filename="backend/syntax_error.h" />
+		<Unit filename="file/EGM/efilereader.cpp" />
+		<Unit filename="file/EGM/efilereader.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="printcolors.cpp" />
 		<Unit filename="printcolors.h" />

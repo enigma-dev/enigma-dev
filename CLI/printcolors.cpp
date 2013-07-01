@@ -30,6 +30,11 @@ using namespace std;
 
 #include "printcolors.h"
 
+unsigned long RGBA2DWORD(int iR, int iG, int iB, int iA)
+{
+    return (((((iR << 8) + iG) << 8) + iB) << 8) + iA;
+}
+
 void textcolor(int attr, int fg, int bg) {
     char command[13];
 

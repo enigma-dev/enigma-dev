@@ -1,4 +1,4 @@
-CXXFLAGS := -I. -I../ -Ibackend -I../CompilerSource
+CXXFLAGS := -I. -I../ -Ibackend -I../CompilerSource -I./file -I./file/EGM -I./file/GMK -I./file/GMX -I./file/GMZ
 
 SOURCES := $(wildcard *.cpp) $(wildcard backend/*.cpp)
 

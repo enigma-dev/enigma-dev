@@ -43,6 +43,8 @@
 #define CYAN            6
 #define WHITE           7
 
+unsigned long RGBA2DWORD(int iR, int iG, int iB, int iA);
+
 void textcolor(int attr, int fg, int bg);
 void textcolorbg(int attr, int bg);
 void textcolorfg(int attr, int fg);
