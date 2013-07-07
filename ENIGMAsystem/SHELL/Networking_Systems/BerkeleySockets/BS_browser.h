@@ -40,20 +40,20 @@ http://www.ietf.org/rfc/rfc2616.txt
 #include <stdarg.h>
 #include <stdlib.h>
 
-void die(char *e, int n, ...);
+void die(const char *e, int n, ...);
 int prepare(char **ret, const char *cmd, int argc, ...);
-void ftpsend(int in, char *msg);
-void ftpparse(int in, char *cmd, char *arg, char *disp);
-char *ftpexpect(int in, char *exp);
+void ftpsend(int in, const char *msg);
+void ftpparse(int in, const char *cmd, const char *arg, const char *disp);
+char *ftpexpect(int in, const char *exp);
 //Opens a connection with an FTP server using given hostname, username, and password.
 //Returns an identifier for the FTP connection.
-int net_ftp_open(char *host, char *user, char *pass);
+int net_ftp_open(string host, string user, string pass);
 //Uploads data to an ftp server to be stored as file.
 //Indicate the ftp connection, the remote filename to store the data in, and the data (and size)
-void net_ftp_send(int in, char *file, char *msg, int msglen);
+void net_ftp_send(int in, string file, string msg, int msglen);
 //Properly terminates the connection with this ftp socket.
 void net_ftp_close(int in);
 //Queries a http host and location, returns the contents
 //This method handles the packets and headers for you
-char *net_http(char *host, char *loc);
+string net_http(string host, string loc);
 
