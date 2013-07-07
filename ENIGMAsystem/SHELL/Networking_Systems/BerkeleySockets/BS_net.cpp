@@ -23,6 +23,7 @@
 */
 
 #include "BS_net.h"
+#include "libEGMstd.h"
 
 #ifndef _WIN32
  #include <netdb.h>
@@ -53,7 +54,7 @@ bool net_cleanup() {
  return !(winsock_started = 0);
 }
 
-int net_connect(char *addr, char *port, bool serve, bool udp) {
+int net_connect(string addr, string port, bool server, bool udp) {
  net_init();
 
  struct addrinfo hints, *sinf;
@@ -62,8 +63,7 @@ int net_connect(char *addr, char *port, bool serve, bool udp) {
  hints.ai_socktype = (udp == 0) ? SOCK_STREAM : SOCK_DGRAM;
  hints.ai_flags = AI_PASSIVE;
 
- if (serve != 0 || addr == NULL || addr[0] == '\0') addr = NULL;
- if (getaddrinfo(addr, port, &hints, &sinf) != 0) return -2;
+ if (getaddrinfo(addr.c_str(), port.c_str(), &hints, &sinf) != 0) return -2;
 
  int s = socket(sinf->ai_family, sinf->ai_socktype, sinf->ai_protocol);
  if (s == -1) {
@@ -71,7 +71,7 @@ int net_connect(char *addr, char *port, bool serve, bool udp) {
   return -3;
  }
 
- if (serve == 0) { //client
+ if (!server) { //client
   if (connect(s, sinf->ai_addr, sinf->ai_addrlen) == SOCKET_ERROR) {
    freeaddrinfo(sinf);
    closesocket(s);
@@ -83,13 +83,13 @@ int net_connect(char *addr, char *port, bool serve, bool udp) {
    closesocket(s);
    return -4;
   }
-  if (udp == 0) { //server tcp
+  if (!udp) { //server tcp
    if (listen(s, 5) == SOCKET_ERROR) {
     freeaddrinfo(sinf);
     closesocket(s);
     return -5;
    }
-  } else if (0) { //server udp
+  } else { //server udp
    if (connect(s, sinf->ai_addr, sinf->ai_addrlen) == SOCKET_ERROR) {
     freeaddrinfo(sinf);
     closesocket(s);
@@ -102,12 +102,12 @@ int net_connect(char *addr, char *port, bool serve, bool udp) {
  return s;
 }
 
-int net_connect_tcp(char *addr, char *port, bool serve) {
- return net_connect(addr,port,serve,0);
+int net_connect_tcp(string addr, string port, bool server) {
+ return net_connect(addr, port, server, 0);
 }
 
-int net_connect_udp(char *localport, bool serve) {
- return net_connect(NULL,localport,serve,1);
+int net_connect_udp(string localport, bool server) {
+ return net_connect(NULL, localport, server, 1);
 }
 
 int net_accept(int sock) {
@@ -117,11 +117,11 @@ int net_accept(int sock) {
 #define BUFSIZE 512
 char buf[BUFSIZE];
 
-char *net_receive(int sock) {
+string net_receive(int sock) {
  int r;
- if ((r = recv(sock,buf,BUFSIZE,0)) == SOCKET_ERROR) return NULL;
+ buf[0] = '\0';
+ if ((r = recv(sock,buf,BUFSIZE,0)) == SOCKET_ERROR) return buf;
  if (r == BUFSIZE) return buf;
- buf[r] = '\0';
  return buf;
 }
 
@@ -138,8 +138,8 @@ int net_bounce(int sock) {
  return 0;
 }
 
-int net_send(int sock, char* msg, int len) {
-  send(sock, msg, len, 0); 
+int net_send(int sock, string msg, int len) {
+  send(sock, msg.c_str(), len, 0); 
 }
 
 int net_get_port(int sock) {

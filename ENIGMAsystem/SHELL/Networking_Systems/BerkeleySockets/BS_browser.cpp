@@ -27,7 +27,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-void die(char *e, int n, ...) {
+void die(const char *e, int n, ...) {
  printf("%s error (%d)\n",e,errno);
  int i;
  va_list s;
@@ -58,13 +58,13 @@ int prepare(char **ret, const char *cmd, int argc, ...) {
  return len;
 }
 
-void ftpsend(int in, char *msg) {
+void ftpsend(int in, const char *msg) {
  printf("> %s",msg);
  if (net_send(in,msg,strlen(msg)) < 0)
   die("Send",1,in);
 }
 
-void ftpparse(int in, char *cmd, char *arg, char *disp) {
+void ftpparse(int in, const char *cmd, const char *arg, const char *disp) {
  int len = strlen(cmd) + strlen(arg) - 2;
  char *packet = (char *)malloc(len);
  sprintf(packet,cmd,arg);
@@ -75,28 +75,28 @@ void ftpparse(int in, char *cmd, char *arg, char *disp) {
  if (len < 0) die("Send",1,in);
 }
 
-char *ftpexpect(int in, char *exp) {
- char *packet = net_receive(in);
+char *ftpexpect(int in, const char *exp) {
+ char *packet = (char *)net_receive(in).c_str();
  printf("%s",packet);
  if (strncmp(packet,exp,4) != 0) die("Response",1,in);
  return packet;
 }
 
-int net_ftp_open(char *host, char *user, char *pass) {
+int net_ftp_open(string host, string user, string pass) {
  int in = net_connect_tcp(host,"ftp",0);
  if (in < 0) die("Connect",0);
  ftpexpect(in,"220 ");
 
- ftpparse(in,"USER %s\r\n",user,user);
+ ftpparse(in,"USER %s\r\n",user.c_str(),user.c_str());
  ftpexpect(in,"331 ");
 
- ftpparse(in,"PASS %s\r\n",pass,"<omitted>");
+ ftpparse(in,"PASS %s\r\n",pass.c_str(),"<omitted>");
  ftpexpect(in,"230 ");
  
  return in;
 }
 
-void net_ftp_send(int in, char *file, char *msg, int msglen) {
+void net_ftp_send(int in, string file, string msg, int msglen) {
  ftpsend(in,"PASV\r\n");
  char *ip = ftpexpect(in,"227 ");
 
@@ -113,7 +113,7 @@ void net_ftp_send(int in, char *file, char *msg, int msglen) {
  sprintf(port,"%d\0",atoi(r2) * 256 + atoi(strchr(r2,',') + 1));
  int out = net_connect_tcp(ip,port,0);
 
- ftpparse(in,"STOR %s\r\n",file,file); //ip overwritten
+ ftpparse(in,"STOR %s\r\n",file.c_str(),file.c_str()); //ip overwritten
  ftpexpect(in,"150 ");
  net_send(out,msg,msglen);
  closesocket(out);
@@ -126,7 +126,7 @@ void net_ftp_close(int in) {
  closesocket(in);
 }
 
-char *net_http(char *host, char *loc) {
+string net_http(string host, string loc) {
  char *packet;
 
  int s = net_connect_tcp(host,"http",0);
@@ -137,13 +137,13 @@ GET %s HTTP/1.1\r\n\
 Host: %s\r\n\
 User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0\r\n\
 Connection: close\r\n\r\n";
- int len = prepare(&packet,cmd,2,loc,host);
+ int len = prepare(&packet,cmd,2,loc.c_str(),host.c_str());
  int r = net_send(s,packet,len);
  free(packet);
  if (r < 0) die("Send",1,s);
 
  do {
-  if ((packet = net_receive(s)) == NULL)
+  if ((packet = (char*)net_receive(s).c_str()) == NULL)
    die("Receive",1,s);
 
   //HTTP 1.1 requires handling of 100 Continue.
