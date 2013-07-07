@@ -44,7 +44,7 @@ namespace enigma_user {
   int instance_count = 0;
 }
 
-extern  deque<int> instance_id;
+extern  deque<int> instance_id; // TODO: Implement and move to enigma_user.
 
 namespace enigma
 {
@@ -185,6 +185,8 @@ namespace enigma
   extern int object_idmax;
   object_basic* fetch_instance_by_int(int x)
   {
+    using namespace enigma_user;
+
     if (x < 0) switch (x)
     {
       case self:
@@ -211,6 +213,8 @@ namespace enigma
 
   iterator fetch_inst_iter_by_int(int x)
   {
+    using namespace enigma_user;
+
     if (x < 0) switch (x) // Keyword-based lookup
     {
       case self:

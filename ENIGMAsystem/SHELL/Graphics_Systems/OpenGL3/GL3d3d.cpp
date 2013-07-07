@@ -18,8 +18,8 @@
 #include "../General/OpenGLHeaders.h"
 #include "GL3d3d.h"
 #include "GL3vertexbuffer.h"
-#include "../General/GLtextures.h"
-#include "GL3mesh.h"
+#include "../General/GStextures.h"
+#include "GL3model.h"
 #include "GL3shapes.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
@@ -32,9 +32,12 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
+namespace enigma {
+  bool d3dMode = false;
+  bool d3dHidden = false;
+  bool d3dZWriteEnable = true;
+}
+
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 GLenum renderstates[22] = {
@@ -55,9 +58,9 @@ void d3d_start()
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
   // Enable depth buffering
-  d3dMode = true;
-  d3dHidden = false;
-  d3dZWriteEnable = true;
+  enigma::d3dMode = true;
+  enigma::d3dHidden = true;
+  enigma::d3dZWriteEnable = true;
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
@@ -78,7 +81,8 @@ void d3d_start()
 
 void d3d_end()
 {
-  d3dMode = false;
+  enigma::d3dMode = false;
+  enigma::d3dHidden = false;
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_ALPHA_TEST);
   glDisable(GL_NORMALIZE);
@@ -91,18 +95,21 @@ void d3d_end()
 
 bool d3d_get_mode()
 {
-    return d3dMode;
+    return enigma::d3dMode;
 }
 
 void d3d_set_hidden(bool enable)
 {
-    d3dHidden = enable;
-}   // TODO: Write function
+    if (!enigma::d3dMode) return;
+    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
+    enigma::d3dHidden = enable;
+}
 
 void d3d_set_zwriteenable(bool enable)
 {
+    if (!enigma::d3dMode) return;
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    d3dZWriteEnable = enable;
+    enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)
@@ -160,6 +167,7 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(bool enable)
 {
+  if (!enigma::d3dMode) return;
   (enable?glEnable:glDisable)(GL_CULL_FACE);
   glFrontFace(GL_CW);
 }
@@ -198,6 +206,7 @@ void d3d_depth_operator(int mode) {
 
 void d3d_set_perspective(bool enable)
 {
+  if (!enigma::d3dMode) return;
   if (enable)
   {
     glMatrixMode(GL_PROJECTION);
@@ -211,7 +220,10 @@ void d3d_set_perspective(bool enable)
     glLoadIdentity();
     gluPerspective(0, 1, 0, 1);
     glMatrixMode(GL_MODELVIEW);
-  } //Perspective not the same as in GM when turning off perspective and using d3d projection
+  }
+  // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
+  // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
+  // See also OpenGL1/GLd3d.cpp.
 }
 
 void d3d_set_depth(double dep)
@@ -236,7 +248,7 @@ namespace enigma_user
 
 void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
 {
-  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
+  (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
@@ -250,7 +262,7 @@ void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double
 
 void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
 {
-  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
+  (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(angle, -aspect, znear, zfar);
@@ -340,10 +352,12 @@ void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double
     indices[3] = 0;
   }
 
+  texture_use(get_texture(texId));
+
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
-  texture_use(get_texture(texId));
+
   glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, indices);
 }
 
@@ -355,11 +369,11 @@ void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, doubl
   GLubyte ceil_indices[] = {0, 2, 1, 3};
   GLubyte floor_indices[] = {3, 1, 2, 0};
 
-  glBindBuffer( GL_ARRAY_BUFFER, 0 );
+  texture_use(get_texture(texId));
+
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
-  texture_use(get_texture(texId));
   if (x2>x1 || y2>y1) {
     glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, ceil_indices);
   } else {
@@ -479,7 +493,7 @@ void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double
         glVertex3fv(v[k]);
         k++;
         tp = 0;
-        for (int i = steps; i >= 0; i--)
+        for (int i = steps + 1; i >= 0; i--)
         {
             v[k][0] = v[i + steps + 1][0]; v[k][1] = v[i + steps + 1][1]; v[k][2] = v[i + steps + 1][2];
             t[k][0] = 0; t[k][1] = 0;

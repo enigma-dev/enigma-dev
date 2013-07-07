@@ -310,7 +310,8 @@ draw: 8
 	Iterator-initialize: /* Draw is initialized in the constructor */
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw will destruct with this */
-	Instead: if (automatic_redraw) screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
+	Default: /* Not drawing the sprite in localless */
+	Instead: if (automatic_redraw) screen_redraw(); # We never want to iterate draw; we let screen_redraw() handle it.
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.

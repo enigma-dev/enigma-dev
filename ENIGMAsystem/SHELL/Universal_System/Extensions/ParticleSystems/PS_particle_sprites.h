@@ -36,9 +36,11 @@ namespace enigma
   struct particle_sprite
   {
     int texture;
-    int width, height;
+    int width, height; // Assumes multiple of 2.
+    pt_shape shape;
   };
   particle_sprite* get_particle_sprite(pt_shape particle_shape);
+  int get_particle_actual_sprite(pt_shape particle_shape);
 }
 
 #endif // ENIGMA_PS_PARTICLESPRITES

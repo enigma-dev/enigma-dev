@@ -16,13 +16,11 @@
 #ifndef __var_te
 #define __var_te
   #ifdef DEBUG_MODE
-    #define div0c(x) { if (!x) return (show_error("Division by zero.",0), *this); }
     #define terror(x)
     #define nterror(x)
     #define terror2(dt)
     #define terrortrue() show_error("Incompatible right-hand type to operator.",0);
   #else
-    #define div0c(x)
     #define terror(x)
     #define terror2(x)
     #define terrortrue()

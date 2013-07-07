@@ -85,8 +85,6 @@ namespace extensions
   }
   void parse_extensions(vector<string> exts)
   {
-    if (exts.empty())
-      return;  //IsmAvatar: Remove this if() return.
     parsed_extensions.clear();
     
     for (unsigned i = 0; i < exts.size(); i++)

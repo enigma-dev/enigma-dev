@@ -19,7 +19,7 @@
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
 //using std::string;
-#include "../General/GLtextures.h"
+#include "../General/GStextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -54,16 +54,8 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	return (x + (x >> 16)) & 63;
 }
 
-unsigned get_texture(int texid)
-{
-	if (texid < 0 || texid >= GmTextures.size())
-	{
-		return -1;
-	}
-	else
-	{
-		return GmTextures[texid]->gltex;
-	}
+unsigned get_texture(int texid) {
+	return (size_t(texid) >= GmTextures.size())? -1 : GmTextures[texid]->gltex;
 }
 
 namespace enigma
@@ -175,7 +167,7 @@ void texture_set_enabled(bool enable)
 void texture_set_interpolation(int enable)
 {
   enigma::interpolate_textures = enable;
-  for (int i = 0; i < GmTextures.size(); i++)
+  for (size_t i = 0; i < GmTextures.size(); i++)
   {
     glBindTexture(GL_TEXTURE_2D, GmTextures[i]->gltex);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
@@ -213,7 +205,7 @@ int texture_get_pixheight(int texid)
 
 void texture_set_repeat(bool repeat)
 {
-  for (int i = 0; i < GmTextures.size(); i++)
+  for (size_t i = 0; i < GmTextures.size(); i++)
   {
     glBindTexture(GL_TEXTURE_2D, GmTextures[i]->gltex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);

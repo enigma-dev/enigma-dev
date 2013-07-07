@@ -54,6 +54,7 @@ import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script;
+import org.lateralgm.resources.Shader;
 import org.lateralgm.resources.Sound;
 import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.Sprite;
@@ -90,6 +91,7 @@ public class EFileWriter
 		writers.put(Background.class,new BackgroundWriter());
 		writers.put(Path.class,new PathTextWriter());
 		writers.put(Script.class,new ScriptWriter());
+		writers.put(Shader.class, new ShaderWriter());
 		writers.put(Font.class,new FontRawWriter());
 		// writers.put(Timeline.class,new TimelineIO());
 		writers.put(GmObject.class,new ObjectEefWriter());
@@ -476,6 +478,27 @@ public class EFileWriter
 			return false;
 			}
 		}
+	
+	static class ShaderWriter extends DataPropWriter
+	{
+	@Override
+	public String getExt(Resource<?,?> r)
+		{
+		return ".shr"; //$NON-NLS-1$
+		}
+
+	@Override
+	public void writeData(OutputStream os, Resource<?,?> r) throws IOException
+		{
+		os.write(((Shader) r).getCode().getBytes()); // charset?
+		}
+
+	@Override
+	public boolean allowProperty(Enum<?> prop)
+		{
+		return false;
+		}
+	}
 
 	static class FontRawWriter implements ResourceWriter
 		{

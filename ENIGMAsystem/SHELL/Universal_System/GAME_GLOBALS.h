@@ -29,6 +29,9 @@
 GM Global variables
 ******************/
 
+#ifndef __GAME_GLOBALS_H
+#define __GAME_GLOBALS_H
+
 bool argument_relative=false;
 
 namespace enigma_user {
@@ -44,11 +47,8 @@ global:     event_number
 global:     event_object
 global:     event_type*/
 namespace enigma_user {
-double      fps;
-}
-
-namespace enigma_user {
-double health=100;
+  double fps;
+  double health=100;
 }
 
 // TODO: MOVEME: Who put this here?
@@ -94,3 +94,5 @@ extern int room_first, room_last;
 /*********************
 End GM global variables
  *********************/
+
+#endif

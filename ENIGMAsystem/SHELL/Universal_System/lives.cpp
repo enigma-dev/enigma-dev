@@ -18,7 +18,7 @@
 #include "lives.h"
 #include <cmath>
 
-INTERCEPT_DEFAULT_COPY(enigma::livesv);
+INTERCEPT_DEFAULT_COPY(enigma::livesv)
 namespace enigma
 {
   using enigma_user::lives;

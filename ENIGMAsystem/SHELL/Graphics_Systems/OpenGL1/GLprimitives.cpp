@@ -18,23 +18,14 @@
 #include "../General/OpenGLHeaders.h"
 #include "GLprimitives.h"
 #include "../General/GLbinding.h"
-#include "../General/GLtextures.h"
+#include "../General/GStextures.h"
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
 
-#if PRIMBUFFER
-GLenum __primitivetype[PRIMDEPTH2];
-int __primitivelength[PRIMDEPTH2];
-float __primitivecolor[PRIMBUFFER][PRIMDEPTH2][4];
-float __primitivexy[PRIMBUFFER][PRIMDEPTH2][2];
-int __currentpcount[PRIMDEPTH2];
-int __currentpdepth;
-#endif
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+#define GETR(x) ((x & 0x0000FF))/255.0
+#define GETG(x) ((x & 0x00FF00)>>8)/255.0
+#define GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 GLenum ptypes_by_id[16] = {
   GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES,
@@ -133,7 +124,7 @@ void d3d_vertex(double x, double y, double z)
 }
 void d3d_vertex_color(double x, double y, double z, int color, double alpha)
 {
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
 }
@@ -144,7 +135,7 @@ void d3d_vertex_texture(double x, double y, double z, double tx, double ty)
 }
 void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha)
 {
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glTexCoord2f(tx,ty);
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
@@ -157,7 +148,7 @@ void d3d_vertex_normal(double x, double y, double z, double nx, double ny, doubl
 }
 void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha)
 {
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
@@ -170,7 +161,7 @@ void d3d_vertex_normal_texture(double x, double y, double z, double nx, double n
 }
 void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha)
 {
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
+    glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glTexCoord2f(tx,ty);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);

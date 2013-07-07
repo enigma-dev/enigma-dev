@@ -36,13 +36,8 @@ using namespace std;
 
 namespace enigma
 {
-  double mouse_xprevious, mouse_yprevious;
-  void update_globals() {
-    mouse_xprevious = enigma_user::mouse_x;
-    mouse_yprevious = enigma_user::mouse_y;
-    enigma_user::mouse_x = enigma_user::window_mouse_get_x();
-    enigma_user::mouse_y = enigma_user::window_mouse_get_y();
-    enigma::room_update();
+  void update_globals()
+  {
     audiosystem_update();
   }
 }

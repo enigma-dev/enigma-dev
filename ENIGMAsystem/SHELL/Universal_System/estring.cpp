@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2011 Josh Ventura
+/** Copyright (C) 2008-2013 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -110,7 +110,8 @@ string string_replace_all(string str,string substr,string newstr) {
 int string_count(string substr,string str) {
 	size_t pos = 0, occ = 0;
 	const size_t sublen = substr.length();
-  while((pos=str.find(substr,pos))!=-1) occ++, pos += sublen;
+  while((pos=str.find(substr,pos)) != string::npos)
+    occ++, pos += sublen;
   return occ;
 }
 

@@ -28,6 +28,7 @@
 #include "PS_particle_deflector.h"
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
+#include "PS_particle.h"
 #include <cstdlib>
 #include <algorithm>
 #include <cmath>
@@ -53,22 +54,26 @@ namespace enigma
   }
   bool particle_deflector::is_inside(double x, double y)
   {
-    return xmin != xmax && ymin != ymax && x >= xmin && x <= xmax && y >= ymin && y <= ymax;
+    // Regions with coordinates along the same axis which are the same are empty.
+    // This has been tested and verified to be consistent with GM.
+    return xmin < xmax && ymin < ymax && x >= xmin && x <= xmax && y >= ymin && y <= ymax;
   }
-  void particle_deflector::set_region(double xmin, double xmax, double ymin, double ymax)
+  void particle_deflector::set_region(double p_xmin, double p_xmax, double p_ymin, double p_ymax)
   {
-    this->xmin = std::min(xmin, xmax);
-    this->xmax = xmax;
-    this->ymin = std::min(ymin, ymax);
-    this->ymax = ymax;
+    // NOTE: The assignment to the region's coordinates means that if p_xmin >= p_xmax, the region is empty.
+    // This has been tested and verified to be consistent with GM.
+    xmin = std::min(p_xmin, p_xmax);
+    xmax = p_xmax;
+    ymin = std::min(p_ymin, p_ymax);
+    ymax = p_ymax;
   }
-  void particle_deflector::set_kind(ps_deflect deflection_kind)
+  void particle_deflector::set_kind(ps_deflect p_deflection_kind)
   {
-    this->deflection_kind = deflection_kind;
+    deflection_kind = p_deflection_kind;
   }
-  void particle_deflector::set_friction(double friction)
+  void particle_deflector::set_friction(double p_friction)
   {
-    this->friction = friction;
+    friction = p_friction;
   }
 }
 
@@ -76,84 +81,86 @@ using enigma::particle_system;
 using enigma::particle_type;
 using enigma::particle_deflector;
 
-int part_deflector_create(int id)
-{
-  particle_system* p_s = enigma::get_particlesystem(id);
-  if (p_s != NULL) {
-    return p_s->create_deflector();
+namespace enigma_user {
+  int part_deflector_create(int id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(id);
+    if (p_s != NULL) {
+      return p_s->create_deflector();
+    }
+    return -1;
   }
-  return -1;
-}
-void part_deflector_destroy(int ps_id, int df_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
-    if (df_it != p_s->id_to_deflector.end()) {
-      delete (*df_it).second;
-      p_s->id_to_deflector.erase(df_it);
+  void part_deflector_destroy(int ps_id, int df_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
+      if (df_it != p_s->id_to_deflector.end()) {
+        delete (*df_it).second;
+        p_s->id_to_deflector.erase(df_it);
+      }
     }
   }
-}
-void part_deflector_destroy_all(int ps_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    for (std::map<int,particle_deflector*>::iterator it = p_s->id_to_deflector.begin(); it != p_s->id_to_deflector.end(); it++)
-    {
-      delete (*it).second;
-    }
-    p_s->id_to_deflector.clear();
-  }
-}
-bool part_deflector_exists(int ps_id, int df_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
-    if (df_it != p_s->id_to_deflector.end()) {
-      return true;
+  void part_deflector_destroy_all(int ps_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      for (std::map<int,particle_deflector*>::iterator it = p_s->id_to_deflector.begin(); it != p_s->id_to_deflector.end(); it++)
+      {
+        delete (*it).second;
+      }
+      p_s->id_to_deflector.clear();
     }
   }
-  return false;
-}
-void part_deflector_clear(int ps_id, int df_id)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
-    if (df_it != p_s->id_to_deflector.end()) {
-      (*df_it).second->initialize();
+  bool part_deflector_exists(int ps_id, int df_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
+      if (df_it != p_s->id_to_deflector.end()) {
+        return true;
+      }
+    }
+    return false;
+  }
+  void part_deflector_clear(int ps_id, int df_id)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
+      if (df_it != p_s->id_to_deflector.end()) {
+        (*df_it).second->initialize();
+      }
     }
   }
-}
-void part_deflector_region(int ps_id, int df_id, double xmin, double xmax, double ymin, double ymax)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
-    if (df_it != p_s->id_to_deflector.end()) {
-      (*df_it).second->set_region(xmin, xmax, ymin, ymax);
+  void part_deflector_region(int ps_id, int df_id, double xmin, double xmax, double ymin, double ymax)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
+      if (df_it != p_s->id_to_deflector.end()) {
+        (*df_it).second->set_region(xmin, xmax, ymin, ymax);
+      }
     }
   }
-}
-void part_deflector_kind(int ps_id, int df_id, int kind)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
-    if (df_it != p_s->id_to_deflector.end()) {
-      (*df_it).second->set_kind(enigma::get_ps_deflect(kind));
+  void part_deflector_kind(int ps_id, int df_id, int kind)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
+      if (df_it != p_s->id_to_deflector.end()) {
+        (*df_it).second->set_kind(enigma::get_ps_deflect(kind));
+      }
     }
   }
-}
-void part_deflector_friction(int ps_id, int df_id, double friction)
-{
-  particle_system* p_s = enigma::get_particlesystem(ps_id);
-  if (p_s != NULL) {
-    std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
-    if (df_it != p_s->id_to_deflector.end()) {
-      (*df_it).second->set_friction(friction);
+  void part_deflector_friction(int ps_id, int df_id, double friction)
+  {
+    particle_system* p_s = enigma::get_particlesystem(ps_id);
+    if (p_s != NULL) {
+      std::map<int,particle_deflector*>::iterator df_it = p_s->id_to_deflector.find(df_id);
+      if (df_it != p_s->id_to_deflector.end()) {
+        (*df_it).second->set_friction(friction);
+      }
     }
   }
 }

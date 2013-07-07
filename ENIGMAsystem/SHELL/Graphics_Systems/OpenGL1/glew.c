@@ -29,11 +29,13 @@
 ** THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#define GLEW_STATIC
+
 #include "../General/glew.h"
 #if defined(_WIN32)
-#  include "../General/wglew.h"
+#  include "../../Bridges/Win32-OpenGL1/wglew.h"
 #elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
-#  include "../General/glxew.h"
+#  include "../../Bridges/xlib-OpenGL1/glxew.h"
 #endif
 
 /*
@@ -108,7 +110,7 @@ void* NSGLGetProcAddress (const GLubyte *name)
   void* addr = dlsym(image, (const char*)name);
   if( addr ) return addr;
 #ifdef GLEW_APPLE_GLX
-  return dlGetProcAddress( name ); // try next for glx symbols
+  return dlGetProcAddress( name ); /* try next for glx symbols */
 #else
   return NULL;
 #endif
@@ -137,7 +139,7 @@ void* NSGLGetProcAddress (const GLubyte *name)
   free(symbolName);
   if( symbol ) return NSAddressOfSymbol(symbol);
 #ifdef GLEW_APPLE_GLX
-  return dlGetProcAddress( name ); // try next for glx symbols
+  return dlGetProcAddress( name ); /* try next for glx symbols */
 #else
   return NULL;
 #endif

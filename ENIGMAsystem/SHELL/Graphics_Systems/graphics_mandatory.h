@@ -41,18 +41,10 @@ namespace enigma
 
   struct particles_implementation
   {
-    // Updates all particle systems that are automatically updated.
-    void (*update_particlesystems)();
     // Draws all given particle systems in the depth range [-high, -low[ that are automatically drawn.
     void (*draw_particlesystems)(double high, double low);
-    void (*clear_effects)();
   };
   void set_particles_implementation(particles_implementation* particles_impl);
-  // Updates all particle systems that are automatically updated.
-  void update_particlesystems();
-  void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
-      double x_offset, double y_offset, particle_sprite* (*get_particle_sprite)(pt_shape particle_shape));
-  void graphics_clean_up_roomend();
   void delete_tiles();
   void load_tiles();
 }
@@ -60,20 +52,19 @@ namespace enigma
 
 namespace enigma_user
 {
+  // Called at random. Maybe.
+  std::string draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
 
-// Called at random. Maybe.
-std::string draw_get_graphics_error(); // Return a const char* error string, if any error has occurred, or an empty string otherwise.
+  // Called each step, or by the user randomly.
+  void screen_refresh(); // Without invoking any events, refresh the contents of the screen.
 
-// Called each step, or by the user randomly.
-void screen_refresh(); // Without invoking any events, refresh the contents of the screen.
+  // Called each step, or by the user randomly.
+  void screen_redraw(); // Invoke all the draw events, but do not refresh the screen.
 
-// Called each step, or by the user randomly.
-void screen_redraw(); // Invoke all the draw events, but do not refresh the screen.
+  void screen_init();
 
-void screen_init();
-
-int background_get_width(int backId);
-int background_get_height(int backId);
-
+  // Called by the room system to retrieve dimensions for background_width/height[room background index].
+  int background_get_width(int backId);
+  int background_get_height(int backId);
 }
 

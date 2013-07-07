@@ -18,7 +18,7 @@
 #include <string>
 #include <cstdio>
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLbackground.h"
+#include "../General/GSbackground.h"
 #include "GLscreen.h"
 #include "GLd3d.h"
 #include "../General/GLbinding.h"
@@ -70,23 +70,12 @@ static inline void draw_back()
 
 namespace enigma
 {
+    extern bool d3dHidden;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
     {
         particles_impl = part_impl;
-    };
-    void update_particlesystems()
-    {
-        if (particles_impl != NULL) {
-            (particles_impl->update_particlesystems)();
-        }
-    }
-    void graphics_clean_up_roomend()
-    {
-        if (particles_impl != NULL) {
-            (particles_impl->clear_effects)();
-        }
     }
 }
 
@@ -113,13 +102,19 @@ void screen_redraw()
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
 
+        int clear_bits = 0;
         if (background_showcolor)
         {
             int clearcolor = ((int)background_color) & 0x00FFFFFF;
             glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
+            clear_bits |= GL_COLOR_BUFFER_BIT;
         }
-        glClear(GL_DEPTH_BUFFER_BIT);
+
+        if (enigma::d3dHidden)
+            clear_bits |= GL_DEPTH_BUFFER_BIT;
+
+        if (clear_bits)
+            glClear(clear_bits);
 
         draw_back();
 
@@ -149,6 +144,7 @@ void screen_redraw()
             if (dit->second.tiles.size())
                 glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
 
+            texture_reset();
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -270,13 +266,19 @@ void screen_redraw()
                 glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                 glMultMatrixd(transformation_matrix);
 
+                int clear_bits = 0;
                 if (background_showcolor)
                 {
                     int clearcolor = ((int)background_color) & 0x00FFFFFF;
                     glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
-                    glClear(GL_COLOR_BUFFER_BIT);
+                    clear_bits |= GL_COLOR_BUFFER_BIT;
                 }
-                glClear(GL_DEPTH_BUFFER_BIT);
+
+                if (enigma::d3dHidden)
+                    clear_bits |= GL_DEPTH_BUFFER_BIT;
+
+                if (clear_bits)
+                    glClear(clear_bits);
 
                 draw_back();
 
@@ -305,6 +307,7 @@ void screen_redraw()
                     if (dit->second.tiles.size())
                         glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
 
+                    texture_reset();
                     enigma::inst_iter* push_it = enigma::instance_event_iterator;
                     //loop instances
                     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -330,11 +333,12 @@ void screen_redraw()
         }
         view_current = 0;
     }
+    screen_refresh();
 }
 
 void screen_init()
 {
-    texture_reset()
+    texture_reset();
     if (!view_enabled)
     {
         glMatrixMode(GL_PROJECTION);

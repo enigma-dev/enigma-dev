@@ -28,24 +28,24 @@
 #include "planar_object.h"
 #include "instance_system.h"
 #include "instance.h"
+#include <cfloat>
 
 namespace enigma_user
 {
 
 int instance_nearest(int x,int y,int obj,bool notme)
 {
-  double dist_lowest=-1;
-  int retid=-4;
-  double xl,yl;
+  double dist_lowest = DBL_MAX;
+  int retid = -4;
+  double xl, yl;
 
   for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
   {
     if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
     xl = ((enigma::object_planar*)*it)->x - x;
     yl = ((enigma::object_planar*)*it)->y - y;
-    const double dstclc = hypot(xl,yl);
-    if (dstclc < dist_lowest or dist_lowest == -1)
-    {
+    const double dstclc = xl * xl + yl * yl;
+    if (dstclc < dist_lowest) {
       dist_lowest = dstclc;
       retid = it->id;
     }
@@ -66,7 +66,7 @@ int instance_furthest(int x,int y,int obj,bool notme)
     if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
     xl=((enigma::object_planar*)*it)->x - x;
     yl=((enigma::object_planar*)*it)->y - y;
-    dstclc = hypot(xl,yl);
+    dstclc = xl * xl + yl * yl;
     if (dstclc > dist_highest)
     {
       dist_highest = dstclc;

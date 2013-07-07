@@ -29,9 +29,11 @@
 #include <cmath>
 #include "Universal_System/instance.h"
 
+#include <floatcomp.h>
+
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {
-    if (angle == 0)
+    if (fzero(angle))
     {
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
         const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
@@ -207,7 +209,7 @@ double distance_to_object(int object)
             distance = tempdist;
         }
     }
-    return (distance == std::numeric_limits<double>::infinity() ? -1 : distance);
+    return (isinf(distance) ? -1 : distance);
 }
 
 double distance_to_point(double x, double y)
@@ -240,15 +242,15 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         max_dist = DMAX;
     }
     angle = fmod(fmod(angle, 360) + 360, 360);
-    if (angle == 90)
+    if (fequal(angle, 90))
     {
         sin_angle = 1; cos_angle = 0;
     }
-    else if (angle == 180)
+    else if (fequal(angle, 180))
     {
         sin_angle = 0; cos_angle = -1;
     }
-    else if (angle == 270)
+    else if (fequal(angle, 270))
     {
         sin_angle = -1; cos_angle = 0;
     }
@@ -287,9 +289,9 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             return 0;
         }
 
-        switch (quad)
+        switch (quad & 3)
         {
-            case 0:
+            case 0: default: // Default case prevents warnings; value can never be outside this range
                 if ((left2 > right1 || top1 > bottom2) &&
                 direction_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
                 direction_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
@@ -410,9 +412,9 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
             // Move at least one step every time there is a collision.
             const double min_dist = dist + 1;
 
-            switch (quad)
+            switch (quad & 3)
             {
-                case 0:
+                case 0: default: // Default case prevents warnings; value can never be outside this range
                     if (direction_difference(point_direction(left1, bottom1, right2, top2),angle) < 0)
                     {
                         dist += ((bottom1) - (top2))/sin_angle;
@@ -519,9 +521,9 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
         if (right2 >= left1 && bottom2 >= top1 && left2 <= right1 && top2 <= bottom1)
             return false;
 
-        switch (quad)
+        switch (quad & 3)
         {
-            case 0:
+            case 0: default: // Default case prevents warnings; value can never be outside this range
                 if ((left2 > right1 || top1 > bottom2) &&
                 direction_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
                 direction_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
@@ -731,7 +733,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
         case 2:  //vertical side hit
             inst1->hspeed *= -1;
         break;
-        case 3: case 4:  //corner or both horizontal and vertical side hit
+        case 3: case 4: default: //corner or both horizontal and vertical side hit
             inst1->hspeed *= -1;
             inst1->vspeed *= -1;
         break;
@@ -931,7 +933,7 @@ void instance_activate_circle(int x, int y, int r, int inside)
 
 void position_change(double x1, double y1, int obj, bool perf)
 {
-    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(all); it; ++it)
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(enigma_user::all); it; ++it)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
 

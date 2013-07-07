@@ -63,6 +63,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     wto << license;
     wto << "#include \"../Universal_System/collisions_object.h\"\n";
     wto << "#include \"../Universal_System/object.h\"\n\n";
+    wto << "#include <map>";
 
     // Write the script names
     wto << "// Script identifiers\n";
@@ -92,8 +93,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           else wto << " /*" << parsed_extensions[i].name << "*/";
         wto << "\n  {\n";
         wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
-        wto << "    object_locals() {}\n";
-        wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {}\n  };\n";
+        wto << "    std::map<string, var> *vmap;\n";
+        wto << "    object_locals() {vmap = NULL;}\n";
+        wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n  };\n";
       for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
       {
         wto << "  \n  struct OBJ_" << i->second->name << ": object_locals\n  {";
@@ -273,7 +275,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         /**** Next are the constructors. One is automated, the other directed.
         * @ *   Automatic constructor:  The constructor generates the ID from a global maximum and links by that alias.
         *////   Directed constructor:   Meant for use by the room system, the constructor uses a specified ID alias assumed to have been checked for conflict.
-
         wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++))";
           wto << ": object_locals(id, " << i->second->id << ")";
           for (size_t ii = 0; ii < i->second->initializers.size(); ii++)
@@ -288,9 +289,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                     << "      mask_index = enigma::objectdata[" << i->second->id << "]->mask;\n";
               wto << "      visible = enigma::objectdata[" << i->second->id << "]->visible;\n      solid = enigma::objectdata[" << i->second->id << "]->solid;\n";
               wto << "      persistent = enigma::objectdata[" << i->second->id << "]->persistent;\n";
-
-
-              wto << "      activate();";
+              wto << "      activate();\n";
             // Coordinates
               wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
 
@@ -325,6 +324,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
           // Destructor
           wto <<   "    \n    ~OBJ_" <<  i->second->name << "()\n    {\n";
+            wto << "      delete vmap;\n";
             wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
             for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
               wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";

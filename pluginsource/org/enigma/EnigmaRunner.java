@@ -25,6 +25,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -53,6 +54,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.TreeNode;
@@ -73,6 +75,7 @@ import org.enigma.messages.Messages;
 import org.enigma.utility.EnigmaBuildReader;
 import org.lateralgm.components.ErrorDialog;
 import org.lateralgm.components.GMLTextArea;
+import org.lateralgm.components.GmMenu;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
@@ -132,7 +135,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		LGM.addReloadListener(this);
 		SubframeInformer.addSubframeListener(this);
 		applyBackground("org/enigma/enigma.png"); //$NON-NLS-1$
-
+		
 		Runtime.getRuntime().addShutdownHook(new Thread()
 			{
 				public void run()
@@ -340,57 +343,66 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public void populateMenu()
 		{
-		JMenu menu = new JMenu(Messages.getString("EnigmaRunner.MENU_ENIGMA")); //$NON-NLS-1$
-
-		busy = new JMenuItem(Messages.getString("EnigmaRunner.MENU_BUSY")); //$NON-NLS-1$
-		busy.setEnabled(false);
-		busy.setVisible(false);
-		menu.add(busy);
-		run = new JMenuItem(Messages.getString("EnigmaRunner.MENU_RUN")); //$NON-NLS-1$
-		run.addActionListener(this);
-		run.setIcon(LGM.getIconForKey("EnigmaPlugin.EXECUTE"));
-		menu.add(run);
 		runb = new JButton(); //$NON-NLS-1$
 		runb.addActionListener(this);
 		runb.setToolTipText(Messages.getString("EnigmaRunner.MENU_RUN"));
 		runb.setIcon(LGM.getIconForKey("EnigmaPlugin.EXECUTE"));
 		LGM.tool.add(new JToolBar.Separator(), 4);
 		LGM.tool.add(runb, 5);
-		debug = new JMenuItem(Messages.getString("EnigmaRunner.MENU_DEBUG")); //$NON-NLS-1$
-		debug.addActionListener(this);
-		debug.setIcon(LGM.getIconForKey("EnigmaPlugin.DEBUG"));
-		menu.add(debug);
 		debugb = new JButton(); //$NON-NLS-1$
 		debugb.addActionListener(this);
 		debugb.setToolTipText(Messages.getString("EnigmaRunner.MENU_DEBUG"));
 		debugb.setIcon(LGM.getIconForKey("EnigmaPlugin.DEBUG"));
 		LGM.tool.add(debugb, 6);
-		design = new JMenuItem(Messages.getString("EnigmaRunner.MENU_DESIGN")); //$NON-NLS-1$
-		design.addActionListener(this);
-		menu.add(design);
-		compile = new JMenuItem(Messages.getString("EnigmaRunner.MENU_COMPILE")); //$NON-NLS-1$
-		compile.addActionListener(this);
-		compile.setIcon(LGM.getIconForKey("EnigmaPlugin.COMPILE"));
-		menu.add(compile);
 		compileb = new JButton(); //$NON-NLS-1$
 		compileb.addActionListener(this);
 		compileb.setToolTipText(Messages.getString("EnigmaRunner.MENU_COMPILE"));
 		compileb.setIcon(LGM.getIconForKey("EnigmaPlugin.COMPILE"));
 		LGM.tool.add(compileb, 7);
-		rebuild = new JMenuItem(Messages.getString("EnigmaRunner.MENU_REBUILD_ALL")); //$NON-NLS-1$
+		
+		JMenu menu = new GmMenu(Messages.getString("EnigmaRunner.MENU_BUILD")); //$NON-NLS-1$
+		if (LGM.themename.equals("Quantum")) {
+		  menu.setFont(LGM.lnfFont);
+		}
+		menu.setMnemonic('B');
+		busy = addItem(Messages.getString("EnigmaRunner.MENU_BUSY"));
+		busy.setEnabled(false);
+		busy.setVisible(false);
+		menu.add(busy);
+		run = addItem(Messages.getString("EnigmaRunner.MENU_RUN")); //$NON-NLS-1$
+		run.addActionListener(this);
+		run.setIcon(LGM.getIconForKey("EnigmaPlugin.EXECUTE"));
+		run.setAccelerator(KeyStroke.getKeyStroke("F5"));
+		menu.add(run);
+		debug = addItem(Messages.getString("EnigmaRunner.MENU_DEBUG")); //$NON-NLS-1$
+		debug.addActionListener(this);
+		debug.setIcon(LGM.getIconForKey("EnigmaPlugin.DEBUG"));
+		debug.setAccelerator(KeyStroke.getKeyStroke("F6"));
+		menu.add(debug);
+		design = addItem(Messages.getString("EnigmaRunner.MENU_DESIGN")); //$NON-NLS-1$
+		design.addActionListener(this);
+		design.setAccelerator(KeyStroke.getKeyStroke("F7"));
+		menu.add(design);
+		compile = addItem(Messages.getString("EnigmaRunner.MENU_COMPILE")); //$NON-NLS-1$
+		compile.addActionListener(this);
+		compile.setIcon(LGM.getIconForKey("EnigmaPlugin.COMPILE"));
+		compile.setAccelerator(KeyStroke.getKeyStroke("F8"));
+		menu.add(compile);
+		rebuild = addItem(Messages.getString("EnigmaRunner.MENU_REBUILD_ALL")); //$NON-NLS-1$
 		rebuild.addActionListener(this);
 		rebuild.setIcon(LGM.getIconForKey("EnigmaPlugin.REBUILD_ALL"));
+		rebuild.setAccelerator(KeyStroke.getKeyStroke("F9"));
 		menu.add(rebuild);
 
 		menu.addSeparator();
 
-		mImport = new JMenuItem(Messages.getString("EnigmaRunner.MENU_IMPORT")); //$NON-NLS-1$
+		mImport = addItem(Messages.getString("EnigmaRunner.MENU_IMPORT")); //$NON-NLS-1$
 		mImport.addActionListener(this);
 		menu.add(mImport);
 
 		menu.addSeparator();
 
-		JMenuItem mi = new JMenuItem(Messages.getString("EnigmaRunner.MENU_SETTINGS")); //$NON-NLS-1$
+		JMenuItem mi = addItem(Messages.getString("EnigmaRunner.MENU_SETTINGS")); //$NON-NLS-1$
 		mi.addActionListener(new ActionListener()
 			{
 				@Override
@@ -402,20 +414,31 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		menu.add(mi);
 
 		JMenu sub = new JMenu(Messages.getString("EnigmaRunner.MENU_KEYWORDS")); //$NON-NLS-1$
+		if (LGM.themename.equals("Quantum")) {
+		  sub.setFont(LGM.lnfFont);
+		}
 		menu.add(sub);
 
-		showFunctions = new JMenuItem(KEY_MODES[FUNCTIONS]);
+		showFunctions = addItem(KEY_MODES[FUNCTIONS]);
 		showFunctions.addActionListener(this);
 		sub.add(showFunctions);
-		showGlobals = new JMenuItem(KEY_MODES[GLOBALS]);
+		showGlobals = addItem(KEY_MODES[GLOBALS]);
 		showGlobals.addActionListener(this);
 		sub.add(showGlobals);
-		showTypes = new JMenuItem(KEY_MODES[TYPES]);
+		showTypes = addItem(KEY_MODES[TYPES]);
 		showTypes.addActionListener(this);
 		sub.add(showTypes);
 
 		LGM.frame.getJMenuBar().add(menu,1);
 		}
+
+	private JMenuItem addItem(String string) {
+		JMenuItem ret = new JMenuItem(string);
+		if (LGM.themename.equals("Quantum")) {
+		  ret.setFont(LGM.lnfFont);
+		}
+		return ret;
+	}
 
 	public void firstSetup()
 		{
@@ -552,6 +575,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		design.setEnabled(en);
 		compile.setEnabled(en);
 		rebuild.setEnabled(en);
+		runb.setEnabled(en);
+		debugb.setEnabled(en);
+		compileb.setEnabled(en);
 		}
 
 	public void compile(final int mode)
@@ -681,7 +707,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			final JList list = new JList(keywordLists[mode]);
 			//			keywordLists[mode].setEditable(false);
 			//			keywordLists[mode].setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-			list.setFont(new Font(Font.MONOSPACED,Font.PLAIN,12));
 			final JTextField filter = new JTextField();
 			filter.getDocument().addDocumentListener(new DocumentListener()
 				{

@@ -152,11 +152,10 @@ double audio_sound_length(int index);
 **/
 void audio_master_gain(float volume, double time);
 /** des
-@param index The index of the audio asset.
 @param volume
 @param time
 **/
-void audio_music_gain(int index, float volume, double time);
+void audio_music_gain(float volume, double time);
 /** des
 @param index The index of the audio asset.
 @param volume

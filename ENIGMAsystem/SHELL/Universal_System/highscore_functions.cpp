@@ -80,19 +80,16 @@ static bool cmp_highscore( const playerScore& a, const playerScore& b ) {
 
 }
 
+#include <Universal_System/roomsystem.h>
+#include <Universal_System/CallbackArrays.h>
+#include <Graphics_Systems/graphics_mandatory.h>
+
 namespace enigma_user
 {
 
 extern int room_width;
 extern int room_height;
-
-void screen_refresh();
-
-void io_handle();
-
-bool keyboard_check(int i);
-void screen_redraw();
-void keyboard_wait();
+extern void io_handle(); // FIXME: This might not exist! It should be determined whether this function belongs in widgets_mandatory or if it shouldn't be used on a whim.
 
 void highscore_show(int numb) {
     highscore_add("player name",numb);
@@ -176,7 +173,7 @@ std::string highscore_name(int place) {
 namespace enigma_user
 {
 
-void draw_text(int x,int y,variant str);
+void draw_text(int x,int y,variant str); // TODO: Holy shit.
 int string_width(variant str);
 
 void draw_highscore(int x1, int y1, int x2, int y2) {

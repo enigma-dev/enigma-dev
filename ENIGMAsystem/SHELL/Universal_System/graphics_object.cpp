@@ -33,17 +33,18 @@
 #include <math.h>
 #include "depth_draw.h"
 #include "graphics_object.h"
+#include <floatcomp.h>
 
 namespace enigma
 {
   object_graphics::object_graphics() {}
   object_graphics::object_graphics(unsigned _x, int _y): object_planar(_x,_y) {}
-  object_graphics::~object_graphics() {};
+  object_graphics::~object_graphics() {}
 
-  INTERCEPT_DEFAULT_COPY(enigma::depthv);
+  INTERCEPT_DEFAULT_COPY(enigma::depthv)
   void depthv::function(variant oldval) {
     rval.d = floor(rval.d);
-    if (oldval.rval.d == rval.d) return;
+    if (fequal(oldval.rval.d, rval.d)) return;
 
     map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
     if (it == id_to_currentnextdepth.end()) { // Insert a request to change in depth.
@@ -68,9 +69,9 @@ namespace enigma
   }
   depthv::~depthv() {}
 
-  int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : sprite_get_width(sprite_index); }
-  int object_graphics::$sprite_height() const { return sprite_index == -1? 0 : sprite_get_height(sprite_index); }
-  int object_graphics::$sprite_xoffset() const { return sprite_index == -1? 0 : sprite_get_xoffset(sprite_index); }
-  int object_graphics::$sprite_yoffset() const { return sprite_index == -1? 0 : sprite_get_yoffset(sprite_index); }
-  int object_graphics::$image_number() const { return sprite_index == -1? 0 : sprite_get_number(sprite_index); }
+  int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : enigma_user::sprite_get_width(sprite_index); }
+  int object_graphics::$sprite_height() const { return sprite_index == -1? 0 : enigma_user::sprite_get_height(sprite_index); }
+  int object_graphics::$sprite_xoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_xoffset(sprite_index); }
+  int object_graphics::$sprite_yoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_yoffset(sprite_index); }
+  int object_graphics::$image_number() const { return sprite_index == -1? 0 : enigma_user::sprite_get_number(sprite_index); }
 }

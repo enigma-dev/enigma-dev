@@ -18,10 +18,10 @@
 // Tile system
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
-#include "../General/GLbackground.h"
+#include "../General/GSbackground.h"
 #include "Universal_System/backgroundstruct.h"
-#include "../General/GLtextures.h"
-#include "../General/GLtiles.h"
+#include "../General/GStextures.h"
+#include "../General/GStiles.h"
 #include "../General/GLtilestruct.h"
 #include "../General/GLbinding.h"
 #include "../General/OpenGLHeaders.h"
@@ -47,8 +47,9 @@
 
 namespace enigma
 {
-    void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
+    static void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
     {
+        if (!enigma_user::background_exists(back)) return;
         get_background(bck2d,back);
         texture_use(GmTextures[bck2d->texture]->gltex);
 
@@ -78,6 +79,7 @@ namespace enigma
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
             if (dit->second.tiles.size())
             {
+                texture_reset();
                 sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
                 int index = int(glGenLists(1));
                 drawing_depths[dit->second.tiles[0].depth].tilelist = index;
@@ -85,7 +87,7 @@ namespace enigma
                 for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
                 {
                     tile t = dit->second.tiles[i];
-                    enigma_user::draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
                 }
                 glEndList();
             }
@@ -102,11 +104,14 @@ namespace enigma
     void rebuild_tile_layer(int layer_depth)
     {
         glPushAttrib(GL_CURRENT_BIT);
+        texture_reset();
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
             if (dit->second.tiles.size())
             {
                 if (dit->second.tiles[0].depth != layer_depth)
                     continue;
+
+                texture_reset();
                 glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
                 int index = int(glGenLists(1));
                 drawing_depths[dit->second.tiles[0].depth].tilelist = index;
@@ -114,7 +119,7 @@ namespace enigma
                 for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
                 {
                     tile t = dit->second.tiles[i];
-                    enigma_user::draw_background_part_ext(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
                 }
                 glEndList();
             }
@@ -247,7 +252,7 @@ double tile_get_visible(int id)
         if (dit->second.tiles.size())
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
                 if (dit->second.tiles[i].id == id)
-                    return (dit->second.tiles[i].alpha == 0);
+                    return (dit->second.tiles[i].alpha > 0);
     return 0;
 }
 
@@ -504,7 +509,7 @@ bool tile_layer_hide(int layer_depth)
                 continue;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
-                enigma::tile t = dit->second.tiles[i];
+                enigma::tile &t = dit->second.tiles[i];
                 t.alpha = 0;
             }
             return true;
@@ -521,7 +526,7 @@ bool tile_layer_show(int layer_depth)
                 continue;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
-                enigma::tile t = dit->second.tiles[i];
+                enigma::tile &t = dit->second.tiles[i];
                 t.alpha = 1;
             }
             return true;
@@ -538,7 +543,7 @@ bool tile_layer_shift(int layer_depth, int x, int y)
                 continue;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
-                enigma::tile t = dit->second.tiles[i];
+                enigma::tile &t = dit->second.tiles[i];
                 t.roomX += x;
                 t.roomY += y;
             }

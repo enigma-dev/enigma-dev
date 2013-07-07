@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -17,8 +17,8 @@
 
 // For querying the graphic's output for debugging purposes, eg. triangles rendered, VRAM usage, and VBO's, etc.
 
-#ifndef __GLPROFILERH_
-#define __GLPROFILERH_
-#include "DirectX10Headers.h"
+#ifndef __DX10PROFILERH_
+#define __DX10PROFILERH_
+#include "../General/DirectXHeaders.h"
 
 #endif

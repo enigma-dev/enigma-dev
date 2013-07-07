@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -20,10 +20,10 @@
 #include <string>
 using std::string;
 
-#include "DirectX10Headers.h"
-#include "DX10sprite.h"
-#include "DX10textures.h"
-#include "binding.h"
+#include "../General/DirectXHeaders.h"
+#include "../General/GSsprite.h"
+#include "../General/GStextures.h"
+#include "../General/DXbinding.h"
 
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/instance_system.h"
@@ -61,8 +61,11 @@ using std::string;
     const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
-bool sprite_exists(int spr) {
+namespace enigma_user
+{
 
+bool sprite_exists(int spr) {
+    return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
 }
 
 void draw_sprite(int spr,int subimg,double x,double y)
@@ -95,6 +98,10 @@ void draw_sprite_part_ext(int spr,int subimg,double left,double top,double width
 
 }
 
+/* Copyright (C) 2010 Harijs Grînbergs, Josh Ventura
+ * The applicable license does not change for this portion of the file.
+ */
+
 void draw_sprite_general(int spr,int subimg,double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1, double a2, double a3, double a4)
 {
 
@@ -102,6 +109,8 @@ void draw_sprite_general(int spr,int subimg,double left,double top,double width,
 
 void draw_sprite_stretched_ext(int spr,int subimg,double x,double y,double w,double h, int blend, double alpha)
 {
+
+}
 
 }
 
@@ -113,6 +122,9 @@ using std::string;
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 
+namespace enigma_user
+{
+
 void draw_sprite_tiled(int spr,int subimg,double x,double y)
 {
 
@@ -122,3 +134,6 @@ void draw_sprite_tiled_ext(int spr,int subimg,double x,double y, double xscale,d
 {
 
 }
+
+}
+

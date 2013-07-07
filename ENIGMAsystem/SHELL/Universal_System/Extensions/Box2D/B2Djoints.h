@@ -15,25 +15,26 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _JOINTS__H
-#define _JOINTS__H
+#ifndef _B2D_JOINTS__H
+#define _B2D_JOINTS__H
 
 #include <Box2D/Box2D.h>
-#include "B2Dfunctions.h"
 
-struct jointInstance {
+struct B2DJoint {
   int worldid;
   b2Joint* joint;
-  jointInstance()
+  b2MouseJoint* mousejoint;
+
+  B2DJoint()
   {
   }
 
-  ~jointInstance()
+  ~B2DJoint()
   {
     //worlds[worldid].world->DestroyJoint(joint);
   }
 }; 
-extern vector<jointInstance> joints;
+extern vector<B2DJoint*> b2djoints;
 
 // constants for getting and setting joint data using b2d_joint_get_value and b2d_joint_set_value, use switch case
 // see http://enigma-dev.org/docs/Wiki/, for information on what they are
@@ -118,6 +119,8 @@ void b2d_joint_get_value(int id);
 @param id
 **/
 void b2d_joint_set_value(int id);
+
 }
 
-#endif
+#endif // _ENIGMA_B2D_JOINTS__H
+

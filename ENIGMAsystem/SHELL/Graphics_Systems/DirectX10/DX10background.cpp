@@ -1,4 +1,4 @@
-/** Copyright (C) 2010-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -18,9 +18,9 @@
 #include <cstddef>
 
 #include <math.h>
-#include "DirectX10Headers.h"
-#include "DX10background.h"
-#include "DX10textures.h"
+#include "../General/DirectXHeaders.h"
+#include "../General/GSbackground.h"
+#include "../General/GStextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 
@@ -51,13 +51,18 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-extern int room_width, room_height;
+namespace enigma_user {
+  extern int room_width, room_height;
+}
 namespace enigma {
   extern size_t background_idmax;
 }
 
-#include "binding.h"
+#include "../General/DXbinding.h"
 #include <string.h> // needed for querying ARB extensions
+
+namespace enigma_user
+{
 
 void draw_background(int back, double x, double y)
 {
@@ -115,21 +120,29 @@ void draw_background_general(int back,double left,double top,double width,double
 }
 
 int background_get_texture(int backId) {
-
+  get_backgroundnv(bck2d,backId,-1);
+  return bck2d->texture;
 }
 
 int background_get_width(int backId) {
-
+  get_backgroundnv(bck2d,backId,-1);
+  return bck2d->width;
 }
 
 int background_get_height(int backId) {
-
+  get_backgroundnv(bck2d,backId,-1);
+  return bck2d->height;
 }
 
 double background_get_texture_width_factor(int backId) {
-
+  get_backgroundnv(bck2d,backId,-1);
+  return bck2d->texbordx;
 }
 
 double background_get_texture_height_factor(int backId) {
+  get_backgroundnv(bck2d,backId,-1);
+  return bck2d->texbordy;
+}
 
 }
+

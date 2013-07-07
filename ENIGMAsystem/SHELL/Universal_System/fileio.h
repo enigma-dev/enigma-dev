@@ -27,6 +27,9 @@
 
 /* Simple, intuitive, integer based file I/O */
 
+namespace enigma_user
+{
+
 int     file_text_open_read(string fname);
 int     file_text_open_write(string fname);
 int     file_text_open_append(string fname);
@@ -48,3 +51,6 @@ size_t  file_bin_position(int fileid);
 void    file_bin_seek(int fileid,size_t pos);
 void    file_bin_write_byte(int fileid,unsigned char byte);
 int     file_bin_read_byte(int fileid);
+
+}
+

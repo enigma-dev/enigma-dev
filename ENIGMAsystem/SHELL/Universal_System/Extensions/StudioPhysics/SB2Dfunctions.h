@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _FUNCTIONS__H
-#define _FUNCTIONS__H
+#ifndef _ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H
+#define _ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H
 
 #include <vector>
 using std::vector;
@@ -48,7 +48,7 @@ struct worldInstance {
 
   void world_update();
 }; 
-extern vector<worldInstance> worlds;
+extern vector<worldInstance*> worlds;
 
 struct fixtureInstance {
   int world;
@@ -76,7 +76,7 @@ struct fixtureInstance {
   }
 
 }; 
-extern vector<fixtureInstance> fixtures;
+extern vector<fixtureInstance*> fixtures;
 
 /** Check if there are no solid objects at a given position.
 @param x coordinate representing the location
@@ -191,6 +191,12 @@ void physics_fixture_set_circle_shape(int id, double radius);
 @param id
 **/
 void physics_fixture_set_polygon_shape(int id);
+/** description...
+@param id
+@param adjstart
+@param adjend
+**/
+void physics_fixture_set_edge_shape(int id, bool adjstart = true, bool adjend = true); 
 /** description...
 @param id
 @param x
@@ -396,4 +402,5 @@ void physics_pause_enable(bool pause);
 
 }
 
-#endif
+#endif // _ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H
+

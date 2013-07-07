@@ -10,3 +10,6 @@ Author: Josh Ventura
 
 Depends:
 	Build-Platforms: Windows
+
+Represents:
+	Build-Platforms: Windows

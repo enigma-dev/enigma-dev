@@ -37,6 +37,8 @@
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/fontstruct.h"
 
+#include "Universal_System/callbacks_events.h"
+
 #include "GameSettings.h"
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
@@ -74,17 +76,12 @@ extern int amain();
 
 #include "Universal_System/resource_data.h"
 #include "Universal_System/highscore_functions.h"
-#include "Universal_System/path_functions.h"
-//#include "Universal_System/motion_planning.h"
-//#include "Universal_System/mp_movement.h"
 
 #include "Universal_System/move_functions.h"
-
 #include "Universal_System/actions.h"
-
 #include "Universal_System/lives.h"
 
-namespace enigma_user {};
+namespace enigma_user {}
 
 using namespace enigma_user;
 
@@ -106,7 +103,7 @@ using namespace enigma_user;
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h"
 
-  #if BUILDMODE
+  #if defined(BUILDMODE) && BUILDMODE
     #include "Modes/buildmode.h"
   #endif
 

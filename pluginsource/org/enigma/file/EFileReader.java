@@ -80,6 +80,9 @@ import org.lateralgm.resources.Room;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script;
 import org.lateralgm.resources.Script.PScript;
+import org.lateralgm.resources.Shader.PShader;
+import org.lateralgm.resources.Shader;
+import org.lateralgm.resources.Shader.PShader;
 import org.lateralgm.resources.Sound;
 import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.Sprite;
@@ -147,6 +150,7 @@ public class EFileReader
 		readers.put(Background.class,new BackgroundReader());
 		readers.put(Path.class,new PathTextReader());
 		readers.put(Script.class,new ScriptReader());
+		readers.put(Shader.class, new ShaderReader());
 		readers.put(Font.class,new FontRawReader());
 		//		readers.put(Timeline.class,new TimelineIO());
 		readers.put(GmObject.class,new ObjectEefReader());
@@ -704,6 +708,28 @@ public class EFileReader
 				}
 			}
 		}
+	
+	static class ShaderReader extends DataPropReader<Shader,PShader>
+	{
+	@Override
+	protected boolean allowProperty(PShader key)
+		{
+		return false;
+		}
+
+	@Override
+	protected void readData(GmFile gf, Shader r, InputStream in)
+		{
+		try
+			{
+			r.setCode(new String(Util.readFully(in).toByteArray()));
+			}
+		catch (IOException e)
+			{
+			e.printStackTrace();
+			}
+		}
+	}
 
 	static class FontRawReader extends DataPropReader<Font,PFont>
 		{

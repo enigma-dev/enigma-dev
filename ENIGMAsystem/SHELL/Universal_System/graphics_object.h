@@ -36,7 +36,7 @@
 namespace enigma
 {
   struct depthv: multifunction_variant {
-    INHERIT_OPERATORS(depthv);
+    INHERIT_OPERATORS(depthv)
     struct inst_iter *myiter;
     void function(variant oldval);
     void init(double depth, object_basic* who);

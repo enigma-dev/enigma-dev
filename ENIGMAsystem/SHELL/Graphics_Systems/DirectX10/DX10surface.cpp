@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Dave "biggoron", Harijs Grinbergs
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,13 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DirectX10Headers.h"
+#include "../General/DirectXHeaders.h"
 using namespace std;
 #include <cstddef>
 #include <iostream>
 #include <math.h>
 
-#include "binding.h"
+#include "../General/DXbinding.h"
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
@@ -31,8 +31,10 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;
-#include "DX10surface.h"
+}
+#include "../General/GSsurface.h"
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -63,6 +65,9 @@ namespace enigma
   int surface_max=0;
 }
 
+namespace enigma_user
+{
+
 bool surface_is_supported()
 {
 
@@ -85,10 +90,7 @@ void surface_reset_target(void)
 
 void surface_free(int id)
 {
-  get_surface(surf,id);
-  surf->width = surf->height = surf->tex = surf->fbo = 0;
-  delete surf;
-  enigma::surface_array[id] = NULL;
+
 }
 
 bool surface_exists(int id)
@@ -158,12 +160,14 @@ int surface_get_texture(int id)
 
 int surface_get_width(int id)
 {
-
+    get_surfacev(surf,id,-1);
+    return (surf->width);
 }
 
 int surface_get_height(int id)
 {
-
+    get_surfacev(surf,id,-1);
+    return (surf->height);
 }
 
 int surface_getpixel(int id, int x, int y)
@@ -173,7 +177,7 @@ int surface_getpixel(int id, int x, int y)
 
 int surface_getpixel_alpha(int id, int x, int y)
 {
- 
+
 }
 
 int surface_get_bound()
@@ -181,13 +185,18 @@ int surface_get_bound()
 
 }
 
-//////////////////////////////////////SAVE TO FILE AND CREATE SPRITE FUNCTIONS/////////
+}
+
+//////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
 //Fuck whoever did this to the spec
-//#ifndef GL_BGR
- // #define GL_BGR 0x80E0
-//#endif
+#ifndef DX_BGR
+  #define DX_BGR 0x80E0
+#endif
 
 #include "Universal_System/estring.h"
+
+namespace enigma_user
+{
 
 int surface_save(int id, string filename)
 {
@@ -206,10 +215,13 @@ int sprite_create_from_surface(int id,int x,int y,int w,int h,bool removeback,bo
 
 void surface_copy_part(int destination,double x,double y,int source,int xs,int ys,int ws,int hs)
 {
- 
+
 }
 
 void surface_copy(int destination,double x,double y,int source)
 {
 
 }
+
+}
+

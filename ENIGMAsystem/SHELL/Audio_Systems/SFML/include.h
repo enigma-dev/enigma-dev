@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Cheeseboy, Robert B. Colton 
+/** Copyright (C) 2013 cheeseboy the great, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,5 +15,5 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
 #include "SFML_basic.h"
+#include "SFML_advanced.h"

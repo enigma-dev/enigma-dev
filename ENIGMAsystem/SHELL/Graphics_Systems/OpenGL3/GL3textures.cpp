@@ -19,7 +19,7 @@
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
 //using std::string;
-#include "../General/GLtextures.h"
+#include "../General/GStextures.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"

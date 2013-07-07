@@ -31,6 +31,7 @@
 #include "instance_system.h"
 #include "roomsystem.h"
 #include "move_functions.h"
+#include <floatcomp.h>
 
 namespace enigma_user
 {
@@ -53,9 +54,9 @@ void motion_add(double newdirection, double newspeed)
 void move_snap(const double hsnap, const double vsnap)
 {
     enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-    if (hsnap)
+    if (fnzero(hsnap))
         inst->x = round(inst->x/hsnap)*hsnap;
-    if (vsnap)
+    if (fnzero(vsnap))
         inst->y = round(inst->y/vsnap)*vsnap;
 }
 
@@ -117,8 +118,8 @@ void move_random(const double snapHor, const double snapVer)
         x1 = sprite_get_xoffset(mask); y1 = sprite_get_yoffset(mask); x2 = room_width - sprite_get_width(mask) + sprite_get_xoffset(mask); y2 = room_height - sprite_get_height(mask) + sprite_get_yoffset(mask);
     }
     using enigma_user::random;
-    inst->x = x1 + (snapHor ? floor(random(x2 - x1)/snapHor)*snapHor : random(x2 - x1));
-    inst->y = y1 + (snapVer ? floor(random(y2 - y1)/snapVer)*snapVer : random(y2 - y1));
+    inst->x = x1 + (fnzero(snapHor) ? floor(random(x2 - x1)/snapHor)*snapHor : random(x2 - x1));
+    inst->y = y1 + (fnzero(snapVer) ? floor(random(y2 - y1)/snapVer)*snapVer : random(y2 - y1));
 }
 
 }

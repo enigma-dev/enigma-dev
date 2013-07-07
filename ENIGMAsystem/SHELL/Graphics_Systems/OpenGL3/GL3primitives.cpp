@@ -17,8 +17,8 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "GL3primitives.h"
-#include "../General/GLtextures.h"
-#include "GL3mesh.h"
+#include "../General/GStextures.h"
+#include "GL3model.h"
 #include "../General/GLbinding.h"
 
 #include <string>
@@ -105,7 +105,7 @@ int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, flo
 int draw_primitive_end()
 {
   if (prim_draw_texture != -1) {
-    texture_use(prim_draw_texture);
+    texture_use(get_texture(prim_draw_texture));
   } else {
     texture_reset();
   }
@@ -137,7 +137,7 @@ void d3d_primitive_begin_texture(int kind, int texId)
 void d3d_primitive_end()
 {
   if (prim_d3d_texture != -1) {
-    texture_use(prim_d3d_texture);
+    texture_use(get_texture(prim_d3d_texture));
   } else {
     texture_reset();
   }

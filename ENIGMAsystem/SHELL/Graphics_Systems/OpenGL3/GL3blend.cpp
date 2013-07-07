@@ -16,7 +16,7 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLblend.h"
+#include "../General/GSblend.h"
 
 namespace enigma_user
 {

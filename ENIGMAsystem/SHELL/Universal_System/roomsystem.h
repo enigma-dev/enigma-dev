@@ -42,7 +42,7 @@ int room_goto_previous();
 int room_goto_next();
 int room_next(int num);
 int room_previous(int num);
-bool room_exists(unsigned roomid);
+bool room_exists(int roomid);
 int room_set_width(int indx, int wid);
 int room_set_height(int indx, int hei);
 int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha = 1, int color = 0xFFFFFF);
@@ -80,6 +80,7 @@ extern int room_speed;
 extern int room_width;
 
 extern var room_caption;
+extern var current_caption;
 
 int room_count();
 #define room_count room_count()
@@ -147,7 +148,7 @@ namespace enigma
 
     void gotome(bool=false);
   };
-  void room_update();
+  void update_mouse_variables();
   extern int maxid, maxtileid;
   extern int room_switching_id; // -1 indicates no room set.
   void rooms_switch();
@@ -159,10 +160,18 @@ namespace enigma
 
 #include "multifunction_variant.h"
 namespace enigma { struct roomv: multifunction_variant {
-  INHERIT_OPERATORS(roomv);
+  INHERIT_OPERATORS(roomv)
   void function(variant oldval);
 }; }
 namespace enigma_user {
   extern enigma::roomv room;
+
+  inline void game_restart() {
+      room_goto_first(true);
+  }
 }
+
+#define action_restart_game game_restart
+
 #endif
+

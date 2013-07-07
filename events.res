@@ -271,7 +271,7 @@ beforecollisionautomaticcollisionhandling: 100000
 	Name: Before collision automatic collision handling
 	Mode: None
 	Default: ;
-	Instead: enigma::perform_automatic_collision_handling_before_collision_event();
+	Instead: enigma::perform_callbacks_before_collision_event();
 
 collision: 4
 	Group: Collision
@@ -308,7 +308,7 @@ particlesystemsupdate: 100000
 	Name: Particle Systems Update
 	Mode: None
 	Default: ;
-	Instead: enigma::update_particlesystems();
+	Instead: enigma::perform_callbacks_particle_updating();
 
 
 # Fun fact: Draw comes after End Step.
@@ -321,7 +321,7 @@ draw: 8
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw will destruct with this */
 	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
-	Instead: if (automatic_redraw) screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
+	Instead: if (automatic_redraw) screen_redraw(); # We never want to iterate draw; we let screen_redraw() handle it.
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
@@ -408,6 +408,10 @@ userfourteen: 7
 	Name: User defined 14
 	Mode: Special
 	Case: 24
+userfifteen: 7
+	Name: User defined 15
+	Mode: Special
+	Case: 25
 
 #other mouse events
 joystickoneleft: 6

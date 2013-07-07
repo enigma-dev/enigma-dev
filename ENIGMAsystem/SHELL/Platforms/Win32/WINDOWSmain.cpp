@@ -24,11 +24,11 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <windows.h>
 #include <time.h>
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <unistd.h>
 using std::string;
 
 #include "WINDOWScallback.h"
@@ -175,6 +175,7 @@ namespace enigma {
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
     int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
+    if (!wid || !hgt) wid = 640, hgt = 480;
     enigma::hInstance = hInstance;
     //enigma::main_argc = argc;
     //enigma::main_argv = argv;
@@ -275,7 +276,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                 needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
               }
               if (remaining_mcs > needed_mcs) {
-                  Sleep(1);
+                  usleep(1);
                   continue;
               }
           }

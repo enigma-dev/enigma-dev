@@ -19,15 +19,16 @@
 
 #include <math.h>
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLbackground.h"
+#include "../General/GSbackground.h"
 #include "Universal_System/backgroundstruct.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/spritestruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-#include "../General/GLtextures.h"
+#include "../General/GStextures.h"
 #ifdef DEBUG_MODE
   #include <string>
   #include "libEGMstd.h"

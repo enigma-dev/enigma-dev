@@ -73,6 +73,9 @@ namespace enigma
   void spritestructarray_reallocate();
 }
 
+namespace enigma_user
+{
+
 extern int sprite_get_width  (int sprite);
 extern int sprite_get_height (int sprite);
 extern double sprite_get_texture_width_factor(int sprite, int subimg);
@@ -84,6 +87,8 @@ extern int sprite_get_bbox_right  (int sprite);
 extern int sprite_get_bbox_top    (int sprite);
 extern int sprite_get_bbox_mode   (int sprite);
 
+}
+
 extern int sprite_get_bbox_bottom_relative (int sprite);
 extern int sprite_get_bbox_left_relative   (int sprite);
 extern int sprite_get_bbox_right_relative  (int sprite);
@@ -91,6 +96,9 @@ extern int sprite_get_bbox_top_relative    (int sprite);
 
 extern const bbox_rect_t &sprite_get_bbox(int sprite);
 extern const bbox_rect_t &sprite_get_bbox_relative(int sprite);
+
+namespace enigma_user
+{
 
 extern int sprite_get_number  (int sprite);
 extern int sprite_get_texture (int sprite, int subimage);
@@ -108,6 +116,8 @@ void sprite_merge(int ind, int copy_sprite);
 void sprite_set_offset(int ind, int xoff, int yoff);
 void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture=true);
 void sprite_set_bbox(int sprite, int left, int top, int right, int bottom);
+
+}
 
 #endif // ENIGMA_SPRITESTRUCT
 

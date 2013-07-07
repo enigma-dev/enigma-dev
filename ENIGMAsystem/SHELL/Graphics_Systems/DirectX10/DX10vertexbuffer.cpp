@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,48 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DirectX10Headers.h"
+#include "../General/DirectXHeaders.h"
 #include "DX10vertexbuffer.h"
 #include <math.h>
-
-// first one is the "Global Vertex Buffer"
-vector<VertexBuffer*> vertexbuffers(0);
-int current_vertex_buffer = 0;
-
-int vertex_buffer_create(int type)
-{
-  int id = vertexbuffers.size();
-  VertexBuffer* vertbuf = new VertexBuffer();
-  vertexbuffers.push_back(vertbuf);
-  return id;
-}
-
-void vertex_buffer_free(int id)
-{
-  delete vertexbuffers[id];
-}
-
-void vertex_buffer_set(int id)
-{
-  current_vertex_buffer = id;
-}
-
-int vertex_buffer_get()
-{
-  return current_vertex_buffer;
-}
-
-void vertex_buffer_reset()
-{
-  current_vertex_buffer = 0;
-}
-
-void vertex_buffer_draw(int id)
-{
-  vertexbuffers[id]->Draw();
-}
-
-bool vertex_buffer_supported()
-{
-
-}

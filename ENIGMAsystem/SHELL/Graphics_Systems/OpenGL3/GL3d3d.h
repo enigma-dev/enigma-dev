@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_GL3D3D_H
+#define ENIGMA_GL3D3D_H 
+
 #include <string>
 
 namespace enigma {
@@ -49,7 +52,6 @@ enum {
 };
 }
 
-extern bool d3dMode;
 extern double projection_matrix[16];
 extern double transformation_matrix[16];
 
@@ -151,3 +153,4 @@ bool d3d_light_enable(int id, bool enable);
 
 }
 
+#endif // ENIGMA_GL3D3D_H 

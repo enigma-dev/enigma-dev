@@ -25,7 +25,9 @@ using namespace std;
 #include "resinit.h"
 #include "zlib.h"
 
-void sound_play(int sound);
+namespace enigma_user {
+  void sound_play(int sound);
+}
 
 namespace enigma
 {

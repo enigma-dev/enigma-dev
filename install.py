@@ -11,7 +11,7 @@ except ImportError:
    from urllib import urlopen
 
 print("Enigma package manager")
-url="https://raw.github.com/enigma-dev/Enigma-packages/master/packages.md5"
+url="http://dl.dropboxusercontent.com/u/1052740/enigma-binaries/packages.md5"
 webFile = urlopen(url)
 updateText=webFile.read().decode().split('\n')
 webFile.close();

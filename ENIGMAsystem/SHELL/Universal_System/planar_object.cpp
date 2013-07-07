@@ -28,6 +28,8 @@
 
 #include "planar_object.h"
 
+#include <floatcomp.h>
+
 namespace enigma
 {
   object_planar::object_planar()
@@ -66,7 +68,7 @@ namespace enigma
 
   void propagate_locals(object_planar* instance)
   {
-    if(instance->gravity || instance->friction)
+    if (fnzero(instance->gravity) || fnzero(instance->friction))
     {
       double
         hb4 = instance->hspeed.rval.d,
@@ -81,19 +83,19 @@ namespace enigma
       if ((vb4>0 && instance->vspeed.rval.d<0) || (vb4<0 && instance->vspeed.rval.d>0))
         instance->vspeed.rval.d=0;
 
-      if (instance->gravity_direction == 270)
+      if (fequal(instance->gravity_direction, 270))
       {
         instance->vspeed.rval.d += (instance->gravity);
       }
-      else if (instance->gravity_direction == 180)
+      else if (fequal(instance->gravity_direction, 180))
       {
         instance->hspeed.rval.d -= (instance->gravity);
       }
-      else if (instance->gravity_direction == 90)
+      else if (fequal(instance->gravity_direction, 90))
       {
         instance->vspeed.rval.d -= (instance->gravity);
       }
-      else if (instance->gravity_direction == 0)
+      else if (fequal(instance->gravity_direction, 0))
       {
         instance->hspeed.rval.d += (instance->gravity);
       }

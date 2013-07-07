@@ -45,12 +45,12 @@ void physics_joint_distance_create(int id, int fixture1, int fixture2, bool coll
   else
   {
     b2DistanceJointDef jointDef;
-    jointDef.bodyA = fixtures[fixture1].body;
-    jointDef.bodyB = fixtures[fixture2].body;
+    jointDef.bodyA = fixtures[fixture1]->body;
+    jointDef.bodyB = fixtures[fixture2]->body;
     jointDef.collideConnected = collide_connected;
     jointDef.frequencyHz = 4.0f;
     jointDef.dampingRatio = 0.5f;
-    joints[id].joint = worlds[joints[id].worldid].world->CreateJoint(&jointDef);
+    joints[id].joint = worlds[joints[id].worldid]->world->CreateJoint(&jointDef);
   }
 }
 
@@ -63,8 +63,8 @@ void physics_joint_mouse_create(int id, int fixture)
   else
   {
     b2MouseJointDef jointDef;
-    jointDef.bodyA = fixtures[fixture].body;
-    joints[id].joint = worlds[joints[id].worldid].world->CreateJoint(&jointDef);
+    jointDef.bodyA = fixtures[fixture]->body;
+    joints[id].joint = worlds[joints[id].worldid]->world->CreateJoint(&jointDef);
   }
 }
 
@@ -85,4 +85,3 @@ void physics_joint_set_target(int id, double x, double y)
 }
 
 }
-

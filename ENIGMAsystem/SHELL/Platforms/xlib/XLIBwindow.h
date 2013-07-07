@@ -17,6 +17,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _XLIB_WINDOW__H
+#define _XLIB_WINDOW__H
+
 #include <string>
 using std::string;
 
@@ -25,7 +28,7 @@ void gmw_init();
 void Sleep(int ms);
 
 namespace enigma_user {
-inline void sleep(int ms) {Sleep(ms);};
+  static inline void sleep(int ms) { Sleep(ms); }
 }
 
 /////////////
@@ -51,9 +54,7 @@ bool window_get_showicons();
 /////////////
 
 namespace enigma_user {
-#ifndef PLATFORMS_MANDATORY__H
 void window_set_caption(string caption);
-#endif
 string window_get_caption();
 }
 
@@ -142,7 +143,7 @@ void window_set_cursor(int c);
 
 void game_end();
 void action_end_game();
-void io_handle(), io_clear();
+void io_handle();
 void keyboard_wait();
 
 void window_set_region_scale(double scale, bool adaptwindow);
@@ -150,11 +151,6 @@ bool window_get_region_scale();
 void window_set_region_size(int w, int h, bool adaptwindow);
 int window_get_region_width();
 int window_get_region_height();
-void window_default();
-
-int window_get_region_width_scaled();
-int window_get_region_height_scaled();
-
 }
 
 /*
@@ -198,14 +194,10 @@ namespace enigma {
 }
 
 namespace enigma_user {
-string parameter_string(unsigned num);
-int parameter_count();
+  string parameter_string(unsigned num);
+  int parameter_count();
+  int display_get_width();
+  int display_get_height();
 }
 
-#define enigmacatchmouse() //Linux should hopefully do that automatically.
-
-namespace enigma_user {
-int display_get_width();
-int display_get_height();
-}
-
+#endif
