@@ -349,6 +349,7 @@ void action_end_game() {
 
 int display_get_width() { return XWidthOfScreen(screen); }
 int display_get_height() { return XHeightOfScreen(screen); }
+bool set_working_directory(string path) { return !chdir(path.c_str()); }
 
 }
 
