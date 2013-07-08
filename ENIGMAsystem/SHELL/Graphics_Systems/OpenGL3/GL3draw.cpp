@@ -34,6 +34,23 @@ namespace enigma {
 namespace enigma_user
 {
 
+int draw_get_msaa_maxlevel()
+{
+  int maximumMSAA;
+  glGetIntegerv(GL_MAX_SAMPLES, &maximumMSAA);
+  return maximumMSAA;
+}
+
+bool draw_get_msaa_supported()
+{
+    return GLEW_EXT_multisample;
+}
+
+void draw_set_msaa_enabled(bool enable)
+{
+  (enable?glEnable:glDisable)(GL_MULTISAMPLE);
+}
+
 void draw_set_line_pattern(unsigned short pattern, int scale)
 {
   if (pattern == -1)

@@ -18,6 +18,9 @@
 namespace enigma_user
 {
 
+int draw_get_msaa_maxlevel();
+bool draw_get_msaa_supported();
+void draw_set_msaa_enabled(bool enable);
 void draw_set_line_pattern(unsigned short pattern, int scale);
 void draw_point(float x, float y);
 void draw_point_color(float x, float y,int color);
