@@ -142,7 +142,7 @@ void texture_set_repeat(int texid, bool repeat)
 
 }
 
-void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw)
+void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt)
 {
 
 }
@@ -158,6 +158,16 @@ void texture_set_priority(int texid, double prio)
 }
 
 void texture_set_border(int texid, int r, int g, int b, double a) 
+{
+
+}
+
+void texture_set_swizzle(int texid, int r, int g, int b, double a)
+{
+
+}
+
+void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
 {
 
 }

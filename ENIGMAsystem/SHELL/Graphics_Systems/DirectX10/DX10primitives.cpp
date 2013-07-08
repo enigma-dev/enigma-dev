@@ -16,7 +16,7 @@
 **/
 
 #include "../General/DirectXHeaders.h"
-#include "DX10primitives.h"
+#include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
 #include "DX10model.h"
 #include "../General/DXbinding.h"

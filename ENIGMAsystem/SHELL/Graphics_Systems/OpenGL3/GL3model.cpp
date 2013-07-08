@@ -17,7 +17,7 @@
 
 #include "GL3d3d.h"
 #include "GL3shapes.h"
-#include "GL3primitives.h"
+#include "../General/GSprimitives.h"
 #include "GL3vertexbuffer.h"
 #include "../General/GStextures.h"
 #include "GL3model.h"
