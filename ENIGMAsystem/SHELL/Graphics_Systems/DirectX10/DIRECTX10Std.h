@@ -23,7 +23,7 @@ namespace enigma
 }
 
 #include "../General/GScolors.h"
-#include "DX10primitives.h"
+#include "../General/GSprimitives.h"
 #include "DX10d3d.h"
 #include "DX10draw.h"
 #include "../General/GSblend.h"
