@@ -20,6 +20,7 @@ using namespace std;
 #include <cstddef>
 #include <iostream>
 #include <math.h>
+#include <string.h>
 
 #include "../General/GLbinding.h"
 #include <stdio.h> //for file writing (surface_save)
@@ -75,65 +76,130 @@ bool surface_is_supported()
 
 int surface_create(int width, int height)
 {
-    if (GLEW_EXT_framebuffer_object)
-    {
-      GLuint tex, fbo;
-      int prevFbo;
-
-      size_t id,
-        w=(int)width,
-        h=(int)height; //get the integer width and height, and prepare to search for an id
-
-      if (enigma::surface_max==0) {
-        enigma::surface_array=new enigma::surface*[1];
-        enigma::surface_max=1;
-      }
-
-      for (id=0; enigma::surface_array[id]!=NULL; id++)
-      {
-        if (id+1 >= enigma::surface_max)
-        {
-          enigma::surface **oldarray=enigma::surface_array;
-          enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
-
-          for (size_t i=0; i<enigma::surface_max; i++)
-            enigma::surface_array[i]=oldarray[i];
-
-          enigma::surface_array[enigma::surface_max]=NULL;
-          enigma::surface_max++;
-          delete[] oldarray;
-        }
-      }
-
-      enigma::surface_array[id] = new enigma::surface;
-      enigma::surface_array[id]->width = w;
-      enigma::surface_array[id]->height = h;
-
-      glGenTextures(1, &tex);
-      glGenFramebuffers(1, &fbo);
-
-      glPushAttrib(GL_TEXTURE_BIT);
-      glBindTexture(GL_TEXTURE_2D, tex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-      glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-      glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex, 0);
-      glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-      glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-        glClearColor(1,1,1,0);
-      glClear(GL_COLOR_BUFFER_BIT);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-      glPopAttrib();
-
-      enigma::surface_array[id]->tex = tex;
-      enigma::surface_array[id]->fbo = fbo;
-
-      return id;
-    }
+  if (!GLEW_EXT_framebuffer_object)
+  {
     return -1;
+  }
+    
+  GLuint tex, fbo;
+  int prevFbo;
+
+  size_t id,
+  w = (int)width,
+  h = (int)height; //get the integer width and height, and prepare to search for an id
+
+  if (enigma::surface_max==0) {
+    enigma::surface_array=new enigma::surface*[1];
+    enigma::surface_max=1;
+  }
+
+  for (id=0; enigma::surface_array[id]!=NULL; id++)
+  {
+    if (id+1 >= enigma::surface_max)
+    {
+      enigma::surface **oldarray=enigma::surface_array;
+      enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
+
+      for (size_t i=0; i<enigma::surface_max; i++)
+        enigma::surface_array[i]=oldarray[i];
+
+      enigma::surface_array[enigma::surface_max]=NULL;
+      enigma::surface_max++;
+      delete[] oldarray;
+    }
+  }
+
+  enigma::surface_array[id] = new enigma::surface;
+  enigma::surface_array[id]->width = w;
+  enigma::surface_array[id]->height = h;
+
+  glGenTextures(1, &tex);
+  glGenFramebuffers(1, &fbo);
+
+  glPushAttrib(GL_TEXTURE_BIT);
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex, 0);
+  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+  glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glClearColor(1,1,1,0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+  glPopAttrib();
+
+  enigma::surface_array[id]->tex = tex;
+  enigma::surface_array[id]->fbo = fbo;
+
+  return id;
+}
+
+int surface_create_msaa(int width, int height, int samples)
+{
+  if (!GLEW_EXT_framebuffer_object)
+  {
+    return -1;
+  }
+    
+  GLuint tex, fbo;
+  int prevFbo;
+
+  size_t id,
+  w = (int)width,
+  h = (int)height; //get the integer width and height, and prepare to search for an id
+
+  if (enigma::surface_max==0) {
+    enigma::surface_array=new enigma::surface*[1];
+    enigma::surface_max=1;
+  }
+
+  for (id=0; enigma::surface_array[id]!=NULL; id++)
+  {
+    if (id+1 >= enigma::surface_max)
+    {
+      enigma::surface **oldarray=enigma::surface_array;
+      enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
+
+      for (size_t i=0; i<enigma::surface_max; i++)
+        enigma::surface_array[i]=oldarray[i];
+
+      enigma::surface_array[enigma::surface_max]=NULL;
+      enigma::surface_max++;
+      delete[] oldarray;
+    }
+  }
+
+  enigma::surface_array[id] = new enigma::surface;
+  enigma::surface_array[id]->width = w;
+  enigma::surface_array[id]->height = h;
+
+  glGenTextures(1, &tex);
+  glGenFramebuffers(1, &fbo);
+  glPushAttrib(GL_TEXTURE_BIT);
+  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tex);
+
+  glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA, w, h, false);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D_MULTISAMPLE, tex, 0);
+  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+  glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glClearColor(1,1,1,0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+  glPopAttrib();
+
+  enigma::surface_array[id]->tex = tex;
+  enigma::surface_array[id]->fbo = fbo;
+
+  return id;
 }
 
 void surface_set_target(int id)

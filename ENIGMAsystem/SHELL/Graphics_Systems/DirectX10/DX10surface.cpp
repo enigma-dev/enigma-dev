@@ -78,6 +78,11 @@ int surface_create(int width, int height)
 
 }
 
+int surface_msaa_create(int width, int height, int levels)
+{
+
+}
+
 void surface_set_target(int id)
 {
 

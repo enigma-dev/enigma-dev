@@ -34,6 +34,21 @@ namespace enigma {
 namespace enigma_user
 {
 
+int draw_get_msaa_maxlevel()
+{
+
+}
+
+bool draw_get_msaa_supported()
+{
+
+}
+
+void draw_set_msaa_enabled(bool enable)
+{
+
+}
+
 void draw_set_line_pattern(unsigned short pattern, int scale)
 {
 
