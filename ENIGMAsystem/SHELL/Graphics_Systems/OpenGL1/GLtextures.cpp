@@ -222,12 +222,12 @@ void texture_set_repeat(int texid, bool repeat)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
 }
 
-void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw)
+void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt)
 {
   glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeatu?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeatv?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeatw?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps?GL_REPEAT:GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt?GL_REPEAT:GL_CLAMP);
 }
 
 void texture_preload(int texid)
@@ -246,6 +246,21 @@ void texture_set_border(int texid, int r, int g, int b, double a)
   GLint color[4] = {r, g, b, a * 255};
   glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+}
+
+void texture_set_swizzle(int texid, int r, int g, int b, double a)
+{
+  GLint color[4] = {r, g, b, a * 255};
+  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
+  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, color);
+}
+
+void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
+{
+  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, maxlod);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, maxlevel);
 }
 
 void texture_mipmapping_filter(int texid, int filter)

@@ -33,7 +33,7 @@ namespace enigma
 }
 
 #include "../General/GScolors.h"
-#include "GL3primitives.h"
+#include "../General/GSprimitives.h"
 #include "GL3d3d.h"
 #include "GL3draw.h"
 #include "../General/GSblend.h"

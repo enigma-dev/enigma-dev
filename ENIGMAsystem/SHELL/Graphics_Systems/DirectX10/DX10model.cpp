@@ -17,7 +17,7 @@
 
 #include "DX10d3d.h"
 #include "DX10shapes.h"
-#include "DX10primitives.h"
+#include "../General/GSprimitives.h"
 #include "DX10vertexbuffer.h"
 #include "../General/GStextures.h"
 #include "DX10model.h"

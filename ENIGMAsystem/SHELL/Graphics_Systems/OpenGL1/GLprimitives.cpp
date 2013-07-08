@@ -16,9 +16,9 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
-#include "GLprimitives.h"
 #include "../General/GLbinding.h"
 #include "../General/GStextures.h"
+#include "../General/GSprimitives.h"
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"

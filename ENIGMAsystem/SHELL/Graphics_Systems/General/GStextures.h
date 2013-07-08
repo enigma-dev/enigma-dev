@@ -69,11 +69,11 @@ void texture_set_interpolation(int enable);
 **/
 bool texture_get_interpolation();
 /** description
-@param texid
+@param texid Index of the texture.
 **/
 int texture_get_pixwidth(int texid);
 /** description
-@param texid
+@param texid Index of the texture.
 **/
 int texture_get_pixheight(int texid);
 /** description
@@ -85,28 +85,28 @@ void texture_set_blending(bool enable);
 **/
 void texture_set_repeat(bool repeat);
 /** description
-@param texid
+@param texid Index of the texture.
 @param repeat
 **/
 void texture_set_repeat(int texid, bool repeat);
 /** description
-@param texid
+@param texid Index of the texture.
 @param repeatu
 @param repeatv
 @param repeatw
 **/
-void texture_set_repeat(int texid, bool repeatu, bool repeatv, bool repeatw);
+void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt);
 /** description
-@param texid
+@param texid Index of the texture.
 **/
 void texture_preload(int texid);
 /** description
-@param texid
+@param texid Index of the texture.
 @param prio
 **/
 void texture_set_priority(int texid, double prio);
 /** description
-@param texid
+@param texid Index of the texture.
 @param r
 @param g 
 @param b
@@ -114,12 +114,27 @@ void texture_set_priority(int texid, double prio);
 **/
 void texture_set_border(int texid, int r, int g, int b, double a);
 /** description
-@param texid
+@param texid Index of the texture.
+@param r
+@param g 
+@param b
+@param a
+**/
+void texture_set_swizzle(int texid, int r, int g, int b, double a);
+/** description
+@param texid Index of the texture.
+@param minlod
+@param maxlod
+@param maxlevel
+**/
+void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel);
+/** description
+@param texid Index of the texture.
 @param enable
 **/
 void texture_mipmapping_filter(int texid, int enable);
 /** description
-@param texid
+@param texid Index of the texture.
 @param levels
 **/
 void texture_mipmapping_generate(int texid, int levels);
@@ -130,7 +145,7 @@ bool  texture_anisotropy_supported();
 **/
 float texture_anisotropy_maxlevel();
 /** description
-@param texid
+@param texid Index of the texture.
 @param levels
 **/
 void  texture_anisotropy_filter(int texid, float levels);
