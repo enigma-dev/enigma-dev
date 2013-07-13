@@ -1,4 +1,6 @@
-/** Copyright (C) 2008-2013 Josh Ventura/Robert B. Colton
+/** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2011-2012 polygone
+*** Copyright (C) 2013 Robert B Colton, canthelp
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -117,7 +119,7 @@ namespace enigma
 
       instance->speed.rval.d = instance->speed.rval.d < 0? -hypot(instance->hspeed.rval.d, instance->vspeed.rval.d) : 
       hypot(instance->hspeed.rval.d, instance->vspeed.rval.d);
-      if (fabs(instance->speed.rval.d) > 1e-20)
+      if (fabs(instance->speed.rval.d) > 1e-12)
       instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180/M_PI)) 
       + (instance->speed.rval.d < 0?  180 : 360), 360);
 
