@@ -20,7 +20,8 @@
 #include <string>
 #include "var4.h"
 #include "reflexive_types.h"
-#include <floatcomp.h>
+//#include <floatcomp.h>
+inline bool varnz(double x) { return fabs(x) <= var_e; }
 
 namespace enigma {
   //Make direction work
@@ -40,7 +41,7 @@ namespace enigma {
   //Make hspeed work
   INTERCEPT_DEFAULT_COPY(hspeedv)
   void hspeedv::function(variant) {
-    if (fnzero(rval.d) or fnzero(*vspd))
+    if (varnz(rval.d) or varnz(*vspd))
     {
         *dir = (int(180+180*(1-atan2(*vspd,rval.d)/M_PI)))%360;
         *spd = hypot(rval.d,*vspd);
@@ -50,7 +51,7 @@ namespace enigma {
   //Make vspeed work -- Same as above, except the arguments to atan2 are reversed
   INTERCEPT_DEFAULT_COPY(vspeedv)
   void vspeedv::function(variant) {
-    if (fnzero(rval.d) or fnzero(*hspd))
+    if (varnz(rval.d) or varnz(*hspd))
     {
         *dir = (int(180+180*(1-atan2(rval.d,*hspd)/M_PI)))%360;
         *spd = hypot(rval.d,*hspd);

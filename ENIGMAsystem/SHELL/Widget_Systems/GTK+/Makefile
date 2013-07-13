@@ -1,5 +1,6 @@
 SOURCES += $(wildcard Widget_Systems/GTK+/*.cpp)
 CFLAGS += $(shell pkg-config --cflags gtk+-2.0)
+LDLIBS += $(shell pkg-config --libs gtk+-2.0) -lgthread-2.0
 
 ifeq ($(PLATFORM), xlib)
 	LDLIBS += $(shell pkg-config --libs gtk+-2.0)
