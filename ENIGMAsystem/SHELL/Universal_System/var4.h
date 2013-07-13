@@ -40,6 +40,7 @@ namespace enigma {
     double d;
     void * p;
     rvt(double x): d(x) {}
+    #define var_e 1e-12
   };
 }
 

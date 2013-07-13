@@ -41,11 +41,11 @@ using namespace std;
 #  define codebloxt(x, y) (y)
 #endif
 
-template<typename t> inline bool vareq(double x, t y) { return fabs(x - y) < 1e-12; }
+template<typename t> inline bool vareq(double x, t y) { return fabs(x - y) <= 1e-12; }
 template<>           inline bool vareq(double x, double y) { return fabs(x - y) < 1e-12; }
 template<>           inline bool vareq(double x, float y)  { return fabsf(float(x) - y) < 1e-8; }
 template<typename t> inline bool varneq(double x, t y) { return fabs(x - y) > 1e-12; }
-template<>           inline bool varneq(double x, double y) { return fabs(x - y) >= 1e-12; }
+template<>           inline bool varneq(double x, double y) { return fabs(x - y) > 1e-12; }
 template<>           inline bool varneq(double x, float y)  { return fabsf(float(x) - y) >= 1e-8; }
 template<typename t> inline bool varzero(t x)      { return !x; }
 template<>           inline bool varzero(float x)  { return codebloxt(x >= 0 && x <= 0, !x); }
@@ -224,25 +224,25 @@ bool variant::operator!=(const variant &x)   EVCONST { return type != x.type or 
 //bool variant::operator!=(const variant x)            { return type != x.type or ((x.type == real) ? rval.d != x.rval.d : sval != x.sval); }
 bool variant::operator!=(const var &x)       EVCONST { return *this != *x; }
 
-types_extrapolate_real_p  (bool variant::operator>=, { return type != real or  rval.d >= x; }) //type != real, then we're string and a priori greater.
+types_extrapolate_real_p  (bool variant::operator>=, { return type != real or  rval.d >= x - var_e; }) //type != real, then we're string and a priori greater.
 types_extrapolate_string_p(bool variant::operator>=, { return type == tstr and sval   >= x; }) //To be more, we must be string anyway.
 bool variant::operator>=(const variant &x)   EVCONST { return !(type < x.type) and (type > x.type or ((x.type == real) ? rval.d >= x.rval.d : sval >= x.sval)); }
 //bool variant::operator>=(const variant x)            { return !(type < x.type) and (type > x.type or ((x.type == real) ? rval.d >= x.rval.d : sval >= x.sval)); }
 bool variant::operator>=(const var &x)       EVCONST { return *this >= *x; }
 
-types_extrapolate_real_p  (bool variant::operator<=, { return type == real and rval.d <= x; }) //To be less, we must be real anyway.
+types_extrapolate_real_p  (bool variant::operator<=, { return type == real and rval.d <= x + var_e; }) //To be less, we must be real anyway.
 types_extrapolate_string_p(bool variant::operator<=, { return type != tstr or  sval   <= x; }) //type != tstr, then we're real and a priori less.
 bool variant::operator<=(const variant &x)   EVCONST { return !(type > x.type) and (type < x.type or ((x.type == real) ? rval.d <= x.rval.d : sval <= x.sval)); }
 //bool variant::operator<=(const variant x)            { return !(type > x.type) and (type < x.type or ((x.type == real) ? rval.d <= x.rval.d : sval <= x.sval)); }
 bool variant::operator<=(const var &x)       EVCONST { return *this <= *x; }
 
-types_extrapolate_real_p  (bool variant::operator>,  { return type != real or  rval.d > x; }) //type != real, then we're string and a priori greater.
+types_extrapolate_real_p  (bool variant::operator>,  { return type != real or  rval.d > x + var_e; }) //type != real, then we're string and a priori greater.
 types_extrapolate_string_p(bool variant::operator>,  { return type == tstr and sval   > x; }) //To be more, we must be string anyway.
 bool variant::operator>(const variant &x)   EVCONST { return !(type < x.type) and (type > x.type or ((x.type == real) ? rval.d > x.rval.d : sval > x.sval)); }
 //bool variant::operator>(const variant x)             { return !(type < x.type) and (type > x.type or ((x.type == real) ? rval.d > x.rval.d : sval > x.sval)); }
 bool variant::operator>(const var &x)       EVCONST  { return *this > *x; }
 
-types_extrapolate_real_p  (bool variant::operator<,  { return type == real and rval.d < x; }) //To be less, we must be real anyway.
+types_extrapolate_real_p  (bool variant::operator<,  { return type == real and rval.d < x - var_e; }) //To be less, we must be real anyway.
 types_extrapolate_string_p(bool variant::operator<,  { return type != tstr or  sval   < x; }) //type != tstr, then we're real and a priori less.
 bool variant::operator<(const variant &x)   EVCONST { return !(type > x.type) and (type < x.type or ((x.type == real) ? rval.d < x.rval.d : sval < x.sval)); }
 //bool variant::operator<(const variant x)             { return !(type > x.type) and (type < x.type or ((x.type == real) ? rval.d < x.rval.d : sval < x.sval)); }
