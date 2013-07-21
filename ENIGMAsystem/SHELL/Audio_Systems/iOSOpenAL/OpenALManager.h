@@ -29,7 +29,7 @@
 #import "OpenAl/alc.h"
 #import "OpenAl/al.h"
 #import <AudioToolbox/AudioToolbox.h>
-#include "iphoneOpenAL.h"
+#include "iOSOpenAL.h"
 
 @interface OpenALManager : NSObject {
 	// OpenAl variables
