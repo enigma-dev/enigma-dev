@@ -15,5 +15,5 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "SFML_basic.h"
-#include "SFML_advanced.h"
+#include "../General/ASbasic.h"
+#include "../General/ASadvanced.h"

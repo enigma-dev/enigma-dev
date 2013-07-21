@@ -27,7 +27,7 @@
 #import "OpenAl/alc.h"
 #import "OpenAl/al.h"
 #import <AudioToolbox/AudioToolbox.h>
-#include "iphoneOpenAL.h"
+#include "iOSOpenAL.h"
 #include <string>
 
 namespace enigma
