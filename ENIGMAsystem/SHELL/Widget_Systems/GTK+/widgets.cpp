@@ -25,6 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "../General/WSwidgets.h"
+
 #include <gtk/gtk.h>
 #include <string>
 #include <vector>

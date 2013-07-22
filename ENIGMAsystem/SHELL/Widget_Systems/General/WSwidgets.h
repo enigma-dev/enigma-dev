@@ -25,13 +25,24 @@
 **                                                                              **
 \********************************************************************************/
 
-int get_color(int defcol);
-string get_open_filename(string filter, string fname);
-string get_save_filename(string filter, string fname);
-string get_directory_alt(string capt, string root);
-string get_directory(string dname);
+#include <string>
+using std::string;
 
-int show_menu(int x, int y, string text);
-int show_menu_ext(int x, int y, string text);
-int show_menu_ext_nl(int x, int y, string text);
+int wgt_window_create(int w, int h);
+void wgt_window_show(int wgt);
 
+int wgt_layout_create(int win, string layout, int hpad, int vpad);
+void wgt_layout_insert_widget(int layout, string cell, int wgt);
+
+bool wgt_exists(int id);
+
+int wgt_button_create(string text);
+int wgt_combobox_create(string contents);
+int wgt_checkbox_create(string text);
+int wgt_textline_create(string text, int numchars);
+
+int wgt_button_get_pressed(int butn);
+bool wgt_checkbox_get_checked(int cbox);
+string wgt_textline_get_text(int tline);
+int wgt_combobox_get_selection(int cbbox);
+string wgt_combobox_get_selected_text(int cbbox);
