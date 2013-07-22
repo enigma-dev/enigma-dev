@@ -147,6 +147,7 @@ inline bool action_replace_sound(int sound, string fname)
 **/
 const char* sound_get_audio_error();
 
+void sound_pitch(int sound, float value);
 }
 
 #endif

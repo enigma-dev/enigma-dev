@@ -65,11 +65,11 @@
 #  define codebloxt(x, y) (y)
 #endif
 
-template<typename t> inline bool vareq(double x, t y) { return fabs(x - y) < 1e-12; }
+template<typename t> inline bool vareq(double x, t y) { return fabs(x - y) <= 1e-12; }
 template<>           inline bool vareq(double x, double y) { return fabs(x - y) < 1e-12; }
 template<>           inline bool vareq(double x, float y)  { return fabsf(float(x) - y) < 1e-8; }
 template<typename t> inline bool varneq(double x, t y) { return fabs(x - y) > 1e-12; }
-template<>           inline bool varneq(double x, double y) { return fabs(x - y) >= 1e-12; }
+template<>           inline bool varneq(double x, double y) { return fabs(x - y) > 1e-12; }
 template<>           inline bool varneq(double x, float y)  { return fabsf(float(x) - y) >= 1e-8; }
 template<typename t> inline bool varzero(t x)      { return !x; }
 template<>           inline bool varzero(float x)  { return codebloxt(x >= 0 && x <= 0, !x); }
