@@ -1,3 +1,3 @@
-#include "as_basic.h"
-#include "as_advanced.h"
+#include "../General/ASbasic.h"
+#include "../General/ASadvanced.h"
 

@@ -16,6 +16,11 @@
 **/
 
 // ***** New Sound System *****
+#ifndef _AS_ADVANCED__H
+#define _AS_ADVANCED__H
+
+#include <string>
+using std::string;
 
 namespace enigma_user
 {
@@ -33,18 +38,18 @@ enum {
 };
 
 /** des
-@param index The index of the audio asset.
+@param index The index of the sound asset.
 @return 
 **/
 bool audio_exists(int index);
 /** des
-@param index The index of the audio asset.
+@param index The index of the sound asset.
 @return 
 **/
 bool audio_is_playing(int index);
 
 /** des
-@param index The index of the audio asset.
+@param index The index of the sound asset.
 @param loop Whether or not to loop the sound at the end.
 **/
 void audio_play_music(int index, bool loop);
@@ -59,14 +64,14 @@ void audio_resume_music();
 void audio_stop_music(); 
 
 /** des
-@param index The index of the audio asset.
+@param index The index of the sound asset.
 @param priority The priority of the sound in queue.
 @param loop Whether or not to loop the sound at the end.
 @return
 **/
 int audio_play_sound(int index, double priority, bool loop);
 /** des
-@param sound The index of the audio asset.
+@param sound The index of the sound asset.
 @param x
 @param y
 @param z
@@ -78,18 +83,32 @@ int audio_play_sound(int index, double priority, bool loop);
 @return
 **/
 int audio_play_sound_at(int sound, double x, double y, double z, int falloff_ref, double falloff_max, double falloff_factor, bool loop, double priority);
-/** des
-@param index The index of the audio asset.
+/** Pauses all audio channels playing the sound.
+@param index The index of the sound asset.
 **/
 void audio_pause_sound(int index);
-/** des
-@param index The index of the audio asset.
+/** Resumes all audio channels playing the sound.
+@param index The index of the sound asset.
 **/
 void audio_resume_sound(int index);
-/** des
-@param index The index of the audio asset.
+/** Stops all audio channels playing the sound.
+@param index The index of the sound asset.
 **/
 void audio_stop_sound(int index);
+
+/** Pauses the audio channel.
+@param index The index of the sound channel.
+**/
+void audio_pause_channel(int index);
+/** Resumes the audio channel.
+@param index The index of the sound channel.
+**/
+void audio_resume_channel(int index);
+/** Stops the audio channel.
+@param index The index of the sound channel.
+**/
+void audio_stop_channel(int index);
+
 /** des
 **/
 void audio_pause_all();
@@ -105,7 +124,7 @@ void audio_stop_all();
 **/
 void audio_music_seek(double offset);
 /** des
-@param index The index of the audio asset.
+@param index The index of the sound asset.
 @param offset 
 **/
 void audio_sound_seek(int index, double offset);
@@ -114,7 +133,7 @@ void audio_sound_seek(int index, double offset);
 **/
 double audio_music_offset();
 /** des
-@param index The index of the audio asset.
+@param index The index of the sound asset.
 @return
 **/
 double audio_sound_offset(int index);
@@ -142,7 +161,7 @@ void audio_listener_position(double x, double y, double z);
 void audio_listener_velocity(double vx, double vy, double vz);
 
 /** des
-@param index The index of the audio asset.
+@param index The index of the sound asset.
 @return
 **/
 double audio_sound_length(int index);
@@ -157,14 +176,14 @@ void audio_master_gain(float volume, double time);
 **/
 void audio_music_gain(float volume, double time);
 /** des
-@param index The index of the audio asset.
+@param index The index of the sound asset.
 @param volume
 @param time
 **/
 void audio_sound_gain(int index, float volume, double time);
 
 /** des
-@param index The index of the audio asset.
+@param index The index of the sound asset.
 @return
 **/
 int audio_get_type(int index);
@@ -184,7 +203,7 @@ int audio_system();
 **/
 int audio_add(string fname, int type);
 /** des
-@param sound The index of the audio asset.
+@param sound The index of the sound asset.
 **/
 void audio_delete(int sound);
 /** des
@@ -201,6 +220,50 @@ int audio_emitter_create();
 @return
 **/
 bool audio_emitter_exists(int index);
+/** des
+@param index The index of the audio emitter.
+@param loop Whether or not to restart at the beginning of the track list when all sounds have played.
+@return
+**/
+void audio_emitter_play(int index, bool loop);
+/** des
+@param index The index of the audio emitter.
+@return
+**/
+void audio_emitter_stop(int index);
+/** des
+@param index The index of the audio emitter.
+@return
+**/
+void audio_emitter_pause(int index);
+/** des
+@param index The index of the audio emitter.
+@return
+**/
+void audio_emitter_resume(int index);
+/** des
+@param index The index of the audio emitter.
+@return
+**/
+int audio_emitter_sound_count(int index);
+/** des
+@param index The index of the audio emitter.
+@param sound The index of the audio emitter track.
+@return
+**/
+int audio_emitter_sound_get(int index, int track);
+/** des
+@param index The index of the audio emitter.
+@param sound The index of the sound asset.
+@return
+**/
+void audio_emitter_sound_add(int index, int sound);
+/** des
+@param index The index of the audio emitter.
+@param sound The index of the sound asset.
+@return
+**/
+void audio_emitter_sound_remove(int index, int track);
 /** des
 @param emitter The index of the audio emitter.
 @param falloff_ref
@@ -246,3 +309,4 @@ void audio_play_sound_on(int emitter, int sound, bool loop, double priority);
 
 }
 
+#endif

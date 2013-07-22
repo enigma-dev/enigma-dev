@@ -16,6 +16,8 @@
 **/
 
 // ***** Old Sound System *****
+#ifndef _AS_BASIC__H
+#define _AS_BASIC__H
 
 namespace enigma_user
 {
@@ -147,3 +149,5 @@ const char* sound_get_audio_error();
 
 void sound_pitch(int sound, float value);
 }
+
+#endif
