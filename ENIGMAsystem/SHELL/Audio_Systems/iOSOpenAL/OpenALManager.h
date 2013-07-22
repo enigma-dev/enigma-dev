@@ -25,24 +25,24 @@
  **                                                                              **
  \********************************************************************************/
 
-namespace enigma_user
-{
+#import <Foundation/Foundation.h>
+#import "OpenAl/alc.h"
+#import "OpenAl/al.h"
+#import <AudioToolbox/AudioToolbox.h>
+#include "iOSOpenAL.h"
 
-bool sound_play(int sound);
-bool sound_loop(int sound);
-void sound_stop(int sound);
-bool sound_pause(int sound);
-bool sound_resume(int sound);
-
-bool sound_isplaying(int sound);
-bool sound_ispaused(int sound);
-
-void sound_pan(int sound, float value);
-void sound_volume(int sound, float value);
-
-int sound_add(string fname, int kind, bool preload);
-
-const char* sound_get_audio_error();
-
+@interface OpenALManager : NSObject {
+	// OpenAl variables
+	ALCcontext* mContext;
+	ALCdevice* mDevice;
+	NSMutableDictionary* soundDictionary; //Dictionary of sound name to id
+	NSMutableArray* bufferStorageArray; //used for sotring sound data when sounds are being loaded
 }
++(AudioFileID)openAudioFile:(NSString*)filePath;
+-(void)initOpenAL;
+-(void)loadASoundOpenAL:(NSString*)soundname;
+-(void)stopSound:(NSString*)soundKey;
+-(void)playSound:(NSString*)soundKey;
+-(void)cleanUpOpenAL;
+@end
 

@@ -1,0 +1,87 @@
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
+#ifndef _SOUND_INSTANCE__H
+#define _SOUND_INSTANCE__H
+#include "ALsystem.h"
+#include "../General/ASadvanced.h"
+
+#ifdef __APPLE__
+#include "../../../additional/alure/include/AL/alure.h"
+#else
+#include <AL/alure.h>
+#endif
+
+#ifdef DEBUG_MODE
+#include "libEGMstd.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
+#endif
+
+#include <vector>
+using std::vector;
+
+struct sound_instance {
+  ALuint source;
+  int soundIndex;
+  double priority;
+  int type;
+  sound_instance(ALint alsource, int sound_id): source(alsource), soundIndex(sound_id) {}
+  sound_instance() {}
+
+void sound_update()
+{
+  // NOTE: Use starttime, elapsedtime, and lasttime
+  // calculate fade
+
+  // calculate falloff
+  switch (falloff_model)
+  {
+    case enigma_user::audio_falloff_exponent_distance:
+      // gain = (listener_distance / reference_distance) ^ (-falloff_factor)
+      break;
+    case enigma_user::audio_falloff_exponent_distance_clamped:
+      // distance = clamp(listener_distance, reference_distance, maximum_distance)
+      // gain = (distance / reference_distance) ^ (-falloff_factor)
+      break;
+    case enigma_user::audio_falloff_inverse_distance:
+      // gain = reference_distance / (reference_distance + falloff_factor * (listener_distance – reference_distance))
+      break;
+    case enigma_user::audio_falloff_inverse_distance_clamped:
+      // distance = clamp(listener_distance, reference_distance, maximum_distance)
+      // gain = reference_distance / (reference_distance + falloff_factor * (distance – reference_distance))
+      break;
+    case enigma_user::audio_falloff_linear_distance:
+      // distance = min(distance, maximum_distance)
+      // gain = (1 – falloff_factor * (distance – reference_distance) / (maximum_distance – reference_distance))
+      break;
+    case enigma_user::audio_falloff_linear_distance_clamped:
+      // distance = clamp(listener_distance, reference_distance, maximum_distance)
+      // gain = (1 – falloff_factor * (distance – reference_distance) / (maximum_distance – reference_distance))
+      break;
+    case enigma_user::audio_falloff_none:
+      // gain = 1
+      break;
+    default:
+      break;
+  }
+}
+
+};
+
+extern vector<sound_instance*> sound_sources;
+
+#endif
