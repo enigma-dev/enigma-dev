@@ -30,7 +30,7 @@
 #include <string>
 using namespace std;
 
-#include "menus.h"
+#include "../General/WSmenus.h"
 
 static bool menu_add_item(HMENU menu,int iid,int id,string str,unsigned int type)
 {

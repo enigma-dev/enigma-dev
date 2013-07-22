@@ -27,6 +27,7 @@
 
 // As is typical of Win32 code, this code is fuck-ugly. Refer to the GTK version for
 // porting to competent widget systems. Use this only for low-level APIs.
+#include "../General/WSwidgets.h"
 
 #define WINVER 9001
 #include <windows.h>

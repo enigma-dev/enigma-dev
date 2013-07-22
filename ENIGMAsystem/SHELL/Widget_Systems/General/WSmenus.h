@@ -1,6 +1,6 @@
-/********************************************************************************\
+/*********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Josh Ventura                                             **
+**  Copyright (C) 2009-2011 Josh Ventura                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -14,7 +14,7 @@
 **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
 **  details.                                                                    **
 **                                                                              **
-**  You should have received a copy of the GNU General Public License along     **
+**  You should have recieved a copy of the GNU General Public License along     **
 **  with this code. If not, see <http://www.gnu.org/licenses/>                  **
 **                                                                              **
 **  ENIGMA is an environment designed to create games and other programs with a **
@@ -23,18 +23,13 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\********************************************************************************/
+\*********************************************************************************/
 
-// IMPLEMENTS from widgets_mandatory:
-// void show_error(string errortext,const bool fatal);
+#include <string>
+using std::string;
 
-// DECLARES AND IMPLEMENTS
-string get_string(string message,string def,string cap="");
-double get_number(string message,string def,string cap="");
-int    get_integer(string message,string def,string cap="");
-bool   get_string_canceled();
-
-string get_open_filename(string filter,string filename,string caption="");
-string get_save_filename(string filter,string filename,string caption="");
-
-int get_color(int defcolor);
+int show_menu(int x, int y, string text);
+int show_menu_ext(int x, int y, string text);
+int show_menu_ext_nl(int x, int y, string text);
+double show_menu(string str, double def);
+double show_menu_pos(double x, double y, string str, double def);

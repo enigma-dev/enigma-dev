@@ -23,8 +23,8 @@
 #include "Universal_System/instance_system.h" //iter
 #include "Universal_System/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
-#include "coll_funcs.h"
 #include "coll_impl.h"
+#include "../General/coll_funcs.h"
 #include <limits>
 #include <cmath>
 #include "Universal_System/instance.h"

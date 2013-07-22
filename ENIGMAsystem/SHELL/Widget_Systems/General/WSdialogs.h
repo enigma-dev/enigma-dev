@@ -1,6 +1,6 @@
-/*********************************************************************************\
+/********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2009-2011 Josh Ventura                                        **
+**  Copyright (C) 2008 Josh Ventura                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -23,10 +23,21 @@
 **  applications created by its users, or damages caused by the environment     **
 **  or programs made in the environment.                                        **
 **                                                                              **
-\*********************************************************************************/
+\********************************************************************************/
 
-int show_menu(int x, int y, string text);
-int show_menu_ext(int x, int y, string text);
-int show_menu_ext_nl(int x, int y, string text);
-double show_menu(string str, double def);
-double show_menu_pos(double x, double y, string str, double def);
+#include <string>
+using std::string;
+
+int get_color(int defcol);
+string get_open_filename(string filter, string fname);
+string get_save_filename(string filter, string fname);
+string get_directory_alt(string capt, string root);
+string get_directory(string dname);
+
+// IMPLEMENTS from widgets_mandatory:
+// void show_error(string errortext, const bool fatal);
+
+string get_string(string message,string def, string cap="");
+double get_number(string message, string def, string cap="");
+int    get_integer(string message, string def, string cap="");
+bool   get_string_canceled();

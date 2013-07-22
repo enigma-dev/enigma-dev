@@ -33,9 +33,9 @@
 
 #include "../General/glew.h"
 #if defined(_WIN32)
-#  include "../../Bridges/Win32-OpenGL3/wglew.h"
+#  include "../../Bridges/General/wglew.h"
 #elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
-#  include "../../Bridges/xlib-OpenGL3/glxew.h"
+#  include "../../Bridges/General/glxew.h"
 #endif
 
 /*
@@ -110,7 +110,7 @@ void* NSGLGetProcAddress (const GLubyte *name)
   void* addr = dlsym(image, (const char*)name);
   if( addr ) return addr;
 #ifdef GLEW_APPLE_GLX
-  return dlGetProcAddress( name ); // try next for glx symbols
+  return dlGetProcAddress( name ); /* try next for glx symbols */
 #else
   return NULL;
 #endif
@@ -139,7 +139,7 @@ void* NSGLGetProcAddress (const GLubyte *name)
   free(symbolName);
   if( symbol ) return NSAddressOfSymbol(symbol);
 #ifdef GLEW_APPLE_GLX
-  return dlGetProcAddress( name ); // try next for glx symbols
+  return dlGetProcAddress( name ); /* try next for glx symbols */
 #else
   return NULL;
 #endif
