@@ -197,7 +197,7 @@ string filename_dir(string fname)
     size_t fp = fname.find_last_of("/\\");
     if (fp == string::npos)
         return "";
-    return fname.substr(fp);
+    return fname.substr(0, fp);
 }
 
 string filename_drive(string fname)
