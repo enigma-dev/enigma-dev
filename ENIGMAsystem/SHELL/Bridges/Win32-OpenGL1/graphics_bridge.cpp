@@ -29,7 +29,7 @@
 #include <windows.h>
 using namespace std;
 
-#include "wglew.h"
+#include "../General/wglew.h"
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"

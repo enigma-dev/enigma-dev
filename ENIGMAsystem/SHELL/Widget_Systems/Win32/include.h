@@ -25,6 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "widgets.h"
-#include "dialogs.h"
-#include "menus.h"
+#include "../General/WSwidgets.h"
+#include "../General/WSdialogs.h"
+#include "../General/WSmenus.h"

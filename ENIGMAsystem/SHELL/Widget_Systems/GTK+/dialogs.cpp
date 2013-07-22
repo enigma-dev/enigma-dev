@@ -25,11 +25,17 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "../General/WSdialogs.h"
+#include "../General/WSmenus.h"
+
 #include <string>
 #include <gtk/gtk.h>
 
 using namespace std;
 
+void show_error(string errortext, const bool fatal) {
+//TODO: Implement
+}
 
 int get_color(int defcol)
 {

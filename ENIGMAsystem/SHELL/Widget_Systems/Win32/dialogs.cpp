@@ -32,7 +32,7 @@ using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "GameSettings.h"
 
-#include "dialogs.h"
+#include "../General/WSdialogs.h"
 
 void show_error(string errortext,const bool fatal)
 {

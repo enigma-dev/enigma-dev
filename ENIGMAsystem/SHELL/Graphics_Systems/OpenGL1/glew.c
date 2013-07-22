@@ -33,9 +33,9 @@
 
 #include "../General/glew.h"
 #if defined(_WIN32)
-#  include "../../Bridges/Win32-OpenGL1/wglew.h"
+#  include "../../Bridges/General/wglew.h"
 #elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
-#  include "../../Bridges/xlib-OpenGL1/glxew.h"
+#  include "../../Bridges/General/glxew.h"
 #endif
 
 /*

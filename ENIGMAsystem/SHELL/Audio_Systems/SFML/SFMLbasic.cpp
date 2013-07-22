@@ -357,6 +357,8 @@ namespace enigma
 
 }
 
+namespace enigma_user {
+
 int sound_add(std::string fname, int kind, bool preload)
 {
   int i = (int)sounds.size();
@@ -551,4 +553,6 @@ float sound_get_volume(int sound)
 float sound_get_pitch(int sound)
 {
 	return sounds[sound]->getPitch();
+}
+
 }

@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "coll_util.h"
 #include "Universal_System/instance_system_base.h"
 
 namespace enigma_user
