@@ -39,7 +39,7 @@
 
 namespace enigma_user {
   const int os_type = os_linux;
-  extern int keyboard_lastkey = 0;
+  int keyboard_lastkey = 0;
   extern string keyboard_lastchar;
 }
 
@@ -77,13 +77,13 @@ namespace enigma
                       enigma_user::keyboard_lastchar = string(1,str[0]);
                   }
               }
+	      enigma_user::keyboard_lastkey = actualKey;
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
                 return 0;
               }
               enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
               enigma::keybdstatus[actualKey]=1;
-	      enigma_user::keyboard_lastkey = actualKey;
               return 0;
         }
         case KeyRelease: {
