@@ -39,7 +39,7 @@
 
 namespace enigma_user {
   const int os_type = os_linux;
-
+  extern int keyboard_lastkey = 0;
   extern string keyboard_lastchar;
 }
 
@@ -83,6 +83,7 @@ namespace enigma
               }
               enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
               enigma::keybdstatus[actualKey]=1;
+	      enigma_user::keyboard_lastkey = actualKey;
               return 0;
         }
         case KeyRelease: {
