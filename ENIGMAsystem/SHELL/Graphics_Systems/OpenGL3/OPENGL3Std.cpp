@@ -34,7 +34,7 @@ namespace enigma
   void graphicssystem_initialize()
   {
     GLenum err = glewInit();
-    
+
     #ifdef DEBUG_MODE
     if (GLEW_OK != err)
     {
@@ -51,8 +51,8 @@ namespace enigma
       using enigma_user::room_width;
       using enigma_user::room_height;
       glViewport(0,0,(int)room_width,(int)room_height);
-      glOrtho(-1,(int)room_width,-1,(int)room_height,0,1);
-      glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glOrtho(0,(int)room_width,0,(int)room_height,0,1);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       glDisable(GL_DEPTH_TEST);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
