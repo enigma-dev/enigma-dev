@@ -1,0 +1,88 @@
+// "//" Indicates commenting in the following format description.
+// Sections are indicated with a number of "-" at the start of the line.
+// Sections go like this: testgroup->api_selection.
+// There can be zero or more sections, and zero or more subsections in a section.
+// Non-newline white space at the start of a line is ignored, and only included to make it more readable.
+type=integration_test
+time=TIMESTAMP // TIMESTAMP is UTC date and time, such as the result from the Unix shell command "date -u -Iseconds".
+platform=PLATFORM // PLATFORM is one of [linux,windows].
+
+-testgroup
+{
+  name=GROUP_NAME // GROUP_NAME is a valid C++ identifier, which must be the same as the name of the folder
+                  // where the given group of tests resides.
+
+  --configuration
+  {
+    api=API_1:SELECTION_1;API_2:SELECTION_2 // API selections, could for instance be graphics=OpenGL1;collision=Precise.
+                                            // API selections may be omitted, as "api=".
+
+    // Zero or more test results.
+
+    test=TEST_NAME_1:DESCRIPTION // TEST_NAME is a valid C++ identifier.
+                                 // DESCRIPTION is a one-line string describing the test.
+    subtest=NAME_1:RESULT:MESSAGE // NAME_* is valid C++ identifier name of the sub-test.
+                                  // RESULT is one of [success,failure,unknown].
+                                  // MESSAGE is a one-line string used for non-success information, such as an error message.
+    subtest=NAME_2:RESULT:MESSAGE
+    subtest=NAME_3:RESULT:MESSAGE
+    subtest=NAME_4:RESULT:MESSAGE
+    end_status=END_STATUS // END_STATUS is one of [compiled_and_ran,failed_compilation,timeout,crash,error].
+
+    test=TEST_NAME_2:DESCRIPTION
+    subtest=NAME_1:RESULT:MESSAGE
+    subtest=NAME_2:RESULT:MESSAGE
+    subtest=NAME_3:RESULT:MESSAGE
+    end_status=END_STATUS
+
+    test=TEST_NAME_3:DESCRIPTION
+    subtest=NAME_1:RESULT:MESSAGE
+    end_status=END_STATUS
+
+    test=TEST_NAME_4:DESCRIPTION
+    subtest=NAME_1:RESULT:MESSAGE
+    subtest=NAME_2:RESULT:MESSAGE
+    subtest=NAME_3:RESULT:MESSAGE
+    subtest=NAME_4:RESULT:MESSAGE
+    end_status=END_STATUS
+  }
+
+  --configuration
+  {
+    [...] // Configuration, test results.
+  }
+}
+
+-testgroup
+{
+  name=GROUP_NAME
+
+  --configuration
+  {
+    // No API selection for this test group.
+    api=
+
+    [...] // Test results.
+  }
+}
+
+-testgroup
+{
+  name=GROUP_NAME
+
+  --configuration
+  {
+    [...] // Configuration, test results.
+  }
+
+  --configuration
+  {
+    [...] // Configuration, test results.
+  }
+
+  --configuration
+  {
+    [...] // Configuration, test results.
+  }
+}
+

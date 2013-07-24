@@ -1,0 +1,5 @@
+linux=graphics:OpenGL1
+linux=graphics:OpenGL3
+windows=graphics:OpenGL1
+windows=graphics:OpenGL3
+windows=graphics:DirectX
