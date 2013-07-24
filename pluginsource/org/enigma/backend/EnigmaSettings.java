@@ -122,7 +122,7 @@ public class EnigmaSettings extends Resource<EnigmaSettings,EnigmaSettings.PEnig
 			String targetName = n.getMC("target-" + key,null);
 			if (targetName == null) continue;
 			for (TargetSelection ts : TargetHandler.targets.get(key))
-				if (ts.id == targetName)
+				if (ts.id.equals(targetName))
 					{
 					targets.put(key,ts);
 					break;

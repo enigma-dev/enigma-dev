@@ -58,7 +58,7 @@ struct language_adapter {
   
   // Big things
   virtual syntax_error* definitionsModified(const char*, const char*) = 0;
-  virtual double compile(EnigmaStruct *es, const char* exe_filename, int mode) = 0;
+  virtual int compile(EnigmaStruct *es, const char* exe_filename, int mode) = 0;
   
   virtual ~language_adapter();
 };
