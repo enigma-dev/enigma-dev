@@ -57,14 +57,14 @@ Overview of integration testing structure
 | Folders and files              | Info                                                        |
 | ------------------------------ | ----------------------------------------------------------- |
 | integration\_tests/            |                                                             |
-|     format/                    | Information about the format                                |
-|     output/                    | Test reports in different formats, temporary files only     |
-|     testlib/                   | Python scripts for dealing with tests and test results      |
-|     tests/                     | Testgroups                                                  |
-|         testgroup\_1/          | Contains tests                                              |
-|         testgroup\_2/          | Contains tests                                              |
-|         testgroup\_3/          | Contains tests                                              |
-|         inttestreport.txt      | Test report, main format                                    |
-|     README.md                  | This README                                                 |
-|     run\_and\_record\_tests.py | Main script to run all or some tests                        |
+| ....format/                    | Information about the format                                |
+| ....output/                    | Test reports in different formats, temporary files only     |
+| ....testlib/                   | Python scripts for dealing with tests and test results      |
+| ....tests/                     | Testgroups                                                  |
+| ........testgroup\_1/          | Contains tests                                              |
+| ........testgroup\_2/          | Contains tests                                              |
+| ........testgroup\_3/          | Contains tests                                              |
+| ........inttestreport.txt      | Test report, main format                                    |
+| ....README.md                  | This README                                                 |
+| ....run\_and\_record\_tests.py | Main script to run all or some tests                        |
 
