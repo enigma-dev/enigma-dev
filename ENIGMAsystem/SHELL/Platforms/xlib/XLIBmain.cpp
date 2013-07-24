@@ -78,6 +78,7 @@ namespace enigma
                   }
               }
 	      enigma_user::keyboard_lastkey = actualKey;
+	      enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
                 return 0;
