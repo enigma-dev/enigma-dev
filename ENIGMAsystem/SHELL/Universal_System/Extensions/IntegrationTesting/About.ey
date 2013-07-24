@@ -1,0 +1,13 @@
+%E-YAML
+---
+
+Name: IntegrationTesting
+ID: Integration Testing
+Description: Adds support for performing integration testing.
+Default: false
+Icon: aok.png
+
+Depends: None
+Dependencies: None
+Implement: extension_integrationtesting
+

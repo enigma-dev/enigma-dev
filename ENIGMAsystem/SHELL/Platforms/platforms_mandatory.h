@@ -67,6 +67,8 @@ int window_mouse_get_y();
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
+void game_end();
+
 }
 
 #endif
