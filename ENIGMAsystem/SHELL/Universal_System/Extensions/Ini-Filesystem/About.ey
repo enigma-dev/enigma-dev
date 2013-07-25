@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: Ini-Filesystem
+ID: Ini-Filesystem
+Author: Daniel Hrabovcak
+Description: Adds support for loading ini files.
+Default: false
+Icon: ini-filesystem.png
+
+Depends: None
+Dependencies: None
+Implement: extension_ini
