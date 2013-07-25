@@ -138,7 +138,7 @@ int net_bounce(int sock) {
  return 0;
 }
 
-int net_send(int sock, string msg, int len) {
+int net_send_raw(int sock, string msg, int len) {
   send(sock, msg.c_str(), len, 0); 
 }
 

@@ -86,7 +86,7 @@ string net_receive(int sock);
 int net_bounce(int sock);
 //Sends a message to specified socket. (We use a #define in the .h file instead)
 //See documentation for Berkeley sockets send() method.
-int net_send(int sock, string msg, int len);
+int net_send_raw(int sock, string msg, int len);
 //Returns the port of a given socket.
 int net_get_port(int sock);
 //Sets whether given socket is in blocking mode

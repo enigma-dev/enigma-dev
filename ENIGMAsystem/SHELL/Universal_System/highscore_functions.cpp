@@ -173,7 +173,7 @@ std::string highscore_name(int place) {
 namespace enigma_user
 {
 
-void draw_text(int x,int y,variant str); // TODO: Holy shit.
+void draw_text(float x, float y,variant str); // TODO: Holy shit.
 int string_width(variant str);
 
 void draw_highscore(int x1, int y1, int x2, int y2) {
