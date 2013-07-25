@@ -83,8 +83,8 @@ void draw_line(float x1,float y1,float x2,float y2)
 {
   texture_reset();
   glBegin(GL_LINES);
-    glVertex2f(x1,y1);
-    glVertex2f(x2,y2);
+    glVertex2f(x1+0.5,y1+0.5);
+    glVertex2f(x2+0.5,y2+0.5);
   glEnd();
 }
 
@@ -94,8 +94,8 @@ void draw_line_width(float x1,float y1,float x2,float y2,float width)
   glPushAttrib(GL_LINE_BIT);
     glLineWidth(width);
     glBegin(GL_LINES);
-      glVertex2f(x1,y1);
-      glVertex2f(x2,y2);
+      glVertex2f(x1+0.5,y1+0.5);
+      glVertex2f(x2+0.5,y2+0.5);
     glEnd();
   glPopAttrib();
 }
@@ -105,9 +105,9 @@ void draw_line_color(float x1,float y1,float x2,float y2,int c1,int c2)
   texture_reset();
   glBegin(GL_LINES);
     glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
-      glVertex2f(x1,y1);
+      glVertex2f(x1+0.5,y1+0.5);
     glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
-      glVertex2f(x2,y2);
+      glVertex2f(x2+0.5,y2+0.5);
   glEnd();
   glColor4ubv(enigma::currentcolor);
 }
@@ -119,9 +119,9 @@ void draw_line_width_color(float x1,float y1,float x2,float y2,float width,int c
     glLineWidth(width);
     glBegin(GL_LINES);
       glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
-      glVertex2f(x1,y1);
+      glVertex2f(x1+0.5,y1+0.5);
       glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
-      glVertex2f(x2,y2);
+      glVertex2f(x2+0.5,y2+0.5);
     glEnd();
   glPopAttrib();
   glColor4ubv(enigma::currentcolor);
@@ -135,10 +135,10 @@ void draw_rectangle(float x1,float y1,float x2,float y2,bool outline)
   if(outline)
   {
     glBegin(GL_LINE_LOOP);
-      glVertex2f(x1,y1);
-      glVertex2f(x1,y2);
-      glVertex2f(x2,y2);
-      glVertex2f(x2,y1);
+      glVertex2f(x1+0.5,y1+0.5);
+      glVertex2f(x1+0.5,y2+0.5);
+      glVertex2f(x2+0.5,y2+0.5);
+      glVertex2f(x2+0.5,y1+0.5);
     glEnd();
   }
   else glRectf(x1,y1,x2,y2);
@@ -158,13 +158,13 @@ void draw_rectangle_angle(float x1,float y1,float x2,float y2,float angle,bool o
     dir = atan2(y1-ym,x1-xm)+angle;
 
   float
-    ldx1 = len*cos(dir),
-    ldy1 = len*sin(dir);
+    ldx1 = len*cos(dir)+(outline?0.5:0),
+    ldy1 = len*sin(dir)+(outline?0.5:0);
 
   dir = atan2(y2-ym,x1-xm)+angle;
   float
-    ldx2 = len*cos(dir),
-    ldy2 = len*sin(dir);
+    ldx2 = len*cos(dir)+(outline?0.5:0),
+    ldy2 = len*sin(dir)+(outline?0.5:0);
 
   glBegin(outline ? GL_LINE_LOOP : GL_QUADS);
     glVertex2f(xm+ldx1,ym-ldy1);
@@ -177,16 +177,29 @@ void draw_rectangle_angle(float x1,float y1,float x2,float y2,float angle,bool o
 void draw_rectangle_color(float x1,float y1,float x2,float y2,int c1,int c2,int c3,int c4,bool outline)
 {
     texture_reset();
-    glBegin(outline?GL_LINE_LOOP:GL_QUADS);
-      glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
-        glVertex2f(x1,y1);
-      glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
-        glVertex2f(x2,y1);
-      glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),enigma::currentcolor[3]);
-        glVertex2f(x2,y2);
-      glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),enigma::currentcolor[3]);
-        glVertex2f(x1,y2);
-    glEnd();
+    if (outline == true){
+        glBegin(GL_LINE_LOOP);
+          glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
+            glVertex2f(x1+0.5,y1+0.5);
+          glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
+            glVertex2f(x2+0.5,y1+0.5);
+          glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),enigma::currentcolor[3]);
+            glVertex2f(x2+0.5,y2+0.5);
+          glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),enigma::currentcolor[3]);
+            glVertex2f(x1+0.5,y2+0.5);
+        glEnd();
+    }else{
+        glBegin(GL_QUADS);
+          glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
+            glVertex2f(x1,y1);
+          glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
+            glVertex2f(x2,y1);
+          glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),enigma::currentcolor[3]);
+            glVertex2f(x2,y2);
+          glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),enigma::currentcolor[3]);
+            glVertex2f(x1,y2);
+        glEnd();
+    }
     glColor4ubv(enigma::currentcolor);
 }
 
@@ -207,7 +220,7 @@ void draw_circle(float x,float y,float r,bool outline)
         for(double i=0;i<=2*M_PI; i+=pr)
         {
             double xc1=cos(i)*r,yc1=sin(i)*r;
-            glVertex2f(x+xc1,y+yc1);
+            glVertex2f(x+xc1+0.5,y+yc1+0.5);
         }
     }
     else
@@ -235,18 +248,20 @@ void draw_circle_color(float x,float y,float r,int c1, int c2,bool outline)
         glVertex2f(x,y);
     }
     //Bagan above
+    //This maybe needs to be split in outline and filled, because now that 0.5 could break it (but by testing it doesn't)
     glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
       float pr=2*M_PI/enigma::circleprecision;
-      glVertex2f(x+r,y);
+      glVertex2f(x+0.5+r,y+0.5);
       for(float i=pr;i<2*M_PI;i+=pr)
-        glVertex2f(x+r*cos(i),y-r*sin(i));
-      glVertex2f(x+r,y);
+        glVertex2f(x+r*cos(i)+0.5,y-r*sin(i)+0.5);
+      glVertex2f(x+0.5+r,y+0.5);
     glEnd();
     glColor4ubv(enigma::currentcolor);
 }
 
 void draw_circle_perfect(float x,float y,float r,bool outline)
 {
+    ///TODO: This is broken. Has some random empty lines when drawn. +0.5 offset doesn't fix it
     texture_reset();
     const float r2 = r*r, r12 = r*M_SQRT1_2;
     glBegin(outline?GL_POINTS:GL_LINES);
@@ -315,17 +330,13 @@ void draw_ellipse(float x1,float y1,float x2,float y2,bool outline)
       pr=2*M_PI/enigma::circleprecision;
   if(outline)
   {
-    glBegin(GL_LINES);
-    for(float i=pr;i<M_PI;i+=pr)
+    glBegin(GL_LINE_STRIP);
+    glVertex2f(x+0.5+hr,y+0.5);
+    for(float i=pr;i<2*M_PI;i+=pr)
     {
-      float xc1 = cos(i)*hr, yc1 = sin(i)*vr;
-      i += pr;
-      float xc2=cos(i)*hr,yc2=sin(i)*vr;
-      glVertex2f(x+xc1,y+yc1);glVertex2f(x+xc2,y+yc2);
-      glVertex2f(x-xc1,y+yc1);glVertex2f(x-xc2,y+yc2);
-      glVertex2f(x+xc1,y-yc1);glVertex2f(x+xc2,y-yc2);
-      glVertex2f(x-xc1,y-yc1);glVertex2f(x-xc2,y-yc2);
+      glVertex2f(x+hr*cos(i)+0.5,y-vr*sin(i)+0.5);
     }
+    glVertex2f(x+0.5+hr,y+0.5);
   }
   else
   {
@@ -358,12 +369,12 @@ void draw_ellipse_color(float x1,float y1,float x2,float y2,int c1, int c2,bool 
         glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
         glVertex2f(x,y);
     }
-
+    //This maybe needs to be split in outline and filled, because now that 0.5 could break it (but by testing it doesn't)
     glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
     float i;
     for(i = pr; i < 2*M_PI; i += pr)
-      glVertex2f(x+hr*cos(i),y+vr*sin(i));
-    glVertex2f(x+hr*cos(i),y+vr*sin(i));
+      glVertex2f(x+hr*cos(i)+0.5,y+vr*sin(i)+0.5);
+    glVertex2f(x+hr*cos(i)+0.5,y+vr*sin(i)+0.5);
     glEnd();
 
     glColor4ubv(enigma::currentcolor);
@@ -371,20 +382,21 @@ void draw_ellipse_color(float x1,float y1,float x2,float y2,int c1, int c2,bool 
 
 void draw_ellipse_perfect(float x1,float y1,float x2,float y2,bool outline)
 {
-  texture_reset();
-  float
+    ///TODO: Doesn't work at all. Draws some kind of lip shape
+    texture_reset();
+    float
     x=(x1+x2)/2,y=(y1+y2)/2,
     hr=fabs(x2-x),vr=fabs(y2-y);
-  glBegin(outline?GL_POINTS:GL_LINES);
-  for(float xc=0;xc<hr;xc++)
-  {
+    glBegin(outline?GL_POINTS:GL_LINES);
+    for(float xc=0;xc<hr;xc++)
+    {
     float yc=vr*cos((M_PI/2)/hr*xc);
-    glVertex2f(x+xc,y+yc);
-    glVertex2f(x+xc,y-yc);
-    glVertex2f(x-xc,y+yc);
-    glVertex2f(x-xc,y-yc);
-  }
-  glEnd();
+        glVertex2f(x+xc,y+yc);
+        glVertex2f(x+xc,y-yc);
+        glVertex2f(x-xc,y+yc);
+        glVertex2f(x-xc,y-yc);
+    }
+    glEnd();
 }
 
 void draw_triangle(float x1,float y1,float x2,float y2,float x3,float y3,bool outline)
@@ -413,63 +425,64 @@ void draw_triangle_color(float x1,float y1,float x2,float y2,float x3,float y3,i
 
 void draw_roundrect(float x1,float y1,float x2,float y2,float r, bool outline)
 {
-  texture_reset();
-  if(x1>x2) {
-    float t=x2;
-    x2=x1;
-    x1=t;
-  }
-  if(y1>y2) {
-    float t=y2;
-    y2=y1;
-    y1=t;
-  }
-  if (x2-x1<r*2){r=(x2-x1)/2;}
-  if (y2-y1<r*2){r=(y2-y1)/2;}
-  if (r<0){r=0;}
-  float r2=r*r,r12=r*M_SQRT1_2,
-      bx1=x1+r,by1=y1+r,
-      bx2=x2-r,by2=y2-r;
-  glBegin(GL_LINES);
-  if(outline)
-  {
-    glVertex2f(x1,by1);glVertex2f(x1,by2);
-    glVertex2f(x2,by1);glVertex2f(x2,by2);
-    glVertex2f(bx1,y1);glVertex2f(bx2,y1);
-    glVertex2f(bx1,y2);glVertex2f(bx2,y2);
-    glEnd();
-    glBegin(GL_POINTS);
-    for(float xc=0,yc=r;xc<=r12;xc++)
-    {
-        if(xc*xc+yc*yc>r2) yc--;
-        glVertex2f(bx2+xc,by2+yc);
-        glVertex2f(bx2+xc,by1-yc);
-        glVertex2f(bx1-xc,by2+yc);
-        glVertex2f(bx1-xc,by1-yc);
-        glVertex2f(bx2+yc,by2+xc);
-        glVertex2f(bx2+yc,by1-xc);
-        glVertex2f(bx1-yc,by2+xc);
-        glVertex2f(bx1-yc,by1-xc);
+    ///TODO: Draws buggy when outline=false and the size is changed (an empty line sometimes appears)
+    texture_reset();
+    if(x1>x2) {
+        float t=x2;
+        x2=x1;
+        x1=t;
     }
-    glEnd();
-  }
-  else
-  {
-    for(float xc=0,yc=r;xc<=r12;xc++)
-    {
-      if(xc*xc+yc*yc>r2) yc--;
-      glVertex2f(bx2+xc,by2+yc);
-      glVertex2f(bx2+xc,by1-yc);
-      glVertex2f(bx1-xc,by2+yc);
-      glVertex2f(bx1-xc,by1-yc);
-      glVertex2f(bx2+yc,by2+xc);
-      glVertex2f(bx2+yc,by1-xc);
-      glVertex2f(bx1-yc,by2+xc);
-      glVertex2f(bx1-yc,by1-xc);
+    if(y1>y2) {
+        float t=y2;
+        y2=y1;
+        y1=t;
     }
-    glEnd();
-    glRectf(bx1,y1,bx2,y2);
-  }
+    if (x2-x1<r*2){r=(x2-x1)/2;}
+    if (y2-y1<r*2){r=(y2-y1)/2;}
+    if (r<0){r=0;}
+    float r2=r*r,r12=r*M_SQRT1_2,
+        bx1=x1+r,by1=y1+r,
+        bx2=x2-r,by2=y2-r;
+    glBegin(GL_LINES);
+    if(outline)
+    {
+        glVertex2f(x1,by1);glVertex2f(x1,by2);
+        glVertex2f(x2,by1);glVertex2f(x2,by2);
+        glVertex2f(bx1,y1);glVertex2f(bx2,y1);
+        glVertex2f(bx1,y2);glVertex2f(bx2,y2);
+        glEnd();
+        glBegin(GL_POINTS);
+        for(float xc=0,yc=r;xc<=r12;xc++)
+        {
+            if(xc*xc+yc*yc>r2) yc--;
+            glVertex2f(bx2+xc,by2+yc);
+            glVertex2f(bx2+xc,by1-yc);
+            glVertex2f(bx1-xc,by2+yc);
+            glVertex2f(bx1-xc,by1-yc);
+            glVertex2f(bx2+yc,by2+xc);
+            glVertex2f(bx2+yc,by1-xc);
+            glVertex2f(bx1-yc,by2+xc);
+            glVertex2f(bx1-yc,by1-xc);
+        }
+        glEnd();
+    }
+    else
+    {
+        for(float xc=0,yc=r;xc<=r12;xc++)
+        {
+            if(xc*xc+yc*yc>r2) yc--;
+            glVertex2f(bx2+xc,by2+yc);
+            glVertex2f(bx2+xc,by1-yc);
+            glVertex2f(bx1-xc,by2+yc);
+            glVertex2f(bx1-xc,by1-yc);
+            glVertex2f(bx2+yc,by2+xc);
+            glVertex2f(bx2+yc,by1-xc);
+            glVertex2f(bx1-yc,by2+xc);
+            glVertex2f(bx1-yc,by1-xc);
+        }
+        glEnd();
+        glRectf(bx1,y1,bx2,y2);
+    }
 }
 
 void draw_roundrect_color(float x1, float y1, float x2, float y2, float r, int col1, int col2, bool outline)
