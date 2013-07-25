@@ -254,7 +254,7 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
 namespace enigma_user
 {
 
-void draw_text(int x,int y,variant str);
+void draw_text(float x,float y,variant str);
 int merge_color(int c1,int c2,double amount);
 int draw_primitive_begin(int kind);
 int draw_vertex(double x, double y);

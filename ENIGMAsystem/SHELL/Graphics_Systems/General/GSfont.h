@@ -31,17 +31,17 @@ void draw_set_valign(unsigned align);
 unsigned draw_get_valign();
 void draw_set_font(int fnt);
 int draw_get_font();
-void draw_text(int x,int y,variant str);
-void draw_text_color(int x,int y,variant str,int c1,int c2,int c3,int c4,double a);
+void draw_text(float x,float y,variant str);
+void draw_text_color(float x,float y,variant str,int c1,int c2,int c3,int c4,double a);
 
-void draw_text_ext(int x,int y,variant str, int sep, int w);
-void draw_text_ext_color(int x,int y,variant str, int sep,int w,int c1,int c2,int c3,int c4,double a);
+void draw_text_ext(float x,float y,variant str, float sep, float w);
+void draw_text_ext_color(float x,float y,variant str, float sep, float w,int c1,int c2,int c3,int c4,double a);
 
-void draw_text_transformed(double x,double y,variant str,double xscale,double yscale,double rot);
-void draw_text_transformed_color(double x,double y,variant str,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
+void draw_text_transformed(float x,float y,variant str,float xscale,float yscale,double rot);
+void draw_text_transformed_color(float x,float y,variant str,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a);
 
-void draw_text_ext_transformed(double x,double y,variant str,int sep,int w, double xscale,double yscale,double rot);
-void draw_text_ext_transformed_color(double x,double y,variant str,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a);
+void draw_text_ext_transformed(float x,float y,variant str,float sep, float w, float xscale,float yscale,double rot);
+void draw_text_ext_transformed_color(float x,float y,variant str,float sep, float w,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a);
 
 unsigned int font_get_texture(int fnt);
 unsigned int font_get_texture_width(int fnt);
@@ -50,12 +50,12 @@ unsigned int font_get_texture_height(int fnt);
 unsigned int string_width(variant str);
 unsigned int string_height(variant str);
 
-unsigned int string_width_ext(variant str, int sep, int w);
-unsigned int string_height_ext(variant str, int sep, int w);
+unsigned int string_width_ext(variant str, float sep, float w);
+unsigned int string_height_ext(variant str, float sep, float w);
 
 unsigned int string_width_line(variant str, int line);
-unsigned int string_width_ext_line(variant str, int w, int line);
-unsigned int string_width_ext_line_count(variant str, int w);
+unsigned int string_width_ext_line(variant str, float w, int line);
+unsigned int string_width_ext_line_count(variant str, float w);
 
 }
 

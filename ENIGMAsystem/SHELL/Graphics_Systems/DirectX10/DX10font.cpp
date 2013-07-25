@@ -125,12 +125,12 @@ unsigned int string_width_line(variant vstr, int line)
   return len;
 }
 
-unsigned int string_width_ext_line(variant vstr, int w, int line)
+unsigned int string_width_ext_line(variant vstr, float w, int line)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  unsigned int width = 0, tw = 0; int cl = 0;
+  unsigned float width = 0, tw = 0; int cl = 0;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r')
@@ -153,12 +153,12 @@ unsigned int string_width_ext_line(variant vstr, int w, int line)
   return width;
 }
 
-unsigned int string_width_ext_line_count(variant vstr, int w)
+unsigned int string_width_ext_line_count(variant vstr, float w)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  unsigned int width = 0, tw = 0, cl = 1;
+  unsigned float width = 0, tw = 0, cl = 1;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r')
@@ -204,19 +204,19 @@ unsigned int string_height(variant vstr)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
-  int hgt = fnt->height;
+  float hgt = fnt->height;
   for (unsigned i = 0; i < str.length(); i++)
     if (str[i] == '\r' or str[i] == '\n')
       hgt += fnt->height;
   return hgt;
 }
 
-unsigned int string_width_ext(variant vstr, int sep, int w) //here sep doesn't do anything, but I can't make it 'default = ""', because its the second argument
+unsigned int string_width_ext(variant vstr, float sep, float w) //here sep doesn't do anything, but I can't make it 'default = ""', because its the second argument
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  unsigned int width = 0, maxwidth = 0;
+  unsigned float width = 0, maxwidth = 0;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == ' '){
@@ -232,12 +232,12 @@ unsigned int string_width_ext(variant vstr, int sep, int w) //here sep doesn't d
   return maxwidth;
 }
 
-unsigned int string_height_ext(variant vstr, int sep, int w)
+unsigned int string_height_ext(variant vstr, float sep, float w)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  unsigned int width = 0, tw = 0, height = fnt->height;
+  unsigned float width = 0, tw = 0, height = fnt->height;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r' or str[i] == '\n')
@@ -270,42 +270,42 @@ unsigned int string_height_ext(variant vstr, int sep, int w)
 namespace enigma_user
 {
 
-void draw_text(int x,int y,variant vstr)
+void draw_text(float x,float y,variant vstr)
 {
 
 }
 
-void draw_text_ext(int x,int y,variant vstr, int sep, int w)
+void draw_text_ext(float x,float y,variant vstr, float sep, float w)
 {
 
 }
 
-void draw_text_transformed(double x,double y,variant vstr,double xscale,double yscale,double rot)
+void draw_text_transformed(float x,float y,variant vstr,float xscale,float yscale,double rot)
 {
 
 }
 
-void draw_text_ext_transformed(double x,double y,variant vstr,int sep, int w, double xscale,double yscale,double rot)
+void draw_text_ext_transformed(float x,float y,variant vstr,float sep, float w, float xscale,float yscale,double rot)
 {
 
 }
 
-void draw_text_transformed_color(double x,double y,variant vstr,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
+void draw_text_transformed_color(float x,float y,variant vstr,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a)
 {
 
 }
 
-void draw_text_ext_transformed_color(double x,double y,variant vstr,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
+void draw_text_ext_transformed_color(float x,float y,variant vstr,int sep,int w,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a)
 {
 
 }
 
-void draw_text_color(int x,int y,variant vstr,int c1,int c2,int c3,int c4,double a)
+void draw_text_color(float x,float y,variant vstr,int c1,int c2,int c3,int c4,double a)
 {
 
 }
 
-void draw_text_ext_color(int x,int y,variant vstr,int sep, int w, int c1,int c2,int c3,int c4,double a)
+void draw_text_ext_color(float x,float y,variant vstr,float sep, float w, int c1,int c2,int c3,int c4,double a)
 {
 
 }
