@@ -18,7 +18,7 @@
 #include <math.h>
 #include <string>
 #include "OpenGLHeaders.h"
-#include "GLEScolors.h"
+#include "../General/GScolors.h"
 
 using namespace std;
 #include "Universal_System/fontstruct.h"
@@ -34,14 +34,14 @@ namespace enigma {
 
 using namespace enigma;
 
-void draw_text(int x,int y,string str)
+void draw_text(float x,float y,string str)
 {
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
     glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
 
-  int xx = x, yy = y+fnt->height;
+  float xx = x, yy = y+fnt->height;
  /* glBegin(GL_QUADS);
   for (unsigned i = 0; i < str.length(); i++)
   {
@@ -88,11 +88,11 @@ unsigned int string_width_line(string str, int line)
   return len;
 }
 
-unsigned int string_width_ext_line(string str, int w, int line)
+unsigned int string_width_ext_line(string str, float w, int line)
 {
   font *fnt = fontstructarray[currentfont];
 
-  unsigned int width = 0, tw = 0, cl = 0;
+  unsigned float width = 0, tw = 0, cl = 0;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r' or str[i] == '\n')
@@ -113,11 +113,11 @@ unsigned int string_width_ext_line(string str, int w, int line)
   return width;
 }
 
-unsigned int string_width_ext_line_count(string str, int w)
+unsigned int string_width_ext_line_count(string str, float w)
 {
   font *fnt = fontstructarray[currentfont];
 
-  unsigned int width = 0, tw = 0, cl = 1;
+  unsigned float width = 0, tw = 0, cl = 1;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r' or str[i] == '\n')
@@ -139,14 +139,14 @@ unsigned int string_width_ext_line_count(string str, int w)
 }
 ///////////////////////////////////////////////////////
 //The following is certainly not pretty, but this is the best way I thought of to replicate GM's function
-void draw_text_ext(int x,int y,string str, int sep, int w)
+void draw_text_ext(float x,float y,string str, float sep, float w)
 {
   font *fnt = fontstructarray[currentfont];
 
   if (bound_texture != fnt->texture)
     glBindTexture(GL_TEXTURE_2D, bound_texture = fnt->texture);
 
-  int xx = x, yy = y+fnt->height, width = 0, tw = 0;
+  float xx = x, yy = y+fnt->height, width = 0, tw = 0;
  /* glBegin(GL_QUADS);
   for (unsigned i = 0; i < str.length(); i++)
   {
@@ -184,7 +184,7 @@ void draw_text_ext(int x,int y,string str, int sep, int w)
   glEnd(); */
 }
 
-void draw_text_transformed(double x,double y,string str,double xscale,double yscale,double rot)
+void draw_text_transformed(float x,float y,string str,float xscale,float yscale,double rot)
 {
   if (currentfont == -1)
     return;
@@ -238,7 +238,7 @@ void draw_text_transformed(double x,double y,string str,double xscale,double ysc
   glEnd(); */
 }
 
-void draw_text_ext_transformed(double x,double y,string str,int sep, int w, double xscale,double yscale,double rot)
+void draw_text_ext_transformed(float x,float y,string str,float sep, float w, float xscale,float yscale,double rot)
 {
   if (currentfont == -1)
     return;
@@ -307,7 +307,7 @@ void draw_text_ext_transformed(double x,double y,string str,int sep, int w, doub
   glEnd();*/
 }
 
-void draw_text_transformed_color(double x,double y,string str,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
+void draw_text_transformed_color(float x,float y,string str,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a)
 {
   if (currentfont == -1)
     return;
@@ -373,7 +373,7 @@ void draw_text_transformed_color(double x,double y,string str,double xscale,doub
   glPopAttrib();*/
 }
 
-void draw_text_ext_transformed_color(double x,double y,string str,int sep,int w,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a)
+void draw_text_ext_transformed_color(float x,float y,string str,int sep,int w,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a)
 {
   if (currentfont == -1)
     return;
@@ -450,7 +450,7 @@ void draw_text_ext_transformed_color(double x,double y,string str,int sep,int w,
   glPopAttrib();*/
 }
 
-void draw_text_color(int x,int y,string str,int c1,int c2,int c3,int c4,double a)
+void draw_text_color(float x,float y,string str,int c1,int c2,int c3,int c4,double a)
 {
   font *fnt = fontstructarray[currentfont];
 
@@ -504,7 +504,7 @@ void draw_text_color(int x,int y,string str,int c1,int c2,int c3,int c4,double a
   glPopAttrib(); */
 }
 
-void draw_text_ext_color(int x,int y,string str,int sep, int w, int c1,int c2,int c3,int c4,double a)
+void draw_text_ext_color(float x,float y,string str,float sep, float w, int c1,int c2,int c3,int c4,double a)
 {
   font *fnt = fontstructarray[currentfont];
 
@@ -602,7 +602,7 @@ unsigned int string_width(string str)
 unsigned int string_height(string str)
 {
   const font *const fnt = fontstructarray[currentfont];
-  int hgt = fnt->height;
+  float hgt = fnt->height;
   for (unsigned i = 0; i < str.length(); i++)
     if (str[i] == '\r' or str[i] == '\n')
       hgt += fnt->height;
@@ -615,11 +615,11 @@ unsigned int string_height(string str = "") //this is funny argument. Even in GM
   return fnt->height;
 }*/
 
-unsigned int string_width_ext(string str, int sep, int w) //here sep doesn't do anything, but I can't make it 'default = ""', because its the second argument
+unsigned int string_width_ext(string str, float sep, float w) //here sep doesn't do anything, but I can't make it 'default = ""', because its the second argument
 {
   font *fnt = fontstructarray[currentfont];
 
-  unsigned int width = 0, maxwidth = 0;
+  unsigned float width = 0, maxwidth = 0;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == ' '){
@@ -635,11 +635,11 @@ unsigned int string_width_ext(string str, int sep, int w) //here sep doesn't do 
   return maxwidth;
 }
 
-unsigned int string_height_ext(string str, int sep, int w)
+unsigned int string_height_ext(string str, float sep, float w)
 {
   font *fnt = fontstructarray[currentfont];
 
-  unsigned int width = 0, tw = 0, height = fnt->height;
+  unsigned float width = 0, tw = 0, height = fnt->height;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r' or str[i] == '\n')

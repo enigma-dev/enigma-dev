@@ -1,7 +1,7 @@
 #include "OPENGLStd.h"
-#include "GLESsprite.h"
-#include "GLESbackground.h"
+#include "../General/GSsprite.h"
+#include "../General/GSbackground.h"
 
-#include "GLESfont.h"
-#include "GLEScurves.h"
+#include "../General/GSfont.h"
+#include "../General/GScurves.h"
 #include "../General/actions.h"

@@ -21,7 +21,7 @@ int screen_redraw(int dontswap)
 
 #include <string>
 #include "OpenGLHeaders.h"
-#include "GLESbackground.h"
+#include "../General/GSbackground.h"
 
 using namespace std;
 
