@@ -108,4 +108,9 @@ def write_xml_version(report, target_name):
     for testgroup in report.testgroups:
         root.extend(_xml_create_testsuites(testgroup))
 
+    try:
+        import os.path
+        os.makedirs(os.path.dirname(target_name))
+    except OSError:
+        pass
     ET.ElementTree(root).write(target_name)

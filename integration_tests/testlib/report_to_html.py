@@ -226,8 +226,13 @@ def write_html_version(report, target_name):
         os.remove(target_name)
     except OSError:
         pass
+    try:
+        import os.path
+        os.makedirs(os.path.dirname(target_name))
+    except OSError:
+        pass
 
-    with open(target_name, "wb") as f:  
+    with open(target_name, "wb") as f:
         f.write("<!DOCTYPE html>".encode())
         ET.ElementTree(root).write(
             f,

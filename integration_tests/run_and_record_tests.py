@@ -58,8 +58,8 @@ def run_and_record_tests(grouptest=None):
             pass
 
     import os.path
-    html_output_name = os.path.abspath("output/testreport.html")
-    xml_output_name = os.path.abspath("output/testreport_jenkins.xml")
+    html_output_name = os.path.abspath(path_base + "/output/testreport.html")
+    xml_output_name = os.path.abspath(path_base + "/output/testreport_jenkins.xml")
 
     report = testlib.parse_test_report.read_test_report(path_base + "/tests/inttestreport.txt")
     testlib.report_to_html.write_html_version(report, html_output_name)
