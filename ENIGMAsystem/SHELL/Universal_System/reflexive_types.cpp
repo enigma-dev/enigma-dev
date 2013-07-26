@@ -21,7 +21,9 @@
 #include "var4.h"
 #include "reflexive_types.h"
 //#include <floatcomp.h>
-inline bool varnz(double x) { return fabs(x) <= var_e; }
+
+// Variable not zero.
+inline bool varnz(double x) { return fabs(x) > var_e; }
 
 namespace enigma {
   //Make direction work
