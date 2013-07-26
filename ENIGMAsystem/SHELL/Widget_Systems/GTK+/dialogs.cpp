@@ -92,14 +92,14 @@ inline void parse_filter_string(GtkFileChooser *dialog, const string &filter)
   }
 }
 
-string get_open_filename(string filter, string fname)
+///TODO: Empty caption should probably not be default "Open File" or similar. It should just be empty, as now it is impossible to set empty caption because of this behavior
+string get_open_filename(string filter, string fname, string caption)
 {
-
   string ret;
   gdk_threads_enter();
 
     GtkWidget *dialog;
-    dialog = gtk_file_chooser_dialog_new ("Open File", NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
+    dialog = gtk_file_chooser_dialog_new (caption==""?"Open File":caption, NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
              GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
     parse_filter_string(GTK_FILE_CHOOSER(dialog), filter);
@@ -119,14 +119,14 @@ string get_open_filename(string filter, string fname)
   return ret;
 }
 
-string get_save_filename(string filter, string fname)
+string get_save_filename(string filter, string fname, string caption)
 {
 
   string ret;
   gdk_threads_enter();
 
     GtkWidget *dialog;
-    dialog = gtk_file_chooser_dialog_new ("Save File", NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
+    dialog = gtk_file_chooser_dialog_new (caption==""?"Save File":caption, NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
              GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
     parse_filter_string(GTK_FILE_CHOOSER(dialog), filter);

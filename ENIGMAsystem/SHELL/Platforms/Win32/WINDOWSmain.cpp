@@ -29,7 +29,9 @@
 #include <sstream>
 #include <algorithm>
 #include <unistd.h>
+#include <vector>
 using std::string;
+using std::vector;
 
 #include "WINDOWScallback.h"
 #include "Universal_System/var4.h"
@@ -59,7 +61,7 @@ namespace enigma //TODO: Find where this belongs
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
 
-  char** main_argv;
+  vector<string> main_argv;
   int main_argc;
 
   void EnableDrawing (HGLRC *hRC);
@@ -177,8 +179,18 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     if (!wid || !hgt) wid = 640, hgt = 480;
     enigma::hInstance = hInstance;
-    //enigma::main_argc = argc;
-    //enigma::main_argv = argv;
+
+    LPWSTR *argv;
+    if ((argv = CommandLineToArgvW(GetCommandLineW(), &enigma::main_argc)))
+    {
+        for (int i = 0; i < enigma::main_argc; i++){
+            char buffer[256];
+            snprintf( buffer, 256, "%ls", argv[i]); //Maybe we should check and show some warning if the argument was longer than 256
+            string param = buffer;
+            enigma::main_argv.push_back(param);
+        }
+        LocalFree(argv);
+    }
 
     //Create the window
         WNDCLASS wcontainer,wmain;

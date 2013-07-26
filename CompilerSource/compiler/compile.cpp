@@ -171,10 +171,10 @@ enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
-  current_language->compile(es, exe_filename, mode);
+  return current_language->compile(es, exe_filename, mode);
 }
 
-double lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
+int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
   cout << "Initializing dialog boxes" << endl;
     ide_dia_clear();

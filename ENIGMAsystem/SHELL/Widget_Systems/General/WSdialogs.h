@@ -29,8 +29,8 @@
 using std::string;
 
 int get_color(int defcol);
-string get_open_filename(string filter, string fname);
-string get_save_filename(string filter, string fname);
+string get_open_filename(string filter, string fname, string caption="");
+string get_save_filename(string filter, string fname, string caption="");
 string get_directory_alt(string capt, string root);
 string get_directory(string dname);
 

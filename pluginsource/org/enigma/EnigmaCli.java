@@ -12,6 +12,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.enigma.TargetHandler.TargetSelection;
 import org.enigma.backend.EnigmaCallbacks;
@@ -42,8 +47,11 @@ public final class EnigmaCli
 	{
 	public static final String prog = "enigma"; //$NON-NLS-1$
 	public static EnigmaDriver DRIVER;
-
-	public static boolean syntax = false;
+	
+	private static final String targetsDelimiter = ";";
+	private static final String targetsItemDelimiter = ":";
+	private static final String targetsStart = "-targets=";
+	private static final String outputStart = "-output=";
 
 	private EnigmaCli()
 		{
@@ -54,27 +62,216 @@ public final class EnigmaCli
 		System.err.println(prog + ": " + err); //$NON-NLS-1$
 		System.exit(-1);
 		}
+	
+	private static enum ArgumentType {
+		HELP, SYNTAX, TARGETS, INPUTFILE, OUTPUTNAME, UNKNOWN
+	}
+	
+	private static class ArgumentTypeAndValue {
+		public final ArgumentType argType;
+		public final String value;
+		
+		public ArgumentTypeAndValue(ArgumentType _argType, String _value) {
+			argType = _argType;
+			value = _value;
+		}
+	}
+	
+	private static List<ArgumentTypeAndValue> parseCommandLineArguments(String[] args) {
+		
+		List<ArgumentTypeAndValue> result = new ArrayList<ArgumentTypeAndValue>();
+		
+		for (String str : args) {
+			ArgumentType argType;
+			String value = str;
+			if (str.equals("-h") || str.equals("--help") || str.equals("-?")) {
+				argType = ArgumentType.HELP;
+				value = "";
+			}
+			else if (str.equals("-s") || str.equals("--syntax")) {
+				argType = ArgumentType.SYNTAX;
+				value = "";
+			}
+			else if (str.startsWith(targetsStart)) {
+				argType = ArgumentType.TARGETS;
+				value = str.substring(targetsStart.length());
+			}
+			else if (str.startsWith(outputStart)) {
+				argType = ArgumentType.OUTPUTNAME;
+				value = str.substring(outputStart.length());
+			}
+			else if (!str.startsWith("-")) {
+				argType = ArgumentType.INPUTFILE;
+				value = str;
+			}
+			else {
+				argType = ArgumentType.UNKNOWN;
+				value = str;
+			}
+			result.add(new ArgumentTypeAndValue(argType, value));
+		}
+		
+		return result;
+	}
+	
+	private static boolean containsArgumentType(List<ArgumentTypeAndValue> parsedArguments, ArgumentType argType) {
+		for (ArgumentTypeAndValue argTypeAndValue : parsedArguments) {
+			if (argTypeAndValue.argType == argType) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static List<String> getValues(List<ArgumentTypeAndValue> parsedArguments, ArgumentType argType) {
+		List<String> results = new ArrayList<String>();
+		for (ArgumentTypeAndValue argTypeAndValue : parsedArguments) {
+			if (argTypeAndValue.argType == argType) {
+				results.add(argTypeAndValue.value);
+			}
+		}
+		return results;
+	}
+	
+	private static class TargetsOrError {
+		public final Map<String, TargetSelection> targetToValue;
+		public final String error; // If empty, no error. Else, error.
+		
+		public TargetsOrError(Map<String, TargetSelection> _targetToValue, String _error) {
+			targetToValue = _targetToValue;
+			error = _error;
+		}
+	}
+
+	private static TargetsOrError parseTargets(String targetsString) {
+		
+		final Map<String, TargetSelection> result = new HashMap<String, TargetSelection>();
+		
+		final String[] targets = targetsString.split(targetsDelimiter);
+		
+		for (String target : targets) {
+			final String[] keyValue = target.split(targetsItemDelimiter);
+			if (keyValue.length != 2) { // Ignore ill-formed key-value pairs.
+				return new TargetsOrError(result, "Ill-formed key-value pair: " + Arrays.toString(keyValue));
+			}
+			final String key = keyValue[0];
+			final String valueString = keyValue[1];
+			if (!TargetHandler.targets.containsKey(key)) {
+				return new TargetsOrError(result, "API type not found: " + key);
+			}
+			final List<TargetSelection> targetSelections = TargetHandler.targets.get(key);
+			boolean found = false;
+			for (TargetSelection targetSelection : targetSelections) {
+				if (targetSelection.id.equals(valueString)) {
+					found = true;
+					result.put(key, targetSelection);
+					break;
+				}
+			}
+			if (!found) {
+				return new TargetsOrError(result, "API target not found. API type, target: " + key + ", " + valueString);
+			}
+		}
+		
+		return new TargetsOrError(result, "");
+	}
 
 	public static void main(String[] args)
 		{
-		if (args.length != 1) error("no input file");
+		final String helpString =
+			"Name:\n" +
+			"  enigma.jar\n" +
+			"Synopsis:\n" +
+			"  java -jar plugins/enigma.jar PATH_TO_GAME [OPTIONS] [" + targetsStart + "API1" + targetsItemDelimiter +
+				"TARGET1[" + targetsDelimiter + "API2" + targetsItemDelimiter + "TARGET2]...]\n" +
+			"Description:\n" +
+			"  Takes a path to a game source as input, and either compiles it or does\n" +
+			"  syntax check on it. Default is compilation. Different API targets than\n" +
+			"  in the game source can be passed as parameters.\n" +
+			"  \n" +
+			"  Note that passing in incompatible API targets may cause undefined\n" +
+			"  behaviour.\n" +
+			"Options:\n" +
+			"  -h, --help, -?\n" +
+			"    Shows this help text.\n" +
+			"  -s, --syntax\n" +
+			"    Performs syntax check instead of compilation.\n" +
+			"  " + outputStart + "\n" +
+			"    Sets the absolute path and name of the output executable when\n" +
+			"    compiling. Default is the path and name of the game source file\n" +
+			"    without its extension.\n"
+			;
+		
+		if (args.length < 1) {
+			System.out.println(helpString);
+			error("No arguments.");
+		}
+		
+		final List<ArgumentTypeAndValue> parsedArguments = parseCommandLineArguments(args);
+		
+		if (containsArgumentType(parsedArguments, ArgumentType.HELP)) {
+			System.out.println(helpString);
+			System.exit(0);
+		}
+		if (containsArgumentType(parsedArguments, ArgumentType.UNKNOWN)) {
+			System.out.println(helpString);
+			error("Unrecognized argument: " + getValues(parsedArguments, ArgumentType.UNKNOWN).get(0));
+		}
 
-		if (args[0].equals("-?") || args[0].equals("--help"))
-			{
-			System.out.println("Fuck you too");
-			System.exit(-1);
+		String inputFile;
+		{
+			final List<String> inputFiles = getValues(parsedArguments, ArgumentType.INPUTFILE);
+			if (inputFiles.size() != 1) {
+				StringBuilder inputFilesString = new StringBuilder("");
+				for (String str : inputFiles) {
+					inputFilesString.append(str);
+					inputFilesString.append("   ");
+				}
+				error("Wrong number of input files. Number: " + inputFiles.size() + ", input files: " + inputFilesString.toString());
 			}
-
-		if (args[0].equals("-s") || args[0].equals("--syntax")) syntax = true;
+			inputFile = inputFiles.get(0);
+		}
+		
+		final boolean syntax = containsArgumentType(parsedArguments, ArgumentType.SYNTAX);
+		final boolean hasTargets = containsArgumentType(parsedArguments, ArgumentType.TARGETS);
+		TargetsOrError parsedTargets;
+		{
+			final List<String> targetsValues = getValues(parsedArguments, ArgumentType.TARGETS);
+			StringBuilder targetsStringBuilder = new StringBuilder();
+			for (String targetsValue : targetsValues) {
+				targetsStringBuilder.append(targetsValue);
+				targetsStringBuilder.append(targetsDelimiter);
+			}
+			String targetsString = targetsStringBuilder.toString();
+			parsedTargets = parseTargets(targetsString);
+			
+			if (hasTargets && !parsedTargets.error.equals("")) {
+				error(parsedTargets.error);
+			}
+		}
+		
 		String outname = null;
-
+		{
+			List<String> outputNames = getValues(parsedArguments, ArgumentType.OUTPUTNAME);
+			if (outputNames.size() == 0) {
+				outname = null;
+			}
+			else if (outputNames.size() == 1) {
+				outname = outputNames.get(0);
+			}
+			else {
+				error("Output name indicated multiple times.");
+			}
+		}
+		
+		int compilation_status = 0;
 		try
 			{
-			initailize(args[0],null);
+			initailize(inputFile,null);
 			if (syntax)
-				syntaxChecker(LGM.currentFile,LGM.root);
+				syntaxChecker(LGM.currentFile,LGM.root,parsedTargets.targetToValue);
 			else
-				compile(LGM.currentFile,LGM.root,outname);
+				compilation_status = compile(LGM.currentFile,LGM.root,outname,parsedTargets.targetToValue);
 			}
 		catch (IOException e)
 			{
@@ -86,8 +283,16 @@ public final class EnigmaCli
 			}
 
 		System.out.println("CLI Done.");
-		System.exit(0); //FIXME: Find out why it doesn't terminate normally
+		System.exit(compilation_status); //FIXME: Find out why it doesn't terminate normally
 		}
+	
+	private static void transformEnigmaSettings(EnigmaSettings enigmaSettings, Map<String, TargetSelection> newTargets) {
+		if (newTargets != null) {
+			for (Map.Entry<String, TargetSelection> target : newTargets.entrySet()) {
+				enigmaSettings.targets.put(target.getKey(), target.getValue());
+			}
+		}
+	}
 
 	private static void addResourceHook()
 		{
@@ -133,20 +338,29 @@ public final class EnigmaCli
 			}
 		return DRIVER.libInit(new EnigmaCallbacks(new CliOutputHandler())); //returns String on toolchain failure
 		}
+	
+	public static void syntaxChecker(GmFile f, ResNode root) {
+		syntaxChecker(f, root, null);
+	}
 
-	public static void syntaxChecker(GmFile f, ResNode root)
+	private static void syntaxChecker(GmFile f, ResNode root, Map<String, TargetSelection> newTargets)
 		{
-		SyntaxError se = syntaxCheck(f,root);
+		SyntaxError se = syntaxCheck(f,root,newTargets);
 		if (se == null || se.absoluteIndex == -1)
 			System.out.println("No syntax errors found.");
 		else
 			error(se.line + ":" + se.position + "::" + se.errorString);
 		}
+	
+	public static SyntaxError syntaxCheck(GmFile f, ResNode root) {
+		return syntaxCheck(f, root, null);
+	}
 
-	public static SyntaxError syntaxCheck(GmFile f, ResNode root)
+	private static SyntaxError syntaxCheck(GmFile f, ResNode root, Map<String, TargetSelection> newTargets)
 		{
 		ResourceHolder<EnigmaSettings> rh = f.resMap.get(EnigmaSettings.class);
 		EnigmaSettings ess = rh == null ? new EnigmaSettings() : rh.getResource();
+		transformEnigmaSettings(ess, newTargets);
 		SyntaxError err = ess.commitToDriver(DRIVER); //returns SyntaxError
 		if (err.absoluteIndex != -1) return err;
 
@@ -162,12 +376,17 @@ public final class EnigmaCli
 
 		return null;
 		}
+	
+	public static int compile(GmFile f, ResNode root, String outname) {
+		return compile(f, root, null);
+	}
 
-	public static void compile(GmFile f, ResNode root, String outname) throws FileNotFoundException,
+	private static int compile(GmFile f, ResNode root, String outname, Map<String, TargetSelection> newTargets) throws FileNotFoundException,
 			GmFormatException
 		{
 		ResourceHolder<EnigmaSettings> rh = f.resMap.get(EnigmaSettings.class);
 		EnigmaSettings ess = rh == null ? new EnigmaSettings() : rh.getResource();
+		transformEnigmaSettings(ess, newTargets);
 		ess.commitToDriver(DRIVER); //returns SyntaxError
 
 		//Generate arguments for compile
@@ -190,7 +409,7 @@ public final class EnigmaCli
 			outname = new File(compiler.outputexe).getAbsolutePath();
 
 		System.out.println("Plugin: Delegating to ENIGMA (out of my hands now)");
-		DRIVER.compileEGMf(es,outname,mode);
+		return DRIVER.compileEGMf(es,outname,mode);
 		}
 
 	private static UnsatisfiedLinkError attemptLib()

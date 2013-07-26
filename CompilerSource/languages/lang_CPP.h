@@ -62,7 +62,7 @@ struct lang_CPP: language_adapter {
   void load_extension_locals();
   
   virtual syntax_error* definitionsModified(const char*, const char*);
-  virtual double compile(EnigmaStruct *es, const char* exe_filename, int mode);
+  virtual int compile(EnigmaStruct *es, const char* exe_filename, int mode);
   
   bool global_exists(string name);
   jdi::definition* find_typename(string name);
