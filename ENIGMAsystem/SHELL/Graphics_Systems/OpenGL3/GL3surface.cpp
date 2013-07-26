@@ -20,6 +20,7 @@ using namespace std;
 #include <cstddef>
 #include <iostream>
 #include <math.h>
+#include <string.h>
 
 #include "../General/GLbinding.h"
 #include <stdio.h> //for file writing (surface_save)
@@ -32,7 +33,7 @@ using namespace std;
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 namespace enigma_user {
-extern int room_width, room_height/*, sprite_idmax*/;
+  extern int room_width, room_height/*, sprite_idmax*/;
 }
 #include "../General/GSsurface.h"
 
@@ -41,13 +42,13 @@ extern int room_width, room_height/*, sprite_idmax*/;
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_surface(surf,id)\
-    if (id < 0 or id >= enigma::surface_max or !enigma::surface_array[id]) {\
+    if (size_t(id) >= enigma::surface_max or !enigma::surface_array[id]) {\
       show_error("Attempting to use non-existing surface " + toString(id), false);\
       return;\
     }\
     enigma::surface* surf = enigma::surface_array[id];
   #define get_surfacev(surf,id,r)\
-    if (id < 0 or size_t(id) >= enigma::surface_max or !enigma::surface_array[id]) {\
+    if (size_t(id) >= enigma::surface_max or !enigma::surface_array[id]) {\
       show_error("Attempting to use non-existing surface " + toString(id), false);\
       return r;\
     }\
@@ -62,7 +63,7 @@ extern int room_width, room_height/*, sprite_idmax*/;
 namespace enigma
 {
   surface **surface_array;
-  int surface_max=0;
+  size_t surface_max=0;
 }
 
 namespace enigma_user
@@ -75,65 +76,66 @@ bool surface_is_supported()
 
 int surface_create(int width, int height)
 {
-    if (GLEW_EXT_framebuffer_object)
-    {
-      GLuint tex, fbo;
-      int prevFbo;
-
-      int id,
-        w=(int)width,
-        h=(int)height; //get the integer width and height, and prepare to search for an id
-
-      if (enigma::surface_max==0) {
-        enigma::surface_array=new enigma::surface*[1];
-        enigma::surface_max=1;
-      }
-
-      for (id=0; enigma::surface_array[id]!=NULL; id++)
-      {
-        if (id+1>=enigma::surface_max)
-        {
-          enigma::surface **oldarray=enigma::surface_array;
-          enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
-
-          for (int i=0; i<enigma::surface_max; i++)
-            enigma::surface_array[i]=oldarray[i];
-
-          enigma::surface_array[enigma::surface_max]=NULL;
-          enigma::surface_max++;
-          delete[] oldarray;
-        }
-      }
-
-      enigma::surface_array[id] = new enigma::surface;
-      enigma::surface_array[id]->width = w;
-      enigma::surface_array[id]->height = h;
-
-      glGenTextures(1, &tex);
-      glGenFramebuffers(1, &fbo);
-
-      glPushAttrib(GL_TEXTURE_BIT);
-      glBindTexture(GL_TEXTURE_2D, tex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-      glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-      glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex, 0);
-      glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-      glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-        glClearColor(1,1,1,0);
-      glClear(GL_COLOR_BUFFER_BIT);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-      glPopAttrib();
-
-      enigma::surface_array[id]->tex = tex;
-      enigma::surface_array[id]->fbo = fbo;
-
-      return id;
-    }
+  if (!GLEW_EXT_framebuffer_object)
+  {
     return -1;
+  }
+    
+  GLuint tex, fbo;
+  int prevFbo;
+
+  size_t id,
+  w = (int)width,
+  h = (int)height; //get the integer width and height, and prepare to search for an id
+
+  if (enigma::surface_max==0) {
+    enigma::surface_array=new enigma::surface*[1];
+    enigma::surface_max=1;
+  }
+
+  for (id=0; enigma::surface_array[id]!=NULL; id++)
+  {
+    if (id+1 >= enigma::surface_max)
+    {
+      enigma::surface **oldarray=enigma::surface_array;
+      enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
+
+      for (size_t i=0; i<enigma::surface_max; i++)
+        enigma::surface_array[i]=oldarray[i];
+
+      enigma::surface_array[enigma::surface_max]=NULL;
+      enigma::surface_max++;
+      delete[] oldarray;
+    }
+  }
+
+  enigma::surface_array[id] = new enigma::surface;
+  enigma::surface_array[id]->width = w;
+  enigma::surface_array[id]->height = h;
+
+  glGenTextures(1, &tex);
+  glGenFramebuffers(1, &fbo);
+
+  glPushAttrib(GL_TEXTURE_BIT);
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex, 0);
+  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+  glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glClearColor(1,1,1,0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+  glPopAttrib();
+
+  enigma::surface_array[id]->tex = tex;
+  enigma::surface_array[id]->fbo = fbo;
+
+  return id;
 }
 
 int surface_create_msaa(int width, int height, int samples)
@@ -228,10 +230,10 @@ void surface_free(int id)
 
 bool surface_exists(int id)
 {
-    return !((id<0) or (id>enigma::surface_max) or (enigma::surface_array[id]==NULL));
+    return size_t(id) < enigma::surface_max && enigma::surface_array[id] != NULL;
 }
 
-void draw_surface(int id, double x, double y)
+void draw_surface(int id, float x, float y)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -250,7 +252,7 @@ void draw_surface(int id, double x, double y)
   glPopAttrib();
 }
 
-void draw_surface_stretched(int id, double x, double y, double w, double h)
+void draw_surface_stretched(int id, float x, float y, float w, float h)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -267,7 +269,7 @@ void draw_surface_stretched(int id, double x, double y, double w, double h)
   glPopAttrib();
 }
 
-void draw_surface_part(int id,double left,double top,double width,double height,double x,double y)
+void draw_surface_part(int id, float left, float top, float width, float height, float x, float y)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -290,7 +292,7 @@ void draw_surface_part(int id,double left,double top,double width,double height,
   glPopAttrib();
 }
 
-void draw_surface_tiled(int id,double x,double y)
+void draw_surface_tiled(int id, float x, float y)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -321,7 +323,7 @@ void draw_surface_tiled(int id,double x,double y)
   glPopAttrib();
 }
 
-void draw_surface_tiled_area(int id,double x,double y,double x1,double y1,double x2,double y2)
+void draw_surface_tiled_area(int id, float x, float y, float x1, float y1, float x2, float y2)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -371,7 +373,7 @@ void draw_surface_tiled_area(int id,double x,double y,double x1,double y1,double
   glPopAttrib();
 }
 
-void draw_surface_ext(int id,double x,double y,double xscale,double yscale,double rot,int color,double alpha)
+void draw_surface_ext(int id, float x, float y, float xscale, float yscale, double rot, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -400,7 +402,7 @@ void draw_surface_ext(int id,double x,double y,double xscale,double yscale,doubl
   glPopAttrib();
 }
 
-void draw_surface_stretched_ext(int id,double x,double y,double w,double h,int color,double alpha)
+void draw_surface_stretched_ext(int id, float x, float y, float w, float h, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -421,7 +423,7 @@ void draw_surface_stretched_ext(int id,double x,double y,double w,double h,int c
   glPopAttrib();
 }
 
-void draw_surface_part_ext(int id,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
+void draw_surface_part_ext(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -445,7 +447,7 @@ void draw_surface_part_ext(int id,double left,double top,double width,double hei
   glPopAttrib();
 }
 
-void draw_surface_tiled_ext(int id,double x,double y,double xscale,double yscale,int color,double alpha)
+void draw_surface_tiled_ext(int id, float x, float y, float xscale, float yscale, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -476,7 +478,7 @@ void draw_surface_tiled_ext(int id,double x,double y,double xscale,double yscale
   glPopAttrib();
 }
 
-void draw_surface_tiled_area_ext(int id,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha)
+void draw_surface_tiled_area_ext(int id, float x, float y, float x1, float y1, float x2, float y2, float xscale, float yscale, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -526,7 +528,7 @@ void draw_surface_tiled_area_ext(int id,double x,double y,double x1,double y1,do
   glPopAttrib();
 }
 
-void draw_surface_general(int id, double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4)
+void draw_surface_general(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -676,7 +678,7 @@ int surface_save(int id, string filename)
 	return 1;
 }
 
-int surface_save_part(int id, string filename,unsigned x,unsigned y,unsigned w,unsigned h)
+int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
 {
     get_surfacev(surf,id,-1);
 	FILE *bmp=fopen(filename.c_str(),"wb");
@@ -729,7 +731,7 @@ int surface_save_part(int id, string filename,unsigned x,unsigned y,unsigned w,u
 	return 1;
 }
 
-int sprite_create_from_surface(int id,int x,int y,int w,int h,bool removeback,bool smooth,int xorig,int yorig)
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
 {
     get_surfacev(surf,id,-1);
     int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
@@ -749,7 +751,7 @@ int sprite_create_from_surface(int id,int x,int y,int w,int h,bool removeback,bo
     return sprid;
 }
 
-void surface_copy_part(int destination,double x,double y,int source,int xs,int ys,int ws,int hs)
+void surface_copy_part(int destination, float x, float y, int source, int xs, int ys, int ws, int hs)
 {
     get_surface(ssurf,source);
     get_surface(dsurf,destination);
@@ -773,7 +775,7 @@ void surface_copy_part(int destination,double x,double y,int source,int xs,int y
 	delete[] surfbuf;
 }
 
-void surface_copy(int destination,double x,double y,int source)
+void surface_copy(int destination, float x, float y, int source)
 {
     get_surface(ssurf,source);
     get_surface(dsurf,destination);

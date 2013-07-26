@@ -46,7 +46,7 @@ void draw_background(int back, float x, float y);
 @param w
 @param h
 **/
-void draw_background_stretched(int back, double x, double y, double w, double h);
+void draw_background_stretched(int back, float x, float y, float w, float h);
 /** description
 @param back The index of the background asset.
 @param left
