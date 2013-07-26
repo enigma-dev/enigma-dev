@@ -48,7 +48,7 @@ namespace enigma
   int surface_max=0;
 }
 
-int surface_create(double width, double height)
+int surface_create(float width, float height)
 {
 	GLuint tex, fbo;
 	int prevFbo;
@@ -136,7 +136,7 @@ int surface_destroy(int id)
 	return 0;
 }
 
-int draw_surface(double id, double x, double y)
+int draw_surface(double id, float x, float y)
 {
     int s=(int)id;
     if (s>enigma::surface_max)

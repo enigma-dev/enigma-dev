@@ -19,13 +19,14 @@
 #include <cstdio>
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSbackground.h"
-#include "GL3screen.h"
-#include "GL3d3d.h"
+#include "../General/GSscreen.h"
+#include "../General/GSd3d.h"
 #include "../General/GLbinding.h"
 
 using namespace std;
 
 #include "Universal_System/var4.h"
+#include "Universal_System/estring.h"
 
 #define __GETR(x) (((unsigned int)x & 0x0000FF))
 #define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
@@ -39,7 +40,17 @@ using namespace std;
 #include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>
 
+//Fuck whoever did this to the spec
+#ifndef GL_BGR
+  #define GL_BGR 0x80E0
+#endif
+
 using namespace enigma;
+
+namespace enigma_user {
+  extern int window_get_width();
+  extern int window_get_height();
+}
 
 static inline void draw_back()
 {
@@ -76,8 +87,7 @@ namespace enigma
     void set_particles_implementation(particles_implementation* part_impl)
     {
         particles_impl = part_impl;
-    };
-    extern void draw_tile(int back,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha);
+    }
 }
 
 namespace enigma_user
@@ -142,14 +152,10 @@ void screen_redraw()
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
-            //loop tiles
-            for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
-            {
-                tile t = dit->second.tiles[i];
-                enigma::draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-            }
-            texture_reset();
+            if (dit->second.tiles.size())
+                glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
 
+            texture_reset();
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -309,17 +315,10 @@ void screen_redraw()
                 }
                 for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
                 {
-                    //loop tiles
-                    for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
-                    {
-                        tile t = dit->second.tiles[i];
-                        if (t.roomX + t.width < view_xview[vc] || t.roomY + t.height < view_yview[vc] || t.roomX > view_xview[vc] + view_wview[vc] || t.roomY > view_yview[vc] + view_hview[vc])
-                            continue;
+                    if (dit->second.tiles.size())
+                        glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
 
-                        enigma::draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-                    }
                     texture_reset();
-
                     enigma::inst_iter* push_it = enigma::instance_event_iterator;
                     //loop instances
                     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -407,6 +406,75 @@ void screen_init()
             }
         }
     }
+}
+
+int screen_save(string filename) //Assumes native integers are little endian
+{
+	unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
+	FILE *bmp = fopen(filename.c_str(),"wb");
+	if(!bmp) return -1;
+
+	char *scrbuf = new char[sz*3];
+	glReadPixels(0,0,w,h,GL_BGR,GL_UNSIGNED_BYTE,scrbuf);
+
+	fwrite("BM",2,1,bmp);
+	sz <<= 2;
+
+	fwrite(&sz,4,1,bmp);
+	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+	fwrite(&w,4,1,bmp);
+	fwrite(&h,4,1,bmp);
+	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+
+	if (w & 3)
+	{
+		size_t pad=w&3;
+		w*=3;
+		sz-=sz>>2;
+		for(unsigned int i=0;i<sz;i+=w)
+		{
+			fwrite(scrbuf+i,w,1,bmp);
+			fwrite("\0\0",pad,1,bmp);
+		}
+	} else fwrite(scrbuf,w*3,h,bmp);
+	fclose(bmp);
+	delete[] scrbuf;
+	return 0;
+}
+
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
+{
+	unsigned sz = w * h;
+	FILE *bmp=fopen(filename.c_str(), "wb");
+	if (!bmp) return -1;
+	fwrite("BM", 2, 1, bmp);
+
+	char *scrbuf = new char[sz*3];
+	glReadPixels(x, y, w, h, GL_BGR, GL_UNSIGNED_BYTE, scrbuf);
+
+	sz <<= 2;
+	fwrite(&sz,4,1,bmp);
+	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+	fwrite(&w,4,1,bmp);
+	fwrite(&h,4,1,bmp);
+	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+
+	if (w & 3)
+	{
+		size_t pad = w & 3;
+		w *= 3;
+		sz -= sz >> 2;
+		for(unsigned i = 0; i < sz; i += w)
+		{
+			fwrite(scrbuf+i,w,1,bmp);
+			fwrite("\0\0",pad,1,bmp);
+		}
+	}
+	else fwrite(scrbuf, w*3, h, bmp);
+
+	fclose(bmp);
+	delete[] scrbuf;
+	return 0;
 }
 
 }

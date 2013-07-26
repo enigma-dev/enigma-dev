@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "../General/DirectXHeaders.h"
-#include "DX10draw.h"
+#include "../General/GSstdraw.h"
 #include "../General/DXbinding.h"
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"

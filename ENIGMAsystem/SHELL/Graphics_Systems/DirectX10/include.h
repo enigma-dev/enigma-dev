@@ -2,7 +2,6 @@
 #include "Info/graphics_info.h" 
 #include "../General/GSsprite.h"
 #include "../General/GSbackground.h"
-#include "DX10vertexbuffer.h"
 #include "DX10shader.h"
 #include "../General/GStextures.h"
 #include "DX10material.h"

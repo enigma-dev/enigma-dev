@@ -15,10 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GL3d3d.h"
+#include "../General/GSd3d.h"
 #include "GL3shapes.h"
 #include "../General/GSprimitives.h"
-#include "GL3vertexbuffer.h"
 #include "../General/GStextures.h"
 #include "GL3model.h"
 #include "Universal_System/var4.h"
@@ -45,6 +44,10 @@ extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
 }
+
+GLenum vbotypes[3] = {   
+  GL_STATIC_DRAW, GL_DYNAMIC_DRAW, GL_STREAM_DRAW
+}; 
 
 struct Primitive
 {
@@ -139,7 +142,7 @@ class Mesh
     vbobuffered = false;
   }
 
-  void VertexVector(double x, double y, double z)
+  void VertexVector(float x, float y, float z)
   {
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
     primitives[currentPrimitive]->vertcount += 1;
@@ -152,12 +155,12 @@ class Mesh
     primitives[currentPrimitive]->indexcount += 1;
   }
 
-  void NormalVector(double nx, double ny, double nz)
+  void NormalVector(float nx, float ny, float nz)
   {
     normals.push_back(nx); normals.push_back(ny); normals.push_back(nz);
   }
 
-  void TextureVector(double tx, double ty)
+  void TextureVector(float tx, float ty)
   {
     textures.push_back(tx); textures.push_back(ty);
   }
@@ -442,7 +445,7 @@ void d3d_model_draw(const unsigned int id) // overload for no additional texture
     meshes[id]->Draw();
 }
 
-void d3d_model_draw(const unsigned int id, double x, double y, double z) // overload for no additional texture call's
+void d3d_model_draw(const unsigned int id, float x, float y, float z) // overload for no additional texture call's
 {
     glTranslatef(x, y, z);
     meshes[id]->Draw();
@@ -455,7 +458,7 @@ void d3d_model_draw(const unsigned int id, int texId)
     meshes[id]->Draw();
 }
 
-void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId)
+void d3d_model_draw(const unsigned int id, float x, float y, float z, int texId)
 {
     texture_use(get_texture(texId));
     d3d_model_draw(id, x, y, z);
@@ -481,17 +484,17 @@ void d3d_model_close(const unsigned int id)
   meshes[id]->Close();
 }
 
-void d3d_model_vertex(const unsigned int id, double x, double y, double z)
+void d3d_model_vertex(const unsigned int id, float x, float y, float z)
 {
   meshes[id]->VertexVector(x, y, z);
 }
 
-void d3d_model_normal(const unsigned int id, double nx, double ny, double nz)
+void d3d_model_normal(const unsigned int id, float nx, float ny, float nz)
 {
   meshes[id]->NormalVector(nx, ny, nz);
 }
 
-void d3d_model_texture(const unsigned int id, double tx, double ty)
+void d3d_model_texture(const unsigned int id, float tx, float ty)
 {
   meshes[id]->TextureVector(tx, ty);
 }
@@ -506,51 +509,51 @@ void d3d_model_index(const unsigned int id, GLuint in)
   meshes[id]->VertexIndex(in);
 }
 
-void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha)
+void d3d_model_vertex_color(const unsigned int id, float x, float y, float z, int col, double alpha)
 {
   meshes[id]->VertexVector(x, y, z);
 }
 
-void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty)
-{
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->TextureVector(tx, ty);
-}
-
-void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha)
+void d3d_model_vertex_texture(const unsigned int id, float x, float y, float z, float tx, float ty)
 {
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->TextureVector(tx, ty);
 }
 
-void d3d_model_vertex_normal(const unsigned int id, double x, double y, double z, double nx, double ny, double nz)
+void d3d_model_vertex_texture_color(const unsigned int id, float x, float y, float z, float tx, float ty, int col, double alpha)
 {
   meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
-}
-
-void d3d_model_vertex_normal_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, int col, double alpha)
-{
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
-}
-
-void d3d_model_vertex_normal_texture(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
-{
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
   meshes[id]->TextureVector(tx, ty);
 }
 
-void d3d_model_vertex_normal_texture_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha)
+void d3d_model_vertex_normal(const unsigned int id, float x, float y, float z, float nx, float ny, float nz)
+{
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+}
+
+void d3d_model_vertex_normal_color(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, int col, double alpha)
+{
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+}
+
+void d3d_model_vertex_normal_texture(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, float tx, float ty)
 {
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->NormalVector(nx, ny, nz);
   meshes[id]->TextureVector(tx, ty);
 }
 
+void d3d_model_vertex_normal_texture_color(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, float tx, float ty, int col, double alpha)
+{
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+  meshes[id]->TextureVector(tx, ty);
+}
 
-void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed)
+
+void d3d_model_block(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed)
 {
   GLfloat verts[] = {x1,y1,z1, x1,y1,z2, x1,y2,z1, x1,y2,z2, x2,y2,z1, x2,y2,z2, x2,y1,z1, x2,y1,z2, // sides
                      x1,y1,z1, x2,y1,z1, x1,y2,z1, x2,y2,z1,  // bottom
@@ -588,7 +591,7 @@ void d3d_model_block(const unsigned int id, double x1, double y1, double z1, dou
   }
 }
 
-void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
+void d3d_model_cylinder(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed, int steps)
 {
         float v[100][3];
         float t[100][3];
@@ -649,7 +652,7 @@ void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, 
         }
 }
 
-void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, bool closed, int steps)
+void d3d_model_cone(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed, int steps)
 {
 
   float v[51][3];
@@ -683,7 +686,7 @@ void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, doub
   }
 }
 
-void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep, int steps)
+void d3d_model_ellipsoid(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, int steps)
 {
 
         float v[277][3];
@@ -756,7 +759,7 @@ void d3d_model_icosahedron(const unsigned int id)
 
 }
 
-void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, int hrep, int vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
+void d3d_model_torus(const unsigned int id, float x1, float y1, float z1, float hrep, float vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
 {
   int numc = csteps, numt = tsteps;
 
@@ -781,7 +784,7 @@ void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, int
   }
 }
 
-void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+void d3d_model_wall(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep)
 {
   if ((x1 == x2 && y1 == y2) || z1 == z2) {
     return;
@@ -830,7 +833,7 @@ void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, doub
   //d3d_model_primitive_end(id);
 }
 
-void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, int hrep, int vrep)
+void d3d_model_floor(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep)
 {
   GLfloat normal[] = {0, 0, 1};
 

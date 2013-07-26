@@ -16,7 +16,7 @@
 **/
 
 #include "../General/DirectXHeaders.h"
-#include "DX10d3d.h"
+#include "../General/GSd3d.h"
 #include "DX10vertexbuffer.h"
 #include "../General/GStextures.h"
 #include "DX10model.h"
@@ -175,52 +175,52 @@ namespace enigma {
 namespace enigma_user
 {
 
-void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
+void d3d_set_projection(float xfrom, float yfrom, float zfrom,float xto, float yto, float zto,float xup, float yup, float zup)
 {
 
 }
 
-void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
+void d3d_set_projection_ext(float xfrom, float yfrom, float zfrom,float xto, float yto, float zto,float xup, float yup, float zup,double angle,double aspect,double znear,double zfar)
 {
 
 }
 
-void d3d_set_projection_ortho(double x, double y, double width, double height, double angle)
+void d3d_set_projection_ortho(float x, float y, float width, float height, double angle)
 {
 
 }
 
-void d3d_set_projection_perspective(double x, double y, double width, double height, double angle)
+void d3d_set_projection_perspective(float x, float y, float width, float height, double angle)
 {
 
 }
 
-void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep)
+void d3d_draw_wall(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep)
 {
 
 }
 
-void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep)
+void d3d_draw_floor(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep)
 {
 
 }
 
-void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed)
+void d3d_draw_block(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep, bool closed)
 {
 
 }
 
-void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed, int steps)
+void d3d_draw_cylinder(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep, bool closed, int steps)
 {
 
 }
 
-void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed, int steps)
+void d3d_draw_cone(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep, bool closed, int steps)
 {
 
 }
 
-void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, int steps)
+void d3d_draw_ellipsoid(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep, int steps)
 {
 
 }
@@ -229,7 +229,7 @@ void d3d_draw_icosahedron(int texId) {
     texture_use(get_texture(texId));
 }
 
-void d3d_draw_torus(double x1, double y1, double z1, int texId, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
+void d3d_draw_torus(float x1, float y1, float z1, int texId, float hrep, float vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
 
 }
 
@@ -239,11 +239,11 @@ void d3d_transform_set_identity()
 
 }
 
-void d3d_transform_add_translation(double xt,double yt,double zt)
+void d3d_transform_add_translation(float xt, float yt, float zt)
 {
 
 }
-void d3d_transform_add_scaling(double xs,double ys,double zs)
+void d3d_transform_add_scaling(float xs, float ys, float zs)
 {
 
 }
@@ -259,16 +259,16 @@ void d3d_transform_add_rotation_z(double angle)
 {
 
 }
-void d3d_transform_add_rotation_axis(double x, double y, double z, double angle)
+void d3d_transform_add_rotation_axis(float x, float y, float z, double angle)
 {
 
 }
 
-void d3d_transform_set_translation(double xt,double yt,double zt)
+void d3d_transform_set_translation(float xt, float yt, float zt)
 {
 
 }
-void d3d_transform_set_scaling(double xs,double ys,double zs)
+void d3d_transform_set_scaling(float xs, float ys, float zs)
 {
 
 }
@@ -284,7 +284,7 @@ void d3d_transform_set_rotation_z(double angle)
 {
 
 }
-void d3d_transform_set_rotation_axis(double x, double y, double z, double angle)
+void d3d_transform_set_rotation_axis(float x, float y, float z, double angle)
 {
 
 }
@@ -341,11 +341,11 @@ bool d3d_transform_stack_disgard()
 #include "Universal_System/fileio.h"
 
 struct posi { // Homogenous point.
-    double x;
-    double y;
-    double z;
-    double w;
-    posi(double x1, double y1, double z1, double w1) : x(x1), y(y1), z(z1), w(w1){}
+    float x;
+    float y;
+    float z;
+    float w;
+    posi(float x1, float y1, float z1, float w1) : x(x1), y(y1), z(z1), w(w1){}
 };
 
 class d3d_lights
@@ -362,12 +362,12 @@ class d3d_lights
 
     }
 
-    bool light_define_direction(int id, double dx, double dy, double dz, int col)
+    bool light_define_direction(int id, float dx, float dy, float dz, int col)
     {
 
     }
 
-    bool light_define_point(int id, double x, double y, double z, double range, int col)
+    bool light_define_point(int id, float x, float y, double z, double range, int col)
     {
 
     }
@@ -391,12 +391,12 @@ class d3d_lights
 namespace enigma_user
 {
 
-bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col)
+bool d3d_light_define_direction(int id, float dx, float dy, float dz, int col)
 {
     return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
 }
 
-bool d3d_light_define_point(int id, double x, double y, double z, double range, int col)
+bool d3d_light_define_point(int id, float x, float y, double z, double range, int col)
 {
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
