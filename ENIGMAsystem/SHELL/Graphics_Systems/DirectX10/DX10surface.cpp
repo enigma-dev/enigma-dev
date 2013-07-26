@@ -103,57 +103,57 @@ bool surface_exists(int id)
     return !((id<0) or (id>enigma::surface_max) or (enigma::surface_array[id]==NULL));
 }
 
-void draw_surface(int id, double x, double y)
+void draw_surface(int id, float x, float y)
 {
 
 }
 
-void draw_surface_stretched(int id, double x, double y, double w, double h)
+void draw_surface_stretched(int id, float x, float y, float w, float h)
 {
 
 }
 
-void draw_surface_part(int id,double left,double top,double width,double height,double x,double y)
+void draw_surface_part(int id, float left, float top, float width, float height, float x, float y)
 {
 
 }
 
-void draw_surface_tiled(int id,double x,double y)
+void draw_surface_tiled(int id, float x, float y)
 {
 
 }
 
-void draw_surface_tiled_area(int id,double x,double y,double x1,double y1,double x2,double y2)
+void draw_surface_tiled_area(int id, float x, float y, float x1, float y1, float x2, float y2)
 {
 
 }
 
-void draw_surface_ext(int id,double x,double y,double xscale,double yscale,double rot,int color,double alpha)
+void draw_surface_ext(int id,float x, float y,float xscale, float yscale,double rot,int color,double alpha)
 {
 
 }
 
-void draw_surface_stretched_ext(int id,double x,double y,double w,double h,int color,double alpha)
+void draw_surface_stretched_ext(int id, float x, float y, float w, float h, int color, double alpha)
 {
 
 }
 
-void draw_surface_part_ext(int id,double left,double top,double width,double height,double x,double y,double xscale,double yscale,int color,double alpha)
+void draw_surface_part_ext(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale,int color, double alpha)
 {
 
 }
 
-void draw_surface_tiled_ext(int id,double x,double y,double xscale,double yscale,int color,double alpha)
+void draw_surface_tiled_ext(int id, float x, float y, float xscale, float yscale, int color, double alpha)
 {
 
 }
 
-void draw_surface_tiled_area_ext(int id,double x,double y,double x1,double y1,double x2,double y2, double xscale, double yscale, int color, double alpha)
+void draw_surface_tiled_area_ext(int id, float x, float y, float x1, float y1, float x2, float y2, float xscale, float yscale, int color, double alpha)
 {
 
 }
 
-void draw_surface_general(int id, double left,double top,double width,double height,double x,double y,double xscale,double yscale,double rot,int c1,int c2,int c3,int c4,double a1,double a2,double a3,double a4)
+void draw_surface_general(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
 {
 
 }
@@ -208,22 +208,22 @@ int surface_save(int id, string filename)
 
 }
 
-int surface_save_part(int id, string filename,unsigned x,unsigned y,unsigned w,unsigned h)
+int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
 {
 
 }
 
-int sprite_create_from_surface(int id,int x,int y,int w,int h,bool removeback,bool smooth,int xorig,int yorig)
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
 {
 
 }
 
-void surface_copy_part(int destination,double x,double y,int source,int xs,int ys,int ws,int hs)
+void surface_copy_part(int destination, float x, float y, int source, int xs, int ys, int ws, int hs)
 {
 
 }
 
-void surface_copy(int destination,double x,double y,int source)
+void surface_copy(int destination, float x, float y, int source)
 {
 
 }

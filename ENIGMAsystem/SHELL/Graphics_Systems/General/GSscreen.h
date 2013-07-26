@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,5 +15,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <string>
+using std::string;
 
-int screen_save(string filename);
+namespace enigma_user {
+  int screen_save(string filename);
+  inline int action_snapshot(string filename)
+  {
+      return screen_save(filename);
+  }
+  int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
+  void screen_redraw();
+  void screen_init();
+
+}

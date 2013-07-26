@@ -59,7 +59,7 @@ int draw_set_blend_mode(int mode);
 @param dest
 @return
 **/
-int draw_set_blend_mode_ext(double src,double dest);
+int draw_set_blend_mode_ext(int src,int dest);
 
 }
 

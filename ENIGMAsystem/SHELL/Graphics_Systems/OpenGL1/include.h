@@ -4,7 +4,7 @@
 #include "../General/GSbackground.h"
 #include "../General/GStextures.h"
 #include "../General/GStiles.h"
-#include "GLmodel.h"
+#include "../General/GSmodel.h"
 
 #include "../General/GSfont.h"
 #include "../General/GScurves.h"

@@ -22,7 +22,7 @@
 #include "Graphics_Systems/General/GLbinding.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/OpenGL3/GL3d3d.h"
+#include "Graphics_Systems/General/GSd3d.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_sprites.h"
 #include <vector>

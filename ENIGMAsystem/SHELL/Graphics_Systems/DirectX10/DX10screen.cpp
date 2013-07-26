@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,13 +19,14 @@
 #include <cstdio>
 #include "../General/DirectXHeaders.h"
 #include "../General/GSbackground.h"
-#include "DX10screen.h"
-#include "DX10d3d.h"
+#include "../General/GSscreen.h"
+#include "../General/GSd3d.h"
 #include "../General/DXbinding.h"
 
 using namespace std;
 
 #include "Universal_System/var4.h"
+#include "Universal_System/estring.h"
 
 #define __GETR(x) (((unsigned int)x & 0x0000FF))
 #define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
@@ -39,7 +40,17 @@ using namespace std;
 #include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>
 
+//Fuck whoever did this to the spec
+#ifndef GL_BGR
+  #define GL_BGR 0x80E0
+#endif
+
 using namespace enigma;
+
+namespace enigma_user {
+  extern int window_get_width();
+  extern int window_get_height();
+}
 
 static inline void draw_back()
 {
@@ -70,12 +81,13 @@ static inline void draw_back()
 
 namespace enigma
 {
+    extern bool d3dHidden;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
     {
         particles_impl = part_impl;
-    };
+    }
 }
 
 namespace enigma_user
@@ -83,12 +95,22 @@ namespace enigma_user
 
 void screen_redraw()
 {
- 
+    
 }
 
 void screen_init()
 {
+    
+}
 
+int screen_save(string filename) //Assumes native integers are little endian
+{
+	
+}
+
+int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
+{
+	
 }
 
 }
