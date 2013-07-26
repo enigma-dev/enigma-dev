@@ -42,21 +42,37 @@ namespace enigma {
 
   //Make hspeed work
   INTERCEPT_DEFAULT_COPY(hspeedv)
-  void hspeedv::function(variant) {
-    if (varnz(rval.d) or varnz(*vspd))
+  void hspeedv::function(variant oldval) {
+    if (rval.d == oldval.rval.d)
+    { // If no changes, return, don't make potentially negative speed non-negative.
+        return;
+    }
+    else if (varnz(rval.d) or varnz(*vspd))
     {
         *dir = (int(180+180*(1-atan2(*vspd,rval.d)/M_PI)))%360;
         *spd = hypot(rval.d,*vspd);
+    }
+    else
+    { // If both set to zero, make speed zero. Direction not set.
+        *spd = 0.0;
     }
   }
 
   //Make vspeed work -- Same as above, except the arguments to atan2 are reversed
   INTERCEPT_DEFAULT_COPY(vspeedv)
-  void vspeedv::function(variant) {
-    if (varnz(rval.d) or varnz(*hspd))
+  void vspeedv::function(variant oldval) {
+    if (rval.d == oldval.rval.d)
+    { // If no changes, return, don't make potentially negative speed non-negative.
+        return;
+    }
+    else if (varnz(rval.d) or varnz(*hspd))
     {
         *dir = (int(180+180*(1-atan2(rval.d,*hspd)/M_PI)))%360;
         *spd = hypot(rval.d,*hspd);
+    }
+    else
+    { // If both set to zero, make speed zero. Direction not set.
+        *spd = 0.0;
     }
   }
 }
