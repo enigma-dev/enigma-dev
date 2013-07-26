@@ -39,7 +39,7 @@ namespace enigma
     #include "GLESprmtvs.h"
 #endif
 #if STDRAWLIB
-    #include "GLESstdraw.h"
+    #include "../General/GSstdraw.h"
 #endif
 #if BLENDMODE
     #include "../General/GSblend.h"
