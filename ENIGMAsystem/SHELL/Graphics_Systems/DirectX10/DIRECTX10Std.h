@@ -24,9 +24,9 @@ namespace enigma
 
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"
-#include "DX10d3d.h"
+#include "../General/GSd3d.h"
 #include "DX10draw.h"
 #include "../General/GSblend.h"
 #include "../General/GSsurface.h"
-#include "DX10miscextra.h"
+#include "../General/GSscreen.h"
 

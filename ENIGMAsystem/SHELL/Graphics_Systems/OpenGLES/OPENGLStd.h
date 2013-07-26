@@ -47,5 +47,5 @@ namespace enigma
 #if GMSURFACE
     #include "../General/GSsurface.h"
 #endif
-#include "GLESmiscextra.h"
+#include "../General/GSscreen.h"
 

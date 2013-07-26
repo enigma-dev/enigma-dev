@@ -34,9 +34,9 @@ namespace enigma
 
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"
-#include "GLd3d.h"
+#include "../General/GSd3d.h"
 #include "GLstdraw.h"
 #include "../General/GSblend.h"
 #include "../General/GSsurface.h"
-#include "GLmiscextra.h"
+#include "../General/GSscreen.h"
 
