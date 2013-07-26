@@ -56,7 +56,7 @@ inline void action_sprite_set(const double spritep, const  double subimage, cons
 	inst->image_speed=speed;
 }
 
-inline void action_draw_text(const string text, const double x, const double y) {
+inline void action_draw_text(const string text, const float x, const float y) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_text(x+inst->x,y+inst->y,text); }
@@ -76,7 +76,7 @@ inline void action_draw_arrow(const double x1, const double y1, const double x2,
     draw_arrow(x1, y1, x2, y2, tipSize, 1, false);
 }
 
-inline void action_draw_background(const int background, const double x, const double y, const int tiled)
+inline void action_draw_background(const int background, const float x, const float y, const int tiled)
 {
     if (argument_relative)
     {
@@ -138,7 +138,7 @@ inline void action_draw_score(const double x, const double y, const string capti
     } else draw_text(x,y,caption+string(score));
 }
 
-inline void action_draw_sprite(const int sprite, const double x, const double y, const int subimage) {
+inline void action_draw_sprite(const int sprite, const float x, const float y, const int subimage) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_sprite(sprite,subimage,x+inst->x,y+inst->y);

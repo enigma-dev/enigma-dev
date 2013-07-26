@@ -33,19 +33,19 @@ namespace enigma
 }
 
 #if COLORSLIB
-    #include "GLEScolors.h"
+    #include "../General/GScolors.h"
 #endif
 #if PRIMTVLIB
     #include "GLESprmtvs.h"
 #endif
 #if STDRAWLIB
-    #include "GLESstdraw.h"
+    #include "../General/GSstdraw.h"
 #endif
 #if BLENDMODE
-    #include "GLESblend.h"
+    #include "../General/GSblend.h"
 #endif
 #if GMSURFACE
-    #include "GLESsurface.h"
+    #include "../General/GSsurface.h"
 #endif
-#include "GLESmiscextra.h"
+#include "../General/GSscreen.h"
 

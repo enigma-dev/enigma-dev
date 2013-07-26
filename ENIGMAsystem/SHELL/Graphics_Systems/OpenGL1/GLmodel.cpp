@@ -16,7 +16,7 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
-#include "GLd3d.h"
+#include "../General/GSd3d.h"
 #include "../General/GStextures.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
@@ -24,7 +24,7 @@
 #include "../General/GLbinding.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 
-#include "GLmodel.h"
+#include "../General/GSmodel.h"
 
 #include "Universal_System/estring.h"
 
@@ -39,6 +39,11 @@ using namespace std;
 #define GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 #include <floatcomp.h>
+
+extern GLenum ptypes_by_id[16];
+namespace enigma {
+  extern unsigned char currentcolor[4];
+}
 
 class d3d_model
 {
@@ -166,7 +171,7 @@ class d3d_model
         return true;
     }
 
-    void draw(double x, double y, double z, int texId)
+    void draw(float x, float y, float z, int texId)
     {
         texture_reset();
         texture_use(get_texture(texId));
@@ -261,7 +266,7 @@ class d3d_model
         glColor4ubv(enigma::currentcolor);
     }
     //TODO: Model basic shapes need to be changed to the basic new oens
-    void model_block(double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed)
+    void model_block(float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed)
     {
         float v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y1, z1}, v3[] = {x2, y1, z2},
               v4[] = {x2, y2, z1}, v5[] = {x2, y2, z2}, v6[] = {x1, y2, z1}, v7[] = {x1, y2, z2},
@@ -300,7 +305,7 @@ class d3d_model
         }
     }
 
-    void model_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed, int steps)
+    void model_cylinder(float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed, int steps)
     {
         float v[100][3];
         float t[100][3];
@@ -348,7 +353,7 @@ class d3d_model
         }
     }
 
-    void model_cone(double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed, int steps)
+    void model_cone(float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed, int steps)
     {
         float v[51][3];
         float t[100][3];
@@ -388,7 +393,7 @@ class d3d_model
         }
     }
 
-    void model_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, int steps)
+    void model_ellipsoid(float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, int steps)
     {
         float v[277][3];
         float t[277][3];
@@ -459,7 +464,7 @@ class d3d_model
 
     }
 
-    void model_torus(double x1, double y1, double z1, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14)
+    void model_torus(float x1, float y1, float z1, float hrep, float vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14)
     {
         int numc = csteps, numt = tsteps;
 
@@ -485,7 +490,7 @@ class d3d_model
         }
     }
 
-    void model_wall(double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep)
+    void model_wall(float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep)
     {
     if ((fequal(x1, x2) && fequal(y1, y2)) || fequal(z1, z2)) {
         return;
@@ -522,7 +527,7 @@ class d3d_model
     model_primitive_end();
     }
 
-    void model_floor(double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep)
+    void model_floor(float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep)
     {
         float v0[] = {x1, y1, z1}, v1[] = {x1, y2, z1}, v2[] = {x2, y1, z2}, v3[] = {x2, y2, z2},
               t0[] = {0, 0}, t1[] = {0, vrep}, t2[] = {hrep, 0}, t3[] = {hrep, vrep};
@@ -574,7 +579,7 @@ bool d3d_model_load(const unsigned int id, string fname)
     return d3d_models[id].load(fname);
 }
 
-void d3d_model_draw(const unsigned int id, double x, double y, double z, int texId)
+void d3d_model_draw(const unsigned int id, float x, float y, float z, int texId)
 {
     d3d_models[id].draw(x, y, z, texId);
 }
@@ -589,70 +594,70 @@ void d3d_model_primitive_end(const unsigned int id)
     d3d_models[id].model_primitive_end();
 }
 
-void d3d_model_vertex(const unsigned int id, double x, double y, double z)
+void d3d_model_vertex(const unsigned int id, float x, float y, float z)
 {
     float v[] = {x, y, z};
     d3d_models[id].model_vertex(v);
 }
 
-void d3d_model_vertex_color(const unsigned int id, double x, double y, double z, int col, double alpha)
+void d3d_model_vertex_color(const unsigned int id, float x, float y, float z, int col, double alpha)
 {
     float v[] = {x, y, z};
     d3d_models[id].model_vertex_color(v, col, alpha);
 }
 
-void d3d_model_vertex_texture(const unsigned int id, double x, double y, double z, double tx, double ty)
+void d3d_model_vertex_texture(const unsigned int id, float x, float y, float z, float tx, float ty)
 {
     float v[] = {x, y, z}, t[] = {tx, ty};
     d3d_models[id].model_vertex_texture(v, t);
 }
 
-void d3d_model_vertex_texture_color(const unsigned int id, double x, double y, double z, double tx, double ty, int col, double alpha)
+void d3d_model_vertex_texture_color(const unsigned int id, float x, float y, float z, float tx, float ty, int col, double alpha)
 {
     float v[] = {x, y, z}, t[] = {tx, ty};
     d3d_models[id].model_vertex_texture_color(v, t, col, alpha);
 }
 
-void d3d_model_vertex_normal(const unsigned int id, double x, double y, double z, double nx, double ny, double nz)
+void d3d_model_vertex_normal(const unsigned int id, float x, float y, float z, float nx, float ny, float nz)
 {
     float v[] = {x, y, z}, n[] = {nx, ny, nz};
     d3d_models[id].model_vertex_normal(v, n);
 }
 
-void d3d_model_vertex_normal_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, int col, double alpha)
+void d3d_model_vertex_normal_color(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, int col, double alpha)
 {
     float v[] = {x, y, z}, n[] = {nx, ny, nz};
     d3d_models[id].model_vertex_normal_color(v, n, col, alpha);
 }
 
-void d3d_model_vertex_normal_texture(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
+void d3d_model_vertex_normal_texture(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, float tx, float ty)
 {
     float v[] = {x, y, z}, n[] = {nx, ny, nz}, t[] = {tx, ty};
     d3d_models[id].model_vertex_normal_texture(v, n, t);
 }
 
-void d3d_model_vertex_normal_texture_color(const unsigned int id, double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int col, double alpha)
+void d3d_model_vertex_normal_texture_color(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, float tx, float ty, int col, double alpha)
 {
     float v[] = {x, y, z}, n[] = {nx, ny, nz}, t[] = {tx, ty};
     d3d_models[id].model_vertex_normal_texture_color(v, n, t, col, alpha);
 }
 
-void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed)
+void d3d_model_block(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed)
 {
     d3d_models[id].model_block(x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
 }
 
-void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed, int steps)
+void d3d_model_cylinder(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed, int steps)
 {
     d3d_models[id].model_cylinder(x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
 }
 
-void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, bool closed, int steps)
+void d3d_model_cone(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed, int steps)
 {
     d3d_models[id].model_cone(x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
 }
 
-void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep, int steps)
+void d3d_model_ellipsoid(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, int steps)
 {
     d3d_models[id].model_ellipsoid(x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
 }
@@ -662,17 +667,17 @@ void d3d_model_icosahedron(const unsigned int id)
     d3d_models[id].model_icosahedron();
 }
 
-void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
+void d3d_model_torus(const unsigned int id, float x1, float y1, float z1, float hrep, float vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
 {
     d3d_models[id].model_torus(x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius, TWOPI);
 }
 
-void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep)
+void d3d_model_wall(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep)
 {
     d3d_models[id].model_wall(x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
 
-void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, double hrep, double vrep)
+void d3d_model_floor(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep)
 {
     d3d_models[id].model_floor(x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
