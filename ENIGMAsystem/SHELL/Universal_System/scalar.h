@@ -19,9 +19,9 @@
 // for major systems and coordinate space. Uncomment the three lines below to switch
 // to double.
 
-#define GS_SCALAR_64
-#define AS_SCALAR_64
-#define CS_SCALAR_64
+//#define GS_SCALAR_64
+//#define AS_SCALAR_64
+//#define CS_SCALAR_64
 
 // Controls graphics, particles, and other rendering precision
 #ifdef GS_SCALAR_64
