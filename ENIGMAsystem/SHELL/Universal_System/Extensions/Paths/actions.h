@@ -31,7 +31,7 @@ extern bool argument_relative;
 namespace enigma_user
 {
 
-inline void action_path(unsigned pathid,double speed,unsigned endaction,bool absolute)
+inline void action_path(unsigned pathid, cs_scalar speed, unsigned endaction, bool absolute)
 {
     path_start(pathid, speed, endaction, absolute);
 }
@@ -39,11 +39,11 @@ inline void action_path_end()
 {
     path_end();
 }
-inline void action_path_position(double position, bool relative)
+inline void action_path_position(cs_scalar position, bool relative)
 {
     path_set_position(position, relative);
 }
-inline void action_path_speed(double speed, bool relative)
+inline void action_path_speed(cs_scalar speed, bool relative)
 {
     path_set_speed(speed, relative);
 }

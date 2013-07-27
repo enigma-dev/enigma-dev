@@ -30,6 +30,8 @@
 using std::vector;
 using std::map;
 
+#include "Universal_System/scalar.h"
+
 #ifdef INCLUDED_FROM_SHELLMAIN
 #  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
@@ -38,26 +40,26 @@ namespace enigma
 {
   struct path_point
   {
-    double x, y, speed, length;
+    cs_scalar x, y, speed, length;
   };
   struct path
   {
     int id, precision;
     bool smooth, closed;
     vector<path_point> pointarray;
-    map<double,int> pointoffset;
-    double total_length, centerx, centery;
+    map<cs_scalar,int> pointoffset;
+    cs_scalar total_length, centerx, centery;
     path(unsigned pathid, bool smooth, bool closed, int precision, unsigned pointcount);
     ~path();
   };
 
   extern path** pathstructarray;
-	void path_add_point(unsigned pathid, double x, double y, double speed);
+  void path_add_point(unsigned pathid, cs_scalar x, cs_scalar y, cs_scalar speed);
   void path_recalculate(unsigned pathid);
-  void path_getXY(path *pth, double &x, double &y, double position);
-  void path_getspeed(path *pth, double &speed, double position);
+  void path_getXY(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position);
+  void path_getspeed(path *pth, cs_scalar &speed, cs_scalar position);
   void pathstructarray_reallocate();
-  typedef map<double,int>::iterator ppi_t;
+  typedef map<cs_scalar,int>::iterator ppi_t;
 }
 
 namespace enigma

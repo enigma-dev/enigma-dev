@@ -130,8 +130,6 @@ void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2
 
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,bool outline)
 {
-  x1 -= 1;
-  y1 -= 1;
   texture_reset();
   if(outline)
   {

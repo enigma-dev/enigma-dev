@@ -303,7 +303,7 @@ float texture_anisotropy_maxlevel()
   return maximumAnisotropy;
 }
 
-void  texture_anisotropy_filter(int texid, float levels)
+void  texture_anisotropy_filter(int texid, gs_scalar levels)
 {
   glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);

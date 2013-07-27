@@ -277,7 +277,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glScalef(1, -1, 1);
-  glOrtho(x-1,x + width,y-1,y + height,0,1);
+  glOrtho(x-0.5,x + width,y-0.5,y + height,0,1);
   glRotatef(angle,0,0,1);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
@@ -292,7 +292,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
   gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
   glMatrixMode(GL_MODELVIEW);
   glScalef(1, -1, 1);
-  glOrtho(x-1,x + width,y-1,y + height,0,1);
+  glOrtho(x,x + width,y,y + height,0,1);
   glRotatef(angle,0,0,1);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);
