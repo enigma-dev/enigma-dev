@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
 #include "Universal_System/instance_system_base.h"
 
 extern bool argument_relative;
@@ -22,7 +23,7 @@ extern bool argument_relative;
 namespace enigma_user
 {
 
-inline bool action_if_object(const int object, const double xx, const double yy) {
+inline bool action_if_object(const int object, const cs_scalar xx, const cs_scalar yy) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         return place_meeting(inst->x+xx,inst->y+yy,object);
@@ -33,7 +34,7 @@ inline bool action_if_object(const int object, const double xx, const double yy)
     return false;
 }
 
-inline bool action_if_empty(const double xx, const double yy, const int objects) {
+inline bool action_if_empty(const cs_scalar xx, const cs_scalar yy, const int objects) {
     if (argument_relative) {
         if (objects == 0)
             return place_free(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+xx,((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+yy);
@@ -57,7 +58,7 @@ inline void action_bounce(int precisely, bool against) {
     move_bounce_object(all, precisely, !against);
 }
 
-inline void action_kill_position(double x, double y)
+inline void action_kill_position(cs_scalar x, cs_scalar y)
 {
     if (argument_relative)
     {
@@ -70,7 +71,7 @@ inline void action_kill_position(double x, double y)
     }
 }
 
-inline bool action_if_collision(const double x, const double y, const int object) {
+inline bool action_if_collision(const cs_scalar x, const cs_scalar y, const int object) {
   return !action_if_empty(x,y,object); //Already takes argument_relative into account
 }
 

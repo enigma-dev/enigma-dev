@@ -15,23 +15,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
+
 #ifndef COLL_UTIL_H
 #define COLL_UTIL_H
 
-bool collide_rect_line(double rx1, double ry1, double rx2, double ry2,
-                       double px1, double py1, double px2, double py2);
-bool collide_rect_rect(double r1x1, double r1y1, double r1x2, double r1y2,
-                       double r2x1, double r2y1, double r2x2, double r2y2);
-bool collide_rect_point(double rx1, double ry1, double rx2, double ry2, double px, double py);
+bool collide_rect_line(cs_scalar rx1, cs_scalar ry1, cs_scalar rx2, cs_scalar ry2,
+                       cs_scalar px1, cs_scalar py1, cs_scalar px2, cs_scalar py2);
+bool collide_rect_rect(cs_scalar r1x1, cs_scalar r1y1, cs_scalar r1x2, cs_scalar r1y2,
+                       cs_scalar r2x1, cs_scalar r2y1, cs_scalar r2x2, cs_scalar r2y2);
+bool collide_rect_point(cs_scalar rx1, cs_scalar ry1, cs_scalar rx2, cs_scalar ry2, cs_scalar px, cs_scalar py);
 
 #include "Universal_System/collisions_object.h"
 
-bool collide_bbox_rect(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2);
-bool collide_bbox_line(const enigma::object_collisions* inst, double ox, double oy, double x1, double y1, double x2, double y2);
-bool collide_bbox_bbox(const enigma::object_collisions* inst1, double ox1, double oy1, const enigma::object_collisions* inst2, double ox2, double oy2);
-bool collide_bbox_point(const enigma::object_collisions* inst, double ox, double oy, double x, double y);
-bool collide_bbox_circle(const enigma::object_collisions* inst, double ox, double oy, double x, double y, double r);
-bool collide_bbox_ellipse(const enigma::object_collisions* inst, double ox, double oy, double x, double y, double rx, double ry);
-void destroy_bbox_point(const enigma::object_collisions* inst, double ox, double oy, double x, double y);
+bool collide_bbox_rect(const enigma::object_collisions* inst, cs_scalar ox, cs_scalar oy, cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2);
+bool collide_bbox_line(const enigma::object_collisions* inst, cs_scalar ox, cs_scalar oy, cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2);
+bool collide_bbox_bbox(const enigma::object_collisions* inst1, cs_scalar ox1, cs_scalar oy1, const enigma::object_collisions* inst2, cs_scalar ox2, cs_scalar oy2);
+bool collide_bbox_point(const enigma::object_collisions* inst, cs_scalar ox, cs_scalar oy, cs_scalar x, cs_scalar y);
+bool collide_bbox_circle(const enigma::object_collisions* inst, cs_scalar ox, cs_scalar oy, cs_scalar x, cs_scalar y, double r);
+bool collide_bbox_ellipse(const enigma::object_collisions* inst, cs_scalar ox, cs_scalar oy, cs_scalar x, cs_scalar y, cs_scalar rx, cs_scalar ry);
+void destroy_bbox_point(const enigma::object_collisions* inst, cs_scalar ox, cs_scalar oy, cs_scalar x, cs_scalar y);
 
 #endif
