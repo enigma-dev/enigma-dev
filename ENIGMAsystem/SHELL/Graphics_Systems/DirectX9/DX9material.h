@@ -15,36 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DX10SHADER__H
-#define _DX10SHADER__H
+#ifndef _DX9MATERIAL__H
+#define _DX9MATERIAL__H
 
-namespace enigma_user
-{
-
-enum {
-  sh_vertex = 0,
-  sh_tesscontrol = 1,
-  sh_tessevaluation = 2,
-  sh_geometry = 3,
-  sh_fragment = 4
-};
-
-int shader_create(int type);
-int shader_load(int id, const char* fname);
-bool shader_compile(int id);
-const char* shader_compile_output(int id);
-void shader_free(int id);
-
-int shader_program_create();
-bool shader_program_link(int id);
-bool shader_program_validate(int id);
-void shader_program_attach(int id, int sid);
-void shader_program_detach(int id, int sid);
-void shader_program_bind_frag_data(int id, const char* name);
-void shader_program_use(int id);
-void shader_program_reset();
-void shader_program_free(int id);
-
+namespace enigma_user {
+int material_create();
+void material_load();
+void material_save();
+void material_add_texture(int id, int tid);
+void material_set_texture(int id, int mtid, int tid);
+void material_remove_texture(int id, int mtid);
+void material_set_shader(int id, int sid);
+int material_get_shader(int id);
+void material_use(int id);
+void material_reset();
+void material_free(int id);
 }
 
 #endif

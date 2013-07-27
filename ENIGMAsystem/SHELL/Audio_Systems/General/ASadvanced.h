@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
+
 // ***** New Sound System *****
 #ifndef _AS_ADVANCED__H
 #define _AS_ADVANCED__H
@@ -82,7 +84,7 @@ int audio_play_sound(int index, double priority, bool loop);
 @param priority The priority of the sound in queue.
 @return
 **/
-int audio_play_sound_at(int sound, double x, double y, double z, int falloff_ref, double falloff_max, double falloff_factor, bool loop, double priority);
+int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, int falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority);
 /** Pauses all audio channels playing the sound.
 @param index The index of the sound asset.
 **/
@@ -146,19 +148,19 @@ double audio_sound_offset(int index);
 @param up_y
 @param up_z
 **/
-void audio_listener_orientation(double lookat_x, double lookat_y, double lookat_z, double up_x, double up_y, double up_z);
+void audio_listener_orientation(as_scalar lookat_x, as_scalar lookat_y, as_scalar lookat_z, as_scalar up_x, as_scalar up_y, as_scalar up_z);
 /** des
 @param x
 @param y
 @param z
 **/
-void audio_listener_position(double x, double y, double z);
+void audio_listener_position(as_scalar x, as_scalar y, as_scalar z);
 /** des
 @param vx
 @param vy
 @param vz
 **/
-void audio_listener_velocity(double vx, double vy, double vz);
+void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz);
 
 /** des
 @param index The index of the sound asset.
@@ -270,7 +272,7 @@ void audio_emitter_sound_remove(int index, int track);
 @param falloff_max
 @param falloff_factor
 **/
-void audio_emitter_falloff(int emitter, double falloff_ref, double falloff_max, double falloff_factor);
+void audio_emitter_falloff(int emitter, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor);
 /** des
 @param emitter The index of the audio emitter.
 **/
@@ -291,14 +293,14 @@ void audio_emitter_pitch(int emitter, double pitch);
 @param y
 @param z
 **/
-void audio_emitter_position(int emitter, double x, double y, double z);
+void audio_emitter_position(int emitter, as_scalar x, as_scalar y, as_scalar z);
 /** des
 @param emitter The index of the audio emitter.
 @param vx
 @param vy
 @param vz
 **/
-void audio_emitter_velocity(int emitter, double vx, double vy, double vz);
+void audio_emitter_velocity(int emitter, as_scalar vx, as_scalar vy, as_scalar vz);
 /** des
 @param emitter The index of the audio emitter.
 @param sound

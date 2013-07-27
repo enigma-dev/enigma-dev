@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
+
 namespace enigma_user
 {
 
@@ -36,26 +38,26 @@ const int pr_aa_dontcare    = 4352;  //GL_DONT_CARE
 
 int draw_primitive_begin(int kind);
 int draw_primitive_begin_texture(int kind,unsigned tex);
-int draw_vertex(float x, float y);
-int draw_vertex_color(float x, float y, int color, float alpha);
-int draw_vertex_texture(float x, float y, float tx, float ty);
-int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha);
+int draw_vertex(gs_scalar x, gs_scalar y);
+int draw_vertex_color(gs_scalar x, gs_scalar y, int color, float alpha);
+int draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty);
+int draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha);
 int draw_primitive_end();
 void d3d_primitive_begin(int kind);
 void d3d_primitive_begin_texture(int kind, int texId);
 void d3d_primitive_end();
-void d3d_vertex(float x, float y, double z);
-void d3d_normal(float nx, float ny, float nz);
-void d3d_texture(float tx, float ty);
+void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
+void d3d_normal(gs_scalar nx, gs_scalar ny, gs_scalar nz);
+void d3d_texture(gs_scalar tx, gs_scalar ty);
 void d3d_color(int col, double alpha);
 void d3d_index(int in);
-void d3d_vertex_color(float x, float y, float z, int color, double alpha);
-void d3d_vertex_texture(float x, float y, float z, float tx, float ty);
-void d3d_vertex_texture_color(float x, float y, float z, float tx, float ty, int color, double alpha);
-void d3d_vertex_normal(float x, float y, float z, float nx, float ny, float nz);
-void d3d_vertex_normal_color(float x, float y, float z, float nx, float ny, float nz, int color, double alpha);
-void d3d_vertex_normal_texture(float x, float y, float z, float nx, float ny, float nz, float tx, float ty);
-void d3d_vertex_normal_texture_color(float x, float y, float z, float nx, float ny, float nz, float tx, float ty, int color, double alpha);
+void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha);
+void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty);
+void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha);
+void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz);
+void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha);
+void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty);
+void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha);
 
 }
 

@@ -25,6 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "Universal_System/scalar.h"
 #include "Universal_System/collisions_object.h"
 #include <cmath>
 #include "Universal_System/instance_system.h"
@@ -36,8 +37,8 @@
 // FIXME: NONSTANDARD
 
 namespace enigma_user {
-extern bool place_meeting(double x, double y, int object);
-extern bool place_free(double x, double y);
+extern bool place_meeting(cs_scalar x, cs_scalar y, int object);
+extern bool place_free(cs_scalar x, cs_scalar y);
 }
 
 static inline double min(double x, double y) { return x<y?x:y; }

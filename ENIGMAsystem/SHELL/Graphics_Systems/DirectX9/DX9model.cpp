@@ -15,12 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX10d3d.h"
-#include "DX10shapes.h"
+#include "DX9d3d.h"
+#include "DX9shapes.h"
 #include "../General/GSprimitives.h"
-#include "DX10vertexbuffer.h"
+#include "DX9vertexbuffer.h"
 #include "../General/GStextures.h"
-#include "DX10model.h"
+#include "DX9model.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -98,7 +98,7 @@ class Mesh
 
   }
 
-  void VertexVector(float x, float y, float z)
+  void VertexVector(gs_scalar x, gs_scalar y, gs_scalar z)
   {
 
   }
@@ -108,12 +108,12 @@ class Mesh
 
   }
 
-  void NormalVector(float nx, float ny, float nz)
+  void NormalVector(gs_scalar nx, gs_scalar ny, gs_scalar nz)
   {
 
   }
 
-  void TextureVector(float tx, float ty)
+  void TextureVector(gs_scalar tx, gs_scalar ty)
   {
 
   }
@@ -311,7 +311,7 @@ void d3d_model_draw(const unsigned int id) // overload for no additional texture
     meshes[id]->Draw();
 }
 
-void d3d_model_draw(const unsigned int id, float x, float y, float z) // overload for no additional texture call's
+void d3d_model_draw(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload for no additional texture call's
 {
 
 }
@@ -322,7 +322,7 @@ void d3d_model_draw(const unsigned int id, int texId)
     meshes[id]->Draw();
 }
 
-void d3d_model_draw(const unsigned int id, float x, float y, float z, int texId)
+void d3d_model_draw(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
     texture_use(get_texture(texId));
     d3d_model_draw(id, x, y, z);
@@ -348,17 +348,17 @@ void d3d_model_close(const unsigned int id)
   meshes[id]->Close();
 }
 
-void d3d_model_vertex(const unsigned int id, float x, float y, float z)
+void d3d_model_vertex(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z)
 {
   meshes[id]->VertexVector(x, y, z);
 }
 
-void d3d_model_normal(const unsigned int id, float nx, float ny, float nz)
+void d3d_model_normal(const unsigned int id, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
   meshes[id]->NormalVector(nx, ny, nz);
 }
 
-void d3d_model_texture(const unsigned int id, float tx, float ty)
+void d3d_model_texture(const unsigned int id, gs_scalar tx, gs_scalar ty)
 {
   meshes[id]->TextureVector(tx, ty);
 }
@@ -373,66 +373,66 @@ void d3d_model_index(const unsigned int id, GLuint in)
   meshes[id]->VertexIndex(in);
 }
 
-void d3d_model_vertex_color(const unsigned int id, float x, float y, float z, int col, double alpha)
+void d3d_model_vertex_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha)
 {
   meshes[id]->VertexVector(x, y, z);
 }
 
-void d3d_model_vertex_texture(const unsigned int id, float x, float y, float z, float tx, float ty)
-{
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->TextureVector(tx, ty);
-}
-
-void d3d_model_vertex_texture_color(const unsigned int id, float x, float y, float z, float tx, float ty, int col, double alpha)
+void d3d_model_vertex_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
 {
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->TextureVector(tx, ty);
 }
 
-void d3d_model_vertex_normal(const unsigned int id, float x, float y, float z, float nx, float ny, float nz)
+void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha)
 {
   meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
-}
-
-void d3d_model_vertex_normal_color(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, int col, double alpha)
-{
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
-}
-
-void d3d_model_vertex_normal_texture(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, float tx, float ty)
-{
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
   meshes[id]->TextureVector(tx, ty);
 }
 
-void d3d_model_vertex_normal_texture_color(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, float tx, float ty, int col, double alpha)
+void d3d_model_vertex_normal(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
+{
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+}
+
+void d3d_model_vertex_normal_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha)
+{
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+}
+
+void d3d_model_vertex_normal_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
 {
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->NormalVector(nx, ny, nz);
   meshes[id]->TextureVector(tx, ty);
 }
 
+void d3d_model_vertex_normal_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int col, double alpha)
+{
+  meshes[id]->VertexVector(x, y, z);
+  meshes[id]->NormalVector(nx, ny, nz);
+  meshes[id]->TextureVector(tx, ty);
+}
 
-void d3d_model_block(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, float hrep, float vrep, bool closed)
+
+void d3d_model_block(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
  
 }
 
-void d3d_model_cylinder(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, float hrep, float vrep, bool closed, int steps)
+void d3d_model_cylinder(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
   
 }
 
-void d3d_model_cone(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, float hrep, float vrep, bool closed, int steps)
+void d3d_model_cone(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
 
 }
 
-void d3d_model_ellipsoid(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, float hrep, float vrep, int steps)
+void d3d_model_ellipsoid(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, int steps)
 {
 
 }
@@ -442,17 +442,17 @@ void d3d_model_icosahedron(const unsigned int id)
 
 }
 
-void d3d_model_torus(const unsigned int id, double x1, double y1, double z1, float hrep, float vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
+void d3d_model_torus(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
 {
 
 }
 
-void d3d_model_wall(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, float hrep, float vrep)
+void d3d_model_wall(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
 {
  
 }
 
-void d3d_model_floor(const unsigned int id, double x1, double y1, double z1, double x2, double y2, double z2, float hrep, float vrep)
+void d3d_model_floor(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
 {
  
 }

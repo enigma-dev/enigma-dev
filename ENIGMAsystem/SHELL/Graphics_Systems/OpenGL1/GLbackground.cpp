@@ -65,7 +65,7 @@ namespace enigma {
 namespace enigma_user
 {
 
-void draw_background(int back, float x, float y)
+void draw_background(int back, gs_scalar x, gs_scalar y)
 {
   get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
@@ -88,7 +88,7 @@ void draw_background(int back, float x, float y)
   glPopAttrib();
 }
 
-void draw_background_stretched(int back, float x, float y, float w, float h)
+void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
   get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
@@ -101,17 +101,17 @@ void draw_background_stretched(int back, float x, float y, float w, float h)
     glTexCoord2f(0,0);
       glVertex2f(x,y);
     glTexCoord2f(tbx,0);
-      glVertex2f(x+w,y);
+      glVertex2f(x+width,y);
     glTexCoord2f(tbx,tby);
-      glVertex2f(x+w,y+h);
+      glVertex2f(x+width,y+height);
     glTexCoord2f(0,tby);
-      glVertex2f(x,y+h);
+      glVertex2f(x,y+height);
   glEnd();
 
   glPopAttrib();
 }
 
-void draw_background_part(int back, float left, float top, float width, float height, float x, float y)
+void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
     get_background(bck2d,back);
       texture_use(GmTextures[bck2d->texture]->gltex);
@@ -137,7 +137,7 @@ void draw_background_part(int back, float left, float top, float width, float he
     glPopAttrib();
 }
 
-void draw_background_tiled(int back, float x, float y)
+void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
 {
     get_background(bck2d,back);
       texture_use(GmTextures[bck2d->texture]->gltex);
@@ -180,7 +180,7 @@ void draw_background_tiled(int back, float x, float y)
     glPopAttrib();
 }
 
-void draw_background_tiled_area(int back, float x, float y, float x1, float y1, float x2, float y2)
+void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
   get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
@@ -231,7 +231,7 @@ void draw_background_tiled_area(int back, float x, float y, float x1, float y1, 
   glPopAttrib();
 }
 
-void draw_background_ext(int back, float x, float y, float xscale, float yscale, double rot, int color, double alpha)
+void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha)
 {
     get_background(bck2d,back);
       texture_use(GmTextures[bck2d->texture]->gltex);
@@ -269,7 +269,7 @@ void draw_background_ext(int back, float x, float y, float xscale, float yscale,
     glPopAttrib();
 }
 
-void draw_background_stretched_ext(int back, float x, float y, float w, float h, int color, double alpha)
+void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, double alpha)
 {
   get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
@@ -283,16 +283,16 @@ void draw_background_stretched_ext(int back, float x, float y, float w, float h,
       glTexCoord2f(0,0);
         glVertex2f(x,y);
       glTexCoord2f(tbx,0);
-        glVertex2f(x+w,y);
+        glVertex2f(x+width,y);
       glTexCoord2f(tbx,tby);
-        glVertex2f(x+w,y+h);
+        glVertex2f(x+width,y+height);
       glTexCoord2f(0,tby);
-        glVertex2f(x,y+h);
+        glVertex2f(x,y+height);
     glEnd();
   glPopAttrib();
 }
 
-void draw_background_part_ext(int back, float left, float top, float width, float height, float x, float y, float xscale, float yscale, int color, double alpha)
+void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
     get_background(bck2d,back);
       texture_use(GmTextures[bck2d->texture]->gltex);
@@ -320,7 +320,7 @@ void draw_background_part_ext(int back, float left, float top, float width, floa
     glPopAttrib();
 }
 
-void draw_background_tiled_ext(int back, float x, float y, float xscale, float yscale, int color, double alpha)
+void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
     get_background(bck2d,back);
       texture_use(GmTextures[bck2d->texture]->gltex);
@@ -365,7 +365,7 @@ void draw_background_tiled_ext(int back, float x, float y, float xscale, float y
     glPopAttrib();
 }
 
-void draw_background_tiled_area_ext(int back, float x, float y, float x1, float y1, float x2, float y2, float xscale, float yscale, int color, double alpha)
+void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
   get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
@@ -416,7 +416,7 @@ void draw_background_tiled_area_ext(int back, float x, float y, float x1, float 
   glPopAttrib();
 }
 
-void draw_background_general(int back, float left, float top, float width, float height, float x, float y, float xscale, float yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
+void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
 {
   get_background(bck2d,back);
   texture_use(GmTextures[bck2d->texture]->gltex);

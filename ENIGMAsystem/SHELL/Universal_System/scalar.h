@@ -15,10 +15,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// For querying the graphic's output for debugging purposes, eg. triangles rendered, VRAM usage, and VBO's, etc.
+// This header implements scalar data types for double and floating point precision
+// for major systems and coordinate space.
 
-#ifndef __DX10PROFILERH_
-#define __DX10PROFILERH_
-#include "../General/DirectXHeaders.h"
+//#define GS_SCALAR_64
+#define AS_SCALAR_64
+#define CS_SCALAR_64
 
+#ifdef GS_SCALAR_64
+typedef double gs_scalar;
+#else
+typedef float gs_scalar;
+#endif
+
+#ifdef AS_SCALAR_64
+typedef double as_scalar;
+#else
+typedef float as_scalar;
+#endif
+
+#ifdef CS_SCALAR_64
+typedef double cs_scalar;
+#else
+typedef float cs_scalar;
 #endif

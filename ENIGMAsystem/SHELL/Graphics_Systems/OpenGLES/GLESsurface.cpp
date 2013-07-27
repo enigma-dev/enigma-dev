@@ -17,11 +17,11 @@
 
 /**Surface functions***********************************************************\
 
-int surface_create(double width, double height)
+int surface_create(gs_scalar width, gs_scalar height)
 int surface_set_target(int id)
 int surface_reset_target(void)
 int surface_destroy(int id)
-int draw_surface(double id, double x, double y)
+int draw_surface(unsigned id, gs_scalar x, gs_scalar y)
 
 \******************************************************************************/
 
@@ -48,7 +48,7 @@ namespace enigma
   int surface_max=0;
 }
 
-int surface_create(float width, float height)
+int surface_create(gs_scalar width, gs_scalar height)
 {
 	GLuint tex, fbo;
 	int prevFbo;
@@ -136,7 +136,7 @@ int surface_destroy(int id)
 	return 0;
 }
 
-int draw_surface(double id, float x, float y)
+int draw_surface(double id, gs_scalar x, gs_scalar y)
 {
     int s=(int)id;
     if (s>enigma::surface_max)

@@ -18,6 +18,7 @@
 #ifndef _SURFSTRUCT__H
 #define _SURFSTRUCT__H
 
+#include "Universal_System/scalar.h"
 #include <string>
 #include "OpenGLHeaders.h"
 using std::string;
@@ -40,17 +41,17 @@ void surface_set_target(int id);
 void surface_reset_target();
 void surface_free(int id);
 bool surface_exists(int id);
-void draw_surface(int id, float x, float y);
-void draw_surface_stretched(int id, float x, float y, float w, float h);
-void draw_surface_part(int id, float left, float top, float width, float height, float x, float y);
-void draw_surface_tiled(int id, float x, float y);
-void draw_surface_tiled_area(int id, float x, float y, float x1, float y1, double x2,double y2);
-void draw_surface_ext(int id,float x, float y,float xscale, float yscale, double rot, int color, double alpha);
-void draw_surface_stretched_ext(int id, float x, float y, float w, float h, int color, double alpha);
-void draw_surface_part_ext(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale, int color, double alpha);
-void draw_surface_tiled_ext(int id, float x, float y, float xscale, float yscale, int color, double alpha);
-void draw_surface_tiled_area_ext(int id, float x, float y, float x1, float y1, double x2, double y2, float xscale, float yscale, int color, double alpha);
-void draw_surface_general(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4);
+void draw_surface(int id, gs_scalar x, gs_scalar y);
+void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei);
+void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y);
+void draw_surface_tiled(int id, gs_scalar x, gs_scalar y);
+void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);
+void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha);
+void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei, int color, double alpha);
+void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha);
+void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha);
+void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha);
+void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4);
 int surface_get_bound();
 int surface_get_texture(int id);
 int surface_get_width(int id);
@@ -59,8 +60,8 @@ int surface_getpixel(int id, int x, int y);
 int surface_getpixel_alpha(int id, int x, int y);
 int surface_save(int id, string filename);
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h);
-void surface_copy(int destination,float x, float y,int source);
-void surface_copy_part(int destination, float x, float y, int source ,int xs, int ys, int ws, int hs);
+void surface_copy(int destination,gs_scalar x, gs_scalar y,int source);
+void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source ,int xs, int ys, int ws, int hs);
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig);
 bool surface_is_supported();
 #define surface_destroy surface_free

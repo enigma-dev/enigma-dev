@@ -59,13 +59,13 @@ int draw_primitive_begin_texture(int dink,unsigned tex)
   return 0;
 }
 
-int draw_vertex(double x, double y)
+int draw_vertex(gs_scalar x, gs_scalar y)
 {
 	glVertex2f(x,y);
 	return 0;
 }
 
-int draw_vertex_color(float x, float y, int col, float alpha)
+int draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(
@@ -77,13 +77,13 @@ int draw_vertex_color(float x, float y, int col, float alpha)
   glPopAttrib();
 	return 0;
 }
-int draw_vertex_texture(float x, float y, float tx, float ty)
+int draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 {
     glTexCoord2f(tx,ty);
     glVertex2f(x,y);
 	return 0;
 }
-int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha)
+int draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
 {
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(
@@ -118,22 +118,22 @@ void d3d_primitive_end()
     glEnd();
 }
 
-void d3d_vertex(float x, float y, float z)
+void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
 {
     glVertex3d(x,y,z);
 }
-void d3d_vertex_color(float x, float y, float z, int color, double alpha)
+void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha)
 {
     glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
 }
-void d3d_vertex_texture(float x, float y, float z, float tx, float ty)
+void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
 {
     glTexCoord2f(tx,ty);
     glVertex3d(x,y,z);
 }
-void d3d_vertex_texture_color(float x, float y, float z, float tx, float ty, int color, double alpha)
+void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha)
 {
     glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glTexCoord2f(tx,ty);
@@ -141,25 +141,25 @@ void d3d_vertex_texture_color(float x, float y, float z, float tx, float ty, int
     glColor4ubv(enigma::currentcolor);
 }
 
-void d3d_vertex_normal(float x, float y, float z, float nx, float ny, float nz)
+void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
 }
-void d3d_vertex_normal_color(float x, float y, float z, float nx, float ny, float nz, int color, double alpha)
+void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha)
 {
     glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
 }
-void d3d_vertex_normal_texture(float x, float y, float z, float nx, float ny, float nz, float tx, float ty)
+void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
 {
     glTexCoord2f(tx,ty);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
 }
-void d3d_vertex_normal_texture_color(float x, float y, float z, float nx, float ny, float nz, float tx, float ty, int color, double alpha)
+void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha)
 {
     glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glTexCoord2f(tx,ty);

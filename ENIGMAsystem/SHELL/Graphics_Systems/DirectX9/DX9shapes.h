@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -31,10 +31,9 @@
 */
 // ***** Information END ***** 
 
-#ifndef __GLSHAPESH_
-#define __GLSHAPESH_
-#include "Universal_System/scalar.h"
-#include "../General/OpenGLHeaders.h"
-GLfloat* block_vertices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
-GLfloat* block_indices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
-#endif
+#ifndef __DX9SHAPESH_
+#define __DX9SHAPESH_
+#include "../General/DirectXHeaders.h"
+GLfloat* block_vertices(gs_scalar  x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
+GLfloat* block_indices(gs_scalar  x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar  y2, gs_scalar z2);
+#endi
