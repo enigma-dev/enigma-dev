@@ -61,7 +61,7 @@ int d3d_primitive_begin(int kind)
     return 0;
 }
 
-int d3d_vertex(double x, double y, double z)
+int d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
 {
    // glVertex3d(x,y,z);
     return 0;
@@ -73,8 +73,7 @@ int d3d_primitive_end()
     return 0;
 }
 
-int d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,
-                       double yto,double zto,double xup,double yup,double zup)
+int d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
    // gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
     return 0;

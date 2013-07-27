@@ -18,6 +18,10 @@
 // This header implements scalar data types for double and floating point precision
 // for major systems and coordinate space.
 
+//#define GS_SCALAR_64
+#define AS_SCALAR_64
+#define CS_SCALAR_64
+
 #ifdef GS_SCALAR_64
 typedef double gs_scalar;
 #else

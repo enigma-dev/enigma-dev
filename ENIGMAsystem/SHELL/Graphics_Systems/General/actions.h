@@ -206,7 +206,7 @@ inline void action_draw_life_images(const gs_scalar x, const gs_scalar y, const 
         draw_sprite(image,-1, actualX+(i*width), actualY);
 }
 
-inline void action_draw_line(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2,)
+inline void action_draw_line(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2)
 {
     if (argument_relative)
     {

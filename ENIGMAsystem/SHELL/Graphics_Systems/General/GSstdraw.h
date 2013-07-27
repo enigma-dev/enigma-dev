@@ -50,7 +50,7 @@ void draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, floa
 void draw_mandelbrot(gs_scalar x, gs_scalar y, float w, double Zx, double Zy, double Zw, unsigned iter);
 void draw_arrow(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float arrow_size, float line_size = 1, bool outline = false);
 void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float border_width, bool up);
-int draw_mandelbrot(gs_scalar x, gs_scalar y, float w, double Zx, double Zy, double Zw, unsigned iter);
+int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsigned iter);
 int draw_getpixel(int,int);
 #define draw_get_pixel draw_getpixel
 

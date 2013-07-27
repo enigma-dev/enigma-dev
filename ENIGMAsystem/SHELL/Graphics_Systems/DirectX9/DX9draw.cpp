@@ -192,7 +192,7 @@ int draw_getpixel(int x, int y)
 
 }
 
-int draw_mandelbrot(gs_scalar x, gs_scalar y, float w, double Zx, double Zy, double Zw, unsigned iter)
+int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsigned iter)
 {
 
 }
