@@ -137,7 +137,7 @@ unsigned int string_width_line(variant vstr, int line)
   return len;
 }
 
-unsigned int string_width_ext_line(variant vstr, float w, int line)
+unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
@@ -165,7 +165,7 @@ unsigned int string_width_ext_line(variant vstr, float w, int line)
   return width;
 }
 
-unsigned int string_width_ext_line_count(variant vstr, float w)
+unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);

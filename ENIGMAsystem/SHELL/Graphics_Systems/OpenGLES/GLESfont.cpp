@@ -92,7 +92,7 @@ unsigned int string_width_ext_line(string str, gs_scalar w, int line)
 {
   font *fnt = fontstructarray[currentfont];
 
-  unsigned gs_scalar width = 0, tw = 0, cl = 0;
+  unsigned int width = 0, tw = 0, cl = 0;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r' or str[i] == '\n')
@@ -117,7 +117,7 @@ unsigned int string_width_ext_line_count(string str, gs_scalar w)
 {
   font *fnt = fontstructarray[currentfont];
 
-  unsigned gs_scalar width = 0, tw = 0, cl = 1;
+  unsigned int width = 0, tw = 0, cl = 1;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r' or str[i] == '\n')
@@ -619,7 +619,7 @@ unsigned int string_width_ext(string str, gs_scalar sep, gs_scalar w) //here sep
 {
   font *fnt = fontstructarray[currentfont];
 
-  unsigned gs_scalar width = 0, maxwidth = 0;
+  unsigned int width = 0, maxwidth = 0;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == ' '){
@@ -639,7 +639,7 @@ unsigned int string_height_ext(string str, gs_scalar sep, gs_scalar w)
 {
   font *fnt = fontstructarray[currentfont];
 
-  unsigned gs_scalar width = 0, tw = 0, height = fnt->height;
+  unsigned int width = 0, tw = 0, height = fnt->height;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r' or str[i] == '\n')
