@@ -21,6 +21,8 @@
  * RAW format, RGB only.
  */
 
+#include "Universal_System/scalar.h"
+
 #ifndef _GLTEXTURES__H
 #define _GLTEXTURES__H
 
@@ -127,7 +129,7 @@ void texture_set_swizzle(int texid, int r, int g, int b, double a);
 @param maxlod
 @param maxlevel
 **/
-void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel);
+void texture_set_levelofdetail(int texid, gs_scalar minlod, gs_scalar maxlod, int maxlevel);
 /** description
 @param texid Index of the texture.
 @param enable
@@ -148,7 +150,7 @@ float texture_anisotropy_maxlevel();
 @param texid Index of the texture.
 @param levels
 **/
-void  texture_anisotropy_filter(int texid, float levels);
+void  texture_anisotropy_filter(int texid, gs_scalar levels);
 /** description
 **/
 bool texture_multitexture_supported();

@@ -18,6 +18,7 @@
 #ifndef ENIGMA_GL3D3D_H
 #define ENIGMA_GL3D3D_H 
 
+#include "Universal_System/scalar.h"
 #include <string>
 
 namespace enigma {
@@ -105,34 +106,34 @@ void d3d_set_fog_density(double density);
 void d3d_set_depth(double dep);
 void d3d_set_shading(bool smooth);
 
-void d3d_set_projection(float xfrom, float yfrom, float zfrom,float xto, float yto, float zto,float xup, float yup, float zup);
-void d3d_set_projection_ext(float xfrom, float yfrom, float zfrom,float xto, float yto, float zto,float xup, float yup, float zup,double angle,double aspect,double znear,double zfar);
-void d3d_set_projection_ortho(float x, float y, float width, float height, double angle);
-void d3d_set_projection_perspective(float x, float y, float width, float height, double angle);
+void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup);
+void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, double angle, double aspect, double znear, double zfar);
+void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle);
+void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle);
 
-void d3d_draw_wall(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep);
-void d3d_draw_floor(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep);
-void d3d_draw_block(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep, bool closed = true);
-void d3d_draw_cylinder(float x1, float y1, float z1, float x2, float y2, float z2, int texid, float hrep, float vrep, bool closed, int steps);
-void d3d_draw_cone(float x1, float y1, float z1, float x2, float y2, float z2, int texid, float hrep, float vrep, bool closed, int steps);
-void d3d_draw_ellipsoid(float x1, float y1, float z1, float x2, float y2, float z2, int texid, float hrep, float vrep, int steps);
+void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep);
+void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep);
+void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed = true);
+void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texid, gs_scalar hrep, gs_scalar vrep, bool closed, int steps);
+void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texid, gs_scalar hrep, gs_scalar vrep, bool closed, int steps);
+void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texid, gs_scalar hrep, gs_scalar vrep, int steps);
 void d3d_draw_icosahedron(int texid);
-void d3d_draw_torus(float x1, float y1, float z1, int texId, float hrep, float vrep, int csteps, int tsteps, float radius, float tradius, float TWOPI = 2*3.14);
+void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, float radius, float tradius, float TWOPI = 2*3.14);
 
 // ***** TRANSFORMATIONS BEGIN *****
 void d3d_transform_set_identity();
-void d3d_transform_add_translation(float xt,float yt,float zt);
-void d3d_transform_add_scaling(float xs,float ys,float zs);
+void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt);
+void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs);
 void d3d_transform_add_rotation_x(double angle);
 void d3d_transform_add_rotation_y(double angle);
 void d3d_transform_add_rotation_z(double angle);
-void d3d_transform_add_rotation_axis(float x, float y, float z, double angle);
-void d3d_transform_set_translation(float xt,float yt,float zt);
-void d3d_transform_set_scaling(float xs,float ys,float zs);
+void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle);
+void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt);
+void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs);
 void d3d_transform_set_rotation_x(double angle);
 void d3d_transform_set_rotation_y(double angle);
 void d3d_transform_set_rotation_z(double angle);
-void d3d_transform_set_rotation_axis(float x, float y, float z, double angle);
+void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle);
 bool d3d_transform_stack_push();
 bool d3d_transform_stack_pop();
 void d3d_transform_stack_clear();
@@ -142,8 +143,8 @@ bool d3d_transform_stack_disgard();
 // ***** TRANSFORMATIONS END *****
 
 // ***** LIGHTS BEGIN *****
-bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col);
-bool d3d_light_define_point(int id, float x, float y, float z, double range, int col);
+bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
+bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
 bool d3d_light_define_specularity(int id, int r, int g, int b, double a);
 void d3d_light_specularity(int facemode, int r, int g, int b, double a);
 void d3d_light_shininess(int facemode, int shine);

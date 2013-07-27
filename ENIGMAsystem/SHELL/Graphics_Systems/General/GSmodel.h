@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
+
 #include <string>
 #include "OpenGLHeaders.h"
 
@@ -38,30 +40,30 @@ enum {
   void d3d_model_save(const unsigned int id, std::string fname);
   bool d3d_model_load(const unsigned int id, std::string fname);
   void d3d_model_draw(const unsigned int id);
-  void d3d_model_draw(const unsigned int id, float x, float y, float z);
+  void d3d_model_draw(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z);
   void d3d_model_draw(const unsigned int id, int texId);
-  void d3d_model_draw(const unsigned int id, float x, float y, float z, int texId);
+  void d3d_model_draw(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId);
   void d3d_model_primitive_begin(const unsigned int id, int kind);
   void d3d_model_primitive_end(const unsigned int id);
-  void d3d_model_vertex(const unsigned int id, float x, float y, float z);
-  void d3d_model_normal(const unsigned int id, float nx, float ny, float nz);
-  void d3d_model_texture(const unsigned int id, float tx, float ty);
+  void d3d_model_vertex(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z);
+  void d3d_model_normal(const unsigned int id, gs_scalar nx, gs_scalar ny, gs_scalar nz);
+  void d3d_model_texture(const unsigned int id, gs_scalar tx, gs_scalar ty);
   void d3d_model_color(const unsigned int id, int col, double alpha);
   void d3d_model_index(const unsigned int id, GLuint in);
-  void d3d_model_vertex_color(const unsigned int id, float x, float y, float z, int col, double alpha);
-  void d3d_model_vertex_texture(const unsigned int id, float x, float y, float z, float tx, float ty);
-  void d3d_model_vertex_texture_color(const unsigned int id, float x, float y, float z, float tx, float ty, int col, double alpha);
-  void d3d_model_vertex_normal(const unsigned int id, float x, float y, float z, float nx, float ny, float nz);
-  void d3d_model_vertex_normal_color(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, int col, double alpha);
-  void d3d_model_vertex_normal_texture(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, float tx, float ty);
-  void d3d_model_vertex_normal_texture_color(const unsigned int id, float x, float y, float z, float nx, float ny, float nz, float tx, float ty, int col, double alpha);
-  void d3d_model_wall(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep);
-  void d3d_model_floor(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep);
-  void d3d_model_block(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed = true);
-  void d3d_model_cylinder(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed, int steps);
-  void d3d_model_cone(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, bool closed, int steps);
-  void d3d_model_ellipsoid(const unsigned int id, float x1, float y1, float z1, float x2, float y2, float z2, float hrep, float vrep, int steps);
+  void d3d_model_vertex_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha);
+  void d3d_model_vertex_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty);
+  void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha);
+  void d3d_model_vertex_normal(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz);
+  void d3d_model_vertex_normal_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha);
+  void d3d_model_vertex_normal_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty);
+  void d3d_model_vertex_normal_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int col, double alpha);
+  void d3d_model_wall(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep);
+  void d3d_model_floor(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep);
+  void d3d_model_block(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed = true);
+  void d3d_model_cylinder(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps);
+  void d3d_model_cone(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps);
+  void d3d_model_ellipsoid(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, int steps);
   void d3d_model_icosahedron(const unsigned int id);
-  void d3d_model_torus(const unsigned int id, float x1, float y1, float z1, float hrep, float vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
+  void d3d_model_torus(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI = 2*3.14);
 }
 
