@@ -49,7 +49,7 @@ namespace enigma {
 namespace enigma_user
 {
 
-void path_start(unsigned pathid,double speed,unsigned endaction,bool absolute)
+void path_start(unsigned pathid, cs_scalar speed, unsigned endaction, bool absolute)
 {
     #ifndef PATH_EXT_SET
         return;
@@ -83,7 +83,7 @@ void path_end()
     inst_paths->path_index = -1;
 }
 
-void path_set_position(double position, bool relative)
+void path_set_position(cs_scalar position, bool relative)
 {
     #ifndef PATH_EXT_SET
         return;
@@ -101,7 +101,7 @@ void path_set_position(double position, bool relative)
     }
 }
 
-void path_set_speed(double speed, bool relative)
+void path_set_speed(cs_scalar speed, bool relative)
 {
     #ifndef PATH_EXT_SET
         return;
@@ -159,7 +159,7 @@ int path_duplicate(unsigned pathid)
     return enigma::path_idmax++;
 }
 
-void path_copy(unsigned pathid,unsigned srcid)
+void path_copy(unsigned pathid, unsigned srcid)
 {
     enigma::pathstructarray[pathid]->pointarray.clear();
     enigma::path *pa = enigma::pathstructarray[pathid];
@@ -171,13 +171,13 @@ void path_copy(unsigned pathid,unsigned srcid)
     enigma::path_recalculate(pathid);
 }
 
-void path_assign(unsigned pathid,unsigned path)
+void path_assign(unsigned pathid, unsigned path)
 {
     delete enigma::pathstructarray[pathid];
     enigma::pathstructarray[pathid] = new enigma::path(*enigma::pathstructarray[path]);
 }
 
-void path_append(unsigned pathid,unsigned path)
+void path_append(unsigned pathid, unsigned path)
 {
     enigma::path *pa = enigma::pathstructarray[pathid];
     enigma::path *pa2 = enigma::pathstructarray[path];
@@ -188,7 +188,7 @@ void path_append(unsigned pathid,unsigned path)
     enigma::path_recalculate(pathid);
 }
 
-void path_shift(unsigned pathid,double xshift,double yshift)
+void path_shift(unsigned pathid, cs_scalar xshift, cs_scalar yshift)
 {
     enigma::path *pa = enigma::pathstructarray[pathid];
     for (vector<enigma::path_point>::iterator it = pa->pointarray.begin(); it!=pa->pointarray.end(); ++it)
@@ -211,7 +211,7 @@ void path_mirror(unsigned pathid)
     }
 }
 
-void path_scale(unsigned pathid,double xscale,double yscale)
+void path_scale(unsigned pathid, cs_scalar xscale, cs_scalar yscale)
 {
     enigma::path *pa = enigma::pathstructarray[pathid];
     for (size_t i=0; i<pa->pointarray.size(); i++){
@@ -221,8 +221,8 @@ void path_scale(unsigned pathid,double xscale,double yscale)
     enigma::path_recalculate(pathid);
 }
 
-void path_rotate(unsigned pathid,double angle)
-{
+void path_rotate(unsigned pathid, double angle)
+{ 
     enigma::path *pa = enigma::pathstructarray[pathid];
     double tmpx, tmpy, a = (M_PI / 180) * -angle;
     for (size_t i=0; i<pa->pointarray.size(); i++){
@@ -233,30 +233,30 @@ void path_rotate(unsigned pathid,double angle)
     }
 }
 
-double path_get_x(unsigned pathid, double t)
+cs_scalar path_get_x(unsigned pathid, double t)
 {
-    double x,y;
+    cs_scalar x,y;
     path_getXY(enigma::pathstructarray[pathid], x, y, t);
     return x;
 }
 
-double path_get_y(unsigned pathid, double t)
+cs_scalar path_get_y(unsigned pathid, double t)
 {
-    double x,y;
+    cs_scalar x,y;
     path_getXY(enigma::pathstructarray[pathid], x, y, t);
     return y;
 }
 
-double path_get_speed(unsigned pathid, double t)
+cs_scalar path_get_speed(unsigned pathid, double t)
 {
-    double speed;
+    cs_scalar speed;
     path_getspeed(enigma::pathstructarray[pathid], speed, t);
     return speed*100;
 }
 
 double path_get_direction(unsigned pathid, double t)
 {
-    double x1,y1,x2,y2,p1,p2,precision;
+    cs_scalar x1,y1,x2,y2,p1,p2,precision;
     precision = 0.0005;
 
     p1 = t - precision;
@@ -276,12 +276,12 @@ double path_get_direction(unsigned pathid, double t)
     return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);
 }
 
-double path_get_center_x(unsigned pathid)
+cs_scalar path_get_center_x(unsigned pathid)
 {
     return enigma::pathstructarray[pathid]->centerx;
 }
 
-double path_get_center_y(unsigned pathid)
+cs_scalar path_get_center_y(unsigned pathid)
 {
     return enigma::pathstructarray[pathid]->centery;
 }
@@ -291,22 +291,22 @@ int path_get_number(unsigned pathid)
     return enigma::pathstructarray[pathid]->pointarray.size();
 }
 
-double path_get_point_x(unsigned pathid, unsigned n)
+cs_scalar path_get_point_x(unsigned pathid, unsigned n)
 {
     return enigma::pathstructarray[pathid]->pointarray[n].x;
 }
 
-double path_get_point_y(unsigned pathid, unsigned n)
+cs_scalar path_get_point_y(unsigned pathid, unsigned n)
 {
     return enigma::pathstructarray[pathid]->pointarray[n].y;
 }
 
-double path_get_point_length(unsigned pathid, unsigned n)
+cs_scalar path_get_point_length(unsigned pathid, unsigned n)
 {
     return enigma::pathstructarray[pathid]->pointarray[n].length;
 }
 
-double path_get_point_speed(unsigned pathid, unsigned n)
+cs_scalar path_get_point_speed(unsigned pathid, unsigned n)
 {
     return enigma::pathstructarray[pathid]->pointarray[n].speed*100;
 }
@@ -316,7 +316,7 @@ int path_get_precision(unsigned pathid)
     return enigma::pathstructarray[pathid]->precision;
 }
 
-double path_get_length(unsigned pathid)
+cs_scalar path_get_length(unsigned pathid)
 {
     return enigma::pathstructarray[pathid]->total_length;
 }
@@ -360,14 +360,14 @@ void path_clear_points(unsigned pathid)
     enigma::path_recalculate(pathid);
 }
 
-void path_add_point(unsigned pathid, double x, double y, double speed)
+void path_add_point(unsigned pathid, cs_scalar x, cs_scalar y, cs_scalar speed)
 {
     enigma::path_point point={x,y,speed/100};
     enigma::pathstructarray[pathid]->pointarray.push_back(point);
     enigma::path_recalculate(pathid);
 }
 
-void path_insert_point(unsigned pathid,unsigned n,double x,double y,double speed)
+void path_insert_point(unsigned pathid, unsigned n, cs_scalar x, cs_scalar y, cs_scalar speed)
 {
     #ifdef DEBUG_MODE
     if (n>enigma::pathstructarray[pathid]->pointarray.size()){
@@ -380,7 +380,7 @@ void path_insert_point(unsigned pathid,unsigned n,double x,double y,double speed
     enigma::path_recalculate(pathid);
 }
 
-void path_change_point(unsigned pathid,unsigned n,double x,double y,double speed)
+void path_change_point(unsigned pathid, unsigned n, cs_scalar x, cs_scalar y, cs_scalar speed)
 {
     #ifdef DEBUG_MODE
     if (n>enigma::pathstructarray[pathid]->pointarray.size()){
@@ -394,7 +394,7 @@ void path_change_point(unsigned pathid,unsigned n,double x,double y,double speed
     enigma::path_recalculate(pathid);
 }
 
-void path_delete_point(unsigned pathid,unsigned n)
+void path_delete_point(unsigned pathid, unsigned n)
 {
     #ifdef DEBUG_MODE
     if (n>enigma::pathstructarray[pathid]->pointarray.size()){
