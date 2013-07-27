@@ -818,7 +818,7 @@ class d3d_lights
             ms = (*light_ind.find(id)).second;
             multimap<int,posi>::iterator it = ind_pos.find(ms);
             if (it != ind_pos.end())
-                ind_pos.erase(it); 
+                ind_pos.erase(it);
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
         else
@@ -851,7 +851,7 @@ class d3d_lights
             ms = (*light_ind.find(id)).second;
             multimap<int,posi>::iterator it = ind_pos.find(ms);
  	    if (it != ind_pos.end())
-                ind_pos.erase(it); 
+                ind_pos.erase(it);
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
         else
@@ -880,7 +880,7 @@ class d3d_lights
         return true;
     }
 
-    bool light_define_specularity(int id, int r, int g, int b, double a) 
+    bool light_define_specularity(int id, int r, int g, int b, double a)
     {
         int ms;
         if (light_ind.find(id) != light_ind.end())
@@ -943,12 +943,12 @@ bool d3d_light_define_direction(int id, float dx, float dy, float dz, int col)
     return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
 }
 
-bool d3d_light_define_point(int id, float x, float y, double z, double range, int col)
+bool d3d_light_define_point(int id, float x, float y, float z, double range, int col)
 {
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a) 
+bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
     return d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
