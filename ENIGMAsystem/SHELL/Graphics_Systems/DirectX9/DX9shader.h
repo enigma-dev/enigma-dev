@@ -15,32 +15,36 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <iostream>
-#include <string>
+#ifndef _DX9SHADER__H
+#define _DX9SHADER__H
 
-#include "../General/DirectXHeaders.h"
-using namespace std;
-#include "DIRECTX10Std.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-namespace enigma
-{
-  unsigned bound_texture=0;
-  unsigned char currentcolor[4] = {0,0,0,255};
-  bool pbo_isgo;
-
-  void graphicssystem_initialize()
-  {
-
-  }
-}
-
-namespace enigma_user {
-// Stolen entirely from the documentation and thrown into a switch() structure.
-string draw_get_graphics_error()
+namespace enigma_user
 {
 
-}
+enum {
+  sh_vertex = 0,
+  sh_tesscontrol = 1,
+  sh_tessevaluation = 2,
+  sh_geometry = 3,
+  sh_fragment = 4
+};
+
+int shader_create(int type);
+int shader_load(int id, const char* fname);
+bool shader_compile(int id);
+const char* shader_compile_output(int id);
+void shader_free(int id);
+
+int shader_program_create();
+bool shader_program_link(int id);
+bool shader_program_validate(int id);
+void shader_program_attach(int id, int sid);
+void shader_program_detach(int id, int sid);
+void shader_program_bind_frag_data(int id, const char* name);
+void shader_program_use(int id);
+void shader_program_reset();
+void shader_program_free(int id);
+
 }
 
+#endif

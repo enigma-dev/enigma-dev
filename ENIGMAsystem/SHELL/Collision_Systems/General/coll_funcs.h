@@ -15,30 +15,31 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
 #include "Universal_System/instance_system_base.h"
 
 namespace enigma_user
 {
 
-bool place_free(double x,double y);
-bool place_empty(double x,double y);
-bool place_meeting(double x, double y, int object);
-bool position_free(double x,double y);
-bool position_empty(double x, double y);
-bool position_meeting(double x, double y, int object);
-void position_destroy_object(double x, double y, int object, bool solid_only = false);
-void position_destroy_solid(double x, double y);
-void position_destroy(double x, double y);
-enigma::instance_t instance_place(double x, double y, int object);
-enigma::instance_t instance_position(double x, double y, int object);
-enigma::instance_t collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
-enigma::instance_t collision_line(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
-enigma::instance_t collision_point(double x, double y, int obj, bool prec = true, bool notme = true);
-enigma::instance_t collision_circle(double x, double y, double radius, int obj, bool prec = true, bool notme = true);
-enigma::instance_t collision_ellipse(double x1, double y1, double x2, double y2, int obj, bool prec = true, bool notme = true);
+bool place_free(cs_scalar x, cs_scalar y);
+bool place_empty(cs_scalar x, cs_scalar y);
+bool place_meeting(cs_scalar x, cs_scalar y, int object);
+bool position_free(cs_scalar x, cs_scalar y);
+bool position_empty(cs_scalar x, cs_scalar y);
+bool position_meeting(cs_scalar x, cs_scalar y, int object);
+void position_destroy_object(cs_scalar x, cs_scalar y, int object, bool solid_only = false);
+void position_destroy_solid(cs_scalar x, cs_scalar y);
+void position_destroy(cs_scalar x, cs_scalar y);
+enigma::instance_t instance_place(cs_scalar x, cs_scalar y, int object);
+enigma::instance_t instance_position(cs_scalar x, cs_scalar y, int object);
+enigma::instance_t collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_line(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_point(cs_scalar x, cs_scalar y, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_circle(cs_scalar x, cs_scalar y, double radius, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_ellipse(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec = true, bool notme = true);
 
 double distance_to_object(int object);
-double distance_to_point(double x, double y);
+double distance_to_point(cs_scalar x, cs_scalar y);
 
 double move_contact_object(int object, double angle, double max_dist = 1000000, bool solid_only = false);
 
@@ -79,7 +80,7 @@ void instance_activate_region(int left, int top, int width, int height, int insi
 void instance_deactivate_circle(int x, int y, int r, int inside = true, bool notme = true);
 void instance_activate_circle(int x, int y, int r, int inside = true);
 
-void position_change(double x1, double y1, int obj, bool perf);
+void position_change(cs_scalar x1, cs_scalar y1, int obj, bool perf);
 
 }
 

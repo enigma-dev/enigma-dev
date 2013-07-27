@@ -16,7 +16,7 @@
 **/
 
 #include "../General/DirectXHeaders.h"
-#include "DX10shader.h"
+#include "DX9shader.h"
 #include <math.h>
 
 #include <stdio.h>      /* printf, scanf, NULL */

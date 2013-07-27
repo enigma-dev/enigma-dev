@@ -116,7 +116,7 @@ int audio_play_sound(int sound, double priority, bool loop)
   }
 }
 
-int audio_play_sound_at(int sound, double x, double y, double z, int falloff_ref, double falloff_max, double falloff_factor, bool loop, double priority)
+int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, int falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority)
 {
   int src = enigma::get_free_channel(priority);
   if (src != -1)
@@ -239,7 +239,7 @@ int audio_get_type(int index)
   return enigma::sounds[sndsrc->soundIndex]->type;
 }
 
-void audio_listener_orientation(double lookat_x, double lookat_y, double lookat_z, double up_x, double up_y, double up_z)
+void audio_listener_orientation(as_scalar lookat_x, as_scalar lookat_y, as_scalar lookat_z, as_scalar up_x, as_scalar up_y, as_scalar up_z)
 {
   listenerOri[0] = up_x;
   listenerOri[1] = up_y;
@@ -250,7 +250,7 @@ void audio_listener_orientation(double lookat_x, double lookat_y, double lookat_
   alListenerfv(AL_ORIENTATION, listenerOri);
 }
 
-void audio_listener_position(double x, double y, double z)
+void audio_listener_position(as_scalar x, as_scalar y, as_scalar z)
 {
   listenerPos[0] = x;
   listenerPos[1] = y;
@@ -258,7 +258,7 @@ void audio_listener_position(double x, double y, double z)
   alListenerfv(AL_POSITION, listenerPos);
 }
 
-void audio_listener_velocity(double vx, double vy, double vz)
+void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz)
 {
   listenerVel[0] = vx;
   listenerVel[1] = vy;
@@ -447,7 +447,7 @@ void audio_emitter_loop(int index, bool loop)
 
 }
 
-void audio_emitter_falloff(int emitter, double falloff_ref, double falloff_max, double falloff_factor)
+void audio_emitter_falloff(int emitter, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor)
 {
   soundEmitter *emit = sound_emitters[emitter];
   emit->falloff[0] = falloff_ref;
@@ -473,7 +473,7 @@ void audio_emitter_pitch(int emitter, double pitch)
   emit->pitch = pitch;
 }
 
-void audio_emitter_position(int emitter, double x, double y, double z)
+void audio_emitter_position(int emitter, as_scalar x, as_scalar y, as_scalar z)
 {
   soundEmitter *emit = sound_emitters[emitter];
   emit->emitPos[0] = x;
@@ -481,7 +481,7 @@ void audio_emitter_position(int emitter, double x, double y, double z)
   emit->emitPos[2] = z;
 }
 
-void audio_emitter_velocity(int emitter, double vx, double vy, double vz)
+void audio_emitter_velocity(int emitter, as_scalar vx, as_scalar vy, as_scalar vz)
 {
   soundEmitter *emit = sound_emitters[emitter];
   emit->emitVel[0] = vx;

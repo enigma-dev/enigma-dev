@@ -30,6 +30,7 @@ extern bool argument_relative;
 
 #include "libEGMstd.h"
 
+#include "Universal_System/scalar.h"
 #include "Universal_System/GAME_GLOBALS.h" // TODO: Do away with this sloppy infestation permanently!
 #include "Universal_System/instance_system_base.h"
 #include "Universal_System/lives.h"
@@ -41,7 +42,7 @@ inline void action_color(const int color) {
 	draw_set_color(color);
 }
 
-inline void action_draw_rectangle(const double x1, const double y1, const double x2, const double y2, const int filled) {
+inline void action_draw_rectangle(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const int filled) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_rectangle(x1+inst->x,y1+inst->y,x2+inst->x,y2+inst->y,filled);
@@ -56,7 +57,7 @@ inline void action_sprite_set(const double spritep, const  double subimage, cons
 	inst->image_speed=speed;
 }
 
-inline void action_draw_text(const string text, const float x, const float y) {
+inline void action_draw_text(const string text, const gs_scalar x, const gs_scalar y) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_text(x+inst->x,y+inst->y,text); }
@@ -72,11 +73,11 @@ inline void action_font(const int font, const int align) {
 
 #define action_message(message) show_message(message)
 
-inline void action_draw_arrow(const double x1, const double y1, const double x2, const double y2, const double tipSize) {
+inline void action_draw_arrow(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const gs_scalar tipSize) {
     draw_arrow(x1, y1, x2, y2, tipSize, 1, false);
 }
 
-inline void action_draw_background(const int background, const float x, const float y, const int tiled)
+inline void action_draw_background(const int background, const gs_scalar x, const gs_scalar y, const int tiled)
 {
     if (argument_relative)
     {
@@ -87,7 +88,7 @@ inline void action_draw_background(const int background, const float x, const fl
       (tiled ? draw_background_tiled : draw_background)(background, x, y);
 }
 
-inline void action_draw_ellipse(const double x1, const double y1, const double x2, const double y2, const int filled)
+inline void action_draw_ellipse(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const int filled)
 {
     if (argument_relative)
     {
@@ -98,7 +99,7 @@ inline void action_draw_ellipse(const double x1, const double y1, const double x
         draw_ellipse(x1, y1, x2, y2, filled);
 }
 
-inline void action_draw_ellipse_gradient(const double x1, const double y1, const double x2, const double y2, const int color1, const int color2)
+inline void action_draw_ellipse_gradient(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const int color1, const int color2)
 {
     if (argument_relative)
     {
@@ -109,7 +110,7 @@ inline void action_draw_ellipse_gradient(const double x1, const double y1, const
         draw_ellipse_color(x1, y1, x2, y2, color1, color2, false);
 }
 
-inline void action_draw_gradient_hor(const double x1, const double y1, const double x2, const double y2, const int color1, const int color2)
+inline void action_draw_gradient_hor(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const int color1, const int color2)
 {
     if (argument_relative)
     {
@@ -120,7 +121,7 @@ inline void action_draw_gradient_hor(const double x1, const double y1, const dou
         draw_rectangle_color(x1, y1, x2, y2, color1, color2, color1, color2, false);
 }
 
-inline void action_draw_gradient_vert(const double x1, const double y1, const double x2, const double y2, const int color1, const int color2)
+inline void action_draw_gradient_vert(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const int color1, const int color2)
 {
     if (argument_relative)
     {
@@ -131,14 +132,14 @@ inline void action_draw_gradient_vert(const double x1, const double y1, const do
         draw_rectangle_color(x1, y1, x2, y2, color1, color1, color2, color2, false);
 }
 
-inline void action_draw_score(const double x, const double y, const string caption) {
+inline void action_draw_score(const gs_scalar x, const gs_scalar y, const string caption) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_text(x+inst->x,y+inst->y,caption+string(score));
     } else draw_text(x,y,caption+string(score));
 }
 
-inline void action_draw_sprite(const int sprite, const float x, const float y, const int subimage) {
+inline void action_draw_sprite(const int sprite, const gs_scalar x, const gs_scalar y, const int subimage) {
     if (argument_relative) {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
         draw_sprite(sprite,subimage,x+inst->x,y+inst->y);
@@ -147,8 +148,8 @@ inline void action_draw_sprite(const int sprite, const float x, const float y, c
         draw_sprite(sprite,subimage,x,y);
 }
 
-void action_draw_health(const double x1, const double y1, const double x2, const double y2, const double backColor, const int barColor);
-void action_draw_health(const double x1, const double y1, const double x2, const double y2, const double backColor, const int barColor) {
+void action_draw_health(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const double backColor, const int barColor);
+void action_draw_health(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const double backColor, const int barColor) {
   double realbar1, realbar2;
   switch (barColor)
   {
@@ -180,7 +181,7 @@ void action_draw_health(const double x1, const double y1, const double x2, const
         draw_healthbar(x1, y1, x2, y2, health, backColor, realbar2, realbar1, 1, 1, 1);
 }
 
-inline void action_draw_life(const double x, const double y, const string caption)
+inline void action_draw_life(const gs_scalar x, const gs_scalar y, const string caption)
 {
     if (argument_relative)
     {
@@ -191,7 +192,7 @@ inline void action_draw_life(const double x, const double y, const string captio
         draw_text(x, y, caption + string(lives));
 }
 
-inline void action_draw_life_images(const double x, const double y, const int image) {
+inline void action_draw_life_images(const gs_scalar x, const gs_scalar y, const int image) {
     int actualX=x, actualY=y;
     const int width = sprite_get_width(image);
 
@@ -205,7 +206,7 @@ inline void action_draw_life_images(const double x, const double y, const int im
         draw_sprite(image,-1, actualX+(i*width), actualY);
 }
 
-inline void action_draw_line(const double x1, const double y1, const double x2, const double y2)
+inline void action_draw_line(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2)
 {
     if (argument_relative)
     {
@@ -216,7 +217,7 @@ inline void action_draw_line(const double x1, const double y1, const double x2, 
         draw_line(x1, y1, x2, y2);
 }
 
-inline void action_draw_text_transformed(const string text, const double x, const double y, const double horScale, const double verScale, const double angle)
+inline void action_draw_text_transformed(const string text, const gs_scalar x, const gs_scalar y, const gs_scalar horScale, const gs_scalar verScale, const double angle)
 {
     if (argument_relative)
     {
@@ -227,7 +228,7 @@ inline void action_draw_text_transformed(const string text, const double x, cons
         draw_text_transformed(x, y, text, horScale, verScale, angle);
 }
 
-inline void action_draw_variable(variant variable, const double x, const double y)
+inline void action_draw_variable(variant variable, const gs_scalar x, const gs_scalar y)
 {
     if (argument_relative)
     {
@@ -260,7 +261,7 @@ inline int action_draw_self()
     return draw_self();
 }
 
-inline void action_sprite_transform(int xscale, int yscale, double angle, int mirror)
+inline void action_sprite_transform(gs_scalar xscale, gs_scalar yscale, double angle, int mirror)
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     inst->image_xscale = (mirror==1 || mirror==3)?-xscale:xscale;
