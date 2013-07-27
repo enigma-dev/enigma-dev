@@ -64,7 +64,7 @@ namespace enigma
       glAlphaFunc(GL_ALWAYS,0);
 
       glColor4f(0,0,0,1);
-      glBindTexture(GL_TEXTURE_2D,0);
+      glBindTexture(GL_TEXTURE_2D,bound_texture=0);
   }
 }
 
