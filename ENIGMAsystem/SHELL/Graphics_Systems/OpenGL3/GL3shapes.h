@@ -33,7 +33,8 @@
 
 #ifndef __GLSHAPESH_
 #define __GLSHAPESH_
+#include "Universal_System/scalar.h"
 #include "../General/OpenGLHeaders.h"
-GLfloat* block_vertices(double x1, double y1, double z1, double x2, double y2, double z2);
-GLfloat* block_indices(double x1, double y1, double z1, double x2, double y2, double z2);
+GLfloat* block_vertices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
+GLfloat* block_indices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
 #endif

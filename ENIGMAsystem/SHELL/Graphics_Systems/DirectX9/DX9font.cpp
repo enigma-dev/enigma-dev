@@ -130,7 +130,7 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  unsigned float width = 0, tw = 0; int cl = 0;
+  unsigned int width = 0, tw = 0; int cl = 0;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r')
@@ -158,7 +158,7 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  unsigned float width = 0, tw = 0, cl = 1;
+  unsigned int width = 0, tw = 0, cl = 1;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r')
@@ -216,7 +216,7 @@ unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here s
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  unsigned float width = 0, maxwidth = 0;
+  unsigned int width = 0, maxwidth = 0;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == ' '){
@@ -237,7 +237,7 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  unsigned float width = 0, tw = 0, height = fnt->height;
+  unsigned int width = 0, tw = 0, height = fnt->height;
   for (unsigned i = 0; i < str.length(); i++)
   {
     if (str[i] == '\r' or str[i] == '\n')

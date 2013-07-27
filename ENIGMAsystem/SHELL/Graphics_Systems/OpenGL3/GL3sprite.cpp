@@ -68,7 +68,7 @@ bool sprite_exists(int spr) {
     return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
 }
 
-void draw_sprite(int spr,int subimg,float x,float y)
+void draw_sprite(int spr, int subimg, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
@@ -95,7 +95,7 @@ void draw_sprite(int spr,int subimg,float x,float y)
 	glPopAttrib();
 }
 
-void draw_sprite_stretched(int spr,int subimg,float x,float y,float w,float h)
+void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
@@ -105,8 +105,8 @@ void draw_sprite_stretched(int spr,int subimg,float x,float y,float w,float h)
     glColor4f(1,1,1,1);
 
     const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
-                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + w,
-                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + h;
+                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
+                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + height;
 
     glBegin(GL_QUADS);
     glTexCoord2f(0,0);
@@ -122,7 +122,7 @@ void draw_sprite_stretched(int spr,int subimg,float x,float y,float w,float h)
 	glPopAttrib();
 }
 
-void draw_sprite_part(int spr,int subimg,float left,float top,float width,float height,float x,float y)
+void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     glPushAttrib(GL_CURRENT_BIT);
@@ -148,7 +148,7 @@ void draw_sprite_part(int spr,int subimg,float left,float top,float width,float 
 	glPopAttrib();
 }
 
-void draw_sprite_part_offset(int spr,int subimg,float left,float top,float width,float height,float x,float y)
+void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     glPushAttrib(GL_CURRENT_BIT);
@@ -176,7 +176,7 @@ void draw_sprite_part_offset(int spr,int subimg,float left,float top,float width
 	glPopAttrib();
 }
 
-void draw_sprite_ext(int spr,int subimg,float x,float y,float xscale,float yscale,double rot,int blend,double alpha)
+void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int blend, double alpha)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
@@ -215,7 +215,7 @@ void draw_sprite_ext(int spr,int subimg,float x,float y,float xscale,float yscal
     glPopAttrib();
 }
 
-void draw_sprite_part_ext(int spr,int subimg,float left,float top,float width,float height,float x,float y,float xscale,float yscale,int color,double alpha)
+void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
     get_spritev(spr2d,spr);
 	glPushAttrib(GL_CURRENT_BIT);
@@ -247,7 +247,7 @@ void draw_sprite_part_ext(int spr,int subimg,float left,float top,float width,fl
  * The applicable license does not change for this portion of the file.
  */
 
-void draw_sprite_general(int spr,int subimg,float left,float top,float width,float height,float x,float y,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a1, double a2, double a3, double a4)
+void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
 {
     get_spritev(spr2d,spr);
     glPushAttrib(GL_CURRENT_BIT);
@@ -290,7 +290,7 @@ void draw_sprite_general(int spr,int subimg,float left,float top,float width,flo
     glPopAttrib();
 }
 
-void draw_sprite_stretched_ext(int spr,int subimg,float x,float y,float w,float h, int blend, double alpha)
+void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int blend, double alpha)
 {
     get_spritev(spr2d,spr);
     glPushAttrib(GL_CURRENT_BIT);
@@ -298,8 +298,8 @@ void draw_sprite_stretched_ext(int spr,int subimg,float x,float y,float w,float 
     texture_use(GmTextures[spr2d->texturearray[usi]]->gltex);
 
     const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
-                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + w,
-                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + h;
+                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
+                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + height;
 
     glBegin(GL_QUADS);
     glTexCoord2f(0,0);
@@ -328,7 +328,7 @@ using std::string;
 namespace enigma_user
 {
 
-void draw_sprite_tiled(int spr,int subimg,float x,float y)
+void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
@@ -371,7 +371,7 @@ void draw_sprite_tiled(int spr,int subimg,float x,float y)
     glPopAttrib();
 }
 
-void draw_sprite_tiled_ext(int spr,int subimg,float x,float y, float xscale,float yscale,int color,double alpha)
+void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;

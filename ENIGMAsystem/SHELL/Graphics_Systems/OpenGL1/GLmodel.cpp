@@ -210,25 +210,25 @@ class d3d_model
         glEndList();
     }
 
-    void model_vertex(gs_scalar v[])
+    void model_vertex(float v[])
     {
         glVertex3fv(v);
     }
 
-    void model_vertex_color(gs_scalar v[], int col, double alpha)
+    void model_vertex_color(float v[], int col, double alpha)
     {
         glColor4f(GETR(col), GETG(col), GETB(col), alpha);
         glVertex3fv(v);
         glColor4ubv(enigma::currentcolor);
     }
 
-    void model_vertex_texture(gs_scalar v[], gs_scalar t[])
+    void model_vertex_texture(float v[], float t[])
     {
         glTexCoord2fv(t);
         glVertex3fv(v);
     }
 
-    void model_vertex_texture_color(gs_scalar v[], gs_scalar t[], int col, double alpha)
+    void model_vertex_texture_color(float v[], float t[], int col, double alpha)
     {
         glColor4f(GETR(col), GETG(col), GETB(col), alpha);
         glTexCoord2fv(t);
@@ -236,13 +236,13 @@ class d3d_model
         glColor4ubv(enigma::currentcolor);
     }
 
-    void model_vertex_normal(gs_scalar v[], gs_scalar n[])
+    void model_vertex_normal(float v[], float n[])
     {
         glNormal3fv(n);
         glVertex3fv(v);
     }
 
-    void model_vertex_normal_color(gs_scalar v[], gs_scalar n[], int col, double alpha)
+    void model_vertex_normal_color(float v[], float n[], int col, double alpha)
     {
         glColor4f(GETR(col), GETG(col), GETB(col), alpha);
         glNormal3fv(n);
@@ -250,14 +250,14 @@ class d3d_model
         glColor4ubv(enigma::currentcolor);
     }
 
-    void model_vertex_normal_texture(gs_scalar v[], gs_scalar n[], gs_scalar t[])
+    void model_vertex_normal_texture(float v[], float t[], float n[])
     {
         glTexCoord2fv(t);
         glNormal3fv(n);
         glVertex3fv(v);
     }
 
-    void model_vertex_normal_texture_color(gs_scalar v[], gs_scalar n[], gs_scalar t[], int col, double alpha)
+    void model_vertex_normal_texture_color(float v[], float t[], float n[], int col, double alpha)
     {
         glColor4f(GETR(col), GETG(col), GETB(col), alpha);
         glTexCoord2fv(t);

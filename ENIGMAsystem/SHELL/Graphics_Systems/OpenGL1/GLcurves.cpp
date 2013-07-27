@@ -392,14 +392,14 @@ void draw_spline_begin(int mode)
     startedSplines.push(new spline);
 }
 
-int draw_spline_vertex(float x, float y)
+int draw_spline_vertex(gs_scalar x, gs_scalar y)
 {
     splinePoint point={x,y,enigma::currentcolor[3],enigma::currentcolor[0] + (enigma::currentcolor[1] << 8) + (enigma::currentcolor[2] << 16)};
     startedSplines.top()->push_back(point);
     return startedSplines.top()->size()-2;
 }
 
-int draw_spline_vertex_color(float x, float y, int col, float alpha)
+int draw_spline_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
     splinePoint point={x,y,alpha,col};
     startedSplines.top()->push_back(point);
