@@ -47,7 +47,7 @@
 
 namespace enigma
 {
-    static void draw_tile(int back,float left,float top,double width,double height,float x,float y,float xscale,float yscale,int color,double alpha)
+    static void draw_tile(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
     {
         if (!enigma_user::background_exists(back)) return;
         get_background(bck2d,back);

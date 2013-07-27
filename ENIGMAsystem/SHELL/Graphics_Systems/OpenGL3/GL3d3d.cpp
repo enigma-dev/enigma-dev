@@ -18,8 +18,6 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "../General/GStextures.h"
-#include "GL3model.h"
-#include "GL3shapes.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -30,6 +28,8 @@ using namespace std;
 #define __GETR(x) ((x & 0x0000FF))/255.0
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+
+#include <floatcomp.h>
 
 namespace enigma {
   bool d3dMode = false;
@@ -222,7 +222,7 @@ void d3d_set_perspective(bool enable)
   }
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
   // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
-  // See also OpenGL1/GLd3d.cpp.
+  // See also OpenGL3/GL3d3d.cpp.
 }
 
 void d3d_set_depth(double dep)
@@ -237,15 +237,10 @@ void d3d_set_shading(bool smooth)
 
 }
 
-extern GLenum ptypes_by_id[16];
-namespace enigma {
-  extern unsigned char currentcolor[4];
-}
-
 namespace enigma_user
 {
 
-void d3d_set_projection(float xfrom, float yfrom, float zfrom,float xto, float yto, float zto,float xup, float yup, float zup)
+void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
   (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
@@ -259,7 +254,7 @@ void d3d_set_projection(float xfrom, float yfrom, float zfrom,float xto, float y
   enigma::d3d_light_update_positions();
 }
 
-void d3d_set_projection_ext(float xfrom, float yfrom, float zfrom,float xto, float yto, float zto,float xup, float yup, float zup,double angle,double aspect,double znear,double zfar)
+void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, double angle, double aspect, double znear, double zfar)
 {
   (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
@@ -273,7 +268,7 @@ void d3d_set_projection_ext(float xfrom, float yfrom, float zfrom,float xto, flo
   enigma::d3d_light_update_positions();
 }
 
-void d3d_set_projection_ortho(float x, float y, float width, float height, double angle)
+void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
 {
   glDisable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
@@ -289,7 +284,7 @@ void d3d_set_projection_ortho(float x, float y, float width, float height, doubl
   enigma::d3d_light_update_positions();
 }
 
-void d3d_set_projection_perspective(float x, float y, float width, float height, double angle)
+void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
 {
   glDisable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
@@ -304,9 +299,9 @@ void d3d_set_projection_perspective(float x, float y, float width, float height,
   enigma::d3d_light_update_positions();
 }
 
-void d3d_draw_wall(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep)
+void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-  if ((x1 == x2 && y1 == y2) || z1 == z2) {
+  if ((fequal(x1, x2) || fequal(y1, y2)) || fequal(z1, z2)) {
     return;
   }
 
@@ -360,7 +355,7 @@ void d3d_draw_wall(float x1, float y1, float z1, float x2, float y2, float z2, i
   glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, indices);
 }
 
-void d3d_draw_floor(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep)
+void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
   GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
           texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
@@ -373,6 +368,7 @@ void d3d_draw_floor(float x1, float y1, float z1, float x2, float y2, float z2, 
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
+
   if (x2>x1 || y2>y1) {
     glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, ceil_indices);
   } else {
@@ -380,20 +376,23 @@ void d3d_draw_floor(float x1, float y1, float z1, float x2, float y2, float z2, 
   }
 }
 
-void d3d_draw_block(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep, bool closed)
+void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-  GLfloat* verts = block_vertices(x1,y1,z1,x2,y2,z2);
-  GLfloat texts[] = {0, vrep, hrep, vrep, 0, 0, hrep, 0,
+  GLfloat verts[] = {x1, y1, z1, x1, y1, z2, x1, y2, z1, x1, y2, z2, x2, y2, z1, x2, y2, z2, x2, y1, z1, x2, y1, z2},
+          texts[] = {0, vrep, hrep, vrep, 0, 0, hrep, 0,
 		     0, vrep, hrep, vrep, 0, 0, hrep, 0},
 	  norms[] = {-0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5,
                      0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5};
   GLubyte indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, // sides
                        0, 2, 6, 4, 1, 7, 3, 5}; // top and bottom
 
+  texture_use(get_texture(texId));
+ // glClientActiveTexture(GL_TEXTURE0);
+
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
-  texture_use(get_texture(texId));
+
   if (closed) {
     glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 18, GL_UNSIGNED_BYTE, indices);
   } else {
@@ -401,7 +400,7 @@ void d3d_draw_block(float x1, float y1, float z1, float x2, float y2, float z2, 
   }
 }
 
-void d3d_draw_cylinder(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep, bool closed, int steps)
+void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
     float v[100][3];
     float t[100][3];
@@ -409,7 +408,7 @@ void d3d_draw_cylinder(float x1, float y1, float z1, float x2, float y2, float z
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
     double a, px, py, tp;
     int k;
-    texture_use(get_texture(texId));
+  texture_use(get_texture(texId));
     glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
     for (int i = 0; i <= steps; i++)
@@ -456,7 +455,7 @@ void d3d_draw_cylinder(float x1, float y1, float z1, float x2, float y2, float z
     }
 }
 
-void d3d_draw_cone(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep, bool closed, int steps)
+void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
     steps = min(max(steps, 3), 48);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
@@ -492,7 +491,7 @@ void d3d_draw_cone(float x1, float y1, float z1, float x2, float y2, float z2, i
         glVertex3fv(v[k]);
         k++;
         tp = 0;
-        for (int i = steps + 1; i >= 0; i--)
+        for (int i = steps; i >= 0; i--)
         {
             v[k][0] = v[i + steps + 1][0]; v[k][1] = v[i + steps + 1][1]; v[k][2] = v[i + steps + 1][2];
             t[k][0] = 0; t[k][1] = 0;
@@ -504,7 +503,7 @@ void d3d_draw_cone(float x1, float y1, float z1, float x2, float y2, float z2, i
     }
 }
 
-void d3d_draw_ellipsoid(float x1, float y1, float z1, float x2, float y2, float z2, int texId, float hrep, float vrep, int steps)
+void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
 {
     steps = min(max(steps, 3), 24);
     const int zsteps = ceil(steps/2.0);
@@ -514,7 +513,6 @@ void d3d_draw_ellipsoid(float x1, float y1, float z1, float x2, float y2, float 
     double a, b, px, py, pz, tp, tzp, cosb;
     double cosx[steps+1], siny[steps+1], txp[steps+1];
     a = M_PI; tp = 0;
-    texture_use(get_texture(texId));
     for (int i = 0; i <= steps; i++)
     {
         cosx[i] = cos(a)*rx; siny[i] = sin(a)*ry;
@@ -522,6 +520,7 @@ void d3d_draw_ellipsoid(float x1, float y1, float z1, float x2, float y2, float 
         a += pr; tp += invstep;
     }
     int k = 0, kk;
+    texture_use(get_texture(texId));
     b = M_PI/2;
     cosb = cos(b);
     pz = rz*sin(b);
@@ -556,15 +555,17 @@ void d3d_draw_ellipsoid(float x1, float y1, float z1, float x2, float y2, float 
     }
 }
 
-void d3d_draw_icosahedron(int texId) {
-    texture_use(get_texture(texId));
+void d3d_draw_icosahedron() {
+
+
 }
 
-void d3d_draw_torus(float x1, float y1, float z1, int texId, float hrep, float vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
+void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
         int numc = csteps, numt = tsteps;
+	texture_use(get_texture(texId));
         for (int i = 0; i < numc; i++) {
             glBegin(GL_QUAD_STRIP);
-	    texture_use(get_texture(texId));
+
             for (int j = 0; j <= numt; j++) {
                 for (int k = 1; k >= 0; k--) {
 
@@ -585,7 +586,8 @@ void d3d_draw_torus(float x1, float y1, float z1, int texId, float hrep, float v
         }
 }
 
-// ***** TRANSFORMATIONS BEGIN *****
+//TODO: with all basic drawing add in normals
+
 void d3d_transform_set_identity()
 {
   transformation_matrix[0] = 1;
@@ -607,7 +609,7 @@ void d3d_transform_set_identity()
   glLoadMatrixd(projection_matrix);
 }
 
-void d3d_transform_add_translation(float xt, float yt, float zt)
+void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
   glLoadIdentity();
   glTranslatef(xt, yt, zt);
@@ -616,7 +618,7 @@ void d3d_transform_add_translation(float xt, float yt, float zt)
   glLoadMatrixd(projection_matrix);
   glMultMatrixd(transformation_matrix);
 }
-void d3d_transform_add_scaling(float xs, float ys, float zs)
+void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
   glLoadIdentity();
   glScalef(xs, ys, zs);
@@ -652,7 +654,7 @@ void d3d_transform_add_rotation_z(double angle)
   glLoadMatrixd(projection_matrix);
   glMultMatrixd(transformation_matrix);
 }
-void d3d_transform_add_rotation_axis(float x, float y, float z, double angle)
+void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
 {
   glLoadIdentity();
   glRotatef(-angle,x,y,z);
@@ -662,7 +664,7 @@ void d3d_transform_add_rotation_axis(float x, float y, float z, double angle)
   glMultMatrixd(transformation_matrix);
 }
 
-void d3d_transform_set_translation(float xt, float yt, float zt)
+void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
   glLoadIdentity();
   glTranslatef(xt, yt, zt);
@@ -670,7 +672,7 @@ void d3d_transform_set_translation(float xt, float yt, float zt)
   glLoadMatrixd(projection_matrix);
   glMultMatrixd(transformation_matrix);
 }
-void d3d_transform_set_scaling(float xs, float ys, float zs)
+void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
   glLoadIdentity();
   glScalef(xs, ys, zs);
@@ -702,7 +704,7 @@ void d3d_transform_set_rotation_z(double angle)
   glLoadMatrixd(projection_matrix);
   glMultMatrixd(transformation_matrix);
 }
-void d3d_transform_set_rotation_axis(float x, float y, float z, double angle)
+void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
 {
   glLoadIdentity();
   glRotatef(-angle,x,y,z);
@@ -776,19 +778,16 @@ bool d3d_transform_stack_disgard()
 
 }
 
-// ***** TRANSFORMATIONS END *****
-
-// ***** LIGHTS BEGIN *****
 #include <map>
 #include <list>
 #include "Universal_System/fileio.h"
 
 struct posi { // Homogenous point.
-    float x;
-    float y;
-    float z;
-    float w;
-    posi(float x1, float y1, float z1, float w1) : x(x1), y(y1), z(z1), w(w1){}
+    gs_scalar x;
+    gs_scalar y;
+    gs_scalar z;
+    gs_scalar w;
+    posi(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar w1) : x(x1), y(y1), z(z1), w(w1){}
 };
 
 class d3d_lights
@@ -810,7 +809,7 @@ class d3d_lights
         }
     }
 
-    bool light_define_direction(int id, double dx, double dy, double dz, int col)
+    bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
         int ms;
         if (light_ind.find(id) != light_ind.end())
@@ -818,7 +817,7 @@ class d3d_lights
             ms = (*light_ind.find(id)).second;
             multimap<int,posi>::iterator it = ind_pos.find(ms);
             if (it != ind_pos.end())
-                ind_pos.erase(it); 
+                ind_pos.erase(it);
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
         else
@@ -840,7 +839,7 @@ class d3d_lights
         return true;
     }
 
-    bool light_define_point(int id, float x, float y, double z, double range, int col)
+    bool light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
     {
         if (range <= 0.0) {
             return false;
@@ -850,8 +849,8 @@ class d3d_lights
         {
             ms = (*light_ind.find(id)).second;
             multimap<int,posi>::iterator it = ind_pos.find(ms);
- 	    if (it != ind_pos.end())
-                ind_pos.erase(it); 
+            if (it != ind_pos.end())
+                ind_pos.erase(it);
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
         else
@@ -880,7 +879,7 @@ class d3d_lights
         return true;
     }
 
-    bool light_define_specularity(int id, int r, int g, int b, double a) 
+    bool light_define_specularity(int id, int r, int g, int b, double a)
     {
         int ms;
         if (light_ind.find(id) != light_ind.end())
@@ -938,17 +937,17 @@ class d3d_lights
 namespace enigma_user
 {
 
-bool d3d_light_define_direction(int id, float dx, float dy, float dz, int col)
+bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
 {
     return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
 }
 
-bool d3d_light_define_point(int id, float x, float y, double z, double range, int col)
+bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
 {
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a) 
+bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
     return d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
@@ -983,5 +982,3 @@ namespace enigma {
         d3d_lighting.light_update_positions();
     }
 }
-
-// ***** LIGHTS END *****

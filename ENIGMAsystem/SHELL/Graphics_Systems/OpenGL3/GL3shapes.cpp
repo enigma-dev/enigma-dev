@@ -17,7 +17,7 @@
 
 #include "GL3shapes.h"
 
-GLfloat* block_vertices(double x1, double y1, double z1, double x2, double y2, double z2)
+GLfloat* block_vertices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2)
 {
  //{ x2, y2, z1, x2, y2, z2, x2, y1, z1, x2, y1, z2}
   static GLfloat verts[24] = {x2, y1, z1, x2, y1, z2};

@@ -19,17 +19,14 @@
 using namespace std;
 #include <cstddef>
 #include <iostream>
-#include <cmath>
-#include <algorithm>
-#include <fstream>      // std::ofstream
+#include <math.h>
+#include <string.h>
 
 #include "../General/GLbinding.h"
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
 #include "Collision_Systems/collision_types.h"
-
-#include "Universal_System/lodepng.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -74,79 +71,80 @@ namespace enigma_user
 
 bool surface_is_supported()
 {
-    return GLEW_ARB_framebuffer_object;
+    return GLEW_EXT_framebuffer_object;
 }
 
 int surface_create(int width, int height)
 {
-    if (GLEW_ARB_framebuffer_object)
-    {
-      GLuint tex, fbo;
-      int prevFbo;
-
-      int id,
-        w=(int)width,
-        h=(int)height; //get the integer width and height, and prepare to search for an id
-
-      if (enigma::surface_max==0) {
-        enigma::surface_array=new enigma::surface*[1];
-        enigma::surface_max=1;
-      }
-
-      for (id=0; enigma::surface_array[id]!=NULL; id++)
-      {
-        if (id+1>=enigma::surface_max)
-        {
-          enigma::surface **oldarray=enigma::surface_array;
-          enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
-
-          for (int i=0; i<enigma::surface_max; i++)
-            enigma::surface_array[i]=oldarray[i];
-
-          enigma::surface_array[enigma::surface_max]=NULL;
-          enigma::surface_max++;
-          delete[] oldarray;
-        }
-      }
-
-      enigma::surface_array[id] = new enigma::surface;
-      enigma::surface_array[id]->width = w;
-      enigma::surface_array[id]->height = h;
-
-      glGenTextures(1, &tex);
-      glGenFramebuffers(1, &fbo);
-
-      glPushAttrib(GL_TEXTURE_BIT);
-      glBindTexture(GL_TEXTURE_2D, tex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-      glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-      glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
-      glDrawBuffer(GL_COLOR_ATTACHMENT0);
-      glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glClearColor(1,1,1,0);
-      glClear(GL_COLOR_BUFFER_BIT);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-      glPopAttrib();
-
-      enigma::surface_array[id]->tex = tex;
-      enigma::surface_array[id]->fbo = fbo;
-
-      return id;
-    }
+  if (!GLEW_EXT_framebuffer_object)
+  {
     return -1;
+  }
+    
+  GLuint tex, fbo;
+  int prevFbo;
+
+  size_t id,
+  w = (int)width,
+  h = (int)height; //get the integer width and height, and prepare to search for an id
+
+  if (enigma::surface_max==0) {
+    enigma::surface_array=new enigma::surface*[1];
+    enigma::surface_max=1;
+  }
+
+  for (id=0; enigma::surface_array[id]!=NULL; id++)
+  {
+    if (id+1 >= enigma::surface_max)
+    {
+      enigma::surface **oldarray=enigma::surface_array;
+      enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
+
+      for (size_t i=0; i<enigma::surface_max; i++)
+        enigma::surface_array[i]=oldarray[i];
+
+      enigma::surface_array[enigma::surface_max]=NULL;
+      enigma::surface_max++;
+      delete[] oldarray;
+    }
+  }
+
+  enigma::surface_array[id] = new enigma::surface;
+  enigma::surface_array[id]->width = w;
+  enigma::surface_array[id]->height = h;
+
+  glGenTextures(1, &tex);
+  glGenFramebuffers(1, &fbo);
+
+  glPushAttrib(GL_TEXTURE_BIT);
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex, 0);
+  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+  glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glClearColor(1,1,1,0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+  glPopAttrib();
+
+  enigma::surface_array[id]->tex = tex;
+  enigma::surface_array[id]->fbo = fbo;
+
+  return id;
 }
 
 int surface_create_msaa(int width, int height, int samples)
 {
-  if (!GLEW_ARB_framebuffer_object)
+  if (!GLEW_EXT_framebuffer_object)
   {
     return -1;
   }
-
+    
   GLuint tex, fbo;
   int prevFbo;
 
@@ -188,11 +186,11 @@ int surface_create_msaa(int width, int height, int samples)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, tex, 0);
-  glDrawBuffer(GL_COLOR_ATTACHMENT0);
-  glReadBuffer(GL_COLOR_ATTACHMENT0);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D_MULTISAMPLE, tex, 0);
+  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+  glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glClearColor(1,1,1,0);
   glClear(GL_COLOR_BUFFER_BIT);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
@@ -207,17 +205,17 @@ int surface_create_msaa(int width, int height, int samples)
 void surface_set_target(int id)
 {
   get_surface(surf,id);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf->fbo); //bind it
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo); //bind it
   glPushMatrix(); //So you can pop it in the reset
   glPushAttrib(GL_VIEWPORT_BIT); //same
   glViewport(0,0,surf->width,surf->height);
   glLoadIdentity();
-  glOrtho(0, surf->width, 0, surf->height, -1, 1);
+  glOrtho(-1, surf->width, -1, surf->height, -1, 1);
 }
 
 void surface_reset_target(void)
 {
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glPopAttrib();
   glPopMatrix();
 }
@@ -225,8 +223,6 @@ void surface_reset_target(void)
 void surface_free(int id)
 {
   get_surface(surf,id);
-  glDeleteTextures(1, &surf->tex);
-  glDeleteFramebuffers(1, &surf->fbo);
   surf->width = surf->height = surf->tex = surf->fbo = 0;
   delete surf;
   enigma::surface_array[id] = NULL;
@@ -237,7 +233,7 @@ bool surface_exists(int id)
     return size_t(id) < enigma::surface_max && enigma::surface_array[id] != NULL;
 }
 
-void draw_surface(int id, float x, float y)
+void draw_surface(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -256,7 +252,7 @@ void draw_surface(int id, float x, float y)
   glPopAttrib();
 }
 
-void draw_surface_stretched(int id, float x, float y, float w, float h)
+void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -273,7 +269,7 @@ void draw_surface_stretched(int id, float x, float y, float w, float h)
   glPopAttrib();
 }
 
-void draw_surface_part(int id, float left, float top, float width, float height, float x, float y)
+void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -281,7 +277,7 @@ void draw_surface_part(int id, float left, float top, float width, float height,
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
 
-  const float tbw=surf->width,tbh=surf->height;
+  const gs_scalar tbw=surf->width,tbh=surf->height;
   glBegin(GL_QUADS);
     glTexCoord2f(left/tbw,top/tbh);
       glVertex2f(x,y);
@@ -296,7 +292,7 @@ void draw_surface_part(int id, float left, float top, float width, float height,
   glPopAttrib();
 }
 
-void draw_surface_tiled(int id, float x, float y)
+void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -327,7 +323,7 @@ void draw_surface_tiled(int id, float x, float y)
   glPopAttrib();
 }
 
-void draw_surface_tiled_area(int id, float x, float y, float x1, float y1, float x2, float y2)
+void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -335,7 +331,7 @@ void draw_surface_tiled_area(int id, float x, float y, float x1, float y1, float
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
-    float sw,sh,i,j,jj,left,top,width,height,X,Y;
+    gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = surf->width;
     sh = surf->height;
 
@@ -377,7 +373,7 @@ void draw_surface_tiled_area(int id, float x, float y, float x1, float y1, float
   glPopAttrib();
 }
 
-void draw_surface_ext(int id, float x, float y, float xscale, float yscale, double rot, int color, double alpha)
+void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -385,10 +381,10 @@ void draw_surface_ext(int id, float x, float y, float xscale, float yscale, doub
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-    const float w=surf->width*xscale, h=surf->height*yscale;
+    const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
     rot *= M_PI/180;
 
-    float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
     glBegin(GL_QUADS);
@@ -406,7 +402,7 @@ void draw_surface_ext(int id, float x, float y, float xscale, float yscale, doub
   glPopAttrib();
 }
 
-void draw_surface_stretched_ext(int id, float x, float y, float w, float h, int color, double alpha)
+void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -418,16 +414,16 @@ void draw_surface_stretched_ext(int id, float x, float y, float w, float h, int 
       glTexCoord2f(0,0);
         glVertex2f(x,y);
       glTexCoord2f(1,0);
-        glVertex2f(x+w,y);
+        glVertex2f(x+width,y);
       glTexCoord2f(1,1);
-        glVertex2f(x+w,y+h);
+        glVertex2f(x+width,y+height);
       glTexCoord2f(0,1);
-        glVertex2f(x,y+h);
+        glVertex2f(x,y+height);
     glEnd();
   glPopAttrib();
 }
 
-void draw_surface_part_ext(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale, int color, double alpha)
+void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -435,7 +431,7 @@ void draw_surface_part_ext(int id, float left, float top, float width, float hei
   glPushAttrib(GL_CURRENT_BIT);
   glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-  const float tbw = surf->width, tbh = surf->height;
+  const gs_scalar tbw = surf->width, tbh = surf->height;
 
   glBegin(GL_QUADS);
     glTexCoord2f(left/tbw,top/tbh);
@@ -451,14 +447,14 @@ void draw_surface_part_ext(int id, float left, float top, float width, float hei
   glPopAttrib();
 }
 
-void draw_surface_tiled_ext(int id, float x, float y, float xscale, float yscale, int color, double alpha)
+void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-    const float w=surf->width*xscale, h=surf->height*yscale;
+    const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
     const int hortil= int (ceil(room_width/(surf->width))),
         vertil= int (ceil(room_height/(surf->height)));
     x=w-fmod(x,w);
@@ -482,7 +478,7 @@ void draw_surface_tiled_ext(int id, float x, float y, float xscale, float yscale
   glPopAttrib();
 }
 
-void draw_surface_tiled_area_ext(int id, float x, float y, float x1, float y1, float x2, float y2, float xscale, float yscale, int color, double alpha)
+void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -490,7 +486,7 @@ void draw_surface_tiled_area_ext(int id, float x, float y, float x1, float y1, f
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-    float sw,sh,i,j,jj,left,top,width,height,X,Y;
+    gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = surf->width*xscale;
     sh = surf->height*yscale;
 
@@ -532,18 +528,18 @@ void draw_surface_tiled_area_ext(int id, float x, float y, float x1, float y1, f
   glPopAttrib();
 }
 
-void draw_surface_general(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
+void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
-    const float tbw = surf->width, tbh = surf->height,
+    const gs_scalar tbw = surf->width, tbh = surf->height,
       w = width*xscale, h = height*yscale;
 
     rot *= M_PI/180;
 
-    float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
     glBegin(GL_QUADS);
@@ -591,10 +587,10 @@ int surface_getpixel(int id, int x, int y)
     get_surfacev(surf,id,-1);
     unsigned char *pixelbuf=new unsigned char[3];
     int prevFbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, surf->fbo);
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
 	glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,pixelbuf);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
     return pixelbuf[0] + (pixelbuf[1] << 8) + (pixelbuf[2] << 16);
 }
 
@@ -603,23 +599,23 @@ int surface_getpixel_alpha(int id, int x, int y)
     get_surfacev(surf,id,-1);
     unsigned char *pixelbuf=new unsigned char[1];
     int prevFbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, surf->fbo);
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
 	glReadPixels(x,y,1,1,GL_ALPHA,GL_UNSIGNED_BYTE,pixelbuf);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
     return pixelbuf[0];
 }
 
 int surface_get_bound()
 {
     int prevFbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
     return prevFbo;
 }
 
 }
 
-//////////////////////////////////////SAVE TO FILE AND CREATE SPRITE FUNCTIONS/////////
+//////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
 //Fuck whoever did this to the spec
 #ifndef GL_BGR
   #define GL_BGR 0x80E0
@@ -627,150 +623,112 @@ int surface_get_bound()
 
 #include "Universal_System/estring.h"
 
-int image_save_bmp(string filename, unsigned char *surfbuf, int w, int h)
-{
-    //3 bytes per pixel used for both input and output.
-    int inputChannels = 3;
-    int outputChannels = 3;
-
-    std::vector<unsigned char> bmp;
-    //bytes 0-13
-    bmp.push_back('B'); bmp.push_back('M'); //0: bfType
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); //2: bfSize; size not yet known for now, filled in later.
-    bmp.push_back(0); bmp.push_back(0); //6: bfReserved1
-    bmp.push_back(0); bmp.push_back(0); //8: bfReserved2
-    bmp.push_back(54 % 256); bmp.push_back(54 / 256); bmp.push_back(0); bmp.push_back(0); //10: bfOffBits (54 header bytes)
-
-    //bytes 14-53
-    bmp.push_back(40); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //14: biSize
-    bmp.push_back(w % 256); bmp.push_back(w / 256); bmp.push_back(0); bmp.push_back(0); //18: biWidth
-    bmp.push_back(h % 256); bmp.push_back(h / 256); bmp.push_back(0); bmp.push_back(0); //22: biHeight
-    bmp.push_back(1); bmp.push_back(0); //26: biPlanes
-    bmp.push_back(outputChannels * 8); bmp.push_back(0); //28: biBitCount
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //30: biCompression
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //34: biSizeImage
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //38: biXPelsPerMeter
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //42: biYPelsPerMeter
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //46: biClrUsed
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //50: biClrImportant
-
-    /*
-    Convert the input RGBRGBRGB pixel buffer to the BMP pixel buffer format. There are 3 differences with the input buffer:
-    -BMP stores the rows inversed, from bottom to top
-    -BMP stores the color channels in BGR instead of RGB order
-    -BMP requires each row to have a multiple of 4 bytes, so sometimes padding bytes are added between rows
-    */
-
-    int imagerowbytes = outputChannels * w;
-    imagerowbytes = imagerowbytes % 4 == 0 ? imagerowbytes : imagerowbytes + (4 - imagerowbytes % 4); //must be multiple of 4
-
-    for(int y = h - 1; y >= 0; y--) //the rows are stored inversed in bmp
-    {
-        int c = 0;
-        for(int x = 0; x < imagerowbytes; x++)
-        {
-          if(x < w * outputChannels)
-          {
-              bmp.push_back(surfbuf[inputChannels * (w * y + x / outputChannels) + c]);
-          }
-          else bmp.push_back(0);
-          c++;
-          if(c >= outputChannels) c = 0;
-        }
-    }
-
-    // Fill in the size
-    bmp[2] = bmp.size() % 256;
-    bmp[3] = (bmp.size() / 256) % 256;
-    bmp[4] = (bmp.size() / 65536) % 256;
-    bmp[5] = bmp.size() / 16777216;
-
-    std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
-    file.write(bmp.empty() ? 0 : (char*)&bmp[0], std::streamsize(bmp.size()));
-    file.close();
-    return 1;
-}
-
-int image_save_png(string filename, const unsigned char *surfbuf, int w, int h)
-{
-    unsigned char* buffer;
-    size_t buffersize;
-    unsigned error = lodepng_encode_memory(&buffer, &buffersize, surfbuf, w, h, LCT_RGBA, 8);
-    if(!error){
-        std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
-        file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
-        file.close();
-    }
-    free(buffer);
-
-    if (error) return -1; else return 1;
-}
-
 namespace enigma_user
 {
 
 int surface_save(int id, string filename)
 {
     get_surfacev(surf,id,-1);
+	FILE *bmp=fopen(filename.c_str(),"wb");
+	if(!bmp) return -1;
 	unsigned int w=surf->width,h=surf->height,sz=w*h;
+	char *surfbuf=new char[sz*3];
+	char *revbuf=new char[sz*3];
     int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
 
-    size_t fp = filename.find_last_of(".");
-    if (fp == string::npos){
-        return -1;
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glReadPixels(0,0,w,h,GL_BGR,GL_UNSIGNED_BYTE,surfbuf);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+
+    //This code flips the buffer vertically. It needs to be done or else the picture will be upside down.
+    for (unsigned int i=0; i<h; i++)
+    {
+        for (unsigned int c=0; c<w; c++)
+        {
+            revbuf[(c+(i)*w)*3]=surfbuf[(c+(h-i)*w)*3];
+            revbuf[(c+(i)*w)*3+1]=surfbuf[(c+(h-i)*w)*3+1];
+            revbuf[(c+(i)*w)*3+2]=surfbuf[(c+(h-i)*w)*3+2];
+        }
     }
-    string ext = filename.substr(fp);
-    transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    GLenum format;
-    int bytes;
-    if (ext == ".bmp") format = GL_BGR, bytes = 3;
-    else if (ext == ".png") format = GL_RGBA, bytes = 4;
-    else return -1;
 
-    unsigned char *surfbuf=new unsigned char[sz*bytes];
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+	fwrite("BM",2,1,bmp);
+	sz<<=2;
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, surf->fbo);
-	glReadPixels(0,0,w,h,format,GL_UNSIGNED_BYTE,surfbuf);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
+	fwrite(&sz,4,1,bmp);
+	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+	fwrite(&w,4,1,bmp);
+	fwrite(&h,4,1,bmp);
+	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
 
-    int status;
-    if (ext == ".bmp") status=image_save_bmp(filename, surfbuf, w, h);
-    else if (ext == ".png") status=image_save_png(filename, surfbuf, w, h);
-    delete[] surfbuf;
-    return status;
+	if(w&3)
+	{
+		size_t pad=w&3;
+		w*=3;
+		sz-=sz>>2;
+		for(unsigned int i=0;i<sz;i+=w)
+		{
+			fwrite(revbuf+i,w,1,bmp);
+			fwrite("\0\0",pad,1,bmp);
+		}
+	} else fwrite(revbuf,w*3,h,bmp);
+	fclose(bmp);
+	delete[] surfbuf;
+	delete[] revbuf;
+	return 1;
 }
 
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
 {
     get_surfacev(surf,id,-1);
-	unsigned int sz=w*h;
+	FILE *bmp=fopen(filename.c_str(),"wb");
+	if(!bmp) return -1;
     int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	unsigned sz=w*h;
+	char *surfbuf=new char[sz*3];
+	glReadPixels(x,y,w,h,GL_BGR,GL_UNSIGNED_BYTE,surfbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
 
-    size_t fp = filename.find_last_of(".");
-    if (fp == string::npos){
-        return -1;
+    char *revbuf=new char[sz*3];
+    //This code flips the buffer vertically. It needs to be done or else the picture will be upside down.
+    for (unsigned int i=0; i<h; i++)
+    {
+        for (unsigned int c=0; c<w; c++)
+        {
+            revbuf[(c+(i)*w)*3]=surfbuf[(c+(h-i)*w)*3];
+            revbuf[(c+(i)*w)*3+1]=surfbuf[(c+(h-i)*w)*3+1];
+            revbuf[(c+(i)*w)*3+2]=surfbuf[(c+(h-i)*w)*3+2];
+        }
     }
-    string ext = filename.substr(fp);
-    transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    GLenum format;
-    int bytes;
-    if (ext == ".bmp") format = GL_BGR, bytes = 3;
-    else if (ext == ".png") format = GL_RGBA, bytes = 4;
-    else return -1;
 
-    unsigned char *surfbuf=new unsigned char[sz*bytes];
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+	fwrite("BM",2,1,bmp);
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, surf->fbo);
-	glReadPixels(x,y,w,h,format,GL_UNSIGNED_BYTE,surfbuf);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
+	sz <<= 2;
+	fwrite(&sz,4,1,bmp);
+	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+	fwrite(&w,4,1,bmp);
+	fwrite(&h,4,1,bmp);
+	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
 
-    int status;
-    if (ext == ".bmp") status=image_save_bmp(filename, surfbuf, w, h);
-    else if (ext == ".png") status=image_save_png(filename, surfbuf, w, h);
-    delete[] surfbuf;
-    return status;
+	if(w&3)
+	{
+		size_t pad=w&3;
+		w*=3;
+		sz-=sz>>2;
+		for(unsigned i=0;i<sz;i+=w)
+		{
+			fwrite(revbuf+i,w,1,bmp);
+			fwrite("\0\0",pad,1,bmp);
+		}
+	}
+	else fwrite(revbuf,w*3,h,bmp);
+
+	fclose(bmp);
+	delete[] surfbuf;
+    delete[] revbuf;
+	return 1;
 }
 
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
@@ -784,25 +742,25 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
     unsigned sz=full_width*full_height;
     unsigned char *surfbuf=new unsigned char[sz*4];
 	int prevFbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
- 	glBindFramebuffer(GL_READ_FRAMEBUFFER, surf->fbo);
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+ 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
 	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
-    enigma::sprite_set_subimage(sprid, 0, xorig, yorig, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+    enigma::sprite_set_subimage(sprid, 0, xorig, yorig, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise. 
     delete[] surfbuf;
     return sprid;
 }
 
-void surface_copy_part(int destination, float x, float y, int source, int xs, int ys, int ws, int hs)
+void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)
 {
     get_surface(ssurf,source);
     get_surface(dsurf,destination);
     unsigned char *surfbuf=new unsigned char[ws*hs*4];
     int prevFbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, ssurf->fbo);
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, ssurf->fbo);
 	glReadPixels(xs,ys,ws,hs,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dsurf->fbo);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, dsurf->fbo);
     glPushMatrix();
     glPushAttrib(GL_VIEWPORT_BIT);
     glViewport(0,0,dsurf->width,dsurf->height);
@@ -810,23 +768,23 @@ void surface_copy_part(int destination, float x, float y, int source, int xs, in
     glOrtho(-1, dsurf->width, -1, dsurf->height, -1, 1);
 	glRasterPos2d(x, y);
 	glDrawPixels(ws,hs,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
     glPopAttrib();
     glPopMatrix();
 	glRasterPos2d(0, 0);
 	delete[] surfbuf;
 }
 
-void surface_copy(int destination, float x, float y, int source)
+void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
 {
     get_surface(ssurf,source);
     get_surface(dsurf,destination);
     unsigned char *surfbuf=new unsigned char[dsurf->width*dsurf->height*4];
     int prevFbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, ssurf->fbo);
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, ssurf->fbo);
 	glReadPixels(0,0,dsurf->width,dsurf->height,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dsurf->fbo);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, dsurf->fbo);
     glPushMatrix();
     glPushAttrib(GL_VIEWPORT_BIT);
     glViewport(0,0,dsurf->width,dsurf->height);
@@ -834,7 +792,7 @@ void surface_copy(int destination, float x, float y, int source)
     glOrtho(-1, dsurf->width, -1, dsurf->height, -1, 1);
 	glRasterPos2d(x, y);
 	glDrawPixels(dsurf->width,dsurf->height,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
     glPopAttrib();
     glPopMatrix();
 	glRasterPos2d(0, 0);

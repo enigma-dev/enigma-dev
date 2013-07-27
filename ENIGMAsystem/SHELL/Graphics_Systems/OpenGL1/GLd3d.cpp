@@ -305,9 +305,9 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
     return;
   }
 
-  gs_scalar xd = x2-x1, yd = y2-y1, zd = z2-z1;
-  gs_scalar normal[3] = {xd*zd, zd*yd, 0};
-  gs_scalar mag = hypot(normal[0], normal[1]);
+  float xd = x2-x1, yd = y2-y1, zd = z2-z1;
+  float normal[3] = {xd*zd, zd*yd, 0};
+  float mag = hypot(normal[0], normal[1]);
   normal[0] /= mag;
   normal[1] /= mag;
   if (x2 < x1) {
@@ -402,8 +402,8 @@ void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
 
 void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-    gs_scalar v[100][3];
-    gs_scalar t[100][3];
+    float v[100][3];
+    float t[100][3];
     steps = min(max(steps, 3), 48);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
     double a, px, py, tp;
@@ -459,8 +459,8 @@ void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
 {
     steps = min(max(steps, 3), 48);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
-    gs_scalar v[(steps + 1)*3 + 1][3];
-    gs_scalar t[(steps + 1)*3 + 1][2];
+    float v[(steps + 1)*3 + 1][3];
+    float t[(steps + 1)*3 + 1][2];
     double a, px, py, tp;
     int k = 0;
     texture_use(get_texture(texId));
@@ -508,8 +508,8 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
     steps = min(max(steps, 3), 24);
     const int zsteps = ceil(steps/2.0);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, rz = (z2-z1)/2, invstep = (1.0/steps)*hrep, invstep2 = (1.0/zsteps)*vrep, pr = 2*M_PI/steps, qr = M_PI/zsteps;
-    gs_scalar v[(steps+2)*(zsteps+2)][3];
-    gs_scalar t[(steps+2)*(zsteps+2)][2];
+    float v[(steps+2)*(zsteps+2)][3];
+    float t[(steps+2)*(zsteps+2)][2];
     double a, b, px, py, pz, tp, tzp, cosb;
     double cosx[steps+1], siny[steps+1], txp[steps+1];
     a = M_PI; tp = 0;
