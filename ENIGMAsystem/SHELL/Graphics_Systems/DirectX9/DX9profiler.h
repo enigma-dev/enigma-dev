@@ -15,21 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DX10MATERIAL__H
-#define _DX10MATERIAL__H
+// For querying the graphic's output for debugging purposes, eg. triangles rendered, VRAM usage, and VBO's, etc.
 
-namespace enigma_user {
-int material_create();
-void material_load();
-void material_save();
-void material_add_texture(int id, int tid);
-void material_set_texture(int id, int mtid, int tid);
-void material_remove_texture(int id, int mtid);
-void material_set_shader(int id, int sid);
-int material_get_shader(int id);
-void material_use(int id);
-void material_reset();
-void material_free(int id);
-}
+#ifndef __DX9PROFILERH_
+#define __DX9PROFILERH_
+#include "../General/DirectXHeaders.h"
 
 #endif

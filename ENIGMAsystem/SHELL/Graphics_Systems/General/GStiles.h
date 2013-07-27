@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
+
 namespace enigma_user
 {
 

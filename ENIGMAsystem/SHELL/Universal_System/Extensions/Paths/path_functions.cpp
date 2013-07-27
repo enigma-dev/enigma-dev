@@ -414,7 +414,7 @@ void path_reverse(unsigned pathid)
 
 //Declare drawing functions here, so it works no matter if GL, GLES or D3D is used
 void draw_spline_begin(int mode);
-int draw_spline_vertex(float x, float y);
+int draw_spline_vertex(gs_scalar x, gs_scalar y);
 void draw_bezier_quadratic_spline_end();
 /*void glBegin(GLenum mode);
 void glEnd(void);
@@ -422,10 +422,10 @@ void glVertex2f(GLfloat  x,  GLfloat  y);
 void glPushAttrib(GLbitfield mask);
 void glPopAttrib(void);*/
 int draw_primitive_begin(int kind);
-int draw_vertex(float x, float y);
+int draw_vertex(gs_scalar x, gs_scalar y);
 int draw_primitive_end();
 
-void draw_path(unsigned pathid,double x,double y,bool absolute)
+void draw_path(unsigned pathid, gs_scalar x, gs_scalar y, bool absolute)
 {
     enigma::path *path = enigma::pathstructarray[pathid];
     if (!path->pointarray.size()){return;}

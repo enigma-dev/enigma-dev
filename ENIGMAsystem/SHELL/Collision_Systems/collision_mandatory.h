@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
 #include "Universal_System/spritestruct.h"
 #include "Collision_Systems/collision_types.h"
 
@@ -38,7 +39,7 @@ namespace enigma
     // This function will be invoked each collision event to obtain a pointer to any
     // instance being collided with. It is expected to return NULL for no collision, or
     // an object_basic* pointing to the first instance found.
-    object_basic *place_meeting_inst(double x, double y, int object);
+    object_basic *place_meeting_inst(cs_scalar x, cs_scalar y, int object);
   #endif
 }
 

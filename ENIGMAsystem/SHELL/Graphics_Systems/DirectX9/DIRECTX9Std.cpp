@@ -15,14 +15,32 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX10shapes.h"
+#include <iostream>
+#include <string>
 
-GLfloat* block_vertices(double x1, double y1, double z1, double x2, double y2, double z2)
+#include "../General/DirectXHeaders.h"
+using namespace std;
+#include "DIRECTX9Std.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h" // Room dimensions.
+#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
+namespace enigma
 {
- //{ x2, y2, z1, x2, y2, z2, x2, y1, z1, x2, y1, z2}
-  static GLfloat verts[24] = {x2, y1, z1, x2, y1, z2};
-  verts[0]=x1;verts[1]=y1;verts[2]=z1; verts[3]=x1;verts[4]=y1;verts[5]=z2; verts[6]=x1;verts[7]=y2;verts[8]=z1;
-  verts[9]=x1;verts[10]=y2;verts[11]=z2; verts[12]=x2;verts[13]=y2;verts[14]=z1; verts[15]=x2;verts[16]=y2;verts[17]=z2;
-  verts[18]=x2;verts[19]=y1;verts[20]=z1; verts[21]=x2;verts[22]=y1;verts[23]=z2; 
-  return verts;
+  unsigned bound_texture=0;
+  unsigned char currentcolor[4] = {0,0,0,255};
+  bool pbo_isgo;
+
+  void graphicssystem_initialize()
+  {
+
+  }
 }
+
+namespace enigma_user {
+// Stolen entirely from the documentation and thrown into a switch() structure.
+string draw_get_graphics_error()
+{
+
+}
+}
+

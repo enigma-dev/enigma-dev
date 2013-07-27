@@ -34,7 +34,7 @@ bool sprite_exists(int spr) {
     return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
 }
 
-int draw_sprite(int spr,int subimg,float x,float y)
+int draw_sprite(int spr, int subimg, gs_scalar x, gs_scalar y)
 {
     enigma::sprite *spr2d = enigma::spritestructarray[spr];
     if (!spr2d)
@@ -50,7 +50,7 @@ int draw_sprite(int spr,int subimg,float x,float y)
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
-    const float tbx = spr2d->texbordx, tby = spr2d->texbordy,
+    const gs_scalar tbx = spr2d->texbordx, tby = spr2d->texbordy,
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
                 yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height;
 
@@ -69,7 +69,7 @@ int draw_sprite(int spr,int subimg,float x,float y)
 	return 0;
 }
 
-int draw_sprite_stretched(int spr,int subimg,float x,float y,float w,float h)
+int draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
 	enigma::sprite *spr2d=enigma::spritestructarray[spr];
 	if (!spr2d)
@@ -84,9 +84,9 @@ int draw_sprite_stretched(int spr,int subimg,float x,float y,float w,float h)
         enigma::bound_texture=spr2d->texturearray[usi];
     }
 
-    const float tbx = spr2d->texbordx, tby = spr2d->texbordy,
-                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + w,
-                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + h;
+    const gs_scalar tbx = spr2d->texbordx, tby = spr2d->texbordy,
+                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
+                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + height;
 
     glBegin(GL_QUADS);
     glTexCoord2f(0,0);
@@ -103,7 +103,7 @@ int draw_sprite_stretched(int spr,int subimg,float x,float y,float w,float h)
 	return 0;
 }
 
-int draw_sprite_part(int spr,int subimg,float left,float top,float width,float height,float x,float y)
+int draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
     enigma::sprite *spr2d=enigma::spritestructarray[spr];
     if (!spr2d)
@@ -118,7 +118,7 @@ int draw_sprite_part(int spr,int subimg,float left,float top,float width,float h
         enigma::bound_texture=spr2d->texturearray[usi];
     }
 
-    float tbw = spr2d->width/(float)spr2d->texbordx, tbh = spr2d->height/(float)spr2d->texbordy,
+    gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texbordx, tbh = spr2d->height/(gs_scalar)spr2d->texbordy,
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
           tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
@@ -137,7 +137,7 @@ int draw_sprite_part(int spr,int subimg,float left,float top,float width,float h
 	return 0;
 }
 
-int draw_sprite_part_offset(int spr,int subimg,float left,float top,float width,float height,float x,float y)
+int draw_sprite_part_offset(int spr,int subimg,gs_scalar left, gs_scalar top,gs_scalar width, gs_scalar height,gs_scalar x, gs_scalar y)
 {
     enigma::sprite *spr2d=enigma::spritestructarray[spr];
     if (!spr2d)
@@ -152,7 +152,7 @@ int draw_sprite_part_offset(int spr,int subimg,float left,float top,float width,
         enigma::bound_texture=spr2d->texturearray[usi];
     }
 
-    float tbw = spr2d->width/spr2d->texbordx, tbh = spr2d->height/spr2d->texbordy,
+    gs_scalar tbw = spr2d->width/spr2d->texbordx, tbh = spr2d->height/spr2d->texbordy,
           xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
           yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height,
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -173,7 +173,7 @@ int draw_sprite_part_offset(int spr,int subimg,float left,float top,float width,
 	return 0;
 }
 
-int draw_sprite_ext(int spr,int subimg,float x,float y,float xscale,float yscale,double rot,int blend,double alpha)
+int draw_sprite_ext(int spr,int subimg,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale,double rot,int blend,double alpha)
 {
     enigma::sprite *spr2d = enigma::spritestructarray[spr];
     if (!spr2d)
@@ -188,11 +188,11 @@ int draw_sprite_ext(int spr,int subimg,float x,float y,float xscale,float yscale
 
     glPushAttrib(GL_CURRENT_BIT);
     glBegin(GL_TRIANGLE_STRIP);
-    const float w = spr2d->width*xscale,   h = spr2d->height*yscale;
-    const float tbx = spr2d->texbordx,   tby = spr2d->texbordy;
+    const gs_scalar w = spr2d->width*xscale,   h = spr2d->height*yscale;
+    const gs_scalar tbx = spr2d->texbordx,   tby = spr2d->texbordy;
     rot *= M_PI/180;
 
-    float
+    gs_scalar
     ulcx = x + xscale * spr2d->xoffset * cos(M_PI+rot) + yscale * spr2d->yoffset * cos(M_PI/2+rot),
     ulcy = y - yscale * spr2d->xoffset * sin(M_PI+rot) - yscale * spr2d->yoffset * sin(M_PI/2+rot);
     glColor4ub(__GETR(blend),__GETG(blend),__GETB(blend),char(alpha*255)); //Implement "blend" parameter
@@ -216,7 +216,7 @@ int draw_sprite_ext(int spr,int subimg,float x,float y,float xscale,float yscale
     return 0;
 }
 
-int draw_sprite_part_ext(int spr,int subimg,float left,float top,float width,float height,float x,float y,float xscale,float yscale,int color,double alpha)
+int draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
 	enigma::sprite *spr2d=enigma::spritestructarray[spr];
 	if (!spr2d)
@@ -231,7 +231,7 @@ int draw_sprite_part_ext(int spr,int subimg,float left,float top,float width,flo
         enigma::bound_texture=spr2d->texturearray[usi];
     }
 
-    float tbw = spr2d->width/(float)spr2d->texbordx, tbh = spr2d->height/(float)spr2d->texbordy,
+    gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texbordx, tbh = spr2d->height/(gs_scalar)spr2d->texbordy,
           xvert1 = x, xvert2 = xvert1 + width*xscale,
           yvert1 = y, yvert2 = yvert1 + height*yscale,
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -256,7 +256,7 @@ int draw_sprite_part_ext(int spr,int subimg,float left,float top,float width,flo
  * The applicable license does not change for this portion of the file.
  */
 
-int draw_sprite_general(int spr,int subimg,float left,float top,float width,float height,float x,float y,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a1, double a2, double a3, double a4)
+int draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
 {
     enigma::sprite *spr2d=enigma::spritestructarray[spr];
     if (!spr2d)
@@ -270,15 +270,15 @@ int draw_sprite_general(int spr,int subimg,float left,float top,float width,floa
         enigma::bound_texture=spr2d->texturearray[usi];
     }
 
-    const float
+    const gs_scalar
     tbx = spr2d->texbordx,  tby = spr2d->texbordy,
     tbw = spr2d->width/tbx, tbh = spr2d->height/tby,
     w = width*xscale, h = height*yscale;
 
     rot *= M_PI/180;
-    const float wcosrot = w*cos(rot), wsinrot = w*sin(rot);
+    const gs_scalar wcosrot = w*cos(rot), wsinrot = w*sin(rot);
 
-    float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
     ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
     glBegin(GL_QUADS);
@@ -308,7 +308,7 @@ int draw_sprite_general(int spr,int subimg,float left,float top,float width,floa
     return 0;
 }
 
-int draw_sprite_stretched_ext(int spr,int subimg,float x,float y,float w,float h, int blend, double alpha)
+int draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int blend, double alpha)
 {
     enigma::sprite *spr2d=enigma::spritestructarray[spr];
     if (!spr2d)
@@ -323,9 +323,9 @@ int draw_sprite_stretched_ext(int spr,int subimg,float x,float y,float w,float h
         enigma::bound_texture=spr2d->texturearray[usi];
     }
 
-    const float tbx = spr2d->texbordx, tby = spr2d->texbordy,
-                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + w,
-                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + h;
+    const gs_scalar tbx = spr2d->texbordx, tby = spr2d->texbordy,
+                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
+                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + height;
 
     glBegin(GL_QUADS);
     glTexCoord2f(0,0);
@@ -350,7 +350,7 @@ using std::string;
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 
-int draw_sprite_tiled(int spr,int subimg,float x,float y)
+int draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y)
 {
     enigma::sprite *spr2d = enigma::spritestructarray[spr];
     if (!spr2d)
@@ -366,7 +366,7 @@ int draw_sprite_tiled(int spr,int subimg,float x,float y)
     glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
-    const float
+    const gs_scalar
     tbx  = spr2d->texbordx,  tby  = spr2d->texbordy,
     xoff = spr2d->xoffset+x, yoff = spr2d->yoffset+y;
     const int
@@ -374,7 +374,7 @@ int draw_sprite_tiled(int spr,int subimg,float x,float y)
     vertil = int (ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (spr2d->height*tby)));
 
     glBegin(GL_QUADS);
-    float xvert1 = -xoff, xvert2 = xvert1 + spr2d->width, yvert1, yvert2;
+    gs_scalar xvert1 = -xoff, xvert2 = xvert1 + spr2d->width, yvert1, yvert2;
     for (int i=0; i<hortil; i++)
     {
         yvert1 = -yoff; yvert2 = yvert1 + spr2d->height;
@@ -400,7 +400,7 @@ int draw_sprite_tiled(int spr,int subimg,float x,float y)
     return 0;
 }
 
-int draw_sprite_tiled_ext(int spr,int subimg,float x,float y,float xscale,float yscale,int color,double alpha)
+int draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
     enigma::sprite *spr2d = enigma::spritestructarray[spr];
     if (!spr2d)
@@ -416,7 +416,7 @@ int draw_sprite_tiled_ext(int spr,int subimg,float x,float y,float xscale,float 
     glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-    const float
+    const gs_scalar
     tbx  = spr2d->texbordx,         tby  = spr2d->texbordy,
     xoff = spr2d->xoffset*xscale+x, yoff = spr2d->yoffset*yscale+y,
     width_scaled = spr2d->width*xscale,
@@ -427,7 +427,7 @@ int draw_sprite_tiled_ext(int spr,int subimg,float x,float y,float xscale,float 
     vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (height_scaled*tby)));
 
     glBegin(GL_QUADS);
-    float xvert1 = -xoff, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
+    gs_scalar xvert1 = -xoff, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
     for (int i=0; i<hortil; i++)
     {
         yvert1 = -yoff; yvert2 = yvert1 + height_scaled;

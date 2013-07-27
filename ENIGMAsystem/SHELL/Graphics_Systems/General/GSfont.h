@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
+
 namespace enigma_user
 {
 
@@ -31,17 +33,17 @@ void draw_set_valign(unsigned align);
 unsigned draw_get_valign();
 void draw_set_font(int fnt);
 int draw_get_font();
-void draw_text(float x,float y,variant str);
-void draw_text_color(float x,float y,variant str,int c1,int c2,int c3,int c4,double a);
+void draw_text(gs_scalar x, gs_scalar y, variant str);
+void draw_text_color(gs_scalar x, gs_scalar y, variant str, int c1, int c2, int c3, int c4, double a);
 
-void draw_text_ext(float x,float y,variant str, float sep, float w);
-void draw_text_ext_color(float x,float y,variant str, float sep, float w,int c1,int c2,int c3,int c4,double a);
+void draw_text_ext(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid);
+void draw_text_ext_color(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, int c1, int c2, int c3, int c4, double a);
 
-void draw_text_transformed(float x,float y,variant str,float xscale,float yscale,double rot);
-void draw_text_transformed_color(float x,float y,variant str,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a);
+void draw_text_transformed(gs_scalar x, gs_scalar y, variant str, gs_scalar xscale, gs_scalar yscale, double rot);
+void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant str, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a);
 
-void draw_text_ext_transformed(float x,float y,variant str,float sep, float w, float xscale,float yscale,double rot);
-void draw_text_ext_transformed_color(float x,float y,variant str,float sep, float w,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a);
+void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot);
+void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a);
 
 unsigned int font_get_texture(int fnt);
 unsigned int font_get_texture_width(int fnt);
@@ -50,12 +52,12 @@ unsigned int font_get_texture_height(int fnt);
 unsigned int string_width(variant str);
 unsigned int string_height(variant str);
 
-unsigned int string_width_ext(variant str, float sep, float w);
-unsigned int string_height_ext(variant str, float sep, float w);
+unsigned int string_width_ext(variant str, gs_scalar sep, gs_scalar wid);
+unsigned int string_height_ext(variant str, gs_scalar sep, gs_scalar wid);
 
 unsigned int string_width_line(variant str, int line);
-unsigned int string_width_ext_line(variant str, float w, int line);
-unsigned int string_width_ext_line_count(variant str, float w);
+unsigned int string_width_ext_line(variant str, gs_scalar wid, int line);
+unsigned int string_width_ext_line_count(variant str, gs_scalar wid);
 
 }
 

@@ -233,7 +233,7 @@ bool surface_exists(int id)
     return size_t(id) < enigma::surface_max && enigma::surface_array[id] != NULL;
 }
 
-void draw_surface(int id, float x, float y)
+void draw_surface(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -252,7 +252,7 @@ void draw_surface(int id, float x, float y)
   glPopAttrib();
 }
 
-void draw_surface_stretched(int id, float x, float y, float w, float h)
+void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -269,7 +269,7 @@ void draw_surface_stretched(int id, float x, float y, float w, float h)
   glPopAttrib();
 }
 
-void draw_surface_part(int id, float left, float top, float width, float height, float x, float y)
+void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -277,7 +277,7 @@ void draw_surface_part(int id, float left, float top, float width, float height,
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
 
-  const float tbw=surf->width,tbh=surf->height;
+  const gs_scalar tbw=surf->width,tbh=surf->height;
   glBegin(GL_QUADS);
     glTexCoord2f(left/tbw,top/tbh);
       glVertex2f(x,y);
@@ -292,7 +292,7 @@ void draw_surface_part(int id, float left, float top, float width, float height,
   glPopAttrib();
 }
 
-void draw_surface_tiled(int id, float x, float y)
+void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -323,7 +323,7 @@ void draw_surface_tiled(int id, float x, float y)
   glPopAttrib();
 }
 
-void draw_surface_tiled_area(int id, float x, float y, float x1, float y1, float x2, float y2)
+void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -331,7 +331,7 @@ void draw_surface_tiled_area(int id, float x, float y, float x1, float y1, float
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
 
-    float sw,sh,i,j,jj,left,top,width,height,X,Y;
+    gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = surf->width;
     sh = surf->height;
 
@@ -373,7 +373,7 @@ void draw_surface_tiled_area(int id, float x, float y, float x1, float y1, float
   glPopAttrib();
 }
 
-void draw_surface_ext(int id, float x, float y, float xscale, float yscale, double rot, int color, double alpha)
+void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -381,10 +381,10 @@ void draw_surface_ext(int id, float x, float y, float xscale, float yscale, doub
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-    const float w=surf->width*xscale, h=surf->height*yscale;
+    const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
     rot *= M_PI/180;
 
-    float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
     glBegin(GL_QUADS);
@@ -402,7 +402,7 @@ void draw_surface_ext(int id, float x, float y, float xscale, float yscale, doub
   glPopAttrib();
 }
 
-void draw_surface_stretched_ext(int id, float x, float y, float w, float h, int color, double alpha)
+void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -414,16 +414,16 @@ void draw_surface_stretched_ext(int id, float x, float y, float w, float h, int 
       glTexCoord2f(0,0);
         glVertex2f(x,y);
       glTexCoord2f(1,0);
-        glVertex2f(x+w,y);
+        glVertex2f(x+width,y);
       glTexCoord2f(1,1);
-        glVertex2f(x+w,y+h);
+        glVertex2f(x+width,y+height);
       glTexCoord2f(0,1);
-        glVertex2f(x,y+h);
+        glVertex2f(x,y+height);
     glEnd();
   glPopAttrib();
 }
 
-void draw_surface_part_ext(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale, int color, double alpha)
+void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -431,7 +431,7 @@ void draw_surface_part_ext(int id, float left, float top, float width, float hei
   glPushAttrib(GL_CURRENT_BIT);
   glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-  const float tbw = surf->width, tbh = surf->height;
+  const gs_scalar tbw = surf->width, tbh = surf->height;
 
   glBegin(GL_QUADS);
     glTexCoord2f(left/tbw,top/tbh);
@@ -447,14 +447,14 @@ void draw_surface_part_ext(int id, float left, float top, float width, float hei
   glPopAttrib();
 }
 
-void draw_surface_tiled_ext(int id, float x, float y, float xscale, float yscale, int color, double alpha)
+void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-    const float w=surf->width*xscale, h=surf->height*yscale;
+    const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
     const int hortil= int (ceil(room_width/(surf->width))),
         vertil= int (ceil(room_height/(surf->height)));
     x=w-fmod(x,w);
@@ -478,7 +478,7 @@ void draw_surface_tiled_ext(int id, float x, float y, float xscale, float yscale
   glPopAttrib();
 }
 
-void draw_surface_tiled_area_ext(int id, float x, float y, float x1, float y1, float x2, float y2, float xscale, float yscale, int color, double alpha)
+void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -486,7 +486,7 @@ void draw_surface_tiled_area_ext(int id, float x, float y, float x1, float y1, f
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
-    float sw,sh,i,j,jj,left,top,width,height,X,Y;
+    gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = surf->width*xscale;
     sh = surf->height*yscale;
 
@@ -528,18 +528,18 @@ void draw_surface_tiled_area_ext(int id, float x, float y, float x1, float y1, f
   glPopAttrib();
 }
 
-void draw_surface_general(int id, float left, float top, float width, float height, float x, float y, float xscale, float yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
+void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
-    const float tbw = surf->width, tbh = surf->height,
+    const gs_scalar tbw = surf->width, tbh = surf->height,
       w = width*xscale, h = height*yscale;
 
     rot *= M_PI/180;
 
-    float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
     glBegin(GL_QUADS);
@@ -751,7 +751,7 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
     return sprid;
 }
 
-void surface_copy_part(int destination, float x, float y, int source, int xs, int ys, int ws, int hs)
+void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)
 {
     get_surface(ssurf,source);
     get_surface(dsurf,destination);
@@ -775,7 +775,7 @@ void surface_copy_part(int destination, float x, float y, int source, int xs, in
 	delete[] surfbuf;
 }
 
-void surface_copy(int destination, float x, float y, int source)
+void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
 {
     get_surface(ssurf,source);
     get_surface(dsurf,destination);

@@ -1,1 +1,0 @@
-SOURCES += $(wildcard Graphics_Systems/DirectX10/*.cpp)

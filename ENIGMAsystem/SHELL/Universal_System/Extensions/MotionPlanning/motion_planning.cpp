@@ -35,9 +35,10 @@ using namespace std;
 #include "libEGMstd.h"
 #include "motion_planning_struct.h"
 #include "motion_planning.h"
+#include "Universal_System/scalar.h"
 
 namespace enigma_user {
-int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme);
+int collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec /*ignored*/, bool notme);
 }
 
 namespace enigma {
@@ -254,10 +255,10 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
 namespace enigma_user
 {
 
-void draw_text(float x,float y,variant str);
+void draw_text(gs_scalar x,gs_scalar y,variant str);
 int merge_color(int c1,int c2,double amount);
 int draw_primitive_begin(int kind);
-int draw_vertex(float x, float y);
+int draw_vertex(gs_scalar x, gs_scalar y);
 int draw_primitive_end();
 int draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
 double draw_get_color();
