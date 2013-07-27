@@ -315,7 +315,8 @@ int main(int argc,char** argv)
 				needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
 			}
 			if (remaining_mcs > needed_mcs) {
-				usleep(1);
+				const long sleeping_time = std::min((remaining_mcs - needed_mcs)/5, long(999999));
+				usleep(std::max(long(1), sleeping_time));
 				continue;
 			}
 		}
