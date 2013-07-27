@@ -125,7 +125,7 @@ unsigned int string_width_line(variant vstr, int line)
   return len;
 }
 
-unsigned int string_width_ext_line(variant vstr, float w, int line)
+unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
@@ -153,7 +153,7 @@ unsigned int string_width_ext_line(variant vstr, float w, int line)
   return width;
 }
 
-unsigned int string_width_ext_line_count(variant vstr, float w)
+unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
@@ -211,7 +211,7 @@ unsigned int string_height(variant vstr)
   return hgt;
 }
 
-unsigned int string_width_ext(variant vstr, float sep, float w) //here sep doesn't do anything, but I can't make it 'default = ""', because its the second argument
+unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here sep doesn't do anything, but I can't make it 'default = ""', because its the second argument
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
@@ -232,7 +232,7 @@ unsigned int string_width_ext(variant vstr, float sep, float w) //here sep doesn
   return maxwidth;
 }
 
-unsigned int string_height_ext(variant vstr, float sep, float w)
+unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
@@ -270,42 +270,42 @@ unsigned int string_height_ext(variant vstr, float sep, float w)
 namespace enigma_user
 {
 
-void draw_text(float x,float y,variant vstr)
+void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
 
 }
 
-void draw_text_ext(float x,float y,variant vstr, float sep, float w)
+void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w)
 {
 
 }
 
-void draw_text_transformed(float x,float y,variant vstr,float xscale,float yscale,double rot)
+void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot)
 {
 
 }
 
-void draw_text_ext_transformed(float x,float y,variant vstr,float sep, float w, float xscale,float yscale,double rot)
+void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot)
 {
 
 }
 
-void draw_text_transformed_color(float x,float y,variant vstr,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a)
+void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a)
 {
 
 }
 
-void draw_text_ext_transformed_color(float x,float y,variant vstr,int sep,int w,float xscale,float yscale,double rot,int c1,int c2,int c3,int c4,double a)
+void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot,int c1, int c2, int c3, int c4, double a)
 {
 
 }
 
-void draw_text_color(float x,float y,variant vstr,int c1,int c2,int c3,int c4,double a)
+void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,int c4,double a)
 {
 
 }
 
-void draw_text_ext_color(float x,float y,variant vstr,float sep, float w, int c1,int c2,int c3,int c4,double a)
+void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs_scalar w, int c1,int c2,int c3,int c4,double a)
 {
 
 }

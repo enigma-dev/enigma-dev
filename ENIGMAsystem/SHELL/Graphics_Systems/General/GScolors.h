@@ -18,8 +18,6 @@
 #ifndef ENIGMA_GLCOLORS_H
 #define ENIGMA_GLCOLORS_H
 
-#include "Universal_System/scalar.h"
-
 namespace enigma_user
 {
 

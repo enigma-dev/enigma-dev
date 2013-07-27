@@ -46,7 +46,7 @@
 #include "../General/DXtilestruct.h"
 namespace enigma
 {
-    void draw_tile(int back, float left, float top, float width, float height, float x, float y, float xscale, float yscale, int color, double alpha)
+    void draw_tile(int back, g_scalar left, g_scalar top, g_scalar width, g_scalar height, g_scalar x, g_scalar y, g_scalar xscale, g_scalar yscale, int color, double alpha)
     {
 
     }

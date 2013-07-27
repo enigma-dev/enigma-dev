@@ -63,48 +63,48 @@ void draw_set_curve_detail(int detail)
     pr_curve_detail = detail;
 }
 
-void draw_bezier_quadratic(float x1, float y1, float x2, float y2, float x3, float y3)
+void draw_bezier_quadratic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3)
 {
 
 }
 
-void draw_bezier_quadratic_color(float x1, float y1, float x2, float y2, float x3, float y3, int c1, int c2, float al1, float al2)
+void draw_bezier_quadratic_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, int c1, int c2, float al1, float al2)
 {
 
 }
 
-void draw_bezier_cubic(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+void draw_bezier_cubic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4)
 {
 
 }
 
-void draw_bezier_cubic_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float al1, float al2)
+void draw_bezier_cubic_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, int c1, int c2, float al1, float al2)
 {
 
 }
 
 //NOTICE:
 //Some of the arguments are not used, but I left them in so it would be easier to use these functions together with drawing functions
-float draw_bezier_quadratic_x(float x1, float y1, float x2, float y2, float x3, float y3, float t)
+float draw_bezier_quadratic_x(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, float t)
 {
     float a = 1.0 - t, b = t;
     return x1*a*a + x2*2*a*b + x3*b*b;
 }
 
-float draw_bezier_quadratic_y(float x1, float y1, float x2, float y2, float x3, float y3, float t)
+float draw_bezier_quadratic_y(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, float t)
 {
     float a = 1.0 - t, b = t;
     return y1*a*a + y2*2*a*b + y3*b*b;
 }
 
-float draw_bezier_cubic_x(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float t)
+float draw_bezier_cubic_x(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, float t)
 {
     float a = 1.0 - t, b = t, a2, b2;
     a2 = a*a; b2 = b*b;
     return x1*a2*a + x2*3*a2*b + x3*3*a*b2 + x4*b2*b;
 }
 
-float draw_bezier_cubic_y(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float t)
+float draw_bezier_cubic_y(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, float t)
 {
     float a = 1.0 - t, b = t, a2, b2;
     a2 = a*a; b2 = b*b;
@@ -114,63 +114,63 @@ float draw_bezier_cubic_y(float x1, float y1, float x2, float y2, float x3, floa
 //The following function is used in other drawing functions for all splines
 //it takes 4 points. Two control points which are at the beggining and the end, and the two points which it actually draws through
 //in the middle
-void draw_spline_part(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+void draw_spline_part(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4)
 {
 
 }
 
-void draw_spline_part_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2)
+void draw_spline_part_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, int c1, int c2, float a1, float a2)
 {
 
 }
 
-void draw_spline2c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+void draw_spline2c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4)
 {
 
 }
 
-void draw_spline2c_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2)
+void draw_spline2c_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, int c1, int c2, float a1, float a2)
 {
 
 }
 
-void draw_spline3(float x1, float y1, float x2, float y2, float x3, float y3)
+void draw_spline3(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3)
 {
 
 }
 
-void draw_spline3_color(float x1, float y1, float x2, float y2, float x3, float y3, int c1, int c2, float a1, float a2)
+void draw_spline3_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, int c1, int c2, float a1, float a2)
 {
 
 }
 
 
-void draw_spline3c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5)
+void draw_spline3c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar x5, gs_scalar y5)
 {
 
 }
 
-void draw_spline3c_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5, int c1, int c2, float a1, float a2)
+void draw_spline3c_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar x5, gs_scalar y5, int c1, int c2, float a1, float a2)
 {
 
 }
 
-void draw_spline4(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+void draw_spline4(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4)
 {
 
 }
 
-void draw_spline4_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int c1, int c2, float a1, float a2)
+void draw_spline4_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, int c1, int c2, float a1, float a2)
 {
 
 }
 
-void draw_spline4c(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5, float x6, float y6)
+void draw_spline4c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar x5, gs_scalar y5, gs_scalar x6, gs_scalar y6)
 {
 
 }
 
-void draw_spline4c_color(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float x5, float y5, float x6, float y6, int c1, int c2, float a1, float a2)
+void draw_spline4c_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar x5, gs_scalar y5, gs_scalar x6, gs_scalar y6, int c1, int c2, float a1, float a2)
 {
 
 }
@@ -188,7 +188,7 @@ int draw_spline_vertex(float x, float y)
     return startedSplines.top()->size()-2;
 }
 
-int draw_spline_vertex_color(float x, float y, int col, float alpha)
+int draw_spline_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
     splinePoint point={x,y,alpha,col};
     startedSplines.top()->push_back(point);
@@ -201,7 +201,7 @@ void draw_spline_end()
 
 }
 
-void draw_bezier_quadratic_spline_part(float x1, float y1, float x2, float y2, float x3, float y3, int c1, int c2, float a1, float a2)
+void draw_bezier_quadratic_spline_part(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, int c1, int c2, float a1, float a2)
 {
 
 }

@@ -26,8 +26,6 @@ int draw_set_blend_mode_ext(ARG src,ARG2 dest)
 
 \******************************************************************************/
 
-#include "Universal_System/scalar.h"
-
 namespace enigma_user
 {
 
