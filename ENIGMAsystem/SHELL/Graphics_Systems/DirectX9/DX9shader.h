@@ -15,4 +15,36 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX10profiler.h"
+#ifndef _DX9SHADER__H
+#define _DX9SHADER__H
+
+namespace enigma_user
+{
+
+enum {
+  sh_vertex = 0,
+  sh_tesscontrol = 1,
+  sh_tessevaluation = 2,
+  sh_geometry = 3,
+  sh_fragment = 4
+};
+
+int shader_create(int type);
+int shader_load(int id, const char* fname);
+bool shader_compile(int id);
+const char* shader_compile_output(int id);
+void shader_free(int id);
+
+int shader_program_create();
+bool shader_program_link(int id);
+bool shader_program_validate(int id);
+void shader_program_attach(int id, int sid);
+void shader_program_detach(int id, int sid);
+void shader_program_bind_frag_data(int id, const char* name);
+void shader_program_use(int id);
+void shader_program_reset();
+void shader_program_free(int id);
+
+}
+
+#endif

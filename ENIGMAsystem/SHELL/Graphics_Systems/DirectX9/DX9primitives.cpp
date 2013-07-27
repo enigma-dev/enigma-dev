@@ -18,7 +18,7 @@
 #include "../General/DirectXHeaders.h"
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
-#include "DX10model.h"
+#include "DX9model.h"
 #include "../General/DXbinding.h"
 
 #include <string>

@@ -15,32 +15,4 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <iostream>
-#include <string>
-
-#include "../General/DirectXHeaders.h"
-using namespace std;
-#include "DIRECTX10Std.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-namespace enigma
-{
-  unsigned bound_texture=0;
-  unsigned char currentcolor[4] = {0,0,0,255};
-  bool pbo_isgo;
-
-  void graphicssystem_initialize()
-  {
-
-  }
-}
-
-namespace enigma_user {
-// Stolen entirely from the documentation and thrown into a switch() structure.
-string draw_get_graphics_error()
-{
-
-}
-}
-
+#include "DX9profiler.h"

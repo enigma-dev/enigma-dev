@@ -16,7 +16,7 @@
 **/
 
 #include "../General/DirectXHeaders.h"
-#include "DX10enable.h"
+#include "DX9enable.h"
 
 namespace enigma_user
 {

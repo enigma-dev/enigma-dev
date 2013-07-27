@@ -31,8 +31,8 @@
 */
 // ***** Information END ***** 
 
-#ifndef __DX10SHAPESH_
-#define __DX10SHAPESH_
+#ifndef __DX9SHAPESH_
+#define __DX9SHAPESH_
 #include "../General/DirectXHeaders.h"
 GLfloat* block_vertices(gs_scalar  x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
 GLfloat* block_indices(gs_scalar  x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar  y2, gs_scalar z2);

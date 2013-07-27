@@ -17,10 +17,10 @@
 
 #include "../General/DirectXHeaders.h"
 #include "../General/GSd3d.h"
-#include "DX10vertexbuffer.h"
+#include "DX9vertexbuffer.h"
 #include "../General/GStextures.h"
-#include "DX10model.h"
-#include "DX10shapes.h"
+#include "DX9model.h"
+#include "DX9shapes.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>

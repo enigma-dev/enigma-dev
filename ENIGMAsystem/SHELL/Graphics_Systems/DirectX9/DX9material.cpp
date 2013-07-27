@@ -16,7 +16,7 @@
 **/
 
 #include "../General/DirectXHeaders.h"
-#include "DX10material.h"
+#include "DX9material.h"
 #include "../General/DXbinding.h"
 #include <math.h>
 

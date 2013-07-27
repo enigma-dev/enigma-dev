@@ -15,12 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX10d3d.h"
-#include "DX10shapes.h"
+#include "DX9d3d.h"
+#include "DX9shapes.h"
 #include "../General/GSprimitives.h"
-#include "DX10vertexbuffer.h"
+#include "DX9vertexbuffer.h"
 #include "../General/GStextures.h"
-#include "DX10model.h"
+#include "DX9model.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
