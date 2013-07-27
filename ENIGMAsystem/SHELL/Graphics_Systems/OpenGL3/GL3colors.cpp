@@ -17,6 +17,7 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "../General/GScolors.h"
+#include "../General/GLbinding.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -36,7 +37,7 @@ namespace enigma_user
 {
 
 void draw_unbind_all() {
-  glBindTexture(GL_TEXTURE_2D, 0);
+  texture_reset();
 }
 
 void draw_clear_alpha(int col,float alpha)

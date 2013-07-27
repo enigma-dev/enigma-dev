@@ -120,7 +120,7 @@ bool path_update()
         return false;
     #endif
     return false;  //function can cause crashes atm, until extension variables fixed
-    
+
     enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
 
     if (inst_paths->path_index == -1 || fzero(inst_paths->path_speed))
@@ -422,7 +422,7 @@ void glVertex2f(GLfloat  x,  GLfloat  y);
 void glPushAttrib(GLbitfield mask);
 void glPopAttrib(void);*/
 int draw_primitive_begin(int kind);
-int draw_vertex(double x, double y);
+int draw_vertex(float x, float y);
 int draw_primitive_end();
 
 void draw_path(unsigned pathid,double x,double y,bool absolute)

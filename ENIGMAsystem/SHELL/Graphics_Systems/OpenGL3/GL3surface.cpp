@@ -16,6 +16,8 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
+#include "../General/GLbinding.h"
+
 using namespace std;
 #include <cstddef>
 #include <iostream>
@@ -117,7 +119,7 @@ int surface_create(int width, int height)
       glGenFramebuffers(1, &fbo);
 
       glPushAttrib(GL_TEXTURE_BIT);
-      glBindTexture(GL_TEXTURE_2D, tex);
+      texture_use(tex);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

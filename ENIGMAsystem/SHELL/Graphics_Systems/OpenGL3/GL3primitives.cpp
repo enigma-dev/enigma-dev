@@ -78,7 +78,7 @@ int draw_primitive_begin_texture(int kind,unsigned tex)
   return 0;
 }
 
-int draw_vertex(double x, double y)
+int draw_vertex(float x, float y)
 {
   d3d_model_vertex(prim_draw_model, x, y, 0);
   return 0;
@@ -146,17 +146,17 @@ void d3d_primitive_end()
   d3d_model_clear(prim_d3d_model);
 }
 
-void d3d_vertex(double x, double y, double z)
+void d3d_vertex(float x, float y, float z)
 {
   d3d_model_vertex(prim_d3d_model, x, y, z);
 }
 
-void d3d_normal(double nx, double ny, double nz)
+void d3d_normal(float nx, float ny, float nz)
 {
   d3d_model_normal(prim_d3d_model, nx, ny, nz);
 }
 
-void d3d_texture(double tx, double ty)
+void d3d_texture(float tx, float ty)
 {
   d3d_model_texture(prim_d3d_model, tx, ty);
 }
@@ -171,37 +171,37 @@ void d3d_index(int in)
   d3d_model_index(prim_d3d_model, in);
 }
 
-void d3d_vertex_color(double x, double y, double z, int color, double alpha)
+void d3d_vertex_color(float x, float y, float z, int color, double alpha)
 {
   d3d_model_vertex_color(prim_d3d_model, x, y, z, color, alpha);
 }
 
-void d3d_vertex_texture(double x, double y, double z, double tx, double ty)
+void d3d_vertex_texture(float x, float y, float z, float tx, float ty)
 {
   d3d_model_vertex_texture(prim_d3d_model, x, y, z, tx, ty);
 }
 
-void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha)
+void d3d_vertex_texture_color(float x, float y, float z, float tx, float ty, int color, double alpha)
 {
   d3d_model_vertex_texture_color(prim_d3d_model, x, y, z, tx, ty, color, alpha);
 }
 
-void d3d_vertex_normal(double x, double y, double z, double nx, double ny, double nz)
+void d3d_vertex_normal(float x, float y, float z, float nx, float ny, float nz)
 {
   d3d_model_vertex_normal(prim_d3d_model, x, y, z, nx, ny, nz);
 }
 
-void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha)
+void d3d_vertex_normal_color(float x, float y, float z, float nx, float ny, float nz, int color, double alpha)
 {
   d3d_model_vertex_normal_color(prim_d3d_model, x, y, z, nx, ny, nz, color, alpha);
 }
 
-void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
+void d3d_vertex_normal_texture(float x, float y, float z, float nx, float ny, float nz, float tx, float ty)
 {
   d3d_model_vertex_normal_texture(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty);
 }
 
-void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha)
+void d3d_vertex_normal_texture_color(float x, float y, float z, float nx, float ny, float nz, float tx, float ty, int color, double alpha)
 {
   d3d_model_vertex_normal_texture_color(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty, color, alpha);
 }
