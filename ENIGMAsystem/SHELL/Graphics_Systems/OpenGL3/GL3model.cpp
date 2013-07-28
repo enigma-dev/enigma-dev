@@ -45,9 +45,9 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
-GLenum vbotypes[3] = {   
+GLenum vbotypes[3] = {
   GL_STATIC_DRAW, GL_DYNAMIC_DRAW, GL_STREAM_DRAW
-}; 
+};
 
 struct Primitive
 {
@@ -86,11 +86,12 @@ class Mesh
   vector<gs_scalar> colors;
   vector<GLuint> indices;
 
-  /* NOTE: only use 1 VBO per model, this could be 
+  /* NOTE: only use 1 VBO per model, this could be
      rewritten to make attributes offset in the single vbo */
   GLuint verticesVBO;
   GLuint texturesVBO;
   GLuint normalsVBO;
+  GLuint colorsVBO;
   GLuint indexVBO;
   GLuint maxindice;
   GLuint rebufferOffset;
@@ -126,7 +127,7 @@ class Mesh
 
   }
 
-  void ClearData() 
+  void ClearData()
   {
     vertices.clear();
     textures.clear();
@@ -172,12 +173,12 @@ class Mesh
 */
   void ColorVector(int col, double alpha)
   {
-    // TODO: Write function
+    colors.push_back(__GETR(col)); colors.push_back(__GETG(col)); colors.push_back(__GETB(col)); colors.push_back(alpha);
   }
 
   void End()
   {
- 
+
   }
 
   void BufferGenerate()
@@ -185,6 +186,7 @@ class Mesh
     glGenBuffers( 1, &verticesVBO );
     glGenBuffers( 1, &texturesVBO );
     glGenBuffers( 1, &normalsVBO );
+    glGenBuffers( 1, &colorsVBO );
     glGenBuffers( 1, &indexVBO );
   }
 
@@ -204,6 +206,11 @@ class Mesh
     glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
     // Send the data to the GPU
     glBufferData( GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), &normals[0], vbotypes[vbotype] );
+
+    // Bind The Colors Buffer
+    glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );
+    // Send the data to the GPU
+    glBufferData( GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), &colors[0], vbotypes[vbotype] );
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
     // Send the data to the GPU
@@ -230,6 +237,10 @@ class Mesh
     // Send the data to the GPU
     glBufferSubData( GL_ARRAY_BUFFER, offset * 3 * sizeof(GLfloat), normals.size(), &normals[0] );
 
+    glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );        // Bind The Buffer
+    // Send the data to the GPU
+    glBufferSubData( GL_ARRAY_BUFFER, offset * 4 * sizeof(GLfloat), colors.size(), &colors[0] );
+
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
     // Send the data to the GPU
     glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, offset * sizeof(GLuint), indices.size(), &indices[0] );
@@ -240,14 +251,14 @@ class Mesh
     ClearData();
   }
 
-  void Open(int offset) 
+  void Open(int offset)
   {
     rebufferOffset = offset;
   }
 
   void Close()
   {
-    BufferSubData(rebufferOffset); 
+    BufferSubData(rebufferOffset);
   }
 
   void Draw()
@@ -274,6 +285,10 @@ class Mesh
     glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
     glNormalPointer( GL_FLOAT, 0, (char *) NULL );     // Set The Normal Pointer To The Normal Buffer
 
+    glEnableClientState(GL_COLOR_ARRAY);
+    glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );
+    glColorPointer( 4, GL_FLOAT, 0, (char *) NULL );     // Set The Color Pointer To The Color Buffer
+
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );
 
     for (int i = 0; i < primitives.size(); i++)
@@ -290,6 +305,7 @@ class Mesh
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
   }
 };
 
@@ -512,6 +528,7 @@ void d3d_model_index(const unsigned int id, GLuint in)
 void d3d_model_vertex_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha)
 {
   meshes[id]->VertexVector(x, y, z);
+  meshes[id]->ColorVector(col, alpha);
 }
 
 void d3d_model_vertex_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
@@ -524,6 +541,7 @@ void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scala
 {
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->TextureVector(tx, ty);
+  meshes[id]->ColorVector(col, alpha);
 }
 
 void d3d_model_vertex_normal(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
@@ -536,6 +554,7 @@ void d3d_model_vertex_normal_color(const unsigned int id, gs_scalar x, gs_scalar
 {
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->NormalVector(nx, ny, nz);
+  meshes[id]->ColorVector(col, alpha);
 }
 
 void d3d_model_vertex_normal_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
@@ -550,6 +569,7 @@ void d3d_model_vertex_normal_texture_color(const unsigned int id, gs_scalar x, g
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->NormalVector(nx, ny, nz);
   meshes[id]->TextureVector(tx, ty);
+  meshes[id]->ColorVector(col, alpha);
 }
 
 
@@ -654,9 +674,6 @@ void d3d_model_cylinder(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_sc
 
 void d3d_model_cone(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-
-  float v[51][3];
-  float t[100][3];
   steps = min(max(steps, 3), 48);
   const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
   double a, px, py, tp;
