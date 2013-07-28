@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+// We don't want to load ALURE from a DLL. Would be kind of a waste.
+#define ALURE_STATIC_LIBRARY 1
+
 #ifndef _AL_SYSTEM__H
 #define _AL_SYSTEM__H
 #include <stddef.h>
@@ -26,7 +29,7 @@
 #endif
 
 extern int falloff_model;
-
+extern bool load_al_dll();
 extern size_t channel_num;
 
 extern ALfloat listenerPos[];

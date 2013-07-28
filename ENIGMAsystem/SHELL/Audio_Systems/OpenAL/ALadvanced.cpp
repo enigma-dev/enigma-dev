@@ -15,10 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
-// We don't want to load ALURE from a DLL. Would be kind of a waste.
-#define ALURE_STATIC_LIBRARY 1
-
 #include <string>
 #include <stdio.h>
 #include <stddef.h>
@@ -35,8 +31,6 @@ using std::string;
 #else
 #include <AL/alure.h>
 #endif
-
-bool load_al_dll();
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
