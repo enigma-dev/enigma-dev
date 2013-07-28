@@ -80,7 +80,9 @@ int draw_primitive_begin_texture(int kind,unsigned tex)
 
 int draw_vertex(gs_scalar x, gs_scalar y)
 {
-  d3d_model_vertex(prim_draw_model, x, y, 0);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  d3d_model_vertex_color(prim_draw_model, x, y, 0, col, alpha);
   return 0;
 }
 
@@ -92,7 +94,9 @@ int draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 
 int draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_texture(prim_draw_model, x, y, 0, tx, ty);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  d3d_model_vertex_texture_color(prim_draw_model, x, y, 0, tx, ty, col, alpha);
   return 0;
 }
 
