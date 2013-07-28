@@ -19,7 +19,7 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#include "include.h"
+#include "inifilesystem.h"
 #include <cstdio>
 
 static int section;
@@ -28,7 +28,7 @@ static char buff[ENIGMA_INI_BUFFER_SIZE];
 
 namespace enigma_user
 {
-	void ini_open(string *filename)
+	void ini_open(string filename)
 	{
 #ifdef DEBUG_MODE
 		if (enigma_ini_file != NULL)

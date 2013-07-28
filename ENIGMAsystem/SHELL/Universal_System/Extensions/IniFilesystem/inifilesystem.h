@@ -51,7 +51,7 @@ namespace enigma_user
 	******************************************************/
 	//void ini_write_string(string section, string key, string value);
 
-	variant ini_read_real(string section, string key, variant def)
+	variant ini_read_real(string section, string key, variant def);
 
 	/**************************************************//*!
 	*	@return	The value of the indicated key inside the
