@@ -15,10 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DX9d3d.h"
+#include "../General/GSd3d.h"
 #include "DX9shapes.h"
 #include "../General/GSprimitives.h"
-#include "DX9vertexbuffer.h"
 #include "../General/GStextures.h"
 #include "DX9model.h"
 #include "Universal_System/var4.h"

@@ -3,11 +3,11 @@
 
 Name: DirectX 9.0
 Identifier: DirectX9
-Description: WARNING! This graphics system is still under development and not as completed as others, we do not recommend its usage for anything other than testing at this time.
+Description: Native rendering for Windows platforms.
 Author: Robert B. Colton
 
 Depends:
 	Windowing: Win32
 
 Represents:
-	Build-platforms: None
+	Build-platforms: Win32

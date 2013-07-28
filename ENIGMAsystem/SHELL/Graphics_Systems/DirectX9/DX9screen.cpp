@@ -90,12 +90,226 @@ namespace enigma
     }
 }
 
+#include "Bridges/General/DXDevice.h"
+
 namespace enigma_user
 {
 
 void screen_redraw()
 {
-    
+    d3ddev->BeginScene();    // begins the 3D scene
+
+if (!view_enabled)
+    {
+
+        int clear_bits = 0;
+		if (background_showcolor)
+		{
+			int clearcolor = ((int)background_color) & 0x00FFFFFF;
+			// clear the window to a deep blue
+			d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+		}
+
+        draw_back();
+
+        // Apply and clear stored depth changes.
+        for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
+        {
+            enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
+            if (inst_depth != NULL) {
+                drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
+                inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
+                if (instance_event_iterator == inst_depth->depth.myiter) {
+                    instance_event_iterator = inst_depth->depth.myiter->prev;
+                }
+                inst_depth->depth.myiter = mynewiter;
+            }
+        }
+        id_to_currentnextdepth.clear();
+
+        if (enigma::particles_impl != NULL) {
+            const double high = numeric_limits<double>::max();
+            const double low = drawing_depths.rbegin() != drawing_depths.rend() ? drawing_depths.rbegin()->first : -numeric_limits<double>::max();
+            (enigma::particles_impl->draw_particlesystems)(high, low);
+        }
+        bool stop_loop = false;
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+        {
+            if (dit->second.tiles.size())
+                //glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
+
+            texture_reset();
+            enigma::inst_iter* push_it = enigma::instance_event_iterator;
+            //loop instances
+            for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
+                enigma::instance_event_iterator->inst->myevent_draw();
+                if (enigma::room_switching_id != -1) {
+                    stop_loop = true;
+                    break;
+                }
+            }
+            enigma::instance_event_iterator = push_it;
+            if (stop_loop) break;
+            //particles
+            if (enigma::particles_impl != NULL) {
+                const double high = dit->first;
+                dit++;
+                const double low = dit != drawing_depths.rend() ? dit->first : -numeric_limits<double>::max();
+                dit--;
+                (enigma::particles_impl->draw_particlesystems)(high, low);
+            }
+        }
+    }
+    else
+    {
+        bool stop_loop = false;
+        for (view_current = 0; view_current < 7; view_current++)
+        {
+            if (view_visible[(int)view_current])
+            {
+                int vc = (int)view_current;
+                int vob = (int)view_object[vc];
+
+                if (vob != -1)
+                {
+                    object_basic *instanceexists = fetch_instance_by_int(vob);
+
+                    if (instanceexists)
+                    {
+                        object_planar* vobr = (object_planar*)instanceexists;
+
+                        double vobx = vobr->x, voby = vobr->y;
+
+                        //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
+                        //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
+
+                        double vbc_h, vbc_v;
+                        (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
+                        (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
+
+                        if (view_hspeed[vc] == -1)
+                        {
+                            if (vobx < view_xview[vc] + vbc_h)
+                                view_xview[vc] = vobx - vbc_h;
+                            else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
+                                view_xview[vc] = vobx + vbc_h - view_wview[vc];
+                        }
+                        else
+                        {
+                            if (vobx < view_xview[vc] + vbc_h)
+                            {
+                                view_xview[vc] -= view_hspeed[vc];
+                                if (view_xview[vc] < vobx - vbc_h)
+                                    view_xview[vc] = vobx - vbc_h;
+                            }
+                            else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
+                            {
+                                view_xview[vc] += view_hspeed[vc];
+                                if (view_xview[vc] > vobx + vbc_h - view_wview[vc])
+                                    view_xview[vc] = vobx + vbc_h - view_wview[vc];
+                            }
+                        }
+
+                        if (view_vspeed[vc] == -1)
+                        {
+                            if (voby < view_yview[vc] + vbc_v)
+                                view_yview[vc] = voby - vbc_v;
+                            else if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
+                                view_yview[vc] = voby + vbc_v - view_hview[vc];
+                        }
+                        else
+                        {
+                            if (voby < view_yview[vc] + vbc_v)
+                            {
+                                view_yview[vc] -= view_vspeed[vc];
+                                if (view_yview[vc] < voby - vbc_v)
+                                    view_yview[vc] = voby - vbc_v;
+                            }
+                            if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
+                            {
+                                view_yview[vc] += view_vspeed[vc];
+                                if (view_yview[vc] > voby + vbc_v - view_hview[vc])
+                                    view_yview[vc] = voby + vbc_v - view_hview[vc];
+                            }
+                        }
+
+                        if (view_xview[vc] < 0)
+                            view_xview[vc] = 0;
+                        else if (view_xview[vc] > room_width - view_wview[vc])
+                            view_xview[vc] = room_width - view_wview[vc];
+
+                        if (view_yview[vc] < 0)
+                            view_yview[vc] = 0;
+                        else if (view_yview[vc] > room_height - view_hview[vc])
+                            view_yview[vc] = room_height - view_hview[vc];
+                    }
+                }
+
+                int clear_bits = 0;
+				if (background_showcolor)
+				{
+					int clearcolor = ((int)background_color) & 0x00FFFFFF;
+					// clear the window to a deep blue
+					d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+				}
+
+                draw_back();
+
+                // Apply and clear stored depth changes.
+                for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
+                {
+                    enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
+                    if (inst_depth != NULL) {
+                        drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
+                        inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
+                        if (instance_event_iterator == inst_depth->depth.myiter) {
+                            instance_event_iterator = inst_depth->depth.myiter->prev;
+                        }
+                        inst_depth->depth.myiter = mynewiter;
+                    }
+                }
+                id_to_currentnextdepth.clear();
+
+                if (enigma::particles_impl != NULL) {
+                    const double high = numeric_limits<double>::max();
+                    const double low = drawing_depths.rbegin() != drawing_depths.rend() ? drawing_depths.rbegin()->first : -numeric_limits<double>::max();
+                    (enigma::particles_impl->draw_particlesystems)(high, low);
+                }
+                for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+                {
+                    if (dit->second.tiles.size())
+                        //glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
+
+                    texture_reset();
+                    enigma::inst_iter* push_it = enigma::instance_event_iterator;
+                    //loop instances
+                    for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
+                        enigma::instance_event_iterator->inst->myevent_draw();
+                        if (enigma::room_switching_id != -1) {
+                            stop_loop = true;
+                            break;
+                        }
+                    }
+                    enigma::instance_event_iterator = push_it;
+                    if (stop_loop) break;
+                    //particles
+                    if (enigma::particles_impl != NULL) {
+                        const double high = dit->first;
+                        dit++;
+                        const double low = dit != drawing_depths.rend() ? dit->first : -numeric_limits<double>::max();
+                        dit--;
+                        (enigma::particles_impl->draw_particlesystems)(high, low);
+                    }
+                }
+                if (stop_loop) break;
+            }
+        }
+        view_current = 0;
+    }
+
+    d3ddev->EndScene();    // ends the 3D scene
+
+    d3ddev->Present(NULL, NULL, NULL, NULL);    // displays the created frame
 }
 
 void screen_init()

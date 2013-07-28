@@ -16,7 +16,7 @@
 **/
 
 #include "../General/DirectXHeaders.h"
-#include "../General/DXblend.h"
+#include "../General/GSblend.h"
 
 namespace enigma_user
 {

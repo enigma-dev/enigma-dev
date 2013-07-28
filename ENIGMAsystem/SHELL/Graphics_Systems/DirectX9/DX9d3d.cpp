@@ -17,7 +17,6 @@
 
 #include "../General/DirectXHeaders.h"
 #include "../General/GSd3d.h"
-#include "DX9vertexbuffer.h"
 #include "../General/GStextures.h"
 #include "DX9model.h"
 #include "DX9shapes.h"
