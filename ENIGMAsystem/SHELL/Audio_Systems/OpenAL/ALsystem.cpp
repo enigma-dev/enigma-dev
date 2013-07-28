@@ -27,7 +27,7 @@ clock_t elapsedtime;
 clock_t lasttime;
 
 int falloff_model = 0;
-
+bool load_al_dll();
 size_t channel_num = 128;
 
 ALfloat listenerPos[] = {0.0f,0.0f,0.0f};
