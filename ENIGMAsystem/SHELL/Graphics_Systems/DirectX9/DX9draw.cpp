@@ -106,22 +106,22 @@ float draw_get_circle_precision() {
     return enigma::circleprecision;
 }
 
-void draw_circle(gs_scalar x, gs_scalar y, gs_scalar rad, bool outline)
+void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
 
 }
 
-void draw_circle_color(gs_scalar x, gs_scalar y, gs_scalar rad, int c1, int c2, bool outline)
+void draw_circle_color(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
 {
 
 }
 
-void draw_circle_perfect(gs_scalar x, gs_scalar y, gs_scalar rad, bool outline)
+void draw_circle_perfect(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
 
 }
 
-void draw_circle_color_perfect(gs_scalar x, gs_scalar y, gs_scalar rad, int c1, int c2, bool outline)
+void draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
 {
 
 }
@@ -151,12 +151,12 @@ void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, 
 
 }
 
-void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,gs_scalar rad, bool outline)
+void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,float rad, bool outline)
 {
 
 }
 
-void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar rad, int col1, int col2, bool outline)
+void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline)
 {
 
 }

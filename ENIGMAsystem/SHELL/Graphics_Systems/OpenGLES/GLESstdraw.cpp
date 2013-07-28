@@ -184,7 +184,7 @@ float draw_get_circle_precision() {
 	return enigma::circleprecision;
 }
 
-int draw_circle(gs_scalar x, gs_scalar y, gs_scalar rad, bool outline)
+int draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
 	untexture();
 	gs_scalar pr=2*M_PI/enigma::circleprecision;
@@ -223,7 +223,7 @@ int draw_circle(gs_scalar x, gs_scalar y, gs_scalar rad, bool outline)
 	return 0;
 }
 
-int draw_circle_color(gs_scalar x, gs_scalar y, gs_scalar rad, int c1, int c2, bool outline)
+int draw_circle_color(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
 {
   untexture();
 	/*if(outline) 
@@ -246,7 +246,7 @@ int draw_circle_color(gs_scalar x, gs_scalar y, gs_scalar rad, int c1, int c2, b
 	return 0;
 }
 
-int draw_circle_perfect(gs_scalar x, gs_scalar y, gs_scalar rad, bool outline)
+int draw_circle_perfect(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
 	untexture();
 	gs_scalar r2=rad*rad,r12=rad*M_SQRT1_2;
@@ -267,7 +267,7 @@ int draw_circle_perfect(gs_scalar x, gs_scalar y, gs_scalar rad, bool outline)
     return 0;
 }
 
-int draw_circle_color_perfect(gs_scalar x, gs_scalar y, gs_scalar rad, int c1, int c2, bool outline)
+int draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
 {
 	untexture();
 	gs_scalar r2=rad*rad;
@@ -417,7 +417,7 @@ int draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, g
 	return 0;
 }
 
-int draw_roundrect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar rad, bool outline)
+int draw_roundrect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, bool outline)
 {
     untexture();
     if(x1>x2)
@@ -481,7 +481,7 @@ int draw_roundrect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_sc
     return 0;
 }
 
-int draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar rad, int col1, int col2, bool outline)
+int draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline)
 {
     untexture();
     if(x1>x2)
