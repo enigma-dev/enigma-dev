@@ -98,6 +98,7 @@ class Mesh
   bool vbogenerated;
   bool vbobuffered;
   int vbotype;
+  bool useColorBuffer; //If color is not used, then it won't bind the color buffer
 
   unsigned int Begin(int pt)
   {
@@ -118,6 +119,7 @@ class Mesh
     maxindice = 0;
     vbogenerated = false;
     vbobuffered = false;
+    useColorBuffer = false;
     currentPrimitive = 0;
     basicShapesPrimitive = Begin(4);
   }
@@ -173,6 +175,7 @@ class Mesh
 */
   void ColorVector(int col, double alpha)
   {
+    useColorBuffer = true;
     colors.push_back(__GETR(col)); colors.push_back(__GETG(col)); colors.push_back(__GETB(col)); colors.push_back(alpha);
   }
 
@@ -207,10 +210,12 @@ class Mesh
     // Send the data to the GPU
     glBufferData( GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), &normals[0], vbotypes[vbotype] );
 
-    // Bind The Colors Buffer
-    glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );
-    // Send the data to the GPU
-    glBufferData( GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), &colors[0], vbotypes[vbotype] );
+    if (useColorBuffer == true){
+        // Bind The Colors Buffer
+        glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );
+        // Send the data to the GPU
+        glBufferData( GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), &colors[0], vbotypes[vbotype] );
+    }
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
     // Send the data to the GPU
@@ -237,9 +242,11 @@ class Mesh
     // Send the data to the GPU
     glBufferSubData( GL_ARRAY_BUFFER, offset * 3 * sizeof(GLfloat), normals.size(), &normals[0] );
 
-    glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );        // Bind The Buffer
-    // Send the data to the GPU
-    glBufferSubData( GL_ARRAY_BUFFER, offset * 4 * sizeof(GLfloat), colors.size(), &colors[0] );
+    if (useColorBuffer == true){
+        glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );        // Bind The Buffer
+        // Send the data to the GPU
+        glBufferSubData( GL_ARRAY_BUFFER, offset * 4 * sizeof(GLfloat), colors.size(), &colors[0] );
+    }
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
     // Send the data to the GPU
@@ -285,9 +292,11 @@ class Mesh
     glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
     glNormalPointer( GL_FLOAT, 0, (char *) NULL );     // Set The Normal Pointer To The Normal Buffer
 
-    glEnableClientState(GL_COLOR_ARRAY);
-    glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );
-    glColorPointer( 4, GL_FLOAT, 0, (char *) NULL );     // Set The Color Pointer To The Color Buffer
+    if (useColorBuffer == true){
+        glEnableClientState(GL_COLOR_ARRAY);
+        glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );
+        glColorPointer( 4, GL_FLOAT, 0, (char *) NULL );     // Set The Color Pointer To The Color Buffer
+    }
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );
 
@@ -305,7 +314,7 @@ class Mesh
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
+    if (useColorBuffer == true) { glDisableClientState(GL_COLOR_ARRAY); }
   }
 };
 
