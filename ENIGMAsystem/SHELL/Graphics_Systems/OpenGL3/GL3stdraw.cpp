@@ -130,8 +130,6 @@ void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2
 
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,bool outline)
 {
-  x1 -= 1;
-  y1 -= 1;
   texture_reset();
   if(outline)
   {
@@ -145,7 +143,7 @@ void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,bool o
   else glRectf(x1,y1,x2,y2);
 }
 
-void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,float angle,bool outline)
+void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float angle, bool outline)
 {
   texture_reset();
   angle *= M_PI/180;

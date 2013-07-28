@@ -104,7 +104,7 @@ namespace enigma
     }
     path::~path() { pathstructarray[id] = NULL; }
 
-    void path_add_point(unsigned pathid, double x, double y, double speed)
+    void path_add_point(unsigned pathid, cs_scalar x, cs_scalar y, cs_scalar speed)
     {
         path_point point={x,y,speed};
         pathstructarray[pathid]->pointarray.push_back(point);
@@ -166,14 +166,14 @@ namespace enigma
     }
 
     /// Returns an iterator to the point in @param path whose segment covers @param position.
-    inline ppi_t path_point_iterator_at(path* pth, double position) {
+    inline ppi_t path_point_iterator_at(path* pth, cs_scalar position) {
       return --pth->pointoffset.upper_bound(position);
     }
-    inline int path_point_index_at(path* pth, double position) {
+    inline int path_point_index_at(path* pth, cs_scalar position) {
       return path_point_iterator_at(pth, position)->second;
     }
 
-    void path_getXY(path *pth, double &x, double &y, double position)
+    void path_getXY(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position)
     {
       if (!pth) return;
       if (!pth->pointarray.size()) return;
@@ -220,7 +220,7 @@ namespace enigma
       }
     }
 
-    void path_getspeed(path *pth, double &speed, double position)
+    void path_getspeed(path *pth, cs_scalar &speed, cs_scalar position)
     {
       if (!pth) return;
       if (!pth->pointarray.size()) return;

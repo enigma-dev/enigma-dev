@@ -192,7 +192,7 @@ float texture_anisotropy_maxlevel()
 
 }
 
-void  texture_anisotropy_filter(int texid, float levels)
+void  texture_anisotropy_filter(int texid, gs_scalar levels)
 {
 
 }
