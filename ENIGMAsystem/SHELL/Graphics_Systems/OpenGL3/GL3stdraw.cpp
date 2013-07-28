@@ -196,7 +196,7 @@ float draw_get_circle_precision() {
     return enigma::circleprecision;
 }
 
-void draw_circle(gs_scalar x, gs_scalar y, gs_scalar rad, bool outline)
+void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
     texture_reset();
     double pr=2*M_PI/enigma::circleprecision;
@@ -222,7 +222,7 @@ void draw_circle(gs_scalar x, gs_scalar y, gs_scalar rad, bool outline)
     glEnd();
 }
 
-void draw_circle_color(gs_scalar x, gs_scalar y, gs_scalar rad,int c1, int c2,bool outline)
+void draw_circle_color(gs_scalar x, gs_scalar y, float rad,int c1, int c2,bool outline)
 {
   texture_reset();
     if(outline)
@@ -244,7 +244,7 @@ void draw_circle_color(gs_scalar x, gs_scalar y, gs_scalar rad,int c1, int c2,bo
     glColor4ubv(enigma::currentcolor);
 }
 
-void draw_circle_perfect(gs_scalar x, gs_scalar y, gs_scalar rad,bool outline)
+void draw_circle_perfect(gs_scalar x, gs_scalar y, float rad,bool outline)
 {
     texture_reset();
     const gs_scalar r2 = rad*rad, r12 = rad*M_SQRT1_2;
@@ -264,7 +264,7 @@ void draw_circle_perfect(gs_scalar x, gs_scalar y, gs_scalar rad,bool outline)
     glEnd();
 }
 
-void draw_circle_color_perfect(gs_scalar x, gs_scalar y, gs_scalar rad, int c1, int c2, bool outline)
+void draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
 {
     texture_reset();
     gs_scalar r2=rad*rad;
@@ -410,7 +410,7 @@ void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,g
   glColor4ubv(enigma::currentcolor);
 }
 
-void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar rad, bool outline)
+void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline)
 {
   texture_reset();
   if(x1>x2) {
@@ -471,7 +471,7 @@ void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_sc
   }
 }
 
-void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar rad, int col1, int col2, bool outline)
+void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline)
 {
   texture_reset();
   if(x1>x2) {
