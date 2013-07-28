@@ -63,61 +63,18 @@ enum {
   phy_joint_frequency
 };
 
-/** Creates a new physics joint in the given world.
-@param world Index of the world.
-@return Returns the index of the newly created joint.
-**/
 int b2d_joint_create(int world);
-/** description...
-@param id Index of the joint.
-@param fixture1
-@param fixture2
-**/
 void b2d_joint_distance_create(int id, int fixture1, int fixture2,  bool collide_connected = true);
-/** description...
-@param id
-**/
 void b2d_joint_revolute_create(int id);
-/** description...
-@param id
-**/
 void b2d_joint_prismatic_create(int id);
-/** description...
-@param id
-**/
 void b2d_joint_pulley_create(int id);
-/** description...
-@param id
-**/
 void b2d_joint_gear_create(int id);
-/** description...
-@param id
-@param fixture
-**/
 void b2d_joint_mouse_create(int id, int fixture);
-/** description...
-@param id
-**/
 void b2d_joint_delete(int id);
 
-/** description...
-@param id
-@param x
-@param y
-**/
 void b2d_joint_set_target(int id, double x, double y);
-
-/** description...
-@param id
-**/
 void b2d_joint_enable_motor(int id);
-/** description...
-@param id
-**/
 void b2d_joint_get_value(int id);
-/** description...
-@param id
-**/
 void b2d_joint_set_value(int id);
 
 }
