@@ -36,8 +36,6 @@ using std::string;
 #include <AL/alure.h>
 #endif
 
-bool load_al_dll();
-
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
