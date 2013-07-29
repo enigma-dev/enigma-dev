@@ -546,7 +546,7 @@ static unsigned int d3d_models_maxid = 0;
 namespace enigma_user
 {
 
-unsigned int d3d_model_create()
+unsigned int d3d_model_create(int vbot)
 {
     d3d_models.insert(pair<unsigned int, d3d_model>(d3d_models_maxid++, d3d_model()));
     return d3d_models_maxid-1;
