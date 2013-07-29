@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DXDevice.h"
-#include "../General/DirectXHeaders.h"
+#include "Bridges/General/DX9Device.h"
+#include "Direct3D9Headers.h"
 #include "../General/GScolors.h"
 #include <math.h>
 
@@ -40,10 +40,11 @@ void draw_unbind_all() {
 
 }
 
-void draw_clear_alpha(int col,float alpha)
+void draw_clear_alpha(int col, float alpha)
 {
-
+	d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(col), __GETG(col), __GETB(col)), alpha, 0);
 }
+
 void draw_clear(int col)
 {
 	d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(col), __GETG(col), __GETB(col)), 1.0f, 0);
@@ -61,14 +62,17 @@ void draw_set_color(int color)
 {
 
 }
+
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
 
 }
+
 void draw_set_alpha(float alpha)
 {
 
 }
+
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
 

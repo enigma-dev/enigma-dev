@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GL3D3D_H
-#define ENIGMA_GL3D3D_H 
+#ifndef ENIGMA_GS3D3D_H
+#define ENIGMA_GS3D3D_H 
 
 #include "Universal_System/scalar.h"
 #include <string>

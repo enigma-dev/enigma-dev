@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
 #include "DX9model.h"
