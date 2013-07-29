@@ -3,7 +3,7 @@
 
 Name: DirectX 9.0
 Identifier: DirectX9
-Description: WARNING! This graphics system is still under development and not as completed as others, we do not recommend its usage for anything other than testing at this time.
+Description: Microsoft DirectX is a group of technologies designed to make Windows-based computers an ideal platform for running and displaying applications rich in multimedia elements such as full-color graphics, video, 3D animation, and rich audio.
 Author: Robert B. Colton
 
 Depends:
