@@ -18,7 +18,7 @@
 #include <cstddef>
 
 #include <math.h>
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
 #include "../General/GSbackground.h"
 #include "../General/GStextures.h"
 #include "Universal_System/backgroundstruct.h"

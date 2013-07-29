@@ -26,7 +26,7 @@ using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/Win32/WINDOWSwindow.h"
-#include "../General/DXDevice.h"
+#include "../General/DX9Device.h"
 
 // include the Direct3D Library file
 #pragma comment (lib, "d3d9.lib")

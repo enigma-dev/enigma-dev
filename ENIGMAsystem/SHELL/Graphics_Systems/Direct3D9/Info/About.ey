@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: Direct3D 9.0
+Identifier: Direct3D9
+Description: Graphics using DirectX 9 for native Windows platforms.
+Author: Robert B. Colton
+
+Depends:
+	Windowing: Win32
+
+Represents:
+	Build-platforms: None
