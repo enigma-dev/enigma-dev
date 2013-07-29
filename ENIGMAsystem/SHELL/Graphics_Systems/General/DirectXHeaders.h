@@ -15,4 +15,4 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <d3d10.h>
+#include <d3dx9.h>
