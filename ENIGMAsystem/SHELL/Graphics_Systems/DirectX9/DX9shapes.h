@@ -31,9 +31,11 @@
 */
 // ***** Information END ***** 
 
+#include "Universal_System/scalar.h"
+
 #ifndef __DX9SHAPESH_
 #define __DX9SHAPESH_
 #include "../General/DirectXHeaders.h"
-GLfloat* block_vertices(gs_scalar  x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
-GLfloat* block_indices(gs_scalar  x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar  y2, gs_scalar z2);
-#endi
+gs_scalar* block_vertices(gs_scalar  x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
+gs_scalar* block_indices(gs_scalar  x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar  y2, gs_scalar z2);
+#endif
