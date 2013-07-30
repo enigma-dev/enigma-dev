@@ -19,7 +19,7 @@
 #include <vector>
 #include <math.h>
 
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
 #include "../General/GScolors.h"
 #include "../General/GScurves.h"
 #include "../General/DXbinding.h"

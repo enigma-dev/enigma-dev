@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include <string>
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
 #include "../General/GScolors.h"

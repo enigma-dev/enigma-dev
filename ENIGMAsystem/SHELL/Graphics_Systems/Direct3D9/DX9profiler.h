@@ -15,4 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <d3d9.h>
+// For querying the graphic's output for debugging purposes, eg. triangles rendered, VRAM usage, and VBO's, etc.
+
+#ifndef __DX9PROFILERH_
+#define __DX9PROFILERH_
+
+#endif

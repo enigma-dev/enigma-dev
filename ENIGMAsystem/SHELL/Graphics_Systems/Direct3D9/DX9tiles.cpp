@@ -41,7 +41,7 @@
 #include "Universal_System/backgroundstruct.h"
 #include "../General/GStextures.h"
 #include "../General/DXbinding.h"
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
 #include "../General/GStiles.h"
 #include "../General/DXtilestruct.h"
 namespace enigma

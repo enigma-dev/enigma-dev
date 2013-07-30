@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,18 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/DirectXHeaders.h"
-#include "../General/GSblend.h"
+#include "Universal_System/scalar.h"
 
-namespace enigma_user
-{
+#ifndef _GLTEXTURESTRUCT__H
+#define _GLTEXTURESTRUCT__H
 
-int draw_set_blend_mode(int mode){
+#include <vector>
+using std::vector;
 
-}
+struct GmTexture {
+	unsigned gltex;
+	GmTexture(unsigned gtex);
+	~GmTexture();
+};
+extern vector<GmTexture*> GmTextures;
 
-int draw_set_blend_mode_ext(int src, int dest){
-
-}
-
-}
+#endif

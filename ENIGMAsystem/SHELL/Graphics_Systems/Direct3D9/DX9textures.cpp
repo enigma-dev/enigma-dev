@@ -16,10 +16,12 @@
 **/
 
 #include <stdio.h>
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
+#include "Bridges/General/DX9Device.h"
 #include <string.h>
 //using std::string;
 #include "../General/GStextures.h"
+#include "DX9TextureStruct.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -34,9 +36,9 @@ namespace enigma {
   extern size_t background_idmax;
 }
 
-GmTexture::GmTexture(unsigned gtex)
+GmTexture::GmTexture(LPDIRECT3DTEXTURE9 gTex)
 {
-
+	gTexture = gTex;
 }
 
 GmTexture::~GmTexture()
@@ -64,7 +66,31 @@ namespace enigma
 
   int graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
   {
+    LPDIRECT3DTEXTURE9 texture = NULL;
+	HRESULT hr;
 
+	hr = d3ddev->CreateTexture(
+		fullwidth,
+		fullheight,
+		1,
+		D3DUSAGE_DYNAMIC,
+		D3DFMT_A8R8G8B8,
+		D3DPOOL_DEFAULT,
+		&texture,
+		0
+	);
+ 
+	D3DLOCKED_RECT rect;
+
+	texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+	
+	unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
+	memcpy(dest, pxdata, sizeof(unsigned char) * fullwidth * fullheight * 4);
+
+	texture->UnlockRect(0);
+	
+    GmTextures.push_back(new GmTexture(texture));
+    return GmTextures.size()-1;
   }
 
   int graphics_duplicate_texture(int tex)
@@ -99,7 +125,9 @@ void texture_set_enabled(bool enable)
 
 void texture_set_interpolation(int enable)
 {
-
+	d3ddev->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+	d3ddev->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+	d3ddev->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR );
 }
 
 bool texture_get_interpolation()

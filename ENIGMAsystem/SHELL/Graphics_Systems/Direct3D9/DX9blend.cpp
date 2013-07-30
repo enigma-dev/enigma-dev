@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,7 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
+#include "Bridges/General/DX9Device.h"
+#include "Direct3D9Headers.h"
 #include "../General/GSblend.h"
 
 namespace enigma_user
@@ -25,29 +26,29 @@ int draw_set_blend_mode(int mode){
 	switch (mode)
 	{
     case bm_add:
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
       return 0;
     case bm_max:
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_COLOR);
+		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_MAX);
       return 0;
     case bm_subtract:
-        glBlendFunc(GL_ZERO,GL_ONE_MINUS_SRC_COLOR);
+		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_SUBTRACT);
       return 0;
     default:
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+        d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
       return 0;
   }
 }
 
-int draw_set_blend_mode_ext(int src,int dest){
-	const static GLenum blendequivs[11] = {
-	  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
-	  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
-	  GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
-    };
-	glBlendFunc(blendequivs[(src-1)%10],blendequivs[(dest-1)%10]);
-	return 0;
+int draw_set_blend_mode_ext(int src, int dest){
+  const static D3DBLEND blendequivs[11] = {
+	  D3DBLEND_ZERO, D3DBLEND_ONE, D3DBLEND_SRCCOLOR, D3DBLEND_INVSRCCOLOR, D3DBLEND_SRCALPHA,
+	  D3DBLEND_INVSRCALPHA, D3DBLEND_DESTALPHA, D3DBLEND_INVDESTALPHA, D3DBLEND_DESTCOLOR,
+	  D3DBLEND_INVDESTCOLOR, D3DBLEND_SRCALPHASAT
+  };
+  d3ddev->SetRenderState(D3DRS_SRCBLEND, blendequivs[(src-1)%10]);
+  d3ddev->SetRenderState(D3DRS_DESTBLEND, blendequivs[(dest-1)%10]);
+  return 0;
 }
 
 }
-

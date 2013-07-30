@@ -23,6 +23,7 @@ using std::string;
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSsprite.h"
 #include "../General/GStextures.h"
+#include "../General/GLTextureStruct.h"
 #include "../General/GLbinding.h"
 
 #include "Universal_System/spritestruct.h"
