@@ -35,18 +35,19 @@ enum {
   bm_max      = 2,
   bm_subtract = 3
 };
+  
 enum {
-  bm_zero             =  1,  // GL_ZERO
-  bm_one              =  2,  // GL_ONE
-  bm_src_color        =  3,  // GL_SRC_COLOR             //only for dest
-  bm_inv_src_color    =  4,  // GL_ONE_MINUS_SRC_COLOR   //only for dest
-  bm_src_alpha        =  5,  // GL_SRC_ALPHA
-  bm_inv_src_alpha    =  6,  // GL_ONE_MINUS_SRC_ALPHA
-  bm_dest_alpha       =  7,  // GL_DST_ALPHA
-  bm_inv_dest_alpha   =  8,  // GL_ONE_MINUS_DST_ALPHA
-  bm_dest_color       =  9,  // GL_DST_COLOR              //only for src
-  bm_inv_dest_color   = 10,  // GL_ONE_MINUS_DST_COLOR    //only for src
-  bm_src_alpha_sat    = 11   // GL_SRC_ALPHA_SATURATE     //only for src
+  bm_zero             =  1,  // GL_ZERO                  D3DBLEND_ZERO
+  bm_one              =  2,  // GL_ONE                   D3DBLEND_ONE
+  bm_src_color        =  3,  // GL_SRC_COLOR             D3DBLEND_SRCCOLOR    //only for dest
+  bm_inv_src_color    =  4,  // GL_ONE_MINUS_SRC_COLOR   D3DBLEND_INVSRCCOLOR //only for dest
+  bm_src_alpha        =  5,  // GL_SRC_ALPHA             D3DBLEND_SRCALPHA
+  bm_inv_src_alpha    =  6,  // GL_ONE_MINUS_SRC_ALPHA   D3DBLEND_INVSRCALPHA
+  bm_dest_alpha       =  7,  // GL_DST_ALPHA             D3DBLEND_DESTALPHA
+  bm_inv_dest_alpha   =  8,  // GL_ONE_MINUS_DST_ALPHA   D3DBLEND_INVDESTALPHA
+  bm_dest_color       =  9,  // GL_DST_COLOR             D3DBLEND_DESTCOLOR     //only for src
+  bm_inv_dest_color   = 10,  // GL_ONE_MINUS_DST_COLOR   D3DBLEND_INVDESTCOLOR  //only for src
+  bm_src_alpha_sat    = 11   // GL_SRC_ALPHA_SATURATE    D3DBLEND_SRCALPHASAT   //only for src
 };
 
 int draw_set_blend_mode(int mode);
