@@ -61,6 +61,12 @@ using std::string;
     const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
+#include "Direct3D9Headers.h"
+#include "Bridges/General/DX9Device.h"
+#include "DX9TextureStruct.h"
+
+	LPD3DXSPRITE sprite=NULL;
+	
 namespace enigma_user
 {
 
@@ -70,7 +76,30 @@ bool sprite_exists(int spr) {
 
 void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y)
 {
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
+    const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
+                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
+                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height;
+	
+
+	if (sprite == NULL) {
+	if (SUCCEEDED(D3DXCreateSprite(d3ddev,&sprite)))
+	{
+		// created OK
+	}
+	}
+	
+	D3DXVECTOR3 pos;
+
+	pos.x = x;
+	pos.y = y;
+	pos.z = 0.0f;
+
+	sprite->Begin(D3DXSPRITE_ALPHABLEND);
+	sprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,NULL,&pos,0xFFFFFFFF);
+	sprite->End();
 }
 
 void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)

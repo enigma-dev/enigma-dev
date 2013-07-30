@@ -34,17 +34,6 @@ namespace enigma
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
-#include <vector>
-using std::vector;
-
-struct GmTexture {
-	unsigned gltex;
-	GmTexture(unsigned gtex);
-	~GmTexture();
-};
-extern vector<GmTexture*> GmTextures;
-
-
 namespace enigma_user {
 enum {
   tx_none,

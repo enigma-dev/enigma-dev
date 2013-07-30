@@ -18,6 +18,7 @@
 #include <math.h>
 #include <string>
 #include "../General/OpenGLHeaders.h"
+#include "../General/GLTextureStruct.h"
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
 #include "../General/GScolors.h"

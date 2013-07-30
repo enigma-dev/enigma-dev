@@ -22,6 +22,7 @@
 #include "libEGMstd.h"
 #include "../General/GScolors.h"
 #include "../General/GSfont.h"
+#include "../General/GLTextureStruct.h"
 #include "../General/GStextures.h"
 #include "../General/GLbinding.h"
 

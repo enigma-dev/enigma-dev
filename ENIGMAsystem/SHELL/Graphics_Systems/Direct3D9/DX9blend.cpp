@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/General/DX9Device.h"
 #include "Direct3D9Headers.h"
 #include "../General/GSblend.h"
 
@@ -40,7 +41,7 @@ int draw_set_blend_mode(int mode){
 }
 
 int draw_set_blend_mode_ext(int src, int dest){
-  const static enum blendequivs[11] = {
+  const static D3DBLEND blendequivs[11] = {
 	  D3DBLEND_ZERO, D3DBLEND_ONE, D3DBLEND_SRCCOLOR, D3DBLEND_INVSRCCOLOR, D3DBLEND_SRCALPHA,
 	  D3DBLEND_INVSRCALPHA, D3DBLEND_DESTALPHA, D3DBLEND_INVDESTALPHA, D3DBLEND_DESTCOLOR,
 	  D3DBLEND_INVDESTCOLOR, D3DBLEND_SRCALPHASAT
