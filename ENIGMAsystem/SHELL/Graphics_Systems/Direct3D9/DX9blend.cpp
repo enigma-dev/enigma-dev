@@ -22,11 +22,32 @@ namespace enigma_user
 {
 
 int draw_set_blend_mode(int mode){
-
+	switch (mode)
+	{
+    case bm_add:
+		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+      return 0;
+    case bm_max:
+		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_MAX);
+      return 0;
+    case bm_subtract:
+		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_SUBTRACT);
+      return 0;
+    default:
+        d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+      return 0;
+  }
 }
 
 int draw_set_blend_mode_ext(int src, int dest){
-
+  const static enum blendequivs[11] = {
+	  D3DBLEND_ZERO, D3DBLEND_ONE, D3DBLEND_SRCCOLOR, D3DBLEND_INVSRCCOLOR, D3DBLEND_SRCALPHA,
+	  D3DBLEND_INVSRCALPHA, D3DBLEND_DESTALPHA, D3DBLEND_INVDESTALPHA, D3DBLEND_DESTCOLOR,
+	  D3DBLEND_INVDESTCOLOR, D3DBLEND_SRCALPHASAT
+  };
+  d3ddev->SetRenderState(D3DRS_SRCBLEND, blendequivs[(src-1)%10]);
+  d3ddev->SetRenderState(D3DRS_DESTBLEND, blendequivs[(dest-1)%10]);
+  return 0;
 }
 
 }

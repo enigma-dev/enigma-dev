@@ -38,7 +38,7 @@ namespace enigma_user
 
 void d3d_start()
 {
-
+	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 }
 
 void d3d_end()
