@@ -16,7 +16,7 @@
 **/
 
 #include <stdio.h>
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
 #include <string.h>
 //using std::string;
 #include "../General/GStextures.h"

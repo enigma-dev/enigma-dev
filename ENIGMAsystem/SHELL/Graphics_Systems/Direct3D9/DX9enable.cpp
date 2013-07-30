@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
 #include "DX9enable.h"
 
 namespace enigma_user

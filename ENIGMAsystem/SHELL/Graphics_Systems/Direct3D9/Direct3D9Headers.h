@@ -15,10 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// For querying the graphic's output for debugging purposes, eg. triangles rendered, VRAM usage, and VBO's, etc.
+#ifndef __DIRECT3D9_HEADERS_H
+#define __DIRECT3D9_HEADERS_H
+#include <d3d9.h>
+#include <cmath>
+#include <string>
+using namespace std;
 
-#ifndef __DX9PROFILERH_
-#define __DX9PROFILERH_
-#include "../General/DirectXHeaders.h"
-
+#include <d3dx9.h>
 #endif

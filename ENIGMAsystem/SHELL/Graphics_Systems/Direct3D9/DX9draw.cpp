@@ -16,7 +16,7 @@
 **/
 
 #include <math.h>
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
 #include "../General/GSstdraw.h"
 #include "../General/DXbinding.h"
 #include <stdio.h>

@@ -17,7 +17,7 @@
 
 #include <string>
 #include <cstdio>
-#include "../General/DirectXHeaders.h"
+#include "Direct3D9Headers.h"
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
@@ -90,7 +90,7 @@ namespace enigma
     }
 }
 
-#include "Bridges/General/DXDevice.h"
+#include "Bridges/General/DX9Device.h"
 
 namespace enigma_user
 {
