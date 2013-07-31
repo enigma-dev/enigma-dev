@@ -27,7 +27,8 @@ using namespace std;
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/Win32/WINDOWSwindow.h"
 #include "../General/DX9Device.h"
-
+LPD3DXSPRITE dsprite = NULL;
+	
 // include the Direct3D Library file
 #pragma comment (lib, "d3d9.lib")
 #pragma comment (lib, "dxerr9.lib")
@@ -58,8 +59,8 @@ namespace enigma
 		d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;  // Throw away previous frames, we don't need them
 		d3dpp.hDeviceWindow = hWnd;  //This is our main (and only) window
 		d3dpp.Flags = 0;            //No flags to set
-		//d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT; //Default Refresh Rate
-		//d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Default Presentation rate
+		d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT; //Default Refresh Rate
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Default Presentation rate
 		d3dpp.BackBufferFormat = format;      //Display format
 		d3dpp.EnableAutoDepthStencil = FALSE; //No depth/stencil buffer
 		
@@ -75,6 +76,11 @@ namespace enigma
                DXGetErrorDescription9(hr),
                DXGetErrorString9(hr),
                MB_ICONERROR | MB_OK);
+		}
+		
+		if (SUCCEEDED(D3DXCreateSprite(d3ddev,&dsprite)))
+		{
+			// created OK
 		}
     }
 
