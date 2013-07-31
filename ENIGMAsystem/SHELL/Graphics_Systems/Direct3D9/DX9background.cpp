@@ -61,12 +61,18 @@ namespace enigma {
 #include "../General/DXbinding.h"
 #include <string.h> // needed for querying ARB extensions
 
+#include "Bridges/General/DX9Device.h"
+#include "DX9TextureStruct.h"
+
 namespace enigma_user
 {
 
 void draw_background(int back, gs_scalar x, gs_scalar y)
 {
-
+  get_background(bck2d,back);
+  D3DXVECTOR3 pos;
+  pos.x = x; pos.y = y; pos.z = 0.0f;
+  dsprite->Draw(GmTextures[bck2d->texture]->gTexture,NULL,NULL,&pos,0xFFFFFFFF);
 }
 
 void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)

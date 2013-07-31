@@ -76,17 +76,9 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-    const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
-                xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
-                yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height;
 	
 	D3DXVECTOR3 pos;
-
-	pos.x = x;
-	pos.y = y;
-	pos.z = 0.0f;
-
+	pos.x = x; pos.y = y; pos.z = 0.0f;
 	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,NULL,&pos,0xFFFFFFFF);
 }
 

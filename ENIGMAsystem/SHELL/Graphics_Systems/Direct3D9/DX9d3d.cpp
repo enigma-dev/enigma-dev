@@ -188,6 +188,11 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 
 	// Set our view matrix
 	d3ddev->SetTransform( D3DTS_VIEW, &matView ); 
+	
+	D3DXMATRIX matProj;
+
+	D3DXMatrixPerspectiveFovLH( &matProj, 60, 4/3, 1.0f, 32000.0f );
+	d3ddev->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup,double angle,double aspect,double znear,double zfar)
@@ -214,12 +219,10 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMATRIX matTrans;    // a matrix to store the translation information
 
 	D3DXMatrixTranslation(&matTrans, x, y, 0);
-	D3DXMatrixRotationZ(&matTrans, angle);
+	//D3DXMatrixRotationZ(&matTrans, angle);
 		
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_VIEW, &matTrans);
-	
-	D3DXMATRIX matRotateZ;    // a matrix to store the rotation information
+	//d3ddev->SetTransform(D3DTS_VIEW, &matTrans);
 	
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -243,14 +246,14 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 	// tell Direct3D about our matrix
 	d3ddev->SetTransform(D3DTS_VIEW, &matTrans);
 	
-	D3DXMATRIX matRotateZ;    // a matrix to store the rotation information
-	
 	D3DXMATRIX matProjection;    // the projection transform matrix
-	D3DXMatrixPerspectiveFovLH(&matProjection,
-                           D3DXToRadian(45),    // the horizontal field of view
-                           (FLOAT)width / (FLOAT)height,    // aspect ratio
+	D3DXMatrixPerspectiveOffCenterLH(&matProjection,
+							0,
+                           (FLOAT)width,   
+						   0, 
+                           (FLOAT)height,   
                            0.0f,    // the near view-plane
-                           32000.0f);    // the far view-plane
+                           1.0f);    // the far view-plane
 						   
 	d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 }
