@@ -219,10 +219,10 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMATRIX matTrans;    // a matrix to store the translation information
 
 	D3DXMatrixTranslation(&matTrans, x, y, 0);
-	//D3DXMatrixRotationZ(&matTrans, angle);
+	D3DXMatrixRotationZ(&matTrans, angle);
 		
 	// tell Direct3D about our matrix
-	//d3ddev->SetTransform(D3DTS_VIEW, &matTrans);
+	d3ddev->SetTransform(D3DTS_VIEW, &matTrans);
 	
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,

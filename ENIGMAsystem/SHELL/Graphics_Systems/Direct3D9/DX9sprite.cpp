@@ -76,10 +76,10 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-	
-	D3DXVECTOR3 pos;
-	pos.x = x; pos.y = y; pos.z = 0.0f;
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,NULL,&pos,0xFFFFFFFF);
+				
+	D3DXVECTOR3 center(spr2d->xoffset, spr2d->yoffset, 0);
+	D3DXVECTOR3 pos(x, y, 0);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,&center,&pos,0xFFFFFFFF);
 }
 
 void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
@@ -89,17 +89,36 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 
 void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
-
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+				
+	D3DXVECTOR3 center(spr2d->xoffset, spr2d->yoffset, 0);
+	D3DXVECTOR3 pos(x, y, 0);
+	tagRECT rect;
+	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,&rect,0,&pos,0xFFFFFFFF);
 }
 
 void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
-
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+				
+	D3DXVECTOR3 center(spr2d->xoffset, spr2d->yoffset, 0);
+	D3DXVECTOR3 pos(x, y, 0);
+	tagRECT rect;
+	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,&rect,&center,&pos,0xFFFFFFFF);
 }
 
 void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int blend, double alpha)
 {
-
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+				
+	D3DXVECTOR3 center(spr2d->xoffset, spr2d->yoffset, 0);
+	D3DXVECTOR3 pos(x, y, 0);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,&center,&pos,0xFFFFFFFF);
 }
 
 void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
