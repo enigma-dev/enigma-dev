@@ -178,7 +178,6 @@ namespace enigma_user
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
-
 	D3DXVECTOR3 vEyePt( xfrom, yfrom, zfrom );
 	D3DXVECTOR3 vLookatPt( xto, yto, zto );
 	D3DXVECTOR3 vUpVec( xup, yup, zup );
@@ -190,6 +189,10 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 	// Set our view matrix
 	d3ddev->SetTransform( D3DTS_VIEW, &matView ); 
 	
+	D3DXMATRIX matProj;
+
+	D3DXMatrixPerspectiveFovLH( &matProj, 60, 4/3, 1.0f, 32000.0f );
+	d3ddev->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup,double angle,double aspect,double znear,double zfar)
@@ -213,31 +216,45 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
 {
-	D3DVIEWPORT9 viewData = { x, y, width, height, 0.0f, 1.0f };
-	HRESULT hr;
+	D3DXMATRIX matTrans;    // a matrix to store the translation information
 
-	hr = d3ddev->SetViewport(&viewData);
-	//if(FAILED(hr))
-		//return hr;
+	D3DXMatrixTranslation(&matTrans, x, y, 0);
+	D3DXMatrixRotationZ(&matTrans, angle);
+		
+	// tell Direct3D about our matrix
+	d3ddev->SetTransform(D3DTS_VIEW, &matTrans);
+	
+	D3DXMATRIX matProjection;    // the projection transform matrix
+	D3DXMatrixOrthoOffCenterLH(&matProjection,
+							0,
+                           (FLOAT)width,   
+						   0, 
+                           (FLOAT)height,   
+                           0.0f,    // the near view-plane
+                           1.0f);    // the far view-plane
+						   
+	d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
 {
-	D3DVIEWPORT9 viewData = { x, y, width, height, 0.0f, 1.0f };
-	HRESULT hr;
+	D3DXMATRIX matTrans;    // a matrix to store the translation information
 
-	hr = d3ddev->SetViewport(&viewData);
-	//if(FAILED(hr))
-		//return hr;
+	D3DXMatrixTranslation(&matTrans, x, y, 0);
+	D3DXMatrixRotationZ(&matTrans, angle);
 		
+	// tell Direct3D about our matrix
+	d3ddev->SetTransform(D3DTS_VIEW, &matTrans);
+	
 	D3DXMATRIX matProjection;    // the projection transform matrix
-
-	D3DXMatrixPerspectiveFovLH(&matProjection,
-                           D3DXToRadian(45),    // the horizontal field of view
-                           (FLOAT)width / (FLOAT)height,    // aspect ratio
-                           1.0f,    // the near view-plane
-                           100.0f);    // the far view-plane
-
+	D3DXMatrixPerspectiveOffCenterLH(&matProjection,
+							0,
+                           (FLOAT)width,   
+						   0, 
+                           (FLOAT)height,   
+                           0.0f,    // the near view-plane
+                           1.0f);    // the far view-plane
+						   
 	d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 }
 
