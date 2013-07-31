@@ -54,7 +54,7 @@ namespace enigma
 		ZeroMemory(&d3dpp, sizeof(d3dpp));    // clear out the struct for use
 		d3dpp.Windowed = TRUE;    // program windowed, not fullscreen
 		d3dpp.BackBufferCount = 1;  //We only need a single back buffer
-		//d3dpp.MultiSampleType = D3DMULTISAMPLE_4_SAMPLES; //No multi-sampling
+		//d3dpp.MultiSampleType = D3DMULTISAMPLE_8_SAMPLES; // 8 levels of multi-sampling
 		//d3dpp.MultiSampleQuality = 0;                //No multi-sampling
 		d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;  // Throw away previous frames, we don't need them
 		d3dpp.hDeviceWindow = hWnd;  //This is our main (and only) window
@@ -77,6 +77,8 @@ namespace enigma
                DXGetErrorString9(hr),
                MB_ICONERROR | MB_OK);
 		}
+		
+		//d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
 		
 		if (SUCCEEDED(D3DXCreateSprite(d3ddev,&dsprite)))
 		{
