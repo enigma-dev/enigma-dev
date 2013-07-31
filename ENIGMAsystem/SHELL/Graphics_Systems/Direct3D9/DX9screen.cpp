@@ -98,8 +98,8 @@ namespace enigma_user
 void screen_redraw()
 {
     d3ddev->BeginScene();    // begins the 3D scene
-
-if (!view_enabled)
+	dsprite->Begin(D3DXSPRITE_ALPHABLEND);
+	if (!view_enabled)
     {
 
         int clear_bits = 0;
@@ -306,7 +306,7 @@ if (!view_enabled)
         }
         view_current = 0;
     }
-
+	dsprite->End();
     d3ddev->EndScene();    // ends the 3D scene
 
     d3ddev->Present(NULL, NULL, NULL, NULL);    // displays the created frame

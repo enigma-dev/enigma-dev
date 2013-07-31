@@ -85,7 +85,12 @@ namespace enigma
 	texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
 	
 	unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-	memcpy(dest, pxdata, sizeof(unsigned char) * fullwidth * fullheight * 4);
+	for(int x=0;x<fullwidth * fullheight*4;x+=4){
+		((char*)dest)[x]=((char*)pxdata)[x+2];//A
+		((char*)dest)[x+1]=((char*)pxdata)[x+1];//R
+		((char*)dest)[x+2]=((char*)pxdata)[x];//G
+		((char*)dest)[x+3]=((char*)pxdata)[x+3];//B
+	}
 
 	texture->UnlockRect(0);
 	
