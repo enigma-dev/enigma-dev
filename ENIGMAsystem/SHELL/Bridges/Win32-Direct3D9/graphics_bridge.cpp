@@ -27,7 +27,8 @@ using namespace std;
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/Win32/WINDOWSwindow.h"
 #include "../General/DX9Device.h"
-
+LPD3DXSPRITE dsprite = NULL;
+	
 // include the Direct3D Library file
 #pragma comment (lib, "d3d9.lib")
 #pragma comment (lib, "dxerr9.lib")
@@ -52,31 +53,35 @@ namespace enigma
 		
 		ZeroMemory(&d3dpp, sizeof(d3dpp));    // clear out the struct for use
 		d3dpp.Windowed = TRUE;    // program windowed, not fullscreen
-		//d3dpp.BackBufferCount = 1;  //We only need a single back buffer
-		//d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE; //No multi-sampling
+		d3dpp.BackBufferCount = 1;  //We only need a single back buffer
+		//d3dpp.MultiSampleType = D3DMULTISAMPLE_4_SAMPLES; //No multi-sampling
 		//d3dpp.MultiSampleQuality = 0;                //No multi-sampling
 		d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;  // Throw away previous frames, we don't need them
-		//d3dpp.hDeviceWindow = hWnd;  //This is our main (and only) window
-		//d3dpp.Flags = 0;            //No flags to set
-		//d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT; //Default Refresh Rate
-		//d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Default Presentation rate
-		//d3dpp.BackBufferFormat = format;      //Display format
-		//d3dpp.EnableAutoDepthStencil = FALSE; //No depth/stencil buffer
+		d3dpp.hDeviceWindow = hWnd;  //This is our main (and only) window
+		d3dpp.Flags = 0;            //No flags to set
+		d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT; //Default Refresh Rate
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Default Presentation rate
+		d3dpp.BackBufferFormat = format;      //Display format
+		d3dpp.EnableAutoDepthStencil = FALSE; //No depth/stencil buffer
 		
 		// create a device class using this information and information from the d3dpp stuct
 		hr = d3dr->CreateDevice(D3DADAPTER_DEFAULT,
                       D3DDEVTYPE_HAL,
                       hWnd,
-                      D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+                      D3DCREATE_HARDWARE_VERTEXPROCESSING,
                       &d3dpp,
                       &d3ddev);
 		if(FAILED(hr)){
-			    // create a "Hello World" message box using MessageBox()
-    MessageBox(NULL,
+			MessageBox(NULL,
                DXGetErrorDescription9(hr),
                DXGetErrorString9(hr),
                MB_ICONERROR | MB_OK);
-			}
+		}
+		
+		if (SUCCEEDED(D3DXCreateSprite(d3ddev,&dsprite)))
+		{
+			// created OK
+		}
     }
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)

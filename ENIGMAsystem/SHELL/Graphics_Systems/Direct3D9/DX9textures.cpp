@@ -87,8 +87,8 @@ namespace enigma
 	unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
 	for(int x=0;x<fullwidth * fullheight*4;x+=4){
 		((char*)dest)[x]=((char*)pxdata)[x+2];//A
-		((char*)dest)[x+1]=((char*)pxdata)[x];//R
-		((char*)dest)[x+2]=((char*)pxdata)[x+1];//G
+		((char*)dest)[x+1]=((char*)pxdata)[x+1];//R
+		((char*)dest)[x+2]=((char*)pxdata)[x];//G
 		((char*)dest)[x+3]=((char*)pxdata)[x+3];//B
 	}
 
