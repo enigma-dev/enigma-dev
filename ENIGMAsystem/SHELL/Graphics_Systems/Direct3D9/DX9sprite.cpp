@@ -84,7 +84,29 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y)
 
 void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+				
+	const float
+    texw = spr2d->width, texh = spr2d->height;
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 center = D3DXVECTOR2(spr2d->xoffset, spr2d->yoffset);
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(width/texw, height/texh);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,0,&trans);
+	
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+	
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, NULL, NULL, 0xFFFFFFFF);
 }
 
 void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
@@ -128,6 +150,9 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,0,&trans);
 	
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+	
 	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, NULL, NULL, 
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
@@ -163,9 +188,32 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
 
 }
 
-void draw_sprite_stretched_ext(int spr,int subimg,gs_scalar x, gs_scalar y,gs_scalar width, gs_scalar height, int color, double alpha)
+void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, double alpha)
 {
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+				
+	const float
+    texw = spr2d->width, texh = spr2d->height;
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 center = D3DXVECTOR2(spr2d->xoffset, spr2d->yoffset);
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(width/texw, height/texh);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,0,&trans);
+	
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+	
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, NULL, NULL, 
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 
 }
