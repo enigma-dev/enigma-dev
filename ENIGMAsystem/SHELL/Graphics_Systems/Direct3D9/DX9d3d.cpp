@@ -117,7 +117,11 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(bool enable)
 {
-
+	if (enable) {
+		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+	} else {
+		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	}
 }
 
 void d3d_set_culling_mode(int mode) {
@@ -132,6 +136,7 @@ void d3d_set_render_mode(int face, int fill)
 {
 
 }
+
 void d3d_set_line_width(float value) {
 
 }
@@ -216,46 +221,62 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
 {
-	D3DXMATRIX matTrans;    // a matrix to store the translation information
+	D3DXMATRIX matRotZ, matTrans, matScale;
 
-	D3DXMatrixTranslation(&matTrans, x, y, 0);
-	D3DXMatrixRotationZ(&matTrans, angle);
-		
-	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_VIEW, &matTrans);
+	// Calculate rotation matrix
+	D3DXMatrixRotationZ( &matRotZ, angle );        // Roll
+
+	// Calculate a translation matrix
+	D3DXMatrixTranslation(&matTrans, x - 0.5, y - height - 0.5, 0);
+
+	D3DXMatrixScaling(&matScale, 1, -1, 1);
+
+	// Calculate our world matrix by multiplying the above (in the correct order)
+	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
+
+	// Set the matrix to be applied to anything we render from now on
+	d3ddev->SetTransform( D3DTS_WORLD, &matWorld);
 	
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
 							0,
-                           (FLOAT)width,   
-						   0, 
-                           (FLOAT)height,   
-                           0.0f,    // the near view-plane
-                           1.0f);    // the far view-plane
+							(FLOAT)width,   
+							0, 
+							(FLOAT)height,   
+							0.0f,    // the near view-plane
+							1.0f);    // the far view-plane
 						   
 	d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
 {
-	D3DXMATRIX matTrans;    // a matrix to store the translation information
+	D3DXMATRIX matRotZ, matTrans, matScale;
 
-	D3DXMatrixTranslation(&matTrans, x, y, 0);
-	D3DXMatrixRotationZ(&matTrans, angle);
-		
-	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_VIEW, &matTrans);
+	// Calculate rotation matrix
+	D3DXMatrixRotationZ( &matRotZ, angle );        // Roll
+
+	// Calculate a translation matrix
+	D3DXMatrixTranslation(&matTrans, x, y - height, 0);
+
+	D3DXMatrixScaling(&matScale, 1, -1, 1);
+
+	// Calculate our world matrix by multiplying the above (in the correct order)
+	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
+
+	// Set the matrix to be applied to anything we render from now on
+	d3ddev->SetTransform( D3DTS_WORLD, &matWorld);
 	
-	D3DXMATRIX matProjection;    // the projection transform matrix
-	D3DXMatrixPerspectiveOffCenterLH(&matProjection,
+	D3DXMATRIX matProj;    // the projection transform matrix
+	D3DXMatrixPerspectiveOffCenterLH(&matProj,
 							0,
                            (FLOAT)width,   
 						   0, 
                            (FLOAT)height,   
                            0.0f,    // the near view-plane
-                           1.0f);    // the far view-plane
+                           32000.0f);    // the far view-plane
 						   
-	d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+	d3ddev->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
 }
 
 void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
