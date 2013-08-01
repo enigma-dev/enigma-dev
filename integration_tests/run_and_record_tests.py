@@ -51,15 +51,15 @@ def run_and_record_tests(grouptest=None):
     else:
         testlib.run_all_platform_tests.run_all_tests(platform)
     import glob
-    for filename in glob.glob(path_base + "/output/*"):
+    for filename in glob.glob(path_base + "/output_temporary/*"):
         try:
             os.remove(filename)
         except OSError:
             pass
 
     import os.path
-    html_output_name = os.path.abspath(path_base + "/output/testreport.html")
-    xml_output_name = os.path.abspath(path_base + "/output/testreport_jenkins.xml")
+    html_output_name = os.path.abspath(path_base + "/output_temporary/testreport.html")
+    xml_output_name = os.path.abspath(path_base + "/output_temporary/testreport_jenkins.xml")
 
     report = testlib.parse_test_report.read_test_report(path_base + "/tests/inttestreport.txt")
     testlib.report_to_html.write_html_version(report, html_output_name)

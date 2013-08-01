@@ -58,7 +58,7 @@ Overview of integration testing structure
 | ------------------------------ | ----------------------------------------------------------- |
 | integration\_tests/            |                                                             |
 | ....format/                    | Information about the format                                |
-| ....output/                    | Test reports in different formats, temporary files only     |
+| ....output_temporary           | Test report output, content is treated as disposable        |
 | ....testlib/                   | Python scripts for dealing with tests and test results      |
 | ....tests/                     | Testgroups                                                  |
 | ........testgroup\_1/          | Contains tests                                              |
