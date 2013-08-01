@@ -79,7 +79,7 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y)
 				
 	D3DXVECTOR3 center(spr2d->xoffset, spr2d->yoffset, 0);
 	D3DXVECTOR3 pos(x, y, 0);
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,&center,&pos,0xFFFFFFFF);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, &center, &pos, 0xFFFFFFFF);
 }
 
 void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
@@ -95,7 +95,7 @@ void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_sca
 	D3DXVECTOR3 pos(x, y, 0);
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,&rect,0,&pos,0xFFFFFFFF);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, &rect, 0, &pos, 0xFFFFFFFF);
 }
 
 void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
@@ -107,10 +107,10 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 	D3DXVECTOR3 pos(x, y, 0);
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,&rect,&center,&pos,0xFFFFFFFF);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, &rect, &center, &pos, 0xFFFFFFFF);
 }
 
-void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int blend, double alpha)
+void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
@@ -128,7 +128,8 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,0,&trans);
 	
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,NULL,NULL,0xFFFFFFFF);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, NULL, NULL, 
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 
 void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
@@ -153,7 +154,8 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
 				
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,NULL,NULL,0xFFFFFFFF);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, NULL, NULL,
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 
 void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
@@ -161,7 +163,7 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
 
 }
 
-void draw_sprite_stretched_ext(int spr,int subimg,gs_scalar x, gs_scalar y,gs_scalar width, gs_scalar height, int blend, double alpha)
+void draw_sprite_stretched_ext(int spr,int subimg,gs_scalar x, gs_scalar y,gs_scalar width, gs_scalar height, int color, double alpha)
 {
 
 }
