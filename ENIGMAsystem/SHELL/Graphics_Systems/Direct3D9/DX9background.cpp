@@ -95,6 +95,9 @@ void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar wid
 	dsprite->SetTransform(&mat);
 	
 	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL, 0xFFFFFFFF);
+	
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
@@ -137,6 +140,9 @@ void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, g
 	
 	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL, 
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+		
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, double alpha)
@@ -161,6 +167,9 @@ void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar
 	
 	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL, 
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+		
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
@@ -186,6 +195,9 @@ void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar
 	
 	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, NULL, 
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+		
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)

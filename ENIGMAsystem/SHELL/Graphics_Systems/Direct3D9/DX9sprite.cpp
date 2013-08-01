@@ -106,6 +106,9 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 	dsprite->SetTransform(&mat);
 	
 	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, NULL, NULL, 0xFFFFFFFF);
+	
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
@@ -154,6 +157,9 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 	
 	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, NULL, NULL, 
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+		
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
@@ -213,6 +219,9 @@ void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs
 	
 	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, NULL, NULL, 
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+		
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 }
