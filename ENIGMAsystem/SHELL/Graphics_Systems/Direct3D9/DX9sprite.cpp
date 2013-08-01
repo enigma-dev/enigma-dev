@@ -92,7 +92,6 @@ void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_sca
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 				
-	D3DXVECTOR3 center(spr2d->xoffset, spr2d->yoffset, 0);
 	D3DXVECTOR3 pos(x, y, 0);
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
@@ -116,19 +115,46 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 				
-	D3DXVECTOR3 center(spr2d->xoffset, spr2d->yoffset, 0);
-	D3DXVECTOR3 pos(x, y, 0);
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,&center,&pos,0xFFFFFFFF);
+	// Screen position of the sprite
+	D3DXVECTOR2 center = D3DXVECTOR2(spr2d->xoffset, spr2d->yoffset);
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
+
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(xscale, yscale);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,0,&trans);
+	
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,NULL,NULL,0xFFFFFFFF);
 }
 
 void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+					
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(xscale, yscale);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,0,0,&trans);
+
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+	
+	tagRECT rect;
+	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
+				
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture,NULL,NULL,NULL,0xFFFFFFFF);
 }
-
-/* Copyright (C) 2010 Harijs Grînbergs, Josh Ventura
- * The applicable license does not change for this portion of the file.
- */
 
 void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
 {
