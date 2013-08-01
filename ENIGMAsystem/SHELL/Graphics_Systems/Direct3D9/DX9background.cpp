@@ -69,20 +69,42 @@ namespace enigma_user
 
 void draw_background(int back, gs_scalar x, gs_scalar y)
 {
-  get_background(bck2d,back);
-  D3DXVECTOR3 pos;
-  pos.x = x; pos.y = y; pos.z = 0.0f;
+  get_background(bck2d, back);
+  D3DXVECTOR3 pos(x, y, 0);
   dsprite->Draw(GmTextures[bck2d->texture]->gTexture,NULL,NULL,&pos,0xFFFFFFFF);
 }
 
 void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
+	get_background(bck2d, back);
+  
+	const float texw = bck2d->width, texh = bck2d->height;
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(width/texw, height/texh);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,0,&trans);
+	
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+	
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL, 0xFFFFFFFF);
 }
 
 void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
+	get_background(bck2d, back);
 
+	D3DXVECTOR3 pos(x, y, 0);
+	tagRECT rect;
+	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, &pos, 0xFFFFFFFF);
 }
 
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
@@ -97,17 +119,73 @@ void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1
 
 void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha)
 {
+	get_background(bck2d, back);
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(xscale, yscale);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,rot,&trans);
+	
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+	
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL, 
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 
 void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, double alpha)
 {
+	get_background(bck2d, back);
+	
+	const float texw = bck2d->width, texh = bck2d->height;
+		
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(width/texw, height/texw);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,0,&trans);
+	
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+	
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL, 
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 
 void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
+	get_background(bck2d, back);
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(xscale, yscale);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,0,&trans);
+	
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+	
+	tagRECT rect;
+	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
+	
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, NULL, 
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 
 void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)

@@ -87,8 +87,7 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 				
-	const float
-    texw = spr2d->width, texh = spr2d->height;
+	const float texw = spr2d->width, texh = spr2d->height;
 	
 	// Screen position of the sprite
 	D3DXVECTOR2 center = D3DXVECTOR2(spr2d->xoffset, spr2d->yoffset);
@@ -148,7 +147,7 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 	D3DXVECTOR2 scaling(xscale, yscale);
 
 	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,0,&trans);
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,rot,&trans);
 	
 	// Tell the sprite about the matrix
 	dsprite->SetTransform(&mat);
