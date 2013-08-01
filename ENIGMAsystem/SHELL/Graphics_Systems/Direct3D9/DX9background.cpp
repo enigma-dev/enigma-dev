@@ -112,12 +112,37 @@ void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar wid
 
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
 {
+    get_background(bck2d,back);
 
+    const float
+    tbx = bck2d->texbordx,tby=bck2d->texbordy;
+
+    const int
+    hortil = int (ceil(room_width/(bck2d->width*tbx))) + 1,
+    vertil = int (ceil(room_height/(bck2d->height*tby))) + 1;
+
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
+
+	D3DXVECTOR3 pos(x, y, 0);
+	tagRECT rect;
+	rect.left = 0; rect.top = 0; rect.right = hortil * bck2d->width; rect.bottom = vertil * bck2d->height;
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, &pos, 0xFFFFFFFF);
 }
 
 void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
+	get_background(bck2d,back);
 
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
+
+	D3DXVECTOR3 pos(x1, y1, 0);
+	tagRECT rect;
+	rect.left = x1 + x; rect.top = y1 + y; rect.right = x2 + x; rect.bottom = y2 + y;
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, &pos, 0xFFFFFFFF);
 }
 
 void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha)
@@ -202,12 +227,71 @@ void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar
 
 void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
+    get_background(bck2d,back);
 
+    const float
+    tbx = bck2d->texbordx,tby=bck2d->texbordy;
+
+    const int
+    hortil = int (ceil(room_width/(bck2d->width*tbx))) + 1,
+    vertil = int (ceil(room_height/(bck2d->height*tby))) + 1;
+
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
+
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(xscale, yscale);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,0,&trans);
+	
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+
+	tagRECT rect;
+	rect.left = 0; rect.top = 0; rect.right = hortil * bck2d->width; rect.bottom = vertil * bck2d->height;
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, NULL,
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+		
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
+	get_background(bck2d,back);
 
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
+
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x1, y1);
+
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+
+	D3DXVECTOR2 scaling(xscale, yscale);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,0,&trans);
+	
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+	
+	tagRECT rect;
+	rect.left = x1 + x; rect.top = y1 + y; rect.right = x2 + x; rect.bottom = y2 + y;
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, NULL,
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+		
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
