@@ -250,14 +250,14 @@ class d3d_model
         glColor4ubv(enigma::currentcolor);
     }
 
-    void model_vertex_normal_texture(float v[], float t[], float n[])
+    void model_vertex_normal_texture(float v[], float n[], float t[])
     {
         glTexCoord2fv(t);
         glNormal3fv(n);
         glVertex3fv(v);
     }
 
-    void model_vertex_normal_texture_color(float v[], float t[], float n[], int col, double alpha)
+    void model_vertex_normal_texture_color(float v[], float n[], float t[], int col, double alpha)
     {
         glColor4f(GETR(col), GETG(col), GETB(col), alpha);
         glTexCoord2fv(t);
