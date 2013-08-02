@@ -81,7 +81,7 @@ static inline void draw_back()
 
 namespace enigma
 {
-    extern bool d3dHidden;
+    extern bool d3dMode;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
@@ -121,7 +121,8 @@ void screen_redraw()
             clear_bits |= GL_COLOR_BUFFER_BIT;
         }
 
-        if (enigma::d3dHidden)
+        // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
+        if (enigma::d3dMode)
             clear_bits |= GL_DEPTH_BUFFER_BIT;
 
         if (clear_bits)
@@ -285,7 +286,8 @@ void screen_redraw()
                     clear_bits |= GL_COLOR_BUFFER_BIT;
                 }
 
-                if (enigma::d3dHidden)
+                // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
+                if (enigma::d3dMode)
                     clear_bits |= GL_DEPTH_BUFFER_BIT;
 
                 if (clear_bits)
