@@ -121,8 +121,8 @@ int draw_primitive_end()
 
 void d3d_primitive_begin(int kind)
 {
-  prim_draw_texture == -1;
-  if (prim_d3d_model = -1) {
+  prim_draw_texture = -1;
+  if (prim_d3d_model == -1) {
     prim_d3d_model = d3d_model_create();
   }
   d3d_model_primitive_begin(prim_d3d_model, kind);
@@ -152,9 +152,12 @@ void d3d_primitive_end()
 
 void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
 {
-  d3d_model_vertex(prim_d3d_model, x, y, z);
+int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  d3d_model_vertex_color(prim_d3d_model, x, y, z, col, alpha);
 }
 
+//Are these functions really needed? They just break stuff!!!
 void d3d_normal(gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
   d3d_model_normal(prim_d3d_model, nx, ny, nz);
@@ -174,6 +177,7 @@ void d3d_index(int in)
 {
   d3d_model_index(prim_d3d_model, in);
 }
+//Function questioning ends here
 
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha)
 {
@@ -182,7 +186,9 @@ void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double a
 
 void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_texture(prim_d3d_model, x, y, z, tx, ty);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  d3d_model_vertex_texture_color(prim_d3d_model, x, y, z, tx, ty, col, alpha);
 }
 
 void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha)
@@ -192,7 +198,9 @@ void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar t
 
 void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
-  d3d_model_vertex_normal(prim_d3d_model, x, y, z, nx, ny, nz);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  d3d_model_vertex_normal_color(prim_d3d_model, x, y, z, nx, ny, nz, col, alpha);
 }
 
 void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha)
@@ -202,7 +210,9 @@ void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx
 
 void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_normal_texture(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  d3d_model_vertex_normal_texture_color(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty, col, alpha);
 }
 
 void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha)

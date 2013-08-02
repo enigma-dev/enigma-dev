@@ -28,12 +28,12 @@ void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar wid
 void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y);
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y);
 void draw_background_tiled_area(int back,gs_scalar x, gs_scalar y,gs_scalar x1, gs_scalar y1,float x2,float y2);
-void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha);
-void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei, int color, double alpha);
-void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale,int color, double alpha);
-void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha);
-void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha);
-void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4);
+void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha);
+void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei, int color, gs_scalar alpha);
+void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale,int color, gs_scalar alpha);
+void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha);
+void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha);
+void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4);
 
 }
 
