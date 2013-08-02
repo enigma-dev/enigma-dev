@@ -177,7 +177,7 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 	glPopAttrib();
 }
 
-void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int blend, double alpha)
+void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int blend, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
@@ -216,7 +216,7 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
     glPopAttrib();
 }
 
-void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
 	glPushAttrib(GL_CURRENT_BIT);
@@ -248,7 +248,7 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
  * The applicable license does not change for this portion of the file.
  */
 
-void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
+void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
 {
     get_spritev(spr2d,spr);
     glPushAttrib(GL_CURRENT_BIT);
@@ -291,7 +291,7 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
     glPopAttrib();
 }
 
-void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int blend, double alpha)
+void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int blend, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
     glPushAttrib(GL_CURRENT_BIT);
@@ -340,17 +340,17 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y)
 
     const float
     tbx  = spr2d->texbordxarray[usi], tby  = spr2d->texbordyarray[usi],
-    xoff = spr2d->xoffset+x, yoff = spr2d->yoffset+y;
+    xoff = fmod(spr2d->xoffset+x,spr2d->width)-spr2d->width, yoff = fmod(spr2d->yoffset+y,spr2d->height)-spr2d->height;
 
     const int
     hortil = int(ceil((view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width) / (spr2d->width*tbx))) + 1,
     vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (spr2d->height*tby))) + 1;
 
     glBegin(GL_QUADS);
-    float xvert1 = -xoff, xvert2 = xvert1 + spr2d->width, yvert1, yvert2;
+    float xvert1 = xoff, xvert2 = xvert1 + spr2d->width, yvert1, yvert2;
     for (int i=0; i<hortil; i++)
     {
-        yvert1 = -yoff; yvert2 = yvert1 + spr2d->height;
+        yvert1 = yoff; yvert2 = yvert1 + spr2d->height;
         for (int c=0; c<vertil; c++)
         {
             glTexCoord2f(0,0);
@@ -372,7 +372,7 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y)
     glPopAttrib();
 }
 
-void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
@@ -383,18 +383,18 @@ void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 
     const float
     tbx  = spr2d->texbordxarray[usi], tby  = spr2d->texbordyarray[usi],
-    xoff = spr2d->xoffset*xscale+x, yoff = spr2d->yoffset*yscale+y,
-    width_scaled = spr2d->width*xscale, height_scaled = spr2d->height*yscale;
+    width_scaled = spr2d->width*xscale, height_scaled = spr2d->height*yscale,
+    xoff = fmod(spr2d->xoffset*xscale+x,width_scaled)-width_scaled, yoff = fmod(spr2d->yoffset*yscale+y,height_scaled)-height_scaled;
 
     const int
     hortil = int(ceil((view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width) / (width_scaled*tbx))) + 1,
     vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (height_scaled*tby))) + 1;
 
     glBegin(GL_QUADS);
-    float xvert1 = -xoff, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
+    float xvert1 = xoff, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
     for (int i=0; i<hortil; i++)
     {
-        yvert1 = -yoff; yvert2 = yvert1 + height_scaled;
+        yvert1 = yoff; yvert2 = yvert1 + height_scaled;
         for (int c=0; c<vertil; c++)
         {
             glTexCoord2f(0,0);

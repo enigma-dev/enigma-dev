@@ -1,4 +1,4 @@
-/** Copyright (C) 2010-2013 Alasdair Morrison, Robert B. Colton
+/** Copyright (C) 2010-2013 Alasdair Morrison, Harijs Grinbergs, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -25,9 +25,14 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/spritestruct.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include "Universal_System/roomsystem.h"
+
+#include "GL3binding.h"
+#include "GL3shapes.h"
+
+#define __GETR(x) (gs_scalar)(((x & 0x0000FF))/255.0)
+#define __GETG(x) (gs_scalar)(((x & 0x00FF00) >> 8)/255.0)
+#define __GETB(x) (gs_scalar)(((x & 0xFF0000) >> 16)/255.0)
 
 #include "../General/GStextures.h"
 #ifdef DEBUG_MODE
@@ -53,144 +58,111 @@
     const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #endif
 
-namespace enigma_user {
-  extern int room_width, room_height;
-}
 namespace enigma {
   extern size_t background_idmax;
 }
 
-#include "../General/GLbinding.h"
-#include <string.h> // needed for querying ARB extensions
+//#include <string.h> // needed for querying ARB extensions
 
 namespace enigma_user
 {
 
 void draw_background(int back, gs_scalar x, gs_scalar y)
 {
-  get_background(bck2d,back);
+    get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
-// see backgroundstruct and spritestruct are storing the gluint to the texture, and when
-  glPushAttrib(GL_CURRENT_BIT);
-  glColor4f(1,1,1,1);
 
-  const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
-  glBegin(GL_QUADS);
-    glTexCoord2f(0,0);
-      glVertex2f(x,y);
-    glTexCoord2f(tbx,0);
-      glVertex2f(x+bck2d->width,y);
-    glTexCoord2f(tbx,tby);
-      glVertex2f(x+bck2d->width,y+bck2d->height);
-    glTexCoord2f(0,tby);
-      glVertex2f(x,y+bck2d->height);
-  glEnd();
+    const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy,
+                xvert1 = x, xvert2 = x+bck2d->width,
+                yvert1 = y, yvert2 = y+bck2d->height;
 
-  glPopAttrib();
+    const gs_scalar data[4*8] = {
+         xvert1, yvert1, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+         xvert2, yvert1, tbx, 0.0, 1.0, 1.0, 1.0, 1.0,
+         xvert2, yvert2, tbx, tby, 1.0, 1.0, 1.0, 1.0,
+         xvert1, yvert2, 0.0, tby, 1.0, 1.0, 1.0, 1.0
+    };
+    plane2D_rotated(data);
 }
 
 void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
-  get_background(bck2d,back);
+    get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
 
-  glPushAttrib(GL_CURRENT_BIT);
-  glColor4f(1,1,1,1);
+    const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy,
+                xvert1 = x, xvert2 = x+width,
+                yvert1 = y, yvert2 = y+height;
 
-  const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
-  glBegin(GL_QUADS);
-    glTexCoord2f(0,0);
-      glVertex2f(x,y);
-    glTexCoord2f(tbx,0);
-      glVertex2f(x+width,y);
-    glTexCoord2f(tbx,tby);
-      glVertex2f(x+width,y+height);
-    glTexCoord2f(0,tby);
-      glVertex2f(x,y+height);
-  glEnd();
-
-  glPopAttrib();
+    const gs_scalar data[4*8] = {
+         xvert1, yvert1, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+         xvert2, yvert1, tbx, 0.0, 1.0, 1.0, 1.0, 1.0,
+         xvert2, yvert2, tbx, tby, 1.0, 1.0, 1.0, 1.0,
+         xvert1, yvert2, 0.0, tby, 1.0, 1.0, 1.0, 1.0
+    };
+    plane2D_rotated(data);
 }
 
 void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
     get_background(bck2d,back);
-      texture_use(GmTextures[bck2d->texture]->gltex);
+    texture_use(GmTextures[bck2d->texture]->gltex);
 
-    glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(1,1,1,1);
-
-    float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
+    const gs_scalar tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
-          tby1 = top/tbh, tby2 = tby1 + height/tbh;
+          tby1 = top/tbh, tby2 = tby1 + height/tbh,
+          xvert1 = x, xvert2 = x+width,
+          yvert1 = y, yvert2 = y+height;
 
-    glBegin(GL_TRIANGLE_STRIP);
-    glTexCoord2f(tbx1,tby1);
-    glVertex2f(x,y);
-    glTexCoord2f(tbx2,tby1);
-    glVertex2f(x+width,y);
-    glTexCoord2f(tbx1,tby2);
-    glVertex2f(x,y+height);
-    glTexCoord2f(tbx2,tby2);
-    glVertex2f(x+width,y+height);
-    glEnd();
-
-    glPopAttrib();
+    const gs_scalar data[4*8] = {
+         xvert1, yvert1, tbx1,tby1, 1.0, 1.0, 1.0, 1.0,
+         xvert2, yvert1, tbx2,tby1, 1.0, 1.0, 1.0, 1.0,
+         xvert2, yvert2, tbx2,tby2, 1.0, 1.0, 1.0, 1.0,
+         xvert1, yvert2, tbx1,tby2, 1.0, 1.0, 1.0, 1.0
+    };
+    plane2D_rotated(data);
 }
 
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
 {
     get_background(bck2d,back);
-      texture_use(GmTextures[bck2d->texture]->gltex);
-    glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(1,1,1,1);
+    texture_use(GmTextures[bck2d->texture]->gltex);
 
-    x = bck2d->width-fmod(x,bck2d->width);
-    y = bck2d->height-fmod(y,bck2d->height);
+    const gs_scalar tbx  = bck2d->texbordx, tby  = bck2d->texbordy,
+    xoff = fmod(x,bck2d->width)-bck2d->width, yoff = fmod(y,bck2d->height)-bck2d->height;
 
-    const float
-    tbx = bck2d->texbordx,tby=bck2d->texbordy;
+    const int hortil = int(ceil((view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width) / (bck2d->width*tbx))) + 1,
+    vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (bck2d->height*tby))) + 1;
 
-    const int
-    hortil = int (ceil(room_width/(bck2d->width*tbx))) + 1,
-    vertil = int (ceil(room_height/(bck2d->height*tby))) + 1;
-
-    glBegin(GL_QUADS);
-    float xvert1 = -x, xvert2 = xvert1 + bck2d->width, yvert1, yvert2;
+    gs_scalar xvert1 = xoff, xvert2 = xvert1 + bck2d->width, yvert1, yvert2;
     for (int i=0; i<hortil; i++)
     {
-        yvert1 = -y; yvert2 = yvert1 + bck2d->height;
+        yvert1 = yoff; yvert2 = yvert1 + bck2d->height;
         for (int c=0; c<vertil; c++)
         {
-            glTexCoord2f(0,0);
-            glVertex2f(xvert1,yvert1);
-            glTexCoord2f(tbx,0);
-            glVertex2f(xvert2,yvert1);
-            glTexCoord2f(tbx,tby);
-            glVertex2f(xvert2,yvert2);
-            glTexCoord2f(0,tby);
-            glVertex2f(xvert1,yvert2);
+            const gs_scalar data[4*8] = {
+                 xvert1, yvert1, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+                 xvert2, yvert1, tbx, 0.0, 1.0, 1.0, 1.0, 1.0,
+                 xvert2, yvert2, tbx, tby, 1.0, 1.0, 1.0, 1.0,
+                 xvert1, yvert2, 0.0, tby, 1.0, 1.0, 1.0, 1.0
+            };
+            plane2D_rotated(data);
+
             yvert1 = yvert2;
             yvert2 += bck2d->height;
         }
         xvert1 = xvert2;
         xvert2 += bck2d->width;
     }
-    glEnd();
-
-    glPopAttrib();
 }
 
 void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
-  get_background(bck2d,back);
+    get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
 
-  glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(1,1,1,1);
-
-    const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
-    float sw,sh,i,j,jj,left,top,width,height,X,Y;
+    const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy;
+    gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = bck2d->width;
     sh = bck2d->height;
 
@@ -198,7 +170,6 @@ void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1
     j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
     jj = j;
 
-    glBegin(GL_QUADS);
     for(i=i; i<=x2; i+=sw)
     {
       for(j=j; j<=y2; j+=sh)
@@ -217,119 +188,90 @@ void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1
         if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
         else height = sh-top;
 
-        glTexCoord2f(left/sw*tbx,top/sh*tby);
-          glVertex2f(X,Y);
-        glTexCoord2f((left+width)/sw*tbx,top/sh*tby);
-          glVertex2f(X+width,Y);
-        glTexCoord2f((left+width)/sw*tbx,(top+height)/sh*tby);
-          glVertex2f(X+width,Y+height);
-        glTexCoord2f(left/sw*tbx,(top+height)/sh*tby);
-          glVertex2f(X,Y+height);
+        const gs_scalar data[4*8] = {
+                 X,Y, left/sw*tbx,top/sh*tby, 1.0, 1.0, 1.0, 1.0,
+                 X+width,Y, (left+width)/sw*tbx,top/sh*tby, 1.0, 1.0, 1.0, 1.0,
+                 X+width,Y+height, (left+width)/sw*tbx,(top+height)/sh*tby, 1.0, 1.0, 1.0, 1.0,
+                 X,Y+height, left/sw*tbx,(top+height)/sh*tby, 1.0, 1.0, 1.0, 1.0
+        };
+        plane2D_rotated(data);
+
       }
       j = jj;
     }
-    glEnd();
-  glPopAttrib();
 }
 
-void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha)
+void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int blend, gs_scalar alpha)
 {
     get_background(bck2d,back);
-      texture_use(GmTextures[bck2d->texture]->gltex);
-
-    glPushAttrib(GL_CURRENT_BIT);
-    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
+    texture_use(GmTextures[bck2d->texture]->gltex);
 
     rot *= M_PI/180;
 
-    const float
+    const gs_scalar w = bck2d->width*xscale, h = bck2d->height*yscale,
     tbx = bck2d->texbordx, tby = bck2d->texbordy,
-    w = bck2d->width*xscale, h = bck2d->height*yscale,
     wsinrot = w*sin(rot), wcosrot = w*cos(rot);
 
-    glBegin(GL_QUADS);
-
-    float
-    ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
-    ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
-    glTexCoord2f(0,0);
-    glVertex2f(ulcx,ulcy);
-    glTexCoord2f(tbx,0);
-    glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-
+    const gs_scalar ulcx = x - xscale * cos(rot) + yscale * cos(M_PI/2+rot),
+    ulcy = y + xscale * sin(rot) - yscale * sin(M_PI/2+rot);
     const double mpr = 3*M_PI/2 + rot;
-    ulcx += h * cos(mpr);
-    ulcy -= h * sin(mpr);
-    glTexCoord2f(tbx,tby);
-    glVertex2f(ulcx + wcosrot, ulcy - wsinrot);
-    glTexCoord2f(0,tby);
-    glVertex2f(ulcx,ulcy);
+    const gs_scalar ulcx2 = ulcx + h * cos(mpr),
+    ulcy2 = ulcy - h * sin(mpr);
 
-    glEnd();
-
-    glPopAttrib();
+    const gs_scalar r = __GETR(blend), g = __GETG(blend), b = __GETB(blend);
+    const gs_scalar data[4*8] = {
+         ulcx, ulcy, 0.0, 0.0, r, g, b, alpha,
+         ulcx + wcosrot, ulcy - wsinrot, tbx, 0.0, r, g, b, alpha,
+         ulcx2 + wcosrot, ulcy2 - wsinrot, tbx, tby, r, g, b, alpha,
+         ulcx2, ulcy2, 0.0, tby, r, g, b, alpha
+    };
+    plane2D_rotated(data);
 }
 
-void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, double alpha)
+void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int blend, gs_scalar alpha)
 {
-  get_background(bck2d,back);
+    get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
 
-  glPushAttrib(GL_CURRENT_BIT);
-    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
+    const gs_scalar tbx=bck2d->texbordx, tby=bck2d->texbordy;
 
-    const float tbx=bck2d->texbordx, tby=bck2d->texbordy;
-
-    glBegin(GL_QUADS);
-      glTexCoord2f(0,0);
-        glVertex2f(x,y);
-      glTexCoord2f(tbx,0);
-        glVertex2f(x+width,y);
-      glTexCoord2f(tbx,tby);
-        glVertex2f(x+width,y+height);
-      glTexCoord2f(0,tby);
-        glVertex2f(x,y+height);
-    glEnd();
-  glPopAttrib();
+    const gs_scalar r = __GETR(blend), g = __GETG(blend), b = __GETB(blend);
+    const gs_scalar data[4*8] = {
+         x, y, 0.0, 0.0, r, g, b, alpha,
+         x + width, y, tbx, 0.0, r, g, b, alpha,
+         x + width, y + height, tbx, tby, r, g, b, alpha,
+         x, y+height, 0.0, tby, r, g, b, alpha
+    };
+    plane2D_rotated(data);
 }
 
-void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int blend, gs_scalar alpha)
 {
     get_background(bck2d,back);
       texture_use(GmTextures[bck2d->texture]->gltex);
 
-    glPushAttrib(GL_CURRENT_BIT);
-    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-
-    float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
+    gs_scalar tbw = bck2d->width/(gs_scalar)bck2d->texbordx, tbh = bck2d->height/(gs_scalar)bck2d->texbordy,
           xvert1 = x, xvert2 = xvert1 + width*xscale,
           yvert1 = y, yvert2 = yvert1 + height*yscale,
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
           tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
-    glBegin(GL_TRIANGLE_STRIP);
-    glTexCoord2f(tbx1,tby1);
-    glVertex2f(xvert1,yvert1);
-    glTexCoord2f(tbx2,tby1);
-    glVertex2f(xvert2,yvert1);
-    glTexCoord2f(tbx1,tby2);
-    glVertex2f(xvert1,yvert2);
-    glTexCoord2f(tbx2,tby2);
-    glVertex2f(xvert2,yvert2);
-    glEnd();
-
-    glPopAttrib();
+    const gs_scalar r = __GETR(blend), g = __GETG(blend), b = __GETB(blend);
+    const gs_scalar data[4*8] = {
+         xvert1,yvert1, tbx1,tby1, r, g, b, alpha,
+         xvert2,yvert1, tbx2,tby1, r, g, b, alpha,
+         xvert2,yvert2, tbx2,tby2, r, g, b, alpha,
+         xvert1,yvert2, tbx1,tby2, r, g, b, alpha
+    };
+    plane2D_rotated(data);
 }
 
-void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int blend, gs_scalar alpha)
 {
     get_background(bck2d,back);
-      texture_use(GmTextures[bck2d->texture]->gltex);
+    texture_use(GmTextures[bck2d->texture]->gltex);
 
-    glPushAttrib(GL_CURRENT_BIT);
-    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-
-    const float
+    const gs_scalar
     tbx = bck2d->texbordx, tby = bck2d->texbordy,
     width_scaled = bck2d->width*xscale, height_scaled = bck2d->height*yscale;
 
@@ -340,42 +282,36 @@ void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xsc
     hortil = int(ceil(room_width/(width_scaled*tbx))) + 1,
     vertil = int(ceil(room_height/(height_scaled*tby))) + 1;
 
-    glBegin(GL_QUADS);
-    float xvert1 = -x, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
+    gs_scalar xvert1 = -x, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
+    const gs_scalar r = __GETR(blend), g = __GETG(blend), b = __GETB(blend);
     for (int i=0; i<hortil; i++)
     {
         yvert1 = -y; yvert2 = yvert1 + height_scaled;
         for (int c=0; c<vertil; c++)
         {
-            glTexCoord2f(0,0);
-            glVertex2f(xvert1,yvert1);
-            glTexCoord2f(tbx,0);
-            glVertex2f(xvert2,yvert1);
-            glTexCoord2f(tbx,tby);
-            glVertex2f(xvert2,yvert2);
-            glTexCoord2f(0,tby);
-            glVertex2f(xvert1,yvert2);
+            const gs_scalar data[4*8] = {
+                 xvert1,yvert1, 0.0,0.0, r, g, b, alpha,
+                 xvert2,yvert1, tbx,0.0, r, g, b, alpha,
+                 xvert2,yvert2, tbx,tby, r, g, b, alpha,
+                 xvert1,yvert2, 0.0,tby, r, g, b, alpha
+            };
+            plane2D_rotated(data);
+
             yvert1 = yvert2;
             yvert2 += height_scaled;
         }
         xvert1 = xvert2;
         xvert2 += width_scaled;
     }
-    glEnd();
-
-    glPopAttrib();
 }
 
-void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int blend, gs_scalar alpha)
 {
-  get_background(bck2d,back);
+    get_background(bck2d,back);
     texture_use(GmTextures[bck2d->texture]->gltex);
 
-  glPushAttrib(GL_CURRENT_BIT);
-    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-
-    const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
-    float sw,sh,i,j,jj,left,top,width,height,X,Y;
+    const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy;
+    gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = bck2d->width*xscale;
     sh = bck2d->height*yscale;
 
@@ -383,7 +319,7 @@ void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scala
     j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
     jj = j;
 
-    glBegin(GL_QUADS);
+    const gs_scalar r = __GETR(blend), g = __GETG(blend), b = __GETB(blend);
     for(i=i; i<=x2; i+=sw)
     {
       for(j=j; j<=y2; j+=sh)
@@ -402,58 +338,44 @@ void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scala
         if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
         else height = sh-top;
 
-        glTexCoord2f(left/sw*tbx,top/sh*tby);
-          glVertex2f(X,Y);
-        glTexCoord2f((left+width)/sw*tbx,top/sh*tby);
-          glVertex2f(X+width,Y);
-        glTexCoord2f((left+width)/sw*tbx,(top+height)/sh*tby);
-          glVertex2f(X+width,Y+height);
-        glTexCoord2f(left/sw*tbx,(top+height)/sh*tby);
-          glVertex2f(X,Y+height);
+        const gs_scalar data[4*8] = {
+             X,Y, left/sw*tbx,top/sh*tby, r, g, b, alpha,
+             X+width,Y, (left+width)/sw*tbx,top/sh*tby, r, g, b, alpha,
+             X+width,Y+height, (left+width)/sw*tbx,(top+height)/sh*tby, r, g, b, alpha,
+             X,Y+height, left/sw*tbx,(top+height)/sh*tby, r, g, b, alpha
+        };
+        plane2D_rotated(data);
       }
       j = jj;
     }
-    glEnd();
-  glPopAttrib();
 }
 
-void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
+void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
 {
-  get_background(bck2d,back);
-  texture_use(GmTextures[bck2d->texture]->gltex);
+    get_background(bck2d,back);
+    texture_use(GmTextures[bck2d->texture]->gltex);
 
-  glPushAttrib(GL_CURRENT_BIT);
-    const float
+    const gs_scalar
       tbx = bck2d->texbordx,  tby = bck2d->texbordy,
       tbw = bck2d->width/tbx, tbh = bck2d->height/tby,
       w = width*xscale, h = height*yscale;
 
     rot *= M_PI/180;
-    const float wcosrot = w*cos(rot), wsinrot = w*sin(rot);
+    const gs_scalar wcosrot = w*cos(rot), wsinrot = w*sin(rot);
 
-    float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
-    glBegin(GL_QUADS);
-      glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),char(a1*255));
-      glTexCoord2f(left/tbw,top/tbh);
-        glVertex2f(ulcx,ulcy);
+    gs_scalar ulcx2 = ulcx + h * cos(3*M_PI/2 + rot),
+    ulcy2 = ulcy - h * sin(3*M_PI/2 + rot);
 
-      glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),char(a2*255));
-      glTexCoord2f((left+width)/tbw,top/tbh);
-        glVertex2f((ulcx + wcosrot), (ulcy - wsinrot));
-
-      ulcx += h * cos(3*M_PI/2 + rot);
-      ulcy -= h * sin(3*M_PI/2 + rot);
-      glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),char(a3*255));
-      glTexCoord2f((left+width)/tbw,(top+height)/tbh);
-        glVertex2f((ulcx + wcosrot), (ulcy - wsinrot));
-
-      glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),char(a4*255));
-      glTexCoord2f(left/tbw,(top+height)/tbh);
-        glVertex2f(ulcx,ulcy);
-    glEnd();
-  glPopAttrib();
+    const gs_scalar data[4*8] = {
+         ulcx,ulcy, left/tbw,top/tbh, __GETR(c1), __GETG(c1), __GETB(c1), a1,
+         (ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw,top/tbh, __GETR(c2), __GETG(c2), __GETB(c2), a2,
+         (ulcx2 + wcosrot), (ulcy2 - wsinrot), (left+width)/tbw,(top+height)/tbh, __GETR(c3), __GETG(c3), __GETB(c3), a3,
+         ulcx2,ulcy2, left/tbw,(top+height)/tbh, __GETR(c4), __GETG(c4), __GETB(c4), a4
+    };
+    plane2D_rotated(data);
 }
 
 int background_get_texture(int backId) {
