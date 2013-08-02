@@ -100,7 +100,7 @@ namespace enigma {
     }
     return long(value);
   }
-  void sleep_for_framerate(int rs)
+  void set_room_speed(int rs)
   {
     current_room_speed = rs;
   }

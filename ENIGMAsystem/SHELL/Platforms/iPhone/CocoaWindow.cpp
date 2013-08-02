@@ -309,7 +309,7 @@ namespace enigma {
 	}
 #define hielem 9
 	static int last_second[hielem+1] = {0},last_microsecond[hielem+1] = {0};
-	void sleep_for_framerate(int rs)
+	void set_room_speed(int rs)
 	{
 		timeval tv;
 		

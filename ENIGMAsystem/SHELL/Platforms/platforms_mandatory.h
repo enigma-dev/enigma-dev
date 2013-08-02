@@ -44,7 +44,7 @@ namespace enigma
   void windowsystem_write_exename(char* exenamehere);
 
   // This method should take an integer framerate and perform the necessary operations to limit fps to that rate.
-  void sleep_for_framerate(int framerate);
+  void set_room_speed(int framerate);
 
   // This method is called at load time. It allows for initializing arrays for input.
   void input_initialize();
