@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Harijs Grinbergs, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -21,7 +21,7 @@
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
-#include "../General/GLbinding.h"
+#include "GL3binding.h"
 
 using namespace std;
 
@@ -46,6 +46,17 @@ using namespace std;
 #endif
 
 using namespace enigma;
+namespace enigma
+{
+    vector<float> globalVBO_data;
+    vector<unsigned int> globalVBO_indices;
+    GLuint globalVBO; //The buffer itself
+    unsigned int globalVBO_texture;
+    unsigned int globalVBO_datCount; //Length of the VBO data buffer
+    unsigned int globalVBO_verCount; //Number of vertices on this buffer
+    unsigned int globalVBO_indCount; //Number of indices
+    unsigned int globalVBO_maxBSize; //Maximum buffer size. Buffer will not be regenerated if the current buffer size is smaller than the maximum
+}
 
 namespace enigma_user {
   extern int window_get_width();
@@ -76,6 +87,34 @@ static inline void draw_back()
             else
                 draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
         }
+    }
+}
+
+void draw_globalVBO()
+{
+    if (globalVBO_verCount>0){
+        //printf("Got here - vertex size = %i, vari = %i, vertCount = %i, IndCount = %i\n", globalVBO_data.size(), globalVBO_datCount,globalVBO_verCount,globalVBO_indCount);
+        glBindTexture(GL_TEXTURE_2D,enigma::bound_texture);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+        glBindBuffer(GL_ARRAY_BUFFER, globalVBO);
+
+        if (globalVBO_verCount>globalVBO_maxBSize) glBufferData(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(float), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
+        else glBufferSubData(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(float), &globalVBO_data[0]);
+        glVertexPointer( 2, GL_FLOAT, sizeof(float) * 8, NULL );
+        glTexCoordPointer( 2, GL_FLOAT, sizeof(float) * 8, (void*)(sizeof(float) * 2) );
+        glColorPointer( 4, GL_FLOAT, sizeof(float) * 8, (void*)(sizeof(float) * 4) );
+
+        //glDrawArrays( GL_TRIANGLES, 0, globalVBO_data.size() / 7);
+        glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
+
+        glDisableClientState( GL_COLOR_ARRAY );
+        glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+        glDisableClientState( GL_VERTEX_ARRAY );
+
+        globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
     }
 }
 
@@ -177,6 +216,7 @@ void screen_redraw()
                 (enigma::particles_impl->draw_particlesystems)(high, low);
             }
         }
+        draw_globalVBO();
     }
     else
     {
@@ -351,6 +391,7 @@ void screen_redraw()
 
 void screen_init()
 {
+    glGenBuffers(1, &globalVBO);
     texture_reset();
     if (!view_enabled)
     {

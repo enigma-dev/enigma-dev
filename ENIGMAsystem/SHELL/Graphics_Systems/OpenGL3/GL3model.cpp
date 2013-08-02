@@ -129,6 +129,11 @@ class Mesh
 
   }
 
+  void useColor()
+  {
+      useColorBuffer = true;
+  }
+
   void ClearData()
   {
     vertices.clear();
@@ -175,7 +180,6 @@ class Mesh
 */
   void ColorVector(int col, double alpha)
   {
-    useColorBuffer = true;
     colors.push_back(__GETR(col)); colors.push_back(__GETG(col)); colors.push_back(__GETB(col)); colors.push_back(alpha);
   }
 
@@ -300,7 +304,7 @@ class Mesh
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );
 
-    for (int i = 0; i < primitives.size(); i++)
+    for (unsigned int i = 0; i < primitives.size(); i++)
     {
       if (primitives[i]->indexcount > 0) {
         glDrawRangeElements(ptypes_by_id[primitives[i]->type], primitives[i]->indexstart, maxindice + 1, primitives[i]->indexcount, GL_UNSIGNED_INT, 0);
@@ -512,8 +516,12 @@ void d3d_model_close(const unsigned int id)
 void d3d_model_vertex(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z)
 {
   meshes[id]->VertexVector(x, y, z);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  meshes[id]->ColorVector(col, alpha);
 }
 
+//Are these functions really needed? They just break stuff!
 void d3d_model_normal(const unsigned int id, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
   meshes[id]->NormalVector(nx, ny, nz);
@@ -533,17 +541,22 @@ void d3d_model_index(const unsigned int id, GLuint in)
 {
   meshes[id]->VertexIndex(in);
 }
+//Functions questioning ends here!
 
 void d3d_model_vertex_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha)
 {
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->ColorVector(col, alpha);
+  meshes[id]->useColor();
 }
 
 void d3d_model_vertex_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
 {
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->TextureVector(tx, ty);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  meshes[id]->ColorVector(col, alpha);
 }
 
 void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha)
@@ -551,12 +564,16 @@ void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scala
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->TextureVector(tx, ty);
   meshes[id]->ColorVector(col, alpha);
+  meshes[id]->useColor();
 }
 
 void d3d_model_vertex_normal(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->NormalVector(nx, ny, nz);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  meshes[id]->ColorVector(col, alpha);
 }
 
 void d3d_model_vertex_normal_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha)
@@ -564,6 +581,7 @@ void d3d_model_vertex_normal_color(const unsigned int id, gs_scalar x, gs_scalar
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->NormalVector(nx, ny, nz);
   meshes[id]->ColorVector(col, alpha);
+  meshes[id]->useColor();
 }
 
 void d3d_model_vertex_normal_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
@@ -571,6 +589,9 @@ void d3d_model_vertex_normal_texture(const unsigned int id, gs_scalar x, gs_scal
   meshes[id]->VertexVector(x, y, z);
   meshes[id]->NormalVector(nx, ny, nz);
   meshes[id]->TextureVector(tx, ty);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  float alpha = (float)enigma::currentcolor[3] / 255.0;
+  meshes[id]->ColorVector(col, alpha);
 }
 
 void d3d_model_vertex_normal_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int col, double alpha)
@@ -579,6 +600,7 @@ void d3d_model_vertex_normal_texture_color(const unsigned int id, gs_scalar x, g
   meshes[id]->NormalVector(nx, ny, nz);
   meshes[id]->TextureVector(tx, ty);
   meshes[id]->ColorVector(col, alpha);
+  meshes[id]->useColor();
 }
 
 
