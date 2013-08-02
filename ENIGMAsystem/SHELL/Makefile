@@ -81,7 +81,7 @@ override CPPFLAGS += -I.
 
 .PHONY: all clean
 
-all: $(OUTPUTNAME)
+all: compile_game
 
 clean:
 	$(RM) $(OUTPUTNAME) $(OBJECTS) $(RESOURCEBINARY) $(DEPENDS)
@@ -105,8 +105,8 @@ endif
 # building #
 ############
 
-$(OUTPUTNAME): $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
+compile_game: $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
+	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
