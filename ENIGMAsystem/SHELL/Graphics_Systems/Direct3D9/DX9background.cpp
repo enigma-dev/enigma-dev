@@ -58,7 +58,7 @@ namespace enigma {
   extern size_t background_idmax;
 }
 
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 #include <string.h> // needed for querying ARB extensions
 
 #include "Bridges/General/DX9Device.h"
@@ -80,11 +80,11 @@ void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar wid
 
 	const float texw = bck2d->width, texh = bck2d->height;
 
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
 	// Build our matrix to rotate, scale and position our sprite
 	D3DXMATRIX mat;
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
 	D3DXVECTOR2 scaling(width/texw, height/texh);
 
@@ -114,6 +114,9 @@ void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
 {
     get_background(bck2d,back);
 
+    x = bck2d->width-fmod(x,bck2d->width);
+    y = bck2d->height-fmod(y,bck2d->height);
+
     const float
     tbx = bck2d->texbordx,tby=bck2d->texbordy;
 
@@ -121,39 +124,71 @@ void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
     hortil = int (ceil(room_width/(bck2d->width*tbx))) + 1,
     vertil = int (ceil(room_height/(bck2d->height*tby))) + 1;
 
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
-
-	D3DXVECTOR3 pos(x, y, 0);
-	tagRECT rect;
-	rect.left = 0; rect.top = 0; rect.right = hortil * bck2d->width; rect.bottom = vertil * bck2d->height;
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, &pos, 0xFFFFFFFF);
+    float xvert1 = -x, xvert2 = xvert1 + bck2d->width, yvert1, yvert2;
+    for (int i=0; i<hortil; i++)
+    {
+        yvert1 = -y; yvert2 = yvert1 + bck2d->height;
+        for (int c=0; c<vertil; c++)
+        {
+			
+			D3DXVECTOR3 pos(xvert1, yvert1, 0);
+			dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, 0xFFFFFFFF);
+	
+            yvert1 = yvert2;
+            yvert2 += bck2d->height;
+        }
+        xvert1 = xvert2;
+        xvert2 += bck2d->width;
+    }
 }
 
 void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
 	get_background(bck2d,back);
 
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
+    const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
+    float sw,sh,i,j,jj,left,top,width,height,X,Y;
+    sw = bck2d->width;
+    sh = bck2d->height;
 
-	D3DXVECTOR3 pos(x1, y1, 0);
-	tagRECT rect;
-	rect.left = x1 + x; rect.top = y1 + y; rect.right = x2 + x; rect.bottom = y2 + y;
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, &pos, 0xFFFFFFFF);
+    i = x1-(fmod(x1,sw) - fmod(x,sw)) - sw*(fmod(x1,sw)<fmod(x,sw));
+    j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
+    jj = j;
+
+    for(i=i; i<=x2; i+=sw)
+    {
+      for(j=j; j<=y2; j+=sh)
+      {
+        if(i <= x1) left = x1-i;
+        else left = 0;
+        X = i+left;
+
+        if(j <= y1) top = y1-j;
+        else top = 0;
+        Y = j+top;
+
+        if(x2 <= i+sw) width = ((sw)-(i+sw-x2)+1)-left;
+        else width = sw-left;
+
+        if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
+        else height = sh-top;
+		  
+		D3DXVECTOR3 pos(X, Y, 0);
+		dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, 0xFFFFFFFF);
+      }
+      j = jj;
+    }
 }
 
 void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
 	get_background(bck2d, back);
 
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
 	// Build our matrix to rotate, scale and position our sprite
 	D3DXMATRIX mat;
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
 	D3DXVECTOR2 scaling(xscale, yscale);
 
@@ -176,11 +211,11 @@ void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar
 
 	const float texw = bck2d->width, texh = bck2d->height;
 
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
 	// Build our matrix to rotate, scale and position our sprite
 	D3DXMATRIX mat;
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
 	D3DXVECTOR2 scaling(width/texw, height/texw);
 
@@ -201,11 +236,11 @@ void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar
 {
 	get_background(bck2d, back);
 
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
 	// Build our matrix to rotate, scale and position our sprite
 	D3DXMATRIX mat;
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
 	D3DXVECTOR2 scaling(xscale, yscale);
 
@@ -230,35 +265,48 @@ void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xsc
     get_background(bck2d,back);
 
     const float
-    tbx = bck2d->texbordx,tby=bck2d->texbordy;
+    tbx = bck2d->texbordx, tby = bck2d->texbordy,
+    width_scaled = bck2d->width*xscale, height_scaled = bck2d->height*yscale;
+
+    x = width_scaled-fmod(x,width_scaled);
+    y = height_scaled-fmod(y,height_scaled);
 
     const int
-    hortil = int (ceil(room_width/(bck2d->width*tbx))) + 1,
-    vertil = int (ceil(room_height/(bck2d->height*tby))) + 1;
+    hortil = int(ceil(room_width/(width_scaled*tbx))) + 1,
+    vertil = int(ceil(room_height/(height_scaled*tby))) + 1;
 
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
-
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
+    float xvert1 = -x, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
+	
 	// Build our matrix to rotate, scale and position our sprite
 	D3DXMATRIX mat;
+			
+    for (int i=0; i<hortil; i++)
+    {
+        yvert1 = -y; yvert2 = yvert1 + height_scaled;
+        for (int c=0; c<vertil; c++)
+        {
+		
+			// Screen position of the sprite
+			D3DXVECTOR2 trans = D3DXVECTOR2(xvert1, yvert1);
 
-	D3DXVECTOR2 scaling(xscale, yscale);
+			D3DXVECTOR2 scaling(xscale, yscale);
 
-	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,0,&trans);
+			// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+			D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,0,&trans);
 
-	// Tell the sprite about the matrix
-	dsprite->SetTransform(&mat);
-
-	tagRECT rect;
-	rect.left = 0; rect.top = 0; rect.right = hortil * bck2d->width; rect.bottom = vertil * bck2d->height;
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, NULL,
-		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
-
+			// Tell the sprite about the matrix
+			dsprite->SetTransform(&mat);
+			
+			dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL,
+				D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+	
+            yvert1 = yvert2;
+            yvert2 += height_scaled;
+        }
+        xvert1 = xvert2;
+        xvert2 += width_scaled;
+    }
+	
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
 	dsprite->SetTransform(&mat);
 }
@@ -267,28 +315,52 @@ void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scala
 {
 	get_background(bck2d,back);
 
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
+    const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
+    float sw,sh,i,j,jj,left,top,width,height,X,Y;
+    sw = bck2d->width*xscale;
+    sh = bck2d->height*yscale;
 
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x1, y1);
+    i = x1-(fmod(x1,sw) - fmod(x,sw)) - sw*(fmod(x1,sw)<fmod(x,sw));
+    j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
+    jj = j;
 
 	// Build our matrix to rotate, scale and position our sprite
 	D3DXMATRIX mat;
+	
+    for(i=i; i<=x2; i+=sw)
+    {
+      for(j=j; j<=y2; j+=sh)
+      {
+        if(i <= x1) left = x1-i;
+        else left = 0;
+        X = i+left;
 
-	D3DXVECTOR2 scaling(xscale, yscale);
+        if(j <= y1) top = y1-j;
+        else top = 0;
+        Y = j+top;
 
-	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,0,&trans);
+        if(x2 <= i+sw) width = ((sw)-(i+sw-x2)+1)-left;
+        else width = sw-left;
 
-	// Tell the sprite about the matrix
-	dsprite->SetTransform(&mat);
+        if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
+        else height = sh-top;
 
-	tagRECT rect;
-	rect.left = x1 + x; rect.top = y1 + y; rect.right = x2 + x; rect.bottom = y2 + y;
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, NULL,
-		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+		// Screen position of the sprite
+		D3DXVECTOR2 trans = D3DXVECTOR2(X, Y);
+
+		D3DXVECTOR2 scaling(xscale, yscale);
+
+		// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+		D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,0,&trans);
+
+		// Tell the sprite about the matrix
+		dsprite->SetTransform(&mat);
+
+		dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL,
+			D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+      }
+      j = jj;
+    }
 
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
 	dsprite->SetTransform(&mat);
