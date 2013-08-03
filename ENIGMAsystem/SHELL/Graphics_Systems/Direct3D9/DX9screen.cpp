@@ -21,7 +21,7 @@
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 
 using namespace std;
 
@@ -37,6 +37,8 @@ using namespace std;
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"
+#include "Platforms/Win32/WINDOWSwindow.h"
+#include "Universal_System/CallbackArrays.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>
 
@@ -97,6 +99,9 @@ namespace enigma_user
 
 void screen_redraw()
 {
+	mouse_x = window_mouse_get_x();
+	mouse_y = window_mouse_get_y();
+	
     d3ddev->BeginScene();    // begins the 3D scene
 	dsprite->Begin(D3DXSPRITE_ALPHABLEND);
 	if (!view_enabled)
@@ -111,7 +116,7 @@ void screen_redraw()
 		}
 
         draw_back();
-
+	
         // Apply and clear stored depth changes.
         for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
         {
@@ -308,7 +313,7 @@ void screen_redraw()
     }
 	dsprite->End();
     d3ddev->EndScene();    // ends the 3D scene
-
+	
     d3ddev->Present(NULL, NULL, NULL, NULL);    // displays the created frame
 }
 

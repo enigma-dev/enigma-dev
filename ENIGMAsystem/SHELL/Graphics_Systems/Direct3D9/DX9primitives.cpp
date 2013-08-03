@@ -19,7 +19,7 @@
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
 #include "DX9model.h"
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
@@ -95,7 +95,7 @@ int draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar 
 int draw_primitive_end()
 {
   if (prim_draw_texture != -1) {
-    texture_use(get_texture(prim_draw_texture));
+    texture_use(prim_draw_texture);
   } else {
     texture_reset();
   }
@@ -127,7 +127,7 @@ void d3d_primitive_begin_texture(int kind, int texId)
 void d3d_primitive_end()
 {
   if (prim_d3d_texture != -1) {
-    texture_use(get_texture(prim_d3d_texture));
+    texture_use(prim_d3d_texture);
   } else {
     texture_reset();
   }

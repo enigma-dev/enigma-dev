@@ -46,6 +46,10 @@ GmTexture::~GmTexture()
 	glDeleteTextures(1, &gltex);
 }
 
+unsigned get_texture(int texid) {
+	return (size_t(texid) >= GmTextures.size())? -1 : GmTextures[texid]->gltex;
+}
+
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
 	x -= ((x >> 1) & 0x55555555);
@@ -53,10 +57,6 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	x =  ((x >> 4) + x) & 0x0f0f0f0f;
 	x += x >> 8;
 	return (x + (x >> 16)) & 63;
-}
-
-unsigned get_texture(int texid) {
-	return (size_t(texid) >= GmTextures.size())? -1 : GmTextures[texid]->gltex;
 }
 
 namespace enigma
