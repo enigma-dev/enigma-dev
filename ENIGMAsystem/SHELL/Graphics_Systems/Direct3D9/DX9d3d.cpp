@@ -196,7 +196,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 	
 	D3DXMATRIX matProj;
 
-	D3DXMatrixPerspectiveFovLH( &matProj, 60, 4/3, 1.0f, 32000.0f );
+	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(60), 4/3, 1.0f, 32000.0f );
 	d3ddev->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
@@ -209,13 +209,13 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 	// Get D3DX to fill in the matrix values
 	D3DXMATRIX matView;
 	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
-
+		
 	// Set our view matrix
 	d3ddev->SetTransform( D3DTS_VIEW, &matView ); 
 	
 	D3DXMATRIX matProj;
 
-	D3DXMatrixPerspectiveFovLH( &matProj, angle, aspect, znear, zfar );
+	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(angle), aspect, znear, zfar );
 	d3ddev->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
@@ -235,7 +235,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
 
 	// Set the matrix to be applied to anything we render from now on
-	d3ddev->SetTransform( D3DTS_WORLD, &matWorld);
+	d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
 	
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -265,7 +265,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
 
 	// Set the matrix to be applied to anything we render from now on
-	d3ddev->SetTransform( D3DTS_WORLD, &matWorld);
+	d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
 	
 	D3DXMATRIX matProj;    // the projection transform matrix
 	D3DXMatrixPerspectiveOffCenterLH(&matProj,
@@ -316,6 +316,10 @@ void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scal
 
 }
 
+D3DXMATRIX matTrans; 
+D3DXMATRIX matRot; 
+D3DXMATRIX matScale; 
+
 // ***** TRANSFORMATIONS BEGIN *****
 void d3d_transform_set_identity()
 {
@@ -323,31 +327,6 @@ void d3d_transform_set_identity()
 }
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
-{
-
-}
-void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
-{
-
-}
-void d3d_transform_add_rotation_x(double angle)
-{
-
-}
-void d3d_transform_add_rotation_y(double angle)
-{
-
-}
-void d3d_transform_add_rotation_z(double angle)
-{
-
-}
-void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
-{
-
-}
-
-void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
 	D3DXMATRIX matTranslate;    // a matrix to store the translation information
 
@@ -357,12 +336,71 @@ void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 
 	// tell Direct3D about our matrix
 	d3ddev->SetTransform(D3DTS_WORLD, &matTranslate);
+	
+}
+
+void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
+{
+	// build a matrix to double the size of the model
+	// store it to matScale
+	D3DXMatrixScaling(&matScale, xs, ys, zs);
+	
+	D3DXMATRIX matWorld = matTrans * matRot * matScale; 
+
+	// tell Direct3D about our matrix
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+}
+
+void d3d_transform_add_rotation_x(double angle)
+{
+	// build a matrix to rotate the model 3.14 radians
+	D3DXMatrixRotationX(&matRot, angle);
+	
+	D3DXMATRIX matWorld = matTrans * matRot * matScale; 
+
+	// tell Direct3D about our matrix
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+}
+
+void d3d_transform_add_rotation_y(double angle)
+{
+	// build a matrix to rotate the model 3.14 radians
+	D3DXMatrixRotationY(&matRot, angle);
+	
+	D3DXMATRIX matWorld = matTrans * matRot * matScale; 
+
+	// tell Direct3D about our matrix
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+}
+
+void d3d_transform_add_rotation_z(double angle)
+{
+	// build a matrix to rotate the model 3.14 radians
+	D3DXMatrixRotationZ(&matRot, angle);
+	
+	D3DXMATRIX matWorld = matTrans * matRot * matScale; 
+
+	// tell Direct3D about our matrix
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+}
+
+void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
+{
+
+}
+
+void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
+{
+	// build a matrix to move the model 12 units along the x-axis and 4 units along the y-axis
+	// store it to matTranslate
+	D3DXMatrixTranslation(&matTrans, xt, yt, zt);
+
+	// tell Direct3D about our matrix
+	d3ddev->SetTransform(D3DTS_WORLD, &matTrans);
 }
 
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
-	D3DXMATRIX matScale;    // a matrix to store the scaling information
-
 	// build a matrix to double the size of the model
 	// store it to matScale
 	D3DXMatrixScaling(&matScale, xs, ys, zs);
@@ -373,35 +411,29 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 
 void d3d_transform_set_rotation_x(double angle)
 {
-	D3DXMATRIX matRotateX;    // a matrix to store the rotation information
-
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationX(&matRotateX, angle);
+	D3DXMatrixRotationX(&matRot, angle);
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matRotateX);
+	d3ddev->SetTransform(D3DTS_WORLD, &matRot);
 }
 
 void d3d_transform_set_rotation_y(double angle)
 {
-	D3DXMATRIX matRotateY;    // a matrix to store the rotation information
-
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationY(&matRotateY, angle);
+	D3DXMatrixRotationY(&matRot, angle);
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matRotateY);
+	d3ddev->SetTransform(D3DTS_WORLD, &matRot);
 }
 
 void d3d_transform_set_rotation_z(double angle)
 {
-	D3DXMATRIX matRotateZ;    // a matrix to store the rotation information
-
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationX(&matRotateZ, angle);
+	D3DXMatrixRotationX(&matRot, angle);
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matRotateZ);
+	d3ddev->SetTransform(D3DTS_WORLD, &matRot);
 }
 
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
