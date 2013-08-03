@@ -15,22 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SURFSTRUCT__H
-#define _SURFSTRUCT__H
-
 #include "Universal_System/scalar.h"
-#include <string>
-#include "OpenGLHeaders.h"
-using std::string;
-
-namespace enigma
-{
-  struct surface
-  {
-    GLuint tex, fbo;
-    int width, height;
-  };
-}
 
 namespace enigma_user
 {
@@ -67,5 +52,3 @@ bool surface_is_supported();
 #define surface_destroy surface_free
 
 }
-
-#endif

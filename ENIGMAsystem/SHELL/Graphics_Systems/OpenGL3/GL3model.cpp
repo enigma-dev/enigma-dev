@@ -521,7 +521,6 @@ void d3d_model_vertex(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar
   meshes[id]->ColorVector(col, alpha);
 }
 
-//Are these functions really needed? They just break stuff!
 void d3d_model_normal(const unsigned int id, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
   meshes[id]->NormalVector(nx, ny, nz);
@@ -541,7 +540,6 @@ void d3d_model_index(const unsigned int id, GLuint in)
 {
   meshes[id]->VertexIndex(in);
 }
-//Functions questioning ends here!
 
 void d3d_model_vertex_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha)
 {
