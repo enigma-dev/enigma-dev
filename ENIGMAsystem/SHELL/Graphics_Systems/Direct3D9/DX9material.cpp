@@ -17,7 +17,7 @@
 
 #include "Direct3D9Headers.h"
 #include "DX9material.h"
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 #include <math.h>
 
 #include <vector>

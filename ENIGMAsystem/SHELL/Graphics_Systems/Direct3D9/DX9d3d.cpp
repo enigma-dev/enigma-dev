@@ -18,7 +18,7 @@
 #include "../General/GSd3d.h"
 #include "Direct3D9Headers.h"
 #include "../General/GStextures.h"
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 #include "DX9model.h"
 #include "DX9shapes.h"
 #include "Universal_System/var4.h"
@@ -310,7 +310,6 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
 }
 
 void d3d_draw_icosahedron(int texId) {
-    texture_use(get_texture(texId));
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {

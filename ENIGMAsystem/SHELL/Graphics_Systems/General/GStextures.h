@@ -43,8 +43,6 @@ enum {
 };
 }
 
-unsigned get_texture(int texid); // fail safe macro
-
 namespace enigma_user
 {
 

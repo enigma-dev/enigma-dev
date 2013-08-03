@@ -18,7 +18,7 @@
 #include <math.h>
 #include "Direct3D9Headers.h"
 #include "../General/GSstdraw.h"
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"
 
