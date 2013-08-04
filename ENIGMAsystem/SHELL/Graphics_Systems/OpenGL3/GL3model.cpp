@@ -127,7 +127,11 @@ class Mesh
 
   ~Mesh()
   {
-
+    glDeleteBuffers(1, &verticesVBO);
+    glDeleteBuffers(1, &texturesVBO);
+    glDeleteBuffers(1, &normalsVBO);
+    glDeleteBuffers(1, &colorsVBO);
+    glDeleteBuffers(1, &indexVBO);
   }
 
   void useColor()
