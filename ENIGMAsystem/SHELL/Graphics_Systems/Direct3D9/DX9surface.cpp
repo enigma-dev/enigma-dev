@@ -21,7 +21,7 @@ using namespace std;
 #include <iostream>
 #include <math.h>
 
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"

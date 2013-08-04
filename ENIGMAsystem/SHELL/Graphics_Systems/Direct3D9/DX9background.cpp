@@ -58,7 +58,7 @@ namespace enigma {
   extern size_t background_idmax;
 }
 
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 #include <string.h> // needed for querying ARB extensions
 
 #include "Bridges/General/DX9Device.h"

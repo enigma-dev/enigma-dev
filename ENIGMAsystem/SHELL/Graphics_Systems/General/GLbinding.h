@@ -15,6 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "../General/GLTextureStruct.h"
+
+#ifndef __GL_BINDING_H
+#define __GL_BINDING_H
+
+unsigned get_texture(int texid);
+
 // OpenGL does not memorize the bound texture and significant slowdowns occur by constantly rebinding a texture
 // glBind calls clog up the pipeline avoid them at all costs, texture paging is good
 #define use_bound_texture_global
@@ -26,4 +33,6 @@
 #else
   #define texture_reset() glBindTexture(GL_TEXTURE_2D, 0)
   #define texture_use(texid) glBindTexture(GL_TEXTURE_2D, texid)
+#endif
+
 #endif

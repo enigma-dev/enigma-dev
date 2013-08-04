@@ -23,7 +23,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 
 using namespace std;
 
@@ -317,13 +317,13 @@ void d3d_model_draw(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z
 
 void d3d_model_draw(const unsigned int id, int texId)
 {
-    texture_use(get_texture(texId));
+    texture_use(texId);
     meshes[id]->Draw();
 }
 
 void d3d_model_draw(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
-    texture_use(get_texture(texId));
+    texture_use(texId);
     d3d_model_draw(id, x, y, z);
 }
 

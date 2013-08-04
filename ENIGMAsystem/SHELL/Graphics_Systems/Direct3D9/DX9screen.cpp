@@ -21,7 +21,7 @@
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 
 using namespace std;
 

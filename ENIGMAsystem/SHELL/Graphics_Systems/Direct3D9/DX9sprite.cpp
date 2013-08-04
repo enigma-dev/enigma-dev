@@ -23,7 +23,7 @@ using std::string;
 #include "Direct3D9Headers.h"
 #include "../General/GSsprite.h"
 #include "../General/GStextures.h"
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/instance_system.h"

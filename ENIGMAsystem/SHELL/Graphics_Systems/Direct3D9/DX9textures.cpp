@@ -25,7 +25,7 @@
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "../General/DXbinding.h"
+#include "DX9binding.h"
 
 vector<GmTexture*> GmTextures(0);
 
@@ -46,6 +46,10 @@ GmTexture::~GmTexture()
 
 }
 
+LPDIRECT3DTEXTURE9 get_texture(int texid) {
+
+}
+
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
 	x -= ((x >> 1) & 0x55555555);
@@ -53,11 +57,6 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	x =  ((x >> 4) + x) & 0x0f0f0f0f;
 	x += x >> 8;
 	return (x + (x >> 16)) & 63;
-}
-
-unsigned get_texture(int texid) 
-{
-
 }
 
 namespace enigma
@@ -85,11 +84,11 @@ namespace enigma
 	texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
 	
 	unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-	for(int x=0;x<fullwidth * fullheight*4;x+=4){
-		((char*)dest)[x]=((char*)pxdata)[x+2];//A
-		((char*)dest)[x+1]=((char*)pxdata)[x+1];//R
-		((char*)dest)[x+2]=((char*)pxdata)[x];//G
-		((char*)dest)[x+3]=((char*)pxdata)[x+3];//B
+	for(int x = 0; x < fullwidth * fullheight * 4; x += 4){
+		((unsigned char*)dest)[x]  =((unsigned char*)pxdata)[x + 2];   //A
+		((unsigned char*)dest)[x+1]=((unsigned char*)pxdata)[x + 1];   //R
+		((unsigned char*)dest)[x+2]=((unsigned char*)pxdata)[x];       //G
+		((unsigned char*)dest)[x+3]=((unsigned char*)pxdata)[x + 3];   //B
 	}
 
 	texture->UnlockRect(0);
