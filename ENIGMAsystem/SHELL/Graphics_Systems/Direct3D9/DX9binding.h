@@ -24,14 +24,14 @@ LPDIRECT3DTEXTURE9 get_texture(int texid);
 
 // DirectX does not memorize the bound texture and significant slowdowns occur by constantly rebinding a texture
 // glBind calls clog up the pipeline avoid them at all costs, texture paging is good
-#define use_bound_texture_global
+//#define use_bound_texture_global
 #ifdef use_bound_texture_global
   namespace enigma { extern LPDIRECT3DTEXTURE9 bound_texture; }
   #define texture_reset() if (enigma::bound_texture != NULL) d3ddev->SetTexture(0, enigma::bound_texture = 0);
   #define texture_use(texid) if (enigma::bound_texture != get_texture(texid)) \
 	d3ddev->SetTexture(0, enigma::bound_texture = get_texture(texid));
 #else
-  #define texture_reset() d3ddev->SetTexture(0, 0);
+  #define texture_reset() 
   #define texture_use(texid) d3ddev->SetTexture(0, get_texture(texid));
 #endif
 

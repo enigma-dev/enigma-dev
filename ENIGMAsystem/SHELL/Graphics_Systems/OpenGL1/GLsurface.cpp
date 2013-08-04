@@ -36,6 +36,7 @@ namespace enigma_user {
   extern int room_width, room_height/*, sprite_idmax*/;
 }
 #include "../General/GSsurface.h"
+#include "../General/GLSurfaceStruct.h"
 
 #ifdef DEBUG_MODE
   #include <string>

@@ -60,7 +60,9 @@ int merge_color(int c1,int c2,double amount)
 
 void draw_set_color(int color)
 {
-
+	enigma::currentcolor[0] = __GETR(color);
+	enigma::currentcolor[1] = __GETG(color);
+	enigma::currentcolor[2] = __GETB(color);
 }
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
