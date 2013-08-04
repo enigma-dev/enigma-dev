@@ -395,6 +395,7 @@ void io_handle()
     if(handleEvents() > 0)
       exit(0);
   }
+  enigma::update_mouse_variables();
 }
 
 void window_set_cursor(int c)
