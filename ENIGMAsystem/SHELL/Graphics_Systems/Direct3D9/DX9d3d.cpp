@@ -196,7 +196,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 	
 	D3DXMATRIX matProj;
 
-	D3DXMatrixPerspectiveFovLH( &matProj, 60, 4/3, 1.0f, 32000.0f );
+	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(60), 4/3, 1.0f, 32000.0f );
 	d3ddev->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
@@ -209,13 +209,13 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 	// Get D3DX to fill in the matrix values
 	D3DXMATRIX matView;
 	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
-
+		
 	// Set our view matrix
 	d3ddev->SetTransform( D3DTS_VIEW, &matView ); 
 	
 	D3DXMATRIX matProj;
 
-	D3DXMatrixPerspectiveFovLH( &matProj, angle, aspect, znear, zfar );
+	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(angle), aspect, znear, zfar );
 	d3ddev->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
@@ -235,7 +235,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
 
 	// Set the matrix to be applied to anything we render from now on
-	d3ddev->SetTransform( D3DTS_WORLD, &matWorld);
+	d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
 	
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -265,7 +265,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
 
 	// Set the matrix to be applied to anything we render from now on
-	d3ddev->SetTransform( D3DTS_WORLD, &matWorld);
+	d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
 	
 	D3DXMATRIX matProj;    // the projection transform matrix
 	D3DXMatrixPerspectiveOffCenterLH(&matProj,
