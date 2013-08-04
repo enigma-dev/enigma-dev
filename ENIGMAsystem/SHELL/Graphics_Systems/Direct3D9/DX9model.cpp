@@ -234,17 +234,18 @@ class Mesh
 	VOID* pVoid;    // a void pointer
     // lock v_buffer and load the vertices into it
     v_buffer->Lock(0, 0, (void**)&pVoid, 0);
-    //memcpy(pVoid, vertices.begin(), sizeof(vertices));
 	memcpy(pVoid, &(vertices[0]), vertices.size() * sizeof(CUSTOMVERTEX));
     v_buffer->Unlock();
 	  
-    // lock i_buffer and load the indices into it
-    //i_buffer->Lock(0, 0, (void**)&pVoid, 0);
-    //memcpy(pVoid, &indices[0], sizeof(indices));
-    //i_buffer->Unlock();
+	if (indices.size() > 0) {
+      // lock i_buffer and load the indices into it
+      i_buffer->Lock(0, 0, (void**)&pVoid, 0);
+      memcpy(pVoid, &indices[0], indices.size() * sizeof(short));
+      i_buffer->Unlock();
+	}
 
     // Clean up the data from RAM it is now safe on VRAM
-    //ClearData();
+    ClearData();
   }
 
   void BufferSubData(GLint offset)
@@ -252,17 +253,18 @@ class Mesh
 	VOID* pVoid;    // a void pointer
     // lock v_buffer and load the vertices into it
     v_buffer->Lock(0, 0, (void**)&pVoid, 0);
-    //memcpy(pVoid, vertices, sizeof(vertices));
-	memcpy(pVoid, &(vertices[0]), vertices.size()*sizeof(CUSTOMVERTEX));
+	memcpy(pVoid, &(vertices[0]), vertices.size() * sizeof(CUSTOMVERTEX));
     v_buffer->Unlock();
 	  
-    // lock i_buffer and load the indices into it
-    //i_buffer->Lock(0, 0, (void**)&pVoid, 0);
-    //memcpy(pVoid, indices, sizeof(indices));
-    //i_buffer->Unlock();
+	if (indices.size() > 0) {
+      // lock i_buffer and load the indices into it
+      i_buffer->Lock(0, 0, (void**)&pVoid, 0);
+      memcpy(pVoid, &indices[0], indices.size() * sizeof(short));
+      i_buffer->Unlock();
+	}
 
     // Clean up the data from RAM it is now safe on VRAM
-   // ClearData();
+    ClearData();
   }
 
   void Open(int offset) 
@@ -289,7 +291,7 @@ class Mesh
 	// enable vertex array's for fast vertex processing
 	// select the vertex buffer to display
 	d3ddev->SetStreamSource(0, v_buffer, 0, sizeof(CUSTOMVERTEX));
-	//d3ddev->SetIndices(i_buffer);
+	d3ddev->SetIndices(i_buffer);
 
     for (unsigned int i = 0; i < primitives.size(); i++)
     {
