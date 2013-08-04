@@ -73,6 +73,7 @@ struct Primitive
 };
 
 /* Mesh clearing has a memory leak */
+// TODO: Verify that Mesh clearing no longer has memory leaks after latest changes.
 class Mesh
 {
   public:
@@ -145,6 +146,9 @@ class Mesh
 
   void Clear()
   {
+    for (unsigned int i = 0; i < primitives.size(); i++) {
+      delete primitives[i];
+    }
     primitives.clear();
     ClearData();
     vbobuffered = false;
