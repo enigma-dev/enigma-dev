@@ -47,7 +47,7 @@ GmTexture::~GmTexture()
 }
 
 LPDIRECT3DTEXTURE9 get_texture(int texid) {
-
+  return (size_t(texid) >= GmTextures.size())? NULL : GmTextures[texid]->gTexture;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
