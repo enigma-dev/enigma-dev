@@ -405,6 +405,8 @@ void screen_init()
         //glEnable(GL_ALPHA_TEST);
         //glEnable(GL_TEXTURE_2D);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+  		//d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
         //glAlphaFunc(GL_ALWAYS,0);
         //glColor4f(0,0,0,1);
     }
@@ -451,6 +453,8 @@ void screen_init()
                 //glEnable(GL_ALPHA_TEST);
                 //glEnable(GL_TEXTURE_2D);
                 //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
                 //glAlphaFunc(GL_ALWAYS,0);
                 //glColor4f(0,0,0,1);
                 break;
