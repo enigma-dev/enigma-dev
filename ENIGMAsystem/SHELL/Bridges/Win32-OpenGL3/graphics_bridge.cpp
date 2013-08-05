@@ -93,7 +93,16 @@ namespace enigma {
   }
 }
 
+#include "Universal_System/roomsystem.h"
+
 namespace enigma_user {
+
+  void screen_refresh() {
+    window_set_caption(room_caption);
+    enigma::update_mouse_variables();
+	SwapBuffers(enigma::window_hDC);
+  }
+
   void set_synchronization(bool enable) {
 
     // General notes:

@@ -227,7 +227,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMatrixRotationZ( &matRotZ, angle );        // Roll
 
 	// Calculate a translation matrix
-	D3DXMatrixTranslation(&matTrans, x - 0.5, y - height - 0.5, 0);
+	D3DXMatrixTranslation(&matTrans, -x - 0.5, -y - height - 0.5, 0);
 
 	D3DXMatrixScaling(&matScale, 1, -1, 1);
 
@@ -257,7 +257,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 	D3DXMatrixRotationZ( &matRotZ, angle );        // Roll
 
 	// Calculate a translation matrix
-	D3DXMatrixTranslation(&matTrans, x, y - height, 0);
+	D3DXMatrixTranslation(&matTrans, -x, -y - height, 0);
 
 	D3DXMatrixScaling(&matScale, 1, -1, 1);
 
