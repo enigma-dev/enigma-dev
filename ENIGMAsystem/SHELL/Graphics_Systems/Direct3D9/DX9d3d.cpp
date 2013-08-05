@@ -31,7 +31,6 @@
 bool d3dMode = false;
 bool d3dHidden = false;
 bool d3dZWriteEnable = true;
-double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 namespace enigma_user
 {
@@ -95,7 +94,7 @@ void d3d_set_fog_color(int color)
 	HRESULT hr;
 	hr = d3ddev->SetRenderState(
                     D3DRS_FOGCOLOR,
-                    0x00FFFFFF); // Highest 8 bits are not used.
+                    D3DCOLOR_COLORVALUE(__GETR(color), __GETG(color), __GETB(color), 1.0f)); // Highest 8 bits are not used.
 	//if(FAILED(hr))
 		//return hr;
 }
@@ -118,9 +117,9 @@ void d3d_set_fog_density(double density)
 void d3d_set_culling(bool enable)
 {
 	if (enable) {
-		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+		//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 	} else {
-		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+		//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	}
 }
 
@@ -627,7 +626,7 @@ void d3d_light_shininess(int facemode, int shine)
 
 void d3d_light_define_ambient(int col)
 {
-	//d3ddev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(__GETR(col), __GETG(col), __GETB(col)));  
+	d3ddev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), 1));  
 }
 
 bool d3d_light_enable(int id, bool enable)
