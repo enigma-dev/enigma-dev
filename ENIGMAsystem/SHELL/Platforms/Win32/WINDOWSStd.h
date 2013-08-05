@@ -31,8 +31,6 @@ void windowsystem_write_exename(char* exenamehere);
 namespace enigma_user
 {
 
-void screen_refresh();
-
 int sleep(int millis);
 void set_synchronization(bool enable);
 

@@ -61,6 +61,7 @@ namespace enigma {
 #include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
+  
   void set_synchronization(bool enable) {
 
     // General notes:

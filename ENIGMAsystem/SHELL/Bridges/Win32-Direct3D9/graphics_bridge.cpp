@@ -93,8 +93,16 @@ namespace enigma
     }
 }
 
+#include "Universal_System/roomsystem.h"
+
 namespace enigma_user
 {
+
+void screen_refresh() {
+    window_set_caption(room_caption);
+    enigma::update_mouse_variables();
+	d3ddev->Present(NULL, NULL, NULL, NULL);
+}
 
 void set_synchronization(bool enable) //TODO: Needs to be rewritten
 {
