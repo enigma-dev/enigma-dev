@@ -99,9 +99,6 @@ namespace enigma_user
 
 void screen_redraw()
 {
-	mouse_x = window_mouse_get_x();
-	mouse_y = window_mouse_get_y();
-	
     d3ddev->BeginScene();    // begins the 3D scene
 	dsprite->Begin(D3DXSPRITE_ALPHABLEND);
 	if (!view_enabled)
@@ -315,6 +312,7 @@ void screen_redraw()
     d3ddev->EndScene();    // ends the 3D scene
 	
     d3ddev->Present(NULL, NULL, NULL, NULL);    // displays the created frame
+	screen_refresh();
 }
 
 void screen_init()
