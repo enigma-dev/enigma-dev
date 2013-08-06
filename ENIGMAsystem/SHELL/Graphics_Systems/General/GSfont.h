@@ -34,16 +34,16 @@ unsigned draw_get_valign();
 void draw_set_font(int fnt);
 int draw_get_font();
 void draw_text(gs_scalar x, gs_scalar y, variant str);
-void draw_text_color(gs_scalar x, gs_scalar y, variant str, int c1, int c2, int c3, int c4, double a);
+void draw_text_color(gs_scalar x, gs_scalar y, variant str, int c1, int c2, int c3, int c4, gs_scalar a);
 
 void draw_text_ext(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid);
-void draw_text_ext_color(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, int c1, int c2, int c3, int c4, double a);
+void draw_text_ext_color(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, int c1, int c2, int c3, int c4, gs_scalar a);
 
 void draw_text_transformed(gs_scalar x, gs_scalar y, variant str, gs_scalar xscale, gs_scalar yscale, double rot);
-void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant str, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a);
+void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant str, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a);
 
 void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot);
-void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a);
+void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a);
 
 unsigned int font_get_texture(int fnt);
 unsigned int font_get_texture_width(int fnt);

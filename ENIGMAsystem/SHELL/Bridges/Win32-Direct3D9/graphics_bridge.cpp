@@ -28,10 +28,6 @@ using namespace std;
 #include "Platforms/Win32/WINDOWSwindow.h"
 #include "../General/DX9Device.h"
 LPD3DXSPRITE dsprite = NULL;
-	
-// include the Direct3D Library file
-#pragma comment (lib, "d3d9.lib")
-#pragma comment (lib, "dxerr9.lib")
 
 // global declarations
 LPDIRECT3D9 d3dr;    // the pointer to our Direct3D interface
@@ -93,8 +89,16 @@ namespace enigma
     }
 }
 
+#include "Universal_System/roomsystem.h"
+
 namespace enigma_user
 {
+
+void screen_refresh() {
+    window_set_caption(room_caption);
+    enigma::update_mouse_variables();
+	d3ddev->Present(NULL, NULL, NULL, NULL);
+}
 
 void set_synchronization(bool enable) //TODO: Needs to be rewritten
 {

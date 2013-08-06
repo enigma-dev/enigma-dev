@@ -678,7 +678,7 @@ texture_use(GmTextures[fnt->texture]->gltex);
   }
 }
 
-void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a)
+void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
@@ -803,7 +803,7 @@ texture_use(GmTextures[fnt->texture]->gltex);
     glPopAttrib();
 }
 
-void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, int sep, int w, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a)
+void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
@@ -954,7 +954,7 @@ texture_use(GmTextures[fnt->texture]->gltex);
     glPopAttrib();
 }
 
-void draw_text_color(gs_scalar x, gs_scalar y, variant vstr, int c1, int c2, int c3, int c4, double a)
+void draw_text_color(gs_scalar x, gs_scalar y, variant vstr, int c1, int c2, int c3, int c4, gs_scalar a)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
@@ -1050,7 +1050,7 @@ texture_use(GmTextures[fnt->texture]->gltex);
   glPopAttrib();
 }
 
-void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, int c1, int c2, int c3, int c4, double a)
+void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, int c1, int c2, int c3, int c4, gs_scalar a)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);

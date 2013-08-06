@@ -22,28 +22,18 @@ namespace enigma_user
 {
 
 enum {
-  sh_vertex = 0,
-  sh_tesscontrol = 1,
-  sh_tessevaluation = 2,
-  sh_geometry = 3,
-  sh_fragment = 4
+  sh_unknown = 0,
+  sh_vertex = 1,
+  sh_pixel = 2
 };
 
-int shader_create(int type);
-int shader_load(int id, const char* fname);
-bool shader_compile(int id);
-const char* shader_compile_output(int id);
-void shader_free(int id);
-
-int shader_program_create();
-bool shader_program_link(int id);
-bool shader_program_validate(int id);
-void shader_program_attach(int id, int sid);
-void shader_program_detach(int id, int sid);
-void shader_program_bind_frag_data(int id, const char* name);
-void shader_program_use(int id);
-void shader_program_reset();
-void shader_program_free(int id);
+int hlsl_shader_create(int type);
+int hlsl_shader_load(int id, string fname);
+void hlsl_shader_set_constantf(int id, unsigned start, const float* data, unsigned count);
+void hlsl_shader_set_vector(int id, string name, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar w);
+void hlsl_shader_use(int id);
+void hlsl_shader_reset();
+void hlsl_shader_free(int id);
 
 }
 

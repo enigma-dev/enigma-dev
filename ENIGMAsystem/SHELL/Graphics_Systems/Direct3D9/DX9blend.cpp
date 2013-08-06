@@ -23,19 +23,28 @@ namespace enigma_user
 {
 
 int draw_set_blend_mode(int mode){
+
 	switch (mode)
 	{
     case bm_add:
 		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
       return 0;
     case bm_max:
 		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_MAX);
+		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
       return 0;
     case bm_subtract:
 		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_SUBTRACT);
+		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
       return 0;
     default:
         d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
       return 0;
   }
 }

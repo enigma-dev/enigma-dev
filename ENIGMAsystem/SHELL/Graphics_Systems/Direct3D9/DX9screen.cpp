@@ -103,7 +103,31 @@ void screen_redraw()
 	dsprite->Begin(D3DXSPRITE_ALPHABLEND);
 	if (!view_enabled)
     {
+		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
+		d3ddev->SetViewport(&pViewport);
+		
+		D3DXMATRIX matTrans, matScale;
 
+		// Calculate a translation matrix
+		D3DXMatrixTranslation(&matTrans, -0.5, -room_height - 0.5, 0);
+		D3DXMatrixScaling(&matScale, 1, -1, 1);
+		
+		// Calculate our world matrix by multiplying the above (in the correct order)
+		D3DXMATRIX matWorld = matTrans * matScale;
+
+		// Set the matrix to be applied to anything we render from now on
+		d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+	
+		D3DXMATRIX matProjection;    // the projection transform matrix
+		D3DXMatrixOrthoOffCenterLH(&matProjection,
+							0,
+							(FLOAT)room_width,   
+							0, 
+							(FLOAT)room_height,   
+							0.0f,    // the near view-plane
+							1.0f);    // the far view-plane
+		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+		
         int clear_bits = 0;
 		if (background_showcolor)
 		{
@@ -246,7 +270,33 @@ void screen_redraw()
                             view_yview[vc] = room_height - view_hview[vc];
                     }
                 }
+				
+				D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc], 
+					(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
+				d3ddev->SetViewport(&pViewport);
+		
+				D3DXMATRIX matTrans, matScale;
 
+				// Calculate a translation matrix
+				D3DXMatrixTranslation(&matTrans, -view_xview[vc] - 0.5, -view_yview[vc] - room_height - 0.5, 0);
+				D3DXMatrixScaling(&matScale, 1, -1, 1);
+		
+				// Calculate our world matrix by multiplying the above (in the correct order)
+				D3DXMATRIX matWorld = matTrans * matScale;
+
+				// Set the matrix to be applied to anything we render from now on
+				d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+	
+				D3DXMATRIX matProjection;    // the projection transform matrix
+				D3DXMatrixOrthoOffCenterLH(&matProjection,
+							0,
+							(FLOAT)view_wview[vc],   
+							0, 
+							(FLOAT)view_hview[vc],   
+							0.0f,    // the near view-plane
+							1.0f);    // the far view-plane
+				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+				
                 int clear_bits = 0;
 				if (background_showcolor)
 				{
@@ -310,14 +360,107 @@ void screen_redraw()
     }
 	dsprite->End();
     d3ddev->EndScene();    // ends the 3D scene
-	
-    d3ddev->Present(NULL, NULL, NULL, NULL);    // displays the created frame
+		
 	screen_refresh();
 }
 
 void screen_init()
 {
-    
+    if (!view_enabled)
+    {
+        //glMatrixMode(GL_PROJECTION);
+          //gluPerspective(0, 1, 0, 1);
+        //glMatrixMode(GL_MODELVIEW);
+
+		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+		
+		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
+		d3ddev->SetViewport(&pViewport);
+		
+		D3DXMATRIX matTrans, matScale;
+						
+		// Calculate a translation matrix
+		D3DXMatrixTranslation(&matTrans, -0.5, -room_height - 0.5, 0);
+		D3DXMatrixScaling(&matScale, 1, -1, 1);
+		
+		// Calculate our world matrix by multiplying the above (in the correct order)
+		D3DXMATRIX matWorld = matTrans * matScale;
+
+		// Set the matrix to be applied to anything we render from now on
+		d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+	
+		D3DXMATRIX matProjection;    // the projection transform matrix
+		D3DXMatrixOrthoOffCenterLH(&matProjection,
+							0,
+							(FLOAT)room_width,   
+							0, 
+							(FLOAT)room_height,   
+							0.0f,    // the near view-plane
+							1.0f);    // the far view-plane
+		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+				
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //glDisable(GL_DEPTH_TEST);
+        //glEnable(GL_BLEND);
+        //glEnable(GL_ALPHA_TEST);
+        //glEnable(GL_TEXTURE_2D);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+  		//d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+        //glAlphaFunc(GL_ALWAYS,0);
+        //glColor4f(0,0,0,1);
+    }
+    else
+    {
+		for (view_current = 0; view_current < 7; view_current++)
+        {
+            if (view_visible[(int)view_current])
+            {
+                int vc = (int)view_current;
+                  //gluPerspective(0, 1, 0, 1);
+				  
+				D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc], 
+					(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
+				d3ddev->SetViewport(&pViewport);
+		
+				D3DXMATRIX matTrans, matScale;
+
+				// Calculate a translation matrix
+				D3DXMatrixTranslation(&matTrans, -view_xview[vc] - 0.5, -view_yview[vc] - room_height - 0.5, 0);
+				D3DXMatrixScaling(&matScale, 1, -1, 1);
+		
+				// Calculate our world matrix by multiplying the above (in the correct order)
+				D3DXMATRIX matWorld = matTrans * matScale;
+
+				// Set the matrix to be applied to anything we render from now on
+				d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+	
+				D3DXMATRIX matProjection;    // the projection transform matrix
+				D3DXMatrixOrthoOffCenterLH(&matProjection,
+							0,
+							(FLOAT)view_wview[vc],   
+							0, 
+							(FLOAT)view_hview[vc],   
+							0.0f,    // the near view-plane
+							1.0f);    // the far view-plane
+				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+				  
+				d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+				  
+                //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                //glDisable(GL_DEPTH_TEST);
+                //glEnable(GL_BLEND);
+                //glEnable(GL_ALPHA_TEST);
+                //glEnable(GL_TEXTURE_2D);
+                //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+                //glAlphaFunc(GL_ALWAYS,0);
+                //glColor4f(0,0,0,1);
+                break;
+            }
+        }
+    }  
 }
 
 int screen_save(string filename) //Assumes native integers are little endian

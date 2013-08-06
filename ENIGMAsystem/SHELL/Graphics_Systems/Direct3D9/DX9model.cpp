@@ -72,19 +72,22 @@ struct Primitive
   {
 	switch (type) {
 		case enigma_user::pr_trianglestrip:
-			return vertcount / 2;
+			return (vertcount - 3) + 1;
 			break;
 		case enigma_user::pr_trianglelist:
 			return vertcount / 3;
 			break;
 		case enigma_user::pr_trianglefan:
-			return vertcount;
+			return (vertcount - 3) + 1;
 			break;
 		case enigma_user::pr_linelist:
 			return vertcount / 2;
 			break;
 		case enigma_user::pr_linestrip:
-			return vertcount / 1;
+			return vertcount - 1;
+			break;
+		case enigma_user::pr_pointlist:
+			return vertcount;
 			break;
 	}
   }
@@ -94,18 +97,18 @@ struct CUSTOMVERTEX
 {
     float x, y, z;
     D3DCOLOR diffuse;
-	float nx, ny, nz;
+	//float nx, ny, nz;
     float u, v;
     CUSTOMVERTEX(){}
     CUSTOMVERTEX(float px, float py, float pz, float pnx, float pny, float pnz, D3DCOLOR pdiffuse, float pu, float pv)
     {
         x = px; y = py; z = pz;
         diffuse = pdiffuse;
-		nx = pnx; ny = pny; nz = pnz;
+		//nx = pnx; ny = pny; nz = pnz;
         u = pu; v = pv;
     }
 };
-#define CUSTOMFVF (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_NORMAL | D3DFVF_TEX1)
+#define CUSTOMFVF (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
 /* Mesh clearing has a memory leak */
 class Mesh
@@ -133,7 +136,7 @@ class Mesh
     unsigned int id = primitives.size();
     currentPrimitive = id;
     Primitive* newPrim = new Primitive(pt);
-    newPrim->vertstart = vertices.size() / 3;
+    newPrim->vertstart = vertices.size();
     newPrim->indexstart = indices.size();
     primitives.push_back(newPrim);
 
@@ -142,8 +145,8 @@ class Mesh
 
   Mesh(int vbot = enigma_user::vbo_static)
   {
-  	LPDIRECT3DVERTEXBUFFER9 v_buffer = NULL;    // the pointer to the vertex buffer
-	LPDIRECT3DINDEXBUFFER9 i_buffer = NULL;    // the pointer to the index buffer
+  	v_buffer = NULL;    // the pointer to the vertex buffer
+	i_buffer = NULL;    // the pointer to the index buffer
     vbotype = vbot;
     maxindice = 0;
     vbogenerated = false;
@@ -180,9 +183,8 @@ class Mesh
   {
 	CUSTOMVERTEX vert;
 	vert.x = x; vert.y = y; vert.z = z;
-	//vert.diffuse = D3DCOLOR_XRGB(__GETR(col), __GETG(col), __GETB(col));
-	vert.diffuse = 0xFFFFFFFF;
-	vert.nx = nx; vert.ny = ny; vert.nz = nz;
+	vert.diffuse = D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), alpha);
+	//vert.nx = nx; vert.ny = ny; vert.nz = nz;
 	vert.u = u; vert.v = v;
 
 	vertices.push_back(vert);
@@ -210,14 +212,16 @@ class Mesh
                            D3DPOOL_MANAGED,
                            &v_buffer,
                            NULL);
-						   
-	// create a index buffer interface called i_buffer
-	d3ddev->CreateIndexBuffer(indices.size() * sizeof(short),
+					
+	if (indices.size() > 0) {
+		// create a index buffer interface called i_buffer
+		d3ddev->CreateIndexBuffer(indices.size() * sizeof(short),
                           0,
                           D3DFMT_INDEX16,
                           D3DPOOL_MANAGED,
                           &i_buffer,
                           NULL);
+	}
   }
 
   void BufferData()
@@ -239,7 +243,7 @@ class Mesh
     ClearData();
   }
 
-  void BufferSubData(GLint offset)
+  void BufferSubData(unsigned offset)
   {
 	VOID* pVoid;    // a void pointer
     // lock v_buffer and load the vertices into it
@@ -282,9 +286,10 @@ class Mesh
 	// enable vertex array's for fast vertex processing
 	// select the vertex buffer to display
 	d3ddev->SetStreamSource(0, v_buffer, 0, sizeof(CUSTOMVERTEX));
-	d3ddev->SetIndices(i_buffer);
-	
-	d3ddev->SetTexture(0, get_texture(0));
+	d3ddev->SetFVF(CUSTOMFVF);
+	if (i_buffer != NULL) {
+	  d3ddev->SetIndices(i_buffer);
+	}
 
     for (unsigned int i = 0; i < primitives.size(); i++)
     {
@@ -454,19 +459,13 @@ void d3d_model_draw(const unsigned int id) // overload for no additional texture
     meshes[id]->Draw();
 }
 
+#include "../General/GSd3d.h"
+
 void d3d_model_draw(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload for no additional texture call's
 {
-	D3DXMATRIX matTranslate;    // a matrix to store the translation information
-
-	// build a matrix to move the model 12 units along the x-axis and 4 units along the y-axis
-	// store it to matTranslate
-	D3DXMatrixTranslation(&matTranslate, x, y, z);
-
-	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matTranslate);
-    //glTranslatef(x, y, z);
+	d3d_transform_add_translation(x, y, z);
     meshes[id]->Draw();
-    //glTranslatef(-x, -y, -z);
+	d3d_transform_add_translation(-x, -y, -z);
 }
 
 void d3d_model_draw(const unsigned int id, int texId)
@@ -501,27 +500,14 @@ void d3d_model_close(const unsigned int id)
   meshes[id]->Close();
 }
 
+#define c_white 0xFFFFFF
+
 void d3d_model_vertex(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z)
 {
-  meshes[id]->VertexVector(x, y, z, 0, 0, 0, 0, 0, 0, 1);
+  meshes[id]->VertexVector(x, y, z, 0, 0, 0, 0, 0, c_white, 1);
 }
 
-void d3d_model_normal(const unsigned int id, gs_scalar nx, gs_scalar ny, gs_scalar nz)
-{
-  meshes[id]->VertexVector(0, 0, 0, nx, ny, nz, 0, 0, 0, 1);
-}
-
-void d3d_model_texture(const unsigned int id, gs_scalar u, gs_scalar v)
-{
-  meshes[id]->VertexVector(0, 0, 0, 0, 0, 0, u, v, 0, 1);
-}
-
-void d3d_model_color(const unsigned int id, int col, double alpha)
-{
-  meshes[id]->VertexVector(0, 0, 0, 0, 0, 0, 0, 0, col, alpha);
-}
-
-void d3d_model_index(const unsigned int id, GLuint in)
+void d3d_model_index(const unsigned int id, unsigned in)
 {
   meshes[id]->VertexIndex(in);
 }
@@ -534,7 +520,7 @@ void d3d_model_vertex_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_
 
 void d3d_model_vertex_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar u, gs_scalar v)
 {
-  meshes[id]->VertexVector(x, y, z, 0, 0, 0, u, v, 0, 1); 
+  meshes[id]->VertexVector(x, y, z, 0, 0, 0, u, v, c_white, 1); 
 }
 
 void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar u, gs_scalar v, int col, double alpha)
@@ -545,7 +531,7 @@ void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scala
 
 void d3d_model_vertex_normal(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
-  meshes[id]->VertexVector(x, y, z, nx, ny, nz, 0, 0, 0, 1); 
+  meshes[id]->VertexVector(x, y, z, nx, ny, nz, 0, 0, c_white, 1); 
 }
 
 void d3d_model_vertex_normal_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha)
@@ -556,7 +542,7 @@ void d3d_model_vertex_normal_color(const unsigned int id, gs_scalar x, gs_scalar
 
 void d3d_model_vertex_normal_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar u, gs_scalar v)
 {
-  meshes[id]->VertexVector(x, y, z, nx, ny, nz, u, v, 0, 1); 
+  meshes[id]->VertexVector(x, y, z, nx, ny, nz, u, v, c_white, 1); 
 }
 
 void d3d_model_vertex_normal_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar u, gs_scalar v, int col, double alpha)
@@ -645,10 +631,9 @@ void d3d_model_cylinder(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_sc
             k++;
             for (int i = 0; i < steps*2; i+=2)
             {
-                d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
-                d3d_model_vertex_texture(id, v[i+3][0], v[i+3][1], v[i+3][2], t[i+2][0], t[i+2][1]);
-                d3d_model_vertex_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], t[i][0], t[i][1]);
-		d3d_model_normal(id, 0, 0, -1); d3d_model_normal(id, 0, 0, -1); d3d_model_normal(id, 0, 0, -1);
+                d3d_model_vertex_normal_texture(id, cx, cy, z1, 0, 0, -1, 0, vrep);
+                d3d_model_vertex_normal_texture(id, v[i+3][0], v[i+3][1], v[i+3][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
+                d3d_model_vertex_normal_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], 0, 0, -1, t[i][0], t[i][1]);
             }
 
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
@@ -656,10 +641,9 @@ void d3d_model_cylinder(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_sc
             k++;
             for (int i = 0; i < steps*2; i+=2)
             {
-                d3d_model_vertex_texture(id, cx, cy, z2, 0, vrep);
-                d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
-                d3d_model_vertex_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], t[i+2][0], t[i+2][1]);
-		d3d_model_normal(id, 0, 0, 1); d3d_model_normal(id, 0, 0, 1); d3d_model_normal(id, 0, 0, 1);
+                d3d_model_vertex_normal_texture(id, cx, cy, z2, 0, 0, -1, 0, vrep);
+                d3d_model_vertex_normal_texture(id, v[i][0], v[i][1], v[i][2], 0, 0, -1, t[i][0], t[i][1]);
+                d3d_model_vertex_normal_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
             }
         }
 }

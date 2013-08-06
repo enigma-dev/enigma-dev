@@ -15,18 +15,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-using std::string;
+#ifndef _SOUND_EMITTER__H
+#define _SOUND_EMITTER__H
 
-namespace enigma_user {
-  int screen_save(string filename);
-  inline int action_snapshot(string filename)
-  {
-      return screen_save(filename);
-  }
-  int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
-  void screen_redraw();
-  void screen_refresh();
-  void screen_init();
+#ifdef DEBUG_MODE
+#include "libEGMstd.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
+#endif
 
-}
+#include <vector>
+using std::vector;
+
+struct soundEmitter
+{
+  float emitPos[3];
+  float emitVel[3];
+  float falloff[3];
+  float pitch;
+  float volume;
+  vector<int> sound_tracks;
+  soundEmitter(): emitPos {0.0f,0.0f,0.0f}, emitVel {0.0f,0.0f,0.0f}, falloff{0.0f,0.0f,1.0f}, volume(1.0f) {}
+};
+
+extern vector<soundEmitter*> sound_emitters;
+#endif

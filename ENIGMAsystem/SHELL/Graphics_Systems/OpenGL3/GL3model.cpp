@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "GL3shapes.h"
 #include "../General/GSprimitives.h"
@@ -23,7 +24,9 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
-#include "../General/GLbinding.h"
+#include <stdio.h>
+
+#include "GL3binding.h"
 
 using namespace std;
 
@@ -39,6 +42,8 @@ using namespace std;
 
 #include <vector>
 using std::vector;
+
+unsigned get_texture(int texid);
 
 extern GLenum ptypes_by_id[16];
 namespace enigma {
@@ -529,21 +534,6 @@ void d3d_model_vertex(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar
   meshes[id]->ColorVector(col, alpha);
 }
 
-void d3d_model_normal(const unsigned int id, gs_scalar nx, gs_scalar ny, gs_scalar nz)
-{
-  meshes[id]->NormalVector(nx, ny, nz);
-}
-
-void d3d_model_texture(const unsigned int id, gs_scalar tx, gs_scalar ty)
-{
-  meshes[id]->TextureVector(tx, ty);
-}
-
-void d3d_model_color(const unsigned int id, int col, double alpha)
-{
-  meshes[id]->ColorVector(col, alpha);
-}
-
 void d3d_model_index(const unsigned int id, GLuint in)
 {
   meshes[id]->VertexIndex(in);
@@ -690,10 +680,9 @@ void d3d_model_cylinder(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_sc
             k++;
             for (int i = 0; i < steps*2; i+=2)
             {
-                d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
-                d3d_model_vertex_texture(id, v[i+3][0], v[i+3][1], v[i+3][2], t[i+2][0], t[i+2][1]);
-                d3d_model_vertex_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], t[i][0], t[i][1]);
-		d3d_model_normal(id, 0, 0, -1); d3d_model_normal(id, 0, 0, -1); d3d_model_normal(id, 0, 0, -1);
+                d3d_model_vertex_normal_texture(id, cx, cy, z1, 0, 0, -1, 0, vrep);
+                d3d_model_vertex_normal_texture(id, v[i+3][0], v[i+3][1], v[i+3][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
+                d3d_model_vertex_normal_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], 0, 0, -1, t[i][0], t[i][1]);
             }
 
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
@@ -701,10 +690,9 @@ void d3d_model_cylinder(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_sc
             k++;
             for (int i = 0; i < steps*2; i+=2)
             {
-                d3d_model_vertex_texture(id, cx, cy, z2, 0, vrep);
-                d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
-                d3d_model_vertex_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], t[i+2][0], t[i+2][1]);
-		d3d_model_normal(id, 0, 0, 1); d3d_model_normal(id, 0, 0, 1); d3d_model_normal(id, 0, 0, 1);
+                d3d_model_vertex_normal_texture(id, cx, cy, z2, 0, 0, -1, 0, vrep);
+                d3d_model_vertex_normal_texture(id, v[i][0], v[i][1], v[i][2], 0, 0, -1, t[i][0], t[i][1]);
+                d3d_model_vertex_normal_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
             }
         }
 }

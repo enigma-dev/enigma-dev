@@ -48,7 +48,7 @@ using namespace std;
 using namespace enigma;
 namespace enigma
 {
-    vector<float> globalVBO_data;
+    vector<gs_scalar> globalVBO_data;
     vector<unsigned int> globalVBO_indices;
     GLuint globalVBO; //The buffer itself
     unsigned int globalVBO_texture;
@@ -56,6 +56,7 @@ namespace enigma
     unsigned int globalVBO_verCount; //Number of vertices on this buffer
     unsigned int globalVBO_indCount; //Number of indices
     unsigned int globalVBO_maxBSize; //Maximum buffer size. Buffer will not be regenerated if the current buffer size is smaller than the maximum
+    unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 }
 
 namespace enigma_user {
@@ -93,7 +94,9 @@ static inline void draw_back()
 void draw_globalVBO()
 {
     if (globalVBO_verCount>0){
-        //printf("Got here - vertex size = %i, vari = %i, vertCount = %i, IndCount = %i\n", globalVBO_data.size(), globalVBO_datCount,globalVBO_verCount,globalVBO_indCount);
+        //int fbo;
+        //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+        //printf("RENDERING THIS - Verts = %i, inds = %i and fbo = %i, data size = %i, index size = %i\n",globalVBO_verCount,globalVBO_indCount,fbo,globalVBO_data.size(),globalVBO_indices.size() );
         glBindTexture(GL_TEXTURE_2D,enigma::bound_texture);
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -101,13 +104,12 @@ void draw_globalVBO()
 
         glBindBuffer(GL_ARRAY_BUFFER, globalVBO);
 
-        if (globalVBO_verCount>globalVBO_maxBSize) glBufferData(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(float), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
-        else glBufferSubData(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(float), &globalVBO_data[0]);
-        glVertexPointer( 2, GL_FLOAT, sizeof(float) * 8, NULL );
-        glTexCoordPointer( 2, GL_FLOAT, sizeof(float) * 8, (void*)(sizeof(float) * 2) );
-        glColorPointer( 4, GL_FLOAT, sizeof(float) * 8, (void*)(sizeof(float) * 4) );
+        if (globalVBO_verCount>globalVBO_maxBSize) glBufferData(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
+        else glBufferSubData(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
+        glVertexPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, NULL );
+        glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
+        glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
 
-        //glDrawArrays( GL_TRIANGLES, 0, globalVBO_data.size() / 7);
         glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
 
         glDisableClientState( GL_COLOR_ARRAY );
@@ -134,20 +136,11 @@ namespace enigma_user
 
 void screen_redraw()
 {
-    int FBO;
     if (!view_enabled)
     {
         glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
-        if (GLEW_EXT_framebuffer_object)
-        {
-            glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
-            glScalef(1, (FBO==0?-1:1), 1);
-        }
-        else
-        {
-            glScalef(1, -1, 1);
-        }
+        glScalef(1, (bound_framebuffer==0?-1:1), 1);
         glOrtho(0, room_width, 0, room_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
@@ -190,6 +183,7 @@ void screen_redraw()
             (enigma::particles_impl->draw_particlesystems)(high, low);
         }
         bool stop_loop = false;
+
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
             if (dit->second.tiles.size())
@@ -305,15 +299,8 @@ void screen_redraw()
 
                 glViewport(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc]);
                 glLoadIdentity();
-                if (GLEW_EXT_framebuffer_object)
-                {
-                    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
-                    glScalef(1, (FBO==0?-1:1), 1);
-                }
-                else
-                {
-                    glScalef(1, -1, 1);
-                }
+                glScalef(1, (bound_framebuffer==0?-1:1), 1);
+
                 glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
                 glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                 glMultMatrixd(transformation_matrix);

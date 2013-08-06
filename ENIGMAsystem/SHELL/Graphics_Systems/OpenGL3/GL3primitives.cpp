@@ -19,7 +19,9 @@
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
 #include "GL3model.h"
-#include "../General/GLbinding.h"
+#include "GL3binding.h"
+
+#include <stdio.h>
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
@@ -39,8 +41,8 @@ int __currentpdepth;
 
 GLenum ptypes_by_id[16] = {
   GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES,
-  GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_LINE_LOOP, GL_QUADS,
-  GL_QUAD_STRIP, GL_POLYGON,
+  GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_POINTS, GL_POINTS,
+  GL_POINTS, GL_POINTS,
 
   //These are padding.
   GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS
@@ -54,6 +56,8 @@ int prim_draw_model = -1;
 int prim_draw_texture = -1;
 int prim_d3d_model = -1;
 int prim_d3d_texture = -1;
+
+unsigned get_texture(int texid);
 
 namespace enigma_user
 {
@@ -80,9 +84,7 @@ int draw_primitive_begin_texture(int kind,unsigned tex)
 
 int draw_vertex(gs_scalar x, gs_scalar y)
 {
-  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
-  float alpha = (float)enigma::currentcolor[3] / 255.0;
-  d3d_model_vertex_color(prim_draw_model, x, y, 0, col, alpha);
+  d3d_model_vertex(prim_draw_model, x, y, 0);
   return 0;
 }
 
@@ -112,6 +114,7 @@ int draw_primitive_end()
     texture_use(get_texture(prim_draw_texture));
   } else {
     texture_reset();
+    printf("TEX RESET\n");
   }
   prim_draw_texture = -1;
   d3d_model_draw(prim_draw_model);
@@ -140,11 +143,11 @@ void d3d_primitive_begin_texture(int kind, int texId)
 
 void d3d_primitive_end()
 {
-  if (prim_d3d_texture != -1) {
+  /*if (prim_d3d_texture != -1) {
     texture_use(get_texture(prim_d3d_texture));
   } else {
     texture_reset();
-  }
+  }*/
   prim_d3d_texture = -1;
   d3d_model_draw(prim_d3d_model);
   d3d_model_clear(prim_d3d_model);
@@ -152,32 +155,15 @@ void d3d_primitive_end()
 
 void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
 {
-int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
   float alpha = (float)enigma::currentcolor[3] / 255.0;
   d3d_model_vertex_color(prim_d3d_model, x, y, z, col, alpha);
-}
-
-//Are these functions really needed? They just break stuff!!!
-void d3d_normal(gs_scalar nx, gs_scalar ny, gs_scalar nz)
-{
-  d3d_model_normal(prim_d3d_model, nx, ny, nz);
-}
-
-void d3d_texture(gs_scalar tx, gs_scalar ty)
-{
-  d3d_model_texture(prim_d3d_model, tx, ty);
-}
-
-void d3d_color(int col, double alpha)
-{
-  d3d_model_color(prim_d3d_model, col, alpha);
 }
 
 void d3d_index(int in)
 {
   d3d_model_index(prim_d3d_model, in);
 }
-//Function questioning ends here
 
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha)
 {
