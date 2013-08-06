@@ -26,6 +26,7 @@ namespace enigma_user {
   }
   int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
   void screen_redraw();
+  void screen_refresh();
   void screen_init();
 
 }

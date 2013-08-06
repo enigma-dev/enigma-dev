@@ -39,7 +39,6 @@ namespace enigma
 {
     extern HWND hWnd;
     extern HDC window_hDC;
-
     void windowsystem_write_exename(char* exenamehere)
     {
       GetModuleFileName(NULL, exenamehere, 1024);
@@ -48,11 +47,6 @@ namespace enigma
 
 namespace enigma_user {
 extern var room_caption;
-void screen_refresh() {
-    window_set_caption(room_caption);
-    enigma::update_mouse_variables();
-    SwapBuffers(enigma::window_hDC);
-}
 }
 
 void enigma_catchmouse_backend(bool x) {
