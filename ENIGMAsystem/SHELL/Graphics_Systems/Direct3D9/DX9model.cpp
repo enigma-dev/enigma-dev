@@ -72,19 +72,22 @@ struct Primitive
   {
 	switch (type) {
 		case enigma_user::pr_trianglestrip:
-			return vertcount / 2;
+			return (vertcount - 3) + 1;
 			break;
 		case enigma_user::pr_trianglelist:
 			return vertcount / 3;
 			break;
 		case enigma_user::pr_trianglefan:
-			return vertcount;
+			return (vertcount - 3) + 1;
 			break;
 		case enigma_user::pr_linelist:
 			return vertcount / 2;
 			break;
 		case enigma_user::pr_linestrip:
-			return vertcount / 1;
+			return vertcount - 1;
+			break;
+		case enigma_user::pr_pointlist:
+			return vertcount;
 			break;
 	}
   }
@@ -93,19 +96,19 @@ struct Primitive
 struct CUSTOMVERTEX
 {
     float x, y, z;
-    D3DCOLOR diffuse;
-	float nx, ny, nz;
+   // D3DCOLOR diffuse;
+	//float nx, ny, nz;
     float u, v;
     CUSTOMVERTEX(){}
     CUSTOMVERTEX(float px, float py, float pz, float pnx, float pny, float pnz, D3DCOLOR pdiffuse, float pu, float pv)
     {
         x = px; y = py; z = pz;
-        diffuse = pdiffuse;
-		nx = pnx; ny = pny; nz = pnz;
+        //diffuse = pdiffuse;
+		//nx = pnx; ny = pny; nz = pnz;
         u = pu; v = pv;
     }
 };
-#define CUSTOMFVF (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_NORMAL | D3DFVF_TEX1)
+#define CUSTOMFVF (D3DFVF_XYZ | D3DFVF_TEX1)
 
 /* Mesh clearing has a memory leak */
 class Mesh
@@ -133,7 +136,7 @@ class Mesh
     unsigned int id = primitives.size();
     currentPrimitive = id;
     Primitive* newPrim = new Primitive(pt);
-    newPrim->vertstart = vertices.size() / 3;
+    newPrim->vertstart = vertices.size();
     newPrim->indexstart = indices.size();
     primitives.push_back(newPrim);
 
@@ -142,8 +145,8 @@ class Mesh
 
   Mesh(int vbot = enigma_user::vbo_static)
   {
-  	LPDIRECT3DVERTEXBUFFER9 v_buffer = NULL;    // the pointer to the vertex buffer
-	LPDIRECT3DINDEXBUFFER9 i_buffer = NULL;    // the pointer to the index buffer
+  	v_buffer = NULL;    // the pointer to the vertex buffer
+	i_buffer = NULL;    // the pointer to the index buffer
     vbotype = vbot;
     maxindice = 0;
     vbogenerated = false;
@@ -180,9 +183,8 @@ class Mesh
   {
 	CUSTOMVERTEX vert;
 	vert.x = x; vert.y = y; vert.z = z;
-	//vert.diffuse = D3DCOLOR_XRGB(__GETR(col), __GETG(col), __GETB(col));
-	vert.diffuse = 0xFFFFFFFF;
-	vert.nx = nx; vert.ny = ny; vert.nz = nz;
+	//vert.diffuse = 0xFFFFFFFF;
+	//vert.nx = nx; vert.ny = ny; vert.nz = nz;
 	vert.u = u; vert.v = v;
 
 	vertices.push_back(vert);
@@ -210,14 +212,16 @@ class Mesh
                            D3DPOOL_MANAGED,
                            &v_buffer,
                            NULL);
-						   
-	// create a index buffer interface called i_buffer
-	d3ddev->CreateIndexBuffer(indices.size() * sizeof(short),
+					
+	if (indices.size() > 0) {
+		// create a index buffer interface called i_buffer
+		d3ddev->CreateIndexBuffer(indices.size() * sizeof(short),
                           0,
                           D3DFMT_INDEX16,
                           D3DPOOL_MANAGED,
                           &i_buffer,
                           NULL);
+	}
   }
 
   void BufferData()
@@ -282,9 +286,10 @@ class Mesh
 	// enable vertex array's for fast vertex processing
 	// select the vertex buffer to display
 	d3ddev->SetStreamSource(0, v_buffer, 0, sizeof(CUSTOMVERTEX));
-	d3ddev->SetIndices(i_buffer);
-	
-	d3ddev->SetTexture(0, get_texture(0));
+	d3ddev->SetFVF(CUSTOMFVF);
+	if (i_buffer != NULL) {
+	  d3ddev->SetIndices(i_buffer);
+	}
 
     for (unsigned int i = 0; i < primitives.size(); i++)
     {
