@@ -38,6 +38,8 @@ void sound_pause_all();
 bool sound_resume(int sound);
 void sound_resume_all();
 
+float sound_get_pan(int sound);
+float sound_get_volume(int sound);
 float sound_get_length(int sound);
 float sound_get_position(int sound);
 void sound_seek(int sound, float position);
