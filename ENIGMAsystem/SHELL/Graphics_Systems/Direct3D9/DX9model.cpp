@@ -454,19 +454,13 @@ void d3d_model_draw(const unsigned int id) // overload for no additional texture
     meshes[id]->Draw();
 }
 
+#include "../General/GSd3d.h"
+
 void d3d_model_draw(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload for no additional texture call's
 {
-	D3DXMATRIX matTranslate;    // a matrix to store the translation information
-
-	// build a matrix to move the model 12 units along the x-axis and 4 units along the y-axis
-	// store it to matTranslate
-	D3DXMatrixTranslation(&matTranslate, x, y, z);
-
-	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matTranslate);
-    //glTranslatef(x, y, z);
+	d3d_transform_add_translation(x, y, z);
     meshes[id]->Draw();
-    //glTranslatef(-x, -y, -z);
+	d3d_transform_add_translation(-x, -y, -z);
 }
 
 void d3d_model_draw(const unsigned int id, int texId)
