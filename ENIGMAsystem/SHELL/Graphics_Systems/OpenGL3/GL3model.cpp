@@ -24,7 +24,9 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
-#include "../General/GLbinding.h"
+#include <stdio.h>
+
+#include "GL3binding.h"
 
 using namespace std;
 
@@ -40,6 +42,8 @@ using namespace std;
 
 #include <vector>
 using std::vector;
+
+unsigned get_texture(int texid);
 
 extern GLenum ptypes_by_id[16];
 namespace enigma {

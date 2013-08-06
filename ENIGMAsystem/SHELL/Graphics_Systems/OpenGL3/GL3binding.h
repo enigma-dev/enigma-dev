@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef GL3BINDING_H
+
 #include <vector>
 using std::vector;
 
@@ -24,8 +26,10 @@ using std::vector;
    extern vector<float> globalVBO_data;
   }
   void draw_globalVBO();
-  #define texture_reset() if(enigma::bound_texture) draw_globalVBO(), enigma::bound_texture = 0;
+  #define texture_reset() if(enigma::bound_texture) draw_globalVBO(), enigma::bound_texture = 0, glBindTexture(GL_TEXTURE_2D,enigma::bound_texture);
   //The (now removed) enigma::globalVBO_data.size()>enigma::globalVBO_data.max_size()-100 is used to check if we don't fill it over top and segfault
   //This only happens when drawing over 5000000 (5 million) sprites at once. When texture atlas is implemented there is a greater chance of this happening
   #define texture_use(texid) if (enigma::bound_texture != unsigned(texid)) \
     draw_globalVBO(), enigma::bound_texture = texid;
+
+#endif
