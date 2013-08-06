@@ -18,9 +18,6 @@
 #include "Universal_System/scalar.h"
 
 #include <string>
-#include "OpenGLHeaders.h"
-
-extern GLenum vbotypes[];
 
 namespace enigma_user {
 
@@ -46,10 +43,7 @@ enum {
   void d3d_model_primitive_begin(const unsigned int id, int kind);
   void d3d_model_primitive_end(const unsigned int id);
   void d3d_model_vertex(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z);
-  void d3d_model_normal(const unsigned int id, gs_scalar nx, gs_scalar ny, gs_scalar nz);
-  void d3d_model_texture(const unsigned int id, gs_scalar tx, gs_scalar ty);
-  void d3d_model_color(const unsigned int id, int col, double alpha);
-  void d3d_model_index(const unsigned int id, GLuint in);
+  void d3d_model_index(const unsigned int id, unsigned in);
   void d3d_model_vertex_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha);
   void d3d_model_vertex_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty);
   void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha);

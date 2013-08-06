@@ -25,31 +25,36 @@ namespace enigma {
     void d3d_light_update_positions();
 }
 
-// ***** RENDER STATE MODE CONSTANTS *****
+// ***** RENDER STATE CONSTANTS *****
 namespace enigma_user {
 enum {
   rs_fill,
   rs_line,
   rs_point,
+  
   rs_front,
   rs_back,
   rs_front_back,
+  
   rs_clockwise,
   rs_counterclockwise,
+  
   rs_nicest,
   rs_fastest,
   rs_dontcare,
+  
   rs_exp,
   rs_exp2, 
   rs_linear,
-  rs_never, 	// Always False
-  rs_less, 	// source Z < depth Z
-  rs_equal,	// source Z = depth Z
-  rs_lequal, 	// source Z <= depth Z
-  rs_greater,	// source Z > depth Z
-  rs_notequal, 	// source Z != depth Z
-  rs_gequal, 	// source Z >= depth Z
-  rs_always     // Always True
+  
+  rs_never, 	// Always False            D3DCMP_NEVER
+  rs_less, 	    // source Z < depth Z      D3DCMP_LESS
+  rs_equal,	    // source Z = depth Z      D3DCMP_EQUAL
+  rs_lequal, 	// source Z <= depth Z     D3DCMP_LESSEQUAL
+  rs_greater,	// source Z > depth Z      D3DCMP_GREATER
+  rs_notequal, 	// source Z != depth Z     D3DCMP_NOTEQUAL
+  rs_gequal, 	// source Z >= depth Z     D3DCMP_GREATEREQUAL
+  rs_always     // Always True             D3DCMP_ALWAYS
 };
 }
 

@@ -18,6 +18,7 @@
 #ifndef ENIGMA_PS_PARTICLE_BRIDGE_OPENGL3_H
 #define ENIGMA_PS_PARTICLE_BRIDGE_OPENGL3_H
 
+#include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GLbinding.h"
 #include "Graphics_Systems/General/GStextures.h"

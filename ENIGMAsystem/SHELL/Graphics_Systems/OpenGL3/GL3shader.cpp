@@ -25,16 +25,12 @@
 #include <vector>
 using std::vector;
 
-#include <iostream>
-#include <fstream>
-using namespace std;
-
 GLenum shadertypes[5] = {   
   GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
 }; 
 
 struct Shader{
-  const char* log;
+  string log;
   GLuint shader;
   Shader(int type) 
   {
@@ -67,7 +63,7 @@ vector<ShaderProgram*> shaderprograms(0);
 namespace enigma_user
 {
 
-int shader_create(int type)
+int glsl_shader_create(int type)
 {
   unsigned int id = shaders.size();
   shaders.push_back(new Shader(type));
@@ -91,10 +87,10 @@ unsigned long getFileLength(ifstream& file)
 namespace enigma_user
 {
 
-int shader_load(int id, const char* fname)
+int glsl_shader_load(int id, string fname)
 {
   ifstream file;
-  file.open(fname, ios::in); // opens as ASCII
+  file.open(fname.c_str(), ios::in); // opens as ASCII
   if (!file.is_open()) return 1; // Error: File could not be oppenned
 
   unsigned long len = getFileLength(file);
@@ -121,7 +117,7 @@ int shader_load(int id, const char* fname)
   return 3; // No Error
 }
 
-bool shader_compile(int id)
+bool glsl_shader_compile(int id)
 {
   glCompileShader(shaders[id]->shader);
 
@@ -135,7 +131,7 @@ bool shader_compile(int id)
     GLchar* compiler_log = (GLchar*)malloc(blen);
 
     glGetInfoLogARB(shaders[id]->shader, blen, &slen, compiler_log);
-    shaders[id]->log = compiler_log;
+    shaders[id]->log = (string)compiler_log;
   } else {
     shaders[id]->log = "Shader compile log empty";
   }
@@ -150,24 +146,24 @@ bool shader_compile(int id)
   }
 }
 
-const char* shader_compile_output(int id)
+string glsl_shader_get_infolog(int id)
 {
   return shaders[id]->log;
 }
 
-void shader_free(int id)
+void glsl_shader_free(int id)
 {
   delete shaders[id];
 }
 
-int shader_program_create()
+int glsl_program_create()
 {
   unsigned int id = shaderprograms.size();
   shaderprograms.push_back(new ShaderProgram());
   return id;
 }
 
-bool shader_program_link(int id)
+bool glsl_program_link(int id)
 {
 //glBindFragDataLocation(shaderprograms[id]->shaderprogram, 0, "fragColor");
 
@@ -182,7 +178,7 @@ bool shader_program_link(int id)
   }
 }
 
-bool shader_program_validate(int id)
+bool glsl_program_validate(int id)
 {
   glValidateProgram(shaderprograms[id]->shaderprogram);
   GLint validated;
@@ -195,29 +191,81 @@ bool shader_program_validate(int id)
   }
 }
 
-void shader_program_attach(int id, int sid)
+void glsl_program_attach(int id, int sid)
 {
   glAttachShader(shaderprograms[id]->shaderprogram, shaders[sid]->shader);
 }
 
-void shader_program_detach(int id, int sid)
+void glsl_program_detach(int id, int sid)
 {
   glDetachShader(shaderprograms[id]->shaderprogram, shaders[sid]->shader);
 }
 
-void shader_program_use(int id)
+void glsl_program_use(int id)
 {
   glUseProgram(shaderprograms[id]->shaderprogram);
 }
 
-void shader_program_reset()
+void glsl_program_reset()
 {
   glUseProgram(0);
 }
 
-void shader_program_free(int id)
+void glsl_program_free(int id)
 {
   delete shaderprograms[id];
+}
+
+int glsl_get_uniform_location(unsigned program, string name) {
+	return glGetUniformLocation(shaderprograms[program]->shaderprogram, name.c_str());
+}
+
+void glsl_uniformf(int location, float v0) {
+	glUniform1f(location, v0);
+}
+
+void glsl_uniformf(int location, float v0, float v1) {
+	glUniform2f(location, v0, v1);
+}
+
+void glsl_uniformf(int location, float v0, float v1, float v2) {
+	glUniform3f(location, v0, v1, v2);
+}
+
+void glsl_uniformf(int location, float v0, float v1, float v2, float v3) {
+	glUniform4f(location, v0, v1, v2, v3);
+}
+
+void glsl_uniformi(int location, int v0) {
+	glUniform1i(location, v0);
+}
+
+void glsl_uniformi(int location, int v0, int v1) {
+	glUniform2i(location, v0, v1);
+}
+
+void glsl_uniformi(int location, int v0, int v1, int v2) {
+	glUniform3i(location, v0, v1, v2);
+}
+
+void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
+	glUniform4i(location, v0, v1, v2, v3);
+}
+
+void glsl_uniformui(int location, unsigned v0) {
+	glUniform1ui(location, v0);
+}
+
+void glsl_uniformui(int location, unsigned v0, unsigned v1) {
+	glUniform2ui(location, v0, v1);
+}
+
+void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
+	glUniform3ui(location, v0, v1, v2);
+}
+
+void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3) {
+	glUniform4ui(location, v0, v1, v2, v3);
 }
 
 }

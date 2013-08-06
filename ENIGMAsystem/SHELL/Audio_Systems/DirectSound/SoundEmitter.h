@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,26 +15,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DX9SHADER__H
-#define _DX9SHADER__H
+#ifndef _SOUND_EMITTER__H
+#define _SOUND_EMITTER__H
 
-namespace enigma_user
+#ifdef DEBUG_MODE
+#include "libEGMstd.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
+#endif
+
+#include <vector>
+using std::vector;
+
+struct soundEmitter
 {
-
-enum {
-  sh_unknown = 0,
-  sh_vertex = 1,
-  sh_pixel = 2
+  float emitPos[3];
+  float emitVel[3];
+  float falloff[3];
+  float pitch;
+  float volume;
+  vector<int> sound_tracks;
+  soundEmitter(): emitPos {0.0f,0.0f,0.0f}, emitVel {0.0f,0.0f,0.0f}, falloff{0.0f,0.0f,1.0f}, volume(1.0f) {}
 };
 
-int hlsl_shader_create(int type);
-int hlsl_shader_load(int id, string fname);
-void hlsl_shader_set_constantf(int id, unsigned start, const float* data, unsigned count);
-void hlsl_shader_set_vector(int id, string name, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar w);
-void hlsl_shader_use(int id);
-void hlsl_shader_reset();
-void hlsl_shader_free(int id);
-
-}
-
+extern vector<soundEmitter*> sound_emitters;
 #endif
