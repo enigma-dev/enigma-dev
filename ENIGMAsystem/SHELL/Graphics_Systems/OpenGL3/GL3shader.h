@@ -18,6 +18,10 @@
 #ifndef _GLSHADER__H
 #define _GLSHADER__H
 
+#include <iostream>
+#include <fstream>
+using namespace std;
+
 namespace enigma_user
 {
 
@@ -29,21 +33,36 @@ enum {
   sh_fragment = 4
 };
 
-int shader_create(int type);
-int shader_load(int id, const char* fname);
-bool shader_compile(int id);
-const char* shader_compile_output(int id);
-void shader_free(int id);
+int glsl_shader_create(int type);
+int glsl_shader_load(int id, string fname);
+bool glsl_shader_compile(int id);
+string glsl_shader_get_infolog(int id);
+void glsl_shader_free(int id);
 
-int shader_program_create();
-bool shader_program_link(int id);
-bool shader_program_validate(int id);
-void shader_program_attach(int id, int sid);
-void shader_program_detach(int id, int sid);
-void shader_program_bind_frag_data(int id, const char* name);
-void shader_program_use(int id);
-void shader_program_reset();
-void shader_program_free(int id);
+int glsl_program_create();
+bool glsl_program_link(int id);
+bool glsl_program_validate(int id);
+void glsl_program_attach(int id, int sid);
+void glsl_program_detach(int id, int sid);
+void glsl_program_bind_frag_data(int id, string name);
+void glsl_program_use(int id);
+void glsl_program_reset();
+void glsl_program_free(int id);
+
+int glsl_get_uniform_location(unsigned program, string name);
+
+void glsl_uniformf(int location, float v0);
+void glsl_uniformf(int location, float v0, float v1);
+void glsl_uniformf(int location, float v0, float v1, float v2);
+void glsl_uniformf(int location, float v0, float v1, float v2, float v3);
+void glsl_uniformi(int location, int v0);
+void glsl_uniformi(int location, int v0, int v1);
+void glsl_uniformi(int location, int v0, int v1, int v2);
+void glsl_uniformi(int location, int v0, int v1, int v2, int v3);
+void glsl_uniformui(int location, unsigned v0);
+void glsl_uniformui(int location, unsigned v0, unsigned v1);
+void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2);
+void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3);
 
 }
 

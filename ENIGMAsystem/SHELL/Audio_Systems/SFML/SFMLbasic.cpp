@@ -75,12 +75,12 @@ class CustomSoundStream: public sf::SoundStream {
 };
 
 struct PlayableSound {
-        virtual ~PlayableSound() {
+    virtual ~PlayableSound() {
 
-        }
+    }
 	virtual bool play() = 0;
 	virtual bool pause() = 0;
-        virtual void stop() = 0;
+    virtual void stop() = 0;
 	virtual sf::SoundSource::Status getStatus() = 0;
 	virtual sf::Time getPlayingOffset() = 0;
 	virtual sf::Time getDuration() = 0;
@@ -95,7 +95,7 @@ struct PlayableSound {
 	virtual float getY() = 0;
 	virtual float getZ() = 0;
 	virtual bool setLoop(bool loop) = 0;
-        virtual void setVolume(float volume) = 0;
+    virtual void setVolume(float volume) = 0;
 	virtual void setPlayingOffset(sf::Time offset) = 0;
 	virtual void setPosition(float x, float y, float z) = 0;
 	virtual void setPitch(float pitch) = 0;

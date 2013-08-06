@@ -63,6 +63,15 @@ void draw_set_color(int color)
 	enigma::currentcolor[0] = __GETR(color);
 	enigma::currentcolor[1] = __GETG(color);
 	enigma::currentcolor[2] = __GETB(color);
+	D3DMATERIAL9 mat;
+	//zero memory (NEW)
+	ZeroMemory(&mat, sizeof(mat));
+	//diffuse color (NEW)
+	mat.Diffuse.r = 1.0f;
+	mat.Diffuse.g = 0.0f;
+	mat.Diffuse.b = 0.0f;
+	mat.Diffuse.a = 0;
+	d3ddev->SetMaterial(&mat);
 }
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)

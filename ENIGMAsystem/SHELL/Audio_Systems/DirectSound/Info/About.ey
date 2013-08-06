@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: DirectSound
+Identifier: DirectSound
+Description: Play sounds using DirectSound, which is part of the DirectX runtime, is included with the MinGW compiler.
+Author: Robert B. Colton
+
+Depends:
+	Build-platforms: Windows
+Represents:
+	Build-platforms: None
