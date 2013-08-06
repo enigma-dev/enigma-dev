@@ -626,7 +626,7 @@ void d3d_light_shininess(int facemode, int shine)
 
 void d3d_light_define_ambient(int col)
 {
-	//d3ddev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(__GETR(col), __GETG(col), __GETB(col)));  
+	d3ddev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), 1));  
 }
 
 bool d3d_light_enable(int id, bool enable)
