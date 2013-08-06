@@ -96,19 +96,19 @@ struct Primitive
 struct CUSTOMVERTEX
 {
     float x, y, z;
-   // D3DCOLOR diffuse;
+    D3DCOLOR diffuse;
 	//float nx, ny, nz;
     float u, v;
     CUSTOMVERTEX(){}
     CUSTOMVERTEX(float px, float py, float pz, float pnx, float pny, float pnz, D3DCOLOR pdiffuse, float pu, float pv)
     {
         x = px; y = py; z = pz;
-        //diffuse = pdiffuse;
+        diffuse = pdiffuse;
 		//nx = pnx; ny = pny; nz = pnz;
         u = pu; v = pv;
     }
 };
-#define CUSTOMFVF (D3DFVF_XYZ | D3DFVF_TEX1)
+#define CUSTOMFVF (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
 /* Mesh clearing has a memory leak */
 class Mesh
@@ -183,7 +183,7 @@ class Mesh
   {
 	CUSTOMVERTEX vert;
 	vert.x = x; vert.y = y; vert.z = z;
-	//vert.diffuse = 0xFFFFFFFF;
+	vert.diffuse = D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), alpha);
 	//vert.nx = nx; vert.ny = ny; vert.nz = nz;
 	vert.u = u; vert.v = v;
 
@@ -500,19 +500,21 @@ void d3d_model_close(const unsigned int id)
   meshes[id]->Close();
 }
 
+#define c_white 0xFFFFFF
+
 void d3d_model_vertex(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z)
 {
-  meshes[id]->VertexVector(x, y, z, 0, 0, 0, 0, 0, 0, 1);
+  meshes[id]->VertexVector(x, y, z, 0, 0, 0, 0, 0, c_white, 1);
 }
 
 void d3d_model_normal(const unsigned int id, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
-  meshes[id]->VertexVector(0, 0, 0, nx, ny, nz, 0, 0, 0, 1);
+  meshes[id]->VertexVector(0, 0, 0, nx, ny, nz, 0, 0, c_white, 1);
 }
 
 void d3d_model_texture(const unsigned int id, gs_scalar u, gs_scalar v)
 {
-  meshes[id]->VertexVector(0, 0, 0, 0, 0, 0, u, v, 0, 1);
+  meshes[id]->VertexVector(0, 0, 0, 0, 0, 0, u, v, c_white, 1);
 }
 
 void d3d_model_color(const unsigned int id, int col, double alpha)
@@ -533,7 +535,7 @@ void d3d_model_vertex_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_
 
 void d3d_model_vertex_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar u, gs_scalar v)
 {
-  meshes[id]->VertexVector(x, y, z, 0, 0, 0, u, v, 0, 1); 
+  meshes[id]->VertexVector(x, y, z, 0, 0, 0, u, v, c_white, 1); 
 }
 
 void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar u, gs_scalar v, int col, double alpha)
@@ -544,7 +546,7 @@ void d3d_model_vertex_texture_color(const unsigned int id, gs_scalar x, gs_scala
 
 void d3d_model_vertex_normal(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
-  meshes[id]->VertexVector(x, y, z, nx, ny, nz, 0, 0, 0, 1); 
+  meshes[id]->VertexVector(x, y, z, nx, ny, nz, 0, 0, c_white, 1); 
 }
 
 void d3d_model_vertex_normal_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha)
@@ -555,7 +557,7 @@ void d3d_model_vertex_normal_color(const unsigned int id, gs_scalar x, gs_scalar
 
 void d3d_model_vertex_normal_texture(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar u, gs_scalar v)
 {
-  meshes[id]->VertexVector(x, y, z, nx, ny, nz, u, v, 0, 1); 
+  meshes[id]->VertexVector(x, y, z, nx, ny, nz, u, v, c_white, 1); 
 }
 
 void d3d_model_vertex_normal_texture_color(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar u, gs_scalar v, int col, double alpha)

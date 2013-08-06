@@ -42,7 +42,7 @@ void draw_unbind_all() {
 
 void draw_clear_alpha(int col, float alpha)
 {
-	d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), alpha), 1.0f, 0);
+	d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), (char)alpha * 255), 1.0f, 0);
 }
 
 void draw_clear(int col)
