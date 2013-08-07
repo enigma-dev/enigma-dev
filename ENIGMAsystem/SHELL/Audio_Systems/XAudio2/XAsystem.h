@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,46 +15,24 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// We don't want to load ALURE from a DLL. Would be kind of a waste.
-#define ALURE_STATIC_LIBRARY 1
-
-#ifndef _AL_SYSTEM__H
-#define _AL_SYSTEM__H
+#ifndef _XA_SYSTEM__H
+#define _XA_SYSTEM__H
 #include <stddef.h>
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
-
 extern int falloff_model;
-extern bool load_al_dll();
 extern size_t channel_num;
 
-extern ALfloat listenerPos[];
-extern ALfloat listenerVel[];
-extern ALfloat listenerOri[];
+extern float listenerPos[];
+extern float listenerVel[];
+extern float listenerOri[];
 
 #include "SoundResource.h"
 
 namespace enigma { 
-  extern size_t sound_idmax;
 
   int get_free_channel(double priority);
 
-  #ifdef DEBUG_MODE
-    #define get_sound(snd,id,failure)\
-      if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {\
-        show_error("Sound " + toString(id) + " does not exist", false);\
-        return failure;\
-      } SoundResource *const snd = sound_resources[id];
-  #else
-    #define get_sound(snd,id,failure)\
-      SoundResource *const snd = sound_resources[id];
-  #endif
-
-  void eos_callback(void *soundID, ALuint src);
+  void eos_callback(void *soundID, unsigned src);
   int audiosystem_initialize();
   SoundResource* sound_new_with_source();
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize);
