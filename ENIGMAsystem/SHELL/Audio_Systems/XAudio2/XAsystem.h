@@ -15,22 +15,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DS_SYSTEM__H
-#define _DS_SYSTEM__H
-
+#ifndef _XA_SYSTEM__H
+#define _XA_SYSTEM__H
 #include <stddef.h>
-#include <windows.h>
-#include <mmsystem.h>
-#include <dsound.h>
 
-extern IDirectSoundBuffer* primaryBuffer;
 extern int falloff_model;
 extern size_t channel_num;
 
 extern float listenerPos[];
 extern float listenerVel[];
 extern float listenerOri[];
-	
+
 namespace enigma { 
 
   enum load_state {
@@ -41,7 +36,6 @@ namespace enigma {
   };
   struct sound
   {
-    IDirectSoundBuffer* soundBuffer;
     unsigned buf[3]; // The buffer-id of the sound data
     void (*cleanup)(void *userdata); // optional cleanup callback for streams
     void *userdata; // optional userdata for streams
