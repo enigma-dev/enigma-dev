@@ -18,8 +18,30 @@
 #include <stdio.h>
 
 #include "DSsystem.h"
-#include "SoundInstance.h"
-#include "SoundEmitter.h"
+
+#pragma comment(lib, "dsound.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "winmm.lib")
+	struct WaveHeaderType
+	{
+		char chunkId[4];
+		unsigned long chunkSize;
+		char format[4];
+		char subChunkId[4];
+		unsigned long subChunkSize;
+		unsigned short audioFormat;
+		unsigned short numChannels;
+		unsigned long sampleRate;
+		unsigned long bytesPerSecond;
+		unsigned short blockAlign;
+		unsigned short bitsPerSample;
+		char dataChunkId[4];
+		unsigned long dataSize;
+	};
+	
+IDirectSound8* dsound;
+
+const GUID GUID_NULL = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } }; 
 
 #include <time.h>
 clock_t starttime;
@@ -33,10 +55,12 @@ float listenerPos[] = {0.0f,0.0f,0.0f};
 float listenerVel[] = {0.0f,0.0f,0.0f};
 float listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 
-// first one is reserved for music
-vector<sound_instance*> sound_sources(1);
-vector<soundEmitter*> sound_emitters(0);
+#include <string>
+using std::string;
 
+#include "Platforms/Win32/WINDOWSmain.h"
+IDirectSoundBuffer* primaryBuffer;
+	
 namespace enigma {
 
   int get_free_channel(double priority)
@@ -55,16 +79,134 @@ namespace enigma {
 
   int audiosystem_initialize()
   {
+	HRESULT result;
+	DSBUFFERDESC bufferDesc;
+ 
+	// Initialize the direct sound interface pointer for the default sound device.
+	result = DirectSoundCreate8(NULL, &dsound, NULL);
+	if(FAILED(result))
+	{
+		MessageBox(NULL, "Failed to create DirectSound8 object.", "Error", MB_OK);
+		return false;
+	}
+ 
+	// Set the cooperative level to priority so the format of the primary sound buffer can be modified.
+	result = dsound->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
+	if(FAILED(result))
+	{
+		MessageBox(NULL, "Failed to set the cooperative level of the Window handle.", "Error", MB_OK);
+		return false;
+	}
+	
+	// Setup the primary buffer description.
+	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
+	bufferDesc.dwFlags = DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRLVOLUME;
+	bufferDesc.dwBufferBytes = 0;
+	bufferDesc.dwReserved = 0;
+	bufferDesc.lpwfxFormat = NULL;
+	bufferDesc.guid3DAlgorithm = GUID_NULL;
+	dsound->CreateSoundBuffer(&bufferDesc, &primaryBuffer, NULL);
+	
+	// Setup the format of the primary sound bufffer.
+	// In this case it is a .WAV file recorded at 44,100 samples per second in 16-bit stereo (cd audio format).
+	WAVEFORMATEX primaryFormat;
+	primaryFormat.wFormatTag = WAVE_FORMAT_PCM;
+	primaryFormat.nSamplesPerSec = 44100;
+	primaryFormat.wBitsPerSample = 16;
+	primaryFormat.nChannels = 2;
+	primaryFormat.nBlockAlign = (primaryFormat.wBitsPerSample / 8) * primaryFormat.nChannels;
+	primaryFormat.nAvgBytesPerSec = primaryFormat.nSamplesPerSec * primaryFormat.nBlockAlign;
+	primaryFormat.cbSize = 0;
+	
+	primaryBuffer->SetFormat(&primaryFormat);
+	
+	starttime = clock();
+    elapsedtime = starttime;
+    lasttime = elapsedtime;
+    printf("Initializing audio system...\n");
+    if (sound_idmax == 0)
+      sounds = NULL;
+    else
+      sounds = new sound*[sound_idmax];
 
+    for (size_t i = 0; i < sound_idmax; i++)
+      sounds[i] = NULL;
+	
+	return true;
   }
 
   sound* sound_new_with_source() {
-
+    sound *res = new sound();
+    res->loaded = LOADSTATE_SOURCED;
+    return res;
   }
+
 
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
+    sound *snd = sounds[id];
+    if (!snd) {
+      snd = sounds[id] = sound_new_with_source();
+	}
+    if (snd->loaded != LOADSTATE_SOURCED) {
+      //fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
+      return 1;
+    }
+	  
+	WAVEFORMATEX waveFormat;
+	waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+	waveFormat.nSamplesPerSec = 16000;
+	waveFormat.wBitsPerSample = 16;
+	waveFormat.nChannels = 1;
+	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
+	waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
+	waveFormat.cbSize = 0;
+	
+    unsigned int& buf = snd->buf[0];
+	DSBUFFERDESC bufferDesc;
+	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
+	bufferDesc.dwFlags = DSBCAPS_CTRLVOLUME;
+	bufferDesc.dwBufferBytes = bufsize;
+	bufferDesc.dwReserved = 0;
+	bufferDesc.lpwfxFormat = &waveFormat;
+	bufferDesc.guid3DAlgorithm = GUID_NULL;
+	dsound->CreateSoundBuffer(&bufferDesc, &snd->soundBuffer, NULL);
+	
+	LPVOID lpvWrite;
+	DWORD  dwLength;
 
+	IDirectSoundBuffer* sndBuf = snd->soundBuffer;
+	//sndBuf->SetFormat(&waveFormat);
+	if (DS_OK == sndBuf->Lock(
+      0,          // Offset at which to start lock.
+      0,          // Size of lock; ignored because of flag.
+      &lpvWrite,  // Gets address of first part of lock.
+      &dwLength,  // Gets size of first part of lock.
+      NULL,       // Address of wraparound not needed. 
+      NULL,       // Size of wraparound not needed.
+      DSBLOCK_ENTIREBUFFER))  // Flag.
+	{
+		memcpy(lpvWrite, buffer, dwLength);
+		sndBuf->Unlock(
+		lpvWrite,   // Address of lock start.
+		dwLength,   // Size of lock.
+		NULL,       // No wraparound portion.
+		0);         // No wraparound size.
+	} else {
+		//ErrorHandler();  // Add error-handling here.
+	}
+	
+	snd->soundBuffer->SetCurrentPosition(0);
+	// Set volume of the buffer to 100%.
+	snd->soundBuffer->SetVolume(DSBVOLUME_MAX);
+	
+    if (!buf) {
+      //fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
+      return 2;
+    }
+
+    snd->loaded = LOADSTATE_COMPLETE;
+    return 0;
   }
 
 
@@ -87,17 +229,19 @@ namespace enigma {
 
   void audiosystem_update(void)
   {
-    elapsedtime = clock() - lasttime;
-    lasttime = elapsedtime;
-    // update all the sounds so they can calculate fall off and gain
-    for(size_t i = 1; i < sound_sources.size(); i++) {
-      sound_sources[i]->sound_update();
-    }
+
   }
 
   void audiosystem_cleanup()
   {
-
+	// Release the direct sound interface pointer.
+	if(dsound)
+	{
+		dsound->Release();
+		dsound = 0;
+	}
+ 
+	return;
   }
 
 }
