@@ -146,7 +146,7 @@ bool glsl_shader_compile(int id)
   }
 }
 
-string glsl_shader_compile_output(int id)
+string glsl_shader_get_infolog(int id)
 {
   return shaders[id]->log;
 }
@@ -214,6 +214,58 @@ void glsl_program_reset()
 void glsl_program_free(int id)
 {
   delete shaderprograms[id];
+}
+
+int glsl_get_uniform_location(unsigned program, string name) {
+	return glGetUniformLocation(shaderprograms[program]->shaderprogram, name.c_str());
+}
+
+void glsl_uniformf(int location, float v0) {
+	glUniform1f(location, v0);
+}
+
+void glsl_uniformf(int location, float v0, float v1) {
+	glUniform2f(location, v0, v1);
+}
+
+void glsl_uniformf(int location, float v0, float v1, float v2) {
+	glUniform3f(location, v0, v1, v2);
+}
+
+void glsl_uniformf(int location, float v0, float v1, float v2, float v3) {
+	glUniform4f(location, v0, v1, v2, v3);
+}
+
+void glsl_uniformi(int location, int v0) {
+	glUniform1i(location, v0);
+}
+
+void glsl_uniformi(int location, int v0, int v1) {
+	glUniform2i(location, v0, v1);
+}
+
+void glsl_uniformi(int location, int v0, int v1, int v2) {
+	glUniform3i(location, v0, v1, v2);
+}
+
+void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
+	glUniform4i(location, v0, v1, v2, v3);
+}
+
+void glsl_uniformui(int location, unsigned v0) {
+	glUniform1ui(location, v0);
+}
+
+void glsl_uniformui(int location, unsigned v0, unsigned v1) {
+	glUniform2ui(location, v0, v1);
+}
+
+void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
+	glUniform3ui(location, v0, v1, v2);
+}
+
+void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3) {
+	glUniform4ui(location, v0, v1, v2, v3);
 }
 
 }
