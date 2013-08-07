@@ -19,13 +19,14 @@
 
 namespace enigma_user
 {
-
-const int pr_pointlist      = 1;     // GL_POINTS            D3DPT_POINTLIST
-const int pr_linelist       = 2;     // GL_LINES             D3DPT_LINELIST
-const int pr_linestrip      = 3;     // GL_LINE_STRIP        D3DPT_LINESTRIP
-const int pr_trianglelist   = 4;     // GL_TRIANGLES         D3DPT_TRIANGLELIST
-const int pr_trianglestrip  = 5;     // GL_TRIANGLE_STRIP    D3DPT_TRIANGLESTRIP
-const int pr_trianglefan    = 6;     // GL_TRIANGLE_FAN      D3DPT_TRIANGLEFAN
+enum {
+  pr_pointlist      = 1,     // GL_POINTS            D3DPT_POINTLIST
+  pr_linelist       = 2,     // GL_LINES             D3DPT_LINELIST
+  pr_linestrip      = 3,     // GL_LINE_STRIP        D3DPT_LINESTRIP
+  pr_trianglelist   = 4,     // GL_TRIANGLES         D3DPT_TRIANGLELIST
+  pr_trianglestrip  = 5,     // GL_TRIANGLE_STRIP    D3DPT_TRIANGLESTRIP
+  pr_trianglefan    = 6      // GL_TRIANGLE_FAN      D3DPT_TRIANGLEFAN
+};
 
 int draw_primitive_begin(int kind);
 int draw_primitive_begin_texture(int kind,unsigned tex);
@@ -38,9 +39,6 @@ void d3d_primitive_begin(int kind);
 void d3d_primitive_begin_texture(int kind, int texId);
 void d3d_primitive_end();
 void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
-void d3d_normal(gs_scalar nx, gs_scalar ny, gs_scalar nz);
-void d3d_texture(gs_scalar tx, gs_scalar ty);
-void d3d_color(int col, double alpha);
 void d3d_index(int in);
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha);
 void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty);

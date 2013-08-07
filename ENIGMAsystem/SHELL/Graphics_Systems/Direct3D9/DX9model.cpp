@@ -243,7 +243,7 @@ class Mesh
     ClearData();
   }
 
-  void BufferSubData(GLint offset)
+  void BufferSubData(unsigned offset)
   {
 	VOID* pVoid;    // a void pointer
     // lock v_buffer and load the vertices into it
@@ -507,22 +507,7 @@ void d3d_model_vertex(const unsigned int id, gs_scalar x, gs_scalar y, gs_scalar
   meshes[id]->VertexVector(x, y, z, 0, 0, 0, 0, 0, c_white, 1);
 }
 
-void d3d_model_normal(const unsigned int id, gs_scalar nx, gs_scalar ny, gs_scalar nz)
-{
-  meshes[id]->VertexVector(0, 0, 0, nx, ny, nz, 0, 0, c_white, 1);
-}
-
-void d3d_model_texture(const unsigned int id, gs_scalar u, gs_scalar v)
-{
-  meshes[id]->VertexVector(0, 0, 0, 0, 0, 0, u, v, c_white, 1);
-}
-
-void d3d_model_color(const unsigned int id, int col, double alpha)
-{
-  meshes[id]->VertexVector(0, 0, 0, 0, 0, 0, 0, 0, col, alpha);
-}
-
-void d3d_model_index(const unsigned int id, GLuint in)
+void d3d_model_index(const unsigned int id, unsigned in)
 {
   meshes[id]->VertexIndex(in);
 }
@@ -646,10 +631,9 @@ void d3d_model_cylinder(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_sc
             k++;
             for (int i = 0; i < steps*2; i+=2)
             {
-                d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
-                d3d_model_vertex_texture(id, v[i+3][0], v[i+3][1], v[i+3][2], t[i+2][0], t[i+2][1]);
-                d3d_model_vertex_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], t[i][0], t[i][1]);
-		d3d_model_normal(id, 0, 0, -1); d3d_model_normal(id, 0, 0, -1); d3d_model_normal(id, 0, 0, -1);
+                d3d_model_vertex_normal_texture(id, cx, cy, z1, 0, 0, -1, 0, vrep);
+                d3d_model_vertex_normal_texture(id, v[i+3][0], v[i+3][1], v[i+3][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
+                d3d_model_vertex_normal_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], 0, 0, -1, t[i][0], t[i][1]);
             }
 
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
@@ -657,10 +641,9 @@ void d3d_model_cylinder(const unsigned int id, gs_scalar x1, gs_scalar y1, gs_sc
             k++;
             for (int i = 0; i < steps*2; i+=2)
             {
-                d3d_model_vertex_texture(id, cx, cy, z2, 0, vrep);
-                d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
-                d3d_model_vertex_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], t[i+2][0], t[i+2][1]);
-		d3d_model_normal(id, 0, 0, 1); d3d_model_normal(id, 0, 0, 1); d3d_model_normal(id, 0, 0, 1);
+                d3d_model_vertex_normal_texture(id, cx, cy, z2, 0, 0, -1, 0, vrep);
+                d3d_model_vertex_normal_texture(id, v[i][0], v[i][1], v[i][2], 0, 0, -1, t[i][0], t[i][1]);
+                d3d_model_vertex_normal_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
             }
         }
 }

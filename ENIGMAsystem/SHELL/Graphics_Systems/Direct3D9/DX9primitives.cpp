@@ -150,21 +150,6 @@ void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
   d3d_model_vertex(prim_d3d_model, x, y, z);
 }
 
-void d3d_normal(gs_scalar nx, gs_scalar ny, gs_scalar nz)
-{
-  d3d_model_normal(prim_d3d_model, nx, ny, nz);
-}
-
-void d3d_texture(gs_scalar tx, gs_scalar ty)
-{
-  d3d_model_texture(prim_d3d_model, tx, ty);
-}
-
-void d3d_color(int col, double alpha)
-{
-  d3d_model_color(prim_d3d_model, col, alpha);
-}
-
 void d3d_index(int in)
 {
   d3d_model_index(prim_d3d_model, in);
