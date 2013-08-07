@@ -91,10 +91,10 @@ unsigned long getFileLength(ifstream& file)
 namespace enigma_user
 {
 
-int shader_load(int id, const char* fname)
+int shader_load(int id, string fname)
 {
   ifstream file;
-  file.open(fname, ios::in); // opens as ASCII
+  file.open(fname.c_str(), ios::in); // opens as ASCII
   if (!file.is_open()) return 1; // Error: File could not be oppenned
 
   unsigned long len = getFileLength(file);
