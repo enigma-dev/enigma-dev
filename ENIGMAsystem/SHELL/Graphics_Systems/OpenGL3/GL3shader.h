@@ -18,6 +18,10 @@
 #ifndef _GLSHADER__H
 #define _GLSHADER__H
 
+#include <iostream>
+#include <fstream>
+using namespace std;
+
 namespace enigma_user
 {
 
@@ -30,7 +34,7 @@ enum {
 };
 
 int shader_create(int type);
-int shader_load(int id, const char* fname);
+int shader_load(int id, std::string fname);
 bool shader_compile(int id);
 const char* shader_compile_output(int id);
 void shader_free(int id);

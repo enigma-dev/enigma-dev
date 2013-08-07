@@ -25,10 +25,6 @@
 #include <vector>
 using std::vector;
 
-#include <iostream>
-#include <fstream>
-using namespace std;
-
 GLenum shadertypes[5] = {   
   GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
 }; 
