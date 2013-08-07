@@ -30,7 +30,7 @@ GLenum shadertypes[5] = {
 }; 
 
 struct Shader{
-  const char* log;
+  string log;
   GLuint shader;
   Shader(int type) 
   {
@@ -63,7 +63,7 @@ vector<ShaderProgram*> shaderprograms(0);
 namespace enigma_user
 {
 
-int shader_create(int type)
+int glsl_shader_create(int type)
 {
   unsigned int id = shaders.size();
   shaders.push_back(new Shader(type));
@@ -87,7 +87,7 @@ unsigned long getFileLength(ifstream& file)
 namespace enigma_user
 {
 
-int shader_load(int id, string fname)
+int glsl_shader_load(int id, string fname)
 {
   ifstream file;
   file.open(fname.c_str(), ios::in); // opens as ASCII
@@ -117,7 +117,7 @@ int shader_load(int id, string fname)
   return 3; // No Error
 }
 
-bool shader_compile(int id)
+bool glsl_shader_compile(int id)
 {
   glCompileShader(shaders[id]->shader);
 
@@ -131,7 +131,7 @@ bool shader_compile(int id)
     GLchar* compiler_log = (GLchar*)malloc(blen);
 
     glGetInfoLogARB(shaders[id]->shader, blen, &slen, compiler_log);
-    shaders[id]->log = compiler_log;
+    shaders[id]->log = (string)compiler_log;
   } else {
     shaders[id]->log = "Shader compile log empty";
   }
@@ -146,24 +146,24 @@ bool shader_compile(int id)
   }
 }
 
-const char* shader_compile_output(int id)
+string glsl_shader_compile_output(int id)
 {
   return shaders[id]->log;
 }
 
-void shader_free(int id)
+void glsl_shader_free(int id)
 {
   delete shaders[id];
 }
 
-int shader_program_create()
+int glsl_program_create()
 {
   unsigned int id = shaderprograms.size();
   shaderprograms.push_back(new ShaderProgram());
   return id;
 }
 
-bool shader_program_link(int id)
+bool glsl_program_link(int id)
 {
 //glBindFragDataLocation(shaderprograms[id]->shaderprogram, 0, "fragColor");
 
@@ -178,7 +178,7 @@ bool shader_program_link(int id)
   }
 }
 
-bool shader_program_validate(int id)
+bool glsl_program_validate(int id)
 {
   glValidateProgram(shaderprograms[id]->shaderprogram);
   GLint validated;
@@ -191,27 +191,27 @@ bool shader_program_validate(int id)
   }
 }
 
-void shader_program_attach(int id, int sid)
+void glsl_program_attach(int id, int sid)
 {
   glAttachShader(shaderprograms[id]->shaderprogram, shaders[sid]->shader);
 }
 
-void shader_program_detach(int id, int sid)
+void glsl_program_detach(int id, int sid)
 {
   glDetachShader(shaderprograms[id]->shaderprogram, shaders[sid]->shader);
 }
 
-void shader_program_use(int id)
+void glsl_program_use(int id)
 {
   glUseProgram(shaderprograms[id]->shaderprogram);
 }
 
-void shader_program_reset()
+void glsl_program_reset()
 {
   glUseProgram(0);
 }
 
-void shader_program_free(int id)
+void glsl_program_free(int id)
 {
   delete shaderprograms[id];
 }
