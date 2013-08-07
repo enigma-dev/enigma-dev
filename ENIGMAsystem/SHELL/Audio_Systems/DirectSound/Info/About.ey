@@ -9,5 +9,4 @@ Author: Robert B. Colton
 Depends:
 	Build-platforms: Windows
 Represents:
-	Build-platforms: Windows
-
+	Build-platforms: None
