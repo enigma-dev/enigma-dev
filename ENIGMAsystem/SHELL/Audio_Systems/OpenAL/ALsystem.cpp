@@ -40,8 +40,8 @@ vector<soundEmitter*> sound_emitters(0);
 
 namespace enigma {
 
-    int get_free_channel(double priority)
-    {
+  int get_free_channel(double priority)
+  {
     // test for channels not playing anything
     for(size_t i = 1; i < sound_sources.size(); i++)
     {
