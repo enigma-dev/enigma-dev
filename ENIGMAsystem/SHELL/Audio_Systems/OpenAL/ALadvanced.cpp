@@ -50,6 +50,7 @@ bool audio_exists(int sound)
 {
   return unsigned(sound) < enigma::sound_idmax && bool(enigma::sounds[sound]);
 }
+
 bool audio_is_playing(int sound) {
   // test for channels playing the sound
   for(size_t i = 0; i < sound_sources.size(); i++)

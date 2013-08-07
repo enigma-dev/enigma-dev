@@ -133,12 +133,12 @@ int surface_create(int width, int height)
       glClearColor(1,1,1,0);
       glClear(GL_COLOR_BUFFER_BIT);
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
-      glPopAttrib();
 
       enigma::surface_array[id]->tex = tex;
       enigma::surface_array[id]->fbo = fbo;
 
       glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
+      glPopAttrib();
 
       return id;
     }

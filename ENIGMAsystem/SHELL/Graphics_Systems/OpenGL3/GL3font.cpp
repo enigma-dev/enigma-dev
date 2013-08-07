@@ -36,6 +36,7 @@ using namespace std;
 
 namespace enigma {
   static int currentfont = -1;
+  extern unsigned char currentcolor[4];
   extern size_t font_idmax;
 }
 
@@ -293,6 +294,7 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
   get_fontv(fnt,currentfont);
   texture_use(GmTextures[fnt->texture]->gltex);
   gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
+  gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
   if (halign == fa_left){
       gs_scalar xx = x;
       for (unsigned i = 0; i < str.length(); i++)
@@ -307,13 +309,13 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           const gs_scalar data[4*8] = {
-            xx + g.x,  yy + g.y, g.tx,  g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x2, yy + g.y, g.tx2, g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x2, yy + g.y2, g.tx2, g.ty2, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x,  yy + g.y2, g.tx,  g.ty2, 0.0, 0.0, 0.0, 1.0
+            xx + g.x,  yy + g.y, g.tx,  g.ty, re, gr, bl, al,
+            xx + g.x2, yy + g.y, g.tx2, g.ty, re, gr, bl, al,
+            xx + g.x2, yy + g.y2, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.x,  yy + g.y2, g.tx,  g.ty2, re, gr, bl, al
           };
           plane2D_rotated(data);
-          xx += int(g.xs);
+          xx += gs_scalar(g.xs);
         }
       }
   } else {
@@ -332,10 +334,10 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           const gs_scalar data[4*8] = {
-            xx + g.x,  yy + g.y, g.tx,  g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x2, yy + g.y, g.tx2, g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x2, yy + g.y2, g.tx2, g.ty2, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x,  yy + g.y2, g.tx,  g.ty2, 0.0, 0.0, 0.0, 1.0
+            xx + g.x,  yy + g.y, g.tx,  g.ty, re, gr, bl, al,
+            xx + g.x2, yy + g.y, g.tx2, g.ty, re, gr, bl, al,
+            xx + g.x2, yy + g.y2, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.x,  yy + g.y2, g.tx,  g.ty2, re, gr, bl, al
           };
           plane2D_rotated(data);
           xx += gs_scalar(g.xs);
@@ -350,10 +352,10 @@ void draw_text_ext(gs_scalar x, gs_scalar y,variant vstr, gs_scalar sep, gs_scal
   get_fontv(fnt,currentfont);
   texture_use(GmTextures[fnt->texture]->gltex);
 
-  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
-
+  gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
+  gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
   if (halign == fa_left){
-      float xx = x, width = 0, tw = 0;
+      gs_scalar xx = x, width = 0, tw = 0;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -376,23 +378,23 @@ void draw_text_ext(gs_scalar x, gs_scalar y,variant vstr, gs_scalar sep, gs_scal
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           const gs_scalar data[4*8] = {
-            xx + g.x,  yy + g.y, g.tx,  g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x2, yy + g.y, g.tx2, g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x2, yy + g.y2, g.tx2, g.ty2, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x,  yy + g.y2, g.tx,  g.ty2, 0.0, 0.0, 0.0, 1.0
+            xx + g.x,  yy + g.y, g.tx,  g.ty, re, gr, bl, al,
+            xx + g.x2, yy + g.y, g.tx2, g.ty, re, gr, bl, al,
+            xx + g.x2, yy + g.y2, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.x,  yy + g.y2, g.tx,  g.ty2, re, gr, bl, al
           };
           plane2D_rotated(data);
-          xx += float(g.xs);
+          xx += gs_scalar(g.xs);
         }
       }
   } else {
-      float xx = halign == fa_center ? x-float(string_width_ext_line(str,w,0)/2) : x-float(string_width_ext_line(str,w,0)), line = 0, width = 0, tw = 0;
+      gs_scalar xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,0)/2) : x-gs_scalar(string_width_ext_line(str,w,0)), line = 0, width = 0, tw = 0;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
-          line += 1, xx = halign == fa_center ? x-float(string_width_ext_line(str,w,line)/2) : x-float(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n', width = 0;
+          line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n', width = 0;
         else if (str[i] == '\n')
-          line += 1, xx = halign == fa_center ? x-float(string_width_ext_line(str,w,line)/2) : x-float(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), width = 0;
+          line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), width = 0;
         else if (str[i] == ' '){
           xx += get_space_width(fnt), width += get_space_width(fnt), tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
@@ -404,17 +406,17 @@ void draw_text_ext(gs_scalar x, gs_scalar y,variant vstr, gs_scalar sep, gs_scal
           }
 
           if (width+tw >= w && w != -1)
-            line += 1, xx = halign == fa_center ? x-float(string_width_ext_line(str,w,line)/2) : x-float(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
+            line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           const gs_scalar data[4*8] = {
-            xx + g.x,  yy + g.y, g.tx,  g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x2, yy + g.y, g.tx2, g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x2, yy + g.y2, g.tx2, g.ty2, 0.0, 0.0, 0.0, 1.0,
-            xx + g.x,  yy + g.y2, g.tx,  g.ty2, 0.0, 0.0, 0.0, 1.0
+            xx + g.x,  yy + g.y, g.tx,  g.ty, re, gr, bl, al,
+            xx + g.x2, yy + g.y, g.tx2, g.ty, re, gr, bl, al,
+            xx + g.x2, yy + g.y2, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.x,  yy + g.y2, g.tx,  g.ty2, re, gr, bl, al
           };
           plane2D_rotated(data);
-          xx += float(g.xs);
+          xx += gs_scalar(g.xs);
           width += g.xs;
         }
       }
@@ -426,15 +428,16 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
   texture_use(GmTextures[fnt->texture]->gltex);
+  gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
 
   rot *= M_PI/180;
 
-  const float sv = sin(rot), cv = cos(rot),
+  const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
     cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx, yy, tmpx, tmpy, tmpsize;
+  gs_scalar xx, yy, tmpx, tmpy, tmpsize;
   if (valign == fa_top)
     yy = y + fnt->yoffset * cvy, xx = x + fnt->yoffset * svy;
   else if (valign == fa_middle)
@@ -457,18 +460,18 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
 
           const gs_scalar data[4*8] = {
-            lx, ly, g.tx,  g.ty, 0.0, 0.0, 0.0, 1.0,
-            lx + w * cvx, ly - w * svx, g.tx2, g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy, g.tx2, g.ty2, 0.0, 0.0, 0.0, 1.0,
-            xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, 0.0, 0.0, 0.0, 1.0
+            lx, ly, g.tx,  g.ty, re, gr, bl, al,
+            lx + w * cvx, ly - w * svx, g.tx2, g.ty, re, gr, bl, al,
+            xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, re, gr, bl, al
           };
           plane2D_rotated(data);
-          xx += int(g.xs) * cvx;
-          yy -= int(g.xs) * svx;
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
         }
       }
     } else {
@@ -499,18 +502,18 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
 
           const gs_scalar data[4*8] = {
-            lx, ly, g.tx,  g.ty, 0.0, 0.0, 0.0, 1.0,
-            lx + w * cvx, ly - w * svx, g.tx2, g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy, g.tx2, g.ty2, 0.0, 0.0, 0.0, 1.0,
-            xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, 0.0, 0.0, 0.0, 1.0
+            lx, ly, g.tx,  g.ty, re, gr, bl, al,
+            lx + w * cvx, ly - w * svx, g.tx2, g.ty, re, gr, bl, al,
+            xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, re, gr, bl, al
           };
           plane2D_rotated(data);
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
         }
       }
     }
@@ -521,15 +524,16 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
   texture_use(GmTextures[fnt->texture]->gltex);
+  gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
 
   rot *= M_PI/180;
 
-  const float sv = sin(rot), cv = cos(rot),
+  const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
     cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx, yy, tmpx, tmpy, wi, tmpsize;
+  gs_scalar xx, yy, tmpx, tmpy, wi, tmpsize;
   if (valign == fa_top)
     yy = y + fnt->yoffset * cvy, xx = x + fnt->yoffset * svy;
   else if (valign == fa_middle)
@@ -565,19 +569,19 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
 
           const gs_scalar data[4*8] = {
-            lx, ly, g.tx,  g.ty, 0.0, 0.0, 0.0, 1.0,
-            lx + wi * cvx, ly - wi * svx, g.tx2, g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy, g.tx2, g.ty2, 0.0, 0.0, 0.0, 1.0,
-            xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, 0.0, 0.0, 0.0, 1.0
+            lx, ly, g.tx,  g.ty, re, gr, bl, al,
+            lx + wi * cvx, ly - wi * svx, g.tx2, g.ty, re, gr, bl, al,
+            xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, re, gr, bl, al
           };
           plane2D_rotated(data);
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
   } else {
@@ -626,19 +630,19 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
 
           const gs_scalar data[4*8] = {
-            lx, ly, g.tx,  g.ty, 0.0, 0.0, 0.0, 1.0,
-            lx + wi * cvx, ly - wi * svx, g.tx2, g.ty, 0.0, 0.0, 0.0, 1.0,
-            xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy, g.tx2, g.ty2, 0.0, 0.0, 0.0, 1.0,
-            xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, 0.0, 0.0, 0.0, 1.0
+            lx, ly, g.tx,  g.ty, re, gr, bl, al,
+            lx + wi * cvx, ly - wi * svx, g.tx2, g.ty, re, gr, bl, al,
+            xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, re, gr, bl, al
           };
           plane2D_rotated(data);
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
   }
@@ -652,12 +656,12 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
 
   rot *= M_PI/180;
 
-  const float sv = sin(rot), cv = cos(rot),
+  const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
     cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx, yy, tmpx, tmpy, tmpsize;
+  gs_scalar xx, yy, tmpx, tmpy, tmpsize;
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4, width = 0;
   if (valign == fa_top)
     yy = y + fnt->yoffset * cvy, xx = x + fnt->yoffset * svy;
@@ -682,12 +686,12 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
-          const float lx = xx + g.y * svy;
-          const float ly = yy + g.y * cvy;
-          hcol1 = merge_color(c1,c2,(float)(width)/tmpsize);
-          hcol2 = merge_color(c1,c2,(float)(width+g.xs)/tmpsize);
-          hcol3 = merge_color(c4,c3,(float)(width)/tmpsize);
-          hcol4 = merge_color(c4,c3,(float)(width+g.xs)/tmpsize);
+          const gs_scalar lx = xx + g.y * svy;
+          const gs_scalar ly = yy + g.y * cvy;
+          hcol1 = merge_color(c1,c2,(gs_scalar)(width)/tmpsize);
+          hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/tmpsize);
+          hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
+          hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
 
           const gs_scalar data[4*8] = {
             lx, ly, g.tx,  g.ty, __GETR(hcol1),__GETG(hcol1),__GETB(hcol1), a,
@@ -696,9 +700,9 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
             xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, __GETR(hcol4),__GETG(hcol4),__GETB(hcol4), a
           };
           plane2D_rotated(data);
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
     } else {
@@ -729,12 +733,12 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-            hcol1 = merge_color(c1,c2,(float)(width)/tmpsize);
-            hcol2 = merge_color(c1,c2,(float)(width+g.xs)/tmpsize);
-            hcol3 = merge_color(c4,c3,(float)(width)/tmpsize);
-            hcol4 = merge_color(c4,c3,(float)(width+g.xs)/tmpsize);
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
+            hcol1 = merge_color(c1,c2,(gs_scalar)(width)/tmpsize);
+            hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/tmpsize);
+            hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
+            hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
 
           const gs_scalar data[4*8] = {
             lx, ly, g.tx,  g.ty, __GETR(hcol1),__GETG(hcol1),__GETB(hcol1), a,
@@ -743,9 +747,9 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
             xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, __GETR(hcol4),__GETG(hcol4),__GETB(hcol4), a
           };
           plane2D_rotated(data);
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
     }
@@ -759,12 +763,12 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
 
   rot *= M_PI/180;
 
-  const float sv = sin(rot), cv = cos(rot),
+  const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
     cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx, yy, tmpx, tmpy, tmpsize;
+  gs_scalar xx, yy, tmpx, tmpy, tmpsize;
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4, width = 0;
   if (valign == fa_top)
     yy = y + fnt->yoffset * cvy, xx = x + fnt->yoffset * svy;
@@ -799,12 +803,12 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-            hcol1 = merge_color(c1,c2,(float)(width)/tmpsize);
-            hcol2 = merge_color(c1,c2,(float)(width+g.xs)/tmpsize);
-            hcol3 = merge_color(c4,c3,(float)(width)/tmpsize);
-            hcol4 = merge_color(c4,c3,(float)(width+g.xs)/tmpsize);
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
+            hcol1 = merge_color(c1,c2,(gs_scalar)(width)/tmpsize);
+            hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/tmpsize);
+            hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
+            hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
 
           const gs_scalar data[4*8] = {
             lx, ly, g.tx,  g.ty, __GETR(hcol1),__GETG(hcol1),__GETB(hcol1), a,
@@ -813,9 +817,9 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
             xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, __GETR(hcol4),__GETG(hcol4),__GETB(hcol4), a
           };
           plane2D_rotated(data);
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
     } else {
@@ -862,12 +866,12 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-            hcol1 = merge_color(c1,c2,(float)(width)/tmpsize);
-            hcol2 = merge_color(c1,c2,(float)(width+g.xs)/tmpsize);
-            hcol3 = merge_color(c4,c3,(float)(width)/tmpsize);
-            hcol4 = merge_color(c4,c3,(float)(width+g.xs)/tmpsize);
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
+            hcol1 = merge_color(c1,c2,(gs_scalar)(width)/tmpsize);
+            hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/tmpsize);
+            hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
+            hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
 
           const gs_scalar data[4*8] = {
             lx, ly, g.tx,  g.ty, __GETR(hcol1),__GETG(hcol1),__GETB(hcol1), a,
@@ -877,9 +881,9 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
           };
           plane2D_rotated(data);
 
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
     }
@@ -967,11 +971,11 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, 
   get_fontv(fnt,currentfont);
   texture_use(GmTextures[fnt->texture]->gltex);
 
-  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
-  float width = 0, tw = 0, line = 0, sw = string_width_ext_line(str, w, line);
+  gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
+  gs_scalar width = 0, tw = 0, line = 0, sw = string_width_ext_line(str, w, line);
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4;
   if (halign == fa_left){
-      float xx = x;
+      gs_scalar xx = x;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -994,10 +998,10 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, 
             xx = x, yy += (sep==-1 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-          hcol1 = merge_color(c1,c2,(float)(width)/sw);
-          hcol2 = merge_color(c1,c2,(float)(width+g.xs)/sw);
-          hcol3 = merge_color(c4,c3,(float)(width)/sw);
-          hcol4 = merge_color(c4,c3,(float)(width+g.xs)/sw);
+          hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
+          hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
+          hcol3 = merge_color(c4,c3,(gs_scalar)(width)/sw);
+          hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/sw);
 
           const gs_scalar data[4*8] = {
             xx + g.x,  yy + g.y, g.tx,  g.ty, __GETR(hcol1),__GETG(hcol1),__GETB(hcol1), a,
@@ -1006,12 +1010,12 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, 
             xx + g.x,  yy + g.y2, g.tx,  g.ty2, __GETR(hcol4),__GETG(hcol4),__GETB(hcol4), a
           };
           plane2D_rotated(data);
-          xx += float(g.xs);
+          xx += gs_scalar(g.xs);
           width = xx-x;
         }
       }
   } else {
-      float xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
+      gs_scalar xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -1032,10 +1036,10 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, 
             yy += (sep==-1 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-          hcol1 = merge_color(c1,c2,(float)(width)/sw);
-          hcol2 = merge_color(c1,c2,(float)(width+g.xs)/sw);
-          hcol3 = merge_color(c4,c3,(float)(width)/sw);
-          hcol4 = merge_color(c4,c3,(float)(width+g.xs)/sw);
+          hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
+          hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
+          hcol3 = merge_color(c4,c3,(gs_scalar)(width)/sw);
+          hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/sw);
 
           const gs_scalar data[4*8] = {
             xx + g.x,  yy + g.y, g.tx,  g.ty, __GETR(hcol1),__GETG(hcol1),__GETB(hcol1), a,
@@ -1044,7 +1048,7 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, 
             xx + g.x,  yy + g.y2, g.tx,  g.ty2, __GETR(hcol4),__GETG(hcol4),__GETB(hcol4), a
           };
           plane2D_rotated(data);
-          xx += float(g.xs);
+          xx += gs_scalar(g.xs);
           width = xx-tmpx;
         }
       }
