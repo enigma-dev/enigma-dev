@@ -18,10 +18,6 @@
 #include <stdio.h>
 
 #include "DSsystem.h"
-
-#pragma comment(lib, "dsound.lib")
-#pragma comment(lib, "dxguid.lib")
-#pragma comment(lib, "winmm.lib")
 	struct WaveHeaderType
 	{
 		char chunkId[4];
