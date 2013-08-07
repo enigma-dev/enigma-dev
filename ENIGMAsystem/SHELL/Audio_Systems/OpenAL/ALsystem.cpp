@@ -18,7 +18,8 @@
 #include <stdio.h>
 
 #include "ALsystem.h"
-#include "SoundInstance.h"
+#include "SoundChannel.h"
+#include "SoundResource.h"
 #include "SoundEmitter.h"
 
 #include <time.h>
@@ -35,18 +36,21 @@ ALfloat listenerVel[] = {0.0f,0.0f,0.0f};
 ALfloat listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 
 // first one is reserved for music
-vector<sound_instance*> sound_sources(1);
-vector<soundEmitter*> sound_emitters(0);
+vector<SoundChannel*> sound_channels(1);
+vector<SoundResource*> sound_resources(0);
+vector<SoundEmitter*> sound_emitters(0);
+
+#include "Widget_Systems/widgets_mandatory.h" // show_error
 
 namespace enigma {
 
   int get_free_channel(double priority)
   {
     // test for channels not playing anything
-    for(size_t i = 1; i < sound_sources.size(); i++)
+    for(size_t i = 1; i < sound_channels.size(); i++)
     {
       ALint state;
-      alGetSourcei(sound_sources[i]->source, AL_SOURCE_STATE, &state);
+      alGetSourcei(sound_channels[i]->source, AL_SOURCE_STATE, &state);
       if (state != AL_PLAYING)
       {
         return i;
@@ -54,21 +58,19 @@ namespace enigma {
     }
     // finally if you still couldnt find an empty channel, and we have a few more we can generate
     // go ahead and generate a new one
-    if (sound_sources.size() < channel_num)
+    if (sound_channels.size() < channel_num)
     {
-      int i = sound_sources.size();
+      int i = sound_channels.size();
       ALuint src;
       alGenSources(1, &src);
-      //sound_sources.resize(i + 1);
-      //sound_sources[i]->source = src;
-      sound_instance* sndinst = new sound_instance(src,i);
-      sound_sources.push_back(sndinst);
+      SoundChannel* sndsrc = new SoundChannel(src,i);
+      sound_channels.push_back(sndsrc);
       return i;
     }
     // test for channels playing a lower priority sound, and take their spot if they are
-    for(size_t i = 1; i < sound_sources.size(); i++)
+    for(size_t i = 1; i < sound_channels.size(); i++)
     {
-      if (sound_sources[i]->priority < priority)
+      if (sound_channels[i]->priority < priority)
       {
         return i;
       }
@@ -76,8 +78,6 @@ namespace enigma {
   
     return -1;
   }
-
-  sound **sounds;
 
   void eos_callback(void *soundID, ALuint src)
   {
@@ -92,10 +92,6 @@ namespace enigma {
     elapsedtime = starttime;
     lasttime = elapsedtime;
     printf("Initializing audio system...\n");
-    if (sound_idmax == 0)
-      sounds = NULL;
-    else
-      sounds = new sound*[sound_idmax];
 
     #ifdef _WIN32
     if (!load_al_dll())
@@ -110,14 +106,12 @@ namespace enigma {
       return 1;
     }
 
-    for (size_t i = 0; i < sound_idmax; i++)
-      sounds[i] = NULL;
-
     return 0;
   }
 
-  sound* sound_new_with_source() {
-    sound *res = new sound();
+  SoundResource* sound_new_with_source() {
+    SoundResource *res = new SoundResource();
+	sound_resources.push_back(res);
     alGetError();
     int a = alGetError();
     if(a != AL_NO_ERROR) {
@@ -132,14 +126,13 @@ namespace enigma {
 
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
-    sound *snd = sounds[id];
-    if (!snd)
-      snd = sounds[id] = sound_new_with_source();
+	
+    SoundResource *snd = sound_new_with_source();
+
     if (snd->loaded != LOADSTATE_SOURCED) {
       fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
       return 1;
     }
-
     ALuint& buf = snd->buf[0];
     buf = alureCreateBufferFromMemory((ALubyte*)buffer, bufsize);
 
@@ -152,12 +145,10 @@ namespace enigma {
     return 0;
   }
 
-
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata)
   {
-    sound *snd = sounds[id];
-    if (!snd)
-      snd = sounds[id] = sound_new_with_source();
+    SoundResource *snd = sound_new_with_source();
+	
     if (snd->loaded != LOADSTATE_SOURCED)
       return 1;
 
@@ -176,14 +167,9 @@ namespace enigma {
 
   int sound_allocate()
   {
-    // Make room for sound
-    sound **nsounds = new sound*[sound_idmax+1];
-    for (size_t i = 0; i < sound_idmax; i++)
-      nsounds[i] = sounds[i];
-    nsounds[sound_idmax] = sound_new_with_source();
-    delete[] sounds;
-    sounds = nsounds;
-    return sound_idmax++;
+	int id = sound_resources.size();
+	sound_resources.push_back(new SoundResource());
+	return id;
   }
 
   void audiosystem_update(void)
@@ -192,30 +178,30 @@ namespace enigma {
 
     elapsedtime = clock() - lasttime;
     lasttime = elapsedtime;
-    // update all the sounds so they can calculate fall off and gain
-    for(size_t i = 1; i < sound_sources.size(); i++) {
-      sound_sources[i]->sound_update();
+    // update all the sound channels so they can calculate fall off and gain
+    for(size_t i = 1; i < sound_channels.size(); i++) {
+      sound_channels[i]->sound_update();
     }
   }
 
   void audiosystem_cleanup()
   {
-    for (size_t i = 0; i < sound_idmax; i++)
-    if (sounds[i])
+    for (size_t i = 0; i < sound_resources.size(); i++)
+    if (sound_resources[i])
     {
-      switch (sounds[i]->loaded)
+      switch (sound_resources[i]->loaded)
       {
         case LOADSTATE_COMPLETE:
-          alDeleteBuffers(sounds[i]->stream ? 3 : 1, sounds[i]->buf);
-          if (sounds[i]->stream) {
-            alureStopSource(sound_sources[i]->source, true);
-            alureDestroyStream(sounds[i]->stream, 0, 0);
-            if (sounds[i]->cleanup) sounds[i]->cleanup(sounds[i]->userdata);
+          alDeleteBuffers(sound_resources[i]->stream ? 3 : 1, sound_resources[i]->buf);
+          if (sound_resources[i]->stream) {
+            alureDestroyStream(sound_resources[i]->stream, 0, 0);
+            if (sound_resources[i]->cleanup) sound_resources[i]->cleanup(sound_resources[i]->userdata);
           }
           // fallthrough
         case LOADSTATE_SOURCED:
-          for(size_t j = 1; j < sound_sources.size(); j++) {
-            alDeleteSources(1, &sound_sources[j]->source);
+          for(size_t j = 1; j < sound_channels.size(); j++) {
+			alureStopSource(sound_channels[i]->source, true);
+            alDeleteSources(1, &sound_channels[j]->source);
           }
           break;
         

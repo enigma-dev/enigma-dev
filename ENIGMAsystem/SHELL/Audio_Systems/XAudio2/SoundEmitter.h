@@ -18,12 +18,6 @@
 #ifndef _SOUND_EMITTER__H
 #define _SOUND_EMITTER__H
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
-
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
@@ -34,11 +28,11 @@ using std::vector;
 
 struct SoundEmitter
 {
-  ALfloat emitPos[3];
-  ALfloat emitVel[3];
-  ALfloat falloff[3];
-  ALfloat pitch;
-  ALfloat volume;
+  float emitPos[3];
+  float emitVel[3];
+  float falloff[3];
+  float pitch;
+  float volume;
   vector<int> sound_tracks;
   SoundEmitter(): emitPos {0.0f,0.0f,0.0f}, emitVel {0.0f,0.0f,0.0f}, falloff{0.0f,0.0f,1.0f}, volume(1.0f) {}
 };
