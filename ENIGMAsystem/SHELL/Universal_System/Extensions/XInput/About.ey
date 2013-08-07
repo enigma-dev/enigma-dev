@@ -1,0 +1,14 @@
+%E-YAML
+---
+
+Name: XInput
+ID: XInput
+Description: Game pad and joystick support on Windows and Xbox 360.
+Default: false
+Build-date: 8/8/2013
+Icon: xinputlogo.png
+
+Depends: None
+Dependencies: None
+Implement: extension_xinput
+

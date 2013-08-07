@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,33 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_EMITTER__H
-#define _SOUND_EMITTER__H
+#include "XIgamepad.h"
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
+namespace enigma_user {
 
-#ifdef DEBUG_MODE
-#include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
-#endif
-
-#include <vector>
-using std::vector;
-
-struct SoundEmitter
-{
-  ALfloat emitPos[3];
-  ALfloat emitVel[3];
-  ALfloat falloff[3];
-  ALfloat pitch;
-  ALfloat volume;
-  vector<int> sound_tracks;
-  SoundEmitter(): emitPos {0.0f,0.0f,0.0f}, emitVel {0.0f,0.0f,0.0f}, falloff{0.0f,0.0f,1.0f}, volume(1.0f) {}
-};
-
-extern vector<SoundEmitter*> sound_emitters;
-#endif
+}

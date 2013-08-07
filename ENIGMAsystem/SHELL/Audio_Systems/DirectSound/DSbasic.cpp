@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -36,7 +36,7 @@ namespace enigma_user
 
 bool sound_exists(int sound)
 {
-    return unsigned(sound) < enigma::sound_idmax && bool(enigma::sounds[sound]);
+    return unsigned(sound) < sound_resources.size() && bool(sound_resources[sound]);
 }
 
 bool sound_play(int sound) // Returns whether sound is playing
@@ -61,7 +61,7 @@ bool sound_pause(int sound) // Returns whether the sound was successfully paused
 
 void sound_pause_all()
 {
-  for (size_t i = 0; i < enigma::sound_idmax; i++) {
+  for (size_t i = 0; i < sound_resources.size(); i++) {
     get_sound(snd, i, 0);
 	snd->soundBuffer->Stop();
   }
@@ -74,16 +74,16 @@ void sound_stop(int sound) {
 
 void sound_stop_all()
 {
-  for (size_t i = 0; i < enigma::sound_idmax; i++) {
+  for (size_t i = 0; i < sound_resources.size(); i++) {
     get_sound(snd, i, 0);
 	snd->soundBuffer->Stop();
   }
 }
 
 void sound_delete(int sound) {
+  get_sound(snd,sound,0);
   sound_stop(sound);
-  delete enigma::sounds[sound];
-  enigma::sounds[sound] = NULL;
+  sound_resources.erase(sound_resources.begin() + sound);
 }
 
 void sound_volume(int sound, float volume) {
@@ -103,7 +103,7 @@ bool sound_resume(int sound) // Returns whether the sound is playing
 
 void sound_resume_all()
 {
-  for (size_t i = 0; i < enigma::sound_idmax; i++) {
+  for (size_t i = 0; i < sound_resources.size(); i++) {
     get_sound(snd, i, 0);
 	snd->soundBuffer->Play(0, 0, 0);
   }
@@ -121,7 +121,8 @@ bool sound_isplaying(int sound) {
 }
 
 bool sound_ispaused(int sound) {
-  return !enigma::sounds[sound]->idle and !enigma::sounds[sound]->playing;
+  get_sound(snd,sound,0);
+  return !snd->idle and !snd->playing;
 }
 
 void sound_pan(int sound, float value)
@@ -162,7 +163,7 @@ void sound_seek(int sound, float position) {
 }
 
 void sound_seek_all(float position) {
-  for (size_t i = 0; i < enigma::sound_idmax; i++) {
+  for (size_t i = 0; i < sound_resources.size(); i++) {
     get_sound(snd, i, 0);
 	snd->soundBuffer->SetCurrentPosition(position);
   }
@@ -207,7 +208,7 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
   delete fdata;
   
   if (fail)
-    return (--enigma::sound_idmax, -1);
+    return -1;
   return rid;
 }
 
