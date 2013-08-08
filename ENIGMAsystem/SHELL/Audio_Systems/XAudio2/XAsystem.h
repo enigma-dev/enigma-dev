@@ -27,16 +27,8 @@ extern float listenerVel[];
 extern float listenerOri[];
 
 #include "SoundResource.h"
-struct SoundResource;
 
 namespace enigma { 
-
-  enum load_state {
-    LOADSTATE_NONE,
-    LOADSTATE_SOURCED,
-    LOADSTATE_INDICATED,
-    LOADSTATE_COMPLETE
-  };
 
   int get_free_channel(double priority);
 

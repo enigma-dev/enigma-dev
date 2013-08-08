@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,9 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_INSTANCE__H
-#define _SOUND_INSTANCE__H
-#include "XAsystem.h"
+#ifndef _SOUND_RESOURCE__H
+#define _SOUND_RESOURCE__H
 #include "../General/ASadvanced.h"
 
 #ifdef DEBUG_MODE
@@ -28,54 +27,31 @@
 #include <vector>
 using std::vector;
 
-struct SoundResource {
-  unsigned source;
-  int soundIndex;
-  double priority;
-  int type;
-  SoundResource(int alsource, int sound_id): source(alsource), soundIndex(sound_id) {}
-  SoundResource() {}
-
-void sound_update()
+enum load_state {
+    LOADSTATE_NONE,
+    LOADSTATE_SOURCED,
+    LOADSTATE_INDICATED,
+    LOADSTATE_COMPLETE
+};
+  
+struct SoundResource
 {
-  // NOTE: Use starttime, elapsedtime, and lasttime
-  // calculate fade
+    unsigned buf[3]; // The buffer-id of the sound data
+    void (*cleanup)(void *userdata); // optional cleanup callback for streams
+    void *userdata; // optional userdata for streams
+    void (*seek)(void *userdata, float position); // optional seeking
+    int type; //0 for sound, 1 for music, -1 for error
+    int kind; //
 
-  // calculate falloff
-  switch (falloff_model)
-  {
-    case enigma_user::audio_falloff_exponent_distance:
-      // gain = (listener_distance / reference_distance) ^ (-falloff_factor)
-      break;
-    case enigma_user::audio_falloff_exponent_distance_clamped:
-      // distance = clamp(listener_distance, reference_distance, maximum_distance)
-      // gain = (distance / reference_distance) ^ (-falloff_factor)
-      break;
-    case enigma_user::audio_falloff_inverse_distance:
-      // gain = reference_distance / (reference_distance + falloff_factor * (listener_distance – reference_distance))
-      break;
-    case enigma_user::audio_falloff_inverse_distance_clamped:
-      // distance = clamp(listener_distance, reference_distance, maximum_distance)
-      // gain = reference_distance / (reference_distance + falloff_factor * (distance – reference_distance))
-      break;
-    case enigma_user::audio_falloff_linear_distance:
-      // distance = min(distance, maximum_distance)
-      // gain = (1 – falloff_factor * (distance – reference_distance) / (maximum_distance – reference_distance))
-      break;
-    case enigma_user::audio_falloff_linear_distance_clamped:
-      // distance = clamp(listener_distance, reference_distance, maximum_distance)
-      // gain = (1 – falloff_factor * (distance – reference_distance) / (maximum_distance – reference_distance))
-      break;
-    case enigma_user::audio_falloff_none:
-      // gain = 1
-      break;
-    default:
-      break;
-  }
-}
+    load_state loaded;   // Degree to which this sound has been loaded successfully
+    bool idle;    // True if this sound is not being used, false if playing or paused.
+    bool playing; // True if this sound is playing; not paused or idle.
 
+    SoundResource(): cleanup(0), userdata(0), seek(0), type(0), kind(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
+      buf[0] = 0; buf[1] = 0; buf[2] = 0;
+    }
 };
 
-extern vector<SoundResource*> sound_sources;
+extern vector<SoundResource*> sound_resources;
 
 #endif

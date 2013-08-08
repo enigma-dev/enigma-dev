@@ -19,6 +19,7 @@
 
 #include "XAsystem.h"
 #include "SoundEmitter.h"
+#include "SoundChannel.h"
 
 #include <time.h>
 clock_t starttime;
@@ -33,7 +34,8 @@ float listenerVel[] = {0.0f,0.0f,0.0f};
 float listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 
 // first one is reserved for music
-vector<SoundResource*> sound_sources(1);
+vector<SoundChannel*> sound_channels(1);
+vector<SoundResource*> sound_resources(0);
 vector<SoundEmitter*> sound_emitters(0);
 
 namespace enigma {
