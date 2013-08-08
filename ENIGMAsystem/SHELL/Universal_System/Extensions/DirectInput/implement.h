@@ -15,8 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "XIjoystick.h"
+namespace enigma {
+  struct extension_directinput
+  {
+    void directinput_update() {
 
-namespace enigma_user {
-
+    }
+  };
 }
+
