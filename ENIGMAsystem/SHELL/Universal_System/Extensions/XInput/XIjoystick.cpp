@@ -16,4 +16,7 @@
 **/
 
 #include "XIjoystick.h"
-#include "XIgamepad.h"
+
+namespace enigma_user {
+
+}
