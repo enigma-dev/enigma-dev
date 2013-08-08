@@ -328,7 +328,11 @@ public final class EnigmaCli
 
 		try
 			{
-			attemptLib();
+			final UnsatisfiedLinkError result = attemptLib();
+			if (result != null)
+				{
+				throw result;
+				}
 			}
 		catch (UnsatisfiedLinkError e)
 			{
