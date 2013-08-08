@@ -15,9 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <vector>
-using std::vector;
-
 namespace enigma {
   struct extension_xinput
   {
