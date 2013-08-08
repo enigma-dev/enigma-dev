@@ -32,7 +32,7 @@
 #include <vector>
 using std::vector;
 
-struct soundEmitter
+struct SoundEmitter
 {
   ALfloat emitPos[3];
   ALfloat emitVel[3];
@@ -40,8 +40,8 @@ struct soundEmitter
   ALfloat pitch;
   ALfloat volume;
   vector<int> sound_tracks;
-  soundEmitter(): emitPos {0.0f,0.0f,0.0f}, emitVel {0.0f,0.0f,0.0f}, falloff{0.0f,0.0f,1.0f}, volume(1.0f) {}
+  SoundEmitter(): emitPos {0.0f,0.0f,0.0f}, emitVel {0.0f,0.0f,0.0f}, falloff{0.0f,0.0f,1.0f}, volume(1.0f) {}
 };
 
-extern vector<soundEmitter*> sound_emitters;
+extern vector<SoundEmitter*> sound_emitters;
 #endif

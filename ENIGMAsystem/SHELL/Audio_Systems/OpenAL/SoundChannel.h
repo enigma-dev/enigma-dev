@@ -15,10 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_INSTANCE__H
-#define _SOUND_INSTANCE__H
-#include "ALsystem.h"
+#ifndef _SOUND_CHANNEL__H
+#define _SOUND_CHANNEL__H
 #include "../General/ASadvanced.h"
+#include "ALsystem.h"
 
 #ifdef __APPLE__
 #include "../../../additional/alure/include/AL/alure.h"
@@ -34,13 +34,13 @@
 #include <vector>
 using std::vector;
 
-struct sound_instance {
+struct SoundChannel {
   ALuint source;
   int soundIndex;
   double priority;
   int type;
-  sound_instance(ALint alsource, int sound_id): source(alsource), soundIndex(sound_id) {}
-  sound_instance() {}
+  SoundChannel(ALint alsource, int sound_id): source(alsource), soundIndex(sound_id) {}
+  SoundChannel() {}
 
 void sound_update()
 {
@@ -82,6 +82,6 @@ void sound_update()
 
 };
 
-extern vector<sound_instance*> sound_sources;
+extern vector<SoundChannel*> sound_channels;
 
 #endif
