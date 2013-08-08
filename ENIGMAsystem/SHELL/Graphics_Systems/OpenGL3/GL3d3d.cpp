@@ -183,13 +183,6 @@ void d3d_set_render_mode(int face, int fill)
 {
   glPolygonMode(renderstates[face], renderstates[fill]);
 }
-void d3d_set_line_width(float value) {
-  glLineWidth(value);
-}
-
-void d3d_set_point_size(float value) {
-  glPointSize(value);
-}
 
 void d3d_depth_clear() {
   d3d_depth_clear_value(1.0f);

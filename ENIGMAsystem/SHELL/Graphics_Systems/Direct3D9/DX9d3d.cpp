@@ -136,14 +136,6 @@ void d3d_set_render_mode(int face, int fill)
 
 }
 
-void d3d_set_line_width(float value) {
-
-}
-
-void d3d_set_point_size(float value) {
-
-}
-
 void d3d_depth_clear() {
   d3d_depth_clear_value(1.0f);
 }

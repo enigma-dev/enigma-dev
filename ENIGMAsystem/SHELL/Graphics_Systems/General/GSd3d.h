@@ -76,8 +76,6 @@ void d3d_set_culling(bool enable);
 void d3d_set_culling_mode(int mode);
 void d3d_set_culling_orientation(int mode);
 void d3d_set_render_mode(int face, int fill);
-void d3d_set_line_width(float value);
-void d3d_set_point_size(float value);
 void d3d_depth_operator(int mode);
 void d3d_depth_clear();
 void d3d_depth_clear_value(float value);
