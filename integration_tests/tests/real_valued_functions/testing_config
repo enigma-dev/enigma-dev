@@ -1,2 +1,2 @@
-linux=
-windows=
+linux=windowing:xlib
+windows=windowing:Win32

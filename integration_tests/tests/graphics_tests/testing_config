@@ -1,5 +1,5 @@
-linux=graphics:OpenGL1
-linux=graphics:OpenGL3
-windows=graphics:OpenGL1
-windows=graphics:OpenGL3
-windows=graphics:DirectX
+linux=graphics:OpenGL1;windowing:xlib
+linux=graphics:OpenGL3;windowing:xlib
+windows=graphics:OpenGL1;windowing:Win32
+windows=graphics:OpenGL3;windowing:Win32
+windows=graphics:Direct3D9;windowing:Win32
