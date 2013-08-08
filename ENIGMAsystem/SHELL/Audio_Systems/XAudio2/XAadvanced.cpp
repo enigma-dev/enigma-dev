@@ -22,7 +22,7 @@
 using std::string;
 #include "../General/ASadvanced.h"
 #include "Audio_Systems/audio_mandatory.h"
-#include "SoundInstance.h"
+#include "SoundResource.h"
 #include "SoundEmitter.h"
 #include "XAsystem.h"
 
@@ -42,7 +42,7 @@ namespace enigma_user
 
 bool audio_exists(int sound)
 {
-  return unsigned(sound) < enigma::sound_idmax && bool(enigma::sounds[sound]);
+
 }
 
 bool audio_is_playing(int sound) {

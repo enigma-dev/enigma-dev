@@ -18,7 +18,6 @@
 #include <stdio.h>
 
 #include "XAsystem.h"
-#include "SoundInstance.h"
 #include "SoundEmitter.h"
 
 #include <time.h>
@@ -34,8 +33,8 @@ float listenerVel[] = {0.0f,0.0f,0.0f};
 float listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 
 // first one is reserved for music
-vector<sound_instance*> sound_sources(1);
-vector<soundEmitter*> sound_emitters(0);
+vector<SoundResource*> sound_sources(1);
+vector<SoundEmitter*> sound_emitters(0);
 
 namespace enigma {
 
@@ -44,13 +43,9 @@ namespace enigma {
 
   }
 
-  sound **sounds;
-
   void eos_callback(void *soundID, unsigned src)
   {
-    get_sound(snd, (ptrdiff_t)soundID, );
-    snd->playing = false;
-    snd->idle = true;
+
   }
 
   int audiosystem_initialize()
@@ -58,7 +53,7 @@ namespace enigma {
 
   }
 
-  sound* sound_new_with_source() {
+  SoundResource* sound_new_with_source() {
 
   }
 

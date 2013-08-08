@@ -22,7 +22,7 @@
 using std::string;
 #include "../General/ASbasic.h"
 #include "Audio_Systems/audio_mandatory.h"
-#include "SoundInstance.h"
+#include "SoundResource.h"
 #include "SoundEmitter.h"
 #include "XAsystem.h"
 

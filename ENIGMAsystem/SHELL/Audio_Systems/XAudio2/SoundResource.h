@@ -28,13 +28,13 @@
 #include <vector>
 using std::vector;
 
-struct sound_instance {
+struct SoundResource {
   unsigned source;
   int soundIndex;
   double priority;
   int type;
-  sound_instance(int alsource, int sound_id): source(alsource), soundIndex(sound_id) {}
-  sound_instance() {}
+  SoundResource(int alsource, int sound_id): source(alsource), soundIndex(sound_id) {}
+  SoundResource() {}
 
 void sound_update()
 {
@@ -76,6 +76,6 @@ void sound_update()
 
 };
 
-extern vector<sound_instance*> sound_sources;
+extern vector<SoundResource*> sound_sources;
 
 #endif
