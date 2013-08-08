@@ -31,52 +31,26 @@ extern float listenerPos[];
 extern float listenerVel[];
 extern float listenerOri[];
 	
+#include "SoundResource.h"
+	
 namespace enigma { 
-
-  enum load_state {
-    LOADSTATE_NONE,
-    LOADSTATE_SOURCED,
-    LOADSTATE_INDICATED,
-    LOADSTATE_COMPLETE
-  };
-  struct sound
-  {
-    IDirectSoundBuffer* soundBuffer;
-    unsigned buf[3]; // The buffer-id of the sound data
-    void (*cleanup)(void *userdata); // optional cleanup callback for streams
-    void *userdata; // optional userdata for streams
-    void (*seek)(void *userdata, float position); // optional seeking
-    int type; //0 for sound, 1 for music, -1 for error
-    int kind; //
-
-    load_state loaded;   // Degree to which this sound has been loaded successfully
-    bool idle;    // True if this sound is not being used, false if playing or paused.
-    bool playing; // True if this sound is playing; not paused or idle.
-
-    sound(): cleanup(0), userdata(0), seek(0), type(0), kind(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
-      buf[0] = 0; buf[1] = 0; buf[2] = 0;
-    }
-  };
 
   int get_free_channel(double priority);
 
-  extern sound **sounds;
-  extern size_t sound_idmax;
-
   #ifdef DEBUG_MODE
     #define get_sound(snd,id,failure)\
-      if (id < 0 or size_t(id) >= enigma::sound_idmax or !enigma::sounds[id]) {\
+      if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {\
         show_error("Sound " + toString(id) + " does not exist", false);\
         return failure;\
-      } enigma::sound *const snd = enigma::sounds[id];
+      } SoundResource *const snd = sound_resources[id];
   #else
     #define get_sound(snd,id,failure)\
-      enigma::sound *const snd = enigma::sounds[id];
+      SoundResource *const snd = sound_resources[id];
   #endif
 
   void eos_callback(void *soundID, unsigned src);
   int audiosystem_initialize();
-  sound* sound_new_with_source();
+  SoundResource* sound_new_with_source();
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize);
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata);
   int sound_allocate();

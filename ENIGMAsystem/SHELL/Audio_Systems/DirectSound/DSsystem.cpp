@@ -60,6 +60,8 @@ using std::string;
 
 #include "Platforms/Win32/WINDOWSmain.h"
 IDirectSoundBuffer* primaryBuffer;
+
+vector<SoundResource*> sound_resources(0);
 	
 namespace enigma {
 
@@ -67,8 +69,6 @@ namespace enigma {
   {
 
   }
-
-  sound **sounds;
 
   void eos_callback(void *soundID, unsigned src)
   {
@@ -79,6 +79,11 @@ namespace enigma {
 
   int audiosystem_initialize()
   {
+  	starttime = clock();
+    elapsedtime = starttime;
+    lasttime = elapsedtime;
+    printf("Initializing audio system...\n");
+	
 	HRESULT result;
 	DSBUFFERDESC bufferDesc;
  
@@ -120,23 +125,12 @@ namespace enigma {
 	
 	primaryBuffer->SetFormat(&primaryFormat);
 	
-	starttime = clock();
-    elapsedtime = starttime;
-    lasttime = elapsedtime;
-    printf("Initializing audio system...\n");
-    if (sound_idmax == 0)
-      sounds = NULL;
-    else
-      sounds = new sound*[sound_idmax];
-
-    for (size_t i = 0; i < sound_idmax; i++)
-      sounds[i] = NULL;
-	
 	return true;
   }
 
-  sound* sound_new_with_source() {
-    sound *res = new sound();
+  SoundResource* sound_new_with_source() {
+    SoundResource *res = new SoundResource();
+	sound_resources.push_back(res);
     res->loaded = LOADSTATE_SOURCED;
     return res;
   }
@@ -144,10 +138,7 @@ namespace enigma {
 
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
-    sound *snd = sounds[id];
-    if (!snd) {
-      snd = sounds[id] = sound_new_with_source();
-	}
+    SoundResource *snd = sound_new_with_source();
     if (snd->loaded != LOADSTATE_SOURCED) {
       //fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
       return 1;
@@ -217,14 +208,9 @@ namespace enigma {
 
   int sound_allocate()
   {
-    // Make room for sound
-    sound **nsounds = new sound*[sound_idmax+1];
-    for (size_t i = 0; i < sound_idmax; i++)
-      nsounds[i] = sounds[i];
-    nsounds[sound_idmax] = sound_new_with_source();
-    delete[] sounds;
-    sounds = nsounds;
-    return sound_idmax++;
+	int id = sound_resources.size();
+	sound_resources.push_back(new SoundResource());
+	return id;
   }
 
   void audiosystem_update(void)
