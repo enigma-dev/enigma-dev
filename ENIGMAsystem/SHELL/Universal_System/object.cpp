@@ -24,27 +24,52 @@
 #include "object.h"
 #include "libEGMstd.h"
 
+
+#ifdef DEBUG_MODE
+  #include "instance_system.h"
+  #include "resource_data.h" // TODO: We don't guarantee these functions exist. But they're useful for debugging. We need a debug namespace that offers this, too.
+  #include <Widget_Systems/widgets_mandatory.h> // show_error
+#endif
+
 namespace enigma
 {
     extern int maxid;
     objectstruct** objectdata;
     int instancecount = 0;
     int id_current =0;
-
+    
+    #ifdef DEBUG_MODE
+      static inline int DEBUG_ID_CHECK(int id, int objind) {
+        std::map<int, inst_iter*>::iterator it = instance_list.find(id);
+        if (it != instance_list.end()) {
+          show_error("Two instances were given the same ID! Object `" + enigma_user::object_get_name(it->second->inst->object_index)
+                     + "' and new object `" + enigma_user::object_get_name(objind)
+                     + "' both have ID " + toString(id)
+                     + "': A new ID has been assigned so the game can continue, but references by this ID may fail."
+                     " This bug is likely caused by the IDE, and can be worked around by using the 'Defrag IDs'"
+                     " feature to assign new, ordered IDs to all instances.", false);
+          return maxid++;
+        }
+        return id;
+      }
+    #else
+    # define DEBUG_ID_CHECK(x, y) (x)
+    #endif
+    
     double newinst_x, newinst_y;
     int newinst_obj, newinst_id;
 
-    void object_basic::unlink() {}
+    void object_basic::unlink()     {}
     void object_basic::deactivate() {}
-    void object_basic::activate() {}
+    void object_basic::activate()   {}
     variant object_basic::myevent_create()    { return 0; }
-    variant object_basic::myevent_gamestart()    { return 0; }
-    variant object_basic::myevent_draw()    { return 0; }
-    variant object_basic::myevent_roomend() { return 0; }
-    variant object_basic::myevent_destroy() { return 0; }
+    variant object_basic::myevent_gamestart() { return 0; }
+    variant object_basic::myevent_draw()      { return 0; }
+    variant object_basic::myevent_roomend()   { return 0; }
+    variant object_basic::myevent_destroy()   { return 0; }
 
-    object_basic::object_basic(): id(0), object_index(-4) {}
-    object_basic::object_basic(int uid, int uoid): id(uid), object_index(uoid) {}
+    object_basic::object_basic(): id(-4), object_index(-4) {}
+    object_basic::object_basic(int uid, int uoid): id(DEBUG_ID_CHECK(uid, uoid)), object_index(uoid) {}
     object_basic::~object_basic() {}
 
     extern objectstruct objs[];
