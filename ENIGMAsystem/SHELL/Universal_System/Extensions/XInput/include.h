@@ -15,5 +15,4 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "XIjoystick.h"
 #include "XIgamepad.h"
