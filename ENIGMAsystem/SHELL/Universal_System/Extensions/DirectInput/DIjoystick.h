@@ -31,6 +31,7 @@ using std::string;
 namespace enigma_user
 {
 
+bool joystick_load(int id);
 bool joystick_exists(int id);
 string joystick_name(int id);
 int joystick_axes(int id);

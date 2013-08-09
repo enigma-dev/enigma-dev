@@ -15,22 +15,80 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <windows.h>
 #include <dinput.h>
 #include "DIjoystick.h"  
+#include "Platforms/Win32/WINDOWSmain.h"
 
 namespace enigma_user
 {
 
-double joystick_axis(int id, int axisnum) {
+bool joystick_load(int id)
+{
+	JOYINFO joyinfo; 
+	UINT wNumDevs; 
+	BOOL bDevAttached; 
+ 
+    if((wNumDevs = joyGetNumDevs()) == 0) 
+        return false; 
+		
+    if (joySetCapture(enigma::hWnd, JOYSTICKID1 + id, NULL, FALSE)) 
+    { 
+        MessageBeep(MB_ICONEXCLAMATION); 
+        MessageBox(enigma::hWnd, "Couldn't capture the joystick.", NULL, 
+            MB_OK | MB_ICONEXCLAMATION); 
+        return false;
+    } 
+	
+	bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) != JOYERR_UNPLUGGED; 
+    if (!bDevAttached) 
+        return false;
+		
+	return true;
+}
 
+double joystick_axis(int id, int axisnum) {
+	JOYINFOEX joyinfo; 
+    joyGetPosEx(JOYSTICKID1 + id, &joyinfo); 
+	switch (axisnum) {
+		case 1:
+			return joyinfo.dwXpos;
+			break;
+		case 2:
+			return joyinfo.dwYpos;
+			break;
+		case 3: 
+			return joyinfo.dwZpos;
+			break;
+		case 4:
+			return joyinfo.dwRpos;
+			break;
+		case 5:
+			return joyinfo.dwUpos;
+			break;
+		case 6: 
+			return joyinfo.dwVpos;
+			break;
+		default:
+			return 0;
+	}
 }
 
 bool joystick_button(int id, int buttonnum) {
-
+	JOYINFOEX joyinfo; 
+    joyGetPosEx(JOYSTICKID1 + id, &joyinfo); 
+	return (joyinfo.dwButtons & (JOY_BUTTON1 + buttonnum));
 }
 
 bool joystick_exists(int id) {
-
+	JOYINFO joyinfo; 
+	UINT wNumDevs; 
+	BOOL bDevAttached; 
+ 
+    if((wNumDevs = joyGetNumDevs()) == 0) 
+        return false; 
+    bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) != JOYERR_UNPLUGGED; 
+	return bDevAttached;
 }
 
 string joystick_name(int id) {
@@ -51,11 +109,17 @@ bool joystick_has_pov(int id) {
 
 int joystick_direction(int id)
 {
-
+  JOYINFOEX joyinfo; 
+  joyGetPosEx(JOYSTICKID1 + id, &joyinfo); 		
+  const int x = joyinfo.dwXpos < -.5 ? 0 : joyinfo.dwXpos > .5 ? 2 : 1;
+  const int y = joyinfo.dwYpos < -.5 ? 0 : joyinfo.dwYpos > .5 ? 6 : 3;
+  return 97 + x + y;
 }
 
 double joystick_pov(int id) {
-
+	JOYINFOEX joyinfo; 
+    joyGetPosEx(JOYSTICKID1 + id, &joyinfo); 
+	return joyinfo.dwPOV / 100;
 }
 
 }
