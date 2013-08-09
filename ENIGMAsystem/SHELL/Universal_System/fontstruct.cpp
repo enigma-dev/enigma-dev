@@ -47,7 +47,7 @@ namespace enigma
     if (fontstructarray and fold) {
       for (unsigned i = 0; i <= font_idmax; i++)
         fsan[i] = fold[i];
-      delete fold;
+      delete[] fold;
     }
     fontstructarray = fsan + 1;
     fontstructarray[font_idmax] = ret;
