@@ -92,19 +92,27 @@ bool joystick_exists(int id) {
 }
 
 string joystick_name(int id) {
-
+	JOYCAPS joycaps; 
+    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps)); 
+	return joycaps.szPname;
 }
 
 int joystick_axes(int id) {
-
+	JOYCAPS joycaps; 
+    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps)); 
+	return joycaps.wNumAxes;
 }
 
 int joystick_buttons(int id) {
-
+	JOYCAPS joycaps; 
+    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps)); 
+	return joycaps.wNumButtons;
 }
 
 bool joystick_has_pov(int id) {
-
+	JOYCAPS joycaps; 
+    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps)); 
+	return (joycaps.wCaps & JOYCAPS_HASPOV);
 }
 
 int joystick_direction(int id)
