@@ -15,12 +15,4 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma {
-  struct extension_xinput
-  {
-    void xinput_update() {
-
-    }
-  };
-}
-
+#include "DIjoystick.h"

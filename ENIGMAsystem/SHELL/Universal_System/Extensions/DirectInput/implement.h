@@ -16,9 +16,9 @@
 **/
 
 namespace enigma {
-  struct extension_xinput
+  struct extension_directinput
   {
-    void xinput_update() {
+    void directinput_update() {
 
     }
   };

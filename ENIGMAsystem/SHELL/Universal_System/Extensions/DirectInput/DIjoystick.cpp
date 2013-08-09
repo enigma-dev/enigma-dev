@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2011-2012 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,12 +15,48 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma {
-  struct extension_xinput
-  {
-    void xinput_update() {
+#include <dinput.h>
+#include "DIjoystick.h"  
 
-    }
-  };
+namespace enigma_user
+{
+
+double joystick_axis(int id, int axisnum) {
+
+}
+
+bool joystick_button(int id, int buttonnum) {
+
+}
+
+bool joystick_exists(int id) {
+
+}
+
+string joystick_name(int id) {
+
+}
+
+int joystick_axes(int id) {
+
+}
+
+int joystick_buttons(int id) {
+
+}
+
+bool joystick_has_pov(int id) {
+
+}
+
+int joystick_direction(int id)
+{
+
+}
+
+double joystick_pov(int id) {
+
+}
+
 }
 
