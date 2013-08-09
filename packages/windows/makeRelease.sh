@@ -31,7 +31,7 @@ else
 	exit 1
 fi
 
-# Copy shit into it
+# Copy stuff into it
 case "$platform" in
 	"win")
 		cp ./CompilerSource/stupidity-buffer/ENIGMA.exe $odir/

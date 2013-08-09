@@ -44,7 +44,7 @@ namespace enigma
     virtual void function(variant oldvalue);
     
     //These are assignment operators and require a reference to be passed
-    multifunction_variant& operator=(multifunction_variant&); // Stop shit from happening
+    multifunction_variant& operator=(multifunction_variant&); // Stop unintended things from happening
     types_extrapolate_alldec(multifunction_variant& operator=)
     types_extrapolate_alldec(multifunction_variant& operator+=)
     types_extrapolate_alldec(multifunction_variant& operator-=)

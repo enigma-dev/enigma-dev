@@ -886,7 +886,7 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
     if (code[sp2++] == ' ') spos = sp2;
   
   cout << " <" << ((synt && code.length()) == (synt && synt->length()) ? "equivalent" : "UNEQUAL") << "> [" << (pos > code.length()) << "]";
-  cout << "ass: " << spos << ", " << epos << ": " << code.length() << endl;
+  cout << "position: " << spos << ", " << epos << ": " << code.length() << endl;
   string ptname = code.substr(spos,epos-spos+1); // Isolate the potential template's name
   jdi::definition* a = main_context->get_global()->look_up(ptname);
   if (!a) return 0;

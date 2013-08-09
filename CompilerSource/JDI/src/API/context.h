@@ -159,7 +159,7 @@ namespace jdi
     void output_types(ostream &out = cout); ///< Print a list of scoped-in types.
     void output_macro(string macroname, ostream &out = cout); ///< Print a single macro to a given stream.
     void output_macros(ostream &out = cout); ///< Print a list of scoped-in macros.
-    void output_definitions(ostream &out = cout); ///< Print a any scoped-in other shit.
+    void output_definitions(ostream &out = cout); ///< Print a any scoped-in other stuff.
     
     /// Drop all current macros, freeing them.
     void dump_macros();

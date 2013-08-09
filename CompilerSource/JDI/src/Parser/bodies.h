@@ -245,7 +245,7 @@ namespace jdip {
     @brief A field-free utility class extending \c context, implementing the
            recursive-descent functions needed by the parser.
     
-    This is some heavy shit.
+    This is some heavy stuff.
   **/
   struct context_parser: jdi::context
   {

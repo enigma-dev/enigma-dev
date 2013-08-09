@@ -46,7 +46,7 @@
 
 #include <map> //Log lookup
 #include <string> //Ease of use
-#include <iostream> //Print shit
+#include <iostream> //Print stuff
 #include <vector> //Store case labels
 #include <cstdlib> //stdout, fflush
 #include <cstdio> //stdout, fflush

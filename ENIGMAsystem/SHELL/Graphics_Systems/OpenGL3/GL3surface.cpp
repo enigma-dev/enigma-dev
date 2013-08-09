@@ -560,8 +560,8 @@ int surface_get_bound()
 
 }
 
-//////////////////////////////////////SAVE TO FILE AND CREATE SPRITE FUNCTIONS/////////
-//Fuck whoever did this to the spec
+//////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
+//whoever did this to the spec, screwed it up
 #ifndef GL_BGR
   #define GL_BGR 0x80E0
 #endif

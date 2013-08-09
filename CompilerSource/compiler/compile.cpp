@@ -231,7 +231,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   // Pick apart the sent resources
   edbg << "Location in memory of structure: " << (void*)es << flushl;
   if (es == NULL) {
-    idpr("Java ENIGMA plugin dropped its ass.",-1);
+    idpr("Java ENIGMA plugin has failed.",-1);
     return E_ERROR_PLUGIN_FUCKED_UP;
   }
 

@@ -106,9 +106,9 @@ void instance_destroy()
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
         enigma::instance_event_iterator->inst->unlink();
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
-    printf("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! %p ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!", (void*)a);
+    printf("WARNING! %p is not currently in the stack", (void*)a);
     if (a != (enigma::object_basic*)enigma::instance_event_iterator->inst)
-    printf("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO %p TO POINTING TO %p\n", (void*)a, (void*)(enigma::object_basic*)enigma::instance_event_iterator->inst);
+    printf("WARNING! The iterator changed from pointing to %p to %p\n", (void*)a, (void*)(enigma::object_basic*)enigma::instance_event_iterator->inst);
   }
 }
 

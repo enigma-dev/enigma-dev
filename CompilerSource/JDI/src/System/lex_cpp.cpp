@@ -718,8 +718,8 @@ token_t lexer_cpp::get_token(error_handler *herr)
   get_token_top:
   
   #ifdef DEBUG_MODE
-    static int number_of_times_GDB_has_dropped_its_ass = 0;
-    ++number_of_times_GDB_has_dropped_its_ass;
+    static int number_of_times_GDB_failed = 0;
+    ++number_of_times_GDB_failed;
   #endif
   
   for (;;) // Loop until we find something or hit world's end
@@ -925,7 +925,7 @@ token_t lexer_cpp::get_token(error_handler *herr)
   cerr << "UNREACHABLE BLOCK REACHED" << endl;
   return token_t(TT_INVALID,filename,line,pos-lpos++);
   
-  POP_FILE: // This block was created instead of a helper function to piss Rusky off.
+  POP_FILE: // This block was created instead of a helper function to make Rusky upset.
   if (pop_file())
     return token_t(token_basics(TT_ENDOFCODE,filename,line,pos-lpos));
   
@@ -1045,8 +1045,8 @@ void lexer_macro::update() { cfile = lcpp->data; length = lcpp->length; }
 token_t lexer_macro::get_token(error_handler *herr)
 {
   #ifdef DEBUG_MODE
-    static int number_of_times_GDB_has_dropped_its_ass_in_this_function = 0;
-    ++number_of_times_GDB_has_dropped_its_ass_in_this_function;
+    static int number_of_times_GDB_failed_in_this_function = 0;
+    ++number_of_times_GDB_failed_in_this_function;
   #endif
   
   for (;;) // Loop until we find something or hit world's end

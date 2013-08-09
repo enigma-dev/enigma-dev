@@ -194,7 +194,7 @@ int surface_get_bound()
 }
 
 //////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
-//Fuck whoever did this to the spec
+//whoever did this to the spec, screwed it up
 #ifndef DX_BGR
   #define DX_BGR 0x80E0
 #endif
