@@ -360,7 +360,7 @@ var::~var() { cleanup(); }
 
 
 /*
-   This part is about ass-backwards. But we'll go along with it. For science. You monster.
+   This part is about bass-ackwards. But we'll go along with it. For science. You monster.
 */
 #ifdef DEBUG_MODE
   #undef div0c

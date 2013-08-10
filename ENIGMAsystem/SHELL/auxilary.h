@@ -58,4 +58,4 @@
       typedef const _Tp&                  reference;
     };
     
-#error Ass caekz
+#error undescriptive error message

@@ -15,5 +15,5 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// Linker shit right meow...
+// Adding this include makes the compiler not error, it's not being used, perhaps something should be done about this?
 #include "Universal_System/instance_system_base.h"

@@ -2,7 +2,7 @@
  * @file  debug_macros.cpp
  * @brief Source implementing the conditional macros for parser debugging.
  * 
- * This file implements the ass-end of the debug macros.
+ * This file implements the back-end of the debug macros.
  *
  * @section License
  * 

@@ -56,9 +56,6 @@ void lang_CPP::load_extension_locals()
   }
 }
 
-
-const char* heaping_pile_of_dog_shit = "ERROR: Unknown";
-
 #ifdef _WIN32
  #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)
@@ -139,10 +136,9 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   } else cerr << "ERROR! Namespace enigma not found!" << endl;
   
   if (res) {
-    cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never fucking happy. Have a turd.\n";
-    cout << heaping_pile_of_dog_shit;
+    cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
     
-    ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
+    ide_passback_error.set(0,0,0,"Parse failed; details in stdout.");
     cout << "Continuing anyway." << endl;
     // return &ide_passback_error;
   } else {    

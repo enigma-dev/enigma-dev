@@ -187,8 +187,8 @@ full_type jdip::read_type(lexer *lex, token_t &token, definition_scope *scope, c
 int jdip::read_referencers(ref_stack &refs, const full_type& ft, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr)
 {
   #ifdef DEBUG_MODE
-  static int number_of_times_GDB_dropped_its_ass = 0;
-  number_of_times_GDB_dropped_its_ass++;
+  static int number_of_times_GDB_failed = 0;
+  number_of_times_GDB_failed++;
   #endif
   
   for (;;)
@@ -306,8 +306,8 @@ int jdip::read_referencers(ref_stack &refs, const full_type& ft, lexer *lex, tok
 int jdip::read_referencers_post(ref_stack &refs, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr)
 {
   #ifdef DEBUG_MODE
-  static int number_of_times_GDB_dropped_its_ass = 0;
-  number_of_times_GDB_dropped_its_ass++;
+  static int number_of_times_GDB_failed = 0;
+  number_of_times_GDB_failed++;
   #endif
   
   for (;;)

@@ -22,7 +22,7 @@
 // 4) box2d's manual also states you should blend previous timesteps for updating the world with the current timestep
 //    in order to make the simulation run smoother
 // 5) box2d manual is available here... http://www.box2d.org/manual.html
-// 6) I made joints bind fixtures, where as studio's joints bind instances together, that's stupid, fuck that
+// 6) I made joints bind fixtures, where as studio's joints bind instances together, that's stupid, seriously
 // 7) box2d's classes allow you to set a b2Shape for instance to a b2CircleShape or b2PolygonShape
 //    that is why I wrote the classes to use an abstracted pointer reference such as b2Shape and b2Joint
 

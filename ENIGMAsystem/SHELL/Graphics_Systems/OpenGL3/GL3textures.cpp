@@ -195,7 +195,7 @@ void texture_set_blending(bool enable)
 
 double texture_get_width(int texid)
 {
-  // returns floating point scale to the bg or some shit
+  // returns floating point scale to the bg or something
 }
 
 double texture_get_height(int texid)

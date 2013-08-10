@@ -764,7 +764,7 @@ public class EFileReader
 					//MainEvent ev = new MainEvent();
 					if (evnode.id == null || evnode.id.length < 2)
 						{
-						System.err.println("FUCK");
+						System.err.println("ERROR! NULL event node id");
 						return;
 						}
 					int mid = Integer.parseInt(evnode.id[1]);
@@ -788,7 +788,7 @@ public class EFileReader
 						{
 						if (actnode.id == null || actnode.id.length < 2)
 							{
-							System.err.println("actFUCK");
+							System.err.println("ERROR! NULL action node id");
 							continue;
 							}
 						int aid = Integer.parseInt(actnode.id[0]), lid = Integer.parseInt(actnode.id[1]);
@@ -801,7 +801,7 @@ public class EFileReader
 						LibAction la = LibManager.getLibAction(lid,aid);
 						if (la == null)
 							{
-							System.err.println("FUCK! UNDEFINED ACTION AND THEN SOME.");
+							System.err.println("ERROR! Undefined action, and then some");
 							return;
 							}
 						Action a = e.addAction(la); //assuming the Library was found and la != null

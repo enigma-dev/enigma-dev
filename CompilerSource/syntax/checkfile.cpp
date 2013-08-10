@@ -62,7 +62,7 @@ int file_check(string filename)
     if (syncheck::scrcount>0)
     { syncheck::scrcount=0; syncheck::scrnames.clear(); }*/
 
-    //Segfaulting piece o' shit
+    // Segmentation fault may occur here
     for (int i=0;in2[i]!='\r' && in2[i]!='\n';i++)
     {
         if (!is_letter(in2[i]))

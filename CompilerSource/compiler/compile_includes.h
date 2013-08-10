@@ -2,7 +2,7 @@
   @file  compile_includes.h
   @brief Contains general-purpose functions for use in compile.cpp.
   
-  This file seems like a pile of shit and will likely be removed soon in favor of
+  This file seems like a garbage and will likely be removed soon in favor of
   just sticking its few methods in the including source.
   
   @section License

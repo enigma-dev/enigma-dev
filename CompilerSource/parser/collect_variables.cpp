@@ -227,7 +227,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       }
       
       // Indicate that we're in a declaration and should start
-      // Ignoring shit rather than adding it to the local list
+      // Ignoring stuff rather than adding it to the local list
       in_decl = true;
       
       // Log this position

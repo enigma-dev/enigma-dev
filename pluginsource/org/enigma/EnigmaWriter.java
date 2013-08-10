@@ -242,7 +242,7 @@ public final class EnigmaWriter
 		og.copyright = ig.get(PGameSettings.COPYRIGHT);
 		og.description = ig.get(PGameSettings.DESCRIPTION);
 
-		//All this shit is just to write the icon to a temp file and provide the filename...
+		//All this stuff is just to write the icon to a temp file and provide the filename...
 		ICOFile ico = ig.get(PGameSettings.GAME_ICON);
 		OutputStream os = null;
 		String fn = null;
