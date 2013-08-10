@@ -104,8 +104,8 @@ namespace enigma_user
 void b2d_world_create(int pixeltometerscale)
 {
   enigma::init_box2d_system();
-  /** studio's fucked up world creation just auto binds it to the current room
-      thats fuckin retarded thus why i overloaded the function and provided an extra
+  /** studio's messed up world creation just auto binds it to the current room
+      thats dumb, thus why i overloaded the function and provided an extra
       function for setting the pixel to metre scale
   **/
 }
@@ -188,7 +188,7 @@ void b2d_world_update_speed(int index, int updatesperstep)
 
 void b2d_world_draw_debug()
 {
-  // draws all the fixtures and their rotations in the room for u, wants constants, fuck that
+  // draws all the fixtures and their rotations in the room for u, wants constants, im not doing that
   // end programmer can do it themselves
 }
 

@@ -503,27 +503,10 @@ class d3d_model
     const float usize = fabs(zd), vsize = hypotf(xd, yd);
     const float uz = zd/usize, vx = xd/vsize, vy = yd/vsize;
     glNormal3f(uz*vy, uz*vx, 0);
-
-    if (x2>x1 || y2>y1) {
       model_vertex_texture(v0,t0);
-    } else {
-      model_vertex_texture(v3,t3);
-    }
-    if (x1>x2 || y1>y2) {
       model_vertex_texture(v1,t1);
-    } else {
       model_vertex_texture(v2,t2);
-    }
-    if (x1>x2 || y1>y2) {
-      model_vertex_texture(v2,t2);
-    } else {
-      model_vertex_texture(v1,t1);
-    }
-    if (x2>x1 || y2>y1) {
       model_vertex_texture(v3,t3);
-    } else {
-      model_vertex_texture(v0,t0);
-    }
     model_primitive_end();
     }
 
