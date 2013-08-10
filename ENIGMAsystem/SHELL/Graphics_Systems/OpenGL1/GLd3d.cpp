@@ -302,10 +302,6 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 
 void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-  if ((fequal(x1, x2) || fequal(y1, y2)) || fequal(z1, z2)) {
-    return;
-  }
-
   float xd = x2-x1, yd = y2-y1, zd = z2-z1;
   float normal[3] = {xd*zd, zd*yd, 0};
   float mag = hypot(normal[0], normal[1]);
