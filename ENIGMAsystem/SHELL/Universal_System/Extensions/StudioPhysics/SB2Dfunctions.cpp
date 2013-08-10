@@ -120,7 +120,7 @@ namespace enigma_user
 void physics_world_create(int pixeltometerscale)
 {
   enigma::init_studio_physics();
-  /** stupido's fucked up world creation just auto binds it to the current room
+  /** stupido's messed up world creation just auto binds it to the current room
   **/
 }
 
@@ -507,7 +507,7 @@ void physics_mass_properties(double mass, double local_center_x, double local_ce
 
 void physics_draw_debug()
 {
-  // draws the currently bound fixture's shape with draw color, fuck that let the end programmer have control
+  // draws the currently bound fixture's shape with draw color, im not doing that let the end programmer have control
 }
 
 }
