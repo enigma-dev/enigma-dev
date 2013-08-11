@@ -49,8 +49,9 @@ namespace enigma_user
 void texture_set_enabled(bool enable);
 void texture_set_interpolation(int enable);
 bool texture_get_interpolation();
-int texture_get_pixwidth(int texid);
-int texture_get_pixheight(int texid);
+int texture_get_texel_width(int texid);
+int texture_get_texel_height(int texid);
+void texture_set_stage(int stage, int texid);
 void texture_set_blending(bool enable);
 void texture_set_repeat(bool repeat);
 void texture_set_repeat(int texid, bool repeat);
