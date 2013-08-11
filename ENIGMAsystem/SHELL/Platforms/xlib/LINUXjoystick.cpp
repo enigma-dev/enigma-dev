@@ -96,6 +96,7 @@ namespace enigma
         }
       else
       {
+        enigma_user::joystick_lastbutton = a.number;
         //printf("Button %d pressed: %d\n", a.number, a.value);
         my_joystick->button[a.number] = a.value;
         //printf("Wrap: %d\n",my_joystick->wrapbutton[a.number]);
@@ -117,118 +118,119 @@ namespace enigma
 namespace enigma_user
 {
   
-#ifdef DEBUG_MODE
-#  define checkId(failv) { if (size_t(id) > enigma::joysticks.size()) { return (failv); } }
-#  define checkPositiveId(failv) { if (id < 0) return (failv); }
-#else
-#  define checkId(failv)
-#  define checkPositiveId(failv)
-#endif
+  #ifdef DEBUG_MODE
+  #  define checkId(failv) { if (size_t(id) > enigma::joysticks.size()) { return (failv); } }
+  #  define checkPositiveId(failv) { if (id < 0) return (failv); }
+  #else
+  #  define checkId(failv)
+  #  define checkPositiveId(failv)
+  #endif
 
-bool joystick_load(int id)
-{
-  checkPositiveId(false);
-  if (size_t(id) >= enigma::joysticks.size())
-    enigma::joysticks.resize(id+1, 0);
-  else
-     delete enigma::joysticks[id];
-  
-  char sps[32]; sprintf(sps,"/dev/input/js%d",id);
-  string devn(sps);
-  int device = open(devn.c_str(), O_RDONLY|O_NONBLOCK);
-  if (device == -1)
+  bool joystick_load(int id)
+  {
+    checkPositiveId(false);
+    if (size_t(id) >= enigma::joysticks.size())
+      enigma::joysticks.resize(id+1, 0);
+    else
+       delete enigma::joysticks[id];
+    
+    char sps[32]; sprintf(sps,"/dev/input/js%d",id);
+    string devn(sps);
+    int device = open(devn.c_str(), O_RDONLY|O_NONBLOCK);
+    if (device == -1)
+      return false;
+    
+    int ac = 4, bc = 4;
+    ioctl(device, I_SRDOPT, RMSGN);
+    if (ioctl(device, JSIOCGAXES, &ac) or ioctl(device, JSIOCGBUTTONS, &bc))
+      return (close(device), false);
+    
+    char name[256]; name[0] = 0;
+    if (ioctl(device, JSIOCGNAME(256), name) > 0)
+      devn = name;
+    printf("Joystick name: %s\n",name);
+    
+    enigma::e_joystick* const jsn = new enigma::e_joystick(device, devn, ac, bc);
+    enigma::joysticks[id] = jsn;
+    enigma::handle_joystick(jsn);
+    return true;
+  }
+
+  void joystick_map_button(int id, int butnum, char key)
+  {
+    checkId(void());
+    if ((unsigned)id >= enigma::joysticks.size())
+      return;
+    enigma::e_joystick *js = enigma::joysticks[id];
+    if (js and butnum < js->buttoncount)
+      js->wrapbutton[butnum] = key;
+  }
+
+  void joystick_map_axis(int id, int axisnum, char keyneg, char keypos)
+  {
+    checkId(void());
+    if ((unsigned)id >= enigma::joysticks.size())
+      return;
+    enigma::e_joystick *js = enigma::joysticks[id];
+    if (js and axisnum < js->axiscount)
+      js->wrapaxis_negative[axisnum] = keyneg,
+      js->wrapaxis_positive[axisnum] = keypos;
+  }
+
+  double joystick_axis(int id, int axisnum) {
+    checkId(0);
+    const enigma::e_joystick * const js = enigma::joysticks[id];
+    return js->axis[axisnum];
+  }
+  bool joystick_button(int id, int buttonnum) {
+    checkId(0);
+    const enigma::e_joystick * const js = enigma::joysticks[id];
+    return js->button[buttonnum];
+  }
+
+  bool joystick_exists(int id) {
+    if (size_t(id) > enigma::joysticks.size())
+      return false;
+    const enigma::e_joystick * const js = enigma::joysticks[id];
+    return js && js->device != -1;
+  }
+
+  string joystick_name(int id) {
+    checkId("");
+    enigma::e_joystick * const js = enigma::joysticks[id];
+    return js->name;
+  }
+
+  int joystick_axes(int id) {
+    checkId(0);
+    enigma::e_joystick * const js = enigma::joysticks[id];
+    return js->axiscount;
+  }
+
+  int joystick_buttons(int id) {
+    checkId(0);
+    enigma::e_joystick * const js = enigma::joysticks[id];
+    return js->buttoncount;
+  }
+
+  bool joystick_has_pov(int id) {
+    checkId(false);
     return false;
+  }
+  int joystick_direction(int id)
+  {
+    checkId(0);
+    enigma::e_joystick * const js = enigma::joysticks[id];
+    if (js->axiscount < 2) return 0;
+    const int x = js->axis[0] < -.5 ? 0 : js->axis[0] > .5 ? 2 : 1;
+    const int y = js->axis[1] < -.5 ? 0 : js->axis[1] > .5 ? 6 : 3;
+    return 97 + x + y;
+  }
+  double joystick_pov(int id) {
+    checkId(0);
+    return 0;
+  }
   
-  int ac = 4, bc = 4;
-  ioctl(device, I_SRDOPT, RMSGN);
-  if (ioctl(device, JSIOCGAXES, &ac) or ioctl(device, JSIOCGBUTTONS, &bc))
-    return (close(device), false);
-  
-  char name[256]; name[0] = 0;
-  if (ioctl(device, JSIOCGNAME(256), name) > 0)
-    devn = name;
-  printf("Joystick name: %s\n",name);
-  
-  enigma::e_joystick* const jsn = new enigma::e_joystick(device, devn, ac, bc);
-  enigma::joysticks[id] = jsn;
-  enigma::handle_joystick(jsn);
-  return true;
-}
-
-void joystick_map_button(int id, int butnum, char key)
-{
-  checkId(void());
-  if ((unsigned)id >= enigma::joysticks.size())
-    return;
-  enigma::e_joystick *js = enigma::joysticks[id];
-  if (js and butnum < js->buttoncount)
-    js->wrapbutton[butnum] = key;
-}
-
-void joystick_map_axis(int id, int axisnum, char keyneg, char keypos)
-{
-  checkId(void());
-  if ((unsigned)id >= enigma::joysticks.size())
-    return;
-  enigma::e_joystick *js = enigma::joysticks[id];
-  if (js and axisnum < js->axiscount)
-    js->wrapaxis_negative[axisnum] = keyneg,
-    js->wrapaxis_positive[axisnum] = keypos;
-}
-
-double joystick_axis(int id, int axisnum) {
-  checkId(0);
-  const enigma::e_joystick * const js = enigma::joysticks[id];
-  return js->axis[axisnum];
-}
-bool joystick_button(int id, int buttonnum) {
-  checkId(0);
-  const enigma::e_joystick * const js = enigma::joysticks[id];
-  return js->button[buttonnum];
-}
-
-bool joystick_exists(int id) {
-  if (size_t(id) > enigma::joysticks.size())
-    return false;
-  const enigma::e_joystick * const js = enigma::joysticks[id];
-  return js && js->device != -1;
-}
-
-string joystick_name(int id) {
-  checkId("");
-  enigma::e_joystick * const js = enigma::joysticks[id];
-  return js->name;
-}
-
-int joystick_axes(int id) {
-  checkId(0);
-  enigma::e_joystick * const js = enigma::joysticks[id];
-  return js->axiscount;
-}
-
-int joystick_buttons(int id) {
-  checkId(0);
-  enigma::e_joystick * const js = enigma::joysticks[id];
-  return js->buttoncount;
-}
-
-bool joystick_has_pov(int id) {
-  checkId(false);
-  return false;
-}
-int joystick_direction(int id)
-{
-  checkId(0);
-  enigma::e_joystick * const js = enigma::joysticks[id];
-  if (js->axiscount < 2) return 0;
-  const int x = js->axis[0] < -.5 ? 0 : js->axis[0] > .5 ? 2 : 1;
-  const int y = js->axis[1] < -.5 ? 0 : js->axis[1] > .5 ? 6 : 3;
-  return 97 + x + y;
-}
-double joystick_pov(int id) {
-  checkId(0);
-  return 0;
-}
-
+  int joystick_lastbutton = -1;
 }
 

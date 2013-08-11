@@ -65,7 +65,7 @@ namespace enigma
       
       int e = sound_add_from_buffer(id,fdata,size);
       if (e) printf("Failed to load sound %d; error %d\n",i,e);
-      delete fdata;
+      delete[] fdata;
     }
   }
 }

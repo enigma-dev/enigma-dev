@@ -19,7 +19,9 @@
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
 #include "GL3model.h"
-#include "../General/GLbinding.h"
+#include "GL3binding.h"
+
+#include <stdio.h>
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
@@ -55,6 +57,8 @@ int prim_draw_texture = -1;
 int prim_d3d_model = -1;
 int prim_d3d_texture = -1;
 
+unsigned get_texture(int texid);
+
 namespace enigma_user
 {
 
@@ -80,9 +84,7 @@ int draw_primitive_begin_texture(int kind,unsigned tex)
 
 int draw_vertex(gs_scalar x, gs_scalar y)
 {
-  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
-  float alpha = (float)enigma::currentcolor[3] / 255.0;
-  d3d_model_vertex_color(prim_draw_model, x, y, 0, col, alpha);
+  d3d_model_vertex(prim_draw_model, x, y, 0);
   return 0;
 }
 
@@ -152,7 +154,7 @@ void d3d_primitive_end()
 
 void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
 {
-int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
+  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
   float alpha = (float)enigma::currentcolor[3] / 255.0;
   d3d_model_vertex_color(prim_d3d_model, x, y, z, col, alpha);
 }

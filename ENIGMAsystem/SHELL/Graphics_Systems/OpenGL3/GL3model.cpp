@@ -24,7 +24,9 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
-#include "../General/GLbinding.h"
+#include <stdio.h>
+
+#include "GL3binding.h"
 
 using namespace std;
 
@@ -40,6 +42,8 @@ using namespace std;
 
 #include <vector>
 using std::vector;
+
+unsigned get_texture(int texid);
 
 extern GLenum ptypes_by_id[16];
 namespace enigma {
@@ -101,6 +105,9 @@ class Mesh
   bool vbobuffered;
   int vbotype;
   bool useColorBuffer; //If color is not used, then it won't bind the color buffer
+  bool useTextureBuffer;
+  bool useNormalBuffer;
+  bool useIndexBuffer;
 
   unsigned int Begin(int pt)
   {
@@ -218,26 +225,41 @@ class Mesh
     // Send the data to the GPU
     glBufferData( GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], vbotypes[vbotype] );
 
-    // Bind The Texture Coordinate Buffer
-    glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
-    // Send the data to the GPU
-    glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], vbotypes[vbotype] );
+    if (textures.size()>0){
+        // Bind The Texture Coordinate Buffer
+        glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
+        // Send the data to the GPU
+        glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], vbotypes[vbotype] );
+        useTextureBuffer = true;
+    }else{
+        useTextureBuffer = false;
+    }
 
-    // Bind The Normal Coordinate Buffer
-    glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
-    // Send the data to the GPU
-    glBufferData( GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), &normals[0], vbotypes[vbotype] );
+    if (normals.size()>0){
+        // Bind The Normal Coordinate Buffer
+        glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
+        // Send the data to the GPU
+        glBufferData( GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), &normals[0], vbotypes[vbotype] );
+        useNormalBuffer = true;
+    }else{
+        useNormalBuffer = false;
+    }
 
-    if (useColorBuffer == true){
+    if (useColorBuffer == true && colors.size()>0){
         // Bind The Colors Buffer
         glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );
         // Send the data to the GPU
         glBufferData( GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), &colors[0], vbotypes[vbotype] );
     }
 
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
-    // Send the data to the GPU
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], vbotypes[vbotype] );
+    if (indices.size()>0){
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
+        // Send the data to the GPU
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], vbotypes[vbotype] );
+        useIndexBuffer = true;
+    }else{
+        useIndexBuffer = false;
+    }
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
@@ -252,23 +274,37 @@ class Mesh
     // Send the data to the GPU
     glBufferSubData( GL_ARRAY_BUFFER, offset * 3 * sizeof(GLfloat), vertices.size(), &vertices[0] );
 
-    glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
-    // Send the data to the GPU
-    glBufferSubData( GL_ARRAY_BUFFER, offset * 2 * sizeof(GLfloat), textures.size(), &textures[0] );
+    if (textures.size()>0){
+        glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
+        // Send the data to the GPU
+        glBufferSubData( GL_ARRAY_BUFFER, offset * 2 * sizeof(GLfloat), textures.size(), &textures[0] );
+        useTextureBuffer = true;
+    }else{
+        useTextureBuffer = false;
+    }
 
-    glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );        // Bind The Buffer
-    // Send the data to the GPU
-    glBufferSubData( GL_ARRAY_BUFFER, offset * 3 * sizeof(GLfloat), normals.size(), &normals[0] );
+    if (normals.size()>0){
+        glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );        // Bind The Buffer
+        // Send the data to the GPU
+        glBufferSubData( GL_ARRAY_BUFFER, offset * 3 * sizeof(GLfloat), normals.size(), &normals[0] );
+        useNormalBuffer = true;
+    }else{
+        useNormalBuffer = false;
+    }
 
-    if (useColorBuffer == true){
+    if (useColorBuffer == true && colors.size()>0){
         glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );        // Bind The Buffer
         // Send the data to the GPU
         glBufferSubData( GL_ARRAY_BUFFER, offset * 4 * sizeof(GLfloat), colors.size(), &colors[0] );
     }
 
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
-    // Send the data to the GPU
-    glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, offset * sizeof(GLuint), indices.size(), &indices[0] );
+    if (indices.size()>0){
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
+        // Send the data to the GPU
+        glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, offset * sizeof(GLuint), indices.size(), &indices[0] );
+    }else{
+        useIndexBuffer = false;
+    }
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
@@ -302,13 +338,17 @@ class Mesh
     glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );
     glVertexPointer( 3, GL_FLOAT, 0, (char *) NULL );       // Set The Vertex Pointer To The Vertex Buffer
 
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
-    glTexCoordPointer( 2, GL_FLOAT, 0, (char *) NULL );     // Set The TexCoord Pointer To The TexCoord Buffer
+    if (useTextureBuffer == true){
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
+        glTexCoordPointer( 2, GL_FLOAT, 0, (char *) NULL );     // Set The TexCoord Pointer To The TexCoord Buffer
+    }
 
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
-    glNormalPointer( GL_FLOAT, 0, (char *) NULL );     // Set The Normal Pointer To The Normal Buffer
+    if (useNormalBuffer == true){
+        glEnableClientState(GL_NORMAL_ARRAY);
+        glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
+        glNormalPointer( GL_FLOAT, 0, (char *) NULL );     // Set The Normal Pointer To The Normal Buffer
+    }
 
     if (useColorBuffer == true){
         glEnableClientState(GL_COLOR_ARRAY);
@@ -316,7 +356,9 @@ class Mesh
         glColorPointer( 4, GL_FLOAT, 0, (char *) NULL );     // Set The Color Pointer To The Color Buffer
     }
 
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );
+    if (useIndexBuffer == true){
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );
+    }
 
     for (unsigned int i = 0; i < primitives.size(); i++)
     {
@@ -330,9 +372,9 @@ class Mesh
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
     glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    if (useColorBuffer == true) { glDisableClientState(GL_COLOR_ARRAY); }
+    if (useTextureBuffer == true) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (useNormalBuffer == true) glDisableClientState(GL_NORMAL_ARRAY);
+    if (useColorBuffer == true) glDisableClientState(GL_COLOR_ARRAY);
   }
 };
 

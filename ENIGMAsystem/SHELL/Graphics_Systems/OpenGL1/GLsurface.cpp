@@ -81,7 +81,7 @@ int surface_create(int width, int height)
   {
     return -1;
   }
-    
+
   GLuint tex, fbo;
   int prevFbo;
 
@@ -145,7 +145,7 @@ int surface_create_msaa(int width, int height, int samples)
   {
     return -1;
   }
-    
+
   GLuint tex, fbo;
   int prevFbo;
 
@@ -205,6 +205,11 @@ int surface_create_msaa(int width, int height, int samples)
 
 void surface_set_target(int id)
 {
+  //This fixes several consecutive surface_set_target() calls without surface_reset_target.
+  int prevFbo;
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  if (prevFbo != 0) glPopAttrib(); glPopMatrix();
+  //
   get_surface(surf,id);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo); //bind it
   glPushMatrix(); //So you can pop it in the reset
@@ -253,7 +258,7 @@ void draw_surface(int id, gs_scalar x, gs_scalar y)
   glPopAttrib();
 }
 
-void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
+void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -374,7 +379,7 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_
   glPopAttrib();
 }
 
-void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, double alpha)
+void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -403,7 +408,7 @@ void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_sca
   glPopAttrib();
 }
 
-void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, double alpha)
+void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -424,7 +429,7 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar widt
   glPopAttrib();
 }
 
-void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -448,7 +453,7 @@ void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar widt
   glPopAttrib();
 }
 
-void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -479,7 +484,7 @@ void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, 
   glPopAttrib();
 }
 
-void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -529,7 +534,7 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
   glPopAttrib();
 }
 
-void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
+void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
 {
   get_surface(surf,id);
   texture_use(surf->tex);
@@ -747,7 +752,7 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
  	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
 	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
-    enigma::sprite_set_subimage(sprid, 0, xorig, yorig, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise. 
+    enigma::sprite_set_subimage(sprid, 0, xorig, yorig, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
     delete[] surfbuf;
     return sprid;
 }
