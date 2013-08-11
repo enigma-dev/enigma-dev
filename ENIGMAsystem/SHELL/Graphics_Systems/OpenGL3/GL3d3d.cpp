@@ -323,30 +323,6 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
 
   GLubyte indices[] = {0, 1, 2, 3};
 
-  if (x2>x1 || y2>y1) {
-    indices[0] = 0;
-  } else {
-    indices[0] = 3;
-  }
-
-  if (x2<x1 || y2<y1) {
-    indices[1] = 2;
-  } else {
-    indices[1] = 1;
-  }
-
-  if (x2<x1 || y2<y1) {
-    indices[2] = 1;
-  } else {
-    indices[2] = 2;
-  }
-
-  if (x2>x1 || y2>y1) {
-    indices[3] = 3;
-  } else {
-    indices[3] = 0;
-  }
-
   texture_use(get_texture(texId));
 
   glVertexPointer(3, GL_FLOAT, 0, verts);
@@ -361,7 +337,6 @@ void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
   GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
           texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
           norms[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1};
-  GLubyte ceil_indices[] = {0, 2, 1, 3};
   GLubyte floor_indices[] = {3, 1, 2, 0};
 
   texture_use(get_texture(texId));
@@ -370,11 +345,7 @@ void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
 
-  if (x2>x1 || y2>y1) {
-    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, ceil_indices);
-  } else {
-    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, floor_indices);
-  }
+  glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, floor_indices);
 }
 
 void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
