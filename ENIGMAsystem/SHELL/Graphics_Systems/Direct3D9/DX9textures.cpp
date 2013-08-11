@@ -154,14 +154,18 @@ double texture_get_height(int texid)
 
 }
 
-int texture_get_pixwidth(int texid)
+int texture_get_texel_width(int texid)
 {
 
 }
 
-int texture_get_pixheight(int texid)
+int texture_get_texel_height(int texid)
 {
 
+}
+
+void texture_set_stage(int stage, int texid) {
+	d3ddev->SetTexture(stage, enigma::bound_texture = get_texture(texid));
 }
 
 void texture_set_repeat(bool repeat)

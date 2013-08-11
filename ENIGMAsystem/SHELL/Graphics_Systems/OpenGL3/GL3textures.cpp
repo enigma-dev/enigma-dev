@@ -203,7 +203,7 @@ double texture_get_height(int texid)
   // so does this one
 }
 
-int texture_get_pixwidth(int texid)
+int texture_get_texel_width(int texid)
 {
   // returns the actual number of pixels in the texture across the xaxis
   GLint width = 0;
@@ -212,13 +212,18 @@ int texture_get_pixwidth(int texid)
   return width;
 }
 
-int texture_get_pixheight(int texid)
+int texture_get_texel_height(int texid)
 {
   // returns the actual number of pixels in the tex across the yaxis
   GLint height = 0;
   texture_use(GmTextures[texid]->gltex);
   glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &height);
   return height;
+}
+
+void texture_set_stage(int stage, int texid) {
+	glActiveTexture(GL_TEXTURE0 + stage);
+	glBindTexture(GL_TEXTURE_2D, get_texture(texid));
 }
 
 void texture_set_repeat(bool repeat)

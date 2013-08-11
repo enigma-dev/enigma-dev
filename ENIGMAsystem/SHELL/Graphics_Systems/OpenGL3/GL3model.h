@@ -19,7 +19,7 @@
 #include "../General/GSmodel.h"
 
 namespace enigma_user {
-  void d3d_model_open(const unsigned int id, int offset);
-  void d3d_model_close(const unsigned int id);
+  void d3d_model_open(int id, int offset);
+  void d3d_model_close(int id);
 }
 
