@@ -85,14 +85,6 @@ void audio_falloff_set_model(int model);
 
 int audio_emitter_create();
 bool audio_emitter_exists(int index);
-void audio_emitter_play(int index, bool loop);
-void audio_emitter_stop(int index);
-void audio_emitter_pause(int index);
-void audio_emitter_resume(int index);
-int audio_emitter_sound_count(int index);
-int audio_emitter_sound_get(int index, int track);
-void audio_emitter_sound_add(int index, int sound);
-void audio_emitter_sound_remove(int index, int track);
 void audio_emitter_falloff(int emitter, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor);
 void audio_emitter_free(int emitter);
 void audio_emitter_gain(int emitter, double gain);
