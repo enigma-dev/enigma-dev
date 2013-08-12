@@ -61,7 +61,9 @@ class grid
 
     public:
     grid() {}
-    grid(const unsigned int w, const unsigned int h) {ygrid = h; xgrid = w; grid_array = new t[h*w];}
+    grid(const unsigned int w, const unsigned int h) {
+		ygrid = h; xgrid = w; grid_array = new t[w*h];
+	}
     ~grid() {}
 
     void destroy()
@@ -480,7 +482,8 @@ namespace enigma_user
 unsigned int ds_grid_create(const unsigned int w, const unsigned int h)
 {
     //Creates a new grid. The function returns an integer as an id that must be used in all other functions to access the particular grid.
-    ds_grids.insert(pair<unsigned int, grid<variant> >(ds_grids_maxid++, grid<variant>(w, h)));
+    pair<map<unsigned int, grid<variant> >::iterator, bool> ins = ds_grids.insert(pair<unsigned int, grid<variant> >(ds_grids_maxid++, grid<variant>(w, h)));
+	ins.first->second.clear(0);
     return ds_grids_maxid-1;
 }
 
