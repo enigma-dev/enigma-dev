@@ -22,6 +22,10 @@
 #include <stdio.h>      /* printf, scanf, NULL */
 #include <stdlib.h>     /* malloc, free, rand */
 
+#include <iostream>
+#include <fstream>
+using namespace std;
+
 #include <vector>
 using std::vector;
 
