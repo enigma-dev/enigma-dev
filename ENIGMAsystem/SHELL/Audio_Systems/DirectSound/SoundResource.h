@@ -43,6 +43,7 @@ enum load_state {
 struct SoundResource
 {
     IDirectSoundBuffer* soundBuffer;
+	//IDirectSoundFXChorus8* soundEffect;
     unsigned buf[3]; // The buffer-id of the sound data
     void (*cleanup)(void *userdata); // optional cleanup callback for streams
     void *userdata; // optional userdata for streams
