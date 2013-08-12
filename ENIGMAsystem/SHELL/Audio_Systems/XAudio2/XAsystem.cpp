@@ -21,6 +21,8 @@
 #include "SoundEmitter.h"
 #include "SoundChannel.h"
 
+#include <objbase.h>
+
 #include <time.h>
 clock_t starttime;
 clock_t elapsedtime;
