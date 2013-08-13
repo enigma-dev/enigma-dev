@@ -99,6 +99,7 @@ public class ProgressFrame extends JFrame implements OutputHandler
 	public ProgressFrame()
 		{
 		super(Messages.getString("EnigmaFrame.TITLE")); //$NON-NLS-1$
+		this.setIconImage(LGM.getIconForKey("EnigmaPlugin.COMPILE").getImage());
 		setLocationRelativeTo(LGM.frame);
 		JPanel p = new JPanel(new BorderLayout());
 		ta = new JTextPane();
