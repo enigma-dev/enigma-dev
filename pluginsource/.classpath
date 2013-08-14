@@ -2,6 +2,11 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JNA"/>
 	<classpathentry kind="lib" path="C:/Users/Owner/Desktop/ENIGMA/enigma-dev/lateralgm.jar"/>
+<<<<<<< HEAD
+=======
+	<classpathentry exported="true" kind="lib" path="C:/Users/Owner/Desktop/ENIGMA/enigma-dev/plugins/shared/jna.jar"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/LateralGM"/>
+>>>>>>> 3603ae4c11403fa89fd0e4ad4026da3bf0b3fd60
 	<classpathentry kind="src" path=""/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/Owner/Desktop/ENIGMA/enigma-dev/plugins/shared/jna.jar"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/LateralGM"/>
