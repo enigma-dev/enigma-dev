@@ -82,10 +82,10 @@ import org.lateralgm.components.mdi.MDIFrame;
 import org.lateralgm.file.GmFile.ResourceHolder;
 import org.lateralgm.file.GmFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
-import org.lateralgm.jedit.GMLKeywords;
-import org.lateralgm.jedit.GMLKeywords.Construct;
-import org.lateralgm.jedit.GMLKeywords.Function;
-import org.lateralgm.jedit.GMLKeywords.Keyword;
+import org.lateralgm.joshedit.GMLKeywords;
+import org.lateralgm.joshedit.GMLKeywords.Construct;
+import org.lateralgm.joshedit.GMLKeywords.Function;
+import org.lateralgm.joshedit.GMLKeywords.Keyword;
 import org.lateralgm.main.FileChooser;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
@@ -642,7 +642,9 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					ef.progress(20,Messages.getString("EnigmaRunner.CALLING")); //$NON-NLS-1$
 					System.out.println("Plugin: Delegating to ENIGMA (out of my hands now)");
 					System.out.println(DRIVER.compileEGMf(es,efi == null ? null : efi.getAbsolutePath(),mode));
-
+					setupBaseKeywords();
+					populateKeywords();
+					
 					setMenuEnabled(true);
 					}
 			}.start();
