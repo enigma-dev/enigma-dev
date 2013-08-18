@@ -20,6 +20,7 @@
 #include "../General/GStextures.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
+#include "libEGMstd.h"
 #include <math.h>
 #include "../General/GLbinding.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
@@ -71,6 +72,12 @@ class d3d_model
     {
     }//TODO: format needs to be decided on
 
+    #if DEBUG_MODE
+      #define ifdebug(x) x
+    #else
+      #define ifdebug(x)
+    #endif
+
     bool load(string fname)  //TODO: this needs to be rewritten properly not using the file_text functions
     {
         using namespace enigma_user;
@@ -86,9 +93,11 @@ class d3d_model
         int kind;
         float v[3], n[3], t[2];
         double col, alpha;
+        ifdebug(int linenum = 3);
         while (!file_text_eof(file))
         {
-            switch (int(file_text_read_real(file)))
+            int modelt = (int)file_text_read_real(file);
+            switch (modelt)
             {
                 case  0:
                     kind = file_text_read_real(file);
@@ -161,11 +170,12 @@ class d3d_model
                     break;
                 default:
                   #if DEBUG_MODE
-                  show_error("Error loading model: invalid solid type", false);
+                  show_error("Error loading model: invalid solid type " + toString(modelt) + ": model \"" + fname + "\", line " + toString(linenum), false);
                   #endif
                   break;
             }
             file_text_readln(file);
+            ifdebug(++linenum);
         }
         file_text_close(file);
         return true;
