@@ -209,7 +209,7 @@ double distance_to_object(int object)
             distance = tempdist;
         }
     }
-    return (isinf(distance) ? -1 : distance);
+    return (std::isinf(distance) ? -1 : distance);
 }
 
 double distance_to_point(cs_scalar x, cs_scalar y)

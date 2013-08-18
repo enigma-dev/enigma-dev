@@ -107,11 +107,12 @@ namespace enigma
     //Load rooms
     enigma::rooms_load();
 
+    enigma::game_settings_initialize();
+
     //Go to the first room
     if (enigma_user::room_count)
       enigma::game_start();
 
-    enigma::game_settings_initialize();
     return 0;
   }
 }
