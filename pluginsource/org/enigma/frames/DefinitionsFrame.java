@@ -14,7 +14,7 @@ import javax.swing.event.CaretListener;
 
 import org.enigma.backend.Definitions;
 import org.enigma.backend.Definitions.PDefinitions;
-import org.lateralgm.components.GMLTextArea;
+import org.lateralgm.components.CodeTextArea;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.impl.TextAreaFocusTraversalPolicy;
 import org.lateralgm.subframes.InstantiableResourceFrame;
@@ -25,7 +25,7 @@ public class DefinitionsFrame extends InstantiableResourceFrame<Definitions,PDef
 	private static final long serialVersionUID = 1L;
 	public JToolBar tool;
 	public JComboBox kinds;
-	public GMLTextArea code;
+	public CodeTextArea code;
 	public JPanel status;
 
 	public DefinitionsFrame(Definitions res, ResNode node)
@@ -43,7 +43,7 @@ public class DefinitionsFrame extends InstantiableResourceFrame<Definitions,PDef
 		tool.add(save);
 		tool.addSeparator();
 
-		code = new GMLTextArea((String) res.get(PDefinitions.CODE));
+		code = new CodeTextArea((String) res.get(PDefinitions.CODE));
 		add(code,BorderLayout.CENTER);
 		code.addEditorButtons(tool);
 
