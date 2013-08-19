@@ -26,6 +26,7 @@
 **                                                                              **
 \********************************************************************************/
 #include <vector>
+#include <cstdlib>
 #include <map>
 using std::vector;
 using std::multimap;

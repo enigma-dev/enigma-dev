@@ -32,6 +32,7 @@
 #include "motion_planning_struct.h"
 #include <cmath>
 #include <algorithm>
+#include <cstdlib>
 //#include <iostream>
 using std::multimap;
 using std::pair;
