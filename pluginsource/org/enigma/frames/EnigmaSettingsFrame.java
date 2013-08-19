@@ -83,7 +83,7 @@ import org.enigma.backend.EnigmaSettings;
 import org.enigma.backend.EnigmaSettings.PEnigmaSettings;
 import org.enigma.messages.Messages;
 import org.lateralgm.components.CustomFileChooser;
-import org.lateralgm.components.GMLTextArea;
+import org.lateralgm.components.CodeTextArea;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.IndexButtonGroup;
 import org.lateralgm.main.LGM;
@@ -908,7 +908,7 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 						{
 						res.commitToDriver(EnigmaRunner.DRIVER);
 						EnigmaRunner.populateKeywords();
-						GMLTextArea.updateKeywords();
+						CodeTextArea.updateKeywords();
 						}
 					}
 				cfDef = null;

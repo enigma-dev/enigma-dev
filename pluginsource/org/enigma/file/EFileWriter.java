@@ -35,8 +35,8 @@ import javax.imageio.ImageIO;
 import org.enigma.backend.EnigmaSettings;
 import org.enigma.messages.Messages;
 import org.lateralgm.components.impl.ResNode;
-import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmFile.FormatFlavor;
+import org.lateralgm.file.ProjectFile;
+import org.lateralgm.file.ProjectFile.FormatFlavor;
 import org.lateralgm.file.GmStreamEncoder;
 import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.main.Util;
@@ -211,7 +211,7 @@ public class EFileWriter
 	 */
 	public static interface ResourceWriter
 		{
-		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+		public void write(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir)
 				throws IOException;
 		}
 
@@ -223,7 +223,7 @@ public class EFileWriter
 	 */
 	public static abstract class DataResourceWriter implements ResourceWriter
 		{
-		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+		public void write(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir)
 				throws IOException
 			{
 			String name = (String) child.getUserObject();
@@ -293,7 +293,7 @@ public class EFileWriter
 		}
 
 	// Constructors
-	public static void writeEgmFile(File loc, GmFile gf, ResNode tree, boolean zip)
+	public static void writeEProjectFile(File loc, ProjectFile gf, ResNode tree, boolean zip)
 		{
 		try
 			{
@@ -302,7 +302,7 @@ public class EFileWriter
 				out = new EGMZip(new FileOutputStream(loc));
 			else
 				out = new EGMFolder(loc);
-			writeEgmFile(out,gf,tree);
+			writeEProjectFile(out,gf,tree);
 			out.close();
 			}
 		catch (IOException e)
@@ -312,12 +312,12 @@ public class EFileWriter
 			}
 		}
 
-	public static void writeEgmZipFile(OutputStream os, GmFile gf, ResNode tree)
+	public static void writeEgmZipFile(OutputStream os, ProjectFile gf, ResNode tree)
 		{
 		try
 			{
 			EGMOutputStream out = new EGMZip(os);
-			writeEgmFile(out,gf,tree);
+			writeEProjectFile(out,gf,tree);
 			out.close();
 			}
 		catch (IOException e)
@@ -327,14 +327,14 @@ public class EFileWriter
 			}
 		}
 
-	public static void writeEgmFile(EGMOutputStream os, GmFile gf, ResNode tree) throws IOException
+	public static void writeEProjectFile(EGMOutputStream os, ProjectFile gf, ResNode tree) throws IOException
 		{
 		writeNodeChildren(os,gf,tree,new ArrayList<String>());
 		}
 
 	// Workhorse methods
 	/** Recursively writes out the tree nodes into the zip. */
-	public static void writeNodeChildren(EGMOutputStream os, GmFile gf, ResNode node, List<String> dir)
+	public static void writeNodeChildren(EGMOutputStream os, ProjectFile gf, ResNode node, List<String> dir)
 			throws IOException
 		{
 		PrintStream ps = new PrintStream(os.next(dir,"toc.txt")); //$NON-NLS-1$
@@ -371,7 +371,7 @@ public class EFileWriter
 	 * Looks up the registered writer for this resource and invokes the write
 	 * method
 	 */
-	public static void writeResource(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+	public static void writeResource(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir)
 			throws IOException
 		{
 		ResourceWriter writer = writers.get(child.kind);
@@ -479,7 +479,7 @@ public class EFileWriter
 
 	static class FontRawWriter implements ResourceWriter
 		{
-		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+		public void write(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir)
 				throws IOException
 			{
 			String name = (String) child.getUserObject();
@@ -766,7 +766,7 @@ public class EFileWriter
 		{
 		public static final String RTF = ".rtf";
 
-		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+		public void write(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir)
 				throws IOException
 			{
 			String name = (String) child.getUserObject();
@@ -801,7 +801,7 @@ public class EFileWriter
 	static class GameSettingsThreeWriter implements ResourceWriter
 		{
 		@Override
-		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+		public void write(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir)
 				throws IOException
 			{
 			GameSettings gs = gf.gameSettings;
@@ -860,7 +860,7 @@ public class EFileWriter
 	static class ExtensionsEmptyWriter implements ResourceWriter
 		{
 		@Override
-		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+		public void write(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir)
 				throws IOException
 			{
 			String name = (String) child.getUserObject();
@@ -871,7 +871,7 @@ public class EFileWriter
 	static class EnigmaSettingsWriter implements ResourceWriter
 		{
 		@Override
-		public void write(EGMOutputStream os, GmFile gf, ResNode child, List<String> dir)
+		public void write(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir)
 				throws IOException
 			{
 			//			ResourceReference<? extends Resource<?,?>> ref = child.getRes();
