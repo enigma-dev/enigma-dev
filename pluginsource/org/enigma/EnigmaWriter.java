@@ -75,7 +75,7 @@ import org.enigma.backend.util.Point;
 import org.enigma.backend.util.Polygon;
 import org.enigma.utility.Masker.Mask;
 import org.lateralgm.components.impl.ResNode;
-import org.lateralgm.file.GmFile;
+import org.lateralgm.file.ProjectFile;
 import org.lateralgm.file.iconio.ICOFile;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
@@ -105,20 +105,20 @@ import com.sun.xml.internal.bind.marshaller.Messages;
 
 public final class EnigmaWriter
 	{
-	protected GmFile i;
+	protected ProjectFile i;
 	protected EnigmaStruct o;
 	protected ResNode root;
 
 	static Map<BufferedImage,ByteArrayOutputStream> imageCache = new WeakHashMap<BufferedImage,ByteArrayOutputStream>();
 
-	private EnigmaWriter(GmFile in, EnigmaStruct out, ResNode root)
+	private EnigmaWriter(ProjectFile in, EnigmaStruct out, ResNode root)
 		{
 		i = in;
 		o = out;
 		this.root = root;
 		}
 
-	public static EnigmaStruct prepareStruct(GmFile f, ResNode root)
+	public static EnigmaStruct prepareStruct(ProjectFile f, ResNode root)
 		{
 		EnigmaWriter ew = new EnigmaWriter(f,new EnigmaStruct(),root);
 		ew.populateStruct();
@@ -129,7 +129,7 @@ public final class EnigmaWriter
 		{
 		o.fileVersion = i.format == null ? -1 : i.format.getVersion();
 		o.filename = i.uri == null ? null : i.uri.toString();
-
+		
 		populateSettings();
 		populateSprites();
 		populateSounds();
@@ -198,9 +198,9 @@ public final class EnigmaWriter
 		og.alwaysOnTop = ig.get(PGameSettings.ALWAYS_ON_TOP);
 		og.colorOutsideRoom = ARGBtoRGBA(((Color) ig.get(PGameSettings.COLOR_OUTSIDE_ROOM)).getRGB());
 		og.setResolution = ig.get(PGameSettings.SET_RESOLUTION);
-		og.colorDepth = GmFile.GS_DEPTH_CODE.get(ig.get(PGameSettings.COLOR_DEPTH)).byteValue();
-		og.resolution = GmFile.GS_RESOL_CODE.get(ig.get(PGameSettings.RESOLUTION)).byteValue();
-		og.frequency = GmFile.GS_FREQ_CODE.get(ig.get(PGameSettings.FREQUENCY)).byteValue();
+		og.colorDepth = ProjectFile.GS_DEPTH_CODE.get(ig.get(PGameSettings.COLOR_DEPTH)).byteValue();
+		og.resolution = ProjectFile.GS_RESOL_CODE.get(ig.get(PGameSettings.RESOLUTION)).byteValue();
+		og.frequency = ProjectFile.GS_FREQ_CODE.get(ig.get(PGameSettings.FREQUENCY)).byteValue();
 		og.dontShowButtons = ig.get(PGameSettings.DONT_SHOW_BUTTONS);
 		og.useSynchronization = ig.get(PGameSettings.USE_SYNCHRONIZATION);
 		og.disableScreensavers = ig.get(PGameSettings.DISABLE_SCREENSAVERS);
@@ -210,9 +210,9 @@ public final class EnigmaWriter
 		og.letF5SaveF6Load = ig.get(PGameSettings.LET_F5_SAVE_F6_LOAD);
 		og.letF9Screenshot = ig.get(PGameSettings.LET_F9_SCREENSHOT);
 		og.treatCloseAsEscape = ig.get(PGameSettings.TREAT_CLOSE_AS_ESCAPE);
-		og.gamePriority = GmFile.GS_PRIORITY_CODE.get(ig.get(PGameSettings.GAME_PRIORITY)).byteValue();
+		og.gamePriority = ProjectFile.GS_PRIORITY_CODE.get(ig.get(PGameSettings.GAME_PRIORITY)).byteValue();
 		og.freezeOnLoseFocus = ig.get(PGameSettings.FREEZE_ON_LOSE_FOCUS);
-		og.loadBarMode = GmFile.GS_PROGBAR_CODE.get(ig.get(PGameSettings.LOAD_BAR_MODE)).byteValue();
+		og.loadBarMode = ProjectFile.GS_PROGBAR_CODE.get(ig.get(PGameSettings.LOAD_BAR_MODE)).byteValue();
 		//populateImage((BufferedImage) ig.get(PGameSettings.FRONT_LOAD_BAR),og.frontLoadBar,false);
 		//populateImage((BufferedImage) ig.get(PGameSettings.BACK_LOAD_BAR),og.backLoadBar,false);
 		og.showCustomLoadImage = ig.get(PGameSettings.SHOW_CUSTOM_LOAD_IMAGE);
@@ -229,7 +229,7 @@ public final class EnigmaWriter
 		og.lastChanged = ig.get(PGameSettings.LAST_CHANGED);
 		og.information = ig.get(PGameSettings.INFORMATION);
 
-		og.includeFolder = GmFile.GS_INCFOLDER_CODE.get(ig.get(PGameSettings.INCLUDE_FOLDER));
+		og.includeFolder = ProjectFile.GS_INCFOLDER_CODE.get(ig.get(PGameSettings.INCLUDE_FOLDER));
 		og.overwriteExisting = ig.get(PGameSettings.OVERWRITE_EXISTING);
 		og.removeAtGameEnd = ig.get(PGameSettings.REMOVE_AT_GAME_END);
 
@@ -289,14 +289,14 @@ public final class EnigmaWriter
 			os.id = is.getId();
 
 			os.transparent = is.get(PSprite.TRANSPARENT);
-			os.shape = GmFile.SPRITE_MASK_CODE.get(is.get(PSprite.SHAPE)); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
+			os.shape = ProjectFile.SPRITE_MASK_CODE.get(is.get(PSprite.SHAPE)); //0*=Precise, 1=Rectangle,  2=Disk, 3=Diamond
 			os.alphaTolerance = is.get(PSprite.ALPHA_TOLERANCE);
 			os.separateMask = is.get(PSprite.SEPARATE_MASK);
 			os.smoothEdges = is.get(PSprite.SMOOTH_EDGES);
 			os.preload = is.get(PSprite.PRELOAD);
 			os.originX = is.get(PSprite.ORIGIN_X);
 			os.originY = is.get(PSprite.ORIGIN_Y);
-			os.bbMode = GmFile.SPRITE_BB_CODE.get(is.get(PSprite.BB_MODE)); //0*=Automatic, 1=Full image, 2=Manual
+			os.bbMode = ProjectFile.SPRITE_BB_CODE.get(is.get(PSprite.BB_MODE)); //0*=Automatic, 1=Full image, 2=Manual
 			os.bbLeft = is.get(PSprite.BB_LEFT);
 			os.bbRight = is.get(PSprite.BB_RIGHT);
 			os.bbTop = is.get(PSprite.BB_TOP);
@@ -376,7 +376,7 @@ public final class EnigmaWriter
 			os.name = is.getName();
 			os.id = is.getId();
 
-			os.kind = GmFile.SOUND_CODE.get(is.get(PSound.KIND));
+			os.kind = ProjectFile.SOUND_CODE.get(is.get(PSound.KIND));
 			os.fileType = is.get(PSound.FILE_TYPE);
 			os.fileName = is.get(PSound.FILE_NAME);
 			os.chorus = is.get(PSound.CHORUS);

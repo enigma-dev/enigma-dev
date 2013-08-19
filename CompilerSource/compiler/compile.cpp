@@ -176,6 +176,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
 
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
+
   cout << "Initializing dialog boxes" << endl;
     ide_dia_clear();
     ide_dia_open();

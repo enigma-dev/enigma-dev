@@ -53,8 +53,8 @@ import org.enigma.backend.EnigmaSettings.PEnigmaSettings;
 import org.enigma.file.EEFReader.EEFNode;
 import org.enigma.messages.Messages;
 import org.lateralgm.components.impl.ResNode;
-import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmFile.SingletonResourceHolder;
+import org.lateralgm.file.ProjectFile;
+import org.lateralgm.file.ProjectFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
 import org.lateralgm.file.GmStreamDecoder;
 import org.lateralgm.file.ResourceList;
@@ -158,9 +158,9 @@ public class EFileReader
 		}
 
 	// Modularity Classes
-	static abstract class EGMFile
+	static abstract class EProjectFile
 		{
-		public abstract EGMFile getEntry(String name);
+		public abstract EProjectFile getEntry(String name);
 
 		public abstract boolean exists();
 
@@ -173,7 +173,7 @@ public class EFileReader
 		public abstract Set<String> getEntries(String dir);
 		}
 
-	static class EGMZipFile extends EGMFile
+	static class EGMZipFile extends EProjectFile
 		{
 		ZipFile z;
 		private ZipEntry ent;
@@ -200,7 +200,7 @@ public class EFileReader
 				}
 			}
 
-		public EGMFile getEntry(String name)
+		public EProjectFile getEntry(String name)
 			{
 			ent = z.getEntry(name);
 			return this;
@@ -250,7 +250,7 @@ public class EFileReader
 			}
 		}
 
-	static class EGMFolderFile extends EGMFile
+	static class EGMFolderFile extends EProjectFile
 		{
 		File f;
 		private File last;
@@ -262,7 +262,7 @@ public class EFileReader
 			}
 
 		@Override
-		public EGMFile getEntry(String name)
+		public EProjectFile getEntry(String name)
 			{
 			last = new File(f,name);
 			return this;
@@ -324,10 +324,10 @@ public class EFileReader
 	 */
 	public static interface ResourceReader<R extends Resource<R,?>>
 		{
-		public void read(EGMFile f, GmFile gf, InputStream in, String dir, String name, R r)
+		public void read(EProjectFile f, ProjectFile gf, InputStream in, String dir, String name, R r)
 				throws IOException;
 
-		public void readUnknown(EGMFile f, GmFile gf, InputStream is, String dir, String name,
+		public void readUnknown(EProjectFile f, ProjectFile gf, InputStream is, String dir, String name,
 				Resource<?,?> r) throws IOException;
 		}
 
@@ -335,14 +335,14 @@ public class EFileReader
 			ResourceReader<R>
 		{
 		@SuppressWarnings("unchecked")
-		public void readUnknown(EGMFile f, GmFile gf, InputStream is, String dir, String name,
+		public void readUnknown(EProjectFile f, ProjectFile gf, InputStream is, String dir, String name,
 				Resource<?,?> r) throws IOException
 			{
 			read(f,gf,is,dir,name,(R) r);
 			}
 
 		@Override
-		public void read(EGMFile f, GmFile gf, InputStream in, String dir, String name, R r)
+		public void read(EProjectFile f, ProjectFile gf, InputStream in, String dir, String name, R r)
 				throws IOException
 			{
 			Properties i = new Properties();
@@ -353,7 +353,7 @@ public class EFileReader
 			readDataFile(f,gf,r,i,dir);
 			}
 
-		protected void readProperties(GmFile gf, PropertyMap<P> p, Properties i)
+		protected void readProperties(ProjectFile gf, PropertyMap<P> p, Properties i)
 			{
 			for (Entry<P,Object> e : p.entrySet())
 				{
@@ -368,7 +368,7 @@ public class EFileReader
 			}
 
 		/** Subclasses may wish to override this method for custom/no data file handling. */
-		protected void readDataFile(EGMFile f, GmFile gf, R r, Properties i, String dir)
+		protected void readDataFile(EProjectFile f, ProjectFile gf, R r, Properties i, String dir)
 				throws IOException
 			{
 			String fn = i.getProperty("Data"); //$NON-NLS-1$
@@ -415,7 +415,7 @@ public class EFileReader
 		 * Subclasses should override this method to explicitly convert
 		 * special keys or keys whose default value is null.
 		 */
-		protected void put(GmFile gf, PropertyMap<P> p, P key, String val)
+		protected void put(ProjectFile gf, PropertyMap<P> p, P key, String val)
 			{
 			Object def = p.get(key);
 			p.put(key,convert(val,def == null ? null : def.getClass()));
@@ -428,7 +428,7 @@ public class EFileReader
 			if (!pr.invoke()) postpone.add(pr);
 			}
 
-		protected abstract void readData(GmFile gf, R r, InputStream in);
+		protected abstract void readData(ProjectFile gf, R r, InputStream in);
 
 		/**
 		 * Returns whether the following property is expected/should be read from the properties file.
@@ -480,9 +480,9 @@ public class EFileReader
 			}
 		}
 
-	public static GmFile readEgmFile(File f, ResNode root, boolean zip) throws GmFormatException
+	public static ProjectFile readEgmFile(File f, ResNode root, boolean zip) throws GmFormatException
 		{
-		GmFile gf = new GmFile();
+		ProjectFile gf = new ProjectFile();
 		gf.resMap.put(EnigmaSettings.class,new SingletonResourceHolder<EnigmaSettings>(
 				new EnigmaSettings()));
 		gf.uri = f.toURI();
@@ -497,7 +497,7 @@ public class EFileReader
 			}
 		}
 
-	public static void readEgmFile(EGMFile f, GmFile gf, ResNode root) throws IOException
+	public static void readEgmFile(EProjectFile f, ProjectFile gf, ResNode root) throws IOException
 		{
 		gf.format = EFileWriter.FLAVOR_EGM;
 		readNodeChildren(f,gf,root,null,new String());
@@ -506,7 +506,7 @@ public class EFileReader
 		}
 
 	// Workhorse methods
-	public static void readNodeChildren(EGMFile f, GmFile gf, ResNode parent,
+	public static void readNodeChildren(EProjectFile f, ProjectFile gf, ResNode parent,
 			Class<? extends Resource<?,?>> k, String dir) throws IOException
 		{
 		System.out.println(">" + dir);
@@ -558,7 +558,7 @@ public class EFileReader
 		processEntries(f,gf,parent,toc,dir);
 		}
 
-	public static void processEntries(EGMFile f, GmFile gf, ResNode parent,
+	public static void processEntries(EProjectFile f, ProjectFile gf, ResNode parent,
 			Iterable<EgmEntry> entries, String dir) throws IOException
 		{
 		for (EgmEntry e : entries)
@@ -587,7 +587,7 @@ public class EFileReader
 			}
 		}
 
-	public static ResourceReference<? extends Resource<?,?>> readResource(EGMFile f, GmFile gf,
+	public static ResourceReference<? extends Resource<?,?>> readResource(EProjectFile f, ProjectFile gf,
 			ResNode parent, Class<? extends Resource<?,?>> kind, InputStream is, String dir, String name)
 			throws IOException
 		{
@@ -609,7 +609,7 @@ public class EFileReader
 
 	static class SpriteApngReader extends DataPropReader<Sprite,PSprite>
 		{
-		protected void readData(GmFile gf, Sprite r, InputStream in)
+		protected void readData(ProjectFile gf, Sprite r, InputStream in)
 			{
 			try
 				{
@@ -624,7 +624,7 @@ public class EFileReader
 	static class SoundReader extends DataPropReader<Sound,PSound>
 		{
 		@Override
-		protected void readData(GmFile gf, Sound r, InputStream in)
+		protected void readData(ProjectFile gf, Sound r, InputStream in)
 			{
 			try
 				{
@@ -640,7 +640,7 @@ public class EFileReader
 	static class BackgroundReader extends DataPropReader<Background,PBackground>
 		{
 		@Override
-		protected void readData(GmFile gf, Background r, InputStream in)
+		protected void readData(ProjectFile gf, Background r, InputStream in)
 			{
 			try
 				{
@@ -656,7 +656,7 @@ public class EFileReader
 	static class PathTextReader extends DataPropReader<Path,PPath>
 		{
 		@Override
-		protected void readData(GmFile gf, Path r, InputStream in)
+		protected void readData(ProjectFile gf, Path r, InputStream in)
 			{
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			try
@@ -692,7 +692,7 @@ public class EFileReader
 			}
 
 		@Override
-		protected void readData(GmFile gf, Script r, InputStream in)
+		protected void readData(ProjectFile gf, Script r, InputStream in)
 			{
 			try
 				{
@@ -708,14 +708,14 @@ public class EFileReader
 	static class FontRawReader extends DataPropReader<Font,PFont>
 		{
 		@Override
-		protected void readDataFile(EGMFile f, GmFile gf, Font r, Properties i, String dir)
+		protected void readDataFile(EProjectFile f, ProjectFile gf, Font r, Properties i, String dir)
 				throws IOException
 			{
 			//Override as no-op. Raw fonts have no data file.
 			}
 
 		@Override
-		protected void readData(GmFile gf, Font r, InputStream in)
+		protected void readData(ProjectFile gf, Font r, InputStream in)
 			{
 			//Raw fonts have no data file.
 			}
@@ -723,7 +723,7 @@ public class EFileReader
 
 	static class ObjectEefReader extends DataPropReader<GmObject,PGmObject>
 		{
-		protected void readData(GmFile gf, GmObject r, InputStream in)
+		protected void readData(ProjectFile gf, GmObject r, InputStream in)
 			{
 			EEFNode en = EEFReader.parse(in);
 			System.out.println("EEF Contents:");
@@ -810,7 +810,7 @@ public class EFileReader
 					}
 			}
 
-		static void putAppliesRef(final GmFile gf, final Action act, final String name)
+		static void putAppliesRef(final ProjectFile gf, final Action act, final String name)
 			{
 			PostponedRef pr = new PostponedRef()
 				{
@@ -831,7 +831,7 @@ public class EFileReader
 			if (!pr.invoke()) postpone.add(pr);
 			}
 
-		static void putOtherRef(final GmFile gf, final Event e, final String name)
+		static void putOtherRef(final ProjectFile gf, final Event e, final String name)
 			{
 			PostponedRef pr = new PostponedRef()
 				{
@@ -846,7 +846,7 @@ public class EFileReader
 			if (!pr.invoke()) postpone.add(pr);
 			}
 
-		static void putArgumentRef(final GmFile gf, final Argument arg, final String name)
+		static void putArgumentRef(final ProjectFile gf, final Argument arg, final String name)
 			{
 			PostponedRef pr = new PostponedRef()
 				{
@@ -862,7 +862,7 @@ public class EFileReader
 			}
 
 		@Override
-		protected void put(GmFile gf, PropertyMap<PGmObject> p, PGmObject key, String val)
+		protected void put(ProjectFile gf, PropertyMap<PGmObject> p, PGmObject key, String val)
 			{
 			if (key == PGmObject.SPRITE || key == PGmObject.MASK)
 				{
@@ -887,7 +887,7 @@ public class EFileReader
 			}
 
 		@Override
-		protected void readData(GmFile gf, Room r, InputStream in)
+		protected void readData(ProjectFile gf, Room r, InputStream in)
 			{
 			EEFNode en = EEFReader.parse(in);
 			for (EEFNode child : en.children)
@@ -1088,7 +1088,7 @@ public class EFileReader
 	static class RoomGmDataReader extends DataPropReader<Room,PRoom>
 		{
 		@Override
-		protected void readData(GmFile gf, Room rm, InputStream in2)
+		protected void readData(ProjectFile gf, Room rm, InputStream in2)
 			{
 			try
 				{
@@ -1173,7 +1173,7 @@ public class EFileReader
 			return key != PGameInformation.TEXT;
 			}
 
-		protected void readData(GmFile gf, GameInformation r, InputStream in)
+		protected void readData(ProjectFile gf, GameInformation r, InputStream in)
 			{
 			try
 				{
@@ -1198,7 +1198,7 @@ public class EFileReader
 			}
 
 		@Override
-		protected void readDataFile(EGMFile f, GmFile gf, GameSettings r, Properties i, String dir)
+		protected void readDataFile(EProjectFile f, ProjectFile gf, GameSettings r, Properties i, String dir)
 				throws IOException
 			{
 			String[] entries = { "Icon","Splash","Filler","Progress" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -1231,7 +1231,7 @@ public class EFileReader
 				}
 			}
 
-		protected void readData(GmFile gf, GameSettings r, InputStream in)
+		protected void readData(ProjectFile gf, GameSettings r, InputStream in)
 			{ //Unused since readDataFile is overridden
 			}
 		}
@@ -1239,13 +1239,13 @@ public class EFileReader
 	static class ExtensionsEmptyReader implements ResourceReader<Extensions>
 		{
 		@Override
-		public void read(EGMFile f, GmFile gf, InputStream in, String dir, String name, Extensions e)
+		public void read(EProjectFile f, ProjectFile gf, InputStream in, String dir, String name, Extensions e)
 				throws IOException
 			{ //Extensions empty
 			}
 
 		@Override
-		public void readUnknown(EGMFile f, GmFile gf, InputStream is, String dir, String name,
+		public void readUnknown(EProjectFile f, ProjectFile gf, InputStream is, String dir, String name,
 				Resource<?,?> r) throws IOException
 			{ //Extensions empty
 			}
@@ -1254,7 +1254,7 @@ public class EFileReader
 	static class EnigmaSettingsReader extends DataPropReader<EnigmaSettings,PEnigmaSettings>
 		{
 		@Override
-		public void read(EGMFile f, GmFile gf, InputStream in, String dir, String name,
+		public void read(EProjectFile f, ProjectFile gf, InputStream in, String dir, String name,
 				EnigmaSettings es) throws IOException
 			{
 			//			YamlNode node = YamlParser.parse(new Scanner(in));
@@ -1265,7 +1265,7 @@ public class EFileReader
 			readDataFile(f,gf,es,i,dir);
 			}
 
-		protected void readData(GmFile gf, EnigmaSettings r, InputStream in)
+		protected void readData(ProjectFile gf, EnigmaSettings r, InputStream in)
 			{
 			Set<String> names = new HashSet<String>();
 			Collections.addAll(names,"definitions","globallocals","initialization","cleanup");

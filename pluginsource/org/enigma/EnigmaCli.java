@@ -28,10 +28,11 @@ import org.enigma.backend.EnigmaStruct;
 import org.enigma.file.EgmIO;
 import org.enigma.messages.Messages;
 import org.lateralgm.components.impl.ResNode;
-import org.lateralgm.file.GmFile;
-import org.lateralgm.file.GmFile.ResourceHolder;
-import org.lateralgm.file.GmFile.SingletonResourceHolder;
+import org.lateralgm.file.ProjectFile;
+import org.lateralgm.file.ProjectFile.ResourceHolder;
+import org.lateralgm.file.ProjectFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
+import org.lateralgm.file.ProjectFormatException;
 import org.lateralgm.main.FileChooser;
 import org.lateralgm.main.FileChooser.FileReader;
 import org.lateralgm.main.LGM;
@@ -176,7 +177,7 @@ public final class EnigmaCli
 		return new TargetsOrError(result, "");
 	}
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws ProjectFormatException
 		{
 		final String helpString =
 			"Name:\n" +
@@ -310,7 +311,7 @@ public final class EnigmaCli
 				new EnigmaSettings()));
 		}
 
-	public static String initailize(String fn, ResNode root) throws GmFormatException,IOException
+	public static String initailize(String fn, ResNode root) throws IOException, ProjectFormatException
 		{
 		File file = new File(fn);
 		if (!file.exists()) throw new FileNotFoundException(fn);
@@ -324,7 +325,7 @@ public final class EnigmaCli
 		URI uri = file.toURI();
 		FileReader reader = FileChooser.findReader(uri);
 
-		LGM.currentFile = reader.read(uri.toURL().openStream(),uri,LGM.newRoot());
+		LGM.currentFile = reader.read(uri.toURL().openStream(),uri,LGM.newRoot(), false);
 
 		try
 			{
@@ -339,11 +340,11 @@ public final class EnigmaCli
 		return DRIVER.libInit(new EnigmaCallbacks(new CliOutputHandler())); //returns String on toolchain failure
 		}
 	
-	public static void syntaxChecker(GmFile f, ResNode root) {
+	public static void syntaxChecker(ProjectFile f, ResNode root) {
 		syntaxChecker(f, root, null);
 	}
 
-	private static void syntaxChecker(GmFile f, ResNode root, Map<String, TargetSelection> newTargets)
+	private static void syntaxChecker(ProjectFile f, ResNode root, Map<String, TargetSelection> newTargets)
 		{
 		SyntaxError se = syntaxCheck(f,root,newTargets);
 		if (se == null || se.absoluteIndex == -1)
@@ -352,11 +353,11 @@ public final class EnigmaCli
 			error(se.line + ":" + se.position + "::" + se.errorString);
 		}
 	
-	public static SyntaxError syntaxCheck(GmFile f, ResNode root) {
+	public static SyntaxError syntaxCheck(ProjectFile f, ResNode root) {
 		return syntaxCheck(f, root, null);
 	}
 
-	private static SyntaxError syntaxCheck(GmFile f, ResNode root, Map<String, TargetSelection> newTargets)
+	private static SyntaxError syntaxCheck(ProjectFile f, ResNode root, Map<String, TargetSelection> newTargets)
 		{
 		ResourceHolder<EnigmaSettings> rh = f.resMap.get(EnigmaSettings.class);
 		EnigmaSettings ess = rh == null ? new EnigmaSettings() : rh.getResource();
@@ -377,11 +378,11 @@ public final class EnigmaCli
 		return null;
 		}
 	
-	public static int compile(GmFile f, ResNode root, String outname) {
+	public static int compile(ProjectFile f, ResNode root, String outname) {
 		return compile(f, root, null);
 	}
 
-	private static int compile(GmFile f, ResNode root, String outname, Map<String, TargetSelection> newTargets) throws FileNotFoundException,
+	private static int compile(ProjectFile f, ResNode root, String outname, Map<String, TargetSelection> newTargets) throws FileNotFoundException,
 			GmFormatException
 		{
 		ResourceHolder<EnigmaSettings> rh = f.resMap.get(EnigmaSettings.class);
@@ -391,7 +392,7 @@ public final class EnigmaCli
 
 		//Generate arguments for compile
 		EnigmaStruct es = EnigmaWriter.prepareStruct(f,root);
-
+		
 		//XXX: Handle custom modes?
 		int mode = EnigmaRunner.MODE_COMPILE;
 
