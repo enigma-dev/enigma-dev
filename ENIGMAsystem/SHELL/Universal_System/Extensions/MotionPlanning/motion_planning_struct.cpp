@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -24,6 +25,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+
 #include <vector>
 #include <map>
 #include <list>
@@ -50,8 +52,8 @@ namespace enigma
         gridstructarray[id]->nodearray.reserve(hcells*vcells);
         for (unsigned int i = 0; i < hcells*vcells; i++)
         {
-            node node={floor(i / vcells),i % vcells,0,0,0,1};
-            gridstructarray[id]->nodearray.push_back(node);
+            node nnode(floor(i / vcells),i % vcells,0,0,0,1);
+            gridstructarray[id]->nodearray.push_back(nnode);
         }
 
         grid *gr = gridstructarray[id];

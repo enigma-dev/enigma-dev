@@ -50,6 +50,9 @@ struct scrtdata {
   ethread* mt;
   scrtdata(int s, variant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
 };
+
+namespace enigma_user {
+	
 static void* thread_script_func(void* data) {
   const scrtdata* const md = (scrtdata*)data;
   md->mt->ret = script_execute(md->scr,md->args[0],md->args[1],md->args[2],md->args[3],md->args[4],md->args[5],md->args[6],md->args[7]);
@@ -74,4 +77,5 @@ bool thread_finished(int thread) {
 }
 variant thread_get_return(int thread) {
   return threads[thread]->ret;
+}
 }
